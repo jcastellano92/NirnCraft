@@ -1319,6 +1319,10 @@ float pixelAngle = 0.001f;  // the camera's pixel size on the tangent plane (the
 // a secondary ray (lighting=realistic: shadows, sky visibility, light): cutouts at their full resolution, as a shadow
 // map or a ray traced shadow sees the leaf, not the camera's mip of it
 thread_local bool tlSecondary = false;
+// foliagelight=opaque (a diagnostic, lighting=realistic): leaves and plants stop secondary rays whole, cutout holes
+// and all, as a renderer whose voxels know no gaps sees them (what that costs a crown's light)
+bool opaqueFoliage = false;
+bool foliage(const State& s);
 
 // one-sided ray / quad (its two triangles, 0-1-2 and 0-2-3 as the GPU draws a quad), nearest beyond tmin
 bool hitQuad(const Quad& q, V3 base, V3 o, V3 d, float tmin, float& t, int& tri, float& b1, float& b2) {
@@ -1371,7 +1375,7 @@ void testBlock(int x, int y, int z, V3 o, V3 d, float tmin, Hit& best, std::vect
         RGBA tex = sample(q.sprite, u, v, lod);
         uint8_t layer = q.layer;
         if (!opt.cutoutLeaves && st.has(F_LEAVES)) layer = SOLID;  // ModelBlockRenderer.forceOpaque
-        if (layer == CUTOUT && tex[3] < 0.5f) return;
+        if (layer == CUTOUT && tex[3] < 0.5f && !(opaqueFoliage && tlSecondary && foliage(st))) return;
         if (layer == TRANSLUCENT && tex[3] < 0.1f) return;
         best.hit = true, best.t = t, best.bx = x, best.by = y, best.bz = z, best.st = &st, best.model = m, best.q = q, best.tri = tri;
         best.b1 = b1, best.b2 = b2, best.tex = tex, best.layer = layer;
@@ -1948,6 +1952,7 @@ void setupReal(const Args& a) {
     real.bounce = int(num(a, "bounce", 0));
     real.lights = num(a, "lights", 1) != 0;
     real.sss = num(a, "sss", 1) != 0;
+    opaqueFoliage = str(a, "foliagelight", "cutout") == "opaque";
     real.lightI = float(num(a, "lighti", 9.4));
     real.lightR0 = float(num(a, "lightr0", 0.5));
     if (num(a, "floor", 1) == 0) real.floor = C3{};

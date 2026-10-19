@@ -227,6 +227,8 @@ def main():
           f"sun visibility {v[0]:.2f} / {v[1]:.2f}, floor y {ys[0]:.3f}")
     check("a leaf block on the floor: the floor inside it is shaded by its leaves from behind too",
           v[2] == 0 and v[3] == 1 and abs(ys[2] - 1) < 1e-3, f"sun visibility {v[2]:.2f} / {v[3]:.2f} (two-sided occlusion)")
+    vo = [r["real"]["sunVis"] for r in run(exe, tmp, rays[:2], base + leaf + ["samples=4", "ao=1", "foliagelight=opaque"])]
+    check("foliagelight=opaque (the diagnostic): the leaf block shades its holes too", vo == [0, 0], f"sun visibility {vo}")
     r = run(exe, tmp, [((xs[0], 3.5, zs[0]), down)], base + leaf[:-1] + ["sss=1", "samples=16", "ao=1"])[0]["real"]
     # the floor is stone (not foliage): no light through; the leaf's own top under the sun gets it
     rr = run(exe, tmp, [((xs[0], 8, zs[0]), down)], base + leaf[:-1] + ["sss=1", "samples=16", "ao=1"])[0]["real"]
