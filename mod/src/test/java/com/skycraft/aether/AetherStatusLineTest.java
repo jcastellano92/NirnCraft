@@ -70,8 +70,8 @@ class AetherStatusLineTest {
         assertFalse(e.outOfMemory());
         assertEquals("device lost", AetherNative.AetherException.statusName(AetherNative.ERR_DEVICE_LOST));
         assertEquals("status -42", AetherNative.AetherException.statusName(-42));
-        assertEquals("0.10.0", AetherNative.abiString(AetherNative.ABI_VERSION));
-        assertEquals("0.9.0", AetherNative.abiString(AetherNative.ABI_MIN));
+        assertEquals("0.11.0", AetherNative.abiString(AetherNative.ABI_VERSION));
+        assertEquals("0.11.0", AetherNative.abiString(AetherNative.ABI_MIN));
         assertTrue(AetherNative.enableNativeAccessArg().startsWith("--enable-native-access="));
     }
 
