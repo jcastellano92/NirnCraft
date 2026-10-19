@@ -181,8 +181,11 @@ struct Volume {
         int32_t i = secAt[size_t(gx + nsx * (gz + nsz * gy))];
         return i < 0 ? nullptr : &secs[size_t(i)];
     }
+    bool cropped = false;
+    int c0[3] = {0, 0, 0}, c1[3] = {0, 0, 0};  // box= (volume coordinates, inclusive): one element, the rest air
     const Block* at(int x, int y, int z) const {
         if (x < 0 || y < 0 || z < 0 || x >= sx || y >= sy || z >= sz) return nullptr;
+        if (cropped && (x < c0[0] || y < c0[1] || z < c0[2] || x > c1[0] || y > c1[1] || z > c1[2])) return nullptr;
         uint32_t id;
         if (sparse) {
             const Sec* c = section(x >> 4, y >> 4, z >> 4);

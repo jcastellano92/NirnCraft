@@ -307,6 +307,17 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "atlas_lab: no volume at '%s' (in game: /nirncraft-atlaslab here <name> <r> <down> <up>)\n", volPath.c_str());
         return 2;
     }
+    // box=x0,y0,z0,x1,y1,z1 (world blocks, inclusive): only the blocks inside it exist, the rest is air (one element
+    // cut from an export: a house, a tree, a chunk; its light keeps what the world gave it)
+    if (a.count("box")) {
+        int b[6] = {0, 0, 0, 0, 0, 0};
+        if (std::sscanf(a["box"].c_str(), "%d,%d,%d,%d,%d,%d", &b[0], &b[1], &b[2], &b[3], &b[4], &b[5]) == 6) {
+            int o[3] = {vol.x0, vol.y0, vol.z0};
+            vol.cropped = true;
+            for (int k = 0; k < 3; k++)
+                vol.c0[k] = std::min(b[k], b[k + 3]) - o[k], vol.c1[k] = std::max(b[k], b[k + 3]) - o[k];
+        }
+    }
     {  // the tints the game blended at the box's centre (AtlasLabExport writes them beside the volume)
         std::string side = volPath.substr(0, volPath.size() >= 4 ? volPath.size() - 4 : 0) + ".json";
         std::ifstream f(side);
