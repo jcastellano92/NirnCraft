@@ -368,6 +368,7 @@ struct Sample {
     RGB c;
     int steps = 0;
     float t = 0;  // how far along the ray the hit is (blocks): reprojection for the moving-camera TAA
+    uint32_t id = 0;  // which surface was hit (block, voxel, box or group): TAA keeps history only on the same one
 };
 
 // where a ray enters the cube [lo, lo + size) (0 when it starts inside)
@@ -402,6 +403,7 @@ Sample traceMicro(V3 o, V3 d) {
                 int f = enteredFace(axis, d);
                 s.hit = true;
                 s.t = boxEntry(o, d, {mx * 0.25f, my * 0.25f, mz * 0.25f}, 0.25f);
+                s.id = hash(uint32_t(bx) * 73856093u ^ uint32_t(by) * 19349663u ^ uint32_t(bz) * 83492791u) | 1u;
                 s.c = lit(microCol(mx, my, mz, f), f);
                 return true;
             });
@@ -424,6 +426,7 @@ Sample traceMicroDense(V3 o, V3 d) {
             int f = enteredFace(axis, d);
             s.hit = true;
             s.t = boxEntry(o, d, {mx * 0.25f, my * 0.25f, mz * 0.25f}, 0.25f);
+            s.id = hash(uint32_t(bx) * 73856093u ^ uint32_t(by) * 19349663u ^ uint32_t(bz) * 83492791u) | 1u;
             s.c = lit(microCol(mx, my, mz, f), f);
             return true;
         });
@@ -499,6 +502,7 @@ Sample traceBlocks(const std::vector<BlockLevel>& L, int level, V3 o, V3 d, bool
         int f = enteredFace(axis, d);
         s.hit = true;
         s.t = boxEntry(o, d, {x * cs, y * cs, z * cs}, cs);
+        s.id = hash(uint32_t(x) * 73856093u ^ uint32_t(y) * 19349663u ^ uint32_t(z) * 83492791u ^ uint32_t(level)) | 1u;
         s.c = lit(tinted(b, b.mean), f);
         return true;
     });
@@ -659,6 +663,7 @@ Sample traceCov(int level, V3 o, V3 d, uint32_t seed, bool boxed = false) {
         }
         s.hit = true;
         s.t = boxEntry(o, d, {x * cs, y * cs, z * cs}, cs);
+        s.id = hash(uint32_t(x) * 73856093u ^ uint32_t(y) * 19349663u ^ uint32_t(z) * 83492791u ^ uint32_t(level)) | 1u;
         s.c = cc;
         return true;
     });
@@ -833,6 +838,7 @@ bool traceNode(int idx, BoxCtx& c) {
     if (asBox) {
         if (drawnBoxes) (*drawnBoxes)[size_t(idx)].store(1, std::memory_order_relaxed);
         V3 pin = c.o + c.d * t;
+        c.s->id = uint32_t(idx) * 2u + 1u;
         if (boxFace(n, axis, c.d[axis] < 0, pin, t, c)) return true;
         // a hole: the face the ray leaves by, seen from outside
         int ax2 = 0;
@@ -1007,6 +1013,7 @@ bool traceGroup(int idx, BoxCtx& c) {
     if (leaf || g.err * 0.25f <= c.tol * t * c.pa) {
         if (drawnBoxes) (*drawnBoxes)[size_t(idx)].store(1, std::memory_order_relaxed);
         Node n{{g.lo[0], g.lo[1], g.lo[2]}, {g.hi[0], g.hi[1], g.hi[2]}, g.err, -1};
+        c.s->id = uint32_t(idx) * 2u + 1u;
         if (boxFace(n, axis, c.d[axis] < 0, c.o + c.d * t, t, c)) return true;
         int ax2 = 0;
         float best = 1e30f;
