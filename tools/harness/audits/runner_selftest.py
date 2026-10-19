@@ -148,5 +148,26 @@ finally:
     harness.results.latest = real_latest
 expect(cam is None and "did not succeed" in why, "camera_from refuses a live capture whose last run failed (no stale screenshot)")
 
+# --- a busy client whose progress stops fails fast; one that advances never does ---------------------------------
+w = live_world.ProgressWatch(0.0)
+expect(w.stalled_for("a|3|0", 0.0) == 0 and w.stalled_for("a|3|0", 100.0) == 100.0 and w.stalled_for("a|3|7", 120.0) == 0,
+       "progress that changes (an export's chunk count) resets the stall clock; unchanged progress counts up")
+expect(live_world.ProgressWatch(0.0).stalled_for(None, 500.0) == 0, "an older client without progress is never 'stalled'")
+expect(live_world.STALL_S <= 180, "a silent hang fails within 3 minutes, not at the step's long deadline")
+
+# --- a lab scene matching a live capture is a new result when that capture's run changes (even a failed run) -------
+r = harness.Runner.__new__(harness.Runner)
+r._inputs, r.seed = None, 0
+cam_scene = {"id": "x", "tier": "lab", "lab": {"tool": "atlas_lab"}, "camera_from": {"scene": "s", "variant": "vanilla"}}
+real_latest = harness.results.latest
+try:
+    harness.results.latest = lambda scene, v: {"status": "pass", "capturedAt": "t1"}
+    a = r.inputs(cam_scene, "lab")
+    harness.results.latest = lambda scene, v: {"status": "error", "capturedAt": "t2"}
+    b = r.inputs(cam_scene, "lab")
+finally:
+    harness.results.latest = real_latest
+expect(a.get("live") != b.get("live"), "a failed live capture changes the lab's fingerprint (no reused old pass)")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)

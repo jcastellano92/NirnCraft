@@ -161,7 +161,20 @@ def _iris_enable():
             cfg.write_text(re.sub(r"^enableShaders=false", "enableShaders=true", text, flags=re.M), encoding="utf-8")
 
 
-def launch(group, groups, limit=900):
+def launch(group, groups, limit=900, attempt=1):
+    """Starts the client and waits for its world. A client that dies while loading (before the world is up: a driver
+    or window-creation crash such as 0xC000041D) is started once more; a second death fails the launch."""
+    try:
+        return _launch(group, groups, limit)
+    except RuntimeError as e:
+        if attempt == 1 and "exited while loading" in str(e):
+            log(f"  the client died while loading ({e}); starting it once more")
+            tr.step("launch_retry", group=group, error=str(e)[:300])
+            return launch(group, groups, limit, attempt=2)
+        raise
+
+
+def _launch(group, groups, limit=900):
     tr.step("launch", group=group)
     _iris_enable()
     cfg = groups.get(group, {})

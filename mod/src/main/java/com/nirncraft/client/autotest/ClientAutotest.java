@@ -351,6 +351,9 @@ public final class ClientAutotest {
             status.addProperty("readiness", READINESS.describe());
             int[] pre = com.nirncraft.atlas.AtlasTileServer.prebuildProgress();  // the far field's coarse pre-build
             if (pre != null) status.addProperty("farPrebuild", pre[0] + "/" + pre[1]);
+            // what advances while a step runs (the harness fails a step whose progress stops: a hang, not a slow step)
+            status.addProperty("progress", liveLastAction + "|" + LIVE_ACTIONS.size() + "|" + com.nirncraft.atlas.AtlasLabExport.viewProgress
+                    + "|" + visualStable + "|" + liveSettleStable + "|" + liveSettlePartial);
             status.addProperty("commandPending", liveCommand != null || liveResources != null || liveCapture != null || burstRemaining>0 || ReviewCaptures.pending()>0 || FrameProbe.active() || CameraTravel.active());
             status.addProperty("controlVersion", liveModified);
             status.addProperty("lastAction", liveLastAction);

@@ -312,12 +312,16 @@ class Runner:
         if s["tier"] == "lab":
             exe = ROOT / "native/build/Release" / f"{s['lab'].get('tool', 'atlas_render')}.exe"
             files = lab_files(s["lab"])  # exported inputs (atlas_lab): a new export is a new result
-            if s.get("camera_from"):  # and a new live capture to match is too
-                cf = s["camera_from"]
+            live = ""
+            if s.get("camera_from"):  # and a new live capture to match is too, or its run failing (its old picture
+                cf = s["camera_from"]  # stays on disk: the file alone would let an old pass be reused)
                 files = files + [Path(f"{results.stem(cf['scene'], cf.get('variant', 'vanilla'))}.after.png")]
+                lr = results.latest(cf["scene"], cf.get("variant", "vanilla")) or {}
+                live = f"{lr.get('status')}|{lr.get('capturedAt')}"
             return {**base, "exe": results_hash([exe, ROOT / "native/build/Release/atlas_core.dll"]),
                     "pack": tree_hash(ROOT / "shaderpack/InfiniteATLAS"),
-                    **({"files": results_hash([f for f in files if f.exists()])} if files else {})}
+                    **({"files": results_hash([f for f in files if f.exists()])} if files else {}),
+                    **({"live": live} if live else {})}
         return {**base, "inputs": tree_hash(*[ROOT / g for g in s.get("inputs", [])])}
 
     def invalidate(self):

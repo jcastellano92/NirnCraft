@@ -36,6 +36,7 @@ INSTANCE_NAME = selected_instance(os.environ.get("NIRNCRAFT_NATIVE_INSTANCE", TA
 INSTANCE = PRISM_ROOT / "instances" / INSTANCE_NAME
 GAME = INSTANCE / ".minecraft"
 HEARTBEAT_STALE = 30  # seconds without a status write: the client froze, crashed or lost its control loop
+STALL_S = 150  # seconds without any progress (action, queue, export, settle streaks) while busy: a hang, fail it now
 DEV = GAME / "world-preview"
 GROUPS = {
     "scenes": ["nirncraft/scatter"],
@@ -208,6 +209,20 @@ def _submit(lines, timeout=900):
     raise RuntimeError("Job is still pending: " + job + "; inspect status/outbox before queuing more work")
 
 
+class ProgressWatch:
+    """Seconds since a busy client's progress (its status "progress": action, queue, export, settle streaks) last
+    changed; no progress field (an older client) never counts as stalled."""
+
+    def __init__(self, now):
+        self.last, self.at = None, now
+
+    def stalled_for(self, progress, now):
+        if progress is None or progress != self.last:
+            self.last, self.at = progress, now
+            return 0.0
+        return now - self.at
+
+
 def live_actions(lines, timeout=180, cancel=False):
     with live_guard():
         return _live_actions(lines, timeout, cancel)
@@ -223,6 +238,7 @@ def _live_actions(lines, timeout=180, cancel=False):
     atomic(GAME / "nirncraft-live.txt", ("\n".join(lines) + "\n").encode())
     stamp = (GAME / "nirncraft-live.txt").stat().st_mtime_ns // 1_000_000
     deadline = time.monotonic() + timeout
+    watch = ProgressWatch(time.monotonic())
     while time.monotonic() < deadline:
         if cancel and not processes():
             return
@@ -233,6 +249,11 @@ def _live_actions(lines, timeout=180, cancel=False):
             return
         if c.get("error", "").startswith("client disconnected"):  # lost the world mid-step: say why, at once
             raise RuntimeError(c["error"])
+        p = c.get("progress")
+        if watch.stalled_for(p, time.monotonic()) > STALL_S:  # busy but nothing moves: say what, at once
+            raise RuntimeError(f"client stalled: no progress for {STALL_S} s on {c.get('lastAction')!r} "
+                               f"(queued {c.get('queued')}, settling {c.get('settling')}, command {c.get('commandPending')}, "
+                               f"progress {p})")
         age = heartbeat_age(c, GAME / "nirncraft-live-status.json")
         if age > HEARTBEAT_STALE:  # the client writes its status every second, loading screens included
             alive = bool(processes())

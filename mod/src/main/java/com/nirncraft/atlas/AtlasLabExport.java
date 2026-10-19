@@ -61,6 +61,9 @@ public final class AtlasLabExport {
 
     static final int TILE = 4;
 
+    /** Progress of the running view export (chunks done; the autotest's status carries it: liveness, not a hang). */
+    public static volatile int viewProgress;
+
     @SubscribeEvent
     public static void onCommands(RegisterClientCommandsEvent event) {
         // one greedy argument each: the same parser as the autotest verb
@@ -366,6 +369,7 @@ public final class AtlasLabExport {
                 long until = System.nanoTime() + 40_000_000L;  // a share of the tick, then the next tick
                 while (at[0] < chunks.size() && System.nanoTime() < until) {
                     long[] c = chunks.get(at[0]++);
+                    viewProgress = at[0];
                     var chunk = level.getChunk((int) c[0], (int) c[1]);
                     int lo = Integer.MAX_VALUE, hi = Integer.MIN_VALUE;
                     for (int z = 0; z < 16; z++)
