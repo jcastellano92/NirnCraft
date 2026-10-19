@@ -866,6 +866,14 @@ class Runner:
             if tm["twinStructure"] > 20 or tm["twinSkyline"] > 6:
                 m.setdefault("flags", []).append(f"lab and live differ (structure {tm['twinStructure']}, skyline "
                                                  f"{tm['twinSkyline']}%, dE {tm['twinDE']}): not the same view or terrain")
+        if s.get("vet_pose") and s["tier"] == "live" and live_png.exists():  # does the capture show what it is for
+            import review
+            pv = review.pose(live_png, s.get("vet_pose") if isinstance(s.get("vet_pose"), str) else s.get("title", s["id"]))
+            m["pose"] = pv.get("verdict") or "unvetted"
+            if pv.get("verdict") == "USELESS":
+                fails.append(f"pose useless (the reviewer sees: {pv.get('sees', '')[:90]}); fix: {pv.get('fix', '')[:120]}")
+            elif pv.get("verdict") == "WEAK":
+                m.setdefault("flags", []).append(f"pose weak: {pv.get('problems', '')[:80]}; fix: {pv.get('fix', '')[:120]}")
         status = "fail" if fails else ("flag" if m.get("flags") else "pass")
         rec.update(status=status, fails=fails)
         results.stem(s["id"], v).with_suffix("")

@@ -94,7 +94,7 @@ def _export(slug, title, pose, time, tags, box, underground):
             "tags": ["suite:truth", "feature:farfield"] + tags, "tier": "live", "group": "live", "variants": ["vanilla"],
             "weather": "off", "time": time, "settle": "static", "pose": pose, "wait": 100,
             "setup": setup, "cleanup": cleanup, "measure": 0, "checks": {}, "capture": "world", "timeout": 1800,
-            "source": "tools/harness/truth.py",
+            "source": "tools/harness/truth.py", "vet_pose": title,
             "note": f"exports {slug}(.alv, .alv2, .json){'' if underground else f', {slug}-view(.als2, .json)'} beside the "
                     "block library and Minecraft's mesh data (quads.bin, sprites.bin); the capture is fog-free vanilla"}
 
@@ -133,7 +133,7 @@ def staged(slug, title, states, time=6000, tags=(), spacing=2, per_row=16):
               "variants": ["vanilla"], "weather": "off", "time": time, "settle": "static",
               "pose": {"camera": [cx, y + 22, cz - 26, cx, y + 1, cz]}, "seed": 1234, "wait": 100, "setup": setup,
               "cleanup": ["truth-quiet off", "fog-off off"], "measure": 0, "checks": {}, "capture": "world",
-              "timeout": 1800, "source": "tools/harness/truth.py"}
+              "timeout": 1800, "source": "tools/harness/truth.py", "vet_pose": title}
     return [export, _lab(slug, title, list(tags), "near", f"{slug}.alv2")]
 
 

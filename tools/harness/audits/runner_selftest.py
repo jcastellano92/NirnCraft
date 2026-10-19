@@ -197,5 +197,12 @@ lab_scene = {"id": "B", "tier": "lab", "after": ["L"], "camera_from": {"scene": 
 got = [s["id"] for s, _ in harness.items_of([live_scene, lab_scene], oa)]
 expect(got == ["B"], "--offline leaves live scenes out and never pulls one in as another scene's inputs")
 
+pp = review.parse_pose("VERDICT: WEAK
+SEES: a wall
+PROBLEMS: too close
+FIX: move back 40 blocks")
+expect(pp["verdict"] == "WEAK" and pp["fix"] == "move back 40 blocks", "the pose review's answer is read field by field")
+expect(review.parse_pose("I could not open the image.")["verdict"] is None, "no verdict line: unvetted, never a pass")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)

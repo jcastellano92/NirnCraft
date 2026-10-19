@@ -6,6 +6,9 @@ project memory, no conversation of the agent that made the fix). Its verdicts mo
 Two modes:
 * claims: "is this fixed?" per issue in needs-review (evidence: the before | after sheet, twin side-by-side, zooms).
 * pages: the visual-reviewer pass over a run's agent pages (BROKEN / REGRESSION / CHECK lines), used by the gate.
+* pose: does a capture actually show what its scene is for (subject in view, unblocked, informative)? Scenes with
+  `vet_pose` get it after every capture: USELESS fails the capture (a comparison never runs on a useless view),
+  WEAK flags it, each with the camera change the reviewer suggests.
 """
 import json
 import re
@@ -119,3 +122,37 @@ def parse_pages(text):
 # what the last pages() pass reported beyond its findings: {"ok": n tests it says look right (None: it did not say),
 # "findings": n, "answer": its last words}; the gate logs coverage from it
 LAST_PAGES = {}
+
+
+def pose(png, subject, model="haiku"):
+    """One capture against what it is meant to show: {"verdict": USEFUL | WEAK | USELESS | None, "fix", "sees"}."""
+    png = Path(png)
+    prompt = "\n".join([
+        f"Open this Minecraft screenshot with the Read tool: {png}",
+        f"It was taken by an automated camera to show: {subject}",
+        "Judge only what you can see. Answer in exactly this format:",
+        "VERDICT: <USEFUL | WEAK | USELESS>",
+        "SEES: <one sentence: what is actually in the picture>",
+        "PROBLEMS: <camera inside a wall or building, blocked view, facing the wrong way, too close, too far, only "
+        "sky or ground, subject off-frame, too dark; or none>",
+        "FIX: <a concrete camera change: turn left/right N degrees, move back/forward/up N blocks, pitch up/down; or none>",
+        "Be strict: a subject that is only a small or blocked part of the frame is WEAK; not visible at all is USELESS."])
+    try:
+        text = _ask(prompt, model, [png.parent])
+    except Exception as e:  # noqa: BLE001  no reviewer: the capture is unvetted, said so, never blocked by it
+        _log({"mode": "pose", "png": str(png), "subject": subject, "error": str(e)[:200]})
+        return {"verdict": None, "fix": "", "sees": "", "error": str(e)[:200]}
+    out = parse_pose(text)
+    _log({"mode": "pose", "png": str(png), "subject": subject, **out})
+    return out
+
+
+def parse_pose(text):
+    """The pose reviewer's answer as fields; an answer without a verdict line is None (unvetted, never a pass)."""
+    def line(key):
+        m = re.search(rf"^\**{key}\**:\s*(.+)$", text, re.M)
+        return m.group(1).strip() if m else ""
+    v = line("VERDICT").split()[0].upper().strip("*") if line("VERDICT") else None
+    return {"verdict": v if v in ("USEFUL", "WEAK", "USELESS") else None, "fix": line("FIX"), "sees": line("SEES"),
+            "problems": line("PROBLEMS")}
+
