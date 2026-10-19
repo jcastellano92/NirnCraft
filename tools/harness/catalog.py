@@ -61,7 +61,7 @@ def groups():
 STAGE = (4096, 520, 4096)
 BIG = {"giant": 12, "mammoth": 12, "dragon": 26, "alduin": 30, "dwarven_centurion": 12, "netch": 10, "troll": 7,
        "frost_troll": 7, "silt_strider": 30, "wispmother": 7, "dragon_priest": 6, "werewolf": 6, "horker": 6,
-       "sabre_cat": 6, "bear": 6, "mudcrab": 4}
+       "sabre_cat": 6, "bear": 6, "mudcrab": 4, "longship": 18, "cog": 14, "rowboat": 5}
 
 
 def _entity_categories():

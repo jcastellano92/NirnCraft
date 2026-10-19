@@ -577,10 +577,33 @@ BLOCKING = {"RaceScreen", "IntroLoadingScreen", "ReceivingLevelScreen", "LevelLo
             "DisconnectedScreen", "TitleScreen"}
 
 
-def screen_blocking():
-    """The screen covering the world when it is one a scene cannot pass (None when the world is showing)."""
-    s = (lw.read_json(GAME / "nirncraft-live-status.json") or {}).get("screen")
-    return s if s in BLOCKING else None
+LOADING = {"IntroLoadingScreen", "ReceivingLevelScreen", "LevelLoadingScreen", "GenericMessageScreen"}
+
+
+def screen_blocking(limit=600):
+    """The screen covering the world when it is one a scene cannot pass (None when the world is showing). While a
+    loading screen is up this waits for the game's own hook (status `loading` false / `worldReadyAt` set, logged as
+    "world ready"), as long as its heartbeat is alive; `limit` seconds is only a safety net."""
+    t0 = time.monotonic()
+    seen = None
+    while True:
+        st = lw.read_json(GAME / "nirncraft-live-status.json") or {}
+        s = st.get("screen")
+        loading = st.get("loading", s in LOADING)
+        if s not in BLOCKING and not loading:
+            if seen:
+                tr.step("world_ready", after=round(time.monotonic() - t0, 1), was=seen)
+            return None
+        if s in BLOCKING and s not in LOADING:
+            return s
+        seen = seen or s or "loading"
+        age = time.time() - st.get("updated", 0) / 1000
+        if age > lw.HEARTBEAT_STALE:
+            return f"{seen} (heartbeat stopped {age:.0f} s ago)"
+        if time.monotonic() - t0 > limit:
+            return f"{seen} (still loading after {limit} s)"
+        time.sleep(0.5)
+
 
 def capture(scene, variant, pose_lines, capture_lines):
     """Run one scene + variant; returns (png path, receipt dict, perf dict or None)."""
