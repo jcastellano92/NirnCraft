@@ -229,6 +229,11 @@ public final class AtlasEdits {
             TileJournal j = JOURNAL.computeIfAbsent(tileKey(Math.floorDiv(p.getX(), TILE), Math.floorDiv(p.getZ(), TILE)),
                     k -> new TileJournal());
             synchronized (j) {
+                // only a real change: a fire's age or a crop's growth ticking at a light's position notifies its
+                // neighbours every few ticks, and bumping the version each time re-sent the tile to every client and
+                // rebuilt it forever (the far field never went idle in towns with chimney fires)
+                Light old = j.lights.get(e.getKey());
+                if (old != null ? old.level() == now : now <= 0) continue;
                 j.version++;
                 j.lights.put(e.getKey(), new Light(p.getX(), p.getY(), p.getZ(), now, j.version));
             }
