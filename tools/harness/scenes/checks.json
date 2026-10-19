@@ -65,11 +65,9 @@
     "-3",
     "tools/harness/harness.py",
     "cameras",
-    "atlas-helgen-*",
-    "atlas-whiterun-*",
-    "atlas-riverwood-*",
-    "--tag",
-    "suite:places-planned"
+    "atlas-helgen-aerial",
+    "atlas-whiterun-aerial",
+    "atlas-riverwood-aerial"
    ],
    "inputs": [
     "mod/src/main/java/com/nirncraft/qa",

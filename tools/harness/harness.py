@@ -110,11 +110,14 @@ def select(scenes, a):
         change_tags, a.reloads = impact(changed_files(a.changed or "HEAD"))
         if not change_tags:
             return []
+    # ids alone pick exactly those tests; ids next to a suite / tag / tier filter are added to what it selects
+    filters = bool(a.suite or a.tag or a.tier or a.group or a.changed is not None)
+    named = [s for s in scenes if a.ids and any(fnmatch.fnmatch(s["id"], p) for p in a.ids)]
+    if a.ids and not filters:
+        return named[: a.limit] if a.limit else named
     out = []
     for s in scenes:
         tags = s["tags"]
-        if a.ids and not any(fnmatch.fnmatch(s["id"], p) for p in a.ids):
-            continue
         if suites and not any(tag_match("suite:" + x, tags) for x in suites if x):
             continue
         if any(not any(tag_match(x, tags) for x in q.split(",")) for q in (a.tag or [])):
@@ -128,6 +131,8 @@ def select(scenes, a):
         if change_tags is not None and not any(tag_match(x, tags) for x in change_tags):
             continue
         out.append(s)
+    seen = {s["id"] for s in out}
+    out += [s for s in named if s["id"] not in seen]
     if a.limit:
         out = out[: a.limit]
     return out
