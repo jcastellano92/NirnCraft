@@ -1,0 +1,9 @@
+{
+  "parent": "nirncraft:block/container/grand_template_open",
+  "textures": {
+    "side": "nirncraft:block/container/grand_dwemer_side",
+    "front": "nirncraft:block/container/grand_dwemer_front",
+    "top": "nirncraft:block/container/grand_dwemer_top",
+    "inner": "nirncraft:block/container/chest_dwemer_inner"
+  }
+}

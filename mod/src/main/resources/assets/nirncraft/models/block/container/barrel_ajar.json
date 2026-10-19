@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "nirncraft:block/container/barrel_top_ajar",
+    "bottom": "nirncraft:block/container/barrel_bottom",
+    "side": "nirncraft:block/container/barrel_side"
+  }
+}

@@ -130,7 +130,7 @@ public class SeaWreckFeature extends ConfiguredFeature<NoneFeatureConfiguration>
 
     private static void loot(WorldGenLevel level, BlockPos pos, Identifier table, RandomSource r) {
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, table), r.nextLong());
+        if (be instanceof RandomizableContainerBlockEntity) com.nirncraft.loot.container.LootContainers.setLootTable(level, pos, table, r.nextLong());
     }
 
     /** A worldgen heightmap, or its live counterpart when placed by command in a finished world. */

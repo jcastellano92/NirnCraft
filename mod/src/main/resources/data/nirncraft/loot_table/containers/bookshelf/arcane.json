@@ -1,0 +1,72 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 3
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 1,
+          "modifier": {
+            "type": "nirncraft:regional_book"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 30,
+          "modifier": {
+            "type": "nirncraft:leveled_tome"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 8,
+          "value": "nirncraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 8,
+          "modifier": {
+            "type": "nirncraft:skill_book"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 54
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "condition": {
+            "min": 10,
+            "max": 999,
+            "type": "nirncraft:loot_level"
+          },
+          "value": "nirncraft:parts/staff"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 19
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/bookshelf/arcane"
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "nirncraft:block/container/grand_template_ajar",
+  "textures": {
+    "side": "nirncraft:block/container/grand_elven_side",
+    "front": "nirncraft:block/container/grand_elven_front",
+    "top": "nirncraft:block/container/grand_elven_top",
+    "inner": "nirncraft:block/container/chest_elven_inner"
+  }
+}

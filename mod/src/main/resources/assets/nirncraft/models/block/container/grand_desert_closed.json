@@ -1,0 +1,9 @@
+{
+  "parent": "nirncraft:block/container/grand_template_closed",
+  "textures": {
+    "side": "nirncraft:block/container/grand_desert_side",
+    "front": "nirncraft:block/container/grand_desert_front",
+    "top": "nirncraft:block/container/grand_desert_top",
+    "inner": "nirncraft:block/container/chest_desert_inner"
+  }
+}

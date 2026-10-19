@@ -1,0 +1,424 @@
+{
+  "variants": {
+    "books=0,facing=north,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_0"
+    },
+    "books=1,facing=north,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_1"
+    },
+    "books=2,facing=north,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_2"
+    },
+    "books=3,facing=north,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_3"
+    },
+    "books=0,facing=north,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_0"
+    },
+    "books=1,facing=north,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_1"
+    },
+    "books=2,facing=north,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_2"
+    },
+    "books=3,facing=north,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_3"
+    },
+    "books=0,facing=north,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_0"
+    },
+    "books=1,facing=north,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_1"
+    },
+    "books=2,facing=north,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_2"
+    },
+    "books=3,facing=north,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_3"
+    },
+    "books=0,facing=north,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_0"
+    },
+    "books=1,facing=north,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_1"
+    },
+    "books=2,facing=north,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_2"
+    },
+    "books=3,facing=north,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_3"
+    },
+    "books=0,facing=north,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_0"
+    },
+    "books=1,facing=north,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_1"
+    },
+    "books=2,facing=north,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_2"
+    },
+    "books=3,facing=north,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_3"
+    },
+    "books=0,facing=north,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_0"
+    },
+    "books=1,facing=north,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_1"
+    },
+    "books=2,facing=north,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_2"
+    },
+    "books=3,facing=north,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_3"
+    },
+    "books=0,facing=north,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_0"
+    },
+    "books=1,facing=north,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_1"
+    },
+    "books=2,facing=north,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_2"
+    },
+    "books=3,facing=north,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_3"
+    },
+    "books=0,facing=east,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_0",
+      "y": 90
+    },
+    "books=1,facing=east,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_1",
+      "y": 90
+    },
+    "books=2,facing=east,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_2",
+      "y": 90
+    },
+    "books=3,facing=east,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_3",
+      "y": 90
+    },
+    "books=0,facing=east,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_0",
+      "y": 90
+    },
+    "books=1,facing=east,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_1",
+      "y": 90
+    },
+    "books=2,facing=east,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_2",
+      "y": 90
+    },
+    "books=3,facing=east,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_3",
+      "y": 90
+    },
+    "books=0,facing=east,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_0",
+      "y": 90
+    },
+    "books=1,facing=east,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_1",
+      "y": 90
+    },
+    "books=2,facing=east,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_2",
+      "y": 90
+    },
+    "books=3,facing=east,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_3",
+      "y": 90
+    },
+    "books=0,facing=east,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_0",
+      "y": 90
+    },
+    "books=1,facing=east,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_1",
+      "y": 90
+    },
+    "books=2,facing=east,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_2",
+      "y": 90
+    },
+    "books=3,facing=east,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_3",
+      "y": 90
+    },
+    "books=0,facing=east,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_0",
+      "y": 90
+    },
+    "books=1,facing=east,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_1",
+      "y": 90
+    },
+    "books=2,facing=east,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_2",
+      "y": 90
+    },
+    "books=3,facing=east,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_3",
+      "y": 90
+    },
+    "books=0,facing=east,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_0",
+      "y": 90
+    },
+    "books=1,facing=east,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_1",
+      "y": 90
+    },
+    "books=2,facing=east,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_2",
+      "y": 90
+    },
+    "books=3,facing=east,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_3",
+      "y": 90
+    },
+    "books=0,facing=east,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_0",
+      "y": 90
+    },
+    "books=1,facing=east,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_1",
+      "y": 90
+    },
+    "books=2,facing=east,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_2",
+      "y": 90
+    },
+    "books=3,facing=east,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_3",
+      "y": 90
+    },
+    "books=0,facing=south,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_0",
+      "y": 180
+    },
+    "books=1,facing=south,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_1",
+      "y": 180
+    },
+    "books=2,facing=south,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_2",
+      "y": 180
+    },
+    "books=3,facing=south,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_3",
+      "y": 180
+    },
+    "books=0,facing=south,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_0",
+      "y": 180
+    },
+    "books=1,facing=south,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_1",
+      "y": 180
+    },
+    "books=2,facing=south,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_2",
+      "y": 180
+    },
+    "books=3,facing=south,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_3",
+      "y": 180
+    },
+    "books=0,facing=south,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_0",
+      "y": 180
+    },
+    "books=1,facing=south,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_1",
+      "y": 180
+    },
+    "books=2,facing=south,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_2",
+      "y": 180
+    },
+    "books=3,facing=south,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_3",
+      "y": 180
+    },
+    "books=0,facing=south,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_0",
+      "y": 180
+    },
+    "books=1,facing=south,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_1",
+      "y": 180
+    },
+    "books=2,facing=south,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_2",
+      "y": 180
+    },
+    "books=3,facing=south,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_3",
+      "y": 180
+    },
+    "books=0,facing=south,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_0",
+      "y": 180
+    },
+    "books=1,facing=south,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_1",
+      "y": 180
+    },
+    "books=2,facing=south,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_2",
+      "y": 180
+    },
+    "books=3,facing=south,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_3",
+      "y": 180
+    },
+    "books=0,facing=south,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_0",
+      "y": 180
+    },
+    "books=1,facing=south,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_1",
+      "y": 180
+    },
+    "books=2,facing=south,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_2",
+      "y": 180
+    },
+    "books=3,facing=south,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_3",
+      "y": 180
+    },
+    "books=0,facing=south,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_0",
+      "y": 180
+    },
+    "books=1,facing=south,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_1",
+      "y": 180
+    },
+    "books=2,facing=south,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_2",
+      "y": 180
+    },
+    "books=3,facing=south,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_3",
+      "y": 180
+    },
+    "books=0,facing=west,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_0",
+      "y": 270
+    },
+    "books=1,facing=west,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_1",
+      "y": 270
+    },
+    "books=2,facing=west,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_2",
+      "y": 270
+    },
+    "books=3,facing=west,style=nordic": {
+      "model": "nirncraft:block/container/shelf_nordic_3",
+      "y": 270
+    },
+    "books=0,facing=west,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_0",
+      "y": 270
+    },
+    "books=1,facing=west,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_1",
+      "y": 270
+    },
+    "books=2,facing=west,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_2",
+      "y": 270
+    },
+    "books=3,facing=west,style=imperial": {
+      "model": "nirncraft:block/container/shelf_imperial_3",
+      "y": 270
+    },
+    "books=0,facing=west,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_0",
+      "y": 270
+    },
+    "books=1,facing=west,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_1",
+      "y": 270
+    },
+    "books=2,facing=west,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_2",
+      "y": 270
+    },
+    "books=3,facing=west,style=velothi": {
+      "model": "nirncraft:block/container/shelf_velothi_3",
+      "y": 270
+    },
+    "books=0,facing=west,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_0",
+      "y": 270
+    },
+    "books=1,facing=west,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_1",
+      "y": 270
+    },
+    "books=2,facing=west,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_2",
+      "y": 270
+    },
+    "books=3,facing=west,style=dwemer": {
+      "model": "nirncraft:block/container/shelf_dwemer_3",
+      "y": 270
+    },
+    "books=0,facing=west,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_0",
+      "y": 270
+    },
+    "books=1,facing=west,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_1",
+      "y": 270
+    },
+    "books=2,facing=west,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_2",
+      "y": 270
+    },
+    "books=3,facing=west,style=elven": {
+      "model": "nirncraft:block/container/shelf_elven_3",
+      "y": 270
+    },
+    "books=0,facing=west,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_0",
+      "y": 270
+    },
+    "books=1,facing=west,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_1",
+      "y": 270
+    },
+    "books=2,facing=west,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_2",
+      "y": 270
+    },
+    "books=3,facing=west,style=desert": {
+      "model": "nirncraft:block/container/shelf_desert_3",
+      "y": 270
+    },
+    "books=0,facing=west,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_0",
+      "y": 270
+    },
+    "books=1,facing=west,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_1",
+      "y": 270
+    },
+    "books=2,facing=west,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_2",
+      "y": 270
+    },
+    "books=3,facing=west,style=rustic": {
+      "model": "nirncraft:block/container/shelf_rustic_3",
+      "y": 270
+    }
+  }
+}

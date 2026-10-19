@@ -170,7 +170,8 @@ public final class CrimeHud {
             boolean isContainer = block instanceof net.minecraft.world.level.block.ChestBlock
                     || block instanceof net.minecraft.world.level.block.BarrelBlock
                     || block instanceof net.minecraft.world.level.block.ShulkerBoxBlock
-                    || block instanceof com.nirncraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureContainerBlock;
+                    || block instanceof com.nirncraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureContainerBlock
+                    || block instanceof com.nirncraft.loot.container.LootContainerBlock;
 
             if (isContainer) {
                 boolean owned = (info != null && info.pos().equals(bpos) && info.owned()) || Ownership.isOwnedByOther(mc.player, mc.level, bpos);

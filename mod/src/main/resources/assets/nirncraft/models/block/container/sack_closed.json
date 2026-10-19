@@ -1,0 +1,216 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "nirncraft:block/container/sack",
+    "sack": "nirncraft:block/container/sack",
+    "rope": "nirncraft:block/container/sack_rope",
+    "inner": "nirncraft:block/container/sack_inner"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        9,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#sack",
+          "uv": [
+            3,
+            7,
+            13,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#sack",
+          "uv": [
+            3,
+            7,
+            13,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#sack",
+          "uv": [
+            3,
+            7,
+            13,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#sack",
+          "uv": [
+            3,
+            7,
+            13,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#sack",
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ]
+        },
+        "down": {
+          "texture": "#sack",
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ],
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        9,
+        5
+      ],
+      "to": [
+        11,
+        11,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#sack",
+          "uv": [
+            5,
+            5,
+            11,
+            7
+          ]
+        },
+        "south": {
+          "texture": "#sack",
+          "uv": [
+            5,
+            5,
+            11,
+            7
+          ]
+        },
+        "east": {
+          "texture": "#sack",
+          "uv": [
+            5,
+            5,
+            11,
+            7
+          ]
+        },
+        "west": {
+          "texture": "#sack",
+          "uv": [
+            5,
+            5,
+            11,
+            7
+          ]
+        },
+        "up": {
+          "texture": "#sack",
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ]
+        },
+        "down": {
+          "texture": "#sack",
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        11,
+        6
+      ],
+      "to": [
+        10,
+        12,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#rope",
+          "uv": [
+            6,
+            4,
+            10,
+            5
+          ]
+        },
+        "south": {
+          "texture": "#rope",
+          "uv": [
+            6,
+            4,
+            10,
+            5
+          ]
+        },
+        "east": {
+          "texture": "#rope",
+          "uv": [
+            6,
+            4,
+            10,
+            5
+          ]
+        },
+        "west": {
+          "texture": "#rope",
+          "uv": [
+            6,
+            4,
+            10,
+            5
+          ]
+        },
+        "up": {
+          "texture": "#rope",
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ]
+        },
+        "down": {
+          "texture": "#rope",
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ]
+        }
+      }
+    }
+  ]
+}

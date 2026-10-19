@@ -149,7 +149,7 @@ public final class SiteKit {
 
     private void lootAt(int x, int y, int z, Identifier table) {
         BlockEntity be = level.getBlockEntity(m.set(x, y, z));
-        if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, table), r.nextLong());
+        if (be instanceof RandomizableContainerBlockEntity) com.nirncraft.loot.container.LootContainers.setLootTable(level, m.immutable(), table, r.nextLong());
     }
 
     /** Leaves a lair marker; fill it with {@link LairMarkerBlockEntity#creature} / {@link LairMarkerBlockEntity#npc}. */

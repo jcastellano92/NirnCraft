@@ -217,6 +217,9 @@ Each unique is a fixed, named, enchanted and pre-tempered weapon with lore and a
   | households and shops | 10 days (30 with Lootr, which has a single timer) |
   | boss chests, dragon lairs, word walls, Daedric shrines and placed uniques | never |
 
+  * **NirnCraft's containers** (`loot.container`, docs/CONTAINERS.md) replace Lootr: per-player copies, the same
+    restock times per player (and `restockScale`), never over a player's things. `containers.system` in
+    `config/nirncraft-containers-common.toml` decides who runs loot containers while Lootr is still installed.
   * **With Lootr.** Lootr is in the pack. Each player loots their own copy of every container. The pack's
     `config/lootr-common.toml`, written by `tools/loot_data.py`, refreshes exactly the restocking tables after
     720,000 ticks. Corpses, rewards and lock bonuses are not containers.

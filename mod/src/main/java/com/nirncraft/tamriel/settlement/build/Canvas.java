@@ -608,8 +608,9 @@ public final class Canvas {
         wset(x, y, z, rot(state));
         if (loot == null) return;
         m.set(x, y, z);
-        if (level.getBlockEntity(m) instanceof RandomizableContainerBlockEntity c) {
-            c.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, loot), hash(x, y, z, 31));
+        if (level.getBlockEntity(m) instanceof RandomizableContainerBlockEntity) {
+            // a NirnCraft per-player loot container when the config says so (loot.container), else the vanilla table
+            com.nirncraft.loot.container.LootContainers.setLootTable(level, m.immutable(), loot, hash(x, y, z, 31));
         }
     }
 

@@ -595,6 +595,6 @@ public final class DockBuilder {
 
     private static void loot(ServerLevel level, BlockPos pos, Identifier table) {
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, table), level.getRandom().nextLong());
+        if (be instanceof RandomizableContainerBlockEntity) com.nirncraft.loot.container.LootContainers.setLootTable(level, pos, table, level.getRandom().nextLong());
     }
 }

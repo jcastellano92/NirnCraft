@@ -1,0 +1,9 @@
+{
+  "parent": "nirncraft:block/container/grand_template_open",
+  "textures": {
+    "side": "nirncraft:block/container/grand_nordic_side",
+    "front": "nirncraft:block/container/grand_nordic_front",
+    "top": "nirncraft:block/container/grand_nordic_top",
+    "inner": "nirncraft:block/container/chest_nordic_inner"
+  }
+}

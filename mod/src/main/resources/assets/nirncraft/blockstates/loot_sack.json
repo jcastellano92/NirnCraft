@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=north,lid=closed": {
+      "model": "nirncraft:block/container/sack_closed"
+    },
+    "facing=north,lid=ajar": {
+      "model": "nirncraft:block/container/sack_ajar"
+    },
+    "facing=north,lid=open": {
+      "model": "nirncraft:block/container/sack_open"
+    },
+    "facing=east,lid=closed": {
+      "model": "nirncraft:block/container/sack_closed",
+      "y": 90
+    },
+    "facing=east,lid=ajar": {
+      "model": "nirncraft:block/container/sack_ajar",
+      "y": 90
+    },
+    "facing=east,lid=open": {
+      "model": "nirncraft:block/container/sack_open",
+      "y": 90
+    },
+    "facing=south,lid=closed": {
+      "model": "nirncraft:block/container/sack_closed",
+      "y": 180
+    },
+    "facing=south,lid=ajar": {
+      "model": "nirncraft:block/container/sack_ajar",
+      "y": 180
+    },
+    "facing=south,lid=open": {
+      "model": "nirncraft:block/container/sack_open",
+      "y": 180
+    },
+    "facing=west,lid=closed": {
+      "model": "nirncraft:block/container/sack_closed",
+      "y": 270
+    },
+    "facing=west,lid=ajar": {
+      "model": "nirncraft:block/container/sack_ajar",
+      "y": 270
+    },
+    "facing=west,lid=open": {
+      "model": "nirncraft:block/container/sack_open",
+      "y": 270
+    }
+  }
+}

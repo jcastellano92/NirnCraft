@@ -59,7 +59,7 @@ import java.util.UUID;
 /**
  * Locked loot containers and the lockpicking minigame.
  *
- * <p>Any container that still has a loot table to generate (or any Lootr container) is a lock candidate the first
+ * <p>Any container that still has a loot table to generate (or any Lootr or NirnCraft loot container) is a lock candidate the first
  * time someone interacts with it. Whether it's locked (~35%) and how hard (Novice..Master, harder deeper down and in
  * the Nether) is derived from the world seed and the position, and remembered in {@link LockData}. Every player picks
  * a lock once; afterwards it stays open for them (per world, {@link LockData#unlocked}).</p>
@@ -124,7 +124,8 @@ public final class Locks {
         if (be == null) return false;
         Identifier id = BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock());
         if (id != null && id.getNamespace().equals("lootr")) return true;
-        return be instanceof RandomizableContainerBlockEntity && Theft.lootTable(be) != null;
+        // NirnCraft's world loot containers (loot.container) keep their table: one lock per container, picked per player
+        return (be instanceof RandomizableContainerBlockEntity || com.nirncraft.loot.container.LootContainers.isWorldLoot(be)) && Theft.lootTable(be) != null;
     }
 
     /** Whether the door at {@code pos} (lower half) is the door of an inn's private guest room. */

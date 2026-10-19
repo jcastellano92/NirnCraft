@@ -131,11 +131,12 @@ public final class Theft {
         return loot.contains(VILLAGE_LOOT) || com.nirncraft.loot.Containers.isOwned(loot);
     }
 
-    /** The loot table a container still has to generate, or null. */
+    /**
+     * The loot table a container still has to generate, or null; a NirnCraft loot container always knows its table
+     * (loot.container.LootContainers#lootTableOf), so its ownership never changes once it has been opened.
+     */
     static String lootTable(BlockEntity be) {
-        if (!(be instanceof RandomizableContainerBlockEntity)) return null;
-        CompoundTag tag = be.saveWithoutMetadata(be.getLevel().registryAccess());
-        return com.nirncraft.platform.NbtData.hasType(tag, "LootTable", Tag.TAG_STRING) ? tag.getStringOr("LootTable","") : null;
+        return com.nirncraft.loot.container.LootContainers.lootTableOf(be);
     }
 
     // ------------------------------------------------------------------ tracking which block a menu belongs to

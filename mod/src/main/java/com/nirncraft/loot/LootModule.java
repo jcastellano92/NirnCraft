@@ -35,5 +35,10 @@ public final class LootModule {
         ITEMS.register(modBus);
         AddTableModifier.init(modBus);
         LootFunctions.init(modBus);
+        // NirnCraft's own per-player loot containers (docs/CONTAINERS.md), replacing Lootr
+        com.nirncraft.loot.container.ContainerRegistry.init(modBus);
+        com.nirncraft.NirnCraft.config(net.neoforged.fml.config.ModConfig.Type.LOCAL, com.nirncraft.loot.container.ContainersConfig.SPEC,
+                "nirncraft-containers-common.toml");
+        com.nirncraft.loot.container.ContainerSelfTest.registerAutorun();
     }
 }

@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=north,lid=closed": {
+      "model": "nirncraft:block/container/remains"
+    },
+    "facing=north,lid=ajar": {
+      "model": "nirncraft:block/container/remains"
+    },
+    "facing=north,lid=open": {
+      "model": "nirncraft:block/container/remains"
+    },
+    "facing=east,lid=closed": {
+      "model": "nirncraft:block/container/remains",
+      "y": 90
+    },
+    "facing=east,lid=ajar": {
+      "model": "nirncraft:block/container/remains",
+      "y": 90
+    },
+    "facing=east,lid=open": {
+      "model": "nirncraft:block/container/remains",
+      "y": 90
+    },
+    "facing=south,lid=closed": {
+      "model": "nirncraft:block/container/remains",
+      "y": 180
+    },
+    "facing=south,lid=ajar": {
+      "model": "nirncraft:block/container/remains",
+      "y": 180
+    },
+    "facing=south,lid=open": {
+      "model": "nirncraft:block/container/remains",
+      "y": 180
+    },
+    "facing=west,lid=closed": {
+      "model": "nirncraft:block/container/remains",
+      "y": 270
+    },
+    "facing=west,lid=ajar": {
+      "model": "nirncraft:block/container/remains",
+      "y": 270
+    },
+    "facing=west,lid=open": {
+      "model": "nirncraft:block/container/remains",
+      "y": 270
+    }
+  }
+}

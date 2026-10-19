@@ -1,0 +1,9 @@
+{
+  "parent": "nirncraft:block/container/grand_template_ajar",
+  "textures": {
+    "side": "nirncraft:block/container/grand_imperial_side",
+    "front": "nirncraft:block/container/grand_imperial_front",
+    "top": "nirncraft:block/container/grand_imperial_top",
+    "inner": "nirncraft:block/container/chest_imperial_inner"
+  }
+}

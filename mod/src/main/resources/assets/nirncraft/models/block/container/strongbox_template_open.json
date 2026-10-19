@@ -1,0 +1,213 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "#side"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        4
+      ],
+      "to": [
+        13,
+        5,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#front",
+          "uv": [
+            3,
+            11,
+            13,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            3,
+            11,
+            13,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            3,
+            11,
+            13,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            3,
+            11,
+            13,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#inner",
+          "uv": [
+            1,
+            1,
+            15,
+            15
+          ]
+        },
+        "down": {
+          "texture": "#side",
+          "uv": [
+            1,
+            1,
+            15,
+            15
+          ],
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        5,
+        10
+      ],
+      "to": [
+        13,
+        13,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#inner",
+          "uv": [
+            3,
+            1,
+            13,
+            15
+          ]
+        },
+        "south": {
+          "texture": "#top",
+          "uv": [
+            3,
+            1,
+            13,
+            15
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            4,
+            9,
+            6,
+            11
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            10,
+            9,
+            12,
+            11
+          ]
+        },
+        "up": {
+          "texture": "#front",
+          "uv": [
+            3,
+            9,
+            13,
+            11
+          ]
+        },
+        "down": {
+          "texture": "#side",
+          "uv": [
+            3,
+            0,
+            13,
+            2
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        11,
+        9
+      ],
+      "to": [
+        9,
+        14,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#front",
+          "uv": [
+            6,
+            3,
+            8,
+            7
+          ]
+        },
+        "south": {
+          "texture": "#front",
+          "uv": [
+            6,
+            3,
+            8,
+            7
+          ]
+        },
+        "east": {
+          "texture": "#front",
+          "uv": [
+            6,
+            3,
+            8,
+            7
+          ]
+        },
+        "west": {
+          "texture": "#front",
+          "uv": [
+            6,
+            3,
+            8,
+            7
+          ]
+        },
+        "up": {
+          "texture": "#front",
+          "uv": [
+            6,
+            3,
+            8,
+            7
+          ]
+        },
+        "down": {
+          "texture": "#front",
+          "uv": [
+            6,
+            3,
+            8,
+            7
+          ]
+        }
+      }
+    }
+  ]
+}
