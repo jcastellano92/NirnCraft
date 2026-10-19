@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "nirncraft:block/graht_oak_log",
+    "side": "nirncraft:block/graht_oak_log"
+  }
+}

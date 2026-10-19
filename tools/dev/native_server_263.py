@@ -46,7 +46,7 @@ def prepare(scratch: Path, runtime: Path, control: Path, java: Path, jdwp: int, 
     for path in paths:
         if path.suffix == '.jar':
             with zipfile.ZipFile(path) as archive:
-                if 'com/skycraft/Skycraft.class' in archive.namelist():
+                if 'com/nirncraft/NirnCraft.class' in archive.namelist():
                     raise ValueError('A packaged old core must not override native development classes')
     compiled = scratch / 'build/classes/java/main'
     resources = scratch / 'build/resources/main'
@@ -61,11 +61,11 @@ def prepare(scratch: Path, runtime: Path, control: Path, java: Path, jdwp: int, 
     authored_rules = json.loads((ROOT / 'mod/src/main/resources' / rules_path).read_text(encoding='utf8'))
     if rules != authored_rules:
         raise ValueError('Processed native recipe-rules metadata is stale')
-    core = (compiled / 'com/skycraft/Skycraft.class').read_bytes()
+    core = (compiled / 'com/nirncraft/NirnCraft.class').read_bytes()
     if core[:4] != b'\xca\xfe\xba\xbe' or int.from_bytes(core[6:8], 'big') != 69:
         raise ValueError('Development core was not compiled for Java 25')
     props = [java_arg(line) for line in texts['serverRunVmArgs.txt'].splitlines()]
-    expected_dev = '-Dskycraft.dev=' + str(control)
+    expected_dev = '-Dnirncraft.dev=' + str(control)
     if not any(line.replace('\\', '/').lower() == expected_dev.replace('\\', '/').lower() for line in props):
         raise ValueError('Prepared server control directory differs from requested runtime')
     launch = runtime / 'native-launch'
@@ -74,8 +74,8 @@ def prepare(scratch: Path, runtime: Path, control: Path, java: Path, jdwp: int, 
         shutil.copyfile(path, launch / name)
     args = ['-Xmx' + xmx, f'-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:{jdwp}',
             '@' + (launch / 'serverRunClasspath.txt').as_posix(), '@' + (launch / 'serverRunVmArgs.txt').as_posix(),
-            '-Dskycraft.dev=' + control.as_posix(),
-            '-Dfml.modFolders=skycraft%%' + compiled.as_posix() + ';skycraft%%' + resources.as_posix(),
+            '-Dnirncraft.dev=' + control.as_posix(),
+            '-Dfml.modFolders=nirncraft%%' + compiled.as_posix() + ';nirncraft%%' + resources.as_posix(),
             'net.neoforged.devlaunch.Main', '@' + (launch / 'serverRunProgramArgs.txt').as_posix()]
     return {'minecraft': '26.3', 'neoforge': '26.3.0.90', 'javaVersion': 25, 'java': str(java),
             'runtime': str(runtime), 'control': str(control), 'args': args}
@@ -89,9 +89,9 @@ def main() -> None:
     parser.add_argument('--xmx', default='4G')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    scratch = Path(os.environ.get('SKYCRAFT_263_SCRATCH', r'E:\Skycraft-scratch\migration-26.3')).resolve()
-    java_home = Path(os.environ.get('SKYCRAFT_JAVA25_HOME') or
-                     Path(r'E:\Skycraft-scratch\toolchains\java25-location.txt').read_text().strip()).resolve(strict=True)
+    scratch = Path(os.environ.get('NIRNCRAFT_263_SCRATCH', r'E:\NirnCraft-scratch\migration-26.3')).resolve()
+    java_home = Path(os.environ.get('NIRNCRAFT_JAVA25_HOME') or
+                     Path(r'E:\NirnCraft-scratch\toolchains\java25-location.txt').read_text().strip()).resolve(strict=True)
     java = java_home / 'bin/java.exe'
     runtime, control = args.runtime.resolve(strict=True), args.control.resolve(strict=True)
     environment = os.environ.copy()

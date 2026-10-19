@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "nirncraft:block/word_wall"
+    },
+    "facing=east": {
+      "model": "nirncraft:block/word_wall",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "nirncraft:block/word_wall",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nirncraft:block/word_wall",
+      "y": 270
+    }
+  }
+}

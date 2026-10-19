@@ -1,13 +1,13 @@
 'use strict';
 // Authoring helpers for the marquee quest files (quests/marquee_<province>.json). A province script
 // (tools/marquee/mq_<province>.js) builds one File with npc/relic/boss/scene/quest calls and writes it to
-// mod/src/main/resources/skycraft/quests/. Output is the ordinary story-engine format (docs/QUESTS.md); run
+// mod/src/main/resources/nirncraft/quests/. Output is the ordinary story-engine format (docs/QUESTS.md); run
 // `node tools/quest_lang.js` afterwards. Texts are original; names are lore facts or invented.
 const fs = require('fs');
 const path = require('path');
 
-const QUEST_DIR = path.join(__dirname, '..', '..', 'mod', 'src', 'main', 'resources', 'skycraft', 'quests');
-const LORE_DIR = path.join(__dirname, '..', '..', 'mod', 'src', 'main', 'resources', 'skycraft', 'lore', 'places');
+const QUEST_DIR = path.join(__dirname, '..', '..', 'mod', 'src', 'main', 'resources', 'nirncraft', 'quests');
+const LORE_DIR = path.join(__dirname, '..', '..', 'mod', 'src', 'main', 'resources', 'nirncraft', 'lore', 'places');
 
 class File {
   constructor(line, prefix, category = 'side') {

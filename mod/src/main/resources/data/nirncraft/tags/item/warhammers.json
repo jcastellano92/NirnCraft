@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:iron_warhammer",
+    "nirncraft:steel_warhammer",
+    "nirncraft:orcish_warhammer",
+    "nirncraft:dwarven_warhammer",
+    "nirncraft:elven_warhammer",
+    "nirncraft:glass_warhammer",
+    "nirncraft:ebony_warhammer",
+    "nirncraft:daedric_warhammer",
+    "nirncraft:dragonbone_warhammer",
+    "nirncraft:silver_warhammer",
+    "nirncraft:ancient_nord_warhammer",
+    "nirncraft:forsworn_warhammer",
+    "nirncraft:imperial_warhammer",
+    "nirncraft:falmer_warhammer",
+    "nirncraft:nordic_warhammer",
+    "nirncraft:skyforge_warhammer",
+    "nirncraft:akaviri_warhammer",
+    "nirncraft:stalhrim_warhammer",
+    "nirncraft:breton_warhammer",
+    "nirncraft:atmoran_warhammer",
+    {
+      "id": "#nirncraft:arsenal/warhammers",
+      "required": false
+    }
+  ]
+}

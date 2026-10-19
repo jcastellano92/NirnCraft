@@ -9,7 +9,7 @@ KEYS={'ITEMS':'ITEM','BLOCKS':'BLOCK','ENTITY_TYPES':'ENTITY_TYPE','MOB_EFFECTS'
  'VILLAGER_PROFESSIONS':'VILLAGER_PROFESSION','POI_TYPES':'POINT_OF_INTEREST_TYPE','PAINTING_VARIANTS':'PAINTING_VARIANT'}
 def migrate(scope):
  count=0
- for p in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
+ for p in (ROOT/'mod/src/main/java/com/nirncraft').rglob('*.java'):
   if owner(p)!=scope:continue
   raw=p.read_bytes();s=raw.decode('utf8');out=s
   out=out.replace('import net.neoforged.neoforge.registries.RegistryObject;','import java.util.function.Supplier;')

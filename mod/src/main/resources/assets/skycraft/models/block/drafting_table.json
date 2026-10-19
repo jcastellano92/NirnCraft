@@ -1,9 +1,0 @@
-{
-  "parent": "minecraft:block/orientable_with_bottom",
-  "textures": {
-    "top": "skycraft:block/drafting_table_top",
-    "bottom": "skycraft:block/drafting_table_bottom",
-    "front": "skycraft:block/drafting_table_front",
-    "side": "skycraft:block/drafting_table_side"
-  }
-}

@@ -3,7 +3,7 @@
 # tools/refresh_packwiz.py. Exits non-zero if any entry can't be resolved.
 # Usage: tools/build-pack.sh
 # Requires packwiz on PATH, python3, and network access to Modrinth/CurseForge.
-# Skycraft Core is NOT added here: the committed pack never contains it. Builds inject it with
+# NirnCraft Core is NOT added here: the committed pack never contains it. Builds inject it with
 # tools/prepare-build-pack.sh <jar>.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

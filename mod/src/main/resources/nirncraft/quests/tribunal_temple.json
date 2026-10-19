@@ -1,0 +1,549 @@
+{
+  "line": "tribunal_temple",
+  "category": "faction",
+  "faction": "tribunal_temple",
+  "region": "morrowind/ascadian_isles",
+  "speakers": {
+    "narrator": "Narrator",
+    "dagoth_odros": "Dagoth Odros"
+  },
+  "places": {
+    "fields_of_kummu": {
+      "x": 6860,
+      "z": 940,
+      "r": 34,
+      "name": "Fields of Kummu"
+    },
+    "koal_cave": {
+      "x": 5640,
+      "z": -560,
+      "r": 28,
+      "name": "Koal Cave"
+    },
+    "ilunibi": {
+      "x": 6150,
+      "z": -60,
+      "r": 32,
+      "name": "Ilunibi"
+    },
+    "suran": {
+      "x": 7600,
+      "z": 840,
+      "r": 36,
+      "name": "Suran"
+    }
+  },
+  "npcs": [
+    {
+      "id": "tholer_saryoni",
+      "name": "Archcanon Tholer Saryoni",
+      "role": "priest",
+      "place": "vivec",
+      "offset": [
+        6,
+        -6
+      ],
+      "greet": "The High Fane is open to every pilgrim. The Three are watching over Vvardenfell, even when Vvardenfell forgets to look up."
+    },
+    {
+      "id": "dalvilu_arethan",
+      "name": "Canon Dalvilu Arethan",
+      "role": "priest",
+      "place": "balmora",
+      "offset": [
+        -6,
+        8
+      ],
+      "hall": "tribunal_temple",
+      "greet": "Balmora's temple keeps its doors open and its lamps lit. If you are troubled, sit. If you are here to help, there is always more to do."
+    },
+    {
+      "id": "brother_dranos",
+      "name": "Brother Dranos Velas",
+      "role": "priest",
+      "place": "suran",
+      "offset": [
+        -8,
+        6
+      ],
+      "greet": "I tend the sick, and I read old books, and I ask old questions. Some in the Temple think the last of these is the most dangerous."
+    },
+    {
+      "id": "sedrisa_vandu",
+      "name": "Sedrisa Vandu",
+      "role": "apothecary",
+      "place": "suran",
+      "offset": [
+        5,
+        -3
+      ],
+      "female": true,
+      "greet": "Half the village is coughing ash and the other half is too frightened to come near them. I'm running out of everything."
+    }
+  ],
+  "relics": [
+    {
+      "id": "pilgrims_token",
+      "name": "Pilgrim's Token of the Seven Graces",
+      "desc": "A small clay token, stamped at each shrine of the pilgrimage. It is nearly full.",
+      "icon": 26
+    },
+    {
+      "id": "ash_salts",
+      "name": "Ash Salts and Trama Root",
+      "desc": "Bitter ingredients from the ashlands. Boiled together, they ease the blight's grip.",
+      "icon": 15
+    },
+    {
+      "id": "dissident_tract",
+      "name": "Dissident Tract",
+      "desc": "A pamphlet questioning the divinity of the Three. Written with care, and with considerable courage.",
+      "icon": 7
+    }
+  ],
+  "scenes": {
+    "tt_ilunibi": [
+      [
+        "narrator",
+        "Deep in Ilunibi, the walls are crusted with ash and something like wet bark. Low chanting echoes from a chamber below."
+      ],
+      [
+        "dagoth_odros",
+        "A pilgrim of the false gods. How sweet. Come closer. Dream with us. The Sleeper is waking, and he remembers you."
+      ]
+    ],
+    "tt_patriarch": [
+      [
+        "narrator",
+        "Beneath the High Fane, the Archcanon lays a hand on your brow. The light through the great windows is the color of Vivec's own city at dusk."
+      ],
+      [
+        "tholer_saryoni",
+        "You walked the Graces, purged the Sixth House, healed the blighted, weighed justice and mercy, and stood fast at Ghostgate."
+      ],
+      [
+        "tholer_saryoni",
+        "The Temple has many servants. It has few shepherds. Rise, Patriarch."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "tt_pilgrimage_of_graces",
+      "title": "The Pilgrimage of the Seven Graces",
+      "start": "npc:dalvilu_arethan",
+      "requires": [
+        "!faction:tribunal_temple"
+      ],
+      "offer": "I want to serve the Tribunal Temple.",
+      "pitch": "Every servant of the Temple walks the pilgrimage of the Graces. Pray at the Fields of Kummu for humility, at Koal Cave for courage, and at the Ghostgate for valor, then present your token to the Archcanon in Vivec. Walk it with an open heart.",
+      "desc": "Canon Dalvilu Arethan of the Balmora temple sent me on the Pilgrimage of the Seven Graces, to pray at the shrines of Kummu, Koal Cave and the Ghostgate, then present myself to Archcanon Tholer Saryoni in Vivec.",
+      "on_start": "relic:pilgrims_token",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "fields_of_kummu",
+          "radius": 12,
+          "text": "Pray at the shrine in the Fields of Kummu",
+          "journal": "At the Fields of Kummu I knelt in the mud as the pilgrims do, in memory of Vivec helping a farmer carry his load. My knees are still wet."
+        },
+        {
+          "type": "go",
+          "place": "koal_cave",
+          "radius": 12,
+          "text": "Pray at the shrine of courage in Koal Cave"
+        },
+        {
+          "type": "go",
+          "place": "ghostfence_morrowind",
+          "offset": [
+            -60,
+            -40
+          ],
+          "radius": 14,
+          "text": "Pray at the shrine of valor beside the Ghostgate"
+        },
+        {
+          "type": "deliver",
+          "npc": "tholer_saryoni",
+          "relic": "pilgrims_token",
+          "text": "Present your pilgrim's token to Archcanon Saryoni in Vivec",
+          "topic": "I have walked the Graces, Archcanon.",
+          "reply": "So I see. Your token is full and your boots are worn through. Welcome to the Tribunal Temple, Layman. Walk with the Three.",
+          "place": "vivec"
+        }
+      ],
+      "outro": "I walked the Pilgrimage of the Seven Graces and was received into the Tribunal Temple by Archcanon Tholer Saryoni.",
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "nirncraft:chitin_chestplate",
+          "nirncraft:spell_tome_lesser_ward"
+        ]
+      },
+      "region": "morrowind/ascadian_isles",
+      "why": [
+        "morrowind/ascadian_isles.L7.plantation_slaves",
+        "morrowind/ascadian_isles.L8.vivec_the_living_god"
+      ],
+      "consequence": {
+        "world_state": "tt_pilgrimage_of_graces_resolved",
+        "flag": "conseq_tt_pilgrimage_of_graces",
+        "summary": "I walked the Pilgrimage of the Seven Graces and was received into the Tribunal Temple by Archcanon Tholer Saryoni."
+      }
+    },
+    {
+      "id": "tt_purge_ilunibi",
+      "title": "The Purging of Ilunibi",
+      "start": "npc:dalvilu_arethan",
+      "requires": [
+        "quest:tt_pilgrimage_of_graces|faction:tribunal_temple"
+      ],
+      "offer": "Is there work for the Temple, Canon?",
+      "pitch": "Dreamers have been walking out of Balmora at night and not coming back. The Ordinators traced them to Ilunibi, a cave to the north. It belongs to the Sixth House now. Purge it.",
+      "desc": "Balmora citizens have been lured away by dreams to Ilunibi, a cave held by the Sixth House. Canon Arethan has asked me to cleanse it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "ilunibi",
+          "text": "Travel to Ilunibi",
+          "actions": "scene:tt_ilunibi"
+        },
+        {
+          "type": "clear",
+          "place": "ilunibi",
+          "placement": "structure",
+          "text": "Destroy the ash creatures and dreamers",
+          "spawn": [
+            {
+              "type": "nirncraft:ash_spawn",
+              "count": 3
+            },
+            {
+              "type": "npc:mage",
+              "count": 2,
+              "name": "Sleeper Dreamer",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "ilunibi",
+          "placement": "structure",
+          "text": "Destroy the ash vampire Dagoth Odros",
+          "spawn": [
+            {
+              "type": "nirncraft:vampire_lord",
+              "name": "Dagoth Odros",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.5
+            }
+          ],
+          "journal": "Dagoth Odros came apart into hot ash. The chanting stopped. Two dreamers in the lowest chamber woke and asked me where they were."
+        },
+        {
+          "type": "talk",
+          "npc": "dalvilu_arethan",
+          "text": "Report to Canon Arethan",
+          "topic": "Ilunibi is cleansed. An ash vampire led the dreamers.",
+          "reply": "An ash vampire, so close to Balmora. The Sixth House grows bolder. The Temple owes you its thanks, and the dreamers owe you their minds.",
+          "place": "balmora"
+        }
+      ],
+      "outro": "I purged Ilunibi of the Sixth House and destroyed the ash vampire Dagoth Odros.",
+      "rewards": {
+        "gold": 400,
+        "faction_points": 3,
+        "items": [
+          "nirncraft:spell_tome_ironflesh"
+        ]
+      },
+      "region": "morrowind/bitter_coast",
+      "why": [
+        "morrowind/bitter_coast.L8.bitter_superstitions",
+        "morrowind/bitter_coast.L10.smuggler_caves"
+      ],
+      "consequence": {
+        "world_state": "tt_purge_ilunibi_resolved",
+        "flag": "conseq_tt_purge_ilunibi",
+        "summary": "I purged Ilunibi of the Sixth House and destroyed the ash vampire Dagoth Odros."
+      }
+    },
+    {
+      "id": "tt_blight_of_suran",
+      "title": "The Blight of Suran",
+      "start": "auto",
+      "requires": [
+        "quest:tt_purge_ilunibi"
+      ],
+      "desc": "The blight has reached Suran. The apothecary Sedrisa Vandu is out of remedies, and the Temple has sent me to help her.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "suran",
+          "text": "Travel to Suran"
+        },
+        {
+          "type": "talk",
+          "npc": "sedrisa_vandu",
+          "text": "Speak with Sedrisa Vandu",
+          "topic": "The Temple sent me to help with the blight.",
+          "reply": "Then help me fast. I need ash salts and trama root, and both grow out past the old guar track where the kagouti den. Bring me a good bundle.",
+          "place": "suran"
+        },
+        {
+          "type": "clear",
+          "place": "suran",
+          "offset": [
+            -220,
+            -160
+          ],
+          "text": "Clear the kagouti from the herb grounds",
+          "spawn": [
+            {
+              "type": "nirncraft:kagouti",
+              "count": 2
+            },
+            {
+              "type": "nirncraft:alit",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "suran",
+          "offset": [
+            -220,
+            -160
+          ],
+          "relic": "ash_salts",
+          "radius": 12,
+          "text": "Gather ash salts and trama root"
+        },
+        {
+          "type": "deliver",
+          "npc": "sedrisa_vandu",
+          "relic": "ash_salts",
+          "text": "Bring the ingredients to Sedrisa Vandu",
+          "topic": "Ash salts and trama root. As much as I could carry.",
+          "reply": "Enough for every bed in the village. Sit with them while it brews. Prayers help, and so does a hand to hold.",
+          "place": "suran"
+        },
+        {
+          "type": "wait",
+          "hours": 6,
+          "text": "Tend the blighted with Sedrisa",
+          "journal": "Through the night, the coughing quieted, bed by bed. Brother Dranos of the village chapel worked beside us without a word about the Temple."
+        }
+      ],
+      "outro": "I helped cure Suran of the blight. Brother Dranos Velas worked beside me, and I learned later that the Ordinators are watching him.",
+      "rewards": {
+        "gold": 400,
+        "faction_points": 5,
+        "items": [
+          "nirncraft:amulet_of_mara"
+        ]
+      },
+      "region": "morrowind/ascadian_isles",
+      "why": [
+        "morrowind/ascadian_isles.L8.vivec_the_living_god",
+        "morrowind/ascadian_isles.L9.twin_lamps_underground"
+      ],
+      "consequence": {
+        "world_state": "tt_blight_of_suran_resolved",
+        "flag": "conseq_tt_blight_of_suran",
+        "summary": "I helped cure Suran of the blight. Brother Dranos Velas worked beside me, and I learned later that the Ordinators are watching him."
+      }
+    },
+    {
+      "id": "tt_ordinators_question",
+      "title": "The Ordinator's Question",
+      "start": "npc:tharen",
+      "requires": [
+        "quest:tt_blight_of_suran"
+      ],
+      "offer": "You wanted to speak with me, Ordinator?",
+      "pitch": "You were in Suran. So was Brother Dranos Velas, who writes tracts doubting the Three. Find his writings and bring them to me. What happens to him then is the Temple's business. And yours, I suspect.",
+      "desc": "The Ordinator Tharen Veloth has asked me to investigate Brother Dranos Velas of Suran, suspected of writing heretical tracts against the Tribunal.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "suran",
+          "text": "Return to Suran"
+        },
+        {
+          "type": "retrieve",
+          "place": "suran",
+          "offset": [
+            -8,
+            6
+          ],
+          "relic": "dissident_tract",
+          "radius": 8,
+          "text": "Search Brother Dranos's chapel for his writings"
+        },
+        {
+          "type": "talk",
+          "npc": "brother_dranos",
+          "text": "Confront Brother Dranos",
+          "topic": "I found your tract.",
+          "reply": "Then you know I don't hate the Three. I only ask what they are, and where they've gone. If that is heresy, the Temple is more fragile than it thinks.",
+          "place": "suran"
+        },
+        {
+          "type": "talk",
+          "npc": "brother_dranos",
+          "text": "Decide Brother Dranos's fate",
+          "choices": [
+            {
+              "label": "I'll take this to the Ordinators. The law is the law.",
+              "reply": "Then I'll pack. Thank you for letting me say it to your face, at least.",
+              "actions": "flag:tt_dranos_reported;retire:brother_dranos"
+            },
+            {
+              "label": "Burn it. Keep tending your sick, and keep your questions quiet.",
+              "reply": "Mercy, from a Temple servant. Perhaps I was wrong about the Temple after all.",
+              "actions": "flag:tt_dranos_spared;take:dissident_tract"
+            }
+          ],
+          "place": "suran"
+        },
+        {
+          "type": "talk",
+          "npc": "tharen",
+          "text": "Report to Tharen Veloth in Vivec",
+          "topic": "I've looked into Brother Dranos.",
+          "reply": "And made your choice, I see. The Temple asks for judgment from its servants, not only obedience. You'll need both where you're going."
+        }
+      ],
+      "outro": "I investigated Brother Dranos Velas for heresy and decided what the Ordinators would hear.",
+      "rewards": {
+        "gold": 500,
+        "faction_points": 6
+      },
+      "region": "morrowind/ascadian_isles",
+      "why": [
+        "morrowind/ascadian_isles.L8.seven_graces",
+        "morrowind/ascadian_isles.L9.temple_secrets"
+      ],
+      "consequence": {
+        "world_state": "tt_ordinators_question_resolved",
+        "flag": "conseq_tt_ordinators_question",
+        "summary": "I investigated Brother Dranos Velas for heresy and decided what the Ordinators would hear."
+      }
+    },
+    {
+      "id": "tt_ghostgate_vigil",
+      "title": "Vigil at the Ghostgate",
+      "start": "auto",
+      "requires": [
+        "quest:tt_ordinators_question"
+      ],
+      "desc": "Sixth House cultists are marching on the pilgrims' shrine beside the Ghostgate. The Buoyant Armigers are stretched thin, and Archcanon Saryoni has asked me to hold the shrine.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "ghostfence_morrowind",
+          "offset": [
+            -60,
+            -40
+          ],
+          "radius": 14,
+          "text": "Reach the shrine at the Ghostgate"
+        },
+        {
+          "type": "clear",
+          "place": "ghostfence_morrowind",
+          "offset": [
+            -60,
+            -40
+          ],
+          "text": "Hold the shrine against the Dagoth cultists",
+          "spawn": [
+            {
+              "type": "npc:mage",
+              "count": 3,
+              "name": "Dagoth Cultist",
+              "hostile": true,
+              "armor": "#6b2a1a"
+            },
+            {
+              "type": "nirncraft:ash_spawn",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "ghostfence_morrowind",
+          "offset": [
+            -60,
+            -40
+          ],
+          "text": "Kill the cult's leader, the Ash Prophet",
+          "spawn": [
+            {
+              "type": "nirncraft:vampire_lord",
+              "name": "The Ash Prophet",
+              "target": true,
+              "boss": true,
+              "hp": 3.5,
+              "dmg": 1.6
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "tholer_saryoni",
+          "text": "Report to Archcanon Saryoni",
+          "topic": "The shrine at the Ghostgate stands.",
+          "reply": "Then the pilgrims will walk there tomorrow, and never know how close it came. Stay. I have one more thing to say, and I want to say it in the Fane.",
+          "actions": "scene:tt_patriarch",
+          "place": "vivec"
+        }
+      ],
+      "outro": "I held the Ghostgate shrine against the Sixth House. Archcanon Tholer Saryoni raised me to Patriarch of the Tribunal Temple.",
+      "rewards": {
+        "gold": 1800,
+        "faction_points": 58,
+        "flags": [
+          "tt_patriarch"
+        ],
+        "perks": 1,
+        "items": [
+          {
+            "item": "nirncraft:ordinator_chestplate",
+            "name": "Vestments of the Patriarch",
+            "enchant": {
+              "protection": 4,
+              "fire_protection": 3
+            }
+          },
+          {
+            "item": "nirncraft:ebony_mace",
+            "name": "Mace of the Three",
+            "enchant": {
+              "smite": 5,
+              "unbreaking": 3
+            }
+          }
+        ]
+      },
+      "region": "morrowind/red_mountain",
+      "why": [
+        "morrowind.L9.ghostfence_holds",
+        "morrowind/red_mountain.L7.garrison_life"
+      ],
+      "consequence": {
+        "world_state": "tt_ghostgate_vigil_resolved",
+        "flag": "conseq_tt_ghostgate_vigil",
+        "summary": "I held the Ghostgate shrine against the Sixth House. Archcanon Tholer Saryoni raised me to Patriarch of the Tribunal Temple."
+      }
+    }
+  ]
+}

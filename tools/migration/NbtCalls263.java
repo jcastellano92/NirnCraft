@@ -47,7 +47,7 @@ public final class NbtCalls263 {
                 if(name.equals("getCompound")&&count==1)replacement=prefix+"getCompoundOrEmpty("+text(source,call.getArgument(0))+")";
                 if(name.equals("getList")&&(count==1||count==2))replacement=prefix+"getListOrEmpty("+text(source,call.getArgument(0))+")";
                 if(Set.of("getIntArray","getLongArray","getByteArray").contains(name)&&count==1)replacement=text(source,call)+".orElseGet(() -> new "+name.substring(3,name.length()-5).toLowerCase(Locale.ROOT)+"[0])";
-                if(name.equals("contains")&&count==2)replacement="com.skycraft.platform.NbtData.hasType("+text(source,call.getScope().get())+", "+text(source,call.getArgument(0))+", "+text(source,call.getArgument(1))+")";
+                if(name.equals("contains")&&count==2)replacement="com.nirncraft.platform.NbtData.hasType("+text(source,call.getScope().get())+", "+text(source,call.getArgument(0))+", "+text(source,call.getArgument(1))+")";
                 if(replacement!=null) { var range=call.getRange().orElseThrow();edits.add(new Edit(offset(source,range.begin),offset(source,range.end)+1,replacement)); }
             }
             edits.sort(Comparator.comparingInt(Edit::start).thenComparing(Comparator.comparingInt(Edit::end).reversed()));

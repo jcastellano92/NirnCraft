@@ -1,0 +1,3395 @@
+{
+  "line": "mq_cyrodiil",
+  "category": "side",
+  "speakers": {
+    "mq_cyr_ic_warden_voice": "The Cistern Warden",
+    "mq_cyr_bv_lady": "A Stone Voice",
+    "mq_cyr_sk_widow": "The Winemaker's Widow",
+    "mq_cyr_ch_oak": "The Oak"
+  },
+  "npcs": [
+    {
+      "id": "mq_cyr_ic_aurex",
+      "name": "Prefect Hostilia Aurex",
+      "role": "imperial_soldier",
+      "place": "elven_gardens_district",
+      "offset": [
+        6,
+        8
+      ],
+      "female": true,
+      "greet": "Elven Gardens night watch. I count lamps, locks and people, in that order, and tonight one of those sums is wrong. State your business or walk on."
+    },
+    {
+      "id": "mq_cyr_ic_calvus",
+      "name": "Brother Calvus",
+      "role": "priest",
+      "place": "temple_district",
+      "offset": [
+        -8,
+        6
+      ],
+      "greet": "Every sin in the Imperial City is whispered to me at least once. Do not worry. I have the memory of a sieve. Only the heavy things stay behind."
+    },
+    {
+      "id": "mq_cyr_ic_pomponia",
+      "name": "Archivist Pomponia Sedge",
+      "role": "scholar",
+      "place": "arboretum",
+      "offset": [
+        10,
+        -6
+      ],
+      "female": true,
+      "greet": "Careful of the glasshouse door, it sticks. The Arboretum keeps three thousand living species and four hundred years of botanical grudges. I water both."
+    },
+    {
+      "id": "mq_cyr_ic_junius",
+      "name": "Drainmaster Junius Pell",
+      "role": "citizen",
+      "place": "waterfront_district",
+      "offset": [
+        -12,
+        10
+      ],
+      "greet": "Pell, Drainmaster of the Waterfront, forty-one years in the dark with a lantern and a ledger. If it flows, I know where. If it should not flow, I know where too."
+    },
+    {
+      "id": "mq_cyr_ic_odalis",
+      "name": "Odalis Fenn",
+      "role": "innkeeper",
+      "place": "market_district",
+      "offset": [
+        14,
+        6
+      ],
+      "female": true,
+      "greet": "Welcome to the Third Ledger. Every cup comes with a receipt, stamped in triplicate, and no, I will not take it off the bill if you lose it. Rules are rules. Sit."
+    },
+    {
+      "id": "mq_cyr_ic_cato",
+      "name": "Cato Merrit",
+      "role": "merchant",
+      "place": "market_district",
+      "offset": [
+        -10,
+        -8
+      ],
+      "greet": "Merrit & Son, wax, seals and stationery. Your signet, your sealing ring, your good name: all of them cost less than you think and exactly what they are worth."
+    },
+    {
+      "id": "mq_cyr_ic_dar_meeska",
+      "name": "Dar-Meeska",
+      "role": "fisher",
+      "place": "waterfront_district",
+      "offset": [
+        18,
+        -4
+      ],
+      "female": true,
+      "greet": "Bargeman, not boatman. Boats are for people with somewhere to be. I carry whatever the river hands me, and I do not read what is written on it."
+    },
+    {
+      "id": "mq_cyr_ic_verus",
+      "name": "Under-Chamberlain Verus Tiro",
+      "role": "steward",
+      "place": "nobles_district",
+      "offset": [
+        0,
+        12
+      ],
+      "greet": "The Palace is aware of your presence, citizen. It is also aware of a number of things you would prefer it were not. Be brief."
+    },
+    {
+      "id": "mq_cyr_br_ilsa",
+      "name": "Captain Ilsa Varro",
+      "role": "imperial_soldier",
+      "place": "bruma",
+      "offset": [
+        -6,
+        -10
+      ],
+      "female": true,
+      "greet": "Pass is open, but only just. Snow slides every second dawn and the courier road is a coin toss. If you can ride, I could use a rider. If you cannot, mind the ice."
+    },
+    {
+      "id": "mq_cyr_br_hrodgar",
+      "name": "Old Hrodgar the Chandler",
+      "role": "merchant",
+      "place": "bruma",
+      "offset": [
+        12,
+        6
+      ],
+      "greet": "Candles by the stone, by the pound, by the hour. Beeswax for the temple, tallow for the poor, a black one for the nights you do not want to be seen. And if you ask nicely, a rumour."
+    },
+    {
+      "id": "mq_cyr_br_matina",
+      "name": "Sister Matina",
+      "role": "priest",
+      "place": "bruma",
+      "offset": [
+        0,
+        18
+      ],
+      "female": true,
+      "greet": "The Chapel is open to all who come in peace, and to a few who do not, provided they wipe their boots. I am copying the Dragon-Blood prayers. It is slow. The ink freezes."
+    },
+    {
+      "id": "mq_cyr_br_brandt",
+      "name": "Brandt Ironsled",
+      "role": "blacksmith",
+      "place": "bruma",
+      "offset": [
+        -14,
+        8
+      ],
+      "greet": "Bellows run on the creek, hammers run on my arm, and the iron runs when I tell it. If you want it by Morning Star, tell me now. If you want it pretty, tell me after."
+    },
+    {
+      "id": "mq_cyr_br_ysolde",
+      "name": "Innkeeper Ysolde Frostbrow",
+      "role": "innkeeper",
+      "place": "bruma",
+      "offset": [
+        20,
+        -8
+      ],
+      "female": true,
+      "greet": "Welcome to the Jerall View. Thirty-one steps up, and every one of them worth it. The stew is hot, the beds are warm, and the window faces north, so you can watch it snow on someone else."
+    },
+    {
+      "id": "mq_cyr_br_wulf",
+      "name": "Wulf Three-Sleds",
+      "role": "hunter",
+      "place": "bruma",
+      "offset": [
+        -20,
+        -14
+      ],
+      "greet": "Three sleds I have lost to that pass, and I have named the last one Patience. If the road is closed, I am your man. If it is open, I am drunk."
+    },
+    {
+      "id": "mq_cyr_bv_nettle",
+      "name": "Mother Nettle",
+      "role": "fisher",
+      "place": "bravil",
+      "offset": [
+        -10,
+        14
+      ],
+      "female": true,
+      "greet": "Eels for coin, secrets for eels, and a free word for anyone who can lift a basket. I have fed this hill for sixty winters, child, and I know what every stair has eaten."
+    },
+    {
+      "id": "mq_cyr_bv_ulrich",
+      "name": "Ulrich the Quiet",
+      "role": "citizen",
+      "place": "bravil",
+      "offset": [
+        24,
+        6
+      ],
+      "greet": "The man gestures at his throat, then at the slate hanging from his belt. It reads, in careful, rounded letters: I am sorry. I do not speak. Please do not be unkind."
+    },
+    {
+      "id": "mq_cyr_bv_pellia",
+      "name": "Captain Pellia Vorn",
+      "role": "imperial_soldier",
+      "place": "bravil",
+      "offset": [
+        4,
+        -18
+      ],
+      "female": true,
+      "greet": "If you are here to tell me the Count's clerk has done something, get in the queue. I have been writing the queue down. It is nine pages long and I have no one to give it to."
+    },
+    {
+      "id": "mq_cyr_bv_vedius",
+      "name": "Clerk Vedius Hallow",
+      "role": "steward",
+      "place": "bravil",
+      "offset": [
+        -24,
+        -10
+      ],
+      "greet": "The Count's counting-house is closed to the public on Sundas. And Tirdas. And, as it happens, today. What business could possibly require my attention?"
+    },
+    {
+      "id": "mq_cyr_bv_ottilie",
+      "name": "Madame Ottilie Brand",
+      "role": "innkeeper",
+      "place": "bravil",
+      "offset": [
+        16,
+        18
+      ],
+      "female": true,
+      "greet": "Welcome to the Lonely Suitor Lodge, ten storeys of balcony and one of dignity. We number the rooms to ninety-nine. Do not ask about forty to fifty-nine. Everyone asks. It is tiresome."
+    },
+    {
+      "id": "mq_cyr_bv_tomas",
+      "name": "Tomas Fenn",
+      "role": "merchant",
+      "place": "bravil",
+      "offset": [
+        -18,
+        6
+      ],
+      "greet": "Lucky knots, three for a copper! The Lady blesses every fisherman who ties one. If it fails, it was tied wrong. If it works, it was tied right. Either way, I did my part."
+    },
+    {
+      "id": "mq_cyr_sk_lucan",
+      "name": "Steward Lucan Rilus",
+      "role": "steward",
+      "place": "skingrad",
+      "offset": [
+        4,
+        -16
+      ],
+      "greet": "The Count's ledger is the only honest document in Skingrad, and it is missing a page. If that is a joke, I am too tired to laugh. If it is not, I would like very much to meet the one who stole it."
+    },
+    {
+      "id": "mq_cyr_sk_gaspara",
+      "name": "Gaspara Vell",
+      "role": "innkeeper",
+      "place": "skingrad",
+      "offset": [
+        -14,
+        12
+      ],
+      "female": true,
+      "greet": "The Two Sisters Lodge! No sisters, mind. I am the daughter and the Lodge is the other half. The arbour is open until the grapes are crushed. Then it is open until the wine is drunk."
+    },
+    {
+      "id": "mq_cyr_sk_brother_gallus",
+      "name": "Brother Gallus",
+      "role": "priest",
+      "place": "skingrad",
+      "offset": [
+        20,
+        -10
+      ],
+      "greet": "The Count's Garden Chapel has no walls, only columns. People say the Nine do not need roofs. I say the Nine do not pay for roofs. Mind the bees; they are tenants."
+    },
+    {
+      "id": "mq_cyr_sk_orla",
+      "name": "Orla Dunmoor",
+      "role": "blacksmith",
+      "place": "skingrad",
+      "offset": [
+        -22,
+        -6
+      ],
+      "female": true,
+      "greet": "Barrel hoops, press screws, pruning shears, and a very fine spoon if you know where to look. I do not make swords. A sword never fed anyone. Sit. Tell me about your hoop."
+    },
+    {
+      "id": "mq_cyr_sk_ferro",
+      "name": "Ferro Quinn",
+      "role": "merchant",
+      "place": "skingrad",
+      "offset": [
+        12,
+        18
+      ],
+      "greet": "Cask-sticks and spigots, the finest corks this side of Chorrol, and cheap rope in case a customer wishes to hang themselves from disappointment. My own wine, however, is excellent."
+    },
+    {
+      "id": "mq_cyr_an_teodor",
+      "name": "Harbourmaster Teodor Arenius",
+      "role": "steward",
+      "place": "anvil",
+      "offset": [
+        -4,
+        18
+      ],
+      "greet": "Manifests are in order, duties are paid, and the tide table is accurate to the quarter-hour. If you came to ask about a particular name, I regret that I have mislaid it."
+    },
+    {
+      "id": "mq_cyr_an_marga",
+      "name": "Marga the Net-Mender",
+      "role": "fisher",
+      "place": "anvil",
+      "offset": [
+        -16,
+        -8
+      ],
+      "female": true,
+      "greet": "Needle, twine, and a very good memory. I mend what the sea breaks. I also remember which boats it breaks twice, and which it stops breaking altogether, if you follow me."
+    },
+    {
+      "id": "mq_cyr_an_dufrane",
+      "name": "Cap'n Dufrane",
+      "role": "adventurer",
+      "place": "anvil",
+      "offset": [
+        22,
+        10
+      ],
+      "greet": "Retired. Entirely. A man who has spent thirty years smuggling cheese has earned the right to sell maps to anyone fool enough to buy one. Sit, sit, and pretend you did not hear that."
+    },
+    {
+      "id": "mq_cyr_an_olwen",
+      "name": "Keeper Olwen Starrow",
+      "role": "citizen",
+      "place": "anvil_lighthouse",
+      "offset": [
+        4,
+        6
+      ],
+      "female": true,
+      "greet": "The lamp is mine. The lens is mine. The oil is the Harbourmaster's, and the dark is, I am told, nobody's fault. Do you often climb stairs for no reason?"
+    },
+    {
+      "id": "mq_cyr_an_eudora",
+      "name": "Bosun Eudora Pell",
+      "role": "innkeeper",
+      "place": "anvil",
+      "offset": [
+        10,
+        -20
+      ],
+      "female": true,
+      "greet": "The Drowned Compass: ale, hammocks, and the only inn in Anvil that has never lost a guest to the sea. We lost two to the cellar, but the cellar is a different matter. Say hello to Gull. Gull does not like you."
+    },
+    {
+      "id": "mq_cyr_an_hob",
+      "name": "Hob Wetherly",
+      "role": "merchant",
+      "place": "anvil",
+      "offset": [
+        28,
+        -4
+      ],
+      "greet": "Chandler to the harbour, rope to the nation. Buy a coil, take a coil. If you leave without a coil the harbour gets nervous, and a nervous harbour is a leaky harbour."
+    },
+    {
+      "id": "mq_cyr_kv_ilvara",
+      "name": "Sister Ilvara",
+      "role": "priest",
+      "place": "kvatch",
+      "offset": [
+        -6,
+        10
+      ],
+      "female": true,
+      "greet": "Water is boiled, bandages are boiled, bread is cut. If you are hurt, sit. If you are not, lift. The roll of the lost is on the wall. Please do not touch it with dirty hands."
+    },
+    {
+      "id": "mq_cyr_kv_dorrik",
+      "name": "Dorrik the Bricklayer",
+      "role": "miner",
+      "place": "kvatch",
+      "offset": [
+        18,
+        -6
+      ],
+      "greet": "Stone by stone, lad. The Count said rebuild and I said how, and he said stone by stone. So that is what I do. If you find a cellar the city forgot, you tell me first. Before the priests."
+    },
+    {
+      "id": "mq_cyr_kv_hetta",
+      "name": "Hetta Rooke",
+      "role": "innkeeper",
+      "place": "kvatch",
+      "offset": [
+        -18,
+        14
+      ],
+      "female": true,
+      "greet": "The Canvas Cup, under the arena stands, which is why the mugs are dented Legion helmets and the soup is a bit gritty. Do not ask whose helmets. Sit down and have some. It is all paid for."
+    },
+    {
+      "id": "mq_cyr_kv_tilly",
+      "name": "Tilly Emmerich",
+      "role": "child",
+      "place": "kvatch",
+      "offset": [
+        10,
+        18
+      ],
+      "female": true,
+      "greet": "I have a kite. It is my da's kite. He said I could keep it if I did not fly it near the big hole. I am not near the hole. I am going to be at the hole in about a minute."
+    },
+    {
+      "id": "mq_cyr_kv_pell",
+      "name": "Quartermaster Fenn Pell",
+      "role": "merchant",
+      "place": "kvatch",
+      "offset": [
+        -22,
+        -12
+      ],
+      "greet": "Quartermaster to the rebuilding. Pay, pitch, plaster and pins. If you are doing anything with a hammer, I want a receipt. If it is the wrong hammer, I want a different receipt."
+    },
+    {
+      "id": "mq_cyr_ch_arden",
+      "name": "Arden the Woodwright",
+      "role": "lumberjack",
+      "place": "chorrol",
+      "offset": [
+        -12,
+        8
+      ],
+      "greet": "I tend the Oak. Not the town, not the guild, not the Count, the Oak. It is two thousand years old and has never once asked me for anything. I am beginning to suspect it is too polite."
+    },
+    {
+      "id": "mq_cyr_ch_hesk",
+      "name": "Brother Hesk",
+      "role": "scholar",
+      "place": "chorrol",
+      "offset": [
+        14,
+        -14
+      ],
+      "greet": "Scribe of Weynon Priory, here on business that is not business. If a man leaves you a letter and says, burn it, do not burn it. Read it first, then burn it. That is the proper order."
+    },
+    {
+      "id": "mq_cyr_ch_thorne",
+      "name": "Fenwick Thorne",
+      "role": "apothecary",
+      "place": "chorrol",
+      "offset": [
+        22,
+        8
+      ],
+      "greet": "Tinctures, poultices and one very effective cough syrup that is mostly honey. If you are ill, I can help. If you are dying, I can tell you the date. Either way, no credit."
+    },
+    {
+      "id": "mq_cyr_ch_mabyn",
+      "name": "Mabyn Hartwell",
+      "role": "innkeeper",
+      "place": "chorrol",
+      "offset": [
+        -20,
+        -10
+      ],
+      "female": true,
+      "greet": "Welcome to the Hungry Heron. That is Heron on the wall. Do not ask him to move. He has been there since my husband died, and he does not like to be bothered. He is, as you can see, a very good listener."
+    },
+    {
+      "id": "mq_cyr_ch_tarn",
+      "name": "Tarn Wexley",
+      "role": "miner",
+      "place": "chorrol",
+      "offset": [
+        4,
+        22
+      ],
+      "greet": "Wells, cisterns, drains and the occasional grave. A good well is a good argument, I say. You dig down until the earth stops disagreeing. I have never dug a wet one that I could not talk my way out of."
+    },
+    {
+      "id": "mq_cyr_cy_ilvesa",
+      "name": "Ilvesa Dren",
+      "role": "steward",
+      "place": "cheydinhal",
+      "offset": [
+        -12,
+        6
+      ],
+      "female": true,
+      "greet": "The Refugee Hall is not a charity and not a prison. It is a roof, a pot and a roll of names. If you have a complaint, tell it to the roll. If you have a coin, tell it to me."
+    },
+    {
+      "id": "mq_cyr_cy_brenius",
+      "name": "Brenius Marcus",
+      "role": "merchant",
+      "place": "cheydinhal",
+      "offset": [
+        16,
+        -8
+      ],
+      "greet": "Cheydinhal has been my town for sixty years, and it will be my town for twenty more. The market is mine by long custom. The newcomers may sell at the edges, and be grateful."
+    },
+    {
+      "id": "mq_cyr_cy_sarel",
+      "name": "Captain Sarel",
+      "role": "imperial_soldier",
+      "place": "cheydinhal",
+      "offset": [
+        0,
+        -18
+      ],
+      "greet": "I keep the peace, and I keep it fairly. That means everyone is a little angry with me all the time. It is the only sign I am doing it right."
+    },
+    {
+      "id": "mq_cyr_cy_odell",
+      "name": "Toll-Keeper Odell Corbolo",
+      "role": "citizen",
+      "place": "cheydinhal",
+      "offset": [
+        26,
+        12
+      ],
+      "greet": "The bridge is open, the toll is one riddle or one copper, and I will not hear arguments about the ratio. Last month a scholar paid in the answer to the riddle I had not yet asked. I let him through."
+    },
+    {
+      "id": "mq_cyr_cy_nelas",
+      "name": "Hlaren Nelas",
+      "role": "citizen",
+      "place": "cheydinhal",
+      "offset": [
+        -26,
+        -14
+      ],
+      "greet": "He keeps his hood up and his voice low. If asked, he says he is a cooper from Ald'ruhn. His hands, when he thinks no one is looking, still fold into the Ordinator's salute."
+    }
+  ],
+  "relics": [
+    {
+      "id": "mq_cyr_ic_grate_key",
+      "name": "Drainmaster's Key-Ring",
+      "desc": "Seven bronze keys on a loop of eel-hide. One of them is far older than the rest and has no teeth, only a pattern of notches.",
+      "icon": 15
+    },
+    {
+      "id": "mq_cyr_ic_cistern_chart",
+      "name": "Cistern Survey Chart",
+      "desc": "A waxed canvas chart with three circles drawn on it in charcoal. Water is marked in blue chalk. Someone has underlined the third circle twice.",
+      "icon": 7
+    },
+    {
+      "id": "mq_cyr_ic_alessian_seal",
+      "name": "Alessian Seal of Tenure",
+      "desc": "A disc of white-gold the size of a palm, stamped with a pattern of interlocked branches. It is cold, even in sunlight.",
+      "icon": 11
+    },
+    {
+      "id": "mq_cyr_ic_forged_stamp",
+      "name": "Merrit Forged Stamp",
+      "desc": "A boxwood stamp carved to print a customs-house mark. The carving is superb. That is the problem.",
+      "icon": 7
+    },
+    {
+      "id": "mq_cyr_ic_pewter_locket",
+      "name": "Dented Pewter Locket",
+      "desc": "A child-sized locket with a lock of fair hair inside and a name scratched on the back: Ennia.",
+      "icon": 17
+    },
+    {
+      "id": "mq_cyr_br_bell_rope",
+      "name": "Frayed Bell-Rope",
+      "desc": "A hand-width of braided hemp with an iron toggle. Someone has cut it neatly, on one side only.",
+      "icon": 7
+    },
+    {
+      "id": "mq_cyr_br_reliquary_sled",
+      "name": "Relic Case of the Talos Chapel",
+      "desc": "A lead-lined case etched with a stylised dragon. It holds three bones, each wrapped in blue wool.",
+      "icon": 11
+    },
+    {
+      "id": "mq_cyr_bv_charter",
+      "name": "Founders' Charter of Bravil",
+      "desc": "A vellum roll in a waxed tube, signed by seven fishers and one bishop. The ink is brown and the margins are full of small drawings of eels.",
+      "icon": 7
+    },
+    {
+      "id": "mq_cyr_bv_love_note",
+      "name": "Folded Love Note",
+      "desc": "A square of grey paper, folded small, left under a door. The writing is neat, patient, and entirely unlike a man who cannot speak.",
+      "icon": 17
+    },
+    {
+      "id": "mq_cyr_sk_missing_page",
+      "name": "The Missing Ledger Page",
+      "desc": "A single sheet of ledger paper, cleanly cut from the binding. Four lines of figures, a seal in green wax, and a name you will recognise.",
+      "icon": 7
+    },
+    {
+      "id": "mq_cyr_sk_ring",
+      "name": "Winemaker's Wedding Ring",
+      "desc": "A thin gold band engraved with a vine. The inside reads: To my last vintage.",
+      "icon": 17
+    },
+    {
+      "id": "mq_cyr_an_lens_cover",
+      "name": "Soot-Blackened Lens Shutter",
+      "desc": "A hinged brass shutter, fitted over the great lens of Anvil Lighthouse. It is lamp-black on the inside and has been oiled, recently, by a careful hand.",
+      "icon": 11
+    },
+    {
+      "id": "mq_cyr_an_wreckers_ledger",
+      "name": "Wrecker's Tally Book",
+      "desc": "A water-stained ledger listing ships, hours and tides. Three pages are headed with a name that has been thoroughly scratched out.",
+      "icon": 7
+    },
+    {
+      "id": "mq_cyr_an_dufrane_map",
+      "name": "Dufrane's Honest Map",
+      "desc": "A chart of the Gold Coast annotated in three inks and four hands. The X is not where it should be, and the legend reads: Or is it?",
+      "icon": 7
+    },
+    {
+      "id": "mq_cyr_an_gull_ring",
+      "name": "Gull's Brass Ring",
+      "desc": "A small brass ring in a gull's nest of rope, string and tin. It is stamped with a number, and the number is a room at the Drowned Compass.",
+      "icon": 17
+    },
+    {
+      "id": "mq_cyr_kv_list_lost",
+      "name": "Chapel Roll of the Lost",
+      "desc": "A heavy leatherbound book, water-stained at the bottom of every page. Names, dates, and in the margin, small notes: lost the arch, lost the bakery, lost her sons.",
+      "icon": 7
+    },
+    {
+      "id": "mq_cyr_kv_dorrik_stamp",
+      "name": "Pre-Fall Brick-Stamp",
+      "desc": "A single fired brick, marked with a stamp that is neither Imperial nor Kvatchi. The mark looks like a lantern in a ring.",
+      "icon": 11
+    },
+    {
+      "id": "mq_cyr_kv_kite",
+      "name": "Tilly's Kite",
+      "desc": "A kite made of old blue cloth and two dowels. The tail is made of ribbon from a Legion cloak.",
+      "icon": 17
+    },
+    {
+      "id": "mq_cyr_kv_paychest",
+      "name": "Mason's Pay-Chest",
+      "desc": "A small iron-banded chest stamped with the arms of the Count of Kvatch. Heavy. Locked. Faintly warm.",
+      "icon": 11
+    },
+    {
+      "id": "mq_cyr_ch_bark",
+      "name": "Oak-Bark Samples",
+      "desc": "Three scraps of grey-green bark in oilcloth. Where they were cut, the heartwood underneath is black and faintly sticky, and smells of vinegar.",
+      "icon": 19
+    },
+    {
+      "id": "mq_cyr_ch_tincture",
+      "name": "Heartwood Tincture",
+      "desc": "A stoppered brown bottle, warm to the touch. The label, in Fenwick Thorne's cramped script, reads: for trees, not for people. Do not ask.",
+      "icon": 19
+    },
+    {
+      "id": "mq_cyr_ch_priory_letter",
+      "name": "The Letter That Should Not Exist",
+      "desc": "A folded page sealed in plain wax. The hand is that of a dead man, the date is next year, and the address is a house that has been a ruin for thirty years.",
+      "icon": 7
+    },
+    {
+      "id": "mq_cyr_ch_heron_key",
+      "name": "The Heron's Brass Key",
+      "desc": "A small brass key the length of a finger, tied to the heron's leg with a bit of green ribbon. A tag reads: Cellar. Mabyn only.",
+      "icon": 17
+    },
+    {
+      "id": "mq_cyr_cy_house_deed",
+      "name": "The Empty House's Deed",
+      "desc": "A deed for a narrow house by the old wall, signed by a landlord who has not set foot in it, and countersigned by a notary who is not listed in any Imperial register.",
+      "icon": 7
+    },
+    {
+      "id": "mq_cyr_cy_ash_vial",
+      "name": "Vial of Ancestral Ash",
+      "desc": "A glass vial stoppered with wax, the ash inside is pale and fine, and warm to the touch. The label is in Dunmeri script and means only: hearth.",
+      "icon": 17
+    }
+  ],
+  "bosses": {
+    "mq_cyr_ic_warden": {
+      "name": "The Cistern Warden",
+      "type": "minecraft:drowned",
+      "hp": 4,
+      "dmg": 1.4,
+      "level": 18,
+      "weapon": "nirncraft:elven_sword",
+      "gear": {
+        "head": "nirncraft:elven_gilded_helmet"
+      },
+      "drop": "loot:major",
+      "glow": true
+    },
+    "mq_cyr_ic_tallyman": {
+      "name": "Gaius Tallyman",
+      "type": "npc:thug",
+      "hostile": true,
+      "hp": 3.5,
+      "dmg": 1.4,
+      "level": 16,
+      "weapon": "nirncraft:imperial_sword",
+      "gear": {
+        "chest": "nirncraft:imperial_light_chestplate"
+      },
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "mq_cyr_br_ridgewalker": {
+      "name": "The Ridgewalker",
+      "type": "nirncraft:frost_giant",
+      "hp": 3.5,
+      "dmg": 1.4,
+      "level": 22,
+      "drop": "loot:major",
+      "glow": false
+    },
+    "mq_cyr_br_stormraider": {
+      "name": "Heskel Snowmantle",
+      "type": "nirncraft:bandit_chief",
+      "hp": 3.5,
+      "dmg": 1.5,
+      "level": 20,
+      "weapon": "nirncraft:nordic_sword",
+      "gear": {
+        "head": "nirncraft:fur_helmet",
+        "chest": "nirncraft:fur_chestplate"
+      },
+      "drop": "loot:major",
+      "glow": false
+    },
+    "mq_cyr_bv_hallow_guard": {
+      "name": "Brink, the Counting-House Fist",
+      "type": "npc:thug",
+      "hostile": true,
+      "hp": 3.5,
+      "dmg": 1.5,
+      "level": 14,
+      "weapon": "nirncraft:steel_mace",
+      "gear": {
+        "chest": "nirncraft:studded_chestplate"
+      },
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "mq_cyr_sk_tithe_forger": {
+      "name": "Marro the Quill",
+      "type": "npc:thug",
+      "hostile": true,
+      "hp": 3,
+      "dmg": 1.4,
+      "level": 12,
+      "weapon": "nirncraft:imperial_dagger",
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "mq_cyr_an_skerry": {
+      "name": "Gannet Skerry",
+      "type": "npc:thug",
+      "hostile": true,
+      "hp": 4.5,
+      "dmg": 1.6,
+      "level": 20,
+      "weapon": "nirncraft:steel_sword",
+      "gear": {
+        "chest": "nirncraft:scaled_chestplate",
+        "head": "nirncraft:scaled_helmet"
+      },
+      "drop": "loot:major",
+      "glow": false
+    },
+    "mq_cyr_kv_remnant": {
+      "name": "Gate-Remnant Dremora",
+      "type": "nirncraft:dremora",
+      "hp": 3.5,
+      "dmg": 1.4,
+      "level": 18,
+      "drop": "loot:major",
+      "glow": true
+    },
+    "mq_cyr_kv_thief_lord": {
+      "name": "Wick Hollis",
+      "type": "nirncraft:bandit_chief",
+      "hp": 3,
+      "dmg": 1.4,
+      "level": 14,
+      "weapon": "nirncraft:steel_sword",
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "mq_cyr_ch_mother_blight": {
+      "name": "The Rot-Heart",
+      "type": "nirncraft:spriggan",
+      "hp": 3.5,
+      "dmg": 1.4,
+      "level": 14,
+      "drop": "loot:major",
+      "glow": true
+    },
+    "mq_cyr_cy_landlord_thug": {
+      "name": "Tullus the Collector",
+      "type": "npc:thug",
+      "hostile": true,
+      "hp": 3.5,
+      "dmg": 1.5,
+      "level": 14,
+      "weapon": "nirncraft:steel_mace",
+      "drop": "loot:standard",
+      "glow": false
+    }
+  },
+  "scenes": {
+    "mq_cyr_ic_grate_opens": [
+      [
+        "narrator",
+        "The old grate groans like a door on the wrong side of a tomb. Cool air rises, smelling of stone, wet iron and something sweeter that you cannot name."
+      ],
+      [
+        "mq_cyr_ic_junius",
+        "That is not a drain. I have walked every drain in this city, and that is not one. That is a stair."
+      ]
+    ],
+    "mq_cyr_ic_seal_lifted": [
+      [
+        "narrator",
+        "The seal comes off its plinth with a sound like a held breath let go. Somewhere above you, a bell begins to ring, though no bell in the city is rung at this hour."
+      ],
+      [
+        "mq_cyr_ic_warden_voice",
+        "Tenure ends. The keeper is relieved. Who relieves the relief?"
+      ]
+    ],
+    "mq_cyr_br_bell_wakes": [
+      [
+        "narrator",
+        "The old bell tolls once, a note so low the snow shivers off the eaves. A long way under the ridge, a reply comes, slower, as though something very large were turning in its sleep."
+      ],
+      [
+        "mq_cyr_br_matina",
+        "That bell has been mute since before the Empire. By the Nine, what have you done?"
+      ]
+    ],
+    "mq_cyr_bv_statue_hollow": [
+      [
+        "narrator",
+        "You press your palm to the base of the old statue. A hollow note answers, like a drum under a blanket, and a seam of old tar splits down the stone."
+      ],
+      [
+        "mq_cyr_bv_lady",
+        "Take it. Tell them it was theirs to begin with."
+      ]
+    ],
+    "mq_cyr_sk_widow_appears": [
+      [
+        "narrator",
+        "The wine in the chapel font ripples, though no one has touched it. A woman's shape stands behind the third column, translucent as new glass, and hums an old harvest song."
+      ],
+      [
+        "mq_cyr_sk_widow",
+        "He left it in the press. I could not find him in the dark. Will you take it to him, please? He is only asleep."
+      ]
+    ],
+    "mq_cyr_an_beacon_lit": [
+      [
+        "narrator",
+        "The shutter swings back and the great lamp bursts into steady gold. Across the bay, boats that had been creeping along the rocks all night turn their prows toward Anvil with a cheer you can hear from the stair."
+      ],
+      [
+        "mq_cyr_an_olwen",
+        "Look at them. They have been waiting four nights for that, and not one of them said so."
+      ]
+    ],
+    "mq_cyr_kv_gate_remnant": [
+      [
+        "narrator",
+        "The crater lip hums. A seam in the air, no longer than a doorway, opens with a sound like a tongue being unpeeled from a hot spoon. Something steps through, carrying a banner of old ash."
+      ]
+    ],
+    "mq_cyr_ch_oak_night": [
+      [
+        "narrator",
+        "The canopy shivers, though there is no wind. A sound travels the whole length of the trunk, like water finding a new crack. The leaves overhead turn, one by one, to pale undersides."
+      ],
+      [
+        "mq_cyr_ch_oak",
+        "Not yet. Not yet. Not yet."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "mq_cyr_ic_ring",
+      "title": "The Ring Beneath the Rings",
+      "region": "cyrodiil/heartlands",
+      "start": "npc:mq_cyr_ic_junius",
+      "requires": [
+        "level:10"
+      ],
+      "offer": "You wrote to the Prefect about a grate that is on no map.",
+      "pitch": "The Prefect sent me a form, in triplicate, telling me to file a form. So I am asking someone who walks. Behind the tannery wall in the Waterfront there is a grate older than the wall, welded shut with Ayleid white-iron. I have the key ring of my predecessors, and one key on it fits nothing I have ever found. Open the grate for me. Come back and tell me it is a drain, and I will sleep.",
+      "desc": "Drainmaster Junius Pell has a sealed grate in the Waterfront that no Imperial map shows, and a key that fits nothing. Under the White-Gold Tower, older rings of the city may lie waiting.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ic_junius",
+          "text": "Take the old key from Junius Pell",
+          "topic": "Give me the key, Drainmaster. I will look at your grate.",
+          "reply": "Seven keys, and the seventh is the one that frightens me. It was in the ring when I inherited it, and old Marcus before me never knew either. Go. If it is only a drain, I will buy you a drink.",
+          "actions": "relic:mq_cyr_ic_grate_key"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ic_dar_meeska",
+          "text": "Ask the bargewoman Dar-Meeska what the river says about the grate",
+          "topic": "Drainmaster Pell says there is a grate behind the tannery wall that is not on any map. You carry what the river hands you. Have you seen it?",
+          "reply": "Seen? I have carried the river's own silt past it for nine years. The water goes in at the bottom of that grate and does not come out. Not a trickle. A thing that swallows a river and says nothing is not a drain. It is a mouth. Open it from the top. Do not go in from the bottom. The current is wrong."
+        },
+        {
+          "type": "go",
+          "place": "waterfront_district",
+          "text": "Find the sealed grate behind the tannery wall",
+          "offset": [
+            24,
+            30
+          ],
+          "radius": 10
+        },
+        {
+          "type": "clear",
+          "place": "waterfront_district",
+          "placement": "near",
+          "text": "Drive the vermin out of the culvert",
+          "spawn": [
+            {
+              "type": "nirncraft:skeever",
+              "name": "Drain Skeever",
+              "count": 5
+            },
+            {
+              "type": "nirncraft:mudcrab",
+              "name": "Culvert Crab",
+              "count": 2
+            }
+          ],
+          "offset": [
+            24,
+            30
+          ],
+          "actions": "scene:mq_cyr_ic_grate_opens"
+        },
+        {
+          "type": "go",
+          "place": "arboretum",
+          "text": "Chart the first cistern, which lies beneath the Arboretum glasshouses",
+          "offset": [
+            4,
+            4
+          ],
+          "radius": 12,
+          "journal": "The first ring is a round cistern with a dry floor and a ceiling of green glass. The glasshouses above are sitting on it like a lid on a bowl. The walls are carved with branches that never end."
+        },
+        {
+          "type": "go",
+          "place": "memorial_district",
+          "text": "Chart the second cistern, beneath the Memorial District",
+          "offset": [
+            -6,
+            6
+          ],
+          "radius": 12,
+          "journal": "The second ring is wet to the knee. The carvings here are of faces, hundreds of them, each different, each with its eyes closed."
+        },
+        {
+          "type": "go",
+          "place": "elven_gardens_district",
+          "text": "Chart the third cistern, beneath the Elven Gardens",
+          "offset": [
+            10,
+            -4
+          ],
+          "radius": 12,
+          "actions": "relic:mq_cyr_ic_cistern_chart",
+          "journal": "The third ring is flooded to the roof. A pale lamp burns under the water and has done for a very long time."
+        },
+        {
+          "type": "kill",
+          "place": "elven_gardens_district",
+          "placement": "near",
+          "text": "Defeat the Cistern Warden and take the Alessian seal",
+          "spawn": [
+            {
+              "boss_id": "mq_cyr_ic_warden"
+            }
+          ],
+          "offset": [
+            10,
+            -4
+          ],
+          "actions": "relic:mq_cyr_ic_alessian_seal;scene:mq_cyr_ic_seal_lifted"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ic_junius",
+          "text": "Tell Junius Pell what lies under his city",
+          "topic": "It is not a drain, Drainmaster. Under the city there are three rings of Ayleid cisterns, and the third was guarding this.",
+          "reply": "Three. Of course there are three. Then I owe you a drink and the city owes you a great deal more, and the city will not pay it. Now. A thing like that does not belong in my ledger. Who do you give it to? The Palace will say it is theirs by right of tenure. Pomponia in the Arboretum says everything older than Alessia belongs to the living city, and she is the only one who has ever walked these rings with a lamp. I will not choose for you.",
+          "choices": [
+            {
+              "label": "Carry it to the Under-Chamberlain. The Palace keeps what the Empire needs kept.",
+              "reply": "Then take it up the Tower stair and say nothing about how you found it. The Palace likes its miracles with the paperwork already filed.",
+              "actions": "flag:mq_cyr_ic_seal_palace;take:mq_cyr_ic_alessian_seal;take:mq_cyr_ic_cistern_chart;points:imperial_legion:2;give:nirncraft:imperial_shield"
+            },
+            {
+              "label": "Give it to Pomponia. The Arboretum is the only place that still grows what the Ayleids planted.",
+              "reply": "She will weep, and then she will make you a list of everything the seal opens. Take it. It is better in the hands of someone who knows what it is for.",
+              "actions": "flag:mq_cyr_ic_seal_arboretum;take:mq_cyr_ic_alessian_seal;take:mq_cyr_ic_cistern_chart;give:nirncraft:skill_book_alchemy;loot:standard"
+            }
+          ]
+        }
+      ],
+      "outro": "Three rings beneath the three rings of the Imperial City are no longer a secret kept by one drainmaster and one dead Ayleid warden. Whoever holds the seal now holds a key to what lies under the White-Gold Tower. The city above carries on, as it always has, a little less sure of its own floor.",
+      "rewards": {
+        "gold": 800,
+        "loot": "major",
+        "items": [
+          {
+            "item": "nirncraft:elven_gilded_helmet",
+            "name": "Cistern-Warden Circlet",
+            "enchant": {
+              "unbreaking": 2,
+              "protection": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "heartlands.L9.council_factions",
+        "heartlands.L8.temple_of_the_one"
+      ]
+    },
+    {
+      "id": "mq_cyr_ic_receipts",
+      "title": "Receipts in Triplicate",
+      "region": "cyrodiil/heartlands",
+      "start": "npc:mq_cyr_ic_odalis",
+      "requires": [
+        "level:6"
+      ],
+      "offer": "Your receipts. Something is off with them?",
+      "pitch": "Every cup in this house comes with a receipt, and every receipt has been stamped by the customs desk across the street, as the law requires. This week I counted forty receipts for cups I never poured. Someone is printing my stamps. They are using my tavern as a laundry for goods that never paid duty. I am not angry for me. I am angry because the numbers do not add up, and numbers are supposed to.",
+      "desc": "Odalis Fenn of the Third Ledger has found forty receipts for drinks she never poured. Someone is forging customs stamps and washing smuggled goods through her tavern books.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ic_cato",
+          "text": "Ask the stationer, Cato Merrit, who buys stamping wax in quantity",
+          "topic": "Odalis Fenn says the stamp on her receipts is false. Who in the Market District buys that much red wax?",
+          "reply": "Wax? Red wax is bought by everyone. Boxwood blanks, though, those are bought by one man. Gaius Tallyman, who says he is an assessor. He is certainly assessing something. I have not seen his work, you understand. If you were to bring me a blank, I could tell you whose chisel carved it."
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "waterfront_district",
+          "text": "Wait for dark on the Waterfront"
+        },
+        {
+          "type": "kill",
+          "place": "waterfront_district",
+          "placement": "near",
+          "text": "Catch Gaius Tallyman in the act at the Waterfront warehouses",
+          "spawn": [
+            {
+              "boss_id": "mq_cyr_ic_tallyman"
+            },
+            {
+              "type": "npc:thug",
+              "name": "Tallyman Porter",
+              "count": 2,
+              "hostile": true,
+              "armor": "#6b5a40"
+            }
+          ],
+          "offset": [
+            -30,
+            12
+          ],
+          "actions": "relic:mq_cyr_ic_forged_stamp"
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_ic_cato",
+          "relic": "mq_cyr_ic_forged_stamp",
+          "text": "Bring the forged stamp to Cato Merrit",
+          "topic": "I caught Gaius Tallyman. This was in his coat.",
+          "reply": "That is my chisel work, or the work of one who learned from it. I taught the boy, you see. Three years my apprentice, and not a word of thanks. Take it to the Prefect, or take it to the bin, but please keep my name off the record. I will tell you where the rest of the ring meets, and in return, you will not have heard it from me.",
+          "choices": [
+            {
+              "label": "Take the stamp to Prefect Aurex. The law keeps its receipts.",
+              "reply": "Then I will light a candle for the apprentice and not the master. Go on.",
+              "actions": "flag:mq_cyr_ic_receipts_reported;take:mq_cyr_ic_forged_stamp;points:imperial_legion:1;give:minecraft:emerald*6"
+            },
+            {
+              "label": "Keep the stamp. Every city has one man who prints the weather. Today, it is me.",
+              "reply": "Then we are friends, and these things cannot be said aloud. Go. Spend wisely, and always ask for a receipt.",
+              "actions": "flag:mq_cyr_ic_receipts_kept;take:mq_cyr_ic_forged_stamp;points:thieves_guild:1;give:nirncraft:lockpick*4;give:nirncraft:coin_purse"
+            }
+          ]
+        }
+      ],
+      "outro": "The Third Ledger now hands out receipts that match the cups poured. Whether Gaius Tallyman is in a cell or in a better coat is a matter between you, Cato Merrit and your conscience.",
+      "rewards": {
+        "gold": 350,
+        "items": [
+          {
+            "item": "nirncraft:imperial_dagger",
+            "name": "Ledger-Keeper",
+            "enchant": {
+              "sharpness": 1,
+              "unbreaking": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "heartlands.L9.council_factions",
+        "heartlands.L8.temple_of_the_one"
+      ]
+    },
+    {
+      "id": "mq_cyr_ic_confession",
+      "title": "The Lent Confession",
+      "region": "cyrodiil/heartlands",
+      "start": "npc:mq_cyr_ic_calvus",
+      "requires": [
+        "level:8",
+        "!flag:mq_cyr_ic_confession_done"
+      ],
+      "offer": "You mentioned a confession that will not stay buried.",
+      "pitch": "A dying man was carried into the temple three nights ago. He told me he had killed a child in the Memorial District, long ago, and buried her in the old graveyard with her locket. Then he died. The priest in me is bound, and the man in me is not. I cannot sleep for the sound of a small bell, which is somewhere in the Memorial District, and which is not there when I look.",
+      "desc": "Brother Calvus heard the last confession of a dying man who claimed to have murdered a child and buried her in the Memorial District graveyard. A small bell rings there at night.",
+      "objectives": [
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "memorial_district",
+          "text": "Walk the Memorial District graveyard after dark",
+          "offset": [
+            10,
+            -4
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "memorial_district",
+          "relic": "mq_cyr_ic_pewter_locket",
+          "text": "Dig where the small bell rings and find the pewter locket",
+          "offset": [
+            10,
+            -4
+          ],
+          "journal": "There was no child under the stone. Only a pewter locket, wrapped in a woman's kerchief, and a hole just wide enough to bury a very small coffin. Someone had dug the grave and not filled it."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ic_aurex",
+          "text": "Ask Prefect Aurex who was missing from the Memorial District twenty years ago",
+          "topic": "I found a locket marked Ennia, in a grave with no body. Does the Watch have a record?",
+          "reply": "Ennia Vanto. Eight years old, vanished in the Year of the Yellow Fever. Her mother, Maera Vanto, still lives in the Elven Gardens and still keeps a candle in the window. The dying man was her brother. He took the blame so that her mother would not know that Ennia ran away with a caravan and never came home. I have known that for a decade. I have never had the cruelty to say."
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_ic_calvus",
+          "relic": "mq_cyr_ic_pewter_locket",
+          "text": "Bring the locket to Brother Calvus",
+          "topic": "There was no child in the grave. Only this. And her aunt wanted to be spared the truth.",
+          "reply": "Then he lied for love, and told the lie to the only man who may not repeat it. Foolish brother. Foolish me. What will you do with the thing? A mother who thinks her child was murdered grieves one way. A mother who is told the child may have simply gone away grieves another, worse way, because there is hope in it.",
+          "choices": [
+            {
+              "label": "Tell Maera the truth. She has a right to hope.",
+              "reply": "Then you are braver than any priest. Take the locket and a blessing I am not permitted to give.",
+              "actions": "flag:mq_cyr_ic_confession_done;flag:mq_cyr_ic_maera_told;take:mq_cyr_ic_pewter_locket;give:nirncraft:amulet_of_mara"
+            },
+            {
+              "label": "Let the lie rest. Some sorrows are load-bearing.",
+              "reply": "Then I will keep the secret and the candle, and answer to Arkay for both.",
+              "actions": "flag:mq_cyr_ic_confession_done;flag:mq_cyr_ic_maera_spared;take:mq_cyr_ic_pewter_locket;give:minecraft:emerald*5"
+            }
+          ]
+        }
+      ],
+      "outro": "The small bell has stopped in the Memorial District. Whether it rang for a lost girl or for the man who lied so that his sister would never wonder is a question Brother Calvus will carry to his own grave, with the rest of the city's heavy things.",
+      "rewards": {
+        "gold": 300,
+        "loot": "minor"
+      },
+      "why": [
+        "heartlands.L9.council_factions",
+        "heartlands.L8.temple_of_the_one"
+      ]
+    },
+    {
+      "id": "mq_cyr_ic_graft",
+      "title": "The Grafting Day Wager",
+      "region": "cyrodiil/heartlands",
+      "start": "npc:mq_cyr_ic_pomponia",
+      "requires": [
+        "level:5",
+        "!flag:mq_cyr_ic_graft_done"
+      ],
+      "offer": "You have a contest on your hands, Archivist?",
+      "pitch": "Grafting Day, tomorrow. Every nursery in Cyrodiil enters one tree, and the Arboretum hands out the green ribbon. For three years the ribbon has gone to House Dolabella, and for three years their entry has been suspiciously perfect. I have heard they bribe the judges. I would rather catch them than accuse them. Go to the Nobles District tonight, and watch the Dolabella greenhouse. Whatever you see, do not touch the tree.",
+      "desc": "Archivist Pomponia Sedge suspects House Dolabella of cheating at the Imperial City Grafting Day contest. She wants someone to watch their greenhouse in the Nobles District.",
+      "objectives": [
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "nobles_district",
+          "text": "Watch the Dolabella greenhouse after dark",
+          "offset": [
+            -20,
+            8
+          ]
+        },
+        {
+          "type": "clear",
+          "place": "nobles_district",
+          "placement": "near",
+          "text": "Stop the men carrying the real grafts out through the side door",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Greenhouse Burglar",
+              "count": 3,
+              "hostile": true,
+              "armor": "#4c6b3a"
+            }
+          ],
+          "offset": [
+            -20,
+            8
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ic_verus",
+          "text": "Confront the Dolabella steward in the Nobles District",
+          "topic": "Your masters were swapping the real grafts for their own, Under-Chamberlain. The Arboretum has the proof.",
+          "reply": "They were swapping nothing. Those were the Arboretum's grafts, delivered to us for safekeeping, and my men are guilty of an excess of zeal. Do not look at me like that. House Dolabella has won three ribbons because the Arboretum entered no tree of its own. The Archivist is afraid she has no talent left. Tell her that, from me. And tell her I lost my ribbon bet to her mother."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ic_pomponia",
+          "text": "Tell Pomponia Sedge what the greenhouse hid",
+          "topic": "House Dolabella was holding your own entries, Archivist. You did not enter a tree for three years.",
+          "reply": "No. I did not. I thought mine would be second best, and I could not bear that. Then they were not cheating, only kind. Gods. And I sent you into the night for it. Take this, a cutting from the Silverbirch of the founders. Put it where it will grow.",
+          "actions": "flag:mq_cyr_ic_graft_done;give:nirncraft:amulet_of_mara;loot:minor"
+        }
+      ],
+      "outro": "On Grafting Day the Arboretum entered a tree of its own, a sorry little silverbirch, and lost to House Dolabella by a wide margin. Pomponia Sedge says it was the best day she has had in years.",
+      "rewards": {
+        "gold": 240,
+        "items": [
+          {
+            "item": "nirncraft:imperial_light_helmet",
+            "name": "Gardener's Cap",
+            "enchant": {
+              "unbreaking": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "heartlands.L9.council_factions",
+        "heartlands.L8.temple_of_the_one"
+      ]
+    },
+    {
+      "id": "mq_cyr_br_wager",
+      "title": "The Snow-Load Wager",
+      "region": "cyrodiil/jerall_mountains",
+      "start": "npc:mq_cyr_br_ilsa",
+      "requires": [
+        "level:12"
+      ],
+      "offer": "Captain, you said you wanted a rider.",
+      "pitch": "The terraces are Bruma. Every child here learns the steps before the alphabet. At first snow we hold the Stair-Race: top of the town to the chapel gate, three hundred and eleven steps with a sack of flour on your shoulder, and the Legion is expected to lose with dignity. This year the stakes are higher. The Chapel is to receive relics from the Imperial City, and the pass will close behind them. I need someone who can win the race and then carry the relics through the blizzard. In that order.",
+      "desc": "Captain Ilsa Varro wants a rider to win Bruma's Stair-Race, then escort a sledge of Talos relics through the Jerall pass before the storm closes it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bruma",
+          "text": "Reach the top of the terraces for the Stair-Race",
+          "offset": [
+            -30,
+            -38
+          ],
+          "radius": 8
+        },
+        {
+          "type": "go",
+          "place": "bruma",
+          "text": "Climb the three hundred and eleven steps to the Chapel gate with a sack of flour",
+          "offset": [
+            0,
+            28
+          ],
+          "radius": 6,
+          "journal": "The race was won by two breaths, mostly because a shopkeeper's dog got in front of the lead runner. Captain Varro said she had not seen such a clean victory since the Legion took the Gold Coast, which is to say never."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_br_wulf",
+          "text": "Find Wulf Three-Sleds to drive the relic sledge",
+          "topic": "Captain Varro says you know the pass. Will you take the sledge up to the relics and bring them down with me?",
+          "reply": "The pass. Aye. If the snow holds, it takes two nights. If it does not, I lose a fourth sled and you lose the relics. Walk beside me, keep your sword out, and do not talk when I tell you not to. Ice-sound travels."
+        },
+        {
+          "type": "retrieve",
+          "place": "cloud_ruler_temple",
+          "relic": "mq_cyr_br_reliquary_sled",
+          "text": "Collect the relic case waiting at Cloud Ruler Temple",
+          "offset": [
+            -20,
+            40
+          ],
+          "radius": 20
+        },
+        {
+          "type": "escort",
+          "npc": "mq_cyr_br_wulf",
+          "place": "bruma",
+          "text": "Bring Wulf and the sledge down to the Chapel through the blizzard",
+          "offset": [
+            0,
+            28
+          ],
+          "radius": 20
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_br_matina",
+          "relic": "mq_cyr_br_reliquary_sled",
+          "text": "Hand the relic case to Sister Matina",
+          "topic": "The relics of the Talos Chapel, Sister. All three bones.",
+          "reply": "Three bones, wrapped in blue wool, exactly as the letter said. You have done what I would have asked of the Captain and been too proud to. Now, do not move. Someone is climbing the tower stair, and it is not one of mine."
+        },
+        {
+          "type": "kill",
+          "place": "bruma",
+          "placement": "near",
+          "text": "Defend the Chapel bell tower from the raiders of Heskel Snowmantle",
+          "spawn": [
+            {
+              "boss_id": "mq_cyr_br_stormraider"
+            },
+            {
+              "type": "nirncraft:bandit",
+              "name": "Snowmantle Raider",
+              "count": 4
+            }
+          ],
+          "offset": [
+            0,
+            28
+          ]
+        },
+        {
+          "type": "go",
+          "place": "bruma",
+          "text": "Climb the bell tower and ring the old bell",
+          "offset": [
+            0,
+            28
+          ],
+          "radius": 5,
+          "actions": "scene:mq_cyr_br_bell_wakes"
+        },
+        {
+          "type": "kill",
+          "place": "bruma",
+          "placement": "near",
+          "text": "Face the thing that woke under the ridge",
+          "spawn": [
+            {
+              "boss_id": "mq_cyr_br_ridgewalker"
+            }
+          ],
+          "offset": [
+            -10,
+            -30
+          ]
+        }
+      ],
+      "outro": "Bruma remembers the Stair-Race for the dog, and the bell for what answered it. The relics sit in the Chapel under a blue cloth, and the sledge-driver has named his fourth sled Optimism.",
+      "rewards": {
+        "gold": 900,
+        "loot": "major",
+        "items": [
+          {
+            "item": "nirncraft:imperial_shield",
+            "name": "Stair-Warden's Bulwark",
+            "enchant": {
+              "protection": 3,
+              "unbreaking": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "jerall_mountains.L9.pass_tolls",
+        "jerall_mountains.L8.talos_first"
+      ]
+    },
+    {
+      "id": "mq_cyr_br_candle",
+      "title": "A Candle of Little Weight",
+      "region": "cyrodiil/jerall_mountains",
+      "start": "npc:mq_cyr_br_hrodgar",
+      "requires": [
+        "level:6"
+      ],
+      "offer": "You mentioned a candle of a certain kind.",
+      "pitch": "People ask for a black candle and then do not say what for. I do not mind. A man who keeps a black candle in a Talos town is a man with an honest sort of sin. But this season, three candles went out of the shop and not one came back to be paid for. Someone is lighting them in the old Cloud Ruler road. I would like to know who, and whether they are grieving or planning.",
+      "desc": "Old Hrodgar the Chandler is missing payment for three black candles, and someone is lighting them along the old Cloud Ruler road.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "cloud_ruler_temple",
+          "text": "Follow the black candles along the old road to Cloud Ruler Temple",
+          "offset": [
+            -20,
+            40
+          ],
+          "radius": 20
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_br_matina",
+          "text": "Ask Sister Matina why the candles are lit",
+          "topic": "Someone is lighting black candles along the road to the old temple. Do you know why?",
+          "reply": "Black candles are for the unmourned. Ysolde Frostbrow told me last winter that her husband, who took the pass in the Year of the Red Mountain's Smoke, was never found. Every winter she sets a candle on the road, and every winter she has said she would stop. I would not stop. I might light one with her."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_br_ysolde",
+          "text": "Speak to Ysolde Frostbrow",
+          "topic": "Sister Matina told me. I am sorry for your husband.",
+          "reply": "He wanted to see the ridge-light from the other side. Went one night with a sled and a dog. I am told he waved. I am not told anything else. Hrodgar has written it all down, the dear fool, as a debt. I will pay it. But if you walk the pass again, and find a dog collar, I would like to know.",
+          "actions": "give:nirncraft:amulet_of_mara"
+        }
+      ],
+      "outro": "The candles on the Cloud Ruler road have a name now. Ysolde Frostbrow lights one a year and pays Old Hrodgar for it, and neither of them speaks of the debt.",
+      "rewards": {
+        "gold": 200,
+        "loot": "minor"
+      },
+      "why": [
+        "jerall_mountains.L9.pass_tolls",
+        "jerall_mountains.L8.talos_first"
+      ]
+    },
+    {
+      "id": "mq_cyr_br_bell_rope",
+      "title": "The Cut Rope",
+      "region": "cyrodiil/jerall_mountains",
+      "start": "npc:mq_cyr_br_matina",
+      "requires": [
+        "level:10",
+        "quest:mq_cyr_br_wager"
+      ],
+      "offer": "The bell, Sister. Something is still wrong with it?",
+      "pitch": "The rope was cut. Not frayed, not broken: cut, from one side only, by someone who knew which fibres would hold the weight and which would not. The bell has not rung properly since you woke it. I want to know who wanted it silent in the first place. Look at the stone behind the bell. There is a chandler's mark on it, and it is not Hrodgar's.",
+      "desc": "The Chapel's old bell-rope was cut by someone who wanted it silent. A chandler's mark that is not Hrodgar's has been found on the stone behind it.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "bruma",
+          "relic": "mq_cyr_br_bell_rope",
+          "text": "Search the bell tower for the cut rope and the chandler's mark",
+          "offset": [
+            0,
+            28
+          ],
+          "radius": 8
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_br_hrodgar",
+          "text": "Show the rope to Old Hrodgar",
+          "topic": "The bell-rope was cut and a chandler's mark was left on the stone. Whose is it?",
+          "reply": "Mine. Or rather, my father's. A two-flame mark. Old Bruma families used it before the Imperial wax tax. Only one house still has the die: the Brandt family smithy. Do not look at me. I sell candles, I do not cut ropes."
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_br_brandt",
+          "relic": "mq_cyr_br_bell_rope",
+          "text": "Ask Brandt Ironsled about the rope",
+          "topic": "Your family die was left on the stone behind the bell. And the rope was cut.",
+          "reply": "Aye, my die. And aye, I cut it. My daughter was married under that bell, and the first night it rang after the old Count's death she woke up screaming and has not slept well since. I did not think anyone would climb that tower again. I am sorry. If it is to ring, let it ring. But put her in the Chapel garden first, please, before the old song starts.",
+          "choices": [
+            {
+              "label": "Keep the secret. A father protecting a daughter is not a crime.",
+              "reply": "Then I owe you a great deal of iron. Come by the forge.",
+              "actions": "flag:mq_cyr_br_rope_kept;take:mq_cyr_br_bell_rope;give:nirncraft:steel_shield"
+            },
+            {
+              "label": "Tell Sister Matina. The Chapel should know who cut the rope.",
+              "reply": "Then I will tell it myself, at the next service. Thank you for the courtesy.",
+              "actions": "flag:mq_cyr_br_rope_told;take:mq_cyr_br_bell_rope;points:imperial_cult:1;give:minecraft:emerald*5"
+            }
+          ]
+        }
+      ],
+      "outro": "The Chapel bell hangs with a new rope, spliced by Brandt Ironsled, and rings with the right note. Nobody has asked who tied the knot.",
+      "rewards": {
+        "gold": 280
+      },
+      "why": [
+        "jerall_mountains.L9.pass_tolls",
+        "jerall_mountains.L8.talos_first"
+      ]
+    },
+    {
+      "id": "mq_cyr_bv_lady",
+      "title": "The Lady's Lucky Day",
+      "region": "cyrodiil/nibenay_valley",
+      "start": "npc:mq_cyr_bv_pellia",
+      "requires": [
+        "level:8"
+      ],
+      "offer": "Captain, what is the trouble with the statue?",
+      "pitch": "Every beggar and half the fishwives in Bravil leave a coin in the Lucky Old Lady's hand, and every dawn the hand is empty. I thought it was thieves. Then I thought it was a custom. Now I think it is the Count's clerk, and I cannot prove it, because the clerk is a very careful man. Ask three people for the story of the statue. Everyone in this town tells a different one, and one of them is true.",
+      "desc": "Captain Pellia Vorn suspects the Count's clerk of emptying the Lucky Old Lady statue's hand every dawn. Three townspeople tell three stories of the statue, and one is the key.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_bv_nettle",
+          "text": "Hear Mother Nettle's version of the Lady",
+          "topic": "Captain Vorn says you know the story of the statue.",
+          "reply": "A girl, child. Fourteen, drowned in the first flood, dragged out by a priest of Zenithar who put her into a boat of stone and set her at the top of the stair, so that the next flood would see her first. The coins are her wages. The statue is what is left of the last girl who asked for nothing."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_bv_tomas",
+          "text": "Hear Tomas Fenn's version of the Lady",
+          "topic": "Mother Nettle says it is a drowned girl. What do you say?",
+          "reply": "A thief, saint-thief, which is a different thing. Stole a bishop's purse to feed four brothers and was drowned in the Larsius for it. The bishop felt such guilt he carved the statue at his own expense. Luck is what he hoped his guilt would buy. I do not charge for this one. I have only ever told it for coins."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_bv_pellia",
+          "text": "Hear Captain Vorn's own version",
+          "topic": "Everyone tells it differently. What do you say, Captain?",
+          "reply": "The seal of the Count's own house is cut into the base. Under the moss, on the north side, there is a charter: the founders bound the city's tithe to the statue, to be held for the poor, with the statue as the seal. I have it from my grandmother, who is dead, and it is the only version I believe because she never once said it was a pretty story."
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "bravil",
+          "text": "Wait for dark, then watch the dock below the statue",
+          "offset": [
+            10,
+            10
+          ]
+        },
+        {
+          "type": "clear",
+          "place": "bravil",
+          "placement": "near",
+          "text": "Stop the skooma barge crew unloading under the statue",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Barge Hand",
+              "count": 3,
+              "hostile": true,
+              "armor": "#4a4030"
+            }
+          ],
+          "offset": [
+            26,
+            12
+          ],
+          "journal": "The barge hands carried small tarred jars, and each jar went into the hollow beneath the statue's hand. Whoever empties the hand at dawn is collecting more than coppers."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_bv_ulrich",
+          "text": "Question the barge pilot, Ulrich the Quiet",
+          "topic": "You were the pilot. The skooma went into the statue. Who takes it out?",
+          "reply": "He scratches on the slate with a stub of chalk: THE CLERK. A WOMAN. A MAN. THE CLERK PAYS ME TO STAY SILENT. I AM ALREADY. He gives you a rueful look. The slate goes on: I WOULD LIKE TO BE SOMEWHERE ELSE."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_bv_vedius",
+          "text": "Catch Clerk Vedius Hallow at the counting-house door",
+          "topic": "Mother Nettle's barge crew say the hand of the statue is emptied each dawn on your orders, Clerk. Is that so?",
+          "reply": "On my orders? On the Count's orders, as the Count's own steward, which is a very different thing. The statue is a municipal asset. Its contents are municipal. If a barge crew has been feeding it, then it is the barge crew who is trespassing. Brink! Show this person the yard."
+        },
+        {
+          "type": "kill",
+          "place": "bravil",
+          "placement": "near",
+          "text": "Break the clerk's man in the counting-house yard",
+          "spawn": [
+            {
+              "boss_id": "mq_cyr_bv_hallow_guard"
+            }
+          ],
+          "offset": [
+            -26,
+            -12
+          ],
+          "radius": 16
+        },
+        {
+          "type": "retrieve",
+          "place": "lucky_old_lady_statue",
+          "relic": "mq_cyr_bv_charter",
+          "text": "Open the base of the statue and take the Founders' Charter",
+          "offset": [
+            0,
+            0
+          ],
+          "radius": 10,
+          "actions": "scene:mq_cyr_bv_statue_hollow"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_bv_pellia",
+          "text": "Take the charter to Captain Vorn and decide its fate",
+          "topic": "The charter is in the base, as you said. The clerk was stealing the tithe and using the hollow as a smuggler's drop.",
+          "reply": "It has been here the whole time. I could put this on the Count's desk, and the whole city would learn that its own founders gave its poor a right. The cost is Ulrich, because the barge crew will hang for it, and he was their pilot. Or I could bury it back and break the clerk quietly. Nobody else needs to know it was ever more than a statue.",
+          "choices": [
+            {
+              "label": "Make it public. The poor of Bravil have a right to know what they are owed.",
+              "reply": "Then I will read it from the steps of the temple on Morndas. Ulrich will have a day's start. I will see to it myself.",
+              "actions": "flag:mq_cyr_bv_charter_public;take:mq_cyr_bv_charter;points:imperial_legion:2;loot:standard"
+            },
+            {
+              "label": "Bury it. A city that knows what it is owed starts a war over it.",
+              "reply": "Then I will keep it where only I can find it, and a hundred years from now someone braver will have it. I do not like it. But I will do it.",
+              "actions": "flag:mq_cyr_bv_charter_buried;take:mq_cyr_bv_charter;give:nirncraft:amulet_of_mara;give:minecraft:emerald*8"
+            }
+          ]
+        }
+      ],
+      "outro": "The Lucky Old Lady stands at the top of the stair with her hand open. Some say she is a drowned girl, some a saint-thief. Captain Pellia Vorn knows she is a seal on a promise, and so, now, do you.",
+      "rewards": {
+        "gold": 750,
+        "loot": "major",
+        "items": [
+          {
+            "item": "nirncraft:imperial_shield",
+            "name": "Charter-Warden",
+            "enchant": {
+              "protection": 2,
+              "unbreaking": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "nibenay_valley.L9.corrupt_clerk",
+        "nibenay_valley.L8.mara_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_bv_eels",
+      "title": "Eel Rights of the Bay Bridge",
+      "region": "cyrodiil/nibenay_valley",
+      "start": "npc:mq_cyr_bv_nettle",
+      "requires": [
+        "level:5"
+      ],
+      "offer": "You mentioned a dispute over eels.",
+      "pitch": "My mother fished the eel-pools under Bay Bridge, and her mother before her. Now that jumped-up knot-seller Tomas Fenn says the pool is his, because the Count's clerk sold him a paper. I want an arbiter who does not care about either of us. I want you. Bring me three eels from the pool, living if you can, and I will show you what a pool owner can do that a paper-buyer cannot.",
+      "desc": "Mother Nettle and Tomas Fenn each claim the eel pool under Bay Bridge. She wants three eels from it as proof of who the pool answers to.",
+      "objectives": [
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_bv_nettle",
+          "item": "nirncraft:niben_eel",
+          "count": 3,
+          "text": "Bring Mother Nettle three Niben eels",
+          "topic": "I have the eels, Mother Nettle. Show me what a pool owner can do.",
+          "reply": "Watch. Eels come when I whistle the old tune. A pool owner is one the eels know. Tomas, now, he has a piece of paper. Take me to the pool. Take the paper-man too."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_bv_tomas",
+          "text": "Tell Tomas Fenn to come to the pool",
+          "topic": "Mother Nettle says the eels know her. Come and show them your paper.",
+          "reply": "Show them? They are eels. Fine. I will come, and I will bring the paper, and I will bring my lucky knots. The first one to make an eel obey wins, and I shall rule on the terms myself. No? Then you do it. Be fair. You have the face for it."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_bv_pellia",
+          "text": "Ask Captain Vorn to witness",
+          "topic": "Two claims on the Bay Bridge pool, Captain. Mother Nettle and Tomas Fenn. I need a witness.",
+          "reply": "A witness. And a clerk's paper, which, I may say, I have seen before, and which was sold twice, to two other men, and neither of them is Tomas. The pool is Nettle's. It has always been. I will put it in writing. Tell Tomas I will be sending a clerk of my own to talk about fraud.",
+          "choices": [
+            {
+              "label": "Tell Tomas gently. He was cheated too.",
+              "reply": "Then I will not write his name on the fraud list. The man is a fool, not a thief.",
+              "actions": "flag:mq_cyr_bv_tomas_spared;give:nirncraft:lockpick*2"
+            },
+            {
+              "label": "Let the Captain write him down. A fool with a paper still bought a stolen thing.",
+              "reply": "Then it is written. He will have a day to return what the clerk gave him.",
+              "actions": "flag:mq_cyr_bv_tomas_listed;points:imperial_legion:1;give:minecraft:emerald*4"
+            }
+          ]
+        }
+      ],
+      "outro": "The eel pool under Bay Bridge is Mother Nettle's, in writing. She has not stopped whistling since.",
+      "rewards": {
+        "gold": 200,
+        "loot": "minor"
+      },
+      "why": [
+        "nibenay_valley.L9.corrupt_clerk",
+        "nibenay_valley.L8.mara_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_bv_letters",
+      "title": "Letters to the Lonely Suitor",
+      "region": "cyrodiil/nibenay_valley",
+      "start": "npc:mq_cyr_bv_ottilie",
+      "requires": [
+        "level:4"
+      ],
+      "offer": "Letters under the door, you said?",
+      "pitch": "Every night, a note is slipped under the door of the Lodge, and every morning it is still there, addressed to the same woman and signed by no one. The woman is Captain Vorn, and she has never once received them, because I have been too embarrassed to give them to her. They are lovely. They are far better than anything I have ever received. Find the writer. If he is a fool, I will burn them. If he is a poet, I will weep.",
+      "desc": "Madame Ottilie Brand of the Lonely Suitor Lodge has a stack of anonymous love notes addressed to Captain Pellia Vorn. She wants to know who writes them.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "bravil",
+          "relic": "mq_cyr_bv_love_note",
+          "text": "Wait at the Lodge door for the next note to be pushed under it",
+          "offset": [
+            16,
+            18
+          ],
+          "radius": 8
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "bravil",
+          "text": "Wait for dark and follow the footsteps from the Lodge door",
+          "offset": [
+            16,
+            18
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_bv_ulrich",
+          "text": "Follow the footsteps to the pilot of the skooma barge",
+          "topic": "You write the notes. Why do you not simply say it to her?",
+          "reply": "He holds up the slate, then wipes it with his sleeve, then writes again, slowly: BECAUSE I AM A MAN WHO CARRIES SKOOMA. SHE IS A WOMAN WHO ARRESTS THEM. THIS IS WHY I WRITE. There is a long pause. Then, smaller: WOULD YOU DELIVER IT, IF I ASK?"
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_bv_pellia",
+          "relic": "mq_cyr_bv_love_note",
+          "text": "Give the note to Captain Vorn",
+          "topic": "I was asked to deliver this. The writer is someone you know, though you may not like it.",
+          "reply": "A letter. For me. I have been arresting this town for eleven years and nobody has ever once... Hm. This is beautifully written. Who wrote it? ... Ah. I see. Well. That makes it considerably more difficult. Do not say anything. I need to think.",
+          "choices": [
+            {
+              "label": "Tell her it is Ulrich. He is a barge-pilot, and he is kind.",
+              "reply": "The pilot. The one who cannot speak. Of course it is. I should have noticed that every letter has the same tilt as his slate. I will find him. I will not arrest him. Not tonight.",
+              "actions": "flag:mq_cyr_bv_ulrich_named;give:nirncraft:amulet_of_mara"
+            },
+            {
+              "label": "Say nothing. Let her wonder.",
+              "reply": "Then I will wonder. I will go on wondering. It is better than knowing, and also worse. Thank you.",
+              "actions": "flag:mq_cyr_bv_ulrich_unnamed;give:minecraft:emerald*3"
+            }
+          ]
+        }
+      ],
+      "outro": "The letters under the Lodge door have stopped. Madame Ottilie says they stopped the night Captain Vorn left a reply, and that the reply was only one word long.",
+      "rewards": {
+        "gold": 180,
+        "loot": "minor"
+      },
+      "why": [
+        "nibenay_valley.L9.corrupt_clerk",
+        "nibenay_valley.L8.mara_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_sk_page",
+      "title": "The Page the Count Removed",
+      "region": "cyrodiil/west_weald",
+      "start": "npc:mq_cyr_sk_lucan",
+      "requires": [
+        "level:9"
+      ],
+      "offer": "Steward Rilus, the page. Tell me what is on it.",
+      "pitch": "Seventeen years of the Count's tithes, every cask, every fee, every favour, and in the middle of the Harvest Year a single page is gone. I know what was on it because I wrote it. Four lines. Four names. One of them is my own brother-in-law, and I would very much like to know whether I have been writing the lines I think I have been. Find the page. Find who cut it. Do not read it before you bring it to me.",
+      "desc": "Steward Lucan Rilus of Skingrad has lost a page of the Count's ledger bearing four names, one of them a relative. He wants it found and returned unread.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_sk_ferro",
+          "text": "Ask the cork-seller Ferro Quinn who handles the Count's tithe paper",
+          "topic": "The Steward's ledger is missing a page. Who sells vellum cut that fine in Skingrad?",
+          "reply": "Cut that fine, and with a green seal? Only one hand in Skingrad cuts to the hair. Marro the Quill, who does contracts for people who prefer not to be named. He rents a room above the cooper's on the lower street, and he sleeps in the daytime. I did not tell you."
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "skingrad",
+          "text": "Wait for night, then watch the cooper's upper room",
+          "offset": [
+            -18,
+            20
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "skingrad",
+          "placement": "near",
+          "text": "Corner Marro the Quill above the cooper's",
+          "spawn": [
+            {
+              "boss_id": "mq_cyr_sk_tithe_forger"
+            }
+          ],
+          "offset": [
+            -18,
+            20
+          ],
+          "radius": 12,
+          "actions": "relic:mq_cyr_sk_missing_page"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_sk_gaspara",
+          "text": "Ask Gaspara Vell who paid for the room",
+          "topic": "Marro the Quill had a page. Who put him up at the Two Sisters Lodge?",
+          "reply": "Put him up? Nobody. He ate here twice a week for a year, always in the corner, always paying in new coin from the Count's own mint. I thought he was an inspector. I have been giving him a discount ever since."
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_sk_lucan",
+          "relic": "mq_cyr_sk_missing_page",
+          "text": "Return the page to Steward Rilus",
+          "topic": "I have the page. I did not read it. Though I could not help noticing a seal.",
+          "reply": "Green wax. Of course. The mint's own steward. Then the four names are those who profit from a tithe the Count does not know exists, and one of them is, yes, my brother-in-law. I will take it from here. Though I would like your counsel. If I give this to the Count, my sister loses her husband. If I burn it, I keep what is left of the mint's honesty, and none of it is honest.",
+          "choices": [
+            {
+              "label": "Give it to the Count. A mint that cheats the Count is worse than a family that does not speak.",
+              "reply": "Then I am glad you are not my sister's lawyer. Take this for the trouble.",
+              "actions": "flag:mq_cyr_sk_page_filed;take:mq_cyr_sk_missing_page;points:imperial_legion:2;loot:standard"
+            },
+            {
+              "label": "Burn it. Let the brother-in-law owe you, and let the mint know someone saw.",
+              "reply": "That is a more Cyrodiilic answer than I expected. I will keep a copy. Always keep a copy.",
+              "actions": "flag:mq_cyr_sk_page_burned;take:mq_cyr_sk_missing_page;give:nirncraft:lockpick*3;give:minecraft:emerald*6"
+            }
+          ]
+        }
+      ],
+      "outro": "Skingrad's ledger has a missing page and a Steward who now sleeps a little better, or a little worse, depending on what he did with it.",
+      "rewards": {
+        "gold": 600,
+        "loot": "standard",
+        "items": [
+          {
+            "item": "nirncraft:imperial_sword",
+            "name": "Steward's Quill",
+            "enchant": {
+              "sharpness": 2,
+              "unbreaking": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "west_weald.L9.wine_feud",
+        "west_weald.L8.julianos_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_sk_cask_run",
+      "title": "The Harvest Cask Run",
+      "region": "cyrodiil/west_weald",
+      "start": "npc:mq_cyr_sk_orla",
+      "requires": [
+        "level:5"
+      ],
+      "offer": "Dunmoor, what is this about a cask race?",
+      "pitch": "Harvest Day. Every apprentice in Skingrad rolls a half-empty cask down the Rampart Stair, through the market and out the east gate, and the first to hit the Count's gatepost wins the cask, whatever is in it. I forged the hoops for eleven of them. Ten will be gone by the third turn. The eleventh is mine. I want a runner who will not stop. You.",
+      "desc": "Orla Dunmoor has built a cask for Skingrad's Harvest Day downhill race and wants a runner who can keep it rolling through the market and out the east gate.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "skingrad",
+          "text": "Take your cask to the top of the Rampart Stair",
+          "offset": [
+            -6,
+            -40
+          ],
+          "radius": 6
+        },
+        {
+          "type": "go",
+          "place": "skingrad",
+          "text": "Roll through the market square without stopping",
+          "offset": [
+            0,
+            4
+          ],
+          "radius": 6
+        },
+        {
+          "type": "go",
+          "place": "skingrad",
+          "text": "Reach the Count's gatepost beyond the east gate",
+          "offset": [
+            60,
+            6
+          ],
+          "radius": 6,
+          "journal": "Three casks hit the wall, one bounced into a fishmonger's awning, and the Colovian wine merchant's cask sailed over the gatepost and into a hay-cart. Yours was the only cask that arrived upright."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_sk_orla",
+          "text": "Return to Orla Dunmoor with the winning cask",
+          "topic": "We hit the Count's gatepost. Upright. The hoops held.",
+          "reply": "Upright! Gods and spigots. Do you know how long I have been trying to make a cask that arrives upright? Twelve years. Drink the thing, it is two-thirds full of the Count's best vinegar. I put it there to keep the apprentices honest."
+        }
+      ],
+      "outro": "The Harvest Cask Run went to a strange and happy stranger on an upright cask. Orla Dunmoor tells the story every Harvest Day and has stopped mentioning the vinegar.",
+      "rewards": {
+        "gold": 220,
+        "items": [
+          {
+            "item": "nirncraft:imperial_light_boots",
+            "name": "Cask-Runner Boots",
+            "enchant": {
+              "feather_falling": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "west_weald.L9.wine_feud",
+        "west_weald.L8.julianos_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_sk_widow",
+      "title": "The Weeping Column",
+      "region": "cyrodiil/west_weald",
+      "start": "npc:mq_cyr_sk_brother_gallus",
+      "requires": [
+        "level:8",
+        "!flag:mq_cyr_sk_widow_done"
+      ],
+      "offer": "Brother Gallus, you wanted someone for a vigil?",
+      "pitch": "One of the columns of the Count's Garden Chapel weeps wine at midnight. It runs down the stone and fills the font, and I have tasted it, and it is very good. It is also terribly sad. I do not mind a miracle. I mind not knowing whose miracle it is. Keep the vigil with me. Tonight. Bring a lamp.",
+      "desc": "A column in the Count's Garden Chapel weeps wine at midnight. Brother Gallus wants a witness at the vigil, and an answer.",
+      "objectives": [
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "skingrad",
+          "text": "Keep vigil at the Garden Chapel after dark",
+          "offset": [
+            20,
+            -10
+          ],
+          "actions": "scene:mq_cyr_sk_widow_appears"
+        },
+        {
+          "type": "retrieve",
+          "place": "skingrad",
+          "relic": "mq_cyr_sk_ring",
+          "text": "Search the old press-house cellar the widow spoke of",
+          "offset": [
+            26,
+            -24
+          ],
+          "radius": 12,
+          "journal": "In the press-house cellar, behind a rack of dry casks, lay a winemaker's skeleton, face down, one hand outstretched toward a door that no longer opened. The ring was on his finger."
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_sk_brother_gallus",
+          "relic": "mq_cyr_sk_ring",
+          "text": "Bring the ring back to Brother Gallus at the chapel",
+          "topic": "I found him in the press-house cellar, and the ring. He did not leave her.",
+          "reply": "Then it is a wedding ring, and a grave, and a widow still waiting by a column. I will bury him at the chapel and say his name at the font. Tonight, the column should stop. Go in peace, and thank you.",
+          "actions": "flag:mq_cyr_sk_widow_done"
+        }
+      ],
+      "outro": "The Count's Garden Chapel column does not weep wine any more. Brother Gallus says he misses the taste, and that he has never said a prayer so grateful in his life.",
+      "rewards": {
+        "gold": 300,
+        "loot": "minor"
+      },
+      "why": [
+        "west_weald.L9.wine_feud",
+        "west_weald.L8.julianos_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_an_beacon",
+      "title": "The Dark Beacon",
+      "region": "cyrodiil/gold_coast",
+      "start": "npc:mq_cyr_an_marga",
+      "requires": [
+        "level:12"
+      ],
+      "offer": "Marga, what boats are not coming back?",
+      "pitch": "Four boats in a month, all on moonless nights, all with a lamp that failed. It is not the oil and it is not the Keeper. Olwen has trimmed that wick every night for thirty years. Someone is putting the light out, and someone is waiting on the rocks to pick up what the sea drops. Go to the lighthouse. Climb the stair. Look at the lens. Tell me I am wrong.",
+      "desc": "Marga the Net-Mender believes Anvil's lighthouse lamp is being dimmed on purpose, to wreck ships on moonless nights. She wants someone to climb the stair and look.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "anvil_lighthouse",
+          "text": "Climb Anvil Lighthouse to the lamp room",
+          "offset": [
+            0,
+            0
+          ],
+          "radius": 12
+        },
+        {
+          "type": "retrieve",
+          "place": "anvil_lighthouse",
+          "relic": "mq_cyr_an_lens_cover",
+          "text": "Examine the lamp and recover the blackened lens shutter",
+          "offset": [
+            0,
+            0
+          ],
+          "radius": 12,
+          "journal": "The shutter was not an accident of soot. Someone had hinged it, oiled it and fitted a pull-cord that ran down the outside wall. Whoever dimmed the lamp did not need to climb the stair at all."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_an_olwen",
+          "text": "Ask Keeper Olwen Starrow who has the pull-cord",
+          "topic": "There is a cord on the lens shutter running down the outer wall. Who knows it is there?",
+          "reply": "A cord. I have been blind in the left eye since last winter, and I did not look. Teodor Arenius brought a mason last spring to repair the gallery. The mason put in the hinge. I assumed it was a vent. I... I thought it was a vent. Gods forgive me. How many boats?"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "dunbarrow_cove",
+          "text": "Wait for a moonless night and watch the sea cave of Dunbarrow Cove",
+          "offset": [
+            0,
+            0
+          ]
+        },
+        {
+          "type": "clear",
+          "place": "dunbarrow_cove",
+          "placement": "structure",
+          "text": "Take the sea cave from the wreckers",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "name": "Cove Wrecker",
+              "count": 4
+            }
+          ],
+          "actions": "relic:mq_cyr_an_wreckers_ledger"
+        },
+        {
+          "type": "kill",
+          "place": "dunbarrow_cove",
+          "placement": "structure",
+          "text": "Defeat Gannet Skerry, the wreckers' master",
+          "spawn": [
+            {
+              "boss_id": "mq_cyr_an_skerry"
+            }
+          ]
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_an_teodor",
+          "relic": "mq_cyr_an_wreckers_ledger",
+          "text": "Bring the tally book to the Harbourmaster",
+          "topic": "Three pages carry a name, scratched out. The same name. Do you know it?",
+          "reply": "It is my brother's. Brannoc. He lost the family boat to the rocks three years ago and I am told the sea took him. He did not drown. He has been standing on that headland every moonless night for three years, and I have been paying him with harbour fees. I did not know about the lamp. I swear it. I did not ask, which is worse.",
+          "choices": [
+            {
+              "label": "The harbour will want to hear it from you, Teodor. Stand before them.",
+              "reply": "Then I will. Not this night. But this month. Take the book to the Legion tonight; I will walk up to them myself.",
+              "actions": "flag:mq_cyr_an_teodor_confessed;take:mq_cyr_an_wreckers_ledger;points:imperial_legion:2;loot:standard"
+            },
+            {
+              "label": "Keep the book. Your brother is dead to the sea. Let the harbour go on.",
+              "reply": "Then I am in your debt, and it is a debt I will carry for my brother. You may collect it whenever you like.",
+              "actions": "flag:mq_cyr_an_teodor_shielded;take:mq_cyr_an_wreckers_ledger;give:nirncraft:scaled_boots;give:minecraft:emerald*8"
+            }
+          ]
+        },
+        {
+          "type": "go",
+          "place": "anvil_lighthouse",
+          "text": "Return to the lighthouse and relight the beacon with Olwen",
+          "offset": [
+            0,
+            0
+          ],
+          "radius": 10,
+          "actions": "scene:mq_cyr_an_beacon_lit"
+        }
+      ],
+      "outro": "The beacon of Anvil burns steady gold every night now, and the pull-cord is gone from the wall. Marga mends nets in the harbour and does not say she told you so. Her needle says it for her.",
+      "rewards": {
+        "gold": 850,
+        "loot": "major",
+        "items": [
+          {
+            "item": "nirncraft:imperial_light_chestplate",
+            "name": "Lamp-Keeper's Coat",
+            "enchant": {
+              "protection": 2,
+              "unbreaking": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "gold_coast.L9.kvatch_rebuild",
+        "gold_coast.L8.dibella_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_an_gull",
+      "title": "The Gull That Counted",
+      "region": "cyrodiil/gold_coast",
+      "start": "npc:mq_cyr_an_eudora",
+      "requires": [
+        "level:4"
+      ],
+      "offer": "You mentioned a gull, Bosun?",
+      "pitch": "Gull is a thief. I have kept him because he is the only thing in Anvil that has never asked me for money. This week he took a brass ring off a guest's washstand and flew it up to the Benirus roof. The guest is a customs man and he is very polite about it. I want the ring back before he gets less polite.",
+      "desc": "The Drowned Compass's gull has stolen a customs man's brass ring and nested with it on the Benirus Manor roof. Bosun Eudora Pell wants it back before the customs man stops being polite.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "benirus_manor",
+          "relic": "mq_cyr_an_gull_ring",
+          "text": "Climb to the gull's nest on the Benirus Manor roof and take the brass ring",
+          "offset": [
+            0,
+            4
+          ],
+          "radius": 10
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_an_marga",
+          "text": "Ask Marga the Net-Mender what the stamped number means",
+          "topic": "This ring is stamped with a room number at the Drowned Compass. Is it a lodger's token?",
+          "reply": "Room nine. Not a lodger. Cellar nine. There is a stair at the back of the Drowned Compass that goes down to the old storm drain, and the drain goes out to the cove. Every smuggler in Anvil used that room before the Legion came. The customs man was not polite by accident, child. He was looking for it."
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_an_eudora",
+          "relic": "mq_cyr_an_gull_ring",
+          "text": "Return the ring and ask Eudora about cellar nine",
+          "topic": "Your gull stole the key to cellar nine. The customs man was looking for the stair.",
+          "reply": "Cellar nine. Aye. It has been dry since my mother's day, and she told me never to count the steps. I will tell the polite gentleman that Gull ate the key. He will believe me, because he has met Gull. Take this. If you ever need a back door in Anvil, the door is here.",
+          "actions": "flag:mq_cyr_an_cellar_known;give:nirncraft:lockpick*3"
+        }
+      ],
+      "outro": "The customs man left Anvil unsatisfied and the Drowned Compass went on serving. Gull sits on the roof beam with a smug expression and a new bit of tin.",
+      "rewards": {
+        "gold": 160
+      },
+      "why": [
+        "gold_coast.L9.kvatch_rebuild",
+        "gold_coast.L8.dibella_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_an_strike",
+      "title": "The Net-Menders' Strike",
+      "region": "cyrodiil/gold_coast",
+      "start": "npc:mq_cyr_an_hob",
+      "requires": [
+        "level:6"
+      ],
+      "offer": "The net-menders are on strike, chandler?",
+      "pitch": "The net-menders have put down their needles. Marga leads them. They want their rope tax lowered, and the Harbourmaster says the Count needs it for the new breakwater. Nobody is wrong and nobody is right and every boat in Anvil is ragged. I sell rope, I do not settle strikes. Can you go between them?",
+      "desc": "The net-menders of Anvil have stopped work over a rope tax. Chandler Hob Wetherly asks you to act as go-between for Marga and the Harbourmaster.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_an_marga",
+          "text": "Hear the net-menders' terms from Marga",
+          "topic": "Hob says the strike is over the rope tax. What will you accept?",
+          "reply": "A fifth off, signed by the Harbourmaster's own pen. We mend the Count's nets for nothing in the autumn, in return. Nobody has ever asked what we would give. They only ask what we cost."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_an_teodor",
+          "text": "Put the terms to Harbourmaster Teodor Arenius",
+          "topic": "The net-menders want a fifth off the rope tax, and will mend the Count's nets free in autumn.",
+          "reply": "A fifth. In autumn. Well. The breakwater needs money, but a harbour with no nets earns nothing at all. I would have settled for a tenth if anyone had asked. Tell her I will sign tomorrow. And tell her that the Count's nets are not as bad as she remembers."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_an_hob",
+          "text": "Tell Hob Wetherly it is settled",
+          "topic": "It is done, chandler. A fifth off, and free mending in autumn.",
+          "reply": "A fifth! Then I will have to lower my rope price or the harbour will think I am profiting. Take a coil. Have two. I shall be selling rope at a loss for a week, and every net-mender in Anvil will buy a coil from me out of spite."
+        }
+      ],
+      "outro": "The net-menders of Anvil are back at work. The breakwater is half-built and the harbour is full. Hob Wetherly is selling rope at a loss and will tell you about it at length.",
+      "rewards": {
+        "gold": 180,
+        "loot": "minor",
+        "items": [
+          {
+            "item": "nirncraft:fine_fishing_rod",
+            "name": "Net-Mender's Rod",
+            "enchant": {}
+          }
+        ]
+      },
+      "why": [
+        "gold_coast.L9.kvatch_rebuild",
+        "gold_coast.L8.dibella_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_an_map",
+      "title": "Dufrane's Honest Map",
+      "region": "cyrodiil/gold_coast",
+      "start": "npc:mq_cyr_an_dufrane",
+      "requires": [
+        "level:10"
+      ],
+      "offer": "Cap'n, you were selling a map?",
+      "pitch": "A map. Honest. Sold for cheap, because the man who made it is dead and the man who sells it is old. There is a stash at the Tribune's Folly, a smuggler's cache I laid down thirty years ago, and I cannot get up the hill any more. Go and fetch it, and I will give you half. Mind the Legion. Mind the sea-wind. Mind the bit with the stairs.",
+      "desc": "Retired smuggler Cap'n Dufrane sells an honest map to a stash he cached thirty years ago at Tribune's Folly. He wants it fetched, for half.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_an_dufrane",
+          "text": "Take the map from Cap'n Dufrane",
+          "topic": "Give me the map, Cap'n. I will see if it is as honest as you say.",
+          "reply": "It is. Mostly. There is one thing I should mention. The X is where the cache was. The stairs are where the cache is. These are not the same place. Do not look at me like that. A man must protect his retirement.",
+          "actions": "relic:mq_cyr_an_dufrane_map"
+        },
+        {
+          "type": "retrieve",
+          "place": "tribunes_folly",
+          "relic": "mq_cyr_an_dufrane_map",
+          "text": "Find the smuggler's cache at the Tribune's Folly",
+          "offset": [
+            0,
+            6
+          ],
+          "radius": 14,
+          "journal": "The cache was a barrel of ship biscuit, three crates of Elsweyr moon-sugar and a letter. The letter was addressed to the finder and signed Dufrane. It said, in a spidery hand: If you are reading this, I am dead, and you have been very patient."
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_an_dufrane",
+          "relic": "mq_cyr_an_dufrane_map",
+          "text": "Bring the Cap'n what is in the barrel",
+          "topic": "It was a barrel of biscuit, some sugar and a letter. The letter says, \"You have been very patient.\"",
+          "reply": "Ah. I was afraid of that. I wrote it thirty years ago. I did not think the biscuit would last. I meant the gold to be there. A man gets used to his own lies. There was no gold, my friend. There never was. But I will give you half the sugar, and this, which is real.",
+          "actions": "give:nirncraft:moon_sugar*4;give:nirncraft:gold_ring"
+        }
+      ],
+      "outro": "Cap'n Dufrane has been sentenced to a lifetime of honesty and a pension of moon-sugar. He tells the story of the biscuit at the Drowned Compass to anyone who will buy him a drink.",
+      "rewards": {
+        "gold": 300
+      },
+      "why": [
+        "gold_coast.L9.kvatch_rebuild",
+        "gold_coast.L8.dibella_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_kv_ash",
+      "title": "What the Ashes Keep",
+      "region": "cyrodiil/gold_coast",
+      "start": "npc:mq_cyr_kv_ilvara",
+      "requires": [
+        "level:12"
+      ],
+      "offer": "Sister Ilvara, you said you need help with the roll.",
+      "pitch": "The roll of the lost is on the chapel wall. It is not complete. The first copy burned with the old Chapel, and what I have is what survivors remember. I need someone to find the original, and to find what Dorrik found under the east wall. He will not say what it is. He looks at it at night. I think he is afraid it is a name.",
+      "desc": "Sister Ilvara keeps the chapel roll of Kvatch's lost, but it is incomplete. Dorrik the Bricklayer has found something in the rubble he will not show her.",
+      "objectives": [
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_kv_dorrik",
+          "item": "nirncraft:quarried_stone",
+          "count": 12,
+          "text": "Haul twelve blocks of quarried stone to Dorrik at the east wall",
+          "topic": "Sister Ilvara sent me. I have the stone. What did you find under the wall?",
+          "reply": "Twelve. That will do for the ward. Under the wall there was a cellar, and in the cellar a row of shelves, and on the shelves this brick. It is not Kvatchi work. I have been laying brick in this city for forty years and I have never seen that mark. I am afraid it means the city was not what it said it was.",
+          "actions": "relic:mq_cyr_kv_dorrik_stamp"
+        },
+        {
+          "type": "retrieve",
+          "place": "kvatch",
+          "relic": "mq_cyr_kv_list_lost",
+          "text": "Search the chapel crypt for the original roll of the lost",
+          "offset": [
+            -6,
+            10
+          ],
+          "radius": 10,
+          "journal": "The roll lay under a collapsed pew, wrapped in an oilskin: three hundred and forty names in a dozen hands. At the end, in a smaller, slanted hand, a thirty-first page that was not in any copy: names of people who were never counted among the lost, because no one knew they had been there."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_kv_tilly",
+          "text": "Ask Tilly Emmerich about the survivors she saw leave the crater",
+          "topic": "Tilly, do you remember anyone leaving Kvatch the night of the burning, who is not on the roll?",
+          "reply": "My da carried me out. And a lady in a green cloak went the other way. Into the crater. She had a lantern. She did not come back. I asked Sister Ilvara and she said that is not a person, that is a bad dream. But I saw her. She had the same lantern as the brick."
+        },
+        {
+          "type": "clear",
+          "place": "belletors_folly",
+          "placement": "structure",
+          "text": "Follow the lantern woman's trail into Belletor's Folly",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "name": "Folly Squatter",
+              "count": 3
+            },
+            {
+              "type": "minecraft:skeleton",
+              "name": "Cold Sentry",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "go",
+          "place": "kvatch_gate",
+          "text": "Go to the crater lip where the lantern woman was last seen",
+          "offset": [
+            0,
+            0
+          ],
+          "radius": 14,
+          "actions": "scene:mq_cyr_kv_gate_remnant"
+        },
+        {
+          "type": "kill",
+          "place": "kvatch_gate",
+          "placement": "near",
+          "text": "Seal the gate remnant before the new wall rises",
+          "spawn": [
+            {
+              "boss_id": "mq_cyr_kv_remnant"
+            },
+            {
+              "type": "nirncraft:scamp",
+              "name": "Ash Scamp",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_kv_ilvara",
+          "relic": "mq_cyr_kv_list_lost",
+          "text": "Return the original roll and the thirty-first page to Sister Ilvara",
+          "topic": "The original roll, Sister. And a page of names nobody counted.",
+          "reply": "Thirty-first page. Oh. They are travellers. People who were here for the harvest, merchants, a dozen children of a family who had come for a wedding. Nobody counted them. Nobody was left to. Will you read them aloud at the ceremony? Or do I put them into the roll and let the book speak?",
+          "choices": [
+            {
+              "label": "Read them aloud. The dead should be heard.",
+              "reply": "Then I will ask Savlian for the chapel yard, and we will stand there. Thank you. It is a hard thing and a good one.",
+              "actions": "flag:mq_cyr_kv_names_spoken;take:mq_cyr_kv_list_lost;give:nirncraft:amulet_of_mara;loot:standard"
+            },
+            {
+              "label": "Write them in the roll and let it speak quietly. Some grief should not have an audience.",
+              "reply": "Then I will write them tonight, in my own hand, and the chapel will be a quieter place for it. Take this, with my thanks.",
+              "actions": "flag:mq_cyr_kv_names_written;take:mq_cyr_kv_list_lost;give:nirncraft:gold_necklace;give:minecraft:emerald*6"
+            }
+          ]
+        }
+      ],
+      "outro": "The roll of the lost in Kvatch's chapel has thirty-one pages now, and Dorrik the Bricklayer has put the brick in the east wall where it can be seen. The new gate is shut and the old one is quiet. For now.",
+      "rewards": {
+        "gold": 800,
+        "loot": "major",
+        "items": [
+          {
+            "item": "nirncraft:imperial_helmet",
+            "name": "Kvatch Wall-Warden's Helm",
+            "enchant": {
+              "protection": 2,
+              "unbreaking": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "gold_coast.L9.kvatch_rebuild",
+        "gold_coast.L8.dibella_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_kv_kite",
+      "title": "A Kite near the Crater",
+      "region": "cyrodiil/gold_coast",
+      "start": "npc:mq_cyr_kv_tilly",
+      "requires": [
+        "level:6"
+      ],
+      "offer": "Tilly, what are you doing near the crater?",
+      "pitch": "My kite went over the edge. It is my da's kite, and it is blue, and the string broke on the wind. It is down there with the bad things. I am not allowed to go down. You are not my da. You can go down. You have a sword. Please?",
+      "desc": "A child, Tilly Emmerich, has lost her father's blue kite over the crater edge. She wants it fetched, and her escorted home.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "kvatch_gate",
+          "placement": "near",
+          "text": "Drive off the scamps at the crater edge",
+          "spawn": [
+            {
+              "type": "nirncraft:scamp",
+              "name": "Crater Scamp",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "kvatch_gate",
+          "relic": "mq_cyr_kv_kite",
+          "text": "Retrieve Tilly's blue kite from the crater edge",
+          "offset": [
+            10,
+            6
+          ],
+          "radius": 10
+        },
+        {
+          "type": "escort",
+          "npc": "mq_cyr_kv_tilly",
+          "place": "kvatch",
+          "text": "Take Tilly home to the Chapel field hospital",
+          "offset": [
+            -6,
+            10
+          ],
+          "radius": 12
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_kv_ilvara",
+          "relic": "mq_cyr_kv_kite",
+          "text": "Give the kite back to Tilly via Sister Ilvara",
+          "topic": "This is Tilly's kite. She is sleeping at the chapel. Keep it for her, Sister.",
+          "reply": "Her father's kite. He made it from his own cloak the night before. She has not slept in four days. I will put it by her bed and say nothing. Thank you, stranger. Take this. It is only bread, but we have little else to give.",
+          "actions": "give:nirncraft:sweetroll*3"
+        }
+      ],
+      "outro": "Tilly flies the kite from the chapel roof now, not the crater edge. Sister Ilvara says she can see it from the roll-wall, and that it is the most hopeful sight in Kvatch.",
+      "rewards": {
+        "gold": 150
+      },
+      "why": [
+        "gold_coast.L9.kvatch_rebuild",
+        "gold_coast.L8.dibella_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_kv_paychest",
+      "title": "The Mason's Pay-Chest",
+      "region": "cyrodiil/gold_coast",
+      "start": "npc:mq_cyr_kv_pell",
+      "requires": [
+        "level:9"
+      ],
+      "offer": "Quartermaster, the pay-chest. What happened?",
+      "pitch": "Three days to payday, and the chest walked. An iron-banded thing, locked, with the Count's arms, guarded by two men who say they never left their post. A trail of bricks leads to Dasek Moor. I do not care who has it. The masons have not been paid and a mason without pay is a mason on strike. Bring it back, and no one will ask how.",
+      "desc": "The rebuilding's pay-chest has been stolen, and a trail of bricks leads to the old fort at Dasek Moor. Quartermaster Fenn Pell wants it back before payday.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_kv_hetta",
+          "text": "Ask Hetta Rooke who has been spending too freely at the Canvas Cup",
+          "topic": "The pay-chest walked. Who in Kvatch has suddenly got money to spend?",
+          "reply": "Money? Nobody. Except a man who calls himself Wick, who bought the whole house a round on Morndas and paid in new Kvatch silver, still sticky with the mason's wax. He said he was a stone-merchant. I said I was a Cyrodiil queen. He laughed. He went east, toward Dasek Moor. I thought it was a funny thing for a stone-merchant to do."
+        },
+        {
+          "type": "clear",
+          "place": "dasek_moor",
+          "placement": "near",
+          "text": "Clear the thieves' camp at Dasek Moor",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "name": "Moor Thief",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "dasek_moor",
+          "placement": "near",
+          "text": "Catch Wick Hollis, who planned the theft",
+          "spawn": [
+            {
+              "boss_id": "mq_cyr_kv_thief_lord"
+            }
+          ],
+          "actions": "relic:mq_cyr_kv_paychest"
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_kv_pell",
+          "relic": "mq_cyr_kv_paychest",
+          "text": "Return the pay-chest to Fenn Pell",
+          "topic": "The chest is whole. Wick Hollis will not trouble the masons again.",
+          "reply": "Whole! And warm. I assume that is the Count's luck. Keep the receipt, and the reward. The masons are paid, and the brick shall go up on time. Wick Hollis. I had my suspicions. A man who borrows my pen and never gives it back has something wrong with him."
+        }
+      ],
+      "outro": "The masons of Kvatch were paid on time and Quartermaster Fenn Pell has a new pen. The wall is a handspan higher than last week.",
+      "rewards": {
+        "gold": 350,
+        "loot": "minor"
+      },
+      "why": [
+        "gold_coast.L9.kvatch_rebuild",
+        "gold_coast.L8.dibella_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_ch_oak",
+      "title": "A Sickness in the Heartwood",
+      "region": "cyrodiil/colovian_highlands",
+      "start": "npc:mq_cyr_ch_arden",
+      "requires": [
+        "level:9"
+      ],
+      "offer": "Woodwright, the Oak looks unwell.",
+      "pitch": "It is not the Oak that is ill. It is the heartwood, and there is no stone in all Chorrol sharper than that distinction. The leaves are thin, the roots are black at the tips, and something is eating it from the middle. Take a sample of the bark at the third buttress, where the black began. Take it to Fenwick Thorne. He knows plants. I know only wood.",
+      "desc": "The Great Oak of Chorrol is sick at the heart. Arden the Woodwright asks for bark samples, a cure, and a night's vigil against whatever is eating it from within.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "chorrol",
+          "relic": "mq_cyr_ch_bark",
+          "text": "Cut bark samples at the third buttress of the Great Oak",
+          "offset": [
+            0,
+            0
+          ],
+          "radius": 14
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_ch_thorne",
+          "relic": "mq_cyr_ch_bark",
+          "text": "Show the bark to Fenwick Thorne",
+          "topic": "Arden says the Oak is dying from the middle. Is there a cure?",
+          "reply": "Dying? Not yet. A blight, a very particular one, spread by a beetle that lays its eggs in the bark crack. Cure the beetle, cure the Oak. For that I need two things: elves ear and juniper berries, from the roadside. Bring them, and I will make a tincture that the Oak will drink through its roots."
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_ch_thorne",
+          "item": "nirncraft:elves_ear",
+          "count": 3,
+          "text": "Gather three elves ear for Fenwick Thorne",
+          "topic": "Here are the elves ear. Three, as you asked.",
+          "reply": "Good. Now the berries. I would go myself, but my hips and the highland road are old enemies."
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_ch_thorne",
+          "item": "nirncraft:juniper_berries",
+          "count": 3,
+          "text": "Gather three juniper berries for Fenwick Thorne",
+          "topic": "Juniper berries, three. Is the tincture ready?",
+          "reply": "Give me a night to steep it. Come back at dusk. Do not go near the Oak without a lantern. Something in it has begun to move.",
+          "actions": "relic:mq_cyr_ch_tincture"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "chorrol",
+          "text": "Keep the Oak at dusk against the beetle swarm",
+          "offset": [
+            0,
+            0
+          ],
+          "actions": "scene:mq_cyr_ch_oak_night"
+        },
+        {
+          "type": "clear",
+          "place": "chorrol",
+          "placement": "near",
+          "text": "Hold the Oak against the heartwood beetles",
+          "spawn": [
+            {
+              "type": "minecraft:silverfish",
+              "name": "Heartwood Beetle",
+              "count": 8
+            },
+            {
+              "type": "minecraft:cave_spider",
+              "name": "Rot-Spider",
+              "count": 3
+            }
+          ],
+          "offset": [
+            0,
+            0
+          ],
+          "radius": 24
+        },
+        {
+          "type": "kill",
+          "place": "chorrol",
+          "placement": "near",
+          "text": "Cut down the Rot-Heart that has grown in the Oak's wound",
+          "spawn": [
+            {
+              "boss_id": "mq_cyr_ch_mother_blight"
+            }
+          ],
+          "offset": [
+            0,
+            0
+          ],
+          "radius": 24
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ch_arden",
+          "text": "Tell Arden what the Oak needs",
+          "topic": "The beetles are dead and the Rot-Heart is cut out, but the roots are bleeding into the town wells. Will you fell it, or tend it?",
+          "reply": "Fell... Gods. The Count's steward has asked me three times. The wells have gone black and the roots reach the cisterns. If it goes, the water runs clear in a month. If it stays, I give it every night I have left. I cannot choose this one. You can. You have not been here two thousand years.",
+          "choices": [
+            {
+              "label": "Save the Oak. A town can dig new wells. It cannot grow a new Oak.",
+              "reply": "Then I will move the wells. Tarn Wexley will grumble and dig. I will give the Oak every night I have left, and thank you every one.",
+              "actions": "flag:mq_cyr_ch_oak_saved;take:mq_cyr_ch_tincture;give:nirncraft:amulet_of_mara;loot:standard"
+            },
+            {
+              "label": "Fell it. The town drinks first. An Oak can be mourned.",
+              "reply": "Then I will take the first cut myself. The Oak's wood is worth more than Chorrol, and the town will be warm for twenty winters. I will tell it before the axe falls.",
+              "actions": "flag:mq_cyr_ch_oak_felled;take:mq_cyr_ch_tincture;give:nirncraft:sawn_log*16;give:minecraft:emerald*10"
+            }
+          ]
+        }
+      ],
+      "outro": "The Great Oak of Chorrol is a smaller thing than it was, or it is gone, or it is alive. In any case Arden the Woodwright tends what remains, and the wells run clear, and nobody in Chorrol will speak of it without lowering their voice.",
+      "rewards": {
+        "gold": 750,
+        "loot": "major",
+        "items": [
+          {
+            "item": "nirncraft:imperial_battleaxe",
+            "name": "Oakwarden's Edge",
+            "enchant": {
+              "sharpness": 2,
+              "unbreaking": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "colovian_highlands.L9.guild_rivalry",
+        "colovian_highlands.L8.stendarr_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_ch_letter",
+      "title": "The Letter That Should Not Exist",
+      "region": "cyrodiil/colovian_highlands",
+      "start": "npc:mq_cyr_ch_hesk",
+      "requires": [
+        "level:8",
+        "!flag:mq_cyr_ch_letter_done"
+      ],
+      "offer": "Brother Hesk, what letter is this?",
+      "pitch": "A courier left it at Weynon Priory, wet to the wrist, and rode into the night. The seal is the Count of Chorrol's. The hand is the Count's. The date is next year. The Count has been dead twelve years. I would burn it. I cannot. It is the most remarkable thing I have ever held. Take it to the house it is addressed to. I will not go myself. I find I am afraid of what the house will say.",
+      "desc": "A letter has arrived at Weynon Priory that is sealed and written by a dead Count and dated next year. Brother Hesk will not deliver it himself.",
+      "on_start": "relic:mq_cyr_ch_priory_letter",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "weynon_priory",
+          "text": "Take the letter to the ruined house it is addressed to, near Weynon Priory",
+          "offset": [
+            0,
+            0
+          ],
+          "radius": 18
+        },
+        {
+          "type": "clear",
+          "place": "weynon_priory",
+          "placement": "near",
+          "text": "Drive the squatters out of the ruined house",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "name": "Ruin Squatter",
+              "count": 3
+            },
+            {
+              "type": "minecraft:zombie",
+              "name": "Cold Servant",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_ch_hesk",
+          "relic": "mq_cyr_ch_priory_letter",
+          "text": "Take the letter back to Brother Hesk",
+          "topic": "The house is empty. The letter was waiting there. I did not open it. Open it yourself.",
+          "reply": "Then I will read it. \"To my dearest Cassia: when you read this, I am gone, and the oak is in danger, and you are not yet the woman I hoped you would be. I will help you. Burn this when you are done. Do not tell Arden.\" It is the Count's hand. It is written on this year's paper. And yet here it is. I think someone has been writing in his name, and they do it very well.",
+          "choices": [
+            {
+              "label": "Show it to Lady Cassia Vallarius. It is meant for her.",
+              "reply": "Then I will go with you. She has a right to it, and she deserves a kind face when she reads it.",
+              "actions": "flag:mq_cyr_ch_letter_done;flag:mq_cyr_ch_letter_cassia;give:nirncraft:amulet_of_mara"
+            },
+            {
+              "label": "Burn it. The dead should not write to the living.",
+              "reply": "Then it is burned. And I will say a prayer and not tell anyone. The ash shall go in the font.",
+              "actions": "flag:mq_cyr_ch_letter_done;flag:mq_cyr_ch_letter_burned;take:mq_cyr_ch_priory_letter;give:minecraft:emerald*5"
+            }
+          ]
+        }
+      ],
+      "outro": "Whatever wrote the Count's letter, it has stopped. Brother Hesk now keeps a second candle by his desk, lit, and does not say why.",
+      "rewards": {
+        "gold": 280,
+        "loot": "minor"
+      },
+      "why": [
+        "colovian_highlands.L9.guild_rivalry",
+        "colovian_highlands.L8.stendarr_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_ch_heron",
+      "title": "The Heron's Brass Key",
+      "region": "cyrodiil/colovian_highlands",
+      "start": "npc:mq_cyr_ch_mabyn",
+      "requires": [
+        "level:5"
+      ],
+      "offer": "Mabyn, what is the story with your heron?",
+      "pitch": "I have never told this to a living soul. The heron is my husband's. He stuffed it himself, the day he died, and he said, Mabyn, the heron knows. I thought it was the fever talking. Last week a bit of green ribbon slid out of the heron's leg. There is a key. I cannot reach it, because I am afraid of the heron. Will you take it down for me?",
+      "desc": "Mabyn Hartwell of the Hungry Heron is afraid of the stuffed heron on her wall, and of the brass key that has begun to show beneath its leg. She wants it taken down, and opened.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "chorrol",
+          "relic": "mq_cyr_ch_heron_key",
+          "text": "Take the brass key from the stuffed heron's leg",
+          "offset": [
+            -20,
+            -10
+          ],
+          "radius": 8
+        },
+        {
+          "type": "go",
+          "place": "chorrol",
+          "text": "Open the cellar door behind the Hungry Heron's hearth",
+          "offset": [
+            -24,
+            -12
+          ],
+          "radius": 6,
+          "journal": "The cellar door hid a stair, and the stair a small dry cellar with one chest. The chest held a hundred and twenty gold septims and a note in the dead husband's hand: For the day you stop being afraid of the heron."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ch_mabyn",
+          "text": "Show Mabyn what her husband left",
+          "topic": "The cellar held a chest and a note. He left it for the day you stopped being afraid of the heron.",
+          "reply": "Oh, you old fool. You stuffed a bird to hold a key and told me not to be afraid of it. A hundred and twenty septims. Is it the heron, or is it you? I do not know. I am going to take it down and put it by the fire, where it belongs. Take this, and drink on the house.",
+          "actions": "give:nirncraft:ale*3"
+        }
+      ],
+      "outro": "The heron now sits by the fire in the Hungry Heron, wearing the dead husband's hat. Mabyn Hartwell has been seen to talk to it, and sometimes to listen.",
+      "rewards": {
+        "gold": 180
+      },
+      "why": [
+        "colovian_highlands.L9.guild_rivalry",
+        "colovian_highlands.L8.stendarr_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_ch_well",
+      "title": "Deeper than the Well",
+      "region": "cyrodiil/colovian_highlands",
+      "start": "npc:mq_cyr_ch_tarn",
+      "requires": [
+        "level:7"
+      ],
+      "offer": "Tarn, the wells. Something is wrong.",
+      "pitch": "My apprentice Pip went down the old crumbling mine to find a vein of clean water for the new well, and he has not come back up in two days. The mine is full of things that bite. I am too old to be bitten. If you find him, tell him I am not angry. Tell him I will be angry later, at home, with soup.",
+      "desc": "Tarn Wexley's apprentice went into the Crumbling Mine looking for clean water and has not returned in two days.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "crumbling_mine",
+          "placement": "structure",
+          "text": "Clear the Crumbling Mine of whatever is biting",
+          "spawn": [
+            {
+              "type": "nirncraft:skeever",
+              "name": "Mine Skeever",
+              "count": 4
+            },
+            {
+              "type": "minecraft:cave_spider",
+              "name": "Seam Spider",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "go",
+          "place": "crumbling_mine",
+          "text": "Find Pip, Tarn Wexley's apprentice, in the lower gallery",
+          "offset": [
+            0,
+            0
+          ],
+          "radius": 20
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ch_tarn",
+          "text": "Bring Pip's news back to Tarn Wexley",
+          "topic": "Your apprentice is safe. He was stuck in the lower gallery with a cracked lantern and a bag of dirt.",
+          "reply": "Dirt. Of course. It is clean water or nothing, he said, and he must have thought dirt would tell him. I will keep him on, and he will carry buckets for a year. Thank you. Take this. It is the first clean sample from the new vein.",
+          "actions": "give:nirncraft:quarried_stone*8;give:minecraft:emerald*3"
+        }
+      ],
+      "outro": "The new well in Chorrol runs clean, and a certain apprentice carries buckets and does not complain.",
+      "rewards": {
+        "gold": 220
+      },
+      "why": [
+        "colovian_highlands.L9.guild_rivalry",
+        "colovian_highlands.L8.stendarr_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_cy_house",
+      "title": "The Empty House by the Wall",
+      "region": "cyrodiil/nibenay_basin",
+      "start": "npc:mq_cyr_cy_ilvesa",
+      "requires": [
+        "level:8"
+      ],
+      "offer": "Warden Dren, what is wrong with the house?",
+      "pitch": "There is a house by the old wall, free to any family that will have it, and not one Dunmer will enter. Brenius Marcus says they are ungrateful. They say the house is haunted. I have lived a long life and I have never seen a house that makes a refugee cross a street. Look at it. Talk to them. Talk to him. See what you find.",
+      "desc": "A free house by Cheydinhal's old wall stands empty because no Dunmer refugee will cross its threshold. Ilvesa Dren of the Refugee Hall asks you to find out why.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_cy_brenius",
+          "text": "Hear Brenius Marcus's side",
+          "topic": "The refugees say the house is haunted. You say they are ungrateful. What is your side?",
+          "reply": "Ungrateful, certainly. I let them have a stall at the edge of the market. I let them have the house for nothing. And they say it is haunted. Nobody has died in it. Nobody has so much as stubbed a toe. If there is a ghost it has very good manners."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_cy_ilvesa",
+          "text": "Hear the refugees' side from Ilvesa Dren",
+          "topic": "Brenius says nobody has died in the house. What do the refugees say?",
+          "reply": "They say it is not the dead. It is the living. Three families went in, and a fourth saw a man in the cellar window, in an old Ordinator's coat, with a hand on a hilt. Not a ghost. A man. The next morning the family was gone. Nobody has asked where."
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "cheydinhal",
+          "text": "Wait for dark, then watch the empty house by the wall",
+          "offset": [
+            -30,
+            20
+          ]
+        },
+        {
+          "type": "clear",
+          "place": "cheydinhal",
+          "placement": "near",
+          "text": "Break the landlord's men in the cellar",
+          "spawn": [
+            {
+              "boss_id": "mq_cyr_cy_landlord_thug"
+            },
+            {
+              "type": "npc:thug",
+              "name": "Cellar Hand",
+              "count": 2,
+              "hostile": true,
+              "armor": "#554838"
+            }
+          ],
+          "offset": [
+            -30,
+            20
+          ],
+          "radius": 12,
+          "actions": "relic:mq_cyr_cy_house_deed"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_cy_nelas",
+          "text": "Question the hooded man hiding in the cellar",
+          "topic": "You are an Ordinator. You have been hiding here since the landlord's men drove the families out. Why?",
+          "reply": "I am no longer an Ordinator. I am a man who left. The landlord paid me to keep the families out, and I did, until I saw the children. I could not stop them. I could only hide the deed from the one who would take it. Here. It is yours.",
+          "actions": "flag:mq_cyr_cy_ordinator_found"
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_cy_sarel",
+          "relic": "mq_cyr_cy_house_deed",
+          "text": "Take the deed to Captain Sarel",
+          "topic": "The landlord is a man with an invented notary and a hired Ordinator. The deed proves it.",
+          "reply": "A forged deed. So the landlord took the house in the name of a notary who does not exist, and has been renting it to refugees in a way that guarantees they will flee. I could arrest Brenius, who vouched for it. Or I could let him make amends, which is what a decent man would do. I leave the choice to the people who found the thing.",
+          "choices": [
+            {
+              "label": "Let Brenius make amends. The market and the Hall will both need him.",
+              "reply": "Then I will tell him so tonight. He will cry. I hope it improves him.",
+              "actions": "flag:mq_cyr_cy_peace;take:mq_cyr_cy_house_deed;give:nirncraft:amulet_of_mara;loot:standard"
+            },
+            {
+              "label": "Arrest him. A forged deed is a forged deed.",
+              "reply": "Then it is done. The Hall will have the house, and the market will have a new owner, and I will have a long night.",
+              "actions": "flag:mq_cyr_cy_arrested;take:mq_cyr_cy_house_deed;points:imperial_legion:2;give:minecraft:emerald*7"
+            }
+          ]
+        }
+      ],
+      "outro": "The house by the old wall has a family in it now, and a candle in the window. Whether the market made peace with the Refugee Hall or the Hall made peace with the market, the street has a different sound after dark.",
+      "rewards": {
+        "gold": 650,
+        "loot": "standard",
+        "items": [
+          {
+            "item": "nirncraft:ordinator_helmet",
+            "name": "Ordinator's Honest Helm",
+            "enchant": {
+              "protection": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "nibenay_basin.L9.dunmer_count",
+        "nibenay_basin.L8.arkay_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_cy_riddle",
+      "title": "The Toll of Three Answers",
+      "region": "cyrodiil/nibenay_basin",
+      "start": "npc:mq_cyr_cy_odell",
+      "requires": [
+        "level:4"
+      ],
+      "offer": "Odell, you said the toll is a riddle?",
+      "pitch": "Today, at the bridge, three travellers will each pay in an answer. I have set three riddles on the stone. Their answers are a name, a place, and a thing. Bring me the answers, and I will let you through for nothing, and give you the bridge-keeper's purse that the first of them forgot.",
+      "desc": "Toll-Keeper Odell Corbolo has set three riddles on the stone of Corbolo Bridge. Their answers are somewhere in Cheydinhal.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_cy_ilvesa",
+          "text": "Ask Ilvesa Dren: what is always counted but never spent?",
+          "topic": "Odell asked me a riddle. What is always counted but never spent?",
+          "reply": "A roll. The roll of names. Always counted, never spent. Good riddle. Odell is better at them than he looks."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_cy_brenius",
+          "text": "Ask Brenius Marcus: what grows in the market and never in the field?",
+          "topic": "Odell asked me a riddle. What grows in the market and never in the field?",
+          "reply": "Debt. Do not look at me like that. It grows beautifully. Tell Odell I said so, and that I am not paying him a copper for it."
+        },
+        {
+          "type": "talk",
+          "npc": "mq_cyr_cy_odell",
+          "text": "Give Odell his three answers",
+          "topic": "A roll. Debt. And one more, the one I worked out myself: the bridge itself.",
+          "reply": "The bridge! Not a soul in twenty years has said the bridge. Well done. Through you go, toll-free, and here, the purse. It was only forty copper. The first traveller was a fool and the second a liar, and I am a toll-keeper who likes his riddles answered.",
+          "actions": "give:minecraft:emerald*4"
+        }
+      ],
+      "outro": "The riddles on the stone of Corbolo Bridge change every month. A few say they have been answered, most say they never will be, and Odell Corbolo smiles at all of them.",
+      "rewards": {
+        "gold": 140
+      },
+      "why": [
+        "nibenay_basin.L9.dunmer_count",
+        "nibenay_basin.L8.arkay_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_cy_ash",
+      "title": "The Wrong Soil",
+      "region": "cyrodiil/nibenay_basin",
+      "start": "npc:mq_cyr_cy_ilvesa",
+      "requires": [
+        "level:7",
+        "quest:mq_cyr_cy_house"
+      ],
+      "offer": "Warden Dren, another trouble?",
+      "pitch": "There is a spirit in the Great Chapel annex. An old woman, a Dunmer, who died the week we came. She was buried in Cyrodiil soil, and her family cannot bring her home. She stands at the shrine every night and asks for her hearth. I have no hearth to give. Bring me ash. Any ash that burned in a Dunmer fire. We will set her to rest.",
+      "desc": "A Dunmer refugee grandmother haunts the Cheydinhal Great Chapel annex, begging for the ash of her hearth. Ilvesa Dren needs ash to lay her to rest.",
+      "objectives": [
+        {
+          "type": "deliver",
+          "npc": "mq_cyr_cy_ilvesa",
+          "item": "nirncraft:ash_salts",
+          "count": 2,
+          "text": "Bring two portions of ash salts to Ilvesa Dren",
+          "topic": "Ash salts, two portions. It is the nearest I could find to a Dunmer hearth.",
+          "reply": "It is the nearest anyone could. It will do. Take it to the shrine yourself. She trusts you. She has seen you carry the deed.",
+          "actions": "relic:mq_cyr_cy_ash_vial"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "cheydinhal",
+          "text": "Go to the Great Chapel annex shrine at night",
+          "offset": [
+            10,
+            14
+          ]
+        },
+        {
+          "type": "go",
+          "place": "cheydinhal",
+          "text": "Set the vial of ash on the ancestor shrine",
+          "offset": [
+            10,
+            14
+          ],
+          "radius": 6,
+          "actions": "take:mq_cyr_cy_ash_vial;flag:mq_cyr_cy_ash_done",
+          "journal": "The old woman bent over the shrine and breathed in. Then she smiled, and for a moment the whole annex smelled of woodsmoke and spiced bread, and the air was warm."
+        }
+      ],
+      "outro": "The ancestor shrine in Cheydinhal's Great Chapel annex is quiet. Ilvesa Dren has hung a small lantern over it, and the refugees leave a pinch of ash there on feast days.",
+      "rewards": {
+        "gold": 240,
+        "loot": "minor"
+      },
+      "why": [
+        "nibenay_basin.L9.dunmer_count",
+        "nibenay_basin.L8.arkay_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_ic_after_palace",
+      "title": "Under Glass",
+      "region": "cyrodiil/heartlands",
+      "start": "auto",
+      "requires": [
+        "level:10",
+        "quest:mq_cyr_ic_ring",
+        "flag:mq_cyr_ic_seal_palace"
+      ],
+      "pitch": "The Alessian seal went to the Palace. Under-Chamberlain Verus Tiro has something to say about what came of it.",
+      "desc": "The Alessian seal went to the Palace. Under-Chamberlain Verus Tiro has something to say about what came of it.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ic_verus",
+          "text": "Hear what the Palace did with the Alessian seal",
+          "topic": "The seal went to the Palace. What did you do with it?",
+          "reply": "It sits under glass in a room that has no door, and is guarded by men who do not know what they guard. Each of the three cisterns has been sealed with a new grate and a very old lock. The Prefect is furious. The Archivist is furious. I am rather pleased. A city should know how many floors it has, and then pretend it does not. Take this, from the Palace stores."
+        }
+      ],
+      "outro": "The Palace keeps its seal under glass and its cisterns behind new locks. The Imperial City has three floors it will not admit, and one more lie it tells with a straight face.",
+      "rewards": {
+        "gold": 250,
+        "items": [
+          {
+            "item": "nirncraft:imperial_light_helmet",
+            "name": "Palace Wardens' Cap",
+            "enchant": {
+              "protection": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "heartlands.L9.council_factions",
+        "heartlands.L8.temple_of_the_one"
+      ]
+    },
+    {
+      "id": "mq_cyr_ic_after_arboretum",
+      "title": "What Grew from the Seal",
+      "region": "cyrodiil/heartlands",
+      "start": "auto",
+      "requires": [
+        "level:10",
+        "quest:mq_cyr_ic_ring",
+        "flag:mq_cyr_ic_seal_arboretum"
+      ],
+      "pitch": "The Alessian seal went to the Arboretum. Archivist Pomponia Sedge wants you to see what has come of it.",
+      "desc": "The Alessian seal went to the Arboretum. Archivist Pomponia Sedge wants you to see what has come of it.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ic_pomponia",
+          "text": "See what Pomponia Sedge has done with the Alessian seal",
+          "topic": "The seal went to the Arboretum. What did you do with it?",
+          "reply": "It opened a bed. A single square of cold soil, under the glasshouse, which has never frozen or flooded in the six days since. I planted the warm blue bulb in it. It bloomed overnight. The Palace sent a clerk to demand it back. I told him it was still growing and could not be moved. He left a form. I am eating the form. Thank you, stranger. The city has a fourth ring now, and it is mine."
+        }
+      ],
+      "outro": "A cold bed of soil blooms beneath the Arboretum glasshouse. Pomponia Sedge keeps it watered, and has stopped answering the Palace's forms.",
+      "rewards": {
+        "gold": 250,
+        "items": [
+          {
+            "item": "nirncraft:amulet_of_mara",
+            "name": "Seedling of the Third Ring",
+            "enchant": {}
+          }
+        ]
+      },
+      "why": [
+        "heartlands.L9.council_factions",
+        "heartlands.L8.temple_of_the_one"
+      ]
+    },
+    {
+      "id": "mq_cyr_ch_after_saved",
+      "title": "New Wells for the Oak",
+      "region": "cyrodiil/colovian_highlands",
+      "start": "auto",
+      "requires": [
+        "level:9",
+        "quest:mq_cyr_ch_oak",
+        "flag:mq_cyr_ch_oak_saved"
+      ],
+      "pitch": "The Great Oak was saved. Tarn Wexley is digging new wells and has opinions.",
+      "desc": "The Great Oak was saved. Tarn Wexley is digging new wells and has opinions.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ch_tarn",
+          "text": "Hear how Tarn Wexley is digging new wells around the Oak",
+          "topic": "The Oak is saved. How are the wells?",
+          "reply": "Eleven feet, and clean, and no root in it. I have dug six, and each is a better argument than the last. The Oak drinks from the east; the town drinks from the west; and the two of them have stopped speaking, as old neighbours do. It is the best compromise I ever made. Take this. It is the first fish from the new cistern. It is an honest fish."
+        }
+      ],
+      "outro": "The wells of Chorrol are clean and the Oak is alive. Tarn Wexley calls it the best compromise of his career.",
+      "rewards": {
+        "gold": 220,
+        "items": [
+          {
+            "item": "nirncraft:fine_fishing_rod",
+            "name": "Well-Digger's Lucky Rod",
+            "enchant": {}
+          }
+        ]
+      },
+      "why": [
+        "colovian_highlands.L9.guild_rivalry",
+        "colovian_highlands.L8.stendarr_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_ch_after_felled",
+      "title": "The First Cut",
+      "region": "cyrodiil/colovian_highlands",
+      "start": "auto",
+      "requires": [
+        "level:9",
+        "quest:mq_cyr_ch_oak",
+        "flag:mq_cyr_ch_oak_felled"
+      ],
+      "pitch": "The Great Oak was felled. Arden the Woodwright is carving the first bench from its trunk.",
+      "desc": "The Great Oak was felled. Arden the Woodwright is carving the first bench from its trunk.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_ch_arden",
+          "text": "Visit Arden the Woodwright at the felled Oak",
+          "topic": "The Oak is down. How is the work?",
+          "reply": "I made the first cut myself, and I told it first. It did not answer. That was the worst of it. I am carving a bench from the first ring, for the Chapel, with one name on it: the Oak. The town will be warm for twenty winters and cold for a hundred years of memory. Take this heartwood. Do not burn it. Make something that can be sat on."
+        }
+      ],
+      "outro": "A bench of heartwood sits before the Chapel of Chorrol, with a single word carved on it. The town is warm, and does not speak of the Oak above a whisper.",
+      "rewards": {
+        "gold": 220,
+        "items": [
+          {
+            "item": "nirncraft:sawn_log",
+            "name": "Heartwood of the Great Oak",
+            "enchant": {}
+          }
+        ]
+      },
+      "why": [
+        "colovian_highlands.L9.guild_rivalry",
+        "colovian_highlands.L8.stendarr_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_an_after_confessed",
+      "title": "The Walk to the Legion",
+      "region": "cyrodiil/gold_coast",
+      "start": "auto",
+      "requires": [
+        "level:12",
+        "quest:mq_cyr_an_beacon",
+        "flag:mq_cyr_an_teodor_confessed"
+      ],
+      "pitch": "Harbourmaster Teodor Arenius walked to the Legion himself. Marga the Net-Mender has news.",
+      "desc": "Harbourmaster Teodor Arenius walked to the Legion himself. Marga the Net-Mender has news.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_an_marga",
+          "text": "Hear from Marga what became of the Harbourmaster",
+          "topic": "Teodor confessed. What happened to him?",
+          "reply": "He walked up the quay at noon with the tally book under his arm, and gave it to the Legion captain himself. They kept him in the cells for a month and let him out on a bond. He is the Keeper's assistant now, trimming wicks. I do not forgive him. I do not need to. He climbs the stair every dusk, and the lamp has not gone dim since. Take this. It is my best net-needle."
+        }
+      ],
+      "outro": "Teodor Arenius trims the wicks of the Anvil lighthouse under the Keeper's eye. Nobody in the harbour has forgiven him, and nobody sleeps badly.",
+      "rewards": {
+        "gold": 300,
+        "items": [
+          {
+            "item": "nirncraft:scaled_boots",
+            "name": "Net-Mender's Gift",
+            "enchant": {
+              "unbreaking": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "gold_coast.L9.kvatch_rebuild",
+        "gold_coast.L8.dibella_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_an_after_shielded",
+      "title": "A Debt in Brass",
+      "region": "cyrodiil/gold_coast",
+      "start": "auto",
+      "requires": [
+        "level:12",
+        "quest:mq_cyr_an_beacon",
+        "flag:mq_cyr_an_teodor_shielded"
+      ],
+      "pitch": "You kept the wreckers' book from the Legion. Harbourmaster Teodor Arenius says he owes you.",
+      "desc": "You kept the wreckers' book from the Legion. Harbourmaster Teodor Arenius says he owes you.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_an_teodor",
+          "text": "Collect on the Harbourmaster's debt",
+          "topic": "You said you owed me a debt.",
+          "reply": "I do. A man like me does not forget. Here is a harbour pass: it opens every gate on the quay, at any hour, and no tally will record it. I wish I could give you more. I wish I could give my brother what he is owed. Instead I give you a key. Use it well. And if you ever see a lamp go dim in Anvil, you will know whose fault it is.",
+          "actions": "give:nirncraft:lockpick*5"
+        }
+      ],
+      "outro": "The Harbourmaster of Anvil has paid his debt in a pass and a promise. The beacon burns, and the tally book is ash, and nobody has asked.",
+      "rewards": {
+        "gold": 300,
+        "items": [
+          {
+            "item": "nirncraft:lockpick",
+            "name": "Harbour-Pass Pins",
+            "enchant": {}
+          }
+        ]
+      },
+      "why": [
+        "gold_coast.L9.kvatch_rebuild",
+        "gold_coast.L8.dibella_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_bv_after_public",
+      "title": "Read from the Steps",
+      "region": "cyrodiil/nibenay_valley",
+      "start": "auto",
+      "requires": [
+        "level:8",
+        "quest:mq_cyr_bv_lady",
+        "flag:mq_cyr_bv_charter_public"
+      ],
+      "pitch": "Captain Pellia Vorn read the Founders' Charter from the temple steps. She has news.",
+      "desc": "Captain Pellia Vorn read the Founders' Charter from the temple steps. She has news.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_bv_pellia",
+          "text": "Hear how Bravil took the reading of the charter",
+          "topic": "You read the charter. How did the city take it?",
+          "reply": "Loudly. Mother Nettle wept. Tomas Fenn tied a lucky knot in my sleeve and refused to take it off. The Count's clerk left on the morning boat. The tithe is paid to the poor now, from a box that the Lady holds in her hand, and every coin is counted twice. Ulrich was gone before the reading ended. I found a slate on my desk: THANK YOU. He will not be back."
+        }
+      ],
+      "outro": "The tithe of Bravil is paid to the poor of the town from the hand of the Lucky Old Lady. Ulrich the Quiet is somewhere else, and has, one hopes, found a place to speak.",
+      "rewards": {
+        "gold": 250,
+        "items": [
+          {
+            "item": "nirncraft:imperial_shield",
+            "name": "Charter-Reader's Shield",
+            "enchant": {
+              "protection": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "nibenay_valley.L9.corrupt_clerk",
+        "nibenay_valley.L8.mara_chapel"
+      ]
+    },
+    {
+      "id": "mq_cyr_bv_after_buried",
+      "title": "The Quiet Charter",
+      "region": "cyrodiil/nibenay_valley",
+      "start": "auto",
+      "requires": [
+        "level:8",
+        "quest:mq_cyr_bv_lady",
+        "flag:mq_cyr_bv_charter_buried"
+      ],
+      "pitch": "The charter went back under the Lady. Mother Nettle suspects what you did, and has a word.",
+      "desc": "The charter went back under the Lady. Mother Nettle suspects what you did, and has a word.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_cyr_bv_nettle",
+          "text": "Hear what Mother Nettle makes of the buried charter",
+          "topic": "The charter is buried. You suspect it?",
+          "reply": "Suspect? Child, I have been at the foot of that stair for sixty winters. I know when the Lady has been disturbed. You put the thing back, and somebody smarter than I put a coin in her hand last night, and it was not a copper. Say nothing. I shall say nothing. It is the oldest way to keep a promise, and the quietest, and the surest. Take this. It is only an eel, but it is a very good eel."
+        }
+      ],
+      "outro": "The charter lies beneath the Lady, undisturbed. Someone leaves a gold coin in her hand each dawn, and Mother Nettle says it is only the tide.",
+      "rewards": {
+        "gold": 250,
+        "items": [
+          {
+            "item": "nirncraft:amulet_of_mara",
+            "name": "Eel-Charm of Mother Nettle",
+            "enchant": {}
+          }
+        ]
+      },
+      "why": [
+        "nibenay_valley.L9.corrupt_clerk",
+        "nibenay_valley.L8.mara_chapel"
+      ]
+    }
+  ]
+}

@@ -1,19 +1,19 @@
 {
   "replace": false,
   "values": [
-    "skycraft:orichalcum_ore",
-    "skycraft:deepslate_orichalcum_ore",
-    "skycraft:moonstone_ore",
-    "skycraft:deepslate_moonstone_ore",
-    "skycraft:malachite_ore",
-    "skycraft:deepslate_malachite_ore",
-    "skycraft:quicksilver_ore",
-    "skycraft:deepslate_quicksilver_ore",
-    "skycraft:silver_ore",
-    "skycraft:deepslate_silver_ore",
-    "skycraft:daedric_bricks",
-    "skycraft:daedric_glyph_bricks",
-    "skycraft:daedric_pillar",
-    "skycraft:coldharbour_bricks"
+    "nirncraft:orichalcum_ore",
+    "nirncraft:deepslate_orichalcum_ore",
+    "nirncraft:moonstone_ore",
+    "nirncraft:deepslate_moonstone_ore",
+    "nirncraft:malachite_ore",
+    "nirncraft:deepslate_malachite_ore",
+    "nirncraft:quicksilver_ore",
+    "nirncraft:deepslate_quicksilver_ore",
+    "nirncraft:silver_ore",
+    "nirncraft:deepslate_silver_ore",
+    "nirncraft:daedric_bricks",
+    "nirncraft:daedric_glyph_bricks",
+    "nirncraft:daedric_pillar",
+    "nirncraft:coldharbour_bricks"
   ]
 }

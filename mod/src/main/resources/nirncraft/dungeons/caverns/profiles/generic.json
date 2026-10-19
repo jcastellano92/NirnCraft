@@ -1,0 +1,1957 @@
+[
+ {
+  "id": "generic_fungal_grotto",
+  "name": "Fungal Grotto",
+  "lore": "Pale caps and glowing spores fatten on a thousand years of drip. Nothing here has seen the sun.",
+  "weight": 0.8,
+  "match": {
+   "themes": [
+    "cave",
+    "hagraven_lair",
+    "barrow"
+   ]
+  },
+  "shapes": {
+   "bowl_bridges": 3,
+   "karst": 2,
+   "root_cavern": 1,
+   "canyon": 1,
+   "pillar_maze": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:podzol@14",
+    "minecraft:mud@10",
+    "minecraft:rooted_dirt@8",
+    "rock@68"
+   ],
+   "wall": [
+    "minecraft:moss_block@40",
+    "minecraft:mud@20",
+    "minecraft:shroomlight@6",
+    "minecraft:dripstone_block@34"
+   ],
+   "spike": [
+    "minecraft:dripstone_block@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:mossy_stone_bricks@1",
+    "minecraft:stone_bricks@5"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.25
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:cave_vines_plant[berries=true]"
+    ],
+    "density": 30,
+    "len": [
+     2,
+     8
+    ],
+    "tip": [
+     "minecraft:cave_vines[berries=true]"
+    ]
+   },
+   {
+    "type": "mushroom",
+    "block": [
+     "minecraft:mushroom_stem"
+    ],
+    "cap": [
+     "minecraft:red_mushroom_block",
+     "minecraft:brown_mushroom_block"
+    ],
+    "tip": [
+     "minecraft:shroomlight"
+    ],
+    "density": 14,
+    "radius": 2
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:red_mushroom",
+     "minecraft:brown_mushroom"
+    ],
+    "density": 76
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:glow_lichen[down=true]"
+    ],
+    "density": 80
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 60
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.05
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:shroomlight"
+   ],
+   "density": 44,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "particle": "spore",
+  "lightColor": "orange"
+ },
+ {
+  "id": "generic_crystal_cavern",
+  "name": "Crystal Cavern",
+  "lore": "Amethyst grew in the dark before there was a name for the dark. It still sings when struck.",
+  "weight": 0.8,
+  "match": {
+   "themes": [
+    "cave",
+    "mine",
+    "necromancer_lair"
+   ]
+  },
+  "shapes": {
+   "bowl_bridges": 3,
+   "amphitheatre": 1,
+   "karst": 2,
+   "shaft": 1,
+   "floating_islands": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:calcite@10",
+    "minecraft:amethyst_block@4",
+    "minecraft:tuff@20",
+    "minecraft:smooth_basalt@10",
+    "rock@56"
+   ],
+   "wall": [
+    "minecraft:calcite@34",
+    "minecraft:amethyst_block@26",
+    "minecraft:budding_amethyst@6",
+    "minecraft:pearlescent_froglight@6",
+    "minecraft:tuff@28"
+   ],
+   "spike": [
+    "minecraft:calcite@1",
+    "minecraft:dripstone_block@3"
+   ],
+   "platform": [
+    "minecraft:calcite@1",
+    "minecraft:polished_diorite@5"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.5
+  },
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:amethyst_block"
+    ],
+    "density": 16,
+    "len": [
+     4,
+     8
+    ],
+    "cap": [
+     "minecraft:pearlescent_froglight"
+    ],
+    "tip": [
+     "minecraft:amethyst_cluster[facing=up]"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:amethyst_cluster[facing=up]"
+    ],
+    "density": 74
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:large_amethyst_bud[facing=up]"
+    ],
+    "density": 40
+   }
+  ],
+  "features": [],
+  "lights": {
+   "roof": [
+    "minecraft:pearlescent_froglight",
+    "minecraft:verdant_froglight"
+   ],
+   "density": 44,
+   "cluster": 3
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "lightColor": "violet"
+ },
+ {
+  "id": "generic_frozen_cavern",
+  "name": "Frozen Cavern",
+  "lore": "Meltwater from a thousand winters froze in the shape of the room it filled.",
+  "weight": 0.9,
+  "match": {
+   "temps": [
+    "cold"
+   ]
+  },
+  "shapes": {
+   "bowl_bridges": 2,
+   "crevasse": 2,
+   "canyon": 2,
+   "amphitheatre": 1,
+   "cathedral": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:packed_ice@25",
+    "minecraft:blue_ice@11",
+    "rock@64"
+   ],
+   "wall": [
+    "minecraft:packed_ice@45",
+    "minecraft:blue_ice@35",
+    "minecraft:sea_lantern@8",
+    "minecraft:snow_block@12"
+   ],
+   "spike": [
+    "minecraft:packed_ice@2",
+    "minecraft:blue_ice@1"
+   ],
+   "platform": [
+    "minecraft:blue_ice@1",
+    "minecraft:polished_diorite@5"
+   ],
+   "patch": [
+    "minecraft:snow_block"
+   ],
+   "patchAt": 0.15
+  },
+  "fluid": {
+   "kind": "ice"
+  },
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:blue_ice"
+    ],
+    "density": 14,
+    "len": [
+     4,
+     8
+    ],
+    "cap": [
+     "minecraft:sea_lantern"
+    ],
+    "tip": [
+     "minecraft:packed_ice"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:snow"
+    ],
+    "density": 96
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.05
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern"
+   ],
+   "density": 44,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "nirncraft:ice_wraith"
+  ],
+  "lightColor": "blue"
+ },
+ {
+  "id": "generic_ember_cavern",
+  "name": "Ember Cavern",
+  "lore": "The stone is still warm. Somewhere below, the world has not finished cooling.",
+  "weight": 0.7,
+  "match": {
+   "themes": [
+    "mine",
+    "vampire_lair",
+    "dwemer",
+    "cave"
+   ],
+   "temps": [
+    "mild",
+    "hot",
+    "volcanic"
+   ]
+  },
+  "shapes": {
+   "bowl_bridges": 3,
+   "lava_river": 2,
+   "amphitheatre": 1,
+   "lava_tube": 1,
+   "pillar_maze": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:basalt@26",
+    "minecraft:blackstone@18",
+    "minecraft:smooth_basalt@16",
+    "minecraft:tuff@40"
+   ],
+   "wall": [
+    "minecraft:basalt@40",
+    "minecraft:blackstone@30",
+    "minecraft:magma_block@14",
+    "minecraft:glowstone@6",
+    "minecraft:smooth_basalt@10"
+   ],
+   "spike": [
+    "minecraft:basalt@1",
+    "minecraft:blackstone@2"
+   ],
+   "platform": [
+    "minecraft:gilded_blackstone@1",
+    "minecraft:polished_blackstone_bricks@5"
+   ]
+  },
+  "fluid": "lava",
+  "flora": [
+   {
+    "type": "column",
+    "block": [
+     "minecraft:basalt"
+    ],
+    "density": 22,
+    "len": [
+     2,
+     5
+    ],
+    "tip": [
+     "minecraft:shroomlight"
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:magma_block"
+    ],
+    "amount": 0.2
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:glowstone"
+   ],
+   "density": 44,
+   "cluster": 3
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "lightColor": "red"
+ },
+ {
+  "id": "generic_flooded_cavern",
+  "name": "Flooded Cavern",
+  "lore": "Water found every crack. The ceiling weeps, and the floor remembers the lake it used to be.",
+  "weight": 0.6,
+  "match": {},
+  "shapes": {
+   "bowl_bridges": 3,
+   "pillar_maze": 2,
+   "canyon": 1,
+   "karst": 1,
+   "sea_cave": 1,
+   "amphitheatre": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:gravel@14",
+    "minecraft:clay@12",
+    "minecraft:andesite@14",
+    "rock@60"
+   ],
+   "wall": [
+    "minecraft:moss_block@38",
+    "minecraft:dripstone_block@24",
+    "minecraft:clay@8",
+    "minecraft:sea_lantern@6",
+    "minecraft:andesite@24"
+   ],
+   "spike": [
+    "minecraft:dripstone_block@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:mossy_stone_bricks@1",
+    "minecraft:stone_bricks@5"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.3
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:cave_vines_plant[berries=true]"
+    ],
+    "density": 30,
+    "len": [
+     2,
+     8
+    ],
+    "tip": [
+     "minecraft:cave_vines[berries=true]"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:glow_lichen[down=true]",
+     "minecraft:moss_carpet"
+    ],
+    "density": 80
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fern"
+    ],
+    "density": 20
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.05
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:ochre_froglight"
+   ],
+   "density": 44,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "lightColor": "warm"
+ },
+ {
+  "id": "generic_deepslate_depths",
+  "name": "Deepslate Depths",
+  "lore": "Far below the roots of the mountains, the stone goes dark and quiet and strangely clean.",
+  "weight": 1.0,
+  "match": {
+   "maxY": -4
+  },
+  "shapes": {
+   "shaft": 2,
+   "canyon": 2,
+   "crevasse": 2,
+   "bowl_bridges": 2,
+   "pillar_maze": 1,
+   "amphitheatre": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:deepslate@30",
+    "minecraft:cobbled_deepslate@20",
+    "minecraft:tuff@10",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:deepslate@40",
+    "minecraft:cobbled_deepslate@30",
+    "minecraft:polished_deepslate@8",
+    "minecraft:tuff@12",
+    "minecraft:calcite@4"
+   ],
+   "spike": [
+    "minecraft:deepslate@2",
+    "minecraft:tuff@1"
+   ],
+   "platform": [
+    "minecraft:deepslate_bricks@4",
+    "minecraft:chiseled_deepslate@1"
+   ],
+   "patch": [
+    "minecraft:sculk"
+   ],
+   "patchAt": 0.45
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:sculk_vein[down=true]"
+    ],
+    "density": 40
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:glow_lichen[down=true]"
+    ],
+    "density": 50
+   },
+   {
+    "type": "column",
+    "block": [
+     "minecraft:deepslate"
+    ],
+    "density": 16,
+    "len": [
+     2,
+     4
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:amethyst_block"
+    ],
+    "scale": 6.0,
+    "amount": 0.035
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:verdant_froglight"
+   ],
+   "density": 52,
+   "cluster": 2
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "ambient": [
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     2,
+     4
+    ],
+    "where": "air"
+   }
+  ],
+  "lightColor": "cyan"
+ },
+ {
+  "id": "generic_mine_vault",
+  "name": "Mine Vault",
+  "lore": "The seam ran out here, into a hollow the miners never meant to find. Their lanterns still hang from the beams.",
+  "weight": 1.4,
+  "match": {
+   "themes": [
+    "mine"
+   ]
+  },
+  "shapes": {
+   "canyon": 3,
+   "shaft": 2,
+   "bowl_bridges": 2,
+   "pillar_maze": 1,
+   "floating_islands": 1,
+   "lava_river": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:cobblestone@8",
+    "minecraft:andesite@12",
+    "minecraft:gravel@10",
+    "rock@70"
+   ],
+   "wall": [
+    "minecraft:andesite@26",
+    "minecraft:cobblestone@18",
+    "minecraft:tuff@12",
+    "minecraft:gravel@10",
+    "minecraft:coal_ore@4",
+    "minecraft:iron_ore@4",
+    "minecraft:copper_ore@3",
+    "rock@23"
+   ],
+   "spike": [
+    "minecraft:andesite@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:stone_bricks@1",
+    "minecraft:oak_planks@2"
+   ],
+   "pillar": [
+    "minecraft:oak_log@3",
+    "minecraft:andesite@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.6
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:coal_ore",
+     "minecraft:iron_ore"
+    ],
+    "density": 14
+   },
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:iron_chain"
+    ],
+    "density": 8,
+    "len": [
+     3,
+     5
+    ],
+    "tip": [
+     "minecraft:lantern[hanging=true]"
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:iron_ore",
+     "minecraft:copper_ore",
+     "minecraft:gold_ore"
+    ],
+    "scale": 5.0,
+    "amount": 0.04
+   },
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:oak_planks"
+    ],
+    "count": [
+     3,
+     6
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:glowstone"
+   ],
+   "density": 60,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "loot": {
+   "relic": "nirncraft:chests/relic_mine",
+   "platform": "nirncraft:chests/mine_ore",
+   "minor": "nirncraft:chests/mine_ore"
+  },
+  "lightColor": "warm"
+ },
+ {
+  "id": "generic_barrow_vault",
+  "name": "Barrow Vault",
+  "lore": "The old dead built downward, and when the mountain gave them no more room they dug into the mountain's own bones.",
+  "weight": 1.2,
+  "match": {
+   "themes": [
+    "barrow"
+   ]
+  },
+  "shapes": {
+   "cathedral": 3,
+   "amphitheatre": 2,
+   "collapsed_city": 2,
+   "pillar_maze": 2,
+   "bowl_bridges": 1,
+   "bone_cavern": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:stone_bricks@20",
+    "minecraft:cracked_stone_bricks@12",
+    "minecraft:cobblestone@10",
+    "rock@58"
+   ],
+   "wall": [
+    "minecraft:stone_bricks@28",
+    "minecraft:mossy_stone_bricks@14",
+    "minecraft:cobblestone@10",
+    "minecraft:andesite@20",
+    "rock@28"
+   ],
+   "spike": [
+    "minecraft:andesite@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:stone_bricks@4",
+    "minecraft:chiseled_stone_bricks@1"
+   ],
+   "pillar": [
+    "minecraft:stone_bricks@4",
+    "minecraft:cracked_stone_bricks@1",
+    "minecraft:mossy_stone_bricks@1"
+   ],
+   "ruin": [
+    "minecraft:cracked_stone_bricks@2",
+    "minecraft:mossy_stone_bricks@2",
+    "minecraft:cobblestone@1"
+   ],
+   "patch": [
+    "minecraft:gravel"
+   ],
+   "patchAt": 0.35
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.4
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:cobweb"
+    ],
+    "density": 20
+   },
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:cobweb"
+    ],
+    "density": 24
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:bone_block"
+    ],
+    "density": 8
+   }
+  ],
+  "features": [
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:cracked_stone_bricks",
+     "minecraft:mossy_cobblestone"
+    ],
+    "count": [
+     4,
+     8
+    ]
+   },
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:stone_bricks"
+    ],
+    "count": [
+     1,
+     2
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:shroomlight"
+   ],
+   "density": 70,
+   "cluster": 1
+  },
+  "setpiece": {
+   "type": "altar",
+   "block": [
+    "minecraft:stone_bricks"
+   ],
+   "accent": [
+    "minecraft:soul_lantern"
+   ]
+  },
+  "foes": [
+   "nirncraft:draugr"
+  ],
+  "loot": {
+   "relic": "nirncraft:chests/relic_barrow",
+   "platform": "nirncraft:chests/dungeon_common",
+   "minor": "nirncraft:chests/dungeon_minor"
+  },
+  "lightColor": "cyan"
+ },
+ {
+  "id": "generic_ruin_hall",
+  "name": "Sunken Hall",
+  "lore": "A hall of a people long gone, the roof fallen in and the floor settled below its first level.",
+  "weight": 1.2,
+  "match": {
+   "themes": [
+    "ruin",
+    "fort"
+   ]
+  },
+  "shapes": {
+   "collapsed_city": 3,
+   "cathedral": 2,
+   "amphitheatre": 2,
+   "pillar_maze": 1,
+   "bowl_bridges": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:stone_bricks@18",
+    "minecraft:mossy_stone_bricks@10",
+    "minecraft:gravel@10",
+    "rock@62"
+   ],
+   "wall": [
+    "minecraft:stone_bricks@30",
+    "minecraft:mossy_stone_bricks@20",
+    "minecraft:cobblestone@10",
+    "rock@40"
+   ],
+   "spike": [
+    "minecraft:andesite@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:chiseled_stone_bricks@1",
+    "minecraft:stone_bricks@5"
+   ],
+   "ruin": [
+    "minecraft:stone_bricks@2",
+    "minecraft:cracked_stone_bricks@2",
+    "minecraft:mossy_stone_bricks@1"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.3
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.5
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet",
+     "minecraft:fern"
+    ],
+    "density": 70
+   },
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:glow_lichen[down=true]"
+    ],
+    "density": 60
+   }
+  ],
+  "features": [
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:stone_bricks",
+     "minecraft:mossy_stone_bricks"
+    ],
+    "count": [
+     5,
+     9
+    ]
+   },
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:stone_bricks"
+    ],
+    "count": [
+     1,
+     3
+    ],
+    "accent": [
+     "minecraft:lantern"
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:ochre_froglight"
+   ],
+   "density": 60,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "statue",
+   "block": [
+    "minecraft:stone_bricks"
+   ]
+  },
+  "foes": [],
+  "loot": {
+   "relic": "nirncraft:chests/relic_ruin",
+   "platform": "nirncraft:chests/dungeon_common",
+   "minor": "nirncraft:chests/dungeon_minor"
+  },
+  "lightColor": "warm"
+ },
+ {
+  "id": "generic_dwemer_foundry",
+  "name": "Dwemer Foundry",
+  "lore": "Green copper and cold brass, and under it all the long patient hum of a machine nobody switched off.",
+  "weight": 1.6,
+  "match": {
+   "themes": [
+    "dwemer"
+   ]
+  },
+  "shapes": {
+   "cathedral": 3,
+   "pillar_maze": 2,
+   "amphitheatre": 2,
+   "collapsed_city": 1,
+   "bowl_bridges": 1,
+   "lava_river": 1,
+   "honeycomb": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:cut_copper@10",
+    "minecraft:exposed_cut_copper@8",
+    "minecraft:weathered_cut_copper@6",
+    "rock@50"
+   ],
+   "wall": [
+    "minecraft:cut_copper@12",
+    "minecraft:exposed_cut_copper@12",
+    "minecraft:weathered_cut_copper@10",
+    "minecraft:oxidized_cut_copper@6",
+    "minecraft:smooth_stone@8",
+    "rock@30"
+   ],
+   "spike": [
+    "minecraft:cut_copper@1",
+    "rock@3"
+   ],
+   "platform": [
+    "minecraft:cut_copper@3",
+    "minecraft:copper_block@1"
+   ],
+   "pillar": [
+    "minecraft:cut_copper@3",
+    "minecraft:exposed_cut_copper@2",
+    "minecraft:weathered_cut_copper@1"
+   ],
+   "ruin": [
+    "minecraft:weathered_cut_copper@2",
+    "minecraft:oxidized_cut_copper@2",
+    "minecraft:copper_block@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.5
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:copper_block",
+     "minecraft:raw_copper_block"
+    ],
+    "density": 8
+   },
+   {
+    "type": "column",
+    "block": [
+     "minecraft:copper_block"
+    ],
+    "density": 10,
+    "len": [
+     3,
+     5
+    ],
+    "tip": [
+     "minecraft:lantern"
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "smoke",
+    "count": [
+     3,
+     5
+    ],
+    "block": [
+     "minecraft:cut_copper"
+    ]
+   },
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:copper_ore"
+    ],
+    "scale": 5.0,
+    "amount": 0.04
+   },
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:oxidized_cut_copper"
+    ],
+    "count": [
+     3,
+     6
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:ochre_froglight",
+    "minecraft:glowstone"
+   ],
+   "density": 56,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "obelisk",
+   "block": [
+    "minecraft:weathered_cut_copper"
+   ],
+   "accent": [
+    "minecraft:lantern"
+   ]
+  },
+  "foes": [
+   "nirncraft:dwarven_spider"
+  ],
+  "loot": {
+   "relic": "nirncraft:chests/relic_dwemer",
+   "platform": "nirncraft:chests/dwemer_scrap",
+   "minor": "nirncraft:chests/dwemer_scrap"
+  },
+  "particle": "steam",
+  "lightColor": "warm"
+ },
+ {
+  "id": "generic_vampire_undercroft",
+  "name": "Vampire Undercroft",
+  "lore": "Black stone and red candle-wax; a place built by people who wanted to be watched while they were not seen.",
+  "weight": 1.6,
+  "match": {
+   "themes": [
+    "vampire_lair"
+   ]
+  },
+  "shapes": {
+   "cathedral": 3,
+   "amphitheatre": 2,
+   "pillar_maze": 1,
+   "collapsed_city": 1,
+   "bowl_bridges": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:blackstone@20",
+    "minecraft:polished_blackstone_bricks@10",
+    "minecraft:red_terracotta@6",
+    "rock@50"
+   ],
+   "wall": [
+    "minecraft:blackstone@35",
+    "minecraft:cracked_deepslate_bricks@20",
+    "minecraft:red_terracotta@8",
+    "minecraft:bone_block@6",
+    "rock@30"
+   ],
+   "spike": [
+    "minecraft:blackstone@3",
+    "minecraft:bone_block@1"
+   ],
+   "platform": [
+    "minecraft:polished_blackstone_bricks@4",
+    "minecraft:gilded_blackstone@1"
+   ],
+   "pillar": [
+    "minecraft:polished_blackstone_bricks@3",
+    "minecraft:blackstone@2"
+   ],
+   "ruin": [
+    "minecraft:cracked_deepslate_bricks@2",
+    "minecraft:blackstone@2"
+   ]
+  },
+  "fluid": "none",
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:candle[lit=true]"
+    ],
+    "density": 18
+   },
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:hanging_roots"
+    ],
+    "density": 20
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:bone_block"
+    ],
+    "density": 10
+   }
+  ],
+  "features": [
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:polished_blackstone_bricks"
+    ],
+    "count": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:soul_lantern"
+    ]
+   },
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:red_nether_bricks"
+    ],
+    "scale": 5.0,
+    "amount": 0.035
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:shroomlight",
+    "minecraft:crying_obsidian"
+   ],
+   "density": 60,
+   "cluster": 1,
+   "post": [
+    "minecraft:soul_lantern"
+   ]
+  },
+  "setpiece": {
+   "type": "altar",
+   "block": [
+    "minecraft:polished_blackstone_bricks"
+   ],
+   "accent": [
+    "minecraft:soul_lantern"
+   ]
+  },
+  "foes": [
+   "nirncraft:vampire"
+  ],
+  "ambient": [
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     4,
+     7
+    ],
+    "where": "air"
+   }
+  ],
+  "lightColor": "red"
+ },
+ {
+  "id": "generic_necromancer_ossuary",
+  "name": "Ossuary Cavern",
+  "lore": "Every wall is stacked with the bones of the people who were never allowed to rest.",
+  "weight": 1.6,
+  "match": {
+   "themes": [
+    "necromancer_lair"
+   ]
+  },
+  "shapes": {
+   "bone_cavern": 3,
+   "cathedral": 2,
+   "pillar_maze": 1,
+   "amphitheatre": 1,
+   "bowl_bridges": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:soul_soil@18",
+    "minecraft:tuff@14",
+    "minecraft:bone_block@6",
+    "rock@50"
+   ],
+   "wall": [
+    "minecraft:tuff@30",
+    "minecraft:bone_block@22",
+    "minecraft:soul_soil@16",
+    "minecraft:cobbled_deepslate@20",
+    "minecraft:amethyst_block@4",
+    "rock@8"
+   ],
+   "spike": [
+    "minecraft:bone_block@2",
+    "minecraft:tuff@2"
+   ],
+   "platform": [
+    "minecraft:deepslate_bricks@3",
+    "minecraft:chiseled_deepslate@1"
+   ],
+   "pillar": [
+    "minecraft:bone_block@4",
+    "minecraft:tuff@1"
+   ],
+   "patch": [
+    "minecraft:soul_sand"
+   ],
+   "patchAt": 0.35
+  },
+  "fluid": "none",
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:bone_block"
+    ],
+    "density": 24
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:skeleton_skull"
+    ],
+    "density": 6
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:soul_fire"
+    ],
+    "density": 5
+   },
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:cobweb"
+    ],
+    "density": 30
+   }
+  ],
+  "features": [
+   {
+    "type": "ribs",
+    "block": [
+     "minecraft:bone_block"
+    ],
+    "count": [
+     5,
+     5
+    ]
+   },
+   {
+    "type": "boulders",
+    "block": [
+     "minecraft:bone_block"
+    ],
+    "count": [
+     2,
+     4
+    ],
+    "size": [
+     1,
+     2
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern"
+   ],
+   "density": 70,
+   "cluster": 2
+  },
+  "setpiece": {
+   "type": "altar",
+   "block": [
+    "minecraft:deepslate_bricks"
+   ],
+   "accent": [
+    "minecraft:soul_lantern"
+   ]
+  },
+  "foes": [
+   "minecraft:skeleton"
+  ],
+  "elite": "Bone-Reader",
+  "lightColor": "cyan"
+ },
+ {
+  "id": "generic_hagraven_nest",
+  "name": "Hagraven Nest",
+  "lore": "Antlers, feathers and knotted roots: a nest of something that was a woman once, and wishes you would forget it.",
+  "weight": 1.6,
+  "match": {
+   "themes": [
+    "hagraven_lair"
+   ]
+  },
+  "shapes": {
+   "root_cavern": 3,
+   "karst": 2,
+   "bowl_bridges": 1,
+   "pillar_maze": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:mud@16",
+    "minecraft:rooted_dirt@14",
+    "minecraft:moss_block@10",
+    "rock@50"
+   ],
+   "wall": [
+    "minecraft:mud@24",
+    "minecraft:mangrove_roots@12",
+    "minecraft:rooted_dirt@18",
+    "minecraft:moss_block@14",
+    "rock@20"
+   ],
+   "spike": [
+    "minecraft:mangrove_roots@1",
+    "minecraft:dripstone_block@2"
+   ],
+   "platform": [
+    "minecraft:mud_bricks@3",
+    "minecraft:stone_bricks@1"
+   ],
+   "pillar": [
+    "minecraft:mangrove_log@3",
+    "minecraft:mangrove_roots@2"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.6
+  },
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:hanging_roots"
+    ],
+    "density": 40,
+    "len": [
+     2,
+     7
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:bone_block",
+     "minecraft:mangrove_roots"
+    ],
+    "density": 30
+   },
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:cobweb"
+    ],
+    "density": 20
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:brown_mushroom"
+    ],
+    "density": 30
+   }
+  ],
+  "features": [
+   {
+    "type": "boulders",
+    "block": [
+     "minecraft:bone_block"
+    ],
+    "count": [
+     2,
+     4
+    ],
+    "size": [
+     1,
+     2
+    ]
+   },
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:mangrove_roots"
+    ],
+    "scale": 5.0,
+    "amount": 0.03
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:shroomlight"
+   ],
+   "density": 52,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "shrine",
+   "block": [
+    "minecraft:mud_bricks"
+   ],
+   "accent": [
+    "minecraft:soul_lantern"
+   ]
+  },
+  "foes": [
+   "nirncraft:hagraven",
+   "nirncraft:forsworn"
+  ],
+  "ambient": [
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     2,
+     4
+    ],
+    "where": "air"
+   }
+  ],
+  "lightColor": "green"
+ },
+ {
+  "id": "generic_highland_ice",
+  "name": "High Ice Hollow",
+  "lore": "Cold air pools in the high places and the rock never thaws. Snow falls in here from no sky at all.",
+  "weight": 1.3,
+  "match": {
+   "minY": 100,
+   "temps": [
+    "cold"
+   ]
+  },
+  "shapes": {
+   "crevasse": 3,
+   "canyon": 2,
+   "bowl_bridges": 1,
+   "amphitheatre": 1,
+   "karst": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:snow_block@28",
+    "minecraft:packed_ice@18",
+    "rock@54"
+   ],
+   "wall": [
+    "minecraft:packed_ice@40",
+    "minecraft:blue_ice@24",
+    "minecraft:snow_block@20",
+    "rock@16"
+   ],
+   "spike": [
+    "minecraft:packed_ice@2",
+    "minecraft:blue_ice@1"
+   ],
+   "platform": [
+    "minecraft:polished_diorite@3",
+    "minecraft:blue_ice@1"
+   ]
+  },
+  "fluid": {
+   "kind": "ice",
+   "chance": 0.7
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:snow"
+    ],
+    "density": 130
+   },
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:packed_ice"
+    ],
+    "density": 12,
+    "len": [
+     4,
+     9
+    ],
+    "tip": [
+     "minecraft:blue_ice"
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "pool",
+    "fluid": "powder_snow",
+    "count": [
+     2,
+     3
+    ],
+    "size": [
+     2,
+     3
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:blue_ice"
+   ],
+   "density": 60,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "nirncraft:ice_wraith",
+   "nirncraft:frost_atronach"
+  ],
+  "lightColor": "blue"
+ },
+ {
+  "id": "generic_jungle_overgrowth",
+  "name": "Overgrown Hollow",
+  "lore": "The roof is a green ceiling of its own, the roots of things that grow outside, working down to the water.",
+  "weight": 1.0,
+  "match": {
+   "temps": [
+    "wet"
+   ]
+  },
+  "shapes": {
+   "root_cavern": 3,
+   "karst": 2,
+   "bowl_bridges": 2,
+   "pillar_maze": 1,
+   "canyon": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:moss_block@20",
+    "minecraft:rooted_dirt@10",
+    "minecraft:mud@8",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:moss_block@36",
+    "minecraft:rooted_dirt@18",
+    "minecraft:mud@10",
+    "minecraft:jungle_log@6",
+    "rock@30"
+   ],
+   "spike": [
+    "minecraft:dripstone_block@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:mossy_stone_bricks@3",
+    "minecraft:stone_bricks@2"
+   ],
+   "pillar": [
+    "minecraft:jungle_log@3",
+    "minecraft:mangrove_roots@1"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.2
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:vine"
+    ],
+    "density": 50,
+    "len": [
+     3,
+     8
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fern",
+     "minecraft:large_fern",
+     "minecraft:azalea"
+    ],
+    "density": 80
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 60
+   },
+   {
+    "type": "mushroom",
+    "block": [
+     "minecraft:mushroom_stem"
+    ],
+    "cap": [
+     "minecraft:brown_mushroom_block"
+    ],
+    "tip": [
+     "minecraft:shroomlight"
+    ],
+    "density": 8,
+    "radius": 2
+   },
+   {
+    "type": "bed",
+    "block": [
+     "minecraft:seagrass"
+    ],
+    "density": 40
+   },
+   {
+    "type": "float",
+    "block": [
+     "minecraft:lily_pad"
+    ],
+    "density": 30
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.04
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:verdant_froglight",
+    "minecraft:shroomlight"
+   ],
+   "density": 52,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "ambient": [
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     2,
+     4
+    ],
+    "where": "air"
+   },
+   {
+    "entity": "minecraft:axolotl",
+    "count": [
+     2,
+     4
+    ],
+    "where": "water"
+   }
+  ],
+  "lightColor": "green"
+ },
+ {
+  "id": "generic_desert_hollow",
+  "name": "Dry Hollow",
+  "lore": "Sand sifts down from cracks above and the air tastes of old salt. Whatever water there was, was a long time ago.",
+  "weight": 1.0,
+  "match": {
+   "temps": [
+    "hot"
+   ]
+  },
+  "shapes": {
+   "canyon": 3,
+   "bowl_bridges": 2,
+   "karst": 2,
+   "collapsed_city": 1,
+   "shaft": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:sandstone@24",
+    "minecraft:sand@14",
+    "minecraft:cut_sandstone@6",
+    "rock@30"
+   ],
+   "wall": [
+    "minecraft:sandstone@40",
+    "minecraft:smooth_sandstone@20",
+    "minecraft:red_sandstone@10",
+    "rock@20"
+   ],
+   "spike": [
+    "minecraft:sandstone@2",
+    "minecraft:cut_sandstone@1"
+   ],
+   "platform": [
+    "minecraft:cut_sandstone@4",
+    "minecraft:chiseled_sandstone@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.25
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:dead_bush",
+     "minecraft:sand"
+    ],
+    "density": 40
+   },
+   {
+    "type": "column",
+    "block": [
+     "minecraft:cut_sandstone"
+    ],
+    "density": 12,
+    "len": [
+     2,
+     4
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:cut_sandstone",
+     "minecraft:sandstone"
+    ],
+    "count": [
+     3,
+     6
+    ]
+   },
+   {
+    "type": "boulders",
+    "block": [
+     "minecraft:sandstone"
+    ],
+    "count": [
+     3,
+     5
+    ],
+    "size": [
+     2,
+     3
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:glowstone",
+    "minecraft:ochre_froglight"
+   ],
+   "density": 56,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "lightColor": "warm"
+ },
+ {
+  "id": "generic_volcanic_vent",
+  "name": "Volcanic Vent",
+  "lore": "Ash drifts through the dark and the rock ticks as it cools. Heat comes up through every crack.",
+  "weight": 1.2,
+  "match": {
+   "temps": [
+    "volcanic"
+   ]
+  },
+  "shapes": {
+   "lava_river": 3,
+   "lava_tube": 2,
+   "bowl_bridges": 2,
+   "crevasse": 1,
+   "amphitheatre": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:basalt@24",
+    "minecraft:blackstone@20",
+    "minecraft:magma_block@3",
+    "rock@53"
+   ],
+   "wall": [
+    "minecraft:basalt@36",
+    "minecraft:blackstone@30",
+    "minecraft:magma_block@12",
+    "minecraft:obsidian@8",
+    "minecraft:glowstone@4"
+   ],
+   "spike": [
+    "minecraft:basalt@2",
+    "minecraft:blackstone@2"
+   ],
+   "platform": [
+    "minecraft:polished_blackstone_bricks@4",
+    "minecraft:gilded_blackstone@1"
+   ]
+  },
+  "fluid": "lava",
+  "flora": [
+   {
+    "type": "column",
+    "block": [
+     "minecraft:basalt"
+    ],
+    "density": 20,
+    "len": [
+     2,
+     5
+    ],
+    "tip": [
+     "minecraft:shroomlight"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fire"
+    ],
+    "density": 4
+   }
+  ],
+  "features": [
+   {
+    "type": "smoke",
+    "count": [
+     3,
+     6
+    ],
+    "block": [
+     "minecraft:basalt"
+    ]
+   },
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:magma_block"
+    ],
+    "amount": 0.25
+   },
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:magma_block"
+    ],
+    "scale": 5.0,
+    "amount": 0.03
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:glowstone"
+   ],
+   "density": 48,
+   "cluster": 3
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "nirncraft:ash_spawn",
+   "nirncraft:flame_atronach"
+  ],
+  "particle": "ash",
+  "lightColor": "red"
+ }
+]

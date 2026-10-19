@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/skeever_cave",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274011,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "skeever_cave"
+    ]
+  }
+}

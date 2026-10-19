@@ -1,8 +1,8 @@
 """Generates the guide module's pixel art and models.
 
 Writes into mod/src/main/resources:
-  assets/skycraft/textures/item/travelers_handbook.png   a worn leather field guide with a compass rose and a strap
-  assets/skycraft/models/item/travelers_handbook.json
+  assets/nirncraft/textures/item/travelers_handbook.png   a worn leather field guide with a compass rose and a strap
+  assets/nirncraft/models/item/travelers_handbook.json
 
 The reading screen reuses the lore module's book_spread.png. Run from anywhere: python3 tools/textures/guide.py
 """
@@ -13,8 +13,8 @@ from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-TEX = os.path.join(RES, "assets", "skycraft", "textures")
-MODELS = os.path.join(RES, "assets", "skycraft", "models")
+TEX = os.path.join(RES, "assets", "nirncraft", "textures")
+MODELS = os.path.join(RES, "assets", "nirncraft", "models")
 
 
 def rgba(hex_color, a=255):
@@ -77,7 +77,7 @@ def main():
     handbook_icon().save(out)
     model = os.path.join(MODELS, "item", "travelers_handbook.json")
     with open(model, "w", encoding="utf-8", newline="\n") as f:
-        json.dump({"parent": "minecraft:item/generated", "textures": {"layer0": "skycraft:item/travelers_handbook"}}, f, indent=2)
+        json.dump({"parent": "minecraft:item/generated", "textures": {"layer0": "nirncraft:item/travelers_handbook"}}, f, indent=2)
         f.write("\n")
     print("wrote", out)
     print("wrote", model)

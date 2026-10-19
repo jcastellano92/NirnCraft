@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/senche_tiger_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 13660192
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 1710618
+      }
+    ]
+  }
+}

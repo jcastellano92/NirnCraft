@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "nirncraft:realm_terrain",
+    "realm": "sovngarde",
+    "channel": "height",
+    "large": "nirncraft:realm/large",
+    "mid": "nirncraft:realm/mid",
+    "detail": "nirncraft:realm/detail"
+  }
+}

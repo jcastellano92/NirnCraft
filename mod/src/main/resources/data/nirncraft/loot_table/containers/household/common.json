@@ -1,0 +1,94 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:parts/food"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 70,
+          "modifier": {
+            "min": 3,
+            "max": 15,
+            "growth": 0.04,
+            "type": "nirncraft:scaled_gold"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 30
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:parts/clutter"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 15,
+          "value": "nirncraft:parts/potions"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 18,
+          "value": "nirncraft:parts/lore_note"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:gold_ring",
+          "weight": 4,
+          "modifier": {
+            "tag": "nirncraft:loot/trinkets",
+            "type": "nirncraft:regional_tag"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 1,
+          "modifier": {
+            "type": "nirncraft:skill_book"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 4,
+          "modifier": {
+            "type": "nirncraft:regional_book"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 58
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/household/common"
+}

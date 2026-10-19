@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:elven_gilded"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:elven_gilded"
+      }
+    ]
+  }
+}

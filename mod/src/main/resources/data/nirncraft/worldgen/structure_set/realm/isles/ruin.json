@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:realm/isles/ruin",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 14,
+    "separation": 5,
+    "salt": 2041505
+  }
+}

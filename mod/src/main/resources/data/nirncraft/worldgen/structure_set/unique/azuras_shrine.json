@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:unique/azuras_shrine",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274043,
+    "types": [
+      "daedric_shrine"
+    ],
+    "variants": [
+      "azura_great"
+    ]
+  }
+}

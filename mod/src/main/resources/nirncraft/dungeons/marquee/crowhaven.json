@@ -1,0 +1,854 @@
+{
+ "id": "crowhaven",
+ "why": [
+  "gold_coast.L1.low_sea_cliffs",
+  "gold_coast.L11.old_pirate_ages"
+ ],
+ "kit": "nord",
+ "entry_depth": 22,
+ "palette": {
+  "wall": [
+   "minecraft:stone_bricks*5",
+   "minecraft:cracked_stone_bricks*3",
+   "minecraft:deepslate_bricks*3",
+   "minecraft:mossy_stone_bricks*2"
+  ],
+  "floor": [
+   "minecraft:stone_bricks*5",
+   "minecraft:deepslate_tiles*3",
+   "minecraft:cracked_stone_bricks*2"
+  ],
+  "ceiling": [
+   "minecraft:stone_bricks*4",
+   "minecraft:deepslate_bricks*3"
+  ],
+  "rock": "minecraft:cobblestone",
+  "trim": "minecraft:chiseled_stone_bricks",
+  "pillar": "minecraft:polished_basalt",
+  "cap": "minecraft:chiseled_stone_bricks",
+  "light": "minecraft:soul_lantern",
+  "dim": "minecraft:redstone_lamp",
+  "rail": "minecraft:stone_brick_wall",
+  "stair": "minecraft:stone_brick_stairs"
+ },
+ "boss": {
+  "id": "nirncraft:vampire|minecraft:evoker",
+  "name": "Lord Lovidicus the Starved"
+ },
+ "books": {
+  "lore_1": {
+   "title": "Journal of the Lord of Crowhaven",
+   "author": "Lord Lovidicus",
+   "pages": [
+    "Atop the wind-scoured bluffs northwest of Anvil, Fort Crowhaven's sealed cellars hold the tragic journal and blood-starved court of the Gray Prince's father."
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "r_entry",
+   "name": "Bluff Bastion Entry",
+   "at": [
+    0,
+    0
+   ],
+   "y": -8,
+   "half": [
+    5,
+    6
+   ],
+   "h": 12,
+   "role": "start",
+   "doors": {
+    "s": 8
+   },
+   "ops": [
+    {
+     "op": "landing",
+     "y": 8,
+     "depth": 3,
+     "stairs": 3
+    },
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Crowhaven Thrall",
+       "mode": "awake",
+       "n": 2
+      },
+      {
+       "id": "minecraft:zombie",
+       "name": "Gold Coast Vampire",
+       "mode": "sleep",
+       "n": 1,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_west_1",
+   "name": "West Guardroom",
+   "at": [
+    -1,
+    0
+   ],
+   "y": -8,
+   "half": [
+    4,
+    4
+   ],
+   "h": 6,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 3
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Crowhaven Thrall",
+       "mode": "sleep",
+       "at": [
+        [
+         -3,
+         -3
+        ],
+        [
+         -3,
+         3
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_common",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_east_1",
+   "name": "East Guardroom",
+   "at": [
+    1,
+    0
+   ],
+   "y": -8,
+   "half": [
+    4,
+    4
+   ],
+   "h": 6,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 3
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Gold Coast Vampire",
+       "mode": "ambush",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      -3
+     ],
+     "table": "nirncraft:chests/dungeon_minor",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "r_rotunda",
+   "name": "Courtyard of Crows",
+   "at": [
+    0,
+    -1
+   ],
+   "y": -10,
+   "half": [
+    5,
+    5
+   ],
+   "h": 10,
+   "ops": [
+    {
+     "op": "bowl",
+     "tiers": 2,
+     "width": 2,
+     "step": 1
+    },
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Blood-Starved Hound",
+       "mode": "awake",
+       "n": 2,
+       "where": "ledge"
+      },
+      {
+       "id": "minecraft:vindicator",
+       "name": "Crypt Gargoyle",
+       "mode": "ambush",
+       "n": 1,
+       "where": "ledge"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_west_2",
+   "name": "Blood-Cellar West",
+   "at": [
+    -1,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Gold Coast Vampire",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_east_2",
+   "name": "Portrait Gallery",
+   "at": [
+    1,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Blood-Starved Hound",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_common",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "r_shaft",
+   "name": "The Iron Portcullis Shaft",
+   "at": [
+    0,
+    -2
+   ],
+   "y": -13,
+   "half": [
+    5,
+    5
+   ],
+   "h": 12,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vindicator",
+       "name": "Crypt Gargoyle",
+       "mode": "elite",
+       "at": [
+        [
+         0,
+         -3
+        ]
+       ]
+      },
+      {
+       "id": "minecraft:skeleton",
+       "name": "Crowhaven Thrall",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_west_3",
+   "name": "West Coffin Vault",
+   "at": [
+    -1,
+    -2
+   ],
+   "y": -17,
+   "half": [
+    4,
+    5
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Blood-Starved Hound",
+       "mode": "sleep",
+       "at": [
+        [
+         -3,
+         -3
+        ],
+        [
+         -3,
+         0
+        ],
+        [
+         -3,
+         3
+        ],
+        [
+         3,
+         3
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      -3
+     ],
+     "table": "nirncraft:chests/dungeon_common",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_east_3",
+   "name": "East Coffin Vault",
+   "at": [
+    1,
+    -2
+   ],
+   "y": -17,
+   "half": [
+    4,
+    5
+   ],
+   "h": 9,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Crypt Gargoyle",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      4
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_conduit",
+   "name": "Chained Cell",
+   "at": [
+    -1,
+    -3
+   ],
+   "y": -21,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vex",
+       "name": "Blood-Starved Hound",
+       "mode": "awake",
+       "n": 2,
+       "where": "any"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_boss",
+   "name": "Lord Lovidicus's Quarters",
+   "at": [
+    0,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    6,
+    6
+   ],
+   "h": 16,
+   "role": "boss",
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 10
+    },
+    {
+     "op": "boss",
+     "at": [
+      0,
+      -2
+     ],
+     "dais": 2
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -5
+     ],
+     "table": "nirncraft:chests/dungeon_boss",
+     "face": "s",
+     "capstone": true
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Crypt Gargoyle",
+       "mode": "sleep",
+       "at": [
+        [
+         -4,
+         3
+        ],
+        [
+         4,
+         3
+        ],
+        [
+         -4,
+         0
+        ],
+        [
+         4,
+         0
+        ]
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_study",
+   "name": "Locked Desk Study",
+   "at": [
+    1,
+    -3
+   ],
+   "y": -21,
+   "half": [
+    4,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      3,
+      -3,
+      0
+     ],
+     "to": [
+      3,
+      -3,
+      0
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "lectern",
+     "at": [
+      3,
+      -3,
+      1
+     ],
+     "book": "lore_1",
+     "candle": true,
+     "face": "w"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Gold Coast Vampire",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_basin",
+   "name": "Sea-Spray Cistern",
+   "at": [
+    -2,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "flood",
+     "sink": 3,
+     "margin": 1,
+     "causeway": 3,
+     "rails": false
+    },
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Crowhaven Thrall",
+       "mode": "awake",
+       "n": 1,
+       "where": "lane"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_reliquary",
+   "name": "Heirloom Armory",
+   "at": [
+    2,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Blood-Starved Hound",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_outer_walk",
+   "name": "Collapsed Curtain Walk",
+   "at": [
+    -2,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Gold Coast Vampire",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_minor",
+     "face": "n"
+    }
+   ]
+  }
+ ],
+ "links": [
+  {
+   "a": "r_entry",
+   "b": "r_west_1"
+  },
+  {
+   "a": "r_entry",
+   "b": "r_east_1"
+  },
+  {
+   "a": "r_entry",
+   "b": "r_rotunda"
+  },
+  {
+   "a": "r_rotunda",
+   "b": "r_west_2"
+  },
+  {
+   "a": "r_rotunda",
+   "b": "r_east_2"
+  },
+  {
+   "a": "r_west_2",
+   "b": "r_basin"
+  },
+  {
+   "a": "r_east_2",
+   "b": "r_reliquary"
+  },
+  {
+   "a": "r_rotunda",
+   "b": "r_shaft",
+   "gate": "r_rotunda"
+  },
+  {
+   "a": "r_shaft",
+   "b": "r_west_3"
+  },
+  {
+   "a": "r_shaft",
+   "b": "r_east_3"
+  },
+  {
+   "a": "r_west_3",
+   "b": "r_conduit"
+  },
+  {
+   "a": "r_east_3",
+   "b": "r_study"
+  },
+  {
+   "a": "r_study",
+   "b": "r_boss",
+   "gate": "r_study",
+   "trap": true
+  },
+  {
+   "a": "r_west_3",
+   "b": "r_outer_walk"
+  },
+  {
+   "a": "r_basin",
+   "b": "r_outer_walk"
+  }
+ ]
+}

@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "skycraft:block/glowing_mushroom_cap"
-  }
-}

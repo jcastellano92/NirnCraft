@@ -1,0 +1,59 @@
+{
+  "_comment": "Inter-faction hostility. Mobs of group 'a' that meet a mob of group 'b' within warRadius (and have line of sight) fight. 'mutual' = both sides may open; 'hunts' = only a attacks b. chance = per check (every 20 ticks) probability. Undead (draugr), giants, spiders and Daedra-vs-Daedra are deliberately absent: they ignore each other.",
+  "minHealthFraction": 0.35,
+  "cooldownTicks": 900,
+  "maxEngagements": 3,
+  "groups": {
+    "bandit": ["nirncraft:bandit", "nirncraft:bandit_chief"],
+    "forsworn": ["nirncraft:forsworn", "nirncraft:hagraven"],
+    "necromancer": ["nirncraft:necromancer"],
+    "vampire": ["nirncraft:vampire"],
+    "falmer": ["nirncraft:falmer", "nirncraft:chaurus", "nirncraft:chaurus_hunter"],
+    "automaton": ["nirncraft:dwarven_spider", "nirncraft:dwarven_sphere", "nirncraft:dwarven_centurion"],
+    "predator": [
+      "nirncraft:wolf", "nirncraft:bear", "nirncraft:sabre_cat", "nirncraft:senche_tiger",
+      "nirncraft:kagouti", "nirncraft:alit", "nirncraft:nix_hound", "nirncraft:durzog",
+      "nirncraft:wamasu", "nirncraft:swamp_leviathan", "nirncraft:giant_scorpion",
+      "nirncraft:sand_serpent", "nirncraft:hackwing", "nirncraft:realm_stalker"
+    ],
+    "prey": [
+      "nirncraft:deer", "nirncraft:elk", "minecraft:rabbit", "minecraft:goat",
+      "minecraft:sheep", "minecraft:horse", "nirncraft:mudcrab", "nirncraft:guar",
+      "nirncraft:echatere", "nirncraft:indrik", "nirncraft:horker", "nirncraft:realm_grazer"
+    ],
+    "hunter": [],
+    "legion": [],
+    "stormcloak": [],
+    "thalmor": []
+  },
+  "npc_roles": {
+    "IMPERIAL_SOLDIER": "legion",
+    "STORMCLOAK_SOLDIER": "stormcloak",
+    "THALMOR": "thalmor",
+    "THUG": "bandit",
+    "FORSWORN": "forsworn",
+    "NECROMANCER": "necromancer",
+    "VAMPIRE": "vampire",
+    "HUNTER": "hunter"
+  },
+  "relations": [
+    {"a": "bandit",     "b": "forsworn",    "kind": "mutual", "chance": 0.5},
+    {"a": "bandit",     "b": "necromancer", "kind": "mutual", "chance": 0.5},
+    {"a": "bandit",     "b": "vampire",     "kind": "mutual", "chance": 0.5},
+    {"a": "forsworn",   "b": "necromancer", "kind": "mutual", "chance": 0.4},
+    {"a": "falmer",     "b": "automaton",   "kind": "mutual", "chance": 0.7},
+    {"a": "falmer",     "b": "bandit",      "kind": "mutual", "chance": 0.5},
+    {"a": "legion",     "b": "stormcloak",  "kind": "mutual", "chance": 0.6},
+    {"a": "legion",     "b": "bandit",      "kind": "mutual", "chance": 0.6},
+    {"a": "legion",     "b": "forsworn",    "kind": "mutual", "chance": 0.6},
+    {"a": "legion",     "b": "necromancer", "kind": "mutual", "chance": 0.6},
+    {"a": "stormcloak", "b": "thalmor",     "kind": "mutual", "chance": 0.7},
+    {"a": "stormcloak", "b": "bandit",      "kind": "mutual", "chance": 0.6},
+    {"a": "stormcloak", "b": "forsworn",    "kind": "mutual", "chance": 0.6},
+    {"a": "stormcloak", "b": "vampire",     "kind": "mutual", "chance": 0.6},
+    {"a": "predator",   "b": "prey",        "kind": "hunts",  "chance": 0.15},
+    {"a": "hunter",     "b": "prey",        "kind": "hunts",  "chance": 0.4},
+    {"a": "hunter",     "b": "predator",    "kind": "hunts",  "chance": 0.3},
+    {"a": "predator",   "b": "hunter",      "kind": "hunts",  "chance": 0.2}
+  ]
+}

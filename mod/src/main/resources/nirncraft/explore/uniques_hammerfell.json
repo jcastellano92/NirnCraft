@@ -1,0 +1,1186 @@
+[
+  {
+    "id": "shehai_first_rank_spirit_blade",
+    "kind": "yokudan_obelisk",
+    "x": -5280,
+    "z": 4120,
+    "place": "lost_city_of_the_na_totambu",
+    "item": "nirncraft:yokudan_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:smite": 5,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Luminous memory-stone greatsword of Frandar Hunding's Ansei from the Lost City of the Na-Totambu.",
+    "why": [
+      "hammerfell.L8.sword_path",
+      "alikr_desert.L10.na_totambu_city"
+    ]
+  },
+  {
+    "id": "sentinel_moon_scimitar_of_fahara_jad",
+    "kind": "yokudan_obelisk",
+    "x": -5112,
+    "z": 4152,
+    "place": "castle_sentinel",
+    "item": "nirncraft:redguard_sword",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:looting": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Crescent-stamped royal scimitar of King Fahara'jad's palace guard in Sentinel.",
+    "why": [
+      "sentinel.L6.dome_capital",
+      "sentinel.L7.palace_crowns"
+    ]
+  },
+  {
+    "id": "tristore_alchemical_phylactery",
+    "kind": "mage_ruin",
+    "x": -8616,
+    "z": 5784,
+    "place": "tuwhaccas_throne",
+    "item": "nirncraft:gold_ruby_necklace",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:fire_protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Sealed glass-and-electrum phylactery from the buried Tristore Laboratory near Tu'whacca's Throne.",
+    "why": [
+      "alikr_desert.L10.defiled_temples",
+      "hammerfell.L10.necromancers"
+    ]
+  },
+  {
+    "id": "web_of_anker_venom_fang_dagger",
+    "kind": "dead_adventurer",
+    "x": -8620,
+    "z": 5620,
+    "place": "santaki",
+    "item": "nirncraft:redguard_dagger",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:bane_of_arthropods": 5,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Hollow-grooved scorpion-fang jambiya recovered from the Web of Anker sinkhole.",
+    "why": [
+      "alikr_desert.L4.scorpion_ground",
+      "alikr_desert.L10.web_of_anker"
+    ]
+  },
+  {
+    "id": "volenfell_rourken_hammer_head",
+    "kind": "dwemer_vent",
+    "x": -5976,
+    "z": 5816,
+    "place": "volenfell",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:knockback": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Tonal-brass warhammer forged in tribute to Clan Rourken's founding at Volenfell.",
+    "why": [
+      "hammerfell.L10.dwemer_halls",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "lekis_ephemeral_edge",
+    "kind": "yokudan_obelisk",
+    "x": -8100,
+    "z": 5900,
+    "place": "lekis_blade",
+    "item": "nirncraft:yokudan_sword",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:sweeping": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Practice blade of the Saint of the Spirit Sword consecrated at Leki's Blade.",
+    "why": [
+      "hammerfell.L7.sword_rank",
+      "hammerfell.L8.sword_path"
+    ]
+  },
+  {
+    "id": "ashabah_consecrated_wraps",
+    "kind": "abandoned_camp",
+    "x": -5912,
+    "z": 6456,
+    "place": "motalion_necropolis",
+    "item": "nirncraft:ra_gada_chestplate",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Ash-rubbed linen and bronze scale lamellar worn by the exiled Ash'abah tomb-cleansers.",
+    "why": [
+      "hammerfell.L7.stained_hands",
+      "hammerfell.L8.necropolis_dead"
+    ]
+  },
+  {
+    "id": "salas_en_sunken_ansei_aegis",
+    "kind": "treasure_cache",
+    "x": -8800,
+    "z": 6650,
+    "place": "salas_en",
+    "item": "nirncraft:ra_gada_shield",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:thorns": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Sun-disc buckler of the First Wave Ra Gada unearthed at Salas En.",
+    "why": [
+      "alikr_desert.L9.ra_gada_war_camps",
+      "alikr_desert.L11.two_waves"
+    ]
+  },
+  {
+    "id": "hallins_unyielding_honor_blade",
+    "kind": "yokudan_obelisk",
+    "x": -5350,
+    "z": 5000,
+    "place": "hall_of_heroes",
+    "item": "nirncraft:yokudan_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:fire_aspect": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Ansei Maje's oath-sworn greatsword from the Hall of Heroes south of Hallin's Stand.",
+    "why": [
+      "bangkorai.L8.na_totambu_reverence",
+      "bangkorai.L11.na_totambu_line"
+    ]
+  },
+  {
+    "id": "bangkorai_garrison_gatewarden_shield",
+    "kind": "ancient_battlefield",
+    "x": -4850,
+    "z": 4250,
+    "place": "bangkorai_garrison",
+    "item": "nirncraft:ra_gada_shield",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:blast_protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Towering iron-rimmed shield that held the great wall of Bangkorai Garrison against the Seventh Legion.",
+    "why": [
+      "bangkorai.L6.garrison_pass",
+      "bangkorai.L11.garrison_pass_wars"
+    ]
+  },
+  {
+    "id": "razaks_brass_cog_crossbow",
+    "kind": "dwemer_vent",
+    "x": -5950,
+    "z": 4550,
+    "place": "razaks_wheel",
+    "item": "minecraft:crossbow",
+    "enchant": {
+      "minecraft:quick_charge": 3,
+      "minecraft:multishot": 1,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Clockwork Rourken arbalest engineered by Master Craftsman Razak.",
+    "why": [
+      "hammerfell.L10.dwemer_halls",
+      "bangkorai.L1.santaki_ridge"
+    ]
+  },
+  {
+    "id": "klathzgar_steam_forged_warhammer",
+    "kind": "dwemer_vent",
+    "x": -5100,
+    "z": 4050,
+    "place": "klathzgar",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:fire_aspect": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Piston-weighted Dwarven hammer from the canyon foundries of Klathzgar.",
+    "why": [
+      "bangkorai.L1.ephesus_heights",
+      "hammerfell.L10.dwemer_halls"
+    ]
+  },
+  {
+    "id": "blackheart_corsair_captains_cutlass",
+    "kind": "sea_shrine",
+    "x": -5600,
+    "z": 3830,
+    "place": "blackheart_haven",
+    "item": "nirncraft:redguard_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:smite": 4,
+      "minecraft:looting": 3
+    },
+    "note": "Bone-hilted boarding scimitar of Captain Blackheart from the Bjoulsae pirate coves.",
+    "why": [
+      "bangkorai.L9.river_pirates",
+      "hammerfell.L10.smugglers_coves"
+    ]
+  },
+  {
+    "id": "skyreach_pinnacle_celestial_staff",
+    "kind": "mage_ruin",
+    "x": -3800,
+    "z": 3650,
+    "place": "skyreach_pinnacle",
+    "item": "nirncraft:yokudan_bow",
+    "enchant": {
+      "minecraft:power": 5,
+      "minecraft:flame": 1,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Star-metal Nedic bow resonating with the apex observatory of Skyreach Pinnacle.",
+    "why": [
+      "craglorn.L10.skyreach_pinnacle",
+      "craglorn.L11.nedic_star_empire"
+    ]
+  },
+  {
+    "id": "hel_ra_warrior_star_greatsword",
+    "kind": "ancient_battlefield",
+    "x": -4248,
+    "z": 3064,
+    "place": "hel_ra_citadel_hammerfell",
+    "item": "nirncraft:yokudan_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:knockback": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Stone-forged Shehai greatsword of the Celestial Warrior's honor guard at Hel Ra Citadel.",
+    "why": [
+      "craglorn.L8.celestial_reverence",
+      "craglorn.L11.fall_of_the_shards"
+    ]
+  },
+  {
+    "id": "sanctum_ophidia_serpent_fang",
+    "kind": "stone_circle",
+    "x": -3870,
+    "z": 4550,
+    "place": "sanctum_ophidia",
+    "item": "nirncraft:yokudan_dagger",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:looting": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Nirncrux-veined ritual kris of the Scaled Court from Sanctum Ophidia.",
+    "why": [
+      "craglorn.L9.serpent_cult_rising",
+      "craglorn.L10.sanctum_ophidia"
+    ]
+  },
+  {
+    "id": "aetherian_archive_star_gazer_circlet",
+    "kind": "overlook",
+    "x": -3760,
+    "z": 3420,
+    "place": "aetherian_archive",
+    "item": "nirncraft:gold_circlet",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:feather_falling": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Astrolabe-engraved diadem worn by the Star-Gazers at the Aetherian Archive.",
+    "why": [
+      "craglorn.L8.star_watching",
+      "craglorn.L10.aetherian_archive"
+    ]
+  },
+  {
+    "id": "rkundzelft_nirncrux_resonator_bow",
+    "kind": "mineral_vein",
+    "x": -3720,
+    "z": 2750,
+    "place": "rkundzelft",
+    "item": "nirncraft:dwarven_bow",
+    "enchant": {
+      "minecraft:power": 5,
+      "minecraft:punch": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Crimson Nirncrux-cored Dwarven bow from the steam-works of Rkundzelft.",
+    "why": [
+      "craglorn.L5.crater_glass_and_ore",
+      "hammerfell.L10.dwemer_halls"
+    ]
+  },
+  {
+    "id": "scourg_barrow_boethiah_ebony_mace",
+    "kind": "stone_circle",
+    "x": -4485,
+    "z": 2184,
+    "place": "shedungent",
+    "item": "nirncraft:ebony_mace",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:fire_aspect": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Obsidian-spiked war mace from the sky-ship vault of Scourg Barrow in the Dragontail peaks.",
+    "why": [
+      "dragontail.L10.scourg_barrow",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "dragontail_iron_orc_cleaver",
+    "kind": "bandit_lookout",
+    "x": -4345,
+    "z": 5070,
+    "place": "ashana_necropolis",
+    "item": "nirncraft:orcish_battleaxe",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:knockback": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Crude red-iron battleaxe of the Dragontail mountain Orc clans.",
+    "why": [
+      "dragontail.L5.mines",
+      "dragontail.L7.ore_lords"
+    ]
+  },
+  {
+    "id": "forebear_rihad_cavalry_lance",
+    "kind": "wayshrine",
+    "x": -4403,
+    "z": 6548,
+    "place": "gaanset_fort",
+    "item": "nirncraft:redguard_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:sweeping": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Heavy Forebear border-knight scimitar forged along the Brena foothills.",
+    "why": [
+      "dragontail.L6.pass_to_kvatch",
+      "dragontail.L11.imperial_border"
+    ]
+  },
+  {
+    "id": "tigonus_desert_pass_longbow",
+    "kind": "hunters_camp",
+    "x": -7108,
+    "z": 4473,
+    "place": "tigonus",
+    "item": "nirncraft:redguard_bow",
+    "enchant": {
+      "minecraft:power": 4,
+      "minecraft:infinity": 1,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Cedar-and-sinew caravan guard bow from the highland pass of Tigonus.",
+    "why": [
+      "dragontail.L4.cedar_ridge",
+      "sentinel.L4.tigonus_marsh"
+    ]
+  },
+  {
+    "id": "hubalajad_princely_mourning_ring",
+    "kind": "yokudan_obelisk",
+    "x": -5650,
+    "z": 8150,
+    "place": "hubalajad_palace",
+    "item": "nirncraft:gold_ring",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Royal emerald signet of Prince Hew's extravagant funerary palace on Hew's Bane.",
+    "why": [
+      "hews_bane.L10.hubalajad_palace",
+      "hews_bane.L11.prince_hubalajad_folly"
+    ]
+  },
+  {
+    "id": "abahs_landing_master_thief_dagger",
+    "kind": "treasure_cache",
+    "x": -5300,
+    "z": 8400,
+    "place": "thieves_den",
+    "item": "nirncraft:redguard_dagger",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:looting": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Blackened stiletto of the Abah's Landing Thieves Guild Council.",
+    "why": [
+      "hews_bane.L7.dock_thieves_and_cutpurses",
+      "hews_bane.L8.nocturnal_coin_custom"
+    ]
+  },
+  {
+    "id": "bahrahas_gloom_magnifico_cuirass",
+    "kind": "sea_shrine",
+    "x": -6100,
+    "z": 7550,
+    "place": "bahrahas_gloom",
+    "item": "nirncraft:ra_gada_chestplate",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:thorns": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Ancestral tomb-armor sealed by Magnifico Bahraha inside Bahraha's Gloom.",
+    "why": [
+      "hews_bane.L6.necropolis_cliffs",
+      "hews_bane.L7.forebear_merchant_syndicates"
+    ]
+  },
+  {
+    "id": "bthzark_tonal_chrono_compass",
+    "kind": "dwemer_vent",
+    "x": -10450,
+    "z": 7000,
+    "place": "bthzark",
+    "item": "nirncraft:dwarven_shield",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:fire_protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Star-calibrated Dwemer astrolabe buckler from the observatory vaults of Bthzark.",
+    "why": [
+      "stros_mkai.L5.dwemer_salvage",
+      "stros_mkai.L10.bthzark"
+    ]
+  },
+  {
+    "id": "cyrus_restless_league_saber",
+    "kind": "sea_shrine",
+    "x": -10150,
+    "z": 7260,
+    "place": "port_hunding",
+    "item": "nirncraft:redguard_sword",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:sweeping": 3,
+      "minecraft:looting": 3
+    },
+    "note": "The curved naval saber of the Restless League from Port Hunding on Stros M'Kai.",
+    "why": [
+      "stros_mkai.L6.port_hunding",
+      "stros_mkai.L11.hunding_bay_battle"
+    ]
+  },
+  {
+    "id": "ngasta_kvata_necromantic_scepter",
+    "kind": "mage_ruin",
+    "x": -10850,
+    "z": 6950,
+    "place": "ngastas_tower",
+    "item": "nirncraft:ebony_dagger",
+    "enchant": {
+      "minecraft:smite": 5,
+      "minecraft:fire_aspect": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Soul-snare ritual blade of the Sload necromancer N'Gasta on western Stros M'Kai.",
+    "why": [
+      "stros_mkai.L8.fear_of_the_islet",
+      "stros_mkai.L10.ngastas_isle"
+    ]
+  },
+  {
+    "id": "sentinel_docks_relic_cache",
+    "kind": "yokudan_obelisk",
+    "x": -8260,
+    "z": 4780,
+    "place": "sentinel_docks",
+    "item": "nirncraft:redguard_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.sentinel_docks in Sentinel.",
+    "why": [
+      "sentinel.L9.betony_lever",
+      "sentinel.L8.marsh_witch_fear"
+    ]
+  },
+  {
+    "id": "coldrock_diggings_relic_cache",
+    "kind": "dwemer_vent",
+    "x": -7650,
+    "z": 4950,
+    "place": "coldrock_diggings",
+    "item": "nirncraft:redguard_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.coldrock_diggings in Sentinel.",
+    "why": [
+      "sentinel.L10.witches_of_the_marsh",
+      "sentinel.L10.selenu_coast"
+    ]
+  },
+  {
+    "id": "stonekeep_relic_cache",
+    "kind": "treasure_cache",
+    "x": -7600,
+    "z": 6700,
+    "place": "stonekeep",
+    "item": "nirncraft:redguard_dagger",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.stonekeep in Alikr Desert.",
+    "why": [
+      "alikr_desert.L7.caravan_men",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "seps_spine_relic_cache",
+    "kind": "mage_ruin",
+    "x": -8450,
+    "z": 6650,
+    "place": "seps_spine",
+    "item": "nirncraft:redguard_war_axe",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.seps_spine in Alikr Desert.",
+    "why": [
+      "alikr_desert.L8.stendarr_patron",
+      "alikr_desert.L1.erg"
+    ]
+  },
+  {
+    "id": "goats_head_oasis_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -7650,
+    "z": 5850,
+    "place": "goats_head_oasis",
+    "item": "nirncraft:redguard_mace",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.goats_head_oasis in Alikr Desert.",
+    "why": [
+      "alikr_desert.L8.well_oaths",
+      "alikr_desert.L1.dakfron_hot_plain"
+    ]
+  },
+  {
+    "id": "shrikes_aerie_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -6150,
+    "z": 6150,
+    "place": "shrikes_aerie",
+    "item": "nirncraft:redguard_bow",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.shrikes_aerie in Alikr Desert.",
+    "why": [
+      "alikr_desert.L9.well_feud",
+      "alikr_desert.L3.hidden_wells"
+    ]
+  },
+  {
+    "id": "hollow_waste_relic_cache",
+    "kind": "desert_shrine",
+    "x": -6600,
+    "z": 6950,
+    "place": "hollow_waste",
+    "item": "nirncraft:yokudan_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.hollow_waste in Alikr Desert.",
+    "why": [
+      "alikr_desert.L9.dragon_fear",
+      "alikr_desert.L4.reg_plain"
+    ]
+  },
+  {
+    "id": "divads_chagrin_mine_relic_cache",
+    "kind": "yokudan_obelisk",
+    "x": -7300,
+    "z": 5650,
+    "place": "divads_chagrin_mine",
+    "item": "nirncraft:yokudan_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.divads_chagrin_mine in Alikr Desert.",
+    "why": [
+      "alikr_desert.L9.ra_gada_war_camps",
+      "alikr_desert.L10.kykos_coven"
+    ]
+  },
+  {
+    "id": "kulati_mines_relic_cache",
+    "kind": "dwemer_vent",
+    "x": -6750,
+    "z": 4950,
+    "place": "kulati_mines",
+    "item": "nirncraft:yokudan_battleaxe",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.kulati_mines in Alikr Desert.",
+    "why": [
+      "alikr_desert.L10.na_totambu_city",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "aldunz_relic_cache",
+    "kind": "treasure_cache",
+    "x": -6400,
+    "z": 5300,
+    "place": "aldunz",
+    "item": "nirncraft:yokudan_dagger",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.aldunz in Alikr Desert.",
+    "why": [
+      "alikr_desert.L10.volenfell",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "rkulftzel_relic_cache",
+    "kind": "mage_ruin",
+    "x": -7250,
+    "z": 5050,
+    "place": "rkulftzel",
+    "item": "nirncraft:yokudan_bow",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.rkulftzel in Alikr Desert.",
+    "why": [
+      "alikr_desert.L10.web_of_anker",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "ragnthar_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -8900,
+    "z": 6300,
+    "place": "ragnthar",
+    "item": "nirncraft:ra_gada_chestplate",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.ragnthar in Alikr Desert.",
+    "why": [
+      "alikr_desert.L10.faughtas_guard",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "tavahim_rest_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -6381,
+    "z": 6840,
+    "place": "tavahim_rest",
+    "item": "nirncraft:ra_gada_helmet",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.tavahim_rest in Alikr Desert.",
+    "why": [
+      "alikr_desert.L10.kykos_coven",
+      "alikr_desert.L3.owned_wells"
+    ]
+  },
+  {
+    "id": "ashabah_pass_relic_cache",
+    "kind": "desert_shrine",
+    "x": -6150,
+    "z": 4850,
+    "place": "ashabah_pass",
+    "item": "nirncraft:ra_gada_shield",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.ashabah_pass in Dragontail.",
+    "why": [
+      "dragontail.L7.ore_lords",
+      "dragontail.L4.vent_daedra"
+    ]
+  },
+  {
+    "id": "bangkorai_pass_relic_cache",
+    "kind": "yokudan_obelisk",
+    "x": -5500,
+    "z": 4550,
+    "place": "bangkorai_pass",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.bangkorai_pass in Dragontail.",
+    "why": [
+      "dragontail.L7.debt_miners",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "sunken_road_relic_cache",
+    "kind": "dwemer_vent",
+    "x": -5750,
+    "z": 4500,
+    "place": "sunken_road",
+    "item": "nirncraft:gold_ruby_necklace",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.sunken_road in Dragontail.",
+    "why": [
+      "dragontail.L8.arkay_patron",
+      "dragontail.L1.red_wall"
+    ]
+  },
+  {
+    "id": "wethers_cleft_relic_cache",
+    "kind": "treasure_cache",
+    "x": -4800,
+    "z": 4950,
+    "place": "wethers_cleft",
+    "item": "nirncraft:gold_circlet",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.wethers_cleft in Dragontail.",
+    "why": [
+      "dragontail.L8.fire_pacts",
+      "dragontail.L3.canyon_springs"
+    ]
+  },
+  {
+    "id": "valley_of_scars_relic_cache",
+    "kind": "mage_ruin",
+    "x": -4450,
+    "z": 4900,
+    "place": "valley_of_scars",
+    "item": "nirncraft:redguard_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.valley_of_scars in Dragontail.",
+    "why": [
+      "dragontail.L9.debt_unrest",
+      "dragontail.L4.fumarole_field"
+    ]
+  },
+  {
+    "id": "hoondings_watch_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -6680,
+    "z": 4600,
+    "place": "hoondings_watch",
+    "item": "nirncraft:redguard_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.hoondings_watch in Dragontail.",
+    "why": [
+      "dragontail.L10.scourg_barrow",
+      "dragontail.L11.imperial_border"
+    ]
+  },
+  {
+    "id": "yldzuun_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -5896,
+    "z": 5976,
+    "place": "yldzuun",
+    "item": "nirncraft:redguard_dagger",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.yldzuun in Dragontail.",
+    "why": [
+      "dragontail.L10.mountain_witches",
+      "dragontail.L10.devilrock_coven"
+    ]
+  },
+  {
+    "id": "old_sords_cave_relic_cache",
+    "kind": "desert_shrine",
+    "x": -4750,
+    "z": 4500,
+    "place": "old_sords_cave",
+    "item": "nirncraft:redguard_war_axe",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.old_sords_cave in Dragontail.",
+    "why": [
+      "dragontail.L10.khulari_mines",
+      "dragontail.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "torogs_spite_relic_cache",
+    "kind": "yokudan_obelisk",
+    "x": -5250,
+    "z": 4450,
+    "place": "torogs_spite",
+    "item": "nirncraft:redguard_mace",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.torogs_spite in Dragontail.",
+    "why": [
+      "dragontail.L11.scourg_kings",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "rkindaleft_relic_cache",
+    "kind": "dwemer_vent",
+    "x": -5500,
+    "z": 4800,
+    "place": "rkindaleft",
+    "item": "nirncraft:redguard_bow",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.rkindaleft in Dragontail.",
+    "why": [
+      "dragontail.L5.mines",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "nilata_ruins_relic_cache",
+    "kind": "treasure_cache",
+    "x": -5150,
+    "z": 4900,
+    "place": "nilata_ruins",
+    "item": "nirncraft:yokudan_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.nilata_ruins in Dragontail.",
+    "why": [
+      "dragontail.L5.obsidian_and_sulphur",
+      "dragontail.L8.fire_pacts"
+    ]
+  },
+  {
+    "id": "zalgazs_den_relic_cache",
+    "kind": "mage_ruin",
+    "x": -4180,
+    "z": 4900,
+    "place": "zalgazs_den",
+    "item": "nirncraft:yokudan_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.zalgazs_den in Dragontail.",
+    "why": [
+      "dragontail.L4.volcanic_scree",
+      "dragontail.L10.scourg_barrow"
+    ]
+  },
+  {
+    "id": "dragonstar_arena_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -3720,
+    "z": 2450,
+    "place": "dragonstar_arena",
+    "item": "nirncraft:yokudan_battleaxe",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.dragonstar_arena in Craglorn.",
+    "why": [
+      "craglorn.L7.mage_patrons",
+      "craglorn.L9.serpent_cult_rising"
+    ]
+  },
+  {
+    "id": "no_shira_citadel_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -6150,
+    "z": 8150,
+    "place": "no_shira_citadel",
+    "item": "nirncraft:yokudan_dagger",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.no_shira_citadel in Hews Bane.",
+    "why": [
+      "hews_bane.L7.dock_thieves_and_cutpurses",
+      "hews_bane.L1.abecean_headlands"
+    ]
+  },
+  {
+    "id": "zehts_displeasure_relic_cache",
+    "kind": "desert_shrine",
+    "x": -5700,
+    "z": 7600,
+    "place": "zehts_displeasure",
+    "item": "nirncraft:yokudan_bow",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.zehts_displeasure in Hews Bane.",
+    "why": [
+      "hews_bane.L7.hunted_traitors",
+      "hews_bane.L3.cliff_cisterns"
+    ]
+  },
+  {
+    "id": "sharktooth_grotto_relic_cache",
+    "kind": "yokudan_obelisk",
+    "x": -7400,
+    "z": 8000,
+    "place": "sharktooth_grotto",
+    "item": "nirncraft:ra_gada_chestplate",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.sharktooth_grotto in Hews Bane.",
+    "why": [
+      "hews_bane.L8.no_forgiveness_oath",
+      "hews_bane.L4.sea_cliff_harpies"
+    ]
+  },
+  {
+    "id": "ncharft_relic_cache",
+    "kind": "dwemer_vent",
+    "x": -4935,
+    "z": 8296,
+    "place": "ncharft",
+    "item": "nirncraft:ra_gada_helmet",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.ncharft in Hews Bane.",
+    "why": [
+      "hews_bane.L8.nocturnal_coin_custom",
+      "hews_bane.L8.forebear_temples"
+    ]
+  },
+  {
+    "id": "halahim_tombs_relic_cache",
+    "kind": "treasure_cache",
+    "x": -6192,
+    "z": 6937,
+    "place": "halahim_tombs",
+    "item": "nirncraft:ra_gada_shield",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.halahim_tombs in Hews Bane.",
+    "why": [
+      "hews_bane.L9.collaborator_hunt",
+      "hews_bane.L5.abecean_shipping"
+    ]
+  },
+  {
+    "id": "sean_hollow_relic_cache",
+    "kind": "mage_ruin",
+    "x": -6831,
+    "z": 7150,
+    "place": "sean_hollow",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.sean_hollow in Hews Bane.",
+    "why": [
+      "hews_bane.L9.syndicate_vs_thieves",
+      "hews_bane.L10.thrall_cove"
+    ]
+  },
+  {
+    "id": "halset_rest_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -6470,
+    "z": 7765,
+    "place": "halset_rest",
+    "item": "nirncraft:gold_ruby_necklace",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.halset_rest in Hews Bane.",
+    "why": [
+      "hews_bane.L10.ahaleb_necropolis",
+      "hews_bane.L8.forebear_temples"
+    ]
+  },
+  {
+    "id": "onsis_breath_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -9928,
+    "z": 7080,
+    "place": "onsis_breath",
+    "item": "nirncraft:gold_circlet",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.onsis_breath in Stros Mkai.",
+    "why": [
+      "stros_mkai.L6.palace_plateau",
+      "stros_mkai.L1.necromancer_islet"
+    ]
+  },
+  {
+    "id": "ex_gilane_reliquary",
+    "title": "Reliquary of place.nirncraft.gilane",
+    "kind": "shrine",
+    "x": -8650,
+    "z": 6850,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.gilane.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_hegathe_reliquary",
+    "title": "Reliquary of place.nirncraft.hegathe",
+    "kind": "shrine",
+    "x": -9150,
+    "z": 6450,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.hegathe.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_kozanset_reliquary",
+    "title": "Reliquary of place.nirncraft.kozanset",
+    "kind": "shrine",
+    "x": -5950,
+    "z": 4220,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.kozanset.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_dragonstar_reliquary",
+    "title": "Reliquary of place.nirncraft.dragonstar",
+    "kind": "shrine",
+    "x": -4100,
+    "z": 2550,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.dragonstar.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_ephesus_reliquary",
+    "title": "Reliquary of place.nirncraft.ephesus",
+    "kind": "shrine",
+    "x": -4806,
+    "z": 4798,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.ephesus.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_abahs_landing_reliquary",
+    "title": "Reliquary of place.nirncraft.abahs_landing",
+    "kind": "shrine",
+    "x": -5350,
+    "z": 8450,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.abahs_landing.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_bergama_reliquary",
+    "title": "Reliquary of place.nirncraft.bergama",
+    "kind": "shrine",
+    "x": -7544,
+    "z": 5368,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.bergama.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_antiphyllos_reliquary",
+    "title": "Reliquary of place.nirncraft.antiphyllos",
+    "kind": "shrine",
+    "x": -7640,
+    "z": 5310,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.antiphyllos.",
+    "item": "nirncraft:elven_sword"
+  }
+]

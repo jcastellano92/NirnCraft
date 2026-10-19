@@ -1,8 +1,0 @@
-{
-  "parent": "skycraft:block/standing_stone_lower",
-  "render_type": "minecraft:cutout",
-  "textures": {
-    "face": "skycraft:block/standing_stone_lady_lower",
-    "glow": "skycraft:block/standing_stone_lady_lower_glow"
-  }
-}

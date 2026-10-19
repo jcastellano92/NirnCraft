@@ -2,12 +2,12 @@
 """Blocks, items and skies of the realms (workstream Realms): original procedural textures plus every block asset.
 
 Writes:
-  * 16x16 block textures into assets/skycraft/textures/block/ (animated gates with .mcmeta)
-  * item textures (Sigil Stone, Black Book) into assets/skycraft/textures/item/
-  * sky textures into assets/skycraft/textures/environment/realms/ (Dagon's eye, Hermaeus Mora's eye, the Soul
+  * 16x16 block textures into assets/nirncraft/textures/block/ (animated gates with .mcmeta)
+  * item textures (Sigil Stone, Black Book) into assets/nirncraft/textures/item/
+  * sky textures into assets/nirncraft/textures/environment/realms/ (Dagon's eye, Hermaeus Mora's eye, the Soul
     Cairn's orb, Coldharbour's dark sun, Sovngarde's sun, smoke and cloud layers)
   * blockstates, block and item models, block loot tables
-Names live in mod/src/main/lang/skycraft/realms.json (written by tools/worldgen/realms.py).
+Names live in mod/src/main/lang/nirncraft/realms.json (written by tools/worldgen/realms.py).
 
 Run from anywhere:  py -3 tools/textures/realms.py
 """
@@ -21,12 +21,12 @@ from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-ASSETS = os.path.join(RES, "assets", "skycraft")
+ASSETS = os.path.join(RES, "assets", "nirncraft")
 DATA = os.path.join(RES, "data")
 TEX = os.path.join(ASSETS, "textures", "block")
 ITEM_TEX = os.path.join(ASSETS, "textures", "item")
 SKY = os.path.join(ASSETS, "textures", "environment", "realms")
-SK = "skycraft"
+SK = "nirncraft"
 
 
 # ------------------------------------------------------------------------------------------------ helpers

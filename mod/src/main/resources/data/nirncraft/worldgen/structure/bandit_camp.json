@@ -1,0 +1,8 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "bandit_camp",
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

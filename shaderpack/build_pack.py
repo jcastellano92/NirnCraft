@@ -1,4 +1,4 @@
-"""Validate and package the Skycraft Aether shader pack.
+"""Validate and package the NirnCraft Atlas shader pack.
 
 Resolves #include the way Iris does ("/lib/x.glsl" is relative to shaders/), compiles every program stage with the
 Vulkan SDK's glslangValidator (desktop GLSL, compatibility profile), then zips the pack for Iris. Iris itself still
@@ -15,10 +15,10 @@ import zipfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-PACK = HERE / "SkycraftAether"
+PACK = HERE / "InfiniteATLAS"
 SHADERS = PACK / "shaders"
 OUT = HERE / "build"
-GLSLANG = Path(os.environ.get("VULKAN_SDK", r"F:\Projects\Personal\Skycraft\toolchains\VulkanSDK\1.4.357.0")) / "Bin" / "glslangValidator.exe"
+GLSLANG = (Path(os.environ["VULKAN_SDK"]) if "VULKAN_SDK" in os.environ else next((d / "toolchains" for d in Path(__file__).resolve().parents if (d / "toolchains").is_dir()), Path("toolchains")) / "VulkanSDK/1.4.357.0") / "Bin" / "glslangValidator.exe"
 INCLUDE = re.compile(r'^\s*#include\s+"([^"]+)"\s*$')
 
 
@@ -64,7 +64,7 @@ def main():
     if failures:
         sys.exit(1)
     if "--no-zip" not in sys.argv:
-        z = OUT / "SkycraftAether.zip"
+        z = OUT / "InfiniteATLAS.zip"
         with zipfile.ZipFile(z, "w", zipfile.ZIP_DEFLATED) as zf:
             for f in sorted(PACK.rglob("*")):
                 if f.is_file():

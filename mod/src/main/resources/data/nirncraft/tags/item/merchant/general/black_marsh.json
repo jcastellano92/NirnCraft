@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:hist_sap",
+      "required": false
+    },
+    {
+      "id": "nirncraft:marshmerrow",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bittergreen_petals",
+      "required": false
+    },
+    {
+      "id": "nirncraft:chitin_plate",
+      "required": false
+    },
+    "minecraft:cod"
+  ]
+}

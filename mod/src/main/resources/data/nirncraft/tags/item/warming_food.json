@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:apple_cabbage_stew",
+    "nirncraft:beef_stew",
+    "nirncraft:venison_stew",
+    "nirncraft:horker_stew",
+    "nirncraft:vegetable_soup",
+    "nirncraft:tomato_soup",
+    "nirncraft:potato_soup",
+    "nirncraft:elsweyr_fondue",
+    "nirncraft:fish_stew",
+    "nirncraft:fish_chowder",
+    "minecraft:mushroom_stew",
+    "minecraft:rabbit_stew",
+    "minecraft:beetroot_soup",
+    "minecraft:suspicious_stew"
+  ]
+}

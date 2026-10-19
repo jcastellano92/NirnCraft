@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:generic",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arrow",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 4,
+                "max": 12
+              },
+              "type": "minecraft:set_count"
+            },
+            {
+              "kind": "arrow",
+              "type": "nirncraft:leveled_gear"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:leveled/arrows"
+}

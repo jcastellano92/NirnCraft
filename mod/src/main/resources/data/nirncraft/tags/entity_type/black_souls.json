@@ -1,0 +1,24 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:villager",
+    "minecraft:wandering_trader",
+    "minecraft:pillager",
+    "minecraft:vindicator",
+    "minecraft:evoker",
+    "minecraft:witch",
+    "minecraft:illusioner",
+    {
+      "id": "nirncraft:bandit",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bandit_chief",
+      "required": false
+    },
+    {
+      "id": "nirncraft:guard",
+      "required": false
+    }
+  ]
+}

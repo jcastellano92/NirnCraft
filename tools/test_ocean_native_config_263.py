@@ -13,16 +13,16 @@ class NativeOceanConfigTest(unittest.TestCase):
         self.game=Path(temporary.name)
         self.save=self.game/'saves/qa_world_263';self.save.mkdir(parents=True)
         (self.save/'level.dat').write_bytes(b'test save marker')
-        self.base=self.game/'config/skycraft-ocean-server.toml';self.base.parent.mkdir()
+        self.base=self.game/'config/nirncraft-ocean-server.toml';self.base.parent.mkdir()
         self.base.write_text('[outerOcean]\nwrapEnabled=true\nhalfWidth=29360128\n')
 
     def test_world_synced_override_has_native_priority(self):
-        override=self.save/'syncedconfig/skycraft-ocean-server.toml';override.parent.mkdir()
+        override=self.save/'syncedconfig/nirncraft-ocean-server.toml';override.parent.mkdir()
         override.write_text('[outerOcean]\nwrapEnabled=true\nhalfWidth=65536\n')
         self.assertEqual(override,ocean.effective_config(self.game,'qa_world_263'))
 
     def test_missing_world_override_uses_instance_config_and_ignores_legacy_seeding_files(self):
-        for path in (self.save/'serverconfig/skycraft-ocean-server.toml',self.game/'defaultconfigs/skycraft-ocean-server.toml'):
+        for path in (self.save/'serverconfig/nirncraft-ocean-server.toml',self.game/'defaultconfigs/nirncraft-ocean-server.toml'):
             path.parent.mkdir();path.write_text('legacy=true')
         self.assertEqual(self.base,ocean.effective_config(self.game))
         self.base.unlink()

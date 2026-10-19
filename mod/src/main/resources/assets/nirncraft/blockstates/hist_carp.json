@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/hist_carp"
+      },
+      {
+        "model": "nirncraft:block/hist_carp",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/hist_carp",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/hist_carp",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/hist_carp_harvested"
+      },
+      {
+        "model": "nirncraft:block/hist_carp_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/hist_carp_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/hist_carp_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

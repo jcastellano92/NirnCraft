@@ -1,0 +1,593 @@
+{
+  "provinces": {
+    "skyrim": {
+      "say": "society.nirncraft.say.province.skyrim",
+      "lines": 20,
+      "gossip": 6
+    },
+    "cyrodiil": {
+      "say": "society.nirncraft.say.province.cyrodiil",
+      "lines": 20,
+      "gossip": 6
+    },
+    "morrowind": {
+      "say": "society.nirncraft.say.province.morrowind",
+      "lines": 20,
+      "gossip": 6
+    },
+    "black_marsh": {
+      "say": "society.nirncraft.say.province.black_marsh",
+      "lines": 20,
+      "gossip": 6
+    },
+    "elsweyr": {
+      "say": "society.nirncraft.say.province.elsweyr",
+      "lines": 20,
+      "gossip": 6
+    },
+    "valenwood": {
+      "say": "society.nirncraft.say.province.valenwood",
+      "lines": 20,
+      "gossip": 6
+    },
+    "summerset": {
+      "say": "society.nirncraft.say.province.summerset",
+      "lines": 20,
+      "gossip": 6
+    },
+    "hammerfell": {
+      "say": "society.nirncraft.say.province.hammerfell",
+      "lines": 20,
+      "gossip": 6
+    },
+    "high_rock": {
+      "say": "society.nirncraft.say.province.high_rock",
+      "lines": 20,
+      "gossip": 6
+    },
+    "atmora": {
+      "say": "society.nirncraft.say.province.atmora",
+      "lines": 20,
+      "gossip": 6
+    },
+    "akavir": {
+      "say": "society.nirncraft.say.province.akavir",
+      "lines": 20,
+      "gossip": 6
+    },
+    "yokuda": {
+      "say": "society.nirncraft.say.province.yokuda",
+      "lines": 20,
+      "gossip": 6
+    },
+    "pyandonea": {
+      "say": "society.nirncraft.say.province.pyandonea",
+      "lines": 20,
+      "gossip": 6
+    },
+    "thras": {
+      "say": "society.nirncraft.say.province.thras",
+      "lines": 20,
+      "gossip": 6
+    },
+    "foreign": {
+      "say": "society.nirncraft.say.province.foreign",
+      "lines": 20,
+      "gossip": 6
+    },
+    "sea": {
+      "say": "society.nirncraft.say.province.sea",
+      "lines": 8,
+      "gossip": 6
+    }
+  },
+  "regions": {
+    "whiterun": {
+      "say": "society.nirncraft.say.region.whiterun",
+      "lines": 20,
+      "gossip": 4
+    },
+    "falkreath": {
+      "say": "society.nirncraft.say.region.falkreath",
+      "lines": 20,
+      "gossip": 4
+    },
+    "the_rift": {
+      "say": "society.nirncraft.say.region.the_rift",
+      "lines": 20,
+      "gossip": 4
+    },
+    "eastmarch": {
+      "say": "society.nirncraft.say.region.eastmarch",
+      "lines": 20,
+      "gossip": 4
+    },
+    "the_pale": {
+      "say": "society.nirncraft.say.region.the_pale",
+      "lines": 20,
+      "gossip": 4
+    },
+    "winterhold": {
+      "say": "society.nirncraft.say.region.winterhold",
+      "lines": 20,
+      "gossip": 4
+    },
+    "hjaalmarch": {
+      "say": "society.nirncraft.say.region.hjaalmarch",
+      "lines": 20,
+      "gossip": 4
+    },
+    "haafingar": {
+      "say": "society.nirncraft.say.region.haafingar",
+      "lines": 20,
+      "gossip": 4
+    },
+    "the_reach": {
+      "say": "society.nirncraft.say.region.the_reach",
+      "lines": 20,
+      "gossip": 4
+    },
+    "daggerfall": {
+      "say": "society.nirncraft.say.region.daggerfall",
+      "lines": 20,
+      "gossip": 4
+    },
+    "anticlere": {
+      "say": "society.nirncraft.say.region.anticlere",
+      "lines": 20,
+      "gossip": 4
+    },
+    "dwynnen": {
+      "say": "society.nirncraft.say.region.dwynnen",
+      "lines": 20,
+      "gossip": 4
+    },
+    "wayrest": {
+      "say": "society.nirncraft.say.region.wayrest",
+      "lines": 20,
+      "gossip": 4
+    },
+    "wrothgar": {
+      "say": "society.nirncraft.say.region.wrothgar",
+      "lines": 20,
+      "gossip": 4
+    },
+    "glenumbra": {
+      "say": "society.nirncraft.say.region.glenumbra",
+      "lines": 20,
+      "gossip": 4
+    },
+    "rivenspire": {
+      "say": "society.nirncraft.say.region.rivenspire",
+      "lines": 20,
+      "gossip": 4
+    },
+    "stormhaven": {
+      "say": "society.nirncraft.say.region.stormhaven",
+      "lines": 20,
+      "gossip": 4
+    },
+    "bjoulsae": {
+      "say": "society.nirncraft.say.region.bjoulsae",
+      "lines": 20,
+      "gossip": 4
+    },
+    "sentinel": {
+      "say": "society.nirncraft.say.region.sentinel",
+      "lines": 20,
+      "gossip": 4
+    },
+    "alikr_desert": {
+      "say": "society.nirncraft.say.region.alikr_desert",
+      "lines": 20,
+      "gossip": 4
+    },
+    "bangkorai": {
+      "say": "society.nirncraft.say.region.bangkorai",
+      "lines": 20,
+      "gossip": 4
+    },
+    "dragontail": {
+      "say": "society.nirncraft.say.region.dragontail",
+      "lines": 20,
+      "gossip": 4
+    },
+    "craglorn": {
+      "say": "society.nirncraft.say.region.craglorn",
+      "lines": 20,
+      "gossip": 4
+    },
+    "hews_bane": {
+      "say": "society.nirncraft.say.region.hews_bane",
+      "lines": 20,
+      "gossip": 4
+    },
+    "stros_mkai": {
+      "say": "society.nirncraft.say.region.stros_mkai",
+      "lines": 20,
+      "gossip": 4
+    },
+    "jerall_mountains": {
+      "say": "society.nirncraft.say.region.jerall_mountains",
+      "lines": 20,
+      "gossip": 4
+    },
+    "colovian_highlands": {
+      "say": "society.nirncraft.say.region.colovian_highlands",
+      "lines": 20,
+      "gossip": 4
+    },
+    "heartlands": {
+      "say": "society.nirncraft.say.region.heartlands",
+      "lines": 20,
+      "gossip": 4
+    },
+    "great_forest": {
+      "say": "society.nirncraft.say.region.great_forest",
+      "lines": 20,
+      "gossip": 4
+    },
+    "nibenay_basin": {
+      "say": "society.nirncraft.say.region.nibenay_basin",
+      "lines": 20,
+      "gossip": 4
+    },
+    "west_weald": {
+      "say": "society.nirncraft.say.region.west_weald",
+      "lines": 20,
+      "gossip": 4
+    },
+    "gold_coast": {
+      "say": "society.nirncraft.say.region.gold_coast",
+      "lines": 20,
+      "gossip": 4
+    },
+    "nibenay_valley": {
+      "say": "society.nirncraft.say.region.nibenay_valley",
+      "lines": 20,
+      "gossip": 4
+    },
+    "blackwood": {
+      "say": "society.nirncraft.say.region.blackwood",
+      "lines": 20,
+      "gossip": 4
+    },
+    "stonefalls": {
+      "say": "society.nirncraft.say.region.stonefalls",
+      "lines": 20,
+      "gossip": 4
+    },
+    "deshaan": {
+      "say": "society.nirncraft.say.region.deshaan",
+      "lines": 20,
+      "gossip": 4
+    },
+    "molag_amur": {
+      "say": "society.nirncraft.say.region.molag_amur",
+      "lines": 20,
+      "gossip": 4
+    },
+    "telvannis": {
+      "say": "society.nirncraft.say.region.telvannis",
+      "lines": 20,
+      "gossip": 4
+    },
+    "sheogorad": {
+      "say": "society.nirncraft.say.region.sheogorad",
+      "lines": 20,
+      "gossip": 4
+    },
+    "vvardenfell_ashlands": {
+      "say": "society.nirncraft.say.region.vvardenfell_ashlands",
+      "lines": 20,
+      "gossip": 4
+    },
+    "grazelands": {
+      "say": "society.nirncraft.say.region.grazelands",
+      "lines": 20,
+      "gossip": 4
+    },
+    "azuras_coast": {
+      "say": "society.nirncraft.say.region.azuras_coast",
+      "lines": 20,
+      "gossip": 4
+    },
+    "west_gash": {
+      "say": "society.nirncraft.say.region.west_gash",
+      "lines": 20,
+      "gossip": 4
+    },
+    "bitter_coast": {
+      "say": "society.nirncraft.say.region.bitter_coast",
+      "lines": 20,
+      "gossip": 4
+    },
+    "ascadian_isles": {
+      "say": "society.nirncraft.say.region.ascadian_isles",
+      "lines": 20,
+      "gossip": 4
+    },
+    "red_mountain": {
+      "say": "society.nirncraft.say.region.red_mountain",
+      "lines": 20,
+      "gossip": 4
+    },
+    "solstheim": {
+      "say": "society.nirncraft.say.region.solstheim",
+      "lines": 20,
+      "gossip": 4
+    },
+    "shadowfen": {
+      "say": "society.nirncraft.say.region.shadowfen",
+      "lines": 20,
+      "gossip": 4
+    },
+    "stormhold": {
+      "say": "society.nirncraft.say.region.stormhold",
+      "lines": 20,
+      "gossip": 4
+    },
+    "helstrom": {
+      "say": "society.nirncraft.say.region.helstrom",
+      "lines": 20,
+      "gossip": 4
+    },
+    "gideon": {
+      "say": "society.nirncraft.say.region.gideon",
+      "lines": 20,
+      "gossip": 4
+    },
+    "lilmoth": {
+      "say": "society.nirncraft.say.region.lilmoth",
+      "lines": 20,
+      "gossip": 4
+    },
+    "murkmire": {
+      "say": "society.nirncraft.say.region.murkmire",
+      "lines": 20,
+      "gossip": 4
+    },
+    "anequina": {
+      "say": "society.nirncraft.say.region.anequina",
+      "lines": 20,
+      "gossip": 4
+    },
+    "rimmen": {
+      "say": "society.nirncraft.say.region.rimmen",
+      "lines": 20,
+      "gossip": 4
+    },
+    "torval": {
+      "say": "society.nirncraft.say.region.torval",
+      "lines": 20,
+      "gossip": 4
+    },
+    "pellitine": {
+      "say": "society.nirncraft.say.region.pellitine",
+      "lines": 20,
+      "gossip": 4
+    },
+    "senchal": {
+      "say": "society.nirncraft.say.region.senchal",
+      "lines": 20,
+      "gossip": 4
+    },
+    "malabal_tor": {
+      "say": "society.nirncraft.say.region.malabal_tor",
+      "lines": 20,
+      "gossip": 4
+    },
+    "reapers_march": {
+      "say": "society.nirncraft.say.region.reapers_march",
+      "lines": 20,
+      "gossip": 4
+    },
+    "grahtwood": {
+      "say": "society.nirncraft.say.region.grahtwood",
+      "lines": 20,
+      "gossip": 4
+    },
+    "greenshade": {
+      "say": "society.nirncraft.say.region.greenshade",
+      "lines": 20,
+      "gossip": 4
+    },
+    "summerset_isle": {
+      "say": "society.nirncraft.say.region.summerset_isle",
+      "lines": 20,
+      "gossip": 4
+    },
+    "auridon": {
+      "say": "society.nirncraft.say.region.auridon",
+      "lines": 20,
+      "gossip": 4
+    },
+    "artaeum": {
+      "say": "society.nirncraft.say.region.artaeum",
+      "lines": 20,
+      "gossip": 4
+    },
+    "ice_waste": {
+      "say": "society.nirncraft.say.region.ice_waste",
+      "lines": 20,
+      "gossip": 4
+    },
+    "frozen_forest": {
+      "say": "society.nirncraft.say.region.frozen_forest",
+      "lines": 20,
+      "gossip": 4
+    },
+    "tsaesci": {
+      "say": "society.nirncraft.say.region.tsaesci",
+      "lines": 20,
+      "gossip": 4
+    },
+    "kamal": {
+      "say": "society.nirncraft.say.region.kamal",
+      "lines": 20,
+      "gossip": 4
+    },
+    "tang_mo": {
+      "say": "society.nirncraft.say.region.tang_mo",
+      "lines": 20,
+      "gossip": 4
+    },
+    "ka_po_tun": {
+      "say": "society.nirncraft.say.region.ka_po_tun",
+      "lines": 20,
+      "gossip": 4
+    },
+    "yokudan_desert": {
+      "say": "society.nirncraft.say.region.yokudan_desert",
+      "lines": 20,
+      "gossip": 4
+    },
+    "sunken_isles": {
+      "say": "society.nirncraft.say.region.sunken_isles",
+      "lines": 20,
+      "gossip": 4
+    },
+    "maormer_isles": {
+      "say": "society.nirncraft.say.region.maormer_isles",
+      "lines": 20,
+      "gossip": 4
+    },
+    "coral_kingdom": {
+      "say": "society.nirncraft.say.region.coral_kingdom",
+      "lines": 20,
+      "gossip": 4
+    },
+    "open_ocean": {
+      "say": "society.nirncraft.say.region.open_ocean",
+      "lines": 6,
+      "gossip": 4
+    },
+    "iliac_bay": {
+      "say": "society.nirncraft.say.region.iliac_bay",
+      "lines": 6,
+      "gossip": 4
+    },
+    "topal_bay": {
+      "say": "society.nirncraft.say.region.topal_bay",
+      "lines": 6,
+      "gossip": 4
+    },
+    "inner_sea": {
+      "say": "society.nirncraft.say.region.inner_sea",
+      "lines": 6,
+      "gossip": 4
+    },
+    "sea_of_ghosts": {
+      "say": "society.nirncraft.say.region.sea_of_ghosts",
+      "lines": 6,
+      "gossip": 4
+    },
+    "abecean_sea": {
+      "say": "society.nirncraft.say.region.abecean_sea",
+      "lines": 6,
+      "gossip": 4
+    },
+    "padomaic_ocean": {
+      "say": "society.nirncraft.say.region.padomaic_ocean",
+      "lines": 6,
+      "gossip": 4
+    },
+    "eltheric_ocean": {
+      "say": "society.nirncraft.say.region.eltheric_ocean",
+      "lines": 6,
+      "gossip": 4
+    }
+  },
+  "gossip": {
+    "skyrim": 6,
+    "cyrodiil": 6,
+    "morrowind": 6,
+    "black_marsh": 6,
+    "elsweyr": 6,
+    "valenwood": 6,
+    "summerset": 6,
+    "hammerfell": 6,
+    "high_rock": 6,
+    "atmora": 6,
+    "akavir": 6,
+    "yokuda": 6,
+    "pyandonea": 6,
+    "thras": 6,
+    "foreign": 6,
+    "whiterun": 4,
+    "falkreath": 4,
+    "the_rift": 4,
+    "eastmarch": 4,
+    "the_pale": 4,
+    "winterhold": 4,
+    "hjaalmarch": 4,
+    "haafingar": 4,
+    "the_reach": 4,
+    "daggerfall": 4,
+    "anticlere": 4,
+    "dwynnen": 4,
+    "wayrest": 4,
+    "wrothgar": 4,
+    "glenumbra": 4,
+    "rivenspire": 4,
+    "stormhaven": 4,
+    "bjoulsae": 4,
+    "sentinel": 4,
+    "alikr_desert": 4,
+    "bangkorai": 4,
+    "dragontail": 4,
+    "craglorn": 4,
+    "hews_bane": 4,
+    "stros_mkai": 4,
+    "jerall_mountains": 4,
+    "colovian_highlands": 4,
+    "heartlands": 4,
+    "great_forest": 4,
+    "nibenay_basin": 4,
+    "west_weald": 4,
+    "gold_coast": 4,
+    "nibenay_valley": 4,
+    "blackwood": 4,
+    "stonefalls": 4,
+    "deshaan": 4,
+    "molag_amur": 4,
+    "telvannis": 4,
+    "sheogorad": 4,
+    "vvardenfell_ashlands": 4,
+    "grazelands": 4,
+    "azuras_coast": 4,
+    "west_gash": 4,
+    "bitter_coast": 4,
+    "ascadian_isles": 4,
+    "red_mountain": 4,
+    "solstheim": 4,
+    "shadowfen": 4,
+    "stormhold": 4,
+    "helstrom": 4,
+    "gideon": 4,
+    "lilmoth": 4,
+    "murkmire": 4,
+    "anequina": 4,
+    "rimmen": 4,
+    "torval": 4,
+    "pellitine": 4,
+    "senchal": 4,
+    "malabal_tor": 4,
+    "reapers_march": 4,
+    "grahtwood": 4,
+    "greenshade": 4,
+    "summerset_isle": 4,
+    "auridon": 4,
+    "artaeum": 4,
+    "ice_waste": 4,
+    "frozen_forest": 4,
+    "tsaesci": 4,
+    "kamal": 4,
+    "tang_mo": 4,
+    "ka_po_tun": 4,
+    "yokudan_desert": 4,
+    "sunken_isles": 4,
+    "maormer_isles": 4,
+    "coral_kingdom": 4
+  }
+}

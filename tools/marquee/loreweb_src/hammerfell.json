@@ -31,7 +31,7 @@
         "outro": "The lost city's great cistern drank deep for a moment and then, slowly, began to give. In the far oases the wells rose a hand's breadth. The dune-king's herald is a shadow now, and the account is closed.",
         "boss": {
           "name": "Herald of the Dune-King",
-          "type": "skycraft:sand_serpent",
+          "type": "nirncraft:sand_serpent",
           "hp": 3.4,
           "dmg": 1.5,
           "level": 28
@@ -72,7 +72,7 @@
         "outro": "At the top of the spire I stood on the last panel and understood it. It was not an ending but a stairway. I did not carve my own face; I stepped off it.",
         "boss": {
           "name": "The Last Panel",
-          "type": "skycraft:gargoyle",
+          "type": "nirncraft:gargoyle",
           "hp": 3.2,
           "dmg": 1.5,
           "level": 28
@@ -112,7 +112,7 @@
         "outro": "In the garden under the skylights the palms bent towards me. I carried out one seed and left the gardener's ledger where his heirs could find it. The dead have waited long enough.",
         "boss": {
           "name": "Lord Hubalajad's Steward",
-          "type": "skycraft:necromancer",
+          "type": "nirncraft:necromancer",
           "hp": 3.0,
           "dmg": 1.4,
           "level": 24
@@ -151,7 +151,7 @@
         "outro": "The wind sang through the arches and the torn page lay in my hands, a map of tides with a missing corner. The fifth-year ship is no longer owed. Someone, somewhere, will have to fill the corner.",
         "boss": {
           "name": "The Prow-Keeper",
-          "type": "skycraft:wamasu",
+          "type": "nirncraft:wamasu",
           "hp": 3.2,
           "dmg": 1.4,
           "level": 24

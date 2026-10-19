@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "top": "nirncraft:block/drafting_table_top",
+    "bottom": "nirncraft:block/drafting_table_bottom",
+    "front": "nirncraft:block/drafting_table_front",
+    "side": "nirncraft:block/drafting_table_side"
+  }
+}

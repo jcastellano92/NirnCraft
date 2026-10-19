@@ -15,8 +15,8 @@ import os
 from PIL import Image
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures", "item")
-MODELS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "models", "item")
+TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures", "item")
+MODELS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "models", "item")
 
 T = (0, 0, 0, 0)
 OUT = (0x1E, 0x14, 0x10, 255)
@@ -162,7 +162,7 @@ MOUNT_PAL = {"o": OUT, "Y": rgba(0xF2D060), "y": rgba(0xB89030)}
 
 def model(name, layers):
     with open(os.path.join(MODELS, name + ".json"), "w", encoding="utf-8", newline="\n") as f:
-        json.dump({"parent": "minecraft:item/generated", "textures": {f"layer{i}": "skycraft:item/" + l for i, l in enumerate(layers)}},
+        json.dump({"parent": "minecraft:item/generated", "textures": {f"layer{i}": "nirncraft:item/" + l for i, l in enumerate(layers)}},
                   f, indent=2)
         f.write("\n")
 

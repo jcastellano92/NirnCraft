@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "nirncraft:biome/orange_aspen_checked",
+      "chance": 0.3
+    },
+    {
+      "feature": "nirncraft:biome/tall_golden_aspen_checked",
+      "chance": 0.2
+    },
+    {
+      "feature": "nirncraft:biome/tall_orange_aspen_checked",
+      "chance": 0.1
+    },
+    {
+      "feature": "nirncraft:biome/tall_spruce_checked",
+      "chance": 0.1
+    }
+  ],
+  "default": "nirncraft:biome/golden_aspen_checked"
+}

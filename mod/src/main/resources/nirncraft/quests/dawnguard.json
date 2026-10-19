@@ -1,0 +1,545 @@
+{
+  "line": "dawnguard",
+  "category": "side",
+  "region": "skyrim/the_rift",
+  "speakers": {
+    "valerica": "Valerica",
+    "vyrthur": "Arch-Curate Vyrthur",
+    "harkon_lord": "Harkon"
+  },
+  "npcs": [
+    {
+      "id": "isran",
+      "name": "Isran",
+      "role": "adventurer",
+      "place": "fort_dawnguard",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "The Vigil of Stendarr failed. The Dawnguard won't. Vampires are getting bolder, and somebody has to be bolder still."
+    },
+    {
+      "id": "serana",
+      "name": "Serana",
+      "role": "mage",
+      "place": "dimhollow_crypt",
+      "offset": [
+        0,
+        0
+      ],
+      "female": true,
+      "greet": "I've been asleep a long time. Tell me the world hasn't changed too much. Actually, don't."
+    },
+    {
+      "id": "harkon",
+      "name": "Lord Harkon",
+      "role": "jarl",
+      "place": "castle_volkihar",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "You stand in Castle Volkihar, mortal, and you still have your blood. Consider that a courtesy."
+    },
+    {
+      "id": "dexion",
+      "name": "Dexion Evicus",
+      "role": "priest",
+      "place": "dragon_bridge",
+      "offset": [
+        8,
+        6
+      ],
+      "greet": "A Moth Priest reads the Elder Scrolls, and pays for it with his eyes. I will pay, if the cause is worth it."
+    }
+  ],
+  "relics": [
+    {
+      "id": "elder_scroll_blood",
+      "name": "Elder Scroll (Blood)",
+      "desc": "Serana's scroll. It speaks of a bow, a prophecy, and the sun's death.",
+      "icon": 25
+    },
+    {
+      "id": "ancestor_moth",
+      "name": "Ancestor Moth Swarm",
+      "desc": "Glowing moths drawn from the Ancestor Glade, which let a Moth Priest read a Scroll safely.",
+      "icon": 22
+    },
+    {
+      "id": "elder_scroll_sun",
+      "name": "Elder Scroll (Sun)",
+      "desc": "Valerica's scroll, guarded in the Soul Cairn for an age.",
+      "icon": 25
+    },
+    {
+      "id": "aetherial_bow",
+      "name": "Unstrung Bow of Auriel",
+      "desc": "Auriel's own bow, waiting for its sunlit arrows.",
+      "icon": 21
+    }
+  ],
+  "scenes": {
+    "serana_wakes": [
+      [
+        "narrator",
+        "The stone sarcophagus in the heart of the crypt slides open. A pale woman steps out, blinking, an Elder Scroll strapped to her back."
+      ],
+      [
+        "serana",
+        "Who are you? How long was I in there? Never mind. I need to get home. Castle Volkihar, in the north sea. Will you take me?"
+      ]
+    ],
+    "harkon_gift": [
+      [
+        "harkon",
+        "You returned my daughter. I am in your debt, and I pay my debts. I offer you my blood, the gift of the Vampire Lord."
+      ]
+    ],
+    "soul_cairn": [
+      [
+        "narrator",
+        "A portal of red light opens in the courtyard. Beyond it, purple skies and drifting souls: the Soul Cairn, a realm of Oblivion."
+      ],
+      [
+        "valerica",
+        "Serana? You came. Then Harkon is still chasing that prophecy. I hid the other Scroll here so he could never have it. Take it, and stop him."
+      ]
+    ],
+    "vale": [
+      [
+        "narrator",
+        "Through Darkfall Cave the snow gives way to a hidden valley of waterfalls and pale trees, lit by a sun that never seems to set."
+      ],
+      [
+        "vyrthur",
+        "You've come for the bow. Many came. The Snow Elves made sure none returned."
+      ]
+    ],
+    "harkon_falls": [
+      [
+        "harkon_lord",
+        "No... the prophecy was mine... the sun would be mine..."
+      ],
+      [
+        "serana",
+        "It's over. He was my father, and I'm glad it's over. Let's go home. Wherever that is now."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "dg_dawnguard",
+      "title": "Dawnguard",
+      "start": "auto",
+      "requires": [
+        "level:10"
+      ],
+      "desc": "A guard told me of a new order of vampire hunters, the Dawnguard, gathering at an old fort in the Dayspring Canyon near Riften. Vampires are bold enough to attack towns now.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "fort_dawnguard",
+          "text": "Travel to Fort Dawnguard"
+        },
+        {
+          "type": "talk",
+          "npc": "isran",
+          "text": "Speak with Isran",
+          "topic": "I want to join the Dawnguard.",
+          "reply": "Good, because I'm not turning anyone away. There's a crypt, Dimhollow, where the vampires have been digging. I want to know why. Go."
+        },
+        {
+          "type": "clear",
+          "place": "fort_dawnguard",
+          "text": "Help drive off the vampires testing the fort's walls",
+          "spawn": [
+            {
+              "type": "nirncraft:vampire",
+              "count": 3,
+              "name": "Volkihar Vampire"
+            },
+            {
+              "type": "nirncraft:death_hound",
+              "count": 2
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 200,
+        "flags": [
+          "dawnguard"
+        ],
+        "items": [
+          {
+            "item": "minecraft:crossbow",
+            "name": "Dawnguard Crossbow",
+            "enchant": {
+              "quick_charge": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
+    },
+    {
+      "id": "dg_awakening",
+      "title": "Awakening",
+      "start": "auto",
+      "requires": [
+        "quest:dg_dawnguard"
+      ],
+      "desc": "Isran sent me to Dimhollow Crypt to find out what the vampires are digging for.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "dimhollow_crypt",
+          "text": "Travel to Dimhollow Crypt"
+        },
+        {
+          "type": "clear",
+          "place": "dimhollow_crypt",
+          "placement": "structure",
+          "text": "Fight through the crypt",
+          "spawn": [
+            {
+              "type": "nirncraft:vampire",
+              "count": 2
+            },
+            {
+              "type": "nirncraft:gargoyle",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "serana",
+          "text": "Open the sealed sarcophagus",
+          "topic": "Who are you?",
+          "reply": "Serana. Please, no more questions. I need to get home to Castle Volkihar. My family will want to know I'm awake.",
+          "actions": "scene:serana_wakes"
+        },
+        {
+          "type": "escort",
+          "npc": "serana",
+          "place": "castle_volkihar",
+          "text": "Take Serana home to Castle Volkihar"
+        }
+      ],
+      "rewards": {
+        "gold": 300
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
+    },
+    {
+      "id": "dg_bloodline",
+      "title": "Bloodline",
+      "start": "auto",
+      "requires": [
+        "quest:dg_awakening"
+      ],
+      "desc": "Serana's family are the vampires of Castle Volkihar, and her father, Lord Harkon, has something to offer me.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "harkon",
+          "text": "Hear Lord Harkon's offer",
+          "actions": "scene:harkon_gift",
+          "choices": [
+            {
+              "label": "I accept your gift.",
+              "reply": "Then drink, and rise as a lord of the night. Serana will guide you. We have a prophecy to fulfill.",
+              "actions": "flag:dg_vampire;vampire_lord;relocate:serana:fort_dawnguard"
+            },
+            {
+              "label": "I refuse. I'm Dawnguard.",
+              "reply": "A pity. Leave my hall while I'm still in a generous mood. Serana stays with me.",
+              "actions": "flag:dg_hunter;relocate:serana:fort_dawnguard"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "isran",
+          "text": "Report to Isran at Fort Dawnguard",
+          "topic": "Volkihar's lord wants to blot out the sun.",
+          "reply": "A prophecy, and an Elder Scroll, and a vampire girl who wants to help us. Fine. I'll take any weapon I can get. Find a Moth Priest to read that Scroll."
+        }
+      ],
+      "rewards": {
+        "gold": 300
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
+    },
+    {
+      "id": "dg_prophet",
+      "title": "Prophet",
+      "start": "auto",
+      "requires": [
+        "quest:dg_bloodline"
+      ],
+      "desc": "Serana's Elder Scroll holds part of Harkon's prophecy. A Moth Priest, Dexion Evicus, is traveling near Dragon Bridge and could read it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "dragon_bridge",
+          "text": "Find the Moth Priest near Dragon Bridge"
+        },
+        {
+          "type": "clear",
+          "place": "dragon_bridge",
+          "offset": [
+            8,
+            6
+          ],
+          "text": "Kill the vampires holding the Moth Priest",
+          "spawn": [
+            {
+              "type": "nirncraft:vampire",
+              "count": 3,
+              "name": "Vampire Thrall Master"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "dexion",
+          "text": "Free Dexion Evicus",
+          "topic": "You're free. We need you to read a Scroll.",
+          "reply": "Free? And a Scroll to read, my reward for it. Take me to your fort, and bring me an ancestor moth swarm from the glade near Falkreath; I'll need their light."
+        },
+        {
+          "type": "escort",
+          "npc": "dexion",
+          "place": "fort_dawnguard",
+          "text": "Escort Dexion to Fort Dawnguard"
+        },
+        {
+          "type": "retrieve",
+          "place": "ancestor_glade",
+          "relic": "ancestor_moth",
+          "radius": 16,
+          "text": "Gather ancestor moths in the Ancestor Glade"
+        },
+        {
+          "type": "deliver",
+          "npc": "dexion",
+          "relic": "ancestor_moth",
+          "text": "Bring the moths to Dexion",
+          "topic": "The moths, as you asked.",
+          "reply": "Then I read. 'Amongst the Vale lies the bow of Auriel, which with blood made dark will darken the sun.' And there is a second Scroll. It lies with Serana's mother.",
+          "actions": "relic:elder_scroll_blood"
+        }
+      ],
+      "rewards": {
+        "gold": 400
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
+    },
+    {
+      "id": "dg_chasing_echoes",
+      "title": "Chasing Echoes",
+      "start": "auto",
+      "requires": [
+        "quest:dg_prophet"
+      ],
+      "desc": "Serana's mother, Valerica, fled into the Soul Cairn with the second Elder Scroll. The portal is in the courtyard of Castle Volkihar.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "castle_volkihar",
+          "radius": 20,
+          "text": "Open the portal in Castle Volkihar's courtyard",
+          "actions": "scene:soul_cairn;teleport_dim:nirncraft:soul_cairn"
+        },
+        {
+          "type": "dimension",
+          "dim": "nirncraft:soul_cairn",
+          "text": "Enter the Soul Cairn"
+        },
+        {
+          "type": "go",
+          "place": "valerica_refuge",
+          "radius": 40,
+          "text": "Cross the Soul Cairn to Valerica's refuge"
+        },
+        {
+          "type": "kill",
+          "place": "valerica_refuge",
+          "text": "Defeat the Keeper guarding Valerica",
+          "spawn": [
+            {
+              "type": "nirncraft:keeper",
+              "name": "Keeper of the Soul Cairn",
+              "target": true,
+              "boss": true,
+              "hp": 2.0
+            },
+            {
+              "type": "nirncraft:boneman",
+              "count": 2
+            }
+          ],
+          "actions": "relic:elder_scroll_sun;flight:castle_volkihar",
+          "journal": "With the Keeper destroyed, Valerica gave up the second Elder Scroll, and I left the Soul Cairn before it could keep me."
+        }
+      ],
+      "rewards": {
+        "gold": 500,
+        "perks": 1
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
+    },
+    {
+      "id": "dg_touching_the_sky",
+      "title": "Touching the Sky",
+      "start": "auto",
+      "requires": [
+        "quest:dg_chasing_echoes"
+      ],
+      "desc": "Both Scrolls point to the Forgotten Vale, a hidden valley beyond Darkfall Cave, where the Snow Elves kept Auriel's bow.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "darkfall_cave",
+          "text": "Travel to Darkfall Cave"
+        },
+        {
+          "type": "go",
+          "place": "forgotten_vale",
+          "text": "Find the way into the Forgotten Vale",
+          "actions": "scene:vale"
+        },
+        {
+          "type": "clear",
+          "place": "forgotten_vale",
+          "text": "Fight through the Falmer of the Vale",
+          "spawn": [
+            {
+              "type": "nirncraft:falmer",
+              "count": 4
+            },
+            {
+              "type": "nirncraft:frostbite_spider",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "forgotten_vale",
+          "text": "Defeat Arch-Curate Vyrthur",
+          "spawn": [
+            {
+              "type": "nirncraft:falmer",
+              "name": "Arch-Curate Vyrthur",
+              "target": true,
+              "boss": true,
+              "hp": 3.0
+            }
+          ],
+          "actions": "relic:aetherial_bow"
+        }
+      ],
+      "rewards": {
+        "gold": 600
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
+    },
+    {
+      "id": "dg_kindred_judgment",
+      "title": "Kindred Judgment",
+      "start": "auto",
+      "requires": [
+        "quest:dg_touching_the_sky"
+      ],
+      "desc": "With Auriel's bow, Harkon can be stopped before he blots out the sun. Castle Volkihar is where it ends.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "castle_volkihar",
+          "text": "Storm Castle Volkihar",
+          "actions": "summon:serana"
+        },
+        {
+          "type": "clear",
+          "place": "castle_volkihar",
+          "text": "Fight through Harkon's court",
+          "spawn": [
+            {
+              "type": "nirncraft:vampire",
+              "count": 4,
+              "name": "Volkihar Vampire"
+            },
+            {
+              "type": "nirncraft:death_hound",
+              "count": 2
+            },
+            {
+              "type": "nirncraft:gargoyle",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "castle_volkihar",
+          "text": "Destroy Harkon",
+          "spawn": [
+            {
+              "type": "nirncraft:vampire_lord",
+              "name": "Harkon, Vampire Lord",
+              "target": true,
+              "boss": true,
+              "hp": 4.0,
+              "dmg": 1.3
+            }
+          ],
+          "actions": "retire:harkon;take:aetherial_bow;scene:harkon_falls"
+        },
+        {
+          "type": "talk",
+          "npc": "serana",
+          "text": "Speak with Serana",
+          "topic": "It's over.",
+          "reply": "It is. Keep the bow. It's yours by every right that matters. And if you need a companion who doesn't mind the dark, you know where to find me."
+        }
+      ],
+      "rewards": {
+        "gold": 2000,
+        "title": "dawnguard_champion",
+        "flags": [
+          "harkon_slain"
+        ],
+        "items": [
+          "nirncraft:auriels_bow"
+        ]
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
+    }
+  ]
+}

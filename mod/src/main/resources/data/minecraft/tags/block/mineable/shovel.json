@@ -1,10 +1,10 @@
 {
   "replace": false,
   "values": [
-    "skycraft:ash_block",
-    "skycraft:ash_layer",
-    "skycraft:dune_sand",
-    "skycraft:deadlands_ash",
-    "skycraft:soul_ash"
+    "nirncraft:ash_block",
+    "nirncraft:ash_layer",
+    "nirncraft:dune_sand",
+    "nirncraft:deadlands_ash",
+    "nirncraft:soul_ash"
   ]
 }

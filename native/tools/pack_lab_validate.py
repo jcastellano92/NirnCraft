@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate every program of the Skycraft Aether shader pack with glslangValidator, the way Iris would build it:
+"""Validate every program of the NirnCraft Atlas shader pack with glslangValidator, the way Iris would build it:
 includes resolved from the pack root, and settings.glsl rewritten per quality profile (shaders.properties
 profile.LOW .. profile.ULTRA), so every tier's code path compiles, not only the defaults.
 
@@ -19,8 +19,8 @@ import tempfile
 
 HERE = pathlib.Path(__file__).resolve()
 ROOT = HERE.parents[2]
-PACK = ROOT / "shaderpack" / "SkycraftAether" / "shaders"
-DEFAULT_GLSLANG = pathlib.Path(r"F:\Projects\Personal\Skycraft\toolchains\VulkanSDK\1.4.357.0\Bin\glslangValidator.exe")
+PACK = ROOT / "shaderpack" / "InfiniteATLAS" / "shaders"
+DEFAULT_GLSLANG = next((d / "toolchains" for d in pathlib.Path(__file__).resolve().parents if (d / "toolchains").is_dir()), pathlib.Path("toolchains")) / "VulkanSDK/1.4.357.0/Bin/glslangValidator.exe"
 INCLUDE = re.compile(r'^\s*#include\s+"([^"]+)"\s*$')
 
 

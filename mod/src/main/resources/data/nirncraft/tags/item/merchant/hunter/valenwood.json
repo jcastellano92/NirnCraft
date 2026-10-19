@@ -1,0 +1,35 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:raw_venison",
+      "required": false
+    },
+    {
+      "id": "nirncraft:venison_chop",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leather_strips",
+      "required": false
+    },
+    "minecraft:leather",
+    "minecraft:bone",
+    {
+      "id": "nirncraft:indrik_feather",
+      "required": false
+    },
+    {
+      "id": "nirncraft:large_antlers",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_antlers",
+      "required": false
+    }
+  ]
+}

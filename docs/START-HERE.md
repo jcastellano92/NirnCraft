@@ -6,12 +6,12 @@ Historical Forge 1.20.1 / Java 17 descriptions below remain project history. Pre
 the native port's full build, server and visual acceptance gates must pass independently. Multiplayer uses normal
 Minecraft server lists and LAN; Essential/e4mc are disabled.
 
-**If you are a new session, read this first.** It takes five minutes and tells you what Skycraft is, where everything
+**If you are a new session, read this first.** It takes five minutes and tells you what NirnCraft is, where everything
 lives, where the work stands, what to run next and the rules you must keep.
 
 ## What the project is
 
-Skycraft is a Skyrim total conversion for Minecraft 1.20.1 Forge (Java 17, official Mojang mappings), grown into the
+NirnCraft is a Skyrim total conversion for Minecraft 1.20.1 Forge (Java 17, official Mojang mappings), grown into the
 whole of Tamriel and the lands around it: its own terrain, biomes, micro-biomes, roads, towns, NPCs, dungeons, cave
 networks, creatures, quests, magic, music, skybox/weather, and UI, with no third-party content mods (performance and
 library mods are fine). It ships as a Prism Launcher instance. The owner's goal: every province as full, unique and
@@ -31,7 +31,7 @@ real loaded world, visual review, then saved cameras. Generation changes invalid
 
 | What | Where |
 | --- | --- |
-| The mod (Java, resources, lang) | `mod/` (`mod/src/main/java/com/skycraft/<module>`, `mod/src/main/resources/skycraft/`) |
+| The mod (Java, resources, lang) | `mod/` (`mod/src/main/java/com/nirncraft/<module>`, `mod/src/main/resources/nirncraft/`) |
 | Generators and QA tools | `tools/` (`tools/qa/qa.ps1` is the harness; `tools/worldgen/`, `tools/marquee/`, `tools/bake/`, `tools/dev/`) |
 | **The master plan, audit & roadmap (`T1`–`T12`)** | [`docs/world/WORLD-PLAN.md`](world/WORLD-PLAN.md) (Sections 7, 8, 9, and 10) |
 | **The rulebook** | [`docs/world/DESIGN-PRINCIPLES.md`](world/DESIGN-PRINCIPLES.md) (world building first, the 11-layer sheet, the measured Skyrim floor) |
@@ -91,7 +91,7 @@ broker, fast loop, saving progress), and the phase prompts `docs/prompts/VT0-fou
 5. **Keep / amplify / replace** legacy sources; **source precedence**: Skyrim, Oblivion and Morrowind positions are
    canonical over Daggerfall and Arena.
 6. **The fast loop.** Iterate with Tier 0 JUnit tests (`tools\qa\qa.ps1 -Unit`) and the persistent dev server
-   (`tools\dev\devserver.ps1 hotswap|run`, `/skycraft-dev reload`, `/skycraft-dev regen`); run the full gates once per
+   (`tools\dev\devserver.ps1 hotswap|run`, `/nirncraft-dev reload`, `/nirncraft-dev regen`); run the full gates once per
    phase (`tools\qa\qa.ps1 -Server -Rebake`). **Live client**: agents may use only the authorised autotest Prism
    instance (`docs/LIVE-WORLD-PREVIEW.md`), and only through the live client broker
    (`docs/world/VISUAL-TARGETS-PLAN.md` 5.1): one live client and one dev server at a time, jobs queued and batched.

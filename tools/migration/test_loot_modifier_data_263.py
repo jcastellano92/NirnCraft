@@ -8,7 +8,7 @@ m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 
 class LootModifierDataTest(unittest.TestCase):
     def test_nested_block_state_filter_keeps_crop_maturity_and_modifier_condition(self):
-        old = {"type":"skycraft:add_table","table":"skycraft:harvest/saltrice","conditions":[
+        old = {"type":"nirncraft:add_table","table":"nirncraft:harvest/saltrice","conditions":[
             {"condition":"minecraft:block_state_property","block":"minecraft:wheat","properties":{"age":"7"}},
             {"condition":"minecraft:random_chance","chance":0.1}]}
         before = copy.deepcopy(old); converted = m.convert(old)

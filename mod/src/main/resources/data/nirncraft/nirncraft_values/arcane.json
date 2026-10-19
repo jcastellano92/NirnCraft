@@ -1,0 +1,24 @@
+{
+  "values": {
+    "nirncraft:soul_gem_petty": 10,
+    "nirncraft:soul_gem_lesser": 25,
+    "nirncraft:soul_gem_common": 50,
+    "nirncraft:soul_gem_greater": 100,
+    "nirncraft:soul_gem_grand": 200,
+    "nirncraft:soul_gem_black": 250,
+    "nirncraft:azuras_star": 1500,
+    "nirncraft:arcane_enchanter": 300,
+    "nirncraft:alchemy_lab": 250,
+    "nirncraft:salt_pile": 2,
+    "nirncraft:nightshade": 8,
+    "nirncraft:deathbell": 4,
+    "nirncraft:nirnroot": 10,
+    "nirncraft:frost_mirriam": 1,
+    "nirncraft:void_salts": 125,
+    "nirncraft:fire_salts": 50,
+    "nirncraft:frost_salts": 100,
+    "nirncraft:vampire_dust": 25,
+    "nirncraft:bear_claws": 2,
+    "nirncraft:hawk_feather": 15
+  }
+}

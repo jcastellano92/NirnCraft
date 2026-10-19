@@ -1,0 +1,141 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 3,
+        "max": 6
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 14,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 10,
+              "max": 60
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 6,
+          "modifier": {
+            "kind": "weapon",
+            "enchant_chance": 0.1,
+            "quality_chance": 0.2,
+            "type": "nirncraft:regional_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_chestplate",
+          "weight": 4,
+          "modifier": {
+            "kind": "armor",
+            "enchant_chance": 0.1,
+            "quality_chance": 0.2,
+            "type": "nirncraft:regional_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arrow",
+          "weight": 6,
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 5,
+                "max": 14
+              },
+              "type": "minecraft:set_count"
+            },
+            {
+              "kind": "arrow",
+              "type": "nirncraft:leveled_gear"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:lockpick",
+          "weight": 4,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 4
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:skooma",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 4,
+          "modifier": {
+            "poison": false,
+            "type": "nirncraft:skyrim_potion"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "nirncraft:chests/gold"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 40,
+          "modifier": {
+            "tag": "{book:\"explore_lead_bandit_orders\",nirncraft_value:2}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:treasure_map",
+          "weight": 20,
+          "modifier": {
+            "type": "nirncraft:explore_treasure_map"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 40
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 5,
+          "value": "nirncraft:chests/skill_books"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 95
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:explore/lookout"
+}

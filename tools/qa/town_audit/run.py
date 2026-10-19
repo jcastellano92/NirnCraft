@@ -2,8 +2,8 @@
 
 usage: py -3 -I tools/qa/town_audit/run.py [--world <world_dir>] [--no-world]
 
-Reads the baked street plan (mod/src/main/resources/skycraft/baked/streetplan.bin) and the places; no server is booted.
-With a saved world (default mod/run/world, or --world / SKYCRAFT_WORLD) it also flood-fills Whiterun and Helgen over the
+Reads the baked street plan (mod/src/main/resources/nirncraft/baked/streetplan.bin) and the places; no server is booted.
+With a saved world (default mod/run/world, or --world / NIRNCRAFT_WORLD) it also flood-fills Whiterun and Helgen over the
 generated blocks (world_truth).  Intermediate files go to tools/qa/out/town_audit/ (gitignored).
 Steps: plan_audit.py (walk raster, key buildings, props, scatter, repeats) -> budget.py (free lots) -> gates.py (gate and
 road ends) -> [bfs_truth.py + truth_summary.py per settlement in the world] -> make_json.py (rows, npc jobs) -> final.py.
@@ -29,12 +29,12 @@ def main():
     world = None
     if '--world' in argv:
         world = argv[argv.index('--world') + 1]
-        os.environ['SKYCRAFT_WORLD'] = world
+        os.environ['NIRNCRAFT_WORLD'] = world
     step('plan_audit.py')
     step('budget.py')
     step('gates.py')
     if '--no-world' not in argv:
-        w = world or os.environ.get('SKYCRAFT_WORLD') or os.path.join(HERE, '..', '..', '..', 'mod', 'run', 'world')
+        w = world or os.environ.get('NIRNCRAFT_WORLD') or os.path.join(HERE, '..', '..', '..', 'mod', 'run', 'world')
         if os.path.isdir(os.path.join(w, 'region')):
             step('bfs_truth.py', 'whiterun', '175')
             step('bfs_truth.py', 'helgen', '90')

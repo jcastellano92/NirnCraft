@@ -3,12 +3,12 @@
 
   assets/minecraft/textures/environment/celestial/moon/*.png   transparent native26.3 vanilla moon overrides
   assets/minecraft/textures/environment/moon_phases.png   preserved legacy transparent moon override
-  assets/skycraft/textures/environment/{masser,secunda}_phases.png 16 phases, 4x4, baked by bake_lunar.py
-  assets/skycraft/textures/environment/masser_halo.png    faint shader-off lunar scattering fallback
-  assets/skycraft/textures/environment/galaxy.png         horizontally tiling galaxy band
-  assets/skycraft/textures/environment/clouds.png         cloud sprite atlas (4x4) for atmosphere.client.CloudRenderer
+  assets/nirncraft/textures/environment/{masser,secunda}_phases.png 16 phases, 4x4, baked by bake_lunar.py
+  assets/nirncraft/textures/environment/masser_halo.png    faint shader-off lunar scattering fallback
+  assets/nirncraft/textures/environment/galaxy.png         horizontally tiling galaxy band
+  assets/nirncraft/textures/environment/clouds.png         cloud sprite atlas (4x4) for atmosphere.client.CloudRenderer
                                                           (`atmosphere.py clouds` rewrites only this one)
-  assets/skycraft/textures/particle/*.png + particles/*.json  atmospheric particle sprites (visual package):
+  assets/nirncraft/textures/particle/*.png + particles/*.json  atmospheric particle sprites (visual package):
       snowflake, ash_flake, ember, sand_dust, falling_leaf, firefly, frost_breath, marsh_wisp, dust_mote
 
 Lunar atlases use public NASA LROC/LOLA data with fictional-body tints; see bake_lunar.py and lunar_sources.txt.
@@ -21,10 +21,10 @@ import numpy as np
 from PIL import Image
 
 ROOT = pathlib.Path(__file__).resolve().parents[2] / "mod/src/main/resources/assets"
-SKY = ROOT / "skycraft/textures/environment"
+SKY = ROOT / "nirncraft/textures/environment"
 VANILLA = ROOT / "minecraft/textures/environment"
-PARTICLE_TEX = ROOT / "skycraft/textures/particle"
-PARTICLE_DEF = ROOT / "skycraft/particles"
+PARTICLE_TEX = ROOT / "nirncraft/textures/particle"
+PARTICLE_DEF = ROOT / "nirncraft/particles"
 
 
 def periodic_noise(h, w, rng, falloff=1.8, low=1.0):
@@ -304,7 +304,7 @@ def particles():
         for i, img in enumerate(imgs):
             tex = f"{name}_{i}"
             Image.fromarray(img, "RGBA").save(PARTICLE_TEX / f"{tex}.png")
-            names.append(f"skycraft:{tex}")
+            names.append(f"nirncraft:{tex}")
         (PARTICLE_DEF / f"{name}.json").write_text(json.dumps({"textures": names}, indent=2) + "\n")
     print("wrote", len(sprites), "particle sprite sets to", PARTICLE_TEX)
 

@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/tsun_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 13148232
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 9082016
+      }
+    ]
+  }
+}

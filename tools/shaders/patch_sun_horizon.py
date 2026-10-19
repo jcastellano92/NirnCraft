@@ -1,5 +1,5 @@
 """
-Compatibility cleanup for Skycraft's Complementary patch.
+Compatibility cleanup for NirnCraft's Complementary patch.
 
 Restores the physical solar elevation in older patched packs. A camera-local terrain
 horizon must not shift the sun, sky palette, or all world lighting. Terrain occlusion
@@ -14,30 +14,30 @@ import sys
 import tempfile
 import zipfile
 
-MARK = "skycraftSunHorizonTex"
+MARK = "nirncraftSunHorizonTex"
 SDOTU_OLD = "float SdotU = dot(sunVec, upVec);"
-SDOTU_LEGACY = "float SdotU = dot(sunVec, upVec) - skycraftHorizonShift(dot(sunVec, upVec));"
+SDOTU_LEGACY = "float SdotU = dot(sunVec, upVec) - nirncraftHorizonShift(dot(sunVec, upVec));"
 SDOTU_NEW = SDOTU_OLD
 
-UNIFORM_ANCHOR = "uniform sampler2D skycraftWeatherTex;"
+UNIFORM_ANCHOR = "uniform sampler2D nirncraftWeatherTex;"
 UNIFORM_ADD = (
-    "uniform sampler2D skycraftSunHorizonTex;\r\n"
-    "// SKYCRAFT_SUN_HORIZON: how far terrain on the sun's side of the sky lifts the effective horizon (in sine of the sun's height)\r\n"
-    "float skycraftHorizonShift(float rawSdotU) {\r\n"
-    "    float skyHorizonSin = texture2DLod(skycraftSunHorizonTex, vec2(0.5), 0.0).r * 0.5;\r\n"
+    "uniform sampler2D nirncraftSunHorizonTex;\r\n"
+    "// NIRNCRAFT_SUN_HORIZON: how far terrain on the sun's side of the sky lifts the effective horizon (in sine of the sun's height)\r\n"
+    "float nirncraftHorizonShift(float rawSdotU) {\r\n"
+    "    float skyHorizonSin = texture2DLod(nirncraftSunHorizonTex, vec2(0.5), 0.0).r * 0.5;\r\n"
     "    return skyHorizonSin * clamp((0.45 - rawSdotU) / 0.25, 0.0, 1.0);\r\n"
     "}"
 )
 
-PROP_ANCHOR = "customTexture.skycraftWeatherTex = skycraft:textures/environment/weather_field.png"
-PROP_ADD = "\r\n    customTexture.skycraftSunHorizonTex = skycraft:textures/environment/sun_horizon.png"
+PROP_ANCHOR = "customTexture.nirncraftWeatherTex = nirncraft:textures/environment/weather_field.png"
+PROP_ADD = "\r\n    customTexture.nirncraftSunHorizonTex = nirncraft:textures/environment/sun_horizon.png"
 
 
 def patch_uniforms(text: str) -> str:
     if MARK in text:
         return text
     if UNIFORM_ANCHOR not in text:
-        raise RuntimeError("uniforms.glsl is not Skycraft-patched yet (run patch_complementary_clouds.py first)")
+        raise RuntimeError("uniforms.glsl is not NirnCraft-patched yet (run patch_complementary_clouds.py first)")
     return text.replace(UNIFORM_ANCHOR, UNIFORM_ANCHOR + "\r\n" + UNIFORM_ADD, 1)
 
 
@@ -45,7 +45,7 @@ def patch_properties(text: str) -> str:
     if MARK in text:
         return text
     if PROP_ANCHOR not in text:
-        raise RuntimeError("shaders.properties is not Skycraft-patched yet")
+        raise RuntimeError("shaders.properties is not NirnCraft-patched yet")
     return text.replace(PROP_ANCHOR, PROP_ANCHOR + PROP_ADD, 1)
 
 

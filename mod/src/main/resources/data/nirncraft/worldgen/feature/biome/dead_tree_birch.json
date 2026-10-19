@@ -1,0 +1,11 @@
+{
+  "type": "nirncraft:dead_tree",
+  "config": {
+    "state": {
+      "id": "minecraft:birch_log",
+      "properties": {
+        "axis": "y"
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/mora_tapinella"
+      },
+      {
+        "model": "nirncraft:block/mora_tapinella",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/mora_tapinella",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/mora_tapinella",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/mora_tapinella_harvested"
+      },
+      {
+        "model": "nirncraft:block/mora_tapinella_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/mora_tapinella_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/mora_tapinella_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

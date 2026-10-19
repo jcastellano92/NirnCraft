@@ -1,0 +1,64 @@
+{
+  "has_precipitation": false,
+  "temperature": 1.2,
+  "downfall": 0.0,
+  "effects": {
+    "water_color": "#2a3450",
+    "grass_color": "#5a4040",
+    "foliage_color": "#4a3030"
+  },
+  "carvers": [],
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "nirncraft:realm/ch_chain_pylon",
+      "nirncraft:realm/ch_broken_pillar",
+      "nirncraft:realm/ch_soul_fire_pit"
+    ],
+    [],
+    [],
+    [],
+    [
+      "nirncraft:realm/ch_lavafall"
+    ],
+    [
+      "nirncraft:realm/ch_fire",
+      "nirncraft:realm/ch_soul_fire"
+    ],
+    []
+  ],
+  "attributes": {
+    "minecraft:visual/sky_color": "#2a1a1e",
+    "minecraft:visual/fog_color": "#382226",
+    "minecraft:visual/water_fog_color": "#10141e",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": {
+      "modifier": "append",
+      "argument": [
+        {
+          "probability": 0.01,
+          "particle": {
+            "type": "minecraft:smoke"
+          }
+        }
+      ]
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {},
+        "spawn_costs": {}
+      }
+    }
+  }
+}

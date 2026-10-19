@@ -3,7 +3,7 @@
 Owner direction (playtest 5): no guards in the wilderness; one guard, wandering, in a minor settlement; two posted in
 every major settlement, one on each side of the entrance; nothing in anything smaller; and the right guards for the
 region. The rule is `society/GuardWatch.java`, the posts are `society/GatePosts.java`, the look of a guard is the table
-`mod/src/main/resources/skycraft/creatures/guard_profiles.json` read by `creatures/GuardProfiles.java`.
+`mod/src/main/resources/nirncraft/creatures/guard_profiles.json` read by `creatures/GuardProfiles.java`.
 
 ## Count by settlement tier
 
@@ -23,8 +23,8 @@ What was removed: barracks, gate and palace guards from `GUARD` anchors (the hou
 Helgen's scripted garrison), `CreatureSpawns.maintainGuards` and the iron-golem-to-guard replacement, road patrols
 (`Travelers.PATROL` is never rolled), the random thief-chase encounter (two guards in open country; still available when
 forced). Guards an older save left in a settlement that belong to no post, patrol or scene are removed when a player is
-near; old road patrols likewise. Kept: dungeon, fort and camp enemies, quest guards (`skycraft_quest_id`,
-`skycraft_quest_npc`), guild staff, the jail's guard, soldiers on the roads (Legion and Stormcloak squads and tax
+near; old road patrols likewise. Kept: dungeon, fort and camp enemies, quest guards (`nirncraft_quest_id`,
+`nirncraft_quest_npc`), guild staff, the jail's guard, soldiers on the roads (Legion and Stormcloak squads and tax
 collectors are NPC soldiers, not hold guards) and Helgen's scripted soldiers.
 
 ## Crime still works with so few guards
@@ -73,7 +73,7 @@ yet (Atmora, Akavir, Yokuda) uses a neighbour's: see `provinces` in the table.
   settlement resolves to its own hold.
 * `py -3 -I tools/qa/population_lint.py` (qa.ps1 -Server, `/skypop <id>`): per settlement the watch is 2 + 0, 0 + 1 or
   0 + 0, and no housing resident is a guard (Helgen excepted).
-* `SocietySelfTest` (`/skycraft-society selftest`): the rule on the whole places file; the guard of 20+ settlements over
+* `SocietySelfTest` (`/nirncraft-society selftest`): the rule on the whole places file; the guard of 20+ settlements over
   the provinces; Whiterun has exactly two posted guards at its main gate, nobody else, and a killed one is replaced;
   Riverwood has exactly one patrolling guard and a second visit adds none; Old Hroldan has none and no guard stands
   within 300 blocks of it unmarked.

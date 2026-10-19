@@ -1,6 +1,6 @@
 """Generates the creatures module's entity textures (PIL).
 
-Writes PNGs into mod/src/main/resources/assets/skycraft/textures/entity/:
+Writes PNGs into mod/src/main/resources/assets/nirncraft/textures/entity/:
   bandit/bandit_0..3.png, bandit/bandit_chief.png       64x64 player-layout skins
   draugr/draugr_0..1.png, draugr/draugr_deathlord.png   64x64 (+ draugr_eyes.png glow layer)
   guard/guard_<profile>.png                            64x64, one per guard profile (guard_profiles.json)
@@ -16,7 +16,7 @@ import random
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures", "entity")
+OUT = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures", "entity")
 
 
 # ---------------------------------------------------------------------------------------------------- color helpers
@@ -409,14 +409,14 @@ def draugr_eyes():
 
 # ---- guards
 #
-# One skin per guard profile of mod/src/main/resources/skycraft/creatures/guard_profiles.json (the table that maps a
+# One skin per guard profile of mod/src/main/resources/nirncraft/creatures/guard_profiles.json (the table that maps a
 # settlement's place / region / culture / province to a guard, see docs/world/GUARDS.md). The "art" object of a profile
 # is read here: tunic / trim / metal / mail / leather colours (hex), helm style, skin tone, eye colour, chest emblem.
 # Skyrim's nine holds keep the closed helm and the cross emblem: their skins are the ones the game always had.
 
 import json
 
-GUARD_PROFILES = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft", "creatures", "guard_profiles.json")
+GUARD_PROFILES = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft", "creatures", "guard_profiles.json")
 
 GUARD_SKIN_TONES = {
     "nord": SKIN["nord"], "imperial": hexc("d6a882"), "breton": hexc("ecd2bc"), "redguard": hexc("a46e4a"),

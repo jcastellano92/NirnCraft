@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/snowberries"
+      },
+      {
+        "model": "nirncraft:block/snowberries",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/snowberries",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/snowberries",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/snowberries_harvested"
+      },
+      {
+        "model": "nirncraft:block/snowberries_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/snowberries_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/snowberries_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

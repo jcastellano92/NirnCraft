@@ -4,7 +4,7 @@ import static_facts as SF
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 rows = json.load(open('rows.json'))
 truth = json.load(open('truth_summary.json')) if os.path.exists('truth_summary.json') else {}
-manifest = json.load(open(REPO + '/mod/src/main/resources/skycraft/baked/manifest.json'))
+manifest = json.load(open(REPO + '/mod/src/main/resources/nirncraft/baked/manifest.json'))
 TIERS = ('capital', 'city', 'town', 'village', 'hamlet')
 bt = collections.defaultdict(list)
 for r in rows:
@@ -58,11 +58,11 @@ for t in TIERS:
                  for name in ('leader_hall', 'inn', 'shop', 'smithy', 'house_rich')})
 sky = [r['id'] for r in rows if (r['region'] or '').startswith('skyrim/') and r['tier'] in ('capital', 'city', 'town')]
 doc = dict(
-    schema='skycraft.town_audit/1', step='TO0', generated='2026-10-13',
+    schema='nirncraft.town_audit/1', step='TO0', generated='2026-10-13',
     inputs=dict(streetplan_bake_inputs=manifest['inputs'],
-                streetplan_bin='mod/src/main/resources/skycraft/baked/streetplan.bin (version 1, 884 settlements, 60153 nodes, 57709 edges, 12936 doors, 63807 plots, 64549 specs)',
+                streetplan_bin='mod/src/main/resources/nirncraft/baked/streetplan.bin (version 1, 884 settlements, 60153 nodes, 57709 edges, 12936 doors, 63807 plots, 64549 specs)',
                 world_sample='mod/run/world (saved QA world with whiterun, helgen and 5 farms generated), used for world_truth only',
-                places='mod/src/main/resources/skycraft/tamriel/places/*.json; tier from the place type (place type capital in skyrim_settlements counts as capital only for the five hold capitals)'),
+                places='mod/src/main/resources/nirncraft/tamriel/places/*.json; tier from the place type (place type capital in skyrim_settlements counts as capital only for the five hold capitals)'),
     definitions={
         'tier': 'capital|city|town|village|hamlet = DESIGN-PRINCIPLES 4.4',
         'key_buildings.status': 'reachable = a door cell of the building is connected to a gate over the plan walk raster (street/lane/alley bands, bridges, stairs edges, plaza rectangles, gate passages, doorstep paths; 8-neighbour, height step <= 1, <= 2 on stairs cells); street_only = the planner found a street for the door (StreetPlan dReach true) but that street is not connected to any gate; unreachable = no walk; no_door = the builder declares no entrance (Canvas.door instead of Canvas.entrance: jails, some landmarks), so the plan cannot test it',

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "nirncraft:mammoth_tusk",
+    "minecraft:flint"
+  ],
+  "result": {
+    "count": 4,
+    "id": "nirncraft:powdered_mammoth_tusk"
+  }
+}

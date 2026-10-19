@@ -1,0 +1,114 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 14,
+          "modifier": {
+            "type": "nirncraft:leveled_tome"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 8,
+          "value": "nirncraft:chests/soul_gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 8,
+          "modifier": {
+            "poison": false,
+            "type": "nirncraft:skyrim_potion"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:amethyst_shard",
+          "weight": 4,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 2,
+          "value": "nirncraft:arsenal/staves"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 6,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 10,
+              "max": 50
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:void_salts",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 30,
+          "modifier": {
+            "tag": "{book:\"explore_note_failed_experiment\",nirncraft_value:2}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 25,
+          "modifier": {
+            "tag": "{book:\"explore_note_apprentice_lament\",nirncraft_value:2}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 45
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 22,
+          "value": "nirncraft:chests/skill_books"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 78
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:explore/mage"
+}

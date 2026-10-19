@@ -1,7 +1,7 @@
 <# Opt-in NVMe outputs/cache. Does not move the repository, saves, or change global Gradle settings.
    First seed/measure with benchmark_storage.py. Other tools retain mod/build unless given this jar explicitly. #>
 param(
-    [string]$ScratchRoot = 'E:\Skycraft-scratch\storage-benchmark',
+    [string]$ScratchRoot = 'E:\NirnCraft-scratch\storage-benchmark',
     [string[]]$Tasks = @('build'),
     [string]$InitScript = ''
 )
@@ -23,7 +23,7 @@ try {
     if ($resolvedInitScript) { $auditArgs = @('-I', $resolvedInitScript) }
     & .\gradlew.bat @Tasks --offline --console=plain '-Dorg.gradle.jvmargs=-Xmx2G' `
         @auditArgs `
-        "-PskycraftBuildDir=$(Join-Path $ScratchRoot 'build-main')" `
+        "-PnirncraftBuildDir=$(Join-Path $ScratchRoot 'build-main')" `
         --project-cache-dir (Join-Path $ScratchRoot 'project-cache-main')
     $buildCode = $LASTEXITCODE
 } finally {

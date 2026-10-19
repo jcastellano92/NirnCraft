@@ -158,7 +158,7 @@ class ProcessGuardTest(unittest.TestCase):
             log = root / "build.log"
             log.write_text("preserve previous log")
             with self.holder(root / ".native-build.lock"), \
-                    patch.dict(os.environ, {"SKYCRAFT_263_SCRATCH": str(root), "SKYCRAFT_JAVA25_HOME": str(root / "java")}), \
+                    patch.dict(os.environ, {"NIRNCRAFT_263_SCRATCH": str(root), "NIRNCRAFT_JAVA25_HOME": str(root / "java")}), \
                     patch.object(sys, "argv", ["build_263.py", "--log", str(log), "build"]), \
                     patch.object(build.subprocess, "call") as call, contextlib.redirect_stderr(io.StringIO()) as errors:
                 self.assertEqual(2, build.main())
@@ -173,11 +173,11 @@ class ProcessGuardTest(unittest.TestCase):
 
             def fake_gradle(args, **kwargs):
                 self.assert_busy(lock, os.getpid())
-                self.assertIn("-PskycraftBuildDir=" + str(root.resolve() / "build"), args)
+                self.assertIn("-PnirncraftBuildDir=" + str(root.resolve() / "build"), args)
                 kwargs["stdout"].write(b"mock build output")
                 return 9
 
-            with patch.dict(os.environ, {"SKYCRAFT_263_SCRATCH": str(root), "SKYCRAFT_JAVA25_HOME": str(root / "java")}), \
+            with patch.dict(os.environ, {"NIRNCRAFT_263_SCRATCH": str(root), "NIRNCRAFT_JAVA25_HOME": str(root / "java")}), \
                     patch.object(sys, "argv", ["build_263.py", "--log", str(root / "build.log"), "test"]), \
                     patch.object(build.subprocess, "call", side_effect=fake_gradle):
                 self.assertEqual(9, build.main())
@@ -186,7 +186,7 @@ class ProcessGuardTest(unittest.TestCase):
     def test_python_build_forwards_tasks_offline_and_child_environment_exactly(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder).resolve()
-            env = {"SKYCRAFT_263_SCRATCH": str(root), "SKYCRAFT_JAVA25_HOME": str(root / "java"),
+            env = {"NIRNCRAFT_263_SCRATCH": str(root), "NIRNCRAFT_JAVA25_HOME": str(root / "java"),
                    "JAVA_HOME": "parent java", "GRADLE_USER_HOME": "parent gradle", "DEBUG": "parent debug"}
             for options, tasks, offline in (([], ["build"], False),
                                              (["--offline", "--", "compileJava", "test"], ["compileJava", "test"], True)):
@@ -199,7 +199,7 @@ class ProcessGuardTest(unittest.TestCase):
                     if offline:
                         expected.append("--offline")
                     expected += ["--console=plain", "-Dorg.gradle.jvmargs=-Xmx3G",
-                                 "-PskycraftBuildDir=" + str(root / "build"),
+                                 "-PnirncraftBuildDir=" + str(root / "build"),
                                  "--project-cache-dir", str(root / "project-cache")]
                     self.assertEqual(expected, args)
                     child = call.call_args.kwargs
@@ -276,9 +276,9 @@ class ProcessGuardTest(unittest.TestCase):
             root = Path(folder)
             game = root / "game"
             game.mkdir()
-            batch = game / "skycraft-live.txt"
+            batch = game / "nirncraft-live.txt"
             batch.write_text("previous batch")
-            lock = root / ".skycraft-live.lock"
+            lock = root / ".nirncraft-live.lock"
 
             def status():
                 self.assert_busy(lock, os.getpid())
@@ -300,9 +300,9 @@ class ProcessGuardTest(unittest.TestCase):
             root = Path(folder)
             game = root / "game"
             game.mkdir()
-            batch = game / "skycraft-live.txt"
+            batch = game / "nirncraft-live.txt"
             batch.write_text("active batch")
-            with self.holder(root / ".skycraft-live.lock"), patch.object(live, "PRISM_ROOT", root), \
+            with self.holder(root / ".nirncraft-live.lock"), patch.object(live, "PRISM_ROOT", root), \
                     patch.object(live, "GAME", game), patch.object(live, "status") as status:
                 for cancel in (False, True):
                     with self.assertRaises(GuardBusy):
@@ -316,7 +316,7 @@ class ProcessGuardTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             dev = root / "world-preview"
-            lock = root / ".skycraft-live.lock"
+            lock = root / ".nirncraft-live.lock"
             real_atomic = live.atomic
 
             def ready():
@@ -342,13 +342,13 @@ class ProcessGuardTest(unittest.TestCase):
                         patch.object(live, "status", return_value={"client": client}):
                     with self.assertRaisesRegex(RuntimeError, message):
                         live.live_actions(["identity"])
-                self.assertFalse((root / "game/skycraft-live.txt").exists())
-                self.assertEqual(0, self.contender(root / ".skycraft-live.lock").returncode)
+                self.assertFalse((root / "game/nirncraft-live.txt").exists())
+                self.assertEqual(0, self.contender(root / ".nirncraft-live.lock").returncode)
 
     def test_live_cli_guards_mutations_but_read_only_dispatch_remains_available(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
-            lock = root / ".skycraft-live.lock"
+            lock = root / ".nirncraft-live.lock"
             with self.holder(lock), patch.object(live, "PRISM_ROOT", root), patch.object(live, "dispatch") as dispatch:
                 for action in ("status", "storage", "profile"):
                     with patch.object(sys, "argv", ["live_world.py", action]):
@@ -362,7 +362,7 @@ class ProcessGuardTest(unittest.TestCase):
     def test_cli_guard_and_imported_live_guard_can_nest(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
-            lock = root / ".skycraft-live.lock"
+            lock = root / ".nirncraft-live.lock"
 
             def dispatch(args):
                 with live.live_guard():

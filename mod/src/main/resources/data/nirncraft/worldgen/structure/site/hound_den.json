@@ -1,0 +1,18 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "cave",
+  "kit": "bosmer",
+  "flavor": 1,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "hound_den"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

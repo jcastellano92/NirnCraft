@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "minecraft:birch_checked",
+      "chance": 0.25
+    },
+    {
+      "feature": "nirncraft:biome/swamp_oak_checked",
+      "chance": 0.2
+    },
+    {
+      "feature": "minecraft:fancy_oak_checked",
+      "chance": 0.15
+    },
+    {
+      "feature": "nirncraft:biome/cypress_checked",
+      "chance": 0.1
+    }
+  ],
+  "default": "minecraft:oak_checked"
+}

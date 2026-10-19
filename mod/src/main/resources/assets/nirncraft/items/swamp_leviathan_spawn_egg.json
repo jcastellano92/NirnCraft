@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/swamp_leviathan_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 3820074
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 9083482
+      }
+    ]
+  }
+}

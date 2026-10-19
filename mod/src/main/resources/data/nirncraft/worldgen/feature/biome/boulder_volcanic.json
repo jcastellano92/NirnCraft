@@ -1,0 +1,31 @@
+{
+  "type": "nirncraft:boulder",
+  "config": {
+    "state": {
+      "type": "minecraft:weighted",
+      "entries": [
+        {
+          "data": "nirncraft:volcanic_rock",
+          "weight": 6
+        },
+        {
+          "data": "nirncraft:cracked_volcanic_rock",
+          "weight": 2
+        },
+        {
+          "data": "minecraft:basalt",
+          "weight": 1
+        },
+        {
+          "data": "minecraft:blackstone",
+          "weight": 1
+        }
+      ]
+    },
+    "radius": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 1,
+      "max_inclusive": 3
+    }
+  }
+}

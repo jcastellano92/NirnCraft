@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "#nirncraft:spawns/plains",
+    "#nirncraft:spawns/forest",
+    "#nirncraft:spawns/pine_forest",
+    "#nirncraft:spawns/tundra",
+    "#minecraft:is_taiga",
+    "#minecraft:is_savanna",
+    "#minecraft:is_hill"
+  ]
+}

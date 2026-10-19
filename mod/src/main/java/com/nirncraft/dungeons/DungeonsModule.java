@@ -1,0 +1,56 @@
+package com.nirncraft.dungeons;
+
+import com.nirncraft.dungeons.entity.DwarvenCenturion;
+import com.nirncraft.dungeons.entity.DwarvenSphere;
+import com.nirncraft.dungeons.entity.DwarvenSpider;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import net.neoforged.bus.api.IEventBus;
+
+/**
+ * Procedural dungeons and landmarks of Nirn (one {@code nirncraft:dungeon} structure type, themed per structure JSON):
+ * Skyrim's named sites at their places on the map ({@code nirncraft:places}), the long ones in tiles
+ * ({@code nirncraft:sites}: the 7,000 Steps, Blackreach), and the random dungeons of the other provinces and the endless
+ * lands, dressed in their region's culture ({@code world.Kit}). Also the Nordic puzzles (glyph pillars, claw doors and
+ * the dragon claws, {@code puzzle}), dormant draugr, and the Dwemer automatons that guard the ruins.
+ *
+ * <p>Everything syncs through vanilla structure data and {@code SynchedEntityData}; the module has no packets.</p>
+ */
+public final class DungeonsModule {
+    private DungeonsModule() {}
+
+    /** Registers this module's DeferredRegisters and mod-bus listeners. Called from the mod constructor. */
+    public static void init(IEventBus modBus) {
+        DungeonsRegistry.init(modBus);
+        com.nirncraft.NirnCraft.config(net.neoforged.fml.config.ModConfig.Type.LOCAL,
+                DungeonsConfig.SPEC, "nirncraft-dungeons.toml");
+        modBus.addListener(DungeonsModule::onAttributes);
+        modBus.addListener(DungeonsModule::onSpawnPlacements);
+    }
+
+    /** Registers this module's packets via {@link com.nirncraft.network.SkyNetwork#register}. Called once at startup. */
+    public static void registerPackets() {
+        // no packets: structure pieces, entity data and boss bars use vanilla sync
+    }
+
+    private static void onAttributes(EntityAttributeCreationEvent event) {
+        event.put(DungeonsRegistry.DWARVEN_SPIDER.get(), DwarvenSpider.createAttributes().build());
+        event.put(DungeonsRegistry.DWARVEN_SPHERE.get(), DwarvenSphere.createAttributes().build());
+        event.put(DungeonsRegistry.DWARVEN_CENTURION.get(), DwarvenCenturion.createAttributes().build());
+    }
+
+    private static void onSpawnPlacements(RegisterSpawnPlacementsEvent event) {
+        RegisterSpawnPlacementsEvent.Operation op = RegisterSpawnPlacementsEvent.Operation.REPLACE;
+        // automatons only spawn naturally inside Dwemer ruins (structure spawn overrides), in the dark
+        event.register(DungeonsRegistry.DWARVEN_SPIDER.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                Monster::checkMonsterSpawnRules, op);
+        event.register(DungeonsRegistry.DWARVEN_SPHERE.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                Monster::checkMonsterSpawnRules, op);
+        event.register(DungeonsRegistry.DWARVEN_CENTURION.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> reason != net.minecraft.world.entity.EntitySpawnReason.NATURAL
+                        && Monster.checkAnyLightMonsterSpawnRules(type, level, reason, pos, random), op);
+    }
+}

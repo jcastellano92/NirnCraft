@@ -20,7 +20,7 @@ def nbt_caps():
                        (b"nan", m.Node(5, bytes.fromhex("7fc01234")))])
     overflow = m.Node(10, [(b"items", m.Node(9, (10, [m.compound(id=m.Node(8, b"minecraft:diamond"), Count=m.Node(1, b"\x01"))])))])
     positions = m.Node(12, struct.pack(">iqq", 2, 7, -991))
-    caps = m.Node(10, [(b"skycraft:player_data", data), (b"skycraft:overflow", overflow), (b"skycraft:placed_blocks", positions), (b"other_mod:untouched", m.Node(8, b"opaque"))])
+    caps = m.Node(10, [(b"nirncraft:player_data", data), (b"nirncraft:overflow", overflow), (b"nirncraft:placed_blocks", positions), (b"other_mod:untouched", m.Node(8, b"opaque"))])
     return m.Node(10, [(b"DataVersion", m.Node(3, struct.pack(">i", 3465))), (b"ForgeCaps", caps)])
 
 class LegacyAttachmentsTest(unittest.TestCase):
@@ -42,9 +42,9 @@ class LegacyAttachmentsTest(unittest.TestCase):
         self.assertEqual(3, sum(counts.values()))
 
     def test_existing_native_data_wins(self):
-        root = nbt_caps(); native = m.Node(10, [(b"skycraft:player_data", m.compound(data=m.compound()))]); m.put(root, m.ATTACHMENTS, native)
-        original = copy.deepcopy(m.child(native, b"skycraft:player_data")); counts = {}; m.convert(root, counts)
-        self.assertEqual(original, m.child(native, b"skycraft:player_data")); self.assertNotIn("skycraft:player_data", counts)
+        root = nbt_caps(); native = m.Node(10, [(b"nirncraft:player_data", m.compound(data=m.compound()))]); m.put(root, m.ATTACHMENTS, native)
+        original = copy.deepcopy(m.child(native, b"nirncraft:player_data")); counts = {}; m.convert(root, counts)
+        self.assertEqual(original, m.child(native, b"nirncraft:player_data")); self.assertNotIn("nirncraft:player_data", counts)
 
     def test_region_inline_and_external_chunks_keep_unknown_fields(self):
         for compression, external in [(1, False), (2, False), (3, False), (2, True)]:
@@ -69,7 +69,7 @@ class LegacyAttachmentsTest(unittest.TestCase):
             report = m.migrate(source, target)
             self.assertFalse(report["source_modified"]); self.assertEqual(3, sum(report["attachments"].values()))
             self.assertEqual(before, hashlib.sha256((source/"level.dat").read_bytes()).hexdigest())
-            self.assertTrue((target/"skycraft-26.3-migration.json").exists())
+            self.assertTrue((target/"nirncraft-26.3-migration.json").exists())
             with self.assertRaises(ValueError): m.migrate(source, target)
             with self.assertRaises(ValueError): m.migrate(source, source/"nested")
 
@@ -92,7 +92,7 @@ class LegacyAttachmentsTest(unittest.TestCase):
             (source/"serverconfig").mkdir(); (source/"syncedconfig").mkdir()
             for name in m.SYNCED_CONFIGS:
                 (source/"serverconfig"/name).write_bytes(b"# authored legacy override\r\nvalue = 7\r\n")
-            native = "skycraft-ocean-server.toml"
+            native = "nirncraft-ocean-server.toml"
             (source/"syncedconfig"/native).write_bytes(b"# native override wins\nvalue = 9\n")
             (source/"serverconfig/other-mod-server.toml").write_text("untouched = true\n")
             before = {str(p.relative_to(source)): p.read_bytes() for p in source.rglob("*") if p.is_file()}
@@ -107,7 +107,7 @@ class LegacyAttachmentsTest(unittest.TestCase):
             self.assertEqual([], m.migrate_configs(target)["copied"])
 
     def test_config_migration_covers_every_explicit_synced_registration(self):
-        sources = HERE.parents[1]/"mod/src/main/java/com/skycraft"
+        sources = HERE.parents[1]/"mod/src/main/java/com/nirncraft"
         registered = set()
         for path in sources.rglob("*.java"):
             registered.update(re.findall(r"config\(ModConfig\.Type\.SYNCED,\s*\w+\.\w+\s*,\s*\"([^\"]+)\"", path.read_text(encoding="utf-8")))
@@ -117,22 +117,22 @@ class LegacyAttachmentsTest(unittest.TestCase):
     def test_survival_rule_is_typed_and_retains_existing_native_value(self):
         for value in (b"true", b"false"):
             with self.subTest(value=value):
-                rules = m.compound(skycraftSurvivalMode=m.Node(8,value), doDaylightCycle=m.Node(8,b"false"))
+                rules = m.compound(nirncraftSurvivalMode=m.Node(8,value), doDaylightCycle=m.Node(8,b"false"))
                 root = m.compound(Data=m.compound(GameRules=rules)); counts = {}
                 packed = m.migrate_bytes(m.write_nbt(b"",root),3,counts)
                 rebuilt = m.read_nbt(packed)[1]
                 new_rules = m.child(m.child(rebuilt,b"Data"),b"GameRules")
-                self.assertEqual(m.Node(1,b"\x01" if value == b"true" else b"\x00"),m.child(new_rules,b"skycraft:survival_mode"))
+                self.assertEqual(m.Node(1,b"\x01" if value == b"true" else b"\x00"),m.child(new_rules,b"nirncraft:survival_mode"))
                 self.assertEqual(m.Node(8,b"false"),m.child(new_rules,b"doDaylightCycle"))
-                self.assertIsNone(m.child(new_rules,b"skycraftSurvivalMode"))
-                self.assertEqual(1,counts["game_rule:skycraft:survival_mode"])
+                self.assertIsNone(m.child(new_rules,b"nirncraftSurvivalMode"))
+                self.assertEqual(1,counts["game_rule:nirncraft:survival_mode"])
                 self.assertIsNone(m.migrate_bytes(packed,3,counts))
-        rules = m.compound(skycraftSurvivalMode=m.Node(8,b"false"))
-        native = m.Node(1,b"\x01"); m.put(rules,b"skycraft:survival_mode",native)
+        rules = m.compound(nirncraftSurvivalMode=m.Node(8,b"false"))
+        native = m.Node(1,b"\x01"); m.put(rules,b"nirncraft:survival_mode",native)
         m.convert_survival_rule(m.compound(Data=m.compound(GameRules=rules)),{})
-        self.assertEqual(native,m.child(rules,b"skycraft:survival_mode"))
+        self.assertEqual(native,m.child(rules,b"nirncraft:survival_mode"))
         with self.assertRaises(ValueError):
-            m.convert_survival_rule(m.compound(Data=m.compound(GameRules=m.compound(skycraftSurvivalMode=m.Node(8,b"invalid")))),{})
+            m.convert_survival_rule(m.compound(Data=m.compound(GameRules=m.compound(nirncraftSurvivalMode=m.Node(8,b"invalid")))),{})
 
     def test_real_legacy_random_sequences_keep_all_states_and_exact_schema_boundary(self):
         fixtures = HERE.parents[1]/"mod/src/test/resources/migration"

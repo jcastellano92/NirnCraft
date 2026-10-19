@@ -1,0 +1,25 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "tundra_shrub",
+        "weight": 4
+      },
+      {
+        "species": "juniper",
+        "weight": 3
+      },
+      {
+        "species": "snowy_spruce",
+        "weight": 2
+      },
+      {
+        "species": "frozen_pine",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

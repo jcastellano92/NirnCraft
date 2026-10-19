@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-The Skycraft sound catalogue: every sound event, the files behind it, its subtitle and how it is played.
+The NirnCraft sound catalogue: every sound event, the files behind it, its subtitle and how it is played.
 
 This file is the single source of truth shared by
   * tools/music/compose.py ............ music/*.ogg           (category "music")
   * tools/music/synth_ambience.py ..... ambient/**.ogg        (categories "bed", "ambient")
   * tools/music/synth_skyrim_sfx.py ... creature/, shout/, magic/, ui/, wordwall/, world/ (the other categories)
-  * mod/src/main/resources/assets/skycraft/sounds.json        (written by this script)
-  * mod/src/main/lang/skycraft/audio.json (subtitles)          (written by this script)
-  * com.skycraft.audio.AudioSounds / com.skycraft.world.WorldSounds (Java registration; --check verifies it)
+  * mod/src/main/resources/assets/nirncraft/sounds.json        (written by this script)
+  * mod/src/main/lang/nirncraft/audio.json (subtitles)          (written by this script)
+  * com.nirncraft.audio.AudioSounds / com.nirncraft.world.WorldSounds (Java registration; --check verifies it)
   * tools/music/import_skyrim_audio.py  (the personal importer overrides these events)
 
 Usage:
@@ -26,15 +26,15 @@ import sys
 from dataclasses import dataclass, field
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-SOUNDS = REPO / "mod/src/main/resources/assets/skycraft/sounds"
-SOUNDS_JSON = REPO / "mod/src/main/resources/assets/skycraft/sounds.json"
-LANG = REPO / "mod/src/main/lang/skycraft/audio.json"
-JAVA = REPO / "mod/src/main/java/com/skycraft"
+SOUNDS = REPO / "mod/src/main/resources/assets/nirncraft/sounds"
+SOUNDS_JSON = REPO / "mod/src/main/resources/assets/nirncraft/sounds.json"
+LANG = REPO / "mod/src/main/lang/nirncraft/audio.json"
+JAVA = REPO / "mod/src/main/java/com/nirncraft"
 
 
 @dataclass
 class Event:
-    name: str                      # event id in the skycraft namespace, e.g. "entity.dragon.roar"
+    name: str                      # event id in the nirncraft namespace, e.g. "entity.dragon.roar"
     files: list                    # file stems relative to sounds/, e.g. ["creature/dragon/roar1"]; "@event" = nested event
     category: str                  # music | bed | ambient | creature | shout | magic | ui | world
     subtitle: str | None = None    # English subtitle (None = no subtitle)
@@ -51,12 +51,12 @@ class Event:
         sounds = []
         for i, f in enumerate(self.files):
             if f.startswith("@"):
-                sounds.append({"name": "skycraft:" + f[1:], "type": "event"})
+                sounds.append({"name": "nirncraft:" + f[1:], "type": "event"})
                 continue
             if not (self.stream or self.distance or self.volume or self.weights):
-                sounds.append("skycraft:" + f)
+                sounds.append("nirncraft:" + f)
                 continue
-            s = {"name": "skycraft:" + f}
+            s = {"name": "nirncraft:" + f}
             if self.stream:
                 s["stream"] = True
             if self.distance:
@@ -72,7 +72,7 @@ class Event:
         return out
 
     def subtitle_key(self):
-        return "subtitles.skycraft." + self.name
+        return "subtitles.nirncraft." + self.name
 
 
 EVENTS: list[Event] = []
@@ -299,7 +299,7 @@ SHOUTS = {
     "disarm": ["ZUN", "HAAL", "VIIK"], "elemental_fury": ["SU", "GRAH", "DUN"], "kynes_peace": ["KAAN", "DREM", "OV"],
     "animal_allegiance": ["RAAN", "MIR", "TAH"], "storm_call": ["STRUN", "BAH", "QO"], "dragonrend": ["JOOR", "ZAH", "FRUL"],
 }
-# shouts added later (Dawnguard / Dragonborn and the rest of com.skycraft.magic.shout.Shout): encoded smaller (LOFI)
+# shouts added later (Dawnguard / Dragonborn and the rest of com.nirncraft.magic.shout.Shout): encoded smaller (LOFI)
 NEW_SHOUTS = {
     "ice_form": ["IIZ", "SLEN", "NUS"], "throw_voice": ["ZUL", "MEY", "GUT"], "dismay": ["FAAS", "RU", "MAAR"],
     "call_dragon": ["OD", "AH", "VIING"], "call_of_valor": ["HUN", "KAAL", "ZOOR"], "cyclone": ["VEN", "GAAR", "NOS"],
@@ -344,7 +344,7 @@ for name, sub in UI:
     ev(f"ui.{name}", [f"ui/{name}"], "ui", sub)
 
 # =====================================================================================================  fire and aftermath
-# Registered by com.skycraft.fire.FireSounds. The aftermath piece plays inside the footprint of a place that was just
+# Registered by com.nirncraft.fire.FireSounds. The aftermath piece plays inside the footprint of a place that was just
 # attacked (Helgen: fire/client/MusicZones); the ambience one-shots are positional, quiet, and played with cooldowns by
 # the fire module (fire sites, mourners), never by the random ambience engine.
 ev("music.helgen_aftermath", ["music/helgen_aftermath"], "music", stream=True)

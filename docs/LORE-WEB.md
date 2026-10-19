@@ -37,8 +37,8 @@ the arcs of a province also chain into a ring.
 | `tools/marquee/loreweb_build.js` | builds everything below from the source |
 | `tools/marquee/loreweb_doc.js` | rewrites the tables of this file |
 | `tools/marquee/loreweb.json` | machine-readable web for builders (city plans, landmarks, scatter) |
-| `mod/src/main/resources/skycraft/lore/places/loreweb.json` | hooks, rumours and notes (listed in that folder's `index.json`) |
-| `mod/src/main/resources/skycraft/quests/loreweb_<province>.json`, `loreweb_threads.json` | quests, ids `lw_*` (listed in `quests/index.json`) |
+| `mod/src/main/resources/nirncraft/lore/places/loreweb.json` | hooks, rumours and notes (listed in that folder's `index.json`) |
+| `mod/src/main/resources/nirncraft/quests/loreweb_<province>.json`, `loreweb_threads.json` | quests, ids `lw_*` (listed in `quests/index.json`) |
 | `tools/marquee/loreweb_check.js` | verifies links, orphans, starts and ends |
 
 Workflow: edit `loreweb_src`, then `node tools/marquee/loreweb_build.js`, `node tools/place_lore.js`,

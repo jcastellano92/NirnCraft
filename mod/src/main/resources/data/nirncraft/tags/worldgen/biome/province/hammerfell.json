@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:alikr_desert",
+    "nirncraft:alikr_dunes",
+    "nirncraft:bangkorai",
+    "nirncraft:craglorn",
+    "nirncraft:dragontail_mountains",
+    "nirncraft:iliac_rainforest",
+    "nirncraft:iliac_scrub",
+    "nirncraft:stros_mkai_coast",
+    "nirncraft:tigonus_marsh",
+    "nirncraft:warm_steppe"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:lockpick",
+      "required": false
+    },
+    "minecraft:gold_ingot",
+    {
+      "id": "nirncraft:silver_ingot",
+      "required": false
+    },
+    "minecraft:gold_nugget",
+    "minecraft:splash_potion",
+    "minecraft:splash_potion",
+    {
+      "id": "nirncraft:skooma",
+      "required": false
+    },
+    {
+      "id": "nirncraft:moon_sugar",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:thief_goods",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:merchant/gems",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:jewelry",
+      "required": false
+    },
+    "minecraft:name_tag",
+    "minecraft:spyglass",
+    "minecraft:clock"
+  ]
+}

@@ -15,7 +15,7 @@ module.exports = function (f) {
 
   f.relic('pact_waiver', 'Waiver of the Green Pact', 'A strip of green silk stamped with three leaf-seals, granting one wagon of foreign goods passage through Valenwood without felling or lighting a living tree. The ink is still faintly damp.', 11);
   f.relic('wagon_deed', 'Deed to the Sha\'ka Wagon', 'A folded deed of ownership for a small caravan wagon, the wheels of which were designed by a Dwemer and the axle by a Khajiit and the rest by whichever fool offered the lowest price.', 11);
-  f.boss('wood_witch', { name: 'Hagraven Nelloth the Sap-Spinner', type: 'skycraft:hagraven', hp: 3.6, dmg: 1.5, level: 26, drop: 'loot:standard', glow: true });
+  f.boss('wood_witch', { name: 'Hagraven Nelloth the Sap-Spinner', type: 'nirncraft:hagraven', hp: 3.6, dmg: 1.5, level: 26, drop: 'loot:standard', glow: true });
   f.scene('raw_ritual', [
     ['narrator', 'The trees on either side of the road are hung with ribbons, bone chimes and small dripping cups. A procession of Bosmer in green paint wades through the mist, singing very low.'],
     ['@shaka', 'Do not break step, and do not look at the lead singer. It is the Pact\'s tithe-walk. If a wagon crosses their path, they will assume the wagon is the tithe.'],
@@ -74,7 +74,7 @@ module.exports = function (f) {
 
   f.relic('garden_seeds', 'Pouch of Hanging Seeds', 'A small pouch of silver-green seeds, each as small as a dewdrop, each wrapped in a scrap of moss. They are said to bloom only when planted while the sun is exactly half over the horizon.', 20);
   f.relic('dawn_trowel', 'Dawn-Trowel of Arenthia', 'A trowel of bone-white wood, its edge gilded in the waterfall\'s spray. The handle is worn into a shape that no human hand quite fits, as if the gardener who used it was not human.', 26);
-  f.boss('falls_stalker', { name: 'The Fall-Stalker', type: 'skycraft:sabre_cat', hp: 3.4, dmg: 1.5, level: 22, drop: 'loot:standard', glow: false });
+  f.boss('falls_stalker', { name: 'The Fall-Stalker', type: 'nirncraft:sabre_cat', hp: 3.4, dmg: 1.5, level: 22, drop: 'loot:standard', glow: false });
   f.scene('are_dawn', [
     ['narrator', 'The first light strikes the falls, and every drop of spray becomes a fleck of gold. On the terrace, in the exact point where the light lands, a single patch of bare ground steams faintly.'],
     ['@eld', 'Here. This is where Eld\'s grandmother planted. The seeds will wake in the light, if they are wanted, and they will be wanted if you say so out loud.'],
@@ -99,7 +99,7 @@ module.exports = function (f) {
         ] }),
     ],
     outro: 'The oldest terrace of Arenthia is green again. Within a season there will be roses where there was only wall, and the waterfall sings above them.',
-    rewards: { gold: 420, loot: 'standard', items: [{ item: 'skycraft:bosmer_helmet', name: 'Gardener\'s Sun-Hood', enchant: { protection: 2, respiration: 1 } }] },
+    rewards: { gold: 420, loot: 'standard', items: [{ item: 'nirncraft:bosmer_helmet', name: 'Gardener\'s Sun-Hood', enchant: { protection: 2, respiration: 1 } }] },
   });
 
   f.q({
@@ -129,7 +129,7 @@ module.exports = function (f) {
     'The Thorn-and-Thistle is a squat inn set into the Thorn Wall itself, its back room a hollow in the living hedge. Aldis says it is the safest tavern in Valenwood, because the wall itself will bite a brawler, and has.', true);
 
   f.relic('gap_stone', 'Gap-Stone', 'A hand-sized stone, smooth as an egg, wedged into a thorn-wall gap for years and worked loose only this week. The stone is cool, even in sunlight, and bears a chisel-mark no Bosmer smith would own.', 21);
-  f.boss('wall_breaker', { name: 'Gurzun Wall-Breaker', type: 'skycraft:troll', hp: 3.0, dmg: 1.5, level: 24, drop: 'loot:standard', glow: false });
+  f.boss('wall_breaker', { name: 'Gurzun Wall-Breaker', type: 'nirncraft:troll', hp: 3.0, dmg: 1.5, level: 24, drop: 'loot:standard', glow: false });
   f.scene('mar_gap', [
     ['narrator', 'The Thorn Wall rises in a green-black tangle, each thorn as long as a finger. Near its base a hole has been worked through, neat as a doorway, and the hedge on either side has been bent back, not cut.'],
     ['@cael', 'Not cut. Bent. The Pact forbids a cut. Whoever made this knew the Pact, and used it. They did not break the law. They simply read it more carefully than we did.'],
@@ -215,7 +215,7 @@ module.exports = function (f) {
     objectives: [
       o.go('arorin_ruins', 'Search the Arorin Ruins where the hunters were last seen'),
       o.clear('arorin_ruins', 'Drive off the wolves that have scattered the hunters',
-        [mob('skycraft:wolf', 4, 'Pack Wolf'), mob('skycraft:werewolf', 1, 'Pale Pack-Mother')]),
+        [mob('nirncraft:wolf', 4, 'Pack Wolf'), mob('nirncraft:werewolf', 1, 'Pale Pack-Mother')]),
       o.escort('@drabul_chief', 'drabul', 'Walk Borgakh to the village to meet the hunters and settle the matter'),
     ],
     outro: 'The hunting-party was found alive and half-eaten by embarrassment. Orc and Bosmer shared one very awkward feast, and the truce of Drabul has never been stronger.',
@@ -251,7 +251,7 @@ module.exports = function (f) {
     objectives: [
       o.go('dokrin_monastery', 'Descend to the monastery vault where the harp plays'),
       o.clear('dokrin_monastery', 'Drive off the shades that dance to the harp',
-        [mob('skycraft:will_o_wisp', 2, 'Hymn-Dancer'), mob('minecraft:skeleton', 2, 'Harp-Bone')], { placement: 'structure' }),
+        [mob('nirncraft:will_o_wisp', 2, 'Hymn-Dancer'), mob('minecraft:skeleton', 2, 'Harp-Bone')], { placement: 'structure' }),
       o.talk('@monk_singer', 'Tell Brother Hael the harp is still',
         'The harp is silent. I unstrung it. It will not be heard again.',
         'Brother Hael tries to speak and nothing comes. He stands, mute, for a very long time. Then he bows low, and the other monks bow, and a silence falls on the monastery for the first time in three days that is not a silence of fear. It is a silence of rest.'),

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "nirncraft:biome/tall_spruce_checked",
+      "chance": 0.4
+    },
+    {
+      "feature": "nirncraft:biome/snowy_pine_checked",
+      "chance": 0.2
+    }
+  ],
+  "default": "nirncraft:biome/snowy_spruce_checked"
+}

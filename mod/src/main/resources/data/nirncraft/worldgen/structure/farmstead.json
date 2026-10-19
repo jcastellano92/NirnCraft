@@ -1,0 +1,10 @@
+{
+  "type": "nirncraft:settlement",
+  "size": "farm",
+  "source": "generic",
+  "culture": "auto",
+  "biomes": "#nirncraft:settlement_biomes",
+  "step": "top_layer_modification",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_box"
+}

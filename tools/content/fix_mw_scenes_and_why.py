@@ -10,7 +10,7 @@ import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-SKY = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft")
+SKY = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft")
 
 
 def jload(path, default=None):

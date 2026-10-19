@@ -1,4 +1,4 @@
-"""Live loop for the SkycraftAether pack in the running disposable preview (no restart, no rebuild).
+"""Live loop for the InfiniteATLAS pack in the running disposable preview (no restart, no rebuild).
 
     py -3 shaderpack/tools/pack_live.py [--launch] [--close] [--cams helgen-near-smoke,mine-crystal-chamber]
                                         [--tag NAME] [--time 6000] [--weather clear|rain|thunder] [--no-sync] [--off]
@@ -7,14 +7,14 @@
 cleanly at the end (nothing is left running). The live lease (.work/lease/live.json) is taken for the run and
 released after --close.
 
-1. syncs this worktree's pack into the instance's shaderpacks/SkycraftAether (only changed files),
+1. syncs this worktree's pack into the instance's shaderpacks/InfiniteATLAS (only changed files),
 2. reloads it in the running game (`shaders off` / `shaders on` through tools/dev/live_world.py actions, which owns the
    harness lock, readiness and busy checks),
 3. prints only the shader compile/link errors Iris logged since the reload,
 4. visits approved cameras (tools/qa/visual-cameras.json) and captures each: `TAG-CAMERA.png` under the instance's
    build/autotest-screenshots (with --off, also a shaders-off frame for comparison).
 
-Run from the main checkout (F:\\Projects\\Personal\\Skycraft\\Skycraft). Needs a running, ready preview
+Works from the main checkout or any worktree. Needs a running, ready preview
 (`live_world.py status`: client.fresh) and the live lease (.work/lease/live.json) held by this workstream.
 """
 import argparse
@@ -30,27 +30,29 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-PACK = HERE.parent / "SkycraftAether"
-MAIN = Path(os.environ.get("SKYCRAFT_MAIN", r"F:\Projects\Personal\Skycraft\Skycraft"))
-INSTANCE = Path(os.environ["APPDATA"]) / "PrismLauncher/instances/Skycraft-26.3-autotest/.minecraft"
-DEST = INSTANCE / "shaderpacks/SkycraftAether"
+PACK = HERE.parent / "InfiniteATLAS"
+MAIN = (Path(os.environ["NIRNCRAFT_MAIN"]) if "NIRNCRAFT_MAIN" in os.environ else  # main checkout
+        Path(subprocess.check_output(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+                                     cwd=HERE, text=True).strip()).parent)
+INSTANCE = Path(os.environ["APPDATA"]) / "PrismLauncher/instances/NirnCraft-26.3-autotest/.minecraft"
+DEST = INSTANCE / "shaderpacks/InfiniteATLAS"
 LOG = INSTANCE / "logs/latest.log"
 SHOTS = INSTANCE / "build/autotest-screenshots"
 
 
-DEST_ZIP = INSTANCE / "shaderpacks/SkycraftAether.zip"
+DEST_ZIP = INSTANCE / "shaderpacks/InfiniteATLAS.zip"
 
 
 def sync():
     """Build this tree's pack (glslang-validated zip, as shipped) and install it the way players get it: when the
-    instance selects SkycraftAether.zip (the modpack default) the zip is replaced; a loose-folder instance gets the
+    instance selects InfiniteATLAS.zip (the modpack default) the zip is replaced; a loose-folder instance gets the
     folder synced."""
     iris = INSTANCE / "config/iris.properties"
-    if iris.exists() and "shaderPack=SkycraftAether.zip" in iris.read_text(encoding="utf-8", errors="replace"):
+    if iris.exists() and "shaderPack=InfiniteATLAS.zip" in iris.read_text(encoding="utf-8", errors="replace"):
         r = subprocess.run([sys.executable, "-I", str(HERE.parent / "build_pack.py")], capture_output=True, text=True)
         if r.returncode:
             raise SystemExit("pack build failed:\n" + (r.stdout + r.stderr)[-1500:])
-        built = HERE.parent / "build/SkycraftAether.zip"
+        built = HERE.parent / "build/InfiniteATLAS.zip"
         if DEST_ZIP.exists() and filecmp.cmp(built, DEST_ZIP, shallow=False):
             return 0
         shutil.copy2(built, DEST_ZIP)
@@ -110,7 +112,7 @@ def camera_lines(name, weather, day_time):
     c = cams[name] if isinstance(cams, dict) else next(x for x in cams if x.get("name") == name)
     (x, y, z), (tx, ty, tz) = c["position"], c["lookAt"]
     pre = [f"command time set {day_time}"] if day_time else []
-    pre += [f"command weather {weather}"] if weather else []  # Skycraft's own weather may refuse vanilla's
+    pre += [f"command weather {weather}"] if weather else []  # NirnCraft's own weather may refuse vanilla's
     return pre + [f"camera {x} {y} {z} {tx} {ty} {tz}", "settle 1800"]
 
 
@@ -129,7 +131,7 @@ def client_state():
 
 
 LEASE = MAIN / ".work/lease/live.json"
-OWNER = "aether/shader workstream (pack_live.py)"
+OWNER = "atlas/shader workstream (pack_live.py)"
 
 
 def take_lease():
@@ -137,11 +139,11 @@ def take_lease():
     if LEASE.exists():
         held = json.loads(LEASE.read_text(encoding="utf-8"))
         age = time.time() - time.mktime(time.strptime(held.get("heartbeat", now), "%Y-%m-%dT%H:%M:%SZ")) + time.timezone
-        if not held.get("owner", "").startswith("aether/shader") and age < 600:
+        if not held.get("owner", "").startswith("atlas/shader") and age < 600:
             raise SystemExit(f"live lease held by {held.get('owner')} (heartbeat {int(age)} s ago): wait your turn")
     LEASE.parent.mkdir(parents=True, exist_ok=True)
     LEASE.write_text(json.dumps({"owner": OWNER, "system": "claude-code", "job": "pack live loop",
-                                 "instance": "Skycraft-26.3-autotest", "heartbeat": now}), encoding="utf-8")
+                                 "instance": "NirnCraft-26.3-autotest", "heartbeat": now}), encoding="utf-8")
 
 
 def launch_and_wait(limit=900):
@@ -170,7 +172,7 @@ def launch_and_wait(limit=900):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cams", default="helgen-near-smoke")
-    ap.add_argument("--tag", default="aether")
+    ap.add_argument("--tag", default="atlas")
     ap.add_argument("--time", default="")
     ap.add_argument("--weather", default="")
     ap.add_argument("--no-sync", action="store_true")

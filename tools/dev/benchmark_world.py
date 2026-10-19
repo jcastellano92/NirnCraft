@@ -55,7 +55,7 @@ def main():
     for iteration in range(args.runs):
         for drive in (('F','E') if iteration%2==0 else ('E','F')):
             if inputs()!=source_inputs:raise ValueError('Sources changed during paired benchmark; preserve partial results and restart comparison')
-            base=ROOT/'dist/world-tests/runtimes' if drive=='F' else Path('E:/Skycraft-scratch/world-benchmark')
+            base=ROOT/'dist/world-tests/runtimes' if drive=='F' else Path('E:/NirnCraft-scratch/world-benchmark')
             runtime=(base/(stamp+'-'+drive+'-'+str(iteration))).resolve()
             # No recursive delete, reuse or move; every case has a newly owned path.
             if runtime.exists():raise ValueError('Refusing existing benchmark runtime')

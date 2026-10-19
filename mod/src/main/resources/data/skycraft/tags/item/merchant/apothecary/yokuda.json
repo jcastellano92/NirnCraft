@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    {
-      "id": "#skycraft:loot/ingredients/yokuda",
-      "required": false
-    }
-  ]
-}

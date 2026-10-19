@@ -1,0 +1,273 @@
+{
+  "id": "camp_gushnukbur",
+  "why": [
+    "greenshade.L1.drowned_coast",
+    "greenshade.L5.bridge_port",
+    "greenshade.L6.woodhearth_seat"
+  ],
+  "sil": "valenwood-camp-gushnukbur-plan",
+  "base": "none",
+  "overlay": "greenshade",
+  "radius": 36,
+  "reach": 48,
+  "gates": [
+    [
+      0,
+      34
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        17
+      ],
+      "overlay": "greenshade",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        17,
+        36
+      ],
+      "overlay": "greenshade",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 7,
+      "name": "camp_gushnukbur_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -10
+      ],
+      "name": "camp_gushnukbur_landmark",
+      "overlay": "greenshade"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          31
+        ],
+        [
+          -2,
+          8
+        ],
+        [
+          -2,
+          -17
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -24,
+          9
+        ],
+        [
+          -2,
+          11
+        ],
+        [
+          24,
+          8
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -2,
+        0
+      ],
+      "rx": 20,
+      "rz": 15,
+      "wobble": 5,
+      "lobes": 3,
+      "phase": 2.23,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        13,
+        0
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "camp_gushnukbur_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        3,
+        29
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "camp_gushnukbur_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        13
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "camp_gushnukbur_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -19,
+        22
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "camp_gushnukbur_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -12,
+        -6
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "camp_gushnukbur_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -25
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "camp_gushnukbur_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        8,
+        -10
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "camp_gushnukbur_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "camp_gushnukbur_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "camp_gushnukbur_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "camp_gushnukbur_b_5",
+    "smithy": "camp_gushnukbur_b_7"
+  },
+  "titles": {
+    "camp_gushnukbur_b_1": "place.nirncraft.camp_gushnukbur Council & Seat Hall",
+    "camp_gushnukbur_b_2": "place.nirncraft.camp_gushnukbur High Sanctuary",
+    "camp_gushnukbur_b_3": "place.nirncraft.camp_gushnukbur Fighters & Wayfarers Hall",
+    "camp_gushnukbur_b_4": "place.nirncraft.camp_gushnukbur Mages & Chroniclers Spire",
+    "camp_gushnukbur_b_5": "place.nirncraft.camp_gushnukbur The Lantern & Hearth Inn",
+    "camp_gushnukbur_b_6": "place.nirncraft.camp_gushnukbur The Traveler's Rest Tavern",
+    "camp_gushnukbur_b_7": "place.nirncraft.camp_gushnukbur Master Forge & Armorer",
+    "camp_gushnukbur_landmark": "High Seat of place.nirncraft.camp_gushnukbur",
+    "camp_gushnukbur_plaza": "place.nirncraft.camp_gushnukbur Central Plaza"
+  },
+  "innKey": "camp_gushnukbur_b_5",
+  "zones": [
+    {
+      "at": [
+        -2,
+        -13
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -2,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        12,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 30,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

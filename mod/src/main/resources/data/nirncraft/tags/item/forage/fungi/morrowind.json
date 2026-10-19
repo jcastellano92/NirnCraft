@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:hypha_facia",
+      "required": false
+    },
+    {
+      "id": "nirncraft:emperor_parasol_moss",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ash_creep_cluster",
+      "required": false
+    },
+    {
+      "id": "nirncraft:glowing_mushroom",
+      "required": false
+    }
+  ]
+}

@@ -1,9 +1,0 @@
-{
-  "parent": "minecraft:block/orientable_with_bottom",
-  "textures": {
-    "top": "skycraft:block/blacksmith_forge_top",
-    "bottom": "skycraft:block/blacksmith_forge_bottom",
-    "front": "skycraft:block/blacksmith_forge_front",
-    "side": "skycraft:block/blacksmith_forge_side"
-  }
-}

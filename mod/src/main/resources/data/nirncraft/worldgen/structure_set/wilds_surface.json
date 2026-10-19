@@ -1,0 +1,54 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:fort",
+      "weight": 4
+    },
+    {
+      "structure": "nirncraft:bandit_camp",
+      "weight": 4
+    },
+    {
+      "structure": "nirncraft:watchtower",
+      "weight": 3
+    },
+    {
+      "structure": "nirncraft:mage_tower",
+      "weight": 2
+    },
+    {
+      "structure": "nirncraft:giant_camp",
+      "weight": 1
+    },
+    {
+      "structure": "nirncraft:dragon_lair",
+      "weight": 1
+    },
+    {
+      "structure": "nirncraft:nordic_ruin",
+      "weight": 1
+    },
+    {
+      "structure": "nirncraft:grove",
+      "weight": 1
+    },
+    {
+      "structure": "nirncraft:cabin",
+      "weight": 2
+    },
+    {
+      "structure": "nirncraft:daedric_shrine",
+      "weight": 1
+    },
+    {
+      "structure": "nirncraft:forsworn_camp",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 36,
+    "separation": 12,
+    "salt": 718273502
+  }
+}

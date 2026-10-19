@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:stormcloak"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:stormcloak"
+      }
+    ]
+  }
+}

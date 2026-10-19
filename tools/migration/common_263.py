@@ -10,7 +10,7 @@ PERMISSIONS={1:'MODERATOR',2:'GAMEMASTER',3:'ADMIN',4:'OWNER'}
 
 def migrate():
     changed=0
-    for path in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
+    for path in (ROOT/'mod/src/main/java/com/nirncraft').rglob('*.java'):
         if owner(path)!='root':continue
         source=path.read_text(encoding='utf8');result=source
         for old,new in EFFECTS.items():result=re.sub(r'\bMobEffects\.'+old+r'\b','MobEffects.'+new,result)

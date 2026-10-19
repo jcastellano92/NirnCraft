@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cod",
+    "minecraft:salmon",
+    "minecraft:tropical_fish",
+    "minecraft:pufferfish",
+    "minecraft:cooked_cod",
+    "minecraft:cooked_salmon",
+    "minecraft:fishing_rod",
+    "#nirncraft:fish",
+    "nirncraft:fishing_rod",
+    "nirncraft:fine_fishing_rod",
+    "nirncraft:fishing_bait",
+    "nirncraft:glow_bait",
+    "nirncraft:grilled_fish",
+    "nirncraft:smoked_fish",
+    "minecraft:kelp",
+    "minecraft:dried_kelp",
+    "minecraft:nautilus_shell",
+    "minecraft:ink_sac",
+    "minecraft:glow_ink_sac",
+    "minecraft:prismarine_shard",
+    "minecraft:prismarine_crystals",
+    "minecraft:string",
+    "minecraft:cod_bucket",
+    "minecraft:salmon_bucket",
+    "minecraft:turtle_scute"
+  ]
+}

@@ -1,0 +1,70 @@
+package com.nirncraft.scatter;
+
+import com.nirncraft.NirnCraft;
+import com.nirncraft.core.Notifier;
+import com.nirncraft.core.PlayerData;
+import com.nirncraft.core.SkyData;
+import com.nirncraft.core.Skill;
+import com.nirncraft.skills.Progression;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+
+import java.util.Arrays;
+
+/**
+ * "Found: Great arch" the first time a player comes upon a hidden stash or a formation (a little Athletics
+ * experience, like the minor sites of the explore module). Only players in the overworld are checked, every two
+ * seconds.
+ */
+@net.neoforged.fml.common.EventBusSubscriber(modid = NirnCraft.MODID)
+public final class ScatterEvents {
+    private static final int INTERVAL = 40;
+
+    private ScatterEvents() {}
+
+    @SubscribeEvent
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (player.isSpectator() || player.level().dimension() != Level.OVERWORLD) return;
+        if ((player.tickCount + (player.getId() & 31) + 11) % INTERVAL != 0) return;
+        if (!ScatterConfig.discoveries()) return;
+        try {
+            ServerLevel level = player.level();
+            int x = player.getBlockX(), z = player.getBlockZ();
+            for (Discoveries.Find f : Discoveries.within(level.getSeed(), x, z, 48)) {
+                int reach = f.type() == Discoveries.Type.HIDDEN_STASH ? 7 : f.type().radius + 6;
+                if (f.distSqr(x, z) > (long) reach * reach) continue;
+                found(player, level, f);
+            }
+        } catch (RuntimeException e) {
+            NirnCraft.LOGGER.debug("NirnCraft scatter check failed for {}", player.getName().getString(), e);
+        }
+    }
+
+    private static void found(ServerPlayer player, ServerLevel level, Discoveries.Find f) {
+        // only once the chunk exists (a find far from loaded terrain is not "found" yet)
+        if (level.getChunkSource().getChunkNow(f.chunkX(), f.chunkZ()) == null) return;
+        PlayerData data = SkyData.get(player);
+        CompoundTag mod = data.module("scatter");
+        long[] found = mod.getLongArray("found").orElseGet(() -> new long[0]);
+        long key = f.key() ^ ((long) f.type().ordinal() << 56);
+        for (long k : found) if (k == key) return;
+        long[] grown = Arrays.copyOf(found, found.length + 1);
+        grown[found.length] = key;
+        mod.putLongArray("found", grown);
+        data.addStat("scatter_found", 1);
+        data.markDirty();
+        if (ScatterConfig.messages()) {
+            Notifier.message(player, Component.translatable("scatter.nirncraft.found",
+                    Component.translatable("scatter.nirncraft.find." + f.type().id())));
+        }
+        double xp = ScatterConfig.xp();
+        if (xp > 0) Progression.addSkillXp(player, Skill.ATHLETICS, (float) xp);
+    }
+}

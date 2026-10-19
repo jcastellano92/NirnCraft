@@ -1,0 +1,17 @@
+{
+  "feature": "nirncraft:biome/swamp_hist",
+  "placement": [
+    {
+      "type": "minecraft:block_predicate_filter",
+      "predicate": {
+        "type": "minecraft:would_survive",
+        "state": {
+          "id": "minecraft:mangrove_propagule",
+          "properties": {
+            "stage": "0"
+          }
+        }
+      }
+    }
+  ]
+}

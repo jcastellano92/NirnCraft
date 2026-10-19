@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:orsinium"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:orsinium"
+      }
+    ]
+  }
+}

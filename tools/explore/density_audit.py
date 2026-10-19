@@ -2,12 +2,12 @@
 
 Two subcommands:
 
-  py -3 tools/explore/density_audit.py render [--dir mod/run/skycraft-explore] [--tag regions] [--tiles tamriel]
-      Reads the CSVs written by the in-game audit (`/skycraft-explore audit all`), draws heatmaps of the walking
+  py -3 tools/explore/density_audit.py render [--dir mod/run/nirncraft-explore] [--tag regions] [--tiles tamriel]
+      Reads the CSVs written by the in-game audit (`/nirncraft-explore audit all`), draws heatmaps of the walking
       distance to the nearest point of interest over the Tamriel preview (docs/exploration/*.png), writes
       docs/exploration/density.csv and fills the region table of docs/EXPLORATION.md between the AUDIT markers.
 
-  py -3 tools/explore/density_audit.py estimate [--seed 1234] [--out mod/run/skycraft-explore]
+  py -3 tools/explore/density_audit.py estimate [--seed 1234] [--out mod/run/nirncraft-explore]
       An offline estimate for the Tamriel raster from the map assets alone (no game needed): named places,
       random-spread structure sets (exact placement math, map-only acceptance), the minor-site grid (same hash as
       explore/MinorSites.java, map context from the raster cells) and a Poisson estimate of the rarity-filtered site
@@ -28,8 +28,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-TAMRIEL = os.path.join(RES, "skycraft", "tamriel")
-DATA = os.path.join(RES, "data", "skycraft")
+TAMRIEL = os.path.join(RES, "nirncraft", "tamriel")
+DATA = os.path.join(RES, "data", "nirncraft")
 DOCS = os.path.join(ROOT, "docs")
 OUTDIR = os.path.join(DOCS, "exploration")
 PREVIEW = os.path.join(ROOT, "tools", "worldgen", "preview_tamriel.png")
@@ -286,8 +286,8 @@ def structure_sets():
             return out
         for v in json.load(open(p))["values"]:
             v = v["id"] if isinstance(v, dict) else v
-            if v.startswith("#skycraft:"):
-                out |= tag_values(v[len("#skycraft:"):], seen + (name,))
+            if v.startswith("#nirncraft:"):
+                out |= tag_values(v[len("#nirncraft:"):], seen + (name,))
             elif not v.startswith("#"):
                 out.add(v)
         return out
@@ -453,8 +453,8 @@ def estimate(args):
                             i += 1
                         e = entries[min(i, len(entries) - 1)]
                     sid, wgt, cat, where, typ = e
-                    ok = allows(where if typ == "skycraft:dungeon" else None, prov, r["id"])
-                    if typ == "skycraft:dungeon" and where is None:
+                    ok = allows(where if typ == "nirncraft:dungeon" else None, prov, r["id"])
+                    if typ == "nirncraft:dungeon" and where is None:
                         ok = allows([], prov, r["id"])
                     if ok:
                         if cat:
@@ -541,12 +541,12 @@ def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("render")
-    r.add_argument("--dir", default=os.path.join(ROOT, "mod", "run", "skycraft-explore"))
+    r.add_argument("--dir", default=os.path.join(ROOT, "mod", "run", "nirncraft-explore"))
     r.add_argument("--tag", default="regions")
     r.add_argument("--tiles", default="tamriel")
     e = sub.add_parser("estimate")
     e.add_argument("--seed", type=int, default=1234)
-    e.add_argument("--out", default=os.path.join(ROOT, "mod", "run", "skycraft-explore"))
+    e.add_argument("--out", default=os.path.join(ROOT, "mod", "run", "nirncraft-explore"))
     a = ap.parse_args()
     if a.cmd == "render":
         render(a)

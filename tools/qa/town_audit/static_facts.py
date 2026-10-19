@@ -1,6 +1,6 @@
 """Facts read from the code on 2026-10-13 (TO0), with file:line, that the plan data cannot show.  final.py copies them
 into docs/world/town_audit.json (`findings`, `equipment_matrix`, `routine_causes`) so later steps can tick them off.
-Paths are under mod/src/main/java/com/skycraft/."""
+Paths are under mod/src/main/java/com/nirncraft/."""
 
 # severity: A blocks play, B visible defect, C quality
 FINDINGS = [
@@ -32,7 +32,7 @@ FINDINGS = [
          where=['tamriel/settlement/grammar/Outdoors.java:265-272 (candles at x=0 when w==1 overwrite the pedestal at g+1)',
                 'tamriel/settlement/grammar/Zoning.java:1098-1103 (lining: 1/3 of rank-1 streets, half shrines, offset only for axis-aligned streets)',
                 'tamriel/settlement/plan/Plan.java:214-223 (lineHits: integer half width, strict <, samples every 2 blocks: a 1x1 prop never collides with a width-1/3 street)'],
-         evidence='375 one-cell shrines in 884 settlements (Whiterun specs 175/176: y121 candle, y122 skycraft:shrine_of_kynareth)'),
+         evidence='375 one-cell shrines in 884 settlements (Whiterun specs 175/176: y121 candle, y122 nirncraft:shrine_of_kynareth)'),
     dict(id='F08', step='TO5', severity='B', title='Crop plots and fences inside town cores',
          where=['tamriel/settlement/grammar/Zoning.java:1122-1160 (backyards: garden behind every home/inn/tannery/butcher, no zone test)',
                 'tamriel/settlement/grammar/Fabric.java:483-497 (filler: 4/12 GARDEN, 2/12 PEN anywhere inside R)',

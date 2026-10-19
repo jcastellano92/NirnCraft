@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:swamp",
+    "minecraft:mangrove_swamp",
+    {
+      "id": "#forge:is_swamp",
+      "required": false
+    },
+    "nirncraft:bitter_coast_swamp",
+    "nirncraft:black_marsh_swamp",
+    "nirncraft:blackwood_swamp",
+    "nirncraft:deep_mire",
+    "nirncraft:fen_edge",
+    "nirncraft:hist_grove",
+    "nirncraft:hjaalmarch_marsh",
+    "nirncraft:mangrove_delta",
+    "nirncraft:murkmire",
+    "nirncraft:murky_river",
+    "nirncraft:reedlands",
+    "nirncraft:shadowfen",
+    "nirncraft:tigonus_marsh",
+    "nirncraft:valenwood_mangrove_coast"
+  ]
+}

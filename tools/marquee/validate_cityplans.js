@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * Validates the city plans (mod/src/main/resources/skycraft/tamriel/cityplans/*.json, format in
+ * Validates the city plans (mod/src/main/resources/nirncraft/tamriel/cityplans/*.json, format in
  * settlement/plan/CityPlan.java) and their style overlays, offline:
  *   node tools/marquee/validate_cityplans.js            check; exit 1 on errors
  *   node tools/marquee/validate_cityplans.js --lang     also merge each plan's "titles" into
- *                                                       mod/src/main/lang/skycraft/settlements.json
+ *                                                       mod/src/main/lang/nirncraft/settlements.json
  * Checks: JSON parses; id is a place; index lists every file; landmark ids are registered (LandmarkRegistry.java);
  * building/queue kinds are archetypes; flags are known; overlays exist and their ids hash without collision;
  * base "none" has gates inside the radius; reach/radius do not exceed the place radius; silhouette tags unique
@@ -14,10 +14,10 @@
 const fs = require("fs");
 const path = require("path");
 const root = path.resolve(__dirname, "..", "..");
-const res = path.join(root, "mod", "src", "main", "resources", "skycraft", "tamriel");
+const res = path.join(root, "mod", "src", "main", "resources", "nirncraft", "tamriel");
 const plansDir = path.join(res, "cityplans");
 const overlayDir = path.join(res, "styles", "overlays");
-const langFile = path.join(root, "mod", "src", "main", "lang", "skycraft", "settlements.json");
+const langFile = path.join(root, "mod", "src", "main", "lang", "nirncraft", "settlements.json");
 const writeLang = process.argv.includes("--lang");
 
 let errors = 0;
@@ -33,11 +33,11 @@ for (const f of pidx) {
   for (const e of JSON.parse(fs.readFileSync(p, "utf8"))) places[e.id] = e;
 }
 // registry ids and archetypes parsed from the Java sources
-const reg = fs.readFileSync(path.join(root, "mod", "src", "main", "java", "com", "skycraft", "tamriel", "settlement", "build", "LandmarkRegistry.java"), "utf8");
+const reg = fs.readFileSync(path.join(root, "mod", "src", "main", "java", "com", "nirncraft", "tamriel", "settlement", "build", "LandmarkRegistry.java"), "utf8");
 const landmarkIds = new Set([...reg.matchAll(/reg\("([a-z_]+)"/g)].map((m) => m[1]));
-const arche = fs.readFileSync(path.join(root, "mod", "src", "main", "java", "com", "skycraft", "tamriel", "settlement", "plan", "Archetype.java"), "utf8");
+const arche = fs.readFileSync(path.join(root, "mod", "src", "main", "java", "com", "nirncraft", "tamriel", "settlement", "plan", "Archetype.java"), "utf8");
 const archetypes = new Set([...arche.matchAll(/^\s+([A-Z_]+)\((?:true|false),/gm)].map((m) => m[1].toLowerCase()));
-const useSrc = fs.readFileSync(path.join(root, "mod", "src", "main", "java", "com", "skycraft", "tamriel", "settlement", "grammar", "Use.java"), "utf8");
+const useSrc = fs.readFileSync(path.join(root, "mod", "src", "main", "java", "com", "nirncraft", "tamriel", "settlement", "grammar", "Use.java"), "utf8");
 const uses = new Set([...useSrc.matchAll(/^\s+([A-Z_]+)\(\d+, \d+, \d+, \d+,/gm)].map((m) => m[1].toLowerCase()));
 const FLAGS = new Set(["for_sale", "upper", "rich", "water", "no_beard", "fixed", "major", "palisade", "ruined", "burnt", "sign", "seat", "ground"]);
 const LINE_KINDS = new Set(["street", "wall", "bridge", "canal"]);
@@ -199,13 +199,13 @@ for (const f of fs.existsSync(overlayDir) ? fs.readdirSync(overlayDir) : []) {
 // sign names
 const missing = [];
 for (const [key, id] of usedNames) {
-  const lk = "settlement.skycraft.name." + key;
+  const lk = "settlement.nirncraft.name." + key;
   if (!(key in titles) && !(lk in lang)) missing.push(`${id}: no title for ${key}`);
 }
 if (writeLang) {
   let n = 0;
   for (const [key, text] of Object.entries(titles)) {
-    const lk = "settlement.skycraft.name." + key;
+    const lk = "settlement.nirncraft.name." + key;
     if (lang[lk] !== text) { lang[lk] = text; n++; }
   }
   const sorted = {};

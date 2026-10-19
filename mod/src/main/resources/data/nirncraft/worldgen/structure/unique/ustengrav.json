@@ -1,0 +1,17 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "barrow",
+  "special": "ustengrav",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "ustengrav"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Skycraft original soundtrack: a small procedural composer + synthesiser.
+NirnCraft original soundtrack: a small procedural composer + synthesiser.
 
 Every piece is written by a seeded composition engine (modal chord progressions, voice-led pads, motif
 development for the melodies, pattern libraries for drums and ostinati) and synthesised from scratch:
@@ -30,11 +30,11 @@ half-flat second) oud and darbuka; High Rock's lute, recorder and Celtic modes; 
 Akavir's pentatonic koto, shakuhachi and taiko; and the open sea.
 
 Nothing is sampled or transcribed: all melodies come from the random motif generator, so the music is original
-to Skycraft and ships with the mod.  It is *not* Skyrim's soundtrack; players who own Skyrim can map their own
+to NirnCraft and ships with the mod.  It is *not* Skyrim's soundtrack; players who own Skyrim can map their own
 copy of it onto the same events with tools/music/import_skyrim_audio.py (see docs/MUSIC.md).
 
 Usage:
-    py -3 tools/music/compose.py                 # render every track to assets/skycraft/sounds/music/*.ogg
+    py -3 tools/music/compose.py                 # render every track to assets/nirncraft/sounds/music/*.ogg
     py -3 tools/music/compose.py town_1 combat_2 # only these
     py -3 tools/music/compose.py -j 4            # four tracks in parallel
     py -3 tools/music/compose.py --wav out/      # also keep 16-bit WAVs
@@ -61,7 +61,7 @@ import audiolib  # noqa: E402
 # Synthesis rate. The jar budget (docs/MUSIC.md) is met by encoding long pieces at 24 kHz, Vorbis q1.
 SR = 32000
 REPO = pathlib.Path(__file__).resolve().parents[2]
-OUT_DIR = REPO / "mod/src/main/resources/assets/skycraft/sounds/music"
+OUT_DIR = REPO / "mod/src/main/resources/assets/nirncraft/sounds/music"
 ENCODE_SR = 24000
 ENCODE_Q = 1.0
 
@@ -2423,7 +2423,7 @@ def render_track(name: str, wav_dir=None, quality_override=None):
     if quality_override is not None:
         q = quality_override
     out = audiolib.write_ogg(x, OUT_DIR / f"{name}.ogg", SR, quality=q, out_sr=out_sr,
-                             title=f"Skycraft - {name.replace('_', ' ').title()}")
+                             title=f"NirnCraft - {name.replace('_', ' ').title()}")
     size = out.stat().st_size
     peak = 20 * math.log10(max(1e-9, float(np.max(np.abs(x)))))
     rms = 20 * math.log10(max(1e-9, float(np.sqrt(np.mean(x ** 2)))))

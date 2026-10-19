@@ -1,0 +1,459 @@
+{
+  "line": "silver_hand",
+  "category": "faction",
+  "faction": "silver_hand",
+  "region": "skyrim/whiterun",
+  "speakers": {
+    "narrator": "Narrator"
+  },
+  "npcs": [
+    {
+      "id": "brenna_ashfall",
+      "name": "Vigilant Brenna Ashfall",
+      "role": "priest",
+      "place": "whiterun",
+      "offset": [
+        -10,
+        14
+      ],
+      "female": true,
+      "greet": "Stendarr bids us hunt monsters. He never said they'd all have fangs. Some carry silver and call themselves heroes."
+    },
+    {
+      "id": "sigrun_pelt_trader",
+      "name": "Sigrun the Pelt-Trader",
+      "role": "hunter",
+      "place": "chillfurrow_farm",
+      "offset": [
+        6,
+        4
+      ],
+      "female": true,
+      "greet": "If you're here to buy, I've nothing left. They took the furs. They took everything."
+    },
+    {
+      "id": "njada_stonearm",
+      "name": "Njada Stonearm",
+      "role": "adventurer",
+      "place": "jorrvaskr",
+      "offset": [
+        -6,
+        4
+      ],
+      "female": true,
+      "greet": "The whelps in Jorrvaskr fight with their mouths. I fight with a shield. Guess which of us gets more work."
+    }
+  ],
+  "relics": [
+    {
+      "id": "sh_flaying_list",
+      "name": "The Skinner's List",
+      "desc": "Names of hunters, smiths and farmers who trade with Jorrvaskr. Three are crossed out in something brown.",
+      "icon": 11
+    },
+    {
+      "id": "sh_varek_journal",
+      "name": "Journal of Varek Silverfist",
+      "desc": "Plans for the Silver Hand after Krev, written in a cramped, proud hand, and a map of the old refuge where the hunters gather.",
+      "icon": 7
+    }
+  ],
+  "scenes": {
+    "sh_the_list": [
+      [
+        "brenna_ashfall",
+        "Look at these names. A tanner. A woodcutter. A farmer whose only crime was selling mutton to Jorrvaskr's kitchen."
+      ],
+      [
+        "brenna_ashfall",
+        "The Silver Hand say they hunt beasts. I have hunted beasts for twenty years. Beasts do not keep lists."
+      ]
+    ],
+    "sh_the_end": [
+      [
+        "narrator",
+        "In the deepest chamber of Driftshade Refuge, silver-tipped arrows lie in bundles beside tanning racks no one wants to look at too closely."
+      ],
+      [
+        "brenna_ashfall",
+        "It's done. Without Krev and without Varek, the rest will scatter like crows. Stendarr keep me from feeling glad of it. I feel glad of it anyway."
+      ],
+      [
+        "njada_stonearm",
+        "Jorrvaskr will drink to you tonight, Vigilant or no. Don't tell Vilkas I said so."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "sh_the_skinners_list",
+      "title": "The Skinner's List",
+      "faction": "vigilants_of_stendarr",
+      "start": "npc:brenna_ashfall",
+      "requires": [
+        "level:5"
+      ],
+      "offer": "You look like someone who's lost a trail.",
+      "pitch": "Not lost. Followed it too far. The Silver Hand murdered a pelt-trader at Chillfurrow Farm because he sold furs to the Companions. They call it hunting werewolves. I call it butchery, and I mean to prove it. Will you help?",
+      "desc": "Vigilant Brenna Ashfall believes the Silver Hand, a band of self-styled werewolf hunters, murdered a pelt-trader at Chillfurrow Farm because he did business with the Companions.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "sigrun_pelt_trader",
+          "text": "Speak with Sigrun at Chillfurrow Farm",
+          "topic": "Vigilant Ashfall sent me. I'm sorry about your husband.",
+          "reply": "He sold wolf pelts to Jorrvaskr for twenty years. That's all. They came at night with silver arrows and said he was 'feeding the beasts.' They camp in the gully east of here. I can still hear them laughing."
+        },
+        {
+          "type": "clear",
+          "place": "chillfurrow_farm",
+          "offset": [
+            120,
+            -90
+          ],
+          "text": "Clear the Silver Hand camp east of the farm",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Silver Hand Stalker",
+              "hostile": true,
+              "armor": "#c0c8d0"
+            }
+          ],
+          "journal": "The stalkers had a fire going and Sigrun's furs drying beside it. One of them was wearing her husband's boots."
+        },
+        {
+          "type": "retrieve",
+          "place": "chillfurrow_farm",
+          "offset": [
+            120,
+            -90
+          ],
+          "relic": "sh_flaying_list",
+          "radius": 10,
+          "text": "Search the camp"
+        },
+        {
+          "type": "deliver",
+          "npc": "brenna_ashfall",
+          "relic": "sh_flaying_list",
+          "text": "Bring the list to Vigilant Ashfall in Whiterun",
+          "topic": "The Silver Hand were carrying this. It's a list of names.",
+          "reply": "Let me see it.",
+          "actions": "scene:sh_the_list"
+        }
+      ],
+      "outro": "The Silver Hand murdered a pelt-trader for selling furs to the Companions, and they carry a list of others marked to die. Vigilant Brenna Ashfall means to end them.",
+      "rewards": {
+        "gold": 250,
+        "faction_points": 3
+      },
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "sh_silver_under_greymoor",
+      "title": "Silver Under Greymoor",
+      "faction": "vigilants_of_stendarr",
+      "start": "auto",
+      "requires": [
+        "quest:sh_the_skinners_list"
+      ],
+      "desc": "The list was written at Fort Greymoor, a Silver Hand hideout west of Whiterun. Njada Stonearm of the Companions went there to settle it alone and has not come back.",
+      "on_start": "relocate:njada_stonearm:fort_greymoor:6:4",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "fort_greymoor",
+          "text": "Travel to Fort Greymoor"
+        },
+        {
+          "type": "clear",
+          "place": "fort_greymoor",
+          "placement": "structure",
+          "text": "Fight through the Silver Hand in the fort",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 4,
+              "name": "Silver Hand Hunter",
+              "hostile": true,
+              "armor": "#c0c8d0"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "fort_greymoor",
+          "placement": "structure",
+          "text": "Kill Hrafnhild Silver-Brand, the fort's warden",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Hrafnhild Silver-Brand",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4,
+              "hostile": true,
+              "armor": "#a8b0b8",
+              "weapon": "nirncraft:steel_war_axe"
+            }
+          ],
+          "journal": "Hrafnhild kept a branding iron shaped like a silver hand heating in the brazier. Njada was chained beside it, and had not yet been marked."
+        },
+        {
+          "type": "talk",
+          "npc": "njada_stonearm",
+          "text": "Free Njada Stonearm",
+          "topic": "Can you stand?",
+          "reply": "I can stand, walk and hit things. A Vigilant's errand-runner, saving a Companion? Don't tell Vilkas. Get me out of here and I'll owe you a drink, maybe two."
+        },
+        {
+          "type": "escort",
+          "npc": "njada_stonearm",
+          "place": "jorrvaskr",
+          "text": "Escort Njada back to Jorrvaskr"
+        },
+        {
+          "type": "talk",
+          "npc": "brenna_ashfall",
+          "text": "Report to Vigilant Ashfall",
+          "topic": "Greymoor is ours. Njada is home in Jorrvaskr.",
+          "reply": "Good. Whatever the Companions are, they did not deserve that. Hrafnhild answered to Krev the Skinner. He holds Gallows Rock, and he will know by now what we did."
+        }
+      ],
+      "outro": "I cleared the Silver Hand from Fort Greymoor and brought Njada Stonearm of the Companions home alive. Their warden answered to Krev the Skinner of Gallows Rock.",
+      "rewards": {
+        "gold": 400,
+        "faction_points": 4
+      },
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "sh_krev_the_skinner",
+      "title": "Krev the Skinner",
+      "faction": "vigilants_of_stendarr",
+      "start": "auto",
+      "requires": [
+        "quest:sh_silver_under_greymoor",
+        "!quest:comp_the_silver_hand"
+      ],
+      "desc": "Krev the Skinner leads the Silver Hand from the ruined fort of Gallows Rock. Brenna Ashfall wants him stopped before he takes revenge for Greymoor.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "gallows_rock",
+          "text": "Travel to Gallows Rock"
+        },
+        {
+          "type": "clear",
+          "place": "gallows_rock",
+          "placement": "structure",
+          "text": "Fight through the Silver Hand at Gallows Rock",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 4,
+              "name": "Silver Hand Blade",
+              "hostile": true,
+              "armor": "#c0c8d0"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "gallows_rock",
+          "placement": "structure",
+          "text": "Kill Krev the Skinner",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Krev the Skinner",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5,
+              "hostile": true,
+              "armor": "#a8b0b8",
+              "weapon": "nirncraft:steel_greatsword"
+            }
+          ],
+          "journal": "Krev talked the whole fight: about beasts, about blood, about the pelts he would hang in his hall. He stopped talking at the end."
+        },
+        {
+          "type": "talk",
+          "npc": "brenna_ashfall",
+          "text": "Report to Vigilant Ashfall",
+          "topic": "Krev the Skinner is dead.",
+          "reply": "Then the Silver Hand have lost their knife. But a knife needs a hand to hold it. Krev took orders from someone. I want to know who."
+        }
+      ],
+      "outro": "I killed Krev the Skinner at Gallows Rock. Brenna Ashfall believes someone above Krev still holds the Silver Hand together.",
+      "rewards": {
+        "gold": 500,
+        "faction_points": 4
+      },
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "sh_the_last_silver",
+      "title": "The Last of the Silver",
+      "faction": "vigilants_of_stendarr",
+      "start": "auto",
+      "requires": [
+        "quest:sh_silver_under_greymoor",
+        "quest:sh_krev_the_skinner|quest:comp_the_silver_hand"
+      ],
+      "desc": "With Krev the Skinner dead, the Silver Hand in Skyrim answer to one man: Varek Silverfist. Brenna Ashfall has word of a courier carrying his orders on the road north of Whiterun.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "brenna_ashfall",
+          "text": "Speak with Vigilant Ashfall",
+          "topic": "Krev is dead. Is it over?",
+          "reply": "Krev was the knife. Varek Silverfist is the hand that holds it, and nobody has seen his face in years. A courier rides for him on the road north of the city. Take what he carries."
+        },
+        {
+          "type": "kill",
+          "place": "whiterun",
+          "offset": [
+            80,
+            -380
+          ],
+          "text": "Stop Varek's courier on the north road",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Silver Hand Courier",
+              "target": true,
+              "hostile": true,
+              "armor": "#c0c8d0"
+            },
+            {
+              "type": "npc:thug",
+              "count": 2,
+              "name": "Courier's Guard",
+              "hostile": true,
+              "armor": "#c0c8d0"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "whiterun",
+          "offset": [
+            80,
+            -380
+          ],
+          "relic": "sh_varek_journal",
+          "radius": 10,
+          "text": "Search the courier's saddlebags"
+        },
+        {
+          "type": "deliver",
+          "npc": "brenna_ashfall",
+          "relic": "sh_varek_journal",
+          "text": "Bring Varek's journal to Vigilant Ashfall",
+          "topic": "The courier was carrying Varek's own journal.",
+          "reply": "Arrogant enough to write it all down. He gathers the last of them at Driftshade Refuge, north in the Pale. I'm coming with you. Njada says she is too, and I have stopped arguing with her."
+        },
+        {
+          "type": "go",
+          "place": "driftshade_refuge",
+          "text": "Travel to Driftshade Refuge",
+          "actions": "summon:brenna_ashfall;summon:njada_stonearm"
+        },
+        {
+          "type": "clear",
+          "place": "driftshade_refuge",
+          "placement": "structure",
+          "text": "Break the Silver Hand's last stronghold",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 4,
+              "name": "Silver Hand Veteran",
+              "hostile": true,
+              "armor": "#c0c8d0"
+            },
+            {
+              "type": "nirncraft:werewolf",
+              "name": "Chained Werewolf"
+            }
+          ],
+          "journal": "They kept a werewolf in chains to train their recruits, starved half to madness. When the chains broke, it went for the hunters first."
+        },
+        {
+          "type": "kill",
+          "place": "driftshade_refuge",
+          "placement": "structure",
+          "text": "Kill Varek Silverfist",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Varek Silverfist",
+              "target": true,
+              "boss": true,
+              "hp": 3.5,
+              "dmg": 1.6,
+              "hostile": true,
+              "armor": "#e0e4e8",
+              "weapon": "nirncraft:steel_greatsword"
+            }
+          ],
+          "actions": "scene:sh_the_end",
+          "journal": "Varek wore a gauntlet of real silver, his whole right hand. He swore the beasts would inherit Skyrim without him. Then he fell, and the gauntlet rang on the stone."
+        },
+        {
+          "type": "talk",
+          "npc": "brenna_ashfall",
+          "text": "Speak with Vigilant Ashfall",
+          "topic": "The Silver Hand is finished.",
+          "reply": "In Skyrim, at least. Take this. It was Varek's, and it has hunted too many innocent people. Let it hunt something that deserves it.",
+          "actions": "relocate:brenna_ashfall:whiterun:-10:14;relocate:njada_stonearm:jorrvaskr:-6:4"
+        }
+      ],
+      "outro": "I took Varek Silverfist's journal from his courier and followed it to Driftshade Refuge, where I killed him and broke the last of the Silver Hand in Skyrim.",
+      "rewards": {
+        "gold": 1000,
+        "faction_points": 8,
+        "perks": 1,
+        "flags": [
+          "sh_silver_hand_broken"
+        ],
+        "items": [
+          {
+            "item": "nirncraft:steel_greatsword",
+            "name": "Varek's Silver Edge",
+            "enchant": {
+              "smite": 4,
+              "sharpness": 3,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "nirncraft:steel_plate_chestplate",
+            "name": "Vigilant's Hauberk",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    }
+  ]
+}

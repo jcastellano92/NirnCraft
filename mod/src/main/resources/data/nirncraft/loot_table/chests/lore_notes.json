@@ -1,0 +1,82 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"letter_homesick_legionnaire\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"note_camp_orders\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"note_scrawled_warning\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"note_shopping_list\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 7,
+          "modifier": {
+            "tag": "{book:\"journal_lost_explorer\",nirncraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"note_treasure_hint\",nirncraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"for_the_nords\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"empire_keeps_us_whole\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        }
+      ]
+    }
+  ]
+}

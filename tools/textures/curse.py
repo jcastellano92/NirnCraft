@@ -1,6 +1,6 @@
 """Generates the curse module's textures (PIL), all original procedural art.
 
-Writes into mod/src/main/resources/assets/skycraft/textures/:
+Writes into mod/src/main/resources/assets/nirncraft/textures/:
   entity/curse/werewolf.png (+ _eyes)        128x64  WerewolfModel
   entity/curse/vampire_lord.png (+ _eyes)    128x64  VampireLordModel
   entity/curse/death_hound.png (+ _eyes)     64x32   DeathHoundModel
@@ -23,8 +23,8 @@ import re
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures")
-MODELS = os.path.join(ROOT, "mod", "src", "main", "java", "com", "skycraft", "curse", "client", "model")
+TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures")
+MODELS = os.path.join(ROOT, "mod", "src", "main", "java", "com", "nirncraft", "curse", "client", "model")
 
 
 # ------------------------------------------------------------------------------------------------ helpers

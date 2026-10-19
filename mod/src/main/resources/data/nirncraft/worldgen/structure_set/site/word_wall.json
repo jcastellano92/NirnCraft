@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/word_wall",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274039,
+    "types": [
+      "word_wall"
+    ],
+    "variants": []
+  }
+}

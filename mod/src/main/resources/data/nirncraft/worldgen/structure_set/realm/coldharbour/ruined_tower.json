@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:realm/coldharbour/ruined_tower",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 10,
+    "separation": 4,
+    "salt": 2041507
+  }
+}

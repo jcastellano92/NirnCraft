@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "nirncraft:block/page_block_top",
+    "side": "nirncraft:block/page_block"
+  }
+}

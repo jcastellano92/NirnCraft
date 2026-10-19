@@ -1,0 +1,616 @@
+{
+  "line": "imperial_cult",
+  "category": "faction",
+  "faction": "imperial_cult",
+  "region": "cyrodiil/heartlands",
+  "speakers": {
+    "narrator": "Narrator"
+  },
+  "places": {
+    "green_emperor_catacombs": {
+      "x": 1010,
+      "z": 5790,
+      "r": 20,
+      "name": "Catacombs of the Green Emperor Way"
+    }
+  },
+  "npcs": [
+    {
+      "id": "primate_artorius",
+      "name": "Primate Artorius",
+      "role": "priest",
+      "place": "imperial_city",
+      "offset": [
+        -4,
+        -12
+      ],
+      "greet": "The Temple of the One welcomes every soul, the faithful and the merely tired alike. Sit, if you need to. The Nine are patient."
+    },
+    {
+      "id": "old_tamsin",
+      "name": "Old Tamsin",
+      "role": "beggar",
+      "place": "imperial_city",
+      "offset": [
+        16,
+        -14
+      ],
+      "female": true,
+      "greet": "A septim for an old woman? Or a crust. Or a kind word. I'm not choosy, dear, I'm only hungry."
+    },
+    {
+      "id": "corvinus_aelius",
+      "name": "Corvinus Aelius",
+      "role": "merchant",
+      "place": "imperial_city",
+      "offset": [
+        -18,
+        -6
+      ],
+      "greet": "Fine silks from the Market District, priced for people who never ask the price. Are you that kind of person?"
+    },
+    {
+      "id": "sister_ilara",
+      "name": "Sister Ilara",
+      "role": "priest",
+      "place": "bravil",
+      "offset": [
+        6,
+        -12
+      ],
+      "female": true,
+      "greet": "Mara's chapel is full and the sick keep coming. If you are well, roll up your sleeves. If you are sick, lie down. Either way, welcome."
+    }
+  ],
+  "relics": [
+    {
+      "id": "alms_purse",
+      "name": "Temple Alms Purse",
+      "desc": "A purse stitched with the symbols of the Nine, heavy with donations for the poor.",
+      "icon": 11
+    },
+    {
+      "id": "arkay_censer",
+      "name": "Censer of Arkay",
+      "desc": "A small brass censer that the Temple uses to bless the resting dead. The smoke smells of cedar.",
+      "icon": 15
+    },
+    {
+      "id": "dagon_idol",
+      "name": "Idol of Mehrunes Dagon",
+      "desc": "A crude red idol of the Prince of Destruction, carved by people who should have known better.",
+      "icon": 26
+    },
+    {
+      "id": "marsh_heal_herbs",
+      "name": "Bundle of Bravil Healing Herbs",
+      "desc": "Marsh herbs that Sister Ilara can brew into a draught against the coughing sickness.",
+      "icon": 15
+    }
+  ],
+  "scenes": {
+    "ic_catacombs": [
+      [
+        "narrator",
+        "The catacomb air is cold and still. Then the candles gutter all at once, and somewhere in the dark, bone scrapes on stone."
+      ],
+      [
+        "primate_artorius",
+        "Arkay keeps the door between life and death. When the dead walk, someone has propped it open. Close it, gently if you can."
+      ]
+    ],
+    "ic_blessing": [
+      [
+        "narrator",
+        "In the great dome of the Temple of the One, the Primate stands beneath the windows of the Nine. Colored light falls across the floor like water."
+      ],
+      [
+        "primate_artorius",
+        "You fed the poor, quieted the dead, walked the roads of the Divines, scoured a Daedric shrine and nursed a sick city back to health."
+      ],
+      [
+        "primate_artorius",
+        "The Nine do not need us to be perfect. They need us to keep showing up. You have. Kneel, and receive their blessing."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "ic_alms_for_the_poor",
+      "title": "Alms for the Poor",
+      "start": "npc:primate_artorius",
+      "requires": [
+        "!faction:imperial_cult"
+      ],
+      "offer": "I'd like to serve the Temple.",
+      "pitch": "Service starts with the smallest things. Corvinus Aelius in the Market District has promised the Temple a donation and keeps forgetting. Collect it, then see that Old Tamsin outside the Temple eats tonight. Come back and tell me what you learned.",
+      "desc": "Primate Artorius of the Temple of the One asked me to collect a promised donation from the merchant Corvinus Aelius and use it to feed the beggar Old Tamsin.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "corvinus_aelius",
+          "text": "Collect the Temple's donation from Corvinus Aelius",
+          "topic": "The Primate sent me about the donation you promised.",
+          "reply": "Did I promise that? I suppose I did. Here. For the Temple. Tell the Primate my name, and tell him it was generous.",
+          "actions": "relic:alms_purse",
+          "place": "imperial_city"
+        },
+        {
+          "type": "deliver",
+          "npc": "old_tamsin",
+          "item": "minecraft:bread",
+          "count": 3,
+          "text": "Bring Old Tamsin three loaves of bread",
+          "topic": "This is from the Temple. Eat, mother.",
+          "reply": "Bless you, dear. Bless the Temple, too, and bless whatever merchant got shamed into paying for it.",
+          "place": "imperial_city"
+        },
+        {
+          "type": "deliver",
+          "npc": "primate_artorius",
+          "relic": "alms_purse",
+          "text": "Bring the alms purse to Primate Artorius",
+          "topic": "Tamsin has eaten. The rest of the donation is here.",
+          "reply": "Good. You fed a hungry woman and reminded a rich man of his promise. Both are acts of faith. Welcome to the Imperial Cult, Layman.",
+          "place": "imperial_city"
+        }
+      ],
+      "outro": "I gathered alms for the poor and was received into the Imperial Cult by Primate Artorius at the Temple of the One.",
+      "rewards": {
+        "gold": 100,
+        "join": true,
+        "items": [
+          "nirncraft:silver_ring"
+        ]
+      },
+      "region": "cyrodiil/heartlands",
+      "why": [
+        "cyrodiil/heartlands.L8.temple_of_the_one",
+        "cyrodiil.L8.the_nine"
+      ],
+      "consequence": {
+        "world_state": "ic_alms_for_the_poor_resolved",
+        "flag": "conseq_ic_alms_for_the_poor",
+        "summary": "I gathered alms for the poor and was received into the Imperial Cult by Primate Artorius at the Temple of the One."
+      }
+    },
+    {
+      "id": "ic_rest_for_the_restless",
+      "title": "Rest for the Restless",
+      "start": "auto",
+      "requires": [
+        "quest:ic_alms_for_the_poor|faction:imperial_cult"
+      ],
+      "desc": "The dead in the catacombs beneath the Green Emperor Way have begun to stir. Primate Artorius asked me to carry Arkay's censer into the catacombs and put them back to rest.",
+      "on_start": "relic:arkay_censer",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "green_emperor_catacombs",
+          "text": "Enter the catacombs of the Green Emperor Way",
+          "actions": "scene:ic_catacombs"
+        },
+        {
+          "type": "clear",
+          "place": "green_emperor_catacombs",
+          "placement": "structure",
+          "text": "Lay the restless dead to rest",
+          "spawn": [
+            {
+              "type": "minecraft:zombie",
+              "count": 3,
+              "name": "Restless Dead"
+            },
+            {
+              "type": "minecraft:skeleton",
+              "count": 2,
+              "name": "Risen Bones"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "green_emperor_catacombs",
+          "placement": "structure",
+          "text": "Destroy the necromancer who disturbed the tombs",
+          "spawn": [
+            {
+              "type": "nirncraft:necromancer",
+              "name": "Grave-Robber Tullus",
+              "target": true,
+              "boss": true,
+              "hp": 2.0
+            }
+          ],
+          "journal": "A grave-robber with a little necromancy had been raising the dead to dig for him. The censer's smoke settled the rest back into their niches."
+        },
+        {
+          "type": "deliver",
+          "npc": "primate_artorius",
+          "relic": "arkay_censer",
+          "text": "Return Arkay's censer to Primate Artorius",
+          "topic": "The catacombs are quiet again. A grave-robber was raising them.",
+          "reply": "Arkay will be pleased, and so will the families of the dead. You did that with courage and with respect. Both are needed.",
+          "place": "imperial_city"
+        }
+      ],
+      "outro": "I put the restless dead of the Green Emperor Way catacombs back to rest and ended the grave-robber who woke them.",
+      "rewards": {
+        "gold": 300,
+        "faction_points": 4,
+        "items": [
+          "nirncraft:spell_tome_lesser_ward"
+        ]
+      },
+      "region": "cyrodiil/heartlands",
+      "why": [
+        "cyrodiil/heartlands.L8.temple_of_the_one",
+        "cyrodiil/nibenay_basin.L8.arkay_chapel"
+      ],
+      "consequence": {
+        "world_state": "ic_rest_for_the_restless_resolved",
+        "flag": "conseq_ic_rest_for_the_restless",
+        "summary": "I put the restless dead of the Green Emperor Way catacombs back to rest and ended the grave-robber who woke them."
+      }
+    },
+    {
+      "id": "ic_roads_of_the_divines",
+      "title": "The Roads of the Divines",
+      "start": "npc:primate_artorius",
+      "requires": [
+        "quest:ic_rest_for_the_restless"
+      ],
+      "offer": "How else can I serve?",
+      "pitch": "Walk the roads of the Divines. Each city of Cyrodiil keeps a chapel to one of the Nine. Pray at five of them: Dibella in Anvil, Julianos in Skingrad, Zenithar in Leyawiin, Arkay in Cheydinhal and Talos in Bruma. You will come back changed, or at least footsore.",
+      "desc": "Primate Artorius sent me on a pilgrimage to the chapels of the Divines across Cyrodiil: Anvil, Skingrad, Leyawiin, Cheydinhal and Bruma.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "anvil",
+          "offset": [
+            -14,
+            10
+          ],
+          "radius": 10,
+          "text": "Pray at the Chapel of Dibella in Anvil"
+        },
+        {
+          "type": "go",
+          "place": "skingrad",
+          "offset": [
+            10,
+            -14
+          ],
+          "radius": 10,
+          "text": "Pray at the Chapel of Julianos in Skingrad"
+        },
+        {
+          "type": "go",
+          "place": "leyawiin",
+          "offset": [
+            12,
+            8
+          ],
+          "radius": 10,
+          "text": "Pray at the Chapel of Zenithar in Leyawiin"
+        },
+        {
+          "type": "go",
+          "place": "cheydinhal",
+          "offset": [
+            -12,
+            -8
+          ],
+          "radius": 10,
+          "text": "Pray at the Chapel of Arkay in Cheydinhal"
+        },
+        {
+          "type": "go",
+          "place": "bruma",
+          "offset": [
+            8,
+            12
+          ],
+          "radius": 10,
+          "text": "Pray at the Great Chapel of Talos in Bruma",
+          "journal": "The Chapel of Talos in Bruma is quiet these days, and the priest kept glancing at the door. But the old prayers were still carved over the altar."
+        },
+        {
+          "type": "talk",
+          "npc": "primate_artorius",
+          "text": "Return to Primate Artorius",
+          "topic": "I prayed at all five chapels.",
+          "reply": "Then you have seen what I wanted you to see: the Nine are not in this Temple alone. They are in every city, and every city needs them differently.",
+          "place": "imperial_city"
+        }
+      ],
+      "outro": "I walked the roads of the Divines and prayed at five chapels across Cyrodiil.",
+      "rewards": {
+        "gold": 400,
+        "faction_points": 6,
+        "items": [
+          {
+            "item": "nirncraft:amulet_of_talos",
+            "name": "Pilgrim's Amulet of the Nine",
+            "enchant": {
+              "protection": 1
+            }
+          }
+        ]
+      },
+      "region": "cyrodiil/heartlands",
+      "why": [
+        "cyrodiil.L8.wayshrines",
+        "cyrodiil.L8.the_nine"
+      ],
+      "consequence": {
+        "world_state": "ic_roads_of_the_divines_resolved",
+        "flag": "conseq_ic_roads_of_the_divines",
+        "summary": "I walked the roads of the Divines and prayed at five chapels across Cyrodiil."
+      }
+    },
+    {
+      "id": "ic_stendarrs_hammer",
+      "title": "Stendarr's Hammer",
+      "start": "auto",
+      "requires": [
+        "quest:ic_roads_of_the_divines"
+      ],
+      "desc": "Worshippers of Mehrunes Dagon, the remnants of the old Mythic Dawn, have gathered at the Prince's shrine south of the Heartland. Primate Artorius has asked me to carry Stendarr's justice to them.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "shrine_mehrunes_dagon_cyrodiil",
+          "text": "Travel to the shrine of Mehrunes Dagon"
+        },
+        {
+          "type": "clear",
+          "place": "shrine_mehrunes_dagon_cyrodiil",
+          "text": "Drive out the cultists and their summoned servants",
+          "spawn": [
+            {
+              "type": "npc:mage",
+              "count": 3,
+              "name": "Mythic Dawn Remnant",
+              "hostile": true,
+              "armor": "#8b1a1a"
+            },
+            {
+              "type": "nirncraft:scamp",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "shrine_mehrunes_dagon_cyrodiil",
+          "text": "Kill the cult's leader, Ruinous Cassia",
+          "spawn": [
+            {
+              "type": "npc:mage",
+              "name": "Ruinous Cassia",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4,
+              "hostile": true,
+              "armor": "#8b1a1a"
+            },
+            {
+              "type": "nirncraft:flame_atronach",
+              "name": "Bound Flame Atronach"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "shrine_mehrunes_dagon_cyrodiil",
+          "relic": "dagon_idol",
+          "radius": 10,
+          "text": "Take the cult's idol"
+        },
+        {
+          "type": "deliver",
+          "npc": "primate_artorius",
+          "relic": "dagon_idol",
+          "text": "Bring the idol to Primate Artorius",
+          "topic": "The cult is broken. Their idol, for the Temple to destroy.",
+          "reply": "Stendarr's mercy is for the repentant. His hammer is for those who would burn the world twice. You knew the difference. I will see this idol ground to dust.",
+          "place": "imperial_city"
+        }
+      ],
+      "outro": "I broke a Mythic Dawn remnant at the shrine of Mehrunes Dagon and brought their idol to the Temple to be destroyed.",
+      "rewards": {
+        "gold": 600,
+        "faction_points": 8
+      },
+      "region": "cyrodiil/heartlands",
+      "why": [
+        "cyrodiil.L8.the_nine",
+        "cyrodiil/colovian_highlands.L8.stendarr_chapel"
+      ],
+      "consequence": {
+        "world_state": "ic_stendarrs_hammer_resolved",
+        "flag": "conseq_ic_stendarrs_hammer",
+        "summary": "I broke a Mythic Dawn remnant at the shrine of Mehrunes Dagon and brought their idol to the Temple to be destroyed."
+      }
+    },
+    {
+      "id": "ic_maras_mercy",
+      "title": "Mara's Mercy",
+      "start": "auto",
+      "requires": [
+        "quest:ic_stendarrs_hammer"
+      ],
+      "desc": "A coughing sickness has spread through Bravil. Sister Ilara at the Chapel of Mara needs healing herbs from the marshes, and every pair of hands the Temple can spare.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bravil",
+          "text": "Travel to Bravil"
+        },
+        {
+          "type": "talk",
+          "npc": "sister_ilara",
+          "text": "Speak with Sister Ilara at the Chapel of Mara",
+          "topic": "The Primate sent me to help.",
+          "reply": "Then go into the marsh east of the city and gather the bitter herbs that grow where the water runs clear. Careful. The mudcrabs are in a mood this season.",
+          "place": "bravil"
+        },
+        {
+          "type": "clear",
+          "place": "bravil",
+          "offset": [
+            220,
+            90
+          ],
+          "text": "Clear the mudcrabs from the herb beds",
+          "spawn": [
+            {
+              "type": "nirncraft:mudcrab",
+              "count": 3
+            },
+            {
+              "type": "nirncraft:slaughterfish",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "bravil",
+          "offset": [
+            220,
+            90
+          ],
+          "relic": "marsh_heal_herbs",
+          "radius": 10,
+          "text": "Gather the healing herbs"
+        },
+        {
+          "type": "deliver",
+          "npc": "sister_ilara",
+          "relic": "marsh_heal_herbs",
+          "text": "Bring the herbs to Sister Ilara",
+          "topic": "The herbs, as many as I could carry.",
+          "reply": "Enough to brew for the whole chapel. Now stay and help me tend them. Mara heals through hands, not only through prayers.",
+          "place": "bravil"
+        },
+        {
+          "type": "wait",
+          "hours": 6,
+          "text": "Tend the sick with Sister Ilara",
+          "journal": "I spent the night carrying water and holding cups to cracked lips. By dawn the coughing in the chapel had eased, and two children were asking for breakfast."
+        }
+      ],
+      "outro": "I gathered herbs and nursed Bravil's sick through the worst of the coughing sickness at the Chapel of Mara.",
+      "rewards": {
+        "gold": 500,
+        "faction_points": 10,
+        "items": [
+          "nirncraft:amulet_of_mara"
+        ]
+      },
+      "region": "cyrodiil/heartlands",
+      "why": [
+        "cyrodiil/nibenay_valley.L8.mara_chapel",
+        "cyrodiil.L8.the_nine"
+      ],
+      "consequence": {
+        "world_state": "ic_maras_mercy_resolved",
+        "flag": "conseq_ic_maras_mercy",
+        "summary": "I gathered herbs and nursed Bravil's sick through the worst of the coughing sickness at the Chapel of Mara."
+      }
+    },
+    {
+      "id": "ic_primates_blessing",
+      "title": "The Primate's Blessing",
+      "start": "auto",
+      "requires": [
+        "quest:ic_maras_mercy"
+      ],
+      "desc": "Word of Bravil reached the Temple of the One before I did. Primate Artorius has asked me to come to the great dome to receive the blessing of the Nine.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "imperial_city",
+          "offset": [
+            -4,
+            -12
+          ],
+          "radius": 10,
+          "text": "Go to the Temple of the One"
+        },
+        {
+          "type": "talk",
+          "npc": "primate_artorius",
+          "text": "Kneel before Primate Artorius",
+          "topic": "You asked for me, Primate.",
+          "reply": "I did. Choose the Divine whose blessing you would carry with you. All Nine will watch over you, but one will walk closer.",
+          "actions": "scene:ic_blessing",
+          "place": "imperial_city"
+        },
+        {
+          "type": "talk",
+          "npc": "primate_artorius",
+          "text": "Choose the Divine whose blessing you will carry",
+          "choices": [
+            {
+              "label": "Mara, for mercy.",
+              "reply": "Mara, then. May you always find the strength to be kind.",
+              "actions": "flag:ic_blessed_mara;effect:regeneration:600:0"
+            },
+            {
+              "label": "Stendarr, for justice.",
+              "reply": "Stendarr, then. May your hand be firm and your judgment fair.",
+              "actions": "flag:ic_blessed_stendarr;effect:strength:600:0"
+            },
+            {
+              "label": "Arkay, for the dead.",
+              "reply": "Arkay, then. May you never fear the door he keeps.",
+              "actions": "flag:ic_blessed_arkay;effect:resistance:600:0"
+            }
+          ],
+          "place": "imperial_city"
+        }
+      ],
+      "outro": "Primate Artorius blessed me in the name of the Nine beneath the dome of the Temple of the One, and raised me to the rank of Master of the Cult.",
+      "rewards": {
+        "gold": 1200,
+        "faction_points": 44,
+        "flags": [
+          "ic_primate_blessing"
+        ],
+        "perks": 1,
+        "items": [
+          {
+            "item": "nirncraft:amulet_of_mara",
+            "name": "Amulet of the Primate's Blessing",
+            "enchant": {
+              "protection": 3
+            }
+          },
+          {
+            "item": "nirncraft:steel_mace",
+            "name": "Hammer of Stendarr",
+            "enchant": {
+              "smite": 5,
+              "unbreaking": 3
+            }
+          },
+          "nirncraft:spell_tome_ironflesh"
+        ]
+      },
+      "region": "cyrodiil/heartlands",
+      "why": [
+        "cyrodiil/heartlands.L8.temple_of_the_one",
+        "cyrodiil.L8.the_nine"
+      ],
+      "consequence": {
+        "world_state": "ic_primates_blessing_resolved",
+        "flag": "conseq_ic_primates_blessing",
+        "summary": "Primate Artorius blessed me in the name of the Nine beneath the dome of the Temple of the One, and raised me to the rank of Master of the Cult."
+      }
+    }
+  ]
+}

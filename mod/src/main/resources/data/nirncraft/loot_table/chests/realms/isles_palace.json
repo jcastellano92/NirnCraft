@@ -1,0 +1,90 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:chests/gold"
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 5
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:cake",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:amethyst_shard",
+          "weight": 6,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 6
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "nirncraft:chests/soul_gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:flawless_diamond",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "nirncraft:chests/spell_tomes"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:enchanted_golden_apple",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{book:\"letter_from_new_sheoth\",nirncraft_value:40}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{book:\"mania_and_dementia\",nirncraft_value:40}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 20
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:chests/realms/isles_palace"
+}

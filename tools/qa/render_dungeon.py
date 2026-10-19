@@ -4,7 +4,7 @@ usage:
   py -3 -I tools/qa/render_dungeon.py <world_dir> <place_id | x,z | x,y,z> <out_dir> [--name N]
   py -3 -I tools/qa/render_dungeon.py <world_dir> box <out_dir> --box x1 z1 x2 z2 y1 y2
   py -3 -I tools/qa/render_dungeon.py <export.json.gz> <out_dir> [--name N]     (no world needed: an export written by
-      `/skycraft-dungeon-qa export <place id>...`; also draws enemy / boss / chest / lectern / trap markers)
+      `/nirncraft-dungeon-qa export <place id>...`; also draws enemy / boss / chest / lectern / trap markers)
 
 Outputs (PNG, <=1600 px wide): 00_exterior_iso, 01_exterior_top, 10..1n_level_*, 20..2n_interior_*, plus a
 legend strip in each cutaway.  No Minecraft client needed; stdlib + numpy + PIL.
@@ -23,7 +23,7 @@ from mca import World  # noqa: E402
 import dungeon_export  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-TEX = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'assets', 'skycraft', 'textures', 'block')
+TEX = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'assets', 'nirncraft', 'textures', 'block')
 
 # ------------------------------------------------------------------ palette
 VANILLA = {
@@ -61,7 +61,7 @@ _texcache = {}
 
 def tex_avg(name):
     ns, _, n = name.partition(':')
-    if ns != 'skycraft':
+    if ns != 'nirncraft':
         return None
     base = n.replace('_slab', '').replace('_stairs', '').replace('_wall', '').replace('_fence', '')
     for cand in (n, base, n + '_top', base + '_top', n + '_side', base + '_side'):
@@ -114,7 +114,7 @@ NATURAL_EXACT = {
 NATURAL_SUB = ('_ore', 'leaves', 'grass', 'fern', 'flower', 'tulip', 'orchid', 'azure_bluet', 'dandelion', 'poppy',
                'mushroom', 'vine', 'sapling', 'bush', 'berry', 'frosted', 'ice', 'snow', 'lichen', 'kelp', 'seagrass',
                'dead_', 'lily', 'rose', 'peony', 'lilac', 'cornflower', 'allium', 'oxeye', 'tundra', 'moss')
-NATURAL_PREFIX_SKY = ('skycraft:frosted', 'skycraft:glowing_mushroom', 'skycraft:nirnroot', 'skycraft:tundra')
+NATURAL_PREFIX_SKY = ('nirncraft:frosted', 'nirncraft:glowing_mushroom', 'nirncraft:nirnroot', 'nirncraft:tundra')
 NONSOLID_SUB = ('air', 'torch', 'lantern', 'candle', 'carpet', 'skull', 'head', 'sign', 'button', 'pressure_plate',
                 'grass', 'fern', 'flower', 'tulip', 'sapling', 'vine', 'cobweb', 'rail', 'lever', 'tripwire',
                 'redstone_wire', 'banner', 'bluet', 'dandelion', 'poppy', 'orchid', 'allium', 'rose', 'peony',
@@ -201,7 +201,7 @@ def font(sz):
 
 # ------------------------------------------------------------------ place lookup
 def find_place(pid):
-    for f in glob.glob(os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel', 'places', '*.json')):
+    for f in glob.glob(os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'tamriel', 'places', '*.json')):
         try:
             d = json.load(open(f, encoding='utf8'))
         except Exception:
@@ -215,7 +215,7 @@ def find_place(pid):
 
 # ------------------------------------------------------------------ export-backed world (no .mca files)
 class ExportWorld:
-    """Same surface as mca.World (names, box, block_entities) over a /skycraft-dungeon-qa export."""
+    """Same surface as mca.World (names, box, block_entities) over a /nirncraft-dungeon-qa export."""
 
     def __init__(self, ex):
         self.ex = ex
@@ -244,7 +244,7 @@ class ExportWorld:
             res.append({'id': 'minecraft:lectern', 'x': c['x'], 'y': c['y'], 'z': c['z']})
         for c in ex.mechanisms:
             if c['kind'] == 'word_wall':
-                res.append({'id': 'skycraft:word_wall', 'x': c['x'], 'y': c['y'], 'z': c['z']})
+                res.append({'id': 'nirncraft:word_wall', 'x': c['x'], 'y': c['y'], 'z': c['z']})
         return [b for b in res if x1 <= b['x'] <= x2 and z1 <= b['z'] <= z2]
 
 

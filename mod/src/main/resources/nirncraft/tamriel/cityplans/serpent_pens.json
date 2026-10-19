@@ -1,0 +1,286 @@
+{
+  "id": "serpent_pens",
+  "why": [
+    "maormer_isles.L1.volcanic_reef_isles",
+    "maormer_isles.L5.black_pearl_and_scale_trade",
+    "maormer_isles.L6.mistveil_and_fleet_anchorage"
+  ],
+  "sil": "pyandonea-serpent-pens-plan",
+  "base": "none",
+  "overlay": "maormer_isles",
+  "radius": 22,
+  "reach": 34,
+  "gates": [
+    [
+      0,
+      20
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        10
+      ],
+      "overlay": "maormer_isles",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        10,
+        22
+      ],
+      "overlay": "maormer_isles",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "serpent_pens_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "sea_stack",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "serpent_pens_landmark",
+      "overlay": "maormer_isles"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          17
+        ],
+        [
+          -2,
+          0
+        ],
+        [
+          2,
+          -11
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -15,
+          0
+        ],
+        [
+          -2,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -2,
+        0
+      ],
+      "rx": 12,
+      "rz": 11,
+      "wobble": 2,
+      "lobes": 4,
+      "phase": 1.44,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "maormer_isles",
+      "name": "serpent_pens_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "overlay": "maormer_isles",
+      "name": "serpent_pens_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        8
+      ],
+      "face": "north",
+      "overlay": "maormer_isles",
+      "name": "serpent_pens_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -11,
+        11
+      ],
+      "face": "north",
+      "overlay": "maormer_isles",
+      "name": "serpent_pens_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "maormer_isles",
+      "name": "serpent_pens_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "maormer_isles",
+      "name": "serpent_pens_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -8
+      ],
+      "face": "south",
+      "overlay": "maormer_isles",
+      "name": "serpent_pens_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "maormer_isles",
+      "name": "serpent_pens_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "serpent_pens_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "serpent_pens_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "serpent_pens_b_5",
+    "smithy": "serpent_pens_b_7"
+  },
+  "titles": {
+    "serpent_pens_b_1": "place.nirncraft.serpent_pens Council & Seat Hall",
+    "serpent_pens_b_2": "place.nirncraft.serpent_pens High Sanctuary",
+    "serpent_pens_b_3": "place.nirncraft.serpent_pens Fighters & Wayfarers Hall",
+    "serpent_pens_b_4": "place.nirncraft.serpent_pens Mages & Chroniclers Spire",
+    "serpent_pens_b_5": "place.nirncraft.serpent_pens The Lantern & Hearth Inn",
+    "serpent_pens_b_6": "place.nirncraft.serpent_pens The Traveler's Rest Tavern",
+    "serpent_pens_b_7": "place.nirncraft.serpent_pens Master Forge & Armorer",
+    "serpent_pens_b_8": "place.nirncraft.serpent_pens Botanicals & Remedies",
+    "serpent_pens_landmark": "High Seat of place.nirncraft.serpent_pens",
+    "serpent_pens_plaza": "place.nirncraft.serpent_pens Central Plaza"
+  },
+  "innKey": "serpent_pens_b_5",
+  "zones": [
+    {
+      "at": [
+        -2,
+        -8
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -2,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 18,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

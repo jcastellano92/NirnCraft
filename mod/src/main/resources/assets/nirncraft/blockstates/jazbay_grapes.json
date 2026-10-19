@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/jazbay_grapes"
+      },
+      {
+        "model": "nirncraft:block/jazbay_grapes",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/jazbay_grapes",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/jazbay_grapes",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/jazbay_grapes_harvested"
+      },
+      {
+        "model": "nirncraft:block/jazbay_grapes_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/jazbay_grapes_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/jazbay_grapes_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

@@ -69,15 +69,15 @@ class ExactPackTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "active metadata"):
             pack_check.validate_pack(self.pack)
 
-    def test_only_skycrafts_own_shader_pack_can_be_enabled(self):
+    def test_only_nirncrafts_own_shader_pack_can_be_enabled(self):
         path = self.pack / "config/iris.properties"
-        path.write_text(path.read_text().replace("shaderPack=SkycraftAether.zip", "shaderPack=ComplementaryReimagined.zip"))
-        with self.assertRaisesRegex(ValueError, "must be SkycraftAether.zip"):
+        path.write_text(path.read_text().replace("shaderPack=InfiniteATLAS.zip", "shaderPack=ComplementaryReimagined.zip"))
+        with self.assertRaisesRegex(ValueError, "must be InfiniteATLAS.zip"):
             pack_check.validate_pack(self.pack)
 
     def test_foreign_shader_pack_files_are_rejected(self):
         (self.pack / "shaderpacks/Other.zip").write_bytes(b"PK")
-        with self.assertRaisesRegex(ValueError, "only SkycraftAether.zip"):
+        with self.assertRaisesRegex(ValueError, "only InfiniteATLAS.zip"):
             pack_check.validate_pack(self.pack)
 
     def test_tampered_indexed_config_is_rejected(self):
@@ -89,11 +89,11 @@ class ExactPackTest(unittest.TestCase):
     def core(self, target="[26.3]", major=69, legacy=False):
         jar = Path(self.temp.name) / "core.jar"
         name = "META-INF/mods.toml" if legacy else "META-INF/neoforge.mods.toml"
-        metadata = ('[[mods]]\nmodId="skycraft"\n[[dependencies.skycraft]]\nmodId="minecraft"\n'
-                    f'versionRange="{target}"\n[[dependencies.skycraft]]\nmodId="neoforge"\n')
+        metadata = ('[[mods]]\nmodId="nirncraft"\n[[dependencies.nirncraft]]\nmodId="minecraft"\n'
+                    f'versionRange="{target}"\n[[dependencies.nirncraft]]\nmodId="neoforge"\n')
         with zipfile.ZipFile(jar, "w") as output:
             output.writestr(name, metadata)
-            output.writestr("com/skycraft/Skycraft.class", b"\xca\xfe\xba\xbe\0\0" + major.to_bytes(2, "big"))
+            output.writestr("com/nirncraft/NirnCraft.class", b"\xca\xfe\xba\xbe\0\0" + major.to_bytes(2, "big"))
         return jar
 
     def test_old_forge_core_is_rejected(self):

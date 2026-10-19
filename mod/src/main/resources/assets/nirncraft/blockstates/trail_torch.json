@@ -1,0 +1,1 @@
+{"variants": {"lit=true": {"model": "nirncraft:block/trail_torch"}, "lit=false": {"model": "nirncraft:block/trail_torch_unlit"}}}

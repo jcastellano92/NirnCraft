@@ -1,0 +1,16 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "prince_shrine",
+  "where": [
+    "realm",
+    "atmora",
+    "akavir",
+    "yokuda",
+    "pyandonea",
+    "thras"
+  ],
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

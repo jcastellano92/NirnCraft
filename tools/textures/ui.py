@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Generates Skycraft's HUD and menu art (visual workstream). Everything is original and procedural.
+"""Generates NirnCraft's HUD and menu art (visual workstream). Everything is original and procedural.
 
-  assets/skycraft/textures/gui/hud/sneak_eye.png      5 frames (64x32 each, stacked vertically): closed .. wide open
-  assets/skycraft/textures/gui/hud/crosshair.png      2 frames (32x32 each, side by side): idle, on a target
-  assets/skycraft/textures/gui/hud/compass.png        440x28 compass band (drawn at 220x14)
-  assets/skycraft/textures/gui/hud/bar_caps.png       ornate bar end caps, 2 rows (target / boss), 48x16 each half
-  assets/skycraft/textures/gui/hud/ornament.png       128x16 banner divider with a central knot
-  assets/skycraft/textures/gui/loading/vignette_N.png 640x360 painted loading-screen scenes (monochrome, Skyrim-like)
-  assets/skycraft/textures/gui/loading/smoke.png      256x256 tiling smoke for the loading screen background
+  assets/nirncraft/textures/gui/hud/sneak_eye.png      5 frames (64x32 each, stacked vertically): closed .. wide open
+  assets/nirncraft/textures/gui/hud/crosshair.png      2 frames (32x32 each, side by side): idle, on a target
+  assets/nirncraft/textures/gui/hud/compass.png        440x28 compass band (drawn at 220x14)
+  assets/nirncraft/textures/gui/hud/bar_caps.png       ornate bar end caps, 2 rows (target / boss), 48x16 each half
+  assets/nirncraft/textures/gui/hud/ornament.png       128x16 banner divider with a central knot
+  assets/nirncraft/textures/gui/loading/vignette_N.png 640x360 painted loading-screen scenes (monochrome, Skyrim-like)
+  assets/nirncraft/textures/gui/loading/smoke.png      256x256 tiling smoke for the loading screen background
 
 All sprites are white/grey so the game can tint them. Requires numpy and Pillow.
 """
@@ -17,7 +17,7 @@ import pathlib
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
-ROOT = pathlib.Path(__file__).resolve().parents[2] / "mod/src/main/resources/assets/skycraft/textures/gui"
+ROOT = pathlib.Path(__file__).resolve().parents[2] / "mod/src/main/resources/assets/nirncraft/textures/gui"
 HUD = ROOT / "hud"
 LOADING = ROOT / "loading"
 

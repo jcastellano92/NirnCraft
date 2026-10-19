@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "facing=north,waterlogged=true": {
+      "model": "nirncraft:block/kollop_bed",
+      "y": 0
+    },
+    "facing=north,waterlogged=false": {
+      "model": "nirncraft:block/kollop_bed",
+      "y": 0
+    },
+    "facing=east,waterlogged=true": {
+      "model": "nirncraft:block/kollop_bed",
+      "y": 90
+    },
+    "facing=east,waterlogged=false": {
+      "model": "nirncraft:block/kollop_bed",
+      "y": 90
+    },
+    "facing=south,waterlogged=true": {
+      "model": "nirncraft:block/kollop_bed",
+      "y": 180
+    },
+    "facing=south,waterlogged=false": {
+      "model": "nirncraft:block/kollop_bed",
+      "y": 180
+    },
+    "facing=west,waterlogged=true": {
+      "model": "nirncraft:block/kollop_bed",
+      "y": 270
+    },
+    "facing=west,waterlogged=false": {
+      "model": "nirncraft:block/kollop_bed",
+      "y": 270
+    }
+  }
+}

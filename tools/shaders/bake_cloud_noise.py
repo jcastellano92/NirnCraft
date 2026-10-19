@@ -11,7 +11,7 @@ from PIL import Image
 
 SIZE = 64
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "mod/src/main/resources/assets/skycraft/textures/environment/cloud_noise_volume.png"
+OUT = ROOT / "mod/src/main/resources/assets/nirncraft/textures/environment/cloud_noise_volume.png"
 
 
 def gradient_noise(frequency, seed):

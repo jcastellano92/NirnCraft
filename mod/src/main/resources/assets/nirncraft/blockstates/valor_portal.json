@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "axis_x=true,return=true": {
+      "model": "nirncraft:block/valor_portal"
+    },
+    "axis_x=true,return=false": {
+      "model": "nirncraft:block/valor_portal"
+    },
+    "axis_x=false,return=true": {
+      "model": "nirncraft:block/valor_portal",
+      "y": 90
+    },
+    "axis_x=false,return=false": {
+      "model": "nirncraft:block/valor_portal",
+      "y": 90
+    }
+  }
+}

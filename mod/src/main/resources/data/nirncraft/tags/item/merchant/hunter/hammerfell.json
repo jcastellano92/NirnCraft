@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:scorpion_stinger",
+      "required": false
+    },
+    {
+      "id": "nirncraft:harpy_feather",
+      "required": false
+    }
+  ]
+}

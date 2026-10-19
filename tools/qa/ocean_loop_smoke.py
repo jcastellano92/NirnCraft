@@ -13,7 +13,7 @@ import time
 ROOT=Path(__file__).resolve().parents[2]
 NUMBER=r'([-+0-9.eE]+)[dDfF]?'
 POSITION=re.compile(r'\[\s*'+NUMBER+r'\s*,\s*'+NUMBER+r'\s*,\s*'+NUMBER+r'\s*\]')
-FIXTURE='skycraft_ocean_wrap_qa'
+FIXTURE='nirncraft_ocean_wrap_qa'
 
 
 def entity_position(output):
@@ -45,8 +45,8 @@ def effective_config(game, world=None):
     else:
         save=game/'saves'/world
         if not (save/'level.dat').is_file():raise ValueError('Selected save has no level.dat: '+str(save))
-    override=save/'syncedconfig/skycraft-ocean-server.toml'
-    selected=override if override.is_file() else game/'config/skycraft-ocean-server.toml'
+    override=save/'syncedconfig/nirncraft-ocean-server.toml'
+    selected=override if override.is_file() else game/'config/nirncraft-ocean-server.toml'
     if not selected.is_file():raise ValueError('No native ocean configuration at '+str(selected))
     return selected
 

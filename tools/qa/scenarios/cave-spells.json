@@ -8,14 +8,14 @@
   "scope":"Real normal Cast packet, server casting, target damage attributed to observer, received beam FX. Stationary no-AI target; not enemy AI/staff/storm coverage.",
   "variants":{"flames":{"spell":"flames"},"frostbite":{"spell":"frostbite"},"sparks":{"spell":"sparks"}},
   "setupCommands":[
-    "skycraft-dev scenario difficulty normal",
+    "nirncraft-dev scenario difficulty normal",
     "gamemode creative @p",
-    "execute as @p at @p run skycraft-dev scenario equip {spell}",
-    "execute as @p at @p run skycraft-dev scenario spawn {run} minecraft:zombie -275 88 795"
+    "execute as @p at @p run nirncraft-dev scenario equip {spell}",
+    "execute as @p at @p run nirncraft-dev scenario spawn {run} minecraft:zombie -275 88 795"
   ],
   "steps":[
     {"actions":["cast start"]},
-    {"waitFor":{"timeoutSeconds":8,"probeCommands":["execute as @p at @p run skycraft-dev scenario observe {run}"],"assertions":[
+    {"waitFor":{"timeoutSeconds":8,"probeCommands":["execute as @p at @p run nirncraft-dev scenario observe {run}"],"assertions":[
       {"file":"world-preview/scenarios/{run}.json","field":"healthLost","atLeast":0.1},
       {"file":"world-preview/scenarios/{run}.json","field":"damageFromObserver","equals":true}
     ]}},
@@ -26,5 +26,5 @@
     {"file":"world-preview/scenarios/{run}.json","field":"damageFromObserver","equals":true}
   ],
   "captures":["{run}-beam"],
-  "cleanupCommands":["execute as @p at @p run skycraft-dev scenario cleanup {run}","gamemode spectator @p","skycraft-dev scenario difficulty peaceful"]
+  "cleanupCommands":["execute as @p at @p run nirncraft-dev scenario cleanup {run}","gamemode spectator @p","nirncraft-dev scenario difficulty peaceful"]
 }

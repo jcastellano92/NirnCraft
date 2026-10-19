@@ -1,0 +1,55 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 8,
+            "max": 30,
+            "growth": 0.04,
+            "type": "nirncraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:vampire_dust",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "nirncraft:parts/potions"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 2,
+          "value": "nirncraft:parts/gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 2,
+          "value": "nirncraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 3
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/dungeon/theme/vampire"
+}

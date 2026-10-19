@@ -1,0 +1,9 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "mage_tower",
+  "regional_kit": true,
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

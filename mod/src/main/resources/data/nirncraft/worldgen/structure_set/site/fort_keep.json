@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/fort_keep",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274517,
+    "types": [
+      "fort"
+    ],
+    "variants": [
+      "keep"
+    ]
+  }
+}

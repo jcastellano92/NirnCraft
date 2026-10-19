@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/ice_cave",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274010,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "ice_cave"
+    ]
+  }
+}

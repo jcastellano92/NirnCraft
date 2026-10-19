@@ -1,0 +1,12 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "ruin",
+  "kit": "velothi",
+  "where": [
+    "morrowind"
+  ],
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

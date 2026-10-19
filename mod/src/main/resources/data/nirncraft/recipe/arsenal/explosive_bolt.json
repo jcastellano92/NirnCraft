@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "nirncraft:steel_bolt",
+    "nirncraft:steel_bolt",
+    "nirncraft:steel_bolt",
+    "nirncraft:steel_bolt",
+    "minecraft:gunpowder",
+    "minecraft:gunpowder"
+  ],
+  "result": {
+    "count": 4,
+    "id": "nirncraft:explosive_bolt"
+  }
+}

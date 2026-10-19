@@ -1,0 +1,7 @@
+{
+  "type": "nirncraft:realm_decor",
+  "config": {
+    "kind": "chain_pylon",
+    "size": 1
+  }
+}

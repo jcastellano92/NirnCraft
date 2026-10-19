@@ -22,8 +22,8 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "tools"))
 from validate_pack import TARGET, validate_core_jar
 from dev.process_guard import process_guard
-PRISM_ROOT = Path(os.environ.get("SKYCRAFT_PRISM_ROOT", str(Path(os.environ.get("APPDATA", "")) / "PrismLauncher"))).resolve()
-DIAGNOSTIC_NAME = "Skycraft-26.3-core-diagnostic"
+PRISM_ROOT = Path(os.environ.get("NIRNCRAFT_PRISM_ROOT", str(Path(os.environ.get("APPDATA", "")) / "PrismLauncher"))).resolve()
+DIAGNOSTIC_NAME = "NirnCraft-26.3-core-diagnostic"
 
 
 def selected_instance(name):
@@ -32,16 +32,16 @@ def selected_instance(name):
     return name
 
 
-INSTANCE_NAME = selected_instance(os.environ.get("SKYCRAFT_NATIVE_INSTANCE", TARGET["instanceName"]))
+INSTANCE_NAME = selected_instance(os.environ.get("NIRNCRAFT_NATIVE_INSTANCE", TARGET["instanceName"]))
 INSTANCE = PRISM_ROOT / "instances" / INSTANCE_NAME
 GAME = INSTANCE / ".minecraft"
 DEV = GAME / "world-preview"
 GROUPS = {
-    "scenes": ["skycraft/scatter"],
-    "places": ["skycraft/tamriel/places"],
-    "cityplans": ["skycraft/tamriel/cityplans", "skycraft/tamriel/styles"],
-    "quests": ["skycraft/quests"],
-    "palettes": ["skycraft/tamriel/palettes.json"],
+    "scenes": ["nirncraft/scatter"],
+    "places": ["nirncraft/tamriel/places"],
+    "cityplans": ["nirncraft/tamriel/cityplans", "nirncraft/tamriel/styles"],
+    "quests": ["nirncraft/quests"],
+    "palettes": ["nirncraft/tamriel/palettes.json"],
 }
 
 
@@ -79,9 +79,9 @@ def validate_diagnostic_instance(instance):
             marker.get("diagnosticOnly") is not True or marker.get("fullPackAcceptance") is not False or \
             marker.get("target") != expected:
         raise ValueError("Missing or mismatched native core diagnostic identity")
-    if {path.name for path in (game / "mods").iterdir()} != {"skycraft-core.jar"}:
-        raise ValueError("Core diagnostic must contain only the actual native Skycraft core")
-    core = game / "mods/skycraft-core.jar"
+    if {path.name for path in (game / "mods").iterdir()} != {"nirncraft-core.jar"}:
+        raise ValueError("Core diagnostic must contain only the actual native NirnCraft core")
+    core = game / "mods/nirncraft-core.jar"
     validate_core_jar(core)
     if hashlib.sha256(core.read_bytes()).hexdigest() != marker.get("coreSha256"):
         raise ValueError("Core diagnostic changed since preparation; rebuild its separate diagnostic archive")
@@ -106,7 +106,7 @@ def processes():
 
 def status():
     procs = processes()
-    live = read_json(GAME / "skycraft-live-status.json")
+    live = read_json(GAME / "nirncraft-live-status.json")
     age = (time.time() * 1000 - live.get("updated", 0)) / 1000
     live["ageSeconds"] = round(age, 1) if live else None
     live["fresh"] = age < 15 and any(p["pid"] == live.get("pid") for p in procs)
@@ -163,7 +163,7 @@ def require_ready():
 
 def live_guard():
     # Shared across both allowlisted instances in this Prism data directory.
-    return process_guard(PRISM_ROOT / ".skycraft-live.lock", "live_world.py")
+    return process_guard(PRISM_ROOT / ".nirncraft-live.lock", "live_world.py")
 
 
 def submit(lines, timeout=900):
@@ -205,13 +205,13 @@ def _live_actions(lines, timeout=180, cancel=False):
         raise RuntimeError("Client control heartbeat is absent/stale; use status and wait for the world")
     if not cancel and any(c.get(k, 0) for k in ("queued", "waitTicks", "burstFrames", "settling", "commandPending")):
         raise RuntimeError("QA control queue is busy; wait for it to finish")
-    atomic(GAME / "skycraft-live.txt", ("\n".join(lines) + "\n").encode())
-    stamp = (GAME / "skycraft-live.txt").stat().st_mtime_ns // 1_000_000
+    atomic(GAME / "nirncraft-live.txt", ("\n".join(lines) + "\n").encode())
+    stamp = (GAME / "nirncraft-live.txt").stat().st_mtime_ns // 1_000_000
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if cancel and not processes():
             return
-        c = read_json(GAME / "skycraft-live-status.json")
+        c = read_json(GAME / "nirncraft-live-status.json")
         if c.get("controlVersion", 0) == stamp and not any(c.get(k, 0) for k in ("queued", "waitTicks", "burstFrames", "settling", "commandPending")):
             if c.get("error"):
                 raise RuntimeError(c["error"])
@@ -295,7 +295,7 @@ def upload_bakes(folder):
         raise RuntimeError("Close the preview first: bakes replace packaged plans and take effect at next launch")
     stamp = DEV / "outbox/bake-packaged-inputs"
     expected = stamp.read_text().strip()
-    core = GAME / "mods/skycraft-core.jar"
+    core = GAME / "mods/nirncraft-core.jar"
     receipt = read_json(DEV / "outbox/runtime.json")
     if receipt.get("coreSha256") != hashlib.sha256(core.read_bytes()).hexdigest():
         raise RuntimeError("Runtime receipt does not match this jar; launch the preview once to record its packaged inputs")
@@ -306,7 +306,7 @@ def upload_bakes(folder):
     for name in [*result, "manifest.json"]:
         shutil.copy2(folder / name, backup / name)
     tmp = core.with_suffix(".preview-tmp")
-    replacements = {"skycraft/baked/" + n: (folder / n).read_bytes() for n in [*result, "manifest.json"]}
+    replacements = {"nirncraft/baked/" + n: (folder / n).read_bytes() for n in [*result, "manifest.json"]}
     with zipfile.ZipFile(core) as src, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as dst:
         for entry in src.infolist():
             if entry.filename not in replacements:
@@ -323,7 +323,7 @@ def jar_bake_inputs(archive):
     Callers also require an unchanged Bake.class and equality with a hash actually
     recorded by the running JVM. A parser mismatch therefore refuses reuse.
     """
-    source=(REPO/'mod/src/main/java/com/skycraft/bake/Bake.java').read_text()
+    source=(REPO/'mod/src/main/java/com/nirncraft/bake/Bake.java').read_text()
     source=re.sub(r'/\*.*?\*/|//[^\n]*','',source,flags=re.S)
     def array(name):
         match=re.search(r'\b'+name+r'\s*=\s*\{(.*?)\};',source,re.S)
@@ -336,16 +336,16 @@ def jar_bake_inputs(archive):
     version=re.search(r'\bFORMAT\s*=\s*(\d+)',source)
     if not version:raise ValueError('Missing bake format')
     h.update(('format'+version[1]).encode())
-    for name in array('MAP_FILES'):feed('skycraft/tamriel/'+name)
-    index='skycraft/tamriel/places/index.json'
+    for name in array('MAP_FILES'):feed('nirncraft/tamriel/'+name)
+    index='nirncraft/tamriel/places/index.json'
     if index in names:
         raw=archive.read(index);h.update(raw)
-        for name in json.loads(raw):feed('skycraft/tamriel/places/'+name)
+        for name in json.loads(raw):feed('nirncraft/tamriel/places/'+name)
     for name in array('DATA_FILES'):feed(name.lstrip('/'))
-    index='skycraft/tamriel/cityplans/index.json'
+    index='nirncraft/tamriel/cityplans/index.json'
     if index in names:
         raw=archive.read(index);h.update(raw)
-        for name in json.loads(raw).get('plans',[]):feed('skycraft/tamriel/cityplans/'+name+'.json')
+        for name in json.loads(raw).get('plans',[]):feed('nirncraft/tamriel/cityplans/'+name+'.json')
     for name in array('CLASSES'):feed(name.replace('.','/')+'.class')
     return h.hexdigest()
 
@@ -354,7 +354,7 @@ def stage_core(jar, folder, output):
     """Stage runtime bakes into a rebuilt core only when its declared dependencies match the verified JVM."""
     jar, folder, output = Path(jar), Path(folder), Path(output)
     validate_core_jar(jar)
-    core = GAME / 'mods/skycraft-core.jar'
+    core = GAME / 'mods/nirncraft-core.jar'
     receipt = read_json(DEV / 'outbox/runtime.json')
     runtime_sha = hashlib.sha256(core.read_bytes()).hexdigest()
     if receipt.get('coreSha256') != runtime_sha:
@@ -362,13 +362,13 @@ def stage_core(jar, folder, output):
     expected = (DEV / 'outbox/bake-packaged-inputs').read_text().strip()
     validated = validate_bakes(folder, expected)
     with zipfile.ZipFile(core) as old, zipfile.ZipFile(jar) as new:
-        bake_class = 'com/skycraft/bake/Bake.class'
+        bake_class = 'com/nirncraft/bake/Bake.class'
         if (old.read(bake_class) != new.read(bake_class) or jar_bake_inputs(old) != expected
                 or jar_bake_inputs(new) != expected):
             raise ValueError('Rebuilt core has different bake dependencies; compute and verify bakes in that runtime')
         if output.resolve() in (core.resolve(), jar.resolve()) or output.exists():
             raise ValueError('Stage to a new artifact path; never replace the installed or input core')
-        replacements = {'skycraft/baked/' + n: (folder / n).read_bytes() for n in [*validated, 'manifest.json']}
+        replacements = {'nirncraft/baked/' + n: (folder / n).read_bytes() for n in [*validated, 'manifest.json']}
         output.parent.mkdir(parents=True, exist_ok=True)
         tmp = output.with_suffix('.staging')
         try:
@@ -392,7 +392,7 @@ def install_core(jar):
     if processes():
         raise RuntimeError('Close the disposable preview before installing code')
     validate_core_jar(jar)
-    core = GAME / 'mods/skycraft-core.jar'
+    core = GAME / 'mods/nirncraft-core.jar'
     receipt = read_json(DEV / 'outbox/runtime.json')
     known = receipt.get('coreSha256') == hashlib.sha256(core.read_bytes()).hexdigest()
     with zipfile.ZipFile(core) as old, zipfile.ZipFile(jar) as new:
@@ -400,13 +400,13 @@ def install_core(jar):
         names = old_names | new_names
         changed = [n for n in sorted(names) if n not in old_names or n not in new_names
                    or old.read(n) != new.read(n)]
-        safe = known and all(n.startswith(('com/skycraft/client/autotest/', 'com/skycraft/fire/client/',
-                                          'com/skycraft/atmosphere/client/', 'assets/skycraft/shaders/', 'skycraft/baked/'))
-                             or n in ('skycraft/generation-identity.txt','assets/skycraft/textures/environment/smoke_sources.png')
+        safe = known and all(n.startswith(('com/nirncraft/client/autotest/', 'com/nirncraft/fire/client/',
+                                          'com/nirncraft/atmosphere/client/', 'assets/nirncraft/shaders/', 'nirncraft/baked/'))
+                             or n in ('nirncraft/generation-identity.txt','assets/nirncraft/textures/environment/smoke_sources.png')
                              or any(n==p+'.class' or n.startswith(p+'$') for p in
-                                    ('com/skycraft/inventory/PackSelfTest','com/skycraft/inventory/OverflowSelfTest')) for n in changed)
+                                    ('com/nirncraft/inventory/PackSelfTest','com/nirncraft/inventory/OverflowSelfTest')) for n in changed)
         expected=(DEV/'outbox/bake-packaged-inputs').read_text().strip() if known else ''
-        bake_class='com/skycraft/bake/Bake.class'
+        bake_class='com/nirncraft/bake/Bake.class'
         if known and bake_class in old_names and bake_class in new_names and old.read(bake_class)==new.read(bake_class):
             # QA/server ticket changes need not trigger an expensive rebake when
             # every declared bake dependency still has the exact runtime hash.
@@ -415,15 +415,15 @@ def install_core(jar):
         fresh_verified_bakes = False
         if safe:
             def verified_entries(archive):
-                manifest = json.loads(archive.read('skycraft/baked/manifest.json'))
+                manifest = json.loads(archive.read('nirncraft/baked/manifest.json'))
                 names = {n + '.bin' for n in ('landmass', 'roadplan', 'streetplan', 'sceneplan')}
                 if manifest.get('format') != 1 or set(manifest.get('files', [])) != names or manifest.get('inputs') != expected:
                     raise ValueError('Packaged bake manifest is stale or incomplete')
-                entries = {'skycraft/baked/manifest.json': archive.read('skycraft/baked/manifest.json')}
+                entries = {'nirncraft/baked/manifest.json': archive.read('nirncraft/baked/manifest.json')}
                 for name in names:
-                    raw = archive.read('skycraft/baked/' + name)
+                    raw = archive.read('nirncraft/baked/' + name)
                     if decode_bake(raw)[0] != expected: raise ValueError('Packaged bake has mixed inputs')
-                    entries['skycraft/baked/' + name] = raw
+                    entries['nirncraft/baked/' + name] = raw
                 return entries
             try:
                 replacements = verified_entries(old)
@@ -433,7 +433,7 @@ def install_core(jar):
                 verified_entries(new)
                 safe = False
                 fresh_verified_bakes = True
-        backup = DEV / 'core-backups' / str(time.time_ns()) / 'skycraft-core.jar'
+        backup = DEV / 'core-backups' / str(time.time_ns()) / 'nirncraft-core.jar'
         backup.parent.mkdir(parents=True)
         shutil.copy2(core, backup)
         tmp = core.with_suffix('.preview-tmp')
@@ -494,12 +494,12 @@ def dispatch(args):
             raise RuntimeError("Client is running; close it before changing its launch flags")
         cfg = INSTANCE / "instance.cfg"
         text = cfg.read_text()
-        flags = "-Dskycraft.dev=world-preview -Dskycraft.preview.resources=world-preview/resources"
+        flags = "-Dnirncraft.dev=world-preview -Dnirncraft.preview.resources=world-preview/resources"
         if not re.search(r'^JvmArgs=', text, re.M):
             raise RuntimeError("Instance has no JvmArgs entry; prepare the disposable autotest instance first")
-        if "-Dskycraft.dev=" in text and any(flag not in text for flag in flags.split()):
+        if "-Dnirncraft.dev=" in text and any(flag not in text for flag in flags.split()):
             raise RuntimeError("Instance has different preview paths; review its launch flags before enabling")
-        if "-Dskycraft.dev=" not in text:
+        if "-Dnirncraft.dev=" not in text:
             text = re.sub(r'^JvmArgs="?(.*?)"?$', lambda m: 'JvmArgs="' + m[1].strip('"') + ' ' + flags + '"', text, flags=re.M)
         atomic(cfg, text.encode())
         print("Preview flags enabled. No normal Prism instance changed.")
@@ -509,7 +509,7 @@ def dispatch(args):
             return
         if not INSTANCE.is_dir():
             raise RuntimeError("Prepare the disposable instance first with tools/qa/prism_autotest.ps1")
-        validate_core_jar(GAME / "mods/skycraft-core.jar")
+        validate_core_jar(GAME / "mods/nirncraft-core.jar")
         components = json.loads((INSTANCE / "mmc-pack.json").read_text(encoding="utf-8-sig"))["components"]
         validate_components(components)
         if INSTANCE_NAME == DIAGNOSTIC_NAME:
@@ -520,7 +520,7 @@ def dispatch(args):
         other = TARGET["instanceName"] if INSTANCE_NAME == DIAGNOSTIC_NAME else DIAGNOSTIC_NAME
         if exact_processes(PRISM_ROOT, other):
             raise RuntimeError("Another disposable native client is running; close it cleanly first")
-        atomic(GAME / "skycraft-live.txt", b"# New preview session; idle\n")
+        atomic(GAME / "nirncraft-live.txt", b"# New preview session; idle\n")
         launcher = Path(os.environ["LOCALAPPDATA"]) / "Programs/PrismLauncher/prismlauncher.exe"
         subprocess.Popen([str(launcher), "--dir", str(PRISM_ROOT), "--launch", INSTANCE_NAME], creationflags=subprocess.CREATE_NO_WINDOW)
         print("Preview launch requested; status will report when the world heartbeat is ready")
@@ -534,7 +534,7 @@ def dispatch(args):
             # Bootstrap from the previous live controller, which had no status JSON.
             log = GAME / "logs/latest.log"
             if log.exists() and "Autotest live: ready" in log.read_text(encoding="utf-8", errors="replace"):
-                atomic(GAME / "skycraft-live.txt", b"stop\n")
+                atomic(GAME / "nirncraft-live.txt", b"stop\n")
             else:
                 # No controller (a menu, a disconnect screen, a failed join): ask this exact instance's game window to
                 # close, as its close button does (WM_CLOSE; Minecraft shuts down and saves normally). Never a kill.
@@ -565,7 +565,7 @@ def dispatch(args):
             raise RuntimeError("Client capture sequence is busy; wait before changing world data")
         name, count = snapshot(args.target)
         print(f"Staged snapshot {name}: {count} JSON files")
-        submit(["skycraft-dev reload " + args.target, "skycraft-dev bake-status"])
+        submit(["nirncraft-dev reload " + args.target, "nirncraft-dev bake-status"])
     elif args.action == "regen":
         a, b, c, d = args.bounds
         x1, x2, z1, z2 = min(a, c), max(a, c), min(b, d), max(b, d)
@@ -574,7 +574,7 @@ def dispatch(args):
             raise ValueError("Preview regeneration is limited to 256 chunks; split the area")
         # Existing regen needs all players and their chunk tickets far from the area.
         submit(["@timeout 900", f"tp @a {x2+2048} 360 {z2+2048}",
-                f"skycraft-dev regen {x1} {z1} {x2} {z2}", "skycraft-dev status"])
+                f"nirncraft-dev regen {x1} {z1} {x2} {z2}", "nirncraft-dev status"])
         print("Fresh area ready; use a dungeon view/camera command to return. Release tickets when done.")
     elif args.action == "shader":
         acceptance = read_json(GAME / "migration/custom-shader-acceptance.json")

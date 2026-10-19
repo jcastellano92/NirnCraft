@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:bound_battleaxe",
+    "nirncraft:iron_battleaxe",
+    "nirncraft:steel_battleaxe",
+    "nirncraft:orcish_battleaxe",
+    "nirncraft:dwarven_battleaxe",
+    "nirncraft:elven_battleaxe",
+    "nirncraft:glass_battleaxe",
+    "nirncraft:ebony_battleaxe",
+    "nirncraft:daedric_battleaxe",
+    "nirncraft:dragonbone_battleaxe",
+    "nirncraft:silver_battleaxe",
+    "nirncraft:ancient_nord_battleaxe",
+    "nirncraft:forsworn_battleaxe",
+    "nirncraft:imperial_battleaxe",
+    "nirncraft:falmer_battleaxe",
+    "nirncraft:nordic_battleaxe",
+    "nirncraft:skyforge_battleaxe",
+    "nirncraft:akaviri_battleaxe",
+    "nirncraft:stalhrim_battleaxe",
+    "nirncraft:yokudan_battleaxe",
+    "nirncraft:atmoran_battleaxe",
+    {
+      "id": "#nirncraft:arsenal/battleaxes",
+      "required": false
+    }
+  ]
+}

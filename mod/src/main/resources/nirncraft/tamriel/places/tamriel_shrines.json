@@ -1,0 +1,1922 @@
+[
+  {
+    "id": "shrine_azura_cyrodiil",
+    "name": "place.nirncraft.shrine_azura_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/great_forest",
+    "x": 102,
+    "z": 6266,
+    "radius": 12,
+    "variant": "azura",
+    "why": [
+      "great_forest.L1.forest_loam_hills",
+      "great_forest.L1.ruin_dense_ridge"
+    ]
+  },
+  {
+    "id": "shrine_boethiah_cyrodiil",
+    "name": "place.nirncraft.shrine_boethiah_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/jerall_mountains",
+    "x": 885,
+    "z": 3279,
+    "radius": 12,
+    "variant": "boethiah",
+    "why": [
+      "jerall_mountains.L1.pale_pass_notch",
+      "jerall_mountains.L1.granite_caves"
+    ]
+  },
+  {
+    "id": "shrine_clavicus_vile_cyrodiil",
+    "name": "place.nirncraft.shrine_clavicus_vile_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/colovian_highlands",
+    "x": -1075,
+    "z": 5299,
+    "radius": 12,
+    "variant": "clavicus_vile",
+    "why": [
+      "colovian_highlands.L1.karst_valleys",
+      "colovian_highlands.L1.limestone_caves"
+    ]
+  },
+  {
+    "id": "shrine_hermaeus_mora_cyrodiil",
+    "name": "place.nirncraft.shrine_hermaeus_mora_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/nibenay_basin",
+    "x": 3517,
+    "z": 4139,
+    "radius": 12,
+    "variant": "hermaeus_mora",
+    "why": [
+      "nibenay_basin.L1.valus_foothills",
+      "nibenay_basin.L1.basin_silt"
+    ]
+  },
+  {
+    "id": "shrine_hircine_cyrodiil",
+    "name": "place.nirncraft.shrine_hircine_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/west_weald",
+    "x": -1186,
+    "z": 6119,
+    "radius": 12,
+    "variant": "hircine",
+    "why": [
+      "west_weald.L1.warm_limestone_slopes",
+      "west_weald.L1.deep_ayleid_vault"
+    ]
+  },
+  {
+    "id": "shrine_malacath_cyrodiil",
+    "name": "place.nirncraft.shrine_malacath_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/gold_coast",
+    "x": -1925,
+    "z": 8284,
+    "radius": 12,
+    "variant": "malacath",
+    "why": [
+      "gold_coast.L1.low_sea_cliffs",
+      "gold_coast.L1.sea_caves"
+    ]
+  },
+  {
+    "id": "shrine_mehrunes_dagon_cyrodiil",
+    "name": "place.nirncraft.shrine_mehrunes_dagon_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/nibenay_valley",
+    "x": 1186,
+    "z": 8607,
+    "radius": 12,
+    "variant": "mehrunes_dagon",
+    "why": [
+      "nibenay_valley.L1.river_flats",
+      "nibenay_valley.L1.riverbank_caves"
+    ]
+  },
+  {
+    "id": "shrine_mephala_cyrodiil",
+    "name": "place.nirncraft.shrine_mephala_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/blackwood",
+    "x": 3023,
+    "z": 10011,
+    "radius": 12,
+    "variant": "mephala",
+    "why": [
+      "blackwood.L1.mangrove_mud",
+      "blackwood.L1.peat"
+    ]
+  },
+  {
+    "id": "shrine_meridia_cyrodiil",
+    "name": "place.nirncraft.shrine_meridia_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/heartlands",
+    "x": 1774,
+    "z": 5065,
+    "radius": 12,
+    "variant": "meridia",
+    "why": [
+      "heartlands.L1.island_bedrock",
+      "heartlands.L1.lakeshore_clay"
+    ]
+  },
+  {
+    "id": "shrine_molag_bal_cyrodiil",
+    "name": "place.nirncraft.shrine_molag_bal_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/jerall_mountains",
+    "x": 943,
+    "z": 2482,
+    "radius": 12,
+    "variant": "molag_bal",
+    "why": [
+      "jerall_mountains.L1.pale_pass_notch",
+      "jerall_mountains.L1.granite_caves"
+    ]
+  },
+  {
+    "id": "shrine_namira_cyrodiil",
+    "name": "place.nirncraft.shrine_namira_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/colovian_highlands",
+    "x": -1077,
+    "z": 4815,
+    "radius": 12,
+    "variant": "namira",
+    "why": [
+      "colovian_highlands.L1.karst_valleys",
+      "colovian_highlands.L1.limestone_caves"
+    ]
+  },
+  {
+    "id": "shrine_nocturnal_cyrodiil",
+    "name": "place.nirncraft.shrine_nocturnal_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/nibenay_basin",
+    "x": 3154,
+    "z": 5078,
+    "radius": 12,
+    "variant": "nocturnal",
+    "why": [
+      "nibenay_basin.L1.valus_foothills",
+      "nibenay_basin.L1.basin_silt"
+    ]
+  },
+  {
+    "id": "shrine_peryite_cyrodiil",
+    "name": "place.nirncraft.shrine_peryite_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/west_weald",
+    "x": -1338,
+    "z": 7121,
+    "radius": 12,
+    "variant": "peryite",
+    "why": [
+      "west_weald.L1.warm_limestone_slopes",
+      "west_weald.L1.deep_ayleid_vault"
+    ]
+  },
+  {
+    "id": "shrine_sanguine_cyrodiil",
+    "name": "place.nirncraft.shrine_sanguine_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/west_weald",
+    "x": -2072,
+    "z": 7326,
+    "radius": 12,
+    "variant": "sanguine",
+    "why": [
+      "west_weald.L1.warm_limestone_slopes",
+      "west_weald.L1.deep_ayleid_vault"
+    ]
+  },
+  {
+    "id": "shrine_sheogorath_cyrodiil",
+    "name": "place.nirncraft.shrine_sheogorath_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/nibenay_valley",
+    "x": 1291,
+    "z": 8128,
+    "radius": 12,
+    "variant": "sheogorath",
+    "why": [
+      "nibenay_valley.L1.river_flats",
+      "nibenay_valley.L1.riverbank_caves"
+    ]
+  },
+  {
+    "id": "shrine_vaermina_cyrodiil",
+    "name": "place.nirncraft.shrine_vaermina_cyrodiil",
+    "type": "daedric_shrine",
+    "culture": "imperial",
+    "region": "cyrodiil/nibenay_valley",
+    "x": 2718,
+    "z": 9278,
+    "radius": 12,
+    "variant": "vaermina",
+    "why": [
+      "nibenay_valley.L1.river_flats",
+      "nibenay_valley.L1.riverbank_caves"
+    ]
+  },
+  {
+    "id": "shrine_azura_morrowind",
+    "name": "place.nirncraft.shrine_azura_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/deshaan",
+    "x": 6695,
+    "z": 3081,
+    "radius": 12,
+    "variant": "azura",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L1.obsidian_gorge"
+    ]
+  },
+  {
+    "id": "shrine_boethiah_morrowind",
+    "name": "place.nirncraft.shrine_boethiah_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/ascadian_isles",
+    "x": 6628,
+    "z": 1189,
+    "radius": 12,
+    "variant": "boethiah",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L1.lake_basins"
+    ]
+  },
+  {
+    "id": "shrine_clavicus_vile_morrowind",
+    "name": "place.nirncraft.shrine_clavicus_vile_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/west_gash",
+    "x": 5571,
+    "z": 7,
+    "radius": 12,
+    "variant": "clavicus_vile",
+    "why": [
+      "west_gash.L1.gash_ridges",
+      "west_gash.L1.odai_gorge"
+    ]
+  },
+  {
+    "id": "shrine_hermaeus_mora_morrowind",
+    "name": "place.nirncraft.shrine_hermaeus_mora_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/vvardenfell_ashlands",
+    "x": 5584,
+    "z": -832,
+    "radius": 12,
+    "variant": "hermaeus_mora",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.scoria_ridges"
+    ]
+  },
+  {
+    "id": "shrine_hircine_morrowind",
+    "name": "place.nirncraft.shrine_hircine_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/azuras_coast",
+    "x": 8380,
+    "z": 360,
+    "radius": 12,
+    "variant": "hircine",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L1.sea_cliffs"
+    ]
+  },
+  {
+    "id": "shrine_malacath_morrowind",
+    "name": "place.nirncraft.shrine_malacath_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/deshaan",
+    "x": 5520,
+    "z": 2388,
+    "radius": 12,
+    "variant": "malacath",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L1.obsidian_gorge"
+    ]
+  },
+  {
+    "id": "shrine_mehrunes_dagon_morrowind",
+    "name": "place.nirncraft.shrine_mehrunes_dagon_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/molag_amur",
+    "x": 8074,
+    "z": 3341,
+    "radius": 12,
+    "variant": "mehrunes_dagon",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "molag_amur.L1.cinder_cones"
+    ]
+  },
+  {
+    "id": "shrine_mephala_morrowind",
+    "name": "place.nirncraft.shrine_mephala_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/red_mountain",
+    "x": 7584,
+    "z": 20,
+    "radius": 12,
+    "variant": "mephala",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L1.cinder_slopes"
+    ]
+  },
+  {
+    "id": "shrine_meridia_morrowind",
+    "name": "place.nirncraft.shrine_meridia_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/deshaan",
+    "x": 7143,
+    "z": 2977,
+    "radius": 12,
+    "variant": "meridia",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L1.obsidian_gorge"
+    ]
+  },
+  {
+    "id": "shrine_molag_bal_morrowind",
+    "name": "place.nirncraft.shrine_molag_bal_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/ascadian_isles",
+    "x": 6819,
+    "z": 716,
+    "radius": 12,
+    "variant": "molag_bal",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L1.lake_basins"
+    ]
+  },
+  {
+    "id": "shrine_namira_morrowind",
+    "name": "place.nirncraft.shrine_namira_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/west_gash",
+    "x": 6235,
+    "z": -192,
+    "radius": 12,
+    "variant": "namira",
+    "why": [
+      "west_gash.L1.gash_ridges",
+      "west_gash.L1.odai_gorge"
+    ]
+  },
+  {
+    "id": "shrine_nocturnal_morrowind",
+    "name": "place.nirncraft.shrine_nocturnal_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/vvardenfell_ashlands",
+    "x": 5942,
+    "z": -1056,
+    "radius": 12,
+    "variant": "nocturnal",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.scoria_ridges"
+    ]
+  },
+  {
+    "id": "shrine_peryite_morrowind",
+    "name": "place.nirncraft.shrine_peryite_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/azuras_coast",
+    "x": 8020,
+    "z": 108,
+    "radius": 12,
+    "variant": "peryite",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L1.sea_cliffs"
+    ]
+  },
+  {
+    "id": "shrine_sanguine_morrowind",
+    "name": "place.nirncraft.shrine_sanguine_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/deshaan",
+    "x": 5398,
+    "z": 2833,
+    "radius": 12,
+    "variant": "sanguine",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L1.obsidian_gorge"
+    ]
+  },
+  {
+    "id": "shrine_sheogorath_morrowind",
+    "name": "place.nirncraft.shrine_sheogorath_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/molag_amur",
+    "x": 8594,
+    "z": 3017,
+    "radius": 12,
+    "variant": "sheogorath",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "molag_amur.L1.cinder_cones"
+    ]
+  },
+  {
+    "id": "shrine_vaermina_morrowind",
+    "name": "place.nirncraft.shrine_vaermina_morrowind",
+    "type": "daedric_shrine",
+    "culture": "dunmer",
+    "region": "morrowind/red_mountain",
+    "x": 6613,
+    "z": -127,
+    "radius": 12,
+    "variant": "vaermina",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L1.cinder_slopes"
+    ]
+  },
+  {
+    "id": "shrine_azura_high_rock",
+    "name": "place.nirncraft.shrine_azura_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/wayrest",
+    "x": -5992,
+    "z": 2888,
+    "radius": 12,
+    "variant": "azura",
+    "why": [
+      "wayrest.L1.bjoulsae_mouth",
+      "wayrest.L1.castle_spur"
+    ]
+  },
+  {
+    "id": "shrine_boethiah_high_rock",
+    "name": "place.nirncraft.shrine_boethiah_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/daggerfall",
+    "x": -9232,
+    "z": 2116,
+    "radius": 12,
+    "variant": "boethiah",
+    "why": [
+      "daggerfall.L1.dagger_bluffs",
+      "daggerfall.L1.glenpoint_headland"
+    ]
+  },
+  {
+    "id": "shrine_clavicus_vile_high_rock",
+    "name": "place.nirncraft.shrine_clavicus_vile_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/glenumbra",
+    "x": -8482,
+    "z": -13,
+    "radius": 12,
+    "variant": "clavicus_vile",
+    "why": [
+      "glenumbra.L1.ocean_cliffs",
+      "glenumbra.L1.camlorn_hill"
+    ]
+  },
+  {
+    "id": "shrine_hermaeus_mora_high_rock",
+    "name": "place.nirncraft.shrine_hermaeus_mora_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/rivenspire",
+    "x": -7839,
+    "z": -709,
+    "radius": 12,
+    "variant": "hermaeus_mora",
+    "why": [
+      "rivenspire.L1.dark_crags",
+      "rivenspire.L1.shornhelm_gap"
+    ]
+  },
+  {
+    "id": "shrine_hircine_high_rock",
+    "name": "place.nirncraft.shrine_hircine_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/stormhaven",
+    "x": -7205,
+    "z": 473,
+    "radius": 12,
+    "variant": "hircine",
+    "why": [
+      "stormhaven.L1.rolling_uplands",
+      "stormhaven.L1.weeping_crag"
+    ]
+  },
+  {
+    "id": "shrine_malacath_high_rock",
+    "name": "place.nirncraft.shrine_malacath_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/wrothgar",
+    "x": -4849,
+    "z": 588,
+    "radius": 12,
+    "variant": "malacath",
+    "why": [
+      "wrothgar.L1.granite_peaks",
+      "wrothgar.L1.orsinium_plateau"
+    ]
+  },
+  {
+    "id": "shrine_mehrunes_dagon_high_rock",
+    "name": "place.nirncraft.shrine_mehrunes_dagon_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/wayrest",
+    "x": -5155,
+    "z": 2758,
+    "radius": 12,
+    "variant": "mehrunes_dagon",
+    "why": [
+      "wayrest.L1.bjoulsae_mouth",
+      "wayrest.L1.castle_spur"
+    ]
+  },
+  {
+    "id": "shrine_mephala_high_rock",
+    "name": "place.nirncraft.shrine_mephala_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/anticlere",
+    "x": -8697,
+    "z": 2274,
+    "radius": 12,
+    "variant": "mephala",
+    "why": [
+      "anticlere.L1.anticlere_scarp",
+      "anticlere.L1.river_meadows"
+    ]
+  },
+  {
+    "id": "shrine_meridia_high_rock",
+    "name": "place.nirncraft.shrine_meridia_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/glenumbra",
+    "x": -8628,
+    "z": 480,
+    "radius": 12,
+    "variant": "meridia",
+    "why": [
+      "glenumbra.L1.ocean_cliffs",
+      "glenumbra.L1.camlorn_hill"
+    ]
+  },
+  {
+    "id": "shrine_molag_bal_high_rock",
+    "name": "place.nirncraft.shrine_molag_bal_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/rivenspire",
+    "x": -8202,
+    "z": -1473,
+    "radius": 12,
+    "variant": "molag_bal",
+    "why": [
+      "rivenspire.L1.dark_crags",
+      "rivenspire.L1.shornhelm_gap"
+    ]
+  },
+  {
+    "id": "shrine_namira_high_rock",
+    "name": "place.nirncraft.shrine_namira_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/stormhaven",
+    "x": -7125,
+    "z": -477,
+    "radius": 12,
+    "variant": "namira",
+    "why": [
+      "stormhaven.L1.rolling_uplands",
+      "stormhaven.L1.weeping_crag"
+    ]
+  },
+  {
+    "id": "shrine_nocturnal_high_rock",
+    "name": "place.nirncraft.shrine_nocturnal_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/wrothgar",
+    "x": -5167,
+    "z": 320,
+    "radius": 12,
+    "variant": "nocturnal",
+    "why": [
+      "wrothgar.L1.granite_peaks",
+      "wrothgar.L1.orsinium_plateau"
+    ]
+  },
+  {
+    "id": "shrine_peryite_high_rock",
+    "name": "place.nirncraft.shrine_peryite_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/wrothgar",
+    "x": -4562,
+    "z": 2951,
+    "radius": 12,
+    "variant": "peryite",
+    "why": [
+      "wrothgar.L1.granite_peaks",
+      "wrothgar.L1.orsinium_plateau"
+    ]
+  },
+  {
+    "id": "shrine_sanguine_high_rock",
+    "name": "place.nirncraft.shrine_sanguine_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/daggerfall",
+    "x": -9665,
+    "z": 2246,
+    "radius": 12,
+    "variant": "sanguine",
+    "why": [
+      "daggerfall.L1.dagger_bluffs",
+      "daggerfall.L1.glenpoint_headland"
+    ]
+  },
+  {
+    "id": "shrine_sheogorath_high_rock",
+    "name": "place.nirncraft.shrine_sheogorath_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/glenumbra",
+    "x": -9476,
+    "z": 338,
+    "radius": 12,
+    "variant": "sheogorath",
+    "why": [
+      "glenumbra.L1.ocean_cliffs",
+      "glenumbra.L1.camlorn_hill"
+    ]
+  },
+  {
+    "id": "shrine_vaermina_high_rock",
+    "name": "place.nirncraft.shrine_vaermina_high_rock",
+    "type": "daedric_shrine",
+    "culture": "breton",
+    "region": "high_rock/rivenspire",
+    "x": -7168,
+    "z": -968,
+    "radius": 12,
+    "variant": "vaermina",
+    "why": [
+      "rivenspire.L1.dark_crags",
+      "rivenspire.L1.shornhelm_gap"
+    ]
+  },
+  {
+    "id": "shrine_azura_hammerfell",
+    "name": "place.nirncraft.shrine_azura_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8170,
+    "z": 5557,
+    "radius": 12,
+    "variant": "azura",
+    "why": [
+      "alikr_desert.L1.erg",
+      "alikr_desert.L1.mesas"
+    ]
+  },
+  {
+    "id": "shrine_boethiah_hammerfell",
+    "name": "place.nirncraft.shrine_boethiah_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4773,
+    "z": 3886,
+    "radius": 12,
+    "variant": "boethiah",
+    "why": [
+      "bangkorai.L1.red_clay_valleys",
+      "bangkorai.L1.ephesus_heights"
+    ]
+  },
+  {
+    "id": "shrine_clavicus_vile_hammerfell",
+    "name": "place.nirncraft.shrine_clavicus_vile_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5539,
+    "z": 5736,
+    "radius": 12,
+    "variant": "clavicus_vile",
+    "why": [
+      "dragontail.L1.black_ridges",
+      "dragontail.L1.red_wall"
+    ]
+  },
+  {
+    "id": "shrine_hermaeus_mora_hammerfell",
+    "name": "place.nirncraft.shrine_hermaeus_mora_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5117,
+    "z": 6476,
+    "radius": 12,
+    "variant": "hermaeus_mora",
+    "why": [
+      "dragontail.L1.black_ridges",
+      "dragontail.L1.red_wall"
+    ]
+  },
+  {
+    "id": "shrine_hircine_hammerfell",
+    "name": "place.nirncraft.shrine_hircine_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6718,
+    "z": 7441,
+    "radius": 12,
+    "variant": "hircine",
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L1.taneth_cliff_shelf"
+    ]
+  },
+  {
+    "id": "shrine_malacath_hammerfell",
+    "name": "place.nirncraft.shrine_malacath_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7547,
+    "z": 5132,
+    "radius": 12,
+    "variant": "malacath",
+    "why": [
+      "sentinel.L1.harbour_cliff",
+      "sentinel.L1.garden_terraces"
+    ]
+  },
+  {
+    "id": "shrine_mehrunes_dagon_hammerfell",
+    "name": "place.nirncraft.shrine_mehrunes_dagon_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4133,
+    "z": 3214,
+    "radius": 12,
+    "variant": "mehrunes_dagon",
+    "why": [
+      "craglorn.L1.craglorn_badlands",
+      "craglorn.L1.starfall_craters"
+    ]
+  },
+  {
+    "id": "shrine_mephala_hammerfell",
+    "name": "place.nirncraft.shrine_mephala_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6038,
+    "z": 5954,
+    "radius": 12,
+    "variant": "mephala",
+    "why": [
+      "alikr_desert.L1.erg",
+      "alikr_desert.L1.mesas"
+    ]
+  },
+  {
+    "id": "shrine_meridia_hammerfell",
+    "name": "place.nirncraft.shrine_meridia_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4662,
+    "z": 6501,
+    "radius": 12,
+    "variant": "meridia",
+    "why": [
+      "dragontail.L1.black_ridges",
+      "dragontail.L1.red_wall"
+    ]
+  },
+  {
+    "id": "shrine_molag_bal_hammerfell",
+    "name": "place.nirncraft.shrine_molag_bal_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6540,
+    "z": 7103,
+    "radius": 12,
+    "variant": "molag_bal",
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L1.taneth_cliff_shelf"
+    ]
+  },
+  {
+    "id": "shrine_namira_hammerfell",
+    "name": "place.nirncraft.shrine_namira_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8664,
+    "z": 5800,
+    "radius": 12,
+    "variant": "namira",
+    "why": [
+      "alikr_desert.L1.erg",
+      "alikr_desert.L1.mesas"
+    ]
+  },
+  {
+    "id": "shrine_nocturnal_hammerfell",
+    "name": "place.nirncraft.shrine_nocturnal_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4181,
+    "z": 4177,
+    "radius": 12,
+    "variant": "nocturnal",
+    "why": [
+      "craglorn.L1.craglorn_badlands",
+      "craglorn.L1.starfall_craters"
+    ]
+  },
+  {
+    "id": "shrine_peryite_hammerfell",
+    "name": "place.nirncraft.shrine_peryite_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6612,
+    "z": 6599,
+    "radius": 12,
+    "variant": "peryite",
+    "why": [
+      "alikr_desert.L1.erg",
+      "alikr_desert.L1.mesas"
+    ]
+  },
+  {
+    "id": "shrine_sanguine_hammerfell",
+    "name": "place.nirncraft.shrine_sanguine_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4040,
+    "z": 6722,
+    "radius": 12,
+    "variant": "sanguine",
+    "why": [
+      "dragontail.L1.black_ridges",
+      "dragontail.L1.red_wall"
+    ]
+  },
+  {
+    "id": "shrine_sheogorath_hammerfell",
+    "name": "place.nirncraft.shrine_sheogorath_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5909,
+    "z": 7954,
+    "radius": 12,
+    "variant": "sheogorath",
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L1.taneth_cliff_shelf"
+    ]
+  },
+  {
+    "id": "shrine_vaermina_hammerfell",
+    "name": "place.nirncraft.shrine_vaermina_hammerfell",
+    "type": "daedric_shrine",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8393,
+    "z": 5914,
+    "radius": 12,
+    "variant": "vaermina",
+    "why": [
+      "alikr_desert.L1.erg",
+      "alikr_desert.L1.mesas"
+    ]
+  },
+  {
+    "id": "shrine_azura_black_marsh",
+    "name": "place.nirncraft.shrine_azura_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 4609,
+    "z": 6356,
+    "radius": 12,
+    "variant": "azura",
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ]
+  },
+  {
+    "id": "shrine_boethiah_black_marsh",
+    "name": "place.nirncraft.shrine_boethiah_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 4700,
+    "z": 5408,
+    "radius": 12,
+    "variant": "boethiah",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_clavicus_vile_black_marsh",
+    "name": "place.nirncraft.shrine_clavicus_vile_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 6620,
+    "z": 4264,
+    "radius": 12,
+    "variant": "clavicus_vile",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_hermaeus_mora_black_marsh",
+    "name": "place.nirncraft.shrine_hermaeus_mora_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 4702,
+    "z": 5977,
+    "radius": 12,
+    "variant": "hermaeus_mora",
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ]
+  },
+  {
+    "id": "shrine_hircine_black_marsh",
+    "name": "place.nirncraft.shrine_hircine_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 4570,
+    "z": 6607,
+    "radius": 12,
+    "variant": "hircine",
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ]
+  },
+  {
+    "id": "shrine_malacath_black_marsh",
+    "name": "place.nirncraft.shrine_malacath_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 8607,
+    "z": 4373,
+    "radius": 12,
+    "variant": "malacath",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_mehrunes_dagon_black_marsh",
+    "name": "place.nirncraft.shrine_mehrunes_dagon_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 4725,
+    "z": 5662,
+    "radius": 12,
+    "variant": "mehrunes_dagon",
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ]
+  },
+  {
+    "id": "shrine_mephala_black_marsh",
+    "name": "place.nirncraft.shrine_mephala_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 8997,
+    "z": 4354,
+    "radius": 12,
+    "variant": "mephala",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_meridia_black_marsh",
+    "name": "place.nirncraft.shrine_meridia_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 5982,
+    "z": 4230,
+    "radius": 12,
+    "variant": "meridia",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_molag_bal_black_marsh",
+    "name": "place.nirncraft.shrine_molag_bal_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 4766,
+    "z": 4863,
+    "radius": 12,
+    "variant": "molag_bal",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_namira_black_marsh",
+    "name": "place.nirncraft.shrine_namira_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 8237,
+    "z": 4327,
+    "radius": 12,
+    "variant": "namira",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_nocturnal_black_marsh",
+    "name": "place.nirncraft.shrine_nocturnal_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 6870,
+    "z": 4110,
+    "radius": 12,
+    "variant": "nocturnal",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_peryite_black_marsh",
+    "name": "place.nirncraft.shrine_peryite_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 7121,
+    "z": 4112,
+    "radius": 12,
+    "variant": "peryite",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_sanguine_black_marsh",
+    "name": "place.nirncraft.shrine_sanguine_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 4611,
+    "z": 5061,
+    "radius": 12,
+    "variant": "sanguine",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_sheogorath_black_marsh",
+    "name": "place.nirncraft.shrine_sheogorath_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 7937,
+    "z": 4378,
+    "radius": 12,
+    "variant": "sheogorath",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_vaermina_black_marsh",
+    "name": "place.nirncraft.shrine_vaermina_black_marsh",
+    "type": "daedric_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 7375,
+    "z": 4142,
+    "radius": 12,
+    "variant": "vaermina",
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ]
+  },
+  {
+    "id": "shrine_azura_elsweyr",
+    "name": "place.nirncraft.shrine_azura_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 590,
+    "z": 10866,
+    "radius": 12,
+    "variant": "azura",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ]
+  },
+  {
+    "id": "shrine_boethiah_elsweyr",
+    "name": "place.nirncraft.shrine_boethiah_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": -581,
+    "z": 11712,
+    "radius": 12,
+    "variant": "boethiah",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L1.tenmar_sinkholes"
+    ]
+  },
+  {
+    "id": "shrine_clavicus_vile_elsweyr",
+    "name": "place.nirncraft.shrine_clavicus_vile_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 1194,
+    "z": 12156,
+    "radius": 12,
+    "variant": "clavicus_vile",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ]
+  },
+  {
+    "id": "shrine_hermaeus_mora_elsweyr",
+    "name": "place.nirncraft.shrine_hermaeus_mora_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 2573,
+    "z": 12833,
+    "radius": 12,
+    "variant": "hermaeus_mora",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ]
+  },
+  {
+    "id": "shrine_hircine_elsweyr",
+    "name": "place.nirncraft.shrine_hircine_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/rimmen",
+    "x": 595,
+    "z": 10381,
+    "radius": 12,
+    "variant": "hircine",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L1.alabaster_beds"
+    ]
+  },
+  {
+    "id": "shrine_malacath_elsweyr",
+    "name": "place.nirncraft.shrine_malacath_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -330,
+    "z": 11325,
+    "radius": 12,
+    "variant": "malacath",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L1.badland_gullies"
+    ]
+  },
+  {
+    "id": "shrine_mehrunes_dagon_elsweyr",
+    "name": "place.nirncraft.shrine_mehrunes_dagon_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 1859,
+    "z": 12236,
+    "radius": 12,
+    "variant": "mehrunes_dagon",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ]
+  },
+  {
+    "id": "shrine_mephala_elsweyr",
+    "name": "place.nirncraft.shrine_mephala_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 2876,
+    "z": 13065,
+    "radius": 12,
+    "variant": "mephala",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ]
+  },
+  {
+    "id": "shrine_meridia_elsweyr",
+    "name": "place.nirncraft.shrine_meridia_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/rimmen",
+    "x": 862,
+    "z": 9551,
+    "radius": 12,
+    "variant": "meridia",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L1.alabaster_beds"
+    ]
+  },
+  {
+    "id": "shrine_molag_bal_elsweyr",
+    "name": "place.nirncraft.shrine_molag_bal_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -764,
+    "z": 11244,
+    "radius": 12,
+    "variant": "molag_bal",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L1.badland_gullies"
+    ]
+  },
+  {
+    "id": "shrine_namira_elsweyr",
+    "name": "place.nirncraft.shrine_namira_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 639,
+    "z": 11972,
+    "radius": 12,
+    "variant": "namira",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ]
+  },
+  {
+    "id": "shrine_nocturnal_elsweyr",
+    "name": "place.nirncraft.shrine_nocturnal_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 2080,
+    "z": 13719,
+    "radius": 12,
+    "variant": "nocturnal",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ]
+  },
+  {
+    "id": "shrine_peryite_elsweyr",
+    "name": "place.nirncraft.shrine_peryite_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 1046,
+    "z": 11273,
+    "radius": 12,
+    "variant": "peryite",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ]
+  },
+  {
+    "id": "shrine_sanguine_elsweyr",
+    "name": "place.nirncraft.shrine_sanguine_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -1175,
+    "z": 10904,
+    "radius": 12,
+    "variant": "sanguine",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L1.badland_gullies"
+    ]
+  },
+  {
+    "id": "shrine_sheogorath_elsweyr",
+    "name": "place.nirncraft.shrine_sheogorath_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 1693,
+    "z": 12721,
+    "radius": 12,
+    "variant": "sheogorath",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ]
+  },
+  {
+    "id": "shrine_vaermina_elsweyr",
+    "name": "place.nirncraft.shrine_vaermina_elsweyr",
+    "type": "daedric_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 2515,
+    "z": 13334,
+    "radius": 12,
+    "variant": "vaermina",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ]
+  },
+  {
+    "id": "shrine_azura_valenwood",
+    "name": "place.nirncraft.shrine_azura_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4387,
+    "z": 10487,
+    "radius": 12,
+    "variant": "azura",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ]
+  },
+  {
+    "id": "shrine_boethiah_valenwood",
+    "name": "place.nirncraft.shrine_boethiah_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -4674,
+    "z": 10058,
+    "radius": 12,
+    "variant": "boethiah",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L1.jungle_floor"
+    ]
+  },
+  {
+    "id": "shrine_clavicus_vile_valenwood",
+    "name": "place.nirncraft.shrine_clavicus_vile_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -6254,
+    "z": 12578,
+    "radius": 12,
+    "variant": "clavicus_vile",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ]
+  },
+  {
+    "id": "shrine_hermaeus_mora_valenwood",
+    "name": "place.nirncraft.shrine_hermaeus_mora_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/reapers_march",
+    "x": -2485,
+    "z": 11059,
+    "radius": 12,
+    "variant": "hermaeus_mora",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ]
+  },
+  {
+    "id": "shrine_hircine_valenwood",
+    "name": "place.nirncraft.shrine_hircine_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4407,
+    "z": 10968,
+    "radius": 12,
+    "variant": "hircine",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ]
+  },
+  {
+    "id": "shrine_malacath_valenwood",
+    "name": "place.nirncraft.shrine_malacath_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4877,
+    "z": 10785,
+    "radius": 12,
+    "variant": "malacath",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ]
+  },
+  {
+    "id": "shrine_mehrunes_dagon_valenwood",
+    "name": "place.nirncraft.shrine_mehrunes_dagon_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -5990,
+    "z": 12176,
+    "radius": 12,
+    "variant": "mehrunes_dagon",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ]
+  },
+  {
+    "id": "shrine_mephala_valenwood",
+    "name": "place.nirncraft.shrine_mephala_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/reapers_march",
+    "x": -2931,
+    "z": 10820,
+    "radius": 12,
+    "variant": "mephala",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ]
+  },
+  {
+    "id": "shrine_meridia_valenwood",
+    "name": "place.nirncraft.shrine_meridia_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4670,
+    "z": 11365,
+    "radius": 12,
+    "variant": "meridia",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ]
+  },
+  {
+    "id": "shrine_molag_bal_valenwood",
+    "name": "place.nirncraft.shrine_molag_bal_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -5157,
+    "z": 10315,
+    "radius": 12,
+    "variant": "molag_bal",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L1.jungle_floor"
+    ]
+  },
+  {
+    "id": "shrine_namira_valenwood",
+    "name": "place.nirncraft.shrine_namira_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -6411,
+    "z": 12156,
+    "radius": 12,
+    "variant": "namira",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ]
+  },
+  {
+    "id": "shrine_nocturnal_valenwood",
+    "name": "place.nirncraft.shrine_nocturnal_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/reapers_march",
+    "x": -2804,
+    "z": 10144,
+    "radius": 12,
+    "variant": "nocturnal",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ]
+  },
+  {
+    "id": "shrine_peryite_valenwood",
+    "name": "place.nirncraft.shrine_peryite_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4025,
+    "z": 10845,
+    "radius": 12,
+    "variant": "peryite",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ]
+  },
+  {
+    "id": "shrine_sanguine_valenwood",
+    "name": "place.nirncraft.shrine_sanguine_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -5804,
+    "z": 10940,
+    "radius": 12,
+    "variant": "sanguine",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ]
+  },
+  {
+    "id": "shrine_sheogorath_valenwood",
+    "name": "place.nirncraft.shrine_sheogorath_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -6007,
+    "z": 12955,
+    "radius": 12,
+    "variant": "sheogorath",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ]
+  },
+  {
+    "id": "shrine_vaermina_valenwood",
+    "name": "place.nirncraft.shrine_vaermina_valenwood",
+    "type": "daedric_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/reapers_march",
+    "x": -2234,
+    "z": 10036,
+    "radius": 12,
+    "variant": "vaermina",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ]
+  },
+  {
+    "id": "shrine_azura_summerset",
+    "name": "place.nirncraft.shrine_azura_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11388,
+    "z": 12370,
+    "radius": 12,
+    "variant": "azura",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "shrine_boethiah_summerset",
+    "name": "place.nirncraft.shrine_boethiah_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9814,
+    "z": 11430,
+    "radius": 12,
+    "variant": "boethiah",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "shrine_clavicus_vile_summerset",
+    "name": "place.nirncraft.shrine_clavicus_vile_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11287,
+    "z": 13430,
+    "radius": 12,
+    "variant": "clavicus_vile",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "shrine_hermaeus_mora_summerset",
+    "name": "place.nirncraft.shrine_hermaeus_mora_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9742,
+    "z": 10697,
+    "radius": 12,
+    "variant": "hermaeus_mora",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "shrine_hircine_summerset",
+    "name": "place.nirncraft.shrine_hircine_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11914,
+    "z": 13079,
+    "radius": 12,
+    "variant": "hircine",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "shrine_malacath_summerset",
+    "name": "place.nirncraft.shrine_malacath_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9455,
+    "z": 11960,
+    "radius": 12,
+    "variant": "malacath",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "shrine_mehrunes_dagon_summerset",
+    "name": "place.nirncraft.shrine_mehrunes_dagon_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11105,
+    "z": 12665,
+    "radius": 12,
+    "variant": "mehrunes_dagon",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "shrine_mephala_summerset",
+    "name": "place.nirncraft.shrine_mephala_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9425,
+    "z": 11500,
+    "radius": 12,
+    "variant": "mephala",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "shrine_meridia_summerset",
+    "name": "place.nirncraft.shrine_meridia_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11518,
+    "z": 12875,
+    "radius": 12,
+    "variant": "meridia",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "shrine_molag_bal_summerset",
+    "name": "place.nirncraft.shrine_molag_bal_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9955,
+    "z": 11070,
+    "radius": 12,
+    "variant": "molag_bal",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "shrine_namira_summerset",
+    "name": "place.nirncraft.shrine_namira_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11967,
+    "z": 12635,
+    "radius": 12,
+    "variant": "namira",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "shrine_nocturnal_summerset",
+    "name": "place.nirncraft.shrine_nocturnal_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9537,
+    "z": 11096,
+    "radius": 12,
+    "variant": "nocturnal",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "shrine_peryite_summerset",
+    "name": "place.nirncraft.shrine_peryite_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9400,
+    "z": 10764,
+    "radius": 12,
+    "variant": "peryite",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "shrine_sanguine_summerset",
+    "name": "place.nirncraft.shrine_sanguine_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11409,
+    "z": 13148,
+    "radius": 12,
+    "variant": "sanguine",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "shrine_sheogorath_summerset",
+    "name": "place.nirncraft.shrine_sheogorath_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11648,
+    "z": 13247,
+    "radius": 12,
+    "variant": "sheogorath",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "shrine_vaermina_summerset",
+    "name": "place.nirncraft.shrine_vaermina_summerset",
+    "type": "daedric_shrine",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11361,
+    "z": 12651,
+    "radius": 12,
+    "variant": "vaermina",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  }
+]

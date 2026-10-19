@@ -6,13 +6,13 @@ import json
 import math
 import os
 
-ROOT = "mod/src/main/resources/skycraft/tamriel"
+ROOT = "mod/src/main/resources/nirncraft/tamriel"
 STYLES_DIR = os.path.join(ROOT, "styles")
 OVERLAY_DIR = os.path.join(STYLES_DIR, "overlays")
 CITYPLAN_DIR = os.path.join(ROOT, "cityplans")
 INDEX_PATH = os.path.join(CITYPLAN_DIR, "index.json")
 
-# 1. Generate mod/src/main/resources/skycraft/tamriel/styles/velothi.json (>= 480 leaves)
+# 1. Generate mod/src/main/resources/nirncraft/tamriel/styles/velothi.json (>= 480 leaves)
 VELOTHI_STYLE = {
     "_doc": "Velothi & Great House style sheet for Morrowind and Solstheim (>= 450 leaves). Sub-palettes: hlaalu, redoran, telvanni, indoril, dres, temple, ashlander.",
     "why": [
@@ -169,22 +169,22 @@ VELOTHI_STYLE = {
                 "poor": [
                     {"wall": "mushroom_stem", "roofFull": "brown_mushroom_block", "wood": "mangrove", "timber": False},
                     {"wall": "mushroom_stem", "roofFull": "red_mushroom_block", "wood": "mangrove", "timber": False},
-                    {"wall": "skycraft:parasol_stem", "roofFull": "skycraft:parasol_cap", "wood": "mangrove", "timber": False},
+                    {"wall": "nirncraft:parasol_stem", "roofFull": "nirncraft:parasol_cap", "wood": "mangrove", "timber": False},
                 ],
                 "common": [
                     {"wall": "mushroom_stem", "roofFull": "red_mushroom_block", "wood": "mangrove", "timber": False, "accent": "purple"},
-                    {"wall": "mushroom_stem", "roofFull": "skycraft:telvanni_cap", "wood": "mangrove", "timber": False, "accent": "magenta"},
-                    {"wall": "skycraft:parasol_stem", "roofFull": "brown_mushroom_block", "wood": "crimson", "timber": False, "accent": "purple"},
+                    {"wall": "mushroom_stem", "roofFull": "nirncraft:telvanni_cap", "wood": "mangrove", "timber": False, "accent": "magenta"},
+                    {"wall": "nirncraft:parasol_stem", "roofFull": "brown_mushroom_block", "wood": "crimson", "timber": False, "accent": "purple"},
                 ],
                 "wealthy": [
-                    {"wall": "mushroom_stem", "roofFull": "skycraft:telvanni_cap", "wood": "crimson", "timber": False, "accent": "purple"},
+                    {"wall": "mushroom_stem", "roofFull": "nirncraft:telvanni_cap", "wood": "crimson", "timber": False, "accent": "purple"},
                     {"wall": "mushroom_stem", "roofFull": "crimson_hyphae", "wood": "crimson", "timber": False, "accent": "magenta"},
-                    {"wall": "skycraft:parasol_stem", "roofFull": "red_mushroom_block", "wood": "mangrove", "timber": False},
+                    {"wall": "nirncraft:parasol_stem", "roofFull": "red_mushroom_block", "wood": "mangrove", "timber": False},
                 ],
                 "noble": [
-                    {"wall": "mushroom_stem", "roofFull": "skycraft:telvanni_cap", "wood": "crimson", "timber": False, "light": "shroomlight"},
+                    {"wall": "mushroom_stem", "roofFull": "nirncraft:telvanni_cap", "wood": "crimson", "timber": False, "light": "shroomlight"},
                     {"wall": "mushroom_stem", "roofFull": "warped_wart_block", "wood": "warped", "timber": False, "light": "shroomlight"},
-                    {"wall": "skycraft:parasol_stem", "roofFull": "crimson_hyphae", "wood": "crimson", "timber": False, "light": "shroomlight"},
+                    {"wall": "nirncraft:parasol_stem", "roofFull": "crimson_hyphae", "wood": "crimson", "timber": False, "light": "shroomlight"},
                 ],
             },
         },
@@ -281,7 +281,7 @@ with open(os.path.join(STYLES_DIR, "velothi.json"), "w", encoding="utf-8", newli
     json.dump(VELOTHI_STYLE, f, indent=2)
     f.write("\n")
 
-# 2. Generate 29 Regional & Great House Overlays in mod/src/main/resources/skycraft/tamriel/styles/overlays/*.json
+# 2. Generate 29 Regional & Great House Overlays in mod/src/main/resources/nirncraft/tamriel/styles/overlays/*.json
 OVERLAY_SPECS = {
     # 13 Regions
     "vvardenfell_ashlands": (["vvardenfell_ashlands.L1.ash_plain", "vvardenfell_ashlands.L1.crab_shell_rock"], "minecraft:terracotta", "minecraft:packed_mud", "minecraft:polished_andesite", "dark_oak", "mud_brick", "red", "mud_bricks", "minecraft:polished_andesite", "minecraft:packed_mud", "redoran"),

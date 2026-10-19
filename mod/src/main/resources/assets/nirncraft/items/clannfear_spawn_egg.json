@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/clannfear_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 6956052
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 14206106
+      }
+    ]
+  }
+}

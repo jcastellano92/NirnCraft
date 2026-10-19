@@ -1,8 +1,0 @@
-{
-  "type": "skycraft:realm_site",
-  "site": "coldharbour/arrival",
-  "biomes": "#skycraft:realm/coldharbour",
-  "step": "surface_structures",
-  "spawn_overrides": {},
-  "terrain_adaptation": "none"
-}

@@ -1,8 +1,8 @@
 # Exploration: something worth finding every few minutes
 
 In Skyrim you rarely walk more than a minute or two without spotting something: a camp's smoke, a shrine by the
-road, a cairn on a ridge, a corpse with a note in its pack. This file describes how Skycraft makes all of Nirn that
-dense, and how it measures that it is. The code is in `com.skycraft.explore`. The tools are in `tools/explore/`.
+road, a cairn on a ridge, a corpse with a note in its pack. This file describes how NirnCraft makes all of Nirn that
+dense, and how it measures that it is. The code is in `com.nirncraft.explore`. The tools are in `tools/explore/`.
 
 ## 1. The targets
 
@@ -19,8 +19,8 @@ Open sea is not counted. Every land sample point is attributed to the region it 
 
 ### In game
 
-`/skycraft-explore audit [regions|tamriel|all] [perRegion] [realms]` needs op level 2. It runs on a background
-thread and writes CSV files to `<server>/skycraft-explore/`.
+`/nirncraft-explore audit [regions|tamriel|all] [perRegion] [realms]` needs op level 2. It runs on a background
+thread and writes CSV files to `<server>/nirncraft-explore/`.
 
 The areas it samples:
 
@@ -31,7 +31,7 @@ The areas it samples:
 
 The points of interest come from deterministic placement only. Nothing is generated:
 
-* **Named places**: every entry in `skycraft/tamriel/places/*`.
+* **Named places**: every entry in `nirncraft/tamriel/places/*`.
 * **Random-spread structure sets**: the exact vanilla placement math. That covers `getPotentialStructureChunk`, the
   exclusion zones and the weighted try-in-turn choice. Each candidate is then checked with the structure's own
   `findValidGenerationPoint`. That check is the same one the game runs, which covers culture `where` filters, named
@@ -57,7 +57,7 @@ It also records the distance to the nearest major site.
 
 Vanilla structures are left out. The buried ones (mineshafts, strongholds, ancient cities, buried treasure, ocean
 ruins) are never seen from the surface. The visible ones (ruined portals, pillager outposts) still generate in
-Skycraft's biomes, but they are not Skyrim content.
+NirnCraft's biomes, but they are not Skyrim content.
 
 ### Offline
 
@@ -98,7 +98,7 @@ The share of occupied cells depends on the province:
 These shares were tuned with the audit (section 5). The first pass used 60% for Skyrim and 80% elsewhere. That put a
 point of interest within about 115 blocks of 90% of the land, denser than Skyrim needs, so the shares were lowered.
 
-That share is scaled by `density` in `config/skycraft-explore.toml`.
+That share is scaled by `density` in `config/nirncraft-explore.toml`.
 
 The kind of site is a weighted choice from the map context of the spot:
 
@@ -106,7 +106,7 @@ The kind of site is a weighted choice from the map context of the spot:
 * coast, and lake or river shores;
 * height over the surroundings, mountains, and cold.
 
-Every site has a chest or barrel, with loot tables under `loot_tables/explore/`. Gear comes from Skycraft's leveled
+Every site has a chest or barrel, with loot tables under `loot_tables/explore/`. Gear comes from NirnCraft's leveled
 and regional functions, and ingredients are regional. Most sites can also hold a short note telling their story.
 
 | Kind | Where | What you find |
@@ -124,7 +124,7 @@ and regional functions, and ingredients are regional. Most sites can also hold a
 | Hermit's hut | everywhere | log hut with a **smoking chimney**, bedroll, brewing stand; a hermit (hunter or apothecary) moves in |
 | Bandit lookout | high ground favoured | wooden tower with ladder, **black banner**, a smoking fire, 1–2 bandits, their take |
 | Overlook | high ground only | flagstone landing, bench, a brazier and a banner pole, a spyglass, a traveller's satchel |
-| Exposed vein | mountains favoured | rock outcrop with regional Skycraft ore showing on its faces, a pick, a prospector's barrel |
+| Exposed vein | mountains favoured | rock outcrop with regional NirnCraft ore showing on its faces, a pick, a prospector's barrel |
 | Shipwreck debris | coasts | broken hull, snapped mast, torn sail, barrels and a chest along the beach |
 | Fishing dock | lake and river shores (some coasts) | plank dock on log piles, lantern, rod and barrel; a fisher's camp when no water is close |
 | Hot spring | cold regions | steaming basin (magma below, **smoke vents**), a bather's things |
@@ -144,7 +144,7 @@ and regional functions, and ingredients are regional. Most sites can also hold a
 
 How sites stay well behaved:
 
-* **Cheap and safe.** Sites are built by one feature, `skycraft:minor_site`. It is placed once per chunk in every
+* **Cheap and safe.** Sites are built by one feature, `nirncraft:minor_site`. It is placed once per chunk in every
   overworld biome at `top_layer_modification`, after the trees, and writes only inside the 3×3 chunks it owns.
 * **Clear of named places.** Sites keep 40 blocks clear of every named place's radius.
 * **Clear of surface structures.** A site gives way to any surface structure with a piece over its chunk.
@@ -158,7 +158,7 @@ How sites stay well behaved:
 * **Spottable from afar.** Hunters' camps, hermits' chimneys, bandit lookouts, hot springs, Dwemer vents and
   fire-salt vents have signal-fire smoke columns. Ayleid wells, crystal outcrops, sea shrines and monoliths glow.
   Wayshrines, lookouts, overlooks and battlefields fly banners. Obelisks are gold-capped.
-* **Discovery experience** (configurable in `skycraft-explore.toml`; Skyrim gives none):
+* **Discovery experience** (configurable in `nirncraft-explore.toml`; Skyrim gives none):
   * `discoveryXp` (default 6): Athletics skill-use XP for a newly discovered named place or dungeon. It is hooked in
     `world/Discovery`.
   * `minorSiteXp` (default 2): Athletics XP for the first time you come upon a minor site. A quiet "Found: Hunter's
@@ -166,7 +166,7 @@ How sites stay well behaved:
 * **Skill books in the wild.**
   * Explore loot tables add one skill book 3–12% of the time, 22% at mage towers, plus skill-specific books at
     hunters', fishers', miners' and herbalists' sites.
-  * Skycraft's own dungeon chests skip the generic chest modifiers, so the `skycraft:explore_skill_books` global loot
+  * NirnCraft's own dungeon chests skip the generic chest modifiers, so the `nirncraft:explore_skill_books` global loot
     modifier adds a skill book to 6% of common, minor, Dwemer, giant, dragon and bandit chests, and to 30% of boss
     chests.
 * **Treasure maps.**
@@ -185,7 +185,7 @@ How sites stay well behaved:
   * 33 named uniques are hidden once per world at fixed minor sites across every province and the foreign lands,
     each with a lore line and 12 with a note telling their story.
   * Their positions are picked by `tools/explore/gen_explore_data.py` on dry land well away from named places.
-  * They are all original and don't duplicate the arsenal artifacts. `/skycraft-explore uniques` lists them.
+  * They are all original and don't duplicate the arsenal artifacts. `/nirncraft-explore uniques` lists them.
 
 ## 5. Results
 
@@ -294,8 +294,8 @@ The column groups are:
 
 | Command | What it does |
 | --- | --- |
-| `/skycraft-explore audit [mode] [perRegion] [realms]` | runs the density audit (CSV in `<server>/skycraft-explore/`) |
-| `/skycraft-explore near [radius]` | the minor sites around you |
-| `/skycraft-explore locate <kind> [radius]` | the nearest site of a kind |
-| `/skycraft-explore map` | a treasure map of the nearest cache |
-| `/skycraft-explore uniques` / `unique <id>` | where the uniques are, or give one |
+| `/nirncraft-explore audit [mode] [perRegion] [realms]` | runs the density audit (CSV in `<server>/nirncraft-explore/`) |
+| `/nirncraft-explore near [radius]` | the minor sites around you |
+| `/nirncraft-explore locate <kind> [radius]` | the nearest site of a kind |
+| `/nirncraft-explore map` | a treasure map of the nearest cache |
+| `/nirncraft-explore uniques` / `unique <id>` | where the uniques are, or give one |

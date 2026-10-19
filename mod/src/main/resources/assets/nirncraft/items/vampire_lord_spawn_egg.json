@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/vampire_lord_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 2763312
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 9048600
+      }
+    ]
+  }
+}

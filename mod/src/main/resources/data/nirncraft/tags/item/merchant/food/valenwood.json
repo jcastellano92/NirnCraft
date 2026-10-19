@@ -1,0 +1,31 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:raw_venison",
+      "required": false
+    },
+    {
+      "id": "nirncraft:venison_chop",
+      "required": false
+    },
+    {
+      "id": "nirncraft:venison_stew",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_goat_meat",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leg_of_goat_roast",
+      "required": false
+    },
+    "minecraft:cooked_mutton",
+    "minecraft:honey_bottle",
+    {
+      "id": "nirncraft:ale",
+      "required": false
+    }
+  ]
+}

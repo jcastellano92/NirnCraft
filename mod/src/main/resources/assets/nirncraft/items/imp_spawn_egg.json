@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/imp_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 5925450
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 13688928
+      }
+    ]
+  }
+}

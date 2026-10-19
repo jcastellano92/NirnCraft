@@ -1,0 +1,32 @@
+{
+  "feature": "nirncraft:biome/flora/cover_flowers_rift",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 9
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "nirncraft:flora_density",
+      "density": 1.0,
+      "floor": 0.04,
+      "field": {
+        "salt": 102,
+        "scale": 60,
+        "coverage": 0.62,
+        "softness": 0.15,
+        "kind": "fbm",
+        "mode": "outside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

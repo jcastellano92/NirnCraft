@@ -1,0 +1,309 @@
+{
+  "region": "cyrodiil/gold_coast",
+  "province": "cyrodiil",
+  "line": "story_gold_coast",
+  "category": "main",
+  "title": "What the Ash Remembers",
+  "why": [
+    "cyrodiil/gold_coast.L9.kvatch_rebuild",
+    "cyrodiil/gold_coast.L9.wreckers",
+    "cyrodiil/gold_coast.L7.kvatch_refugees",
+    "cyrodiil/gold_coast.L10.gate_remnant_under_kvatch"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "anvil",
+    "places": [
+      "anvil",
+      "marjas_mill",
+      "fort_wariel",
+      "rasava_camp",
+      "lady_stone",
+      "dunbarrow_cove",
+      "knightsgrave",
+      "salinia",
+      "vibiuss_cabin",
+      "varlaisvea_ayleid_ruins",
+      "sutch",
+      "bodean_camp",
+      "badgerrun_quarry",
+      "otterroot_hideout",
+      "quintus_farm"
+    ],
+    "max_road_blocks": 600,
+    "rumour": "Relief ships bound for Kvatch keep running aground on dark nights north of Anvil, and the dressed stone meant for Kvatch's walls is turning up in private coastal villas.",
+    "notice": "ANVIL HARBOUR & KVATCH REBUILDING FUND: Urgent commission to trace the missing masonry convoys and investigate the false beacon lights along the Gold Coast.",
+    "npc": "story_gold_coast_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_gold_coast_01_missing_mortars",
+      "order": 1,
+      "title": "Stones That Never Climbed",
+      "region": "cyrodiil/gold_coast",
+      "category": "main",
+      "start": "board:anvil",
+      "prereq": null,
+      "why": [
+        "cyrodiil/gold_coast.L9.kvatch_rebuild",
+        "cyrodiil/gold_coast.L7.dock_labour"
+      ],
+      "places": [
+        "anvil",
+        "brina_cross_inn",
+        "kvatch"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "anvil",
+          "objective": "Audit the Kvatch relief manifests at Anvil's harbourmaster office"
+        },
+        {
+          "id": 20,
+          "place": "brina_cross_inn",
+          "objective": "Question the teamsters at Brina Cross Inn about the diverted stone-wains"
+        },
+        {
+          "id": 30,
+          "place": "kvatch",
+          "objective": "Deliver the surviving mortar-wagons to the masons' camp at Kvatch"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "anvil",
+          "text": "Audit the Kvatch relief manifests at Anvil's harbourmaster office"
+        },
+        {
+          "type": "go",
+          "place": "brina_cross_inn",
+          "text": "Question the teamsters at Brina Cross Inn about the diverted stone-wains"
+        },
+        {
+          "type": "go",
+          "place": "kvatch",
+          "text": "Deliver the surviving mortar-wagons to the masons' camp at Kvatch"
+        }
+      ],
+      "consequence": "world_state:kvatch_manifests_audited",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "requires": [],
+      "consequence_detail": {
+        "world_state": "kvatch_manifests_audited",
+        "flag": "story_gc_manifests_audited",
+        "summary": "The harbour manifests show half of Kvatch's reconstruction stone was signed away by a speculator using Council of Ash letters of credit."
+      }
+    },
+    {
+      "id": "story_gold_coast_02_the_false_beacon",
+      "order": 2,
+      "title": "The Dark Beacon",
+      "region": "cyrodiil/gold_coast",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_gold_coast_01_missing_mortars",
+      "requires": [
+        "story_gold_coast_01_missing_mortars"
+      ],
+      "why": [
+        "cyrodiil/gold_coast.L9.wreckers",
+        "cyrodiil/gold_coast.L10.smuggler_coves"
+      ],
+      "places": [
+        "kvatch",
+        "marjas_mill",
+        "gottshaw_inn"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "kvatch",
+          "objective": "Trace the stolen crane-chains down from Kvatch toward Marja's Mill"
+        },
+        {
+          "id": 20,
+          "place": "marjas_mill",
+          "objective": "Inspect the smuggler oil-casks hidden behind Marja's Mill"
+        },
+        {
+          "id": 30,
+          "place": "gottshaw_inn",
+          "objective": "Clear the wrecker lookouts near Gottshaw Inn and smash their false signal-lantern"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "kvatch",
+          "text": "Trace the stolen crane-chains down from Kvatch toward Marja's Mill"
+        },
+        {
+          "type": "go",
+          "place": "marjas_mill",
+          "text": "Inspect the smuggler oil-casks hidden behind Marja's Mill"
+        },
+        {
+          "type": "clear",
+          "place": "gottshaw_inn",
+          "text": "Clear the wrecker lookouts near Gottshaw Inn and smash their false signal-lantern"
+        }
+      ],
+      "consequence": "world_state:gold_coast_false_beacon_smashed",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "gold_coast_false_beacon_smashed",
+        "flag": "story_gc_beacon_smashed",
+        "summary": "The wreckers' shuttered lantern near Gottshaw Inn is destroyed, saving the Abecean timber ships bound for Anvil."
+      }
+    },
+    {
+      "id": "story_gold_coast_03_cinders_below_the_chapel",
+      "order": 3,
+      "title": "Cinders Below the Bluff",
+      "region": "cyrodiil/gold_coast",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_gold_coast_02_the_false_beacon",
+      "requires": [
+        "story_gold_coast_02_the_false_beacon"
+      ],
+      "why": [
+        "cyrodiil/gold_coast.L7.kvatch_refugees",
+        "cyrodiil/gold_coast.L10.gate_remnant_under_kvatch"
+      ],
+      "places": [
+        "gottshaw_inn",
+        "the_withered_rose",
+        "kvatch"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "gottshaw_inn",
+          "objective": "Follow the wrecker paymaster's trail south toward The Withered Rose"
+        },
+        {
+          "id": 20,
+          "place": "the_withered_rose",
+          "objective": "Seize the speculator's ledger of Oblivion-glass shipments at The Withered Rose"
+        },
+        {
+          "id": 30,
+          "place": "kvatch",
+          "objective": "Locate the hidden excavation shaft beneath the Great Gate scar at Kvatch"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "gottshaw_inn",
+          "text": "Follow the wrecker paymaster's trail south toward The Withered Rose"
+        },
+        {
+          "type": "go",
+          "place": "the_withered_rose",
+          "text": "Seize the speculator's ledger of Oblivion-glass shipments at The Withered Rose"
+        },
+        {
+          "type": "go",
+          "place": "kvatch",
+          "text": "Locate the hidden excavation shaft beneath the Great Gate scar at Kvatch"
+        }
+      ],
+      "consequence": "world_state:kvatch_ash_shaft_discovered",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "kvatch_ash_shaft_discovered",
+        "flag": "story_gc_shaft_discovered",
+        "summary": "Council of Ash agents have been stalling Kvatch's rebuild so they can strip sigil-scorched glass from the cavern under the bluff."
+      }
+    },
+    {
+      "id": "story_gold_coast_04_the_second_foundation",
+      "order": 4,
+      "title": "The Second Foundation of Kvatch",
+      "region": "cyrodiil/gold_coast",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_gold_coast_03_cinders_below_the_chapel",
+      "requires": [
+        "story_gold_coast_03_cinders_below_the_chapel"
+      ],
+      "finale": true,
+      "why": [
+        "cyrodiil/gold_coast.L9.kvatch_rebuild",
+        "cyrodiil/gold_coast.L8.akatosh_chapel"
+      ],
+      "places": [
+        "kvatch",
+        "anvil"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "kvatch",
+          "objective": "Descend into the ash-cavern beneath Kvatch and defeat Speculator-Prefect Titus Vane"
+        },
+        {
+          "id": 20,
+          "place": "kvatch",
+          "objective": "Seal the Oblivion fissure and return the stolen reconstruction chest to Kvatch's masons"
+        },
+        {
+          "id": 30,
+          "place": "anvil",
+          "objective": "Proclaim the Gold Coast Reconstruction Charter at Castle Anvil"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "kvatch",
+          "text": "Descend into the ash-cavern beneath Kvatch and defeat Speculator-Prefect Titus Vane"
+        },
+        {
+          "type": "go",
+          "place": "kvatch",
+          "text": "Seal the Oblivion fissure and return the stolen reconstruction chest to Kvatch's masons"
+        },
+        {
+          "type": "go",
+          "place": "anvil",
+          "text": "Proclaim the Gold Coast Reconstruction Charter at Castle Anvil"
+        }
+      ],
+      "consequence": "world_state:kvatch_second_foundation_laid",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Builder of the Wolf's Bluff",
+        "unique_item": "nirncraft:imperial_shield"
+      },
+      "consequence_detail": {
+        "world_state": "kvatch_second_foundation_laid",
+        "flag": "story_gc_finale_complete",
+        "summary": "The ash-fissure under Kvatch is sealed, the wreckers are broken, and Anvil's ships unload full cargoes of dressed stone for Kvatch's new walls."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_gold_coast_hook_npc",
+      "name": "Warden of Anvil",
+      "role": "guard",
+      "place": "anvil",
+      "greet": "Relief ships bound for Kvatch keep running aground on dark nights north of Anvil, and the dressed stone meant for Kvatch's walls is turning up in private coastal villas."
+    }
+  ]
+}

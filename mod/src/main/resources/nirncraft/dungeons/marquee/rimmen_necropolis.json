@@ -1,0 +1,1038 @@
+{
+ "id": "rimmen_necropolis",
+ "kit": "khajiit",
+ "entry_depth": 24,
+ "palette": {
+  "wall": [
+   "minecraft:cut_sandstone*5",
+   "minecraft:smooth_sandstone*4",
+   "minecraft:sandstone*2",
+   "minecraft:light_blue_terracotta*1"
+  ],
+  "floor": [
+   "minecraft:smooth_sandstone*4",
+   "minecraft:cut_sandstone*3",
+   "minecraft:light_blue_glazed_terracotta*1"
+  ],
+  "ceiling": [
+   "minecraft:smooth_sandstone*4",
+   "minecraft:cut_sandstone*3"
+  ],
+  "rock": "minecraft:sandstone",
+  "trim": "minecraft:chiseled_sandstone",
+  "pillar": "minecraft:cut_sandstone",
+  "cap": "minecraft:chiseled_sandstone",
+  "light": "minecraft:sea_lantern",
+  "dim": "minecraft:redstone_lamp",
+  "rail": "minecraft:iron_bars",
+  "stair": "minecraft:smooth_sandstone_stairs"
+ },
+ "boss": {
+  "id": "nirncraft:dragon_priest|nirncraft:draugr_deathlord|minecraft:wither_skeleton",
+  "name": "The Necropolis Regent"
+ },
+ "books": {
+  "architect": {
+   "title": "The Architect's Reckoning",
+   "author": "Shade of an architect",
+   "pages": [
+    "I laid out the city of the dead to follow the moons: a floor for each phase, a door for each season's turning.\n\nThe clock keeps the whole of it. Align the faces and the third level opens. Misalign them and it will keep you instead."
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "moon_gate",
+   "name": "The Moon Gate",
+   "at": [
+    0,
+    0
+   ],
+   "y": -6,
+   "half": [
+    5,
+    5
+   ],
+   "h": 12,
+   "role": "start",
+   "doors": {
+    "s": 6
+   },
+   "ops": [
+    {
+     "op": "landing",
+     "y": 6,
+     "depth": 3,
+     "stairs": 3
+    },
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "scatter",
+     "block": "minecraft:cobweb",
+     "on": "ceiling",
+     "chance": 16
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:husk",
+       "name": "Moon-Cursed Dead",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ossuary_w",
+   "name": "West Ossuary",
+   "at": [
+    -1,
+    0
+   ],
+   "y": -6,
+   "half": [
+    4,
+    4
+   ],
+   "h": 6,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 3
+    },
+    {
+     "op": "fill",
+     "from": [
+      -3,
+      -3,
+      0
+     ],
+     "to": [
+      -3,
+      3,
+      1
+     ],
+     "block": "minecraft:cut_sandstone"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:husk",
+       "name": "Moon-Cursed Dead",
+       "mode": "sleep",
+       "at": [
+        [
+         -2,
+         -3
+        ],
+        [
+         -2,
+         0
+        ],
+        [
+         -2,
+         3
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_common",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "ossuary_e",
+   "name": "East Ossuary",
+   "at": [
+    1,
+    0
+   ],
+   "y": -6,
+   "half": [
+    4,
+    4
+   ],
+   "h": 6,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 3
+    },
+    {
+     "op": "fill",
+     "from": [
+      3,
+      -3,
+      0
+     ],
+     "to": [
+      3,
+      3,
+      1
+     ],
+     "block": "minecraft:cut_sandstone"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Lunar Guardian",
+       "mode": "sleep",
+       "at": [
+        [
+         2,
+         -3
+        ],
+        [
+         2,
+         0
+        ],
+        [
+         2,
+         3
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "avenue_1",
+   "name": "The First Avenue",
+   "at": [
+    0,
+    -1
+   ],
+   "y": -10,
+   "half": [
+    5,
+    4
+   ],
+   "h": 9,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:husk",
+       "name": "Moon-Cursed Dead",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      },
+      {
+       "id": "minecraft:skeleton",
+       "name": "Lunar Guardian",
+       "mode": "awake",
+       "n": 1,
+       "where": "lane"
+      }
+     ]
+    },
+    {
+     "op": "feature",
+     "id": "setpiece:crypt_avenue"
+    }
+   ]
+  },
+  {
+   "id": "atrium_w",
+   "name": "Moonlit Atrium",
+   "at": [
+    -1,
+    -1
+   ],
+   "y": -10,
+   "half": [
+    4,
+    4
+   ],
+   "h": 10,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "fill",
+     "from": [
+      -2,
+      -2,
+      9
+     ],
+     "to": [
+      2,
+      2,
+      9
+     ],
+     "block": "minecraft:glass"
+    },
+    {
+     "op": "fill",
+     "from": [
+      0,
+      0,
+      0
+     ],
+     "to": [
+      0,
+      0,
+      0
+     ],
+     "block": "minecraft:sea_lantern"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Lunar Guardian",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "atrium_e",
+   "name": "Starlit Atrium",
+   "at": [
+    1,
+    -1
+   ],
+   "y": -10,
+   "half": [
+    4,
+    4
+   ],
+   "h": 10,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "fill",
+     "from": [
+      -2,
+      -2,
+      9
+     ],
+     "to": [
+      2,
+      2,
+      9
+     ],
+     "block": "minecraft:glass"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:husk",
+       "name": "Moon-Cursed Dead",
+       "mode": "ambush",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      -3
+     ],
+     "table": "nirncraft:chests/dungeon_common",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "avenue_2",
+   "name": "The Second Avenue",
+   "at": [
+    0,
+    -2
+   ],
+   "y": -15,
+   "half": [
+    5,
+    4
+   ],
+   "h": 9,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:husk",
+       "name": "Moon-Cursed Dead",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      },
+      {
+       "id": "minecraft:skeleton",
+       "name": "Lunar Guardian",
+       "mode": "awake",
+       "n": 2,
+       "where": "lane"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "lunar_clock",
+   "name": "The Lunar Clock",
+   "at": [
+    -1,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    5,
+    5
+   ],
+   "h": 12,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "fill",
+     "from": [
+      -1,
+      -1,
+      0
+     ],
+     "to": [
+      1,
+      1,
+      0
+     ],
+     "block": "minecraft:chiseled_sandstone"
+    },
+    {
+     "op": "fill",
+     "from": [
+      0,
+      0,
+      1
+     ],
+     "to": [
+      0,
+      0,
+      8
+     ],
+     "block": "minecraft:sea_lantern"
+    },
+    {
+     "op": "blocks",
+     "list": [
+      {
+       "at": [
+        -3,
+        0,
+        0
+       ],
+       "block": "minecraft:light_blue_glazed_terracotta"
+      },
+      {
+       "at": [
+        3,
+        0,
+        0
+       ],
+       "block": "minecraft:white_glazed_terracotta"
+      },
+      {
+       "at": [
+        0,
+        -3,
+        0
+       ],
+       "block": "minecraft:light_blue_glazed_terracotta"
+      },
+      {
+       "at": [
+        0,
+        3,
+        0
+       ],
+       "block": "minecraft:white_glazed_terracotta"
+      },
+      {
+       "at": [
+        -3,
+        -3,
+        0
+       ],
+       "block": "minecraft:chiseled_sandstone"
+      },
+      {
+       "at": [
+        3,
+        3,
+        0
+       ],
+       "block": "minecraft:chiseled_sandstone"
+      },
+      {
+       "at": [
+        3,
+        -3,
+        0
+       ],
+       "block": "minecraft:chiseled_sandstone"
+      },
+      {
+       "at": [
+        -3,
+        3,
+        0
+       ],
+       "block": "minecraft:chiseled_sandstone"
+      }
+     ]
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Lunar Champion",
+       "mode": "elite",
+       "at": [
+        [
+         2,
+         -2
+        ]
+       ]
+      },
+      {
+       "id": "minecraft:husk",
+       "name": "Moon-Cursed Dead",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "feature",
+     "id": "setpiece:lunar_clock"
+    }
+   ]
+  },
+  {
+   "id": "arcade",
+   "name": "The Crypt Arcade",
+   "at": [
+    1,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    4,
+    5
+   ],
+   "h": 9,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 2
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:husk",
+       "name": "Moon-Cursed Dead",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      4
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "third_w",
+   "name": "Third Level, West",
+   "at": [
+    -1,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Lunar Guardian",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      -3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "third_e",
+   "name": "Third Level, East",
+   "at": [
+    1,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:husk",
+       "name": "Moon-Cursed Dead",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_common",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "regent",
+   "name": "The Regent's Hall",
+   "at": [
+    0,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    6,
+    6
+   ],
+   "h": 16,
+   "role": "boss",
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 10
+    },
+    {
+     "op": "boss",
+     "at": [
+      0,
+      -2
+     ],
+     "dais": 2
+    },
+    {
+     "op": "fill",
+     "from": [
+      -6,
+      -6,
+      1
+     ],
+     "to": [
+      6,
+      -6,
+      9
+     ],
+     "block": "minecraft:chiseled_sandstone"
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -5
+     ],
+     "table": "nirncraft:chests/marquee_rimmen_necropolis",
+     "face": "s",
+     "capstone": true
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:husk",
+       "name": "Moon-Cursed Dead",
+       "mode": "sleep",
+       "at": [
+        [
+         -4,
+         3
+        ],
+        [
+         4,
+         3
+        ],
+        [
+         -4,
+         0
+        ],
+        [
+         4,
+         0
+        ]
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "shade_study",
+   "name": "The Architect's Study",
+   "at": [
+    -2,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    3,
+    5
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      0,
+      -4,
+      0
+     ],
+     "to": [
+      0,
+      -4,
+      0
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "lectern",
+     "at": [
+      0,
+      -4,
+      1
+     ],
+     "book": "architect",
+     "candle": true,
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Lunar Guardian",
+       "mode": "sleep",
+       "n": 1,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "lunar_cache",
+   "name": "Lunar Cache",
+   "at": [
+    2,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    3,
+    5
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -4
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:husk",
+       "name": "Moon-Cursed Dead",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pass_3",
+   "name": "Back Passage",
+   "at": [
+    -2,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:husk",
+       "name": "Moon-Cursed Dead",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "n"
+    }
+   ]
+  }
+ ],
+ "links": [
+  {
+   "a": "moon_gate",
+   "b": "ossuary_w"
+  },
+  {
+   "a": "moon_gate",
+   "b": "ossuary_e"
+  },
+  {
+   "a": "moon_gate",
+   "b": "avenue_1"
+  },
+  {
+   "a": "avenue_1",
+   "b": "atrium_w"
+  },
+  {
+   "a": "avenue_1",
+   "b": "atrium_e"
+  },
+  {
+   "a": "avenue_1",
+   "b": "avenue_2",
+   "gate": "avenue_1"
+  },
+  {
+   "a": "avenue_2",
+   "b": "lunar_clock"
+  },
+  {
+   "a": "avenue_2",
+   "b": "arcade"
+  },
+  {
+   "a": "lunar_clock",
+   "b": "third_w"
+  },
+  {
+   "a": "arcade",
+   "b": "third_e"
+  },
+  {
+   "a": "lunar_clock",
+   "b": "shade_study"
+  },
+  {
+   "a": "arcade",
+   "b": "lunar_cache"
+  },
+  {
+   "a": "third_e",
+   "b": "regent",
+   "gate": "third_e",
+   "trap": true
+  },
+  {
+   "a": "shade_study",
+   "b": "pass_3"
+  },
+  {
+   "a": "pass_3",
+   "b": "third_w"
+  }
+ ],
+ "why": [
+  "torval.L1.scarp_foot",
+  "rimmen.L1.rimmen_cliff"
+ ]
+}

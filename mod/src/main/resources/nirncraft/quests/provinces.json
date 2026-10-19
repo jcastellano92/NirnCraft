@@ -1,0 +1,948 @@
+{
+  "line": "provinces",
+  "category": "side",
+  "speakers": {
+    "dremora": "Dremora Kynreeve",
+    "sleeper": "The Ascended Sleeper",
+    "hist": "The Hist",
+    "mane": "The Mane",
+    "wilderking": "The Wilderking",
+    "psijic": "Psijic Elder",
+    "ansei": "Rival Ansei",
+    "gurak": "King Gurak",
+    "spirit_mountain": "Wrothgar's Peak"
+  },
+  "npcs": [
+    {
+      "id": "savlian",
+      "name": "Savlian Matius",
+      "role": "imperial_soldier",
+      "place": "kvatch",
+      "offset": [
+        10,
+        30
+      ],
+      "greet": "Kvatch was burned once, in the Oblivion Crisis. We rebuilt it. Now there's a gate in the hills again, and nobody wants to say it out loud."
+    },
+    {
+      "id": "tharen",
+      "name": "Tharen Veloth, Temple Ordinator",
+      "role": "priest",
+      "place": "vivec",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "The Tribunal walked among us once. Now we keep their temples, and the mountain keeps its secrets."
+    },
+    {
+      "id": "hlaalu_factor",
+      "name": "Nevos Hlaalu, Factor",
+      "role": "innkeeper",
+      "place": "balmora",
+      "offset": [
+        6,
+        4
+      ],
+      "greet": "House Hlaalu deals in everything. Even information. Especially information."
+    },
+    {
+      "id": "redoran_warden",
+      "name": "Athyn Redoran, Warden",
+      "role": "housecarl",
+      "place": "aldruhn",
+      "offset": [
+        -4,
+        6
+      ],
+      "greet": "House Redoran keeps the ash at bay. Duty first. Speak quickly."
+    },
+    {
+      "id": "deeja",
+      "name": "Deeja-Sleeps",
+      "role": "priest",
+      "place": "stormhold",
+      "offset": [
+        0,
+        0
+      ],
+      "female": true,
+      "greet": "The Hist speaks in sap and dreams. This one listens. Lately, the Hist sounds afraid."
+    },
+    {
+      "id": "azadhi",
+      "name": "Moon-Priest Azadhi",
+      "role": "priest",
+      "place": "torval",
+      "offset": [
+        4,
+        4
+      ],
+      "female": true,
+      "greet": "Jone and Jode are the two moons, walker. Masser and Secunda, you call them. Their dance tells Khajiit who we are."
+    },
+    {
+      "id": "mane",
+      "name": "The Mane",
+      "role": "jarl",
+      "place": "riverhold",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "The Mane speaks for the moons and for every Khajiit under them. Speak plainly, and the Mane will listen."
+    },
+    {
+      "id": "spinner",
+      "name": "Spinner Aerfin",
+      "role": "priest",
+      "place": "elden_root",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "The Green Pact binds us: we do not cut the living wood, and we eat only flesh. Most outsiders find the second part harder."
+    },
+    {
+      "id": "magister",
+      "name": "Magister Indaenir",
+      "role": "mage",
+      "place": "alinor",
+      "offset": [
+        6,
+        6
+      ],
+      "greet": "Alinor welcomes scholars. Barbarians, it merely tolerates. Which are you?"
+    },
+    {
+      "id": "celinar",
+      "name": "Celinar of the Psijic Order",
+      "role": "mage",
+      "place": "artaeum",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "You found Artaeum. Or Artaeum let itself be found by you. That distinction will matter, later."
+    },
+    {
+      "id": "yasmin",
+      "name": "Yasmin at-Sentinel",
+      "role": "adventurer",
+      "place": "sentinel",
+      "offset": [
+        6,
+        6
+      ],
+      "female": true,
+      "greet": "In Hammerfell, a sword is a prayer. Most people pray badly."
+    },
+    {
+      "id": "gurak",
+      "name": "King Gurak gro-Morkul",
+      "role": "jarl",
+      "place": "orsinium",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "Orsinium has been burned down more times than any city in Tamriel. It is still here. So am I."
+    }
+  ],
+  "relics": [
+    {
+      "id": "sigil_stone",
+      "name": "Sigil Stone",
+      "desc": "Torn from the top of an Oblivion gate's tower. It's warm, and it pulses like a heart.",
+      "icon": 10
+    },
+    {
+      "id": "heart_shard",
+      "name": "Shard of the Heartfire",
+      "desc": "A splinter of red crystal from the depths of Red Mountain, still humming with old power.",
+      "icon": 26
+    },
+    {
+      "id": "hist_sap",
+      "name": "Pure Hist Sap",
+      "desc": "Amber sap from the Root Hist, free of the blight.",
+      "icon": 15
+    },
+    {
+      "id": "moon_relic",
+      "name": "Lunar Lattice Offering",
+      "desc": "A silver lattice that catches both moons' light.",
+      "icon": 16
+    },
+    {
+      "id": "graht_seed",
+      "name": "Graht-Oak Heartseed",
+      "desc": "The seed of a walking tree, pulled from the Wilderking's thorns.",
+      "icon": 22
+    },
+    {
+      "id": "crystal_shard",
+      "name": "Crystal Tower Shard",
+      "desc": "A shard of the Crystal Tower's living stone, stolen by Maormer raiders.",
+      "icon": 19
+    },
+    {
+      "id": "shehai_blade",
+      "name": "Ancestral Shehai",
+      "desc": "The spirit-sword of a Yokudan Ra Gada warrior, sealed in its tomb.",
+      "icon": 21
+    },
+    {
+      "id": "orc_offering",
+      "name": "Ogre Tusk",
+      "desc": "A tusk taken from the ogre that terrorized Wrothgar.",
+      "icon": 23
+    },
+    {
+      "id": "radiant_imperial",
+      "name": "Welkynd Stone",
+      "desc": "A glowing blue Ayleid stone, full of starlight.",
+      "icon": 19
+    },
+    {
+      "id": "radiant_dunmer",
+      "name": "Ancestral Urn",
+      "desc": "Ash of a Dunmer ancestor, stolen from its family tomb.",
+      "icon": 20
+    },
+    {
+      "id": "radiant_argonian",
+      "name": "Vial of Hist Sap",
+      "desc": "Sap from a sacred Hist tree.",
+      "icon": 15
+    },
+    {
+      "id": "radiant_khajiit",
+      "name": "Sack of Moon Sugar",
+      "desc": "Sweet, sticky and sacred. Do not lick.",
+      "icon": 16
+    },
+    {
+      "id": "radiant_bosmer",
+      "name": "Graht-Oak Acorn",
+      "desc": "Taken from a forbidden grove.",
+      "icon": 22
+    },
+    {
+      "id": "radiant_altmer",
+      "name": "Aldmeri Crystal",
+      "desc": "A crystal shard from a Summerset ruin.",
+      "icon": 19
+    },
+    {
+      "id": "radiant_redguard",
+      "name": "Yokudan Relic Blade",
+      "desc": "A curved sword from an age before Hammerfell had its name.",
+      "icon": 21
+    },
+    {
+      "id": "radiant_breton",
+      "name": "Witch-Coven Grimoire",
+      "desc": "A spellbook taken from a coven's altar.",
+      "icon": 7
+    },
+    {
+      "id": "radiant_orc",
+      "name": "Idol of Malacath",
+      "desc": "A crude idol, stolen from a stronghold shrine.",
+      "icon": 20
+    },
+    {
+      "id": "radiant_foreign",
+      "name": "Strange Artifact",
+      "desc": "Nobody knows who made it, or what it's for.",
+      "icon": 17
+    }
+  ],
+  "scenes": {
+    "kvatch_gate": [
+      [
+        "narrator",
+        "The gate stands in the hills above Kvatch: twin spikes of black stone around a membrane of fire. It hums. It breathes."
+      ],
+      [
+        "dremora",
+        "Mortal! The Prince's gate opens again. Step through, and burn with the rest."
+      ]
+    ],
+    "oblivion_return": [
+      [
+        "narrator",
+        "You tear the Sigil Stone from its flame. The tower screams, the red sky folds in on itself, and the Deadlands spit you back into Cyrodiil's clean air. Behind you the gate's fire gutters out."
+      ]
+    ],
+    "red_mountain": [
+      [
+        "sleeper",
+        "The heart beats still, outlander. The Tribunal is gone; the House of Troubles stirs. Sleep, and wake as one of us."
+      ],
+      [
+        "narrator",
+        "Ash rises from every vent of the mountain. Shapes stand up out of it."
+      ]
+    ],
+    "hist": [
+      [
+        "hist",
+        "We remember the root before the root. We remember you, warm-blood, though you have never come here before."
+      ],
+      [
+        "deeja",
+        "The Hist speaks to you? Then you are touched. The blight is lifting."
+      ]
+    ],
+    "moons": [
+      [
+        "narrator",
+        "Both moons rise over the Temple of the Two Moons, and the silver lattice on the altar catches their light and throws it across the stones."
+      ],
+      [
+        "azadhi",
+        "Jone and Jode dance again. The Lunar Lattice holds. The Mane will want to hear this."
+      ]
+    ],
+    "green_heart": [
+      [
+        "wilderking",
+        "Who walks in my wood without the Pact? Ah. You come with the Spinner's word. Take the seed, then, and plant it where the forest bled."
+      ]
+    ],
+    "artaeum": [
+      [
+        "psijic",
+        "Artaeum appears to those the Order has need of. Sit. Breathe. Listen to the old ways. When you leave, you will see magic differently."
+      ]
+    ],
+    "duel": [
+      [
+        "ansei",
+        "A shehai is the soul made into a blade. Draw yours, if you have one. Mine has been waiting a long time."
+      ]
+    ],
+    "wrothgar": [
+      [
+        "gurak",
+        "The mountain does not care who your parents were. Climb it, and kill what lives at the top. Then you are Orsimer enough for me."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "prov_cyr_kvatch",
+      "title": "Echoes of Kvatch",
+      "region": "cyrodiil/gold_coast",
+      "start": "npc:savlian",
+      "requires": [
+        "level:15"
+      ],
+      "offer": "What's wrong in Kvatch?",
+      "pitch": "A gate. In the hills. Two hundred years after the Crisis, an Oblivion gate is open again above Kvatch. Somebody has to close it before what's behind it comes through.",
+      "desc": "An Oblivion gate has opened above Kvatch, echoing the Crisis that once burned the city. Savlian Matius of the city watch needs someone to go through it and close it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "kvatch_gate",
+          "text": "Go to the Oblivion gate above Kvatch",
+          "actions": "scene:kvatch_gate"
+        },
+        {
+          "type": "clear",
+          "place": "kvatch_gate",
+          "radius": 32,
+          "text": "Kill the dremora guarding the gate",
+          "spawn": [
+            {
+              "type": "nirncraft:dremora",
+              "count": 3,
+              "name": "Dremora Guard"
+            }
+          ]
+        },
+        {
+          "type": "go",
+          "place": "kvatch_gate",
+          "radius": 8,
+          "text": "Step through the Oblivion gate",
+          "actions": "teleport_dim:minecraft:the_nether"
+        },
+        {
+          "type": "flag",
+          "flag": "sigil_keeper_slain",
+          "place": "kvatch_sigil_tower",
+          "radius": 24,
+          "text": "Climb the Great Sigil Tower and defeat the Sigil Keeper",
+          "actions": "relic:sigil_stone"
+        },
+        {
+          "type": "flag",
+          "flag": "kvatch_gate_closed",
+          "place": "kvatch_sigil_tower",
+          "radius": 24,
+          "text": "Take the Sigil Stone from its flame to close the gate",
+          "actions": "scene:oblivion_return"
+        },
+        {
+          "type": "deliver",
+          "npc": "savlian",
+          "relic": "sigil_stone",
+          "text": "Bring the Sigil Stone to Savlian Matius",
+          "topic": "The gate is closed. Here's what held it open.",
+          "reply": "Closed. Just like the Hero of Kvatch did it, two hundred years ago. Kvatch owes you, and Kvatch pays its debts."
+        }
+      ],
+      "rewards": {
+        "gold": 1500,
+        "perks": 1,
+        "items": [
+          {
+            "item": "minecraft:netherite_sword",
+            "name": "Sigil-Forged Blade",
+            "enchant": {
+              "fire_aspect": 2,
+              "sharpness": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "gold_coast.L9.kvatch_rebuild",
+        "gold_coast.L8.dibella_chapel"
+      ]
+    },
+    {
+      "id": "prov_mw_red_mountain",
+      "title": "Ash and Ember",
+      "region": "morrowind/ascadian_isles",
+      "start": "npc:tharen",
+      "requires": [
+        "level:18"
+      ],
+      "offer": "What's troubling the Temple?",
+      "pitch": "Red Mountain. Ash storms, and in the storms, voices. Sleepers walk out of the ash in Balmora and Ald'ruhn. The Great Houses argue; the Temple must act. Speak with Hlaalu and Redoran, and then go to the mountain.",
+      "desc": "Something is stirring in Red Mountain again. The Temple of the Tribunal wants the Great Houses' cooperation and someone to go into the heart of the mountain.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "hlaalu_factor",
+          "text": "Win House Hlaalu's support in Balmora",
+          "topic": "The Temple asks for Hlaalu's help on Red Mountain.",
+          "reply": "Help costs. But a quiet mountain is good for trade. Hlaalu will open the roads. Tell the Temple we expect a discount on blessings."
+        },
+        {
+          "type": "talk",
+          "npc": "redoran_warden",
+          "text": "Win House Redoran's support in Ald'ruhn",
+          "topic": "The Temple needs Redoran on Red Mountain.",
+          "reply": "Redoran has been on Red Mountain for a thousand years. Go through the Ghostfence; our wardens will hold the gate behind you."
+        },
+        {
+          "type": "go",
+          "place": "ghostfence",
+          "text": "Pass through the Ghostfence"
+        },
+        {
+          "type": "clear",
+          "place": "red_mountain",
+          "radius": 48,
+          "text": "Fight through the ash creatures of Red Mountain",
+          "actions": "scene:red_mountain",
+          "spawn": [
+            {
+              "type": "nirncraft:ash_spawn",
+              "count": 5,
+              "name": "Ash Ghoul"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "dagoth_ur_heart",
+          "text": "Destroy the Ascended Sleeper",
+          "spawn": [
+            {
+              "type": "nirncraft:necromancer",
+              "name": "Ascended Sleeper",
+              "target": true,
+              "boss": true,
+              "hp": 3.0
+            }
+          ],
+          "actions": "relic:heart_shard"
+        },
+        {
+          "type": "deliver",
+          "npc": "tharen",
+          "relic": "heart_shard",
+          "text": "Bring the shard to Tharen Veloth in Vivec",
+          "topic": "Red Mountain is quiet again.",
+          "reply": "Quiet for now. The Temple will keep this shard where no Sleeper can find it. You have the gratitude of the Tribunal, and of all three Houses, which is rarer."
+        }
+      ],
+      "rewards": {
+        "gold": 2000,
+        "perks": 1,
+        "items": [
+          "nirncraft:spell_tome_fire_storm"
+        ]
+      },
+      "why": [
+        "ascadian_isles.L9.twin_lamps_underground",
+        "ascadian_isles.L8.vivec_the_living_god"
+      ]
+    },
+    {
+      "id": "prov_bm_hist",
+      "title": "The Hist Remembers",
+      "region": "black_marsh/stormhold",
+      "start": "npc:deeja",
+      "requires": [
+        "level:15"
+      ],
+      "offer": "Why is the Hist afraid?",
+      "pitch": "A blight. It creeps up the roots of the Root Hist in the deep marsh, and sap-thieves bleed the trees while they are weak. Go to the Root Hist. Bring back sap that is still pure.",
+      "desc": "The Root Hist of Black Marsh is blighted and robbed by sap-thieves. Deeja-Sleeps of Stormhold wants pure sap saved before the tree sickens.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "root_hist",
+          "text": "Find the Root Hist in the deep marsh"
+        },
+        {
+          "type": "clear",
+          "place": "root_hist",
+          "radius": 40,
+          "text": "Drive off the sap-thieves and the blighted beasts",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "count": 3,
+              "name": "Sap-Thief"
+            },
+            {
+              "type": "nirncraft:troll",
+              "count": 1,
+              "name": "Blighted Wamasu"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "root_hist",
+          "relic": "hist_sap",
+          "radius": 12,
+          "text": "Gather pure sap from the Root Hist",
+          "actions": "scene:hist"
+        },
+        {
+          "type": "deliver",
+          "npc": "deeja",
+          "relic": "hist_sap",
+          "text": "Bring the sap to Deeja-Sleeps",
+          "topic": "Pure sap from the Root Hist.",
+          "reply": "The Hist will heal. And it will remember you. When an Argonian says that, walker, it is not a small thing."
+        }
+      ],
+      "rewards": {
+        "gold": 1500,
+        "perks": 1,
+        "items": [
+          {
+            "item": "minecraft:potion",
+            "name": "Hist Draught"
+          }
+        ]
+      },
+      "why": [
+        "stormhold.L9.caravan_toll_dispute",
+        "stormhold.L8.shadow_sign_vigil"
+      ]
+    },
+    {
+      "id": "prov_els_moons",
+      "title": "Moons and Mane",
+      "region": "elsweyr/torval",
+      "start": "npc:azadhi",
+      "requires": [
+        "level:15"
+      ],
+      "offer": "What troubles the moons?",
+      "pitch": "The Temple of the Two Moons has been desecrated by the Dro-m'Athra, the lost spirits. The Lunar Lattice cannot hold the moons' light while they haunt it. Cleanse the temple by night, when the moons can see you.",
+      "desc": "Dark spirits haunt the Temple of the Two Moons. Moon-Priest Azadhi asked me to cleanse it by moonlight and carry word to the Mane.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "moon_temple",
+          "text": "Travel to the Temple of the Two Moons"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Wait for the moons to rise"
+        },
+        {
+          "type": "clear",
+          "place": "moon_temple",
+          "radius": 32,
+          "text": "Banish the Dro-m'Athra",
+          "spawn": [
+            {
+              "type": "minecraft:vex",
+              "count": 3,
+              "name": "Dro-m'Athra Spirit"
+            },
+            {
+              "type": "nirncraft:wispmother",
+              "count": 1,
+              "name": "Dro-m'Athra Destroyer"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "moon_temple",
+          "relic": "moon_relic",
+          "radius": 10,
+          "text": "Restore the Lunar Lattice",
+          "actions": "scene:moons"
+        },
+        {
+          "type": "deliver",
+          "npc": "mane",
+          "relic": "moon_relic",
+          "text": "Present the Lattice offering to the Mane in Riverhold",
+          "topic": "The moons dance again over the temple.",
+          "reply": "The Mane felt it, the moment the light returned. You are not of the moons, and yet you served them. Elsweyr remembers its friends."
+        }
+      ],
+      "rewards": {
+        "gold": 1500,
+        "perks": 1,
+        "items": [
+          {
+            "item": "nirncraft:elven_dagger",
+            "name": "Claw of Jone",
+            "enchant": {
+              "sharpness": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "torval.L9.mane_succession",
+        "torval.L8.mane_seat"
+      ]
+    },
+    {
+      "id": "prov_vw_green_pact",
+      "title": "The Green Pact",
+      "region": "valenwood/grahtwood",
+      "start": "npc:spinner",
+      "requires": [
+        "level:15"
+      ],
+      "offer": "Tell me about the Green Pact.",
+      "pitch": "Better: live it. Hunt as we hunt; take only flesh. Then go to the Green Heart, where thorns choke the old trees. The Wilderking guards a seed there. If the Pact is in you, he'll give it.",
+      "desc": "Spinner Aerfin of Elden Root wants me to live by the Green Pact, the Bosmer covenant with their forest, and bring a graht-oak seed out of the thorn-choked Green Heart.",
+      "objectives": [
+        {
+          "type": "kill_type",
+          "entity": "minecraft:cow,minecraft:pig,minecraft:sheep,minecraft:rabbit,nirncraft:deer,nirncraft:elk,nirncraft:bear,nirncraft:sabre_cat",
+          "count": 3,
+          "text": "Hunt three beasts, as the Pact allows"
+        },
+        {
+          "type": "go",
+          "place": "green_heart",
+          "text": "Travel to the Green Heart"
+        },
+        {
+          "type": "clear",
+          "place": "green_heart",
+          "radius": 40,
+          "text": "Cut through the Wilderking's thorns",
+          "spawn": [
+            {
+              "type": "nirncraft:spriggan",
+              "count": 3,
+              "name": "Thorn Spriggan"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "green_heart",
+          "relic": "graht_seed",
+          "radius": 12,
+          "text": "Take the graht-oak seed",
+          "actions": "scene:green_heart"
+        },
+        {
+          "type": "deliver",
+          "npc": "spinner",
+          "relic": "graht_seed",
+          "text": "Bring the seed to Spinner Aerfin",
+          "topic": "The Wilderking gave me the seed.",
+          "reply": "Then the Pact is in you, whatever your ears look like. We'll plant it in Falinesti's old ground. One day it'll walk."
+        }
+      ],
+      "rewards": {
+        "gold": 1500,
+        "perks": 1,
+        "items": [
+          {
+            "item": "nirncraft:elven_bow",
+            "name": "Wilderking's Bow",
+            "enchant": {
+              "power": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "grahtwood.L9.court_vs_voice",
+        "grahtwood.L8.elden_temple"
+      ]
+    },
+    {
+      "id": "prov_sum_psijic",
+      "title": "Isle of the Psijics",
+      "region": "summerset/summerset_isle",
+      "start": "npc:magister",
+      "requires": [
+        "level:18"
+      ],
+      "offer": "I've heard Artaeum can't be found.",
+      "pitch": "It can't. Unless the Psijic Order wants you. Maormer raiders stole a shard of the Crystal Tower; return it, and perhaps the Order will notice you. Perhaps.",
+      "desc": "A magister of Alinor says that recovering a stolen shard of the Crystal Tower might earn the attention of the Psijic Order, whose island of Artaeum appears only to those it chooses.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "crystal_tower",
+          "text": "Go to the Crystal Tower"
+        },
+        {
+          "type": "clear",
+          "place": "crystal_tower",
+          "radius": 40,
+          "text": "Hunt down the Maormer raiders",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "count": 4,
+              "name": "Maormer Raider"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "crystal_tower",
+          "relic": "crystal_shard",
+          "radius": 12,
+          "text": "Recover the stolen shard"
+        },
+        {
+          "type": "go",
+          "place": "artaeum",
+          "text": "Sail to Artaeum, which is suddenly on the horizon"
+        },
+        {
+          "type": "deliver",
+          "npc": "celinar",
+          "relic": "crystal_shard",
+          "text": "Give the shard to Celinar of the Psijic Order",
+          "topic": "I've brought the Crystal Tower's shard.",
+          "reply": "And so Artaeum let you land. Stay a while. The Order teaches nothing quickly.",
+          "actions": "scene:artaeum"
+        },
+        {
+          "type": "wait",
+          "hours": 2,
+          "place": "artaeum",
+          "text": "Meditate with the Psijics"
+        }
+      ],
+      "rewards": {
+        "gold": 1000,
+        "perks": 2,
+        "flags": [
+          "psijic_friend"
+        ],
+        "items": [
+          "nirncraft:spell_tome_conjure_storm_atronach"
+        ]
+      },
+      "why": [
+        "summerset_isle.L9.house_vs_thalmor",
+        "summerset_isle.L8.tower_faith"
+      ]
+    },
+    {
+      "id": "prov_ham_sword_singer",
+      "title": "The Sword-Singer's Oath",
+      "region": "hammerfell/alikr_desert",
+      "start": "npc:yasmin",
+      "requires": [
+        "level:15"
+      ],
+      "offer": "How does one become a sword-singer?",
+      "pitch": "You don't, not in one lifetime. But you can earn a shehai. Go to the tomb of the Ra Gada, the first warriors who sailed from Yokuda. Take an ancestor's blade, if its guardians let you. Then a rival waits at Hel Ra.",
+      "desc": "Yasmin at-Sentinel offered to test me in the way of the Yokudan sword-singers: claim an ancestral blade from the Ra Gada tomb and win a duel at Hel Ra Citadel.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "ra_gada_tomb",
+          "text": "Travel to the Tomb of the Ra Gada"
+        },
+        {
+          "type": "clear",
+          "place": "ra_gada_tomb",
+          "radius": 32,
+          "text": "Lay the tomb's restless guardians to rest",
+          "spawn": [
+            {
+              "type": "minecraft:husk",
+              "count": 4,
+              "name": "Ra Gada Guardian"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "ra_gada_tomb",
+          "relic": "shehai_blade",
+          "radius": 12,
+          "text": "Take the ancestral shehai"
+        },
+        {
+          "type": "go",
+          "place": "hel_ra_citadel",
+          "text": "Go to Hel Ra Citadel",
+          "actions": "scene:duel"
+        },
+        {
+          "type": "kill",
+          "place": "hel_ra_citadel",
+          "text": "Defeat the rival ansei in a duel",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Rival Ansei, Dunes-Walker",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "deliver",
+          "npc": "yasmin",
+          "relic": "shehai_blade",
+          "text": "Return to Yasmin in Sentinel",
+          "topic": "I won the duel.",
+          "reply": "Then your blade sang, and you heard it. Keep it. A shehai is never given, only earned, and you have earned this one."
+        }
+      ],
+      "rewards": {
+        "gold": 1500,
+        "perks": 1,
+        "items": [
+          {
+            "item": "minecraft:diamond_sword",
+            "name": "Ansei Shehai",
+            "enchant": {
+              "sharpness": 4,
+              "sweeping": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "alikr_desert.L9.well_feud",
+        "alikr_desert.L8.yokudan_gods"
+      ]
+    },
+    {
+      "id": "prov_hr_orsinium",
+      "title": "Orsinium Rising",
+      "region": "high_rock/wrothgar",
+      "start": "npc:gurak",
+      "requires": [
+        "level:15"
+      ],
+      "offer": "What does Orsinium need?",
+      "pitch": "Iron, for the forges. And a monster dead, for the clans to see. Bring ten bars of iron to the stronghold forge, then climb Wrothgar Peak and kill the ogre that eats our goats.",
+      "desc": "King Gurak gro-Morkul of Orsinium tests outsiders who would be friends of the Orcs: feed the forges, then kill the ogre of Wrothgar Peak.",
+      "objectives": [
+        {
+          "type": "deliver",
+          "npc": "gurak",
+          "item": "minecraft:iron_ingot",
+          "count": 10,
+          "text": "Bring ten iron ingots for Orsinium's forges",
+          "topic": "Iron for your forges.",
+          "reply": "Good iron. Now the mountain.",
+          "actions": "scene:wrothgar"
+        },
+        {
+          "type": "go",
+          "place": "morkul_stronghold",
+          "text": "Pass through Morkul Stronghold"
+        },
+        {
+          "type": "go",
+          "place": "wrothgar_peak",
+          "text": "Climb Wrothgar Peak"
+        },
+        {
+          "type": "kill",
+          "place": "wrothgar_peak",
+          "text": "Kill the ogre of Wrothgar Peak",
+          "spawn": [
+            {
+              "type": "nirncraft:giant",
+              "name": "Wrothgar Ogre",
+              "target": true,
+              "boss": true,
+              "hp": 1.6
+            }
+          ],
+          "actions": "relic:orc_offering"
+        },
+        {
+          "type": "deliver",
+          "npc": "gurak",
+          "relic": "orc_offering",
+          "text": "Bring the ogre's tusk to King Gurak",
+          "topic": "The ogre is dead.",
+          "reply": "Then the clans will sing of a pink-skin who climbed Wrothgar. Badly, but they'll sing. Orsinium's gates are open to you, blood-kin."
+        }
+      ],
+      "rewards": {
+        "gold": 1500,
+        "perks": 1,
+        "flags": [
+          "orsinium_blood_kin"
+        ],
+        "items": [
+          {
+            "item": "nirncraft:orcish_greatsword",
+            "name": "Blade of Wrothgar",
+            "enchant": {
+              "sharpness": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "wrothgar.L9.ore_rights",
+        "wrothgar.L8.malacath"
+      ]
+    }
+  ]
+}

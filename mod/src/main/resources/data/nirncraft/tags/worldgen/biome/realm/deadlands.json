@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:deadlands_lava_sea",
+    "nirncraft:deadlands_ashen_wastes",
+    "nirncraft:deadlands_blood_fields",
+    "nirncraft:deadlands_spires",
+    "nirncraft:deadlands_harrada_thicket"
+  ]
+}

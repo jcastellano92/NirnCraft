@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "nirncraft:biome/baobab_checked",
+      "chance": 0.15
+    }
+  ],
+  "default": "minecraft:acacia_checked"
+}

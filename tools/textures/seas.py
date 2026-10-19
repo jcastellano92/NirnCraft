@@ -1,4 +1,4 @@
-"""Textures of the seas module (com.skycraft.seas): its creatures, the kollop shellfish and the ship liveries' sails.
+"""Textures of the seas module (com.nirncraft.seas): its creatures, the kollop shellfish and the ship liveries' sails.
 
 Run tools/textures/dump_sea_rigs.sh first when a rig in SeaDefs.java changed, then (from tools/textures):
     py -3 seas.py

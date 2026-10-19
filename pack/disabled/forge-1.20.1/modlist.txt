@@ -1,11 +1,11 @@
-# Skycraft mod list for Minecraft 1.20.1 / Forge 47.4.10
+# NirnCraft mod list for Minecraft 1.20.1 / Forge 47.4.10
 # Format: <source>:<slug> [| <fallback source>:<slug>]   # comment
 # Sources: mr = Modrinth, cf = CurseForge. tools/build-pack.sh resolves each entry with packwiz
 # (dependencies are added automatically) and fails if any entry can't be resolved.
 # An entry whose pack/<mods|shaderpacks|resourcepacks>/<slug>.pw.toml already exists keeps that pinned version;
 # to update a mod, edit or delete its .pw.toml.
-# Skycraft prefers its own implementations over third-party feature mods: trees, townsfolk, followers, NPC dialogue, the map
-# and physics are Skycraft Core's. Library and performance mods are fine.
+# NirnCraft prefers its own implementations over third-party feature mods: trees, townsfolk, followers, NPC dialogue, the map
+# and physics are NirnCraft Core's. Library and performance mods are fine.
 
 # --- Performance (runs efficiently, even with huge view distances) ---
 mr:embeddium                     # Sodium-based renderer for Forge (client)
@@ -24,7 +24,7 @@ mr:structure-layout-optimizer    # faster jigsaw structure generation (towns, du
 mr:memoryleakfix
 mr:spark                         # profiler for diagnosing lag
 
-# --- Core RPG behaviour (Skycraft Core is injected at build time from mod/build/libs; see docs/DEVELOPING.md) ---
+# --- Core RPG behaviour (NirnCraft Core is injected at build time from mod/build/libs; see docs/DEVELOPING.md) ---
 mr:lootr                         # per-player loot chests: every player gets their own dungeon loot
 mr:better-combat                 # directional combos and weapon swings
 cf:dynamiclights-reforged | mr:dynamic-lights-reforged   # torches light up the world in your hand
@@ -34,13 +34,13 @@ mr:default-options               # ships default keybinds for new players
 mr:essential                     # easy multiplayer hosting/invites with friends, skins & cosmetics
 mr:itemphysic-lite | cf:item-physic-lite   # dropped items lie in the world with physics (Skyrim clutter)
 
-# --- NPCs, factions: townsfolk, companions, followers and marriage are Skycraft's own (society module) ---
+# --- NPCs, factions: townsfolk, companions, followers and marriage are NirnCraft's own (society module) ---
 
-# --- Vampires, werewolves: Skycraft's own (curse module) ---
+# --- Vampires, werewolves: NirnCraft's own (curse module) ---
 
 # --- Towns, cities, dungeons, roads and secrets ---
 
-# --- Survival: fishing, camping (bedrolls, tents) and player corpses are Skycraft's own (survival module) ---
+# --- Survival: fishing, camping (bedrolls, tents) and player corpses are NirnCraft's own (survival module) ---
 
 # --- Shaders (optional, client) ---
 mr:complementary-reimagined         # shader pack with Distant Horizons support

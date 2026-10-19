@@ -12,7 +12,7 @@ rasters or assets.
 
 **Notation.** Sheet fields are `layer.id`; province fields carry the prefix `P.` (for example `P.L3.niben`). A field's
 causes follow it in square brackets. Region ids drop the `cyrodiil/` prefix. "Floor" is the Skyrim median per km²
-times the region's area; "abs." is Skyrim's thinnest hold. Area is Skycraft km² from `parity.py`.
+times the region's area; "abs." is Skyrim's thinnest hold. Area is NirnCraft km² from `parity.py`.
 
 **Assumed era (owner decision C1).** Cyrodiil is shown in the year after the Oblivion Crisis (end of the Third Era):
 the gates are closed but scarred, the Dragonfires are out, there is no emperor and the Elder Council governs. This
@@ -322,7 +322,7 @@ two counties share a dominant tree** (spruce, pine, oak, beech, cypress, mangrov
 | Gold Road | weye - inn_of_ill_omen - skingrad - brina_cross_inn - kvatch - gottshaw_inn - anvil | exists | Longest leg (~9,650 road blocks); add two road towns (section 5) and a carriage |
 | Black Road | weye - chorrol | exists | Add Weynon Priory as a named stop |
 | Silver Road | aleswell - bleakers_way | exists | |
-| Orange Road | bleakers_way - bruma | exists | Keep Skycraft's naming (SCALE 6.2) |
+| Orange Road | bleakers_way - bruma | exists | Keep NirnCraft's naming (SCALE 6.2) |
 | Blue Road | pells_gate - cheydinhal | exists | Add Cropsford, Harlun's Watch as stops |
 | Green Road | roxey_inn - faregyl_inn - bravil | exists | |
 | Yellow Road | bravil - drunken_dragon_inn - leyawiin | exists | |

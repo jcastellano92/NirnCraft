@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/ashen_grass_pod"
+      },
+      {
+        "model": "nirncraft:block/ashen_grass_pod",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/ashen_grass_pod",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/ashen_grass_pod",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/ashen_grass_pod_harvested"
+      },
+      {
+        "model": "nirncraft:block/ashen_grass_pod_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/ashen_grass_pod_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/ashen_grass_pod_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

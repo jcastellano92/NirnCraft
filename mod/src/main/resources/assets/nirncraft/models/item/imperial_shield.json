@@ -1,0 +1,478 @@
+{
+  "gui_light": "front",
+  "textures": {
+    "shield": "nirncraft:item/shield/imperial",
+    "particle": "nirncraft:item/shield/imperial"
+  },
+  "elements": [
+    {
+      "from": [
+        -5,
+        10,
+        1
+      ],
+      "to": [
+        5,
+        11,
+        2
+      ],
+      "faces": {
+        "south": {
+          "uv": [
+            1.0,
+            0.5,
+            6.0,
+            1.0
+          ],
+          "texture": "#shield"
+        },
+        "north": {
+          "uv": [
+            7.5,
+            0.5,
+            12.5,
+            1.0
+          ],
+          "texture": "#shield"
+        },
+        "east": {
+          "uv": [
+            13.5,
+            0.5,
+            14.0,
+            1.0
+          ],
+          "texture": "#shield"
+        },
+        "west": {
+          "uv": [
+            14.0,
+            0.5,
+            14.5,
+            1.0
+          ],
+          "texture": "#shield"
+        },
+        "up": {
+          "uv": [
+            13.5,
+            0.5,
+            15.5,
+            1.0
+          ],
+          "texture": "#shield"
+        },
+        "down": {
+          "uv": [
+            13.5,
+            0.5,
+            15.5,
+            1.0
+          ],
+          "texture": "#shield"
+        }
+      }
+    },
+    {
+      "from": [
+        -6,
+        -10,
+        1
+      ],
+      "to": [
+        6,
+        10,
+        2
+      ],
+      "faces": {
+        "south": {
+          "uv": [
+            0.5,
+            1.0,
+            6.5,
+            11.0
+          ],
+          "texture": "#shield"
+        },
+        "north": {
+          "uv": [
+            7.0,
+            1.0,
+            13.0,
+            11.0
+          ],
+          "texture": "#shield"
+        },
+        "east": {
+          "uv": [
+            13.5,
+            1.0,
+            14.0,
+            11.0
+          ],
+          "texture": "#shield"
+        },
+        "west": {
+          "uv": [
+            14.0,
+            1.0,
+            14.5,
+            11.0
+          ],
+          "texture": "#shield"
+        },
+        "up": {
+          "uv": [
+            13.5,
+            1.0,
+            15.5,
+            1.5
+          ],
+          "texture": "#shield"
+        },
+        "down": {
+          "uv": [
+            13.5,
+            10.5,
+            15.5,
+            11.0
+          ],
+          "texture": "#shield"
+        }
+      }
+    },
+    {
+      "from": [
+        -5,
+        -11,
+        1
+      ],
+      "to": [
+        5,
+        -10,
+        2
+      ],
+      "faces": {
+        "south": {
+          "uv": [
+            1.0,
+            11.0,
+            6.0,
+            11.5
+          ],
+          "texture": "#shield"
+        },
+        "north": {
+          "uv": [
+            7.5,
+            11.0,
+            12.5,
+            11.5
+          ],
+          "texture": "#shield"
+        },
+        "east": {
+          "uv": [
+            13.5,
+            11.0,
+            14.0,
+            11.5
+          ],
+          "texture": "#shield"
+        },
+        "west": {
+          "uv": [
+            14.0,
+            11.0,
+            14.5,
+            11.5
+          ],
+          "texture": "#shield"
+        },
+        "up": {
+          "uv": [
+            13.5,
+            11.0,
+            15.5,
+            11.5
+          ],
+          "texture": "#shield"
+        },
+        "down": {
+          "uv": [
+            13.5,
+            11.0,
+            15.5,
+            11.5
+          ],
+          "texture": "#shield"
+        }
+      }
+    },
+    {
+      "from": [
+        -1,
+        -3,
+        -5
+      ],
+      "to": [
+        1,
+        3,
+        1
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7.0,
+            12.0,
+            10.0,
+            15.0
+          ],
+          "texture": "#shield"
+        },
+        "south": {
+          "uv": [
+            7.0,
+            12.0,
+            10.0,
+            15.0
+          ],
+          "texture": "#shield"
+        },
+        "east": {
+          "uv": [
+            7.0,
+            12.0,
+            10.0,
+            15.0
+          ],
+          "texture": "#shield"
+        },
+        "west": {
+          "uv": [
+            7.0,
+            12.0,
+            10.0,
+            15.0
+          ],
+          "texture": "#shield"
+        },
+        "up": {
+          "uv": [
+            7.0,
+            12.0,
+            10.0,
+            15.0
+          ],
+          "texture": "#shield"
+        },
+        "down": {
+          "uv": [
+            7.0,
+            12.0,
+            10.0,
+            15.0
+          ],
+          "texture": "#shield"
+        }
+      }
+    },
+    {
+      "from": [
+        -2,
+        -2,
+        2
+      ],
+      "to": [
+        2,
+        2,
+        3
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            13.5,
+            12.0,
+            15.5,
+            14.0
+          ],
+          "texture": "#shield"
+        },
+        "south": {
+          "uv": [
+            13.5,
+            12.0,
+            15.5,
+            14.0
+          ],
+          "texture": "#shield"
+        },
+        "east": {
+          "uv": [
+            13.5,
+            12.0,
+            15.5,
+            14.0
+          ],
+          "texture": "#shield"
+        },
+        "west": {
+          "uv": [
+            13.5,
+            12.0,
+            15.5,
+            14.0
+          ],
+          "texture": "#shield"
+        },
+        "up": {
+          "uv": [
+            13.5,
+            12.0,
+            15.5,
+            14.0
+          ],
+          "texture": "#shield"
+        },
+        "down": {
+          "uv": [
+            13.5,
+            12.0,
+            15.5,
+            14.0
+          ],
+          "texture": "#shield"
+        }
+      }
+    }
+  ],
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "translation": [
+        10,
+        6,
+        -4
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "translation": [
+        10,
+        6,
+        12
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        180,
+        5
+      ],
+      "translation": [
+        -10,
+        2,
+        -10
+      ],
+      "scale": [
+        1.25,
+        1.25,
+        1.25
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        180,
+        5
+      ],
+      "translation": [
+        10,
+        0,
+        -10
+      ],
+      "scale": [
+        1.25,
+        1.25,
+        1.25
+      ]
+    },
+    "gui": {
+      "rotation": [
+        15,
+        -25,
+        -5
+      ],
+      "translation": [
+        2,
+        3,
+        0
+      ],
+      "scale": [
+        0.65,
+        0.65,
+        0.65
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        180,
+        0
+      ],
+      "translation": [
+        -4.5,
+        4.5,
+        -5
+      ],
+      "scale": [
+        0.55,
+        0.55,
+        0.55
+      ]
+    },
+    "ground": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        2,
+        4,
+        2
+      ],
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ]
+    }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "blocking": 1
+      },
+      "model": "nirncraft:item/imperial_shield_blocking"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "type": "nirncraft:realm_site",
+  "site": "coldharbour/ruined_tower",
+  "biomes": "#nirncraft:realm/coldharbour",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

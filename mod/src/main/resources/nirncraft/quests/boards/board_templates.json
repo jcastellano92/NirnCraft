@@ -1,0 +1,139 @@
+{
+  "refresh_ticks": 48000,
+  "min_jobs": 3,
+  "max_jobs": 6,
+  "min_distance": 300,
+  "max_distance": 1500,
+  "size_rewards": {
+    "SMALL": { "gold": 100, "xp": 50, "reputation": 2 },
+    "MEDIUM": { "gold": 200, "xp": 100, "reputation": 4 },
+    "LARGE": { "gold": 350, "xp": 175, "reputation": 6 },
+    "MAJOR": { "gold": 500, "xp": 250, "reputation": 10 }
+  },
+  "archetypes": [
+    {
+      "id": "bandit_bounty",
+      "category": "BOUNTY",
+      "title_key": "quest.nirncraft.board.bandit_bounty.title",
+      "desc_key": "quest.nirncraft.board.bandit_bounty.desc",
+      "objective_key": "quest.nirncraft.board.bandit_bounty.obj",
+      "boss_types": [
+        { "entity": "minecraft:pillager", "name": "Bandit Chief", "hp": 3.0, "dmg": 1.6, "weapon": "nirncraft:steel_greatsword", "armor": "iron" },
+        { "entity": "minecraft:vindicator", "name": "Outlaw Warlord", "hp": 3.2, "dmg": 1.7, "weapon": "nirncraft:steel_battleaxe", "armor": "chain" },
+        { "entity": "minecraft:evoker", "name": "Rogue Battlemage", "hp": 2.8, "dmg": 1.6, "weapon": "nirncraft:steel_dagger", "armor": "leather" }
+      ]
+    },
+    {
+      "id": "beast_hunt",
+      "category": "BOUNTY",
+      "title_key": "quest.nirncraft.board.beast_hunt.title",
+      "desc_key": "quest.nirncraft.board.beast_hunt.desc",
+      "objective_key": "quest.nirncraft.board.beast_hunt.obj",
+      "return_key": "quest.nirncraft.board.beast_hunt.return",
+      "beasts_by_province": {
+        "skyrim": [
+          { "entity": "nirncraft:troll", "fallback": "minecraft:polar_bear", "name": "Frost Troll", "hp": 3.5, "dmg": 1.8 },
+          { "entity": "nirncraft:sabre_cat", "fallback": "minecraft:ravager", "name": "Snowy Sabre Cat", "hp": 3.0, "dmg": 1.7 },
+          { "entity": "nirncraft:frostbite_spider", "fallback": "minecraft:cave_spider", "name": "Giant Frostbite Spider", "hp": 3.2, "dmg": 1.6 },
+          { "entity": "nirncraft:hagraven", "fallback": "minecraft:witch", "name": "Crag Hagraven", "hp": 3.0, "dmg": 1.7 }
+        ],
+        "morrowind": [
+          { "entity": "nirncraft:kagouti", "fallback": "minecraft:hoglin", "name": "Blighted Kagouti", "hp": 3.4, "dmg": 1.8 },
+          { "entity": "nirncraft:alit", "fallback": "minecraft:ravager", "name": "Ashland Alit", "hp": 3.0, "dmg": 1.6 },
+          { "entity": "nirncraft:ash_spawn", "fallback": "minecraft:wither_skeleton", "name": "Ash Spawn Champion", "hp": 3.2, "dmg": 1.7 }
+        ],
+        "cyrodiil": [
+          { "entity": "nirncraft:minotaur", "fallback": "minecraft:ravager", "name": "Colovian Minotaur", "hp": 3.6, "dmg": 1.8 },
+          { "entity": "nirncraft:ogre", "fallback": "minecraft:iron_golem", "name": "Jerall Ogre", "hp": 3.5, "dmg": 1.7 },
+          { "entity": "nirncraft:spriggan", "fallback": "minecraft:witch", "name": "Ancient Spriggan", "hp": 3.0, "dmg": 1.6 }
+        ],
+        "hammerfell": [
+          { "entity": "nirncraft:giant_scorpion", "fallback": "minecraft:spider", "name": "Dune Scorpion", "hp": 3.3, "dmg": 1.7 },
+          { "entity": "nirncraft:sand_serpent", "fallback": "minecraft:cave_spider", "name": "Alik'r Sand Serpent", "hp": 3.2, "dmg": 1.7 }
+        ],
+        "high_rock": [
+          { "entity": "nirncraft:harpy", "fallback": "minecraft:phantom", "name": "Glenumbra Harpy Matriarch", "hp": 3.0, "dmg": 1.6 },
+          { "entity": "nirncraft:hagraven", "fallback": "minecraft:witch", "name": "Wyrd Hagraven", "hp": 3.2, "dmg": 1.7 }
+        ],
+        "black_marsh": [
+          { "entity": "nirncraft:wamasu", "fallback": "minecraft:ravager", "name": "Elder Wamasu", "hp": 3.8, "dmg": 1.9 },
+          { "entity": "nirncraft:hackwing", "fallback": "minecraft:phantom", "name": "Bog Hackwing", "hp": 3.0, "dmg": 1.6 }
+        ],
+        "elsweyr": [
+          { "entity": "nirncraft:senche_tiger", "fallback": "minecraft:ravager", "name": "Man-Eating Senche", "hp": 3.4, "dmg": 1.8 },
+          { "entity": "nirncraft:sand_serpent", "fallback": "minecraft:spider", "name": "Anequina Terror", "hp": 3.2, "dmg": 1.7 }
+        ],
+        "valenwood": [
+          { "entity": "nirncraft:spriggan", "fallback": "minecraft:witch", "name": "Blightroot Spriggan", "hp": 3.2, "dmg": 1.7 },
+          { "entity": "nirncraft:indrik", "fallback": "minecraft:ravager", "name": "Crazed Indrik", "hp": 3.4, "dmg": 1.7 }
+        ],
+        "summerset": [
+          { "entity": "nirncraft:indrik", "fallback": "minecraft:ravager", "name": "Corrupted Indrik", "hp": 3.5, "dmg": 1.8 },
+          { "entity": "nirncraft:wisp", "fallback": "minecraft:vex", "name": "Gloom Wisp Mother", "hp": 3.0, "dmg": 1.7 }
+        ]
+      }
+    },
+    {
+      "id": "lost_heirloom",
+      "category": "SIDE",
+      "title_key": "quest.nirncraft.board.lost_heirloom.title",
+      "desc_key": "quest.nirncraft.board.lost_heirloom.desc",
+      "objective_go_key": "quest.nirncraft.board.lost_heirloom.obj_go",
+      "objective_return_key": "quest.nirncraft.board.lost_heirloom.obj_return",
+      "items": [
+        "Family Signet Ring",
+        "Ancestral War Horn",
+        "Silver Locket",
+        "Carved Ivory Amulet",
+        "Merchant's Strongbox",
+        "Heirloom Dagger",
+        "Grandfather's Pocket Watch",
+        "Runed Clan Brooch"
+      ],
+      "residents": [
+        "the local smith",
+        "an anxious merchant",
+        "the innkeeper",
+        "an elder townsperson",
+        "a grieving widow",
+        "the town apothecary"
+      ]
+    },
+    {
+      "id": "missing_person",
+      "category": "SIDE",
+      "title_key": "quest.nirncraft.board.missing_person.title",
+      "desc_key": "quest.nirncraft.board.missing_person.desc",
+      "objective_search_key": "quest.nirncraft.board.missing_person.obj_search",
+      "objective_report_key": "quest.nirncraft.board.missing_person.obj_report",
+      "names": [
+        "Halvar the Trapper",
+        "Sunniva the Herbalist",
+        "Brennus the Peddler",
+        "Eiruki the Scout",
+        "Talen-Jee the Prospector",
+        "Maelis the Scholar",
+        "Kharjo's Courier",
+        "Ragna the Woodcutter"
+      ]
+    },
+    {
+      "id": "supply_order",
+      "category": "MISC",
+      "title_key": "quest.nirncraft.board.supply_order.title",
+      "desc_key": "quest.nirncraft.board.supply_order.desc",
+      "objective_gather_key": "quest.nirncraft.board.supply_order.obj_gather",
+      "objective_deliver_key": "quest.nirncraft.board.supply_order.obj_deliver",
+      "supplies": [
+        { "item": "minecraft:iron_ingot", "name": "Iron Ingots", "count": 5, "recipient": "the local smith", "filter": "villager" },
+        { "item": "minecraft:copper_ingot", "name": "Copper Ingots", "count": 6, "recipient": "the local smith", "filter": "villager" },
+        { "item": "minecraft:gold_ingot", "name": "Gold Ingots", "count": 4, "recipient": "the town jeweler", "filter": "villager" },
+        { "item": "minecraft:red_mushroom", "name": "Red Mushrooms", "count": 6, "recipient": "the town alchemist", "filter": "villager" },
+        { "item": "minecraft:brown_mushroom", "name": "Cave Mushrooms", "count": 6, "recipient": "the town alchemist", "filter": "villager" },
+        { "item": "minecraft:sweet_berries", "name": "Snowberries", "count": 8, "recipient": "the innkeeper", "filter": "villager" },
+        { "item": "minecraft:leather", "name": "Cured Hides", "count": 5, "recipient": "the local outfitter", "filter": "villager" },
+        { "item": "minecraft:coal", "name": "Forge Coal", "count": 8, "recipient": "the local smith", "filter": "villager" }
+      ]
+    }
+  ]
+}

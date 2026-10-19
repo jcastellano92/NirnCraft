@@ -1,0 +1,134 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 10,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 30,
+              "max": 120
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:coin_purse",
+          "weight": 4,
+          "modifier": {
+            "tag": "{gold:250L}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:garnet",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:ruby",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:sapphire",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:flawless_ruby",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:flawless_diamond",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gold_ingot",
+          "weight": 4,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            },
+            "type": "minecraft:set_count"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "nirncraft:leveled/weapon"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 2,
+          "value": "nirncraft:chests/lore_books"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{book:\"seas_drowned_yokuda\",nirncraft_value:40}",
+            "type": "minecraft:set_custom_data"
+          }
+        }
+      ],
+      "condition": {
+        "chance": 0.7,
+        "type": "minecraft:random_chance"
+      }
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:pearl",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:small_pearl",
+          "weight": 5,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            },
+            "type": "minecraft:set_count"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -12,7 +12,7 @@ zones, settlement sizes and building-type counts, road topology. The raw extract
 and everything committed holds only facts, numbers, coordinates, designs and our own words. No raster, model, texture,
 sound or text from the game enters the repo, raw or resampled. Terrain is hand-traced vectors with heights we choose
 (AGENT-RULES legal rule). The Basic Roads path data shipped inside DFO Online's `vendor/` folder is permission-only for
-that project. We do not read it into Skycraft; we only compared aggregate numbers against it (section 7).
+that project. We do not read it into NirnCraft; we only compared aggregate numbers against it (section 7).
 
 ---
 
@@ -27,7 +27,7 @@ that project. We do not read it into Skycraft; we only compared aggregate number
    example Totambu is 3,800 blocks from where Daggerfall puts it). Camlorn, Shornhelm, Evermor, Northpoint, Farrun,
    Jehanna, Orsinium, Elinhir, Skaven, Rihad, Taneth, Gilane, Hegathe and Stros M'Kai lie outside Daggerfall's map.
    They stay where they are, with two small fixes (section 2.4).
-4. **Two levels of politics.** Nine realms become Skycraft regions (six of them existing ids). Daggerfall's 44
+4. **Two levels of politics.** Nine realms become NirnCraft regions (six of them existing ids). Daggerfall's 44
    political regions become **fiefs** inside them, each with a seat, a lord and a banner. The template's
    fixed-per-region content (storyline, marquee, open dungeon) goes to realms, not fiefs (section 4).
 5. **Curate, do not import.** Daggerfall has 15,251 locations in this window. We take about 176 (1.2%). That gives
@@ -44,7 +44,7 @@ Sources:
   (`src/formats/mapsFile.js`, `blocksFile.js`, `woodsFile.js`, `pakFile.js`) are plain ES modules that Node imports
   directly. Its own road generator is `src/world/roadNetwork.js`.
 
-| Data | Count / shape | Use in Skycraft |
+| Data | Count / shape | Use in NirnCraft |
 | --- | --- | --- |
 | Heightmap (WOODS.WLD) | 1000 x 500 px, land values 0-109 (median 30, p95 75); 1 px = 819 m in Daggerfall | Guide for hand-traced ranges, hills and valleys (section 10). Never resampled into the repo |
 | Climate raster (CLIMATE.PAK) | 10 classes: woodlands, haunted woodlands, mountain woods, mountain, desert, hot desert, subtropical, rainforest, swamp, ocean | Biome palette per fief (section 4.3) |
@@ -65,24 +65,24 @@ files in `.reference/daggerfall_ref/` are one column off; v2 is aligned.
 
 ---
 
-## 2. Scale and the mapping into Skycraft's frame
+## 2. Scale and the mapping into NirnCraft's frame
 
 ### 2.1 Daggerfall is a different scale of world
 
 Daggerfall's map is 819 x 410 km (1 px = 32,768 units = 819 m). Daggerfall city to Wayrest is 653 px, or 535 km.
-Skycraft keeps the provinces in lore-map proportion to a 6,000-block Skyrim. On that map Daggerfall and Wayrest are
+NirnCraft keeps the provinces in lore-map proportion to a 6,000-block Skyrim. On that map Daggerfall and Wayrest are
 4,061 blocks apart, so **one Daggerfall pixel becomes about 6.2 blocks**. That is a 1:132 compression of Daggerfall's
 ground. Skyrim is roughly 1:1.
 
 This is fixed by the lore frame, not chosen. A larger scale would push Wayrest into Craglorn and Wrothgar. A smaller
 one would leave southern High Rock empty.
 
-At this scale the whole Daggerfall window covers **12.4 km² of Skycraft land**: about half of Skyrim's 26.5 km², in
+At this scale the whole Daggerfall window covers **12.4 km² of NirnCraft land**: about half of Skyrim's 26.5 km², in
 6,200 x 3,100 blocks. Daggerfall's 15,251 locations would be 1,230 per km². Skyrim has 14.3.
 
 ### 2.2 How far the current placement is from Daggerfall
 
-For the cities on both maps, the ratio of current Skycraft distance to Daggerfall distance should be one number. Today
+For the cities on both maps, the ratio of current NirnCraft distance to Daggerfall distance should be one number. Today
 it ranges from 3.0 to 54. The Daggerfall-era towns were placed from region names without Daggerfall's geography.
 Examples (blocks; "DF" = Daggerfall pixels x 6.22):
 
@@ -188,10 +188,10 @@ random-block dungeon mazes, and hours of empty walking between near-identical do
 
 ## 4. Regions: realms and fiefs
 
-### 4.1 Nine realms (Skycraft regions inside the window)
+### 4.1 Nine realms (NirnCraft regions inside the window)
 
 Grouped by geography, kingdom and race. Five keep an existing id (`TAMRIEL.md` section 9: ids are never renamed;
-polygons may change), and four are new ids. Areas are Skycraft km² of land.
+polygons may change), and four are new ids. Areas are NirnCraft km² of land.
 
 | Realm (region id) | Fiefs (Daggerfall regions) | km² | Seat | Climate mix | Palette proposal |
 | --- | --- | --- | --- | --- | --- |
@@ -221,7 +221,7 @@ today), `music` and `weather`. They also gain a `realm_banner` colour. This is o
 ### 4.2 Fiefs (44 Daggerfall regions)
 
 A fief is a named sub-area. It is not a `Region`, so it has no palette or level band of its own. It is stored as
-polygons in a new `skycraft/tamriel/fiefs.json` (`id`, `realm`, `name`, `seat`, `lord` title, `temple`, `order`,
+polygons in a new `nirncraft/tamriel/fiefs.json` (`id`, `realm`, `name`, `seat`, `lord` title, `temple`, `order`,
 `coven`, `bloodline`, `poly`). A static `Fiefs.at(x, z)` lookup serves the map screen (fief names at mid zoom), road
 signs ("Entering the Barony of Kambria"), dialogue ("the Baron of Koegria"), and quest givers.
 
@@ -244,7 +244,7 @@ Two other political regions get no fief:
 
 ### 4.3 Climates to biomes
 
-| Daggerfall climate | Where | Skycraft biome (existing / new) |
+| Daggerfall climate | Where | NirnCraft biome (existing / new) |
 | --- | --- | --- |
 | woodlands | most of High Rock's bay shore | `stormhaven`, `wayrest_farmland` |
 | haunted woodlands | Ykalon, Phrygias, edges of Dwynnen and Northmoor | `rivenspire` (gloomy), new `haunted_wood` (dead oaks, fog, crows) |
@@ -260,7 +260,7 @@ existing High Rock greens, plus terracotta, ochre and palm-green for the south s
 
 ---
 
-## 5. Places: what becomes a Skycraft place
+## 5. Places: what becomes a NirnCraft place
 
 ### 5.1 Selection rules (implemented in `df_curate_v2.py`, output `selection.json`)
 
@@ -276,7 +276,7 @@ existing High Rock greens, plus terracotta, ochre and palm-green for the south s
 5. **Unique sites:** all 14 covens and the main-story sites (Privateer's Hold, Castle Necromoghan, Woodborne Hall,
    Lysandus' Tomb, Castle Llugwych, Direnni Tower, Tristore Laboratory, Scourg Barrow, Shedungent, Orsinium). Mantellan
    Crux becomes a pocket realm reached from the Daggerfall coast, not an overworld site.
-6. **Per-realm quotas** (Skycraft km² of land), each kind with a minimum spacing:
+6. **Per-realm quotas** (NirnCraft km² of land), each kind with a minimum spacing:
 
    | Kind | Per km² | Min. spacing (blocks) | Picking order |
    | --- | --- | --- | --- |
@@ -316,7 +316,7 @@ villages, 28 farms, 13 forts, 40 landmarks and 157 dungeons. Rules for IB3:
 
 ---
 
-## 6. Town layouts: from Daggerfall's block grid to Skycraft city plans
+## 6. Town layouts: from Daggerfall's block grid to NirnCraft city plans
 
 ### 6.1 What a Daggerfall town is
 
@@ -344,7 +344,7 @@ The city-plan generator (IB4) reads `townplan_seeds.json` and writes a draft `ci
 * The zoning planner fills streets and houses.
 * Hand polish follows for capitals, cities and marquee towns.
 
-| Daggerfall block or building | Skycraft plan element | `Archetype` / grammar `Use` |
+| Daggerfall block or building | NirnCraft plan element | `Archetype` / grammar `Use` |
 | --- | --- | --- |
 | `WALL` ring; gate blocks AA08-11 | `walls` ring (radius from tier) with 4 gates at the grid side positions, main gate toward the nearest road end | `WALL`, `GATE`; `gates` list |
 | `PALA`, `CAST`, capital `CUST` blocks | Palace or castle landmark; capitals get the marquee landmark | `PALACE` / grammar `KEEP` |
@@ -373,7 +373,7 @@ The city-plan generator (IB4) reads `townplan_seeds.json` and writes a draft `ci
 
 ### 6.3 Counts by tier
 
-Daggerfall's counts become Skycraft's tier targets (`DESIGN-PRINCIPLES.md` 4.4):
+Daggerfall's counts become NirnCraft's tier targets (`DESIGN-PRINCIPLES.md` 4.4):
 
 * **Capitals** keep every service kind present in Daggerfall (at least one of each), with these caps: inns 3,
   smithies 2, stores 3, guild halls as in Daggerfall. Houses fill to 100-170 buildings.
@@ -425,7 +425,7 @@ These apply on top of the mapping:
 We do not import pixels. The road plan (P1) already routes every link on our own terrain, with profiles, bridges and
 switchbacks. What we take is **topology and naming**:
 
-1. **Named roads** (`skycraft/roads/named_roads.json`): these come first in `RoadGraph`.
+1. **Named roads** (`nirncraft/roads/named_roads.json`): these come first in `RoadGraph`.
    * **North Shore Road:** Daggerfall, Anticlere, Dwynnen (or the Shalgora keep), Kambria, Menevia, Wayrest. Highway.
    * **Glenumbra Road:** Daggerfall, Glenpoint, Northmoor, then north out of the window to Camlorn. Highway.
    * **South Shore Road:** Sentinel, Tigonus, Kozanset, Lainlyn, then round the bay head by the Bjoulsae bridge to
@@ -450,11 +450,11 @@ switchbacks. What we take is **topology and naming**:
 
 ## 8. Dungeons
 
-### 8.1 Daggerfall types to Skycraft themes
+### 8.1 Daggerfall types to NirnCraft themes
 
 Uses the dungeon `variant` values in use today:
 
-| Daggerfall type | Skycraft variant | Notes |
+| Daggerfall type | NirnCraft variant | Notes |
 | --- | --- | --- |
 | crypt, cemetery | `breton_crypt` (High Rock), `yokudan_tomb` (Hammerfell) | Cemeteries are settlement-edge scenes, not dungeons |
 | orc stronghold | `orc_ruin`, or a live Orc stronghold settlement in Wrothgar | Some become friendly strongholds (Morkul-style) |
@@ -519,7 +519,7 @@ ours):
   bargains and daedric summonings on the daedra's days.
 * **Vampire bloodlines** by fief group (Vraseth in the Daggerfall realm, Montalion round Wayrest and Bangkorai,
   Lyrezi in Wrothgar...). Haunts and a bloodline storyline for afflicted players.
-* **Guild networks:** the Mages and Fighters Guilds in every city (705 and 636 halls in Daggerfall). In Skycraft, one
+* **Guild networks:** the Mages and Fighters Guilds in every city (705 and 636 halls in Daggerfall). In NirnCraft, one
   hall per realm seat, with the guild's province chain in Wayrest (Mages) and Sentinel (Fighters). The thieves' den
   and a Dark Brotherhood sanctuary go in Daggerfall and Sentinel.
 * **Main-story places** become the lore-web thread "the golem's key" across the three capitals: Privateer's Hold,
@@ -580,11 +580,11 @@ Order: IB1, then IB2 and IB3 in parallel, then IB4, IB5 and IB6 in parallel, the
 | Phase | What | Owns (files) | Gates (measurable) |
 | --- | --- | --- | --- |
 | **IB0 Extraction** (done) | v2 extraction, scale study, selection proposal | `.reference/daggerfall_ref/v2/**` (gitignored), this doc | Files listed in the v2 README rebuild from the scripts |
-| **IB1 Frame and vectors** | Apply the mapping. Trace the window's coast, islands, realm polygons, ranges, areas and rivers via `iliac_trace.py`. Move Betony; shrink the northern ESO regions. Update `TAMRIEL.md` section 9 (Sentinel x, Elinhir, Gilane) | `tools/worldgen/iliac_trace.py` (new), `tools/worldgen/tamriel_vectors.json` (Iliac part), regenerated `skycraft/tamriel/*.png`, `TAMRIEL.md` section 9 | `layout_lint.py` passes. Coast agreement with Daggerfall's warped coast >= 0.90 inside the window (measured by a `.reference`-only check script, not committed data). All binding anchors on land in their region. No file under `mod/` or `tools/` contains Daggerfall raster data (size and grep check). Haiku visual review of `preview_places_high_rock.png` and `preview_places_hammerfell.png` |
-| **IB2 Realms, fiefs, biomes** | 3 new realm regions, re-cut existing ones. `fiefs.json` + `Fiefs` lookup. New biomes (`iliac_scrub`, `iliac_rainforest`, `tigonus_marsh`, `haunted_wood`). Palettes. Lang names | `regions.json` (via `tamriel_map.py`), `skycraft/tamriel/fiefs.json` (new), `com.skycraft.tamriel.Fiefs` (new), `tools/worldgen/biomes.py`, `palettes.json`, `lang/skycraft/tamriel_regions.json` | Every fief >= 0.01 km² present, with area within 10% of `region_table.json`. Every palette covers ocean, beach and river. `/skybiome census` on each realm shows its signature biome as the top lowland pick. `compileJava` passes |
+| **IB1 Frame and vectors** | Apply the mapping. Trace the window's coast, islands, realm polygons, ranges, areas and rivers via `iliac_trace.py`. Move Betony; shrink the northern ESO regions. Update `TAMRIEL.md` section 9 (Sentinel x, Elinhir, Gilane) | `tools/worldgen/iliac_trace.py` (new), `tools/worldgen/tamriel_vectors.json` (Iliac part), regenerated `nirncraft/tamriel/*.png`, `TAMRIEL.md` section 9 | `layout_lint.py` passes. Coast agreement with Daggerfall's warped coast >= 0.90 inside the window (measured by a `.reference`-only check script, not committed data). All binding anchors on land in their region. No file under `mod/` or `tools/` contains Daggerfall raster data (size and grep check). Haiku visual review of `preview_places_high_rock.png` and `preview_places_hammerfell.png` |
+| **IB2 Realms, fiefs, biomes** | 3 new realm regions, re-cut existing ones. `fiefs.json` + `Fiefs` lookup. New biomes (`iliac_scrub`, `iliac_rainforest`, `tigonus_marsh`, `haunted_wood`). Palettes. Lang names | `regions.json` (via `tamriel_map.py`), `nirncraft/tamriel/fiefs.json` (new), `com.nirncraft.tamriel.Fiefs` (new), `tools/worldgen/biomes.py`, `palettes.json`, `lang/nirncraft/tamriel_regions.json` | Every fief >= 0.01 km² present, with area within 10% of `region_table.json`. Every palette covers ocean, beach and river. `/skybiome census` on each realm shows its signature biome as the top lowland pick. `compileJava` passes |
 | **IB3 Places** | Generate a place draft from `selection.json` (tool `tools/worldgen/iliac_places.py`, reading `.reference` at authoring time only), hand-review, reconcile the 274 existing in-window places (section 5.2). Fief-keep place type (`village` + `variant: "fief_keep"`) | `places/high_rock.json`, `places/hammerfell.json`, `places/provinces.json` (moved anchors), `tools/worldgen/iliac_places.py` (new), lang place names | Per realm: settlements and dungeons inside the 4.4/4.5 bands of `DESIGN-PRINCIPLES.md` (documented deviation for fief keeps). Spacing rules hold. 100% on land. `tools/marquee/validate.js` passes (231 ids). No lore-web place dropped. `parity.py` SET does not regress |
-| **IB4 City plans** | `tools/worldgen/iliac_cityplans.py`: seeds to draft `cityplans/<id>.json` (zoning base, gates, quarters, service counts). Hand polish for Daggerfall, Sentinel, Wayrest (replace `castleCapital`), Glenpoint and the 6 realm seats. `Use.BANK` if taken | `skycraft/tamriel/cityplans/*.json` (new ids), `tools/worldgen/iliac_cityplans.py`, `settlement/grammar/Use.java` (additive) | `validate_cityplans.js` passes (unique `sil`). `/skysettle` metrics per tier in band (buildings, services). `town_checks.py` passes. `render_town.py` contact sheet passes Haiku review as "not a reskin". 0 unstaffed workplaces (`population_lint.py`) |
-| **IB5 Roads** | Named Iliac roads, ferries. Rebake `roadplan`, `sceneplan` | `skycraft/roads/named_roads.json`, `skycraft/tamriel/ports.json`, baked files | `roadplan_lint.py` 0 errors. `reach_lint.py` 100% of new places reached. Two new corridors in `full_corridors.ps1` (daggerfall:anticlere, sentinel:tigonus) at 0 gaps, 0 unbridged crossings, 0 drops without a step. `placement_lint.py` densities in target |
+| **IB4 City plans** | `tools/worldgen/iliac_cityplans.py`: seeds to draft `cityplans/<id>.json` (zoning base, gates, quarters, service counts). Hand polish for Daggerfall, Sentinel, Wayrest (replace `castleCapital`), Glenpoint and the 6 realm seats. `Use.BANK` if taken | `nirncraft/tamriel/cityplans/*.json` (new ids), `tools/worldgen/iliac_cityplans.py`, `settlement/grammar/Use.java` (additive) | `validate_cityplans.js` passes (unique `sil`). `/skysettle` metrics per tier in band (buildings, services). `town_checks.py` passes. `render_town.py` contact sheet passes Haiku review as "not a reskin". 0 unstaffed workplaces (`population_lint.py`) |
+| **IB5 Roads** | Named Iliac roads, ferries. Rebake `roadplan`, `sceneplan` | `nirncraft/roads/named_roads.json`, `nirncraft/tamriel/ports.json`, baked files | `roadplan_lint.py` 0 errors. `reach_lint.py` 100% of new places reached. Two new corridors in `full_corridors.ps1` (daggerfall:anticlere, sentinel:tigonus) at 0 gaps, 0 unbridged crossings, 0 drops without a step. `placement_lint.py` densities in target |
 | **IB6 Terrain relief** | Signature landforms, heights per section 10, hydrology rerun, seams at the window edge | `tools/worldgen/tamriel_vectors.json` (ranges, areas, rivers, lakes, peaks in the window), `tools/worldgen/hydrology*.py` inputs, regenerated rasters | `hydrology_report.py`: >= 6 named rivers reach the bay, every lake has an outlet. Relief: p90 local relief per realm (1 km windows) >= Skyrim's median hold. Every realm has >= 1 XL landform. Spearman rank correlation between our elevation and Daggerfall's (at 1 km) >= 0.6 inside the window (`.reference`-only check). Road plan still passes after the rebake |
 | **IB7 Dungeons** | Variants per section 8, marquee data plans for 9 realms, new room kits (`breton_keep_ruin`, `scorpion_den`) | `places/*.json` variants, `dungeons/marquee/**`, dungeon kit data | `d_identity` = 1.0 for the bay. >= 5 palettes and >= 8 rosters per realm. 9 marquee plans validate |
 | **IB8 Stories and factions** | Realm storylines, 10 order lines, coven bargains, bloodline line, lore-web thread, region voice | `quests/**` (bay realms), `tools/marquee/loreweb.json`, region voice data | `novelty_lint.py --strict` 0 pairs. Every realm story hook reachable from its first town (F-HOOK). The quest validators pass |
@@ -593,7 +593,7 @@ Order: IB1, then IB2 and IB3 in parallel, then IB4, IB5 and IB6 in parallel, the
 
 ## 12. Numbers to remember
 
-* 1 Daggerfall map pixel = 819 m in Daggerfall = 6.22 Skycraft blocks. Daggerfall and Wayrest are exact; Sentinel
+* 1 Daggerfall map pixel = 819 m in Daggerfall = 6.22 NirnCraft blocks. Daggerfall and Wayrest are exact; Sentinel
   moves 224 east.
 * Window: 12.4 km² of land, 9 realms, 44 fiefs.
 * Place counts: 15,251 Daggerfall locations become about 176 places (14.2/km²). Of those, 65 are settlements (3

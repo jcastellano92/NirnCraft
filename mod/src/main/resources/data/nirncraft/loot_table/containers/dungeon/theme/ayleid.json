@@ -1,0 +1,71 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 8,
+            "max": 25,
+            "growth": 0.04,
+            "type": "nirncraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "nirncraft:parts/gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "nirncraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:refined_moonstone",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 1,
+          "modifier": {
+            "type": "nirncraft:leveled_tome"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 4
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:regional_treasure",
+          "weight": 4,
+          "modifier": {
+            "type": "nirncraft:regional_treasure"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 96
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/dungeon/theme/ayleid"
+}

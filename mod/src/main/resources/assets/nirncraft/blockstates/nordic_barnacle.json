@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/nordic_barnacle"
+      },
+      {
+        "model": "nirncraft:block/nordic_barnacle",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/nordic_barnacle",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/nordic_barnacle",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/nordic_barnacle_harvested"
+      },
+      {
+        "model": "nirncraft:block/nordic_barnacle_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/nordic_barnacle_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/nordic_barnacle_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

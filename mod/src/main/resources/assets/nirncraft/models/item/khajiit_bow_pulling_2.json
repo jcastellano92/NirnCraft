@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/khajiit_bow",
+  "textures": {
+    "layer0": "nirncraft:item/khajiit_bow_pulling_2"
+  }
+}

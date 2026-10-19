@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "group": "ebony_ingot",
+  "ingredient": [
+    "nirncraft:ebony_ore",
+    "nirncraft:deepslate_ebony_ore"
+  ],
+  "result": {
+    "id": "nirncraft:ebony_ingot"
+  },
+  "experience": 0.7,
+  "cookingtime": 200
+}

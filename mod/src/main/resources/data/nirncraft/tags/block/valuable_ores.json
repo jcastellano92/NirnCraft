@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:orichalcum_ore",
+    "nirncraft:moonstone_ore",
+    "nirncraft:malachite_ore",
+    "nirncraft:quicksilver_ore",
+    "nirncraft:ebony_ore",
+    "nirncraft:deepslate_orichalcum_ore",
+    "nirncraft:deepslate_moonstone_ore",
+    "nirncraft:deepslate_malachite_ore",
+    "nirncraft:deepslate_quicksilver_ore",
+    "nirncraft:deepslate_ebony_ore"
+  ]
+}

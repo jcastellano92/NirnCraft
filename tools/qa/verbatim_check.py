@@ -4,10 +4,10 @@ Usage:
   py -3 -I tools/qa/verbatim_check.py [--corpus <dir>] [--shingle-size 8]
 
 Scans:
-  - mod/src/main/lang/skycraft/*.json
-  - mod/src/main/resources/skycraft/lore/**/*.json
-  - mod/src/main/resources/skycraft/quests/**/*.json
-  - mod/src/main/resources/skycraft/realms/books.json
+  - mod/src/main/lang/nirncraft/*.json
+  - mod/src/main/resources/nirncraft/lore/**/*.json
+  - mod/src/main/resources/nirncraft/quests/**/*.json
+  - mod/src/main/resources/nirncraft/realms/books.json
 
 Checks:
   1. Internal prose integrity:
@@ -31,8 +31,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-LANG_DIR = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft")
-SKY_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft")
+LANG_DIR = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft")
+SKY_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft")
 DEFAULT_CORPUS = os.path.join(ROOT, ".reference", "corpus")
 
 PROSE_FIELD_NAMES = {"hook", "title", "text", "pitch", "greet", "talk", "bark", "objective"}

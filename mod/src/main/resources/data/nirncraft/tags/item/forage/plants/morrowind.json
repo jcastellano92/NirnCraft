@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:comberry",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bittergreen_petals",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gold_kanet",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ashen_grass_pod",
+      "required": false
+    },
+    {
+      "id": "nirncraft:trama_root",
+      "required": false
+    }
+  ]
+}

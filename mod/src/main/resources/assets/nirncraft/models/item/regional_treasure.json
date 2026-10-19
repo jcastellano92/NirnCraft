@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "nirncraft:item/regional_treasure",
+    "layer1": "nirncraft:item/regional_treasure_mount"
+  }
+}

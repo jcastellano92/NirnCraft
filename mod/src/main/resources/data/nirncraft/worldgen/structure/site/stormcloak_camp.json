@@ -1,0 +1,17 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "military_camp",
+  "flavor": 1,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "stormcloak_camp"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

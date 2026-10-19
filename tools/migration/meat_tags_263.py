@@ -15,7 +15,7 @@ def authored_meat_ids(java):
 
     def collect(args, original):
         if len(args) == 4 and args[2].strip() == "true" and re.fullmatch(r'"[a-z0-9_]+"', args[0].strip()):
-            result.add("skycraft:" + args[0].strip()[1:-1])
+            result.add("nirncraft:" + args[0].strip()[1:-1])
         return original
 
     calls(source, "food", collect)
@@ -25,7 +25,7 @@ def authored_meat_ids(java):
 
     def collect_fishing(args, original):
         if len(args) == 3 and re.fullmatch(r'"[a-z0-9_]+"', args[0].strip()):
-            result.add("skycraft:" + args[0].strip()[1:-1])
+            result.add("nirncraft:" + args[0].strip()[1:-1])
         return original
 
     calls(fishing, "food", collect_fishing)
@@ -33,22 +33,22 @@ def authored_meat_ids(java):
     if "true, props)" not in fish_item:
         raise ValueError("Review FishItem's authored meat flag before generating wolf food")
     species = (java / "fishing/FishSpecies.java").read_text(encoding="utf-8")
-    result.update("skycraft:" + identifier for identifier in re.findall(r'\bfish\("([a-z0-9_]+)"\s*,', species))
+    result.update("nirncraft:" + identifier for identifier in re.findall(r'\bfish\("([a-z0-9_]+)"\s*,', species))
     return sorted(result)
 
 
 def upgrade(resources):
     resources = Path(resources)
-    java = resources.parents[1] / "java/com/skycraft/survival"
+    java = resources.parents[1] / "java/com/nirncraft/survival"
     if not (java / "SurvivalRegistry.java").exists():
         return 0
-    target = resources / "skycraft/tags/item/legacy_wolf_food.json"
+    target = resources / "nirncraft/tags/item/legacy_wolf_food.json"
     value = {"replace": False, "values": authored_meat_ids(java)}
     files = {target: value}
     wolf = resources / "minecraft/tags/item/wolf_food.json"
     native = json.loads(wolf.read_text(encoding="utf-8")) if wolf.exists() else {"replace": False, "values": []}
-    if "#skycraft:legacy_wolf_food" not in native.get("values", []):
-        native.setdefault("values", []).append("#skycraft:legacy_wolf_food")
+    if "#nirncraft:legacy_wolf_food" not in native.get("values", []):
+        native.setdefault("values", []).append("#nirncraft:legacy_wolf_food")
     files[wolf] = native
     changed = 0
     for path, value in files.items():

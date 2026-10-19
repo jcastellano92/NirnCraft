@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:pearl",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_pearl",
+      "required": false
+    }
+  ]
+}

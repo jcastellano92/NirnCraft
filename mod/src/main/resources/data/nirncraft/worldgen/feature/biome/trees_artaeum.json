@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "nirncraft:biome/summerset_gold_checked",
+      "chance": 0.4
+    },
+    {
+      "feature": "minecraft:birch_checked",
+      "chance": 0.1
+    }
+  ],
+  "default": "minecraft:cherry_checked"
+}

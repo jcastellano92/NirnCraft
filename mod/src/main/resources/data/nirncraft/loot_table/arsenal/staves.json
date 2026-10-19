@@ -1,0 +1,66 @@
+{
+  "type": "minecraft:generic",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:staff_of_flames",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:staff_of_frostbite",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:staff_of_sparks",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:staff_of_fireballs",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:staff_of_ice_storms",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:staff_of_chain_lightning",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:staff_of_calm",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:staff_of_fury",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:staff_of_conjure_familiar",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:staff_of_paralysis",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:staff_of_healing",
+          "weight": 1
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:arsenal/staves"
+}

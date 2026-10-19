@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 2,
+            "max": 8,
+            "growth": 0.02,
+            "type": "nirncraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 6,
+          "value": "nirncraft:parts/lockpicks"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:garnet",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 5
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/lock_bonus/novice"
+}

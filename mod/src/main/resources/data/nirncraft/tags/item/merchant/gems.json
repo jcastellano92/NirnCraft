@@ -1,0 +1,44 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:garnet",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ruby",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sapphire",
+      "required": false
+    },
+    {
+      "id": "nirncraft:flawless_garnet",
+      "required": false
+    },
+    {
+      "id": "nirncraft:flawless_ruby",
+      "required": false
+    },
+    {
+      "id": "nirncraft:flawless_sapphire",
+      "required": false
+    },
+    {
+      "id": "nirncraft:flawless_diamond",
+      "required": false
+    },
+    "minecraft:diamond",
+    "minecraft:emerald",
+    "minecraft:amethyst_shard",
+    {
+      "id": "nirncraft:pearl",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_pearl",
+      "required": false
+    }
+  ]
+}

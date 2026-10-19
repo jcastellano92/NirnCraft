@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generates the fauna module's textures (PIL).
 
-Writes PNGs into mod/src/main/resources/assets/skycraft/textures/:
+Writes PNGs into mod/src/main/resources/assets/nirncraft/textures/:
   (the wildlife - deer, elk, sabre cats, bears, horkers, mudcrabs, mammoths, slaughterfish - are rig models painted by
    bestiary_fauna.py into entity/creatures/)
   entity/fauna/butterfly_monarch.png, butterfly_blue.png, luna_moth.png   32x32 (InsectModels.Butterfly)
@@ -23,7 +23,7 @@ import random
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures")
+TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures")
 
 
 # ---------------------------------------------------------------------------------------------------- helpers

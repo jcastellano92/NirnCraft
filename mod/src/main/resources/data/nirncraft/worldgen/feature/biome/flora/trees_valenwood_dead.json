@@ -1,0 +1,21 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "fallen_graht_oak",
+        "weight": 2
+      },
+      {
+        "species": "fallen_jungle",
+        "weight": 2
+      },
+      {
+        "species": "stump_jungle",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

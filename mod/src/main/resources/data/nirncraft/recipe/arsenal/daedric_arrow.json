@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "HD",
+    "S ",
+    "F "
+  ],
+  "key": {
+    "H": "nirncraft:ebony_ingot",
+    "D": "nirncraft:daedra_heart",
+    "S": "minecraft:stick",
+    "F": "minecraft:feather"
+  },
+  "result": {
+    "count": 24,
+    "id": "nirncraft:daedric_arrow"
+  }
+}

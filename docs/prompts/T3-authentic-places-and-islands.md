@@ -10,13 +10,13 @@ Across 6 provincial place files (`morrowind.json`: 562, `foreign.json`: 485, `bl
 
 ## 2. Write Set
 
-* `mod/src/main/resources/skycraft/tamriel/places/{morrowind,foreign,black_marsh,elsweyr,valenwood,summerset,hammerfell,high_rock,cyrodiil}.json`
-* `mod/src/main/resources/skycraft/dungeons/identity/*.json`
-* `mod/src/main/resources/skycraft/quests/**/*.json` (if any quest references a renamed `_site_` ID)
-* `mod/src/main/resources/skycraft/lore/places/*.json`
-* `mod/src/main/lang/skycraft/places.json`
-* `mod/src/main/java/com/skycraft/tamriel/terrain/{OceanIsles,Beyond,TamrielHeight}.java`
-* `mod/src/main/java/com/skycraft/explore/MinorSites.java`
+* `mod/src/main/resources/nirncraft/tamriel/places/{morrowind,foreign,black_marsh,elsweyr,valenwood,summerset,hammerfell,high_rock,cyrodiil}.json`
+* `mod/src/main/resources/nirncraft/dungeons/identity/*.json`
+* `mod/src/main/resources/nirncraft/quests/**/*.json` (if any quest references a renamed `_site_` ID)
+* `mod/src/main/resources/nirncraft/lore/places/*.json`
+* `mod/src/main/lang/nirncraft/places.json`
+* `mod/src/main/java/com/nirncraft/tamriel/terrain/{OceanIsles,Beyond,TamrielHeight}.java`
+* `mod/src/main/java/com/nirncraft/explore/MinorSites.java`
 * `tools/qa/{layout_lint,dungeon_identity_gen,dungeon_identity_lint}.py`
 
 ## 3. Implementation Steps

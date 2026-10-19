@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:stalhrim",
+      "required": false
+    },
+    {
+      "id": "nirncraft:chitin_plate",
+      "required": false
+    },
+    {
+      "id": "nirncraft:netch_leather",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ebony_ingot",
+      "required": false
+    }
+  ]
+}

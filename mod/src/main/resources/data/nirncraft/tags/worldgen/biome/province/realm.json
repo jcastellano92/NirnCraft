@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:crystal_spires",
+    "nirncraft:rocky_shore",
+    "nirncraft:tropical_beach",
+    "nirncraft:warm_beach",
+    "nirncraft:warm_river"
+  ]
+}

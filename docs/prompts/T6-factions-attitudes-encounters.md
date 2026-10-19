@@ -13,18 +13,18 @@ Currently:
 
 ## 2. Write Set
 
-* `mod/src/main/java/com/skycraft/society/{Reputation,Relationships,RaceAttitudes,ContextualDialogue,Encounters,SocietySelftest}.java`
-* `mod/src/main/java/com/skycraft/economy/PriceEngine.java`
-* `mod/src/main/java/com/skycraft/creatures/spawn/WildScenes.java`
-* `mod/src/main/resources/skycraft/society/{factions,race_attitudes}.json` (new)
-* `mod/src/main/resources/skycraft/creatures/scenes.json`
-* `mod/src/main/lang/skycraft/society*.json`
+* `mod/src/main/java/com/nirncraft/society/{Reputation,Relationships,RaceAttitudes,ContextualDialogue,Encounters,SocietySelftest}.java`
+* `mod/src/main/java/com/nirncraft/economy/PriceEngine.java`
+* `mod/src/main/java/com/nirncraft/creatures/spawn/WildScenes.java`
+* `mod/src/main/resources/nirncraft/society/{factions,race_attitudes}.json` (new)
+* `mod/src/main/resources/nirncraft/creatures/scenes.json`
+* `mod/src/main/lang/nirncraft/society*.json`
 
 ## 3. Implementation Steps
 
-1. **Provincial Factions (`Reputation.java`, `resources/skycraft/society/factions.json`):**
+1. **Provincial Factions (`Reputation.java`, `resources/nirncraft/society/factions.json`):**
    * Register all provincial factions in `Reputation.FACTIONS` and map each of the 75 land regions and 446 settlements to its ruling faction(s), allied factions, rival factions, and dominant faith in `factions.json` (citing `WorldSheets` L6–L9).
-2. **`RaceAttitudes.java` & `resources/skycraft/society/race_attitudes.json`:**
+2. **`RaceAttitudes.java` & `resources/nirncraft/society/race_attitudes.json`:**
    * Build `RaceAttitudes` evaluating `(regionId, settlementId, npcRole, npcRace, playerRace, playerReputation)` to return:
      * `dispositionDelta` (`-35` to `+30`),
      * `priceMultiplier` (`0.85f` to `1.25f`),

@@ -1,0 +1,154 @@
+{
+  "variants": {
+    "claw=0,facing=north": {
+      "model": "nirncraft:block/claw_keyhole"
+    },
+    "claw=0,facing=east": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 90
+    },
+    "claw=0,facing=south": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 180
+    },
+    "claw=0,facing=west": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 270
+    },
+    "claw=1,facing=north": {
+      "model": "nirncraft:block/claw_keyhole"
+    },
+    "claw=1,facing=east": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 90
+    },
+    "claw=1,facing=south": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 180
+    },
+    "claw=1,facing=west": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 270
+    },
+    "claw=2,facing=north": {
+      "model": "nirncraft:block/claw_keyhole"
+    },
+    "claw=2,facing=east": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 90
+    },
+    "claw=2,facing=south": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 180
+    },
+    "claw=2,facing=west": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 270
+    },
+    "claw=3,facing=north": {
+      "model": "nirncraft:block/claw_keyhole"
+    },
+    "claw=3,facing=east": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 90
+    },
+    "claw=3,facing=south": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 180
+    },
+    "claw=3,facing=west": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 270
+    },
+    "claw=4,facing=north": {
+      "model": "nirncraft:block/claw_keyhole"
+    },
+    "claw=4,facing=east": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 90
+    },
+    "claw=4,facing=south": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 180
+    },
+    "claw=4,facing=west": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 270
+    },
+    "claw=5,facing=north": {
+      "model": "nirncraft:block/claw_keyhole"
+    },
+    "claw=5,facing=east": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 90
+    },
+    "claw=5,facing=south": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 180
+    },
+    "claw=5,facing=west": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 270
+    },
+    "claw=6,facing=north": {
+      "model": "nirncraft:block/claw_keyhole"
+    },
+    "claw=6,facing=east": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 90
+    },
+    "claw=6,facing=south": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 180
+    },
+    "claw=6,facing=west": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 270
+    },
+    "claw=7,facing=north": {
+      "model": "nirncraft:block/claw_keyhole"
+    },
+    "claw=7,facing=east": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 90
+    },
+    "claw=7,facing=south": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 180
+    },
+    "claw=7,facing=west": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 270
+    },
+    "claw=8,facing=north": {
+      "model": "nirncraft:block/claw_keyhole"
+    },
+    "claw=8,facing=east": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 90
+    },
+    "claw=8,facing=south": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 180
+    },
+    "claw=8,facing=west": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 270
+    },
+    "claw=9,facing=north": {
+      "model": "nirncraft:block/claw_keyhole"
+    },
+    "claw=9,facing=east": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 90
+    },
+    "claw=9,facing=south": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 180
+    },
+    "claw=9,facing=west": {
+      "model": "nirncraft:block/claw_keyhole",
+      "y": 270
+    }
+  }
+}

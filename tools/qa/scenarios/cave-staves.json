@@ -25,10 +25,10 @@
     }
   },
   "setupCommands": [
-    "skycraft-dev scenario difficulty normal",
+    "nirncraft-dev scenario difficulty normal",
     "gamemode creative @p",
-    "item replace entity @p weapon.mainhand with skycraft:{staff}",
-    "execute as @p at @p run skycraft-dev scenario spawn {run} minecraft:zombie -275 88 798"
+    "item replace entity @p weapon.mainhand with nirncraft:{staff}",
+    "execute as @p at @p run nirncraft-dev scenario spawn {run} minecraft:zombie -275 88 798"
   ],
   "steps": [
     {
@@ -40,7 +40,7 @@
       "waitFor": {
         "timeoutSeconds": 8,
         "probeCommands": [
-          "execute as @p at @p run skycraft-dev scenario observe {run}"
+          "execute as @p at @p run nirncraft-dev scenario observe {run}"
         ],
         "assertions": [
           {
@@ -79,9 +79,9 @@
     "{run}-beam"
   ],
   "cleanupCommands": [
-    "execute as @p at @p run skycraft-dev scenario cleanup {run}",
+    "execute as @p at @p run nirncraft-dev scenario cleanup {run}",
     "gamemode spectator @p",
-    "skycraft-dev scenario difficulty peaceful",
+    "nirncraft-dev scenario difficulty peaceful",
     "item replace entity @p weapon.mainhand with minecraft:air"
   ]
 }

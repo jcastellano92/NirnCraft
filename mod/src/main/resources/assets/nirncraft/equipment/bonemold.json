@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:bonemold"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:bonemold"
+      }
+    ]
+  }
+}

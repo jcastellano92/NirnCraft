@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "nirncraft:biome/giant_spruce_checked",
+      "chance": 0.22
+    },
+    {
+      "feature": "minecraft:mega_spruce_checked",
+      "chance": 0.12
+    },
+    {
+      "feature": "nirncraft:biome/tall_pine_checked",
+      "chance": 0.18
+    },
+    {
+      "feature": "minecraft:fancy_oak_checked",
+      "chance": 0.05
+    }
+  ],
+  "default": "nirncraft:biome/tall_spruce_checked"
+}

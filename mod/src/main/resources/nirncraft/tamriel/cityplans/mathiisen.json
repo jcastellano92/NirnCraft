@@ -1,0 +1,378 @@
+{
+  "id": "mathiisen",
+  "why": [
+    "auridon.L1.ridge",
+    "auridon.L5.vulkhel_open_port",
+    "auridon.L6.firsthold_seat"
+  ],
+  "sil": "summerset-mathiisen-plan",
+  "base": "none",
+  "overlay": "auridon",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "auridon",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "auridon",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "mathiisen_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "crystal_tower",
+      "at": [
+        -6,
+        -21
+      ],
+      "name": "mathiisen_landmark",
+      "overlay": "auridon"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          53
+        ],
+        [
+          4,
+          14
+        ],
+        [
+          4,
+          -27
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -39,
+          15
+        ],
+        [
+          4,
+          18
+        ],
+        [
+          39,
+          12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        4,
+        2
+      ],
+      "rx": 30,
+      "rz": 26,
+      "wobble": 4,
+      "lobes": 5,
+      "phase": 2.88,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        0
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "mathiisen_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        42,
+        18
+      ],
+      "face": "north",
+      "overlay": "auridon",
+      "name": "mathiisen_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        15,
+        24
+      ],
+      "face": "north",
+      "overlay": "auridon",
+      "name": "mathiisen_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        41
+      ],
+      "face": "north",
+      "overlay": "auridon",
+      "name": "mathiisen_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "auridon",
+      "name": "mathiisen_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "auridon",
+      "name": "mathiisen_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -22,
+        12
+      ],
+      "face": "north",
+      "overlay": "auridon",
+      "name": "mathiisen_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "mathiisen_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -17,
+        -1
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "mathiisen_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -33
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "mathiisen_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -25,
+        -17
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "mathiisen_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "mathiisen_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        15,
+        -24
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "mathiisen_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        42,
+        -18
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "mathiisen_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "fountain",
+      "theme": "mathiisen_fountain",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "mathiisen_statue",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "mathiisen_garden",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "mathiisen_b_5",
+    "store": "mathiisen_b_10",
+    "smithy": "mathiisen_b_7"
+  },
+  "titles": {
+    "mathiisen_b_1": "place.nirncraft.mathiisen Council & Seat Hall",
+    "mathiisen_b_2": "place.nirncraft.mathiisen High Sanctuary",
+    "mathiisen_b_3": "place.nirncraft.mathiisen Fighters & Wayfarers Hall",
+    "mathiisen_b_4": "place.nirncraft.mathiisen Mages & Chroniclers Spire",
+    "mathiisen_b_5": "place.nirncraft.mathiisen The Lantern & Hearth Inn",
+    "mathiisen_b_6": "place.nirncraft.mathiisen The Traveler's Rest Tavern",
+    "mathiisen_b_7": "place.nirncraft.mathiisen Master Forge & Armorer",
+    "mathiisen_b_8": "place.nirncraft.mathiisen Botanicals & Remedies",
+    "mathiisen_b_9": "place.nirncraft.mathiisen Scriptorium & Charts",
+    "mathiisen_b_10": "place.nirncraft.mathiisen Grand Provisioner & Sundries",
+    "mathiisen_b_11": "place.nirncraft.mathiisen Silk & Hide Clothier",
+    "mathiisen_b_12": "place.nirncraft.mathiisen Lapidary & Signets",
+    "mathiisen_b_13": "place.nirncraft.mathiisen Wayfarer Stables & Post",
+    "mathiisen_b_14": "place.nirncraft.mathiisen Bonded Factor Warehouse",
+    "mathiisen_landmark": "High Seat of place.nirncraft.mathiisen",
+    "mathiisen_plaza": "place.nirncraft.mathiisen Central Plaza"
+  },
+  "innKey": "mathiisen_b_5",
+  "zones": [
+    {
+      "at": [
+        4,
+        -21
+      ],
+      "r": 19,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        4,
+        2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        20,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 49,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

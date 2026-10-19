@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/hypha_facia"
+      },
+      {
+        "model": "nirncraft:block/hypha_facia",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/hypha_facia",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/hypha_facia",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/hypha_facia_harvested"
+      },
+      {
+        "model": "nirncraft:block/hypha_facia_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/hypha_facia_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/hypha_facia_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

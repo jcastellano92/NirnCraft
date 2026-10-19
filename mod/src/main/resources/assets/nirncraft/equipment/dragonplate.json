@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:dragonplate"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:dragonplate"
+      }
+    ]
+  }
+}

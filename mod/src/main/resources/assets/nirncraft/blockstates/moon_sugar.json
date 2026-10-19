@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/moon_sugar"
+      },
+      {
+        "model": "nirncraft:block/moon_sugar",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/moon_sugar",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/moon_sugar",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/moon_sugar_harvested"
+      },
+      {
+        "model": "nirncraft:block/moon_sugar_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/moon_sugar_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/moon_sugar_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

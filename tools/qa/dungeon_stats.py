@@ -24,7 +24,7 @@ from collections import Counter, defaultdict
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-SKY = os.path.join(RES, "skycraft")
+SKY = os.path.join(RES, "nirncraft")
 FLOORS_PATH = os.path.join(HERE, "floors.json")
 
 CLASSES = ("marquee", "major", "short", "minor", "unmarked")

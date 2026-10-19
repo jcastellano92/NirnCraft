@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:kwama_egg",
+      "required": false
+    },
+    {
+      "id": "nirncraft:saltrice",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ash_yam",
+      "required": false
+    },
+    {
+      "id": "nirncraft:comberry",
+      "required": false
+    },
+    {
+      "id": "nirncraft:marshmerrow",
+      "required": false
+    },
+    {
+      "id": "nirncraft:scrib_jelly",
+      "required": false
+    }
+  ]
+}

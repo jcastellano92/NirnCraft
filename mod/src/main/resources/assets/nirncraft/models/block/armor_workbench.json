@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "top": "nirncraft:block/armor_workbench_top",
+    "bottom": "nirncraft:block/armor_workbench_bottom",
+    "front": "nirncraft:block/armor_workbench_front",
+    "side": "nirncraft:block/armor_workbench_side"
+  }
+}

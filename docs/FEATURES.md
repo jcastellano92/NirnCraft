@@ -1,21 +1,21 @@
-# Skycraft feature guide
+# NirnCraft feature guide
 
-This is how each part of Skyrim, and of the wider Elder Scrolls world, works in Skycraft. Nearly everything here is
-**Skycraft Core**, the one custom mod in the pack. The few features that come from third-party mods say so. For
+This is how each part of Skyrim, and of the wider Elder Scrolls world, works in NirnCraft. Nearly everything here is
+**NirnCraft Core**, the one custom mod in the pack. The few features that come from third-party mods say so. For
 keys and commands see [CONTROLS.md](CONTROLS.md), and for the world itself see [WORLD.md](WORLD.md).
 
-Settings named below live in the pack's `config/` folder. Server-side files (`skycraft-*-common.toml`) set the rules
+Settings named below live in the pack's `config/` folder. Server-side files (`nirncraft-*-common.toml`) set the rules
 for everyone; `*-client.toml` files are per player.
 
 ## Starting out
 
 * **The prisoner's cart.** New players appear on the road outside Helgen. Once you've chosen a race, the main quest
-  begins with the cart arriving at Helgen. `helgenStart` in `skycraft-quest.toml` turns this off.
+  begins with the cart arriving at Helgen. `helgenStart` in `nirncraft-quest.toml` turns this off.
 * **Character creator.** It opens a few seconds after you first join and returns every 30 seconds until you've
   chosen. You are invulnerable while you choose. It has a Lore tab and an Appearance tab (sub-people, sex, skin,
   hair, beard and clothes). Your race is permanent unless an operator resets it.
 * **The Traveler's Handbook.** Every player gets one in their pack on first join (`giveOnFirstJoin` in
-  `skycraft-guide-common.toml`). It's a parchment book in twelve chapters: Getting Started, Controls, Races, Skills
+  `nirncraft-guide-common.toml`). It's a parchment book in twelve chapters: Getting Started, Controls, Races, Skills
   and Perks, Magic and the Voice, Combat, Stealth and Crime, Economy and Houses, Survival, Factions and Quests, The
   World of Nirn, and Playing Together. The Controls chapter shows your actual key bindings. `/handbook` opens it even
   without the item.
@@ -23,14 +23,14 @@ for everyone; `*-client.toml` files are per player.
   run low on health, pick a lock, pickpocket, learn a Word of Power, absorb a dragon soul, can level up, feel cold,
   hunger or fatigue, fish, discover a place, get a bounty, are over-encumbered, ride a horse, see a dragon, or enter
   Oblivion. Each hint shows once and waits while a menu is open. Turn them off with `tutorialHints` in
-  `skycraft-guide-client.toml` or `/handbook hints off`. `/handbook hints reset` shows them all again.
+  `nirncraft-guide-client.toml` or `/handbook hints off`. `/handbook hints reset` shows them all again.
 * **Digging is earned.** You can mine ore veins (pickaxe) and fell trees (axe) from the start, but the land itself
   takes Mining perks:
   * **Excavator** (Mining 10): dirt, sand, gravel, clay and snow.
   * **Stonebreaker** (Mining 30): stone and deepslate.
   * **Deep Delver** (Mining 75): the deepest rock.
 
-  Blocks you placed yourself always come back. `restrictDigging` in `skycraft-common.toml` turns this off.
+  Blocks you placed yourself always come back. `restrictDigging` in `nirncraft-common.toml` turns this off.
 
 ## Races
 
@@ -100,7 +100,7 @@ Townsfolk come from the same races, in the mix of their region. Players and NPCs
 
 ## Combat and arms
 
-Better Combat provides the directional swing animations. Everything else is Skycraft.
+Better Combat provides the directional swing animations. Everything else is NirnCraft.
 
 * **Weapon families.**
   * One-Handed: daggers, swords, war axes and maces.
@@ -122,7 +122,7 @@ Better Combat provides the directional swing animations. Everything else is Skyc
   * Bosses take at most ×2.
 * **Archery.** Headshots deal ×1.5, and arrows stay in bodies and can be looted back.
 * **Kill cams.** Slow-motion finishing shots on the last enemy of a fight, and sometimes on others
-  (`skycraft-arsenal-*.toml`).
+  (`nirncraft-arsenal-*.toml`).
 * **Armour.** Heavy and Light Armor protect more as they level. Heavy armour slows you until you take Conditioning.
 * **The arsenal:**
   * **Weapons:** 191 smithed weapons (26 of them bows) in 27 materials, from Iron, Steel and Orcish to Daedric,
@@ -290,7 +290,7 @@ Better Combat provides the directional swing animations. Everything else is Skyc
 ## Creatures and dragons
 
 There are about 80 kinds of creatures and foes, all rig-animated, with original sounds. Regional spawn tables
-(`data/skycraft/region_spawns/`) decide what lives where. Spawns stay out of sight and out of settlements, and
+(`data/nirncraft/region_spawns/`) decide what lives where. Spawns stay out of sight and out of settlements, and
 hostiles and wildlife have separate budgets.
 
 * **Skyrim's foes:**
@@ -315,13 +315,13 @@ hostiles and wildlife have separate budgets.
     there are skeletal dragons too.
   * After Dragon Rising they perch at Word Walls. Alduin raises the dead from the burial mounds.
   * Dragonrend grounds them. A slain dragon burns down to a skeleton.
-  * Random dragon attacks begin at level 3 (`skycraft-creatures.toml`).
+  * Random dragon attacks begin at level 3 (`nirncraft-creatures.toml`).
 * **Bodies.** Slain creatures leave a body to loot, and arrows that hit them can be recovered.
 
 ## Survival
 
-* **Survival Mode** is on by default. Turn it off for a world with `/gamerule skycraftSurvivalMode false`, or for
-  the whole server in `skycraft-survival.toml`. Its meters sit above the health bar.
+* **Survival Mode** is on by default. Turn it off for a world with `/gamerule nirncraftSurvivalMode false`, or for
+  the whole server in `nirncraft-survival.toml`. Its meters sit above the health bar.
   * **Hunger** goes Peckish → Hungry → Famished → Starving and lowers your Stamina.
   * **Fatigue** goes Tired → Weary → Debilitated and lowers your Magicka. A bed or an inn room makes you Well
     Rested. A bedroll or tent only leaves you Rested.
@@ -394,7 +394,7 @@ hostiles and wildlife have separate budgets.
   * Everyone votes before the group waits or sleeps.
   * Each player gets their own loot from dungeon chests (Lootr).
   * Dragon souls go to everyone nearby.
-  * PvP counts as a crime, and party friendly fire is off by default (`skycraft-quest.toml`).
+  * PvP counts as a crime, and party friendly fire is off by default (`nirncraft-quest.toml`).
 * **Joining a world.** You're offered a fast travel to your party leader.
 
 ## Skills, leveling and perks [Core]
@@ -533,7 +533,7 @@ a wall with an unknown id keeps it and teaches a stand-in shout. Placement code 
 
 Weather hooks: `ShoutHooks.onClearSkies` / `onStormCall` let the weather and visuals code react to those shouts.
 Spell sounds all go through `SpellSounds` (slots the audio module can override), and summoned creature types through
-`Summons.entityType` (e.g. a registered `skycraft:flame_atronach` replaces the blaze stand-in automatically).
+`Summons.entityType` (e.g. a registered `nirncraft:flame_atronach` replaces the blaze stand-in automatically).
 
 ## Enemies and spawning
 
@@ -626,7 +626,7 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
     on the highways, lantern posts. The map screen draws the whole planned network and the historic roads' names.
   * Travelers, Khajiit caravans, guard patrols and the occasional bandit ambush walk the roads, going on from town to
     town along the network. Carriages reach every capital the roads reach.
-  * `/skycraft-roads stats | render | inspect | export-inns` (operators) report and picture the network.
+  * `/nirncraft-roads stats | render | inspect | export-inns` (operators) report and picture the network.
 * **Location discovery** [Core]: "DISCOVERED: Bleakwind Barrow" banners with Skyrim-style names, shown on the
   compass and on the Skyrim map.
 * **Per-player loot chests** (Lootr): every player gets their own loot from each dungeon chest.
@@ -696,8 +696,8 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
 * **Survival Mode** [Core]: Skyrim's hunger (Peckish to Starving), fatigue (Tired to Debilitated) and cold (Chilly to
   Numb), with stat penalties and a lower carry weight. Warmth from fur, hide and Nordic gear, hoods and cloaks; fires,
   forges and hot stews warm you; cold water is deadly; Nords feel the cold less. Small meters sit above the health
-  bar. Switch it off in `config/skycraft-survival.toml` or per world with `/gamerule skycraftSurvivalMode false`.
-* **Fishing** [Core]: Skycraft rods, more than fifty fish of Skyrim and every province (salmon, char, pike, histcarp,
+  bar. Switch it off in `config/nirncraft-survival.toml` or per world with `/gamerule nirncraftSurvivalMode false`.
+* **Fishing** [Core]: NirnCraft rods, more than fifty fish of Skyrim and every province (salmon, char, pike, histcarp,
   glassfish, Abecean longfin, Niben eel, sugar koi...) by water, region, time, weather and depth; fishing spots with
   jumping fish; Skyrim's reel-in timing bar. Fish are cooking and alchemy ingredients and feed the Fishing skill.
 * **Camping** [Core]: bedrolls (sleep anywhere, never a respawn point), hide tents and campfire kits.
@@ -708,7 +708,7 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
   tracks with a resource pack (see `docs/MUSIC.md`).
 * **Oblivion.** The Nether is Oblivion: Deadlands, Daedra and Oblivion Gates.
 * **Sovngarde.** The End is Sovngarde, where Alduin awaits.
-* **Vampires and werewolves** are Skycraft's own (curse module), as in Skyrim and Dawnguard:
+* **Vampires and werewolves** are NirnCraft's own (curse module), as in Skyrim and Dawnguard:
   * **Vampirism.** Vampires and death hounds can pass on Sanguinare Vampiris; cure it (potion, shrine, priest) within
     three days or you turn. Every day without feeding raises your stage (Sated to Blood-Starved): more Health, Magicka
     and Stamina lost in sunlight (where nothing regenerates), more weakness to fire, more resistance to frost, and at
@@ -724,7 +724,7 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
     its own 11-perk tree. Cured by burning a Glenmoril witch head (Companions).
   * The magic menu (P) and skills (K) show the form's abilities and perk tree while transformed. Being seen changing
     is a 1000 gold crime. Vampire lairs have Vampire Lords, death hounds and gargoyles that wait as statues; rare
-    werewolves hunt the wilds at night. `/skycraft-curse` (operators) tests it all.
+    werewolves hunt the wilds at night. `/nirncraft-curse` (operators) tests it all.
 * **Oblivion and Sovngarde** are real realms now: see *Realms of Oblivion and the afterlife* below.
 * **Vampires and werewolves** (Vampirism, Werewolves: Become a Beast) let you transform, with their own skill
   trees. As in Skyrim, vampires keep to caves and lairs: Vampirism's vampire forest biome, hunter tent camps and
@@ -749,7 +749,7 @@ Spell sounds all go through `SpellSounds` (slots the audio module can override),
 ## World protection [Core]
 
 As in Skyrim, you can't pick up the world. Outside a homestead you may not break or place blocks, save for the
-designated harvests. Server-authoritative and multiplayer-safe (`com.skycraft.protect`, `config/skycraft-protect.toml`).
+designated harvests. Server-authoritative and multiplayer-safe (`com.nirncraft.protect`, `config/nirncraft-protect.toml`).
 
 * **Where you may build and break:** inside your own homestead claim, and a party member's when it is shared
   (`HomesteadClaim.canBuild`). The existing homestead rules (block whitelist, depth and height limits) still apply, and
@@ -765,17 +765,17 @@ designated harvests. Server-authoritative and multiplayer-safe (`com.skycraft.pr
   homestead can be dug). A red "This isn't yours to break" hint explains a refusal (once every two seconds).
 * **Never blocked:** opening doors and containers (locks and crime rules still apply), picking things up ([F] Take),
   moving items between containers and bags. Camp gear and the drafting table can be placed anywhere
-  (`#skycraft:placeable_anywhere`).
+  (`#nirncraft:placeable_anywhere`).
 * **Griefing is off:** creeper, TNT, ghast and dragon blasts destroy no blocks and no paintings, item frames or armor
   stands (only a player's own TNT inside a homestead they may build in does); endermen, withers, ravagers,
   silverfish, snow golems and door-breaking zombies do no block work (townsfolk keep their farm work); fire that
   appears outside a homestead goes out at once; no buckets of water or lava outside a homestead and no stone
   generated by lava and water; hoes, axes, shovels and bone meal do nothing there and farmland is not trampled;
   pistons inside a homestead cannot reach across its edge.
-* **Operators:** `/skycraft-protect status | bypass | check [x y z] | selftest`. `bypass` toggles the rules for
+* **Operators:** `/nirncraft-protect status | bypass | check [x y z] | selftest`. `bypass` toggles the rules for
   yourself; creative mode bypasses them too (`creativeBypass`). `check` prints the homestead, the footprint
   (settlement, road, structure, site), the block class and the verdicts, with the reason.
-* **Self-test:** `/skycraft-protect selftest` (also the autorun task `protect` and a check of `tools\qa\qa.ps1
+* **Self-test:** `/nirncraft-protect selftest` (also the autorun task `protect` and a check of `tools\qa\qa.ps1
   -Server`): a fake survival player in Whiterun and in the wilderness breaks glass, a bed and a chest (cancelled),
   mines a vein, chops a tree (allowed away from towns, cancelled in them), builds in and out of a homestead, and a
   real explosion goes off next to a block cluster (nothing changes). Every block is restored afterwards.
@@ -783,7 +783,7 @@ designated harvests. Server-authoritative and multiplayer-safe (`com.skycraft.pr
 ## Realms of Oblivion and the afterlife [Core]
 
 Six realms are fully built worlds of their own: terrain, biomes, sky and fog, creatures, structures with loot, and a
-way in and a way out. Generated by `tools/worldgen/realms.py` (data) and `com.skycraft.realms` (terrain, structures).
+way in and a way out. Generated by `tools/worldgen/realms.py` (data) and `com.nirncraft.realms` (terrain, structures).
 
 * **The Deadlands** (Mehrunes Dagon; the Nether dimension). Jagged red-black rock islands and thin spires over a
   sea of lava under a blood-red sky with a burning vortex; ash wastes, blood fields of bloodgrass, harrada thickets
@@ -828,30 +828,30 @@ way in and a way out. Generated by `tools/worldgen/realms.py` (data) and `com.sk
 * **Quests** use them: the Kvatch gate (climb the tower, kill the Sigil Keeper, take the stone), Chasing Echoes (the
   Soul Cairn), the Path of Knowledge and the Summit of Apocrypha (Apocrypha), The Mind of Madness (the Isles), The
   House of Horrors (Coldharbour) and the main quest's Sovngarde.
-* Operators: `/skycraft-realm go <realm> [chapter]`, `/skycraft-realm home`, `/skycraft-realm where`,
-  `/skycraft-realm map <realm> <x> <z> <radius>` (writes a relief map to `realm-maps/`).
+* Operators: `/nirncraft-realm go <realm> [chapter]`, `/nirncraft-realm home`, `/nirncraft-realm where`,
+  `/nirncraft-realm map <realm> <x> <z> <radius>` (writes a relief map to `realm-maps/`).
 
 ## Fire and aftermath [Fire]
 
-Package `com.skycraft.fire` (blocks, fire sites, far renderer, aftermath scenes), generators `tools/textures/fire.py`
+Package `com.nirncraft.fire` (blocks, fire sites, far renderer, aftermath scenes), generators `tools/textures/fire.py`
 and the fire entries of `tools/music/sound_catalog.py` / `synth_ambience.py` / `compose.py`. Operators:
-`/skycraft-fire stats|list|add|ignite|douse|remove|burst|scan|census [place] [generate]|respawn <place>|clear <place>|selftest`.
+`/nirncraft-fire stats|list|add|ignite|douse|remove|burst|scan|census [place] [generate]|respawn <place>|clear <place>|selftest`.
 
 * **Big fire blocks** (`big_fire`, `flame_column`, `flame_tip`, `rubble_fire`, `smouldering_embers`): animated,
   emissive (light 15; each flame texture ships a labPBR `_s` emission map for shader packs), persistent and
   non-spreading: they are not vanilla fire (no random or scheduled ticks, never ignite a neighbour, never burn a block)
   and only hurt what stands in them (`fire.bigFireHurts`: flames and rubble fire set you alight, embers burn like a
   magma block unless you sneak). Stack base, column and tip for a tall flame
-  (`BigFireBlock.column`). All are in the block tag `skycraft:persistent_fire`, which the world protection skips.
+  (`BigFireBlock.column`). All are in the block tag `nirncraft:persistent_fire`, which the world protection skips.
 * **Burnt block set:** `charred_planks` (+ stairs, slab), `charred_log`, `charred_beam`, `scorched_stone`,
   `scorched_stone_bricks`; decals `soot_stain`, `blood_stain`; debris `timber_debris`, `splintered_wreckage`,
-  `stuck_arrows`. The ash layer is the realms' `skycraft:ash_layer`.
+  `stuck_arrows`. The ash layer is the realms' `nirncraft:ash_layer`.
 * **Fire sites** (`FireSites`, server): positions with intensity (0..2.5), flame height (1..48) and smoke (0..3) that
   clients near them draw as a far fire (animated flame sprites, additive glow, rising smoke column) out to
   `farFire.distance` blocks (default 640), independent of particle culling. Saved per dimension, synced within
   `fire.syncRadius` (1100). The renderer (`FarFireRenderer`) draws in `RenderLevelStageEvent.AFTER_PARTICLES` through
   vanilla's eyes / entity-translucent shaders (so Oculus/Iris map them), restores all state, and is switched off with
-  `farFire.farFire = false` (`skycraft-fire-client.toml`).
+  `farFire.farFire = false` (`nirncraft-fire-client.toml`).
 * **API for other systems**
   * Server: `FireSites.add(level, pos, intensity, height)` / `add(level, pos, intensity, height, smoke, lifeTicks)` (a
     temporary site when `lifeTicks > 0`), `FireSites.remove(level, pos)`, `FireSites.burst(level, vec3, intensity,
@@ -884,7 +884,7 @@ and the fire entries of `tools/music/sound_catalog.py` / `synth_ambience.py` / `
   (`HelgenFolk`) show one short line (by what they do, the hour, a drawn weapon) with only Continue and Goodbye: no
   topics, no trade, no work. The exceptions: the named story people (Hadvar, Ralof...: only their story choices) and the
   salvage cart's merchant (Barter only).
-* **Audio:** `music.helgen_aftermath` plays inside Helgen's footprint (`assets/skycraft/fire/music_zones.json`, any
+* **Audio:** `music.helgen_aftermath` plays inside Helgen's footprint (`assets/nirncraft/fire/music_zones.json`, any
   place can get one) with the soundtrack's normal crossfade; `ambient.fire_crackle`, `fire_roar`, `timber_creak`,
   `timber_collapse`, `sobbing`, `mourning` are quiet, positional, one per site every few seconds at most
   (`ambience.volume`).
@@ -897,5 +897,5 @@ and the fire entries of `tools/music/sound_catalog.py` / `synth_ambience.py` / `
   Saturn and Memory Leak Fix.
 * **Server:** Canary (a Lithium port), Krypton, Clumps and Structure Layout Optimizer. Spark is included for
   profiling.
-* **Skycraft's own systems** run on per-tick budgets: road paving, travellers, ambience and particles. The map
+* **NirnCraft's own systems** run on per-tick budgets: road paving, travellers, ambience and particles. The map
   sampler worldgen uses is allocation-free and thread-safe, so Distant Horizons can generate far terrain in parallel.

@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:guar_hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:alit_hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:kagouti_hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:netch_leather",
+      "required": false
+    },
+    {
+      "id": "nirncraft:cliff_racer_plumes",
+      "required": false
+    }
+  ]
+}

@@ -14,7 +14,7 @@ gradle.projectsEvaluated {
     p.tasks.register('weatherCoverageAudit', JavaExec) {
         dependsOn compileAudit
         classpath = p.files(compiled) + p.sourceSets.test.runtimeClasspath
-        mainClass = 'com.skycraft.qa.WeatherCoverageAudit'
+        mainClass = 'com.nirncraft.qa.WeatherCoverageAudit'
         maxHeapSize = '2G'
         args new File(p.projectDir, '../dist/weather-coverage').absolutePath
     }

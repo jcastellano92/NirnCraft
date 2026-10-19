@@ -1,0 +1,13 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "ruin",
+  "kit": "daedric",
+  "where": [
+    "morrowind",
+    "realm"
+  ],
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

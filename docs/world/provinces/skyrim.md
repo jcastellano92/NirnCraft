@@ -25,7 +25,7 @@ Reach) far past the real game, the parity reference is the target and the densit
 
 ## 1. World model sheet
 
-Data home: `skycraft/tamriel/world/skyrim.json` (MS22): one province block, nine hold blocks, each field
+Data home: `nirncraft/tamriel/world/skyrim.json` (MS22): one province block, nine hold blocks, each field
 `{id, text, cites}`. Ids below are the ids the JSON will use. A cite in the same block is written `L1.x`; a cite to the
 province is written `sk.L9.x`. Every L2-L11 field cites at least one field above it.
 
@@ -421,7 +421,7 @@ exempt from the 0.5% rule.
 Skyrim is canonical (`SCALE-AND-GEOGRAPHY.md` 5.1, source precedence in WORLD-PLAN). It is the yardstick for the
 whole continent: 1.11 blocks per game metre (plus or minus 0.07), relief p50 74, p90 168, ruggedness 5.6, and the
 vertical curve of 0.35 blocks per metre up to about 360 m, 0.45 at 580 m. **No relief change, no anchor move, no scale
-change.** Measured against the reference markers (`markers.json`), 348 of the 377 non-DLC markers match a Skycraft
+change.** Measured against the reference markers (`markers.json`), 348 of the 377 non-DLC markers match a NirnCraft
 place by name and every one lies within 150 blocks of its reference position. What is left is the short list below.
 
 ### 3.1 Fixes
@@ -1003,7 +1003,7 @@ conflict chain.
 | Travel | `travel/skyrim.json` (R3e), `ports.json` | carriage stables on four seats, 29 wayshrines, the Dawnstar berth | SK2, SK7 |
 | Terrain | `tools/worldgen/tamriel_vectors.json` | the Dawnstar cove, check the Winterhold coast (M2, M5) | SK2 |
 | Dungeons | `dungeons/identity/skyrim.json`, `dungeons/marquee/*.json`, `structure/unique/*.json` | 4 marquee plans, unmarked, key relics, power sites, cave and ruin fills | SK5 |
-| Creatures and spawns | `data/skycraft/region_spawns/skyrim.json` | hostile mix per hold (6 holds at 0 hostile kinds), signature creatures | SK7 |
+| Creatures and spawns | `data/nirncraft/region_spawns/skyrim.json` | hostile mix per hold (6 holds at 0 hostile kinds), signature creatures | SK7 |
 | Scenes and encounters | `creatures/scenes.json` (6 kinds today) | at least 8 kinds usable per hold, 3 Skyrim-only, 3 wonder moments per hold | SK7 |
 | Quests | `quests/place_skyrim_*.json`, `side_skyrim.json`, `marquee_skyrim.json`, faction files, new `quests/story/skyrim_*.json` | 9 hold chains, main re-attribution, faction extensions, war flags | SK6 |
 | Lore | `lore/places/skyrim_*.json`, `tools/marquee/loreweb_src/skyrim.json` (new), threads | 9 arcs, 4 thread joins, readables | SK6 |
@@ -1151,7 +1151,7 @@ phase is one worktree and one merge (`_COMMON.md` section 7). "Owns" is the writ
 | --- | --- | --- | --- | --- | --- |
 | SK1 Sheet and micro-biomes | S1 (V1, V3) | `skyrim.json` from section 1 (nine holds plus province); the 76 micro rules of section 2; per-hold weather tables from L2; music cue per hold | `tamriel/world/skyrim.json`, `palettes.json` Skyrim micro rules, `region_spawns/skyrim.json` keys, `tools/qa/region_audit.py` checks | R3a, R3b | `worldsheet_lint` 0; F-MICRO; every rule cites a field; chunk generation within +5% |
 | SK2 Map additions and roads | S1 data, V5 bake (serial) | M1-M7 (relabels, Dawnstar cove, Amol, old Snowhawk, coast check, heat inputs), 12 lanes, 2 trails, 3 cross-province ends, stables on four seats | `places/skyrim_*.json`, `tamriel_vectors.json` (cove, coast), `roads/named_roads.json`, `cityplans` stable lots | SK1 | `layout_lint` 0; `roadplan_lint` 0; `reach_lint` 0 isolated; `parity.py` re-run recorded as the new baseline |
-| SK3 Capitals | S2 | Five capitals to capital depth: 73+ named people, 27+ interiors, 23+ named buildings, courts, 5 trainers, class gradient, the interiors the sweep lists (Blue Palace, Grey Quarter, thieves' den, Understone, Jorrvaskr) | `cityplans/{whiterun,solitude,windhelm,riften,markarth}.json`, `society/**` (named residents), `lang/skycraft/{society,settlements}.json` | SK2, R3d | `parity.py --tiers` capitals >= 73/27/23/45; F-COURT; `population_lint` 0; `town_checks` unreachable <= 1%; Haiku "not a reskin" |
+| SK3 Capitals | S2 | Five capitals to capital depth: 73+ named people, 27+ interiors, 23+ named buildings, courts, 5 trainers, class gradient, the interiors the sweep lists (Blue Palace, Grey Quarter, thieves' den, Understone, Jorrvaskr) | `cityplans/{whiterun,solitude,windhelm,riften,markarth}.json`, `society/**` (named residents), `lang/nirncraft/{society,settlements}.json` | SK2, R3d | `parity.py --tiers` capitals >= 73/27/23/45; F-COURT; `population_lint` 0; `town_checks` unreachable <= 1%; Haiku "not a reskin" |
 | SK4 Cities, towns, villages | S2 | Four small seats, the College, Helgen and the towns to tier floors; 14 new plans; Falkreath's promotion and steadings; Orc sets | `cityplans/<14 new ids>`, existing small-seat plans, `society/**` | SK2, R3d (parallel with SK3) | tier table met for all 24 swept settlements and the new ones; `s_bespoke` 100%; `s_npcs` >= 37.5, `s_bldgs` >= 9.4 per town in every hold |
 | SK5 Dungeons and secrets | S3 (V4, V7) | 4 marquee plans, 16 unmarked (`hidden: true`), power sites to floor, 12 key relics, caves in 5 holds, forts in the Reach, camps to 27, Amol and old Snowhawk places, hostile mix | `places/skyrim_landmarks.json`, `dungeons/marquee/**`, `dungeons/identity/skyrim.json`, `structure/unique/**`, `region_spawns/skyrim.json` | SK2 (parallel with SK3, SK4, SK6) | `d_identity` 1.0; d_marquee >= 1 per hold; unmarked >= 0.57/km2; F-LOOP; `dungeon_audit` reach 0 blockers; `parity` DUN, CRE >= 95 |
 | SK6 Quests and reactivity | S4 (V8) | Nine hold chains, main re-attribution, war flags, faction floors, 9 lore-web arcs plus 4 joins, 12 deed-keyed lines per hold, boards, readables, 9 festivals | `quests/*skyrim*`, `quests/story/skyrim_*`, `lore/places/*skyrim*`, `loreweb_src/skyrim.json`, `calendar/festivals.json` (Skyrim rows), `society/region_voice.json` (Skyrim keys) | SK1, R3d, R3e (parallel with SK3-SK5) | q/km2 >= 11.2 per hold, chain per hold, F-STARTS >= 4, `story_lint` 0, `novelty_lint --strict` 0, `verbatim_check` 0, F-HOOK <= 800, F-REACT |
@@ -1165,7 +1165,7 @@ counts, so SK1 and SK2 each end with a re-run recorded as the new baseline.
 **Open items for the first R4 session (all resolved in R4).**
 
 1. **M1 hold relabels (resolved):** Applied data relabels in `skyrim_landmarks.json` (`brood_cavern`, `orotheim`, `eldersblood_peak`, `talking_stone_camp` -> `hjaalmarch`; `bleakwind_bluff` -> `the_reach`; `volskygge`, `forebears_holdout` -> `haafingar`; `nightcaller_temple` -> `the_pale`; `ironbind_barrow` -> `winterhold`; `uttering_hills_cave` -> `eastmarch`).
-2. **`parity.py` reader (`O10`, resolved):** Extended `parity.py` to read named residents from `society/*_residents.json`, named buildings from `cityplans/*.json`, dialogue from `lang/skycraft/society*.json`, and regional story chains from `quests/story/*.json`.
+2. **`parity.py` reader (`O10`, resolved):** Extended `parity.py` to read named residents from `society/*_residents.json`, named buildings from `cityplans/*.json`, dialogue from `lang/nirncraft/society*.json`, and regional story chains from `quests/story/*.json`.
 3. **Villages vs towns (resolved):** Kept `darkwater_crossing` and `stonehills` as `village` with bespoke cityplans and full town-floor populations.
 4. **Falkreath & The Reach (resolved):** Added Falkreath/Winterhold/Hjaalmarch/Reach steadings, `amol`, and `old_snowhawk`; clamped `the_reach` level band to `8..28` (`spread = 20 <= 20`).
 5. **M5 Winterhold coast (resolved):** Macro raster verified; `layout_lint.py` 0 errors.

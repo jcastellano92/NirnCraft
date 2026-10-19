@@ -18,7 +18,7 @@ def matches(rule: dict, place: dict) -> bool:
 
 
 def read_places(resources: Path) -> tuple[list[dict], list[dict]]:
-    folder = resources / "skycraft/tamriel/places"
+    folder = resources / "nirncraft/tamriel/places"
     by_id: dict[str, dict] = {}
     duplicates = []
     for filename in json.loads((folder / "index.json").read_text(encoding="utf-8")):
@@ -33,22 +33,22 @@ def read_places(resources: Path) -> tuple[list[dict], list[dict]]:
 
 def registration_rules(resources: Path) -> list[dict]:
     # Parse each registry file once; thousands of site queries reuse this immutable snapshot.
-    worldgen = resources / "data/skycraft/worldgen"
+    worldgen = resources / "data/nirncraft/worldgen"
     result = []
     for path in sorted((worldgen / "structure_set").rglob("*.json")):
         structure_set = json.loads(path.read_text(encoding="utf-8"))
         placement = structure_set.get("placement", {})
-        if placement.get("type") != "skycraft:places":
+        if placement.get("type") != "nirncraft:places":
             continue
         for entry in structure_set.get("structures", []):
             name = entry["structure"]
-            if not name.startswith("skycraft:"):
+            if not name.startswith("nirncraft:"):
                 continue
             definition = worldgen / "structure" / (name.split(":", 1)[1] + ".json")
             if not definition.exists():
                 continue
             structure = json.loads(definition.read_text(encoding="utf-8"))
-            if structure.get("type") != "skycraft:dungeon" or "place" not in structure:
+            if structure.get("type") != "nirncraft:dungeon" or "place" not in structure:
                 continue
             metadata = {"structure": name, "theme": structure["theme"], "kit": structure.get("kit", "none"),
                         "regional_kit": structure.get("regional_kit", False), "flavor": structure.get("flavor"),
@@ -64,8 +64,8 @@ def paired_emitters(resources: Path, place: dict, rules: list[dict] | None = Non
 
 
 def marquee_town_conflicts(resources: Path, places: list[dict]) -> list[dict]:
-    marquee = resources / "skycraft/dungeons/marquee"
-    cities = resources / "skycraft/tamriel/cityplans"
+    marquee = resources / "nirncraft/dungeons/marquee"
+    cities = resources / "nirncraft/tamriel/cityplans"
     if not (marquee / "index.json").exists() or not (cities / "index.json").exists():
         return []
     marquee_ids = {name.removesuffix(".json") for name in json.loads((marquee / "index.json").read_text(encoding="utf-8"))}

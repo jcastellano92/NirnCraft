@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:dark_forest",
+    {
+      "id": "terralith:moonlight_grove",
+      "required": false
+    },
+    {
+      "id": "terralith:moonlight_valley",
+      "required": false
+    },
+    "nirncraft:falkreath_forest",
+    "nirncraft:great_forest",
+    "nirncraft:haunted_wood",
+    "nirncraft:rivenspire"
+  ]
+}

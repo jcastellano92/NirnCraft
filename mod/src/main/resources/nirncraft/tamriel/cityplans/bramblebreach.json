@@ -1,0 +1,256 @@
+{
+  "id": "bramblebreach",
+  "why": [
+    "greenshade.L1.drowned_coast",
+    "greenshade.L5.bridge_port",
+    "greenshade.L6.woodhearth_seat"
+  ],
+  "sil": "valenwood-bramblebreach-plan",
+  "base": "none",
+  "overlay": "greenshade",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "greenshade",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "greenshade",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "bramblebreach_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "bramblebreach_landmark",
+      "overlay": "greenshade"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        4,
+        2
+      ],
+      "spokes": 5,
+      "r0": 10,
+      "r1": 29,
+      "wobble": 5,
+      "offset": 0.7,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        21
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          35
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          -4,
+          -20
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        32
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "bramblebreach_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        -14,
+        28
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "bramblebreach_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "bramblebreach_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        33,
+        2
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "bramblebreach_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "bramblebreach_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "bramblebreach_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -33,
+        1
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "bramblebreach_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "bramblebreach_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "bramblebreach_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "bramblebreach_b_5",
+    "smithy": "bramblebreach_b_7"
+  },
+  "titles": {
+    "bramblebreach_b_1": "place.nirncraft.bramblebreach Council & Seat Hall",
+    "bramblebreach_b_2": "place.nirncraft.bramblebreach High Sanctuary",
+    "bramblebreach_b_3": "place.nirncraft.bramblebreach Fighters & Wayfarers Hall",
+    "bramblebreach_b_4": "place.nirncraft.bramblebreach Mages & Chroniclers Spire",
+    "bramblebreach_b_5": "place.nirncraft.bramblebreach The Lantern & Hearth Inn",
+    "bramblebreach_b_6": "place.nirncraft.bramblebreach The Traveler's Rest Tavern",
+    "bramblebreach_b_7": "place.nirncraft.bramblebreach Master Forge & Armorer",
+    "bramblebreach_landmark": "High Seat of place.nirncraft.bramblebreach",
+    "bramblebreach_plaza": "place.nirncraft.bramblebreach Central Plaza"
+  },
+  "innKey": "bramblebreach_b_5",
+  "zones": [
+    {
+      "at": [
+        4,
+        -15
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        4,
+        2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

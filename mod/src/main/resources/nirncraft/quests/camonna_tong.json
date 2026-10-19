@@ -1,0 +1,595 @@
+{
+  "line": "camonna_tong",
+  "category": "faction",
+  "faction": "camonna_tong",
+  "region": "morrowind/west_gash",
+  "speakers": {
+    "narrator": "Narrator"
+  },
+  "places": {
+    "dren_plantation": {
+      "x": 7040,
+      "z": 1100,
+      "r": 40,
+      "name": "Dren Plantation"
+    },
+    "arvel_plantation": {
+      "x": 7200,
+      "z": 940,
+      "r": 36,
+      "name": "Arvel Plantation"
+    },
+    "addamasartus": {
+      "x": 6720,
+      "z": 1120,
+      "r": 28,
+      "name": "Addamasartus"
+    }
+  },
+  "npcs": [
+    {
+      "id": "sovor_trandel",
+      "name": "Sovor Trandel",
+      "role": "thug",
+      "place": "balmora",
+      "offset": [
+        -8,
+        10
+      ],
+      "hall": "camonna_tong",
+      "greet": "This is the Council Club. Morrowind for the Dunmer, and the Dunmer for the Tong. If you're an outlander, the door is behind you."
+    },
+    {
+      "id": "orvas_dren",
+      "name": "Orvas Dren",
+      "role": "jarl",
+      "place": "dren_plantation",
+      "offset": [
+        2,
+        -2
+      ],
+      "greet": "My brother sits in the Duke's chair in Ebonheart and smiles at Imperials. I grow saltrice and keep the Tong fed. One of us is honest about what Morrowind needs."
+    },
+    {
+      "id": "marius_faelian",
+      "name": "Marius Faelian",
+      "role": "merchant",
+      "place": "balmora",
+      "offset": [
+        14,
+        6
+      ],
+      "greet": "Imperial goods, Imperial prices, Imperial receipts. I don't deal in anything that isn't on the books."
+    },
+    {
+      "id": "corvo_malaxius",
+      "name": "Corvo Malaxius",
+      "role": "thief",
+      "place": "balmora",
+      "offset": [
+        -16,
+        -10
+      ],
+      "greet": "Looking to sell something? I'm looking to buy. No questions, no names, and especially no Tong."
+    }
+  ],
+  "relics": [
+    {
+      "id": "moon_sugar_crate",
+      "name": "Crate of Moon Sugar",
+      "desc": "Fine moon sugar from the Dren plantation, marked as saltrice for the excise men.",
+      "icon": 15
+    },
+    {
+      "id": "smuggler_ledger_tong",
+      "name": "Outlander Smuggler's Ledger",
+      "desc": "A smuggler's accounts, with a column of payments to a Balmora fence named Corvo.",
+      "icon": 11
+    },
+    {
+      "id": "arvel_deed",
+      "name": "Arvel Plantation Debt Papers",
+      "desc": "The Arvels' debts to an Imperial bank, which Orvas Dren will be delighted to buy.",
+      "icon": 7
+    }
+  ],
+  "scenes": {
+    "ct_dren": [
+      [
+        "orvas_dren",
+        "You know what the outlanders call us? Criminals. The Imperials take our ebony, our glass, our land, and call it law. We take it back, and it's crime."
+      ],
+      [
+        "orvas_dren",
+        "I don't care about their words. I care that Dunmer coin stays in Dunmer hands. Do your work and you'll never go hungry."
+      ]
+    ],
+    "ct_boss": [
+      [
+        "narrator",
+        "The Council Club falls quiet as you walk in. Sovor Trandel sets down his cup and stands."
+      ],
+      [
+        "sovor_trandel",
+        "Dalam Gavyn wanted to sell the Tong to the East Empire Company for a pension. You buried him instead. Dren says the Club is yours."
+      ],
+      [
+        "orvas_dren",
+        "Boss of the Tong in Balmora. Keep the outlanders nervous and the coin flowing, and you'll do fine."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "ct_blood_of_the_land",
+      "title": "Blood of the Land",
+      "start": "npc:sovor_trandel",
+      "requires": [
+        "race:dunmer",
+        "!faction:camonna_tong",
+        "!faction:thieves_guild",
+        "!faction:east_empire_company"
+      ],
+      "offer": "I'm Dunmer, and I'm looking for work.",
+      "pitch": "Good. You've got the right blood, now show me the right spine. An Imperial trader, Marius Faelian, opened a shop in the Commerce district without asking the Tong's leave. Go and explain the local customs to him.",
+      "desc": "Sovor Trandel of the Camonna Tong's Council Club in Balmora will take me on if I teach an Imperial trader, Marius Faelian, what it costs to do business in Balmora.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "marius_faelian",
+          "text": "Visit Marius Faelian",
+          "topic": "You opened a shop in Balmora without the Tong's leave.",
+          "reply": "I have a license from the Hlaalu Council, thank you. I'm not paying anyone else.",
+          "place": "balmora"
+        },
+        {
+          "type": "talk",
+          "npc": "marius_faelian",
+          "text": "Persuade Marius Faelian",
+          "choices": [
+            {
+              "label": "Pay, or this shop burns tonight, with or without you inside.",
+              "reply": "All right! All right. How much? Gods, how did anyone ever think this was a civilized province?",
+              "actions": "flag:ct_faelian_pays"
+            },
+            {
+              "label": "Pay, and the Tong makes sure no one robs you. Refuse, and see who does.",
+              "reply": "That's... protection, is it? Fine. Fine. A small fee, for peace of mind.",
+              "actions": "flag:ct_faelian_protected"
+            }
+          ],
+          "place": "balmora"
+        },
+        {
+          "type": "talk",
+          "npc": "sovor_trandel",
+          "text": "Report to Sovor Trandel",
+          "topic": "The Imperial will pay.",
+          "reply": "Of course he will. They always do, once someone explains it properly. Welcome to the Camonna Tong, Associate.",
+          "place": "balmora"
+        }
+      ],
+      "outro": "I joined the Camonna Tong in Balmora after persuading an Imperial trader to pay for the privilege of staying in business.",
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "nirncraft:chitin_dagger",
+          "nirncraft:netch_chestplate"
+        ]
+      },
+      "region": "morrowind/west_gash",
+      "why": [
+        "morrowind/west_gash.L7.merchant_city",
+        "morrowind/west_gash.L7.outlander_miners"
+      ],
+      "consequence": {
+        "world_state": "ct_blood_of_the_land_resolved",
+        "flag": "conseq_ct_blood_of_the_land",
+        "summary": "I joined the Camonna Tong in Balmora after persuading an Imperial trader to pay for the privilege of staying in business."
+      }
+    },
+    {
+      "id": "ct_sugar_run",
+      "title": "The Sugar Run",
+      "start": "npc:sovor_trandel",
+      "requires": [
+        "quest:ct_blood_of_the_land|faction:camonna_tong"
+      ],
+      "offer": "What else needs doing?",
+      "pitch": "A crate of moon sugar is waiting at the Dren plantation. Bring it to Balmora. The Imperial excise men have been sniffing the roads, so don't stop to chat with anyone in uniform.",
+      "desc": "Sovor Trandel sent me to collect a crate of moon sugar from Orvas Dren's plantation and run it to Balmora past the excise patrols.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "dren_plantation",
+          "text": "Travel to the Dren plantation"
+        },
+        {
+          "type": "talk",
+          "npc": "orvas_dren",
+          "text": "Meet Orvas Dren",
+          "topic": "Sovor sent me for the crate.",
+          "reply": "Sovor's new one. Good. Take it. And listen to me a moment, before you go.",
+          "actions": "relic:moon_sugar_crate;scene:ct_dren",
+          "place": "dren_plantation"
+        },
+        {
+          "type": "clear",
+          "place": "dren_plantation",
+          "offset": [
+            -260,
+            -200
+          ],
+          "text": "Deal with the excise patrol waiting on the road",
+          "spawn": [
+            {
+              "type": "npc:imperial_soldier",
+              "count": 2,
+              "name": "Imperial Excise Man",
+              "hostile": true,
+              "armor": "imperial"
+            }
+          ],
+          "journal": "The excise men had been told exactly which road I'd take. Someone in Balmora is talking."
+        },
+        {
+          "type": "deliver",
+          "npc": "sovor_trandel",
+          "relic": "moon_sugar_crate",
+          "text": "Deliver the moon sugar to Sovor Trandel",
+          "topic": "The sugar's here. But the excise men knew my route.",
+          "reply": "Then someone sold you. Outlander smugglers, most likely, or that Guild fence who thinks he owns the docks. We'll deal with them next.",
+          "place": "balmora"
+        }
+      ],
+      "outro": "I ran a crate of moon sugar from the Dren plantation to Balmora. The excise men were waiting for me, which means someone talked.",
+      "rewards": {
+        "gold": 300,
+        "faction_points": 2
+      },
+      "region": "morrowind/ascadian_isles",
+      "why": [
+        "morrowind/ascadian_isles.L7.canton_ranks",
+        "morrowind/ascadian_isles.L8.seven_graces"
+      ],
+      "consequence": {
+        "world_state": "ct_sugar_run_resolved",
+        "flag": "conseq_ct_sugar_run",
+        "summary": "I ran a crate of moon sugar from the Dren plantation to Balmora. The excise men were waiting for me, which means someone talked."
+      }
+    },
+    {
+      "id": "ct_outlanders_out",
+      "title": "Outlanders Out",
+      "start": "auto",
+      "requires": [
+        "quest:ct_sugar_run"
+      ],
+      "desc": "An outlander smuggling crew operating out of Addamasartus has been undercutting the Tong's trade, and they were the ones who tipped off the excise men. Sovor wants them gone, and their Thieves Guild fence warned.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "addamasartus",
+          "text": "Travel to the smugglers' cave at Addamasartus"
+        },
+        {
+          "type": "clear",
+          "place": "addamasartus",
+          "placement": "structure",
+          "text": "Clear out the outlander smugglers",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Outlander Smuggler",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "addamasartus",
+          "placement": "structure",
+          "text": "Kill their captain, Ferrus Ashby",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Ferrus Ashby",
+              "target": true,
+              "boss": true,
+              "hp": 2.0,
+              "dmg": 1.3,
+              "hostile": true
+            }
+          ],
+          "actions": "relic:smuggler_ledger_tong"
+        },
+        {
+          "type": "talk",
+          "npc": "corvo_malaxius",
+          "text": "Pay a visit to the fence Corvo Malaxius",
+          "topic": "Your smuggler friends at Addamasartus are dead. I have their ledger.",
+          "reply": "Now, now. Let's not be hasty. Business is business. What does the Tong want?",
+          "place": "balmora"
+        },
+        {
+          "type": "talk",
+          "npc": "corvo_malaxius",
+          "text": "Decide what the Tong wants from Corvo",
+          "choices": [
+            {
+              "label": "A cut of everything you fence in Balmora, from now on.",
+              "reply": "A cut. Fine. My Guild masters won't like it, but they're far away and you're very close.",
+              "actions": "flag:ct_fence_taxed"
+            },
+            {
+              "label": "You leave Balmora. Tonight.",
+              "reply": "Tonight. Understood. I hear Ebonheart is lovely this time of year.",
+              "actions": "flag:ct_fence_exiled;retire:corvo_malaxius"
+            }
+          ],
+          "place": "balmora"
+        },
+        {
+          "type": "deliver",
+          "npc": "sovor_trandel",
+          "relic": "smuggler_ledger_tong",
+          "text": "Bring the smuggler's ledger to Sovor Trandel",
+          "topic": "The smugglers are dead and the fence is handled.",
+          "reply": "Good. That's two problems gone and one lesson taught. You're climbing, Runner.",
+          "place": "balmora"
+        }
+      ],
+      "outro": "I wiped out the outlander smugglers at Addamasartus and dealt with their Thieves Guild fence in Balmora.",
+      "rewards": {
+        "gold": 400,
+        "faction_points": 3
+      },
+      "region": "morrowind/ascadian_isles",
+      "why": [
+        "morrowind/ascadian_isles.L8.vivec_the_living_god",
+        "morrowind/ascadian_isles.L9.twin_lamps_underground"
+      ],
+      "consequence": {
+        "world_state": "ct_outlanders_out_resolved",
+        "flag": "conseq_ct_outlanders_out",
+        "summary": "I wiped out the outlander smugglers at Addamasartus and dealt with their Thieves Guild fence in Balmora."
+      }
+    },
+    {
+      "id": "ct_friend_on_the_council",
+      "title": "A Friend in the Council",
+      "start": "npc:sovor_trandel",
+      "requires": [
+        "quest:ct_outlanders_out"
+      ],
+      "offer": "Any work for a Runner?",
+      "pitch": "Nevos, the Hlaalu factor, keeps the Council's eyes turned away from our business. Some outlander guild has hired bruisers to rough him up and frighten him straight. If Nevos gets frightened, we get raided. Keep him safe.",
+      "desc": "Nevos the Hlaalu factor quietly helps the Tong. Hired bruisers are coming to frighten him into turning on us, and Sovor wants me to protect him.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "hlaalu_factor",
+          "text": "Find Nevos the factor",
+          "topic": "The Tong sent me. You've got trouble coming.",
+          "reply": "I know. I saw them by the bridge, three of them, watching my door. I'm a factor, not a fighter. Please."
+        },
+        {
+          "type": "clear",
+          "place": "balmora",
+          "offset": [
+            20,
+            30
+          ],
+          "text": "Deal with the bruisers waiting for Nevos",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Guild Bruiser",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "hlaalu_factor",
+          "text": "Reassure Nevos",
+          "topic": "They're gone. Nobody will bother you.",
+          "reply": "Then tell Sovor the Council's inspectors will be very busy with the Imperial warehouses this month. Very busy indeed."
+        }
+      ],
+      "outro": "I protected Nevos, the Hlaalu factor, and the Tong's friend on the Council will keep its eyes elsewhere.",
+      "rewards": {
+        "gold": 500,
+        "faction_points": 4
+      },
+      "region": "morrowind/west_gash",
+      "why": [
+        "morrowind/west_gash.L8.pragmatic_piety",
+        "morrowind/west_gash.L9.mine_ownership_fight"
+      ],
+      "consequence": {
+        "world_state": "ct_friend_on_the_council_resolved",
+        "flag": "conseq_ct_friend_on_the_council",
+        "summary": "I protected Nevos, the Hlaalu factor, and the Tong's friend on the Council will keep its eyes elsewhere."
+      }
+    },
+    {
+      "id": "ct_ashes_at_arvel",
+      "title": "Ashes at Arvel",
+      "start": "npc:orvas_dren",
+      "requires": [
+        "quest:ct_friend_on_the_council"
+      ],
+      "offer": "Sovor says you need someone.",
+      "pitch": "The Arvels next door owe an Imperial bank more than their plantation is worth, and they've hired guards to keep the bank's men out. Take their debt papers. When I own their debts, I own their fields.",
+      "desc": "Orvas Dren wants the debt papers from the neighbouring Arvel plantation. With them, he can take the plantation and push the Imperials out of the Ascadian Isles.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "arvel_plantation",
+          "text": "Travel to the Arvel plantation"
+        },
+        {
+          "type": "clear",
+          "place": "arvel_plantation",
+          "text": "Get past the plantation guards",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 4,
+              "name": "Arvel Guard",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "arvel_plantation",
+          "relic": "arvel_deed",
+          "radius": 10,
+          "text": "Take the Arvel debt papers"
+        },
+        {
+          "type": "deliver",
+          "npc": "orvas_dren",
+          "relic": "arvel_deed",
+          "text": "Bring the papers to Orvas Dren",
+          "topic": "The Arvels' debts. All of them.",
+          "reply": "Excellent. In a month, Arvel saltrice will be Dren saltrice. You have a gift for this, you know. Sovor has a problem in Balmora. I think you're the solution.",
+          "place": "dren_plantation"
+        }
+      ],
+      "outro": "I stole the Arvel plantation's debt papers for Orvas Dren, who will soon own their fields.",
+      "rewards": {
+        "gold": 700,
+        "faction_points": 5,
+        "items": [
+          {
+            "item": "nirncraft:chitin_war_axe",
+            "name": "Dren's Favour",
+            "enchant": {
+              "sharpness": 3
+            }
+          }
+        ]
+      },
+      "region": "morrowind/ascadian_isles",
+      "why": [
+        "morrowind/ascadian_isles.L9.twin_lamps_underground",
+        "morrowind/ascadian_isles.L10.under_vivec"
+      ],
+      "consequence": {
+        "world_state": "ct_ashes_at_arvel_resolved",
+        "flag": "conseq_ct_ashes_at_arvel",
+        "summary": "I stole the Arvel plantation's debt papers for Orvas Dren, who will soon own their fields."
+      }
+    },
+    {
+      "id": "ct_boss_of_the_tong",
+      "title": "Boss of the Tong",
+      "start": "auto",
+      "requires": [
+        "quest:ct_ashes_at_arvel"
+      ],
+      "desc": "Sovor Trandel's underboss, Dalam Gavyn, has been selling Tong secrets to the East Empire Company. Sovor and Orvas Dren want him dead, and want me to do it.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "sovor_trandel",
+          "text": "Speak with Sovor Trandel",
+          "topic": "Dren says you have a problem.",
+          "reply": "Dalam Gavyn. My underboss, my friend, and a traitor who sold our routes to the Company. He's holed up in a warehouse by the river with his own men. End it.",
+          "place": "balmora"
+        },
+        {
+          "type": "clear",
+          "place": "balmora",
+          "offset": [
+            -70,
+            50
+          ],
+          "text": "Kill Dalam Gavyn's bodyguards",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Gavyn's Bodyguard",
+              "hostile": true,
+              "armor": "#5a3a22"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "balmora",
+          "offset": [
+            -70,
+            50
+          ],
+          "text": "Kill the traitor Dalam Gavyn",
+          "spawn": [
+            {
+              "type": "npc:assassin",
+              "name": "Dalam Gavyn",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5,
+              "hostile": true,
+              "weapon": "nirncraft:glass_dagger"
+            }
+          ],
+          "journal": "Dalam Gavyn begged at the end. He said the Company would make us all rich. Orvas Dren will not see it that way."
+        },
+        {
+          "type": "talk",
+          "npc": "sovor_trandel",
+          "text": "Return to the Council Club",
+          "topic": "Gavyn is dead.",
+          "reply": "Then come in. Everyone's waiting.",
+          "actions": "scene:ct_boss",
+          "place": "balmora"
+        }
+      ],
+      "outro": "I killed the traitor Dalam Gavyn, and the Camonna Tong named me Boss of the Council Club in Balmora.",
+      "rewards": {
+        "gold": 1500,
+        "faction_points": 6,
+        "flags": [
+          "ct_boss"
+        ],
+        "perks": 1,
+        "items": [
+          {
+            "item": "nirncraft:glass_dagger",
+            "name": "The Tong's Tooth",
+            "enchant": {
+              "sharpness": 4,
+              "looting": 3
+            }
+          },
+          {
+            "item": "nirncraft:bonemold_chestplate",
+            "name": "Council Club Cuirass",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "region": "morrowind/west_gash",
+      "why": [
+        "morrowind/west_gash.L9.mine_ownership_fight",
+        "morrowind/west_gash.L10.smuggled_ebony"
+      ],
+      "consequence": {
+        "world_state": "ct_boss_of_the_tong_resolved",
+        "flag": "conseq_ct_boss_of_the_tong",
+        "summary": "I killed the traitor Dalam Gavyn, and the Camonna Tong named me Boss of the Council Club in Balmora."
+      }
+    }
+  ]
+}

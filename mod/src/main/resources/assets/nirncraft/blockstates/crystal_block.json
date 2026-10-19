@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "nirncraft:block/crystal_block"
+    }
+  }
+}

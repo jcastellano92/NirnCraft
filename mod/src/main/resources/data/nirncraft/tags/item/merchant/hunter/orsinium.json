@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:echatere_hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:durzog_hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:troll_fat",
+      "required": false
+    }
+  ]
+}

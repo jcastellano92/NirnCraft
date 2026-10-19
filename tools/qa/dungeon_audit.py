@@ -1,7 +1,7 @@
 """Offline dungeon audit over exports (no world, no client): renders every export of the sample list and builds one
 contact sheet per dungeon plus the reachability report.
 
-  1. boot once:  tools\\qa\\qa.ps1 -Server -NoBuild -ServerCmds "skycraft-dungeon-qa export <ids from dungeon_sample.json>"
+  1. boot once:  tools\\qa\\qa.ps1 -Server -NoBuild -ServerCmds "nirncraft-dungeon-qa export <ids from dungeon_sample.json>"
   2. py -3 -I tools/qa/dungeon_audit.py [--exports mod/run/qa-exports] [--out tools/qa/out/dungeon_audit]
 
 Writes <out>/<id>/*.png (render_dungeon.py), <out>/<id>.jpg (contact sheet, <= 1600 px wide), <out>/reach.md and

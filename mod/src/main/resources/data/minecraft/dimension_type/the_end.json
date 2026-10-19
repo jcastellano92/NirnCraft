@@ -4,7 +4,7 @@
   "has_ceiling": false,
   "has_skylight": true,
   "height": 256,
-  "infiniburn": "#skycraft:infiniburn_realms",
+  "infiniburn": "#nirncraft:infiniburn_realms",
   "logical_height": 256,
   "min_y": 0,
   "monster_spawn_block_light_limit": 0,
@@ -23,9 +23,9 @@
     "minecraft:gameplay/piglins_zombify": true,
     "minecraft:gameplay/respawn_anchor_works": false,
     "minecraft:gameplay/water_evaporates": false,
-    "neoforge:custom_skybox": "skycraft:sovngarde",
-    "neoforge:custom_clouds": "skycraft:sovngarde",
-    "neoforge:custom_weather_effects": "skycraft:sovngarde",
+    "neoforge:custom_skybox": "nirncraft:sovngarde",
+    "neoforge:custom_clouds": "nirncraft:sovngarde",
+    "neoforge:custom_weather_effects": "nirncraft:sovngarde",
     "minecraft:gameplay/fast_lava": false,
     "minecraft:visual/default_dripstone_particle": {
       "type": "minecraft:dripping_dripstone_water"
@@ -42,10 +42,10 @@
     }
   },
   "has_ender_dragon_fight": true,
-  "default_clock": "skycraft:fixed/the_end",
+  "default_clock": "nirncraft:fixed/the_end",
   "timelines": [
-    "skycraft:fixed/the_end/day",
-    "skycraft:fixed/the_end/moon"
+    "nirncraft:fixed/the_end/day",
+    "nirncraft:fixed/the_end/moon"
   ],
   "has_fixed_time": true
 }

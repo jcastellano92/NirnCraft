@@ -1,7 +1,7 @@
 """The realms' biomes: per realm, the roles the biome source picks (RealmBiomeSource.java) and each biome's look.
 
 Colours: sky/fog/water per biome (the realms' sky renderer reads the fog colour; vanilla uses the rest); grass and
-foliage tints; one ambient particle. Spawning is the region spawner's (data/skycraft/region_spawns/realms.json), so
+foliage tints; one ambient particle. Spawning is the region spawner's (data/nirncraft/region_spawns/realms.json), so
 biome spawners stay empty.
 """
 from realms_features import lists

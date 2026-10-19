@@ -1,6 +1,0 @@
-{
-  "parent": "skycraft:item/orcish_bow",
-  "textures": {
-    "layer0": "skycraft:item/orcish_bow_pulling_0"
-  }
-}

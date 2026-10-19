@@ -1,8 +1,8 @@
 # Inventory: carrying capacity is weight, nothing else
 
 Skyrim's only carrying limit is weight. Vanilla's `Inventory` has 36 storage slots, a byte stack count and cannot be
-enlarged without a mixin or an access transformer (both banned), so Skycraft keeps those 36 slots as the "hands and
-belt" and adds an overflow **pack** behind them. Code: `com.skycraft.inventory.Pack` (design comment at the top).
+enlarged without a mixin or an access transformer (both banned), so NirnCraft keeps those 36 slots as the "hands and
+belt" and adds an overflow **pack** behind them. Code: `com.nirncraft.inventory.Pack` (design comment at the top).
 
 One idea runs through everything below: **a slot list is never the limit, an overflow behind it is.** The same
 reusable store (`BulkStore`) is the pack of a player, the overflow of every chest/barrel/ender chest, and the
@@ -93,7 +93,7 @@ through `Inv.take` and hands the gold over with `Inv.giveOrDrop`, so pack iron w
 facade" (`Ammo`).
 
 **Vanilla menus.** Every vanilla menu screen is replaced by a Skyrim one that lists the pack next to the slots and shows
-the carry weight: chests, barrels, ender chests, shulker boxes, hoppers, dispensers/droppers and Skycraft's bodies and
+the carry weight: chests, barrels, ender chests, shulker boxes, hoppers, dispensers/droppers and NirnCraft's bodies and
 holds by `SkyrimContainerScreen` (`inventory/client/MenuSkins`); furnaces, brewing stand, anvil, grindstone, smithing
 table, loom, stonecutter, cartography table, enchanting table, beacon, crafting table and the trader by
 `SkyrimMachineScreen`, whose moves go through `MachineActions` (a pack entry is pulled into a real slot with
@@ -151,7 +151,7 @@ Skyrim's chest holds anything; the engineering cap is 2000 kinds x 1,000,000 eac
   capability (`ContainerOverflow.CAP`, via `AttachCapabilitiesEvent<BlockEntity>`). Forge serialises it into the block
   entity's NBT (`ForgeCaps`), so it is saved with the chunk, survives a restart, travels with `/clone`, and marks the
   chunk dirty when it changes. Eligible: every `RandomizableContainerBlockEntity` (chests, trapped chests, barrels,
-  modded chests, every Skycraft container block, which are all vanilla chests/barrels) except hoppers, dispensers/
+  modded chests, every NirnCraft container block, which are all vanilla chests/barrels) except hoppers, dispensers/
   droppers and shulker boxes (a shulker keeps its items with the item). The ender chest's overflow is the player's
   (`module ender_pack`, never synced to the client with the rest of the player's data).
 * **Double chests.** One `CompoundContainer`, one overflow: the half with the smaller block position (x, then y, then
@@ -185,7 +185,7 @@ Skyrim's chest holds anything; the engineering cap is 2000 kinds x 1,000,000 eac
   overflow, so a crash with the menu open loses nothing. `Saddlebags.fit` (saddle shrinks or goes: overflow rows first,
   last first, then the last slots) and `emptyToPlayer` (`Mounts.retire`, so buying, taming and selling) hand items to
   the player through `Inv.giveOrDrop`, with the open menu's slots written first and reloaded after.
-* **Followers' trade bags** (`society/Followers`). 27 slots plus an overflow (`skycraft_follower_ov` in the NPC's
+* **Followers' trade bags** (`society/Followers`). 27 slots plus an overflow (`nirncraft_follower_ov` in the NPC's
   persistent data), weight-limited at `Followers.CARRY_KG` (300, the player's base) over both; the Skyrim container
   screen lists it like a chest. Gear the follower takes off and the stow of swapped gear ignore the weight (never
   refused, never dropped while the overflow takes it); when the menu closes over the limit (a shift-click can overfill)
@@ -235,7 +235,7 @@ Skyrim's chest holds anything; the engineering cap is 2000 kinds x 1,000,000 eac
 
 ## Selling
 
-Quest items (quest flag, `skycraft_quest_item`, quest item kinds: letters, relics, keys), coins, conjured weapons and
+Quest items (quest flag, `nirncraft_quest_item`, quest item kinds: letters, relics, keys), coins, conjured weapons and
 filled containers are not listed and are refused by the server (`Barter.sell`, `Barter.sellable`, `isQuestKind`).
 The sell list marks equipped rows with an "E" badge and the inventory screen's colours and sorts them last;
 unequipped stacks of one item (slots and pack) are one row. Selling an equipped item needs the explicit second click
@@ -252,8 +252,8 @@ suppresses Speech XP from that shop for two minutes (no sell/buy-back farming).
   pool, one buy-back list. The building also says the trade (`economy/shop_trades.json`: counter anchor -> shop types, so
   a tailor's counter is a tailor's whatever pool the NPC was spawned with). A job may sell only part of the shared stock
   (`jobs.<id>.sells`, e.g. the cook sells food): a filter over the one stock, enforced on the server at buy time.
-* **Saved with the world** (`ShopBook`, SavedData `skycraft_shops`, one `BulkStore` for the shelves and one for the sold
-  ledger, caps 256 / 128 kinds and 1,000,000 per row). Old per-NPC stock in `skycraft_shop` is taken over once and removed.
+* **Saved with the world** (`ShopBook`, SavedData `nirncraft_shops`, one `BulkStore` for the shelves and one for the sold
+  ledger, caps 256 / 128 kinds and 1,000,000 per row). Old per-NPC stock in `nirncraft_shop` is taken over once and removed.
 * **Deterministic restocks.** The generated goods of a period (`Shop.RESTOCK_DAYS` = 2) are a pure function of
   (world seed, shop key, period, trade) (`ShopStock.seed`); the customer no longer shapes them, so every player and
   client sees one list. Quantity brackets, per-trade floors and allowed categories, and province-bound goods (mead is
@@ -261,7 +261,7 @@ suppresses Speech XP from that shop for two minutes (no sell/buy-back farming).
 * **What a player sells goes on the shared shelf** (`Shop.addSold`), at the shop's markup for every later customer, and
   stays across restocks (the ledger); purchases take sold goods first so it turns over. A buy-back takes the goods off the
   shelf again; when the 30 minutes pass they simply stay.
-* **Keepsakes** (`Resale.isKeepsake`: artifacts and `#skycraft:no_resale`, legendary items, curses, written books) are
+* **Keepsakes** (`Resale.isKeepsake`: artifacts and `#nirncraft:no_resale`, legendary items, curses, written books) are
   never put on a shelf: the sale needs a second click, the goods are held in the shop's record for the seller alone
   (persisted, 30 minutes of game time), then they are gone. Quest items, coins, bound weapons and filled containers are
   still refused outright.
@@ -278,11 +278,11 @@ narrow. Format: one decimal below 10, whole numbers, then `1.2k` / `12k` / `1.2m
 
 ## Tests
 
-`/skycraft-inventory selftest` (also autorun task `inventory`, `tools/qa/qa.ps1 -Server`, log line
+`/nirncraft-inventory selftest` (also autorun task `inventory`, `tools/qa/qa.ps1 -Server`, log line
 `Inventory selftest: n/m checks passed`): 336 distinct items and 1000 arrows into a full inventory, weights, real
 `saveWithoutId` / compressed NBT / `load` round trip, packet encode/decode of the mirror, refill, virtual slot
 actions, a full container taken into a full inventory, quest item sale refusal (slot and pack), equipped confirmation,
-buy back. `/skycraft-inventory pack` shows your own pack.
+buy back. `/nirncraft-inventory pack` shows your own pack.
 
 `inventory/OverflowSelfTest` (part of the same run): the bulk store (caps, order, versioned NBT, repair of bad/duplicate
 rows, absorb); a container with an overflow driven through the real `handleContainerTake/Store` (Store All into a full
@@ -295,7 +295,7 @@ the ammo hook (bow and crossbow); the stragglers: Transmute from the pack, a fol
 NBT round trip, death) and restock with an overflow. Static lint: `tools/qa/data_checks.py` (direct slot reads
 outside the whitelist).
 
-`/skycraft-mounts selftest` (`mounts/MountsSelfTest`, `bagOverflow`): 80 distinct kinds through the real
+`/nirncraft-mounts selftest` (`mounts/MountsSelfTest`, `bagOverflow`): 80 distinct kinds through the real
 `handleContainerStore` into 52 slots plus overflow, the weight rule over both (a too heavy item refused, 1000 light
 items stored only up to the last kilogram, the rest stays with the player), the record's list through compressed NBT
 and a reopened bag, the module absent from the data sync, a saddle that carries a quarter and then nothing (spills,

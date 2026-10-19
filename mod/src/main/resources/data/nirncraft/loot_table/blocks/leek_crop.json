@@ -1,0 +1,69 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "nirncraft:leek",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "nirncraft:leek_crop",
+                "state": {
+                  "age": "7"
+                }
+              },
+              "modifier": {
+                "count": {
+                  "type": "minecraft:uniform",
+                  "min": 1,
+                  "max": 2
+                },
+                "type": "minecraft:set_count"
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "nirncraft:leek_seeds"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:leek_seeds",
+          "modifier": {
+            "enchantment": "minecraft:fortune",
+            "formula": "minecraft:binomial_with_bonus_count",
+            "parameters": {
+              "extra": 2,
+              "probability": 0.5714286
+            },
+            "type": "minecraft:apply_bonus"
+          }
+        }
+      ],
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "nirncraft:leek_crop",
+        "state": {
+          "age": "7"
+        }
+      }
+    }
+  ],
+  "random_sequence": "nirncraft:blocks/leek_crop",
+  "modifier": {
+    "type": "minecraft:explosion_decay"
+  }
+}

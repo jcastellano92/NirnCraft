@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab_top",
-  "textures": {
-    "bottom": "skycraft:block/charred_planks",
-    "top": "skycraft:block/charred_planks",
-    "side": "skycraft:block/charred_planks"
-  }
-}

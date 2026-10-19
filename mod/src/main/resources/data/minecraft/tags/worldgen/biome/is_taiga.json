@@ -1,12 +1,12 @@
 {
   "replace": false,
   "values": [
-    "skycraft:atmoran_frozen_forest",
-    "skycraft:falkreath_forest",
-    "skycraft:jerall_foothills",
-    "skycraft:pine_forest",
-    "skycraft:snowy_pine_forest",
-    "skycraft:solstheim_pine_forest",
-    "skycraft:wrothgarian_mountains"
+    "nirncraft:atmoran_frozen_forest",
+    "nirncraft:falkreath_forest",
+    "nirncraft:jerall_foothills",
+    "nirncraft:pine_forest",
+    "nirncraft:snowy_pine_forest",
+    "nirncraft:solstheim_pine_forest",
+    "nirncraft:wrothgarian_mountains"
   ]
 }

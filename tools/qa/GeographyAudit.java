@@ -1,9 +1,9 @@
-package com.skycraft.qa;
+package com.nirncraft.qa;
 
 import com.google.gson.GsonBuilder;
-import com.skycraft.tamriel.MapSample;
-import com.skycraft.tamriel.Regions;
-import com.skycraft.tamriel.TamrielMap;
+import com.nirncraft.tamriel.MapSample;
+import com.nirncraft.tamriel.Regions;
+import com.nirncraft.tamriel.TamrielMap;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;

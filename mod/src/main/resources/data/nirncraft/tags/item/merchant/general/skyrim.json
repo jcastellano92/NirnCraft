@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:nord_mead",
+      "required": false
+    },
+    {
+      "id": "nirncraft:honningbrew_mead",
+      "required": false
+    },
+    {
+      "id": "nirncraft:cabbage",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leek",
+      "required": false
+    },
+    {
+      "id": "nirncraft:eidar_cheese_wedge",
+      "required": false
+    },
+    {
+      "id": "nirncraft:wolf_pelt",
+      "required": false
+    },
+    {
+      "id": "nirncraft:firewood",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silver_ingot",
+      "required": false
+    }
+  ]
+}

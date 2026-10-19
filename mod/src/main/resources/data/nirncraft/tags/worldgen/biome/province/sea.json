@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:cold_ocean",
+    "nirncraft:coral_sea",
+    "nirncraft:deep_cold_ocean",
+    "nirncraft:deep_temperate_ocean",
+    "nirncraft:deep_warm_ocean",
+    "nirncraft:temperate_ocean",
+    "nirncraft:warm_ocean"
+  ]
+}

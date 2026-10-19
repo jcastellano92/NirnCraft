@@ -1,0 +1,7 @@
+{
+  "type": "nirncraft:add_table",
+  "table": "nirncraft:chests/smithing_materials",
+  "prefix": "chests/",
+  "chance": 0.5,
+  "priority": 18
+}

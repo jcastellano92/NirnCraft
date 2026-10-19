@@ -1,8 +1,8 @@
-"""Compile native Skycraft pipelines offline with installed26.3 shaderc/SPIR-V libraries; never starts Minecraft."""
+"""Compile native NirnCraft pipelines offline with installed26.3 shaderc/SPIR-V libraries; never starts Minecraft."""
 from pathlib import Path
 import argparse,hashlib,json,re,subprocess,zipfile
 ROOT=Path(__file__).resolve().parents[2]
-DEFAULT=Path(r'E:\Skycraft-scratch\migration-26.3')
+DEFAULT=Path(r'E:\NirnCraft-scratch\migration-26.3')
 
 def run(command):
     result=subprocess.run(command,cwd=ROOT,text=True,capture_output=True)
@@ -12,7 +12,7 @@ def run(command):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--scratch',type=Path,default=DEFAULT)
-    parser.add_argument('--jdk',type=Path,default=Path(r'E:\Skycraft-scratch\toolchains\jdk-25.0.4.1+1'))
+    parser.add_argument('--jdk',type=Path,default=Path(r'E:\NirnCraft-scratch\toolchains\jdk-25.0.4.1+1'))
     parser.add_argument('--core-jar',type=Path,help='Also validate the actual packaged native core metadata')
     args=parser.parse_args();scratch=args.scratch;output=scratch/'native-shader-audit';output.mkdir(exist_ok=True)
     # Gradle expands pack.mcmeta. Valid source JSON can become invalid packaged JSON,
@@ -44,10 +44,10 @@ def main():
     for entry in classpath.split(';'):
         if 'arm64' in entry:continue
         # The older component-audit argfile also references the preserved Forge core for comparison.
-        # Never let incomplete native compilation silently resolve any Skycraft class from that jar.
+        # Never let incomplete native compilation silently resolve any NirnCraft class from that jar.
         if Path(entry).is_file() and entry.endswith('.jar'):
             with zipfile.ZipFile(entry) as archive:
-                if 'com/skycraft/Skycraft.class' in archive.namelist():continue
+                if 'com/nirncraft/NirnCraft.class' in archive.namelist():continue
         parts=entry.replace('\\','/').split('/')
         if 'files-2.1' not in parts:extras.append(entry);continue
         index=parts.index('files-2.1');group,artifact,version=parts[index+1:index+4]
@@ -59,7 +59,7 @@ def main():
     def invoke(tool,arguments,name):
         argfile=output/(name+'.args');argfile.write_text('\n'.join('"'+str(v).replace('\\','/')+'"' for v in arguments))
         run([str(args.jdk/'bin'/(tool+'.exe')),'@'+str(argfile)])
-    invoke('javac',['--release','25','-proc:none','-cp',classpath,'-d',output,ROOT/'tools/migration/NativeShaderAudit263.java',ROOT/'mod/src/main/java/com/skycraft/fire/client/FireRenderTypes.java'],'compile')
+    invoke('javac',['--release','25','-proc:none','-cp',classpath,'-d',output,ROOT/'tools/migration/NativeShaderAudit263.java',ROOT/'mod/src/main/java/com/nirncraft/fire/client/FireRenderTypes.java'],'compile')
     java=['--enable-native-access=ALL-UNNAMED','-cp',str(output)+';'+classpath,'NativeShaderAudit263']
     invoke('java',java+['describe',output/'pipelines.json'],'describe')
     native=zipfile.ZipFile(scratch/'build/moddev/artifacts/minecraft-patched-26.3.0.90-sources.jar')

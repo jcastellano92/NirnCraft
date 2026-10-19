@@ -1,0 +1,27 @@
+{
+  "feature": "nirncraft:biome/flora/trees_great_forest_under",
+  "placement": [
+    {
+      "type": "nirncraft:flora_scatter",
+      "spacing": 4,
+      "min_distance": 0.8,
+      "density": 0.6,
+      "floor": 0.15,
+      "field": {
+        "salt": 102,
+        "scale": 60,
+        "coverage": 0.62,
+        "softness": 0.15,
+        "kind": "fbm",
+        "mode": "edge"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:realm/nirn/named_gate",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 2041509,
+    "types": [
+      "landmark"
+    ],
+    "variants": [
+      "oblivion_gate"
+    ]
+  }
+}

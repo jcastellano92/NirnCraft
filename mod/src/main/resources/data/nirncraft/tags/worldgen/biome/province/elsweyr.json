@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:anequina_badlands",
+    "nirncraft:elsweyr_canyons",
+    "nirncraft:elsweyr_dunes",
+    "nirncraft:elsweyr_savanna",
+    "nirncraft:pellitine_jungle",
+    "nirncraft:sugar_fields"
+  ]
+}

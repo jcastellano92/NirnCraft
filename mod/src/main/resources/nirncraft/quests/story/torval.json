@@ -1,0 +1,686 @@
+{
+  "region": "elsweyr/torval",
+  "province": "elsweyr",
+  "line": "story_torval",
+  "category": "main",
+  "title": "The Mane's Braid",
+  "summary": "Within the sacred forest-basin of Torval, priestly wardens and Ohmes court scribes race to recover a stolen ancestral hair-braid relic before the Two-Moons Procession.",
+  "why": [
+    "torval.L7.priestly_quarter",
+    "torval.L7.court_ohmes",
+    "torval.L7.pilgrim_poor"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "torval",
+    "places": [
+      "torval",
+      "rimmen_necropolis",
+      "shrine_azura_elsweyr",
+      "zura_homestead",
+      "ahset_sugar_farm",
+      "rinkha_hollow",
+      "sjahai_sugar_farm",
+      "rinrinzir_ruins",
+      "kozir_hollow",
+      "rinra_hollow",
+      "jonar_camp",
+      "shrine_of_the_twin_moons",
+      "shrine_namira_elsweyr",
+      "ravonar_moon_temple",
+      "temple_of_the_purifying_moons",
+      "valley_guard",
+      "duncori_walk",
+      "tasha",
+      "roadside_sleeping_sand_cat"
+    ],
+    "npc": "story_torval_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "Pilgrims crowded outside Torval's incense gates whisper that a silver reliquary holding a braid of the First Mane was taken from the Cedar Sanctum during the new-moon eclipse.",
+    "notice": "PRIESTLY QUARTER OF TORVAL: Trusted walkers of the Two-Moons Path sought to recover the Cedar Reliquary before the Procession of Jone and Jode."
+  },
+  "npcs": [
+    {
+      "id": "story_torval_hook_npc",
+      "name": "Warden of Torval",
+      "role": "guard",
+      "place": "torval",
+      "greet": "Pilgrims crowded outside Torval's incense gates whisper that a silver reliquary holding a braid of the First Mane was taken from the Cedar Sanctum during the new-moon eclipse.",
+      "talk": [
+        "The trouble across Torval began when sealed dispatches started bypassing Torval.",
+        "If you mean to help the Mane's Seat of Torval, start by checking the trail between Torval and Shabaae Mine."
+      ]
+    },
+    {
+      "id": "story_torval_envoy_npc",
+      "name": "Chronicler of Torval",
+      "role": "scholar",
+      "place": "shabaae_mine",
+      "greet": "Keep your voice low—everyone at Shabaae Mine is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from Shabaae Mine toward Havoset Homestead before they vanished into the brush.",
+        "Bring any ciphered tallies back to Torval so Speaker-for-the-Mane Kha'jirr can see the proof."
+      ]
+    },
+    {
+      "id": "story_torval_scout_npc",
+      "name": "Outrider of Havoset Homestead",
+      "role": "scout",
+      "place": "havoset_homestead",
+      "greet": "You made good time from Shabaae Mine. The saboteurs have fortified the approaches near Tasha.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at Tasha with a picked guard.",
+        "Once Tasha is cleared, return to Torval to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_torval_steward_npc",
+      "name": "Speaker of Torval",
+      "role": "steward",
+      "place": "torval",
+      "greet": "Speaker-for-the-Mane Kha'jirr awaits word on whether the crisis in Torval has been contained.",
+      "talk": [
+        "The elders of Torval have prepared the concord table for your return.",
+        "All of Torval owes you a debt for standing between Torval and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_torval_boss_01": {
+      "name": "Usurper-Captain of Torval (1)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "torval",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_torval_boss_02": {
+      "name": "Usurper-Captain of Shabaae Mine (2)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "shabaae_mine",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_torval_boss_03": {
+      "name": "Usurper-Captain of Havoset Homestead (3)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "havoset_homestead",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_torval_boss_04": {
+      "name": "Usurper-Captain of Tasha (4)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "tasha",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_torval_boss_05": {
+      "name": "Usurper-Captain of Zudoset Hollow (5)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "zudoset_hollow",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_torval_boss_06": {
+      "name": "Usurper-Captain of Shrine Clavicus Vile Elsweyr (6)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "shrine_clavicus_vile_elsweyr",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_torval_boss_07": {
+      "name": "Usurper-Captain of Drokaae Sugar Farm (7)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "drokaae_sugar_farm",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_torval_boss_08": {
+      "name": "Usurper-Captain of Jozir Grove (8)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "jozir_grove",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_torval_scene_01": [
+      "Warden of Torval: Examine these marks recovered near Torval—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Torval and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Torval, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_02": [
+      "Warden of Torval: Examine these marks recovered near Shabaae Mine—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Shabaae Mine and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Shabaae Mine, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_03": [
+      "Warden of Torval: Examine these marks recovered near Havoset Homestead—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Havoset Homestead and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Havoset Homestead, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_04": [
+      "Warden of Torval: Examine these marks recovered near Tasha—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Tasha and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Tasha, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_05": [
+      "Warden of Torval: Examine these marks recovered near Zudoset Hollow—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Zudoset Hollow and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Zudoset Hollow, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_06": [
+      "Warden of Torval: Examine these marks recovered near Shrine Clavicus Vile Elsweyr—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Shrine Clavicus Vile Elsweyr and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Shrine Clavicus Vile Elsweyr, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_07": [
+      "Warden of Torval: Examine these marks recovered near Drokaae Sugar Farm—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Drokaae Sugar Farm and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Drokaae Sugar Farm, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_08": [
+      "Warden of Torval: Examine these marks recovered near Jozir Grove—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Jozir Grove and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Jozir Grove, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_09": [
+      "Warden of Torval: Examine these marks recovered near Shrine Sheogorath Elsweyr—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Shrine Sheogorath Elsweyr and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Shrine Sheogorath Elsweyr, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_10": [
+      "Warden of Torval: Examine these marks recovered near Merryvale Farms—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Merryvale Farms and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Merryvale Farms, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_11": [
+      "Warden of Torval: Examine these marks recovered near Duncori Walk—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Duncori Walk and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Duncori Walk, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_12": [
+      "Warden of Torval: Examine these marks recovered near Red Hands Run—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Red Hands Run and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Red Hands Run, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_13": [
+      "Warden of Torval: Examine these marks recovered near Koraset Grove—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Koraset Grove and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Koraset Grove, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_14": [
+      "Warden of Torval: Examine these marks recovered near Zunar Cavern—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Zunar Cavern and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Zunar Cavern, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_15": [
+      "Warden of Torval: Examine these marks recovered near Khathari Camp—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Khathari Camp and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Khathari Camp, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_16": [
+      "Warden of Torval: Examine these marks recovered near Zuhai Sugar Farm—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Zuhai Sugar Farm and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Zuhai Sugar Farm, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_17": [
+      "Warden of Torval: Examine these marks recovered near Rinra Hollow—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Rinra Hollow and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Rinra Hollow, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_18": [
+      "Warden of Torval: Examine these marks recovered near Merryvale Sugar Farm Caves—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Merryvale Sugar Farm Caves and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Merryvale Sugar Farm Caves, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_19": [
+      "Warden of Torval: Examine these marks recovered near Joqakhi Lair—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Joqakhi Lair and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Joqakhi Lair, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_20": [
+      "Warden of Torval: Examine these marks recovered near Sjahai Sugar Farm—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Sjahai Sugar Farm and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Sjahai Sugar Farm, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_21": [
+      "Warden of Torval: Examine these marks recovered near Ahset Sugar Farm—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Ahset Sugar Farm and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Ahset Sugar Farm, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_22": [
+      "Warden of Torval: Examine these marks recovered near Dari Stones—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Dari Stones and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Dari Stones, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_23": [
+      "Warden of Torval: Examine these marks recovered near Shrine of the Waxing Moon—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Shrine of the Waxing Moon and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Shrine of the Waxing Moon, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_24": [
+      "Warden of Torval: Examine these marks recovered near Shrine of Namiira—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Shrine of Namiira and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Shrine of Namiira, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_25": [
+      "Warden of Torval: Examine these marks recovered near Nemoal Fort—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Nemoal Fort and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Nemoal Fort, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_26": [
+      "Warden of Torval: Examine these marks recovered near Shrine Mehrunes Dagon Elsweyr—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Shrine Mehrunes Dagon Elsweyr and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Shrine Mehrunes Dagon Elsweyr, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_27": [
+      "Warden of Torval: Examine these marks recovered near Jazunar Sugar Farm—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Jazunar Sugar Farm and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Jazunar Sugar Farm, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_28": [
+      "Warden of Torval: Examine these marks recovered near Zura Homestead—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Zura Homestead and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Zura Homestead, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_29": [
+      "Warden of Torval: Examine these marks recovered near Jonar Camp—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Jonar Camp and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Jonar Camp, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_30": [
+      "Warden of Torval: Examine these marks recovered near Tenmar Borderlands—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Tenmar Borderlands and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Tenmar Borderlands, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_31": [
+      "Warden of Torval: Examine these marks recovered near Roadside Sleeping Sand Cat—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Roadside Sleeping Sand Cat and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Roadside Sleeping Sand Cat, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_32": [
+      "Warden of Torval: Examine these marks recovered near Shrine Namira Elsweyr—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Shrine Namira Elsweyr and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Shrine Namira Elsweyr, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_33": [
+      "Warden of Torval: Examine these marks recovered near Rinkha Hollow—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Rinkha Hollow and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Rinkha Hollow, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_34": [
+      "Warden of Torval: Examine these marks recovered near Two Moons at Tenmar Temple—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Two Moons at Tenmar Temple and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Two Moons at Tenmar Temple, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_35": [
+      "Warden of Torval: Examine these marks recovered near Sekhi Fire—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Sekhi Fire and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Sekhi Fire, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_36": [
+      "Warden of Torval: Examine these marks recovered near Nahaar Hollow—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Nahaar Hollow and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Nahaar Hollow, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_37": [
+      "Warden of Torval: Examine these marks recovered near Ravonar Moon Temple—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Ravonar Moon Temple and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Ravonar Moon Temple, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_38": [
+      "Warden of Torval: Examine these marks recovered near Tenarr Zalviit Ossuary—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Tenarr Zalviit Ossuary and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Tenarr Zalviit Ossuary, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_39": [
+      "Warden of Torval: Examine these marks recovered near Temple of the Purifying Moons—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Temple of the Purifying Moons and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Temple of the Purifying Moons, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_40": [
+      "Warden of Torval: Examine these marks recovered near Jeal Camp—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Jeal Camp and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Jeal Camp, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_41": [
+      "Warden of Torval: Examine these marks recovered near Snar Grove—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Snar Grove and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Snar Grove, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_42": [
+      "Warden of Torval: Examine these marks recovered near Neri Rest—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Neri Rest and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Neri Rest, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_43": [
+      "Warden of Torval: Examine these marks recovered near Sezahkha Homestead—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Sezahkha Homestead and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Sezahkha Homestead, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_44": [
+      "Warden of Torval: Examine these marks recovered near Weeping Scar—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Weeping Scar and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Weeping Scar, then bring the recovered charter back to Torval."
+    ],
+    "story_torval_scene_45": [
+      "Warden of Torval: Examine these marks recovered near Sugar Slingers Den—they match the cabal troubling Torval.",
+      "Chronicler of Torval: The seal impressions cite the old charters of the Mane's Seat of Torval word for word.",
+      "Outrider of Havoset Homestead: Our scouts spotted lantern-signals flashing between Sugar Slingers Den and Tasha at dusk.",
+      "Speaker of Torval: Strike swiftly at Sugar Slingers Den, then bring the recovered charter back to Torval."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_torval_01_opening",
+      "order": 1,
+      "title": "Silence in the Cedar Sanctum",
+      "region": "elsweyr/torval",
+      "category": "main",
+      "giver": "story_torval_hook_npc",
+      "start": "npc:story_torval_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "torval.L7.priestly_quarter",
+        "torval.L7.court_ohmes"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Torval and Shabaae Mine in Torval.",
+      "places": [
+        "torval",
+        "shabaae_mine"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "torval",
+          "objective": "Speak with the Warden at Torval and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "shabaae_mine",
+          "objective": "Examine the disturbed boundary markers at Shabaae Mine"
+        },
+        {
+          "id": 30,
+          "place": "torval",
+          "objective": "Return the recovered seal-impression to the Chronicler at Torval"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "torval",
+          "text": "Speak with the Warden at Torval and inspect the contested tallies",
+          "scene": "story_torval_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "shabaae_mine",
+          "text": "Examine the disturbed boundary markers at Shabaae Mine"
+        },
+        {
+          "type": "go",
+          "place": "torval",
+          "text": "Return the recovered seal-impression to the Chronicler at Torval"
+        }
+      ],
+      "consequence": "world_state:torval_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_torval_02_trail",
+      "order": 2,
+      "title": "Scribes of the Ohmes Court",
+      "region": "elsweyr/torval",
+      "category": "main",
+      "giver": "story_torval_envoy_npc",
+      "start": "auto",
+      "prereq": "story_torval_01_opening",
+      "requires": [
+        "story_torval_01_opening"
+      ],
+      "why": [
+        "torval.L7.court_ohmes",
+        "torval.L7.pilgrim_poor"
+      ],
+      "summary": "Follow the conspirators' supply route from Shabaae Mine to Havoset Homestead and seize their cipher-ledger.",
+      "places": [
+        "shabaae_mine",
+        "havoset_homestead"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "shabaae_mine",
+          "objective": "Track the night-couriers departing Shabaae Mine"
+        },
+        {
+          "id": 20,
+          "place": "havoset_homestead",
+          "objective": "Drive off the cabal outriders at Havoset Homestead and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "shabaae_mine",
+          "objective": "Deliver the cipher-box to the expedition chronicler at Shabaae Mine"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "shabaae_mine",
+          "text": "Track the night-couriers departing Shabaae Mine",
+          "scene": "story_torval_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "havoset_homestead",
+          "text": "Drive off the cabal outriders at Havoset Homestead and seize their cipher-box",
+          "boss": "story_torval_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "shabaae_mine",
+          "text": "Deliver the cipher-box to the expedition chronicler at Shabaae Mine"
+        }
+      ],
+      "consequence": "world_state:torval_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_torval_03_sanctum",
+      "order": 3,
+      "title": "Shadow of the Dark Beat",
+      "region": "elsweyr/torval",
+      "category": "main",
+      "giver": "story_torval_scout_npc",
+      "start": "auto",
+      "prereq": "story_torval_02_trail",
+      "requires": [
+        "story_torval_02_trail"
+      ],
+      "why": [
+        "torval.L7.pilgrim_poor",
+        "torval.L8.mane_seat"
+      ],
+      "summary": "Secure the outer wards between Havoset Homestead and Tasha to lay bare the cabal's stronghold.",
+      "places": [
+        "havoset_homestead",
+        "tasha"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "havoset_homestead",
+          "objective": "Meet the outrider scout at Havoset Homestead to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "tasha",
+          "objective": "Scout the fortified threshold at Tasha and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "torval",
+          "objective": "Carry the ward-key back to the council table at Torval"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "havoset_homestead",
+          "text": "Meet the outrider scout at Havoset Homestead to decode the sanctum approach",
+          "scene": "story_torval_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "tasha",
+          "text": "Scout the fortified threshold at Tasha and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "torval",
+          "text": "Carry the ward-key back to the council table at Torval"
+        }
+      ],
+      "consequence": "world_state:torval_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_torval_04_finale",
+      "order": 4,
+      "title": "Procession of the Two Moons",
+      "region": "elsweyr/torval",
+      "category": "main",
+      "giver": "story_torval_steward_npc",
+      "start": "auto",
+      "prereq": "story_torval_03_sanctum",
+      "requires": [
+        "story_torval_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "torval.L7.priestly_quarter",
+        "torval.L8.mane_seat"
+      ],
+      "summary": "Storm the cabal stronghold at Tasha and witness Speaker-for-the-Mane Kha'jirr seal the regional concord at Torval.",
+      "places": [
+        "tasha",
+        "torval"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "tasha",
+          "objective": "Storm the inner chamber at Tasha and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "tasha",
+          "objective": "Recover the stolen charter-seal of Torval from Tasha"
+        },
+        {
+          "id": 30,
+          "place": "torval",
+          "objective": "Present the charter-seal at Torval to restore peace across Torval"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "tasha",
+          "text": "Storm the inner chamber at Tasha and defeat the cabal ringleader",
+          "boss": "story_torval_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "tasha",
+          "text": "Recover the stolen charter-seal of Torval from Tasha"
+        },
+        {
+          "type": "go",
+          "place": "torval",
+          "text": "Present the charter-seal at Torval to restore peace across Torval",
+          "scene": "story_torval_scene_04"
+        }
+      ],
+      "consequence": "world_state:torval_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Torval"
+      }
+    }
+  ]
+}

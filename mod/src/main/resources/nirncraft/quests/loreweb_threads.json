@@ -1,0 +1,873 @@
+{
+  "line": "loreweb_threads",
+  "category": "side",
+  "bosses": {
+    "lw_t_welkynd_boss": {
+      "name": "The Lampwright Magister",
+      "type": "nirncraft:necromancer",
+      "hp": 4,
+      "dmg": 1.6,
+      "level": 34,
+      "drop": "loot:major",
+      "glow": false
+    },
+    "lw_t_ash_boss": {
+      "name": "The Ash-Bound Chorus",
+      "type": "nirncraft:ash_spawn",
+      "hp": 3.8,
+      "dmg": 1.6,
+      "level": 32,
+      "drop": "loot:major",
+      "glow": false
+    },
+    "lw_t_dial_boss": {
+      "name": "The Spire's Last Attendant",
+      "type": "nirncraft:dwarven_centurion",
+      "hp": 4.2,
+      "dmg": 1.7,
+      "level": 34,
+      "drop": "loot:major",
+      "glow": false
+    },
+    "lw_t_sugar_boss": {
+      "name": "The Pale Lender",
+      "type": "nirncraft:vampire_lord",
+      "hp": 4,
+      "dmg": 1.6,
+      "level": 32,
+      "drop": "loot:major",
+      "glow": false
+    },
+    "lw_t_bone_boss": {
+      "name": "The Spine-Keeper",
+      "type": "nirncraft:dragon_priest",
+      "hp": 4,
+      "dmg": 1.7,
+      "level": 34,
+      "drop": "loot:major",
+      "glow": false
+    },
+    "lw_t_tide_boss": {
+      "name": "The Navigator's Shade",
+      "type": "nirncraft:draugr_deathlord",
+      "hp": 4,
+      "dmg": 1.6,
+      "level": 32,
+      "drop": "loot:major",
+      "glow": false
+    },
+    "lw_t_crown_boss": {
+      "name": "The Hollow King's Echo",
+      "type": "nirncraft:draugr_deathlord",
+      "hp": 4.4,
+      "dmg": 1.7,
+      "level": 36,
+      "drop": "loot:major",
+      "glow": false
+    },
+    "lw_t_falls_boss": {
+      "name": "Mother of the Hush",
+      "type": "nirncraft:hagraven",
+      "hp": 4,
+      "dmg": 1.6,
+      "level": 32,
+      "drop": "loot:major",
+      "glow": false
+    }
+  },
+  "quests": [
+    {
+      "id": "lw_t_welkynd_a",
+      "title": "The Welkynd Census",
+      "region": "cyrodiil/colovian_highlands",
+      "start": "find",
+      "find": {
+        "place": "gate_of_alma_ruma",
+        "offset": [
+          -6,
+          4
+        ],
+        "radius": 4,
+        "clue": "lectern",
+        "text": "A scholar's census slate leans against the gate-arch: eight stone-names in a column, five struck through in a fresh hand. The last line reads, in Aldmeri: 'Then the Tower.'"
+      },
+      "requires": [
+        "level:20"
+      ],
+      "desc": "A census slate at an Alessian gate lists eight light-stones, five of them struck through in a fresh hand.",
+      "pitch": "A scholar at an old gate says someone is taking a census of the Ayleid lamps, and crossing them off.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "shardiuss_excavation",
+          "text": "Find the first relit lamp in the Shardiuss pit and follow the cabal's route west."
+        },
+        {
+          "type": "go",
+          "place": "miscarcand",
+          "text": "Relight the Miscarcand name-lamp and carry its flame to the Valenwood towers."
+        },
+        {
+          "type": "go",
+          "place": "ne_salas",
+          "text": "Relight the Ne Salas pillar and take the cabal's tally on to the star-vault."
+        }
+      ],
+      "rewards": {
+        "gold": 400,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The lamps are being relit across the Cyrodiil ruins, the Valenwood vaults and the Tower of the Summerset Isles.",
+      "why": [
+        "colovian_highlands.L9.guild_rivalry",
+        "colovian_highlands.L8.stendarr_chapel"
+      ]
+    },
+    {
+      "id": "lw_t_welkynd_b",
+      "title": "The Welkynd Census (II)",
+      "region": "cyrodiil/colovian_highlands",
+      "start": "auto",
+      "requires": [
+        "quest:lw_t_welkynd_a"
+      ],
+      "desc": "The lamps are being relit across the Cyrodiil ruins, the Valenwood vaults and the Tower of the Summerset Isles.",
+      "pitch": "A scholar at an old gate says someone is taking a census of the Ayleid lamps, and crossing them off.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "reliquary_of_stars",
+          "text": "Relight the star-vault's ceiling and follow the white flame to the burned city."
+        },
+        {
+          "type": "go",
+          "place": "city_of_ash",
+          "text": "Relight the burned city's cistern lamp and sail for the Crystal Tower."
+        },
+        {
+          "type": "go",
+          "place": "crystal_tower_summerset",
+          "text": "Climb the Crystal Tower to the lens-room where the last stone waits."
+        },
+        {
+          "type": "kill",
+          "place": "psijic_relic_vaults",
+          "text": "Face the Lampwright Magister in the vaults beneath the Tower.",
+          "spawn": [
+            {
+              "boss_id": "lw_t_welkynd_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 1000,
+        "loot": "legendary",
+        "flags": [
+          "lw_t_welkynd_done"
+        ],
+        "unique": "psijic_longbow"
+      },
+      "outro": "I lit the eighth stone with my own hand. The Tower's lens turned slowly and, for the span of a breath, the sky above Summerset showed every star a thousand years gone. The Lampwrights bowed. I did not know what I had begun.",
+      "why": [
+        "colovian_highlands.L9.guild_rivalry",
+        "colovian_highlands.L8.stendarr_chapel"
+      ]
+    },
+    {
+      "id": "lw_t_ash_a",
+      "title": "The Ash Remembers",
+      "region": "morrowind/red_mountain",
+      "start": "find",
+      "find": {
+        "place": "ghostfence_morrowind",
+        "offset": [
+          3,
+          -7
+        ],
+        "radius": 4,
+        "clue": "urn",
+        "text": "A glass urn at a ghostfence gate-post holds a pinch of grey ash and a card: 'Falls where it chooses. Remembers what it burned. Follow the fall.' A map of the prevailing winds is pinned beneath."
+      },
+      "requires": [
+        "level:20"
+      ],
+      "desc": "A glass urn at the ghostfence holds a pinch of ash and a card: 'Falls where it chooses. Remembers what it burned.'",
+      "pitch": "A Telvanni scholar insists that ash is a kind of speech, and that it has begun to say something.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "red_mountain",
+          "text": "Gather a pinch of ash at the crater lip and follow the fall east."
+        },
+        {
+          "type": "go",
+          "place": "cheydinhal",
+          "text": "Visit the Dunmer refugees of Cheydinhal and learn what their ash-jars hold."
+        },
+        {
+          "type": "go",
+          "place": "raven_rock",
+          "text": "Hear the ash-yam farmers of Raven Rock describe what the fallen ash says."
+        }
+      ],
+      "rewards": {
+        "gold": 360,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The wind's trail runs from the volcano through a refugee canal and an island grove to the roots of the Hist.",
+      "why": [
+        "red_mountain.L9.fence_weakening",
+        "red_mountain.L8.fence_of_the_dead"
+      ]
+    },
+    {
+      "id": "lw_t_ash_b",
+      "title": "The Ash Remembers (II)",
+      "region": "morrowind/red_mountain",
+      "start": "auto",
+      "requires": [
+        "quest:lw_t_ash_a"
+      ],
+      "desc": "The wind's trail runs from the volcano through a refugee canal and an island grove to the roots of the Hist.",
+      "pitch": "A Telvanni scholar insists that ash is a kind of speech, and that it has begun to say something.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "brodir_grove",
+          "text": "Walk the grove at dusk and listen to the ash in the roots."
+        },
+        {
+          "type": "go",
+          "place": "helstrom",
+          "text": "Cross the border at Helstrom and follow the ash into the fen."
+        },
+        {
+          "type": "go",
+          "place": "thorn",
+          "text": "Ask the Hist-sages of Thorn to read the ash in the Great Pool."
+        },
+        {
+          "type": "kill",
+          "place": "root_whisper_village",
+          "text": "Lay the gathered ashes at the roots of the abandoned village and listen.",
+          "spawn": [
+            {
+              "boss_id": "lw_t_ash_boss"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 900,
+        "loot": "legendary",
+        "flags": [
+          "lw_t_ash_done"
+        ],
+        "unique": "hist_fang"
+      },
+      "outro": "The great Hist-root took the ashes into itself and, for an hour, I heard every name they had been. The ash will fall again, but it will fall quieter now. It has been heard.",
+      "why": [
+        "red_mountain.L9.fence_weakening",
+        "red_mountain.L8.fence_of_the_dead"
+      ]
+    },
+    {
+      "id": "lw_t_dial_a",
+      "title": "The Dwemer Dial",
+      "region": "morrowind/ascadian_isles",
+      "start": "find",
+      "find": {
+        "place": "halls_of_fabrication",
+        "offset": [
+          4,
+          -3
+        ],
+        "radius": 4,
+        "clue": "lever",
+        "text": "A lever behind a stilled conveyor drops a bronze plate. Its face is a dial with one hand, its figure scratched with a tiny cross and, in scholar's script: 'Eight of these. All the same figure. All ticking.'"
+      },
+      "requires": [
+        "level:20"
+      ],
+      "desc": "A bronze dial behind a stilled conveyor, one hand, one cross, and the note: 'Eight of these, all ticking.'",
+      "pitch": "A scholar in the fabrication hall says there are eight dials, and that they have never been wrong.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "arkngthand",
+          "text": "Find Arkngthand's dial above the centrifuge and compare its figure."
+        },
+        {
+          "type": "go",
+          "place": "nchardak",
+          "text": "Take the dial from Nchardak's coolant hall before the ice takes it."
+        },
+        {
+          "type": "go",
+          "place": "kagrumez",
+          "text": "Read the Kagrumez dial under the star-dome and match its tick."
+        }
+      ],
+      "rewards": {
+        "gold": 400,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The dials are scattered across Morrowind, Solstheim, High Rock, Hammerfell and Elsweyr, and all answer to a spire on a rock.",
+      "why": [
+        "ascadian_isles.L9.twin_lamps_underground",
+        "ascadian_isles.L8.vivec_the_living_god"
+      ]
+    },
+    {
+      "id": "lw_t_dial_b",
+      "title": "The Dwemer Dial (II)",
+      "region": "morrowind/ascadian_isles",
+      "start": "auto",
+      "requires": [
+        "quest:lw_t_dial_a"
+      ],
+      "desc": "The dials are scattered across Morrowind, Solstheim, High Rock, Hammerfell and Elsweyr, and all answer to a spire on a rock.",
+      "pitch": "A scholar in the fabrication hall says there are eight dials, and that they have never been wrong.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "mthartzel",
+          "text": "Unfasten the Mthartzel dial from the pump hall's gauge-wall."
+        },
+        {
+          "type": "go",
+          "place": "volenfell",
+          "text": "Dig the Volenfell dial out of its sand-drift."
+        },
+        {
+          "type": "go",
+          "place": "halls_of_colossus",
+          "text": "Find the dial beneath the colossus's chest and note how far it has turned."
+        },
+        {
+          "type": "kill",
+          "place": "rkuldumz_spire",
+          "text": "Reach the spire's summit and hold the last dial before it reaches its mark.",
+          "spawn": [
+            {
+              "boss_id": "lw_t_dial_boss"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 1000,
+        "loot": "legendary",
+        "flags": [
+          "lw_t_dial_done"
+        ],
+        "unique": "trueflame"
+      },
+      "outro": "At the spire's summit I held the last dial's hand an inch from its mark. The brass at my feet hummed, the brass in a hundred ruins hummed. I did not let it fall. I do not know what would have come, but I knew it would have been very old.",
+      "why": [
+        "ascadian_isles.L9.twin_lamps_underground",
+        "ascadian_isles.L8.vivec_the_living_god"
+      ]
+    },
+    {
+      "id": "lw_t_sugar_a",
+      "title": "The Sugar Road",
+      "region": "elsweyr/pellitine",
+      "start": "find",
+      "find": {
+        "place": "moon_sugar_meadow",
+        "offset": [
+          9,
+          4
+        ],
+        "radius": 4,
+        "clue": "urn",
+        "text": "A sugar-urn at the meadow's edge holds a debt-slip folded around a coin. The slip bears a watermark: a crescent moon and a ledger. 'Purchased. Do not pay the farmer. Pay the Counting-House.'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A debt-slip in a sugar-urn with a crescent-and-ledger watermark: 'Do not pay the farmer. Pay the Counting-House.'",
+      "pitch": "A farmer says her debts were bought by a house she has never met, and that its slips bear a moon.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "tathara_sugar_farm",
+          "text": "Trace the farm's purchased debt to the sugar-port's counting-room."
+        },
+        {
+          "type": "go",
+          "place": "senchal",
+          "text": "Open the Counting-House's branch behind a Senchal sugar warehouse."
+        },
+        {
+          "type": "go",
+          "place": "baandari_caravan_stop",
+          "text": "Take the caravan-mother's debt-slips to the next town on the trade-road."
+        },
+        {
+          "type": "go",
+          "place": "rawlkha",
+          "text": "Follow the debt-slips from Rawlkha's lantern market north into Cyrodiil."
+        }
+      ],
+      "rewards": {
+        "gold": 360,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The slips' trail runs from sugar farms and Khajiit caravans through river and lake towns to a stilt-market in the Bitter Coast.",
+      "why": [
+        "pellitine.L9.planter_vs_crown",
+        "pellitine.L8.garden_priests"
+      ]
+    },
+    {
+      "id": "lw_t_sugar_b",
+      "title": "The Sugar Road (II)",
+      "region": "elsweyr/pellitine",
+      "start": "auto",
+      "requires": [
+        "quest:lw_t_sugar_a"
+      ],
+      "desc": "The slips' trail runs from sugar farms and Khajiit caravans through river and lake towns to a stilt-market in the Bitter Coast.",
+      "pitch": "A farmer says her debts were bought by a house she has never met, and that its slips bear a moon.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bravil",
+          "text": "Trace the Crescent Ledger's river-agents in Bravil's flooded cellars."
+        },
+        {
+          "type": "go",
+          "place": "lunar_fang_docks",
+          "text": "Take the ledger's night-boats from the Lunar Fang Docks toward Morrowind."
+        },
+        {
+          "type": "go",
+          "place": "balmora",
+          "text": "Break the Counting-House's silt-strider ledger-room in Balmora."
+        },
+        {
+          "type": "kill",
+          "place": "gnaar_mok",
+          "text": "Open the strongbox beneath the Gnaar Mok stilts and face the Pale Lender.",
+          "spawn": [
+            {
+              "boss_id": "lw_t_sugar_boss"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 900,
+        "loot": "legendary",
+        "flags": [
+          "lw_t_sugar_done"
+        ],
+        "unique": "moonblade_of_the_mane"
+      },
+      "outro": "The strongbox rose out of the mud on its chain, heavy with years instead of gold. I opened it, and I read the names, and I burned the slips one by one. I do not know how many were freed. I know I burned them all.",
+      "why": [
+        "pellitine.L9.planter_vs_crown",
+        "pellitine.L8.garden_priests"
+      ]
+    },
+    {
+      "id": "lw_t_bone_a",
+      "title": "The Bone Census",
+      "region": "elsweyr/anequina",
+      "start": "find",
+      "find": {
+        "place": "prowls_edge_dragonscour",
+        "offset": [
+          5,
+          3
+        ],
+        "radius": 4,
+        "clue": "skeleton",
+        "text": "A great dragon's rib-arch with a gap in its spine: one vertebra, neatly removed, a clean saw-cut. A tag in a courtly hand: 'Number 14 of 41. Inspected. Collected.'"
+      },
+      "requires": [
+        "level:20"
+      ],
+      "desc": "A dragon's rib-arch with one vertebra neatly removed and a courtly tag: 'Number 14 of 41. Collected.'",
+      "pitch": "A bone-picker says every dragon grave he knows is missing a single piece, taken cleanly and tagged.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "sancre_tor",
+          "text": "Search the Akaviri barrow for the next tagged bone-niche."
+        },
+        {
+          "type": "go",
+          "place": "hvitkald_peak",
+          "text": "Climb Hvitkald to the peak's cairn and read the tag left on a frozen rib."
+        },
+        {
+          "type": "go",
+          "place": "onsis_breath",
+          "text": "Find the bone-arch's missing vertebra among the singing stones."
+        }
+      ],
+      "rewards": {
+        "gold": 380,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The missing bones trace from desert and mountain graves to an ice mound and a valley of ribs, and on to a serpent temple.",
+      "why": [
+        "anequina.L9.northern_crown",
+        "anequina.L8.ridge_temples"
+      ]
+    },
+    {
+      "id": "lw_t_bone_b",
+      "title": "The Bone Census (II)",
+      "region": "elsweyr/anequina",
+      "start": "auto",
+      "requires": [
+        "quest:lw_t_bone_a"
+      ],
+      "desc": "The missing bones trace from desert and mountain graves to an ice mound and a valley of ribs, and on to a serpent temple.",
+      "pitch": "A bone-picker says every dragon grave he knows is missing a single piece, taken cleanly and tagged.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "the_frozen_dragon_mound",
+          "text": "Climb the frozen mound and find the bone the serpent-court could not take."
+        },
+        {
+          "type": "go",
+          "place": "dragon_graveyard_of_akavir",
+          "text": "Cross the valley of ribs and find the bone-marked cradle path to the temple."
+        },
+        {
+          "type": "kill",
+          "place": "temple_of_the_serpent_emperor",
+          "text": "Reach the temple's spine-cradle and decide where the forty-first bone goes.",
+          "spawn": [
+            {
+              "boss_id": "lw_t_bone_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 950,
+        "loot": "legendary",
+        "flags": [
+          "lw_t_bone_done"
+        ],
+        "unique": "dragonguard_katana"
+      },
+      "outro": "In the serpent temple a spine of forty-one vertebrae lay in a cradle, two short of its full length. I took the one I had carried and laid it down, but not in its place. The court's ladder will remain forty-one rungs; it will not reach.",
+      "why": [
+        "anequina.L9.northern_crown",
+        "anequina.L8.ridge_temples"
+      ]
+    },
+    {
+      "id": "lw_t_tide_a",
+      "title": "The Tide-Ledger",
+      "region": "yokuda/yokudan_desert",
+      "start": "find",
+      "find": {
+        "place": "temple_of_satakal",
+        "offset": [
+          6,
+          2
+        ],
+        "radius": 4,
+        "clue": "stone",
+        "text": "A scale-mosaic tile at the temple's threshold bears an unfamiliar tide-glyph and a navigator's mark. Scratched into its edge: 'One of nine. Seek the other eight. Read at low tide only.'"
+      },
+      "requires": [
+        "level:20"
+      ],
+      "desc": "A scale-mosaic tile bears a navigator's tide-glyph: 'One of nine. Read at low tide only.'",
+      "pitch": "A serpent-priest says the tile came from a ledger torn in nine, each piece hidden in a different sea.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "port_hunding",
+          "text": "Find the harbour's hidden ledger-page behind its sealed manifest."
+        },
+        {
+          "type": "go",
+          "place": "stros_mkai",
+          "text": "Read the lighthouse's treaty plate for a tide-glyph and carry it north."
+        },
+        {
+          "type": "go",
+          "place": "haknirs_shoal",
+          "text": "Pry open the wreck's bow-chest for a ledger page among the barnacles."
+        },
+        {
+          "type": "go",
+          "place": "firsthold",
+          "text": "Search Firsthold's lighthouse for the fourth page, hidden in its lens-case."
+        }
+      ],
+      "rewards": {
+        "gold": 380,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The ledger's nine pieces lie in ports from Hammerfell and Solstheim to the Maormer isles and Yokuda.",
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    {
+      "id": "lw_t_tide_b",
+      "title": "The Tide-Ledger (II)",
+      "region": "yokuda/yokudan_desert",
+      "start": "auto",
+      "requires": [
+        "quest:lw_t_tide_a"
+      ],
+      "desc": "The ledger's nine pieces lie in ports from Hammerfell and Solstheim to the Maormer isles and Yokuda.",
+      "pitch": "A serpent-priest says the tile came from a ledger torn in nine, each piece hidden in a different sea.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "serpent_pens",
+          "text": "Take the fifth page from the keeper's totem and look for the Maormer's copy."
+        },
+        {
+          "type": "go",
+          "place": "orgnums_citadel",
+          "text": "Consult the sea-king's window for the sixth page and the Maormer's secret."
+        },
+        {
+          "type": "go",
+          "place": "ra_gada_encampment",
+          "text": "Bring the gathered pages to the Ra Gada drill-master and ask his counsel."
+        },
+        {
+          "type": "kill",
+          "place": "sunken_temple_of_the_yokudan_kings",
+          "text": "Lay the nine pages on the funeral barge and read the ledger's tide.",
+          "spawn": [
+            {
+              "boss_id": "lw_t_tide_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 950,
+        "loot": "legendary",
+        "flags": [
+          "lw_t_tide_done"
+        ],
+        "unique": "sword_of_the_ansei"
+      },
+      "outro": "In the sunken temple's hall I laid the ninth page against the other eight and a chart of tides unfolded across the water. The road home was shorter than I had feared, and stranger. I set the pages back, one in each of nine ports, so no one people would own the road.",
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    {
+      "id": "lw_t_crown_a",
+      "title": "The Sundered Crown",
+      "region": "high_rock/glenumbra",
+      "start": "find",
+      "find": {
+        "place": "tomb_of_lost_kings",
+        "offset": [
+          -4,
+          7
+        ],
+        "radius": 4,
+        "clue": "grave",
+        "text": "A king's tomb has a seal cut cleanly in two, the other half missing. Beside it is a fresh chisel-mark and a note: 'Number three. The ring is gone. The ring of the Hollow King.'"
+      },
+      "requires": [
+        "level:20"
+      ],
+      "desc": "A royal tomb's seal cut in two, with a note: 'Number three. The ring is gone. The ring of the Hollow King.'",
+      "pitch": "A grave-warden says someone has been taking pieces of royal regalia from tombs, one realm at a time.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "tuwhaccas_throne",
+          "text": "Look for the missing throne-arm inscription in the desert king's hall."
+        },
+        {
+          "type": "go",
+          "place": "tomb_of_the_apostates",
+          "text": "Search the hollow tree's heartwood for the missing tomb-panel."
+        },
+        {
+          "type": "go",
+          "place": "soulrest",
+          "text": "Ask the island keepers of Soulrest which crypt was opened last."
+        }
+      ],
+      "rewards": {
+        "gold": 440,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The pieces of the Hollow King lie in barrows, throne-halls, ships and ice from High Rock to Akavir.",
+      "why": [
+        "glenumbra.L9.wyrd_vs_clergy",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "lw_t_crown_b",
+      "title": "The Sundered Crown (II)",
+      "region": "high_rock/glenumbra",
+      "start": "auto",
+      "requires": [
+        "quest:lw_t_crown_a"
+      ],
+      "desc": "The pieces of the Hollow King lie in barrows, throne-halls, ships and ice from High Rock to Akavir.",
+      "pitch": "A grave-warden says someone has been taking pieces of royal regalia from tombs, one realm at a time.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "old_orsinium",
+          "text": "Descend into Old Orsinium and find the hammer-forged piece in the lowest forge."
+        },
+        {
+          "type": "go",
+          "place": "gyldenhul_barrow",
+          "text": "Examine the barrow's mural for the missing finger of the ancient king."
+        },
+        {
+          "type": "go",
+          "place": "wolf_jarls_howe",
+          "text": "Climb into the howe's ship and find the crown in its keel-chest."
+        },
+        {
+          "type": "kill",
+          "place": "frost_throne_of_kamal",
+          "text": "Reach the ice throne and face whoever has gathered the Hollow King.",
+          "spawn": [
+            {
+              "boss_id": "lw_t_crown_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 1100,
+        "loot": "legendary",
+        "flags": [
+          "lw_t_crown_done"
+        ],
+        "unique": "gauldur_blackblade"
+      },
+      "outro": "At the ice throne I found the last piece already in the thief's hands: a woman in a pilgrim's cloak who wept as she held the crown. She had never wanted him whole. She wanted him found. I helped her bury him again, deeper.",
+      "why": [
+        "glenumbra.L9.wyrd_vs_clergy",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "lw_t_falls_a",
+      "title": "The Silent Falls",
+      "region": "cyrodiil/nibenay_valley",
+      "start": "find",
+      "find": {
+        "place": "mist_mirror_refuge",
+        "offset": [
+          3,
+          -5
+        ],
+        "radius": 4,
+        "clue": "lectern",
+        "text": "A pilgrim's notebook left on a flat rock: eight falls named, six crossed out with the date and a single word, 'hushed'. 'Tonight: the pool at Mist Mirror. Do not be near the water when it stops.'"
+      },
+      "requires": [
+        "level:20"
+      ],
+      "desc": "A pilgrim's notebook names eight waterfalls, six crossed out as 'hushed', and warns that tonight is the pool at Mist Mirror.",
+      "pitch": "A pilgrim says the waterfalls are falling silent in order, one a night, and nobody can stop it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "waterdancer_falls",
+          "text": "Stand at the base of Waterdancer Falls when the water falls silent."
+        },
+        {
+          "type": "go",
+          "place": "tor_hame_khard",
+          "text": "Wait at the waterfall court of Tor Hame Khard for the hush."
+        },
+        {
+          "type": "go",
+          "place": "anequina_aqueduct",
+          "text": "Sit beneath the aqueduct's arches on the night the channel stops."
+        }
+      ],
+      "rewards": {
+        "gold": 380,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The hush has moved from falls and aqueducts to a lava-cascade, a weeping inn, an ice seam and finally to the Black Marsh falls.",
+      "why": [
+        "nibenay_valley.L9.corrupt_clerk",
+        "nibenay_valley.L8.mara_chapel"
+      ]
+    },
+    {
+      "id": "lw_t_falls_b",
+      "title": "The Silent Falls (II)",
+      "region": "cyrodiil/nibenay_valley",
+      "start": "auto",
+      "requires": [
+        "quest:lw_t_falls_a"
+      ],
+      "desc": "The hush has moved from falls and aqueducts to a lava-cascade, a weeping inn, an ice seam and finally to the Black Marsh falls.",
+      "pitch": "A pilgrim says the waterfalls are falling silent in order, one a night, and nobody can stop it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "molag_mar",
+          "text": "Visit the lava-cascade's grotto at Molag Mar the night it falls silent."
+        },
+        {
+          "type": "go",
+          "place": "weeping_giant",
+          "text": "Sit beside the weeping giant's cheek and listen as the tears slow."
+        },
+        {
+          "type": "go",
+          "place": "stalhrim_source",
+          "text": "Visit the stalhrim basin at the hush and note the hum's pitch."
+        },
+        {
+          "type": "kill",
+          "place": "weeping_wamasu_falls",
+          "text": "Climb to the weeping falls and face the coven before the last verse.",
+          "spawn": [
+            {
+              "boss_id": "lw_t_falls_boss"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 950,
+        "loot": "legendary",
+        "flags": [
+          "lw_t_falls_done"
+        ],
+        "unique": "hist_fang"
+      },
+      "outro": "I stood in the spray of the last falls as the water dropped to a whisper and the wamasu in the rock began to weep. The coven's eighth verse was unfinished. I sang the other eight from memory, in the old tongue. The water remembered its voice.",
+      "why": [
+        "nibenay_valley.L9.corrupt_clerk",
+        "nibenay_valley.L8.mara_chapel"
+      ]
+    }
+  ]
+}

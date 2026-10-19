@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "nirncraft:block/hist_sap_block"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:gold_ring",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silver_ring",
+      "required": false
+    }
+  ]
+}

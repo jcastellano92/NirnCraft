@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 4,
+        "max": 7
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "nirncraft:chests/harbor_supplies"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "nirncraft:chests/skyrim_food"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 2,
+          "value": "nirncraft:chests/smithing_materials"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 2,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 20,
+              "max": 80
+            },
+            "type": "minecraft:set_count"
+          }
+        }
+      ]
+    }
+  ]
+}

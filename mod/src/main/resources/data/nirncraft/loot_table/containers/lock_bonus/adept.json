@@ -1,0 +1,55 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 10,
+            "max": 25,
+            "growth": 0.02,
+            "type": "nirncraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "nirncraft:parts/lockpicks"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "nirncraft:parts/gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "nirncraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:gold_ring",
+          "weight": 1,
+          "modifier": {
+            "tag": "nirncraft:loot/trinkets",
+            "type": "nirncraft:regional_tag"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 2
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/lock_bonus/adept"
+}

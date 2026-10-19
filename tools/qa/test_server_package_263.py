@@ -66,12 +66,12 @@ def validate_server(server):
     if receipt.get('target') != SERVER_TARGET or not receipt.get('fullServerPack'):
         raise ValueError('Not the exact native full server package')
     rows = server_mods(validate_pack())
-    if {p.name for p in (server / 'mods').glob('*.jar')} != {r['filename'] for r in rows} | {'skycraft-core.jar'}:
+    if {p.name for p in (server / 'mods').glob('*.jar')} != {r['filename'] for r in rows} | {'nirncraft-core.jar'}:
         raise ValueError('Unexpected or missing server mod')
     for row in rows:
         if file_hash(server / 'mods' / row['filename'], row['hashFormat']) != row['hash']:
             raise ValueError(f"Server mod differs from lock: {row['filename']}")
-    core = server / 'mods/skycraft-core.jar'
+    core = server / 'mods/nirncraft-core.jar'
     validate_core_jar(core)
     if file_hash(core, 'sha256') != receipt['coreSha256']:
         raise ValueError('Server core differs from package receipt')
@@ -98,12 +98,12 @@ def run(archive, java, work_root, startup_timeout=900, command_timeout=180, heap
     (server / 'eula.txt').write_text('# Isolated automated QA only.\neula=true\n', encoding='utf-8')
     (server / 'qa_jvm_args.txt').write_text('-Xms1G\n-Xmx' + heap + '\n-XX:+UseG1GC\n', encoding='utf-8')
     token = uuid.uuid4().hex
-    args = [str(java), '@qa_jvm_args.txt', '-Dskycraft.serverQa=' + token,
+    args = [str(java), '@qa_jvm_args.txt', '-Dnirncraft.serverQa=' + token,
             '@' + (NATIVE_ARGS / ('win_args.txt' if os.name == 'nt' else 'unix_args.txt')).as_posix(), 'nogui']
     if dev_control:
         # Explicit QA only; preserve normal spawn ownership while enabling the
         # production jar's existing public diagnostic commands/inbox.
-        args[2:2] = ['-Dskycraft.dev=' + (server / 'qa-control').as_posix(), '-Dskycraft.dev.keepSpawn=true']
+        args[2:2] = ['-Dnirncraft.dev=' + (server / 'qa-control').as_posix(), '-Dnirncraft.dev.keepSpawn=true']
     started = time.monotonic()
     result = {'schema': 1, 'target': SERVER_TARGET, 'archive': str(archive), 'archiveSha256': file_hash(archive, 'sha256'),
               'coreSha256': package['coreSha256'], 'runtime': str(server), 'java': str(java), 'port': port,
@@ -156,7 +156,7 @@ def run(archive, java, work_root, startup_timeout=900, command_timeout=180, heap
             print(json.dumps({'pid': process.pid, 'runtime': str(server), 'port': port}), flush=True)
             wait_for(r'Done \(', startup_timeout, 'startup')
             for command, expected in [('list', r'There are \d+ of a max of \d+ players online'),
-                                      ('skycraft-bake check', r'Bake is up to date[.]')]:
+                                      ('nirncraft-bake check', r'Bake is up to date[.]')]:
                 send(command)
                 wait_for(expected, command_timeout, command)
             for command in commands or []:
@@ -170,7 +170,7 @@ def run(archive, java, work_root, startup_timeout=900, command_timeout=180, heap
             if process.returncode != 0:
                 raise RuntimeError(f'Owned server exit code: {process.returncode}')
             text = (work / 'console.log').read_text(encoding='utf-8')
-            result['shutdown'] = shutdown_evidence(text, dimension_ids(server / 'mods/skycraft-core.jar'))
+            result['shutdown'] = shutdown_evidence(text, dimension_ids(server / 'mods/nirncraft-core.jar'))
             errors = [line for line in text.splitlines() if re.search(r'/(?:ERROR|FATAL)\]|\[(?:ERROR|FATAL)\]|Exception in thread', line)]
             if errors or list((server / 'crash-reports').glob('*.txt')):
                 result['failures'].extend(errors[:60])
@@ -208,14 +208,14 @@ def run(archive, java, work_root, startup_timeout=900, command_timeout=180, heap
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--archive', type=Path, default=ROOT / 'dist/Skycraft-26.3-server.zip')
+    parser.add_argument('--archive', type=Path, default=ROOT / 'dist/NirnCraft-26.3-server.zip')
     parser.add_argument('--java', required=True, type=Path)
     parser.add_argument('--work-root', type=Path, default=ROOT / 'dist/server-test-263')
     parser.add_argument('--startup-timeout', type=int, default=900)
     parser.add_argument('--command-timeout', type=int, default=180)
     parser.add_argument('--heap', default='4G')
     parser.add_argument('--commands', type=Path, help='JSON array of command/expect/optional timeout objects')
-    parser.add_argument('--dev-control', action='store_true', help='Enable Skycraft development diagnostics in this isolated QA copy only')
+    parser.add_argument('--dev-control', action='store_true', help='Enable NirnCraft development diagnostics in this isolated QA copy only')
     args = parser.parse_args()
     commands = json.loads(args.commands.read_text(encoding='utf-8')) if args.commands else None
     return run(args.archive, args.java, args.work_root, args.startup_timeout, args.command_timeout, args.heap, commands, args.dev_control)

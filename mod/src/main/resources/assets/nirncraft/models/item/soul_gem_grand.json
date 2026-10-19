@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "nirncraft:item/soul_gem_grand"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "nirncraft:filled": 1
+      },
+      "model": "nirncraft:item/soul_gem_grand_filled"
+    }
+  ]
+}

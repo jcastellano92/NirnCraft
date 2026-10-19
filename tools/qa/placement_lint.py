@@ -6,7 +6,7 @@ single-prop kinds (fewer than three related props, no builder/cluster/anchor), e
 per-zone / per-biome-family kind mix. Exit code 1 if anything required is missing.
 
 Pipeline P6 (planned scenes, docs/WORLDGEN-PIPELINE.md section 8): every human prop belongs to a scene of the baked
-scene plan (mod/src/main/resources/skycraft/baked/sceneplan.bin). Checks that no zone of rules.json rolls a human kind,
+scene plan (mod/src/main/resources/nirncraft/baked/sceneplan.bin). Checks that no zone of rules.json rolls a human kind,
 that the code guards are in place (no per-chunk human roll, no wayside pass, landmark grid without human vignettes,
 road dressing off in plan-era worlds), that every scene has an anchor, a reason and props of human kinds only, and
 reports the scene density per km of road (by class, from roadplan.bin) and per km² of land against the targets.
@@ -21,8 +21,8 @@ import sys
 import zlib
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-RES = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft')
-JAVA = os.path.join(ROOT, 'mod', 'src', 'main', 'java', 'com', 'skycraft')
+RES = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft')
+JAVA = os.path.join(ROOT, 'mod', 'src', 'main', 'java', 'com', 'nirncraft')
 
 
 def load(p):

@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/saltrice"
+      },
+      {
+        "model": "nirncraft:block/saltrice",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/saltrice",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/saltrice",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/saltrice_harvested"
+      },
+      {
+        "model": "nirncraft:block/saltrice_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/saltrice_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/saltrice_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

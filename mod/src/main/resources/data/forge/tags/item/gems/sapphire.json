@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:sapphire",
-    "skycraft:flawless_sapphire"
+    "nirncraft:sapphire",
+    "nirncraft:flawless_sapphire"
   ]
 }

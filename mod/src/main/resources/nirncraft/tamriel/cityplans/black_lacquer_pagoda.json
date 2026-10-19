@@ -1,0 +1,286 @@
+{
+  "id": "black_lacquer_pagoda",
+  "why": [
+    "tsaesci.L1.red_earth_basin",
+    "tsaesci.L5.folded_steel_and_lacquer",
+    "tsaesci.L6.tsaesci_factor_compound"
+  ],
+  "sil": "akavir-black-lacquer-pagoda-plan",
+  "base": "none",
+  "overlay": "tsaesci",
+  "radius": 24,
+  "reach": 36,
+  "gates": [
+    [
+      0,
+      22
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        11
+      ],
+      "overlay": "tsaesci",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        11,
+        24
+      ],
+      "overlay": "tsaesci",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "black_lacquer_pagoda_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "black_lacquer_pagoda_landmark",
+      "overlay": "tsaesci"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          19
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          -6,
+          -12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -16,
+          0
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          16,
+          2
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        6,
+        -2
+      ],
+      "rx": 13,
+      "rz": 11,
+      "wobble": 4,
+      "lobes": 4,
+      "phase": 1.12,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "tsaesci",
+      "name": "black_lacquer_pagoda_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        12,
+        12
+      ],
+      "face": "north",
+      "overlay": "tsaesci",
+      "name": "black_lacquer_pagoda_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        9
+      ],
+      "face": "north",
+      "overlay": "tsaesci",
+      "name": "black_lacquer_pagoda_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -12,
+        12
+      ],
+      "face": "north",
+      "overlay": "tsaesci",
+      "name": "black_lacquer_pagoda_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -9,
+        0
+      ],
+      "face": "south",
+      "overlay": "tsaesci",
+      "name": "black_lacquer_pagoda_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -12,
+        -12
+      ],
+      "face": "south",
+      "overlay": "tsaesci",
+      "name": "black_lacquer_pagoda_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -9
+      ],
+      "face": "south",
+      "overlay": "tsaesci",
+      "name": "black_lacquer_pagoda_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        12,
+        -12
+      ],
+      "face": "south",
+      "overlay": "tsaesci",
+      "name": "black_lacquer_pagoda_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "black_lacquer_pagoda_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "black_lacquer_pagoda_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "black_lacquer_pagoda_b_5",
+    "smithy": "black_lacquer_pagoda_b_7"
+  },
+  "titles": {
+    "black_lacquer_pagoda_b_1": "place.nirncraft.black_lacquer_pagoda Council & Seat Hall",
+    "black_lacquer_pagoda_b_2": "place.nirncraft.black_lacquer_pagoda High Sanctuary",
+    "black_lacquer_pagoda_b_3": "place.nirncraft.black_lacquer_pagoda Fighters & Wayfarers Hall",
+    "black_lacquer_pagoda_b_4": "place.nirncraft.black_lacquer_pagoda Mages & Chroniclers Spire",
+    "black_lacquer_pagoda_b_5": "place.nirncraft.black_lacquer_pagoda The Lantern & Hearth Inn",
+    "black_lacquer_pagoda_b_6": "place.nirncraft.black_lacquer_pagoda The Traveler's Rest Tavern",
+    "black_lacquer_pagoda_b_7": "place.nirncraft.black_lacquer_pagoda Master Forge & Armorer",
+    "black_lacquer_pagoda_b_8": "place.nirncraft.black_lacquer_pagoda Botanicals & Remedies",
+    "black_lacquer_pagoda_landmark": "High Seat of place.nirncraft.black_lacquer_pagoda",
+    "black_lacquer_pagoda_plaza": "place.nirncraft.black_lacquer_pagoda Central Plaza"
+  },
+  "innKey": "black_lacquer_pagoda_b_5",
+  "zones": [
+    {
+      "at": [
+        6,
+        -9
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "marsh_snag",
+        "weight": 2
+      },
+      {
+        "species": "fallen_mangrove",
+        "weight": 2
+      },
+      {
+        "species": "fallen_oak",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

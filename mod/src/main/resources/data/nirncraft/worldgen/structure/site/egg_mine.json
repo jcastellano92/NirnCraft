@@ -1,0 +1,17 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "mine",
+  "regional_kit": true,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "egg_mine"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

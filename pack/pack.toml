@@ -1,12 +1,12 @@
-name = "Skycraft"
-author = "Skycraft Team"
+name = "NirnCraft"
+author = "NirnCraft Team"
 version = "0.1.0"
 pack-format = "packwiz:1.1.0"
 
 [index]
 file = "index.toml"
 hash-format = "sha256"
-hash = "73c1a54ef43a27fd9a02b4e142b04d4b80a4d58064c6e811e7252a30e0b2b2a4"
+hash = "97db6267789792727056213f1f1f293a7758af0296bfe4f72d54d41937bd6d6d"
 
 [versions]
 neoforge = "26.3.0.90"

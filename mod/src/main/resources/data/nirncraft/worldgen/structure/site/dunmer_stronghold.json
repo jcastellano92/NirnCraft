@@ -1,0 +1,17 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "fort",
+  "kit": "velothi",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "dunmer_stronghold"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

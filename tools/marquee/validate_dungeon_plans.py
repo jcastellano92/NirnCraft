@@ -1,4 +1,4 @@
-"""Static check of the marquee dungeon plans (mod/src/main/resources/skycraft/dungeons/marquee/*.json).
+"""Static check of the marquee dungeon plans (mod/src/main/resources/nirncraft/dungeons/marquee/*.json).
 
 usage: py -3 -I tools/marquee/validate_dungeon_plans.py [plan.json ...]
 
@@ -14,7 +14,7 @@ import sys
 
 CELL = 15
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DIR = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'dungeons', 'marquee')
+DIR = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'dungeons', 'marquee')
 SIDES = {(1, 0): 'e', (-1, 0): 'w', (0, 1): 's', (0, -1): 'n'}
 
 

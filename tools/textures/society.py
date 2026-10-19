@@ -1,6 +1,6 @@
 """Generates the society module's textures (PIL).
 
-Writes PNGs into mod/src/main/resources/assets/skycraft/textures/entity/society/:
+Writes PNGs into mod/src/main/resources/assets/nirncraft/textures/entity/society/:
   <role>_0.png, <role>_1.png         64x64 player-layout skins for every NPC role (0 = male, 1 = female); fallback only
   cosmetic/<id>.png                  64x64 faction regalia (CosmeticLayer UVs: hood, torso, tabard panels, cloak, pelts)
   npc/...                            the layers NpcSkins composites into race-correct townsfolk (see "NPC layers")
@@ -14,7 +14,7 @@ import random
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures", "entity", "society")
+OUT = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures", "entity", "society")
 
 
 # ---------------------------------------------------------------------------------------------------- color helpers

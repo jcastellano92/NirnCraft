@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:settlement_tavern",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 520103,
+    "types": [
+      "village",
+      "town"
+    ],
+    "variants": [
+      "inn"
+    ]
+  }
+}

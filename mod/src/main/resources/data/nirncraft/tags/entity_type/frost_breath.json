@@ -1,0 +1,81 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#nirncraft:talkers",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:guards",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:merchants",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bandit",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bandit_chief",
+      "required": false
+    },
+    {
+      "id": "nirncraft:forsworn",
+      "required": false
+    },
+    {
+      "id": "nirncraft:necromancer",
+      "required": false
+    },
+    {
+      "id": "nirncraft:giant",
+      "required": false
+    },
+    {
+      "id": "nirncraft:mammoth",
+      "required": false
+    },
+    {
+      "id": "nirncraft:deer",
+      "required": false
+    },
+    {
+      "id": "nirncraft:elk",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sabre_cat",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bear",
+      "required": false
+    },
+    {
+      "id": "nirncraft:wolf",
+      "required": false
+    },
+    {
+      "id": "minecraft:horse",
+      "required": false
+    },
+    {
+      "id": "minecraft:wolf",
+      "required": false
+    },
+    {
+      "id": "minecraft:goat",
+      "required": false
+    },
+    {
+      "id": "minecraft:villager",
+      "required": false
+    },
+    {
+      "id": "minecraft:wandering_trader",
+      "required": false
+    }
+  ]
+}

@@ -15,10 +15,10 @@ module.exports = function (f) {
 
   f.relic('blight_sap', 'Phial of Black Sap', 'A glass phial of sap the colour of old tar. It smells faintly of rot and faintly, horribly, of honey. Birds will not land near it.', 23);
   f.relic('sound_wood_shard', 'Shard of Sound Heartwood', 'A palm-sized slab of pale heartwood, warm and faintly green, cut from the healthy trunk. It hums softly when held to your ear, like a sleeper breathing.', 20);
-  f.boss('blight_heart', { name: 'The Blight-Heart of Elden Root', type: 'skycraft:spriggan', hp: 4.2, dmg: 1.6, level: 30,
+  f.boss('blight_heart', { name: 'The Blight-Heart of Elden Root', type: 'nirncraft:spriggan', hp: 4.2, dmg: 1.6, level: 30,
     drop: 'loot:major', glow: true });
-  f.boss('middens_fence', { name: 'Peddler Sorwe Rat-Tail', type: 'skycraft:bandit_chief', hp: 2.8, dmg: 1.3, level: 18,
-    weapon: 'skycraft:bosmer_dagger', gear: { chest: 'skycraft:bosmer_chestplate' }, drop: 'loot:standard', glow: false });
+  f.boss('middens_fence', { name: 'Peddler Sorwe Rat-Tail', type: 'nirncraft:bandit_chief', hp: 2.8, dmg: 1.3, level: 18,
+    weapon: 'nirncraft:bosmer_dagger', gear: { chest: 'nirncraft:bosmer_chestplate' }, drop: 'loot:standard', glow: false });
 
   f.scene('er_tier_one', [
     ['narrator', 'Root-light falls in green bars across the market. Where the great roots arch overhead, the sap-lanterns burn amber, and every one of them flickers in time with a slow, uneven pulse.'],
@@ -39,7 +39,7 @@ module.exports = function (f) {
       o.go('the_orrery', 'Climb to the second tier, where the Orrery hangs in the boughs, and test the sap again'),
       o.go('elden_tree', 'Climb to the Crown of the Elden Tree', { actions: 'scene:@er_crown_rot;relic:@blight_sap' }),
       o.kill('elden_tree', 'Cut the Blight-Heart from the Crown bough',
-        [{ boss_id: '@blight_heart' }, mob('skycraft:spriggan', 2, 'Blight-Sprout')]),
+        [{ boss_id: '@blight_heart' }, mob('nirncraft:spriggan', 2, 'Blight-Sprout')]),
       o.talk('@aeth', 'Tell the Silvenar\'s Voice what you found in the Crown',
         'A blight was eating the Crown from within. Black sap, and a heart that was not the tree\'s own. It is cut out, and the bough is dying.',
         'Aeth is quiet for the length of a long breath. "The Pact forbids us to harm the living wood. You have cut a living bough, in the Silvenar\'s own city. By the letter, you have broken the oldest of our laws. By the spirit..." He stops. "The Court asks what you did it for. Say it plainly, and the Court will decide whether to thank you or to judge you."',
@@ -49,7 +49,7 @@ module.exports = function (f) {
         ] }),
     ],
     outro: 'The Crown bough was cut, and the sap runs amber again from root to leaf. A law was bent, for the sake of a tree, and Elden Root has not yet decided whether to be grateful.',
-    rewards: { gold: 800, loot: 'major', items: [{ item: 'skycraft:bosmer_bow', name: 'Heartwood Remembrance', enchant: { power: 3, unbreaking: 2 } }] },
+    rewards: { gold: 800, loot: 'major', items: [{ item: 'nirncraft:bosmer_bow', name: 'Heartwood Remembrance', enchant: { power: 3, unbreaking: 2 } }] },
   });
 
   f.q({
@@ -87,7 +87,7 @@ module.exports = function (f) {
         'Fenwe\'s ears go flat, then up. "She did not cheat! Ha! Then the muttering will go on, but about you, which is entirely fair. Walker, drink first tonight. The Hollow Acorn bows to the Arrow, whoever holds it."'),
     ],
     outro: 'The Arrow of the Root Festival was won by a stranger, and Lewen Nine-Arrows took the defeat with a very straight back and a very fast second round.',
-    rewards: { gold: 260, loot: 'minor', items: [{ item: 'skycraft:bosmer_bow', name: 'Festival Arrow-Bow', enchant: { power: 1 } }] },
+    rewards: { gold: 260, loot: 'minor', items: [{ item: 'nirncraft:bosmer_bow', name: 'Festival Arrow-Bow', enchant: { power: 1 } }] },
   });
 
   // ------------------------------------------------------------------ FALINESTI
@@ -102,7 +102,7 @@ module.exports = function (f) {
 
   f.relic('root_ring', 'Ring of the Root-Tender', 'A hoop of living wood, never withered, worn by every Root-Tender since the first. It is warm in the hand and pulses faintly, like a patient waiting.', 26);
   f.relic('autumn_acorn', 'Acorn of the Autumn Site', 'A single acorn as large as a fist, hard as iron and faintly gold. The Lorekeeper says the city planted it, once, on its first autumn, and forgot where.', 20);
-  f.boss('river_wraith', { name: 'The Drowned Ford-Warden', type: 'skycraft:will_o_wisp', hp: 4.0, dmg: 1.5, level: 28, drop: 'loot:major', glow: true });
+  f.boss('river_wraith', { name: 'The Drowned Ford-Warden', type: 'nirncraft:will_o_wisp', hp: 4.0, dmg: 1.5, level: 28, drop: 'loot:major', glow: true });
   f.scene('fal_crossing', [
     ['narrator', 'The roots go under the water one at a time, groping like fingers into dark. Each root takes its hold, then draws the city after it. Along the bank the pilgrims stand silent, afraid to breathe.'],
     ['@maelin', 'This is the crossing, walker. A hundred seasons ago it was a ford. Now it is a river with a memory. Something below remembers being a ford, and it does not wish to be crossed.'],
@@ -163,8 +163,8 @@ module.exports = function (f) {
 
   f.relic('rotted_knot', 'Rotted Node-Knot', 'A bridge-knot of black twisted fibre, cut from a failing support. Where it touched the rope, someone has packed it with a pale, damp paste that smells of wet mushrooms.', 23);
   f.relic('ground_camp_rope', 'Ground-Camp Rope', 'A long coil of oiled, hand-twisted rope, as thick as a wrist and smelling faintly of tar. The ground-camp spins it by moonlight. A tag on one end says, in a child\'s hand: \'For the Weave, with love\'.', 11);
-  f.boss('weave_saboteur', { name: 'Raik Mushroom-Hand', type: 'skycraft:bandit_chief', hp: 2.9, dmg: 1.3, level: 20,
-    weapon: 'skycraft:bosmer_dagger', gear: { head: 'skycraft:bosmer_helmet' }, drop: 'loot:standard', glow: false });
+  f.boss('weave_saboteur', { name: 'Raik Mushroom-Hand', type: 'nirncraft:bandit_chief', hp: 2.9, dmg: 1.3, level: 20,
+    weapon: 'nirncraft:bosmer_dagger', gear: { head: 'nirncraft:bosmer_helmet' }, drop: 'loot:standard', glow: false });
   f.scene('woo_node', [
     ['narrator', 'Twelve stories up the Weave, a main-support node sways in the wind. Its great knot is soft and black, and when Tilu\'s mallet strikes it the sound is a dull, sick thud.'],
     ['@tilu', 'Hear that? A sound knot sings. That one wheezes. Someone has been feeding it. A knot does not rot in a month unless it is helped.'],
@@ -189,7 +189,7 @@ module.exports = function (f) {
         ] }),
     ],
     outro: 'Raik Mushroom-Hand was cut down from the Weave, and the ground-camp\'s children, to their great astonishment, were handed ropes and told they were wanted.',
-    rewards: { gold: 560, loot: 'standard', items: [{ item: 'skycraft:bosmer_dagger', name: 'Warden\'s Mallet-Knife', enchant: { sharpness: 2, unbreaking: 2 } }] },
+    rewards: { gold: 560, loot: 'standard', items: [{ item: 'nirncraft:bosmer_dagger', name: 'Warden\'s Mallet-Knife', enchant: { sharpness: 2, unbreaking: 2 } }] },
   });
 
   f.q({
@@ -201,7 +201,7 @@ module.exports = function (f) {
       o.go('echo_pond', 'Cast the net into Echo Pond and see what it does'),
       o.cond('night', 'Wait at the pond until the net stirs', 'echo_pond'),
       o.kill('echo_pond', 'Kill what the net has caught in the still water',
-        [mob('skycraft:will_o_wisp', 1, 'Netted Marsh-Light', { target: true })]),
+        [mob('nirncraft:will_o_wisp', 1, 'Netted Marsh-Light', { target: true })]),
       o.talk('@orwen', 'Tell Orwen what the net was meant to catch',
         'It was made to catch lights. A will-o-wisp, a marsh-light. Someone wanted one alive, and sent the net to the best net-trader in Greenshade.',
         'Orwen pulls at his ear. "Lights. Of course. A net for lights does not catch fish. It catches, hm, a different kind of prey. The weaver would be a Wispmother\'s apprentice, or a bored witch. Orwen will weave a second net, the same, and send it on, for the sender\'s sake. They will need two."'),
@@ -222,8 +222,8 @@ module.exports = function (f) {
 
   f.relic('silvenar_scroll', 'The Unwritten Scroll', 'A tightly rolled scroll bound in a ribbon of silver bark. No one has ever read it; every scribe who unrolls it finds the page blank, and every scribe who rolls it up again swears it was not.', 15);
   f.relic('audience_token', 'Token of Audience', 'A small wooden disc stamped with the Silvenar\'s leaf and carved with a single word: WAIT. It is warm to the touch and, held up to the light, it flickers.', 26);
-  f.boss('archive_guardian', { name: 'The Root-Wrapped Archivist', type: 'skycraft:draugr_deathlord', hp: 3.6, dmg: 1.5, level: 28,
-    weapon: 'skycraft:bosmer_sword', gear: { head: 'skycraft:bosmer_helmet' }, drop: 'loot:major', glow: true });
+  f.boss('archive_guardian', { name: 'The Root-Wrapped Archivist', type: 'nirncraft:draugr_deathlord', hp: 3.6, dmg: 1.5, level: 28,
+    weapon: 'nirncraft:bosmer_sword', gear: { head: 'nirncraft:bosmer_helmet' }, drop: 'loot:major', glow: true });
   f.scene('sil_gate', [
     ['narrator', 'The mist parts on a wall of living root. Fireflies drift in lazy loops about a single arched gap no wider than a man, lit from within by a slow green glow.'],
     ['@gatewarden', 'You came by the east path. Nobody comes by the east path. It is not on any map. Either you are very lost or very well informed, and I do not know which is more alarming.'],

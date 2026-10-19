@@ -1,13 +1,13 @@
 {
   "replace": false,
   "values": [
-    "skycraft:bjoulsae_river",
-    "skycraft:cyrodiil_river",
-    "skycraft:frozen_river",
-    "skycraft:jungle_river",
-    "skycraft:lake_rumare_shore",
-    "skycraft:skyrim_lake",
-    "skycraft:skyrim_river",
-    "skycraft:warm_river"
+    "nirncraft:bjoulsae_river",
+    "nirncraft:cyrodiil_river",
+    "nirncraft:frozen_river",
+    "nirncraft:jungle_river",
+    "nirncraft:lake_rumare_shore",
+    "nirncraft:skyrim_lake",
+    "nirncraft:skyrim_river",
+    "nirncraft:warm_river"
   ]
 }

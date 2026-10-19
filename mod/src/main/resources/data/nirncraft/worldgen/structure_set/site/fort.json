@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/fort",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274034,
+    "types": [
+      "fort",
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "fort"
+    ]
+  }
+}

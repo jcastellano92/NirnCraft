@@ -1,10 +1,10 @@
 # Loot: a progression economy
 
-Skycraft's loot follows Skyrim's leveled lists. Every container is worth opening, nothing breaks the economy, each
+NirnCraft's loot follows Skyrim's leveled lists. Every container is worth opening, nothing breaks the economy, each
 province tastes different, and there is always something left to collect. This file is the contract between the
 modules that place containers (dungeons, settlements, explorers' sites) and the loot module that fills them.
 
-* Code: `com.skycraft.loot`.
+* Code: `com.nirncraft.loot`.
   * `LootLevels`: the loot level.
   * `LootTiers`: the material ladders.
   * `LootFunctions`: the loot functions.
@@ -15,7 +15,7 @@ modules that place containers (dungeons, settlements, explorers' sites) and the 
 * Data: `tools/loot_data.py` writes every table in this file. Never hand-edit a generated table: edit the script and
   re-run it.
 * Tuning: `tools/loot_sim.py` simulates a character's progress. In game, `/skyloot curve <table>` does the same, and
-  so does `skycraft-loot-sample.txt` (see "Testing").
+  so does `nirncraft-loot-sample.txt` (see "Testing").
 
 ## 1. The loot level
 
@@ -25,7 +25,7 @@ Every roll happens at a loot level (`LootLevels.of`):
   * This is Skyrim's encounter zones: a level-50 hero who clears Whiterun's barrows (band 1–10) finds level-25 gear.
   * It is never above the character's level. A level-5 player who runs into Akavir finds level-5 gear, not
     Daedric.
-* **Corpses** roll at the creature's own `skycraft_level`, and never above the killer's level.
+* **Corpses** roll at the creature's own `nirncraft_level`, and never above the killer's level.
 * **Danger**: a region whose bottom level is above the player pays +2% gold per level of gap, up to +40%. It never
   gives better gear.
 * **The player** is THIS_ENTITY when it is a player.
@@ -50,7 +50,7 @@ drops, the rung before it 30%, and everything older 10%.
 | 46 | Daedric | Daedric | (Glass, Stalhrim) |
 | 50 | Dragonbone | Dragonplate | Dragonscale |
 
-Provinces' own gear (`#skycraft:gear/<key>`) keeps the gear catalogue's level: Imperial 3, Chitin 3, Bonemold,
+Provinces' own gear (`#nirncraft:gear/<key>`) keeps the gear catalogue's level: Imperial 3, Chitin 3, Bonemold,
 Akaviri 19 and so on. `RegionalGear.minLevel` reads the same table, and the item audit checks it.
 
 ### Enchantments and quality
@@ -63,13 +63,13 @@ Akaviri 19 and so on. `RegionalGear.minLevel` reads the same table, and the item
   is a 15% chance of a second enchantment.
 * **Tempering quality.** Some drops are pre-tempered. Quality runs 1..`1 + L/12`, capped at 5.
 
-### Gold (`skycraft:scaled_gold {min, max, growth}`)
+### Gold (`nirncraft:scaled_gold {min, max, growth}`)
 
 * Amount = `uniform(min, max) × (1 + growth × (L − 1)) × danger`.
 * Growth is 0.04 by default and 0.05–0.06 for boss and noble hoards.
 * Small amounts drop as loose Septims; anything above 64 drops as a coin purse.
 
-## 2. Container taxonomy: `skycraft:containers/<kind>/<tier>`
+## 2. Container taxonomy: `nirncraft:containers/<kind>/<tier>`
 
 Values are the mean total value (gold plus items at their Skyrim values) from `tools/loot_sim.py`. "Tier curve"
 means the gear follows the ladders above at the loot level.
@@ -93,9 +93,9 @@ means the gear follows the ladders above at the loot level.
 | `site/<kind>` | `shrine daedric_shrine word_wall dragon_lair mine shipwreck flotsam harbor landing_camp alchemist_lair` | shipwreck 225 → 1220 | | | | | the dragon lair is a boss chest plus bones and scales; shrines and word walls hold place collectibles |
 | `corpse/<rank>` | what a dead creature carries (see the entity tables) | bandit 20 → 44, leader 148 → 1773 | | | | | `commoner bandit bandit_boss soldier mage mage_boss draugr draugr_boss forsworn falmer vampire dremora giant brute dragon_priest dragon` |
 | `reward/<tier>` | quest rewards: `minor standard major legendary` | standard 224 → 1654 | | | | | `LootApi.questReward(player, tier)` |
-| `skycraft:uniques/<id>` | one legendary unique (section 4) | | | | | | each character finds it once |
+| `nirncraft:uniques/<id>` | one legendary unique (section 4) | | | | | | each character finds it once |
 
-Building blocks under `skycraft:parts/*` are shared by the tables above: `gems`, `soul_gems`, `potions`, `food`,
+Building blocks under `nirncraft:parts/*` are shared by the tables above: `gems`, `soul_gems`, `potions`, `food`,
 `lore_note`, `lockpicks`, `smithing`, `staff`, `clutter`, `gear_common`, `gear_boss` and `gear_rich`.
 
 * **Gem gates.** Rubies appear from level 6, emeralds from 9, sapphires from 12, diamonds from 18 and flawless
@@ -131,7 +131,7 @@ Building blocks under `skycraft:parts/*` are shared by the tables above: `gems`,
 
 ## 3. Regional flavour
 
-| province (gear key) | gear (`#skycraft:gear/<key>`) | ingredients (`#skycraft:loot/ingredients/<key>`) | trinkets (`#skycraft:loot/trinkets/<key>`) | treasures |
+| province (gear key) | gear (`#nirncraft:gear/<key>`) | ingredients (`#nirncraft:loot/ingredients/<key>`) | trinkets (`#nirncraft:loot/trinkets/<key>`) | treasures |
 | --- | --- | --- | --- | --- |
 | skyrim | Nord leveled lists, Ancient Nord, Falmer | Skyrim's | silver and gold rings, Talos amulet, circlets | Dwemer artefacts |
 | solstheim | Stalhrim, Bonemold, Chitin | Solstheim's | silver, copper | Morrowind's set, Black Books |
@@ -144,7 +144,7 @@ Building blocks under `skycraft:parts/*` are shared by the tables above: `gems`,
 | hammerfell | Ra Gada, Redguard, Yokudan | Alik'r herbs | gold | Yokudan relics |
 | high_rock / orsinium | Breton / Orsinium | Wrothgar's | silver, Mara | Direnni, coven and Orc relics |
 
-* **Books.** `skycraft:regional_book` favours the province's own lore books eight to one.
+* **Books.** `nirncraft:regional_book` favours the province's own lore books eight to one.
 * **Gear key.** `RegionalGear.gearKey(region)` decides the key: the province, except Wrothgar (`orsinium`) and
   Solstheim (`solstheim`).
 
@@ -170,7 +170,7 @@ it shows where to look: the named place, "a Prince's shrine", or the province.
 | Regional treasures | 5 per province, from that province's chests (missing ones three times as likely) | 1,500 gold and 1 perk point per set |
 | Legendary arms | 38 uniques (below) | 10,000 gold and 3 perk points |
 
-**Place collectibles** (`skycraft:place_collectibles`):
+**Place collectibles** (`nirncraft:place_collectibles`):
 
 * The dungeon's standard and boss chests, sarcophagi, shrines and word walls hand a character the collectibles bound
   to the named place (`places/*.json`) whose radius covers the container.
@@ -183,11 +183,11 @@ it shows where to look: the named place, "a Prince's shrine", or the province.
 
 Each unique is a fixed, named, enchanted and pre-tempered weapon with lore and a value well above its material.
 
-* **Placing one.** Explorers' sites place them with the table `skycraft:uniques/<id>` or with
+* **Placing one.** Explorers' sites place them with the table `nirncraft:uniques/<id>` or with
   `LegendaryUniques.create(id)`.
 * **Placed uniques.** Uniques with a place are also handed out by that place's chests.
 * **Province uniques.** Uniques without a place turn up, rarely, in their province's boss chests
-  (`skycraft:random_unique`).
+  (`nirncraft:random_unique`).
 * **Once per character.** Every character finds each unique once.
 
 | province | id (base, level, place) |
@@ -235,8 +235,8 @@ Each unique is a fixed, named, enchanted and pre-tempered weapon with lore and a
 * **Dungeons (DUNGEON-QA) and explorers (EXPLORE).**
   * Point containers at `Containers.dungeon("minor" | "standard" | "boss")`, `containers/dungeon/theme/<culture>`,
     `containers/misc/*`, `containers/camp/*` or `containers/site/*`.
-  * The old `skycraft:chests/*` ids still work as aliases, so the existing builders already use the new tables.
-* **Explorers' uniques.** Place a unique with `skycraft:uniques/<id>`, or put `LegendaryUniques.create(id)` on a
+  * The old `nirncraft:chests/*` ids still work as aliases, so the existing builders already use the new tables.
+* **Explorers' uniques.** Place a unique with `nirncraft:uniques/<id>`, or put `LegendaryUniques.create(id)` on a
   rack.
 * **Settlements (BUILDKIT).** Use `Containers.household(wealth 0..3)` for chests and `Containers.householdStores(...)`
   for barrels and sacks. Use `containers/shop/<type>` for shop back rooms. Taking from any of these is theft.
@@ -254,5 +254,5 @@ Each unique is a fixed, named, enchanted and pre-tempered weapon with lore and a
   * `/skyloot curve <table>` prints the averages at levels 1, 6, 12, 18, 27, 32, 46 and 60.
   * `/skyloot collections`, `/skyloot unique <id>` and `/skyloot collectible <collection> <entry>` check and hand
     out collectibles.
-* **Startup sample.** When `run/skycraft-loot-sample.request` exists, the server writes every `containers/*`
-  table's curve to `run/skycraft-loot-sample.txt` on start.
+* **Startup sample.** When `run/nirncraft-loot-sample.request` exists, the server writes every `containers/*`
+  table's curve to `run/nirncraft-loot-sample.txt` on start.

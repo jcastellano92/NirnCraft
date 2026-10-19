@@ -15,19 +15,19 @@ Currently:
 
 ## 2. Write Set
 
-* `mod/src/main/java/com/skycraft/crafting/{SmithingTier,RegionalGear}.java`
-* `mod/src/main/java/com/skycraft/arsenal/{ArsenalItems,LeveledGear,Sheathe}.java`
-* `mod/src/main/java/com/skycraft/arsenal/client/{KillCamClient,SheathedWeaponLayer}.java`
-* `mod/src/main/java/com/skycraft/loot/{LegendaryUniques,Collectibles,CorpseEvents}.java`
-* `mod/src/main/java/com/skycraft/combat/CombatHandler.java`
-* `mod/src/main/java/com/skycraft/vitals/ActionHandler.java`
-* `mod/src/main/java/com/skycraft/client/ClientEvents.java`
-* `mod/src/main/java/com/skycraft/society/entity/{NpcEntity,NpcGoals}.java`
-* `mod/src/main/java/com/skycraft/society/client/NpcModel.java`
-* `mod/src/main/java/com/skycraft/creatures/client/SkyHumanoidModel.java`
-* `mod/src/main/resources/assets/skycraft/{models,textures}/item/**`
-* `mod/src/main/resources/data/skycraft/weapon_attributes/*.json`
-* `mod/src/main/lang/skycraft/items*.json`
+* `mod/src/main/java/com/nirncraft/crafting/{SmithingTier,RegionalGear}.java`
+* `mod/src/main/java/com/nirncraft/arsenal/{ArsenalItems,LeveledGear,Sheathe}.java`
+* `mod/src/main/java/com/nirncraft/arsenal/client/{KillCamClient,SheathedWeaponLayer}.java`
+* `mod/src/main/java/com/nirncraft/loot/{LegendaryUniques,Collectibles,CorpseEvents}.java`
+* `mod/src/main/java/com/nirncraft/combat/CombatHandler.java`
+* `mod/src/main/java/com/nirncraft/vitals/ActionHandler.java`
+* `mod/src/main/java/com/nirncraft/client/ClientEvents.java`
+* `mod/src/main/java/com/nirncraft/society/entity/{NpcEntity,NpcGoals}.java`
+* `mod/src/main/java/com/nirncraft/society/client/NpcModel.java`
+* `mod/src/main/java/com/nirncraft/creatures/client/SkyHumanoidModel.java`
+* `mod/src/main/resources/assets/nirncraft/{models,textures}/item/**`
+* `mod/src/main/resources/data/nirncraft/weapon_attributes/*.json`
+* `mod/src/main/lang/nirncraft/items*.json`
 
 ## 3. Implementation Steps
 

@@ -7,6 +7,6 @@ url = "https://github.com/MrCrayfish/Framework/releases/download/v0.13.27%2B26.3
 hash-format = "sha256"
 hash = "1d18809e402156b3ff4244baa9a156c6b7e957b3452cc09b7e550753fdcc8183"
 
-[skycraft]
+[nirncraft]
 minecraft = "26.3"
 loader = "neoforge"

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "group": "silver_ingot",
+  "ingredient": "nirncraft:raw_silver",
+  "result": {
+    "id": "nirncraft:silver_ingot"
+  },
+  "experience": 0.7,
+  "cookingtime": 200
+}

@@ -26,7 +26,7 @@ cannot hide a hole. The category score is the mean of its sub-metrics. Three kin
            Skyrim's own number. Flagged "P" in the raw tables.
 
 For s_npcs, s_bldgs, q_total and q_per_town the reference is the larger of our Skyrim's value and the value measured
-from the real game (SKYRIM_MEASURED below), so Skycraft's own Skyrim can score under 100 too.
+from the real game (SKYRIM_MEASURED below), so NirnCraft's own Skyrim can score under 100 too.
 
 Anything that is the same everywhere (spells, perks, recipes, NPC role list, rare creature variants) is global: it is
 listed under GLOBAL and not scored per region.
@@ -44,12 +44,12 @@ from collections import Counter, defaultdict
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.environ.get("PARITY_ROOT") or os.path.abspath(os.path.join(HERE, "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-SKY = os.path.join(RES, "skycraft")
+SKY = os.path.join(RES, "nirncraft")
 TAM = os.path.join(SKY, "tamriel")
-DATA = os.path.join(RES, "data", "skycraft")
-JAVA = os.path.join(ROOT, "mod", "src", "main", "java", "com", "skycraft")
-LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft")
-SOUNDS = os.path.join(RES, "assets", "skycraft", "sounds")
+DATA = os.path.join(RES, "data", "nirncraft")
+JAVA = os.path.join(ROOT, "mod", "src", "main", "java", "com", "nirncraft")
+LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft")
+SOUNDS = os.path.join(RES, "assets", "nirncraft", "sounds")
 OUT = os.path.join(HERE, "out")
 CELL_KM2 = (32 / 1000.0) ** 2  # raster cell is 32 blocks (1 block = 1 m): 0.001024 km2
 CAP = 150.0
@@ -115,8 +115,8 @@ METRICS = [
 M_BY_ID = {m[0]: m for m in METRICS}
 
 # Measured from the real game (the owner's Skyrim SE install, nine holds, counts only; see
-# docs/world/DESIGN-PRINCIPLES.md 4.1). Where Skycraft's own Skyrim is thinner than the real thing, the real number is
-# the reference, so the bar is Skyrim itself and not our copy of it. Areas are Skycraft km2 of the same holds (26.49).
+# docs/world/DESIGN-PRINCIPLES.md 4.1). Where NirnCraft's own Skyrim is thinner than the real thing, the real number is
+# the reference, so the bar is Skyrim itself and not our copy of it. Areas are NirnCraft km2 of the same holds (26.49).
 #   s_npcs      845 unique named NPCs placed in the nine holds / 18 named towns          = 46.9 (our Skyrim: 10.4)
 #   s_bldgs     210 named building locations (houses, shops, inns, temples, halls) / 18 = 11.7 (our Skyrim: 5.3)
 #   q_total     371 journal quests (main, faction, Daedric, side, misc, radiant) / 26.49 km2 = 14.0 (ours: 12.6)
@@ -298,9 +298,9 @@ def feature_names(fid, depth=0):
                 elif any(w in short for w in PLANT_WORDS) and "ore" not in short.split("_"):
                     plants.add(n)
             for sp in re.findall(r'"species":\s*"([a-z_0-9]+)"', s):
-                trees.add("skycraft:" + sp)
+                trees.add("nirncraft:" + sp)
             for ref in set(re.findall(r'"([a-z_]+:[a-z0-9_]+/[a-z0-9_/]+)"', s)):
-                if ref != fid and depth < 6 and ref.split(":")[0] in ("skycraft", "minecraft"):
+                if ref != fid and depth < 6 and ref.split(":")[0] in ("nirncraft", "minecraft"):
                     t, pl = feature_names(ref, depth + 1)
                     trees |= t
                     plants |= pl
@@ -316,7 +316,7 @@ def biome_flora(bid):
         j = jload(os.path.join(WG, "biome", bid.split(":")[1] + ".json"), {})
         for step in j.get("features", []):
             for f in step:
-                if f.startswith("skycraft:biome/") or f.split(":")[0] == "minecraft":
+                if f.startswith("nirncraft:biome/") or f.split(":")[0] == "minecraft":
                     t, p = feature_names(f)
                     trees |= t
                     plants |= p
@@ -386,7 +386,7 @@ def region_biomes(region, pj):
                 out.add(m["biome"])
         k = p.get("fallback")
         seen += 1
-    return {b for b in out if b.startswith("skycraft:")
+    return {b for b in out if b.startswith("nirncraft:")
             and os.path.exists(os.path.join(WG, "biome", b.split(":")[1] + ".json"))}
 
 
@@ -431,7 +431,7 @@ def collect():
             sites.setdefault(v, dict(site="unique/" + os.path.basename(f)[:-5], theme=j.get("theme"), kit=j.get("kit"), flavor=None))
     for f in glob.glob(os.path.join(WG, "structure", "*.json")):
         j = jload(f, {})
-        if j.get("type") == "skycraft:dungeon":
+        if j.get("type") == "nirncraft:dungeon":
             randoms.append((os.path.basename(f)[:-5], j))
     for f in glob.glob(os.path.join(WG, "structure", "ruin", "*.json")):
         randoms.append(("ruin/" + os.path.basename(f)[:-5], jload(f, {})))
@@ -589,7 +589,7 @@ def collect():
     for rg, n in scenes_n.items():
         R[rg]["scenes"] += n
 
-    # ---- society data files (skycraft/society/*.json: courts, trainers, province residents)
+    # ---- society data files (nirncraft/society/*.json: courts, trainers, province residents)
     for tf in sorted(glob.glob(os.path.join(SKY, "society", "*.json"))):
         tj = jload(tf, {})
         if not isinstance(tj, dict):
@@ -695,11 +695,11 @@ def collect():
                     if isinstance(v, dict) and v.get("id"):
                         dun_identity[v["id"]] = v
     place_lang = jload(os.path.join(LANG, "place_lore.json"), {})
-    book_keys = [k for k in place_lang if k.startswith("book.skycraft.place.")]
+    book_keys = [k for k in place_lang if k.startswith("book.nirncraft.place.")]
     books_by_place = Counter()
     for k in book_keys:
         parts = k.split(".")
-        # book.skycraft.place.<id>.<n...>; ids may contain no dots
+        # book.nirncraft.place.<id>.<n...>; ids may contain no dots
         if len(parts) >= 4:
             books_by_place[parts[3]] += 1
     prov_regions = defaultdict(list)

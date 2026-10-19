@@ -3,7 +3,7 @@
 Tributaries, springs, lake basins, deltas, waterfalls and river sites for the Tamriel map. Authored rivers and lakes
 (`tools/worldgen/tamriel_vectors.json`) are never moved; everything here is derived on top of them and baked into the
 same rasters the Java side already reads (`MapRaster` / `TamrielHeight` / `MapWaterFeature`) plus
-`skycraft/tamriel/hydrology.json`.
+`nirncraft/tamriel/hydrology.json`.
 
 ## Method
 

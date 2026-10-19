@@ -1,0 +1,184 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 5,
+            "max": 16,
+            "growth": 0.05,
+            "type": "nirncraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 70,
+          "value": "nirncraft:parts/gear_common"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 30
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 12,
+          "value": "nirncraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar",
+          "weight": 18,
+          "modifier": [
+            {
+              "tag": "nirncraft:loot/ingredients",
+              "type": "nirncraft:regional_tag"
+            },
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 8,
+          "value": "nirncraft:parts/lockpicks"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 10,
+          "value": "nirncraft:parts/gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 5,
+          "modifier": {
+            "type": "nirncraft:leveled_tome"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 14,
+          "value": "nirncraft:parts/potions"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "type": "nirncraft:regional_book"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:gold_ring",
+          "weight": 4,
+          "modifier": {
+            "tag": "nirncraft:loot/trinkets",
+            "type": "nirncraft:regional_tag"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 2,
+          "modifier": {
+            "type": "nirncraft:skill_book"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 6,
+          "value": "nirncraft:parts/food"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 16
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:regional_treasure",
+          "weight": 3,
+          "condition": {
+            "min": 12,
+            "max": 999,
+            "type": "nirncraft:loot_level"
+          },
+          "modifier": {
+            "type": "nirncraft:regional_treasure"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 97
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:parts/gems"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "collection": "stones_of_barenziah",
+            "type": "nirncraft:collection_complete"
+          },
+          {
+            "chance": 0.3,
+            "type": "minecraft:random_chance"
+          }
+        ]
+      }
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 1,
+          "modifier": {
+            "type": "nirncraft:place_collectibles"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/dungeon/standard"
+}

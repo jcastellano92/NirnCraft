@@ -5,7 +5,7 @@ from java_text import matching,arguments
 
 def migrate(scope):
     changed=0
-    for path in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
+    for path in (ROOT/'mod/src/main/java/com/nirncraft').rglob('*.java'):
         if owner(path)!=scope:continue
         source=path.read_text(encoding='utf8');edits=[]
         pattern=r'void (addAdditionalSaveData|readAdditionalSaveData)\((?:net\.minecraft\.nbt\.)?CompoundTag (\w+)\)\s*\{'
@@ -30,7 +30,7 @@ def migrate(scope):
                     if not re.fullmatch(r'"(?:[^"\\]|\\.)*"',key):
                         raise ValueError(str(path)+': nonliteral saved field needs review: '+key)
                     if key not in keys:keys.append(key)
-                init='com.skycraft.platform.ValueTags.read('+value+(' , '+', '.join(keys) if keys else '')+')'
+                init='com.nirncraft.platform.ValueTags.read('+value+(' , '+', '.join(keys) if keys else '')+')'
                 suffix=''
             else:
                 init='new net.minecraft.nbt.CompoundTag()'

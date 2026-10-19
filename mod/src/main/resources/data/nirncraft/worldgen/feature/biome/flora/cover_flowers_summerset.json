@@ -1,0 +1,42 @@
+{
+  "type": "nirncraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:lily_of_the_valley",
+        "weight": 3
+      },
+      {
+        "state": "minecraft:white_tulip",
+        "weight": 2
+      },
+      {
+        "state": "minecraft:azure_bluet",
+        "weight": 2
+      },
+      {
+        "state": "minecraft:allium",
+        "weight": 1
+      },
+      {
+        "state": {
+          "id": "minecraft:peony",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 1
+      }
+    ],
+    "scale": 28,
+    "patchiness": 0.85,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 3,
+      "max_inclusive": 8
+    },
+    "spread": 3,
+    "salt": 9288,
+    "near_water": false
+  }
+}

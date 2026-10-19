@@ -25,10 +25,10 @@ class DiagnosticIsolation(unittest.TestCase):
         game = self.instance / '.minecraft'
         (game / 'mods').mkdir(parents=True)
         (game / 'migration').mkdir()
-        self.core = game / 'mods/skycraft-core.jar'
+        self.core = game / 'mods/nirncraft-core.jar'
         with zipfile.ZipFile(self.core, 'w') as jar:
-            jar.writestr('META-INF/neoforge.mods.toml', '[[mods]]\nmodId="skycraft"\n[[dependencies.skycraft]]\nmodId="minecraft"\nversionRange="[26.3]"\n[[dependencies.skycraft]]\nmodId="neoforge"\n')
-            jar.writestr('com/skycraft/Skycraft.class', bytes.fromhex('cafebabe00000045'))
+            jar.writestr('META-INF/neoforge.mods.toml', '[[mods]]\nmodId="nirncraft"\n[[dependencies.nirncraft]]\nmodId="minecraft"\nversionRange="[26.3]"\n[[dependencies.nirncraft]]\nmodId="neoforge"\n')
+            jar.writestr('com/nirncraft/NirnCraft.class', bytes.fromhex('cafebabe00000045'))
         marker = {'diagnosticOnly': True, 'fullPackAcceptance': False,
                   'instanceName': diagnostic.DIAGNOSTIC_NAME,
                   'target': {key: diagnostic.TARGET[key] for key in ('minecraft', 'neoforge', 'java')},
@@ -70,12 +70,12 @@ class DiagnosticIsolation(unittest.TestCase):
         self.assertFalse(result['runtimeVerified'])
         self.assertFalse(result['launched'])
         instance = Path(result['instance'])
-        self.assertIn('-Dskycraft.autotest.server=127.0.0.1:25576', (instance / 'instance.cfg').read_text())
-        self.assertIn('skycraft.autotest.world=\n', (instance / '.minecraft/skycraft_autotest.properties').read_text())
+        self.assertIn('-Dnirncraft.autotest.server=127.0.0.1:25576', (instance / 'instance.cfg').read_text())
+        self.assertIn('nirncraft.autotest.world=\n', (instance / '.minecraft/nirncraft_autotest.properties').read_text())
 
     def test_preparation_preserves_full_pack_and_authentication(self):
         prism = self.root / 'Prism'
-        for name in ('Skycraft', 'Skycraft-autotest', diagnostic.TARGET['instanceName'], diagnostic.DIAGNOSTIC_NAME):
+        for name in ('NirnCraft', 'NirnCraft-autotest', diagnostic.TARGET['instanceName'], diagnostic.DIAGNOSTIC_NAME):
             folder = prism / 'instances' / name
             folder.mkdir(parents=True)
             (folder / 'keep').write_text(name)
@@ -85,14 +85,14 @@ class DiagnosticIsolation(unittest.TestCase):
             result = diagnostic.prepare(self.archive, prism, None)
         self.assertFalse(result['fullPackAcceptance'])
         self.assertFalse(result['launched'])
-        for name in ('Skycraft', 'Skycraft-autotest', diagnostic.TARGET['instanceName']):
+        for name in ('NirnCraft', 'NirnCraft-autotest', diagnostic.TARGET['instanceName']):
             self.assertEqual(name, (prism / 'instances' / name / 'keep').read_text())
         self.assertEqual('private account fixture', (prism / 'accounts.json').read_text())
         self.assertEqual(diagnostic.DIAGNOSTIC_NAME, (Path(result['backup']) / 'keep').read_text())
         cfg = (Path(result['instance']) / 'instance.cfg').read_text()
         self.assertIn('name=' + diagnostic.DIAGNOSTIC_NAME, cfg)
-        self.assertIn('-Dskycraft.autotest.live=true', cfg)
-        self.assertIn('qa_core_diagnostic_263', (Path(result['instance']) / '.minecraft/skycraft_autotest.properties').read_text())
+        self.assertIn('-Dnirncraft.autotest.live=true', cfg)
+        self.assertIn('qa_core_diagnostic_263', (Path(result['instance']) / '.minecraft/nirncraft_autotest.properties').read_text())
 
 
 if __name__ == '__main__':

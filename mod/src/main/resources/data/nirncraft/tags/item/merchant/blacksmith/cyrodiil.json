@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:steel_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:corundum_ingot",
+      "required": false
+    },
+    "minecraft:iron_ingot"
+  ]
+}

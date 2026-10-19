@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/thistle_branch"
+      },
+      {
+        "model": "nirncraft:block/thistle_branch",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/thistle_branch",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/thistle_branch",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/thistle_branch_harvested"
+      },
+      {
+        "model": "nirncraft:block/thistle_branch_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/thistle_branch_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/thistle_branch_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

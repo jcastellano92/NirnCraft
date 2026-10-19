@@ -2,7 +2,7 @@
 """Floating-landmark census on the dev server (docs/AGENT-RULES.md fast loop).
 
 Regenerates an area in tiles with the current code, then runs the server census
-`/skycraft-landmarks groundcheck <x> <z> <half>` (com.skycraft.landmarks.GroundCheck) tile by tile: every landmark
+`/nirncraft-landmarks groundcheck <x> <z> <half>` (com.nirncraft.landmarks.GroundCheck) tile by tile: every landmark
 site, minor site and scene prop is scanned for parts of solid blocks with no way down to the terrain (a flood fill
 over the finished chunks), and a control sample of plain terrain gives the natural rate. Prints the summed table and
 the worst sites; exit code 1 when more than --max-share of the built sites float.
@@ -11,11 +11,11 @@ the worst sites; exit code 1 when more than --max-share of the built sites float
   py -3 -I tools/qa/landmark_ground_check.py --center 0 0 --half 1500 --legacy   # the same with the old placement
   py -3 -I tools/qa/landmark_ground_check.py --center 0 0 --half 1500 --no-regen # census of what is there
 
---legacy switches `/skycraft-landmarks grounding false` first (the five-point settle of before the fix, no foundations,
+--legacy switches `/nirncraft-landmarks grounding false` first (the five-point settle of before the fix, no foundations,
 no support pass) and back on afterwards, so one server run gives the before/after pair. A dev server restart (new
 code) resets the switch to ON. The census is per 500-block tile: one command that loads the 3x3 chunks of every site
 of 9 km2 at once ran a 4 GB server out of heap (chunks cannot unload inside one tick).
-One dev server per machine: this uses tools/dev/devserver.ps1; set SKYCRAFT_DEV_FORCE=1 to pass -Force when
+One dev server per machine: this uses tools/dev/devserver.ps1; set NIRNCRAFT_DEV_FORCE=1 to pass -Force when
 another worktree's server is up and there is RAM for two.
 """
 import argparse
@@ -26,8 +26,8 @@ import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DEV = os.path.join(ROOT, "tools", "dev", "devserver.ps1")
-OUT_JSON = os.path.join(ROOT, "mod", "run", "devworld", "skycraft-landmarks", "groundcheck.json")
-FORCE = os.environ.get("SKYCRAFT_DEV_FORCE") == "1"
+OUT_JSON = os.path.join(ROOT, "mod", "run", "devworld", "nirncraft-landmarks", "groundcheck.json")
+FORCE = os.environ.get("NIRNCRAFT_DEV_FORCE") == "1"
 TILE = 500  # blocks; 32x32 chunks: a 63x63 tile ran a 4 GB dev server out of heap
 
 
@@ -73,7 +73,7 @@ def main():
     cx, cz, half = a.center[0], a.center[1], a.half
     area = list(tiles(cx - half, cz - half, cx + half, cz + half))
 
-    rc, out = dev(["skycraft-landmarks grounding %s" % ("false" if a.legacy else "true")])
+    rc, out = dev(["nirncraft-landmarks grounding %s" % ("false" if a.legacy else "true")])
     if rc != 0:
         print(out[-600:])
         return 2
@@ -81,8 +81,8 @@ def main():
         for i, (x0, z0, x1, z1) in enumerate(area):
             if i and a.restart_every and i % a.restart_every == 0:
                 restart()
-                dev(["skycraft-landmarks grounding %s" % ("false" if a.legacy else "true")])
-            rc, out = dev(["skycraft-dev regen %d %d %d %d" % (x0, z0, x1, z1), "save-all flush"])
+                dev(["nirncraft-landmarks grounding %s" % ("false" if a.legacy else "true")])
+            rc, out = dev(["nirncraft-dev regen %d %d %d %d" % (x0, z0, x1, z1), "save-all flush"])
             print("regen %d/%d (%d,%d)-(%d,%d): %s" % (i + 1, len(area), x0, z0, x1, z1, "ok" if rc == 0 else "FAILED rc=%d" % rc), flush=True)
             if rc != 0:
                 print(out[-600:])
@@ -90,7 +90,7 @@ def main():
     cats, bad, counters = {}, [], ""
     for i, (x0, z0, x1, z1) in enumerate(area):
         tcx, tcz, th = (x0 + x1) // 2, (z0 + z1) // 2, (x1 - x0 + 1) // 2
-        rc, out = dev(["skycraft-landmarks groundcheck %d %d %d" % (tcx, tcz, th)])
+        rc, out = dev(["nirncraft-landmarks groundcheck %d %d %d" % (tcx, tcz, th)])
         if rc != 0:
             print("census tile %d failed rc=%d\n%s" % (i + 1, rc, out[-600:]))
             return 2
@@ -109,7 +109,7 @@ def main():
         counters = data.get("counters", "")
         print("census %d/%d done" % (i + 1, len(area)), flush=True)
     if a.legacy:
-        dev(["skycraft-landmarks grounding true"])
+        dev(["nirncraft-landmarks grounding true"])
 
     print("census %d,%d +-%d, grounding %s" % (cx, cz, half, "OFF (legacy)" if a.legacy else "ON"))
     print("  %-18s %6s %6s %6s %7s %6s %8s" % ("category", "sites", "built", "float", "share", "stray", "blocks"))

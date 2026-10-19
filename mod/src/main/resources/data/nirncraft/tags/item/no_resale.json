@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "#nirncraft:artifacts",
+    {
+      "id": "nirncraft:house_key",
+      "required": false
+    },
+    {
+      "id": "nirncraft:monster_trophy",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "steps",
+  "sites": "seven_thousand_steps",
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

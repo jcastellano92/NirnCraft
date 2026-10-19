@@ -31,7 +31,7 @@ except ImportError:  # pragma: no cover
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-RES_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft", "tamriel")
+RES_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft", "tamriel")
 
 CELL = 32
 SEA = 63

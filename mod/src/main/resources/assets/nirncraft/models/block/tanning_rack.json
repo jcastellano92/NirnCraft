@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "top": "nirncraft:block/tanning_rack_top",
+    "bottom": "nirncraft:block/tanning_rack_bottom",
+    "front": "nirncraft:block/tanning_rack_front",
+    "side": "nirncraft:block/tanning_rack_side"
+  }
+}

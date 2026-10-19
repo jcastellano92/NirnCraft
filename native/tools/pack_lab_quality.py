@@ -22,7 +22,7 @@ usage (from native/, after native\\build.ps1 or a pack_lab build):
 --smooth: every knob together from 0 to 1 in tenths per scene (loss against all-1 and the passes' GPU time per step,
 plus a contact sheet smooth.png): the look and the cost should both change in small, even steps, with no jump.
 
-Runs pack_lab at below-normal priority, one at a time, aether on its CPU backend (gpu=0); skips while the GPU is busy
+Runs pack_lab at below-normal priority, one at a time, atlas on its CPU backend (gpu=0); skips while the GPU is busy
 (nvidia-smi utilization >= 40%, e.g. a game running).
 """
 from __future__ import annotations

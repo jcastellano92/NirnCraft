@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "nirncraft:block/stuck_arrows",
+        "y": 0
+      },
+      {
+        "model": "nirncraft:block/stuck_arrows",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/stuck_arrows",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/stuck_arrows",
+        "y": 270
+      }
+    ]
+  }
+}

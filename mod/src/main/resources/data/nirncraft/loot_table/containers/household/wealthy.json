@@ -1,0 +1,120 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 10,
+            "max": 40,
+            "growth": 0.04,
+            "type": "nirncraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:parts/food"
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:gold_ring",
+          "weight": 25,
+          "modifier": {
+            "tag": "nirncraft:loot/trinkets",
+            "type": "nirncraft:regional_tag"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 15,
+          "value": "nirncraft:parts/gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 10,
+          "value": "nirncraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 25,
+          "value": "nirncraft:parts/potions"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 6,
+          "modifier": {
+            "kind": "weapon",
+            "enchant_chance": 0.1,
+            "quality_chance": 0.15,
+            "type": "nirncraft:regional_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 6,
+          "modifier": {
+            "kind": "armor",
+            "enchant_chance": 0.1,
+            "quality_chance": 0.15,
+            "type": "nirncraft:regional_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 3,
+          "modifier": {
+            "type": "nirncraft:skill_book"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 10
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 40,
+          "modifier": {
+            "type": "nirncraft:regional_book"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 60
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/household/wealthy"
+}

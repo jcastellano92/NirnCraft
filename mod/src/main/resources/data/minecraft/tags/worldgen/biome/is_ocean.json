@@ -1,15 +1,15 @@
 {
   "replace": false,
   "values": [
-    "skycraft:cold_ocean",
-    "skycraft:coral_sea",
-    "skycraft:deep_cold_ocean",
-    "skycraft:deep_sea_of_ghosts",
-    "skycraft:deep_temperate_ocean",
-    "skycraft:deep_warm_ocean",
-    "skycraft:inner_sea",
-    "skycraft:sea_of_ghosts",
-    "skycraft:temperate_ocean",
-    "skycraft:warm_ocean"
+    "nirncraft:cold_ocean",
+    "nirncraft:coral_sea",
+    "nirncraft:deep_cold_ocean",
+    "nirncraft:deep_sea_of_ghosts",
+    "nirncraft:deep_temperate_ocean",
+    "nirncraft:deep_warm_ocean",
+    "nirncraft:inner_sea",
+    "nirncraft:sea_of_ghosts",
+    "nirncraft:temperate_ocean",
+    "nirncraft:warm_ocean"
   ]
 }

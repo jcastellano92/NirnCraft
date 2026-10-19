@@ -1,0 +1,312 @@
+{
+  "region": "cyrodiil/heartlands",
+  "province": "cyrodiil",
+  "line": "story_heartlands",
+  "category": "main",
+  "title": "The Ring Beneath the Rings",
+  "why": [
+    "cyrodiil/heartlands.L9.council_factions",
+    "cyrodiil/heartlands.L10.ring_beneath_the_rings",
+    "cyrodiil/heartlands.L7.ward_ladder",
+    "cyrodiil/heartlands.L9.watch_vs_guild"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "imperial_city",
+    "places": [
+      "imperial_city",
+      "wayshrine_of_julianos_3",
+      "owlmarsh_pit",
+      "northwestern_shore_dolmen",
+      "oblivion_gate_68",
+      "blue_road_keep",
+      "the_winking_griffon",
+      "oblivion_gate_89",
+      "fort_roebeck",
+      "bleakers_outpost",
+      "birchbend_diggings",
+      "old_bridge",
+      "fort_sejanus",
+      "root_tooth_mill",
+      "charcoal_cave",
+      "belda",
+      "exhausted_mine",
+      "waterfront_district",
+      "chalman_keep"
+    ],
+    "max_road_blocks": 600,
+    "rumour": "Two Elder Council clerks were pulled from Lake Rumare at dawn, each clutching a freshly illuminated pedigree naming a different nobleman as heir to the Ruby Throne.",
+    "notice": "IMPERIAL WATCH PROCLAMATION: Information regarding the counterfeit Chancery seals circulating in the Market District and around Lake Rumare will be richly rewarded.",
+    "npc": "story_heartlands_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_heartlands_01_two_pedigrees",
+      "order": 1,
+      "title": "Two Seals of the Dragon",
+      "region": "cyrodiil/heartlands",
+      "category": "main",
+      "start": "board:imperial_city",
+      "prereq": null,
+      "why": [
+        "cyrodiil/heartlands.L9.council_factions",
+        "cyrodiil/heartlands.L7.ward_ladder"
+      ],
+      "places": [
+        "imperial_city",
+        "aleswell"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "imperial_city",
+          "objective": "Examine the two matching Septim pedigree rolls at the Imperial Watch post in the Imperial City"
+        },
+        {
+          "id": 20,
+          "place": "aleswell",
+          "objective": "Track the parchment-maker's watermark north across the lake road to Aleswell"
+        },
+        {
+          "id": 30,
+          "place": "imperial_city",
+          "objective": "Bring the vellum sample and ink-receipt back to the Chancery archivist in the Imperial City"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "imperial_city",
+          "text": "Examine the two matching Septim pedigree rolls at the Imperial Watch post in the Imperial City"
+        },
+        {
+          "type": "go",
+          "place": "aleswell",
+          "text": "Track the parchment-maker's watermark north across the lake road to Aleswell"
+        },
+        {
+          "type": "go",
+          "place": "imperial_city",
+          "text": "Bring the vellum sample and ink-receipt back to the Chancery archivist in the Imperial City"
+        }
+      ],
+      "consequence": "world_state:heartlands_vellum_traced",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "requires": [],
+      "consequence_detail": {
+        "world_state": "heartlands_vellum_traced",
+        "flag": "story_hl_vellum_traced",
+        "summary": "Both rival pedigrees were penned on Third Era Chancery vellum stolen from the same sealed archive."
+      }
+    },
+    {
+      "id": "story_heartlands_02_ink_of_the_ancestors",
+      "order": 2,
+      "title": "Gall and Gold-Leaf",
+      "region": "cyrodiil/heartlands",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_heartlands_01_two_pedigrees",
+      "requires": [
+        "story_heartlands_01_two_pedigrees"
+      ],
+      "why": [
+        "cyrodiil/heartlands.L8.university_rationalism",
+        "cyrodiil/heartlands.L10.lake_cult_caves"
+      ],
+      "places": [
+        "imperial_city",
+        "fort_caractacus",
+        "roxey_inn"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "imperial_city",
+          "objective": "Follow the gold-beater's delivery list from the Imperial City across the northern causeway"
+        },
+        {
+          "id": 20,
+          "place": "fort_caractacus",
+          "objective": "Clear the hired cutthroats out of Fort Caractacus and recover the engraved brass signet-dies"
+        },
+        {
+          "id": 30,
+          "place": "roxey_inn",
+          "objective": "Question the courier's factor waiting at Roxey Inn"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "imperial_city",
+          "text": "Follow the gold-beater's delivery list from the Imperial City across the northern causeway"
+        },
+        {
+          "type": "clear",
+          "place": "fort_caractacus",
+          "text": "Clear the hired cutthroats out of Fort Caractacus and recover the engraved brass signet-dies"
+        },
+        {
+          "type": "go",
+          "place": "roxey_inn",
+          "text": "Question the courier's factor waiting at Roxey Inn"
+        }
+      ],
+      "consequence": "world_state:caractacus_dies_recovered",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "caractacus_dies_recovered",
+        "flag": "story_hl_dies_recovered",
+        "summary": "The signet-dies recovered at Fort Caractacus bear the mark of Caelia Vane, former Chief Herald of the Elder Council."
+      }
+    },
+    {
+      "id": "story_heartlands_03_the_sunken_chancery",
+      "order": 3,
+      "title": "The Sunken Chancery Key",
+      "region": "cyrodiil/heartlands",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_heartlands_02_ink_of_the_ancestors",
+      "requires": [
+        "story_heartlands_02_ink_of_the_ancestors"
+      ],
+      "why": [
+        "cyrodiil/heartlands.L7.beggar_eyes",
+        "cyrodiil/heartlands.L10.prison_tunnels"
+      ],
+      "places": [
+        "roxey_inn",
+        "pells_gate",
+        "fort_alessia"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "roxey_inn",
+          "objective": "Ride south from Roxey Inn along the Red Ring Road toward Pell's Gate"
+        },
+        {
+          "id": 20,
+          "place": "pells_gate",
+          "objective": "Meet the retired sewer-warden in Pell's Gate to learn which sluice-gate leads under the Palace"
+        },
+        {
+          "id": 30,
+          "place": "fort_alessia",
+          "objective": "Seize the Ayleid ring-key from the Council of Ash garrison at Fort Alessia"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "roxey_inn",
+          "text": "Ride south from Roxey Inn along the Red Ring Road toward Pell's Gate"
+        },
+        {
+          "type": "go",
+          "place": "pells_gate",
+          "text": "Meet the retired sewer-warden in Pell's Gate to learn which sluice-gate leads under the Palace"
+        },
+        {
+          "type": "clear",
+          "place": "fort_alessia",
+          "text": "Seize the Ayleid ring-key from the Council of Ash garrison at Fort Alessia"
+        }
+      ],
+      "consequence": "world_state:substructure_ring_key_taken",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "substructure_ring_key_taken",
+        "flag": "story_hl_ring_key_taken",
+        "summary": "With the Ayleid ring-key from Fort Alessia, the sealed lower gallery beneath the Imperial City wards can be opened."
+      }
+    },
+    {
+      "id": "story_heartlands_04_the_forgers_press",
+      "order": 4,
+      "title": "The Ring Beneath the Rings",
+      "region": "cyrodiil/heartlands",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_heartlands_03_the_sunken_chancery",
+      "requires": [
+        "story_heartlands_03_the_sunken_chancery"
+      ],
+      "finale": true,
+      "why": [
+        "cyrodiil/heartlands.L10.ring_beneath_the_rings",
+        "cyrodiil/heartlands.L9.council_factions"
+      ],
+      "places": [
+        "fort_alessia",
+        "imperial_city"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "fort_alessia",
+          "objective": "Carry the Ayleid ring-key from Fort Alessia back to the Imperial City underworks"
+        },
+        {
+          "id": 20,
+          "place": "imperial_city",
+          "objective": "Descend into the Ring Beneath the Rings and defeat Chief Herald Caelia Vane's bodyguards"
+        },
+        {
+          "id": 30,
+          "place": "imperial_city",
+          "objective": "Shatter the forgery press and lay the Council of Ash's subscriber roll before the Elder Council"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "fort_alessia",
+          "text": "Carry the Ayleid ring-key from Fort Alessia back to the Imperial City underworks"
+        },
+        {
+          "type": "clear",
+          "place": "imperial_city",
+          "text": "Descend into the Ring Beneath the Rings and defeat Chief Herald Caelia Vane's bodyguards"
+        },
+        {
+          "type": "go",
+          "place": "imperial_city",
+          "text": "Shatter the forgery press and lay the Council of Ash's subscriber roll before the Elder Council"
+        }
+      ],
+      "consequence": "world_state:council_of_ash_exposed_in_capital",
+      "rewards": {
+        "gold": 900,
+        "xp": 1000,
+        "title": "Inquisitor of the Ruby Seal",
+        "unique_item": "nirncraft:imperial_chestplate"
+      },
+      "consequence_detail": {
+        "world_state": "council_of_ash_exposed_in_capital",
+        "flag": "story_hl_finale_complete",
+        "summary": "Caelia Vane's地下 forgery press is smashed and the Council of Ash's list of bribed councillors is read aloud in the Elder Council chambers."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_heartlands_hook_npc",
+      "name": "Warden of the Imperial City",
+      "role": "guard",
+      "place": "imperial_city",
+      "greet": "Two Elder Council clerks were pulled from Lake Rumare at dawn, each clutching a freshly illuminated pedigree naming a different nobleman as heir to the Ruby Throne."
+    }
+  ]
+}

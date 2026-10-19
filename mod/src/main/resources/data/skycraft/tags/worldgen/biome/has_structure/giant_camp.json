@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "#skycraft:spawns/plains",
-    "minecraft:snowy_plains",
-    "#minecraft:is_savanna",
-    {"id": "#forge:is_plains", "required": false}
-  ]
-}

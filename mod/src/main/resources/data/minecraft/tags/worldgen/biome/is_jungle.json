@@ -1,11 +1,11 @@
 {
   "replace": false,
   "values": [
-    "skycraft:graht_oak_forest",
-    "skycraft:iliac_rainforest",
-    "skycraft:pellitine_jungle",
-    "skycraft:pyandonean_jungle_isles",
-    "skycraft:tsaesci_jungle",
-    "skycraft:valenwood_rainforest"
+    "nirncraft:graht_oak_forest",
+    "nirncraft:iliac_rainforest",
+    "nirncraft:pellitine_jungle",
+    "nirncraft:pyandonean_jungle_isles",
+    "nirncraft:tsaesci_jungle",
+    "nirncraft:valenwood_rainforest"
   ]
 }

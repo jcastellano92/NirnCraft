@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/glowing_mushroom"
+      },
+      {
+        "model": "nirncraft:block/glowing_mushroom",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/glowing_mushroom",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/glowing_mushroom",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/glowing_mushroom_harvested"
+      },
+      {
+        "model": "nirncraft:block/glowing_mushroom_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/glowing_mushroom_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/glowing_mushroom_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

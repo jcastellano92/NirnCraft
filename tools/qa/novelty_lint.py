@@ -20,7 +20,7 @@ import re
 import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft")
+LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft")
 FILES = ["place_lore", "society", "quest", "quest_story", "lore"]
 PROVINCES = ["skyrim", "cyrodiil", "morrowind", "black_marsh", "elsweyr", "valenwood", "summerset", "hammerfell",
              "high_rock", "atmora", "akavir", "yokuda", "solstheim"]

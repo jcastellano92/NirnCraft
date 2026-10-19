@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "group": "quicksilver_ingot",
+  "ingredient": [
+    "nirncraft:quicksilver_ore",
+    "nirncraft:deepslate_quicksilver_ore"
+  ],
+  "result": {
+    "id": "nirncraft:quicksilver_ingot"
+  },
+  "experience": 0.7,
+  "cookingtime": 100
+}

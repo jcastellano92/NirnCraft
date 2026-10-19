@@ -1,6 +1,6 @@
 # Controllable 0.21.x client config (Framework config "controllable:client").
-# Skycraft defaults for the Steam Deck: Steam button icons, virtual mouse cursor in menus, all button hints.
-# Keys Skycraft doesn't set are filled in by Framework with Controllable's defaults on first launch.
+# NirnCraft defaults for the Steam Deck: Steam button icons, virtual mouse cursor in menus, all button hints.
+# Keys NirnCraft doesn't set are filled in by Framework with Controllable's defaults on first launch.
 
 [client.options]
 	controllerIcons = "STEAM"

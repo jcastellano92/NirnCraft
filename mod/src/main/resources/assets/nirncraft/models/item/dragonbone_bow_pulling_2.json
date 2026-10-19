@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/dragonbone_bow",
+  "textures": {
+    "layer0": "nirncraft:item/dragonbone_bow_pulling_2"
+  }
+}

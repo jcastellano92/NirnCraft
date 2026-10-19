@@ -13,12 +13,12 @@ Currently:
 
 ## 2. Write Set
 
-* `mod/src/main/java/com/skycraft/roads/Carriages.java`
-* `mod/src/main/java/com/skycraft/travel/{TravelNetworks,TravelCommand,TravelSelftest}.java`
-* `mod/src/main/java/com/skycraft/creatures/travel/StriderPorts.java`
-* `mod/src/main/java/com/skycraft/sailing/FerryRoutes.java`
-* `mod/src/main/resources/skycraft/travel/*.json`
-* `mod/src/main/lang/skycraft/travel.json`
+* `mod/src/main/java/com/nirncraft/roads/Carriages.java`
+* `mod/src/main/java/com/nirncraft/travel/{TravelNetworks,TravelCommand,TravelSelftest}.java`
+* `mod/src/main/java/com/nirncraft/creatures/travel/StriderPorts.java`
+* `mod/src/main/java/com/nirncraft/sailing/FerryRoutes.java`
+* `mod/src/main/resources/nirncraft/travel/*.json`
+* `mod/src/main/lang/nirncraft/travel.json`
 
 ## 3. Implementation Steps
 

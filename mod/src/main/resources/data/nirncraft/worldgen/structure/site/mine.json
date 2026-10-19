@@ -1,0 +1,16 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "mine",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "mine"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

@@ -1,0 +1,616 @@
+{
+  "line": "thalmor",
+  "category": "faction",
+  "faction": "thalmor",
+  "region": "summerset/summerset_isle",
+  "speakers": {
+    "narrator": "Narrator"
+  },
+  "places": {
+    "orvanwe_estate": {
+      "x": -11650,
+      "z": 12700,
+      "r": 30,
+      "name": "Orvanwe Estate"
+    }
+  },
+  "npcs": [
+    {
+      "id": "erunor_vaelanwe",
+      "name": "Justiciar Erunor Vaelanwe",
+      "role": "thalmor",
+      "place": "alinor",
+      "offset": [
+        5,
+        5
+      ],
+      "hall": "thalmor",
+      "greet": "You stand straighter than most recruits. Good. The Thalmor notice posture. We notice everything, eventually."
+    },
+    {
+      "id": "elenwen",
+      "name": "First Emissary Elenwen",
+      "role": "thalmor",
+      "place": "thalmor_embassy",
+      "offset": [
+        3,
+        -4
+      ],
+      "female": true,
+      "greet": "Skyrim is cold, its people are loud, and its gods are wrong. Otherwise it is a perfectly pleasant posting. What do you need?"
+    },
+    {
+      "id": "telanil_orvanwe",
+      "name": "Envoy Telanil Orvanwe",
+      "role": "thalmor",
+      "place": "thalmor_embassy",
+      "offset": [
+        -5,
+        3
+      ],
+      "greet": "Another fresh face from home. Have a drink. The Emissary's wine is the only thing in this province that isn't trying to kill us."
+    },
+    {
+      "id": "sigrun_frost_hand",
+      "name": "Sigrun Frost-Hand",
+      "role": "farmer",
+      "place": "rorikstead",
+      "offset": [
+        10,
+        -8
+      ],
+      "female": true,
+      "greet": "Rorikstead grows good grain and minds its own business. I'd thank you to do the same, elf."
+    }
+  ],
+  "relics": [
+    {
+      "id": "th_dead_drop_letter",
+      "name": "Unsigned Letter",
+      "desc": "Found under a loose cobble on the Alinor quay. The cipher is clumsy; the treason is not.",
+      "icon": 11
+    },
+    {
+      "id": "th_blade_insignia",
+      "name": "Tarnished Blades Insignia",
+      "desc": "A dragon on a dulled steel badge. Its owner kept it hidden for thirty years and polished it every night.",
+      "icon": 26
+    },
+    {
+      "id": "th_talos_amulet",
+      "name": "Amulet of Talos",
+      "desc": "Taken from a hidden shrine near Rorikstead. Its worshippers would call it faith. The Thalmor call it evidence.",
+      "icon": 26
+    },
+    {
+      "id": "th_orvanwe_letters",
+      "name": "Orvanwe's Correspondence",
+      "desc": "Letters in a careful hand, sold to a Windhelm buyer: patrol routes, prisoner lists, and the Emissary's own notes.",
+      "icon": 11
+    }
+  ],
+  "scenes": {
+    "th_reception": [
+      [
+        "narrator",
+        "Music drifts through the embassy hall. Jarls' cousins and merchant princes hold their cups very carefully and smile at the Thalmor guards."
+      ],
+      [
+        "elenwen",
+        "Look at them. Every one of them hates us, and every one of them came. That is what power is: an invitation no one can afford to refuse."
+      ],
+      [
+        "elenwen",
+        "Mingle. Someone in this room has been selling my letters. Find out who before the wine runs out."
+      ]
+    ],
+    "th_high_justiciar": [
+      [
+        "erunor_vaelanwe",
+        "Orvanwe's family has served the Dominion for nine generations. He sold all nine of them for Windhelm gold."
+      ],
+      [
+        "erunor_vaelanwe",
+        "You found him, you judged him, and you did not hesitate. The Emissary has written to Alinor about you. I have been asked to read her letter aloud."
+      ],
+      [
+        "narrator",
+        "The letter is short. It names you High Justiciar, and asks that you be given whatever you need."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "th_eyes_of_the_dominion",
+      "title": "The Eyes of the Dominion",
+      "start": "npc:erunor_vaelanwe",
+      "requires": [
+        "!faction:thalmor",
+        "race:altmer",
+        "!faction:blades",
+        "!faction:stormcloaks"
+      ],
+      "offer": "I wish to serve the Thalmor.",
+      "pitch": "Many do, in words. Someone in Alinor is leaving letters for the enemies of the Dominion under a cobblestone on the quay. Find the letter, bring it to me unread, and we will discuss your future.",
+      "desc": "Justiciar Erunor Vaelanwe in Alinor offered me a test: find the treasonous letter someone has been leaving beneath a stone on the city's quay, and bring it to him without reading it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "alinor",
+          "offset": [
+            120,
+            80
+          ],
+          "text": "Search the Alinor quay"
+        },
+        {
+          "type": "retrieve",
+          "place": "alinor",
+          "offset": [
+            120,
+            80
+          ],
+          "relic": "th_dead_drop_letter",
+          "radius": 8,
+          "text": "Find the letter under the loose cobblestone"
+        },
+        {
+          "type": "kill",
+          "place": "alinor",
+          "offset": [
+            120,
+            80
+          ],
+          "text": "Deal with the courier who comes to collect it",
+          "spawn": [
+            {
+              "type": "npc:thief",
+              "name": "Nervous Courier",
+              "target": true,
+              "hp": 1.5,
+              "hostile": true
+            }
+          ],
+          "journal": "The courier drew a knife when he saw me standing over his stone. He was not a fighter, only a man paid to walk somewhere at night."
+        },
+        {
+          "type": "deliver",
+          "npc": "erunor_vaelanwe",
+          "relic": "th_dead_drop_letter",
+          "text": "Bring the letter to Justiciar Vaelanwe",
+          "topic": "The letter. I did not read it.",
+          "reply": "You did not. I would have known. The courier will not be missed, and his employer will be found. Welcome to the Thalmor, Agent. You begin in Skyrim.",
+          "place": "alinor"
+        }
+      ],
+      "outro": "I passed Justiciar Vaelanwe's test in Alinor and was taken into the Thalmor as an Agent. My first posting is the embassy in Skyrim.",
+      "rewards": {
+        "gold": 200,
+        "join": true,
+        "items": [
+          "nirncraft:elven_dagger",
+          "nirncraft:thalmor_chestplate"
+        ]
+      },
+      "region": "summerset/summerset_isle",
+      "why": [
+        "summerset_isle.L7.alinor_houses",
+        "summerset_isle.L7.shimmerene_permit_quarter"
+      ],
+      "consequence": {
+        "world_state": "th_eyes_of_the_dominion_resolved",
+        "flag": "conseq_th_eyes_of_the_dominion",
+        "summary": "I passed Justiciar Vaelanwe's test in Alinor and was taken into the Thalmor as an Agent. My first posting is the embassy in Skyrim."
+      }
+    },
+    {
+      "id": "th_the_last_blade",
+      "title": "The Last Blade of Falkreath",
+      "start": "npc:elenwen",
+      "requires": [
+        "quest:th_eyes_of_the_dominion|faction:thalmor"
+      ],
+      "offer": "Justiciar Vaelanwe sent me to you.",
+      "pitch": "He told me you were punctual. Good. One of the old Emperor's Blades has been hiding in the hills above Falkreath for thirty years, living as a hunter. He was careless at a market last month and someone remembered his face. Bring me his insignia.",
+      "desc": "First Emissary Elenwen sent me after a Blade who survived the Great War and has hidden as a hunter in the hills above Falkreath ever since.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "falkreath",
+          "offset": [
+            -200,
+            150
+          ],
+          "text": "Search the hills above Falkreath"
+        },
+        {
+          "type": "clear",
+          "place": "falkreath",
+          "offset": [
+            -200,
+            150
+          ],
+          "text": "Get past the hunter's guard dogs",
+          "spawn": [
+            {
+              "type": "nirncraft:wolf",
+              "count": 2,
+              "name": "Hunter's Hound"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "falkreath",
+          "offset": [
+            -200,
+            150
+          ],
+          "text": "Defeat the old Blade",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Orvald the Grey, Blade",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.6,
+              "hostile": true,
+              "armor": "#7a6a3a",
+              "weapon": "nirncraft:akaviri_sword"
+            }
+          ],
+          "journal": "He was old and slow and still very nearly killed me. At the end he said only that the dragon would return whether the Thalmor liked it or not."
+        },
+        {
+          "type": "retrieve",
+          "place": "falkreath",
+          "offset": [
+            -200,
+            150
+          ],
+          "relic": "th_blade_insignia",
+          "radius": 10,
+          "text": "Take the Blade's insignia"
+        },
+        {
+          "type": "deliver",
+          "npc": "elenwen",
+          "relic": "th_blade_insignia",
+          "text": "Bring the insignia to Elenwen at the embassy",
+          "topic": "The Blade is dead. Here is his badge.",
+          "reply": "One fewer. They are like weeds: cut one and three more were already seeding somewhere. Still. The Dominion remembers who does the cutting.",
+          "place": "thalmor_embassy"
+        }
+      ],
+      "outro": "I hunted down an old Blade in the hills above Falkreath and brought his insignia to First Emissary Elenwen.",
+      "rewards": {
+        "gold": 350,
+        "faction_points": 3
+      },
+      "region": "skyrim/falkreath",
+      "why": [
+        "falkreath.L7.young_jarl",
+        "falkreath.L7.hunters_apart"
+      ],
+      "consequence": {
+        "world_state": "th_the_last_blade_resolved",
+        "flag": "conseq_th_the_last_blade",
+        "summary": "I hunted down an old Blade in the hills above Falkreath and brought his insignia to First Emissary Elenwen."
+      }
+    },
+    {
+      "id": "th_a_question_of_heresy",
+      "title": "A Question of Heresy",
+      "start": "npc:elenwen",
+      "requires": [
+        "quest:th_the_last_blade"
+      ],
+      "offer": "Do you have more work for me?",
+      "pitch": "A small thing. A farming family near Rorikstead keeps a shrine to Talos in their barn. The worship of a man as a god is a lie the Concordat forbids. Speak to them. Find the shrine. Bring me what you find on the altar.",
+      "desc": "Elenwen sent me to Rorikstead to investigate Talos worship. A farmer named Sigrun Frost-Hand is said to keep a hidden shrine. I am beginning to wonder what the Thalmor do with such people afterwards.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "sigrun_frost_hand",
+          "text": "Question Sigrun Frost-Hand in Rorikstead",
+          "topic": "I'm told there is a shrine to Talos nearby.",
+          "reply": "Told by whom? We grow grain. My father fought at the Red Ring for the Empire you made peace with. If there's a shrine, it's his, and he's dead.",
+          "place": "rorikstead"
+        },
+        {
+          "type": "talk",
+          "npc": "sigrun_frost_hand",
+          "text": "Decide what to tell her",
+          "choices": [
+            {
+              "label": "Warn her: the Justiciars will come. Get your family away tonight.",
+              "reply": "Why would one of you... No. Don't explain. Thank you. We'll be gone by dark. There are some at the shrine who won't leave. I can't help them.",
+              "actions": "flag:th_warned_talos"
+            },
+            {
+              "label": "Tell her the Dominion is merciful to those who cooperate.",
+              "reply": "Merciful. I've heard what that word means in your mouths. Do what you came to do, then.",
+              "actions": "flag:th_reported_talos"
+            }
+          ],
+          "place": "rorikstead"
+        },
+        {
+          "type": "go",
+          "place": "rorikstead",
+          "offset": [
+            150,
+            -120
+          ],
+          "text": "Find the hidden shrine outside Rorikstead"
+        },
+        {
+          "type": "clear",
+          "place": "rorikstead",
+          "offset": [
+            150,
+            -120
+          ],
+          "text": "Deal with those defending the shrine",
+          "spawn": [
+            {
+              "type": "npc:stormcloak_soldier",
+              "count": 2,
+              "name": "Talos Zealot",
+              "hostile": true
+            },
+            {
+              "type": "npc:citizen",
+              "count": 2,
+              "name": "Desperate Worshipper",
+              "hostile": true,
+              "if": "!flag:th_warned_talos"
+            }
+          ],
+          "journal": "They died with the god's name in their mouths. I told myself it was the law. It was easier to believe in the middle of the fight than afterwards."
+        },
+        {
+          "type": "retrieve",
+          "place": "rorikstead",
+          "offset": [
+            150,
+            -120
+          ],
+          "relic": "th_talos_amulet",
+          "radius": 8,
+          "text": "Take the amulet from the altar"
+        },
+        {
+          "type": "deliver",
+          "npc": "elenwen",
+          "relic": "th_talos_amulet",
+          "text": "Bring the amulet to Elenwen",
+          "topic": "The shrine is gone. This was on the altar.",
+          "reply": "And the family? No, never mind. The Nords keep running and we keep finding them. Your report will say the shrine was destroyed. Leave the rest of it to me.",
+          "place": "thalmor_embassy"
+        }
+      ],
+      "outro": "I destroyed a shrine to Talos outside Rorikstead and brought its amulet to Elenwen. Whatever I told Sigrun Frost-Hand, I will carry it for a long time.",
+      "rewards": {
+        "gold": 400,
+        "faction_points": 3
+      },
+      "region": "skyrim/whiterun",
+      "why": [
+        "whiterun.L7.warrior_hall",
+        "whiterun.L7.caravans_outside"
+      ],
+      "consequence": {
+        "world_state": "th_a_question_of_heresy_resolved",
+        "flag": "conseq_th_a_question_of_heresy",
+        "summary": "I destroyed a shrine to Talos outside Rorikstead and brought its amulet to Elenwen. Whatever I told Sigrun Frost-Hand, I will carry it for a long time."
+      }
+    },
+    {
+      "id": "th_the_reception",
+      "title": "An Evening at the Embassy",
+      "start": "auto",
+      "requires": [
+        "quest:th_a_question_of_heresy"
+      ],
+      "desc": "Elenwen is holding a reception at the embassy for Skyrim's nobility. Someone among the guests or the staff has been selling her letters to Windhelm, and she wants the traitor found before the evening ends.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "elenwen",
+          "text": "Attend Elenwen's reception",
+          "topic": "You asked for me, Emissary.",
+          "reply": "I did. Smile, take a cup, and listen.",
+          "actions": "scene:th_reception",
+          "place": "thalmor_embassy"
+        },
+        {
+          "type": "talk",
+          "npc": "telanil_orvanwe",
+          "text": "Speak with Envoy Telanil Orvanwe",
+          "topic": "You seem to know everyone here.",
+          "reply": "Fourteen years in this frozen province. I know which jarl drinks, which one gambles, and which one owes money to the other. Knowledge is the only currency that never freezes.",
+          "place": "thalmor_embassy"
+        },
+        {
+          "type": "talk",
+          "npc": "telanil_orvanwe",
+          "text": "Press Orvanwe",
+          "choices": [
+            {
+              "label": "And who buys your knowledge, Envoy?",
+              "reply": "Buys? What a curious word. Excuse me. I see the Emissary's steward waving.",
+              "actions": "flag:th_pressed_telanil"
+            },
+            {
+              "label": "Flatter him and let him keep talking.",
+              "reply": "You are a wise one. Most new agents preach. You listen. Come to my study some evening. We could help each other.",
+              "actions": "flag:th_flattered_telanil"
+            }
+          ],
+          "place": "thalmor_embassy"
+        },
+        {
+          "type": "go",
+          "place": "thalmor_embassy",
+          "offset": [
+            -12,
+            8
+          ],
+          "radius": 6,
+          "text": "Slip away to Orvanwe's study"
+        },
+        {
+          "type": "retrieve",
+          "place": "thalmor_embassy",
+          "offset": [
+            -12,
+            8
+          ],
+          "relic": "th_orvanwe_letters",
+          "radius": 6,
+          "placement": "near",
+          "text": "Search the study for his correspondence"
+        },
+        {
+          "type": "deliver",
+          "npc": "elenwen",
+          "relic": "th_orvanwe_letters",
+          "text": "Show the letters to Elenwen",
+          "topic": "It's Orvanwe. He's been selling your notes to a buyer in Windhelm.",
+          "reply": "Telanil. Fourteen years and a seat at my table. He left the moment you walked out of the hall, of course. A ship for Summerset was waiting. Justiciar Vaelanwe will want to hear this himself.",
+          "actions": "retire:telanil_orvanwe",
+          "place": "thalmor_embassy"
+        }
+      ],
+      "outro": "At Elenwen's reception I found the traitor: Envoy Telanil Orvanwe, who had been selling the embassy's secrets to Ulfric's people. He fled to Summerset before he could be taken.",
+      "rewards": {
+        "gold": 450,
+        "faction_points": 3,
+        "items": [
+          "nirncraft:thalmor_helmet"
+        ]
+      },
+      "region": "skyrim/haafingar",
+      "why": [
+        "haafingar.L7.few_beggars",
+        "haafingar.L8.divines_temple"
+      ],
+      "consequence": {
+        "world_state": "th_the_reception_resolved",
+        "flag": "conseq_th_the_reception",
+        "summary": "At Elenwen's reception I found the traitor: Envoy Telanil Orvanwe, who had been selling the embassy's secrets to Ulfric's people. He fled to Summerset before he could be taken."
+      }
+    },
+    {
+      "id": "th_traitor_in_gold",
+      "title": "The Traitor in Gold",
+      "start": "auto",
+      "requires": [
+        "quest:th_the_reception"
+      ],
+      "desc": "Telanil Orvanwe has fled to his family's estate on Summerset, outside Alinor. Justiciar Vaelanwe wants him brought to the Dominion's justice, and he wants me to be the one who brings it.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "erunor_vaelanwe",
+          "text": "Report to Justiciar Vaelanwe in Alinor",
+          "topic": "Orvanwe is a traitor. He has fled home.",
+          "reply": "To his family estate west of the city. He has hired swords, and he thinks old blood will shield him. It will not. Go, and come back with the matter closed.",
+          "place": "alinor"
+        },
+        {
+          "type": "go",
+          "place": "orvanwe_estate",
+          "text": "Travel to the Orvanwe estate"
+        },
+        {
+          "type": "clear",
+          "place": "orvanwe_estate",
+          "placement": "structure",
+          "text": "Cut through Orvanwe's hired swords",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 4,
+              "name": "Orvanwe Sellsword",
+              "hostile": true,
+              "armor": "#8a6a2a"
+            },
+            {
+              "type": "npc:mage",
+              "name": "Hired Battlemage",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "orvanwe_estate",
+          "placement": "structure",
+          "text": "Bring Telanil Orvanwe to justice",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "name": "Telanil Orvanwe, Traitor",
+              "target": true,
+              "boss": true,
+              "hp": 3.5,
+              "dmg": 1.7,
+              "hostile": true,
+              "weapon": "nirncraft:glass_sword"
+            }
+          ],
+          "journal": "He offered me half of what Ulfric paid him. Then all of it. Then he drew his sword, and that was the only honest thing he did all night."
+        },
+        {
+          "type": "talk",
+          "npc": "erunor_vaelanwe",
+          "text": "Report to Justiciar Vaelanwe",
+          "topic": "It's done. Orvanwe will sell nothing more.",
+          "reply": "Then the matter is closed, and you closed it. Stand still a moment. There is a letter from the Emissary, and I am to read it in front of you.",
+          "actions": "scene:th_high_justiciar",
+          "place": "alinor"
+        }
+      ],
+      "outro": "I ended Telanil Orvanwe's treason at his family estate on Summerset. Justiciar Vaelanwe read out Elenwen's letter: I am a High Justiciar of the Thalmor.",
+      "rewards": {
+        "gold": 1200,
+        "faction_points": 6,
+        "perks": 1,
+        "flags": [
+          "th_high_justiciar"
+        ],
+        "items": [
+          {
+            "item": "nirncraft:glass_sword",
+            "name": "The Justiciar's Verdict",
+            "enchant": {
+              "sharpness": 4,
+              "looting": 2,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "nirncraft:thalmor_leggings",
+            "name": "High Justiciar's Greaves",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "region": "summerset/summerset_isle",
+      "why": [
+        "summerset_isle.L8.sacred_numbers",
+        "summerset_isle.L9.house_vs_thalmor"
+      ],
+      "consequence": {
+        "world_state": "th_traitor_in_gold_resolved",
+        "flag": "conseq_th_traitor_in_gold",
+        "summary": "I ended Telanil Orvanwe's treason at his family estate on Summerset. Justiciar Vaelanwe read out Elenwen's letter: I am a High Justiciar of the Thalmor."
+      }
+    }
+  ]
+}

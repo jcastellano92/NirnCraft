@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:mudcrab_chitin",
+      "required": false
+    },
+    {
+      "id": "nirncraft:slaughterfish_scales",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_pearl",
+      "required": false
+    }
+  ]
+}

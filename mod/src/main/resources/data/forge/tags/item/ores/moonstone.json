@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:moonstone_ore",
-    "skycraft:deepslate_moonstone_ore"
+    "nirncraft:moonstone_ore",
+    "nirncraft:deepslate_moonstone_ore"
   ]
 }

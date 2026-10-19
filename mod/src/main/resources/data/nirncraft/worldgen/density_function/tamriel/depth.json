@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:mul",
+  "left": 0.0078125,
+  "right": {
+    "type": "minecraft:add",
+    "left": "nirncraft:tamriel/height",
+    "right": {
+      "type": "minecraft:mul",
+      "left": -1.0,
+      "right": "minecraft:y"
+    }
+  }
+}

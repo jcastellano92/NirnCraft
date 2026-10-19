@@ -1,0 +1,286 @@
+{
+  "id": "hall_of_the_ansei",
+  "why": [
+    "yokudan_desert.L1.sheared_red_mesas",
+    "yokudan_desert.L5.orichalcum_and_star_charts",
+    "yokudan_desert.L6.new_tava_pilgrim_port"
+  ],
+  "sil": "yokuda-hall-of-the-ansei-plan",
+  "base": "none",
+  "overlay": "yokudan_desert",
+  "radius": 22,
+  "reach": 34,
+  "gates": [
+    [
+      0,
+      20
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        10
+      ],
+      "overlay": "yokudan_desert",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        10,
+        22
+      ],
+      "overlay": "yokudan_desert",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "hall_of_the_ansei_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "dome_palace",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "hall_of_the_ansei_landmark",
+      "overlay": "yokudan_desert"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          17
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          -6,
+          -11
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -15,
+          0
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          15,
+          2
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        6,
+        -2
+      ],
+      "rx": 13,
+      "rz": 11,
+      "wobble": 5,
+      "lobes": 4,
+      "phase": 2.27,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "yokudan_desert",
+      "name": "hall_of_the_ansei_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "overlay": "yokudan_desert",
+      "name": "hall_of_the_ansei_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        8
+      ],
+      "face": "north",
+      "overlay": "yokudan_desert",
+      "name": "hall_of_the_ansei_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -11,
+        11
+      ],
+      "face": "north",
+      "overlay": "yokudan_desert",
+      "name": "hall_of_the_ansei_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "yokudan_desert",
+      "name": "hall_of_the_ansei_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "yokudan_desert",
+      "name": "hall_of_the_ansei_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -8
+      ],
+      "face": "south",
+      "overlay": "yokudan_desert",
+      "name": "hall_of_the_ansei_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "yokudan_desert",
+      "name": "hall_of_the_ansei_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "statue",
+      "theme": "hall_of_the_ansei_statue",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "hall_of_the_ansei_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "hall_of_the_ansei_b_5",
+    "smithy": "hall_of_the_ansei_b_7"
+  },
+  "titles": {
+    "hall_of_the_ansei_b_1": "place.nirncraft.hall_of_the_ansei Council & Seat Hall",
+    "hall_of_the_ansei_b_2": "place.nirncraft.hall_of_the_ansei High Sanctuary",
+    "hall_of_the_ansei_b_3": "place.nirncraft.hall_of_the_ansei Fighters & Wayfarers Hall",
+    "hall_of_the_ansei_b_4": "place.nirncraft.hall_of_the_ansei Mages & Chroniclers Spire",
+    "hall_of_the_ansei_b_5": "place.nirncraft.hall_of_the_ansei The Lantern & Hearth Inn",
+    "hall_of_the_ansei_b_6": "place.nirncraft.hall_of_the_ansei The Traveler's Rest Tavern",
+    "hall_of_the_ansei_b_7": "place.nirncraft.hall_of_the_ansei Master Forge & Armorer",
+    "hall_of_the_ansei_b_8": "place.nirncraft.hall_of_the_ansei Botanicals & Remedies",
+    "hall_of_the_ansei_landmark": "High Seat of place.nirncraft.hall_of_the_ansei",
+    "hall_of_the_ansei_plaza": "place.nirncraft.hall_of_the_ansei Central Plaza"
+  },
+  "innKey": "hall_of_the_ansei_b_5",
+  "zones": [
+    {
+      "at": [
+        6,
+        -8
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 18,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

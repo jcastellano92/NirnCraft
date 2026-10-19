@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Deterministic generator for R7 Morrowind & Solstheim V8:
-- 13 MS1 regional storylines in mod/src/main/resources/skycraft/quests/story/<region>.json
-- Expanded Morrowind & Solstheim side quests in mod/src/main/resources/skycraft/quests/side_morrowind.json
+- 13 MS1 regional storylines in mod/src/main/resources/nirncraft/quests/story/<region>.json
+- Expanded Morrowind & Solstheim side quests in mod/src/main/resources/nirncraft/quests/side_morrowind.json
 - F-WHY / region / placed-objective / Great House exclusivity back-fills on Morrowind & Solstheim faction quest files
-- Full Morrowind & Solstheim place lore & regional flavour in mod/src/main/resources/skycraft/lore/places/morrowind.json
-- Morrowind & Solstheim road encounters & wonder moments in mod/src/main/resources/skycraft/creatures/scenes.json
-- 13 Morrowind & Solstheim regional festivals in mod/src/main/resources/skycraft/calendar/festivals.json
-- Lang updates in mod/src/main/lang/skycraft/{quests,lore,guide,calendar}.json
+- Full Morrowind & Solstheim place lore & regional flavour in mod/src/main/resources/nirncraft/lore/places/morrowind.json
+- Morrowind & Solstheim road encounters & wonder moments in mod/src/main/resources/nirncraft/creatures/scenes.json
+- 13 Morrowind & Solstheim regional festivals in mod/src/main/resources/nirncraft/calendar/festivals.json
+- Lang updates in mod/src/main/lang/nirncraft/{quests,lore,guide,calendar}.json
 """
 import glob
 import json
@@ -16,8 +16,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-RES = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft")
-LANG_DIR = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft")
+RES = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft")
+LANG_DIR = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft")
 
 sys.path.insert(0, os.path.join(ROOT, "tools", "qa"))
 import flow_audit as fa  # noqa: E402
@@ -38,7 +38,7 @@ def jsave(path, data):
 
 
 def human_name(pid: str, raw_name: str = "") -> str:
-    if raw_name and not raw_name.startswith("place.skycraft."):
+    if raw_name and not raw_name.startswith("place.nirncraft."):
         return raw_name
     base = pid
     for px in ("mw_", "morrowind_", "side_mw_", "sol_"):
@@ -478,7 +478,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Legate-Arbiter of Stonefalls",
-                        "unique_item": "skycraft:ebony_longsword",
+                        "unique_item": "nirncraft:ebony_longsword",
                     },
                 },
             ],
@@ -630,7 +630,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Hand of Mournhold's Peace",
-                        "unique_item": "skycraft:ebony_mace",
+                        "unique_item": "nirncraft:ebony_mace",
                     },
                 },
             ],
@@ -782,7 +782,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Warden of the White Walls",
-                        "unique_item": "skycraft:staff_of_banishing",
+                        "unique_item": "nirncraft:staff_of_banishing",
                     },
                 },
             ],
@@ -934,7 +934,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Arbiter of Tel Naga",
-                        "unique_item": "skycraft:staff_of_fireballs",
+                        "unique_item": "nirncraft:staff_of_fireballs",
                     },
                 },
             ],
@@ -1086,7 +1086,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Beacon-Keeper of Sheogorad",
-                        "unique_item": "skycraft:nordic_war_axe",
+                        "unique_item": "nirncraft:nordic_war_axe",
                     },
                 },
             ],
@@ -1238,7 +1238,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Shield-Brother of Skar",
-                        "unique_item": "skycraft:ebony_warhammer",
+                        "unique_item": "nirncraft:ebony_warhammer",
                     },
                 },
             ],
@@ -1390,7 +1390,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Peace-Speaker of the Grazelands",
-                        "unique_item": "skycraft:glass_bow",
+                        "unique_item": "nirncraft:glass_bow",
                     },
                 },
             ],
@@ -1542,7 +1542,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Star-Warden of Azura's Coast",
-                        "unique_item": "skycraft:glass_greatsword",
+                        "unique_item": "nirncraft:glass_greatsword",
                     },
                 },
             ],
@@ -1695,7 +1695,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Factor-Inspector of the Odai",
-                        "unique_item": "skycraft:glass_dagger",
+                        "unique_item": "nirncraft:glass_dagger",
                     },
                 },
             ],
@@ -1847,7 +1847,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Reef-Warden of the Bitter Coast",
-                        "unique_item": "skycraft:glass_sword",
+                        "unique_item": "nirncraft:glass_sword",
                     },
                 },
             ],
@@ -2000,7 +2000,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Lantern-Bearer of the Cantons",
-                        "unique_item": "skycraft:ebony_sword",
+                        "unique_item": "nirncraft:ebony_sword",
                     },
                 },
             ],
@@ -2152,7 +2152,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Vigil-Warden of Ghostgate",
-                        "unique_item": "skycraft:daedric_greatsword",
+                        "unique_item": "nirncraft:daedric_greatsword",
                     },
                 },
             ],
@@ -2311,7 +2311,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Hearth-Friend of Raven Rock and Skaal",
-                        "unique_item": "skycraft:stalhrim_greatsword",
+                        "unique_item": "nirncraft:stalhrim_greatsword",
                     },
                 },
             ],
@@ -3176,7 +3176,7 @@ def update_scenes_and_festivals():
             "props": ["fire"],
             "actors": [
                 {"npc": "citizen", "count": [1, 2], "radius": 3},
-                {"entity": "skycraft:torchbug", "count": [3, 5], "radius": 4},
+                {"entity": "nirncraft:torchbug", "count": [3, 5], "radius": 4},
             ],
         },
         {
@@ -3212,7 +3212,7 @@ def update_scenes_and_festivals():
             "props": [],
             "actors": [
                 {"npc": "scholar", "count": [1, 1], "radius": 3},
-                {"entity": "skycraft:torchbug", "count": [4, 6], "radius": 4},
+                {"entity": "nirncraft:torchbug", "count": [4, 6], "radius": 4},
             ],
         },
         {
@@ -3246,8 +3246,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_stonefalls_inner_sea_charter",
             "name": "Inner Sea Charter-Moot & Ebonheart Regatta",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_stonefalls_inner_sea_charter.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_stonefalls_inner_sea_charter.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_stonefalls_inner_sea_charter.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_stonefalls_inner_sea_charter.announce",
             "month": 4,
             "monthId": "rains_hand",
             "monthName": "Rain's Hand",
@@ -3274,8 +3274,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_deshaan_almalexia_mercy",
             "name": "Procession of Mother Morrowind's Mercy",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_deshaan_almalexia_mercy.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_deshaan_almalexia_mercy.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_deshaan_almalexia_mercy.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_deshaan_almalexia_mercy.announce",
             "month": 3,
             "monthId": "first_seed",
             "monthName": "First Seed",
@@ -3302,8 +3302,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_molag_amur_necrom_all_souls",
             "name": "Vigil of the White Walls & Ancestor-Lantern Night",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_molag_amur_necrom_all_souls.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_molag_amur_necrom_all_souls.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_molag_amur_necrom_all_souls.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_molag_amur_necrom_all_souls.announce",
             "month": 10,
             "monthId": "frostfall",
             "monthName": "Frostfall",
@@ -3330,8 +3330,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_telvannis_spore_conclave",
             "name": "Sadrith Mora Spore-Bloom & Magisterial Fair",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_telvannis_spore_conclave.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_telvannis_spore_conclave.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_telvannis_spore_conclave.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_telvannis_spore_conclave.announce",
             "month": 6,
             "monthId": "mid_year",
             "monthName": "Mid Year",
@@ -3358,8 +3358,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_sheogorad_sanctus_beacon",
             "name": "Dagon Fel Whale-Boat Return & Sanctus Vigil",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_sheogorad_sanctus_beacon.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_sheogorad_sanctus_beacon.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_sheogorad_sanctus_beacon.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_sheogorad_sanctus_beacon.announce",
             "month": 8,
             "monthId": "last_seed",
             "monthName": "Last Seed",
@@ -3386,8 +3386,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_ashlands_skar_muster",
             "name": "Muster of Skar & Ashlander Gate-Truce",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_ashlands_skar_muster.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_ashlands_skar_muster.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_ashlands_skar_muster.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_ashlands_skar_muster.announce",
             "month": 9,
             "monthId": "hearthfire",
             "monthName": "Hearthfire",
@@ -3414,8 +3414,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_grazelands_wickwheat_sheaf",
             "name": "Vos Golden Wickwheat Harvest & Herd-Compact",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_grazelands_wickwheat_sheaf.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_grazelands_wickwheat_sheaf.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_grazelands_wickwheat_sheaf.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_grazelands_wickwheat_sheaf.announce",
             "month": 8,
             "monthId": "last_seed",
             "monthName": "Last Seed",
@@ -3442,8 +3442,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_azuras_coast_moonshadow_vespers",
             "name": "Twilight Vigil of Azura's Coast",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_azuras_coast_moonshadow_vespers.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_azuras_coast_moonshadow_vespers.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_azuras_coast_moonshadow_vespers.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_azuras_coast_moonshadow_vespers.announce",
             "month": 5,
             "monthId": "second_seed",
             "monthName": "Second Seed",
@@ -3470,8 +3470,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_west_gash_odai_scale_day",
             "name": "Balmora Odai Barge-Fair & Hlaalu Assay Day",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_west_gash_odai_scale_day.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_west_gash_odai_scale_day.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_west_gash_odai_scale_day.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_west_gash_odai_scale_day.announce",
             "month": 7,
             "monthId": "suns_height",
             "monthName": "Sun's Height",
@@ -3498,8 +3498,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_bitter_coast_netch_lantern_tide",
             "name": "Gnaar Mok Netch-Lantern Tide & Fisher's Truce",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_bitter_coast_netch_lantern_tide.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_bitter_coast_netch_lantern_tide.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_bitter_coast_netch_lantern_tide.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_bitter_coast_netch_lantern_tide.announce",
             "month": 11,
             "monthId": "suns_dusk",
             "monthName": "Sun's Dusk",
@@ -3526,8 +3526,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_ascadian_vivec_seven_graces",
             "name": "Jubilee of the Seven Graces & Canton Regatta",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_ascadian_vivec_seven_graces.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_ascadian_vivec_seven_graces.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_ascadian_vivec_seven_graces.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_ascadian_vivec_seven_graces.announce",
             "month": 6,
             "monthId": "mid_year",
             "monthName": "Mid Year",
@@ -3554,8 +3554,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_red_mountain_ghostgate_vigil",
             "name": "Vigil of the Two Towers & Ancestor-Pylon Renewal",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_red_mountain_ghostgate_vigil.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_red_mountain_ghostgate_vigil.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_red_mountain_ghostgate_vigil.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_red_mountain_ghostgate_vigil.announce",
             "month": 11,
             "monthId": "suns_dusk",
             "monthName": "Sun's Dusk",
@@ -3582,8 +3582,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_morrowind_solstheim_bulwark_and_stone",
             "name": "Raven Rock Bulwark-Watch & All-Maker Hearth-Truce",
-            "titleKey": "skycraft.calendar.festival.v8_fest_morrowind_solstheim_bulwark_and_stone.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_morrowind_solstheim_bulwark_and_stone.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_morrowind_solstheim_bulwark_and_stone.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_morrowind_solstheim_bulwark_and_stone.announce",
             "month": 12,
             "monthId": "evening_star",
             "monthName": "Evening Star",
@@ -3643,39 +3643,39 @@ def update_lang_files(stories, mw_scenes, mw_festivals):
         "v8_mw_wonder_skaal_all_maker_vigil": "A Skaal shaman and northern hunters chant the Song of the Wind beside a frost-rimmed standing stone at twilight.",
     }
     for wid, wtxt in wonder_texts.items():
-        cal[f"skycraft.scene.wonder.{wid}"] = wtxt
+        cal[f"nirncraft.scene.wonder.{wid}"] = wtxt
     jsave(cal_path, cal)
 
     # 2. quests.json
     q_lang_path = os.path.join(LANG_DIR, "quests.json")
     qlang = jload(q_lang_path, {})
     for rkey, sdata in stories.items():
-        qlang[f"quest.skycraft.story.{rkey}.title"] = sdata["title"]
-        qlang[f"quest.skycraft.story.{rkey}.rumour"] = sdata["hook"]["rumour"]
-        qlang[f"quest.skycraft.story.{rkey}.notice"] = sdata["hook"]["notice"]
+        qlang[f"quest.nirncraft.story.{rkey}.title"] = sdata["title"]
+        qlang[f"quest.nirncraft.story.{rkey}.rumour"] = sdata["hook"]["rumour"]
+        qlang[f"quest.nirncraft.story.{rkey}.notice"] = sdata["hook"]["notice"]
         for q in sdata["quests"]:
-            qlang[f"quest.skycraft.{q['id']}.title"] = q["title"]
+            qlang[f"quest.nirncraft.{q['id']}.title"] = q["title"]
             for st in q["stages"]:
-                qlang[f"quest.skycraft.{q['id']}.stage.{st['id']}"] = st["objective"]
+                qlang[f"quest.nirncraft.{q['id']}.stage.{st['id']}"] = st["objective"]
     jsave(q_lang_path, qlang)
 
     # 3. lore.json
     lore_lang_path = os.path.join(LANG_DIR, "lore.json")
     llang = jload(lore_lang_path, {})
     mw_books = {
-        "book.skycraft.morrowind_ebonheart_charter_law": "Two Seals on the Inner Sea: Ebonheart Customs Law",
-        "book.skycraft.morrowind_mournhold_godsreach_rites": "Incense and Ashes in Godsreach",
-        "book.skycraft.morrowind_necrom_ossuary_rolls": "White Walls of Necrom: Custodians of the Ancestors",
-        "book.skycraft.morrowind_tel_naga_precedents": "Spore and Precedent: Rulings of Tel Naga",
-        "book.skycraft.morrowind_sheogorad_sanctus_bells": "Silent Bells of Sanctus Shrine",
-        "book.skycraft.morrowind_skar_redoran_councils": "Beneath the Crab-Shell: The Council of Ald'ruhn",
-        "book.skycraft.morrowind_grazelands_wickwheat_pacts": "Wickwheat and Herd-Stone: Compacts of Vos",
-        "book.skycraft.morrowind_holamayan_twilight_lamps": "Lamps of Moonshadow: The Cloister of Holamayan",
-        "book.skycraft.morrowind_caldera_ebony_assays": "Assay-Books of the Odai and Caldera Seam",
-        "book.skycraft.morrowind_bitter_coast_lanterns": "Netch-Lamps in the Mangrove Fog",
-        "book.skycraft.morrowind_vivec_canton_graces": "Underworks and High Fane: The Cantons of Vivec",
-        "book.skycraft.morrowind_ghostgate_two_towers": "Blue Bone and Blight-Wind: The Watch at Ghostgate",
-        "book.skycraft.morrowind_solstheim_ash_and_pine": "Ash-Bulwark and All-Maker Stone: Chronicles of Solstheim",
+        "book.nirncraft.morrowind_ebonheart_charter_law": "Two Seals on the Inner Sea: Ebonheart Customs Law",
+        "book.nirncraft.morrowind_mournhold_godsreach_rites": "Incense and Ashes in Godsreach",
+        "book.nirncraft.morrowind_necrom_ossuary_rolls": "White Walls of Necrom: Custodians of the Ancestors",
+        "book.nirncraft.morrowind_tel_naga_precedents": "Spore and Precedent: Rulings of Tel Naga",
+        "book.nirncraft.morrowind_sheogorad_sanctus_bells": "Silent Bells of Sanctus Shrine",
+        "book.nirncraft.morrowind_skar_redoran_councils": "Beneath the Crab-Shell: The Council of Ald'ruhn",
+        "book.nirncraft.morrowind_grazelands_wickwheat_pacts": "Wickwheat and Herd-Stone: Compacts of Vos",
+        "book.nirncraft.morrowind_holamayan_twilight_lamps": "Lamps of Moonshadow: The Cloister of Holamayan",
+        "book.nirncraft.morrowind_caldera_ebony_assays": "Assay-Books of the Odai and Caldera Seam",
+        "book.nirncraft.morrowind_bitter_coast_lanterns": "Netch-Lamps in the Mangrove Fog",
+        "book.nirncraft.morrowind_vivec_canton_graces": "Underworks and High Fane: The Cantons of Vivec",
+        "book.nirncraft.morrowind_ghostgate_two_towers": "Blue Bone and Blight-Wind: The Watch at Ghostgate",
+        "book.nirncraft.morrowind_solstheim_ash_and_pine": "Ash-Bulwark and All-Maker Stone: Chronicles of Solstheim",
     }
     llang.update(mw_books)
     jsave(lore_lang_path, llang)
@@ -3684,32 +3684,32 @@ def update_lang_files(stories, mw_scenes, mw_festivals):
     guide_path = os.path.join(LANG_DIR, "guide.json")
     glang = jload(guide_path, {})
     guide_updates = {
-        "skycraft.guide.arrive.stonefalls": "Volcanic steam vents and basalt sea-walls frame the Imperial port of Ebonheart and the ancient mainland towns of Stonefalls.",
-        "skycraft.guide.rumour.stonefalls": "Duplicate Inner Sea customs manifests have surfaced between Ebonheart, Davon's Watch, and Kragenmoor while cargo vanishes into Ash Mountain.",
-        "skycraft.guide.arrive.deshaan": "Fertile saltrice plains and sacred avenues lead toward the ringed capital of Mournhold and the southern marshes of Tear.",
-        "skycraft.guide.rumour.deshaan": "Forged Temple quarantine writs are being used to impound caravan warehouses in Mournhold while Dwemer bells toll beneath Bamz-Amschend.",
-        "skycraft.guide.arrive.molag_amur": "White ossuary walls rise above the eastern coast at Necrom while ash-rivers and basalt crags stretch inland across Molag Amur.",
-        "skycraft.guide.rumour.molag_amur": "Corpse-ships wait at Zaappi Docks after grave-brokers stole the ancestral Ossuary Roll from Necrom's lower catacombs.",
-        "skycraft.guide.arrive.telvannis": "Giant Emperor Parasol mushrooms tower over the Zafirbel Bay islands of Sadrith Mora, Firewatch, and Port Telvannis.",
-        "skycraft.guide.rumour.telvannis": "Council Mouths at Tel Naga are hiring outlanders to prune a rogue Dwemer-grafted spore tower near Tel Dreloth.",
-        "skycraft.guide.arrive.sheogorad": "Jagged basalt skerries and cold northern surf surround the Nord-Dunmer fishing port of Dagon Fel and quiet Sanctus Shrine.",
-        "skycraft.guide.rumour.sheogorad": "False storm-lanterns on the Sheogorad reefs have been luring cogs onto the rocks near Vas while locals blame the Urshilaku hunters.",
-        "skycraft.guide.arrive.vvardenfell_ashlands": "Scoured grey ash-plains and wind-carved foyadas surround the giant crab-shell council hall of Skar at Ald'ruhn.",
-        "skycraft.guide.rumour.vvardenfell_ashlands": "Redoran patrols at Ald'ruhn and Maar Gan have uncovered red-wax Sixth House bells smuggled from Falasmaryon and Kogoruhn.",
-        "skycraft.guide.arrive.grazelands": "Golden savannah grass and Telvanni mushroom roots meet the Ashlander tent-rings between Vos, Tel Vos, and Zainab Camp.",
-        "skycraft.guide.rumour.grazelands": "A leaking Dwemer blight-conduit between Mudan-Mul Egg Mine and Nchardahrk has fouled the grazing springs outside Vos.",
-        "skycraft.guide.arrive.azuras_coast": "Basalt headlands and sea-mists shelter the Buoyant Armiger canton of Molag Mar, Divayth Fyr's tower, and hidden Holamayan.",
-        "skycraft.guide.rumour.azuras_coast": "Medical skiffs bound for Tel Fyr and pilgrim boats to Holamayan are being intercepted by rogue factors operating out of Telasero.",
-        "skycraft.guide.arrive.west_gash": "Terraced Hlaalu stone bridges span the Odai River at Balmora below the ebony mines of Caldera and Moonmoth Legion Fort.",
-        "skycraft.guide.rumour.west_gash": "Every third ebony wain from Caldera Mine is vanishing down the smuggling trail toward Hla Oad and Hlormaren.",
-        "skycraft.guide.arrive.bitter_coast": "Bioluminescent fungi and netch-bladder lanterns glow through the mangrove fog around the stilt-village of Gnaar Mok.",
-        "skycraft.guide.rumour.bitter_coast": "An Imperial revenue cutter vanished off Khartag Point after bribed excise clerks lured the crew into the sea-caves of Nammu.",
-        "skycraft.guide.arrive.ascadian_isles": "Placid lagoons and terraced cantons rise at Vivec City above the plantations and pilgrim roads of the Ascadian Isles.",
-        "skycraft.guide.rumour.ascadian_isles": "Twin-lantern chalk marks in Vivec's underworks point to an abolitionist safe-route hunted by Dren Plantation mercenaries.",
-        "skycraft.guide.arrive.red_mountain": "The glowing blue ancestor-wall of the Ghostfence encircles the blighted volcanic slopes of Red Mountain above Ghostgate.",
-        "skycraft.guide.rumour.red_mountain": "Harmonic Sixth House bells inside Nchuleft and Red Mountain's caldera have cracked three bone-pylons along the Ghostfence.",
-        "skycraft.guide.arrive.solstheim": "Ash-drifts from Red Mountain cloak Raven Rock and Tel Mithryn in the south while snow-pines shelter the Skaal in the north.",
-        "skycraft.guide.rumour.solstheim": "Ash-spawn raids from Fort Frostmoth and a strange sleep-chant around the All-Maker Stones have put Raven Rock and Skaal Village on alert.",
+        "nirncraft.guide.arrive.stonefalls": "Volcanic steam vents and basalt sea-walls frame the Imperial port of Ebonheart and the ancient mainland towns of Stonefalls.",
+        "nirncraft.guide.rumour.stonefalls": "Duplicate Inner Sea customs manifests have surfaced between Ebonheart, Davon's Watch, and Kragenmoor while cargo vanishes into Ash Mountain.",
+        "nirncraft.guide.arrive.deshaan": "Fertile saltrice plains and sacred avenues lead toward the ringed capital of Mournhold and the southern marshes of Tear.",
+        "nirncraft.guide.rumour.deshaan": "Forged Temple quarantine writs are being used to impound caravan warehouses in Mournhold while Dwemer bells toll beneath Bamz-Amschend.",
+        "nirncraft.guide.arrive.molag_amur": "White ossuary walls rise above the eastern coast at Necrom while ash-rivers and basalt crags stretch inland across Molag Amur.",
+        "nirncraft.guide.rumour.molag_amur": "Corpse-ships wait at Zaappi Docks after grave-brokers stole the ancestral Ossuary Roll from Necrom's lower catacombs.",
+        "nirncraft.guide.arrive.telvannis": "Giant Emperor Parasol mushrooms tower over the Zafirbel Bay islands of Sadrith Mora, Firewatch, and Port Telvannis.",
+        "nirncraft.guide.rumour.telvannis": "Council Mouths at Tel Naga are hiring outlanders to prune a rogue Dwemer-grafted spore tower near Tel Dreloth.",
+        "nirncraft.guide.arrive.sheogorad": "Jagged basalt skerries and cold northern surf surround the Nord-Dunmer fishing port of Dagon Fel and quiet Sanctus Shrine.",
+        "nirncraft.guide.rumour.sheogorad": "False storm-lanterns on the Sheogorad reefs have been luring cogs onto the rocks near Vas while locals blame the Urshilaku hunters.",
+        "nirncraft.guide.arrive.vvardenfell_ashlands": "Scoured grey ash-plains and wind-carved foyadas surround the giant crab-shell council hall of Skar at Ald'ruhn.",
+        "nirncraft.guide.rumour.vvardenfell_ashlands": "Redoran patrols at Ald'ruhn and Maar Gan have uncovered red-wax Sixth House bells smuggled from Falasmaryon and Kogoruhn.",
+        "nirncraft.guide.arrive.grazelands": "Golden savannah grass and Telvanni mushroom roots meet the Ashlander tent-rings between Vos, Tel Vos, and Zainab Camp.",
+        "nirncraft.guide.rumour.grazelands": "A leaking Dwemer blight-conduit between Mudan-Mul Egg Mine and Nchardahrk has fouled the grazing springs outside Vos.",
+        "nirncraft.guide.arrive.azuras_coast": "Basalt headlands and sea-mists shelter the Buoyant Armiger canton of Molag Mar, Divayth Fyr's tower, and hidden Holamayan.",
+        "nirncraft.guide.rumour.azuras_coast": "Medical skiffs bound for Tel Fyr and pilgrim boats to Holamayan are being intercepted by rogue factors operating out of Telasero.",
+        "nirncraft.guide.arrive.west_gash": "Terraced Hlaalu stone bridges span the Odai River at Balmora below the ebony mines of Caldera and Moonmoth Legion Fort.",
+        "nirncraft.guide.rumour.west_gash": "Every third ebony wain from Caldera Mine is vanishing down the smuggling trail toward Hla Oad and Hlormaren.",
+        "nirncraft.guide.arrive.bitter_coast": "Bioluminescent fungi and netch-bladder lanterns glow through the mangrove fog around the stilt-village of Gnaar Mok.",
+        "nirncraft.guide.rumour.bitter_coast": "An Imperial revenue cutter vanished off Khartag Point after bribed excise clerks lured the crew into the sea-caves of Nammu.",
+        "nirncraft.guide.arrive.ascadian_isles": "Placid lagoons and terraced cantons rise at Vivec City above the plantations and pilgrim roads of the Ascadian Isles.",
+        "nirncraft.guide.rumour.ascadian_isles": "Twin-lantern chalk marks in Vivec's underworks point to an abolitionist safe-route hunted by Dren Plantation mercenaries.",
+        "nirncraft.guide.arrive.red_mountain": "The glowing blue ancestor-wall of the Ghostfence encircles the blighted volcanic slopes of Red Mountain above Ghostgate.",
+        "nirncraft.guide.rumour.red_mountain": "Harmonic Sixth House bells inside Nchuleft and Red Mountain's caldera have cracked three bone-pylons along the Ghostfence.",
+        "nirncraft.guide.arrive.solstheim": "Ash-drifts from Red Mountain cloak Raven Rock and Tel Mithryn in the south while snow-pines shelter the Skaal in the north.",
+        "nirncraft.guide.rumour.solstheim": "Ash-spawn raids from Fort Frostmoth and a strange sleep-chant around the All-Maker Stones have put Raven Rock and Skaal Village on alert.",
     }
     glang.update(guide_updates)
     jsave(guide_path, glang)

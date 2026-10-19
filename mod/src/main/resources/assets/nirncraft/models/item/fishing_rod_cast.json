@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld_rod",
+  "textures": {
+    "layer0": "nirncraft:item/fishing_rod_cast"
+  }
+}

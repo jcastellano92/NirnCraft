@@ -1,0 +1,12 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:settlement_district",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:settlement_districts",
+    "salt": 520106
+  }
+}

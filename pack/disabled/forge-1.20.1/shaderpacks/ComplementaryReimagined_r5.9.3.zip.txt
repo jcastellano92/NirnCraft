@@ -1,4 +1,4 @@
-#Skycraft Complementary Reimagined profile - Landscape-driven 3D volumetric weather & Distant Horizons
+#NirnCraft Complementary Reimagined profile - Landscape-driven 3D volumetric weather & Distant Horizons
 CLOUD_STYLE_DEFINE=3
 CLOUD_ALT1=232
 CLOUD_SHADOWS=true

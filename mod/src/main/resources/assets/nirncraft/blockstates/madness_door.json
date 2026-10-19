@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,half=lower,return=true": {
+      "model": "nirncraft:block/madness_door_lower"
+    },
+    "facing=north,half=lower,return=false": {
+      "model": "nirncraft:block/madness_door_lower"
+    },
+    "facing=north,half=upper,return=true": {
+      "model": "nirncraft:block/madness_door_upper"
+    },
+    "facing=north,half=upper,return=false": {
+      "model": "nirncraft:block/madness_door_upper"
+    },
+    "facing=east,half=lower,return=true": {
+      "model": "nirncraft:block/madness_door_lower",
+      "y": 90
+    },
+    "facing=east,half=lower,return=false": {
+      "model": "nirncraft:block/madness_door_lower",
+      "y": 90
+    },
+    "facing=east,half=upper,return=true": {
+      "model": "nirncraft:block/madness_door_upper",
+      "y": 90
+    },
+    "facing=east,half=upper,return=false": {
+      "model": "nirncraft:block/madness_door_upper",
+      "y": 90
+    },
+    "facing=south,half=lower,return=true": {
+      "model": "nirncraft:block/madness_door_lower",
+      "y": 180
+    },
+    "facing=south,half=lower,return=false": {
+      "model": "nirncraft:block/madness_door_lower",
+      "y": 180
+    },
+    "facing=south,half=upper,return=true": {
+      "model": "nirncraft:block/madness_door_upper",
+      "y": 180
+    },
+    "facing=south,half=upper,return=false": {
+      "model": "nirncraft:block/madness_door_upper",
+      "y": 180
+    },
+    "facing=west,half=lower,return=true": {
+      "model": "nirncraft:block/madness_door_lower",
+      "y": 270
+    },
+    "facing=west,half=lower,return=false": {
+      "model": "nirncraft:block/madness_door_lower",
+      "y": 270
+    },
+    "facing=west,half=upper,return=true": {
+      "model": "nirncraft:block/madness_door_upper",
+      "y": 270
+    },
+    "facing=west,half=upper,return=false": {
+      "model": "nirncraft:block/madness_door_upper",
+      "y": 270
+    }
+  }
+}

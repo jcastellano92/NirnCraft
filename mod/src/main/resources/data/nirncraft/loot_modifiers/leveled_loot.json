@@ -1,0 +1,7 @@
+{
+  "type": "nirncraft:add_table",
+  "table": "nirncraft:leveled/dungeon_extra",
+  "prefix": "chests/",
+  "chance": 0.5,
+  "priority": 13
+}

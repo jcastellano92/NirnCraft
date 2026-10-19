@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "nirncraft:block/word_wall_top",
+    "front": "nirncraft:block/word_wall_front",
+    "side": "nirncraft:block/word_wall_side"
+  }
+}

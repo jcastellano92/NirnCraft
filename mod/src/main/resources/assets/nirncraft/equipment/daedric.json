@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:daedric"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:daedric"
+      }
+    ]
+  }
+}

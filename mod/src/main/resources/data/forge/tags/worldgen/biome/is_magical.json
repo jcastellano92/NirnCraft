@@ -1,14 +1,14 @@
 {
   "replace": false,
   "values": [
-    "skycraft:artaeum",
-    "skycraft:azuras_coast",
-    "skycraft:crystal_coast",
-    "skycraft:crystal_spires",
-    "skycraft:falmer_glow_caves",
-    "skycraft:graht_oak_forest",
-    "skycraft:hist_grove",
-    "skycraft:telvanni_mushroom_forest",
-    "skycraft:thras_coral"
+    "nirncraft:artaeum",
+    "nirncraft:azuras_coast",
+    "nirncraft:crystal_coast",
+    "nirncraft:crystal_spires",
+    "nirncraft:falmer_glow_caves",
+    "nirncraft:graht_oak_forest",
+    "nirncraft:hist_grove",
+    "nirncraft:telvanni_mushroom_forest",
+    "nirncraft:thras_coral"
   ]
 }

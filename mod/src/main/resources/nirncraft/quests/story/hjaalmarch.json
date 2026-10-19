@@ -1,0 +1,169 @@
+{
+  "region": "skyrim/hjaalmarch",
+  "why": [
+    "hjaalmarch.L9.vampire_fear",
+    "hjaalmarch.L10.marsh_vampires",
+    "hjaalmarch.L7.jarl_seer",
+    "hjaalmarch.L7.wizard_suspected"
+  ],
+  "hook": {
+    "place": "morthal",
+    "places": [
+      "morthal",
+      "stonehills",
+      "movarths_lair",
+      "fort_snowhawk",
+      "robbers_gorge"
+    ],
+    "npc": "hjaalmarch_hook_npc",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "hjaalmarch_hook_npc",
+      "name": "Fen-Warden Alvor",
+      "role": "guard",
+      "place": "morthal",
+      "greet": "Another soot-blackened cellar on the boardwalk and torches seen moving toward the marsh cairns—Morthal won't sleep until the fen-brood is rooted out."
+    },
+    {
+      "id": "hjaalmarch_augur_npc",
+      "name": "Hearth-Reader Jonna",
+      "role": "steward",
+      "place": "morthal",
+      "greet": "The Jarl's visions show blood-drinkers trading mining tallies with Stonehills while townsfolk point fingers at the court wizard."
+    },
+    {
+      "id": "hjaalmarch_foreman_npc",
+      "name": "Foreman Gestur",
+      "role": "citizen",
+      "place": "stonehills",
+      "greet": "Night-shift miners vanish between the adit and the old barrow-stones, and the torches burn cold green in the mist."
+    }
+  ],
+  "bosses": {
+    "story_hjaalmarch_brood_thrall": {
+      "name": "Sathor the Fen-Stalker",
+      "entity": "minecraft:Vindicator",
+      "place": "folgunthur",
+      "hp": 115
+    },
+    "story_hjaalmarch_movarth_patriarch": {
+      "name": "Movarth of the Black Fen",
+      "entity": "minecraft:Evoker",
+      "place": "movarths_lair",
+      "hp": 140
+    }
+  },
+  "scenes": {
+    "hjaalmarch_highmoon_vigil": [
+      "Hearth-Reader Jonna: The blood-ledgers from Movarth's Lair prove the court wizard kept the marsh-wards standing when all others failed.",
+      "Fen-Warden Alvor: The boardwalk braziers burn steady again, and the night-watch holds the causeway to Stonehills.",
+      "Hearth-Reader Jonna: Highmoon Hall remembers who stood in the mist when the fen rose."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_hjaalmarch_1",
+      "title": "story.nirncraft.hjaalmarch_1.title",
+      "requires": [],
+      "places": [
+        "morthal",
+        "abandoned_shack",
+        "stonehills"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "morthal",
+          "objective": "Inspect the charred foundations in Morthal with the fen-warden."
+        },
+        {
+          "id": 20,
+          "place": "abandoned_shack",
+          "objective": "Search the marsh cache at the Abandoned Shack for the thrall's tally-scroll."
+        },
+        {
+          "id": 30,
+          "place": "stonehills",
+          "objective": "Warn the night-shift foreman at Stonehills and verify the missing miners' names."
+        }
+      ],
+      "consequence": "guard_banner:hjaalmarch_fen_torches",
+      "why": [
+        "hjaalmarch.L7.jarl_seer",
+        "hjaalmarch.L8.fear_of_the_dark"
+      ]
+    },
+    {
+      "id": "story_hjaalmarch_2",
+      "title": "story.nirncraft.hjaalmarch_2.title",
+      "requires": [
+        "story_hjaalmarch_1"
+      ],
+      "places": [
+        "morthal",
+        "folgunthur",
+        "kjenstag_ruins"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "kjenstag_ruins",
+          "objective": "Trace the disturbed boundary-runes at Kjenstag Ruins."
+        },
+        {
+          "id": 20,
+          "place": "folgunthur",
+          "objective": "Defeat the vampire thrall-captain inside Folgunthur and recover the ritual phial."
+        },
+        {
+          "id": 30,
+          "place": "morthal",
+          "objective": "Deliver the ritual phial to Highmoon Hall in Morthal to clear the court wizard's name."
+        }
+      ],
+      "consequence": "court_status:hjaalmarch_wizard_vindicated",
+      "why": [
+        "hjaalmarch.L7.wizard_suspected",
+        "hjaalmarch.L8.ruined_shrines"
+      ]
+    },
+    {
+      "id": "story_hjaalmarch_3",
+      "title": "story.nirncraft.hjaalmarch_3.title",
+      "requires": [
+        "story_hjaalmarch_2"
+      ],
+      "places": [
+        "morthal",
+        "movarths_lair",
+        "labyrinthian"
+      ],
+      "finale": true,
+      "stages": [
+        {
+          "id": 10,
+          "place": "labyrinthian",
+          "objective": "Re-kindle the outer ward-pillar along the pass at Labyrinthian."
+        },
+        {
+          "id": 20,
+          "place": "movarths_lair",
+          "objective": "Assault Movarth's Lair and slay the vampire patriarch of the marsh brood."
+        },
+        {
+          "id": 30,
+          "place": "morthal",
+          "objective": "Return the coven signet to Highmoon Hall in Morthal."
+        }
+      ],
+      "consequence": "world_state:hjaalmarch_resolved",
+      "why": [
+        "hjaalmarch.L9.vampire_fear",
+        "hjaalmarch.L10.marsh_vampires",
+        "hjaalmarch.L10.bromjunaar_maze"
+      ]
+    }
+  ]
+}

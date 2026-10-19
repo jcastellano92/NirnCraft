@@ -1,0 +1,730 @@
+[
+  {
+    "id": "summerset_summerset_isle_unique_1",
+    "name": "Relic of place.nirncraft.aeriisen_sanctum",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "aeriisen_sanctum",
+    "x": -12969,
+    "z": 14375,
+    "kind": "pedestal",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.aeriisen_sanctum in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_2",
+    "name": "Relic of place.nirncraft.alaxonald",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "alaxonald",
+    "x": -12400,
+    "z": 14100,
+    "kind": "corpse",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.alaxonald in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_3",
+    "name": "Relic of place.nirncraft.ald_mora_ruins",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "ald_mora_ruins",
+    "x": -12450,
+    "z": 12850,
+    "kind": "pedestal",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.ald_mora_ruins in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_4",
+    "name": "Relic of place.nirncraft.alilwe_lighthouse",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "alilwe_lighthouse",
+    "x": -14065,
+    "z": 13580,
+    "kind": "corpse",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.alilwe_lighthouse in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_5",
+    "name": "Relic of place.nirncraft.alimor_sanctum",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "alimor_sanctum",
+    "x": -13387,
+    "z": 14422,
+    "kind": "pedestal",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.alimor_sanctum in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_6",
+    "name": "Relic of place.nirncraft.archons_grove",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "archons_grove",
+    "x": -11500,
+    "z": 13950,
+    "kind": "corpse",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.archons_grove in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_7",
+    "name": "Relic of place.nirncraft.berimor_sea_cave",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "berimor_sea_cave",
+    "x": -12214,
+    "z": 15212,
+    "kind": "pedestal",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.berimor_sea_cave in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_8",
+    "name": "Relic of place.nirncraft.caliel_hollow",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "caliel_hollow",
+    "x": -13482,
+    "z": 14030,
+    "kind": "corpse",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.caliel_hollow in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_9",
+    "name": "Relic of place.nirncraft.cathedral_of_webs",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "cathedral_of_webs",
+    "x": -13350,
+    "z": 12250,
+    "kind": "pedestal",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.cathedral_of_webs in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_10",
+    "name": "Relic of place.nirncraft.cey_tarn_keep",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "cey_tarn_keep",
+    "x": -11201,
+    "z": 13678,
+    "kind": "corpse",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.cey_tarn_keep in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_11",
+    "name": "Relic of place.nirncraft.ceyeth_hollow",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "ceyeth_hollow",
+    "x": -13460,
+    "z": 12026,
+    "kind": "pedestal",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.ceyeth_hollow in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_12",
+    "name": "Relic of place.nirncraft.colossal_aldmeri_grotto",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "colossal_aldmeri_grotto",
+    "x": -11076,
+    "z": 13297,
+    "kind": "corpse",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.colossal_aldmeri_grotto in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_13",
+    "name": "Relic of place.nirncraft.coral_aerie",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "coral_aerie",
+    "x": -12900,
+    "z": 10900,
+    "kind": "pedestal",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.coral_aerie in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_14",
+    "name": "Relic of place.nirncraft.dusk_keep",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "dusk_keep",
+    "x": -11559,
+    "z": 14333,
+    "kind": "corpse",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.dusk_keep in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_15",
+    "name": "Relic of place.nirncraft.eldbur_ruins",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "eldbur_ruins",
+    "x": -11850,
+    "z": 13850,
+    "kind": "pedestal",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.eldbur_ruins in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_16",
+    "name": "Relic of place.nirncraft.eton_nir_grotto",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "eton_nir_grotto",
+    "x": -12300,
+    "z": 12650,
+    "kind": "corpse",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.eton_nir_grotto in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_17",
+    "name": "Relic of place.nirncraft.ezdril_sanctum",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "ezdril_sanctum",
+    "x": -13850,
+    "z": 14478,
+    "kind": "pedestal",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.ezdril_sanctum in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_18",
+    "name": "Relic of place.nirncraft.faorne_sea_cave",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "faorne_sea_cave",
+    "x": -12392,
+    "z": 10932,
+    "kind": "corpse",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.faorne_sea_cave in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_19",
+    "name": "Relic of place.nirncraft.fenancar_cave",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "fenancar_cave",
+    "x": -11635,
+    "z": 12585,
+    "kind": "pedestal",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.fenancar_cave in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_20",
+    "name": "Relic of place.nirncraft.fenethil_watchtower",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "fenethil_watchtower",
+    "x": -13032,
+    "z": 12041,
+    "kind": "corpse",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.fenethil_watchtower in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_21",
+    "name": "Relic of place.nirncraft.feninaan_hollow",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "feninaan_hollow",
+    "x": -12586,
+    "z": 14663,
+    "kind": "pedestal",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.feninaan_hollow in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_22",
+    "name": "Relic of place.nirncraft.galiisen_den",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "galiisen_den",
+    "x": -12808,
+    "z": 13845,
+    "kind": "corpse",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.galiisen_den in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_23",
+    "name": "Relic of place.nirncraft.galilmo_grotto",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "galilmo_grotto",
+    "x": -12486,
+    "z": 14476,
+    "kind": "pedestal",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.galilmo_grotto in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_summerset_isle_unique_24",
+    "name": "Relic of place.nirncraft.gravelds_hideaway",
+    "region": "summerset_isle",
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "place": "gravelds_hideaway",
+    "x": -11400,
+    "z": 13918,
+    "kind": "corpse",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.gravelds_hideaway in Summerset Isle from the elder days."
+  },
+  {
+    "id": "summerset_auridon_unique_1",
+    "name": "Relic of place.nirncraft.berimor_grotto",
+    "region": "auridon",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L4.palm_groves"
+    ],
+    "place": "berimor_grotto",
+    "x": -10297,
+    "z": 12533,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.berimor_grotto in Auridon from the elder days."
+  },
+  {
+    "id": "summerset_auridon_unique_2",
+    "name": "Relic of place.nirncraft.bewan",
+    "region": "auridon",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L4.palm_groves"
+    ],
+    "place": "bewan",
+    "x": -10142,
+    "z": 11514,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.bewan in Auridon from the elder days."
+  },
+  {
+    "id": "summerset_auridon_unique_3",
+    "name": "Relic of place.nirncraft.castle_rilis",
+    "region": "auridon",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L4.palm_groves"
+    ],
+    "place": "castle_rilis",
+    "x": -9450,
+    "z": 10650,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.castle_rilis in Auridon from the elder days."
+  },
+  {
+    "id": "summerset_auridon_unique_4",
+    "name": "Relic of place.nirncraft.dels_claim",
+    "region": "auridon",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L4.palm_groves"
+    ],
+    "place": "dels_claim",
+    "x": -9815,
+    "z": 12906,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.dels_claim in Auridon from the elder days."
+  },
+  {
+    "id": "summerset_auridon_unique_5",
+    "name": "Relic of place.nirncraft.dragonguard_tomb",
+    "region": "auridon",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L4.palm_groves"
+    ],
+    "place": "dragonguard_tomb",
+    "x": -9950,
+    "z": 11650,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.dragonguard_tomb in Auridon from the elder days."
+  },
+  {
+    "id": "summerset_auridon_unique_6",
+    "name": "Relic of place.nirncraft.entilas_folly",
+    "region": "auridon",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L4.palm_groves"
+    ],
+    "place": "entilas_folly",
+    "x": -9600,
+    "z": 12250,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.entilas_folly in Auridon from the elder days."
+  },
+  {
+    "id": "summerset_auridon_unique_7",
+    "name": "Relic of place.nirncraft.ezduiin",
+    "region": "auridon",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L4.palm_groves"
+    ],
+    "place": "ezduiin",
+    "x": -9700,
+    "z": 11550,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ezduiin in Auridon from the elder days."
+  },
+  {
+    "id": "summerset_auridon_unique_8",
+    "name": "Relic of place.nirncraft.glister_vale",
+    "region": "auridon",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L4.palm_groves"
+    ],
+    "place": "glister_vale",
+    "x": -10050,
+    "z": 12350,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.glister_vale in Auridon from the elder days."
+  },
+  {
+    "id": "summerset_artaeum_unique_1",
+    "name": "Relic of place.nirncraft.ceporah_tower",
+    "region": "artaeum",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L4.lotus_meadow"
+    ],
+    "place": "ceporah_tower",
+    "x": -11497,
+    "z": 11015,
+    "kind": "pedestal",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ceporah_tower in Artaeum from the elder days."
+  },
+  {
+    "id": "summerset_artaeum_unique_2",
+    "name": "Relic of place.nirncraft.dreaming_cave",
+    "region": "artaeum",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L4.lotus_meadow"
+    ],
+    "place": "dreaming_cave",
+    "x": -11555,
+    "z": 10948,
+    "kind": "corpse",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.dreaming_cave in Artaeum from the elder days."
+  },
+  {
+    "id": "summerset_artaeum_unique_3",
+    "name": "Relic of place.nirncraft.psijic_relic_vaults",
+    "region": "artaeum",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L4.lotus_meadow"
+    ],
+    "place": "psijic_relic_vaults",
+    "x": -11486,
+    "z": 11243,
+    "kind": "pedestal",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.psijic_relic_vaults in Artaeum from the elder days."
+  },
+  {
+    "id": "summerset_artaeum_unique_4",
+    "name": "Relic of place.nirncraft.traitors_vault",
+    "region": "artaeum",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L4.lotus_meadow"
+    ],
+    "place": "traitors_vault",
+    "x": -11700,
+    "z": 11050,
+    "kind": "corpse",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.traitors_vault in Artaeum from the elder days."
+  },
+  {
+    "id": "summerset_artaeum_unique_5",
+    "name": "Relic of place.nirncraft.wreck_of_the_silver_anchor",
+    "region": "artaeum",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L4.lotus_meadow"
+    ],
+    "place": "wreck_of_the_silver_anchor",
+    "x": -12042,
+    "z": 11127,
+    "kind": "pedestal",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.wreck_of_the_silver_anchor in Artaeum from the elder days."
+  },
+  {
+    "id": "summerset_artaeum_v4_unique_6",
+    "name": "Relic of Glass A Crimson Crystal Praxis Vault (6)",
+    "region": "artaeum",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "place": "glass_a_crimson_crystal_praxis_vault",
+    "x": -11861,
+    "z": 11123,
+    "kind": "barrow",
+    "item": "nirncraft:elven_bow",
+    "enchant": {
+      "power": 5
+    },
+    "note": "Preserved at Glass A Crimson Crystal Praxis Vault in Artaeum from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_artaeum_v4_unique_7",
+    "name": "Relic of Old W Dawn Glass Sky-Spire (7)",
+    "region": "artaeum",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "place": "old_w_dawn_glass_sky_spire",
+    "x": -11929,
+    "z": 11371,
+    "kind": "ruin",
+    "item": "nirncraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Old W Dawn Glass Sky-Spire in Artaeum from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_artaeum_v4_unique_8",
+    "name": "Relic of Psijic White Aldmeri Ancestor Fane (8)",
+    "region": "artaeum",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "place": "psijic_white_aldmeri_ancestor_fane",
+    "x": -11766,
+    "z": 11347,
+    "kind": "cairn",
+    "item": "nirncraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Psijic White Aldmeri Ancestor Fane in Artaeum from the elder council.",
+    "_r7_r12_v4": true
+  }
+]

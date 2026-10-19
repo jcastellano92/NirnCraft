@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cocoa_beans",
+    {
+      "id": "nirncraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "nirncraft:juniper_berries",
+      "required": false
+    },
+    "minecraft:sugar"
+  ]
+}

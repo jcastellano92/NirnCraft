@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "nirncraft:item/skill_book_light_armor"
+  }
+}

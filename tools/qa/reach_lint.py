@@ -4,7 +4,7 @@ usage: py -3 -I tools/qa/reach_lint.py [--area whiterun|skyrim|all] [--top N] [-
 Prints a short summary, writes tools/qa/out/reach_lint.txt (every finding), exits 1 on errors.
 
 The planned network is rebuilt offline by porting the rules of roads/RoadGraph.java (named roads from
-skycraft/roads/named_roads.json, the greedy spanner, group joins, farm lanes; landmasses from skycraft/baked/landmass.bin)
+nirncraft/roads/named_roads.json, the greedy spanner, group joins, farm lanes; landmasses from nirncraft/baked/landmass.bin)
 and roads/WorldPlan.java (trails to destinations: TRAIL_RANGE, TRAIL_MIN, FOOTPATH_RANGE for tourist-grade places).
 Links are straight segments here, the planner's routes wander a little around them, so ranges carry a ~10% slack, and
 the terrain weights ignore ridges. --before lints with the trail rules of before the reach pass (no word walls, dragon
@@ -31,7 +31,7 @@ import numpy as np
 from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-RES = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft")
+RES = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft")
 MAPDIR = os.path.join(RES, "tamriel")
 PLACES = os.path.join(MAPDIR, "places")
 OUT = os.path.join(ROOT, "tools", "qa", "out", "reach_lint.txt")

@@ -1,0 +1,13 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "frozen_pine",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

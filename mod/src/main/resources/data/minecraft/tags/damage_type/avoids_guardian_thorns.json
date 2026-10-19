@@ -1,9 +1,9 @@
 {
   "replace": false,
   "values": [
-    "skycraft:fire_spell",
-    "skycraft:frost_spell",
-    "skycraft:shock_spell",
-    "skycraft:spell"
+    "nirncraft:fire_spell",
+    "nirncraft:frost_spell",
+    "nirncraft:shock_spell",
+    "nirncraft:spell"
   ]
 }

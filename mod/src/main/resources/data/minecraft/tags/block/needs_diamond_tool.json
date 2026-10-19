@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:ebony_ore",
-    "skycraft:deepslate_ebony_ore"
+    "nirncraft:ebony_ore",
+    "nirncraft:deepslate_ebony_ore"
   ]
 }

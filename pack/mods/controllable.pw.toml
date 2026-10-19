@@ -7,6 +7,6 @@ url = "https://github.com/MrCrayfish/Controllable/releases/download/v0.26.2%2B26
 hash-format = "sha256"
 hash = "0aeca1e79043177950e80d6433f3ffac2d28358dfcb0ef9ee3454e0ae8c6ed0c"
 
-[skycraft]
+[nirncraft]
 minecraft = "26.3"
 loader = "neoforge"

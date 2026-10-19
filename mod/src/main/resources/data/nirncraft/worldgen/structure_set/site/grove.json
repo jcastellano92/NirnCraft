@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/grove",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274021,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "grove"
+    ]
+  }
+}

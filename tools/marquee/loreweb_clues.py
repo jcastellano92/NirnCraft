@@ -3,8 +3,8 @@
 
 Reads tools/marquee/loreweb.json (situations: three environmental clues per place plus a thread clue) and the place
 lore resource (which places have a readable "web"/"thread" note), and writes
-mod/src/main/resources/skycraft/scatter/loreweb_clues.json, an input of the baked scene plan
-(com.skycraft.worldplan.scene.ScenePlanBuilder). Re-run after loreweb_build.js, then re-bake (tools/bake/bake.ps1).
+mod/src/main/resources/nirncraft/scatter/loreweb_clues.json, an input of the baked scene plan
+(com.nirncraft.worldplan.scene.ScenePlanBuilder). Re-run after loreweb_build.js, then re-bake (tools/bake/bake.ps1).
 
     py -3 -I tools/marquee/loreweb_clues.py
 """
@@ -13,8 +13,8 @@ import os
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 WEB = os.path.join(ROOT, 'tools', 'marquee', 'loreweb.json')
-LORE = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'lore', 'places', 'loreweb.json')
-OUT = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'scatter', 'loreweb_clues.json')
+LORE = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'lore', 'places', 'loreweb.json')
+OUT = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'scatter', 'loreweb_clues.json')
 
 
 def main():

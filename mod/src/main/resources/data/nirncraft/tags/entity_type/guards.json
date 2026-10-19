@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:guard",
+    "minecraft:iron_golem",
+    {
+      "id": "guardvillagers:guard",
+      "required": false
+    }
+  ]
+}

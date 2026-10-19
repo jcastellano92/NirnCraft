@@ -1,0 +1,18 @@
+{
+  "type": "nirncraft:soul_cairn",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "nirncraft:realm/soul_cairn",
+    "biome_source": {
+      "type": "nirncraft:realm",
+      "realm": "soul_cairn",
+      "biomes": {
+        "wastes": "nirncraft:soul_cairn_wastes",
+        "bone_fields": "nirncraft:soul_cairn_bone_fields",
+        "soul_gem_fields": "nirncraft:soul_cairn_soul_gem_fields",
+        "soul_mesas": "nirncraft:soul_cairn_soul_mesas",
+        "boneyard": "nirncraft:soul_cairn_boneyard"
+      }
+    }
+  }
+}

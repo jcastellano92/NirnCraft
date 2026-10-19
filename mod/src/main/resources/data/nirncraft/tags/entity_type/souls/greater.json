@@ -1,0 +1,57 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:frost_atronach",
+      "required": false
+    },
+    {
+      "id": "nirncraft:storm_atronach",
+      "required": false
+    },
+    {
+      "id": "nirncraft:minotaur",
+      "required": false
+    },
+    {
+      "id": "nirncraft:wamasu",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sand_serpent",
+      "required": false
+    },
+    {
+      "id": "nirncraft:indrik",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dremora",
+      "required": false
+    },
+    {
+      "id": "nirncraft:wispmother",
+      "required": false
+    },
+    {
+      "id": "nirncraft:mammoth",
+      "required": false
+    },
+    {
+      "id": "nirncraft:draugr_deathlord",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silt_strider",
+      "required": false
+    },
+    {
+      "id": "nirncraft:tsaesci",
+      "required": false
+    },
+    {
+      "id": "nirncraft:whale",
+      "required": false
+    }
+  ]
+}

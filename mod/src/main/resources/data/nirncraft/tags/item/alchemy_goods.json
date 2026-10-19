@@ -1,0 +1,53 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:salt_pile",
+    "nirncraft:void_salts",
+    "nirncraft:fire_salts",
+    "nirncraft:frost_salts",
+    "nirncraft:vampire_dust",
+    "nirncraft:bear_claws",
+    "nirncraft:hawk_feather",
+    "nirncraft:nightshade",
+    "nirncraft:deathbell",
+    "nirncraft:nirnroot",
+    "nirncraft:frost_mirriam",
+    {
+      "id": "nirncraft:giants_toe",
+      "required": false
+    },
+    {
+      "id": "nirncraft:troll_fat",
+      "required": false
+    },
+    {
+      "id": "nirncraft:skeever_tail",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bone_meal_draugr",
+      "required": false
+    },
+    {
+      "id": "nirncraft:daedra_heart",
+      "required": false
+    },
+    "minecraft:glass_bottle",
+    "minecraft:spider_eye",
+    "minecraft:fermented_spider_eye",
+    "minecraft:glowstone_dust",
+    "minecraft:blaze_powder",
+    "minecraft:ghast_tear",
+    "minecraft:magma_cream",
+    "minecraft:nether_wart",
+    "minecraft:sugar",
+    "minecraft:rabbit_foot",
+    "minecraft:phantom_membrane",
+    "minecraft:glistering_melon_slice",
+    "minecraft:golden_carrot",
+    "minecraft:honeycomb",
+    "minecraft:red_mushroom",
+    "minecraft:brown_mushroom",
+    "minecraft:sweet_berries"
+  ]
+}

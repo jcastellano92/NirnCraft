@@ -14,19 +14,19 @@ Currently:
 
 ## 2. Write Set
 
-* `mod/src/main/java/com/skycraft/tamriel/terrain/{TamrielCaves,TerrainDensity}.java`
-* `mod/src/main/java/com/skycraft/tamriel/worldgen/TamrielBiomeSource.java`
-* `mod/src/main/java/com/skycraft/dungeons/world/{CavernGen,CavernDress}.java`
-* `mod/src/main/java/com/skycraft/seas/world/Undersea.java`
-* `mod/src/main/resources/data/skycraft/worldgen/noise_settings/tamriel.json`
-* `mod/src/main/resources/data/skycraft/worldgen/biome/*.json`
-* `mod/src/main/resources/data/skycraft/region_spawns/*.json`
+* `mod/src/main/java/com/nirncraft/tamriel/terrain/{TamrielCaves,TerrainDensity}.java`
+* `mod/src/main/java/com/nirncraft/tamriel/worldgen/TamrielBiomeSource.java`
+* `mod/src/main/java/com/nirncraft/dungeons/world/{CavernGen,CavernDress}.java`
+* `mod/src/main/java/com/nirncraft/seas/world/Undersea.java`
+* `mod/src/main/resources/data/nirncraft/worldgen/noise_settings/tamriel.json`
+* `mod/src/main/resources/data/nirncraft/worldgen/biome/*.json`
+* `mod/src/main/resources/data/nirncraft/region_spawns/*.json`
 * `tools/worldgen/{biomes,noise_settings}.py`
 
 ## 3. Implementation Steps
 
 1. **Custom World-Scale Cave Router (`TamrielCaves.java`, `noise_settings/tamriel.json`):**
-   * Register density function `skycraft:tamriel_caves` combining regional karst galleries, vaulted subterranean chambers, and river-fed gorge tubes while multiplying by a smooth exclusion mask around `Places` dungeon bounding boxes and `PlanGround` road/settlement pads so world caves complement dungeons and never undermine roads or buildings.
+   * Register density function `nirncraft:tamriel_caves` combining regional karst galleries, vaulted subterranean chambers, and river-fed gorge tubes while multiplying by a smooth exclusion mask around `Places` dungeon bounding boxes and `PlanGround` road/settlement pads so world caves complement dungeons and never undermine roads or buildings.
 2. **14 Regional Subterranean Biomes & Native Spawners (`biomes.py`, `TamrielBiomeSource.java`, `region_spawns/*.json`):**
    * Add 9 new underground biomes (for 14 total) in `tools/worldgen/biomes.py` and `TamrielBiomeSource.java`:
      1. `nordic_karst_caverns` (temperate Skyrim/High Rock limestone & waterfall caves)
@@ -43,7 +43,7 @@ Currently:
      12. `yokudan_sand_vaults` (Hammerfell/Yokuda sunken sandstone galleries & subterranean oases)
      13. `submerged_sea_caverns` (coastal/ocean underwater caves with trapped breathable air pockets & glowing sea-flora)
      14. `abyssal_trench_caves` (deep ocean bioluminescent dreugh/sload caverns)
-   * Strip all vanilla hostile mob entries (`minecraft:zombie`, `skeleton`, `spider`, `creeper`, `enderman`, `witch`, `slime`) from all underground biome JSONs in `biomes.py`, replacing them with native Skycraft creature spawn tables.
+   * Strip all vanilla hostile mob entries (`minecraft:zombie`, `skeleton`, `spider`, `creeper`, `enderman`, `witch`, `slime`) from all underground biome JSONs in `biomes.py`, replacing them with native NirnCraft creature spawn tables.
 3. **True Surface-Piercing Skylights (`lightShaft`), Underground Waterfalls & Subterranean Ruins (`CavernGen.java`, `CavernDress.java`, `Undersea.java`):**
    * In `CavernDress.lightShaft()` (`lines 733–761`), check that `(x, z)` at `surf = g.p.surfaceAt(x, z)` is not on a road (`!PlanGround.isRoadOrPlot(x, z)`) or underwater (`surf > sea + 2`). When clear, carve the shaft **all the way through `surf + 1`** with weathered rock/moss rims and hanging vines (no `SEA_LANTERN` ceiling disc!), allowing natural sunlight, shader god-rays, and rain to illuminate the mossy oasis and pool on the cavern floor.
    * Enhance `CavernDress.waterfall()` to build multi-block stepped ledges and mist pools fed from upper aquifers or surface rivers, and add subterranean shrine/hermitage/ruined-outpost set-pieces in open caverns.

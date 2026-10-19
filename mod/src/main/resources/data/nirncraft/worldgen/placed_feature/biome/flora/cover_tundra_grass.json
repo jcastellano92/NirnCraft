@@ -1,0 +1,32 @@
+{
+  "feature": "nirncraft:biome/flora/cover_tundra_grass",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 30
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "nirncraft:flora_density",
+      "density": 1.0,
+      "floor": 0.2,
+      "field": {
+        "salt": 110,
+        "scale": 11,
+        "coverage": 0.55,
+        "softness": 0.2,
+        "kind": "worley",
+        "mode": "inside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

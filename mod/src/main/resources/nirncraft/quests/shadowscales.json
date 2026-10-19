@@ -1,0 +1,749 @@
+{
+  "line": "shadowscales",
+  "category": "faction",
+  "faction": "shadowscales",
+  "region": "black_marsh/stormhold",
+  "speakers": {
+    "narrator": "Narrator",
+    "hist": "The Hist"
+  },
+  "places": {
+    "xal_irasotl": {
+      "x": 6600,
+      "z": 10750,
+      "r": 40,
+      "name": "Xal Irasotl"
+    }
+  },
+  "npcs": [
+    {
+      "id": "sees_behind_eyes",
+      "name": "Elder Sees-Behind-Eyes",
+      "role": "assassin",
+      "place": "stormhold",
+      "offset": [
+        4,
+        -5
+      ],
+      "hall": "shadowscales",
+      "greet": "You hatched under the Shadow, little one. I smelled it on you before you reached the door. Come in out of the light."
+    },
+    {
+      "id": "weighs_the_coin",
+      "name": "Weighs-the-Coin",
+      "role": "assassin",
+      "place": "stormhold",
+      "offset": [
+        -6,
+        4
+      ],
+      "hall": "shadowscales",
+      "greet": "Another Shadow-born. Welcome. Keep your contracts close and your purse closer. I say it to everyone. Hardly anyone listens."
+    },
+    {
+      "id": "teeba_enoo",
+      "name": "Teeba-Enoo, Royal Envoy",
+      "role": "courier",
+      "place": "stormhold",
+      "offset": [
+        14,
+        -10
+      ],
+      "greet": "The King of Argonia sends his regards, and occasionally his lists. Today I carry a list."
+    },
+    {
+      "id": "tah_weesh",
+      "name": "Tah-Weesh the Egg-Keeper",
+      "role": "citizen",
+      "place": "murkmire",
+      "offset": [
+        6,
+        6
+      ],
+      "female": true,
+      "greet": "Speak softly near the hatchery. The eggs listen, and the ones that are left are frightened."
+    }
+  ],
+  "relics": [
+    {
+      "id": "ss_slaver_brand",
+      "name": "Slaver's Branding Iron",
+      "desc": "A Dunmer house-mark on an iron rod. It has been used recently.",
+      "icon": 26
+    },
+    {
+      "id": "ss_magistrate_seal",
+      "name": "Magistrate's Seal",
+      "desc": "An Imperial seal from a province that no longer belongs to the Empire. Its owner pretended otherwise.",
+      "icon": 26
+    },
+    {
+      "id": "ss_morag_tong_writ",
+      "name": "Morag Tong Writ",
+      "desc": "A sealed writ naming every Shadowscale in the Stormhold enclave. Signed by Weighs-the-Coin, in a careful, greedy hand.",
+      "icon": 11
+    },
+    {
+      "id": "ss_stolen_clutch",
+      "name": "Stolen Clutch of Eggs",
+      "desc": "Six warm, leathery eggs wrapped in moss, packed for a long journey to a collector in Cyrodiil.",
+      "icon": 15
+    }
+  ],
+  "scenes": {
+    "ss_hist_dream": [
+      [
+        "narrator",
+        "The sap is bitter, then sweet, then gone. The marsh tilts. The trees lean down and look at you with no eyes at all."
+      ],
+      [
+        "hist",
+        "Shadow-born. You were laid in the dark and hatched in the dark. The dark is not your enemy. It is your egg. Hunt now."
+      ]
+    ],
+    "ss_the_traitor_named": [
+      [
+        "sees_behind_eyes",
+        "Weighs-the-Coin. He was hatched two nests from mine. I taught him to hold a blade."
+      ],
+      [
+        "sees_behind_eyes",
+        "The Morag Tong pays well for the names of rivals. He gave them every one of us. Go after him, and do not let him reach the river."
+      ]
+    ],
+    "ss_speaker": [
+      [
+        "sees_behind_eyes",
+        "The Tong came for us, and the Tong is buried in our mud. Hear me, all of you. The one who did this was born under the Shadow, like you, and is now more than you."
+      ],
+      [
+        "sees_behind_eyes",
+        "I am old. I will need someone to speak for the Shadow when the King calls. Not yet. But soon."
+      ],
+      [
+        "narrator",
+        "Around the enclave, the Shadowscales lower their heads and touch the ground. One by one, they hiss your name."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "ss_born_under_the_shadow",
+      "title": "Born Under the Shadow",
+      "start": "npc:sees_behind_eyes",
+      "requires": [
+        "!faction:shadowscales",
+        "race:argonian",
+        "!faction:morag_tong"
+      ],
+      "offer": "You say I hatched under the Shadow?",
+      "pitch": "Every Saxhleel born under that sign belongs to the Shadowscales, whether they know it or not. Most are found as hatchlings. You were missed. A Dunmer slaver is camped east of the city, branding our people. Show me what the Shadow made you.",
+      "desc": "Elder Sees-Behind-Eyes of the Shadowscale enclave outside Stormhold told me I was born under the sign of the Shadow. To prove it, I must kill a Dunmer slaver camped east of the city.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "stormhold",
+          "offset": [
+            250,
+            200
+          ],
+          "text": "Find the slavers' camp east of Stormhold"
+        },
+        {
+          "type": "clear",
+          "place": "stormhold",
+          "offset": [
+            250,
+            200
+          ],
+          "text": "Silence the slaver's guards",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Slaver Guard",
+              "hostile": true,
+              "armor": "#5a2a2a"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "stormhold",
+          "offset": [
+            250,
+            200
+          ],
+          "text": "Kill the slaver",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Ravos Dreleth, Slaver",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.5,
+              "hostile": true,
+              "armor": "#5a2a2a",
+              "weapon": "nirncraft:chitin_sword"
+            }
+          ],
+          "journal": "Dreleth had four of our people chained to a stake. When he was dead I cut them loose, and they ran into the reeds without a word. That was thanks enough."
+        },
+        {
+          "type": "retrieve",
+          "place": "stormhold",
+          "offset": [
+            250,
+            200
+          ],
+          "relic": "ss_slaver_brand",
+          "radius": 10,
+          "text": "Take the slaver's branding iron"
+        },
+        {
+          "type": "deliver",
+          "npc": "sees_behind_eyes",
+          "relic": "ss_slaver_brand",
+          "text": "Bring the branding iron to Sees-Behind-Eyes",
+          "topic": "The slaver is dead. His captives are free.",
+          "reply": "And you came back with his iron instead of his purse. Good. The Shadow chose well. You are a Hatchling of the Shadowscales now. Do not let it go to your tail.",
+          "place": "stormhold"
+        }
+      ],
+      "outro": "I killed a Dunmer slaver outside Stormhold and freed his captives. Elder Sees-Behind-Eyes took me into the Shadowscales.",
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "nirncraft:iron_dagger",
+          "nirncraft:argonian_chestplate"
+        ]
+      },
+      "region": "black_marsh/stormhold",
+      "why": [
+        "stormhold.L7.tree_minders_and_factors",
+        "stormhold.L8.shadow_sign_vigil"
+      ],
+      "consequence": {
+        "world_state": "ss_born_under_the_shadow_resolved",
+        "flag": "conseq_ss_born_under_the_shadow",
+        "summary": "I killed a Dunmer slaver outside Stormhold and freed his captives. Elder Sees-Behind-Eyes took me into the Shadowscales."
+      }
+    },
+    {
+      "id": "ss_what_the_hist_teaches",
+      "title": "What the Hist Teaches",
+      "start": "npc:deeja",
+      "requires": [
+        "quest:ss_born_under_the_shadow|faction:shadowscales"
+      ],
+      "offer": "The Elder says the Hist must see me.",
+      "pitch": "The Elder is right. A Shadowscale's blade is sharpened by steel, but its hand is taught by the Hist. Go to the old root-tree south of here, drink, and sleep. What you dream is the lesson. Do not be afraid of what hunts you there.",
+      "desc": "Deeja-Sleeps sent me to drink the sap of an ancient Hist and dream. Every Shadowscale is taught by the Hist before they are taught by anyone else.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "root_hist",
+          "text": "Travel to the ancient Hist"
+        },
+        {
+          "type": "wait",
+          "hours": 3,
+          "text": "Drink the sap and sleep beneath the Hist",
+          "actions": "scene:ss_hist_dream;effect:darkness:6:0"
+        },
+        {
+          "type": "kill",
+          "place": "root_hist",
+          "at_player": true,
+          "text": "Hunt the thing that hunts you in the dream",
+          "spawn": [
+            {
+              "type": "nirncraft:wamasu",
+              "name": "Dream-Hunter",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.5
+            }
+          ],
+          "journal": "In the dream it was always behind me. I stopped running and stood still in the dark, and then it was in front of me, and then it was gone."
+        },
+        {
+          "type": "talk",
+          "npc": "deeja",
+          "text": "Tell Deeja-Sleeps what you dreamed",
+          "topic": "Something hunted me. I stopped running, and it came to me.",
+          "reply": "Yes. The Hist teaches the Shadow-born that stillness is a weapon. What did it mean to you?"
+        },
+        {
+          "type": "talk",
+          "npc": "deeja",
+          "text": "Answer Deeja",
+          "choices": [
+            {
+              "label": "That patience kills more surely than speed.",
+              "reply": "The answer of a good Shadowscale. The Elder will be pleased.",
+              "actions": "flag:ss_way_of_patience"
+            },
+            {
+              "label": "That fear is only a hunter I haven't faced yet.",
+              "reply": "The answer of a brave one. Brave Shadowscales are rare. Try to stay rare by staying alive.",
+              "actions": "flag:ss_way_of_courage"
+            }
+          ],
+          "place": "helstrom"
+        }
+      ],
+      "outro": "I drank from an ancient Hist and dreamed of being hunted until I stopped running. Deeja-Sleeps says the Hist has taught me what it teaches all the Shadow-born.",
+      "rewards": {
+        "gold": 250,
+        "faction_points": 3,
+        "items": [
+          "minecraft:honey_bottle*3"
+        ]
+      },
+      "region": "black_marsh/helstrom",
+      "why": [
+        "helstrom.L8.sap_naming_rite",
+        "helstrom.L9.elder_tree_council"
+      ],
+      "consequence": {
+        "world_state": "ss_what_the_hist_teaches_resolved",
+        "flag": "conseq_ss_what_the_hist_teaches",
+        "summary": "I drank from an ancient Hist and dreamed of being hunted until I stopped running. Deeja-Sleeps says the Hist has taught me what it teaches all the Shadow-born."
+      }
+    },
+    {
+      "id": "ss_the_kings_contract",
+      "title": "The King's Contract",
+      "start": "npc:teeba_enoo",
+      "requires": [
+        "quest:ss_what_the_hist_teaches"
+      ],
+      "offer": "The Elder says you carry a list.",
+      "pitch": "A short one. One name. An Imperial magistrate stayed in Gideon after the Empire left, kept his seal, and still collects 'debts' from our people on his plantation. The King would like the debts cancelled. Permanently. Bring the seal as proof.",
+      "desc": "Teeba-Enoo, envoy of the King of Argonia, gave me my first royal contract: an Imperial magistrate near Gideon who still holds Argonians in debt-bondage, years after the Empire withdrew.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "gideon",
+          "offset": [
+            200,
+            -150
+          ],
+          "text": "Find the magistrate's plantation outside Gideon"
+        },
+        {
+          "type": "clear",
+          "place": "gideon",
+          "offset": [
+            200,
+            -150
+          ],
+          "text": "Deal with the plantation's hired guards",
+          "spawn": [
+            {
+              "type": "npc:imperial_soldier",
+              "count": 3,
+              "name": "Plantation Guard",
+              "hostile": true,
+              "armor": "imperial"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "gideon",
+          "offset": [
+            200,
+            -150
+          ],
+          "text": "Fulfil the King's contract",
+          "spawn": [
+            {
+              "type": "npc:imperial_soldier",
+              "name": "Magistrate Varro Calidius",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.5,
+              "hostile": true,
+              "armor": "imperial",
+              "weapon": "nirncraft:imperial_sword"
+            }
+          ],
+          "journal": "Calidius had a ledger of debts going back twenty years, each one paid many times over. I burned it with him."
+        },
+        {
+          "type": "retrieve",
+          "place": "gideon",
+          "offset": [
+            200,
+            -150
+          ],
+          "relic": "ss_magistrate_seal",
+          "radius": 10,
+          "text": "Take the magistrate's seal"
+        },
+        {
+          "type": "deliver",
+          "npc": "teeba_enoo",
+          "relic": "ss_magistrate_seal",
+          "text": "Bring the seal to Teeba-Enoo in Stormhold",
+          "topic": "The magistrate's debts are cancelled.",
+          "reply": "So I see. The King will melt this down and have it made into something useful. A spoon, perhaps. You will hear from him again, Shadow-Hatched.",
+          "place": "stormhold"
+        }
+      ],
+      "outro": "I fulfilled the King of Argonia's contract on Magistrate Calidius near Gideon and brought his seal back to Teeba-Enoo.",
+      "rewards": {
+        "gold": 400,
+        "faction_points": 3
+      },
+      "region": "black_marsh/gideon",
+      "why": [
+        "gideon.L9.lukiul_and_an_xileel",
+        "gideon.L10.old_governor_vaults"
+      ],
+      "consequence": {
+        "world_state": "ss_the_kings_contract_resolved",
+        "flag": "conseq_ss_the_kings_contract",
+        "summary": "I fulfilled the King of Argonia's contract on Magistrate Calidius near Gideon and brought his seal back to Teeba-Enoo."
+      }
+    },
+    {
+      "id": "ss_a_scale_turned",
+      "title": "A Scale Turned",
+      "start": "auto",
+      "requires": [
+        "quest:ss_the_kings_contract"
+      ],
+      "desc": "Two Shadowscales have died on contracts this month, ambushed by killers who knew exactly where they would be. Elder Sees-Behind-Eyes thinks someone inside the enclave is selling us.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "sees_behind_eyes",
+          "text": "Speak with Elder Sees-Behind-Eyes",
+          "topic": "You sent for me, Elder.",
+          "reply": "Our contracts are being sold. I do not know by whom. You are new, so you are the only one I am sure it is not. Watch the others. Start with the ones who smile.",
+          "place": "stormhold"
+        },
+        {
+          "type": "talk",
+          "npc": "weighs_the_coin",
+          "text": "Speak with Weighs-the-Coin",
+          "topic": "Two of us died this month. Any thoughts?",
+          "reply": "Bad luck, little one. It happens. Contracts go wrong. Now if you'll excuse me, I have an errand in Helstrom. Nothing interesting.",
+          "place": "stormhold"
+        },
+        {
+          "type": "go",
+          "place": "helstrom",
+          "offset": [
+            -200,
+            -150
+          ],
+          "text": "Follow Weighs-the-Coin toward Helstrom",
+          "actions": "retire:weighs_the_coin"
+        },
+        {
+          "type": "clear",
+          "place": "helstrom",
+          "offset": [
+            -200,
+            -150
+          ],
+          "text": "Fight off the Morag Tong agents at the meeting",
+          "spawn": [
+            {
+              "type": "npc:assassin",
+              "count": 3,
+              "name": "Morag Tong Operative",
+              "hostile": true,
+              "armor": "#8a2a1a"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "helstrom",
+          "offset": [
+            -200,
+            -150
+          ],
+          "text": "Kill the traitor",
+          "spawn": [
+            {
+              "type": "npc:assassin",
+              "name": "Weighs-the-Coin",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.6,
+              "hostile": true,
+              "weapon": "nirncraft:elven_dagger"
+            }
+          ],
+          "journal": "Weighs-the-Coin had a purse of Morag Tong gold on his belt. It was heavier than I expected. I wonder if that was how much we were each worth to him."
+        },
+        {
+          "type": "retrieve",
+          "place": "helstrom",
+          "offset": [
+            -200,
+            -150
+          ],
+          "relic": "ss_morag_tong_writ",
+          "radius": 10,
+          "text": "Search the traitor's body"
+        },
+        {
+          "type": "deliver",
+          "npc": "sees_behind_eyes",
+          "relic": "ss_morag_tong_writ",
+          "text": "Bring the writ to the Elder",
+          "topic": "It was Weighs-the-Coin. He sold every name in the enclave to the Morag Tong.",
+          "reply": "Let me see.",
+          "actions": "scene:ss_the_traitor_named",
+          "place": "stormhold"
+        }
+      ],
+      "outro": "I followed Weighs-the-Coin to Helstrom, where he was selling Shadowscale names to the Morag Tong, and killed him. The writ he carried named every one of us.",
+      "rewards": {
+        "gold": 450,
+        "faction_points": 3,
+        "items": [
+          {
+            "item": "nirncraft:argonian_leggings",
+            "name": "Traitor's Scales",
+            "enchant": {
+              "protection": 2
+            }
+          }
+        ]
+      },
+      "region": "black_marsh/helstrom",
+      "why": [
+        "helstrom.L10.elder_root_sanctum",
+        "helstrom.L7.root_heart_tribes"
+      ],
+      "consequence": {
+        "world_state": "ss_a_scale_turned_resolved",
+        "flag": "conseq_ss_a_scale_turned",
+        "summary": "I followed Weighs-the-Coin to Helstrom, where he was selling Shadowscale names to the Morag Tong, and killed him. The writ he carried named every one of us."
+      }
+    },
+    {
+      "id": "ss_the_egg_thief",
+      "title": "The Egg-Thief of Murkmire",
+      "start": "auto",
+      "requires": [
+        "quest:ss_a_scale_turned"
+      ],
+      "desc": "Hatcheries in Murkmire are being robbed. The eggs are sold to collectors in Cyrodiil who keep Argonian hatchlings as curiosities. The Elder has given the contract to me.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "murkmire",
+          "text": "Travel to Murkmire"
+        },
+        {
+          "type": "talk",
+          "npc": "tah_weesh",
+          "text": "Speak with Tah-Weesh the Egg-Keeper",
+          "topic": "The Shadowscales sent me about the stolen eggs.",
+          "reply": "Six clutches in one season. The thief is one of us, a Lukiul who wears Imperial clothes and calls himself a merchant. He hides in Xal Irasotl, the old pyramid in the drowned forest. Bring our eggs home.",
+          "place": "murkmire"
+        },
+        {
+          "type": "go",
+          "place": "xal_irasotl",
+          "text": "Find the xanmeer of Xal Irasotl"
+        },
+        {
+          "type": "clear",
+          "place": "xal_irasotl",
+          "placement": "structure",
+          "text": "Get past the egg-thief's gang",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Shell-Seller's Hireling",
+              "hostile": true
+            },
+            {
+              "type": "nirncraft:wamasu",
+              "name": "Chained Wamasu"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "xal_irasotl",
+          "placement": "structure",
+          "text": "Kill the egg-thief",
+          "spawn": [
+            {
+              "type": "npc:thief",
+              "name": "Hixeeh, Shell-Seller",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5,
+              "hostile": true,
+              "armor": "#6a5a3a"
+            }
+          ],
+          "journal": "Hixeeh said he was only a merchant, and that the collectors would have found someone else. He was right about the second part. Now the collectors will have to."
+        },
+        {
+          "type": "retrieve",
+          "place": "xal_irasotl",
+          "placement": "structure",
+          "relic": "ss_stolen_clutch",
+          "text": "Recover the stolen clutch"
+        },
+        {
+          "type": "deliver",
+          "npc": "tah_weesh",
+          "relic": "ss_stolen_clutch",
+          "text": "Bring the eggs home to Tah-Weesh",
+          "topic": "Your eggs. Still warm.",
+          "reply": "Still warm. Oh, still warm. They will hatch knowing the marsh and not some Imperial's glass cage. When they are old enough, I will tell them a Shadow brought them home.",
+          "place": "murkmire"
+        }
+      ],
+      "outro": "I tracked a Lukiul egg-thief to the xanmeer of Xal Irasotl in Murkmire, killed him, and brought a clutch of stolen eggs back to their hatchery.",
+      "rewards": {
+        "gold": 500,
+        "faction_points": 3
+      },
+      "region": "black_marsh/shadowfen",
+      "why": [
+        "shadowfen.L10.slaver_hideouts",
+        "shadowfen.L7.chain_breaker_clans"
+      ],
+      "consequence": {
+        "world_state": "ss_the_egg_thief_resolved",
+        "flag": "conseq_ss_the_egg_thief",
+        "summary": "I tracked a Lukiul egg-thief to the xanmeer of Xal Irasotl in Murkmire, killed him, and brought a clutch of stolen eggs back to their hatchery."
+      }
+    },
+    {
+      "id": "ss_speaker_of_shadows",
+      "title": "Speaker of Shadows",
+      "start": "auto",
+      "requires": [
+        "quest:ss_the_egg_thief"
+      ],
+      "desc": "The Morag Tong did not take the loss of their informant quietly. Their killers are coming for the enclave outside Stormhold, and the Elder means to meet them in the mud.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "sees_behind_eyes",
+          "text": "Speak with Elder Sees-Behind-Eyes",
+          "topic": "I heard the Tong is coming.",
+          "reply": "Tonight. They think we are scattered and grieving. We are neither. Take the eastern approach; they will come that way, because it is the dry one, and dry-skins love dry ground.",
+          "place": "stormhold"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Wait for nightfall at the enclave"
+        },
+        {
+          "type": "clear",
+          "place": "stormhold",
+          "offset": [
+            150,
+            -150
+          ],
+          "text": "Hold the eastern approach against the Morag Tong",
+          "spawn": [
+            {
+              "type": "npc:assassin",
+              "count": 4,
+              "name": "Morag Tong Assassin",
+              "hostile": true,
+              "armor": "#8a2a1a",
+              "hp": 1.5
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "stormhold",
+          "offset": [
+            150,
+            -150
+          ],
+          "text": "Kill the Tong's Exalted Master",
+          "spawn": [
+            {
+              "type": "npc:assassin",
+              "name": "Exalted Master Dalyn Indoril",
+              "target": true,
+              "boss": true,
+              "hp": 4.0,
+              "dmg": 1.8,
+              "hostile": true,
+              "armor": "#8a2a1a",
+              "weapon": "nirncraft:daedric_dagger"
+            }
+          ],
+          "journal": "Indoril fought like a priest at prayer, every stroke in its proper place. The marsh had no proper places. He slipped, once, and that was enough."
+        },
+        {
+          "type": "talk",
+          "npc": "sees_behind_eyes",
+          "text": "Return to the Elder",
+          "topic": "The eastern approach held. Their master is dead.",
+          "reply": "Then all of the enclave is alive because of you. Stand here, in the middle, where everyone can see.",
+          "actions": "scene:ss_speaker",
+          "place": "stormhold"
+        }
+      ],
+      "outro": "I held the eastern approach against the Morag Tong and killed their Exalted Master. Elder Sees-Behind-Eyes named me a Shadowscale and the one who will one day speak for the Shadow.",
+      "rewards": {
+        "gold": 1200,
+        "faction_points": 5,
+        "perks": 1,
+        "flags": [
+          "ss_speaker_chosen"
+        ],
+        "items": [
+          {
+            "item": "nirncraft:ebony_dagger",
+            "name": "Shadow-Hatched Fang",
+            "enchant": {
+              "sharpness": 5,
+              "looting": 2,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "nirncraft:argonian_helmet",
+            "name": "Hood of the Speaker",
+            "enchant": {
+              "protection": 3,
+              "respiration": 3
+            }
+          }
+        ]
+      },
+      "region": "black_marsh/shadowfen",
+      "why": [
+        "shadowfen.L7.chain_breaker_clans",
+        "shadowfen.L8.shackle_cairns"
+      ],
+      "consequence": {
+        "world_state": "ss_speaker_of_shadows_resolved",
+        "flag": "conseq_ss_speaker_of_shadows",
+        "summary": "I held the eastern approach against the Morag Tong and killed their Exalted Master. Elder Sees-Behind-Eyes named me a Shadowscale and the one who will one day speak for the Shadow."
+      }
+    }
+  ]
+}

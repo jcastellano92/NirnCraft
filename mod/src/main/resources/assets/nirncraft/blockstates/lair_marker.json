@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "waterlogged=true": {
+      "model": "nirncraft:block/lair_marker"
+    },
+    "waterlogged=false": {
+      "model": "nirncraft:block/lair_marker"
+    }
+  }
+}

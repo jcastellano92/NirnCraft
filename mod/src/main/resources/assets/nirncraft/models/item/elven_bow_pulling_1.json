@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/elven_bow",
+  "textures": {
+    "layer0": "nirncraft:item/elven_bow_pulling_1"
+  }
+}

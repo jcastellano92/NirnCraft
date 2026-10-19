@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:dwemer_caverns",
+    "nirncraft:falmer_glow_caves",
+    "nirncraft:ice_caves",
+    "nirncraft:lava_caves",
+    "nirncraft:mushroom_grottos"
+  ]
+}

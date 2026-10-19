@@ -1,0 +1,27 @@
+{
+  "feature": "nirncraft:biome/flora/trees_falkreath_under",
+  "placement": [
+    {
+      "type": "nirncraft:flora_scatter",
+      "spacing": 4,
+      "min_distance": 0.8,
+      "density": 0.55,
+      "floor": 0.12,
+      "field": {
+        "salt": 101,
+        "scale": 72,
+        "coverage": 0.82,
+        "softness": 0.16,
+        "kind": "fbm",
+        "mode": "edge"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

@@ -9,7 +9,7 @@
 #include <thread>
 #include <vector>
 
-namespace aether {
+namespace atlas {
 
 template <typename F>
 void parallelRun(F&& worker, unsigned maxThreads = 0) {
@@ -37,4 +37,4 @@ void parallelRun(F&& worker, unsigned maxThreads = 0) {
     if (first) std::rethrow_exception(first);
 }
 
-}  // namespace aether
+}  // namespace atlas

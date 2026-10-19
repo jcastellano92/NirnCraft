@@ -1,0 +1,34 @@
+{
+  "type": "nirncraft:spire_cluster",
+  "config": {
+    "body": {
+      "type": "minecraft:weighted",
+      "entries": [
+        {
+          "data": "minecraft:packed_ice",
+          "weight": 4
+        },
+        {
+          "data": "minecraft:blue_ice",
+          "weight": 1
+        }
+      ]
+    },
+    "tip": {
+      "type": "minecraft:simple",
+      "state": "minecraft:packed_ice"
+    },
+    "count": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 2,
+      "max_inclusive": 4
+    },
+    "height": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 4,
+      "max_inclusive": 12
+    },
+    "spread": 4,
+    "lean": 0.15
+  }
+}

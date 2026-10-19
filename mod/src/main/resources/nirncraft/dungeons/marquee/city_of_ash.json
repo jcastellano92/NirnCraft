@@ -1,0 +1,1068 @@
+{
+ "id": "city_of_ash",
+ "kit": "ayleid",
+ "entry_depth": 22,
+ "palette": {
+  "wall": [
+   "minecraft:stone_bricks*5",
+   "minecraft:cracked_stone_bricks*4",
+   "minecraft:smooth_basalt*3",
+   "minecraft:tuff*2",
+   "minecraft:blackstone*1"
+  ],
+  "floor": [
+   "minecraft:smooth_basalt*4",
+   "minecraft:stone_bricks*3",
+   "minecraft:cracked_stone_bricks*2"
+  ],
+  "ceiling": [
+   "minecraft:stone_bricks*3",
+   "minecraft:tuff*3"
+  ],
+  "rock": "minecraft:smooth_basalt",
+  "trim": "minecraft:chiseled_stone_bricks",
+  "pillar": "minecraft:stone_bricks",
+  "cap": "minecraft:chiseled_stone_bricks",
+  "light": "minecraft:shroomlight",
+  "dim": "minecraft:redstone_lamp",
+  "rail": "minecraft:iron_bars",
+  "stair": "minecraft:stone_brick_stairs"
+ },
+ "boss": {
+  "id": "nirncraft:dragon_priest|nirncraft:draugr_deathlord|minecraft:wither_skeleton",
+  "name": "The Cinder Magister"
+ },
+ "books": {
+  "cause": {
+   "title": "Notes from the Ash",
+   "author": "unknown",
+   "pages": [
+    "Every terrace of the city once drank from the same cistern. When the lamps were first lit, they were lit from the cistern. When the cistern burned, they all went out at once.\n\nI have only been able to find three lamps that still remember their light."
+   ]
+  },
+  "origin": {
+   "title": "Where the Fire Began",
+   "author": "A magister's apprentice",
+   "pages": [
+    "The Magister wanted a brighter city. He asked the lamps for more than they had. They gave it, and then they gave the rest.\n\nThe lens fell first. The fire followed the light along the walls, as a fire does, like it had been invited."
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "ash_gate",
+   "name": "The Ash Gate",
+   "at": [
+    0,
+    0
+   ],
+   "y": -8,
+   "half": [
+    5,
+    6
+   ],
+   "h": 12,
+   "role": "start",
+   "doors": {
+    "s": 8
+   },
+   "ops": [
+    {
+     "op": "landing",
+     "y": 8,
+     "depth": 3,
+     "stairs": 3
+    },
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5,
+     "block": "dim"
+    },
+    {
+     "op": "scatter",
+     "block": "minecraft:cobweb",
+     "on": "ceiling",
+     "chance": 12
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "burnt_barracks",
+   "name": "Burnt Barracks",
+   "at": [
+    -1,
+    0
+   ],
+   "y": -8,
+   "half": [
+    4,
+    4
+   ],
+   "h": 6,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 3,
+     "block": "dim"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "sleep",
+       "at": [
+        [
+         -3,
+         -3
+        ],
+        [
+         -3,
+         0
+        ],
+        [
+         -3,
+         3
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_common",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "melted_shrine",
+   "name": "The Melted Shrine",
+   "at": [
+    1,
+    0
+   ],
+   "y": -8,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4,
+     "block": "dim"
+    },
+    {
+     "op": "fill",
+     "from": [
+      0,
+      -3,
+      0
+     ],
+     "to": [
+      0,
+      -3,
+      0
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "lectern",
+     "at": [
+      0,
+      -3,
+      1
+     ],
+     "book": "cause",
+     "candle": true,
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:stray",
+       "name": "Cinder Wraith",
+       "mode": "ambush",
+       "n": 1,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "terrace_1",
+   "name": "First Ash Terrace",
+   "at": [
+    0,
+    -1
+   ],
+   "y": -10,
+   "half": [
+    5,
+    5
+   ],
+   "h": 10,
+   "ops": [
+    {
+     "op": "bowl",
+     "tiers": 2,
+     "width": 2,
+     "step": 1
+    },
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5,
+     "block": "dim"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "awake",
+       "n": 2,
+       "where": "ledge"
+      },
+      {
+       "id": "minecraft:stray",
+       "name": "Cinder Wraith",
+       "mode": "ambush",
+       "n": 2,
+       "where": "ledge"
+      }
+     ]
+    },
+    {
+     "op": "feature",
+     "id": "setpiece:ash_terrace"
+    }
+   ]
+  },
+  {
+   "id": "glass_rubble",
+   "name": "Court of Glass Rubble",
+   "at": [
+    -1,
+    -1
+   ],
+   "y": -12,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4,
+     "block": "dim"
+    },
+    {
+     "op": "scatter",
+     "block": "minecraft:glass",
+     "on": "floor",
+     "chance": 12,
+     "salt": 453
+    },
+    {
+     "op": "blocks",
+     "list": [
+      {
+       "at": [
+        -3,
+        -3,
+        0
+       ],
+       "block": "minecraft:redstone_lamp"
+      }
+     ]
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "lamp_court_e",
+   "name": "First Dead Lamp Court",
+   "at": [
+    1,
+    -1
+   ],
+   "y": -12,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4,
+     "block": "dim"
+    },
+    {
+     "op": "fill",
+     "from": [
+      3,
+      -3,
+      0
+     ],
+     "to": [
+      3,
+      -3,
+      1
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "blocks",
+     "list": [
+      {
+       "at": [
+        3,
+        -3,
+        2
+       ],
+       "block": "minecraft:redstone_lamp"
+      }
+     ]
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:stray",
+       "name": "Cinder Wraith",
+       "mode": "ambush",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_common",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "terrace_2",
+   "name": "Second Ash Terrace",
+   "at": [
+    0,
+    -2
+   ],
+   "y": -13,
+   "half": [
+    5,
+    5
+   ],
+   "h": 12,
+   "ops": [
+    {
+     "op": "bowl",
+     "tiers": 3,
+     "width": 1,
+     "step": 1
+    },
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5,
+     "block": "dim"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Champion",
+       "mode": "elite",
+       "at": [
+        [
+         0,
+         -3
+        ]
+       ]
+      },
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "ambush",
+       "n": 3,
+       "where": "ledge"
+      }
+     ]
+    },
+    {
+     "op": "feature",
+     "id": "setpiece:ash_terrace"
+    }
+   ]
+  },
+  {
+   "id": "lamp_court_w",
+   "name": "Second Dead Lamp Court",
+   "at": [
+    -1,
+    -2
+   ],
+   "y": -17,
+   "half": [
+    4,
+    5
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4,
+     "block": "dim"
+    },
+    {
+     "op": "fill",
+     "from": [
+      -3,
+      -4,
+      0
+     ],
+     "to": [
+      -3,
+      -4,
+      1
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "blocks",
+     "list": [
+      {
+       "at": [
+        -3,
+        -4,
+        2
+       ],
+       "block": "minecraft:redstone_lamp"
+      }
+     ]
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      4
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "cistern",
+   "name": "The Scorched Grand Cistern",
+   "at": [
+    1,
+    -2
+   ],
+   "y": -16,
+   "half": [
+    5,
+    5
+   ],
+   "h": 14,
+   "ops": [
+    {
+     "op": "bowl",
+     "tiers": 4,
+     "width": 1,
+     "step": 1
+    },
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 6,
+     "block": "dim"
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 10,
+     "block": "dim"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:stray",
+       "name": "Cinder Wraith",
+       "mode": "awake",
+       "n": 2,
+       "where": "ledge"
+      },
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "sleep",
+       "n": 3,
+       "where": "ledge"
+      }
+     ]
+    },
+    {
+     "op": "feature",
+     "id": "setpiece:scorched_cistern"
+    }
+   ]
+  },
+  {
+   "id": "fallen_lens",
+   "name": "The Fallen Lens",
+   "at": [
+    -1,
+    -3
+   ],
+   "y": -21,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4,
+     "block": "dim"
+    },
+    {
+     "op": "fill",
+     "from": [
+      -1,
+      -1,
+      0
+     ],
+     "to": [
+      1,
+      1,
+      0
+     ],
+     "block": "minecraft:tinted_glass"
+    },
+    {
+     "op": "blocks",
+     "list": [
+      {
+       "at": [
+        0,
+        0,
+        1
+       ],
+       "block": "minecraft:redstone_lamp"
+      }
+     ]
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "magister",
+   "name": "The Magister's Chamber",
+   "at": [
+    0,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    6,
+    6
+   ],
+   "h": 16,
+   "role": "boss",
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5,
+     "block": "dim"
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 10,
+     "block": "dim"
+    },
+    {
+     "op": "boss",
+     "at": [
+      0,
+      -2
+     ],
+     "dais": 2
+    },
+    {
+     "op": "fill",
+     "from": [
+      -6,
+      -6,
+      1
+     ],
+     "to": [
+      6,
+      -6,
+      9
+     ],
+     "block": "minecraft:smooth_basalt"
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -5
+     ],
+     "table": "nirncraft:chests/marquee_city_of_ash",
+     "face": "s",
+     "capstone": true
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "sleep",
+       "at": [
+        [
+         -4,
+         3
+        ],
+        [
+         4,
+         3
+        ],
+        [
+         -4,
+         0
+        ],
+        [
+         4,
+         0
+        ]
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cause_room",
+   "name": "Where It Began",
+   "at": [
+    1,
+    -3
+   ],
+   "y": -20,
+   "half": [
+    4,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4,
+     "block": "dim"
+    },
+    {
+     "op": "fill",
+     "from": [
+      3,
+      -3,
+      0
+     ],
+     "to": [
+      3,
+      -3,
+      0
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "lectern",
+     "at": [
+      3,
+      -3,
+      1
+     ],
+     "book": "origin",
+     "candle": true,
+     "face": "w"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:stray",
+       "name": "Cinder Wraith",
+       "mode": "ambush",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ash_vent",
+   "name": "The Ash Vent",
+   "at": [
+    -2,
+    -1
+   ],
+   "y": -12,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4,
+     "block": "dim"
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -3
+     ],
+     "table": "nirncraft:chests/dungeon_minor",
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:stray",
+       "name": "Cinder Wraith",
+       "mode": "sleep",
+       "n": 1,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "glasswright",
+   "name": "The Glasswright's Cell",
+   "at": [
+    2,
+    -1
+   ],
+   "y": -12,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4,
+     "block": "dim"
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pass_2",
+   "name": "Side Passage",
+   "at": [
+    -2,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_minor",
+     "face": "n"
+    }
+   ]
+  },
+  {
+   "id": "pass_3",
+   "name": "Back Passage",
+   "at": [
+    -2,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Charred Guardian",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "n"
+    }
+   ]
+  }
+ ],
+ "links": [
+  {
+   "a": "ash_gate",
+   "b": "burnt_barracks"
+  },
+  {
+   "a": "ash_gate",
+   "b": "melted_shrine"
+  },
+  {
+   "a": "ash_gate",
+   "b": "terrace_1"
+  },
+  {
+   "a": "terrace_1",
+   "b": "glass_rubble"
+  },
+  {
+   "a": "terrace_1",
+   "b": "lamp_court_e"
+  },
+  {
+   "a": "glass_rubble",
+   "b": "ash_vent"
+  },
+  {
+   "a": "lamp_court_e",
+   "b": "glasswright"
+  },
+  {
+   "a": "terrace_1",
+   "b": "terrace_2"
+  },
+  {
+   "a": "terrace_2",
+   "b": "lamp_court_w"
+  },
+  {
+   "a": "terrace_2",
+   "b": "cistern"
+  },
+  {
+   "a": "lamp_court_w",
+   "b": "fallen_lens"
+  },
+  {
+   "a": "cistern",
+   "b": "cause_room"
+  },
+  {
+   "a": "cause_room",
+   "b": "magister",
+   "gate": "cause_room",
+   "trap": true
+  },
+  {
+   "a": "lamp_court_w",
+   "b": "pass_2"
+  },
+  {
+   "a": "pass_2",
+   "b": "pass_3"
+  },
+  {
+   "a": "pass_3",
+   "b": "fallen_lens"
+  }
+ ],
+ "why": [
+  "greenshade.L1.drowned_coast",
+  "greenshade.L4.mire_fen"
+ ]
+}

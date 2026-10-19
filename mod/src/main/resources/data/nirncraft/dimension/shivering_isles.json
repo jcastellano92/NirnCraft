@@ -1,0 +1,20 @@
+{
+  "type": "nirncraft:shivering_isles",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "nirncraft:realm/shivering_isles",
+    "biome_source": {
+      "type": "nirncraft:realm",
+      "realm": "shivering_isles",
+      "biomes": {
+        "mania_fields": "nirncraft:shivering_isles_mania_fields",
+        "mania_mushroom_forest": "nirncraft:shivering_isles_mania_mushroom_forest",
+        "mania_crystal_grove": "nirncraft:shivering_isles_mania_crystal_grove",
+        "dementia_swamp": "nirncraft:shivering_isles_dementia_swamp",
+        "dementia_forest": "nirncraft:shivering_isles_dementia_forest",
+        "fringe": "nirncraft:shivering_isles_fringe",
+        "sea": "nirncraft:shivering_isles_sea"
+      }
+    }
+  }
+}

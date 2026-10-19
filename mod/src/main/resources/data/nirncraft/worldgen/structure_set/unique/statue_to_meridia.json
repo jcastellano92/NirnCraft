@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:unique/statue_to_meridia",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274044,
+    "types": [
+      "daedric_shrine"
+    ],
+    "variants": [
+      "meridia_great"
+    ]
+  }
+}

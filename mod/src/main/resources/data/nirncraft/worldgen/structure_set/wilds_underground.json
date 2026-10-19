@@ -1,0 +1,90 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:cave",
+      "weight": 7
+    },
+    {
+      "structure": "nirncraft:mine",
+      "weight": 2
+    },
+    {
+      "structure": "nirncraft:vampire_lair",
+      "weight": 1
+    },
+    {
+      "structure": "nirncraft:necromancer_lair",
+      "weight": 2
+    },
+    {
+      "structure": "nirncraft:hagraven_lair",
+      "weight": 1
+    },
+    {
+      "structure": "nirncraft:dwemer_ruin",
+      "weight": 3
+    },
+    {
+      "structure": "nirncraft:nordic_barrow",
+      "weight": 3
+    },
+    {
+      "structure": "nirncraft:ruin/ayleid",
+      "weight": 5
+    },
+    {
+      "structure": "nirncraft:ruin/velothi_tomb",
+      "weight": 5
+    },
+    {
+      "structure": "nirncraft:ruin/daedric",
+      "weight": 3
+    },
+    {
+      "structure": "nirncraft:ruin/xanmeer",
+      "weight": 6
+    },
+    {
+      "structure": "nirncraft:ruin/moon_temple",
+      "weight": 6
+    },
+    {
+      "structure": "nirncraft:ruin/tree_tomb",
+      "weight": 5
+    },
+    {
+      "structure": "nirncraft:ruin/crystal_vault",
+      "weight": 5
+    },
+    {
+      "structure": "nirncraft:ruin/yokudan_tomb",
+      "weight": 6
+    },
+    {
+      "structure": "nirncraft:ruin/atmoran_tomb",
+      "weight": 6
+    },
+    {
+      "structure": "nirncraft:ruin/sea_vault",
+      "weight": 5
+    },
+    {
+      "structure": "nirncraft:ruin/coral_pit",
+      "weight": 6
+    },
+    {
+      "structure": "nirncraft:ruin/akaviri",
+      "weight": 6
+    },
+    {
+      "structure": "nirncraft:ice_cave",
+      "weight": 2
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 30,
+    "separation": 10,
+    "salt": 718273501
+  }
+}

@@ -1,10 +1,10 @@
-"""The Skycraft arms & armour catalogue: every Skyrim weapon material and armour set plus the gear of the other
+"""The NirnCraft arms & armour catalogue: every Skyrim weapon material and armour set plus the gear of the other
 provinces of Tamriel and the lands beyond.
 
 This table is the single source of truth. tools/textures/gear.py reads it and writes:
   * the generated enum constants of SmithingTier.java and SkyArmorMaterial.java (between the "gear:" markers),
-  * item textures, item models, armour layers and the 3D armour geometry (skycraft/gear/armor_models.json),
-  * lang (mod/src/main/lang/skycraft/gear.json), gold values, weights, item tags and loot tables.
+  * item textures, item models, armour layers and the 3D armour geometry (nirncraft/gear/armor_models.json),
+  * lang (mod/src/main/lang/nirncraft/gear.json), gold values, weights, item tags and loot tables.
 
 Numbers follow Skyrim: `sword` is the base damage of the material's sword, `ar` the armour ratings of
 helmet / cuirass / gauntlets / boots, `wt` and `val` weights and gold values (helmet, cuirass, gauntlets, boots,
@@ -77,14 +77,14 @@ S = "smithing."
 STEEL, ELVEN, ADV, GLASS, DRAGON = S + "steel_smithing", S + "elven_smithing", S + "advanced_armors", S + "glass_smithing", S + "dragon_armor"
 DWARVEN, ORCISH, EBONY, DAEDRIC = S + "dwarven_smithing", S + "orcish_smithing", S + "ebony_smithing", S + "daedric_smithing"
 
-IRON_INGOT, STEEL_INGOT = "minecraft:iron_ingot", "skycraft:steel_ingot"
-CORUNDUM, ORICHALCUM, MOONSTONE = "skycraft:corundum_ingot", "skycraft:orichalcum_ingot", "skycraft:refined_moonstone"
-MALACHITE, QUICKSILVER, EBONY_INGOT = "skycraft:refined_malachite", "skycraft:quicksilver_ingot", "skycraft:ebony_ingot"
-SILVER, GOLD, DWEMER = "skycraft:silver_ingot", "minecraft:gold_ingot", "skycraft:dwarven_metal_ingot"
-LEATHER, HIDE, STRIPS = "minecraft:leather", "skycraft:hide", "skycraft:leather_strips"
-DRAGON_BONE, DRAGON_SCALE, DAEDRA_HEART = "skycraft:dragon_bone", "skycraft:dragon_scale", "skycraft:daedra_heart"
-STALHRIM, CHITIN, CHAURUS, NETCH = "skycraft:stalhrim", "skycraft:chitin_plate", "skycraft:chaurus_chitin", "skycraft:netch_leather"
-BONE, DRAUGR_BONE, PRISMARINE, WOOL = "minecraft:bone", "skycraft:bone_meal_draugr", "minecraft:prismarine_shard", "minecraft:black_wool"
+IRON_INGOT, STEEL_INGOT = "minecraft:iron_ingot", "nirncraft:steel_ingot"
+CORUNDUM, ORICHALCUM, MOONSTONE = "nirncraft:corundum_ingot", "nirncraft:orichalcum_ingot", "nirncraft:refined_moonstone"
+MALACHITE, QUICKSILVER, EBONY_INGOT = "nirncraft:refined_malachite", "nirncraft:quicksilver_ingot", "nirncraft:ebony_ingot"
+SILVER, GOLD, DWEMER = "nirncraft:silver_ingot", "minecraft:gold_ingot", "nirncraft:dwarven_metal_ingot"
+LEATHER, HIDE, STRIPS = "minecraft:leather", "nirncraft:hide", "nirncraft:leather_strips"
+DRAGON_BONE, DRAGON_SCALE, DAEDRA_HEART = "nirncraft:dragon_bone", "nirncraft:dragon_scale", "nirncraft:daedra_heart"
+STALHRIM, CHITIN, CHAURUS, NETCH = "nirncraft:stalhrim", "nirncraft:chitin_plate", "nirncraft:chaurus_chitin", "nirncraft:netch_leather"
+BONE, DRAUGR_BONE, PRISMARINE, WOOL = "minecraft:bone", "nirncraft:bone_meal_draugr", "minecraft:prismarine_shard", "minecraft:black_wool"
 
 SKYRIM = ("skyrim",)
 

@@ -1,5 +1,5 @@
 """Offline renderer for natural landmarks: top-down plus isometric close-ups of the sites a
-`/skycraft-landmarks sample ...` run generated. No Minecraft client; reads the saved world's region files.
+`/nirncraft-landmarks sample ...` run generated. No Minecraft client; reads the saved world's region files.
 
 usage:
   py -3 -I tools/landmarks/render_sites.py <world_dir> <sample.json> [<sample2.json> ...] --out docs/screens/landmarks

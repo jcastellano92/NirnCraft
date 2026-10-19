@@ -1,8 +1,0 @@
-{
-  "type": "skycraft:dungeon",
-  "theme": "bandit_camp",
-  "biomes": "#skycraft:dungeons/anywhere",
-  "step": "surface_structures",
-  "spawn_overrides": {},
-  "terrain_adaptation": "beard_thin"
-}

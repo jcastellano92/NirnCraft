@@ -1,6 +1,0 @@
-{
-  "parent": "skycraft:item/khajiit_bow",
-  "textures": {
-    "layer0": "skycraft:item/khajiit_bow_pulling_0"
-  }
-}

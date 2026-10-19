@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:wolf_pelt",
+      "required": false
+    },
+    {
+      "id": "nirncraft:echatere_hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:durzog_hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dwemer_gear",
+      "required": false
+    },
+    {
+      "id": "nirncraft:horker_tusk",
+      "required": false
+    },
+    {
+      "id": "nirncraft:mammoth_tusk",
+      "required": false
+    },
+    {
+      "id": "nirncraft:netch_leather",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:unique/blackreach",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:sites",
+    "salt": 718274058,
+    "sites": "blackreach"
+  }
+}

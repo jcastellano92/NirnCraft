@@ -1,0 +1,14 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "dragon_mound",
+  "place": {
+    "types": [
+      "dragon_mound"
+    ],
+    "variants": []
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

@@ -13,7 +13,7 @@ gradle.projectsEvaluated {
     p.tasks.register('geographyAudit', JavaExec) {
         dependsOn compileAudit
         classpath = p.files(compiled) + p.sourceSets.test.runtimeClasspath
-        mainClass = 'com.skycraft.qa.GeographyAudit'
+        mainClass = 'com.nirncraft.qa.GeographyAudit'
         maxHeapSize = '2G'
         args new File(p.projectDir, '../dist/world-tests/geography.json').absolutePath
     }

@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "skycraft:item/regional_treasure",
-    "layer1": "skycraft:item/regional_treasure_mount"
-  }
-}

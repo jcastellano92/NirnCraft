@@ -1,0 +1,52 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:iron_arrow",
+      "required": false
+    },
+    {
+      "id": "nirncraft:steel_arrow",
+      "required": false
+    },
+    {
+      "id": "nirncraft:orcish_arrow",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dwarven_arrow",
+      "required": false
+    },
+    {
+      "id": "nirncraft:elven_arrow",
+      "required": false
+    },
+    {
+      "id": "nirncraft:steel_bolt",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dwarven_bolt",
+      "required": false
+    },
+    "minecraft:feather",
+    "minecraft:flint",
+    "minecraft:string",
+    {
+      "id": "nirncraft:firewood",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leather_strips",
+      "required": false
+    },
+    {
+      "id": "nirncraft:imperial_crossbow",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hunting_bow",
+      "required": false
+    }
+  ]
+}

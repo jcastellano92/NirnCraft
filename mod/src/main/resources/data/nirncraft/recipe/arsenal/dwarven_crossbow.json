@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "#I#",
+    "@T@",
+    " # "
+  ],
+  "key": {
+    "#": "nirncraft:dwarven_metal_ingot",
+    "I": "nirncraft:dwarven_metal_ingot",
+    "@": "minecraft:string",
+    "T": "minecraft:tripwire_hook"
+  },
+  "result": {
+    "count": 1,
+    "id": "nirncraft:dwarven_crossbow"
+  }
+}

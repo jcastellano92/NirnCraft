@@ -4,20 +4,20 @@
 Writes (all generated, never hand-edit the outputs):
   * data/minecraft/dimension/{the_nether,the_end}.json and data/minecraft/dimension_type/{the_nether,the_end}.json
     (the Deadlands replace the Nether's worldgen, Sovngarde the End's; vanilla portals and the dragon fight keep working)
-  * data/skycraft/dimension/<realm>.json and data/skycraft/dimension_type/<realm>.json (the four new realms)
-  * data/skycraft/worldgen/noise/realm/*.json, density_function/realm/<realm>/*.json, noise_settings/realm/<realm>.json
-  * data/skycraft/worldgen/biome/<realm>_<role>.json (each realm's 4-7 biomes; feature lists filtered from ONE
+  * data/nirncraft/dimension/<realm>.json and data/nirncraft/dimension_type/<realm>.json (the four new realms)
+  * data/nirncraft/worldgen/noise/realm/*.json, density_function/realm/<realm>/*.json, noise_settings/realm/<realm>.json
+  * data/nirncraft/worldgen/biome/<realm>_<role>.json (each realm's 4-7 biomes; feature lists filtered from ONE
     canonical ordered list per generation step, so no feature-order cycle can happen)
-  * data/skycraft/worldgen/{configured,placed}_feature/realm/*.json
-  * data/skycraft/worldgen/structure/realm/**.json and structure_set/realm/**.json
-  * data/skycraft/tags/worldgen/biome/realm/<realm>.json, block tags (infiniburn, mineable, tool tiers)
-  * data/skycraft/region_spawns/realms.json (the region spawner's tables for the realms)
-  * data/skycraft/loot_tables/chests/realms/*.json
-  * skycraft/tamriel/places/realms.json (+ index.json entry): the ways into the realms that stand in Nirn
-  * assets/skycraft/lore/books/<id>.json: the realms' lore books (original text)
-  * mod/src/main/lang/skycraft/realms.json
+  * data/nirncraft/worldgen/{configured,placed}_feature/realm/*.json
+  * data/nirncraft/worldgen/structure/realm/**.json and structure_set/realm/**.json
+  * data/nirncraft/tags/worldgen/biome/realm/<realm>.json, block tags (infiniburn, mineable, tool tiers)
+  * data/nirncraft/region_spawns/realms.json (the region spawner's tables for the realms)
+  * data/nirncraft/loot_tables/chests/realms/*.json
+  * nirncraft/tamriel/places/realms.json (+ index.json entry): the ways into the realms that stand in Nirn
+  * assets/nirncraft/lore/books/<id>.json: the realms' lore books (original text)
+  * mod/src/main/lang/nirncraft/realms.json
 
-Terrain model (see RealmTerrain.java): skycraft:realm_terrain gives each realm's 2D surface height and three masks;
+Terrain model (see RealmTerrain.java): nirncraft:realm_terrain gives each realm's 2D surface height and three masks;
 the density is (height - y) / 8 plus a 3D crag noise scaled by the "jag" mask, and for the Deadlands and Apocrypha a
 band of floating rock / page platforms high above.
 
@@ -30,7 +30,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
 DATA = os.path.join(RES, "data")
-SK = "skycraft"
+SK = "nirncraft"
 
 
 def write(path, obj):
@@ -94,39 +94,39 @@ NOISES = {
 
 def terrain(realm, channel):
     return {"type": "minecraft:cache_2d", "argument": {
-        "type": "skycraft:realm_terrain", "realm": realm, "channel": channel,
-        "large": "skycraft:realm/large", "mid": "skycraft:realm/mid", "detail": "skycraft:realm/detail"}}
+        "type": "nirncraft:realm_terrain", "realm": realm, "channel": channel,
+        "large": "nirncraft:realm/large", "mid": "nirncraft:realm/mid", "detail": "nirncraft:realm/detail"}}
 
 
 # ============================================================================================ the realms
 # per realm: dimension, dimension type, min_y/height, sea level, fluid, default block, crag amplitude, floating band
 REALMS = {
-    "deadlands": dict(dim="minecraft:the_nether", dtype="minecraft:the_nether", effects="skycraft:deadlands",
-                      min_y=0, height=256, sea=40, fluid="lava", stone="skycraft:deadlands_rock", jag=1.3,
+    "deadlands": dict(dim="minecraft:the_nether", dtype="minecraft:the_nether", effects="nirncraft:deadlands",
+                      min_y=0, height=256, sea=40, fluid="lava", stone="nirncraft:deadlands_rock", jag=1.3,
                       floating=dict(y0=112, y1=176, scale=1.0, yscale=1.6, threshold=0.62),
                       fixed_time=13200, ambient=0.12, ultrawarm=True, scale=8.0, skylight=True,
-                      infiniburn="#skycraft:infiniburn_realms", spawn_light=11),
-    "sovngarde": dict(dim="minecraft:the_end", dtype="minecraft:the_end", effects="skycraft:sovngarde",
+                      infiniburn="#nirncraft:infiniburn_realms", spawn_light=11),
+    "sovngarde": dict(dim="minecraft:the_end", dtype="minecraft:the_end", effects="nirncraft:sovngarde",
                       min_y=0, height=256, sea=0, fluid="water", stone="minecraft:stone", jag=0.9, floating=None,
                       fixed_time=7000, ambient=0.08, ultrawarm=False, scale=1.0, skylight=True,
-                      infiniburn="#skycraft:infiniburn_realms", spawn_light=0),
-    "shivering_isles": dict(dim="skycraft:shivering_isles", dtype="skycraft:shivering_isles", effects="skycraft:shivering_isles",
+                      infiniburn="#nirncraft:infiniburn_realms", spawn_light=0),
+    "shivering_isles": dict(dim="nirncraft:shivering_isles", dtype="nirncraft:shivering_isles", effects="nirncraft:shivering_isles",
                             min_y=0, height=256, sea=63, fluid="water", stone="minecraft:stone", jag=0.8, floating=None,
                             fixed_time=None, ambient=0.05, ultrawarm=False, scale=1.0, skylight=True,
                             infiniburn="#minecraft:infiniburn_overworld", spawn_light=7),
-    "apocrypha": dict(dim="skycraft:apocrypha", dtype="skycraft:apocrypha", effects="skycraft:apocrypha",
-                      min_y=0, height=256, sea=52, fluid="water", stone="skycraft:apocrypha_stone", jag=0.0,
+    "apocrypha": dict(dim="nirncraft:apocrypha", dtype="nirncraft:apocrypha", effects="nirncraft:apocrypha",
+                      min_y=0, height=256, sea=52, fluid="water", stone="nirncraft:apocrypha_stone", jag=0.0,
                       floating=dict(y0=86, y1=150, scale=0.9, yscale=4.0, threshold=0.58),
                       fixed_time=18000, ambient=0.18, ultrawarm=False, scale=1.0, skylight=True,
-                      infiniburn="#skycraft:infiniburn_realms", spawn_light=15),
-    "soul_cairn": dict(dim="skycraft:soul_cairn", dtype="skycraft:soul_cairn", effects="skycraft:soul_cairn",
-                       min_y=0, height=256, sea=0, fluid="water", stone="skycraft:soul_stone", jag=0.7, floating=None,
+                      infiniburn="#nirncraft:infiniburn_realms", spawn_light=15),
+    "soul_cairn": dict(dim="nirncraft:soul_cairn", dtype="nirncraft:soul_cairn", effects="nirncraft:soul_cairn",
+                       min_y=0, height=256, sea=0, fluid="water", stone="nirncraft:soul_stone", jag=0.7, floating=None,
                        fixed_time=15500, ambient=0.15, ultrawarm=False, scale=1.0, skylight=True,
-                       infiniburn="#skycraft:infiniburn_realms", spawn_light=15),
-    "coldharbour": dict(dim="skycraft:coldharbour", dtype="skycraft:coldharbour", effects="skycraft:coldharbour",
-                        min_y=0, height=256, sea=56, fluid="lava", stone="skycraft:coldharbour_stone", jag=1.0, floating=None,
+                       infiniburn="#nirncraft:infiniburn_realms", spawn_light=15),
+    "coldharbour": dict(dim="nirncraft:coldharbour", dtype="nirncraft:coldharbour", effects="nirncraft:coldharbour",
+                        min_y=0, height=256, sea=56, fluid="lava", stone="nirncraft:coldharbour_stone", jag=1.0, floating=None,
                         fixed_time=17000, ambient=0.1, ultrawarm=True, scale=1.0, skylight=True,
-                        infiniburn="#skycraft:infiniburn_realms", spawn_light=15),
+                        infiniburn="#nirncraft:infiniburn_realms", spawn_light=15),
 }
 
 
@@ -135,17 +135,17 @@ def fluid_state(f):
 
 
 def noise_settings(rid, r):
-    base = "skycraft:realm/" + rid + "/"
+    base = "nirncraft:realm/" + rid + "/"
     top = r["min_y"] + r["height"]
     below = mul(0.125, add(base + "height", mul(-1.0, "minecraft:y")))
     density = below
     if r["jag"] > 0:
-        density = add(density, mul(base + "jag", mul(r["jag"], noise("skycraft:realm/jag", 1.0, 1.4))))
+        density = add(density, mul(base + "jag", mul(r["jag"], noise("nirncraft:realm/jag", 1.0, 1.4))))
     fl = r["floating"]
     if fl:
         mid = (fl["y0"] + fl["y1"]) / 2.0
         tent = dmin(ygrad(fl["y0"], mid, 0.0, 1.0), ygrad(mid, fl["y1"], 1.0, 0.0))
-        floating = add(mul(tent, noise("skycraft:realm/float", fl["scale"], fl["yscale"])), -fl["threshold"])
+        floating = add(mul(tent, noise("nirncraft:realm/float", fl["scale"], fl["yscale"])), -fl["threshold"])
         density = dmax(density, mul(4.0, floating))
     # solid floor at the bottom, open sky at the top
     density = dmin(dmax(density, ygrad(r["min_y"], r["min_y"] + 4, 1.0, -1.0)), ygrad(top - 24, top - 4, 1.0, -1.0))
@@ -222,7 +222,7 @@ def patch(lo, hi, n="minecraft:surface"):
 
 
 STEEP = {"type": "minecraft:steep"}
-BEDROCK = cond({"type": "minecraft:vertical_gradient", "random_name": "skycraft:realm_bedrock",
+BEDROCK = cond({"type": "minecraft:vertical_gradient", "random_name": "nirncraft:realm_bedrock",
                 "true_at_and_below": {"above_bottom": 0}, "false_at_and_above": {"above_bottom": 4}}, block("bedrock"))
 
 
@@ -341,57 +341,57 @@ REALM_NAMES = {
 }
 
 MESSAGES = {
-    "realm.skycraft.entering": "Entering %s",
-    "realm.skycraft.missing": "%s cannot be reached from this world.",
-    "realm.skycraft.gate.closed": "The gate is dead. Its fire has gone out.",
-    "realm.skycraft.sigil.hint": "Hold the item to enchant in your other hand, then use the Sigil Stone.",
-    "realm.skycraft.sigil.cannot": "The Sigil Stone's power will not bind to %s.",
-    "realm.skycraft.sigil.bound": "%s bound to %s.",
-    "realm.skycraft.sigil.tooltip": "Use with an item in your off hand to bind its enchantment.",
-    "realm.skycraft.sigil.taken": "Sigil Stone Taken",
-    "realm.skycraft.sigil.taken.sub": "The gate collapses. The Deadlands cast you out.",
-    "realm.skycraft.sigil.taken.sub_nogate": "The tower shakes. The Deadlands cast you out.",
-    "realm.skycraft.soul_cairn.toll": "The portal hungers for a soul. Carry a filled soul gem to pass the first time.",
-    "realm.skycraft.soul_cairn.toll_paid": "The Ideal Masters take their due: a soul gem's light goes out.",
-    "realm.skycraft.book.wait": "The pages won't settle yet.",
-    "realm.skycraft.tsun.greet.0": "Tsun: I am Tsun, shield-thane to Ysgramor. None pass the Whalebone Bridge unless I judge them worthy.",
-    "realm.skycraft.tsun.greet.1": "Tsun: Your sword-arm is still warm. You are not yet one of us, traveller.",
-    "realm.skycraft.tsun.greet.2": "Tsun: The heroes in the Hall drink to your deeds. When you would go back to Nirn, ask it of me (sneak and speak).",
-    "realm.skycraft.tsun.return": "Tsun: It is not yet your time. Go back to the world of the living, and earn your seat here.",
-    "realm.skycraft.tsun.victory": "Tsun: Alduin is gone, and Sovngarde sings your name. Return to Nirn, hero, until the day you return for good.",
-    "item.skycraft.sigil_stone": "Sigil Stone",
-    "item.skycraft.black_book": "Black Book",
-    "item.skycraft.black_book.titled": "Black Book: %s",
-    "item.skycraft.black_book.tooltip": "Reading it opens a way into Apocrypha.",
-    "book.skycraft.black_book.waking_dreams": "Waking Dreams",
-    "book.skycraft.black_book.epistolary_acumen": "Epistolary Acumen",
-    "book.skycraft.black_book.the_sallow_regent": "The Sallow Regent",
-    "book.skycraft.black_book.filament_and_filigree": "Filament and Filigree",
-    "book.skycraft.black_book.untold_legends": "Untold Legends",
-    "book.skycraft.black_book.the_winds_of_change": "The Winds of Change",
-    "place.skycraft.kvatch_gate": "The Burning Gate of Kvatch",
-    "place.skycraft.shivering_isles_door": "The Door to the Shivering Isles",
-    "place.skycraft.black_book_epistolary": "Altar of Epistolary Acumen",
-    "place.skycraft.black_book_sallow_regent": "Altar of the Sallow Regent",
-    "place.skycraft.black_book_filament": "Altar of Filament and Filigree",
-    "place.skycraft.soul_cairn_portal": "Soul Cairn Portal",
-    "place.skycraft.dark_anchor": "The Dark Anchor",
+    "realm.nirncraft.entering": "Entering %s",
+    "realm.nirncraft.missing": "%s cannot be reached from this world.",
+    "realm.nirncraft.gate.closed": "The gate is dead. Its fire has gone out.",
+    "realm.nirncraft.sigil.hint": "Hold the item to enchant in your other hand, then use the Sigil Stone.",
+    "realm.nirncraft.sigil.cannot": "The Sigil Stone's power will not bind to %s.",
+    "realm.nirncraft.sigil.bound": "%s bound to %s.",
+    "realm.nirncraft.sigil.tooltip": "Use with an item in your off hand to bind its enchantment.",
+    "realm.nirncraft.sigil.taken": "Sigil Stone Taken",
+    "realm.nirncraft.sigil.taken.sub": "The gate collapses. The Deadlands cast you out.",
+    "realm.nirncraft.sigil.taken.sub_nogate": "The tower shakes. The Deadlands cast you out.",
+    "realm.nirncraft.soul_cairn.toll": "The portal hungers for a soul. Carry a filled soul gem to pass the first time.",
+    "realm.nirncraft.soul_cairn.toll_paid": "The Ideal Masters take their due: a soul gem's light goes out.",
+    "realm.nirncraft.book.wait": "The pages won't settle yet.",
+    "realm.nirncraft.tsun.greet.0": "Tsun: I am Tsun, shield-thane to Ysgramor. None pass the Whalebone Bridge unless I judge them worthy.",
+    "realm.nirncraft.tsun.greet.1": "Tsun: Your sword-arm is still warm. You are not yet one of us, traveller.",
+    "realm.nirncraft.tsun.greet.2": "Tsun: The heroes in the Hall drink to your deeds. When you would go back to Nirn, ask it of me (sneak and speak).",
+    "realm.nirncraft.tsun.return": "Tsun: It is not yet your time. Go back to the world of the living, and earn your seat here.",
+    "realm.nirncraft.tsun.victory": "Tsun: Alduin is gone, and Sovngarde sings your name. Return to Nirn, hero, until the day you return for good.",
+    "item.nirncraft.sigil_stone": "Sigil Stone",
+    "item.nirncraft.black_book": "Black Book",
+    "item.nirncraft.black_book.titled": "Black Book: %s",
+    "item.nirncraft.black_book.tooltip": "Reading it opens a way into Apocrypha.",
+    "book.nirncraft.black_book.waking_dreams": "Waking Dreams",
+    "book.nirncraft.black_book.epistolary_acumen": "Epistolary Acumen",
+    "book.nirncraft.black_book.the_sallow_regent": "The Sallow Regent",
+    "book.nirncraft.black_book.filament_and_filigree": "Filament and Filigree",
+    "book.nirncraft.black_book.untold_legends": "Untold Legends",
+    "book.nirncraft.black_book.the_winds_of_change": "The Winds of Change",
+    "place.nirncraft.kvatch_gate": "The Burning Gate of Kvatch",
+    "place.nirncraft.shivering_isles_door": "The Door to the Shivering Isles",
+    "place.nirncraft.black_book_epistolary": "Altar of Epistolary Acumen",
+    "place.nirncraft.black_book_sallow_regent": "Altar of the Sallow Regent",
+    "place.nirncraft.black_book_filament": "Altar of Filament and Filigree",
+    "place.nirncraft.soul_cairn_portal": "Soul Cairn Portal",
+    "place.nirncraft.dark_anchor": "The Dark Anchor",
 }
 
 
 def lang(biomes, books):
     out = {}
     for rid, (name, sub) in REALM_NAMES.items():
-        out["realm.skycraft." + rid] = name
-        out["realm.skycraft." + rid + ".sub"] = sub
+        out["realm.nirncraft." + rid] = name
+        out["realm.nirncraft." + rid + ".sub"] = sub
         dim = REALMS[rid]["dim"].split(":")[1]
-        out["region.skycraft.dimension." + dim] = name
+        out["region.nirncraft.dimension." + dim] = name
     for (_realm, _role, path, name, _j) in biomes:
-        out["biome.skycraft." + path] = name
+        out["biome.nirncraft." + path] = name
     for bid, name in BLOCK_NAMES.items():
-        out["block.skycraft." + bid] = name
+        out["block.nirncraft." + bid] = name
     for bid, b in books.items():
-        out["book.skycraft." + bid] = b[4]
+        out["book.nirncraft." + bid] = b[4]
     out.update(MESSAGES)
     return dict(sorted(out.items()))
 
@@ -416,9 +416,9 @@ def write_tags(biomes):
     for (realm, _role, path, _n, _j) in biomes:
         by_realm.setdefault(realm, []).append(SK + ":" + path)
     for realm, ids in by_realm.items():
-        data("skycraft/tags/worldgen/biome/realm/%s.json" % realm, {"replace": False, "values": ids})
+        data("nirncraft/tags/worldgen/biome/realm/%s.json" % realm, {"replace": False, "values": ids})
     s = lambda *n: [SK + ":" + x for x in n]
-    data("skycraft/tags/blocks/infiniburn_realms.json", {"replace": False, "values": [
+    data("nirncraft/tags/blocks/infiniburn_realms.json", {"replace": False, "values": [
         "#minecraft:infiniburn_overworld", "minecraft:blackstone", "minecraft:basalt"] + s(
         "deadlands_rock", "deadlands_magma_rock", "deadlands_ash", "coldharbour_stone", "soul_stone")})
     merge_tag("blocks", "minecraft:infiniburn_overworld", s("deadlands_magma_rock"))
@@ -439,12 +439,12 @@ def write_tags(biomes):
                                                      "black_book", "soul_portal", "coldharbour_portal", "sigil_flame"))
     merge_tag("blocks", "minecraft:features_cannot_replace", s("sigil_stone", "oblivion_portal", "black_book", "madness_door"))
     # the realms' creatures in the shared creature tags (monster hunting perks, undead weaknesses, bosses unleveled)
-    merge_tag("entity_types", "skycraft:monsters", s(
+    merge_tag("entity_types", "nirncraft:monsters", s(
         "clannfear", "daedroth", "spider_daedra", "grummite", "baliwog", "gnarl", "elytra", "flesh_atronach", "seeker",
         "lurker", "keeper", "boneman", "mistman", "wrathman", "harvester"))
-    merge_tag("entity_types", "skycraft:undead", s("keeper", "boneman", "mistman", "wrathman"))
+    merge_tag("entity_types", "nirncraft:undead", s("keeper", "boneman", "mistman", "wrathman"))
     merge_tag("entity_types", "forge:bosses", s("miraak"))
-    data("skycraft/tags/worldgen/structure/realms.json", {"replace": False,
+    data("nirncraft/tags/worldgen/structure/realms.json", {"replace": False,
                                                           "values": [SK + ":realm/" + k for k in STRUCTURES_KEYS()]})
 
 
@@ -460,16 +460,16 @@ def main():
     import realms_features
 
     for name, params in NOISES.items():
-        data("skycraft/worldgen/noise/%s.json" % name, params)
+        data("nirncraft/worldgen/noise/%s.json" % name, params)
     biomes = realms_biomes.all_biomes()
     roles = {}
     for (realm, role, path, _n, j) in biomes:
-        data("skycraft/worldgen/biome/%s.json" % path, j)
+        data("nirncraft/worldgen/biome/%s.json" % path, j)
         roles.setdefault(realm, {})[role] = SK + ":" + path
     for rid, r in REALMS.items():
         for ch in ("height", "jag", "shape", "feature"):
-            data("skycraft/worldgen/density_function/realm/%s/%s.json" % (rid, ch), terrain(rid, ch))
-        data("skycraft/worldgen/noise_settings/realm/%s.json" % rid, noise_settings(rid, r))
+            data("nirncraft/worldgen/density_function/realm/%s/%s.json" % (rid, ch), terrain(rid, ch))
+        data("nirncraft/worldgen/noise_settings/realm/%s.json" % rid, noise_settings(rid, r))
         ns, path = r["dtype"].split(":")
         data("%s/dimension_type/%s.json" % (ns, path), dimension_type(r))
         dns, dpath = r["dim"].split(":")
@@ -477,18 +477,18 @@ def main():
             "type": "minecraft:noise", "settings": SK + ":realm/" + rid,
             "biome_source": {"type": SK + ":realm", "realm": rid, "biomes": roles[rid]}}})
     for name, cf in realms_features.CF.items():
-        data("skycraft/worldgen/configured_feature/realm/%s.json" % name, cf)
+        data("nirncraft/worldgen/configured_feature/realm/%s.json" % name, cf)
     for name, pf in realms_features.PF.items():
-        data("skycraft/worldgen/placed_feature/realm/%s.json" % name, pf)
+        data("nirncraft/worldgen/placed_feature/realm/%s.json" % name, pf)
     for site, (biome_tag, placement) in realms_content.STRUCTURES.items():
-        data("skycraft/worldgen/structure/realm/%s.json" % site, realms_content.structure_json(site, biome_tag))
-        data("skycraft/worldgen/structure_set/realm/%s.json" % site, realms_content.structure_set_json(site, placement))
-    data("skycraft/region_spawns/realms.json", realms_content.SPAWNS)
+        data("nirncraft/worldgen/structure/realm/%s.json" % site, realms_content.structure_json(site, biome_tag))
+        data("nirncraft/worldgen/structure_set/realm/%s.json" % site, realms_content.structure_set_json(site, placement))
+    data("nirncraft/region_spawns/realms.json", realms_content.SPAWNS)
     for name, pools in realms_content.LOOT.items():
-        data("skycraft/loot_tables/chests/realms/%s.json" % name, {"type": "minecraft:chest", "pools": pools,
-                                                                   "random_sequence": "skycraft:chests/realms/" + name})
+        data("nirncraft/loot_tables/chests/realms/%s.json" % name, {"type": "minecraft:chest", "pools": pools,
+                                                                   "random_sequence": "nirncraft:chests/realms/" + name})
     # the ways in, as named places of Tamriel
-    places_dir = os.path.join(RES, "skycraft", "tamriel", "places")
+    places_dir = os.path.join(RES, "nirncraft", "tamriel", "places")
     write(os.path.join(places_dir, "realms.json"), realms_content.PLACES)
     idx_path = os.path.join(places_dir, "index.json")
     with open(idx_path, encoding="utf-8") as f:
@@ -502,11 +502,11 @@ def main():
     write_tags(biomes)
     write(os.path.join(ROOT, "mod", "src", "main", "lang", SK, "realms.json"), lang(biomes, realms_content.BOOKS))
     # the Java side registers the books and names the sites from these tables
-    write(os.path.join(RES, "skycraft", "realms", "books.json"),
+    write(os.path.join(RES, "nirncraft", "realms", "books.json"),
           [{"id": k, "category": v[0], "cover": v[1], "weight": v[2], "value": v[3],
             **({"why": realms_content.BOOK_WHY[k]} if k in getattr(realms_content, "BOOK_WHY", {}) else {})}
            for k, v in realms_content.BOOKS.items()])
-    write(os.path.join(RES, "skycraft", "realms", "site_names.json"), realms_content.SITE_NAMES)
+    write(os.path.join(RES, "nirncraft", "realms", "site_names.json"), realms_content.SITE_NAMES)
     print("realms: %d biomes, %d placed features, %d structures written" % (len(biomes), len(realms_features.PF),
                                                                           len(realms_content.STRUCTURES)))
 

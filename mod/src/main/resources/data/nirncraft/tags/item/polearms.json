@@ -1,0 +1,32 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:iron_spear",
+    "nirncraft:iron_halberd",
+    "nirncraft:iron_glaive",
+    "nirncraft:steel_spear",
+    "nirncraft:steel_halberd",
+    "nirncraft:steel_glaive",
+    "nirncraft:orcish_spear",
+    "nirncraft:orcish_halberd",
+    "nirncraft:orcish_glaive",
+    "nirncraft:dwarven_spear",
+    "nirncraft:dwarven_halberd",
+    "nirncraft:dwarven_glaive",
+    "nirncraft:elven_spear",
+    "nirncraft:elven_halberd",
+    "nirncraft:elven_glaive",
+    "nirncraft:glass_spear",
+    "nirncraft:glass_halberd",
+    "nirncraft:glass_glaive",
+    "nirncraft:ebony_spear",
+    "nirncraft:ebony_halberd",
+    "nirncraft:ebony_glaive",
+    "nirncraft:daedric_spear",
+    "nirncraft:daedric_halberd",
+    "nirncraft:daedric_glaive",
+    "nirncraft:dragonbone_spear",
+    "nirncraft:dragonbone_halberd",
+    "nirncraft:dragonbone_glaive"
+  ]
+}

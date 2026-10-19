@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:realm/deadlands/bridge",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 9,
+    "separation": 3,
+    "salt": 2041503
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:hide"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:hide"
+      }
+    ]
+  }
+}

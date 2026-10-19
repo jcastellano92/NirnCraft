@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Skycraft procedural ambience synthesiser: every file of the sound-catalogue categories "bed" and "ambient".
+NirnCraft procedural ambience synthesiser: every file of the sound-catalogue categories "bed" and "ambient".
 
 Everything here is ORIGINAL procedural synthesis (numpy, plus scipy.signal for a few causal filters). No game audio
 is read, sampled or analysed.
@@ -2009,7 +2009,7 @@ def sh_cicada(rng, v, sr):
     return verb(y, sr, rng, 0.75, 0.16)
 
 
-# ---------------------------------------------------------------------------- fire and aftermath (com.skycraft.fire)
+# ---------------------------------------------------------------------------- fire and aftermath (com.nirncraft.fire)
 
 def sh_fire_crackle(rng, v, sr):
     """A burning house heard from a few blocks: a soft low rush with sparse wood pops."""

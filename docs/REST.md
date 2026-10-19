@@ -3,7 +3,7 @@
 One system for sleeping, waiting, the rest need, multiplayer time skips and the jail sentence. Code:
 `world/RestManager` (server sessions, skips, spawn gate), `world/RestLogic` (the pure rules, self-tested),
 `world/RestSim` (townsfolk and world catch-up), `world/client/RestClient` (camera, HUD, input). Selftest:
-`/skycraft-crime selftest` ("rest:" lines).
+`/nirncraft-crime selftest` ("rest:" lines).
 
 ## What the player does
 
@@ -11,7 +11,7 @@ One system for sleeping, waiting, the rest need, multiplayer time skips and the 
   its crosshair prompt reads "[F] Sleep Bed"). Sneak-use is still vanilla sleeping. Sleeping is the **real vanilla sleeping
   state**: every client draws the lying pose, the hitbox is low, damage wakes. The vanilla "Leave Bed" screen and black-out
   are replaced by our panel while a rest session runs.
-* **Wait** = the wait key (`key.skycraft.wait`, default I; every message shows the real binding) sits the player on the
+* **Wait** = the wait key (`key.nirncraft.wait`, default I; every message shows the real binding) sits the player on the
   ground (a rider on an invisible `Marker`; sneak = stand up). Pressing the key again stands up and cancels a running skip.
 * Camera goes third person; the view the player had is remembered and restored on every exit (stand up, cancel, logout,
   death, ESC).
@@ -58,7 +58,7 @@ vignette and progress bar show it. During it, per tick and bounded:
   (`RestSim` only moves scheduled townsfolk: not busy, not hunting, not prisoners, not followers).
 * **Live time**: skipped ticks are added to the game time, so every cooldown, room and pacing deadline runs out, but
   anything that **removes a creature on a timer** counts the real clock `RestManager.liveTime(level)` (game time minus
-  the ticks rest added, persisted in `skycraft_rest_rule`): encounters and their summons, wild scenes, region-spawned
+  the ticks rest added, persisted in `nirncraft_rest_rule`): encounters and their summons, wild scenes, region-spawned
   creatures, ambushes, wild dragons, conjured summons. Read and write such deadlines with `liveTime`, never the raw
   game time. Vanilla `checkDespawn` uses tick counters and distance, not game time.
 * **Hunters**: hostiles already hunting a resting player when a skip starts have their target cleared and the skip does
@@ -98,10 +98,10 @@ gets up and other resting players are told.
 
 Vanilla wakes everybody and skips to morning once all players have slept 100 ticks. Our system owns time, so while anybody
 lies in a bed the world's `playersSleepingPercentage` is raised to 1000 and put back afterwards (`RestManager.guardSleepRule`;
-the original value is kept in `skycraft_rest_rule` world data and restored at server start after a crash). The "you can only
+the original value is kept in `nirncraft_rest_rule` world data and restored at server start after a crash). The "you can only
 sleep at night" stop is lifted for resting players (`SleepingTimeCheckEvent`).
 
-## Config (`config/skycraft-world-common.toml`, `[rest]`)
+## Config (`config/nirncraft-world-common.toml`, `[rest]`)
 
 | key | default | effect |
 | --- | --- | --- |
@@ -123,6 +123,6 @@ prisoner in the cell. Prisoners are excluded from the group requirement; the cel
 ## Notes and limits
 
 * Sitting keeps the full standing hitbox (a rider cannot be made smaller without mixins). Sleeping has the vanilla low one.
-* Not accelerated: dropped items (they do not despawn), Skycraft's own crafting stations that tick on their own counters,
+* Not accelerated: dropped items (they do not despawn), NirnCraft's own crafting stations that tick on their own counters,
   entity fire, mob AI. Regional difficulty (chunk inhabited time) rises with the game-time jump, as for any elapsed time.
 * `doDaylightCycle` off: a skip still moves the clock (as before).

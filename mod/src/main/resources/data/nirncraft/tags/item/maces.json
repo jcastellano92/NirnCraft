@@ -1,0 +1,32 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:iron_mace",
+    "nirncraft:steel_mace",
+    "nirncraft:orcish_mace",
+    "nirncraft:dwarven_mace",
+    "nirncraft:elven_mace",
+    "nirncraft:glass_mace",
+    "nirncraft:ebony_mace",
+    "nirncraft:daedric_mace",
+    "nirncraft:dragonbone_mace",
+    "nirncraft:silver_mace",
+    "nirncraft:ancient_nord_mace",
+    "nirncraft:forsworn_mace",
+    "nirncraft:imperial_mace",
+    "nirncraft:falmer_mace",
+    "nirncraft:nordic_mace",
+    "nirncraft:skyforge_mace",
+    "nirncraft:akaviri_mace",
+    "nirncraft:stalhrim_mace",
+    "nirncraft:chitin_mace",
+    "nirncraft:redguard_mace",
+    "nirncraft:bosmer_mace",
+    "nirncraft:breton_mace",
+    "nirncraft:argonian_mace",
+    {
+      "id": "#nirncraft:arsenal/maces",
+      "required": false
+    }
+  ]
+}

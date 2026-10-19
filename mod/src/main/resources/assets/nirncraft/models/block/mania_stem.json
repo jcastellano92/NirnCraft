@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "nirncraft:block/mania_stem_top",
+    "side": "nirncraft:block/mania_stem"
+  }
+}

@@ -11,8 +11,8 @@ import os
 from PIL import Image
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures", "item")
-MODELS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "models", "item")
+TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures", "item")
+MODELS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "models", "item")
 
 GROUPS = {
     "warrior": (0xC8, 0x46, 0x3C),
@@ -111,7 +111,7 @@ def book(group_rgb, emblem, variant, emblem_color=GOLD):
 
 
 def model(name):
-    return {"parent": "minecraft:item/generated", "textures": {"layer0": f"skycraft:item/{name}"}}
+    return {"parent": "minecraft:item/generated", "textures": {"layer0": f"nirncraft:item/{name}"}}
 
 
 def main():

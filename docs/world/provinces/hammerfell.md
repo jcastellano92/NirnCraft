@@ -10,10 +10,10 @@ bridge.
 classes, counts, the building mix of towns and Stros M'kai's site layout. Every description below is our own. No game
 text, raster or asset enters the repo. Invented people are ours.
 
-**Era.** Skycraft is set in 4E 201, twenty-odd years after Hammerfell drove the Aldmeri Dominion out on its own. Every
+**Era.** NirnCraft is set in 4E 201, twenty-odd years after Hammerfell drove the Aldmeri Dominion out on its own. Every
 older era is a **history layer** (L11) that must be visible today.
 
-**Scope.** Hammerfell is 25.3 km² in Skycraft today, 0.95 times Skyrim, close to the lore map. Northern Hammerfell (the
+**Scope.** Hammerfell is 25.3 km² in NirnCraft today, 0.95 times Skyrim, close to the lore map. Northern Hammerfell (the
 bay shore) follows Daggerfall. Southern Hammerfell follows Arena's backbone. Stros M'kai follows Redguard's layout
 (`SCALE-AND-GEOGRAPHY.md` 5.5). Stros M'kai sits in this province (region `hammerfell/stros_mkai`). Orsinium is in
 `high_rock.md` (region `high_rock/wrothgar`), but its sieges are part of Hammerfell's history too.
@@ -418,7 +418,7 @@ harbour. Fief keeps are walled compounds (a kasbah-like keep with a tower and a 
   the coast fiefs have 2 temples and 6-11 taverns each.
 * The bay-head river towns look like Breton towns: Totambu has 17 taverns and 4 guild halls, Lainlyn 16 and Kozanset
   15. They are the trading, mixed edge of the province.
-* Skycraft capitals get 2 inns and a large temple quarter with a necropolis gate. The jungle cities get 2 inns and a
+* NirnCraft capitals get 2 inns and a large temple quarter with a necropolis gate. The jungle cities get 2 inns and a
   river market.
 
 ### 5.1 Settlements by realm
@@ -478,7 +478,7 @@ sells to both. IB8 checks each choice against lore.
 
 ### 6.1 Daggerfall dungeon types to Hammerfell themes
 
-| Daggerfall type (where it clusters) | Skycraft variant | Hammerfell reason |
+| Daggerfall type (where it clusters) | NirnCraft variant | Hammerfell reason |
 | --- | --- | --- |
 | Crypt, cemetery (Alik'r 23 crypts; cemeteries everywhere) | `yokudan_tomb` (necropolis), tended or defiled; cemeteries become settlement-edge scenes | hf.L8.necropolis_dead |
 | Desecrated temple (Alik'r 26, Totambu 24) | `daedric_ruin` / cult temple in a Yokudan temple shell | hf.L10.defiled_temples |
@@ -652,7 +652,7 @@ marquee pair and one order hall or sword-school.
 | --- | --- | --- | --- |
 | World sheet | `tamriel/world/hammerfell.json` (MS22) | Province block; `sentinel`, `alikr_desert` (two halves), `bangkorai`, `dragontail` (two halves), `stros_mkai`, `craglorn`, `hews_bane` | before IB3 |
 | Regions and polygons | `tamriel_vectors.json`, `regions.json` | New `sentinel`; re-cut `bangkorai`; shrunk `alikr_desert` and `dragontail`; hinge applied | IB1, IB2 |
-| Fiefs | `skycraft/tamriel/fiefs.json`, `Fiefs` | 19 fiefs with seat, lord title, temple, order, coven, bloodline, banner, Crown or Forebear lean | IB2 |
+| Fiefs | `nirncraft/tamriel/fiefs.json`, `Fiefs` | 19 fiefs with seat, lord title, temple, order, coven, bloodline, banner, Crown or Forebear lean | IB2 |
 | Biomes | `biomes.py`, `palettes.json` | `iliac_scrub`, `iliac_rainforest`, `tigonus_marsh`; micro tables | IB2, MS21 |
 | Places | `places/hammerfell.json`, `places/provinces.json` | About 75 window places; moves for Sentinel, Elinhir, Gilane, the Stros M'kai sites, `scourg_barrow` (in), `shedungent` (out), `tuwhaccas_throne` and `goats_head_oasis` (re-homed) | IB1, IB3 |
 | City plans | `cityplans/*.json` (`sentinel.json` and `rihad.json` exist) | Sentinel polish, Berbaaqnia, Totambu, Dragontail, Tigonus, Abibon-Gora, Port Hunding (Redguard layout); 9 keeps with distinct forms; overlays per realm | IB4 |

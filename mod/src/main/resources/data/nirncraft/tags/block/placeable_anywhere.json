@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:drafting_table",
+    "nirncraft:bedroll",
+    "nirncraft:tent",
+    "nirncraft:cooking_pot"
+  ]
+}

@@ -21,7 +21,7 @@ def passable_name(s):
     return s in EXACT or s.endswith(ENDS) or s.startswith(STARTS) or s in ('iron_bars_not',)
 def load_world(path=None):
     root = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
-    return World(path or os.environ.get('SKYCRAFT_WORLD') or os.path.join(root, 'mod', 'run', 'world'))
+    return World(path or os.environ.get('NIRNCRAFT_WORLD') or os.path.join(root, 'mod', 'run', 'world'))
 def classify(w):
     n=len(w.names)
     passable=np.zeros(n,bool); fluid=np.zeros(n,bool); support=np.zeros(n,bool)

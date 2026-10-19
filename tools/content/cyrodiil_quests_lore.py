@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Deterministic generator for R6 Cyrodiil V8:
-- 9 MS1 regional storylines in mod/src/main/resources/skycraft/quests/story/<county>.json
-- Expanded Cyrodiil side quests in mod/src/main/resources/skycraft/quests/side_cyrodiil.json
+- 9 MS1 regional storylines in mod/src/main/resources/nirncraft/quests/story/<county>.json
+- Expanded Cyrodiil side quests in mod/src/main/resources/nirncraft/quests/side_cyrodiil.json
 - F-WHY / region / placed-objective back-fills on Cyrodiil faction quest files
-- Full Cyrodiil place lore & county flavour in mod/src/main/resources/skycraft/lore/places/cyrodiil.json
-- Cyrodiil road encounters & wonder moments in mod/src/main/resources/skycraft/creatures/scenes.json
-- 9 Cyrodiil county festivals in mod/src/main/resources/skycraft/calendar/festivals.json
-- Lang updates in mod/src/main/lang/skycraft/{quests,lore,guide,calendar}.json
+- Full Cyrodiil place lore & county flavour in mod/src/main/resources/nirncraft/lore/places/cyrodiil.json
+- Cyrodiil road encounters & wonder moments in mod/src/main/resources/nirncraft/creatures/scenes.json
+- 9 Cyrodiil county festivals in mod/src/main/resources/nirncraft/calendar/festivals.json
+- Lang updates in mod/src/main/lang/nirncraft/{quests,lore,guide,calendar}.json
 """
 import glob
 import json
@@ -16,8 +16,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-RES = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft")
-LANG_DIR = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft")
+RES = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft")
+LANG_DIR = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft")
 
 sys.path.insert(0, os.path.join(ROOT, "tools", "qa"))
 import flow_audit as fa  # noqa: E402
@@ -38,7 +38,7 @@ def jsave(path, data):
 
 
 def human_name(pid: str, raw_name: str = "") -> str:
-    if raw_name and not raw_name.startswith("place.skycraft."):
+    if raw_name and not raw_name.startswith("place.nirncraft."):
         return raw_name
     base = pid
     for px in ("cyr_", "cyrodiil_", "side_cyr_"):
@@ -422,7 +422,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Warden of Pale Pass",
-                        "unique_item": "skycraft:imperial_sword",
+                        "unique_item": "nirncraft:imperial_sword",
                     },
                 },
             ],
@@ -574,7 +574,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Champion of the Great Oak",
-                        "unique_item": "skycraft:steel_greatsword",
+                        "unique_item": "nirncraft:steel_greatsword",
                     },
                 },
             ],
@@ -726,7 +726,7 @@ def build_story_files(hook_places):
                         "gold": 900,
                         "xp": 1000,
                         "title": "Inquisitor of the Ruby Seal",
-                        "unique_item": "skycraft:imperial_chestplate",
+                        "unique_item": "nirncraft:imperial_chestplate",
                     },
                 },
             ],
@@ -878,7 +878,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Warden of the Great Forest",
-                        "unique_item": "skycraft:elven_sword",
+                        "unique_item": "nirncraft:elven_sword",
                     },
                 },
             ],
@@ -1030,7 +1030,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Syndic of the Painted Bridges",
-                        "unique_item": "skycraft:chitin_sword",
+                        "unique_item": "nirncraft:chitin_sword",
                     },
                 },
             ],
@@ -1182,7 +1182,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Keeper of the Weald Cask",
-                        "unique_item": "skycraft:glass_dagger",
+                        "unique_item": "nirncraft:glass_dagger",
                     },
                 },
             ],
@@ -1334,7 +1334,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Builder of the Wolf's Bluff",
-                        "unique_item": "skycraft:imperial_shield",
+                        "unique_item": "nirncraft:imperial_shield",
                     },
                 },
             ],
@@ -1486,7 +1486,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Friend of the Lucky Lady",
-                        "unique_item": "skycraft:khajiit_sabre",
+                        "unique_item": "nirncraft:khajiit_sabre",
                     },
                 },
             ],
@@ -1638,7 +1638,7 @@ def build_story_files(hook_places):
                         "gold": 800,
                         "xp": 900,
                         "title": "Peacemaker of the Niben Mouth",
-                        "unique_item": "skycraft:argonian_war_axe",
+                        "unique_item": "nirncraft:argonian_war_axe",
                     },
                 },
             ],
@@ -2335,7 +2335,7 @@ def update_scenes_and_festivals():
             "props": [],
             "actors": [
                 {"npc": "scholar", "count": [1, 1], "radius": 3},
-                {"entity": "skycraft:torchbug", "count": [3, 5], "radius": 4},
+                {"entity": "nirncraft:torchbug", "count": [3, 5], "radius": 4},
             ],
         },
         {
@@ -2404,8 +2404,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_cyrodiil_jerall_pale_pass_thaw",
             "name": "Pale Pass Thaw & Talos Torch-Muster",
-            "titleKey": "skycraft.calendar.festival.v8_fest_cyrodiil_jerall_pale_pass_thaw.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_cyrodiil_jerall_pale_pass_thaw.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_jerall_pale_pass_thaw.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_jerall_pale_pass_thaw.announce",
             "month": 3,
             "monthId": "first_seed",
             "monthName": "First Seed",
@@ -2433,8 +2433,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_cyrodiil_colovian_great_oak_assize",
             "name": "Great Oak Assize & Highland Fleece Fair",
-            "titleKey": "skycraft.calendar.festival.v8_fest_cyrodiil_colovian_great_oak_assize.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_cyrodiil_colovian_great_oak_assize.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_colovian_great_oak_assize.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_colovian_great_oak_assize.announce",
             "month": 5,
             "monthId": "second_seed",
             "monthName": "Second Seed",
@@ -2462,8 +2462,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_cyrodiil_heartlands_arena_championship",
             "name": "Imperial City Arena Grand Championship & Ruby Jubilee",
-            "titleKey": "skycraft.calendar.festival.v8_fest_cyrodiil_heartlands_arena_championship.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_cyrodiil_heartlands_arena_championship.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_heartlands_arena_championship.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_heartlands_arena_championship.announce",
             "month": 7,
             "monthId": "suns_height",
             "monthName": "Sun's Height",
@@ -2491,8 +2491,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_cyrodiil_great_forest_weynon_vespers",
             "name": "Great Forest Wayshrine Vigil & Woodland Fair",
-            "titleKey": "skycraft.calendar.festival.v8_fest_cyrodiil_great_forest_weynon_vespers.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_cyrodiil_great_forest_weynon_vespers.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_great_forest_weynon_vespers.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_great_forest_weynon_vespers.announce",
             "month": 6,
             "monthId": "mid_year",
             "monthName": "Mid Year",
@@ -2520,8 +2520,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_cyrodiil_nibenay_basin_corbolo_lanterns",
             "name": "Corbolo Painted-Bridge & Willow Lantern Regatta",
-            "titleKey": "skycraft.calendar.festival.v8_fest_cyrodiil_nibenay_basin_corbolo_lanterns.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_cyrodiil_nibenay_basin_corbolo_lanterns.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_nibenay_basin_corbolo_lanterns.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_nibenay_basin_corbolo_lanterns.announce",
             "month": 4,
             "monthId": "rains_hand",
             "monthName": "Rain's Hand",
@@ -2549,8 +2549,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_cyrodiil_west_weald_wine_harvest",
             "name": "Skingrad Colovian Wine Harvest & First Cask Tapping",
-            "titleKey": "skycraft.calendar.festival.v8_fest_cyrodiil_west_weald_wine_harvest.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_cyrodiil_west_weald_wine_harvest.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_west_weald_wine_harvest.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_west_weald_wine_harvest.announce",
             "month": 9,
             "monthId": "hearthfire",
             "monthName": "Hearthfire",
@@ -2578,8 +2578,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_cyrodiil_gold_coast_abecean_beacon",
             "name": "Anvil Golden Sail & Dibellan Lighthouse Fair",
-            "titleKey": "skycraft.calendar.festival.v8_fest_cyrodiil_gold_coast_abecean_beacon.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_cyrodiil_gold_coast_abecean_beacon.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_gold_coast_abecean_beacon.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_gold_coast_abecean_beacon.announce",
             "month": 8,
             "monthId": "last_seed",
             "monthName": "Last Seed",
@@ -2607,8 +2607,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_cyrodiil_nibenay_valley_lucky_lady",
             "name": "Gala of the Lucky Old Lady & Niben Barge-Moot",
-            "titleKey": "skycraft.calendar.festival.v8_fest_cyrodiil_nibenay_valley_lucky_lady.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_cyrodiil_nibenay_valley_lucky_lady.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_nibenay_valley_lucky_lady.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_nibenay_valley_lucky_lady.announce",
             "month": 11,
             "monthId": "suns_dusk",
             "monthName": "Sun's Dusk",
@@ -2636,8 +2636,8 @@ def update_scenes_and_festivals():
         {
             "id": "v8_fest_cyrodiil_blackwood_topal_reed_truce",
             "name": "Topal Bay Reed-Lantern Vigil & Zenithar Scale-Day",
-            "titleKey": "skycraft.calendar.festival.v8_fest_cyrodiil_blackwood_topal_reed_truce.title",
-            "announceKey": "skycraft.calendar.festival.v8_fest_cyrodiil_blackwood_topal_reed_truce.announce",
+            "titleKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_blackwood_topal_reed_truce.title",
+            "announceKey": "nirncraft.calendar.festival.v8_fest_cyrodiil_blackwood_topal_reed_truce.announce",
             "month": 12,
             "monthId": "evening_star",
             "monthName": "Evening Star",
@@ -2694,36 +2694,36 @@ def update_lang_files(stories, cyr_scenes, cyr_festivals):
         "v8_cyr_wonder_minotaur_imperial_cairn": "A solitary horned minotaur kneels peacefully beside a weathered First Era Alessian boundary-stone.",
     }
     for wid, wtxt in wonder_texts.items():
-        cal[f"skycraft.scene.wonder.{wid}"] = wtxt
+        cal[f"nirncraft.scene.wonder.{wid}"] = wtxt
     jsave(cal_path, cal)
 
     # 2. quests.json
     q_lang_path = os.path.join(LANG_DIR, "quests.json")
     qlang = jload(q_lang_path, {})
     for ckey, sdata in stories.items():
-        qlang[f"quest.skycraft.story.{ckey}.title"] = sdata["title"]
-        qlang[f"quest.skycraft.story.{ckey}.rumour"] = sdata["hook"]["rumour"]
-        qlang[f"quest.skycraft.story.{ckey}.notice"] = sdata["hook"]["notice"]
+        qlang[f"quest.nirncraft.story.{ckey}.title"] = sdata["title"]
+        qlang[f"quest.nirncraft.story.{ckey}.rumour"] = sdata["hook"]["rumour"]
+        qlang[f"quest.nirncraft.story.{ckey}.notice"] = sdata["hook"]["notice"]
         for q in sdata["quests"]:
-            qlang[f"quest.skycraft.{q['id']}.title"] = q["title"]
+            qlang[f"quest.nirncraft.{q['id']}.title"] = q["title"]
             for st in q["stages"]:
-                qlang[f"quest.skycraft.{q['id']}.stage.{st['id']}"] = st["objective"]
+                qlang[f"quest.nirncraft.{q['id']}.stage.{st['id']}"] = st["objective"]
     jsave(q_lang_path, qlang)
 
     # 3. lore.json (varied titles so novelty_lint.py --strict stays 100% green)
     lore_lang_path = os.path.join(LANG_DIR, "lore.json")
     llang = jload(lore_lang_path, {})
     cyr_books = {
-        "book.skycraft.cyrodiil_council_of_ash": "On the Council of Ash and the Empty Ruby Throne",
-        "book.skycraft.cyrodiil_pale_pass_tariffs": "Customs and Cold Iron: A History of Pale Pass",
-        "book.skycraft.cyrodiil_colovian_wool_staple": "Fleece and Oak: Charters of the Colovian Estates",
-        "book.skycraft.cyrodiil_ring_beneath_rings": "Subterranean Masonry of the Imperial Island",
-        "book.skycraft.cyrodiil_ayleid_forest_conduits": "Welkynd Lattices of the Great Forest",
-        "book.skycraft.cyrodiil_corbolo_canal_law": "Two Banks Upon the Corbolo: Cheydinhal Trade Law",
-        "book.skycraft.cyrodiil_weald_vintages": "Cellar-Books of the West Weald Vintners",
-        "book.skycraft.cyrodiil_kvatch_second_wall": "Mortar from the Cinders: Rebuilding Kvatch",
-        "book.skycraft.cyrodiil_lucky_old_lady": "Wish-Coins and Canal-Locks of Old Bravil",
-        "book.skycraft.cyrodiil_niben_mouth_truce": "Mangrove and Milestone: The Leyawiin Border Compacts",
+        "book.nirncraft.cyrodiil_council_of_ash": "On the Council of Ash and the Empty Ruby Throne",
+        "book.nirncraft.cyrodiil_pale_pass_tariffs": "Customs and Cold Iron: A History of Pale Pass",
+        "book.nirncraft.cyrodiil_colovian_wool_staple": "Fleece and Oak: Charters of the Colovian Estates",
+        "book.nirncraft.cyrodiil_ring_beneath_rings": "Subterranean Masonry of the Imperial Island",
+        "book.nirncraft.cyrodiil_ayleid_forest_conduits": "Welkynd Lattices of the Great Forest",
+        "book.nirncraft.cyrodiil_corbolo_canal_law": "Two Banks Upon the Corbolo: Cheydinhal Trade Law",
+        "book.nirncraft.cyrodiil_weald_vintages": "Cellar-Books of the West Weald Vintners",
+        "book.nirncraft.cyrodiil_kvatch_second_wall": "Mortar from the Cinders: Rebuilding Kvatch",
+        "book.nirncraft.cyrodiil_lucky_old_lady": "Wish-Coins and Canal-Locks of Old Bravil",
+        "book.nirncraft.cyrodiil_niben_mouth_truce": "Mangrove and Milestone: The Leyawiin Border Compacts",
     }
     llang.update(cyr_books)
     jsave(lore_lang_path, llang)
@@ -2732,24 +2732,24 @@ def update_lang_files(stories, cyr_scenes, cyr_festivals):
     guide_path = os.path.join(LANG_DIR, "guide.json")
     glang = jload(guide_path, {})
     guide_updates = {
-        "skycraft.guide.arrive.jerall_mountains": "Snow-laden passes along the Jerall crest look down upon Bruma, Cloud Ruler Temple, and the northern marches of Cyrodiil.",
-        "skycraft.guide.rumour.jerall_mountains": "Caravanners in Bruma complain of double Pale Pass tolls between Countess Carvain's gate-reeves and the Legion, while smugglers work Fort Dragonclaw.",
-        "skycraft.guide.arrive.colovian_highlands": "Oak-crowned hills and stone sheep-estates stand watch over Chorrol and the proud Colovian West.",
-        "skycraft.guide.rumour.colovian_highlands": "The Fighters Guild in Chorrol is losing highland wool-contracts to cut-rate brokers while baited goblin raids strike the estates.",
-        "skycraft.guide.arrive.heartlands": "Across the sparkling waters of Lake Rumare, White-Gold Tower gleams above the six wards and ancient underworks of the Imperial City.",
-        "skycraft.guide.rumour.heartlands": "Imperial Watch investigators seek the master forger beneath the capital who is selling identical Septim pedigrees to rival Elder Council blocs.",
-        "skycraft.guide.arrive.great_forest": "Sunlight filters through ancient oaks and white Ayleid arches between Weye, Weynon Priory, and the deep glades of the Great Forest.",
-        "skycraft.guide.rumour.great_forest": "Three Arcane University scholars vanished near Fort Nikel and Vlastarus after receiving invitations to the midnight Forest Lectures.",
-        "skycraft.guide.arrive.nibenay_basin": "Willow-lined streams and painted bridges wind beneath the eastern foothills of Cheydinhal and the Nibenay Basin.",
-        "skycraft.guide.rumour.nibenay_basin": "A scuttled silk-barge in Cheydinhal's Corbolo canal lock has Dunmer bankers and old Nibenese merchants on the brink of a charter war.",
-        "skycraft.guide.arrive.west_weald": "Rolling vineyards and limestone pastures stretch between the high walls of Skingrad and the Valenwood border.",
-        "skycraft.guide.rumour.west_weald": "Sabotaged wine-wains and counterfeit wax seals have reignited the Surilie-Tamika feud outside Skingrad before the autumn Wine Harvest.",
-        "skycraft.guide.arrive.gold_coast": "Warm sea breezes stir the olive groves of Anvil and the rising scaffolding of Kvatch along the Abecean shore.",
-        "skycraft.guide.rumour.gold_coast": "Masonry shipments for Kvatch's rebuild are vanishing along the Gold Road while false beacon lights lure ships onto the reefs north of Anvil.",
-        "skycraft.guide.arrive.nibenay_valley": "River mists drift past the Lucky Old Lady's plaza and bustling timber docks of Bravil along the lower Niben.",
-        "skycraft.guide.rumour.nibenay_valley": "Wish-coins in Bravil's fountain are being swapped for skooma-barge brass tokens stamped in the harbour clerk's own office.",
-        "skycraft.guide.arrive.blackwood": "Cypress roots and lantern-lit causeways wind through the dark border-marshes of Leyawiin and Blackwood.",
-        "skycraft.guide.rumour.blackwood": "Ampoules of stolen Hist sap have washed into Leyawiin's reed-canals, drawing An-Xileel scouts to the Niben mouth.",
+        "nirncraft.guide.arrive.jerall_mountains": "Snow-laden passes along the Jerall crest look down upon Bruma, Cloud Ruler Temple, and the northern marches of Cyrodiil.",
+        "nirncraft.guide.rumour.jerall_mountains": "Caravanners in Bruma complain of double Pale Pass tolls between Countess Carvain's gate-reeves and the Legion, while smugglers work Fort Dragonclaw.",
+        "nirncraft.guide.arrive.colovian_highlands": "Oak-crowned hills and stone sheep-estates stand watch over Chorrol and the proud Colovian West.",
+        "nirncraft.guide.rumour.colovian_highlands": "The Fighters Guild in Chorrol is losing highland wool-contracts to cut-rate brokers while baited goblin raids strike the estates.",
+        "nirncraft.guide.arrive.heartlands": "Across the sparkling waters of Lake Rumare, White-Gold Tower gleams above the six wards and ancient underworks of the Imperial City.",
+        "nirncraft.guide.rumour.heartlands": "Imperial Watch investigators seek the master forger beneath the capital who is selling identical Septim pedigrees to rival Elder Council blocs.",
+        "nirncraft.guide.arrive.great_forest": "Sunlight filters through ancient oaks and white Ayleid arches between Weye, Weynon Priory, and the deep glades of the Great Forest.",
+        "nirncraft.guide.rumour.great_forest": "Three Arcane University scholars vanished near Fort Nikel and Vlastarus after receiving invitations to the midnight Forest Lectures.",
+        "nirncraft.guide.arrive.nibenay_basin": "Willow-lined streams and painted bridges wind beneath the eastern foothills of Cheydinhal and the Nibenay Basin.",
+        "nirncraft.guide.rumour.nibenay_basin": "A scuttled silk-barge in Cheydinhal's Corbolo canal lock has Dunmer bankers and old Nibenese merchants on the brink of a charter war.",
+        "nirncraft.guide.arrive.west_weald": "Rolling vineyards and limestone pastures stretch between the high walls of Skingrad and the Valenwood border.",
+        "nirncraft.guide.rumour.west_weald": "Sabotaged wine-wains and counterfeit wax seals have reignited the Surilie-Tamika feud outside Skingrad before the autumn Wine Harvest.",
+        "nirncraft.guide.arrive.gold_coast": "Warm sea breezes stir the olive groves of Anvil and the rising scaffolding of Kvatch along the Abecean shore.",
+        "nirncraft.guide.rumour.gold_coast": "Masonry shipments for Kvatch's rebuild are vanishing along the Gold Road while false beacon lights lure ships onto the reefs north of Anvil.",
+        "nirncraft.guide.arrive.nibenay_valley": "River mists drift past the Lucky Old Lady's plaza and bustling timber docks of Bravil along the lower Niben.",
+        "nirncraft.guide.rumour.nibenay_valley": "Wish-coins in Bravil's fountain are being swapped for skooma-barge brass tokens stamped in the harbour clerk's own office.",
+        "nirncraft.guide.arrive.blackwood": "Cypress roots and lantern-lit causeways wind through the dark border-marshes of Leyawiin and Blackwood.",
+        "nirncraft.guide.rumour.blackwood": "Ampoules of stolen Hist sap have washed into Leyawiin's reed-canals, drawing An-Xileel scouts to the Niben mouth.",
     }
     glang.update(guide_updates)
     jsave(guide_path, glang)

@@ -39,7 +39,7 @@ class LegacyProbeTest(unittest.TestCase):
             ("region", "dimensions/minecraft/overworld/region", "minecraft:overworld"),
             ("DIM-1/region", "dimensions/minecraft/the_nether/region", "minecraft:the_nether"),
             ("DIM1/region", "dimensions/minecraft/the_end/region", "minecraft:the_end"),
-            ("dimensions/skycraft/coldharbour/region", "dimensions/skycraft/coldharbour/region", "skycraft:coldharbour"),
+            ("dimensions/nirncraft/coldharbour/region", "dimensions/nirncraft/coldharbour/region", "nirncraft:coldharbour"),
         ):
             with self.subTest(dimension=dimension), tempfile.TemporaryDirectory() as directory:
                 world = Path(directory)

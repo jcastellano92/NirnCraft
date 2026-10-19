@@ -1,0 +1,16 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "sky_haven",
+  "place": {
+    "types": [
+      "landmark"
+    ],
+    "variants": [
+      "sky_haven_temple"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

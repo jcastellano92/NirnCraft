@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:thistle_branch",
+      "required": false
+    },
+    {
+      "id": "nirncraft:juniper_berries",
+      "required": false
+    }
+  ]
+}

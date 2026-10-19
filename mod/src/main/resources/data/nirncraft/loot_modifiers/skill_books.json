@@ -1,0 +1,7 @@
+{
+  "type": "nirncraft:add_table",
+  "table": "nirncraft:chests/skill_books",
+  "prefix": "chests/",
+  "chance": 0.12,
+  "priority": 14
+}

@@ -1,0 +1,44 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:dragon_priest",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dragon",
+      "required": false
+    },
+    {
+      "id": "nirncraft:giant",
+      "required": false
+    },
+    {
+      "id": "nirncraft:frost_giant",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sea_serpent",
+      "required": false
+    },
+    {
+      "id": "nirncraft:swamp_leviathan",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dwarven_centurion",
+      "required": false
+    },
+    "minecraft:ender_dragon",
+    "minecraft:wither",
+    "minecraft:warden",
+    {
+      "id": "nirncraft:dreugh_queen",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sea_leviathan",
+      "required": false
+    }
+  ]
+}

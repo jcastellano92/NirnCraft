@@ -1,0 +1,268 @@
+{
+  "id": "greenhill",
+  "why": [
+    "reapers_march.L1.knolls",
+    "reapers_march.L5.grain_road",
+    "reapers_march.L6.arenthia_seat"
+  ],
+  "sil": "valenwood-greenhill-plan",
+  "base": "none",
+  "overlay": "reapers_march",
+  "radius": 26,
+  "reach": 38,
+  "gates": [
+    [
+      0,
+      24
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        12
+      ],
+      "overlay": "reapers_march",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        12,
+        26
+      ],
+      "overlay": "reapers_march",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "greenhill_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -7
+      ],
+      "name": "greenhill_landmark",
+      "overlay": "reapers_march"
+    }
+  ],
+  "nets": [
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        21
+      ],
+      "to": [
+        6,
+        -14
+      ],
+      "legs": 3,
+      "amp": 12,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "loop",
+      "at": [
+        6,
+        -2
+      ],
+      "rx": 12,
+      "rz": 11,
+      "wobble": 2,
+      "lobes": 3,
+      "phase": 1.74,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -18,
+          0
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          18,
+          2
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "cross"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "greenhill_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        12,
+        15
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "greenhill_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -2,
+        9
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "greenhill_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -17,
+        8
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "greenhill_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        -4
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "greenhill_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -4,
+        -18
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "greenhill_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        6,
+        -7
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "greenhill_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "greenhill_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "greenhill_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "greenhill_b_5",
+    "smithy": "greenhill_b_7"
+  },
+  "titles": {
+    "greenhill_b_1": "place.nirncraft.greenhill Council & Seat Hall",
+    "greenhill_b_2": "place.nirncraft.greenhill High Sanctuary",
+    "greenhill_b_3": "place.nirncraft.greenhill Fighters & Wayfarers Hall",
+    "greenhill_b_4": "place.nirncraft.greenhill Mages & Chroniclers Spire",
+    "greenhill_b_5": "place.nirncraft.greenhill The Lantern & Hearth Inn",
+    "greenhill_b_6": "place.nirncraft.greenhill The Traveler's Rest Tavern",
+    "greenhill_b_7": "place.nirncraft.greenhill Master Forge & Armorer",
+    "greenhill_landmark": "High Seat of place.nirncraft.greenhill",
+    "greenhill_plaza": "place.nirncraft.greenhill Central Plaza"
+  },
+  "innKey": "greenhill_b_5",
+  "zones": [
+    {
+      "at": [
+        6,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        9,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 22,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

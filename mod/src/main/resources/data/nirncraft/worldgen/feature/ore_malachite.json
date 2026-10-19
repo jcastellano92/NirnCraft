@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:ore",
+  "size": 4,
+  "discard_chance_on_air_exposure": 0.5,
+  "targets": [
+    {
+      "target": {
+        "predicate_type": "minecraft:tag_match",
+        "tag": "minecraft:stone_ore_replaceables"
+      },
+      "state": "nirncraft:malachite_ore"
+    },
+    {
+      "target": {
+        "predicate_type": "minecraft:tag_match",
+        "tag": "nirncraft:deepslate_ore_replaceables"
+      },
+      "state": "nirncraft:deepslate_malachite_ore"
+    }
+  ]
+}

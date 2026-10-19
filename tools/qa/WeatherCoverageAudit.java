@@ -1,14 +1,14 @@
-package com.skycraft.qa;
+package com.nirncraft.qa;
 
 import com.google.gson.GsonBuilder;
-import com.skycraft.atmosphere.WeatherFront;
-import com.skycraft.atmosphere.WeatherPhysics;
-import com.skycraft.atmosphere.weather.WeatherKind;
-import com.skycraft.atmosphere.weather.WeatherProfile;
-import com.skycraft.tamriel.MapSample;
-import com.skycraft.tamriel.Region;
-import com.skycraft.tamriel.Regions;
-import com.skycraft.tamriel.TamrielMap;
+import com.nirncraft.atmosphere.WeatherFront;
+import com.nirncraft.atmosphere.WeatherPhysics;
+import com.nirncraft.atmosphere.weather.WeatherKind;
+import com.nirncraft.atmosphere.weather.WeatherProfile;
+import com.nirncraft.tamriel.MapSample;
+import com.nirncraft.tamriel.Region;
+import com.nirncraft.tamriel.Regions;
+import com.nirncraft.tamriel.TamrielMap;
 import net.minecraft.util.RandomSource;
 
 import java.io.PrintWriter;

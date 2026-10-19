@@ -48,14 +48,14 @@ public final class NativeShaderAudit263 {
     }
     static void describe(Path output) throws Exception{
         var pipelines=new JsonArray();int index=0;
-        for(boolean textured:new boolean[]{false,true})for(boolean fog:new boolean[]{false,true})for(boolean far:new boolean[]{false,true})for(var blend:com.skycraft.render.client.WorldDraw.Blend.values()){
-            var material=com.skycraft.render.client.WorldDraw.material(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft","audit_"+(index++)),
+        for(boolean textured:new boolean[]{false,true})for(boolean fog:new boolean[]{false,true})for(boolean far:new boolean[]{false,true})for(var blend:com.nirncraft.render.client.WorldDraw.Blend.values()){
+            var material=com.nirncraft.render.client.WorldDraw.material(net.minecraft.resources.Identifier.fromNamespaceAndPath("nirncraft","audit_"+(index++)),
                 textured?com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX_COLOR:com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR,
                 com.mojang.renderpearl.api.pipeline.PrimitiveTopology.QUADS,blend,true,fog,far);
             pipelines.add(pipeline(material.pipeline()));
             for(var stage:net.minecraft.client.renderer.oit.OitStage.values())pipelines.add(pipeline(material.oit().getPipeline(stage)));
         }
-        for(String type:List.of("com.skycraft.fire.client.FireRenderTypes","com.skycraft.client.UiPipelines","com.skycraft.realms.client.RealmLightmap")){
+        for(String type:List.of("com.nirncraft.fire.client.FireRenderTypes","com.nirncraft.client.UiPipelines","com.nirncraft.realms.client.RealmLightmap")){
             for(var field:Class.forName(type).getDeclaredFields()){
                 if(!java.lang.reflect.Modifier.isStatic(field.getModifiers()))continue;field.setAccessible(true);
                 if(field.getType()==com.mojang.renderpearl.api.pipeline.RenderPipeline.class)pipelines.add(pipeline((com.mojang.renderpearl.api.pipeline.RenderPipeline)field.get(null)));

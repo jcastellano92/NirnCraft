@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": {
+    "end": "nirncraft:block/hist_log_top",
+    "side": "nirncraft:block/hist_log"
+  }
+}

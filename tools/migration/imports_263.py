@@ -2,17 +2,17 @@
 from pathlib import Path
 import argparse,collections,re,zipfile,json
 ROOT=Path(__file__).resolve().parents[2]
-SCRATCH=Path(r'E:\Skycraft-scratch\migration-26.3')
+SCRATCH=Path(r'E:\NirnCraft-scratch\migration-26.3')
 WORLD={'tamriel','worldplan','worldgen','world','roads','dungeons','scatter','landmarks','realms','society','economy','quest','explore','sailing','seas','lore','homestead'}
 DATA={'core','inventory','crafting','magic','creatures','fauna','curse','mounts','arsenal','combat','vitals','crime','skills','loot','protect','dig','audio','perf','dev'}
 network_list=ROOT/'dist/code-review/neoforge-migration/network-transformed-files.txt'
 NETWORK={x.strip().replace('\\','/') for x in network_list.read_text().splitlines() if x.strip()}
-NETWORK.update('mod/src/main/java/com/skycraft/'+x for x in ('core/SkyData.java','core/PlayerData.java','core/PlayerDataEvents.java','dig/PlacedBlocks.java','magic/MagicFx.java','creatures/CreatureItems.java','mounts/MountItems.java','registry/ModItems.java'))
+NETWORK.update('mod/src/main/java/com/nirncraft/'+x for x in ('core/SkyData.java','core/PlayerData.java','core/PlayerDataEvents.java','dig/PlacedBlocks.java','magic/MagicFx.java','creatures/CreatureItems.java','mounts/MountItems.java','registry/ModItems.java'))
 def owner(path):
     rel=path.relative_to(ROOT).as_posix()
-    if rel in {'mod/src/main/java/com/skycraft/perf/FastSurfaceRule.java','mod/src/main/java/com/skycraft/perf/StageBench.java','mod/src/main/java/com/skycraft/lore/StandingStoneShrineFeature.java','mod/src/main/java/com/skycraft/lore/LoreModule.java','mod/src/main/java/com/skycraft/seas/SeasRegistry.java'} or ('/com/skycraft/seas/world/' in rel and path.name.endswith('Feature.java')):return 'world'
-    if rel in NETWORK or '/com/skycraft/network/' in rel:return 'network'
-    module=path.relative_to(ROOT/'mod/src/main/java/com/skycraft').parts[0]
+    if rel in {'mod/src/main/java/com/nirncraft/perf/FastSurfaceRule.java','mod/src/main/java/com/nirncraft/perf/StageBench.java','mod/src/main/java/com/nirncraft/lore/StandingStoneShrineFeature.java','mod/src/main/java/com/nirncraft/lore/LoreModule.java','mod/src/main/java/com/nirncraft/seas/SeasRegistry.java'} or ('/com/nirncraft/seas/world/' in rel and path.name.endswith('Feature.java')):return 'world'
+    if rel in NETWORK or '/com/nirncraft/network/' in rel:return 'network'
+    module=path.relative_to(ROOT/'mod/src/main/java/com/nirncraft').parts[0]
     if module=='client':return 'ui'
     if module=='visual' and '/client/' in rel and any(name in path.stem for name in ('Autotest','Review','Gallery','Tour')):return 'ui'
     if '/client/' in rel and path.name.endswith('Screen.java'):return 'ui'
@@ -29,7 +29,7 @@ def migrate(scope):
     for n in names:simple[n.rsplit('.',1)[-1]].add(n)
     unresolved=set();changes=[]
     pattern=re.compile(r'^import ((?:net\.minecraft|net\.neoforged)\.[\w.]+);',re.M)
-    for path in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
+    for path in (ROOT/'mod/src/main/java/com/nirncraft').rglob('*.java'):
         if owner(path)!=scope:continue
         raw=path.read_bytes();s=raw.decode('utf8')
         def replace(m):

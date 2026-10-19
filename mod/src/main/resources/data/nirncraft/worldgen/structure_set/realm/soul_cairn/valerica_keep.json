@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:realm/soul_cairn/valerica_keep",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:realm_grid",
+    "salt": 52,
+    "spacing": 0,
+    "fixed": [
+      [
+        0,
+        -12
+      ]
+    ]
+  }
+}

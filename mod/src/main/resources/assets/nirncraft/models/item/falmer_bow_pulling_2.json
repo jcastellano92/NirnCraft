@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/falmer_bow",
+  "textures": {
+    "layer0": "nirncraft:item/falmer_bow_pulling_2"
+  }
+}

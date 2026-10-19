@@ -1,17 +1,17 @@
 {
   "replace": false,
   "values": [
-    "skycraft:artaeum",
-    "skycraft:ascadian_isles",
-    "skycraft:hist_grove",
-    "skycraft:iliac_rainforest",
-    "skycraft:mushroom_grottos",
-    "skycraft:pellitine_jungle",
-    "skycraft:pyandonean_jungle_isles",
-    "skycraft:summerset_meadow",
-    "skycraft:tang_mo_islands",
-    "skycraft:tsaesci_jungle",
-    "skycraft:valenwood_rainforest",
+    "nirncraft:artaeum",
+    "nirncraft:ascadian_isles",
+    "nirncraft:hist_grove",
+    "nirncraft:iliac_rainforest",
+    "nirncraft:mushroom_grottos",
+    "nirncraft:pellitine_jungle",
+    "nirncraft:pyandonean_jungle_isles",
+    "nirncraft:summerset_meadow",
+    "nirncraft:tang_mo_islands",
+    "nirncraft:tsaesci_jungle",
+    "nirncraft:valenwood_rainforest",
     "minecraft:lush_caves"
   ]
 }

@@ -16,8 +16,8 @@ if QA_DIR not in sys.path:
 
 import dungeon_identity_gen as dig  # noqa: E402
 
-SKY = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft")
-LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft")
+SKY = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft")
+LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft")
 
 SCENES_PATH = os.path.join(SKY, "creatures", "scenes.json")
 FESTIVALS_PATH = os.path.join(SKY, "calendar", "festivals.json")
@@ -214,7 +214,7 @@ NEW_SCENES = [
         "props": ["fire"],
         "actors": [
             {"npc": "priest", "count": [1, 2], "radius": 3},
-            {"entity": "skycraft:torchbug", "count": [4, 6], "radius": 4},
+            {"entity": "nirncraft:torchbug", "count": [4, 6], "radius": 4},
         ],
     },
     {
@@ -232,7 +232,7 @@ NEW_SCENES = [
         "props": [],
         "actors": [
             {"npc": "priest", "count": [1, 1], "radius": 2},
-            {"entity": "skycraft:torchbug", "count": [3, 5], "radius": 4},
+            {"entity": "nirncraft:torchbug", "count": [3, 5], "radius": 4},
         ],
     },
     {
@@ -474,7 +474,7 @@ NEW_SCENES = [
         "props": [],
         "actors": [
             {"npc": "priest", "count": [1, 1], "radius": 3},
-            {"entity": "skycraft:torchbug", "count": [4, 6], "radius": 4},
+            {"entity": "nirncraft:torchbug", "count": [4, 6], "radius": 4},
         ],
     },
     {
@@ -663,7 +663,7 @@ NEW_SCENES = [
         "actors": [
             {"npc": "bard", "count": [1, 1], "radius": 2},
             {"npc": "priest", "count": [1, 1], "radius": 3},
-            {"entity": "skycraft:butterfly", "count": [4, 6], "radius": 4},
+            {"entity": "nirncraft:butterfly", "count": [4, 6], "radius": 4},
         ],
     },
     {
@@ -681,8 +681,8 @@ NEW_SCENES = [
         "props": [],
         "actors": [
             {"npc": "priest", "count": [1, 2], "radius": 3},
-            {"entity": "skycraft:deer", "count": [1, 2], "radius": 5},
-            {"entity": "skycraft:torchbug", "count": [3, 5], "radius": 4},
+            {"entity": "nirncraft:deer", "count": [1, 2], "radius": 5},
+            {"entity": "nirncraft:torchbug", "count": [3, 5], "radius": 4},
         ],
     },
     {
@@ -700,7 +700,7 @@ NEW_SCENES = [
         "props": [],
         "actors": [
             {"npc": "priest", "count": [1, 1], "radius": 3},
-            {"entity": "skycraft:torchbug", "count": [4, 6], "radius": 4},
+            {"entity": "nirncraft:torchbug", "count": [4, 6], "radius": 4},
         ],
     },
     {
@@ -718,7 +718,7 @@ NEW_SCENES = [
         "props": [],
         "actors": [
             {"npc": "citizen", "count": [1, 2], "radius": 3},
-            {"entity": "skycraft:butterfly", "count": [3, 5], "radius": 4},
+            {"entity": "nirncraft:butterfly", "count": [3, 5], "radius": 4},
         ],
     },
     # --- R11 Summerset (8 road encounters + 4 wonder moments) ---
@@ -904,7 +904,7 @@ NEW_SCENES = [
         "props": [],
         "actors": [
             {"npc": "mage", "count": [1, 2], "radius": 3},
-            {"entity": "skycraft:torchbug", "count": [4, 6], "radius": 4},
+            {"entity": "nirncraft:torchbug", "count": [4, 6], "radius": 4},
         ],
     },
     {
@@ -923,7 +923,7 @@ NEW_SCENES = [
         "actors": [
             {"npc": "scholar", "count": [1, 1], "radius": 2},
             {"npc": "bard", "count": [1, 1], "radius": 3},
-            {"entity": "skycraft:butterfly", "count": [3, 5], "radius": 4},
+            {"entity": "nirncraft:butterfly", "count": [3, 5], "radius": 4},
         ],
     },
     {
@@ -980,7 +980,7 @@ NEW_SCENES = [
         "props": ["fire"],
         "actors": [
             {"npc": "guard", "count": [1, 2], "radius": 3, "group": "defenders"},
-            {"entity": "skycraft:draugr", "count": [2, 3], "radius": 5, "hostile": True, "group": "attackers"},
+            {"entity": "nirncraft:draugr", "count": [2, 3], "radius": 5, "hostile": True, "group": "attackers"},
         ],
     },
     {
@@ -1148,7 +1148,7 @@ NEW_SCENES = [
         "props": [],
         "actors": [
             {"npc": "priest", "count": [1, 1], "radius": 2},
-            {"entity": "skycraft:torchbug", "count": [4, 6], "radius": 4},
+            {"entity": "nirncraft:torchbug", "count": [4, 6], "radius": 4},
         ],
     },
     {
@@ -1166,37 +1166,37 @@ NEW_SCENES = [
         "props": ["fire"],
         "actors": [
             {"npc": "mage", "count": [1, 2], "radius": 3},
-            {"entity": "skycraft:torchbug", "count": [3, 5], "radius": 4},
+            {"entity": "nirncraft:torchbug", "count": [3, 5], "radius": 4},
         ],
     },
 ]
 
 WONDER_LANG = {
     # Black Marsh
-    "skycraft.scene.wonder.v8_bm_wonder_hist_amber_sap_communion": "Tree-Minders and young Saxhleel initiates kneel around a weeping Hist root-arch as golden amber sap-light rises into the mist.",
-    "skycraft.scene.wonder.v8_bm_wonder_xanmeer_solstice_stele": "A stepped Xanmeer calendar-stone glows with pale jade phosphorescence while a Bright-Throat cantor chants the Sithis change-hymn.",
-    "skycraft.scene.wonder.v8_bm_wonder_kothringi_silver_bell_mist": "Marsh-pilgrims float reed-lanterns beside a weathered Kothringi pillar as a distant silver ship-bell tolls through the fog.",
-    "skycraft.scene.wonder.v8_bm_wonder_shadowfen_broken_chain_cairn": "Freed Argonian families hang rusted manacles upon a mossy shackle-cairn while a bard plays a reed-flute hymn of return.",
+    "nirncraft.scene.wonder.v8_bm_wonder_hist_amber_sap_communion": "Tree-Minders and young Saxhleel initiates kneel around a weeping Hist root-arch as golden amber sap-light rises into the mist.",
+    "nirncraft.scene.wonder.v8_bm_wonder_xanmeer_solstice_stele": "A stepped Xanmeer calendar-stone glows with pale jade phosphorescence while a Bright-Throat cantor chants the Sithis change-hymn.",
+    "nirncraft.scene.wonder.v8_bm_wonder_kothringi_silver_bell_mist": "Marsh-pilgrims float reed-lanterns beside a weathered Kothringi pillar as a distant silver ship-bell tolls through the fog.",
+    "nirncraft.scene.wonder.v8_bm_wonder_shadowfen_broken_chain_cairn": "Freed Argonian families hang rusted manacles upon a mossy shackle-cairn while a bard plays a reed-flute hymn of return.",
     # Elsweyr
-    "skycraft.scene.wonder.v8_el_wonder_jone_and_jode_eclipse_dance": "Moon-Dancers and a Clan Mother perform the Two-Moons step-liturgy on a sandstone terrace under Jone and Jode.",
-    "skycraft.scene.wonder.v8_el_wonder_hakoshae_painted_mask_vigil": "Mourners hang gilded funerary masks and silk ribbons before an alabaster ridge-tomb as twilight wind-bells chime.",
-    "skycraft.scene.wonder.v8_el_wonder_sugar_grove_firefly_harvest": "Silver moon-sugar cane stalks shimmer with hundreds of torchbugs while a garden-priest blesses the night harvest.",
-    "skycraft.scene.wonder.v8_el_wonder_anequina_scour_wind_chimes": "Desert ascetics tend a ring of moonstone wind-harps on a red mesa rim above an ancient dragon scour.",
+    "nirncraft.scene.wonder.v8_el_wonder_jone_and_jode_eclipse_dance": "Moon-Dancers and a Clan Mother perform the Two-Moons step-liturgy on a sandstone terrace under Jone and Jode.",
+    "nirncraft.scene.wonder.v8_el_wonder_hakoshae_painted_mask_vigil": "Mourners hang gilded funerary masks and silk ribbons before an alabaster ridge-tomb as twilight wind-bells chime.",
+    "nirncraft.scene.wonder.v8_el_wonder_sugar_grove_firefly_harvest": "Silver moon-sugar cane stalks shimmer with hundreds of torchbugs while a garden-priest blesses the night harvest.",
+    "nirncraft.scene.wonder.v8_el_wonder_anequina_scour_wind_chimes": "Desert ascetics tend a ring of moonstone wind-harps on a red mesa rim above an ancient dragon scour.",
     # Valenwood
-    "skycraft.scene.wonder.v8_vw_wonder_falinesti_root_shrine_song": "Spinners and bone-flute players sing the Walking City's seasonal call beside a vacant Falinesti root-cradle ringed with butterflies.",
-    "skycraft.scene.wonder.v8_vw_wonder_silvenar_green_lady_blessing": "Envoys of the Silvenar and the Green Lady bless a living vine-arch as forest deer and glowing torchbugs gather unafraid.",
-    "skycraft.scene.wonder.v8_vw_wonder_wilderking_hollow_bloom": "A peaceful spriggan tends bioluminescent blossoms in a silent Greenshade hollow while a Spinner listens in reverence.",
-    "skycraft.scene.wonder.v8_vw_wonder_graht_canopy_sap_drop": "Sap-tappers catch golden droplets freely offered by a colossal graht-oak while bone-chimes ring in the canopy wind.",
+    "nirncraft.scene.wonder.v8_vw_wonder_falinesti_root_shrine_song": "Spinners and bone-flute players sing the Walking City's seasonal call beside a vacant Falinesti root-cradle ringed with butterflies.",
+    "nirncraft.scene.wonder.v8_vw_wonder_silvenar_green_lady_blessing": "Envoys of the Silvenar and the Green Lady bless a living vine-arch as forest deer and glowing torchbugs gather unafraid.",
+    "nirncraft.scene.wonder.v8_vw_wonder_wilderking_hollow_bloom": "A peaceful spriggan tends bioluminescent blossoms in a silent Greenshade hollow while a Spinner listens in reverence.",
+    "nirncraft.scene.wonder.v8_vw_wonder_graht_canopy_sap_drop": "Sap-tappers catch golden droplets freely offered by a colossal graht-oak while bone-chimes ring in the canopy wind.",
     # Summerset
-    "skycraft.scene.wonder.v8_su_wonder_crystal_pillar_ancestors_vigil": "Altmer families tend a lamplit ancestor-pillar of translucent glass as trapped evening sunlight refracts into a prism overhead.",
-    "skycraft.scene.wonder.v8_su_wonder_ceporah_lotus_mist_chant": "Psijic initiates meditate beside a silver-leaved orchard terrace as golden torchbugs orbit in slow, timeless arcs.",
-    "skycraft.scene.wonder.v8_su_wonder_syrabane_mariner_beacon": "Choir-scholars light an alabaster beacon of Syrabane on a sea-promontory as white moths swirl in the salt breeze.",
-    "skycraft.scene.wonder.v8_su_wonder_auridon_cherry_blossom_vespers": "College harpists play beneath drifting pink blossoms beside a marble wayshrine of Auri-El.",
+    "nirncraft.scene.wonder.v8_su_wonder_crystal_pillar_ancestors_vigil": "Altmer families tend a lamplit ancestor-pillar of translucent glass as trapped evening sunlight refracts into a prism overhead.",
+    "nirncraft.scene.wonder.v8_su_wonder_ceporah_lotus_mist_chant": "Psijic initiates meditate beside a silver-leaved orchard terrace as golden torchbugs orbit in slow, timeless arcs.",
+    "nirncraft.scene.wonder.v8_su_wonder_syrabane_mariner_beacon": "Choir-scholars light an alabaster beacon of Syrabane on a sea-promontory as white moths swirl in the salt breeze.",
+    "nirncraft.scene.wonder.v8_su_wonder_auridon_cherry_blossom_vespers": "College harpists play beneath drifting pink blossoms beside a marble wayshrine of Auri-El.",
     # Foreign Lands
-    "skycraft.scene.wonder.v8_fl_wonder_atmora_emerald_aurora_totem": "An emerald northern aurora crowns a colossal rime-encrusted Atmoran Hawk-and-Whale totem while chroniclers stand in hushed awe.",
-    "skycraft.scene.wonder.v8_fl_wonder_ka_po_tun_dragon_flame_vespers": "Tiger-Monk retainers strike a giant bronze gong on a golden steppe terrace as twin dragon-braziers ignite against the sunset.",
-    "skycraft.scene.wonder.v8_fl_wonder_yokuda_memory_stone_hum": "An Ansei memory-obelisk on a star-clear Yokudan headland hums with golden sword-chords while torchbugs trace the Warrior constellation.",
-    "skycraft.scene.wonder.v8_fl_wonder_pyandonea_leviathan_mist_horn": "Storm-Caste chanters blow a coiled mother-of-pearl horn into the sea-mist as bioluminescent ripples answer across the lagoon.",
+    "nirncraft.scene.wonder.v8_fl_wonder_atmora_emerald_aurora_totem": "An emerald northern aurora crowns a colossal rime-encrusted Atmoran Hawk-and-Whale totem while chroniclers stand in hushed awe.",
+    "nirncraft.scene.wonder.v8_fl_wonder_ka_po_tun_dragon_flame_vespers": "Tiger-Monk retainers strike a giant bronze gong on a golden steppe terrace as twin dragon-braziers ignite against the sunset.",
+    "nirncraft.scene.wonder.v8_fl_wonder_yokuda_memory_stone_hum": "An Ansei memory-obelisk on a star-clear Yokudan headland hums with golden sword-chords while torchbugs trace the Warrior constellation.",
+    "nirncraft.scene.wonder.v8_fl_wonder_pyandonea_leviathan_mist_horn": "Storm-Caste chanters blow a coiled mother-of-pearl horn into the sea-mist as bioluminescent ripples answer across the lagoon.",
 }
 
 # ---------------------------------------------------------------------------
@@ -1762,99 +1762,99 @@ FESTIVAL_SPECS = [
 # ---------------------------------------------------------------------------
 GUIDE_UPDATES = {
     # R8 Black Marsh (6 exact regions + 4 aliases)
-    "skycraft.guide.arrive.shadowfen": "Hanging moss, rusted shackle-cairns, and sunken Xanmeer steps rise from the mist-shrouded waters of Shadowfen around Thorn.",
-    "skycraft.guide.rumour.shadowfen": "Chain-Breaker wardens in Thorn and Ten-Maur-Wolk warn that Dres slaver remnants are tampering with the broken-shackle cairns.",
-    "skycraft.guide.arrive.stormhold": "Barsaebic Ayleid stonework and Argonian mud-domes mingle along the border causeways of Stormhold.",
-    "skycraft.guide.rumour.stormhold": "Tree-Minders and caravan factors in Stormhold dispute tampered toll-seals discovered near the Barsaebic undercity.",
-    "skycraft.guide.arrive.helstrom": "Dense root-tangles and amber-lit channels guard the sacred Hist sanctuary at the heart of Helstrom.",
-    "skycraft.guide.rumour.helstrom": "Root-Heart elders in Helstrom seek trustworthy outsiders to investigate disturbed sap-stones along the inner causeway.",
-    "skycraft.guide.arrive.gideon": "Walled levees, bog-rice paddies, and weathered Kothringi pillars mark the western marshlands of Gideon.",
-    "skycraft.guide.rumour.gideon": "Lukiul magistrates and An-Xileel scouts in Gideon clash over missing levee tallies at the old governor's vaults.",
-    "skycraft.guide.arrive.lilmoth": "Salt-tides and river silt meet among the smuggling wharves and sunken quarantine shrines of Lilmoth.",
-    "skycraft.guide.rumour.lilmoth": "Harbour syndicates in Lilmoth and Blackrose accuse customhouse clerks of diverting spice barges into the drowned hulks.",
-    "skycraft.guide.arrive.murkmire": "Vibrant swamp-blooms, stilt-villages, and towering calendar Xanmeers rise from the southern depths of Murkmire.",
-    "skycraft.guide.rumour.murkmire": "Bright-Throat and Dead-Water elders in Murkmire seek aid after a Sithis calendar-tablet was pried from the grand Xanmeer.",
+    "nirncraft.guide.arrive.shadowfen": "Hanging moss, rusted shackle-cairns, and sunken Xanmeer steps rise from the mist-shrouded waters of Shadowfen around Thorn.",
+    "nirncraft.guide.rumour.shadowfen": "Chain-Breaker wardens in Thorn and Ten-Maur-Wolk warn that Dres slaver remnants are tampering with the broken-shackle cairns.",
+    "nirncraft.guide.arrive.stormhold": "Barsaebic Ayleid stonework and Argonian mud-domes mingle along the border causeways of Stormhold.",
+    "nirncraft.guide.rumour.stormhold": "Tree-Minders and caravan factors in Stormhold dispute tampered toll-seals discovered near the Barsaebic undercity.",
+    "nirncraft.guide.arrive.helstrom": "Dense root-tangles and amber-lit channels guard the sacred Hist sanctuary at the heart of Helstrom.",
+    "nirncraft.guide.rumour.helstrom": "Root-Heart elders in Helstrom seek trustworthy outsiders to investigate disturbed sap-stones along the inner causeway.",
+    "nirncraft.guide.arrive.gideon": "Walled levees, bog-rice paddies, and weathered Kothringi pillars mark the western marshlands of Gideon.",
+    "nirncraft.guide.rumour.gideon": "Lukiul magistrates and An-Xileel scouts in Gideon clash over missing levee tallies at the old governor's vaults.",
+    "nirncraft.guide.arrive.lilmoth": "Salt-tides and river silt meet among the smuggling wharves and sunken quarantine shrines of Lilmoth.",
+    "nirncraft.guide.rumour.lilmoth": "Harbour syndicates in Lilmoth and Blackrose accuse customhouse clerks of diverting spice barges into the drowned hulks.",
+    "nirncraft.guide.arrive.murkmire": "Vibrant swamp-blooms, stilt-villages, and towering calendar Xanmeers rise from the southern depths of Murkmire.",
+    "nirncraft.guide.rumour.murkmire": "Bright-Throat and Dead-Water elders in Murkmire seek aid after a Sithis calendar-tablet was pried from the grand Xanmeer.",
     # Black Marsh aliases
-    "skycraft.guide.arrive.blackrose": "Dark stone prison-walls and reed-fringed canals rise above the southern marsh approaches to Blackrose and Lilmoth.",
-    "skycraft.guide.rumour.blackrose": "Wardens near Blackrose Ruins and Lilmoth report missing customs tallies along the smuggler channels.",
-    "skycraft.guide.arrive.thornmarsh": "Percolating mire-pools and raised timber causeways wind toward the border seat of Thorn.",
-    "skycraft.guide.rumour.thornmarsh": "Chain-Breaker scouts around Thorn hunt remnant slavers hiding in the sunken Xanmeer vaults.",
-    "skycraft.guide.arrive.archon_coast": "Mangrove surf and coral-crusted channels line the eastern Archon shore of Black Marsh.",
-    "skycraft.guide.rumour.archon_coast": "Coastal boatmen between Archon and Helstrom speak of altered beacon-stones along the eastern tide-channels.",
-    "skycraft.guide.arrive.argonia_heart": "Colossal Hist roots arch over the spore-thick waterways at the impenetrable heart of Argonia.",
-    "skycraft.guide.rumour.argonia_heart": "Tree-Minders in the inner marsh guard the sacred sap-naming pools against unauthorised delves.",
+    "nirncraft.guide.arrive.blackrose": "Dark stone prison-walls and reed-fringed canals rise above the southern marsh approaches to Blackrose and Lilmoth.",
+    "nirncraft.guide.rumour.blackrose": "Wardens near Blackrose Ruins and Lilmoth report missing customs tallies along the smuggler channels.",
+    "nirncraft.guide.arrive.thornmarsh": "Percolating mire-pools and raised timber causeways wind toward the border seat of Thorn.",
+    "nirncraft.guide.rumour.thornmarsh": "Chain-Breaker scouts around Thorn hunt remnant slavers hiding in the sunken Xanmeer vaults.",
+    "nirncraft.guide.arrive.archon_coast": "Mangrove surf and coral-crusted channels line the eastern Archon shore of Black Marsh.",
+    "nirncraft.guide.rumour.archon_coast": "Coastal boatmen between Archon and Helstrom speak of altered beacon-stones along the eastern tide-channels.",
+    "nirncraft.guide.arrive.argonia_heart": "Colossal Hist roots arch over the spore-thick waterways at the impenetrable heart of Argonia.",
+    "nirncraft.guide.rumour.argonia_heart": "Tree-Minders in the inner marsh guard the sacred sap-naming pools against unauthorised delves.",
     # R9 Elsweyr (5 exact regions + 2 aliases)
-    "skycraft.guide.arrive.anequina": "Sun-bleached badlands, caravan wheels, and wind-scoured mesas stretch across the northern kingdom of Anequina from Riverhold to Dune.",
-    "skycraft.guide.rumour.anequina": "Well-clan wardens in Riverhold and Dune investigate tampered cistern-tallies and Renrijra canyon ambushes.",
-    "skycraft.guide.arrive.rimmen": "Imperial-era aqueducts and palace terraces overlook the sugar-cane fields and alabaster quarries of Rimmen.",
-    "skycraft.guide.rumour.rimmen": "Master artisans and Hakoshae mask-makers in Rimmen warn of stolen ancestral seals inside the old necropolis.",
-    "skycraft.guide.arrive.torval": "Incense and bronze moon-bells echo from the cedar sanctuaries of Torval where the Mane holds court.",
-    "skycraft.guide.rumour.torval": "Priests in Torval's temple quarter seek aid after a Two-Moons procession seal vanished on the road to Shabaae Mine.",
-    "skycraft.guide.arrive.pellitine": "Warm monsoon rains nourish the lush Tenmar jungles, boil-houses, and spice groves of southern Pellitine around Corinthe.",
-    "skycraft.guide.rumour.pellitine": "Cane-cutters and planter houses in Corinthe are on edge over contested debt-tallies at the Halls of Colossus.",
-    "skycraft.guide.arrive.senchal": "Colorful silk sails and gilded pagoda roofs gleam above the southern harbour wards of Senchal.",
-    "skycraft.guide.rumour.senchal": "Harbour wardens in Senchal track counterfeit customs stamps moving between the Lower Sweet docks and the smuggler coves.",
+    "nirncraft.guide.arrive.anequina": "Sun-bleached badlands, caravan wheels, and wind-scoured mesas stretch across the northern kingdom of Anequina from Riverhold to Dune.",
+    "nirncraft.guide.rumour.anequina": "Well-clan wardens in Riverhold and Dune investigate tampered cistern-tallies and Renrijra canyon ambushes.",
+    "nirncraft.guide.arrive.rimmen": "Imperial-era aqueducts and palace terraces overlook the sugar-cane fields and alabaster quarries of Rimmen.",
+    "nirncraft.guide.rumour.rimmen": "Master artisans and Hakoshae mask-makers in Rimmen warn of stolen ancestral seals inside the old necropolis.",
+    "nirncraft.guide.arrive.torval": "Incense and bronze moon-bells echo from the cedar sanctuaries of Torval where the Mane holds court.",
+    "nirncraft.guide.rumour.torval": "Priests in Torval's temple quarter seek aid after a Two-Moons procession seal vanished on the road to Shabaae Mine.",
+    "nirncraft.guide.arrive.pellitine": "Warm monsoon rains nourish the lush Tenmar jungles, boil-houses, and spice groves of southern Pellitine around Corinthe.",
+    "nirncraft.guide.rumour.pellitine": "Cane-cutters and planter houses in Corinthe are on edge over contested debt-tallies at the Halls of Colossus.",
+    "nirncraft.guide.arrive.senchal": "Colorful silk sails and gilded pagoda roofs gleam above the southern harbour wards of Senchal.",
+    "nirncraft.guide.rumour.senchal": "Harbour wardens in Senchal track counterfeit customs stamps moving between the Lower Sweet docks and the smuggler coves.",
     # Elsweyr aliases
-    "skycraft.guide.arrive.khenarthis_roost": "Trade-wind palms and temple bells greet ships making landfall along the southern coast of Senchal and Khenarthi's Roost.",
-    "skycraft.guide.rumour.khenarthis_roost": "Sailors along the southern anchorage warn of skooma smugglers using false Khenarthi wind-signals.",
-    "skycraft.guide.arrive.rimmen_steppe": "Dry steppe grass and white alabaster ridges roll beneath the aqueduct arches of the Rimmen frontier.",
-    "skycraft.guide.rumour.rimmen_steppe": "Baandari traders outside Rimmen whisper of customs disputes and tomb-thieves in the quarry undercuts.",
+    "nirncraft.guide.arrive.khenarthis_roost": "Trade-wind palms and temple bells greet ships making landfall along the southern coast of Senchal and Khenarthi's Roost.",
+    "nirncraft.guide.rumour.khenarthis_roost": "Sailors along the southern anchorage warn of skooma smugglers using false Khenarthi wind-signals.",
+    "nirncraft.guide.arrive.rimmen_steppe": "Dry steppe grass and white alabaster ridges roll beneath the aqueduct arches of the Rimmen frontier.",
+    "nirncraft.guide.rumour.rimmen_steppe": "Baandari traders outside Rimmen whisper of customs disputes and tomb-thieves in the quarry undercuts.",
     # R10 Valenwood (4 exact regions + 1 alias)
-    "skycraft.guide.arrive.malabal_tor": "Canopies so thick they swallow the noon sun shelter the migratory tree-boughs of Silvenar and Malabal Tor.",
-    "skycraft.guide.rumour.malabal_tor": "Envoys at Silvenar and Velyn Harbor seek scouts to settle a Green Pact dispute near the Tomb of the Apostates.",
-    "skycraft.guide.arrive.reapers_march": "Golden savannas and ancient Khajiiti temples meet the northern border-woods of Arenthia and Rawl'kha in Reaper's March.",
-    "skycraft.guide.rumour.reapers_march": "Truce-elders in Arenthia and Rawl'kha investigate a missing Bone-Truce relic along the northern grain road.",
-    "skycraft.guide.arrive.grahtwood": "Colossal graht-oaks wide as citadels lift the bough-halls of Elden Root high above the southern delta.",
-    "skycraft.guide.rumour.grahtwood": "Spinners and sap-tappers at Elden Root report disturbed Ayleid vaults beneath the great tree's roots.",
-    "skycraft.guide.arrive.greenshade": "Crystal springs, root-bridges, and flower-carpeted glades wind toward Woodhearth and the western shores of Greenshade.",
-    "skycraft.guide.rumour.greenshade": "Spinners in Woodhearth and Greenheart warn of Maormer landing parties disturbing the Wilderking's hollow.",
+    "nirncraft.guide.arrive.malabal_tor": "Canopies so thick they swallow the noon sun shelter the migratory tree-boughs of Silvenar and Malabal Tor.",
+    "nirncraft.guide.rumour.malabal_tor": "Envoys at Silvenar and Velyn Harbor seek scouts to settle a Green Pact dispute near the Tomb of the Apostates.",
+    "nirncraft.guide.arrive.reapers_march": "Golden savannas and ancient Khajiiti temples meet the northern border-woods of Arenthia and Rawl'kha in Reaper's March.",
+    "nirncraft.guide.rumour.reapers_march": "Truce-elders in Arenthia and Rawl'kha investigate a missing Bone-Truce relic along the northern grain road.",
+    "nirncraft.guide.arrive.grahtwood": "Colossal graht-oaks wide as citadels lift the bough-halls of Elden Root high above the southern delta.",
+    "nirncraft.guide.rumour.grahtwood": "Spinners and sap-tappers at Elden Root report disturbed Ayleid vaults beneath the great tree's roots.",
+    "nirncraft.guide.arrive.greenshade": "Crystal springs, root-bridges, and flower-carpeted glades wind toward Woodhearth and the western shores of Greenshade.",
+    "nirncraft.guide.rumour.greenshade": "Spinners in Woodhearth and Greenheart warn of Maormer landing parties disturbing the Wilderking's hollow.",
     # Valenwood alias
-    "skycraft.guide.arrive.arenthia_vale": "Vine-draped Colovian stonework and Bosmer hunting trails converge across the border hills of Arenthia Vale.",
-    "skycraft.guide.rumour.arenthia_vale": "Border wardens in Arenthia need scouts to inspect disturbed Bone-Truce markers along the Strid frontier.",
+    "nirncraft.guide.arrive.arenthia_vale": "Vine-draped Colovian stonework and Bosmer hunting trails converge across the border hills of Arenthia Vale.",
+    "nirncraft.guide.rumour.arenthia_vale": "Border wardens in Arenthia need scouts to inspect disturbed Bone-Truce markers along the Strid frontier.",
     # R11 Summerset (3 exact regions + 1 alias)
-    "skycraft.guide.arrive.summerset_isle": "Alabaster towers and prismatic glass spires catch the sea-light above the terraced gardens of Alinor and Cloudrest.",
-    "skycraft.guide.rumour.summerset_isle": "Sapiarchs and Kinlord stewards in Alinor quietly investigate missing lineage-tallies and abyssal geyser tremors.",
-    "skycraft.guide.arrive.auridon": "Cherry-blossom groves and white marble sanctuaries line the eastern shores of Firsthold and Skywatch on Auridon.",
-    "skycraft.guide.rumour.auridon": "High Elf marines in Firsthold and Skywatch hunt Veiled Heritance conspirators tampering with coastal beacons.",
-    "skycraft.guide.arrive.artaeum": "Beyond the reach of ordinary charts, the timeless lotus orchards and Ceporah spires of Artaeum drift in quiet serenity.",
-    "skycraft.guide.rumour.artaeum": "Ritemasters at the Grand Psijic Villa ask trusted travellers to stabilise time-vault seals around Ceporah Tower.",
+    "nirncraft.guide.arrive.summerset_isle": "Alabaster towers and prismatic glass spires catch the sea-light above the terraced gardens of Alinor and Cloudrest.",
+    "nirncraft.guide.rumour.summerset_isle": "Sapiarchs and Kinlord stewards in Alinor quietly investigate missing lineage-tallies and abyssal geyser tremors.",
+    "nirncraft.guide.arrive.auridon": "Cherry-blossom groves and white marble sanctuaries line the eastern shores of Firsthold and Skywatch on Auridon.",
+    "nirncraft.guide.rumour.auridon": "High Elf marines in Firsthold and Skywatch hunt Veiled Heritance conspirators tampering with coastal beacons.",
+    "nirncraft.guide.arrive.artaeum": "Beyond the reach of ordinary charts, the timeless lotus orchards and Ceporah spires of Artaeum drift in quiet serenity.",
+    "nirncraft.guide.rumour.artaeum": "Ritemasters at the Grand Psijic Villa ask trusted travellers to stabilise time-vault seals around Ceporah Tower.",
     # Summerset alias
-    "skycraft.guide.arrive.arteum": "Beyond the reach of ordinary charts, the timeless lotus orchards and Ceporah spires of Artaeum drift in quiet serenity.",
-    "skycraft.guide.rumour.arteum": "Ritemasters at the Grand Psijic Villa ask trusted travellers to stabilise time-vault seals around Ceporah Tower.",
+    "nirncraft.guide.arrive.arteum": "Beyond the reach of ordinary charts, the timeless lotus orchards and Ceporah spires of Artaeum drift in quiet serenity.",
+    "nirncraft.guide.rumour.arteum": "Ritemasters at the Grand Psijic Villa ask trusted travellers to stabilise time-vault seals around Ceporah Tower.",
     # R12 Foreign Lands (10 exact regions + 6 aliases)
-    "skycraft.guide.arrive.ice_waste": "Howling catabatic blizzards and blue glacier walls stretch endlessly across the Ice Waste of old Atmora above Kjolvik.",
-    "skycraft.guide.rumour.ice_waste": "Windhelm charter crews at Kjolvik Anchorage seek aid recovering stalhrim tallies from the Frozen Dragon Mound.",
-    "skycraft.guide.arrive.frozen_forest": "Rime-coated petrified pines stand in stone-still silence above the ancient stone slipways of Jylkurfyk in Atmora.",
-    "skycraft.guide.rumour.frozen_forest": "Chroniclers at Jylkurfyk warn that a frost-bound barrow-king is stirring inside the ice-tombs.",
-    "skycraft.guide.arrive.tsaesci": "Stepped red-lacquer canals and bamboo mists guard the coiled valleys of Tsaesci around the Black Lacquer Pagoda.",
-    "skycraft.guide.rumour.tsaesci": "Tally-seal custodians at the Black Lacquer Pagoda investigate a missing Imperial eagle-standard from the Ionith ruins.",
-    "skycraft.guide.arrive.kamal": "Volcanic ice-peaks and thaw-flooded fjords mark the harsh northern domain of Kamal around Ada'Soom's Gate.",
-    "skycraft.guide.rumour.kamal": "Pass-watch wardens at Ada'Soom's Gate offer high bounties to halt a Winter Host thaw-vanguard descending from the glaciers.",
-    "skycraft.guide.arrive.tang_mo": "Mist-wreathed karst spires and cloud-bamboo suspension bridges rise above Tang Mo Harbor Village.",
-    "skycraft.guide.rumour.tang_mo": "Island ranger clans at Tang Mo Harbor Village seek allies after raiders cut the signal ropes at Thousand Monkey Tree.",
-    "skycraft.guide.arrive.ka_po_tun": "Golden grass steppes and monumental tiger-carved gates blaze under the eastern sun around Tosh Raka's Palace.",
-    "skycraft.guide.rumour.ka_po_tun": "Tiger-Monk retainers at Tosh Raka's Palace test travellers who can recover the stolen bronze sanctuary seals.",
-    "skycraft.guide.arrive.yokudan_desert": "Sheared red mesas and star-aligned sword-temples remain above the waves around the Hall of the Ansei in Yokuda.",
-    "skycraft.guide.rumour.yokudan_desert": "Ankh-keepers at the Hall of the Ansei seek help recovering stolen star-charts from Hunding's Dojo.",
-    "skycraft.guide.arrive.sunken_isles": "Turquoise ruin-lagoons and wave-washed causeways mark the outer Sunken Isles of lost Yokuda.",
-    "skycraft.guide.rumour.sunken_isles": "Salvage wardens on the Isle of the Drowned Ansei warn of plunderers breaking the seals of the sunken royal temple.",
-    "skycraft.guide.arrive.maormer_isles": "Warm sea-mist curtains and serpent-prowed docks surround the Pyandonean Fleet Anchorage in the Maormer Isles.",
-    "skycraft.guide.rumour.maormer_isles": "Truce-captains at Mistveil Village and the Fleet Anchorage clash with Storm-Caste saboteurs over the black-pearl tallies.",
-    "skycraft.guide.arrive.coral_kingdom": "Phosphorescent brine-haze and living coral spires rise from the abyssal caldera of the Coral Kingdom of Thras.",
-    "skycraft.guide.rumour.coral_kingdom": "Sandbar contractors near the Coral Tower of Thras warn that unsealed plague-vats are fouling the lagoon exchange.",
+    "nirncraft.guide.arrive.ice_waste": "Howling catabatic blizzards and blue glacier walls stretch endlessly across the Ice Waste of old Atmora above Kjolvik.",
+    "nirncraft.guide.rumour.ice_waste": "Windhelm charter crews at Kjolvik Anchorage seek aid recovering stalhrim tallies from the Frozen Dragon Mound.",
+    "nirncraft.guide.arrive.frozen_forest": "Rime-coated petrified pines stand in stone-still silence above the ancient stone slipways of Jylkurfyk in Atmora.",
+    "nirncraft.guide.rumour.frozen_forest": "Chroniclers at Jylkurfyk warn that a frost-bound barrow-king is stirring inside the ice-tombs.",
+    "nirncraft.guide.arrive.tsaesci": "Stepped red-lacquer canals and bamboo mists guard the coiled valleys of Tsaesci around the Black Lacquer Pagoda.",
+    "nirncraft.guide.rumour.tsaesci": "Tally-seal custodians at the Black Lacquer Pagoda investigate a missing Imperial eagle-standard from the Ionith ruins.",
+    "nirncraft.guide.arrive.kamal": "Volcanic ice-peaks and thaw-flooded fjords mark the harsh northern domain of Kamal around Ada'Soom's Gate.",
+    "nirncraft.guide.rumour.kamal": "Pass-watch wardens at Ada'Soom's Gate offer high bounties to halt a Winter Host thaw-vanguard descending from the glaciers.",
+    "nirncraft.guide.arrive.tang_mo": "Mist-wreathed karst spires and cloud-bamboo suspension bridges rise above Tang Mo Harbor Village.",
+    "nirncraft.guide.rumour.tang_mo": "Island ranger clans at Tang Mo Harbor Village seek allies after raiders cut the signal ropes at Thousand Monkey Tree.",
+    "nirncraft.guide.arrive.ka_po_tun": "Golden grass steppes and monumental tiger-carved gates blaze under the eastern sun around Tosh Raka's Palace.",
+    "nirncraft.guide.rumour.ka_po_tun": "Tiger-Monk retainers at Tosh Raka's Palace test travellers who can recover the stolen bronze sanctuary seals.",
+    "nirncraft.guide.arrive.yokudan_desert": "Sheared red mesas and star-aligned sword-temples remain above the waves around the Hall of the Ansei in Yokuda.",
+    "nirncraft.guide.rumour.yokudan_desert": "Ankh-keepers at the Hall of the Ansei seek help recovering stolen star-charts from Hunding's Dojo.",
+    "nirncraft.guide.arrive.sunken_isles": "Turquoise ruin-lagoons and wave-washed causeways mark the outer Sunken Isles of lost Yokuda.",
+    "nirncraft.guide.rumour.sunken_isles": "Salvage wardens on the Isle of the Drowned Ansei warn of plunderers breaking the seals of the sunken royal temple.",
+    "nirncraft.guide.arrive.maormer_isles": "Warm sea-mist curtains and serpent-prowed docks surround the Pyandonean Fleet Anchorage in the Maormer Isles.",
+    "nirncraft.guide.rumour.maormer_isles": "Truce-captains at Mistveil Village and the Fleet Anchorage clash with Storm-Caste saboteurs over the black-pearl tallies.",
+    "nirncraft.guide.arrive.coral_kingdom": "Phosphorescent brine-haze and living coral spires rise from the abyssal caldera of the Coral Kingdom of Thras.",
+    "nirncraft.guide.rumour.coral_kingdom": "Sandbar contractors near the Coral Tower of Thras warn that unsealed plague-vats are fouling the lagoon exchange.",
     # Foreign Lands aliases
-    "skycraft.guide.arrive.atmora_coast": "Pack-ice leads and frozen shingle beaches mark the perilous southern landing coast of old Atmora.",
-    "skycraft.guide.rumour.atmora_coast": "Charter crews at Kjolvik watch the summer ice-leads and seek delvers for the entombed great-halls.",
-    "skycraft.guide.arrive.jylkurfyk": "Petrified rime-woods and ancient stone ship-slips frame the ruined Atmoran port of Jylkurfyk.",
-    "skycraft.guide.rumour.jylkurfyk": "Expedition chroniclers at Jylkurfyk seek guards to inspect disturbed dragon-totem seals in the great barrow.",
-    "skycraft.guide.arrive.yokuda_remnant": "Sun-baked red mesas and Ansei star-obelisks stand above the sea on the remnant islands of Yokuda.",
-    "skycraft.guide.rumour.yokuda_remnant": "Ansei keepers at New Tava and the Hall of the Ansei guard the fault-vaults against unlicensed treasure-seekers.",
-    "skycraft.guide.arrive.ra_gada_shoals": "Submerged marble colonnades and turquoise shoals mark where the Ra Gada fleets last sailed from Yokuda.",
-    "skycraft.guide.rumour.ra_gada_shoals": "Salvage divers in the Sunken Isles trade memory-stone rubbings recovered from the drowned orichalc vaults.",
-    "skycraft.guide.arrive.pyandonea": "Eternal sea-mist and kelp-draped volcanic reefs shelter the serpent lagoons of Pyandonea.",
-    "skycraft.guide.rumour.pyandonea": "Truce-fleet captains at the Pyandonean Anchorage seek discreet hands to quell a Storm-Caste mutiny.",
-    "skycraft.guide.arrive.thras": "Bleached and living coral ziggurats ring the abyssal blue holes of the Thrassian archipelago.",
-    "skycraft.guide.rumour.thras": "Quarantined factors on the Thras sandbars pay handsomely to contain rogue thrall-reef specimens.",
+    "nirncraft.guide.arrive.atmora_coast": "Pack-ice leads and frozen shingle beaches mark the perilous southern landing coast of old Atmora.",
+    "nirncraft.guide.rumour.atmora_coast": "Charter crews at Kjolvik watch the summer ice-leads and seek delvers for the entombed great-halls.",
+    "nirncraft.guide.arrive.jylkurfyk": "Petrified rime-woods and ancient stone ship-slips frame the ruined Atmoran port of Jylkurfyk.",
+    "nirncraft.guide.rumour.jylkurfyk": "Expedition chroniclers at Jylkurfyk seek guards to inspect disturbed dragon-totem seals in the great barrow.",
+    "nirncraft.guide.arrive.yokuda_remnant": "Sun-baked red mesas and Ansei star-obelisks stand above the sea on the remnant islands of Yokuda.",
+    "nirncraft.guide.rumour.yokuda_remnant": "Ansei keepers at New Tava and the Hall of the Ansei guard the fault-vaults against unlicensed treasure-seekers.",
+    "nirncraft.guide.arrive.ra_gada_shoals": "Submerged marble colonnades and turquoise shoals mark where the Ra Gada fleets last sailed from Yokuda.",
+    "nirncraft.guide.rumour.ra_gada_shoals": "Salvage divers in the Sunken Isles trade memory-stone rubbings recovered from the drowned orichalc vaults.",
+    "nirncraft.guide.arrive.pyandonea": "Eternal sea-mist and kelp-draped volcanic reefs shelter the serpent lagoons of Pyandonea.",
+    "nirncraft.guide.rumour.pyandonea": "Truce-fleet captains at the Pyandonean Anchorage seek discreet hands to quell a Storm-Caste mutiny.",
+    "nirncraft.guide.arrive.thras": "Bleached and living coral ziggurats ring the abyssal blue holes of the Thrassian archipelago.",
+    "nirncraft.guide.rumour.thras": "Quarantined factors on the Thras sandbars pay handsomely to contain rogue thrall-reef specimens.",
 }
 
 
@@ -1957,8 +1957,8 @@ def build_festivals() -> tuple[list[dict], dict[str, str]]:
     ) in FESTIVAL_SPECS:
         mid, mname = MONTH_META[month]
         doy = (month - 1) * 30 + day
-        tkey = f"skycraft.calendar.festival.{fid}.title"
-        akey = f"skycraft.calendar.festival.{fid}.announce"
+        tkey = f"nirncraft.calendar.festival.{fid}.title"
+        akey = f"nirncraft.calendar.festival.{fid}.announce"
         fest_objs.append(
             {
                 "id": fid,

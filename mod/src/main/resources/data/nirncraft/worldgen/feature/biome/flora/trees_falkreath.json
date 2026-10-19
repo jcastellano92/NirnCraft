@@ -1,0 +1,29 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "skyrim_pine",
+        "weight": 10
+      },
+      {
+        "species": "giant_pine",
+        "weight": 4
+      },
+      {
+        "species": "skyrim_spruce",
+        "weight": 6
+      },
+      {
+        "species": "dark_oak",
+        "weight": 2
+      },
+      {
+        "species": "birch",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

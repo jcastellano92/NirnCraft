@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:black_marsh_swamp",
+    "nirncraft:deep_mire",
+    "nirncraft:fen_edge",
+    "nirncraft:hist_grove",
+    "nirncraft:mangrove_delta",
+    "nirncraft:murkmire",
+    "nirncraft:murky_river",
+    "nirncraft:reedlands",
+    "nirncraft:shadowfen"
+  ]
+}

@@ -1,0 +1,256 @@
+{
+  "id": "roadside_green_bough",
+  "why": [
+    "malabal_tor.L1.xylo_gorge",
+    "malabal_tor.L4.jungle_understorey",
+    "malabal_tor.L6.silvenar_seat"
+  ],
+  "sil": "valenwood-roadside-green-bough-plan",
+  "base": "none",
+  "overlay": "malabal_tor",
+  "radius": 24,
+  "reach": 36,
+  "gates": [
+    [
+      0,
+      22
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        11
+      ],
+      "overlay": "malabal_tor",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        11,
+        24
+      ],
+      "overlay": "malabal_tor",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "roadside_green_bough_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "roadside_green_bough_landmark",
+      "overlay": "malabal_tor"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        2,
+        6
+      ],
+      "spokes": 6,
+      "r0": 10,
+      "r1": 22,
+      "wobble": 6,
+      "offset": 1.61,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        18
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          19
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          -2,
+          -12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "roadside_green_bough_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        14
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "roadside_green_bough_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -2,
+        8
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "roadside_green_bough_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -16,
+        7
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "roadside_green_bough_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        -4
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "roadside_green_bough_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -4,
+        -17
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "roadside_green_bough_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        5,
+        -7
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "roadside_green_bough_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "roadside_green_bough_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "roadside_green_bough_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "roadside_green_bough_b_5",
+    "smithy": "roadside_green_bough_b_7"
+  },
+  "titles": {
+    "roadside_green_bough_b_1": "place.nirncraft.roadside_green_bough Council & Seat Hall",
+    "roadside_green_bough_b_2": "place.nirncraft.roadside_green_bough High Sanctuary",
+    "roadside_green_bough_b_3": "place.nirncraft.roadside_green_bough Fighters & Wayfarers Hall",
+    "roadside_green_bough_b_4": "place.nirncraft.roadside_green_bough Mages & Chroniclers Spire",
+    "roadside_green_bough_b_5": "place.nirncraft.roadside_green_bough The Lantern & Hearth Inn",
+    "roadside_green_bough_b_6": "place.nirncraft.roadside_green_bough The Traveler's Rest Tavern",
+    "roadside_green_bough_b_7": "place.nirncraft.roadside_green_bough Master Forge & Armorer",
+    "roadside_green_bough_landmark": "High Seat of place.nirncraft.roadside_green_bough",
+    "roadside_green_bough_plaza": "place.nirncraft.roadside_green_bough Central Plaza"
+  },
+  "innKey": "roadside_green_bough_b_5",
+  "zones": [
+    {
+      "at": [
+        2,
+        -9
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        2,
+        6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageDraw
 
-OUTPUT_DIR = "mod/src/main/resources/assets/skycraft/textures/entity/race"
+OUTPUT_DIR = "mod/src/main/resources/assets/nirncraft/textures/entity/race"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def shade(color, factor):

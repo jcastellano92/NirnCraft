@@ -1,0 +1,32 @@
+{
+  "feature": "nirncraft:biome/flora/cover_grapes",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 8
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "nirncraft:flora_density",
+      "density": 1.0,
+      "floor": 0.0,
+      "field": {
+        "salt": 117,
+        "scale": 18,
+        "coverage": 0.35,
+        "softness": 0.1,
+        "kind": "fbm",
+        "mode": "inside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Deterministic generator for R8-R12 Step V8 Quests, 28 MS1 Regional Storylines & Place Lore
 plus R7-R12 Step V5 MS11 Travel Network Files:
-- 28 MS1 regional storylines in mod/src/main/resources/skycraft/quests/story/<region>.json
-- Expanded side quests in mod/src/main/resources/skycraft/quests/side_{black_marsh,elsweyr,valenwood,summerset,foreign}.json
+- 28 MS1 regional storylines in mod/src/main/resources/nirncraft/quests/story/<region>.json
+- Expanded side quests in mod/src/main/resources/nirncraft/quests/side_{black_marsh,elsweyr,valenwood,summerset,foreign}.json
 - F-WHY / region / placed-objective back-fills on R8-R12 faction, marquee, and loreweb quest files
-- Full place lore & regional flavour in mod/src/main/resources/skycraft/lore/places/{black_marsh,elsweyr,valenwood,summerset,foreign}.json
-- 10 MS11 travel network files in mod/src/main/resources/skycraft/travel/{morrowind,black_marsh,elsweyr,valenwood,summerset,atmora,akavir,yokuda,pyandonea,thras}.json
+- Full place lore & regional flavour in mod/src/main/resources/nirncraft/lore/places/{black_marsh,elsweyr,valenwood,summerset,foreign}.json
+- 10 MS11 travel network files in mod/src/main/resources/nirncraft/travel/{morrowind,black_marsh,elsweyr,valenwood,summerset,atmora,akavir,yokuda,pyandonea,thras}.json
 """
 import glob
 import json
@@ -15,7 +15,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-RES = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft")
+RES = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft")
 
 sys.path.insert(0, os.path.join(ROOT, "tools", "qa"))
 import flow_audit as fa  # noqa: E402
@@ -36,7 +36,7 @@ def jsave(path, data):
 
 
 def human_name(pid: str, raw_name: str = "") -> str:
-    if raw_name and not raw_name.startswith("place.skycraft."):
+    if raw_name and not raw_name.startswith("place.nirncraft."):
         return raw_name
     base = pid
     for px in ("bm_", "els_", "val_", "sum_", "for_", "mw_", "side_"):
@@ -825,7 +825,7 @@ def build_story_files(places_by_reg, hook_places, story_pools):
             bosses[f"story_{rshort}_boss_{bi:02d}"] = {
                 "name": f"Usurper-Captain of {bplace_name} ({bi})",
                 "rank": "boss",
-                "type": "skycraft:bandit_chief",
+                "type": "nirncraft:bandit_chief",
                 "place": bplace,
                 "weapon": "iron_sword",
                 "hp_mult": 2.8,
@@ -1658,7 +1658,7 @@ def build_travel_files(places_by_reg, all_pools):
                     node_obj = {
                         "id": p["id"],
                         "place": p["id"],
-                        "name": p.get("name") or f"place.skycraft.{p['id']}",
+                        "name": p.get("name") or f"place.nirncraft.{p['id']}",
                         "region": rid,
                         "x": int(p["x"]),
                         "z": int(p["z"]),
@@ -1687,7 +1687,7 @@ def build_travel_files(places_by_reg, all_pools):
                 if not reg_nodes or min(math.hypot(wx - n["x"], wz - n["z"]) for n in reg_nodes) > 360.0:
                     wnode = {
                         "id": f"wayshrine_{rshort}_{w_idx:02d}",
-                        "name": f"travel.skycraft.wayshrine.{rshort}.{w_idx:02d}",
+                        "name": f"travel.nirncraft.wayshrine.{rshort}.{w_idx:02d}",
                         "region": rid,
                         "x": int(wx),
                         "z": int(wz),
@@ -1711,7 +1711,7 @@ def build_travel_files(places_by_reg, all_pools):
                 offset_z = (((w_idx // 5) % 5) - 2) * 24
                 wnode = {
                     "id": f"wayshrine_{rshort}_{w_idx:02d}",
-                    "name": f"travel.skycraft.wayshrine.{rshort}.{w_idx:02d}",
+                    "name": f"travel.nirncraft.wayshrine.{rshort}.{w_idx:02d}",
                     "region": rid,
                     "x": int(pt[0] + offset_x),
                     "z": int(pt[1] + offset_z),

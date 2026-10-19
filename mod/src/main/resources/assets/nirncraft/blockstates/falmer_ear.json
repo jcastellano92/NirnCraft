@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/falmer_ear"
+      },
+      {
+        "model": "nirncraft:block/falmer_ear",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/falmer_ear",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/falmer_ear",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/falmer_ear_harvested"
+      },
+      {
+        "model": "nirncraft:block/falmer_ear_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/falmer_ear_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/falmer_ear_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

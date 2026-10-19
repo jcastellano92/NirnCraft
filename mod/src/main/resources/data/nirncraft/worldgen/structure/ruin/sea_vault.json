@@ -1,0 +1,13 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "ruin",
+  "kit": "maormer",
+  "where": [
+    "pyandonea",
+    "summerset"
+  ],
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

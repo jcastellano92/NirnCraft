@@ -10,7 +10,7 @@
 #include <dlfcn.h>
 #endif
 
-namespace aether {
+namespace atlas {
 namespace {
 
 #if defined(_WIN32)
@@ -209,7 +209,7 @@ bool GlApi::load(std::string& err) {
 #undef LOAD
 #undef OPT
     if (!missing.empty()) {
-        err = "OpenGL lacks " + missing + " (aether needs OpenGL 4.5)";
+        err = "OpenGL lacks " + missing + " (atlas needs OpenGL 4.5)";
         return false;
     }
     GetIntegerv(GL_MAJOR_VERSION, &major);
@@ -220,7 +220,7 @@ bool GlApi::load(std::string& err) {
     GetIntegerv(GL_NUM_EXTENSIONS, &n);
     for (GLint i = 0; i < n; i++)
         if (const GLubyte* e = GetStringi(GL_EXTENSIONS, GLuint(i))) extensions += reinterpret_cast<const char*>(e) + std::string(" ");
-    // what aether uses is 4.5 core, or the same as extensions on an older context: Minecraft asks for a 3.3 core
+    // what atlas uses is 4.5 core, or the same as extensions on an older context: Minecraft asks for a 3.3 core
     // profile, and drivers expose direct state access and image copies there (NVIDIA, Mesa, AMD)
     bool core45 = major > 4 || (major == 4 && minor >= 5);
     if (!core45 && !(hasExtension("GL_ARB_direct_state_access") && hasExtension("GL_ARB_copy_image"))) {
@@ -240,4 +240,4 @@ bool GlApi::load(std::string& err) {
     return true;
 }
 
-}  // namespace aether
+}  // namespace atlas

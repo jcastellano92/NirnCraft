@@ -1,22 +1,22 @@
-"""Publish native26.3 item definitions from preserved Skycraft geometry and legacy predicates."""
+"""Publish native26.3 item definitions from preserved NirnCraft geometry and legacy predicates."""
 from pathlib import Path
 import json,re
 from java_text import matching
 ROOT=Path(__file__).resolve().parents[2]
-MODELS=ROOT/'mod/src/main/resources/assets/skycraft/models/item'
-OUT=ROOT/'mod/src/main/resources/assets/skycraft/items'
+MODELS=ROOT/'mod/src/main/resources/assets/nirncraft/models/item'
+OUT=ROOT/'mod/src/main/resources/assets/nirncraft/items'
 def model(ref):
     result={'type':'minecraft:model','model':ref}
-    tint={'skycraft:item/graht_oak_leaves':0x4e9a32,'skycraft:item/hist_leaves':0x5a7a3a}.get(ref)
+    tint={'nirncraft:item/graht_oak_leaves':0x4e9a32,'nirncraft:item/hist_leaves':0x5a7a3a}.get(ref)
     if tint is not None: result['tints']=[{'type':'minecraft:constant','value':tint}]
-    if ref=='skycraft:item/regional_treasure':result['tints']=[{'type':'skycraft:treasure'},{'type':'minecraft:constant','value':0xffffff}]
+    if ref=='nirncraft:item/regional_treasure':result['tints']=[{'type':'nirncraft:treasure'},{'type':'minecraft:constant','value':0xffffff}]
     return result
 def test(key,value,yes,no,crossbow=False):
     if key in ('pulling','blocking','cast'):
         return {'type':'minecraft:condition','property':'minecraft:fishing_rod/cast' if key=='cast' else 'minecraft:using_item','on_true':yes,'on_false':no}
     if key in ('charged','firework'):
         return {'type':'minecraft:select','property':'minecraft:charge_type','cases':[{'when':'rocket' if key=='firework' else ['arrow','rocket'],'model':yes}],'fallback':no}
-    props={'custom_model_data':'minecraft:custom_model_data','skycraft:filled':'skycraft:filled','skycraft:cover':'skycraft:cover','pull':'minecraft:crossbow/pull' if crossbow else 'minecraft:use_duration'}
+    props={'custom_model_data':'minecraft:custom_model_data','nirncraft:filled':'nirncraft:filled','nirncraft:cover':'nirncraft:cover','pull':'minecraft:crossbow/pull' if crossbow else 'minecraft:use_duration'}
     if key not in props: raise ValueError(f'Unmigrated item predicate {key}')
     out={'type':'minecraft:range_dispatch','property':props[key],'entries':[{'threshold':value,'model':yes}],'fallback':no}
     if key=='pull' and not crossbow: out['scale']=.05
@@ -31,7 +31,7 @@ def convert(ref,source):
     return {'model':current}
 def egg_palettes():
     """Read active registration palettes; unused alternative specs cannot override live eggs."""
-    base=ROOT/'mod/src/main/java/com/skycraft'
+    base=ROOT/'mod/src/main/java/com/nirncraft'
     palettes={}
     for relative in ('creatures/ModEntities.java','fauna/FaunaEntities.java','curse/CurseRegistry.java'):
         source=(base/relative).read_text(encoding='utf8')
@@ -77,15 +77,15 @@ def egg_template():
 
 def main():
     count=0;variants=0;palettes=egg_palettes()
-    template=MODELS/'template_skycraft_spawn_egg.json'
+    template=MODELS/'template_nirncraft_spawn_egg.json'
     template.write_text(json.dumps(egg_template(),indent=2)+'\n',encoding='utf8')
     for path in sorted(MODELS.rglob('*.json')):
         if path==template:continue
         source=json.loads(path.read_text(encoding='utf8'));relative=path.relative_to(MODELS)
-        ref='skycraft:item/'+relative.with_suffix('').as_posix()
+        ref='nirncraft:item/'+relative.with_suffix('').as_posix()
         if path.stem.endswith('_spawn_egg'):
             if path.stem not in palettes:raise ValueError('No active palette for '+path.stem)
-            path.write_text(json.dumps({'parent':'skycraft:item/template_skycraft_spawn_egg'},indent=2)+'\n',encoding='utf8')
+            path.write_text(json.dumps({'parent':'nirncraft:item/template_nirncraft_spawn_egg'},indent=2)+'\n',encoding='utf8')
             result={'model':{'type':'minecraft:model','model':ref,'tints':[{'type':'minecraft:constant','value':color} for color in palettes[path.stem]]}}
         else:result=convert(ref,source)
         target=OUT/relative;target.parent.mkdir(parents=True,exist_ok=True)

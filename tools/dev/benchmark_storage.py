@@ -61,7 +61,7 @@ def main():
             for mode in ('full', 'unchanged'):
                 command = [str(project / 'gradlew.bat'), 'compileJava', 'processResources',
                            '--offline', '--console=plain', '-Dorg.gradle.jvmargs=-Xmx2G',
-                           '-PskycraftBuildDir=' + str(build), '--project-cache-dir', str(project_cache)]
+                           '-PnirncraftBuildDir=' + str(build), '--project-cache-dir', str(project_cache)]
                 if mode == 'full':
                     command.append('--rerun-tasks')
                 env = dict(os.environ, GRADLE_USER_HOME=str(cache))

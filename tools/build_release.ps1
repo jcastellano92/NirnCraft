@@ -12,19 +12,19 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 Set-Location -LiteralPath $root
-$scratch = if ($env:SKYCRAFT_263_SCRATCH) { [IO.Path]::GetFullPath($env:SKYCRAFT_263_SCRATCH) } else { 'E:\Skycraft-scratch\migration-26.3' }
+$scratch = if ($env:NIRNCRAFT_263_SCRATCH) { [IO.Path]::GetFullPath($env:NIRNCRAFT_263_SCRATCH) } else { 'E:\NirnCraft-scratch\migration-26.3' }
 if (-not $Java) {
-    $javaRoot = if ($env:SKYCRAFT_JAVA25_HOME) { $env:SKYCRAFT_JAVA25_HOME } else { (Get-Content -LiteralPath 'E:\Skycraft-scratch\toolchains\java25-location.txt' -Raw).Trim() }
+    $javaRoot = if ($env:NIRNCRAFT_JAVA25_HOME) { $env:NIRNCRAFT_JAVA25_HOME } else { (Get-Content -LiteralPath 'E:\NirnCraft-scratch\toolchains\java25-location.txt' -Raw).Trim() }
     $Java = Join-Path $javaRoot 'bin/java.exe'
 }
 $Java = (Resolve-Path -LiteralPath $Java).Path
 if (-not $OutputDir) { $OutputDir = Join-Path $root ('dist/release-26.3-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')) }
 $OutputDir = [IO.Path]::GetFullPath($OutputDir)
-$clientZip = Join-Path $OutputDir 'Skycraft-26.3-client-instance.zip'
-$serverZip = Join-Path $OutputDir 'Skycraft-26.3-server.zip'
+$clientZip = Join-Path $OutputDir 'NirnCraft-26.3-client-instance.zip'
+$serverZip = Join-Path $OutputDir 'NirnCraft-26.3-server.zip'
 if ((Test-Path -LiteralPath $clientZip) -or (Test-Path -LiteralPath $serverZip)) { throw 'Preserve previous packages; choose a fresh OutputDir.' }
-$oldJava = $env:SKYCRAFT_JAVA25_HOME
-$env:SKYCRAFT_JAVA25_HOME = Split-Path (Split-Path $Java -Parent) -Parent
+$oldJava = $env:NIRNCRAFT_JAVA25_HOME
+$env:NIRNCRAFT_JAVA25_HOME = Split-Path (Split-Path $Java -Parent) -Parent
 try {
     & py -3 -I tools/build_server_instance.py --check-java --java $Java
     if ($LASTEXITCODE -ne 0) { throw 'Select Java 25 before starting the release build.' }
@@ -59,5 +59,5 @@ try {
     } else {
         Write-Host "Candidate packages created; dedicated server QA was not run (-SkipQa): $OutputDir"
     }
-} finally { $env:SKYCRAFT_JAVA25_HOME = $oldJava }
+} finally { $env:NIRNCRAFT_JAVA25_HOME = $oldJava }
 exit 0

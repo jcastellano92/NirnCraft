@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "nirncraft:block/flame_tip",
+        "y": 0
+      },
+      {
+        "model": "nirncraft:block/flame_tip",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/flame_tip",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/flame_tip",
+        "y": 270
+      }
+    ]
+  }
+}

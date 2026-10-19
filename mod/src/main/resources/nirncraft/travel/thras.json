@@ -1,0 +1,435 @@
+{
+  "province": "thras",
+  "why": [
+    "coral_kingdom.L1.agonir_coral_caldera",
+    "coral_kingdom.L2.phosphorescent_brine_haze"
+  ],
+  "modes": [
+    "boat",
+    "caravan",
+    "wayshrine",
+    "foot"
+  ],
+  "nodes": [
+    {
+      "id": "sload_spawning_pools",
+      "place": "sload_spawning_pools",
+      "name": "place.nirncraft.sload_spawning_pools",
+      "region": "thras/coral_kingdom",
+      "x": -16045,
+      "z": 16258,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine",
+        "boat",
+        "caravan"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_coral_kingdom_01",
+      "name": "travel.nirncraft.wayshrine.coral_kingdom.01",
+      "region": "thras/coral_kingdom",
+      "x": -15410,
+      "z": 16730,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine",
+        "foot"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_coral_kingdom_02",
+      "name": "travel.nirncraft.wayshrine.coral_kingdom.02",
+      "region": "thras/coral_kingdom",
+      "x": -16418,
+      "z": 17341,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_coral_kingdom_03",
+      "name": "travel.nirncraft.wayshrine.coral_kingdom.03",
+      "region": "thras/coral_kingdom",
+      "x": -14600,
+      "z": 17800,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_coral_kingdom_04",
+      "name": "travel.nirncraft.wayshrine.coral_kingdom.04",
+      "region": "thras/coral_kingdom",
+      "x": -15362,
+      "z": 16682,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_coral_kingdom_05",
+      "name": "travel.nirncraft.wayshrine.coral_kingdom.05",
+      "region": "thras/coral_kingdom",
+      "x": -14648,
+      "z": 17776,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "id": "coral_tower_of_thras",
+      "region": "thras/coral_kingdom",
+      "x": -15410,
+      "z": 16730,
+      "modes": [
+        "boat",
+        "caravan",
+        "foot",
+        "wayshrine"
+      ],
+      "why": [
+        "coral_kingdom.L6.quarantined_sandbar_camp",
+        "thras.L6.thras_sandbar_camp"
+      ],
+      "place": "coral_tower_of_thras"
+    },
+    {
+      "id": "alinor",
+      "region": "summerset/summerset_isle",
+      "x": -11200,
+      "z": 13000,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "thras.L6.thras_sandbar_camp"
+      ],
+      "place": "alinor"
+    },
+    {
+      "id": "lillandril",
+      "region": "summerset/summerset_isle",
+      "x": -13700,
+      "z": 12550,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "thras.L6.thras_sandbar_camp"
+      ],
+      "place": "lillandril"
+    },
+    {
+      "id": "woodhearth",
+      "region": "valenwood/greenshade",
+      "x": -6700,
+      "z": 12600,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "thras.L6.thras_sandbar_camp"
+      ],
+      "place": "woodhearth"
+    }
+  ],
+  "routes": [
+    {
+      "from": "sload_spawning_pools",
+      "to": "wayshrine_coral_kingdom_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_sload_spawning_pools_to_wayshrine_coral_kingdom_01",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "sload_spawning_pools",
+      "to": "wayshrine_coral_kingdom_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_sload_spawning_pools_to_wayshrine_coral_kingdom_04",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_01",
+      "to": "wayshrine_coral_kingdom_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_wayshrine_coral_kingdom_01_to_wayshrine_coral_kingdom_04",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_01",
+      "to": "sload_spawning_pools",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_wayshrine_coral_kingdom_01_to_sload_spawning_pools",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_02",
+      "to": "sload_spawning_pools",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_wayshrine_coral_kingdom_02_to_sload_spawning_pools",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_02",
+      "to": "wayshrine_coral_kingdom_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_wayshrine_coral_kingdom_02_to_wayshrine_coral_kingdom_01",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_03",
+      "to": "wayshrine_coral_kingdom_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_wayshrine_coral_kingdom_03_to_wayshrine_coral_kingdom_05",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_03",
+      "to": "wayshrine_coral_kingdom_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_wayshrine_coral_kingdom_03_to_wayshrine_coral_kingdom_01",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_04",
+      "to": "wayshrine_coral_kingdom_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_wayshrine_coral_kingdom_04_to_wayshrine_coral_kingdom_01",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_04",
+      "to": "sload_spawning_pools",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_wayshrine_coral_kingdom_04_to_sload_spawning_pools",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_05",
+      "to": "wayshrine_coral_kingdom_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_wayshrine_coral_kingdom_05_to_wayshrine_coral_kingdom_03",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_05",
+      "to": "wayshrine_coral_kingdom_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "thras_wayshrine_wayshrine_coral_kingdom_05_to_wayshrine_coral_kingdom_01",
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "sload_spawning_pools",
+      "to": "alinor",
+      "mode": "boat",
+      "cost": 100,
+      "path": "sea_of_pearls_quarantine_cutter",
+      "why": [
+        "thras.L6.thras_sandbar_camp",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "alinor",
+      "to": "sload_spawning_pools",
+      "mode": "boat",
+      "cost": 100,
+      "path": "sea_of_pearls_quarantine_cutter",
+      "why": [
+        "thras.L6.thras_sandbar_camp",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "coral_tower_of_thras",
+      "to": "lillandril",
+      "mode": "boat",
+      "cost": 95,
+      "path": "agonir_atoll_smuggler_brig",
+      "why": [
+        "coral_kingdom.L6.quarantined_sandbar_camp",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "lillandril",
+      "to": "coral_tower_of_thras",
+      "mode": "boat",
+      "cost": 95,
+      "path": "agonir_atoll_smuggler_brig",
+      "why": [
+        "coral_kingdom.L6.quarantined_sandbar_camp",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "sload_spawning_pools",
+      "to": "woodhearth",
+      "mode": "boat",
+      "cost": 105,
+      "path": "thrassian_reef_contraband_skiff",
+      "why": [
+        "thras.L6.thras_sandbar_camp",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "woodhearth",
+      "to": "sload_spawning_pools",
+      "mode": "boat",
+      "cost": 105,
+      "path": "thrassian_reef_contraband_skiff",
+      "why": [
+        "thras.L6.thras_sandbar_camp",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "sload_spawning_pools",
+      "to": "coral_tower_of_thras",
+      "mode": "caravan",
+      "cost": 43,
+      "path": "exposed_coral_shelf_litter_track",
+      "why": [
+        "coral_kingdom.L6.quarantined_sandbar_camp",
+        "coral_kingdom.L5.alchemical_sandbar_exchange"
+      ]
+    },
+    {
+      "from": "coral_tower_of_thras",
+      "to": "sload_spawning_pools",
+      "mode": "caravan",
+      "cost": 43,
+      "path": "exposed_coral_shelf_litter_track",
+      "why": [
+        "coral_kingdom.L6.quarantined_sandbar_camp",
+        "coral_kingdom.L5.alchemical_sandbar_exchange"
+      ]
+    },
+    {
+      "from": "coral_tower_of_thras",
+      "to": "wayshrine_coral_kingdom_01",
+      "mode": "foot",
+      "cost": 0,
+      "path": "calcified_sponge_causeway",
+      "why": [
+        "coral_kingdom.L6.quarantined_sandbar_camp",
+        "thras.L6.thras_sandbar_camp"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_01",
+      "to": "coral_tower_of_thras",
+      "mode": "foot",
+      "cost": 0,
+      "path": "calcified_sponge_causeway",
+      "why": [
+        "coral_kingdom.L6.quarantined_sandbar_camp",
+        "thras.L6.thras_sandbar_camp"
+      ]
+    }
+  ]
+}

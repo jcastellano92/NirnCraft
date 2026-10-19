@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/ayleid_ruin",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274501,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "ayleid_ruin"
+    ]
+  }
+}

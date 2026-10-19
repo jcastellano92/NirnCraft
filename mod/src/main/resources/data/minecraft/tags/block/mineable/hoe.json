@@ -1,13 +1,13 @@
 {
   "replace": false,
   "values": [
-    "skycraft:golden_aspen_leaves",
-    "skycraft:orange_aspen_leaves",
-    "skycraft:snowy_spruce_leaves",
-    "skycraft:graht_oak_leaves",
-    "skycraft:palm_fronds",
-    "skycraft:hist_leaves",
-    "skycraft:hist_sap_block",
-    "skycraft:apocrypha_tentacle"
+    "nirncraft:golden_aspen_leaves",
+    "nirncraft:orange_aspen_leaves",
+    "nirncraft:snowy_spruce_leaves",
+    "nirncraft:graht_oak_leaves",
+    "nirncraft:palm_fronds",
+    "nirncraft:hist_leaves",
+    "nirncraft:hist_sap_block",
+    "nirncraft:apocrypha_tentacle"
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:artaeum",
+    "nirncraft:auridon_vineyards",
+    "nirncraft:crystal_coast",
+    "nirncraft:summerset_meadow",
+    "nirncraft:summerset_shore"
+  ]
+}

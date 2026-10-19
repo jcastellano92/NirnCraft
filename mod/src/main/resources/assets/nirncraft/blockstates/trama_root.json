@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/trama_root"
+      },
+      {
+        "model": "nirncraft:block/trama_root",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/trama_root",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/trama_root",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/trama_root_harvested"
+      },
+      {
+        "model": "nirncraft:block/trama_root_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/trama_root_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/trama_root_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

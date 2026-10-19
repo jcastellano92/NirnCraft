@@ -10,10 +10,10 @@ if ! command -v "$JAVAC" >/dev/null 2>&1 && [ -x "/c/Program Files/Java/jdk-17/b
   JAVA="/c/Program Files/Java/jdk-17/bin/java.exe"
 fi
 cd "$ROOT"
-RIG=mod/src/main/java/com/skycraft/creatures/client/rig
-SEA=mod/src/main/java/com/skycraft/seas/client/rig
+RIG=mod/src/main/java/com/nirncraft/creatures/client/rig
+SEA=mod/src/main/java/com/nirncraft/seas/client/rig
 mkdir -p mod/build
 WORK="$(mktemp -d "$ROOT/mod/build/seadump-XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 "$JAVAC" -encoding UTF-8 -d "$WORK" $(ls $RIG/*.java | grep -v RigDump.java) "$SEA/SeaDefs.java" "$SEA/SeaRigDump.java"
-"$JAVA" -cp "$WORK" com.skycraft.seas.client.rig.SeaRigDump tools/textures/rigs
+"$JAVA" -cp "$WORK" com.nirncraft.seas.client.rig.SeaRigDump tools/textures/rigs

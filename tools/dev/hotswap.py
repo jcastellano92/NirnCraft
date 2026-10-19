@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-JDWP HotSwap client for the Skycraft persistent dev server (Tier 1).
+JDWP HotSwap client for the NirnCraft persistent dev server (Tier 1).
 
 Compares compiled .class files in mod/build/classes/java/main against the server's
 boot snapshot (classes-boot) and last hotswapped state (classes-last):

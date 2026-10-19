@@ -1,0 +1,698 @@
+{
+  "region": "elsweyr/anequina",
+  "province": "elsweyr",
+  "line": "story_anequina",
+  "category": "main",
+  "title": "The Well-Oath of Dune",
+  "summary": "Caravan masters and badland herders between Dune, Orcrest, and Riverhold face a water-tally crisis when desert raiders defile the Two-Moons ridge temples and choke the qanat wells.",
+  "why": [
+    "anequina.L7.well_clans",
+    "anequina.L7.caravan_masters_rich",
+    "anequina.L7.herders_poor"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "dune",
+    "places": [
+      "dune",
+      "the_prancing_netch",
+      "verkarth_hills",
+      "orcrest",
+      "thaal",
+      "hadronar_vault",
+      "sleepy_senche_mine",
+      "dakheset_outpost",
+      "nightmare_plateau",
+      "defense_force_outpost",
+      "shadow_dance_ruins",
+      "mokhazir_ruins",
+      "sae_burrow",
+      "haseae",
+      "rishakhi_sugar_farm",
+      "nisha_den",
+      "riverhold",
+      "seaplace",
+      "cori_darglade",
+      "tardorn_wood",
+      "kings_walk",
+      "riset",
+      "khazir",
+      "kae",
+      "thae",
+      "kajoae",
+      "the_drowsy_tankard",
+      "jeqara",
+      "the_lonely_hare",
+      "drokhekha",
+      "tehai"
+    ],
+    "npc": "story_anequina_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "Caravans halting at Dune say the deep qanat cisterns along the Orcrest road are running dry while armed outriders divert the night-water toward a sealed ridge temple.",
+    "notice": "CLAN-COURT OF DUNE: Trackers and caravan-guards wanted to inspect the badland qanat shafts between Dune, Orcrest, and Riverhold."
+  },
+  "npcs": [
+    {
+      "id": "story_anequina_hook_npc",
+      "name": "Warden of Dune",
+      "role": "guard",
+      "place": "dune",
+      "greet": "Caravans halting at Dune say the deep qanat cisterns along the Orcrest road are running dry while armed outriders divert the night-water toward a sealed ridge temple.",
+      "talk": [
+        "The trouble across Anequina began when sealed dispatches started bypassing Dune.",
+        "If you mean to help the Well-Clans of Anequina, start by checking the trail between Dune and Shrine to Lorkhaj."
+      ]
+    },
+    {
+      "id": "story_anequina_envoy_npc",
+      "name": "Chronicler of Dune",
+      "role": "scholar",
+      "place": "shrine_to_lorkhaj",
+      "greet": "Keep your voice low—everyone at Shrine to Lorkhaj is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from Shrine to Lorkhaj toward Dakheset Outpost before they vanished into the brush.",
+        "Bring any ciphered tallies back to Dune so Clan-Mother Ahzirr can see the proof."
+      ]
+    },
+    {
+      "id": "story_anequina_scout_npc",
+      "name": "Outrider of Dakheset Outpost",
+      "role": "scout",
+      "place": "dakheset_outpost",
+      "greet": "You made good time from Shrine to Lorkhaj. The saboteurs have fortified the approaches near Defense Force Outpost.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at Defense Force Outpost with a picked guard.",
+        "Once Defense Force Outpost is cleared, return to Dune to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_anequina_steward_npc",
+      "name": "Speaker of Dune",
+      "role": "steward",
+      "place": "dune",
+      "greet": "Clan-Mother Ahzirr awaits word on whether the crisis in Anequina has been contained.",
+      "talk": [
+        "The elders of Dune have prepared the concord table for your return.",
+        "All of Anequina owes you a debt for standing between Dune and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_anequina_boss_01": {
+      "name": "Usurper-Captain of Dune (1)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "dune",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_anequina_boss_02": {
+      "name": "Usurper-Captain of Shrine to Lorkhaj (2)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "shrine_to_lorkhaj",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_anequina_boss_03": {
+      "name": "Usurper-Captain of Dakheset Outpost (3)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "dakheset_outpost",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_anequina_boss_04": {
+      "name": "Usurper-Captain of Defense Force Outpost (4)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "defense_force_outpost",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_anequina_boss_05": {
+      "name": "Usurper-Captain of Nanar Ruins (5)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "nanar_ruins",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_anequina_boss_06": {
+      "name": "Usurper-Captain of Vonee Sugar Farm (6)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "vonee_sugar_farm",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_anequina_boss_07": {
+      "name": "Usurper-Captain of Starlight Adeptorium (7)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "starlight_adeptorium",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_anequina_boss_08": {
+      "name": "Usurper-Captain of Tomb of the Moon Singers (8)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "tomb_of_the_moon_singers",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_anequina_scene_01": [
+      "Warden of Dune: Examine these marks recovered near Dune—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Dune and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Dune, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_02": [
+      "Warden of Dune: Examine these marks recovered near Shrine to Lorkhaj—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Shrine to Lorkhaj and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Shrine to Lorkhaj, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_03": [
+      "Warden of Dune: Examine these marks recovered near Dakheset Outpost—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Dakheset Outpost and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Dakheset Outpost, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_04": [
+      "Warden of Dune: Examine these marks recovered near Defense Force Outpost—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Defense Force Outpost and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Defense Force Outpost, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_05": [
+      "Warden of Dune: Examine these marks recovered near Nanar Ruins—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Nanar Ruins and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Nanar Ruins, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_06": [
+      "Warden of Dune: Examine these marks recovered near Vonee Sugar Farm—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Vonee Sugar Farm and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Vonee Sugar Farm, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_07": [
+      "Warden of Dune: Examine these marks recovered near Starlight Adeptorium—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Starlight Adeptorium and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Starlight Adeptorium, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_08": [
+      "Warden of Dune: Examine these marks recovered near Tomb of the Moon Singers—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Tomb of the Moon Singers and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Tomb of the Moon Singers, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_09": [
+      "Warden of Dune: Examine these marks recovered near Zura Ruins—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Zura Ruins and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Zura Ruins, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_10": [
+      "Warden of Dune: Examine these marks recovered near Maset Sugar Farm—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Maset Sugar Farm and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Maset Sugar Farm, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_11": [
+      "Warden of Dune: Examine these marks recovered near Rasha Fort—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Rasha Fort and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Rasha Fort, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_12": [
+      "Warden of Dune: Examine these marks recovered near Verkarth Hills—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Verkarth Hills and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Verkarth Hills, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_13": [
+      "Warden of Dune: Examine these marks recovered near Seaplace—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Seaplace and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Seaplace, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_14": [
+      "Warden of Dune: Examine these marks recovered near Bonechime Outpost—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Bonechime Outpost and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Bonechime Outpost, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_15": [
+      "Warden of Dune: Examine these marks recovered near Star Haven Adeptorium—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Star Haven Adeptorium and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Star Haven Adeptorium, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_16": [
+      "Warden of Dune: Examine these marks recovered near The Sleeping Badger—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between The Sleeping Badger and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at The Sleeping Badger, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_17": [
+      "Warden of Dune: Examine these marks recovered near Joe Hole—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Joe Hole and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Joe Hole, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_18": [
+      "Warden of Dune: Examine these marks recovered near Koae Mine—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Koae Mine and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Koae Mine, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_19": [
+      "Warden of Dune: Examine these marks recovered near Khazir—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Khazir and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Khazir, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_20": [
+      "Warden of Dune: Examine these marks recovered near Cori Darglade—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Cori Darglade and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Cori Darglade, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_21": [
+      "Warden of Dune: Examine these marks recovered near Qamaae Rest—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Qamaae Rest and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Qamaae Rest, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_22": [
+      "Warden of Dune: Examine these marks recovered near Teal Campsite—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Teal Campsite and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Teal Campsite, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_23": [
+      "Warden of Dune: Examine these marks recovered near Nevoe Oasis—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Nevoe Oasis and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Nevoe Oasis, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_24": [
+      "Warden of Dune: Examine these marks recovered near The Lonely Hare—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between The Lonely Hare and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at The Lonely Hare, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_25": [
+      "Warden of Dune: Examine these marks recovered near Shrine Sanguine Elsweyr—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Shrine Sanguine Elsweyr and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Shrine Sanguine Elsweyr, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_26": [
+      "Warden of Dune: Examine these marks recovered near The Prowl—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between The Prowl and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at The Prowl, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_27": [
+      "Warden of Dune: Examine these marks recovered near Jee Sugar Farm—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Jee Sugar Farm and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Jee Sugar Farm, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_28": [
+      "Warden of Dune: Examine these marks recovered near Masamar Outpost—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Masamar Outpost and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Masamar Outpost, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_29": [
+      "Warden of Dune: Examine these marks recovered near Saimisil Steppes—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Saimisil Steppes and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Saimisil Steppes, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_30": [
+      "Warden of Dune: Examine these marks recovered near Khakhaae Mesa—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Khakhaae Mesa and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Khakhaae Mesa, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_31": [
+      "Warden of Dune: Examine these marks recovered near Jeqara—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Jeqara and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Jeqara, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_32": [
+      "Warden of Dune: Examine these marks recovered near Baamaae Homestead—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Baamaae Homestead and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Baamaae Homestead, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_33": [
+      "Warden of Dune: Examine these marks recovered near Tardorn Wood—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Tardorn Wood and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Tardorn Wood, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_34": [
+      "Warden of Dune: Examine these marks recovered near Sae Burrow—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Sae Burrow and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Sae Burrow, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_35": [
+      "Warden of Dune: Examine these marks recovered near Mokhazir Ruins—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Mokhazir Ruins and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Mokhazir Ruins, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_36": [
+      "Warden of Dune: Examine these marks recovered near Joshazir Pit—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Joshazir Pit and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Joshazir Pit, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_37": [
+      "Warden of Dune: Examine these marks recovered near Ne Quin Al—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Ne Quin Al and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Ne Quin Al, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_38": [
+      "Warden of Dune: Examine these marks recovered near Riset—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Riset and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Riset, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_39": [
+      "Warden of Dune: Examine these marks recovered near Talon Gulch—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Talon Gulch and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Talon Gulch, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_40": [
+      "Warden of Dune: Examine these marks recovered near Kojanar Oasis—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Kojanar Oasis and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Kojanar Oasis, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_41": [
+      "Warden of Dune: Examine these marks recovered near Prowls Edge Dragonscour—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Prowls Edge Dragonscour and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Prowls Edge Dragonscour, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_42": [
+      "Warden of Dune: Examine these marks recovered near Khaar Ruins—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Khaar Ruins and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Khaar Ruins, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_43": [
+      "Warden of Dune: Examine these marks recovered near Vodohai Moon Temple—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Vodohai Moon Temple and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Vodohai Moon Temple, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_44": [
+      "Warden of Dune: Examine these marks recovered near Riverhold—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Riverhold and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Riverhold, then bring the recovered charter back to Dune."
+    ],
+    "story_anequina_scene_45": [
+      "Warden of Dune: Examine these marks recovered near Voe Moon Temple—they match the cabal troubling Anequina.",
+      "Chronicler of Dune: The seal impressions cite the old charters of the Well-Clans of Anequina word for word.",
+      "Outrider of Dakheset Outpost: Our scouts spotted lantern-signals flashing between Voe Moon Temple and Defense Force Outpost at dusk.",
+      "Speaker of Dune: Strike swiftly at Voe Moon Temple, then bring the recovered charter back to Dune."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_anequina_01_opening",
+      "order": 1,
+      "title": "Dry Stones at the Qanat",
+      "region": "elsweyr/anequina",
+      "category": "main",
+      "giver": "story_anequina_hook_npc",
+      "start": "npc:story_anequina_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "anequina.L7.well_clans",
+        "anequina.L7.caravan_masters_rich"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Dune and Shrine to Lorkhaj in Anequina.",
+      "places": [
+        "dune",
+        "shrine_to_lorkhaj"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "dune",
+          "objective": "Speak with the Warden at Dune and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "shrine_to_lorkhaj",
+          "objective": "Examine the disturbed boundary markers at Shrine to Lorkhaj"
+        },
+        {
+          "id": 30,
+          "place": "dune",
+          "objective": "Return the recovered seal-impression to the Chronicler at Dune"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "dune",
+          "text": "Speak with the Warden at Dune and inspect the contested tallies",
+          "scene": "story_anequina_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "shrine_to_lorkhaj",
+          "text": "Examine the disturbed boundary markers at Shrine to Lorkhaj"
+        },
+        {
+          "type": "go",
+          "place": "dune",
+          "text": "Return the recovered seal-impression to the Chronicler at Dune"
+        }
+      ],
+      "consequence": "world_state:anequina_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_anequina_02_trail",
+      "order": 2,
+      "title": "Tracks Across the Badlands",
+      "region": "elsweyr/anequina",
+      "category": "main",
+      "giver": "story_anequina_envoy_npc",
+      "start": "auto",
+      "prereq": "story_anequina_01_opening",
+      "requires": [
+        "story_anequina_01_opening"
+      ],
+      "why": [
+        "anequina.L7.caravan_masters_rich",
+        "anequina.L7.herders_poor"
+      ],
+      "summary": "Follow the conspirators' supply route from Shrine to Lorkhaj to Dakheset Outpost and seize their cipher-ledger.",
+      "places": [
+        "shrine_to_lorkhaj",
+        "dakheset_outpost"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "shrine_to_lorkhaj",
+          "objective": "Track the night-couriers departing Shrine to Lorkhaj"
+        },
+        {
+          "id": 20,
+          "place": "dakheset_outpost",
+          "objective": "Drive off the cabal outriders at Dakheset Outpost and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "shrine_to_lorkhaj",
+          "objective": "Deliver the cipher-box to the expedition chronicler at Shrine to Lorkhaj"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "shrine_to_lorkhaj",
+          "text": "Track the night-couriers departing Shrine to Lorkhaj",
+          "scene": "story_anequina_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "dakheset_outpost",
+          "text": "Drive off the cabal outriders at Dakheset Outpost and seize their cipher-box",
+          "boss": "story_anequina_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "shrine_to_lorkhaj",
+          "text": "Deliver the cipher-box to the expedition chronicler at Shrine to Lorkhaj"
+        }
+      ],
+      "consequence": "world_state:anequina_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_anequina_03_sanctum",
+      "order": 3,
+      "title": "Lamps of the Ridge-Temple",
+      "region": "elsweyr/anequina",
+      "category": "main",
+      "giver": "story_anequina_scout_npc",
+      "start": "auto",
+      "prereq": "story_anequina_02_trail",
+      "requires": [
+        "story_anequina_02_trail"
+      ],
+      "why": [
+        "anequina.L7.herders_poor",
+        "anequina.L8.ridge_temples"
+      ],
+      "summary": "Secure the outer wards between Dakheset Outpost and Defense Force Outpost to lay bare the cabal's stronghold.",
+      "places": [
+        "dakheset_outpost",
+        "defense_force_outpost"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "dakheset_outpost",
+          "objective": "Meet the outrider scout at Dakheset Outpost to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "defense_force_outpost",
+          "objective": "Scout the fortified threshold at Defense Force Outpost and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "dune",
+          "objective": "Carry the ward-key back to the council table at Dune"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "dakheset_outpost",
+          "text": "Meet the outrider scout at Dakheset Outpost to decode the sanctum approach",
+          "scene": "story_anequina_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "defense_force_outpost",
+          "text": "Scout the fortified threshold at Defense Force Outpost and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "dune",
+          "text": "Carry the ward-key back to the council table at Dune"
+        }
+      ],
+      "consequence": "world_state:anequina_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_anequina_04_finale",
+      "order": 4,
+      "title": "The Two-Moons Well-Compact",
+      "region": "elsweyr/anequina",
+      "category": "main",
+      "giver": "story_anequina_steward_npc",
+      "start": "auto",
+      "prereq": "story_anequina_03_sanctum",
+      "requires": [
+        "story_anequina_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "anequina.L7.well_clans",
+        "anequina.L8.ridge_temples"
+      ],
+      "summary": "Storm the cabal stronghold at Defense Force Outpost and witness Clan-Mother Ahzirr seal the regional concord at Dune.",
+      "places": [
+        "defense_force_outpost",
+        "dune"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "defense_force_outpost",
+          "objective": "Storm the inner chamber at Defense Force Outpost and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "defense_force_outpost",
+          "objective": "Recover the stolen charter-seal of Anequina from Defense Force Outpost"
+        },
+        {
+          "id": 30,
+          "place": "dune",
+          "objective": "Present the charter-seal at Dune to restore peace across Anequina"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "defense_force_outpost",
+          "text": "Storm the inner chamber at Defense Force Outpost and defeat the cabal ringleader",
+          "boss": "story_anequina_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "defense_force_outpost",
+          "text": "Recover the stolen charter-seal of Anequina from Defense Force Outpost"
+        },
+        {
+          "type": "go",
+          "place": "dune",
+          "text": "Present the charter-seal at Dune to restore peace across Anequina",
+          "scene": "story_anequina_scene_04"
+        }
+      ],
+      "consequence": "world_state:anequina_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Dune"
+      }
+    }
+  ]
+}

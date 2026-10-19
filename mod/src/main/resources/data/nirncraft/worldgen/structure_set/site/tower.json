@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/tower",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274516,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "tower"
+    ]
+  }
+}

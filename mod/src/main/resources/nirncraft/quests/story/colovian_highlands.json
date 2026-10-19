@@ -1,0 +1,306 @@
+{
+  "region": "cyrodiil/colovian_highlands",
+  "province": "cyrodiil",
+  "line": "story_colovian_highlands",
+  "category": "main",
+  "title": "Wool and Steel",
+  "why": [
+    "cyrodiil/colovian_highlands.L9.guild_rivalry",
+    "cyrodiil/colovian_highlands.L9.herder_logger_feud",
+    "cyrodiil/colovian_highlands.L7.guild_town",
+    "cyrodiil/colovian_highlands.L10.goblin_wars"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "chorrol",
+    "places": [
+      "chorrol",
+      "fort_empire",
+      "ayleid_well_1",
+      "ash_milegate",
+      "brindle_home",
+      "wolfbrook_vault",
+      "oblivion_gate_44",
+      "zimars_winery",
+      "redhedge_caverns",
+      "black_mere_burrow",
+      "willowwell_watchtower",
+      "fernrock_hollow",
+      "badgercrest_hole"
+    ],
+    "max_road_blocks": 600,
+    "rumour": "Every wool-factor between Chorrol and Battlehorn has dropped the Fighters Guild for a cheap broker wearing an ash-grey seal—and any shepherd who refuses wakes up to goblins in his fold.",
+    "notice": "CHORROL FIGHTERS GUILD HALL: Sellswords and investigators wanted beneath the Great Oak to look into the staged goblin raids on the Colovian wool-runs.",
+    "npc": "story_colovian_highlands_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_colovian_highlands_01_empty_board",
+      "order": 1,
+      "title": "The Empty Contract Board",
+      "region": "cyrodiil/colovian_highlands",
+      "category": "main",
+      "start": "board:chorrol",
+      "prereq": null,
+      "why": [
+        "cyrodiil/colovian_highlands.L9.guild_rivalry",
+        "cyrodiil/colovian_highlands.L7.guild_town"
+      ],
+      "places": [
+        "chorrol",
+        "battlehorn_castle"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "chorrol",
+          "objective": "Review the cancelled shepherd-escort contracts at the Chorrol Fighters Guild hall"
+        },
+        {
+          "id": 20,
+          "place": "battlehorn_castle",
+          "objective": "Inspect the burned wool-wagons outside Battlehorn Castle and question the drovers"
+        },
+        {
+          "id": 30,
+          "place": "chorrol",
+          "objective": "Bring the painted goblin-totem splinter back to the Guild steward in Chorrol"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "chorrol",
+          "text": "Review the cancelled shepherd-escort contracts at the Chorrol Fighters Guild hall"
+        },
+        {
+          "type": "go",
+          "place": "battlehorn_castle",
+          "text": "Inspect the burned wool-wagons outside Battlehorn Castle and question the drovers"
+        },
+        {
+          "type": "go",
+          "place": "chorrol",
+          "text": "Bring the painted goblin-totem splinter back to the Guild steward in Chorrol"
+        }
+      ],
+      "consequence": "world_state:chorrol_totem_bait_found",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "requires": [],
+      "consequence_detail": {
+        "world_state": "chorrol_totem_bait_found",
+        "flag": "story_ch_totem_bait_found",
+        "summary": "The goblin-totem splinter found at Battlehorn Castle is freshly cut with an Imperial carpenter's saw, proving the raids were baited."
+      }
+    },
+    {
+      "id": "story_colovian_highlands_02_totem_bait",
+      "order": 2,
+      "title": "Planted Stakes",
+      "region": "cyrodiil/colovian_highlands",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_colovian_highlands_01_empty_board",
+      "requires": [
+        "story_colovian_highlands_01_empty_board"
+      ],
+      "why": [
+        "cyrodiil/colovian_highlands.L10.goblin_wars",
+        "cyrodiil/colovian_highlands.L9.herder_logger_feud"
+      ],
+      "places": [
+        "chorrol",
+        "fort_carmala",
+        "hackdirt"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "chorrol",
+          "objective": "Follow the sawdust trail south from Chorrol toward the ridge above Fort Carmala"
+        },
+        {
+          "id": 20,
+          "place": "fort_carmala",
+          "objective": "Drive off the hired totem-planters at Fort Carmala and seize their route-map"
+        },
+        {
+          "id": 30,
+          "place": "hackdirt",
+          "objective": "Trace the wagon-ruts to the timber depot near Hackdirt"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "chorrol",
+          "text": "Follow the sawdust trail south from Chorrol toward the ridge above Fort Carmala"
+        },
+        {
+          "type": "clear",
+          "place": "fort_carmala",
+          "text": "Drive off the hired totem-planters at Fort Carmala and seize their route-map"
+        },
+        {
+          "type": "go",
+          "place": "hackdirt",
+          "text": "Trace the wagon-ruts to the timber depot near Hackdirt"
+        }
+      ],
+      "consequence": "world_state:fort_carmala_planters_routed",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "fort_carmala_planters_routed",
+        "flag": "story_ch_planters_routed",
+        "summary": "The route-map from Fort Carmala shows the raids are coordinated from a fortified counting-house at Fort Ash."
+      }
+    },
+    {
+      "id": "story_colovian_highlands_03_timber_and_fleece",
+      "order": 3,
+      "title": "The Ash-Broker's Ledger",
+      "region": "cyrodiil/colovian_highlands",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_colovian_highlands_02_totem_bait",
+      "requires": [
+        "story_colovian_highlands_02_totem_bait"
+      ],
+      "why": [
+        "cyrodiil/colovian_highlands.L9.guild_rivalry",
+        "cyrodiil/colovian_highlands.L10.ridge_keeps"
+      ],
+      "places": [
+        "hackdirt",
+        "fort_ash",
+        "chorrol"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "hackdirt",
+          "objective": "Question the teamsters outside Hackdirt about the night shipments to Fort Ash"
+        },
+        {
+          "id": 20,
+          "place": "fort_ash",
+          "objective": "Infiltrate the outer court of Fort Ash and recover the double-entry wool and mercenary ledger"
+        },
+        {
+          "id": 30,
+          "place": "chorrol",
+          "objective": "Present the ledger to Countess Valga's herald and the Fighters Guild steward in Chorrol"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "hackdirt",
+          "text": "Question the teamsters outside Hackdirt about the night shipments to Fort Ash"
+        },
+        {
+          "type": "go",
+          "place": "fort_ash",
+          "text": "Infiltrate the outer court of Fort Ash and recover the double-entry wool and mercenary ledger"
+        },
+        {
+          "type": "go",
+          "place": "chorrol",
+          "text": "Present the ledger to Countess Valga's herald and the Fighters Guild steward in Chorrol"
+        }
+      ],
+      "consequence": "world_state:ash_broker_ledger_read",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "ash_broker_ledger_read",
+        "flag": "story_ch_ledger_read",
+        "summary": "The ledger proves an Elder Council factor named Mallius Varro has been subsidising Blackwood recruiters to corner Colovian wool."
+      }
+    },
+    {
+      "id": "story_colovian_highlands_04_the_oak_assize",
+      "order": 4,
+      "title": "The Great Oak Assize",
+      "region": "cyrodiil/colovian_highlands",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_colovian_highlands_03_timber_and_fleece",
+      "requires": [
+        "story_colovian_highlands_03_timber_and_fleece"
+      ],
+      "finale": true,
+      "why": [
+        "cyrodiil/colovian_highlands.L8.oak_reverence",
+        "cyrodiil/colovian_highlands.L7.colovian_pride"
+      ],
+      "places": [
+        "fort_ash",
+        "chorrol"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "fort_ash",
+          "objective": "Storm the keep of Fort Ash and defeat Provost Mallius Varro's mercenary company"
+        },
+        {
+          "id": 20,
+          "place": "fort_ash",
+          "objective": "Recover the stolen Colovian Wool-Staple Charter and Council of Ash correspondence"
+        },
+        {
+          "id": 30,
+          "place": "chorrol",
+          "objective": "Convene the Great Oak Assize in Chorrol to restore the Fighters Guild's highland contracts"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "fort_ash",
+          "text": "Storm the keep of Fort Ash and defeat Provost Mallius Varro's mercenary company"
+        },
+        {
+          "type": "go",
+          "place": "fort_ash",
+          "text": "Recover the stolen Colovian Wool-Staple Charter and Council of Ash correspondence"
+        },
+        {
+          "type": "go",
+          "place": "chorrol",
+          "text": "Convene the Great Oak Assize in Chorrol to restore the Fighters Guild's highland contracts"
+        }
+      ],
+      "consequence": "world_state:colovian_oak_assize_restored",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of the Great Oak",
+        "unique_item": "nirncraft:steel_greatsword"
+      },
+      "consequence_detail": {
+        "world_state": "colovian_oak_assize_restored",
+        "flag": "story_ch_finale_complete",
+        "summary": "Beneath the Great Oak of Chorrol, the wool-estates and loggers sign a mutual peace and renew the Fighters Guild charter."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_colovian_highlands_hook_npc",
+      "name": "Warden of Chorrol",
+      "role": "guard",
+      "place": "chorrol",
+      "greet": "Every wool-factor between Chorrol and Battlehorn has dropped the Fighters Guild for a cheap broker wearing an ash-grey seal—and any shepherd who refuses wakes up to goblins in his fold."
+    }
+  ]
+}

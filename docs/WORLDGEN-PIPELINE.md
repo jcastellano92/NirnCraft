@@ -74,9 +74,9 @@ whiterun-rorikstead, whiterun-dragon_bridge and one river crossing; plus `reach_
   step on the corridors.
 * **P4 Vegetation masks (S10).** Tree and flora features check the road/street/pad/plot masks before placing; remove the
   clearing code paths that create floating crowns. Gate: floating vegetation within 150 blocks of the sample towns ~0.
-  *Status:* `com.skycraft.world.PlacementMask` is in (per-chunk clearance grid from structure pieces, settlement cores,
+  *Status:* `com.nirncraft.world.PlacementMask` is in (per-chunk clearance grid from structure pieces, settlement cores,
   site pads and the map road channel; trees, huge trees, ground cover, rocks, natural scatter, patches via the
-  `skycraft:placement_mask` filter). The road corridors are weak until P1: the map channel does not follow the
+  `nirncraft:placement_mask` filter). The road corridors are weak until P1: the map channel does not follow the
   planner's roads, so `roads/worldplan` must `PlacementMask.register(Source)` its baked polylines (class half width + 2).
   Paver/Canvas clearing and `OrphanSweep` stay as the safety net and as the upgrade path for old saves.
 * **P5 Streets to every door (S5). DONE** (section 7c). Settlement plans emit a street graph that reaches every door (and gate lanes that
@@ -108,9 +108,9 @@ towers and camps are not road destinations; nothing joins doors to roads. P1-P5 
 
 ## 6. P1 result: the baked road plan (S3 + S4)
 
-Package `com.skycraft.worldplan` (plus the facade `com.skycraft.roads.PlanLinks`); bake name `roadplan`
-(`skycraft/baked/roadplan.bin`, binary format version 1, 1.3 MB deflated, input-hashed by `Bake` like `landmass`; the
-bake registry is now a list of `com.skycraft.bake.Bakeable`). Loaded at server start on a background thread
+Package `com.nirncraft.worldplan` (plus the facade `com.nirncraft.roads.PlanLinks`); bake name `roadplan`
+(`nirncraft/baked/roadplan.bin`, binary format version 1, 1.3 MB deflated, input-hashed by `Bake` like `landmass`; the
+bake registry is now a list of `com.nirncraft.bake.Bakeable`). Loaded at server start on a background thread
 (`RoadPlanCommands.onAboutToStart`, ~240 ms); if the bake is stale it is planned live (~5 s, 8 threads).
 
 **How it is made** (`RoadPlanBuilder`, ~4 s for all of Nirn):
@@ -146,17 +146,17 @@ bake registry is now a list of `com.skycraft.bake.Bakeable`). Loaded at server s
 ground (mountain roads in the Velothi range and Wrothgar: switchbacks could not fit; P2 cuts/fills them); 33 junction
 pins missed by > 0.6 blocks (two pins further apart than the cap allows).
 **Seed independence:** baked on seed 2428247 (Nirn), then recomputed live under seed 7777 in `qa.ps1 -Server -Bake`:
-identical bytes (sha a01b7dbeaf23...), `skycraft-roadplan verify` likewise. Nothing in the builder takes a seed.
+identical bytes (sha a01b7dbeaf23...), `nirncraft-roadplan verify` likewise. Nothing in the builder takes a seed.
 **Query speed:** `RoadPlan.at` over 1M random Tamriel columns: 108 ns average; 1M columns within 20 blocks of a
 road (full buckets): 374 ns. Allocation-free.
 
 **Tools:** `py -3 -I tools/qa/roadplan_lint.py [--render] [--screens]` reads the baked file directly and checks every
 link's profile against its cap, every wet vertex on a bridge/culvert/ford with clearance, spans tiling segments, no
 overlap outside junctions (current: 0 errors). Renders to `tools/qa/out/roadplan/`; screens in `docs/screens/worldplan/`
-(Skyrim, Whiterun, Riverwood). Server: `/skycraft-roadplan stats|at <x> <z>|bench [millions]|verify`, autorun task
+(Skyrim, Whiterun, Riverwood). Server: `/nirncraft-roadplan stats|at <x> <z>|bench [millions]|verify`, autorun task
 `roadplan`.
 
-**API for P2/P3** (`com.skycraft.worldplan.RoadPlan`, immutable, thread-safe):
+**API for P2/P3** (`com.nirncraft.worldplan.RoadPlan`, immutable, thread-safe):
 ```java
 RoadPlan plan = RoadPlan.get();            // baked (or planned live once)
 RoadPlan.Hit hit = new RoadPlan.Hit();     // reuse one per thread
@@ -179,7 +179,7 @@ hash includes them); `qa.ps1 -Bake` fails on a stale bake.
 
 ## 7. P2 result: the terrain obeys the plan (S7)
 
-Code: `com.skycraft.worldplan.PlanGround` (new, not baked, not in the bake hash), called from
+Code: `com.nirncraft.worldplan.PlanGround` (new, not baked, not in the bake hash), called from
 `TamrielHeight.height` (the only place the surface height is computed) and `TamrielChannel` (road / overhang channels);
 `RoadPlan.bedHeight(x, z)` (one static method added to `RoadPlan`, so the bake was regenerated: same plan bytes, new
 input hash); `tools/worldgen/noise_settings.py` (two cave tweaks, `tamriel.json` regenerated). Dev tools: autorun task
@@ -213,7 +213,7 @@ generated), `tools/qa/p2_corridors.py` (corridor tiles for headless generation, 
   116k buckets, 2.06M edge entries, built in ~120 ms on the plan loader thread after the plan), deterministic, and
   independent of the seed (they only read the plan and the macro sample). Distant Horizons uses the same generator.
 
-**Numbers** (`SKYCRAFT_AUTORUN=roadterrain:30000`, Nirn seed; 30,000 columns: a third uniform over Tamriel, a third within 40
+**Numbers** (`NIRNCRAFT_AUTORUN=roadterrain:30000`, Nirn seed; 30,000 columns: a third uniform over Tamriel, a third within 40
 blocks of a road vertex, a third around pads; the height is `getBaseHeight` through the real noise router, old terrain =
 the plan switched off for that thread):
 * Plan lookup (bed + pad), per column: ~0.3 us over uniform Tamriel columns (5.6% of them shaped), 0.7-1.4 us within 20
@@ -272,7 +272,7 @@ barrier and water changes up to ~40 blocks away in marsh are expected after any 
 
 ## 7b. P3 result: roads, crossings and the network paint from the plan (S8 + S9)
 
-Code (package `com.skycraft.roads`): `RoadPaint` (the world generation feature `skycraft:road_paint`, added to every
+Code (package `com.nirncraft.roads`): `RoadPaint` (the world generation feature `nirncraft:road_paint`, added to every
 overworld biome at `top_layer_modification` by the biome modifier `z_road_paint`, so it runs after the vegetation and
 the landmarks), `RoadMask` (the plan as a `PlacementMask.Source`), `PlanRoute` (the network's polylines come from the plan);
 changed: `RoadCells`, `Paver`, `RoadNetwork`, `RoadsData`, `Road`, `RoadsConfig`, `RoadsModule`, `RoadLayout`,
@@ -315,7 +315,7 @@ street starts there.
 **Numbers** (fresh world seed 7777, roads module on, 45 tiles around the 4 corridors, the plan-based check
 `tools/qa/p3_corridors.py measure`, 1,820 centre-line points every 2 blocks outside 8 blocks of any site): gaps 0, drops > 1
 0, tree-blocked 0, unbridged 0, obstacles 0; 5 bridges and 2 culverts, all clean. On span examples regenerated with
-`/skycraft-dev regen` (7 bridges incl. 2 over dry gaps, 5 culverts, 8 stairs runs, 3 fords, 2 tunnels, 205 switchback
+`/nirncraft-dev regen` (7 bridges incl. 2 over dry gaps, 5 culverts, 8 stairs runs, 3 fords, 2 tunnels, 205 switchback
 points; 1,406 points): gaps 1 (a farm fence on a plan road), drops > 1 5 (2 farm/plan seams, 1 ford where two plan segments
 disagree by 2-3 blocks, 2 covered-bridge seams), big drops 2, unbridged 0; 176 points are covered by ground (the 173 tunnel
 points and 3 bridge points under a natural rise the macro ground did not predict). The legacy `road_measure.py` on the
@@ -323,17 +323,17 @@ same 4 corridors (1,898 points): gaps 11, drops > 1 8, tree 0, obstacle 0, unbri
 structure the road ends at (Whiterun's walls and gate, Helgen, Rorikstead's farm fields, a farm fence, a stray plant) —
 inside its settlement zone, where the grammar owns the ground (P5). `roadplan_lint` 0 errors and `reach_lint` unchanged.
 Cost: `RoadPaint` 0.19-0.22 ms per painted chunk (1,289 of ~4,500 corridor chunks); `PlacementMask` plan source ~70 us per
-chunk grid; chunk generation 24 ms per chunk with and without the painter in `/skycraft-dev regen` (difference inside noise).
+chunk grid; chunk generation 24 ms per chunk with and without the painter in `/nirncraft-dev regen` (difference inside noise).
 Screens: `docs/screens/worldplan/p3_bridge.jpg`, `p3_culvert.jpg`, `p3_switchback.jpg` (`render_town.py <world> --box x z half out`).
 Known limits: farm plots and walls (structure pieces) keep their ground where a plan road crosses them (P5); a bridge
 over a rise the macro plan did not know becomes a short covered passage; a steep tunnel is stairs.
 
 ## 7c. P5 result: streets to every door (S5)
 
-Code: package `com.skycraft.worldplan.street`: `StreetPlan` (the baked data, bake name `streetplan`, format version 1,
+Code: package `com.nirncraft.worldplan.street`: `StreetPlan` (the baked data, bake name `streetplan`, format version 1,
 queries), `StreetPlanBuilder` (the bake), `StreetTerrain` (the seed-free plan terrain), `StreetPaint` (the world
-generation feature `skycraft:street_paint`, biome modifier `zz_street_paint`, after the road painter), `StreetMask` (the
-`PlacementMask` source), `StreetPlanModule` (registration, loader thread, `/skycraft-streetplan stats|at|lint [id]|debug
+generation feature `nirncraft:street_paint`, biome modifier `zz_street_paint`, after the road painter), `StreetMask` (the
+`PlacementMask` source), `StreetPlanModule` (registration, loader thread, `/nirncraft-streetplan stats|at|lint [id]|debug
 <id> <x> <z>|trace|repaint|verify`, autorun task `streetplan`). Changed: `SettlementStructure` (named places are built
 from the baked layout; `planPlace` plans on the plan terrain), `plan/Plan` (`keepOut`, terrace seating in `resolve`, wall
 towers face the town), `plan/Terrain` (height-model constructor), `plan/Spec` (`OMIT`, `NO_BACK_DOOR`), `plan/Nets` and
@@ -403,7 +403,7 @@ vertex exactly (lint: 0 GATE/ROAD nodes off a road plan vertex); the gate lane j
 yards and houses keep 2.5 blocks off every planned road bed.
 
 **Numbers** (bake of this phase; the 24-town Skyrim sweep sample and the 4 corridors regenerated in the Nirn dev world
-with the final code, `/skycraft-dev regen`):
+with the final code, `/nirncraft-dev regen`):
 * Bake: 884 settlements, 64,564 specs (5,387 props left out, 324 buildings turned to a free side, 292 back doors not
   built), 60,263 nodes, 57,820 edges (37,707 doorstep path edges, ~150 km), 12,962 doors, 58 with no walk in the plan
   (0.45%: buildings walled in by another piece, a ruin inside a wall tower, a door two blocks under its street), 1,295
@@ -427,7 +427,7 @@ plan). Doors of landmarks, jails and towers built with `Canvas.door` (not `entra
 block wide and is not stepped with stair blocks (a one-block rise is a step). Street lines are still painted by the
 settlement's STREET pieces on the real ground.
 
-**API** (`com.skycraft.worldplan.street.StreetPlan`, immutable, thread-safe):
+**API** (`com.nirncraft.worldplan.street.StreetPlan`, immutable, thread-safe):
 ```java
 StreetPlan plan = StreetPlan.get();               // baked (or planned live once)
 StreetPlan.Hit hit = new StreetPlan.Hit();        // reuse one per thread
@@ -448,7 +448,7 @@ nClass nJoinSeg nJoinVert` (a GATE / ROAD node's road plan segment and global ve
 Both are baked like `roadplan` (seed-independent, versioned, input-hashed, loaded at start, queried allocation-free).
 P3 only needs to know that these exist; P5/P6 must not change `RoadPlan`'s format.
 
-**P5 `streetplan` (bake name `streetplan`, package `com.skycraft.worldplan.street`)**
+**P5 `streetplan` (bake name `streetplan`, package `com.nirncraft.worldplan.street`)**
 * Per settlement id: a street graph `nodes[] {id, x, z, h}` (h = pad/street height, fractional) and
   `edges[] {a, b, width, class: MAIN|LANE|ALLEY|PATH|STAIRS|BRIDGE, surface}`; every node of class GATE carries the
   `RoadPlan` segment id + vertex it joins (`join.segment`, `join.vertex`), so streets and roads meet at one cell.
@@ -461,7 +461,7 @@ P3 only needs to know that these exist; P5/P6 must not change `RoadPlan`'s forma
   plans become the authored input, the bake their resolved output).
 * Gate (P5): unreachable doors <= 1% on the Skyrim sweep sample; every GATE node joins a road plan vertex.
 
-**P6 `sceneplan` (bake name `sceneplan`, package `com.skycraft.worldplan.scene`)**
+**P6 `sceneplan` (bake name `sceneplan`, package `com.nirncraft.worldplan.scene`)**
 * A list of scenes `{id, kind, x, z, h, facing, anchor: {type: ROAD_BEND|CROSSROADS|FORD|BRIDGE_END|FARM|CAMP_SITE|
   SHRINE_SITE|BATTLE_SITE|RUIN_EDGE|DUNGEON_MOUTH|LOREWEB_CLUE, ref}, reason, props[], clue?}` produced from the road
   plan (bends, crossroads, fords, bridge ends: one wayside every 1.5-3 km of road, rarer on trails), sites (farms,
@@ -477,12 +477,12 @@ P3 only needs to know that these exist; P5/P6 must not change `RoadPlan`'s forma
 
 ## 9. P6 result: planned scenes (S6 + S11)
 
-Code: package `com.skycraft.worldplan.scene` (`ScenePlan` data + chunk index, `ScenePlanBuilder`, `SceneKinds`,
-`ScenePlanCommands`), `com.skycraft.scatter.SceneRealiser` (new); changed `scatter/Scatter`, `ScatterRules`,
+Code: package `com.nirncraft.worldplan.scene` (`ScenePlan` data + chunk index, `ScenePlanBuilder`, `SceneKinds`,
+`ScenePlanCommands`), `com.nirncraft.scatter.SceneRealiser` (new); changed `scatter/Scatter`, `ScatterRules`,
 `ScatterFeature`, `ScatterStats`, `ScatterCommands`, `scatter/rules.json` (zones natural only; new `scenes` section);
 `scatter/Waysides` deleted (the server-thread per-chunk wayside pass). Outside the package, two one-line guards:
 `landmarks/Landmarks.compute` leaves cells of human vignettes empty, `roads/Dressing.layout` returns in plan-era
-worlds. Bake: name `sceneplan` (`skycraft/baked/sceneplan.bin`, format version 1, 140 KB deflated / 636 KB raw), its
+worlds. Bake: name `sceneplan` (`nirncraft/baked/sceneplan.bin`, format version 1, 140 KB deflated / 636 KB raw), its
 classes and data files (`scatter/kinds.json`, `rules.json`, `loreweb_clues.json`, `landmarks/kinds.json`) are in the
 `Bake` input hash; loaded on a background thread at server start (17 ms; ~0.3 s live). New data:
 `scatter/loreweb_clues.json` from `tools/marquee/loreweb.json` (`py -3 -I tools/marquee/loreweb_clues.py`).
@@ -504,7 +504,7 @@ Validity everywhere: dry map ground, macro slope <= 0.9, outside every place's r
 road bed, scenes 6 blocks apart. Kinds per anchor: `rules.json` `scenes.anchors` (scatter human kinds, clusters
 expanded into member props at bake time, `lm:<builder>` = a landmark S/M vignette of that family).
 
-**Realising** (`SceneRealiser`, called first by the `skycraft:scatter` feature): for the chunk being decorated,
+**Realising** (`SceneRealiser`, called first by the `nirncraft:scatter` feature): for the chunk being decorated,
 `ScenePlan.inChunk` (a chunk -> scenes index of footprints and paths); each prop whose centre is in the chunk is built
 (scatter kinds through `Scatter.planned`: ground, slope, water, structure/road mask checks, up to 3 retries within 2
 blocks inside the chunk; vignettes through `LandmarkBuilder`; sign, note barrel), and the path columns inside the
@@ -519,13 +519,13 @@ BATTLE_SITE 171, RUIN_EDGE 152, DUNGEON_MOUTH 958, LOREWEB_CLUE 746 (12 of 758 f
 lane 0.34 (32 / 95 km; 0.25-0.71), trail 0.22 (137 / 620 km; 0.17-0.29); scenes per km² of land 9.1 (3,962 / 436 km²;
 target 5-15, i.e. one scene every ~330 blocks). Few fords and bridge ends: crossroads win the anchor choice in the
 dense network. Realisation on the dev world (6 regenerated areas, 654 chunks): 27 scene props built, 4 refused by
-the ground (2 placement mask, 1 blocked, 1 sign), 0 human props from per-chunk rolls (`/skycraft-scatter stats` line
+the ground (2 placement mask, 1 blocked, 1 sign), 0 human props from per-chunk rolls (`/nirncraft-scatter stats` line
 `scene props built ...`). Feature time 0.25 ms per chunk on average. `placement_lint.py`: 0 problems (0 human kinds
 rolled, 5/5 code guards, 0 scene errors, densities in target).
 Screens: `docs/screens/worldplan/p6_crossroads.jpg` (cairn and road sign at the Whiterun-Rorikstead crossroads),
 `p6_loreclue.jpg` (Ald Velothi clue: cairn, sign with the clue, barrel with the place's note), `p6_cemetery.jpg`
 (Whiterun's cemetery on the rise).
-**Tools:** `/skycraft-sceneplan stats|near <x> <z>|list <anchor|kind> [n]|verify`, autorun task `sceneplan`.
+**Tools:** `/nirncraft-sceneplan stats|near <x> <z>|list <anchor|kind> [n]|verify`, autorun task `sceneplan`.
 **Known limits / next:** minor sites (`explore/MinorSites`) and hidden stashes stay on their seeded cell grids (sites
 with a purpose each, not clutter; making them seed-independent is a separate step); props near a structure or in a
 dense forest can still be refused at realisation (the plan cannot see seeded trees: registering scene footprints
@@ -539,7 +539,7 @@ with far-edge opposite-side travel. Runtime tile fallback is disabled, including
 The following describes retained tools/prototype architecture; it is not active terrain or a performance
 guarantee. Old first-consumer/settlement-realization gaps remain dormant rather than production work.
 
-Code: package `com.skycraft.worldplan.tile` (`TilePlan`, `TilePlanner`, `TileSheetGenerator`, `TilePlanData`,
+Code: package `com.nirncraft.worldplan.tile` (`TilePlan`, `TilePlanner`, `TileSheetGenerator`, `TilePlanData`,
 `TilePlanCommands`); composite fallback hooks in `RoadPlan.at` / `RoadPlan.bedHeight`, `StreetPlan.at` / `StreetPlan.pad`,
 and `ScenePlan.covers` / `ScenePlan.planFor` when `!TamrielMap.inTamriel(x, z)`; Tier 0 tests in `TilePlanTest`.
 
@@ -563,7 +563,7 @@ and `ScenePlan.covers` / `ScenePlan.planFor` when `!TamrielMap.inTamriel(x, z)`;
    plot pads for each settlement; and builds a `ScenePlan` with causal `reason` citations into the tile sheet.
 4. **Off-thread execution & persistence (`TilePlanData`):** runtime queries call `TilePlanner.getIfReady(x, z)` which
    never stalls the server thread (`0 ms` stall) and schedules the tile plus its 4 cardinal neighbours on a daemon pool;
-   `TilePlan.write()`/`read()` persists compressed tile plans in `data/skycraft_tile_plans.dat` (`SavedData`) so reloaded
+   `TilePlan.write()`/`read()` persists compressed tile plans in `data/nirncraft_tile_plans.dat` (`SavedData`) so reloaded
    tiles match recomputed bytes bit-for-bit.
-5. **Tools:** `/skycraft-tile plan <tileX> <tileZ> | sheet <tileX> <tileZ> | at <x> <z> | selftest`, autorun task `tileplan`.
+5. **Tools:** `/nirncraft-tile plan <tileX> <tileZ> | sheet <tileX> <tileZ> | at <x> <z> | selftest`, autorun task `tileplan`.
 

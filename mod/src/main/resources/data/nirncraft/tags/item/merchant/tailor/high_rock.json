@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:white_wool",
+    "minecraft:blue_wool",
+    "minecraft:red_wool",
+    "minecraft:string",
+    {
+      "id": "nirncraft:hide",
+      "required": false
+    }
+  ]
+}

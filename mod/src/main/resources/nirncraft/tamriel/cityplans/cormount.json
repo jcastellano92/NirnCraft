@@ -1,0 +1,361 @@
+{
+  "id": "cormount",
+  "why": [
+    "grahtwood.L1.elden_grove_soil",
+    "grahtwood.L4.graht_grove",
+    "grahtwood.L6.elden_root_capital"
+  ],
+  "sil": "valenwood-cormount-plan",
+  "base": "none",
+  "overlay": "grahtwood",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "grahtwood",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "grahtwood",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "cormount_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        -12,
+        -37
+      ],
+      "name": "cormount_landmark",
+      "overlay": "grahtwood"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        -4
+      ],
+      "spokes": 7,
+      "r0": 14,
+      "r1": 42,
+      "wobble": 7,
+      "offset": 1.94,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        31
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          53
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          0,
+          -29
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        4
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "cormount_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        42,
+        18
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "cormount_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        12,
+        28
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "cormount_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        12,
+        44
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "cormount_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "cormount_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "cormount_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -22,
+        12
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "cormount_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "cormount_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -17,
+        -1
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "cormount_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -49,
+        -17
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "cormount_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        23,
+        -20
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "cormount_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        25,
+        -41
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "cormount_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        41,
+        -16
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "cormount_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        35,
+        38
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "cormount_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "cormount_great_tree",
+      "count": 1
+    },
+    {
+      "type": "garden",
+      "theme": "cormount_garden",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "cormount_lamps",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "cormount_b_5",
+    "store": "cormount_b_10",
+    "smithy": "cormount_b_7"
+  },
+  "titles": {
+    "cormount_b_1": "place.nirncraft.cormount Council & Seat Hall",
+    "cormount_b_2": "place.nirncraft.cormount High Sanctuary",
+    "cormount_b_3": "place.nirncraft.cormount Fighters & Wayfarers Hall",
+    "cormount_b_4": "place.nirncraft.cormount Mages & Chroniclers Spire",
+    "cormount_b_5": "place.nirncraft.cormount The Lantern & Hearth Inn",
+    "cormount_b_6": "place.nirncraft.cormount The Traveler's Rest Tavern",
+    "cormount_b_7": "place.nirncraft.cormount Master Forge & Armorer",
+    "cormount_b_8": "place.nirncraft.cormount Botanicals & Remedies",
+    "cormount_b_9": "place.nirncraft.cormount Scriptorium & Charts",
+    "cormount_b_10": "place.nirncraft.cormount Grand Provisioner & Sundries",
+    "cormount_b_11": "place.nirncraft.cormount Silk & Hide Clothier",
+    "cormount_b_12": "place.nirncraft.cormount Lapidary & Signets",
+    "cormount_b_13": "place.nirncraft.cormount Wayfarer Stables & Post",
+    "cormount_b_14": "place.nirncraft.cormount Bonded Factor Warehouse",
+    "cormount_landmark": "High Seat of place.nirncraft.cormount",
+    "cormount_plaza": "place.nirncraft.cormount Central Plaza"
+  },
+  "innKey": "cormount_b_5",
+  "zones": [
+    {
+      "at": [
+        0,
+        -21
+      ],
+      "r": 19,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        20,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 49,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

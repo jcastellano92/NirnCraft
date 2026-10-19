@@ -9,8 +9,8 @@ geometry; `camera-plan` scouts 27 nearby poses once. Captures include JSON recei
 invalidated by seed/dimension/generation changes. Reject captures made inside terrain.
 
 This is the operating guide for future AI sessions and the owner. Run from the repository root
-`F:\Projects\Personal\Skycraft\Skycraft`, not its parent folder. The owner has authorized visual testing and live
-updates in the disposable **Skycraft-26.3-autotest** Prism instance. Preserve the normal **Skycraft** instance and its saves.
+the repository root, not its parent folder. The owner has authorized visual testing and live
+updates in the disposable **NirnCraft-26.3-autotest** Prism instance. Preserve the normal **NirnCraft** instance and its saves.
 
 ## Check before launching anything
 
@@ -29,7 +29,7 @@ The client may already be running. Reuse it. Never launch a second game or a sep
 the same preview. While a command waits, give the owner progress updates; do not silently wait for minutes.
 
 Mutating `live_world.py` calls and imported `live_actions`/`submit` calls share a nonblocking OS lock at
-`<Prism data directory>/.skycraft-live.lock`, across both allowlisted native instances. The lock covers readiness
+`<Prism data directory>/.nirncraft-live.lock`, across both allowlisted native instances. The lock covers readiness
 and busy checks through action/job acknowledgement, so competing cooperative callers cannot overwrite a live
 batch. Contention reports only a sanitized tool label and PID; `status`, `storage` and `profile` remain available.
 The file persists, but the OS releases ownership after exit, process death or reboot. Never delete it or force a
@@ -49,7 +49,7 @@ py -3 tools/dev/live_world.py status
 kill Java processes. It deliberately cancels that preview's pending capture sequence. On the previous controller it
 can bootstrap shutdown only if its log confirms `Autotest live: ready`. Otherwise close the actual game window.
 `enable` changes only the disposable instance's launch flags and refuses while it runs. It adds
-`-Dskycraft.dev=world-preview -Dskycraft.preview.resources=world-preview/resources`. These are development flags;
+`-Dnirncraft.dev=world-preview -Dnirncraft.preview.resources=world-preview/resources`. These are development flags;
 do not ship them. The instance must already have the existing autotest/live/load-world flags (use
 `tools/qa/prism_autotest.ps1 -Live` to prepare a new disposable instance). `launch` clears old capture commands,
 requests Prism launch and returns; poll status for readiness. It refuses to create a duplicate Java process.
@@ -69,7 +69,7 @@ py -3 tools/dev/live_world.py regen -400 320 -273 447
 ```
 
 Reload copies the selected source JSON into an immutable snapshot beneath `.minecraft/world-preview/resources/`,
-validates JSON and hashes, atomically switches `current.json`, then executes the existing `/skycraft-dev reload`
+validates JSON and hashes, atomically switches `current.json`, then executes the existing `/nirncraft-dev reload`
 through its serialized server inbox. The packaged client reads that snapshot instead of requiring a rebuilt jar.
 The server checks every file/hash before activating the complete resource map. Other target groups retain their
 last staged snapshot within the same world session. A new boot starts a fresh snapshot so unrelated old overrides
@@ -82,7 +82,7 @@ Reloading data does **not** repaint saved chunks. `regen` regenerates the specif
 2048 blocks away so their chunk tickets can unload the area, regenerates and awaits the actual unload/generation/paving completion. The wrapper
 limits each request to 256 chunks. Stay at least one chunk inside the rectangle when judging results (decoration and
 road paving need neighbours). It leaves the player parked: return with a saved camera/dungeon-view command after
-the job completes. Use `skycraft-dev release` when finished to release regeneration tickets. Saved quest/spawn flags
+the job completes. Use `nirncraft-dev release` when finished to release regeneration tickets. Saved quest/spawn flags
 are preserved; regeneration is not a new-game simulation. Do not run this on the owner's save.
 
 City-plan/place changes can require new road/street bakes; those caches are explicitly reported as requiring a
@@ -100,16 +100,16 @@ py -3 tools/dev/live_world.py commands dist/weather-review/dungeons/preview-comm
 Example file:
 
 ```text
-execute as @p at @p run skycraft-dungeon-qa view shimmermist_cave hall
+execute as @p at @p run nirncraft-dungeon-qa view shimmermist_cave hall
 @wait 120
 effect clear @p minecraft:night_vision
-skycraft-dev status
+nirncraft-dev status
 ```
 
 Existing dungeon selectors include `entrance`, `mouth` (inside looking out), `hall`, `descent`, `boss`, `room N`,
 and `feature NAME`. They select real planned dungeon geometry; they do not repaint it. The QA view command adds
 60 seconds of Night Vision, so clear it before judging lighting. Feature searches paint in memory and may take
-seconds; wait for completion. `skycraft-dungeon-qa air-survey <ids...>` writes real room/corridor bounds and feature
+seconds; wait for completion. `nirncraft-dungeon-qa air-survey <ids...>` writes real room/corridor bounds and feature
 markers to `dungeon_qa/atmosphere-scenes.json`. A `surface_skylight` marker means an actual surface opening;
 `light_shaft` can be a sealed glowing set piece and does not prove real sunlight.
 
@@ -135,7 +135,7 @@ bake headers against the bundle manifest before preserving bakes. A stale instal
 by a verified new bundle. It refuses when neither bundle is valid. It never edits the owner's instance.
 
 To prepare a rebuilt core while the preview is still running, use `stage-core BUILT_JAR RUNTIME_BAKE_FOLDER NEW_JAR`.
-The folder is normally the disposable game's `skycraft-bake` directory after `/skycraft-bake refresh` completes.
+The folder is normally the disposable game's `nirncraft-bake` directory after `/nirncraft-bake refresh` completes.
 Staging requires identical bake-validator bytecode and packaged bake inputs in the old/new cores, matching runtime
 core identity, and a complete matching bundle. It writes a new jar and receipt without changing the running game.
 Then cleanly close, install the staged jar, verify the installed SHA256 against its receipt, and launch. If inputs
@@ -153,11 +153,11 @@ After that gate it patches the installed Complementary zip from source and reque
 client, waiting for its acknowledgement. It refuses a busy capture queue. This does not rebuild the mod or restart
 Minecraft. Check `latest.log` for shader compile errors and inspect actual frames after each material change.
 
-The existing `.minecraft/skycraft-live.txt` accepts `reload`, `shaders on|off`, `command COMMAND`,
+The existing `.minecraft/nirncraft-live.txt` accepts `reload`, `shaders on|off`, `command COMMAND`,
 `visit X Z HEIGHT_ABOVE_SURFACE YAW PITCH WEATHER`, `front X Z RADIUS WEATHER [VX VZ]`, `wait TICKS`, `capture TAG`,
 `settle TIMEOUT_TICKS`, `flash cg|c2c|ic`, `fx fire|frost|shock|holy|push`, and `stop`. Editing that file **replaces** its pending queue.
 Do not have two writers. Captures are `.minecraft/build/autotest-screenshots/TAG.png`; encoding may finish after the
-capture log. `skycraft-live-status.json` reports acknowledgement, queue and last error. An acknowledged Iris reload
+capture log. `nirncraft-live-status.json` reports acknowledgement, queue and last error. An acknowledged Iris reload
 alone does not prove that GLSL compiled successfully. Read the game log and visually inspect.
 
 `fx` triggers existing client FX with test sources; it is not proof that an enemy AI or a staff emitted the expected
@@ -179,12 +179,12 @@ py -3 tools/dev/live_world.py profile
 ```
 
 Measured build/cache trial (2026-10-17): `py -3 tools/dev/benchmark_storage.py --scratch
-E:\Skycraft-scratch\storage-benchmark --runs 2` froze identical sources on F:, discarded warm-ups, alternated cases
+E:\NirnCraft-scratch\storage-benchmark --runs 2` froze identical sources on F:, discarded warm-ups, alternated cases
 and measured full compilation/resource processing and unchanged builds. Median seconds: F: outputs/C: caches
 85.67/11.12; E: outputs/C: caches 79.40/10.83; E: outputs/E: caches 74.03/8.98. Cache seeding cost 147 seconds once.
 Raw samples/logs: `dist/weather-review/storage/benchmark.json`. Warm filesystem, two samples per case; these are
 build timings, not worldgen or GPU speedups. The optional `tools/dev/build_fast.ps1` reuses that E: cache and writes
-to `E:\Skycraft-scratch\storage-benchmark\build-main`. It restores GRADLE_USER_HOME on exit. Existing scripts still
+to `E:\NirnCraft-scratch\storage-benchmark\build-main`. It restores GRADLE_USER_HOME on exit. Existing scripts still
 default to `mod/build`; pass the fast build's jar explicitly to packaging. Do not run simultaneous Gradles.
 
 `profile` extracts actual launch/world-load durations, loaded/stale bakes and regeneration phase summaries from the
@@ -211,13 +211,13 @@ This is a proposed renderer/generator investigation, not an implemented replacem
 Research checked 2026-10-17:
 
 - [C2ME upstream](https://github.com/RelativityMC/C2ME-fabric): parallel generation, loading and I/O; its tree includes
-  density compilation/OpenCL modules. Custom generators can violate threading assumptions. Skycraft's
+  density compilation/OpenCL modules. Custom generators can violate threading assumptions. NirnCraft's
   `TamrielHeight`, `TamrielChannel` and `TamrielCaves` density functions plus terrain protection queries require an
-  explicit compatibility/parity audit; a generic GPU-noise benchmark does not prove Skycraft acceleration.
+  explicit compatibility/parity audit; a generic GPU-noise benchmark does not prove NirnCraft acceleration.
 - [Voxy official page](https://modrinth.com/mod/voxy): distant LOD rendering/conversion, OpenGL 4.6, explicit shader
   integration; the official compatibility list does not include Forge 1.20.1. Reuse architectural lessons, and test
   distant geometry generation separately from rendering. Its [source license](https://github.com/MCRcortex/voxy/blob/dev/LICENSE.md)
-  reserves redistribution; this is not permission to copy its renderer into Skycraft.
+  reserves redistribution; this is not permission to copy its renderer into NirnCraft.
 - The [unofficial Forge OpenCL port](https://github.com/udbwhdjwbdj/c2me-opencl-forge1201) describes batch biome/noise
   generation, caching and fallback, but also labels its accelerator sources as reverse-engineered research code.
   It has not been installed, benchmarked or treated as a production dependency here.
@@ -235,7 +235,7 @@ independently of fog/shader quality before claiming the reference scale is achie
 ```powershell
 # Produce and verify accepted data with the repository's existing bake/QA pipeline first.
 py -3 tools/dev/live_world.py close
-py -3 tools/dev/live_world.py upload-bakes mod/src/main/resources/skycraft/baked
+py -3 tools/dev/live_world.py upload-bakes mod/src/main/resources/nirncraft/baked
 py -3 tools/dev/live_world.py launch
 ```
 
@@ -307,6 +307,6 @@ preview_world.py verify. Selection normally closes Prism's windows before editin
 settings and overwrites external edits while open. No process is force-killed. The verifier requires the actual
 loaded-save log entry and expected seed, plus a fresh preview identity/PID. Reject frames if these disagree.
 A newly imported headless world has a fresh player: for a non-intro visual fixture explicitly execute as that
-player `skycraft-quest intro skip` in the disposable copy. Otherwise IntroFlow can legitimately return them to
+player `nirncraft-quest intro skip` in the disposable copy. Otherwise IntroFlow can legitimately return them to
 the cottage during camera settling. Retain the skipped-intro setup in the test scope; do not pretend it tests
 that opening sequence. Existing review_world is retained and selectable for normal cave regressions.

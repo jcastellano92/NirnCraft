@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/giant_lichen"
+      },
+      {
+        "model": "nirncraft:block/giant_lichen",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/giant_lichen",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/giant_lichen",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/giant_lichen_harvested"
+      },
+      {
+        "model": "nirncraft:block/giant_lichen_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/giant_lichen_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/giant_lichen_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

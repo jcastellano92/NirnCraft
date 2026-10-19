@@ -1,0 +1,94 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 3,
+        "max": 5
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:sea_serpent_scale",
+          "weight": 6,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 5
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:garnet",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:ruby",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:sapphire",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:flawless_ruby",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:flawless_diamond",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:coin_purse",
+          "weight": 3,
+          "modifier": {
+            "tag": "{gold:400L}",
+            "type": "minecraft:set_custom_data"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 2,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "nirncraft:chests/sea_wreck"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 2,
+          "value": "nirncraft:leveled/weapon"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{book:\"seas_serpent_warning\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        }
+      ],
+      "condition": {
+        "chance": 0.5,
+        "type": "minecraft:random_chance"
+      }
+    }
+  ]
+}

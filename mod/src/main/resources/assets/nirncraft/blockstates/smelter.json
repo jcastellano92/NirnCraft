@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "nirncraft:block/smelter"
+    },
+    "facing=east": {
+      "model": "nirncraft:block/smelter",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "nirncraft:block/smelter",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nirncraft:block/smelter",
+      "y": 270
+    }
+  }
+}

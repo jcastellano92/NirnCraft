@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "nirncraft:biome/juniper_checked",
+      "chance": 0.3
+    },
+    {
+      "feature": "nirncraft:biome/crooked_oak_checked",
+      "chance": 0.2
+    }
+  ],
+  "default": "nirncraft:biome/west_gash_pine_checked"
+}

@@ -1,9 +1,0 @@
-{
-  "type": "skycraft:dungeon",
-  "theme": "steps",
-  "sites": "seven_thousand_steps",
-  "biomes": "#skycraft:dungeons/anywhere",
-  "step": "surface_structures",
-  "spawn_overrides": {},
-  "terrain_adaptation": "none"
-}

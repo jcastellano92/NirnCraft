@@ -1,6 +1,6 @@
 # Minecraft 26.3 client acceptance
 
-Target: Minecraft 26.3, NeoForge 26.3.0.90, Java 25. Use the isolated `Skycraft-26.3-autotest` instance. Preserve the old 1.20.1 instances, custom Distant Horizons binaries, shaders and their patchers. Those integrations remain disabled until individually verified against this platform.
+Target: Minecraft 26.3, NeoForge 26.3.0.90, Java 25. Use the isolated `NirnCraft-26.3-autotest` instance. Preserve the old 1.20.1 instances, custom Distant Horizons binaries, shaders and their patchers. Those integrations remain disabled until individually verified against this platform.
 
 ## Verified locally during the port
 
@@ -18,7 +18,7 @@ The native full build35 passed 231 tests without failures, errors or skipped tes
 
 The first full-pack client reached its actual native graphics startup, then failed in official Sodium0.9.2's `LevelExtractorMixin`: it expects the four-argument `extractVisibleBlockEntities` overload removed by newer NeoForge26.3 patches. The owner approved official Sodium0.9.3-beta.1 (`SS023RVV`), containing [official Sodium PR3948](https://github.com/CaffeineMC/sodium/pull/3948). That artifact is now pinned; the original0.9.2 metadata and cached artifact are preserved. Iris remains1.11.7 (`Ag5S66CF`). Its unchanged native jar declares Sodium`[0.6,)`; the platform lock records the narrow, artifact/hash-bound exception to Iris's older Modrinth dependency ID. Full-pack startup and rendering with this approved pair still require actual acceptance.
 
-A separate `Skycraft-26.3-core-diagnostic` instance with build35's actual core and no third-party mods reached an integrated Tamriel world, loaded the native assets/bakes and initialized EFX reverb with two auxiliary sends. It then exposed a lazy texture upload inside the sky render pass. Source fixes are being verified through the central build and a later actual run; this attempt produced no accepted loaded-world visual comparison. The full-pack instance and dependency pins were preserved. Diagnostic results cannot establish full-pack, custom shader or Distant Horizons acceptance.
+A separate `NirnCraft-26.3-core-diagnostic` instance with build35's actual core and no third-party mods reached an integrated Tamriel world, loaded the native assets/bakes and initialized EFX reverb with two auxiliary sends. It then exposed a lazy texture upload inside the sky render pass. Source fixes are being verified through the central build and a later actual run; this attempt produced no accepted loaded-world visual comparison. The full-pack instance and dependency pins were preserved. Diagnostic results cannot establish full-pack, custom shader or Distant Horizons acceptance.
 
 Build36 passed233 tests. Its actual core diagnostic rendered the integrated world with native GPU timestamp samples and captured the character creator. That screenshot exposed spectator-state body culling in the menu snapshot; the next source checkpoint overrides only the preview state so the torso, limbs, armor and racial features can render. The real player's spectator state and invisibility effects are preserved. Recheck the full avatar visually after rebuilding.
 

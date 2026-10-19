@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:containers/shop/barracks"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:chests/village/barracks"
+}

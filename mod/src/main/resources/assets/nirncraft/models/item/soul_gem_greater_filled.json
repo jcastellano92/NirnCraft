@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "nirncraft:item/soul_gem_greater_filled"
+  }
+}

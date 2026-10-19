@@ -19,11 +19,11 @@ import tempfile
 import zipfile
 
 ROOT=pathlib.Path(__file__).resolve().parents[2]
-FOLDERS=("world0","world-1","world1","skycraftIsles","skycraftApocrypha","skycraftSoulCairn","skycraftColdharbour")
+FOLDERS=("world0","world-1","world1","nirncraftIsles","nirncraftApocrypha","nirncraftSoulCairn","nirncraftColdharbour")
 
 
 def load_patch():
-    spec=importlib.util.spec_from_file_location("skycraft_patch",pathlib.Path(__file__).with_name("patch_complementary_clouds.py"))
+    spec=importlib.util.spec_from_file_location("nirncraft_patch",pathlib.Path(__file__).with_name("patch_complementary_clouds.py"))
     patch=importlib.util.module_from_spec(spec);spec.loader.exec_module(patch);return patch
 
 
@@ -93,12 +93,12 @@ def disabled_programs(compiler,temp,properties,profile):
         stripped=line.strip()
         if re.match(r"#(?:if|ifdef|ifndef|elif|else|endif|define|undef)\b",stripped): lines.append(stripped)
         match=re.match(r"program\.([^/]+)/([^.]+)\.enabled\s*=\s*false",stripped)
-        if match: lines.append("SKYCRAFT_DISABLED_"+match[1].replace("-","_minus_")+"__"+match[2])
+        if match: lines.append("NIRNCRAFT_DISABLED_"+match[1].replace("-","_minus_")+"__"+match[2])
     target=temp/"program-policy.comp"
     target.write_text("#version 430\n"+definitions+"\n".join(lines)+"\n",encoding="utf-8")
     result=subprocess.run([str(compiler),"-E","-S","comp",str(target)],capture_output=True,text=True)
     if result.returncode: raise ValueError("Program policy preprocessing failed: "+result.stdout+result.stderr)
-    return {(folder.replace("_minus_","-"),program) for folder,program in re.findall(r"SKYCRAFT_DISABLED_(\w+)__(\w+)",result.stdout)}
+    return {(folder.replace("_minus_","-"),program) for folder,program in re.findall(r"NIRNCRAFT_DISABLED_(\w+)__(\w+)",result.stdout)}
 
 
 def compute_cases(compiler,output,temp,sources,profile,full):
@@ -139,13 +139,13 @@ def run(compiler,output,pack=None,full=False,compute_only=False):
         pack=output/"matrix-fixture.zip"
         cached=next((ROOT/"dist/.cache").glob("*ComplementaryReimagined_r5.9.3.zip"))
         shutil.copyfile(cached,pack);patch.patch_shaderpack_zip(pack)
-        solar_spec=importlib.util.spec_from_file_location("skycraft_solar_cleanup",pathlib.Path(__file__).with_name("patch_sun_horizon.py"))
+        solar_spec=importlib.util.spec_from_file_location("nirncraft_solar_cleanup",pathlib.Path(__file__).with_name("patch_sun_horizon.py"))
         solar=importlib.util.module_from_spec(solar_spec);solar_spec.loader.exec_module(solar)
         solar.patch_zip(pack,pack)
     sources=Sources(pack)
     profile=dict(line.split("=",1) for line in patch.SHADER_TXT_CONTENT.splitlines() if "=" in line and not line.startswith("#"))
     results=[]
-    with tempfile.TemporaryDirectory(prefix="skycraft-glsl-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="nirncraft-glsl-") as temporary:
         temp=pathlib.Path(temporary)
         for folder in (() if compute_only else FOLDERS):
             for quality in ((1,2,3) if full else (2,)):

@@ -1,4 +1,4 @@
-// aether_core tests: SVDAG round trips, sharing, the C ABI, and CPU/Vulkan kernel parity on preview terrain.
+// atlas_core tests: SVDAG round trips, sharing, the C ABI, and CPU/Vulkan kernel parity on preview terrain.
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -13,12 +13,12 @@
 #include <string>
 #include <vector>
 
-#include "aether/aether.h"
+#include "atlas/atlas.h"
 #include "camera.hpp"
 #include "svdag.hpp"
 #include "parallel.hpp"
 
-using namespace aether;
+using namespace atlas;
 
 static int failures = 0;
 #define CHECK(c)                                                              \
@@ -106,22 +106,22 @@ static void testSvdag() {
 
 static void testAbi() {
     std::printf("c abi\n");
-    CHECK(aether_abi_version() == AETHER_ABI_VERSION);
-    std::printf("  %s\n", aether_build_info());
-    AetherContext* ctx = nullptr;
-    CHECK(aether_create(AETHER_BACKEND_CPU, &ctx) == AETHER_OK);
-    CHECK(aether_render(ctx, nullptr, nullptr) == AETHER_ERR_ARG);
+    CHECK(atlas_abi_version() == ATLAS_ABI_VERSION);
+    std::printf("  %s\n", atlas_build_info());
+    AtlasContext* ctx = nullptr;
+    CHECK(atlas_create(ATLAS_BACKEND_CPU, &ctx) == ATLAS_OK);
+    CHECK(atlas_render(ctx, nullptr, nullptr) == ATLAS_ERR_ARG);
     // a flat synthetic tile at lod 0 around the origin, rendered looking down: every pixel must hit at the expected depth
     std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
     std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
     for (int tz = -2; tz <= 2; tz++)
         for (int tx = -2; tx <= 2; tx++) {
-            AetherColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-            CHECK(aether_upload_column_tile(ctx, &t) == AETHER_OK);
+            AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            CHECK(atlas_upload_column_tile(ctx, &t) == ATLAS_OK);
         }
     double centre[3] = {10.5, 140.0, 10.5};
-    CHECK(aether_update(ctx, centre, 0) == AETHER_OK);
-    AetherFrame f{};
+    CHECK(atlas_update(ctx, centre, 0) == ATLAS_OK);
+    AtlasFrame f{};
     f.cameraPos[0] = 10.5;
     f.cameraPos[1] = 140.0;
     f.cameraPos[2] = 10.5;
@@ -135,8 +135,8 @@ static void testAbi() {
     f.lodBias = 1;
     std::vector<float> depth(64 * 64);
     std::vector<uint32_t> color(64 * 64);
-    AetherFrameOutput o{color.data(), nullptr, depth.data()};
-    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    AtlasFrameOutput o{color.data(), nullptr, depth.data()};
+    CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
     // surface 100 means voxels with centre < 100 are solid: the top face is y = 100, 40 blocks below the camera
     double worst = 0;
     for (int py = 0; py < 64; py++)
@@ -152,7 +152,7 @@ static void testAbi() {
     // grazing rays: camera on integer coordinates, so whole pixel columns run inside region boundary planes
     // (regression: these used to stall on the boundary and see through the ground)
     for (double yaw : {0.0, 90.0, 180.0, 270.0}) {
-        AetherFrame g = f;
+        AtlasFrame g = f;
         g.cameraPos[0] = 0.0;
         g.cameraPos[1] = 140.0;
         g.cameraPos[2] = 0.0;
@@ -160,8 +160,8 @@ static void testAbi() {
         g.height = 64;
         cameraMatrix(yaw, -25, 60, 1.5, g.invViewProj);
         std::vector<float> dg(96 * 64);
-        AetherFrameOutput og{nullptr, nullptr, dg.data()};
-        CHECK(aether_render(ctx, &g, &og) == AETHER_OK);
+        AtlasFrameOutput og{nullptr, nullptr, dg.data()};
+        CHECK(atlas_render(ctx, &g, &og) == ATLAS_OK);
         double worstG = 0;
         for (int py = 0; py < 64; py++)
             for (int px = 0; px < 96; px++) {
@@ -178,29 +178,29 @@ static void testAbi() {
         std::printf("  grazing yaw %3.0f: worst depth error %.4f blocks\n", yaw, worstG);
         CHECK(worstG < 0.02);
     }
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
 }
 
 // A ray must cross a stretch no LOD has loaded yet and still hit land streamed in behind it.
 static void testStreamingGap() {
     std::printf("streaming gap\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
     std::vector<float> flat(256 * 256, 100.0f), wall(256 * 256, 300.0f), water(256 * 256, NAN);
     std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
     // LOD 0 around the camera, then nothing until LOD 2 tile x = 2 (blocks 2048..3071), which is a 300-high wall
     for (int tz = -2; tz <= 2; tz++)
         for (int tx = -2; tx <= 2; tx++) {
-            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-            aether_upload_column_tile(ctx, &t);
+            AtlasColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
         }
     for (int tz = -2; tz <= 2; tz++) {
-        AetherColumnTile t{2, 2, tz, wall.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-        aether_upload_column_tile(ctx, &t);
+        AtlasColumnTile t{2, 2, tz, wall.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+        atlas_upload_column_tile(ctx, &t);
     }
     double centre[3] = {0.5, 140.0, 0.5};
-    aether_update(ctx, centre, 0);
-    AetherFrame f{};
+    atlas_update(ctx, centre, 0);
+    AtlasFrame f{};
     f.cameraPos[0] = 0.5;
     f.cameraPos[1] = 140.0;
     f.cameraPos[2] = 0.5;
@@ -211,14 +211,14 @@ static void testStreamingGap() {
     f.sunDir[1] = 1;
     f.lodBias = 1;
     std::vector<float> depth(32 * 32);
-    AetherFrameOutput o{nullptr, nullptr, depth.data()};
-    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    AtlasFrameOutput o{nullptr, nullptr, depth.data()};
+    CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
     float d = depth[16 * 32 + 16];
     std::printf("  centre pixel depth %.1f (wall face at 2047.5)\n", d);
     CHECK(std::abs(d - 2047.5f) < 8.0f);
-    AetherStats st{};
-    aether_get_stats(ctx, &st);
-    aether_destroy(ctx);
+    AtlasStats st{};
+    atlas_get_stats(ctx, &st);
+    atlas_destroy(ctx);
 }
 
 // Four zones along one ray east at y 140: A populated air (LOD 0, x 0..255), B unloaded at every LOD (256..511),
@@ -226,8 +226,8 @@ static void testStreamingGap() {
 // brick-sized stepping through B and LOD thrashing in C (either would exhaust the segment budget or miss D).
 static void testFourZones() {
     std::printf("four-zone ray\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
     std::vector<float> flat(256 * 256, 100.0f), withWall(256 * 256, 100.0f), water(256 * 256, NAN);
     for (int j = 0; j < 256; j++)
         for (int i = 188; i < 256; i++) withWall[size_t(j) * 256 + i] = 300.0f;  // x >= 512 + 188 = 700
@@ -235,12 +235,12 @@ static void testFourZones() {
     for (int tz = -2; tz <= 2; tz++)
         for (int tx = -2; tx <= 2; tx++) {
             if (tx == 1) continue;  // zone B: no tile at any LOD
-            AetherColumnTile t{0, tx, tz, tx == 2 ? withWall.data() : flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-            aether_upload_column_tile(ctx, &t);
+            AtlasColumnTile t{0, tx, tz, tx == 2 ? withWall.data() : flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
         }
     double centre[3] = {0.5, 140.0, 0.5};
-    aether_update(ctx, centre, 0);
-    AetherFrame f{};
+    atlas_update(ctx, centre, 0);
+    AtlasFrame f{};
     f.cameraPos[0] = 0.5;
     f.cameraPos[1] = 140.0;
     f.cameraPos[2] = 0.5;
@@ -251,12 +251,12 @@ static void testFourZones() {
     f.sunDir[1] = 1;
     f.lodBias = 1;
     std::vector<float> depth(32 * 32);
-    AetherFrameOutput o{nullptr, nullptr, depth.data()};
-    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    AtlasFrameOutput o{nullptr, nullptr, depth.data()};
+    CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
     float d = depth[16 * 32 + 16];
     std::printf("  centre pixel depth %.1f (wall face at 699.5)\n", d);
     CHECK(std::abs(d - 699.5f) < 1.0f);
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
 }
 
 // A slope crossing a vertical region boundary (LOD 0 regions span y -64 + 256k), seen from far enough that normals
@@ -268,26 +268,26 @@ static void testRegionSeam() {
     std::printf("vertical region seam\n");
     struct Case { float boundary, base, flat, camY, pitch; };
     for (Case cs : {Case{448, 300, 280, 430, 2}, Case{192, 100, 90, 210.4f, -4}})
-    for (AetherBackend backend : {AETHER_BACKEND_CPU, AETHER_BACKEND_VULKAN}) {
+    for (AtlasBackend backend : {ATLAS_BACKEND_CPU, ATLAS_BACKEND_VULKAN}) {
         std::vector<float> ramp(256 * 256), flat(256 * 256, cs.flat), water(256 * 256, NAN);
         for (int j = 0; j < 256; j++)
             for (int i = 0; i < 256; i++) ramp[size_t(j) * 256 + i] = cs.base + 0.8f * float(i);
         std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
-        AetherContext* ctx = nullptr;
-        if (aether_create(backend, &ctx) != AETHER_OK) {
+        AtlasContext* ctx = nullptr;
+        if (atlas_create(backend, &ctx) != ATLAS_OK) {
             std::printf("  SKIP: no Vulkan\n");
             continue;
         }
         for (int tz = -1; tz <= 1; tz++)
             for (int tx = -3; tx <= 1; tx++) {
-                AetherColumnTile t{0, tx, tz, tx == 0 ? ramp.data() : flat.data(), water.data(), top.data(), fill.data(),
+                AtlasColumnTile t{0, tx, tz, tx == 0 ? ramp.data() : flat.data(), water.data(), top.data(), fill.data(),
                                    nullptr, nullptr};
-                aether_upload_column_tile(ctx, &t);
+                atlas_upload_column_tile(ctx, &t);
             }
         const uint32_t W = 160, H = 160;
         double centre[3] = {-500.5, cs.camY, 128.5};
-        aether_update(ctx, centre, 0);
-        AetherFrame f{};
+        atlas_update(ctx, centre, 0);
+        AtlasFrame f{};
         for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
         f.width = W;
         f.height = H;
@@ -297,8 +297,8 @@ static void testRegionSeam() {
         f.lodBias = 1;
         std::vector<uint32_t> normal(W * H);
         std::vector<float> depth(W * H);
-        AetherFrameOutput o{nullptr, normal.data(), depth.data(), nullptr};
-        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        AtlasFrameOutput o{nullptr, normal.data(), depth.data(), nullptr};
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
         // mean normal.y of the hits per 2-block band of world height
         double sum[64] = {}, cnt[64] = {};
         for (uint32_t py = 0; py < H; py++)
@@ -331,19 +331,19 @@ static void testRegionSeam() {
         }
         rest /= std::max(1.0, nRest);
         std::printf("  boundary %.0f, %s: mean normal.y %.2f at the boundary, %.2f elsewhere\n", cs.boundary,
-                    backend == AETHER_BACKEND_CPU ? "cpu   " : "vulkan", seam, rest);
+                    backend == ATLAS_BACKEND_CPU ? "cpu   " : "vulkan", seam, rest);
         CHECK(cnt[32] >= 20 && cnt[31] >= 20);
         CHECK(std::abs(seam - rest) < 0.15);
-        aether_destroy(ctx);
+        atlas_destroy(ctx);
     }
 }
 
-// Buildings over a tile (aether_upload_column_structures): a 12 x 12 house, walls to 110 and a roof to 114 on ground at
+// Buildings over a tile (atlas_upload_column_structures): a 12 x 12 house, walls to 110 and a roof to 114 on ground at
 // 100, seen from straight above; it survives the ground being re-uploaded (a refined tile) and goes when removed.
 static void testStructures() {
     std::printf("structures\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
     const size_t N = 256 * 256;
     std::vector<float> ground(N, 100.0f), water(N, NAN), wall(N, NAN), roof(N, NAN);
     std::vector<uint16_t> top(N, 2), fill(N, 3), wallMat(N, 0), roofMat(N, 0);
@@ -355,21 +355,21 @@ static void testStructures() {
             wallMat[c] = 40;
             roofMat[c] = 41;
         }
-    AetherMaterial extra[2] = {{{0.8f, 0.78f, 0.7f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN},
-                               {{0.5f, 0.12f, 0.08f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN}};
-    CHECK(aether_set_materials(ctx, 40, extra, 2) == AETHER_OK);
-    CHECK(aether_set_materials(ctx, 0, extra, 1) == AETHER_ERR_ARG);
+    AtlasMaterial extra[2] = {{{0.8f, 0.78f, 0.7f}, 0.9f, 0.0f, ATLAS_CLASS_TERRAIN},
+                               {{0.5f, 0.12f, 0.08f}, 0.9f, 0.0f, ATLAS_CLASS_TERRAIN}};
+    CHECK(atlas_set_materials(ctx, 40, extra, 2) == ATLAS_OK);
+    CHECK(atlas_set_materials(ctx, 0, extra, 1) == ATLAS_ERR_ARG);
     // the buildings first, then the ground: they attach when it arrives
-    CHECK(aether_upload_column_structures(ctx, 0, 0, 0, wall.data(), roof.data(), wallMat.data(), roofMat.data()) == AETHER_OK);
+    CHECK(atlas_upload_column_structures(ctx, 0, 0, 0, wall.data(), roof.data(), wallMat.data(), roofMat.data()) == ATLAS_OK);
     for (int tz = -1; tz <= 1; tz++)
         for (int tx = -1; tx <= 1; tx++) {
-            AetherColumnTile t{0, tx, tz, ground.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-            aether_upload_column_tile(ctx, &t);
+            AtlasColumnTile t{0, tx, tz, ground.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
         }
     auto centreDepth = [&](float* edgeOut) {
         double centre[3] = {128.0, 160.0, 128.0};
-        aether_update(ctx, centre, 0);
-        AetherFrame f{};
+        atlas_update(ctx, centre, 0);
+        AtlasFrame f{};
         for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
         f.width = f.height = 33;
         cameraMatrix(0, -89.9, 20, 1.0, f.invViewProj);
@@ -377,8 +377,8 @@ static void testStructures() {
         f.sunDir[1] = 1;
         f.lodBias = 1;
         std::vector<float> depth(33 * 33);
-        AetherFrameOutput o{nullptr, nullptr, depth.data(), nullptr};
-        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        AtlasFrameOutput o{nullptr, nullptr, depth.data(), nullptr};
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
         if (edgeOut) *edgeOut = depth[0];
         return depth[16 * 33 + 16];
     };
@@ -387,19 +387,19 @@ static void testStructures() {
     CHECK(std::abs(d - 46.0f) < 1.5f);
     // the ground refined: the house stays
     std::vector<float> ground2(N, 101.0f);
-    AetherColumnTile t2{0, 0, 0, ground2.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-    aether_upload_column_tile(ctx, &t2);
+    AtlasColumnTile t2{0, 0, 0, ground2.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+    atlas_upload_column_tile(ctx, &t2);
     float d2 = centreDepth(nullptr);
     CHECK(std::abs(d2 - 46.0f) < 1.5f);
     // removed: the ground (101) shows through
-    CHECK(aether_upload_column_structures(ctx, 0, 0, 0, nullptr, nullptr, nullptr, nullptr) == AETHER_OK);
+    CHECK(atlas_upload_column_structures(ctx, 0, 0, 0, nullptr, nullptr, nullptr, nullptr) == ATLAS_OK);
     float d3 = centreDepth(nullptr);
     std::printf("  after a ground refine %.2f; removed %.2f (ground at 59)\n", d2, d3);
     CHECK(std::abs(d3 - 59.0f) < 1.5f);
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
 }
 
-// The sun map (aether_set_sun_map): a 200-block pillar on flat ground, the sun 30 degrees up in the east. Decoded
+// The sun map (atlas_set_sun_map): a 200-block pillar on flat ground, the sun 30 degrees up in the east. Decoded
 // as a shader pack would (parameter row only): the ground in the pillar's shadow is behind an occluder, open ground
 // and the pillar's top are not; CPU and Vulkan agree.
 static bool sunLit(const std::vector<float>& m, uint32_t S, const double p[3]) {
@@ -423,9 +423,9 @@ static void testSunMap() {
     std::vector<float> maps[2];
     const uint32_t S = 256;
     int b = 0;
-    for (AetherBackend backend : {AETHER_BACKEND_CPU, AETHER_BACKEND_VULKAN}) {
-        AetherContext* ctx = nullptr;
-        if (aether_create(backend, &ctx) != AETHER_OK) {
+    for (AtlasBackend backend : {ATLAS_BACKEND_CPU, ATLAS_BACKEND_VULKAN}) {
+        AtlasContext* ctx = nullptr;
+        if (atlas_create(backend, &ctx) != ATLAS_OK) {
             std::printf("  SKIP: no Vulkan\n");
             continue;
         }
@@ -442,15 +442,15 @@ static void testSunMap() {
                             for (int ii = c - r; ii < c + r; ii++) s[size_t(jj) * 256 + ii] = 300.0f;
                     }
                     (void)span;
-                    AetherColumnTile t{lod, tx, tz, p ? pillar.data() : s.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-                    aether_upload_column_tile(ctx, &t);
+                    AtlasColumnTile t{lod, tx, tz, p ? pillar.data() : s.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+                    atlas_upload_column_tile(ctx, &t);
                 }
         }
-        CHECK(aether_set_sun_map(ctx, S, 512.0f) == AETHER_OK);
-        CHECK(aether_set_sun_map(ctx, 32, 512.0f) == AETHER_ERR_ARG);
+        CHECK(atlas_set_sun_map(ctx, S, 512.0f) == ATLAS_OK);
+        CHECK(atlas_set_sun_map(ctx, 32, 512.0f) == ATLAS_ERR_ARG);
         double centre[3] = {128.5, 160.0, 128.5};
-        aether_update(ctx, centre, 0);
-        AetherFrame f{};
+        atlas_update(ctx, centre, 0);
+        AtlasFrame f{};
         for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
         f.width = f.height = 16;
         cameraMatrix(0, -10, 60, 1.0, f.invViewProj);
@@ -459,19 +459,19 @@ static void testSunMap() {
         f.sunDir[0] = float(std::cos(el));
         f.sunDir[1] = float(std::sin(el));
         f.lodBias = 1;
-        AetherFrameOutput o{};
-        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        AtlasFrameOutput o{};
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
         maps[b].resize(size_t(S) * (S + 1) * 2);
-        CHECK(aether_read_sun_map(ctx, maps[b].data(), uint32_t(maps[b].size())) == AETHER_OK);
+        CHECK(atlas_read_sun_map(ctx, maps[b].data(), uint32_t(maps[b].size())) == ATLAS_OK);
         const auto& m = maps[b];
         double behind[3] = {128 - 80.0, 100.5, 128}, open[3] = {128 + 150.0, 100.5, 128 + 150.0}, crest[3] = {128, 300.5, 128};
-        std::printf("  %s: behind the pillar %s, open ground %s, its top %s\n", backend == AETHER_BACKEND_CPU ? "cpu   " : "vulkan",
+        std::printf("  %s: behind the pillar %s, open ground %s, its top %s\n", backend == ATLAS_BACKEND_CPU ? "cpu   " : "vulkan",
                     sunLit(m, S, behind) ? "lit" : "shadowed", sunLit(m, S, open) ? "lit" : "shadowed", sunLit(m, S, crest) ? "lit" : "shadowed");
         CHECK(!sunLit(m, S, behind));
         CHECK(sunLit(m, S, open));
         CHECK(sunLit(m, S, crest));
         b++;
-        aether_destroy(ctx);
+        atlas_destroy(ctx);
     }
     if (b == 2) {
         size_t off = 0;
@@ -487,18 +487,18 @@ static void testSunMap() {
 // A far actor on flat ground: the ray must hit its body at the analytic distance, in front of the terrain.
 static void testActors() {
     std::printf("far actors\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
     std::vector<float> flat(256 * 256, 100.0f), water(256 * 256, NAN);
     std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
     for (int tz = -2; tz <= 2; tz++)
         for (int tx = -2; tx <= 2; tx++) {
-            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-            aether_upload_column_tile(ctx, &t);
+            AtlasColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
         }
     double centre[3] = {0.5, 101.0, 0.5};
-    aether_update(ctx, centre, 0);
-    AetherActor a{};
+    atlas_update(ctx, centre, 0);
+    AtlasActor a{};
     a.pos[0] = 200.5;
     a.pos[1] = 100.0;
     a.pos[2] = 0.5;
@@ -506,8 +506,8 @@ static void testActors() {
     a.radius = 0.35f;
     a.kind = 0;
     a.tint = 0xFF3050C0u;
-    CHECK(aether_set_actors(ctx, &a, 1) == AETHER_OK);
-    AetherFrame f{};
+    CHECK(atlas_set_actors(ctx, &a, 1) == ATLAS_OK);
+    AtlasFrame f{};
     f.cameraPos[0] = 0.5;
     f.cameraPos[1] = 101.0;
     f.cameraPos[2] = 0.5;
@@ -518,20 +518,20 @@ static void testActors() {
     f.planetRadius = 0;
     f.sunDir[1] = 1;
     f.lodBias = 1;
-    f.flags = AETHER_FRAME_ACTORS;
+    f.flags = ATLAS_FRAME_ACTORS;
     std::vector<float> depth(33 * 33);
     std::vector<uint32_t> normal(33 * 33);
-    AetherFrameOutput o{nullptr, normal.data(), depth.data(), nullptr};
-    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    AtlasFrameOutput o{nullptr, normal.data(), depth.data(), nullptr};
+    CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
     float d = depth[16 * 33 + 16];
     uint32_t cls = (normal[16 * 33 + 16] >> 16) & 255;
     std::printf("  centre pixel depth %.3f (capsule front at 199.65), class %u\n", d, cls);
     CHECK(std::abs(d - 199.65f) < 0.02f);
     CHECK(cls == 4);
     f.flags = 0;  // actors off: the same ray goes on to the far ground (level ray: no hit at all here)
-    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
     CHECK(depth[16 * 33 + 16] > 1e29f);
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
 }
 
 // Refinement fades: a tile replaced while resident dissolves from the old ground to the new one over the fade time,
@@ -539,17 +539,17 @@ static void testActors() {
 // Then LOD dither: a flat plane looks the same at every level, so depth must not change while the level map does.
 static void testTransitions() {
     std::printf("refinement fades and LOD dither\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
-    CHECK(aether_set_transitions(ctx, -1.0f) == AETHER_ERR_ARG);
-    CHECK(aether_set_transitions(ctx, 2.0f) == AETHER_OK);  // long enough that a loaded machine still catches its start
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
+    CHECK(atlas_set_transitions(ctx, -1.0f) == ATLAS_ERR_ARG);
+    CHECK(atlas_set_transitions(ctx, 2.0f) == ATLAS_OK);  // long enough that a loaded machine still catches its start
     std::vector<float> low(256 * 256, 100.0f), high(256 * 256, 110.0f), water(256 * 256, NAN);
     std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
     auto upload = [&](std::vector<float>& h, int lod) {
         for (int tz = -2; tz <= 2; tz++)
             for (int tx = -2; tx <= 2; tx++) {
-                AetherColumnTile t{lod, tx, tz, h.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-                aether_upload_column_tile(ctx, &t);
+                AtlasColumnTile t{lod, tx, tz, h.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+                atlas_upload_column_tile(ctx, &t);
             }
     };
     auto sleepMs = [](int ms) {
@@ -558,10 +558,10 @@ static void testTransitions() {
     };
     upload(low, 0);
     double centre[3] = {10.5, 140.0, 10.5};
-    aether_update(ctx, centre, 0);
+    atlas_update(ctx, centre, 0);
     sleepMs(2100);
-    aether_update(ctx, centre, 0);  // the first window's own fade-in is over (and dropped)
-    AetherFrame f{};
+    atlas_update(ctx, centre, 0);  // the first window's own fade-in is over (and dropped)
+    AtlasFrame f{};
     f.cameraPos[0] = 10.5;
     f.cameraPos[1] = 140.0;
     f.cameraPos[2] = 10.5;
@@ -573,9 +573,9 @@ static void testTransitions() {
     f.sunDir[1] = 1;
     f.lodBias = 1;
     std::vector<float> depth(64 * 64);
-    AetherFrameOutput o{nullptr, nullptr, depth.data()};
+    AtlasFrameOutput o{nullptr, nullptr, depth.data()};
     auto newShare = [&] {
-        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
         size_t n = 0;
         for (size_t i = 0; i < depth.size(); i++) {
             float nx = (float(i % 64) + 0.5f) / 64 * 2 - 1, ny = 1 - (float(i / 64) + 0.5f) / 64 * 2;
@@ -586,35 +586,35 @@ static void testTransitions() {
     };
     double before = newShare();
     upload(high, 0);
-    aether_update(ctx, centre, 0);
+    atlas_update(ctx, centre, 0);
     double start = newShare();
     sleepMs(2100);
-    aether_update(ctx, centre, 0);
+    atlas_update(ctx, centre, 0);
     double end = newShare();
     std::printf("  new ground: %.0f%% before the swap, %.0f%% right after it, %.0f%% after the fade\n", 100 * before,
                 100 * start, 100 * end);
     CHECK(before == 0.0);
     CHECK(start < 0.5);
     CHECK(end == 1.0);
-    aether_set_transitions(ctx, 0.0f);  // fades off: the swap is immediate
+    atlas_set_transitions(ctx, 0.0f);  // fades off: the swap is immediate
     upload(low, 0);
-    aether_update(ctx, centre, 0);
+    atlas_update(ctx, centre, 0);
     CHECK(newShare() == 0.0);
 
     for (int lod = 1; lod < 3; lod++) upload(low, lod);  // (y 100 is a face at LODs 0-2: 2^lod divides 164)
-    aether_update(ctx, centre, 0);
-    AetherFrame g = f;
+    atlas_update(ctx, centre, 0);
+    AtlasFrame g = f;
     g.width = 160;
     g.height = 90;
     cameraMatrix(90, -4, 70, 160.0 / 90.0, g.invViewProj);
     g.maxDistance = 6000;
-    g.flags = AETHER_FRAME_DEBUG_LOD;
+    g.flags = ATLAS_FRAME_DEBUG_LOD;
     std::vector<float> d0(160 * 90), d1(160 * 90);
     std::vector<uint32_t> c0(160 * 90), c1(160 * 90);
-    AetherFrameOutput o0{c0.data(), nullptr, d0.data()}, o1{c1.data(), nullptr, d1.data()};
-    CHECK(aether_render(ctx, &g, &o0) == AETHER_OK);
-    g.flags |= AETHER_FRAME_LOD_DITHER;
-    CHECK(aether_render(ctx, &g, &o1) == AETHER_OK);
+    AtlasFrameOutput o0{c0.data(), nullptr, d0.data()}, o1{c1.data(), nullptr, d1.data()};
+    CHECK(atlas_render(ctx, &g, &o0) == ATLAS_OK);
+    g.flags |= ATLAS_FRAME_LOD_DITHER;
+    CHECK(atlas_render(ctx, &g, &o1) == ATLAS_OK);
     size_t hits = 0, depthOff = 0, lodChanged = 0;
     for (size_t i = 0; i < d0.size(); i++) {
         if (d0[i] > 1e29f) continue;
@@ -626,27 +626,27 @@ static void testTransitions() {
     CHECK(hits > 1000);
     CHECK(lodChanged > 0 && lodChanged < hits / 3);
     CHECK(depthOff < hits / 200 + 2);
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
 }
 
 // Far lights: a lantern 600 blocks out glows at night (a bright core at its pixel, nothing far from it), is gone by day,
 // and a wall between it and the camera hides it; fires stay lit by day.
 static void testLights() {
     std::printf("far lights\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
     std::vector<float> flat(256 * 256, 100.0f), water(256 * 256, NAN);
     std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
     for (int tz = -2; tz <= 2; tz++)
         for (int tx = -2; tx <= 2; tx++) {
-            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-            aether_upload_column_tile(ctx, &t);
+            AtlasColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
         }
     double centre[3] = {0.5, 104.0, 0.5};
-    aether_update(ctx, centre, 0);
-    AetherLight l{{600.5, 103.0, 0.5}, 1.0f, 1.0f, 0x40A0FFu, AETHER_LIGHT_NIGHT};
-    CHECK(aether_set_light_group(ctx, 7, &l, 1) == AETHER_OK);
-    AetherFrame f{};
+    atlas_update(ctx, centre, 0);
+    AtlasLight l{{600.5, 103.0, 0.5}, 1.0f, 1.0f, 0x40A0FFu, ATLAS_LIGHT_NIGHT};
+    CHECK(atlas_set_light_group(ctx, 7, &l, 1) == ATLAS_OK);
+    AtlasFrame f{};
     f.cameraPos[0] = 0.5;
     f.cameraPos[1] = 104.0;
     f.cameraPos[2] = 0.5;
@@ -655,9 +655,9 @@ static void testLights() {
     f.maxDistance = 2000;
     f.planetRadius = 0;
     f.lodBias = 1;
-    f.flags = AETHER_FRAME_ATMOS;
+    f.flags = ATLAS_FRAME_ATMOS;
     std::vector<float> lin(65 * 65 * 4);
-    AetherFrameOutput o{nullptr, nullptr, nullptr, lin.data()};
+    AtlasFrameOutput o{nullptr, nullptr, nullptr, lin.data()};
     auto lum = [&](int x, int y) {
         const float* p = &lin[(size_t(y) * 65 + x) * 4];
         return p[0] + p[1] + p[2];
@@ -667,7 +667,7 @@ static void testLights() {
         f.sunDir[1] = sunY;
         f.sunDir[2] = std::sqrt(1 - sunY * sunY);
         cameraMatrix(90, 0, 6, 1.0, f.invViewProj);  // east, level, narrow
-        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
     };
     // where the light falls on screen: the brightest pixel
     shoot(-0.5f);
@@ -686,27 +686,27 @@ static void testLights() {
     std::vector<float> wall = flat;
     for (int z = 0; z < 256; z++)
         for (int x = 44; x < 48; x++) wall[size_t(z) * 256 + x] = 140.0f;
-    AetherColumnTile t{0, 1, 0, wall.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-    aether_upload_column_tile(ctx, &t);
-    AetherColumnTile t2{0, 1, -1, wall.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-    aether_upload_column_tile(ctx, &t2);
-    aether_update(ctx, centre, 0);
+    AtlasColumnTile t{0, 1, 0, wall.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+    atlas_upload_column_tile(ctx, &t);
+    AtlasColumnTile t2{0, 1, -1, wall.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+    atlas_upload_column_tile(ctx, &t2);
+    atlas_update(ctx, centre, 0);
     shoot(-0.5f);
     float hidden = lum(bx, by);
     std::printf("  behind a wall: %.4f\n", hidden);
     CHECK(hidden < nightCore * 0.05f);
     // a fire stays lit by day (dimmer against the bright day it is drawn over, but there)
-    l.kind = AETHER_LIGHT_FIRE;
+    l.kind = ATLAS_LIGHT_FIRE;
     l.pos[1] = 160.0;  // above the wall
-    aether_set_light_group(ctx, 7, &l, 1);
+    atlas_set_light_group(ctx, 7, &l, 1);
     shoot(0.6f);
     float fire = 0;
     for (int y = 0; y < 65; y++)
         for (int x = 0; x < 65; x++) fire = std::max(fire, lum(x, y));
     std::printf("  a fire by day: core %.3f\n", fire);
     CHECK(fire > 0.2f);
-    CHECK(aether_set_light_group(ctx, 7, nullptr, 0) == AETHER_OK);
-    aether_destroy(ctx);
+    CHECK(atlas_set_light_group(ctx, 7, nullptr, 0) == ATLAS_OK);
+    atlas_destroy(ctx);
 }
 
 // A humanoid impostor is a lit silhouette, never a filled dark rectangle: its pixels cover a humanoid share of their
@@ -715,18 +715,18 @@ static void testLights() {
 // a dissolve over the first 16 blocks past it.
 static void testImpostorShape() {
     std::printf("humanoid impostor shape\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
     std::vector<float> flat(256 * 256, 100.0f), water(256 * 256, NAN);
     std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
     for (int tz = -2; tz <= 2; tz++)
         for (int tx = -2; tx <= 2; tx++) {
-            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-            aether_upload_column_tile(ctx, &t);
+            AtlasColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
         }
     double centre[3] = {0.5, 101.62, 0.5};
-    aether_update(ctx, centre, 0);
-    AetherActor a{};
+    atlas_update(ctx, centre, 0);
+    AtlasActor a{};
     a.pos[0] = 0.5;
     a.pos[1] = 100.0;
     a.pos[2] = -29.5;  // 30 blocks north
@@ -735,8 +735,8 @@ static void testImpostorShape() {
     a.radius = 0.3f;
     a.kind = 0;
     a.tint = 0xFFC05020u;  // blue-ish cloth (r 0x20, g 0x50, b 0xC0)
-    aether_set_actors(ctx, &a, 1);
-    AetherFrame f{};
+    atlas_set_actors(ctx, &a, 1);
+    AtlasFrame f{};
     for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
     f.width = 128;
     f.height = 128;
@@ -747,13 +747,13 @@ static void testImpostorShape() {
     f.sunDir[1] = 0.8f;
     f.sunDir[2] = 0.5f;
     f.lodBias = 1;
-    f.flags = AETHER_FRAME_ACTORS | AETHER_FRAME_SKY;
+    f.flags = ATLAS_FRAME_ACTORS | ATLAS_FRAME_SKY;
     std::vector<uint32_t> normal(128 * 128);
     std::vector<float> lin(128 * 128 * 4);
-    AetherFrameOutput o{nullptr, normal.data(), nullptr, lin.data()};
+    AtlasFrameOutput o{nullptr, normal.data(), nullptr, lin.data()};
     auto measure = [&](float nearEnd, size_t& px, int& w, int& h, double rgb[3]) {
         f.nearFieldEnd = nearEnd;
-        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
         int x0 = 128, x1 = -1, y0 = 128, y1 = -1;
         px = 0;
         rgb[0] = rgb[1] = rgb[2] = 0;
@@ -789,25 +789,25 @@ static void testImpostorShape() {
     std::printf("  near field to 40: %zu px; to 22 (fading in): %zu px\n", inside, band);
     CHECK(inside == 0);
     CHECK(band > px / 4 && band < px * 3 / 4);
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
 }
 
 // A dragon's wings beat (its silhouette changes over the beat), fold on the ground, and an impostor marked half
 // transparent covers about half its pixels (the per-pixel dissolve of a tracking-boundary cross-fade).
 static void testActorMotion() {
     std::printf("far actor motion and fades\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
     std::vector<float> flat(256 * 256, 100.0f), water(256 * 256, NAN);
     std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
     for (int tz = -2; tz <= 2; tz++)
         for (int tx = -2; tx <= 2; tx++) {
-            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-            aether_upload_column_tile(ctx, &t);
+            AtlasColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
         }
     double centre[3] = {0.5, 160.0, 0.5};
-    aether_update(ctx, centre, 0);
-    AetherActor a{};
+    atlas_update(ctx, centre, 0);
+    AtlasActor a{};
     a.pos[0] = 0.5;
     a.pos[1] = 140.0;
     a.pos[2] = -150.5;
@@ -815,7 +815,7 @@ static void testActorMotion() {
     a.radius = 6.0f;
     a.kind = 2;  // dragon, facing -Z (away from the camera)
     a.tint = 0xFF283038u;
-    AetherFrame f{};
+    AtlasFrame f{};
     f.cameraPos[0] = 0.5;
     f.cameraPos[1] = 180.0;
     f.cameraPos[2] = 0.5;
@@ -826,14 +826,14 @@ static void testActorMotion() {
     f.planetRadius = 0;
     f.sunDir[1] = 1;
     f.lodBias = 1;
-    f.flags = AETHER_FRAME_ACTORS;
+    f.flags = ATLAS_FRAME_ACTORS;
     std::vector<uint32_t> normal(96 * 64);
-    AetherFrameOutput o{nullptr, normal.data(), nullptr, nullptr};
+    AtlasFrameOutput o{nullptr, normal.data(), nullptr, nullptr};
     auto cover = [&](uint32_t flags, float t) {
         a.flags = flags;
-        aether_set_actors(ctx, &a, 1);
+        atlas_set_actors(ctx, &a, 1);
         f.timeSec = t;
-        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
         size_t n = 0, top = 64, bottom = 0;
         for (size_t i = 0; i < normal.size(); i++)
             if (((normal[i] >> 16) & 255) == 4) {
@@ -843,12 +843,12 @@ static void testActorMotion() {
             }
         return std::array<size_t, 3>{n, top, bottom};
     };
-    auto up = cover(AETHER_GAIT_FLAP << 8, 0.3125f);    // beat phase 90 degrees: wings raised
-    auto down = cover(AETHER_GAIT_FLAP << 8, 0.9375f);  // 270 degrees: lowered
-    auto folded = cover(AETHER_GAIT_STILL << 8, 0.3125f);
-    auto full = cover(AETHER_GAIT_GLIDE << 8, 0.0f);
-    auto half = cover((AETHER_GAIT_GLIDE << 8) | 128u, 0.0f);
-    auto gone = cover((AETHER_GAIT_GLIDE << 8) | 255u, 0.0f);
+    auto up = cover(ATLAS_GAIT_FLAP << 8, 0.3125f);    // beat phase 90 degrees: wings raised
+    auto down = cover(ATLAS_GAIT_FLAP << 8, 0.9375f);  // 270 degrees: lowered
+    auto folded = cover(ATLAS_GAIT_STILL << 8, 0.3125f);
+    auto full = cover(ATLAS_GAIT_GLIDE << 8, 0.0f);
+    auto half = cover((ATLAS_GAIT_GLIDE << 8) | 128u, 0.0f);
+    auto gone = cover((ATLAS_GAIT_GLIDE << 8) | 255u, 0.0f);
     std::printf("  dragon px: wings up %zu (rows %zu-%zu), down %zu (rows %zu-%zu), folded %zu; gliding %zu, half faded %zu, "
                 "gone %zu\n", up[0], up[1], up[2], down[0], down[1], down[2], folded[0], full[0], half[0], gone[0]);
     CHECK(up[0] > 50 && down[0] > 50);
@@ -856,49 +856,49 @@ static void testActorMotion() {
     CHECK(folded[0] < full[0]);   // folded wings cover less than spread ones
     CHECK(half[0] > full[0] / 4 && half[0] < full[0] * 3 / 4);
     CHECK(gone[0] == 0);
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
 }
 
-// The world's surface blocks (aether_upload_column_heights3): a top block override replaces the dressing's on dry
+// The world's surface blocks (atlas_upload_column_heights3): a top block override replaces the dressing's on dry
 // ground, a frozen column turns its water to ice, and a river column gets flowing water.
 static void testSurfaceOverrides(const char* raster) {
     std::printf("surface block overrides\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
-    if (aether_preview_load_raster(ctx, raster) != AETHER_OK) {
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
+    if (atlas_preview_load_raster(ctx, raster) != ATLAS_OK) {
         std::printf("  SKIP: no raster\n");
-        aether_destroy(ctx);
+        atlas_destroy(ctx);
         return;
     }
-    AetherMaterial red{{0.6f, 0.02f, 0.02f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN};
-    CHECK(aether_set_materials(ctx, 300, &red, 1) == AETHER_OK);
+    AtlasMaterial red{{0.6f, 0.02f, 0.02f}, 0.9f, 0.0f, ATLAS_CLASS_TERRAIN};
+    CHECK(atlas_set_materials(ctx, 300, &red, 1) == ATLAS_OK);
     const size_t N = 256 * 256;
     std::vector<float> surf(N, 100.0f), water(N, NAN);
     std::vector<uint16_t> top(N, 0), fill(N, 0);
     std::vector<uint8_t> flags(N, 0);
     for (size_t c = 0; c < N; c++) {
         bool wet = (c % 256) >= 128;  // the east half is a pond
-        if (wet) water[c] = 103.0f, flags[c] = AETHER_COLUMN_FROZEN;
+        if (wet) water[c] = 103.0f, flags[c] = ATLAS_COLUMN_FROZEN;
         else top[c] = 300;
     }
     for (int tz = -1; tz <= 1; tz++)
         for (int tx = -1; tx <= 1; tx++)
-            CHECK(aether_upload_column_heights3(ctx, 0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr,
-                                                nullptr, flags.data()) == AETHER_OK);
+            CHECK(atlas_upload_column_heights3(ctx, 0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr,
+                                                nullptr, flags.data()) == ATLAS_OK);
     double centre[3] = {128.0, 180.0, 128.0};
-    aether_update(ctx, centre, 0);
-    AetherFrame f{};
+    atlas_update(ctx, centre, 0);
+    AtlasFrame f{};
     for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
     f.width = f.height = 48;
     cameraMatrix(0, -89.9, 40, 1.0, f.invViewProj);
     f.maxDistance = 6000;
     f.sunDir[1] = 1;
     f.lodBias = 1;
-    f.flags = AETHER_FRAME_DEBUG_ALBEDO;
+    f.flags = ATLAS_FRAME_DEBUG_ALBEDO;
     std::vector<float> lin(48 * 48 * 4);
     std::vector<uint32_t> normal(48 * 48);
-    AetherFrameOutput o{nullptr, normal.data(), nullptr, lin.data()};
-    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    AtlasFrameOutput o{nullptr, normal.data(), nullptr, lin.data()};
+    CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
     size_t redWest = 0, iceEast = 0, waterEast = 0;
     for (int py = 0; py < 48; py++)
         for (int px = 0; px < 48; px++) {
@@ -906,35 +906,35 @@ static void testSurfaceOverrides(const char* raster) {
             uint32_t cls = (normal[i] >> 16) & 255;
             if (px < 20) redWest += lin[i * 4] > 3 * lin[i * 4 + 1] && lin[i * 4] > 0.2f;
             if (px > 28) {
-                iceEast += cls == AETHER_CLASS_TERRAIN && lin[i * 4 + 2] > lin[i * 4] && lin[i * 4 + 2] > 0.3f;
-                waterEast += cls == AETHER_CLASS_WATER;
+                iceEast += cls == ATLAS_CLASS_TERRAIN && lin[i * 4 + 2] > lin[i * 4] && lin[i * 4 + 2] > 0.3f;
+                waterEast += cls == ATLAS_CLASS_WATER;
             }
         }
     std::printf("  west (dry, red top): %zu of 960 px red; east (frozen pond): %zu ice px, %zu water px\n", redWest, iceEast, waterEast);
     CHECK(redWest > 900);
     CHECK(iceEast > 900 && waterEast == 0);
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
 }
 
 // Pixels the near field covers skip the far march entirely; the rest render exactly as without near depth.
 static void testNearDepth(const char* raster) {
     std::printf("near-depth skip\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
-    if (aether_preview_load_raster(ctx, raster) != AETHER_OK) {
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
+    if (atlas_preview_load_raster(ctx, raster) != ATLAS_OK) {
         std::printf("  SKIP: no raster\n");
-        aether_destroy(ctx);
+        atlas_destroy(ctx);
         return;
     }
-    double x = 0, z = 0, y = aether_preview_height(ctx, x, z) + 60;
+    double x = 0, z = 0, y = atlas_preview_height(ctx, x, z) + 60;
     for (int lod = 0; lod < 4; lod++) {
         int span = 256 << lod;
-        aether_preview_generate(ctx, lod, -2 * span, -2 * span, 3 * span, 3 * span);
+        atlas_preview_generate(ctx, lod, -2 * span, -2 * span, 3 * span, 3 * span);
     }
     double centre[3] = {x, y, z};
-    aether_update(ctx, centre, 0);
+    atlas_update(ctx, centre, 0);
     const uint32_t W = 128, H = 72;
-    AetherFrame f{};
+    AtlasFrame f{};
     f.cameraPos[0] = x;
     f.cameraPos[1] = y;
     f.cameraPos[2] = z;
@@ -945,20 +945,20 @@ static void testNearDepth(const char* raster) {
     f.maxDistance = 8000;
     f.sunDir[1] = 1;
     f.lodBias = 1;
-    f.flags = AETHER_FRAME_ATMOS;
+    f.flags = ATLAS_FRAME_ATMOS;
     std::vector<float> base(W * H * 4), with(W * H * 4), nearDist(W * H);
     for (uint32_t py = 0; py < H; py++)
         for (uint32_t px = 0; px < W; px++) nearDist[py * W + px] = px < W / 2 ? 20.0f : 1e30f;  // left half covered
-    AetherFrameOutput o1{nullptr, nullptr, nullptr, base.data()};
-    CHECK(aether_render(ctx, &f, &o1) == AETHER_OK);
-    AetherStats s1{};
-    aether_get_stats(ctx, &s1);
-    f.flags |= AETHER_FRAME_NEAR_DEPTH;
+    AtlasFrameOutput o1{nullptr, nullptr, nullptr, base.data()};
+    CHECK(atlas_render(ctx, &f, &o1) == ATLAS_OK);
+    AtlasStats s1{};
+    atlas_get_stats(ctx, &s1);
+    f.flags |= ATLAS_FRAME_NEAR_DEPTH;
     f.nearDepth = nearDist.data();
-    AetherFrameOutput o2{nullptr, nullptr, nullptr, with.data()};
-    CHECK(aether_render(ctx, &f, &o2) == AETHER_OK);
-    AetherStats s2{};
-    aether_get_stats(ctx, &s2);
+    AtlasFrameOutput o2{nullptr, nullptr, nullptr, with.data()};
+    CHECK(atlas_render(ctx, &f, &o2) == ATLAS_OK);
+    AtlasStats s2{};
+    atlas_get_stats(ctx, &s2);
     size_t leftNonZero = 0, rightDiff = 0;
     for (uint32_t py = 0; py < H; py++)
         for (uint32_t px = 0; px < W; px++) {
@@ -972,31 +972,31 @@ static void testNearDepth(const char* raster) {
     CHECK(leftNonZero == 0);
     CHECK(rightDiff == 0);
     CHECK(s2.raySteps * 10 < s1.raySteps * 7);
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
 }
 
-// Caller geometry, preview dressing (aether_upload_column_heights): the terrain sits where the caller says.
+// Caller geometry, preview dressing (atlas_upload_column_heights): the terrain sits where the caller says.
 static void testColumnHeights(const char* raster) {
     std::printf("column heights upload\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
     std::vector<float> surf(256 * 256), water(256 * 256, NAN);
-    CHECK(aether_upload_column_heights(ctx, 0, 0, 0, surf.data(), water.data()) == AETHER_ERR_STATE);  // no raster
-    if (aether_preview_load_raster(ctx, raster) != AETHER_OK) {
+    CHECK(atlas_upload_column_heights(ctx, 0, 0, 0, surf.data(), water.data()) == ATLAS_ERR_STATE);  // no raster
+    if (atlas_preview_load_raster(ctx, raster) != ATLAS_OK) {
         std::printf("  SKIP: no raster\n");
-        aether_destroy(ctx);
+        atlas_destroy(ctx);
         return;
     }
     // dry upland (the uploads below carry no water, the reference keeps its seas and rivers)
     double x = 1000.5, z = -700.5;
     for (int k = 0; k < 400; k++) {
-        double h = aether_preview_height(ctx, x, z);
+        double h = atlas_preview_height(ctx, x, z);
         if (h > 120 && h < 250) break;
         x = 1000.5 + (k % 20) * 997.0;
         z = -700.5 + (k / 20) * 1013.0;
     }
-    float h0 = aether_preview_height(ctx, x, z);
-    CHECK(aether_has_tile(ctx, 0, int(std::floor(x / 256)), int(std::floor(z / 256))) == 0);
+    float h0 = atlas_preview_height(ctx, x, z);
+    CHECK(atlas_has_tile(ctx, 0, int(std::floor(x / 256)), int(std::floor(z / 256))) == 0);
     for (int lod = 0; lod < 3; lod++) {
         int span = 256 << lod, s = 1 << lod;
         int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
@@ -1005,17 +1005,17 @@ static void testColumnHeights(const char* raster) {
                 // the preview's own ground, lifted 7 blocks, dry: what an exact source would hand over
                 for (int j = 0; j < 256; j++)
                     for (int i = 0; i < 256; i++)
-                        surf[j * 256 + i] = aether_preview_height(ctx, tx * span + (i + 0.5) * s, tz * span + (j + 0.5) * s) + 7.0f;
-                CHECK(aether_upload_column_heights(ctx, lod, tx, tz, surf.data(), water.data()) == AETHER_OK);
+                        surf[j * 256 + i] = atlas_preview_height(ctx, tx * span + (i + 0.5) * s, tz * span + (j + 0.5) * s) + 7.0f;
+                CHECK(atlas_upload_column_heights(ctx, lod, tx, tz, surf.data(), water.data()) == ATLAS_OK);
             }
     }
-    CHECK(aether_has_tile(ctx, 0, int(std::floor(x / 256)), int(std::floor(z / 256))) == 1);
-    CHECK(aether_upload_column_heights(ctx, 99, 0, 0, surf.data(), water.data()) == AETHER_ERR_ARG);
+    CHECK(atlas_has_tile(ctx, 0, int(std::floor(x / 256)), int(std::floor(z / 256))) == 1);
+    CHECK(atlas_upload_column_heights(ctx, 99, 0, 0, surf.data(), water.data()) == ATLAS_ERR_ARG);
     double y = h0 + 60;
     double centre[3] = {x, y, z};
-    aether_update(ctx, centre, 0);
+    atlas_update(ctx, centre, 0);
     const uint32_t W = 33, H = 33;
-    AetherFrame f{};
+    AtlasFrame f{};
     f.cameraPos[0] = x;
     f.cameraPos[1] = y;
     f.cameraPos[2] = z;
@@ -1026,19 +1026,19 @@ static void testColumnHeights(const char* raster) {
     f.sunDir[1] = 1;
     f.lodBias = 1;
     // against the preview's own tiles: every pixel 7 blocks nearer (ground or the canopy dressed onto it)
-    AetherContext* ref = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ref);
-    aether_preview_load_raster(ref, raster);
+    AtlasContext* ref = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ref);
+    atlas_preview_load_raster(ref, raster);
     for (int lod = 0; lod < 3; lod++) {
         int span = 256 << lod;
         int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
-        aether_preview_generate(ref, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
+        atlas_preview_generate(ref, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
     }
-    aether_update(ref, centre, 0);
+    atlas_update(ref, centre, 0);
     std::vector<float> depth(W * H), refDepth(W * H);
-    AetherFrameOutput o{nullptr, nullptr, depth.data(), nullptr}, oref{nullptr, nullptr, refDepth.data(), nullptr};
-    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
-    CHECK(aether_render(ref, &f, &oref) == AETHER_OK);
+    AtlasFrameOutput o{nullptr, nullptr, depth.data(), nullptr}, oref{nullptr, nullptr, refDepth.data(), nullptr};
+    CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
+    CHECK(atlas_render(ref, &f, &oref) == ATLAS_OK);
     std::vector<float> lift;
     for (uint32_t i = 0; i < W * H; i++)
         if (depth[i] < 1e29f && refDepth[i] < 1e29f) lift.push_back(refDepth[i] - depth[i]);
@@ -1048,26 +1048,26 @@ static void testColumnHeights(const char* raster) {
                 lift.size(), med);
     CHECK(lift.size() > W * H / 2);
     CHECK(std::abs(med - 7.0f) < 0.75f);
-    aether_destroy(ref);
-    aether_destroy(ctx);
+    atlas_destroy(ref);
+    atlas_destroy(ctx);
 }
 
-// Biome tints over the dressing (aether_upload_column_heights2): grass-family tops take the caller's material.
+// Biome tints over the dressing (atlas_upload_column_heights2): grass-family tops take the caller's material.
 static void testGrassTint(const char* raster) {
     std::printf("grass tint\n");
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
-    if (aether_preview_load_raster(ctx, raster) != AETHER_OK) {
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
+    if (atlas_preview_load_raster(ctx, raster) != ATLAS_OK) {
         std::printf("  SKIP: no raster\n");
-        aether_destroy(ctx);
+        atlas_destroy(ctx);
         return;
     }
-    AetherMaterial red{{0.6f, 0.02f, 0.02f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN};
-    CHECK(aether_set_materials(ctx, 300, &red, 1) == AETHER_OK);
+    AtlasMaterial red{{0.6f, 0.02f, 0.02f}, 0.9f, 0.0f, ATLAS_CLASS_TERRAIN};
+    CHECK(atlas_set_materials(ctx, 300, &red, 1) == ATLAS_OK);
     // a temperate lowland with grass (search the raster for one)
     double x = 0.5, z = 0.5;
     for (int k = 0; k < 400; k++) {
-        double h = aether_preview_height(ctx, x, z);
+        double h = atlas_preview_height(ctx, x, z);
         if (h > 70 && h < 110) break;
         x = 0.5 + (k % 20) * 731.0;
         z = 0.5 + (k / 20) * 677.0;
@@ -1081,14 +1081,14 @@ static void testGrassTint(const char* raster) {
             for (int tx = -1; tx <= 1; tx++) {
                 int cx = int(std::floor(x / 256)) + tx, cz = int(std::floor(z / 256)) + tz;
                 for (int j = 0; j < 256; j++)
-                    for (int i = 0; i < 256; i++) surf[size_t(j) * 256 + i] = aether_preview_height(ctx, cx * 256 + i + 0.5, cz * 256 + j + 0.5);
-                CHECK(aether_upload_column_heights2(ctx, 0, cx, cz, surf.data(), water.data(), pass ? grass.data() : nullptr,
-                                                    nullptr) == AETHER_OK);
+                    for (int i = 0; i < 256; i++) surf[size_t(j) * 256 + i] = atlas_preview_height(ctx, cx * 256 + i + 0.5, cz * 256 + j + 0.5);
+                CHECK(atlas_upload_column_heights2(ctx, 0, cx, cz, surf.data(), water.data(), pass ? grass.data() : nullptr,
+                                                    nullptr) == ATLAS_OK);
             }
-        double h0 = aether_preview_height(ctx, x, z);
+        double h0 = atlas_preview_height(ctx, x, z);
         double centre[3] = {x, h0 + 80, z};
-        aether_update(ctx, centre, 0);
-        AetherFrame f{};
+        atlas_update(ctx, centre, 0);
+        AtlasFrame f{};
         for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
         f.width = f.height = 48;
         cameraMatrix(0, -89.9, 60, 1.0, f.invViewProj);
@@ -1096,8 +1096,8 @@ static void testGrassTint(const char* raster) {
         f.sunDir[1] = 1;
         f.lodBias = 1;
         std::vector<float> lin(48 * 48 * 4);
-        AetherFrameOutput o{nullptr, nullptr, nullptr, lin.data()};
-        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        AtlasFrameOutput o{nullptr, nullptr, nullptr, lin.data()};
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
         size_t redPx = 0;
         for (size_t i = 0; i < 48 * 48; i++) redPx += lin[i * 4] > 3 * lin[i * 4 + 1] && lin[i * 4] > 0.01f;
         frac[pass] = double(redPx) / (48 * 48);
@@ -1105,43 +1105,43 @@ static void testGrassTint(const char* raster) {
     std::printf("  red-tinted pixels: %.0f%% without the override, %.0f%% with it\n", 100 * frac[0], 100 * frac[1]);
     CHECK(frac[0] < 0.01);
     CHECK(frac[1] > 0.1);  // the open grass of the view (forest and rock keep their own)
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
 }
 
 static bool parity(const char* raster) {
     std::printf("cpu/vulkan parity (preview terrain)\n");
-    AetherContext* cpu = nullptr;
-    AetherContext* gpu = nullptr;
-    if (aether_create(AETHER_BACKEND_VULKAN, &gpu) != AETHER_OK) {
+    AtlasContext* cpu = nullptr;
+    AtlasContext* gpu = nullptr;
+    if (atlas_create(ATLAS_BACKEND_VULKAN, &gpu) != ATLAS_OK) {
         std::printf("  SKIP: no Vulkan device\n");
         return true;
     }
-    aether_create(AETHER_BACKEND_CPU, &cpu);
-    if (aether_preview_load_raster(cpu, raster) != AETHER_OK || aether_preview_load_raster(gpu, raster) != AETHER_OK) {
+    atlas_create(ATLAS_BACKEND_CPU, &cpu);
+    if (atlas_preview_load_raster(cpu, raster) != ATLAS_OK || atlas_preview_load_raster(gpu, raster) != ATLAS_OK) {
         std::printf("  SKIP: %s missing (run native/tools/export_raster.py)\n", raster);
-        aether_destroy(cpu);
-        aether_destroy(gpu);
+        atlas_destroy(cpu);
+        atlas_destroy(gpu);
         return true;
     }
     double x = 0, z = 0;
-    double y = aether_preview_height(cpu, x, z) + 60;
+    double y = atlas_preview_height(cpu, x, z) + 60;
     double centre[3] = {x, y, z};
     // a row of fires out east (the far-light pass in both builds)
-    std::vector<AetherLight> fires;
+    std::vector<AtlasLight> fires;
     for (int i = 0; i < 40; i++)
-        fires.push_back(AetherLight{{x + 400.0 + i * 90.0, aether_preview_height(cpu, x + 400.0 + i * 90.0, z + (i % 7 - 3) * 40.0) + 4.0,
-                                     z + (i % 7 - 3) * 40.0}, 1.5f, 2.0f, 0x2080FFu, AETHER_LIGHT_FIRE});
-    for (AetherContext* c : {cpu, gpu}) {
+        fires.push_back(AtlasLight{{x + 400.0 + i * 90.0, atlas_preview_height(cpu, x + 400.0 + i * 90.0, z + (i % 7 - 3) * 40.0) + 4.0,
+                                     z + (i % 7 - 3) * 40.0}, 1.5f, 2.0f, 0x2080FFu, ATLAS_LIGHT_FIRE});
+    for (AtlasContext* c : {cpu, gpu}) {
         for (int lod = 0; lod < 7; lod++) {
             int span = 256 << lod;
             int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
-            aether_preview_generate(c, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
+            atlas_preview_generate(c, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
         }
-        aether_update(c, centre, 0);
-        aether_set_light_group(c, 1, fires.data(), uint32_t(fires.size()));
+        atlas_update(c, centre, 0);
+        atlas_set_light_group(c, 1, fires.data(), uint32_t(fires.size()));
     }
     const uint32_t W = 320, H = 180;
-    AetherFrame f{};
+    AtlasFrame f{};
     f.cameraPos[0] = x;
     f.cameraPos[1] = y;
     f.cameraPos[2] = z;
@@ -1154,12 +1154,12 @@ static bool parity(const char* raster) {
     f.sunDir[1] = 0.6f;
     f.sunDir[2] = -0.3f;
     f.lodBias = 1;
-    f.flags = AETHER_FRAME_SHADOWS | AETHER_FRAME_ATMOS | AETHER_FRAME_SKY;
+    f.flags = ATLAS_FRAME_SHADOWS | ATLAS_FRAME_ATMOS | ATLAS_FRAME_SKY;
     std::vector<float> dc(W * H), dg(W * H);
     std::vector<uint32_t> cc(W * H), cg(W * H);
-    AetherFrameOutput oc{cc.data(), nullptr, dc.data()}, og{cg.data(), nullptr, dg.data()};
-    CHECK(aether_render(cpu, &f, &oc) == AETHER_OK);
-    CHECK(aether_render(gpu, &f, &og) == AETHER_OK);
+    AtlasFrameOutput oc{cc.data(), nullptr, dc.data()}, og{cg.data(), nullptr, dg.data()};
+    CHECK(atlas_render(cpu, &f, &oc) == ATLAS_OK);
+    CHECK(atlas_render(gpu, &f, &og) == ATLAS_OK);
     size_t hitMismatch = 0, depthBad = 0, colorBad = 0, hits = 0;
     for (size_t i = 0; i < dc.size(); i++) {
         bool hc = dc[i] < 1e29f, hg = dg[i] < 1e29f;
@@ -1200,18 +1200,18 @@ static bool parity(const char* raster) {
             fld[i] = uint32_t(c * 255) | uint32_t(0.1 * 255) << 8 | 5u << 24;
             dyn[i] = uint32_t(240.0 / 1024 * 255) | uint32_t(120.0 / 1024 * 255) << 8 | uint32_t(0.1024 * 255) << 16;
         }
-        AetherWeather wth{fld.data(), dyn.data(), fld.data(), dyn.data(), 0.0f};
-        for (AetherContext* c : {cpu, gpu}) {
-            aether_set_cloud_noise(c, noise.data());
-            aether_set_weather(c, &wth);
+        AtlasWeather wth{fld.data(), dyn.data(), fld.data(), dyn.data(), 0.0f};
+        for (AtlasContext* c : {cpu, gpu}) {
+            atlas_set_cloud_noise(c, noise.data());
+            atlas_set_weather(c, &wth);
         }
-        AetherFrame fc = f;
+        AtlasFrame fc = f;
         cameraMatrix(90, 6, 70, double(W) / H, fc.invViewProj);  // up into the deck
-        fc.flags = (fc.flags | AETHER_FRAME_CLOUDS) & ~AETHER_FRAME_SKY;  // alpha = cloud opacity over the sky
+        fc.flags = (fc.flags | ATLAS_FRAME_CLOUDS) & ~ATLAS_FRAME_SKY;  // alpha = cloud opacity over the sky
         std::vector<float> lc(W * H * 4), lg(W * H * 4);
-        AetherFrameOutput ocl{nullptr, nullptr, nullptr, lc.data()}, ogl{nullptr, nullptr, nullptr, lg.data()};
-        CHECK(aether_render(cpu, &fc, &ocl) == AETHER_OK);
-        CHECK(aether_render(gpu, &fc, &ogl) == AETHER_OK);
+        AtlasFrameOutput ocl{nullptr, nullptr, nullptr, lc.data()}, ogl{nullptr, nullptr, nullptr, lg.data()};
+        CHECK(atlas_render(cpu, &fc, &ocl) == ATLAS_OK);
+        CHECK(atlas_render(gpu, &fc, &ogl) == ATLAS_OK);
         size_t cloudy = 0, bad = 0;
         for (size_t i = 0; i < size_t(W) * H; i++) {
             bool diff = false;
@@ -1229,32 +1229,32 @@ static bool parity(const char* raster) {
         // temporal clouds (Vulkan context, which has history from the frame above). The reference is a fresh march
         // in its own context: a cloud-less frame of the same pose first (so the cloud pass clips to the right
         // surfaces, as in game), then the cloud frame, which has no cloud history and so marches every block.
-        AetherContext* fresh = nullptr;
-        aether_create(AETHER_BACKEND_VULKAN, &fresh);
-        aether_preview_load_raster(fresh, raster);
+        AtlasContext* fresh = nullptr;
+        atlas_create(ATLAS_BACKEND_VULKAN, &fresh);
+        atlas_preview_load_raster(fresh, raster);
         for (int lod = 0; lod < 7; lod++) {
             int span = 256 << lod;
             int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
-            aether_preview_generate(fresh, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
+            atlas_preview_generate(fresh, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
         }
-        aether_update(fresh, centre, 0);
-        aether_set_cloud_noise(fresh, noise.data());
-        aether_set_light_group(fresh, 1, fires.data(), uint32_t(fires.size()));
-        aether_set_weather(fresh, &wth);
+        atlas_update(fresh, centre, 0);
+        atlas_set_cloud_noise(fresh, noise.data());
+        atlas_set_light_group(fresh, 1, fires.data(), uint32_t(fires.size()));
+        atlas_set_weather(fresh, &wth);
         std::vector<float> lf(W * H * 4);
-        AetherFrameOutput olf{nullptr, nullptr, nullptr, lf.data()};
-        auto freshRender = [&](const AetherFrame& pose) {
-            AetherFrame bare = pose;
-            bare.flags &= ~(AETHER_FRAME_CLOUDS | AETHER_FRAME_CLOUDS_QUARTER);
-            CHECK(aether_render(fresh, &bare, &olf) == AETHER_OK);
-            CHECK(aether_render(fresh, &pose, &olf) == AETHER_OK);
+        AtlasFrameOutput olf{nullptr, nullptr, nullptr, lf.data()};
+        auto freshRender = [&](const AtlasFrame& pose) {
+            AtlasFrame bare = pose;
+            bare.flags &= ~(ATLAS_FRAME_CLOUDS | ATLAS_FRAME_CLOUDS_QUARTER);
+            CHECK(atlas_render(fresh, &bare, &olf) == ATLAS_OK);
+            CHECK(atlas_render(fresh, &pose, &olf) == ATLAS_OK);
         };
 
         // a static camera converges to the fresh march exactly, then stays bit-stable
         std::vector<float> lt(W * H * 4), lt2(W * H * 4);
-        AetherFrameOutput olt{nullptr, nullptr, nullptr, lt.data()}, olt2{nullptr, nullptr, nullptr, lt2.data()};
-        for (int i = 0; i < 6; i++) CHECK(aether_render(gpu, &fc, &olt) == AETHER_OK);
-        for (int i = 0; i < 4; i++) CHECK(aether_render(gpu, &fc, &olt2) == AETHER_OK);
+        AtlasFrameOutput olt{nullptr, nullptr, nullptr, lt.data()}, olt2{nullptr, nullptr, nullptr, lt2.data()};
+        for (int i = 0; i < 6; i++) CHECK(atlas_render(gpu, &fc, &olt) == ATLAS_OK);
+        for (int i = 0; i < 4; i++) CHECK(atlas_render(gpu, &fc, &olt2) == ATLAS_OK);
         freshRender(fc);
         size_t staticDiff = 0, freshOff = 0;
         for (size_t i = 0; i < lt.size(); i++) {
@@ -1267,10 +1267,10 @@ static bool parity(const char* raster) {
         CHECK(staticDiff == 0);
 
         // a slowly turning one stays close to a fresh march of its final pose
-        AetherFrame fm = fc;
+        AtlasFrame fm = fc;
         for (int i = 0; i <= 8; i++) {
             cameraMatrix(90 + i * 0.25, 6, 70, double(W) / H, fm.invViewProj);  // 0.25 degrees per frame
-            CHECK(aether_render(gpu, &fm, &olt) == AETHER_OK);
+            CHECK(atlas_render(gpu, &fm, &olt) == ATLAS_OK);
         }
         freshRender(fm);
         size_t moved = 0;
@@ -1282,27 +1282,27 @@ static bool parity(const char* raster) {
         }
         std::printf("  temporal, turning camera: %.2f%% px off by > 0.08 alpha (worst %.3f)\n", 100.0 * moved / n, worstA);
         CHECK(moved / n < 0.02);
-        aether_destroy(fresh);
+        atlas_destroy(fresh);
     }
-    aether_destroy(cpu);
-    aether_destroy(gpu);
+    atlas_destroy(cpu);
+    atlas_destroy(gpu);
     return true;
 }
 
-// The error paths (aether.h AetherStatus): out of memory, a lost device and a hang, through the test hook
-// (aether_debug_fault / AETHER_FAULT), on the CPU backend always and on Vulkan when a device is there; a fresh
+// The error paths (atlas.h AtlasStatus): out of memory, a lost device and a hang, through the test hook
+// (atlas_debug_fault / ATLAS_FAULT), on the CPU backend always and on Vulkan when a device is there; a fresh
 // context after a loss (the mod's retry); the memory query; the clipmap size; worker exceptions never terminating.
-static bool faultScene(AetherContext* ctx, AetherFrame& f) {
+static bool faultScene(AtlasContext* ctx, AtlasFrame& f) {
     std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
     std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
     for (int tz = -1; tz <= 1; tz++)
         for (int tx = -1; tx <= 1; tx++) {
-            AetherColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-            if (aether_upload_column_tile(ctx, &t) != AETHER_OK) return false;
+            AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            if (atlas_upload_column_tile(ctx, &t) != ATLAS_OK) return false;
         }
     double centre[3] = {10.5, 140.0, 10.5};
-    if (aether_update(ctx, centre, 0) != AETHER_OK) return false;
-    f = AetherFrame{};
+    if (atlas_update(ctx, centre, 0) != ATLAS_OK) return false;
+    f = AtlasFrame{};
     f.cameraPos[0] = 10.5;
     f.cameraPos[1] = 140.0;
     f.cameraPos[2] = 10.5;
@@ -1328,123 +1328,123 @@ static void setEnv(const char* k, const char* v) {
 static void testFaults() {
     std::printf("faults\n");
     std::vector<float> depth(32 * 32);
-    AetherFrameOutput o{nullptr, nullptr, depth.data(), nullptr};
-    for (AetherBackend be : {AETHER_BACKEND_CPU, AETHER_BACKEND_VULKAN}) {
-        const char* name = be == AETHER_BACKEND_CPU ? "cpu" : "vulkan";
-        AetherContext* ctx = nullptr;
-        if (aether_create(be, &ctx) != AETHER_OK) {
-            CHECK(be == AETHER_BACKEND_VULKAN);
-            std::printf("  vulkan: no device (%s): skipped\n", aether_last_error(nullptr));
+    AtlasFrameOutput o{nullptr, nullptr, depth.data(), nullptr};
+    for (AtlasBackend be : {ATLAS_BACKEND_CPU, ATLAS_BACKEND_VULKAN}) {
+        const char* name = be == ATLAS_BACKEND_CPU ? "cpu" : "vulkan";
+        AtlasContext* ctx = nullptr;
+        if (atlas_create(be, &ctx) != ATLAS_OK) {
+            CHECK(be == ATLAS_BACKEND_VULKAN);
+            std::printf("  vulkan: no device (%s): skipped\n", atlas_last_error(nullptr));
             continue;
         }
-        AetherFrame f;
+        AtlasFrame f;
         CHECK(faultScene(ctx, f));
-        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
         CHECK(std::abs(depth[16 * 32 + 16] - 40.0f) < 0.5f);
-        CHECK(aether_debug_fault(ctx, 99, 0) == AETHER_ERR_ARG);
+        CHECK(atlas_debug_fault(ctx, 99, 0) == ATLAS_ERR_ARG);
 
         // out of memory: the armed frame fails, the context goes on
-        CHECK(aether_debug_fault(ctx, AETHER_FAULT_OUT_OF_MEMORY, 1) == AETHER_OK);
-        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
-        CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_OUT_OF_MEMORY);
-        CHECK(std::strstr(aether_last_error(ctx), "OUT_OF_DEVICE_MEMORY") != nullptr);
-        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        CHECK(atlas_debug_fault(ctx, ATLAS_FAULT_OUT_OF_MEMORY, 1) == ATLAS_OK);
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_ERR_OUT_OF_MEMORY);
+        CHECK(std::strstr(atlas_last_error(ctx), "OUT_OF_DEVICE_MEMORY") != nullptr);
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
 
         // memory: Vulkan knows its heaps (and what it allocated); the CPU backend has none
-        AetherMemoryInfo mi{};
-        AetherStatus ms = aether_memory_info(ctx, &mi);
-        if (be == AETHER_BACKEND_CPU) {
-            CHECK(ms == AETHER_ERR_UNSUPPORTED);
+        AtlasMemoryInfo mi{};
+        AtlasStatus ms = atlas_memory_info(ctx, &mi);
+        if (be == ATLAS_BACKEND_CPU) {
+            CHECK(ms == ATLAS_ERR_UNSUPPORTED);
         } else {
-            CHECK(ms == AETHER_OK);
+            CHECK(ms == ATLAS_OK);
             CHECK(mi.deviceLocalBytes > (64ull << 20));
-            CHECK(mi.aetherBytes > 0 && mi.aetherBytes < mi.deviceLocalBytes + mi.hostHeapBytes);
-            if (mi.flags & AETHER_MEMORY_BUDGET_EXT)
+            CHECK(mi.atlasBytes > 0 && mi.atlasBytes < mi.deviceLocalBytes + mi.hostHeapBytes);
+            if (mi.flags & ATLAS_MEMORY_BUDGET_EXT)
                 CHECK(mi.deviceLocalBudget > 0 && mi.deviceLocalBudget <= mi.deviceLocalBytes);
             std::printf("  vulkan memory: device-local %.0f MB (budget %.0f MB, used %.0f MB, %s), host heap %.0f MB, "
-                        "aether %.1f MB%s\n",
+                        "atlas %.1f MB%s\n",
                         mi.deviceLocalBytes / 1048576.0, mi.deviceLocalBudget / 1048576.0, mi.deviceLocalUsage / 1048576.0,
-                        (mi.flags & AETHER_MEMORY_BUDGET_EXT) ? "VK_EXT_memory_budget" : "no budget extension",
-                        mi.hostHeapBytes / 1048576.0, mi.aetherBytes / 1048576.0, mi.integrated ? ", integrated" : "");
+                        (mi.flags & ATLAS_MEMORY_BUDGET_EXT) ? "VK_EXT_memory_budget" : "no budget extension",
+                        mi.hostHeapBytes / 1048576.0, mi.atlasBytes / 1048576.0, mi.integrated ? ", integrated" : "");
         }
 
         // a lost device: the frame fails, every later GPU call too; CPU-side uploads still work; destroy is clean
-        CHECK(aether_debug_fault(ctx, AETHER_FAULT_DEVICE_LOST, 0) == AETHER_OK);
-        CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_DEVICE_LOST);
-        CHECK(std::strstr(aether_last_error(ctx), "DEVICE_LOST") != nullptr);
-        CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_DEVICE_LOST);
-        CHECK(std::strstr(aether_last_error(ctx), "lost earlier") != nullptr);
-        AetherGlTargets gt{};
-        CHECK(aether_gl_attach(ctx, 64, 64, &gt) == AETHER_ERR_DEVICE_LOST);
+        CHECK(atlas_debug_fault(ctx, ATLAS_FAULT_DEVICE_LOST, 0) == ATLAS_OK);
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_ERR_DEVICE_LOST);
+        CHECK(std::strstr(atlas_last_error(ctx), "DEVICE_LOST") != nullptr);
+        CHECK(atlas_render(ctx, &f, &o) == ATLAS_ERR_DEVICE_LOST);
+        CHECK(std::strstr(atlas_last_error(ctx), "lost earlier") != nullptr);
+        AtlasGlTargets gt{};
+        CHECK(atlas_gl_attach(ctx, 64, 64, &gt) == ATLAS_ERR_DEVICE_LOST);
         double centre[3] = {10.5, 140.0, 10.5};
-        CHECK(aether_update(ctx, centre, 0) == AETHER_OK);
-        CHECK(aether_memory_info(ctx, &mi) == AETHER_ERR_DEVICE_LOST);
-        CHECK(std::string(aether_info(ctx)).find("\"deviceLost\":true") != std::string::npos);
-        aether_gl_detach(ctx);
-        aether_destroy(ctx);
+        CHECK(atlas_update(ctx, centre, 0) == ATLAS_OK);
+        CHECK(atlas_memory_info(ctx, &mi) == ATLAS_ERR_DEVICE_LOST);
+        CHECK(std::string(atlas_info(ctx)).find("\"deviceLost\":true") != std::string::npos);
+        atlas_gl_detach(ctx);
+        atlas_destroy(ctx);
 
-        // a hang: AETHER_ERR_TIMEOUT, then dead the same way; destroy abandons the device instead of waiting
+        // a hang: ATLAS_ERR_TIMEOUT, then dead the same way; destroy abandons the device instead of waiting
         ctx = nullptr;
-        CHECK(aether_create(be, &ctx) == AETHER_OK);
+        CHECK(atlas_create(be, &ctx) == ATLAS_OK);
         if (ctx) {
             CHECK(faultScene(ctx, f));
-            CHECK(aether_debug_fault(ctx, AETHER_FAULT_TIMEOUT, 0) == AETHER_OK);
-            CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_TIMEOUT);
-            CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_TIMEOUT);
-            aether_destroy(ctx);
+            CHECK(atlas_debug_fault(ctx, ATLAS_FAULT_TIMEOUT, 0) == ATLAS_OK);
+            CHECK(atlas_render(ctx, &f, &o) == ATLAS_ERR_TIMEOUT);
+            CHECK(atlas_render(ctx, &f, &o) == ATLAS_ERR_TIMEOUT);
+            atlas_destroy(ctx);
         }
 
         // the retry: a new context renders again
         ctx = nullptr;
-        CHECK(aether_create(be, &ctx) == AETHER_OK);
+        CHECK(atlas_create(be, &ctx) == ATLAS_OK);
         if (ctx) {
             CHECK(faultScene(ctx, f));
-            CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+            CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
             CHECK(std::abs(depth[16 * 32 + 16] - 40.0f) < 0.5f);
-            aether_destroy(ctx);
+            atlas_destroy(ctx);
         }
 
-        // AETHER_FAULT arms every new context: device_lost after one good frame
-        setEnv("AETHER_FAULT", "device_lost@1");
+        // ATLAS_FAULT arms every new context: device_lost after one good frame
+        setEnv("ATLAS_FAULT", "device_lost@1");
         ctx = nullptr;
-        CHECK(aether_create(be, &ctx) == AETHER_OK);
-        setEnv("AETHER_FAULT", nullptr);
+        CHECK(atlas_create(be, &ctx) == ATLAS_OK);
+        setEnv("ATLAS_FAULT", nullptr);
         if (ctx) {
             CHECK(faultScene(ctx, f));
-            CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
-            CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_DEVICE_LOST);
-            aether_destroy(ctx);
+            CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
+            CHECK(atlas_render(ctx, &f, &o) == ATLAS_ERR_DEVICE_LOST);
+            atlas_destroy(ctx);
         }
         std::printf("  %s: out of memory recovers; device lost / timeout stay dead and destroy cleanly; a new context renders\n",
                     name);
     }
 
     // the clipmap: argument checks, and fewer levels keep fewer regions
-    AetherContext* ctx = nullptr;
-    CHECK(aether_create(AETHER_BACKEND_CPU, &ctx) == AETHER_OK);
-    CHECK(aether_set_clipmap(ctx, 0) == AETHER_ERR_ARG);
-    CHECK(aether_set_clipmap(ctx, 8) == AETHER_ERR_ARG);
-    CHECK(aether_set_clipmap(ctx, 1) == AETHER_OK);
+    AtlasContext* ctx = nullptr;
+    CHECK(atlas_create(ATLAS_BACKEND_CPU, &ctx) == ATLAS_OK);
+    CHECK(atlas_set_clipmap(ctx, 0) == ATLAS_ERR_ARG);
+    CHECK(atlas_set_clipmap(ctx, 8) == ATLAS_ERR_ARG);
+    CHECK(atlas_set_clipmap(ctx, 1) == ATLAS_OK);
     std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
     std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
     auto upload = [&] {
         for (int lod = 0; lod < 2; lod++) {
-            AetherColumnTile t{lod, 0, 0, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
-            CHECK(aether_upload_column_tile(ctx, &t) == AETHER_OK);
+            AtlasColumnTile t{lod, 0, 0, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            CHECK(atlas_upload_column_tile(ctx, &t) == ATLAS_OK);
         }
     };
     upload();
     double centre[3] = {10.5, 140.0, 10.5};
-    CHECK(aether_update(ctx, centre, 0) == AETHER_OK);
-    AetherStats st{};
-    CHECK(aether_get_stats(ctx, &st) == AETHER_OK);
+    CHECK(atlas_update(ctx, centre, 0) == ATLAS_OK);
+    AtlasStats st{};
+    CHECK(atlas_get_stats(ctx, &st) == ATLAS_OK);
     uint32_t one = st.regions;
-    CHECK(aether_set_clipmap(ctx, 2) == AETHER_OK);
+    CHECK(atlas_set_clipmap(ctx, 2) == ATLAS_OK);
     upload();
-    CHECK(aether_update(ctx, centre, 0) == AETHER_OK);
-    CHECK(aether_get_stats(ctx, &st) == AETHER_OK);
+    CHECK(atlas_update(ctx, centre, 0) == ATLAS_OK);
+    CHECK(atlas_get_stats(ctx, &st) == ATLAS_OK);
     CHECK(one > 0 && st.regions > one);
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
 
     // a worker's exception comes back to the caller (no std::terminate), after every worker stopped
     std::atomic<int> ran{0};

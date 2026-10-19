@@ -1,9 +1,9 @@
 {
   "replace": false,
   "values": [
-    "skycraft:coral_sea",
-    "skycraft:deep_warm_ocean",
-    "skycraft:inner_sea",
-    "skycraft:warm_ocean"
+    "nirncraft:coral_sea",
+    "nirncraft:deep_warm_ocean",
+    "nirncraft:inner_sea",
+    "nirncraft:warm_ocean"
   ]
 }

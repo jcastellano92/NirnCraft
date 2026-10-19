@@ -25,7 +25,7 @@
     "minecraft:gameplay/piglins_zombify": true,
     "minecraft:gameplay/respawn_anchor_works": false,
     "minecraft:gameplay/water_evaporates": false,
-    "neoforge:custom_clouds": "skycraft:tamriel_clouds",
+    "neoforge:custom_clouds": "nirncraft:tamriel_clouds",
     "minecraft:visual/cloud_height": 330.0,
     "minecraft:gameplay/fast_lava": false,
     "minecraft:visual/default_dripstone_particle": {

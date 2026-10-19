@@ -1,0 +1,315 @@
+{
+ "id": "evermor_undercroft",
+ "why": [
+  "bjoulsae.L10.drowned_undercroft",
+  "bjoulsae.L11.founding_of_evermor"
+ ],
+ "kit": "breton_keep_ruin",
+ "entry_depth": 22,
+ "palette": {
+  "wall": [
+   "minecraft:stone_bricks*5",
+   "minecraft:mossy_stone_bricks*4",
+   "minecraft:tuff*3",
+   "minecraft:cobblestone*3",
+   "minecraft:spruce_log*2"
+  ],
+  "floor": [
+   "minecraft:stone_bricks*4",
+   "minecraft:mossy_cobblestone*4",
+   "minecraft:coarse_dirt*2"
+  ],
+  "ceiling": [
+   "minecraft:spruce_planks*4",
+   "minecraft:stone_bricks*4"
+  ],
+  "rock": "minecraft:tuff",
+  "trim": "minecraft:chiseled_stone_bricks",
+  "pillar": "minecraft:spruce_log",
+  "cap": "minecraft:chiseled_stone_bricks",
+  "light": "minecraft:lantern[hanging=true]",
+  "dim": "minecraft:redstone_lamp",
+  "rail": "minecraft:stone_brick_wall",
+  "stair": "minecraft:stone_brick_stairs"
+ },
+ "boss": {
+  "id": "nirncraft:hagraven|nirncraft:forsworn|minecraft:evoker",
+  "name": "Briar-Crone Ukawei of the Winterborn"
+ },
+ "books": {
+  "rivergate": {
+   "title": "The River-Gate Ledger",
+   "author": "Bailiff Blaise of Evermor",
+   "pages": [
+    "The Winterborn did not scale the river bluff; they came through the old Bjoulsae flood-culverts beneath the horse-paddocks.\n\nWe dropped the iron portcullis on the third cellar, trapping their Briar-Crone below with the old Dukes' coffers."
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "culvert_gate",
+   "name": "The Bjoulsae Sluice-Gate",
+   "at": [0, 0],
+   "y": -8,
+   "half": [5, 6],
+   "h": 12,
+   "role": "start",
+   "doors": {"s": 8},
+   "ops": [
+    {"op": "landing", "y": 8, "depth": 3, "stairs": 3},
+    {"op": "pillars", "inset": 2, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "scatter", "block": "minecraft:cobweb", "on": "ceiling", "chance": 14},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Winterborn Sapper", "mode": "awake", "n": 2},
+     {"id": "minecraft:skeleton", "name": "River-Guard Corpse", "mode": "sleep", "n": 1, "where": "wall"}
+    ]}
+   ]
+  },
+  {
+   "id": "toll_west",
+   "name": "Barge-Toll Vault",
+   "at": [-1, 0],
+   "y": -8,
+   "half": [4, 4],
+   "h": 6,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 3},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Winterborn Skirmisher", "mode": "sleep", "at": [[-3, -3], [-3, 3]]}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "nirncraft:chests/dungeon_common", "face": "w"}
+   ]
+  },
+  {
+   "id": "tack_east",
+   "name": "The Subterranean Tack-Room",
+   "at": [1, 0],
+   "y": -8,
+   "half": [4, 4],
+   "h": 6,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 3},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Winterborn Raider", "mode": "ambush", "n": 2, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [-3, -3], "table": "nirncraft:chests/dungeon_minor", "face": "e"}
+   ]
+  },
+  {
+   "id": "flooded_rotunda",
+   "name": "The River-Lock Rotunda",
+   "at": [0, -1],
+   "y": -10,
+   "half": [5, 5],
+   "h": 10,
+   "ops": [
+    {"op": "bowl", "tiers": 2, "width": 2, "step": 1},
+    {"op": "pillars", "inset": 1, "every": 4},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Winterborn Peltast", "mode": "awake", "n": 2, "where": "ledge"},
+     {"id": "minecraft:skeleton", "name": "Evermor Watchman", "mode": "ambush", "n": 2, "where": "ledge"}
+    ]},
+    {"op": "feature", "id": "setpiece:river_lock_rotunda"}
+   ]
+  },
+  {
+   "id": "totem_gallery",
+   "name": "Gallery of Antler Totems",
+   "at": [-1, -1],
+   "y": -14,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "fill", "from": [-3, -3, 0], "to": [-2, -3, 0], "block": "minecraft:bone_block"},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Totem Carver", "mode": "sleep", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "nirncraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "grain_cellar",
+   "name": "The Citadel Grain Vault",
+   "at": [1, -1],
+   "y": -14,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "scatter", "block": "minecraft:cobweb", "on": "floor", "chance": 16, "salt": 450},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Winterborn Pillager", "mode": "sleep", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [-3, 3], "table": "nirncraft:chests/dungeon_common", "face": "e"}
+   ]
+  },
+  {
+   "id": "dukes_crypt",
+   "name": "Crypt of the Horse-Dukes",
+   "at": [0, -2],
+   "y": -13,
+   "half": [5, 5],
+   "h": 12,
+   "ops": [
+    {"op": "pillars", "inset": 1, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "blocks", "list": [
+     {"at": [0, -3, 0], "block": "minecraft:chiseled_stone_bricks"}
+    ]},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Winterborn Briarheart", "mode": "elite", "at": [[0, -2]]},
+     {"id": "minecraft:skeleton", "name": "Risen Horse-Lord", "mode": "ambush", "n": 3, "where": "wall"}
+    ]},
+    {"op": "feature", "id": "setpiece:horse_dukes_crypt"}
+   ]
+  },
+  {
+   "id": "barrack_west",
+   "name": "Old Guard Barracks",
+   "at": [-1, -2],
+   "y": -17,
+   "half": [4, 5],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Winterborn Warrior", "mode": "sleep", "at": [[-3, -3], [-3, 0], [-3, 3], [3, 3]]}
+    ]},
+    {"op": "chest", "at": [3, -3], "table": "nirncraft:chests/dungeon_common", "face": "w"}
+   ]
+  },
+  {
+   "id": "armory_east",
+   "name": "The Lance Armory",
+   "at": [1, -2],
+   "y": -17,
+   "half": [4, 5],
+   "h": 9,
+   "ops": [
+    {"op": "pillars", "inset": 1, "every": 4},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "scatter", "block": "minecraft:skeleton_skull", "on": "floor", "chance": 14, "salt": 451},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Armored Lancer", "mode": "ambush", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [3, 4], "table": "nirncraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "harpy_roost",
+   "name": "Subterranean Harpy Nest",
+   "at": [-1, -3],
+   "y": -21,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:harpy|minecraft:vex", "name": "Bjoulsae Harpy", "mode": "awake", "n": 2, "where": "any"}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "nirncraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "briar_sanctum",
+   "name": "The Briar-Crone's Undercroft",
+   "at": [0, -3],
+   "y": -22,
+   "half": [6, 6],
+   "h": 16,
+   "role": "boss",
+   "ops": [
+    {"op": "pillars", "inset": 2, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "walllights", "every": 4, "y": 10},
+    {"op": "boss", "at": [0, -2], "dais": 2},
+    {"op": "fill", "from": [-6, -6, 1], "to": [6, -6, 9], "block": "minecraft:chiseled_stone_bricks"},
+    {"op": "chest", "at": [0, -5], "table": "nirncraft:chests/dungeon_boss", "face": "s", "capstone": true},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Winterborn Sworn-Guard", "mode": "sleep", "at": [[-4, 3], [4, 3], [-4, 0], [4, 0]]}
+    ]}
+   ]
+  },
+  {
+   "id": "bailiff_office",
+   "name": "The Bailiff's Counting Room",
+   "at": [1, -3],
+   "y": -21,
+   "half": [4, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "fill", "from": [3, -3, 0], "to": [3, -3, 0], "block": "trim"},
+    {"op": "lectern", "at": [3, -3, 1], "book": "rivergate", "candle": true, "face": "w"},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Winterborn Shaman", "mode": "sleep", "n": 2, "where": "wall"}
+    ]}
+   ]
+  },
+  {
+   "id": "river_seep",
+   "name": "Bjoulsae Seepage Basin",
+   "at": [-2, -1],
+   "y": -14,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "flood", "sink": 3, "margin": 1, "causeway": 3, "rails": false},
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:drowned", "name": "River Corpse", "mode": "awake", "n": 1, "where": "lane"}
+    ]}
+   ]
+  },
+  {
+   "id": "ducal_treasury",
+   "name": "The Ducal Coffer Room",
+   "at": [2, -1],
+   "y": -14,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "chest", "at": [0, -3], "table": "nirncraft:chests/dungeon_cache", "face": "s"},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Coffer Plunderer", "mode": "sleep", "n": 2, "where": "wall"}
+    ]}
+   ]
+  },
+  {
+   "id": "drain_passage",
+   "name": "Old Culvert Walk",
+   "at": [-2, -2],
+   "y": -18,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:forsworn|minecraft:vindicator", "name": "Culvert Scout", "mode": "sleep", "n": 2, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [0, 3], "table": "nirncraft:chests/dungeon_minor", "face": "n"}
+   ]
+  }
+ ],
+ "links": [
+  {"a": "culvert_gate", "b": "toll_west"},
+  {"a": "culvert_gate", "b": "tack_east"},
+  {"a": "culvert_gate", "b": "flooded_rotunda"},
+  {"a": "flooded_rotunda", "b": "totem_gallery"},
+  {"a": "flooded_rotunda", "b": "grain_cellar"},
+  {"a": "totem_gallery", "b": "river_seep"},
+  {"a": "grain_cellar", "b": "ducal_treasury"},
+  {"a": "flooded_rotunda", "b": "dukes_crypt", "gate": "flooded_rotunda"},
+  {"a": "dukes_crypt", "b": "barrack_west"},
+  {"a": "dukes_crypt", "b": "armory_east"},
+  {"a": "barrack_west", "b": "harpy_roost"},
+  {"a": "armory_east", "b": "bailiff_office"},
+  {"a": "bailiff_office", "b": "briar_sanctum", "gate": "bailiff_office", "trap": true},
+  {"a": "barrack_west", "b": "drain_passage"},
+  {"a": "river_seep", "b": "drain_passage"}
+ ]
+}

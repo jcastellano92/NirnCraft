@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:chitin"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:chitin"
+      }
+    ]
+  }
+}

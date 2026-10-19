@@ -232,7 +232,7 @@ patches, so a large region needs repeated patches, not more kinds. Pellitine (8.
 
 ### 3.2 Coast and water
 
-* **Senchal harbour.** Arena puts sea where Skycraft has land south of Torval (SCALE 5.6). Cut a deep bay so Senchal
+* **Senchal harbour.** Arena puts sea where NirnCraft has land south of Torval (SCALE 5.6). Cut a deep bay so Senchal
   sits on a real harbour and Torval is near the water. Verify against the lore map before editing.
 * **Pellitine rivers.** Three rivers (named in data, our names) run from the escarpment springs to Topal Bay, braided
   on the floodplain with levees; Corinthe's canals take from the middle one. Add to `hydrology.json`.

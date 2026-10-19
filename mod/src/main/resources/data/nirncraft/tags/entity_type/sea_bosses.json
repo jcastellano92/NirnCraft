@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:dreugh_queen",
+    "nirncraft:sea_leviathan",
+    {
+      "id": "nirncraft:sea_serpent",
+      "required": false
+    }
+  ]
+}

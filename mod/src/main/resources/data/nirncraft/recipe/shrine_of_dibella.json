@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " C ",
+    "SXS",
+    "SSS"
+  ],
+  "key": {
+    "C": "minecraft:candle",
+    "S": "minecraft:stone_bricks",
+    "X": "minecraft:pink_tulip"
+  },
+  "result": {
+    "id": "nirncraft:shrine_of_dibella"
+  }
+}

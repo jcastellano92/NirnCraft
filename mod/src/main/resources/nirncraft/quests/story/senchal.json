@@ -1,0 +1,680 @@
+{
+  "region": "elsweyr/senchal",
+  "province": "elsweyr",
+  "line": "story_senchal",
+  "category": "main",
+  "title": "Winds Over the Lower Sweet",
+  "summary": "Between Palace Hill and the Lower Sweet boilers of Senchal, Khenarthi temple-wardens and harbour sailors hunt a skooma-lord cartel hijacking sugar-hulks in the Topal straits.",
+  "why": [
+    "senchal.L7.palace_hill",
+    "senchal.L7.lower_sweet",
+    "senchal.L7.sailors_and_boilers"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "senchal",
+    "places": [
+      "senchal",
+      "passage_of_dadna_ghaten",
+      "droae_pit",
+      "nihai",
+      "baaal_sugar_farm",
+      "qasha_ruins",
+      "hunt_masters_ruins",
+      "black_heights",
+      "thaae_cove",
+      "baathazir_docks",
+      "mamar",
+      "jaar_harbor",
+      "roadside_saffron_tent"
+    ],
+    "npc": "story_senchal_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "Three spice-dhows bound for Senchal's Palace Hill quays were lured into Crimson Cove by false lantern-signals, and their sugar casks reappeared in the Lower Sweet boiler-dens.",
+    "notice": "SENCHAL HARBOUR MASTER & KHENARTHI TEMPLE: Mariners and blades wanted to break the false-beacon ring operating between Senchal and Crimson Cove."
+  },
+  "npcs": [
+    {
+      "id": "story_senchal_hook_npc",
+      "name": "Warden of Senchal",
+      "role": "guard",
+      "place": "senchal",
+      "greet": "Three spice-dhows bound for Senchal's Palace Hill quays were lured into Crimson Cove by false lantern-signals, and their sugar casks reappeared in the Lower Sweet boiler-dens.",
+      "talk": [
+        "The trouble across Senchal began when sealed dispatches started bypassing Senchal.",
+        "If you mean to help the Maritime Court of Senchal, start by checking the trail between Senchal and Senchal Palace."
+      ]
+    },
+    {
+      "id": "story_senchal_envoy_npc",
+      "name": "Chronicler of Senchal",
+      "role": "scholar",
+      "place": "senchal_palace",
+      "greet": "Keep your voice low—everyone at Senchal Palace is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from Senchal Palace toward Senchal Merchant Square before they vanished into the brush.",
+        "Bring any ciphered tallies back to Senchal so Admiral-Factor Zaydak can see the proof."
+      ]
+    },
+    {
+      "id": "story_senchal_scout_npc",
+      "name": "Outrider of Senchal Merchant Square",
+      "role": "scout",
+      "place": "senchal_merchant_square",
+      "greet": "You made good time from Senchal Palace. The saboteurs have fortified the approaches near The Sweet Breezes Inn.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at The Sweet Breezes Inn with a picked guard.",
+        "Once The Sweet Breezes Inn is cleared, return to Senchal to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_senchal_steward_npc",
+      "name": "Speaker of Senchal",
+      "role": "steward",
+      "place": "senchal",
+      "greet": "Admiral-Factor Zaydak awaits word on whether the crisis in Senchal has been contained.",
+      "talk": [
+        "The elders of Senchal have prepared the concord table for your return.",
+        "All of Senchal owes you a debt for standing between Senchal and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_senchal_boss_01": {
+      "name": "Usurper-Captain of Senchal (1)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "senchal",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_senchal_boss_02": {
+      "name": "Usurper-Captain of Senchal Palace (2)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "senchal_palace",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_senchal_boss_03": {
+      "name": "Usurper-Captain of Senchal Merchant Square (3)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "senchal_merchant_square",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_senchal_boss_04": {
+      "name": "Usurper-Captain of The Sweet Breezes Inn (4)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "the_sweet_breezes_inn",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_senchal_boss_05": {
+      "name": "Usurper-Captain of Black Kiergo (5)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "black_kiergo",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_senchal_boss_06": {
+      "name": "Usurper-Captain of Senchal Customs House (6)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "senchal_customs_house",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_senchal_boss_07": {
+      "name": "Usurper-Captain of Forsaken Citadel (7)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "forsaken_citadel",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_senchal_boss_08": {
+      "name": "Usurper-Captain of West Sentry Tower (8)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "west_sentry_tower",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_senchal_scene_01": [
+      "Warden of Senchal: Examine these marks recovered near Senchal—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Senchal and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Senchal, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_02": [
+      "Warden of Senchal: Examine these marks recovered near Senchal Palace—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Senchal Palace and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Senchal Palace, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_03": [
+      "Warden of Senchal: Examine these marks recovered near Senchal Merchant Square—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Senchal Merchant Square and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Senchal Merchant Square, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_04": [
+      "Warden of Senchal: Examine these marks recovered near The Sweet Breezes Inn—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between The Sweet Breezes Inn and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at The Sweet Breezes Inn, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_05": [
+      "Warden of Senchal: Examine these marks recovered near Black Kiergo—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Black Kiergo and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Black Kiergo, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_06": [
+      "Warden of Senchal: Examine these marks recovered near Senchal Customs House—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Senchal Customs House and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Senchal Customs House, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_07": [
+      "Warden of Senchal: Examine these marks recovered near Forsaken Citadel—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Forsaken Citadel and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Forsaken Citadel, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_08": [
+      "Warden of Senchal: Examine these marks recovered near West Sentry Tower—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between West Sentry Tower and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at West Sentry Tower, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_09": [
+      "Warden of Senchal: Examine these marks recovered near Wreck of the Lonely Barrel—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Wreck of the Lonely Barrel and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Wreck of the Lonely Barrel, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_10": [
+      "Warden of Senchal: Examine these marks recovered near Shrine Vaermina Elsweyr—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Shrine Vaermina Elsweyr and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Shrine Vaermina Elsweyr, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_11": [
+      "Warden of Senchal: Examine these marks recovered near Jothazir Rest—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Jothazir Rest and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Jothazir Rest, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_12": [
+      "Warden of Senchal: Examine these marks recovered near Jaar Harbor—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Jaar Harbor and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Jaar Harbor, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_13": [
+      "Warden of Senchal: Examine these marks recovered near Kheal Oasis—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Kheal Oasis and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Kheal Oasis, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_14": [
+      "Warden of Senchal: Examine these marks recovered near North Dragonscour—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between North Dragonscour and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at North Dragonscour, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_15": [
+      "Warden of Senchal: Examine these marks recovered near Tekomar Fort—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Tekomar Fort and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Tekomar Fort, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_16": [
+      "Warden of Senchal: Examine these marks recovered near Baathazir Docks—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Baathazir Docks and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Baathazir Docks, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_17": [
+      "Warden of Senchal: Examine these marks recovered near Shrine Mephala Elsweyr—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Shrine Mephala Elsweyr and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Shrine Mephala Elsweyr, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_18": [
+      "Warden of Senchal: Examine these marks recovered near South Guard Ruins—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between South Guard Ruins and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at South Guard Ruins, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_19": [
+      "Warden of Senchal: Examine these marks recovered near Nakha Camp—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Nakha Camp and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Nakha Camp, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_20": [
+      "Warden of Senchal: Examine these marks recovered near Shrine Nocturnal Elsweyr—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Shrine Nocturnal Elsweyr and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Shrine Nocturnal Elsweyr, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_21": [
+      "Warden of Senchal: Examine these marks recovered near Mamar—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Mamar and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Mamar, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_22": [
+      "Warden of Senchal: Examine these marks recovered near Raset Nest—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Raset Nest and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Raset Nest, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_23": [
+      "Warden of Senchal: Examine these marks recovered near Shae Oasis—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Shae Oasis and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Shae Oasis, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_24": [
+      "Warden of Senchal: Examine these marks recovered near Khenarthis Breath Temple—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Khenarthis Breath Temple and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Khenarthis Breath Temple, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_25": [
+      "Warden of Senchal: Examine these marks recovered near Potentates Retreat—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Potentates Retreat and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Potentates Retreat, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_26": [
+      "Warden of Senchal: Examine these marks recovered near The Forgotten Mane—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between The Forgotten Mane and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at The Forgotten Mane, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_27": [
+      "Warden of Senchal: Examine these marks recovered near Shrine Hermaeus Mora Elsweyr—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Shrine Hermaeus Mora Elsweyr and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Shrine Hermaeus Mora Elsweyr, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_28": [
+      "Warden of Senchal: Examine these marks recovered near Zhan Khaj Crest—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Zhan Khaj Crest and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Zhan Khaj Crest, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_29": [
+      "Warden of Senchal: Examine these marks recovered near Mara Oasis—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Mara Oasis and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Mara Oasis, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_30": [
+      "Warden of Senchal: Examine these marks recovered near Zazaradis Quarry and Mine—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Zazaradis Quarry and Mine and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Zazaradis Quarry and Mine, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_31": [
+      "Warden of Senchal: Examine these marks recovered near Roadside Saffron Tent—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Roadside Saffron Tent and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Roadside Saffron Tent, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_32": [
+      "Warden of Senchal: Examine these marks recovered near Thaae Cove—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Thaae Cove and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Thaae Cove, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_33": [
+      "Warden of Senchal: Examine these marks recovered near Dadonar Encampment—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Dadonar Encampment and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Dadonar Encampment, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_34": [
+      "Warden of Senchal: Examine these marks recovered near Black Heights—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Black Heights and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Black Heights, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_35": [
+      "Warden of Senchal: Examine these marks recovered near South Dragonscour—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between South Dragonscour and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at South Dragonscour, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_36": [
+      "Warden of Senchal: Examine these marks recovered near Doomstone Keep—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Doomstone Keep and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Doomstone Keep, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_37": [
+      "Warden of Senchal: Examine these marks recovered near Droae Pit—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Droae Pit and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Droae Pit, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_38": [
+      "Warden of Senchal: Examine these marks recovered near Drosha Hollow—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Drosha Hollow and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Drosha Hollow, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_39": [
+      "Warden of Senchal: Examine these marks recovered near Quinrawl Peninsula—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Quinrawl Peninsula and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Quinrawl Peninsula, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_40": [
+      "Warden of Senchal: Examine these marks recovered near Baaal Sugar Farm—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Baaal Sugar Farm and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Baaal Sugar Farm, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_41": [
+      "Warden of Senchal: Examine these marks recovered near Passage of Dadna Ghaten—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Passage of Dadna Ghaten and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Passage of Dadna Ghaten, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_42": [
+      "Warden of Senchal: Examine these marks recovered near Takoal Camp—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Takoal Camp and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Takoal Camp, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_43": [
+      "Warden of Senchal: Examine these marks recovered near Wreck of the Jolly Flagon—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Wreck of the Jolly Flagon and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Wreck of the Jolly Flagon, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_44": [
+      "Warden of Senchal: Examine these marks recovered near Mataae Cave—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Mataae Cave and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Mataae Cave, then bring the recovered charter back to Senchal."
+    ],
+    "story_senchal_scene_45": [
+      "Warden of Senchal: Examine these marks recovered near Shrine of the Masser—they match the cabal troubling Senchal.",
+      "Chronicler of Senchal: The seal impressions cite the old charters of the Maritime Court of Senchal word for word.",
+      "Outrider of Senchal Merchant Square: Our scouts spotted lantern-signals flashing between Shrine of the Masser and The Sweet Breezes Inn at dusk.",
+      "Speaker of Senchal: Strike swiftly at Shrine of the Masser, then bring the recovered charter back to Senchal."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_senchal_01_opening",
+      "order": 1,
+      "title": "Lanterns on the Topal Tide",
+      "region": "elsweyr/senchal",
+      "category": "main",
+      "giver": "story_senchal_hook_npc",
+      "start": "npc:story_senchal_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "senchal.L7.palace_hill",
+        "senchal.L7.lower_sweet"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Senchal and Senchal Palace in Senchal.",
+      "places": [
+        "senchal",
+        "senchal_palace"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "senchal",
+          "objective": "Speak with the Warden at Senchal and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "senchal_palace",
+          "objective": "Examine the disturbed boundary markers at Senchal Palace"
+        },
+        {
+          "id": 30,
+          "place": "senchal",
+          "objective": "Return the recovered seal-impression to the Chronicler at Senchal"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "senchal",
+          "text": "Speak with the Warden at Senchal and inspect the contested tallies",
+          "scene": "story_senchal_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "senchal_palace",
+          "text": "Examine the disturbed boundary markers at Senchal Palace"
+        },
+        {
+          "type": "go",
+          "place": "senchal",
+          "text": "Return the recovered seal-impression to the Chronicler at Senchal"
+        }
+      ],
+      "consequence": "world_state:senchal_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_senchal_02_trail",
+      "order": 2,
+      "title": "Boilers of the Lower Sweet",
+      "region": "elsweyr/senchal",
+      "category": "main",
+      "giver": "story_senchal_envoy_npc",
+      "start": "auto",
+      "prereq": "story_senchal_01_opening",
+      "requires": [
+        "story_senchal_01_opening"
+      ],
+      "why": [
+        "senchal.L7.lower_sweet",
+        "senchal.L7.sailors_and_boilers"
+      ],
+      "summary": "Follow the conspirators' supply route from Senchal Palace to Senchal Merchant Square and seize their cipher-ledger.",
+      "places": [
+        "senchal_palace",
+        "senchal_merchant_square"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "senchal_palace",
+          "objective": "Track the night-couriers departing Senchal Palace"
+        },
+        {
+          "id": 20,
+          "place": "senchal_merchant_square",
+          "objective": "Drive off the cabal outriders at Senchal Merchant Square and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "senchal_palace",
+          "objective": "Deliver the cipher-box to the expedition chronicler at Senchal Palace"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "senchal_palace",
+          "text": "Track the night-couriers departing Senchal Palace",
+          "scene": "story_senchal_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "senchal_merchant_square",
+          "text": "Drive off the cabal outriders at Senchal Merchant Square and seize their cipher-box",
+          "boss": "story_senchal_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "senchal_palace",
+          "text": "Deliver the cipher-box to the expedition chronicler at Senchal Palace"
+        }
+      ],
+      "consequence": "world_state:senchal_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_senchal_03_sanctum",
+      "order": 3,
+      "title": "The Crimson Cove Hulks",
+      "region": "elsweyr/senchal",
+      "category": "main",
+      "giver": "story_senchal_scout_npc",
+      "start": "auto",
+      "prereq": "story_senchal_02_trail",
+      "requires": [
+        "story_senchal_02_trail"
+      ],
+      "why": [
+        "senchal.L7.sailors_and_boilers",
+        "senchal.L8.khenarthi_winds"
+      ],
+      "summary": "Secure the outer wards between Senchal Merchant Square and The Sweet Breezes Inn to lay bare the cabal's stronghold.",
+      "places": [
+        "senchal_merchant_square",
+        "the_sweet_breezes_inn"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "senchal_merchant_square",
+          "objective": "Meet the outrider scout at Senchal Merchant Square to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "the_sweet_breezes_inn",
+          "objective": "Scout the fortified threshold at The Sweet Breezes Inn and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "senchal",
+          "objective": "Carry the ward-key back to the council table at Senchal"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "senchal_merchant_square",
+          "text": "Meet the outrider scout at Senchal Merchant Square to decode the sanctum approach",
+          "scene": "story_senchal_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "the_sweet_breezes_inn",
+          "text": "Scout the fortified threshold at The Sweet Breezes Inn and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "senchal",
+          "text": "Carry the ward-key back to the council table at Senchal"
+        }
+      ],
+      "consequence": "world_state:senchal_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_senchal_04_finale",
+      "order": 4,
+      "title": "Khenarthi's Fair Wind",
+      "region": "elsweyr/senchal",
+      "category": "main",
+      "giver": "story_senchal_steward_npc",
+      "start": "auto",
+      "prereq": "story_senchal_03_sanctum",
+      "requires": [
+        "story_senchal_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "senchal.L7.palace_hill",
+        "senchal.L8.khenarthi_winds"
+      ],
+      "summary": "Storm the cabal stronghold at The Sweet Breezes Inn and witness Admiral-Factor Zaydak seal the regional concord at Senchal.",
+      "places": [
+        "the_sweet_breezes_inn",
+        "senchal"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "the_sweet_breezes_inn",
+          "objective": "Storm the inner chamber at The Sweet Breezes Inn and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "the_sweet_breezes_inn",
+          "objective": "Recover the stolen charter-seal of Senchal from The Sweet Breezes Inn"
+        },
+        {
+          "id": 30,
+          "place": "senchal",
+          "objective": "Present the charter-seal at Senchal to restore peace across Senchal"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "the_sweet_breezes_inn",
+          "text": "Storm the inner chamber at The Sweet Breezes Inn and defeat the cabal ringleader",
+          "boss": "story_senchal_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "the_sweet_breezes_inn",
+          "text": "Recover the stolen charter-seal of Senchal from The Sweet Breezes Inn"
+        },
+        {
+          "type": "go",
+          "place": "senchal",
+          "text": "Present the charter-seal at Senchal to restore peace across Senchal",
+          "scene": "story_senchal_scene_04"
+        }
+      ],
+      "consequence": "world_state:senchal_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Senchal"
+      }
+    }
+  ]
+}

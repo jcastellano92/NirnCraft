@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/sea_leviathan_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 2759226
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 10113216
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "weights": {
+    "nirncraft:small_antlers": 0.1,
+    "nirncraft:large_antlers": 0.1,
+    "nirncraft:sabre_cat_tooth": 0.1,
+    "nirncraft:mudcrab_chitin": 0.25,
+    "nirncraft:slaughterfish_scales": 0.1,
+    "nirncraft:horker_tusk": 2.0,
+    "nirncraft:mammoth_tusk": 4.0,
+    "nirncraft:monarch_wing": 0.1,
+    "nirncraft:blue_butterfly_wing": 0.1,
+    "nirncraft:blue_dartwing": 0.1,
+    "nirncraft:torchbug_thorax": 0.1,
+    "nirncraft:luna_moth_wing": 0.1
+  }
+}

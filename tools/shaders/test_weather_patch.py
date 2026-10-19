@@ -62,10 +62,10 @@ class WeatherPatchTest(unittest.TestCase):
             solar.patch_zip(target,target)
             PATCH.patch_shaderpack_zip(target)
             with zipfile.ZipFile(target) as archive:
-                self.assertIn(b"skycraftSunHorizonTex",archive.read("shaders/lib/uniforms.glsl"))
+                self.assertIn(b"nirncraftSunHorizonTex",archive.read("shaders/lib/uniforms.glsl"))
 
     def test_circular_wind_keeps_wrap_neighbors_near_north(self):
-        shader = (ROOT / "mod/src/main/resources/assets/skycraft/shaders/include/wind.glsl").read_text()
+        shader = (ROOT / "mod/src/main/resources/assets/nirncraft/shaders/include/wind.glsl").read_text()
         self.assertIn("fract(a+(fract(b-a+0.5)-0.5)*weight+1.0)",shader)
         def mix(a,b,weight): return (a+((b-a+0.5)%1-0.5)*weight+1)%1
         for first,second in ((359,1),(355,5),(1,359),(5,355)):
@@ -74,7 +74,7 @@ class WeatherPatchTest(unittest.TestCase):
         self.assertAlmostEqual(90,mix(60/360,120/360,0.5)*360)
 
     def test_baked_volume_has_wrapping_slice_gutters(self):
-        atlas = Image.open(ROOT / "mod/src/main/resources/assets/skycraft/textures/environment/cloud_noise_volume.png")
+        atlas = Image.open(ROOT / "mod/src/main/resources/assets/nirncraft/textures/environment/cloud_noise_volume.png")
         self.assertEqual((528, 528), atlas.size)
         for layer in range(64):
             x, y = layer % 8 * 66, layer // 8 * 66
@@ -89,7 +89,7 @@ class WeatherPatchTest(unittest.TestCase):
         self.assertNotIn("tracePosM.xz *=", density)
         self.assertNotIn("syncedTime", density)
         self.assertNotIn("windDir.x * wind,", density)
-        self.assertIn("wind *= SkycraftWeatherTime()", density)
+        self.assertIn("wind *= NirnCraftWeatherTime()", density)
 
     def test_shader_upgrade_preserves_files_and_is_idempotent(self):
         source = next((ROOT / "dist/.cache").glob("*ComplementaryReimagined_r5.9.3.zip"), None)
@@ -107,54 +107,54 @@ class WeatherPatchTest(unittest.TestCase):
             self.assertEqual(first, second, "Rebuilding a patched pack must not accumulate shader edits")
             with zipfile.ZipFile(source) as z:
                 self.assertTrue(set(z.namelist()).issubset(first))
-            shared = "shaders/lib/atmospherics/clouds/skycraftDensity.glsl"
+            shared = "shaders/lib/atmospherics/clouds/nirncraftDensity.glsl"
             self.assertIn(shared, first)
-            fire = (ROOT / 'mod/src/main/java/com/skycraft/fire/client/FarFireRenderer.java').read_text()
+            fire = (ROOT / 'mod/src/main/java/com/nirncraft/fire/client/FarFireRenderer.java').read_text()
             marker = re.search(r'zip\.getEntry\("([^"]+)"\)', fire).group(1)
             self.assertIn(marker, first, 'Fire fallback must detect the actual installed shared smoke include')
             properties = first["shaders/shaders.properties"].decode()
-            for name in ("skycraftWeatherTex", "skycraftWeatherFarTex", "skycraftLightningTex"):
-                self.assertIn("customTexture." + name + " = skycraft:textures/environment/", properties)
+            for name in ("nirncraftWeatherTex", "nirncraftWeatherFarTex", "nirncraftLightningTex"):
+                self.assertIn("customTexture." + name + " = nirncraft:textures/environment/", properties)
             self.assertNotRegex(properties, r"shadow\.culling\s*=\s*(?:true|reversed)")
             # The package builder chains the legacy solar cleanup after this patch.
             sun_spec = importlib.util.spec_from_file_location("sun_patch", pathlib.Path(__file__).with_name("patch_sun_horizon.py"))
             sun_patch = importlib.util.module_from_spec(sun_spec)
             sun_spec.loader.exec_module(sun_patch)
-            self.assertIn("skycraftSunHorizonTex", sun_patch.patch_properties(properties))
+            self.assertIn("nirncraftSunHorizonTex", sun_patch.patch_properties(properties))
             for n in ("shaders/lib/lighting/cloudShadows.glsl", "shaders/lib/atmospherics/clouds/unboundClouds.glsl"):
-                self.assertIn(b'#include "/lib/atmospherics/clouds/skycraftDensity.glsl"', first[n])
+                self.assertIn(b'#include "/lib/atmospherics/clouds/nirncraftDensity.glsl"', first[n])
             for n in ("shaders/lib/antialiasing/taa.glsl", "shaders/program/dh_water.glsl", "shaders/program/gbuffers_water.glsl"):
-                self.assertIn(b"SKYCRAFT_CLOUD_DEPTH_RANGE", first[n], n)
-            self.assertIn(b"SKYCRAFT_VOLUME_DEPTH_CLIP", first["shaders/lib/atmospherics/volumetricLight/volumetricLight.glsl"])
+                self.assertIn(b"NIRNCRAFT_CLOUD_DEPTH_RANGE", first[n], n)
+            self.assertIn(b"NIRNCRAFT_VOLUME_DEPTH_CLIP", first["shaders/lib/atmospherics/volumetricLight/volumetricLight.glsl"])
             self.assertNotIn("GetShadowOnCloud(tracePos", PATCH.UNBOUND_CLOUDS_GLSL)
             self.assertNotIn("volumetricClouds.a *= 0.55", PATCH.UNBOUND_CLOUDS_GLSL)
             self.assertIn(b"DoWave_Foliage(playerPos.xyz, worldPos, 1.65);", first["shaders/lib/materials/materialMethods/wavingBlocks.glsl"])
             lighting = first["shaders/lib/lighting/mainLighting.glsl"]
             self.assertNotIn(b"normalize(pow(lightColor, vec3(0.37)))", lighting)
-            self.assertIn(b"SKYCRAFT_FINITE_DARK_HIGHLIGHT", lighting)
-            self.assertIn(b"SKYCRAFT_SKY_OCCLUSION", lighting)
-            self.assertIn(b"SKYCRAFT_PHASE_INDEPENDENT_FLASH", lighting)
+            self.assertIn(b"NIRNCRAFT_FINITE_DARK_HIGHLIGHT", lighting)
+            self.assertIn(b"NIRNCRAFT_SKY_OCCLUSION", lighting)
+            self.assertIn(b"NIRNCRAFT_PHASE_INDEPENDENT_FLASH", lighting)
             self.assertLess(lighting.index(b"sceneLighting *= moonPhaseInfluence"),
-                            lighting.index(b"sceneLighting += SkycraftLightningSurface"))
-            self.assertIn(b"SKYCRAFT_CHANNEL_RECEIVER", lighting)
-            self.assertIn("shaders/lib/atmospherics/skycraftLightning.glsl", first)
-            self.assertIn("SkycraftLightningCloud(cloudPlayerPos, cloudAltitude)", PATCH.UNBOUND_CLOUDS_GLSL)
-            self.assertLess(PATCH.CLOUD_DENSITY_GLSL.index('#include "/lib/atmospherics/skycraftLightning.glsl"'),
-                            PATCH.CLOUD_DENSITY_GLSL.index('vec3 SkycraftLightningCloud('))
+                            lighting.index(b"sceneLighting += NirnCraftLightningSurface"))
+            self.assertIn(b"NIRNCRAFT_CHANNEL_RECEIVER", lighting)
+            self.assertIn("shaders/lib/atmospherics/nirncraftLightning.glsl", first)
+            self.assertIn("NirnCraftLightningCloud(cloudPlayerPos, cloudAltitude)", PATCH.UNBOUND_CLOUDS_GLSL)
+            self.assertLess(PATCH.CLOUD_DENSITY_GLSL.index('#include "/lib/atmospherics/nirncraftLightning.glsl"'),
+                            PATCH.CLOUD_DENSITY_GLSL.index('vec3 NirnCraftLightningCloud('))
             self.assertNotIn("skyFlash * internalGlow", PATCH.UNBOUND_CLOUDS_GLSL)
             self.assertNotIn("texture2DLod(noisetex, streakPos.xy", PATCH.UNBOUND_CLOUDS_GLSL)
             self.assertNotIn("skyAerosol == 3) ? vec3(1.", PATCH.UNBOUND_CLOUDS_GLSL)
 
     def test_outdoor_lightning_is_blocked_under_roofs_but_roof_faces_stay_lit(self):
-        shader = (PATCH.ROOT / "mod/src/main/resources/assets/skycraft/shaders/include/lightning.glsl").read_text()
-        for function in ("SkycraftLightningVolume", "SkycraftLightningSurface"):
+        shader = (PATCH.ROOT / "mod/src/main/resources/assets/nirncraft/shaders/include/lightning.glsl").read_text()
+        for function in ("NirnCraftLightningVolume", "NirnCraftLightningSurface"):
             body = shader.split("vec3 " + function + "(", 1)[1].split("\n}", 1)[0]
-            self.assertIn("SkycraftOutdoorLightExposure(playerPos)", body)
+            self.assertIn("NirnCraftOutdoorLightExposure(playerPos)", body)
             self.assertIn("if (exposure <= 0.0) return vec3(0.0)", body)
-        old = "// SKYCRAFT_SHARED_AIR\nvoid DoAtmosphericFog(vec3 playerPos) { color = mix(color, vec4(fogColorM, 0.0), fog); }\nvoid DoWaterFog() {}\nDoBorderFog(color, skyFade, max(length(playerPos.xz), abs(playerPos.y)), VdotU, VdotS, dither);"
+        old = "// NIRNCRAFT_SHARED_AIR\nvoid DoAtmosphericFog(vec3 playerPos) { color = mix(color, vec4(fogColorM, 0.0), fog); }\nvoid DoWaterFog() {}\nDoBorderFog(color, skyFade, max(length(playerPos.xz), abs(playerPos.y)), VdotU, VdotS, dither);"
         upgraded = PATCH.patch_main_fog_glsl(old)
-        self.assertIn("fog *= SkycraftOutdoorLightExposure(playerPos)", upgraded)
-        self.assertIn("if (SkycraftOutdoorLightExposure(playerPos) > 0.0)", upgraded)
+        self.assertIn("fog *= NirnCraftOutdoorLightExposure(playerPos)", upgraded)
+        self.assertIn("if (NirnCraftOutdoorLightExposure(playerPos) > 0.0)", upgraded)
         self.assertEqual(upgraded, PATCH.patch_main_fog_glsl(upgraded))
         def exposure(depth):
             t = min(1.0, max(0.0, (depth-0.75)/1.25))
@@ -164,12 +164,12 @@ class WeatherPatchTest(unittest.TestCase):
         # Outdoor ground/roof top, air above it, or a real open shaft over its floor.
         for depth in (0, -1, -100):
             self.assertEqual(1, exposure(depth))
-        local = (PATCH.ROOT / "mod/src/main/resources/assets/skycraft/shaders/include/interior.glsl").read_text()
-        self.assertNotIn("SkycraftOutdoorLightExposure", local.split("vec3 SkycraftLocalLight", 1)[1])
+        local = (PATCH.ROOT / "mod/src/main/resources/assets/nirncraft/shaders/include/interior.glsl").read_text()
+        self.assertNotIn("NirnCraftOutdoorLightExposure", local.split("vec3 NirnCraftLocalLight", 1)[1])
 
     def test_upper_wind_cannot_fold_wisps_around_the_world_origin(self):
-        ice = PATCH.CLOUD_DENSITY_GLSL.split("float SkycraftHighCloudDensity", 1)[1].split("float SkycraftMiddleCloudDensity", 1)[0]
-        self.assertIn("SKYCRAFT_STABLE_ICE_FRAME", ice)
+        ice = PATCH.CLOUD_DENSITY_GLSL.split("float NirnCraftHighCloudDensity", 1)[1].split("float NirnCraftMiddleCloudDensity", 1)[0]
+        self.assertIn("NIRNCRAFT_STABLE_ICE_FRAME", ice)
         self.assertNotIn("dot(xz, wind)", ice)
         # Changing regional wind must have the same bounded displacement near
         # Whiterun and at the distant edges of Tamriel, rather than growing with XZ.
@@ -185,7 +185,7 @@ class WeatherPatchTest(unittest.TestCase):
         # Reference integration of a homogeneous slab must keep its optical depth
         # when the camera crosses its top or the adaptive budget changes.
         shader = PATCH.UNBOUND_CLOUDS_GLSL
-        self.assertIn("SKYCRAFT_COMPLETE_CLOUD_INTERVAL", shader)
+        self.assertIn("NIRNCRAFT_COMPLETE_CLOUD_INTERVAL", shader)
         self.assertNotIn("if (tracePos.y < lowerPlaneAltitude || tracePos.y > higherPlaneAltitude) break;", shader)
         for height in (20, 80, 650, 1020, 1200, 1536, 2048, 2048.01, 3000):
             for ray_y in (-1, -0.37, -0.03, 0.03, 0.37, 1):
@@ -212,7 +212,7 @@ class WeatherPatchTest(unittest.TestCase):
                 self.assertLess(float(match[1]), float(match[2]), match.group())
 
     def test_upgrade_older_cloud_colour_patch(self):
-        old = "// SKYCRAFT_CLOUD_COLORS\nvec4 skyCloudColW = vec4(0.0);\nfloat skyCloudRainF = clamp(max(rainFactor, skyCloudColW.r), 0.0, 1.0);\n"
+        old = "// NIRNCRAFT_CLOUD_COLORS\nvec4 skyCloudColW = vec4(0.0);\nfloat skyCloudRainF = clamp(max(rainFactor, skyCloudColW.r), 0.0, 1.0);\n"
         upgraded = PATCH.patch_cloud_colors_glsl(old)
         self.assertIn("float skyCloudRainF = 0.0;", upgraded)
         self.assertEqual(upgraded, PATCH.patch_cloud_colors_glsl(upgraded))

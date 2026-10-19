@@ -1,0 +1,72 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#minecraft:is_overworld",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/caves",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/coast",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/cold",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/dark_forest",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/forest",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/frozen_peaks",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/mountain",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/pine_forest",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/plains",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/reach",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/river",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/snowy_forest",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/swamp",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/tundra",
+      "required": false
+    },
+    {
+      "id": "#nirncraft:spawns/wilderness",
+      "required": false
+    },
+    "minecraft:plains",
+    "minecraft:snowy_slopes",
+    "minecraft:ocean"
+  ]
+}

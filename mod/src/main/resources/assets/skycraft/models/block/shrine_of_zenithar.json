@@ -1,8 +1,0 @@
-{
-  "parent": "skycraft:block/shrine",
-  "textures": {
-    "stone": "skycraft:block/shrine_stone",
-    "symbol": "skycraft:block/shrine_zenithar",
-    "top": "skycraft:block/shrine_zenithar_top"
-  }
-}

@@ -1,0 +1,65 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 60,
+          "modifier": {
+            "min": 2,
+            "max": 10,
+            "growth": 0.04,
+            "type": "nirncraft:scaled_gold"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 40
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "nirncraft:parts/gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:bone_meal_draugr",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar",
+          "weight": 4,
+          "modifier": [
+            {
+              "tag": "nirncraft:loot/ingredients",
+              "type": "nirncraft:regional_tag"
+            },
+            {
+              "count": 1,
+              "type": "minecraft:set_count"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 2,
+          "value": "nirncraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 16
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/misc/urn"
+}

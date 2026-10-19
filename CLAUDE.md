@@ -1,4 +1,4 @@
-# Skycraft: instructions for any Claude session
+# NirnCraft: instructions for any Claude session
 
 **Current platform: Minecraft 26.3, NeoForge 26.3.0.90, Java 25.** Read
 [`docs/NATIVE-26.3-PREVIEW.md`](docs/NATIVE-26.3-PREVIEW.md) before any build, server or client command.

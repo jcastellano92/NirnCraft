@@ -42,7 +42,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:whiterun_tundra"
+                  "nirncraft:whiterun_tundra"
                 ]
               },
               "then_run": {
@@ -454,7 +454,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:whiterun_plains"
+                  "nirncraft:whiterun_plains"
                 ]
               },
               "then_run": {
@@ -767,7 +767,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:pine_forest"
+                  "nirncraft:pine_forest"
                 ]
               },
               "then_run": {
@@ -1167,8 +1167,8 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:snowy_pine_forest",
-                  "skycraft:pale_heath"
+                  "nirncraft:snowy_pine_forest",
+                  "nirncraft:pale_heath"
                 ]
               },
               "then_run": {
@@ -1484,7 +1484,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:falkreath_forest"
+                  "nirncraft:falkreath_forest"
                 ]
               },
               "then_run": {
@@ -1830,7 +1830,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:rift_autumn_forest"
+                  "nirncraft:rift_autumn_forest"
                 ]
               },
               "then_run": {
@@ -2161,7 +2161,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:reach_crags"
+                  "nirncraft:reach_crags"
                 ]
               },
               "then_run": {
@@ -2573,7 +2573,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:reach_valley"
+                  "nirncraft:reach_valley"
                 ]
               },
               "then_run": {
@@ -2790,7 +2790,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:hjaalmarch_marsh"
+                  "nirncraft:hjaalmarch_marsh"
                 ]
               },
               "then_run": {
@@ -2981,7 +2981,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:eastmarch_volcanic_tundra"
+                  "nirncraft:eastmarch_volcanic_tundra"
                 ]
               },
               "then_run": {
@@ -3339,7 +3339,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:eastmarch_hot_springs"
+                  "nirncraft:eastmarch_hot_springs"
                 ]
               },
               "then_run": {
@@ -3697,7 +3697,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:pale_snowfield"
+                  "nirncraft:pale_snowfield"
                 ]
               },
               "then_run": {
@@ -3909,7 +3909,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:winterhold_glacier"
+                  "nirncraft:winterhold_glacier"
                 ]
               },
               "then_run": {
@@ -4084,7 +4084,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:throat_of_the_world"
+                  "nirncraft:throat_of_the_world"
                 ]
               },
               "then_run": {
@@ -4233,7 +4233,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:frosted_stone"
+                                "Name": "nirncraft:frosted_stone"
                               }
                             }
                           },
@@ -4313,7 +4313,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:snowy_slopes"
+                  "nirncraft:snowy_slopes"
                 ]
               },
               "then_run": {
@@ -4542,7 +4542,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:alpine_meadow"
+                  "nirncraft:alpine_meadow"
                 ]
               },
               "then_run": {
@@ -4870,7 +4870,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:skyrim_highlands"
+                  "nirncraft:skyrim_highlands"
                 ]
               },
               "then_run": {
@@ -5282,7 +5282,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:skyrim_coast"
+                  "nirncraft:skyrim_coast"
                 ]
               },
               "then_run": {
@@ -5476,7 +5476,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:frozen_shore"
+                  "nirncraft:frozen_shore"
                 ]
               },
               "then_run": {
@@ -5670,9 +5670,9 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:skyrim_river",
-                  "skycraft:frozen_river",
-                  "skycraft:skyrim_lake"
+                  "nirncraft:skyrim_river",
+                  "nirncraft:frozen_river",
+                  "nirncraft:skyrim_lake"
                 ]
               },
               "then_run": {
@@ -5874,10 +5874,10 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:sea_of_ghosts",
-                  "skycraft:deep_sea_of_ghosts",
-                  "skycraft:cold_ocean",
-                  "skycraft:deep_cold_ocean"
+                  "nirncraft:sea_of_ghosts",
+                  "nirncraft:deep_sea_of_ghosts",
+                  "nirncraft:cold_ocean",
+                  "nirncraft:deep_cold_ocean"
                 ]
               },
               "then_run": {
@@ -5977,7 +5977,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:solstheim_ashlands"
+                  "nirncraft:solstheim_ashlands"
                 ]
               },
               "then_run": {
@@ -5995,7 +5995,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   },
@@ -6141,7 +6141,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -6156,7 +6156,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -6193,7 +6193,7 @@
                           {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:ash_block"
+                              "Name": "nirncraft:ash_block"
                             }
                           }
                         ]
@@ -6245,14 +6245,14 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
                           {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:ash_block"
+                              "Name": "nirncraft:ash_block"
                             }
                           }
                         ]
@@ -6287,7 +6287,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   }
@@ -6299,7 +6299,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:solstheim_pine_forest"
+                  "nirncraft:solstheim_pine_forest"
                 ]
               },
               "then_run": {
@@ -6530,7 +6530,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:ash_block"
+                                "Name": "nirncraft:ash_block"
                               }
                             }
                           },
@@ -6630,8 +6630,8 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:heartlands",
-                  "skycraft:wayrest_farmland"
+                  "nirncraft:heartlands",
+                  "nirncraft:wayrest_farmland"
                 ]
               },
               "then_run": {
@@ -6848,7 +6848,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:great_forest"
+                  "nirncraft:great_forest"
                 ]
               },
               "then_run": {
@@ -7063,7 +7063,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:colovian_highlands"
+                  "nirncraft:colovian_highlands"
                 ]
               },
               "then_run": {
@@ -7460,7 +7460,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:gold_coast"
+                  "nirncraft:gold_coast"
                 ]
               },
               "then_run": {
@@ -7657,7 +7657,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:west_weald_vineyards"
+                  "nirncraft:west_weald_vineyards"
                 ]
               },
               "then_run": {
@@ -7854,10 +7854,10 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:nibenay_valley",
-                  "skycraft:lake_rumare_shore",
-                  "skycraft:cyrodiil_river",
-                  "skycraft:bjoulsae_river"
+                  "nirncraft:nibenay_valley",
+                  "nirncraft:lake_rumare_shore",
+                  "nirncraft:cyrodiil_river",
+                  "nirncraft:bjoulsae_river"
                 ]
               },
               "then_run": {
@@ -8059,11 +8059,11 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:blackwood_swamp",
-                  "skycraft:black_marsh_swamp",
-                  "skycraft:shadowfen",
-                  "skycraft:fen_edge",
-                  "skycraft:reedlands"
+                  "nirncraft:blackwood_swamp",
+                  "nirncraft:black_marsh_swamp",
+                  "nirncraft:shadowfen",
+                  "nirncraft:fen_edge",
+                  "nirncraft:reedlands"
                 ]
               },
               "then_run": {
@@ -8254,7 +8254,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:jerall_foothills"
+                  "nirncraft:jerall_foothills"
                 ]
               },
               "then_run": {
@@ -8651,9 +8651,9 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:temperate_beach",
-                  "skycraft:warm_beach",
-                  "skycraft:tropical_beach"
+                  "nirncraft:temperate_beach",
+                  "nirncraft:warm_beach",
+                  "nirncraft:tropical_beach"
                 ]
               },
               "then_run": {
@@ -8765,7 +8765,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:vvardenfell_ashlands"
+                  "nirncraft:vvardenfell_ashlands"
                 ]
               },
               "then_run": {
@@ -8783,7 +8783,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   },
@@ -8815,7 +8815,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -8830,7 +8830,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -8860,14 +8860,14 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:cracked_volcanic_rock"
+                                "Name": "nirncraft:cracked_volcanic_rock"
                               }
                             }
                           },
                           {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:ash_block"
+                              "Name": "nirncraft:ash_block"
                             }
                           }
                         ]
@@ -8902,14 +8902,14 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
                           {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:ash_block"
+                              "Name": "nirncraft:ash_block"
                             }
                           }
                         ]
@@ -8928,7 +8928,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:ash_block"
+                        "Name": "nirncraft:ash_block"
                       }
                     }
                   },
@@ -8944,7 +8944,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   }
@@ -8956,7 +8956,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:red_mountain"
+                  "nirncraft:red_mountain"
                 ]
               },
               "then_run": {
@@ -8990,7 +8990,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -9005,7 +9005,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:magma_volcanic_rock"
+                                "Name": "nirncraft:magma_volcanic_rock"
                               }
                             }
                           },
@@ -9020,7 +9020,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:cracked_volcanic_rock"
+                                "Name": "nirncraft:cracked_volcanic_rock"
                               }
                             }
                           },
@@ -9035,7 +9035,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:ash_block"
+                                "Name": "nirncraft:ash_block"
                               }
                             }
                           },
@@ -9057,7 +9057,7 @@
                           {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:volcanic_rock"
+                              "Name": "nirncraft:volcanic_rock"
                             }
                           }
                         ]
@@ -9092,14 +9092,14 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
                           {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:volcanic_rock"
+                              "Name": "nirncraft:volcanic_rock"
                             }
                           }
                         ]
@@ -9118,7 +9118,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   },
@@ -9134,7 +9134,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   }
@@ -9146,7 +9146,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:bitter_coast_swamp"
+                  "nirncraft:bitter_coast_swamp"
                 ]
               },
               "then_run": {
@@ -9434,7 +9434,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:grazelands"
+                  "nirncraft:grazelands"
                 ]
               },
               "then_run": {
@@ -9468,7 +9468,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -9498,7 +9498,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:ash_block"
+                                "Name": "nirncraft:ash_block"
                               }
                             }
                           },
@@ -9543,7 +9543,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -9581,7 +9581,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:west_gash"
+                  "nirncraft:west_gash"
                 ]
               },
               "then_run": {
@@ -9631,7 +9631,7 @@
                                   "then_run": {
                                     "type": "minecraft:block",
                                     "result_state": {
-                                      "Name": "skycraft:volcanic_rock"
+                                      "Name": "nirncraft:volcanic_rock"
                                     }
                                   }
                                 },
@@ -9747,7 +9747,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -9847,7 +9847,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:ascadian_isles"
+                  "nirncraft:ascadian_isles"
                 ]
               },
               "then_run": {
@@ -9970,7 +9970,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:azuras_coast"
+                  "nirncraft:azuras_coast"
                 ]
               },
               "then_run": {
@@ -10182,7 +10182,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:sheogorad"
+                  "nirncraft:sheogorad"
                 ]
               },
               "then_run": {
@@ -10394,7 +10394,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:molag_amur"
+                  "nirncraft:molag_amur"
                 ]
               },
               "then_run": {
@@ -10412,7 +10412,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   },
@@ -10444,7 +10444,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -10459,7 +10459,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -10474,7 +10474,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:magma_volcanic_rock"
+                                "Name": "nirncraft:magma_volcanic_rock"
                               }
                             }
                           },
@@ -10489,7 +10489,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:cracked_volcanic_rock"
+                                "Name": "nirncraft:cracked_volcanic_rock"
                               }
                             }
                           },
@@ -10511,7 +10511,7 @@
                           {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:ash_block"
+                              "Name": "nirncraft:ash_block"
                             }
                           }
                         ]
@@ -10546,14 +10546,14 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
                           {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:volcanic_rock"
+                              "Name": "nirncraft:volcanic_rock"
                             }
                           }
                         ]
@@ -10572,7 +10572,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   },
@@ -10588,7 +10588,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   }
@@ -10600,7 +10600,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:telvanni_mushroom_forest"
+                  "nirncraft:telvanni_mushroom_forest"
                 ]
               },
               "then_run": {
@@ -10818,7 +10818,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:deshaan_plains"
+                  "nirncraft:deshaan_plains"
                 ]
               },
               "then_run": {
@@ -10852,7 +10852,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -10882,7 +10882,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:ash_block"
+                                "Name": "nirncraft:ash_block"
                               }
                             }
                           },
@@ -10942,7 +10942,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -10980,8 +10980,8 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:stonefalls",
-                  "skycraft:ash_heath"
+                  "nirncraft:stonefalls",
+                  "nirncraft:ash_heath"
                 ]
               },
               "then_run": {
@@ -11015,7 +11015,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -11030,7 +11030,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:ash_block"
+                                "Name": "nirncraft:ash_block"
                               }
                             }
                           },
@@ -11045,7 +11045,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -11105,7 +11105,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -11147,7 +11147,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   }
@@ -11159,7 +11159,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:ash_shore"
+                  "nirncraft:ash_shore"
                 ]
               },
               "then_run": {
@@ -11177,7 +11177,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   },
@@ -11209,7 +11209,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
@@ -11239,14 +11239,14 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
                           {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:ash_block"
+                              "Name": "nirncraft:ash_block"
                             }
                           }
                         ]
@@ -11281,14 +11281,14 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:volcanic_rock"
+                                "Name": "nirncraft:volcanic_rock"
                               }
                             }
                           },
                           {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:ash_block"
+                              "Name": "nirncraft:ash_block"
                             }
                           }
                         ]
@@ -11323,7 +11323,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:volcanic_rock"
+                        "Name": "nirncraft:volcanic_rock"
                       }
                     }
                   }
@@ -11335,7 +11335,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:inner_sea"
+                  "nirncraft:inner_sea"
                 ]
               },
               "then_run": {
@@ -11429,7 +11429,7 @@
                           "then_run": {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:ash_block"
+                              "Name": "nirncraft:ash_block"
                             }
                           }
                         },
@@ -11450,7 +11450,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:deep_mire"
+                  "nirncraft:deep_mire"
                 ]
               },
               "then_run": {
@@ -11621,7 +11621,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:hist_grove"
+                  "nirncraft:hist_grove"
                 ]
               },
               "then_run": {
@@ -11792,8 +11792,8 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:mangrove_delta",
-                  "skycraft:valenwood_mangrove_coast"
+                  "nirncraft:mangrove_delta",
+                  "nirncraft:valenwood_mangrove_coast"
                 ]
               },
               "then_run": {
@@ -11969,7 +11969,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:murkmire"
+                  "nirncraft:murkmire"
                 ]
               },
               "then_run": {
@@ -12160,7 +12160,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:murky_river"
+                  "nirncraft:murky_river"
                 ]
               },
               "then_run": {
@@ -12260,7 +12260,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:anequina_badlands"
+                  "nirncraft:anequina_badlands"
                 ]
               },
               "then_run": {
@@ -12538,8 +12538,8 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:elsweyr_dunes",
-                  "skycraft:alikr_dunes"
+                  "nirncraft:elsweyr_dunes",
+                  "nirncraft:alikr_dunes"
                 ]
               },
               "then_run": {
@@ -12599,7 +12599,7 @@
                           {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:dune_sand"
+                              "Name": "nirncraft:dune_sand"
                             }
                           }
                         ]
@@ -12626,7 +12626,7 @@
                       "then_run": {
                         "type": "minecraft:block",
                         "result_state": {
-                          "Name": "skycraft:dune_sand"
+                          "Name": "nirncraft:dune_sand"
                         }
                       }
                     }
@@ -12671,8 +12671,8 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:elsweyr_savanna",
-                  "skycraft:warm_steppe"
+                  "nirncraft:elsweyr_savanna",
+                  "nirncraft:warm_steppe"
                 ]
               },
               "then_run": {
@@ -12819,10 +12819,10 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:pellitine_jungle",
-                  "skycraft:valenwood_rainforest",
-                  "skycraft:tsaesci_jungle",
-                  "skycraft:pyandonean_jungle_isles"
+                  "nirncraft:pellitine_jungle",
+                  "nirncraft:valenwood_rainforest",
+                  "nirncraft:tsaesci_jungle",
+                  "nirncraft:pyandonean_jungle_isles"
                 ]
               },
               "then_run": {
@@ -13022,7 +13022,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:sugar_fields"
+                  "nirncraft:sugar_fields"
                 ]
               },
               "then_run": {
@@ -13125,7 +13125,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:elsweyr_canyons"
+                  "nirncraft:elsweyr_canyons"
                 ]
               },
               "then_run": {
@@ -13403,7 +13403,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:graht_oak_forest"
+                  "nirncraft:graht_oak_forest"
                 ]
               },
               "then_run": {
@@ -13618,8 +13618,8 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:reapers_march",
-                  "skycraft:stormhaven"
+                  "nirncraft:reapers_march",
+                  "nirncraft:stormhaven"
                 ]
               },
               "then_run": {
@@ -13819,8 +13819,8 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:jungle_river",
-                  "skycraft:warm_river"
+                  "nirncraft:jungle_river",
+                  "nirncraft:warm_river"
                 ]
               },
               "then_run": {
@@ -13935,7 +13935,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:crystal_coast"
+                  "nirncraft:crystal_coast"
                 ]
               },
               "then_run": {
@@ -14014,7 +14014,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:crystal_block"
+                                "Name": "nirncraft:crystal_block"
                               }
                             }
                           },
@@ -14097,8 +14097,8 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:summerset_meadow",
-                  "skycraft:auridon_vineyards"
+                  "nirncraft:summerset_meadow",
+                  "nirncraft:auridon_vineyards"
                 ]
               },
               "then_run": {
@@ -14230,7 +14230,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:artaeum"
+                  "nirncraft:artaeum"
                 ]
               },
               "then_run": {
@@ -14377,7 +14377,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:summerset_shore"
+                  "nirncraft:summerset_shore"
                 ]
               },
               "then_run": {
@@ -14524,7 +14524,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:alikr_desert"
+                  "nirncraft:alikr_desert"
                 ]
               },
               "then_run": {
@@ -14589,7 +14589,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:dune_sand"
+                                "Name": "nirncraft:dune_sand"
                               }
                             }
                           },
@@ -14715,7 +14715,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:dragontail_mountains"
+                  "nirncraft:dragontail_mountains"
                 ]
               },
               "then_run": {
@@ -14906,7 +14906,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:craglorn"
+                  "nirncraft:craglorn"
                 ]
               },
               "then_run": {
@@ -15184,7 +15184,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:bangkorai"
+                  "nirncraft:bangkorai"
                 ]
               },
               "then_run": {
@@ -15581,7 +15581,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:iliac_scrub"
+                  "nirncraft:iliac_scrub"
                 ]
               },
               "then_run": {
@@ -15743,7 +15743,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:iliac_rainforest"
+                  "nirncraft:iliac_rainforest"
                 ]
               },
               "then_run": {
@@ -15908,7 +15908,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:tigonus_marsh"
+                  "nirncraft:tigonus_marsh"
                 ]
               },
               "then_run": {
@@ -16114,7 +16114,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:stros_mkai_coast"
+                  "nirncraft:stros_mkai_coast"
                 ]
               },
               "then_run": {
@@ -16264,7 +16264,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:glenumbra_moors"
+                  "nirncraft:glenumbra_moors"
                 ]
               },
               "then_run": {
@@ -16479,7 +16479,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:rivenspire"
+                  "nirncraft:rivenspire"
                 ]
               },
               "then_run": {
@@ -16825,7 +16825,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:haunted_wood"
+                  "nirncraft:haunted_wood"
                 ]
               },
               "then_run": {
@@ -17040,7 +17040,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:wrothgarian_mountains"
+                  "nirncraft:wrothgarian_mountains"
                 ]
               },
               "then_run": {
@@ -17422,7 +17422,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:atmoran_ice_waste"
+                  "nirncraft:atmoran_ice_waste"
                 ]
               },
               "then_run": {
@@ -17501,7 +17501,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:frosted_stone"
+                                "Name": "nirncraft:frosted_stone"
                               }
                             }
                           },
@@ -17543,7 +17543,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:frosted_stone"
+                                "Name": "nirncraft:frosted_stone"
                               }
                             }
                           },
@@ -17597,7 +17597,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:atmoran_frozen_forest"
+                  "nirncraft:atmoran_frozen_forest"
                 ]
               },
               "then_run": {
@@ -17913,7 +17913,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:kamal_snowfield"
+                  "nirncraft:kamal_snowfield"
                 ]
               },
               "then_run": {
@@ -17947,7 +17947,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:frosted_stone"
+                                "Name": "nirncraft:frosted_stone"
                               }
                             }
                           },
@@ -17962,7 +17962,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:frosted_stone"
+                                "Name": "nirncraft:frosted_stone"
                               }
                             }
                           },
@@ -18072,7 +18072,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:tang_mo_islands"
+                  "nirncraft:tang_mo_islands"
                 ]
               },
               "then_run": {
@@ -18269,7 +18269,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:ka_po_tun_steppe"
+                  "nirncraft:ka_po_tun_steppe"
                 ]
               },
               "then_run": {
@@ -18466,7 +18466,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:yokudan_desert"
+                  "nirncraft:yokudan_desert"
                 ]
               },
               "then_run": {
@@ -18531,7 +18531,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:dune_sand"
+                                "Name": "nirncraft:dune_sand"
                               }
                             }
                           },
@@ -18657,7 +18657,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:sunken_isles"
+                  "nirncraft:sunken_isles"
                 ]
               },
               "then_run": {
@@ -18807,7 +18807,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:thras_coral"
+                  "nirncraft:thras_coral"
                 ]
               },
               "then_run": {
@@ -18825,7 +18825,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:coral_stone"
+                        "Name": "nirncraft:coral_stone"
                       }
                     }
                   },
@@ -18857,7 +18857,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:coral_stone"
+                                "Name": "nirncraft:coral_stone"
                               }
                             }
                           },
@@ -18872,7 +18872,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:coral_stone"
+                                "Name": "nirncraft:coral_stone"
                               }
                             }
                           },
@@ -18947,7 +18947,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:coral_stone"
+                                "Name": "nirncraft:coral_stone"
                               }
                             }
                           },
@@ -18984,7 +18984,7 @@
                           "then_run": {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:coral_stone"
+                              "Name": "nirncraft:coral_stone"
                             }
                           }
                         },
@@ -19009,7 +19009,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:coral_stone"
+                        "Name": "nirncraft:coral_stone"
                       }
                     }
                   }
@@ -19021,7 +19021,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:crystal_spires"
+                  "nirncraft:crystal_spires"
                 ]
               },
               "then_run": {
@@ -19070,7 +19070,7 @@
                             "then_run": {
                               "type": "minecraft:block",
                               "result_state": {
-                                "Name": "skycraft:crystal_block"
+                                "Name": "nirncraft:crystal_block"
                               }
                             }
                           },
@@ -19183,7 +19183,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:rocky_shore"
+                  "nirncraft:rocky_shore"
                 ]
               },
               "then_run": {
@@ -19298,8 +19298,8 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:temperate_ocean",
-                  "skycraft:deep_temperate_ocean"
+                  "nirncraft:temperate_ocean",
+                  "nirncraft:deep_temperate_ocean"
                 ]
               },
               "then_run": {
@@ -19430,8 +19430,8 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:warm_ocean",
-                  "skycraft:deep_warm_ocean"
+                  "nirncraft:warm_ocean",
+                  "nirncraft:deep_warm_ocean"
                 ]
               },
               "then_run": {
@@ -19527,7 +19527,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "skycraft:coral_sea"
+                  "nirncraft:coral_sea"
                 ]
               },
               "then_run": {
@@ -19606,7 +19606,7 @@
                           "then_run": {
                             "type": "minecraft:block",
                             "result_state": {
-                              "Name": "skycraft:coral_stone"
+                              "Name": "nirncraft:coral_stone"
                             }
                           }
                         },
@@ -19631,7 +19631,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "skycraft:coral_stone"
+                        "Name": "nirncraft:coral_stone"
                       }
                     }
                   }
@@ -19852,7 +19852,7 @@
             "if_true": {
               "type": "minecraft:biome",
               "biome_is": [
-                "skycraft:dwemer_caverns"
+                "nirncraft:dwemer_caverns"
               ]
             },
             "then_run": {
@@ -19927,7 +19927,7 @@
             "if_true": {
               "type": "minecraft:biome",
               "biome_is": [
-                "skycraft:falmer_glow_caves"
+                "nirncraft:falmer_glow_caves"
               ]
             },
             "then_run": {
@@ -20019,7 +20019,7 @@
             "if_true": {
               "type": "minecraft:biome",
               "biome_is": [
-                "skycraft:ice_caves"
+                "nirncraft:ice_caves"
               ]
             },
             "then_run": {
@@ -20105,7 +20105,7 @@
             "if_true": {
               "type": "minecraft:biome",
               "biome_is": [
-                "skycraft:lava_caves"
+                "nirncraft:lava_caves"
               ]
             },
             "then_run": {
@@ -20134,7 +20134,7 @@
                         "then_run": {
                           "type": "minecraft:block",
                           "result_state": {
-                            "Name": "skycraft:magma_volcanic_rock"
+                            "Name": "nirncraft:magma_volcanic_rock"
                           }
                         }
                       },
@@ -20149,7 +20149,7 @@
                         "then_run": {
                           "type": "minecraft:block",
                           "result_state": {
-                            "Name": "skycraft:cracked_volcanic_rock"
+                            "Name": "nirncraft:cracked_volcanic_rock"
                           }
                         }
                       },
@@ -20171,7 +20171,7 @@
                       {
                         "type": "minecraft:block",
                         "result_state": {
-                          "Name": "skycraft:volcanic_rock"
+                          "Name": "nirncraft:volcanic_rock"
                         }
                       }
                     ]
@@ -20180,7 +20180,7 @@
                 {
                   "type": "minecraft:block",
                   "result_state": {
-                    "Name": "skycraft:volcanic_rock"
+                    "Name": "nirncraft:volcanic_rock"
                   }
                 }
               ]
@@ -20191,7 +20191,7 @@
             "if_true": {
               "type": "minecraft:biome",
               "biome_is": [
-                "skycraft:mushroom_grottos"
+                "nirncraft:mushroom_grottos"
               ]
             },
             "then_run": {
@@ -20283,7 +20283,7 @@
             "if_true": {
               "type": "minecraft:biome",
               "biome_is": [
-                "skycraft:ice_caves"
+                "nirncraft:ice_caves"
               ]
             },
             "then_run": {
@@ -20315,7 +20315,7 @@
                   "then_run": {
                     "type": "minecraft:block",
                     "result_state": {
-                      "Name": "skycraft:frosted_stone"
+                      "Name": "nirncraft:frosted_stone"
                     }
                   }
                 },
@@ -20333,7 +20333,7 @@
             "if_true": {
               "type": "minecraft:biome",
               "biome_is": [
-                "skycraft:lava_caves"
+                "nirncraft:lava_caves"
               ]
             },
             "then_run": {
@@ -20350,7 +20350,7 @@
                   "then_run": {
                     "type": "minecraft:block",
                     "result_state": {
-                      "Name": "skycraft:volcanic_rock"
+                      "Name": "nirncraft:volcanic_rock"
                     }
                   }
                 },

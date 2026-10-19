@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 5,
+          "modifier": [
+            {
+              "poison": false,
+              "type": "nirncraft:skyrim_potion"
+            },
+            {
+              "count": 1,
+              "type": "minecraft:set_count"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 1,
+          "modifier": [
+            {
+              "poison": true,
+              "type": "nirncraft:skyrim_potion"
+            },
+            {
+              "count": 1,
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:parts/potions"
+}

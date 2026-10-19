@@ -1,4 +1,4 @@
-// Far lights (aether_set_light_group): kept per group, indexed in 1 km cells with pixel-sized clusters for the far
+// Far lights (atlas_set_light_group): kept per group, indexed in 1 km cells with pixel-sized clusters for the far
 // distance, and each frame culled, ranked and binned into 32 px screen tiles for the far kernel (farLights).
 #pragma once
 #include <cstdint>
@@ -7,10 +7,10 @@
 #include <mutex>
 #include <vector>
 
-#include "aether/aether.h"
+#include "atlas/atlas.h"
 #include "gpu_layout.hpp"
 
-namespace aether {
+namespace atlas {
 
 struct LightIndex;
 
@@ -31,7 +31,7 @@ constexpr uint32_t LIGHTS_PER_TILE = 64;
 
 class Lights {
 public:
-    void setGroup(uint32_t group, const AetherLight* l, uint32_t n);
+    void setGroup(uint32_t group, const AtlasLight* l, uint32_t n);
     void setBudget(uint32_t maxPerFrame, float clusterDistance);
     // Appends this frame's lights, then the tile table (6 tiles per record: start, count) and the index lists (12 per
     // record), to `out` after whatever it holds; returns the number of lights (0: nothing appended).
@@ -46,4 +46,4 @@ private:
     float clusterDistance_ = 6000.0f;
 };
 
-}  // namespace aether
+}  // namespace atlas

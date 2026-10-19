@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/nightingale_bow",
+  "textures": {
+    "layer0": "nirncraft:item/nightingale_bow_pulling_0"
+  }
+}

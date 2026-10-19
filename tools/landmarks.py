@@ -1,4 +1,4 @@
-"""Generates Skycraft's landmark and dungeon data: the named sites of Skyrim and the shrines of the Daedric Princes
+"""Generates NirnCraft's landmark and dungeon data: the named sites of Skyrim and the shrines of the Daedric Princes
 across Tamriel (places files), their names (lang), and the structure / structure set JSON that builds every named
 site and every random dungeon of the wilds.
 
@@ -9,13 +9,13 @@ scaled to blocks with Whiterun at 0,0) is not part of the repo; only facts deriv
 positions and the shout each Word Wall teaches. Re-run after changing the tables below and commit the outputs.
 
 Outputs (relative to the repo root):
-  mod/src/main/resources/skycraft/tamriel/places/skyrim_landmarks.json   Skyrim's (and Solstheim's) named sites
-  mod/src/main/resources/skycraft/tamriel/places/tamriel_shrines.json    a shrine of every Prince in every province
-  mod/src/main/resources/skycraft/tamriel/places/index.json              (the shrines file appended if missing)
-  mod/src/main/lang/skycraft/landmarks.json                              place names
-  mod/src/main/resources/data/skycraft/worldgen/structure/**.json        dungeon / landmark structures
-  mod/src/main/resources/data/skycraft/worldgen/structure_set/**.json    their placements
-  mod/src/main/resources/data/skycraft/tags/worldgen/structure/{dungeons,road_destinations}.json
+  mod/src/main/resources/nirncraft/tamriel/places/skyrim_landmarks.json   Skyrim's (and Solstheim's) named sites
+  mod/src/main/resources/nirncraft/tamriel/places/tamriel_shrines.json    a shrine of every Prince in every province
+  mod/src/main/resources/nirncraft/tamriel/places/index.json              (the shrines file appended if missing)
+  mod/src/main/lang/nirncraft/landmarks.json                              place names
+  mod/src/main/resources/data/nirncraft/worldgen/structure/**.json        dungeon / landmark structures
+  mod/src/main/resources/data/nirncraft/worldgen/structure_set/**.json    their placements
+  mod/src/main/resources/data/nirncraft/tags/worldgen/structure/{dungeons,road_destinations}.json
 """
 import json
 import math
@@ -25,9 +25,9 @@ import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-PLACES = os.path.join(RES, "skycraft", "tamriel", "places")
-DATA = os.path.join(RES, "data", "skycraft")
-LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft", "landmarks.json")
+PLACES = os.path.join(RES, "nirncraft", "tamriel", "places")
+DATA = os.path.join(RES, "data", "nirncraft")
+LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft", "landmarks.json")
 
 # Solstheim's markers are in their own worldspace: placed relative to Raven Rock, which sits at (4300, -2900).
 RAVEN_ROCK = (4300, -2900)
@@ -176,7 +176,7 @@ for pr in PRINCES:
 VARIANT_INFO["azura_great"] = ("daedric_shrine", 26, "daedric")
 VARIANT_INFO["meridia_great"] = ("daedric_shrine", 26, "daedric")
 
-# Word Wall words (as extracted) -> shout id. Shouts the magic module lacks keep their own id; Skycraft maps them.
+# Word Wall words (as extracted) -> shout id. Shouts the magic module lacks keep their own id; NirnCraft maps them.
 WORDS = [
     ({"fus", "ro", "dah"}, "unrelenting_force"), ({"yol", "toor", "shul"}, "fire_breath"),
     ({"fo", "krah", "diin"}, "frost_breath"), ({"wuld", "nah", "kest"}, "whirlwind_sprint"),
@@ -242,11 +242,11 @@ def main(markers_path):
     def add(pid, name, ptype, culture, region, x, z, radius, variant, **extra):
         if any(p["id"] == pid for p in places):
             pid = pid + "_" + str(len(places))
-        p = {"id": pid, "name": "place.skycraft." + pid, "type": ptype, "culture": culture, "region": region,
+        p = {"id": pid, "name": "place.nirncraft." + pid, "type": ptype, "culture": culture, "region": region,
              "x": int(x), "z": int(z), "radius": radius, "variant": variant}
         p.update({k: v for k, v in extra.items() if v})
         places.append(p)
-        lang["place.skycraft." + pid] = name
+        lang["place.nirncraft." + pid] = name
         return p
 
     # ---- map markers
@@ -427,7 +427,7 @@ class MapCells:
         self.ok = False
         try:
             from PIL import Image
-            d = os.path.join(RES, "skycraft", "tamriel")
+            d = os.path.join(RES, "nirncraft", "tamriel")
             self.reg = Image.open(os.path.join(d, "regions.png")).load()
             self.elev = Image.open(os.path.join(d, "elevation.png")).load()
             self.coast = Image.open(os.path.join(d, "coast.png")).load()
@@ -512,9 +512,9 @@ def province_shrines(lang):
             region = land["id"] if land is not None and land["province"] == prov else near[0]
             if cells.ok and region == near[0] and land is None:
                 print("shrine still off land:", pid, x, z)
-            out.append({"id": pid, "name": "place.skycraft." + pid, "type": "daedric_shrine", "culture": CULTURE[prov],
+            out.append({"id": pid, "name": "place.nirncraft." + pid, "type": "daedric_shrine", "culture": CULTURE[prov],
                         "region": region, "x": x, "z": z, "radius": 12, "variant": prince})
-            lang["place.skycraft." + pid] = PRINCE_NAMES[prince]
+            lang["place.nirncraft." + pid] = PRINCE_NAMES[prince]
     return out
 
 
@@ -527,10 +527,10 @@ def hash_str(s):
 
 # ---------------------------------------------------------------------- structures
 
-ANYWHERE = "#skycraft:dungeons/anywhere"
+ANYWHERE = "#nirncraft:dungeons/anywhere"
 DWEMER_SPAWNS = {"monster": {"bounding_box": "piece", "spawns": [
-    {"type": "skycraft:dwarven_spider", "weight": 10, "minCount": 1, "maxCount": 2},
-    {"type": "skycraft:dwarven_sphere", "weight": 3, "minCount": 1, "maxCount": 1}]}}
+    {"type": "nirncraft:dwarven_spider", "weight": 10, "minCount": 1, "maxCount": 2},
+    {"type": "nirncraft:dwarven_sphere", "weight": 3, "minCount": 1, "maxCount": 1}]}}
 
 UNDERGROUND = {"barrow", "cave", "dwemer", "mine", "vampire_lair", "necromancer_lair", "hagraven_lair", "ruin", "scorpion_den"}
 
@@ -583,7 +583,7 @@ ADDITIONAL_PROVINCE_SITES = [
 
 def structure(theme, kit=None, flavor=None, special=None, place=None, where=None, regional=False, sites=None,
               pad=False, spawns=None):
-    s = {"type": "skycraft:dungeon", "theme": theme}
+    s = {"type": "nirncraft:dungeon", "theme": theme}
     if kit:
         s["kit"] = kit
     if regional:
@@ -617,9 +617,9 @@ def structures():
         salt[0] += 1
         written.append(write_json(os.path.join(sdir, sid + ".json"), st))
         written.append(write_json(os.path.join(setdir, sid + ".json"), {
-            "structures": [{"structure": "skycraft:" + sid, "weight": 1}],
-            "placement": {"type": "skycraft:places", "salt": salt[0], "types": types, "variants": variants}}))
-        dungeon_ids.append("skycraft:" + sid)
+            "structures": [{"structure": "nirncraft:" + sid, "weight": 1}],
+            "placement": {"type": "nirncraft:places", "salt": salt[0], "types": types, "variants": variants}}))
+        dungeon_ids.append("nirncraft:" + sid)
 
     def pf(types, variants):
         return {"types": types, "variants": variants}
@@ -689,7 +689,7 @@ def structures():
         place_set(sid, types, variants, structure(theme, place=pf(types, variants), **kw))
         if any(v in variants for v in ("barrow", "dwemer_ruin", "fort", "bleak_falls_barrow", "labyrinthian", "high_hrothgar",
                                        "ustengrav", "saarthal", "forelhost", "sky_haven_temple", "mine", "giant_camp")):
-            road_ids.append("skycraft:" + sid)
+            road_ids.append("nirncraft:" + sid)
 
     # ---- site lists: the 7,000 Steps, the summit path, Blackreach
     for sid, theme, sites in [("unique/seven_thousand_steps", "steps", "seven_thousand_steps"),
@@ -700,10 +700,10 @@ def structures():
         st["step"] = "underground_structures" if theme == "blackreach" else "surface_structures"
         written.append(write_json(os.path.join(sdir, sid + ".json"), st))
         written.append(write_json(os.path.join(setdir, sid + ".json"), {
-            "structures": [{"structure": "skycraft:" + sid, "weight": 1}],
-            "placement": {"type": "skycraft:sites", "salt": salt[0], "sites": sites}}))
+            "structures": [{"structure": "nirncraft:" + sid, "weight": 1}],
+            "placement": {"type": "nirncraft:sites", "salt": salt[0], "sites": sites}}))
         if theme == "blackreach":
-            dungeon_ids.append("skycraft:" + sid)
+            dungeon_ids.append("nirncraft:" + sid)
 
     # ---- the named sites of the other provinces (tools/provinces.py): culture ruins, regional keeps and towers
     salt[0] = 718274500
@@ -712,7 +712,7 @@ def structures():
         theme = kw.pop("theme")
         place_set(sid, types, variants, structure(theme, place=pf(types, variants), **kw))
         if theme in ("ruin", "fort"):
-            road_ids.append("skycraft:" + sid)
+            road_ids.append("nirncraft:" + sid)
 
     # Added after the historical sequence: preserve every existing placement salt.
     for sid, types, variants, kw in [
@@ -728,7 +728,7 @@ def structures():
         theme = kw.pop("theme")
         place_set(sid, types, variants, structure(theme, place=pf(types, variants), **kw))
         if theme in ("ruin", "fort"):
-            road_ids.append("skycraft:" + sid)
+            road_ids.append("nirncraft:" + sid)
 
     # ---- the wilds beyond Skyrim: random sites by culture (old ids kept for the Skyrim-era dungeon types)
     everywhere_but_skyrim = []
@@ -769,15 +769,15 @@ def structures():
     ]
     for sid, st, w in underground + surface:
         written.append(write_json(os.path.join(sdir, sid + ".json"), st))
-        dungeon_ids.append("skycraft:" + sid)
+        dungeon_ids.append("nirncraft:" + sid)
     for setid, entries, spacing, sep, s in [("wilds_underground", underground, 30, 10, 718273501),
                                            ("wilds_surface", surface, 36, 12, 718273502)]:
         written.append(write_json(os.path.join(setdir, setid + ".json"), {
-            "structures": [{"structure": "skycraft:" + sid, "weight": w} for sid, st, w in entries],
+            "structures": [{"structure": "nirncraft:" + sid, "weight": w} for sid, st, w in entries],
             "placement": {"type": "minecraft:random_spread", "spacing": spacing, "separation": sep, "salt": s}}))
-    road_ids += ["skycraft:nordic_barrow", "skycraft:dwemer_ruin", "skycraft:fort", "skycraft:mine", "skycraft:giant_camp",
-                 "skycraft:ruin/ayleid", "skycraft:ruin/velothi_tomb", "skycraft:ruin/xanmeer", "skycraft:ruin/moon_temple",
-                 "skycraft:ruin/yokudan_tomb", "skycraft:ruin/crystal_vault", "skycraft:ruin/tree_tomb"]
+    road_ids += ["nirncraft:nordic_barrow", "nirncraft:dwemer_ruin", "nirncraft:fort", "nirncraft:mine", "nirncraft:giant_camp",
+                 "nirncraft:ruin/ayleid", "nirncraft:ruin/velothi_tomb", "nirncraft:ruin/xanmeer", "nirncraft:ruin/moon_temple",
+                 "nirncraft:ruin/yokudan_tomb", "nirncraft:ruin/crystal_vault", "nirncraft:ruin/tree_tomb"]
 
     # old per-theme sets are folded into the two wilds sets
     for old in ["cave", "daedric_shrine", "dragon_lair", "dwemer_ruin", "fort", "giant_camp", "hagraven_lair", "mine",
@@ -790,9 +790,9 @@ def structures():
     write_json(os.path.join(tags, "dungeons.json"), {"replace": False, "values": [
         "minecraft:mineshaft", "minecraft:mineshaft_mesa", "minecraft:stronghold", "minecraft:ancient_city",
         "minecraft:desert_pyramid", "minecraft:jungle_pyramid", "minecraft:trail_ruins"] + sorted(set(dungeon_ids))})
-    write_json(os.path.join(tags, "road_destinations.json"), {"replace": False, "values": ["#skycraft:towns"] + sorted(set(road_ids))})
+    write_json(os.path.join(tags, "road_destinations.json"), {"replace": False, "values": ["#nirncraft:towns"] + sorted(set(road_ids))})
     write_json(os.path.join(DATA, "tags", "worldgen", "biome", "dungeons", "anywhere.json"), {"replace": False, "values": [
-        "#minecraft:is_overworld", {"id": "#skycraft:dungeon_land", "required": False}]})
+        "#minecraft:is_overworld", {"id": "#nirncraft:dungeon_land", "required": False}]})
     print(f"wrote {len(written)} structure files, {len(set(dungeon_ids))} dungeon structures")
 
 

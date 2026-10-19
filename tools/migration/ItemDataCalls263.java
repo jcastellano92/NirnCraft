@@ -42,12 +42,12 @@ public final class ItemDataCalls263 {
                 String name=call.getNameAsString();Node replace=call;String replacement;
                 String scope=text(source,call.getScope().get());
                 if(name.equals("of")&&scope.equals("ItemStack")&&call.getArguments().size()==1) {
-                    replacement="com.skycraft.inventory.ItemData.parse("+text(source,call.getArgument(0))+")";
+                    replacement="com.nirncraft.inventory.ItemData.parse("+text(source,call.getArgument(0))+")";
                 } else if(name.equals("save")&&stackNames.contains(scope)&&call.getArguments().size()==1) {
                     String target=text(source,call.getArgument(0));
                     replacement=target.matches("new (?:net\\.minecraft\\.nbt\\.)?CompoundTag\\(\\)")
-                            ? "com.skycraft.inventory.ItemData.save("+scope+")"
-                            : "com.skycraft.platform.ItemTags.saveInto("+scope+", "+target+")";
+                            ? "com.nirncraft.inventory.ItemData.save("+scope+")"
+                            : "com.nirncraft.platform.ItemTags.saveInto("+scope+", "+target+")";
                 } else if(Set.of("getTag","getOrCreateTag").contains(name)&&call.getArguments().isEmpty()) {
                     MethodCallExpr parent=call;
                     while(parent.getParentNode().orElse(null) instanceof MethodCallExpr next && next.getScope().orElse(null)==parent) {
@@ -58,31 +58,31 @@ public final class ItemDataCalls263 {
                         String body=text(source,parent);
                         String old=text(source,call);
                         body="customData263"+body.substring(old.length());
-                        replacement="com.skycraft.inventory.ItemData.updateCustom("+scope+", customData263 -> "+body+")";
+                        replacement="com.nirncraft.inventory.ItemData.updateCustom("+scope+", customData263 -> "+body+")";
                         replace=parent;
-                    } else replacement="com.skycraft.inventory.ItemData."+(name.equals("getTag")?"custom":"customOrEmpty")+"("+scope+")";
+                    } else replacement="com.nirncraft.inventory.ItemData."+(name.equals("getTag")?"custom":"customOrEmpty")+"("+scope+")";
                 } else if(name.equals("setTag")&&call.getArguments().size()==1) {
-                    replacement="com.skycraft.inventory.ItemData.setCustom("+scope+", "+text(source,call.getArgument(0))+")";
+                    replacement="com.nirncraft.inventory.ItemData.setCustom("+scope+", "+text(source,call.getArgument(0))+")";
                 } else if(name.equals("hasTag")&&call.getArguments().isEmpty()) {
-                    replacement="com.skycraft.inventory.ItemData.hasCustom("+scope+")";
+                    replacement="com.nirncraft.inventory.ItemData.hasCustom("+scope+")";
                 } else if(name.equals("removeTagKey")&&call.getArguments().size()==1) {
-                    replacement="com.skycraft.inventory.ItemData.updateCustom("+scope+", customData263 -> customData263.remove("+text(source,call.getArgument(0))+"))";
+                    replacement="com.nirncraft.inventory.ItemData.updateCustom("+scope+", customData263 -> customData263.remove("+text(source,call.getArgument(0))+"))";
                 } else if(name.equals("contains")&&call.getArguments().size()==2&&text(source,call.getArgument(1)).contains("Tag.TAG_")) {
-                    replacement="com.skycraft.platform.NbtData.hasType("+scope+", "+text(source,call.getArgument(0))+", "+text(source,call.getArgument(1))+")";
+                    replacement="com.nirncraft.platform.NbtData.hasType("+scope+", "+text(source,call.getArgument(0))+", "+text(source,call.getArgument(1))+")";
                 } else if(call.getScope().orElse(null) instanceof FieldAccessExpr field && Set.of("offhand","armor").contains(field.getNameAsString()) && Set.of("get","set").contains(name)) {
                     String inventory=text(source,field.getScope());
                     String index=field.getNameAsString().equals("offhand")?"net.minecraft.world.entity.player.Inventory.SLOT_OFFHAND":"36 + ("+text(source,call.getArgument(0))+")";
                     replacement=inventory+"."+(name.equals("get")?"getItem":"setItem")+"("+index;
                     if(name.equals("set"))replacement+=", "+text(source,call.getArgument(1));
                     replacement+=")";
-                } else if(Set.of("hasEffect","getEffect","removeEffect","removeEffectNoUpdate").contains(name)&&call.getArguments().size()==1&&!scope.equals("com.skycraft.platform.Effects")) {
+                } else if(Set.of("hasEffect","getEffect","removeEffect","removeEffectNoUpdate").contains(name)&&call.getArguments().size()==1&&!scope.equals("com.nirncraft.platform.Effects")) {
                     String argument=text(source,call.getArgument(0));
-                    if(argument.startsWith("com.skycraft.platform.Effects.holder("))continue;
-                    replacement=scope+"."+name+"(com.skycraft.platform.Effects.holder("+argument+"))";
+                    if(argument.startsWith("com.nirncraft.platform.Effects.holder("))continue;
+                    replacement=scope+"."+name+"(com.nirncraft.platform.Effects.holder("+argument+"))";
                 } else if(name.equals("hurt")&&call.getArguments().size()==2&&!scope.equals("super")) {
-                    replacement="com.skycraft.platform.Effects.hurt("+scope+", "+text(source,call.getArgument(0))+", "+text(source,call.getArgument(1))+")";
+                    replacement="com.nirncraft.platform.Effects.hurt("+scope+", "+text(source,call.getArgument(0))+", "+text(source,call.getArgument(1))+")";
                 } else if(name.equals("playNotifySound")&&call.getArguments().size()==4) {
-                    replacement="com.skycraft.magic.MagicFx.soundToPlayer("+scope+", "+String.join(", ",call.getArguments().stream().map(a -> text(source,a)).toList())+")";
+                    replacement="com.nirncraft.magic.MagicFx.soundToPlayer("+scope+", "+String.join(", ",call.getArguments().stream().map(a -> text(source,a)).toList())+")";
                 } else if(name.equals("swing")&&call.getArguments().size()==2) {
                     if(text(source,call.getArgument(1)).contains("SwingAnimation"))continue;
                     replacement=scope+".swing("+text(source,call.getArgument(0))+", net.minecraft.world.item.component.SwingAnimation.DEFAULT, "+text(source,call.getArgument(1))+")";
@@ -97,8 +97,8 @@ public final class ItemDataCalls263 {
             for(var creation:unit.findAll(ObjectCreationExpr.class)) {
                 if(!creation.getType().getNameAsString().equals("MobEffectInstance")||creation.getArguments().size()<2)continue;
                 var argument=creation.getArgument(0);String value=text(source,argument);
-                if(value.startsWith("com.skycraft.platform.Effects.holder("))continue;
-                var range=argument.getRange().orElseThrow();edits.add(new Edit(offset(source,range.begin),offset(source,range.end)+1,"com.skycraft.platform.Effects.holder("+value+")"));
+                if(value.startsWith("com.nirncraft.platform.Effects.holder("))continue;
+                var range=argument.getRange().orElseThrow();edits.add(new Edit(offset(source,range.begin),offset(source,range.end)+1,"com.nirncraft.platform.Effects.holder("+value+")"));
             }
             for(var field:unit.findAll(FieldAccessExpr.class)) {
                 String name=field.getNameAsString();

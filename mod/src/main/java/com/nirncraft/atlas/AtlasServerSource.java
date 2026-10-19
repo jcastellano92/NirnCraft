@@ -1,0 +1,132 @@
+package com.nirncraft.atlas;
+
+import com.nirncraft.network.SkyNetwork;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+/**
+ * Multiplayer column source: the raster stand-in at once, refined with exact tiles the server sends
+ * (AtlasTileServer). Tiles are cached per world under the game directory, so a revisit costs no traffic; requests
+ * are capped in flight and re-sent after a timeout (the server drops what it is too busy for, or what left the window).
+ */
+final class AtlasServerSource extends AtlasRefiningSource {
+    static final int IN_FLIGHT = AtlasTileServer.OUTSTANDING;
+    static final long TIMEOUT_MS = 20_000;
+
+    private final Path cache;
+    private final ConcurrentLinkedQueue<AtlasNet.TileData> arrived = new ConcurrentLinkedQueue<>();
+    private final Map<Long, byte[]> ready = new HashMap<>();
+    private final Map<Long, Long> asked = new HashMap<>();  // key -> when
+    private final List<int[]> toAsk = new ArrayList<>();
+    private final AtlasTileUpload upload = new AtlasTileUpload();
+
+    AtlasServerSource(long worldId, Path gameDir, Callable<Path> raster) {
+        super(raster);
+        cache = gameDir.resolve("atlas-cache").resolve(Long.toHexString(worldId)).resolve("v" + AtlasTileCodec.VERSION);
+    }
+
+    /** From the network (client thread). */
+    void accept(AtlasNet.TileData m) {
+        arrived.add(m);
+        long n = ++receivedTiles;
+        receivedBytes += m.data().length;
+        // the first tile, then every 256: that the multiplayer stream works and what it carries
+        if (n == 1 || n % 256 == 0)
+            com.nirncraft.NirnCraft.LOGGER.info("atlas: {} far tiles ({} MB) received from the server",
+                    n, String.format("%.1f", receivedBytes / 1e6));
+    }
+
+    private long receivedTiles, receivedBytes, requestsSent;
+
+    @Override
+    Refined refine(AtlasNative.Context ctx, int lod, int tx, int tz) {
+        for (AtlasNet.TileData m; (m = arrived.poll()) != null; ) {
+            long k = key(m.lod(), m.tx(), m.tz());
+            asked.remove(k);
+            if (ready.size() >= 64) ready.clear();  // arrivals for tiles the camera left: the disk cache has them
+            ready.put(k, m.data());
+            if (m.data().length > 0) store(m.lod(), m.tx(), m.tz(), m.data());
+        }
+        long k = key(lod, tx, tz);
+        byte[] b = ready.remove(k);
+        if (b != null && b.length == 0) return Refined.NEVER;  // the server does not serve this tile
+        boolean cached = b == null;
+        if (cached) b = load(lod, tx, tz);
+        if (b != null) {
+            // the server's exact geometry, biome tints and surface blocks, dressed as in single player
+            if (upload.upload(ctx, lod, tx, tz, b)) return Refined.DONE;
+            if (!cached) return Refined.NEVER;  // the server sent garbage: keep the stand-in
+            try {
+                Files.deleteIfExists(file(lod, tx, tz));  // a damaged cache entry: ask again
+            } catch (IOException ignored) {
+                return Refined.NEVER;
+            }
+        }
+        long now = System.currentTimeMillis();
+        Long t = asked.get(k);
+        if (t != null && now - t < TIMEOUT_MS) return Refined.LATER;
+        if (t != null) asked.remove(k);
+        if (asked.size() < IN_FLIGHT && toAsk.size() < AtlasNet.MAX_REQUEST) {
+            asked.put(k, now);
+            toAsk.add(new int[] {lod, tx, tz});
+        }
+        return Refined.LATER;
+    }
+
+    @Override
+    void materials(AtlasMaterials m) {
+        upload.materials(m);
+    }
+
+    @Override
+    int budget(int lod) {
+        return 8;  // decode + dress: a few ms each
+    }
+
+    @Override
+    void endCover(AtlasNative.Context ctx) {
+        if (toAsk.isEmpty()) return;
+        int n = toAsk.size();
+        byte[] lods = new byte[n];
+        int[] txs = new int[n], tzs = new int[n];
+        for (int i = 0; i < n; i++) {
+            lods[i] = (byte) toAsk.get(i)[0];
+            txs[i] = toAsk.get(i)[1];
+            tzs[i] = toAsk.get(i)[2];
+        }
+        toAsk.clear();
+        if (requestsSent++ == 0) com.nirncraft.NirnCraft.LOGGER.info("atlas: asking the server for far tiles ({} in the first request)", n);
+        SkyNetwork.sendToServer(new AtlasNet.TileRequest(lods, txs, tzs));
+    }
+
+    private Path file(int lod, int tx, int tz) {
+        return cache.resolve("l" + lod).resolve(tx + "_" + tz + ".bin");
+    }
+
+    private byte[] load(int lod, int tx, int tz) {
+        Path f = file(lod, tx, tz);
+        try {
+            return Files.isRegularFile(f) && Files.size(f) <= AtlasTileCodec.MAX_BYTES ? Files.readAllBytes(f) : null;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private void store(int lod, int tx, int tz, byte[] data) {
+        try {
+            Path f = file(lod, tx, tz);
+            Files.createDirectories(f.getParent());
+            Files.write(f, data);
+        } catch (IOException e) {
+            // the cache is an optimisation: the tile is re-requested next visit
+        }
+    }
+}

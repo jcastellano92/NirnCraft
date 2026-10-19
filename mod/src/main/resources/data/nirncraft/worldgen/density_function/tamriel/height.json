@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "nirncraft:tamriel_height",
+    "hills": "nirncraft:tamriel_hills",
+    "detail": "nirncraft:tamriel_detail",
+    "ridges": "nirncraft:tamriel_ridges",
+    "dunes": "nirncraft:tamriel_dunes"
+  }
+}

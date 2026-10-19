@@ -1,0 +1,67 @@
+{
+  "has_precipitation": false,
+  "temperature": 2.0,
+  "downfall": 0.0,
+  "effects": {
+    "water_color": "#6b2a1a",
+    "grass_color": "#8a1a10",
+    "foliage_color": "#7a1a12"
+  },
+  "carvers": [],
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "nirncraft:realm/dl_spike"
+    ],
+    [],
+    [
+      "nirncraft:realm/dl_magma_vein",
+      "nirncraft:realm/dl_blackstone_blob"
+    ],
+    [],
+    [
+      "nirncraft:realm/dl_lavafall"
+    ],
+    [
+      "nirncraft:realm/dl_flames",
+      "nirncraft:realm/dl_hanging_vines",
+      "nirncraft:realm/dl_bloodgrass",
+      "nirncraft:realm/dl_harrada"
+    ],
+    []
+  ],
+  "attributes": {
+    "minecraft:visual/sky_color": "#c02a16",
+    "minecraft:visual/fog_color": "#641208",
+    "minecraft:visual/water_fog_color": "#330a05",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": {
+      "modifier": "append",
+      "argument": [
+        {
+          "probability": 0.018,
+          "particle": {
+            "type": "minecraft:crimson_spore"
+          }
+        }
+      ]
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {},
+        "spawn_costs": {}
+      }
+    }
+  }
+}

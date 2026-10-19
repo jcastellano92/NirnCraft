@@ -17,10 +17,10 @@ module.exports = function (f) {
 
   f.relic('caravan_bell', 'Bell of the Seventh Wagon', 'A brass caravan bell with a cracked lip, still warm. Its clapper has been tied with a strip of blue cloth, as if someone wished it to be quiet.', 22);
   f.relic('wheel_tally', 'Khir\'s Toll-Tally', 'A leather tally strap with a hundred knots. Each knot is a cart. One knot is a different colour, tied by someone who was not Khir.', 11);
-  f.boss('sand_warden', { name: 'The Sand-Sworn Warden', type: 'skycraft:draugr_deathlord', hp: 3.4, dmg: 1.5, level: 26,
-    weapon: 'skycraft:khajiit_sword', gear: { head: 'skycraft:khajiit_helmet' }, drop: 'loot:standard', glow: true });
-  f.boss('oasis_snatcher', { name: 'Zhirr the Oasis-Snatcher', type: 'skycraft:bandit_chief', hp: 3.1, dmg: 1.4, level: 24,
-    weapon: 'skycraft:khajiit_bow', gear: { chest: 'skycraft:khajiit_chestplate' }, drop: 'loot:standard', glow: false });
+  f.boss('sand_warden', { name: 'The Sand-Sworn Warden', type: 'nirncraft:draugr_deathlord', hp: 3.4, dmg: 1.5, level: 26,
+    weapon: 'nirncraft:khajiit_sword', gear: { head: 'nirncraft:khajiit_helmet' }, drop: 'loot:standard', glow: true });
+  f.boss('oasis_snatcher', { name: 'Zhirr the Oasis-Snatcher', type: 'nirncraft:bandit_chief', hp: 3.1, dmg: 1.4, level: 24,
+    weapon: 'nirncraft:khajiit_bow', gear: { chest: 'nirncraft:khajiit_chestplate' }, drop: 'loot:standard', glow: false });
 
   f.scene('dune_wreck', [
     ['narrator', 'Seven wagons stand in a circle on a salt-crust flat. The sand has drifted to the axles, and the draft-cats lie curled in their harness as if asleep. They are not asleep.'],
@@ -37,7 +37,7 @@ module.exports = function (f) {
       o.go('teal_campsite', 'Follow the wheel-ruts to Teal Campsite', { actions: 'scene:@dune_wreck' }),
       o.retrieve('teal_campsite', 'Find the eighth driver\'s bell among the wagons', '@caravan_bell'),
       o.clear('temar_oasis', 'Clear the poachers off Temar Oasis',
-        [mob('skycraft:bandit', 3, 'Oasis Poacher')]),
+        [mob('nirncraft:bandit', 3, 'Oasis Poacher')]),
       o.kill('temar_oasis', 'Face Zhirr the Oasis-Snatcher, who dammed the well',
         [{ boss_id: '@oasis_snatcher' }, mob('npc:thug', 2, 'Zhirr\'s Digger', { hostile: true })]),
       o.deliver('@mizra', '@caravan_bell', 'Bring the bell back to Mizra',
@@ -49,7 +49,7 @@ module.exports = function (f) {
         ] }),
     ],
     outro: 'Seven wagons and an eighth driver went to their rest at last, and a bell with a tied clapper hangs where only camel-drivers look.',
-    rewards: { gold: 560, loot: 'standard', items: [{ item: 'skycraft:khajiit_bow', name: 'Bell-Silent Bow', enchant: { power: 2, unbreaking: 2 } }] },
+    rewards: { gold: 560, loot: 'standard', items: [{ item: 'nirncraft:khajiit_bow', name: 'Bell-Silent Bow', enchant: { power: 2, unbreaking: 2 } }] },
   });
 
   f.q({
@@ -119,9 +119,9 @@ module.exports = function (f) {
 
   f.relic('queen_cell', 'Queen Cell in a Wax Cradle', 'A sealed cradle of cream wax cut from the oldest hive of the Garden Cathedral. Inside, something very small is dreaming of flowers.', 20);
   f.relic('colossus_cog', 'Dwarven Honeycomb Cog', 'A palm-sized bronze cog, hexagonal, ringed with the faintest etched hive-pattern. It was made by people who clearly thought bees were showing off.', 18);
-  f.boss('hornet_queen', { name: 'The Hornet-Queen of Khenarthi\'s Arch', type: 'skycraft:giant_scorpion', hp: 3.4, dmg: 1.5, level: 24, drop: 'loot:standard', glow: false });
-  f.boss('graft_thief', { name: 'Orlin Quick-Shears', type: 'skycraft:bandit_chief', hp: 2.8, dmg: 1.3, level: 20,
-    weapon: 'skycraft:khajiit_dagger', gear: { chest: 'skycraft:khajiit_chestplate' }, drop: 'loot:standard', glow: false });
+  f.boss('hornet_queen', { name: 'The Hornet-Queen of Khenarthi\'s Arch', type: 'nirncraft:giant_scorpion', hp: 3.4, dmg: 1.5, level: 24, drop: 'loot:standard', glow: false });
+  f.boss('graft_thief', { name: 'Orlin Quick-Shears', type: 'nirncraft:bandit_chief', hp: 2.8, dmg: 1.3, level: 20,
+    weapon: 'nirncraft:khajiit_dagger', gear: { chest: 'nirncraft:khajiit_chestplate' }, drop: 'loot:standard', glow: false });
 
   f.q({
     id: 'the_gardens_bees', title: 'The Garden\'s Bees', region: 'elsweyr/pellitine', start: 'npc:@mura', requires: ['level:12'],
@@ -142,7 +142,7 @@ module.exports = function (f) {
         ] }),
     ],
     outro: 'The Garden Cathedral hums again. The first honey of the season has a faint taste of something that no flower in Corinthe has ever worn.',
-    rewards: { gold: 460, loot: 'standard', items: [{ item: 'skycraft:khajiit_shield', name: 'Beekeeper\'s Ward', enchant: { protection: 2, thorns: 1 } }] },
+    rewards: { gold: 460, loot: 'standard', items: [{ item: 'nirncraft:khajiit_shield', name: 'Beekeeper\'s Ward', enchant: { protection: 2, thorns: 1 } }] },
   });
 
   f.q({
@@ -170,7 +170,7 @@ module.exports = function (f) {
     objectives: [
       o.go('halls_of_colossus', 'Ask after the pear at the Halls of Colossus, where the branch was found'),
       o.clear('halls_of_colossus', 'Clear the machines that guard the colossus hall',
-        [mob('skycraft:dwarven_sphere', 2, 'Hive-Cog Sphere'), mob('skycraft:dwarven_spider', 3, 'Cog-Scuttler')], { placement: 'structure' }),
+        [mob('nirncraft:dwarven_sphere', 2, 'Hive-Cog Sphere'), mob('nirncraft:dwarven_spider', 3, 'Cog-Scuttler')], { placement: 'structure' }),
       o.retrieve('halls_of_colossus', 'Recover the pilgrim\'s cog, which hides the grafting notes', '@colossus_cog', { placement: 'structure' }),
       o.kill('corinthe', 'Catch Orlin Quick-Shears, the grafting-book thief',
         [{ boss_id: '@graft_thief' }]),
@@ -198,8 +198,8 @@ module.exports = function (f) {
 
   f.relic('cistern_seal', 'Cracked Cistern Seal', 'A fired-clay seal that once bound the lid of the Third Cistern. A fingernail-wide crack runs across the face, and the crack is clean-edged: cut, not broken.', 21);
   f.relic('water_ledger', 'Mala\'s Water-Ledger', 'A thick slate-bound ledger of every cistern\'s measure. The last four entries are written in a hand that is not Mala\'s.', 11);
-  f.boss('water_thief', { name: 'Thirst-Lord Zadhir', type: 'skycraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 22,
-    weapon: 'skycraft:khajiit_sword', gear: { head: 'skycraft:khajiit_helmet', chest: 'skycraft:khajiit_chestplate' }, drop: 'loot:standard', glow: false });
+  f.boss('water_thief', { name: 'Thirst-Lord Zadhir', type: 'nirncraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 22,
+    weapon: 'nirncraft:khajiit_sword', gear: { head: 'nirncraft:khajiit_helmet', chest: 'nirncraft:khajiit_chestplate' }, drop: 'loot:standard', glow: false });
 
   f.q({
     id: 'the_dry_season', title: 'The Dry Season', region: 'elsweyr/anequina', start: 'npc:@mala', requires: ['level:10'],
@@ -211,7 +211,7 @@ module.exports = function (f) {
       o.cond('night', 'Hide in the Third Cistern\'s shaft until the water-thief comes', 'orcrest'),
       o.retrieve('the_scar', 'Follow the wet rope-marks to the Scar and recover the cracked seal', '@cistern_seal'),
       o.kill('talon_gulch', 'Corner Thirst-Lord Zadhir in Talon Gulch',
-        [{ boss_id: '@water_thief' }, mob('skycraft:bandit', 2, 'Water-Hauler')]),
+        [{ boss_id: '@water_thief' }, mob('nirncraft:bandit', 2, 'Water-Hauler')]),
       o.talk('@raz', 'Show Raz the cracked seal and tell him of the thief',
         'The water was being hauled out through a cut in the seal by a thief who sells it back to you. Zadhir is dead.',
         'Raz looks at the seal for a long time. "Sold back. To us. Water we owned." He does not smile, but his jaw does something close. "Mala was right. Raz will say it once. Mala was right. The Gate will open a morning early for you, any time, any day."'),
@@ -229,7 +229,7 @@ module.exports = function (f) {
       o.go('shrine_to_lorkhaj', 'Listen for the hum at the shrine to Lorkhaj'),
       o.cond('night', 'Wait for the dry wind to rise after dusk', 'shrine_to_lorkhaj'),
       o.clear('the_bone_pit', 'Silence what drums beneath the plateau in the Bone Pit',
-        [mob('minecraft:skeleton', 4, 'Drum-Bone'), mob('skycraft:necromancer', 1, 'Drum-Priest')], { placement: 'structure' }),
+        [mob('minecraft:skeleton', 4, 'Drum-Bone'), mob('nirncraft:necromancer', 1, 'Drum-Priest')], { placement: 'structure' }),
       o.talk('@sihe', 'Tell Sihe the hum has stopped',
         'A drum-priest was beating the dead beneath the plateau. The note is gone. Listen.',
         'Sihe tilts her ears and stays very still for a long moment. "Nothing. The Gate is quiet. Sihe has not heard the plateau be quiet since she was a cub. It is... lonely. Thank you, walker. Sihe will miss it, which is not at all what she expected."'),
@@ -249,8 +249,8 @@ module.exports = function (f) {
     'Hamza runs the Pilgrim\'s Rest, a long low house with seventeen beds and no locks. He says the moonstones watch the door. Nobody has stolen anything from there in living memory, which is a long time among cats.');
 
   f.relic('alignment_lens', 'Alignment Lens of Hakoshae', 'A palm-sized disc of clear moonstone, polished flat on one side and curved on the other. Held up at the right hour, it throws both moons\' light as one thin silver line across the ground.', 20);
-  f.boss('tomb_tenant', { name: 'The Tenant Beneath the Third Stone', type: 'skycraft:draugr_deathlord', hp: 3.8, dmg: 1.6, level: 32,
-    weapon: 'skycraft:khajiit_war_axe', gear: { head: 'skycraft:khajiit_helmet', chest: 'skycraft:khajiit_chestplate' }, drop: 'loot:major', glow: true });
+  f.boss('tomb_tenant', { name: 'The Tenant Beneath the Third Stone', type: 'nirncraft:draugr_deathlord', hp: 3.8, dmg: 1.6, level: 32,
+    weapon: 'nirncraft:khajiit_war_axe', gear: { head: 'nirncraft:khajiit_helmet', chest: 'nirncraft:khajiit_chestplate' }, drop: 'loot:major', glow: true });
   f.scene('hak_align', [
     ['narrator', 'The ring of moonstones stands silent. Then, between one breath and the next, both moons rise at once above the same stone, and a thin silver line runs from the third stone to the ground at your feet.'],
     ['@dar', 'There. Hold the lens still. Do not breathe. The line points to a door. The door has not been seen in eleven hundred years, and it will not be seen again until the moons come together.'],
@@ -290,7 +290,7 @@ module.exports = function (f) {
     objectives: [
       o.go('shrine_of_the_crescent', 'Search the Shrine of the Crescent for Pilgrim Ke'),
       o.clear('shrine_of_the_crescent', 'Drive off the bandits who have made camp at the shrine',
-        [mob('skycraft:bandit', 3, 'Shrine-Robber')], { placement: 'structure' }),
+        [mob('nirncraft:bandit', 3, 'Shrine-Robber')], { placement: 'structure' }),
       o.escort('@ke', 'hakoshae', 'Escort Pilgrim Ke back to Hakoshae'),
     ],
     outro: 'Ke was found asleep in a bandit\'s bedroll, quite content, with a bandit\'s hat on. He says he has begun a third lap. Hamza says that is a lie.',
@@ -337,7 +337,7 @@ module.exports = function (f) {
     objectives: [
       o.go('tathara_sugar_farm', 'Search the burned fields for the fire-setters\' tracks'),
       o.kill('hanikhi_outpost', 'Catch the arsonists at Hanikhi Outpost',
-        [mob('skycraft:bandit', 3, 'Torch-Hired Hand'), mob('skycraft:bandit_chief', 1, 'Cane-Burner Zhasa')]),
+        [mob('nirncraft:bandit', 3, 'Torch-Hired Hand'), mob('nirncraft:bandit_chief', 1, 'Cane-Burner Zhasa')]),
       o.talk('@cane_widow', 'Tell Tathara who hired the fire',
         'Four hired hands, paid by a buyer who wanted your land for his own cane. He is a neighbour. You may guess which.',
         'Tathara closes her eyes. "Guessed. Always guessed. The one with the new gate. The one who brought pies at the funeral of the crop. Walker, there will be a reckoning, and it will not be with fire. Tathara will plant again. She will plant it twice as wide, right up to his gate."'),
@@ -371,7 +371,7 @@ module.exports = function (f) {
     objectives: [
       o.go('nekha_camp', 'Find the fence at Nekha Camp'),
       o.kill('nekha_camp', 'Take the route book from the fence',
-        [mob('skycraft:bandit_chief', 1, 'Fence Zhil-ra'), mob('skycraft:bandit', 2, 'Camp Guard')], { actions: 'relic:@route_book', placement: 'structure' }),
+        [mob('nirncraft:bandit_chief', 1, 'Fence Zhil-ra'), mob('nirncraft:bandit', 2, 'Camp Guard')], { actions: 'relic:@route_book', placement: 'structure' }),
       o.deliver('@route_trader', '@route_book', 'Return the book to Ha\'bir',
         'Your book, whole. The fence had not yet sold it. He had copied three pages.',
         'Ha\'bir counts the pages with his thumb and breathes out slowly. "Three copied. Three pages. Ha\'bir will change those wells by morning. A route book is only a gift to the person who does not know the road has changed. Walker, the Baandari clans owe you a road-name."'),

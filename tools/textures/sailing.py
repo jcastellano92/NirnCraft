@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generates the sailing module's textures (PIL), all original procedural art.
 
-Writes PNGs into mod/src/main/resources/assets/skycraft/textures/:
+Writes PNGs into mod/src/main/resources/assets/nirncraft/textures/:
   entity/sailing/ship_atlas.png   256x256  16 px tiles for the block-built ship models (indices match
                                            sailing.client.ShipModels) plus two 64x64 sails at y = 192:
                                            x = 0 Nord red-and-white stripes, x = 64 Imperial cream sail with a dragon
@@ -23,7 +23,7 @@ import random
 from PIL import Image, ImageDraw
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures")
+TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures")
 
 
 def hexc(h, a=255):

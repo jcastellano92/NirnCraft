@@ -1,5 +1,5 @@
 # Prepare and optionally launch the isolated Minecraft 26.3 / NeoForge / Java 25 full-pack preview.
-# The legacy Skycraft-autotest and normal Skycraft instances are preserved.
+# The legacy NirnCraft-autotest and normal NirnCraft instances are preserved.
 # Use -PrepareOnly before the owner's runtime launch gate; this never starts Minecraft.
 param(
     [string]$Tour = "", [switch]$Live, [switch]$PrepareOnly, [string]$SaveSource = "", [string]$Server = "",
@@ -15,7 +15,7 @@ if ($Shaders -ne "off") {
     throw "The customized shader pack is preserved but disabled until its native 26.3 integration is accepted. Start with -Shaders off."
 }
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
-$name = "Skycraft-26.3-autotest"
+$name = "NirnCraft-26.3-autotest"
 $inst = Join-Path $PrismRoot "instances\$name"
 $script = Join-Path $PSScriptRoot "prepare_prism_263.py"
 $prepareArgs = @("-3", $script, "--prism-root", $PrismRoot, "--width", "$Width", "--height", "$Height",
@@ -40,7 +40,7 @@ $launchArgs = @("--dir", ('"' + [IO.Path]::GetFullPath($PrismRoot) + '"'), "--la
 Start-Process -FilePath $PrismExe -ArgumentList $launchArgs -WindowStyle Hidden | Out-Null
 $deadline = (Get-Date).AddSeconds($Timeout)
 $log = Join-Path $mc "logs\latest.log"
-$completion = if ($Live) { 'Autotest live: ready' } else { 'tour finished|Skycraft Autotest: Completed successfully' }
+$completion = if ($Live) { 'Autotest live: ready' } else { 'tour finished|NirnCraft Autotest: Completed successfully' }
 $crashPattern = 'Encountered an unexpected exception|Exception ticking world|Game crashed!|LinkageError|OutOfMemoryError|Failed to create shader rendering pipeline|ShaderCompileException|Invalid program|Failed to load registries|Failed to parse data|Caught exception during event|Loading errors encountered'
 $done = $false
 while ((Get-Date) -lt $deadline) {
@@ -54,7 +54,7 @@ while ((Get-Date) -lt $deadline) {
 }
 if (-not $done) { throw "Native preview readiness timed out; inspect $log and tools/dev/live_world.py status. No process was killed." }
 if ($Live) {
-    "Native live preview ready: $mc\skycraft-live.txt; captures: $mc\build\autotest-screenshots."
+    "Native live preview ready: $mc\nirncraft-live.txt; captures: $mc\build\autotest-screenshots."
     return
 }
 Select-String -LiteralPath $log -Pattern 'Autotest' | Select-Object -Last 8 | ForEach-Object { $_.Line.Substring(0, [Math]::Min(200, $_.Line.Length)) }

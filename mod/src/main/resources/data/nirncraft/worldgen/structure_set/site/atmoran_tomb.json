@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/atmoran_tomb",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274510,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "atmoran_tomb"
+    ]
+  }
+}

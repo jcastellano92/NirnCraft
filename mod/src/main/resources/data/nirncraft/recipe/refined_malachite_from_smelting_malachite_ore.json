@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "group": "refined_malachite",
+  "ingredient": [
+    "nirncraft:malachite_ore",
+    "nirncraft:deepslate_malachite_ore"
+  ],
+  "result": {
+    "id": "nirncraft:refined_malachite"
+  },
+  "experience": 0.7,
+  "cookingtime": 200
+}

@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:juniper_berries",
+      "required": false
+    },
+    {
+      "id": "nirncraft:jazbay_grapes",
+      "required": false
+    }
+  ]
+}

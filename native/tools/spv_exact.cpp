@@ -1,9 +1,9 @@
-// Build step for the exact-height kernel (aether_height.slang): makes the SPIR-V's floating-point contract explicit
+// Build step for the exact-height kernel (atlas_height.slang): makes the SPIR-V's floating-point contract explicit
 // and refuses to build when it is not what the kernel's exactness argument needs.
 //  * adds the float-controls execution modes for 32 and 64 bit: RoundingModeRTE and SignedZeroInfNanPreserve (with
 //    their capabilities), so a conforming driver must round to nearest even and keep signed zeros, infinities and
 //    NaNs (the host checks the device supports both). Denormal handling is left to the device: the kernel never lets
-//    a denormal reach an unflagged result (see aether_height.slang), and refuses DenormFlushToZero/DenormPreserve
+//    a denormal reach an unflagged result (see atlas_height.slang), and refuses DenormFlushToZero/DenormPreserve
 //    requests it did not make
 //  * checks every floating-point arithmetic instruction carries NoContraction (no fused multiply-add, no
 //    reassociation), and that no extended instruction other than the bit packers is used (no driver transcendentals)

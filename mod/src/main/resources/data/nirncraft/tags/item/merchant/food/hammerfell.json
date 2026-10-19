@@ -1,0 +1,31 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:spiced_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leg_of_goat_roast",
+      "required": false
+    },
+    {
+      "id": "nirncraft:goat_cheese_wedge",
+      "required": false
+    },
+    {
+      "id": "nirncraft:tomato",
+      "required": false
+    },
+    {
+      "id": "nirncraft:tomato_soup",
+      "required": false
+    },
+    "minecraft:sugar",
+    "minecraft:cocoa_beans"
+  ]
+}

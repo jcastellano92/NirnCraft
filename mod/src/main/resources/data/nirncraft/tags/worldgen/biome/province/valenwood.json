@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:graht_oak_forest",
+    "nirncraft:jungle_river",
+    "nirncraft:reapers_march",
+    "nirncraft:valenwood_mangrove_coast",
+    "nirncraft:valenwood_rainforest"
+  ]
+}

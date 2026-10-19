@@ -1,8 +1,8 @@
 """Population lint: residents vs beds, jobs vs workplaces, trainers, courts (F-COURT), and idle clusters per settlement.
 
 Reads the files the `/skypop <place id>` server command writes (the housing model run over a place's real generated
-plan, see com.skycraft.society.Housing): <run dir>/skycraft-previews/population_<id>.json, together with
-mod/src/main/resources/skycraft/society/trainers.json and mod/src/main/resources/skycraft/society/courts.json.
+plan, see com.nirncraft.society.Housing): <run dir>/nirncraft-previews/population_<id>.json, together with
+mod/src/main/resources/nirncraft/society/trainers.json and mod/src/main/resources/nirncraft/society/courts.json.
 qa.ps1 -Server runs the command for a sample (whiterun, riverwood, helgen, rorikstead, dragon_bridge, falkreath,
 old_hroldan) and then this.
 
@@ -25,13 +25,13 @@ import os
 import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DEFAULT_DIR = os.path.join(ROOT, 'mod', 'run', 'skycraft-previews')
-TRAINERS_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'society', 'trainers.json')
-COURTS_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'society', 'courts.json')
-RESIDENTS_GLOB = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'society', '*_residents.json')
-WORLDSHEETS_GLOB = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel', 'world', '*.json')
-NPC_REGION_VOICE_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'npc', 'region_voice.json')
-SKYRIM_PLACES_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel', 'places', 'skyrim_settlements.json')
+DEFAULT_DIR = os.path.join(ROOT, 'mod', 'run', 'nirncraft-previews')
+TRAINERS_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'society', 'trainers.json')
+COURTS_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'society', 'courts.json')
+RESIDENTS_GLOB = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'society', '*_residents.json')
+WORLDSHEETS_GLOB = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'tamriel', 'world', '*.json')
+NPC_REGION_VOICE_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'npc', 'region_voice.json')
+SKYRIM_PLACES_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'tamriel', 'places', 'skyrim_settlements.json')
 
 BED_TYPES = {'bed', 'guild_bed', 'guest_bed'}
 WORKPLACE = {'jarl', 'housecarl', 'steward', 'wizard', 'inn', 'priest', 'smith', 'merchant', 'alchemist', 'guard',
@@ -101,8 +101,8 @@ def load_authored_residents():
             errs.append(f'{fname}: failed to parse JSON: {exc}')
             continue
 
-        if 'place.skycraft.' in raw_text:
-            errs.append(f'{fname}: contains raw place.skycraft.<id> localization token')
+        if 'place.nirncraft.' in raw_text:
+            errs.append(f'{fname}: contains raw place.nirncraft.<id> localization token')
 
         settlements = data.get('settlements')
         if not isinstance(settlements, dict) or not settlements:
@@ -145,10 +145,10 @@ AUTHORED_BY_SETTLEMENT, AUTHORED_FILE_COUNT, AUTHORED_TOTAL_RESIDENTS, AUTHORED_
 
 
 def lint_region_voices():
-    """Verifies mod/src/main/resources/skycraft/npc/region_voice.json and society*.json coverage."""
+    """Verifies mod/src/main/resources/nirncraft/npc/region_voice.json and society*.json coverage."""
     errs = []
     if not os.path.isfile(NPC_REGION_VOICE_JSON):
-        return ['missing mod/src/main/resources/skycraft/npc/region_voice.json']
+        return ['missing mod/src/main/resources/nirncraft/npc/region_voice.json']
     rv = load_json_safe(NPC_REGION_VOICE_JSON)
     provs = rv.get('provinces') or {}
     regs = rv.get('regions') or {}

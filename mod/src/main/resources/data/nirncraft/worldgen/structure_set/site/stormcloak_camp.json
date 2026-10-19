@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/stormcloak_camp",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274025,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "stormcloak_camp"
+    ]
+  }
+}

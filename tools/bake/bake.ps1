@@ -12,19 +12,19 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
-$scratch = if ($env:SKYCRAFT_263_SCRATCH) { [IO.Path]::GetFullPath($env:SKYCRAFT_263_SCRATCH) } else { 'E:\Skycraft-scratch\migration-26.3' }
+$scratch = if ($env:NIRNCRAFT_263_SCRATCH) { [IO.Path]::GetFullPath($env:NIRNCRAFT_263_SCRATCH) } else { 'E:\NirnCraft-scratch\migration-26.3' }
 if (-not $RuntimeRoot) { $RuntimeRoot = Join-Path $scratch ('runtime/release-bake-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')) }
 $RuntimeRoot = [IO.Path]::GetFullPath($RuntimeRoot)
 if (Test-Path -LiteralPath $RuntimeRoot) { throw 'Preserve existing bake worlds and evidence; choose a fresh RuntimeRoot.' }
 $controller = Join-Path $root 'tools/dev/devserver.ps1'
-$oldThreads = $env:SKYCRAFT_BAKE_THREADS
+$oldThreads = $env:NIRNCRAFT_BAKE_THREADS
 $started = $false
 try {
-    if ($Threads -gt 0) { $env:SKYCRAFT_BAKE_THREADS = "$Threads" }
+    if ($Threads -gt 0) { $env:NIRNCRAFT_BAKE_THREADS = "$Threads" }
     & $controller start -RuntimeRoot $RuntimeRoot -Port $Port -Xmx $Xmx -BootTimeout $Timeout
     if ($LASTEXITCODE -ne 0) { throw 'Native bake server failed to start; no source bakes were changed.' }
     $started = $true
-    & $controller run 'skycraft-bake refresh|skycraft-dev bake-status' -Wait -All -NoRestart -RuntimeRoot $RuntimeRoot -Timeout $Timeout
+    & $controller run 'nirncraft-bake refresh|nirncraft-dev bake-status' -Wait -All -NoRestart -RuntimeRoot $RuntimeRoot -Timeout $Timeout
     if ($LASTEXITCODE -ne 0) { throw 'Native refresh/verification failed; staging and old bakes were preserved.' }
     $job = Get-ChildItem -LiteralPath (Join-Path $RuntimeRoot 'outbox') -Filter '*.done' |
         Sort-Object LastWriteTime -Descending | Select-Object -First 1
@@ -38,13 +38,13 @@ try {
             & $controller stop -RuntimeRoot $RuntimeRoot
             if ($LASTEXITCODE -ne 0) { throw 'Native bake server did not stop cleanly; source bakes remain unchanged.' }
         }
-    } finally { $env:SKYCRAFT_BAKE_THREADS = $oldThreads }
+    } finally { $env:NIRNCRAFT_BAKE_THREADS = $oldThreads }
 }
-$staging = Join-Path $RuntimeRoot 'skycraft-bake'
+$staging = Join-Path $RuntimeRoot 'nirncraft-bake'
 if (-not (Test-Path -LiteralPath (Join-Path $staging 'manifest.json'))) {
     # Up-to-date refresh compares the existing embedded bundle against a real
     # computation; there is intentionally no replacement in this case.
-    $staging = Join-Path $root 'mod/src/main/resources/skycraft/baked'
+    $staging = Join-Path $root 'mod/src/main/resources/nirncraft/baked'
 }
 & py -3 -I (Join-Path $PSScriptRoot 'publish_263.py') --staging $staging --expected $expected --backup (Join-Path $RuntimeRoot 'publication') --evidence $evidence --done $job.FullName --shutdown-log (Join-Path $RuntimeRoot 'server.log')
 if ($LASTEXITCODE -ne 0) { throw 'Native staged bundle validation/publication failed; inspect retained QA evidence.' }

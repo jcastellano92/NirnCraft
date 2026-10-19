@@ -1,14 +1,14 @@
-﻿// pack_lab: the Skycraft Aether shader pack's screen passes (deferred, composite, composite1, final) run offline on a
-// scene aether renders, so lighting, water, fog, sky, shafts and bloom can be judged without Minecraft.
+﻿// pack_lab: the NirnCraft Atlas shader pack's screen passes (deferred, composite, composite1, final) run offline on a
+// scene atlas renders, so lighting, water, fog, sky, shafts and bloom can be judged without Minecraft.
 //
-// aether provides the G-buffer within a near radius (albedo, normal, depth, the bed under water), its own lit far
+// atlas provides the G-buffer within a near radius (albedo, normal, depth, the bed under water), its own lit far
 // field beyond it (with clouds), and the real sun map; a lab-only pass mirrors gbuffers_water for water surfaces.
 // The pack's programs are compiled as Iris would (includes resolved, RENDERTARGETS honoured, ping-pong when a pass
 // reads and writes the same buffer) in a GL compatibility context, with Iris-style uniforms.
 //
 // usage: pack_lab out.png [x=0 z=0 above=40 yaw=105 pitch=-4 time=0.25 rain=0 water=0 near=256 w=1280 h=720
-//                          clouds=1 temp=0.6 cold=0 aether=1]
-//   aether=0: aether's frame absent (1x1 blanks): the pack's fallback cloud deck and plain fog
+//                          clouds=1 temp=0.6 cold=0 atlas=1]
+//   atlas=0: atlas's frame absent (1x1 blanks): the pack's fallback cloud deck and plain fog
 //   time: 0 sunrise, 0.25 noon, 0.5 sunset, 0.75 midnight; water=1 puts the eye under water
 // adaptive quality (shaders/lib/quality.glsl): q=<0..1> binds the mod's qualityKnobs texture with every knob at q
 //   (without q= or any q* key the pack runs its fallback counts); per-knob overrides qs (shadow taps) qa (SSAO) qr (SSR)
@@ -43,7 +43,7 @@
 #include <string>
 #include <vector>
 
-#include "aether/aether.h"
+#include "atlas/atlas.h"
 #include "png.hpp"
 
 namespace {
@@ -114,7 +114,7 @@ HGLRC makeContext() {
 }
 
 // ---------------------------------------------------------------- the pack's programs
-std::string PACK;  // .../shaderpack/SkycraftAether/shaders
+std::string PACK;  // .../shaderpack/InfiniteATLAS/shaders
 
 std::string readFile(const std::string& p) {
     std::ifstream f(p, std::ios::binary);
@@ -453,7 +453,7 @@ void toFloat(const M4& a, float* out) {
     for (int i = 0; i < 16; i++) out[i] = float(a.m[i]);
 }
 
-// octahedral: aether's packNormal (normal buffer rg) and the pack's octEncode are the same mapping
+// octahedral: atlas's packNormal (normal buffer rg) and the pack's octEncode are the same mapping
 void octDecode(float ex, float ez, float n[3]) {
     ex = ex * 2 - 1;
     ez = ez * 2 - 1;
@@ -476,7 +476,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     const char* outPng = argv[1];
-    PACK = sarg(argc, argv, "pack", "../shaderpack/SkycraftAether/shaders");  // run from native/ (pack=: another copy)
+    PACK = sarg(argc, argv, "pack", "../shaderpack/InfiniteATLAS/shaders");  // run from native/ (pack=: another copy)
     std::string profileName = sarg(argc, argv, "profile", "");
     if (!profileName.empty() && !loadProfile(profileName)) {
         std::printf("pack_lab: no profile.%s in shaders.properties\n", profileName.c_str());
@@ -497,9 +497,9 @@ int main(int argc, char** argv) {
     int eyeInWater = int(arg(argc, argv, "water", 0));
     bool clouds = arg(argc, argv, "clouds", 1) != 0;
 
-    // ---- aether: the scene
-    AetherContext* ctx = nullptr;
-    // a good neighbour on a shared machine: below-normal priority, and aether on its CPU reference backend (bit-exact
+    // ---- atlas: the scene
+    AtlasContext* ctx = nullptr;
+    // a good neighbour on a shared machine: below-normal priority, and atlas on its CPU reference backend (bit-exact
     // with Vulkan, tested) unless gpu=1, so only the pack's few full-screen GL passes touch the GPU
     SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
     // gpu=1 Vulkan, gpu=0 CPU, gpu=auto (-1, default): Vulkan only while the GPU is idle (someone else's game or test
@@ -508,39 +508,39 @@ int main(int argc, char** argv) {
     int busy = gpuArg < 0 ? gpuBusyPercent() : 0;
     bool gpu = gpuArg > 0 || (gpuArg < 0 && busy < 40);
     if (gpuArg < 0) std::printf("pack_lab: GPU %d%% busy -> %s\n", busy, gpu ? "Vulkan" : "CPU");
-    if (gpu && aether_create(AETHER_BACKEND_VULKAN, &ctx) != AETHER_OK) gpu = false;
-    if (!gpu && !ctx && aether_create(AETHER_BACKEND_CPU, &ctx) != AETHER_OK) return 1;
+    if (gpu && atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) gpu = false;
+    if (!gpu && !ctx && atlas_create(ATLAS_BACKEND_CPU, &ctx) != ATLAS_OK) return 1;
     auto clock0 = std::chrono::steady_clock::now();
     auto lap = [&](const char* what) {
         auto now = std::chrono::steady_clock::now();
         std::printf("pack_lab: %-10s %7.1f ms\n", what, std::chrono::duration<double, std::milli>(now - clock0).count());
         clock0 = now;
     };
-    if (aether_preview_load_raster(ctx, "data/tamriel_raster.bin") != AETHER_OK) {
-        std::printf("pack_lab: %s\n", aether_last_error(ctx));
+    if (atlas_preview_load_raster(ctx, "data/tamriel_raster.bin") != ATLAS_OK) {
+        std::printf("pack_lab: %s\n", atlas_last_error(ctx));
         return 1;
     }
     if (arg(argc, argv, "scan", 0) != 0) {  // shore finder: points within 6 km whose ground is below sea level
         for (int dz = -6000; dz <= 6000; dz += 500)
             for (int dx = -6000; dx <= 6000; dx += 500) {
-                float h = aether_preview_height(ctx, x + dx, z + dz);
+                float h = atlas_preview_height(ctx, x + dx, z + dz);
                 if (h < 58) std::printf("water at %d %d (ground %.0f)\n", int(x + dx), int(z + dz), h);
             }
         return 0;
     }
     lap("raster");
-    double ground = aether_preview_height(ctx, x, z);
+    double ground = atlas_preview_height(ctx, x, z);
     double y = std::max(ground, 63.0) + arg(argc, argv, "above", sceneName.empty() ? 40 : 1.62);
     if (eyeInWater) y = std::max(ground + 2.0, 60.0);
     std::printf("pack_lab: camera %.0f %.0f %.0f (ground %.0f)\n", x, y, z, ground);
     for (int lod = 0; lod < 7; lod++) {
         int span = 256 << lod;
         int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
-        aether_preview_generate(ctx, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
+        atlas_preview_generate(ctx, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
     }
     double centre[3] = {x, y, z};
     lap("generate");
-    aether_update(ctx, centre, 0);
+    atlas_update(ctx, centre, 0);
     lap("svdag");
     std::vector<uint32_t> noise(64 * 64 * 64);
     bool haveNoise = false;
@@ -548,7 +548,7 @@ int main(int argc, char** argv) {
         haveNoise = std::fread(noise.data(), 4, noise.size(), nf) == noise.size();
         std::fclose(nf);
     }
-    if (haveNoise) aether_set_cloud_noise(ctx, noise.data());
+    if (haveNoise) atlas_set_cloud_noise(ctx, noise.data());
     std::vector<uint32_t> fld(128 * 128), dyn(128 * 128);
     double groundFog = arg(argc, argv, "fog", 0);  // the mod's ground-fog drive (weather_dynamics a)
     int band = int(arg(argc, argv, "band", 0));     // aerosol band: 0 rain, 1 snow, 2 dust, 3 ash
@@ -571,11 +571,11 @@ int main(int argc, char** argv) {
         dyn[i] = uint32_t(240.0 / 1024 * 255) | uint32_t(120.0 / 1024 * 255) << 8 | uint32_t(0.1024 * 255) << 16
                | uint32_t(std::lround(groundFog * 255)) << 24;
     }
-    AetherWeather wth{fld.data(), dyn.data(), fld.data(), dyn.data(), float(rain)};
-    aether_set_weather(ctx, &wth);
-    aether_set_sun_map(ctx, 1024, 2048.0f);
+    AtlasWeather wth{fld.data(), dyn.data(), fld.data(), dyn.data(), float(rain)};
+    atlas_set_weather(ctx, &wth);
+    atlas_set_sun_map(ctx, 1024, 2048.0f);
 
-    // camera: the GL view / projection the pack sees, and aether's inverse from the same matrices
+    // camera: the GL view / projection the pack sees, and atlas's inverse from the same matrices
     const double PI = 3.14159265358979323846;
     double yr = yaw * PI / 180, pr = pitch * PI / 180;
     double f[3] = {std::sin(yr) * std::cos(pr), std::sin(pr), -std::cos(yr) * std::cos(pr)};
@@ -603,7 +603,7 @@ int main(int argc, char** argv) {
     double ang = timeOfDay * 2 * PI, tilt = -25.0 * PI / 180;
     double sun[3] = {std::cos(ang), std::sin(ang) * std::cos(tilt), std::sin(ang) * std::sin(tilt)};
 
-    AetherFrame fr{};
+    AtlasFrame fr{};
     fr.cameraPos[0] = x;
     fr.cameraPos[1] = y;
     fr.cameraPos[2] = z;
@@ -618,19 +618,19 @@ int main(int argc, char** argv) {
     size_t N = size_t(W) * H;
     std::vector<float> farLin(N * 4), farDepth(N), bedLin(N * 4), bedDepth(N), surfLin(N * 4), surfDepth(N);
     std::vector<uint32_t> bedNormal(N), surfNormal(N);
-    // the far field: aether's own lit render (with clouds), as the game composites it
-    fr.flags = AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS | (clouds && haveNoise ? AETHER_FRAME_CLOUDS : 0);
-    AetherFrameOutput o1{nullptr, nullptr, farDepth.data(), farLin.data()};
-    for (int i = 0; i < 3; i++) aether_render(ctx, &fr, &o1);
+    // the far field: atlas's own lit render (with clouds), as the game composites it
+    fr.flags = ATLAS_FRAME_ATMOS | ATLAS_FRAME_SHADOWS | (clouds && haveNoise ? ATLAS_FRAME_CLOUDS : 0);
+    AtlasFrameOutput o1{nullptr, nullptr, farDepth.data(), farLin.data()};
+    for (int i = 0; i < 3; i++) atlas_render(ctx, &fr, &o1);
     // the near field's G-buffer: albedo, normals and depth, through water (the bed) and to the water's surface
-    fr.flags = AETHER_FRAME_DEBUG_ALBEDO | AETHER_FRAME_SEE_THROUGH_WATER | AETHER_FRAME_SHADOWS;
-    AetherFrameOutput o2{nullptr, bedNormal.data(), bedDepth.data(), bedLin.data()};
-    aether_render(ctx, &fr, &o2);
-    fr.flags = AETHER_FRAME_DEBUG_ALBEDO | AETHER_FRAME_SHADOWS;
-    AetherFrameOutput o3{nullptr, surfNormal.data(), surfDepth.data(), surfLin.data()};
-    aether_render(ctx, &fr, &o3);
+    fr.flags = ATLAS_FRAME_DEBUG_ALBEDO | ATLAS_FRAME_SEE_THROUGH_WATER | ATLAS_FRAME_SHADOWS;
+    AtlasFrameOutput o2{nullptr, bedNormal.data(), bedDepth.data(), bedLin.data()};
+    atlas_render(ctx, &fr, &o2);
+    fr.flags = ATLAS_FRAME_DEBUG_ALBEDO | ATLAS_FRAME_SHADOWS;
+    AtlasFrameOutput o3{nullptr, surfNormal.data(), surfDepth.data(), surfLin.data()};
+    atlas_render(ctx, &fr, &o3);
     std::vector<float> sunMap(size_t(1024) * 1025 * 2);
-    bool haveSunMap = arg(argc, argv, "sunmap", 1) != 0 && aether_read_sun_map(ctx, sunMap.data(), uint32_t(sunMap.size())) == AETHER_OK;
+    bool haveSunMap = arg(argc, argv, "sunmap", 1) != 0 && atlas_read_sun_map(ctx, sunMap.data(), uint32_t(sunMap.size())) == ATLAS_OK;
     lap("render");
 
     // ---- GL
@@ -665,7 +665,7 @@ int main(int argc, char** argv) {
     auto ahead = [&](double along, double across, double up, double out[3]) {
         for (int k = 0; k < 3; k++) out[k] = (k == 0 ? x : k == 1 ? y : z) + fwd[k] * along + side[k] * across;
         out[1] = y + up;
-        double g = aether_preview_height(ctx, out[0], out[2]);
+        double g = atlas_preview_height(ctx, out[0], out[2]);
         if (up < 0) out[1] = std::max(g, 63.0) + 1.5;  // on the ground
     };
     if (arg(argc, argv, "lamps", 0) != 0) {
@@ -779,7 +779,7 @@ int main(int argc, char** argv) {
             normalLm[g * 4 + 2] = uint16_t(std::lround(lampLight(w, rgb) * 65535));
         }
         normalLm[g * 4 + 3] = 65535;  // sky light: outdoors
-        bool foliage = cls == 1;      // AETHER_CLASS_FOLIAGE
+        bool foliage = cls == 1;      // ATLAS_CLASS_FOLIAGE
         specularBuf[g * 4 + 0] = uint8_t(foliage ? 0.35 * 255 : 0.25 * 255);
         specularBuf[g * 4 + 1] = uint8_t(0.03 * 255);
         specularBuf[g * 4 + 2] = uint8_t(foliage ? 0.6 * 255 : 0);
@@ -834,8 +834,8 @@ int main(int argc, char** argv) {
             nn[i] = (normalLm[g * 4] >> 8) | (normalLm[g * 4 + 1] >> 8) << 8 | (bedNormal[i] >> 16 & 255) * 60 << 16 | 0xFF000000u;
         }
         std::string base = std::string(outPng).substr(0, std::strlen(outPng) - 4);
-        aether::writePng(base + "_albedo.png", a.data(), W, H);
-        aether::writePng(base + "_normal.png", nn.data(), W, H);
+        atlas::writePng(base + "_albedo.png", a.data(), W, H);
+        atlas::writePng(base + "_normal.png", nn.data(), W, H);
     }
 
     auto rgba8 = [](double r, double g, double b, double a) {
@@ -1017,14 +1017,14 @@ int main(int argc, char** argv) {
     GLuint d0 = texture2d(GL_DEPTH_COMPONENT32F_, W, H, GL_DEPTH_COMPONENT, GL_FLOAT, depth0.data());
     GLuint d1 = texture2d(GL_DEPTH_COMPONENT32F_, W, H, GL_DEPTH_COMPONENT, GL_FLOAT, depth1.data());
     GLuint labWater = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, waterMask.data());
-    // aether=0: the mod's renderer absent (other dimensions, aether off): 1x1 blanks, as the mod registers them
-    bool aetherOn = arg(argc, argv, "aether", 1) != 0;
+    // atlas=0: the mod's renderer absent (other dimensions, atlas off): 1x1 blanks, as the mod registers them
+    bool atlasOn = arg(argc, argv, "atlas", 1) != 0;
     float zero4[4] = {0, 0, 0, 0};
-    GLuint aetherColor = aetherOn ? texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, aColor.data())
+    GLuint atlasColor = atlasOn ? texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, aColor.data())
                                   : texture2d(GL_RGBA16F_, 1, 1, GL_RGBA, GL_FLOAT, zero4);
-    GLuint aetherDepth = aetherOn ? texture2d(GL_R32F_, W, H, GL_RED, GL_FLOAT, aDepth.data())
+    GLuint atlasDepth = atlasOn ? texture2d(GL_R32F_, W, H, GL_RED, GL_FLOAT, aDepth.data())
                                   : texture2d(GL_R32F_, 1, 1, GL_RED, GL_FLOAT, zero4);
-    GLuint aetherSunMap = haveSunMap ? texture2d(GL_RG32F_, 1024, 1025, GL_RG_, GL_FLOAT, sunMap.data())
+    GLuint atlasSunMap = haveSunMap ? texture2d(GL_RG32F_, 1024, 1025, GL_RG_, GL_FLOAT, sunMap.data())
                                      : texture2d(GL_RG32F_, 1, 2, GL_RG_, GL_FLOAT, nullptr);
     // the shadow map: a lit 1x1 stand-in, or with a scene a real one of the scene's solids along Iris' shadow light
     // (the pack's own distortion and depth packing: lib/lighting.glsl distortShadow), so shafts and sun patches come
@@ -1080,7 +1080,7 @@ int main(int argc, char** argv) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     GLuint outTex = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    // the weather grids aether got, as the mod's weather_field / weather_dynamics textures (RGBA8, r in the low byte)
+    // the weather grids atlas got, as the mod's weather_field / weather_dynamics textures (RGBA8, r in the low byte)
     GLuint weatherFieldTex = texture2d(GL_RGBA8, 128, 128, GL_RGBA, GL_UNSIGNED_BYTE, fld.data());
     GLuint weatherDynTex = texture2d(GL_RGBA8, 128, 128, GL_RGBA, GL_UNSIGNED_BYTE, dyn.data());
     // the pack's own baked textures (shaderpack/tools/bake_grades.py writes raw copies for the lab: w, h, RGBA8)
@@ -1231,8 +1231,8 @@ int main(int argc, char** argv) {
     if (!pWater.id || !pDeferred.id || !pComposite.id || !pBloom.id || !pFinal.id) return 1;
 
     samplers = {{"colortex0", tex[0]}, {"colortex1", tex[1]}, {"colortex2", tex[2]}, {"colortex3", tex[3]},
-                {"labWater", labWater}, {"aetherColor", aetherColor}, {"aetherDepth", aetherDepth},
-                {"aetherSunMap", aetherSunMap}, {"weatherField", weatherFieldTex}, {"weatherDyn", weatherDynTex},
+                {"labWater", labWater}, {"atlasColor", atlasColor}, {"atlasDepth", atlasDepth},
+                {"atlasSunMap", atlasSunMap}, {"weatherField", weatherFieldTex}, {"weatherDyn", weatherDynTex},
                 {"fogRadianceTex", fogRadTex}, {"smokeSourcesTex", smokeTex}, {"lightningTex", boltTex},
                 {"sunHorizonTex", horizonTex}, {"masserPhases", phaseTex}, {"secundaPhases", phaseTex},
                 {"qualityKnobs", qualityTex}, {"gradeLut", gradeLutTex}, {"gradeMap", gradeMapTex}};
@@ -1317,7 +1317,7 @@ int main(int argc, char** argv) {
         if (ppx >= 0 && ppy >= 0) {
             pts = {{(ppx + 0.5) / W, (ppy + 0.5) / H}};
             size_t i = size_t(ppy) * W + size_t(ppx);
-            std::printf("pixel %d,%d: aether far %.3f %.3f %.3f a %.3f depth %.1f | bed %.1f surf %.1f cls bed %u surf %u | water px %d\n",
+            std::printf("pixel %d,%d: atlas far %.3f %.3f %.3f a %.3f depth %.1f | bed %.1f surf %.1f cls bed %u surf %u | water px %d\n",
                         int(ppx), int(ppy), farLin[i * 4], farLin[i * 4 + 1], farLin[i * 4 + 2], farLin[i * 4 + 3], farDepth[i],
                         bedDepth[i], surfDepth[i], bedNormal[i] >> 16 & 255, surfNormal[i] >> 16 & 255,
                         int(waterMask[row(i) * 4 + 3] > 0));
@@ -1334,7 +1334,7 @@ int main(int argc, char** argv) {
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, px.data());
     for (uint32_t yy = 0; yy < H; yy++) std::memcpy(&img[size_t(yy) * W * 4], &px[size_t(H - 1 - yy) * W * 4], W * 4);
     lap("gl+pack");
-    aether::writePng(outPng, reinterpret_cast<const uint32_t*>(img.data()), W, H);
+    atlas::writePng(outPng, reinterpret_cast<const uint32_t*>(img.data()), W, H);
     std::printf("pack_lab: wrote %s (%s)\n", outPng, ok ? "all passes ran" : "a pass FAILED");
     // sweep=FILE: the same scene under other knob settings, one image (and timing) per line
     const char* sweep = nullptr;
@@ -1362,11 +1362,11 @@ int main(int argc, char** argv) {
             glBindTexture(GL_TEXTURE_2D, outTex);
             glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, px.data());
             for (uint32_t yy = 0; yy < H; yy++) std::memcpy(&img[size_t(yy) * W * 4], &px[size_t(H - 1 - yy) * W * 4], W * 4);
-            aether::writePng(toks[0], reinterpret_cast<const uint32_t*>(img.data()), W, H);
+            atlas::writePng(toks[0], reinterpret_cast<const uint32_t*>(img.data()), W, H);
             if (ms >= 0) std::printf("pack_lab: sweep %s %.3f ms\n", toks[0].c_str(), ms);
             else std::printf("pack_lab: sweep %s\n", toks[0].c_str());
         }
     }
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
     return ok ? 0 : 1;
 }

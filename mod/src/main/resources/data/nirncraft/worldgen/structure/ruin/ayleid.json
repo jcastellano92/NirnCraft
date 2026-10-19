@@ -1,0 +1,15 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "ruin",
+  "kit": "ayleid",
+  "where": [
+    "cyrodiil",
+    "valenwood",
+    "high_rock",
+    "realm"
+  ],
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

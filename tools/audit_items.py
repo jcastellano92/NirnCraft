@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Audit every registered Skycraft item for its place in the economy.
+"""Audit every registered NirnCraft item for its place in the economy.
 
 Checks, per item:
-  * a lang name (item.skycraft.<id> or block.skycraft.<id>) and an item model whose textures exist;
-  * a gold value and a weight from the data tables (skycraft_values / skycraft_weights, by id or tag), not the
+  * a lang name (item.nirncraft.<id> or block.nirncraft.<id>) and an item model whose textures exist;
+  * a gold value and a weight from the data tables (nirncraft_values / nirncraft_weights, by id or tag), not the
     heuristic fallback;
   * the inventory category its kind calls for (weapons, apparel, ingredients, books, spell tomes...);
   * ingredients: four distinct alchemy effects (every creature/fauna/arcane ingredient; trophies in
-    #skycraft:trophies are exempt);
+    #nirncraft:trophies are exempt);
   * gear (weapons, armour, shields, jewellery): enchantable at the Arcane Enchanter with at least one enchantment,
     and temperable (jewellery is not tempered; artifacts, bound weapons and staves are exempt from enchanting);
   * books and spell tomes: some merchant stocks them;
@@ -15,10 +15,10 @@ Checks, per item:
 
 Item ids come from the Java registries (string literals and the generated lists: tomes, skill books, gear, masks,
 ingredients...), the lang files and the item models; the game-side facts (value source, categories, enchantments,
-tempering, merchants) come from the dump the server writes when mod/run/skycraft-item-audit.request exists:
+tempering, merchants) come from the dump the server writes when mod/run/nirncraft-item-audit.request exists:
 
-    echo > mod/run/skycraft-item-audit.request   then   ./gradlew runServer   (or tools/test-server.sh)
-    py -3 tools/audit_items.py [--dump mod/run/skycraft-item-audit.json] [--out report.txt] [--verbose]
+    echo > mod/run/nirncraft-item-audit.request   then   ./gradlew runServer   (or tools/test-server.sh)
+    py -3 tools/audit_items.py [--dump mod/run/nirncraft-item-audit.json] [--out report.txt] [--verbose]
 
 Exit code 1 when there are gaps.
 """
@@ -31,10 +31,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 MAIN = ROOT / "mod" / "src" / "main"
-JAVA = MAIN / "java" / "com" / "skycraft"
-ASSETS = MAIN / "resources" / "assets" / "skycraft"
+JAVA = MAIN / "java" / "com" / "nirncraft"
+ASSETS = MAIN / "resources" / "assets" / "nirncraft"
 DATA = MAIN / "resources" / "data"
-LANG = MAIN / "lang" / "skycraft"
+LANG = MAIN / "lang" / "nirncraft"
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_assets  # noqa: E402
@@ -66,7 +66,7 @@ def lang_keys():
 
 def audit_affixes(keys, vals, gap):
     """Audit R14 item affixes: qualities, makers, enchant tiers, storied items, worldsheet cites, and novelty."""
-    affix_dir = MAIN / "resources" / "skycraft" / "loot" / "affixes"
+    affix_dir = MAIN / "resources" / "nirncraft" / "loot" / "affixes"
     for req in ("qualities.json", "makers.json", "enchant_tiers.json", "storied.json"):
         p = affix_dir / req
         if not p.exists():
@@ -225,8 +225,8 @@ def variant_models():
             continue
         for o in data.get("overrides", []):
             ref = o.get("model", "")
-            if ref.startswith("skycraft:item/"):
-                out.add(ref[len("skycraft:item/"):])
+            if ref.startswith("nirncraft:item/"):
+                out.add(ref[len("nirncraft:item/"):])
     return out
 
 
@@ -252,7 +252,7 @@ def resolve_tag(tag, seen=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump", default=str(ROOT / "mod" / "run" / "skycraft-item-audit.json"))
+    ap.add_argument("--dump", default=str(ROOT / "mod" / "run" / "nirncraft-item-audit.json"))
     ap.add_argument("--out")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
@@ -272,7 +272,7 @@ def main():
             {
                 k.split(".", 2)[2]
                 for k in keys
-                if k.startswith("item.skycraft.") and k.count(".") == 2 and "%s" not in str(vals.get(k, ""))
+                if k.startswith("item.nirncraft.") and k.count(".") == 2 and "%s" not in str(vals.get(k, ""))
             }
             & (literal | model_stems)
         ) | literal
@@ -283,7 +283,7 @@ def main():
 
     affix_count = audit_affixes(keys, vals, gap)
 
-    trophies = {i.split(":", 1)[1] for i in resolve_tag("skycraft:trophies")}
+    trophies = {i.split(":", 1)[1] for i in resolve_tag("nirncraft:trophies")}
     expected_ingredients = set(lists.get("CreatureItems.INGREDIENTS", [])) | set(lists.get("ArcaneRegistry.MORE_INGREDIENTS", []))
     expected_ingredients -= trophies
 
@@ -292,7 +292,7 @@ def main():
             if lit not in variants and not lit.endswith("_crop"):
                 gap(lit, "registered in Java source but missing from the running game (or a typo)")
         for missing in dump.get("unregistered_ingredients", []):
-            if missing.startswith("skycraft:"):
+            if missing.startswith("nirncraft:"):
                 gap(missing, "alchemy ingredient table names an item that is not registered")
 
     for i in sorted(ids):
@@ -300,7 +300,7 @@ def main():
         cls = info.get("class", "").rsplit(".", 1)[-1].split("$")[-1]
         egg = i.endswith("_spawn_egg")
         # names and art
-        if f"item.skycraft.{i}" not in keys and f"block.skycraft.{i}" not in keys:
+        if f"item.nirncraft.{i}" not in keys and f"block.nirncraft.{i}" not in keys:
             gap(i, "no lang name")
         errs = []
         check_assets.check_model(ASSETS / "models" / "item" / f"{i}.json", set(), errs, f"item {i}")
@@ -316,7 +316,7 @@ def main():
             gap(i, f"weight only from the heuristic ({info['weight']})")
         inv = info["inv_category"]
         tags = set(info.get("tags", []))
-        jewelry = "skycraft:jewelry" in tags
+        jewelry = "nirncraft:jewelry" in tags
         want = None
         if "effects" in info or i in expected_ingredients:
             want = "INGREDIENTS"
@@ -367,7 +367,7 @@ def main():
         sold = sum(1 for info in items.values() if info.get("merchants"))
         lines.append(f"items some merchant stocks: {sold}")
         ing = sum(1 for info in items.values() if "effects" in info)
-        lines.append(f"Skycraft alchemy ingredients: {ing}")
+        lines.append(f"NirnCraft alchemy ingredients: {ing}")
         for key, by_level in dump.get("leveled", {}).items():
             lines.append(f"leveled {key}: " + ", ".join(f"L{lv}->{r['max_level']}" for lv, r in by_level.items()))
         for town, by_type in dump.get("shops", {}).items():

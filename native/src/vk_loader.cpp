@@ -10,13 +10,13 @@
 #include <dlfcn.h>
 #endif
 
-namespace aether {
+namespace atlas {
 
 PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = nullptr;
-#define AETHER_VK_DEFINE(name) PFN_##name name = nullptr;
-AETHER_VK_GLOBAL_FNS(AETHER_VK_DEFINE)
-AETHER_VK_INSTANCE_FNS(AETHER_VK_DEFINE)
-#undef AETHER_VK_DEFINE
+#define ATLAS_VK_DEFINE(name) PFN_##name name = nullptr;
+ATLAS_VK_GLOBAL_FNS(ATLAS_VK_DEFINE)
+ATLAS_VK_INSTANCE_FNS(ATLAS_VK_DEFINE)
+#undef ATLAS_VK_DEFINE
 
 namespace {
 std::mutex loadMu;
@@ -46,9 +46,9 @@ bool vkLoadGlobal(std::string& err) {
         err = "the Vulkan loader lacks vkGetInstanceProcAddr";
         return false;
     }
-#define AETHER_VK_GLOBAL(name) name = reinterpret_cast<PFN_##name>(gipa(VK_NULL_HANDLE, #name));
-    AETHER_VK_GLOBAL_FNS(AETHER_VK_GLOBAL)
-#undef AETHER_VK_GLOBAL
+#define ATLAS_VK_GLOBAL(name) name = reinterpret_cast<PFN_##name>(gipa(VK_NULL_HANDLE, #name));
+    ATLAS_VK_GLOBAL_FNS(ATLAS_VK_GLOBAL)
+#undef ATLAS_VK_GLOBAL
     if (!vkCreateInstance || !vkEnumerateInstanceExtensionProperties) {
         err = "the Vulkan loader lacks vkCreateInstance";
         return false;
@@ -61,11 +61,11 @@ bool vkLoadInstance(VkInstance instance, std::string& err) {
     std::lock_guard<std::mutex> lock(loadMu);
     if (instanceLoaded) return true;
     std::string missing;
-#define AETHER_VK_INSTANCE(name)                                                    \
+#define ATLAS_VK_INSTANCE(name)                                                    \
     name = reinterpret_cast<PFN_##name>(vkGetInstanceProcAddr(instance, #name));    \
     if (!name) missing += std::string(missing.empty() ? "" : ", ") + #name;
-    AETHER_VK_INSTANCE_FNS(AETHER_VK_INSTANCE)
-#undef AETHER_VK_INSTANCE
+    ATLAS_VK_INSTANCE_FNS(ATLAS_VK_INSTANCE)
+#undef ATLAS_VK_INSTANCE
     if (!missing.empty()) {
         err = "the Vulkan loader lacks " + missing + " (needs Vulkan 1.2)";
         return false;
@@ -74,4 +74,4 @@ bool vkLoadInstance(VkInstance instance, std::string& err) {
     return true;
 }
 
-}  // namespace aether
+}  // namespace atlas

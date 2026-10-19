@@ -1,13 +1,13 @@
 {
   "replace": false,
   "values": [
-    "skycraft:scathecraw",
-    "skycraft:ash_grass",
-    "skycraft:swamp_reeds",
-    "skycraft:ash_layer",
-    "skycraft:bloodgrass",
-    "skycraft:harrada",
-    "skycraft:mania_bloom",
-    "skycraft:dementia_bulb"
+    "nirncraft:scathecraw",
+    "nirncraft:ash_grass",
+    "nirncraft:swamp_reeds",
+    "nirncraft:ash_layer",
+    "nirncraft:bloodgrass",
+    "nirncraft:harrada",
+    "nirncraft:mania_bloom",
+    "nirncraft:dementia_bulb"
   ]
 }

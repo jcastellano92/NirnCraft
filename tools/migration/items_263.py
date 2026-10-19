@@ -3,7 +3,7 @@ import re
 from imports_263 import ROOT,owner
 from java_text import matching,arguments
 
-for path in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
+for path in (ROOT/'mod/src/main/java/com/nirncraft').rglob('*.java'):
     if owner(path)!='root':continue
     source=path.read_text(encoding='utf8');result=source;edits=[]
     pattern=r'void appendHoverText\(ItemStack (\w+), @Nullable Level (\w+), List<Component> (\w+), TooltipFlag (\w+)\)\s*\{'
@@ -17,7 +17,7 @@ for path in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
         if re.search(r'\b'+level+r'\b',body):body='\n        Level '+level+' = context263.level();'+body
         edits.append((m.start(),end+1,sig+body+'}'))
     for start,end,value in reversed(edits):result=result[:start]+value+result[end:]
-    result=result.replace('DistExecutor.unsafeCallWhenOn(', 'com.skycraft.platform.Sides.callOn(')
+    result=result.replace('DistExecutor.unsafeCallWhenOn(', 'com.nirncraft.platform.Sides.callOn(')
     result=result.replace('.setHoverName(','.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, ')
     result=result.replace('InteractionResultHolder<ItemStack>','InteractionResult')
     result=result.replace('import net.minecraft.world.InteractionResultHolder;','import net.minecraft.world.InteractionResult;')
@@ -26,15 +26,15 @@ for path in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
     edits=[]
     for m in re.finditer(r'InteractionResultHolder\.(sidedSuccess|success|consume|fail|pass)\(',result):
         end=matching(result,m.end()-1);a=arguments(result[m.end():end]);method=m[1]
-        if method=='sidedSuccess':value='com.skycraft.platform.Interactions.sidedSuccess('+a[1].strip()+').heldItemTransformedTo('+a[0].strip()+')'
+        if method=='sidedSuccess':value='com.nirncraft.platform.Interactions.sidedSuccess('+a[1].strip()+').heldItemTransformedTo('+a[0].strip()+')'
         elif method in ['success','consume']:value='InteractionResult.'+method.upper()+'.heldItemTransformedTo('+a[0].strip()+')'
         else:value='InteractionResult.'+method.upper()
         edits.append((m.start(),end+1,value))
     for start,end,value in reversed(edits):result=result[:start]+value+result[end:]
     # Old block/entity interaction calls had the same predicted/consumed split.
-    result=result.replace('InteractionResult.sidedSuccess(', 'com.skycraft.platform.Interactions.sidedSuccess(')
+    result=result.replace('InteractionResult.sidedSuccess(', 'com.nirncraft.platform.Interactions.sidedSuccess(')
     if result!=source:path.write_text(result,encoding='utf8');print(path.relative_to(ROOT))
 
-p=ROOT/'mod/src/main/java/com/skycraft/arsenal/item/ArtifactItem.java'
+p=ROOT/'mod/src/main/java/com/nirncraft/arsenal/item/ArtifactItem.java'
 s=p.read_text(encoding='utf8').replace('List<Component> tooltip','java.util.function.Consumer<Component> tooltip').replace('tooltip.add(','tooltip.accept(')
 p.write_text(s,encoding='utf8')

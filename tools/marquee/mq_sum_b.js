@@ -15,8 +15,8 @@ module.exports = function (f) {
 
   f.relic('last_lamp', 'The Unlit Lamp of Dusk', 'A tall lantern of bone-white glass and brass, its wick fresh, its oil full, never once lit. A tag in a child\'s hand is tied to its handle: \'for the one who is coming\'.', 17);
   f.relic('drowned_cap', 'Cap of the Lost Boatman', 'A small knitted cap of undyed wool with a lilac ribbon, stiff with salt. A single thread in the ribbon is a different, older wool that does not belong to any Summerset flock.', 11);
-  f.boss('hollow_skiff', { name: 'The Skiff-Taker', type: 'skycraft:draugr_deathlord', hp: 3.6, dmg: 1.5, level: 28,
-    weapon: 'skycraft:elven_sword', drop: 'loot:major', glow: true });
+  f.boss('hollow_skiff', { name: 'The Skiff-Taker', type: 'nirncraft:draugr_deathlord', hp: 3.6, dmg: 1.5, level: 28,
+    weapon: 'nirncraft:elven_sword', drop: 'loot:major', glow: true });
   f.scene('dus_lamps', [
     ['narrator', 'Dusk puts on her lamps one by one. The Lantern Tower flares, the quay flickers into gold, and one lamp on the south wall stays dark, no matter how often it is lit.'],
     ['@sen', 'That one. The southernmost. It was lit last by a man who has not come home. Every night Sen lights it and it goes out. It goes out because it is waiting. Not for oil. For him.'],
@@ -41,7 +41,7 @@ module.exports = function (f) {
         ] }),
     ],
     outro: 'A cap with a lilac ribbon was brought home. The south wall of Dusk, whether lit or dark, is no longer waiting.',
-    rewards: { gold: 560, loot: 'standard', items: [{ item: 'skycraft:elven_dagger', name: 'Lamplighter\'s Wick-Knife', enchant: { sharpness: 2, fire_aspect: 1 } }] },
+    rewards: { gold: 560, loot: 'standard', items: [{ item: 'nirncraft:elven_dagger', name: 'Lamplighter\'s Wick-Knife', enchant: { sharpness: 2, fire_aspect: 1 } }] },
   });
 
   f.q({
@@ -59,7 +59,7 @@ module.exports = function (f) {
           choice('Break the stall and burn the candles.', 'Orla does not move. "A pity. But a very natural reaction. The candles will burn, of course. They always do. And what they light, I cannot say. Go carefully, walker."', 'flag:@orla_burned'),
         ] }),
       o.kill('dusk', 'Face Orla\'s true shape at the quay at midnight',
-        [mob('skycraft:vampire', 1, 'Orla of the Lilac Hour', { hostile: true })]),
+        [mob('nirncraft:vampire', 1, 'Orla of the Lilac Hour', { hostile: true })]),
     ],
     outro: 'The Pale Merchant\'s stall stood empty from that night, and the book of ships has a single clean page at the back, in lilac ink, in Wenlin\'s hand: \'The sea is not hungry tonight.\'',
     rewards: { gold: 640, loot: 'standard' },
@@ -78,8 +78,8 @@ module.exports = function (f) {
   f.relic('smuggler_manifest', 'The Second Manifest', 'A ship\'s manifest written on thin slate-paper, with a pale blue Maormer wave-mark pressed beside every third entry. The cargo it lists is not on any customs roll.', 11);
   f.relic('lamp_tag', 'Tag of the Replaced Lantern', 'A brass tag from a dock lantern pole, stamped with a number that does not match any lantern in the harbour. The paint on the lantern it hung beneath was a different blue.', 26);
   f.relic('hem_sail', 'The Sail with a Name in Its Hem', 'A small teal sail, folded in thirds and kept dry in oilcloth. Along the hem, in tiny stitches of dark thread, is a girl\'s name and a date. A seam inside has been mended three times by somebody who did not have to.', 11);
-  f.boss('maormer_runner', { name: 'Sea-Captain Ssir-Vaal', type: 'skycraft:bandit_chief', hp: 3.4, dmg: 1.5, level: 26,
-    weapon: 'skycraft:maormer_sword', gear: { head: 'skycraft:maormer_helmet', chest: 'skycraft:maormer_chestplate' }, drop: 'loot:standard', glow: false });
+  f.boss('maormer_runner', { name: 'Sea-Captain Ssir-Vaal', type: 'nirncraft:bandit_chief', hp: 3.4, dmg: 1.5, level: 26,
+    weapon: 'nirncraft:maormer_sword', gear: { head: 'nirncraft:maormer_helmet', chest: 'nirncraft:maormer_chestplate' }, drop: 'loot:standard', glow: false });
   f.scene('shi_pole', [
     ['narrator', 'Eleven lantern poles stand along the docks, each topped with a brass lamp the colour of warm honey. The twelfth, at the end of the quay, burns a faint, cold blue, and its shadow falls the wrong way.'],
     ['@fen', 'That is not one of mine. It has been there four days. It lights at the hour of the tide, and every ship that passes under it has a new crewman at the wheel in the morning. I have not been able to remove it. Nobody wants to touch it.'],
@@ -94,7 +94,7 @@ module.exports = function (f) {
       o.go('shimmerene_dockworks', 'Inspect the blue lantern on the dockworks', { actions: 'scene:@shi_pole;relic:@lamp_tag' }),
       o.cond('night', 'Hide in the sail-loft and watch the quay at the tide', 'shimmerene'),
       o.kill('shimmerene_dockworks', 'Take down Sea-Captain Ssir-Vaal and his boarding crew',
-        [{ boss_id: '@maormer_runner' }, mob('skycraft:bandit', 3, 'Wave-Mark Deckhand')], { actions: 'relic:@smuggler_manifest' }),
+        [{ boss_id: '@maormer_runner' }, mob('nirncraft:bandit', 3, 'Wave-Mark Deckhand')], { actions: 'relic:@smuggler_manifest' }),
       o.deliver('@fen', '@smuggler_manifest', 'Bring the second manifest to Fen',
         'The twelfth lantern was a Maormer runner\'s signal. The cargo they swapped was weapons for the sea-raiders of Pyandonea. The manifest names the dock-hand who took the bribe.',
         'Fen reads the manifest line by line, and the colour drains from his face. "Yeli. The sail-maker\'s brother. He has run the east crane for ten years. Walker, I have a rota. I know every entry. I did not know this. What would you have Fen do with a man who sold a harbour for a handful of silver?"',
@@ -115,7 +115,7 @@ module.exports = function (f) {
     objectives: [
       o.go('shimmerene_dockworks', 'Search the old sail-store of the dockworks for the missing sail'),
       o.clear('colossal_aldmeri_grotto', 'Drive off the smugglers who store stolen goods in the Colossal Aldmeri Grotto',
-        [mob('skycraft:bandit', 3, 'Grotto Smuggler')]),
+        [mob('nirncraft:bandit', 3, 'Grotto Smuggler')]),
       o.retrieve('colossal_aldmeri_grotto', 'Find the sail with the hem-name', '@hem_sail', { placement: 'structure' }),
       o.talk('@yeli', 'Bring Yeli the sail and tell her where it was kept',
         'The sail was hung in a smuggler\'s cave, folded with great care. Whoever kept it did not use it. They only kept it.',
@@ -136,7 +136,7 @@ module.exports = function (f) {
     'The Tide-Turn Inn sits on the causeway itself, so that at high tide its front steps are underwater and at low tide its back steps are dry. Naereth keeps two doors and charges accordingly.', true);
 
   f.relic('gate_key', 'Key of the Tide Gate', 'An iron key green with verdigris, as long as a forearm, its bow cast as a closing wave. A salt-crust has grown over the bit, and a very small crab has made its home in the ward.', 26);
-  f.boss('tide_hag', { name: 'Old Maud Saltrib', type: 'skycraft:hagraven', hp: 3.2, dmg: 1.5, level: 24, drop: 'loot:standard', glow: true });
+  f.boss('tide_hag', { name: 'Old Maud Saltrib', type: 'nirncraft:hagraven', hp: 3.2, dmg: 1.5, level: 24, drop: 'loot:standard', glow: true });
 
   f.q({
     id: 'the_tide_gate', title: 'The Tide Gate', region: 'summerset/auridon', start: 'npc:@ro', requires: ['level:16'],
@@ -170,7 +170,7 @@ module.exports = function (f) {
       o.go('greenwater_cove', 'Follow the net\'s tune along the shore to Greenwater Cove'),
       o.cond('night', 'Wait until the tide drops and the stone ring is exposed', 'greenwater_cove'),
       o.kill('greenwater_cove', 'Quiet what sings beneath the ring',
-        [mob('skycraft:sea_serpent', 1, 'The Singing Eel', { target: true }), mob('minecraft:drowned', 2, 'Ring-Drowned')]),
+        [mob('nirncraft:sea_serpent', 1, 'The Singing Eel', { target: true }), mob('minecraft:drowned', 2, 'Ring-Drowned')]),
       o.talk('@lyn', 'Tell Lyn the song is finished',
         'It was an eel, an old one, calling for a mate that died long ago. It is quiet now. Your net will hum no more.',
         'Lyn is quiet. Then, softly: "An eel. A lonely one. It is a sad thing to answer a song and silence it. But thank you. Lyn will keep the net, with its tune. A net should remember whom it has been called by."'),
@@ -188,8 +188,8 @@ module.exports = function (f) {
     'Olo rows the narrow strait to Artaeum and says she has done so for eleven years, though every year she has made exactly the same number of crossings. She is not sure how. She has stopped asking.', true);
   f.relic('psijic_token', 'Psijic Token of Passage', 'A flat disc of grey-green stone, warm as a cheek. When it is dropped, it lands at a different place on the floor each time, and none of them are where it fell.', 26);
   f.relic('mirror_shard', 'Shard of the False Door', 'A sliver of mirror from the Traitor\'s Vault. It shows not your face, but the face you would wear if you had said yes to the last thing that tempted you.', 20);
-  f.boss('false_door_keeper', { name: 'The Door That Wore a Face', type: 'skycraft:dremora', hp: 3.8, dmg: 1.6, level: 36,
-    weapon: 'skycraft:elven_sword', drop: 'loot:major', glow: true });
+  f.boss('false_door_keeper', { name: 'The Door That Wore a Face', type: 'nirncraft:dremora', hp: 3.8, dmg: 1.6, level: 36,
+    weapon: 'nirncraft:elven_sword', drop: 'loot:major', glow: true });
   f.scene('art_vault', [
     ['narrator', 'A hall of doors, all identical, stretches away in both directions. Each door has a handle and a mirror and a faint, patient smile. When you open one, you are back in the hall, and the other doors have changed places.'],
     ['@quenel', 'Three doors, two lies. One truth. A thousand years ago a Psijic was locked in here for a betrayal. The vault was built to hold a mind that could not be broken, only mistaken. Walker, I would not trust the door that looks the most like the way out.'],
@@ -214,7 +214,7 @@ module.exports = function (f) {
         ] }),
     ],
     outro: 'The Traitor\'s Vault has one fewer door. The initiate who sat before the mirror spoke again that evening, and said only: \'Good morning.\'',
-    rewards: { gold: 1200, loot: 'major', items: [{ item: 'skycraft:elven_gilded_chestplate', name: 'Mantle of the Last Refusal', enchant: { protection: 4, unbreaking: 3 } }] },
+    rewards: { gold: 1200, loot: 'major', items: [{ item: 'nirncraft:elven_gilded_chestplate', name: 'Mantle of the Last Refusal', enchant: { protection: 4, unbreaking: 3 } }] },
   });
 
   f.q({
@@ -225,7 +225,7 @@ module.exports = function (f) {
     objectives: [
       o.go('ceporah_tower', 'Climb Ceporah Tower, where the grey-cloaked passenger vanished'),
       o.clear('ceporah_tower', 'Drive off the shades that keep the tower\'s stair',
-        [mob('minecraft:vex', 3, 'Tower-Vex'), mob('skycraft:necromancer', 1, 'Staircase Wraith')], { placement: 'structure' }),
+        [mob('minecraft:vex', 3, 'Tower-Vex'), mob('nirncraft:necromancer', 1, 'Staircase Wraith')], { placement: 'structure' }),
       o.talk('@quenel', 'Ask Quenel who the grey-cloaked man was',
         'Olo rowed a man who was not in her boat. He went to Ceporah Tower. Who was he?',
         'Quenel is very still. "A man in a grey cloak. Tall. Walker, there was a Psijic, long ago, who rowed the strait before Olo. He drowned with his boat. He has not stopped his crossings. He is a very patient man. Olo has been doing his work, quite without knowing. The Order has a question: shall Olo be told, or shall the work go on?"',
@@ -258,7 +258,7 @@ module.exports = function (f) {
   f.relic('orchard_deed', 'Deed of the Eleven Apples', 'A parchment deed in an archaic hand, leaf-stamped, granting the orchard of King\'s Haven \'to the two daughters of the house, jointly, for as long as the tree bears\'. The word jointly has been underlined by a very patient clerk.', 11);
   f.relic('groom_note', 'Drathelin\'s Note', 'A hurried note on a torn menu-card, folded in four and pinned with a lover\'s hairpin. It is neatly written and unashamed.', 11);
   f.relic('courier_letter', 'The Courier\'s Letter', 'A sealed letter in a courier\'s oilskin, the wax stamped with the Dominion\'s sun and, beneath it, a small private mark: a harbour lamp and a daughter\'s initial.', 11);
-  f.boss('grove_stalker', { name: 'The Growing One', type: 'skycraft:spriggan', hp: 3.4, dmg: 1.5, level: 26, drop: 'loot:standard', glow: true });
+  f.boss('grove_stalker', { name: 'The Growing One', type: 'nirncraft:spriggan', hp: 3.4, dmg: 1.5, level: 26, drop: 'loot:standard', glow: true });
 
   f.q({
     id: 'the_tree_of_two_claims', title: 'The Tree of Two Claims', region: 'summerset/summerset_isle', start: 'npc:@apple_claimant', requires: ['level:10'],
@@ -284,7 +284,7 @@ module.exports = function (f) {
     objectives: [
       o.cond('night', 'Keep vigil in the belfry until the bell rings', 'dawnbreak'),
       o.kill('dawnbreak', 'Strike down whatever is ringing the bell',
-        [mob('skycraft:will_o_wisp', 1, 'Bell-Ringer Wisp', { target: true }), mob('minecraft:vex', 1, 'Rope-Knotter')], { actions: 'relic:@midnight_rope' }),
+        [mob('nirncraft:will_o_wisp', 1, 'Bell-Ringer Wisp', { target: true }), mob('minecraft:vex', 1, 'Rope-Knotter')], { actions: 'relic:@midnight_rope' }),
       o.talk('@bell_sexton', 'Tell Aldaer what rang his bell',
         'A wisp, with a vex to help. They were ringing the hour a drowned bell-ringer once kept. Here is the rope.',
         'Aldaer holds the rope and, for the first time in a fortnight, breathes out fully. "A drowned ringer. His boat was lost the night the third century ended. He is still ringing the hour he missed. Walker, shall we let him? Midnight is a quiet hour. Aldaer does not mind losing sleep, if the ringer has found his bell."',
@@ -305,7 +305,7 @@ module.exports = function (f) {
     objectives: [
       o.go('shattered_grove', 'Examine the growing tree at Shattered Grove'),
       o.kill('shattered_grove', 'Destroy the Growing One before it breaks the trunk',
-        [{ boss_id: '@grove_stalker' }, mob('skycraft:spriggan', 2, 'Grove-Sprout')]),
+        [{ boss_id: '@grove_stalker' }, mob('nirncraft:spriggan', 2, 'Grove-Sprout')]),
       o.talk('@grove_watcher', 'Tell Ilmen what grew within the tree',
         'A spriggan, a very old one, was seeding itself inside the trunk to be born. It is dead now. The tree has stopped growing.',
         'Ilmen lowers his gold ribbon, which has become a very long, very useless gold line. "Stopped. Quite stopped. Walker, a tree is a gift and a danger, and I have measured one and dissected another. Shall I plant a seed in the same hollow, and see what grows? Or let it lie fallow, in case the old thing was a symptom of something older?"',

@@ -16,7 +16,7 @@ def resolve(tree,state):
         for case in tree['cases']:
             if value in (case['when'] if isinstance(case['when'],list) else [case['when']]):return resolve(case['model'],state)
         return resolve(tree['fallback'],state)
-    key={'minecraft:custom_model_data':'custom_model_data','skycraft:filled':'skycraft:filled','skycraft:cover':'skycraft:cover','minecraft:crossbow/pull':'pull','minecraft:use_duration':'pull'}[prop]
+    key={'minecraft:custom_model_data':'custom_model_data','nirncraft:filled':'nirncraft:filled','nirncraft:cover':'nirncraft:cover','minecraft:crossbow/pull':'pull','minecraft:use_duration':'pull'}[prop]
     value=state.get(key,0)
     selected=tree['fallback']
     for entry in tree['entries']:
@@ -30,7 +30,7 @@ class NativeItemModelsTest(unittest.TestCase):
             original=json.loads(path.read_text(encoding='utf8'))
             overrides=original.get('overrides',[])
             if not overrides:continue
-            variants+=1;ref='skycraft:item/'+path.relative_to(MODELS).with_suffix('').as_posix()
+            variants+=1;ref='nirncraft:item/'+path.relative_to(MODELS).with_suffix('').as_posix()
             native=convert(ref,original)['model']
             keys=sorted({key for override in overrides for key in override['predicate']})
             samples={key:{0.,1.} for key in keys}
@@ -50,12 +50,12 @@ class NativeItemModelsTest(unittest.TestCase):
             native=json.loads((OUT/(name+'.json')).read_text())['model']
             self.assertEqual(colors,tuple(tint['value'] for tint in native['tints']),name)
             geometry=json.loads((MODELS/(name+'.json')).read_text())
-            self.assertEqual('skycraft:item/template_skycraft_spawn_egg',geometry['parent'])
+            self.assertEqual('nirncraft:item/template_nirncraft_spawn_egg',geometry['parent'])
     def test_leaf_and_treasure_tints_survive_component_migration(self):
         for name,color in [('hist_leaves',0x5a7a3a),('graht_oak_leaves',0x4e9a32)]:
             self.assertEqual(color,json.loads((OUT/(name+'.json')).read_text())['model']['tints'][0]['value'])
         treasure=json.loads((OUT/'regional_treasure.json').read_text())['model']['tints']
-        self.assertEqual('skycraft:treasure',treasure[0]['type'])
+        self.assertEqual('nirncraft:treasure',treasure[0]['type'])
         self.assertEqual(0xffffff,treasure[1]['value'])
     def test_native_moon_atlas_overrides_suppress_all_eight_phases(self):
         import struct,zlib
@@ -75,7 +75,7 @@ class NativeItemModelsTest(unittest.TestCase):
             if isinstance(value,dict):
                 if value.get('type')=='minecraft:model':
                     ref=value['model'];namespace,name=ref.split(':',1)
-                    if namespace=='skycraft':self.assertTrue((MODELS.parent/(name+'.json')).is_file(),ref)
+                    if namespace=='nirncraft':self.assertTrue((MODELS.parent/(name+'.json')).is_file(),ref)
                 for child in value.values():visit(child)
             elif isinstance(value,list):
                 for child in value:visit(child)

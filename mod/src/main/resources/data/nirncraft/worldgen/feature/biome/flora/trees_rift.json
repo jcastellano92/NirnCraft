@@ -1,0 +1,33 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "aspen_gold",
+        "weight": 8
+      },
+      {
+        "species": "aspen_orange",
+        "weight": 6
+      },
+      {
+        "species": "skyrim_pine",
+        "weight": 3
+      },
+      {
+        "species": "maple",
+        "weight": 2
+      },
+      {
+        "species": "aspen_young_gold",
+        "weight": 2
+      },
+      {
+        "species": "aspen_young_orange",
+        "weight": 2
+      }
+    ],
+    "stands": 0.8,
+    "stand_scale": 48
+  }
+}

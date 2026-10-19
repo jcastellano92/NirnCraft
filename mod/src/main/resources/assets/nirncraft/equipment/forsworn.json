@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:forsworn"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:forsworn"
+      }
+    ]
+  }
+}

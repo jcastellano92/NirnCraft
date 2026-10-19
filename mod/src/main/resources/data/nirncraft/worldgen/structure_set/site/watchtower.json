@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/watchtower",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274029,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "watchtower"
+    ]
+  }
+}

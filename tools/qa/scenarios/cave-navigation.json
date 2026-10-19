@@ -10,18 +10,18 @@
     "local_navigation"
   ],
   "camera": "mine-spell-lane",
-  "planReference": "Embershard room3, actual lantern walkway; native Skycraft NPC traverses five metres toward observer",
+  "planReference": "Embershard room3, actual lantern walkway; native NirnCraft NPC traverses five metres toward observer",
   "scope": "Actual engine navigation and observed native NPC arrival on a five-metre walkway with a repeatedly requested goal. Explicitly scripted locomotion; not autonomous schedules, combat or door interactions.",
   "setupCommands": [
     "gamemode creative @p",
-    "execute as @p at @p run skycraft-dev scenario spawn {run} skycraft:npc -275 89 795 active"
+    "execute as @p at @p run nirncraft-dev scenario spawn {run} nirncraft:npc -275 89 795 active"
   ],
   "steps": [
     {
       "waitFor": {
         "timeoutSeconds": 5,
         "probeCommands": [
-          "execute as @p at @p run skycraft-dev scenario observe {run}"
+          "execute as @p at @p run nirncraft-dev scenario observe {run}"
         ],
         "assertions": [
           {
@@ -34,14 +34,14 @@
     },
     {
       "commands": [
-        "execute as @p at @p run skycraft-dev scenario move {run} -275 88 800"
+        "execute as @p at @p run nirncraft-dev scenario move {run} -275 88 800"
       ]
     },
     {
       "waitFor": {
         "timeoutSeconds": 20,
         "probeCommands": [
-          "execute as @p at @p run skycraft-dev scenario observe {run}"
+          "execute as @p at @p run nirncraft-dev scenario observe {run}"
         ],
         "assertions": [
           {
@@ -51,7 +51,7 @@
           }
         ],
         "whilePendingCommands": [
-          "execute as @p at @p run skycraft-dev scenario move {run} -275 88 800"
+          "execute as @p at @p run nirncraft-dev scenario move {run} -275 88 800"
         ]
       }
     },
@@ -72,7 +72,7 @@
     "{run}-arrival"
   ],
   "cleanupCommands": [
-    "execute as @p at @p run skycraft-dev scenario cleanup {run}",
+    "execute as @p at @p run nirncraft-dev scenario cleanup {run}",
     "gamemode spectator @p"
   ]
 }

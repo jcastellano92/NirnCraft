@@ -15,7 +15,7 @@ for d in reports:
 with zipfile.ZipFile(SCRATCH/'build/moddev/artifacts/minecraft-patched-26.3.0.90-sources.jar') as z:
     entity_constants=re.findall(r'public static final EntityType<[^;=]+> (\w+) =',z.read('net/minecraft/world/entity/EntityTypes.java').decode())
 
-for p in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
+for p in (ROOT/'mod/src/main/java/com/nirncraft').rglob('*.java'):
     if owner(p)!='root':continue
     s=p.read_text(encoding='utf8');v=s
     for a,b in access.get(p,{}).items():v=re.sub(re.escape(a)+r'\b',lambda _:b,v)
@@ -28,7 +28,7 @@ for p in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
     v=v.replace('getGameProfile().getName()', 'getGameProfile().name()').replace('getGameProfile().getId()', 'getGameProfile().id()')
     v=v.replace('ChunkPos.asLong(', 'ChunkPos.pack(')
     v=v.replace('SpawnPlacements.Type.', 'net.minecraft.world.entity.SpawnPlacementTypes.')
-    v=v.replace('NbtUtils.writeBlockPos(', 'com.skycraft.platform.NbtPositions.write(').replace('NbtUtils.readBlockPos(', 'com.skycraft.platform.NbtPositions.read(')
+    v=v.replace('NbtUtils.writeBlockPos(', 'com.nirncraft.platform.NbtPositions.write(').replace('NbtUtils.readBlockPos(', 'com.nirncraft.platform.NbtPositions.read(')
     v=v.replace('BlockEvent.BreakEvent','net.neoforged.neoforge.event.level.block.BreakBlockEvent')
     v=v.replace('.getSharedSpawnPos()', '.getRespawnData().pos()').replace('.getSharedSpawnAngle()', '.getRespawnData().yaw()')
     if s!=v:p.write_text(v,encoding='utf8');print(p.relative_to(ROOT))

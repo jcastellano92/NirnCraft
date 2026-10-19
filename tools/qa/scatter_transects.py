@@ -1,8 +1,8 @@
 """Scatter QA (offline, no Minecraft client): prop density vs distance along transects, annotated strips and close-ups.
 
 A transect is a straight line from a settlement centre (origin) along a bearing, `length` blocks, `width` blocks wide.
-Inputs: the saved world (region files), the per-chunk CSV of `/skycraft-scatter export` and optionally the placement log
-(`-Dskycraft.scatter.log=<file>`, lines `x,z,zone,kind,human,humanity`).
+Inputs: the saved world (region files), the per-chunk CSV of `/nirncraft-scatter export` and optionally the placement log
+(`-Dnirncraft.scatter.log=<file>`, lines `x,z,zone,kind,human,humanity`).
 
 usage:
   py -3 -I tools/qa/scatter_transects.py analyze --export export_62_-68.csv [--export ...] --transects transects.json [--out out.json]
@@ -190,7 +190,7 @@ def read_log(path):
 
 def places():
     out = []
-    d = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel', 'places')
+    d = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'tamriel', 'places')
     for f in json.load(open(os.path.join(d, 'index.json'), encoding='utf8')):
         p = os.path.join(d, f)
         if os.path.exists(p):

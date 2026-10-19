@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/spider_egg"
+      },
+      {
+        "model": "nirncraft:block/spider_egg",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/spider_egg",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/spider_egg",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/spider_egg_harvested"
+      },
+      {
+        "model": "nirncraft:block/spider_egg_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/spider_egg_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/spider_egg_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

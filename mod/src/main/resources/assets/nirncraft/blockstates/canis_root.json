@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/canis_root"
+      },
+      {
+        "model": "nirncraft:block/canis_root",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/canis_root",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/canis_root",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/canis_root_harvested"
+      },
+      {
+        "model": "nirncraft:block/canis_root_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/canis_root_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/canis_root_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

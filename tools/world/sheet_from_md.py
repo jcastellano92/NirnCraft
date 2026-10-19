@@ -2,7 +2,7 @@
 """Extracts Section 1 (World model sheet) of a province markdown doc into JSON (MS22).
 
 Usage:
-  py -3 -I tools/world/sheet_from_md.py docs/world/provinces/skyrim.md --out mod/src/main/resources/skycraft/tamriel/world/skyrim.json [--stamp-identity]
+  py -3 -I tools/world/sheet_from_md.py docs/world/provinces/skyrim.md --out mod/src/main/resources/nirncraft/tamriel/world/skyrim.json [--stamp-identity]
 
 Rules:
 - Parses the province block (1.1) and all region sub-sheets (1.2+) across layers L1..L11.
@@ -18,7 +18,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-RES = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft")
+RES = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft")
 
 LAYERS = [f"L{i}" for i in range(1, 12)]
 
@@ -729,7 +729,7 @@ def stamp_skyrim_dungeon_identity(sheet: dict) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Extract Section 1 world model sheet from province markdown.")
     ap.add_argument("markdown", help="Path to docs/world/provinces/<province>.md")
-    ap.add_argument("--out", help="Output JSON path (default: mod/src/main/resources/skycraft/tamriel/world/<province>.json)")
+    ap.add_argument("--out", help="Output JSON path (default: mod/src/main/resources/nirncraft/tamriel/world/<province>.json)")
     ap.add_argument("--stamp-identity", action="store_true", help="Also stamp resolving L10 why cites onto dungeons/identity/skyrim.json")
     args = ap.parse_args()
 

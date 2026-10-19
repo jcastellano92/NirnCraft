@@ -1,4 +1,4 @@
-// Vulkan compute backend for the aether_far kernel.
+// Vulkan compute backend for the atlas_far kernel.
 //  * Host path (harness, tests): scene in host-visible buffers (BAR when available), outputs read back.
 //  * GL path (game), zero-copy: outputs published into images whose memory is exported to the game's OpenGL context
 //    (VK_KHR_external_memory_win32 <-> GL_EXT_memory_object_win32 on Windows, VK_KHR_external_memory_fd <->
@@ -28,15 +28,15 @@
 #include <string>
 #include <vector>
 
-#include "aether_cloud_spv.h"
-#include "aether_sunmap_spv.h"    // generated: the same kernel source's cloudMain entry
-#include "aether_far_spv.h"      // generated: aether_far_spv[], aether_far_spv_size (bytes)
-#include "aether_ingest_spv.h"   // generated
-#include "aether_publish_spv.h"  // generated
+#include "atlas_cloud_spv.h"
+#include "atlas_sunmap_spv.h"    // generated: the same kernel source's cloudMain entry
+#include "atlas_far_spv.h"      // generated: atlas_far_spv[], atlas_far_spv_size (bytes)
+#include "atlas_ingest_spv.h"   // generated
+#include "atlas_publish_spv.h"  // generated
 #include "backend.hpp"
 #include "gl_api.hpp"
 
-namespace aether {
+namespace atlas {
 namespace {
 
 // ---- platform shim: the one place the two interop flavours differ -------------------------------------------------
@@ -188,32 +188,32 @@ constexpr int IMG_COLOR = 0, IMG_NORMAL = 1, IMG_DEPTH = 2, IMG_NEAR = 3, IMAGES
 // image. Same bottom-up rows as GL; the Vulkan ingest pass flips them for the far kernel.
 const char* LINEARIZE_GLSL = R"GLSL(#version 430
 layout(local_size_x = 8, local_size_y = 8) in;
-layout(binding = 15) uniform sampler2D aetherNearDepth;
-layout(r32f, binding = 7) uniform writeonly image2D aetherNearOut;
-uniform mat4 aetherInvProj;
-uniform vec2 aetherSize;
-uniform int aetherZeroToOne;
-uniform int aetherReversed;
+layout(binding = 15) uniform sampler2D atlasNearDepth;
+layout(r32f, binding = 7) uniform writeonly image2D atlasNearOut;
+uniform mat4 atlasInvProj;
+uniform vec2 atlasSize;
+uniform int atlasZeroToOne;
+uniform int atlasReversed;
 void main() {
     ivec2 p = ivec2(gl_GlobalInvocationID.xy);
-    if (p.x >= int(aetherSize.x) || p.y >= int(aetherSize.y)) return;
-    // aether may render below the window's resolution (dynamic scale): an aether pixel takes the farthest of four
+    if (p.x >= int(atlasSize.x) || p.y >= int(atlasSize.y)) return;
+    // atlas may render below the window's resolution (dynamic scale): an atlas pixel takes the farthest of four
     // samples over its footprint, so it is skipped only where near geometry covers all of it (at scale 1 all four
     // land on the same texel: the exact depth)
-    ivec2 full = textureSize(aetherNearDepth, 0);
-    vec2 f = vec2(full) / aetherSize;
+    ivec2 full = textureSize(atlasNearDepth, 0);
+    vec2 f = vec2(full) / atlasSize;
     float dist = 0.0;
     for (int k = 0; k < 4; k++) {
         vec2 o = vec2(k & 1, k >> 1) * 0.5 + 0.25;
         ivec2 q = clamp(ivec2((vec2(p) + o) * f), ivec2(0), full - 1);
-        float d = texelFetch(aetherNearDepth, q, 0).r;
-        bool sky = aetherReversed != 0 ? d <= 0.0 : d >= 1.0;
-        float z = aetherZeroToOne != 0 ? d : d * 2.0 - 1.0;
+        float d = texelFetch(atlasNearDepth, q, 0).r;
+        bool sky = atlasReversed != 0 ? d <= 0.0 : d >= 1.0;
+        float z = atlasZeroToOne != 0 ? d : d * 2.0 - 1.0;
         vec2 ndc = (vec2(q) + 0.5) / vec2(full) * 2.0 - 1.0;
-        vec4 v = aetherInvProj * vec4(ndc, z, 1.0);
+        vec4 v = atlasInvProj * vec4(ndc, z, 1.0);
         dist = max(dist, sky ? 1e30 : length(v.xyz / v.w));
     }
-    imageStore(aetherNearOut, p, vec4(dist));
+    imageStore(atlasNearOut, p, vec4(dist));
 }
 )GLSL";
 
@@ -239,11 +239,11 @@ struct Buf {
     VkDeviceMemory mem = VK_NULL_HANDLE;
     void* map = nullptr;
     VkDeviceSize size = 0;
-    VkDeviceSize memBytes = 0;  // of its allocation (aether_memory_info's aetherBytes)
+    VkDeviceSize memBytes = 0;  // of its allocation (atlas_memory_info's atlasBytes)
     Mem kind = Mem::HostWrite;
 };
 
-// Fence waits: far longer than any frame or upload aether makes (a 4K frame on an iGPU is ~100 ms), shorter than a
+// Fence waits: far longer than any frame or upload atlas makes (a 4K frame on an iGPU is ~100 ms), shorter than a
 // player waits for a frozen game. Windows resets a GPU stuck for 2 s (TDR) and amdgpu after 10 s; either way the wait
 // returns VK_ERROR_DEVICE_LOST, and a wait that runs out first means a hung device, treated as lost.
 constexpr uint64_t FENCE_TIMEOUT_NS = 5'000'000'000ull;
@@ -265,7 +265,7 @@ const char* vkResultName(VkResult r) {
     }
 }
 
-// What a failed VkResult means for the context (aether.h AetherStatus).
+// What a failed VkResult means for the context (atlas.h AtlasStatus).
 Fault classify(VkResult r) {
     switch (r) {
         case VK_SUCCESS: return Fault::None;
@@ -331,9 +331,9 @@ class VulkanBackend final : public Backend {
 public:
     ~VulkanBackend() override {
         if (fault_ == Fault::Timeout) {
-            // a hung device may still run aether's work: destroying what it uses (or waiting for it) could crash or
+            // a hung device may still run atlas's work: destroying what it uses (or waiting for it) could crash or
             // freeze the game, so everything is left to the driver and the process exit (a few hundred MB at most)
-            std::fprintf(stderr, "[aether] the GPU hung: the Vulkan device is abandoned, not destroyed\n");
+            std::fprintf(stderr, "[atlas] the GPU hung: the Vulkan device is abandoned, not destroyed\n");
             return;
         }
         if (dev_) {
@@ -424,13 +424,13 @@ public:
         std::vector<VkDescriptorType> farTypes(BINDINGS, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
         farTypes[B_FRAME] = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         farTypes[B_NOISE_TEX] = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        if (!createPipe(aether_far_spv, aether_far_spv_size, farTypes, 0, farPipe_, farLayout_, farSetLayout_, farShader_, err))
+        if (!createPipe(atlas_far_spv, atlas_far_spv_size, farTypes, 0, farPipe_, farLayout_, farSetLayout_, farShader_, err))
             return false;
         {
             // the cloud pass: same source, same bindings, same descriptor set as the far pass
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
-            smci.codeSize = aether_cloud_spv_size;
-            smci.pCode = aether_cloud_spv;
+            smci.codeSize = atlas_cloud_spv_size;
+            smci.pCode = atlas_cloud_spv;
             if (vkCreateShaderModule(dev_, &smci, nullptr, &cloudShader_) != VK_SUCCESS) return fail(err, "cloud shader");
             VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
             cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
@@ -441,8 +441,8 @@ public:
             if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &cloudPipe_) != VK_SUCCESS)
                 return fail(err, "cloud pipeline");
             // and the sun map pass
-            smci.codeSize = aether_sunmap_spv_size;
-            smci.pCode = aether_sunmap_spv;
+            smci.codeSize = atlas_sunmap_spv_size;
+            smci.pCode = atlas_sunmap_spv;
             if (vkCreateShaderModule(dev_, &smci, nullptr, &sunShader_) != VK_SUCCESS) return fail(err, "sun map shader");
             cp.stage.module = sunShader_;
             if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &sunPipe_) != VK_SUCCESS)
@@ -451,11 +451,11 @@ public:
         std::vector<VkDescriptorType> pubTypes = {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE};
-        if (!createPipe(aether_publish_spv, aether_publish_spv_size, pubTypes, 8, publishPipe_, publishLayout_,
+        if (!createPipe(atlas_publish_spv, atlas_publish_spv_size, pubTypes, 8, publishPipe_, publishLayout_,
                         publishSetLayout_, publishShader_, err))
             return false;
         std::vector<VkDescriptorType> ingTypes = {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER};
-        if (!createPipe(aether_ingest_spv, aether_ingest_spv_size, ingTypes, 8, ingestPipe_, ingestLayout_, ingestSetLayout_,
+        if (!createPipe(atlas_ingest_spv, atlas_ingest_spv_size, ingTypes, 8, ingestPipe_, ingestLayout_, ingestSetLayout_,
                         ingestShader_, err))
             return false;
 
@@ -534,7 +534,7 @@ public:
             }
         }
         if (host >= 0) m.hostHeapBytes = mp.memoryHeaps[host].size;
-        m.aetherBytes = allocated_.load();
+        m.atlasBytes = allocated_.load();
         m.integrated = props_.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
                        props_.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU;
         m.budgetExt = budgetExt_;
@@ -543,7 +543,7 @@ public:
 
     bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) override {
         if (lost_) return fail(err, "the device was lost");
-        if (injectedNow(err)) return false;  // aether_debug_fault / AETHER_FAULT
+        if (injectedNow(err)) return false;  // atlas_debug_fault / ATLAS_FAULT
         Slot& s = slots_[frameIndex_++ % SLOTS];
         if (!waitSlot(s, gpuMs, err)) return false;
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
@@ -586,8 +586,8 @@ public:
         glVendor_ = str(GL_VENDOR);
         glWinsys_ = GlApi::windowSystem();
         while (gl_.GetError() != GL_NO_ERROR) {}  // the caller's stale errors are not ours
-        // zero-copy when the driver pair allows it, else host copies; AETHER_INTEROP=hostcopy|zerocopy forces one
-        const char* f = std::getenv("AETHER_INTEROP");
+        // zero-copy when the driver pair allows it, else host copies; ATLAS_INTEROP=hostcopy|zerocopy forces one
+        const char* f = std::getenv("ATLAS_INTEROP");
         std::string force = f ? f : "";
         {
             // reported whatever the mode (info): is the GL context on our device at all?
@@ -598,7 +598,7 @@ public:
                 for (int i = 0; i < n; i++) glUuidMatch_ |= std::memcmp(u[i], deviceUuid_, 16) == 0;
         }
         std::string why = zeroCopyBlocker(w, h, force != "zerocopy");
-        if (force == "hostcopy") why = "forced by AETHER_INTEROP=hostcopy";
+        if (force == "hostcopy") why = "forced by ATLAS_INTEROP=hostcopy";
         if (!why.empty() && force == "zerocopy") return fail(err, ("zero-copy interop unavailable: " + why).c_str());
         bool ok = false;
         if (why.empty()) {
@@ -618,7 +618,7 @@ public:
             }
         }
         interopWhy_ = why;
-        if (mode_ == Interop::HostCopy) std::fprintf(stderr, "[aether] OpenGL interop: host copies (%s)\n", why.c_str());
+        if (mode_ == Interop::HostCopy) std::fprintf(stderr, "[atlas] OpenGL interop: host copies (%s)\n", why.c_str());
         width_ = w;
         height_ = h;
         firstGlFrame_ = true;
@@ -630,7 +630,7 @@ public:
     }
 
     bool glRender(const FrameInputs& in, const GlFrameIO* io, double* gpuMs, std::string& err) override {
-        if (!attached_) return fail(err, "aether_gl_attach first");
+        if (!attached_) return fail(err, "atlas_gl_attach first");
         if (lost_) return fail(err, "the device was lost");
         // before any GL semaphore is signalled: a failure here leaves GL waiting on nothing
         if (injectedNow(err)) return false;
@@ -724,7 +724,7 @@ public:
     // ---- host-copy fallback ----------------------------------------------------------------------------------
     // The frame is published into Vulkan-local images (the same publish pass, so the GL textures hold exactly what
     // zero-copy would), copied into the slot's host buffer, and uploaded with glTextureSubImage2D. By default the
-    // CPU waits for this frame's GPU work (no added latency); AETHER_HOSTCOPY_LATENCY=1 uploads the previous
+    // CPU waits for this frame's GPU work (no added latency); ATLAS_HOSTCOPY_LATENCY=1 uploads the previous
     // frame instead, so the CPU never waits but the far field lags one frame behind the camera.
     bool hostCopyFrame(Slot& s, const FrameInputs&, const FrameGpu& frame, const GlFrameIO* io, double* gpuMs,
                        std::string& err) {
@@ -767,7 +767,7 @@ public:
         s.hostSun = sunBytes != 0;
         firstGlFrame_ = false;
         frameIndex_++;
-        const char* lag = std::getenv("AETHER_HOSTCOPY_LATENCY");
+        const char* lag = std::getenv("ATLAS_HOSTCOPY_LATENCY");
         Slot& up = lag && *lag == '1' ? slots_[frameIndex_ % SLOTS] : s;  // the other slot holds the previous frame
         if (!up.hostPending) return true;
         auto t0 = std::chrono::steady_clock::now();
@@ -866,8 +866,8 @@ private:
         if (r == VK_SUCCESS) return true;
         Fault f = classify(r);
         std::string msg = std::string(what) + ": " + vkResultName(r) + " (" + std::to_string(int(r)) + ")";
-        if (f == Fault::DeviceLost) msg += ": the GPU was reset (driver timeout / TDR, GPU reset) or aether's work faulted";
-        if (f == Fault::Timeout) msg += ": the GPU did not finish aether's work in 5 s (hung or stalled)";
+        if (f == Fault::DeviceLost) msg += ": the GPU was reset (driver timeout / TDR, GPU reset) or atlas's work faulted";
+        if (f == Fault::Timeout) msg += ": the GPU did not finish atlas's work in 5 s (hung or stalled)";
         return failWith(f, err, msg);
     }
 
@@ -916,10 +916,10 @@ private:
             gl_.DeleteShader(sh);
             gl_.GetProgramiv(linProgram_, GL_LINK_STATUS, &ok);
             if (!ok) return fail(err, "near-depth GL program link failed");
-            uInvProj_ = gl_.GetUniformLocation(linProgram_, "aetherInvProj");
-            uSize_ = gl_.GetUniformLocation(linProgram_, "aetherSize");
-            uZeroToOne_ = gl_.GetUniformLocation(linProgram_, "aetherZeroToOne");
-            uReversed_ = gl_.GetUniformLocation(linProgram_, "aetherReversed");
+            uInvProj_ = gl_.GetUniformLocation(linProgram_, "atlasInvProj");
+            uSize_ = gl_.GetUniformLocation(linProgram_, "atlasSize");
+            uZeroToOne_ = gl_.GetUniformLocation(linProgram_, "atlasZeroToOne");
+            uReversed_ = gl_.GetUniformLocation(linProgram_, "atlasReversed");
             gl_.CreateSamplers(1, &linSampler_);
             gl_.SamplerParameteri(linSampler_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl_.SamplerParameteri(linSampler_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1037,13 +1037,13 @@ private:
     bool createInstance(std::string& err) {
         if (!vkLoadGlobal(err)) return false;
         VkApplicationInfo app{VK_STRUCTURE_TYPE_APPLICATION_INFO};
-        app.pApplicationName = "aether_core";
+        app.pApplicationName = "atlas_core";
         app.apiVersion = VK_API_VERSION_1_2;  // baseline: Pascal-era drivers, Mesa, MoltenVK-free Linux stacks
         VkInstanceCreateInfo ici{VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
         ici.pApplicationInfo = &app;
         const char* layers[] = {"VK_LAYER_KHRONOS_validation"};
         const char* instExt[] = {VK_EXT_DEBUG_UTILS_EXTENSION_NAME};
-        const char* val = std::getenv("AETHER_VK_VALIDATION");
+        const char* val = std::getenv("ATLAS_VK_VALIDATION");
         bool validate = val && *val == '1';
         if (validate) {
             ici.enabledLayerCount = 1;
@@ -1077,9 +1077,9 @@ private:
         return true;
     }
 
-    // Which device: the one the game's GL context runs on when a context is current (aether_create is called on the
+    // Which device: the one the game's GL context runs on when a context is current (atlas_create is called on the
     // render thread: hybrid laptops, a Deck with lavapipe installed beside RADV, a second GPU), else the best type
-    // (discrete > integrated > virtual > cpu). AETHER_VK_DEVICE=<index or name substring> overrides both.
+    // (discrete > integrated > virtual > cpu). ATLAS_VK_DEVICE=<index or name substring> overrides both.
     bool pickDevice(std::string& err) {
         uint32_t n = 0;
         vkEnumeratePhysicalDevices(inst_, &n, nullptr);
@@ -1092,7 +1092,7 @@ private:
             std::string e;
             if (probe.load(e)) probe.deviceUuids(glUuids, 8, glCount);
         }
-        const char* want = std::getenv("AETHER_VK_DEVICE");
+        const char* want = std::getenv("ATLAS_VK_DEVICE");
         int best = -1, bestScore = -1;
         std::string reasons;
         for (uint32_t i = 0; i < n; i++) {
@@ -1262,7 +1262,7 @@ private:
         if (gl_.driverUuid(du)) {
             glDriverUuid_ = hex16(du);
             // opaque handles only import into the same driver build (spec: driver and device UUID must match);
-            // AETHER_INTEROP=zerocopy waives this one check, for a stack that reports differing UUIDs yet works
+            // ATLAS_INTEROP=zerocopy waives this one check, for a stack that reports differing UUIDs yet works
             if (strictDriver && std::memcmp(du, driverUuid_, 16) != 0)
                 return "GL driver UUID " + glDriverUuid_ + " differs from Vulkan's " + hex16(driverUuid_);
         }
@@ -1283,7 +1283,7 @@ private:
         };
         std::vector<const char*> enable;
         // external memory / semaphores themselves are core in 1.1; only the handle flavour is an extension
-        // VK_EXT_memory_budget (optional): what the process may use of each heap, for aether_memory_info
+        // VK_EXT_memory_budget (optional): what the process may use of each heap, for atlas_memory_info
         if (has(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME)) {
             enable.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
             budgetExt_ = true;
@@ -1541,7 +1541,7 @@ private:
         vkBeginCommandBuffer(s.cmd, &bi);
         if (s.query) {
             vkCmdResetQueryPool(s.cmd, s.query, 0, 2);
-            // at the compute stage, which the GL-ready semaphore wait blocks: the time is aether's own work only
+            // at the compute stage, which the GL-ready semaphore wait blocks: the time is atlas's own work only
             vkCmdWriteTimestamp(s.cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, s.query, 0);
         }
     }
@@ -1785,7 +1785,7 @@ private:
         float uncovered = 1e30f, zero[4] = {};
         gl_.ClearTexImage(images_[IMG_NEAR].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
         if (mode_ == Interop::HostCopy) {
-            // the first upload lands a frame late with AETHER_HOSTCOPY_LATENCY: start empty, not undefined
+            // the first upload lands a frame late with ATLAS_HOSTCOPY_LATENCY: start empty, not undefined
             gl_.ClearTexImage(images_[IMG_COLOR].glTex, 0, GL_RGBA, GL_FLOAT, zero);
             gl_.ClearTexImage(images_[IMG_NORMAL].glTex, 0, GL_RGBA, GL_FLOAT, zero);
             gl_.ClearTexImage(images_[IMG_DEPTH].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
@@ -1947,7 +1947,7 @@ private:
         b = {};
     }
 
-    // vkAllocateMemory with the bookkeeping aether_memory_info reports (and the test hook's view of it)
+    // vkAllocateMemory with the bookkeeping atlas_memory_info reports (and the test hook's view of it)
     VkResult allocate(const VkMemoryAllocateInfo& ma, VkDeviceMemory& mem) {
         mem = VK_NULL_HANDLE;
         VkResult r = vkAllocateMemory(dev_, &ma, nullptr, &mem);
@@ -2197,4 +2197,4 @@ std::unique_ptr<Backend> makeVulkanBackend(std::string& err) {
     return b;
 }
 
-}  // namespace aether
+}  // namespace atlas

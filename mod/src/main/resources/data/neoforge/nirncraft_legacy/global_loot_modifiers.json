@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "entries": [
+    "nirncraft:gold",
+    "nirncraft:spell_tomes",
+    "nirncraft:soul_gems",
+    "nirncraft:smithing_materials",
+    "nirncraft:alchemy_ingredients",
+    "nirncraft:skyrim_gear",
+    "nirncraft:lockpicks",
+    "nirncraft:skill_books",
+    "nirncraft:leveled_loot",
+    "nirncraft:lore_books",
+    "nirncraft:skyrim_food",
+    "nirncraft:regional_gear",
+    "nirncraft:forage_plants",
+    "nirncraft:forage_fungi",
+    "nirncraft:forage_nests",
+    "nirncraft:forage_moss",
+    "nirncraft:forage_moon_sugar",
+    "nirncraft:forage_trama_root",
+    "nirncraft:forage_saltrice",
+    "nirncraft:explore_skill_books",
+    "nirncraft:explore_skill_books_boss"
+  ]
+}

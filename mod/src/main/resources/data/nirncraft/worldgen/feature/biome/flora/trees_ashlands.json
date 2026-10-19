@@ -1,0 +1,21 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "charred_tree",
+        "weight": 3
+      },
+      {
+        "species": "ash_tree",
+        "weight": 2
+      },
+      {
+        "species": "fallen_charred",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

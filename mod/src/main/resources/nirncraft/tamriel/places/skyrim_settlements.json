@@ -1,0 +1,1136 @@
+[
+  {
+    "id": "whiterun",
+    "name": "place.nirncraft.whiterun",
+    "type": "capital",
+    "culture": "nord",
+    "region": "skyrim/whiterun",
+    "x": 62,
+    "z": -68,
+    "radius": 115,
+    "variant": "whiterun",
+    "why": [
+      "whiterun.L6.whiterun_seat",
+      "whiterun.L1.city_rock",
+      "skyrim.L6.nine_seats"
+    ]
+  },
+  {
+    "id": "solitude",
+    "name": "place.nirncraft.solitude",
+    "type": "capital",
+    "culture": "nord",
+    "region": "skyrim/haafingar",
+    "x": -1216,
+    "z": -1740,
+    "radius": 135,
+    "variant": "solitude",
+    "why": [
+      "haafingar.L6.solitude_seat",
+      "haafingar.L1.solitude_arch",
+      "skyrim.L6.nine_seats"
+    ]
+  },
+  {
+    "id": "windhelm",
+    "name": "place.nirncraft.windhelm",
+    "type": "capital",
+    "culture": "nord",
+    "region": "skyrim/eastmarch",
+    "x": 1825,
+    "z": -717,
+    "radius": 100,
+    "variant": "windhelm",
+    "why": [
+      "eastmarch.L6.windhelm_seat",
+      "eastmarch.L11.ysgramor_city",
+      "skyrim.L6.nine_seats"
+    ]
+  },
+  {
+    "id": "riften",
+    "name": "place.nirncraft.riften",
+    "type": "capital",
+    "culture": "nord",
+    "region": "skyrim/the_rift",
+    "x": 2435,
+    "z": 1418,
+    "radius": 80,
+    "variant": "riften",
+    "why": [
+      "the_rift.L6.riften_seat",
+      "the_rift.L3.honrich_city",
+      "skyrim.L6.nine_seats"
+    ]
+  },
+  {
+    "id": "markarth",
+    "name": "place.nirncraft.markarth",
+    "type": "capital",
+    "culture": "nord",
+    "region": "skyrim/the_reach",
+    "x": -3102,
+    "z": -191,
+    "radius": 85,
+    "variant": "markarth",
+    "why": [
+      "the_reach.L6.markarth_seat",
+      "the_reach.L1.dwemer_city_rock",
+      "skyrim.L6.nine_seats"
+    ]
+  },
+  {
+    "id": "winterhold",
+    "name": "place.nirncraft.winterhold",
+    "type": "capital",
+    "culture": "nord",
+    "region": "skyrim/winterhold",
+    "x": 1417,
+    "z": -1749,
+    "radius": 70,
+    "variant": "winterhold",
+    "why": [
+      "winterhold.L6.winterhold_remnant",
+      "winterhold.L11.great_collapse",
+      "skyrim.L6.nine_seats"
+    ]
+  },
+  {
+    "id": "falkreath",
+    "name": "place.nirncraft.falkreath",
+    "type": "capital",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -795,
+    "z": 1250,
+    "radius": 85,
+    "variant": "falkreath",
+    "why": [
+      "falkreath.L6.falkreath_graves",
+      "falkreath.L7.town_of_mourners",
+      "skyrim.L6.nine_seats"
+    ]
+  },
+  {
+    "id": "morthal",
+    "name": "place.nirncraft.morthal",
+    "type": "capital",
+    "culture": "nord",
+    "region": "skyrim/hjaalmarch",
+    "x": -928,
+    "z": -1176,
+    "radius": 75,
+    "variant": "morthal",
+    "why": [
+      "hjaalmarch.L6.morthal_seat",
+      "hjaalmarch.L3.hjaal_delta",
+      "skyrim.L6.nine_seats"
+    ]
+  },
+  {
+    "id": "dawnstar",
+    "name": "place.nirncraft.dawnstar",
+    "type": "capital",
+    "culture": "nord",
+    "region": "skyrim/the_pale",
+    "x": 174,
+    "z": -1801,
+    "radius": 85,
+    "variant": "dawnstar",
+    "why": [
+      "the_pale.L6.dawnstar_seat",
+      "the_pale.L5.two_mines",
+      "skyrim.L6.nine_seats"
+    ]
+  },
+  {
+    "id": "college_of_winterhold",
+    "name": "place.nirncraft.college_of_winterhold",
+    "type": "town",
+    "culture": "nord",
+    "region": "skyrim/winterhold",
+    "x": 1529,
+    "z": -1886,
+    "radius": 60,
+    "variant": "college_of_winterhold",
+    "why": [
+      "winterhold.L6.college",
+      "winterhold.L1.college_stack",
+      "winterhold.L5.college_coin"
+    ]
+  },
+  {
+    "id": "riverwood",
+    "name": "place.nirncraft.riverwood",
+    "type": "town",
+    "culture": "nord",
+    "region": "skyrim/whiterun",
+    "x": 33,
+    "z": 593,
+    "radius": 60,
+    "why": [
+      "whiterun.L6.riverwood",
+      "whiterun.L5.riverwood_timber",
+      "skyrim.L6.work_villages"
+    ]
+  },
+  {
+    "id": "rorikstead",
+    "name": "place.nirncraft.rorikstead",
+    "type": "town",
+    "culture": "nord",
+    "region": "skyrim/whiterun",
+    "x": -1652,
+    "z": -228,
+    "radius": 55,
+    "why": [
+      "whiterun.L6.rorikstead",
+      "whiterun.L5.river_farms",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "ivarstead",
+    "name": "place.nirncraft.ivarstead",
+    "type": "town",
+    "culture": "nord",
+    "region": "skyrim/the_rift",
+    "x": 896,
+    "z": 901,
+    "radius": 55,
+    "why": [
+      "the_rift.L6.ivarstead",
+      "the_rift.L8.voice_pilgrims",
+      "skyrim.L8.way_of_the_voice"
+    ]
+  },
+  {
+    "id": "helgen",
+    "name": "place.nirncraft.helgen",
+    "type": "town",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -24,
+    "z": 1143,
+    "radius": 60,
+    "variant": "helgen",
+    "why": [
+      "falkreath.L6.helgen_fort",
+      "falkreath.L9.helgen_burned",
+      "falkreath.L11.helgen_keep"
+    ]
+  },
+  {
+    "id": "dragon_bridge",
+    "name": "place.nirncraft.dragon_bridge",
+    "type": "town",
+    "culture": "nord",
+    "region": "skyrim/haafingar",
+    "x": -1934,
+    "z": -1432,
+    "radius": 55,
+    "variant": "dragon_bridge",
+    "why": [
+      "haafingar.L6.dragon_bridge",
+      "haafingar.L5.toll_bridge",
+      "haafingar.L11.dragon_bridge_age"
+    ]
+  },
+  {
+    "id": "karthwasten",
+    "name": "place.nirncraft.karthwasten",
+    "type": "town",
+    "culture": "nord",
+    "region": "skyrim/the_reach",
+    "x": -2420,
+    "z": -729,
+    "radius": 50,
+    "variant": "mining",
+    "why": [
+      "the_reach.L6.mine_villages",
+      "the_reach.L5.silver_mining",
+      "skyrim.L6.work_villages"
+    ]
+  },
+  {
+    "id": "kynesgrove",
+    "name": "place.nirncraft.kynesgrove",
+    "type": "town",
+    "culture": "nord",
+    "region": "skyrim/eastmarch",
+    "x": 1825,
+    "z": -298,
+    "radius": 50,
+    "variant": "mining",
+    "why": [
+      "eastmarch.L6.kynesgrove",
+      "eastmarch.L5.mines",
+      "skyrim.L6.work_villages"
+    ]
+  },
+  {
+    "id": "shors_stone",
+    "name": "place.nirncraft.shors_stone",
+    "type": "town",
+    "culture": "nord",
+    "region": "skyrim/the_rift",
+    "x": 2269,
+    "z": 842,
+    "radius": 45,
+    "variant": "mining",
+    "why": [
+      "the_rift.L6.shors_stone",
+      "the_rift.L5.redbelly_iron",
+      "skyrim.L6.work_villages"
+    ]
+  },
+  {
+    "id": "darkwater_crossing",
+    "name": "place.nirncraft.darkwater_crossing",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/eastmarch",
+    "x": 1595,
+    "z": 421,
+    "radius": 40,
+    "variant": "mining",
+    "why": [
+      "eastmarch.L6.darkwater_crossing",
+      "eastmarch.L3.darkwater_ford",
+      "skyrim.L6.work_villages"
+    ]
+  },
+  {
+    "id": "soljunds_sinkhole",
+    "name": "place.nirncraft.soljunds_sinkhole",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/the_reach",
+    "x": -2180,
+    "z": -217,
+    "radius": 35,
+    "variant": "mining",
+    "why": [
+      "the_reach.L6.mine_villages",
+      "the_reach.L5.small_mines",
+      "skyrim.L5.mining_wealth"
+    ]
+  },
+  {
+    "id": "stonehills",
+    "name": "place.nirncraft.stonehills",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/hjaalmarch",
+    "x": -430,
+    "z": -1137,
+    "radius": 40,
+    "variant": "mining",
+    "why": [
+      "hjaalmarch.L6.stonehills",
+      "hjaalmarch.L5.stonehills_iron",
+      "skyrim.L6.work_villages"
+    ]
+  },
+  {
+    "id": "old_hroldan",
+    "name": "place.nirncraft.old_hroldan",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/the_reach",
+    "x": -2131,
+    "z": -10,
+    "radius": 26,
+    "variant": "inn",
+    "why": [
+      "the_reach.L6.hroldan_inn",
+      "the_reach.L11.old_hroldan_battle",
+      "skyrim.L5.road_hub"
+    ]
+  },
+  {
+    "id": "nightgate_inn",
+    "name": "place.nirncraft.nightgate_inn",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/the_pale",
+    "x": 856,
+    "z": -848,
+    "radius": 24,
+    "variant": "inn",
+    "why": [
+      "the_pale.L6.nightgate",
+      "the_pale.L5.roadside_inn",
+      "skyrim.L5.road_hub"
+    ]
+  },
+  {
+    "id": "heartwood_mill",
+    "name": "place.nirncraft.heartwood_mill",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/the_rift",
+    "x": 1796,
+    "z": 1401,
+    "radius": 32,
+    "variant": "mill",
+    "why": [
+      "the_rift.L6.heartwood_mill",
+      "the_rift.L5.heartwood_timber",
+      "skyrim.L5.timber"
+    ]
+  },
+  {
+    "id": "angas_mill",
+    "name": "place.nirncraft.angas_mill",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/eastmarch",
+    "x": 1455,
+    "z": -630,
+    "radius": 32,
+    "variant": "mill",
+    "why": [
+      "eastmarch.L6.mills_and_farms",
+      "eastmarch.L5.river_mills",
+      "skyrim.L5.timber"
+    ]
+  },
+  {
+    "id": "half_moon_mill",
+    "name": "place.nirncraft.half_moon_mill",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -994,
+    "z": 805,
+    "radius": 32,
+    "variant": "mill",
+    "why": [
+      "falkreath.L6.half_moon_mill",
+      "falkreath.L5.timber",
+      "falkreath.L10.necromancers_and_vampires"
+    ]
+  },
+  {
+    "id": "solitude_sawmill",
+    "name": "place.nirncraft.solitude_sawmill",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/haafingar",
+    "x": -1555,
+    "z": -1563,
+    "radius": 32,
+    "variant": "mill",
+    "why": [
+      "haafingar.L6.sawmill_hamlet",
+      "haafingar.L5.sawmill",
+      "skyrim.L5.timber"
+    ]
+  },
+  {
+    "id": "mixwater_mill",
+    "name": "place.nirncraft.mixwater_mill",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/eastmarch",
+    "x": 1414,
+    "z": -15,
+    "radius": 32,
+    "variant": "mill",
+    "why": [
+      "eastmarch.L6.mills_and_farms",
+      "eastmarch.L5.river_mills",
+      "skyrim.L5.timber"
+    ]
+  },
+  {
+    "id": "honningbrew_meadery",
+    "name": "place.nirncraft.honningbrew_meadery",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/whiterun",
+    "x": 176,
+    "z": 163,
+    "radius": 30,
+    "variant": "meadery",
+    "why": [
+      "whiterun.L5.meadery",
+      "whiterun.L5.crossroads_trade",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "dushnikh_yal",
+    "name": "place.nirncraft.dushnikh_yal",
+    "type": "village",
+    "culture": "orc",
+    "region": "skyrim/the_reach",
+    "x": -2623,
+    "z": 243,
+    "radius": 38,
+    "variant": "stronghold",
+    "why": [
+      "the_reach.L6.two_strongholds",
+      "the_reach.L5.orc_mining",
+      "skyrim.L7.orc_strongholds"
+    ]
+  },
+  {
+    "id": "mor_khazgur",
+    "name": "place.nirncraft.mor_khazgur",
+    "type": "village",
+    "culture": "orc",
+    "region": "skyrim/the_reach",
+    "x": -2720,
+    "z": -1415,
+    "radius": 38,
+    "variant": "stronghold",
+    "why": [
+      "the_reach.L6.two_strongholds",
+      "the_reach.L5.orc_mining",
+      "skyrim.L7.orc_strongholds"
+    ]
+  },
+  {
+    "id": "largashbur",
+    "name": "place.nirncraft.largashbur",
+    "type": "village",
+    "culture": "orc",
+    "region": "skyrim/the_rift",
+    "x": 1831,
+    "z": 1636,
+    "radius": 38,
+    "variant": "stronghold",
+    "why": [
+      "the_rift.L6.largashbur",
+      "the_rift.L8.cursed_clan",
+      "skyrim.L7.orc_strongholds"
+    ]
+  },
+  {
+    "id": "narzulbur",
+    "name": "place.nirncraft.narzulbur",
+    "type": "village",
+    "culture": "orc",
+    "region": "skyrim/eastmarch",
+    "x": 2224,
+    "z": -304,
+    "radius": 38,
+    "variant": "stronghold",
+    "why": [
+      "eastmarch.L6.narzulbur",
+      "eastmarch.L5.mines",
+      "skyrim.L7.orc_strongholds"
+    ]
+  },
+  {
+    "id": "thalmor_embassy",
+    "name": "place.nirncraft.thalmor_embassy",
+    "type": "village",
+    "culture": "altmer",
+    "region": "skyrim/haafingar",
+    "x": -1569,
+    "z": -1883,
+    "radius": 34,
+    "variant": "embassy",
+    "why": [
+      "haafingar.L6.embassy",
+      "haafingar.L9.thalmor_embassy",
+      "skyrim.L9.thalmor_watch"
+    ]
+  },
+  {
+    "id": "pelagia_farm",
+    "name": "place.nirncraft.pelagia_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/whiterun",
+    "x": -9,
+    "z": 151,
+    "radius": 28,
+    "why": [
+      "whiterun.L5.river_farms",
+      "whiterun.L6.whiterun_seat",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "chillfurrow_farm",
+    "name": "place.nirncraft.chillfurrow_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/whiterun",
+    "x": 185,
+    "z": 45,
+    "radius": 28,
+    "why": [
+      "whiterun.L5.river_farms",
+      "whiterun.L6.whiterun_seat",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "battle_born_farm",
+    "name": "place.nirncraft.battle_born_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/whiterun",
+    "x": 219,
+    "z": -40,
+    "radius": 28,
+    "why": [
+      "whiterun.L5.river_farms",
+      "whiterun.L7.clan_feud",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "loreius_farm",
+    "name": "place.nirncraft.loreius_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_pale",
+    "x": 205,
+    "z": -531,
+    "radius": 28,
+    "why": [
+      "the_pale.L6.heath_farms",
+      "the_pale.L4.pale_heath",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "salvius_farm",
+    "name": "place.nirncraft.salvius_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_reach",
+    "x": -2921,
+    "z": -207,
+    "radius": 28,
+    "why": [
+      "the_reach.L5.river_farms",
+      "the_reach.L6.markarth_seat",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "snow_shod_farm",
+    "name": "place.nirncraft.snow_shod_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_rift",
+    "x": 2316,
+    "z": 1606,
+    "radius": 28,
+    "why": [
+      "the_rift.L6.lake_farms",
+      "the_rift.L6.riften_seat",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "hollyfrost_farm",
+    "name": "place.nirncraft.hollyfrost_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/eastmarch",
+    "x": 2060,
+    "z": -685,
+    "radius": 28,
+    "why": [
+      "eastmarch.L6.mills_and_farms",
+      "eastmarch.L5.warm_farms",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "hlaalu_farm",
+    "name": "place.nirncraft.hlaalu_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/eastmarch",
+    "x": 2011,
+    "z": -655,
+    "radius": 28,
+    "why": [
+      "eastmarch.L6.mills_and_farms",
+      "eastmarch.L11.red_year_refugees",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "brandy_mug_farm",
+    "name": "place.nirncraft.brandy_mug_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/eastmarch",
+    "x": 1911,
+    "z": -528,
+    "radius": 28,
+    "why": [
+      "eastmarch.L6.mills_and_farms",
+      "eastmarch.L11.red_year_refugees",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "merryfair_farm",
+    "name": "place.nirncraft.merryfair_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_rift",
+    "x": 2322,
+    "z": 1289,
+    "radius": 28,
+    "why": [
+      "the_rift.L6.lake_farms",
+      "the_rift.L1.birch_basin",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "sarethi_farm",
+    "name": "place.nirncraft.sarethi_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_rift",
+    "x": 1470,
+    "z": 1007,
+    "radius": 28,
+    "why": [
+      "the_rift.L6.lake_farms",
+      "the_rift.L3.treva_river",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "goldenglow_estate",
+    "name": "place.nirncraft.goldenglow_estate",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_rift",
+    "x": 2153,
+    "z": 1429,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "the_rift.L5.honey_estate",
+      "the_rift.L3.estate_island",
+      "the_rift.L10.thieves_below"
+    ]
+  },
+  {
+    "id": "black_briar_lodge",
+    "name": "place.nirncraft.black_briar_lodge",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_rift",
+    "x": 2824,
+    "z": 1428,
+    "radius": 26,
+    "variant": "lodge",
+    "why": [
+      "the_rift.L7.meadery_rule",
+      "the_rift.L9.meadery_power",
+      "the_rift.L1.border_heights"
+    ]
+  },
+  {
+    "id": "whiterun_stables",
+    "name": "place.nirncraft.whiterun_stables",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/whiterun",
+    "x": -24,
+    "z": 51,
+    "radius": 26,
+    "variant": "stables",
+    "why": [
+      "whiterun.L6.caravan_ground",
+      "whiterun.L5.crossroads_trade",
+      "skyrim.L5.road_hub"
+    ]
+  },
+  {
+    "id": "windhelm_stables",
+    "name": "place.nirncraft.windhelm_stables",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/eastmarch",
+    "x": 1840,
+    "z": -532,
+    "radius": 26,
+    "variant": "stables",
+    "why": [
+      "eastmarch.L6.windhelm_seat",
+      "eastmarch.L3.windhelm_bridge",
+      "skyrim.L5.road_hub"
+    ]
+  },
+  {
+    "id": "markarth_stables",
+    "name": "place.nirncraft.markarth_stables",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_reach",
+    "x": -3028,
+    "z": -227,
+    "radius": 26,
+    "variant": "stables",
+    "why": [
+      "the_reach.L6.markarth_seat",
+      "the_reach.L6.karth_road",
+      "skyrim.L5.road_hub"
+    ]
+  },
+  {
+    "id": "riften_stables",
+    "name": "place.nirncraft.riften_stables",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_rift",
+    "x": 2430,
+    "z": 1324,
+    "radius": 26,
+    "variant": "stables",
+    "why": [
+      "the_rift.L6.riften_seat",
+      "the_rift.L5.meadery",
+      "skyrim.L5.road_hub"
+    ]
+  },
+  {
+    "id": "katlas_farm",
+    "name": "place.nirncraft.katlas_farm",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/haafingar",
+    "x": -1494,
+    "z": -1647,
+    "radius": 26,
+    "variant": "stables",
+    "why": [
+      "haafingar.L6.solitude_seat",
+      "haafingar.L5.imperial_market",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "lakeview",
+    "name": "place.nirncraft.lakeview",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -468,
+    "z": 982,
+    "radius": 30,
+    "variant": "homestead",
+    "why": [
+      "falkreath.L6.lakeview_steading",
+      "falkreath.L3.lake_ilinalta",
+      "falkreath.L5.timber"
+    ]
+  },
+  {
+    "id": "heljarchen",
+    "name": "place.nirncraft.heljarchen",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_pale",
+    "x": 184,
+    "z": -730,
+    "radius": 30,
+    "variant": "homestead",
+    "why": [
+      "the_pale.L6.heath_farms",
+      "the_pale.L1.snow_highland",
+      "skyrim.L5.farm_and_mead"
+    ]
+  },
+  {
+    "id": "windstad",
+    "name": "place.nirncraft.windstad",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/hjaalmarch",
+    "x": -690,
+    "z": -1699,
+    "radius": 30,
+    "variant": "homestead",
+    "why": [
+      "hjaalmarch.L6.windstad",
+      "hjaalmarch.L1.low_coast",
+      "hjaalmarch.L5.fishing"
+    ]
+  },
+  {
+    "id": "skaal_village",
+    "name": "place.nirncraft.skaal_village",
+    "type": "village",
+    "culture": "atmoran",
+    "region": "morrowind/solstheim",
+    "x": 4975,
+    "z": -3467,
+    "radius": 45,
+    "variant": "skaal",
+    "why": [
+      "solstheim.L1.moesring_massif",
+      "solstheim.L1.north_cliffs"
+    ]
+  },
+  {
+    "id": "thirsk_mead_hall",
+    "name": "place.nirncraft.thirsk_mead_hall",
+    "type": "village",
+    "culture": "nord",
+    "region": "morrowind/solstheim",
+    "x": 4877,
+    "z": -3273,
+    "radius": 30,
+    "variant": "mead_hall",
+    "why": [
+      "solstheim.L1.moesring_massif",
+      "solstheim.L1.north_cliffs"
+    ]
+  },
+  {
+    "id": "tel_mithryn",
+    "name": "place.nirncraft.tel_mithryn",
+    "type": "village",
+    "culture": "dunmer",
+    "region": "morrowind/solstheim",
+    "x": 5007,
+    "z": -2722,
+    "radius": 40,
+    "variant": "telvanni",
+    "why": [
+      "solstheim.L1.moesring_massif",
+      "solstheim.L1.north_cliffs"
+    ]
+  },
+  {
+    "id": "old_attius_farm",
+    "name": "place.nirncraft.old_attius_farm",
+    "type": "farm",
+    "culture": "imperial",
+    "region": "morrowind/solstheim",
+    "x": 4360,
+    "z": -2713,
+    "radius": 24,
+    "why": [
+      "solstheim.L1.moesring_massif",
+      "solstheim.L1.north_cliffs"
+    ]
+  },
+  {
+    "id": "amol",
+    "name": "place.nirncraft.amol",
+    "type": "village",
+    "culture": "nord",
+    "region": "skyrim/winterhold",
+    "x": 1690,
+    "z": -1050,
+    "radius": 36,
+    "variant": "hamlet",
+    "why": [
+      "winterhold.L6.winterhold_remnant",
+      "skyrim.L6.work_villages"
+    ]
+  },
+  {
+    "id": "frostflow_stead",
+    "name": "place.nirncraft.frostflow_stead",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/winterhold",
+    "x": 1120,
+    "z": -1680,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "winterhold.L5.wreck_salvage",
+      "winterhold.L4.blind_hunters"
+    ]
+  },
+  {
+    "id": "yorgrim_stead",
+    "name": "place.nirncraft.yorgrim_stead",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/winterhold",
+    "x": 1550,
+    "z": -1200,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "winterhold.L5.horker_hunting",
+      "winterhold.L4.snow_pine_pockets"
+    ]
+  },
+  {
+    "id": "pilgrims_rest_stead",
+    "name": "place.nirncraft.pilgrims_rest_stead",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/winterhold",
+    "x": 1420,
+    "z": -1480,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "winterhold.L5.wreck_salvage",
+      "winterhold.L8.azura_statue"
+    ]
+  },
+  {
+    "id": "pinewatch_stead",
+    "name": "place.nirncraft.pinewatch_stead",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -620,
+    "z": 1450,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "falkreath.L6.hunters_camps",
+      "falkreath.L5.timber"
+    ]
+  },
+  {
+    "id": "knifepoint_stead",
+    "name": "place.nirncraft.knifepoint_stead",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -1420,
+    "z": 1480,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "falkreath.L6.hunters_camps",
+      "falkreath.L5.hunting"
+    ]
+  },
+  {
+    "id": "ilinalta_fishery",
+    "name": "place.nirncraft.ilinalta_fishery",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -1320,
+    "z": 1280,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "falkreath.L3.lake_ilinalta",
+      "falkreath.L6.hunters_camps"
+    ]
+  },
+  {
+    "id": "hunters_rest_stead",
+    "name": "place.nirncraft.hunters_rest_stead",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -1180,
+    "z": 1620,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "falkreath.L6.hunters_camps",
+      "falkreath.L8.huntsman_cult"
+    ]
+  },
+  {
+    "id": "southfringe_stead",
+    "name": "place.nirncraft.southfringe_stead",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -1550,
+    "z": 1380,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "falkreath.L5.border_trade",
+      "falkreath.L6.hunters_camps"
+    ]
+  },
+  {
+    "id": "drajkmyr_fishery",
+    "name": "place.nirncraft.drajkmyr_fishery",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/hjaalmarch",
+    "x": -780,
+    "z": -1480,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "hjaalmarch.L5.fishing",
+      "hjaalmarch.L1.drajkmyr_flats"
+    ]
+  },
+  {
+    "id": "karth_river_stead",
+    "name": "place.nirncraft.karth_river_stead",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_reach",
+    "x": -2350,
+    "z": -520,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "the_reach.L5.river_farms",
+      "the_reach.L3.karth_upper"
+    ]
+  },
+  {
+    "id": "corpselight_stead",
+    "name": "place.nirncraft.corpselight_stead",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -980,
+    "z": 1520,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "falkreath.L6.hunters_camps",
+      "falkreath.L4.old_pine"
+    ]
+  },
+  {
+    "id": "kolskeggr_stead",
+    "name": "place.nirncraft.kolskeggr_stead",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/the_reach",
+    "x": -2620,
+    "z": -480,
+    "radius": 24,
+    "variant": "farm",
+    "why": [
+      "the_reach.L5.river_farms",
+      "the_reach.L5.small_mines"
+    ]
+  },
+  {
+    "id": "falkreath_border_lodge",
+    "name": "place.nirncraft.falkreath_border_lodge",
+    "type": "farm",
+    "culture": "nord",
+    "region": "skyrim/falkreath",
+    "x": -1260,
+    "z": 1720,
+    "radius": 28,
+    "why": [
+      "falkreath.L1.jerall_foothills",
+      "falkreath.L1.ilinalta_valley"
+    ]
+  }
+]

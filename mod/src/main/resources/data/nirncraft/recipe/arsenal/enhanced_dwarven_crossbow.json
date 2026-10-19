@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "I I",
+    " C ",
+    "I I"
+  ],
+  "key": {
+    "I": "nirncraft:dwarven_metal_ingot",
+    "C": "nirncraft:dwarven_crossbow"
+  },
+  "result": {
+    "count": 1,
+    "id": "nirncraft:enhanced_dwarven_crossbow"
+  }
+}

@@ -1,0 +1,827 @@
+{
+  "province": "yokuda",
+  "why": [
+    "yokudan_desert.L1.sheared_red_mesas",
+    "yokudan_desert.L2.star_clear_arid",
+    "sunken_isles.L1.submerged_city_shelves",
+    "sunken_isles.L2.trade_wind_swell"
+  ],
+  "modes": [
+    "boat",
+    "caravan",
+    "wayshrine",
+    "foot"
+  ],
+  "nodes": [
+    {
+      "id": "hall_of_the_ansei",
+      "place": "hall_of_the_ansei",
+      "name": "place.nirncraft.hall_of_the_ansei",
+      "region": "yokuda/yokudan_desert",
+      "x": -19500,
+      "z": 5200,
+      "mode": "boat",
+      "modes": [
+        "boat",
+        "wayshrine",
+        "caravan",
+        "foot"
+      ],
+      "kind": "hub",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "id": "sand_drowned_village",
+      "place": "sand_drowned_village",
+      "name": "place.nirncraft.sand_drowned_village",
+      "region": "yokuda/yokudan_desert",
+      "x": -20400,
+      "z": 4200,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine",
+        "boat",
+        "caravan"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "id": "tall_papas_spire",
+      "place": "tall_papas_spire",
+      "name": "place.nirncraft.tall_papas_spire",
+      "region": "yokuda/yokudan_desert",
+      "x": -19600,
+      "z": 8400,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine",
+        "foot"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "id": "yokudan_wellspring",
+      "place": "yokudan_wellspring",
+      "name": "place.nirncraft.yokudan_wellspring",
+      "region": "yokuda/yokudan_desert",
+      "x": -17600,
+      "z": 6600,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine",
+        "caravan"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "id": "wayshrine_yokudan_desert_01",
+      "name": "travel.nirncraft.wayshrine.yokudan_desert.01",
+      "region": "yokuda/yokudan_desert",
+      "x": -18800,
+      "z": 4500,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "id": "wayshrine_yokudan_desert_02",
+      "name": "travel.nirncraft.wayshrine.yokudan_desert.02",
+      "region": "yokuda/yokudan_desert",
+      "x": -20800,
+      "z": 7200,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "id": "wayshrine_yokudan_desert_03",
+      "name": "travel.nirncraft.wayshrine.yokudan_desert.03",
+      "region": "yokuda/yokudan_desert",
+      "x": -17200,
+      "z": 8200,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "id": "wayshrine_yokudan_desert_04",
+      "name": "travel.nirncraft.wayshrine.yokudan_desert.04",
+      "region": "yokuda/yokudan_desert",
+      "x": -18400,
+      "z": 3600,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "id": "isle_of_the_drowned_ansei",
+      "place": "isle_of_the_drowned_ansei",
+      "name": "place.nirncraft.isle_of_the_drowned_ansei",
+      "region": "yokuda/sunken_isles",
+      "x": -18000,
+      "z": 10900,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine",
+        "boat"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "id": "wayshrine_sunken_isles_01",
+      "name": "travel.nirncraft.wayshrine.sunken_isles.01",
+      "region": "yokuda/sunken_isles",
+      "x": -17262,
+      "z": 12437,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "id": "wayshrine_sunken_isles_02",
+      "name": "travel.nirncraft.wayshrine.sunken_isles.02",
+      "region": "yokuda/sunken_isles",
+      "x": -18300,
+      "z": 11600,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "id": "wayshrine_sunken_isles_03",
+      "name": "travel.nirncraft.wayshrine.sunken_isles.03",
+      "region": "yokuda/sunken_isles",
+      "x": -17238,
+      "z": 12389,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "id": "wayshrine_sunken_isles_04",
+      "name": "travel.nirncraft.wayshrine.sunken_isles.04",
+      "region": "yokuda/sunken_isles",
+      "x": -17952,
+      "z": 10852,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "id": "wayshrine_sunken_isles_05",
+      "name": "travel.nirncraft.wayshrine.sunken_isles.05",
+      "region": "yokuda/sunken_isles",
+      "x": -18348,
+      "z": 11576,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "id": "coral_choked_palace",
+      "region": "yokuda/sunken_isles",
+      "x": -17262,
+      "z": 12437,
+      "modes": [
+        "boat",
+        "foot",
+        "wayshrine"
+      ],
+      "why": [
+        "sunken_isles.L6.riven_shoal_anchorage",
+        "yokuda.L6.riven_shoal_camp"
+      ],
+      "place": "coral_choked_palace"
+    },
+    {
+      "id": "anvil",
+      "region": "cyrodiil/gold_coast",
+      "x": -3900,
+      "z": 8700,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "yokuda.L6.new_tava_anchorage"
+      ],
+      "place": "anvil"
+    },
+    {
+      "id": "hegathe",
+      "region": "hammerfell/alikr_desert",
+      "x": -9150,
+      "z": 6450,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "yokuda.L6.new_tava_anchorage"
+      ],
+      "place": "hegathe"
+    },
+    {
+      "id": "sentinel",
+      "region": "hammerfell/sentinel",
+      "x": -7976,
+      "z": 4900,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "yokuda.L6.new_tava_anchorage"
+      ],
+      "place": "sentinel"
+    },
+    {
+      "id": "stros_mkai",
+      "region": "hammerfell/stros_mkai",
+      "x": -10200,
+      "z": 7200,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "yokuda.L6.riven_shoal_camp"
+      ],
+      "place": "stros_mkai"
+    }
+  ],
+  "routes": [
+    {
+      "from": "hall_of_the_ansei",
+      "to": "wayshrine_yokudan_desert_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_hall_of_the_ansei_to_wayshrine_yokudan_desert_01",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "hall_of_the_ansei",
+      "to": "sand_drowned_village",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_hall_of_the_ansei_to_sand_drowned_village",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "sand_drowned_village",
+      "to": "hall_of_the_ansei",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_sand_drowned_village_to_hall_of_the_ansei",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "sand_drowned_village",
+      "to": "wayshrine_yokudan_desert_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_sand_drowned_village_to_wayshrine_yokudan_desert_01",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "tall_papas_spire",
+      "to": "wayshrine_yokudan_desert_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_tall_papas_spire_to_wayshrine_yokudan_desert_02",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "tall_papas_spire",
+      "to": "wayshrine_yokudan_desert_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_tall_papas_spire_to_wayshrine_yokudan_desert_03",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "yokudan_wellspring",
+      "to": "wayshrine_yokudan_desert_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_yokudan_wellspring_to_wayshrine_yokudan_desert_03",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "yokudan_wellspring",
+      "to": "hall_of_the_ansei",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_yokudan_wellspring_to_hall_of_the_ansei",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "wayshrine_yokudan_desert_01",
+      "to": "wayshrine_yokudan_desert_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_yokudan_desert_01_to_wayshrine_yokudan_desert_04",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "wayshrine_yokudan_desert_01",
+      "to": "hall_of_the_ansei",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_yokudan_desert_01_to_hall_of_the_ansei",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "wayshrine_yokudan_desert_02",
+      "to": "tall_papas_spire",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_yokudan_desert_02_to_tall_papas_spire",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "wayshrine_yokudan_desert_02",
+      "to": "hall_of_the_ansei",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_yokudan_desert_02_to_hall_of_the_ansei",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "wayshrine_yokudan_desert_03",
+      "to": "yokudan_wellspring",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_yokudan_desert_03_to_yokudan_wellspring",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "wayshrine_yokudan_desert_03",
+      "to": "tall_papas_spire",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_yokudan_desert_03_to_tall_papas_spire",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "wayshrine_yokudan_desert_04",
+      "to": "wayshrine_yokudan_desert_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_yokudan_desert_04_to_wayshrine_yokudan_desert_01",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "wayshrine_yokudan_desert_04",
+      "to": "hall_of_the_ansei",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_yokudan_desert_04_to_hall_of_the_ansei",
+      "why": [
+        "yokudan_desert.L1.sheared_red_mesas",
+        "yokudan_desert.L2.star_clear_arid"
+      ]
+    },
+    {
+      "from": "isle_of_the_drowned_ansei",
+      "to": "wayshrine_sunken_isles_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_isle_of_the_drowned_ansei_to_wayshrine_sunken_isles_04",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "isle_of_the_drowned_ansei",
+      "to": "wayshrine_sunken_isles_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_isle_of_the_drowned_ansei_to_wayshrine_sunken_isles_05",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "wayshrine_sunken_isles_01",
+      "to": "wayshrine_sunken_isles_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_sunken_isles_01_to_wayshrine_sunken_isles_03",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "wayshrine_sunken_isles_01",
+      "to": "wayshrine_sunken_isles_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_sunken_isles_01_to_wayshrine_sunken_isles_02",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "wayshrine_sunken_isles_02",
+      "to": "wayshrine_sunken_isles_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_sunken_isles_02_to_wayshrine_sunken_isles_05",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "wayshrine_sunken_isles_02",
+      "to": "isle_of_the_drowned_ansei",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_sunken_isles_02_to_isle_of_the_drowned_ansei",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "wayshrine_sunken_isles_03",
+      "to": "wayshrine_sunken_isles_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_sunken_isles_03_to_wayshrine_sunken_isles_01",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "wayshrine_sunken_isles_03",
+      "to": "wayshrine_sunken_isles_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_sunken_isles_03_to_wayshrine_sunken_isles_02",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "wayshrine_sunken_isles_04",
+      "to": "isle_of_the_drowned_ansei",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_sunken_isles_04_to_isle_of_the_drowned_ansei",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "wayshrine_sunken_isles_04",
+      "to": "wayshrine_sunken_isles_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_sunken_isles_04_to_wayshrine_sunken_isles_02",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "wayshrine_sunken_isles_05",
+      "to": "wayshrine_sunken_isles_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_sunken_isles_05_to_wayshrine_sunken_isles_02",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "wayshrine_sunken_isles_05",
+      "to": "isle_of_the_drowned_ansei",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "yokuda_wayshrine_wayshrine_sunken_isles_05_to_isle_of_the_drowned_ansei",
+      "why": [
+        "sunken_isles.L1.submerged_city_shelves",
+        "sunken_isles.L2.trade_wind_swell"
+      ]
+    },
+    {
+      "from": "isle_of_the_drowned_ansei",
+      "to": "sentinel",
+      "mode": "boat",
+      "cost": 115,
+      "path": "ra_gada_western_ocean_passage",
+      "why": [
+        "yokuda.L6.new_tava_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "sentinel",
+      "to": "isle_of_the_drowned_ansei",
+      "mode": "boat",
+      "cost": 115,
+      "path": "ra_gada_western_ocean_passage",
+      "why": [
+        "yokuda.L6.new_tava_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "sand_drowned_village",
+      "to": "hegathe",
+      "mode": "boat",
+      "cost": 110,
+      "path": "old_yokuda_pilgrim_convoy",
+      "why": [
+        "yokudan_desert.L6.new_tava_pilgrim_port",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "hegathe",
+      "to": "sand_drowned_village",
+      "mode": "boat",
+      "cost": 110,
+      "path": "old_yokuda_pilgrim_convoy",
+      "why": [
+        "yokudan_desert.L6.new_tava_pilgrim_port",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "coral_choked_palace",
+      "to": "anvil",
+      "mode": "boat",
+      "cost": 120,
+      "path": "azurian_current_chart_expedition",
+      "why": [
+        "sunken_isles.L6.riven_shoal_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "anvil",
+      "to": "coral_choked_palace",
+      "mode": "boat",
+      "cost": 120,
+      "path": "azurian_current_chart_expedition",
+      "why": [
+        "sunken_isles.L6.riven_shoal_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "isle_of_the_drowned_ansei",
+      "to": "stros_mkai",
+      "mode": "boat",
+      "cost": 95,
+      "path": "hundings_wake_trade_fleet",
+      "why": [
+        "sunken_isles.L6.riven_shoal_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "stros_mkai",
+      "to": "isle_of_the_drowned_ansei",
+      "mode": "boat",
+      "cost": 95,
+      "path": "hundings_wake_trade_fleet",
+      "why": [
+        "sunken_isles.L6.riven_shoal_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "sand_drowned_village",
+      "to": "yokudan_wellspring",
+      "mode": "caravan",
+      "cost": 144,
+      "path": "na_totambu_mesa_caravan_trail",
+      "why": [
+        "yokudan_desert.L6.new_tava_pilgrim_port",
+        "yokudan_desert.L5.orichalcum_and_star_charts"
+      ]
+    },
+    {
+      "from": "yokudan_wellspring",
+      "to": "sand_drowned_village",
+      "mode": "caravan",
+      "cost": 144,
+      "path": "na_totambu_mesa_caravan_trail",
+      "why": [
+        "yokudan_desert.L6.new_tava_pilgrim_port",
+        "yokudan_desert.L5.orichalcum_and_star_charts"
+      ]
+    },
+    {
+      "from": "yokudan_wellspring",
+      "to": "hall_of_the_ansei",
+      "mode": "caravan",
+      "cost": 98,
+      "path": "orichalc_wadi_camel_track",
+      "why": [
+        "yokudan_desert.L6.new_tava_pilgrim_port",
+        "yokudan_desert.L5.orichalcum_and_star_charts"
+      ]
+    },
+    {
+      "from": "hall_of_the_ansei",
+      "to": "yokudan_wellspring",
+      "mode": "caravan",
+      "cost": 98,
+      "path": "orichalc_wadi_camel_track",
+      "why": [
+        "yokudan_desert.L6.new_tava_pilgrim_port",
+        "yokudan_desert.L5.orichalcum_and_star_charts"
+      ]
+    },
+    {
+      "from": "hall_of_the_ansei",
+      "to": "tall_papas_spire",
+      "mode": "foot",
+      "cost": 0,
+      "path": "sword_singer_pilgrim_ascent",
+      "why": [
+        "yokudan_desert.L6.new_tava_pilgrim_port",
+        "yokuda.L5.pilgrim_and_chart_trade"
+      ]
+    },
+    {
+      "from": "tall_papas_spire",
+      "to": "hall_of_the_ansei",
+      "mode": "foot",
+      "cost": 0,
+      "path": "sword_singer_pilgrim_ascent",
+      "why": [
+        "yokudan_desert.L6.new_tava_pilgrim_port",
+        "yokuda.L5.pilgrim_and_chart_trade"
+      ]
+    }
+  ]
+}

@@ -6,7 +6,7 @@ S = SK + ":"
 
 # ============================================================================================ structures
 def grid(spacing=0, fixed=(), salt=0):
-    p = {"type": "skycraft:realm_grid", "salt": salt, "spacing": spacing}
+    p = {"type": "nirncraft:realm_grid", "salt": salt, "spacing": spacing}
     if fixed:
         p["fixed"] = [list(f) for f in fixed]
     return p
@@ -17,7 +17,7 @@ def spread(spacing, separation, salt):
 
 
 def places(variant, salt):
-    return {"type": "skycraft:places", "salt": salt, "types": ["landmark"], "variants": [variant]}
+    return {"type": "nirncraft:places", "salt": salt, "types": ["landmark"], "variants": [variant]}
 
 
 def chunk_of(x, z):
@@ -27,38 +27,38 @@ def chunk_of(x, z):
 # site id -> (biomes, placement). Fixed landmarks name their start chunk (RealmLayout's coordinates).
 STRUCTURES = {
     # the Deadlands
-    "deadlands/sigil_keep": ("#skycraft:realm/deadlands", grid(40, salt=11)),
-    "deadlands/citadel": ("#skycraft:realm/deadlands", spread(24, 9, 2041501)),
-    "deadlands/spire": ("#skycraft:realm/deadlands", spread(11, 4, 2041502)),
-    "deadlands/bridge": ("#skycraft:realm/deadlands", spread(9, 3, 2041503)),
+    "deadlands/sigil_keep": ("#nirncraft:realm/deadlands", grid(40, salt=11)),
+    "deadlands/citadel": ("#nirncraft:realm/deadlands", spread(24, 9, 2041501)),
+    "deadlands/spire": ("#nirncraft:realm/deadlands", spread(11, 4, 2041502)),
+    "deadlands/bridge": ("#nirncraft:realm/deadlands", spread(9, 3, 2041503)),
     # Sovngarde
-    "sovngarde/arrival": ("#skycraft:realm/sovngarde", grid(fixed=[chunk_of(0, 300)], salt=21)),
-    "sovngarde/arena": ("#skycraft:realm/sovngarde", grid(fixed=[chunk_of(0, 0)], salt=22)),
-    "sovngarde/whalebone_bridge": ("#skycraft:realm/sovngarde", grid(fixed=[chunk_of(0, -126)], salt=23)),
-    "sovngarde/hall_of_valor": ("#skycraft:realm/sovngarde", grid(fixed=[chunk_of(0, -275)], salt=24)),
-    "sovngarde/hero_cairn": ("#skycraft:realm/sovngarde", spread(14, 5, 2041504)),
+    "sovngarde/arrival": ("#nirncraft:realm/sovngarde", grid(fixed=[chunk_of(0, 300)], salt=21)),
+    "sovngarde/arena": ("#nirncraft:realm/sovngarde", grid(fixed=[chunk_of(0, 0)], salt=22)),
+    "sovngarde/whalebone_bridge": ("#nirncraft:realm/sovngarde", grid(fixed=[chunk_of(0, -126)], salt=23)),
+    "sovngarde/hall_of_valor": ("#nirncraft:realm/sovngarde", grid(fixed=[chunk_of(0, -275)], salt=24)),
+    "sovngarde/hero_cairn": ("#nirncraft:realm/sovngarde", spread(14, 5, 2041504)),
     # the Shivering Isles
-    "isles/fringe": ("#skycraft:realm/shivering_isles", grid(fixed=[chunk_of(760, 0)], salt=31)),
-    "isles/new_sheoth": ("#skycraft:realm/shivering_isles", grid(fixed=[chunk_of(0, 0)], salt=32)),
-    "isles/ruin": ("#skycraft:realm/shivering_isles", spread(14, 5, 2041505)),
+    "isles/fringe": ("#nirncraft:realm/shivering_isles", grid(fixed=[chunk_of(760, 0)], salt=31)),
+    "isles/new_sheoth": ("#nirncraft:realm/shivering_isles", grid(fixed=[chunk_of(0, 0)], salt=32)),
+    "isles/ruin": ("#nirncraft:realm/shivering_isles", spread(14, 5, 2041505)),
     # Apocrypha
-    "apocrypha/chapter": ("#skycraft:realm/apocrypha", grid(32, salt=41)),
+    "apocrypha/chapter": ("#nirncraft:realm/apocrypha", grid(32, salt=41)),
     # the Soul Cairn
-    "soul_cairn/arrival": ("#skycraft:realm/soul_cairn", grid(fixed=[chunk_of(0, 220)], salt=51)),
-    "soul_cairn/valerica_keep": ("#skycraft:realm/soul_cairn", grid(fixed=[chunk_of(0, -180)], salt=52)),
-    "soul_cairn/boneyard": ("#skycraft:realm/soul_cairn", grid(fixed=[chunk_of(480, -60)], salt=53)),
-    "soul_cairn/mausoleum": ("#skycraft:realm/soul_cairn", spread(12, 4, 2041506)),
+    "soul_cairn/arrival": ("#nirncraft:realm/soul_cairn", grid(fixed=[chunk_of(0, 220)], salt=51)),
+    "soul_cairn/valerica_keep": ("#nirncraft:realm/soul_cairn", grid(fixed=[chunk_of(0, -180)], salt=52)),
+    "soul_cairn/boneyard": ("#nirncraft:realm/soul_cairn", grid(fixed=[chunk_of(480, -60)], salt=53)),
+    "soul_cairn/mausoleum": ("#nirncraft:realm/soul_cairn", spread(12, 4, 2041506)),
     # Coldharbour
-    "coldharbour/arrival": ("#skycraft:realm/coldharbour", grid(fixed=[chunk_of(0, 150)], salt=61)),
-    "coldharbour/hollow_city": ("#skycraft:realm/coldharbour", grid(fixed=[chunk_of(0, -200)], salt=62)),
-    "coldharbour/ruined_tower": ("#skycraft:realm/coldharbour", spread(10, 4, 2041507)),
+    "coldharbour/arrival": ("#nirncraft:realm/coldharbour", grid(fixed=[chunk_of(0, 150)], salt=61)),
+    "coldharbour/hollow_city": ("#nirncraft:realm/coldharbour", grid(fixed=[chunk_of(0, -200)], salt=62)),
+    "coldharbour/ruined_tower": ("#nirncraft:realm/coldharbour", spread(10, 4, 2041507)),
     # the ways in, in Nirn
-    "nirn/oblivion_gate": ("#skycraft:dungeons/anywhere", spread(56, 20, 2041508)),
-    "nirn/named_gate": ("#skycraft:dungeons/anywhere", places("oblivion_gate", 2041509)),
-    "nirn/madness_door": ("#skycraft:dungeons/anywhere", places("madness_door", 2041510)),
-    "nirn/black_book_altar": ("#skycraft:dungeons/anywhere", places("black_book_altar", 2041511)),
-    "nirn/soul_cairn_portal": ("#skycraft:dungeons/anywhere", places("soul_cairn_portal", 2041512)),
-    "nirn/dark_anchor": ("#skycraft:dungeons/anywhere", places("dark_anchor", 2041513)),
+    "nirn/oblivion_gate": ("#nirncraft:dungeons/anywhere", spread(56, 20, 2041508)),
+    "nirn/named_gate": ("#nirncraft:dungeons/anywhere", places("oblivion_gate", 2041509)),
+    "nirn/madness_door": ("#nirncraft:dungeons/anywhere", places("madness_door", 2041510)),
+    "nirn/black_book_altar": ("#nirncraft:dungeons/anywhere", places("black_book_altar", 2041511)),
+    "nirn/soul_cairn_portal": ("#nirncraft:dungeons/anywhere", places("soul_cairn_portal", 2041512)),
+    "nirn/dark_anchor": ("#nirncraft:dungeons/anywhere", places("dark_anchor", 2041513)),
 }
 
 # discovery names (LocationNames gets them through the realms' hook); generic sites are named by kind
@@ -78,7 +78,7 @@ SITE_NAMES = {
 
 
 def structure_json(site, biomes):
-    return {"type": "skycraft:realm_site", "site": site, "biomes": biomes, "step": "surface_structures",
+    return {"type": "nirncraft:realm_site", "site": site, "biomes": biomes, "step": "surface_structures",
             "spawn_overrides": {}, "terrain_adaptation": "none"}
 
 
@@ -111,27 +111,27 @@ SPAWNS = [
     {"regions": ["minecraft:the_end"], "why": ["whiterun.L8.honour_and_sovngarde", "skyrim.L8.ancestor_barrows"], "groups": [
         group(S + "sovngarde_hero", 10, (1, 2), kind="wildlife"), group(S + "wandering_soul", 6, (1, 3), kind="wildlife")]},
     # the Shivering Isles
-    {"regions": ["skycraft:shivering_isles"], "biomes": [S + "shivering_isles_dementia_swamp", S + "shivering_isles_dementia_forest"],
+    {"regions": ["nirncraft:shivering_isles"], "biomes": [S + "shivering_isles_dementia_swamp", S + "shivering_isles_dementia_forest"],
      "why": ["cyrodiil.L8.daedric_shrines", "nibenay_basin.L10.arrius_cult_cells"], "groups": [
         group(S + "grummite", 10, (2, 4)), group(S + "baliwog", 6, (1, 3)), group(S + "gnarl", 5, (1, 1)),
         group(S + "elytra", 4, (1, 2)), group(S + "flesh_atronach", 2, (1, 1), levels=(15, 999)),
         group(S + "baliwog", 6, (2, 3), place="water")]},
-    {"regions": ["skycraft:shivering_isles"], "biomes": [S + "shivering_isles_mania_fields", S + "shivering_isles_mania_mushroom_forest",
+    {"regions": ["nirncraft:shivering_isles"], "biomes": [S + "shivering_isles_mania_fields", S + "shivering_isles_mania_mushroom_forest",
                                                        S + "shivering_isles_mania_crystal_grove", S + "shivering_isles_fringe"],
      "why": ["cyrodiil.L8.daedric_shrines", "cyrodiil.L10.cult_remnants"], "groups": [
         group(S + "elytra", 8, (1, 3)), group(S + "gnarl", 5, (1, 1)), group(S + "grummite", 4, (1, 2)),
         group(S + "flesh_atronach", 2, (1, 1), levels=(15, 999))]},
     # Apocrypha
-    {"regions": ["skycraft:apocrypha"], "why": ["solstheim.L10.black_book_altars", "solstheim.L11.black_book_return"], "groups": [
+    {"regions": ["nirncraft:apocrypha"], "why": ["solstheim.L10.black_book_altars", "solstheim.L11.black_book_return"], "groups": [
         group(S + "seeker", 10, (1, 3)), group(S + "lurker", 3, (1, 1), levels=(15, 999)),
         group(S + "lurker", 4, (1, 1), place="water")]},
     # the Soul Cairn
-    {"regions": ["skycraft:soul_cairn"], "why": ["haafingar.L10.soul_cairn_gate", "skyrim.L10.volkihar"], "groups": [
+    {"regions": ["nirncraft:soul_cairn"], "why": ["haafingar.L10.soul_cairn_gate", "skyrim.L10.volkihar"], "groups": [
         group(S + "boneman", 9, (1, 3)), group(S + "mistman", 7, (1, 2)), group(S + "wrathman", 3, (1, 1), levels=(18, 999)),
         group(S + "keeper", 2, (1, 1), levels=(25, 999)),
         group(S + "wandering_soul", 10, (2, 4), kind="wildlife")]},
     # Coldharbour
-    {"regions": ["skycraft:coldharbour"], "why": ["cyrodiil.L11.three_banner_war", "cyrodiil.L10.cult_remnants"], "groups": [
+    {"regions": ["nirncraft:coldharbour"], "why": ["cyrodiil.L11.three_banner_war", "cyrodiil.L10.cult_remnants"], "groups": [
         group(S + "dremora", 9, (1, 2)), group(S + "harvester", 4, (1, 1)), group(S + "flame_atronach", 4, (1, 1)),
         group(S + "scamp", 6, (2, 3)), group(S + "daedroth", 3, (1, 1)), group(S + "wandering_soul", 6, (1, 3), kind="wildlife")]},
 ]
@@ -166,16 +166,16 @@ def pool(rolls, *entries):
 
 
 def book(bid, value):
-    return item(S + "book", 1, nbt="{book:\"%s\",skycraft_value:%d}" % (bid, value))
+    return item(S + "book", 1, nbt="{book:\"%s\",nirncraft_value:%d}" % (bid, value))
 
 
 def black_book(chapter):
-    return item(S + "black_book", 1, nbt="{chapter:%d,skycraft_value:500}" % chapter)
+    return item(S + "black_book", 1, nbt="{chapter:%d,nirncraft_value:500}" % chapter)
 
 
 def sigil(weight):
     return {"type": "minecraft:item", "name": S + "sigil_stone", "weight": weight,
-            "functions": [{"function": "minecraft:set_nbt", "tag": "{sigil:{ench:\"minecraft:fire_aspect\",lvl:2},skycraft_value:270}"}]}
+            "functions": [{"function": "minecraft:set_nbt", "tag": "{sigil:{ench:\"minecraft:fire_aspect\",lvl:2},nirncraft_value:270}"}]}
 
 
 DAEDRIC = [S + "daedric_" + p for p in ("sword", "dagger", "war_axe", "mace", "greatsword", "battleaxe", "warhammer", "bow",
@@ -259,25 +259,25 @@ LOOT = {
 
 # ============================================================================================ places in Nirn
 PLACES = [
-    {"id": "kvatch_gate", "name": "place.skycraft.kvatch_gate", "type": "landmark", "class": "marquee", "culture": "imperial",
+    {"id": "kvatch_gate", "name": "place.nirncraft.kvatch_gate", "type": "landmark", "class": "marquee", "culture": "imperial",
      "region": "cyrodiil/gold_coast", "x": -2480, "z": 8190, "radius": 18, "variant": "oblivion_gate",
      "why": ["cyrodiil.L11.oblivion_crisis", "gold_coast.L11.kvatch_burned", "gold_coast.L10.gate_remnant_under_kvatch"]},
-    {"id": "shivering_isles_door", "name": "place.skycraft.shivering_isles_door", "type": "landmark", "class": "marquee", "culture": "imperial",
+    {"id": "shivering_isles_door", "name": "place.nirncraft.shivering_isles_door", "type": "landmark", "class": "marquee", "culture": "imperial",
      "region": "sea/topal_bay", "x": 3600, "z": 10330, "radius": 12, "variant": "madness_door",
      "why": ["cyrodiil.L8.daedric_shrines", "nibenay_basin.L10.arrius_cult_cells", "cyrodiil.L11.oblivion_crisis"]},
-    {"id": "black_book_epistolary", "name": "place.skycraft.black_book_epistolary", "type": "landmark", "class": "marquee", "culture": "dunmer",
+    {"id": "black_book_epistolary", "name": "place.nirncraft.black_book_epistolary", "type": "landmark", "class": "marquee", "culture": "dunmer",
      "region": "morrowind/solstheim", "x": 4990, "z": -3000, "radius": 8, "variant": "black_book_altar",
      "why": ["solstheim.L10.black_book_altars", "solstheim.L11.black_book_return", "morrowind.L10.daedric_ruins"]},
-    {"id": "black_book_sallow_regent", "name": "place.skycraft.black_book_sallow_regent", "type": "landmark", "class": "marquee", "culture": "nord",
+    {"id": "black_book_sallow_regent", "name": "place.nirncraft.black_book_sallow_regent", "type": "landmark", "class": "marquee", "culture": "nord",
      "region": "morrowind/solstheim", "x": 4290, "z": -3600, "radius": 8, "variant": "black_book_altar",
      "why": ["solstheim.L10.black_book_altars", "solstheim.L11.black_book_return", "morrowind.L10.daedric_ruins"]},
-    {"id": "black_book_filament", "name": "place.skycraft.black_book_filament", "type": "landmark", "class": "marquee", "culture": "nord",
+    {"id": "black_book_filament", "name": "place.nirncraft.black_book_filament", "type": "landmark", "class": "marquee", "culture": "nord",
      "region": "morrowind/solstheim", "x": 4230, "z": -3150, "radius": 8, "variant": "black_book_altar",
      "why": ["solstheim.L10.black_book_altars", "solstheim.L11.black_book_return", "morrowind.L10.daedric_ruins"]},
-    {"id": "soul_cairn_portal", "name": "place.skycraft.soul_cairn_portal", "type": "landmark", "class": "marquee", "culture": "imperial",
+    {"id": "soul_cairn_portal", "name": "place.nirncraft.soul_cairn_portal", "type": "landmark", "class": "marquee", "culture": "imperial",
      "region": "skyrim/haafingar", "x": -3148, "z": -2402, "radius": 10, "variant": "soul_cairn_portal",
      "why": ["skyrim.L10.volkihar", "haafingar.L10.soul_cairn_gate", "haafingar.L10.volkihar_castle"]},
-    {"id": "dark_anchor", "name": "place.skycraft.dark_anchor", "type": "landmark", "class": "marquee", "culture": "imperial",
+    {"id": "dark_anchor", "name": "place.nirncraft.dark_anchor", "type": "landmark", "class": "marquee", "culture": "imperial",
      "region": "cyrodiil/jerall_mountains", "x": 1010, "z": 2530, "radius": 12, "variant": "dark_anchor",
      "why": ["cyrodiil.L10.cult_remnants", "jerall_mountains.L10.sancre_tor_barrow", "cyrodiil.L11.three_banner_war"]},
 ]

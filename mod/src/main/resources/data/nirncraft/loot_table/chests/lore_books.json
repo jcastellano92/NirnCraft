@@ -1,0 +1,595 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 10,
+          "modifier": {
+            "tag": "{book:\"brief_history_nordic_empire\",nirncraft_value:25}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 10,
+          "modifier": {
+            "tag": "{book:\"nine_holds\",nirncraft_value:15}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"winter_without_end\",nirncraft_value:20}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"stones_and_mileposts\",nirncraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"wary_primer_daedra\",nirncraft_value:40}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"price_of_bargains\",nirncraft_value:30}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"shrine_keeper_confession\",nirncraft_value:35}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"where_deep_folk_went\",nirncraft_value:40}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"dwarven_mechanisms\",nirncraft_value:45}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"brass_and_resonance\",nirncraft_value:35}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 7,
+          "modifier": {
+            "tag": "{book:\"when_dragons_ruled\",nirncraft_value:30}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"patience_of_the_voice\",nirncraft_value:35}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"on_the_dragon_blooded\",nirncraft_value:50}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"walls_that_speak\",nirncraft_value:30}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 10,
+          "modifier": {
+            "tag": "{book:\"novice_alchemist\",nirncraft_value:20}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 10,
+          "modifier": {
+            "tag": "{book:\"hammer_and_hearth\",nirncraft_value:20}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"gentle_hands\",nirncraft_value:25}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"on_standing_stones\",nirncraft_value:20}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 10,
+          "modifier": {
+            "tag": "{book:\"northern_wilds\",nirncraft_value:15}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"first_steps_spellcraft\",nirncraft_value:25}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"huntsmans_almanac\",nirncraft_value:15}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"cheese_wheel_dispute\",nirncraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 7,
+          "modifier": {
+            "tag": "{book:\"hearth_for_two\",nirncraft_value:15}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"retired_guard\",nirncraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"mudcrab_who_haggled\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"skeever_king\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"lantern_on_frostmoor\",nirncraft_value:15}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"song_of_hearthfires\",nirncraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"ballad_iron_shield\",nirncraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"in_praise_of_mead\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 7,
+          "modifier": {
+            "tag": "{book:\"lament_barrow_gate\",nirncraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"letter_homesick_legionnaire\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"note_camp_orders\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"note_scrawled_warning\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"note_shopping_list\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 7,
+          "modifier": {
+            "tag": "{book:\"journal_lost_explorer\",nirncraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"note_treasure_hint\",nirncraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"voice_and_the_throat\",nirncraft_value:30}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"blades_in_the_dark_years\",nirncraft_value:35}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 3,
+          "modifier": {
+            "tag": "{book:\"rending_shout\",nirncraft_value:60}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"hall_of_the_companions\",nirncraft_value:20}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"for_the_nords\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"empire_keeps_us_whole\",nirncraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 4,
+          "modifier": {
+            "tag": "{book:\"of_silence_and_sanctuary\",nirncraft_value:40}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"nightingale_shadow\",nirncraft_value:25}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"winterhold_before_the_fall\",nirncraft_value:20}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"olafs_fire\",nirncraft_value:15}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"mist_of_sovngarde\",nirncraft_value:15}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"allmakers_stones\",nirncraft_value:25}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"ash_over_raven_rock\",nirncraft_value:20}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"gates_at_kvatch\",nirncraft_value:30}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"starlight_in_glass\",nirncraft_value:30}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"three_who_were_gods\",nirncraft_value:35}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"house_by_house\",nirncraft_value:25}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"what_the_hist_remembers\",nirncraft_value:30}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"jone_and_jode\",nirncraft_value:25}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"covenant_of_root_and_bone\",nirncraft_value:25}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 4,
+          "modifier": {
+            "tag": "{book:\"the_island_that_isnt\",nirncraft_value:40}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"sword_is_a_prayer\",nirncraft_value:30}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"orsinium_again\",nirncraft_value:25}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"courts_and_covens\",nirncraft_value:25}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 5,
+          "modifier": {
+            "tag": "{book:\"beyond_the_edge_of_the_map\",nirncraft_value:40}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 4,
+          "modifier": {
+            "tag": "{book:\"what_the_tsaesci_left\",nirncraft_value:45}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 4,
+          "modifier": {
+            "tag": "{book:\"yokuda_beneath_the_waves\",nirncraft_value:45}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 4,
+          "modifier": {
+            "tag": "{book:\"the_cold_cradle\",nirncraft_value:45}",
+            "type": "minecraft:set_custom_data"
+          }
+        }
+      ]
+    }
+  ]
+}

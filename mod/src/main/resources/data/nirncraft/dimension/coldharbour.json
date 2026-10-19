@@ -1,0 +1,18 @@
+{
+  "type": "nirncraft:coldharbour",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "nirncraft:realm/coldharbour",
+    "biome_source": {
+      "type": "nirncraft:realm",
+      "realm": "coldharbour",
+      "biomes": {
+        "chained_wastes": "nirncraft:coldharbour_chained_wastes",
+        "burning_ruins": "nirncraft:coldharbour_burning_ruins",
+        "hollow_city": "nirncraft:coldharbour_hollow_city",
+        "lava_rift": "nirncraft:coldharbour_lava_rift",
+        "black_crags": "nirncraft:coldharbour_black_crags"
+      }
+    }
+  }
+}

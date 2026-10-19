@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:silver_ore",
-    "skycraft:deepslate_silver_ore"
+    "nirncraft:silver_ore",
+    "nirncraft:deepslate_silver_ore"
   ]
 }

@@ -28,12 +28,12 @@
     "ambient_light": 0.08,
     "bed_works": false,
     "coordinate_scale": 1.0,
-    "effects": "skycraft:sovngarde",
+    "effects": "nirncraft:sovngarde",
     "has_ceiling": false,
     "has_raids": false,
     "has_skylight": true,
     "height": 256,
-    "infiniburn": "#skycraft:infiniburn_realms",
+    "infiniburn": "#nirncraft:infiniburn_realms",
     "logical_height": 256,
     "min_y": 0,
     "monster_spawn_block_light_limit": 0,
@@ -54,12 +54,12 @@
     "ambient_light": 0.12,
     "bed_works": false,
     "coordinate_scale": 8.0,
-    "effects": "skycraft:deadlands",
+    "effects": "nirncraft:deadlands",
     "has_ceiling": false,
     "has_raids": false,
     "has_skylight": true,
     "height": 256,
-    "infiniburn": "#skycraft:infiniburn_realms",
+    "infiniburn": "#nirncraft:infiniburn_realms",
     "logical_height": 256,
     "min_y": 0,
     "monster_spawn_block_light_limit": 0,
@@ -76,16 +76,16 @@
     "ultrawarm": true,
     "fixed_time": 13200
   },
-  "skycraft:apocrypha": {
+  "nirncraft:apocrypha": {
     "ambient_light": 0.18,
     "bed_works": false,
     "coordinate_scale": 1.0,
-    "effects": "skycraft:apocrypha",
+    "effects": "nirncraft:apocrypha",
     "has_ceiling": false,
     "has_raids": false,
     "has_skylight": true,
     "height": 256,
-    "infiniburn": "#skycraft:infiniburn_realms",
+    "infiniburn": "#nirncraft:infiniburn_realms",
     "logical_height": 256,
     "min_y": 0,
     "monster_spawn_block_light_limit": 0,
@@ -102,16 +102,16 @@
     "ultrawarm": false,
     "fixed_time": 18000
   },
-  "skycraft:coldharbour": {
+  "nirncraft:coldharbour": {
     "ambient_light": 0.1,
     "bed_works": false,
     "coordinate_scale": 1.0,
-    "effects": "skycraft:coldharbour",
+    "effects": "nirncraft:coldharbour",
     "has_ceiling": false,
     "has_raids": false,
     "has_skylight": true,
     "height": 256,
-    "infiniburn": "#skycraft:infiniburn_realms",
+    "infiniburn": "#nirncraft:infiniburn_realms",
     "logical_height": 256,
     "min_y": 0,
     "monster_spawn_block_light_limit": 0,
@@ -128,7 +128,7 @@
     "ultrawarm": true,
     "fixed_time": 17000
   },
-  "skycraft:jail": {
+  "nirncraft:jail": {
     "ultrawarm": false,
     "natural": false,
     "coordinate_scale": 1.0,
@@ -148,11 +148,11 @@
     "infiniburn": "#minecraft:infiniburn_overworld",
     "effects": "minecraft:overworld"
   },
-  "skycraft:shivering_isles": {
+  "nirncraft:shivering_isles": {
     "ambient_light": 0.05,
     "bed_works": false,
     "coordinate_scale": 1.0,
-    "effects": "skycraft:shivering_isles",
+    "effects": "nirncraft:shivering_isles",
     "has_ceiling": false,
     "has_raids": false,
     "has_skylight": true,
@@ -173,16 +173,16 @@
     "respawn_anchor_works": false,
     "ultrawarm": false
   },
-  "skycraft:soul_cairn": {
+  "nirncraft:soul_cairn": {
     "ambient_light": 0.15,
     "bed_works": false,
     "coordinate_scale": 1.0,
-    "effects": "skycraft:soul_cairn",
+    "effects": "nirncraft:soul_cairn",
     "has_ceiling": false,
     "has_raids": false,
     "has_skylight": true,
     "height": 256,
-    "infiniburn": "#skycraft:infiniburn_realms",
+    "infiniburn": "#nirncraft:infiniburn_realms",
     "logical_height": 256,
     "min_y": 0,
     "monster_spawn_block_light_limit": 0,

@@ -13,7 +13,7 @@ usage:
           spans       per span type: points, gaps, and for bridges / culverts / tunnels / stairs / fords the number of
                       spans ([spans, judged, clean]: every sample a clean road, for culverts open to water or air below)
         Generate first: tiles from p2_corridors.py, a fresh world with the roads module ON (RoadPaint is a world
-        generation feature; no legacy paver needed), 'skycraft-roads stats' to idle, 'stop'.
+        generation feature; no legacy paver needed), 'nirncraft-roads stats' to idle, 'stop'.
   py -3 -I tools/qa/p3_corridors.py pick <roadplan.bin> <a>:<b> ...
         prints one example centre per bridge / culvert / ford / stairs / tunnel / switchback span of those links
         (for render_town.py --box close-ups).

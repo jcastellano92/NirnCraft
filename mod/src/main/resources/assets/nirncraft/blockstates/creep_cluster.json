@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/creep_cluster"
+      },
+      {
+        "model": "nirncraft:block/creep_cluster",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/creep_cluster",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/creep_cluster",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/creep_cluster_harvested"
+      },
+      {
+        "model": "nirncraft:block/creep_cluster_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/creep_cluster_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/creep_cluster_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

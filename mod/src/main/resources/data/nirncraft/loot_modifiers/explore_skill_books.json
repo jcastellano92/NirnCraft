@@ -1,0 +1,15 @@
+{
+  "type": "nirncraft:explore_skill_books",
+  "tables": [
+    "nirncraft:chests/dungeon_common",
+    "nirncraft:chests/dungeon_minor",
+    "nirncraft:chests/dwemer_scrap",
+    "nirncraft:chests/giant_camp",
+    "nirncraft:chests/dragon_lair",
+    "nirncraft:chests/bandit_camp",
+    "nirncraft:chests/mine_ore"
+  ],
+  "table": "nirncraft:chests/skill_books",
+  "chance": 0.06,
+  "priority": 2
+}

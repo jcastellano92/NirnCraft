@@ -1,0 +1,103 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 50,
+          "modifier": {
+            "min": 2,
+            "max": 8,
+            "growth": 0.04,
+            "type": "nirncraft:scaled_gold"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 50
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar",
+          "weight": 30,
+          "modifier": [
+            {
+              "tag": "nirncraft:loot/ingredients",
+              "type": "nirncraft:regional_tag"
+            },
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 12,
+          "value": "nirncraft:parts/potions"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 7,
+          "value": "nirncraft:parts/lockpicks"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arrow",
+          "weight": 9,
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 6,
+                "max": 14
+              },
+              "type": "minecraft:set_count"
+            },
+            {
+              "kind": "arrow",
+              "type": "nirncraft:leveled_gear"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "nirncraft:parts/gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "nirncraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 10,
+          "value": "nirncraft:parts/food"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "nirncraft:parts/lore_note"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 20
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/dungeon/minor"
+}

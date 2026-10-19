@@ -1,0 +1,109 @@
+{
+  "variants": {
+    "facing=north,part=a_front": {
+      "model": "nirncraft:block/tent_side_a"
+    },
+    "facing=north,part=a_mid": {
+      "model": "nirncraft:block/tent_side_a"
+    },
+    "facing=north,part=a_back": {
+      "model": "nirncraft:block/tent_side_a_back"
+    },
+    "facing=north,part=b_front": {
+      "model": "nirncraft:block/tent_side_b"
+    },
+    "facing=north,part=b_mid": {
+      "model": "nirncraft:block/tent_side_b"
+    },
+    "facing=north,part=b_back": {
+      "model": "nirncraft:block/tent_side_b_back"
+    },
+    "facing=north,part=back": {
+      "model": "nirncraft:block/tent_back"
+    },
+    "facing=east,part=a_front": {
+      "model": "nirncraft:block/tent_side_a",
+      "y": 90
+    },
+    "facing=east,part=a_mid": {
+      "model": "nirncraft:block/tent_side_a",
+      "y": 90
+    },
+    "facing=east,part=a_back": {
+      "model": "nirncraft:block/tent_side_a_back",
+      "y": 90
+    },
+    "facing=east,part=b_front": {
+      "model": "nirncraft:block/tent_side_b",
+      "y": 90
+    },
+    "facing=east,part=b_mid": {
+      "model": "nirncraft:block/tent_side_b",
+      "y": 90
+    },
+    "facing=east,part=b_back": {
+      "model": "nirncraft:block/tent_side_b_back",
+      "y": 90
+    },
+    "facing=east,part=back": {
+      "model": "nirncraft:block/tent_back",
+      "y": 90
+    },
+    "facing=south,part=a_front": {
+      "model": "nirncraft:block/tent_side_a",
+      "y": 180
+    },
+    "facing=south,part=a_mid": {
+      "model": "nirncraft:block/tent_side_a",
+      "y": 180
+    },
+    "facing=south,part=a_back": {
+      "model": "nirncraft:block/tent_side_a_back",
+      "y": 180
+    },
+    "facing=south,part=b_front": {
+      "model": "nirncraft:block/tent_side_b",
+      "y": 180
+    },
+    "facing=south,part=b_mid": {
+      "model": "nirncraft:block/tent_side_b",
+      "y": 180
+    },
+    "facing=south,part=b_back": {
+      "model": "nirncraft:block/tent_side_b_back",
+      "y": 180
+    },
+    "facing=south,part=back": {
+      "model": "nirncraft:block/tent_back",
+      "y": 180
+    },
+    "facing=west,part=a_front": {
+      "model": "nirncraft:block/tent_side_a",
+      "y": 270
+    },
+    "facing=west,part=a_mid": {
+      "model": "nirncraft:block/tent_side_a",
+      "y": 270
+    },
+    "facing=west,part=a_back": {
+      "model": "nirncraft:block/tent_side_a_back",
+      "y": 270
+    },
+    "facing=west,part=b_front": {
+      "model": "nirncraft:block/tent_side_b",
+      "y": 270
+    },
+    "facing=west,part=b_mid": {
+      "model": "nirncraft:block/tent_side_b",
+      "y": 270
+    },
+    "facing=west,part=b_back": {
+      "model": "nirncraft:block/tent_side_b_back",
+      "y": 270
+    },
+    "facing=west,part=back": {
+      "model": "nirncraft:block/tent_back",
+      "y": 270
+    }
+  }
+}

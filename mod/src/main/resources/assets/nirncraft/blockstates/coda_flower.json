@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/coda_flower"
+      },
+      {
+        "model": "nirncraft:block/coda_flower",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/coda_flower",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/coda_flower",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/coda_flower_harvested"
+      },
+      {
+        "model": "nirncraft:block/coda_flower_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/coda_flower_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/coda_flower_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

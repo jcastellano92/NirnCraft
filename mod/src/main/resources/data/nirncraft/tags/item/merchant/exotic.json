@@ -1,0 +1,89 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:moon_sugar",
+      "required": false
+    },
+    {
+      "id": "nirncraft:skooma",
+      "required": false
+    },
+    "minecraft:sugar",
+    "minecraft:cocoa_beans",
+    {
+      "id": "nirncraft:jazbay_grapes",
+      "required": false
+    },
+    {
+      "id": "nirncraft:elsweyr_fondue",
+      "required": false
+    },
+    {
+      "id": "nirncraft:pearl",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_pearl",
+      "required": false
+    },
+    {
+      "id": "nirncraft:garnet",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ruby",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sapphire",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silver_ring",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gold_ring",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hawk_feather",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sabre_cat_tooth",
+      "required": false
+    },
+    "minecraft:honey_bottle",
+    "minecraft:rabbit_foot",
+    {
+      "id": "nirncraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "nirncraft:alto_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:spiced_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:khajiit_dagger",
+      "required": false
+    },
+    {
+      "id": "nirncraft:khajiit_helmet",
+      "required": false
+    },
+    {
+      "id": "nirncraft:khajiit_boots",
+      "required": false
+    },
+    {
+      "id": "nirncraft:lockpick",
+      "required": false
+    }
+  ]
+}

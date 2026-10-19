@@ -1,0 +1,25 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "olive",
+        "weight": 4
+      },
+      {
+        "species": "cypress",
+        "weight": 4
+      },
+      {
+        "species": "fruit_tree",
+        "weight": 1
+      },
+      {
+        "species": "palm",
+        "weight": 1
+      }
+    ],
+    "stands": 0.8,
+    "stand_scale": 48
+  }
+}

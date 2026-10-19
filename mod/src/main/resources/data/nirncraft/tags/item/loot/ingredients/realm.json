@@ -1,0 +1,53 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "nirncraft:nightshade",
+      "required": false
+    },
+    {
+      "id": "nirncraft:glowing_mushroom",
+      "required": false
+    },
+    {
+      "id": "nirncraft:white_cap",
+      "required": false
+    },
+    {
+      "id": "nirncraft:imp_stool",
+      "required": false
+    },
+    {
+      "id": "nirncraft:spider_egg",
+      "required": false
+    },
+    {
+      "id": "nirncraft:glow_dust",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ectoplasm",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bear_claws",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hawk_feather",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_antlers",
+      "required": false
+    },
+    {
+      "id": "nirncraft:pearl",
+      "required": false
+    }
+  ]
+}

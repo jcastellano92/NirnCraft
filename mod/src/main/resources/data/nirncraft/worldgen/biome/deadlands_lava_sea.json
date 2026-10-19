@@ -1,0 +1,62 @@
+{
+  "has_precipitation": false,
+  "temperature": 2.0,
+  "downfall": 0.0,
+  "effects": {
+    "water_color": "#6b2a1a"
+  },
+  "carvers": [],
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "nirncraft:realm/dl_spike"
+    ],
+    [],
+    [
+      "nirncraft:realm/dl_magma_vein",
+      "nirncraft:realm/dl_blackstone_blob"
+    ],
+    [],
+    [
+      "nirncraft:realm/dl_lavafall"
+    ],
+    [
+      "nirncraft:realm/dl_flames"
+    ],
+    []
+  ],
+  "attributes": {
+    "minecraft:visual/sky_color": "#b0281a",
+    "minecraft:visual/fog_color": "#5a1208",
+    "minecraft:visual/water_fog_color": "#330a05",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": {
+      "modifier": "append",
+      "argument": [
+        {
+          "probability": 0.006,
+          "particle": {
+            "type": "minecraft:ash"
+          }
+        }
+      ]
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {},
+        "spawn_costs": {}
+      }
+    }
+  }
+}

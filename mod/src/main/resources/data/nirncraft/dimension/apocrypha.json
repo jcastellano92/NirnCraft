@@ -1,0 +1,17 @@
+{
+  "type": "nirncraft:apocrypha",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "nirncraft:realm/apocrypha",
+    "biome_source": {
+      "type": "nirncraft:realm",
+      "realm": "apocrypha",
+      "biomes": {
+        "ink_sea": "nirncraft:apocrypha_ink_sea",
+        "stacks": "nirncraft:apocrypha_stacks",
+        "tentacle_depths": "nirncraft:apocrypha_tentacle_depths",
+        "floating_library": "nirncraft:apocrypha_floating_library"
+      }
+    }
+  }
+}

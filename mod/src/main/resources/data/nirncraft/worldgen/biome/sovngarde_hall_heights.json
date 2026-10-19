@@ -1,0 +1,61 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.7,
+  "downfall": 0.4,
+  "effects": {
+    "water_color": "#5aa0d0",
+    "grass_color": "#d0bc58",
+    "foliage_color": "#e0b83a"
+  },
+  "carvers": [],
+  "features": [
+    [],
+    [],
+    [
+      "nirncraft:realm/sg_boulder"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "nirncraft:realm/sg_golden_tree",
+      "nirncraft:realm/sg_flowers",
+      "nirncraft:realm/sg_grass"
+    ],
+    []
+  ],
+  "attributes": {
+    "minecraft:visual/sky_color": "#9cc0e8",
+    "minecraft:visual/fog_color": "#d8dce6",
+    "minecraft:visual/water_fog_color": "#2a5a8a",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": {
+      "modifier": "append",
+      "argument": [
+        {
+          "probability": 0.0015,
+          "particle": {
+            "type": "minecraft:end_rod"
+          }
+        }
+      ]
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {},
+        "spawn_costs": {}
+      }
+    }
+  }
+}

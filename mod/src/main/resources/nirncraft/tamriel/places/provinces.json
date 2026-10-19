@@ -1,0 +1,647 @@
+[
+  {
+    "id": "imperial_city",
+    "name": "place.nirncraft.imperial_city",
+    "type": "capital",
+    "culture": "imperial",
+    "region": "cyrodiil/heartlands",
+    "x": 900,
+    "z": 5900,
+    "radius": 200,
+    "why": [
+      "heartlands.L1.island_bedrock",
+      "heartlands.L1.lakeshore_clay"
+    ]
+  },
+  {
+    "id": "bruma",
+    "name": "place.nirncraft.bruma",
+    "type": "city",
+    "culture": "imperial",
+    "region": "cyrodiil/jerall_mountains",
+    "x": 1500,
+    "z": 3000,
+    "radius": 150,
+    "why": [
+      "jerall_mountains.L1.pale_pass_notch",
+      "jerall_mountains.L1.granite_caves"
+    ]
+  },
+  {
+    "id": "chorrol",
+    "name": "place.nirncraft.chorrol",
+    "type": "city",
+    "culture": "imperial",
+    "region": "cyrodiil/colovian_highlands",
+    "x": -1300,
+    "z": 4400,
+    "radius": 150,
+    "why": [
+      "colovian_highlands.L1.karst_valleys",
+      "colovian_highlands.L1.limestone_caves"
+    ]
+  },
+  {
+    "id": "cheydinhal",
+    "name": "place.nirncraft.cheydinhal",
+    "type": "city",
+    "culture": "imperial",
+    "region": "cyrodiil/nibenay_basin",
+    "x": 3700,
+    "z": 5000,
+    "radius": 150,
+    "why": [
+      "nibenay_basin.L1.valus_foothills",
+      "nibenay_basin.L1.basin_silt"
+    ]
+  },
+  {
+    "id": "skingrad",
+    "name": "place.nirncraft.skingrad",
+    "type": "city",
+    "culture": "imperial",
+    "region": "cyrodiil/west_weald",
+    "x": -1700,
+    "z": 6700,
+    "radius": 150,
+    "why": [
+      "west_weald.L1.warm_limestone_slopes",
+      "west_weald.L1.deep_ayleid_vault"
+    ]
+  },
+  {
+    "id": "kvatch",
+    "name": "place.nirncraft.kvatch",
+    "type": "city",
+    "culture": "imperial",
+    "region": "cyrodiil/gold_coast",
+    "x": -2700,
+    "z": 8000,
+    "radius": 150,
+    "why": [
+      "gold_coast.L1.low_sea_cliffs",
+      "gold_coast.L1.sea_caves"
+    ]
+  },
+  {
+    "id": "anvil",
+    "name": "place.nirncraft.anvil",
+    "type": "city",
+    "culture": "imperial",
+    "region": "cyrodiil/gold_coast",
+    "x": -3900,
+    "z": 8700,
+    "radius": 150,
+    "why": [
+      "gold_coast.L1.low_sea_cliffs",
+      "gold_coast.L1.sea_caves"
+    ]
+  },
+  {
+    "id": "bravil",
+    "name": "place.nirncraft.bravil",
+    "type": "city",
+    "culture": "imperial",
+    "region": "cyrodiil/nibenay_valley",
+    "x": 1800,
+    "z": 8700,
+    "radius": 150,
+    "why": [
+      "nibenay_valley.L1.river_flats",
+      "nibenay_valley.L1.riverbank_caves"
+    ]
+  },
+  {
+    "id": "leyawiin",
+    "name": "place.nirncraft.leyawiin",
+    "type": "city",
+    "culture": "imperial",
+    "region": "cyrodiil/blackwood",
+    "x": 3600,
+    "z": 9900,
+    "radius": 150,
+    "why": [
+      "blackwood.L1.mangrove_mud",
+      "blackwood.L1.peat"
+    ]
+  },
+  {
+    "id": "mournhold",
+    "name": "place.nirncraft.mournhold",
+    "type": "capital",
+    "culture": "dunmer",
+    "region": "morrowind/deshaan",
+    "x": 6300,
+    "z": 3300,
+    "radius": 200,
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L1.obsidian_gorge"
+    ]
+  },
+  {
+    "id": "vivec",
+    "name": "place.nirncraft.vivec",
+    "type": "city",
+    "culture": "dunmer",
+    "region": "morrowind/ascadian_isles",
+    "x": 7400,
+    "z": 1300,
+    "radius": 150,
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L1.lake_basins"
+    ]
+  },
+  {
+    "id": "balmora",
+    "name": "place.nirncraft.balmora",
+    "type": "city",
+    "culture": "dunmer",
+    "region": "morrowind/west_gash",
+    "x": 6300,
+    "z": 500,
+    "radius": 150,
+    "why": [
+      "west_gash.L1.gash_ridges",
+      "west_gash.L1.odai_gorge"
+    ]
+  },
+  {
+    "id": "aldruhn",
+    "name": "place.nirncraft.aldruhn",
+    "type": "city",
+    "culture": "dunmer",
+    "region": "morrowind/vvardenfell_ashlands",
+    "x": 6100,
+    "z": -500,
+    "radius": 150,
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.scoria_ridges"
+    ]
+  },
+  {
+    "id": "sadrith_mora",
+    "name": "place.nirncraft.sadrith_mora",
+    "type": "city",
+    "culture": "dunmer",
+    "region": "morrowind/telvannis",
+    "x": 8900,
+    "z": 100,
+    "radius": 150,
+    "isolated": true,
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L1.fungal_forest_soils"
+    ]
+  },
+  {
+    "id": "ebonheart",
+    "name": "place.nirncraft.ebonheart",
+    "type": "city",
+    "culture": "dunmer",
+    "region": "morrowind/stonefalls",
+    "x": 4700,
+    "z": 2400,
+    "radius": 150,
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L1.twin_peaks"
+    ]
+  },
+  {
+    "id": "necrom",
+    "name": "place.nirncraft.necrom",
+    "type": "city",
+    "culture": "dunmer",
+    "region": "morrowind/molag_amur",
+    "x": 8900,
+    "z": 3600,
+    "radius": 150,
+    "why": [
+      "molag_amur.L1.lava_field",
+      "molag_amur.L1.cinder_cones"
+    ]
+  },
+  {
+    "id": "red_mountain",
+    "name": "place.nirncraft.red_mountain",
+    "type": "landmark",
+    "culture": "dunmer",
+    "region": "morrowind/red_mountain",
+    "x": 7100,
+    "z": -400,
+    "radius": 64,
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L1.cinder_slopes"
+    ]
+  },
+  {
+    "id": "raven_rock",
+    "name": "place.nirncraft.raven_rock",
+    "type": "town",
+    "culture": "dunmer",
+    "region": "morrowind/solstheim",
+    "x": 4300,
+    "z": -2900,
+    "radius": 90,
+    "why": [
+      "solstheim.L1.moesring_massif",
+      "solstheim.L1.north_cliffs"
+    ]
+  },
+  {
+    "id": "wayrest",
+    "name": "place.nirncraft.wayrest",
+    "type": "capital",
+    "culture": "breton",
+    "region": "high_rock/wayrest",
+    "x": -5300,
+    "z": 3300,
+    "radius": 200,
+    "why": [
+      "wayrest.L1.bjoulsae_mouth",
+      "wayrest.L1.castle_spur"
+    ]
+  },
+  {
+    "id": "daggerfall",
+    "name": "place.nirncraft.daggerfall",
+    "type": "capital",
+    "culture": "breton",
+    "region": "high_rock/daggerfall",
+    "x": -9300,
+    "z": 2600,
+    "radius": 200,
+    "why": [
+      "daggerfall.L1.dagger_bluffs",
+      "daggerfall.L1.glenpoint_headland"
+    ]
+  },
+  {
+    "id": "camlorn",
+    "name": "place.nirncraft.camlorn",
+    "type": "city",
+    "culture": "breton",
+    "region": "high_rock/glenumbra",
+    "x": -9000,
+    "z": -200,
+    "radius": 150,
+    "why": [
+      "glenumbra.L1.ocean_cliffs",
+      "glenumbra.L1.camlorn_hill"
+    ]
+  },
+  {
+    "id": "shornhelm",
+    "name": "place.nirncraft.shornhelm",
+    "type": "city",
+    "culture": "breton",
+    "region": "high_rock/rivenspire",
+    "x": -7600,
+    "z": -1300,
+    "radius": 150,
+    "why": [
+      "rivenspire.L1.dark_crags",
+      "rivenspire.L1.shornhelm_gap"
+    ]
+  },
+  {
+    "id": "evermor",
+    "name": "place.nirncraft.evermor",
+    "type": "city",
+    "culture": "breton",
+    "region": "high_rock/bjoulsae",
+    "x": -6600,
+    "z": 200,
+    "radius": 150,
+    "why": [
+      "bjoulsae.L1.bjoulsae_trench",
+      "bjoulsae.L1.evermor_lake_basin"
+    ]
+  },
+  {
+    "id": "orsinium",
+    "name": "place.nirncraft.orsinium",
+    "type": "capital",
+    "culture": "orc",
+    "region": "high_rock/wrothgar",
+    "x": -4300,
+    "z": 300,
+    "radius": 200,
+    "why": [
+      "wrothgar.L1.granite_peaks",
+      "wrothgar.L1.orsinium_plateau"
+    ]
+  },
+  {
+    "id": "sentinel",
+    "name": "place.nirncraft.sentinel",
+    "type": "capital",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7976,
+    "z": 4900,
+    "radius": 200,
+    "why": [
+      "sentinel.L1.harbour_cliff",
+      "sentinel.L1.garden_terraces"
+    ]
+  },
+  {
+    "id": "elinhir",
+    "name": "place.nirncraft.elinhir",
+    "type": "city",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3950,
+    "z": 3800,
+    "radius": 150,
+    "why": [
+      "craglorn.L1.craglorn_badlands",
+      "craglorn.L1.starfall_craters"
+    ]
+  },
+  {
+    "id": "skaven",
+    "name": "place.nirncraft.skaven",
+    "type": "city",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6400,
+    "z": 5700,
+    "radius": 150,
+    "why": [
+      "alikr_desert.L1.erg",
+      "alikr_desert.L1.mesas"
+    ]
+  },
+  {
+    "id": "rihad",
+    "name": "place.nirncraft.rihad",
+    "type": "city",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4800,
+    "z": 7200,
+    "radius": 150,
+    "why": [
+      "dragontail.L1.black_ridges",
+      "dragontail.L1.red_wall"
+    ]
+  },
+  {
+    "id": "taneth",
+    "name": "place.nirncraft.taneth",
+    "type": "city",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6800,
+    "z": 8000,
+    "radius": 150,
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L1.taneth_cliff_shelf"
+    ]
+  },
+  {
+    "id": "stros_mkai",
+    "name": "place.nirncraft.stros_mkai",
+    "type": "town",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10200,
+    "z": 7200,
+    "radius": 90,
+    "why": [
+      "stros_mkai.L1.two_lobes",
+      "stros_mkai.L1.harbour_bay"
+    ]
+  },
+  {
+    "id": "stormhold",
+    "name": "place.nirncraft.stormhold",
+    "type": "city",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 6400,
+    "z": 6300,
+    "radius": 150,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ]
+  },
+  {
+    "id": "gideon",
+    "name": "place.nirncraft.gideon",
+    "type": "city",
+    "culture": "argonian",
+    "region": "black_marsh/gideon",
+    "x": 5800,
+    "z": 8300,
+    "radius": 150,
+    "why": [
+      "gideon.L1.western_levee_plain",
+      "gideon.L1.blackrose_basin"
+    ]
+  },
+  {
+    "id": "helstrom",
+    "name": "place.nirncraft.helstrom",
+    "type": "city",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 8900,
+    "z": 6400,
+    "radius": 150,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ]
+  },
+  {
+    "id": "lilmoth",
+    "name": "place.nirncraft.lilmoth",
+    "type": "capital",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 7700,
+    "z": 10000,
+    "radius": 200,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L2.topal_sea_fog"
+    ]
+  },
+  {
+    "id": "murkmire",
+    "name": "place.nirncraft.murkmire",
+    "type": "town",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 6800,
+    "z": 11000,
+    "radius": 90,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L2.equatorial_downpour"
+    ]
+  },
+  {
+    "id": "rimmen",
+    "name": "place.nirncraft.rimmen",
+    "type": "city",
+    "culture": "khajiit",
+    "region": "elsweyr/rimmen",
+    "x": 1200,
+    "z": 10400,
+    "radius": 150,
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L1.alabaster_beds"
+    ]
+  },
+  {
+    "id": "riverhold",
+    "name": "place.nirncraft.riverhold",
+    "type": "city",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -600,
+    "z": 10800,
+    "radius": 150,
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L1.badland_gullies"
+    ]
+  },
+  {
+    "id": "torval",
+    "name": "place.nirncraft.torval",
+    "type": "capital",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 1200,
+    "z": 12600,
+    "radius": 200,
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ]
+  },
+  {
+    "id": "senchal",
+    "name": "place.nirncraft.senchal",
+    "type": "city",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 2800,
+    "z": 13700,
+    "radius": 150,
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ]
+  },
+  {
+    "id": "elden_root",
+    "name": "place.nirncraft.elden_root",
+    "type": "capital",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4000,
+    "z": 11300,
+    "radius": 200,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ]
+  },
+  {
+    "id": "falinesti",
+    "name": "place.nirncraft.falinesti",
+    "type": "city",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -5600,
+    "z": 10200,
+    "radius": 150,
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L1.jungle_floor"
+    ]
+  },
+  {
+    "id": "woodhearth",
+    "name": "place.nirncraft.woodhearth",
+    "type": "city",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -6700,
+    "z": 12600,
+    "radius": 150,
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ]
+  },
+  {
+    "id": "arenthia",
+    "name": "place.nirncraft.arenthia",
+    "type": "town",
+    "culture": "bosmer",
+    "region": "valenwood/reapers_march",
+    "x": -2300,
+    "z": 10500,
+    "radius": 90,
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ]
+  },
+  {
+    "id": "alinor",
+    "name": "place.nirncraft.alinor",
+    "type": "capital",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11200,
+    "z": 13000,
+    "radius": 200,
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "firsthold",
+    "name": "place.nirncraft.firsthold",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9300,
+    "z": 11000,
+    "radius": 90,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "artaeum",
+    "name": "place.nirncraft.artaeum",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11600,
+    "z": 11200,
+    "radius": 64,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L2.standing_mist"
+    ]
+  }
+]

@@ -1,10 +1,10 @@
 {
   "replace": false,
   "values": [
-    "skycraft:alikr_desert",
-    "skycraft:alikr_dunes",
-    "skycraft:elsweyr_dunes",
-    "skycraft:yokudan_desert",
+    "nirncraft:alikr_desert",
+    "nirncraft:alikr_dunes",
+    "nirncraft:elsweyr_dunes",
+    "nirncraft:yokudan_desert",
     "minecraft:desert"
   ]
 }

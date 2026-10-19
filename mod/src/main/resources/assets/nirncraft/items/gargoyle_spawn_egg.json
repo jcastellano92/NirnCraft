@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/gargoyle_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 7236196
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 10107434
+      }
+    ]
+  }
+}

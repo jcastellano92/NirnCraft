@@ -1,6 +1,0 @@
-{
-  "parent": "skycraft:item/forsworn_bow",
-  "textures": {
-    "layer0": "skycraft:item/forsworn_bow_pulling_0"
-  }
-}

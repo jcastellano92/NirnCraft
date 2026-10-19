@@ -20,7 +20,7 @@ NAMES={
 }
 def migrate(scope):
  count=0
- for path in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
+ for path in (ROOT/'mod/src/main/java/com/nirncraft').rglob('*.java'):
   if owner(path)!=scope:continue
   raw=path.read_bytes();s=raw.decode('utf8');out=s;changes=[]
   pattern=re.compile(r'TickEvent\.(\w+)\s+(\w+)')

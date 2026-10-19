@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:draugr",
+    "nirncraft:draugr_deathlord",
+    "minecraft:zombie",
+    "minecraft:zombie_villager",
+    "minecraft:husk",
+    "minecraft:drowned",
+    "minecraft:skeleton",
+    "minecraft:stray",
+    "minecraft:wither_skeleton",
+    "minecraft:phantom",
+    "minecraft:zombified_piglin",
+    "minecraft:zoglin",
+    "minecraft:wither",
+    "minecraft:skeleton_horse",
+    "minecraft:zombie_horse",
+    "nirncraft:vampire",
+    "nirncraft:vampire_lord",
+    "nirncraft:death_hound",
+    "nirncraft:gargoyle",
+    "nirncraft:ash_spawn",
+    "nirncraft:dragon_priest",
+    "nirncraft:keeper",
+    "nirncraft:boneman",
+    "nirncraft:mistman",
+    "nirncraft:wrathman"
+  ]
+}

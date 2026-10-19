@@ -1,0 +1,11 @@
+{
+  "type": "nirncraft:fallen_log",
+  "config": {
+    "state": {
+      "id": "minecraft:birch_log",
+      "properties": {
+        "axis": "x"
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "necromancer_lair",
+  "kit": "daedric",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "cultist_lair"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

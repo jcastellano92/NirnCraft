@@ -38,7 +38,7 @@ if __name__ == "__main__":
     assert values[0, -1, 0] > values[0, -1, 2]
     assert values[0, 0].max() == 0
     assert values[-1, -1].mean() > values[0, -1].mean()
-    path = ROOT / "mod/src/main/resources/assets/skycraft/textures/environment/atmosphere_transmittance.png"
+    path = ROOT / "mod/src/main/resources/assets/nirncraft/textures/environment/atmosphere_transmittance.png"
     Image.fromarray(np.uint8(np.clip(values**0.25, 0, 1) * 255 + 0.5), "RGB").save(path)
     path.with_name(path.name + ".mcmeta").write_text(json.dumps({"texture": {"blur": True, "clamp": True}}))
     print("Wrote", path)

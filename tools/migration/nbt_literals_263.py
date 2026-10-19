@@ -5,7 +5,7 @@ from java_text import matching,arguments
 DEFAULTS={'getByte':'(byte)0','getShort':'(short)0','getInt':'0','getLong':'0L','getFloat':'0F','getDouble':'0D','getString':'""','getBoolean':'false'}
 def migrate(scope):
  count=0
- for path in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
+ for path in (ROOT/'mod/src/main/java/com/nirncraft').rglob('*.java'):
   if owner(path)!=scope:continue
   raw=path.read_bytes();s=raw.decode('utf8');changes=[]
   pattern=re.compile(r'\.(getByte|getShort|getInt|getLong|getFloat|getDouble|getString|getBoolean|getCompound|getList)\(\s*"')

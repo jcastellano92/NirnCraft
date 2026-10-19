@@ -3,15 +3,15 @@
 Usage: py -3 tools/explore/gen_explore_data.py
 
 Writes (all under mod/src/main/):
-  resources/data/skycraft/loot_tables/explore/*.json        minor-site loot
-  resources/data/skycraft/worldgen/{configured,placed}_feature/minor_site.json
-  resources/data/skycraft/forge/biome_modifier/explore_minor_sites.json
-  resources/data/skycraft/loot_modifiers/explore_skill_books.json (+ entry in forge global_loot_modifiers.json)
-  resources/assets/skycraft/lore/books/explore_*.json         note texts
-  resources/assets/skycraft/{blockstates,models}/...           Ayleid well and treasure map models
-  resources/assets/skycraft/textures/item/treasure_map.png     procedural icon
-  resources/skycraft/explore/uniques.json                      unique items and where they lie
-  lang/skycraft/explore.json
+  resources/data/nirncraft/loot_tables/explore/*.json        minor-site loot
+  resources/data/nirncraft/worldgen/{configured,placed}_feature/minor_site.json
+  resources/data/nirncraft/forge/biome_modifier/explore_minor_sites.json
+  resources/data/nirncraft/loot_modifiers/explore_skill_books.json (+ entry in forge global_loot_modifiers.json)
+  resources/assets/nirncraft/lore/books/explore_*.json         note texts
+  resources/assets/nirncraft/{blockstates,models}/...           Ayleid well and treasure map models
+  resources/assets/nirncraft/textures/item/treasure_map.png     procedural icon
+  resources/nirncraft/explore/uniques.json                      unique items and where they lie
+  lang/nirncraft/explore.json
 Unique positions are picked from the Tamriel map assets: dry land in the named region, well away from every named
 place and from each other. Rerun after the map or the places change.
 """
@@ -30,9 +30,9 @@ from explore_text import MISC_LANG, NOTES, SITE_NAMES, UNIQUES  # noqa: E402
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MAIN = os.path.join(ROOT, "mod", "src", "main")
 RES = os.path.join(MAIN, "resources")
-DATA = os.path.join(RES, "data", "skycraft")
-ASSETS = os.path.join(RES, "assets", "skycraft")
-TAMRIEL = os.path.join(RES, "skycraft", "tamriel")
+DATA = os.path.join(RES, "data", "nirncraft")
+ASSETS = os.path.join(RES, "assets", "nirncraft")
+TAMRIEL = os.path.join(RES, "nirncraft", "tamriel")
 
 MIN_X, MIN_Z, CELL = -15360, -5120, 32
 
@@ -41,7 +41,7 @@ def write(path, obj):
     import importlib.util
     from pathlib import Path
     converter = Path(__file__).resolve().parents[1] / "worldgen" / "format_263.py"
-    spec = importlib.util.spec_from_file_location("skycraft_worldgen_263", converter)
+    spec = importlib.util.spec_from_file_location("nirncraft_worldgen_263", converter)
     native = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(native)
     path, obj = native.prepare(path, obj)
@@ -76,48 +76,48 @@ def empty(weight):
 
 
 def gold(lo, hi, w=10):
-    return item("skycraft:septim", w, (lo, hi))
+    return item("nirncraft:septim", w, (lo, hi))
 
 
 def gear(kind, w=10, enchant=0.1, quality=0.2, leveled=False):
     base = {"weapon": "minecraft:iron_sword", "armor": "minecraft:iron_chestplate", "bow": "minecraft:bow",
             "shield": "minecraft:iron_sword", "any": "minecraft:iron_sword"}[kind]
-    fn = {"function": "skycraft:leveled_gear" if leveled else "skycraft:regional_gear", "kind": kind,
+    fn = {"function": "nirncraft:leveled_gear" if leveled else "nirncraft:regional_gear", "kind": kind,
           "enchant_chance": enchant, "quality_chance": quality}
     return item(base, w, fns=[fn])
 
 
 def arrows(w=4):
     return item("minecraft:arrow", w, fns=[{"function": "minecraft:set_count", "count": uni(5, 14)},
-                                          {"function": "skycraft:leveled_gear", "kind": "arrow"}])
+                                          {"function": "nirncraft:leveled_gear", "kind": "arrow"}])
 
 
 def ingredient(w=10, lo=1, hi=3):
-    return item("minecraft:sugar", w, fns=[{"function": "skycraft:regional_tag", "tag": "skycraft:loot/ingredients"},
+    return item("minecraft:sugar", w, fns=[{"function": "nirncraft:regional_tag", "tag": "nirncraft:loot/ingredients"},
                                           {"function": "minecraft:set_count", "count": uni(lo, hi)}])
 
 
 def potion(w=4, poison=False):
-    return item("minecraft:potion", w, fns=[{"function": "skycraft:skyrim_potion", "poison": poison}])
+    return item("minecraft:potion", w, fns=[{"function": "nirncraft:skyrim_potion", "poison": poison}])
 
 
 def tome(w=2, schools=None):
-    fn = {"function": "skycraft:leveled_tome"}
+    fn = {"function": "nirncraft:leveled_tome"}
     if schools:
         fn["schools"] = schools
     return item("minecraft:book", w, fns=[fn])
 
 
 def note(book_id, w=1):
-    return item("skycraft:book", w, fns=[{"function": "minecraft:set_nbt", "tag": '{book:"%s",skycraft_value:2}' % book_id}])
+    return item("nirncraft:book", w, fns=[{"function": "minecraft:set_nbt", "tag": '{book:"%s",nirncraft_value:2}' % book_id}])
 
 
 def lead(w=1):
-    return item("skycraft:book", w, fns=[{"function": "skycraft:explore_lead"}])
+    return item("nirncraft:book", w, fns=[{"function": "nirncraft:explore_lead"}])
 
 
 def tmap(w=1):
-    return item("skycraft:treasure_map", w, fns=[{"function": "skycraft:explore_treasure_map"}])
+    return item("nirncraft:treasure_map", w, fns=[{"function": "nirncraft:explore_treasure_map"}])
 
 
 def pool(entries, rolls=1):
@@ -126,12 +126,12 @@ def pool(entries, rolls=1):
 
 def loot(name, *pools):
     write(os.path.join(DATA, "loot_table", "explore", name + ".json"),
-          {"type": "minecraft:chest", "pools": list(pools), "random_sequence": "skycraft:explore/" + name})
+          {"type": "minecraft:chest", "pools": list(pools), "random_sequence": "nirncraft:explore/" + name})
 
 
 def skill_books(chance_pct):
     """A pool that adds one skill book chance_pct percent of the time."""
-    return pool([table("skycraft:chests/skill_books", chance_pct), empty(100 - chance_pct)])
+    return pool([table("nirncraft:chests/skill_books", chance_pct), empty(100 - chance_pct)])
 
 
 def maps_and_leads(map_pct, lead_pct):
@@ -147,140 +147,140 @@ def site_note(book_id, pct):
 
 
 def gen_loot():
-    food = table("skycraft:chests/skyrim_food", 10)
+    food = table("nirncraft:chests/skyrim_food", 10)
     loot("camp",
          pool([gold(2, 15, 10), food, item("minecraft:torch", 6, (1, 3)), item("minecraft:leather", 4, (1, 2)),
-               item("skycraft:lockpick", 3, (1, 3)), potion(3), empty(6)], (2, 4)),
+               item("nirncraft:lockpick", 3, (1, 3)), potion(3), empty(6)], (2, 4)),
          journals(), maps_and_leads(18, 30), skill_books(3))
     loot("hunter",
-         pool([item("minecraft:leather", 10, (1, 4)), item("skycraft:wolf_pelt", 6, (1, 2)), item("skycraft:raw_venison", 8, (1, 3)),
-               item("skycraft:hide", 6, (1, 3)), arrows(8), gear("bow", 3, leveled=True), item("skycraft:bear_claws", 2),
+         pool([item("minecraft:leather", 10, (1, 4)), item("nirncraft:wolf_pelt", 6, (1, 2)), item("nirncraft:raw_venison", 8, (1, 3)),
+               item("nirncraft:hide", 6, (1, 3)), arrows(8), gear("bow", 3, leveled=True), item("nirncraft:bear_claws", 2),
                gold(3, 20, 6), food], (2, 5)),
-         pool([item("skycraft:skill_book_archery", 3), item("skycraft:skill_book_hunting", 3), empty(94)]),
+         pool([item("nirncraft:skill_book_archery", 3), item("nirncraft:skill_book_hunting", 3), empty(94)]),
          maps_and_leads(8, 12))
     loot("hermit",
          pool([ingredient(12, 1, 4), potion(6), item("minecraft:mushroom_stew", 3), food, gold(5, 40, 8),
-               item("skycraft:garnet", 2), tome(2), table("skycraft:chests/soul_gems", 2)], (3, 6)),
+               item("nirncraft:garnet", 2), tome(2), table("nirncraft:chests/soul_gems", 2)], (3, 6)),
          site_note("explore_note_hermit_rules", 35), skill_books(10), maps_and_leads(12, 20))
     loot("hermit_food", pool([food, item("minecraft:bread", 6, (1, 3)), item("minecraft:apple", 4, (1, 4)),
-                              item("skycraft:nord_mead", 3)], (2, 4)))
+                              item("nirncraft:nord_mead", 3)], (2, 4)))
     loot("lookout",
-         pool([gold(10, 60, 14), gear("weapon", 6, 0.1, 0.2), gear("armor", 4), arrows(6), item("skycraft:lockpick", 4, (1, 4)),
-               item("skycraft:skooma", 2), potion(4), table("skycraft:chests/gold", 4)], (3, 6)),
+         pool([gold(10, 60, 14), gear("weapon", 6, 0.1, 0.2), gear("armor", 4), arrows(6), item("nirncraft:lockpick", 4, (1, 4)),
+               item("nirncraft:skooma", 2), potion(4), table("nirncraft:chests/gold", 4)], (3, 6)),
          pool([note("explore_lead_bandit_orders", 40), tmap(20), empty(40)]), skill_books(5))
     loot("fisher",
-         pool([item("minecraft:cod", 10, (1, 4)), item("minecraft:salmon", 8, (1, 3)), item("skycraft:fishing_bait", 8, (2, 8)),
-               item("skycraft:fishing_rod", 3), item("minecraft:string", 5, (1, 3)), item("skycraft:salt_pile", 4, (1, 3)),
+         pool([item("minecraft:cod", 10, (1, 4)), item("minecraft:salmon", 8, (1, 3)), item("nirncraft:fishing_bait", 8, (2, 8)),
+               item("nirncraft:fishing_rod", 3), item("minecraft:string", 5, (1, 3)), item("nirncraft:salt_pile", 4, (1, 3)),
                gold(1, 12, 5)], (2, 4)),
-         site_note("explore_note_fishers_almanac", 25), pool([item("skycraft:skill_book_fishing", 5), empty(95)]))
+         site_note("explore_note_fishers_almanac", 25), pool([item("nirncraft:skill_book_fishing", 5), empty(95)]))
     loot("offerings",
-         pool([gold(3, 30, 20), item("minecraft:candle", 8, (1, 3)), item("skycraft:garnet", 3), item("skycraft:ruby", 2),
-               item("skycraft:amulet_of_mara", 1), item("skycraft:amulet_of_talos", 1), item("skycraft:silver_ring", 2),
+         pool([gold(3, 30, 20), item("minecraft:candle", 8, (1, 3)), item("nirncraft:garnet", 3), item("nirncraft:ruby", 2),
+               item("nirncraft:amulet_of_mara", 1), item("nirncraft:amulet_of_talos", 1), item("nirncraft:silver_ring", 2),
                potion(4), item("minecraft:poppy", 4, (1, 3))], (1, 3)),
          pool([note("explore_note_wayshrine_prayer", 20), note("explore_note_menhir_verse", 10),
                note("explore_note_sea_hymn", 5), empty(65)]), skill_books(3))
     loot("cache",
-         pool([item("skycraft:coin_purse", 20, fns=[{"function": "minecraft:set_nbt", "tag": "{gold:150L}"}]),
-               item("skycraft:coin_purse", 10, fns=[{"function": "minecraft:set_nbt", "tag": "{gold:300L}"}]),
+         pool([item("nirncraft:coin_purse", 20, fns=[{"function": "minecraft:set_nbt", "tag": "{gold:150L}"}]),
+               item("nirncraft:coin_purse", 10, fns=[{"function": "minecraft:set_nbt", "tag": "{gold:300L}"}]),
                gold(25, 64, 10)]),
          pool([gear("weapon", 10, 0.5, 0.5), gear("armor", 10, 0.5, 0.5), gear("bow", 3, 0.5, 0.5, leveled=True),
-               item("skycraft:flawless_ruby", 3), item("skycraft:flawless_sapphire", 2), item("skycraft:flawless_diamond", 1),
-               item("skycraft:gold_diamond_ring", 2), item("skycraft:gold_ruby_necklace", 2),
-               table("skycraft:chests/soul_gems", 4), potion(6), tome(3)], (2, 4)),
+               item("nirncraft:flawless_ruby", 3), item("nirncraft:flawless_sapphire", 2), item("nirncraft:flawless_diamond", 1),
+               item("nirncraft:gold_diamond_ring", 2), item("nirncraft:gold_ruby_necklace", 2),
+               table("nirncraft:chests/soul_gems", 4), potion(6), tome(3)], (2, 4)),
          site_note("explore_note_cache_ledger", 30), skill_books(12),
-         pool([table("skycraft:arsenal/staves", 2), table("skycraft:legendary", 1), empty(97)]))
+         pool([table("nirncraft:arsenal/staves", 2), table("nirncraft:legendary", 1), empty(97)]))
     loot("adventurer",
          pool([gold(5, 50, 12), potion(8), gear("weapon", 5, 0.2, 0.2), gear("armor", 5, 0.2, 0.2), arrows(4),
-               item("minecraft:torch", 5, (1, 4)), item("skycraft:lockpick", 4, (1, 5)), food,
-               table("skycraft:chests/soul_gems", 2)], (2, 5)),
+               item("minecraft:torch", 5, (1, 4)), item("nirncraft:lockpick", 4, (1, 5)), food,
+               table("nirncraft:chests/soul_gems", 2)], (2, 5)),
          maps_and_leads(20, 35), skill_books(8))
     loot("battlefield",
          pool([gear("weapon", 12, 0.05, 0.1, leveled=True), gear("shield", 6, 0.05, 0.1), gear("armor", 8, 0.05, 0.1, leveled=True),
                arrows(8), gold(5, 40, 8), item("minecraft:iron_ingot", 4, (1, 3))], (2, 4)),
          site_note("explore_note_last_orders", 35), skill_books(6))
     loot("cairn",
-         pool([gold(8, 40, 14), item("skycraft:ancient_nord_war_axe", 3), item("skycraft:ancient_nord_sword", 3),
-               item("skycraft:ancient_nord_helmet", 2), table("skycraft:chests/soul_gems", 4), item("skycraft:garnet", 3),
-               item("skycraft:bone_meal_draugr", 4, (1, 3)), item("skycraft:silver_necklace", 2)], (1, 3)),
+         pool([gold(8, 40, 14), item("nirncraft:ancient_nord_war_axe", 3), item("nirncraft:ancient_nord_sword", 3),
+               item("nirncraft:ancient_nord_helmet", 2), table("nirncraft:chests/soul_gems", 4), item("nirncraft:garnet", 3),
+               item("nirncraft:bone_meal_draugr", 4, (1, 3)), item("nirncraft:silver_necklace", 2)], (1, 3)),
          site_note("explore_note_cairn_epitaph", 25), skill_books(4))
     loot("ayleid",
-         pool([item("skycraft:refined_moonstone", 6, (1, 2)), item("skycraft:raw_moonstone", 6, (1, 3)), potion(8),
-               table("skycraft:chests/soul_gems", 5), item("skycraft:sapphire", 3), tome(3, ["restoration", "alteration"]),
+         pool([item("nirncraft:refined_moonstone", 6, (1, 2)), item("nirncraft:raw_moonstone", 6, (1, 3)), potion(8),
+               table("nirncraft:chests/soul_gems", 5), item("nirncraft:sapphire", 3), tome(3, ["restoration", "alteration"]),
                gold(10, 40, 6)], (2, 3)),
          site_note("explore_note_ayleid_fragment", 40), skill_books(6))
     loot("velothi",
          pool([gold(5, 30, 12), ingredient(10), item("minecraft:candle", 6, (1, 3)), potion(4),
-               table("skycraft:chests/soul_gems", 3), item("skycraft:garnet", 2)], (2, 3)),
+               table("nirncraft:chests/soul_gems", 3), item("nirncraft:garnet", 2)], (2, 3)),
          site_note("explore_note_velothi_prayer", 40), skill_books(4))
     loot("yokudan",
-         pool([gold(20, 64, 14), item("skycraft:ruby", 4), item("skycraft:gold_ring", 3), gear("weapon", 6, 0.3, 0.3),
+         pool([gold(20, 64, 14), item("nirncraft:ruby", 4), item("nirncraft:gold_ring", 3), gear("weapon", 6, 0.3, 0.3),
                item("minecraft:gold_ingot", 4, (1, 3)), potion(4)], (2, 4)),
          site_note("explore_note_obelisk_rubbing", 40), skill_books(5))
     loot("akaviri",
-         pool([gold(10, 50, 12), item("skycraft:akaviri_dagger", 3), item("skycraft:sapphire", 3),
+         pool([gold(10, 50, 12), item("nirncraft:akaviri_dagger", 3), item("nirncraft:sapphire", 3),
                item("minecraft:lantern", 4), potion(4), ingredient(6)], (2, 3)),
          site_note("explore_note_akaviri_scroll", 45), skill_books(5))
     loot("monolith",
-         pool([gold(10, 60, 10), item("minecraft:amethyst_shard", 8, (1, 4)), item("skycraft:void_salts", 3),
-               table("skycraft:chests/soul_gems", 5), tome(4), potion(4), item("skycraft:flawless_sapphire", 1)], (2, 4)),
+         pool([gold(10, 60, 10), item("minecraft:amethyst_shard", 8, (1, 4)), item("nirncraft:void_salts", 3),
+               table("nirncraft:chests/soul_gems", 5), tome(4), potion(4), item("nirncraft:flawless_sapphire", 1)], (2, 4)),
          site_note("explore_note_monolith_riddle", 40), maps_and_leads(15, 20), skill_books(8))
     loot("hist",
-         pool([item("skycraft:hist_sap", 10, (1, 3)), ingredient(10), item("skycraft:marshmerrow", 4, (1, 2)), potion(4),
+         pool([item("nirncraft:hist_sap", 10, (1, 3)), ingredient(10), item("nirncraft:marshmerrow", 4, (1, 2)), potion(4),
                gold(5, 25, 6)], (2, 4)),
          site_note("explore_note_hist_song", 40), skill_books(4))
     loot("moon_sugar",
-         pool([item("skycraft:moon_sugar", 14, (2, 6)), item("skycraft:skooma", 4, (1, 2)), gold(10, 40, 8),
+         pool([item("nirncraft:moon_sugar", 14, (2, 6)), item("nirncraft:skooma", 4, (1, 2)), gold(10, 40, 8),
                item("minecraft:sugar_cane", 6, (2, 6))], (2, 4)),
          site_note("explore_note_sugar_ledger", 35))
     loot("beehive",
          pool([item("minecraft:honey_bottle", 12, (1, 3)), item("minecraft:honeycomb", 10, (1, 4)), ingredient(6),
-               item("skycraft:honey_nut_treat", 4, (1, 2)), arrows(4)], (2, 4)),
+               item("nirncraft:honey_nut_treat", 4, (1, 2)), arrows(4)], (2, 4)),
          site_note("explore_note_honey_harvest", 35), skill_books(3))
     loot("crystal",
-         pool([item("minecraft:amethyst_shard", 10, (2, 6)), item("skycraft:refined_moonstone", 6, (1, 2)),
-               item("skycraft:refined_malachite", 4), item("skycraft:flawless_sapphire", 2), item("skycraft:flawless_diamond", 1),
-               item("skycraft:sapphire", 4), gold(10, 40, 6)], (2, 4)),
+         pool([item("minecraft:amethyst_shard", 10, (2, 6)), item("nirncraft:refined_moonstone", 6, (1, 2)),
+               item("nirncraft:refined_malachite", 4), item("nirncraft:flawless_sapphire", 2), item("nirncraft:flawless_diamond", 1),
+               item("nirncraft:sapphire", 4), gold(10, 40, 6)], (2, 4)),
          site_note("explore_note_gemcutter", 35), skill_books(4))
     loot("dwemer",
-         pool([table("skycraft:chests/dwemer_scrap", 30), item("skycraft:dwemer_gear", 6, (1, 2)), item("skycraft:dwarven_oil", 4),
-               item("skycraft:dwarven_metal_ingot", 4, (1, 2)), gear("weapon", 2, 0.2, 0.2)], (2, 4)),
+         pool([table("nirncraft:chests/dwemer_scrap", 30), item("nirncraft:dwemer_gear", 6, (1, 2)), item("nirncraft:dwarven_oil", 4),
+               item("nirncraft:dwarven_metal_ingot", 4, (1, 2)), gear("weapon", 2, 0.2, 0.2)], (2, 4)),
          site_note("explore_note_dwemer_survey", 35), skill_books(6))
     loot("overlook",
-         pool([gold(5, 35, 12), potion(8), food, item("minecraft:spyglass", 2), item("skycraft:lockpick", 3, (1, 3)),
+         pool([gold(5, 35, 12), potion(8), food, item("minecraft:spyglass", 2), item("nirncraft:lockpick", 3, (1, 3)),
                item("minecraft:torch", 4, (1, 3))], (2, 4)),
          maps_and_leads(25, 30), skill_books(5))
     loot("miner",
-         pool([table("skycraft:chests/mine_ore", 30), item("minecraft:iron_pickaxe", 3), item("minecraft:torch", 6, (2, 6)),
-               item("skycraft:raw_silver", 4, (1, 3)), item("skycraft:raw_corundum", 4, (1, 3))], (2, 4)),
-         site_note("explore_note_prospector_claim", 30), pool([item("skycraft:skill_book_mining", 4), item("skycraft:skill_book_smithing", 3), empty(93)]))
+         pool([table("nirncraft:chests/mine_ore", 30), item("minecraft:iron_pickaxe", 3), item("minecraft:torch", 6, (2, 6)),
+               item("nirncraft:raw_silver", 4, (1, 3)), item("nirncraft:raw_corundum", 4, (1, 3))], (2, 4)),
+         site_note("explore_note_prospector_claim", 30), pool([item("nirncraft:skill_book_mining", 4), item("nirncraft:skill_book_smithing", 3), empty(93)]))
     loot("herbalist",
-         pool([ingredient(16, 1, 4), table("skycraft:chests/alchemy_ingredients", 10), potion(8, False), potion(3, True),
+         pool([ingredient(16, 1, 4), table("nirncraft:chests/alchemy_ingredients", 10), potion(8, False), potion(3, True),
                item("minecraft:glass_bottle", 6, (1, 4))], (3, 6)),
-         site_note("explore_note_herb_notes", 35), pool([item("skycraft:skill_book_alchemy", 6), empty(94)]))
+         site_note("explore_note_herb_notes", 35), pool([item("nirncraft:skill_book_alchemy", 6), empty(94)]))
     loot("reagent",
-         pool([item("skycraft:nirnroot", 8, (1, 2)), item("skycraft:glowing_mushroom", 8, (1, 3)), ingredient(12, 1, 3),
-               item("skycraft:void_salts", 2), potion(4)], (2, 4)),
-         pool([item("skycraft:skill_book_alchemy", 5), empty(95)]))
+         pool([item("nirncraft:nirnroot", 8, (1, 2)), item("nirncraft:glowing_mushroom", 8, (1, 3)), ingredient(12, 1, 3),
+               item("nirncraft:void_salts", 2), potion(4)], (2, 4)),
+         pool([item("nirncraft:skill_book_alchemy", 5), empty(95)]))
     loot("reagent_giant",
-         pool([item("skycraft:giants_toe", 20), item("skycraft:mammoth_tusk", 6), item("skycraft:mammoth_steak", 6, (1, 2)),
+         pool([item("nirncraft:giants_toe", 20), item("nirncraft:mammoth_tusk", 6), item("nirncraft:mammoth_steak", 6, (1, 2)),
                ingredient(8)], (1, 3)),
          site_note("explore_note_giant_hunters", 40))
     loot("reagent_fire",
-         pool([item("skycraft:fire_salts", 20, (1, 3)), item("skycraft:ash_salts", 6, (1, 3)), ingredient(8), potion(3)], (2, 3)),
-         pool([item("skycraft:skill_book_destruction", 4), empty(96)]))
+         pool([item("nirncraft:fire_salts", 20, (1, 3)), item("nirncraft:ash_salts", 6, (1, 3)), ingredient(8), potion(3)], (2, 3)),
+         pool([item("nirncraft:skill_book_destruction", 4), empty(96)]))
     loot("bather",
-         pool([potion(10), food, gold(3, 20, 8), item("minecraft:leather_boots", 3), item("skycraft:silver_ring", 2),
+         pool([potion(10), food, gold(3, 20, 8), item("minecraft:leather_boots", 3), item("nirncraft:silver_ring", 2),
                item("minecraft:white_wool", 3)], (2, 3)),
          site_note("explore_note_bathers_complaint", 40))
     loot("shipwreck",
-         pool([table("skycraft:chests/sea_wreck", 30), gold(10, 50, 10), item("skycraft:alto_wine", 4, (1, 2)),
+         pool([table("nirncraft:chests/sea_wreck", 30), gold(10, 50, 10), item("nirncraft:alto_wine", 4, (1, 2)),
                item("minecraft:lead", 3), item("minecraft:paper", 4, (1, 4))], (2, 4)),
          site_note("explore_note_ships_log", 35), maps_and_leads(15, 15))
     loot("mage",
-         pool([tome(14), table("skycraft:chests/soul_gems", 8), potion(8), item("minecraft:amethyst_shard", 4, (1, 3)),
-               table("skycraft:arsenal/staves", 2), gold(10, 50, 6), item("skycraft:void_salts", 2)], (2, 4)),
+         pool([tome(14), table("nirncraft:chests/soul_gems", 8), potion(8), item("minecraft:amethyst_shard", 4, (1, 3)),
+               table("nirncraft:arsenal/staves", 2), gold(10, 50, 6), item("nirncraft:void_salts", 2)], (2, 4)),
          pool([note("explore_note_failed_experiment", 30), note("explore_note_apprentice_lament", 25), empty(45)]),
-         pool([table("skycraft:chests/skill_books", 22), empty(78)]))
+         pool([table("nirncraft:chests/skill_books", 22), empty(78)]))
 
 
 # ================================================================================================ notes & lang
@@ -289,15 +289,15 @@ def gen_notes(lang):
     books = os.path.join(ASSETS, "lore", "books")
     for nid, (title, author, pages) in NOTES.items():
         write(os.path.join(books, nid + ".json"), {"author": author, "pages": pages})
-        lang["book.skycraft." + nid] = title
+        lang["book.nirncraft." + nid] = title
     for uid, u in UNIQUES.items():
-        lang["explore.skycraft.unique." + uid] = u["name"]
-        lang["explore.skycraft.unique." + uid + ".lore"] = u["lore"]
+        lang["explore.nirncraft.unique." + uid] = u["name"]
+        lang["explore.nirncraft.unique." + uid + ".lore"] = u["lore"]
         if u.get("note"):
             title, author, pages = u["note"]
             nid = "explore_unique_" + uid
             write(os.path.join(books, nid + ".json"), {"author": author, "pages": pages})
-            lang["book.skycraft." + nid] = title
+            lang["book.nirncraft." + nid] = title
 
 
 # ================================================================================================ uniques
@@ -369,31 +369,31 @@ def gen_uniques():
             entry["note"] = "explore_unique_" + uid
         out.append(entry)
         print(f"unique {uid:28s} {u['kind']:18s} {x:7d} {z:7d}  {u['region']}")
-    write(os.path.join(RES, "skycraft", "explore", "uniques.json"), out)
+    write(os.path.join(RES, "nirncraft", "explore", "uniques.json"), out)
 
 
 # ================================================================================================ worldgen & GLM
 
 def gen_worldgen():
     wg = os.path.join(DATA, "worldgen")
-    write(os.path.join(wg, "configured_feature", "minor_site.json"), {"type": "skycraft:minor_site", "config": {}})
+    write(os.path.join(wg, "configured_feature", "minor_site.json"), {"type": "nirncraft:minor_site", "config": {}})
     # once per chunk: the feature finds its own site (MinorSites), so no count, spread or biome filter
-    write(os.path.join(wg, "placed_feature", "minor_site.json"), {"feature": "skycraft:minor_site", "placement": []})
+    write(os.path.join(wg, "placed_feature", "minor_site.json"), {"feature": "nirncraft:minor_site", "placement": []})
     write(os.path.join(DATA, "forge", "biome_modifier", "explore_minor_sites.json"),
-          {"type": "forge:add_features", "biomes": "#minecraft:is_overworld", "features": "skycraft:minor_site",
+          {"type": "forge:add_features", "biomes": "#minecraft:is_overworld", "features": "nirncraft:minor_site",
            "step": "top_layer_modification"})
     write(os.path.join(DATA, "loot_modifiers", "explore_skill_books.json"),
-          {"type": "skycraft:explore_skill_books", "conditions": [],
-           "tables": ["skycraft:chests/dungeon_common", "skycraft:chests/dungeon_minor", "skycraft:chests/dwemer_scrap",
-                      "skycraft:chests/giant_camp", "skycraft:chests/dragon_lair", "skycraft:chests/bandit_camp",
-                      "skycraft:chests/mine_ore"],
-           "table": "skycraft:chests/skill_books", "chance": 0.06})
+          {"type": "nirncraft:explore_skill_books", "conditions": [],
+           "tables": ["nirncraft:chests/dungeon_common", "nirncraft:chests/dungeon_minor", "nirncraft:chests/dwemer_scrap",
+                      "nirncraft:chests/giant_camp", "nirncraft:chests/dragon_lair", "nirncraft:chests/bandit_camp",
+                      "nirncraft:chests/mine_ore"],
+           "table": "nirncraft:chests/skill_books", "chance": 0.06})
     write(os.path.join(DATA, "loot_modifiers", "explore_skill_books_boss.json"),
-          {"type": "skycraft:explore_skill_books", "conditions": [], "tables": ["skycraft:chests/dungeon_boss"],
-           "table": "skycraft:chests/skill_books", "chance": 0.3})
+          {"type": "nirncraft:explore_skill_books", "conditions": [], "tables": ["nirncraft:chests/dungeon_boss"],
+           "table": "nirncraft:chests/skill_books", "chance": 0.3})
     glm = os.path.join(RES, "data", "forge", "loot_modifiers", "global_loot_modifiers.json")
     d = json.load(open(glm, encoding="utf-8"))
-    for e in ("skycraft:explore_skill_books", "skycraft:explore_skill_books_boss"):
+    for e in ("nirncraft:explore_skill_books", "nirncraft:explore_skill_books_boss"):
         if e not in d["entries"]:
             d["entries"].append(e)
     write(glm, d)
@@ -402,7 +402,7 @@ def gen_worldgen():
 # ================================================================================================ assets
 
 def gen_assets(lang):
-    write(os.path.join(ASSETS, "blockstates", "ayleid_well.json"), {"variants": {"": {"model": "skycraft:block/ayleid_well"}}})
+    write(os.path.join(ASSETS, "blockstates", "ayleid_well.json"), {"variants": {"": {"model": "nirncraft:block/ayleid_well"}}})
     # a fluted white pedestal holding a glowing welkynd stone (vanilla textures, original model)
     write(os.path.join(ASSETS, "models", "block", "ayleid_well.json"), {
         "parent": "minecraft:block/block",
@@ -417,9 +417,9 @@ def gen_assets(lang):
             {"from": [5.5, 9, 5.5], "to": [10.5, 14, 10.5], "shade": False,
              "faces": {d: {"texture": "#stone"} for d in ("north", "south", "east", "west", "up", "down")}},
         ]})
-    write(os.path.join(ASSETS, "models", "item", "ayleid_well.json"), {"parent": "skycraft:block/ayleid_well"})
+    write(os.path.join(ASSETS, "models", "item", "ayleid_well.json"), {"parent": "nirncraft:block/ayleid_well"})
     write(os.path.join(ASSETS, "models", "item", "treasure_map.json"),
-          {"parent": "minecraft:item/generated", "textures": {"layer0": "skycraft:item/treasure_map"}})
+          {"parent": "minecraft:item/generated", "textures": {"layer0": "nirncraft:item/treasure_map"}})
     write(os.path.join(DATA, "loot_table", "blocks", "ayleid_well.json"), {"type": "minecraft:block", "pools": []})
     # the icon: a curled parchment with ink lines and a red X (procedural)
     s = 16
@@ -446,14 +446,14 @@ def gen_assets(lang):
 def main():
     lang = {}
     for k, v in SITE_NAMES.items():
-        lang["explore.skycraft.site." + k] = v
+        lang["explore.nirncraft.site." + k] = v
     lang.update(MISC_LANG)
     gen_loot()
     gen_notes(lang)
     gen_uniques()
     gen_worldgen()
     gen_assets(lang)
-    write(os.path.join(MAIN, "lang", "skycraft", "explore.json"), dict(sorted(lang.items())))
+    write(os.path.join(MAIN, "lang", "nirncraft", "explore.json"), dict(sorted(lang.items())))
     print("lang keys", len(lang))
 
 

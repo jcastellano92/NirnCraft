@@ -10,7 +10,7 @@ spec.loader.exec_module(live)
 
 class NativeComponents(unittest.TestCase):
     def test_instance_selector_rejects_normal_and_legacy_instances(self):
-        for name in ('Skycraft', 'Skycraft-autotest', '../Skycraft', 'Other'):
+        for name in ('NirnCraft', 'NirnCraft-autotest', '../NirnCraft', 'Other'):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 live.selected_instance(name)
         self.assertEqual(live.TARGET['instanceName'], live.selected_instance(live.TARGET['instanceName']))

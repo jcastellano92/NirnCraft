@@ -1,4 +1,4 @@
-"""Textures of the rig-model creatures (Skycraft's bestiary), painted from the rig layouts by rigpaint.py.
+"""Textures of the rig-model creatures (NirnCraft's bestiary), painted from the rig layouts by rigpaint.py.
 
 Run tools/textures/dump_rigs.sh first when a rig changed, then:  py -3 tools/textures/bestiary.py [name ...]
 Writes textures/entity/creatures/<name>[_<variant>].png (+ _glow.png emissive layers).

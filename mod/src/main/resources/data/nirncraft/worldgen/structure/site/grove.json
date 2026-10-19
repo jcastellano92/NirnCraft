@@ -1,0 +1,16 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "grove",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "grove"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

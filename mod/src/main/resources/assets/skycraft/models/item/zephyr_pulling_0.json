@@ -1,6 +1,0 @@
-{
-  "parent": "skycraft:item/zephyr",
-  "textures": {
-    "layer0": "skycraft:item/zephyr_pulling_0"
-  }
-}

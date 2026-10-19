@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/ancient_nord_bow",
+  "textures": {
+    "layer0": "nirncraft:item/ancient_nord_bow_pulling_1"
+  }
+}

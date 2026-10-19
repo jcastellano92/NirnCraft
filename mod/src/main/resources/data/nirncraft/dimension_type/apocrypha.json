@@ -1,0 +1,55 @@
+{
+  "ambient_light": 0.18,
+  "coordinate_scale": 1.0,
+  "has_ceiling": false,
+  "has_skylight": true,
+  "height": 256,
+  "infiniburn": "#nirncraft:infiniburn_realms",
+  "logical_height": 256,
+  "min_y": 0,
+  "monster_spawn_block_light_limit": 0,
+  "monster_spawn_light_level": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 0,
+    "max_inclusive": 15
+  },
+  "attributes": {
+    "minecraft:gameplay/bed_rule": {
+      "can_sleep": "never",
+      "can_set_spawn": "never",
+      "destroy_on_use": true
+    },
+    "minecraft:gameplay/can_start_raid": false,
+    "minecraft:gameplay/piglins_zombify": true,
+    "minecraft:gameplay/respawn_anchor_works": false,
+    "minecraft:gameplay/water_evaporates": false,
+    "neoforge:custom_skybox": "nirncraft:apocrypha",
+    "neoforge:custom_clouds": "nirncraft:apocrypha",
+    "neoforge:custom_weather_effects": "nirncraft:apocrypha",
+    "minecraft:gameplay/fast_lava": false,
+    "minecraft:visual/default_dripstone_particle": {
+      "type": "minecraft:dripping_dripstone_water"
+    },
+    "minecraft:gameplay/nether_portal_spawns_piglin": false,
+    "minecraft:visual/ambient_light_color": "#4f3d30",
+    "minecraft:audio/background_music": {
+      "creative": {
+        "max_delay": 24000,
+        "min_delay": 12000,
+        "sound": "minecraft:music.creative"
+      },
+      "default": {
+        "max_delay": 24000,
+        "min_delay": 12000,
+        "sound": "minecraft:music.game"
+      }
+    }
+  },
+  "has_ender_dragon_fight": false,
+  "default_clock": "nirncraft:fixed/apocrypha",
+  "timelines": [
+    "nirncraft:fixed/apocrypha/day",
+    "nirncraft:fixed/apocrypha/moon"
+  ],
+  "has_fixed_time": true
+}

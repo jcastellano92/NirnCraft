@@ -3,7 +3,7 @@ import argparse,re
 from imports_263 import ROOT,owner
 def migrate(scope):
  count=0
- for path in (ROOT/'mod/src/main/java/com/skycraft').rglob('*.java'):
+ for path in (ROOT/'mod/src/main/java/com/nirncraft').rglob('*.java'):
   if owner(path)!=scope:continue
   raw=path.read_bytes();s=raw.decode('utf8');out=s
   # Correct the earlier broad height receiver match, then reapply the bounded receiver mapping.

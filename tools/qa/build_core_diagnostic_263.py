@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / 'tools'))
 from validate_pack import TARGET, validate_core_jar
 from prepare_prism_263 import java_25
 
-NAME = 'Skycraft-26.3-core-diagnostic'
+NAME = 'NirnCraft-26.3-core-diagnostic'
 
 
 def build(core: Path, output: Path, java: Path) -> None:
@@ -43,7 +43,7 @@ def build(core: Path, output: Path, java: Path) -> None:
             archive.writestr(NAME + '/mmc-pack.json', json.dumps({'formatVersion': 1, 'components': [
                 {'uid': 'net.minecraft', 'version': TARGET['minecraft']},
                 {'uid': 'net.neoforged', 'version': TARGET['neoforge']}]}))
-            archive.write(core, NAME + '/.minecraft/mods/skycraft-core.jar')
+            archive.write(core, NAME + '/.minecraft/mods/nirncraft-core.jar')
             archive.writestr(NAME + '/.minecraft/migration/core-diagnostic.json', json.dumps(metadata, indent=2))
             archive.writestr(NAME + '/.minecraft/options.txt',
                              'onboardAccessibility:false\npauseOnLostFocus:false\nrenderDistance:8\nmaxFps:60\nfullscreen:false\n')

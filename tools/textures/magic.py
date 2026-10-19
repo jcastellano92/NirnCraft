@@ -1,16 +1,16 @@
 """Generates the magic module's pixel art and per-spell tome assets.
 
 Writes into mod/src/main/resources:
-  assets/skycraft/textures/item/spell_tome_<school>.png      one cover per school of magic
-  assets/skycraft/textures/item/bound_sword.png, bound_battleaxe.png, bound_bow.png, bound_bow_pulling_0..2.png
-  assets/skycraft/textures/block/word_wall_front.png, word_wall_side.png, word_wall_top.png
-  assets/skycraft/textures/mob_effect/<effect>.png           18x18 status effect icons
-  assets/skycraft/models/item/spell_tome_<spell>.json        every tome points at its school's texture
-  data/skycraft/tags/items/spell_tomes.json
-  data/skycraft/loot_tables/chests/spell_tomes.json          weighted by spell level
-  data/skycraft/skycraft_values/magic.json                   gold values of tomes (economy module)
+  assets/nirncraft/textures/item/spell_tome_<school>.png      one cover per school of magic
+  assets/nirncraft/textures/item/bound_sword.png, bound_battleaxe.png, bound_bow.png, bound_bow_pulling_0..2.png
+  assets/nirncraft/textures/block/word_wall_front.png, word_wall_side.png, word_wall_top.png
+  assets/nirncraft/textures/mob_effect/<effect>.png           18x18 status effect icons
+  assets/nirncraft/models/item/spell_tome_<spell>.json        every tome points at its school's texture
+  data/nirncraft/tags/items/spell_tomes.json
+  data/nirncraft/loot_tables/chests/spell_tomes.json          weighted by spell level
+  data/nirncraft/nirncraft_values/magic.json                   gold values of tomes (economy module)
 
-The spell list is read from mod/src/main/java/com/skycraft/magic/spell/Spells.java so it can never drift.
+The spell list is read from mod/src/main/java/com/nirncraft/magic/spell/Spells.java so it can never drift.
 Run from anywhere: python3 tools/textures/magic.py
 """
 import json
@@ -22,10 +22,10 @@ from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-TEX = os.path.join(RES, "assets", "skycraft", "textures")
-MODELS = os.path.join(RES, "assets", "skycraft", "models")
-DATA = os.path.join(RES, "data", "skycraft")
-SPELLS_JAVA = os.path.join(ROOT, "mod", "src", "main", "java", "com", "skycraft", "magic", "spell", "Spells.java")
+TEX = os.path.join(RES, "assets", "nirncraft", "textures")
+MODELS = os.path.join(RES, "assets", "nirncraft", "models")
+DATA = os.path.join(RES, "data", "nirncraft")
+SPELLS_JAVA = os.path.join(ROOT, "mod", "src", "main", "java", "com", "nirncraft", "magic", "spell", "Spells.java")
 
 
 def rgba(hex_color, a=255):
@@ -76,7 +76,7 @@ EMBLEMS = {
     "alteration": ["..#..", ".#+#.", "#+.+#", ".#+#.", "..#.."],    # a crystal
     "conjuration": [".###.", "#...#", "#.+.#", "#...#", ".###."],   # a portal
     "illusion": [".....", ".###.", "#+#+#", ".###.", "....."],      # an eye
-    "mysticism": ["#...#", ".#+#.", "..#..", ".#+#.", "#...#"],     # crossed paths of the aether
+    "mysticism": ["#...#", ".#+#.", "..#..", ".#+#.", "#...#"],     # crossed paths of the atlas
 }
 
 
@@ -601,8 +601,8 @@ def altar_models():
     """Block model, blockstate, item model and loot table of the Spellmaking Altar (a pedestal with a slab top)."""
     model = {
         "parent": "minecraft:block/block",
-        "textures": {"particle": "skycraft:block/spellmaking_altar_side", "top": "skycraft:block/spellmaking_altar_top",
-                     "side": "skycraft:block/spellmaking_altar_side", "base": "skycraft:block/spellmaking_altar_base"},
+        "textures": {"particle": "nirncraft:block/spellmaking_altar_side", "top": "nirncraft:block/spellmaking_altar_top",
+                     "side": "nirncraft:block/spellmaking_altar_side", "base": "nirncraft:block/spellmaking_altar_base"},
         "elements": [
             {"from": [1, 0, 1], "to": [15, 3, 15], "faces": {
                 "down": {"texture": "#base"}, "up": {"texture": "#base"}, "north": {"texture": "#base"}, "south": {"texture": "#base"},
@@ -616,13 +616,13 @@ def altar_models():
         ],
     }
     write_json(os.path.join(MODELS, "block", "spellmaking_altar.json"), model)
-    write_json(os.path.join(MODELS, "item", "spellmaking_altar.json"), {"parent": "skycraft:block/spellmaking_altar"})
-    states = {"variants": {f"facing={f}": ({"model": "skycraft:block/spellmaking_altar", "y": r} if r else {"model": "skycraft:block/spellmaking_altar"})
+    write_json(os.path.join(MODELS, "item", "spellmaking_altar.json"), {"parent": "nirncraft:block/spellmaking_altar"})
+    states = {"variants": {f"facing={f}": ({"model": "nirncraft:block/spellmaking_altar", "y": r} if r else {"model": "nirncraft:block/spellmaking_altar"})
                            for f, r in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}}
-    write_json(os.path.join(RES, "assets", "skycraft", "blockstates", "spellmaking_altar.json"), states)
+    write_json(os.path.join(RES, "assets", "nirncraft", "blockstates", "spellmaking_altar.json"), states)
     write_json(os.path.join(DATA, "loot_table", "blocks", "spellmaking_altar.json"), {
         "type": "minecraft:block",
-        "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": "skycraft:spellmaking_altar"}],
+        "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": "nirncraft:spellmaking_altar"}],
                    "conditions": [{"condition": "minecraft:survives_explosion"}]}],
     })
 
@@ -644,7 +644,7 @@ def main():
     written.append(save(bound_battleaxe(), "item", "bound_battleaxe.png"))
     written.append(save(bound_dagger(), "item", "bound_dagger.png"))
     write_json(os.path.join(MODELS, "item", "bound_dagger.json"),
-               {"parent": "minecraft:item/handheld", "textures": {"layer0": "skycraft:item/bound_dagger"}})
+               {"parent": "minecraft:item/handheld", "textures": {"layer0": "nirncraft:item/bound_dagger"}})
     for part in ("top", "side", "base"):
         written.append(save(altar_texture(part), "block", f"spellmaking_altar_{part}.png"))
     altar_models()
@@ -660,20 +660,20 @@ def main():
     spells = read_spells()
     for spell_id, school, _tier in spells:
         write_json(os.path.join(MODELS, "item", f"spell_tome_{spell_id}.json"),
-                   {"parent": "minecraft:item/generated", "textures": {"layer0": f"skycraft:item/spell_tome_{school}"}})
+                   {"parent": "minecraft:item/generated", "textures": {"layer0": f"nirncraft:item/spell_tome_{school}"}})
     write_json(os.path.join(DATA, "tags", "item", "spell_tomes.json"),
-               {"replace": False, "values": [f"skycraft:spell_tome_{s}" for s, _, _ in spells]})
+               {"replace": False, "values": [f"nirncraft:spell_tome_{s}" for s, _, _ in spells]})
     write_json(os.path.join(DATA, "loot_table", "chests", "spell_tomes.json"), {
         "type": "minecraft:chest",
         "pools": [{
             "rolls": 1,
-            "entries": [{"type": "minecraft:item", "name": f"skycraft:spell_tome_{s}", "weight": TIER_WEIGHT[t]} for s, _, t in spells],
+            "entries": [{"type": "minecraft:item", "name": f"nirncraft:spell_tome_{s}", "weight": TIER_WEIGHT[t]} for s, _, t in spells],
         }],
     })
-    values = {f"skycraft:spell_tome_{s}": TIER_VALUE[t] for s, _, t in spells}
-    values.update({"skycraft:bound_sword": 0, "skycraft:bound_battleaxe": 0, "skycraft:bound_bow": 0, "skycraft:bound_dagger": 0,
-                   "skycraft:word_wall": 0, "skycraft:spellmaking_altar": 400})
-    write_json(os.path.join(DATA, "skycraft_values", "magic.json"), {"values": values})
+    values = {f"nirncraft:spell_tome_{s}": TIER_VALUE[t] for s, _, t in spells}
+    values.update({"nirncraft:bound_sword": 0, "nirncraft:bound_battleaxe": 0, "nirncraft:bound_bow": 0, "nirncraft:bound_dagger": 0,
+                   "nirncraft:word_wall": 0, "nirncraft:spellmaking_altar": 400})
+    write_json(os.path.join(DATA, "nirncraft_values", "magic.json"), {"values": values})
     print(f"wrote {len(written)} textures and assets for {len(spells)} spells")
 
 

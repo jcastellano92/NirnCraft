@@ -1,0 +1,378 @@
+{
+  "id": "belport_run",
+  "why": [
+    "summerset_isle.L1.tower_upland",
+    "summerset_isle.L5.alinor_court_economy",
+    "summerset_isle.L6.alinor_capital"
+  ],
+  "sil": "summerset-belport-run-plan",
+  "base": "none",
+  "overlay": "summerset_isle",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "summerset_isle",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "summerset_isle",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "belport_run_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "crystal_tower",
+      "at": [
+        -6,
+        -21
+      ],
+      "name": "belport_run_landmark",
+      "overlay": "summerset_isle"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          53
+        ],
+        [
+          -2,
+          14
+        ],
+        [
+          -2,
+          -27
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -39,
+          15
+        ],
+        [
+          -2,
+          18
+        ],
+        [
+          39,
+          12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -2,
+        0
+      ],
+      "rx": 30,
+      "rz": 26,
+      "wobble": 4,
+      "lobes": 3,
+      "phase": 2.42,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        0
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        42,
+        18
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        15,
+        24
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        41
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -22,
+        12
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -17,
+        -1
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -33
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -25,
+        -17
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        15,
+        -24
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        42,
+        -18
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "belport_run_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "fountain",
+      "theme": "belport_run_fountain",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "belport_run_statue",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "belport_run_garden",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "belport_run_b_5",
+    "store": "belport_run_b_10",
+    "smithy": "belport_run_b_7"
+  },
+  "titles": {
+    "belport_run_b_1": "place.nirncraft.belport_run Council & Seat Hall",
+    "belport_run_b_2": "place.nirncraft.belport_run High Sanctuary",
+    "belport_run_b_3": "place.nirncraft.belport_run Fighters & Wayfarers Hall",
+    "belport_run_b_4": "place.nirncraft.belport_run Mages & Chroniclers Spire",
+    "belport_run_b_5": "place.nirncraft.belport_run The Lantern & Hearth Inn",
+    "belport_run_b_6": "place.nirncraft.belport_run The Traveler's Rest Tavern",
+    "belport_run_b_7": "place.nirncraft.belport_run Master Forge & Armorer",
+    "belport_run_b_8": "place.nirncraft.belport_run Botanicals & Remedies",
+    "belport_run_b_9": "place.nirncraft.belport_run Scriptorium & Charts",
+    "belport_run_b_10": "place.nirncraft.belport_run Grand Provisioner & Sundries",
+    "belport_run_b_11": "place.nirncraft.belport_run Silk & Hide Clothier",
+    "belport_run_b_12": "place.nirncraft.belport_run Lapidary & Signets",
+    "belport_run_b_13": "place.nirncraft.belport_run Wayfarer Stables & Post",
+    "belport_run_b_14": "place.nirncraft.belport_run Bonded Factor Warehouse",
+    "belport_run_landmark": "High Seat of place.nirncraft.belport_run",
+    "belport_run_plaza": "place.nirncraft.belport_run Central Plaza"
+  },
+  "innKey": "belport_run_b_5",
+  "zones": [
+    {
+      "at": [
+        -2,
+        -21
+      ],
+      "r": 19,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -2,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        20,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 49,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

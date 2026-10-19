@@ -41,13 +41,13 @@ def migrate(source):
     source=calls(source,"putUUID",lambda args,orig:"store("+args[0]+", net.minecraft.core.UUIDUtil.CODEC,"+args[1]+")" if len(args)==2 else orig)
     source=calls(source,"getUUID",lambda args,orig:"read("+args[0]+", net.minecraft.core.UUIDUtil.CODEC).orElseThrow()" if len(args)==1 else orig)
     source=calls(source,"hasUUID",lambda args,orig:"read("+args[0]+", net.minecraft.core.UUIDUtil.CODEC).isPresent()" if len(args)==1 else orig)
-    source=re.sub(r"([\w.$]+)\.contains\(([^\n]+?),\s*((?:net\.minecraft\.nbt\.)?Tag\.TAG_\w+)\)",r"com.skycraft.platform.NbtData.hasType(\1, \2, \3)",source)
+    source=re.sub(r"([\w.$]+)\.contains\(([^\n]+?),\s*((?:net\.minecraft\.nbt\.)?Tag\.TAG_\w+)\)",r"com.nirncraft.platform.NbtData.hasType(\1, \2, \3)",source)
     return source
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument("--owner",required=True,choices=("network","world","root","ui"));args=parser.parse_args()
     changed=0
-    for path in (ROOT/"mod/src/main/java/com/skycraft").rglob("*.java"):
+    for path in (ROOT/"mod/src/main/java/com/nirncraft").rglob("*.java"):
         if owner(path)!=args.owner:continue
         text=path.read_text(encoding="utf-8");result=migrate(text)
         if result!=text:path.write_text(result,encoding="utf-8",newline="\n");changed+=1

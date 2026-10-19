@@ -1,14 +1,14 @@
 // Vulkan -> OpenGL bridge test: a hidden GL context (WGL; EGL or GLX on Linux, see gl_context.hpp) imports
-// aether_core's shared images; frames rendered through the semaphores must read back from GL matching the host-path
+// atlas_core's shared images; frames rendered through the semaphores must read back from GL matching the host-path
 // render of the same frame (colour to half-float precision, depth exactly). GL also writes the near field's distances
 // into the shared nearDepth image, and the covered pixels must come back empty. When the driver pair cannot share
-// memory, aether falls back to host copies (AETHER_INTEROP=hostcopy forces it): the same frames must still match;
+// memory, atlas falls back to host copies (ATLAS_INTEROP=hostcopy forces it): the same frames must still match;
 // the near-depth skip is off there (every pixel is marched, so the references are the plain renders).
 // Two contexts, one after the other (gl_context.hpp): the platform's default one, then the production one, an OpenGL
 // 3.3 core forward-compatible profile like Minecraft's. The second must pass too, and land on the same interop path as
 // the first (zero-copy where the interop extensions exist, host-copy otherwise): a driver that drops an extension, or a
 // GL 4.5-only call, in the 3.3 core profile would otherwise only show up in game.
-//   aether_gl_test [native/data] [--context=both|default|core33]
+//   atlas_gl_test [native/data] [--context=both|default|core33]
 
 #include <algorithm>
 #include <atomic>
@@ -21,12 +21,12 @@
 #include <string>
 #include <vector>
 
-#include "aether/aether.h"
+#include "atlas/atlas.h"
 #include "camera.hpp"
 #include "gl_api.hpp"
 #include "gl_context.hpp"
 
-using namespace aether;
+using namespace atlas;
 
 
 struct Compare {
@@ -58,8 +58,8 @@ static Compare compare(const std::vector<float>& refC, const std::vector<float>&
 
 enum Result { PASS, FAIL, SKIP };
 
-static Result runSuite(const std::string& data, aether_test::Profile profile, std::string& mode) {
-    aether_test::GlContext glc;
+static Result runSuite(const std::string& data, atlas_test::Profile profile, std::string& mode) {
+    atlas_test::GlContext glc;
     GlApi gl;
     std::string err;
     if (!glc.create(err, profile) || !gl.load(err)) {
@@ -67,7 +67,7 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
         return SKIP;
     }
     std::printf("GL (%s): %s | %s\n", glc.kind, gl.GetString(GL_RENDERER), gl.GetString(GL_VERSION));
-    if (profile == aether_test::Profile::Core33) {
+    if (profile == atlas_test::Profile::Core33) {
         // the context really is what the game runs on: core profile (no compatibility functions), forward-compatible
         const GLenum GL_CONTEXT_PROFILE_MASK_ = 0x9126, GL_CONTEXT_FLAGS_ = 0x821E;
         GLint mask = 0, flags = 0;
@@ -89,26 +89,26 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     };
     bool glClean = true;
 
-    AetherContext* ctx = nullptr;
-    if (aether_create(AETHER_BACKEND_VULKAN, &ctx) != AETHER_OK) {
-        std::printf("SKIP: no Vulkan backend (%s)\n", aether_last_error(nullptr));
+    AtlasContext* ctx = nullptr;
+    if (atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) {
+        std::printf("SKIP: no Vulkan backend (%s)\n", atlas_last_error(nullptr));
         return SKIP;
     }
-    if (aether_preview_load_raster(ctx, (data + "/tamriel_raster.bin").c_str()) != AETHER_OK) {
-        std::printf("SKIP: %s\n", aether_last_error(ctx));
+    if (atlas_preview_load_raster(ctx, (data + "/tamriel_raster.bin").c_str()) != ATLAS_OK) {
+        std::printf("SKIP: %s\n", atlas_last_error(ctx));
         return SKIP;
     }
-    double x = 0, z = 0, y = std::fmax(aether_preview_height(ctx, x, z), 63.0) + 60;
+    double x = 0, z = 0, y = std::fmax(atlas_preview_height(ctx, x, z), 63.0) + 60;
     for (int lod = 0; lod < 7; lod++) {
         int span = 256 << lod;
         int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
-        aether_preview_generate(ctx, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
+        atlas_preview_generate(ctx, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
     }
     double centre[3] = {x, y, z};
-    aether_update(ctx, centre, 0);
+    atlas_update(ctx, centre, 0);
 
     const uint32_t W = 960, H = 540;
-    AetherFrame f{};
+    AtlasFrame f{};
     f.cameraPos[0] = x;
     f.cameraPos[1] = y;
     f.cameraPos[2] = z;
@@ -122,23 +122,23 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     f.sunDir[1] = 0.5f;
     f.sunDir[2] = 0.66f;
     f.lodBias = 1;
-    f.flags = AETHER_FRAME_SHADOWS | AETHER_FRAME_ATMOS | AETHER_FRAME_SKY;  // weather is zero here: no clouds
+    f.flags = ATLAS_FRAME_SHADOWS | ATLAS_FRAME_ATMOS | ATLAS_FRAME_SKY;  // weather is zero here: no clouds
 
     std::vector<float> refColor(size_t(W) * H * 4), refDepth(size_t(W) * H);
-    AetherFrameOutput o{nullptr, nullptr, refDepth.data(), refColor.data()};
-    if (aether_render(ctx, &f, &o) != AETHER_OK) {
-        std::printf("FAIL host render: %s\n", aether_last_error(ctx));
+    AtlasFrameOutput o{nullptr, nullptr, refDepth.data(), refColor.data()};
+    if (atlas_render(ctx, &f, &o) != ATLAS_OK) {
+        std::printf("FAIL host render: %s\n", atlas_last_error(ctx));
         return FAIL;
     }
 
-    AetherGlTargets t{};
-    if (aether_gl_attach(ctx, W, H, &t) != AETHER_OK) {
-        std::printf("FAIL attach: %s\n", aether_last_error(ctx));
+    AtlasGlTargets t{};
+    if (atlas_gl_attach(ctx, W, H, &t) != ATLAS_OK) {
+        std::printf("FAIL attach: %s\n", atlas_last_error(ctx));
         return FAIL;
     }
     std::printf("attached: color %u normal %u depth %u nearDepth %u (%ux%u)\n", t.color, t.normal, t.depth,
                 t.nearDepth, t.width, t.height);
-    std::string info = aether_info(ctx);
+    std::string info = atlas_info(ctx);
     std::printf("info: %s\n", info.c_str());
     const bool host = info.find("\"interop\":\"host-copy\"") != std::string::npos;
     mode = host ? "host-copy" : "zero-copy";
@@ -151,8 +151,8 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     const int FRAMES = 60;
     auto c0 = std::chrono::steady_clock::now();
     for (int i = 0; i < FRAMES; i++) {
-        if (aether_gl_render(ctx, &f) != AETHER_OK) {
-            std::printf("FAIL gl render %d: %s\n", i, aether_last_error(ctx));
+        if (atlas_gl_render(ctx, &f) != ATLAS_OK) {
+            std::printf("FAIL gl render %d: %s\n", i, atlas_last_error(ctx));
             return FAIL;
         }
     }
@@ -163,11 +163,11 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     gl.GetTextureImage(t.color, 0, GL_RGBA, GL_FLOAT, GLsizei(glColor.size() * 4), glColor.data());
     gl.GetTextureImage(t.depth, 0, GL_RED, GL_FLOAT, GLsizei(glDepth.size() * 4), glDepth.data());
     Compare c1 = compare(refColor, refDepth, glColor, glDepth, W, H);
-    AetherStats st{};
-    aether_get_stats(ctx, &st);
-    std::printf("%d frames: %.3f ms CPU per aether_gl_render, %.2f ms wall incl. final glFinish, GPU %.2f ms/frame\n",
+    AtlasStats st{};
+    atlas_get_stats(ctx, &st);
+    std::printf("%d frames: %.3f ms CPU per atlas_gl_render, %.2f ms wall incl. final glFinish, GPU %.2f ms/frame\n",
                 FRAMES, cpuMs, wallMs, st.lastFrameMs);
-    if (host) std::printf("host-copy cost, last frame: %s\n", std::strstr(aether_info(ctx), "\"hostCopy\""));
+    if (host) std::printf("host-copy cost, last frame: %s\n", std::strstr(atlas_info(ctx), "\"hostCopy\""));
     glClean &= glCheck("frames");
     std::printf("GL readback vs host render: %zu colour (worst rel %.1e) and %zu depth pixels differ\n", c1.color,
                 c1.worstRel, c1.depth);
@@ -178,12 +178,12 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     std::vector<float> nearDist(size_t(W) * H);
     for (uint32_t yy = 0; yy < H; yy++)
         for (uint32_t xx = 0; xx < W; xx++) nearDist[size_t(yy) * W + xx] = xx < W / 2 ? covered : 1e30f;
-    AetherFrame fn = f;
-    fn.flags |= AETHER_FRAME_NEAR_DEPTH;
+    AtlasFrame fn = f;
+    fn.flags |= ATLAS_FRAME_NEAR_DEPTH;
     fn.nearDepth = nearDist.data();
-    AetherFrameOutput on{nullptr, nullptr, refDepth.data(), refColor.data()};
-    if (aether_render(ctx, &fn, &on) != AETHER_OK) {
-        std::printf("FAIL host near render: %s\n", aether_last_error(ctx));
+    AtlasFrameOutput on{nullptr, nullptr, refDepth.data(), refColor.data()};
+    if (atlas_render(ctx, &fn, &on) != ATLAS_OK) {
+        std::printf("FAIL host near render: %s\n", atlas_last_error(ctx));
         return FAIL;
     }
     if (host) {
@@ -191,7 +191,7 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
         refDepth = plainDepth;
     }
     fn.nearDepth = nullptr;  // the GL path reads the shared image
-    for (int i = 0; i < 3; i++) aether_gl_render(ctx, &fn);
+    for (int i = 0; i < 3; i++) atlas_gl_render(ctx, &fn);
     gl.Finish();
     gl.GetTextureImage(t.color, 0, GL_RGBA, GL_FLOAT, GLsizei(glColor.size() * 4), glColor.data());
     gl.GetTextureImage(t.depth, 0, GL_RED, GL_FLOAT, GLsizei(glDepth.size() * 4), glDepth.data());
@@ -204,7 +204,7 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     glClean &= glCheck("near depth frames");
     std::printf("near depth from GL: %zu covered pixels drawn; vs host: %zu colour, %zu depth pixels differ\n",
                 coveredLit, c2.color, c2.depth);
-    // the game's own depth buffer: GL depth texture -> aether linearises it; plus copies into caller textures
+    // the game's own depth buffer: GL depth texture -> atlas linearises it; plus copies into caller textures
     const double n0 = 0.05, f0 = 100000.0, fov = 70.0, aspect = double(W) / H;
     const double fy = 1.0 / std::tan(fov * 3.14159265358979323846 / 360.0), fxp = fy / aspect;
     float invProj[16] = {float(1 / fxp), 0, 0, 0, 0, float(1 / fy), 0, 0, 0, 0, 0, float((n0 - f0) / (2 * n0 * f0)),
@@ -227,16 +227,16 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
         gl.CreateTextures(GL_TEXTURE_2D, 1, &dst[i]);
         gl.TextureStorage2D(dst[i], 1, dstFmt[i], GLsizei(W), GLsizei(H));
     }
-    AetherGlFrameIO io{};
+    AtlasGlFrameIO io{};
     io.nearDepthTex = depthTex;
     std::memcpy(io.nearInvProjection, invProj, sizeof(invProj));
     io.dstColor = dst[0];
     io.dstNormal = dst[1];
     io.dstDepth = dst[2];
-    AetherFrame fd = f;  // no NEAR_DEPTH flag: the io depth texture turns it on
+    AtlasFrame fd = f;  // no NEAR_DEPTH flag: the io depth texture turns it on
     for (int i = 0; i < 3; i++)
-        if (aether_gl_render_io(ctx, &fd, &io) != AETHER_OK) {
-            std::printf("FAIL gl render io: %s\n", aether_last_error(ctx));
+        if (atlas_gl_render_io(ctx, &fd, &io) != ATLAS_OK) {
+            std::printf("FAIL gl render io: %s\n", atlas_last_error(ctx));
             return FAIL;
         }
     gl.Finish();
@@ -249,9 +249,9 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     gl.CreateFramebuffers(1, &fbo);
     gl.NamedFramebufferTexture(fbo, GL_DEPTH_ATTACHMENT, depthTex, 0);
     gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-    AetherGlFrameIO iob = io;
-    iob.nearDepthTex = AETHER_GL_BOUND_DEPTH;
-    for (int i = 0; i < 3; i++) aether_gl_render_io(ctx, &fd, &iob);
+    AtlasGlFrameIO iob = io;
+    iob.nearDepthTex = ATLAS_GL_BOUND_DEPTH;
+    for (int i = 0; i < 3; i++) atlas_gl_render_io(ctx, &fd, &iob);
     gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     gl.Finish();
     gl.GetTextureImage(dst[0], 0, GL_RGBA, GL_FLOAT, GLsizei(glColor.size() * 4), glColor.data());
@@ -260,8 +260,8 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     std::printf("depth via the bound framebuffer: %zu colour, %zu depth pixels differ from host\n", c4.color, c4.depth);
     glClean &= glCheck("depth-buffer frames");
     gl.DeleteFramebuffers(1, &fbo);
-    // dynamic resolution: the window's depth at twice aether's size, the same left half covered, plus one covered
-    // full-resolution column that covers only half of each aether pixel it falls in: that one must not be skipped
+    // dynamic resolution: the window's depth at twice atlas's size, the same left half covered, plus one covered
+    // full-resolution column that covers only half of each atlas pixel it falls in: that one must not be skipped
     std::vector<float> depth2(size_t(4) * W * H);
     for (uint32_t yy = 0; yy < 2 * H; yy++)
         for (uint32_t xx = 0; xx < 2 * W; xx++) {
@@ -276,28 +276,28 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     gl.CreateTextures(GL_TEXTURE_2D, 1, &depthTex2);
     gl.TextureStorage2D(depthTex2, 1, GL_DEPTH_COMPONENT32F, GLsizei(2 * W), GLsizei(2 * H));
     gl.TextureSubImage2D(depthTex2, 0, 0, 0, GLsizei(2 * W), GLsizei(2 * H), GL_DEPTH_COMPONENT, GL_FLOAT, depth2.data());
-    AetherGlFrameIO io2 = io;
+    AtlasGlFrameIO io2 = io;
     io2.nearDepthTex = depthTex2;
-    for (int i = 0; i < 3; i++) aether_gl_render_io(ctx, &fd, &io2);
+    for (int i = 0; i < 3; i++) atlas_gl_render_io(ctx, &fd, &io2);
     gl.Finish();
     gl.GetTextureImage(dst[0], 0, GL_RGBA, GL_FLOAT, GLsizei(glColor.size() * 4), glColor.data());
     gl.GetTextureImage(dst[2], 0, GL_RED, GL_FLOAT, GLsizei(glDepth.size() * 4), glDepth.data());
     Compare c5 = compare(refColor, refDepth, glColor, glDepth, W, H);
-    std::printf("near depth at twice aether's resolution: %zu colour, %zu depth pixels differ from host\n", c5.color, c5.depth);
+    std::printf("near depth at twice atlas's resolution: %zu colour, %zu depth pixels differ from host\n", c5.color, c5.depth);
     gl.DeleteTextures(1, &depthTex2);
     // the sun map through GL: copied into the caller's RG32F texture, identical to the device buffer
     const uint32_t SM = 128;
-    aether_set_sun_map(ctx, SM, 512.0f);
+    atlas_set_sun_map(ctx, SM, 512.0f);
     GLuint sunTex = 0;
     gl.CreateTextures(GL_TEXTURE_2D, 1, &sunTex);
     gl.TextureStorage2D(sunTex, 1, GL_RG32F, GLsizei(SM), GLsizei(SM + 1));
-    AetherGlFrameIO io3 = io;
+    AtlasGlFrameIO io3 = io;
     io3.dstSunMap = sunTex;
-    for (int i = 0; i < 3; i++) aether_gl_render_io(ctx, &fd, &io3);
+    for (int i = 0; i < 3; i++) atlas_gl_render_io(ctx, &fd, &io3);
     gl.Finish();
     std::vector<float> sunGl(size_t(SM) * (SM + 1) * 2), sunDev(sunGl.size());
     gl.GetTextureImage(sunTex, 0, GL_RG, GL_FLOAT, GLsizei(sunGl.size() * 4), sunGl.data());
-    bool sunRead = aether_read_sun_map(ctx, sunDev.data(), uint32_t(sunDev.size())) == AETHER_OK;
+    bool sunRead = atlas_read_sun_map(ctx, sunDev.data(), uint32_t(sunDev.size())) == ATLAS_OK;
     size_t sunOff = 0;
     for (size_t k = 0; k < sunGl.size(); k++)
         if (std::memcmp(&sunGl[k], &sunDev[k], 4) != 0) {  // bit-exact copies (a NaN never equals itself)
@@ -307,7 +307,7 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     bool sunParams = sunGl[size_t(SM) * SM * 2 + 13] == 1.0f;  // the parameter row's valid flag
     std::printf("sun map via GL: %zu of %zu values differ from the device buffer; parameter row %s\n", sunOff,
                 sunGl.size(), sunParams ? "present" : "MISSING");
-    aether_set_sun_map(ctx, 0, 512.0f);
+    atlas_set_sun_map(ctx, 0, 512.0f);
     gl.DeleteTextures(1, &sunTex);
     bool sunOk = sunRead && sunOff == 0 && sunParams;
     gl.DeleteTextures(1, &depthTex);
@@ -326,22 +326,22 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
             for (int lod = 0; lod < 7; lod++) {
                 int span = 256 << lod;
                 int rx = int(std::floor(cx / span)), rz = int(std::floor(z / span));
-                aether_preview_generate(ctx, lod, (rx - 2) * span, (rz - 2) * span, (rx + 3) * span, (rz + 3) * span);
+                atlas_preview_generate(ctx, lod, (rx - 2) * span, (rz - 2) * span, (rx + 3) * span, (rz + 3) * span);
             }
             double c[3] = {cx, y, z};
-            aether_update(ctx, c, 0);
+            atlas_update(ctx, c, 0);
             rebuilds++;
         }
     });
     std::vector<double> frameMs;
-    AetherFrame ff = f;
+    AtlasFrame ff = f;
     for (int i = 0; i < 240; i++) {
         double px = x + i * 5.0;  // 300 blocks/s at 60 fps
         camX = px;
         ff.cameraPos[0] = px;
         auto t0 = std::chrono::steady_clock::now();
-        if (aether_gl_render(ctx, &ff) != AETHER_OK) {
-            std::printf("FAIL streaming render %d: %s\n", i, aether_last_error(ctx));
+        if (atlas_gl_render(ctx, &ff) != ATLAS_OK) {
+            std::printf("FAIL streaming render %d: %s\n", i, atlas_last_error(ctx));
             stop = true;
             worker.join();
             return FAIL;
@@ -354,26 +354,26 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     gl.Finish();
     std::vector<double> sorted = frameMs;
     std::sort(sorted.begin(), sorted.end());
-    std::printf("streaming flight: %d clipmap rebuilds during 240 frames; aether_gl_render CPU median %.2f ms, "
+    std::printf("streaming flight: %d clipmap rebuilds during 240 frames; atlas_gl_render CPU median %.2f ms, "
                 "p99 %.2f ms, max %.2f ms\n", rebuilds.load(), sorted[sorted.size() / 2], sorted[sorted.size() * 99 / 100],
                 sorted.back());
     // host copies wait for the GPU inside the call, so only zero-copy is held to the 8 ms p99 (software drivers set
-    // AETHER_TEST_SLOW=1: they take seconds per frame)
-    const char* slow = std::getenv("AETHER_TEST_SLOW");
+    // ATLAS_TEST_SLOW=1: they take seconds per frame)
+    const char* slow = std::getenv("ATLAS_TEST_SLOW");
     bool smooth = host || (slow && *slow == '1') || sorted[sorted.size() * 99 / 100] < 8.0;
     glClean &= glCheck("streaming");
 
     // a lost device mid-game (the test hook, as a TDR / GPU reset would): that frame fails with
-    // AETHER_ERR_DEVICE_LOST before GL is asked to wait on anything, every later frame fails the same way, GL stays
+    // ATLAS_ERR_DEVICE_LOST before GL is asked to wait on anything, every later frame fails the same way, GL stays
     // clean and usable, detach and destroy are safe; then a fresh context (the mod's retry) renders again
-    bool lossOk = aether_debug_fault(ctx, AETHER_FAULT_DEVICE_LOST, 0) == AETHER_OK;
-    lossOk &= aether_gl_render(ctx, &ff) == AETHER_ERR_DEVICE_LOST;
-    lossOk &= aether_gl_render(ctx, &ff) == AETHER_ERR_DEVICE_LOST;
-    lossOk &= std::string(aether_info(ctx)).find("\"deviceLost\":true") != std::string::npos;
+    bool lossOk = atlas_debug_fault(ctx, ATLAS_FAULT_DEVICE_LOST, 0) == ATLAS_OK;
+    lossOk &= atlas_gl_render(ctx, &ff) == ATLAS_ERR_DEVICE_LOST;
+    lossOk &= atlas_gl_render(ctx, &ff) == ATLAS_ERR_DEVICE_LOST;
+    lossOk &= std::string(atlas_info(ctx)).find("\"deviceLost\":true") != std::string::npos;
     glClean &= glCheck("device lost");
-    aether_gl_detach(ctx);
+    atlas_gl_detach(ctx);
     glClean &= glCheck("detach");
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
     {
         // GL still runs (nothing waits on a semaphore the lost device never signals)
         GLuint probe = 0;
@@ -386,29 +386,29 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     }
     glClean &= glCheck("after the loss");
     {
-        AetherContext* again = nullptr;
-        bool retry = aether_create(AETHER_BACKEND_VULKAN, &again) == AETHER_OK;
+        AtlasContext* again = nullptr;
+        bool retry = atlas_create(ATLAS_BACKEND_VULKAN, &again) == ATLAS_OK;
         if (retry) {
             std::vector<float> s0(256 * 256, 100.0f), w0(256 * 256, NAN);
             std::vector<uint16_t> t0(256 * 256, 2), f0(256 * 256, 3);
-            AetherColumnTile tile{0, int32_t(std::floor(x / 256)), int32_t(std::floor(z / 256)), s0.data(), w0.data(),
+            AtlasColumnTile tile{0, int32_t(std::floor(x / 256)), int32_t(std::floor(z / 256)), s0.data(), w0.data(),
                                   t0.data(), f0.data(), nullptr, nullptr};
-            AetherGlTargets t2{};
-            AetherFrame small = ff;
+            AtlasGlTargets t2{};
+            AtlasFrame small = ff;
             small.width = 160;
             small.height = 90;
-            retry = aether_upload_column_tile(again, &tile) == AETHER_OK && aether_update(again, centre, 0) == AETHER_OK &&
-                    aether_gl_attach(again, 160, 90, &t2) == AETHER_OK && aether_gl_render(again, &small) == AETHER_OK &&
-                    aether_gl_render(again, &small) == AETHER_OK;
-            if (!retry) std::printf("  retry context: %s\n", aether_last_error(again));
+            retry = atlas_upload_column_tile(again, &tile) == ATLAS_OK && atlas_update(again, centre, 0) == ATLAS_OK &&
+                    atlas_gl_attach(again, 160, 90, &t2) == ATLAS_OK && atlas_gl_render(again, &small) == ATLAS_OK &&
+                    atlas_gl_render(again, &small) == ATLAS_OK;
+            if (!retry) std::printf("  retry context: %s\n", atlas_last_error(again));
             gl.Finish();
-            aether_gl_detach(again);
-            aether_destroy(again);
+            atlas_gl_detach(again);
+            atlas_destroy(again);
         }
         lossOk &= retry;
         glClean &= glCheck("retry context");
     }
-    std::printf("device loss: %s\n", lossOk ? "frame fails with AETHER_ERR_DEVICE_LOST, GL clean, a new context renders"
+    std::printf("device loss: %s\n", lossOk ? "frame fails with ATLAS_ERR_DEVICE_LOST, GL clean, a new context renders"
                                              : "FAILED");
     glc.destroy();
     bool ok = c1.color == 0 && c1.depth == 0 && c2.color == 0 && c2.depth == 0 && coveredLit == 0 && glClean &&
@@ -426,7 +426,7 @@ int main(int argc, char** argv) {
         else data = a;
     }
     if (which != "both" && which != "default" && which != "core33") {
-        std::printf("usage: aether_gl_test [native/data] [--context=both|default|core33]\n");
+        std::printf("usage: atlas_gl_test [native/data] [--context=both|default|core33]\n");
         return 2;
     }
     const char* names[3] = {"PASS", "FAIL", "SKIP"};
@@ -434,11 +434,11 @@ int main(int argc, char** argv) {
     std::string defMode, coreMode;
     if (which != "core33") {
         std::printf("== default context\n");
-        def = runSuite(data, aether_test::Profile::Default, defMode);
+        def = runSuite(data, atlas_test::Profile::Default, defMode);
     }
     if (which != "default") {
         std::printf("== OpenGL 3.3 core profile (the game's context)\n");
-        core = runSuite(data, aether_test::Profile::Core33, coreMode);
+        core = runSuite(data, atlas_test::Profile::Core33, coreMode);
     }
     bool ok = def != FAIL && core != FAIL;
     if (which == "both") {

@@ -1,7 +1,7 @@
 """Condenses a Minecraft/Forge log into a few lines for the QA harness.
 
 usage: py -3 -I tools/qa/log_summary.py <log file> [crash-reports dir]
-Prints 'FAIL ...' lines for real problems (crash reports, Skycraft stack traces, failed selftests, registry
+Prints 'FAIL ...' lines for real problems (crash reports, NirnCraft stack traces, failed selftests, registry
 errors, missing assets) and short 'info' lines for counts. Known harmless dev-environment noise is ignored.
 """
 import os
@@ -33,7 +33,7 @@ def main():
     if done:
         infos.append("info " + re.sub(r"^.*?: ", "", done[-1]))
 
-    # selftest results printed by /skycraft-quest selftest and /skycraft magic selftest
+    # selftest results printed by /nirncraft-quest selftest and /nirncraft magic selftest
     for l in lines:
         if re.search(r"selftest", l, re.I) and re.search(r"(\d+/\d+|problem|OK|fail)", l, re.I) and "Autorun" not in l:
             msg = re.sub(r"^.*?\]: ", "", l)
@@ -42,14 +42,14 @@ def main():
             else:
                 infos.append("info selftest: " + msg[:200])
 
-    # exceptions with a Skycraft frame or registry trouble
+    # exceptions with a NirnCraft frame or registry trouble
     traces = Counter()
     for i, l in enumerate(lines):
         if NOISE.search(l):
             continue
         if re.search(r"Exception|Error:|Caused by", l) and not l.lstrip().startswith("at "):
             window = lines[i:i + 25]
-            if any("com.skycraft" in w for w in window) or re.search(r"Duplicate|registry|NoClassDefFound|Attempted to load class", l):
+            if any("com.nirncraft" in w for w in window) or re.search(r"Duplicate|registry|NoClassDefFound|Attempted to load class", l):
                 traces[re.sub(r"^\[[^\]]*\] \[[^\]]*\] ", "", l.strip())[:180]] += 1
     for msg, n in traces.most_common(12):
         fails.append(f"FAIL x{n} {msg}")
@@ -57,7 +57,7 @@ def main():
     missing = Counter()
     for l in lines:
         m = re.search(r"(Missing (sound|texture|model)s? .*?|Unable to load model: .*?|Missing textures in model .*?)(\s|$)", l)
-        if m and "skycraft" in l:
+        if m and "nirncraft" in l:
             missing[m.group(1)[:140]] += 1
     for msg, n in missing.most_common(6):
         fails.append(f"FAIL x{n} {msg}")
@@ -65,7 +65,7 @@ def main():
     lag = sum(1 for l in lines if "Can't keep up" in l)
     if lag:
         infos.append(f"info {lag}x 'Can't keep up' (vanilla forceload stalls are normal in tests)")
-    warns = Counter(re.sub(r"^\[[^\]]*\] ", "", l)[:120] for l in lines if "/WARN]" in l and "skycraft" in l.lower() and not NOISE.search(l))
+    warns = Counter(re.sub(r"^\[[^\]]*\] ", "", l)[:120] for l in lines if "/WARN]" in l and "nirncraft" in l.lower() and not NOISE.search(l))
     for msg, n in warns.most_common(5):
         infos.append(f"warn x{n} {msg}")
 

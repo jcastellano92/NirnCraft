@@ -1,10 +1,10 @@
 ﻿# Quests
 
-Skycraft's story quests are data: JSON files in `mod/src/main/resources/skycraft/quests/`, listed in `index.json`
-and loaded by `com.skycraft.quest.story.StoryData`. The format is documented at the top of `StoryData.java`. After
+NirnCraft's story quests are data: JSON files in `mod/src/main/resources/nirncraft/quests/`, listed in `index.json`
+and loaded by `com.nirncraft.quest.story.StoryData`. The format is documented at the top of `StoryData.java`. After
 editing quest data run `node tools/quest_lang.js`: it validates every file and exports all texts to
-`mod/src/main/lang/skycraft/quest_story.json`. In game, `/skycraft-quest selftest` builds every quest and checks what
-a playthrough would hit, and `/skycraft-quest selftest flow` plays every quest from its first step to completion.
+`mod/src/main/lang/nirncraft/quest_story.json`. In game, `/nirncraft-quest selftest` builds every quest and checks what
+a playthrough would hit, and `/nirncraft-quest selftest flow` plays every quest from its first step to completion.
 
 ## Side quests of the provinces
 
@@ -45,8 +45,8 @@ A quest file can declare named bosses in a `bosses` block. A boss is an existing
 
 ```json
 "bosses": {
-  "side_cyr_example": {"name": "Anaraen the Unlit", "type": "skycraft:necromancer", "hp": 4.0, "dmg": 1.6, "level": 24,
-    "weapon": "skycraft:elven_dagger", "gear": {"head": "skycraft:elven_gilded_helmet"},
+  "side_cyr_example": {"name": "Anaraen the Unlit", "type": "nirncraft:necromancer", "hp": 4.0, "dmg": 1.6, "level": 24,
+    "weapon": "nirncraft:elven_dagger", "gear": {"head": "nirncraft:elven_gilded_helmet"},
     "drop": "unique:welkynd_sliver,loot:major", "glow": false}
 }
 ```
@@ -60,7 +60,7 @@ A quest file can declare named bosses in a `bosses` block. A boss is an existing
   boss bar.
 * The action `boss:<id>` raises the boss next to the party, for ambushes and twists.
 
-`com.skycraft.quest.story.Bosses` implements this. `QuestSpawner` calls `Bosses.apply` for every quest entity.
+`com.nirncraft.quest.story.Bosses` implements this. `QuestSpawner` calls `Bosses.apply` for every quest entity.
 
 ### Rewards
 
@@ -119,7 +119,7 @@ take these arguments:
 | `%5$s` | region |
 | `%6$s` | destination town |
 
-The class `com.skycraft.quest.story.RadiantTemplates` builds them, and `quest_lang.js` exports their texts.
+The class `com.nirncraft.quest.story.RadiantTemplates` builds them, and `quest_lang.js` exports their texts.
 
 ## Tools
 
@@ -129,7 +129,7 @@ The class `com.skycraft.quest.story.RadiantTemplates` builds them, and `quest_la
   * bosses and their drops;
   * legendary unique ids and loot tiers;
   * hidden clue places and kinds;
-  * Skycraft item ids.
+  * NirnCraft item ids.
 * `node tools/quest_lang.js --dry --with side_new.json` checks a file that isn't in `index.json` yet, without
   writing anything.
 

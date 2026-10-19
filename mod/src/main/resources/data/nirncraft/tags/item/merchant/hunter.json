@@ -1,0 +1,66 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:hide",
+      "required": false
+    },
+    "minecraft:leather",
+    {
+      "id": "nirncraft:leather_strips",
+      "required": false
+    },
+    {
+      "id": "nirncraft:wolf_pelt",
+      "required": false
+    },
+    "minecraft:rabbit_hide",
+    "minecraft:rabbit_foot",
+    "minecraft:feather",
+    "minecraft:bone",
+    {
+      "id": "nirncraft:small_antlers",
+      "required": false
+    },
+    {
+      "id": "nirncraft:large_antlers",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sabre_cat_tooth",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bear_claws",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hawk_feather",
+      "required": false
+    },
+    {
+      "id": "nirncraft:horker_tusk",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_venison",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_horker_meat",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_goat_meat",
+      "required": false
+    },
+    {
+      "id": "nirncraft:iron_arrow",
+      "required": false
+    },
+    {
+      "id": "nirncraft:steel_arrow",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/bandit_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 5914155
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 11569754
+      }
+    ]
+  }
+}

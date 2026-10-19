@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/ash_yam"
+      },
+      {
+        "model": "nirncraft:block/ash_yam",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/ash_yam",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/ash_yam",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/ash_yam_harvested"
+      },
+      {
+        "model": "nirncraft:block/ash_yam_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/ash_yam_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/ash_yam_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

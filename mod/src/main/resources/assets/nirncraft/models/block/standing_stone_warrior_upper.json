@@ -1,0 +1,8 @@
+{
+  "parent": "nirncraft:block/standing_stone_upper",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "face": "nirncraft:block/standing_stone_warrior_upper",
+    "glow": "nirncraft:block/standing_stone_warrior_upper_glow"
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "region": "skyrim/falkreath",
+  "why": [
+    "falkreath.L7.young_jarl",
+    "falkreath.L9.jarl_uncle",
+    "falkreath.L9.helgen_burned",
+    "falkreath.L10.pass_bandits"
+  ],
+  "hook": {
+    "place": "helgen",
+    "places": [
+      "helgen",
+      "falkreath",
+      "fort_neugrad",
+      "fort_sungard",
+      "lakeview",
+      "greywater_grotto"
+    ],
+    "npc": "falkreath_hook_npc",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "falkreath_hook_npc",
+      "name": "Outrider Vidgrod",
+      "role": "guard",
+      "place": "helgen",
+      "greet": "Since Helgen burned, brigands in the pine passes collect tribute with wax seals stamped in Falkreath's own longhouse."
+    },
+    {
+      "id": "falkreath_bailiff_npc",
+      "name": "Reeve Valdr",
+      "role": "steward",
+      "place": "falkreath",
+      "greet": "The young Jarl calls it border pragmatism; the old thanes call it selling the hold's roads to cutthroats."
+    },
+    {
+      "id": "falkreath_keeper_npc",
+      "name": "Grave-Warden Orla",
+      "role": "priest",
+      "place": "corpselight_stead",
+      "greet": "Arkay's lamps dim whenever the barrow-robbers above Shriekwind break another ancient lintel."
+    }
+  ],
+  "bosses": {
+    "story_falkreath_knifepoint_chief": {
+      "name": "Hordr the Tax-Reaver",
+      "entity": "minecraft:Vindicator",
+      "place": "knifepoint_ridge",
+      "hp": 115
+    },
+    "story_falkreath_shriekwind_lord": {
+      "name": "Vighar of the Pine-Crypt",
+      "entity": "minecraft:Stray",
+      "place": "south_shriekwind_bastion",
+      "hp": 130
+    }
+  },
+  "scenes": {
+    "falkreath_longhouse_reckoning": [
+      "Reeve Valdr: The Knifepoint tally-sticks and the Shriekwind ward-stones are laid before the hearth.",
+      "Outrider Vidgrod: No brigand company rides the Pale Pass under longhouse immunity again.",
+      "Reeve Valdr: Let the churchyard bells ring clear—Falkreath's border watch answers to the hold, not to highwaymen."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_falkreath_1",
+      "title": "story.nirncraft.falkreath_1.title",
+      "requires": [],
+      "places": [
+        "helgen",
+        "embershard_mine",
+        "falkreath"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "helgen",
+          "objective": "Question the border outrider outside the charred walls of Helgen."
+        },
+        {
+          "id": 20,
+          "place": "embershard_mine",
+          "objective": "Recover the wax-sealed safe-conduct pass from the raiders at Embershard Mine."
+        },
+        {
+          "id": 30,
+          "place": "falkreath",
+          "objective": "Bring the safe-conduct pass to the hold reeve in Falkreath."
+        }
+      ],
+      "consequence": "guard_banner:falkreath_pass_watch",
+      "why": [
+        "falkreath.L9.helgen_burned",
+        "falkreath.L10.pass_bandits"
+      ]
+    },
+    {
+      "id": "story_falkreath_2",
+      "title": "story.nirncraft.falkreath_2.title",
+      "requires": [
+        "story_falkreath_1"
+      ],
+      "places": [
+        "falkreath",
+        "bilegulch_mine",
+        "knifepoint_ridge"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "falkreath",
+          "objective": "Compare the longhouse tribute rolls with the older thanes' complaints."
+        },
+        {
+          "id": 20,
+          "place": "bilegulch_mine",
+          "objective": "Seize the diverted ore-Chests hidden inside Bilegulch Mine."
+        },
+        {
+          "id": 30,
+          "place": "knifepoint_ridge",
+          "objective": "Defeat the toll-reaver chief at Knifepoint Ridge and burn the extortion pact."
+        }
+      ],
+      "consequence": "patrol_route:falkreath_west_road_open",
+      "why": [
+        "falkreath.L7.young_jarl",
+        "falkreath.L9.jarl_uncle"
+      ]
+    },
+    {
+      "id": "story_falkreath_3",
+      "title": "story.nirncraft.falkreath_3.title",
+      "requires": [
+        "story_falkreath_2"
+      ],
+      "places": [
+        "falkreath",
+        "south_shriekwind_bastion",
+        "halldirs_cairn"
+      ],
+      "finale": true,
+      "stages": [
+        {
+          "id": 10,
+          "place": "halldirs_cairn",
+          "objective": "Restore the desecrated boundary-cairn at Halldir's Cairn."
+        },
+        {
+          "id": 20,
+          "place": "south_shriekwind_bastion",
+          "objective": "Slay the pine-crypt covener in South Shriekwind Bastion and reclaim the funerary urns."
+        },
+        {
+          "id": 30,
+          "place": "falkreath",
+          "objective": "Witness the new border-watch oath in Falkreath."
+        }
+      ],
+      "consequence": "world_state:falkreath_resolved",
+      "why": [
+        "falkreath.L7.town_of_mourners",
+        "falkreath.L8.arkay_priests",
+        "falkreath.L10.necromancers_and_vampires"
+      ]
+    }
+  ]
+}

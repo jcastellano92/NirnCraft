@@ -1,0 +1,48 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:snowy_plains",
+    "minecraft:ice_spikes",
+    {
+      "id": "terralith:wintry_lowlands",
+      "required": false
+    },
+    {
+      "id": "terralith:cold_shrubland",
+      "required": false
+    },
+    {
+      "id": "terralith:gravel_desert",
+      "required": false
+    },
+    {
+      "id": "terralith:snowy_shield",
+      "required": false
+    },
+    {
+      "id": "terralith:rocky_shrubland",
+      "required": false
+    },
+    {
+      "id": "terralith:ice_marsh",
+      "required": false
+    },
+    {
+      "id": "terralith:alpine_highlands",
+      "required": false
+    },
+    {
+      "id": "terralith:snowy_badlands",
+      "required": false
+    },
+    "nirncraft:atmoran_ice_waste",
+    "nirncraft:eastmarch_hot_springs",
+    "nirncraft:eastmarch_volcanic_tundra",
+    "nirncraft:kamal_snowfield",
+    "nirncraft:pale_heath",
+    "nirncraft:pale_snowfield",
+    "nirncraft:skyrim_highlands",
+    "nirncraft:whiterun_tundra",
+    "nirncraft:winterhold_glacier"
+  ]
+}

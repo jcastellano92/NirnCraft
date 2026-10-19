@@ -1,0 +1,14 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "word_wall",
+  "place": {
+    "types": [
+      "word_wall"
+    ],
+    "variants": []
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

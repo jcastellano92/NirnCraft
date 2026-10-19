@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column",
-  "textures": {
-    "end": "skycraft:block/black_page_block_top",
-    "side": "skycraft:block/black_page_block"
-  }
-}

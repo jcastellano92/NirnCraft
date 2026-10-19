@@ -17,11 +17,11 @@ module.exports = function (f) {
 
   f.relic('tally_stone', 'Tally-Stone of the Purifying Moons', 'A palm-sized disc of white clay scored with two columns of notches. One column counts casks sent out under the temple\'s seal, the other counts casks that came back. The columns have not matched in a year.', 21);
   f.relic('pawprint_tab', 'Pawprint Tab-Book', 'Ma\'tisha\'s oldest tab-book, thick with inked paw-pads. One long page of identical prints in pale grey ink records a moon-sugar run that no honest tavern should know about.', 11);
-  f.boss('marish', { name: 'Ma\'rish Half-Tail', type: 'skycraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 24,
-    weapon: 'skycraft:khajiit_sword', gear: { chest: 'skycraft:khajiit_chestplate', head: 'skycraft:khajiit_helmet' },
+  f.boss('marish', { name: 'Ma\'rish Half-Tail', type: 'nirncraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 24,
+    weapon: 'nirncraft:khajiit_sword', gear: { chest: 'nirncraft:khajiit_chestplate', head: 'nirncraft:khajiit_helmet' },
     drop: 'loot:standard', glow: false });
-  f.boss('hollow_choir', { name: 'The Hollow Choirmaster', type: 'skycraft:necromancer', hp: 3.2, dmg: 1.5, level: 26,
-    weapon: 'skycraft:staff_of_sparks', drop: 'loot:standard', glow: true });
+  f.boss('hollow_choir', { name: 'The Hollow Choirmaster', type: 'nirncraft:necromancer', hp: 3.2, dmg: 1.5, level: 26,
+    weapon: 'nirncraft:staff_of_sparks', drop: 'loot:standard', glow: true });
 
   f.scene('led_stones', [
     ['narrator', 'Nine tally-stones sit in a ring on the shrine floor, each scored with notches for the moon-sugar casks blessed that season. Moonlight lies across them like a ruler.'],
@@ -41,7 +41,7 @@ module.exports = function (f) {
       o.go('shrine_of_the_twin_moons', 'Read the tally-stones at the Shrine of the Twin Moons', { actions: 'scene:@led_stones' }),
       o.cond('night', 'Wait for night, when the stones record both moons\' marks', 'shrine_of_the_twin_moons'),
       o.clear('temple_of_the_purifying_moons', 'Drive off the squatters at the Temple of the Purifying Moons',
-        [mob('skycraft:bandit', 3, 'Temple Squatter'), mob('npc:thug', 1, 'Cask-Hand', { hostile: true })]),
+        [mob('nirncraft:bandit', 3, 'Temple Squatter'), mob('npc:thug', 1, 'Cask-Hand', { hostile: true })]),
       o.retrieve('temple_of_the_purifying_moons', 'Take the temple\'s tally-stone', '@tally_stone', { placement: 'structure' }),
       o.talk('@ridar', 'Show Ri\'dar the two columns of notches',
         'The temple counts four hundred out. Your scales count three ninety-nine in. Look at the stone.',
@@ -63,7 +63,7 @@ module.exports = function (f) {
       o.go('red_hands_run', 'Follow the sugar-dust trail along Red Hand\'s Run'),
       o.cond('night', 'Watch the caravan road at night, where the casks change carts', 'red_hands_run'),
       o.go('sugar_slingers_den', 'Find the Sugar-Slingers\' Den', { actions: 'scene:@led_den' }),
-      o.kill('sugar_slingers_den', 'Settle accounts with Ma\'rish Half-Tail', [{ boss_id: '@marish' }, mob('skycraft:bandit', 2, 'Den Lender')],
+      o.kill('sugar_slingers_den', 'Settle accounts with Ma\'rish Half-Tail', [{ boss_id: '@marish' }, mob('nirncraft:bandit', 2, 'Den Lender')],
         { placement: 'structure', actions: 'relic:@pawprint_tab' }),
       o.deliver('@jaro', '@pawprint_tab', 'Bring Ma\'rish\'s tab-book to Jaro',
         'Here is where the cask went. All four hundred of them, one a moon.',
@@ -74,7 +74,7 @@ module.exports = function (f) {
         ] }),
     ],
     outro: 'One cask per moon had walked all the way from the temple to a den in the dunes. The ledger now balances, and what that cost is for the chooser to carry.',
-    rewards: { gold: 800, loot: 'major', items: [{ item: 'skycraft:khajiit_dagger', name: 'Scribe\'s Quill-Claw', enchant: { sharpness: 3, looting: 1 } }] },
+    rewards: { gold: 800, loot: 'major', items: [{ item: 'nirncraft:khajiit_dagger', name: 'Scribe\'s Quill-Claw', enchant: { sharpness: 3, looting: 1 } }] },
   });
 
   f.q({
@@ -85,7 +85,7 @@ module.exports = function (f) {
     objectives: [
       o.go('tenarr_zalviit_ossuary', 'Travel to the Tenarr Zalviit Ossuary'),
       o.clear('tenarr_zalviit_ossuary', 'Quiet the restless dead of the ossuary',
-        [mob('minecraft:skeleton', 4, 'Hourless Bone'), mob('skycraft:necromancer', 1, 'Choir-Binder')], { placement: 'structure' }),
+        [mob('minecraft:skeleton', 4, 'Hourless Bone'), mob('nirncraft:necromancer', 1, 'Choir-Binder')], { placement: 'structure' }),
       o.kill('tenarr_zalviit_ossuary', 'Silence the Hollow Choirmaster who sings the hour wrongly',
         [{ boss_id: '@hollow_choir' }], { placement: 'structure' }),
       o.talk('@shahra', 'Tell Shahra what you found in the ossuary',
@@ -130,8 +130,8 @@ module.exports = function (f) {
 
   f.relic('mural_rubbing', 'Rubbing of the Tomb Mural', 'A charcoal rubbing on silk of a mural: a loom of seven strands, each strand a different Rimmen guild\'s sign, all seven woven into one pattern that no living artisan knows how to repeat.', 15);
   f.relic('sira_key_loan', 'Sira\'s Loaned Key', 'A black iron key as long as a hand, warm from being carried against a priestess\'s heart. It opens the necropolis door, once.', 26);
-  f.boss('weaver_shade', { name: 'The Weaver Who Would Not Stop', type: 'skycraft:draugr_deathlord', hp: 3.6, dmg: 1.6, level: 30,
-    weapon: 'skycraft:khajiit_war_axe', gear: { head: 'skycraft:khajiit_helmet' }, drop: 'loot:major', glow: true });
+  f.boss('weaver_shade', { name: 'The Weaver Who Would Not Stop', type: 'nirncraft:draugr_deathlord', hp: 3.6, dmg: 1.6, level: 30,
+    weapon: 'nirncraft:khajiit_war_axe', gear: { head: 'nirncraft:khajiit_helmet' }, drop: 'loot:major', glow: true });
 
   f.scene('rim_mural', [
     ['narrator', 'The necropolis mural is a loom the length of a hall. Seven bands of thread-pattern run into one another until they make a tapestry that your eye cannot hold.'],
@@ -163,7 +163,7 @@ module.exports = function (f) {
         ] }),
     ],
     outro: 'The seven strands of the Weaver\'s pattern are known again, or buried again. Either way Rimmen has an artisan in its debt and a gatewarden who has stopped scowling at you.',
-    rewards: { gold: 700, loot: 'major', items: [{ item: 'skycraft:khajiit_shield', name: 'Seven-Strand Aegis', enchant: { protection: 3, unbreaking: 2 } }] },
+    rewards: { gold: 700, loot: 'major', items: [{ item: 'nirncraft:khajiit_shield', name: 'Seven-Strand Aegis', enchant: { protection: 3, unbreaking: 2 } }] },
   });
 
   f.q({
@@ -222,8 +222,8 @@ module.exports = function (f) {
 
   f.relic('batch_sample', 'Phial of the Bitter Batch', 'A phial of cloudy sugar-syrup that tastes of sweet, then of iron, then of nothing at all. Three days of it make a dock-hand forget his own name.', 23);
   f.relic('boiler_token', 'Tema\'s Boiler Token', 'A brass token stamped with a vat\'s number. Tema gives one to every hand she trusts to open the sluice. This one was found in the wrong boiler, three floors down.', 26);
-  f.boss('bitter_dealer', { name: 'Zahra the Bitter-Hand', type: 'skycraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 22,
-    weapon: 'skycraft:khajiit_dagger', gear: { chest: 'skycraft:khajiit_chestplate' }, drop: 'loot:standard', glow: false });
+  f.boss('bitter_dealer', { name: 'Zahra the Bitter-Hand', type: 'nirncraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 22,
+    weapon: 'nirncraft:khajiit_dagger', gear: { chest: 'nirncraft:khajiit_chestplate' }, drop: 'loot:standard', glow: false });
 
   f.q({
     id: 'the_bitter_batch', title: 'The Bitter Batch', region: 'elsweyr/senchal', start: 'npc:@tema', requires: ['level:12'],
@@ -251,7 +251,7 @@ module.exports = function (f) {
         ] }),
     ],
     outro: 'The Bitter Batch was a poison with a name, a face and a price. Senchal\'s sugar is clean again, and its boilers are warier of strangers who offer silver.',
-    rewards: { gold: 560, loot: 'standard', items: [{ item: 'skycraft:khajiit_war_axe', name: 'Tema\'s Stirring-Paddle', enchant: { sharpness: 2, fire_aspect: 1 } }] },
+    rewards: { gold: 560, loot: 'standard', items: [{ item: 'nirncraft:khajiit_war_axe', name: 'Tema\'s Stirring-Paddle', enchant: { sharpness: 2, fire_aspect: 1 } }] },
   });
 
   f.q({

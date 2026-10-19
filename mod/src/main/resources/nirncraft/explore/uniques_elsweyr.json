@@ -1,0 +1,1235 @@
+[
+  {
+    "id": "elsweyr_anequina_unique_1",
+    "name": "Relic of place.nirncraft.abode_of_ignominy",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "abode_of_ignominy",
+    "x": -900,
+    "z": 11150,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.abode_of_ignominy in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_2",
+    "name": "Relic of place.nirncraft.ahhai_camp",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "ahhai_camp",
+    "x": -235,
+    "z": 9969,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.ahhai_camp in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_3",
+    "name": "Relic of place.nirncraft.ahshari_grotto",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "ahshari_grotto",
+    "x": 200,
+    "z": 10640,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ahshari_grotto in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_4",
+    "name": "Relic of place.nirncraft.bonechime_outpost",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "bonechime_outpost",
+    "x": -1700,
+    "z": 9550,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.bonechime_outpost in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_5",
+    "name": "Relic of place.nirncraft.dakheset_outpost",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "dakheset_outpost",
+    "x": -1647,
+    "z": 10424,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.dakheset_outpost in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_6",
+    "name": "Relic of place.nirncraft.defense_force_outpost",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "defense_force_outpost",
+    "x": -1700,
+    "z": 9900,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.defense_force_outpost in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_7",
+    "name": "Relic of place.nirncraft.hadronar_vault",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "hadronar_vault",
+    "x": 463,
+    "z": 9783,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.hadronar_vault in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_8",
+    "name": "Relic of place.nirncraft.jakha_hollow",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "jakha_hollow",
+    "x": -935,
+    "z": 11352,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.jakha_hollow in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_9",
+    "name": "Relic of place.nirncraft.joe_hole",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "joe_hole",
+    "x": -1233,
+    "z": 10726,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.joe_hole in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_10",
+    "name": "Relic of place.nirncraft.jomar_ruins",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "jomar_ruins",
+    "x": 275,
+    "z": 10327,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.jomar_ruins in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_11",
+    "name": "Relic of place.nirncraft.joshazir_pit",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "joshazir_pit",
+    "x": -1291,
+    "z": 9140,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.joshazir_pit in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_12",
+    "name": "Relic of place.nirncraft.kadahai_outpost",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "kadahai_outpost",
+    "x": 72,
+    "z": 10152,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.kadahai_outpost in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_13",
+    "name": "Relic of place.nirncraft.khaar_ruins",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "khaar_ruins",
+    "x": -422,
+    "z": 10233,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.khaar_ruins in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_anequina_unique_14",
+    "name": "Relic of place.nirncraft.khetee_crypt",
+    "region": "anequina",
+    "why": [
+      "anequina.L1.mesa_field",
+      "anequina.L4.steppe"
+    ],
+    "place": "khetee_crypt",
+    "x": -182,
+    "z": 10448,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.khetee_crypt in Anequina from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_1",
+    "name": "Relic of place.nirncraft.ahbaae_pit",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "ahbaae_pit",
+    "x": 2931,
+    "z": 10199,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ahbaae_pit in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_2",
+    "name": "Relic of place.nirncraft.donar_camp",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "donar_camp",
+    "x": 3153,
+    "z": 10999,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.donar_camp in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_3",
+    "name": "Relic of place.nirncraft.droskhi_moon_temple",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "droskhi_moon_temple",
+    "x": 1911,
+    "z": 10104,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.droskhi_moon_temple in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_4",
+    "name": "Relic of place.nirncraft.hakoshae_tombs",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "hakoshae_tombs",
+    "x": 2650,
+    "z": 11250,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.hakoshae_tombs in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_5",
+    "name": "Relic of place.nirncraft.hanikhi_outpost",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "hanikhi_outpost",
+    "x": 944,
+    "z": 9993,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.hanikhi_outpost in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_6",
+    "name": "Relic of place.nirncraft.jaar_hole",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "jaar_hole",
+    "x": 2643,
+    "z": 10742,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.jaar_hole in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_7",
+    "name": "Relic of place.nirncraft.jekhi_den",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "jekhi_den",
+    "x": 2959,
+    "z": 11000,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.jekhi_den in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_8",
+    "name": "Relic of place.nirncraft.joahe_hole",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "joahe_hole",
+    "x": 2927,
+    "z": 10774,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.joahe_hole in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_9",
+    "name": "Relic of place.nirncraft.jonihai_vault",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "jonihai_vault",
+    "x": 743,
+    "z": 9421,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.jonihai_vault in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_10",
+    "name": "Relic of place.nirncraft.khara_burrow",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "khara_burrow",
+    "x": 1523,
+    "z": 9973,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.khara_burrow in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_11",
+    "name": "Relic of place.nirncraft.khekha_watchtower",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "khekha_watchtower",
+    "x": 2827,
+    "z": 11126,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.khekha_watchtower in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_rimmen_unique_12",
+    "name": "Relic of place.nirncraft.kherinnar_delve",
+    "region": "rimmen",
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L4.savanna_edge"
+    ],
+    "place": "kherinnar_delve",
+    "x": 1704,
+    "z": 10457,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.kherinnar_delve in Rimmen from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_1",
+    "name": "Relic of place.nirncraft.jakokhi_ruins",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "jakokhi_ruins",
+    "x": 1976,
+    "z": 11498,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.jakokhi_ruins in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_2",
+    "name": "Relic of place.nirncraft.jeal_camp",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "jeal_camp",
+    "x": 1332,
+    "z": 11623,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.jeal_camp in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_3",
+    "name": "Relic of place.nirncraft.jonar_camp",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "jonar_camp",
+    "x": 632,
+    "z": 13170,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.jonar_camp in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_4",
+    "name": "Relic of place.nirncraft.joqakhi_lair",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "joqakhi_lair",
+    "x": 1677,
+    "z": 12107,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.joqakhi_lair in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_5",
+    "name": "Relic of place.nirncraft.jozir_grove",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "jozir_grove",
+    "x": 977,
+    "z": 13009,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.jozir_grove in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_6",
+    "name": "Relic of place.nirncraft.khathari_camp",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "khathari_camp",
+    "x": 646,
+    "z": 12367,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.khathari_camp in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_7",
+    "name": "Relic of place.nirncraft.khekhaal_caverns",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "khekhaal_caverns",
+    "x": 730,
+    "z": 11059,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.khekhaal_caverns in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_8",
+    "name": "Relic of place.nirncraft.koraset_grove",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "koraset_grove",
+    "x": 1688,
+    "z": 12913,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.koraset_grove in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_9",
+    "name": "Relic of place.nirncraft.kozir_diggings",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "kozir_diggings",
+    "x": 942,
+    "z": 11002,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.kozir_diggings in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_10",
+    "name": "Relic of place.nirncraft.kozir_hollow",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "kozir_hollow",
+    "x": 1657,
+    "z": 11225,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.kozir_hollow in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_11",
+    "name": "Relic of place.nirncraft.merryvale_sugar_farm_caves",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "merryvale_sugar_farm_caves",
+    "x": 1050,
+    "z": 11950,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.merryvale_sugar_farm_caves in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_torval_unique_12",
+    "name": "Relic of place.nirncraft.nahaar_hollow",
+    "region": "torval",
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L4.aqueduct_green"
+    ],
+    "place": "nahaar_hollow",
+    "x": 889,
+    "z": 11728,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.nahaar_hollow in Torval from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_1",
+    "name": "Relic of place.nirncraft.ahdohai_hideout",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "ahdohai_hideout",
+    "x": 426,
+    "z": 14377,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ahdohai_hideout in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_2",
+    "name": "Relic of place.nirncraft.ahkhi_grotto",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "ahkhi_grotto",
+    "x": -1190,
+    "z": 12365,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ahkhi_grotto in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_3",
+    "name": "Relic of place.nirncraft.baathanar_sanctum",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "baathanar_sanctum",
+    "x": -1687,
+    "z": 13135,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.baathanar_sanctum in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_4",
+    "name": "Relic of place.nirncraft.dakhi_ruins",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "dakhi_ruins",
+    "x": -170,
+    "z": 11718,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.dakhi_ruins in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_5",
+    "name": "Relic of place.nirncraft.darkpool_mine",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "darkpool_mine",
+    "x": -1504,
+    "z": 11854,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.darkpool_mine in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_6",
+    "name": "Relic of place.nirncraft.desert_wind_caverns",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "desert_wind_caverns",
+    "x": 350,
+    "z": 11900,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.desert_wind_caverns in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_7",
+    "name": "Relic of place.nirncraft.doae_hole",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "doae_hole",
+    "x": -1197,
+    "z": 11922,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.doae_hole in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_8",
+    "name": "Relic of place.nirncraft.dorazir_moon_temple",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "dorazir_moon_temple",
+    "x": 978,
+    "z": 13481,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.dorazir_moon_temple in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_9",
+    "name": "Relic of place.nirncraft.drokamar_hideout",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "drokamar_hideout",
+    "x": -368,
+    "z": 14288,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.drokamar_hideout in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_10",
+    "name": "Relic of place.nirncraft.hae_camp",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "hae_camp",
+    "x": -1898,
+    "z": 13366,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.hae_camp in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_11",
+    "name": "Relic of place.nirncraft.hakhi_moon_temple",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "hakhi_moon_temple",
+    "x": -1242,
+    "z": 14184,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.hakhi_moon_temple in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_12",
+    "name": "Relic of place.nirncraft.halls_of_colossus",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "halls_of_colossus",
+    "x": -378,
+    "z": 13355,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.halls_of_colossus in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_13",
+    "name": "Relic of place.nirncraft.halls_of_the_highmane",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "halls_of_the_highmane",
+    "x": 1502,
+    "z": 13384,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.halls_of_the_highmane in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_14",
+    "name": "Relic of place.nirncraft.hidden_moon_crypts",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "hidden_moon_crypts",
+    "x": 400,
+    "z": 11500,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.hidden_moon_crypts in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_15",
+    "name": "Relic of place.nirncraft.jakhi_ruins",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "jakhi_ruins",
+    "x": -1451,
+    "z": 12117,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.jakhi_ruins in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_16",
+    "name": "Relic of place.nirncraft.jehai_watch",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "jehai_watch",
+    "x": -430,
+    "z": 13978,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.jehai_watch in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_17",
+    "name": "Relic of place.nirncraft.jemar_crypt",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "jemar_crypt",
+    "x": -782,
+    "z": 14520,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.jemar_crypt in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_18",
+    "name": "Relic of place.nirncraft.jeri_moon_temple",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "jeri_moon_temple",
+    "x": 553,
+    "z": 13754,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.jeri_moon_temple in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_19",
+    "name": "Relic of place.nirncraft.jora_grove",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "jora_grove",
+    "x": 1517,
+    "z": 14137,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.jora_grove in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_pellitine_unique_20",
+    "name": "Relic of place.nirncraft.jori_watch",
+    "region": "pellitine",
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L4.cane_floodplain"
+    ],
+    "place": "jori_watch",
+    "x": -1210,
+    "z": 13004,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.jori_watch in Pellitine from the elder days."
+  },
+  {
+    "id": "elsweyr_senchal_unique_1",
+    "name": "Relic of place.nirncraft.ahdahai_pit",
+    "region": "senchal",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L4.cove_beach"
+    ],
+    "place": "ahdahai_pit",
+    "x": 2251,
+    "z": 12305,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ahdahai_pit in Senchal from the elder days."
+  },
+  {
+    "id": "elsweyr_senchal_unique_2",
+    "name": "Relic of place.nirncraft.ahsae_hollow",
+    "region": "senchal",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L4.cove_beach"
+    ],
+    "place": "ahsae_hollow",
+    "x": 2374,
+    "z": 11861,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ahsae_hollow in Senchal from the elder days."
+  },
+  {
+    "id": "elsweyr_senchal_unique_3",
+    "name": "Relic of place.nirncraft.dadonar_encampment",
+    "region": "senchal",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L4.cove_beach"
+    ],
+    "place": "dadonar_encampment",
+    "x": 1864,
+    "z": 13928,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.dadonar_encampment in Senchal from the elder days."
+  },
+  {
+    "id": "elsweyr_senchal_unique_4",
+    "name": "Relic of place.nirncraft.doomstone_keep",
+    "region": "senchal",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L4.cove_beach"
+    ],
+    "place": "doomstone_keep",
+    "x": 2850,
+    "z": 12650,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.doomstone_keep in Senchal from the elder days."
+  },
+  {
+    "id": "elsweyr_senchal_unique_5",
+    "name": "Relic of place.nirncraft.droae_pit",
+    "region": "senchal",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L4.cove_beach"
+    ],
+    "place": "droae_pit",
+    "x": 1781,
+    "z": 13420,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.droae_pit in Senchal from the elder days."
+  },
+  {
+    "id": "elsweyr_senchal_unique_6",
+    "name": "Relic of place.nirncraft.drosha_hollow",
+    "region": "senchal",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L4.cove_beach"
+    ],
+    "place": "drosha_hollow",
+    "x": 2325,
+    "z": 12748,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.drosha_hollow in Senchal from the elder days."
+  },
+  {
+    "id": "elsweyr_senchal_unique_7",
+    "name": "Relic of place.nirncraft.forsaken_citadel",
+    "region": "senchal",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L4.cove_beach"
+    ],
+    "place": "forsaken_citadel",
+    "x": 2745,
+    "z": 13389,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.forsaken_citadel in Senchal from the elder days."
+  },
+  {
+    "id": "elsweyr_senchal_unique_8",
+    "name": "Relic of place.nirncraft.hunt_masters_ruins",
+    "region": "senchal",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L4.cove_beach"
+    ],
+    "place": "hunt_masters_ruins",
+    "x": 2300,
+    "z": 12050,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.hunt_masters_ruins in Senchal from the elder days."
+  },
+  {
+    "id": "elsweyr_senchal_unique_9",
+    "name": "Relic of place.nirncraft.jakoae_hollow",
+    "region": "senchal",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L4.cove_beach"
+    ],
+    "place": "jakoae_hollow",
+    "x": 2906,
+    "z": 11884,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.jakoae_hollow in Senchal from the elder days."
+  },
+  {
+    "id": "elsweyr_senchal_unique_10",
+    "name": "Relic of place.nirncraft.joar_moon_temple",
+    "region": "senchal",
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L4.cove_beach"
+    ],
+    "place": "joar_moon_temple",
+    "x": 2703,
+    "z": 11922,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.joar_moon_temple in Senchal from the elder days."
+  }
+]

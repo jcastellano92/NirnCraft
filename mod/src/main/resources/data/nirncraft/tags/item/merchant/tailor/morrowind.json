@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:netch_leather",
+      "required": false
+    },
+    {
+      "id": "nirncraft:guar_hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:kagouti_hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:alit_hide",
+      "required": false
+    }
+  ]
+}

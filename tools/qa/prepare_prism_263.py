@@ -48,9 +48,9 @@ def exact_processes(prism_root, instance_name=INSTANCE_NAME):
 
 def java_25(path=None):
     candidates = [path] if path else [
-        os.environ.get("SKYCRAFT_JAVA_25"),
+        os.environ.get("NIRNCRAFT_JAVA_25"),
         str(Path(os.environ["JAVA_HOME"]) / "bin/java.exe") if os.environ.get("JAVA_HOME") else None,
-        "E:/Skycraft-scratch/toolchains/jdk-25.0.4.1+1/bin/java.exe",
+        "E:/NirnCraft-scratch/toolchains/jdk-25.0.4.1+1/bin/java.exe",
         shutil.which("java"),
     ]
     for candidate in candidates:
@@ -105,19 +105,19 @@ def validate_instance(instance, lock):
     game = instance / ".minecraft"
     expected = {row["filename"]: row for row in lock["active"] if row["side"] != "server"}
     actual = {path.name for path in (game / "mods").glob("*") if path.is_file()}
-    if actual != set(expected) | {"skycraft-core.jar"}:
+    if actual != set(expected) | {"nirncraft-core.jar"}:
         raise ValueError("Archive contains missing, unpinned, or legacy active mods")
     for name, row in expected.items():
         if digest(game / "mods" / name, row["hashFormat"]) != row["hash"].lower():
             raise ValueError(f"Client dependency hash mismatch: {name}")
-    validate_core_jar(game / "mods/skycraft-core.jar")
+    validate_core_jar(game / "mods/nirncraft-core.jar")
     packs = sorted(p.name for p in (game / "shaderpacks").iterdir()) if (game / "shaderpacks").exists() else []
-    if [p for p in packs if p != "SkycraftAether.zip"]:
-        raise ValueError(f"Only Skycraft's own shader pack may ship in the preview, found {packs}")
+    if [p for p in packs if p != "InfiniteATLAS.zip"]:
+        raise ValueError(f"Only NirnCraft's own shader pack may ship in the preview, found {packs}")
     iris = (game / "config/iris.properties").read_text(encoding="utf-8-sig")
     if not (re.search(r"^enableShaders=false$", iris, re.M)
-            or (re.search(r"^enableShaders=true$", iris, re.M) and re.search(r"^shaderPack=SkycraftAether\.zip$", iris, re.M))):
-        raise ValueError("Preview shaders must be off or Skycraft's own SkycraftAether.zip")
+            or (re.search(r"^enableShaders=true$", iris, re.M) and re.search(r"^shaderPack=InfiniteATLAS\.zip$", iris, re.M))):
+        raise ValueError("Preview shaders must be off or NirnCraft's own InfiniteATLAS.zip")
     embedded = json.loads((game / "migration/platform-lock.json").read_text(encoding="utf-8-sig"))
     if embedded != lock:
         raise ValueError("Archive was built with a different platform/dependency lock")
@@ -137,25 +137,25 @@ def configure(instance, java, *, live=False, tour="", extra="", width=1280, heig
                   JavaVersion="25", OverrideWindow="true", MinecraftWinWidth=str(width),
                   MinecraftWinHeight=str(height), LaunchMaximized="false")
     # A properties file keeps complex arguments out of Prism/Windows shell parsing.
-    properties = {"skycraft.autotest": "true", "skycraft.autotest.world": "" if server else world,
-                  "skycraft.autotest.tour": tour.replace(" ", "+"), "skycraft.autotest.tourUp": str(up),
-                  "skycraft.autotest.tourPitch": str(pitch), "skycraft.autotest.tourWait": str(tour_wait)}
-    boot_flags = ["-Dskycraft.autotest=true"]
+    properties = {"nirncraft.autotest": "true", "nirncraft.autotest.world": "" if server else world,
+                  "nirncraft.autotest.tour": tour.replace(" ", "+"), "nirncraft.autotest.tourUp": str(up),
+                  "nirncraft.autotest.tourPitch": str(pitch), "nirncraft.autotest.tourWait": str(tour_wait)}
+    boot_flags = ["-Dnirncraft.autotest=true"]
     if server:
-        properties["skycraft.autotest.server"] = server
-        boot_flags.append("-Dskycraft.autotest.server=" + server)
+        properties["nirncraft.autotest.server"] = server
+        boot_flags.append("-Dnirncraft.autotest.server=" + server)
     if live:
-        properties.update({"skycraft.autotest.live": "true", "skycraft.dev": "world-preview",
-                           "skycraft.preview.resources": "world-preview/resources"})
+        properties.update({"nirncraft.autotest.live": "true", "nirncraft.dev": "world-preview",
+                           "nirncraft.preview.resources": "world-preview/resources"})
         # Common-side preview subscribers may initialize before ClientAutotest reads the file.
-        boot_flags += ["-Dskycraft.autotest.live=true", "-Dskycraft.dev=world-preview",
-                       "-Dskycraft.preview.resources=world-preview/resources"]
+        boot_flags += ["-Dnirncraft.autotest.live=true", "-Dnirncraft.dev=world-preview",
+                       "-Dnirncraft.preview.resources=world-preview/resources"]
     if save_source:
         save_source = Path(save_source).resolve()
         if not (save_source / "level.dat").is_file():
             raise ValueError("--save-source must be an existing save directory containing level.dat")
         shutil.copytree(save_source, instance / ".minecraft/saves" / save_source.name)
-        properties.update({"skycraft.autotest.createflow": "true", "skycraft.autotest.load": save_source.name})
+        properties.update({"nirncraft.autotest.createflow": "true", "nirncraft.autotest.load": save_source.name})
     fields["JvmArgs"] = fields.get("JvmArgs", "").strip('"') + " " + " ".join(boot_flags)
     if extra:
         # Extra JVM flags retain the existing tour API, while rejecting newlines/config injection.
@@ -170,7 +170,7 @@ def configure(instance, java, *, live=False, tour="", extra="", width=1280, heig
         encoded = value.encode("utf-16-be", "surrogatepass")
         return "".join(chr(int.from_bytes(encoded[i:i+2], "big")) if int.from_bytes(encoded[i:i+2], "big") < 128
                        else "\\u" + encoded[i:i+2].hex() for i in range(0, len(encoded), 2))
-    (game / "skycraft_autotest.properties").write_text(
+    (game / "nirncraft_autotest.properties").write_text(
         "\n".join(f"{key}={escape(value)}" for key, value in properties.items()) + "\n", encoding="ascii")
     (game / "options.txt").write_text("\n".join([
         "onboardAccessibility:false", "pauseOnLostFocus:false", "skipMultiplayerWarning:true", "tutorialStep:none",
@@ -190,18 +190,18 @@ def prepare(archive, prism_root, java, **options):
     java = java_25(java)
     if exact_processes(prism_root):
         raise ValueError("The exact 26.3 preview is running; close it cleanly before replacing its files")
-    if exact_processes(prism_root, "Skycraft-26.3-core-diagnostic"):
+    if exact_processes(prism_root, "NirnCraft-26.3-core-diagnostic"):
         raise ValueError("The core diagnostic is running; close it cleanly before preparing the full native preview")
     prism_root.mkdir(parents=True, exist_ok=True)
     instances = prism_root / "instances"
     instances.mkdir(exist_ok=True)
     destination = instances / INSTANCE_NAME
-    with tempfile.TemporaryDirectory(prefix="skycraft-263-staging-", dir=prism_root) as temporary:
+    with tempfile.TemporaryDirectory(prefix="nirncraft-263-staging-", dir=prism_root) as temporary:
         source = extract(archive, Path(temporary))
         validate_instance(source, lock)
         configure(source, java, **options)
         receipt = {"target": TARGET, "archive": str(archive), "archiveSha256": digest(archive),
-                   "coreSha256": digest(source / ".minecraft/mods/skycraft-core.jar"),
+                   "coreSha256": digest(source / ".minecraft/mods/nirncraft-core.jar"),
                    "java": str(java), "preparedAt": time.time(), "runtimeVerified": False,
                    "server": options.get("server") or None,
                    "expectedTransport": "tcp" if options.get("server") else "memory"}
@@ -209,7 +209,7 @@ def prepare(archive, prism_root, java, **options):
         backup = None
         # Prism notices a complete instance on rename. Keep previous saves/screenshots in its backup.
         if destination.exists():
-            backups = prism_root / "skycraft-263-backups"
+            backups = prism_root / "nirncraft-263-backups"
             backups.mkdir(exist_ok=True)
             backup = backups / str(time.time_ns())
             destination.rename(backup)
@@ -225,7 +225,7 @@ def prepare(archive, prism_root, java, **options):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--archive", type=Path, default=ROOT / "dist/Skycraft-26.3-client-instance.zip")
+    parser.add_argument("--archive", type=Path, default=ROOT / "dist/NirnCraft-26.3-client-instance.zip")
     parser.add_argument("--prism-root", type=Path, default=Path(os.environ.get("APPDATA", "")) / "PrismLauncher")
     parser.add_argument("--java", type=Path)
     parser.add_argument("--live", action="store_true")

@@ -16,7 +16,7 @@ come and why few stay.
 
 ## 1. World model sheet
 
-Data home: `skycraft/tamriel/world/foreign.json` (MS22): one umbrella expedition block (`foreign`), five continent/land
+Data home: `nirncraft/tamriel/world/foreign.json` (MS22): one umbrella expedition block (`foreign`), five continent/land
 blocks (`atmora`, `akavir`, `yokuda`, `pyandonea`, `thras`), and ten regional sub-sheets covering all 10 foreign regions
 in `regions.json`.
 

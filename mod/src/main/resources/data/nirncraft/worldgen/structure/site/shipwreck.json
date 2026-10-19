@@ -1,0 +1,16 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "shipwreck",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "shipwreck"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

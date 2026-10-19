@@ -1,0 +1,470 @@
+{
+  "source_chances": {
+    "boss": 0.45,
+    "container": 0.25,
+    "corpse": 0.16,
+    "merchant": 0.1
+  },
+  "makers": [
+    {
+      "id": "skyforge",
+      "name": "Skyforge",
+      "lang_key": "affix.nirncraft.maker.skyforge",
+      "desc_key": "affix.nirncraft.maker.skyforge.desc",
+      "desc": "Quenched beside the eagle-stone above Jorrvaskr where ancient hearth-coal never cools.",
+      "cultures": [
+        "nord",
+        "atmoran"
+      ],
+      "provinces": [
+        "skyrim",
+        "atmora"
+      ],
+      "regions": [
+        "skyrim/whiterun",
+        "skyrim/the_pale",
+        "skyrim/falkreath",
+        "skyrim/hjaalmarch"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.1,
+      "value_mult": 1.1,
+      "why": [
+        "whiterun.L5.skyforge_steel",
+        "whiterun.L11.skyforge"
+      ]
+    },
+    {
+      "id": "orsinium_forged",
+      "name": "Orsinium-Forged",
+      "lang_key": "affix.nirncraft.maker.orsinium_forged",
+      "desc_key": "affix.nirncraft.maker.orsinium_forged.desc",
+      "desc": "Beaten over Wrothgarian anthracite by stronghold smith-wives who alloy iron with green orichalcum.",
+      "cultures": [
+        "orc",
+        "orsinium"
+      ],
+      "provinces": [
+        "orsinium",
+        "high_rock"
+      ],
+      "regions": [
+        "high_rock/wrothgar",
+        "skyrim/the_reach",
+        "hammerfell/dragontail"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.07,
+      "durability_mult": 1.15,
+      "value_mult": 1.1,
+      "why": [
+        "wrothgar.L5.orichalcum_forges",
+        "wrothgar.L11.three_sieges"
+      ]
+    },
+    {
+      "id": "dwemer_wrought",
+      "name": "Dwemer-Wrought",
+      "lang_key": "affix.nirncraft.maker.dwemer_wrought",
+      "desc_key": "affix.nirncraft.maker.dwemer_wrought.desc",
+      "desc": "Cast in tonal brass-alloy that resists rust even after centuries beneath steam conduits.",
+      "cultures": [
+        "dwemer"
+      ],
+      "provinces": [
+        "skyrim",
+        "hammerfell",
+        "morrowind"
+      ],
+      "regions": [
+        "skyrim/the_reach",
+        "skyrim/the_pale",
+        "skyrim/winterhold",
+        "hammerfell/stros_mkai",
+        "hammerfell/alikr_desert"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.06,
+      "durability_mult": 1.2,
+      "value_mult": 1.12,
+      "why": [
+        "stros_mkai.L5.dwemer_salvage",
+        "the_reach.L11.dwemer_era"
+      ]
+    },
+    {
+      "id": "ayleid_etched",
+      "name": "Ayleid-Etched",
+      "lang_key": "affix.nirncraft.maker.ayleid_etched",
+      "desc_key": "affix.nirncraft.maker.ayleid_etched.desc",
+      "desc": "Chased with starlight latticework recovered from white-stone vaults of the Heartland.",
+      "cultures": [
+        "ayleid",
+        "imperial"
+      ],
+      "provinces": [
+        "cyrodiil",
+        "valenwood"
+      ],
+      "regions": [
+        "hammerfell/craglorn",
+        "hammerfell/bangkorai",
+        "skyrim/falkreath"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.08,
+      "value_mult": 1.12,
+      "why": [
+        "craglorn.L5.crater_glass_and_ore",
+        "craglorn.L11.nedic_star_empire"
+      ]
+    },
+    {
+      "id": "redguard_folded",
+      "name": "Redguard-Folded",
+      "lang_key": "affix.nirncraft.maker.redguard_folded",
+      "desc_key": "affix.nirncraft.maker.redguard_folded.desc",
+      "desc": "Watered steel folded twelve times in Dragontail charcoal according to Ra Gada sword-canon.",
+      "cultures": [
+        "redguard",
+        "yokudan",
+        "crowns",
+        "forebears"
+      ],
+      "provinces": [
+        "hammerfell",
+        "yokuda"
+      ],
+      "regions": [
+        "hammerfell/sentinel",
+        "hammerfell/alikr_desert",
+        "hammerfell/bangkorai",
+        "hammerfell/dragontail",
+        "hammerfell/stros_mkai",
+        "hammerfell/craglorn",
+        "hammerfell/hews_bane"
+      ],
+      "damage_mult": 1.07,
+      "armor_mult": 1.04,
+      "durability_mult": 1.1,
+      "value_mult": 1.1,
+      "why": [
+        "hammerfell.L5.blades",
+        "sentinel.L11.harbour_of_the_first_landing"
+      ]
+    },
+    {
+      "id": "bosmer_bone",
+      "name": "Bosmer Bone-Shaped",
+      "lang_key": "affix.nirncraft.maker.bosmer_bone",
+      "desc_key": "affix.nirncraft.maker.bosmer_bone.desc",
+      "desc": "Sinew-bound horn and cured bone laminated without touching living timber.",
+      "cultures": [
+        "bosmer"
+      ],
+      "provinces": [
+        "valenwood"
+      ],
+      "regions": [
+        "skyrim/falkreath",
+        "high_rock/glenumbra"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.04,
+      "durability_mult": 1.06,
+      "value_mult": 1.08,
+      "why": [
+        "falkreath.L5.hunting",
+        "falkreath.L11.sunderstone"
+      ]
+    },
+    {
+      "id": "akaviri_tempered",
+      "name": "Akaviri-Tempered",
+      "lang_key": "affix.nirncraft.maker.akaviri_tempered",
+      "desc_key": "affix.nirncraft.maker.akaviri_tempered.desc",
+      "desc": "Differential clay-tempered edge bearing the wave-line of the old Dragonguard armouries.",
+      "cultures": [
+        "akaviri",
+        "blades"
+      ],
+      "provinces": [
+        "akavir",
+        "cyrodiil",
+        "skyrim"
+      ],
+      "regions": [
+        "skyrim/the_reach",
+        "skyrim/falkreath",
+        "hammerfell/craglorn"
+      ],
+      "damage_mult": 1.08,
+      "armor_mult": 1.04,
+      "durability_mult": 1.1,
+      "value_mult": 1.12,
+      "why": [
+        "falkreath.L5.border_trade",
+        "skyrim.L11.dragon_war"
+      ]
+    },
+    {
+      "id": "dunmer_bonemold",
+      "name": "Dunmer Bonemold",
+      "lang_key": "affix.nirncraft.maker.dunmer_bonemold",
+      "desc_key": "affix.nirncraft.maker.dunmer_bonemold.desc",
+      "desc": "Resin-cured ash-bone and chitin plates laminated against cinders by Velothi outlanders.",
+      "cultures": [
+        "dunmer",
+        "velothi",
+        "ashlander"
+      ],
+      "provinces": [
+        "morrowind",
+        "solstheim"
+      ],
+      "regions": [
+        "skyrim/eastmarch",
+        "skyrim/the_rift",
+        "skyrim/winterhold",
+        "morrowind/solstheim"
+      ],
+      "damage_mult": 1.04,
+      "armor_mult": 1.06,
+      "durability_mult": 1.12,
+      "value_mult": 1.09,
+      "why": [
+        "eastmarch.L5.harbour",
+        "eastmarch.L11.red_year_refugees"
+      ]
+    },
+    {
+      "id": "altmer_glass_spun",
+      "name": "Altmer Glass-Spun",
+      "lang_key": "affix.nirncraft.maker.altmer_glass_spun",
+      "desc_key": "affix.nirncraft.maker.altmer_glass_spun.desc",
+      "desc": "Filigree malachite and moonstone drawn on high-elven mandrels descended from Direnni workshops.",
+      "cultures": [
+        "altmer",
+        "direnni"
+      ],
+      "provinces": [
+        "summerset",
+        "pyandonea"
+      ],
+      "regions": [
+        "high_rock/wayrest",
+        "high_rock/glenumbra",
+        "high_rock/rivenspire",
+        "skyrim/haafingar"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.06,
+      "durability_mult": 1.08,
+      "value_mult": 1.12,
+      "why": [
+        "high_rock.L5.bay_shipping",
+        "high_rock.L11.direnni_hegemony"
+      ]
+    },
+    {
+      "id": "breton_guild_steel",
+      "name": "Breton Guild-Steel",
+      "lang_key": "affix.nirncraft.maker.breton_guild_steel",
+      "desc_key": "affix.nirncraft.maker.breton_guild_steel.desc",
+      "desc": "Stamped with a chartered Iliac guildhall touchmark and balanced for chivalric tournament lists.",
+      "cultures": [
+        "breton"
+      ],
+      "provinces": [
+        "high_rock"
+      ],
+      "regions": [
+        "high_rock/daggerfall",
+        "high_rock/anticlere",
+        "high_rock/dwynnen",
+        "high_rock/wayrest",
+        "high_rock/glenumbra",
+        "high_rock/rivenspire",
+        "high_rock/stormhaven",
+        "high_rock/bjoulsae"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.06,
+      "durability_mult": 1.1,
+      "value_mult": 1.09,
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L11.covenant_capital"
+      ]
+    },
+    {
+      "id": "imperial_legion_issue",
+      "name": "Imperial Legion-Issue",
+      "lang_key": "affix.nirncraft.maker.imperial_legion_issue",
+      "desc_key": "affix.nirncraft.maker.imperial_legion_issue.desc",
+      "desc": "Quartermaster-inspected steel stamped with the cohort numeral of an Imperial border garrison.",
+      "cultures": [
+        "imperial",
+        "colovian",
+        "nibenese"
+      ],
+      "provinces": [
+        "cyrodiil",
+        "skyrim"
+      ],
+      "regions": [
+        "skyrim/haafingar",
+        "skyrim/falkreath",
+        "hammerfell/bangkorai",
+        "hammerfell/dragontail",
+        "high_rock/stormhaven"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.06,
+      "durability_mult": 1.12,
+      "value_mult": 1.08,
+      "why": [
+        "haafingar.L5.imperial_market",
+        "dragontail.L11.imperial_border"
+      ]
+    },
+    {
+      "id": "argonian_hist_cured",
+      "name": "Argonian Hist-Cured",
+      "lang_key": "affix.nirncraft.maker.argonian_hist_cured",
+      "desc_key": "affix.nirncraft.maker.argonian_hist_cured.desc",
+      "desc": "Steeped in marsh-sap lacquer that shrugs off brackish fen water and salt fog alike.",
+      "cultures": [
+        "argonian"
+      ],
+      "provinces": [
+        "black_marsh"
+      ],
+      "regions": [
+        "skyrim/hjaalmarch",
+        "skyrim/eastmarch",
+        "high_rock/wayrest"
+      ],
+      "damage_mult": 1.04,
+      "armor_mult": 1.05,
+      "durability_mult": 1.14,
+      "value_mult": 1.08,
+      "why": [
+        "hjaalmarch.L5.marsh_herbs",
+        "skyrim.L11.septim_rise"
+      ]
+    },
+    {
+      "id": "khajiit_moon_forged",
+      "name": "Khajiit Moon-Forged",
+      "lang_key": "affix.nirncraft.maker.khajiit_moon_forged",
+      "desc_key": "affix.nirncraft.maker.khajiit_moon_forged.desc",
+      "desc": "Curved caravan steel polished with fine dune-silica for silent draw along desert roads.",
+      "cultures": [
+        "khajiit"
+      ],
+      "provinces": [
+        "elsweyr"
+      ],
+      "regions": [
+        "skyrim/whiterun",
+        "skyrim/the_rift",
+        "hammerfell/sentinel",
+        "hammerfell/alikr_desert",
+        "hammerfell/hews_bane"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.04,
+      "durability_mult": 1.08,
+      "value_mult": 1.09,
+      "why": [
+        "hammerfell.L5.caravans_and_salt",
+        "alikr_desert.L11.caravan_wars"
+      ]
+    },
+    {
+      "id": "markarth_silver",
+      "name": "Markarth Silver-Inlaid",
+      "lang_key": "affix.nirncraft.maker.markarth_silver",
+      "desc_key": "affix.nirncraft.maker.markarth_silver.desc",
+      "desc": "Karth-gorge iron chased with Cidhna silver wire by crag-smiths of the western Reach.",
+      "cultures": [
+        "reachmen",
+        "nord"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "regions": [
+        "skyrim/the_reach",
+        "high_rock/bjoulsae"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.08,
+      "value_mult": 1.1,
+      "why": [
+        "the_reach.L5.silver_mining",
+        "the_reach.L11.reach_kingdom"
+      ]
+    },
+    {
+      "id": "windhelm_hearth",
+      "name": "Windhelm Hearth-Hammered",
+      "lang_key": "affix.nirncraft.maker.windhelm_hearth",
+      "desc_key": "affix.nirncraft.maker.windhelm_hearth.desc",
+      "desc": "Thick winter-forged plate hammered beside the White River docks to endure Sea of Ghosts gales.",
+      "cultures": [
+        "nord"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "regions": [
+        "skyrim/eastmarch",
+        "skyrim/winterhold",
+        "skyrim/the_pale",
+        "skyrim/the_rift"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.06,
+      "durability_mult": 1.12,
+      "value_mult": 1.09,
+      "why": [
+        "eastmarch.L5.mines",
+        "eastmarch.L11.ysgramor_city"
+      ]
+    },
+    {
+      "id": "abah_corsair",
+      "name": "Abah Corsair-Rigged",
+      "lang_key": "affix.nirncraft.maker.abah_corsair",
+      "desc_key": "affix.nirncraft.maker.abah_corsair.desc",
+      "desc": "Brass-fitted boarding gear waterproofed with pitch in the hidden coves of Hew's Bane.",
+      "cultures": [
+        "redguard",
+        "breton"
+      ],
+      "provinces": [
+        "hammerfell",
+        "high_rock"
+      ],
+      "regions": [
+        "hammerfell/hews_bane",
+        "hammerfell/stros_mkai",
+        "high_rock/daggerfall",
+        "high_rock/dwynnen"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.04,
+      "durability_mult": 1.1,
+      "value_mult": 1.1,
+      "why": [
+        "hews_bane.L5.abecean_shipping",
+        "hews_bane.L11.betrayal_of_taneth"
+      ]
+    }
+  ]
+}

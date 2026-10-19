@@ -1,0 +1,119 @@
+{
+  "_doc": "Dunmer style sheet. Kit styles: hlaalu (adobe and flat roofs), redoran (chitin hulls), telvanni (mushroom towers), velothi (ashlar canton blocks).",
+  "windows": "fence",
+  "hearth": false,
+  "faith": ["almalexia", "sotha_sil", "vivec", "mara", "stendarr"],
+  "crops": ["saltrice", "potatoes", "beetroots"],
+  "animals": ["chicken", "pig", "goat"],
+  "colors": ["orange", "red", "brown", "yellow"],
+  "forms": {"cluster": 3, "linear": 2, "canal": 2, "crossroads": 1},
+  "roofs": {"poor": {"flat": 1}, "common": {"flat": 4, "dome": 1}, "wealthy": {"flat": 3, "dome": 2}, "noble": {"dome": 3, "flat": 1}},
+  "halls": {"dome": 2, "flat": 1},
+  "footprints": {"poor": {"rect": 1}, "common": {"rect": 3, "l": 1}, "wealthy": {"l": 2, "rect": 1, "t": 1}, "noble": {"t": 2, "u": 1, "l": 1}},
+  "storeys": {"poor": [1, 1], "common": [1, 2], "wealthy": [2, 2], "noble": [2, 3]},
+  "rules": {"timber": 0.4, "porch": 0.15, "balcony": 0.2, "outsideStairs": 0.35, "shutters": 0.0, "flowerBoxes": 0.1,
+    "chimney": 0.0, "annex": 0.3, "banners": 0.6, "lanterns": 0.6, "awning": 0.6, "tower": 0.3},
+  "tiers": {
+    "poor": [
+      {"wall": "packed_mud", "low": "mud_bricks", "roof": "mud_brick", "wood": "jungle", "timber": false, "accent": "brown"},
+      {"wall": "sandstone", "low": "sandstone", "roof": "sandstone", "wood": "jungle", "timber": false, "accent": "orange"},
+      {"wall": "smooth_sandstone", "wall2": "sandstone", "low": "mud_bricks", "roof": "smooth_sandstone", "wood": "dark_oak", "timber": false}
+    ],
+    "common": [
+      {"wall": "smooth_sandstone", "low": "cut_sandstone", "roof": "smooth_sandstone", "wood": "jungle", "accent": "orange"},
+      {"wall": "sandstone", "wall2": "chiseled_sandstone", "low": "cut_sandstone", "roof": "sandstone", "wood": "jungle", "timber": false, "accent": "red"},
+      {"wall": "mud_bricks", "wall2": "packed_mud", "low": "sandstone", "roof": "mud_brick", "wood": "dark_oak", "timber": false, "accent": "yellow"}
+    ],
+    "wealthy": [
+      {"wall": "smooth_sandstone", "low": "cut_sandstone", "roof": "smooth_sandstone", "trim": "sandstone", "wood": "jungle", "window": "orange_stained_glass_pane", "accent": "orange"},
+      {"wall": "cut_sandstone", "wall2": "chiseled_sandstone", "low": "smooth_sandstone", "roof": "sandstone", "wood": "dark_oak", "timber": false, "accent": "red"},
+      {"wall": "white_terracotta", "low": "cut_sandstone", "roof": "smooth_sandstone", "wood": "jungle", "timber": false, "accent": "yellow"}
+    ],
+    "noble": [
+      {"wall": "smooth_sandstone", "wall2": "cut_sandstone", "low": "chiseled_sandstone", "roof": "smooth_sandstone", "wood": "jungle", "window": "orange_stained_glass_pane", "timber": false, "accent": "orange"},
+      {"wall": "cut_sandstone", "low": "smooth_sandstone", "roof": "smooth_sandstone", "roofFull": "orange_terracotta", "wood": "dark_oak", "timber": false, "accent": "red"},
+      {"wall": "chiseled_sandstone", "wall2": "smooth_sandstone", "low": "cut_sandstone", "roof": "sandstone", "wood": "jungle", "timber": false, "accent": "yellow"}
+    ]
+  },
+  "styles": {
+    "redoran": {
+      "bodies": {"poor": {"chitin": 1}, "common": {"chitin": 3, "rect": 1}, "wealthy": {"chitin": 2, "rect": 1}, "noble": {"rect": 1}},
+      "hallBody": "chitin",
+      "forms": {"linear": 3, "cluster": 2, "crossroads": 1},
+      "tiers": {
+        "poor": [
+          {"wall": "packed_mud", "low": "mud_bricks", "roof": "mud_brick", "roofFull": "terracotta", "wood": "dark_oak", "timber": false},
+          {"wall": "mud_bricks", "low": "packed_mud", "roof": "mud_brick", "roofFull": "brown_terracotta", "wood": "dark_oak", "timber": false},
+          {"wall": "brown_terracotta", "low": "mud_bricks", "roof": "mud_brick", "roofFull": "terracotta", "wood": "spruce", "timber": false}
+        ],
+        "common": [
+          {"wall": "packed_mud", "low": "mud_bricks", "roof": "mud_brick", "roofFull": "terracotta", "wood": "dark_oak", "timber": false, "accent": "red"},
+          {"wall": "terracotta", "low": "mud_bricks", "roof": "mud_brick", "roofFull": "red_terracotta", "wood": "dark_oak", "timber": false},
+          {"wall": "mud_bricks", "low": "polished_andesite", "roof": "mud_brick", "roofFull": "brown_terracotta", "wood": "dark_oak", "timber": false}
+        ],
+        "wealthy": [
+          {"wall": "terracotta", "low": "polished_andesite", "roof": "mud_brick", "roofFull": "red_terracotta", "wood": "dark_oak", "timber": false},
+          {"wall": "packed_mud", "low": "andesite", "roof": "mud_brick", "roofFull": "orange_terracotta", "wood": "dark_oak", "timber": false},
+          {"wall": "red_terracotta", "low": "mud_bricks", "roof": "mud_brick", "roofFull": "terracotta", "wood": "dark_oak", "timber": false}
+        ],
+        "noble": [
+          {"wall": "polished_andesite", "low": "andesite", "roof": "polished_andesite", "wood": "dark_oak", "timber": false},
+          {"wall": "terracotta", "low": "polished_andesite", "roof": "mud_brick", "wood": "dark_oak", "timber": false},
+          {"wall": "mud_bricks", "low": "polished_andesite", "roof": "polished_andesite", "wood": "dark_oak", "timber": false}
+        ]
+      }
+    },
+    "telvanni": {
+      "bodies": {"poor": {"mushroom": 1}, "common": {"mushroom": 1}, "wealthy": {"mushroom": 1}, "noble": {"mushroom": 1}},
+      "hallBody": "mushroom",
+      "forms": {"ring": 3, "cluster": 2},
+      "tiers": {
+        "poor": [
+          {"wall": "mushroom_stem", "roofFull": "brown_mushroom_block", "wood": "mangrove", "timber": false},
+          {"wall": "mushroom_stem", "roofFull": "red_mushroom_block", "wood": "mangrove", "timber": false},
+          {"wall": "nirncraft:parasol_stem", "roofFull": "nirncraft:parasol_cap", "wood": "mangrove", "timber": false}
+        ],
+        "common": [
+          {"wall": "mushroom_stem", "roofFull": "red_mushroom_block", "wood": "mangrove", "timber": false, "accent": "purple"},
+          {"wall": "mushroom_stem", "roofFull": "nirncraft:telvanni_cap", "wood": "mangrove", "timber": false, "accent": "magenta"},
+          {"wall": "nirncraft:parasol_stem", "roofFull": "brown_mushroom_block", "wood": "crimson", "timber": false, "accent": "purple"}
+        ],
+        "wealthy": [
+          {"wall": "mushroom_stem", "roofFull": "nirncraft:telvanni_cap", "wood": "crimson", "timber": false, "accent": "purple"},
+          {"wall": "mushroom_stem", "roofFull": "crimson_hyphae", "wood": "crimson", "timber": false, "accent": "magenta"},
+          {"wall": "nirncraft:parasol_stem", "roofFull": "red_mushroom_block", "wood": "mangrove", "timber": false}
+        ],
+        "noble": [
+          {"wall": "mushroom_stem", "roofFull": "nirncraft:telvanni_cap", "wood": "crimson", "timber": false, "light": "shroomlight"},
+          {"wall": "mushroom_stem", "roofFull": "warped_wart_block", "wood": "warped", "timber": false, "light": "shroomlight"},
+          {"wall": "nirncraft:parasol_stem", "roofFull": "crimson_hyphae", "wood": "crimson", "timber": false, "light": "shroomlight"}
+        ]
+      }
+    },
+    "velothi": {
+      "forms": {"canal": 3, "grid": 2, "cluster": 2},
+      "tiers": {
+        "poor": [
+          {"wall": "andesite", "low": "tuff", "roof": "andesite", "wood": "dark_oak", "timber": false},
+          {"wall": "tuff", "low": "cobblestone", "roof": "cobblestone", "wood": "dark_oak", "timber": false},
+          {"wall": "stone", "low": "tuff", "roof": "stone", "wood": "spruce", "timber": false}
+        ],
+        "common": [
+          {"wall": "polished_andesite", "low": "tuff", "roof": "polished_andesite", "wood": "dark_oak", "timber": false},
+          {"wall": "andesite", "wall2": "polished_andesite", "low": "stone_bricks", "roof": "andesite", "wood": "dark_oak", "timber": false},
+          {"wall": "smooth_stone", "low": "tuff", "roof": "stone_brick", "wood": "dark_oak", "timber": false}
+        ],
+        "wealthy": [
+          {"wall": "polished_andesite", "low": "polished_basalt", "roof": "polished_andesite", "wood": "dark_oak", "timber": false, "accent": "red"},
+          {"wall": "stone_bricks", "low": "polished_andesite", "roof": "stone_brick", "wood": "dark_oak", "timber": false},
+          {"wall": "smooth_stone", "wall2": "polished_andesite", "low": "tuff", "roof": "polished_andesite", "wood": "dark_oak", "timber": false}
+        ],
+        "noble": [
+          {"wall": "polished_andesite", "low": "chiseled_stone_bricks", "roof": "polished_andesite", "wood": "dark_oak", "column": "polished_basalt", "timber": false},
+          {"wall": "stone_bricks", "wall2": "chiseled_stone_bricks", "low": "polished_basalt", "roof": "stone_brick", "wood": "dark_oak", "timber": false},
+          {"wall": "calcite", "low": "polished_andesite", "roof": "polished_andesite", "wood": "dark_oak", "timber": false}
+        ]
+      }
+    }
+  }
+}

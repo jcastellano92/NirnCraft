@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:dripstone_caves",
+    "minecraft:lush_caves",
+    "nirncraft:dwemer_caverns",
+    "nirncraft:falmer_glow_caves",
+    "nirncraft:ice_caves",
+    "nirncraft:lava_caves",
+    "nirncraft:mushroom_grottos"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/hound_den",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274533,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "hound_den"
+    ]
+  }
+}

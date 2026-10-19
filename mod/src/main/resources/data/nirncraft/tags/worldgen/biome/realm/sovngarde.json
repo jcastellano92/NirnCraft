@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:sovngarde_fields",
+    "nirncraft:sovngarde_mistvale",
+    "nirncraft:sovngarde_chasm",
+    "nirncraft:sovngarde_hall_heights",
+    "nirncraft:sovngarde_golden_grove",
+    "nirncraft:sovngarde_mountains"
+  ]
+}

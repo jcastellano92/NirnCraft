@@ -1,11 +1,11 @@
 {
   "replace": false,
   "values": [
-    "skycraft:atmoran_ice_waste",
-    "skycraft:molag_amur",
-    "skycraft:red_mountain",
-    "skycraft:solstheim_ashlands",
-    "skycraft:vvardenfell_ashlands",
-    "skycraft:winterhold_glacier"
+    "nirncraft:atmoran_ice_waste",
+    "nirncraft:molag_amur",
+    "nirncraft:red_mountain",
+    "nirncraft:solstheim_ashlands",
+    "nirncraft:vvardenfell_ashlands",
+    "nirncraft:winterhold_glacier"
   ]
 }

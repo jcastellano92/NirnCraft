@@ -2,11 +2,11 @@ hash-format = "sha256"
 
 [[files]]
 file = "config/defaultoptions/keybindings.txt"
-hash = "3920a09c6c1a979bcd0ee4e92119ba38f6d13af6d9271b5544a35a4517fc3649"
+hash = "d7710a6bac56f5a77d465963c96904d14fed126576b45f23afa96ad0292c8f11"
 
 [[files]]
 file = "config/defaultoptions/options.txt"
-hash = "aeec438e4e522d686816dd47ae71ed6fc05c125076c6ddb1f541d72a442c53cd"
+hash = "7279c95dad962c78fea8e401062e9265337131672cc2bd11ca10b2f68c0a6cd5"
 
 [[files]]
 file = "config/dynamic_fps.json"
@@ -14,126 +14,126 @@ hash = "20540c89aa94d1bced9ac7c2122f82018ebbf9252a7a937a41f907f088850a8c"
 
 [[files]]
 file = "config/iris.properties"
-hash = "4da17bdbae124b2b055d77c7113ba29cf0fb200d6499b22376a27f4ab0b290a7"
+hash = "a5a872b272783f33971f461325daad1a7028d5bb6df492882cbd6e232d4bdb2c"
 
 [[files]]
 file = "config/lootr-common.toml"
-hash = "1cbbf34e7da65a1d5b20a0fb1b7499235a46c15397d48aee7c3fae2119b2daf5"
+hash = "ceaf9faceb7056613c43a9536e47e2e38deef518494cd3447995c70150355de2"
 
 [[files]]
 file = "migration/platform-lock.json"
-hash = "7e1ab1ab4722fd16e4e06e096e0a9646195a3266e6f741dc0885b2e20d20fc06"
+hash = "0f43be78ccf795fc11b534f953a69ceefb8f822ba6b8e31647137fc3e247d346"
 
 [[files]]
 file = "mods/balm.pw.toml"
-hash = "35d0b23ada388fa1109fab124070ec7a9f8a52af5d9d9414a0cdc1613e4334a3"
+hash = "71f658a50c7610787a1c15521d1131d54f9be905ac0b6708852665510d93fb84"
 metafile = true
 
 [[files]]
 file = "mods/better-combat.pw.toml"
-hash = "36486b361f6cdc75d20e2ed26ae527c3606875ce667f609ad756bd20e4c0d979"
+hash = "b0ca47b4e919827530725bc7f8163fa5b24c2512e9c820db3127d0d62259acfe"
 metafile = true
 
 [[files]]
 file = "mods/cloth-config.pw.toml"
-hash = "9d912dcd3664e2eba9031a1a4086429c1d04ee61176ce630c1f4baa5e954f086"
+hash = "e18d6a91ed4241ffeffaeefdaf9171d010d44662f66b41eba198ce920c4ce7ca"
 metafile = true
 
 [[files]]
 file = "mods/clumps.pw.toml"
-hash = "47d3765c603494d648b83e587636e2af5090c9dc7fdfd597cb3e491464880a6c"
+hash = "da5f70a181bc8deaba85f9da80559481cdeab98bd92d5fe3b88fe9f8456991e8"
 metafile = true
 
 [[files]]
 file = "mods/controllable.pw.toml"
-hash = "fc0da4cbe20d0a484a06f7f475063376e004a4fcb0449029dc6495b6d60c9f07"
+hash = "a16b98818f8527ae7eadb16a044723861f0f87cdcc4e8e9805e673fe99deed70"
 metafile = true
 
 [[files]]
 file = "mods/creativecore.pw.toml"
-hash = "af7e5b99abbd33e9ef61b4e277c2d65ab847ba4b8940c1bc649fc92b27fedd21"
+hash = "7693108f19e1e065bfff07fb54c86b45b1744e3e0221674cd7611cbf5473ed90"
 metafile = true
 
 [[files]]
 file = "mods/default-options.pw.toml"
-hash = "c34060db9e32c13f7e83459df75ee8b375a7da27ceb02287ecee824dce9abccb"
+hash = "23ee66728a9f5f02dfce281851a3f08baebac0dc8af617b9787e13e317f7f429"
 metafile = true
 
 [[files]]
 file = "mods/dynamic-fps.pw.toml"
-hash = "7ff1709bffa91124b3decf28d20c361d66dc4bba08b2c10ce9b42af93ccb53a2"
+hash = "c4c780e493044659f63f1c9d4c3b9f2908960b74f2ab6086839c13fcf7033d40"
 metafile = true
 
 [[files]]
 file = "mods/entityculling.pw.toml"
-hash = "e68dd204d32b8507c4c44690c90c421cc99a8238a844ce6f26d20218caef02d4"
+hash = "9b94c71159d15929c3d79038ed88cb481f7ce9ebbcece5184c128a8ecb118440"
 metafile = true
 
 [[files]]
 file = "mods/ferrite-core.pw.toml"
-hash = "3f677a0bf6cd3a9b19164d19f127fd5e150996b8f5ba2e80f87da61db40774da"
+hash = "0f4ae04f131366c6e41ac49c26b4d1586531bfc7c80af243967b5d6f63619d9b"
 metafile = true
 
 [[files]]
 file = "mods/framework.pw.toml"
-hash = "38d36a4b683b7c14a1c3150faacd8c1617485c9546712fc10b1bdaebb71b6c40"
+hash = "c39b377b38f62ec02ab817b3fbb3a8e54964c0c21b0737e82231aef6a544ed6f"
 metafile = true
 
 [[files]]
 file = "mods/immediatelyfast.pw.toml"
-hash = "0a0c5da87b77c61813a569a10844fa99fcf62933850c7d7f6dc7f6e7e2b70539"
+hash = "89984b07fe9c1eed2fc825a366c6412281327a1ca9e8a82ab8032879dbfd0237"
 metafile = true
 
 [[files]]
 file = "mods/iris.pw.toml"
-hash = "d347f82fe2cfefd3f4556fea86743bcf6ca6850bd99ec14a2d3f3199cd149e64"
+hash = "18ba97f4a2f7333e73c07b670fefb966c417e8baa0ba797e872c1c1af20c728a"
 metafile = true
 
 [[files]]
 file = "mods/itemphysic-lite.pw.toml"
-hash = "75f2fa94167f2464497d8577660b4d657e18d76b6474ce12f46f93aacc9fd43f"
+hash = "945381b5609509da229648e318befb6e6f74b8574f07792e626c9e5637b8520e"
 metafile = true
 
 [[files]]
 file = "mods/lithium.pw.toml"
-hash = "d75073eba5f2eaa5ea43ec43c447c8ffde986920f7c785e459314dddc6d2caa8"
+hash = "2360d196a95e21a8507fd4414e19006d7807ee06fabe586647057cd40f8d3dfd"
 metafile = true
 
 [[files]]
 file = "mods/lootr.pw.toml"
-hash = "d66fb04cbb1ec97c3b61cc4a383f4828549b547ec191b675a7d7ef5dda9be8c1"
+hash = "d0772358c317fa05b751a1ac385d77f8cdbebe82af4664f265e016a31bd47b68"
 metafile = true
 
 [[files]]
 file = "mods/mouse-tweaks.pw.toml"
-hash = "c54cb523eab1cb0e277e2b1f9f59ac1a8a8c23f9b62ee1c1ff4f828602029158"
+hash = "4e35725d86c815b8a53dc9098885269f1e9f92dbc4d7cebf236c96526a894462"
 metafile = true
 
 [[files]]
 file = "mods/player-animation-library.pw.toml"
-hash = "4764d7db44bf602e22895620ef8c849c22e526e976c0287507f96bd2b772e827"
+hash = "c8a18df76b7a96b4eb8fc71987edaab08f2132d089ef60e447a63c408f64b47b"
 metafile = true
 
 [[files]]
 file = "mods/resourceful-config.pw.toml"
-hash = "bef9cb77343f0ecbdcf1699179a433fd2c9e982462c9d6225c84937e601b1e37"
+hash = "20d32be549b078a96f46a56801bb87fb3200f0c456771f2b4983815189a58b32"
 metafile = true
 
 [[files]]
 file = "mods/sodium.pw.toml"
-hash = "e6f9ef5c99012b3d8bb4e680ea2387a5da05023764ee101023f1cbd5191988aa"
+hash = "c26d7b2b4392d9bc9e076a183ed9e8f871da0682fdc39a026d2fc8398430f3f1"
 metafile = true
 
 [[files]]
 file = "mods/spark.pw.toml"
-hash = "58189b1e7b6af469fa3246a8f3faf3f44f1de2e4a8d4b0cc977c3cc96ead9db0"
+hash = "bbaff17a550ddf29729d0bdc0a6629b42a06266f7101952a45c7bc9e4222afcd"
 metafile = true
 
 [[files]]
 file = "mods/structure-layout-optimizer.pw.toml"
-hash = "4e4fb2264f0c6d04ccd96d2f54d110ed663d93929dab4a1e4431ac19fdb87f23"
+hash = "5d6b73b07381dfd523e080d148cbb1ff7792e3d87b05e0418abededa7d7b92e2"
 metafile = true
 
 [[files]]
-file = "shaderpacks/SkycraftAether.zip"
-hash = "aec8106f74eb5aa32151f1964203794bc094c4213a846d4ef61ba74e931be7c8"
+file = "shaderpacks/InfiniteATLAS.zip"
+hash = "9ba99c2da824bcd88da2bc1618e98ef2b4be4e966d5a3e7e97f9a364517e3f0c"

@@ -1,0 +1,286 @@
+{
+  "id": "vaermunds_rest",
+  "why": [
+    "frozen_forest.L1.fjord_valleys",
+    "frozen_forest.L4.petrified_rime_woods",
+    "frozen_forest.L6.jylkurfyk_port_ruins"
+  ],
+  "sil": "atmora-vaermunds-rest-plan",
+  "base": "none",
+  "overlay": "frozen_forest",
+  "radius": 22,
+  "reach": 34,
+  "gates": [
+    [
+      0,
+      20
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        10
+      ],
+      "overlay": "frozen_forest",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        10,
+        22
+      ],
+      "overlay": "frozen_forest",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "vaermunds_rest_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "arch",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "vaermunds_rest_landmark",
+      "overlay": "frozen_forest"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          17
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          -6,
+          -11
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -15,
+          0
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          15,
+          2
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        6,
+        -2
+      ],
+      "rx": 13,
+      "rz": 11,
+      "wobble": 5,
+      "lobes": 5,
+      "phase": 0.23,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "vaermunds_rest_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "overlay": "frozen_forest",
+      "name": "vaermunds_rest_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        8
+      ],
+      "face": "north",
+      "overlay": "frozen_forest",
+      "name": "vaermunds_rest_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -11,
+        11
+      ],
+      "face": "north",
+      "overlay": "frozen_forest",
+      "name": "vaermunds_rest_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "vaermunds_rest_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "vaermunds_rest_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -8
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "vaermunds_rest_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "vaermunds_rest_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "vaermunds_rest_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "vaermunds_rest_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "vaermunds_rest_b_5",
+    "smithy": "vaermunds_rest_b_7"
+  },
+  "titles": {
+    "vaermunds_rest_b_1": "place.nirncraft.vaermunds_rest Council & Seat Hall",
+    "vaermunds_rest_b_2": "place.nirncraft.vaermunds_rest High Sanctuary",
+    "vaermunds_rest_b_3": "place.nirncraft.vaermunds_rest Fighters & Wayfarers Hall",
+    "vaermunds_rest_b_4": "place.nirncraft.vaermunds_rest Mages & Chroniclers Spire",
+    "vaermunds_rest_b_5": "place.nirncraft.vaermunds_rest The Lantern & Hearth Inn",
+    "vaermunds_rest_b_6": "place.nirncraft.vaermunds_rest The Traveler's Rest Tavern",
+    "vaermunds_rest_b_7": "place.nirncraft.vaermunds_rest Master Forge & Armorer",
+    "vaermunds_rest_b_8": "place.nirncraft.vaermunds_rest Botanicals & Remedies",
+    "vaermunds_rest_landmark": "High Seat of place.nirncraft.vaermunds_rest",
+    "vaermunds_rest_plaza": "place.nirncraft.vaermunds_rest Central Plaza"
+  },
+  "innKey": "vaermunds_rest_b_5",
+  "zones": [
+    {
+      "at": [
+        6,
+        -8
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 18,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

@@ -262,6 +262,6 @@ def model(set_id, tex_ref):
         "firstperson_lefthand": {"rotation": [0, 180, -5], "translation": [5, 5, -11], "scale": [1.25, 1.25, 1.25]},
     })
     base = {"gui_light": "front", "textures": {"shield": tex_ref, "particle": tex_ref}, "elements": elements}
-    main = dict(base, display=display, overrides=[{"predicate": {"blocking": 1}, "model": f"skycraft:item/{set_id}_shield_blocking"}])
+    main = dict(base, display=display, overrides=[{"predicate": {"blocking": 1}, "model": f"nirncraft:item/{set_id}_shield_blocking"}])
     block = dict(base, display=blocking)
     return main, block

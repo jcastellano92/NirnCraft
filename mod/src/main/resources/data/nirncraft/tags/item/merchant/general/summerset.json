@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:alto_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:pearl",
+      "required": false
+    },
+    {
+      "id": "nirncraft:elves_ear",
+      "required": false
+    },
+    {
+      "id": "nirncraft:refined_moonstone",
+      "required": false
+    }
+  ]
+}

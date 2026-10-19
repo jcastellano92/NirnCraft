@@ -2,7 +2,7 @@
 
 This is the design rulebook for the whole world: every province, region, city, town, dungeon and roadside spot. The
 master plan and every province phase follow it. It says what "as full and special as Skyrim" means in numbers
-Skycraft can build and measure. The bar is Skyrim itself, measured from the real game (section 4.1). ESO is only a
+NirnCraft can build and measure. The bar is Skyrim itself, measured from the real game (section 4.1). ESO is only a
 pool of optional ideas that may sit on top of that bar (section 4.12).
 
 * **The first principle** (world building is king) governs everything below it. It includes the causal world model
@@ -13,7 +13,7 @@ pool of optional ideas that may sit on top of that bar (section 4.12).
 * **Section 2** covers the research inputs: the owner's asset-research PDF, its resource inventory and what each
   source may be used for, plus what the Daggerfall bible teaches about how a whole TES world's systems fit together.
 * **Section 3** lists the open-world principles from Skyrim, ESO, Morrowind, Oblivion and Daggerfall, each one turned
-  into a Skycraft rule with a measurable target.
+  into a NirnCraft rule with a measurable target.
 * **Section 4** is the region content template. It opens with what made Skyrim great, turned into rules with
   checks (4.0), and the Skyrim baseline measured per hold from the real game (4.1). Then it says what every province
   and region must contain, counted by tier and scaled by area, mapped to existing systems. It lists the missing
@@ -32,7 +32,7 @@ text, name of an invented person, model, texture and sound is our own. Nothing f
 textures, audio, rasters) enters the repo, raw or converted. Section 2.2 says what each listed source may be used
 for.
 
-**Units.** 1 block is about 0.9 m, close to Skyrim's own scale (Skycraft's Skyrim is 26.5 km² of land). 1 km² is
+**Units.** 1 block is about 0.9 m, close to Skyrim's own scale (NirnCraft's Skyrim is 26.5 km² of land). 1 km² is
 1,000 x 1,000 blocks. Walking speed is about 4.3 blocks/s, so 250 blocks is about one minute on foot. "Region" means
 a `regions.json` region (71 land regions; Skyrim's nine holds are regions). "Province" means a group of regions.
 "Named town" means a capital, city or town, as in `parity.py`.
@@ -53,7 +53,7 @@ rob, a mine with no ore in the rock, or a cheerful lute in a town under siege.
 
 Skyrim's geography explains most of what is in it. The underground follows the rock. The cults hide where the law is
 weak. Water decides where people can live. Trade routes decide which towns are busy and which are poor. The people's
-beliefs follow from their history and their neighbours. Skycraft builds every region the same way, starting from
+beliefs follow from their history and their neighbours. NirnCraft builds every region the same way, starting from
 the ground and working up, using the sheet below.
 
 ### The causal world model sheet
@@ -156,7 +156,7 @@ has.
    collectible, unique), knowledge (map reveal, lore, recipe) or a view.
 10. **Skyrim quality everywhere, not only in Skyrim.** Every region meets the Skyrim floor measured from the real
     game (section 4.1): the same density per km², the same depth per settlement tier and the same mix of dungeons,
-    people, quests and secrets as a Skyrim hold. Skyrim's own holds in Skycraft must meet it too. ESO ideas are an
+    people, quests and secrets as a Skyrim hold. Skyrim's own holds in NirnCraft must meet it too. ESO ideas are an
     optional layer on top (4.12) and never replace any part of the floor.
 
 ---
@@ -245,7 +245,7 @@ It ends with a reference list of 72 sources.
    as tables, and ESO strings per update.
 3. **The unrepresented provinces (Hammerfell, High Rock, Cyrodiil, mainland Morrowind) are where fans have spent
    decades of work.** That work uses professional terrain generators (erosion, tectonics), then imports. The demand
-   is for exactly the regions Skycraft's `PARITY.md` shows are thinnest.
+   is for exactly the regions NirnCraft's `PARITY.md` shows are thinnest.
 4. **Big worlds hit engine limits.** Skyrim's physics drifts beyond about 64 cells from the origin, so fan projects
    split land into separate worldspaces. Multiplayer (TES3MP) must put rest, fast travel and the clock under the
    server, and must serialise journal and NPC state.
@@ -257,15 +257,15 @@ It ends with a reference list of 72 sources.
    community.
 
 **What the PDF does not give us.** It gives no open-world design principles. Sections 3 to 5 of this document are
-our own synthesis from the games themselves and from the existing Skycraft docs and playtests.
+our own synthesis from the games themselves and from the existing NirnCraft docs and playtests.
 
-### 2.2 Resource inventory, licensing posture and mapping to Skycraft
+### 2.2 Resource inventory, licensing posture and mapping to NirnCraft
 
 Posture key: **REF** means facts or inspiration only (read it, never ship from it). **LOCAL** means the owner may run
 it on his own game install, with output kept in the gitignored `.reference/`. **NO** means not used. No row permits
 copying game assets or text.
 
-| Source / tool | What it is | Good for | Posture | Skycraft use |
+| Source / tool | What it is | Good for | Posture | NirnCraft use |
 | --- | --- | --- | --- | --- |
 | OpenTESArena | Open C++ re-implementation of Arena (needs the original data) | Arena's continent sketch, its province and city list, dungeon archetypes | REF | Province and city names and rough positions (already in `places/`) |
 | Arena text dumps (dungeon and city strings, via the Imperial Library) | Raw strings | Which city and dungeon types existed | REF | Nothing beyond facts |
@@ -319,23 +319,23 @@ show which systems a whole-province world needs and how they hand off to each ot
 
 ## 3. Open-world design principles
 
-Each principle has a source idea, a Skycraft rule, a target and its check. Ids (P-A1...) are referenced from
+Each principle has a source idea, a NirnCraft rule, a target and its check. Ids (P-A1...) are referenced from
 sections 4 and 5.
 
 ### 3.1 Skyrim
 
 **A. Space and density**
 
-| Id | Principle (why it works) | Skycraft rule | Target | Check |
+| Id | Principle (why it works) | NirnCraft rule | Target | Check |
 | --- | --- | --- | --- | --- |
-| P-A1 | **Something every minute.** Skyrim packs over 400 map markers (`markers.json`: 436), plus many unmarked sites, into the 26.5 km² Skycraft gives it, so you rarely walk two minutes without a find | A notable point of interest close to almost every point of land | POI within 150-250 blocks of >= 90% of land; major site within 600 blocks of >= 90% | `explore/density_audit.py` (met in every region today) |
+| P-A1 | **Something every minute.** Skyrim packs over 400 map markers (`markers.json`: 436), plus many unmarked sites, into the 26.5 km² NirnCraft gives it, so you rarely walk two minutes without a find | A notable point of interest close to almost every point of land | POI within 150-250 blocks of >= 90% of land; major site within 600 blocks of >= 90% | `explore/density_audit.py` (met in every region today) |
 | P-A2 | **Density is depth, not dots.** A Skyrim place has a name, a person or story, and a reason to go | Every place carries a hook, a rumour and (for 40% or more) a note | `d_identity` = 1.0, `r_places` >= 11.4/km², `r_notes` >= 44.7/km² (floors) | `parity.py` DUN, LOR |
-| P-A3 | **Spacing by tier.** Big things are far apart, small things close | Grid spacing per landmark tier (`landmarks/Tier.java`) and minor-site cells of 160 blocks | S about 17/km², M about 9/km², L about 4.5/km², XL >= 0.33/km² (today 0.075: raise it, see P-B2) | `/skycraft-landmarks`, F-WEENIE |
+| P-A3 | **Spacing by tier.** Big things are far apart, small things close | Grid spacing per landmark tier (`landmarks/Tier.java`) and minor-site cells of 160 blocks | S about 17/km², M about 9/km², L about 4.5/km², XL >= 0.33/km² (today 0.075: raise it, see P-B2) | `/nirncraft-landmarks`, F-WEENIE |
 | P-A4 | **Hold identity.** Each hold has its own colour, land, people, threat and industry | Each region differs in palette, landform, culture mix, creature mix, industry and voice | Category floors in `PARITY.md` 5; `y_looks` >= 2, `l_kinds` >= 10, `c_total` >= 25 per region | `parity.py --assert-floor` |
 
 **B. Discovery, sightlines and weenies**
 
-| Id | Principle | Skycraft rule | Target | Check |
+| Id | Principle | NirnCraft rule | Target | Check |
 | --- | --- | --- | --- | --- |
 | P-B1 | **The rule of three (discovery loop).** You set out for something you can see, and on the way two more things catch your eye, so a trip becomes a chain | Design the land so any goal has two or more detours on the way. From a vantage point you can see or hear about at least three things | On a road walk, >= 2 secondary POIs within 120 blocks of the route per 600 blocks; from a hilltop vantage, >= 3 distinct POIs with line of sight within 250 blocks (vanilla render distance) and >= 5 within 1,000 (Distant Horizons) | F-VISTA, F-DETOUR (new, 5.4) |
 | P-B2 | **Weenies.** A tall, unique silhouette pulls you across the land (a mountain peak, a palace on a rock, a tower, a giant's fire) | Every region has a visible-from-afar silhouette: an XL landmark, a marquee tower or palace, a lit beacon or a named peak. Dungeon exteriors on heights (barrows on hills) | >= 70% of land points see a weenie within 1,500 blocks (DH); every region has >= 1 XL landmark plus 1 per 3 km² | F-WEENIE (new) |
@@ -344,7 +344,7 @@ sections 4 and 5.
 
 **C. Dungeons**
 
-| Id | Principle | Skycraft rule | Target | Check |
+| Id | Principle | NirnCraft rule | Target | Check |
 | --- | --- | --- | --- | --- |
 | P-C1 | **Loop, then shortcut home.** A Skyrim dungeon is a one-way loop that ends near the entrance with a lever, door or drop | Major and marquee dungeons are loops: the boss room opens a shortcut back | >= 90% of major, 100% of marquee | `dungeon_audit.py` (F-LOOP) |
 | P-C2 | **Kit-built, hand-composed.** Rooms come from kits, but each dungeon's order, story and set piece are authored | Room templates per culture kit (>= 6), set pieces, traps and puzzles per culture | `d_rooms` >= 40, `d_built` >= 5 per region | PA12 |
@@ -354,7 +354,7 @@ sections 4 and 5.
 
 **D. Quests and story**
 
-| Id | Principle | Skycraft rule | Target | Check |
+| Id | Principle | NirnCraft rule | Target | Check |
 | --- | --- | --- | --- | --- |
 | P-D1 | **Authored stories carry the world; radiant work fills the gaps.** | Every region story and side quest is authored; radiant templates are filler with named givers and places | Authored >= 70% of the quests a player meets in a region | `parity.py` QST + F-RADIANT share |
 | P-D2 | **Quests point at places.** In Skyrim nearly every quest uses a real location (93%) | Quests use registered places | `q_placed` >= 0.9 | `parity.py` |
@@ -363,7 +363,7 @@ sections 4 and 5.
 
 **E. Pacing: peace and danger**
 
-| Id | Principle | Skycraft rule | Target | Check |
+| Id | Principle | NirnCraft rule | Target | Check |
 | --- | --- | --- | --- | --- |
 | P-E1 | **Quiet by default.** Long walks with music, wind and wildlife | Quiet weights, quiet roads (`ECOLOGY.md`) | road300 <= 5% by day and <= 20% by night | `ecology_report.py` |
 | P-E2 | **World encounters, not random attacks.** Skyrim's roads stage small scenes: a courier, a prisoner escort, hunters, a fight in progress | A library of scripted encounters per region, anchored to roads and wild spots | >= 40 kinds in total, >= 8 per region, >= 3 of them unique to the province | `scenes.json` count (F-ENC) |
@@ -372,7 +372,7 @@ sections 4 and 5.
 
 **F. Travel**
 
-| Id | Principle | Skycraft rule | Target | Check |
+| Id | Principle | NirnCraft rule | Target | Check |
 | --- | --- | --- | --- | --- |
 | P-F1 | **Walk first, fast travel second.** Fast travel only to places you have found, so the first trip is on foot | Already the rule (map to discovered places) | Unchanged | none |
 | P-F2 | **Roads as content.** Signs, inns, shrines, waysides, patrols, caravans | Waysides every 1.5-3 km, signposts at every junction, roadside inns | Waysides per km in `placement_lint` bands; every junction signed | sceneplan stats, F-SIGN (new) |
@@ -380,7 +380,7 @@ sections 4 and 5.
 
 **G. Factions and towns**
 
-| Id | Principle | Skycraft rule | Target | Check |
+| Id | Principle | NirnCraft rule | Target | Check |
 | --- | --- | --- | --- | --- |
 | P-G1 | **Guild homes are places.** Each Skyrim faction owns a building in a different city and gives that city meaning | Each province has 2-4 joinable faction hubs, spread over different cities | >= 2 per province | Faction data, F-HUBS |
 | P-G2 | **Towns run on an industry.** Mines, mills, farms, docks | Every village and larger has a work site with jobs and sells its product (`Zoning.ensureTrades` plus industry) | 0 unstaffed workplaces; 1 industry per settlement | `population_lint.py`, `town_checks.py` |
@@ -388,7 +388,7 @@ sections 4 and 5.
 
 **H. Economy**
 
-| Id | Principle | Skycraft rule | Target | Check |
+| Id | Principle | NirnCraft rule | Target | Check |
 | --- | --- | --- | --- | --- |
 | P-H1 | **Regional goods.** What a place sells says where you are | Regional ingredients, ore, fish, gear | `i_ingr` >= 30 per province (stage 1); each town sells >= 2 regional goods | `parity.py` ITM |
 | P-H2 | **Reasons to come back to town.** Sell, craft, train, rest, turn in quests | Every town has the services of its tier (4.4) | 100% | `town_checks.py`, `population_lint.py` |
@@ -410,7 +410,7 @@ zone's main city.
 
 **What ESO improved in the flow:**
 
-| Id | Improvement | Skycraft rule | Target | Check |
+| Id | Improvement | NirnCraft rule | Target | Check |
 | --- | --- | --- | --- | --- |
 | P-I1 | **Every zone tells its own story.** You learn a zone's politics and people by playing its chain | A region storyline per region (MS1) | 5-8 quests per region | F-STORY |
 | P-I2 | **Clear signposting.** Quest givers are marked, points of interest show on the compass when near, and a zone guide lists what is left | A compass hint for undiscovered places within 150 blocks, a quest-giver marker in towns and a Region Guide (MS2, MS13) | Every region has a complete guide | F-GUIDE |
@@ -422,7 +422,7 @@ zone's main city.
 
 ### 3.3 Morrowind, Oblivion and Daggerfall
 
-| Id | Strength | Skycraft rule | Target | Check |
+| Id | Strength | NirnCraft rule | Target | Check |
 | --- | --- | --- | --- | --- |
 | P-J1 | **Morrowind: exclusive factions and alien uniqueness.** Great Houses you can join only one of, cities you could never mistake (a city of cantons, mushroom towers, a giant crab shell) | Mutually exclusive faction choices per province where lore has them (houses, crowns and forebears, clans); each city's silhouette tag is unique (marquee) | >= 1 exclusive faction choice in Morrowind, Hammerfell and High Rock | Faction data |
 | P-J2 | **Morrowind: travel networks as world-building.** Striders, boats, guild guides, propylons, intervention spells | Province travel networks (MS11) | Each province has >= 2 travel modes beyond walking and horse | F-TRAVEL |
@@ -437,10 +437,10 @@ zone's main city.
 ### 4.0 What made Skyrim great (rules every province must meet)
 
 Skyrim's quality is not its dot count. It comes from a handful of things it did everywhere. Each one below is a rule
-for every Skycraft province, with the check that proves it. The first principle (world building is king) comes before
+for every NirnCraft province, with the check that proves it. The first principle (world building is king) comes before
 all of them: each rule is met through the region's world model sheet, never as decoration.
 
-| # | What Skyrim did | Rule for every Skycraft region | Check |
+| # | What Skyrim did | Rule for every NirnCraft region | Check |
 | --- | --- | --- | --- |
 | G1 | **Each hold has an identity you can feel within seconds.** The Reach's red crags and stone city, the Pale's snow and mining town, the Rift's autumn birches and canals | Each region differs from its neighbours in palette, landform, architecture, weather, music cue, politics and creature mix, all drawn from its sheet (L1-L9) | Blind test: Haiku names the region from 3 random screenshots at >= 80%; `y_looks` >= 3, `c_total` >= 25, a region music cue (PA20) |
 | G2 | **A skyline pulls you off the road.** A tower on a ridge, a barrow on a hill, smoke from a camp, a peak, a ruin's arch, about every few hundred blocks | Weenies and detours are planned from sightlines, not scattered | F-WEENIE >= 70%; F-VISTA >= 3 within 250 blocks; F-DETOUR >= 2 per 600 blocks of road |
@@ -468,8 +468,8 @@ copies Skyrim's shapes in a new colour fails G1 and the coherence check.
 official add-ons), read locally with the `.reference/skyrim_ref` scripts. Only counts and facts are recorded; no
 text, names of invented people or assets enter the repo (legal line). Each count was attributed to a hold through
 Skyrim's own location records (location parent chains). Where that failed, positions were used (the nearest map
-marker of a known hold). Areas are **Skycraft km²** (1,000 x 1,000 blocks) of the same hold on our map, which is
-what `parity.py` divides by. One Skycraft km² is about 0.8 real km². Solstheim is shown for comparison but is not in
+marker of a known hold). Areas are **NirnCraft km²** (1,000 x 1,000 blocks) of the same hold on our map, which is
+what `parity.py` divides by. One NirnCraft km² is about 0.8 real km². Solstheim is shown for comparison but is not in
 the median.
 
 What each column means:
@@ -490,7 +490,7 @@ The figures are lower bounds wherever attribution was uncertain.
 
 | Measure | Min / median / max per hold | Per km² min / **median** / max | Solstheim (0.98 km²) |
 | --- | --- | --- | --- |
-| Land area (Skycraft km²) | 1.41 / 2.91 / 4.64 | n/a | 0.98 |
+| Land area (NirnCraft km²) | 1.41 / 2.91 / 4.64 | n/a | 0.98 |
 | Map markers (all kinds) | 29 / 41 / 56 | 11.0 / **14.6** / 22.0 | 52 |
 | Dungeon locations (named, all themes) | 18 / 26 / 37 | 6.7 / **8.9** / 14.9 | 35 |
 | Distinct dungeon inhabitant themes | 8 / 10 / 13 | n/a | 13 |
@@ -546,7 +546,7 @@ heart.
 
 **How to read the counts.**
 
-* **The floor is Skyrim's median per km², scaled by area**, for every Skycraft region whatever its province. A
+* **The floor is Skyrim's median per km², scaled by area**, for every NirnCraft region whatever its province. A
   region's count is `max(absolute floor, round(median density x km²))`.
 * **The absolute floor is Skyrim's minimum per km²** (the thinnest hold). No region goes below it, even where the
   terrain is hostile (deserts, swamps, ice).
@@ -560,7 +560,7 @@ heart.
   expeditions, not homelands.
 * Status: **EXISTS** means the system is built and only content is missing. **PARTIAL** means part of the system
   exists. **MISSING** means a new system is needed (specs in 4.11).
-* Honest note: at Skyrim density, a 4 km² region needs about 130 named NPCs, 36 dungeons and 55 quests, and Skycraft
+* Honest note: at Skyrim density, a 4 km² region needs about 130 named NPCs, 36 dungeons and 55 quests, and NirnCraft
   has 71 regions. Hand authoring cannot reach that everywhere. Generators that read the world model sheet (named
   residents from the population grammar, dungeon identity, quest templates bound to real places) carry most of it,
   and authored work goes where the player meets it first. Generated content must still pass the coherence check.
@@ -585,7 +585,7 @@ heart.
 
 ### 4.3 Region layer: the Skyrim floor (every region)
 
-"Median" and "abs." are per Skycraft km²; the example is a medium region of 4 km². Inhabitants, building styles and
+"Median" and "abs." are per NirnCraft km²; the example is a medium region of 4 km². Inhabitants, building styles and
 names always come from the region's own sheet. A "Nordic ruin" becomes an Ayleid well-ruin in Cyrodiil, a Velothi
 tomb in Morrowind or a Yokudan necropolis in Hammerfell.
 
@@ -648,7 +648,7 @@ tomb in Morrowind or a Yokudan necropolis in Hammerfell.
 * **Village**: working settlements such as mills, mines, Orc strongholds and roadside inns.
 * **Hamlet**: farms and estates.
 
-Skycraft's `places` types map onto these tiers: capital to capital or city, town to town, village to village, and
+NirnCraft's `places` types map onto these tiers: capital to capital or city, town to town, village to village, and
 farm to hamlet.
 
 **Density per region.** Skyrim's holds have 2.0 settlements per km² at the median, and 0.43 in the thinnest hold.
@@ -671,7 +671,7 @@ meet these counts (`PARITY.md` SET raw). **The gap is depth, not count.**
 | **Village** (18) | 0 / **3** / 12 | 1 / **2** / 4 | 0 / **1** / 4 | 0 / **0** / 3 | 0 / **0.5** / 4 | 0 / **0** / 1 | 0 / **2** / 13 | 0 / **0.5** / 13 |
 | **Hamlet** (13) | 1 / **2** / 5 | 1 / **1** / 4 | 0 / **0** / 1 | 0 / **0** / 1 | 0 | 0 | 1 / **1** / 3 | 0 / **0** / 2 |
 
-**The Skycraft floor per tier.** The target is the bold median and the absolute floor is the minimum. Skycraft's
+**The NirnCraft floor per tier.** The target is the bold median and the absolute floor is the minimum. NirnCraft's
 larger footprint means more buildings than Skyrim, but never fewer enterable, named or staffed ones.
 
 | Tier | Named NPCs | Enterable interiors | Named buildings | Distinct roles | Services required (Skyrim-measured) | Quests (authored + radiant offers) | Scenes | Other |
@@ -747,7 +747,7 @@ detail. The M and L tiers above already exceed that in count. What they need is 
 
 ### 4.8 Quests per region (Skyrim-measured)
 
-Skyrim has 371 journal quests in its nine holds: 14.0 per Skycraft km² over the whole province. A median hold carries
+Skyrim has 371 journal quests in its nine holds: 14.0 per NirnCraft km² over the whole province. A median hold carries
 33 of them itself (9.7 per km², 8 in the thinnest hold) and shares the rest with the province. Every region needs
 the following:
 
@@ -788,7 +788,7 @@ the following:
 | Marquee places and identity | `tools/marquee/marquee.json`, city plans, PA13 and PA17 | `MARQUEE.md`, `MARQUEE-PLAN.md` |
 | Unique towns | `tamriel/settlement/grammar` (Zoning, Fabric), `cityplans/*.json`, styles | `SKYRIM-SWEEP.md` |
 | Dungeon identity | Dungeon grammar, `dungeon_identity_gen.py` and lint, PA3, PA11, PA12 | `DUNGEON-AUDIT.md`, `PARITY.md` |
-| Landmarks S-XL | `com.skycraft.landmarks`, `landmarks/kinds.json` | `EXPLORATION.md` |
+| Landmarks S-XL | `com.nirncraft.landmarks`, `landmarks/kinds.json` | `EXPLORATION.md` |
 | Scenes | `worldplan/scene`, `SceneRealiser`, `scatter/rules.json` | `WORLDGEN-PIPELINE.md` 9 |
 | Lore web | `tools/marquee/loreweb*`, `lore/places/loreweb.json` | `LORE-WEB.md` |
 | Quests | `quests/*.json`, `quest/story`, `RadiantTemplates`, `quest_lang.js` | `QUESTS.md` |
@@ -915,7 +915,7 @@ meets the Skyrim floor, and never count toward it. MS21 and MS22 are part of the
 
 * **MS21 Micro-biome layer.** Skyrim is not one big biome per hold. Hot springs steam inside Eastmarch's tundra,
   a birch glade sits in a pine forest, salt marsh lies at a river mouth and rock fields cover the high moors, and each
-  one matches the land, the weather and the people. Each Skycraft region becomes a mosaic of micro-biomes driven by
+  one matches the land, the weather and the people. Each NirnCraft region becomes a mosaic of micro-biomes driven by
   its geography and listed in its sheet (L4, citing L1-L3).
   * **Drivers** (map variables, all baked or derivable from the existing rasters):
     * elevation bands and the snowline;
@@ -934,7 +934,7 @@ meets the Skyrim floor, and never count toward it. MS21 and MS22 are part of the
     * the creature table, through `region_spawns` keys;
     * what people do there (farms in valleys, mines in crags, fishers on coasts, herders on the moors), which feeds
       the settlement grammar and minor sites.
-  * **How Skycraft does it.**
+  * **How NirnCraft does it.**
     * `TamrielBiomeSource` already picks from a region palette by context (OCEAN, BEACH, RIVER, LAKE, MARSH,
       LOWLAND, UPLAND, PEAK, SUMMIT) with a climate and geography bias. `ecotones.py` already grades palettes
       toward their neighbours.
@@ -964,12 +964,12 @@ meets the Skyrim floor, and never count toward it. MS21 and MS22 are part of the
     * the forbidden pairs listed in the sheet are absent (a crop on a micro-biome whose climate forbids it, an
       industry with no resource, a shrine to a faith the region does not hold).
   * **Format as built (`tools/world/SCHEMA.md`).** `tools/world/sheet_from_md.py <provinces/x.md> --out <json>` parses
-    section 1 of a province markdown plan into `mod/src/main/resources/skycraft/tamriel/world/<province>.json` with
+    section 1 of a province markdown plan into `mod/src/main/resources/nirncraft/tamriel/world/<province>.json` with
     `province`, `truth`, `layers` (`L1`..`L11` of `{id, text, cites}`), `regions` (`<region>` -> `{truth, layers, jobs,
     dungeon_themes}`), and `forbidden` (`{kind, a, b, reason}`). Field IDs are global as `<scope>.L<n>.<id>` (aliases
-    `sk`/`skyrim`, `reach`/`the_reach`, `rift`/`the_rift`, `pale`/`the_pale` normalized). `com.skycraft.tamriel.world.WorldSheets`
-    loads all sheets asynchronously at server start and exposes `/skycraft-world sheet <scope> [layer]`;
-    `SettlementPopulation` (`SkycraftWhy` NBT tag from `jobs`) and `dungeons/identity/skyrim.json` (`why` from `L10`
+    `sk`/`skyrim`, `reach`/`the_reach`, `rift`/`the_rift`, `pale`/`the_pale` normalized). `com.nirncraft.tamriel.world.WorldSheets`
+    loads all sheets asynchronously at server start and exposes `/nirncraft-world sheet <scope> [layer]`;
+    `SettlementPopulation` (`NirnCraftWhy` NBT tag from `jobs`) and `dungeons/identity/skyrim.json` (`why` from `L10`
     `dungeon_themes`) are the first two consumers.
 
   The lint runs in `qa.ps1` and in every province phase report.

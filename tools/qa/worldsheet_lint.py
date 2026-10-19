@@ -27,7 +27,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-SKY = os.path.join(RES, "skycraft")
+SKY = os.path.join(RES, "nirncraft")
 WORLD_DIR = os.path.join(SKY, "tamriel", "world")
 
 LAYERS = [f"L{i}" for i in range(1, 12)]
@@ -278,7 +278,7 @@ def scan_content(province_filter: str | None, sheets: dict, all_fields: dict, er
                     jobs_why += 1
     record_stat("settlement_jobs", jobs_total, jobs_why)
 
-    # 2. Dungeon identity (mod/src/main/resources/skycraft/dungeons/identity/*.json)
+    # 2. Dungeon identity (mod/src/main/resources/nirncraft/dungeons/identity/*.json)
     di_total = 0
     di_why = 0
     ident_dir = os.path.join(SKY, "dungeons", "identity")
@@ -301,7 +301,7 @@ def scan_content(province_filter: str | None, sheets: dict, all_fields: dict, er
                     di_why += 1
     record_stat("dungeon_identity", di_total, di_why)
 
-    # 3. Places (mod/src/main/resources/skycraft/tamriel/places/*.json)
+    # 3. Places (mod/src/main/resources/nirncraft/tamriel/places/*.json)
     pl_total = 0
     pl_why = 0
     places_dir = os.path.join(SKY, "tamriel", "places")
@@ -323,7 +323,7 @@ def scan_content(province_filter: str | None, sheets: dict, all_fields: dict, er
                     pl_why += 1
     record_stat("places", pl_total, pl_why)
 
-    # 4. Quests (mod/src/main/resources/skycraft/quests/*.json)
+    # 4. Quests (mod/src/main/resources/nirncraft/quests/*.json)
     q_total = 0
     q_why = 0
     quests_dir = os.path.join(SKY, "quests")
@@ -346,7 +346,7 @@ def scan_content(province_filter: str | None, sheets: dict, all_fields: dict, er
                     q_why += 1
     record_stat("quests", q_total, q_why)
 
-    # 5. Scatter scene kinds (mod/src/main/resources/skycraft/scatter/kinds.json)
+    # 5. Scatter scene kinds (mod/src/main/resources/nirncraft/scatter/kinds.json)
     sk_total = 0
     sk_why = 0
     kinds_path = os.path.join(SKY, "scatter", "kinds.json")
@@ -360,7 +360,7 @@ def scan_content(province_filter: str | None, sheets: dict, all_fields: dict, er
                 sk_why += 1
     record_stat("scatter_kinds", sk_total, sk_why)
 
-    # 6. Lore places & books (skycraft/lore/places/*.json and skycraft/realms/books.json)
+    # 6. Lore places & books (nirncraft/lore/places/*.json and nirncraft/realms/books.json)
     lore_total = 0
     lore_why = 0
     lore_dir = os.path.join(SKY, "lore", "places")
@@ -392,10 +392,10 @@ def scan_content(province_filter: str | None, sheets: dict, all_fields: dict, er
                         lore_why += 1
     record_stat("lore", lore_total, lore_why)
 
-    # 7. Region spawns (data/skycraft/region_spawns/*.json)
+    # 7. Region spawns (data/nirncraft/region_spawns/*.json)
     sp_total = 0
     sp_why = 0
-    sp_dir = os.path.join(RES, "data", "skycraft", "region_spawns")
+    sp_dir = os.path.join(RES, "data", "nirncraft", "region_spawns")
     if os.path.isdir(sp_dir):
         for path in sorted(glob.glob(os.path.join(sp_dir, "*.json"))):
             bn = os.path.basename(path)
@@ -410,7 +410,7 @@ def scan_content(province_filter: str | None, sheets: dict, all_fields: dict, er
                         sp_why += 1
     record_stat("region_spawns", sp_total, sp_why)
 
-    # 8. Palettes micro-biome rules (skycraft/tamriel/palettes.json once R3b lands)
+    # 8. Palettes micro-biome rules (nirncraft/tamriel/palettes.json once R3b lands)
     pm_total = 0
     pm_why = 0
     pal_path = os.path.join(SKY, "tamriel", "palettes.json")

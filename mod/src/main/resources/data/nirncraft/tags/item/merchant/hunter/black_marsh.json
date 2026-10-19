@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:wamasu_scale",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leviathan_tooth",
+      "required": false
+    }
+  ]
+}

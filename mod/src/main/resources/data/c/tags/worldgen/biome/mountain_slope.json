@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:alpine_meadow",
-    "skycraft:snowy_slopes"
+    "nirncraft:alpine_meadow",
+    "nirncraft:snowy_slopes"
   ]
 }

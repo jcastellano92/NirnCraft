@@ -1,0 +1,8 @@
+{
+  "type": "nirncraft:realm_site",
+  "site": "isles/fringe",
+  "biomes": "#nirncraft:realm/shivering_isles",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

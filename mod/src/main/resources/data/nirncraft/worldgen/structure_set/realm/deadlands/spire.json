@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:realm/deadlands/spire",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 11,
+    "separation": 4,
+    "salt": 2041502
+  }
+}

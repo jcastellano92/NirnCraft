@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:jazbay_grapes",
+      "required": false
+    },
+    {
+      "id": "nirncraft:elves_ear",
+      "required": false
+    },
+    {
+      "id": "nirncraft:canis_root",
+      "required": false
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 """Generates the body layers of the races added after Skyrim's ten, the cosmetic sub-peoples, and the race feature
 texture (PIL). Everything here is original procedural art.
 
-Writes into mod/src/main/resources/assets/skycraft/textures/entity/society/npc/:
+Writes into mod/src/main/resources/assets/nirncraft/textures/entity/society/npc/:
   body/<race>_<m|f>_<tone>.png          the new races (Maormer, Reachmen, Ohmes-raht, Lilmothiit, Imga, Tsaesci,
                                         Ka Po' Tun, Tang Mo, Atmorans, Snow Elves, Dwemer, Ayleids, Kothringi)
   body/<race>_v<n>_<m|f>_<tone>.png     variants: Nibenese Imperials, Wood Orcs, Cathay-raht, Naga and Agaceph

@@ -1,0 +1,25 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "swamp_oak",
+        "weight": 4
+      },
+      {
+        "species": "bald_cypress",
+        "weight": 3
+      },
+      {
+        "species": "mangrove",
+        "weight": 2
+      },
+      {
+        "species": "swamp_hist",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

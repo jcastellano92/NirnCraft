@@ -31,9 +31,9 @@ minor sites -- caves, camps, farms, towers, tombs -- named in the province's own
 Iliac Bay. They are seeded and stable: re-running gives the same places.
 
 Outputs (relative to the repo root):
-  mod/src/main/resources/skycraft/tamriel/places/<province>.json  (cyrodiil, morrowind, ..., foreign)
-  mod/src/main/resources/skycraft/tamriel/places/index.json       (the files appended if missing)
-  mod/src/main/lang/skycraft/provinces.json                       place names and one-line descriptions
+  mod/src/main/resources/nirncraft/tamriel/places/<province>.json  (cyrodiil, morrowind, ..., foreign)
+  mod/src/main/resources/nirncraft/tamriel/places/index.json       (the files appended if missing)
+  mod/src/main/lang/nirncraft/provinces.json                       place names and one-line descriptions
 The structures that build the new kinds (culture ruins, regional keeps and towers) are written by
 `py -3 tools/landmarks.py --structures` (its PROVINCE_SITES table); check_builders() warns about any kind nothing builds.
 """
@@ -50,10 +50,10 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-MAPDIR = os.path.join(RES, "skycraft", "tamriel")
+MAPDIR = os.path.join(RES, "nirncraft", "tamriel")
 PLACES_DIR = os.path.join(MAPDIR, "places")
-QUEST_PLACES = os.path.join(RES, "skycraft", "quests", "places.json")
-LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft", "provinces.json")
+QUEST_PLACES = os.path.join(RES, "nirncraft", "quests", "places.json")
+LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft", "provinces.json")
 DATA_DIR = os.path.join(ROOT, "tools", "provinces_data")
 PREVIEW_DIR = os.path.join(ROOT, "tools", "worldgen")
 
@@ -77,7 +77,7 @@ DENSITY = 60000
 #          P = pin only (lies inside another place, e.g. a city district: nothing is built for it)
 
 KINDS = {
-    # settlements (skycraft:settlement with the culture kit; variants pick special layouts)
+    # settlements (nirncraft:settlement with the culture kit; variants pick special layouts)
     "city": ("city", "", 110, "S"),
     "town": ("town", "", 60, "S"),
     "village": ("village", "", 42, "S"),
@@ -170,19 +170,19 @@ for _prince in ["azura", "boethiah", "clavicus_vile", "hermaeus_mora", "hircine"
                 "mephala", "meridia", "molag_bal", "namira", "nocturnal", "peryite", "sanguine", "sheogorath", "vaermina"]:
     KINDS["shrine_" + _prince] = ("daedric_shrine", _prince, 12, "")
 
-# Every kind above must be built by a skycraft:places structure set (tools/landmarks.py writes the dungeon ones,
+# Every kind above must be built by a nirncraft:places structure set (tools/landmarks.py writes the dungeon ones,
 # including the culture ruins, keeps and towers these provinces need: PROVINCE_SITES); check_builders() verifies it.
 
 
 def check_builders():
-    """Warns about kinds whose (type, variant) no skycraft:places structure set builds (district pins excepted)."""
-    sets = os.path.join(RES, "data", "skycraft", "worldgen", "structure_set")
+    """Warns about kinds whose (type, variant) no nirncraft:places structure set builds (district pins excepted)."""
+    sets = os.path.join(RES, "data", "nirncraft", "worldgen", "structure_set")
     rules = []
     for dirpath, _, names in os.walk(sets):
         for n in names:
             if n.endswith(".json"):
                 pl = json.load(open(os.path.join(dirpath, n), encoding="utf-8")).get("placement", {})
-                if pl.get("type") == "skycraft:places":
+                if pl.get("type") == "nirncraft:places":
                     rules.append((set(pl.get("types", [])), set(pl.get("variants", []))))
     for kind, (ptype, variant, _, flags) in sorted(KINDS.items()):
         if "P" in flags:
@@ -427,7 +427,7 @@ class Placer:
         self.moves = []
         self.dropped = []
         self.ingest_skipped = 0
-        self.region_names = json.load(open(os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft",
+        self.region_names = json.load(open(os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft",
                                                         "tamriel_regions.json"), encoding="utf-8"))
 
     def add(self, x, z, r):
@@ -520,17 +520,17 @@ def build_entry(prov, row, placer, used_ids, lang, out, default_culture):
     used_ids.add(pid)
     reg = placer.cells.by_id.get(got)
     culture = opts.get("culture") or (reg["culture"] if reg and reg.get("culture") else default_culture)
-    e = {"id": pid, "name": "place.skycraft." + pid, "type": ptype, "culture": culture, "region": got,
+    e = {"id": pid, "name": "place.nirncraft." + pid, "type": ptype, "culture": culture, "region": got,
          "x": tx, "z": tz, "radius": radius}
     if variant:
         e["variant"] = variant
     out.append(e)
-    lang["place.skycraft." + pid] = name
+    lang["place.nirncraft." + pid] = name
     if not desc and ingested:
         rname = placer.region_names.get(reg["name"], got.split("/")[1].replace("_", " ").title()) if reg else ""
         desc = minor_module().describe(culture, kind, rname, random.Random(pid))
     if desc:
-        lang["place.skycraft." + pid + ".desc"] = desc
+        lang["place.nirncraft." + pid + ".desc"] = desc
     return e
 
 
@@ -1046,7 +1046,7 @@ def fill(cells, placer, used_ids, lang, files, existing):
                                       and p.get("region") != "morrowind/solstheim")
         have += sum(1 for p in files.get(GATES_FILE[:-5], []) if p["region"].split("/")[0] == prov)
         need = target - have
-        rng = random.Random("skycraft-provinces-" + prov)
+        rng = random.Random("nirncraft-provinces-" + prov)
         added = 0
         if need > 0:
             dry = np.argwhere(inprov & cells.dry)
@@ -1080,14 +1080,14 @@ def fill(cells, placer, used_ids, lang, files, existing):
                         continue
                     placer.add(x, z, radius)
                     used_ids.add(pid)
-                    e = {"id": pid, "name": "place.skycraft." + pid, "type": ptype, "culture": culture,
+                    e = {"id": pid, "name": "place.nirncraft." + pid, "type": ptype, "culture": culture,
                          "region": r["id"], "x": x, "z": z, "radius": radius}
                     if variant:
                         e["variant"] = variant
                     files[prov].append(e)
-                    lang["place.skycraft." + pid] = nm
+                    lang["place.nirncraft." + pid] = nm
                     rname = region_lang.get(r["name"], r["id"].split("/")[1].replace("_", " ").title())
-                    lang["place.skycraft." + pid + ".desc"] = minor.describe(culture, kind, rname, rng)
+                    lang["place.nirncraft." + pid + ".desc"] = minor.describe(culture, kind, rname, rng)
                     added += 1
         report[prov] = (area // 1000000, target, have, added)
     for prov, (area, target, have, added) in report.items():
@@ -1202,11 +1202,11 @@ def ingest_gates(placer, refs, used_ids, lang):
         x, z, got = spot
         placer.add(x, z, 16)
         used_ids.add(pid)
-        out.append({"id": pid, "name": "place.skycraft.oblivion_gate", "type": "landmark", "culture": "daedric",
+        out.append({"id": pid, "name": "place.nirncraft.oblivion_gate", "type": "landmark", "culture": "daedric",
                     "region": got, "x": x, "z": z, "radius": 16, "variant": "oblivion_gate"})
     if out:
-        lang["place.skycraft.oblivion_gate"] = "Oblivion Gate"
-        lang["place.skycraft.oblivion_gate.desc"] = "A burning gate to the Deadlands, torn open in the Oblivion Crisis."
+        lang["place.nirncraft.oblivion_gate"] = "Oblivion Gate"
+        lang["place.nirncraft.oblivion_gate.desc"] = "A burning gate to the Deadlands, torn open in the Oblivion Crisis."
         print(f"  ingest: {len(out)} Oblivion gates")
     return out
 

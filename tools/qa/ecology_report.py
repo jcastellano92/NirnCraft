@@ -2,10 +2,10 @@
 """Creature ecology & encounter library report and gate checker (MS04 / MS14).
 
 Validates that every creature in a province's ``creatures`` section in
-``mod/src/main/resources/skycraft/tamriel/world/<province>.json`` satisfies the
+``mod/src/main/resources/nirncraft/tamriel/world/<province>.json`` satisfies the
 Design Principles ecology contract (docs/world/DESIGN-PRINCIPLES.md section 4,
 docs/ECOLOGY.md), AND validates the encounter library in
-``mod/src/main/resources/skycraft/creatures/scenes.json`` against ``F-ENC``,
+``mod/src/main/resources/nirncraft/creatures/scenes.json`` against ``F-ENC``,
 ``F-WONDER``, and ``road300`` day/night quiet road thresholds:
 
 * Every creature has ``diet`` in ``{herbivore, omnivore, predator, apex, scavenger, construct, undead, daedra}``.
@@ -31,10 +31,10 @@ import sys
 from typing import Any
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-WORLD_DIR = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "tamriel" / "world"
-SCENES_FILE = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "creatures" / "scenes.json"
-FESTIVALS_FILE = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "calendar" / "festivals.json"
-REGIONS_FILE = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "tamriel" / "regions.json"
+WORLD_DIR = ROOT / "mod" / "src" / "main" / "resources" / "nirncraft" / "tamriel" / "world"
+SCENES_FILE = ROOT / "mod" / "src" / "main" / "resources" / "nirncraft" / "creatures" / "scenes.json"
+FESTIVALS_FILE = ROOT / "mod" / "src" / "main" / "resources" / "nirncraft" / "calendar" / "festivals.json"
+REGIONS_FILE = ROOT / "mod" / "src" / "main" / "resources" / "nirncraft" / "tamriel" / "regions.json"
 
 SKYRIM_HOLDS = (
     "whiterun",

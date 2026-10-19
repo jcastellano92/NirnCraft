@@ -92,7 +92,7 @@ def item_state(stack):
 
 
 def overflow_summary(be):
-    wrapper = attachment(be, b"skycraft:overflow")
+    wrapper = attachment(be, b"nirncraft:overflow")
     data = nbt.child(wrapper, b"data") if wrapper is not None else None
     rows = nbt.child(data, b"e") if data is not None else None
     totals = collections.Counter()
@@ -151,7 +151,7 @@ def block_state_at(chunk, position):
 
 def scan(world, selection=None):
     world = world.resolve(strict=True)
-    manifest = world / "skycraft-26.3-migration.json"
+    manifest = world / "nirncraft-26.3-migration.json"
     selected = collections.defaultdict(set)
     selected_positions = collections.defaultdict(set)
     if selection:
@@ -180,7 +180,7 @@ def scan(world, selection=None):
                            "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
             for cx, cz, chunk in region_chunks(path, selected[relative] if selection else None):
                 statistics["chunks_read"] += 1
-                placed = attachment(chunk, b"skycraft:placed_blocks")
+                placed = attachment(chunk, b"nirncraft:placed_blocks")
                 positions = sorted(set(long_values(nbt.child(placed, b"positions") if placed else None)))
                 if placed:
                     statistics["placed_attachments"] += 1
@@ -217,7 +217,7 @@ def scan(world, selection=None):
             "limits": ["Empty attachments do not prove nonempty payload conservation.",
                        "Native item codecs may change serialized layout; compare full counts and explicit fixture identity markers.",
                        "Run scans only while the target server is stopped."]}
-    provenance = world / "skycraft-populated-legacy-fixture.json"
+    provenance = world / "nirncraft-populated-legacy-fixture.json"
     if provenance.is_file():
         result["fixture_provenance"] = json.loads(provenance.read_text())
     return result

@@ -13,47 +13,47 @@
 #include <thread>
 #include <vector>
 
-#include "aether/aether.h"
+#include "atlas/atlas.h"
 #include "backend.hpp"
 #include "lights.hpp"
 #include "parallel.hpp"
 #include "preview_source.hpp"
 #include "world.hpp"
 
-#ifndef AETHER_VERSION_STRING
-#define AETHER_VERSION_STRING "dev"
+#ifndef ATLAS_VERSION_STRING
+#define ATLAS_VERSION_STRING "dev"
 #endif
 
-using namespace aether;
+using namespace atlas;
 
-// The Java binding (com.skycraft.aether.AetherNative) declares these layouts by hand; any change is an ABI bump.
-static_assert(sizeof(AetherMaterial) == 24);
-static_assert(sizeof(AetherColumnTile) == 64 && offsetof(AetherColumnTile, surface) == 16);
-static_assert(sizeof(AetherFrame) == 144 && offsetof(AetherFrame, invViewProj) == 24 && offsetof(AetherFrame, width) == 88 &&
-              offsetof(AetherFrame, sunDir) == 108 && offsetof(AetherFrame, flags) == 128 &&
-              offsetof(AetherFrame, nearDepth) == 136);
-static_assert(sizeof(AetherFrameOutput) == 32 && offsetof(AetherFrameOutput, colorLinear) == 24);
-static_assert(sizeof(AetherWeather) == 40 && offsetof(AetherWeather, rainFactor) == 32);
-static_assert(sizeof(AetherActor) == 48 && offsetof(AetherActor, kind) == 36);
-static_assert(sizeof(AetherGlFrameIO) == 96 && offsetof(AetherGlFrameIO, nearInvProjection) == 16 &&
-              offsetof(AetherGlFrameIO, dstColor) == 80);
-static_assert(sizeof(AetherLight) == 40 && offsetof(AetherLight, radius) == 24 && offsetof(AetherLight, kind) == 36);
-static_assert(sizeof(AetherStats) == 56 && offsetof(AetherStats, nodeBytes) == 8 && offsetof(AetherStats, raySteps) == 48);
+// The Java binding (com.nirncraft.atlas.AtlasNative) declares these layouts by hand; any change is an ABI bump.
+static_assert(sizeof(AtlasMaterial) == 24);
+static_assert(sizeof(AtlasColumnTile) == 64 && offsetof(AtlasColumnTile, surface) == 16);
+static_assert(sizeof(AtlasFrame) == 144 && offsetof(AtlasFrame, invViewProj) == 24 && offsetof(AtlasFrame, width) == 88 &&
+              offsetof(AtlasFrame, sunDir) == 108 && offsetof(AtlasFrame, flags) == 128 &&
+              offsetof(AtlasFrame, nearDepth) == 136);
+static_assert(sizeof(AtlasFrameOutput) == 32 && offsetof(AtlasFrameOutput, colorLinear) == 24);
+static_assert(sizeof(AtlasWeather) == 40 && offsetof(AtlasWeather, rainFactor) == 32);
+static_assert(sizeof(AtlasActor) == 48 && offsetof(AtlasActor, kind) == 36);
+static_assert(sizeof(AtlasGlFrameIO) == 96 && offsetof(AtlasGlFrameIO, nearInvProjection) == 16 &&
+              offsetof(AtlasGlFrameIO, dstColor) == 80);
+static_assert(sizeof(AtlasLight) == 40 && offsetof(AtlasLight, radius) == 24 && offsetof(AtlasLight, kind) == 36);
+static_assert(sizeof(AtlasStats) == 56 && offsetof(AtlasStats, nodeBytes) == 8 && offsetof(AtlasStats, raySteps) == 48);
 
-struct AetherContext {
+struct AtlasContext {
     std::unique_ptr<Backend> backend;
     World world;
     std::vector<MaterialGpu> palette;
     std::vector<uint32_t> weather;  // near field, near dyn, far field, far dyn (128*128 each)
     std::vector<uint32_t> cloudNoise = std::vector<uint32_t>(64 * 64 * 64, 0);
     float rainFactor = 0;
-    std::vector<AetherActor> actors;
+    std::vector<AtlasActor> actors;
     Lights lights;
     std::unique_ptr<PreviewSource> preview;
     FrameTargets targets;
-    AetherStats stats{};
+    AtlasStats stats{};
     std::string error;
-    std::string info;  // aether_info's last answer
+    std::string info;  // atlas_info's last answer
     std::mutex mu;
     uint64_t stagedRevision = UINT64_MAX;
     // the last frame, for temporal cloud reprojection
@@ -62,14 +62,14 @@ struct AetherContext {
     double prevCam[3] = {};
     uint32_t prevW = 0, prevH = 0, prevCloudFlags = 0;
     uint32_t frameIndex = 0;
-    // the sun map (aether_set_sun_map)
+    // the sun map (atlas_set_sun_map)
     uint32_t sunMapSize = 0;
     float sunMapHalf = 2048.0f;
     double sunMapCentre[3] = {1e300, 0, 1e300};
     bool sunMapFull = true;
     uint32_t sunMapCursor = 0;
 
-    AetherStatus fail(AetherStatus s, std::string msg) noexcept {
+    AtlasStatus fail(AtlasStatus s, std::string msg) noexcept {
         try {
             error = std::move(msg);
         } catch (...) {
@@ -81,7 +81,7 @@ struct AetherContext {
 
 namespace {
 
-// why the last aether_create on this thread failed (there is no context to hold the message)
+// why the last atlas_create on this thread failed (there is no context to hold the message)
 std::string& createError() {
     thread_local std::string e;
     return e;
@@ -89,7 +89,7 @@ std::string& createError() {
 
 // Every entry point catches what C++ throws inside (std::bad_alloc, std::system_error from a thread pool, ...): an
 // exception escaping into the JVM's downcall would terminate the game.
-AetherStatus caught(AetherContext* ctx, AetherStatus s, const char* what) noexcept {
+AtlasStatus caught(AtlasContext* ctx, AtlasStatus s, const char* what) noexcept {
     if (ctx) return ctx->fail(s, what);
     try {
         createError() = what;
@@ -97,26 +97,26 @@ AetherStatus caught(AetherContext* ctx, AetherStatus s, const char* what) noexce
     }
     return s;
 }
-#define AETHER_TRY try {
-#define AETHER_CATCH(ctx)                                                                     \
+#define ATLAS_TRY try {
+#define ATLAS_CATCH(ctx)                                                                     \
     }                                                                                         \
     catch (const std::bad_alloc&) {                                                           \
-        return caught(ctx, AETHER_ERR_OUT_OF_MEMORY, "out of host memory (std::bad_alloc)"); \
+        return caught(ctx, ATLAS_ERR_OUT_OF_MEMORY, "out of host memory (std::bad_alloc)"); \
     }                                                                                         \
     catch (const std::exception& e) {                                                         \
-        return caught(ctx, AETHER_ERR_INTERNAL, e.what());                                    \
+        return caught(ctx, ATLAS_ERR_INTERNAL, e.what());                                    \
     }                                                                                         \
     catch (...) {                                                                             \
-        return caught(ctx, AETHER_ERR_INTERNAL, "unknown exception");                         \
+        return caught(ctx, ATLAS_ERR_INTERNAL, "unknown exception");                         \
     }
 
 // The status for a backend call that failed: a lost device, a hang and running out of memory get their own codes
 // (the caller turns the far field off and retries later, or shrinks), anything else `otherwise`.
-AetherStatus backendFailure(AetherContext* ctx, const std::string& err, AetherStatus otherwise) noexcept {
+AtlasStatus backendFailure(AtlasContext* ctx, const std::string& err, AtlasStatus otherwise) noexcept {
     Fault f = ctx->backend->fault();
-    AetherStatus s = f == Fault::DeviceLost    ? AETHER_ERR_DEVICE_LOST
-                     : f == Fault::Timeout     ? AETHER_ERR_TIMEOUT
-                     : f == Fault::OutOfMemory ? AETHER_ERR_OUT_OF_MEMORY
+    AtlasStatus s = f == Fault::DeviceLost    ? ATLAS_ERR_DEVICE_LOST
+                     : f == Fault::Timeout     ? ATLAS_ERR_TIMEOUT
+                     : f == Fault::OutOfMemory ? ATLAS_ERR_OUT_OF_MEMORY
                                                : otherwise;
     ctx->backend->clearFault();
     try {
@@ -127,20 +127,20 @@ AetherStatus backendFailure(AetherContext* ctx, const std::string& err, AetherSt
 }
 
 // A context whose device is gone refuses GPU work (the same status every time) until it is destroyed.
-bool deadDevice(AetherContext* ctx, AetherStatus& s) noexcept {
+bool deadDevice(AtlasContext* ctx, AtlasStatus& s) noexcept {
     if (!ctx->backend->lost()) {
         ctx->backend->clearFault();  // a fault an earlier call recovered from (e.g. zero-copy -> host-copy) is not this one's
         return false;
     }
-    s = ctx->backend->fault() == Fault::Timeout ? AETHER_ERR_TIMEOUT : AETHER_ERR_DEVICE_LOST;
-    ctx->fail(s, s == AETHER_ERR_TIMEOUT ? "the GPU hung earlier (timeout); destroy this context and create a new one"
+    s = ctx->backend->fault() == Fault::Timeout ? ATLAS_ERR_TIMEOUT : ATLAS_ERR_DEVICE_LOST;
+    ctx->fail(s, s == ATLAS_ERR_TIMEOUT ? "the GPU hung earlier (timeout); destroy this context and create a new one"
                                          : "the GPU device was lost earlier; destroy this context and create a new one");
     return true;
 }
 
-// AETHER_FAULT=<device_lost|timeout|oom>[@frames]: arms the test hook on every new context.
+// ATLAS_FAULT=<device_lost|timeout|oom>[@frames]: arms the test hook on every new context.
 void armFromEnvironment(Backend& b) {
-    const char* v = std::getenv("AETHER_FAULT");
+    const char* v = std::getenv("ATLAS_FAULT");
     if (!v || !*v) return;
     std::string s(v);
     uint32_t after = 0;
@@ -152,11 +152,11 @@ void armFromEnvironment(Backend& b) {
     Fault f = s == "device_lost" ? Fault::DeviceLost : s == "timeout" ? Fault::Timeout : s == "oom" ? Fault::OutOfMemory : Fault::None;
     if (f != Fault::None) {
         b.injectFault(f, after);
-        std::fprintf(stderr, "[aether] AETHER_FAULT: %s after %u frames\n", s.c_str(), after);
+        std::fprintf(stderr, "[atlas] ATLAS_FAULT: %s after %u frames\n", s.c_str(), after);
     }
 }
 
-MaterialGpu toGpu(const AetherMaterial& m) {
+MaterialGpu toGpu(const AtlasMaterial& m) {
     MaterialGpu g{};
     g.albedoRough[0] = m.albedo[0];
     g.albedoRough[1] = m.albedo[1];
@@ -167,12 +167,12 @@ MaterialGpu toGpu(const AetherMaterial& m) {
     return g;
 }
 
-void setPalette(AetherContext* ctx, const AetherMaterial* m, uint32_t n) {
+void setPalette(AtlasContext* ctx, const AtlasMaterial* m, uint32_t n) {
     ctx->palette.assign(1, MaterialGpu{});  // id 0 = air
     uint16_t water = 0;
     for (uint32_t i = 0; i < n; i++) {
         ctx->palette.push_back(toGpu(m[i]));
-        if (!water && m[i].cls == AETHER_CLASS_WATER) water = uint16_t(i + 1);
+        if (!water && m[i].cls == ATLAS_CLASS_WATER) water = uint16_t(i + 1);
     }
     if (water) ctx->world.waterMat = water;
     applyWaterFlow(ctx->palette);
@@ -191,39 +191,39 @@ void pixelDir(const float* inv, float px, float py, uint32_t w, uint32_t h, floa
 
 extern "C" {
 
-AETHER_API uint32_t aether_abi_version(void) { return AETHER_ABI_VERSION; }
+ATLAS_API uint32_t atlas_abi_version(void) { return ATLAS_ABI_VERSION; }
 
-#define AETHER_STR2(x) #x
-#define AETHER_STR(x) AETHER_STR2(x)
+#define ATLAS_STR2(x) #x
+#define ATLAS_STR(x) ATLAS_STR2(x)
 #if defined(_WIN32)
-#define AETHER_PLATFORM "windows"
+#define ATLAS_PLATFORM "windows"
 #elif defined(__linux__)
-#define AETHER_PLATFORM "linux"
+#define ATLAS_PLATFORM "linux"
 #else
-#define AETHER_PLATFORM "unknown"
+#define ATLAS_PLATFORM "unknown"
 #endif
 #if defined(_MSC_VER)
-#define AETHER_COMPILER "msvc " AETHER_STR(_MSC_VER)
+#define ATLAS_COMPILER "msvc " ATLAS_STR(_MSC_VER)
 #elif defined(__clang__)
-#define AETHER_COMPILER "clang " __clang_version__
+#define ATLAS_COMPILER "clang " __clang_version__
 #elif defined(__GNUC__)
-#define AETHER_COMPILER "gcc " __VERSION__
+#define ATLAS_COMPILER "gcc " __VERSION__
 #else
-#define AETHER_COMPILER "unknown compiler"
+#define ATLAS_COMPILER "unknown compiler"
 #endif
 
-AETHER_API const char* aether_build_info(void) {
+ATLAS_API const char* atlas_build_info(void) {
     static const std::string s = [] {
         char abi[32];
-        std::snprintf(abi, sizeof(abi), "%u.%u.%u", (AETHER_ABI_VERSION >> 16) & 255u, (AETHER_ABI_VERSION >> 8) & 255u,
-                      AETHER_ABI_VERSION & 255u);
-        return std::string("aether_core " AETHER_VERSION_STRING " (abi ") + abi +
-               "; slang far kernel; " AETHER_PLATFORM ", " AETHER_COMPILER "; " __DATE__ ")";
+        std::snprintf(abi, sizeof(abi), "%u.%u.%u", (ATLAS_ABI_VERSION >> 16) & 255u, (ATLAS_ABI_VERSION >> 8) & 255u,
+                      ATLAS_ABI_VERSION & 255u);
+        return std::string("atlas_core " ATLAS_VERSION_STRING " (abi ") + abi +
+               "; slang far kernel; " ATLAS_PLATFORM ", " ATLAS_COMPILER "; " __DATE__ ")";
     }();
     return s.c_str();
 }
 
-AETHER_API const char* aether_info(AetherContext* ctx) {
+ATLAS_API const char* atlas_info(AtlasContext* ctx) {
     if (!ctx) return "{}";
     try {
         std::lock_guard<std::mutex> lock(ctx->mu);
@@ -236,17 +236,17 @@ AETHER_API const char* aether_info(AetherContext* ctx) {
     }
 }
 
-AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out) {
-    if (!out) return AETHER_ERR_ARG;
+ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {
+    if (!out) return ATLAS_ERR_ARG;
     *out = nullptr;
-    AETHER_TRY
-    auto ctx = std::make_unique<AetherContext>();
-    if (backend == AETHER_BACKEND_VULKAN) {
+    ATLAS_TRY
+    auto ctx = std::make_unique<AtlasContext>();
+    if (backend == ATLAS_BACKEND_VULKAN) {
         std::string err;
         ctx->backend = makeVulkanBackend(err);
         if (!ctx->backend) {
-            createError() = "Vulkan backend unavailable: " + err;  // aether_last_error(NULL) reports it
-            return AETHER_ERR_GPU;
+            createError() = "Vulkan backend unavailable: " + err;  // atlas_last_error(NULL) reports it
+            return ATLAS_ERR_GPU;
         }
     } else {
         ctx->backend = makeCpuBackend();
@@ -256,11 +256,11 @@ AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out
     setPalette(ctx.get(), pal.data(), uint32_t(pal.size()));
     ctx->weather.assign(4 * 128 * 128, 0);
     *out = ctx.release();
-    return AETHER_OK;
-    AETHER_CATCH(nullptr)
+    return ATLAS_OK;
+    ATLAS_CATCH(nullptr)
 }
 
-AETHER_API void aether_destroy(AetherContext* ctx) {
+ATLAS_API void atlas_destroy(AtlasContext* ctx) {
     try {
         delete ctx;
     } catch (...) {
@@ -268,25 +268,25 @@ AETHER_API void aether_destroy(AetherContext* ctx) {
     }
 }
 
-AETHER_API const char* aether_last_error(AetherContext* ctx) {
+ATLAS_API const char* atlas_last_error(AtlasContext* ctx) {
     if (ctx) return ctx->error.c_str();
     return createError().empty() ? "null context" : createError().c_str();
 }
 
-AETHER_API AetherStatus aether_set_palette(AetherContext* ctx, const AetherMaterial* m, uint32_t count) {
-    if (!ctx || (!m && count)) return AETHER_ERR_ARG;
-    if (count > 65534) return ctx->fail(AETHER_ERR_ARG, "palette too large");
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_set_palette(AtlasContext* ctx, const AtlasMaterial* m, uint32_t count) {
+    if (!ctx || (!m && count)) return ATLAS_ERR_ARG;
+    if (count > 65534) return ctx->fail(ATLAS_ERR_ARG, "palette too large");
+    ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
     setPalette(ctx, m, count);
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_upload_column_tile(AetherContext* ctx, const AetherColumnTile* t) {
-    if (!ctx || !t || !t->surface || !t->water || !t->topMat || !t->fillMat) return AETHER_ERR_ARG;
-    if (t->lod < 0 || t->lod >= MAX_LODS) return ctx->fail(AETHER_ERR_ARG, "lod out of range");
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_upload_column_tile(AtlasContext* ctx, const AtlasColumnTile* t) {
+    if (!ctx || !t || !t->surface || !t->water || !t->topMat || !t->fillMat) return ATLAS_ERR_ARG;
+    if (t->lod < 0 || t->lod >= MAX_LODS) return ctx->fail(ATLAS_ERR_ARG, "lod out of range");
+    ATLAS_TRY
     auto tile = std::make_unique<Tile>();
     size_t n = size_t(TILE) * TILE;
     tile->lod = t->lod;
@@ -301,60 +301,60 @@ AETHER_API AetherStatus aether_upload_column_tile(AetherContext* ctx, const Aeth
         tile->canopyMat.assign(t->canopyMat, t->canopyMat + n);
     }
     ctx->world.putTile(std::move(tile));
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_upload_section(AetherContext* ctx, int32_t sx, int32_t sy, int32_t sz, const uint16_t* mats) {
-    if (!ctx || !mats) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_upload_section(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz, const uint16_t* mats) {
+    if (!ctx || !mats) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     ctx->world.putSection(sx, sy, sz, mats);
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_notify_block(AetherContext* ctx, int32_t x, int32_t y, int32_t z, uint16_t mat) {
-    if (!ctx) return AETHER_ERR_ARG;
-    if (y < WORLD_MIN_Y || y >= WORLD_TOP_Y) return AETHER_OK;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_notify_block(AtlasContext* ctx, int32_t x, int32_t y, int32_t z, uint16_t mat) {
+    if (!ctx) return ATLAS_ERR_ARG;
+    if (y < WORLD_MIN_Y || y >= WORLD_TOP_Y) return ATLAS_OK;
+    ATLAS_TRY
     ctx->world.editBlock(x, y, z, mat);
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_set_weather(AetherContext* ctx, const AetherWeather* w) {
-    if (!ctx || !w) return AETHER_ERR_ARG;
+ATLAS_API AtlasStatus atlas_set_weather(AtlasContext* ctx, const AtlasWeather* w) {
+    if (!ctx || !w) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
     const uint32_t* src[4] = {w->nearField, w->nearDyn, w->farField, w->farDyn};
     for (int i = 0; i < 4; i++) {
         if (src[i]) std::memcpy(ctx->weather.data() + size_t(i) * 128 * 128, src[i], 128 * 128 * 4);
     }
     ctx->rainFactor = w->rainFactor;
-    return AETHER_OK;
+    return ATLAS_OK;
 }
 
-AETHER_API AetherStatus aether_set_cloud_noise(AetherContext* ctx, const uint32_t* rgba) {
-    if (!ctx || !rgba) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_set_cloud_noise(AtlasContext* ctx, const uint32_t* rgba) {
+    if (!ctx || !rgba) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
     std::vector<uint32_t> v(rgba, rgba + 64 * 64 * 64);
     ctx->cloudNoise.swap(v);  // new storage: the Vulkan backend re-uploads when the pointer changes
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_set_actors(AetherContext* ctx, const AetherActor* a, uint32_t count) {
-    if (!ctx || (!a && count)) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_set_actors(AtlasContext* ctx, const AtlasActor* a, uint32_t count) {
+    if (!ctx || (!a && count)) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
     ctx->actors.assign(a, a + count);
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_update(AetherContext* ctx, const double centre[3], double budgetMs) {
-    if (!ctx || !centre) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], double budgetMs) {
+    if (!ctx || !centre) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     double ms = 0;
     ctx->world.update(centre, budgetMs, &ms);
     ctx->stats.lastBuildMs = ms;
@@ -364,25 +364,25 @@ AETHER_API AetherStatus aether_update(AetherContext* ctx, const double centre[3]
     if (snap->lodCount && snap->revision != ctx->stagedRevision && !ctx->backend->lost()) {
         if (ctx->backend->stageScene(*snap)) ctx->stagedRevision = snap->revision;
     }
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameInputs& in);
-static void rememberFrame(AetherContext* ctx, const AetherFrame* f);
+static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInputs& in);
+static void rememberFrame(AtlasContext* ctx, const AtlasFrame* f);
 
-AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* f, const AetherFrameOutput* out) {
-    if (!ctx || !f || !out || f->width == 0 || f->height == 0) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_render(AtlasContext* ctx, const AtlasFrame* f, const AtlasFrameOutput* out) {
+    if (!ctx || !f || !out || f->width == 0 || f->height == 0) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
-    AetherStatus dead;
+    AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
     FrameInputs in{};
-    AetherStatus st = buildInputs(ctx, f, in);
-    if (st != AETHER_OK) return st;
+    AtlasStatus st = buildInputs(ctx, f, in);
+    if (st != ATLAS_OK) return st;
     double ms = 0;
     std::string err;
-    if (!ctx->backend->render(in, ctx->targets, &ms, err)) return backendFailure(ctx, err, AETHER_ERR_GPU);
+    if (!ctx->backend->render(in, ctx->targets, &ms, err)) return backendFailure(ctx, err, ATLAS_ERR_GPU);
     rememberFrame(ctx, f);
     size_t n = size_t(f->width) * f->height;
     if (out->colorLinear) std::memcpy(out->colorLinear, ctx->targets.color.data(), n * 16);
@@ -411,37 +411,37 @@ AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* f, 
     for (uint32_t c : ctx->targets.counters) steps += c;
     ctx->stats.raySteps = steps;
     ctx->stats.lastFrameMs = ms;
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_gl_attach(AetherContext* ctx, uint32_t w, uint32_t h, AetherGlTargets* out) {
-    if (!ctx || !out || w == 0 || h == 0) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_gl_attach(AtlasContext* ctx, uint32_t w, uint32_t h, AtlasGlTargets* out) {
+    if (!ctx || !out || w == 0 || h == 0) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
-    AetherStatus dead;
+    AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
     GlTargets t;
     std::string err;
-    if (!ctx->backend->glAttach(w, h, t, err)) return backendFailure(ctx, err, AETHER_ERR_UNSUPPORTED);
-    *out = AetherGlTargets{t.color, t.normal, t.depth, t.nearDepth, t.width, t.height};
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    if (!ctx->backend->glAttach(w, h, t, err)) return backendFailure(ctx, err, ATLAS_ERR_UNSUPPORTED);
+    *out = AtlasGlTargets{t.color, t.normal, t.depth, t.nearDepth, t.width, t.height};
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_gl_render(AetherContext* ctx, const AetherFrame* f) {
-    return aether_gl_render_io(ctx, f, nullptr);
+ATLAS_API AtlasStatus atlas_gl_render(AtlasContext* ctx, const AtlasFrame* f) {
+    return atlas_gl_render_io(ctx, f, nullptr);
 }
 
-AETHER_API AetherStatus aether_gl_render_io(AetherContext* ctx, const AetherFrame* f, const AetherGlFrameIO* io) {
-    if (!ctx || !f || f->width == 0 || f->height == 0) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io) {
+    if (!ctx || !f || f->width == 0 || f->height == 0) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
-    AetherStatus dead;
+    AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
     FrameInputs in{};
-    AetherStatus st = buildInputs(ctx, f, in);
-    if (st != AETHER_OK) return st;
+    AtlasStatus st = buildInputs(ctx, f, in);
+    if (st != ATLAS_OK) return st;
     GlFrameIO g;
     if (io) {
         g.nearDepthTex = io->nearDepthTex;
@@ -456,14 +456,14 @@ AETHER_API AetherStatus aether_gl_render_io(AetherContext* ctx, const AetherFram
     }
     double ms = ctx->stats.lastFrameMs;
     std::string err;
-    if (!ctx->backend->glRender(in, io ? &g : nullptr, &ms, err)) return backendFailure(ctx, err, AETHER_ERR_GPU);
+    if (!ctx->backend->glRender(in, io ? &g : nullptr, &ms, err)) return backendFailure(ctx, err, ATLAS_ERR_GPU);
     rememberFrame(ctx, f);
     ctx->stats.lastFrameMs = ms;
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API void aether_gl_detach(AetherContext* ctx) {
+ATLAS_API void atlas_gl_detach(AtlasContext* ctx) {
     if (!ctx) return;
     try {
         std::lock_guard<std::mutex> lock(ctx->mu);
@@ -499,20 +499,20 @@ static bool invert4(const float* m, float* out) {
 }
 
 // Remembers this frame as the next frame's history (after a successful render).
-static void rememberFrame(AetherContext* ctx, const AetherFrame* f) {
+static void rememberFrame(AtlasContext* ctx, const AtlasFrame* f) {
     std::memcpy(ctx->prevInvVP, f->invViewProj, sizeof(ctx->prevInvVP));
     for (int i = 0; i < 3; i++) ctx->prevCam[i] = f->cameraPos[i];
     ctx->prevW = f->width;
     ctx->prevH = f->height;
-    ctx->prevCloudFlags = f->flags & (AETHER_FRAME_CLOUDS | AETHER_FRAME_CLOUDS_QUARTER);
+    ctx->prevCloudFlags = f->flags & (ATLAS_FRAME_CLOUDS | ATLAS_FRAME_CLOUDS_QUARTER);
     ctx->haveHistory = true;
     ctx->frameIndex++;
 }
 
-static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameInputs& in) {
+static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInputs& in) {
     in.sceneHold = ctx->world.packed();
     in.scene = in.sceneHold.get();
-    if (in.scene->lodCount == 0) return ctx->fail(AETHER_ERR_STATE, "call aether_update before aether_render");
+    if (in.scene->lodCount == 0) return ctx->fail(ATLAS_ERR_STATE, "call atlas_update before atlas_render");
     FrameGpu& g = in.frame;
     std::memcpy(g.invViewProj, f->invViewProj, sizeof(g.invViewProj));
     for (int i = 0; i < 3; i++) {
@@ -538,9 +538,9 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
     g.dims[3] = uint32_t(in.scene->lodCount);
     g.weatherParams[0] = ctx->rainFactor;
     // temporal clouds: last frame's view-projection (inverted back from its inverse) and camera, if comparable
-    uint32_t cloudFlags = f->flags & (AETHER_FRAME_CLOUDS | AETHER_FRAME_CLOUDS_QUARTER);
+    uint32_t cloudFlags = f->flags & (ATLAS_FRAME_CLOUDS | ATLAS_FRAME_CLOUDS_QUARTER);
     bool valid = ctx->haveHistory && ctx->prevW == f->width && ctx->prevH == f->height &&
-                 ctx->prevCloudFlags == cloudFlags && (cloudFlags & AETHER_FRAME_CLOUDS);
+                 ctx->prevCloudFlags == cloudFlags && (cloudFlags & ATLAS_FRAME_CLOUDS);
     if (valid && invert4(ctx->prevInvVP, g.prevViewProj)) {
         for (int i = 0; i < 3; i++) g.prevCam[i] = float(ctx->prevCam[i] - double(g.camInt[i]));
         g.temporal[1] = 1;
@@ -589,7 +589,7 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
     // far actors: in the kernel's frame (relative to the integer camera block, like every other position there),
     // computed in double; the curvature drop uses the distance from the camera itself
     in.actors.clear();
-    for (const AetherActor& a : ctx->actors) {
+    for (const AtlasActor& a : ctx->actors) {
         ActorGpu ag{};
         double dx = a.pos[0] - f->cameraPos[0], dz = a.pos[2] - f->cameraPos[2];
         if (dx * dx + dz * dz > double(f->maxDistance) * f->maxDistance) continue;
@@ -633,39 +633,39 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
         }
     }
     if (in.actors.empty()) in.actors.push_back(ActorGpu{});
-    in.wantNearDepth = (f->flags & AETHER_FRAME_NEAR_DEPTH) != 0;
+    in.wantNearDepth = (f->flags & ATLAS_FRAME_NEAR_DEPTH) != 0;
     in.nearDepth = in.wantNearDepth ? f->nearDepth : nullptr;
-    if ((f->flags & AETHER_FRAME_NEAR_DEPTH) && !f->nearDepth) g.dims[2] &= ~AETHER_FRAME_NEAR_DEPTH;  // GL path sets it back
-    return AETHER_OK;
+    if ((f->flags & ATLAS_FRAME_NEAR_DEPTH) && !f->nearDepth) g.dims[2] &= ~ATLAS_FRAME_NEAR_DEPTH;  // GL path sets it back
+    return ATLAS_OK;
 }
 
-AETHER_API AetherStatus aether_get_stats(AetherContext* ctx, AetherStats* out) {
-    if (!ctx || !out) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_get_stats(AtlasContext* ctx, AtlasStats* out) {
+    if (!ctx || !out) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     ctx->stats.regions = uint32_t(ctx->world.regionCount());
     ctx->stats.nodeBytes = ctx->world.nodeBytes();
     ctx->stats.leafBytes = ctx->world.leafBytes();
     ctx->stats.materialBytes = ctx->world.materialBytes();
     *out = ctx->stats;
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_preview_load_raster(AetherContext* ctx, const char* path) {
-    if (!ctx || !path) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_preview_load_raster(AtlasContext* ctx, const char* path) {
+    if (!ctx || !path) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     auto p = std::make_unique<PreviewSource>();
     std::string err;
-    if (!p->load(path, err)) return ctx->fail(AETHER_ERR_IO, err);
+    if (!p->load(path, err)) return ctx->fail(ATLAS_ERR_IO, err);
     ctx->preview = std::move(p);
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_preview_generate(AetherContext* ctx, int32_t lod, int32_t x0, int32_t z0, int32_t x1, int32_t z1) {
-    if (!ctx || lod < 0 || lod >= MAX_LODS) return AETHER_ERR_ARG;
-    if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded");
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_preview_generate(AtlasContext* ctx, int32_t lod, int32_t x0, int32_t z0, int32_t x1, int32_t z1) {
+    if (!ctx || lod < 0 || lod >= MAX_LODS) return ATLAS_ERR_ARG;
+    if (!ctx->preview) return ctx->fail(ATLAS_ERR_STATE, "no preview raster loaded");
+    ATLAS_TRY
     int span = 256 << lod;
     auto fdiv = [](int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); };
     int tx0 = fdiv(x0, span), tz0 = fdiv(z0, span), tx1 = fdiv(x1 - 1, span), tz1 = fdiv(z1 - 1, span);
@@ -682,37 +682,37 @@ AETHER_API AetherStatus aether_preview_generate(AetherContext* ctx, int32_t lod,
         }
     };
     parallelRun(worker);
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_upload_column_heights(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+ATLAS_API AtlasStatus atlas_upload_column_heights(AtlasContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                      const float* surface, const float* water) {
-    if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return AETHER_ERR_ARG;
-    if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded (it dresses the columns)");
-    AETHER_TRY
+    if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return ATLAS_ERR_ARG;
+    if (!ctx->preview) return ctx->fail(ATLAS_ERR_STATE, "no preview raster loaded (it dresses the columns)");
+    ATLAS_TRY
     ctx->world.putTile(ctx->preview->dressTile(lod, tileX, tileZ, surface, water));
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_upload_column_heights2(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+ATLAS_API AtlasStatus atlas_upload_column_heights2(AtlasContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                       const float* surface, const float* water, const uint16_t* grassMat,
                                                       const uint16_t* foliageMat) {
-    if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return AETHER_ERR_ARG;
-    if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded (it dresses the columns)");
-    AETHER_TRY
+    if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return ATLAS_ERR_ARG;
+    if (!ctx->preview) return ctx->fail(ATLAS_ERR_STATE, "no preview raster loaded (it dresses the columns)");
+    ATLAS_TRY
     ctx->world.putTile(ctx->preview->dressTile(lod, tileX, tileZ, surface, water, grassMat, foliageMat));
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_upload_column_heights3(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+ATLAS_API AtlasStatus atlas_upload_column_heights3(AtlasContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                       const float* surface, const float* water, const uint16_t* topMat,
                                                       const uint16_t* fillMat, const uint16_t* grassMat,
                                                       const uint16_t* foliageMat, const uint8_t* flags) {
-    if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return AETHER_ERR_ARG;
-    if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded (it dresses the columns)");
+    if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return ATLAS_ERR_ARG;
+    if (!ctx->preview) return ctx->fail(ATLAS_ERR_STATE, "no preview raster loaded (it dresses the columns)");
     PreviewSource::Overrides o;
     o.grassMat = grassMat;
     o.foliageMat = foliageMat;
@@ -720,26 +720,26 @@ AETHER_API AetherStatus aether_upload_column_heights3(AetherContext* ctx, int32_
     o.fillMat = fillMat;
     o.flags = flags;
     ctx->world.putTile(ctx->preview->dressTile(lod, tileX, tileZ, surface, water, o));
-    return AETHER_OK;
+    return ATLAS_OK;
 }
 
-AETHER_API AetherStatus aether_upload_column_structures(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+ATLAS_API AtlasStatus atlas_upload_column_structures(AtlasContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                         const float* wallTop, const float* roofTop,
                                                         const uint16_t* wallMat, const uint16_t* roofMat) {
-    return aether_upload_column_structures2(ctx, lod, tileX, tileZ, wallTop, roofTop, wallMat, roofMat, nullptr);
+    return atlas_upload_column_structures2(ctx, lod, tileX, tileZ, wallTop, roofTop, wallMat, roofMat, nullptr);
 }
 
-AETHER_API AetherStatus aether_upload_column_structures2(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+ATLAS_API AtlasStatus atlas_upload_column_structures2(AtlasContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                          const float* wallTop, const float* roofTop,
                                                          const uint16_t* wallMat, const uint16_t* roofMat,
                                                          const float* base) {
-    if (!ctx || lod < 0 || lod >= MAX_LODS) return AETHER_ERR_ARG;
-    AETHER_TRY
+    if (!ctx || lod < 0 || lod >= MAX_LODS) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     if (!wallTop) {
         ctx->world.putStructures(lod, tileX, tileZ, nullptr);
-        return AETHER_OK;
+        return ATLAS_OK;
     }
-    if (!roofTop || !wallMat || !roofMat) return AETHER_ERR_ARG;
+    if (!roofTop || !wallMat || !roofMat) return ATLAS_ERR_ARG;
     size_t n = size_t(TILE) * TILE;
     auto s = std::make_shared<Structures>();
     s->wallTop.assign(wallTop, wallTop + n);
@@ -760,68 +760,68 @@ AETHER_API AetherStatus aether_upload_column_structures2(AetherContext* ctx, int
         s->wallTop[c] = std::min(s->wallTop[c], s->roofTop[c]);
     }
     ctx->world.putStructures(lod, tileX, tileZ, std::move(s));
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_set_materials(AetherContext* ctx, uint32_t first, const AetherMaterial* m, uint32_t count) {
-    if (!ctx || first == 0 || (!m && count)) return AETHER_ERR_ARG;
-    if (uint64_t(first) + count > 65535) return ctx->fail(AETHER_ERR_ARG, "material ids beyond 65534");
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_set_materials(AtlasContext* ctx, uint32_t first, const AtlasMaterial* m, uint32_t count) {
+    if (!ctx || first == 0 || (!m && count)) return ATLAS_ERR_ARG;
+    if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
+    ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
-    AetherMaterial grey{{0.3f, 0.3f, 0.3f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN};
+    AtlasMaterial grey{{0.3f, 0.3f, 0.3f}, 0.9f, 0.0f, ATLAS_CLASS_TERRAIN};
     if (ctx->palette.size() < first + count) ctx->palette.resize(first + count, toGpu(grey));
     for (uint32_t i = 0; i < count; i++) ctx->palette[first + i] = toGpu(m[i]);
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_set_sun_map(AetherContext* ctx, uint32_t size, float halfExtent) {
+ATLAS_API AtlasStatus atlas_set_sun_map(AtlasContext* ctx, uint32_t size, float halfExtent) {
     if (!ctx || (size && (size < 64 || size > 4096)) || (size && !(halfExtent >= 256.0f && halfExtent <= 16384.0f)))
-        return AETHER_ERR_ARG;
+        return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
     ctx->sunMapSize = size;
     ctx->sunMapHalf = halfExtent;
     ctx->sunMapFull = true;
-    return AETHER_OK;
+    return ATLAS_OK;
 }
 
-AETHER_API AetherStatus aether_read_sun_map(AetherContext* ctx, float* out, uint32_t count) {
-    if (!ctx || !out) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_read_sun_map(AtlasContext* ctx, float* out, uint32_t count) {
+    if (!ctx || !out) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
-    AetherStatus dead;
+    AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
     std::vector<float> m;
     std::string err;
-    if (!ctx->backend->readSunMap(m, err)) return backendFailure(ctx, err.empty() ? "no sun map yet" : err, AETHER_ERR_STATE);
-    if (m.empty()) return ctx->fail(AETHER_ERR_STATE, "no sun map yet");
-    if (count < m.size()) return ctx->fail(AETHER_ERR_ARG, "sun map buffer too small");
+    if (!ctx->backend->readSunMap(m, err)) return backendFailure(ctx, err.empty() ? "no sun map yet" : err, ATLAS_ERR_STATE);
+    if (m.empty()) return ctx->fail(ATLAS_ERR_STATE, "no sun map yet");
+    if (count < m.size()) return ctx->fail(ATLAS_ERR_ARG, "sun map buffer too small");
     std::memcpy(out, m.data(), m.size() * 4);
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_set_light_group(AetherContext* ctx, uint32_t group, const AetherLight* lights, uint32_t count) {
-    if (!ctx || (!lights && count)) return AETHER_ERR_ARG;
-    if (count > 1u << 20) return ctx->fail(AETHER_ERR_ARG, "light group too large");
+ATLAS_API AtlasStatus atlas_set_light_group(AtlasContext* ctx, uint32_t group, const AtlasLight* lights, uint32_t count) {
+    if (!ctx || (!lights && count)) return ATLAS_ERR_ARG;
+    if (count > 1u << 20) return ctx->fail(ATLAS_ERR_ARG, "light group too large");
     ctx->lights.setGroup(group, lights, count);
-    return AETHER_OK;
+    return ATLAS_OK;
 }
 
-AETHER_API AetherStatus aether_set_light_budget(AetherContext* ctx, uint32_t maxPerFrame, float clusterDistance) {
-    if (!ctx || !(clusterDistance >= 0.0f)) return AETHER_ERR_ARG;
+ATLAS_API AtlasStatus atlas_set_light_budget(AtlasContext* ctx, uint32_t maxPerFrame, float clusterDistance) {
+    if (!ctx || !(clusterDistance >= 0.0f)) return ATLAS_ERR_ARG;
     ctx->lights.setBudget(maxPerFrame, clusterDistance);
-    return AETHER_OK;
+    return ATLAS_OK;
 }
 
-AETHER_API AetherStatus aether_set_transitions(AetherContext* ctx, float fadeSeconds) {
-    if (!ctx || !(fadeSeconds >= 0.0f && fadeSeconds <= 10.0f)) return AETHER_ERR_ARG;
+ATLAS_API AtlasStatus atlas_set_transitions(AtlasContext* ctx, float fadeSeconds) {
+    if (!ctx || !(fadeSeconds >= 0.0f && fadeSeconds <= 10.0f)) return ATLAS_ERR_ARG;
     ctx->world.fadeMs = uint32_t(fadeSeconds * 1000.0f + 0.5f);
-    return AETHER_OK;
+    return ATLAS_OK;
 }
 
-AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ) {
+ATLAS_API int32_t atlas_has_tile(AtlasContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ) {
     if (!ctx || lod < 0 || lod >= MAX_LODS) return 0;
     try {
         return ctx->world.hasTile(lod, tileX, tileZ) ? 1 : 0;
@@ -830,49 +830,49 @@ AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tile
     }
 }
 
-AETHER_API float aether_preview_height(AetherContext* ctx, double x, double z) {
+ATLAS_API float atlas_preview_height(AtlasContext* ctx, double x, double z) {
     if (!ctx || !ctx->preview) return NAN;
     return ctx->preview->height(x, z);
 }
 
-AETHER_API AetherStatus aether_memory_info(AetherContext* ctx, AetherMemoryInfo* out) {
-    if (!ctx || !out) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_memory_info(AtlasContext* ctx, AtlasMemoryInfo* out) {
+    if (!ctx || !out) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
-    *out = AetherMemoryInfo{};
-    AetherStatus dead;
+    *out = AtlasMemoryInfo{};
+    AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
     MemoryInfo m;
     std::string err;
-    if (!ctx->backend->memoryInfo(m, err)) return ctx->fail(AETHER_ERR_UNSUPPORTED, err);
+    if (!ctx->backend->memoryInfo(m, err)) return ctx->fail(ATLAS_ERR_UNSUPPORTED, err);
     out->deviceLocalBytes = m.deviceLocalBytes;
     out->deviceLocalBudget = m.deviceLocalBudget;
     out->deviceLocalUsage = m.deviceLocalUsage;
     out->hostHeapBytes = m.hostHeapBytes;
-    out->aetherBytes = m.aetherBytes;
+    out->atlasBytes = m.atlasBytes;
     out->integrated = m.integrated ? 1u : 0u;
-    out->flags = m.budgetExt ? AETHER_MEMORY_BUDGET_EXT : 0u;
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    out->flags = m.budgetExt ? ATLAS_MEMORY_BUDGET_EXT : 0u;
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
-AETHER_API AetherStatus aether_set_clipmap(AetherContext* ctx, uint32_t lodCount) {
-    if (!ctx || lodCount < 1 || lodCount > 7u) return AETHER_ERR_ARG;  // 7: the default (and the most the mod streams)
+ATLAS_API AtlasStatus atlas_set_clipmap(AtlasContext* ctx, uint32_t lodCount) {
+    if (!ctx || lodCount < 1 || lodCount > 7u) return ATLAS_ERR_ARG;  // 7: the default (and the most the mod streams)
     ctx->world.lodCount = int(lodCount);
-    return AETHER_OK;
+    return ATLAS_OK;
 }
 
-AETHER_API AetherStatus aether_debug_fault(AetherContext* ctx, uint32_t fault, uint32_t afterFrames) {
-    if (!ctx || fault > AETHER_FAULT_TIMEOUT) return AETHER_ERR_ARG;
-    AETHER_TRY
+ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint32_t afterFrames) {
+    if (!ctx || fault > ATLAS_FAULT_TIMEOUT) return ATLAS_ERR_ARG;
+    ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
-    Fault f = fault == AETHER_FAULT_DEVICE_LOST    ? Fault::DeviceLost
-              : fault == AETHER_FAULT_OUT_OF_MEMORY ? Fault::OutOfMemory
-              : fault == AETHER_FAULT_TIMEOUT       ? Fault::Timeout
+    Fault f = fault == ATLAS_FAULT_DEVICE_LOST    ? Fault::DeviceLost
+              : fault == ATLAS_FAULT_OUT_OF_MEMORY ? Fault::OutOfMemory
+              : fault == ATLAS_FAULT_TIMEOUT       ? Fault::Timeout
                                                     : Fault::None;
     ctx->backend->injectFault(f, afterFrames);
-    return AETHER_OK;
-    AETHER_CATCH(ctx)
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
 }  // extern "C"

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "group": "ebony_ingot",
+  "ingredient": "nirncraft:raw_ebony",
+  "result": {
+    "id": "nirncraft:ebony_ingot"
+  },
+  "experience": 0.7,
+  "cookingtime": 100
+}

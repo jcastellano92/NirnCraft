@@ -1,0 +1,685 @@
+package com.nirncraft.inventory;
+
+import com.nirncraft.combat.WeaponClass;
+import com.nirncraft.core.Notifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.neoforged.neoforge.event.EventHooks;
+import org.jetbrains.annotations.Nullable;
+
+/**
+ * Server side of the Skyrim inventory screen and the favorites menu. Every request names a slot of the player's own
+ * inventory and the item expected there; anything that doesn't match the server's state is ignored.
+ */
+public final class InventoryActions {
+    /** {@link Inventory#getItem(int)} index of the first armor slot (feet); head is {@code ARMOR_START + 3}. */
+    public static final int ARMOR_START = Inventory.INVENTORY_SIZE;
+    public static final int OFFHAND = Inventory.SLOT_OFFHAND;
+    public static final int SLOT_COUNT = OFFHAND + 1;
+
+    private InventoryActions() {}
+
+    static void handle(ServerPlayer player, int action, int slot, Identifier itemId) {
+        if (!player.isAlive() || player.isSpectator()) return;
+        // only while no other container is open (the Skyrim screen is not a container screen)
+        if (player.containerMenu != player.inventoryMenu) return;
+        if (!player.inventoryMenu.getCarried().isEmpty()) return;
+        Inventory inv = player.getInventory();
+        if (Pack.isVirtual(slot)) {
+            // a row that lives only in the overflow pack: favorite and drop act on the pack directly, everything else
+            // pulls one stack into a real slot first and then runs the normal slot rules
+            int index = slot - Pack.VIRTUAL_BASE;
+            ItemStack entry = Pack.get(player, index);
+            if (entry.isEmpty() || !BuiltInRegistries.ITEM.getKey(entry.getItem()).equals(itemId)) {
+                // Stale virtual index: search pack first
+                int foundIdx = Pack.find(player, s -> BuiltInRegistries.ITEM.getKey(s.getItem()).equals(itemId));
+                if (foundIdx >= 0) {
+                    index = foundIdx;
+                    entry = Pack.get(player, index);
+                } else {
+                    // Check if it already drained/refilled into real slots
+                    int real = -1;
+                    for (int i = 0; i < SLOT_COUNT; i++) {
+                        ItemStack s = inv.getItem(i);
+                        if (!s.isEmpty() && BuiltInRegistries.ITEM.getKey(s.getItem()).equals(itemId)) {
+                            real = i;
+                            break;
+                        }
+                    }
+                    if (real >= 0) {
+                        slot = real;
+                    } else {
+                        return;
+                    }
+                }
+            }
+            if (Pack.isVirtual(slot)) {
+                if (action == InventoryPackets.InvAction.FAVORITE) {
+                    Pack.setFavorite(player, entry, !InvCategory.isFavorite(entry));
+                    CarryWeight.invalidate(player);
+                    player.containerMenu.broadcastChanges();
+                    Pack.sync(player);
+                    return;
+                }
+                if (action == InventoryPackets.InvAction.DROP_ONE || action == InventoryPackets.InvAction.DROP_ALL) {
+                    if (com.nirncraft.quest.QuestItems.isQuestItem(entry)) {
+                        message(player, "quest_item");
+                        return;
+                    }
+                    tossAll(player, inv, Pack.take(player, index, action == InventoryPackets.InvAction.DROP_ALL ? Integer.MAX_VALUE : 1));
+                    CarryWeight.invalidate(player);
+                    player.containerMenu.broadcastChanges();
+                    Pack.sync(player);
+                    return;
+                }
+                slot = Pack.materialize(player, index, itemId);
+                if (slot < 0) {
+                    message(player, "full");
+                    return;
+                }
+            }
+        }
+        if (slot < 0 || slot >= SLOT_COUNT || slot >= inv.getContainerSize()) return;
+        ItemStack stack = inv.getItem(slot);
+        if (stack.isEmpty() || !BuiltInRegistries.ITEM.getKey(stack.getItem()).equals(itemId)) {
+            // Real slot mismatch: search other real slots
+            int found = -1;
+            for (int i = 0; i < SLOT_COUNT; i++) {
+                ItemStack s = inv.getItem(i);
+                if (!s.isEmpty() && BuiltInRegistries.ITEM.getKey(s.getItem()).equals(itemId)) {
+                    found = i;
+                    break;
+                }
+            }
+            if (found >= 0) {
+                slot = found;
+                stack = inv.getItem(slot);
+            } else {
+                // Check if it moved into the pack
+                int pIdx = Pack.find(player, s -> BuiltInRegistries.ITEM.getKey(s.getItem()).equals(itemId));
+                if (pIdx >= 0) {
+                    slot = Pack.materialize(player, pIdx, itemId);
+                    if (slot < 0) {
+                        message(player, "full");
+                        return;
+                    }
+                    stack = inv.getItem(slot);
+                } else {
+                    return;
+                }
+            }
+        }
+
+        switch (action) {
+            case InventoryPackets.InvAction.EQUIP -> equip(player, inv, slot, stack);
+            case InventoryPackets.InvAction.EQUIP_LEFT -> equipLeft(player, inv, slot, stack);
+            case InventoryPackets.InvAction.USE -> use(player, inv, slot, stack);
+            case InventoryPackets.InvAction.DROP_ONE -> drop(player, inv, slot, stack, false);
+            case InventoryPackets.InvAction.DROP_ALL -> drop(player, inv, slot, stack, true);
+            case InventoryPackets.InvAction.FAVORITE -> favorite(player, inv, stack);
+            case InventoryPackets.InvAction.READ -> read(player, inv, slot, stack, itemId);
+            case InventoryPackets.InvAction.APPLY_POISON -> {
+                if (com.nirncraft.crafting.arcane.ArcaneEvents.applyPoisonFromInventory(player, stack) && stack.isEmpty()) {
+                    inv.setItem(slot, ItemStack.EMPTY);
+                }
+            }
+            default -> {
+                return;
+            }
+        }
+        if (action == InventoryPackets.InvAction.EQUIP || action == InventoryPackets.InvAction.EQUIP_LEFT) {
+            com.nirncraft.magic.Hands.settle(player); // one hand system: a new item in a hand replaces its spell / bound weapon
+        }
+        CarryWeight.invalidate(player);
+        player.containerMenu.broadcastChanges();
+        Pack.sync(player);
+    }
+
+    // ------------------------------------------------------------------ slot helpers
+
+    public static boolean isArmorSlot(int slot) {
+        return slot >= ARMOR_START && slot < ARMOR_START + 4;
+    }
+
+    /** Equip states of a row (the same numbers as the client's InvEntry). */
+    public static final int EQ_NONE = 0, EQ_RIGHT = 1, EQ_LEFT = 2, EQ_WORN = 3;
+
+    /**
+     * What a stack in {@code slot} is doing: worn armor / worn jewellery (the apparel module), the left hand, the held
+     * right hand, or nothing. Same rules the Skyrim inventory screen draws its equipped marks with.
+     */
+    public static int equipState(net.minecraft.world.entity.player.Player player, Inventory inv, int slot, ItemStack stack) {
+        if (isArmorSlot(slot)) return EQ_WORN;
+        if (slot == OFFHAND) return EQ_LEFT;
+        if (slot == inv.getSelectedSlot()) return EQ_RIGHT;
+        return isWornJewelry(player, stack) ? EQ_WORN : EQ_NONE;
+    }
+
+    /** Jewellery counts as worn when its item id is the one in the apparel module (any stack of it, slot or pack). */
+    public static boolean isWornJewelry(net.minecraft.world.entity.player.Player player, ItemStack stack) {
+        if (stack.isEmpty() || !com.nirncraft.economy.ItemCategory.isJewelry(stack)) return false;
+        Identifier key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        String id = key != null ? key.toString() : "";
+        CompoundTag apparel = com.nirncraft.core.SkyData.get(player).module("apparel");
+        return id.equals(apparel.getStringOr("necklace", "")) || id.equals(apparel.getStringOr("ring", "")) || id.equals(apparel.getStringOr("circlet", ""));
+    }
+
+    /** Armor slot / offhand / the selected hotbar slot. */
+    public static boolean isEquipped(Inventory inv, int slot) {
+        return isArmorSlot(slot) || slot == OFFHAND || slot == inv.getSelectedSlot();
+    }
+
+    /** The armor or offhand slot an item goes to, or null for "hold it in the right hand". */
+    @Nullable
+    public static EquipmentSlot equipSlotFor(ItemStack stack) {
+        if (com.nirncraft.economy.ItemCategory.isJewelry(stack)) {
+            Identifier key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            if (key != null) {
+                String path = key.getPath();
+                if (path.contains("circlet")) return EquipmentSlot.HEAD;
+                if (path.contains("necklace") || path.contains("amulet") || path.contains("pendant")) return EquipmentSlot.CHEST;
+                if (path.contains("ring")) return EquipmentSlot.OFFHAND;
+            }
+        }
+        EquipmentSlot slot = EquipmentData.slot(stack);
+        if (slot != null && slot != EquipmentSlot.MAINHAND) return slot;
+        return stack.has(net.minecraft.core.component.DataComponents.BLOCKS_ATTACKS) ? EquipmentSlot.OFFHAND : null;
+    }
+
+    private static int armorIndex(EquipmentSlot slot) {
+        return ARMOR_START + slot.getIndex();
+    }
+
+    /** A free slot, main inventory (9-35) first, then the hotbar. -1 if the inventory is full. */
+    private static int freeSlot(Inventory inv) {
+        for (int i = Inventory.getSelectionSize(); i < Inventory.INVENTORY_SIZE; i++) if (inv.getItem(i).isEmpty()) return i;
+        for (int i = 0; i < Inventory.getSelectionSize(); i++) if (inv.getItem(i).isEmpty()) return i;
+        return -1;
+    }
+
+    private static int freeHotbarSlot(Inventory inv) {
+        for (int i = 0; i < Inventory.getSelectionSize(); i++) if (inv.getItem(i).isEmpty()) return i;
+        return -1;
+    }
+
+    private static void select(ServerPlayer player, int hotbarSlot) {
+        if (player.getInventory().getSelectedSlot() == hotbarSlot) return;
+        player.getInventory().setSelectedSlot(hotbarSlot);
+        player.connection.send(new ClientboundSetHeldSlotPacket(hotbarSlot));
+    }
+
+    private static boolean bound(ServerPlayer player, ItemStack stack) {
+        return !player.isCreative() && EnchantmentHelper.has(stack, net.minecraft.world.item.enchantment.EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE);
+    }
+
+    private static void message(ServerPlayer player, String key) {
+        Notifier.message(player, Component.translatable("inventory.nirncraft.msg." + key));
+    }
+
+    // ------------------------------------------------------------------ equip
+
+    private static boolean isUsableEquipment(ItemStack stack) {
+        if (com.nirncraft.economy.ItemCategory.isJewelry(stack)) return true;
+        EquipmentSlot slot = equipSlotFor(stack);
+        if (slot != null && slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) return true;
+        net.minecraft.world.item.Item it = stack.getItem();
+        if (stack.has(net.minecraft.core.component.DataComponents.WEAPON) || stack.has(net.minecraft.core.component.DataComponents.TOOL)
+                || it instanceof net.minecraft.world.item.ProjectileWeaponItem || it instanceof net.minecraft.world.item.ShieldItem
+                || it instanceof net.minecraft.world.item.TridentItem || it instanceof net.minecraft.world.item.FishingRodItem
+                || it instanceof net.minecraft.world.item.ShearsItem) {
+            return true;
+        }
+        // a saddle is held in the hand: sneak up to a wild mount and use it (com.nirncraft.mounts)
+        return it == net.minecraft.world.item.Items.TORCH || it == net.minecraft.world.item.Items.SOUL_TORCH
+                || com.nirncraft.mounts.MountItems.isSaddle(stack);
+    }
+
+    private static void equip(ServerPlayer player, Inventory inv, int slot, ItemStack stack) {
+        if (isArmorSlot(slot)) {
+            unequip(player, inv, slot, stack);
+            return;
+        }
+        if (slot == OFFHAND) {
+            if (equipSlotFor(stack) == EquipmentSlot.OFFHAND) {
+                unequip(player, inv, slot, stack);
+                return;
+            }
+            // A one-handed weapon/tool in the left hand was left-clicked (equip right):
+            // if another identical copy exists in the bag/pack, equip that copy to right hand; otherwise move this one to right hand.
+            int extraSlot = findExtraCopy(player, inv, stack, OFFHAND);
+            if (extraSlot >= 0) {
+                holdRight(player, inv, extraSlot, inv.getItem(extraSlot));
+            } else {
+                holdRightFromOffhand(player, inv, stack);
+            }
+            return;
+        }
+        if (!isUsableEquipment(stack)) return;
+
+        if (com.nirncraft.economy.ItemCategory.isJewelry(stack)) {
+            Identifier key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            String path = key != null ? key.getPath() : "";
+            String kind = path.contains("circlet") ? "circlet" : path.contains("ring") ? "ring" : "necklace";
+            com.nirncraft.core.PlayerData data = com.nirncraft.core.SkyData.get(player);
+            CompoundTag apparel = data.module("apparel");
+            String curWorn = apparel.getStringOr(kind, "");
+            String thisId = key != null ? key.toString() : "";
+            if (thisId.equals(curWorn)) {
+                apparel.remove(kind);
+            } else {
+                apparel.putString(kind, thisId);
+            }
+            data.markDirty();
+            com.nirncraft.core.PlayerDataEvents.fullSync(player);
+            return;
+        }
+
+        EquipmentSlot target = equipSlotFor(stack);
+        if (target != null && target.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+            wear(player, inv, slot, stack, target);
+        } else if (target == EquipmentSlot.OFFHAND) {
+            equipLeft(player, inv, slot, stack);
+        } else if (slot == inv.getSelectedSlot()) {
+            unequip(player, inv, slot, stack);
+        } else {
+            holdRight(player, inv, slot, stack);
+        }
+    }
+
+    /** Finds another stack matching {@code template} outside {@code excludeSlot} (and outside armor/hands), materializing from Pack if needed. */
+    private static int findExtraCopy(ServerPlayer player, Inventory inv, ItemStack template, int excludeSlot) {
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
+            if (i == excludeSlot || i == inv.getSelectedSlot()) continue;
+            ItemStack s = inv.getItem(i);
+            if (!s.isEmpty() && ItemStack.isSameItemSameComponents(s, template)) return i;
+        }
+        int pIdx = Pack.find(player, s -> ItemStack.isSameItemSameComponents(s, template));
+        if (pIdx >= 0) {
+            Identifier id = BuiltInRegistries.ITEM.getKey(template.getItem());
+            return Pack.materialize(player, pIdx, id);
+        }
+        return -1;
+    }
+
+    private static void holdRightFromOffhand(ServerPlayer player, Inventory inv, ItemStack stack) {
+        com.nirncraft.magic.MagicData.tag(player).remove(com.nirncraft.magic.Hands.FROM_RIGHT_ITEM);
+        com.nirncraft.magic.MagicData.tag(player).remove(com.nirncraft.magic.Hands.FROM_LEFT_ITEM);
+        inv.setItem(OFFHAND, ItemStack.EMPTY);
+        int sel = inv.getSelectedSlot();
+        ItemStack held = inv.getItem(sel);
+        if (com.nirncraft.magic.bound.BoundWeapons.isBound(held)) {
+            inv.setItem(sel, ItemStack.EMPTY);
+            held = ItemStack.EMPTY;
+        }
+        if (held.isEmpty()) {
+            inv.setItem(sel, stack);
+        } else {
+            int free = freeSlot(inv);
+            inv.setItem(sel, stack);
+            if (free >= 0) inv.setItem(free, held);
+            else Pack.giveOrDrop(player, held);
+        }
+    }
+
+    private static void wear(ServerPlayer player, Inventory inv, int slot, ItemStack stack, EquipmentSlot target) {
+        ItemStack worn = inv.getItem(armorIndex(target));
+        if (com.nirncraft.magic.bound.BoundWeapons.isBound(worn)) {
+            com.nirncraft.magic.MagicData.tag(player).remove("prev_chest_armor");
+            player.setItemSlot(target, ItemStack.EMPTY);
+            worn = ItemStack.EMPTY;
+        } else if (!worn.isEmpty() && bound(player, worn)) {
+            message(player, "bound");
+            return;
+        }
+        if (stack.getCount() > 1) {
+            ItemStack one = stack.split(1);
+            player.setItemSlot(target, one);
+            if (!worn.isEmpty()) Pack.giveOrDrop(player, worn);
+        } else {
+            inv.setItem(slot, ItemStack.EMPTY);
+            player.setItemSlot(target, stack);
+            inv.setItem(slot, worn);
+        }
+    }
+
+    /** Moves an item into the right hand (selected hotbar slot), keeping the hotbar tidy. */
+    private static void holdRight(ServerPlayer player, Inventory inv, int slot, ItemStack stack) {
+        com.nirncraft.magic.MagicData.tag(player).remove(com.nirncraft.magic.Hands.FROM_RIGHT_ITEM);
+        int sel = inv.getSelectedSlot();
+        ItemStack held = inv.getItem(sel);
+        if (com.nirncraft.magic.bound.BoundWeapons.isBound(held)) {
+            inv.setItem(sel, ItemStack.EMPTY);
+            held = ItemStack.EMPTY;
+        }
+        if (stack.getCount() > 1 && stack.getMaxStackSize() > 1) {
+            ItemStack one = stack.split(1);
+            if (!held.isEmpty()) {
+                int free = freeSlot(inv);
+                if (free >= 0) inv.setItem(free, held);
+                else Pack.giveOrDrop(player, held);
+            }
+            inv.setItem(sel, one);
+            stack = one;
+        } else if (Inventory.isHotbarSlot(slot)) {
+            select(player, slot);
+        } else {
+            if (held.isEmpty()) {
+                inv.setItem(slot, ItemStack.EMPTY);
+                inv.setItem(sel, stack);
+            } else {
+                int free = freeHotbarSlot(inv);
+                if (free >= 0) {
+                    inv.setItem(slot, ItemStack.EMPTY);
+                    inv.setItem(free, stack);
+                    select(player, free);
+                } else {
+                    inv.setItem(slot, held);
+                    inv.setItem(sel, stack);
+                }
+            }
+        }
+        // Two-handed weapons need both hands: put away whatever is in the left hand if there's room.
+        if (com.nirncraft.magic.Hands.twoHanded(stack)) {
+            ItemStack off = inv.getItem(OFFHAND);
+            if (com.nirncraft.magic.bound.BoundWeapons.isBound(off)) {
+                com.nirncraft.magic.MagicData.tag(player).remove(com.nirncraft.magic.Hands.FROM_LEFT_ITEM);
+                inv.setItem(OFFHAND, ItemStack.EMPTY);
+            } else if (!off.isEmpty()) {
+                int free = freeSlot(inv);
+                inv.setItem(OFFHAND, ItemStack.EMPTY);
+                if (free >= 0) inv.setItem(free, off);
+                else Pack.giveOrDrop(player, off); // all 36 slots taken: the pack holds it
+            }
+        }
+    }
+
+    private static void equipLeft(ServerPlayer player, Inventory inv, int slot, ItemStack stack) {
+        if (slot == OFFHAND) {
+            unequip(player, inv, slot, stack);
+            return;
+        }
+        if (isArmorSlot(slot)) return;
+        EquipmentSlot target = equipSlotFor(stack);
+        if (target != null && target.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) return; // armor can't be held
+        if (com.nirncraft.magic.Hands.twoHanded(stack) || com.nirncraft.mounts.MountItems.isSaddle(stack)) return;
+
+        // If right-clicking the item currently in the right hand, check if we have a second copy to dual-wield
+        if (slot == inv.getSelectedSlot()) {
+            int extraSlot = findExtraCopy(player, inv, stack, inv.getSelectedSlot());
+            if (extraSlot >= 0) {
+                slot = extraSlot;
+                stack = inv.getItem(extraSlot);
+            } else {
+                com.nirncraft.magic.MagicData.tag(player).remove(com.nirncraft.magic.Hands.FROM_RIGHT_ITEM);
+            }
+        }
+
+        // If the right hand holds a two-handed weapon, stow it (or dismiss it if bound) before equipping the left hand
+        ItemStack main = inv.getItem(inv.getSelectedSlot());
+        if (com.nirncraft.magic.Hands.twoHanded(main)) {
+            if (com.nirncraft.magic.bound.BoundWeapons.isBound(main)) {
+                com.nirncraft.magic.MagicData.tag(player).remove(com.nirncraft.magic.Hands.FROM_RIGHT_ITEM);
+                inv.setItem(inv.getSelectedSlot(), ItemStack.EMPTY);
+            } else {
+                unequip(player, inv, inv.getSelectedSlot(), main);
+            }
+        }
+
+        com.nirncraft.magic.MagicData.tag(player).remove(com.nirncraft.magic.Hands.FROM_LEFT_ITEM);
+        ItemStack off = inv.getItem(OFFHAND);
+        if (com.nirncraft.magic.bound.BoundWeapons.isBound(off)) {
+            inv.setItem(OFFHAND, ItemStack.EMPTY);
+            off = ItemStack.EMPTY;
+        }
+        if (stack.getCount() > 1 && !(stack.getItem() instanceof net.minecraft.world.item.ArrowItem)) {
+            ItemStack one = stack.split(1);
+            player.setItemSlot(EquipmentSlot.OFFHAND, one);
+            if (!off.isEmpty()) {
+                int free = freeSlot(inv);
+                if (free >= 0) inv.setItem(free, off);
+                else Pack.giveOrDrop(player, off);
+            }
+        } else {
+            inv.setItem(slot, ItemStack.EMPTY);
+            player.setItemSlot(EquipmentSlot.OFFHAND, stack);
+            inv.setItem(slot, off);
+        }
+    }
+
+    private static void unequip(ServerPlayer player, Inventory inv, int slot, ItemStack stack) {
+        if (com.nirncraft.magic.bound.BoundWeapons.isBound(stack)) {
+            if (isArmorSlot(slot)) {
+                com.nirncraft.magic.MagicData.tag(player).remove("prev_chest_armor");
+                EquipmentSlot eqSlot = Inventory.EQUIPMENT_SLOT_MAPPING.get(slot);
+                player.setItemSlot(eqSlot, ItemStack.EMPTY);
+            } else {
+                if (slot == OFFHAND) com.nirncraft.magic.MagicData.tag(player).remove(com.nirncraft.magic.Hands.FROM_LEFT_ITEM);
+                else if (slot == inv.getSelectedSlot()) com.nirncraft.magic.MagicData.tag(player).remove(com.nirncraft.magic.Hands.FROM_RIGHT_ITEM);
+                inv.setItem(slot, ItemStack.EMPTY);
+            }
+            player.level().playSound(null, player.blockPosition(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.6f, 0.7f);
+            com.nirncraft.core.SkyData.get(player).markDirty();
+            com.nirncraft.core.PlayerDataEvents.fullSync(player);
+            return;
+        }
+        if (isArmorSlot(slot) && bound(player, stack)) {
+            message(player, "bound");
+            return;
+        }
+        if (slot == OFFHAND) {
+            com.nirncraft.magic.MagicData.tag(player).remove(com.nirncraft.magic.Hands.FROM_LEFT_ITEM);
+        } else if (slot == inv.getSelectedSlot()) {
+            com.nirncraft.magic.MagicData.tag(player).remove(com.nirncraft.magic.Hands.FROM_RIGHT_ITEM);
+        }
+        if (slot == inv.getSelectedSlot() && Inventory.isHotbarSlot(slot)) {
+            // put the weapon away into the backpack; with a full backpack, just switch to an empty hand
+            for (int i = Inventory.getSelectionSize(); i < Inventory.INVENTORY_SIZE; i++) {
+                if (inv.getItem(i).isEmpty()) {
+                    inv.setItem(slot, ItemStack.EMPTY);
+                    inv.setItem(i, stack);
+                    return;
+                }
+            }
+            int empty = freeHotbarSlot(inv);
+            if (empty >= 0) {
+                select(player, empty);
+            } else {
+                // every slot is taken: the weapon goes into the pack (weight is the only carrying limit)
+                inv.setItem(slot, ItemStack.EMPTY);
+                Pack.giveOrDrop(player, stack);
+            }
+            return;
+        }
+        int free = freeSlot(inv);
+        if (isArmorSlot(slot)) {
+            EquipmentSlot eqSlot = Inventory.EQUIPMENT_SLOT_MAPPING.get(slot);
+            player.setItemSlot(eqSlot, ItemStack.EMPTY);
+        } else {
+            inv.setItem(slot, ItemStack.EMPTY);
+        }
+        if (free >= 0) inv.setItem(free, stack);
+        else Pack.giveOrDrop(player, stack);
+    }
+
+    // ------------------------------------------------------------------ use / read
+
+    private static void use(ServerPlayer player, Inventory inv, int slot, ItemStack stack) {
+        if (!InvCategory.isConsumable(stack)) return;
+        com.nirncraft.crafting.arcane.alchemy.Ingredients.Ingredient ing = com.nirncraft.crafting.arcane.alchemy.Ingredients.get(stack);
+        if (ing != null && !stack.has(net.minecraft.core.component.DataComponents.FOOD)) {
+            com.nirncraft.crafting.arcane.alchemy.Alchemy.discoverByTasting(player, ing);
+            if (!player.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                    SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.7f, 0.9f + player.getRandom().nextFloat() * 0.2f);
+            if (stack.isEmpty()) {
+                inv.setItem(slot, ItemStack.EMPTY);
+            }
+            return;
+        }
+        if (stack.getItem() instanceof net.minecraft.world.item.SplashPotionItem
+                || stack.getItem() instanceof net.minecraft.world.item.LingeringPotionItem) {
+            for (net.minecraft.world.effect.MobEffectInstance effect : com.nirncraft.platform.ArcaneData.effects(stack)) {
+                if (effect.getEffect().value().isInstantaneous()) {
+                    effect.getEffect().value().applyInstantaneousEffect(player.level(), player, player, player, effect.getAmplifier(), 1.0);
+                } else {
+                    player.addEffect(new net.minecraft.world.effect.MobEffectInstance(effect));
+                }
+            }
+            if (!player.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
+            if (stack.isEmpty()) {
+                inv.setItem(slot, ItemStack.EMPTY);
+            }
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_DRINK,
+                    SoundSource.PLAYERS, 0.5f, player.level().getRandom().nextFloat() * 0.1f + 0.9f);
+            return;
+        }
+        if (stack.has(net.minecraft.core.component.DataComponents.FOOD)) {
+            FoodProperties food = stack.get(net.minecraft.core.component.DataComponents.FOOD);
+            if (food != null && !player.canEat(food.canAlwaysEat())) {
+                message(player, "not_hungry");
+                return;
+            }
+        }
+        boolean drink = stack.getUseAnimation() == ItemUseAnimation.DRINK;
+        ItemStack before = stack.copy();
+        // Same sequence as LivingEntity#completeUsingItem, so food/potion effects, advancements and
+        // LivingEntityUseItemEvent.Finish listeners (Skyrim food healing) all run.
+        ItemStack result = com.nirncraft.platform.ItemUse.finish(stack, player);
+        result = EventHooks.onItemUseFinish(player, before, 0, result);
+        if (result != stack) {
+            if (stack.isEmpty()) {
+                inv.setItem(slot, result);
+            } else if (!result.isEmpty()) {
+                Pack.giveOrDrop(player, result); // an empty bottle...
+            }
+        } else if (stack.isEmpty()) {
+            inv.setItem(slot, ItemStack.EMPTY);
+        }
+        if (drink) {
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_DRINK,
+                    SoundSource.PLAYERS, 0.5f, player.level().getRandom().nextFloat() * 0.1f + 0.9f);
+        }
+    }
+
+    /** Reads a book, spell tome, or skill book directly without disturbing the player's equipped weapons. */
+    private static void read(ServerPlayer player, Inventory inv, int slot, ItemStack stack, Identifier itemId) {
+        if (!InvCategory.isReadable(stack)) return;
+        if (stack.getItem() instanceof com.nirncraft.magic.spell.SpellTomeItem tome) {
+            tome.readStack(player, stack);
+            if (stack.isEmpty()) inv.setItem(slot, ItemStack.EMPTY);
+            return;
+        }
+        if (stack.getItem() instanceof com.nirncraft.economy.SkillBookItem skillBook) {
+            skillBook.readStack(player, stack);
+            return;
+        }
+        if (stack.getItem() instanceof com.nirncraft.lore.LoreBookItem loreBook) {
+            loreBook.readStack(player, stack);
+            return;
+        }
+        if (stack.getItem() instanceof com.nirncraft.guide.HandbookItem) {
+            return;
+        }
+        if (slot != inv.getSelectedSlot()) {
+            if (isArmorSlot(slot)) return;
+            if (slot == OFFHAND) {
+                ItemStack held = inv.getItem(inv.getSelectedSlot());
+                inv.setItem(OFFHAND, held);
+                inv.setItem(inv.getSelectedSlot(), stack);
+            } else {
+                holdRight(player, inv, slot, stack);
+            }
+        }
+        // push the slot changes now so they reach the client before the UseHeld request
+        player.inventoryMenu.broadcastChanges();
+        com.nirncraft.network.SkyNetwork.sendToPlayer(player, new InventoryPackets.UseHeld(itemId));
+    }
+
+    // ------------------------------------------------------------------ drop / favorite
+
+    private static void drop(ServerPlayer player, Inventory inv, int slot, ItemStack stack, boolean all) {
+        if (isArmorSlot(slot) && bound(player, stack)) {
+            message(player, "bound");
+            return;
+        }
+        if (com.nirncraft.quest.QuestItems.isQuestItem(stack)) {
+            message(player, "quest_item");
+            return;
+        }
+        if (!all) {
+            toss(player, inv, inv.removeItem(slot, 1));
+            return;
+        }
+        if (isEquipped(inv, slot)) {
+            toss(player, inv, inv.removeItem(slot, stack.getCount()));
+            return;
+        }
+        // "drop all" drops the whole row of the list: every unequipped stack of this exact item
+        ItemStack template = stack.copy();
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
+            if (i == inv.getSelectedSlot()) continue;
+            ItemStack s = inv.getItem(i);
+            if (!s.isEmpty() && !com.nirncraft.quest.QuestItems.isQuestItem(s) && ItemStack.isSameItemSameComponents(s, template)) {
+                toss(player, inv, inv.removeItem(i, s.getCount()));
+            }
+        }
+        // ... and the part of the row that sits in the overflow pack
+        tossAll(player, inv, Pack.takeAll(player, template));
+    }
+
+    private static void toss(ServerPlayer player, Inventory inv, ItemStack stack) {
+        if (stack.isEmpty()) return;
+        ItemEntity entity = player.drop(stack, true, net.minecraft.util.Prediction.SERVER_ONLY);
+        if (entity == null) {
+            // a mod cancelled the toss: don't let the item vanish
+            Pack.giveOrDrop(player, stack);
+        }
+    }
+
+    /** Tosses a stack of any size as max-size stacks (at most 64 entities per action; the rest stays in the pack). */
+    private static void tossAll(ServerPlayer player, Inventory inv, ItemStack stack) {
+        int entities = 0;
+        while (!stack.isEmpty() && entities++ < 64) toss(player, inv, stack.split(stack.getMaxStackSize()));
+        if (!stack.isEmpty()) Pack.add(player, stack);
+    }
+
+    /** Toggles the favorite mark on every stack of this exact item (the whole list row), pack entry included. */
+    private static void favorite(ServerPlayer player, Inventory inv, ItemStack stack) {
+        boolean fav = !InvCategory.isFavorite(stack);
+        ItemStack template = stack.copy();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack s = inv.getItem(i);
+            if (s.isEmpty() || !ItemStack.isSameItemSameComponents(s, template)) continue;
+            setFavorite(s, fav);
+            inv.setChanged();
+        }
+        Pack.setFavorite(player, template, fav);
+    }
+
+    static void setFavorite(ItemStack stack, boolean fav) {
+        if (fav) {
+            com.nirncraft.inventory.ItemData.updateCustom(stack, customData263 -> customData263.putBoolean(InvCategory.FAVORITE_NBT, true));
+        } else {
+            CompoundTag tag = com.nirncraft.inventory.ItemData.custom(stack);
+            if (tag != null) com.nirncraft.inventory.ItemData.updateCustom(stack, customData263 -> customData263.remove(InvCategory.FAVORITE_NBT));
+        }
+    }
+}

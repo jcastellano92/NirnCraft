@@ -1,4 +1,4 @@
-"""Validate the exact platform/dependency lock before producing a Skycraft package.
+"""Validate the exact platform/dependency lock before producing a NirnCraft package.
 
 This check is local and does not launch Minecraft or certify runtime integration.
 """
@@ -11,7 +11,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGET = {"minecraft": "26.3", "neoforge": "26.3.0.90", "java": 25,
-          "instanceName": "Skycraft-26.3-autotest"}
+          "instanceName": "NirnCraft-26.3-autotest"}
 # Owner-approved fix for the native NeoForge render-overload removal, bounded to these exact artifacts.
 IRIS_SODIUM_OVERRIDE = {
     "id": "iris-1.11.7-sodium-0.9.3-beta.1-neoforge26.3",
@@ -68,7 +68,7 @@ def validate_pack(pack_dir=ROOT / "pack"):
             raise ValueError("Dependency override does not match the exact approved Iris/Sodium artifacts and original declaration")
     for row in lock["active"]:
         meta = tomllib.loads((pack_dir / row["metadata"]).read_text(encoding="utf8"))
-        if meta.get("skycraft") != {"minecraft": TARGET["minecraft"], "loader": "neoforge"}:
+        if meta.get("nirncraft") != {"minecraft": TARGET["minecraft"], "loader": "neoforge"}:
             raise ValueError(f"{row['key']}: missing exact game/loader declaration")
         download = meta["download"]
         if (meta["filename"], meta.get("side", "both"), download["hash-format"], download["hash"]) != (
@@ -87,17 +87,17 @@ def validate_pack(pack_dir=ROOT / "pack"):
                     raise ValueError(f"{row['key']}: missing required exact dependency {dep}")
     iris = dict(line.split("=", 1) for line in (pack_dir / "config/iris.properties").read_text().splitlines()
                 if line and not line.startswith("#") and "=" in line)
-    # the only shader pack is Skycraft's own (shaderpack/SkycraftAether, shipped as pack/shaderpacks/SkycraftAether.zip)
+    # the only shader pack is NirnCraft's own (shaderpack/InfiniteATLAS, shipped as pack/shaderpacks/InfiniteATLAS.zip)
     if iris.get("enableShaders") not in ("false", "true"):
         raise ValueError("config/iris.properties: enableShaders must be true or false")
-    if iris.get("enableShaders") == "true" and iris.get("shaderPack") != "SkycraftAether.zip":
-        raise ValueError("config/iris.properties: the enabled shader pack must be SkycraftAether.zip")
+    if iris.get("enableShaders") == "true" and iris.get("shaderPack") != "InfiniteATLAS.zip":
+        raise ValueError("config/iris.properties: the enabled shader pack must be InfiniteATLAS.zip")
     shaderpacks = pack_dir / "shaderpacks"
-    extra = sorted(p.name for p in shaderpacks.iterdir() if p.name != "SkycraftAether.zip") if shaderpacks.exists() else []
+    extra = sorted(p.name for p in shaderpacks.iterdir() if p.name != "InfiniteATLAS.zip") if shaderpacks.exists() else []
     if extra:
-        raise ValueError(f"pack/shaderpacks may hold only SkycraftAether.zip, found {extra}")
-    if iris.get("enableShaders") == "true" and not (shaderpacks / "SkycraftAether.zip").is_file():
-        raise ValueError("pack/shaderpacks/SkycraftAether.zip is missing (py -3 -I shaderpack/build_pack.py)")
+        raise ValueError(f"pack/shaderpacks may hold only InfiniteATLAS.zip, found {extra}")
+    if iris.get("enableShaders") == "true" and not (shaderpacks / "InfiniteATLAS.zip").is_file():
+        raise ValueError("pack/shaderpacks/InfiniteATLAS.zip is missing (py -3 -I shaderpack/build_pack.py)")
     if keys & {"essential", "e4mc", "distanthorizons", "c2me-neoforge", "oculus", "embeddium"}:
         raise ValueError("unapproved hosting, legacy renderers or experimental integrations are active")
     index_path = pack_dir / pack["index"]["file"]
@@ -122,18 +122,18 @@ def validate_core_jar(path):
     with zipfile.ZipFile(path) as jar:
         try:
             meta = tomllib.loads(jar.read("META-INF/neoforge.mods.toml").decode("utf8"))
-            entry = jar.read("com/skycraft/Skycraft.class")
+            entry = jar.read("com/nirncraft/NirnCraft.class")
         except KeyError as error:
-            raise ValueError("core is not a NeoForge Skycraft jar") from error
-        if not any(m.get("modId") == "skycraft" for m in meta.get("mods", [])):
-            raise ValueError("core does not declare the Skycraft mod")
-        deps = meta.get("dependencies", {}).get("skycraft", [])
+            raise ValueError("core is not a NeoForge NirnCraft jar") from error
+        if not any(m.get("modId") == "nirncraft" for m in meta.get("mods", [])):
+            raise ValueError("core does not declare the NirnCraft mod")
+        deps = meta.get("dependencies", {}).get("nirncraft", [])
         if not any(d.get("modId") == "minecraft" and d.get("versionRange") == "[26.3]" for d in deps):
             raise ValueError("core does not require exactly Minecraft 26.3")
         if not any(d.get("modId") == "neoforge" for d in deps):
             raise ValueError("core does not require NeoForge")
         if entry[:4] != b"\xca\xfe\xba\xbe" or int.from_bytes(entry[6:8], "big") != 69:
-            raise ValueError("Skycraft entry class must be compiled for Java 25 (class version 69)")
+            raise ValueError("NirnCraft entry class must be compiled for Java 25 (class version 69)")
 
 
 if __name__ == "__main__":

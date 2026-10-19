@@ -1,8 +1,8 @@
 # Jail: sentences, escapes and what the jail keeps
 
-Code: `com.skycraft.crime.Jail` (sites, sentence, release, escape, guard reaction), `crime.JailEvidence` (the two stores and
+Code: `com.nirncraft.crime.Jail` (sites, sentence, release, escape, guard reaction), `crime.JailEvidence` (the two stores and
 their blocks), builders `tamriel/settlement/build/Jails` (hold jails) and `Jail.buildCell` (the jail dimension's cell
-blocks). Self-test: `/skycraft-crime selftest`.
+blocks). Self-test: `/nirncraft-crime selftest`.
 
 ## The sentence
 
@@ -69,7 +69,7 @@ the block" rule). Pickpocketing is sneak + Interact on the guard.
 ## The jail key
 
 A guard of a jail carries a jail key in his pockets (`Pickpocket.generate`; refilled daily for a jail's guards). It is
-the jail's property (tag `skycraft_jail_property`, the tooltip says so), **not** stolen goods (`Pickpocket.take` does not
+the jail's property (tag `nirncraft_jail_property`, the tooltip says so), **not** stolen goods (`Pickpocket.take` does not
 mark it, so nothing confiscates or retrieves it) and it is never consumed: it opens the cell door, the cell block gate,
 the evidence room's iron door and the confiscated barrel, any number of times (`Locks.blocks`: only inside a jail
 area, so it opens nothing in the town). It stays in the inventory until the prisoner leaves the jail for good
@@ -78,7 +78,7 @@ into the cell does not take it (the guard sees you, he does not search you).
 
 ## Rounds (guards on patrol)
 
-A hold jail has two patrolling guards (`JailPatrol`, spawned by the jail when missing, tagged `skycraft_jail_patrol`),
+A hold jail has two patrolling guards (`JailPatrol`, spawned by the jail when missing, tagged `nirncraft_jail_patrol`),
 the jail dimension's cell block one. Their stop is a pure function of the game time, so the pattern can be learnt: a slot
 is 10 s, the round 8 slots (80 s); guard 2 walks the same round two slots later.
 
@@ -129,7 +129,7 @@ is 10 s, the round 8 slots (80 s); guard 2 walks the same round two slots later.
 
 A player who is not under arrest may walk into a jail's front hall (the first 3 blocks behind the front door, with the
 evidence chest and the confiscated goods) without penalty, guards do not react. The rest of the guard room, the gate and
-the cell block are for guards: a guard who sees a visitor there tells them to leave (`crime.skycraft.jail.visitor_warn`),
+the cell block are for guards: a guard who sees a visitor there tells them to leave (`crime.nirncraft.jail.visitor_warn`),
 and a visitor who is still there 5 s later is trespassing (`Bounty.TRESPASS` through `Crimes.report`: a bounty only if
 someone sees it). `JailVisitors.visitorStep` is the rule. A night challenge is not implemented.
 

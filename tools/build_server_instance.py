@@ -92,7 +92,7 @@ def fetch(path, url, expected, algorithm, cache):
 def baked_bundle(core):
     """Check the full, internally consistent bundle; live bake check remains mandatory."""
     with zipfile.ZipFile(core) as archive:
-        manifest = json.loads(archive.read('skycraft/baked/manifest.json'))
+        manifest = json.loads(archive.read('nirncraft/baked/manifest.json'))
         names = {name + '.bin' for name in ('landmass', 'roadplan', 'streetplan', 'sceneplan')}
         if manifest.get('format') != 1 or set(manifest.get('files', [])) != names:
             raise ValueError('Core does not contain all four native bakes')
@@ -100,7 +100,7 @@ def baked_bundle(core):
         if not re.fullmatch('[0-9a-f]{64}', expected):
             raise ValueError('Invalid embedded bake input hash')
         for name in names:
-            raw = archive.read('skycraft/baked/' + name)
+            raw = archive.read('nirncraft/baked/' + name)
             length = int.from_bytes(raw[:2], 'big')
             if raw[2:2 + length].decode('ascii') != expected or not zlib.decompress(raw[2 + length:]):
                 raise ValueError(f'Mixed, corrupt or empty embedded bake: {name}')
@@ -201,16 +201,16 @@ def write_launchers(server):
             path.chmod(0o755)
     (server / 'user_jvm_args.txt').write_text('-Xms2G\n-Xmx6G\n-XX:+UseG1GC\n-XX:MaxGCPauseMillis=200\n', encoding='utf-8')
     (server / 'server.properties').write_text(
-        '# Skycraft native defaults; preserve these when upgrading an existing world.\n'
-        'motd=Skycraft - The Elder Scrolls in Minecraft\nlevel-seed=Nirn\ndifficulty=normal\n'
+        '# NirnCraft native defaults; preserve these when upgrading an existing world.\n'
+        'motd=NirnCraft - The Elder Scrolls in Minecraft\nlevel-seed=Nirn\ndifficulty=normal\n'
         'allow-flight=true\nmax-tick-time=120000\nview-distance=10\nsimulation-distance=8\n'
         'spawn-protection=0\nenable-command-block=false\nsync-chunk-writes=true\nonline-mode=true\npvp=true\n', encoding='utf-8')
     (server / 'README.txt').write_text(
-        'Skycraft dedicated server: Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25\n\n'
+        'NirnCraft dedicated server: Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25\n\n'
         'Extract the complete server directory to a new location. Keep old worlds and installations backed up.\n'
         'Read https://aka.ms/MinecraftEULA and create eula.txt containing eula=true only if you agree.\n'
         'Windows: run.bat (or run.ps1). Linux/macOS: ./run.sh nogui. These check Java 25 before starting.\n'
-        'Choose Java with SKYCRAFT_JAVA (full executable path), JAVA_HOME, or PATH, in that order.\n'
+        'Choose Java with NIRNCRAFT_JAVA (full executable path), JAVA_HOME, or PATH, in that order.\n'
         'Adjust memory in user_jvm_args.txt; defaults are 2 GB initial and 6 GB maximum.\n'
         'Fresh servers use Nirn, the authored seed with shipped plans. Keep an existing world\'s seed unchanged.\n'
         'Join through normal Minecraft Multiplayer using this exact client pack; local network discovery\n'
@@ -232,7 +232,7 @@ def build(core, output, java, work_root, cache, keep_work=False, base_archive=No
     rows, entries = server_mods(lock), pack_tools.read_index()
     work_root, cache = Path(work_root).resolve(), Path(cache).resolve()
     work_root.mkdir(parents=True, exist_ok=True)
-    work = Path(tempfile.mkdtemp(prefix='skycraft-server-263-', dir=work_root))
+    work = Path(tempfile.mkdtemp(prefix='nirncraft-server-263-', dir=work_root))
     server = work / 'server'
     server.mkdir()
     print('Native server staging:', server, flush=True)
@@ -264,8 +264,8 @@ def build(core, output, java, work_root, cache, keep_work=False, base_archive=No
             shutil.copyfile(source, destination)
     with ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(lambda task: fetch(*task), tasks))
-    shutil.copyfile(core, server / 'mods/skycraft-core.jar')
-    expected = {row['filename'] for row in rows} | {'skycraft-core.jar'}
+    shutil.copyfile(core, server / 'mods/nirncraft-core.jar')
+    expected = {row['filename'] for row in rows} | {'nirncraft-core.jar'}
     if {p.name for p in (server / 'mods').glob('*.jar')} != expected:
         raise ValueError('Packaged server mod list differs from the exact side-filtered lock')
     declarations = declared_server_dependencies(server, rows)
@@ -290,7 +290,7 @@ def build(core, output, java, work_root, cache, keep_work=False, base_archive=No
     partial.rename(output)
     if not keep_work:
         # Delete only the unique temporary tree we created, under its checked parent.
-        if work.parent != work_root or not work.name.startswith('skycraft-server-263-'):
+        if work.parent != work_root or not work.name.startswith('nirncraft-server-263-'):
             raise ValueError('Refusing to clean an unexpected staging path')
         shutil.rmtree(work)
     print(json.dumps({'archive': str(output), 'sha256': pack_tools.file_hash(output, 'sha256'),
@@ -301,7 +301,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--core-jar', type=Path)
     parser.add_argument('--check-java', action='store_true', help='Check the selected Java 25 executable, then exit without installing or launching anything')
-    parser.add_argument('--output-zip', type=Path, default=ROOT / 'dist/Skycraft-26.3-server.zip')
+    parser.add_argument('--output-zip', type=Path, default=ROOT / 'dist/NirnCraft-26.3-server.zip')
     parser.add_argument('--java', type=Path, required=True)
     parser.add_argument('--work-root', type=Path, default=ROOT / 'dist/server-build-263')
     parser.add_argument('--cache', type=Path, default=ROOT / 'dist/.cache')

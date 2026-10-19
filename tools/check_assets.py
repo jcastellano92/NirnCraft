@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Fail if a skycraft item model is missing or references a missing texture.
+"""Fail if a nirncraft item model is missing or references a missing texture.
 
-Items are discovered from assets/skycraft/lang/en_us.json ("item.skycraft.<id>").
+Items are discovered from assets/nirncraft/lang/en_us.json ("item.nirncraft.<id>").
 Run from the repo root: python tools/check_assets.py
 
 NARROW BY DESIGN: this only covers the ITEM models of ids that have a lang key. It never opens a blockstate, a block
 model, a model's element rotations or a variant key, so it reported "0 problems" while four fire/debris block models
 were being rejected by the game's loader (magenta cubes in Helgen). The whole chain (registered blocks and items,
-blockstates, model syntax, parents, texture variables, PNGs, texture literals in Java, unregistered skycraft: ids)
+blockstates, model syntax, parents, texture variables, PNGs, texture literals in Java, unregistered nirncraft: ids)
 is tools/qa/asset_audit.py; qa.ps1 runs both.
 """
 import json
@@ -15,9 +15,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent / "mod" / "src" / "main"
-ASSETS = ROOT / "resources" / "assets" / "skycraft"
-LANG = [ROOT / "lang" / "skycraft"]
-NS = "skycraft"
+ASSETS = ROOT / "resources" / "assets" / "nirncraft"
+LANG = [ROOT / "lang" / "nirncraft"]
+NS = "nirncraft"
 
 
 NON_ITEMS = {"poison_of", "potion_of", "legendary_fish"}
@@ -30,8 +30,8 @@ def item_ids():
             continue
         for f in d.glob("*.json"):
             for k in json.loads(f.read_text(encoding="utf-8")):
-                if k.startswith("item.skycraft."):
-                    name = k[len("item.skycraft."):]
+                if k.startswith("item.nirncraft."):
+                    name = k[len("item.nirncraft."):]
                     if "." not in name and name not in NON_ITEMS:
                         ids.add(name)
     return ids

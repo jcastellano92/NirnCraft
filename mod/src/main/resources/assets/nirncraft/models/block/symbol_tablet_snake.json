@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "nirncraft:block/symbol_tablet_snake",
+    "side": "nirncraft:block/puzzle_stone_side",
+    "top": "nirncraft:block/puzzle_stone_side"
+  }
+}

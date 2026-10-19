@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:moon_sugar",
+      "required": false
+    },
+    {
+      "id": "nirncraft:skooma",
+      "required": false
+    },
+    "minecraft:sugar",
+    {
+      "id": "nirncraft:elsweyr_fondue",
+      "required": false
+    },
+    {
+      "id": "nirncraft:spiced_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:honey_nut_treat",
+      "required": false
+    }
+  ]
+}

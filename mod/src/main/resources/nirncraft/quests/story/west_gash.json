@@ -1,0 +1,808 @@
+{
+  "region": "morrowind/west_gash",
+  "province": "morrowind",
+  "line": "story_west_gash",
+  "category": "main",
+  "title": "Two Seals on the Caldera Seam",
+  "why": [
+    "morrowind/west_gash.L7.merchant_city",
+    "morrowind/west_gash.L7.dockside_syndicate",
+    "morrowind/west_gash.L7.outlander_miners",
+    "morrowind/west_gash.L9.hlaalu_collaboration",
+    "morrowind/west_gash.L9.mine_ownership_fight",
+    "morrowind/west_gash.L10.smuggled_ebony"
+  ],
+  "hook": {
+    "place": "balmora",
+    "rumour": "Along the Odai River in Balmora, Hlaalu council clerks and Moonmoth Legion officers trade accusations over missing raw ebony shipments from Caldera while Camonna Tong toughs watch from the cornerclubs.",
+    "notice": "HLAALU COUNCIL MANOR, BALMORA — Investigators commissioned to audit the missing ebony tallies between Balmora, Caldera, and Moonmoth Legion Fort.",
+    "context": "The West Gash is House Hlaalu's commercial heartland: Imperial charter-towns at Caldera and Legion forts at Moonmoth enrich Balmora's nobles while feeding bitter nationalist resentment.",
+    "places": [
+      "balmora",
+      "shrine_namira_morrowind",
+      "hla_oad",
+      "sinsibadon",
+      "abinabi"
+    ],
+    "npc": "story_west_gash_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_west_gash_01_ledgers_on_the_odai",
+      "order": 1,
+      "title": "Ledgers on the Odai River",
+      "region": "morrowind/west_gash",
+      "category": "main",
+      "start": "hook",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "morrowind/west_gash.L7.merchant_city",
+        "morrowind/west_gash.L9.hlaalu_collaboration"
+      ],
+      "places": [
+        "balmora",
+        "shrine_namira_morrowind",
+        "hla_oad",
+        "sinsibadon",
+        "abinabi"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "balmora",
+          "objective": "Inspect the disputed assay books at Hlaalu Council Manor in Balmora"
+        },
+        {
+          "id": 20,
+          "place": "moonmoth_legion_fort",
+          "objective": "Verify the Imperial escort logs with the knight-captain at Moonmoth Legion Fort"
+        },
+        {
+          "id": 30,
+          "place": "caldera",
+          "objective": "Question the magistrate's clerks inside the Tudor guild-hall at Caldera"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "balmora",
+          "text": "Inspect the disputed assay books at Hlaalu Council Manor in Balmora"
+        },
+        {
+          "type": "go",
+          "place": "moonmoth_legion_fort",
+          "text": "Verify the Imperial escort logs with the knight-captain at Moonmoth Legion Fort"
+        },
+        {
+          "type": "go",
+          "place": "caldera",
+          "text": "Question the magistrate's clerks inside the Tudor guild-hall at Caldera"
+        }
+      ],
+      "consequence": "world_state:west_gash_assay_tampering_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "consequence_detail": {
+        "world_state": "west_gash_assay_tampering_exposed",
+        "flag": "story_wg_assay_exposed",
+        "summary": "Comparing Balmora, Moonmoth, and Caldera records proves every third ebony wain was diverted down the western trail toward Hla Oad."
+      }
+    },
+    {
+      "id": "story_west_gash_02_contraband_at_caldera",
+      "order": 2,
+      "title": "The Night-Shift at Caldera Mine",
+      "region": "morrowind/west_gash",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_west_gash_01_ledgers_on_the_odai",
+      "requires": [
+        "story_west_gash_01_ledgers_on_the_odai"
+      ],
+      "why": [
+        "morrowind/west_gash.L7.outlander_miners",
+        "morrowind/west_gash.L9.mine_ownership_fight"
+      ],
+      "places": [
+        "caldera_mine",
+        "rethan_manor",
+        "hla_oad"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "caldera_mine",
+          "objective": "Inspect the hidden ore-chute at Caldera Mine and question the night-shift foreman"
+        },
+        {
+          "id": 20,
+          "place": "rethan_manor",
+          "objective": "Check the Odai river-barge moorings below Rethan Manor"
+        },
+        {
+          "id": 30,
+          "place": "hla_oad",
+          "objective": "Intercept the smuggler skiff crew at the stilts of Hla Oad"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "caldera_mine",
+          "text": "Inspect the hidden ore-chute at Caldera Mine and question the night-shift foreman"
+        },
+        {
+          "type": "go",
+          "place": "rethan_manor",
+          "text": "Check the Odai river-barge moorings below Rethan Manor"
+        },
+        {
+          "type": "clear",
+          "place": "hla_oad",
+          "text": "Intercept the smuggler skiff crew at the stilts of Hla Oad"
+        }
+      ],
+      "consequence": "world_state:hla_oad_ebony_skiff_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "hla_oad_ebony_skiff_seized",
+        "flag": "story_wg_skiff_seized",
+        "summary": "The smuggler skiff at Hla Oad is seized, revealing that the stolen ebony is stored inside the stronghold of Hlormaren and Bthanchend."
+      }
+    },
+    {
+      "id": "story_west_gash_03_vault_of_hlormaren",
+      "order": 3,
+      "title": "Iron and Ebony at Hlormaren",
+      "region": "morrowind/west_gash",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_west_gash_02_contraband_at_caldera",
+      "requires": [
+        "story_west_gash_02_contraband_at_caldera"
+      ],
+      "why": [
+        "morrowind/west_gash.L7.dockside_syndicate",
+        "morrowind/west_gash.L10.smuggled_ebony"
+      ],
+      "places": [
+        "hlormaren",
+        "bthanchend",
+        "odai_plateau"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "hlormaren",
+          "objective": "Storm the coastal stronghold of Hlormaren and defeat the syndicate factor's guards"
+        },
+        {
+          "id": 20,
+          "place": "bthanchend",
+          "objective": "Recover the stamped Imperial ebony ingots hidden inside the Dwemer gallery at Bthanchend"
+        },
+        {
+          "id": 30,
+          "place": "odai_plateau",
+          "objective": "Deliver the recovered ingots to the Hlaalu escrow post at Odai Plateau"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "hlormaren",
+          "text": "Storm the coastal stronghold of Hlormaren and defeat the syndicate factor's guards"
+        },
+        {
+          "type": "clear",
+          "place": "bthanchend",
+          "text": "Recover the stamped Imperial ebony ingots hidden inside the Dwemer gallery at Bthanchend"
+        },
+        {
+          "type": "go",
+          "place": "odai_plateau",
+          "text": "Deliver the recovered ingots to the Hlaalu escrow post at Odai Plateau"
+        }
+      ],
+      "consequence": "world_state:hlormaren_ebony_ring_broken",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "hlormaren_ebony_ring_broken",
+        "flag": "story_wg_hlormaren_cleared",
+        "summary": "The stolen Caldera ebony ingots are recovered from Hlormaren and Bthanchend and placed under guard at Odai Plateau."
+      }
+    },
+    {
+      "id": "story_west_gash_04_settlement_at_balmora",
+      "order": 4,
+      "title": "The Odai Charter Settlement",
+      "region": "morrowind/west_gash",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_west_gash_03_vault_of_hlormaren",
+      "requires": [
+        "story_west_gash_03_vault_of_hlormaren"
+      ],
+      "finale": true,
+      "why": [
+        "morrowind/west_gash.L8.pragmatic_piety",
+        "morrowind/west_gash.L9.mine_ownership_fight"
+      ],
+      "places": [
+        "caldera",
+        "balmora"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "caldera",
+          "objective": "File the restored assay rolls at the Magistrate's Hall in Caldera"
+        },
+        {
+          "id": 20,
+          "place": "balmora",
+          "objective": "Present the signed Caldera-Balmora Assay Compact at Hlaalu Council Manor in Balmora"
+        },
+        {
+          "id": 30,
+          "place": "balmora",
+          "objective": "Receive your factor's share and title on the bridges of Balmora"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "caldera",
+          "text": "File the restored assay rolls at the Magistrate's Hall in Caldera"
+        },
+        {
+          "type": "go",
+          "place": "balmora",
+          "text": "Present the signed Caldera-Balmora Assay Compact at Hlaalu Council Manor in Balmora"
+        },
+        {
+          "type": "go",
+          "place": "balmora",
+          "text": "Receive your factor's share and title on the bridges of Balmora"
+        }
+      ],
+      "consequence": "world_state:balmora_caldera_assay_compact_signed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Factor-Inspector of the Odai",
+        "unique_item": "nirncraft:glass_dagger"
+      },
+      "consequence_detail": {
+        "world_state": "balmora_caldera_assay_compact_signed",
+        "flag": "story_wg_finale_complete",
+        "summary": "Honest pay and audited ore-weighing resume at Caldera Mine, and Balmora's Council Manor honors you as Factor-Inspector of the Odai."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_west_gash_hook_npc",
+      "name": "Warden of Balmora",
+      "role": "guard",
+      "place": "balmora",
+      "greet": "Along the Odai River in Balmora, Hlaalu council clerks and Moonmoth Legion officers trade accusations over missing raw ebony shipments from Caldera while Camonna Tong toughs watch from the cornerclubs."
+    }
+  ],
+  "scenes": {
+    "story_west_gash_scene_01": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (1).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_02": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (2).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_03": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (3).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_04": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (4).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_05": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (5).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_06": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (6).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_07": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (7).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_08": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (8).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_09": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (9).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_10": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (10).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_11": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (11).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_12": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (12).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_13": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (13).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_14": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (14).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_15": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (15).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_16": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (16).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_17": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (17).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_18": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (18).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_19": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (19).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_20": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (20).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_21": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (21).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_22": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (22).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_23": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (23).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_24": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (24).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_25": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (25).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_26": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (26).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_27": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (27).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_28": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (28).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_29": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (29).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_30": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (30).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_31": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (31).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_32": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (32).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_33": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (33).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_34": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (34).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_35": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (35).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_36": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (36).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_37": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (37).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_38": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (38).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_39": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (39).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_40": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (40).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_41": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (41).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_42": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (42).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_43": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (43).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_44": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (44).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_45": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (45).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_46": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (46).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_47": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (47).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_48": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (48).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_49": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (49).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_50": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (50).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_51": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (51).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_52": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (52).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_53": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (53).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_54": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (54).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_55": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (55).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_56": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (56).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_57": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (57).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_58": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (58).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_59": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (59).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_60": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (60).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_61": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (61).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_62": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (62).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_63": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (63).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_64": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (64).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_65": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (65).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_66": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (66).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_67": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (67).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_68": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (68).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_69": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (69).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_70": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (70).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_71": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (71).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_72": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (72).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_73": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (73).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_74": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (74).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_75": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (75).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_76": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (76).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_77": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (77).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_78": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (78).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_79": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (79).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ],
+    "story_west_gash_scene_80": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Abinabi (80).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Abinabi at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Abinabi and report back to the seat."
+    ],
+    "story_west_gash_scene_81": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Balmora (81).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Balmora at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Balmora and report back to the seat."
+    ],
+    "story_west_gash_scene_82": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Shrine Namira Morrowind (82).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Shrine Namira Morrowind at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Shrine Namira Morrowind and report back to the seat."
+    ],
+    "story_west_gash_scene_83": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Hla Oad (83).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Hla Oad at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Hla Oad and report back to the seat."
+    ],
+    "story_west_gash_scene_84": [
+      "Warden of Balmora: Examine the ash-wax seals recovered near Sinsibadon (84).",
+      "Watch-Captain of West Gash: The ledger entries match the dispatches troubling West Gash.",
+      "Watch-Captain of West Gash: Our scouts tracked the courier column past Sinsibadon at dusk.",
+      "Watch-Captain of West Gash: Secure the approaches around Sinsibadon and report back to the seat."
+    ]
+  }
+}

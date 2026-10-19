@@ -6,10 +6,10 @@ module.exports = function (f) {
   f.relic('stolen_banner', 'The Claw Gate Banner', 'A great saffron banner embroidered with a pair of black claws, folded over a rope. It is fraying at the edge where it was carried by someone in a hurry, and smells of rival-village woodsmoke.', 11);
   f.relic('cub_charm', 'Moon-Cub\'s Charm', 'A little charm of two silver crescents on a thread, to be tied round a newborn\'s wrist at the first night when both moons show. This one has not yet been blessed.', 20);
   f.relic('moon_sugar_cask', 'Cask of Blessed Moon-Sugar', 'A small oak cask sealed with the Moon-Priests\' pawprint. It is faintly warm, and smells of honey and of something older. The seal has been pried and mended with wax.', 11);
-  f.boss('banner_taker', { name: 'Kasha Hill-Banner', type: 'skycraft:bandit_chief', hp: 2.8, dmg: 1.3, level: 18,
-    weapon: 'skycraft:khajiit_war_axe', drop: 'loot:standard', glow: false });
-  f.boss('cask_watcher', { name: 'The Cask-Warden of Senchal', type: 'skycraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 22,
-    weapon: 'skycraft:khajiit_sword', gear: { chest: 'skycraft:khajiit_chestplate' }, drop: 'loot:standard', glow: false });
+  f.boss('banner_taker', { name: 'Kasha Hill-Banner', type: 'nirncraft:bandit_chief', hp: 2.8, dmg: 1.3, level: 18,
+    weapon: 'nirncraft:khajiit_war_axe', drop: 'loot:standard', glow: false });
+  f.boss('cask_watcher', { name: 'The Cask-Warden of Senchal', type: 'nirncraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 22,
+    weapon: 'nirncraft:khajiit_sword', gear: { chest: 'nirncraft:khajiit_chestplate' }, drop: 'loot:standard', glow: false });
 
   f.q({
     id: 'the_borrowed_banner', title: 'The Borrowed Banner', region: 'elsweyr/anequina', start: 'npc:@raz', requires: ['level:12'],

@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:town",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 156,
+    "separation": 60,
+    "salt": 731201
+  }
+}

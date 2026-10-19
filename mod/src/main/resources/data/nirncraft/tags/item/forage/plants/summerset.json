@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:elves_ear",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gold_kanet",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "top": "nirncraft:block/grindstone_wheel_top",
+    "bottom": "nirncraft:block/grindstone_wheel_bottom",
+    "front": "nirncraft:block/grindstone_wheel_front",
+    "side": "nirncraft:block/grindstone_wheel_side"
+  }
+}

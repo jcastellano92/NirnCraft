@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:shivering_isles_mania_fields",
+    "nirncraft:shivering_isles_mania_mushroom_forest",
+    "nirncraft:shivering_isles_mania_crystal_grove",
+    "nirncraft:shivering_isles_dementia_swamp",
+    "nirncraft:shivering_isles_dementia_forest",
+    "nirncraft:shivering_isles_fringe",
+    "nirncraft:shivering_isles_sea"
+  ]
+}

@@ -4,19 +4,19 @@ Read [`_COMMON.md`](_COMMON.md) and [`docs/world/WORLD-PLAN.md`](../world/WORLD-
 
 ## 1. Goal
 
-In Skyrim, `throat_of_the_world` in `peaks.json` (`MapPeaks.java`) is a monumental analytical peak (`height: 560, reach: 450`) with a carved `High Hrothgar` shelf (`y=362, r=52`), two graded switchback paths (the 7,000 Steps), and dedicated multi-piece world structures (`THROAT_SUMMIT`, `HIGH_HROTHGAR`, `STEPS`). Outside Skyrim, High Rock, and Hammerfell, **`peaks.json` has ZERO (`0`) peaks**, and standalone `"type": "landmark"` places like `red_mountain` (`variant: ""`), `crystal_tower_summerset` (`variant: "monument"`), and `falinesti_*_site` (`variant: "clearing"|"source"`) dispatch to `com.skycraft.dungeons.world.Landmarks.landmark()`, which builds a **7×7×10 cobblestone pillar or 9×9 log ring**! Meanwhile, `balfiera` (Isle of Balfiera) is a generic radial town lacking the **Adamantine / Direnni Tower**.
+In Skyrim, `throat_of_the_world` in `peaks.json` (`MapPeaks.java`) is a monumental analytical peak (`height: 560, reach: 450`) with a carved `High Hrothgar` shelf (`y=362, r=52`), two graded switchback paths (the 7,000 Steps), and dedicated multi-piece world structures (`THROAT_SUMMIT`, `HIGH_HROTHGAR`, `STEPS`). Outside Skyrim, High Rock, and Hammerfell, **`peaks.json` has ZERO (`0`) peaks**, and standalone `"type": "landmark"` places like `red_mountain` (`variant: ""`), `crystal_tower_summerset` (`variant: "monument"`), and `falinesti_*_site` (`variant: "clearing"|"source"`) dispatch to `com.nirncraft.dungeons.world.Landmarks.landmark()`, which builds a **7×7×10 cobblestone pillar or 9×9 log ring**! Meanwhile, `balfiera` (Isle of Balfiera) is a generic radial town lacking the **Adamantine / Direnni Tower**.
 
 `T4` expands `peaks.json` and `MapPeaks.java` from 19 to **60+ analytical peaks, volcanic calderas, mesas, and cliff shelves across all 11 provinces**, and replaces the 7×7 landmark stubs with monumental multi-chunk world-wonder structures.
 
 ## 2. Write Set
 
-* `mod/src/main/java/com/skycraft/tamriel/terrain/MapPeaks.java`
-* `mod/src/main/resources/skycraft/tamriel/peaks.json`
-* `mod/src/main/java/com/skycraft/dungeons/world/{Landmarks,DungeonStructure,SiteParams}.java`
-* `mod/src/main/java/com/skycraft/tamriel/settlement/build/{Landmarks,MarqueeLandmarks,LandmarkRegistry}.java`
-* `mod/src/main/resources/skycraft/tamriel/cityplans/{balfiera,vivec,aldruhn,sadrith_mora,mournhold,imperial_city,alinor,elden_root,sunspire}.json`
-* `mod/src/main/resources/skycraft/tamriel/places/*.json`
-* `mod/src/test/java/com/skycraft/tamriel/TamrielPlanTest.java`
+* `mod/src/main/java/com/nirncraft/tamriel/terrain/MapPeaks.java`
+* `mod/src/main/resources/nirncraft/tamriel/peaks.json`
+* `mod/src/main/java/com/nirncraft/dungeons/world/{Landmarks,DungeonStructure,SiteParams}.java`
+* `mod/src/main/java/com/nirncraft/tamriel/settlement/build/{Landmarks,MarqueeLandmarks,LandmarkRegistry}.java`
+* `mod/src/main/resources/nirncraft/tamriel/cityplans/{balfiera,vivec,aldruhn,sadrith_mora,mournhold,imperial_city,alinor,elden_root,sunspire}.json`
+* `mod/src/main/resources/nirncraft/tamriel/places/*.json`
+* `mod/src/test/java/com/nirncraft/tamriel/TamrielPlanTest.java`
 
 ## 3. Implementation Steps
 
@@ -30,7 +30,7 @@ In Skyrim, `throat_of_the_world` in `peaks.json` (`MapPeaks.java`) is a monument
      * **Elsweyr:** `sunspire_peak` (`height=470, reach=400`, Dragon-Temple shelf at `y=415` + switchback pilgrim trail), `anequina_grand_mesa`, `two_moons_spire`, `quin_rawl_crag`.
      * **Black Marsh:** `helstrom_hist_dome` (broad root-mound rise), `murkmire_xanmeer_bluff`, `shadowfen_karst_needle`.
      * **Outer Realms:** `jylkurfyk_frost_horn` (Atmora), `ysgramor_watch_peak` (Atmora), `ka_po_tun_heaven_peak` (Akavir), `kamal_glacier_horn` (Akavir), `tang_mo_jade_peak` (Akavir), `orichalc_mesa` (Yokuda), `coral_kingdom_pinnacle` (Thras).
-2. **Monumental World-Wonder Structures (`com.skycraft.dungeons.world.Landmarks`, `MarqueeLandmarks.java`):**
+2. **Monumental World-Wonder Structures (`com.nirncraft.dungeons.world.Landmarks`, `MarqueeLandmarks.java`):**
    * **Adamantine / Direnni Tower (`balfiera` / `dirennis_tower`):** Add `adamantine_tower` (25×25×180 fluted metallic-stone cylinder spire with Aedric vault entrance and Direnni courtyard) to `MarqueeLandmarks.java` and pin it in `balfiera.json`.
    * **Red Mountain Summit, Dagoth Ur Citadel & Ghostfence (`red_mountain`, `dagoth_ur`, `ghostgate`):** Build a massive volcanic crater citadel with Dwemer brass piping, magma bridges, and Ghostfence bone-and-brass energy pylons instead of the 7×7 `Style.MONUMENT` pillar.
    * **Crystal-Like-Law (`crystal_tower_summerset`):** Build a 23×23×175 multi-tiered translucent crystal spire and terraced arcane gardens.

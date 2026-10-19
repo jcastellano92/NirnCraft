@@ -1,0 +1,352 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:nirnroot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:elves_ear",
+      "required": false
+    },
+    {
+      "id": "nirncraft:canis_root",
+      "required": false
+    },
+    {
+      "id": "nirncraft:imp_stool",
+      "required": false
+    },
+    {
+      "id": "nirncraft:nightshade",
+      "required": false
+    },
+    {
+      "id": "nirncraft:jazbay_grapes",
+      "required": false
+    },
+    {
+      "id": "nirncraft:monarch_wing",
+      "required": false
+    },
+    {
+      "id": "nirncraft:minotaur_horn",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ogre_tooth",
+      "required": false
+    },
+    {
+      "id": "nirncraft:spriggan_sap",
+      "required": false
+    },
+    {
+      "id": "nirncraft:wisp_wrappings",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dreugh_wax",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bleeding_crown",
+      "required": false
+    },
+    {
+      "id": "nirncraft:white_cap",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ectoplasm",
+      "required": false
+    },
+    {
+      "id": "nirncraft:scamp_skin",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bear_claws",
+      "required": false
+    },
+    {
+      "id": "nirncraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hawk_feather",
+      "required": false
+    },
+    {
+      "id": "nirncraft:garlic",
+      "required": false
+    },
+    "minecraft:lilac",
+    "minecraft:red_tulip",
+    "minecraft:white_tulip",
+    {
+      "id": "nirncraft:gargoyle_shard",
+      "required": false
+    },
+    {
+      "id": "nirncraft:harpy_feather",
+      "required": false
+    },
+    {
+      "id": "nirncraft:deathbell",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hagraven_feathers",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hagraven_claw",
+      "required": false
+    },
+    {
+      "id": "nirncraft:juniper_berries",
+      "required": false
+    },
+    {
+      "id": "nirncraft:frost_mirriam",
+      "required": false
+    },
+    {
+      "id": "nirncraft:creep_cluster",
+      "required": false
+    },
+    {
+      "id": "nirncraft:namiras_rot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:glowing_mushroom",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hanging_moss",
+      "required": false
+    },
+    {
+      "id": "nirncraft:swamp_fungal_pod",
+      "required": false
+    },
+    {
+      "id": "nirncraft:thistle_branch",
+      "required": false
+    },
+    {
+      "id": "nirncraft:giant_lichen",
+      "required": false
+    },
+    {
+      "id": "nirncraft:mora_tapinella",
+      "required": false
+    },
+    {
+      "id": "nirncraft:poison_bloom",
+      "required": false
+    },
+    {
+      "id": "nirncraft:rock_warbler_egg",
+      "required": false
+    },
+    {
+      "id": "nirncraft:pine_thrush_egg",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hawks_egg",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hawk_beak",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_antlers",
+      "required": false
+    },
+    {
+      "id": "nirncraft:large_antlers",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sabre_cat_tooth",
+      "required": false
+    },
+    {
+      "id": "nirncraft:eye_of_sabre_cat",
+      "required": false
+    },
+    {
+      "id": "nirncraft:mudcrab_chitin",
+      "required": false
+    },
+    {
+      "id": "nirncraft:slaughterfish_scales",
+      "required": false
+    },
+    {
+      "id": "nirncraft:troll_fat",
+      "required": false
+    },
+    {
+      "id": "nirncraft:giants_toe",
+      "required": false
+    },
+    {
+      "id": "nirncraft:skeever_tail",
+      "required": false
+    },
+    {
+      "id": "nirncraft:spider_egg",
+      "required": false
+    },
+    {
+      "id": "nirncraft:chaurus_eggs",
+      "required": false
+    },
+    {
+      "id": "nirncraft:falmer_ear",
+      "required": false
+    },
+    {
+      "id": "nirncraft:briar_heart",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ice_wraith_teeth",
+      "required": false
+    },
+    {
+      "id": "nirncraft:powdered_mammoth_tusk",
+      "required": false
+    },
+    {
+      "id": "nirncraft:pearl",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_pearl",
+      "required": false
+    },
+    {
+      "id": "nirncraft:nordic_barnacle",
+      "required": false
+    },
+    {
+      "id": "nirncraft:torchbug_thorax",
+      "required": false
+    },
+    {
+      "id": "nirncraft:luna_moth_wing",
+      "required": false
+    },
+    {
+      "id": "nirncraft:blue_butterfly_wing",
+      "required": false
+    },
+    {
+      "id": "nirncraft:blue_dartwing",
+      "required": false
+    },
+    {
+      "id": "nirncraft:vampire_dust",
+      "required": false
+    },
+    {
+      "id": "nirncraft:fire_salts",
+      "required": false
+    },
+    {
+      "id": "nirncraft:frost_salts",
+      "required": false
+    },
+    {
+      "id": "nirncraft:void_salts",
+      "required": false
+    },
+    {
+      "id": "nirncraft:glow_dust",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bone_meal_draugr",
+      "required": false
+    },
+    {
+      "id": "nirncraft:chaurus_hunter_antennae",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dwarven_oil",
+      "required": false
+    },
+    {
+      "id": "nirncraft:frostbite_venom",
+      "required": false
+    },
+    {
+      "id": "nirncraft:kamal_horn",
+      "required": false
+    },
+    {
+      "id": "nirncraft:tsaesci_scale",
+      "required": false
+    },
+    {
+      "id": "minecraft:pink_tulip",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hist_sap",
+      "required": false
+    },
+    {
+      "id": "nirncraft:wamasu_scale",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leviathan_tooth",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bittergreen_petals",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hypha_facia",
+      "required": false
+    },
+    {
+      "id": "nirncraft:marshmerrow",
+      "required": false
+    },
+    {
+      "id": "minecraft:blue_orchid",
+      "required": false
+    },
+    {
+      "id": "nirncraft:moon_sugar",
+      "required": false
+    },
+    {
+      "id": "minecraft:sugar",
+      "required": false
+    },
+    {
+      "id": "minecraft:cocoa_beans",
+      "required": false
+    },
+    {
+      "id": "nirncraft:scorpion_stinger",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sea_serpent_scale",
+      "required": false
+    }
+  ]
+}

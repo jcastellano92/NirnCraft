@@ -1,0 +1,2004 @@
+[
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "biomes": [
+      "nirncraft:nordic_karst_caverns",
+      "nirncraft:dwemer_caverns",
+      "nirncraft:falmer_glow_caves",
+      "nirncraft:mushroom_grottos",
+      "nirncraft:submerged_sea_caverns"
+    ],
+    "why": [
+      "high_rock.L4.wood_spiders",
+      "high_rock.L10.undercrofts",
+      "high_rock.L10.sea_caves"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 14,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:frostbite_spider",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "ambusher",
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 9,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:gargoyle",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:dreugh",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 7,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:troll",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "families": [
+      "ocean",
+      "beach",
+      "river",
+      "swamp",
+      "desert",
+      "jungle",
+      "ash",
+      "frozen",
+      "mountain",
+      "forest",
+      "plains"
+    ],
+    "why": [
+      "high_rock.L4.mosaic",
+      "high_rock.L4.cliff_harpies",
+      "high_rock.L7.feudal_ladder"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:wolf",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:bear",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:sabre_cat",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:harpy",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "skirmisher",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:ogre",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          14,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:minotaur",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          14,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "nirncraft:gargoyle",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:imp",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "rare",
+        "roles": [
+          "ranged",
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "nirncraft:will_o_wisp",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "rare",
+        "roles": [
+          "caster",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 1,
+        "levels": [
+          16,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "nirncraft:wispmother",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "rare",
+        "roles": [
+          "caster",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "nirncraft:spriggan",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "rare",
+        "roles": [
+          "caster",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:hagraven",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "humanoid",
+        "roles": [
+          "caster",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          3,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:forsworn",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "humanoid",
+        "roles": [
+          "skirmisher",
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:bandit",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "humanoid",
+        "roles": [
+          "vanguard",
+          "skirmisher",
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:bandit_chief",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "humanoid",
+        "roles": [
+          "vanguard",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "nirncraft:vampire",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "undead",
+        "roles": [
+          "caster",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "nirncraft:death_hound",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "undead",
+        "roles": [
+          "skirmisher",
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "nirncraft:necromancer",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "humanoid",
+        "roles": [
+          "caster",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "minecraft:skeleton",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "undead",
+        "roles": [
+          "ranged",
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "nirncraft:draugr",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "undead",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:dreugh",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:land_dreugh",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:troll",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          2,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:frostbite_spider",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "ambusher",
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:durzog",
+        "count": [
+          2,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:frostbite_spider",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 7,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:skeever",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "predator",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "minecraft:bat",
+        "count": [
+          2,
+          5
+        ],
+        "tag": "passive",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:vampire",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "undead",
+        "roles": [
+          "caster",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:death_hound",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "undead",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:necromancer",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "humanoid",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:draugr",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "undead",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 1,
+        "levels": [
+          20,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:draugr",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "undead",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:bandit",
+        "count": [
+          2,
+          3
+        ],
+        "tag": "humanoid",
+        "roles": [
+          "vanguard",
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:troll",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:bear",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:sabre_cat",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:ogre",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:harpy",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:chaurus",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:falmer",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "humanoid",
+        "roles": [
+          "skirmisher",
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:dwarven_spider",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "construct",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:scamp",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "daedra",
+        "roles": [
+          "skirmisher",
+          "ranged"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:deer",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:elk",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:echatere",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:guar",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:mudcrab",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:slaughterfish",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:horker",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 2,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "nirncraft:indrik",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "minecraft:rabbit",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "minecraft:fox",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "minecraft:goat",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "minecraft:horse",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "minecraft:camel",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "minecraft:chicken",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "minecraft:cow",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "passive"
+      },
+      {
+        "kind": "wildlife",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "minecraft:sheep",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "passive"
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "regions": [
+      "high_rock/glenumbra"
+    ],
+    "micro": [
+      "glenumbra/sea_bluff_heath",
+      "glenumbra/heather_moor",
+      "glenumbra/peat_bog",
+      "glenumbra/spider_dell",
+      "glenumbra/haunted_wood"
+    ],
+    "families": [
+      "forest",
+      "swamp",
+      "plains",
+      "beach"
+    ],
+    "why": [
+      "glenumbra.L4.moor_wolves",
+      "glenumbra.L4.wyrd_grove",
+      "glenumbra.L10.cath_bedraud"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:wolf",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "members": [
+          {
+            "entity": "nirncraft:hagraven",
+            "count": [
+              1,
+              1
+            ]
+          },
+          {
+            "entity": "nirncraft:spriggan",
+            "count": [
+              1,
+              1
+            ]
+          }
+        ],
+        "tag": "rare",
+        "roles": [
+          "caster",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "members": [
+          {
+            "entity": "nirncraft:necromancer",
+            "count": [
+              1,
+              1
+            ]
+          },
+          {
+            "entity": "minecraft:skeleton",
+            "count": [
+              1,
+              3
+            ]
+          }
+        ],
+        "tag": "undead",
+        "roles": [
+          "caster",
+          "ranged",
+          "support"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "nirncraft:mudcrab",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "passive"
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "regions": [
+      "high_rock/rivenspire"
+    ],
+    "micro": [
+      "rivenspire/crag_scrub",
+      "rivenspire/cove_strand",
+      "rivenspire/heather_moor"
+    ],
+    "families": [
+      "mountain",
+      "plains",
+      "beach"
+    ],
+    "why": [
+      "rivenspire.L4.crag_ravens",
+      "rivenspire.L10.doomcrag",
+      "high_rock.L10.bloodlines"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:gargoyle",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "members": [
+          {
+            "entity": "nirncraft:vampire",
+            "count": [
+              1,
+              2
+            ]
+          },
+          {
+            "entity": "nirncraft:death_hound",
+            "count": [
+              1,
+              2
+            ]
+          }
+        ],
+        "tag": "undead",
+        "roles": [
+          "caster",
+          "skirmisher",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:harpy",
+        "count": [
+          2,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "skirmisher",
+          "ranged"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "minecraft:goat",
+        "count": [
+          2,
+          3
+        ],
+        "tag": "passive"
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "regions": [
+      "high_rock/stormhaven"
+    ],
+    "micro": [
+      "stormhaven/oak_beech_wood",
+      "stormhaven/wheat_and_orchard",
+      "stormhaven/water_meadow",
+      "stormhaven/limestone_gorge"
+    ],
+    "families": [
+      "plains",
+      "forest",
+      "beach",
+      "river"
+    ],
+    "why": [
+      "stormhaven.L4.oak_and_beech",
+      "stormhaven.L4.spriggan_springs",
+      "stormhaven.L9.highway_banditry"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:dreugh",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          3,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "members": [
+          {
+            "entity": "nirncraft:bandit_chief",
+            "count": [
+              1,
+              1
+            ]
+          },
+          {
+            "entity": "nirncraft:bandit",
+            "count": [
+              2,
+              3
+            ]
+          }
+        ],
+        "tag": "humanoid",
+        "roles": [
+          "vanguard",
+          "ranged",
+          "support"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "nirncraft:deer",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "passive"
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "regions": [
+      "high_rock/bjoulsae"
+    ],
+    "micro": [
+      "bjoulsae/reed_lake",
+      "bjoulsae/water_meadow",
+      "bjoulsae/crag_scrub"
+    ],
+    "families": [
+      "plains",
+      "river",
+      "mountain"
+    ],
+    "why": [
+      "bjoulsae.L4.valley_meadows",
+      "bjoulsae.L5.horse_breeding",
+      "bjoulsae.L9.reachfolk_raids"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "members": [
+          {
+            "entity": "nirncraft:forsworn",
+            "count": [
+              2,
+              4
+            ]
+          },
+          {
+            "entity": "nirncraft:hagraven",
+            "count": [
+              0,
+              1
+            ]
+          }
+        ],
+        "tag": "humanoid",
+        "roles": [
+          "skirmisher",
+          "ranged",
+          "caster",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:harpy",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "skirmisher",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "day",
+        "place": "surface",
+        "entity": "minecraft:horse",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "passive"
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "regions": [
+      "high_rock/wayrest"
+    ],
+    "micro": [
+      "wayrest/salt_marsh",
+      "wayrest/island_grass",
+      "wayrest/cove_strand"
+    ],
+    "families": [
+      "swamp",
+      "river",
+      "beach",
+      "forest"
+    ],
+    "why": [
+      "wayrest.L4.salt_marsh",
+      "wayrest.L4.channel_isles",
+      "high_rock.L10.city_shadows"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:dreugh",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "night",
+        "place": "surface",
+        "entity": "nirncraft:will_o_wisp",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "rare",
+        "roles": [
+          "caster",
+          "support"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:mudcrab",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "passive"
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "regions": [
+      "high_rock/wrothgar"
+    ],
+    "micro": [
+      "wrothgar/pine_larch_slope",
+      "wrothgar/alpine_meadow",
+      "wrothgar/scree_and_snowfield",
+      "wrothgar/forge_valley"
+    ],
+    "families": [
+      "frozen",
+      "mountain",
+      "forest"
+    ],
+    "why": [
+      "wrothgar.L4.troll_ledges",
+      "wrothgar.L4.bear_valleys",
+      "wrothgar.L10.clanless_raiders"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:durzog",
+        "count": [
+          2,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "skirmisher",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:troll",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:ogre",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:echatere",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "passive"
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "why": [
+      "high_rock.L3.bjoulsae_artery",
+      "high_rock.L3.many_rivers",
+      "wayrest.L3.tidal_flats"
+    ],
+    "groups": [
+      {
+        "kind": "wildlife",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "water",
+        "entity": "nirncraft:slaughterfish",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator"
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "water",
+        "entity": "nirncraft:dreugh",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "ambusher"
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "high_rock"
+    ],
+    "why": [
+      "high_rock.L10.undercrofts",
+      "high_rock.L10.bloodlines",
+      "dwynnen.L4.karst_bat_caves"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:skeever",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "predator",
+        "roles": [
+          "skirmisher",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:ogre",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:necromancer",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "humanoid",
+        "roles": [
+          "caster",
+          "ranged",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          12,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "members": [
+          {
+            "entity": "nirncraft:vampire",
+            "count": [
+              1,
+              2
+            ]
+          },
+          {
+            "entity": "nirncraft:death_hound",
+            "count": [
+              0,
+              1
+            ]
+          }
+        ],
+        "tag": "undead",
+        "roles": [
+          "caster",
+          "ambusher",
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 1,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:harpy",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "skirmisher"
+        ]
+      }
+    ]
+  }
+]

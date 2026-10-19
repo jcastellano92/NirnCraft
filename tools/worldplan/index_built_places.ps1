@@ -1,13 +1,13 @@
-# Regenerates mod/src/main/resources/skycraft/worldplan/built_places.json: the place filters ({types, variants}) of
+# Regenerates mod/src/main/resources/nirncraft/worldplan/built_places.json: the place filters ({types, variants}) of
 # every structure that builds a named place. The scene plan reads it to know which trail destinations have nothing
 # built at them (so a trail's-end scene stands there instead of an empty pad). Re-run after adding or changing a
-# structure under data/skycraft/worldgen/structure/.
+# structure under data/nirncraft/worldgen/structure/.
 #
 #   tools/worldplan/index_built_places.ps1
 $ErrorActionPreference = 'Stop'
 $root = Resolve-Path (Join-Path $PSScriptRoot '..\..')
-$structures = Join-Path $root 'mod\src\main\resources\data\skycraft\worldgen\structure'
-$out = Join-Path $root 'mod\src\main\resources\skycraft\worldplan\built_places.json'
+$structures = Join-Path $root 'mod\src\main\resources\data\nirncraft\worldgen\structure'
+$out = Join-Path $root 'mod\src\main\resources\nirncraft\worldplan\built_places.json'
 $filters = New-Object System.Collections.Generic.List[string]
 $seen = @{}
 Get-ChildItem $structures -Recurse -Filter *.json | Sort-Object FullName | ForEach-Object {

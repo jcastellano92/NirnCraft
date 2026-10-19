@@ -21,7 +21,7 @@ TAGS = {"blocks": "block", "items": "item", "entity_types": "entity_type",
 COMMON_TAGS = json.loads((Path(__file__).parent / "native_common_tags_263.json").read_text(encoding="utf-8"))
 VANILLA_IDS = {"minecraft:chain": "minecraft:iron_chain", "minecraft:grass": "minecraft:short_grass",
                "minecraft:scute": "minecraft:turtle_scute"}
-# NeoForge supplies its own enchanting-table recipe after Skycraft's normal
+# NeoForge supplies its own enchanting-table recipe after NirnCraft's normal
 # mod-data pack. Preserve the explicit authored removal above that loader pack
 # with the native resource-filter mechanism rather than a lower override.
 DISABLED_RECIPES = {"minecraft:enchanting_table"}
@@ -81,7 +81,7 @@ def sync_common_tag_bridges(root):
     for relative, rule in COMMON_TAGS.items():
         legacy = root / "forge/tags" / relative
         if not legacy.exists():
-            # The shipped Forge crops tag came from its loader, rather than Skycraft.
+            # The shipped Forge crops tag came from its loader, rather than NirnCraft.
             if relative != "item/crops.json":
                 continue
             legacy.parent.mkdir(parents=True, exist_ok=True)
@@ -112,7 +112,7 @@ def native_path(path):
     if parts[kind] == "recipe":
         identifier = parts[start + 1] + ":" + "/".join(parts[kind + 1:]).removesuffix(".json")
         if identifier in DISABLED_RECIPES:
-            parts[kind] = "skycraft_legacy"
+            parts[kind] = "nirncraft_legacy"
             parts.insert(kind + 1, "disabled_recipes")
     if parts[kind] == "tags" and kind + 1 < len(parts):
         parts[kind + 1] = TAGS.get(parts[kind + 1], parts[kind + 1])
@@ -123,7 +123,7 @@ def native_path(path):
     # outside the active loot_modifiers directory (which requires a codec type).
     if parts[start + 1] in {"forge", "neoforge"} and parts[kind] == "loot_modifiers" and path.name == "global_loot_modifiers.json":
         parts[start + 1] = "neoforge"
-        parts[kind] = "skycraft_legacy"
+        parts[kind] = "nirncraft_legacy"
     return Path(*parts)
 
 
@@ -137,7 +137,7 @@ def sync_disabled_recipe_filters(root):
     removal_filters = []
     for identifier in sorted(DISABLED_RECIPES):
         namespace, relative = identifier.split(":", 1)
-        if not (root / namespace / "skycraft_legacy/disabled_recipes" / (relative + ".json")).exists():
+        if not (root / namespace / "nirncraft_legacy/disabled_recipes" / (relative + ".json")).exists():
             continue
         # Gradle's existing template expansion also consumes backslash escapes.
         # Identifier paths only use /._-a-z0-9, so [.] quotes the sole regexp
@@ -162,9 +162,9 @@ def sync_disabled_recipe_filters(root):
         changed = 1
     if converted.get("filter", {}).get("block"):
         # NeoForge's own mod-data pack overrides enchanting_table after the main
-        # Skycraft pack. A required TOP pack applies the authored removal last.
+        # NirnCraft pack. A required TOP pack applies the authored removal last.
         rules = root.parent / "resourcepacks/recipe_rules/pack.mcmeta"
-        rule_metadata = {"pack": {"description": "Skycraft recipe rules", "min_format": [121, 0], "max_format": [121, 0]},
+        rule_metadata = {"pack": {"description": "NirnCraft recipe rules", "min_format": [121, 0], "max_format": [121, 0]},
                          "filter": {"block": removal_filters}}
         current = json.loads(rules.read_text(encoding="utf-8")) if rules.exists() else None
         if current != rule_metadata:
@@ -313,13 +313,13 @@ def prepare(path, value):
         value = loot(value)
     elif "/loot_modifiers/" in normalized and target.name != "global_loot_modifiers.json":
         helper = Path(__file__).parent / "migration" / "loot_modifier_data_263.py"
-        spec = importlib.util.spec_from_file_location("skycraft_loot_modifier_data_263", helper)
+        spec = importlib.util.spec_from_file_location("nirncraft_loot_modifier_data_263", helper)
         native = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(native)
         value = native.convert(value)
         resource_root, relative = normalized.split("/data/", 1)
         namespace, name = relative.split("/loot_modifiers/", 1)
-        manifest = Path(resource_root) / "data/neoforge/skycraft_legacy/global_loot_modifiers.json"
+        manifest = Path(resource_root) / "data/neoforge/nirncraft_legacy/global_loot_modifiers.json"
         if manifest.exists():
             order = json.loads(manifest.read_text(encoding="utf-8")).get("entries", [])
             identifier = namespace + ":" + name.removesuffix(".json")
@@ -359,20 +359,20 @@ def upgrade_resources(root):
     changed += sync_disabled_recipe_filters(root)
     # Caverns/blueprints are classpath-authored JSON rather than datapack
     # registries. They use the same native block IDs and must survive regeneration.
-    for path in sorted((Path(root).parent / "skycraft").rglob("*.json")):
+    for path in sorted((Path(root).parent / "nirncraft").rglob("*.json")):
         original = json.loads(path.read_text(encoding="utf-8"))
         converted = identifiers(original)
         if converted != original:
             path.write_text(json.dumps(converted, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
             changed += 1
-    meat_spec = importlib.util.spec_from_file_location("skycraft_meat_tags_263", Path(__file__).parent / "migration/meat_tags_263.py")
+    meat_spec = importlib.util.spec_from_file_location("nirncraft_meat_tags_263", Path(__file__).parent / "migration/meat_tags_263.py")
     meat = importlib.util.module_from_spec(meat_spec)
     meat_spec.loader.exec_module(meat)
     changed += meat.upgrade(root)
-    # Classification generation belongs to a complete Skycraft source tree;
+    # Classification generation belongs to a complete NirnCraft source tree;
     # arbitrary conversion fixtures must not acquire unrelated content.
-    if (Path(root).parents[1] / "java/com/skycraft/realms/RealmCreatures.java").exists():
-        entity_spec = importlib.util.spec_from_file_location("skycraft_entity_tags_263", Path(__file__).parent / "migration/entity_tags_263.py")
+    if (Path(root).parents[1] / "java/com/nirncraft/realms/RealmCreatures.java").exists():
+        entity_spec = importlib.util.spec_from_file_location("nirncraft_entity_tags_263", Path(__file__).parent / "migration/entity_tags_263.py")
         entity_tags = importlib.util.module_from_spec(entity_spec)
         entity_spec.loader.exec_module(entity_tags)
         changed += entity_tags.upgrade(root)

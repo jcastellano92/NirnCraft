@@ -1,0 +1,57 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:nord_mead",
+      "required": false
+    },
+    {
+      "id": "nirncraft:honningbrew_mead",
+      "required": false
+    },
+    {
+      "id": "nirncraft:black_briar_mead",
+      "required": false
+    },
+    {
+      "id": "nirncraft:horker_loaf",
+      "required": false
+    },
+    {
+      "id": "nirncraft:horker_stew",
+      "required": false
+    },
+    {
+      "id": "nirncraft:mammoth_steak",
+      "required": false
+    },
+    {
+      "id": "nirncraft:eidar_cheese_wedge",
+      "required": false
+    },
+    {
+      "id": "nirncraft:goat_cheese_wedge",
+      "required": false
+    },
+    {
+      "id": "nirncraft:cabbage",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leek",
+      "required": false
+    },
+    {
+      "id": "nirncraft:apple_cabbage_stew",
+      "required": false
+    },
+    {
+      "id": "nirncraft:venison_stew",
+      "required": false
+    },
+    {
+      "id": "nirncraft:salmon_steak",
+      "required": false
+    }
+  ]
+}

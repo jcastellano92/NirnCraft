@@ -1,0 +1,752 @@
+{
+  "boss_chance": 0.05,
+  "epithets": [
+    {
+      "id": "first_watch",
+      "name": "of the First Watch",
+      "lang_key": "affix.nirncraft.storied.epithet.first_watch"
+    },
+    {
+      "id": "broken_banner",
+      "name": "of the Broken Banner",
+      "lang_key": "affix.nirncraft.storied.epithet.broken_banner"
+    },
+    {
+      "id": "winter_march",
+      "name": "of the Winter March",
+      "lang_key": "affix.nirncraft.storied.epithet.winter_march"
+    },
+    {
+      "id": "old_charter",
+      "name": "of the Old Charter",
+      "lang_key": "affix.nirncraft.storied.epithet.old_charter"
+    },
+    {
+      "id": "salt_truce",
+      "name": "of the Salt Truce",
+      "lang_key": "affix.nirncraft.storied.epithet.salt_truce"
+    },
+    {
+      "id": "high_pass",
+      "name": "of the High Pass",
+      "lang_key": "affix.nirncraft.storied.epithet.high_pass"
+    },
+    {
+      "id": "beacon_tower",
+      "name": "of the Beacon Tower",
+      "lang_key": "affix.nirncraft.storied.epithet.beacon_tower"
+    },
+    {
+      "id": "iron_vigil",
+      "name": "of the Iron Vigil",
+      "lang_key": "affix.nirncraft.storied.epithet.iron_vigil"
+    },
+    {
+      "id": "deep_vault",
+      "name": "of the Deep Vault",
+      "lang_key": "affix.nirncraft.storied.epithet.deep_vault"
+    },
+    {
+      "id": "red_ford",
+      "name": "of the Red Ford",
+      "lang_key": "affix.nirncraft.storied.epithet.red_ford"
+    },
+    {
+      "id": "lantern_gate",
+      "name": "of the Lantern Gate",
+      "lang_key": "affix.nirncraft.storied.epithet.lantern_gate"
+    },
+    {
+      "id": "siege_line",
+      "name": "of the Siege Line",
+      "lang_key": "affix.nirncraft.storied.epithet.siege_line"
+    },
+    {
+      "id": "star_cairn",
+      "name": "of the Star Cairn",
+      "lang_key": "affix.nirncraft.storied.epithet.star_cairn"
+    },
+    {
+      "id": "harbour_chain",
+      "name": "of the Harbour Chain",
+      "lang_key": "affix.nirncraft.storied.epithet.harbour_chain"
+    },
+    {
+      "id": "dawn_muster",
+      "name": "of the Dawn Muster",
+      "lang_key": "affix.nirncraft.storied.epithet.dawn_muster"
+    },
+    {
+      "id": "silent_barrows",
+      "name": "of the Silent Barrows",
+      "lang_key": "affix.nirncraft.storied.epithet.silent_barrows"
+    }
+  ],
+  "entries": [
+    {
+      "id": "whiterun_jorrvaskr_oath",
+      "prefix": "Jorrvaskr-Oath",
+      "provenance": "Sworn over upturned mead-plank timber when the Five Hundred first climbed onto the windy tundra bluff.",
+      "regions": [
+        "skyrim/whiterun"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "cultures": [
+        "nord"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.05,
+      "durability_mult": 1.15,
+      "value_mult": 1.18,
+      "why": [
+        "whiterun.L11.ysgramor_hall",
+        "whiterun.L11.skyforge"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.whiterun_jorrvaskr_oath.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.whiterun_jorrvaskr_oath.provenance"
+    },
+    {
+      "id": "whiterun_watchtower_char",
+      "prefix": "Dragon-Porch",
+      "provenance": "Scorched along the fuller during the night the western watchtower stones cracked under dragonfire.",
+      "regions": [
+        "skyrim/whiterun"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "cultures": [
+        "nord"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.04,
+      "durability_mult": 1.12,
+      "value_mult": 1.18,
+      "why": [
+        "whiterun.L11.dragon_porch",
+        "whiterun.L11.watchtower_attack"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.whiterun_watchtower_char.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.whiterun_watchtower_char.provenance"
+    },
+    {
+      "id": "haafingar_wolf_ward",
+      "prefix": "Wolf-Queen's Ward",
+      "provenance": "Sealed inside a lead reliquary beneath the Blue Palace after Potema's necromancers were driven from the arch.",
+      "regions": [
+        "skyrim/haafingar"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "cultures": [
+        "nord",
+        "imperial"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.06,
+      "durability_mult": 1.14,
+      "value_mult": 1.18,
+      "why": [
+        "haafingar.L11.wolf_queen",
+        "haafingar.L11.dragon_bridge_age"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.haafingar_wolf_ward.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.haafingar_wolf_ward.provenance"
+    },
+    {
+      "id": "falkreath_pine_elegy",
+      "prefix": "Sunderstone-Marked",
+      "provenance": "Lifted from a mossy jarl-cairn under dripping Falkreath pines where funeral bells toll every autumn.",
+      "regions": [
+        "skyrim/falkreath"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "cultures": [
+        "nord"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.05,
+      "durability_mult": 1.12,
+      "value_mult": 1.16,
+      "why": [
+        "falkreath.L11.old_graves",
+        "falkreath.L11.sunderstone"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.falkreath_pine_elegy.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.falkreath_pine_elegy.provenance"
+    },
+    {
+      "id": "hjaalmarch_bromjunaar_frost",
+      "prefix": "Bromjunaar-bound",
+      "provenance": "Unearthed beneath peat and bog-myrtle outside the shattered stone ring of Labyrinthian.",
+      "regions": [
+        "skyrim/hjaalmarch"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "cultures": [
+        "nord"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.06,
+      "durability_mult": 1.15,
+      "value_mult": 1.18,
+      "why": [
+        "hjaalmarch.L11.bromjunaar",
+        "hjaalmarch.L11.windcaller"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.hjaalmarch_bromjunaar_frost.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.hjaalmarch_bromjunaar_frost.provenance"
+    },
+    {
+      "id": "pale_korvanjund_vigil",
+      "prefix": "Korvanjund-Vigil",
+      "provenance": "Kept greased in horker tallow by sentries who guarded the Jagged Crown's subterranean stair.",
+      "regions": [
+        "skyrim/the_pale"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "cultures": [
+        "nord"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.14,
+      "value_mult": 1.17,
+      "why": [
+        "the_pale.L11.jagged_crown",
+        "the_pale.L11.temple_siege"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.pale_korvanjund_vigil.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.pale_korvanjund_vigil.provenance"
+    },
+    {
+      "id": "rift_forelhost_remnant",
+      "prefix": "Forelhost-Remnant",
+      "provenance": "Recovered from the poisoned cistern terraces high above the golden birch valleys of the Rift.",
+      "regions": [
+        "skyrim/the_rift"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "cultures": [
+        "nord"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.12,
+      "value_mult": 1.18,
+      "why": [
+        "the_rift.L11.forelhost_siege",
+        "the_rift.L11.geirmund"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.rift_forelhost_remnant.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.rift_forelhost_remnant.provenance"
+    },
+    {
+      "id": "winterhold_saarthal_rime",
+      "prefix": "Saarthal-Rime",
+      "provenance": "Pulled from the collapsed cliff-rubble after the Sea of Ghosts swallowed three-quarters of the old capital.",
+      "regions": [
+        "skyrim/winterhold"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "cultures": [
+        "nord",
+        "atmoran"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.06,
+      "durability_mult": 1.16,
+      "value_mult": 1.18,
+      "why": [
+        "winterhold.L11.saarthal",
+        "winterhold.L11.great_collapse"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.winterhold_saarthal_rime.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.winterhold_saarthal_rime.provenance"
+    },
+    {
+      "id": "eastmarch_ysgramor_tide",
+      "prefix": "Palace-of-Kings",
+      "provenance": "Notched with tally-marks along its guard by a shield-thane who sailed south from Atmora's freezing shoals.",
+      "regions": [
+        "skyrim/eastmarch"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "cultures": [
+        "nord",
+        "atmoran"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.15,
+      "value_mult": 1.18,
+      "why": [
+        "eastmarch.L11.ysgramor_city",
+        "skyrim.L11.atmoran_landing"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.eastmarch_ysgramor_tide.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.eastmarch_ysgramor_tide.provenance"
+    },
+    {
+      "id": "reach_old_hroldan_brass",
+      "prefix": "Hroldan-Spire",
+      "provenance": "Hammered where storm-magic cracked the limestone battlements above the Karth gorge.",
+      "regions": [
+        "skyrim/the_reach"
+      ],
+      "provinces": [
+        "skyrim"
+      ],
+      "cultures": [
+        "reachmen",
+        "nord",
+        "dwemer"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.14,
+      "value_mult": 1.18,
+      "why": [
+        "the_reach.L11.old_hroldan_battle",
+        "the_reach.L11.markarth_incident"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.reach_old_hroldan_brass.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.reach_old_hroldan_brass.provenance"
+    },
+    {
+      "id": "daggerfall_cryngaine_ash",
+      "prefix": "Cryngaine-Field",
+      "provenance": "Trampled into heather mud when King Lysandus fell before the arrow-storm on the southern moors.",
+      "regions": [
+        "high_rock/daggerfall"
+      ],
+      "provinces": [
+        "high_rock"
+      ],
+      "cultures": [
+        "breton"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.12,
+      "value_mult": 1.18,
+      "why": [
+        "daggerfall.L11.betony_war",
+        "daggerfall.L11.glenumbra_moors_battle"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.daggerfall_cryngaine_ash.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.daggerfall_cryngaine_ash.provenance"
+    },
+    {
+      "id": "daggerfall_numidium_echo",
+      "prefix": "Warp-Touched",
+      "provenance": "Bears two conflicting royal timestamps from the day the Brass God folded six kingdoms into four.",
+      "regions": [
+        "high_rock/daggerfall",
+        "high_rock/wayrest",
+        "hammerfell/sentinel"
+      ],
+      "provinces": [
+        "high_rock",
+        "hammerfell"
+      ],
+      "cultures": [
+        "breton",
+        "redguard"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.06,
+      "durability_mult": 1.15,
+      "value_mult": 1.2,
+      "why": [
+        "daggerfall.L11.warp_scars",
+        "high_rock.L11.warp_in_the_west"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.daggerfall_numidium_echo.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.daggerfall_numidium_echo.provenance"
+    },
+    {
+      "id": "anticlere_charter_crest",
+      "prefix": "Highcross-Charter",
+      "provenance": "Pledged as surety between two feuding hill-barons before the border keep consolidated their valleys.",
+      "regions": [
+        "high_rock/anticlere"
+      ],
+      "provinces": [
+        "high_rock"
+      ],
+      "cultures": [
+        "breton"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.05,
+      "durability_mult": 1.12,
+      "value_mult": 1.16,
+      "why": [
+        "anticlere.L11.petty_kingdoms",
+        "anticlere.L11.failed_clearances"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.anticlere_charter_crest.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.anticlere_charter_crest.provenance"
+    },
+    {
+      "id": "dwynnen_bhoriane_banner",
+      "prefix": "Bhoriane-Vanguard",
+      "provenance": "Carried across the stony river causeway when Duke Eadwyre's lancers broke the western coastal raiders.",
+      "regions": [
+        "high_rock/dwynnen"
+      ],
+      "provinces": [
+        "high_rock"
+      ],
+      "cultures": [
+        "breton"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.06,
+      "durability_mult": 1.12,
+      "value_mult": 1.17,
+      "why": [
+        "dwynnen.L11.petty_wars",
+        "dwynnen.L11.raven_defeat"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.dwynnen_bhoriane_banner.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.dwynnen_bhoriane_banner.provenance"
+    },
+    {
+      "id": "wayrest_direnni_signet",
+      "prefix": "Baelborne-Signet",
+      "provenance": "Stamped with a swan-and-tower countermark from the merchant princes who raised the harbour sea-chain.",
+      "regions": [
+        "high_rock/wayrest"
+      ],
+      "provinces": [
+        "high_rock"
+      ],
+      "cultures": [
+        "breton",
+        "altmer"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.06,
+      "durability_mult": 1.14,
+      "value_mult": 1.18,
+      "why": [
+        "wayrest.L11.direnni_seat",
+        "wayrest.L11.covenant_capital"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.wayrest_direnni_signet.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.wayrest_direnni_signet.provenance"
+    },
+    {
+      "id": "wrothgar_paragon_anvil",
+      "prefix": "Paragon-Anvil",
+      "provenance": "Salvaged from the vitrified gate-stones of old Orsinium after the thirty-year siege finally ended.",
+      "regions": [
+        "high_rock/wrothgar"
+      ],
+      "provinces": [
+        "orsinium",
+        "high_rock"
+      ],
+      "cultures": [
+        "orc"
+      ],
+      "damage_mult": 1.07,
+      "armor_mult": 1.06,
+      "durability_mult": 1.18,
+      "value_mult": 1.19,
+      "why": [
+        "wrothgar.L11.three_sieges",
+        "wrothgar.L11.paragons_memorial"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.wrothgar_paragon_anvil.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.wrothgar_paragon_anvil.provenance"
+    },
+    {
+      "id": "glenumbra_camlorn_crown",
+      "prefix": "Camlorn-Standard",
+      "provenance": "Tempered during the autumn muster when Direnni spell-captains broke the Alessian host on the moors.",
+      "regions": [
+        "high_rock/glenumbra"
+      ],
+      "provinces": [
+        "high_rock"
+      ],
+      "cultures": [
+        "breton"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.12,
+      "value_mult": 1.17,
+      "why": [
+        "glenumbra.L11.alessian_defeat",
+        "glenumbra.L11.old_crown_of_camlorn"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.glenumbra_camlorn_crown.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.glenumbra_camlorn_crown.provenance"
+    },
+    {
+      "id": "rivenspire_doomcrag_spire",
+      "prefix": "Doomcrag-Warded",
+      "provenance": "Inscribed with silver containment runes after the Ebon Crypt fissure poisoned the western chalk ridges.",
+      "regions": [
+        "high_rock/rivenspire"
+      ],
+      "provinces": [
+        "high_rock"
+      ],
+      "cultures": [
+        "breton"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.14,
+      "value_mult": 1.18,
+      "why": [
+        "rivenspire.L11.doomcrag_fall",
+        "rivenspire.L11.nedic_crag_kings"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.rivenspire_doomcrag_spire.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.rivenspire_doomcrag_spire.provenance"
+    },
+    {
+      "id": "stormhaven_abbey_bell",
+      "prefix": "Pariah-Abbey",
+      "provenance": "Blessed with rosemary oil by chantry wardens who patrol the old pilgrim road above Wayrest Sound.",
+      "regions": [
+        "high_rock/stormhaven"
+      ],
+      "provinces": [
+        "high_rock"
+      ],
+      "cultures": [
+        "breton",
+        "imperial"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.06,
+      "durability_mult": 1.14,
+      "value_mult": 1.17,
+      "why": [
+        "stormhaven.L11.old_pilgrim_way",
+        "stormhaven.L11.giant_stone_legend"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.stormhaven_abbey_bell.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.stormhaven_abbey_bell.provenance"
+    },
+    {
+      "id": "bjoulsae_evermor_ford",
+      "prefix": "Bjoulsae-Ford",
+      "provenance": "Hung from a river-warden's saddle during the border cavalry campaigns along the Druadach foothills.",
+      "regions": [
+        "high_rock/bjoulsae"
+      ],
+      "provinces": [
+        "high_rock"
+      ],
+      "cultures": [
+        "breton",
+        "reachmen"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.12,
+      "value_mult": 1.17,
+      "why": [
+        "bjoulsae.L11.founding_of_evermor",
+        "bjoulsae.L11.druadach_border_wars"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.bjoulsae_evermor_ford.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.bjoulsae_evermor_ford.provenance"
+    },
+    {
+      "id": "sentinel_first_landing",
+      "prefix": "First-Landing",
+      "provenance": "Etched with the prow-sigil of the Ra Gada captains who anchored beneath Sentinel's red headland.",
+      "regions": [
+        "hammerfell/sentinel"
+      ],
+      "provinces": [
+        "hammerfell"
+      ],
+      "cultures": [
+        "redguard"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.14,
+      "value_mult": 1.18,
+      "why": [
+        "sentinel.L11.harbour_of_the_first_landing",
+        "sentinel.L11.lysandus_war"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.sentinel_first_landing.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.sentinel_first_landing.provenance"
+    },
+    {
+      "id": "alikr_volenfell_sand",
+      "prefix": "Volenfell-Sand",
+      "provenance": "Scoured bright by salt-devil winds where Rourken's bronze hammer first struck the desert basin.",
+      "regions": [
+        "hammerfell/alikr_desert"
+      ],
+      "provinces": [
+        "hammerfell"
+      ],
+      "cultures": [
+        "redguard",
+        "dwemer"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.16,
+      "value_mult": 1.18,
+      "why": [
+        "alikr_desert.L11.two_waves",
+        "alikr_desert.L11.caravan_wars"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.alikr_volenfell_sand.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.alikr_volenfell_sand.provenance"
+    },
+    {
+      "id": "bangkorai_ephesus_pass",
+      "prefix": "Bangkorai-Gate",
+      "provenance": "Held the canyon parapet when garrison shield-lines turned back three northern invading armies.",
+      "regions": [
+        "hammerfell/bangkorai"
+      ],
+      "provinces": [
+        "hammerfell"
+      ],
+      "cultures": [
+        "redguard",
+        "breton"
+      ],
+      "damage_mult": 1.05,
+      "armor_mult": 1.06,
+      "durability_mult": 1.15,
+      "value_mult": 1.18,
+      "why": [
+        "bangkorai.L11.garrison_pass_wars",
+        "bangkorai.L11.na_totambu_line"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.bangkorai_ephesus_pass.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.bangkorai_ephesus_pass.provenance"
+    },
+    {
+      "id": "dragontail_scourg_obsidian",
+      "prefix": "Scourg-Crest",
+      "provenance": "Quenched in sulphurous mountain runoff where Dragontail pass-sentries watch the northern ridge.",
+      "regions": [
+        "hammerfell/dragontail"
+      ],
+      "provinces": [
+        "hammerfell"
+      ],
+      "cultures": [
+        "redguard",
+        "orc"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.14,
+      "value_mult": 1.17,
+      "why": [
+        "dragontail.L11.scourg_kings",
+        "dragontail.L11.imperial_border"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.dragontail_scourg_obsidian.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.dragontail_scourg_obsidian.provenance"
+    },
+    {
+      "id": "stros_hunding_prow",
+      "prefix": "Hunding-Tide",
+      "provenance": "Salvaged from the charred flagship timbers after Prince A'tor's fleet burned in the southern bay.",
+      "regions": [
+        "hammerfell/stros_mkai"
+      ],
+      "provinces": [
+        "hammerfell"
+      ],
+      "cultures": [
+        "redguard"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.14,
+      "value_mult": 1.19,
+      "why": [
+        "stros_mkai.L11.hunding_bay_battle",
+        "stros_mkai.L11.first_treaty"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.stros_hunding_prow.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.stros_hunding_prow.provenance"
+    },
+    {
+      "id": "craglorn_star_cairn",
+      "prefix": "Star-Gazes",
+      "provenance": "Forged from meteoric iron gathered beneath the shattered observatory domes of old Craglorn.",
+      "regions": [
+        "hammerfell/craglorn"
+      ],
+      "provinces": [
+        "hammerfell"
+      ],
+      "cultures": [
+        "redguard",
+        "imperial"
+      ],
+      "damage_mult": 1.07,
+      "armor_mult": 1.05,
+      "durability_mult": 1.15,
+      "value_mult": 1.19,
+      "why": [
+        "craglorn.L11.nedic_star_empire",
+        "craglorn.L11.fall_of_the_shards"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.craglorn_star_cairn.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.craglorn_star_cairn.provenance"
+    },
+    {
+      "id": "hews_bane_hubalajad",
+      "prefix": "Abah-Landing",
+      "provenance": "Smuggled out of Taneth's harbour vaults on the night the southern sea-lanes changed hands.",
+      "regions": [
+        "hammerfell/hews_bane"
+      ],
+      "provinces": [
+        "hammerfell"
+      ],
+      "cultures": [
+        "redguard"
+      ],
+      "damage_mult": 1.06,
+      "armor_mult": 1.05,
+      "durability_mult": 1.12,
+      "value_mult": 1.18,
+      "why": [
+        "hews_bane.L11.betrayal_of_taneth",
+        "hews_bane.L11.prince_hubalajad_folly"
+      ],
+      "lang_prefix_key": "affix.nirncraft.storied.hews_bane_hubalajad.prefix",
+      "lang_prov_key": "affix.nirncraft.storied.hews_bane_hubalajad.provenance"
+    }
+  ]
+}

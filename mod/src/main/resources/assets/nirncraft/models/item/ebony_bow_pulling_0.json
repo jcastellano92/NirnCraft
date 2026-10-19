@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/ebony_bow",
+  "textures": {
+    "layer0": "nirncraft:item/ebony_bow_pulling_0"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "nirncraft:realm_site",
+  "site": "apocrypha/chapter",
+  "biomes": "#nirncraft:realm/apocrypha",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

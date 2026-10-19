@@ -13,7 +13,7 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
-spec = importlib.util.spec_from_file_location("skycraft_data_format_263", ROOT / "tools/data_format_263.py")
+spec = importlib.util.spec_from_file_location("nirncraft_data_format_263", ROOT / "tools/data_format_263.py")
 data_format = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(data_format)
 PREFIX = "mod/src/main/resources/data/"

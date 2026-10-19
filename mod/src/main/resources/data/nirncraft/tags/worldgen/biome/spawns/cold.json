@@ -1,0 +1,43 @@
+{
+  "replace": false,
+  "values": [
+    "#nirncraft:spawns/tundra",
+    "#nirncraft:spawns/frozen_peaks",
+    "#nirncraft:spawns/snowy_forest",
+    "minecraft:taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:windswept_forest",
+    "minecraft:frozen_river",
+    "minecraft:snowy_beach",
+    "minecraft:meadow",
+    {
+      "id": "#forge:is_snowy",
+      "required": false
+    },
+    {
+      "id": "#forge:is_cold/overworld",
+      "required": false
+    },
+    "nirncraft:atmoran_frozen_forest",
+    "nirncraft:atmoran_ice_waste",
+    "nirncraft:deep_sea_of_ghosts",
+    "nirncraft:frozen_river",
+    "nirncraft:frozen_shore",
+    "nirncraft:hjaalmarch_marsh",
+    "nirncraft:ice_caves",
+    "nirncraft:kamal_snowfield",
+    "nirncraft:pale_heath",
+    "nirncraft:pale_snowfield",
+    "nirncraft:sea_of_ghosts",
+    "nirncraft:skyrim_coast",
+    "nirncraft:snowy_pine_forest",
+    "nirncraft:snowy_slopes",
+    "nirncraft:solstheim_pine_forest",
+    "nirncraft:throat_of_the_world",
+    "nirncraft:winterhold_glacier",
+    "nirncraft:wrothgarian_mountains"
+  ]
+}

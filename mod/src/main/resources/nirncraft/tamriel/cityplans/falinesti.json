@@ -1,0 +1,406 @@
+{
+  "id": "falinesti",
+  "why": [
+    "malabal_tor.L1.xylo_gorge",
+    "malabal_tor.L4.jungle_understorey",
+    "malabal_tor.L6.silvenar_seat"
+  ],
+  "sil": "walking-tree-moves",
+  "base": "none",
+  "overlay": "falinesti",
+  "radius": 96,
+  "reach": 112,
+  "gates": [
+    [
+      0,
+      94
+    ],
+    [
+      -94,
+      0
+    ],
+    [
+      94,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        46
+      ],
+      "overlay": "falinesti",
+      "wealth": "noble"
+    },
+    {
+      "ring": [
+        46,
+        96
+      ],
+      "overlay": "malabal_tor",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 14,
+      "name": "falinesti_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        -12,
+        -37
+      ],
+      "name": "falinesti_landmark",
+      "overlay": "falinesti"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        4,
+        2
+      ],
+      "spokes": 8,
+      "r0": 23,
+      "r1": 69,
+      "wobble": 8,
+      "offset": 1.41,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        44,
+        65
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          91
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          -4,
+          -49
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        35,
+        0
+      ],
+      "face": "south",
+      "overlay": "falinesti",
+      "name": "falinesti_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        64,
+        25
+      ],
+      "face": "north",
+      "overlay": "falinesti",
+      "name": "falinesti_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        29,
+        26
+      ],
+      "face": "north",
+      "overlay": "falinesti",
+      "name": "falinesti_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        31,
+        62
+      ],
+      "face": "north",
+      "overlay": "falinesti",
+      "name": "falinesti_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        34
+      ],
+      "face": "north",
+      "overlay": "falinesti",
+      "name": "falinesti_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -19,
+        66
+      ],
+      "face": "north",
+      "overlay": "falinesti",
+      "name": "falinesti_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -21,
+        28
+      ],
+      "face": "north",
+      "overlay": "falinesti",
+      "name": "falinesti_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -59,
+        36
+      ],
+      "face": "north",
+      "overlay": "falinesti",
+      "name": "falinesti_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -34,
+        6
+      ],
+      "face": "north",
+      "overlay": "falinesti",
+      "name": "falinesti_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -68,
+        -13
+      ],
+      "face": "south",
+      "overlay": "falinesti",
+      "name": "falinesti_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -18,
+        -1
+      ],
+      "face": "south",
+      "overlay": "falinesti",
+      "name": "falinesti_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        -46,
+        -55
+      ],
+      "face": "south",
+      "overlay": "falinesti",
+      "name": "falinesti_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        23,
+        -33
+      ],
+      "face": "south",
+      "overlay": "falinesti",
+      "name": "falinesti_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        3,
+        -72
+      ],
+      "face": "south",
+      "overlay": "falinesti",
+      "name": "falinesti_b_14"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        39,
+        -31
+      ],
+      "face": "south",
+      "overlay": "falinesti",
+      "name": "falinesti_b_15"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        55,
+        -47
+      ],
+      "face": "south",
+      "overlay": "falinesti",
+      "name": "falinesti_b_16"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        16,
+        0
+      ],
+      "face": "south",
+      "overlay": "falinesti",
+      "name": "falinesti_b_17"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "falinesti_great_tree",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "falinesti_garden",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "falinesti_lamps",
+      "count": 4
+    },
+    {
+      "type": "shrine",
+      "theme": "falinesti_shrine",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "falinesti_b_5",
+    "store": "falinesti_b_10",
+    "smithy": "falinesti_b_7"
+  },
+  "titles": {
+    "falinesti_b_1": "place.nirncraft.falinesti Council & Seat Hall",
+    "falinesti_b_2": "place.nirncraft.falinesti High Sanctuary",
+    "falinesti_b_3": "place.nirncraft.falinesti Fighters & Wayfarers Hall",
+    "falinesti_b_4": "place.nirncraft.falinesti Mages & Chroniclers Spire",
+    "falinesti_b_5": "place.nirncraft.falinesti The Lantern & Hearth Inn",
+    "falinesti_b_6": "place.nirncraft.falinesti The Traveler's Rest Tavern",
+    "falinesti_b_7": "place.nirncraft.falinesti Master Forge & Armorer",
+    "falinesti_b_8": "place.nirncraft.falinesti Botanicals & Remedies",
+    "falinesti_b_9": "place.nirncraft.falinesti Scriptorium & Charts",
+    "falinesti_b_10": "place.nirncraft.falinesti Grand Provisioner & Sundries",
+    "falinesti_b_11": "place.nirncraft.falinesti Silk & Hide Clothier",
+    "falinesti_b_12": "place.nirncraft.falinesti Lapidary & Signets",
+    "falinesti_b_13": "place.nirncraft.falinesti Wayfarer Stables & Post",
+    "falinesti_b_14": "place.nirncraft.falinesti Bonded Factor Warehouse",
+    "falinesti_b_15": "place.nirncraft.falinesti Watch Garrison Barracks",
+    "falinesti_b_16": "place.nirncraft.falinesti High Steward's Manor",
+    "falinesti_b_17": "place.nirncraft.falinesti Merchant-Factor's Villa",
+    "falinesti_landmark": "High Seat of place.nirncraft.falinesti",
+    "falinesti_plaza": "place.nirncraft.falinesti Central Plaza"
+  },
+  "innKey": "falinesti_b_5",
+  "zones": [
+    {
+      "at": [
+        4,
+        -36
+      ],
+      "r": 31,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        4,
+        2
+      ],
+      "r": 27,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        33,
+        8
+      ],
+      "r": 27,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 81,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 9,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "on": "main"
+    }
+  ]
+}

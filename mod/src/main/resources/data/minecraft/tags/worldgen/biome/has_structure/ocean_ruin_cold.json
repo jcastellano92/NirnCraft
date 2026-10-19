@@ -1,11 +1,11 @@
 {
   "replace": false,
   "values": [
-    "skycraft:cold_ocean",
-    "skycraft:deep_cold_ocean",
-    "skycraft:deep_sea_of_ghosts",
-    "skycraft:deep_temperate_ocean",
-    "skycraft:sea_of_ghosts",
-    "skycraft:temperate_ocean"
+    "nirncraft:cold_ocean",
+    "nirncraft:deep_cold_ocean",
+    "nirncraft:deep_sea_of_ghosts",
+    "nirncraft:deep_temperate_ocean",
+    "nirncraft:sea_of_ghosts",
+    "nirncraft:temperate_ocean"
   ]
 }

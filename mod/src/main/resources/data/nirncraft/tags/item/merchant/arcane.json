@@ -1,0 +1,38 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:book",
+    "minecraft:paper",
+    "minecraft:amethyst_shard",
+    "minecraft:glowstone_dust",
+    "minecraft:potion",
+    {
+      "id": "nirncraft:void_salts",
+      "required": false
+    },
+    {
+      "id": "nirncraft:fire_salts",
+      "required": false
+    },
+    {
+      "id": "nirncraft:frost_salts",
+      "required": false
+    },
+    {
+      "id": "nirncraft:glow_dust",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ectoplasm",
+      "required": false
+    },
+    {
+      "id": "nirncraft:soul_gem_petty",
+      "required": false
+    },
+    {
+      "id": "nirncraft:soul_gem_lesser",
+      "required": false
+    }
+  ]
+}

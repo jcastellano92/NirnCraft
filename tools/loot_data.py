@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Writes Skycraft's loot economy (see docs/LOOT.md): the container taxonomy skycraft:containers/<kind>/<tier>,
-the building-block tables skycraft:parts/*, one table per legendary unique (skycraft:uniques/<id>), the corpse
-tables of humanoid creatures, the aliases that keep the old ids (skycraft:chests/dungeon_common, chests/village/house
+"""Writes NirnCraft's loot economy (see docs/LOOT.md): the container taxonomy nirncraft:containers/<kind>/<tier>,
+the building-block tables nirncraft:parts/*, one table per legendary unique (nirncraft:uniques/<id>), the corpse
+tables of humanoid creatures, the aliases that keep the old ids (nirncraft:chests/dungeon_common, chests/village/house
 ...) working, the regional trinket tags and the pack's Lootr refresh config. Idempotent: re-run after editing.
 
     py -3 tools/loot_data.py            then   py -3 tools/loot_sim.py   to check the curves
 
-Loot functions used (Java, com.skycraft.loot / economy / arsenal):
-  skycraft:scaled_gold {min,max,growth}   skycraft:leveled_gear / regional_gear {kind, enchant_chance, quality_chance}
-  skycraft:skyrim_potion, leveled_tome, regional_tag, regional_book, skill_book, regional_treasure,
-  place_collectibles, random_unique, missing_collectible, unique;  condition skycraft:loot_level {min,max}
+Loot functions used (Java, com.nirncraft.loot / economy / arsenal):
+  nirncraft:scaled_gold {min,max,growth}   nirncraft:leveled_gear / regional_gear {kind, enchant_chance, quality_chance}
+  nirncraft:skyrim_potion, leveled_tome, regional_tag, regional_book, skill_book, regional_treasure,
+  place_collectibles, random_unique, missing_collectible, unique;  condition nirncraft:loot_level {min,max}
 """
 import json
 import re
@@ -17,11 +17,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 MAIN = ROOT / "mod" / "src" / "main"
-DATA = MAIN / "resources" / "data" / "skycraft"
+DATA = MAIN / "resources" / "data" / "nirncraft"
 LOOT = DATA / "loot_table"
 TAGS = DATA / "tags" / "item"
-JAVA = MAIN / "java" / "com" / "skycraft"
-SK = "skycraft:"
+JAVA = MAIN / "java" / "com" / "nirncraft"
+SK = "nirncraft:"
 
 
 def write(path, obj):
@@ -126,7 +126,7 @@ def ingredients(weight=1, lo=1, hi=2):
 
 
 def trinket(weight=1, conditions=None):
-    return item("skycraft:gold_ring", weight, [{"function": SK + "regional_tag", "tag": SK + "loot/trinkets"}], conditions)
+    return item("nirncraft:gold_ring", weight, [{"function": SK + "regional_tag", "tag": SK + "loot/trinkets"}], conditions)
 
 
 def fn_item(fn, weight=1, conditions=None, base="minecraft:stick", **args):
@@ -136,7 +136,7 @@ def fn_item(fn, weight=1, conditions=None, base="minecraft:stick", **args):
 
 
 def book(weight=1):
-    return fn_item("regional_book", weight, base="skycraft:book")
+    return fn_item("regional_book", weight, base="nirncraft:book")
 
 
 def skill_book(weight=1):
@@ -144,7 +144,7 @@ def skill_book(weight=1):
 
 
 def treasure(weight=1, conditions=None):
-    return fn_item("regional_treasure", weight, conditions, base="skycraft:regional_treasure")
+    return fn_item("regional_treasure", weight, conditions, base="nirncraft:regional_treasure")
 
 
 def part(name, weight=1, conditions=None):
@@ -174,14 +174,14 @@ def parts():
         item("flawless_ruby", 4, conditions=[lvl(18)]), item("flawless_sapphire", 3, conditions=[lvl(22)]),
         item("flawless_diamond", 1, conditions=[lvl(27)])])])
     loot("parts/soul_gems", [pool([
-        item("soul_gem_petty", 30), item("soul_gem_petty", 10, [{"function": "minecraft:set_nbt", "tag": "{soul:1,skycraft_value:30}"}]),
-        item("soul_gem_lesser", 22), item("soul_gem_lesser", 7, [{"function": "minecraft:set_nbt", "tag": "{soul:2,skycraft_value:75}"}]),
+        item("soul_gem_petty", 30), item("soul_gem_petty", 10, [{"function": "minecraft:set_nbt", "tag": "{soul:1,nirncraft_value:30}"}]),
+        item("soul_gem_lesser", 22), item("soul_gem_lesser", 7, [{"function": "minecraft:set_nbt", "tag": "{soul:2,nirncraft_value:75}"}]),
         item("soul_gem_common", 14, conditions=[lvl(6)]),
-        item("soul_gem_common", 4, [{"function": "minecraft:set_nbt", "tag": "{soul:3,skycraft_value:150}"}], [lvl(6)]),
+        item("soul_gem_common", 4, [{"function": "minecraft:set_nbt", "tag": "{soul:3,nirncraft_value:150}"}], [lvl(6)]),
         item("soul_gem_greater", 7, conditions=[lvl(18)]),
-        item("soul_gem_greater", 2, [{"function": "minecraft:set_nbt", "tag": "{soul:4,skycraft_value:300}"}], [lvl(18)]),
+        item("soul_gem_greater", 2, [{"function": "minecraft:set_nbt", "tag": "{soul:4,nirncraft_value:300}"}], [lvl(18)]),
         item("soul_gem_grand", 3, conditions=[lvl(30)]),
-        item("soul_gem_grand", 1, [{"function": "minecraft:set_nbt", "tag": "{soul:5,skycraft_value:600}"}], [lvl(36)])])])
+        item("soul_gem_grand", 1, [{"function": "minecraft:set_nbt", "tag": "{soul:5,nirncraft_value:600}"}], [lvl(36)])])])
     loot("parts/potions", [pool([potion(5), potion(1, True)])])
     loot("parts/food", [pool([table_ref("chests/skyrim_food")])])
     loot("parts/lore_note", [pool([table_ref("chests/lore_notes")])])
@@ -428,9 +428,9 @@ ENTITY_RANKS = {"bandit": "bandit", "bandit_chief": "bandit_boss", "draugr": "dr
                 "guard": "soldier", "necromancer": "mage", "vampire": "vampire", "giant": "giant", "frost_giant": "giant",
                 "minotaur": "brute", "ogre": "brute", "riekling": "brute", "tsaesci": "brute"}
 # what the corpse rank table now provides: these entries leave the creature's own table
-STRIP_ITEMS = {"skycraft:septim", "skycraft:coin_purse", "skycraft:garnet", "skycraft:ruby", "skycraft:sapphire", "minecraft:amethyst_shard",
-               "minecraft:emerald", "skycraft:small_pearl", "skycraft:flawless_garnet", "skycraft:flawless_ruby", "skycraft:flawless_sapphire",
-               "skycraft:flawless_diamond", "minecraft:diamond", "minecraft:potion", "minecraft:book"}
+STRIP_ITEMS = {"nirncraft:septim", "nirncraft:coin_purse", "nirncraft:garnet", "nirncraft:ruby", "nirncraft:sapphire", "minecraft:amethyst_shard",
+               "minecraft:emerald", "nirncraft:small_pearl", "nirncraft:flawless_garnet", "nirncraft:flawless_ruby", "nirncraft:flawless_sapphire",
+               "nirncraft:flawless_diamond", "minecraft:diamond", "minecraft:potion", "minecraft:book"}
 STRIP_FUNCTIONS = {SK + "regional_gear", SK + "leveled_gear", SK + "skyrim_potion", SK + "leveled_tome"}
 
 
@@ -552,7 +552,7 @@ def lootr_config():
         if any(k in rel for k in ("boss", "dragon_lair", "word_wall", "daedric_shrine", "daedric_offerings")):
             continue
         refresh.append(SK + rel)
-    lines = ["# Skycraft: Skyrim's respawn rules (see docs/LOOT.md). Dungeon, wilderness, household and shop containers",
+    lines = ["# NirnCraft: Skyrim's respawn rules (see docs/LOOT.md). Dungeon, wilderness, household and shop containers",
              "# refill 30 in-game days after a player looted their copy; boss chests and placed uniques never do.",
              "# Generated by tools/loot_data.py.",
              "refresh_value = 720000",

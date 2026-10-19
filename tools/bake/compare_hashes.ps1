@@ -1,4 +1,4 @@
-# Compares the per-chunk block hashes of two benchmark runs (mod/run/skycraft-perf/bench-*.hashes).
+# Compares the per-chunk block hashes of two benchmark runs (mod/run/nirncraft-perf/bench-*.hashes).
 #
 #   tools/bake/compare_hashes.ps1 <a.hashes> <b.hashes>
 #

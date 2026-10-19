@@ -1,0 +1,256 @@
+{
+  "id": "roadside_hollow_oak",
+  "why": [
+    "reapers_march.L1.knolls",
+    "reapers_march.L5.grain_road",
+    "reapers_march.L6.arenthia_seat"
+  ],
+  "sil": "valenwood-roadside-hollow-oak-plan",
+  "base": "none",
+  "overlay": "reapers_march",
+  "radius": 24,
+  "reach": 36,
+  "gates": [
+    [
+      0,
+      22
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        11
+      ],
+      "overlay": "reapers_march",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        11,
+        24
+      ],
+      "overlay": "reapers_march",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "roadside_hollow_oak_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "roadside_hollow_oak_landmark",
+      "overlay": "reapers_march"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        4,
+        2
+      ],
+      "spokes": 7,
+      "r0": 10,
+      "r1": 22,
+      "wobble": 7,
+      "offset": 2.02,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        18
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          19
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          -4,
+          -12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "roadside_hollow_oak_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        14
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "roadside_hollow_oak_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -2,
+        8
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "roadside_hollow_oak_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -16,
+        7
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "roadside_hollow_oak_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        -4
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "roadside_hollow_oak_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -4,
+        -17
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "roadside_hollow_oak_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        5,
+        -7
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "roadside_hollow_oak_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "roadside_hollow_oak_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "roadside_hollow_oak_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "roadside_hollow_oak_b_5",
+    "smithy": "roadside_hollow_oak_b_7"
+  },
+  "titles": {
+    "roadside_hollow_oak_b_1": "place.nirncraft.roadside_hollow_oak Council & Seat Hall",
+    "roadside_hollow_oak_b_2": "place.nirncraft.roadside_hollow_oak High Sanctuary",
+    "roadside_hollow_oak_b_3": "place.nirncraft.roadside_hollow_oak Fighters & Wayfarers Hall",
+    "roadside_hollow_oak_b_4": "place.nirncraft.roadside_hollow_oak Mages & Chroniclers Spire",
+    "roadside_hollow_oak_b_5": "place.nirncraft.roadside_hollow_oak The Lantern & Hearth Inn",
+    "roadside_hollow_oak_b_6": "place.nirncraft.roadside_hollow_oak The Traveler's Rest Tavern",
+    "roadside_hollow_oak_b_7": "place.nirncraft.roadside_hollow_oak Master Forge & Armorer",
+    "roadside_hollow_oak_landmark": "High Seat of place.nirncraft.roadside_hollow_oak",
+    "roadside_hollow_oak_plaza": "place.nirncraft.roadside_hollow_oak Central Plaza"
+  },
+  "innKey": "roadside_hollow_oak_b_5",
+  "zones": [
+    {
+      "at": [
+        4,
+        -9
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        4,
+        2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

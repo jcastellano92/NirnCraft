@@ -1,0 +1,803 @@
+{
+  "region": "morrowind/red_mountain",
+  "province": "morrowind",
+  "line": "story_red_mountain",
+  "category": "main",
+  "title": "The Cracking Pylon of Ghostgate",
+  "why": [
+    "morrowind/red_mountain.L7.garrison_life",
+    "morrowind/red_mountain.L8.fence_of_the_dead",
+    "morrowind/red_mountain.L9.fence_weakening",
+    "morrowind/red_mountain.L10.sixth_house_citadels",
+    "morrowind.L9.ghostfence_holds"
+  ],
+  "hook": {
+    "place": "ghostgate",
+    "rumour": "Between the Tower of Dawn and Tower of Dusk at Ghostgate, Buoyant Armigers and Ordinators report that three bone-pylons along the Ghostfence have begun to hum in dissonance with Dagoth Ur's ash-storms.",
+    "notice": "GHOSTGATE CITADEL COMMAND — Veteran volunteers required to inspect the bone-pylons along Foyada Ashur-Dan and purge the Sixth House resonators inside the Ghostfence.",
+    "context": "Red Mountain is the blighted volcanic heart of Vvardenfell, encircled by the glowing blue Ghostfence built from the consecrated bones of Dunmer ancestors.",
+    "places": [
+      "ghostgate",
+      "mzanchend",
+      "verelnim_ancestral_tomb"
+    ],
+    "npc": "story_red_mountain_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_red_mountain_01_dissonance_on_the_fence",
+      "order": 1,
+      "title": "Bone and Blue Fire at Ghostgate",
+      "region": "morrowind/red_mountain",
+      "category": "main",
+      "start": "hook",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "morrowind/red_mountain.L7.garrison_life",
+        "morrowind/red_mountain.L8.fence_of_the_dead"
+      ],
+      "places": [
+        "ghostgate",
+        "mzanchend",
+        "verelnim_ancestral_tomb"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "ghostgate",
+          "objective": "Report to the Armiger captain in the Tower of Dusk at Ghostgate"
+        },
+        {
+          "id": 20,
+          "place": "ghostfence_morrowind",
+          "objective": "Inspect the cracked ancestral bone-pylon along the Ghostfence perimeter"
+        },
+        {
+          "id": 30,
+          "place": "foyada_ashur_dan",
+          "objective": "Clear the ash-ghoul scouting party advancing down Foyada Ashur-Dan"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "ghostgate",
+          "text": "Report to the Armiger captain in the Tower of Dusk at Ghostgate"
+        },
+        {
+          "type": "go",
+          "place": "ghostfence_morrowind",
+          "text": "Inspect the cracked ancestral bone-pylon along the Ghostfence perimeter"
+        },
+        {
+          "type": "clear",
+          "place": "foyada_ashur_dan",
+          "text": "Clear the ash-ghoul scouting party advancing down Foyada Ashur-Dan"
+        }
+      ],
+      "consequence": "world_state:ghostfence_pylon_crack_charted",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "consequence_detail": {
+        "world_state": "ghostfence_pylon_crack_charted",
+        "flag": "story_rm_pylon_charted",
+        "summary": "The cracked pylon along the Ghostfence is stabilized temporarily, and ash-tuning spikes found in Foyada Ashur-Dan point to Falensarano and Mzanchend."
+      }
+    },
+    {
+      "id": "story_red_mountain_02_conduit_of_mzanchend",
+      "order": 2,
+      "title": "The Brass Conduit of Mzanchend",
+      "region": "morrowind/red_mountain",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_red_mountain_01_dissonance_on_the_fence",
+      "requires": [
+        "story_red_mountain_01_dissonance_on_the_fence"
+      ],
+      "why": [
+        "morrowind/red_mountain.L9.fence_weakening",
+        "morrowind/red_mountain.L10.sixth_house_citadels"
+      ],
+      "places": [
+        "valley_of_the_wind",
+        "mzanchend",
+        "falensarano"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "valley_of_the_wind",
+          "objective": "Follow the ash-storm ridge through the Valley of the Wind"
+        },
+        {
+          "id": 20,
+          "place": "mzanchend",
+          "objective": "Retrieve the Dwemer grounding-rod from the steam-galleries of Mzanchend"
+        },
+        {
+          "id": 30,
+          "place": "falensarano",
+          "objective": "Defeat the Ascended Sleeper relay-keeper atop the stronghold of Falensarano"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "valley_of_the_wind",
+          "text": "Follow the ash-storm ridge through the Valley of the Wind"
+        },
+        {
+          "type": "clear",
+          "place": "mzanchend",
+          "text": "Retrieve the Dwemer grounding-rod from the steam-galleries of Mzanchend"
+        },
+        {
+          "type": "clear",
+          "place": "falensarano",
+          "text": "Defeat the Ascended Sleeper relay-keeper atop the stronghold of Falensarano"
+        }
+      ],
+      "consequence": "world_state:mzanchend_grounding_rod_recovered",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "mzanchend_grounding_rod_recovered",
+        "flag": "story_rm_mzanchend_cleared",
+        "summary": "The Dwemer grounding-rod is recovered from Mzanchend and the relay-keeper at Falensarano is destroyed."
+      }
+    },
+    {
+      "id": "story_red_mountain_03_choir_of_the_caldera",
+      "order": 3,
+      "title": "Bells of the Inner Caldera",
+      "region": "morrowind/red_mountain",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_red_mountain_02_conduit_of_mzanchend",
+      "requires": [
+        "story_red_mountain_02_conduit_of_mzanchend"
+      ],
+      "why": [
+        "morrowind/red_mountain.L10.sixth_house_citadels",
+        "morrowind.L10.sixth_house"
+      ],
+      "places": [
+        "foyada_esannudan",
+        "nchuleft",
+        "red_mountain"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "foyada_esannudan",
+          "objective": "Ascend the basalt gorge of Foyada Esannudan inside the Ghostfence"
+        },
+        {
+          "id": 20,
+          "place": "nchuleft",
+          "objective": "Shatter the secondary ash-harmonic bells mounted in the ruins of Nchuleft"
+        },
+        {
+          "id": 30,
+          "place": "red_mountain",
+          "objective": "Slay the Dagoth heart-priest conducting the blight-storm on the rim of Red Mountain"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "foyada_esannudan",
+          "text": "Ascend the basalt gorge of Foyada Esannudan inside the Ghostfence"
+        },
+        {
+          "type": "clear",
+          "place": "nchuleft",
+          "text": "Shatter the secondary ash-harmonic bells mounted in the ruins of Nchuleft"
+        },
+        {
+          "type": "clear",
+          "place": "red_mountain",
+          "text": "Slay the Dagoth heart-priest conducting the blight-storm on the rim of Red Mountain"
+        }
+      ],
+      "consequence": "world_state:red_mountain_heart_priest_slain",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "red_mountain_heart_priest_slain",
+        "flag": "story_rm_caldera_cleared",
+        "summary": "The Dagoth heart-priest on Red Mountain's rim is slain and the harmonic bells threatening the Ghostfence are shattered."
+      }
+    },
+    {
+      "id": "story_red_mountain_04_vigil_of_the_towers",
+      "order": 4,
+      "title": "The Blue Wall Holds",
+      "region": "morrowind/red_mountain",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_red_mountain_03_choir_of_the_caldera",
+      "requires": [
+        "story_red_mountain_03_choir_of_the_caldera"
+      ],
+      "finale": true,
+      "why": [
+        "morrowind/red_mountain.L8.fence_of_the_dead",
+        "morrowind.L9.ghostfence_holds"
+      ],
+      "places": [
+        "ghostfence_morrowind",
+        "ghostgate"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "ghostfence_morrowind",
+          "objective": "Drive the Dwemer grounding-rod into the repaired bone-pylon at the Ghostfence"
+        },
+        {
+          "id": 20,
+          "place": "ghostgate",
+          "objective": "Return the consecrated ancestor-casket to the reliquary of Ghostgate"
+        },
+        {
+          "id": 30,
+          "place": "ghostgate",
+          "objective": "Receive the Salute of the Two Towers from the Armigers and Ordinators at Ghostgate"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "ghostfence_morrowind",
+          "text": "Drive the Dwemer grounding-rod into the repaired bone-pylon at the Ghostfence"
+        },
+        {
+          "type": "go",
+          "place": "ghostgate",
+          "text": "Return the consecrated ancestor-casket to the reliquary of Ghostgate"
+        },
+        {
+          "type": "go",
+          "place": "ghostgate",
+          "text": "Receive the Salute of the Two Towers from the Armigers and Ordinators at Ghostgate"
+        }
+      ],
+      "consequence": "world_state:ghostgate_pylon_wall_reanchored",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Vigil-Warden of Ghostgate",
+        "unique_item": "nirncraft:daedric_greatsword"
+      },
+      "consequence_detail": {
+        "world_state": "ghostgate_pylon_wall_reanchored",
+        "flag": "story_rm_finale_complete",
+        "summary": "The Ghostfence bone-pylon burns bright blue once more, holding back the blight-winds above Ghostgate."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_red_mountain_hook_npc",
+      "name": "Warden of Ghostgate",
+      "role": "guard",
+      "place": "ghostgate",
+      "greet": "Between the Tower of Dawn and Tower of Dusk at Ghostgate, Buoyant Armigers and Ordinators report that three bone-pylons along the Ghostfence have begun to hum in dissonance with Dagoth Ur's ash-storms."
+    }
+  ],
+  "scenes": {
+    "story_red_mountain_scene_01": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (1).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_02": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (2).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_03": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (3).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_04": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (4).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_05": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (5).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_06": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (6).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_07": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (7).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_08": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (8).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_09": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (9).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_10": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (10).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_11": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (11).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_12": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (12).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_13": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (13).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_14": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (14).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_15": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (15).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_16": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (16).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_17": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (17).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_18": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (18).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_19": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (19).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_20": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (20).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_21": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (21).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_22": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (22).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_23": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (23).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_24": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (24).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_25": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (25).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_26": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (26).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_27": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (27).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_28": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (28).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_29": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (29).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_30": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (30).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_31": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (31).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_32": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (32).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_33": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (33).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_34": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (34).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_35": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (35).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_36": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (36).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_37": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (37).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_38": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (38).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_39": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (39).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_40": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (40).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_41": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (41).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_42": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (42).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_43": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (43).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_44": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (44).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_45": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (45).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_46": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (46).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_47": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (47).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_48": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (48).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_49": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (49).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_50": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (50).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_51": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (51).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_52": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (52).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_53": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (53).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_54": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (54).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_55": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (55).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_56": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (56).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_57": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (57).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_58": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (58).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_59": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (59).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_60": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (60).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_61": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (61).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_62": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (62).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_63": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (63).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_64": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (64).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_65": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (65).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_66": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (66).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_67": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (67).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_68": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (68).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_69": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (69).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_70": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (70).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_71": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (71).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_72": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (72).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_73": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (73).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_74": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (74).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_75": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (75).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_76": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (76).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_77": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (77).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_78": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (78).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_79": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (79).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_80": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (80).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_81": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (81).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ],
+    "story_red_mountain_scene_82": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Ghostgate (82).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Ghostgate at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Ghostgate and report back to the seat."
+    ],
+    "story_red_mountain_scene_83": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Mzanchend (83).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Mzanchend at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Mzanchend and report back to the seat."
+    ],
+    "story_red_mountain_scene_84": [
+      "Warden of Ghostgate: Examine the ash-wax seals recovered near Verelnim Ancestral Tomb (84).",
+      "Watch-Captain of Red Mountain: The ledger entries match the dispatches troubling Red Mountain.",
+      "Watch-Captain of Red Mountain: Our scouts tracked the courier column past Verelnim Ancestral Tomb at dusk.",
+      "Watch-Captain of Red Mountain: Secure the approaches around Verelnim Ancestral Tomb and report back to the seat."
+    ]
+  }
+}

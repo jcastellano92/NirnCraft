@@ -1,0 +1,422 @@
+{
+  "id": "soulrest",
+  "why": [
+    "gideon.L1.western_levee_plain",
+    "gideon.L5.levee_rice_and_punt_trade",
+    "gideon.L6.gideon_walled_seat"
+  ],
+  "sil": "tomb-island-necropolis",
+  "base": "none",
+  "overlay": "soulrest",
+  "radius": 96,
+  "reach": 112,
+  "gates": [
+    [
+      0,
+      94
+    ],
+    [
+      -94,
+      0
+    ],
+    [
+      94,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        46
+      ],
+      "overlay": "soulrest",
+      "wealth": "noble"
+    },
+    {
+      "ring": [
+        46,
+        96
+      ],
+      "overlay": "gideon",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 14,
+      "name": "soulrest_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        -1,
+        -28
+      ],
+      "name": "soulrest_landmark",
+      "overlay": "soulrest"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          91
+        ],
+        [
+          -6,
+          23
+        ],
+        [
+          -6,
+          -46
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -65,
+          25
+        ],
+        [
+          -6,
+          29
+        ],
+        [
+          65,
+          21
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -6,
+        -6
+      ],
+      "rx": 50,
+      "rz": 42,
+      "wobble": 5,
+      "lobes": 5,
+      "phase": 1.59,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        35,
+        0
+      ],
+      "face": "south",
+      "overlay": "soulrest",
+      "name": "soulrest_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        64,
+        25
+      ],
+      "face": "north",
+      "overlay": "soulrest",
+      "name": "soulrest_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        29,
+        26
+      ],
+      "face": "north",
+      "overlay": "soulrest",
+      "name": "soulrest_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        31,
+        62
+      ],
+      "face": "north",
+      "overlay": "soulrest",
+      "name": "soulrest_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        34
+      ],
+      "face": "north",
+      "overlay": "soulrest",
+      "name": "soulrest_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -19,
+        66
+      ],
+      "face": "north",
+      "overlay": "soulrest",
+      "name": "soulrest_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -21,
+        28
+      ],
+      "face": "north",
+      "overlay": "soulrest",
+      "name": "soulrest_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -59,
+        36
+      ],
+      "face": "north",
+      "overlay": "soulrest",
+      "name": "soulrest_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -34,
+        6
+      ],
+      "face": "north",
+      "overlay": "soulrest",
+      "name": "soulrest_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -68,
+        -13
+      ],
+      "face": "south",
+      "overlay": "soulrest",
+      "name": "soulrest_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -29,
+        -18
+      ],
+      "face": "south",
+      "overlay": "soulrest",
+      "name": "soulrest_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        -42,
+        -55
+      ],
+      "face": "south",
+      "overlay": "soulrest",
+      "name": "soulrest_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -25,
+        -33
+      ],
+      "face": "south",
+      "overlay": "soulrest",
+      "name": "soulrest_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        6,
+        -69
+      ],
+      "face": "south",
+      "overlay": "soulrest",
+      "name": "soulrest_b_14"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        27,
+        -31
+      ],
+      "face": "south",
+      "overlay": "soulrest",
+      "name": "soulrest_b_15"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        51,
+        -47
+      ],
+      "face": "south",
+      "overlay": "soulrest",
+      "name": "soulrest_b_16"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        41,
+        -25
+      ],
+      "face": "south",
+      "overlay": "soulrest",
+      "name": "soulrest_b_17"
+    }
+  ],
+  "features": [
+    {
+      "type": "pond",
+      "theme": "soulrest_pond",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "soulrest_shrine",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "soulrest_lamps",
+      "count": 4
+    },
+    {
+      "type": "banners",
+      "theme": "soulrest_banners",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "soulrest_b_5",
+    "store": "soulrest_b_10",
+    "smithy": "soulrest_b_7"
+  },
+  "titles": {
+    "soulrest_b_1": "place.nirncraft.soulrest Council & Seat Hall",
+    "soulrest_b_2": "place.nirncraft.soulrest High Sanctuary",
+    "soulrest_b_3": "place.nirncraft.soulrest Fighters & Wayfarers Hall",
+    "soulrest_b_4": "place.nirncraft.soulrest Mages & Chroniclers Spire",
+    "soulrest_b_5": "place.nirncraft.soulrest The Lantern & Hearth Inn",
+    "soulrest_b_6": "place.nirncraft.soulrest The Traveler's Rest Tavern",
+    "soulrest_b_7": "place.nirncraft.soulrest Master Forge & Armorer",
+    "soulrest_b_8": "place.nirncraft.soulrest Botanicals & Remedies",
+    "soulrest_b_9": "place.nirncraft.soulrest Scriptorium & Charts",
+    "soulrest_b_10": "place.nirncraft.soulrest Grand Provisioner & Sundries",
+    "soulrest_b_11": "place.nirncraft.soulrest Silk & Hide Clothier",
+    "soulrest_b_12": "place.nirncraft.soulrest Lapidary & Signets",
+    "soulrest_b_13": "place.nirncraft.soulrest Wayfarer Stables & Post",
+    "soulrest_b_14": "place.nirncraft.soulrest Bonded Factor Warehouse",
+    "soulrest_b_15": "place.nirncraft.soulrest Watch Garrison Barracks",
+    "soulrest_b_16": "place.nirncraft.soulrest High Steward's Manor",
+    "soulrest_b_17": "place.nirncraft.soulrest Merchant-Factor's Villa",
+    "soulrest_landmark": "High Seat of place.nirncraft.soulrest",
+    "soulrest_plaza": "place.nirncraft.soulrest Central Plaza"
+  },
+  "innKey": "soulrest_b_5",
+  "zones": [
+    {
+      "at": [
+        -6,
+        -36
+      ],
+      "r": 31,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -6,
+        -6
+      ],
+      "r": 27,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        33,
+        8
+      ],
+      "r": 27,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 81,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 9,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "on": "main"
+    }
+  ]
+}

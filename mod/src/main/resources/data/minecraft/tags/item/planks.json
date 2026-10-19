@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:graht_oak_planks",
-    "skycraft:palm_planks"
+    "nirncraft:graht_oak_planks",
+    "nirncraft:palm_planks"
   ]
 }

@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/horker_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 6969936
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 15392968
+      }
+    ]
+  }
+}

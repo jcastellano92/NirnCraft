@@ -1,6 +1,6 @@
 """Generates the dungeons module's Dwemer automaton textures (PIL).
 
-Writes PNGs into mod/src/main/resources/assets/skycraft/textures/entity/dwemer/:
+Writes PNGs into mod/src/main/resources/assets/nirncraft/textures/entity/dwemer/:
   dwarven_spider.png      64x32   (DwarvenSpiderModel UVs)
   dwarven_sphere.png      64x64   (DwarvenSphereModel UVs)
   dwarven_centurion.png   128x64  (DwarvenCenturionModel UVs)
@@ -16,7 +16,7 @@ import random
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures", "entity", "dwemer")
+OUT = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures", "entity", "dwemer")
 
 BRONZE = (178, 128, 60)
 BRONZE_DARK = (112, 72, 32)
@@ -196,7 +196,7 @@ def centurion():
 
 # --------------------------------------------------------------------------- Nordic puzzles
 
-ASSETS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft")
+ASSETS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft")
 SYMBOLS = ["bear", "wolf", "hawk", "snake", "whale", "dragon"]
 # 10 x 10 glyph masks ('#' = carved)
 GLYPHS = {
@@ -343,22 +343,22 @@ def puzzle_models():
         for i, s in enumerate(SYMBOLS):
             write_json(os.path.join(models, "block", f"{block}_{s}.json"), {
                 "parent": "minecraft:block/orientable",
-                "textures": {"front": f"skycraft:block/{block}_{s}", "side": "skycraft:block/puzzle_stone_side",
-                             "top": "skycraft:block/puzzle_stone_side"}})
+                "textures": {"front": f"nirncraft:block/{block}_{s}", "side": "nirncraft:block/puzzle_stone_side",
+                             "top": "nirncraft:block/puzzle_stone_side"}})
             for facing, rot in ROT:
-                v = {"model": f"skycraft:block/{block}_{s}"}
+                v = {"model": f"nirncraft:block/{block}_{s}"}
                 if rot:
                     v["y"] = rot
                 variants[f"facing={facing},symbol={i}"] = v
         write_json(os.path.join(bs, f"{block}.json"), {"variants": variants})
     write_json(os.path.join(models, "block", "claw_keyhole.json"), {
         "parent": "minecraft:block/orientable",
-        "textures": {"front": "skycraft:block/claw_keyhole", "side": "skycraft:block/puzzle_stone_side",
-                     "top": "skycraft:block/puzzle_stone_side"}})
+        "textures": {"front": "nirncraft:block/claw_keyhole", "side": "nirncraft:block/puzzle_stone_side",
+                     "top": "nirncraft:block/puzzle_stone_side"}})
     variants = {}
     for c in range(len(CLAWS)):
         for facing, rot in ROT:
-            v = {"model": "skycraft:block/claw_keyhole"}
+            v = {"model": "nirncraft:block/claw_keyhole"}
             if rot:
                 v["y"] = rot
             variants[f"claw={c},facing={facing}"] = v
@@ -383,7 +383,7 @@ def puzzle_models():
     for name, color in CLAWS.items():
         claw_icon(name, color).save(os.path.join(tex_item, f"{name}_claw.png"))
         write_json(os.path.join(models, "item", f"{name}_claw.json"), {
-            "parent": "minecraft:item/generated", "textures": {"layer0": f"skycraft:item/{name}_claw"}})
+            "parent": "minecraft:item/generated", "textures": {"layer0": f"nirncraft:item/{name}_claw"}})
 
 
 # --------------------------------------------------------------------------- Solstheim's All-Maker stones

@@ -1,6 +1,0 @@
-{
-  "parent": "skycraft:item/steel_bow",
-  "textures": {
-    "layer0": "skycraft:item/steel_bow_pulling_1"
-  }
-}

@@ -92,7 +92,7 @@ def main():
     stage=(ROOT/'dist/milestones'/name).resolve()
     if not stage.is_relative_to(ROOT.resolve()): raise ValueError('Stage outside workspace')
     stage.mkdir(parents=True,exist_ok=True)
-    frozen=stage/'skycraft-core.jar'; shutil.copy2(manifest['coreJar'],frozen)
+    frozen=stage/'nirncraft-core.jar'; shutil.copy2(manifest['coreJar'],frozen)
     if digest(frozen)!=proof['coreSha256']: raise ValueError('Core changed while staging')
     # Fixed builder scratch path must remain inside this repository before its cleanup runs.
     scratch=(ROOT/'dist/tmp_prism_build').resolve()
@@ -102,26 +102,26 @@ def main():
     if result.returncode: raise ValueError('Instance packaging failed; inspect '+str(stage/'package.log'))
     target.parent.mkdir(parents=True,exist_ok=True)
     pending=target.with_suffix('.zip.pending')
-    shutil.copy2(ROOT/'dist/Skycraft-client-instance.zip',pending)
+    shutil.copy2(ROOT/'dist/NirnCraft-client-instance.zip',pending)
     proof['knownFindings']=manifest.get('knownFindings',[])
     with zipfile.ZipFile(pending,'a',zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr('Skycraft/QA/milestone.json',json.dumps(proof,indent=2)+'\n')
-        archive.writestr('Skycraft/QA/manifest.json',json.dumps(manifest,indent=2)+'\n')
+        archive.writestr('NirnCraft/QA/milestone.json',json.dumps(proof,indent=2)+'\n')
+        archive.writestr('NirnCraft/QA/manifest.json',json.dumps(manifest,indent=2)+'\n')
         for requirement in manifest['requiredRuns']:
             folder=Path(requirement['path'])
             for file in folder.rglob('*'):
-                if file.is_file(): archive.write(file,'Skycraft/QA/runs/'+folder.name+'/'+file.relative_to(folder).as_posix())
+                if file.is_file(): archive.write(file,'NirnCraft/QA/runs/'+folder.name+'/'+file.relative_to(folder).as_posix())
         for index,source in enumerate(manifest.get('evidenceFiles',[])):
             file=Path(source)
             if not file.is_file(): raise ValueError('Missing evidence: '+str(file))
-            archive.write(file,'Skycraft/QA/evidence/'+str(index)+'-'+file.name)
-        archive.write(manifest['buildLog'],'Skycraft/QA/build.log')
+            archive.write(file,'NirnCraft/QA/evidence/'+str(index)+'-'+file.name)
+        archive.write(manifest['buildLog'],'NirnCraft/QA/build.log')
     with zipfile.ZipFile(pending) as archive:
-        if hashlib.sha256(archive.read('Skycraft/.minecraft/mods/skycraft-core.jar')).hexdigest()!=proof['coreSha256']:
+        if hashlib.sha256(archive.read('NirnCraft/.minecraft/mods/nirncraft-core.jar')).hexdigest()!=proof['coreSha256']:
             raise ValueError('Packaged core does not match tested core')
         if archive.testzip() is not None: raise ValueError('Archive CRC verification failed')
         if proof['shaderContentHashes']:
-            shaders=archive.read('Skycraft/.minecraft/shaderpacks/ComplementaryReimagined_r5.9.3.zip')
+            shaders=archive.read('NirnCraft/.minecraft/shaderpacks/ComplementaryReimagined_r5.9.3.zip')
             content=hashlib.sha256()
             with zipfile.ZipFile(io.BytesIO(shaders)) as pack:
                 for entry in sorted(pack.namelist()):

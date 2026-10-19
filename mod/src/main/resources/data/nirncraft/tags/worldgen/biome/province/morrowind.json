@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:ascadian_isles",
+    "nirncraft:ash_heath",
+    "nirncraft:ash_shore",
+    "nirncraft:azuras_coast",
+    "nirncraft:bitter_coast_swamp",
+    "nirncraft:deshaan_plains",
+    "nirncraft:grazelands",
+    "nirncraft:inner_sea",
+    "nirncraft:molag_amur",
+    "nirncraft:red_mountain",
+    "nirncraft:sheogorad",
+    "nirncraft:solstheim_ashlands",
+    "nirncraft:solstheim_pine_forest",
+    "nirncraft:stonefalls",
+    "nirncraft:telvanni_mushroom_forest",
+    "nirncraft:vvardenfell_ashlands",
+    "nirncraft:west_gash"
+  ]
+}

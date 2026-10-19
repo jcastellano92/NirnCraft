@@ -1,0 +1,46 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:deer",
+    "nirncraft:elk",
+    "nirncraft:sabre_cat",
+    "nirncraft:horker",
+    "nirncraft:mudcrab",
+    "nirncraft:mammoth",
+    "nirncraft:bear",
+    "nirncraft:slaughterfish",
+    "minecraft:wolf",
+    "minecraft:polar_bear",
+    "nirncraft:wolf",
+    "nirncraft:guar",
+    "nirncraft:kagouti",
+    "nirncraft:alit",
+    "nirncraft:nix_hound",
+    "nirncraft:netch",
+    "nirncraft:silt_strider",
+    "nirncraft:hackwing",
+    "nirncraft:senche_tiger",
+    "nirncraft:alfiq",
+    "nirncraft:indrik",
+    "nirncraft:echatere",
+    "nirncraft:durzog",
+    "nirncraft:realm_stalker",
+    "nirncraft:realm_grazer",
+    {
+      "id": "nirncraft:sea_netch",
+      "required": false
+    },
+    {
+      "id": "nirncraft:whale",
+      "required": false
+    },
+    {
+      "id": "nirncraft:seal",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hawk",
+      "required": false
+    }
+  ]
+}

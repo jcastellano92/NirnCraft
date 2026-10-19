@@ -1,0 +1,88 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:iron_ingot",
+    {
+      "id": "nirncraft:steel_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:corundum_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:orichalcum_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silver_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:quicksilver_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:refined_moonstone",
+      "required": false
+    },
+    {
+      "id": "nirncraft:refined_malachite",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ebony_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dwarven_metal_ingot",
+      "required": false
+    },
+    "minecraft:gold_ingot",
+    "minecraft:leather",
+    {
+      "id": "nirncraft:leather_strips",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:firewood",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_corundum",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_orichalcum",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_silver",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_quicksilver",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_moonstone",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_malachite",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_ebony",
+      "required": false
+    },
+    "minecraft:coal",
+    "minecraft:iron_pickaxe",
+    "minecraft:iron_axe",
+    "minecraft:iron_shovel"
+  ]
+}

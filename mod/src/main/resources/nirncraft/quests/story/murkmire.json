@@ -1,0 +1,688 @@
+{
+  "region": "black_marsh/murkmire",
+  "province": "black_marsh",
+  "line": "story_murkmire",
+  "category": "main",
+  "title": "The Calendar Stone of Sithis",
+  "summary": "Bright-Throat carvers and Dead-Water hunters stand on the brink of blood-feud over a missing Sithis Calendar Stone needed to realign the Grand Calendar Xanmeer above Soulrest Sound.",
+  "why": [
+    "murkmire.L7.bright_throat_and_dead_water",
+    "murkmire.L8.sithis_calendar_stones",
+    "murkmire.L9.calendar_stone_feud"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "murkmire",
+    "places": [
+      "murkmire",
+      "deep_throat_village",
+      "tomb_of_many_spears",
+      "tsolutsa_xanmeer",
+      "deep_root",
+      "gray_stride_grotto",
+      "vakakot_fort",
+      "glow_throat_encampment",
+      "chasepoint",
+      "glow_tooth_hideout",
+      "sun_tree_burrow",
+      "teebxa_vulu",
+      "oblivion_gate_54",
+      "root_whisper_village",
+      "dead_water_village",
+      "bright_throat_village",
+      "deep_heart_village",
+      "warm_tail_village",
+      "red_shell_village",
+      "reed_egg_village",
+      "cold_root_village"
+    ],
+    "npc": "story_murkmire_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "The fourth obsidian Calendar Stone was pried from its plinth above Soulrest Sound, and Dead-Water war-canoes are already painted for a feud with the Bright-Throat stilt-villages.",
+    "notice": "SOULREST SOUND & BRIGHT-THROAT ELDERS: Envoys needed to trace the missing Sithis Calendar Stone and restore the Grand Calendar Xanmeer."
+  },
+  "npcs": [
+    {
+      "id": "story_murkmire_hook_npc",
+      "name": "Warden of Murkmire",
+      "role": "guard",
+      "place": "murkmire",
+      "greet": "The fourth obsidian Calendar Stone was pried from its plinth above Soulrest Sound, and Dead-Water war-canoes are already painted for a feud with the Bright-Throat stilt-villages.",
+      "talk": [
+        "The trouble across Murkmire began when sealed dispatches started bypassing Murkmire.",
+        "If you mean to help the Bright-Throat & Dead-Water Tribes, start by checking the trail between Murkmire and Sweet Wallow Hist Grove."
+      ]
+    },
+    {
+      "id": "story_murkmire_envoy_npc",
+      "name": "Chronicler of Murkmire",
+      "role": "scholar",
+      "place": "sweet_wallow_hist_grove",
+      "greet": "Keep your voice low—everyone at Sweet Wallow Hist Grove is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from Sweet Wallow Hist Grove toward Tsezuku before they vanished into the brush.",
+        "Bring any ciphered tallies back to Murkmire so Barge-Mother Seeth-Ka can see the proof."
+      ]
+    },
+    {
+      "id": "story_murkmire_scout_npc",
+      "name": "Outrider of Tsezuku",
+      "role": "scout",
+      "place": "tsezuku",
+      "greet": "You made good time from Sweet Wallow Hist Grove. The saboteurs have fortified the approaches near Red Tail Spring.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at Red Tail Spring with a picked guard.",
+        "Once Red Tail Spring is cleared, return to Murkmire to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_murkmire_steward_npc",
+      "name": "Speaker of Murkmire",
+      "role": "steward",
+      "place": "murkmire",
+      "greet": "Barge-Mother Seeth-Ka awaits word on whether the crisis in Murkmire has been contained.",
+      "talk": [
+        "The elders of Murkmire have prepared the concord table for your return.",
+        "All of Murkmire owes you a debt for standing between Murkmire and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_murkmire_boss_01": {
+      "name": "Usurper-Captain of Murkmire (1)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "murkmire",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_murkmire_boss_02": {
+      "name": "Usurper-Captain of Sweet Wallow Hist Grove (2)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "sweet_wallow_hist_grove",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_murkmire_boss_03": {
+      "name": "Usurper-Captain of Tsezuku (3)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "tsezuku",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_murkmire_boss_04": {
+      "name": "Usurper-Captain of Red Tail Spring (4)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "red_tail_spring",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_murkmire_boss_05": {
+      "name": "Usurper-Captain of Tall Tooth Grotto (5)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "tall_tooth_grotto",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_murkmire_boss_06": {
+      "name": "Usurper-Captain of Zuwake Xanmeer (6)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "zuwake_xanmeer",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_murkmire_boss_07": {
+      "name": "Usurper-Captain of Wither Vault (7)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "wither_vault",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_murkmire_boss_08": {
+      "name": "Usurper-Captain of Sweet Breeze Overlook (8)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "sweet_breeze_overlook",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_murkmire_scene_01": [
+      "Warden of Murkmire: Examine these marks recovered near Murkmire—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Murkmire and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Murkmire, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_02": [
+      "Warden of Murkmire: Examine these marks recovered near Sweet Wallow Hist Grove—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Sweet Wallow Hist Grove and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Sweet Wallow Hist Grove, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_03": [
+      "Warden of Murkmire: Examine these marks recovered near Tsezuku—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Tsezuku and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Tsezuku, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_04": [
+      "Warden of Murkmire: Examine these marks recovered near Red Tail Spring—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Red Tail Spring and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Red Tail Spring, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_05": [
+      "Warden of Murkmire: Examine these marks recovered near Tall Tooth Grotto—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Tall Tooth Grotto and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Tall Tooth Grotto, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_06": [
+      "Warden of Murkmire: Examine these marks recovered near Zuwake Xanmeer—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Zuwake Xanmeer and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Zuwake Xanmeer, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_07": [
+      "Warden of Murkmire: Examine these marks recovered near Wither Vault—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Wither Vault and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Wither Vault, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_08": [
+      "Warden of Murkmire: Examine these marks recovered near Sweet Breeze Overlook—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Sweet Breeze Overlook and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Sweet Breeze Overlook, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_09": [
+      "Warden of Murkmire: Examine these marks recovered near Bok Xul—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Bok Xul and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Bok Xul, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_10": [
+      "Warden of Murkmire: Examine these marks recovered near Bog Moon Ruins—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Bog Moon Ruins and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Bog Moon Ruins, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_11": [
+      "Warden of Murkmire: Examine these marks recovered near Jeetse Ruins—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Jeetse Ruins and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Jeetse Ruins, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_12": [
+      "Warden of Murkmire: Examine these marks recovered near Hist Vine Burrow—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Hist Vine Burrow and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Hist Vine Burrow, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_13": [
+      "Warden of Murkmire: Examine these marks recovered near Sun Fen Spring—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Sun Fen Spring and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Sun Fen Spring, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_14": [
+      "Warden of Murkmire: Examine these marks recovered near Lakemire Xanmeer Manor—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Lakemire Xanmeer Manor and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Lakemire Xanmeer Manor, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_15": [
+      "Warden of Murkmire: Examine these marks recovered near Blackguard Caravan—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Blackguard Caravan and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Blackguard Caravan, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_16": [
+      "Warden of Murkmire: Examine these marks recovered near Blight Bog Sump—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Blight Bog Sump and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Blight Bog Sump, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_17": [
+      "Warden of Murkmire: Examine these marks recovered near Slow Water Cave—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Slow Water Cave and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Slow Water Cave, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_18": [
+      "Warden of Murkmire: Examine these marks recovered near Reed Egg Village—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Reed Egg Village and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Reed Egg Village, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_19": [
+      "Warden of Murkmire: Examine these marks recovered near Warm Pool Spring—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Warm Pool Spring and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Warm Pool Spring, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_20": [
+      "Warden of Murkmire: Examine these marks recovered near Bright Throat Village—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Bright Throat Village and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Bright Throat Village, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_21": [
+      "Warden of Murkmire: Examine these marks recovered near Deep Heart Village—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Deep Heart Village and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Deep Heart Village, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_22": [
+      "Warden of Murkmire: Examine these marks recovered near Sap Mist Ruins—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Sap Mist Ruins and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Sap Mist Ruins, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_23": [
+      "Warden of Murkmire: Examine these marks recovered near Zunushka Xanmeer—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Zunushka Xanmeer and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Zunushka Xanmeer, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_24": [
+      "Warden of Murkmire: Examine these marks recovered near Still Pool Spring—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Still Pool Spring and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Still Pool Spring, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_25": [
+      "Warden of Murkmire: Examine these marks recovered near Slow Stride Hist Grove—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Slow Stride Hist Grove and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Slow Stride Hist Grove, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_26": [
+      "Warden of Murkmire: Examine these marks recovered near Deep Shell Grotto—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Deep Shell Grotto and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Deep Shell Grotto, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_27": [
+      "Warden of Murkmire: Examine these marks recovered near Moss Throat Cave—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Moss Throat Cave and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Moss Throat Cave, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_28": [
+      "Warden of Murkmire: Examine these marks recovered near Hixka Xanmeer—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Hixka Xanmeer and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Hixka Xanmeer, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_29": [
+      "Warden of Murkmire: Examine these marks recovered near Mud Fang Burrow—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Mud Fang Burrow and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Mud Fang Burrow, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_30": [
+      "Warden of Murkmire: Examine these marks recovered near Root Leaf Grotto—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Root Leaf Grotto and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Root Leaf Grotto, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_31": [
+      "Warden of Murkmire: Examine these marks recovered near Dark Tail Cave—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Dark Tail Cave and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Dark Tail Cave, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_32": [
+      "Warden of Murkmire: Examine these marks recovered near Ruined Guardhouse—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Ruined Guardhouse and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Ruined Guardhouse, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_33": [
+      "Warden of Murkmire: Examine these marks recovered near Warm Tree Ruins—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Warm Tree Ruins and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Warm Tree Ruins, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_34": [
+      "Warden of Murkmire: Examine these marks recovered near Glow Tooth Hideout—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Glow Tooth Hideout and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Glow Tooth Hideout, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_35": [
+      "Warden of Murkmire: Examine these marks recovered near Mud Scale Burrow—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Mud Scale Burrow and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Mud Scale Burrow, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_36": [
+      "Warden of Murkmire: Examine these marks recovered near Teeseixi Ruins—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Teeseixi Ruins and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Teeseixi Ruins, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_37": [
+      "Warden of Murkmire: Examine these marks recovered near Swallowed Grove—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Swallowed Grove and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Swallowed Grove, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_38": [
+      "Warden of Murkmire: Examine these marks recovered near Silt Mist Grotto—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Silt Mist Grotto and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Silt Mist Grotto, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_39": [
+      "Warden of Murkmire: Examine these marks recovered near Hist Branch Hist Grove—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Hist Branch Hist Grove and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Hist Branch Hist Grove, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_40": [
+      "Warden of Murkmire: Examine these marks recovered near Sunken House—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Sunken House and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Sunken House, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_41": [
+      "Warden of Murkmire: Examine these marks recovered near Xul Thuxis—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Xul Thuxis and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Xul Thuxis, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_42": [
+      "Warden of Murkmire: Examine these marks recovered near Blackrose Prison—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Blackrose Prison and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Blackrose Prison, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_43": [
+      "Warden of Murkmire: Examine these marks recovered near Slow Fen Crypt—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Slow Fen Crypt and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Slow Fen Crypt, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_44": [
+      "Warden of Murkmire: Examine these marks recovered near Tall Throat Ruins—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Tall Throat Ruins and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Tall Throat Ruins, then bring the recovered charter back to Murkmire."
+    ],
+    "story_murkmire_scene_45": [
+      "Warden of Murkmire: Examine these marks recovered near Cold Moon Grotto—they match the cabal troubling Murkmire.",
+      "Chronicler of Murkmire: The seal impressions cite the old charters of the Bright-Throat & Dead-Water Tribes word for word.",
+      "Outrider of Tsezuku: Our scouts spotted lantern-signals flashing between Cold Moon Grotto and Red Tail Spring at dusk.",
+      "Speaker of Murkmire: Strike swiftly at Cold Moon Grotto, then bring the recovered charter back to Murkmire."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_murkmire_01_opening",
+      "order": 1,
+      "title": "The Empty Plinth at Soulrest",
+      "region": "black_marsh/murkmire",
+      "category": "main",
+      "giver": "story_murkmire_hook_npc",
+      "start": "npc:story_murkmire_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "murkmire.L7.bright_throat_and_dead_water",
+        "murkmire.L8.sithis_calendar_stones"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Murkmire and Sweet Wallow Hist Grove in Murkmire.",
+      "places": [
+        "murkmire",
+        "sweet_wallow_hist_grove"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "murkmire",
+          "objective": "Speak with the Warden at Murkmire and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "sweet_wallow_hist_grove",
+          "objective": "Examine the disturbed boundary markers at Sweet Wallow Hist Grove"
+        },
+        {
+          "id": 30,
+          "place": "murkmire",
+          "objective": "Return the recovered seal-impression to the Chronicler at Murkmire"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "murkmire",
+          "text": "Speak with the Warden at Murkmire and inspect the contested tallies",
+          "scene": "story_murkmire_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "sweet_wallow_hist_grove",
+          "text": "Examine the disturbed boundary markers at Sweet Wallow Hist Grove"
+        },
+        {
+          "type": "go",
+          "place": "murkmire",
+          "text": "Return the recovered seal-impression to the Chronicler at Murkmire"
+        }
+      ],
+      "consequence": "world_state:murkmire_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_murkmire_02_trail",
+      "order": 2,
+      "title": "Canoes on the Dark Lagoon",
+      "region": "black_marsh/murkmire",
+      "category": "main",
+      "giver": "story_murkmire_envoy_npc",
+      "start": "auto",
+      "prereq": "story_murkmire_01_opening",
+      "requires": [
+        "story_murkmire_01_opening"
+      ],
+      "why": [
+        "murkmire.L8.sithis_calendar_stones",
+        "murkmire.L9.calendar_stone_feud"
+      ],
+      "summary": "Follow the conspirators' supply route from Sweet Wallow Hist Grove to Tsezuku and seize their cipher-ledger.",
+      "places": [
+        "sweet_wallow_hist_grove",
+        "tsezuku"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "sweet_wallow_hist_grove",
+          "objective": "Track the night-couriers departing Sweet Wallow Hist Grove"
+        },
+        {
+          "id": 20,
+          "place": "tsezuku",
+          "objective": "Drive off the cabal outriders at Tsezuku and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "sweet_wallow_hist_grove",
+          "objective": "Deliver the cipher-box to the expedition chronicler at Sweet Wallow Hist Grove"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "sweet_wallow_hist_grove",
+          "text": "Track the night-couriers departing Sweet Wallow Hist Grove",
+          "scene": "story_murkmire_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "tsezuku",
+          "text": "Drive off the cabal outriders at Tsezuku and seize their cipher-box",
+          "boss": "story_murkmire_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "sweet_wallow_hist_grove",
+          "text": "Deliver the cipher-box to the expedition chronicler at Sweet Wallow Hist Grove"
+        }
+      ],
+      "consequence": "world_state:murkmire_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_murkmire_03_sanctum",
+      "order": 3,
+      "title": "Chisels of the Bright-Throat",
+      "region": "black_marsh/murkmire",
+      "category": "main",
+      "giver": "story_murkmire_scout_npc",
+      "start": "auto",
+      "prereq": "story_murkmire_02_trail",
+      "requires": [
+        "story_murkmire_02_trail"
+      ],
+      "why": [
+        "murkmire.L9.calendar_stone_feud",
+        "murkmire.L10.grand_calendar_xanmeer"
+      ],
+      "summary": "Secure the outer wards between Tsezuku and Red Tail Spring to lay bare the cabal's stronghold.",
+      "places": [
+        "tsezuku",
+        "red_tail_spring"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "tsezuku",
+          "objective": "Meet the outrider scout at Tsezuku to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "red_tail_spring",
+          "objective": "Scout the fortified threshold at Red Tail Spring and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "murkmire",
+          "objective": "Carry the ward-key back to the council table at Murkmire"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "tsezuku",
+          "text": "Meet the outrider scout at Tsezuku to decode the sanctum approach",
+          "scene": "story_murkmire_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "red_tail_spring",
+          "text": "Scout the fortified threshold at Red Tail Spring and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "murkmire",
+          "text": "Carry the ward-key back to the council table at Murkmire"
+        }
+      ],
+      "consequence": "world_state:murkmire_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_murkmire_04_finale",
+      "order": 4,
+      "title": "The Grand Calendar Alignment",
+      "region": "black_marsh/murkmire",
+      "category": "main",
+      "giver": "story_murkmire_steward_npc",
+      "start": "auto",
+      "prereq": "story_murkmire_03_sanctum",
+      "requires": [
+        "story_murkmire_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "murkmire.L7.bright_throat_and_dead_water",
+        "murkmire.L10.grand_calendar_xanmeer"
+      ],
+      "summary": "Storm the cabal stronghold at Red Tail Spring and witness Barge-Mother Seeth-Ka seal the regional concord at Murkmire.",
+      "places": [
+        "red_tail_spring",
+        "murkmire"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "red_tail_spring",
+          "objective": "Storm the inner chamber at Red Tail Spring and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "red_tail_spring",
+          "objective": "Recover the stolen charter-seal of Murkmire from Red Tail Spring"
+        },
+        {
+          "id": 30,
+          "place": "murkmire",
+          "objective": "Present the charter-seal at Murkmire to restore peace across Murkmire"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "red_tail_spring",
+          "text": "Storm the inner chamber at Red Tail Spring and defeat the cabal ringleader",
+          "boss": "story_murkmire_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "red_tail_spring",
+          "text": "Recover the stolen charter-seal of Murkmire from Red Tail Spring"
+        },
+        {
+          "type": "go",
+          "place": "murkmire",
+          "text": "Present the charter-seal at Murkmire to restore peace across Murkmire",
+          "scene": "story_murkmire_scene_04"
+        }
+      ],
+      "consequence": "world_state:murkmire_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Murkmire"
+      }
+    }
+  ]
+}

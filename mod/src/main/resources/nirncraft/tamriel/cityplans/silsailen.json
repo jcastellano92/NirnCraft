@@ -1,0 +1,273 @@
+{
+  "id": "silsailen",
+  "why": [
+    "auridon.L1.ridge",
+    "auridon.L5.vulkhel_open_port",
+    "auridon.L6.firsthold_seat"
+  ],
+  "sil": "summerset-silsailen-plan",
+  "base": "none",
+  "overlay": "auridon",
+  "radius": 26,
+  "reach": 38,
+  "gates": [
+    [
+      0,
+      24
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        12
+      ],
+      "overlay": "auridon",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        12,
+        26
+      ],
+      "overlay": "auridon",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "silsailen_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "crystal_tower",
+      "at": [
+        -1,
+        -19
+      ],
+      "name": "silsailen_landmark",
+      "overlay": "auridon"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          21
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          -13
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -18,
+          7
+        ],
+        [
+          2,
+          8
+        ],
+        [
+          18,
+          6
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        2,
+        6
+      ],
+      "rx": 13,
+      "rz": 14,
+      "wobble": 3,
+      "lobes": 4,
+      "phase": 1.83,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "silsailen_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        -18,
+        5
+      ],
+      "face": "north",
+      "overlay": "auridon",
+      "name": "silsailen_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -2,
+        9
+      ],
+      "face": "north",
+      "overlay": "auridon",
+      "name": "silsailen_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -17,
+        8
+      ],
+      "face": "north",
+      "overlay": "auridon",
+      "name": "silsailen_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        -4
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "silsailen_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -4,
+        -18
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "silsailen_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        6,
+        -7
+      ],
+      "face": "south",
+      "overlay": "auridon",
+      "name": "silsailen_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "statue",
+      "theme": "silsailen_statue",
+      "count": 1
+    },
+    {
+      "type": "garden",
+      "theme": "silsailen_garden",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "silsailen_b_5",
+    "smithy": "silsailen_b_7"
+  },
+  "titles": {
+    "silsailen_b_1": "place.nirncraft.silsailen Council & Seat Hall",
+    "silsailen_b_2": "place.nirncraft.silsailen High Sanctuary",
+    "silsailen_b_3": "place.nirncraft.silsailen Fighters & Wayfarers Hall",
+    "silsailen_b_4": "place.nirncraft.silsailen Mages & Chroniclers Spire",
+    "silsailen_b_5": "place.nirncraft.silsailen The Lantern & Hearth Inn",
+    "silsailen_b_6": "place.nirncraft.silsailen The Traveler's Rest Tavern",
+    "silsailen_b_7": "place.nirncraft.silsailen Master Forge & Armorer",
+    "silsailen_landmark": "High Seat of place.nirncraft.silsailen",
+    "silsailen_plaza": "place.nirncraft.silsailen Central Plaza"
+  },
+  "innKey": "silsailen_b_5",
+  "zones": [
+    {
+      "at": [
+        2,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        2,
+        6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        9,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 22,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

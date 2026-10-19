@@ -1,0 +1,109 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:ash_layer",
+          "modifier": [
+            {
+              "count": 1,
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "nirncraft:ash_layer",
+                "state": {
+                  "layers": "1"
+                }
+              }
+            },
+            {
+              "count": 2,
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "nirncraft:ash_layer",
+                "state": {
+                  "layers": "2"
+                }
+              }
+            },
+            {
+              "count": 3,
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "nirncraft:ash_layer",
+                "state": {
+                  "layers": "3"
+                }
+              }
+            },
+            {
+              "count": 4,
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "nirncraft:ash_layer",
+                "state": {
+                  "layers": "4"
+                }
+              }
+            },
+            {
+              "count": 5,
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "nirncraft:ash_layer",
+                "state": {
+                  "layers": "5"
+                }
+              }
+            },
+            {
+              "count": 6,
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "nirncraft:ash_layer",
+                "state": {
+                  "layers": "6"
+                }
+              }
+            },
+            {
+              "count": 7,
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "nirncraft:ash_layer",
+                "state": {
+                  "layers": "7"
+                }
+              }
+            },
+            {
+              "count": 8,
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "nirncraft:ash_layer",
+                "state": {
+                  "layers": "8"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
+    }
+  ],
+  "random_sequence": "nirncraft:blocks/ash_layer"
+}

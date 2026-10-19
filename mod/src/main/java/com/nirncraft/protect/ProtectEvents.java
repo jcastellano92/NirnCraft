@@ -1,0 +1,349 @@
+package com.nirncraft.protect;
+
+import com.nirncraft.NirnCraft;
+import com.nirncraft.homestead.HomesteadClaim;
+import com.nirncraft.homestead.HomesteadData;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.block.piston.PistonStructureResolver;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.EntityHitResult;
+import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDestroyBlockEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.entity.player.BonemealEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.neoforged.neoforge.event.level.PistonEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.common.util.FakePlayer;
+
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+
+/**
+ * The world protection handlers (see {@link Protect}): player breaking and placing, and the "griefing off" rules for
+ * explosions, mobs, fire, fluids, pistons, tools and decor entities. Handlers are cheap: a claim lookup (a handful
+ * of homesteads) and, for the few block classes that need it, a cached footprint query.
+ */
+@net.neoforged.fml.common.EventBusSubscriber(modid = NirnCraft.MODID)
+public final class ProtectEvents {
+    /** Fire blocks scripted scenes keep burning ({@code nirncraft:persistent_fire}, added by the Helgen scene). */
+    public static final net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> PERSISTENT_FIRE = net.minecraft.tags.TagKey.create(
+            net.minecraft.core.registries.Registries.BLOCK, net.minecraft.resources.Identifier.fromNamespaceAndPath(NirnCraft.MODID, "persistent_fire"));
+
+    private ProtectEvents() {}
+
+    // ------------------------------------------------------------------ players: breaking and placing
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onBlockBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
+        if (!(event.getLevel() instanceof ServerLevel level) || !(event.getPlayer() instanceof ServerPlayer player)) return;
+        Protect.Decision d = Protect.checkBreak(player, level, event.getPos(), event.getState());
+        if (d.allowed()) return;
+        event.setCanceled(true);
+        Protect.hint(player, d);
+        denied(player, event.getPos(), event.getState());
+    }
+
+    /** Tells the client a block will not break, so it stops predicting it (no crack, no ghost removal). */
+    private static void denied(ServerPlayer player, BlockPos pos, BlockState state) {
+        if (player instanceof FakePlayer || player.connection == null) return;
+        ProtectPackets.sendDenied(player, pos, String.valueOf(BuiltInRegistries.BLOCK.getKey(state.getBlock())));
+    }
+
+    // ------------------------------------------------------------------ the client's picture of the rules
+
+    private static final Map<UUID, Integer> LAST_POLICY = new HashMap<>();
+    private static final int POLICY_RANGE = 320;
+
+    /** Keeps each client's picture of the claims around it (and of whether the rules apply to it) current. */
+    @SubscribeEvent
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 40 != 7) return;
+        if (player instanceof FakePlayer || player.connection == null) return;
+        boolean enabled = Protect.enabled();
+        boolean bypass = Protect.bypassed(player);
+        ServerLevel level = player.level();
+        List<ProtectPackets.ClaimView> views = new ArrayList<>();
+        if (enabled && !bypass) {
+            String dim = level.dimension().identifier().toString();
+            for (HomesteadClaim c : HomesteadData.get(level.getServer()).allClaims()) {
+                if (!dim.equals(c.getDimension())) continue;
+                BlockPos at = c.getCenter();
+                long dx = at.getX() - player.getBlockX(), dz = at.getZ() - player.getBlockZ();
+                long reach = POLICY_RANGE + c.getRadius();
+                if (dx * dx + dz * dz > reach * reach) continue;
+                views.add(new ProtectPackets.ClaimView(at.getX(), at.getY(), at.getZ(), c.getRadius(), c.getMinDepth(),
+                        c.getMaxHeight(), c.canBuild(player)));
+            }
+        }
+        int hash = Objects.hash(enabled, bypass, views);
+        Integer last = LAST_POLICY.put(player.getUUID(), hash);
+        if (last != null && last == hash) return;
+        ProtectPackets.sendPolicy(player, new ProtectPackets.Policy(enabled, bypass, views));
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || !(event.getLevel() instanceof ServerLevel level)) return;
+        Protect.Decision d = Protect.checkPlace(player, level, event.getPos(), event.getPlacedBlock());
+        if (d.allowed()) return;
+        event.setCanceled(true);
+        Protect.hint(player, d);
+    }
+
+    /** Starting to hit a protected block already says no (and why), before any cracks. */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
+        if (event.getLevel().isClientSide() || event.getAction() != PlayerInteractEvent.LeftClickBlock.Action.START) return;
+        if (!(event.getEntity() instanceof ServerPlayer player) || !(event.getLevel() instanceof ServerLevel level)) return;
+        BlockState state = level.getBlockState(event.getPos());
+        if (state.isAir()) return;
+        Protect.Decision d = Protect.checkBreak(player, level, event.getPos(), state);
+        if (d.allowed()) return;
+        event.setCanceled(true);
+        Protect.hint(player, d);
+        denied(player, event.getPos(), state);
+    }
+
+    /** Hoes, axes and shovels do not till, strip or flatten the world outside a homestead. */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onToolAction(BlockEvent.BlockToolModificationEvent event) {
+        if (!ProtectConfig.TOOL_ACTIONS_OFF.get() || !Protect.enabled()) return;
+        if (!(event.getPlayer() instanceof ServerPlayer player) || !(event.getLevel() instanceof ServerLevel level)) return;
+        if (Protect.bypassed(player) || Protect.mayBuildAt(player, level, event.getPos())) return;
+        event.setCanceled(true);
+        if (!event.isSimulated()) Protect.hint(player, "message.nirncraft.protect.break");
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onBonemeal(BonemealEvent event) {
+        if (!ProtectConfig.TOOL_ACTIONS_OFF.get() || !Protect.enabled()) return;
+        if (!(event.getPlayer() instanceof ServerPlayer player)) return;
+        ServerLevel level = player.level();
+        if (Protect.bypassed(player) || Protect.mayBuildAt(player, level, event.getPos())) return;
+        event.setCanceled(true);
+        Protect.hint(player, "message.nirncraft.protect.break");
+    }
+
+    /** Buckets: no pouring water or lava outside a homestead; no scooping out a town's well or fountain. */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onBucket(PlayerInteractEvent.RightClickItem event) {
+        if (denyBucket(event.getEntity(), event.getItemStack())) {
+            event.setCancellationResult(net.minecraft.world.InteractionResult.FAIL);
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onBucketBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (denyBucket(event.getEntity(), event.getItemStack())) event.setUseItem(net.minecraft.util.TriState.FALSE);
+    }
+
+    private static boolean denyBucket(Player actor, net.minecraft.world.item.ItemStack item) {
+        if (!ProtectConfig.FLUIDS_OFF.get() || !Protect.enabled() || !(actor instanceof ServerPlayer player)
+                || !(item.getItem() instanceof BucketItem bucket) || Protect.bypassed(player)) return false;
+        ServerLevel level = player.level();
+        Vec3 start = player.getEyePosition();
+        BlockHitResult hit = level.clip(new net.minecraft.world.level.ClipContext(start,
+                start.add(player.getViewVector(1f).scale(player.blockInteractionRange())),
+                net.minecraft.world.level.ClipContext.Block.OUTLINE, bucket.getFluidContext(), player));
+        if (hit.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK) return false;
+        BlockPos clicked = hit.getBlockPos(); BlockPos target = clicked.relative(hit.getDirection());
+        boolean pouring = bucket.getFluidContext() != net.minecraft.world.level.ClipContext.Fluid.SOURCE_ONLY;
+        if (pouring) {
+            if (Protect.mayBuildAt(player, level, target) || Protect.mayBuildAt(player, level, clicked)) return false;
+            Protect.hint(player, "message.nirncraft.protect.fluid"); return true;
+        }
+        if (Protect.mayBuildAt(player, level, clicked) || !Footprints.at(level, clicked).built()) return false;
+        Protect.hint(player, "message.nirncraft.protect.break"); return true;
+    }
+
+    // ------------------------------------------------------------------ decor entities
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onAttackDecor(AttackEntityEvent event) {
+        if (!ProtectConfig.PROTECT_ENTITIES.get() || !Protect.enabled()) return;
+        Entity target = event.getTarget();
+        if (!isDecor(target) || !(event.getEntity() instanceof ServerPlayer player)) return;
+        if (Protect.bypassed(player) || Protect.mayBuildAt(player, player.level(), target.blockPosition())) return;
+        event.setCanceled(true);
+        Protect.hint(player, "message.nirncraft.protect.break");
+    }
+
+    /** Arrows and spells do not knock paintings, frames and armor stands off the wall either. */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onProjectileDecor(ProjectileImpactEvent event) {
+        if (!ProtectConfig.PROTECT_ENTITIES.get() || !Protect.enabled()) return;
+        if (!(event.getRayTraceResult() instanceof EntityHitResult hit) || !isDecor(hit.getEntity())) return;
+        Entity shooter = event.getProjectile().getOwner();
+        if (!(hit.getEntity().level() instanceof ServerLevel level)) return;
+        if (Protect.bypassed(shooter instanceof Player p ? p : null)) return;
+        if (shooter instanceof Player p && Protect.mayBuildAt(p, level, hit.getEntity().blockPosition())) return;
+        // 1.20.1 used ImpactResult.SKIP_ENTITY: the arrow ignored the decor and flew on. 26.3 only has cancelling, and a
+        // cancelled arrow is left at the hit point and hits the same entity again every tick (it hangs in the air), so
+        // carry it through the decor's box first. Other projectiles keep moving after a cancelled impact by themselves.
+        if (event.getProjectile() instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow) {
+            Vec3 v = arrow.getDeltaMovement();
+            if (v.lengthSqr() > 1.0E-6) {
+                Vec3 dir = v.normalize();
+                net.minecraft.world.phys.AABB box = hit.getEntity().getBoundingBox().inflate(0.31);
+                Vec3 far = hit.getLocation().add(dir.scale(box.getSize() * 2 + 1));
+                box.clip(far, hit.getLocation()).ifPresent(exit -> arrow.setPos(exit.add(dir.scale(0.05))));
+            }
+        }
+        event.setCanceled(true);
+    }
+
+    private static boolean isDecor(Entity e) {
+        return e instanceof HangingEntity || e instanceof ArmorStand;
+    }
+
+    // ------------------------------------------------------------------ griefing off
+
+    /** True for the entities that live and work among people (their block work is their job, not griefing). */
+    private static boolean isTownsperson(Entity e) {
+        return e instanceof AbstractVillager || e instanceof com.nirncraft.society.entity.NpcEntity;
+    }
+
+    /** Creepers, TNT, ghasts and dragon fire break no blocks (and no paintings); a player's own TNT does, at home. */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onExplosion(ExplosionEvent.Detonate event) {
+        if (!ProtectConfig.GRIEFING_OFF.get() || !Protect.enabled() || !(event.getLevel() instanceof ServerLevel level)) return;
+        Explosion explosion = event.getExplosion();
+        ServerPlayer owner = explosion.getIndirectSourceEntity() instanceof ServerPlayer sp ? sp : null;
+        // owner decision (playtest 4): an explosion hurts and throws, it never destroys a block, a player's own TNT in
+        // their own homestead included. (A bypassing op's blast is theirs to make.)
+        if (owner == null || !Protect.bypassed(owner)) event.getAffectedBlocks().clear();
+        if (ProtectConfig.PROTECT_ENTITIES.get()) {
+            event.getAffectedEntities().removeIf(e -> isDecor(e)
+                    && (owner == null || !Protect.bypassed(owner) && !Protect.mayBuildAt(owner, level, e.blockPosition())));
+        }
+    }
+
+    /** Endermen, ravagers, silverfish, zombies at doors, snow golems, foxes...: no block work outside of town life. */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onMobGriefing(EntityMobGriefingEvent event) {
+        Entity e = event.getEntity();
+        if (!ProtectConfig.GRIEFING_OFF.get() || !Protect.enabled() || e == null || e.level().isClientSide()) return;
+        if (isTownsperson(e)) return;
+        event.setCanGrief(false);
+    }
+
+    /** The wither's and the dragon's block breaking. */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onLivingDestroyBlock(LivingDestroyBlockEvent event) {
+        if (!ProtectConfig.GRIEFING_OFF.get() || !Protect.enabled() || event.getEntity().level().isClientSide()) return;
+        if (isTownsperson(event.getEntity())) return;
+        event.setCanceled(true);
+    }
+
+    /** Lava and water meeting outside a homestead leave things as they were (no stone, cobble or obsidian made). */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onFluidPlace(BlockEvent.FluidPlaceBlockEvent event) {
+        if (!ProtectConfig.FLUIDS_OFF.get() || !Protect.enabled() || !(event.getLevel() instanceof ServerLevel level)) return;
+        if (Protect.claimAt(level, event.getPos()) != null) return;
+        event.setNewState(event.getOriginalState());
+    }
+
+    /**
+     * Fire that appears outside a homestead (spread, lightning, lava, flint and steel) goes out on the next tick. Not
+     * while the chunk is generated (structures place braziers and campfires then), and not outside the Overworld
+     * (the realms and the Nether burn).
+     */
+    @SubscribeEvent
+    public static void onFireAppears(BlockEvent.NeighborNotifyEvent event) {
+        if (!(event.getState().getBlock() instanceof BaseFireBlock)) return;
+        if (!ProtectConfig.FIRE_SPREAD_OFF.get() || !Protect.enabled()) return;
+        if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
+        MinecraftServer server = level.getServer();
+        if (!server.isSameThread()) return;
+        // scripted fires (the burning of Helgen...) are tagged and stay; every other fire goes out at once, in a
+        // homestead too (owner decision, playtest 4: fire never spreads and never destroys a block)
+        if (event.getState().is(PERSISTENT_FIRE)) return;
+        BlockPos pos = event.getPos().immutable();
+        server.execute(() -> {
+            if (!level.isLoaded(pos)) return;
+            BlockState now = level.getBlockState(pos);
+            if (now.getBlock() instanceof BaseFireBlock && !now.is(PERSISTENT_FIRE)) level.removeBlock(pos, false);
+        });
+    }
+
+    /** Farmland is not trampled outside a homestead. */
+    @SubscribeEvent
+    public static void onFarmlandTrample(BlockEvent.FarmlandTrampleEvent event) {
+        if (!ProtectConfig.TOOL_ACTIONS_OFF.get() || !Protect.enabled() || !(event.getLevel() instanceof ServerLevel level)) return;
+        if (Protect.claimAt(level, event.getPos()) == null) event.setCanceled(true);
+    }
+
+    /**
+     * A piston inside a homestead moves only what lies inside the same homestead, and pushes only into it: no
+     * reaching across the boundary into a town. (Pistons of structures outside homesteads keep their designs.)
+     */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onPiston(PistonEvent.Pre event) {
+        if (!ProtectConfig.GRIEFING_OFF.get() || !Protect.enabled() || !(event.getLevel() instanceof ServerLevel level)) return;
+        HomesteadClaim home = Protect.claimAt(level, event.getPos());
+        // a piston outside any homestead may not push into one or pull from one either (docs/HOMESTEAD.md, f)
+        if (home == null && HomesteadData.get(level.getServer()).allClaims().isEmpty()) return;
+        PistonStructureResolver helper = event.getStructureHelper();
+        if (helper == null || !helper.resolve()) return;
+        Direction push = event.getPistonMoveType() == PistonEvent.PistonMoveType.EXTEND ? event.getDirection() : event.getDirection().getOpposite();
+        for (BlockPos p : helper.getToPush()) {
+            if (Protect.claimAt(level, p) != home || Protect.claimAt(level, p.relative(push)) != home) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+        for (BlockPos p : helper.getToDestroy()) {
+            if (Protect.claimAt(level, p) != home) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ housekeeping
+
+    @SubscribeEvent
+    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        Protect.forget(event.getEntity().getUUID());
+        LAST_POLICY.remove(event.getEntity().getUUID());
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        Protect.clearAll();
+    }
+}

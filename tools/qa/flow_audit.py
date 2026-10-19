@@ -25,10 +25,10 @@ sys.path.insert(0,HERE)
 import geography
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-SKY = os.path.join(RES, "skycraft")
-DATA = os.path.join(RES, "data", "skycraft")
-LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft")
-JAVA = os.path.join(ROOT, "mod", "src", "main", "java", "com", "skycraft")
+SKY = os.path.join(RES, "nirncraft")
+DATA = os.path.join(RES, "data", "nirncraft")
+LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft")
+JAVA = os.path.join(ROOT, "mod", "src", "main", "java", "com", "nirncraft")
 FLOORS_PATH = os.path.join(HERE, "floors.json")
 
 FLW_ORDER = [
@@ -563,7 +563,7 @@ def main(argv=None):
         if isinstance(td, dict) and td.get("province"):
             travel_by_prov[td["province"]] = td
     palettes_data = jload(os.path.join(SKY, "tamriel", "palettes.json"), {}).get("palettes", {})
-    has_signposts_java = os.path.exists(os.path.join(ROOT, "mod", "src", "main", "java", "com", "skycraft", "roads", "Signposts.java"))
+    has_signposts_java = os.path.exists(os.path.join(ROOT, "mod", "src", "main", "java", "com", "nirncraft", "roads", "Signposts.java"))
     courts_data = jload(os.path.join(SKY, "society", "courts.json"), None)
     vistas_data = jload(os.path.join(SKY, "landmarks", "vistas.json"), None)
     scatter_rules = jload(os.path.join(SKY, "scatter", "rules.json"), {})
@@ -1121,7 +1121,7 @@ def main(argv=None):
             status_counts[(k_flw, st_code)] += 1
 
     elapsed = time.time() - t0
-    print(f"=== Skycraft FLW Player-Flow & Interconnectedness Audit ({len(sel_regs)} region(s), {elapsed:.2f}s) ===")
+    print(f"=== NirnCraft FLW Player-Flow & Interconnectedness Audit ({len(sel_regs)} region(s), {elapsed:.2f}s) ===")
     if len(sel_regs) == 1:
         rid = sel_regs[0]["id"]
         print(f"\nRegion: {rid} ({results[rid]['km2']} km2)")

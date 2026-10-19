@@ -1,8 +1,0 @@
-{
-  "type": "skycraft:realm_site",
-  "site": "nirn/named_gate",
-  "biomes": "#skycraft:dungeons/anywhere",
-  "step": "surface_structures",
-  "spawn_overrides": {},
-  "terrain_adaptation": "none"
-}

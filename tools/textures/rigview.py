@@ -18,7 +18,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 RIGS = os.path.join(HERE, "rigs")
 ANIMS = os.path.join(ROOT, "mod", "build", "rigdump", "anims")
-TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures", "entity")
+TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures", "entity")
 
 
 def rot_zyx(rx, ry, rz):

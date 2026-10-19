@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:soul_cairn_wastes",
+    "nirncraft:soul_cairn_bone_fields",
+    "nirncraft:soul_cairn_soul_gem_fields",
+    "nirncraft:soul_cairn_soul_mesas",
+    "nirncraft:soul_cairn_boneyard"
+  ]
+}

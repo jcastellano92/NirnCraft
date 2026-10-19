@@ -1,6 +1,0 @@
-{
-  "type": "neoforge:add_features",
-  "biomes": "#skycraft:spawns/dark_forest",
-  "features": "skycraft:nightshade_patch",
-  "step": "vegetal_decoration"
-}

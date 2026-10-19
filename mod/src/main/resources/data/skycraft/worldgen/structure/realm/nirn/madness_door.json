@@ -1,8 +1,0 @@
-{
-  "type": "skycraft:realm_site",
-  "site": "nirn/madness_door",
-  "biomes": "#skycraft:dungeons/anywhere",
-  "step": "surface_structures",
-  "spawn_overrides": {},
-  "terrain_adaptation": "none"
-}

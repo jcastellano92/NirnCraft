@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/marshmerrow"
+      },
+      {
+        "model": "nirncraft:block/marshmerrow",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/marshmerrow",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/marshmerrow",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/marshmerrow_harvested"
+      },
+      {
+        "model": "nirncraft:block/marshmerrow_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/marshmerrow_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/marshmerrow_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

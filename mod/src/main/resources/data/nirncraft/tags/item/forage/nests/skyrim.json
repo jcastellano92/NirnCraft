@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:rock_warbler_egg",
+      "required": false
+    },
+    {
+      "id": "nirncraft:pine_thrush_egg",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hawks_egg",
+      "required": false
+    }
+  ]
+}

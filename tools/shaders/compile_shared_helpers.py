@@ -10,10 +10,10 @@ import re
 import subprocess
 
 ROOT=pathlib.Path(__file__).resolve().parents[2]
-ASSETS=ROOT/"mod/src/main/resources/assets/skycraft/shaders/include"
-INCLUDES={"skycraftInterior":"interior","skycraftInteriorDensity":"interior_density",
-          "skycraftLocalOcclusion":"local_occlusion","skycraftVolumeNoise":"volume_noise",
-          "skycraftFogLight":"fog_light","skycraftLocalMedia":"local_media","skycraftWind":"wind"}
+ASSETS=ROOT/"mod/src/main/resources/assets/nirncraft/shaders/include"
+INCLUDES={"nirncraftInterior":"interior","nirncraftInteriorDensity":"interior_density",
+          "nirncraftLocalOcclusion":"local_occlusion","nirncraftVolumeNoise":"volume_noise",
+          "nirncraftFogLight":"fog_light","nirncraftLocalMedia":"local_media","nirncraftWind":"wind"}
 
 
 def expand(text):
@@ -27,7 +27,7 @@ def expand(text):
 def run(compiler,out):
     out.mkdir(parents=True,exist_ok=True)
     results=[]
-    declarations='''uniform sampler2D skycraftFogRadianceTex,skycraftLocalOcclusionTex,skycraftCloudNoiseTex,skycraftDynamicsTex,skycraftSmokeTex;
+    declarations='''uniform sampler2D nirncraftFogRadianceTex,nirncraftLocalOcclusionTex,nirncraftCloudNoiseTex,nirncraftDynamicsTex,nirncraftSmokeTex;
 uniform vec3 cameraPosition,fogColor;
 uniform mat4 gbufferModelViewInverse,gbufferModelView;
 uniform float overworldAngle,sunPathRotation,timeAngle;
@@ -35,9 +35,9 @@ uniform float overworldAngle,sunPathRotation,timeAngle;
 '''
     cases={
         "local-media":(expand((ASSETS/"local_media.glsl").read_text()),
-                       "SkycraftRealmLocalMedia(vec3(0.1),normalize(vec3(1.0)),80.0)"),
-        "wind":((ASSETS/"wind.glsl").read_text(),"SkycraftSampleDynamics(skycraftDynamicsTex,vec2(0.5)).rgb"),
-        "celestial-frame":((ASSETS/"celestial_frame.glsl").read_text(),"SkycraftLightVector()"),
+                       "NirnCraftRealmLocalMedia(vec3(0.1),normalize(vec3(1.0)),80.0)"),
+        "wind":((ASSETS/"wind.glsl").read_text(),"NirnCraftSampleDynamics(nirncraftDynamicsTex,vec2(0.5)).rgb"),
+        "celestial-frame":((ASSETS/"celestial_frame.glsl").read_text(),"NirnCraftLightVector()"),
     }
     for version in (130,330):
         for name,(helper,expression) in cases.items():

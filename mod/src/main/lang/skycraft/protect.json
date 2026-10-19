@@ -1,8 +1,0 @@
-{
-  "message.skycraft.protect.break": "This isn't yours to break.",
-  "message.skycraft.protect.place": "You can't build here. Raise a homestead first.",
-  "message.skycraft.protect.terrain": "The ground here isn't yours to dig.",
-  "message.skycraft.protect.tree": "These trees aren't yours to fell.",
-  "message.skycraft.protect.foreign": "This land belongs to someone else.",
-  "message.skycraft.protect.fluid": "You can't pour that out here."
-}

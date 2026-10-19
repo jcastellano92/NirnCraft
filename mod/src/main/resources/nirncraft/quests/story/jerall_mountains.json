@@ -1,0 +1,308 @@
+{
+  "region": "cyrodiil/jerall_mountains",
+  "province": "cyrodiil",
+  "line": "story_jerall_mountains",
+  "category": "main",
+  "title": "The Pass Toll",
+  "why": [
+    "cyrodiil/jerall_mountains.L9.pass_tolls",
+    "cyrodiil/jerall_mountains.L9.blades_without_emperor",
+    "cyrodiil/jerall_mountains.L7.nord_imperial_mix",
+    "cyrodiil/jerall_mountains.L10.sancre_tor_barrow"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "bruma",
+    "places": [
+      "bruma",
+      "oblivion_gate_71",
+      "graywater_cave",
+      "bleakhearth_hollow",
+      "cinder_rest_ruins",
+      "frostcrag_spire",
+      "rilindawik",
+      "saltbarrow_lair",
+      "didiuss_hut",
+      "goldridge_outpost",
+      "corvinus_catacombs",
+      "mastalen",
+      "mosshill_obelisk",
+      "swallow_field_crypt",
+      "black_barrow_falls"
+    ],
+    "max_road_blocks": 600,
+    "rumour": "Have you heard? Sledges coming down from Pale Pass are being taxed twice—once by Countess Carvain's gate-reeves and again by the Legion detachment—while sealed crates slip through the snows unchecked.",
+    "notice": "BY ORDER OF CASTLE BRUMA & THE NORTHERN LEGION: Caravanners holding duplicate Pale Pass tariff receipts are to present their tallies at the Bruma gatehouse immediately.",
+    "npc": "story_jerall_mountains_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_jerall_mountains_01_double_tariff",
+      "order": 1,
+      "title": "Two Seals on the Snow-Road",
+      "region": "cyrodiil/jerall_mountains",
+      "category": "main",
+      "start": "board:bruma",
+      "prereq": null,
+      "why": [
+        "cyrodiil/jerall_mountains.L9.pass_tolls",
+        "cyrodiil/jerall_mountains.L7.nord_imperial_mix"
+      ],
+      "places": [
+        "bruma",
+        "bleakers_way"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bruma",
+          "objective": "Inspect the contested Pale Pass toll-ledgers at Bruma's northern gatehouse"
+        },
+        {
+          "id": 20,
+          "place": "bleakers_way",
+          "objective": "Question the stranded Nord timber-drovers at Bleaker's Way about the midnight collectors"
+        },
+        {
+          "id": 30,
+          "place": "bruma",
+          "objective": "Return the counterfeit wax impressions to Captain Burd and the Legion quartermaster in Bruma"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bruma",
+          "text": "Inspect the contested Pale Pass toll-ledgers at Bruma's northern gatehouse"
+        },
+        {
+          "type": "go",
+          "place": "bleakers_way",
+          "text": "Question the stranded Nord timber-drovers at Bleaker's Way about the midnight collectors"
+        },
+        {
+          "type": "go",
+          "place": "bruma",
+          "text": "Return the counterfeit wax impressions to Captain Burd and the Legion quartermaster in Bruma"
+        }
+      ],
+      "consequence": "world_state:bruma_double_toll_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "requires": [],
+      "consequence_detail": {
+        "world_state": "bruma_double_toll_exposed",
+        "flag": "story_jm_double_toll_exposed",
+        "summary": "Both Castle Bruma and the Legion realise a third party has been stamping forged customs receipts along the snow-road."
+      }
+    },
+    {
+      "id": "story_jerall_mountains_02_frost_manifest",
+      "order": 2,
+      "title": "The Dragonclaw Waybill",
+      "region": "cyrodiil/jerall_mountains",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_jerall_mountains_01_double_tariff",
+      "requires": [
+        "story_jerall_mountains_01_double_tariff"
+      ],
+      "why": [
+        "cyrodiil/jerall_mountains.L9.pass_tolls",
+        "cyrodiil/jerall_mountains.L7.miner_debt"
+      ],
+      "places": [
+        "bruma",
+        "fort_dragonclaw",
+        "bleakers_way"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bruma",
+          "objective": "Examine the sledge-tracks leading off the Bruma highway toward Fort Dragonclaw"
+        },
+        {
+          "id": 20,
+          "place": "fort_dragonclaw",
+          "objective": "Clear the false-livery toll collectors out of Fort Dragonclaw and seize their iron signet-press"
+        },
+        {
+          "id": 30,
+          "place": "bleakers_way",
+          "objective": "Deliver the recovered waybills to the caravanners waiting at Bleaker's Way"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bruma",
+          "text": "Examine the sledge-tracks leading off the Bruma highway toward Fort Dragonclaw"
+        },
+        {
+          "type": "clear",
+          "place": "fort_dragonclaw",
+          "text": "Clear the false-livery toll collectors out of Fort Dragonclaw and seize their iron signet-press"
+        },
+        {
+          "type": "go",
+          "place": "bleakers_way",
+          "text": "Deliver the recovered waybills to the caravanners waiting at Bleaker's Way"
+        }
+      ],
+      "consequence": "world_state:fort_dragonclaw_press_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "fort_dragonclaw_press_seized",
+        "flag": "story_jm_press_seized",
+        "summary": "The signet-press at Fort Dragonclaw is captured, revealing ciphered dispatches from a syndicate calling itself the Council of Ash."
+      }
+    },
+    {
+      "id": "story_jerall_mountains_03_akaviri_watch",
+      "order": 3,
+      "title": "Watchers on the Rim",
+      "region": "cyrodiil/jerall_mountains",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_jerall_mountains_02_frost_manifest",
+      "requires": [
+        "story_jerall_mountains_02_frost_manifest"
+      ],
+      "why": [
+        "cyrodiil/jerall_mountains.L9.blades_without_emperor",
+        "cyrodiil/jerall_mountains.L8.dragon_blood_lore"
+      ],
+      "places": [
+        "bleakers_way",
+        "cloud_ruler_temple",
+        "fort_pale_pass"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bleakers_way",
+          "objective": "Carry the ciphered Ash-Syndicate tablet from Bleaker's Way up the mountain trail"
+        },
+        {
+          "id": 20,
+          "place": "cloud_ruler_temple",
+          "objective": "Consult the old Blades chronicler at Cloud Ruler Temple to decode the Reman-era pass map"
+        },
+        {
+          "id": 30,
+          "place": "fort_pale_pass",
+          "objective": "Scout the snow-choked customs vaults at Fort Pale Pass where the contraband is cached"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bleakers_way",
+          "text": "Carry the ciphered Ash-Syndicate tablet from Bleaker's Way up the mountain trail"
+        },
+        {
+          "type": "go",
+          "place": "cloud_ruler_temple",
+          "text": "Consult the old Blades chronicler at Cloud Ruler Temple to decode the Reman-era pass map"
+        },
+        {
+          "type": "go",
+          "place": "fort_pale_pass",
+          "text": "Scout the snow-choked customs vaults at Fort Pale Pass where the contraband is cached"
+        }
+      ],
+      "consequence": "world_state:pale_pass_vaults_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "pale_pass_vaults_located",
+        "flag": "story_jm_vaults_located",
+        "summary": "With Cloud Ruler Temple's old maps, the hidden smuggling gallery beneath Fort Pale Pass is laid bare."
+      }
+    },
+    {
+      "id": "story_jerall_mountains_04_ash_in_the_pass",
+      "order": 4,
+      "title": "The Pale Pass Concord",
+      "region": "cyrodiil/jerall_mountains",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_jerall_mountains_03_akaviri_watch",
+      "requires": [
+        "story_jerall_mountains_03_akaviri_watch"
+      ],
+      "finale": true,
+      "why": [
+        "cyrodiil/jerall_mountains.L9.pass_tolls",
+        "cyrodiil/jerall_mountains.L10.sancre_tor_barrow"
+      ],
+      "places": [
+        "fort_pale_pass",
+        "bruma"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "fort_pale_pass",
+          "objective": "Storm the inner customs vault at Fort Pale Pass and defeat Factor Corvus Bellor's guard"
+        },
+        {
+          "id": 20,
+          "place": "fort_pale_pass",
+          "objective": "Seize the Council of Ash bullion chest and the true Imperial toll-charter"
+        },
+        {
+          "id": 30,
+          "place": "bruma",
+          "objective": "Witness Countess Carvain and the Legion legate sign the Pale Pass Tariff Concord in Bruma"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "fort_pale_pass",
+          "text": "Storm the inner customs vault at Fort Pale Pass and defeat Factor Corvus Bellor's guard"
+        },
+        {
+          "type": "go",
+          "place": "fort_pale_pass",
+          "text": "Seize the Council of Ash bullion chest and the true Imperial toll-charter"
+        },
+        {
+          "type": "go",
+          "place": "bruma",
+          "text": "Witness Countess Carvain and the Legion legate sign the Pale Pass Tariff Concord in Bruma"
+        }
+      ],
+      "consequence": "world_state:pale_pass_concord_signed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Warden of Pale Pass",
+        "unique_item": "nirncraft:imperial_sword"
+      },
+      "consequence_detail": {
+        "world_state": "pale_pass_concord_signed",
+        "flag": "story_jm_finale_complete",
+        "summary": "County Bruma and the Northern Legion share the Pale Pass customs house under a single seal, cutting off the Council of Ash's northern revenue."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_jerall_mountains_hook_npc",
+      "name": "Warden of Bruma",
+      "role": "guard",
+      "place": "bruma",
+      "greet": "Have you heard? Sledges coming down from Pale Pass are being taxed twice—once by Countess Carvain's gate-reeves and again by the Legion detachment—while sealed crates slip through the snows unchecked."
+    }
+  ]
+}

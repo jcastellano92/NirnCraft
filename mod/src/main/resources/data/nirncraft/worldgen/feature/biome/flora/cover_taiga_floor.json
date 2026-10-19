@@ -1,0 +1,34 @@
+{
+  "type": "nirncraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:fern",
+        "weight": 5
+      },
+      {
+        "state": "minecraft:short_grass",
+        "weight": 2
+      },
+      {
+        "state": {
+          "id": "minecraft:large_fern",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 2
+      }
+    ],
+    "scale": 16,
+    "patchiness": 0.7,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 2,
+      "max_inclusive": 5
+    },
+    "spread": 2,
+    "salt": 598,
+    "near_water": false
+  }
+}

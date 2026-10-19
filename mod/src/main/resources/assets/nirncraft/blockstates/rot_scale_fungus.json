@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/rot_scale_fungus"
+      },
+      {
+        "model": "nirncraft:block/rot_scale_fungus",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/rot_scale_fungus",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/rot_scale_fungus",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/rot_scale_fungus_harvested"
+      },
+      {
+        "model": "nirncraft:block/rot_scale_fungus_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/rot_scale_fungus_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/rot_scale_fungus_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

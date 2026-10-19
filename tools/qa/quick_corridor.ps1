@@ -8,10 +8,10 @@ then measure its roads with road_measure.py. Target: well under a minute with th
 
 Steps: devserver.ps1 run (auto-starts the dev server, restarts it when mod\src\main changed) -> save-all ->
 corridor_tile.py picks a 160-block tile from the roads the dev world has planned (waits while the planner is still
-working on a fresh world) -> /skycraft-dev regen of the tile plus -Margin blocks (fresh chunks, repaved) ->
+working on a fresh world) -> /nirncraft-dev regen of the tile plus -Margin blocks (fresh chunks, repaved) ->
 road_measure.py --box <tile>. The full gate is tools\qa\full_corridors.ps1 (all four corridors, fresh world).
 Note: the dev world keeps its planned road NETWORK across restarts; after changing road planning code, add -Replan
-(runs /skycraft-roads replan first).
+(runs /nirncraft-roads replan first).
 #>
 param(
     [Parameter(Position = 0, Mandatory = $true)][string]$Corridor,
@@ -29,7 +29,7 @@ $t0 = Get-Date
 function Lap([string]$what) { Write-Host ("[{0,5:N1} s] {1}" -f ((Get-Date) - $t0).TotalSeconds, $what) }
 
 $first = "save-all flush"
-if ($Replan) { $first = "skycraft-roads replan|@wait 200|save-all flush" }
+if ($Replan) { $first = "nirncraft-roads replan|@wait 200|save-all flush" }
 & $Dev run $first -Wait | Out-Null
 if ($LASTEXITCODE -ne 0) { Write-Host "dev server not usable (exit $LASTEXITCODE)"; exit 2 }
 Lap "dev server up"
@@ -46,7 +46,7 @@ $v = "$tile".Trim().Split(' ')
 $x1, $z1, $x2, $z2 = [int]$v[0], [int]$v[1], [int]$v[2], [int]$v[3]
 Lap "tile $x1 $z1 $x2 $z2 ($($v[4]) road points)"
 
-& $Dev run ("skycraft-dev regen {0} {1} {2} {3}" -f ($x1 - $Margin), ($z1 - $Margin), ($x2 + $Margin), ($z2 + $Margin)) -Wait -NoRestart
+& $Dev run ("nirncraft-dev regen {0} {1} {2} {3}" -f ($x1 - $Margin), ($z1 - $Margin), ($x2 + $Margin), ($z2 + $Margin)) -Wait -NoRestart
 if ($LASTEXITCODE -ne 0) { Write-Host "regen failed (exit $LASTEXITCODE)"; exit 1 }
 Lap "regenerated"
 

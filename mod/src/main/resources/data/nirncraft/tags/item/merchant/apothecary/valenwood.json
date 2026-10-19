@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#nirncraft:loot/ingredients/valenwood",
+      "required": false
+    }
+  ]
+}

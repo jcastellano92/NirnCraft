@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/yokudan_tomb",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274508,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "yokudan_tomb"
+    ]
+  }
+}

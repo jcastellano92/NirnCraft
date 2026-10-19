@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/poison_bloom"
+      },
+      {
+        "model": "nirncraft:block/poison_bloom",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/poison_bloom",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/poison_bloom",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/poison_bloom_harvested"
+      },
+      {
+        "model": "nirncraft:block/poison_bloom_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/poison_bloom_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/poison_bloom_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

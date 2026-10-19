@@ -30,10 +30,10 @@ def write_csv(name, rows):
 def main():
     OUT.mkdir(exist_ok=True, parents=True)
     runtime = read(OUT / 'runtime.json')
-    regions = read(RES / 'skycraft/tamriel/regions.json')
-    root = read(RES / 'skycraft/tamriel/palettes.json')
+    regions = read(RES / 'nirncraft/tamriel/regions.json')
+    root = read(RES / 'nirncraft/tamriel/palettes.json')
     palettes = root['palettes']
-    source = (ROOT / 'mod/src/main/java/com/skycraft/atmosphere/weather/WeatherProfile.java').read_text()
+    source = (ROOT / 'mod/src/main/java/com/nirncraft/atmosphere/weather/WeatherProfile.java').read_text()
     overrides = {rid: profile for profile, body in re.findall(r'regions\((\w+),\s*(.*?)\);', source, re.S)
                  for rid in re.findall(r'"([^"]+)"', body)}
     ids = {r['id'] for r in regions}
@@ -49,18 +49,18 @@ def main():
                 for driver in rule[field]:
                     declarations[field + '.' + driver] += 1
     # Inventory every generated biome and every palette reference, including cave/realm entries.
-    biomes = {p.stem: read(p) for p in sorted((RES / 'data/skycraft/worldgen/biome').glob('*.json'))}
+    biomes = {p.stem: read(p) for p in sorted((RES / 'data/nirncraft/worldgen/biome').glob('*.json'))}
     refs = Counter()
     for key, p in palettes.items():
         for choices in p.get('contexts', {}).values():
             for choice in choices:
-                refs[choice['biome'].removeprefix('skycraft:')] += 1
+                refs[choice['biome'].removeprefix('nirncraft:')] += 1
         for rule in p.get('micro', []):
-            refs[rule['biome'].removeprefix('skycraft:')] += 1
-    catalogue = {x.removeprefix('skycraft:') for x in root['catalogue']}
+            refs[rule['biome'].removeprefix('nirncraft:')] += 1
+    catalogue = {x.removeprefix('nirncraft:') for x in root['catalogue']}
     biome_rows = []
     for name, biome in biomes.items():
-        biome_rows.append(dict(biome='skycraft:' + name, temperature=biome.get('temperature'),
+        biome_rows.append(dict(biome='nirncraft:' + name, temperature=biome.get('temperature'),
                                downfall=biome.get('downfall'), precipitation=biome.get('has_precipitation'),
                                listed_in_catalogue=name in catalogue, palette_reference_count=refs[name],
                                weather_reads_downfall=False, cloud_physics_reads_biome_temperature=False,
@@ -98,7 +98,7 @@ def main():
                                 diagnostic_flags=json.dumps(observed['flags'], separators=(',', ':'))))
     write_csv('regions.csv', region_rows)
     sheet_rows = []
-    for path in sorted((RES / 'skycraft/tamriel/world').glob('*.json')):
+    for path in sorted((RES / 'nirncraft/tamriel/world').glob('*.json')):
         sheet = read(path)
         for scope, layers in [(sheet['province'], sheet.get('layers', {}))] + [
                 (rid, r.get('layers', {})) for rid, r in sheet.get('regions', {}).items()]:
@@ -131,7 +131,7 @@ def audit_rasters(regions):
     import numpy as np
     from PIL import Image
     maps = {}
-    base = RES / 'skycraft/tamriel'
+    base = RES / 'nirncraft/tamriel'
     for name in ['regions', 'elevation', 'coast', 'features', 'terrain', 'water', 'heat', 'rainshadow']:
         with Image.open(base / (name + '.png')) as image:
             values = np.array(image)

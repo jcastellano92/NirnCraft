@@ -1,0 +1,7236 @@
+[
+  {
+    "id": "gilane",
+    "name": "place.nirncraft.gilane",
+    "type": "city",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8650,
+    "z": 6850,
+    "radius": 110,
+    "why": [
+      "alikr_desert.L6.caravanserai_city",
+      "alikr_desert.L6.well_towns"
+    ]
+  },
+  {
+    "id": "hegathe",
+    "name": "place.nirncraft.hegathe",
+    "type": "city",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -9150,
+    "z": 6450,
+    "radius": 110,
+    "why": [
+      "alikr_desert.L6.well_towns",
+      "alikr_desert.L5.salt_trade"
+    ]
+  },
+  {
+    "id": "dragonstar",
+    "name": "place.nirncraft.dragonstar",
+    "type": "city",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4100,
+    "z": 2550,
+    "radius": 110,
+    "why": [
+      "craglorn.L6.dragonstar_city",
+      "craglorn.L6.elinhir_city"
+    ]
+  },
+  {
+    "id": "abahs_landing",
+    "name": "place.nirncraft.abahs_landing",
+    "type": "city",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5350,
+    "z": 8450,
+    "radius": 110,
+    "why": [
+      "hews_bane.L6.abahs_landing",
+      "hews_bane.L6.taneth_city"
+    ]
+  },
+  {
+    "id": "kozanset",
+    "name": "place.nirncraft.kozanset",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5950,
+    "z": 4220,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "bangkorai.L6.river_port_city",
+      "bangkorai.L6.ford_towns"
+    ]
+  },
+  {
+    "id": "bergama",
+    "name": "place.nirncraft.bergama",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7544,
+    "z": 5368,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "sentinel.L1.bergama_pans",
+      "sentinel.L6.dome_capital",
+      "sentinel.L6.coast_fief_keeps"
+    ]
+  },
+  {
+    "id": "satakalaam",
+    "name": "place.nirncraft.satakalaam",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5405,
+    "z": 3890,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "bangkorai.L6.ford_towns",
+      "bangkorai.L5.timber"
+    ]
+  },
+  {
+    "id": "antiphyllos",
+    "name": "place.nirncraft.antiphyllos",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7640,
+    "z": 5310,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "sentinel.L6.coast_fief_keeps",
+      "sentinel.L5.dye_works"
+    ]
+  },
+  {
+    "id": "myrkwasa",
+    "name": "place.nirncraft.myrkwasa",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8479,
+    "z": 5530,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "sentinel.L6.marsh_town",
+      "sentinel.L5.salt_pans"
+    ]
+  },
+  {
+    "id": "cybiades",
+    "name": "place.nirncraft.cybiades",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8250,
+    "z": 5280,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "sentinel.L6.ferry_head",
+      "sentinel.L7.dyers_quarter"
+    ]
+  },
+  {
+    "id": "abibon_gora",
+    "name": "place.nirncraft.abibon_gora",
+    "type": "town",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8850,
+    "z": 5980,
+    "radius": 60,
+    "why": [
+      "sentinel.L7.palace_crowns",
+      "sentinel.L9.court_rift"
+    ]
+  },
+  {
+    "id": "totambu",
+    "name": "place.nirncraft.totambu",
+    "type": "city",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5125,
+    "z": 4210,
+    "radius": 110,
+    "why": [
+      "bangkorai.L3.totambu_river",
+      "bangkorai.L8.na_totambu_reverence",
+      "bangkorai.L6.mountain_keeps"
+    ]
+  },
+  {
+    "id": "kairou",
+    "name": "place.nirncraft.kairou",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8780,
+    "z": 5860,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "sentinel.L7.quay_forebears",
+      "sentinel.L6.dome_capital"
+    ]
+  },
+  {
+    "id": "ephesus",
+    "name": "place.nirncraft.ephesus",
+    "type": "town",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4806,
+    "z": 4798,
+    "radius": 60,
+    "why": [
+      "dragontail.L6.terrace_city",
+      "dragontail.L6.mine_villages"
+    ]
+  },
+  {
+    "id": "hallins_stand",
+    "name": "place.nirncraft.hallins_stand",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5550,
+    "z": 5350,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "dragontail.L6.mine_villages",
+      "dragontail.L5.obsidian_and_sulphur"
+    ]
+  },
+  {
+    "id": "lainlyn",
+    "name": "place.nirncraft.lainlyn",
+    "type": "town",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -6037,
+    "z": 3989,
+    "radius": 60,
+    "why": [
+      "bangkorai.L3.lainlyn_river",
+      "bangkorai.L6.garrison_pass",
+      "bangkorai.L8.z_en_patron"
+    ]
+  },
+  {
+    "id": "mournoth",
+    "name": "place.nirncraft.mournoth",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4518,
+    "z": 3776,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "bangkorai.L10.mournoth_labs",
+      "bangkorai.L7.timber_lords",
+      "bangkorai.L9.grove_push"
+    ]
+  },
+  {
+    "id": "ayasofya",
+    "name": "place.nirncraft.ayasofya",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7536,
+    "z": 5168,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "sentinel.L7.dyers_quarter",
+      "sentinel.L6.ferry_head"
+    ]
+  },
+  {
+    "id": "belkarth",
+    "name": "place.nirncraft.belkarth",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4150,
+    "z": 3920,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "craglorn.L6.dragonstar_city",
+      "craglorn.L5.arena_wagering"
+    ]
+  },
+  {
+    "id": "pothago",
+    "name": "place.nirncraft.pothago",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8720,
+    "z": 5543,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "sentinel.L8.arkay_patron",
+      "sentinel.L5.caravan_terminus"
+    ]
+  },
+  {
+    "id": "tigonus",
+    "name": "place.nirncraft.tigonus",
+    "type": "town",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7108,
+    "z": 4473,
+    "radius": 60,
+    "why": [
+      "sentinel.L1.tigonus_lowland",
+      "sentinel.L4.tigonus_marsh",
+      "sentinel.L8.marsh_witch_fear"
+    ]
+  },
+  {
+    "id": "dakfron",
+    "name": "place.nirncraft.dakfron",
+    "type": "town",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5600,
+    "z": 6550,
+    "radius": 60,
+    "why": [
+      "dragontail.L6.pass_to_kvatch",
+      "dragontail.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "morwhas_bounty",
+    "name": "place.nirncraft.morwhas_bounty",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8728,
+    "z": 5832,
+    "radius": 42,
+    "why": [
+      "alikr_desert.L6.south_coast_cities",
+      "alikr_desert.L7.nomad_tribes"
+    ]
+  },
+  {
+    "id": "haddocks_market",
+    "name": "place.nirncraft.haddocks_market",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3950,
+    "z": 4780,
+    "radius": 28,
+    "why": [
+      "craglorn.L6.scavenger_camps",
+      "craglorn.L7.arena_promoters_and_fighters"
+    ]
+  },
+  {
+    "id": "thrall_cove",
+    "name": "place.nirncraft.thrall_cove",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7650,
+    "z": 7650,
+    "radius": 28,
+    "why": [
+      "hews_bane.L10.thrall_cove",
+      "hews_bane.L6.abahs_landing",
+      "hews_bane.L5.smuggled_cargo"
+    ]
+  },
+  {
+    "id": "saintsport",
+    "name": "place.nirncraft.saintsport",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10050,
+    "z": 7380,
+    "radius": 40,
+    "why": [
+      "stros_mkai.L6.port_hunding",
+      "stros_mkai.L6.palace_plateau"
+    ]
+  },
+  {
+    "id": "aswala_stables",
+    "name": "place.nirncraft.aswala_stables",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8650,
+    "z": 5950,
+    "radius": 26,
+    "why": [
+      "alikr_desert.L7.crown_oasis_lords",
+      "alikr_desert.L3.hidden_wells"
+    ]
+  },
+  {
+    "id": "hundings_palatial_hall",
+    "name": "place.nirncraft.hundings_palatial_hall",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7850,
+    "z": 5250,
+    "radius": 34,
+    "why": [
+      "sentinel.L9.court_rift",
+      "sentinel.L5.dye_works"
+    ]
+  },
+  {
+    "id": "hubalajad_palace",
+    "name": "place.nirncraft.hubalajad_palace",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5650,
+    "z": 8150,
+    "radius": 36,
+    "variant": "yokudan_tomb",
+    "class": "marquee",
+    "why": [
+      "hews_bane.L10.hubalajad_palace",
+      "hews_bane.L6.necropolis_cliffs",
+      "hews_bane.L8.nocturnal_coin_custom"
+    ]
+  },
+  {
+    "id": "lekis_blade",
+    "name": "place.nirncraft.lekis_blade",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8100,
+    "z": 5900,
+    "radius": 24,
+    "variant": "keep",
+    "class": "short",
+    "why": [
+      "alikr_desert.L7.nomad_tribes",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "stonekeep",
+    "name": "place.nirncraft.stonekeep",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7600,
+    "z": 6700,
+    "radius": 36,
+    "variant": "orc_ruin",
+    "class": "major",
+    "why": [
+      "alikr_desert.L7.caravan_men",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "bangkorai_garrison",
+    "name": "place.nirncraft.bangkorai_garrison",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4850,
+    "z": 4250,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "bangkorai.L7.mixed_towns",
+      "bangkorai.L10.tide_witches"
+    ]
+  },
+  {
+    "id": "viridian_watch",
+    "name": "place.nirncraft.viridian_watch",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -6050,
+    "z": 4350,
+    "radius": 24,
+    "variant": "keep",
+    "class": "short",
+    "why": [
+      "bangkorai.L7.river_labour",
+      "bangkorai.L11.garrison_pass_wars"
+    ]
+  },
+  {
+    "id": "dragonstar_arena",
+    "name": "place.nirncraft.dragonstar_arena",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3720,
+    "z": 2450,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "craglorn.L7.mage_patrons",
+      "craglorn.L9.serpent_cult_rising"
+    ]
+  },
+  {
+    "id": "hel_ra_citadel_hammerfell",
+    "name": "place.nirncraft.hel_ra_citadel_hammerfell",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4248,
+    "z": 3064,
+    "radius": 24,
+    "variant": "keep",
+    "class": "short",
+    "why": [
+      "craglorn.L7.arena_promoters_and_fighters",
+      "craglorn.L10.skyreach_pinnacle"
+    ]
+  },
+  {
+    "id": "exarchs_stronghold",
+    "name": "place.nirncraft.exarchs_stronghold",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4328,
+    "z": 3240,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "craglorn.L7.border_caravaneers",
+      "craglorn.L11.nedic_star_empire"
+    ]
+  },
+  {
+    "id": "castle_sentinel",
+    "name": "place.nirncraft.castle_sentinel",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5112,
+    "z": 4152,
+    "radius": 20,
+    "variant": "monument",
+    "why": [
+      "bangkorai.L8.z_en_patron",
+      "bangkorai.L3.totambu_river"
+    ]
+  },
+  {
+    "id": "sentinel_docks",
+    "name": "place.nirncraft.sentinel_docks",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8260,
+    "z": 4780,
+    "radius": 8,
+    "variant": "district",
+    "why": [
+      "sentinel.L9.betony_lever",
+      "sentinel.L8.marsh_witch_fear"
+    ]
+  },
+  {
+    "id": "salas_en",
+    "name": "place.nirncraft.salas_en",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8800,
+    "z": 6650,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "alikr_desert.L8.yokudan_gods",
+      "alikr_desert.L11.two_waves"
+    ]
+  },
+  {
+    "id": "seps_spine",
+    "name": "place.nirncraft.seps_spine",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8450,
+    "z": 6650,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "alikr_desert.L8.stendarr_patron",
+      "alikr_desert.L1.erg"
+    ]
+  },
+  {
+    "id": "goats_head_oasis",
+    "name": "place.nirncraft.goats_head_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7650,
+    "z": 5850,
+    "radius": 20,
+    "variant": "source",
+    "why": [
+      "alikr_desert.L8.well_oaths",
+      "alikr_desert.L1.dakfron_hot_plain"
+    ]
+  },
+  {
+    "id": "shrikes_aerie",
+    "name": "place.nirncraft.shrikes_aerie",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6150,
+    "z": 6150,
+    "radius": 12,
+    "variant": "eyrie",
+    "why": [
+      "alikr_desert.L9.well_feud",
+      "alikr_desert.L3.hidden_wells"
+    ]
+  },
+  {
+    "id": "hollow_waste",
+    "name": "place.nirncraft.hollow_waste",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6600,
+    "z": 6950,
+    "radius": 12,
+    "variant": "clearing",
+    "why": [
+      "alikr_desert.L9.dragon_fear",
+      "alikr_desert.L4.reg_plain"
+    ]
+  },
+  {
+    "id": "ashabah_pass",
+    "name": "place.nirncraft.ashabah_pass",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -6150,
+    "z": 4850,
+    "radius": 20,
+    "variant": "monument",
+    "why": [
+      "dragontail.L7.ore_lords",
+      "dragontail.L4.vent_daedra"
+    ]
+  },
+  {
+    "id": "bangkorai_pass",
+    "name": "place.nirncraft.bangkorai_pass",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5500,
+    "z": 4550,
+    "radius": 12,
+    "variant": "pass",
+    "why": [
+      "dragontail.L7.debt_miners",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "sunken_road",
+    "name": "place.nirncraft.sunken_road",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5750,
+    "z": 4500,
+    "radius": 12,
+    "variant": "pass",
+    "why": [
+      "dragontail.L8.arkay_patron",
+      "dragontail.L1.red_wall"
+    ]
+  },
+  {
+    "id": "wethers_cleft",
+    "name": "place.nirncraft.wethers_cleft",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4800,
+    "z": 4950,
+    "radius": 12,
+    "variant": "pass",
+    "why": [
+      "dragontail.L8.fire_pacts",
+      "dragontail.L3.canyon_springs"
+    ]
+  },
+  {
+    "id": "trolls_toothpick",
+    "name": "place.nirncraft.trolls_toothpick",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5300,
+    "z": 3900,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "bangkorai.L8.na_totambu_reverence",
+      "bangkorai.L4.red_clay_banks"
+    ]
+  },
+  {
+    "id": "onsis_breath",
+    "name": "place.nirncraft.onsis_breath",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -9928,
+    "z": 7080,
+    "radius": 12,
+    "variant": "monument",
+    "why": [
+      "stros_mkai.L6.palace_plateau",
+      "stros_mkai.L1.necromancer_islet"
+    ]
+  },
+  {
+    "id": "murciens_hamlet",
+    "name": "place.nirncraft.murciens_hamlet",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5000,
+    "z": 3900,
+    "radius": 20,
+    "variant": "altar",
+    "why": [
+      "bangkorai.L8.giant_taboo",
+      "bangkorai.L4.river_mouth_mangrove"
+    ]
+  },
+  {
+    "id": "aetherian_archive",
+    "name": "place.nirncraft.aetherian_archive",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3760,
+    "z": 3420,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "craglorn.L10.aetherian_archive",
+      "craglorn.L8.star_watching",
+      "craglorn.L4.crater_beasts"
+    ]
+  },
+  {
+    "id": "skyreach_pinnacle",
+    "name": "place.nirncraft.skyreach_pinnacle",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3800,
+    "z": 3650,
+    "radius": 36,
+    "variant": "ayleid_ruin",
+    "class": "marquee",
+    "why": [
+      "craglorn.L10.skyreach_pinnacle",
+      "craglorn.L8.arena_glory",
+      "craglorn.L9.serpent_cult_rising"
+    ]
+  },
+  {
+    "id": "skyreach_hold",
+    "name": "place.nirncraft.skyreach_hold",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4080,
+    "z": 3440,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "craglorn.L8.celestial_reverence",
+      "craglorn.L11.fall_of_the_shards"
+    ]
+  },
+  {
+    "id": "skyreach_temple",
+    "name": "place.nirncraft.skyreach_temple",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4624,
+    "z": 4080,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "bangkorai.L9.grove_push",
+      "bangkorai.L8.giant_taboo"
+    ]
+  },
+  {
+    "id": "shadas_tear",
+    "name": "place.nirncraft.shadas_tear",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3950,
+    "z": 3200,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "craglorn.L9.fixed_bouts",
+      "craglorn.L1.elinhir_granite_tiers"
+    ]
+  },
+  {
+    "id": "seekers_archive",
+    "name": "place.nirncraft.seekers_archive",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4050,
+    "z": 3020,
+    "radius": 20,
+    "variant": "monument",
+    "why": [
+      "craglorn.L9.serpent_cult_rising",
+      "craglorn.L4.badland_scrub"
+    ]
+  },
+  {
+    "id": "spellscar",
+    "name": "place.nirncraft.spellscar",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4150,
+    "z": 4370,
+    "radius": 12,
+    "variant": "clearing",
+    "why": [
+      "craglorn.L9.border_friction",
+      "craglorn.L8.star_watching"
+    ]
+  },
+  {
+    "id": "valley_of_scars",
+    "name": "place.nirncraft.valley_of_scars",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4450,
+    "z": 4900,
+    "radius": 12,
+    "variant": "clearing",
+    "why": [
+      "dragontail.L9.debt_unrest",
+      "dragontail.L4.fumarole_field"
+    ]
+  },
+  {
+    "id": "cradlecrush",
+    "name": "place.nirncraft.cradlecrush",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4300,
+    "z": 2700,
+    "radius": 20,
+    "variant": "altar",
+    "why": [
+      "craglorn.L10.sanctum_ophidia",
+      "craglorn.L11.nedic_star_empire"
+    ]
+  },
+  {
+    "id": "thieves_den",
+    "name": "place.nirncraft.thieves_den",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5300,
+    "z": 8400,
+    "radius": 8,
+    "variant": "district",
+    "why": [
+      "hews_bane.L7.forebear_merchant_syndicates",
+      "hews_bane.L8.nocturnal_coin_custom"
+    ]
+  },
+  {
+    "id": "no_shira_citadel",
+    "name": "place.nirncraft.no_shira_citadel",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6150,
+    "z": 8150,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "hews_bane.L7.dock_thieves_and_cutpurses",
+      "hews_bane.L1.abecean_headlands"
+    ]
+  },
+  {
+    "id": "zehts_displeasure",
+    "name": "place.nirncraft.zehts_displeasure",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5700,
+    "z": 7600,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "hews_bane.L7.hunted_traitors",
+      "hews_bane.L3.cliff_cisterns"
+    ]
+  },
+  {
+    "id": "port_hunding",
+    "name": "place.nirncraft.port_hunding",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10150,
+    "z": 7260,
+    "radius": 20,
+    "variant": "monument",
+    "why": [
+      "stros_mkai.L6.port_hunding",
+      "stros_mkai.L6.lighthouse_point",
+      "stros_mkai.L4.island_palm_coast"
+    ]
+  },
+  {
+    "id": "draggin_tale_inn",
+    "name": "place.nirncraft.draggin_tale_inn",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10230,
+    "z": 7160,
+    "radius": 8,
+    "variant": "district",
+    "why": [
+      "stros_mkai.L7.harbour_lord_and_merchants",
+      "stros_mkai.L4.reef_shallows"
+    ]
+  },
+  {
+    "id": "lost_city_of_the_na_totambu",
+    "name": "place.nirncraft.lost_city_of_the_na_totambu",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5280,
+    "z": 4120,
+    "radius": 36,
+    "variant": "yokudan_tomb",
+    "class": "marquee",
+    "why": [
+      "bangkorai.L9.river_pirates",
+      "bangkorai.L8.na_totambu_reverence"
+    ]
+  },
+  {
+    "id": "tuwhaccas_throne",
+    "name": "place.nirncraft.tuwhaccas_throne",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8616,
+    "z": 5784,
+    "radius": 36,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "sentinel.L9.candle_order",
+      "sentinel.L9.betony_lever"
+    ]
+  },
+  {
+    "id": "motalion_necropolis",
+    "name": "place.nirncraft.motalion_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5912,
+    "z": 6456,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "dragontail.L9.arms_for_both",
+      "dragontail.L10.lava_tubes"
+    ]
+  },
+  {
+    "id": "santaki",
+    "name": "place.nirncraft.santaki",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8620,
+    "z": 5620,
+    "radius": 36,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "sentinel.L10.cistern_undercroft",
+      "sentinel.L10.witches_of_the_marsh"
+    ]
+  },
+  {
+    "id": "hoondings_watch",
+    "name": "place.nirncraft.hoondings_watch",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -6680,
+    "z": 4600,
+    "radius": 36,
+    "variant": "scorpion_den",
+    "class": "short",
+    "why": [
+      "dragontail.L10.scourg_barrow",
+      "dragontail.L11.imperial_border"
+    ]
+  },
+  {
+    "id": "divads_chagrin_mine",
+    "name": "place.nirncraft.divads_chagrin_mine",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7300,
+    "z": 5650,
+    "radius": 36,
+    "variant": "daedric_ruin",
+    "class": "major",
+    "why": [
+      "alikr_desert.L9.ra_gada_war_camps",
+      "alikr_desert.L10.kykos_coven"
+    ]
+  },
+  {
+    "id": "coldrock_diggings",
+    "name": "place.nirncraft.coldrock_diggings",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7650,
+    "z": 4950,
+    "radius": 20,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "sentinel.L10.witches_of_the_marsh",
+      "sentinel.L10.selenu_coast"
+    ]
+  },
+  {
+    "id": "sandblown_mine",
+    "name": "place.nirncraft.sandblown_mine",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4040,
+    "z": 4056,
+    "radius": 36,
+    "variant": "hagraven_lair",
+    "class": "short",
+    "why": [
+      "craglorn.L10.skyreach_pinnacle",
+      "craglorn.L10.sanctum_ophidia"
+    ]
+  },
+  {
+    "id": "kulati_mines",
+    "name": "place.nirncraft.kulati_mines",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6750,
+    "z": 4950,
+    "radius": 20,
+    "variant": "mine",
+    "class": "short",
+    "why": [
+      "alikr_desert.L10.na_totambu_city",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "volenfell",
+    "name": "place.nirncraft.volenfell",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5976,
+    "z": 5816,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "short",
+    "why": [
+      "dragontail.L10.devilrock_coven",
+      "dragontail.L9.debt_unrest"
+    ]
+  },
+  {
+    "id": "aldunz",
+    "name": "place.nirncraft.aldunz",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6400,
+    "z": 5300,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "alikr_desert.L10.volenfell",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "rkulftzel",
+    "name": "place.nirncraft.rkulftzel",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7250,
+    "z": 5050,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "alikr_desert.L10.web_of_anker",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "yldzuun",
+    "name": "place.nirncraft.yldzuun",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5896,
+    "z": 5976,
+    "radius": 36,
+    "variant": "daedric_ruin",
+    "class": "short",
+    "why": [
+      "dragontail.L10.mountain_witches",
+      "dragontail.L10.devilrock_coven"
+    ]
+  },
+  {
+    "id": "ragnthar",
+    "name": "place.nirncraft.ragnthar",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8900,
+    "z": 6300,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "alikr_desert.L10.faughtas_guard",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "hall_of_heroes",
+    "name": "place.nirncraft.hall_of_heroes",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5350,
+    "z": 5000,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "dragontail.L10.lava_tubes",
+      "dragontail.L10.khulari_mines"
+    ]
+  },
+  {
+    "id": "fallen_grotto",
+    "name": "place.nirncraft.fallen_grotto",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5650,
+    "z": 4300,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "bangkorai.L9.forebear_ports",
+      "bangkorai.L9.river_pirates"
+    ]
+  },
+  {
+    "id": "old_sords_cave",
+    "name": "place.nirncraft.old_sords_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4750,
+    "z": 4500,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L10.khulari_mines",
+      "dragontail.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "torogs_spite",
+    "name": "place.nirncraft.torogs_spite",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5250,
+    "z": 4450,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L11.scourg_kings",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "kerbols_hollow",
+    "name": "place.nirncraft.kerbols_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4700,
+    "z": 3750,
+    "radius": 36,
+    "variant": "hagraven_lair",
+    "class": "minor",
+    "why": [
+      "bangkorai.L10.scarab_temple",
+      "bangkorai.L10.orc_hill_bands"
+    ]
+  },
+  {
+    "id": "blackheart_haven",
+    "name": "place.nirncraft.blackheart_haven",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5600,
+    "z": 3830,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "bangkorai.L10.orc_hill_bands",
+      "bangkorai.L10.khulari_heights"
+    ]
+  },
+  {
+    "id": "jackdaw_cove",
+    "name": "place.nirncraft.jackdaw_cove",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -6250,
+    "z": 4200,
+    "radius": 36,
+    "variant": "scorpion_den",
+    "class": "short",
+    "why": [
+      "bangkorai.L10.mournoth_labs",
+      "bangkorai.L8.z_en_patron"
+    ]
+  },
+  {
+    "id": "razaks_wheel",
+    "name": "place.nirncraft.razaks_wheel",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5950,
+    "z": 4550,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "short",
+    "why": [
+      "dragontail.L11.imperial_border",
+      "dragontail.L10.mountain_witches"
+    ]
+  },
+  {
+    "id": "klathzgar",
+    "name": "place.nirncraft.klathzgar",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5100,
+    "z": 4050,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "bangkorai.L10.tide_witches",
+      "bangkorai.L9.grove_push"
+    ]
+  },
+  {
+    "id": "rkindaleft",
+    "name": "place.nirncraft.rkindaleft",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5500,
+    "z": 4800,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "dragontail.L5.mines",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "nilata_ruins",
+    "name": "place.nirncraft.nilata_ruins",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5150,
+    "z": 4900,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "dragontail.L5.obsidian_and_sulphur",
+      "dragontail.L8.fire_pacts"
+    ]
+  },
+  {
+    "id": "sanctum_ophidia",
+    "name": "place.nirncraft.sanctum_ophidia",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3870,
+    "z": 4550,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "craglorn.L10.sanctum_ophidia",
+      "craglorn.L10.aetherian_archive",
+      "craglorn.L8.arena_glory"
+    ]
+  },
+  {
+    "id": "skyreach_catacombs",
+    "name": "place.nirncraft.skyreach_catacombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4414,
+    "z": 3669,
+    "radius": 36,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "bangkorai.L10.khulari_heights",
+      "bangkorai.L10.orc_hill_bands"
+    ]
+  },
+  {
+    "id": "hircines_haunt",
+    "name": "place.nirncraft.hircines_haunt",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3928,
+    "z": 2760,
+    "radius": 36,
+    "variant": "scorpion_den",
+    "class": "minor",
+    "why": [
+      "craglorn.L10.valley_of_scars",
+      "craglorn.L9.serpent_cult_rising"
+    ]
+  },
+  {
+    "id": "fearfang_cavern",
+    "name": "place.nirncraft.fearfang_cavern",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3950,
+    "z": 2850,
+    "radius": 36,
+    "variant": "vampire_lair",
+    "class": "minor",
+    "why": [
+      "craglorn.L11.nedic_star_empire",
+      "craglorn.L10.skyreach_pinnacle"
+    ]
+  },
+  {
+    "id": "zalgazs_den",
+    "name": "place.nirncraft.zalgazs_den",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4180,
+    "z": 4900,
+    "radius": 18,
+    "variant": "den",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "dragontail.L4.volcanic_scree",
+      "dragontail.L10.scourg_barrow"
+    ]
+  },
+  {
+    "id": "lothna_caverns",
+    "name": "place.nirncraft.lothna_caverns",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4450,
+    "z": 4650,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L4.fumarole_field",
+      "dragontail.L10.lava_tubes"
+    ]
+  },
+  {
+    "id": "sandy_grotto",
+    "name": "place.nirncraft.sandy_grotto",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4450,
+    "z": 4200,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L4.canyon_fern",
+      "dragontail.L11.imperial_border"
+    ]
+  },
+  {
+    "id": "earthtear_cavern",
+    "name": "place.nirncraft.earthtear_cavern",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3850,
+    "z": 4250,
+    "radius": 36,
+    "variant": "necromancer_lair",
+    "class": "minor",
+    "why": [
+      "craglorn.L11.fall_of_the_shards",
+      "craglorn.L11.nedic_star_empire"
+    ]
+  },
+  {
+    "id": "ilthags_undertower",
+    "name": "place.nirncraft.ilthags_undertower",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4300,
+    "z": 2930,
+    "radius": 36,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "craglorn.L5.crater_glass_and_ore",
+      "craglorn.L1.elinhir_granite_tiers"
+    ]
+  },
+  {
+    "id": "howling_sepulchers",
+    "name": "place.nirncraft.howling_sepulchers",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4450,
+    "z": 4430,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "dragontail.L4.cedar_ridge",
+      "dragontail.L9.debt_unrest"
+    ]
+  },
+  {
+    "id": "molavar",
+    "name": "place.nirncraft.molavar",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4200,
+    "z": 4650,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "dragontail.L4.vent_daedra",
+      "dragontail.L10.devilrock_coven"
+    ]
+  },
+  {
+    "id": "rkhardahrk",
+    "name": "place.nirncraft.rkhardahrk",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4400,
+    "z": 4050,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "dragontail.L3.snowmelt",
+      "dragontail.L10.khulari_mines"
+    ]
+  },
+  {
+    "id": "rkundzelft",
+    "name": "place.nirncraft.rkundzelft",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3720,
+    "z": 2750,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "short",
+    "why": [
+      "craglorn.L5.arena_wagering",
+      "craglorn.L9.serpent_cult_rising"
+    ]
+  },
+  {
+    "id": "mtharnaz",
+    "name": "place.nirncraft.mtharnaz",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3780,
+    "z": 3050,
+    "radius": 36,
+    "variant": "daedric_ruin",
+    "class": "major",
+    "why": [
+      "craglorn.L5.pass_trade",
+      "craglorn.L10.skyreach_pinnacle"
+    ]
+  },
+  {
+    "id": "bahrahas_gloom",
+    "name": "place.nirncraft.bahrahas_gloom",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6100,
+    "z": 7550,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "hews_bane.L8.forebear_temples",
+      "hews_bane.L9.syndicate_vs_thieves"
+    ]
+  },
+  {
+    "id": "sharktooth_grotto",
+    "name": "place.nirncraft.sharktooth_grotto",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7400,
+    "z": 8000,
+    "radius": 36,
+    "variant": "hagraven_lair",
+    "class": "minor",
+    "why": [
+      "hews_bane.L8.no_forgiveness_oath",
+      "hews_bane.L4.sea_cliff_harpies"
+    ]
+  },
+  {
+    "id": "bthzark",
+    "name": "place.nirncraft.bthzark",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10450,
+    "z": 7000,
+    "radius": 36,
+    "variant": "dwemer_ruin",
+    "class": "marquee",
+    "why": [
+      "stros_mkai.L10.bthzark",
+      "stros_mkai.L7.sailors_and_smugglers",
+      "stros_mkai.L10.catacombs"
+    ]
+  },
+  {
+    "id": "ngastas_tower",
+    "name": "place.nirncraft.ngastas_tower",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10850,
+    "z": 6950,
+    "radius": 36,
+    "variant": "mage_tower",
+    "class": "short",
+    "why": [
+      "stros_mkai.L8.hunding_memory",
+      "stros_mkai.L10.bthzark"
+    ]
+  },
+  {
+    "id": "stros_mkai_lighthouse",
+    "name": "place.nirncraft.stros_mkai_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -9950,
+    "z": 7050,
+    "radius": 36,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "stros_mkai.L8.fear_of_the_islet",
+      "stros_mkai.L11.second_treaty"
+    ]
+  },
+  {
+    "id": "tavahim_rest",
+    "name": "place.nirncraft.tavahim_rest",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6381,
+    "z": 6840,
+    "radius": 12,
+    "variant": "campsite",
+    "why": [
+      "alikr_desert.L10.kykos_coven",
+      "alikr_desert.L3.owned_wells"
+    ]
+  },
+  {
+    "id": "the_lucky_kettle",
+    "name": "place.nirncraft.the_lucky_kettle",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5899,
+    "z": 6312,
+    "radius": 24,
+    "variant": "inn",
+    "why": [
+      "dragontail.L3.canyon_springs",
+      "dragontail.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "nauun_sanctum",
+    "name": "place.nirncraft.nauun_sanctum",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3797,
+    "z": 6378,
+    "radius": 18,
+    "variant": "necromancer_lair",
+    "class": "minor",
+    "why": [
+      "dragontail.L3.sulphur_springs",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "tavalaam_docks",
+    "name": "place.nirncraft.tavalaam_docks",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8369,
+    "z": 7154,
+    "radius": 40,
+    "why": [
+      "alikr_desert.L10.defiled_temples",
+      "alikr_desert.L7.nomad_tribes"
+    ]
+  },
+  {
+    "id": "berud_undercroft",
+    "name": "place.nirncraft.berud_undercroft",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4599,
+    "z": 6837,
+    "radius": 18,
+    "variant": "necromancer_lair",
+    "class": "short",
+    "why": [
+      "dragontail.L1.black_ridges",
+      "dragontail.L10.mountain_witches"
+    ]
+  },
+  {
+    "id": "ncharft",
+    "name": "place.nirncraft.ncharft",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -4935,
+    "z": 8296,
+    "radius": 36,
+    "variant": "scorpion_den",
+    "class": "minor",
+    "why": [
+      "hews_bane.L8.nocturnal_coin_custom",
+      "hews_bane.L8.forebear_temples"
+    ]
+  },
+  {
+    "id": "beranset_web",
+    "name": "place.nirncraft.beranset_web",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5652,
+    "z": 6736,
+    "radius": 18,
+    "variant": "spider_cave",
+    "class": "short",
+    "why": [
+      "dragontail.L1.red_wall",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "lualaam_mine",
+    "name": "place.nirncraft.lualaam_mine",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7544,
+    "z": 7054,
+    "radius": 20,
+    "variant": "mine",
+    "class": "short",
+    "why": [
+      "alikr_desert.L11.two_waves",
+      "alikr_desert.L10.defiled_temples"
+    ]
+  },
+  {
+    "id": "nailah_spire",
+    "name": "place.nirncraft.nailah_spire",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6134,
+    "z": 6382,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "alikr_desert.L11.dragon_dens",
+      "alikr_desert.L4.serpent_sands"
+    ]
+  },
+  {
+    "id": "halahim_tombs",
+    "name": "place.nirncraft.halahim_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6192,
+    "z": 6937,
+    "radius": 36,
+    "variant": "necromancer_lair",
+    "class": "minor",
+    "why": [
+      "hews_bane.L9.collaborator_hunt",
+      "hews_bane.L5.abecean_shipping"
+    ]
+  },
+  {
+    "id": "sean_hollow",
+    "name": "place.nirncraft.sean_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6831,
+    "z": 7150,
+    "radius": 36,
+    "variant": "orc_ruin",
+    "class": "short",
+    "why": [
+      "hews_bane.L9.syndicate_vs_thieves",
+      "hews_bane.L10.thrall_cove"
+    ]
+  },
+  {
+    "id": "koheb_ruins",
+    "name": "place.nirncraft.koheb_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5030,
+    "z": 6790,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "dragontail.L1.ore_seams",
+      "dragontail.L4.vent_daedra"
+    ]
+  },
+  {
+    "id": "the_silver_pilgrim",
+    "name": "place.nirncraft.the_silver_pilgrim",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4151,
+    "z": 5720,
+    "radius": 24,
+    "variant": "inn",
+    "why": [
+      "dragontail.L2.mountain_cold",
+      "dragontail.L6.terrace_city"
+    ]
+  },
+  {
+    "id": "halset_rest",
+    "name": "place.nirncraft.halset_rest",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6470,
+    "z": 7765,
+    "radius": 20,
+    "variant": "monument",
+    "why": [
+      "hews_bane.L10.ahaleb_necropolis",
+      "hews_bane.L8.forebear_temples"
+    ]
+  },
+  {
+    "id": "ahar_cave",
+    "name": "place.nirncraft.ahar_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6103,
+    "z": 5493,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "alikr_desert.L11.caravan_wars",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "ashud_lair",
+    "name": "place.nirncraft.ashud_lair",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7319,
+    "z": 7143,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L5.caravan_tolls",
+      "alikr_desert.L10.kykos_coven"
+    ]
+  },
+  {
+    "id": "jaoon_hideout",
+    "name": "place.nirncraft.jaoon_hideout",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7993,
+    "z": 7832,
+    "radius": 36,
+    "variant": "daedric_ruin",
+    "class": "major",
+    "why": [
+      "hews_bane.L10.thrall_cove",
+      "hews_bane.L8.nocturnal_coin_custom"
+    ]
+  },
+  {
+    "id": "faam_rock",
+    "name": "place.nirncraft.faam_rock",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6635,
+    "z": 7600,
+    "radius": 20,
+    "variant": "altar",
+    "why": [
+      "hews_bane.L10.hubalajad_palace",
+      "hews_bane.L1.taneth_cliff_shelf"
+    ]
+  },
+  {
+    "id": "kaanset_ruins",
+    "name": "place.nirncraft.kaanset_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6990,
+    "z": 6062,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "alikr_desert.L5.salt_trade",
+      "alikr_desert.L1.mesas"
+    ]
+  },
+  {
+    "id": "zaset_encampment",
+    "name": "place.nirncraft.zaset_encampment",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4300,
+    "z": 6744,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "dragontail.L2.fume_haze",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "luira_delve",
+    "name": "place.nirncraft.luira_delve",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4742,
+    "z": 6330,
+    "radius": 20,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "dragontail.L2.canyon_shade",
+      "dragontail.L1.ore_seams"
+    ]
+  },
+  {
+    "id": "daaleb_necropolis",
+    "name": "place.nirncraft.daaleb_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7118,
+    "z": 7912,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "hews_bane.L11.betrayal_of_taneth",
+      "hews_bane.L6.necropolis_cliffs"
+    ]
+  },
+  {
+    "id": "gaanset_fort",
+    "name": "place.nirncraft.gaanset_fort",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4403,
+    "z": 6548,
+    "radius": 24,
+    "variant": "keep",
+    "class": "short",
+    "why": [
+      "dragontail.L6.terrace_city",
+      "dragontail.L9.debt_unrest"
+    ]
+  },
+  {
+    "id": "hauun_cove",
+    "name": "place.nirncraft.hauun_cove",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10573,
+    "z": 7502,
+    "radius": 36,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "stros_mkai.L8.treaty_pride",
+      "stros_mkai.L10.ngastas_isle"
+    ]
+  },
+  {
+    "id": "bulaleb_cave",
+    "name": "place.nirncraft.bulaleb_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7878,
+    "z": 5945,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L5.oasis_dates",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "shaush_delve",
+    "name": "place.nirncraft.shaush_delve",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4083,
+    "z": 5326,
+    "radius": 20,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "dragontail.L6.mine_villages",
+      "dragontail.L5.mines"
+    ]
+  },
+  {
+    "id": "ashush_watch",
+    "name": "place.nirncraft.ashush_watch",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8177,
+    "z": 6185,
+    "radius": 12,
+    "variant": "tower",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L4.erg_dunes",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "baezir_ruins",
+    "name": "place.nirncraft.baezir_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5515,
+    "z": 7159,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "dragontail.L6.pass_to_kvatch",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "bthungthzark",
+    "name": "place.nirncraft.bthungthzark",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5070,
+    "z": 7977,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "hews_bane.L11.prince_hubalajad_folly",
+      "hews_bane.L8.no_forgiveness_oath"
+    ]
+  },
+  {
+    "id": "ashana_necropolis",
+    "name": "place.nirncraft.ashana_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4345,
+    "z": 5070,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "dragontail.L7.ore_lords",
+      "dragontail.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "raama_hollow",
+    "name": "place.nirncraft.raama_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4998,
+    "z": 7640,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L7.debt_miners",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "daira_burrow",
+    "name": "place.nirncraft.daira_burrow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5399,
+    "z": 8025,
+    "radius": 18,
+    "variant": "den",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "hews_bane.L5.abecean_shipping",
+      "hews_bane.L9.syndicate_vs_thieves"
+    ]
+  },
+  {
+    "id": "faoon_web",
+    "name": "place.nirncraft.faoon_web",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8461,
+    "z": 6967,
+    "radius": 18,
+    "variant": "spider_cave",
+    "class": "short",
+    "why": [
+      "alikr_desert.L4.reg_plain",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "faabah_crag",
+    "name": "place.nirncraft.faabah_crag",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3912,
+    "z": 6246,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "dragontail.L8.arkay_patron",
+      "dragontail.L4.fumarole_field"
+    ]
+  },
+  {
+    "id": "taorra_oasis",
+    "name": "place.nirncraft.taorra_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3864,
+    "z": 2252,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "craglorn.L4.badland_scrub",
+      "craglorn.L11.fall_of_the_shards"
+    ]
+  },
+  {
+    "id": "the_drowsy_boar",
+    "name": "place.nirncraft.the_drowsy_boar",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4884,
+    "z": 5235,
+    "radius": 24,
+    "variant": "inn",
+    "why": [
+      "dragontail.L8.fire_pacts",
+      "dragontail.L7.ore_lords"
+    ]
+  },
+  {
+    "id": "taezir_lair",
+    "name": "place.nirncraft.taezir_lair",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5370,
+    "z": 6582,
+    "radius": 18,
+    "variant": "den",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "dragontail.L9.debt_unrest",
+      "dragontail.L8.fire_pacts"
+    ]
+  },
+  {
+    "id": "suluun_den",
+    "name": "place.nirncraft.suluun_den",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7447,
+    "z": 5512,
+    "radius": 18,
+    "variant": "den",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "alikr_desert.L4.oasis_grove",
+      "alikr_desert.L10.kykos_coven"
+    ]
+  },
+  {
+    "id": "kiilah_hollow",
+    "name": "place.nirncraft.kiilah_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4713,
+    "z": 5682,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L9.arms_for_both",
+      "dragontail.L10.scourg_barrow"
+    ]
+  },
+  {
+    "id": "zaoon_farm",
+    "name": "place.nirncraft.zaoon_farm",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5173,
+    "z": 7145,
+    "radius": 28,
+    "why": [
+      "dragontail.L10.scourg_barrow",
+      "dragontail.L6.pass_to_kvatch"
+    ]
+  },
+  {
+    "id": "shrine_of_ruptga",
+    "name": "place.nirncraft.shrine_of_ruptga",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4616,
+    "z": 8048,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "dragontail.L10.devilrock_coven",
+      "dragontail.L11.imperial_border"
+    ]
+  },
+  {
+    "id": "koaleb_oasis",
+    "name": "place.nirncraft.koaleb_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3851,
+    "z": 7062,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "dragontail.L10.mountain_witches",
+      "dragontail.L4.vent_daedra"
+    ]
+  },
+  {
+    "id": "kailah_burrow",
+    "name": "place.nirncraft.kailah_burrow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3467,
+    "z": 2889,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "craglorn.L4.crater_beasts",
+      "craglorn.L8.arena_glory"
+    ]
+  },
+  {
+    "id": "bulush_tombs",
+    "name": "place.nirncraft.bulush_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6234,
+    "z": 7930,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "hews_bane.L5.smuggled_cargo",
+      "hews_bane.L10.hubalajad_palace"
+    ]
+  },
+  {
+    "id": "gaabah_keep",
+    "name": "place.nirncraft.gaabah_keep",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6187,
+    "z": 6726,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "hews_bane.L5.terrace_perfume",
+      "hews_bane.L8.forebear_temples"
+    ]
+  },
+  {
+    "id": "the_winking_goat",
+    "name": "place.nirncraft.the_winking_goat",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7379,
+    "z": 5875,
+    "radius": 24,
+    "variant": "inn",
+    "why": [
+      "alikr_desert.L4.wadi_bed",
+      "alikr_desert.L7.nomad_tribes"
+    ]
+  },
+  {
+    "id": "naan_hole",
+    "name": "place.nirncraft.naan_hole",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5617,
+    "z": 7015,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L10.lava_tubes",
+      "dragontail.L10.devilrock_coven"
+    ]
+  },
+  {
+    "id": "shrine_of_malooc",
+    "name": "place.nirncraft.shrine_of_malooc",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5031,
+    "z": 4308,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "bangkorai.L11.na_totambu_line",
+      "bangkorai.L10.tide_witches"
+    ]
+  },
+  {
+    "id": "seoon_ruins",
+    "name": "place.nirncraft.seoon_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4205,
+    "z": 5967,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "dragontail.L10.khulari_mines",
+      "dragontail.L1.red_wall"
+    ]
+  },
+  {
+    "id": "gaama_mine",
+    "name": "place.nirncraft.gaama_mine",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3895,
+    "z": 5616,
+    "radius": 20,
+    "variant": "mine",
+    "class": "short",
+    "why": [
+      "dragontail.L11.scourg_kings",
+      "dragontail.L10.khulari_mines"
+    ]
+  },
+  {
+    "id": "qaoon_watch",
+    "name": "place.nirncraft.qaoon_watch",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6604,
+    "z": 5069,
+    "radius": 12,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "alikr_desert.L4.mesa_and_hoodoo",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "kooon_grotto",
+    "name": "place.nirncraft.kooon_grotto",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7956,
+    "z": 5658,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "alikr_desert.L4.scorpion_ground",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "bthaldeft",
+    "name": "place.nirncraft.bthaldeft",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4392,
+    "z": 7784,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "dragontail.L11.imperial_border",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "berahim_arch",
+    "name": "place.nirncraft.berahim_arch",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7824,
+    "z": 4849,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "sentinel.L10.dust_witches",
+      "sentinel.L4.terrace_gardens"
+    ]
+  },
+  {
+    "id": "taviz_ruins",
+    "name": "place.nirncraft.taviz_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5464,
+    "z": 7625,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "dragontail.L5.mines",
+      "dragontail.L4.vent_daedra"
+    ]
+  },
+  {
+    "id": "ahset_nest",
+    "name": "place.nirncraft.ahset_nest",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4854,
+    "z": 6055,
+    "radius": 18,
+    "variant": "spider_cave",
+    "class": "short",
+    "why": [
+      "dragontail.L5.obsidian_and_sulphur",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "beralaam_cave",
+    "name": "place.nirncraft.beralaam_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7914,
+    "z": 7414,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "hews_bane.L4.palm_and_cypress_terraces",
+      "hews_bane.L9.collaborator_hunt"
+    ]
+  },
+  {
+    "id": "raset_lighthouse",
+    "name": "place.nirncraft.raset_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -7287,
+    "z": 3754,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "bangkorai.L11.garrison_pass_wars",
+      "bangkorai.L6.garrison_pass"
+    ]
+  },
+  {
+    "id": "sulud_camp",
+    "name": "place.nirncraft.sulud_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4633,
+    "z": 7479,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "dragontail.L4.volcanic_scree",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "saana_diggings",
+    "name": "place.nirncraft.saana_diggings",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4948,
+    "z": 6375,
+    "radius": 20,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "dragontail.L4.fumarole_field",
+      "dragontail.L1.ore_seams"
+    ]
+  },
+  {
+    "id": "sulalaam_hollow",
+    "name": "place.nirncraft.sulalaam_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -6930,
+    "z": 4519,
+    "radius": 36,
+    "variant": "scorpion_den",
+    "class": "minor",
+    "why": [
+      "sentinel.L10.selenu_coast",
+      "sentinel.L9.betony_lever"
+    ]
+  },
+  {
+    "id": "wreck_of_the_prancing_hound",
+    "name": "place.nirncraft.wreck_of_the_prancing_hound",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -4619,
+    "z": 8655,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "hews_bane.L4.sea_cliff_harpies",
+      "hews_bane.L6.taneth_city"
+    ]
+  },
+  {
+    "id": "zauun_docks",
+    "name": "place.nirncraft.zauun_docks",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7368,
+    "z": 4522,
+    "radius": 40,
+    "why": [
+      "sentinel.L10.coven_of_the_tide",
+      "sentinel.L6.coast_fief_keeps"
+    ]
+  },
+  {
+    "id": "tomb_of_zaheb",
+    "name": "place.nirncraft.tomb_of_zaheb",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4109,
+    "z": 6342,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "dragontail.L4.canyon_fern",
+      "dragontail.L10.lava_tubes"
+    ]
+  },
+  {
+    "id": "saalaam_homestead",
+    "name": "place.nirncraft.saalaam_homestead",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7065,
+    "z": 4936,
+    "radius": 30,
+    "variant": "estate",
+    "why": [
+      "alikr_desert.L4.serpent_sands",
+      "alikr_desert.L7.nomad_tribes"
+    ]
+  },
+  {
+    "id": "raiz_wharf",
+    "name": "place.nirncraft.raiz_wharf",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8712,
+    "z": 6792,
+    "radius": 40,
+    "why": [
+      "alikr_desert.L4.dragon_dens",
+      "alikr_desert.L5.salt_trade"
+    ]
+  },
+  {
+    "id": "ashaleb_tower",
+    "name": "place.nirncraft.ashaleb_tower",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4302,
+    "z": 6324,
+    "radius": 12,
+    "variant": "tower",
+    "class": "minor",
+    "why": [
+      "dragontail.L4.cedar_ridge",
+      "dragontail.L9.debt_unrest"
+    ]
+  },
+  {
+    "id": "haakir_cavern",
+    "name": "place.nirncraft.haakir_cavern",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6897,
+    "z": 6927,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "alikr_desert.L3.owned_wells",
+      "alikr_desert.L11.dragon_dens"
+    ]
+  },
+  {
+    "id": "buloon_oasis",
+    "name": "place.nirncraft.buloon_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5715,
+    "z": 6183,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "dragontail.L4.vent_daedra",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "kiorra_pillar",
+    "name": "place.nirncraft.kiorra_pillar",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8938,
+    "z": 5784,
+    "radius": 20,
+    "variant": "monument",
+    "why": [
+      "sentinel.L11.lysandus_war",
+      "sentinel.L1.garden_terraces"
+    ]
+  },
+  {
+    "id": "the_drowsy_guar",
+    "name": "place.nirncraft.the_drowsy_guar",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7728,
+    "z": 5848,
+    "radius": 24,
+    "variant": "inn",
+    "why": [
+      "alikr_desert.L3.hidden_wells",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "saakir_hideout",
+    "name": "place.nirncraft.saakir_hideout",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3856,
+    "z": 4720,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "craglorn.L4.ridge_vultures",
+      "craglorn.L9.fixed_bouts"
+    ]
+  },
+  {
+    "id": "maama_arch",
+    "name": "place.nirncraft.maama_arch",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6131,
+    "z": 7270,
+    "radius": 20,
+    "variant": "watch",
+    "why": [
+      "hews_bane.L4.cove_reefs",
+      "hews_bane.L11.prince_hubalajad_folly"
+    ]
+  },
+  {
+    "id": "nuahim_farm",
+    "name": "place.nirncraft.nuahim_farm",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5652,
+    "z": 6471,
+    "radius": 28,
+    "variant": "estate",
+    "why": [
+      "dragontail.L3.snowmelt",
+      "dragontail.L7.debt_miners"
+    ]
+  },
+  {
+    "id": "shaaleb_watchtower",
+    "name": "place.nirncraft.shaaleb_watchtower",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6714,
+    "z": 5831,
+    "radius": 12,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "alikr_desert.L3.qanat_lines",
+      "alikr_desert.L10.kykos_coven"
+    ]
+  },
+  {
+    "id": "maira_keep",
+    "name": "place.nirncraft.maira_keep",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7214,
+    "z": 6873,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "alikr_desert.L1.erg",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "tomb_of_ahset",
+    "name": "place.nirncraft.tomb_of_ahset",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4440,
+    "z": 5528,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "dragontail.L3.canyon_springs",
+      "dragontail.L10.khulari_mines"
+    ]
+  },
+  {
+    "id": "baheb_hole",
+    "name": "place.nirncraft.baheb_hole",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5804,
+    "z": 5656,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "dragontail.L3.sulphur_springs",
+      "dragontail.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "daaleb_fort",
+    "name": "place.nirncraft.daaleb_fort",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5873,
+    "z": 6733,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "hews_bane.L3.cliff_cisterns",
+      "hews_bane.L8.nocturnal_coin_custom"
+    ]
+  },
+  {
+    "id": "jaush_oasis",
+    "name": "place.nirncraft.jaush_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4728,
+    "z": 7786,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "dragontail.L1.black_ridges",
+      "dragontail.L4.vent_daedra"
+    ]
+  },
+  {
+    "id": "taheb_necropolis",
+    "name": "place.nirncraft.taheb_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8592,
+    "z": 6155,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "alikr_desert.L1.mesas",
+      "alikr_desert.L10.kykos_coven"
+    ]
+  },
+  {
+    "id": "bulalaam_lookout",
+    "name": "place.nirncraft.bulalaam_lookout",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7687,
+    "z": 6856,
+    "radius": 12,
+    "variant": "tower",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L1.reg_plain",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "haiz_homestead",
+    "name": "place.nirncraft.haiz_homestead",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4489,
+    "z": 7371,
+    "radius": 30,
+    "variant": "homestead",
+    "why": [
+      "dragontail.L1.red_wall",
+      "dragontail.L3.canyon_springs"
+    ]
+  },
+  {
+    "id": "nuam_lighthouse",
+    "name": "place.nirncraft.nuam_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8562,
+    "z": 7316,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L1.dakfron_hot_plain",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "ahan_caverns",
+    "name": "place.nirncraft.ahan_caverns",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4176,
+    "z": 3632,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "craglorn.L3.canyon_seeps",
+      "craglorn.L10.skyreach_pinnacle"
+    ]
+  },
+  {
+    "id": "shaabah_homestead",
+    "name": "place.nirncraft.shaabah_homestead",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5291,
+    "z": 7769,
+    "radius": 30,
+    "variant": "mill",
+    "why": [
+      "dragontail.L1.ore_seams",
+      "dragontail.L5.obsidian_and_sulphur"
+    ]
+  },
+  {
+    "id": "faezir_diggings",
+    "name": "place.nirncraft.faezir_diggings",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7413,
+    "z": 7466,
+    "radius": 20,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "hews_bane.L3.tidal_caverns",
+      "hews_bane.L10.thrall_cove"
+    ]
+  },
+  {
+    "id": "kaakir_cave",
+    "name": "place.nirncraft.kaakir_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7409,
+    "z": 4723,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "sentinel.L11.harbour_of_the_first_landing",
+      "sentinel.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "taset_burrow",
+    "name": "place.nirncraft.taset_burrow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5618,
+    "z": 7351,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L2.mountain_cold",
+      "dragontail.L8.fire_pacts"
+    ]
+  },
+  {
+    "id": "kiar_burrow",
+    "name": "place.nirncraft.kiar_burrow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3930,
+    "z": 5231,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L2.fume_haze",
+      "dragontail.L10.scourg_barrow"
+    ]
+  },
+  {
+    "id": "buluun_tower",
+    "name": "place.nirncraft.buluun_tower",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5779,
+    "z": 7117,
+    "radius": 12,
+    "variant": "tower",
+    "class": "minor",
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L9.syndicate_vs_thieves"
+    ]
+  },
+  {
+    "id": "wreck_of_the_lonely_stag",
+    "name": "place.nirncraft.wreck_of_the_lonely_stag",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -9809,
+    "z": 6319,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L1.buried_valleys",
+      "alikr_desert.L6.well_towns"
+    ]
+  },
+  {
+    "id": "abuun_crypt",
+    "name": "place.nirncraft.abuun_crypt",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -4687,
+    "z": 8440,
+    "radius": 18,
+    "variant": "vampire_lair",
+    "class": "short",
+    "why": [
+      "hews_bane.L1.taneth_cliff_shelf",
+      "hews_bane.L8.no_forgiveness_oath"
+    ]
+  },
+  {
+    "id": "zaabah_camp",
+    "name": "place.nirncraft.zaabah_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5497,
+    "z": 5556,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "dragontail.L2.canyon_shade",
+      "dragontail.L9.debt_unrest"
+    ]
+  },
+  {
+    "id": "faoon_hideout",
+    "name": "place.nirncraft.faoon_hideout",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5934,
+    "z": 8363,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "hews_bane.L1.abahs_cove",
+      "hews_bane.L6.necropolis_cliffs"
+    ]
+  },
+  {
+    "id": "kaush_oasis",
+    "name": "place.nirncraft.kaush_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4713,
+    "z": 5302,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "dragontail.L6.terrace_city",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "taoon_tombs",
+    "name": "place.nirncraft.taoon_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -4786,
+    "z": 8176,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "hews_bane.L2.warm_abecean_breeze",
+      "hews_bane.L10.hubalajad_palace"
+    ]
+  },
+  {
+    "id": "haana_tombs",
+    "name": "place.nirncraft.haana_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7285,
+    "z": 7603,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "hews_bane.L2.southern_squalls",
+      "hews_bane.L8.forebear_temples"
+    ]
+  },
+  {
+    "id": "abanset_camp",
+    "name": "place.nirncraft.abanset_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6536,
+    "z": 6378,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L2.sandstorms",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "zailah_quarry",
+    "name": "place.nirncraft.zailah_quarry",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5721,
+    "z": 5367,
+    "radius": 20,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "dragontail.L6.mine_villages",
+      "dragontail.L10.devilrock_coven"
+    ]
+  },
+  {
+    "id": "abaleb_rock",
+    "name": "place.nirncraft.abaleb_rock",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4626,
+    "z": 4711,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "dragontail.L6.pass_to_kvatch",
+      "dragontail.L3.canyon_springs"
+    ]
+  },
+  {
+    "id": "ahaleb_necropolis",
+    "name": "place.nirncraft.ahaleb_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -8011,
+    "z": 7626,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "hews_bane.L10.ahaleb_necropolis",
+      "hews_bane.L6.taneth_city",
+      "hews_bane.L9.collaborator_hunt"
+    ]
+  },
+  {
+    "id": "suloon_grotto",
+    "name": "place.nirncraft.suloon_grotto",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5616,
+    "z": 8528,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "hews_bane.L6.abahs_landing",
+      "hews_bane.L10.thrall_cove"
+    ]
+  },
+  {
+    "id": "kioon_undercroft",
+    "name": "place.nirncraft.kioon_undercroft",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5041,
+    "z": 5368,
+    "radius": 18,
+    "variant": "necromancer_lair",
+    "class": "minor",
+    "why": [
+      "dragontail.L7.ore_lords",
+      "dragontail.L10.khulari_mines"
+    ]
+  },
+  {
+    "id": "gaana_watchtower",
+    "name": "place.nirncraft.gaana_watchtower",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7144,
+    "z": 6393,
+    "radius": 12,
+    "variant": "tower",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L2.hot_dakfron",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "shrine_of_arkay",
+    "name": "place.nirncraft.shrine_of_arkay",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6824,
+    "z": 7688,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "hews_bane.L6.necropolis_cliffs",
+      "hews_bane.L11.prince_hubalajad_folly"
+    ]
+  },
+  {
+    "id": "gaakir_docks",
+    "name": "place.nirncraft.gaakir_docks",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8640,
+    "z": 5384,
+    "radius": 40,
+    "why": [
+      "alikr_desert.L2.cold_nights",
+      "alikr_desert.L7.nomad_tribes"
+    ]
+  },
+  {
+    "id": "tomb_of_baanset",
+    "name": "place.nirncraft.tomb_of_baanset",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3930,
+    "z": 5049,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "dragontail.L7.debt_miners",
+      "dragontail.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "kouun_camp",
+    "name": "place.nirncraft.kouun_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7054,
+    "z": 5813,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L6.caravanserai_city",
+      "alikr_desert.L6.well_towns"
+    ]
+  },
+  {
+    "id": "yasahim_oasis",
+    "name": "place.nirncraft.yasahim_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6535,
+    "z": 5417,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "alikr_desert.L6.well_towns",
+      "alikr_desert.L1.mesas"
+    ]
+  },
+  {
+    "id": "naset_tombs",
+    "name": "place.nirncraft.naset_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5912,
+    "z": 6983,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "hews_bane.L7.forebear_merchant_syndicates",
+      "hews_bane.L8.nocturnal_coin_custom"
+    ]
+  },
+  {
+    "id": "sulan_tower",
+    "name": "place.nirncraft.sulan_tower",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6062,
+    "z": 5207,
+    "radius": 12,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "alikr_desert.L6.south_coast_cities",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "yasoon_tombs",
+    "name": "place.nirncraft.yasoon_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8944,
+    "z": 6128,
+    "radius": 36,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "sentinel.L5.dye_works",
+      "sentinel.L6.marsh_town"
+    ]
+  },
+  {
+    "id": "raiz_necropolis",
+    "name": "place.nirncraft.raiz_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -6384,
+    "z": 4850,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "dragontail.L8.arkay_patron",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "ashaleb_oasis",
+    "name": "place.nirncraft.ashaleb_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6446,
+    "z": 6226,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "alikr_desert.L7.crown_oasis_lords",
+      "alikr_desert.L3.qanat_lines"
+    ]
+  },
+  {
+    "id": "wreck_of_the_gilded_flagon",
+    "name": "place.nirncraft.wreck_of_the_gilded_flagon",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5141,
+    "z": 8761,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "hews_bane.L7.dock_thieves_and_cutpurses",
+      "hews_bane.L10.hubalajad_palace"
+    ]
+  },
+  {
+    "id": "kaahim_ruins",
+    "name": "place.nirncraft.kaahim_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7735,
+    "z": 7924,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "hews_bane.L7.hunted_traitors",
+      "hews_bane.L11.prince_hubalajad_folly"
+    ]
+  },
+  {
+    "id": "zoanset_watch",
+    "name": "place.nirncraft.zoanset_watch",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4664,
+    "z": 4302,
+    "radius": 24,
+    "variant": "keep",
+    "class": "short",
+    "why": [
+      "dragontail.L8.fire_pacts",
+      "dragontail.L10.mountain_witches"
+    ]
+  },
+  {
+    "id": "faaleb",
+    "name": "place.nirncraft.faaleb",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8460,
+    "z": 5560,
+    "radius": 28,
+    "why": [
+      "stros_mkai.L9.treaty_ground",
+      "stros_mkai.L9.smuggling_ring"
+    ]
+  },
+  {
+    "id": "naheb_crag",
+    "name": "place.nirncraft.naheb_crag",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7019,
+    "z": 6714,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "alikr_desert.L7.nomad_tribes",
+      "alikr_desert.L4.oasis_grove"
+    ]
+  },
+  {
+    "id": "beriz_farm",
+    "name": "place.nirncraft.beriz_farm",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7960,
+    "z": 7320,
+    "radius": 28,
+    "why": [
+      "hews_bane.L8.forebear_temples",
+      "hews_bane.L7.dock_thieves_and_cutpurses"
+    ]
+  },
+  {
+    "id": "haaleb_homestead",
+    "name": "place.nirncraft.haaleb_homestead",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6903,
+    "z": 5684,
+    "radius": 30,
+    "variant": "homestead",
+    "why": [
+      "alikr_desert.L7.caravan_men",
+      "alikr_desert.L5.salt_trade"
+    ]
+  },
+  {
+    "id": "ashiz_ruins",
+    "name": "place.nirncraft.ashiz_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8105,
+    "z": 6570,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "alikr_desert.L8.yokudan_gods",
+      "alikr_desert.L2.cold_nights"
+    ]
+  },
+  {
+    "id": "raorra_tombs",
+    "name": "place.nirncraft.raorra_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7987,
+    "z": 6163,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "alikr_desert.L8.stendarr_patron",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "kiush_cove",
+    "name": "place.nirncraft.kiush_cove",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3928,
+    "z": 4888,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L9.debt_unrest",
+      "dragontail.L10.mountain_witches"
+    ]
+  },
+  {
+    "id": "abam_ruins",
+    "name": "place.nirncraft.abam_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5330,
+    "z": 5645,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "dragontail.L9.arms_for_both",
+      "dragontail.L4.fumarole_field"
+    ]
+  },
+  {
+    "id": "kaud_lair",
+    "name": "place.nirncraft.kaud_lair",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6897,
+    "z": 5901,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L8.well_oaths",
+      "alikr_desert.L10.kykos_coven"
+    ]
+  },
+  {
+    "id": "halakir_cave",
+    "name": "place.nirncraft.halakir_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5460,
+    "z": 6352,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "dragontail.L10.scourg_barrow",
+      "dragontail.L4.fumarole_field"
+    ]
+  },
+  {
+    "id": "nuira_watch",
+    "name": "place.nirncraft.nuira_watch",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4486,
+    "z": 5714,
+    "radius": 12,
+    "variant": "tower",
+    "class": "minor",
+    "why": [
+      "dragontail.L10.devilrock_coven",
+      "dragontail.L4.canyon_fern"
+    ]
+  },
+  {
+    "id": "ashana_tombs",
+    "name": "place.nirncraft.ashana_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7730,
+    "z": 7122,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "alikr_desert.L9.well_feud",
+      "alikr_desert.L11.dragon_dens"
+    ]
+  },
+  {
+    "id": "bulan_rock",
+    "name": "place.nirncraft.bulan_rock",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7191,
+    "z": 6580,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "alikr_desert.L9.dragon_fear",
+      "alikr_desert.L3.hidden_wells"
+    ]
+  },
+  {
+    "id": "abset_den",
+    "name": "place.nirncraft.abset_den",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4436,
+    "z": 6105,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "dragontail.L10.mountain_witches",
+      "dragontail.L11.imperial_border"
+    ]
+  },
+  {
+    "id": "zauun_fort",
+    "name": "place.nirncraft.zauun_fort",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5357,
+    "z": 6982,
+    "radius": 24,
+    "variant": "keep",
+    "class": "short",
+    "why": [
+      "dragontail.L10.lava_tubes",
+      "dragontail.L9.debt_unrest"
+    ]
+  },
+  {
+    "id": "faakir_lair",
+    "name": "place.nirncraft.faakir_lair",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7576,
+    "z": 5352,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "sentinel.L5.spice_port",
+      "sentinel.L10.witches_of_the_marsh"
+    ]
+  },
+  {
+    "id": "halanset_spire",
+    "name": "place.nirncraft.halanset_spire",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6354,
+    "z": 7081,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "hews_bane.L8.no_forgiveness_oath",
+      "hews_bane.L4.palm_and_cypress_terraces"
+    ]
+  },
+  {
+    "id": "lualaam_cove",
+    "name": "place.nirncraft.lualaam_cove",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4024,
+    "z": 4520,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "craglorn.L3.crater_basins",
+      "craglorn.L10.valley_of_scars"
+    ]
+  },
+  {
+    "id": "jaoon_vault",
+    "name": "place.nirncraft.jaoon_vault",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8531,
+    "z": 6418,
+    "radius": 18,
+    "variant": "necromancer_lair",
+    "class": "short",
+    "why": [
+      "alikr_desert.L9.ra_gada_war_camps",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "shaana_homestead",
+    "name": "place.nirncraft.shaana_homestead",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3920,
+    "z": 5969,
+    "radius": 30,
+    "why": [
+      "dragontail.L10.khulari_mines",
+      "dragontail.L6.terrace_city"
+    ]
+  },
+  {
+    "id": "seira_citadel",
+    "name": "place.nirncraft.seira_citadel",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6952,
+    "z": 6538,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "alikr_desert.L10.na_totambu_city",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "nchulft",
+    "name": "place.nirncraft.nchulft",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5071,
+    "z": 6226,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "dragontail.L11.scourg_kings",
+      "dragontail.L10.khulari_mines"
+    ]
+  },
+  {
+    "id": "abahim_camp",
+    "name": "place.nirncraft.abahim_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6475,
+    "z": 5994,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L10.volenfell",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "bthungthunch",
+    "name": "place.nirncraft.bthungthunch",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4809,
+    "z": 7570,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "dragontail.L11.imperial_border",
+      "dragontail.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "ashilah_lighthouse",
+    "name": "place.nirncraft.ashilah_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -10312,
+    "z": 5937,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L10.web_of_anker",
+      "alikr_desert.L11.dragon_dens"
+    ]
+  },
+  {
+    "id": "nualeb_cave",
+    "name": "place.nirncraft.nualeb_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8278,
+    "z": 6682,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "alikr_desert.L10.faughtas_guard",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "zoaleb_lookout",
+    "name": "place.nirncraft.zoaleb_lookout",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4491,
+    "z": 6351,
+    "radius": 12,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "dragontail.L5.mines",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "ahalaam_rest",
+    "name": "place.nirncraft.ahalaam_rest",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4519,
+    "z": 7018,
+    "radius": 12,
+    "variant": "campsite",
+    "why": [
+      "dragontail.L5.obsidian_and_sulphur",
+      "dragontail.L3.canyon_springs"
+    ]
+  },
+  {
+    "id": "raan_delve",
+    "name": "place.nirncraft.raan_delve",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8202,
+    "z": 5321,
+    "radius": 36,
+    "variant": "vampire_lair",
+    "class": "minor",
+    "why": [
+      "sentinel.L5.caravan_terminus",
+      "sentinel.L10.coven_of_the_tide"
+    ]
+  },
+  {
+    "id": "mauun_mine",
+    "name": "place.nirncraft.mauun_mine",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7129,
+    "z": 7499,
+    "radius": 20,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "hews_bane.L8.nocturnal_coin_custom",
+      "hews_bane.L1.taneth_cliff_shelf"
+    ]
+  },
+  {
+    "id": "tomb_of_baheb",
+    "name": "place.nirncraft.tomb_of_baheb",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6952,
+    "z": 5129,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "alikr_desert.L10.kykos_coven",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "the_thirsty_barrel",
+    "name": "place.nirncraft.the_thirsty_barrel",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7476,
+    "z": 4904,
+    "radius": 24,
+    "variant": "inn",
+    "why": [
+      "sentinel.L5.salt_pans",
+      "sentinel.L6.ferry_head"
+    ]
+  },
+  {
+    "id": "luahim_camp",
+    "name": "place.nirncraft.luahim_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7494,
+    "z": 6124,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L10.defiled_temples",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "maset_lighthouse",
+    "name": "place.nirncraft.maset_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -7542,
+    "z": 3702,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "bangkorai.L5.timber",
+      "bangkorai.L8.giant_taboo"
+    ]
+  },
+  {
+    "id": "tomb_of_seira",
+    "name": "place.nirncraft.tomb_of_seira",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7385,
+    "z": 6740,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "alikr_desert.L11.two_waves",
+      "alikr_desert.L10.kykos_coven"
+    ]
+  },
+  {
+    "id": "kaheb_ruins",
+    "name": "place.nirncraft.kaheb_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8648,
+    "z": 5768,
+    "radius": 20,
+    "variant": "altar",
+    "why": [
+      "sentinel.L4.coastal_maquis",
+      "sentinel.L1.tigonus_lowland"
+    ]
+  },
+  {
+    "id": "fauun_mine",
+    "name": "place.nirncraft.fauun_mine",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4529,
+    "z": 3815,
+    "radius": 36,
+    "variant": "daedric_ruin",
+    "class": "short",
+    "why": [
+      "bangkorai.L5.river_trade",
+      "bangkorai.L9.forebear_ports"
+    ]
+  },
+  {
+    "id": "wreck_of_the_winking_netch",
+    "name": "place.nirncraft.wreck_of_the_winking_netch",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -8299,
+    "z": 7398,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "hews_bane.L9.collaborator_hunt",
+      "hews_bane.L10.thrall_cove"
+    ]
+  },
+  {
+    "id": "tzinthzark",
+    "name": "place.nirncraft.tzinthzark",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7312,
+    "z": 4848,
+    "radius": 36,
+    "variant": "daedric_ruin",
+    "class": "major",
+    "why": [
+      "sentinel.L4.terrace_gardens",
+      "sentinel.L10.witches_of_the_marsh"
+    ]
+  },
+  {
+    "id": "qaana",
+    "name": "place.nirncraft.qaana",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4633,
+    "z": 3562,
+    "radius": 28,
+    "why": [
+      "bangkorai.L5.bridge_traffic",
+      "bangkorai.L6.garrison_pass"
+    ]
+  },
+  {
+    "id": "ashezir_burrow",
+    "name": "place.nirncraft.ashezir_burrow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7024,
+    "z": 7147,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "hews_bane.L9.syndicate_vs_thieves",
+      "hews_bane.L9.collaborator_hunt"
+    ]
+  },
+  {
+    "id": "baira",
+    "name": "place.nirncraft.baira",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5167,
+    "z": 6928,
+    "radius": 28,
+    "why": [
+      "dragontail.L4.volcanic_scree",
+      "dragontail.L7.ore_lords"
+    ]
+  },
+  {
+    "id": "zaaleb_ruins",
+    "name": "place.nirncraft.zaaleb_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6641,
+    "z": 7279,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "hews_bane.L10.ahaleb_necropolis",
+      "hews_bane.L3.tidal_caverns"
+    ]
+  },
+  {
+    "id": "ashakir_wharf",
+    "name": "place.nirncraft.ashakir_wharf",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -9968,
+    "z": 7120,
+    "radius": 40,
+    "why": [
+      "stros_mkai.L9.smuggling_ring",
+      "stros_mkai.L6.lighthouse_point"
+    ]
+  },
+  {
+    "id": "baakir_necropolis",
+    "name": "place.nirncraft.baakir_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5210,
+    "z": 6705,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "dragontail.L4.fumarole_field",
+      "dragontail.L8.fire_pacts"
+    ]
+  },
+  {
+    "id": "shrine_of_hoonding",
+    "name": "place.nirncraft.shrine_of_hoonding",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6471,
+    "z": 7533,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "hews_bane.L10.thrall_cove",
+      "hews_bane.L11.prince_hubalajad_folly"
+    ]
+  },
+  {
+    "id": "qauun_oasis",
+    "name": "place.nirncraft.qauun_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -6406,
+    "z": 4654,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "dragontail.L4.canyon_fern",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "berezir_farm",
+    "name": "place.nirncraft.berezir_farm",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -6888,
+    "z": 4754,
+    "radius": 28,
+    "variant": "estate",
+    "why": [
+      "sentinel.L4.tigonus_marsh",
+      "sentinel.L6.marsh_town"
+    ]
+  },
+  {
+    "id": "wreck_of_the_drowsy_mudcrab",
+    "name": "place.nirncraft.wreck_of_the_drowsy_mudcrab",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10637,
+    "z": 6993,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "stros_mkai.L10.catacombs",
+      "stros_mkai.L10.ngastas_isle"
+    ]
+  },
+  {
+    "id": "raama_mine",
+    "name": "place.nirncraft.raama_mine",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7885,
+    "z": 6577,
+    "radius": 20,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L11.dragon_dens",
+      "alikr_desert.L1.reg_plain"
+    ]
+  },
+  {
+    "id": "maud_lighthouse",
+    "name": "place.nirncraft.maud_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -10920,
+    "z": 4907,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L11.caravan_wars",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "wreck_of_the_jolly_stag",
+    "name": "place.nirncraft.wreck_of_the_jolly_stag",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -10745,
+    "z": 5608,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L5.caravan_tolls",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "tavama_farm",
+    "name": "place.nirncraft.tavama_farm",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6453,
+    "z": 6681,
+    "radius": 28,
+    "variant": "mill",
+    "why": [
+      "alikr_desert.L5.salt_trade",
+      "alikr_desert.L6.well_towns"
+    ]
+  },
+  {
+    "id": "luanset_burrow",
+    "name": "place.nirncraft.luanset_burrow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5481,
+    "z": 5926,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "dragontail.L4.cedar_ridge",
+      "dragontail.L10.lava_tubes"
+    ]
+  },
+  {
+    "id": "koud_tombs",
+    "name": "place.nirncraft.koud_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5836,
+    "z": 5837,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "dragontail.L4.vent_daedra",
+      "dragontail.L11.imperial_border"
+    ]
+  },
+  {
+    "id": "taahim_keep",
+    "name": "place.nirncraft.taahim_keep",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5867,
+    "z": 5043,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "dragontail.L3.snowmelt",
+      "dragontail.L9.debt_unrest"
+    ]
+  },
+  {
+    "id": "qaanset_tombs",
+    "name": "place.nirncraft.qaanset_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7157,
+    "z": 7285,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "hews_bane.L10.hubalajad_palace",
+      "hews_bane.L8.nocturnal_coin_custom"
+    ]
+  },
+  {
+    "id": "halilah_hollow",
+    "name": "place.nirncraft.halilah_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -6185,
+    "z": 4586,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "dragontail.L3.canyon_springs",
+      "dragontail.L10.devilrock_coven"
+    ]
+  },
+  {
+    "id": "yasheb_camp",
+    "name": "place.nirncraft.yasheb_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5300,
+    "z": 5904,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "dragontail.L3.sulphur_springs",
+      "dragontail.L6.mine_villages"
+    ]
+  },
+  {
+    "id": "wreck_of_the_jolly_guar",
+    "name": "place.nirncraft.wreck_of_the_jolly_guar",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -6444,
+    "z": 4248,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "dragontail.L1.black_ridges",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "suluun_fire",
+    "name": "place.nirncraft.suluun_fire",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7859,
+    "z": 5487,
+    "radius": 12,
+    "variant": "campsite",
+    "why": [
+      "alikr_desert.L5.oasis_dates",
+      "alikr_desert.L1.mesas"
+    ]
+  },
+  {
+    "id": "kiheb_farm",
+    "name": "place.nirncraft.kiheb_farm",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4119,
+    "z": 6537,
+    "radius": 28,
+    "variant": "estate",
+    "why": [
+      "dragontail.L1.red_wall",
+      "dragontail.L6.pass_to_kvatch"
+    ]
+  },
+  {
+    "id": "nuar_ruins",
+    "name": "place.nirncraft.nuar_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8168,
+    "z": 5320,
+    "radius": 20,
+    "variant": "watch",
+    "why": [
+      "sentinel.L4.harpy_cliffs",
+      "sentinel.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "luahim_oasis",
+    "name": "place.nirncraft.luahim_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -8135,
+    "z": 7471,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "hews_bane.L11.betrayal_of_taneth",
+      "hews_bane.L1.abecean_headlands"
+    ]
+  },
+  {
+    "id": "ashezir_rest",
+    "name": "place.nirncraft.ashezir_rest",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5911,
+    "z": 7537,
+    "radius": 12,
+    "variant": "campsite",
+    "why": [
+      "hews_bane.L11.prince_hubalajad_folly",
+      "hews_bane.L3.cliff_cisterns"
+    ]
+  },
+  {
+    "id": "tavan_crypt",
+    "name": "place.nirncraft.tavan_crypt",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7539,
+    "z": 6487,
+    "radius": 18,
+    "variant": "necromancer_lair",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L4.erg_dunes",
+      "alikr_desert.L11.dragon_dens"
+    ]
+  },
+  {
+    "id": "mtharzthumz",
+    "name": "place.nirncraft.mtharzthumz",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8716,
+    "z": 6450,
+    "radius": 32,
+    "variant": "dwemer_ruin",
+    "class": "major",
+    "why": [
+      "alikr_desert.L4.reg_plain",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "tomb_of_qaalaam",
+    "name": "place.nirncraft.tomb_of_qaalaam",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5137,
+    "z": 6004,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "dragontail.L1.ore_seams",
+      "dragontail.L10.mountain_witches"
+    ]
+  },
+  {
+    "id": "berakir_web",
+    "name": "place.nirncraft.berakir_web",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -4889,
+    "z": 8020,
+    "radius": 18,
+    "variant": "spider_cave",
+    "class": "short",
+    "why": [
+      "hews_bane.L5.abecean_shipping",
+      "hews_bane.L8.no_forgiveness_oath"
+    ]
+  },
+  {
+    "id": "zoud_oasis",
+    "name": "place.nirncraft.zoud_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6449,
+    "z": 7315,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "hews_bane.L5.smuggled_cargo",
+      "hews_bane.L8.no_forgiveness_oath"
+    ]
+  },
+  {
+    "id": "tomb_of_kiana",
+    "name": "place.nirncraft.tomb_of_kiana",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -4952,
+    "z": 8495,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "hews_bane.L5.terrace_perfume",
+      "hews_bane.L10.hubalajad_palace"
+    ]
+  },
+  {
+    "id": "bthanthunch",
+    "name": "place.nirncraft.bthanthunch",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4680,
+    "z": 4079,
+    "radius": 36,
+    "variant": "orc_ruin",
+    "class": "short",
+    "why": [
+      "bangkorai.L4.river_jungle",
+      "bangkorai.L11.na_totambu_line"
+    ]
+  },
+  {
+    "id": "gaama_oasis",
+    "name": "place.nirncraft.gaama_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5817,
+    "z": 7733,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "hews_bane.L4.palm_and_cypress_terraces",
+      "hews_bane.L1.abahs_cove"
+    ]
+  },
+  {
+    "id": "nuahim_delve",
+    "name": "place.nirncraft.nuahim_delve",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5096,
+    "z": 6520,
+    "radius": 20,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "dragontail.L2.mountain_cold",
+      "dragontail.L5.mines"
+    ]
+  },
+  {
+    "id": "shailah_hole",
+    "name": "place.nirncraft.shailah_hole",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6899,
+    "z": 7449,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "hews_bane.L4.sea_cliff_harpies",
+      "hews_bane.L9.collaborator_hunt"
+    ]
+  },
+  {
+    "id": "ashset_burrow",
+    "name": "place.nirncraft.ashset_burrow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4949,
+    "z": 5838,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "dragontail.L2.fume_haze",
+      "dragontail.L8.fire_pacts"
+    ]
+  },
+  {
+    "id": "sulan_watch",
+    "name": "place.nirncraft.sulan_watch",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -4492,
+    "z": 8473,
+    "radius": 12,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "hews_bane.L4.cove_reefs",
+      "hews_bane.L6.necropolis_cliffs"
+    ]
+  },
+  {
+    "id": "luam_watch",
+    "name": "place.nirncraft.luam_watch",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4180,
+    "z": 5512,
+    "radius": 12,
+    "variant": "tower",
+    "class": "minor",
+    "why": [
+      "dragontail.L2.canyon_shade",
+      "dragontail.L10.khulari_mines"
+    ]
+  },
+  {
+    "id": "rkhunzak",
+    "name": "place.nirncraft.rkhunzak",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8432,
+    "z": 5626,
+    "radius": 36,
+    "variant": "orc_ruin",
+    "class": "major",
+    "why": [
+      "sentinel.L4.salt_flat",
+      "sentinel.L9.betony_lever"
+    ]
+  },
+  {
+    "id": "saakir_farm",
+    "name": "place.nirncraft.saakir_farm",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5848,
+    "z": 4279,
+    "radius": 28,
+    "why": [
+      "bangkorai.L4.red_clay_banks",
+      "bangkorai.L7.mixed_towns"
+    ]
+  },
+  {
+    "id": "maud_den",
+    "name": "place.nirncraft.maud_den",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3688,
+    "z": 3480,
+    "radius": 18,
+    "variant": "den",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "craglorn.L1.craglorn_badlands",
+      "craglorn.L8.arena_glory"
+    ]
+  },
+  {
+    "id": "wreck_of_the_tipsy_mudcrab",
+    "name": "place.nirncraft.wreck_of_the_tipsy_mudcrab",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -9015,
+    "z": 6778,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L4.oasis_grove",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "maan_burrow",
+    "name": "place.nirncraft.maan_burrow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6488,
+    "z": 7980,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "hews_bane.L3.cliff_cisterns",
+      "hews_bane.L11.prince_hubalajad_folly"
+    ]
+  },
+  {
+    "id": "kiset_wharf",
+    "name": "place.nirncraft.kiset_wharf",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -9419,
+    "z": 6471,
+    "radius": 40,
+    "why": [
+      "alikr_desert.L4.wadi_bed",
+      "alikr_desert.L6.well_towns"
+    ]
+  },
+  {
+    "id": "luam_cave",
+    "name": "place.nirncraft.luam_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -6072,
+    "z": 4041,
+    "radius": 36,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "bangkorai.L4.cloud_forest",
+      "bangkorai.L1.ephesus_heights"
+    ]
+  },
+  {
+    "id": "sailah_homestead",
+    "name": "place.nirncraft.sailah_homestead",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6034,
+    "z": 7826,
+    "radius": 30,
+    "variant": "estate",
+    "why": [
+      "hews_bane.L3.tidal_caverns",
+      "hews_bane.L6.taneth_city"
+    ]
+  },
+  {
+    "id": "the_prancing_wheel",
+    "name": "place.nirncraft.the_prancing_wheel",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5137,
+    "z": 5817,
+    "radius": 24,
+    "variant": "inn",
+    "why": [
+      "dragontail.L6.terrace_city",
+      "dragontail.L5.mines"
+    ]
+  },
+  {
+    "id": "faaleb_cove",
+    "name": "place.nirncraft.faaleb_cove",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7288,
+    "z": 4888,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "short",
+    "why": [
+      "sentinel.L3.palace_cisterns",
+      "sentinel.L9.betony_lever"
+    ]
+  },
+  {
+    "id": "ahira_encampment",
+    "name": "place.nirncraft.ahira_encampment",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6100,
+    "z": 5709,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L4.mesa_and_hoodoo",
+      "alikr_desert.L6.well_towns"
+    ]
+  },
+  {
+    "id": "maanset_hollow",
+    "name": "place.nirncraft.maanset_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5615,
+    "z": 7785,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L10.ahaleb_necropolis"
+    ]
+  },
+  {
+    "id": "sulorra_delve",
+    "name": "place.nirncraft.sulorra_delve",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5433,
+    "z": 5260,
+    "radius": 20,
+    "variant": "mine",
+    "class": "minor",
+    "why": [
+      "dragontail.L6.mine_villages",
+      "dragontail.L1.black_ridges"
+    ]
+  },
+  {
+    "id": "gaan_undercroft",
+    "name": "place.nirncraft.gaan_undercroft",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6728,
+    "z": 6031,
+    "radius": 18,
+    "variant": "vampire_lair",
+    "class": "short",
+    "why": [
+      "alikr_desert.L4.scorpion_ground",
+      "alikr_desert.L11.dragon_dens"
+    ]
+  },
+  {
+    "id": "zoama_hole",
+    "name": "place.nirncraft.zoama_hole",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7320,
+    "z": 6257,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L4.serpent_sands",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "raama_homestead",
+    "name": "place.nirncraft.raama_homestead",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3661,
+    "z": 5459,
+    "radius": 30,
+    "variant": "homestead",
+    "why": [
+      "dragontail.L6.pass_to_kvatch",
+      "dragontail.L7.ore_lords"
+    ]
+  },
+  {
+    "id": "koakir_cave",
+    "name": "place.nirncraft.koakir_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5576,
+    "z": 3912,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "bangkorai.L4.giant_glades",
+      "bangkorai.L10.khulari_heights"
+    ]
+  },
+  {
+    "id": "taanset_burrow",
+    "name": "place.nirncraft.taanset_burrow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7693,
+    "z": 7413,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "hews_bane.L1.taneth_cliff_shelf",
+      "hews_bane.L11.betrayal_of_taneth"
+    ]
+  },
+  {
+    "id": "bulush_sanctum",
+    "name": "place.nirncraft.bulush_sanctum",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7568,
+    "z": 5772,
+    "radius": 18,
+    "variant": "necromancer_lair",
+    "class": "short",
+    "why": [
+      "alikr_desert.L4.dragon_dens",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "zoira_grotto",
+    "name": "place.nirncraft.zoira_grotto",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4912,
+    "z": 7728,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L7.ore_lords",
+      "dragontail.L6.mine_villages"
+    ]
+  },
+  {
+    "id": "halan_hollow",
+    "name": "place.nirncraft.halan_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5335,
+    "z": 4647,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "dragontail.L7.debt_miners",
+      "dragontail.L10.khulari_mines"
+    ]
+  },
+  {
+    "id": "baheb_rest",
+    "name": "place.nirncraft.baheb_rest",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3726,
+    "z": 5044,
+    "radius": 12,
+    "variant": "campsite",
+    "why": [
+      "dragontail.L8.arkay_patron",
+      "dragontail.L3.canyon_springs"
+    ]
+  },
+  {
+    "id": "berud",
+    "name": "place.nirncraft.berud",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5880,
+    "z": 7368,
+    "radius": 28,
+    "why": [
+      "hews_bane.L1.abahs_cove",
+      "hews_bane.L9.collaborator_hunt"
+    ]
+  },
+  {
+    "id": "druscashamz",
+    "name": "place.nirncraft.druscashamz",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10264,
+    "z": 7416,
+    "radius": 36,
+    "variant": "vampire_lair",
+    "class": "short",
+    "why": [
+      "stros_mkai.L10.waterfall_hideout",
+      "stros_mkai.L8.hunding_memory"
+    ]
+  },
+  {
+    "id": "sulush_lighthouse",
+    "name": "place.nirncraft.sulush_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -9357,
+    "z": 5256,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L3.owned_wells",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "baset_campsite",
+    "name": "place.nirncraft.baset_campsite",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4973,
+    "z": 5032,
+    "radius": 12,
+    "variant": "campsite",
+    "why": [
+      "dragontail.L8.fire_pacts",
+      "dragontail.L4.fumarole_field"
+    ]
+  },
+  {
+    "id": "ahorra_necropolis",
+    "name": "place.nirncraft.ahorra_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6739,
+    "z": 6745,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "alikr_desert.L3.hidden_wells",
+      "alikr_desert.L10.kykos_coven"
+    ]
+  },
+  {
+    "id": "beran_necropolis",
+    "name": "place.nirncraft.beran_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7280,
+    "z": 7829,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "hews_bane.L2.warm_abecean_breeze",
+      "hews_bane.L9.syndicate_vs_thieves"
+    ]
+  },
+  {
+    "id": "zoana_homestead",
+    "name": "place.nirncraft.zoana_homestead",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4634,
+    "z": 6138,
+    "radius": 30,
+    "variant": "mill",
+    "why": [
+      "dragontail.L9.debt_unrest",
+      "dragontail.L5.mines"
+    ]
+  },
+  {
+    "id": "jaheb_oasis",
+    "name": "place.nirncraft.jaheb_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7862,
+    "z": 6771,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "alikr_desert.L3.qanat_lines",
+      "alikr_desert.L4.mesa_and_hoodoo"
+    ]
+  },
+  {
+    "id": "haaleb_ruins",
+    "name": "place.nirncraft.haaleb_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4332,
+    "z": 6970,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "dragontail.L9.arms_for_both",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "abilah_lighthouse",
+    "name": "place.nirncraft.abilah_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -10169,
+    "z": 6135,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L1.erg",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "qaezir_ruins",
+    "name": "place.nirncraft.qaezir_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7241,
+    "z": 5420,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "alikr_desert.L1.mesas",
+      "alikr_desert.L8.well_oaths"
+    ]
+  },
+  {
+    "id": "jaama_ruins",
+    "name": "place.nirncraft.jaama_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5933,
+    "z": 8154,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "hews_bane.L2.southern_squalls",
+      "hews_bane.L3.cliff_cisterns"
+    ]
+  },
+  {
+    "id": "zaiz",
+    "name": "place.nirncraft.zaiz",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5875,
+    "z": 6062,
+    "radius": 28,
+    "why": [
+      "dragontail.L10.scourg_barrow",
+      "dragontail.L8.fire_pacts"
+    ]
+  },
+  {
+    "id": "koalaam_necropolis",
+    "name": "place.nirncraft.koalaam_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3865,
+    "z": 6610,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "dragontail.L10.devilrock_coven",
+      "dragontail.L10.scourg_barrow"
+    ]
+  },
+  {
+    "id": "daira_pillar",
+    "name": "place.nirncraft.daira_pillar",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -6544,
+    "z": 4816,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "dragontail.L10.mountain_witches",
+      "dragontail.L4.fumarole_field"
+    ]
+  },
+  {
+    "id": "luset_necropolis",
+    "name": "place.nirncraft.luset_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4838,
+    "z": 6776,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "dragontail.L10.lava_tubes",
+      "dragontail.L11.imperial_border"
+    ]
+  },
+  {
+    "id": "ashanset_homestead",
+    "name": "place.nirncraft.ashanset_homestead",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5271,
+    "z": 5402,
+    "radius": 30,
+    "why": [
+      "dragontail.L10.khulari_mines",
+      "dragontail.L3.canyon_springs"
+    ]
+  },
+  {
+    "id": "gaam_arch",
+    "name": "place.nirncraft.gaam_arch",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4102,
+    "z": 5126,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "dragontail.L11.scourg_kings",
+      "dragontail.L1.red_wall"
+    ]
+  },
+  {
+    "id": "the_prancing_goat",
+    "name": "place.nirncraft.the_prancing_goat",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7831,
+    "z": 7695,
+    "radius": 24,
+    "variant": "inn",
+    "why": [
+      "hews_bane.L6.taneth_city",
+      "hews_bane.L7.dock_thieves_and_cutpurses"
+    ]
+  },
+  {
+    "id": "wreck_of_the_copper_mudcrab",
+    "name": "place.nirncraft.wreck_of_the_copper_mudcrab",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6383,
+    "z": 8167,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "hews_bane.L6.abahs_landing",
+      "hews_bane.L10.ahaleb_necropolis"
+    ]
+  },
+  {
+    "id": "zooon_sanctum",
+    "name": "place.nirncraft.zooon_sanctum",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5390,
+    "z": 6806,
+    "radius": 18,
+    "variant": "vampire_lair",
+    "class": "minor",
+    "why": [
+      "dragontail.L11.imperial_border",
+      "dragontail.L10.khulari_mines"
+    ]
+  },
+  {
+    "id": "tavanset_undercroft",
+    "name": "place.nirncraft.tavanset_undercroft",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8826,
+    "z": 6056,
+    "radius": 18,
+    "variant": "necromancer_lair",
+    "class": "minor",
+    "why": [
+      "sentinel.L3.wadi_river",
+      "sentinel.L10.coven_of_the_tide"
+    ]
+  },
+  {
+    "id": "yasahim_ruins",
+    "name": "place.nirncraft.yasahim_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5609,
+    "z": 4078,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "bangkorai.L4.river_mouth_mangrove",
+      "bangkorai.L8.giant_taboo"
+    ]
+  },
+  {
+    "id": "bulilah_ruins",
+    "name": "place.nirncraft.bulilah_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4654,
+    "z": 5958,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "dragontail.L5.mines",
+      "dragontail.L4.fumarole_field"
+    ]
+  },
+  {
+    "id": "haahim_web",
+    "name": "place.nirncraft.haahim_web",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -3826,
+    "z": 6830,
+    "radius": 18,
+    "variant": "spider_cave",
+    "class": "short",
+    "why": [
+      "dragontail.L5.obsidian_and_sulphur",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "shaam_camp",
+    "name": "place.nirncraft.shaam_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5994,
+    "z": 6584,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "hews_bane.L6.necropolis_cliffs",
+      "hews_bane.L6.taneth_city"
+    ]
+  },
+  {
+    "id": "maaleb_ruins",
+    "name": "place.nirncraft.maaleb_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5142,
+    "z": 7398,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "dragontail.L4.volcanic_scree",
+      "dragontail.L11.scourg_kings"
+    ]
+  },
+  {
+    "id": "tavorra_cove",
+    "name": "place.nirncraft.tavorra_cove",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10200,
+    "z": 7416,
+    "radius": 40,
+    "why": [
+      "stros_mkai.L10.ngastas_isle",
+      "stros_mkai.L9.treaty_ground"
+    ]
+  },
+  {
+    "id": "zoud_lighthouse",
+    "name": "place.nirncraft.zoud_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -9940,
+    "z": 4810,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L1.reg_plain",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "taabah_cavern",
+    "name": "place.nirncraft.taabah_cavern",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3560,
+    "z": 2616,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "craglorn.L1.starfall_craters",
+      "craglorn.L9.serpent_cult_rising"
+    ]
+  },
+  {
+    "id": "bulorra_farm",
+    "name": "place.nirncraft.bulorra_farm",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7975,
+    "z": 6394,
+    "radius": 28,
+    "why": [
+      "alikr_desert.L1.dakfron_hot_plain",
+      "alikr_desert.L6.well_towns"
+    ]
+  },
+  {
+    "id": "taush_cave",
+    "name": "place.nirncraft.taush_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6356,
+    "z": 5079,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L1.buried_valleys",
+      "alikr_desert.L11.dragon_dens"
+    ]
+  },
+  {
+    "id": "ahabah_hollow",
+    "name": "place.nirncraft.ahabah_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8311,
+    "z": 6071,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "alikr_desert.L2.sandstorms",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "qaset_hollow",
+    "name": "place.nirncraft.qaset_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4242,
+    "z": 2287,
+    "radius": 18,
+    "variant": "den",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "craglorn.L1.elinhir_granite_tiers",
+      "craglorn.L10.skyreach_pinnacle"
+    ]
+  },
+  {
+    "id": "berana_hole",
+    "name": "place.nirncraft.berana_hole",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8085,
+    "z": 7250,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "alikr_desert.L2.hot_dakfron",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "jaabah_grotto",
+    "name": "place.nirncraft.jaabah_grotto",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -6727,
+    "z": 4297,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "short",
+    "why": [
+      "dragontail.L4.fumarole_field",
+      "dragontail.L10.khulari_mines"
+    ]
+  },
+  {
+    "id": "sulilah_lighthouse",
+    "name": "place.nirncraft.sulilah_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -9751,
+    "z": 5135,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L2.cold_nights",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "berud_tombs",
+    "name": "place.nirncraft.berud_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10448,
+    "z": 7376,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "stros_mkai.L10.bthzark",
+      "stros_mkai.L10.waterfall_hideout"
+    ]
+  },
+  {
+    "id": "halama_oasis",
+    "name": "place.nirncraft.halama_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4920,
+    "z": 3592,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "bangkorai.L3.lainlyn_river",
+      "bangkorai.L1.red_clay_valleys"
+    ]
+  },
+  {
+    "id": "zaush_camp",
+    "name": "place.nirncraft.zaush_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -6992,
+    "z": 4624,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "sentinel.L3.terrace_channels",
+      "sentinel.L10.coven_of_the_tide"
+    ]
+  },
+  {
+    "id": "yasset_keep",
+    "name": "place.nirncraft.yasset_keep",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4201,
+    "z": 6182,
+    "radius": 24,
+    "variant": "keep",
+    "class": "short",
+    "why": [
+      "dragontail.L4.canyon_fern",
+      "dragontail.L8.fire_pacts"
+    ]
+  },
+  {
+    "id": "sulush_ruins",
+    "name": "place.nirncraft.sulush_ruins",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10540,
+    "z": 7176,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "stros_mkai.L11.hunding_bay_battle",
+      "stros_mkai.L4.island_palm_coast"
+    ]
+  },
+  {
+    "id": "baezir_encampment",
+    "name": "place.nirncraft.baezir_encampment",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4623,
+    "z": 5037,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "dragontail.L4.cedar_ridge",
+      "dragontail.L10.scourg_barrow"
+    ]
+  },
+  {
+    "id": "luana_oasis",
+    "name": "place.nirncraft.luana_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7898,
+    "z": 7057,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "alikr_desert.L6.caravanserai_city",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "yasar_farm",
+    "name": "place.nirncraft.yasar_farm",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3511,
+    "z": 2707,
+    "radius": 28,
+    "why": [
+      "craglorn.L2.high_dry_air",
+      "craglorn.L5.crater_glass_and_ore"
+    ]
+  },
+  {
+    "id": "saakir_hollow",
+    "name": "place.nirncraft.saakir_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4532,
+    "z": 7666,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L4.vent_daedra",
+      "dragontail.L10.lava_tubes"
+    ]
+  },
+  {
+    "id": "haoon_tombs",
+    "name": "place.nirncraft.haoon_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6247,
+    "z": 7730,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "hews_bane.L7.forebear_merchant_syndicates",
+      "hews_bane.L11.prince_hubalajad_folly"
+    ]
+  },
+  {
+    "id": "ahiz_lighthouse",
+    "name": "place.nirncraft.ahiz_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -9896,
+    "z": 7313,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "stros_mkai.L11.first_treaty",
+      "stros_mkai.L11.garrison_rising"
+    ]
+  },
+  {
+    "id": "bular_hollow",
+    "name": "place.nirncraft.bular_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6711,
+    "z": 5236,
+    "radius": 18,
+    "variant": "vampire_lair",
+    "class": "short",
+    "why": [
+      "alikr_desert.L6.well_towns",
+      "alikr_desert.L11.dragon_dens"
+    ]
+  },
+  {
+    "id": "naheb_hollow",
+    "name": "place.nirncraft.naheb_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4424,
+    "z": 3896,
+    "radius": 18,
+    "variant": "cave",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "bangkorai.L3.totambu_river",
+      "bangkorai.L9.grove_push"
+    ]
+  },
+  {
+    "id": "zoahim",
+    "name": "place.nirncraft.zoahim",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3663,
+    "z": 3794,
+    "radius": 28,
+    "why": [
+      "craglorn.L2.pass_chill",
+      "craglorn.L6.dragonstar_city"
+    ]
+  },
+  {
+    "id": "jaira_hollow",
+    "name": "place.nirncraft.jaira_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4871,
+    "z": 3691,
+    "radius": 18,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "bangkorai.L3.floods",
+      "bangkorai.L10.scarab_temple"
+    ]
+  },
+  {
+    "id": "kiud_watch",
+    "name": "place.nirncraft.kiud_watch",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5752,
+    "z": 6895,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "dragontail.L3.snowmelt",
+      "dragontail.L11.imperial_border"
+    ]
+  },
+  {
+    "id": "qaar_tombs",
+    "name": "place.nirncraft.qaar_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5813,
+    "z": 7311,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "hews_bane.L7.dock_thieves_and_cutpurses",
+      "hews_bane.L8.nocturnal_coin_custom"
+    ]
+  },
+  {
+    "id": "qaezir",
+    "name": "place.nirncraft.qaezir",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7471,
+    "z": 7240,
+    "radius": 28,
+    "why": [
+      "hews_bane.L7.hunted_traitors",
+      "hews_bane.L3.tidal_caverns"
+    ]
+  },
+  {
+    "id": "halush_watchtower",
+    "name": "place.nirncraft.halush_watchtower",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7345,
+    "z": 6475,
+    "radius": 12,
+    "variant": "tower",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L6.south_coast_cities",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "nuset_hideout",
+    "name": "place.nirncraft.nuset_hideout",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10328,
+    "z": 6984,
+    "radius": 36,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "stros_mkai.L11.second_treaty",
+      "stros_mkai.L10.ngastas_isle"
+    ]
+  },
+  {
+    "id": "qaabah_cave",
+    "name": "place.nirncraft.qaabah_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5496,
+    "z": 7576,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L3.canyon_springs",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "tomb_of_jaama",
+    "name": "place.nirncraft.tomb_of_jaama",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5933,
+    "z": 5327,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "dragontail.L3.sulphur_springs",
+      "dragontail.L10.devilrock_coven"
+    ]
+  },
+  {
+    "id": "baanset_camp",
+    "name": "place.nirncraft.baanset_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6837,
+    "z": 5486,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L7.crown_oasis_lords",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "raama_cove",
+    "name": "place.nirncraft.raama_cove",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -4922,
+    "z": 8718,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "hews_bane.L8.forebear_temples",
+      "hews_bane.L9.syndicate_vs_thieves"
+    ]
+  },
+  {
+    "id": "yasakir_tombs",
+    "name": "place.nirncraft.yasakir_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10408,
+    "z": 7512,
+    "radius": 36,
+    "variant": "bandit_camp",
+    "class": "unmarked",
+    "hidden": true,
+    "why": [
+      "stros_mkai.L11.garrison_rising",
+      "stros_mkai.L6.palace_plateau"
+    ]
+  },
+  {
+    "id": "nuiz_oasis",
+    "name": "place.nirncraft.nuiz_oasis",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3673,
+    "z": 2262,
+    "radius": 20,
+    "variant": "watch",
+    "why": [
+      "craglorn.L6.elinhir_city",
+      "craglorn.L3.canyon_seeps"
+    ]
+  },
+  {
+    "id": "ahira_citadel",
+    "name": "place.nirncraft.ahira_citadel",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5655,
+    "z": 5190,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "dragontail.L1.black_ridges",
+      "dragontail.L10.khulari_mines"
+    ]
+  },
+  {
+    "id": "ahama_camp",
+    "name": "place.nirncraft.ahama_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7499,
+    "z": 7752,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "hews_bane.L8.no_forgiveness_oath",
+      "hews_bane.L10.hubalajad_palace"
+    ]
+  },
+  {
+    "id": "qaama_fort",
+    "name": "place.nirncraft.qaama_fort",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5227,
+    "z": 5199,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "dragontail.L1.red_wall",
+      "dragontail.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "luset_tombs",
+    "name": "place.nirncraft.luset_tombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4056,
+    "z": 3672,
+    "radius": 36,
+    "variant": "orc_ruin",
+    "class": "major",
+    "why": [
+      "craglorn.L6.dragonstar_city",
+      "craglorn.L10.skyreach_pinnacle"
+    ]
+  },
+  {
+    "id": "naorra_farm",
+    "name": "place.nirncraft.naorra_farm",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5136,
+    "z": 8209,
+    "radius": 28,
+    "variant": "homestead",
+    "why": [
+      "hews_bane.L8.nocturnal_coin_custom",
+      "hews_bane.L5.smuggled_cargo"
+    ]
+  },
+  {
+    "id": "zoakir_necropolis",
+    "name": "place.nirncraft.zoakir_necropolis",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6705,
+    "z": 6422,
+    "radius": 24,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "alikr_desert.L7.nomad_tribes",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "beruun_cave",
+    "name": "place.nirncraft.beruun_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7384,
+    "z": 6925,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "alikr_desert.L7.caravan_men",
+      "alikr_desert.L10.kykos_coven"
+    ]
+  },
+  {
+    "id": "daana_cave",
+    "name": "place.nirncraft.daana_cave",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7240,
+    "z": 4488,
+    "radius": 18,
+    "variant": "cave",
+    "class": "short",
+    "why": [
+      "sentinel.L1.harbour_cliff",
+      "sentinel.L9.betony_lever"
+    ]
+  },
+  {
+    "id": "scourg_barrow",
+    "name": "place.nirncraft.scourg_barrow",
+    "type": "dungeon_fixed",
+    "culture": "orc",
+    "region": "hammerfell/dragontail",
+    "x": -4436,
+    "z": 4567,
+    "radius": 36,
+    "variant": "orc_ruin",
+    "class": "marquee",
+    "why": [
+      "dragontail.L10.scourg_barrow",
+      "dragontail.L1.ore_seams",
+      "dragontail.L9.arms_for_both"
+    ]
+  },
+  {
+    "id": "jalallaara",
+    "name": "place.nirncraft.jalallaara",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7558,
+    "z": 5270,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "sentinel.L1.garden_terraces",
+      "sentinel.L6.coast_fief_keeps"
+    ]
+  },
+  {
+    "id": "berbaaqnia",
+    "name": "place.nirncraft.berbaaqnia",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6954,
+    "z": 4940,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "alikr_desert.L8.yokudan_gods",
+      "alikr_desert.L7.nomad_tribes"
+    ]
+  },
+  {
+    "id": "pheonahator",
+    "name": "place.nirncraft.pheonahator",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6349,
+    "z": 5257,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "alikr_desert.L8.stendarr_patron",
+      "alikr_desert.L3.owned_wells"
+    ]
+  },
+  {
+    "id": "santaki_keep",
+    "name": "place.nirncraft.santaki_keep",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -6283,
+    "z": 5018,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "bangkorai.L1.red_clay_valleys",
+      "bangkorai.L9.river_pirates"
+    ]
+  },
+  {
+    "id": "dragontail",
+    "name": "place.nirncraft.dragontail",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4987,
+    "z": 4954,
+    "radius": 40,
+    "variant": "fief_keep",
+    "why": [
+      "dragontail.L2.mountain_cold",
+      "dragontail.L6.pass_to_kvatch"
+    ]
+  },
+  {
+    "id": "bubyrydata",
+    "name": "place.nirncraft.bubyrydata",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6580,
+    "z": 4818,
+    "radius": 40,
+    "why": [
+      "alikr_desert.L8.well_oaths",
+      "alikr_desert.L9.dragon_fear"
+    ]
+  },
+  {
+    "id": "apputhuga",
+    "name": "place.nirncraft.apputhuga",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4786,
+    "z": 3642,
+    "radius": 40,
+    "why": [
+      "bangkorai.L1.ephesus_heights",
+      "bangkorai.L6.ford_towns"
+    ]
+  },
+  {
+    "id": "morenanu",
+    "name": "place.nirncraft.morenanu",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5647,
+    "z": 5131,
+    "radius": 40,
+    "why": [
+      "dragontail.L2.fume_haze",
+      "dragontail.L7.ore_lords"
+    ]
+  },
+  {
+    "id": "tristore_laboratory",
+    "name": "place.nirncraft.tristore_laboratory",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8120,
+    "z": 5050,
+    "radius": 36,
+    "variant": "yokudan_tomb",
+    "class": "marquee",
+    "why": [
+      "sentinel.L1.tigonus_lowland",
+      "sentinel.L10.coven_of_the_tide"
+    ]
+  },
+  {
+    "id": "web_of_anker",
+    "name": "place.nirncraft.web_of_anker",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6820,
+    "z": 5120,
+    "radius": 36,
+    "variant": "scorpion_den",
+    "class": "marquee",
+    "why": [
+      "alikr_desert.L10.web_of_anker",
+      "alikr_desert.L9.well_feud",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "stros_mkai_palace",
+    "name": "place.nirncraft.stros_mkai_palace",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10260,
+    "z": 7180,
+    "radius": 20,
+    "variant": "monument",
+    "why": [
+      "stros_mkai.L5.harbour_trade",
+      "stros_mkai.L1.harbour_bay"
+    ]
+  },
+  {
+    "id": "stros_mkai_catacombs",
+    "name": "place.nirncraft.stros_mkai_catacombs",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10310,
+    "z": 7220,
+    "radius": 36,
+    "variant": "yokudan_tomb",
+    "class": "major",
+    "why": [
+      "stros_mkai.L10.catacombs",
+      "stros_mkai.L5.dwemer_salvage",
+      "stros_mkai.L11.second_treaty"
+    ]
+  },
+  {
+    "id": "stros_mkai_observatory",
+    "name": "place.nirncraft.stros_mkai_observatory",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10520,
+    "z": 7120,
+    "radius": 20,
+    "variant": "dwemer",
+    "why": [
+      "stros_mkai.L5.shipwrights",
+      "stros_mkai.L4.island_palm_coast"
+    ]
+  },
+  {
+    "id": "stros_mkai_causeway",
+    "name": "place.nirncraft.stros_mkai_causeway",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10680,
+    "z": 7010,
+    "radius": 20,
+    "variant": "bridge",
+    "why": [
+      "stros_mkai.L4.island_palm_coast",
+      "stros_mkai.L4.reef_shallows"
+    ]
+  },
+  {
+    "id": "coven_in_the_marsh",
+    "name": "place.nirncraft.coven_in_the_marsh",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7220,
+    "z": 4560,
+    "radius": 36,
+    "variant": "hagraven_lair",
+    "class": "minor",
+    "why": [
+      "sentinel.L1.abibon_coast",
+      "sentinel.L4.coastal_maquis"
+    ]
+  },
+  {
+    "id": "coven_of_the_tide",
+    "name": "place.nirncraft.coven_of_the_tide",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8420,
+    "z": 5480,
+    "radius": 36,
+    "variant": "hagraven_lair",
+    "class": "short",
+    "why": [
+      "sentinel.L10.coven_of_the_tide",
+      "sentinel.L1.bergama_pans",
+      "sentinel.L4.harpy_cliffs"
+    ]
+  },
+  {
+    "id": "coven_of_dust",
+    "name": "place.nirncraft.coven_of_dust",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7528,
+    "z": 5318,
+    "radius": 36,
+    "variant": "hagraven_lair",
+    "class": "short",
+    "why": [
+      "sentinel.L2.winter_rain_coast",
+      "sentinel.L10.witches_of_the_marsh"
+    ]
+  },
+  {
+    "id": "kykos_coven",
+    "name": "place.nirncraft.kykos_coven",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6714,
+    "z": 5446,
+    "radius": 36,
+    "variant": "hagraven_lair",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L10.kykos_coven",
+      "alikr_desert.L9.dragon_fear",
+      "alikr_desert.L10.na_totambu_city"
+    ]
+  },
+  {
+    "id": "devilrock_coven",
+    "name": "place.nirncraft.devilrock_coven",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -6520,
+    "z": 4320,
+    "radius": 36,
+    "variant": "hagraven_lair",
+    "class": "minor",
+    "why": [
+      "dragontail.L10.devilrock_coven",
+      "dragontail.L2.canyon_shade",
+      "dragontail.L4.cedar_ridge"
+    ]
+  },
+  {
+    "id": "coven_of_the_peaks",
+    "name": "place.nirncraft.coven_of_the_peaks",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4325,
+    "z": 4748,
+    "radius": 36,
+    "variant": "hagraven_lair",
+    "class": "minor",
+    "why": [
+      "dragontail.L6.terrace_city",
+      "dragontail.L10.devilrock_coven"
+    ]
+  },
+  {
+    "id": "tomb_of_anahbi",
+    "name": "place.nirncraft.tomb_of_anahbi",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -6040,
+    "z": 5048,
+    "radius": 36,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "dragontail.L6.mine_villages",
+      "dragontail.L10.lava_tubes"
+    ]
+  },
+  {
+    "id": "shrine_of_the_ansei",
+    "name": "place.nirncraft.shrine_of_the_ansei",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8250,
+    "z": 5950,
+    "radius": 20,
+    "variant": "altar",
+    "why": [
+      "alikr_desert.L9.ra_gada_war_camps",
+      "alikr_desert.L3.hidden_wells"
+    ]
+  },
+  {
+    "id": "well_of_the_long_road",
+    "name": "place.nirncraft.well_of_the_long_road",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7600,
+    "z": 5700,
+    "radius": 20,
+    "variant": "source",
+    "why": [
+      "alikr_desert.L10.na_totambu_city",
+      "alikr_desert.L4.reg_plain"
+    ]
+  },
+  {
+    "id": "sandfang_camp",
+    "name": "place.nirncraft.sandfang_camp",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7400,
+    "z": 5600,
+    "radius": 36,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L10.volenfell",
+      "alikr_desert.L6.well_towns"
+    ]
+  },
+  {
+    "id": "wreck_of_the_salt_gazelle",
+    "name": "place.nirncraft.wreck_of_the_salt_gazelle",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -7150,
+    "z": 7950,
+    "radius": 36,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "hews_bane.L9.collaborator_hunt",
+      "hews_bane.L10.ahaleb_necropolis"
+    ]
+  },
+  {
+    "id": "saltwatch_tower",
+    "name": "place.nirncraft.saltwatch_tower",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6500,
+    "z": 7700,
+    "radius": 36,
+    "variant": "watchtower",
+    "class": "minor",
+    "why": [
+      "hews_bane.L9.syndicate_vs_thieves",
+      "hews_bane.L6.taneth_city"
+    ]
+  },
+  {
+    "id": "ra_gada_tomb",
+    "name": "place.nirncraft.ra_gada_tomb",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7100,
+    "z": 6100,
+    "radius": 36,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "alikr_desert.L10.web_of_anker",
+      "alikr_desert.L10.volenfell"
+    ]
+  },
+  {
+    "id": "side_hf_tomb_of_sahrazad",
+    "name": "place.nirncraft.side_hf_tomb_of_sahrazad",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8780,
+    "z": 5950,
+    "radius": 36,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "sentinel.L2.marsh_heat",
+      "sentinel.L10.coven_of_the_tide"
+    ]
+  },
+  {
+    "id": "side_hf_salt_terrace",
+    "name": "place.nirncraft.side_hf_salt_terrace",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7856,
+    "z": 4880,
+    "radius": 20,
+    "variant": "rock",
+    "why": [
+      "sentinel.L2.inland_dry",
+      "sentinel.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "side_hf_faugtas_guard",
+    "name": "place.nirncraft.side_hf_faugtas_guard",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7088,
+    "z": 6032,
+    "radius": 36,
+    "variant": "yokudan_tomb",
+    "class": "short",
+    "why": [
+      "alikr_desert.L10.faughtas_guard",
+      "alikr_desert.L10.kykos_coven"
+    ]
+  },
+  {
+    "id": "side_hf_singing_dunes",
+    "name": "place.nirncraft.side_hf_singing_dunes",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6896,
+    "z": 5180,
+    "radius": 20,
+    "variant": "stones",
+    "why": [
+      "alikr_desert.L10.kykos_coven",
+      "alikr_desert.L11.caravan_wars"
+    ]
+  },
+  {
+    "id": "side_hf_web_of_anker",
+    "name": "place.nirncraft.side_hf_web_of_anker",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6200,
+    "z": 5650,
+    "radius": 36,
+    "variant": "spider_cave",
+    "class": "minor",
+    "why": [
+      "alikr_desert.L10.web_of_anker",
+      "alikr_desert.L10.defiled_temples",
+      "alikr_desert.L8.stendarr_patron"
+    ]
+  },
+  {
+    "id": "side_hf_well_of_two_names",
+    "name": "place.nirncraft.side_hf_well_of_two_names",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5168,
+    "z": 6992,
+    "radius": 20,
+    "variant": "source",
+    "why": [
+      "dragontail.L6.pass_to_kvatch",
+      "dragontail.L1.red_wall"
+    ]
+  },
+  {
+    "id": "side_hf_devilrock",
+    "name": "place.nirncraft.side_hf_devilrock",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4976,
+    "z": 6800,
+    "radius": 36,
+    "variant": "cave",
+    "class": "minor",
+    "why": [
+      "dragontail.L7.ore_lords",
+      "dragontail.L9.debt_unrest"
+    ]
+  },
+  {
+    "id": "side_hf_mother_stone",
+    "name": "place.nirncraft.side_hf_mother_stone",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -4408,
+    "z": 5816,
+    "radius": 20,
+    "variant": "stones",
+    "why": [
+      "dragontail.L7.debt_miners",
+      "dragontail.L4.fumarole_field"
+    ]
+  },
+  {
+    "id": "side_hf_lantern_cistern",
+    "name": "place.nirncraft.side_hf_lantern_cistern",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -6920,
+    "z": 7850,
+    "radius": 36,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "hews_bane.L10.ahaleb_necropolis",
+      "hews_bane.L9.collaborator_hunt"
+    ]
+  },
+  {
+    "id": "side_hf_thornwatch",
+    "name": "place.nirncraft.side_hf_thornwatch",
+    "type": "fort",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5552,
+    "z": 4120,
+    "radius": 44,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "bangkorai.L1.santaki_ridge",
+      "bangkorai.L8.giant_taboo"
+    ]
+  },
+  {
+    "id": "side_hf_starfall_hollow",
+    "name": "place.nirncraft.side_hf_starfall_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4016,
+    "z": 3850,
+    "radius": 36,
+    "variant": "ayleid_ruin",
+    "class": "short",
+    "why": [
+      "craglorn.L6.scavenger_camps",
+      "craglorn.L11.nedic_star_empire"
+    ]
+  },
+  {
+    "id": "side_hf_mzindhal",
+    "name": "place.nirncraft.side_hf_mzindhal",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -4016,
+    "z": 2576,
+    "radius": 36,
+    "variant": "dwemer_ruin",
+    "class": "short",
+    "why": [
+      "craglorn.L7.mage_patrons",
+      "craglorn.L8.arena_glory"
+    ]
+  },
+  {
+    "id": "side_hf_gullwhistle_cove",
+    "name": "place.nirncraft.side_hf_gullwhistle_cove",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10544,
+    "z": 6992,
+    "radius": 36,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "stros_mkai.L4.jungle_hills",
+      "stros_mkai.L10.ngastas_isle"
+    ]
+  },
+  {
+    "id": "side_hf_brine_hollow",
+    "name": "place.nirncraft.side_hf_brine_hollow",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5552,
+    "z": 8336,
+    "radius": 36,
+    "variant": "smuggler_cave",
+    "class": "minor",
+    "why": [
+      "hews_bane.L10.thrall_cove",
+      "hews_bane.L6.taneth_city"
+    ]
+  },
+  {
+    "id": "bactt_grange",
+    "name": "place.nirncraft.bactt_grange",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -5649,
+    "z": 4943,
+    "radius": 28,
+    "variant": "estate",
+    "why": [
+      "dragontail.L8.arkay_patron",
+      "dragontail.L5.mines"
+    ]
+  },
+  {
+    "id": "the_black_castle_hostel",
+    "name": "place.nirncraft.the_black_castle_hostel",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/dragontail",
+    "x": -6420,
+    "z": 4227,
+    "radius": 40,
+    "variant": "inn",
+    "why": [
+      "dragontail.L8.fire_pacts",
+      "dragontail.L8.arkay_patron"
+    ]
+  },
+  {
+    "id": "beram_grange",
+    "name": "place.nirncraft.beram_grange",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4784,
+    "z": 4240,
+    "radius": 28,
+    "variant": "estate",
+    "why": [
+      "bangkorai.L1.bangkorai_pass",
+      "bangkorai.L3.floods"
+    ]
+  },
+  {
+    "id": "the_beaver_and_dog_tavern",
+    "name": "place.nirncraft.the_beaver_and_dog_tavern",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4753,
+    "z": 3946,
+    "radius": 40,
+    "variant": "inn",
+    "why": [
+      "bangkorai.L2.bay_rain",
+      "bangkorai.L8.z_en_patron"
+    ]
+  },
+  {
+    "id": "bivta_grange",
+    "name": "place.nirncraft.bivta_grange",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -8029,
+    "z": 5917,
+    "radius": 28,
+    "variant": "estate",
+    "why": [
+      "alikr_desert.L11.two_waves",
+      "alikr_desert.L5.salt_trade"
+    ]
+  },
+  {
+    "id": "the_silver_mug_inn",
+    "name": "place.nirncraft.the_silver_mug_inn",
+    "type": "village",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6030,
+    "z": 5261,
+    "radius": 40,
+    "variant": "inn",
+    "why": [
+      "alikr_desert.L11.dragon_dens",
+      "alikr_desert.L6.well_towns"
+    ]
+  },
+  {
+    "id": "cachir_orchard",
+    "name": "place.nirncraft.cachir_orchard",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8567,
+    "z": 5716,
+    "radius": 28,
+    "variant": "homestead",
+    "why": [
+      "sentinel.L6.dome_capital",
+      "sentinel.L6.marsh_town"
+    ]
+  },
+  {
+    "id": "sentinel_landmark_01",
+    "name": "place.nirncraft.sentinel_landmark_01",
+    "type": "standing_stone",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8048,
+    "z": 5232,
+    "radius": 12,
+    "variant": "the_warrior",
+    "why": [
+      "sentinel.L6.coast_fief_keeps",
+      "sentinel.L1.tigonus_lowland"
+    ]
+  },
+  {
+    "id": "sentinel_landmark_02",
+    "name": "place.nirncraft.sentinel_landmark_02",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -8872,
+    "z": 6008,
+    "radius": 20,
+    "variant": "wayshrine",
+    "why": [
+      "sentinel.L6.marsh_town",
+      "sentinel.L3.palace_cisterns"
+    ]
+  },
+  {
+    "id": "bangkorai_farmstead_01",
+    "name": "place.nirncraft.bangkorai_farmstead_01",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -4872,
+    "z": 3976,
+    "radius": 28,
+    "variant": "homestead",
+    "why": [
+      "bangkorai.L2.cloud_line",
+      "bangkorai.L6.mountain_keeps"
+    ]
+  },
+  {
+    "id": "bangkorai_landmark_01",
+    "name": "place.nirncraft.bangkorai_landmark_01",
+    "type": "standing_stone",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5040,
+    "z": 3760,
+    "radius": 12,
+    "variant": "the_warrior",
+    "why": [
+      "bangkorai.L6.river_port_city",
+      "bangkorai.L4.giant_glades"
+    ]
+  },
+  {
+    "id": "bangkorai_landmark_02",
+    "name": "place.nirncraft.bangkorai_landmark_02",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/bangkorai",
+    "x": -5336,
+    "z": 4200,
+    "radius": 20,
+    "variant": "wayshrine",
+    "why": [
+      "bangkorai.L6.ford_towns",
+      "bangkorai.L8.na_totambu_reverence"
+    ]
+  },
+  {
+    "id": "stros_mkai_farmstead_01",
+    "name": "place.nirncraft.stros_mkai_farmstead_01",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10256,
+    "z": 6992,
+    "radius": 28,
+    "why": [
+      "stros_mkai.L4.plateau_scrub",
+      "stros_mkai.L5.harbour_trade"
+    ]
+  },
+  {
+    "id": "stros_mkai_farmstead_02",
+    "name": "place.nirncraft.stros_mkai_farmstead_02",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10344,
+    "z": 7352,
+    "radius": 28,
+    "variant": "estate",
+    "why": [
+      "stros_mkai.L4.reef_shallows",
+      "stros_mkai.L6.port_hunding"
+    ]
+  },
+  {
+    "id": "stros_mkai_farmstead_03",
+    "name": "place.nirncraft.stros_mkai_farmstead_03",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10296,
+    "z": 7000,
+    "radius": 28,
+    "variant": "homestead",
+    "why": [
+      "stros_mkai.L3.waterfall_stream",
+      "stros_mkai.L7.harbour_lord_and_merchants"
+    ]
+  },
+  {
+    "id": "stros_mkai_landmark_01",
+    "name": "place.nirncraft.stros_mkai_landmark_01",
+    "type": "landmark",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10472,
+    "z": 7224,
+    "radius": 20,
+    "variant": "altar",
+    "why": [
+      "stros_mkai.L3.palace_cistern",
+      "stros_mkai.L4.island_palm_coast"
+    ]
+  },
+  {
+    "id": "craglorn_farmstead_01",
+    "name": "place.nirncraft.craglorn_farmstead_01",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3816,
+    "z": 3976,
+    "radius": 28,
+    "variant": "estate",
+    "why": [
+      "craglorn.L7.arena_promoters_and_fighters",
+      "craglorn.L3.canyon_seeps"
+    ]
+  },
+  {
+    "id": "craglorn_farmstead_02",
+    "name": "place.nirncraft.craglorn_farmstead_02",
+    "type": "farm",
+    "culture": "redguard",
+    "region": "hammerfell/craglorn",
+    "x": -3752,
+    "z": 2840,
+    "radius": 28,
+    "variant": "homestead",
+    "why": [
+      "craglorn.L7.border_caravaneers",
+      "craglorn.L3.crater_basins"
+    ]
+  },
+  {
+    "id": "stros_mkai_scorpion_pit",
+    "name": "place.nirncraft.stros_mkai_scorpion_pit",
+    "type": "dungeon_fixed",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10420,
+    "z": 7280,
+    "radius": 36,
+    "variant": "scorpion_den",
+    "class": "short",
+    "why": [
+      "stros_mkai.L1.two_lobes",
+      "stros_mkai.L11.hunding_bay_battle"
+    ]
+  },
+  {
+    "id": "abahs_fang_corsair_island",
+    "name": "place.nirncraft.abahs_fang_corsair_island",
+    "type": "landmark",
+    "variant": "island",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -8203,
+    "z": 7714,
+    "radius": 28,
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L5.abecean_shipping"
+    ]
+  },
+  {
+    "id": "no_shira_outer_shipwreck",
+    "name": "place.nirncraft.no_shira_outer_shipwreck",
+    "type": "dungeon_fixed",
+    "variant": "shipwreck",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -8381,
+    "z": 7787,
+    "radius": 28,
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L5.abecean_shipping"
+    ]
+  },
+  {
+    "id": "stros_mkai_chain_sea_cave",
+    "name": "place.nirncraft.stros_mkai_chain_sea_cave",
+    "type": "dungeon_fixed",
+    "variant": "sea_cave",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10985,
+    "z": 6779,
+    "radius": 28,
+    "why": [
+      "stros_mkai.L1.two_lobes",
+      "stros_mkai.L5.harbour_trade"
+    ]
+  },
+  {
+    "id": "bthzark_shoal_coral_reef",
+    "name": "place.nirncraft.bthzark_shoal_coral_reef",
+    "type": "landmark",
+    "variant": "reef",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10844,
+    "z": 7105,
+    "radius": 28,
+    "why": [
+      "stros_mkai.L1.two_lobes",
+      "stros_mkai.L5.harbour_trade"
+    ]
+  },
+  {
+    "id": "sentinel_iliac_atoll_island",
+    "name": "place.nirncraft.sentinel_iliac_atoll_island",
+    "type": "landmark",
+    "variant": "island",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -6984,
+    "z": 4230,
+    "radius": 28,
+    "why": [
+      "sentinel.L1.harbour_cliff",
+      "sentinel.L5.dye_works"
+    ]
+  },
+  {
+    "id": "kairula_tidal_sea_vault",
+    "name": "place.nirncraft.kairula_tidal_sea_vault",
+    "type": "dungeon_fixed",
+    "variant": "sea_vault",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7031,
+    "z": 4089,
+    "radius": 28,
+    "why": [
+      "sentinel.L1.harbour_cliff",
+      "sentinel.L5.dye_works"
+    ]
+  }
+]

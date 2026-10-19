@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": "nirncraft:dune_sand"
+  },
+  "result": {
+    "id": "minecraft:sandstone"
+  }
+}

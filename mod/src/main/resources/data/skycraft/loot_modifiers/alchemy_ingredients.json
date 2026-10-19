@@ -1,7 +1,0 @@
-{
-  "type": "skycraft:add_table",
-  "table": "skycraft:chests/alchemy_ingredients",
-  "prefix": "chests/",
-  "chance": 0.5,
-  "priority": 17
-}

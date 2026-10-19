@@ -1,0 +1,248 @@
+[
+  {
+    "regions": [
+      "morrowind/solstheim"
+    ],
+    "families": [
+      "plains",
+      "forest",
+      "frozen",
+      "mountain",
+      "swamp",
+      "desert",
+      "jungle",
+      "ash",
+      "beach",
+      "river"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:riekling",
+        "count": [
+          2,
+          4
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          3,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:ash_spawn",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 6,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:wolf",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:bear",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:troll",
+        "count": [
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 2,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:bandit",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:cliff_racer",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:netch",
+        "count": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 4,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:horker",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "surface",
+        "entity": "nirncraft:elk",
+        "count": [
+          1,
+          2
+        ]
+      }
+    ],
+    "why": [
+      "solstheim.L4.ash_waste",
+      "solstheim.L4.riekling_country",
+      "solstheim.L10.ash_spawn"
+    ]
+  },
+  {
+    "regions": [
+      "morrowind/solstheim"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:riekling",
+        "count": [
+          2,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:frostbite_spider",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 5,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:draugr",
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 3,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:ash_spawn",
+        "count": [
+          1,
+          2
+        ]
+      }
+    ],
+    "why": [
+      "solstheim.L10.riekling_dens",
+      "solstheim.L10.thane_dead",
+      "solstheim.L10.ash_spawn"
+    ]
+  }
+]

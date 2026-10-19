@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:bjoulsae_river",
+    "nirncraft:glenumbra_moors",
+    "nirncraft:haunted_wood",
+    "nirncraft:rivenspire",
+    "nirncraft:stormhaven",
+    "nirncraft:wayrest_farmland",
+    "nirncraft:wrothgarian_mountains"
+  ]
+}

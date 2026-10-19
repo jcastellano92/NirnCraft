@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:add",
+  "left": "nirncraft:tamriel/below_surface",
+  "right": {
+    "type": "minecraft:mul",
+    "left": "nirncraft:tamriel/overhang",
+    "right": {
+      "type": "minecraft:mul",
+      "left": 0.55,
+      "right": {
+        "type": "minecraft:noise",
+        "noise": "nirncraft:tamriel_overhang",
+        "xz_scale": 1.0,
+        "y_scale": 1.4
+      }
+    }
+  }
+}

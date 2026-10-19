@@ -1,0 +1,5024 @@
+[
+  {
+    "provinces": [
+      "summerset"
+    ],
+    "biomes": [
+      "nirncraft:summerset_crystal_grottoes",
+      "nirncraft:falmer_glow_caves",
+      "nirncraft:mushroom_grottos"
+    ],
+    "why": [
+      "summerset.L4.silk_spiders",
+      "summerset.L10.crystal_vaults",
+      "summerset.L10.abyssal_vents"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:wisp",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "spirit",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 10,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:indrik",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "nature",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 9,
+        "levels": [
+          3,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:spriggan",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "nature",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "nirncraft:land_dreugh",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "summerset"
+    ],
+    "regions": [
+      "summerset/summerset_isle"
+    ],
+    "families": [
+      "ocean",
+      "beach",
+      "river",
+      "swamp",
+      "desert",
+      "jungle",
+      "ash",
+      "frozen",
+      "mountain",
+      "forest",
+      "plains"
+    ],
+    "why": [
+      "summerset_isle.L1.tower_upland",
+      "summerset_isle.L4.crystal_coast"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:ash_spawn",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_1",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:cliff_racer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_2",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:kagouti",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_3",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:nix_hound",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_4",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:alit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_5",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "water",
+        "entity": "nirncraft:dreugh",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_6",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "water",
+        "entity": "nirncraft:slaughterfish",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_7",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:boneman",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_8",
+        "roles": [
+          "ranged",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_9",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_10",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "minecraft:skeleton",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_11",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_12",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_13",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_14",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_15",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit_chief",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_16",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:dremora",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_17",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:flame_atronach",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_18",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:storm_atronach",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_19",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:frost_atronach",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_20",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:riekling",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_21",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:riekling",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_22",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:werewolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_23",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:werewolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_24",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:wolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_25",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "minecraft:wolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_26",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bear",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_27",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bear",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_28",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bear",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_29",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:sabre_cat",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_30",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:sabre_cat",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_31",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:troll",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_32",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:troll",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_33",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:hagraven",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_34",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:spriggan",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_35",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:spriggan",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_h_36",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:netch",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_1",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:netch",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_2",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:guar",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_3",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:silt_strider",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_4",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:mudcrab",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_5",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:mudcrab",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_6",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:horker",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_7",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:deer",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_8",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:elk",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_9",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:fox",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_10",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:fox",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_11",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:rabbit",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_12",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:goat",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_13",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "water",
+        "entity": "nirncraft:salmon",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_14",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:mammoth",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_15",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:horse",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_16",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:cow",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_17",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:chicken",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_18",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:wolf",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_19",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:hawk",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "summerset_isle_w_20",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:chaurus",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_1",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:chaurus",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_2",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:chaurus",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_3",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dwarven_spider",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_4",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dwarven_sphere",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_5",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dwarven_centurion",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_6",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:falmer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_7",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:falmer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_8",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:falmer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_9",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:vampire",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_10",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:vampire",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_11",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:gargoyle",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_12",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:frostbite_spider",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_13",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:frostbite_spider",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_14",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "minecraft:wither_skeleton",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_15",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_16",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_17",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dragon_priest",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_18",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:wispmother",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_19",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:mudcrab",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_20",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:skeever",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_21",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:skeever",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_22",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:ice_wraith",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_23",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:wisp",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_24",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:wisp",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_25",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_26",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_27",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_28",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:hagraven",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "summerset_isle_c_29",
+        "roles": [
+          "caster"
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "summerset"
+    ],
+    "regions": [
+      "summerset/auridon"
+    ],
+    "families": [
+      "ocean",
+      "beach",
+      "river",
+      "swamp",
+      "desert",
+      "jungle",
+      "ash",
+      "frozen",
+      "mountain",
+      "forest",
+      "plains"
+    ],
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L4.palm_groves"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:ash_spawn",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_1",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:cliff_racer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_2",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:kagouti",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_3",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:nix_hound",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_4",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:alit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_5",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "water",
+        "entity": "nirncraft:dreugh",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_6",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "water",
+        "entity": "nirncraft:slaughterfish",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_7",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:boneman",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_8",
+        "roles": [
+          "ranged",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_9",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_10",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "minecraft:skeleton",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_11",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_12",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_13",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_14",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_15",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit_chief",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_16",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:dremora",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_17",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:flame_atronach",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_18",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:storm_atronach",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_19",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:frost_atronach",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_20",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:riekling",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_21",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:riekling",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_22",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:werewolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_23",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:werewolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_24",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:wolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_25",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "minecraft:wolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_26",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bear",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_27",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bear",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_28",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bear",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_29",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:sabre_cat",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_30",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:sabre_cat",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_31",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:troll",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_32",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:troll",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_33",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:hagraven",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_34",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:spriggan",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_35",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:spriggan",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_h_36",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:netch",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_1",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:netch",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_2",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:guar",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_3",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:silt_strider",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_4",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:mudcrab",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_5",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:mudcrab",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_6",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:horker",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_7",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:deer",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_8",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:elk",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_9",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:fox",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_10",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:fox",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_11",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:rabbit",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_12",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:goat",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_13",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "water",
+        "entity": "nirncraft:salmon",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_14",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:mammoth",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_15",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:horse",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_16",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:cow",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_17",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:chicken",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_18",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:wolf",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_19",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:hawk",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "auridon_w_20",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:chaurus",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_1",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:chaurus",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_2",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:chaurus",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_3",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dwarven_spider",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_4",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dwarven_sphere",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_5",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dwarven_centurion",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_6",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:falmer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_7",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:falmer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_8",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:falmer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_9",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:vampire",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_10",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:vampire",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_11",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:gargoyle",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_12",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:frostbite_spider",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_13",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:frostbite_spider",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_14",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "minecraft:wither_skeleton",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_15",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_16",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_17",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dragon_priest",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_18",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:wispmother",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_19",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:mudcrab",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_20",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:skeever",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_21",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:skeever",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_22",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:ice_wraith",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_23",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:wisp",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_24",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:wisp",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_25",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_26",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_27",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_28",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:hagraven",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "auridon_c_29",
+        "roles": [
+          "caster"
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "summerset"
+    ],
+    "regions": [
+      "summerset/artaeum"
+    ],
+    "families": [
+      "ocean",
+      "beach",
+      "river",
+      "swamp",
+      "desert",
+      "jungle",
+      "ash",
+      "frozen",
+      "mountain",
+      "forest",
+      "plains"
+    ],
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L4.lotus_meadow"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:ash_spawn",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_1",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:cliff_racer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_2",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:kagouti",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_3",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:nix_hound",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_4",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:alit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_5",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "water",
+        "entity": "nirncraft:dreugh",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_6",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "water",
+        "entity": "nirncraft:slaughterfish",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_7",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:boneman",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_8",
+        "roles": [
+          "ranged",
+          "support"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_9",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_10",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "minecraft:skeleton",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_11",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_12",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_13",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_14",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_15",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bandit_chief",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_16",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:dremora",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_17",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:flame_atronach",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_18",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:storm_atronach",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_19",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:frost_atronach",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_20",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:riekling",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_21",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:riekling",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_22",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:werewolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_23",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:werewolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_24",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:wolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_25",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "minecraft:wolf",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_26",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bear",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_27",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bear",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_28",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:bear",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_29",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:sabre_cat",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_30",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:sabre_cat",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_31",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:troll",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_32",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:troll",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_33",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:hagraven",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_34",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:spriggan",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_35",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "surface",
+        "entity": "nirncraft:spriggan",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_h_36",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:netch",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_1",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:netch",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_2",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:guar",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_3",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:silt_strider",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_4",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:mudcrab",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_5",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:mudcrab",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_6",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:horker",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_7",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:deer",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_8",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:elk",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_9",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:fox",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_10",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:fox",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_11",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:rabbit",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_12",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:goat",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_13",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "water",
+        "entity": "nirncraft:salmon",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_14",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:mammoth",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_15",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:horse",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_16",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:cow",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_17",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:chicken",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_18",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "minecraft:wolf",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_19",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "wildlife",
+        "place": "surface",
+        "entity": "nirncraft:hawk",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          4
+        ],
+        "tag": "artaeum_w_20",
+        "roles": [
+          "ambient"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:chaurus",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_1",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:chaurus",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_2",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:chaurus",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_3",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dwarven_spider",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_4",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dwarven_sphere",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_5",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dwarven_centurion",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_6",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:falmer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_7",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:falmer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_8",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:falmer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_9",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:vampire",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_10",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:vampire",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_11",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:gargoyle",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_12",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:frostbite_spider",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_13",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:frostbite_spider",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_14",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "minecraft:wither_skeleton",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_15",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_16",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:draugr",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_17",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:dragon_priest",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_18",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:wispmother",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_19",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:mudcrab",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_20",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:skeever",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_21",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:skeever",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_22",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:ice_wraith",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_23",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:wisp",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_24",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:wisp",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_25",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_26",
+        "roles": [
+          "ranged"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_27",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:necromancer",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_28",
+        "roles": [
+          "caster"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "place": "cave",
+        "entity": "nirncraft:hagraven",
+        "weight": 10,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "artaeum_c_29",
+        "roles": [
+          "caster"
+        ]
+      }
+    ]
+  }
+]

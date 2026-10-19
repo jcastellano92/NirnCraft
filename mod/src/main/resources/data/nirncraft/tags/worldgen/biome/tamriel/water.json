@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:bjoulsae_river",
+    "nirncraft:cyrodiil_river",
+    "nirncraft:frozen_river",
+    "nirncraft:jungle_river",
+    "nirncraft:lake_rumare_shore",
+    "nirncraft:murky_river",
+    "nirncraft:skyrim_lake",
+    "nirncraft:skyrim_river",
+    "nirncraft:warm_river"
+  ]
+}

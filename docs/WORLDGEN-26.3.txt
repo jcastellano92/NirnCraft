@@ -7,7 +7,7 @@ APIs. Compilation and static inventory checks do not certify a playable world.
 
 World generation contracts
 
-26.3 unifies configured features into the feature registry. Skycraft's
+26.3 unifies configured features into the feature registry. NirnCraft's
 worldgen.ConfiguredFeature binds each existing algorithm and config to its native
 MapCodec and Feature implementation. Its subfeature enumeration delegates to the
 algorithm so generation ordering remains explicit. Feature TYPE registrations are
@@ -37,7 +37,7 @@ legacy flat data/<name>.dat files into namespaced storage without deleting the s
 The loader's native file fixing relocates selected vanilla files, not unknown mod
 files. The helper also checks the original overworld root data directory, DIM-1/data,
 DIM1/data and unchanged custom dimension folders. Native default-namespace copies
-are accepted, while canonical skycraft data always takes precedence. Each lookup
+are accepted, while canonical nirncraft data always takes precedence. Each lookup
 stays in the requested dimension, including optional referenced road buckets.
 An existing canonical file that fails decoding stops the lookup instead of
 overwriting it with stale legacy data or creating replacement empty state.
@@ -95,25 +95,25 @@ c:/Minecraft classifications include authored legacy forge: members, and legacy
 queries retain the native default members. References only point from the full
 native tag toward the legacy custom tag; legacy tags include default MEMBERS, so
 no tag points back to itself through its bridge. The tag audit merges real Minecraft,
-NeoForge and Skycraft resources to detect cycles and missing required tag references.
+NeoForge and NirnCraft resources to detect cycles and missing required tag references.
 The legacy meat flag is generated from actual FoodSpec registrations into wolf_food.
 
 Native NeoForge auto-discovers loot_modifiers and sorts by descending priority;
 the old global_loot_modifiers list is no longer a valid active modifier resource.
-Its original authored order is retained in data/neoforge/skycraft_legacy and the
+Its original authored order is retained in data/neoforge/nirncraft_legacy and the
 converter assigns that order as native modifier priorities. Individual modifiers
 remain active, with the same predicates, chance and table payload. Keep the retained
 authoring list consistent when adding or reordering generated global modifiers.
 
 Recipes are a native dynamic registry in 26.3. NeoForge also supplies an enchanting
-recipe in its own mod-data pack, after Skycraft's ordinary pack. The intentionally
+recipe in its own mod-data pack, after NirnCraft's ordinary pack. The intentionally
 disabled enchanting-table recipe uses an exact native pack.mcmeta resource filter,
 registered as a required TOP server-data pack with the public AddPackFindersEvent.
 The filter also removes that recipe's own unlock advancement: native advancement
 criteria and rewards hold recipe registry references, so retaining the unlock for
 an absent recipe would fail registry freeze with an unbound holder.
 Its old authored recipe
-descriptor is retained in minecraft/skycraft_legacy/disabled_recipes rather than
+descriptor is retained in minecraft/nirncraft_legacy/disabled_recipes rather than
 being loaded as an active recipe. The converter reproduces both the move and filter;
 the genuine native WorldDataMigrationTest asserts the recipe is actually absent.
 

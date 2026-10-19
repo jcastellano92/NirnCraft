@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:pearl",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_pearl",
+      "required": false
+    },
+    "minecraft:sugar",
+    {
+      "id": "nirncraft:steel_ingot",
+      "required": false
+    }
+  ]
+}

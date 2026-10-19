@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:imp_stool",
+      "required": false
+    },
+    {
+      "id": "nirncraft:glowing_mushroom",
+      "required": false
+    },
+    {
+      "id": "nirncraft:mora_tapinella",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:alpine_meadow",
+    "nirncraft:deep_sea_of_ghosts",
+    "nirncraft:eastmarch_hot_springs",
+    "nirncraft:eastmarch_volcanic_tundra",
+    "nirncraft:falkreath_forest",
+    "nirncraft:frozen_river",
+    "nirncraft:frozen_shore",
+    "nirncraft:hjaalmarch_marsh",
+    "nirncraft:pale_heath",
+    "nirncraft:pale_snowfield",
+    "nirncraft:pine_forest",
+    "nirncraft:reach_crags",
+    "nirncraft:reach_valley",
+    "nirncraft:rift_autumn_forest",
+    "nirncraft:sea_of_ghosts",
+    "nirncraft:skyrim_coast",
+    "nirncraft:skyrim_highlands",
+    "nirncraft:skyrim_lake",
+    "nirncraft:skyrim_river",
+    "nirncraft:snowy_pine_forest",
+    "nirncraft:snowy_slopes",
+    "nirncraft:throat_of_the_world",
+    "nirncraft:whiterun_plains",
+    "nirncraft:whiterun_tundra",
+    "nirncraft:winterhold_glacier"
+  ]
+}

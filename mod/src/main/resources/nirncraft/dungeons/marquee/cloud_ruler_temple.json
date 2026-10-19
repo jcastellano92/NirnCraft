@@ -1,0 +1,854 @@
+{
+ "id": "cloud_ruler_temple",
+ "why": [
+  "jerall_mountains.L9.blades_without_emperor",
+  "jerall_mountains.L11.reman_fortresses"
+ ],
+ "kit": "akaviri",
+ "entry_depth": 22,
+ "palette": {
+  "wall": [
+   "minecraft:deepslate_bricks*5",
+   "minecraft:polished_blackstone_bricks*4",
+   "minecraft:dark_oak_planks*3",
+   "minecraft:cracked_deepslate_bricks*2"
+  ],
+  "floor": [
+   "minecraft:deepslate_tiles*5",
+   "minecraft:polished_blackstone*3",
+   "minecraft:dark_oak_planks*2"
+  ],
+  "ceiling": [
+   "minecraft:deepslate_bricks*4",
+   "minecraft:dark_oak_planks*3"
+  ],
+  "rock": "minecraft:polished_deepslate",
+  "trim": "minecraft:chiseled_deepslate",
+  "pillar": "minecraft:stripped_dark_oak_log",
+  "cap": "minecraft:chiseled_deepslate",
+  "light": "minecraft:shroomlight",
+  "dim": "minecraft:redstone_lamp",
+  "rail": "minecraft:dark_oak_fence",
+  "stair": "minecraft:deepslate_brick_stairs"
+ },
+ "boss": {
+  "id": "nirncraft:draugr_deathlord|minecraft:vindicator",
+  "name": "Grandmaster's Oath-Bound Sentinel"
+ },
+ "books": {
+  "lore_1": {
+   "title": "Annals of the Dragonguard",
+   "author": "Loremaster Baurus",
+   "pages": [
+    "High on the snowy Jerall crags above Bruma, Cloud Ruler Temple's Akaviri timber-and-stone halls guard the dragon-wall reliefs and ancestral katanas of the Blades."
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "r_entry",
+   "name": "Great Courtyard Gatehouse",
+   "at": [
+    0,
+    0
+   ],
+   "y": -8,
+   "half": [
+    5,
+    6
+   ],
+   "h": 12,
+   "role": "start",
+   "doors": {
+    "s": 8
+   },
+   "ops": [
+    {
+     "op": "landing",
+     "y": 8,
+     "depth": 3,
+     "stairs": 3
+    },
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Akaviri Oath-Guard",
+       "mode": "awake",
+       "n": 2
+      },
+      {
+       "id": "minecraft:zombie",
+       "name": "Cloud Ruler Sentinel",
+       "mode": "sleep",
+       "n": 1,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_west_1",
+   "name": "West Armory Wing",
+   "at": [
+    -1,
+    0
+   ],
+   "y": -8,
+   "half": [
+    4,
+    4
+   ],
+   "h": 6,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 3
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Akaviri Oath-Guard",
+       "mode": "sleep",
+       "at": [
+        [
+         -3,
+         -3
+        ],
+        [
+         -3,
+         3
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_common",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_east_1",
+   "name": "East Barracks Wing",
+   "at": [
+    1,
+    0
+   ],
+   "y": -8,
+   "half": [
+    4,
+    4
+   ],
+   "h": 6,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 3
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Cloud Ruler Sentinel",
+       "mode": "ambush",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      -3
+     ],
+     "table": "nirncraft:chests/dungeon_minor",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "r_rotunda",
+   "name": "Hall of the Dragon Wall",
+   "at": [
+    0,
+    -1
+   ],
+   "y": -10,
+   "half": [
+    5,
+    5
+   ],
+   "h": 10,
+   "ops": [
+    {
+     "op": "bowl",
+     "tiers": 2,
+     "width": 2,
+     "step": 1
+    },
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Jerall Frost-Wraith",
+       "mode": "awake",
+       "n": 2,
+       "where": "ledge"
+      },
+      {
+       "id": "minecraft:vindicator",
+       "name": "Blades Sword-Master",
+       "mode": "ambush",
+       "n": 1,
+       "where": "ledge"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_west_2",
+   "name": "Akaviri Forge-Chamber",
+   "at": [
+    -1,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Cloud Ruler Sentinel",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_east_2",
+   "name": "Gallery of Emperors",
+   "at": [
+    1,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Jerall Frost-Wraith",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_common",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "r_shaft",
+   "name": "The High Watch Shaft",
+   "at": [
+    0,
+    -2
+   ],
+   "y": -13,
+   "half": [
+    5,
+    5
+   ],
+   "h": 12,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vindicator",
+       "name": "Blades Sword-Master",
+       "mode": "elite",
+       "at": [
+        [
+         0,
+         -3
+        ]
+       ]
+      },
+      {
+       "id": "minecraft:skeleton",
+       "name": "Akaviri Oath-Guard",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_west_3",
+   "name": "West Chronicle Archive",
+   "at": [
+    -1,
+    -2
+   ],
+   "y": -17,
+   "half": [
+    4,
+    5
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Jerall Frost-Wraith",
+       "mode": "sleep",
+       "at": [
+        [
+         -3,
+         -3
+        ],
+        [
+         -3,
+         0
+        ],
+        [
+         -3,
+         3
+        ],
+        [
+         3,
+         3
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      -3
+     ],
+     "table": "nirncraft:chests/dungeon_common",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_east_3",
+   "name": "EastKatana Vault",
+   "at": [
+    1,
+    -2
+   ],
+   "y": -17,
+   "half": [
+    4,
+    5
+   ],
+   "h": 9,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Blades Sword-Master",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      4
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_conduit",
+   "name": "Snowmelt Conduit",
+   "at": [
+    -1,
+    -3
+   ],
+   "y": -21,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vex",
+       "name": "Jerall Frost-Wraith",
+       "mode": "awake",
+       "n": 2,
+       "where": "any"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_boss",
+   "name": "Sanctum of the Grandmaster",
+   "at": [
+    0,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    6,
+    6
+   ],
+   "h": 16,
+   "role": "boss",
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 10
+    },
+    {
+     "op": "boss",
+     "at": [
+      0,
+      -2
+     ],
+     "dais": 2
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -5
+     ],
+     "table": "nirncraft:chests/dungeon_boss",
+     "face": "s",
+     "capstone": true
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Blades Sword-Master",
+       "mode": "sleep",
+       "at": [
+        [
+         -4,
+         3
+        ],
+        [
+         4,
+         3
+        ],
+        [
+         -4,
+         0
+        ],
+        [
+         4,
+         0
+        ]
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_study",
+   "name": "Loremaster's Scriptorium",
+   "at": [
+    1,
+    -3
+   ],
+   "y": -21,
+   "half": [
+    4,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      3,
+      -3,
+      0
+     ],
+     "to": [
+      3,
+      -3,
+      0
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "lectern",
+     "at": [
+      3,
+      -3,
+      1
+     ],
+     "book": "lore_1",
+     "candle": true,
+     "face": "w"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Cloud Ruler Sentinel",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_basin",
+   "name": "Mountain Cistern Basin",
+   "at": [
+    -2,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "flood",
+     "sink": 3,
+     "margin": 1,
+     "causeway": 3,
+     "rails": false
+    },
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Akaviri Oath-Guard",
+       "mode": "awake",
+       "n": 1,
+       "where": "lane"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_reliquary",
+   "name": "Dragonscale Reliquary",
+   "at": [
+    2,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -3
+     ],
+     "table": "nirncraft:chests/dungeon_cache",
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Jerall Frost-Wraith",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_outer_walk",
+   "name": "Crag Rampart Walk",
+   "at": [
+    -2,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Cloud Ruler Sentinel",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      3
+     ],
+     "table": "nirncraft:chests/dungeon_minor",
+     "face": "n"
+    }
+   ]
+  }
+ ],
+ "links": [
+  {
+   "a": "r_entry",
+   "b": "r_west_1"
+  },
+  {
+   "a": "r_entry",
+   "b": "r_east_1"
+  },
+  {
+   "a": "r_entry",
+   "b": "r_rotunda"
+  },
+  {
+   "a": "r_rotunda",
+   "b": "r_west_2"
+  },
+  {
+   "a": "r_rotunda",
+   "b": "r_east_2"
+  },
+  {
+   "a": "r_west_2",
+   "b": "r_basin"
+  },
+  {
+   "a": "r_east_2",
+   "b": "r_reliquary"
+  },
+  {
+   "a": "r_rotunda",
+   "b": "r_shaft",
+   "gate": "r_rotunda"
+  },
+  {
+   "a": "r_shaft",
+   "b": "r_west_3"
+  },
+  {
+   "a": "r_shaft",
+   "b": "r_east_3"
+  },
+  {
+   "a": "r_west_3",
+   "b": "r_conduit"
+  },
+  {
+   "a": "r_east_3",
+   "b": "r_study"
+  },
+  {
+   "a": "r_study",
+   "b": "r_boss",
+   "gate": "r_study",
+   "trap": true
+  },
+  {
+   "a": "r_west_3",
+   "b": "r_outer_walk"
+  },
+  {
+   "a": "r_basin",
+   "b": "r_outer_walk"
+  }
+ ]
+}

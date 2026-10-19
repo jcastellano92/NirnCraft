@@ -1,0 +1,620 @@
+{
+  "line": "house_hlaalu",
+  "category": "faction",
+  "faction": "house_hlaalu",
+  "region": "morrowind/west_gash",
+  "speakers": {
+    "narrator": "Narrator"
+  },
+  "places": {
+    "caldera_ebony_mine": {
+      "x": 6060,
+      "z": 140,
+      "r": 34,
+      "name": "Caldera Ebony Mine"
+    },
+    "odai_plateau": {
+      "x": 6040,
+      "z": 760,
+      "r": 40,
+      "name": "Odai Plateau"
+    }
+  },
+  "npcs": [
+    {
+      "id": "nileno_dorvayn",
+      "name": "Nileno Dorvayn",
+      "role": "steward",
+      "place": "balmora",
+      "offset": [
+        5,
+        -4
+      ],
+      "hall": "house_hlaalu",
+      "greet": "House Hlaalu does not ask where you were born, only what you can do and what it costs. Sit. Let us discuss the second part first."
+    },
+    {
+      "id": "crassius_curio",
+      "name": "Crassius Curio",
+      "role": "merchant",
+      "place": "vivec",
+      "offset": [
+        -10,
+        8
+      ],
+      "greet": "Oh, a new face! Do come in. I am Councilor Crassius Curio, patron of the arts, friend of the House, and an enthusiastic judge of character. Mostly of the character's calves."
+    },
+    {
+      "id": "tirvel_sadrano",
+      "name": "Tirvel Sadrano",
+      "role": "merchant",
+      "place": "caldera_ebony_mine",
+      "offset": [
+        6,
+        4
+      ],
+      "greet": "Ebony, raw and honest, straight out of the hill. Well. Straight out of the hill, anyway."
+    },
+    {
+      "id": "meril_vandas",
+      "name": "Meril Vandas",
+      "role": "blacksmith",
+      "place": "odai_plateau",
+      "offset": [
+        3,
+        2
+      ],
+      "greet": "Give me stone, coin and a season without raiders, and I'll give you a manor the whole West Gash will envy."
+    }
+  ],
+  "relics": [
+    {
+      "id": "hlaalu_rent_ledger",
+      "name": "Hlaalu Rent Ledger",
+      "desc": "Rents owed to the Council Manor by Balmora's shopkeepers. Several pages are marked in red.",
+      "icon": 11
+    },
+    {
+      "id": "caldera_ebony_crate",
+      "name": "Crate of Caldera Ebony",
+      "desc": "Raw ebony from the Caldera mine, weighed, sealed and stamped with the Hlaalu mark. All of it this time.",
+      "icon": 26
+    },
+    {
+      "id": "tong_death_list",
+      "name": "The Tong's List",
+      "desc": "Names of Hlaalu loyalists in Balmora, several crossed out. The last name is Nileno Dorvayn's.",
+      "icon": 11
+    },
+    {
+      "id": "rethan_deed",
+      "name": "Deed to Rethan Manor",
+      "desc": "A Hlaalu land grant for a manor on the Odai plateau, signed with a flourish by Councilor Curio.",
+      "icon": 7
+    }
+  ],
+  "scenes": {
+    "hl_curio_grant": [
+      [
+        "crassius_curio",
+        "Nileno tells me you've saved half of Balmora from the Tong. How heroic. How useful. A House needs strongholds, and you need a roof."
+      ],
+      [
+        "crassius_curio",
+        "There's a lovely bit of rock on the Odai plateau. Build something there. Something sturdy, and preferably with a nice bathhouse."
+      ]
+    ],
+    "hl_grandmaster": [
+      [
+        "narrator",
+        "In the Hlaalu Council chamber in Vivec, the councilors argue over coin, then over each other, then, finally, over you."
+      ],
+      [
+        "nileno_dorvayn",
+        "Rethan Manor stands. The Tong is beaten in Balmora. The ebony flows and the ledgers balance. I can think of no one better."
+      ],
+      [
+        "crassius_curio",
+        "Nor I, and I can think of a great many people. Grandmaster of House Hlaalu, then. Try to look surprised."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "hl_manor_errands",
+      "title": "Errands for the Manor",
+      "start": "npc:nileno_dorvayn",
+      "requires": [
+        "!faction:house_hlaalu",
+        "!faction:house_redoran",
+        "!faction:house_telvanni"
+      ],
+      "offer": "I'd like to work for House Hlaalu.",
+      "pitch": "Everybody starts as a hireling. The Manor's storeroom is overrun with rats, and Nevos the factor still hasn't brought me this month's rents. Deal with both and I'll put your name in the books.",
+      "desc": "Councilor Nileno Dorvayn of the Hlaalu Council Manor in Balmora offered me work as a hireling: clear the storeroom of vermin and collect the month's rent ledger from Nevos, the House factor.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "balmora",
+          "offset": [
+            10,
+            -8
+          ],
+          "radius": 12,
+          "placement": "near",
+          "text": "Clear the rats from the Council Manor's storeroom",
+          "spawn": [
+            {
+              "type": "nirncraft:skeever",
+              "count": 4,
+              "name": "Storeroom Rat"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "hlaalu_factor",
+          "text": "Collect the rent ledger from Nevos the factor",
+          "topic": "Nileno Dorvayn wants this month's rent ledger.",
+          "reply": "Of course she does. Tell her the red marks are the shopkeepers who claim they've already paid the Tong. That's her problem now, not mine.",
+          "actions": "relic:hlaalu_rent_ledger"
+        },
+        {
+          "type": "deliver",
+          "npc": "nileno_dorvayn",
+          "relic": "hlaalu_rent_ledger",
+          "text": "Bring the ledger to Nileno Dorvayn",
+          "topic": "The rats are gone and here is the ledger. Nevos says the red names are paying the Tong.",
+          "reply": "Then the Tong is collecting our rents in our own city. Welcome to House Hlaalu, hireling. You'll find we have a great deal of work.",
+          "place": "balmora"
+        }
+      ],
+      "outro": "I joined House Hlaalu as a hireling under Nileno Dorvayn. Already it is clear the Camonna Tong has its hands in the House's pockets.",
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "nirncraft:chitin_chestplate",
+          "nirncraft:iron_sword"
+        ]
+      },
+      "region": "morrowind/west_gash",
+      "why": [
+        "morrowind/west_gash.L7.merchant_city",
+        "morrowind/west_gash.L7.outlander_miners"
+      ],
+      "exclusive_group": "great_house",
+      "exclusive_with": [
+        "house_redoran",
+        "house_telvanni"
+      ],
+      "consequence": {
+        "world_state": "hl_manor_errands_resolved",
+        "flag": "conseq_hl_manor_errands",
+        "summary": "I joined House Hlaalu as a hireling under Nileno Dorvayn. Already it is clear the Camonna Tong has its hands in the House's pockets."
+      }
+    },
+    {
+      "id": "hl_caldera_ebony",
+      "title": "The Caldera Ebony",
+      "start": "npc:nileno_dorvayn",
+      "requires": [
+        "quest:hl_manor_errands|faction:house_hlaalu"
+      ],
+      "offer": "What's next for a hireling?",
+      "pitch": "The ebony shipments from Caldera have been arriving light. A crate here, a crate there. The trader Tirvel Sadrano swears it's the miners. Go and find out whose pockets are heavy.",
+      "desc": "Ebony shipments from the Hlaalu mine at Caldera keep arriving short. Nileno sent me to find out whether the trader Tirvel Sadrano is skimming them.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "caldera_mine",
+          "text": "Travel to the Caldera ebony mine"
+        },
+        {
+          "type": "talk",
+          "npc": "tirvel_sadrano",
+          "text": "Question Tirvel Sadrano",
+          "topic": "The House says your shipments are short.",
+          "reply": "Short? Bandits, my friend. There's a gang in the old shaft taking crates at night. I'd deal with it myself, but I'm a merchant, not a fool."
+        },
+        {
+          "type": "clear",
+          "place": "caldera_mine",
+          "placement": "structure",
+          "text": "Clear the thieves out of the old shaft",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Ebony Thief",
+              "hostile": true
+            }
+          ],
+          "journal": "The thieves weren't bandits. They were miners on Tirvel Sadrano's payroll, and their crates were already addressed to a buyer in Vivec."
+        },
+        {
+          "type": "retrieve",
+          "place": "caldera_mine",
+          "relic": "caldera_ebony_crate",
+          "radius": 10,
+          "text": "Recover the stolen ebony crate"
+        },
+        {
+          "type": "talk",
+          "npc": "tirvel_sadrano",
+          "text": "Confront Tirvel Sadrano",
+          "choices": [
+            {
+              "label": "Your thieves are dead. Pay back the House, or I report you.",
+              "reply": "All right! All right. The difference, with interest. You're a hard one for a hireling. Hlaalu will do well with you.",
+              "actions": "flag:hl_sadrano_fined;give:minecraft:gold_ingot*3"
+            },
+            {
+              "label": "I'm telling Nileno everything.",
+              "reply": "Then I'll be on the first silt strider out of Balmora. Tell her the ebony was always good, at least.",
+              "actions": "flag:hl_sadrano_exposed;retire:tirvel_sadrano"
+            }
+          ]
+        },
+        {
+          "type": "deliver",
+          "npc": "nileno_dorvayn",
+          "relic": "caldera_ebony_crate",
+          "text": "Bring the ebony to Nileno Dorvayn",
+          "topic": "Sadrano was skimming his own shipments. Here is what he stole.",
+          "reply": "A trader who robs himself to rob us. Clever, until it wasn't. You handled it like a Hlaalu: the ebony back, the problem solved, no fuss in the streets.",
+          "place": "balmora"
+        }
+      ],
+      "outro": "I recovered the stolen Caldera ebony and dealt with Tirvel Sadrano, who had been skimming the House's shipments.",
+      "rewards": {
+        "gold": 400,
+        "faction_points": 3
+      },
+      "region": "morrowind/west_gash",
+      "why": [
+        "morrowind/west_gash.L7.dockside_syndicate",
+        "morrowind/west_gash.L8.pragmatic_piety"
+      ],
+      "consequence": {
+        "world_state": "hl_caldera_ebony_resolved",
+        "flag": "conseq_hl_caldera_ebony",
+        "summary": "I recovered the stolen Caldera ebony and dealt with Tirvel Sadrano, who had been skimming the House's shipments."
+      }
+    },
+    {
+      "id": "hl_tongs_grip",
+      "title": "The Tong's Grip",
+      "start": "auto",
+      "requires": [
+        "quest:hl_caldera_ebony"
+      ],
+      "desc": "Hlaalu loyalists in Balmora are being murdered, one by one. Nileno believes the Camonna Tong, Orvas Dren's men, are behind it, and that she is next.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "nileno_dorvayn",
+          "text": "Speak with Nileno Dorvayn",
+          "topic": "You sent for me. You look worried.",
+          "reply": "Two of our loyalists dead this week, both with their throats cut, both after refusing the Tong's protection. The Tong drinks at a warehouse by the river. Find out who gives the orders.",
+          "place": "balmora"
+        },
+        {
+          "type": "clear",
+          "place": "balmora",
+          "offset": [
+            -60,
+            40
+          ],
+          "text": "Break the Tong enforcers at the riverside warehouse",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 4,
+              "name": "Camonna Tong Enforcer",
+              "hostile": true,
+              "armor": "#5a3a22"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "balmora",
+          "offset": [
+            -60,
+            40
+          ],
+          "text": "Kill the Tong captain, Vadryn Gols",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Vadryn Gols",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4,
+              "hostile": true,
+              "armor": "#5a3a22",
+              "weapon": "nirncraft:chitin_war_axe"
+            }
+          ],
+          "actions": "relic:tong_death_list",
+          "journal": "Vadryn Gols carried a list of Hlaalu loyalists. The ones crossed out were dead. The last name on it was Nileno Dorvayn's."
+        },
+        {
+          "type": "deliver",
+          "npc": "crassius_curio",
+          "relic": "tong_death_list",
+          "text": "Take the list to Councilor Crassius Curio in Vivec",
+          "topic": "The Tong has a list of Hlaalu loyalists. Nileno is on it.",
+          "reply": "Dren's men, crossing out Hlaalu names like a grocery list. How very vulgar. Leave it with me; the Council will hear of it.",
+          "actions": "scene:hl_curio_grant;relic:rethan_deed",
+          "place": "vivec"
+        }
+      ],
+      "outro": "I broke the Camonna Tong's cell in Balmora and saved Nileno Dorvayn's life. Crassius Curio was so pleased he granted me land on the Odai plateau.",
+      "rewards": {
+        "gold": 600,
+        "faction_points": 5
+      },
+      "region": "morrowind/west_gash",
+      "why": [
+        "morrowind/west_gash.L7.outlander_miners",
+        "morrowind/west_gash.L9.hlaalu_collaboration"
+      ],
+      "consequence": {
+        "world_state": "hl_tongs_grip_resolved",
+        "flag": "conseq_hl_tongs_grip",
+        "summary": "I broke the Camonna Tong's cell in Balmora and saved Nileno Dorvayn's life. Crassius Curio was so pleased he granted me land on the Odai plateau."
+      }
+    },
+    {
+      "id": "hl_rethan_manor",
+      "title": "A Stronghold on the Odai",
+      "start": "auto",
+      "requires": [
+        "quest:hl_tongs_grip"
+      ],
+      "desc": "Crassius Curio has granted me land on the Odai plateau to build Rethan Manor, a Hlaalu stronghold. First the plateau needs clearing, and the builder needs paying.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "odai_plateau",
+          "text": "Travel to the Odai plateau"
+        },
+        {
+          "type": "clear",
+          "place": "odai_plateau",
+          "text": "Clear the cliff racers nesting on the building site",
+          "spawn": [
+            {
+              "type": "nirncraft:cliff_racer",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "deliver",
+          "npc": "meril_vandas",
+          "relic": "rethan_deed",
+          "text": "Show the deed to the builder, Meril Vandas",
+          "topic": "This land is mine now. Can you build here?",
+          "reply": "Can I? Look at the view. Sign here, and bring me the first payment, and we'll have walls before the next ash storm.",
+          "place": "odai_plateau"
+        },
+        {
+          "type": "deliver",
+          "npc": "meril_vandas",
+          "item": "minecraft:gold_ingot",
+          "count": 5,
+          "text": "Pay Meril Vandas five gold ingots for materials",
+          "topic": "Here's the first payment.",
+          "reply": "Good, honest gold. My crew starts at dawn.",
+          "place": "odai_plateau"
+        },
+        {
+          "type": "wait",
+          "hours": 24,
+          "text": "Wait while the foundations of Rethan Manor are laid",
+          "journal": "By the second evening, the walls of Rethan Manor stood waist-high on the Odai plateau, and Meril's crew was arguing about the bathhouse."
+        }
+      ],
+      "outro": "The first walls of Rethan Manor rise on the Odai plateau. The House has a new stronghold, and so do I.",
+      "rewards": {
+        "gold": 300,
+        "faction_points": 6
+      },
+      "region": "morrowind/west_gash",
+      "why": [
+        "morrowind/west_gash.L8.pragmatic_piety",
+        "morrowind/west_gash.L9.mine_ownership_fight"
+      ],
+      "consequence": {
+        "world_state": "hl_rethan_manor_resolved",
+        "flag": "conseq_hl_rethan_manor",
+        "summary": "The first walls of Rethan Manor rise on the Odai plateau. The House has a new stronghold, and so do I."
+      }
+    },
+    {
+      "id": "hl_rivals_at_the_gate",
+      "title": "Rivals at the Gate",
+      "start": "auto",
+      "requires": [
+        "quest:hl_rethan_manor"
+      ],
+      "desc": "Orvas Dren cannot let a Hlaalu stronghold stand on the Odai plateau, overlooking his routes. Meril Vandas sent word that armed men are gathering below the half-built walls of Rethan Manor.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "odai_plateau",
+          "text": "Hurry back to Rethan Manor"
+        },
+        {
+          "type": "clear",
+          "place": "odai_plateau",
+          "text": "Drive off the Tong's hired blades",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 4,
+              "name": "Dren's Hired Blade",
+              "hostile": true,
+              "armor": "#5a3a22"
+            },
+            {
+              "type": "nirncraft:nix_hound",
+              "count": 2,
+              "name": "Tong War-Hound"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "odai_plateau",
+          "text": "Kill their leader, the mercenary Ulvo Telas",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Ulvo Telas",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5,
+              "hostile": true,
+              "weapon": "nirncraft:dwarven_war_axe"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "meril_vandas",
+          "text": "Check on Meril Vandas",
+          "topic": "They're gone. Is the manor standing?",
+          "reply": "Scorched, not broken. We'll finish the roof by the end of the week. Go to Vivec. Nileno says the Council is meeting, and your name keeps coming up.",
+          "place": "odai_plateau"
+        }
+      ],
+      "outro": "I defended Rethan Manor from Orvas Dren's mercenaries. The stronghold stands, and the Hlaalu Council has taken notice.",
+      "rewards": {
+        "gold": 700,
+        "faction_points": 8,
+        "items": [
+          {
+            "item": "nirncraft:bonemold_chestplate",
+            "name": "Rethan Guard Cuirass",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "region": "morrowind/west_gash",
+      "why": [
+        "morrowind/west_gash.L9.hlaalu_collaboration",
+        "morrowind/west_gash.L10.arkngthand"
+      ],
+      "consequence": {
+        "world_state": "hl_rivals_at_the_gate_resolved",
+        "flag": "conseq_hl_rivals_at_the_gate",
+        "summary": "I defended Rethan Manor from Orvas Dren's mercenaries. The stronghold stands, and the Hlaalu Council has taken notice."
+      }
+    },
+    {
+      "id": "hl_grandmaster",
+      "title": "Grandmaster of Hlaalu",
+      "start": "auto",
+      "requires": [
+        "quest:hl_rivals_at_the_gate"
+      ],
+      "desc": "The Hlaalu Council meets in Vivec, and Nileno Dorvayn and Crassius Curio mean to put my name forward as Grandmaster. I will need to win over the waverers first.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "vivec",
+          "text": "Travel to the Hlaalu Council in Vivec"
+        },
+        {
+          "type": "talk",
+          "npc": "crassius_curio",
+          "text": "Speak with Crassius Curio before the vote",
+          "topic": "Nileno says you mean to nominate me.",
+          "reply": "I do, and I've counted the votes. We're two short. How do you propose to persuade the stubborn ones?",
+          "place": "vivec"
+        },
+        {
+          "type": "talk",
+          "npc": "crassius_curio",
+          "text": "Decide how to win the Council's vote",
+          "choices": [
+            {
+              "label": "With gold. Everyone in this House has a price.",
+              "reply": "Spoken like a true Hlaalu. I'll see the envelopes delivered discreetly.",
+              "actions": "flag:hl_vote_bought"
+            },
+            {
+              "label": "With Caldera ebony contracts. Make it worth their while.",
+              "reply": "Oh, clever. Bribes that look like business. They'll vote for you and thank you for the privilege.",
+              "actions": "flag:hl_vote_traded"
+            },
+            {
+              "label": "With the truth. Rethan Manor stands and the Tong is beaten.",
+              "reply": "How refreshing. It might even work, if I stand behind you looking stern.",
+              "actions": "flag:hl_vote_earned"
+            }
+          ],
+          "place": "vivec"
+        },
+        {
+          "type": "talk",
+          "npc": "nileno_dorvayn",
+          "text": "Attend the Council's vote",
+          "topic": "It's time.",
+          "reply": "It is. Stand straight and let them look at you.",
+          "actions": "scene:hl_grandmaster",
+          "place": "balmora"
+        }
+      ],
+      "outro": "The Hlaalu Council named me Grandmaster of House Hlaalu. Rethan Manor is my seat, and the House's ledgers are now my problem.",
+      "rewards": {
+        "gold": 2000,
+        "faction_points": 50,
+        "flags": [
+          "hl_grandmaster"
+        ],
+        "perks": 1,
+        "items": [
+          {
+            "item": "nirncraft:ebony_sword",
+            "name": "Hlaalu Grandmaster's Blade",
+            "enchant": {
+              "sharpness": 4,
+              "looting": 2
+            }
+          },
+          {
+            "item": "nirncraft:gold_ring",
+            "name": "Signet of the Hlaalu Council",
+            "enchant": {
+              "protection": 2
+            }
+          }
+        ]
+      },
+      "region": "morrowind/ascadian_isles",
+      "why": [
+        "morrowind/ascadian_isles.L9.temple_secrets",
+        "morrowind/ascadian_isles.L10.ald_sotha"
+      ],
+      "consequence": {
+        "world_state": "hl_grandmaster_resolved",
+        "flag": "conseq_hl_grandmaster",
+        "summary": "The Hlaalu Council named me Grandmaster of House Hlaalu. Rethan Manor is my seat, and the House's ledgers are now my problem."
+      }
+    }
+  ],
+  "exclusive_group": "great_house",
+  "exclusive_with": [
+    "house_redoran",
+    "house_telvanni"
+  ]
+}

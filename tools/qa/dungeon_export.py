@@ -1,4 +1,4 @@
-"""Loader for the dungeon exports written by `/skycraft-dungeon-qa export <place id>...` (QaExport.java).
+"""Loader for the dungeon exports written by `/nirncraft-dungeon-qa export <place id>...` (QaExport.java).
 
 An export (`mod/run/qa-exports/<id>.json.gz`) holds the dungeon exactly as the painter lays it into the in-memory
 level: a block palette + run-length blocks over `box`, plus semantic markers (entities, containers, lecterns,

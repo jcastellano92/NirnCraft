@@ -1,8 +1,0 @@
-{
-  "type": "skycraft:realm_site",
-  "site": "sovngarde/arrival",
-  "biomes": "#skycraft:realm/sovngarde",
-  "step": "surface_structures",
-  "spawn_overrides": {},
-  "terrain_adaptation": "none"
-}

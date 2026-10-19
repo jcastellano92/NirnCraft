@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..', '..');
-const pdir = path.join(root, 'mod/src/main/resources/skycraft/tamriel/places');
+const pdir = path.join(root, 'mod/src/main/resources/nirncraft/tamriel/places');
 const m = JSON.parse(fs.readFileSync(path.join(__dirname, 'marquee.json'), 'utf8'));
 const byId = {};
 for (const f of fs.readdirSync(pdir)) {

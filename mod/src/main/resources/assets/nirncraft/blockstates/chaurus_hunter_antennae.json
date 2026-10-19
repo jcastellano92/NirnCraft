@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/chaurus_hunter_antennae"
+      },
+      {
+        "model": "nirncraft:block/chaurus_hunter_antennae",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/chaurus_hunter_antennae",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/chaurus_hunter_antennae",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/chaurus_hunter_antennae_harvested"
+      },
+      {
+        "model": "nirncraft:block/chaurus_hunter_antennae_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/chaurus_hunter_antennae_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/chaurus_hunter_antennae_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

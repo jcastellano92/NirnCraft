@@ -7,7 +7,7 @@
 #include <cmath>
 #include <thread>
 
-namespace aether {
+namespace atlas {
 namespace {
 
 int floorDiv(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
@@ -480,4 +480,4 @@ uint64_t World::materialBytes() const {
     return p->runEnd.size() * 4 + p->runMat.size() * 4;
 }
 
-}  // namespace aether
+}  // namespace atlas

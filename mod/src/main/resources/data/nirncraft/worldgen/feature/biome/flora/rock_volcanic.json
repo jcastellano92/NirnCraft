@@ -1,0 +1,33 @@
+{
+  "type": "nirncraft:flora_rock",
+  "config": {
+    "stone": {
+      "type": "minecraft:weighted",
+      "entries": [
+        {
+          "data": "nirncraft:volcanic_rock",
+          "weight": 6
+        },
+        {
+          "data": "nirncraft:cracked_volcanic_rock",
+          "weight": 2
+        },
+        {
+          "data": "minecraft:basalt",
+          "weight": 1
+        },
+        {
+          "data": "minecraft:blackstone",
+          "weight": 1
+        }
+      ]
+    },
+    "moss_chance": 0.0,
+    "size": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 1,
+      "max_inclusive": 3
+    },
+    "style": "mixed"
+  }
+}

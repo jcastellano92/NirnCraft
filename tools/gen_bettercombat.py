@@ -1,4 +1,4 @@
-"""Generates Better Combat weapon attribute files for Skycraft weapons (ignored when Better Combat is absent).
+"""Generates Better Combat weapon attribute files for NirnCraft weapons (ignored when Better Combat is absent).
 
 Every weapon of tools/textures/gear_catalogue.py gets its family's preset (daggers, swords, axes, maces, claymores,
 double axes, hammers), with per-material overrides (Akaviri katanas, Redguard and Khajiiti scimitars...).
@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.join(HERE, "textures"))
 
 import gear_catalogue as cat  # noqa: E402
 
-root = os.path.join(HERE, "..", "mod", "src", "main", "resources", "data", "skycraft", "weapon_attributes")
+root = os.path.join(HERE, "..", "mod", "src", "main", "resources", "data", "nirncraft", "weapon_attributes")
 
 
 def main():

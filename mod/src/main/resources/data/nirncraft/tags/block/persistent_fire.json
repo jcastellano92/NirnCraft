@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:big_fire",
+    "nirncraft:flame_column",
+    "nirncraft:flame_tip",
+    "nirncraft:rubble_fire",
+    "nirncraft:smouldering_embers"
+  ]
+}

@@ -2,7 +2,7 @@
 
 Usage: py -3 tools/worldgen/tamriel_map.py [--no-preview]
 
-Writes to mod/src/main/resources/skycraft/tamriel/ (all rasters are CELL = 32 blocks per pixel, pixel (0, 0) is the
+Writes to mod/src/main/resources/nirncraft/tamriel/ (all rasters are CELL = 32 blocks per pixel, pixel (0, 0) is the
 cell whose north-west corner is (MIN_X, MIN_Z)):
 
 * regions.png   8-bit indexed: region index into regions.json (0 = sea/open_ocean).
@@ -41,7 +41,7 @@ if HERE not in sys.path:
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 import hydrology as hy  # noqa: E402  (tributaries, lake basins, deltas, waterfalls)
 import hydrology_build as hb  # noqa: E402
-RES_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft", "tamriel")
+RES_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft", "tamriel")
 OUT_DIR = os.environ.get("TAMRIEL_OUT") or RES_DIR  # rasters go here (set TAMRIEL_OUT to experiment without touching the resources)
 PLACES = os.path.join(RES_DIR, "places", "provinces.json")
 SKYRIM_SETTLEMENTS = os.path.join(RES_DIR, "places", "skyrim_settlements.json")
@@ -951,7 +951,7 @@ def write_assets(o):
     for i, r in enumerate(regions):
         prov, short = r["id"].split("/")
         e = {"index": i, "id": r["id"], "province": prov, "kind": r["kind"], "culture": r["culture"],
-             "name": f"region.skycraft.{prov}.{short}", "levels": r["levels"], "palette": r["id"],
+             "name": f"region.nirncraft.{prov}.{short}", "levels": r["levels"], "palette": r["id"],
              "music": prov, "weather": r["weather"]}
         if r.get("capital"):
             e["capital"] = r["capital"]
@@ -966,22 +966,22 @@ def write_assets(o):
         f.write("[\n" + ",\n".join(" " + json.dumps(e) for e in table) + "\n]\n")
 
     lang = {e["name"]: REGION_NAMES.get(e["id"], e["id"].split("/")[1].replace("_", " ").title()) for e in table}
-    lang["region.skycraft.realm.generated"] = "%s"
+    lang["region.nirncraft.realm.generated"] = "%s"
     lang.update(RIVER_NAMES)
     with open(LANG, "w", encoding="utf-8", newline="\n") as f:
         json.dump(dict(sorted(lang.items())), f, indent=2, ensure_ascii=False)
         f.write("\n")
 
 
-LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft", "tamriel_regions.json")
+LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft", "tamriel_regions.json")
 RIVER_NAMES = {
-    "river.skycraft.daggerfall_river": "Ilessan Water",
-    "river.skycraft.anticlere_river": "Maran Water",
-    "river.skycraft.dwynnen_river": "Karstbeck",
-    "river.skycraft.bjoulsae_river": "Bjoulsae River",
-    "river.skycraft.sentinel_wadi": "Wadi Tigonus",
-    "river.skycraft.lainlyn_river": "Lainlyn Run",
-    "river.skycraft.totambu_river": "Totambu River",
+    "river.nirncraft.daggerfall_river": "Ilessan Water",
+    "river.nirncraft.anticlere_river": "Maran Water",
+    "river.nirncraft.dwynnen_river": "Karstbeck",
+    "river.nirncraft.bjoulsae_river": "Bjoulsae River",
+    "river.nirncraft.sentinel_wadi": "Wadi Tigonus",
+    "river.nirncraft.lainlyn_river": "Lainlyn Run",
+    "river.nirncraft.totambu_river": "Totambu River",
 }
 REGION_NAMES = {
     "sea/open_ocean": "The Open Sea", "sea/sea_of_ghosts": "Sea of Ghosts", "sea/abecean_sea": "Abecean Sea",

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "nirncraft:block/armor_workbench"
+    },
+    "facing=east": {
+      "model": "nirncraft:block/armor_workbench",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "nirncraft:block/armor_workbench",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nirncraft:block/armor_workbench",
+      "y": 270
+    }
+  }
+}

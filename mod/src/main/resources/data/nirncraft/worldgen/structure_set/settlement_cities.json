@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:settlement_city",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 520100,
+    "types": [
+      "capital",
+      "city"
+    ]
+  }
+}

@@ -1,9 +1,9 @@
 {
   "replace": false,
   "values": [
-    "skycraft:graht_oak_log",
-    "skycraft:graht_oak_wood",
-    "skycraft:palm_log",
-    "skycraft:hist_log"
+    "nirncraft:graht_oak_log",
+    "nirncraft:graht_oak_wood",
+    "nirncraft:palm_log",
+    "nirncraft:hist_log"
   ]
 }

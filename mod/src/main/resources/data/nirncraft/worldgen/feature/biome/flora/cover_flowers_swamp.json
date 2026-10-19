@@ -1,0 +1,25 @@
+{
+  "type": "nirncraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:blue_orchid",
+        "weight": 4
+      },
+      {
+        "state": "minecraft:lily_of_the_valley",
+        "weight": 1
+      }
+    ],
+    "scale": 28,
+    "patchiness": 0.85,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 3,
+      "max_inclusive": 8
+    },
+    "spread": 3,
+    "salt": 5546,
+    "near_water": false
+  }
+}

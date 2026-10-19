@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/akaviri_bow",
+  "textures": {
+    "layer0": "nirncraft:item/akaviri_bow_pulling_2"
+  }
+}

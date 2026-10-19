@@ -1,10 +1,10 @@
 # Mounts: saddles, tack, saddlebags and stamina
 
-Code: `mod/src/main/java/com/skycraft/mounts/` (`SaddleType`, `MountGear`, `Saddlebags`, `SaddlebagMenu`, `MountStamina`,
+Code: `mod/src/main/java/com/nirncraft/mounts/` (`SaddleType`, `MountGear`, `Saddlebags`, `SaddlebagMenu`, `MountStamina`,
 `Mounts`, `MountKind`; individuals: `MountProfile`, `MountStats`, `MountToken`, `MountGrowth`, `MountInspect`, `MountView`,
 `MountStock`, `MountStable`,
 `StableUi`, `StablePackets`; client `mounts/client`), breaking in `fauna/WildHorseTaming` + `fauna/TameBalance`, the stable
-dialogue `fauna/Stables`, selftest `MountsSelfTest` (`/skycraft-mounts selftest`, run by `qa.ps1 -Server`).
+dialogue `fauna/Stables`, selftest `MountsSelfTest` (`/nirncraft-mounts selftest`, run by `qa.ps1 -Server`).
 
 ## The loop
 1. **Get a saddle** (an item): stablemasters sell them, or craft them (a pack saddle is a saddle, leather and a chest; a war
@@ -70,14 +70,14 @@ stablemasters. Vanilla horse armour works too.
 ## Stamina bar
 While you steer one of your mounts the **HUD stamina bar is the mount's** (the same fraction of your bar): your own value is
 parked in `module("mounts").parked_stamina` and restored the moment you leave the saddle (dismount, death, logout, teleport,
-the mount dying), and the mount keeps what the bar held (`skycraft_mount_stamina` on the entity, `stamina_pts` in the record
+the mount dying), and the mount keeps what the bar held (`nirncraft_mount_stamina` on the entity, `stamina_pts` in the record
 for a mount brought back from afar). Gallop (sprint key) drains 1 point per tick, a jump 6% of the max, resting regains
 slowly; an exhausted mount cannot gallop until a quarter is back and you cannot sprint either. The vitals module neither
 drains nor restores the bar while swapped. The only mount HUD left is a thin health bar when the mount is hurt.
 
 ## Downed and companion combat (`MountCompanion`, `MountCompanionEvents`, `CompanionPackets`, `client/MountDownedClient`)
 
-Applies to every OWNED mount of a `MountKind` (a Skycraft mount entity carrying `skycraft_mount` and a player owner). NPC
+Applies to every OWNED mount of a `MountKind` (a NirnCraft mount entity carrying `nirncraft_mount` and a player owner). NPC
 and guard horses, wild mounts and stable-master stock have no owner tag and are untouched.
 
 ### Downed instead of dead
@@ -92,9 +92,9 @@ and guard horses, wild mounts and stable-master stock have no owner tag and are 
 * **Rises** (`MountCompanion.tryRise`, from the owner's player tick) when it has lain 3 s and the area is calm: owner not
   in combat for 8 s (`Vitals.inCombat`, 160 ticks), no hostile within 24 blocks of the mount or the owner that targets
   either, OR the owner is gone (offline, dead, other dimension, more than 64 blocks away). It stands at 35% health and
-  cannot be ridden for 5 s (`skycraft_mount_rest`; the owner is told).
+  cannot be ridden for 5 s (`nirncraft_mount_rest`; the owner is told).
 * **Call (H)** while down: if calm it gets up and comes; otherwise "is down and cannot come until the fight is over".
-* **Edge cases**: state is entity persistent data (`skycraft_downed`), so it survives saves and restarts. A downed mount
+* **Edge cases**: state is entity persistent data (`nirncraft_downed`), so it survives saves and restarts. A downed mount
   loading with its owner offline/elsewhere, or not the recorded mount, rises quietly; the owner logging out raises it
   quietly; a downed mount that falls below the world is put beside its owner (or the surface) and stays down until
   calm. Dimension change: it stays downed in the old dimension; calling spawns a fresh mount as before, and the old
@@ -107,11 +107,11 @@ the owner, the mob the owner hit, or a hostile targeting the owner (monsters, or
 players, the owner's pets or other owned mounts), stays within 12 blocks of the owner and lets go of a foe more than 20
 blocks from the owner. Beasts attack with their own spec attacks (so their attack attribute and animations); horses and
 Arvak kick (`attribute or base x factor x power`, cooldown, knockback). `power` reads the persistent floats
-`skycraft_mount_power` (multiplier) and `skycraft_mount_level` (+4% per level) that the mount-stat system may write.
+`nirncraft_mount_power` (multiplier) and `nirncraft_mount_level` (+4% per level) that the mount-stat system may write.
 Non-fighters keep 8 blocks from hostiles near the owner (moving away, drifting back to the owner when far), and never get
 a target. A downed fighter leaves the fight like any downed mount.
 
-**Stance**: sneak + the call key (H) while your mount is within 48 blocks, or `/skycraft-mounts stance [follow|stay]`.
+**Stance**: sneak + the call key (H) while your mount is within 48 blocks, or `/nirncraft-mounts stance [follow|stay]`.
 Stay: it does not follow into a fight and only takes foes within 6 blocks. (Sneak-use stays the saddlebag menu.)
 
 | Kind | Role | Kick/attack | Notes |
@@ -132,7 +132,7 @@ Stay: it does not follow into a fight and only takes foes within 6 blocks. (Snea
 ### Future work
 * A real stance/command key and a radial entry; "attack my target" order; per-mount aggression setting.
 * A proper lying/sitting animation per rig (the roll is a render transform) and a lying hitbox.
-* Mount stat/level system (the other mounts workstream): write `skycraft_mount_power` / `skycraft_mount_level`; bardings could
+* Mount stat/level system (the other mounts workstream): write `nirncraft_mount_power` / `nirncraft_mount_level`; bardings could
   add a kick bonus; the kick for the beasts should scale with it too (set the attack attribute modifier).
 * Revive by item (a healing potion or food speeds the rise), and a rise timer shown on the mount's health bar.
 * Keep-away does not avoid doors; camels use a brain, so their flight is only partly effective.
@@ -157,7 +157,7 @@ health, carry +-20%, jump +-10%. **Trust** (0..100) is earned and moves speed (-
   with a swing at your own mount (-3), and while it is left hurt (under 35%) and far from you (-0.5 per 10 s).
 - Applied through attribute modifiers (speed, health, jump) and the stamina, carry and bag multipliers.
 - **The stats belong to the animal, not the player** (`MountToken`, `MountStable`): while it is an entity its persistent data
-  (`skycraft_mstats`, `skycraft_mid` its animal id, custom name, coat, health) is the single truth; whenever it is not an
+  (`nirncraft_mstats`, `nirncraft_mid` its animal id, custom name, coat, health) is the single truth; whenever it is not an
   entity it is a **token**, a self-contained CompoundTag (`id`, `kind`, `stats` incl. rolls, growth, level, XP, trust and
   training counters, `name`, `coat`, `hp`, `origin`; never tack or bag items). The player's record (`mounts.tokens.<kind>`)
   holds only the token of the ACTIVE mount and of the legends, refreshed on every change, on unload (`EntityLeaveLevelEvent`),
@@ -184,7 +184,7 @@ clamped 0.5..2.6; trade-in is 60% of the same formula for yours. Buying and sell
 recomputed on the server. **Train** pays a stable hand one growth point in a stat (fee 50 + 40/point + 20/level + grade;
 Trust +10), at most twice an in-game week and never past the stat's soft cap.
 - **Selling puts the animal in that stable's stock.** Its token (same stats, level, trust, training, name, coat; id kept) moves
-  into the stable's SavedData (`skycraft_mount_stock`, keyed by the stable's key, at most 12, the oldest overflow to a
+  into the stable's SavedData (`nirncraft_mount_stock`, keyed by the stable's key, at most 12, the oldest overflow to a
   bounded "sold on" pool of 64, of which one animal that suits the region is shown per week). It is listed first in the
   stock, priced by its grades and level, indistinguishable from generated animals except that it has a history. Buying it
   restores the token onto a fresh entity: that very animal. Generated stock keeps filling the rest, deterministic per week.
@@ -239,4 +239,4 @@ rank, *Trick Rider* +6% mounted blows and -15% jump cost a rank.
 | Tamed grazer | 45 s | 12.5 | 45 | 3.5 | 150 | 20 | stamina/health/carry 1 |
 
 Stat names follow the kind on cards (camel: Pace, Endurance, Burden; guar: Trot, Hide; cats: Sprint, Pounce, Haul; indrik:
-Grace, Bound; mammoth: Stride, Heave; see `mounts.skycraft.stat.*`). Overweight slowdown is not implemented here.
+Grace, Bound; mammoth: Stride, Heave; see `mounts.nirncraft.stat.*`). Overweight slowdown is not implemented here.

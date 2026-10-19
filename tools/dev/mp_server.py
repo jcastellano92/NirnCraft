@@ -1,7 +1,7 @@
 """A disposable full-pack dedicated server for multiplayer (TCP) tests of the client: the far-field tile stream,
 packets, codecs and visuals as a remote player sees them.
 
-    py -3 tools/dev/mp_server.py setup --zip E:/.../Skycraft-26.3-server-<build>.zip [--port 25790]
+    py -3 tools/dev/mp_server.py setup --zip E:/.../NirnCraft-26.3-server-<build>.zip [--port 25790]
     py -3 tools/dev/mp_server.py start            # detached; returns when "Done" appears (or fails)
     py -3 tools/dev/mp_server.py cmd "op jsnoop420" "tp jsnoop420 0 300 0"
     py -3 tools/dev/mp_server.py jar PATH          # swap in a rebuilt core jar (server must be stopped)
@@ -10,7 +10,7 @@ packets, codecs and visuals as a remote player sees them.
 Then aim the client at it: tools/qa/prism_autotest.ps1 -PrepareOnly -Live -SourceZip dist/...zip
 -Server 127.0.0.1:<port> -Java <java25>, and run live_world.py launch / status (remoteConnected) / actions.
 
-The copy lives in E:/Skycraft-scratch/migration-26.3/mp-server (SKYCRAFT_MP_DIR overrides): loopback only, offline
+The copy lives in E:/NirnCraft-scratch/migration-26.3/mp-server (NIRNCRAFT_MP_DIR overrides): loopback only, offline
 mode, no whitelist, never pauses when empty; the EULA is accepted for this disposable test copy only. A small bridge
 process owns the server's console: commands are appended to console.in, `stop` is always a clean console stop, and
 no process is ever killed by name.
@@ -26,9 +26,9 @@ import time
 import zipfile
 from pathlib import Path
 
-ROOT = Path(os.environ.get("SKYCRAFT_MP_DIR", "E:/Skycraft-scratch/migration-26.3/mp-server"))
+ROOT = Path(os.environ.get("NIRNCRAFT_MP_DIR", "E:/NirnCraft-scratch/migration-26.3/mp-server"))
 SERVER = ROOT / "server"
-JAVA = Path(os.environ.get("SKYCRAFT_JAVA", "E:/Skycraft-scratch/toolchains/jdk-25.0.4.1+1/bin/java.exe"))
+JAVA = Path(os.environ.get("NIRNCRAFT_JAVA", "E:/NirnCraft-scratch/toolchains/jdk-25.0.4.1+1/bin/java.exe"))
 CONSOLE, OUT, STATE = SERVER / "console.in", SERVER / "server.out", ROOT / "mp-server.json"
 
 
@@ -102,7 +102,7 @@ def start(timeout=900):
         if "Done (" in text:
             print(f"server ready on 127.0.0.1:{st['port']} after {time.monotonic() - t0:.0f} s")
             for line in text.splitlines():
-                if "aether tile service" in line:
+                if "atlas tile service" in line:
                     print("  " + line.strip()[-140:])
             return
         if "crash report" in text.lower() or (time.monotonic() - t0 > 30 and not alive(state().get("java"))):
@@ -163,7 +163,7 @@ def main():
     elif a.action == "jar":
         if alive(state().get("java")):
             sys.exit("stop the server first")
-        shutil.copyfile(a.path, SERVER / "mods/skycraft-core.jar")
+        shutil.copyfile(a.path, SERVER / "mods/nirncraft-core.jar")
         print("core jar replaced")
     elif a.action == "status":
         st = state()

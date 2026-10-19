@@ -1,0 +1,94 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:skeever",
+      "required": false
+    },
+    {
+      "id": "nirncraft:mudcrab",
+      "required": false
+    },
+    {
+      "id": "nirncraft:deer",
+      "required": false
+    },
+    {
+      "id": "nirncraft:slaughterfish",
+      "required": false
+    },
+    {
+      "id": "nirncraft:cliff_racer",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hackwing",
+      "required": false
+    },
+    {
+      "id": "nirncraft:alfiq",
+      "required": false
+    },
+    {
+      "id": "nirncraft:wisp",
+      "required": false
+    },
+    {
+      "id": "nirncraft:imp",
+      "required": false
+    },
+    {
+      "id": "nirncraft:torchbug",
+      "required": false
+    },
+    {
+      "id": "nirncraft:butterfly",
+      "required": false
+    },
+    {
+      "id": "nirncraft:moth",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dragonfly",
+      "required": false
+    },
+    {
+      "id": "nirncraft:riekling",
+      "required": false
+    },
+    {
+      "id": "nirncraft:elk",
+      "required": false
+    },
+    {
+      "id": "nirncraft:nix_hound",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dwarven_spider",
+      "required": false
+    },
+    {
+      "id": "nirncraft:wolf",
+      "required": false
+    },
+    "minecraft:chicken",
+    "minecraft:rabbit",
+    "minecraft:fox",
+    "minecraft:cod",
+    "minecraft:salmon",
+    {
+      "id": "nirncraft:sea_netch",
+      "required": false
+    },
+    {
+      "id": "nirncraft:seal",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hawk",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:sweetroll",
+    "nirncraft:garlic_bread",
+    "nirncraft:honey_nut_treat",
+    "nirncraft:boiled_creme_treat",
+    "nirncraft:cheese_wheel",
+    "nirncraft:eidar_cheese_wedge",
+    "nirncraft:goat_cheese_wedge",
+    "nirncraft:venison_chop",
+    "nirncraft:horker_loaf",
+    "nirncraft:salmon_steak",
+    "nirncraft:grilled_leeks",
+    "nirncraft:apple_cabbage_stew",
+    "nirncraft:beef_stew",
+    "nirncraft:venison_stew",
+    "nirncraft:horker_stew",
+    "nirncraft:vegetable_soup",
+    "nirncraft:tomato_soup",
+    "nirncraft:potato_soup",
+    "nirncraft:elsweyr_fondue",
+    "nirncraft:nord_mead",
+    "nirncraft:honningbrew_mead",
+    "nirncraft:black_briar_mead",
+    "nirncraft:ale",
+    "nirncraft:alto_wine",
+    "nirncraft:spiced_wine"
+  ]
+}

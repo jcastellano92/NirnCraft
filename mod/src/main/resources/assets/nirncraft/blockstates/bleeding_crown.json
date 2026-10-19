@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/bleeding_crown"
+      },
+      {
+        "model": "nirncraft:block/bleeding_crown",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/bleeding_crown",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/bleeding_crown",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/bleeding_crown_harvested"
+      },
+      {
+        "model": "nirncraft:block/bleeding_crown_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/bleeding_crown_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/bleeding_crown_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

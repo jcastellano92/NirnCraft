@@ -4,7 +4,7 @@
     "minecraft": "26.3",
     "neoforge": "26.3.0.90",
     "java": 25,
-    "instanceName": "Skycraft-26.3-autotest"
+    "instanceName": "NirnCraft-26.3-autotest"
   },
   "multiplayer": "vanilla-multiplayer-and-lan",
   "shaderPolicy": "Iris installed with shaders disabled; custom shader sources, patchers, previous metadata and presets preserved; rebase and visual acceptance required before enabling.",
@@ -627,7 +627,7 @@
   ],
   "retention": {
     "legacyPack": "disabled/forge-1.20.1",
-    "runtimeSnapshot": "E:/Skycraft-scratch/migration-26.3/baseline-20261018",
+    "runtimeSnapshot": "E:/NirnCraft-scratch/migration-26.3/baseline-20261018",
     "archiveIsInstalled": false
   },
   "integrationStatus": "Exact26.3 native build36/server/core diagnostic render passed; approved Sodium0.9.3-beta.1 compatibility fix requires full-pack client/TCP/render acceptance. Customized shaders and Distant Horizons remain disabled.",

@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/bittergreen_petals"
+      },
+      {
+        "model": "nirncraft:block/bittergreen_petals",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/bittergreen_petals",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/bittergreen_petals",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/bittergreen_petals_harvested"
+      },
+      {
+        "model": "nirncraft:block/bittergreen_petals_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/bittergreen_petals_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/bittergreen_petals_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

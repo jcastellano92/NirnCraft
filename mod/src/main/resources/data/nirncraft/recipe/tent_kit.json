@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LSL",
+    "LSL",
+    "S S"
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "nirncraft:tent_kit"
+  }
+}

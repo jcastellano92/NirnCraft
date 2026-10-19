@@ -1,11 +1,11 @@
-Skycraft full 26.3 migration — active, incomplete
+NirnCraft full 26.3 migration — active, incomplete
 Updated 2026-10-18 (native build checkpoint 38; runtime ownership hold after PC reboot)
 
 Owner's required target
 Minecraft exactly 26.3 (Wilderness Bound), NeoForge 26.3.0.90, Java 25 LTS.
 Official Sodium 0.9.3-beta.1 for 26.3 (explicitly approved by the owner after the
 0.9.2 native runtime crash) and Iris 1.11.7+26.3-neoforge.
-Every existing Skycraft system must be ported. Removing source sets, disabling
+Every existing NirnCraft system must be ported. Removing source sets, disabling
 gameplay registrations or replacing rendering with empty methods is not acceptance.
 Normal Minecraft multiplayer/server list/direct connect/LAN replaces Essential.
 Custom shaders and Distant Horizons are preserved; incompatible versions stay
@@ -15,7 +15,7 @@ Preservation
 The old instance and saves remain untouched. Before the port, all tracked and
 nonignored untracked source, a binary worktree patch and the custom installed
 runtime jars/shader were backed up with SHA256 manifests under:
-E:\Skycraft-scratch\migration-26.3\baseline-20261018
+E:\NirnCraft-scratch\migration-26.3\baseline-20261018
 The old loader metadata and pack definitions are archived, not deleted.
 
 Build from repository root
@@ -91,7 +91,7 @@ retains startup failure evidence, then halts and joins the real server before FM
 closes. Checkpoint 30 confirmed one cleanup/delete with no teardown exception.
 It never substitutes fake APIs or skips assertions.
 Native JUnit logs/config/temp worlds now follow the selected build directory:
-E:/Skycraft-scratch/migration-26.3/build/minecraft-junit with the scratch launcher.
+E:/NirnCraft-scratch/migration-26.3/build/minecraft-junit with the scratch launcher.
 Test results remain under build/test-results/test and build/reports/tests/test.
 
 Source and compiled-descriptor audits resolve all native event subscriptions;
@@ -127,7 +127,7 @@ World/data upgrade reruns are idempotent. Static audit found no missing authored
 resources or checked registry references; native FML decoding also passed in test 27.
 
 Behavior and compatibility gates
-Native incoming damage fires before cooldown rejection. Skycraft's accepted-hit
+Native incoming damage fires before cooldown rejection. NirnCraft's accepted-hit
 handlers now run through a supported DamageContainer ARMOR callback, preserving
 stamina/XP and health scaling for accepted hits. Native armor durability has already
 been charged using the original amount at that point; exact old wear timing is a
@@ -183,7 +183,7 @@ Required acceptance before calling the port complete
 No new commit/push has been requested for this migration.
 
 Isolated native server controls
-py -3 tools/dev/build_263.py --run-dir E:/Skycraft-scratch/migration-26.3/runtime/server --dev-dir E:/Skycraft-scratch/migration-26.3/runtime/server-control --log dist/code-review/neoforge-migration/server-boot-NN.log runServer
+py -3 tools/dev/build_263.py --run-dir E:/NirnCraft-scratch/migration-26.3/runtime/server --dev-dir E:/NirnCraft-scratch/migration-26.3/runtime/server-control --log dist/code-review/neoforge-migration/server-boot-NN.log runServer
 The optional dev directory enables the existing server-thread command inbox;
 atomic *.cmd jobs in its inbox can run selftests, save-all flush and stop. Wait for
 the actual outbox/ready and fresh heartbeat, then inspect each job's done status.

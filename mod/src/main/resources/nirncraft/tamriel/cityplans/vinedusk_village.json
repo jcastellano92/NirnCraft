@@ -1,0 +1,256 @@
+{
+  "id": "vinedusk_village",
+  "why": [
+    "reapers_march.L1.knolls",
+    "reapers_march.L5.grain_road",
+    "reapers_march.L6.arenthia_seat"
+  ],
+  "sil": "valenwood-vinedusk-village-plan",
+  "base": "none",
+  "overlay": "reapers_march",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "reapers_march",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "reapers_march",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "vinedusk_village_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "vinedusk_village_landmark",
+      "overlay": "reapers_march"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        -4
+      ],
+      "spokes": 8,
+      "r0": 10,
+      "r1": 29,
+      "wobble": 8,
+      "offset": 0.83,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        21
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          35
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          0,
+          -20
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        32
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "vinedusk_village_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        -14,
+        28
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "vinedusk_village_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "vinedusk_village_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        33,
+        2
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "vinedusk_village_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "vinedusk_village_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "vinedusk_village_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -33,
+        1
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "vinedusk_village_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "vinedusk_village_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "vinedusk_village_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "vinedusk_village_b_5",
+    "smithy": "vinedusk_village_b_7"
+  },
+  "titles": {
+    "vinedusk_village_b_1": "place.nirncraft.vinedusk_village Council & Seat Hall",
+    "vinedusk_village_b_2": "place.nirncraft.vinedusk_village High Sanctuary",
+    "vinedusk_village_b_3": "place.nirncraft.vinedusk_village Fighters & Wayfarers Hall",
+    "vinedusk_village_b_4": "place.nirncraft.vinedusk_village Mages & Chroniclers Spire",
+    "vinedusk_village_b_5": "place.nirncraft.vinedusk_village The Lantern & Hearth Inn",
+    "vinedusk_village_b_6": "place.nirncraft.vinedusk_village The Traveler's Rest Tavern",
+    "vinedusk_village_b_7": "place.nirncraft.vinedusk_village Master Forge & Armorer",
+    "vinedusk_village_landmark": "High Seat of place.nirncraft.vinedusk_village",
+    "vinedusk_village_plaza": "place.nirncraft.vinedusk_village Central Plaza"
+  },
+  "innKey": "vinedusk_village_b_5",
+  "zones": [
+    {
+      "at": [
+        0,
+        -15
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

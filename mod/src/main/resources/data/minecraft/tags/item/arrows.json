@@ -1,17 +1,17 @@
 {
   "replace": false,
   "values": [
-    "skycraft:iron_arrow",
-    "skycraft:steel_arrow",
-    "skycraft:orcish_arrow",
-    "skycraft:dwarven_arrow",
-    "skycraft:elven_arrow",
-    "skycraft:glass_arrow",
-    "skycraft:ebony_arrow",
-    "skycraft:daedric_arrow",
-    "skycraft:dragonbone_arrow",
-    "skycraft:fire_arrow",
-    "skycraft:frost_arrow",
-    "skycraft:shock_arrow"
+    "nirncraft:iron_arrow",
+    "nirncraft:steel_arrow",
+    "nirncraft:orcish_arrow",
+    "nirncraft:dwarven_arrow",
+    "nirncraft:elven_arrow",
+    "nirncraft:glass_arrow",
+    "nirncraft:ebony_arrow",
+    "nirncraft:daedric_arrow",
+    "nirncraft:dragonbone_arrow",
+    "nirncraft:fire_arrow",
+    "nirncraft:frost_arrow",
+    "nirncraft:shock_arrow"
   ]
 }

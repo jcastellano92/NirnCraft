@@ -1,4 +1,4 @@
-// Kernel backends: the same aether_far kernel on the CPU (Slang -> C++) or on Vulkan (Slang -> SPIR-V).
+// Kernel backends: the same atlas_far kernel on the CPU (Slang -> C++) or on Vulkan (Slang -> SPIR-V).
 #pragma once
 #include <cstdint>
 #include <memory>
@@ -8,7 +8,7 @@
 #include "gpu_layout.hpp"
 #include "world.hpp"
 
-namespace aether {
+namespace atlas {
 
 struct GlFrameIO {
     uint32_t nearDepthTex = 0, depthZeroToOne = 0, reversedZ = 0;
@@ -41,12 +41,12 @@ struct GlTargets {
     uint32_t width = 0, height = 0;
 };
 
-// Why a backend call failed, beyond its message: decides the status the C API returns (aether.h AetherStatus).
+// Why a backend call failed, beyond its message: decides the status the C API returns (atlas.h AtlasStatus).
 enum class Fault { None, Error, DeviceLost, OutOfMemory, Timeout };
 
-// Memory of the device (aether_memory_info); zeros where unknown.
+// Memory of the device (atlas_memory_info); zeros where unknown.
 struct MemoryInfo {
-    uint64_t deviceLocalBytes = 0, deviceLocalBudget = 0, deviceLocalUsage = 0, hostHeapBytes = 0, aetherBytes = 0;
+    uint64_t deviceLocalBytes = 0, deviceLocalBudget = 0, deviceLocalUsage = 0, hostHeapBytes = 0, atlasBytes = 0;
     bool integrated = false, budgetExt = false;
 };
 
@@ -61,7 +61,7 @@ public:
     // have to wait on).
     bool lost() const { return lost_; }
     void clearFault() { if (!lost_) fault_ = Fault::None; }
-    // Test hook (aether_debug_fault): fail as the driver would, after `afterFrames` more frames.
+    // Test hook (atlas_debug_fault): fail as the driver would, after `afterFrames` more frames.
     void injectFault(Fault f, uint32_t afterFrames) {
         injected_ = f;
         injectCountdown_ = afterFrames;
@@ -114,9 +114,9 @@ protected:
         }
         Fault f = injected_;
         injected_ = Fault::None;
-        const char* what = f == Fault::DeviceLost    ? "VK_ERROR_DEVICE_LOST (injected by aether_debug_fault / AETHER_FAULT)"
-                           : f == Fault::Timeout     ? "GPU timeout (injected by aether_debug_fault / AETHER_FAULT)"
-                           : f == Fault::OutOfMemory ? "VK_ERROR_OUT_OF_DEVICE_MEMORY (injected by aether_debug_fault / AETHER_FAULT)"
+        const char* what = f == Fault::DeviceLost    ? "VK_ERROR_DEVICE_LOST (injected by atlas_debug_fault / ATLAS_FAULT)"
+                           : f == Fault::Timeout     ? "GPU timeout (injected by atlas_debug_fault / ATLAS_FAULT)"
+                           : f == Fault::OutOfMemory ? "VK_ERROR_OUT_OF_DEVICE_MEMORY (injected by atlas_debug_fault / ATLAS_FAULT)"
                                                      : "injected error";
         return !failWith(f, err, what);
     }
@@ -132,4 +132,4 @@ private:
 std::unique_ptr<Backend> makeCpuBackend();
 std::unique_ptr<Backend> makeVulkanBackend(std::string& err);  // null + err when no usable device
 
-}  // namespace aether
+}  // namespace atlas

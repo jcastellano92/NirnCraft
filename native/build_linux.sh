@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Build aether_core for Linux (libaether_core.so) and run its suites.
+# Build atlas_core for Linux (libatlas_core.so) and run its suites.
 #
 #   native/build_linux.sh [--debug] [--no-test] [--software] [--glx] [--hostcopy] [--validate] [--clean] [--allow-skip]
 #
 #   --software   run on Mesa's lavapipe (Vulkan) + llvmpipe (GL) instead of the GPU: a strict, GPU-free conformance
 #                pass (needs mesa-vulkan-drivers' lvp_icd json; slow: minutes)
 #   --glx        make the GL test context with GLX (X11 / XWayland, what GLFW uses on X) instead of EGL surfaceless
-#   --hostcopy   force the host-copy fallback (AETHER_INTEROP=hostcopy) to test it on a machine that has interop
+#   --hostcopy   force the host-copy fallback (ATLAS_INTEROP=hostcopy) to test it on a machine that has interop
 #   --validate   Khronos validation + synchronization validation (needs VK_LAYER_KHRONOS_validation installed:
 #                vulkan-validation-layers on Fedora/Bazzite, vulkan-validationlayers on Debian/Ubuntu)
 #
@@ -18,7 +18,7 @@
 #   conda-forge's gcc_linux-64 (sysroot_linux-64 2.28): CXX=x86_64-conda-linux-gnu-g++ native/build_linux.sh
 #
 # Steam Deck (SteamOS is read-only, no compiler): build in a distrobox / toolbox container (Bazzite ships both;
-#   `distrobox create -i fedora:41 aether && distrobox enter aether`, then `sudo dnf install gcc-c++ cmake ninja-build
+#   `distrobox create -i fedora:41 atlas && distrobox enter atlas`, then `sudo dnf install gcc-c++ cmake ninja-build
 #   python3 vulkan-loader mesa-vulkan-drivers vulkan-validation-layers`), and run the tests from Desktop Mode (the
 #   container shares the GPU and the session). The .so links libstdc++/libgcc statically, so the one built in the
 #   container loads in the game's JVM on the host.
@@ -26,7 +26,7 @@
 #   (nvidia_icd.json) and run the tests in a desktop session (GL needs the NVIDIA EGL/GLX vendor library).
 #
 # Environment overrides: SLANG_ROOT (a Slang release), VULKAN_HEADERS (a Vulkan-Headers checkout), CXX, BUILD_DIR,
-# AETHER_VK_DEVICE (index or name substring), AETHER_INTEROP=hostcopy|zerocopy.
+# ATLAS_VK_DEVICE (index or name substring), ATLAS_INTEROP=hostcopy|zerocopy.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -42,8 +42,8 @@ for a in "$@"; do
     --debug) CONFIG=Debug ;;
     --no-test) TEST=0 ;;
     --software) SOFTWARE=1 ;;
-    --glx) export AETHER_TEST_GL=glx ;;
-    --hostcopy) export AETHER_INTEROP=hostcopy ;;
+    --glx) export ATLAS_TEST_GL=glx ;;
+    --hostcopy) export ATLAS_INTEROP=hostcopy ;;
     --validate) VALIDATE=1 ;;
     --clean) CLEAN=1 ;;
     --allow-skip) ALLOW_SKIP=1 ;;
@@ -96,11 +96,11 @@ if [ ! -f "$BUILD/CMakeCache.txt" ]; then
   cmake -S "$HERE" -B "$BUILD" "${GEN[@]}" -DCMAKE_BUILD_TYPE="$CONFIG"
 fi
 cmake --build "$BUILD" --parallel
-echo "built: $BUILD/libaether_core.so"
+echo "built: $BUILD/libatlas_core.so"
 # what the library needs from the system (the mod ships it to every distro: keep this list short)
 if command -v objdump >/dev/null 2>&1; then
-  echo "NEEDED: $(objdump -p "$BUILD/libaether_core.so" | awk '/NEEDED/ {printf "%s ", $2}')"
-  echo "newest glibc symbol: $(objdump -T "$BUILD/libaether_core.so" | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1)"
+  echo "NEEDED: $(objdump -p "$BUILD/libatlas_core.so" | awk '/NEEDED/ {printf "%s ", $2}')"
+  echo "newest glibc symbol: $(objdump -T "$BUILD/libatlas_core.so" | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1)"
 fi
 
 [ "$TEST" = 1 ] || exit 0
@@ -115,11 +115,11 @@ if [ "$SOFTWARE" = 1 ]; then
   for f in /usr/share/vulkan/icd.d/lvp_icd.x86_64.json /usr/share/vulkan/icd.d/lvp_icd.json; do [ -f "$f" ] && LVP="$f"; done
   [ -n "$LVP" ] || { echo "lavapipe not installed (mesa-vulkan-drivers)" >&2; exit 1; }
   export VK_DRIVER_FILES="$LVP" VK_ICD_FILENAMES="$LVP"
-  export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe AETHER_TEST_SLOW=1
+  export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe ATLAS_TEST_SLOW=1
   echo "software drivers: lavapipe ($LVP) + llvmpipe"
 fi
 if [ "$VALIDATE" = 1 ]; then
-  export AETHER_VK_VALIDATION=1 VK_KHRONOS_VALIDATION_VALIDATE_SYNC=true
+  export ATLAS_VK_VALIDATION=1 VK_KHRONOS_VALIDATION_VALIDATE_SYNC=true
 fi
 
 cd "$REPO"
@@ -138,13 +138,13 @@ run() {
   elif grep -q '^SKIP' "$LOG" && [ "$ALLOW_SKIP" != 1 ]; then echo "-- SKIPPED (counts as a failure; --allow-skip)"; status=1
   else echo "-- ok"; fi
 }
-run "$BUILD/aether_tests" "$RASTER"
+run "$BUILD/atlas_tests" "$RASTER"
 # the exact-height kernel: correctly rounded division, known inputs, Vulkan vs its C++ reference bit for bit (a device
 # without shaderFloat64 + RTE / SignedZeroInfNanPreserve float controls reports the CPU fallback and passes)
-run "$BUILD/aether_height_test"
+run "$BUILD/atlas_height_test"
 # the GL bridge on two contexts: a 4.5 core one, then an OpenGL 3.3 core forward-compatible profile like Minecraft's
 # (zero-copy where the interop extensions exist, host-copy otherwise; the 3.3 one must land on the same path)
-run "$BUILD/aether_gl_test" "$HERE/data" --context=both
-run "$BUILD/aether_pack_test" "$REPO/shaderpack/SkycraftAether/shaders/lib/atmosphere.glsl"
+run "$BUILD/atlas_gl_test" "$HERE/data" --context=both
+run "$BUILD/atlas_pack_test" "$REPO/shaderpack/InfiniteATLAS/shaders/lib/atmosphere.glsl"
 [ "$status" = 0 ] && echo "ALL PASSED" || echo "SOME SUITES FAILED"
 exit "$status"

@@ -1,0 +1,680 @@
+{
+  "line": "green_pact",
+  "category": "faction",
+  "faction": "green_pact",
+  "region": "valenwood/grahtwood",
+  "speakers": {
+    "narrator": "Narrator"
+  },
+  "places": {
+    "silvenar_court": {
+      "x": -4900,
+      "z": 10500,
+      "r": 40,
+      "name": "Court of the Silvenar"
+    }
+  },
+  "npcs": [
+    {
+      "id": "faendir",
+      "name": "Warden Faendir",
+      "role": "hunter",
+      "place": "elden_root",
+      "offset": [
+        -5,
+        4
+      ],
+      "hall": "green_pact",
+      "greet": "Mind your feet. That moss was here before your grandmother's grandmother, and it will be here after you, if you mind your feet."
+    },
+    {
+      "id": "silvenar",
+      "name": "The Silvenar",
+      "role": "priest",
+      "place": "silvenar_court",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "I am the voice of the Bosmer. All of them, at once, which is louder than you might think. Speak, and I will hear how the forest answers."
+    },
+    {
+      "id": "green_lady",
+      "name": "The Green Lady",
+      "role": "hunter",
+      "place": "silvenar_court",
+      "offset": [
+        4,
+        3
+      ],
+      "female": true,
+      "greet": "The Silvenar speaks for the people. I hunt for them. If you are here to waste his time, you will find I am quicker than he is."
+    }
+  ],
+  "relics": [
+    {
+      "id": "gp_story_knot",
+      "name": "Spinner's Knot-Cord",
+      "desc": "A cord of braided sinew tied in a hundred knots. Each knot is a sentence of a story only a Spinner can read.",
+      "icon": 11
+    },
+    {
+      "id": "gp_felling_saw",
+      "name": "Two-Man Felling Saw",
+      "desc": "A long Colovian saw with sap still drying in its teeth. The Bosmer would very much like to see it melted.",
+      "icon": 26
+    }
+  ],
+  "scenes": {
+    "gp_spinners_tale": [
+      [
+        "spinner",
+        "Long ago, a hunter grew tired of meat and cut a branch to roast roots on. Only one branch. The tree did not forget."
+      ],
+      [
+        "spinner",
+        "The grove around it grew sour and sharp, and the spriggans came to tend its anger. Every Bosmer child hears this tale. Most think it is a story."
+      ],
+      [
+        "spinner",
+        "You have seen the grove. You know better. The Pact is not a law we keep. It is a promise the forest keeps back, as long as we keep ours."
+      ]
+    ],
+    "gp_bond_renewed": [
+      [
+        "narrator",
+        "The Silvenar takes the Green Lady's hands. For a moment the leaves overhead stop moving, though the wind has not."
+      ],
+      [
+        "silvenar",
+        "When she bleeds, I feel it. When she is far away, the people grow restless and do not know why. We are bound, the two of us, and through us, everyone."
+      ],
+      [
+        "green_lady",
+        "And when he worries, I cannot hunt. Thank you for bringing me home before he worried himself into a fever."
+      ]
+    ],
+    "gp_voice": [
+      [
+        "silvenar",
+        "The forest has spoken to me about you. Not in words. In a feeling of being listened to, which is rarer than you would think."
+      ],
+      [
+        "silvenar",
+        "When I cannot travel, my voice must. I name you its keeper. Carry it carefully. It is everyone's."
+      ],
+      [
+        "narrator",
+        "The Green Lady sets a bow of polished bone and horn across your hands. No living wood went into it."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "gp_the_pact_sworn",
+      "title": "Words Under the Graht-Oak",
+      "start": "npc:faendir",
+      "requires": [
+        "!faction:green_pact"
+      ],
+      "offer": "I'd like to become a friend of the Green Pact.",
+      "pitch": "Friends are easy. Friends do not cut living wood or eat what grows from the ground while they stand in Valenwood. That is the Pact, and Y'ffre made it before there were Bosmer to keep it. Swear to it, then hunt your own supper, and we will see what you are.",
+      "desc": "Warden Faendir of Elden Root offered to bring me into the Wardens of the Green Pact, if I swear to keep Y'ffre's ancient promise: no harm to living plants, and nothing but meat to eat.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "faendir",
+          "text": "Hear the terms of the Green Pact",
+          "topic": "Tell me what swearing means.",
+          "reply": "It means your bow is horn and bone, your house is grown, not built, and your supper bled before you ate it. It means when you kill an enemy in our woods, you do not waste him. We will not ask that last part of an outsider. Not yet.",
+          "place": "elden_root"
+        },
+        {
+          "type": "talk",
+          "npc": "faendir",
+          "text": "Swear the Pact",
+          "choices": [
+            {
+              "label": "I swear to keep the Green Pact as the Bosmer keep it.",
+              "reply": "Then the forest heard you, and so did I. Do not make either of us sorry.",
+              "actions": "flag:gp_full_oath"
+            },
+            {
+              "label": "I swear to keep it while I walk in Valenwood.",
+              "reply": "An honest oath, and a careful one. Y'ffre likes careful. Most of the time.",
+              "actions": "flag:gp_guest_oath"
+            }
+          ],
+          "place": "elden_root"
+        },
+        {
+          "type": "kill_type",
+          "entity": "nirncraft:wolf",
+          "count": 2,
+          "text": "Hunt your supper the Bosmer way"
+        },
+        {
+          "type": "talk",
+          "npc": "faendir",
+          "text": "Return to Warden Faendir",
+          "topic": "I hunted. I ate. Nothing green was harmed.",
+          "reply": "And you did not complain about the lack of bread. That alone puts you ahead of most Imperials. Welcome, Pact-Friend.",
+          "place": "elden_root"
+        }
+      ],
+      "outro": "I swore the Green Pact before Warden Faendir in Elden Root and hunted my supper the Bosmer way. I am a Pact-Friend of the Wardens.",
+      "rewards": {
+        "gold": 120,
+        "join": true,
+        "items": [
+          "nirncraft:bosmer_chestplate",
+          "nirncraft:iron_dagger"
+        ]
+      },
+      "region": "valenwood/malabal_tor",
+      "why": [
+        "malabal_tor.L7.silvenar_court",
+        "malabal_tor.L7.orc_outsiders"
+      ],
+      "consequence": {
+        "world_state": "gp_the_pact_sworn_resolved",
+        "flag": "conseq_gp_the_pact_sworn",
+        "summary": "I swore the Green Pact before Warden Faendir in Elden Root and hunted my supper the Bosmer way. I am a Pact-Friend of the Wardens."
+      }
+    },
+    {
+      "id": "gp_the_spinners_tale",
+      "title": "The Spinner's Tale",
+      "start": "npc:spinner",
+      "requires": [
+        "quest:gp_the_pact_sworn|faction:green_pact"
+      ],
+      "offer": "Faendir says every Warden must hear a Spinner's tale.",
+      "pitch": "Every Warden must hear one and see one. The two are different. North of here, near Falinesti, there is a grove that went sour long ago. Go there, and find a cord of knots I left in it once. Then come back and I will read it to you.",
+      "desc": "Spinner Aerfin, one of Y'ffre's storytellers, sent me to a soured grove near Falinesti to recover a knotted cord that holds one of the oldest tales of the Green Pact.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "falinesti",
+          "offset": [
+            200,
+            -200
+          ],
+          "text": "Find the sour grove near Falinesti"
+        },
+        {
+          "type": "clear",
+          "place": "falinesti",
+          "offset": [
+            200,
+            -200
+          ],
+          "text": "Calm the angry spirits of the grove",
+          "spawn": [
+            {
+              "type": "nirncraft:spriggan",
+              "count": 3,
+              "name": "Sour-Grove Spriggan"
+            },
+            {
+              "type": "nirncraft:will_o_wisp",
+              "count": 2,
+              "name": "Grove Wisp"
+            }
+          ],
+          "journal": "The spriggans fought like they were defending a wound. Maybe they were."
+        },
+        {
+          "type": "retrieve",
+          "place": "falinesti",
+          "offset": [
+            200,
+            -200
+          ],
+          "relic": "gp_story_knot",
+          "radius": 10,
+          "text": "Find the Spinner's knot-cord"
+        },
+        {
+          "type": "deliver",
+          "npc": "spinner",
+          "relic": "gp_story_knot",
+          "text": "Bring the cord to Spinner Aerfin",
+          "topic": "I found your cord. The grove did not want me to.",
+          "reply": "It never does. Sit. Here is what the knots say.",
+          "actions": "scene:gp_spinners_tale"
+        }
+      ],
+      "outro": "I recovered a Spinner's knot-cord from a soured grove near Falinesti. Spinner Aerfin read me its tale: the forest remembers every broken promise.",
+      "rewards": {
+        "gold": 250,
+        "faction_points": 3
+      },
+      "region": "valenwood/greenshade",
+      "why": [
+        "greenshade.L7.ground_camp",
+        "greenshade.L8.wilderking_court"
+      ],
+      "consequence": {
+        "world_state": "gp_the_spinners_tale_resolved",
+        "flag": "conseq_gp_the_spinners_tale",
+        "summary": "I recovered a Spinner's knot-cord from a soured grove near Falinesti. Spinner Aerfin read me its tale: the forest remembers every broken promise."
+      }
+    },
+    {
+      "id": "gp_felling_season",
+      "title": "Felling Season",
+      "start": "npc:faendir",
+      "requires": [
+        "quest:gp_the_spinners_tale"
+      ],
+      "offer": "You've been sharpening that knife a long time.",
+      "pitch": "Colovian timber-cutters have crossed the border and are felling a graht-oak east of the city. A whole graht-oak. There were families in it. Go there before the next one falls. Bring me their saw so I can show the Treethane what it looks like.",
+      "desc": "Colovian loggers have crossed into Valenwood and are felling the great graht-oaks east of Elden Root. Warden Faendir sent me to stop them.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "elden_root",
+          "offset": [
+            200,
+            -150
+          ],
+          "text": "Find the felling camp east of Elden Root"
+        },
+        {
+          "type": "clear",
+          "place": "elden_root",
+          "offset": [
+            200,
+            -150
+          ],
+          "text": "Drive off the timber-cutters",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Colovian Timber-Cutter",
+              "hostile": true,
+              "weapon": "nirncraft:iron_battleaxe"
+            },
+            {
+              "type": "npc:thug",
+              "name": "Hired Sellsword",
+              "hostile": true,
+              "armor": "imperial"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "elden_root",
+          "offset": [
+            200,
+            -150
+          ],
+          "text": "Stop the foreman",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Foreman Albus Varro",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.5,
+              "hostile": true,
+              "weapon": "nirncraft:steel_battleaxe"
+            }
+          ],
+          "journal": "Varro said it was only a tree, and that Cyrodiil needed ships. The graht-oak behind him was older than the Empire. Half of it was already lying in the mud."
+        },
+        {
+          "type": "retrieve",
+          "place": "elden_root",
+          "offset": [
+            200,
+            -150
+          ],
+          "relic": "gp_felling_saw",
+          "radius": 10,
+          "text": "Take the felling saw"
+        },
+        {
+          "type": "deliver",
+          "npc": "faendir",
+          "relic": "gp_felling_saw",
+          "text": "Bring the saw to Warden Faendir",
+          "topic": "The camp is gone. Here is their saw.",
+          "reply": "It will be melted and made into arrowheads, which is the only honest thing it will ever do. You should know: some of the elders are very angry. Angrier than I have seen in years.",
+          "place": "elden_root"
+        }
+      ],
+      "outro": "I stopped a Colovian logging crew from felling a second graht-oak outside Elden Root and brought their saw to Warden Faendir. He warned me that the elders are furious.",
+      "rewards": {
+        "gold": 350,
+        "faction_points": 3,
+        "items": [
+          "nirncraft:bosmer_boots"
+        ]
+      },
+      "region": "valenwood/grahtwood",
+      "why": [
+        "grahtwood.L7.delta_merchants",
+        "grahtwood.L8.elden_temple"
+      ],
+      "consequence": {
+        "world_state": "gp_felling_season_resolved",
+        "flag": "conseq_gp_felling_season",
+        "summary": "I stopped a Colovian logging crew from felling a second graht-oak outside Elden Root and brought their saw to Warden Faendir. He warned me that the elders are furious."
+      }
+    },
+    {
+      "id": "gp_the_wild_hunt",
+      "title": "The Wild Hunt",
+      "start": "auto",
+      "requires": [
+        "quest:gp_felling_season"
+      ],
+      "desc": "In their fury over the felled graht-oak, a circle of Bosmer elders has called the Wild Hunt, the old rite that turns hunters into beasts. The Hunt has no master once it starts, and it is coming for a village outside Elden Root.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "faendir",
+          "text": "Speak with Warden Faendir",
+          "topic": "What happened?",
+          "reply": "The elders called the Wild Hunt. They meant it for the Colovians across the border. But the Hunt does not know borders. It knows hunger. It is running toward the village west of here, and those beasts were our people an hour ago.",
+          "place": "elden_root"
+        },
+        {
+          "type": "go",
+          "place": "elden_root",
+          "offset": [
+            -200,
+            200
+          ],
+          "text": "Reach the village before the Hunt does"
+        },
+        {
+          "type": "clear",
+          "place": "elden_root",
+          "offset": [
+            -200,
+            200
+          ],
+          "text": "Stop the beasts of the Wild Hunt",
+          "spawn": [
+            {
+              "type": "nirncraft:werewolf",
+              "count": 2,
+              "name": "Beast of the Hunt"
+            },
+            {
+              "type": "nirncraft:sabre_cat",
+              "name": "Hunt-Cat"
+            },
+            {
+              "type": "nirncraft:spriggan",
+              "name": "Antlered Huntsman"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "elden_root",
+          "offset": [
+            -200,
+            200
+          ],
+          "text": "Kill the Heart of the Hunt",
+          "spawn": [
+            {
+              "type": "nirncraft:werewolf",
+              "name": "Heart of the Hunt",
+              "target": true,
+              "boss": true,
+              "hp": 4.0,
+              "dmg": 1.8
+            }
+          ],
+          "journal": "The Heart of the Hunt had been the eldest of the circle. As it died it was almost an elf again, for a moment, and it looked relieved."
+        },
+        {
+          "type": "talk",
+          "npc": "faendir",
+          "text": "Return to Warden Faendir",
+          "choices": [
+            {
+              "label": "The elders who called it must answer to the Silvenar.",
+              "reply": "They will. The Silvenar will feel it before I can tell him. That is how the bond works.",
+              "actions": "flag:gp_elders_judged"
+            },
+            {
+              "label": "They paid enough. Let it end here.",
+              "reply": "Mercy. The Green Lady would call it softness. The Silvenar would call it wisdom. I do not know which of them is right.",
+              "actions": "flag:gp_elders_spared"
+            }
+          ],
+          "place": "elden_root"
+        }
+      ],
+      "outro": "The elders' Wild Hunt broke loose and turned on our own people. I stopped it before it reached the village and killed its Heart, the eldest of the circle that called it.",
+      "rewards": {
+        "gold": 450,
+        "faction_points": 3,
+        "items": [
+          {
+            "item": "nirncraft:elven_bow",
+            "name": "Hornbow of the Warden",
+            "enchant": {
+              "power": 3
+            }
+          }
+        ]
+      },
+      "region": "valenwood/reapers_march",
+      "why": [
+        "reapers_march.L8.moonmont",
+        "reapers_march.L9.missing_bone"
+      ],
+      "consequence": {
+        "world_state": "gp_the_wild_hunt_resolved",
+        "flag": "conseq_gp_the_wild_hunt",
+        "summary": "The elders' Wild Hunt broke loose and turned on our own people. I stopped it before it reached the village and killed its Heart, the eldest of the circle that called it."
+      }
+    },
+    {
+      "id": "gp_the_green_ladys_bond",
+      "title": "The Green Lady's Bond",
+      "start": "auto",
+      "requires": [
+        "quest:gp_the_wild_hunt"
+      ],
+      "desc": "The Silvenar has summoned me to his court. The Wild Hunt has strained the bond between him and the Green Lady, and she has gone into the deep forest alone.",
+      "on_start": "relocate:green_lady:green_heart:0:0",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "silvenar_court",
+          "text": "Travel to the Court of the Silvenar"
+        },
+        {
+          "type": "talk",
+          "npc": "silvenar",
+          "text": "Speak with the Silvenar",
+          "topic": "You sent for me.",
+          "reply": "The Hunt was the people's anger, and I carry the people. She felt it through me and went to hunt it out of herself, alone, in the Green Heart. Wood Orcs nest there. I feel each of her wounds. Please bring her home."
+        },
+        {
+          "type": "go",
+          "place": "green_heart",
+          "text": "Find the Green Lady in the Green Heart"
+        },
+        {
+          "type": "clear",
+          "place": "green_heart",
+          "text": "Help the Green Lady against the Wood Orcs",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Wood Orc Raider",
+              "hostile": true,
+              "armor": "#4a5a2a"
+            },
+            {
+              "type": "nirncraft:durzog",
+              "count": 2,
+              "name": "War-Durzog"
+            }
+          ],
+          "journal": "The Green Lady had already killed six of them by the time I arrived. She looked annoyed that I had come, and then very glad."
+        },
+        {
+          "type": "talk",
+          "npc": "green_lady",
+          "text": "Speak with the Green Lady",
+          "topic": "The Silvenar feels every wound you take. He asked me to bring you home.",
+          "reply": "He always asks someone. Usually I refuse. I am tired, and this time, I will let you walk me back."
+        },
+        {
+          "type": "escort",
+          "npc": "green_lady",
+          "place": "silvenar_court",
+          "text": "Bring the Green Lady back to the Silvenar"
+        },
+        {
+          "type": "talk",
+          "npc": "silvenar",
+          "text": "Return to the Silvenar",
+          "topic": "She's home.",
+          "reply": "I know. I felt it, three hills away.",
+          "actions": "scene:gp_bond_renewed;relocate:green_lady:silvenar_court:4:3",
+          "place": "elden_root"
+        }
+      ],
+      "outro": "I found the Green Lady fighting Wood Orcs in the Green Heart and brought her back to the Silvenar's court. Their bond, and through it the people's peace, is mended.",
+      "rewards": {
+        "gold": 450,
+        "faction_points": 3,
+        "items": [
+          "nirncraft:bosmer_leggings"
+        ]
+      },
+      "region": "valenwood/grahtwood",
+      "why": [
+        "grahtwood.L8.crown_lamp",
+        "grahtwood.L9.court_vs_voice"
+      ],
+      "consequence": {
+        "world_state": "gp_the_green_ladys_bond_resolved",
+        "flag": "conseq_gp_the_green_ladys_bond",
+        "summary": "I found the Green Lady fighting Wood Orcs in the Green Heart and brought her back to the Silvenar's court. Their bond, and through it the people's peace, is mended."
+      }
+    },
+    {
+      "id": "gp_voice_of_the_silvenar",
+      "title": "Voice of the Silvenar",
+      "start": "auto",
+      "requires": [
+        "quest:gp_the_green_ladys_bond"
+      ],
+      "desc": "Where the Colovians felled the graht-oak east of Elden Root, something has grown out of the stump: the grief of the tree, given shape. The Silvenar asks me to put it to rest in his name.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "silvenar",
+          "text": "Speak with the Silvenar",
+          "topic": "What do you need of me?",
+          "reply": "The fallen graht-oak is grieving, and its grief has a body now. Wisps gather to it. Go to the stump and end it, gently if you can, and firmly if you must. Tell it the people are sorry. It will understand that much."
+        },
+        {
+          "type": "go",
+          "place": "elden_root",
+          "offset": [
+            200,
+            -150
+          ],
+          "text": "Return to the felled graht-oak"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Wait for the grief to rise at nightfall"
+        },
+        {
+          "type": "kill",
+          "place": "elden_root",
+          "offset": [
+            200,
+            -150
+          ],
+          "text": "Put the graht-oak's grief to rest",
+          "spawn": [
+            {
+              "type": "nirncraft:wispmother",
+              "name": "Grief of the Graht-Oak",
+              "target": true,
+              "boss": true,
+              "hp": 4.0,
+              "dmg": 1.6
+            },
+            {
+              "type": "nirncraft:will_o_wisp",
+              "count": 3,
+              "name": "Mourning Wisp"
+            },
+            {
+              "type": "nirncraft:spriggan",
+              "name": "Stump-Warden"
+            }
+          ],
+          "journal": "I said the words the Silvenar gave me before the last blow. I do not know if it heard. The wisps went out one by one, quietly, like candles at the end of a long night."
+        },
+        {
+          "type": "talk",
+          "npc": "silvenar",
+          "text": "Return to the Silvenar",
+          "topic": "It's at rest. I told it the people were sorry.",
+          "reply": "It heard. So did I. Stand there, beside her.",
+          "actions": "scene:gp_voice"
+        }
+      ],
+      "outro": "I put the grief of the felled graht-oak to rest in the Silvenar's name. He named me keeper of his voice, and the Green Lady gave me a bow that no living tree died for.",
+      "rewards": {
+        "gold": 1200,
+        "faction_points": 5,
+        "perks": 1,
+        "flags": [
+          "gp_voice_of_the_silvenar"
+        ],
+        "items": [
+          {
+            "item": "nirncraft:elven_bow",
+            "name": "Bonebow of the Green Lady",
+            "enchant": {
+              "power": 5,
+              "unbreaking": 3,
+              "looting": 2
+            }
+          },
+          {
+            "item": "nirncraft:bosmer_helmet",
+            "name": "Silvenar's Leaf-Crown",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "region": "valenwood/grahtwood",
+      "why": [
+        "grahtwood.L9.court_vs_voice",
+        "grahtwood.L9.ayleid_digs"
+      ],
+      "consequence": {
+        "world_state": "gp_voice_of_the_silvenar_resolved",
+        "flag": "conseq_gp_voice_of_the_silvenar",
+        "summary": "I put the grief of the felled graht-oak to rest in the Silvenar's name. He named me keeper of his voice, and the Green Lady gave me a bow that no living tree died for."
+      }
+    }
+  ]
+}

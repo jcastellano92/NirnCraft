@@ -19,7 +19,7 @@ class NativeDataMigration(unittest.TestCase):
         original = {"block": ["minecraft:chain[axis=y]@4", "minecraft:grass@2", "minecraft:grass_block*3"],
                     "description": "minecraft:grass stays here as prose", "rock": "rock@12"}
         saved = copy.deepcopy(original)
-        path, converted = data.prepare("/repo/resources/skycraft/dungeons/caverns/profiles/test.json", original)
+        path, converted = data.prepare("/repo/resources/nirncraft/dungeons/caverns/profiles/test.json", original)
         self.assertEqual(original, saved)
         self.assertEqual(converted["block"], ["minecraft:iron_chain[axis=y]@4", "minecraft:short_grass@2", "minecraft:grass_block*3"])
         self.assertEqual(converted["description"], original["description"])
@@ -27,7 +27,7 @@ class NativeDataMigration(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "data"
             root.mkdir()
-            profile = root.parent / "skycraft/dungeons/caverns/profiles/test.json"
+            profile = root.parent / "nirncraft/dungeons/caverns/profiles/test.json"
             profile.parent.mkdir(parents=True)
             profile.write_text(json.dumps(original), encoding="utf-8")
             self.assertGreaterEqual(data.upgrade_resources(root)["converted"], 1)
@@ -36,13 +36,13 @@ class NativeDataMigration(unittest.TestCase):
 
     def test_recipe_ingredients_and_counts(self):
         old = {"type": "minecraft:crafting_shaped", "pattern": ["AB"],
-               "key": {"A": {"item": "skycraft:ebony_ingot"}, "B": {"tag": "c:rods/wooden"}},
-               "result": {"item": "skycraft:ebony_arrows", "count": 24}}
+               "key": {"A": {"item": "nirncraft:ebony_ingot"}, "B": {"tag": "c:rods/wooden"}},
+               "result": {"item": "nirncraft:ebony_arrows", "count": 24}}
         saved = copy.deepcopy(old)
         converted = data.recipe(old)
         self.assertEqual(old, saved)
-        self.assertEqual(converted["key"], {"A": "skycraft:ebony_ingot", "B": "#c:rods/wooden"})
-        self.assertEqual(converted["result"], {"id": "skycraft:ebony_arrows", "count": 24})
+        self.assertEqual(converted["key"], {"A": "nirncraft:ebony_ingot", "B": "#c:rods/wooden"})
+        self.assertEqual(converted["result"], {"id": "nirncraft:ebony_arrows", "count": 24})
         self.assertEqual(data.recipe(converted), converted)
 
     def test_intentionally_blocked_recipe_stays_blocked(self):
@@ -67,7 +67,7 @@ class NativeDataMigration(unittest.TestCase):
             data.upgrade_resources(root)
             self.assertFalse(source.exists())
             self.assertFalse((root / "minecraft/recipe/enchanting_table.json").exists())
-            self.assertTrue((root / "minecraft/skycraft_legacy/disabled_recipes/enchanting_table.json").exists())
+            self.assertTrue((root / "minecraft/nirncraft_legacy/disabled_recipes/enchanting_table.json").exists())
             actual = json.loads(pack.read_text(encoding="utf-8"))
             self.assertEqual(actual["pack"], metadata["pack"])
             filters = [{"namespace": "minecraft", "path": "recipe/enchanting_table[.]json"},
@@ -78,15 +78,15 @@ class NativeDataMigration(unittest.TestCase):
             self.assertEqual(data.upgrade_resources(root), {"converted": 0, "moved": 0})
 
     def test_loot_keeps_order_weights_and_custom_metadata(self):
-        old = {"type": "minecraft:loot_table", "name": "skycraft:parts/treasure", "weight": 7,
-               "conditions": [{"condition": "minecraft:killed_by_player"}, {"condition": "skycraft:loot_level", "min": 8}],
+        old = {"type": "minecraft:loot_table", "name": "nirncraft:parts/treasure", "weight": 7,
+               "conditions": [{"condition": "minecraft:killed_by_player"}, {"condition": "nirncraft:loot_level", "min": 8}],
                "functions": [{"function": "minecraft:set_count", "count": 3},
-                             {"function": "minecraft:set_nbt", "tag": '{book:"the_hist",skycraft_value:25}'}]}
+                             {"function": "minecraft:set_nbt", "tag": '{book:"the_hist",nirncraft_value:25}'}]}
         converted = data.loot(old)
-        self.assertEqual(converted["value"], "skycraft:parts/treasure")
+        self.assertEqual(converted["value"], "nirncraft:parts/treasure")
         self.assertEqual(converted["weight"], 7)
         self.assertEqual([p["type"] for p in converted["condition"]["terms"]],
-                         ["minecraft:killed_by_player", "skycraft:loot_level"])
+                         ["minecraft:killed_by_player", "nirncraft:loot_level"])
         self.assertEqual([p["type"] for p in converted["modifier"]],
                          ["minecraft:set_count", "minecraft:set_custom_data"])
         self.assertEqual(converted["modifier"][1]["tag"], old["functions"][1]["tag"])
@@ -113,15 +113,15 @@ class NativeDataMigration(unittest.TestCase):
     def test_resource_moves_preserve_ids_and_merge_tags(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "data"
-            old = root / "skycraft/tags/items/ore.json"
-            native = root / "skycraft/tags/item/ore.json"
+            old = root / "nirncraft/tags/items/ore.json"
+            native = root / "nirncraft/tags/item/ore.json"
             old.parent.mkdir(parents=True)
             native.parent.mkdir(parents=True)
-            old.write_text(json.dumps({"values": ["skycraft:ebony_ore"]}), encoding="utf-8")
-            native.write_text(json.dumps({"values": ["skycraft:moonstone_ore"]}), encoding="utf-8")
+            old.write_text(json.dumps({"values": ["nirncraft:ebony_ore"]}), encoding="utf-8")
+            native.write_text(json.dumps({"values": ["nirncraft:moonstone_ore"]}), encoding="utf-8")
             self.assertEqual(data.upgrade_resources(root)["moved"], 1)
             self.assertEqual(json.loads(native.read_text(encoding="utf-8"))["values"],
-                             ["skycraft:moonstone_ore", "skycraft:ebony_ore"])
+                             ["nirncraft:moonstone_ore", "nirncraft:ebony_ore"])
             self.assertFalse(old.exists())
             self.assertEqual(data.upgrade_resources(root), {"converted": 0, "moved": 0})
 
@@ -130,22 +130,22 @@ class NativeDataMigration(unittest.TestCase):
             root = Path(directory) / "data"
             old = root / "forge/loot_modifiers/global_loot_modifiers.json"
             old.parent.mkdir(parents=True)
-            old.write_text(json.dumps({"replace": False, "entries": ["skycraft:second", "skycraft:first"]}), encoding="utf-8")
+            old.write_text(json.dumps({"replace": False, "entries": ["nirncraft:second", "nirncraft:first"]}), encoding="utf-8")
             for name in ("first", "second"):
-                path = root / "skycraft/loot_modifiers" / (name + ".json")
+                path = root / "nirncraft/loot_modifiers" / (name + ".json")
                 path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(json.dumps({"type": "skycraft:add_table", "table": "skycraft:" + name}), encoding="utf-8")
+                path.write_text(json.dumps({"type": "nirncraft:add_table", "table": "nirncraft:" + name}), encoding="utf-8")
             data.upgrade_resources(root)
             self.assertFalse(old.exists())
-            archived = root / "neoforge/skycraft_legacy/global_loot_modifiers.json"
-            self.assertEqual(json.loads(archived.read_text(encoding="utf-8"))["entries"], ["skycraft:second", "skycraft:first"])
-            priorities = {name: json.loads((root / "skycraft/loot_modifiers" / (name + ".json")).read_text(encoding="utf-8"))["priority"]
+            archived = root / "neoforge/nirncraft_legacy/global_loot_modifiers.json"
+            self.assertEqual(json.loads(archived.read_text(encoding="utf-8"))["entries"], ["nirncraft:second", "nirncraft:first"])
+            priorities = {name: json.loads((root / "nirncraft/loot_modifiers" / (name + ".json")).read_text(encoding="utf-8"))["priority"]
                           for name in ("first", "second")}
             self.assertGreater(priorities["second"], priorities["first"])
             self.assertEqual(data.upgrade_resources(root), {"converted": 0, "moved": 0})
 
     def test_common_tag_bridges_keep_custom_and_native_members_without_cycle(self):
-        old = {"replace": False, "values": ["skycraft:steel_ingot", {"id": "skycraft:optional_metal", "required": False}]}
+        old = {"replace": False, "values": ["nirncraft:steel_ingot", {"id": "nirncraft:optional_metal", "required": False}]}
         _, converted = data.prepare("/repo/data/forge/tags/items/ingots.json", old)
         self.assertEqual(converted["values"][:2], old["values"])
         self.assertIn("#c:ingots/iron", converted["values"])
@@ -154,15 +154,15 @@ class NativeDataMigration(unittest.TestCase):
         self.assertEqual(data.unique([old["values"][1], old["values"][1]]), [old["values"][1]])
 
     def test_native_feature_move_retains_custom_configuration(self):
-        old = {"type": "skycraft:river_site", "config": {"salt": 41, "spacing": 128}}
-        path, converted = world.prepare("/repo/data/skycraft/worldgen/configured_feature/river_site.json", old)
+        old = {"type": "nirncraft:river_site", "config": {"salt": 41, "spacing": 128}}
+        path, converted = world.prepare("/repo/data/nirncraft/worldgen/configured_feature/river_site.json", old)
         self.assertTrue(Path(path).as_posix().endswith("worldgen/feature/river_site.json"))
         self.assertEqual(converted, old)
 
     def test_runtime_loot_block_predicate_retains_identity_and_exact_state(self):
-        old = {"condition": "minecraft:block_state_property", "block": "skycraft:cabbage_crop", "properties": {"age": "7"}}
+        old = {"condition": "minecraft:block_state_property", "block": "nirncraft:cabbage_crop", "properties": {"age": "7"}}
         converted = data.loot(old)
-        self.assertEqual(converted, {"type": "minecraft:match_block", "blocks": "skycraft:cabbage_crop", "state": {"age": "7"}})
+        self.assertEqual(converted, {"type": "minecraft:match_block", "blocks": "nirncraft:cabbage_crop", "state": {"age": "7"}})
         self.assertEqual(data.loot(converted), converted)
         self.assertEqual(old["properties"], {"age": "7"})
 
@@ -171,22 +171,22 @@ class NativeDataMigration(unittest.TestCase):
         offset = world.tree({"type": "minecraft:random_offset", "xz_spread": spread, "y_spread": 1})
         self.assertEqual(offset, {"type": "minecraft:offset", "x": spread, "y": 1, "z": spread})
         self.assertEqual(world.tree({"type": "minecraft:soil_beneath_tree"}), "minecraft:soil_beneath_tree")
-        self.assertEqual(world.tree({"type": "minecraft:blend_density", "argument": "skycraft:tamriel/sloped"}),
-                         {"type": "minecraft:blend_density", "input": "skycraft:tamriel/sloped"})
-        spawn = world.tree({"type": "skycraft:dwarven_spider", "weight": 10, "minCount": 1, "maxCount": 2})
-        self.assertEqual(spawn, {"type": "skycraft:dwarven_spider", "weight": 10,
+        self.assertEqual(world.tree({"type": "minecraft:blend_density", "argument": "nirncraft:tamriel/sloped"}),
+                         {"type": "minecraft:blend_density", "input": "nirncraft:tamriel/sloped"})
+        spawn = world.tree({"type": "nirncraft:dwarven_spider", "weight": 10, "minCount": 1, "maxCount": 2})
+        self.assertEqual(spawn, {"type": "nirncraft:dwarven_spider", "weight": 10,
                                 "count": {"type": "minecraft:uniform", "min_inclusive": 1, "max_inclusive": 2}})
         for value in (offset, spawn):
             self.assertEqual(world.tree(value), value)
 
     def test_moon_cloud_renderers_and_clocks(self):
-        old = {"effects": "skycraft:deadlands", "fixed_time": 13200, "bed_works": False,
+        old = {"effects": "nirncraft:deadlands", "fixed_time": 13200, "bed_works": False,
                "natural": False, "ultrawarm": True, "piglin_safe": True, "has_raids": False}
         converted = world.dimension_type(old, Path("the_nether.json"))
-        self.assertEqual(converted["default_clock"], "skycraft:fixed/the_nether")
+        self.assertEqual(converted["default_clock"], "nirncraft:fixed/the_nether")
         self.assertTrue(converted["has_fixed_time"])
-        self.assertEqual(converted["attributes"]["neoforge:custom_skybox"], "skycraft:deadlands")
-        self.assertEqual(converted["attributes"]["neoforge:custom_clouds"], "skycraft:deadlands")
+        self.assertEqual(converted["attributes"]["neoforge:custom_skybox"], "nirncraft:deadlands")
+        self.assertEqual(converted["attributes"]["neoforge:custom_clouds"], "nirncraft:deadlands")
         self.assertTrue(converted["attributes"]["minecraft:gameplay/water_evaporates"])
         self.assertFalse(converted["attributes"]["minecraft:gameplay/piglins_zombify"])
         self.assertEqual(world.dimension_type(converted, Path("the_nether.json")), converted)
@@ -198,7 +198,7 @@ class NativeDataMigration(unittest.TestCase):
 
     def test_custom_realm_timelines_keep_authored_biome_fog_and_lighting(self):
         for name in ("the_nether", "the_end", "apocrypha", "soul_cairn", "coldharbour"):
-            clock = "skycraft:fixed/" + name
+            clock = "nirncraft:fixed/" + name
             day = world.fixed_timeline(clock, "day")
             self.assertEqual(day["clock"], clock)
             self.assertNotIn("minecraft:visual/fog_color", day["tracks"])
@@ -207,7 +207,7 @@ class NativeDataMigration(unittest.TestCase):
             self.assertIn("minecraft:gameplay/sky_light_level", day["tracks"])
             moon = world.fixed_timeline(clock, "moon")
             self.assertIn("minecraft:visual/moon_phase", moon["tracks"])
-        jail = world.fixed_timeline("skycraft:fixed/jail", "day")
+        jail = world.fixed_timeline("nirncraft:fixed/jail", "day")
         self.assertIn("minecraft:visual/fog_color", jail["tracks"])
         self.assertIn("minecraft:visual/sunrise_sunset_color", jail["tracks"])
 
@@ -254,10 +254,10 @@ class NativeDataMigration(unittest.TestCase):
                     module = ast.Module(body=[definition], type_ignores=[])
                     namespace = {"__file__": str(source), "Path": Path, "os": os, "json": json}
                     exec(compile(module, str(source), "exec"), namespace)
-                    path = Path(directory) / name.replace("/", "_") / "data/skycraft/recipes/test.json"
-                    namespace[function](path, {"type": "minecraft:smelting", "ingredient": {"item": "skycraft:ebony_ore"}, "result": "skycraft:ebony_ingot"})
+                    path = Path(directory) / name.replace("/", "_") / "data/nirncraft/recipes/test.json"
+                    namespace[function](path, {"type": "minecraft:smelting", "ingredient": {"item": "nirncraft:ebony_ore"}, "result": "nirncraft:ebony_ingot"})
                     native = path.parent.parent / "recipe/test.json"
-                    self.assertEqual(json.loads(native.read_text(encoding="utf-8"))["result"], {"id": "skycraft:ebony_ingot"})
+                    self.assertEqual(json.loads(native.read_text(encoding="utf-8"))["result"], {"id": "nirncraft:ebony_ingot"})
                     self.assertFalse(path.exists())
 
 

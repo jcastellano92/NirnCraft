@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Builds the lore web (docs/LORE-WEB.md) from the authored sources in tools/marquee/loreweb_src/*.json:
 //   tools/marquee/loreweb.json                                        machine-readable situations, arcs, threads
-//   mod/src/main/resources/skycraft/lore/places/loreweb.json          hooks, rumours and readable notes at places
-//   mod/src/main/resources/skycraft/quests/loreweb_<province>.json    hidden 'find' arc quests (ids lw_<arc>_a/_b)
-//   mod/src/main/resources/skycraft/quests/loreweb_threads.json       continent-scale thread quests (lw_t_*)
+//   mod/src/main/resources/nirncraft/lore/places/loreweb.json          hooks, rumours and readable notes at places
+//   mod/src/main/resources/nirncraft/quests/loreweb_<province>.json    hidden 'find' arc quests (ids lw_<arc>_a/_b)
+//   mod/src/main/resources/nirncraft/quests/loreweb_threads.json       continent-scale thread quests (lw_t_*)
 // It also registers the two data files in the lore and quest index.json files.
 // Run:  node tools/marquee/loreweb_build.js   then   node tools/place_lore.js; node tools/quest_lang.js;
 //       node tools/marquee/loreweb_check.js
@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 
 const repo = path.join(__dirname, '..', '..');
-const res = path.join(repo, 'mod', 'src', 'main', 'resources', 'skycraft');
+const res = path.join(repo, 'mod', 'src', 'main', 'resources', 'nirncraft');
 const srcDir = path.join(__dirname, 'loreweb_src');
 const readJson = f => JSON.parse(fs.readFileSync(f, 'utf8'));
 const problems = [];

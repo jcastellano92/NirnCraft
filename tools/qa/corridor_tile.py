@@ -1,12 +1,12 @@
 """Picks what to regenerate and measure for corridors from the roads a world has actually planned
-(world/data/skycraft_roads*.dat).
+(world/data/nirncraft_roads*.dat).
 
 usage: py -3 -I tools/qa/corridor_tile.py <world_dir> <placeA>:<placeB> [--index N] [--tile 160]
   prints 'x1 z1 x2 z2 points' for the N-th best tile (default 0): tiles on the 160-block grid used by p2_corridors.py,
   ranked by the number of road points outside settlement zones (the points road_measure.py judges).
        py -3 -I tools/qa/corridor_tile.py <world_dir> <a>:<b> [<a>:<b> ...] --region [R]
   prints the chunk runs 'cz:cx1-cx2,cx1-cx2;cz:...' of every chunk within R chunks (default 2) of a judged road point
-  of ALL given corridors (for '/skycraft-dev regenchunks'); the point count goes to stderr.
+  of ALL given corridors (for '/nirncraft-dev regenchunks'); the point count goes to stderr.
 Exit 3 when a corridor has no planned road in the world yet (the planner is still working: wait and retry); the message\nends with 'at <x> <z>' (the corridor's far end) so the caller can move the world spawn there: the planner takes the\nlinks nearest to the spawn first.
 """
 import os
@@ -55,7 +55,7 @@ def main():
     world_dir, specs = a[0], a[1:]
     roads = Roads(world_dir)
     here = os.path.dirname(os.path.abspath(__file__))
-    places = load_places(os.path.join(here, '..', '..', 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel',
+    places = load_places(os.path.join(here, '..', '..', 'mod', 'src', 'main', 'resources', 'nirncraft', 'tamriel',
                                       'places', 'skyrim_settlements.json'))
     inzone = zone_fn(roads, places)
     by_place = {}

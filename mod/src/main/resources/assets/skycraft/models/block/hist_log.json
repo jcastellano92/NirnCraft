@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column",
-  "textures": {
-    "end": "skycraft:block/hist_log_top",
-    "side": "skycraft:block/hist_log"
-  }
-}

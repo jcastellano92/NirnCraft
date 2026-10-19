@@ -1,0 +1,11 @@
+{
+  "type": "nirncraft:dead_tree",
+  "config": {
+    "state": {
+      "id": "minecraft:spruce_log",
+      "properties": {
+        "axis": "y"
+      }
+    }
+  }
+}

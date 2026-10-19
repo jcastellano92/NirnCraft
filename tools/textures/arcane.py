@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pixel-art textures for the arcane sub-module (soul gems, alchemy ingredients & plants, stations, effect icons).
 
-Writes PNGs into mod/src/main/resources/assets/skycraft/textures/{item,block,mob_effect}/.
+Writes PNGs into mod/src/main/resources/assets/nirncraft/textures/{item,block,mob_effect}/.
 Run from anywhere:  python3 tools/textures/arcane.py
 """
 import math
@@ -11,7 +11,7 @@ import random
 from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures")
+TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures")
 
 
 def out(kind, name, img):
@@ -312,7 +312,7 @@ def ingredients():
 
 import json
 
-ASSETS_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft")
+ASSETS_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft")
 DATA_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "data")
 
 
@@ -874,8 +874,8 @@ def _box(x0, y0, z0, x1, y1, z1, uv_up, uv_down, uv_side, tex="#atlas", rot=None
 def flora_3d_model(tex_name, kind, harvested=False, base_name=None):
     if base_name is None:
         base_name = tex_name[:-10] if tex_name.endswith("_harvested") else tex_name
-    tex_ref = "skycraft:block/" + tex_name
-    atlas_ref = "skycraft:block/" + base_name + "_atlas"
+    tex_ref = "nirncraft:block/" + tex_name
+    atlas_ref = "nirncraft:block/" + base_name + "_atlas"
 
     # True 3D voxel geometry for mushrooms, nests, shells, pods, and relics
     if kind in ("fungi_dome", "fungi_flat"):
@@ -1056,24 +1056,24 @@ def plants():
         bs = {
             "variants": {
                 "harvested=false": [
-                    {"model": "skycraft:block/" + name},
-                    {"model": "skycraft:block/" + name, "y": 90},
-                    {"model": "skycraft:block/" + name, "y": 180},
-                    {"model": "skycraft:block/" + name, "y": 270},
+                    {"model": "nirncraft:block/" + name},
+                    {"model": "nirncraft:block/" + name, "y": 90},
+                    {"model": "nirncraft:block/" + name, "y": 180},
+                    {"model": "nirncraft:block/" + name, "y": 270},
                 ],
                 "harvested=true": [
-                    {"model": "skycraft:block/" + name + "_harvested"},
-                    {"model": "skycraft:block/" + name + "_harvested", "y": 90},
-                    {"model": "skycraft:block/" + name + "_harvested", "y": 180},
-                    {"model": "skycraft:block/" + name + "_harvested", "y": 270},
+                    {"model": "nirncraft:block/" + name + "_harvested"},
+                    {"model": "nirncraft:block/" + name + "_harvested", "y": 90},
+                    {"model": "nirncraft:block/" + name + "_harvested", "y": 180},
+                    {"model": "nirncraft:block/" + name + "_harvested", "y": 270},
                 ],
             }
         }
         write_json(os.path.join(blockstates_dir, name + ".json"), bs)
-        flower_ids.append("skycraft:" + name)
+        flower_ids.append("nirncraft:" + name)
 
     # Also include tamriel biome wildflower scathecraw in flower tags
-    tag_values = sorted(set(flower_ids + ["skycraft:scathecraw"]))
+    tag_values = sorted(set(flower_ids + ["nirncraft:scathecraw"]))
     mc_block_tags = os.path.join(DATA_DIR, "minecraft", "tags", "blocks")
     write_json(os.path.join(mc_block_tags, "small_flowers.json"), {"replace": False, "values": tag_values})
     write_json(os.path.join(mc_block_tags, "flowers.json"), {"replace": False, "values": tag_values})

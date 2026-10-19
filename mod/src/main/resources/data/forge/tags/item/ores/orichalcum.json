@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:orichalcum_ore",
-    "skycraft:deepslate_orichalcum_ore"
+    "nirncraft:orichalcum_ore",
+    "nirncraft:deepslate_orichalcum_ore"
   ]
 }

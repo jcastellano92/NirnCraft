@@ -68,7 +68,7 @@ Do not mark shader toggles accepted until fresh-native and toggled-native geomet
 
 ## Receiver visibility prototype boundary
 
-`InteriorAtmosphere.experimentalOcclusion(true)` or JVM property `skycraft.localLightOcclusion=true`
+`InteriorAtmosphere.experimentalOcclusion(true)` or JVM property `nirncraft.localLightOcclusion=true`
 enables the experimental loaded64-cube collision-shape cache. It is **off by default** pending measured
 CPU/GPU costs and live acceptance. Default/native rendering retains the existing camera visibility
 fallback; receiver-correct shadows remain a partial finding. The prototype samples four loaded16-cube
@@ -106,6 +106,6 @@ and camera clearance alone do not prove a valid final scene.
 
 There is a separate native cloud dispatch check still outstanding. Vanilla LevelRenderer does not call
 the dimension renderClouds hook when getCloudsType()==OFF; Distant Horizons reports disabling vanilla
-clouds. Skycraft's native hook has no fallback stage. Record the actual runtime clouds option and
+clouds. NirnCraft's native hook has no fallback stage. Record the actual runtime clouds option and
 native cloud frame/build counters before claiming its lunar/cloud rendering has been visually tested.
 Do not change dispatch/fidelity during the readiness A/B experiment.

@@ -1,0 +1,27 @@
+{
+  "feature": "nirncraft:biome/trees_auridon",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 2
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:surface_water_depth_filter",
+      "max_water_depth": 0
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "nirncraft:placement_mask",
+      "radius": 4
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

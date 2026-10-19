@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:orichalcum_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_orichalcum",
+      "required": false
+    }
+  ]
+}

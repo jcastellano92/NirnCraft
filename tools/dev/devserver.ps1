@@ -9,22 +9,22 @@ fresh server per check.
   tools\dev\devserver.ps1 wait <id>             # wait for a queued job and print it
   tools\dev\devserver.ps1 status | stop | restart | reset   # reset = delete the dev world, boot a fresh one
 
-Line forms (com.skycraft.dev.DevServer): a server command ('/' optional; feedback captured), task:<autorun task>[:arg]
+Line forms (com.nirncraft.dev.DevServer): a server command ('/' optional; feedback captured), task:<autorun task>[:arg]
 (roadplan, roadterrain[:n], bake[:dir], verify, columns, bench[:r], stages[:n]), @wait <ticks>, @until <regex>,
-@idle (no chunk work pending), @timeout <s>. Dev-only commands: skycraft-dev regen <x1> <z1> <x2> <z2> [dimension]
-(regenerates that area in place with the current code, overworld = paved too; skycraft:scratch = same generator,
-no roads), skycraft-dev release, skycraft-dev status, skycraft-dev reload <scenes|places|cityplans|quests|palettes|all>.
-Other useful lines: skypop <place>, skycraft-roads export, skycraft-dungeon-qa export ..., skycraft-roadplan verify + @until verify:.
+@idle (no chunk work pending), @timeout <s>. Dev-only commands: nirncraft-dev regen <x1> <z1> <x2> <z2> [dimension]
+(regenerates that area in place with the current code, overworld = paved too; nirncraft:scratch = same generator,
+no roads), nirncraft-dev release, nirncraft-dev status, nirncraft-dev reload <scenes|places|cityplans|quests|palettes|all>.
+Other useful lines: skypop <place>, nirncraft-roads export, nirncraft-dungeon-qa export ..., nirncraft-roadplan verify + @until verify:.
 
 Robustness: one job at a time (the server takes the oldest inbox file); per-job timeout (server side @timeout, client
 side -Timeout); 'run' auto-starts the server when it is down and prefers JDWP hotswap over restart when Java files under
 mod\src\main\java are newer than the last sync (-NoRestart to skip); a dead server is reported with its crash report and log tail.
-World: mod\run\devworld-26.3\world (seed 2428247, Nirn), port: -Port, else $env:SKYCRAFT_DEV_PORT, else derived from the
-worktree path (25700-25989); JDWP port: -JdwpPort, else $env:SKYCRAFT_JDWP_PORT, else Port + 1000 (127.0.0.1:<jdwpPort>).
+World: mod\run\devworld-26.3\world (seed 2428247, Nirn), port: -Port, else $env:NIRNCRAFT_DEV_PORT, else derived from the
+worktree path (25700-25989); JDWP port: -JdwpPort, else $env:NIRNCRAFT_JDWP_PORT, else Port + 1000 (127.0.0.1:<jdwpPort>).
 Full job output: mod\run\devworld-26.3\outbox\<id>.out (the console shows command feedback,
 tagged log lines like [bake]/[dev]/[roadplan] and errors; -All shows every captured log line).
-Memory: the server JVM gets -Xmx (default 4G; -Xmx 6G or $env:SKYCRAFT_SERVER_XMX). ONE dev server per machine: start
-refuses while another worktree's dev server runs or boots (registry in %LOCALAPPDATA%\skycraft-dev; stop that one, or
+Memory: the server JVM gets -Xmx (default 4G; -Xmx 6G or $env:NIRNCRAFT_SERVER_XMX). ONE dev server per machine: start
+refuses while another worktree's dev server runs or boots (registry in %LOCALAPPDATA%\nirncraft-dev; stop that one, or
 -Force when you know there is RAM for two).
 #>
 param(
@@ -45,19 +45,19 @@ $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $Mod = Join-Path $Root "mod"
 $Dev = Join-Path $Mod "run\devworld-26.3"
-$Scratch = if ($env:SKYCRAFT_263_SCRATCH) { [IO.Path]::GetFullPath($env:SKYCRAFT_263_SCRATCH) } else { 'E:\Skycraft-scratch\migration-26.3' }
+$Scratch = if ($env:NIRNCRAFT_263_SCRATCH) { [IO.Path]::GetFullPath($env:NIRNCRAFT_263_SCRATCH) } else { 'E:\NirnCraft-scratch\migration-26.3' }
 $Compiled = Join-Path $Scratch 'build\classes\java\main'
-$JavaRoot = if ($env:SKYCRAFT_JAVA25_HOME) { $env:SKYCRAFT_JAVA25_HOME } else { (Get-Content -LiteralPath 'E:\Skycraft-scratch\toolchains\java25-location.txt' -Raw).Trim() }
+$JavaRoot = if ($env:NIRNCRAFT_JAVA25_HOME) { $env:NIRNCRAFT_JAVA25_HOME } else { (Get-Content -LiteralPath 'E:\NirnCraft-scratch\toolchains\java25-location.txt' -Raw).Trim() }
 $JavaExe = [IO.Path]::GetFullPath((Join-Path $JavaRoot 'bin\java.exe'))
 if ($RuntimeRoot) {
     $candidate = [IO.Path]::GetFullPath($RuntimeRoot).TrimEnd('\')
     $workspacePrefix = ([IO.Path]::GetFullPath((Join-Path $Root 'dist\world-tests\runtimes')).TrimEnd('\') + '\')
-    $nvmePrefix = 'E:\Skycraft-scratch\world-benchmark\'
+    $nvmePrefix = 'E:\NirnCraft-scratch\world-benchmark\'
     $nativePrefix = [IO.Path]::GetFullPath((Join-Path $Scratch 'runtime')).TrimEnd('\') + '\'
     if (-not ($candidate.StartsWith($workspacePrefix,[StringComparison]::OrdinalIgnoreCase) -or
               $candidate.StartsWith($nvmePrefix,[StringComparison]::OrdinalIgnoreCase) -or
               $candidate.StartsWith($nativePrefix,[StringComparison]::OrdinalIgnoreCase))) {
-        throw 'RuntimeRoot must be inside dist\world-tests\runtimes\, E:\Skycraft-scratch\world-benchmark\, or the native scratch runtime directory.'
+        throw 'RuntimeRoot must be inside dist\world-tests\runtimes\, E:\NirnCraft-scratch\world-benchmark\, or the native scratch runtime directory.'
     }
     $Dev = $candidate
 }
@@ -78,8 +78,8 @@ $LastClasses = Join-Path $Dev "classes-last"
 $LaunchFile = Join-Path $Dev 'native-launch.json'
 New-Item -ItemType Directory -Force $Dev, $Inbox, $Outbox | Out-Null
 
-if (-not $Xmx) { $Xmx = $(if ($env:SKYCRAFT_SERVER_XMX) { $env:SKYCRAFT_SERVER_XMX } else { "4G" }) }
-$Registry = Join-Path $env:LOCALAPPDATA "skycraft-dev"
+if (-not $Xmx) { $Xmx = $(if ($env:NIRNCRAFT_SERVER_XMX) { $env:NIRNCRAFT_SERVER_XMX } else { "4G" }) }
+$Registry = Join-Path $env:LOCALAPPDATA "nirncraft-dev"
 New-Item -ItemType Directory -Force $Registry | Out-Null
 $Key = Join-Path $Registry ((("$Root|$Dev").ToLower() -replace '[^a-z0-9]+', '_').Trim('_') + ".txt")
 
@@ -94,14 +94,14 @@ function OtherServers {
 }
 
 if ($Port -le 0) {
-    if ($env:SKYCRAFT_DEV_PORT) { $Port = [int]$env:SKYCRAFT_DEV_PORT }
+    if ($env:NIRNCRAFT_DEV_PORT) { $Port = [int]$env:NIRNCRAFT_DEV_PORT }
     else {
         $h = 0; foreach ($c in "$Root".ToLower().ToCharArray()) { $h = ($h * 31 + [int]$c) % 100003 }
         $Port = 25700 + ($h % 290)
     }
 }
 if ($JdwpPort -le 0) {
-    if ($env:SKYCRAFT_JDWP_PORT) { $JdwpPort = [int]$env:SKYCRAFT_JDWP_PORT }
+    if ($env:NIRNCRAFT_JDWP_PORT) { $JdwpPort = [int]$env:NIRNCRAFT_JDWP_PORT }
     else { $JdwpPort = $Port + 1000 }
 }
 
@@ -119,7 +119,7 @@ function NativeProcess([int]$ServerPid) {
     if (-not $p -or -not $p.ExecutablePath -or -not $p.CommandLine) { return $null }
     if (-not $p.ExecutablePath.Equals($JavaExe,[StringComparison]::OrdinalIgnoreCase)) { return $null }
     $line = $p.CommandLine.Replace('\\','\').Replace('/','\').ToLowerInvariant()
-    $control = ('-Dskycraft.dev=' + $Dev).Replace('/','\').ToLowerInvariant()
+    $control = ('-Dnirncraft.dev=' + $Dev).Replace('/','\').ToLowerInvariant()
     $program = (Join-Path $Dev 'native-launch\serverRunProgramArgs.txt').Replace('/','\').ToLowerInvariant()
     if (-not $line.Contains($control) -or -not $line.Contains($program) -or
         -not $line.Contains('net.neoforged.devlaunch.main')) { return $null }
@@ -208,7 +208,7 @@ function DeathReport {
     $cr = Get-ChildItem (Join-Path $Dev "crash-reports") -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
     if ($cr) {
         Write-Host "crash report: $($cr.FullName)"
-        Get-Content $cr.FullName -TotalCount 30 | Where-Object { $_ -match "Description|Exception|Error|at com\.skycraft" } | Select-Object -First 12 | ForEach-Object { Write-Host "  $_" }
+        Get-Content $cr.FullName -TotalCount 30 | Where-Object { $_ -match "Description|Exception|Error|at com\.nirncraft" } | Select-Object -First 12 | ForEach-Object { Write-Host "  $_" }
     }
     if (Test-Path $Log) {
         Get-Content $Log -Tail 400 | Where-Object { $_ -match "ERROR|FATAL|Exception|BUILD FAILED|error:" } | Select-Object -Last 15 | ForEach-Object { Write-Host "  $_" }
@@ -217,7 +217,7 @@ function DeathReport {
 
 function Start-Dev {
     $preview = @(Get-CimInstance Win32_Process -Filter "Name='javaw.exe' OR Name='java.exe'" -ErrorAction SilentlyContinue |
-        Where-Object { $_.CommandLine -like '*-Dskycraft.autotest=true*' -and $_.CommandLine -like '*-Dskycraft.dev=world-preview*' })
+        Where-Object { $_.CommandLine -like '*-Dnirncraft.autotest=true*' -and $_.CommandLine -like '*-Dnirncraft.dev=world-preview*' })
     if ($preview.Count -gt 0) { Write-Host 'REFUSED: close the disposable Minecraft preview before starting a headless server.'; return $false }
     $r = ReadyInfo
     if ($r) { Write-Host "dev server already running (pid $($r.Pid), port $Port, jdwp 127.0.0.1:$(ActiveJdwpPort), since $($r.Since))"; return $true }
@@ -242,14 +242,14 @@ function Start-Dev {
     $props = Join-Path $Dev "server.properties"
     $lines = @()
     if (Test-Path $props) { $lines = @(Get-Content $props | Where-Object { $_ -notmatch '^(server-port|online-mode|max-tick-time|level-name|pause-when-empty-seconds)=' }) }
-    else { $lines = @("level-seed=2428247", "view-distance=4", "simulation-distance=4", "spawn-protection=0", "motd=Skycraft dev server") }
+    else { $lines = @("level-seed=2428247", "view-distance=4", "simulation-distance=4", "spawn-protection=0", "motd=NirnCraft dev server") }
     $lines += "server-port=$Port", "online-mode=false", "max-tick-time=-1", "level-name=world", 'pause-when-empty-seconds=-1'
     Set-Content $props $lines -Encoding ascii
-    # dev-only world datapack: skycraft:scratch = the overworld's generator in a second dimension (never shipped)
-    $dp = Join-Path $Dev "world\datapacks\skycraft-dev"
-    New-Item -ItemType Directory -Force (Join-Path $dp "data\skycraft\dimension") | Out-Null
-    Set-Content (Join-Path $dp "pack.mcmeta") '{"pack":{"min_format":[121,0],"max_format":[121,0],"description":"Skycraft dev server: scratch dimension"}}' -Encoding ascii
-    Set-Content (Join-Path $dp "data\skycraft\dimension\scratch.json") '{"type":"minecraft:overworld","generator":{"type":"minecraft:noise","settings":"skycraft:tamriel","biome_source":{"type":"skycraft:tamriel"}}}' -Encoding ascii
+    # dev-only world datapack: nirncraft:scratch = the overworld's generator in a second dimension (never shipped)
+    $dp = Join-Path $Dev "world\datapacks\nirncraft-dev"
+    New-Item -ItemType Directory -Force (Join-Path $dp "data\nirncraft\dimension") | Out-Null
+    Set-Content (Join-Path $dp "pack.mcmeta") '{"pack":{"min_format":[121,0],"max_format":[121,0],"description":"NirnCraft dev server: scratch dimension"}}' -Encoding ascii
+    Set-Content (Join-Path $dp "data\nirncraft\dimension\scratch.json") '{"type":"minecraft:overworld","generator":{"type":"minecraft:noise","settings":"nirncraft:tamriel","biome_source":{"type":"nirncraft:tamriel"}}}' -Encoding ascii
     # MDG's public standalone-launch tasks compile resources/classes and supply the exact native classpath.
     $prepareLog = Join-Path $Dev 'native-prepare.log'
     $prepareStarted = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
@@ -365,7 +365,7 @@ function Submit([string]$text) {
 
 function Show([string]$line) {
     if ($All -or -not $line.StartsWith("[log] ")) { Write-Host $line; return }
-    if ($line -match "^\[log\] (ERROR|FATAL|WARN .*Skycraft)|\[(dev|bake|autorun|roadplan|roads|qa|census|dungeon-qa|pop)\]|Exception") { Write-Host $line }
+    if ($line -match "^\[log\] (ERROR|FATAL|WARN .*NirnCraft)|\[(dev|bake|autorun|roadplan|roads|qa|census|dungeon-qa|pop)\]|Exception") { Write-Host $line }
 }
 
 function Wait-DevJob([string]$id) {

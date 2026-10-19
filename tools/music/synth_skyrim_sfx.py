@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Procedural (100 % original, numpy-synthesised) sound effects for Skycraft.
+Procedural (100 % original, numpy-synthesised) sound effects for NirnCraft.
 
 Renders every catalogued file of the categories "creature", "shout", "magic", "ui" and "world"
-(see tools/music/sound_catalog.py) to mod/src/main/resources/assets/skycraft/sounds/<stem>.ogg.
+(see tools/music/sound_catalog.py) to mod/src/main/resources/assets/nirncraft/sounds/<stem>.ogg.
 Nothing here reads, samples or copies any existing recording: every sound is built from oscillators,
 noise, filters and resonators. Each file has its own numpy Generator seeded from crc32(stem), so a
 re-run reproduces the same audio.

@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "nirncraft:block/scathecraw"
+      },
+      {
+        "model": "nirncraft:block/scathecraw",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/scathecraw",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/scathecraw",
+        "y": 270
+      }
+    ]
+  }
+}

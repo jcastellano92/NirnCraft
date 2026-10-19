@@ -1,0 +1,184 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.9,
+  "downfall": 0.9,
+  "effects": {
+    "water_color": "#4e6a52",
+    "grass_color": "#6a8048",
+    "foliage_color": "#5a7040"
+  },
+  "carvers": [],
+  "features": [
+    [],
+    [
+      "nirncraft:map_water",
+      "minecraft:lake_lava_underground"
+    ],
+    [
+      "minecraft:amethyst_geode"
+    ],
+    [
+      "minecraft:monster_room",
+      "minecraft:monster_room_deep"
+    ],
+    [],
+    [],
+    [
+      "minecraft:ore_dirt",
+      "minecraft:ore_gravel",
+      "minecraft:ore_granite_upper",
+      "minecraft:ore_granite_lower",
+      "minecraft:ore_diorite_upper",
+      "minecraft:ore_diorite_lower",
+      "minecraft:ore_andesite_upper",
+      "minecraft:ore_andesite_lower",
+      "minecraft:ore_tuff",
+      "minecraft:ore_coal_upper",
+      "minecraft:ore_coal_lower",
+      "minecraft:ore_iron_upper",
+      "minecraft:ore_iron_middle",
+      "minecraft:ore_iron_small",
+      "minecraft:ore_gold",
+      "minecraft:ore_gold_lower",
+      "minecraft:ore_copper",
+      "minecraft:disk_sand",
+      "minecraft:disk_clay",
+      "minecraft:disk_gravel"
+    ],
+    [],
+    [
+      "minecraft:spring_water",
+      "minecraft:spring_lava"
+    ],
+    [
+      "minecraft:glow_lichen",
+      "minecraft:seagrass_swamp",
+      "nirncraft:biome/emperor_parasols_rare",
+      "nirncraft:biome/flora/trees_bitter_coast",
+      "nirncraft:biome/flora/trees_marsh_dead",
+      "nirncraft:biome/flora/cover_swamp_grass",
+      "nirncraft:biome/flora/cover_mushrooms",
+      "nirncraft:biome/flora/cover_reeds",
+      "nirncraft:biome/flora/cover_lilies",
+      "nirncraft:biome/flora/cover_flowers_swamp"
+    ],
+    [
+      "minecraft:freeze_top_layer"
+    ]
+  ],
+  "attributes": {
+    "minecraft:gameplay/snow_golem_melts": true,
+    "minecraft:visual/water_fog_end_distance": {
+      "argument": 0.85,
+      "modifier": "multiply"
+    },
+    "minecraft:visual/sky_color": "#8aa090",
+    "minecraft:visual/fog_color": "#9caa98",
+    "minecraft:visual/water_fog_color": "#102418",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": {
+      "modifier": "append",
+      "argument": [
+        {
+          "probability": 0.004,
+          "particle": {
+            "type": "minecraft:spore_blossom_air"
+          }
+        }
+      ]
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {
+          "monster": [
+            {
+              "type": "minecraft:spider",
+              "weight": 60,
+              "count": 4
+            },
+            {
+              "type": "minecraft:zombie",
+              "weight": 60,
+              "count": 4
+            },
+            {
+              "type": "minecraft:skeleton",
+              "weight": 60,
+              "count": 4
+            },
+            {
+              "type": "minecraft:slime",
+              "weight": 40,
+              "count": 4
+            },
+            {
+              "type": "minecraft:enderman",
+              "weight": 6,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 1,
+                "max_inclusive": 4
+              }
+            },
+            {
+              "type": "minecraft:witch",
+              "weight": 8,
+              "count": 1
+            }
+          ],
+          "creature": [
+            {
+              "type": "minecraft:frog",
+              "weight": 10,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 2,
+                "max_inclusive": 5
+              }
+            },
+            {
+              "type": "minecraft:chicken",
+              "weight": 2,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 2,
+                "max_inclusive": 3
+              }
+            }
+          ],
+          "ambient": [
+            {
+              "type": "minecraft:bat",
+              "weight": 10,
+              "count": 8
+            }
+          ],
+          "axolotls": [],
+          "underground_water_creature": [
+            {
+              "type": "minecraft:glow_squid",
+              "weight": 10,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 4,
+                "max_inclusive": 6
+              }
+            }
+          ],
+          "water_creature": [],
+          "water_ambient": [],
+          "misc": []
+        },
+        "spawn_costs": {}
+      }
+    }
+  }
+}

@@ -1,10 +1,10 @@
 {
   "replace": false,
   "values": [
-    "skycraft:deep_mire",
-    "skycraft:haunted_wood",
-    "skycraft:rivenspire",
-    "skycraft:shadowfen",
+    "nirncraft:deep_mire",
+    "nirncraft:haunted_wood",
+    "nirncraft:rivenspire",
+    "nirncraft:shadowfen",
     "minecraft:dark_forest",
     "minecraft:pale_garden",
     "minecraft:deep_dark"

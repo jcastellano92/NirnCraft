@@ -1,0 +1,422 @@
+{
+  "id": "dusk",
+  "why": [
+    "summerset_isle.L1.tower_upland",
+    "summerset_isle.L5.alinor_court_economy",
+    "summerset_isle.L6.alinor_capital"
+  ],
+  "sil": "pale-dune-crescent",
+  "base": "none",
+  "overlay": "dusk",
+  "radius": 96,
+  "reach": 112,
+  "gates": [
+    [
+      0,
+      94
+    ],
+    [
+      -94,
+      0
+    ],
+    [
+      94,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        46
+      ],
+      "overlay": "dusk",
+      "wealth": "noble"
+    },
+    {
+      "ring": [
+        46,
+        96
+      ],
+      "overlay": "summerset_isle",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 14,
+      "name": "dusk_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "crystal_tower",
+      "at": [
+        -6,
+        -21
+      ],
+      "name": "dusk_landmark",
+      "overlay": "dusk"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          91
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          -6,
+          -49
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -91,
+          0
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          65,
+          2
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        6,
+        -2
+      ],
+      "rx": 49,
+      "rz": 43,
+      "wobble": 4,
+      "lobes": 3,
+      "phase": 2.78,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        35,
+        0
+      ],
+      "face": "south",
+      "overlay": "dusk",
+      "name": "dusk_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        64,
+        25
+      ],
+      "face": "north",
+      "overlay": "dusk",
+      "name": "dusk_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        29,
+        26
+      ],
+      "face": "north",
+      "overlay": "dusk",
+      "name": "dusk_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        31,
+        62
+      ],
+      "face": "north",
+      "overlay": "dusk",
+      "name": "dusk_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        34
+      ],
+      "face": "north",
+      "overlay": "dusk",
+      "name": "dusk_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -19,
+        66
+      ],
+      "face": "north",
+      "overlay": "dusk",
+      "name": "dusk_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -21,
+        28
+      ],
+      "face": "north",
+      "overlay": "dusk",
+      "name": "dusk_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -59,
+        36
+      ],
+      "face": "north",
+      "overlay": "dusk",
+      "name": "dusk_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -34,
+        6
+      ],
+      "face": "north",
+      "overlay": "dusk",
+      "name": "dusk_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -68,
+        -13
+      ],
+      "face": "south",
+      "overlay": "dusk",
+      "name": "dusk_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -29,
+        -18
+      ],
+      "face": "south",
+      "overlay": "dusk",
+      "name": "dusk_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        -42,
+        -55
+      ],
+      "face": "south",
+      "overlay": "dusk",
+      "name": "dusk_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -11,
+        -41
+      ],
+      "face": "south",
+      "overlay": "dusk",
+      "name": "dusk_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        6,
+        -69
+      ],
+      "face": "south",
+      "overlay": "dusk",
+      "name": "dusk_b_14"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        15,
+        -31
+      ],
+      "face": "south",
+      "overlay": "dusk",
+      "name": "dusk_b_15"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        51,
+        -47
+      ],
+      "face": "south",
+      "overlay": "dusk",
+      "name": "dusk_b_16"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        31,
+        -24
+      ],
+      "face": "south",
+      "overlay": "dusk",
+      "name": "dusk_b_17"
+    }
+  ],
+  "features": [
+    {
+      "type": "fountain",
+      "theme": "dusk_fountain",
+      "count": 2
+    },
+    {
+      "type": "statue",
+      "theme": "dusk_statue",
+      "count": 3
+    },
+    {
+      "type": "garden",
+      "theme": "dusk_garden",
+      "count": 4
+    },
+    {
+      "type": "lamps",
+      "theme": "dusk_lamps",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "dusk_b_5",
+    "store": "dusk_b_10",
+    "smithy": "dusk_b_7"
+  },
+  "titles": {
+    "dusk_b_1": "place.nirncraft.dusk Council & Seat Hall",
+    "dusk_b_2": "place.nirncraft.dusk High Sanctuary",
+    "dusk_b_3": "place.nirncraft.dusk Fighters & Wayfarers Hall",
+    "dusk_b_4": "place.nirncraft.dusk Mages & Chroniclers Spire",
+    "dusk_b_5": "place.nirncraft.dusk The Lantern & Hearth Inn",
+    "dusk_b_6": "place.nirncraft.dusk The Traveler's Rest Tavern",
+    "dusk_b_7": "place.nirncraft.dusk Master Forge & Armorer",
+    "dusk_b_8": "place.nirncraft.dusk Botanicals & Remedies",
+    "dusk_b_9": "place.nirncraft.dusk Scriptorium & Charts",
+    "dusk_b_10": "place.nirncraft.dusk Grand Provisioner & Sundries",
+    "dusk_b_11": "place.nirncraft.dusk Silk & Hide Clothier",
+    "dusk_b_12": "place.nirncraft.dusk Lapidary & Signets",
+    "dusk_b_13": "place.nirncraft.dusk Wayfarer Stables & Post",
+    "dusk_b_14": "place.nirncraft.dusk Bonded Factor Warehouse",
+    "dusk_b_15": "place.nirncraft.dusk Watch Garrison Barracks",
+    "dusk_b_16": "place.nirncraft.dusk High Steward's Manor",
+    "dusk_b_17": "place.nirncraft.dusk Merchant-Factor's Villa",
+    "dusk_landmark": "High Seat of place.nirncraft.dusk",
+    "dusk_plaza": "place.nirncraft.dusk Central Plaza"
+  },
+  "innKey": "dusk_b_5",
+  "zones": [
+    {
+      "at": [
+        6,
+        -36
+      ],
+      "r": 31,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        -2
+      ],
+      "r": 27,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        33,
+        8
+      ],
+      "r": 27,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 81,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 9,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 2,
+      "on": "main"
+    }
+  ]
+}

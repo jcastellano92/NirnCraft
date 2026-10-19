@@ -1,0 +1,273 @@
+{
+  "id": "thaae_cove",
+  "why": [
+    "senchal.L1.harbour_bay",
+    "senchal.L5.sugar_export",
+    "senchal.L6.senchal_seat"
+  ],
+  "sil": "elsweyr-thaae-cove-plan",
+  "base": "none",
+  "overlay": "senchal",
+  "radius": 38,
+  "reach": 50,
+  "gates": [
+    [
+      0,
+      36
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        18
+      ],
+      "overlay": "senchal",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        18,
+        38
+      ],
+      "overlay": "senchal",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "thaae_cove_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "twin_domes",
+      "at": [
+        -1,
+        -22
+      ],
+      "name": "thaae_cove_landmark",
+      "overlay": "senchal"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          33
+        ],
+        [
+          -6,
+          9
+        ],
+        [
+          -6,
+          -18
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -26,
+          10
+        ],
+        [
+          -6,
+          12
+        ],
+        [
+          26,
+          8
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -6,
+        -6
+      ],
+      "rx": 21,
+      "rz": 17,
+      "wobble": 5,
+      "lobes": 3,
+      "phase": 0.29,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        22,
+        0
+      ],
+      "face": "south",
+      "overlay": "senchal",
+      "name": "thaae_cove_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        26
+      ],
+      "face": "north",
+      "overlay": "senchal",
+      "name": "thaae_cove_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -9,
+        23
+      ],
+      "face": "north",
+      "overlay": "senchal",
+      "name": "thaae_cove_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -25,
+        12
+      ],
+      "face": "north",
+      "overlay": "senchal",
+      "name": "thaae_cove_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -20,
+        -6
+      ],
+      "face": "south",
+      "overlay": "senchal",
+      "name": "thaae_cove_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -27
+      ],
+      "face": "south",
+      "overlay": "senchal",
+      "name": "thaae_cove_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        17,
+        -20
+      ],
+      "face": "south",
+      "overlay": "senchal",
+      "name": "thaae_cove_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "market",
+      "theme": "thaae_cove_market",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "thaae_cove_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "thaae_cove_b_5",
+    "smithy": "thaae_cove_b_7"
+  },
+  "titles": {
+    "thaae_cove_b_1": "place.nirncraft.thaae_cove Council & Seat Hall",
+    "thaae_cove_b_2": "place.nirncraft.thaae_cove High Sanctuary",
+    "thaae_cove_b_3": "place.nirncraft.thaae_cove Fighters & Wayfarers Hall",
+    "thaae_cove_b_4": "place.nirncraft.thaae_cove Mages & Chroniclers Spire",
+    "thaae_cove_b_5": "place.nirncraft.thaae_cove The Lantern & Hearth Inn",
+    "thaae_cove_b_6": "place.nirncraft.thaae_cove The Traveler's Rest Tavern",
+    "thaae_cove_b_7": "place.nirncraft.thaae_cove Master Forge & Armorer",
+    "thaae_cove_landmark": "High Seat of place.nirncraft.thaae_cove",
+    "thaae_cove_plaza": "place.nirncraft.thaae_cove Central Plaza"
+  },
+  "innKey": "thaae_cove_b_5",
+  "zones": [
+    {
+      "at": [
+        -6,
+        -14
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -6,
+        -6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        13,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

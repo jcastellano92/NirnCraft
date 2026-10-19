@@ -1,6 +1,6 @@
 # World Model Sheet Schema (MS22)
 
-Each province sheet lives at `mod/src/main/resources/skycraft/tamriel/world/<province>.json` and is generated from Section 1 of `docs/world/provinces/<province>.md` by `tools/world/sheet_from_md.py`.
+Each province sheet lives at `mod/src/main/resources/nirncraft/tamriel/world/<province>.json` and is generated from Section 1 of `docs/world/provinces/<province>.md` by `tools/world/sheet_from_md.py`.
 
 ## Top-Level Structure
 

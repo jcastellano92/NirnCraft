@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/kamal_ice_vault",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274536,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "kamal_ice_vault"
+    ]
+  }
+}

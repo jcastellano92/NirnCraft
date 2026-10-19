@@ -1,0 +1,7 @@
+{
+  "type": "nirncraft:add_table",
+  "table": "nirncraft:gear/regional",
+  "prefix": "chests/",
+  "chance": 0.35,
+  "priority": 10
+}

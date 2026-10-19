@@ -17,10 +17,10 @@ ROOT=Path(__file__).resolve().parents[2]
 SHADER_ERRORS=re.compile(r'ShaderCompileException|Failed to compile|Invalid program|Error compiling|Error linking'
                          r'|^.*\berror:\s|^.*\berror\s+C\d+',re.I|re.M)
 CASES={
-    'shivering_isles':('skycraft:shivering_isles',0,0,'RealmLayout.SI_SHEOTH_R; New Sheoth'),
-    'apocrypha':('skycraft:apocrypha',0,0,'RealmLayout.AP_SPACING; chapter zero / Summit'),
-    'soul_cairn':('skycraft:soul_cairn',0,-180,'RealmLayout.SC_KEEP_Z; Valerica keep'),
-    'coldharbour':('skycraft:coldharbour',0,-200,'RealmLayout.CH_CITY_Z; Hollow City'),
+    'shivering_isles':('nirncraft:shivering_isles',0,0,'RealmLayout.SI_SHEOTH_R; New Sheoth'),
+    'apocrypha':('nirncraft:apocrypha',0,0,'RealmLayout.AP_SPACING; chapter zero / Summit'),
+    'soul_cairn':('nirncraft:soul_cairn',0,-180,'RealmLayout.SC_KEEP_Z; Valerica keep'),
+    'coldharbour':('nirncraft:coldharbour',0,-200,'RealmLayout.CH_CITY_Z; Hollow City'),
     'sovngarde':('minecraft:the_end',0,-275,'RealmLayout.SG_HALL_Z; Hall of Valor'),
     'deadlands':('minecraft:the_nether',8,8,'RealmLayout.keepX/keepZ(0); Great Sigil Tower'),
 }
@@ -45,7 +45,7 @@ def return_home(live):
     if identity.get('dimension')=='minecraft:overworld':return
     if identity.get('dimension') not in {case[0] for case in CASES.values()}:
         raise ValueError('Refusing to route an unrecognized dimension through realm home')
-    live.submit(['execute as @p at @p run skycraft-realm home'],timeout=180)
+    live.submit(['execute as @p at @p run nirncraft-realm home'],timeout=180)
 
 
 def run(names,out):
@@ -71,8 +71,8 @@ def run(names,out):
                 with (out/(realm+'.log')).open('w',encoding='utf8') as log,contextlib.redirect_stdout(log):
                     # Operator route exercises the actual entry path; a fixed landmark gives a repeatable scout candidate.
                     return_home(live)
-                    live.submit(['execute as @p at @p run skycraft-realm go '+realm,
-                                 f'execute as @p at @p run skycraft-realm look {x} {z} 90 120 35'],timeout=300)
+                    live.submit(['execute as @p at @p run nirncraft-realm go '+realm,
+                                 f'execute as @p at @p run nirncraft-realm look {x} {z} 90 120 35'],timeout=300)
                     live.live_actions(['ui close','shaders on','settle 1800','capture '+tag],timeout=300)
                 captures=live.GAME/'build/autotest-screenshots'
                 receipt=live.read_json(captures/(tag+'.json'))

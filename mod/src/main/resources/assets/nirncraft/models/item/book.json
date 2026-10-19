@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "nirncraft:item/book_brown"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "nirncraft:cover": 0.1
+      },
+      "model": "nirncraft:item/book_red"
+    },
+    {
+      "predicate": {
+        "nirncraft:cover": 0.2
+      },
+      "model": "nirncraft:item/book_green"
+    },
+    {
+      "predicate": {
+        "nirncraft:cover": 0.3
+      },
+      "model": "nirncraft:item/book_blue"
+    },
+    {
+      "predicate": {
+        "nirncraft:cover": 0.4
+      },
+      "model": "nirncraft:item/book_black"
+    },
+    {
+      "predicate": {
+        "nirncraft:cover": 0.5
+      },
+      "model": "nirncraft:item/book_sheet"
+    },
+    {
+      "predicate": {
+        "nirncraft:cover": 0.6
+      },
+      "model": "nirncraft:item/book_gold"
+    }
+  ]
+}

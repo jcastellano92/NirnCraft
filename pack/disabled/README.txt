@@ -1,4 +1,4 @@
-Skycraft platform migration preservation
+NirnCraft platform migration preservation
 
 forge-1.20.1/ is the byte-preserved previous pack metadata/configuration, excluded from active indexing and exports.
 neoforge-26.3/ contains compatible stock candidates intentionally disabled until integration acceptance.

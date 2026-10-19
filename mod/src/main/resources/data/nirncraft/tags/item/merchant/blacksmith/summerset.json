@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:refined_moonstone",
+      "required": false
+    },
+    {
+      "id": "nirncraft:refined_malachite",
+      "required": false
+    },
+    {
+      "id": "nirncraft:quicksilver_ingot",
+      "required": false
+    }
+  ]
+}

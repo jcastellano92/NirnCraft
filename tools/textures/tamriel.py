@@ -2,12 +2,12 @@
 """Blocks of Nirn's biomes (workstream B): original procedural 16x16 textures plus every block asset.
 
 Writes:
-  * PNGs into mod/src/main/resources/assets/skycraft/textures/block/
-  * blockstates, block and item models into assets/skycraft/{blockstates,models}/
-  * loot tables into data/skycraft/loot_tables/blocks/
-  * recipes into data/skycraft/recipes/ (planks, wood, ash)
+  * PNGs into mod/src/main/resources/assets/nirncraft/textures/block/
+  * blockstates, block and item models into assets/nirncraft/{blockstates,models}/
+  * loot tables into data/nirncraft/loot_tables/blocks/
+  * recipes into data/nirncraft/recipes/ (planks, wood, ash)
   * block/item tag entries (logs, leaves, planks, mineable, base stone, digging tags), merged into existing files
-Block names live in mod/src/main/lang/skycraft/tamriel_biomes.json (written by tools/worldgen/biomes.py).
+Block names live in mod/src/main/lang/nirncraft/tamriel_biomes.json (written by tools/worldgen/biomes.py).
 
 Run from anywhere:  python3 tools/textures/tamriel.py
 """
@@ -20,10 +20,10 @@ from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-ASSETS = os.path.join(RES, "assets", "skycraft")
+ASSETS = os.path.join(RES, "assets", "nirncraft")
 DATA = os.path.join(RES, "data")
 TEX = os.path.join(ASSETS, "textures", "block")
-SK = "skycraft"
+SK = "nirncraft"
 
 
 # ------------------------------------------------------------------------------------------------ helpers
@@ -554,15 +554,15 @@ def item_model(name, obj):
 
 def loot(name, pools):
     dump(os.path.join(DATA, SK, "loot_table", "blocks", name + ".json"),
-         {"type": "minecraft:block", "pools": pools, "random_sequence": "skycraft:blocks/" + name})
+         {"type": "minecraft:block", "pools": pools, "random_sequence": "nirncraft:blocks/" + name})
 
 
 def b(name):
-    return "skycraft:block/" + name
+    return "nirncraft:block/" + name
 
 
 def self_drop(name, conditions=None):
-    pool = {"rolls": 1, "bonus_rolls": 0, "entries": [{"type": "minecraft:item", "name": "skycraft:" + name}],
+    pool = {"rolls": 1, "bonus_rolls": 0, "entries": [{"type": "minecraft:item", "name": "nirncraft:" + name}],
             "conditions": conditions or [{"condition": "minecraft:survives_explosion"}]}
     loot(name, [pool])
 
@@ -599,7 +599,7 @@ def leaves_block(name):
     blockstate(name, {"variants": {"": {"model": b(name)}}})
     item_model(name, {"parent": b(name)})
     loot(name, [{"rolls": 1, "bonus_rolls": 0, "entries": [{"type": "minecraft:alternatives", "children": [
-        {"type": "minecraft:item", "name": "skycraft:" + name, "conditions": [SHEARS_OR_SILK]},
+        {"type": "minecraft:item", "name": "nirncraft:" + name, "conditions": [SHEARS_OR_SILK]},
         {"type": "minecraft:item", "name": "minecraft:stick",
          "conditions": [{"condition": "minecraft:survives_explosion"},
                         {"condition": "minecraft:table_bonus", "enchantment": "minecraft:fortune",
@@ -698,9 +698,9 @@ def write_assets():
     blockstate("ash_layer", {"variants": variants})
     item_model("ash_layer", {"parent": b("ash_layer_height2")})
     loot("ash_layer", [{"rolls": 1, "bonus_rolls": 0, "entries": [{
-        "type": "minecraft:item", "name": "skycraft:ash_layer",
+        "type": "minecraft:item", "name": "nirncraft:ash_layer",
         "functions": [{"function": "minecraft:set_count", "count": n, "conditions": [
-            {"condition": "minecraft:block_state_property", "block": "skycraft:ash_layer",
+            {"condition": "minecraft:block_state_property", "block": "nirncraft:ash_layer",
              "properties": {"layers": str(n)}}]} for n in range(1, 9)]}],
         "conditions": [{"condition": "minecraft:survives_explosion"}]}])
     # crystal cluster (faces any direction, like amethyst)
@@ -732,7 +732,7 @@ def write_assets():
                                             "half=upper": {"model": b("swamp_reeds_top")}}})
     item_model("swamp_reeds", {"parent": "minecraft:item/generated", "textures": {"layer0": b("swamp_reeds_top")}})
     self_drop("swamp_reeds", [{"condition": "minecraft:survives_explosion"},
-                              {"condition": "minecraft:block_state_property", "block": "skycraft:swamp_reeds",
+                              {"condition": "minecraft:block_state_property", "block": "nirncraft:swamp_reeds",
                                "properties": {"half": "lower"}}])
 
 
@@ -741,30 +741,30 @@ def recipe(name, obj):
 
 
 def write_recipes():
-    for planks_, logs in (("graht_oak_planks", ["skycraft:graht_oak_log", "skycraft:graht_oak_wood"]),
-                          ("palm_planks", ["skycraft:palm_log"])):
+    for planks_, logs in (("graht_oak_planks", ["nirncraft:graht_oak_log", "nirncraft:graht_oak_wood"]),
+                          ("palm_planks", ["nirncraft:palm_log"])):
         recipe(planks_, {"type": "minecraft:crafting_shapeless", "category": "building", "group": "planks",
                          "ingredients": [[{"item": i} for i in logs]],
-                         "result": {"item": "skycraft:" + planks_, "count": 4}})
+                         "result": {"item": "nirncraft:" + planks_, "count": 4}})
     recipe("mangrove_planks_from_hist_log", {"type": "minecraft:crafting_shapeless", "category": "building",
-                                             "group": "planks", "ingredients": [{"item": "skycraft:hist_log"}],
+                                             "group": "planks", "ingredients": [{"item": "nirncraft:hist_log"}],
                                              "result": {"item": "minecraft:mangrove_planks", "count": 4}})
     recipe("graht_oak_wood", {"type": "minecraft:crafting_shaped", "category": "building", "group": "bark",
-                              "pattern": ["##", "##"], "key": {"#": {"item": "skycraft:graht_oak_log"}},
-                              "result": {"item": "skycraft:graht_oak_wood", "count": 3}})
+                              "pattern": ["##", "##"], "key": {"#": {"item": "nirncraft:graht_oak_log"}},
+                              "result": {"item": "nirncraft:graht_oak_wood", "count": 3}})
     recipe("ash_layer", {"type": "minecraft:crafting_shaped", "category": "building", "pattern": ["###"],
-                         "key": {"#": {"item": "skycraft:ash_block"}},
-                         "result": {"item": "skycraft:ash_layer", "count": 6}})
+                         "key": {"#": {"item": "nirncraft:ash_block"}},
+                         "result": {"item": "nirncraft:ash_layer", "count": 6}})
     recipe("ash_block", {"type": "minecraft:crafting_shaped", "category": "building", "pattern": ["##", "##"],
-                         "key": {"#": {"item": "skycraft:ash_layer"}}, "result": {"item": "skycraft:ash_block"}})
+                         "key": {"#": {"item": "nirncraft:ash_layer"}}, "result": {"item": "nirncraft:ash_block"}})
     recipe("mushroom_planks_from_parasol_stem", {"type": "minecraft:crafting_shapeless", "category": "building",
-                                                 "group": "planks", "ingredients": [{"item": "skycraft:parasol_stem"}],
+                                                 "group": "planks", "ingredients": [{"item": "nirncraft:parasol_stem"}],
                                                  "result": {"item": "minecraft:birch_planks", "count": 4}})
     recipe("glass_from_crystal", {"type": "minecraft:smelting", "category": "blocks",
-                                  "ingredient": {"item": "skycraft:crystal_cluster"},
+                                  "ingredient": {"item": "nirncraft:crystal_cluster"},
                                   "result": "minecraft:glass", "experience": 0.1, "cookingtime": 200})
     recipe("sandstone_from_dune_sand", {"type": "minecraft:crafting_shaped", "category": "building",
-                                        "pattern": ["##", "##"], "key": {"#": {"item": "skycraft:dune_sand"}},
+                                        "pattern": ["##", "##"], "key": {"#": {"item": "nirncraft:dune_sand"}},
                                         "result": {"item": "minecraft:sandstone"}})
 
 
@@ -786,7 +786,7 @@ def merge_tag(kind, tag, values):
 
 
 def write_tags():
-    s = lambda *n: ["skycraft:" + x for x in n]
+    s = lambda *n: ["nirncraft:" + x for x in n]
     logs = s("graht_oak_log", "graht_oak_wood", "palm_log", "hist_log")
     leaves = s("golden_aspen_leaves", "orange_aspen_leaves", "snowy_spruce_leaves", "graht_oak_leaves", "palm_fronds",
                "hist_leaves")
@@ -813,8 +813,8 @@ def write_tags():
     merge_tag("blocks", "minecraft:sword_efficient", s("scathecraw", "ash_grass", "swamp_reeds"))
     merge_tag("blocks", "minecraft:crystal_sound_blocks", s("crystal_block"))
     # digging rules (dig/DiggingRules): ash is soft ground, volcanic rock and crystal hard ground
-    merge_tag("blocks", "skycraft:soft_terrain", s("ash_block", "dune_sand"))
-    merge_tag("blocks", "skycraft:hard_terrain", s("magma_volcanic_rock", "crystal_block"))
+    merge_tag("blocks", "nirncraft:soft_terrain", s("ash_block", "dune_sand"))
+    merge_tag("blocks", "nirncraft:hard_terrain", s("magma_volcanic_rock", "crystal_block"))
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ Reads the gitignored Daggerfall reference extraction in `.reference/daggerfall_r
 at authoring time only, applies the similarity + bay-opening hinge transform from
 `docs/world/ILIAC-BAY.md` section 2.3, and outputs simplified vector polygons and
 polylines (at fan-map resolution, never raw or resampled rasters) into:
-  - `mod/src/main/resources/skycraft/tamriel/fiefs.json` (43 fiefs >= 0.01 km2)
+  - `mod/src/main/resources/nirncraft/tamriel/fiefs.json` (43 fiefs >= 0.01 km2)
   - `tools/worldgen/tamriel_vectors.json` (coastline, islands, realms, ranges, areas,
     peaks, lakes, rivers, winds, geothermal)
 
@@ -26,8 +26,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 V2_DIR = os.path.join(ROOT, ".reference", "daggerfall_ref", "v2")
 VEC_PATH = os.path.join(HERE, "tamriel_vectors.json")
-FIEFS_PATH = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft", "tamriel", "fiefs.json")
-TAM_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft", "tamriel")
+FIEFS_PATH = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft", "tamriel", "fiefs.json")
+TAM_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft", "tamriel")
 
 # Similarity + bay-opening hinge parameters (ILIAC-BAY.md section 2.3)
 S_SCALE = 6.221

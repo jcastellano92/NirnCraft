@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:senchal_snapper",
+      "required": false
+    },
+    {
+      "id": "nirncraft:riverhold_catfish",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sugar_koi",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_pearl",
+      "required": false
+    }
+  ]
+}

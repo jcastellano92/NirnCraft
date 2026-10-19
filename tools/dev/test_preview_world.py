@@ -20,7 +20,7 @@ class PreviewWorldTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);game=root/'game';level=game/'saves/qa_test/level.dat';level.parent.mkdir(parents=True)
             level.write_bytes(gzip.compress(compound('',compound('Data',compound('WorldGenSettings',b'\x04'+name('seed')+struct.pack('>q',2428247))))))
-            original='JvmArgs="-Xmx4G -Dskycraft.autotest.load=old -Dskycraft.autotest.live=true"\nOther=value\n'
+            original='JvmArgs="-Xmx4G -Dnirncraft.autotest.load=old -Dnirncraft.autotest.live=true"\nOther=value\n'
             (root/'instance.cfg').write_text(original)
             with patch.multiple(preview.live,INSTANCE=root,GAME=game,DEV=root/'dev'),patch.object(preview,'close_launcher') as close:
                 preview.select('qa_test');close.assert_called_once()

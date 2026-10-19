@@ -3,8 +3,8 @@ onboardAccessibility:false
 toggleCrouch:false
 renderDistance:10
 simulationDistance:8
-key_key.skycraft.wait:key.keyboard.i
-key_key.skycraft.favorites:key.keyboard.r
-key_key.skycraft.journal:key.keyboard.q
-key_key.skycraft.sail_up:key.keyboard.equal
-key_key.skycraft.sail_down:key.keyboard.minus
+key_key.nirncraft.wait:key.keyboard.i
+key_key.nirncraft.favorites:key.keyboard.r
+key_key.nirncraft.journal:key.keyboard.q
+key_key.nirncraft.sail_up:key.keyboard.equal
+key_key.nirncraft.sail_down:key.keyboard.minus

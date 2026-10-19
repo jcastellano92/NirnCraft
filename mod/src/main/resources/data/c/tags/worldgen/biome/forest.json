@@ -1,13 +1,13 @@
 {
   "replace": false,
   "values": [
-    "skycraft:graht_oak_forest",
-    "skycraft:great_forest",
-    "skycraft:haunted_wood",
-    "skycraft:reapers_march",
-    "skycraft:rift_autumn_forest",
-    "skycraft:rivenspire",
-    "skycraft:stormhaven",
-    "skycraft:valenwood_rainforest"
+    "nirncraft:graht_oak_forest",
+    "nirncraft:great_forest",
+    "nirncraft:haunted_wood",
+    "nirncraft:reapers_march",
+    "nirncraft:rift_autumn_forest",
+    "nirncraft:rivenspire",
+    "nirncraft:stormhaven",
+    "nirncraft:valenwood_rainforest"
   ]
 }

@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:chitin_plate",
+      "required": false
+    },
+    {
+      "id": "nirncraft:netch_leather",
+      "required": false
+    },
+    "minecraft:bone",
+    {
+      "id": "nirncraft:ebony_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_ebony",
+      "required": false
+    }
+  ]
+}

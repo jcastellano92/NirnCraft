@@ -1,0 +1,273 @@
+{
+  "id": "nera_cove",
+  "why": [
+    "rimmen.L1.rimmen_cliff",
+    "rimmen.L5.artisan_trade",
+    "rimmen.L6.rimmen_seat"
+  ],
+  "sil": "elsweyr-nera-cove-plan",
+  "base": "none",
+  "overlay": "rimmen",
+  "radius": 38,
+  "reach": 50,
+  "gates": [
+    [
+      0,
+      36
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        18
+      ],
+      "overlay": "rimmen",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        18,
+        38
+      ],
+      "overlay": "rimmen",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "nera_cove_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "twin_domes",
+      "at": [
+        -1,
+        -22
+      ],
+      "name": "nera_cove_landmark",
+      "overlay": "rimmen"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          33
+        ],
+        [
+          6,
+          9
+        ],
+        [
+          6,
+          -18
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -26,
+          10
+        ],
+        [
+          6,
+          12
+        ],
+        [
+          26,
+          8
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        6,
+        -2
+      ],
+      "rx": 18,
+      "rz": 16,
+      "wobble": 2,
+      "lobes": 3,
+      "phase": 2.98,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        22,
+        0
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "nera_cove_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        26
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "nera_cove_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -9,
+        23
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "nera_cove_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -25,
+        12
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "nera_cove_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -20,
+        -6
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "nera_cove_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -27
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "nera_cove_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        17,
+        -20
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "nera_cove_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "market",
+      "theme": "nera_cove_market",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "nera_cove_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "nera_cove_b_5",
+    "smithy": "nera_cove_b_7"
+  },
+  "titles": {
+    "nera_cove_b_1": "place.nirncraft.nera_cove Council & Seat Hall",
+    "nera_cove_b_2": "place.nirncraft.nera_cove High Sanctuary",
+    "nera_cove_b_3": "place.nirncraft.nera_cove Fighters & Wayfarers Hall",
+    "nera_cove_b_4": "place.nirncraft.nera_cove Mages & Chroniclers Spire",
+    "nera_cove_b_5": "place.nirncraft.nera_cove The Lantern & Hearth Inn",
+    "nera_cove_b_6": "place.nirncraft.nera_cove The Traveler's Rest Tavern",
+    "nera_cove_b_7": "place.nirncraft.nera_cove Master Forge & Armorer",
+    "nera_cove_landmark": "High Seat of place.nirncraft.nera_cove",
+    "nera_cove_plaza": "place.nirncraft.nera_cove Central Plaza"
+  },
+  "innKey": "nera_cove_b_5",
+  "zones": [
+    {
+      "at": [
+        6,
+        -14
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        13,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:coldharbour_chained_wastes",
+    "nirncraft:coldharbour_burning_ruins",
+    "nirncraft:coldharbour_hollow_city",
+    "nirncraft:coldharbour_lava_rift",
+    "nirncraft:coldharbour_black_crags"
+  ]
+}

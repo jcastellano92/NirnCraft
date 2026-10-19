@@ -1,4 +1,4 @@
-// Exact-noise kernel tests (aether_height.slang):
+// Exact-noise kernel tests (atlas_height.slang):
 //  1. known inputs: frequency 0 makes every layer sample the lattice origin, so every value is exactly 0; a column
 //     whose lattice fraction would be a float below 2^-100 must come back flagged
 //  2. the kernel (C++ reference build) against an independent plain C++ port of Minecraft 26.3's NoiseStack /
@@ -11,7 +11,7 @@
 #include <random>
 #include <vector>
 
-#include "aether/aether.h"
+#include "atlas/atlas.h"
 
 namespace {
 
@@ -26,7 +26,7 @@ int failures = 0;
         }                                                     \
     } while (0)
 
-constexpr uint32_t SLOTS = AETHER_HEIGHT_SLOTS;
+constexpr uint32_t SLOTS = ATLAS_HEIGHT_SLOTS;
 
 uint32_t bitsOf(float f) {
     uint32_t u;
@@ -51,14 +51,14 @@ std::vector<uint32_t> table(const Noises& noises) {
     }
     for (int n = 0; n < 4; n++)
         for (const Layer& l : noises[n]) {
-            uint32_t w[AETHER_HEIGHT_LAYER_WORDS] = {};
+            uint32_t w[ATLAS_HEIGHT_LAYER_WORDS] = {};
             std::memcpy(w, &l.freq, 8);
             std::memcpy(w + 2, &l.ox, 8);
             std::memcpy(w + 4, &l.oy, 8);
             std::memcpy(w + 6, &l.oz, 8);
             std::memcpy(w + 8, &l.amp, 4);
             std::memcpy(w + 12, l.perm, 256);
-            t.insert(t.end(), w, w + AETHER_HEIGHT_LAYER_WORDS);
+            t.insert(t.end(), w, w + ATLAS_HEIGHT_LAYER_WORDS);
         }
     return t;
 }
@@ -120,16 +120,16 @@ float slotRef(const Noises& n, uint32_t s, int bx, int bz) {
 struct Run {
     std::vector<float> values;
     std::vector<uint32_t> flags;
-    AetherHeightTimes t{};
+    AtlasHeightTimes t{};
 };
 
-Run run(AetherHeight* h, int32_t x0, int32_t z0, int32_t step, uint32_t width, const std::vector<uint32_t>& slots) {
+Run run(AtlasHeight* h, int32_t x0, int32_t z0, int32_t step, uint32_t width, const std::vector<uint32_t>& slots) {
     Run r;
     uint32_t count = uint32_t(slots.size());
     r.values.assign(size_t(count) * SLOTS, -1.0f);
     r.flags.assign(count, 7u);
-    AetherStatus s = aether_height_batch(h, x0, z0, step, width, count, slots.data(), r.values.data(), r.flags.data(), &r.t);
-    CHECK(s == AETHER_OK, "batch: %s", aether_height_last_error(h));
+    AtlasStatus s = atlas_height_batch(h, x0, z0, step, width, count, slots.data(), r.values.data(), r.flags.data(), &r.t);
+    CHECK(s == ATLAS_OK, "batch: %s", atlas_height_last_error(h));
     return r;
 }
 
@@ -137,7 +137,7 @@ void identity(Layer& l) {
     for (int i = 0; i < 256; i++) l.perm[i] = uint8_t(i);
 }
 
-void testKnown(AetherHeight* h, const char* name) {
+void testKnown(AtlasHeight* h, const char* name) {
     Noises n;
     for (int i = 0; i < 4; i++) {
         Layer l{0.0, 0.0, 0.0, 0.0, 0.75f, {}};  // frequency 0: every sample at the lattice origin
@@ -145,7 +145,7 @@ void testKnown(AetherHeight* h, const char* name) {
         n[i].push_back(l);
     }
     auto t = table(n);
-    CHECK(aether_height_set_noise(h, t.data(), uint32_t(t.size())) == AETHER_OK, "set_noise");
+    CHECK(atlas_height_set_noise(h, t.data(), uint32_t(t.size())) == ATLAS_OK, "set_noise");
     std::vector<uint32_t> slots = {0x3FF, 0x001, 0x2AA, 0x000, 0x155, 0x3FF, 0x3, 0x200};
     Run r = run(h, -5, 7, 3, 4, slots);
     int bad = 0;
@@ -162,7 +162,7 @@ void testKnown(AetherHeight* h, const char* name) {
         tiny[i].push_back(l);
     }
     t = table(tiny);
-    CHECK(aether_height_set_noise(h, t.data(), uint32_t(t.size())) == AETHER_OK, "set_noise tiny");
+    CHECK(atlas_height_set_noise(h, t.data(), uint32_t(t.size())) == ATLAS_OK, "set_noise tiny");
     Run f = run(h, -1, 0, 1, 1, {1u});
     bool flagOk = f.flags[0] == 1u;
     std::printf("known inputs (%s): %d wrong values/flags; tiny fraction flagged: %s\n", name, bad, flagOk ? "yes" : "NO");
@@ -188,7 +188,7 @@ void randomNoises(std::mt19937_64& rng, Noises& n) {
     }
 }
 
-void testParity(AetherHeight* cpu, AetherHeight* gpu) {
+void testParity(AtlasHeight* cpu, AtlasHeight* gpu) {
     std::mt19937_64 rng(7);
     // origins: around 0, negative, and far out where x * frequency passes the 2^24 wrap
     const int32_t origins[][3] = {{-128, -128, 1}, {-200000, 150000, 3}, {16000000, -17000000, 64}, {40000000, 40000000, 1}};
@@ -198,8 +198,8 @@ void testParity(AetherHeight* cpu, AetherHeight* gpu) {
         Noises n;
         randomNoises(rng, n);
         auto t = table(n);
-        CHECK(aether_height_set_noise(cpu, t.data(), uint32_t(t.size())) == AETHER_OK, "cpu set_noise");
-        if (gpu) CHECK(aether_height_set_noise(gpu, t.data(), uint32_t(t.size())) == AETHER_OK, "gpu set_noise");
+        CHECK(atlas_height_set_noise(cpu, t.data(), uint32_t(t.size())) == ATLAS_OK, "cpu set_noise");
+        if (gpu) CHECK(atlas_height_set_noise(gpu, t.data(), uint32_t(t.size())) == ATLAS_OK, "gpu set_noise");
         const uint32_t width = 256, count = 256 * 256;
         std::vector<uint32_t> slots(count);
         for (uint32_t k = 0; k < count; k++) slots[k] = 3u | (uint32_t(rng()) & 0x3FCu);
@@ -248,21 +248,21 @@ void testParity(AetherHeight* cpu, AetherHeight* gpu) {
 }  // namespace
 
 int main() {
-    AetherHeight* cpu = nullptr;
-    CHECK(aether_height_create(AETHER_BACKEND_CPU, &cpu) == AETHER_OK, "cpu create");
+    AtlasHeight* cpu = nullptr;
+    CHECK(atlas_height_create(ATLAS_BACKEND_CPU, &cpu) == ATLAS_OK, "cpu create");
     if (!cpu) return 1;
     testKnown(cpu, "cpu");
-    AetherHeight* gpu = nullptr;
-    if (aether_height_create(AETHER_BACKEND_VULKAN, &gpu) == AETHER_OK) {
-        std::printf("exact noise device: %s\n", aether_height_device(gpu));
+    AtlasHeight* gpu = nullptr;
+    if (atlas_height_create(ATLAS_BACKEND_VULKAN, &gpu) == ATLAS_OK) {
+        std::printf("exact noise device: %s\n", atlas_height_device(gpu));
         testKnown(gpu, "vulkan");
     } else {
         std::printf("exact noise: no suitable Vulkan device, GPU checks skipped\n");
         gpu = nullptr;
     }
     testParity(cpu, gpu);
-    if (gpu) aether_height_destroy(gpu);
-    aether_height_destroy(cpu);
+    if (gpu) atlas_height_destroy(gpu);
+    atlas_height_destroy(cpu);
     std::printf(failures ? "height tests: %d FAILED\n" : "height tests: all passed\n", failures);
     return failures ? 1 : 0;
 }

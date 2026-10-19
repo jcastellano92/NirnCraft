@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Validates the place lore (mod/src/main/resources/skycraft/lore/places/*.json, listed in its index.json) and the
-// place mini-quests (mod/src/main/resources/skycraft/quests/place_*.json), exports every text into
-// mod/src/main/lang/skycraft/place_lore.json with the same keys com.skycraft.lore.place.PlaceLore derives, and prints
+// Validates the place lore (mod/src/main/resources/nirncraft/lore/places/*.json, listed in its index.json) and the
+// place mini-quests (mod/src/main/resources/nirncraft/quests/place_*.json), exports every text into
+// mod/src/main/lang/nirncraft/place_lore.json with the same keys com.nirncraft.lore.place.PlaceLore derives, and prints
 // the coverage. Run after editing the lore:  node tools/place_lore.js [--file <lore file>] [--quiet]
 // (then node tools/quest_lang.js for the quest texts). Exit code 1 on any problem. See docs/LORE.md.
 'use strict';
@@ -9,10 +9,10 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..', 'mod', 'src', 'main');
-const res = path.join(root, 'resources', 'skycraft');
+const res = path.join(root, 'resources', 'nirncraft');
 const loreDir = path.join(res, 'lore', 'places');
 const questDir = path.join(res, 'quests');
-const out = path.join(root, 'lang', 'skycraft', 'place_lore.json');
+const out = path.join(root, 'lang', 'nirncraft', 'place_lore.json');
 
 const args = process.argv.slice(2);
 const only = args.includes('--file') ? args[args.indexOf('--file') + 1] : null;
@@ -28,18 +28,18 @@ function put(key, text) {
 }
 const readJson = f => JSON.parse(fs.readFileSync(f, 'utf8'));
 
-// the module's fixed lines (com.skycraft.lore.place)
+// the module's fixed lines (com.nirncraft.lore.place)
 const STATIC = {
-  'place_lore.skycraft.revealed': 'Marked on your map: %s',
-  'place_lore.skycraft.too_busy': 'You have too much on your plate to take up "%s" now.',
-  'place_lore.skycraft.option.trouble': 'Heard of any trouble hereabouts?',
-  'place_lore.skycraft.option.tales': 'Know any local tales?',
-  'place_lore.skycraft.say.busy': '%s But you look like you have enough troubles of your own already.',
-  'place_lore.skycraft.say.quiet.0': 'Quiet, for once. I\'ll not complain about that.',
-  'place_lore.skycraft.say.quiet.1': 'Nothing I\'d trouble a traveler with. Ask again in a few days.',
-  'place_lore.skycraft.say.quiet.2': 'All I hear about is the price of bread and the weather.',
-  'place_lore.skycraft.say.song': 'There\'s an old one they sing around here, "%s": %s',
-  'place_lore.skycraft.say.news': '%1$s You\'ll find %2$s %3$s of here.',
+  'place_lore.nirncraft.revealed': 'Marked on your map: %s',
+  'place_lore.nirncraft.too_busy': 'You have too much on your plate to take up "%s" now.',
+  'place_lore.nirncraft.option.trouble': 'Heard of any trouble hereabouts?',
+  'place_lore.nirncraft.option.tales': 'Know any local tales?',
+  'place_lore.nirncraft.say.busy': '%s But you look like you have enough troubles of your own already.',
+  'place_lore.nirncraft.say.quiet.0': 'Quiet, for once. I\'ll not complain about that.',
+  'place_lore.nirncraft.say.quiet.1': 'Nothing I\'d trouble a traveler with. Ask again in a few days.',
+  'place_lore.nirncraft.say.quiet.2': 'All I hear about is the price of bread and the weather.',
+  'place_lore.nirncraft.say.song': 'There\'s an old one they sing around here, "%s": %s',
+  'place_lore.nirncraft.say.news': '%1$s You\'ll find %2$s %3$s of here.',
 };
 for (const [k, v] of Object.entries(STATIC)) lang[k] = v;
 
@@ -61,7 +61,7 @@ try {
     provinces.add(x.id.split('/')[0]);
   }
 } catch (e) { problems.push(`regions.json: ${e.message}`); }
-const uniquesSrc = fs.readFileSync(path.join(root, 'java', 'com', 'skycraft', 'loot', 'LegendaryUniques.java'), 'utf8');
+const uniquesSrc = fs.readFileSync(path.join(root, 'java', 'com', 'nirncraft', 'loot', 'LegendaryUniques.java'), 'utf8');
 const uniques = new Set([...uniquesSrc.matchAll(/def\("([a-z_]+)"/g)].map(m => m[1]));
 
 // ------------------------------------------------------------------ quests: ids, relics, NPCs; what the others use
@@ -82,16 +82,16 @@ for (const f of readJson(path.join(questDir, 'index.json'))) {
     for (const o of q.objectives || []) for (const s of o.spawn || []) knownSpawns.add(s.type);
   }
 }
-// creatures the mod registers (com.skycraft.creatures), besides those the other questlines already spawn
+// creatures the mod registers (com.nirncraft.creatures), besides those the other questlines already spawn
 for (const id of ['alit', 'ash_spawn', 'chaurus', 'chaurus_hunter', 'cliff_racer', 'death_hound', 'dragon_priest', 'dremora',
   'durzog', 'dwarven_ballista', 'flame_atronach', 'frost_atronach', 'gargoyle', 'giant_scorpion', 'harpy', 'imp', 'kagouti',
   'land_dreugh', 'minotaur', 'netch', 'nix_hound', 'ogre', 'riekling', 'sand_serpent', 'scamp', 'senche_tiger', 'storm_atronach',
   'wamasu', 'will_o_wisp', 'wisp', 'wolf', 'bandit', 'bandit_chief', 'bear', 'draugr', 'draugr_deathlord', 'dwarven_centurion',
   'dwarven_sphere', 'dwarven_spider', 'falmer', 'forsworn', 'frostbite_spider', 'giant', 'hagraven', 'ice_wraith', 'mudcrab',
   'necromancer', 'sabre_cat', 'skeever', 'slaughterfish', 'spriggan', 'troll', 'vampire', 'vampire_lord', 'werewolf',
-  'wispmother', 'dragon', 'horker']) knownSpawns.add('skycraft:' + id);
+  'wispmother', 'dragon', 'horker']) knownSpawns.add('nirncraft:' + id);
 for (const id of ['skeleton', 'zombie', 'husk', 'vex', 'wither_skeleton', 'witch', 'spider', 'drowned', 'stray']) knownSpawns.add('minecraft:' + id);
-const npcRolesSrc = fs.readFileSync(path.join(root, 'java', 'com', 'skycraft', 'society', 'NpcRole.java'), 'utf8');
+const npcRolesSrc = fs.readFileSync(path.join(root, 'java', 'com', 'nirncraft', 'society', 'NpcRole.java'), 'utf8');
 const npcRoles = new Set([...npcRolesSrc.matchAll(/^\s{4}([A-Z_]+)\(/gm)].map(m => m[1].toLowerCase()));
 
 // ------------------------------------------------------------------ the lore files
@@ -116,7 +116,7 @@ for (const f of files) {
     regionCount[rid] = base;
     const first = !regionLore[rid];
     if (first) regionLore[rid] = f;
-    const k = `place_lore.skycraft.region.${regionKey(rid)}`;
+    const k = `place_lore.nirncraft.region.${regionKey(rid)}`;
     if (first && (!Array.isArray(t.rumours) || t.rumours.length < 3)) P(`region ${rid}: needs at least 3 rumours`);
     if (first && (!Array.isArray(t.legends) || t.legends.length < 1)) P(`region ${rid}: needs at least 1 legend`);
     (t.rumours || []).forEach((s, i) => { if (typeof s !== 'string' || s.length < 20) P(`region ${rid}: rumour ${i} is too short`); put(`${k}.rumour.${base.rumour + i}`, s); });
@@ -135,7 +135,7 @@ for (const f of files) {
     if (!places[pid] && !e.future) P(`unknown place ${pid} (mark it "future": true if a later pass adds it)`);
     if (lore[pid]) P(`place ${pid} also written in ${lore[pid].file}`);
     lore[pid] = { file: f, e };
-    const k = `place_lore.skycraft.${pid}`;
+    const k = `place_lore.nirncraft.${pid}`;
     if (typeof e.hook !== 'string' || e.hook.length < 30) P(`${pid}: hook missing or too short`);
     else if (e.hook.length > 320) P(`${pid}: hook longer than 320 characters`);
     if (typeof e.rumour !== 'string' || e.rumour.length < 30) P(`${pid}: rumour missing or too short`);
@@ -167,8 +167,8 @@ for (const f of files) {
       noteCount++;
       pageCount += (n.pages || []).length;
       words += text.split(/\s+/).length;
-      const nk = `place_lore.skycraft.${pid}.${nid}`;
-      put(`book.skycraft.place.${pid}.${nid}`, n.title);
+      const nk = `place_lore.nirncraft.${pid}.${nid}`;
+      put(`book.nirncraft.place.${pid}.${nid}`, n.title);
       put(`${nk}.author`, n.author);
       (n.pages || []).forEach((p, i) => put(`${nk}.p${i}`, p));
     }

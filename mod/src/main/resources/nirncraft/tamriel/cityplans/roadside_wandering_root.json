@@ -1,0 +1,256 @@
+{
+  "id": "roadside_wandering_root",
+  "why": [
+    "greenshade.L1.drowned_coast",
+    "greenshade.L5.bridge_port",
+    "greenshade.L6.woodhearth_seat"
+  ],
+  "sil": "valenwood-roadside-wandering-root-plan",
+  "base": "none",
+  "overlay": "greenshade",
+  "radius": 24,
+  "reach": 36,
+  "gates": [
+    [
+      0,
+      22
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        11
+      ],
+      "overlay": "greenshade",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        11,
+        24
+      ],
+      "overlay": "greenshade",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "roadside_wandering_root_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "roadside_wandering_root_landmark",
+      "overlay": "greenshade"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        -4,
+        4
+      ],
+      "spokes": 6,
+      "r0": 10,
+      "r1": 22,
+      "wobble": 6,
+      "offset": 0.11,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        18
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          19
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          4,
+          -12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "roadside_wandering_root_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        14
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "roadside_wandering_root_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -2,
+        8
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "roadside_wandering_root_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -16,
+        7
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "roadside_wandering_root_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        -4
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "roadside_wandering_root_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -4,
+        -17
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "roadside_wandering_root_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        5,
+        -7
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "roadside_wandering_root_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "roadside_wandering_root_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "roadside_wandering_root_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "roadside_wandering_root_b_5",
+    "smithy": "roadside_wandering_root_b_7"
+  },
+  "titles": {
+    "roadside_wandering_root_b_1": "place.nirncraft.roadside_wandering_root Council & Seat Hall",
+    "roadside_wandering_root_b_2": "place.nirncraft.roadside_wandering_root High Sanctuary",
+    "roadside_wandering_root_b_3": "place.nirncraft.roadside_wandering_root Fighters & Wayfarers Hall",
+    "roadside_wandering_root_b_4": "place.nirncraft.roadside_wandering_root Mages & Chroniclers Spire",
+    "roadside_wandering_root_b_5": "place.nirncraft.roadside_wandering_root The Lantern & Hearth Inn",
+    "roadside_wandering_root_b_6": "place.nirncraft.roadside_wandering_root The Traveler's Rest Tavern",
+    "roadside_wandering_root_b_7": "place.nirncraft.roadside_wandering_root Master Forge & Armorer",
+    "roadside_wandering_root_landmark": "High Seat of place.nirncraft.roadside_wandering_root",
+    "roadside_wandering_root_plaza": "place.nirncraft.roadside_wandering_root Central Plaza"
+  },
+  "innKey": "roadside_wandering_root_b_5",
+  "zones": [
+    {
+      "at": [
+        -4,
+        -9
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -4,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

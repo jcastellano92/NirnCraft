@@ -1,0 +1,34 @@
+{
+  "type": "nirncraft:add_table",
+  "table": "nirncraft:forage/saltrice",
+  "prefix": "blocks/",
+  "chance": 1.0,
+  "condition": {
+    "terms": [
+      {
+        "terms": [
+          {
+            "loot_table_id": "minecraft:blocks/wheat",
+            "type": "neoforge:loot_table_id"
+          }
+        ],
+        "type": "minecraft:any_of"
+      },
+      {
+        "provinces": [
+          "morrowind"
+        ],
+        "type": "nirncraft:region"
+      },
+      {
+        "type": "minecraft:match_block",
+        "blocks": "minecraft:wheat",
+        "state": {
+          "age": "7"
+        }
+      }
+    ],
+    "type": "minecraft:all_of"
+  },
+  "priority": 3
+}

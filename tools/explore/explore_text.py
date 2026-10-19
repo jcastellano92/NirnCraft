@@ -1,7 +1,7 @@
 """Original text of the exploration module: site names, notes, journals and unique items.
 
-Everything here is written for Skycraft (no game text is copied). gen_explore_data.py turns it into the lang file
-(mod/src/main/lang/skycraft/explore.json), the note assets (assets/skycraft/lore/books/explore_*.json) and the
+Everything here is written for NirnCraft (no game text is copied). gen_explore_data.py turns it into the lang file
+(mod/src/main/lang/nirncraft/explore.json), the note assets (assets/nirncraft/lore/books/explore_*.json) and the
 uniques data file.
 """
 
@@ -39,20 +39,20 @@ SITE_NAMES = {
 }
 
 MISC_LANG = {
-    "explore.skycraft.found": "Found: %s",
-    "explore.skycraft.lead.revealed": "The note mentions a place. Your map has been updated: %s",
-    "explore.skycraft.ayleid_well.restored": "The welkynd stone hums, and your magicka floods back.",
-    "explore.skycraft.ayleid_well.spent": "The well is dim. Its power will return tomorrow.",
-    "explore.skycraft.treasure_map.marked": "You study the map and mark the spot on your own.",
-    "explore.skycraft.treasure_map.found": "You found the cache marked on %s.",
-    "explore.skycraft.treasure_map.near": "Somewhere near %s",
-    "explore.skycraft.unique.tag": "Unique",
-    "item.skycraft.treasure_map": "Treasure Map",
-    "item.skycraft.treasure_map.numbered": "Treasure Map %s",
-    "item.skycraft.treasure_map.blank": "The ink has run; nothing can be read.",
-    "item.skycraft.treasure_map.where": "A sketch of the land in %s",
-    "item.skycraft.treasure_map.hint": "Use it to study the drawing. Look for a cairn of stones.",
-    "block.skycraft.ayleid_well": "Ayleid Well",
+    "explore.nirncraft.found": "Found: %s",
+    "explore.nirncraft.lead.revealed": "The note mentions a place. Your map has been updated: %s",
+    "explore.nirncraft.ayleid_well.restored": "The welkynd stone hums, and your magicka floods back.",
+    "explore.nirncraft.ayleid_well.spent": "The well is dim. Its power will return tomorrow.",
+    "explore.nirncraft.treasure_map.marked": "You study the map and mark the spot on your own.",
+    "explore.nirncraft.treasure_map.found": "You found the cache marked on %s.",
+    "explore.nirncraft.treasure_map.near": "Somewhere near %s",
+    "explore.nirncraft.unique.tag": "Unique",
+    "item.nirncraft.treasure_map": "Treasure Map",
+    "item.nirncraft.treasure_map.numbered": "Treasure Map %s",
+    "item.nirncraft.treasure_map.blank": "The ink has run; nothing can be read.",
+    "item.nirncraft.treasure_map.where": "A sketch of the land in %s",
+    "item.nirncraft.treasure_map.hint": "Use it to study the drawing. Look for a cairn of stones.",
+    "block.nirncraft.ayleid_well": "Ayleid Well",
 }
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -250,43 +250,43 @@ NOTES = {
 
 UNIQUES = {
     # Skyrim
-    "frostfang": dict(name="Frostfang", item="skycraft:nordic_war_axe", enchant={"minecraft:sharpness": 2, "minecraft:unbreaking": 2},
+    "frostfang": dict(name="Frostfang", item="nirncraft:nordic_war_axe", enchant={"minecraft:sharpness": 2, "minecraft:unbreaking": 2},
                       kind="dead_adventurer", region="skyrim/the_pale",
                       lore="Its edge never warms, even beside a hearth.",
                       note=("Frostfang's Last Owner", "Scratched on a strip of hide", [
                           "Took the axe from a frost troll's den in the hills. Its owner before me lay there too. The axe "
                           "does not care who holds it.\n\nI think the cold followed it out of the den. My hands have not "
                           "been warm in a week."])),
-    "hearthwarden": dict(name="Hearthwarden", item="skycraft:banded_iron_shield", enchant={"minecraft:protection": 3},
+    "hearthwarden": dict(name="Hearthwarden", item="nirncraft:banded_iron_shield", enchant={"minecraft:protection": 3},
                          kind="hermit_hut", region="skyrim/whiterun",
                          lore="Carried by a housecarl who outlived three jarls and retired to the tundra."),
-    "wanderers_circlet": dict(name="The Wanderer's Circlet", item="skycraft:silver_circlet", enchant={"minecraft:protection": 2, "minecraft:feather_falling": 2},
+    "wanderers_circlet": dict(name="The Wanderer's Circlet", item="nirncraft:silver_circlet", enchant={"minecraft:protection": 2, "minecraft:feather_falling": 2},
                               kind="overlook", region="skyrim/the_rift",
                               lore="Worn by a woman who walked every road in the Rift and wrote none of it down.",
                               note=("A Wanderer's Farewell", "Hild of the Many Roads", [
                                   "I climbed up here every autumn to watch the birches turn. This is the last year my "
                                   "knees will allow it.\n\nI leave the circlet for whoever loves this view as much as I "
                                   "did. Walk the roads for me."])),
-    "stormcrow": dict(name="Stormcrow", item="skycraft:ancient_nord_bow", enchant={"minecraft:power": 3, "minecraft:punch": 1},
+    "stormcrow": dict(name="Stormcrow", item="nirncraft:ancient_nord_bow", enchant={"minecraft:power": 3, "minecraft:punch": 1},
                       kind="nordic_cairn", region="skyrim/haafingar",
                       lore="Its string hums before a storm, and its shafts fly true into the wind."),
-    "riverwyrm_fang": dict(name="Riverwyrm Fang", item="skycraft:elven_dagger", enchant={"minecraft:sharpness": 3},
+    "riverwyrm_fang": dict(name="Riverwyrm Fang", item="nirncraft:elven_dagger", enchant={"minecraft:sharpness": 3},
                            kind="dead_adventurer", region="skyrim/hjaalmarch",
                            lore="Pulled from the jaw of something that lived in the marsh. The marsh wants it back."),
-    "ashfall": dict(name="Ashfall", item="skycraft:steel_greatsword", enchant={"minecraft:fire_aspect": 1, "minecraft:sharpness": 1},
+    "ashfall": dict(name="Ashfall", item="nirncraft:steel_greatsword", enchant={"minecraft:fire_aspect": 1, "minecraft:sharpness": 1},
                     kind="ancient_battlefield", region="skyrim/eastmarch",
                     lore="Forged in a hot spring's steam; it still smells of sulphur.",
                     note=("A Sword Left Behind", "A mercenary", [
                         "We held the ford for two days. Ashfall held it for three; I only carried her.\n\nWhen this is over "
                         "I am going home, and she would only rust on a farm. Let her lie with the others who fought "
                         "here."])),
-    "last_watch_helm": dict(name="Helm of the Last Watch", item="skycraft:iron_helmet", enchant={"minecraft:protection": 2, "minecraft:respiration": 1},
+    "last_watch_helm": dict(name="Helm of the Last Watch", item="nirncraft:iron_helmet", enchant={"minecraft:protection": 2, "minecraft:respiration": 1},
                             kind="bandit_lookout", region="skyrim/the_reach",
                             lore="Taken from a fort's last guard by the bandits who now use his tower."),
-    "kynes_feather": dict(name="Kyne's Feather", item="skycraft:silver_necklace", enchant={"minecraft:feather_falling": 3},
+    "kynes_feather": dict(name="Kyne's Feather", item="nirncraft:silver_necklace", enchant={"minecraft:feather_falling": 3},
                           kind="wayshrine", region="skyrim/falkreath",
                           lore="A hawk's feather sealed in silver. The wind seems to catch you when you fall."),
-    "scribes_mittens": dict(name="Mittens of the Frozen Scribe", item="skycraft:fur_leggings", enchant={"minecraft:protection": 2, "minecraft:unbreaking": 2},
+    "scribes_mittens": dict(name="Mittens of the Frozen Scribe", item="nirncraft:fur_leggings", enchant={"minecraft:protection": 2, "minecraft:unbreaking": 2},
                             kind="mage_ruin", region="skyrim/winterhold",
                             lore="Knitted for a scholar whose ink froze every winter. The ink still froze.",
                             note=("Inventory of the Tower", "Brother Halvard, scribe", [
@@ -294,96 +294,96 @@ UNIQUES = {
                                 "(mine, enchanted, the only warm thing in this tower).\n\nThe Archmage says the tower is "
                                 "'bracing'. The Archmage has never had to write in it."])),
     # Solstheim
-    "ashguard_cuirass": dict(name="Ashguard Cuirass", item="skycraft:bonemold_chestplate", enchant={"minecraft:fire_protection": 4},
+    "ashguard_cuirass": dict(name="Ashguard Cuirass", item="nirncraft:bonemold_chestplate", enchant={"minecraft:fire_protection": 4},
                              kind="velothi_shrine", region="morrowind/solstheim",
                              lore="Bonemold hardened in the ashfall of the Red Year."),
     # Cyrodiil
-    "lindai_gleam": dict(name="Gleam of Lindai", item="skycraft:elven_sword", enchant={"minecraft:smite": 3, "minecraft:sharpness": 1},
+    "lindai_gleam": dict(name="Gleam of Lindai", item="nirncraft:elven_sword", enchant={"minecraft:smite": 3, "minecraft:sharpness": 1},
                          kind="ayleid_well", region="cyrodiil/heartlands",
                          lore="Ayleid steel that glows faintly near the restless dead.",
                          note=("On the Gleam of Lindai", "Imperial antiquarian", [
                              "Found in the basin of a well, not in a ruin; the Ayleids hid their best work in plain "
                              "sight.\n\nThe blade glows near the dead. Near a well it glows brighter, as if remembering "
                              "something."])),
-    "colovian_greaves": dict(name="Boots of the Colovian Rangers", item="skycraft:imperial_light_boots", enchant={"minecraft:feather_falling": 2, "minecraft:protection": 1},
+    "colovian_greaves": dict(name="Boots of the Colovian Rangers", item="nirncraft:imperial_light_boots", enchant={"minecraft:feather_falling": 2, "minecraft:protection": 1},
                              kind="hunters_camp", region="cyrodiil/colovian_highlands",
                              lore="Worn soft by a thousand leagues of highland trails."),
-    "vintners_signet": dict(name="Vintner's Signet", item="skycraft:gold_ring", enchant={"minecraft:protection": 2},
+    "vintners_signet": dict(name="Vintner's Signet", item="nirncraft:gold_ring", enchant={"minecraft:protection": 2},
                             kind="hermit_hut", region="cyrodiil/west_weald",
                             lore="The seal of a vineyard that burned in the Crisis. Its owner kept the ring, and nothing else."),
-    "blackwood_cleaver": dict(name="Blackwood Cleaver", item="skycraft:imperial_war_axe", enchant={"minecraft:bane_of_arthropods": 4},
+    "blackwood_cleaver": dict(name="Blackwood Cleaver", item="nirncraft:imperial_war_axe", enchant={"minecraft:bane_of_arthropods": 4},
                               kind="dead_adventurer", region="cyrodiil/blackwood",
                               lore="A legion axe notched by mudcrab shells and worse."),
     # Morrowind
-    "ashland_stinger": dict(name="Stinger of the Ashlands", item="skycraft:chitin_dagger", enchant={"minecraft:sharpness": 2, "minecraft:fire_aspect": 1},
+    "ashland_stinger": dict(name="Stinger of the Ashlands", item="nirncraft:chitin_dagger", enchant={"minecraft:sharpness": 2, "minecraft:fire_aspect": 1},
                             kind="velothi_shrine", region="morrowind/vvardenfell_ashlands",
                             lore="Cut from a cliff racer's tail and sharpened on volcanic glass."),
-    "spore_warden_helm": dict(name="Spore-Warden Helm", item="skycraft:chitin_helmet", enchant={"minecraft:respiration": 3, "minecraft:protection": 1},
+    "spore_warden_helm": dict(name="Spore-Warden Helm", item="nirncraft:chitin_helmet", enchant={"minecraft:respiration": 3, "minecraft:protection": 1},
                               kind="rare_reagent", region="morrowind/telvannis",
                               lore="Worn by the gardeners of a Telvanni tower to breathe among the spores."),
-    "redoran_watch_shield": dict(name="Shield of the Redoran Watch", item="skycraft:bonemold_shield", enchant={"minecraft:protection": 3},
+    "redoran_watch_shield": dict(name="Shield of the Redoran Watch", item="nirncraft:bonemold_shield", enchant={"minecraft:protection": 3},
                                  kind="ancient_battlefield", region="morrowind/west_gash",
                                  lore="The house colours are flaked away; the dents are all in front."),
     # High Rock
-    "thorn_of_glenumbra": dict(name="Thorn of Glenumbra", item="skycraft:breton_sword", enchant={"minecraft:sharpness": 2, "minecraft:knockback": 1},
+    "thorn_of_glenumbra": dict(name="Thorn of Glenumbra", item="nirncraft:breton_sword", enchant={"minecraft:sharpness": 2, "minecraft:knockback": 1},
                                kind="breton_menhir", region="high_rock/glenumbra",
                                lore="A knight's sword, buried at a standing stone after a vow was broken.",
                                note=("The Broken Vow", "Sir Aubrey of the Moors", [
                                    "I swore at this stone to protect the village. I was away hunting when the raiders "
                                    "came.\n\nI leave my sword here. A man who breaks his word should not carry a "
                                    "knight's blade. Let someone better find it."])),
-    "wrothgar_icebreaker": dict(name="Wrothgar Ice-Breaker", item="skycraft:orcish_warhammer", enchant={"minecraft:sharpness": 2, "minecraft:knockback": 2},
+    "wrothgar_icebreaker": dict(name="Wrothgar Ice-Breaker", item="nirncraft:orcish_warhammer", enchant={"minecraft:sharpness": 2, "minecraft:knockback": 2},
                                 kind="mineral_vein", region="high_rock/wrothgar",
                                 lore="An Orsimer mining hammer that has broken more than rock."),
-    "rivenspire_mourning_ring": dict(name="Rivenspire Mourning Ring", item="skycraft:silver_garnet_ring", enchant={"minecraft:protection": 2},
+    "rivenspire_mourning_ring": dict(name="Rivenspire Mourning Ring", item="nirncraft:silver_garnet_ring", enchant={"minecraft:protection": 2},
                                      kind="dead_adventurer", region="high_rock/rivenspire",
                                      lore="A widow's ring, engraved with a name that someone tried to scratch out."),
     # Hammerfell
-    "sun_sworn_blade": dict(name="Sun-Sworn Blade", item="skycraft:redguard_sword", enchant={"minecraft:sharpness": 3, "minecraft:fire_aspect": 1},
+    "sun_sworn_blade": dict(name="Sun-Sworn Blade", item="nirncraft:redguard_sword", enchant={"minecraft:sharpness": 3, "minecraft:fire_aspect": 1},
                             kind="yokudan_obelisk", region="hammerfell/alikr_desert",
                             lore="A sword-singer's curved blade, left as an offering where the ancestors stopped."),
-    "dune_strider_boots": dict(name="Dune Strider Boots", item="skycraft:hide_boots", enchant={"minecraft:feather_falling": 2, "minecraft:protection": 2},
+    "dune_strider_boots": dict(name="Dune Strider Boots", item="nirncraft:hide_boots", enchant={"minecraft:feather_falling": 2, "minecraft:protection": 2},
                                kind="abandoned_camp", region="hammerfell/bangkorai",
                                lore="Stitched for the sands; they never fill with grit."),
-    "starstone_amulet": dict(name="Starstone Amulet", item="skycraft:gold_ruby_necklace", enchant={"minecraft:fire_protection": 3},
+    "starstone_amulet": dict(name="Starstone Amulet", item="nirncraft:gold_ruby_necklace", enchant={"minecraft:fire_protection": 3},
                              kind="yokudan_obelisk", region="hammerfell/craglorn",
                              lore="A ruby cut in the old Yokudan way, said to have fallen from the sky."),
     # Black Marsh
-    "hist_bark_cuirass": dict(name="Hist-Bark Cuirass", item="skycraft:argonian_chestplate", enchant={"minecraft:protection": 3, "minecraft:thorns": 1},
+    "hist_bark_cuirass": dict(name="Hist-Bark Cuirass", item="nirncraft:argonian_chestplate", enchant={"minecraft:protection": 3, "minecraft:thorns": 1},
                               kind="hist_sapling", region="black_marsh/shadowfen",
                               lore="Shaped from bark the Hist shed willingly. It is still faintly warm."),
-    "swampfang_mace": dict(name="Swampfang Mace", item="skycraft:argonian_mace", enchant={"minecraft:bane_of_arthropods": 3, "minecraft:sharpness": 1},
+    "swampfang_mace": dict(name="Swampfang Mace", item="nirncraft:argonian_mace", enchant={"minecraft:bane_of_arthropods": 3, "minecraft:sharpness": 1},
                            kind="dead_adventurer", region="black_marsh/murkmire",
                            lore="Studded with the teeth of something that is, fortunately, extinct."),
     # Elsweyr
-    "twin_moons_claw": dict(name="Claw of the Twin Moons", item="skycraft:khajiit_dagger", enchant={"minecraft:sharpness": 3, "minecraft:looting": 2},
+    "twin_moons_claw": dict(name="Claw of the Twin Moons", item="nirncraft:khajiit_dagger", enchant={"minecraft:sharpness": 3, "minecraft:looting": 2},
                             kind="moon_sugar_field", region="elsweyr/anequina",
                             lore="Its blade shows two pale reflections, even in daylight.",
                             note=("A Khajiit's Gift", "Dro'mash, caravan guard", [
                                 "This one leaves his claw with the sugar, for luck, as his father did. Whoever takes it "
                                 "takes the luck too.\n\nThis one hopes you need it more than he did."])),
-    "sand_dancer_boots": dict(name="Sand-Dancer's Boots", item="skycraft:khajiit_boots", enchant={"minecraft:feather_falling": 4},
+    "sand_dancer_boots": dict(name="Sand-Dancer's Boots", item="nirncraft:khajiit_boots", enchant={"minecraft:feather_falling": 4},
                               kind="overlook", region="elsweyr/pellitine",
                               lore="Light enough to leap from a cliff and land like a cat. Almost."),
     # Valenwood
-    "green_pact_bow": dict(name="Bow of the Green Pact", item="skycraft:bosmer_bow", enchant={"minecraft:power": 4},
+    "green_pact_bow": dict(name="Bow of the Green Pact", item="nirncraft:bosmer_bow", enchant={"minecraft:power": 4},
                            kind="giant_beehive", region="valenwood/grahtwood",
                            lore="Bone and sinew, no wood: as the Pact demands."),
-    "thornheart_cuirass": dict(name="Thornheart Cuirass", item="skycraft:bosmer_chestplate", enchant={"minecraft:thorns": 3, "minecraft:protection": 1},
+    "thornheart_cuirass": dict(name="Thornheart Cuirass", item="nirncraft:bosmer_chestplate", enchant={"minecraft:thorns": 3, "minecraft:protection": 1},
                                kind="hermit_hut", region="valenwood/reapers_march",
                                lore="Grown, not made; it still sprouts a thorn now and then."),
     # Summerset
-    "crystal_singers_circlet": dict(name="Crystal-Singer's Circlet", item="skycraft:gold_circlet", enchant={"minecraft:protection": 3, "minecraft:respiration": 1},
+    "crystal_singers_circlet": dict(name="Crystal-Singer's Circlet", item="nirncraft:gold_circlet", enchant={"minecraft:protection": 3, "minecraft:respiration": 1},
                                     kind="crystal_outcrop", region="summerset/auridon",
                                     lore="It rings, very faintly, when the wearer hums."),
     # beyond Tamriel
-    "atmoran_rime_axe": dict(name="Atmoran Rime-Axe", item="skycraft:atmoran_war_axe", enchant={"minecraft:sharpness": 3, "minecraft:unbreaking": 3},
+    "atmoran_rime_axe": dict(name="Atmoran Rime-Axe", item="nirncraft:atmoran_war_axe", enchant={"minecraft:sharpness": 3, "minecraft:unbreaking": 3},
                              kind="nordic_cairn", region="atmora", x=-400, z=-11200,
                              lore="From the old country, before the long ships sailed south."),
-    "tsaesci_fang": dict(name="Tsaesci Fang", item="skycraft:akaviri_sword", enchant={"minecraft:sharpness": 4},
+    "tsaesci_fang": dict(name="Tsaesci Fang", item="nirncraft:akaviri_sword", enchant={"minecraft:sharpness": 4},
                          kind="akaviri_shrine", region="akavir", x=17400, z=2600,
                          lore="Folded a thousand times by smiths with no hands, they say."),
-    "tide_ring": dict(name="Maormer Tide-Ring", item="skycraft:silver_ring", enchant={"minecraft:respiration": 3, "minecraft:depth_strider": 3},
+    "tide_ring": dict(name="Maormer Tide-Ring", item="nirncraft:silver_ring", enchant={"minecraft:respiration": 3, "minecraft:depth_strider": 3},
                       kind="sea_shrine", region="pyandonea", x=-19300, z=20600,
                       lore="Cold and damp to the touch, always, as if just pulled from the sea."),
 }

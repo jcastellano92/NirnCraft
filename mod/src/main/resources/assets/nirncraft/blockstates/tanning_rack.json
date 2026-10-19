@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "nirncraft:block/tanning_rack"
+    },
+    "facing=east": {
+      "model": "nirncraft:block/tanning_rack",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "nirncraft:block/tanning_rack",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nirncraft:block/tanning_rack",
+      "y": 270
+    }
+  }
+}

@@ -30,7 +30,7 @@ $t0 = Get-Date
 function Lap([string]$what) { Write-Host ("[{0,6:N1} s] {1}" -f ((Get-Date) - $t0).TotalSeconds, $what) }
 
 if ($Reuse) {
-    & $Dev @DevSettings run "skycraft-roads replan|save-all flush" -Wait | Out-Null
+    & $Dev @DevSettings run "nirncraft-roads replan|save-all flush" -Wait | Out-Null
 } else {
     & $Dev @DevSettings reset | Out-Null
 }
@@ -57,7 +57,7 @@ while ($true) {
 }
 $spec = ($runs | Where-Object { $_ -match "^-?\d+:" } | Select-Object -First 1)
 Lap ("regenerating: " + ($runs | Where-Object { $_ -match "chunks" } | Select-Object -First 1))
-& $Dev @DevSettings run "@timeout 1500|skycraft-dev regenchunks $spec|save-all flush" -Wait -NoRestart
+& $Dev @DevSettings run "@timeout 1500|nirncraft-dev regenchunks $spec|save-all flush" -Wait -NoRestart
 if ($LASTEXITCODE -ne 0) { Write-Host "regen failed (exit $LASTEXITCODE)"; exit 1 }
 Lap "regenerated and paved"
 

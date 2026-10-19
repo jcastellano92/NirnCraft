@@ -1,0 +1,21 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "west_gash_pine",
+        "weight": 5
+      },
+      {
+        "species": "juniper",
+        "weight": 2
+      },
+      {
+        "species": "crag_tree",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

@@ -6,7 +6,7 @@ usage (from the repo root):
   py -3 -I tools/worldgen/hydrology_report.py compare --before DIR --after DIR --out OUTDIR
 
 DIR holds elevation.png, features.png, water.png, terrain.png, coast.png, regions.png (the resource folder
-`mod/src/main/resources/skycraft/tamriel/` or a TAMRIEL_OUT experiment folder).
+`mod/src/main/resources/nirncraft/tamriel/` or a TAMRIEL_OUT experiment folder).
 
 analyze: priority-flood the baked macro height field (pit filling), route D8, accumulate runoff, then compare the
 network with the authored vectors: where rivers end, rivers that run uphill or above the ground, lakes without an

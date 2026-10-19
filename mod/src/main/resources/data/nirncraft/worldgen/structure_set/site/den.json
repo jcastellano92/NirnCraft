@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/den",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274003,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "den"
+    ]
+  }
+}

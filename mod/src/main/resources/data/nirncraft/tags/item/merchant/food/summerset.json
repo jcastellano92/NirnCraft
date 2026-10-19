@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:alto_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:spiced_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:jazbay_grapes",
+      "required": false
+    },
+    {
+      "id": "nirncraft:honey_nut_treat",
+      "required": false
+    },
+    {
+      "id": "nirncraft:boiled_creme_treat",
+      "required": false
+    },
+    {
+      "id": "nirncraft:alinor_sunfish",
+      "required": false
+    },
+    {
+      "id": "nirncraft:auridon_silverfin",
+      "required": false
+    }
+  ]
+}

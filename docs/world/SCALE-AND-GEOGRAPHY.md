@@ -13,7 +13,7 @@ what we keep, what we amplify, what we replace.
 
 ## 0. Summary
 
-* **One block = one metre of Skyrim as built.** Skycraft's Skyrim is the game map at **1.11 blocks per game metre**
+* **One block = one metre of Skyrim as built.** NirnCraft's Skyrim is the game map at **1.11 blocks per game metre**
   (0.01586 blocks/unit; 70 units = 1 m in Morrowind, Oblivion and Skyrim). Every other source is expressed as a
   multiple `k` of that: **Cyrodiil k = 1.58** (1.754 blocks per Oblivion metre), **Vvardenfell k = 0.86** (0.95 blocks
   per Morrowind metre), **Solstheim k = 1.0**, **Arena: 70 blocks per world-map pixel inside a province** (40 for
@@ -21,7 +21,7 @@ what we keep, what we amplify, what we replace.
 * **Inside a province, geometry is a single uniform similarity** (scale + rotation + shift) of its best source. No
   thin-plate warps inside a province: they are why Cyrodiil's city-to-city distances today vary from 1.4x to 2.4x the
   game's (Bruma is 2.4x further from the Imperial City than in Oblivion, Skingrad-Kvatch only 1.47x).
-* **Between provinces, the lore map wins** (Skycraft's current continent outline), not Arena's continent, which puts
+* **Between provinces, the lore map wins** (NirnCraft's current continent outline), not Arena's continent, which puts
   the Imperial City 42 px (about 3 km at our scale) from Whiterun and inflates Summerset and Valenwood.
 * **Relief is the biggest quality gap**: outside Skyrim the macro terrain is flat. Median height above sea is 74 blocks
   in Skyrim but 18-34 in the other provinces (Valenwood max 65, Summerset max 75), and local ruggedness is 1.2-2.5
@@ -52,9 +52,9 @@ RoadChunk statics); `roads/named_roads.json` already encodes Skyrim's road topol
 
 ### 2.1 Skyrim (reference province)
 
-Game metres between map markers vs Skycraft blocks today (`skyrim_settlements.json`):
+Game metres between map markers vs NirnCraft blocks today (`skyrim_settlements.json`):
 
-| Pair | Game m | Skycraft blocks | Blocks per game m |
+| Pair | Game m | NirnCraft blocks | Blocks per game m |
 | --- | ---: | ---: | ---: |
 | Whiterun - Solitude | 2,008 | 2,104 | 1.05 |
 | Whiterun - Windhelm | 1,756 | 1,879 | 1.07 |
@@ -74,7 +74,7 @@ The least-squares similarity of the 9 city centroids is **0.02506 blocks/unit = 
 -3.24 deg** (`oblivion_ref/transform.json`), with residuals of 324-947 blocks: the TAMRIEL.md anchors are not a
 uniform image of the game. Pair ratios today:
 
-| Pair | Game m | Skycraft | Ratio | | Pair | Game m | Skycraft | Ratio |
+| Pair | Game m | NirnCraft | Ratio | | Pair | Game m | NirnCraft | Ratio |
 | --- | ---: | ---: | ---: | --- | --- | ---: | ---: | ---: |
 | IC - Bruma | 1,224 | 2,961 | **2.42** | | Skingrad - Kvatch | 1,119 | 1,640 | **1.47** |
 | IC - Cheydinhal | 1,344 | 2,941 | 2.19 | | Bravil - Leyawiin | 1,567 | 2,163 | 1.38 |
@@ -90,7 +90,7 @@ TAMRIEL.md anchors, which stretches the north (Bruma, Cheydinhal pulled toward S
 Similarity fit 0.01359 blocks/unit = **0.95 blocks per game m** (rms 315). The thin-plate warp through 5 anchors
 (Vivec, Balmora, Ald-ruhn, Sadrith Mora, Red Mountain) is exact at the anchors but distorts the rest:
 
-| Pair | Game m | Skycraft | Ratio |
+| Pair | Game m | NirnCraft | Ratio |
 | --- | ---: | ---: | ---: |
 | Balmora - Vivec | 1,350 | 1,360 | 1.01 |
 | Balmora - Ald-ruhn | 971 | 1,020 | 1.05 |
@@ -108,7 +108,7 @@ The south (Ascadian Isles, Molag Amur) and the north-west are compressed by 20-3
 
 Arena's world map is 320x200 px; each province has a rect on it and its own 320x200 province map (local coords).
 
-* **Inside a province, Arena is a usable layout.** Per-province similarity fits of Arena settlements onto Skycraft's
+* **Inside a province, Arena is a usable layout.** Per-province similarity fits of Arena settlements onto NirnCraft's
   places with the same name:
 
 | Province | n | Blocks per Arena px | Rotation | rms (blocks) |
@@ -126,13 +126,13 @@ Arena's world map is 320x200 px; each province has a rect on it and its own 320x
   intra-province relative placement is honest. Six provinces cluster at 68-86; Valenwood and Summerset at 34-41 mean
   Arena drew them about 1.8x too large (the lore map agrees).
 * **The continent layout is not usable.** One similarity for all 63 shared city-states: 100 blocks/px, rms 2,370.
-  The Imperial City sits 42.5 Arena px from Whiterun (about 2,950 blocks at 69.5) where Skycraft has 6,030, because
+  The Imperial City sits 42.5 Arena px from Whiterun (about 2,950 blocks at 69.5) where NirnCraft has 6,030, because
   Arena's Imperial Province is a small blob squeezed between the others (its land, measured by nearest-settlement
   areas on the world map, is under 2x Skyrim; it holds a single location).
 * Relative land areas (Skyrim = 1.0; Arena from its world-map land mask assigned to the nearest settlement; lore map
   estimated by eye, +-20 %):
 
-| Province | Arena | Lore map (est.) | Skycraft today (km2) | Skycraft relative |
+| Province | Arena | Lore map (est.) | NirnCraft today (km2) | NirnCraft relative |
 | --- | ---: | ---: | ---: | ---: |
 | Skyrim | 1.00 | 1.0 | 26.5 | 1.00 |
 | Cyrodiil | ~1.7 | ~2.0 | 61.2 | 2.31 |
@@ -159,17 +159,17 @@ is about 250 blocks across (Riften-like), the island is about 0.6 km2, and it ma
 | | p25 | p50 | p75 | p90 | p99 | max | ruggedness* |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Skyrim game (m) | 111 | 214 | 357 | 449 | 578 | 607 | |
-| Skycraft Skyrim (blocks) | 38 | 74 | 116 | 168 | 258 | 344 (+ peaks.json) | **5.6** |
+| NirnCraft Skyrim (blocks) | 38 | 74 | 116 | 168 | 258 | 344 (+ peaks.json) | **5.6** |
 | Cyrodiil game, inside the border (m) | 21 | 72 | 168 | 422 (p95) | 535 | 665 | |
-| Skycraft Cyrodiil | 15 | 34 | 65 | 114 | 234 | 354 | 2.2 |
+| NirnCraft Cyrodiil | 15 | 34 | 65 | 114 | 234 | 354 | 2.2 |
 | Vvardenfell + Solstheim game (m) | 10 | 19 | 35 | 63 | 202 | 271 | |
-| Skycraft Morrowind | 9 | 21 | 55 | 150 | 374 | 414 | 4.0 |
-| Skycraft High Rock | 15 | 22 | 69 | 125 | 272 | 357 | 3.4 |
-| Skycraft Hammerfell | 14 | 27 | 76 | 98 | 229 | 327 | 2.5 |
-| Skycraft Elsweyr | 10 | 19 | 38 | 64 | 104 | 138 | 1.5 |
-| Skycraft Valenwood | 10 | 18 | 28 | 35 | 47 | 65 | 1.2 |
-| Skycraft Summerset | 10 | 23 | 30 | 40 | 61 | 75 | 1.9 |
-| Skycraft Black Marsh | 0 | 1 | 1 | 2 | 16 | 137 | 0.4 |
+| NirnCraft Morrowind | 9 | 21 | 55 | 150 | 374 | 414 | 4.0 |
+| NirnCraft High Rock | 15 | 22 | 69 | 125 | 272 | 357 | 3.4 |
+| NirnCraft Hammerfell | 14 | 27 | 76 | 98 | 229 | 327 | 2.5 |
+| NirnCraft Elsweyr | 10 | 19 | 38 | 64 | 104 | 138 | 1.5 |
+| NirnCraft Valenwood | 10 | 18 | 28 | 35 | 47 | 65 | 1.2 |
+| NirnCraft Summerset | 10 | 23 | 30 | 40 | 61 | 75 | 1.9 |
+| NirnCraft Black Marsh | 0 | 1 | 1 | 2 | 16 | 137 | 0.4 |
 
 \* mean absolute height step between neighbouring 32-block raster cells.
 
@@ -195,7 +195,7 @@ itself (Red Mountain 271 m), so Morrowind needs its own, steeper curve (about 1.
    (Valenwood, Summerset 40), rotated and shifted onto the province's lore-map outline; then curated by hand
    (Arena's town names are largely generated and many were later retconned).
 4. **The continent frame** (where each province sits, its outline and its seas) follows the lore map, i.e.
-   Skycraft's current `tamriel_vectors.json` outline. Arena and Daggerfall only adjust coasts locally.
+   NirnCraft's current `tamriel_vectors.json` outline. Arena and Daggerfall only adjust coasts locally.
 5. **Fun constraint on travel.** Minecraft walking is 4.3 blocks/s, sprinting 5.6, a good horse 9-12. Keep
    (a) a named stop (village, inn, fort, landmark) every 600-1,000 blocks of highway, (b) adjacent major settlements
    at most ~3,000 blocks of road apart (12 min walk, 5 min horse), and (c) fast travel for anything longer. Measured:
@@ -249,7 +249,7 @@ grids are used **offline, to author vectors**, and only the vectors (and rasters
 5. **Check** with `tools/qa/parity.py` (FLO, LND) and `REGION-AUDIT.md`'s variety and border checks, plus the relief
    stats of 2.6 (re-run `analyze.py`) against each province's target.
 
-Biome guidance per province is in the modernisation blocks; palettes go to `skycraft/tamriel/palettes.json` as usual.
+Biome guidance per province is in the modernisation blocks; palettes go to `nirncraft/tamriel/palettes.json` as usual.
 
 ## 5. Province by province
 
@@ -257,7 +257,7 @@ Coordinates are block x, z (east, south). "Fit" = position predicted by the sour
 
 ### 5.1 Skyrim (and Solstheim)
 
-* **Scale:** reference. Arena's Skyrim fits Skycraft at 69.5 blocks/px with all 9 city-states within 374 blocks.
+* **Scale:** reference. Arena's Skyrim fits NirnCraft at 69.5 blocks/px with all 9 city-states within 374 blocks.
 * **Moves:** none. Whiterun's capital place sits at (62, -68) while its marker is (0, 0): intended (the city centre
   vs the map marker), leave it.
 * **Additions (curated, from Arena and later lore):**
@@ -334,7 +334,7 @@ Coordinates are block x, z (east, south). "Fit" = position predicted by the sour
   Sheogorad isles, Azura's Coast archipelago and the Odai mouth. Also: the sea south of Vvardenfell is labelled
   `sea/sea_of_ghosts` in `regions.png` at (7140, 1590): it should be `sea/inner_sea` (sea seed fix).
 * **Mainland (Arena-only).** Arena backbone: Ebonheart-Mournhold, Mournhold-Narsis, Mournhold-Necrom, Mournhold-Tear,
-  Narsis-Kragenmoor, Narsis-Tear, Blacklight-Kragenmoor, Firewatch-Necrom, Firewatch-Mournhold. Skycraft has all ten
+  Narsis-Kragenmoor, Narsis-Tear, Blacklight-Kragenmoor, Firewatch-Necrom, Firewatch-Mournhold. NirnCraft has all ten
   Arena city-states. Arena's seven towns (Stoneforest, Karththor Dale, Oaktown, Eagle Moor, Silnim Dale, Dragon Glade,
   Glen Haven) are generated names: use them as a name pool for existing generic villages in Stonefalls and Deshaan; do
   not add. Keep Ebonheart on the mainland (Stonefalls) as designed, and add the Vvardenfell-side Imperial fortress
@@ -356,9 +356,9 @@ Daggerfall is the authoritative source for the Iliac Bay regions (another agent;
 
 * Arena's High Rock backbone: North Point-Shornhelm, Daggerfall-Camlorn, Camlorn-Wayrest, Shornhelm-Wayrest,
   Shornhelm-Evermore, Wayrest-Evermore, Evermore-Farrun, Evermore-Jehanna, Farrun-Jehanna.
-* Arena puts Wayrest at about (-7510, 930) (central High Rock) where Skycraft follows Daggerfall's Iliac Bay
+* Arena puts Wayrest at about (-7510, 930) (central High Rock) where NirnCraft follows Daggerfall's Iliac Bay
   shore (-5300, 3300): follow Daggerfall.
-* Arena's Iliac Bay is a small inlet; Skycraft's (Daggerfall-scale) bay is much bigger: Arena shows land where we
+* Arena's Iliac Bay is a small inlet; NirnCraft's (Daggerfall-scale) bay is much bigger: Arena shows land where we
   have sea around (-9300..-6300, 3850..4500). Follow Daggerfall.
 * High Rock is already 1.54x Skyrim (section 2.4): add no towns; Arena's 7 missing High Rock towns (Old Gate, Meir
   Darguard, Kings Guard, Portdun Creek, Vermeir Wastes, Raven Spring, Cloud Spring) are a name pool only.
@@ -373,7 +373,7 @@ Daggerfall is the authoritative source for the Iliac Bay regions (another agent;
   Gilane-Skaven, Taneth-Rihad, Taneth-Elinhir, Rihad-Elinhir, Rihad-Skaven, Dragonstar-Elinhir, Dragonstar-Skaven,
   Elinhir-Skaven.
 * **Moves:** Gilane is Arena's neighbour of Hegathe and Taneth on the south coast (69 and 67 px of road) but
-  Skycraft has it alone in the far west at (-9900, 6050). Move Gilane to the Abecean shore near (-8650, 6850)
+  NirnCraft has it alone in the far west at (-9900, 6050). Move Gilane to the Abecean shore near (-8650, 6850)
   (Alik'r desert region, ~550 west of Hegathe). The other Hammerfell residuals (Taneth, Elinhir, Dragonstar, Skaven:
   1,400-1,900) are within the Daggerfall agent's area or follow the lore map: no change.
 * **Arena towns missing** (8): Sunkeep, Lainebon Place, Vulnim Gate (Alik'r), Heldorn Mount (Bangkorai), Riverpoint,
@@ -381,7 +381,7 @@ Daggerfall is the authoritative source for the Iliac Bay regions (another agent;
   pool only. Exception: Belkarth (Craglorn's town in later lore) may replace a generic Craglorn village.
 * **Stros M'kai (Redguard layout, scaled at 0.021 blocks/unit onto the current island):**
 
-| Site (our label) | Redguard position -> Skycraft | Current Skycraft place | Proposal |
+| Site (our label) | Redguard position -> NirnCraft | Current NirnCraft place | Proposal |
 | --- | --- | --- | --- |
 | town and harbour (east side of a south-facing bay) | (-10200..-9980, 7240..7370) | `port_hunding` (-10150, 7260) | keep; lay the town on the bay's east shore, harbour tower and warehouse on the west quay (-10180..-10230, 7310) |
 | palace (walled plateau NE of town) | gate (-10060, 7210), grounds (-9990, 7070) | none | add a palace landmark on a 15-20 block plateau |
@@ -421,8 +421,8 @@ Daggerfall is the authoritative source for the Iliac Bay regions (another agent;
   Eldenroot-Southpoint, Silvenar-Falinesti, Silvenar-Greenheart, Silvenar-Arenthia, Woodhearth-Falinesti,
   Woodhearth-Greenheart, Falinesti-Greenheart, Greenheart-Southpoint, Haven-Southpoint.
 * **Moves:** Arena spreads the Reaper's March town cluster (Eagle Vale, Emperors Run, Wasten Brukbrook, Lynpar March)
-  across Grahtwood, 2,100-3,200 blocks from where Skycraft has them; these are Arena-generated names, so no move:
-  instead spread Skycraft's eastern cluster so no two villages are closer than ~600 blocks.
+  across Grahtwood, 2,100-3,200 blocks from where NirnCraft has them; these are Arena-generated names, so no move:
+  instead spread NirnCraft's eastern cluster so no two villages are closer than ~600 blocks.
 * **Missing towns:** Thormar Keep, Vulkwasten Wood, Karthdar Square: name pool for Grahtwood generic villages.
 * **Modernisation.** Keep: Valenwood is lowland forest. Amplify: vertical interest by trees, not hills: Graht-oak
   giants (100+ blocks) as landmarks and walking cities (Falinesti), deep river gorges (Xylo, Strid; 20-40 blocks
@@ -461,7 +461,7 @@ Daggerfall is the authoritative source for the Iliac Bay regions (another agent;
 
 ### 6.1 How it feeds the pipeline
 
-`mod/src/main/resources/skycraft/roads/named_roads.json` is the P1 input: `{id, class, route: [place ids], bridge?}`.
+`mod/src/main/resources/nirncraft/roads/named_roads.json` is the P1 input: `{id, class, route: [place ids], bridge?}`.
 `RoadGraph` builds highways from it first, then roads and lanes, `RoadPlanBuilder` routes and profiles them and bakes
 `roadplan.bin`; `linkName` carries the road's name to signposts and the map. Adding a province's roads = adding
 entries (place ids must exist), re-running `tools/bake/bake.ps1`, then `roadplan_lint.py` and the corridor gate.
@@ -476,7 +476,7 @@ Today it has 20 entries (9 Cyrodiil, 11 Skyrim). Rules for new entries:
 | Province | Source of topology | Named highways (route) |
 | --- | --- | --- |
 | Skyrim | game (authored) | as today: White River, Pale Pass, Falkreath, Treva, Reach, Karth, Hjaal, Eastmarch, Rift, Pale, Winterhold roads |
-| Cyrodiil | Oblivion ROAD graph (11 routes extracted) | as today (Red Ring, Gold, Black, Silver, Orange, Blue, Green, Yellow, Talos Bridge) + **Chorrol-Skingrad** (Colovian road, 181k units in game) + **Bruma-Cheydinhal** (Jerall foothill road, 185k) + a mountain trail Bruma-Chorrol (the extractor labelled it "Orange Road"; Skycraft's `orange_road` is Bleaker's Way-Bruma: keep ours, treat this one as a trail) |
+| Cyrodiil | Oblivion ROAD graph (11 routes extracted) | as today (Red Ring, Gold, Black, Silver, Orange, Blue, Green, Yellow, Talos Bridge) + **Chorrol-Skingrad** (Colovian road, 181k units in game) + **Bruma-Cheydinhal** (Jerall foothill road, 185k) + a mountain trail Bruma-Chorrol (the extractor labelled it "Orange Road"; NirnCraft's `orange_road` is Bleaker's Way-Bruma: keep ours, treat this one as a trail) |
 | Vvardenfell | 174 signpost junctions + 291 road polylines | West Gash road (Gnisis-Ald Velothi-Khuul), Ald-ruhn-Maar Gan, Ald-ruhn-Caldera-Balmora (the main road, cobbled near Balmora), Balmora-Pelagiad-Vivec (main), Seyda Neen-Pelagiad, Vivec-Suran-Molag Mar (Molag Amur foyada road), Vos-Tel Vos road (Grazelands). The ash wastes and Red Mountain get trails only. |
 | Mainland Morrowind | Arena backbone (5.3) | Ebonheart-Mournhold, Mournhold-Narsis-Kragenmoor, Narsis-Tear, Mournhold-Necrom, Firewatch-Necrom, Blacklight-Kragenmoor |
 | High Rock, N. Hammerfell | Daggerfall agent | Arena backbones in 5.4/5.5 as a cross-check |

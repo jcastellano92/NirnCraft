@@ -1,9 +1,0 @@
-{
-  "parent": "minecraft:block/orientable_with_bottom",
-  "textures": {
-    "top": "skycraft:block/armor_workbench_top",
-    "bottom": "skycraft:block/armor_workbench_bottom",
-    "front": "skycraft:block/armor_workbench_front",
-    "side": "skycraft:block/armor_workbench_side"
-  }
-}

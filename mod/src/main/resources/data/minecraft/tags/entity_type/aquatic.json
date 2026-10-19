@@ -1,15 +1,15 @@
 {
   "replace": false,
   "values": [
-    "skycraft:sea_serpent",
-    "skycraft:slaughterfish",
-    "skycraft:dreugh",
-    "skycraft:dreugh_queen",
-    "skycraft:sea_leviathan",
-    "skycraft:giant_slaughterfish",
-    "skycraft:sea_netch",
-    "skycraft:whale",
-    "skycraft:river_betty",
-    "skycraft:abecean_longfin"
+    "nirncraft:sea_serpent",
+    "nirncraft:slaughterfish",
+    "nirncraft:dreugh",
+    "nirncraft:dreugh_queen",
+    "nirncraft:sea_leviathan",
+    "nirncraft:giant_slaughterfish",
+    "nirncraft:sea_netch",
+    "nirncraft:whale",
+    "nirncraft:river_betty",
+    "nirncraft:abecean_longfin"
   ]
 }

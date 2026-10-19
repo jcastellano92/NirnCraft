@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:rabbit",
+    {
+      "id": "nirncraft:deer",
+      "required": false
+    },
+    {
+      "id": "nirncraft:elk",
+      "required": false
+    },
+    {
+      "id": "nirncraft:goat",
+      "required": false
+    },
+    {
+      "id": "nirncraft:fox",
+      "required": false
+    }
+  ]
+}

@@ -1,11 +1,11 @@
 """Iliac Bay places generator & updater (R5 Steps IB3 + IB9 / V4 Places).
 
 Updates:
-  - mod/src/main/resources/skycraft/tamriel/places/provinces.json
-  - mod/src/main/resources/skycraft/tamriel/places/high_rock.json
-  - mod/src/main/resources/skycraft/tamriel/places/hammerfell.json
-  - mod/src/main/resources/skycraft/tamriel/places/tamriel_shrines.json
-  - mod/src/main/resources/skycraft/tamriel/places/tamriel_roadside_inns.json
+  - mod/src/main/resources/nirncraft/tamriel/places/provinces.json
+  - mod/src/main/resources/nirncraft/tamriel/places/high_rock.json
+  - mod/src/main/resources/nirncraft/tamriel/places/hammerfell.json
+  - mod/src/main/resources/nirncraft/tamriel/places/tamriel_shrines.json
+  - mod/src/main/resources/nirncraft/tamriel/places/tamriel_roadside_inns.json
 
 Preserves 100% of existing place IDs across provinces.json, high_rock.json, and hammerfell.json,
 re-homes displaced places onto dry land in the 16 High Rock & Hammerfell land regions, places all 43
@@ -25,7 +25,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "qa"))
 import layout_lint as ll
 
-RES = ROOT / "mod" / "src" / "main" / "resources" / "skycraft"
+RES = ROOT / "mod" / "src" / "main" / "resources" / "nirncraft"
 PLACES_DIR = RES / "tamriel" / "places"
 WORLD_DIR = RES / "tamriel" / "world"
 QUESTS_DIR = RES / "quests"
@@ -469,7 +469,7 @@ def main():
             else:
                 p = {
                     "id": pid,
-                    "name": f"place.skycraft.{pid}",
+                    "name": f"place.nirncraft.{pid}",
                     "type": ptype,
                     "culture": "orc" if reg == "high_rock/wrothgar" and "orc" in str(var) else default_cult,
                     "region": reg,
@@ -509,13 +509,13 @@ def main():
         lst = hr_list if is_hr else hf_list
         if sid in by_id or sid in prov_by_id:
             continue
-        st = s.get("skycraft_type")
+        st = s.get("nirncraft_type")
         if st in ("farm", "inn", "village"):
             ptype = "farm" if st == "farm" else "village"
             var = "inn" if st == "inn" else None
             p = {
                 "id": sid,
-                "name": f"place.skycraft.{sid}",
+                "name": f"place.nirncraft.{sid}",
                 "type": ptype,
                 "culture": "breton" if is_hr else "redguard",
                 "region": realm,
@@ -728,7 +728,7 @@ def main():
             cx, cz, _ = cells[(hash(fid) & 0x7FFFFFFF) % len(cells)]
             p = {
                 "id": fid,
-                "name": f"place.skycraft.{fid}",
+                "name": f"place.nirncraft.{fid}",
                 "type": "farm",
                 "culture": cult,
                 "region": reg,
@@ -749,7 +749,7 @@ def main():
             cx, cz, _ = cells[(hash(fid) & 0x7FFFFFFF) % len(cells)]
             p = {
                 "id": fid,
-                "name": f"place.skycraft.{fid}",
+                "name": f"place.nirncraft.{fid}",
                 "type": "farm",
                 "culture": cult,
                 "region": reg,
@@ -793,7 +793,7 @@ def main():
             cx, cz, _ = cells[(hash(lid) & 0x7FFFFFFF) % len(cells)]
             p = {
                 "id": lid,
-                "name": f"place.skycraft.{lid}",
+                "name": f"place.nirncraft.{lid}",
                 "type": ltype,
                 "culture": cult,
                 "region": reg,

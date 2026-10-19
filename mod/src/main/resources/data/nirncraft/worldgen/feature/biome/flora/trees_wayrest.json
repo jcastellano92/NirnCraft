@@ -1,0 +1,21 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "oak",
+        "weight": 3
+      },
+      {
+        "species": "fruit_tree",
+        "weight": 3
+      },
+      {
+        "species": "elm",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

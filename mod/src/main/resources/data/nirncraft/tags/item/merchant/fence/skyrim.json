@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:skooma",
+      "required": false
+    },
+    {
+      "id": "nirncraft:moon_sugar",
+      "required": false
+    }
+  ]
+}

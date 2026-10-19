@@ -1,0 +1,18 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "watchtower",
+  "regional_kit": true,
+  "flavor": 0,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "tower"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

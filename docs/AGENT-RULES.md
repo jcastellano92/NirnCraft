@@ -1,4 +1,4 @@
-# Skycraft agent rules
+# NirnCraft agent rules
 
 **Current platform override: Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25.** Before building or controlling a runtime,
 read [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md). Use the isolated native build helper and current native devserver;
@@ -15,7 +15,7 @@ phase prompts in `docs/prompts/`. The world-building rules at the end of this fi
 
 ## Phase 1 rules (still apply)
 
-You are fixing review findings in Skycraft, a Skyrim total-conversion for Minecraft 1.20.1 Forge
+You are fixing review findings in NirnCraft, a Skyrim total-conversion for Minecraft 1.20.1 Forge
 (compiled against 47.3.0, the pack runs 47.4.10), official Mojang mappings, Java 17.
 You work in your OWN git worktree (your current working directory). Paths below are relative to the repo root.
 
@@ -27,7 +27,7 @@ You work in your OWN git worktree (your current working directory). Paths below 
 * Real 1.20.1 signatures: `javap -cp <jar> <class>` with javap at `C:\Program Files\Java\jdk-17\bin\javap.exe`
   and the jar
   `C:\Users\Jeremy\.gradle\caches\forge_gradle\minecraft_user_repo\net\minecraftforge\forge\1.20.1-47.3.0_mapped_official_1.20.1\forge-1.20.1-47.3.0_mapped_official_1.20.1.jar`.
-  Third-party mod jars are cached in `F:\Projects\Personal\Skycraft\Skycraft\dist\.cache\` (read-only).
+  Third-party mod jars are cached in `dist\.cache\` (read-only).
 
 ## Code rules
 * No mixins, no access transformers. Forge events and public API; screens replaced via `ScreenEvent.Opening`.
@@ -40,7 +40,7 @@ You work in your OWN git worktree (your current working directory). Paths below 
 * Server is authoritative. Validate every client packet (distance, menu type, ownership, value bounds).
 * Multiplayer must work both on an Essential-hosted integrated server and on a dedicated server.
 * Player data: `SkyData.get(player).module("<name>")`.
-* Lang: only your module's file `mod/src/main/lang/skycraft/<module>.json` (merged at build time).
+* Lang: only your module's file `mod/src/main/lang/nirncraft/<module>.json` (merged at build time).
 * Match the surrounding code style, comment density and naming. Don't reformat files. Don't rewrite files
   wholesale; make targeted edits.
 * Stay inside your OWNED packages. If a fix truly needs a small change in another package, make it minimal and
@@ -60,18 +60,18 @@ You work in your OWN git worktree (your current working directory). Paths below 
 * Every file you created; every file outside your owned packages you edited.
 * Anything risky, needing playtest, or left for later.
 * Confirm the final `./gradlew build` result.
-# Skycraft Phase 2+ rules (every workstream reads this)
+# NirnCraft Phase 2+ rules (every workstream reads this)
 
 Read these first:
 * `the Phase 1 rules section above`.
   The build, code, git and report rules there all still apply. One exception: the "don't touch Holds, Carriages
   or Houses" rule is lifted for the workstreams that now own them.
 * `docs/TAMRIEL.md` in your worktree: the world plan and the Java contracts. The contract signatures in
-  `com.skycraft.tamriel` (`TamrielMap`, `MapSample`, `Region`, `Regions`, `Place`, `PlaceType`, `Places`) are
+  `com.nirncraft.tamriel` (`TamrielMap`, `MapSample`, `Region`, `Regions`, `Place`, `PlaceType`, `Places`) are
   fixed. You may add methods, but don't change or remove existing ones.
 
 ## The owner's direction
-* Skycraft replaces ALL third-party content mods with its own systems: terrain, biomes, structures, villages,
+* NirnCraft replaces ALL third-party content mods with its own systems: terrain, biomes, structures, villages,
   NPCs and ambience. Performance and library mods stay. Build the real thing, not placeholders. Aim for
   complete, polished, Skyrim-faithful content.
 * Don't stop at the minimum. When something in your scope can clearly be made more complete or more
@@ -108,7 +108,7 @@ Read these first:
 * Vertical: compress heights so the Throat of the World peaks near y 370 (world top is y 383; sea level 63).
 
 ## Test in game where possible
-* `./gradlew runServer` (with `--nogui`, from `mod/`) generates a world with only Skycraft loaded. Use it to
+* `./gradlew runServer` (with `--nogui`, from `mod/`) generates a world with only NirnCraft loaded. Use it to
   smoke-test worldgen: no crashes, and sensible timing.
 * Accept the EULA in `mod/run/eula.txt`. Stop the server cleanly with the `stop` command on stdin, or kill it
   after a timeout.
@@ -121,9 +121,9 @@ Read these first:
 * **Iterate with quick checks; run the full gate once at the end of a phase.** Start with Tier 0 pure-Java JUnit 5
   tests (`tools\qa\qa.ps1 -Unit`, < 5 s, no server) for worldplan/map/bake logic. While developing against the
   persistent dev server, use Tier 1 (`tools\dev\devserver.ps1 hotswap` for < 3 s JDWP method-body hot-swap, and
-  `/skycraft-dev reload <scenes|places|cityplans|quests|palettes|all>` for < 1 s in-JVM JSON reload),
+  `/nirncraft-dev reload <scenes|places|cityplans|quests|palettes|all>` for < 1 s in-JVM JSON reload),
   `tools\dev\devserver.ps1 run "cmd|cmd" -Wait`, `tools\qa\quick_corridor.ps1 <a>:<b>` (one tile, ~15 s) and
-  `/skycraft-dev regen` for a bounded area. Compile (`compileJava`) after a chunk of work, as above.
+  `/nirncraft-dev regen` for a bounded area. Compile (`compileJava`) after a chunk of work, as above.
 * **Full gates only at a checkpoint:** `tools\qa\full_corridors.ps1` (the 4-corridor road gate) when the road work of
   the phase is done, and `tools\qa\qa.ps1 -Server -Rebake` before merging (one boot, re-bakes in the same run). Do not
   repeat a full gate after each small edit and do not weaken one: a gate that only the slow path can run is run once,
@@ -144,7 +144,7 @@ Read these first:
   with no road to rob or a mine with no ore in the rock is a bug.
 * **Cite the world-model sheet.** Every region and province has an 11-layer causal sheet (L1 geology, L2 climate, L3
   water, L4 ecology and micro-biomes, L5 economy, L6 settlement pattern, L7 society, L8 culture and belief, L9 politics,
-  L10 the hidden and underground, L11 history), as data in `mod/src/main/resources/skycraft/tamriel/world/<province>.json`
+  L10 the hidden and underground, L11 history), as data in `mod/src/main/resources/nirncraft/tamriel/world/<province>.json`
   (designed in `docs/world/provinces/<province>.md` section 1). Every sheet field in L2-L11 cites a field above it.
   Every new content record (place, NPC, quest, scene kind, dungeon identity, book, creature table, palette or
   micro-biome rule, music cue, weather rule) carries `why: [sheet field ids]`, e.g.

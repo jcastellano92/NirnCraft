@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:iron_ingot",
+    {
+      "id": "nirncraft:steel_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:corundum_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silver_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:quicksilver_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leather_strips",
+      "required": false
+    }
+  ]
+}

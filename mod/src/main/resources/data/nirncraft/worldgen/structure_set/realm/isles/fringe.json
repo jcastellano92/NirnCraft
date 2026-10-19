@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:realm/isles/fringe",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:realm_grid",
+    "salt": 31,
+    "spacing": 0,
+    "fixed": [
+      [
+        47,
+        0
+      ]
+    ]
+  }
+}

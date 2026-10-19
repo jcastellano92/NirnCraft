@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:silver_ring",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gold_ring",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silver_necklace",
+      "required": false
+    },
+    {
+      "id": "nirncraft:amulet_of_talos",
+      "required": false
+    },
+    {
+      "id": "nirncraft:copper_circlet",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silver_garnet_ring",
+      "required": false
+    }
+  ]
+}

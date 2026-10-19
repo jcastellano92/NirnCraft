@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/blisterwort"
+      },
+      {
+        "model": "nirncraft:block/blisterwort",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/blisterwort",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/blisterwort",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/blisterwort_harvested"
+      },
+      {
+        "model": "nirncraft:block/blisterwort_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/blisterwort_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/blisterwort_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

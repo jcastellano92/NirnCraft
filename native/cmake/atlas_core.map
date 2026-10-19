@@ -1,0 +1,7 @@
+/* libatlas_core.so exports only the C API (ATLAS_API, atlas_*): not the Slang-generated CPU kernels
+   (farMain, heightMain, ...), nor C++ template instances that would otherwise interpose with other libraries
+   in the game process */
+{
+  global: atlas_*;
+  local: *;
+};

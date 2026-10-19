@@ -1,0 +1,102 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:bread",
+    "minecraft:apple",
+    "minecraft:torch",
+    "minecraft:lantern",
+    "minecraft:candle",
+    "minecraft:bucket",
+    "minecraft:string",
+    "minecraft:leather",
+    "minecraft:lead",
+    "minecraft:paper",
+    "minecraft:book",
+    "minecraft:glass_bottle",
+    "minecraft:shears",
+    "minecraft:fishing_rod",
+    "minecraft:flint_and_steel",
+    "minecraft:saddle",
+    "minecraft:compass",
+    "minecraft:white_wool",
+    "minecraft:bowl",
+    "minecraft:potion",
+    "minecraft:iron_pickaxe",
+    "minecraft:iron_axe",
+    "minecraft:iron_shovel",
+    {
+      "id": "nirncraft:lockpick",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leather_strips",
+      "required": false
+    },
+    {
+      "id": "nirncraft:firewood",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hide",
+      "required": false
+    },
+    "minecraft:iron_ingot",
+    {
+      "id": "nirncraft:steel_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:iron_arrow",
+      "required": false
+    },
+    {
+      "id": "nirncraft:steel_arrow",
+      "required": false
+    },
+    {
+      "id": "nirncraft:soul_gem_petty",
+      "required": false
+    },
+    {
+      "id": "nirncraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "nirncraft:garlic",
+      "required": false
+    },
+    {
+      "id": "nirncraft:cabbage",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leek",
+      "required": false
+    },
+    {
+      "id": "nirncraft:tomato",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sweetroll",
+      "required": false
+    },
+    {
+      "id": "nirncraft:nord_mead",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ale",
+      "required": false
+    },
+    {
+      "id": "nirncraft:goat_cheese_wedge",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_venison",
+      "required": false
+    },
+    "minecraft:wheat"
+  ]
+}

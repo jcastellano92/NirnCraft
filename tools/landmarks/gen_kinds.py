@@ -1,6 +1,6 @@
-"""Generates mod/src/main/resources/skycraft/landmarks/kinds.json: the table of natural-landmark and vignette kinds.
+"""Generates mod/src/main/resources/nirncraft/landmarks/kinds.json: the table of natural-landmark and vignette kinds.
 
-A kind is a builder (a geometry routine in com.skycraft.landmarks.build), a style, the biome families it belongs to
+A kind is a builder (a geometry routine in com.nirncraft.landmarks.build), a style, the biome families it belongs to
 (with weights), and a footprint. Many kinds share a builder and differ by style, rock set and environment; every
 instance still differs through its seeded size, weathering, overgrowth, rock and wood.
 
@@ -13,7 +13,7 @@ import re
 import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-OUT = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'landmarks', 'kinds.json')
+OUT = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'landmarks', 'kinds.json')
 
 FAMILIES = ['tundra', 'forest', 'plains', 'marsh', 'desert', 'savanna', 'ash', 'volcanic', 'jungle', 'crystal', 'mushroom',
             'mountain', 'coast', 'shore', 'high']
@@ -293,7 +293,7 @@ def check():
             errs.append('%s: builder %s has no purpose in WHY' % (k['id'], k['builder']))
     ids = set()
     builders = set()
-    src = open(os.path.join(ROOT, 'mod', 'src', 'main', 'java', 'com', 'skycraft', 'landmarks', 'build', 'Builders.java'),
+    src = open(os.path.join(ROOT, 'mod', 'src', 'main', 'java', 'com', 'nirncraft', 'landmarks', 'build', 'Builders.java'),
                encoding='utf-8').read()
     known = set(re.findall(r'case "([a-z_]+)" ->', src))
     caps = {'S': 8, 'M': 12, 'L': 22, 'XL': 22}
@@ -311,7 +311,7 @@ def check():
         if not k['w']:
             errs.append(k['id'] + ': no weights')
     # lore: sign lines are 15 characters or fewer
-    lore = json.load(open(os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'landmarks', 'lore.json'),
+    lore = json.load(open(os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'landmarks', 'lore.json'),
                           encoding='utf-8'))
     for grp, lines in lore['epitaph'].items():
         for s in lines:
@@ -348,12 +348,12 @@ def main():
         json.dump(doc, f, indent=1)
         f.write('\n')
     # display names: "s_grave_headstone" -> "Grave: Headstone" (the lang module file of the landmarks)
-    lang = {'landmarks.skycraft.found': 'Found: %s'}
+    lang = {'landmarks.nirncraft.found': 'Found: %s'}
     for k in KINDS:
         parts = k['id'].split('_')[1:]
         title = parts[0].capitalize() + (': ' + ' '.join(p.capitalize() for p in parts[1:]) if len(parts) > 1 else '')
-        lang['landmarks.skycraft.kind.' + k['id']] = title
-    lang_path = os.path.join(ROOT, 'mod', 'src', 'main', 'lang', 'skycraft', 'natural_landmarks.json')
+        lang['landmarks.nirncraft.kind.' + k['id']] = title
+    lang_path = os.path.join(ROOT, 'mod', 'src', 'main', 'lang', 'nirncraft', 'natural_landmarks.json')
     with open(lang_path, 'w', encoding='utf-8') as f:
         json.dump(lang, f, indent=2, sort_keys=True)
         f.write('\n')

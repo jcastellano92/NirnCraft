@@ -1,0 +1,683 @@
+{
+  "region": "valenwood/greenshade",
+  "province": "valenwood",
+  "line": "story_greenshade",
+  "category": "main",
+  "title": "When the Wilderking Sleeps",
+  "summary": "Between the high bridge-tiers of Marbruk, the port of Woodhearth, and the living glades of Greenshade, Spinners of Y'ffre seek to mend a severed story-thread that has left the Wilderking's court silent.",
+  "why": [
+    "greenshade.L7.bridge_district_rank",
+    "greenshade.L7.ground_camp",
+    "greenshade.L8.wilderking_court"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "woodhearth",
+    "places": [
+      "woodhearth",
+      "gurzags_mine",
+      "bramblebreach",
+      "spinners_cottage",
+      "xyath_grotto",
+      "falayas_cove",
+      "driladan_pass",
+      "barrow_trench",
+      "lanalda_pond",
+      "roestia_grotto",
+      "greenheart",
+      "marbruk",
+      "longhaven",
+      "camp_gushnukbur",
+      "malathil_cove",
+      "roadside_wandering_root"
+    ],
+    "npc": "story_greenshade_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "The hollow boughs of the Wilderking's court have gone utterly silent, and the Spinners in Marbruk say someone cut a living memory-root near Woodhearth to bind forest spirits.",
+    "notice": "SPINNERS OF GREENSHADE & MARBRUK COUNCIL: Seekers wanted to walk the waking glades between Marbruk and Woodhearth and mend the severed story-thread."
+  },
+  "npcs": [
+    {
+      "id": "story_greenshade_hook_npc",
+      "name": "Warden of Woodhearth",
+      "role": "guard",
+      "place": "woodhearth",
+      "greet": "The hollow boughs of the Wilderking's court have gone utterly silent, and the Spinners in Marbruk say someone cut a living memory-root near Woodhearth to bind forest spirits.",
+      "talk": [
+        "The trouble across Greenshade began when sealed dispatches started bypassing Woodhearth.",
+        "If you mean to help the Spinners' Conclave of Greenshade, start by checking the trail between Woodhearth and Imperial Underground."
+      ]
+    },
+    {
+      "id": "story_greenshade_envoy_npc",
+      "name": "Chronicler of Woodhearth",
+      "role": "scholar",
+      "place": "imperial_underground",
+      "greet": "Keep your voice low—everyone at Imperial Underground is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from Imperial Underground toward Rootwater Grove before they vanished into the brush.",
+        "Bring any ciphered tallies back to Woodhearth so Hearth-Speaker Indaenir can see the proof."
+      ]
+    },
+    {
+      "id": "story_greenshade_scout_npc",
+      "name": "Outrider of Rootwater Grove",
+      "role": "scout",
+      "place": "rootwater_grove",
+      "greet": "You made good time from Imperial Underground. The saboteurs have fortified the approaches near Wreck of the Blue Wheel.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at Wreck of the Blue Wheel with a picked guard.",
+        "Once Wreck of the Blue Wheel is cleared, return to Woodhearth to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_greenshade_steward_npc",
+      "name": "Speaker of Woodhearth",
+      "role": "steward",
+      "place": "woodhearth",
+      "greet": "Hearth-Speaker Indaenir awaits word on whether the crisis in Greenshade has been contained.",
+      "talk": [
+        "The elders of Woodhearth have prepared the concord table for your return.",
+        "All of Greenshade owes you a debt for standing between Woodhearth and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_greenshade_boss_01": {
+      "name": "Usurper-Captain of Woodhearth (1)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "woodhearth",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_greenshade_boss_02": {
+      "name": "Usurper-Captain of Imperial Underground (2)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "imperial_underground",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_greenshade_boss_03": {
+      "name": "Usurper-Captain of Rootwater Grove (3)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "rootwater_grove",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_greenshade_boss_04": {
+      "name": "Usurper-Captain of Wreck of the Blue Wheel (4)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "wreck_of_the_blue_wheel",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_greenshade_boss_05": {
+      "name": "Usurper-Captain of Serpents Grotto (5)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "serpents_grotto",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_greenshade_boss_06": {
+      "name": "Usurper-Captain of Shademist Moors (6)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "shademist_moors",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_greenshade_boss_07": {
+      "name": "Usurper-Captain of Fishermans Rest (7)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "fishermans_rest",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_greenshade_boss_08": {
+      "name": "Usurper-Captain of Shrine Clavicus Vile Valenwood (8)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "shrine_clavicus_vile_valenwood",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_greenshade_scene_01": [
+      "Warden of Woodhearth: Examine these marks recovered near Woodhearth—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Woodhearth and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Woodhearth, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_02": [
+      "Warden of Woodhearth: Examine these marks recovered near Imperial Underground—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Imperial Underground and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Imperial Underground, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_03": [
+      "Warden of Woodhearth: Examine these marks recovered near Rootwater Grove—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Rootwater Grove and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Rootwater Grove, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_04": [
+      "Warden of Woodhearth: Examine these marks recovered near Wreck of the Blue Wheel—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Wreck of the Blue Wheel and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Wreck of the Blue Wheel, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_05": [
+      "Warden of Woodhearth: Examine these marks recovered near Serpents Grotto—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Serpents Grotto and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Serpents Grotto, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_06": [
+      "Warden of Woodhearth: Examine these marks recovered near Shademist Moors—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Shademist Moors and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Shademist Moors, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_07": [
+      "Warden of Woodhearth: Examine these marks recovered near Fishermans Rest—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Fishermans Rest and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Fishermans Rest, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_08": [
+      "Warden of Woodhearth: Examine these marks recovered near Shrine Clavicus Vile Valenwood—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Shrine Clavicus Vile Valenwood and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Shrine Clavicus Vile Valenwood, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_09": [
+      "Warden of Woodhearth: Examine these marks recovered near Naril Nagaia—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Naril Nagaia and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Naril Nagaia, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_10": [
+      "Warden of Woodhearth: Examine these marks recovered near Rootwater Spring—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Rootwater Spring and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Rootwater Spring, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_11": [
+      "Warden of Woodhearth: Examine these marks recovered near Shrine Namira Valenwood—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Shrine Namira Valenwood and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Shrine Namira Valenwood, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_12": [
+      "Warden of Woodhearth: Examine these marks recovered near Belestia Glade—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Belestia Glade and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Belestia Glade, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_13": [
+      "Warden of Woodhearth: Examine these marks recovered near Malathil Cove—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Malathil Cove and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Malathil Cove, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_14": [
+      "Warden of Woodhearth: Examine these marks recovered near Ossayas Glade—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Ossayas Glade and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Ossayas Glade, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_15": [
+      "Warden of Woodhearth: Examine these marks recovered near Reconnaissance Camp—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Reconnaissance Camp and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Reconnaissance Camp, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_16": [
+      "Warden of Woodhearth: Examine these marks recovered near Vaayas Hideout—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Vaayas Hideout and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Vaayas Hideout, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_17": [
+      "Warden of Woodhearth: Examine these marks recovered near Roestia Ossuary—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Roestia Ossuary and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Roestia Ossuary, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_18": [
+      "Warden of Woodhearth: Examine these marks recovered near Shrine Sheogorath Valenwood—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Shrine Sheogorath Valenwood and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Shrine Sheogorath Valenwood, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_19": [
+      "Warden of Woodhearth: Examine these marks recovered near Longhaven—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Longhaven and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Longhaven, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_20": [
+      "Warden of Woodhearth: Examine these marks recovered near The Shadow—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between The Shadow and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at The Shadow, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_21": [
+      "Warden of Woodhearth: Examine these marks recovered near Shrine Mehrunes Dagon Valenwood—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Shrine Mehrunes Dagon Valenwood and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Shrine Mehrunes Dagon Valenwood, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_22": [
+      "Warden of Woodhearth: Examine these marks recovered near Hollow Den—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Hollow Den and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Hollow Den, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_23": [
+      "Warden of Woodhearth: Examine these marks recovered near The Serpent—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between The Serpent and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at The Serpent, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_24": [
+      "Warden of Woodhearth: Examine these marks recovered near Bouldertree Refuge—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Bouldertree Refuge and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Bouldertree Refuge, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_25": [
+      "Warden of Woodhearth: Examine these marks recovered near Rulanyils Fall—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Rulanyils Fall and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Rulanyils Fall, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_26": [
+      "Warden of Woodhearth: Examine these marks recovered near March of Sacrifices—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between March of Sacrifices and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at March of Sacrifices, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_27": [
+      "Warden of Woodhearth: Examine these marks recovered near Siloria Nest—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Siloria Nest and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Siloria Nest, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_28": [
+      "Warden of Woodhearth: Examine these marks recovered near Rootwatch Tower—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Rootwatch Tower and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Rootwatch Tower, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_29": [
+      "Warden of Woodhearth: Examine these marks recovered near Gathongors Mire—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Gathongors Mire and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Gathongors Mire, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_30": [
+      "Warden of Woodhearth: Examine these marks recovered near The Underroot—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between The Underroot and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at The Underroot, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_31": [
+      "Warden of Woodhearth: Examine these marks recovered near Drowned Coast Dolmen—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Drowned Coast Dolmen and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Drowned Coast Dolmen, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_32": [
+      "Warden of Woodhearth: Examine these marks recovered near Camp Gushnukbur—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Camp Gushnukbur and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Camp Gushnukbur, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_33": [
+      "Warden of Woodhearth: Examine these marks recovered near Greenheart—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Greenheart and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Greenheart, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_34": [
+      "Warden of Woodhearth: Examine these marks recovered near Malaril Ossuary—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Malaril Ossuary and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Malaril Ossuary, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_35": [
+      "Warden of Woodhearth: Examine these marks recovered near Greens Marrow—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Greens Marrow and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Greens Marrow, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_36": [
+      "Warden of Woodhearth: Examine these marks recovered near Shadows Crawl—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Shadows Crawl and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Shadows Crawl, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_37": [
+      "Warden of Woodhearth: Examine these marks recovered near Roadside Wandering Root—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Roadside Wandering Root and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Roadside Wandering Root, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_38": [
+      "Warden of Woodhearth: Examine these marks recovered near City of Ash—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between City of Ash and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at City of Ash, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_39": [
+      "Warden of Woodhearth: Examine these marks recovered near Gerara Falls—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Gerara Falls and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Gerara Falls, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_40": [
+      "Warden of Woodhearth: Examine these marks recovered near Wilderking Court—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Wilderking Court and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Wilderking Court, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_41": [
+      "Warden of Woodhearth: Examine these marks recovered near Verrant Morass—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Verrant Morass and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Verrant Morass, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_42": [
+      "Warden of Woodhearth: Examine these marks recovered near Seaside Overlook—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Seaside Overlook and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Seaside Overlook, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_43": [
+      "Warden of Woodhearth: Examine these marks recovered near Arananga—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Arananga and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Arananga, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_44": [
+      "Warden of Woodhearth: Examine these marks recovered near Thodundors View—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Thodundors View and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Thodundors View, then bring the recovered charter back to Woodhearth."
+    ],
+    "story_greenshade_scene_45": [
+      "Warden of Woodhearth: Examine these marks recovered near Drowned Coast—they match the cabal troubling Greenshade.",
+      "Chronicler of Woodhearth: The seal impressions cite the old charters of the Spinners' Conclave of Greenshade word for word.",
+      "Outrider of Rootwater Grove: Our scouts spotted lantern-signals flashing between Drowned Coast and Wreck of the Blue Wheel at dusk.",
+      "Speaker of Woodhearth: Strike swiftly at Drowned Coast, then bring the recovered charter back to Woodhearth."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_greenshade_01_opening",
+      "order": 1,
+      "title": "The Silent Boughs",
+      "region": "valenwood/greenshade",
+      "category": "main",
+      "giver": "story_greenshade_hook_npc",
+      "start": "npc:story_greenshade_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "greenshade.L7.bridge_district_rank",
+        "greenshade.L7.ground_camp"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Woodhearth and Imperial Underground in Greenshade.",
+      "places": [
+        "woodhearth",
+        "imperial_underground"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "woodhearth",
+          "objective": "Speak with the Warden at Woodhearth and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "imperial_underground",
+          "objective": "Examine the disturbed boundary markers at Imperial Underground"
+        },
+        {
+          "id": 30,
+          "place": "woodhearth",
+          "objective": "Return the recovered seal-impression to the Chronicler at Woodhearth"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "woodhearth",
+          "text": "Speak with the Warden at Woodhearth and inspect the contested tallies",
+          "scene": "story_greenshade_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "imperial_underground",
+          "text": "Examine the disturbed boundary markers at Imperial Underground"
+        },
+        {
+          "type": "go",
+          "place": "woodhearth",
+          "text": "Return the recovered seal-impression to the Chronicler at Woodhearth"
+        }
+      ],
+      "consequence": "world_state:greenshade_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_greenshade_02_trail",
+      "order": 2,
+      "title": "Thread of the Woodhearth Spinner",
+      "region": "valenwood/greenshade",
+      "category": "main",
+      "giver": "story_greenshade_envoy_npc",
+      "start": "auto",
+      "prereq": "story_greenshade_01_opening",
+      "requires": [
+        "story_greenshade_01_opening"
+      ],
+      "why": [
+        "greenshade.L7.ground_camp",
+        "greenshade.L8.wilderking_court"
+      ],
+      "summary": "Follow the conspirators' supply route from Imperial Underground to Rootwater Grove and seize their cipher-ledger.",
+      "places": [
+        "imperial_underground",
+        "rootwater_grove"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "imperial_underground",
+          "objective": "Track the night-couriers departing Imperial Underground"
+        },
+        {
+          "id": 20,
+          "place": "rootwater_grove",
+          "objective": "Drive off the cabal outriders at Rootwater Grove and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "imperial_underground",
+          "objective": "Deliver the cipher-box to the expedition chronicler at Imperial Underground"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "imperial_underground",
+          "text": "Track the night-couriers departing Imperial Underground",
+          "scene": "story_greenshade_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "rootwater_grove",
+          "text": "Drive off the cabal outriders at Rootwater Grove and seize their cipher-box",
+          "boss": "story_greenshade_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "imperial_underground",
+          "text": "Deliver the cipher-box to the expedition chronicler at Imperial Underground"
+        }
+      ],
+      "consequence": "world_state:greenshade_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_greenshade_03_sanctum",
+      "order": 3,
+      "title": "The Bound Hollow",
+      "region": "valenwood/greenshade",
+      "category": "main",
+      "giver": "story_greenshade_scout_npc",
+      "start": "auto",
+      "prereq": "story_greenshade_02_trail",
+      "requires": [
+        "story_greenshade_02_trail"
+      ],
+      "why": [
+        "greenshade.L8.wilderking_court",
+        "greenshade.L8.spinners_of_greenshade"
+      ],
+      "summary": "Secure the outer wards between Rootwater Grove and Wreck of the Blue Wheel to lay bare the cabal's stronghold.",
+      "places": [
+        "rootwater_grove",
+        "wreck_of_the_blue_wheel"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "rootwater_grove",
+          "objective": "Meet the outrider scout at Rootwater Grove to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "wreck_of_the_blue_wheel",
+          "objective": "Scout the fortified threshold at Wreck of the Blue Wheel and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "woodhearth",
+          "objective": "Carry the ward-key back to the council table at Woodhearth"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "rootwater_grove",
+          "text": "Meet the outrider scout at Rootwater Grove to decode the sanctum approach",
+          "scene": "story_greenshade_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "wreck_of_the_blue_wheel",
+          "text": "Scout the fortified threshold at Wreck of the Blue Wheel and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "woodhearth",
+          "text": "Carry the ward-key back to the council table at Woodhearth"
+        }
+      ],
+      "consequence": "world_state:greenshade_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_greenshade_04_finale",
+      "order": 4,
+      "title": "Waking Song of Greenshade",
+      "region": "valenwood/greenshade",
+      "category": "main",
+      "giver": "story_greenshade_steward_npc",
+      "start": "auto",
+      "prereq": "story_greenshade_03_sanctum",
+      "requires": [
+        "story_greenshade_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "greenshade.L7.bridge_district_rank",
+        "greenshade.L8.spinners_of_greenshade"
+      ],
+      "summary": "Storm the cabal stronghold at Wreck of the Blue Wheel and witness Hearth-Speaker Indaenir seal the regional concord at Woodhearth.",
+      "places": [
+        "wreck_of_the_blue_wheel",
+        "woodhearth"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "wreck_of_the_blue_wheel",
+          "objective": "Storm the inner chamber at Wreck of the Blue Wheel and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "wreck_of_the_blue_wheel",
+          "objective": "Recover the stolen charter-seal of Greenshade from Wreck of the Blue Wheel"
+        },
+        {
+          "id": 30,
+          "place": "woodhearth",
+          "objective": "Present the charter-seal at Woodhearth to restore peace across Greenshade"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "wreck_of_the_blue_wheel",
+          "text": "Storm the inner chamber at Wreck of the Blue Wheel and defeat the cabal ringleader",
+          "boss": "story_greenshade_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "wreck_of_the_blue_wheel",
+          "text": "Recover the stolen charter-seal of Greenshade from Wreck of the Blue Wheel"
+        },
+        {
+          "type": "go",
+          "place": "woodhearth",
+          "text": "Present the charter-seal at Woodhearth to restore peace across Greenshade",
+          "scene": "story_greenshade_scene_04"
+        }
+      ],
+      "consequence": "world_state:greenshade_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Woodhearth"
+      }
+    }
+  ]
+}

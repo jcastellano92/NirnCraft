@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "group": "refined_moonstone",
+  "ingredient": [
+    "nirncraft:moonstone_ore",
+    "nirncraft:deepslate_moonstone_ore"
+  ],
+  "result": {
+    "id": "nirncraft:refined_moonstone"
+  },
+  "experience": 0.7,
+  "cookingtime": 100
+}

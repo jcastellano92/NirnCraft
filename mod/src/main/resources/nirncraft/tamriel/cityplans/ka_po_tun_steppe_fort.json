@@ -1,0 +1,281 @@
+{
+  "id": "ka_po_tun_steppe_fort",
+  "why": [
+    "ka_po_tun.L1.golden_steppe_mesa",
+    "ka_po_tun.L5.bronze_and_jade_tribute",
+    "ka_po_tun.L6.tiger_plains_shrine_town"
+  ],
+  "sil": "akavir-ka-po-tun-steppe-fort-plan",
+  "base": "none",
+  "overlay": "ka_po_tun",
+  "radius": 22,
+  "reach": 34,
+  "gates": [
+    [
+      0,
+      20
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        10
+      ],
+      "overlay": "ka_po_tun",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        10,
+        22
+      ],
+      "overlay": "ka_po_tun",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "ka_po_tun_steppe_fort_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "ka_po_tun_steppe_fort_landmark",
+      "overlay": "ka_po_tun"
+    }
+  ],
+  "nets": [
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        17
+      ],
+      "to": [
+        2,
+        -11
+      ],
+      "legs": 4,
+      "amp": 12,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "loop",
+      "at": [
+        2,
+        6
+      ],
+      "rx": 12,
+      "rz": 12,
+      "wobble": 3,
+      "lobes": 3,
+      "phase": 1.39,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -15,
+          0
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          15,
+          -6
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "cross"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "ka_po_tun",
+      "name": "ka_po_tun_steppe_fort_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "overlay": "ka_po_tun",
+      "name": "ka_po_tun_steppe_fort_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        8
+      ],
+      "face": "north",
+      "overlay": "ka_po_tun",
+      "name": "ka_po_tun_steppe_fort_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -11,
+        11
+      ],
+      "face": "north",
+      "overlay": "ka_po_tun",
+      "name": "ka_po_tun_steppe_fort_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "ka_po_tun",
+      "name": "ka_po_tun_steppe_fort_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "ka_po_tun",
+      "name": "ka_po_tun_steppe_fort_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -8
+      ],
+      "face": "south",
+      "overlay": "ka_po_tun",
+      "name": "ka_po_tun_steppe_fort_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "ka_po_tun",
+      "name": "ka_po_tun_steppe_fort_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "ka_po_tun_steppe_fort_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "ka_po_tun_steppe_fort_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "ka_po_tun_steppe_fort_b_5",
+    "smithy": "ka_po_tun_steppe_fort_b_7"
+  },
+  "titles": {
+    "ka_po_tun_steppe_fort_b_1": "place.nirncraft.ka_po_tun_steppe_fort Council & Seat Hall",
+    "ka_po_tun_steppe_fort_b_2": "place.nirncraft.ka_po_tun_steppe_fort High Sanctuary",
+    "ka_po_tun_steppe_fort_b_3": "place.nirncraft.ka_po_tun_steppe_fort Fighters & Wayfarers Hall",
+    "ka_po_tun_steppe_fort_b_4": "place.nirncraft.ka_po_tun_steppe_fort Mages & Chroniclers Spire",
+    "ka_po_tun_steppe_fort_b_5": "place.nirncraft.ka_po_tun_steppe_fort The Lantern & Hearth Inn",
+    "ka_po_tun_steppe_fort_b_6": "place.nirncraft.ka_po_tun_steppe_fort The Traveler's Rest Tavern",
+    "ka_po_tun_steppe_fort_b_7": "place.nirncraft.ka_po_tun_steppe_fort Master Forge & Armorer",
+    "ka_po_tun_steppe_fort_b_8": "place.nirncraft.ka_po_tun_steppe_fort Botanicals & Remedies",
+    "ka_po_tun_steppe_fort_landmark": "High Seat of place.nirncraft.ka_po_tun_steppe_fort",
+    "ka_po_tun_steppe_fort_plaza": "place.nirncraft.ka_po_tun_steppe_fort Central Plaza"
+  },
+  "innKey": "ka_po_tun_steppe_fort_b_5",
+  "zones": [
+    {
+      "at": [
+        2,
+        -8
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        2,
+        6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 18,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

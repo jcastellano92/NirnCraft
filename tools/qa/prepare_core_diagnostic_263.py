@@ -30,21 +30,21 @@ def prepare(archive: Path, prism_root: Path, java: Path | None, server: str = ''
     instances = prism_root / 'instances'
     instances.mkdir(exist_ok=True)
     destination = instances / DIAGNOSTIC_NAME
-    with tempfile.TemporaryDirectory(prefix='skycraft-263-core-staging-', dir=prism_root) as temporary:
+    with tempfile.TemporaryDirectory(prefix='nirncraft-263-core-staging-', dir=prism_root) as temporary:
         source = extract(archive, Path(temporary))
         validate_diagnostic_instance(source)
         configure(source, java, live=True, instance_name=DIAGNOSTIC_NAME,
                   world='' if server else 'qa_core_diagnostic_263', server=server)
         receipt = {'diagnosticOnly': True, 'fullPackAcceptance': False, 'instanceName': DIAGNOSTIC_NAME,
                    'archive': str(archive), 'archiveSha256': digest(archive),
-                   'coreSha256': digest(source / '.minecraft/mods/skycraft-core.jar'),
+                   'coreSha256': digest(source / '.minecraft/mods/nirncraft-core.jar'),
                    'java': str(java), 'preparedAt': time.time(), 'runtimeVerified': False,
                    'server': server or None, 'expectedTransport': 'tcp' if server else 'memory',
                    'activeFullPackChanged': False, 'launched': False}
         (source / '.minecraft/migration/diagnostic-preparation.json').write_text(json.dumps(receipt, indent=2) + '\n')
         backup = None
         if destination.exists():
-            backups = prism_root / 'skycraft-263-core-diagnostic-backups'
+            backups = prism_root / 'nirncraft-263-core-diagnostic-backups'
             backups.mkdir(exist_ok=True)
             backup = backups / str(time.time_ns())
             destination.rename(backup)

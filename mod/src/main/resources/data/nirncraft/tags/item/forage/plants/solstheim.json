@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:ashen_grass_pod",
+      "required": false
+    },
+    {
+      "id": "nirncraft:trama_root",
+      "required": false
+    },
+    {
+      "id": "nirncraft:thistle_branch",
+      "required": false
+    }
+  ]
+}

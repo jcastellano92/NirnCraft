@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "nirncraft:block/swamp_reeds_bottom"
+    },
+    "half=upper": {
+      "model": "nirncraft:block/swamp_reeds_top"
+    }
+  }
+}

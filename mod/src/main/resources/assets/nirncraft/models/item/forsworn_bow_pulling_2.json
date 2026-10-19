@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/forsworn_bow",
+  "textures": {
+    "layer0": "nirncraft:item/forsworn_bow_pulling_2"
+  }
+}

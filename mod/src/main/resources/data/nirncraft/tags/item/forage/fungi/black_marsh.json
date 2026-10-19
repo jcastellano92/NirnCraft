@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:swamp_fungal_pod",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hypha_facia",
+      "required": false
+    },
+    {
+      "id": "nirncraft:imp_stool",
+      "required": false
+    }
+  ]
+}

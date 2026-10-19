@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/deathbell"
+      },
+      {
+        "model": "nirncraft:block/deathbell",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/deathbell",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/deathbell",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/deathbell_harvested"
+      },
+      {
+        "model": "nirncraft:block/deathbell_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/deathbell_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/deathbell_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

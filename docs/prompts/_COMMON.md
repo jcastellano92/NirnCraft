@@ -5,8 +5,8 @@ files can stay short. If a phase file and this file disagree, the phase file win
 
 ## 1. Who you are and where you work
 
-* You are the **orchestrator** of one roadmap phase (or one step of a phase) of Skycraft, a Skyrim total conversion
-  for Minecraft 1.20.1 Forge. Your session runs in the main checkout `F:\Projects\Personal\Skycraft\Skycraft` on the
+* You are the **orchestrator** of one roadmap phase (or one step of a phase) of NirnCraft, a Skyrim total conversion
+  for Minecraft 1.20.1 Forge. Your session runs in the main checkout the repository root on the
   local branch `tamriel-overhaul`.
 * You do the work through **worktree agents** (Agent tool, `isolation: "worktree"`), at most **3 at once** (prefer
   1-2), each with one bounded task and an explicit write set from the phase file. Small docs-only or data-only steps
@@ -41,7 +41,7 @@ Once `tools/qa/verbatim_check.py` exists (R3c) it must report 0.
 
 * Everything builds the world. Every new content record (place, NPC, quest, scene kind, dungeon identity, book,
   creature table, palette or micro-biome rule, music cue, weather rule) carries `why: [sheet field ids]` that resolve
-  in `mod/src/main/resources/skycraft/tamriel/world/<province>.json` (once R3a has built it; before that, cite the
+  in `mod/src/main/resources/nirncraft/tamriel/world/<province>.json` (once R3a has built it; before that, cite the
   field ids of the province document's section 1, e.g. `reach.L5.silver_mining`).
 * Content reports quote the region's world truth paragraph and answer the four questions (why here, what do people do,
   what were the ruins, why are the dangers on this road) with sheet ids.
@@ -55,7 +55,7 @@ Once `tools/qa/verbatim_check.py` exists (R3c) it must report 0.
 * Compile after a chunk of work, not after every edit: from `<worktree>/mod`
   `./gradlew.bat compileJava --console=plain "-Dorg.gradle.jvmargs=-Xmx2G"`. Finish with `build` passing.
 * Iterate on the **dev server**, never a fresh boot per check: `tools\dev\devserver.ps1 run "cmd a|cmd b" -Wait`
-  (auto-starts; restarts itself when `mod\src\main` changed), `/skycraft-dev regen x1 z1 x2 z2` for a bounded area,
+  (auto-starts; restarts itself when `mod\src\main` changed), `/nirncraft-dev regen x1 z1 x2 z2` for a bounded area,
   `tools\qa\quick_corridor.ps1 <a>:<b>` (one road tile, ~15 s; `-Replan` after road planning changes). Once R2 lands:
   `devserver.ps1 hotswap` for method-body changes and `gradlew test` / `qa.ps1 -Unit` for plan-layer tests.
 * Only ONE dev server per machine; `devserver.ps1 stop` when you finish.

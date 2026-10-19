@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/great_lift",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274032,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "great_lift",
+      "mzark"
+    ]
+  }
+}

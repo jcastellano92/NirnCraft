@@ -1,0 +1,56 @@
+{
+  "type": "nirncraft:add_table",
+  "table": "nirncraft:forage/nests",
+  "prefix": "blocks/",
+  "chance": 0.012,
+  "condition": {
+    "terms": [
+      {
+        "terms": [
+          {
+            "loot_table_id": "minecraft:blocks/spruce_leaves",
+            "type": "neoforge:loot_table_id"
+          },
+          {
+            "loot_table_id": "minecraft:blocks/oak_leaves",
+            "type": "neoforge:loot_table_id"
+          },
+          {
+            "loot_table_id": "minecraft:blocks/birch_leaves",
+            "type": "neoforge:loot_table_id"
+          },
+          {
+            "loot_table_id": "minecraft:blocks/dark_oak_leaves",
+            "type": "neoforge:loot_table_id"
+          },
+          {
+            "loot_table_id": "nirncraft:blocks/snowy_spruce_leaves",
+            "type": "neoforge:loot_table_id"
+          },
+          {
+            "loot_table_id": "nirncraft:blocks/golden_aspen_leaves",
+            "type": "neoforge:loot_table_id"
+          },
+          {
+            "loot_table_id": "nirncraft:blocks/orange_aspen_leaves",
+            "type": "neoforge:loot_table_id"
+          }
+        ],
+        "type": "minecraft:any_of"
+      },
+      {
+        "term": {
+          "predicate": {
+            "items": [
+              "minecraft:shears"
+            ]
+          },
+          "type": "minecraft:match_tool"
+        },
+        "type": "minecraft:inverted"
+      }
+    ],
+    "type": "minecraft:all_of"
+  },
+  "priority": 7
+}

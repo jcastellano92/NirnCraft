@@ -1,0 +1,29 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "dark_oak",
+        "weight": 4
+      },
+      {
+        "species": "dead_oak",
+        "weight": 3
+      },
+      {
+        "species": "marsh_snag",
+        "weight": 2
+      },
+      {
+        "species": "oak",
+        "weight": 2
+      },
+      {
+        "species": "skyrim_spruce",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

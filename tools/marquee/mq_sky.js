@@ -18,7 +18,7 @@ f.q({
   objectives: [
     o.go('bonechill_passage', 'Search the scavengers\' camp in Bonechill Passage'),
     o.clear('bonechill_passage', 'Drive off the bandits who have been burning Helgen\'s papers',
-      [mob('skycraft:bandit', 3, 'Paper-Burner')], { placement: 'structure' }),
+      [mob('nirncraft:bandit', 3, 'Paper-Burner')], { placement: 'structure' }),
     o.retrieve('bonechill_passage', 'Take the half-burnt toll-ledger', '@helgen_ledger', { placement: 'structure' }),
     o.talk('@helgen_widow', 'Show Sigrun the last page of the ledger',
       'Your husband\'s caravan is on the last page. It is not burnt. It lists a toll paid in full, and a name signed on the line below.',
@@ -41,7 +41,7 @@ f.q({
   objectives: [
     o.go('northwind_mine', 'Descend to the rock-fall at the bottom of Northwind Mine'),
     o.clear('northwind_mine', 'Clear the creatures that nest where the vein lies',
-      [mob('skycraft:frostbite_spider', 3, 'Vein-Spider'), mob('skycraft:skeever', 2, 'Tunnel-Skeever')], { placement: 'structure' }),
+      [mob('nirncraft:frostbite_spider', 3, 'Vein-Spider'), mob('nirncraft:skeever', 2, 'Tunnel-Skeever')], { placement: 'structure' }),
     o.retrieveItem('northwind_mine', 'Chip a sample from the black vein', 'minecraft:coal', 3),
     o.talk('@shors_prospector', 'Show Hakon what the vein is',
       'It is just coal, Hakon. Very old, very hard, very black coal. It nearly took your hand because the fall was unstable.',
@@ -84,7 +84,7 @@ f.q({
   objectives: [
     o.go('pinemoon_cave', 'Enter Pinemoon Cave and follow the sound downward'),
     o.clear('pinemoon_cave', 'Clear the cave of what has been singing',
-      [mob('skycraft:frostbite_spider', 2, 'Hum-Spinner'), mob('skycraft:wisp', 2, 'Singing Wisp')], { placement: 'structure' }),
+      [mob('nirncraft:frostbite_spider', 2, 'Hum-Spinner'), mob('nirncraft:wisp', 2, 'Singing Wisp')], { placement: 'structure' }),
     o.talk('@db_toll', 'Tell Aldis the bridge is quiet',
       'The singers were wisps in the cave, resonating with the stone. They are gone. The bridge should be quiet.',
       'Aldis stands very still with his ear to the stone. After a long moment, he straightens. "Quiet. Gods. I had grown used to it. A bridge ought to be quiet. It is the only thing it is good for. But, stranger, tonight I will miss it, a little. Hilde\'s will give you a bed, and I will pay for it."'),
@@ -100,7 +100,7 @@ f.q({
   objectives: [
     o.cond('night', 'Keep watch at the lantern until it is touched again', 'dragon_bridge'),
     o.kill('dragon_bridge', 'Stop the thing that snuffs the lamp',
-      [mob('skycraft:wisp', 1, 'Dark-Hand Wisp', { target: true }), mob('minecraft:skeleton', 1, 'Lamp-Smothered Man')]),
+      [mob('nirncraft:wisp', 1, 'Dark-Hand Wisp', { target: true }), mob('minecraft:skeleton', 1, 'Lamp-Smothered Man')]),
     o.talk('@db_lamp', 'Tell Hilde what put out the lamp',
       'It was a wisp, drawn by the flame, that smothered it and carried your guest into the dark. I put it down, and he is at rest.',
       'Hilde lowers her head, and for a time says nothing at all. "At rest. Well. It is something. He paid for three nights and stayed for one. Stranger, the lamp will burn again tonight. And I shall leave a second one lit, by the door, for him."'),
@@ -120,7 +120,7 @@ f.q({
   objectives: [
     o.go('gloombound_mine', 'Watch the pay-cart\'s road near Gloombound Mine'),
     o.kill('gloombound_mine', 'Stop the ambusher who skims the pay-cart',
-      [mob('skycraft:bandit_chief', 1, 'Skim-Hand Brynolf'), mob('skycraft:bandit', 2, 'Road-Cutter')]),
+      [mob('nirncraft:bandit_chief', 1, 'Skim-Hand Brynolf'), mob('nirncraft:bandit', 2, 'Road-Cutter')]),
     o.talk('@kyn_miner', 'Tell Dorlag who was skimming the wages',
       'Brynolf, a former carter. He kept a tenth of every purse and said it was a toll. The tenth is here.',
       'Dorlag takes the purse and counts it, slowly, three times. "A tenth. A tenth of every wage. For months. My men have been feeding their families on nine-tenths of what they earned. Stranger, I will make it right, one tenth at a time. I will tell them it was you who found it. They will want to buy you a drink, and then another."'),
@@ -141,7 +141,7 @@ f.q({
     o.go('karthwasten', 'Question the miners at the ore-carts'),
     o.go('dragontooth_crater', 'Follow the scout\'s trail to Dragontooth Crater'),
     o.kill('dragontooth_crater', 'Stop the Forsworn handler who passes messages',
-      [mob('skycraft:forsworn', 2, 'Crater-Watcher'), mob('skycraft:hagraven', 1, 'Ore-Crone', { target: true })]),
+      [mob('nirncraft:forsworn', 2, 'Crater-Watcher'), mob('nirncraft:hagraven', 1, 'Ore-Crone', { target: true })]),
     o.talk('@karth_mine', 'Tell Ulfhild what you found',
       'It was a hagraven who hid messages in ore and used the scout to carry them. She has no hand in your mine. No one inside it did.',
       'Ulfhild\'s shoulders drop. "No one inside. No one of mine. Thank the Divines. Stranger, the Markarth guards will hear it from my own mouth before the evening. And Ulfhild will keep a pick handy for the next hagraven."'),
@@ -177,7 +177,7 @@ f.q({
   objectives: [
     o.go('shroud_hearth_barrow', 'Enter Shroud Hearth Barrow at night'),
     o.clear('shroud_hearth_barrow', 'Silence the sleeper and its guards',
-      [mob('skycraft:draugr', 3, 'Barrow-Dozer'), mob('skycraft:draugr_deathlord', 1, 'The Snorer')], { placement: 'structure' }),
+      [mob('nirncraft:draugr', 3, 'Barrow-Dozer'), mob('nirncraft:draugr_deathlord', 1, 'The Snorer')], { placement: 'structure' }),
     o.talk('@iva_lodge', 'Tell Wulfgar the barrow is quiet',
       'There was a draugr on a bed of stone, snoring. It had been dreaming of a great feast. It is quiet now.',
       'Wulfgar sits down heavily. "A feast. Nine hundred years of dreaming about dinner. The poor soul. Stranger, I will make you a plate. The best the Vilemyr has. And I will leave a plate at the barrow gate, on the first night of every month, in his honour."'),
@@ -197,7 +197,7 @@ f.q({
   objectives: [
     o.go('autumnshade_clearing', 'Search Autumnshade Clearing for the source of the swords'),
     o.clear('autumnshade_clearing', 'Drive off the spriggans that have been feeding trees iron',
-      [mob('skycraft:spriggan', 2, 'Iron-Fed Spriggan'), mob('skycraft:wolf', 2, 'Grove-Wolf')]),
+      [mob('nirncraft:spriggan', 2, 'Iron-Fed Spriggan'), mob('nirncraft:wolf', 2, 'Grove-Wolf')]),
     o.talk('@heartwood_foreman', 'Tell Hrolf why the trees hold swords',
       'The spriggans were taking iron from a long-lost battle and pressing it into the trunks, to keep it from the world. They are done now.',
       'Hrolf rubs his jaw. "To keep it from the world. That is a generous thing, for a tree. Well, the saws will thank you. Take a plank, friend. It is Autumnshade oak, with a sword in it. It will make a handsome door."'),
@@ -235,7 +235,7 @@ f.q({
   objectives: [
     o.cond('night', 'Wait at the farmhouse door for the scarecrow', 'battle_born_farm'),
     o.kill('battle_born_farm', 'Break the scarecrow and what inhabits it',
-      [mob('skycraft:wisp', 1, 'Straw-Haunting Wisp', { target: true })]),
+      [mob('nirncraft:wisp', 1, 'Straw-Haunting Wisp', { target: true })]),
     o.talk('@bb_farmer', 'Tell Erlend what was in the scarecrow',
       'A wisp, bored, that had taken up residence in the straw. It is gone. The scarecrow is just straw again.',
       'Erlend takes the straw in both hands, shakes it out, and looks vaguely embarrassed. "A wisp. Bored. Well. I may have talked to it a good deal, the past month. It seemed lonely. Stranger, I shall make a new one, and put a hat on it, and a name. The wisp can have it, if it comes back."'),
@@ -254,7 +254,7 @@ f.q({
   objectives: [
     o.go('nightingale_hall', 'Follow the hoof-tracks toward Nightingale Hall'),
     o.clear('nightingale_hall', 'Search the hall\'s stable-yard for the horse-thieves',
-      [mob('skycraft:bandit', 3, 'Night-Rider')]),
+      [mob('nirncraft:bandit', 3, 'Night-Rider')]),
     o.talk('@ss_farmer', 'Tell Aldis who rode his horses',
       'A band of riders used them to move something across the Rift at night. They paid in coin from a hoard they found. They have gone.',
       'Aldis turns one of the coins over, slowly. "A hoard. Old as dust. Well, stranger, I shall keep the coins. A horse is a horse, and a coin is a coin, and a thousand-year-old king is a very handsome thing to hang above the stable door."'),
@@ -290,7 +290,7 @@ f.q({
   objectives: [
     o.go('brandy_mug_farm', 'Search the cellar of the Brandy-Mug farm'),
     o.kill('brandy_mug_farm', 'Destroy the thing that hastens time in the cellar',
-      [mob('skycraft:wisp', 1, 'Cellar-Aging Wisp', { target: true }), mob('skycraft:skeever', 2, 'Cellar Skeever')]),
+      [mob('nirncraft:wisp', 1, 'Cellar-Aging Wisp', { target: true }), mob('nirncraft:skeever', 2, 'Cellar Skeever')]),
     o.talk('@bm_brewer', 'Tell Hjorth the cellar is safe',
       'A wisp had been feeding on the barrels, and aged them as it ate. It is gone. The brandy is only brandy again.',
       'Hjorth uncorks the nearest barrel, sniffs and, with deep reluctance, sighs. "Just brandy. Ordinary brandy. Not even a year old. Stranger, I have never regretted a thing so quickly. The wisp\'s brandy was divine. But Hjorth will pour you a glass of the other, and it will be young, and honest."'),
@@ -309,7 +309,7 @@ f.q({
   objectives: [
     o.cond('night', 'Watch the beds from dusk until the wilting starts', 'sarethi_farm'),
     o.kill('sarethi_farm', 'Destroy the thing that drinks the garden at dusk',
-      [mob('skycraft:spriggan', 1, 'Dusk-Drinker', { target: true })]),
+      [mob('nirncraft:spriggan', 1, 'Dusk-Drinker', { target: true })]),
     o.talk('@sa_farmer', 'Tell Rannveig why her herbs wilted',
       'A young spriggan had taken root at the edge of the garden, and drank from the beds each dusk to grow. It is dead now.',
       'Rannveig sinks to a stool. "A young one. Drinking my herbs to grow. Well. It is not the worst thing a child might do. Stranger, I shall plant a tree at that spot, for it, and say a word. And a bed of nightshade, in case it comes back."'),
@@ -328,7 +328,7 @@ f.q({
   objectives: [
     o.go('lost_prospect_mine', 'Search the road to Lost Prospect Mine where the carts go'),
     o.kill('lost_prospect_mine', 'Catch the skimmer who has been tapping the barrels',
-      [mob('skycraft:bandit', 2, 'Cart-Tapper'), mob('skycraft:bandit_chief', 1, 'Tap-Master Orrin')]),
+      [mob('nirncraft:bandit', 2, 'Cart-Tapper'), mob('nirncraft:bandit_chief', 1, 'Tap-Master Orrin')]),
     o.talk('@bb_lodge_steward', 'Tell Ravenna who was tapping the casks',
       'A small ring, Orrin and two hands, selling the skimmed mead in the mine. No family. Just men with a long thirst.',
       'Ravenna lets out a slow breath. "Not family. Good. Not family. The lodge may be a sinner, friend, but it does not eat its own. Orrin will be dealt with, quietly, in a way that leaves no ripples. Take this. It is silver. It is the only silver the lodge has ever paid for the truth, and it is the only truth it has ever wanted."'),
@@ -384,7 +384,7 @@ f.q({
   objectives: [
     o.go('tower_of_mzark', 'Descend into the Tower of Mzark from the field'),
     o.clear('tower_of_mzark', 'Silence the ticking machine and its guardians',
-      [mob('skycraft:dwarven_spider', 3, 'Field-Spider'), mob('skycraft:dwarven_sphere', 1, 'Tick-Sphere')], { placement: 'structure' }),
+      [mob('nirncraft:dwarven_spider', 3, 'Field-Spider'), mob('nirncraft:dwarven_sphere', 1, 'Tick-Sphere')], { placement: 'structure' }),
     o.talk('@hj_farmer', 'Tell Ketil the ticking is stopped',
       'A Dwemer clock, still running. The sphere guarded its key. It is stopped. Your field is safe.',
       'Ketil listens for a long time. "Silence. Honest silence. Stranger, I did not know how loud it was until it stopped. I may sleep for a week. Take this spur. It was the first thing the plough turned up. It is a very old, very good spur, and it should go with someone who rides."'),
@@ -403,7 +403,7 @@ f.q({
   objectives: [
     o.go('wreck_of_the_icerunner', 'Row out to the Wreck of the Icerunner at dusk'),
     o.clear('wreck_of_the_icerunner', 'Quiet the drowned crew of the Icerunner',
-      [mob('minecraft:drowned', 3, 'Icerunner Crewman'), mob('skycraft:draugr', 1, 'Singing Mate')], { placement: 'structure' }),
+      [mob('minecraft:drowned', 3, 'Icerunner Crewman'), mob('nirncraft:draugr', 1, 'Singing Mate')], { placement: 'structure' }),
     o.talk('@wi_farmer', 'Tell Torvald whose voice was singing',
       'It was the ship\'s cook, drowned with the crew. She was singing a lullaby, the one you used to hum, when you were a child.',
       'Torvald is quiet for a very long moment. "My mother. She sang it. She was a cook, on a ship, before I was born. Stranger, I never knew her ship. I never knew where she was lost. I have been trying to place that song for forty years. And you say she is quiet now?"'),
@@ -423,7 +423,7 @@ f.q({
   objectives: [
     o.go('soljunds_sinkhole', 'Descend into the deepest part of Soljund\'s Sinkhole'),
     o.kill('soljunds_sinkhole', 'Slay the thing that digs in the dark',
-      [mob('skycraft:giant_scorpion', 1, 'The Patient Digger', { target: true }), mob('skycraft:skeever', 2, 'Hole-Skeever')], { placement: 'structure' }),
+      [mob('nirncraft:giant_scorpion', 1, 'The Patient Digger', { target: true }), mob('nirncraft:skeever', 2, 'Hole-Skeever')], { placement: 'structure' }),
     o.talk('@sj_digger', 'Tell Orm the hole will grow no more',
       'A giant, blind scorpion had been digging for years. It is dead now. The sinkhole is as deep as it is going to be.',
       'Orm stands at the edge and looks down for a long time. "As deep as it is going to be. Stranger, I had grown fond of the worry. A man needs a thing to worry about. I will find another. But thank you. The village will not fall in."'),
@@ -459,7 +459,7 @@ f.q({
   objectives: [
     o.go('old_hroldan', 'Search the cellar of the Old Hroldan inn'),
     o.clear('old_hroldan', 'Clear the cellar of the draugr-bound pillar',
-      [mob('skycraft:draugr', 2, 'Pillar-Warden'), mob('skycraft:skeever', 2, 'Cellar Skeever')]),
+      [mob('nirncraft:draugr', 2, 'Pillar-Warden'), mob('nirncraft:skeever', 2, 'Cellar Skeever')]),
     o.talk('@oh_shepherd', 'Tell Guthlaf what holds the inn up',
       'A stone pillar, set by an old Nord king, and a draugr guarding it. It has been holding the inn up for a thousand years. I left the pillar. I put the draugr to rest.',
       'Guthlaf nods, slowly, with great gravity. "A pillar. A guard. A thousand years. And it has held, quietly, without thanks. Stranger, I shall paint a name on that pillar, and burn a candle at its foot. Old Hroldan has stood because someone, once, did not let it fall."'),
@@ -478,7 +478,7 @@ f.q({
   objectives: [
     o.go('uttering_hills_cave', 'Follow the mill-race upstream to Uttering Hills Cave'),
     o.clear('uttering_hills_cave', 'Drive off whatever is turning the water',
-      [mob('skycraft:slaughterfish', 3, 'Eddy-Fish'), mob('skycraft:wisp', 1, 'Whirlpool Wisp')], { placement: 'structure' }),
+      [mob('nirncraft:slaughterfish', 3, 'Eddy-Fish'), mob('nirncraft:wisp', 1, 'Whirlpool Wisp')], { placement: 'structure' }),
     o.talk('@am_miller', 'Tell Gudrun the wheel will turn true',
       'A wisp had set up a whirlpool in the spring, and fish were swimming in circles. It is gone. The mill-race runs straight.',
       'Gudrun watches the great wheel slow, turn once, and then, with a groan of wood, begin to move the right way. "True. Honest. As it should be. Stranger, the first flour out of this mill is yours. I will bake the bread myself. It will not be good bread, but it will be correct."'),
@@ -497,13 +497,13 @@ f.q({
   objectives: [
     o.go('gloombound_mine', 'Follow the forge\'s fire-vein to Gloombound Mine'),
     o.clear('gloombound_mine', 'Clear the miners-turned-thieves who have blocked the fire-vein',
-      [mob('skycraft:bandit', 3, 'Vein-Blocker'), mob('skycraft:flame_atronach', 1, 'Starved Fire-Spirit')], { placement: 'structure' }),
+      [mob('nirncraft:bandit', 3, 'Vein-Blocker'), mob('nirncraft:flame_atronach', 1, 'Starved Fire-Spirit')], { placement: 'structure' }),
     o.talk('@nz_orc', 'Tell Grazbar the forge-fire can be relit',
       'Bandits had blocked the vein with a boulder to steal the coal. I cleared it. The fire-spirit is free. The forge should take.',
       'Grazbar lights the forge with a taper and, with a roar, it takes. She laughs, huge and rough. "Light! Honest light! Stranger, the stronghold owes you a feast and a blade. Take an axe off the rack. It is my best work, and I have never been prouder to give it away."'),
   ],
   outro: 'The forge of Narzulbur roars once more. A stranger carries an axe from the rack, and the smith-wife swears she will make a better one by spring.',
-  rewards: { gold: 360, loot: 'standard', items: [{ item: 'skycraft:orcish_sword', name: 'Grazbar\'s Gift', enchant: { sharpness: 2, fire_aspect: 1 } }] },
+  rewards: { gold: 360, loot: 'standard', items: [{ item: 'nirncraft:orcish_sword', name: 'Grazbar\'s Gift', enchant: { sharpness: 2, fire_aspect: 1 } }] },
 });
 
 const n = f.write('marquee_skyrim.json');

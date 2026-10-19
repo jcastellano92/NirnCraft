@@ -1,0 +1,286 @@
+{
+  "id": "jylkurfyk",
+  "why": [
+    "frozen_forest.L1.fjord_valleys",
+    "frozen_forest.L4.petrified_rime_woods",
+    "frozen_forest.L6.jylkurfyk_port_ruins"
+  ],
+  "sil": "atmora-jylkurfyk-plan",
+  "base": "none",
+  "overlay": "frozen_forest",
+  "radius": 22,
+  "reach": 34,
+  "gates": [
+    [
+      0,
+      20
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        10
+      ],
+      "overlay": "frozen_forest",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        10,
+        22
+      ],
+      "overlay": "frozen_forest",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "jylkurfyk_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "arch",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "jylkurfyk_landmark",
+      "overlay": "frozen_forest"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          17
+        ],
+        [
+          -2,
+          0
+        ],
+        [
+          2,
+          -11
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -15,
+          0
+        ],
+        [
+          -2,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -2,
+        0
+      ],
+      "rx": 13,
+      "rz": 11,
+      "wobble": 5,
+      "lobes": 4,
+      "phase": 0.29,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "jylkurfyk_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "overlay": "frozen_forest",
+      "name": "jylkurfyk_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        8
+      ],
+      "face": "north",
+      "overlay": "frozen_forest",
+      "name": "jylkurfyk_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -11,
+        11
+      ],
+      "face": "north",
+      "overlay": "frozen_forest",
+      "name": "jylkurfyk_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "jylkurfyk_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "jylkurfyk_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -8
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "jylkurfyk_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "jylkurfyk_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "jylkurfyk_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "jylkurfyk_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "jylkurfyk_b_5",
+    "smithy": "jylkurfyk_b_7"
+  },
+  "titles": {
+    "jylkurfyk_b_1": "place.nirncraft.jylkurfyk Council & Seat Hall",
+    "jylkurfyk_b_2": "place.nirncraft.jylkurfyk High Sanctuary",
+    "jylkurfyk_b_3": "place.nirncraft.jylkurfyk Fighters & Wayfarers Hall",
+    "jylkurfyk_b_4": "place.nirncraft.jylkurfyk Mages & Chroniclers Spire",
+    "jylkurfyk_b_5": "place.nirncraft.jylkurfyk The Lantern & Hearth Inn",
+    "jylkurfyk_b_6": "place.nirncraft.jylkurfyk The Traveler's Rest Tavern",
+    "jylkurfyk_b_7": "place.nirncraft.jylkurfyk Master Forge & Armorer",
+    "jylkurfyk_b_8": "place.nirncraft.jylkurfyk Botanicals & Remedies",
+    "jylkurfyk_landmark": "High Seat of place.nirncraft.jylkurfyk",
+    "jylkurfyk_plaza": "place.nirncraft.jylkurfyk Central Plaza"
+  },
+  "innKey": "jylkurfyk_b_5",
+  "zones": [
+    {
+      "at": [
+        -2,
+        -8
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -2,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 18,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

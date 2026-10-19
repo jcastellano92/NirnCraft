@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/scaly_pholiota"
+      },
+      {
+        "model": "nirncraft:block/scaly_pholiota",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/scaly_pholiota",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/scaly_pholiota",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/scaly_pholiota_harvested"
+      },
+      {
+        "model": "nirncraft:block/scaly_pholiota_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/scaly_pholiota_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/scaly_pholiota_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

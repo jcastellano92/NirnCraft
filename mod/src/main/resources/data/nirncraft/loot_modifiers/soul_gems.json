@@ -1,0 +1,7 @@
+{
+  "type": "nirncraft:add_table",
+  "table": "nirncraft:chests/soul_gems",
+  "prefix": "chests/",
+  "chance": 0.35,
+  "priority": 19
+}

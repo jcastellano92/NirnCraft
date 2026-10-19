@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:wheat",
+    "minecraft:carrots",
+    "minecraft:potatoes",
+    "minecraft:beetroots",
+    "minecraft:nether_wart",
+    "minecraft:cocoa",
+    "minecraft:pitcher_crop",
+    "minecraft:sweet_berry_bush",
+    "minecraft:cave_vines",
+    "minecraft:cave_vines_plant",
+    "nirncraft:cabbage_crop",
+    "nirncraft:leek_crop",
+    "nirncraft:tomato_crop",
+    "nirncraft:garlic_crop"
+  ]
+}

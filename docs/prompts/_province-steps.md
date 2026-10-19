@@ -5,7 +5,7 @@ say "run step Vn as defined in `_province-steps.md`". This file defines each ste
 verify while working, and the gates. Read `_COMMON.md` first.
 
 Placeholders: `<P>` = province id (`cyrodiil`), `<doc>` = `docs/world/provinces/<P>.md`, `<regions>` = the province's
-region ids. Resource paths are under `mod/src/main/resources/skycraft/` unless they start with `tools/` or `docs/`.
+region ids. Resource paths are under `mod/src/main/resources/nirncraft/` unless they start with `tools/` or `docs/`.
 
 **Global serial rule.** V2, V3 and V5 of any province (and R3b, R13) never run at the same time as each other: they
 share `tools/worldgen/tamriel_vectors.json`, the rasters, `biomes.py`/`palettes.json` and the bake. Check WORLD-PLAN
@@ -44,7 +44,7 @@ V2's vectors are accepted. V6-V8 need R3a-R3e merged.
   regenerated `tamriel/*.png` and `hydrology.json`, moved anchors in `places/*.json` and `places/provinces.json`,
   `docs/TAMRIEL.md` section 9.
 * **Verify.** `py -3 -I tools/worldgen/tamriel_map.py` (previews), `py -3 -I tools/worldgen/hydrology_report.py`,
-  `qa.ps1 -Layout`, `/skycraft-dev regen` of 2-3 sample areas, `region_render.py` contact sheet to Haiku.
+  `qa.ps1 -Layout`, `/nirncraft-dev regen` of 2-3 sample areas, `region_render.py` contact sheet to Haiku.
 * **Gates.** `layout_lint.py` passes; relief per region p50, p90 and ruggedness within 10% of target (or above);
   `hydrology_report.py`: every lake has an outlet, named rivers reach the sea; every region >= 1 XL landform
   (F-WEENIE >= 70% once `flow_audit.py` exists); no file under `mod/` or `tools/` holds raster data from a game (size
@@ -57,7 +57,7 @@ V2's vectors are accepted. V6-V8 need R3a-R3e merged.
   region covering ocean, beach and river, new biomes through `tools/worldgen/biomes.py` (generated, never hand-edited),
   the MS21 `micro` rules per region with their sheet cites, the L2 weather table, a region music cue, level bands.
 * **Owns.** `tamriel/regions.json` (via `tamriel_map.py`), the `<P>` entries of `palettes.json` and `biomes.py`,
-  generated `data/skycraft/worldgen/**`, `lang/skycraft/tamriel_regions.json` (own keys), `atmosphere` weather data for
+  generated `data/nirncraft/worldgen/**`, `lang/nirncraft/tamriel_regions.json` (own keys), `atmosphere` weather data for
   `<regions>`.
 * **Verify.** `py -3 -I tools/worldgen/biomes.py`, `py -3 -I tools/worldgen/noise_settings.py`,
   `py -3 -I tools/qa/region_audit.py --province <P>`, `/skybiome census` on the dev server per region.
@@ -72,7 +72,7 @@ V2's vectors are accepted. V6-V8 need R3a-R3e merged.
   densities (`max(abs, median x km²)`), unmarked sites (`hidden: true`, 0.57/km²), MS7 `class` on every dungeon,
   `why` on every new or changed place; legacy places reconciled (renamed, upgraded, moved or removed, never silently
   dropped); marquee and lore-web places kept.
-* **Owns.** `tamriel/places/<P>*.json`, `places/index.json` (append), `lang/skycraft/places*.json` (own keys), any
+* **Owns.** `tamriel/places/<P>*.json`, `places/index.json` (append), `lang/nirncraft/places*.json` (own keys), any
   curation tool `tools/worldgen/<P>_places.py` (new).
 * **Verify.** `qa.ps1 -Layout`, `node tools/marquee/validate.js`, `node tools/marquee/loreweb_check.js`,
   `py -3 -I tools/qa/parity.py --province <P>`, `flow_audit.py --province <P>`.
@@ -129,7 +129,7 @@ V2's vectors are accepted. V6-V8 need R3a-R3e merged.
   `lore/places/gen_<P>.json`, `region_spawns/<P>.json`, `explore/uniques_<P>.json`, `landmarks/kinds.json` (`<P>`
   entries), Java room kits only when the phase file says so (one agent owns `dungeons/world/*Rooms.java` at a time).
 * **Verify.** `py -3 -I tools/qa/dungeon_identity_lint.py --province <P>`, `dungeon_stats.py`, `dungeon_audit.py`,
-  `/skycraft-dungeon-qa place <id>` (analyzer), `render_dungeon.py` cutaways to Haiku.
+  `/nirncraft-dungeon-qa place <id>` (analyzer), `render_dungeon.py` cutaways to Haiku.
 * **Gates.** `d_identity` = 1.0; F-LOOP >= 90% of major, 100% of marquee; analyzer 0 blockers on one dungeon per
   variant used; >= 1 marquee dungeon plan per region validates; >= 10 inhabitant themes per region (abs. 8) with one
   signature; `d_caverns` >= 5, `d_rosters` >= 8; F-WEENIE >= 70%; parity DUN, CRE, LND >= 80 for every region.
@@ -145,10 +145,10 @@ V2's vectors are accepted. V6-V8 need R3a-R3e merged.
   per region, readables and collectibles at the 4.3 densities, the province festival. PARITY PA3 (notes), PA10, PA21,
   PA22 for this province fold in here.
 * **Owns.** `quests/<P>_*.json`, `quests/story/<region>.json`, `quests/index.json` (append),
-  `lore/places/regions_<P>.json`, `lore/books/<region>.json`, `lang/skycraft/society_<P>.json`, the `<P>` entries of
+  `lore/places/regions_<P>.json`, `lore/books/<region>.json`, `lang/nirncraft/society_<P>.json`, the `<P>` entries of
   `creatures/scenes.json`, `calendar/festivals.json` and `society/region_voice.json`, `tags/items/gear/<P>.json`.
 * **Verify.** `node tools/quest_lang.js`, `py -3 -I tools/qa/story_lint.py --province <P>`,
-  `/skycraft-quest selftest flow` on the dev server, `novelty_lint.py --strict`, `verbatim_check.py`.
+  `/nirncraft-quest selftest flow` on the dev server, `novelty_lint.py --strict`, `verbatim_check.py`.
 * **Gates.** Quests per region at the 4.8 floors (all kinds 14.0/km², abs. 2.6/km² and >= 8); F-STORY (>= 1 chain of 3+
   per region); F-HOOK <= 800 road blocks; F-STARTS >= 4; F-QUEST-RADIUS median 150-900 and >= 70% in-region;
   `q_placed` >= 0.9; >= 1 consequence per side chain; F-ENC >= 8 (>= 3 specific); F-WONDER >= 3; F-REACT >= 12;

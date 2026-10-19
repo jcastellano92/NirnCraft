@@ -1,5 +1,5 @@
 import struct, zlib, sys, os
-BAKED = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'mod', 'src', 'main', 'resources', 'skycraft', 'baked', 'streetplan.bin')
+BAKED = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'mod', 'src', 'main', 'resources', 'nirncraft', 'baked', 'streetplan.bin')
 class R:
     def __init__(s, b): s.b=b; s.p=0
     def i(s): v=struct.unpack_from('>i',s.b,s.p)[0]; s.p+=4; return v

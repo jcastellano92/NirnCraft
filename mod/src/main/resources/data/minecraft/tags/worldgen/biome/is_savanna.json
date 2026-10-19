@@ -1,12 +1,12 @@
 {
   "replace": false,
   "values": [
-    "skycraft:deshaan_plains",
-    "skycraft:elsweyr_savanna",
-    "skycraft:grazelands",
-    "skycraft:iliac_scrub",
-    "skycraft:ka_po_tun_steppe",
-    "skycraft:sugar_fields",
-    "skycraft:warm_steppe"
+    "nirncraft:deshaan_plains",
+    "nirncraft:elsweyr_savanna",
+    "nirncraft:grazelands",
+    "nirncraft:iliac_scrub",
+    "nirncraft:ka_po_tun_steppe",
+    "nirncraft:sugar_fields",
+    "nirncraft:warm_steppe"
   ]
 }

@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:valenwood_tigerfish",
+      "required": false
+    },
+    {
+      "id": "nirncraft:greenshade_glimmerfish",
+      "required": false
+    },
+    {
+      "id": "nirncraft:woodhearth_mackerel",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gold_coast_snapper",
+      "required": false
+    }
+  ]
+}

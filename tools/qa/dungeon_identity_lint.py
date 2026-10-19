@@ -1,6 +1,6 @@
 """Dungeon identity lint: does each named Skyrim dungeon feel authored, or generic? (offline, from the exports)
 
-  1. tools\\qa\\qa.ps1 -Server -ServerCmds "skycraft-dungeon-qa export <ids, at most 12 per command>|..."
+  1. tools\\qa\\qa.ps1 -Server -ServerCmds "nirncraft-dungeon-qa export <ids, at most 12 per command>|..."
      (the export paints each dungeon in memory; one command is one tick, so more than ~12 ids trip the 60 s watchdog)
   2. py -3 -I tools/qa/dungeon_identity_lint.py [--exports mod/run/qa-exports] [--top 25] [--json out.json] [--static]
 
@@ -33,7 +33,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-SK = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft")
+SK = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft")
 OUT = os.path.join(HERE, "out")
 
 FLAGS = ["no_sign", "no_lectern", "no_lore_note", "no_boss", "unnamed_boss", "roster", "no_motif", "generic_loot", "no_trail",
@@ -152,10 +152,10 @@ def lore():
 
 def names():
     out = {}
-    for f in glob.glob(os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft", "*.json")):
+    for f in glob.glob(os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft", "*.json")):
         for k, v in (jload(f, {}) or {}).items():
-            if k.startswith("place.skycraft."):
-                out[k[len("place.skycraft."):]] = v
+            if k.startswith("place.nirncraft."):
+                out[k[len("place.nirncraft."):]] = v
     return out
 
 

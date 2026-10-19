@@ -1,0 +1,39 @@
+{
+  "type": "nirncraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": {
+          "id": "minecraft:rose_bush",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 2
+      },
+      {
+        "state": {
+          "id": "minecraft:peony",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 2
+      },
+      {
+        "state": "minecraft:poppy",
+        "weight": 3
+      }
+    ],
+    "scale": 28,
+    "patchiness": 0.85,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 2,
+      "max_inclusive": 6
+    },
+    "spread": 3,
+    "salt": 7309,
+    "near_water": false
+  }
+}

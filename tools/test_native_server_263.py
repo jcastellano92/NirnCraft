@@ -23,7 +23,7 @@ class LaunchIntegrity(unittest.TestCase):
         self.moddev = self.scratch / 'build/moddev'
         self.moddev.mkdir(parents=True)
         self.classes = self.scratch / 'build/classes/java/main'
-        self.core = self.classes / 'com/skycraft/Skycraft.class'
+        self.core = self.classes / 'com/nirncraft/NirnCraft.class'
         self.core.parent.mkdir(parents=True)
         self.core.write_bytes(b'\xca\xfe\xba\xbe\0\0\0E')
         self.resources = self.scratch / 'build/resources/main'
@@ -40,7 +40,7 @@ class LaunchIntegrity(unittest.TestCase):
             pass
         self.paths = [self.classes, self.resources, self.mc, self.neo]
         self.write_classpath()
-        (self.moddev / 'serverRunVmArgs.txt').write_text('-Dskycraft.dev=' + str(self.runtime).replace('\\', '\\\\'))
+        (self.moddev / 'serverRunVmArgs.txt').write_text('-Dnirncraft.dev=' + str(self.runtime).replace('\\', '\\\\'))
         (self.moddev / 'serverRunProgramArgs.txt').write_text('net.neoforged.fml.startup.Server\n--nogui\n')
 
     def write_classpath(self):
@@ -53,20 +53,20 @@ class LaunchIntegrity(unittest.TestCase):
     def test_native_launch_keeps_independent_argfiles(self):
         result = self.prepare()
         self.assertEqual(result['minecraft'], '26.3')
-        self.assertIn('-Dskycraft.dev=' + self.runtime.as_posix(), result['args'])
+        self.assertIn('-Dnirncraft.dev=' + self.runtime.as_posix(), result['args'])
         self.assertIn('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:26777', result['args'])
         (self.moddev / 'serverRunProgramArgs.txt').write_text('changed by another prepare task')
         self.assertIn('--nogui', (self.runtime / 'native-launch/serverRunProgramArgs.txt').read_text())
 
     def test_rejects_different_control_directory(self):
-        (self.moddev / 'serverRunVmArgs.txt').write_text('-Dskycraft.dev=another-world')
+        (self.moddev / 'serverRunVmArgs.txt').write_text('-Dnirncraft.dev=another-world')
         with self.assertRaisesRegex(ValueError, 'control directory'):
             self.prepare()
 
     def test_rejects_old_core_in_runtime_classpath(self):
         old = self.base / 'old-core.jar'
         with zipfile.ZipFile(old, 'w') as z:
-            z.writestr('com/skycraft/Skycraft.class', b'old')
+            z.writestr('com/nirncraft/NirnCraft.class', b'old')
         self.paths.append(old)
         self.write_classpath()
         with self.assertRaisesRegex(ValueError, 'old core'):

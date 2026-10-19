@@ -2,8 +2,8 @@
 # These are real integrated-server commands and existing loaded-world capture actions.
 command time set 6000
 command give @p minecraft:diamond_sword
-command give @p skycraft:steel_sword
-command execute as @p at @s run skycraft-weather set clear 120
+command give @p nirncraft:steel_sword
+command execute as @p at @s run nirncraft-weather set clear 120
 command execute as @p at @s run tp @s ~ ~8 ~ 135 12
 settle 1800
 capture native263-world

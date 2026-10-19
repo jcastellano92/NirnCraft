@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "top": "nirncraft:block/blacksmith_forge_top",
+    "bottom": "nirncraft:block/blacksmith_forge_bottom",
+    "front": "nirncraft:block/blacksmith_forge_front",
+    "side": "nirncraft:block/blacksmith_forge_side"
+  }
+}

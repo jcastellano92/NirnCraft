@@ -25,7 +25,7 @@ built in VT0/VT1; until a tool exists, follow the manual fallback given next to 
 | Progress per target and trait | `docs/world/targets/<NN>-<name>/STATUS.json` (written only by tools) | yes |
 | Task notes (progress log, handoff) | `docs/world/targets/<NN>-<name>/notes/<task>.md` | yes |
 | Board (task list and dependencies) | `docs/world/targets/BOARD.json` (+ generated `BOARD.md`) | yes |
-| Claims, leases, queue, results, caches | `.work/` in the MAIN checkout (`F:\Projects\Personal\Skycraft\Skycraft\.work`) | no (gitignored) |
+| Claims, leases, queue, results, caches | `.work/` in the MAIN checkout (`.work`) | no (gitignored) |
 | L1/L2 outputs (exports, renders, probe JSON) | `.work/cache/<digest>/` | no |
 | L4 captures and sheets | `.work/results/<job>/` (promoted reviews go to `dist/world-tests/` as today) | no |
 
@@ -84,7 +84,7 @@ Full builds, bakes and client installs are rare events, not the loop.
 | You changed | Run | Time |
 | --- | --- | --- |
 | targets, plan notes, bible, board | `target_lint.py` (L0) | seconds |
-| reloadable data (cityplans, places, scenes, quests, palettes) | L0, then L1 `SiteExport` on the affected sites; on a running dev server `/skycraft-dev reload <group>`; on the live client `live_world.py reload <group>` | seconds |
+| reloadable data (cityplans, places, scenes, quests, palettes) | L0, then L1 `SiteExport` on the affected sites; on a running dev server `/nirncraft-dev reload <group>`; on the live client `live_world.py reload <group>` | seconds |
 | generated data (`biomes.py`, `caverns.py`, `looks.py`, painters) | the generator, L0, L1 on pilot sites; `reload palettes` where reloadable | seconds to 1 min |
 | generator Java (planner, builders, height, hydrology, caves) | `gradlew classes` (incremental), then L1 `SiteExport` (warm JVM, plans live: no bake needed); dev server: `devserver.ps1 hotswap` (~2 s) | seconds |
 | map vectors and rasters (`res:map`) | `tamriel_map.py`, L0, L1 on affected sites, L2 on the province | 1-5 min |

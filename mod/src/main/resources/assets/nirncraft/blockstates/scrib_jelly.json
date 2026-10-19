@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/scrib_jelly"
+      },
+      {
+        "model": "nirncraft:block/scrib_jelly",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/scrib_jelly",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/scrib_jelly",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/scrib_jelly_harvested"
+      },
+      {
+        "model": "nirncraft:block/scrib_jelly_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/scrib_jelly_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/scrib_jelly_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

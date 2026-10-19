@@ -1,29 +1,29 @@
 #!/usr/bin/env python3
 """Static asset audit: every block, item, model and texture the mod ships or registers must resolve.
 
-Why it exists: tools/check_assets.py only looked at ITEM models of ids that have an `item.skycraft.*` lang key and
-treated every un-namespaced reference as skycraft's. It never opened a blockstate, never followed a model parent chain
+Why it exists: tools/check_assets.py only looked at ITEM models of ids that have an `item.nirncraft.*` lang key and
+treated every un-namespaced reference as nirncraft's. It never opened a blockstate, never followed a model parent chain
 to find the texture variables a face uses, never checked a state against the blockstate's variant keys, and never
 looked at blocks that have no lang entry. A block whose model is missing renders as the magenta/black "missing"
 cube in the world; this audit checks the whole chain.
 
 Checks (ERR fails the run, WARN is informational):
-  blockstates   every registered block has assets/skycraft/blockstates/<id>.json (unless it renders INVISIBLE or is an
+  blockstates   every registered block has assets/nirncraft/blockstates/<id>.json (unless it renders INVISIBLE or is an
                 entity-only render); the JSON parses; every "model" it names exists; with the registry dump every
                 variant key names real properties with valid values and EVERY state of the block matches a variant
                 (an unmatched state renders as the missing model); multipart parts name models that exist.
-  models        every model file parses; the parent chain resolves (skycraft, minecraft from the vanilla client jar,
+  models        every model file parses; the parent chain resolves (nirncraft, minecraft from the vanilla client jar,
                 builtin/*, other mods are listed as external); every texture a face uses (#var) is defined somewhere in
                 the chain and points at an existing PNG; blocks and block items have a particle texture.
-  items         every registered item has assets/skycraft/models/item/<id>.json (a BlockItem without one is a missing-
+  items         every registered item has assets/nirncraft/models/item/<id>.json (a BlockItem without one is a missing-
                 model cube in the hand and the inventory); generated item models have layer0.
   textures      "textures/....png" literals in the Java sources, particle definitions and animation metas exist.
-  ids           'skycraft:<name>' strings in resources (city plans, loot, recipes, quests...) and in the Java sources
+  ids           'nirncraft:<name>' strings in resources (city plans, loot, recipes, quests...) and in the Java sources
                 that name no registered block/item/entity/registry entry and no file of the data pack: those become
                 air or a vanilla fallback at runtime.
 
-The registry comes from the dump the game writes (com.skycraft.dev.AssetDump: mod/run/skycraft-asset-audit.json, written
-by every harness server start or `/skycraft-assets dump`). Without a dump the registry is approximated from the lang
+The registry comes from the dump the game writes (com.nirncraft.dev.AssetDump: mod/run/nirncraft-asset-audit.json, written
+by every harness server start or `/nirncraft-assets dump`). Without a dump the registry is approximated from the lang
 files and block/item model files (then the property and unregistered-id checks that need the real registry are skipped).
 
     py -3 -I tools/qa/asset_audit.py [--dump FILE] [--strict] [--list N] [--json]
@@ -44,17 +44,17 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 MAIN = ROOT / "mod" / "src" / "main"
 RES = MAIN / "resources"
 ASSETS = RES / "assets"
-SKY = ASSETS / "skycraft"
+SKY = ASSETS / "nirncraft"
 JAVA = MAIN / "java"
-LANG = MAIN / "lang" / "skycraft"
-DUMP_NAME = "skycraft-asset-audit.json"
+LANG = MAIN / "lang" / "nirncraft"
+DUMP_NAME = "nirncraft-asset-audit.json"
 DUMP_CANDIDATES = [ROOT / "mod" / "run" / DUMP_NAME, ROOT / "mod" / "run" / "devworld" / DUMP_NAME]
 VANILLA_JAR_GLOBS = [
     Path.home() / ".gradle/caches/forge_gradle/minecraft_repo/versions/1.20.1/client-extra.jar",
     Path.home() / ".gradle/caches/forge_gradle/minecraft_repo/versions/1.20.1/client.jar",
 ]
-NS = "skycraft"
-RID = re.compile(r"(?<![A-Za-z0-9_.:/-])#?skycraft:([a-z0-9_./-]+)")
+NS = "nirncraft"
+RID = re.compile(r"(?<![A-Za-z0-9_.:/-])#?nirncraft:([a-z0-9_./-]+)")
 
 
 class Report:
@@ -440,10 +440,10 @@ def audit(args):
         items = {k: v for k, v in dump["items"].items()}
         registries = dump.get("registries", {})
     else:
-        names = lang_ids("block.skycraft.")
+        names = lang_ids("block.nirncraft.")
         for n in names:
             blocks[n] = {"render": "MODEL", "props": None, "item": True}
-        for n in lang_ids("item.skycraft."):
+        for n in lang_ids("item.nirncraft."):
             if n not in blocks:
                 items[n] = {"block": False}
         for n in blocks:
@@ -451,7 +451,7 @@ def audit(args):
         # blocks that have a blockstate are blocks
         for f in (SKY / "blockstates").glob("*.json"):
             blocks.setdefault(f.stem, {"render": "MODEL", "props": None, "item": True})
-        rep.w("setup", "no registry dump (run the server once: qa.ps1 -Server, or /skycraft-assets dump); "
+        rep.w("setup", "no registry dump (run the server once: qa.ps1 -Server, or /nirncraft-assets dump); "
                        "block properties and unregistered ids are checked only approximately")
 
     # ---- blockstates
@@ -463,7 +463,7 @@ def audit(args):
         render = info.get("render", "MODEL")
         if f is None:
             if render == "MODEL":
-                rep.e("blockstate", f"block skycraft:{bid} has no blockstate JSON (renders as the magenta/black missing cube)")
+                rep.e("blockstate", f"block nirncraft:{bid} has no blockstate JSON (renders as the magenta/black missing cube)")
             continue
     for bid, f in sorted(state_files.items()):
         owner = f"blockstate {bid}"
@@ -473,7 +473,7 @@ def audit(args):
             rep.e("blockstate", f"{owner}: bad JSON ({ex})")
             continue
         if bid not in blocks:
-            rep.w("blockstate", f"{owner}: no registered block skycraft:{bid} (orphan file)")
+            rep.w("blockstate", f"{owner}: no registered block nirncraft:{bid} (orphan file)")
         props = blocks.get(bid, {}).get("props")
         models_in = []
         variants = data.get("variants")
@@ -575,7 +575,7 @@ def audit(args):
             if rel in via_override or rel in parents:
                 continue
             if n not in reg_items and "/" not in n and dump:
-                rep.w("item", f"model item/{n}.json: no registered item skycraft:{n} (orphan)")
+                rep.w("item", f"model item/{n}.json: no registered item nirncraft:{n} (orphan)")
 
     # ---- entities: a registered entity whose texture file cannot be found anywhere under textures/entity (heuristic;
     # renderers that tint a vanilla texture, draw item models or build the name at runtime are listed by name only)
@@ -591,8 +591,8 @@ def audit(args):
 
     # ---- NPC role skins: NpcRenderer maps every role to textures/entity/society/<id>_<skin>.png (fallback skins when the
     # layered NpcSkins composition is not available); a role without them is a missing-texture humanoid
-    role_src = JAVA / "com" / "skycraft" / "society" / "NpcRole.java"
-    rend_src = JAVA / "com" / "skycraft" / "society" / "client" / "NpcRenderer.java"
+    role_src = JAVA / "com" / "nirncraft" / "society" / "NpcRole.java"
+    rend_src = JAVA / "com" / "nirncraft" / "society" / "client" / "NpcRenderer.java"
     if role_src.exists() and rend_src.exists():
         rs = role_src.read_text(encoding="utf-8")
         body = rs[rs.index("public enum NpcRole"):]
@@ -649,7 +649,7 @@ def audit(args):
                 line = txt.count("\n", 0, m.start()) + 1
                 rep.e("texture", f"{jf.relative_to(MAIN).as_posix()}:{line}: texture literal {ref} does not exist")
 
-    # ---- skycraft:<id> strings that nothing registered
+    # ---- nirncraft:<id> strings that nothing registered
     known = set()
     if dump:
         known |= set(blocks) | set(items) | set(dump.get("entities", []))
@@ -657,12 +657,12 @@ def audit(args):
             known |= set(reg)
     else:
         known |= set(blocks) | set(items)
-        known |= lang_ids("entity.skycraft.") | lang_ids("effect.skycraft.") | lang_ids("enchantment.skycraft.")
+        known |= lang_ids("entity.nirncraft.") | lang_ids("effect.nirncraft.") | lang_ids("enchantment.nirncraft.")
         for jf in JAVA.rglob("*.java"):
             for m in re.finditer(r'"([a-z0-9_]{3,})"', jf.read_text(encoding="utf-8", errors="replace")):
                 known.add(m.group(1))
     # every file of the data pack and the resource pack counts as a defined id (loot tables, tags, recipes, models...),
-    # and so does every directory (a "skycraft:loot/ingredients" prefix names the tag files below it)
+    # and so does every directory (a "nirncraft:loot/ingredients" prefix names the tag files below it)
     for base in (RES / "data" / NS, SKY, RES / NS):
         if not base.exists():
             continue
@@ -681,9 +681,9 @@ def audit(args):
             pass
     # declared aliases: QuestSpawner.FALLBACKS (named creatures resolved to a real type at spawn time) and the
     # "NON_ITEMS" prefixes of the weights tables (poison_of_<effect> ...), which are built at runtime
-    qs = JAVA / "com" / "skycraft" / "quest" / "QuestSpawner.java"
+    qs = JAVA / "com" / "nirncraft" / "quest" / "QuestSpawner.java"
     if qs.exists():
-        known |= set(re.findall(r'Map\.entry\("skycraft:([a-z0-9_]+)"', qs.read_text(encoding="utf-8")))
+        known |= set(re.findall(r'Map\.entry\("nirncraft:([a-z0-9_]+)"', qs.read_text(encoding="utf-8")))
     known |= {"poison_of", "potion_of", "legendary_fish"}
     unknown = defaultdict(lambda: defaultdict(int))
 
@@ -716,7 +716,7 @@ def audit(args):
                 txt = f.read_text(encoding="utf-8", errors="replace")
             except Exception:  # noqa: BLE001
                 continue
-            if "skycraft:" not in txt:
+            if "nirncraft:" not in txt:
                 continue
             rel = f.relative_to(RES).as_posix()
             try:
@@ -729,18 +729,18 @@ def audit(args):
     declared = re.compile(r"Mobs\.orElse\(|\btypes\(|Map\.entry\(|FALLBACKS|introType")
     for jf in sorted(JAVA.rglob("*.java")):
         txt = jf.read_text(encoding="utf-8", errors="replace")
-        if "skycraft:" not in txt:
+        if "nirncraft:" not in txt:
             continue
         rel = jf.relative_to(MAIN).as_posix()
         for line in txt.splitlines():
-            if "skycraft:" not in line or declared.search(line) or line.lstrip().startswith(("*", "//")):
+            if "nirncraft:" not in line or declared.search(line) or line.lstrip().startswith(("*", "//")):
                 continue
-            for m in re.finditer(r'"#?skycraft:([a-z0-9_./-]+)"', line):
+            for m in re.finditer(r'"#?nirncraft:([a-z0-9_./-]+)"', line):
                 note(rel, m.group(1))
     for rid, where in sorted(unknown.items()):
         files = sorted(where)
-        in_data = [w for w in files if w.startswith(("data/", "skycraft/"))]
-        msg = f"skycraft:{rid} is not registered or defined ({sum(where.values())}x in {len(files)} file(s): " \
+        in_data = [w for w in files if w.startswith(("data/", "nirncraft/"))]
+        msg = f"nirncraft:{rid} is not registered or defined ({sum(where.values())}x in {len(files)} file(s): " \
               f"{', '.join(files[:3])}{' ...' if len(files) > 3 else ''})"
         (rep.e if in_data else rep.w)("id", msg)
 
@@ -753,7 +753,7 @@ def audit(args):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--dump", help="registry dump (default mod/run/skycraft-asset-audit.json)")
+    ap.add_argument("--dump", help="registry dump (default mod/run/nirncraft-asset-audit.json)")
     ap.add_argument("--strict", action="store_true", help="WARN also fails")
     ap.add_argument("--list", type=int, default=60, help="max ERR/WARN lines to print (default 60)")
     ap.add_argument("--json", action="store_true")

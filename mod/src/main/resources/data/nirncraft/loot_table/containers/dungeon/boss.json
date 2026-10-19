@@ -1,0 +1,227 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 20,
+            "max": 50,
+            "growth": 0.06,
+            "type": "nirncraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:parts/gear_boss"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:parts/gems"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:parts/gems"
+        }
+      ],
+      "condition": {
+        "min": 6,
+        "max": 999,
+        "type": "nirncraft:loot_level"
+      }
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:parts/soul_gems"
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:parts/potions"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 12,
+          "modifier": {
+            "type": "nirncraft:leveled_tome"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 8,
+          "modifier": {
+            "type": "nirncraft:skill_book"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 5,
+          "condition": {
+            "min": 10,
+            "max": 999,
+            "type": "nirncraft:loot_level"
+          },
+          "value": "nirncraft:parts/staff"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:gold_ring",
+          "weight": 10,
+          "modifier": {
+            "tag": "nirncraft:loot/trinkets",
+            "type": "nirncraft:regional_tag"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:regional_treasure",
+          "weight": 12,
+          "condition": {
+            "min": 8,
+            "max": 999,
+            "type": "nirncraft:loot_level"
+          },
+          "modifier": {
+            "type": "nirncraft:regional_treasure"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 3,
+          "condition": {
+            "min": 12,
+            "max": 999,
+            "type": "nirncraft:loot_level"
+          },
+          "modifier": {
+            "type": "nirncraft:random_unique"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 1,
+          "condition": {
+            "min": 18,
+            "max": 999,
+            "type": "nirncraft:loot_level"
+          },
+          "modifier": {
+            "collection": "artifacts_of_legend",
+            "province": true,
+            "type": "nirncraft:missing_collectible"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 49
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 30,
+          "modifier": {
+            "type": "nirncraft:regional_book"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 70
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:parts/gems"
+        }
+      ],
+      "condition": {
+        "collection": "stones_of_barenziah",
+        "type": "nirncraft:collection_complete"
+      }
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 1,
+          "modifier": {
+            "type": "nirncraft:place_collectibles"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 1,
+          "modifier": {
+            "type": "nirncraft:place_collectibles"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/dungeon/boss"
+}

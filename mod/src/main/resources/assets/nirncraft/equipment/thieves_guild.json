@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:thieves_guild"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:thieves_guild"
+      }
+    ]
+  }
+}

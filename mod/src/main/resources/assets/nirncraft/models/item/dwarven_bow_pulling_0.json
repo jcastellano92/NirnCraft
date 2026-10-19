@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/dwarven_bow",
+  "textures": {
+    "layer0": "nirncraft:item/dwarven_bow_pulling_0"
+  }
+}

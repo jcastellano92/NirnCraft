@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/troll_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 13157044
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 5918276
+      }
+    ]
+  }
+}

@@ -12,7 +12,7 @@
 #include "gpu_layout.hpp"
 #include "svdag.hpp"
 
-namespace aether {
+namespace atlas {
 
 constexpr int WORLD_MIN_Y = -64;
 constexpr int WORLD_TOP_Y = 640;
@@ -80,7 +80,7 @@ public:
     int windowRadius = 2;  // regions either side of the camera's region, per LOD
     uint16_t stoneMat = 1;
     uint16_t waterMat = 6;
-    // refinement fades (aether_set_transitions): a region rebuilt over a resident one (an exact tile replacing the
+    // refinement fades (atlas_set_transitions): a region rebuilt over a resident one (an exact tile replacing the
     // stand-in, buildings arriving) keeps the old one packed for fadeMs, and the kernel dissolves from old to new
     // per pixel over that time. 0 = off (swap at once).
     std::atomic<uint32_t> fadeMs{0};
@@ -144,4 +144,4 @@ private:
 // Milliseconds on a steady clock (wraps after 49 days; compared as signed differences).
 uint32_t nowMs();
 
-}  // namespace aether
+}  // namespace atlas

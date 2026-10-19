@@ -1,9 +1,0 @@
-{
-  "parent": "minecraft:block/orientable_with_bottom",
-  "textures": {
-    "top": "skycraft:block/tanning_rack_top",
-    "bottom": "skycraft:block/tanning_rack_bottom",
-    "front": "skycraft:block/tanning_rack_front",
-    "side": "skycraft:block/tanning_rack_side"
-  }
-}

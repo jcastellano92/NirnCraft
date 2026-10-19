@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/zephyr",
+  "textures": {
+    "layer0": "nirncraft:item/zephyr_pulling_2"
+  }
+}

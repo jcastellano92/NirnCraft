@@ -21,7 +21,7 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-TAM = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft", "tamriel")
+TAM = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft", "tamriel")
 META = json.load(open(os.path.join(HERE, "tamriel_vectors.json"), encoding="utf-8"))["meta"]
 CELL, MIN_X, MIN_Z = META["cell"], META["min_x"], META["min_z"]
 

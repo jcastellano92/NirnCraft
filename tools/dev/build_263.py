@@ -12,15 +12,15 @@ def main():
     p.add_argument('--dev-dir',type=Path,help='Enable the dev command inbox in this separate directory')
     p.add_argument('tasks',nargs='*',default=['build'])
     a=p.parse_args()
-    scratch=Path(os.environ.get('SKYCRAFT_263_SCRATCH',r'E:\Skycraft-scratch\migration-26.3')).resolve()
-    location=Path(r'E:\Skycraft-scratch\toolchains\java25-location.txt')
-    java=Path(os.environ.get('SKYCRAFT_JAVA25_HOME') or location.read_text(encoding='utf-8').strip())
+    scratch=Path(os.environ.get('NIRNCRAFT_263_SCRATCH',r'E:\NirnCraft-scratch\migration-26.3')).resolve()
+    location=Path(r'E:\NirnCraft-scratch\toolchains\java25-location.txt')
+    java=Path(os.environ.get('NIRNCRAFT_JAVA25_HOME') or location.read_text(encoding='utf-8').strip())
     env=os.environ.copy();env['JAVA_HOME']=str(java);env['GRADLE_USER_HOME']=str(scratch/'gradle-home')
     env.pop('DEBUG',None) # Gradle's batch launcher otherwise echoes every command into diagnostic logs.
     args=[str(ROOT/'mod/gradlew.bat'),*(a.tasks or ['build']),*(['--offline'] if a.offline else []),'--console=plain','-Dorg.gradle.jvmargs=-Xmx3G',
-          '-PskycraftBuildDir='+str(scratch/'build'),'--project-cache-dir',str(scratch/'project-cache')]
-    if a.run_dir:args.append('-PskycraftRunDir='+str(a.run_dir.resolve()))
-    if a.dev_dir:args.append('-PskycraftDevDir='+str(a.dev_dir.resolve()))
+          '-PnirncraftBuildDir='+str(scratch/'build'),'--project-cache-dir',str(scratch/'project-cache')]
+    if a.run_dir:args.append('-PnirncraftRunDir='+str(a.run_dir.resolve()))
+    if a.dev_dir:args.append('-PnirncraftDevDir='+str(a.dev_dir.resolve()))
     try:
         with process_guard(scratch/'.native-build.lock','build_263.py'):
             if a.log:

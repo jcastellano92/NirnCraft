@@ -1,0 +1,7 @@
+{
+  "type": "nirncraft:add_table",
+  "table": "nirncraft:chests/gold",
+  "prefix": "chests/",
+  "chance": 0.85,
+  "priority": 21
+}

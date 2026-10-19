@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 iliac_cityplans.py — Generates and enriches High Rock and Hammerfell cityplans
-(mod/src/main/resources/skycraft/tamriel/cityplans/*.json and index.json)
+(mod/src/main/resources/nirncraft/tamriel/cityplans/*.json and index.json)
 using .reference/daggerfall_ref/v2/townplan_seeds.json RMB grid roles where available
 and curated Iliac Bay architectural specs from docs/world/provinces/{high_rock,hammerfell}.md.
 """
@@ -12,9 +12,9 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-PLANS_DIR = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "tamriel" / "cityplans"
-PLACES_DIR = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "tamriel" / "places"
-OVERLAYS_DIR = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "tamriel" / "styles" / "overlays"
+PLANS_DIR = ROOT / "mod" / "src" / "main" / "resources" / "nirncraft" / "tamriel" / "cityplans"
+PLACES_DIR = ROOT / "mod" / "src" / "main" / "resources" / "nirncraft" / "tamriel" / "places"
+OVERLAYS_DIR = ROOT / "mod" / "src" / "main" / "resources" / "nirncraft" / "tamriel" / "styles" / "overlays"
 SEEDS_PATH = ROOT / ".reference" / "daggerfall_ref" / "v2" / "townplan_seeds.json"
 
 
@@ -1516,7 +1516,7 @@ def build_plan(spec, place, df_seed, idx_num, used_sigs):
         {"at": [0, 4], "size": 12 if ptype in ("capital", "city") else 9, "stalls": 6 if ptype in ("capital", "city") else 3, "name": plaza_key}
     ]
 
-    # Queue for lot filling (derived from Daggerfall RMB building_types count scaled to Skycraft lot density)
+    # Queue for lot filling (derived from Daggerfall RMB building_types count scaled to NirnCraft lot density)
     house_count = 28 if ptype in ("capital", "city") else (16 if ptype == "town" else 8)
     if df_seed and "building_types" in df_seed:
         df_houses = df_seed["building_types"].get("house2", 0) + df_seed["building_types"].get("house3", 0)
@@ -1599,9 +1599,9 @@ def upgrade_existing_plan(pid, extra_blds):
     return len([b for b in blds if b.get("name")])
 
 
-SOCIETY_DIR = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "society"
-WORLD_DIR = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "tamriel" / "world"
-LANG_DIR = ROOT / "mod" / "src" / "main" / "lang" / "skycraft"
+SOCIETY_DIR = ROOT / "mod" / "src" / "main" / "resources" / "nirncraft" / "society"
+WORLD_DIR = ROOT / "mod" / "src" / "main" / "resources" / "nirncraft" / "tamriel" / "world"
+LANG_DIR = ROOT / "mod" / "src" / "main" / "lang" / "nirncraft"
 
 SKILLS_18 = [
     "one_handed", "two_handed", "archery", "block", "smithing", "heavy_armor",
@@ -2695,12 +2695,12 @@ def generate_society_and_lang():
     ]:
         lang_out = {}
         for rkey, (summary_line, say_lines, react_map) in lore_map.items():
-            lang_out[f"society.skycraft.say.region.{rkey}"] = summary_line
+            lang_out[f"society.nirncraft.say.region.{rkey}"] = summary_line
             for idx, line_txt in enumerate(say_lines, start=1):
-                lang_out[f"society.skycraft.say.{rkey}.{idx}"] = line_txt
+                lang_out[f"society.nirncraft.say.{rkey}.{idx}"] = line_txt
             for deed, r_txt in react_map.items():
                 lang_out[f"react.{rkey}.{deed}"] = r_txt
-                lang_out[f"society.skycraft.react.{rkey}.{deed}"] = r_txt
+                lang_out[f"society.nirncraft.react.{rkey}.{deed}"] = r_txt
         (LANG_DIR / out_fn).write_text(json.dumps(lang_out, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print(f"Wrote {out_fn} ({len(lang_out)} lang keys across {len(lore_map)} regions)")
 

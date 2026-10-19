@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:dwarven_spider",
+    "nirncraft:dwarven_sphere",
+    "nirncraft:dwarven_centurion",
+    "nirncraft:dwarven_ballista"
+  ]
+}

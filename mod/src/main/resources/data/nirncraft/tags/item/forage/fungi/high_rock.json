@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:bleeding_crown",
+      "required": false
+    },
+    {
+      "id": "nirncraft:white_cap",
+      "required": false
+    },
+    {
+      "id": "nirncraft:namiras_rot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:imp_stool",
+      "required": false
+    }
+  ]
+}

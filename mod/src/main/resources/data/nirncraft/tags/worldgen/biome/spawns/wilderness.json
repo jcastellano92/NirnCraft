@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#nirncraft:spawns/plains",
+    "#nirncraft:spawns/forest",
+    "#nirncraft:spawns/pine_forest",
+    "#nirncraft:spawns/tundra",
+    "#nirncraft:spawns/reach"
+  ]
+}

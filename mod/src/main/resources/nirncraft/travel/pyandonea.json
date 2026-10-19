@@ -1,0 +1,540 @@
+{
+  "province": "pyandonea",
+  "why": [
+    "maormer_isles.L1.volcanic_reef_isles",
+    "maormer_isles.L2.warm_mist_curtain"
+  ],
+  "modes": [
+    "boat",
+    "caravan",
+    "wayshrine",
+    "foot"
+  ],
+  "nodes": [
+    {
+      "id": "mistveil_village",
+      "place": "mistveil_village",
+      "name": "place.nirncraft.mistveil_village",
+      "region": "pyandonea/maormer_isles",
+      "x": -20171,
+      "z": 18649,
+      "mode": "boat",
+      "modes": [
+        "boat",
+        "wayshrine",
+        "caravan",
+        "foot"
+      ],
+      "kind": "hub",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "pyandonean_fleet_anchorage",
+      "place": "pyandonean_fleet_anchorage",
+      "name": "place.nirncraft.pyandonean_fleet_anchorage",
+      "region": "pyandonea/maormer_isles",
+      "x": -18200,
+      "z": 20812,
+      "mode": "boat",
+      "modes": [
+        "boat",
+        "wayshrine",
+        "caravan"
+      ],
+      "kind": "hub",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_01",
+      "name": "travel.nirncraft.wayshrine.maormer_isles.01",
+      "region": "pyandonea/maormer_isles",
+      "x": -19800,
+      "z": 19600,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_02",
+      "name": "travel.nirncraft.wayshrine.maormer_isles.02",
+      "region": "pyandonea/maormer_isles",
+      "x": -21200,
+      "z": 20000,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_03",
+      "name": "travel.nirncraft.wayshrine.maormer_isles.03",
+      "region": "pyandonea/maormer_isles",
+      "x": -18270,
+      "z": 18927,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_04",
+      "name": "travel.nirncraft.wayshrine.maormer_isles.04",
+      "region": "pyandonea/maormer_isles",
+      "x": -21152,
+      "z": 19952,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_05",
+      "name": "travel.nirncraft.wayshrine.maormer_isles.05",
+      "region": "pyandonea/maormer_isles",
+      "x": -20219,
+      "z": 18625,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_06",
+      "name": "travel.nirncraft.wayshrine.maormer_isles.06",
+      "region": "pyandonea/maormer_isles",
+      "x": -18224,
+      "z": 20788,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "orgnums_citadel",
+      "region": "pyandonea/maormer_isles",
+      "x": -19800,
+      "z": 19600,
+      "modes": [
+        "caravan",
+        "foot",
+        "wayshrine"
+      ],
+      "why": [
+        "maormer_isles.L6.mistveil_and_fleet_anchorage",
+        "pyandonea.L6.pyandonean_fleet_anchorage"
+      ],
+      "place": "orgnums_citadel"
+    },
+    {
+      "id": "alinor",
+      "region": "summerset/summerset_isle",
+      "x": -11200,
+      "z": 13000,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "pyandonea.L6.pyandonean_fleet_anchorage"
+      ],
+      "place": "alinor"
+    },
+    {
+      "id": "lillandril",
+      "region": "summerset/summerset_isle",
+      "x": -13700,
+      "z": 12550,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "pyandonea.L6.pyandonean_fleet_anchorage"
+      ],
+      "place": "lillandril"
+    },
+    {
+      "id": "woodhearth",
+      "region": "valenwood/greenshade",
+      "x": -6700,
+      "z": 12600,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "pyandonea.L6.pyandonean_fleet_anchorage"
+      ],
+      "place": "woodhearth"
+    }
+  ],
+  "routes": [
+    {
+      "from": "mistveil_village",
+      "to": "wayshrine_maormer_isles_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_mistveil_village_to_wayshrine_maormer_isles_05",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "mistveil_village",
+      "to": "wayshrine_maormer_isles_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_mistveil_village_to_wayshrine_maormer_isles_01",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "pyandonean_fleet_anchorage",
+      "to": "wayshrine_maormer_isles_06",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_pyandonean_fleet_anchorage_to_wayshrine_maormer_isles_06",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "pyandonean_fleet_anchorage",
+      "to": "wayshrine_maormer_isles_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_pyandonean_fleet_anchorage_to_wayshrine_maormer_isles_03",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_01",
+      "to": "mistveil_village",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_01_to_mistveil_village",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_01",
+      "to": "wayshrine_maormer_isles_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_01_to_wayshrine_maormer_isles_05",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_02",
+      "to": "wayshrine_maormer_isles_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_02_to_wayshrine_maormer_isles_04",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_02",
+      "to": "wayshrine_maormer_isles_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_02_to_wayshrine_maormer_isles_01",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_03",
+      "to": "wayshrine_maormer_isles_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_03_to_wayshrine_maormer_isles_01",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_03",
+      "to": "wayshrine_maormer_isles_06",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_03_to_wayshrine_maormer_isles_06",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_04",
+      "to": "wayshrine_maormer_isles_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_04_to_wayshrine_maormer_isles_02",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_04",
+      "to": "wayshrine_maormer_isles_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_04_to_wayshrine_maormer_isles_01",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_05",
+      "to": "mistveil_village",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_05_to_mistveil_village",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_05",
+      "to": "wayshrine_maormer_isles_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_05_to_wayshrine_maormer_isles_01",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_06",
+      "to": "pyandonean_fleet_anchorage",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_06_to_pyandonean_fleet_anchorage",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_06",
+      "to": "wayshrine_maormer_isles_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "pyandonea_wayshrine_wayshrine_maormer_isles_06_to_wayshrine_maormer_isles_03",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "mistveil_village",
+      "to": "pyandonean_fleet_anchorage",
+      "mode": "boat",
+      "cost": 0,
+      "path": "pyandonea_boat_mistveil_village_to_pyandonean_fleet_anchorage",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "pyandonean_fleet_anchorage",
+      "to": "mistveil_village",
+      "mode": "boat",
+      "cost": 0,
+      "path": "pyandonea_boat_pyandonean_fleet_anchorage_to_mistveil_village",
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "pyandonean_fleet_anchorage",
+      "to": "alinor",
+      "mode": "boat",
+      "cost": 105,
+      "path": "veil_of_mist_privateer_channel",
+      "why": [
+        "pyandonea.L6.pyandonean_fleet_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "alinor",
+      "to": "pyandonean_fleet_anchorage",
+      "mode": "boat",
+      "cost": 105,
+      "path": "veil_of_mist_privateer_channel",
+      "why": [
+        "pyandonea.L6.pyandonean_fleet_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "pyandonean_fleet_anchorage",
+      "to": "woodhearth",
+      "mode": "boat",
+      "cost": 95,
+      "path": "sea_serpent_corsair_wake",
+      "why": [
+        "pyandonea.L6.pyandonean_fleet_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "woodhearth",
+      "to": "pyandonean_fleet_anchorage",
+      "mode": "boat",
+      "cost": 95,
+      "path": "sea_serpent_corsair_wake",
+      "why": [
+        "pyandonea.L6.pyandonean_fleet_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "mistveil_village",
+      "to": "lillandril",
+      "mode": "boat",
+      "cost": 110,
+      "path": "abysmal_sea_pearl_runner",
+      "why": [
+        "maormer_isles.L6.mistveil_and_fleet_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "lillandril",
+      "to": "mistveil_village",
+      "mode": "boat",
+      "cost": 110,
+      "path": "abysmal_sea_pearl_runner",
+      "why": [
+        "maormer_isles.L6.mistveil_and_fleet_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "pyandonean_fleet_anchorage",
+      "to": "mistveil_village",
+      "mode": "caravan",
+      "cost": 117,
+      "path": "kelp_canopy_pack_serpent_trail",
+      "why": [
+        "maormer_isles.L6.mistveil_and_fleet_anchorage",
+        "maormer_isles.L5.black_pearl_and_scale_trade"
+      ]
+    },
+    {
+      "from": "mistveil_village",
+      "to": "pyandonean_fleet_anchorage",
+      "mode": "caravan",
+      "cost": 117,
+      "path": "kelp_canopy_pack_serpent_trail",
+      "why": [
+        "maormer_isles.L6.mistveil_and_fleet_anchorage",
+        "maormer_isles.L5.black_pearl_and_scale_trade"
+      ]
+    },
+    {
+      "from": "mistveil_village",
+      "to": "orgnums_citadel",
+      "mode": "foot",
+      "cost": 0,
+      "path": "coiled_king_basalt_causeway",
+      "why": [
+        "maormer_isles.L6.mistveil_and_fleet_anchorage",
+        "pyandonea.L6.pyandonean_fleet_anchorage"
+      ]
+    },
+    {
+      "from": "orgnums_citadel",
+      "to": "mistveil_village",
+      "mode": "foot",
+      "cost": 0,
+      "path": "coiled_king_basalt_causeway",
+      "why": [
+        "maormer_isles.L6.mistveil_and_fleet_anchorage",
+        "pyandonea.L6.pyandonean_fleet_anchorage"
+      ]
+    }
+  ]
+}

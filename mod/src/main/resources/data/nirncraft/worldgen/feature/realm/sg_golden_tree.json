@@ -1,0 +1,44 @@
+{
+  "type": "minecraft:tree",
+  "decorators": [],
+  "ignore_vines": true,
+  "minimum_size": {
+    "type": "minecraft:two_layers_feature_size",
+    "limit": 1,
+    "lower_size": 0,
+    "upper_size": 2
+  },
+  "foliage_provider": {
+    "type": "minecraft:simple",
+    "state": {
+      "id": "nirncraft:golden_aspen_leaves",
+      "properties": {
+        "distance": "7",
+        "persistent": "false",
+        "waterlogged": "false"
+      }
+    }
+  },
+  "foliage_placer": {
+    "type": "minecraft:blob_foliage_placer",
+    "radius": 3,
+    "offset": 0,
+    "height": 4
+  },
+  "trunk_provider": {
+    "type": "minecraft:simple",
+    "state": {
+      "id": "minecraft:birch_log",
+      "properties": {
+        "axis": "y"
+      }
+    }
+  },
+  "trunk_placer": {
+    "type": "minecraft:straight_trunk_placer",
+    "base_height": 7,
+    "height_rand_a": 4,
+    "height_rand_b": 2
+  },
+  "below_trunk_provider": "minecraft:soil_beneath_tree"
+}

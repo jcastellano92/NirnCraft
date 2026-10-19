@@ -1,0 +1,9 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "mine",
+  "regional_kit": true,
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

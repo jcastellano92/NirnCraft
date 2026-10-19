@@ -1,0 +1,18 @@
+{
+  "type": "nirncraft:giant_mushroom",
+  "config": {
+    "stem": {
+      "id": "nirncraft:parasol_stem",
+      "properties": {
+        "axis": "y"
+      }
+    },
+    "cap": "nirncraft:glowing_mushroom_cap",
+    "style": "cave",
+    "height": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 5,
+      "max_inclusive": 16
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:unique/ysgramors_tomb",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274049,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "ysgramors_tomb"
+    ]
+  }
+}

@@ -1,17 +1,17 @@
 """Generates the lore module's pixel art, models and generated data.
 
 Writes into mod/src/main/resources:
-  assets/skycraft/textures/block/standing_stone_side.png, standing_stone_top.png, standing_stone_plinth.png
-  assets/skycraft/textures/block/standing_stone_<sign>_{upper,lower}.png         carved stone face with the sigil
-  assets/skycraft/textures/block/standing_stone_<sign>_{upper,lower}_glow.png    glowing sigil overlay (cutout)
-  assets/skycraft/textures/item/standing_stone_<sign>.png                         inventory icon
-  assets/skycraft/textures/item/book_<cover>.png                                  book covers (+ loose sheet)
-  assets/skycraft/textures/gui/book_spread.png (380x220), book_sheet.png (180x220)
-  assets/skycraft/models/block/standing_stone_{lower,upper}.json                  templates
-  assets/skycraft/models/block/standing_stone_<sign>_{lower,upper}.json
-  assets/skycraft/blockstates/standing_stone_<sign>.json
-  assets/skycraft/models/item/standing_stone_<sign>.json, book.json, book_<cover>.json
-  data/skycraft/loot_tables/chests/lore_books.json, lore_notes.json
+  assets/nirncraft/textures/block/standing_stone_side.png, standing_stone_top.png, standing_stone_plinth.png
+  assets/nirncraft/textures/block/standing_stone_<sign>_{upper,lower}.png         carved stone face with the sigil
+  assets/nirncraft/textures/block/standing_stone_<sign>_{upper,lower}_glow.png    glowing sigil overlay (cutout)
+  assets/nirncraft/textures/item/standing_stone_<sign>.png                         inventory icon
+  assets/nirncraft/textures/item/book_<cover>.png                                  book covers (+ loose sheet)
+  assets/nirncraft/textures/gui/book_spread.png (380x220), book_sheet.png (180x220)
+  assets/nirncraft/models/block/standing_stone_{lower,upper}.json                  templates
+  assets/nirncraft/models/block/standing_stone_<sign>_{lower,upper}.json
+  assets/nirncraft/blockstates/standing_stone_<sign>.json
+  assets/nirncraft/models/item/standing_stone_<sign>.json, book.json, book_<cover>.json
+  data/nirncraft/loot_tables/chests/lore_books.json, lore_notes.json
 
 Constellations are read from lore/client/Constellations.java and books from lore/LoreBooks.java so they never
 drift. Run from anywhere: python3 tools/textures/lore.py
@@ -26,11 +26,11 @@ from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-TEX = os.path.join(RES, "assets", "skycraft", "textures")
-MODELS = os.path.join(RES, "assets", "skycraft", "models")
-BLOCKSTATES = os.path.join(RES, "assets", "skycraft", "blockstates")
-DATA = os.path.join(RES, "data", "skycraft")
-JAVA = os.path.join(ROOT, "mod", "src", "main", "java", "com", "skycraft", "lore")
+TEX = os.path.join(RES, "assets", "nirncraft", "textures")
+MODELS = os.path.join(RES, "assets", "nirncraft", "models")
+BLOCKSTATES = os.path.join(RES, "assets", "nirncraft", "blockstates")
+DATA = os.path.join(RES, "data", "nirncraft")
+JAVA = os.path.join(ROOT, "mod", "src", "main", "java", "com", "nirncraft", "lore")
 
 SIGNS = ["warrior", "mage", "thief", "lady", "lord", "lover", "atronach", "apprentice", "ritual", "serpent",
          "shadow", "steed", "tower"]
@@ -470,24 +470,24 @@ def stone_models(sign):
     written = []
     for half in ("lower", "upper"):
         written.append(write_json(os.path.join(MODELS, "block", f"standing_stone_{sign}_{half}.json"), {
-            "parent": f"skycraft:block/standing_stone_{half}",
+            "parent": f"nirncraft:block/standing_stone_{half}",
             "render_type": "minecraft:cutout",
             "textures": {
-                "face": f"skycraft:block/standing_stone_{sign}_{half}",
-                "glow": f"skycraft:block/standing_stone_{sign}_{half}_glow",
+                "face": f"nirncraft:block/standing_stone_{sign}_{half}",
+                "glow": f"nirncraft:block/standing_stone_{sign}_{half}_glow",
             },
         }))
     variants = {}
     for facing, rot in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
         for half in ("lower", "upper"):
-            v = {"model": f"skycraft:block/standing_stone_{sign}_{half}"}
+            v = {"model": f"nirncraft:block/standing_stone_{sign}_{half}"}
             if rot:
                 v["y"] = rot
             variants[f"facing={facing},half={half}"] = v
     written.append(write_json(os.path.join(BLOCKSTATES, f"standing_stone_{sign}.json"), {"variants": variants}))
     written.append(write_json(os.path.join(MODELS, "item", f"standing_stone_{sign}.json"), {
         "parent": "minecraft:item/generated",
-        "textures": {"layer0": f"skycraft:item/standing_stone_{sign}"},
+        "textures": {"layer0": f"nirncraft:item/standing_stone_{sign}"},
     }))
     return written
 
@@ -506,8 +506,8 @@ def template_models():
         "parent": "minecraft:block/block",
         "render_type": "minecraft:cutout",
         "ambientocclusion": False,
-        "textures": {"particle": "skycraft:block/standing_stone_side", "side": "skycraft:block/standing_stone_side",
-                     "top": "skycraft:block/standing_stone_top", "plinth": "skycraft:block/standing_stone_plinth"},
+        "textures": {"particle": "nirncraft:block/standing_stone_side", "side": "nirncraft:block/standing_stone_side",
+                     "top": "nirncraft:block/standing_stone_top", "plinth": "nirncraft:block/standing_stone_plinth"},
         "elements": [
             {"from": [1, 0, 4], "to": [15, 3, 12], "faces": {
                 "north": face("#plinth"), "south": face("#plinth"), "east": face("#plinth"), "west": face("#plinth"),
@@ -522,8 +522,8 @@ def template_models():
         "parent": "minecraft:block/block",
         "render_type": "minecraft:cutout",
         "ambientocclusion": False,
-        "textures": {"particle": "skycraft:block/standing_stone_side", "side": "skycraft:block/standing_stone_side",
-                     "top": "skycraft:block/standing_stone_top"},
+        "textures": {"particle": "nirncraft:block/standing_stone_side", "side": "nirncraft:block/standing_stone_side",
+                     "top": "nirncraft:block/standing_stone_top"},
         "elements": [
             {"from": [2, 0, 5], "to": [14, 10, 11], "faces": {
                 "north": face("#face"), "south": face("#face"), "east": face("#side"), "west": face("#side"),
@@ -548,13 +548,13 @@ def book_models():
     for i, cover in enumerate(COVERS):
         written.append(write_json(os.path.join(MODELS, "item", f"book_{cover}.json"), {
             "parent": "minecraft:item/generated",
-            "textures": {"layer0": f"skycraft:item/book_{cover}"},
+            "textures": {"layer0": f"nirncraft:item/book_{cover}"},
         }))
         if i > 0:
-            overrides.append({"predicate": {"skycraft:cover": round(i / 10, 2)}, "model": f"skycraft:item/book_{cover}"})
+            overrides.append({"predicate": {"nirncraft:cover": round(i / 10, 2)}, "model": f"nirncraft:item/book_{cover}"})
     written.append(write_json(os.path.join(MODELS, "item", "book.json"), {
         "parent": "minecraft:item/generated",
-        "textures": {"layer0": "skycraft:item/book_brown"},
+        "textures": {"layer0": "nirncraft:item/book_brown"},
         "overrides": overrides,
     }))
     return written
@@ -562,8 +562,8 @@ def book_models():
 
 def loot_tables(books):
     def entry(bid, w, v):
-        return {"type": "minecraft:item", "name": "skycraft:book", "weight": w,
-                "functions": [{"function": "minecraft:set_nbt", "tag": '{book:"%s",skycraft_value:%d}' % (bid, v)}]}
+        return {"type": "minecraft:item", "name": "nirncraft:book", "weight": w,
+                "functions": [{"function": "minecraft:set_nbt", "tag": '{book:"%s",nirncraft_value:%d}' % (bid, v)}]}
 
     all_books = {"type": "minecraft:chest", "pools": [
         {"rolls": 1, "entries": [entry(b, w, v) for (b, _c, _cv, w, v) in books]}]}

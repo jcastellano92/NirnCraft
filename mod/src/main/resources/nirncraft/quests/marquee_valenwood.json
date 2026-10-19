@@ -1,0 +1,2393 @@
+{
+  "line": "marquee_valenwood",
+  "category": "faction",
+  "npcs": [
+    {
+      "id": "mq_val_lirael",
+      "name": "Wardress Lirael",
+      "role": "steward",
+      "place": "elden_root",
+      "offset": [
+        5,
+        6
+      ],
+      "female": true,
+      "greet": "Lirael holds the Root Gate and has counted every foot that has crossed it for nineteen years. She will not tell you the total. She says it would only embarrass you."
+    },
+    {
+      "id": "mq_val_beron",
+      "name": "Sap-Tapper Beron",
+      "role": "lumberjack",
+      "place": "elden_root",
+      "offset": [
+        -7,
+        8
+      ],
+      "greet": "Beron taps the lower roots for the sap that lights every lantern in the city. He talks to the tree while he works, and the tree, he swears, has begun to talk back, mostly about the weather."
+    },
+    {
+      "id": "mq_val_aeth",
+      "name": "Aeth, Voice of the Silvenar",
+      "role": "scholar",
+      "place": "elden_root",
+      "offset": [
+        12,
+        -4
+      ],
+      "greet": "Aeth speaks for a king who rarely speaks for himself. Every sentence is a courtesy and every courtesy is a measure of how much you are worth to the Court."
+    },
+    {
+      "id": "mq_val_acorn",
+      "name": "Fenwe of the Hollow Acorn",
+      "role": "innkeeper",
+      "place": "elden_root",
+      "offset": [
+        -4,
+        -10
+      ],
+      "female": true,
+      "greet": "The Hollow Acorn is a tavern built inside a knot of the great tree itself, with tables on three tiers and no two of them level. Fenwe serves meat only, as the Pact demands, and apologises for it to the tree each night."
+    },
+    {
+      "id": "mq_val_maelin",
+      "name": "Root-Tender Maelin",
+      "role": "steward",
+      "place": "falinesti",
+      "offset": [
+        5,
+        -5
+      ],
+      "greet": "Maelin tends the great roots that carry Falinesti across the forest, one slow step each season. He knows when it will turn, and he is never wrong, and he is never glad to say."
+    },
+    {
+      "id": "mq_val_eri",
+      "name": "Lorekeeper Eri",
+      "role": "scholar",
+      "place": "falinesti",
+      "offset": [
+        -6,
+        6
+      ],
+      "female": true,
+      "greet": "Eri carries the memory of every site the city has stood on. She can tell you which spring flood took a ford and which autumn fire took a copse. She never forgets, and neither, she says, does the tree."
+    },
+    {
+      "id": "mq_val_hael",
+      "name": "Pilgrim Hael",
+      "role": "adventurer",
+      "place": "falinesti",
+      "offset": [
+        9,
+        7
+      ],
+      "greet": "Hael has been following the walking city for eleven years. He has never once arrived at the same time as it. He is very patient and very, very tired."
+    },
+    {
+      "id": "mq_val_bough_inn",
+      "name": "Ilwen of the Four Seasons' Bough",
+      "role": "innkeeper",
+      "place": "falinesti",
+      "offset": [
+        -3,
+        -9
+      ],
+      "female": true,
+      "greet": "The Four Seasons' Bough is a tavern in the city's first limb. It has been moved eleven times and never once re-hung its sign. Ilwen says that is because the city would only move it again."
+    },
+    {
+      "id": "mq_val_tilu",
+      "name": "Bridge-Warden Tilu",
+      "role": "steward",
+      "place": "woodhearth",
+      "offset": [
+        6,
+        5
+      ],
+      "female": true,
+      "greet": "Tilu walks the Great Weave every dawn with a mallet and a coil of rope, checking each plank by ear. She says a sound bridge sings a high note, and a tired one sings low. She has never once been wrong about a bridge."
+    },
+    {
+      "id": "mq_val_orwen",
+      "name": "Net-Trader Orwen",
+      "role": "merchant",
+      "place": "woodhearth",
+      "offset": [
+        -8,
+        6
+      ],
+      "greet": "Orwen sells nets, ropes and woven baskets in Fisher's Hang. He is generous with prices, stingy with news, and has the fastest knots in Greenshade. He says a net is only a promise that something will not get away."
+    },
+    {
+      "id": "mq_val_hush",
+      "name": "Elder Hush of the Ground-Camp",
+      "role": "citizen",
+      "place": "woodhearth",
+      "offset": [
+        3,
+        12
+      ],
+      "female": true,
+      "greet": "Hush speaks for the families who live beneath the bridges and have never been invited above them. She is the quietest woman in Woodhearth, and the only one nobody has ever interrupted."
+    },
+    {
+      "id": "mq_val_slack_rope",
+      "name": "Brenna of the Slack Rope",
+      "role": "innkeeper",
+      "place": "woodhearth",
+      "offset": [
+        -2,
+        -8
+      ],
+      "female": true,
+      "greet": "The Slack Rope hangs from three trees and sways on windy nights. Brenna serves the soup in lidded bowls and the ale in mugs bolted to the table. She says the regulars are very steady drinkers. She says the visitors are very quick learners."
+    },
+    {
+      "id": "mq_val_scribe",
+      "name": "The Silvenar's Scribe Ethelwe",
+      "role": "scholar",
+      "place": "silvenar",
+      "offset": [
+        6,
+        -4
+      ],
+      "female": true,
+      "greet": "Ethelwe writes every word the Silvenar has said in public, and a few he has not. She wears a ring of ink-stains on her left index finger, and says it is the only ring a scribe should ever wear."
+    },
+    {
+      "id": "mq_val_loru",
+      "name": "Archivist Loru",
+      "role": "scholar",
+      "place": "silvenar",
+      "offset": [
+        -7,
+        5
+      ],
+      "greet": "Loru keeps the Root Archive, where scrolls hang from rafters in net-bags like fruit. He can find anything in it, so long as he is not asked to find it quickly."
+    },
+    {
+      "id": "mq_val_gatewarden",
+      "name": "Gate-Warden Wren",
+      "role": "steward",
+      "place": "silvenar",
+      "offset": [
+        10,
+        6
+      ],
+      "female": true,
+      "greet": "Wren keeps the Firefly Gate and is in a permanent mood about it. She says the gate is too wide, the flies too bright and the visitors too numerous. She would prefer the city were found by no one."
+    },
+    {
+      "id": "mq_val_firefly_lantern",
+      "name": "Pip of the Firefly Lantern",
+      "role": "innkeeper",
+      "place": "silvenar",
+      "offset": [
+        -3,
+        -9
+      ],
+      "greet": "The Firefly Lantern is the only tavern in Silvenar, and it is lit entirely by jars of captive fireflies that are released on the stroke of midnight, in a ceremony that irritates the fireflies enormously. Pip is sorry. Pip does it anyway."
+    },
+    {
+      "id": "mq_val_shaka",
+      "name": "Trader Sha'ka",
+      "role": "caravan_trader",
+      "place": "rawlkha",
+      "offset": [
+        5,
+        5
+      ],
+      "female": true,
+      "greet": "Sha'ka sells silk, spice and moon-sugar from a bamboo stall strung above the street and will not take a coin that does not ring. She knows every caravan road in Reaper's March and every Pact patrol that watches it."
+    },
+    {
+      "id": "mq_val_pura",
+      "name": "Fortune-Weaver Pura",
+      "role": "mage",
+      "place": "rawlkha",
+      "offset": [
+        -8,
+        6
+      ],
+      "female": true,
+      "greet": "Pura weaves your fortune into a bracelet while you wait and then, very gently, ties it onto your wrist. She says a fortune you can see is a fortune you can argue with. Most people argue."
+    },
+    {
+      "id": "mq_val_mohr",
+      "name": "Guard Mohr",
+      "role": "steward",
+      "place": "rawlkha",
+      "offset": [
+        9,
+        -6
+      ],
+      "greet": "Mohr stands at the Caravan Gate and has not been relieved since the autumn. He is not complaining. He is simply sitting, with great dignity, on his shield."
+    },
+    {
+      "id": "mq_val_rope_den",
+      "name": "Zhan'ra of the Rope Market Den",
+      "role": "innkeeper",
+      "place": "rawlkha",
+      "offset": [
+        -3,
+        -9
+      ],
+      "female": true,
+      "greet": "The Rope Market Den is an upstairs room with cushions and a hookah and a very long waiting list. Zhan'ra serves moon-sugar tea and gossip in equal measure and will tell you which one is stronger."
+    },
+    {
+      "id": "mq_val_eld",
+      "name": "Gardener Eld",
+      "role": "farmer",
+      "place": "arenthia",
+      "offset": [
+        4,
+        -6
+      ],
+      "female": true,
+      "greet": "Eld tends the hanging terraces in Arenthia and has never been seen to stand on level ground. She talks to the roses in the third person and listens to their replies."
+    },
+    {
+      "id": "mq_val_sel",
+      "name": "Priestess Sel of the Falls",
+      "role": "priest",
+      "place": "arenthia",
+      "offset": [
+        -7,
+        5
+      ],
+      "female": true,
+      "greet": "Sel keeps the waterfall shrine and prays from behind the curtain of water, so the faithful have never seen her face. She says the water prays better when she is not in the way."
+    },
+    {
+      "id": "mq_val_wynn",
+      "name": "Weaver Wynn",
+      "role": "merchant",
+      "place": "arenthia",
+      "offset": [
+        8,
+        7
+      ],
+      "greet": "Wynn weaves moss into cloth and cloth into banners. Her work smells of rain and wears like leather. She sells to Bosmer, to Orcs and, on one occasion, to a very polite wraith."
+    },
+    {
+      "id": "mq_val_cael",
+      "name": "Ranger Cael",
+      "role": "hunter",
+      "place": "marbruk",
+      "offset": [
+        6,
+        5
+      ],
+      "greet": "Cael walks the Thorn Wall at dusk and again at dawn and, once, in the middle of the night, because he felt a draught. The wall is very proud of him. He is not sure the wall understands."
+    },
+    {
+      "id": "mq_val_teva",
+      "name": "Cook Teva",
+      "role": "butcher",
+      "place": "marbruk",
+      "offset": [
+        -7,
+        6
+      ],
+      "female": true,
+      "greet": "Teva cooks for the Watch Hall and listens to everyone. She never repeats a thing, except at the next table, in a different order. She calls it \"tasting\"."
+    },
+    {
+      "id": "mq_val_huln",
+      "name": "Smith Huln",
+      "role": "blacksmith",
+      "place": "marbruk",
+      "offset": [
+        9,
+        -6
+      ],
+      "greet": "Huln shoes horses, forges spearheads and mends pots. He says seven words a day, and spends all of them on the pot."
+    },
+    {
+      "id": "mq_val_thorn_inn",
+      "name": "Aldis of the Thorn-and-Thistle",
+      "role": "innkeeper",
+      "place": "marbruk",
+      "offset": [
+        -3,
+        -10
+      ],
+      "female": true,
+      "greet": "The Thorn-and-Thistle is a squat inn set into the Thorn Wall itself, its back room a hollow in the living hedge. Aldis says it is the safest tavern in Valenwood, because the wall itself will bite a brawler, and has."
+    },
+    {
+      "id": "mq_val_bough_host",
+      "name": "Host Tamlin of the Green Bough",
+      "role": "innkeeper",
+      "place": "roadside_green_bough",
+      "offset": [
+        2,
+        3
+      ],
+      "greet": "Tamlin runs the Green Bough, an inn in a tree whose bough grows another floor every year. He has stopped adding rooms and started adding apologies. Nobody knows why the tree does it."
+    },
+    {
+      "id": "mq_val_drabul_chief",
+      "name": "Chieftain Borgakh of Drabul",
+      "role": "steward",
+      "place": "drabul",
+      "offset": [
+        3,
+        3
+      ],
+      "greet": "Borgakh holds the Orc outpost in the forest, in an uneasy truce with the Bosmer neighbours. He has never once raised his voice. He has never once needed to."
+    },
+    {
+      "id": "mq_val_jath_champion",
+      "name": "Champion Mauhulakh",
+      "role": "jarl",
+      "place": "jathsogur",
+      "offset": [
+        2,
+        2
+      ],
+      "greet": "Mauhulakh leads Jathsogur's stronghold and wants a trial of strength witnessed by someone who owes the clan nothing. He is fair. He is also very, very large."
+    },
+    {
+      "id": "mq_val_monk_singer",
+      "name": "Brother Hael of Dokrin",
+      "role": "priest",
+      "place": "dokrin_monastery",
+      "offset": [
+        3,
+        -3
+      ],
+      "greet": "Brother Hael has sung the same hymn for three days and nights and cannot stop. His voice has gone to a croak. His brothers sing in shifts. All of them look horrified."
+    },
+    {
+      "id": "mq_val_prophecy_hermit",
+      "name": "Hermit Orlen",
+      "role": "scholar",
+      "place": "supplication_house",
+      "offset": [
+        -3,
+        2
+      ],
+      "greet": "Orlen carves one line of a prophecy per year on his doorframe and has done so for forty years. He says he has not decided what it will say. The line is not up to him."
+    },
+    {
+      "id": "mq_val_bridge_feuder",
+      "name": "Feuding Wife Maral",
+      "role": "citizen",
+      "place": "sren_ja",
+      "offset": [
+        2,
+        -3
+      ],
+      "female": true,
+      "greet": "Maral says the shared bridge-plank is hers. Her neighbour says it is his. They have each been sweeping the plank every dawn for six years, in opposite directions."
+    }
+  ],
+  "relics": [
+    {
+      "id": "mq_val_blight_sap",
+      "name": "Phial of Black Sap",
+      "desc": "A glass phial of sap the colour of old tar. It smells faintly of rot and faintly, horribly, of honey. Birds will not land near it.",
+      "icon": 23
+    },
+    {
+      "id": "mq_val_sound_wood_shard",
+      "name": "Shard of Sound Heartwood",
+      "desc": "A palm-sized slab of pale heartwood, warm and faintly green, cut from the healthy trunk. It hums softly when held to your ear, like a sleeper breathing.",
+      "icon": 20
+    },
+    {
+      "id": "mq_val_root_ring",
+      "name": "Ring of the Root-Tender",
+      "desc": "A hoop of living wood, never withered, worn by every Root-Tender since the first. It is warm in the hand and pulses faintly, like a patient waiting.",
+      "icon": 26
+    },
+    {
+      "id": "mq_val_autumn_acorn",
+      "name": "Acorn of the Autumn Site",
+      "desc": "A single acorn as large as a fist, hard as iron and faintly gold. The Lorekeeper says the city planted it, once, on its first autumn, and forgot where.",
+      "icon": 20
+    },
+    {
+      "id": "mq_val_rotted_knot",
+      "name": "Rotted Node-Knot",
+      "desc": "A bridge-knot of black twisted fibre, cut from a failing support. Where it touched the rope, someone has packed it with a pale, damp paste that smells of wet mushrooms.",
+      "icon": 23
+    },
+    {
+      "id": "mq_val_ground_camp_rope",
+      "name": "Ground-Camp Rope",
+      "desc": "A long coil of oiled, hand-twisted rope, as thick as a wrist and smelling faintly of tar. The ground-camp spins it by moonlight. A tag on one end says, in a child's hand: 'For the Weave, with love'.",
+      "icon": 11
+    },
+    {
+      "id": "mq_val_silvenar_scroll",
+      "name": "The Unwritten Scroll",
+      "desc": "A tightly rolled scroll bound in a ribbon of silver bark. No one has ever read it; every scribe who unrolls it finds the page blank, and every scribe who rolls it up again swears it was not.",
+      "icon": 15
+    },
+    {
+      "id": "mq_val_audience_token",
+      "name": "Token of Audience",
+      "desc": "A small wooden disc stamped with the Silvenar's leaf and carved with a single word: WAIT. It is warm to the touch and, held up to the light, it flickers.",
+      "icon": 26
+    },
+    {
+      "id": "mq_val_pact_waiver",
+      "name": "Waiver of the Green Pact",
+      "desc": "A strip of green silk stamped with three leaf-seals, granting one wagon of foreign goods passage through Valenwood without felling or lighting a living tree. The ink is still faintly damp.",
+      "icon": 11
+    },
+    {
+      "id": "mq_val_wagon_deed",
+      "name": "Deed to the Sha'ka Wagon",
+      "desc": "A folded deed of ownership for a small caravan wagon, the wheels of which were designed by a Dwemer and the axle by a Khajiit and the rest by whichever fool offered the lowest price.",
+      "icon": 11
+    },
+    {
+      "id": "mq_val_garden_seeds",
+      "name": "Pouch of Hanging Seeds",
+      "desc": "A small pouch of silver-green seeds, each as small as a dewdrop, each wrapped in a scrap of moss. They are said to bloom only when planted while the sun is exactly half over the horizon.",
+      "icon": 20
+    },
+    {
+      "id": "mq_val_dawn_trowel",
+      "name": "Dawn-Trowel of Arenthia",
+      "desc": "A trowel of bone-white wood, its edge gilded in the waterfall's spray. The handle is worn into a shape that no human hand quite fits, as if the gardener who used it was not human.",
+      "icon": 26
+    },
+    {
+      "id": "mq_val_gap_stone",
+      "name": "Gap-Stone",
+      "desc": "A hand-sized stone, smooth as an egg, wedged into a thorn-wall gap for years and worked loose only this week. The stone is cool, even in sunlight, and bears a chisel-mark no Bosmer smith would own.",
+      "icon": 21
+    },
+    {
+      "id": "mq_val_boughs_acorn",
+      "name": "Acorn of the Growing Bough",
+      "desc": "An acorn the size of a plum, from the bough that adds a floor every year. It is warm, and in your palm it twitches faintly, as if wanting to be planted.",
+      "icon": 20
+    },
+    {
+      "id": "mq_val_plank_deed",
+      "name": "Deed to the Disputed Plank",
+      "desc": "A neatly-worded deed dated three generations ago, giving the shared plank of Sren Ja to 'whoever sweeps it first'. A smudge on the bottom corner could be a stamp, or a thumb.",
+      "icon": 11
+    },
+    {
+      "id": "mq_val_cut_staff",
+      "name": "The Cut Staff",
+      "desc": "A straight young staff of green ash, still weeping sap at the end where it was cut. It was taken from a living tree, and the tree has been bleeding quietly ever since.",
+      "icon": 20
+    },
+    {
+      "id": "mq_val_toll_ribbon",
+      "name": "Toll-Ribbon of the Mist",
+      "desc": "A strip of silver ribbon the Silvenar's court ties round a passer's wrist when they have paid the mist-toll. Both ends are knotted. One is knotted wrongly, with a Baandari hand.",
+      "icon": 11
+    },
+    {
+      "id": "mq_val_hidden_sugar",
+      "name": "Moon-Sugar in a Wagon-Wheel",
+      "desc": "A hollow wagon-wheel hub packed with grey-white crystals of moon-sugar. A Bosmer tongue would find it strange; a Khajiit would weep. It is worth a very large sum, and a very small sentence.",
+      "icon": 11
+    },
+    {
+      "id": "mq_val_three_dyes",
+      "name": "Three Dyes of Arenthia",
+      "desc": "Three stoppered vials: moss-green, falls-silver and dawn-pink. Each was gathered where the water meets the light, and each shifts hue when you look at it from the side.",
+      "icon": 20
+    }
+  ],
+  "bosses": {
+    "mq_val_blight_heart": {
+      "name": "The Blight-Heart of Elden Root",
+      "type": "nirncraft:spriggan",
+      "hp": 4.2,
+      "dmg": 1.6,
+      "level": 30,
+      "drop": "loot:major",
+      "glow": true
+    },
+    "mq_val_middens_fence": {
+      "name": "Peddler Sorwe Rat-Tail",
+      "type": "nirncraft:bandit_chief",
+      "hp": 2.8,
+      "dmg": 1.3,
+      "level": 18,
+      "weapon": "nirncraft:bosmer_dagger",
+      "gear": {
+        "chest": "nirncraft:bosmer_chestplate"
+      },
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "mq_val_river_wraith": {
+      "name": "The Drowned Ford-Warden",
+      "type": "nirncraft:will_o_wisp",
+      "hp": 4,
+      "dmg": 1.5,
+      "level": 28,
+      "drop": "loot:major",
+      "glow": true
+    },
+    "mq_val_weave_saboteur": {
+      "name": "Raik Mushroom-Hand",
+      "type": "nirncraft:bandit_chief",
+      "hp": 2.9,
+      "dmg": 1.3,
+      "level": 20,
+      "weapon": "nirncraft:bosmer_dagger",
+      "gear": {
+        "head": "nirncraft:bosmer_helmet"
+      },
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "mq_val_archive_guardian": {
+      "name": "The Root-Wrapped Archivist",
+      "type": "nirncraft:draugr_deathlord",
+      "hp": 3.6,
+      "dmg": 1.5,
+      "level": 28,
+      "weapon": "nirncraft:bosmer_sword",
+      "gear": {
+        "head": "nirncraft:bosmer_helmet"
+      },
+      "drop": "loot:major",
+      "glow": true
+    },
+    "mq_val_wood_witch": {
+      "name": "Hagraven Nelloth the Sap-Spinner",
+      "type": "nirncraft:hagraven",
+      "hp": 3.6,
+      "dmg": 1.5,
+      "level": 26,
+      "drop": "loot:standard",
+      "glow": true
+    },
+    "mq_val_falls_stalker": {
+      "name": "The Fall-Stalker",
+      "type": "nirncraft:sabre_cat",
+      "hp": 3.4,
+      "dmg": 1.5,
+      "level": 22,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "mq_val_wall_breaker": {
+      "name": "Gurzun Wall-Breaker",
+      "type": "nirncraft:troll",
+      "hp": 3,
+      "dmg": 1.5,
+      "level": 24,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "mq_val_hound_stealer": {
+      "name": "Gorrun Hound-Taker",
+      "type": "nirncraft:bandit_chief",
+      "hp": 2.8,
+      "dmg": 1.3,
+      "level": 18,
+      "weapon": "nirncraft:bosmer_sword",
+      "gear": {
+        "chest": "nirncraft:bosmer_chestplate"
+      },
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "mq_val_sugar_runner": {
+      "name": "Zar'ha the Wheel-Wright",
+      "type": "nirncraft:bandit_chief",
+      "hp": 3,
+      "dmg": 1.4,
+      "level": 22,
+      "weapon": "nirncraft:khajiit_dagger",
+      "drop": "loot:standard",
+      "glow": false
+    }
+  },
+  "scenes": {
+    "mq_val_er_tier_one": [
+      [
+        "narrator",
+        "Root-light falls in green bars across the market. Where the great roots arch overhead, the sap-lanterns burn amber, and every one of them flickers in time with a slow, uneven pulse."
+      ],
+      [
+        "mq_val_beron",
+        "Hear that? Beron has tapped these roots for thirty years. The pulse was a heartbeat. Now it is a stutter. The tree is not asleep, walker. The tree is feverish."
+      ]
+    ],
+    "mq_val_er_crown_rot": [
+      [
+        "narrator",
+        "In the Crown, a single bough has gone black. Its leaves hang like wet cloth, and each one is edged with a fine pale mould that glints like sugar."
+      ],
+      [
+        "mq_val_aeth",
+        "The Silvenar has not been told. The Court believes a bough has merely died, as boughs do. It has not. It is being eaten from the inside, and it is eating back."
+      ]
+    ],
+    "mq_val_fal_crossing": [
+      [
+        "narrator",
+        "The roots go under the water one at a time, groping like fingers into dark. Each root takes its hold, then draws the city after it. Along the bank the pilgrims stand silent, afraid to breathe."
+      ],
+      [
+        "mq_val_maelin",
+        "This is the crossing, walker. A hundred seasons ago it was a ford. Now it is a river with a memory. Something below remembers being a ford, and it does not wish to be crossed."
+      ]
+    ],
+    "mq_val_woo_node": [
+      [
+        "narrator",
+        "Twelve stories up the Weave, a main-support node sways in the wind. Its great knot is soft and black, and when Tilu's mallet strikes it the sound is a dull, sick thud."
+      ],
+      [
+        "mq_val_tilu",
+        "Hear that? A sound knot sings. That one wheezes. Someone has been feeding it. A knot does not rot in a month unless it is helped."
+      ]
+    ],
+    "mq_val_sil_gate": [
+      [
+        "narrator",
+        "The mist parts on a wall of living root. Fireflies drift in lazy loops about a single arched gap no wider than a man, lit from within by a slow green glow."
+      ],
+      [
+        "mq_val_gatewarden",
+        "You came by the east path. Nobody comes by the east path. It is not on any map. Either you are very lost or very well informed, and I do not know which is more alarming."
+      ]
+    ],
+    "mq_val_raw_ritual": [
+      [
+        "narrator",
+        "The trees on either side of the road are hung with ribbons, bone chimes and small dripping cups. A procession of Bosmer in green paint wades through the mist, singing very low."
+      ],
+      [
+        "mq_val_shaka",
+        "Do not break step, and do not look at the lead singer. It is the Pact's tithe-walk. If a wagon crosses their path, they will assume the wagon is the tithe."
+      ]
+    ],
+    "mq_val_are_dawn": [
+      [
+        "narrator",
+        "The first light strikes the falls, and every drop of spray becomes a fleck of gold. On the terrace, in the exact point where the light lands, a single patch of bare ground steams faintly."
+      ],
+      [
+        "mq_val_eld",
+        "Here. This is where Eld's grandmother planted. The seeds will wake in the light, if they are wanted, and they will be wanted if you say so out loud."
+      ]
+    ],
+    "mq_val_mar_gap": [
+      [
+        "narrator",
+        "The Thorn Wall rises in a green-black tangle, each thorn as long as a finger. Near its base a hole has been worked through, neat as a doorway, and the hedge on either side has been bent back, not cut."
+      ],
+      [
+        "mq_val_cael",
+        "Not cut. Bent. The Pact forbids a cut. Whoever made this knew the Pact, and used it. They did not break the law. They simply read it more carefully than we did."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "mq_val_the_trees_fever",
+      "title": "The Tree's Fever",
+      "region": "valenwood/grahtwood",
+      "start": "npc:mq_val_beron",
+      "requires": [
+        "level:16"
+      ],
+      "offer": "You sound as if you are listening to something.",
+      "pitch": "The roots, walker. Listen. The lanterns pulse with the tree's own heart, and for a month now the beat has been wrong. Beron has tapped the first tier, the second tier, and the third. At each tier the sap runs a shade darker. Whatever is wrong began at the Crown and is running down. Climb with Beron's sap-gauge, tier by tier. Find the sick place. And then decide what is to be done with it, because Beron cannot.",
+      "desc": "Sap-Tapper Beron says the Elden Tree is feverish. The sap darkens at each tier, and whatever began in the Crown is spreading down the trunk.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "elden_hollow",
+          "text": "Test the sap at the root tier, in Elden Hollow",
+          "actions": "scene:mq_val_er_tier_one"
+        },
+        {
+          "type": "go",
+          "place": "the_orrery",
+          "text": "Climb to the second tier, where the Orrery hangs in the boughs, and test the sap again"
+        },
+        {
+          "type": "go",
+          "place": "elden_tree",
+          "text": "Climb to the Crown of the Elden Tree",
+          "actions": "scene:mq_val_er_crown_rot;relic:mq_val_blight_sap"
+        },
+        {
+          "type": "kill",
+          "place": "elden_tree",
+          "text": "Cut the Blight-Heart from the Crown bough",
+          "spawn": [
+            {
+              "boss_id": "mq_val_blight_heart"
+            },
+            {
+              "type": "nirncraft:spriggan",
+              "count": 2,
+              "name": "Blight-Sprout"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_aeth",
+          "text": "Tell the Silvenar's Voice what you found in the Crown",
+          "topic": "A blight was eating the Crown from within. Black sap, and a heart that was not the tree's own. It is cut out, and the bough is dying.",
+          "reply": "Aeth is quiet for the length of a long breath. \"The Pact forbids us to harm the living wood. You have cut a living bough, in the Silvenar's own city. By the letter, you have broken the oldest of our laws. By the spirit...\" He stops. \"The Court asks what you did it for. Say it plainly, and the Court will decide whether to thank you or to judge you.\"",
+          "choices": [
+            {
+              "label": "I did it to save the tree. The Pact was written for a healthy forest.",
+              "reply": "Aeth lets out a breath. \"A fair answer. Not the one the Court wants. But the one Aeth would have given. The Silvenar will hear it as you said it. He may even agree.\"",
+              "actions": "flag:mq_val_fever_defended"
+            },
+            {
+              "label": "I did it because the tree was dying, and nobody else would.",
+              "reply": "Aeth's shoulders ease a hair. \"Then you have done what the Pact's wardens could not. They will not forgive you for it. The tree might.\"",
+              "actions": "flag:mq_val_fever_honest;loot:standard"
+            }
+          ],
+          "place": "elden_root"
+        }
+      ],
+      "outro": "The Crown bough was cut, and the sap runs amber again from root to leaf. A law was bent, for the sake of a tree, and Elden Root has not yet decided whether to be grateful.",
+      "rewards": {
+        "gold": 800,
+        "loot": "major",
+        "items": [
+          {
+            "item": "nirncraft:bosmer_bow",
+            "name": "Heartwood Remembrance",
+            "enchant": {
+              "power": 3,
+              "unbreaking": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "grahtwood.L7.crown_court_thalmor",
+        "grahtwood.L7.root_poor"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_trees_fever_resolved",
+        "flag": "conseq_mq_val_the_trees_fever",
+        "summary": "The Crown bough was cut, and the sap runs amber again from root to leaf. A law was bent, for the sake of a tree, and Elden Root has not yet decided whether to be grateful."
+      }
+    },
+    {
+      "id": "mq_val_sound_in_the_middens",
+      "title": "The Sound of the Middens",
+      "region": "valenwood/grahtwood",
+      "start": "npc:mq_val_lirael",
+      "requires": [
+        "level:12"
+      ],
+      "offer": "Your gate has a bruise under its paint.",
+      "pitch": "It has, walker. Seven lamps have gone missing from the Gate in a month. Not the oil. The lamps. Cut right out of their brackets, no damage to the wood. A Bosmer may not damage the wood, so whoever did it was a Bosmer, and a good one. And every lamp that vanishes turns up for sale in the Middens, for a quarter its price. Find the buyer. Find the seller. Find whoever is clever enough to cut without cutting.",
+      "desc": "Seven Root Gate lamps were stolen without damage to the wood and are being sold cheaply in the Middens. Wardress Lirael wants the clever thief.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "the_middens",
+          "text": "Search the Middens for the stolen Root Gate lamps"
+        },
+        {
+          "type": "kill",
+          "place": "the_middens",
+          "text": "Corner the fence, Peddler Sorwe Rat-Tail",
+          "spawn": [
+            {
+              "boss_id": "mq_val_middens_fence"
+            },
+            {
+              "type": "npc:thief",
+              "count": 2,
+              "name": "Middens Cutpurse",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_lirael",
+          "text": "Tell Lirael who was cutting her lamps free",
+          "topic": "The fence was Sorwe Rat-Tail. The cutter is a boy, a gate-lantern apprentice, who has a very good hand and a very bad master.",
+          "reply": "Lirael sets her jaw. \"A boy. A very good hand. Hm. The Pact says no harm to the living wood, and he never harmed it. He is a better thief than the Gate is a guard. Do you want him punished, or apprenticed?\"",
+          "choices": [
+            {
+              "label": "Apprentice him to the Gate. He has the hand for it.",
+              "reply": "Lirael nods slowly. \"A thief at the gate is a lock that knows the key. Very well. He will sweep the stair for a year, and then perhaps trim lamps for a decade.\"",
+              "actions": "flag:mq_val_lamp_apprenticed"
+            },
+            {
+              "label": "Fine him and let his master pay. The master is the real thief.",
+              "reply": "Lirael's ears flick. \"Then the master will pay. In coin, in lamps and in the opinion of the Gate. A good answer. A harder one.\"",
+              "actions": "flag:mq_val_lamp_master_fined"
+            }
+          ],
+          "place": "elden_root"
+        }
+      ],
+      "outro": "The seven lamps hang in their brackets again, and a boy with a very good hand has been told that it is a gift, not a licence.",
+      "rewards": {
+        "gold": 320,
+        "loot": "standard"
+      },
+      "why": [
+        "grahtwood.L7.root_poor",
+        "grahtwood.L7.delta_merchants"
+      ],
+      "consequence": {
+        "world_state": "mq_val_sound_in_the_middens_resolved",
+        "flag": "conseq_mq_val_sound_in_the_middens",
+        "summary": "The seven lamps hang in their brackets again, and a boy with a very good hand has been told that it is a gift, not a licence."
+      }
+    },
+    {
+      "id": "mq_val_the_root_festival_arrow",
+      "title": "The Arrow of the Root Festival",
+      "region": "valenwood/grahtwood",
+      "start": "npc:mq_val_acorn",
+      "requires": [
+        "level:10"
+      ],
+      "offer": "The Hollow Acorn is awfully full for a weekday.",
+      "pitch": "It is the Root Festival, walker! Three days of archery and three nights of arguments about archery. The prize is the Arrow, a gold-tipped heirloom, and the cup is all to the Hollow Acorn, where the winner drinks first. Fenwe has a cousin who has won it nine times and the other tables are muttering that she cheats. Fenwe is certain she does not. But she would be very glad to see someone else take the prize, just once, so the muttering stops.",
+      "desc": "Fenwe wants someone to enter the archery contest of the Root Festival and take the Arrow, if only to quiet the muttering about her champion cousin.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "elden_hollow",
+          "text": "Enter the archery contest at Elden Hollow"
+        },
+        {
+          "type": "kill",
+          "place": "elden_hollow",
+          "text": "Defeat the nine-time champion, Archer Lewen Nine-Arrows",
+          "spawn": [
+            {
+              "type": "npc:hunter",
+              "count": 1,
+              "name": "Lewen Nine-Arrows",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_acorn",
+          "text": "Bring the Arrow back to Fenwe",
+          "topic": "I won the Arrow of the Root Festival. Your cousin shot cleanly; she did not cheat. I was simply better, once.",
+          "reply": "Fenwe's ears go flat, then up. \"She did not cheat! Ha! Then the muttering will go on, but about you, which is entirely fair. Walker, drink first tonight. The Hollow Acorn bows to the Arrow, whoever holds it.\"",
+          "place": "elden_root"
+        }
+      ],
+      "outro": "The Arrow of the Root Festival was won by a stranger, and Lewen Nine-Arrows took the defeat with a very straight back and a very fast second round.",
+      "rewards": {
+        "gold": 260,
+        "loot": "minor",
+        "items": [
+          {
+            "item": "nirncraft:bosmer_bow",
+            "name": "Festival Arrow-Bow",
+            "enchant": {
+              "power": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "grahtwood.L7.delta_merchants",
+        "grahtwood.L8.elden_temple"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_root_festival_arrow_resolved",
+        "flag": "conseq_mq_val_the_root_festival_arrow",
+        "summary": "The Arrow of the Root Festival was won by a stranger, and Lewen Nine-Arrows took the defeat with a very straight back and a very fast second round."
+      }
+    },
+    {
+      "id": "mq_val_chasing_the_walk",
+      "title": "Chasing the Walk",
+      "region": "valenwood/malabal_tor",
+      "start": "npc:mq_val_hael",
+      "requires": [
+        "level:18"
+      ],
+      "offer": "You look like someone who has been walking behind something.",
+      "pitch": "Eleven years, walker. Hael has followed Falinesti from spring to summer to autumn to winter and back, and has never once been at the gate when it opened. Always a day late, always a day early. He has made a bet with himself. Today he will stand where the city will be, not where it is. He needs someone to take the crossing with him. He does not like water.",
+      "desc": "Pilgrim Hael has chased Falinesti for eleven years. He wants to ride the city across a river crossing, and needs a companion for the water.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "falinesti_spring_site",
+          "text": "Reach the Spring site before the city leaves it"
+        },
+        {
+          "type": "go",
+          "place": "falinesti_summer_site",
+          "text": "Travel to the Summer site with the walking city"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Wait until night, when the roots move",
+          "place": "falinesti_summer_site",
+          "actions": "scene:mq_val_fal_crossing"
+        },
+        {
+          "type": "kill",
+          "place": "falinesti_summer_site",
+          "text": "Defend the crossing from the Drowned Ford-Warden",
+          "spawn": [
+            {
+              "boss_id": "mq_val_river_wraith"
+            },
+            {
+              "type": "minecraft:drowned",
+              "count": 3,
+              "name": "Ford-Drowned"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_hael",
+          "text": "Find Hael on the far bank",
+          "topic": "We crossed. The city is on the other side of the river now. Hael, the road ends here. Will you settle, or keep walking?",
+          "reply": "Hael sits down on the bank like a man who has put down a very heavy parcel. \"Eleven years. Hael has been so busy following that he never thought what he would do on arrival. A house? A garden? He has never owned a door. What would you do, walker?\"",
+          "choices": [
+            {
+              "label": "Settle. Let the city carry you now.",
+              "reply": "Hael closes his eyes. \"Then a door. A small one, on the second branch. Hael will plant a tomato and tell it all about the road. Thank you for the crossing.\"",
+              "actions": "flag:mq_val_hael_settled"
+            },
+            {
+              "label": "Keep walking. The city is not the whole forest.",
+              "reply": "Hael laughs with sudden joy. \"Not the whole forest! Of course. There is Reaper's March, and the coast, and the Orcs of Drabul, who owe Hael a song. Walker, Hael will walk to the end of the world in your honour.\"",
+              "actions": "flag:mq_val_hael_walks;loot:standard"
+            }
+          ],
+          "place": "falinesti"
+        }
+      ],
+      "outro": "A pilgrim of eleven years finally arrived. What he did next was his to choose, and the walking city, patient as ever, moved on.",
+      "rewards": {
+        "gold": 740,
+        "loot": "major"
+      },
+      "why": [
+        "malabal_tor.L8.green_lady_trials",
+        "malabal_tor.L9.lady_succession"
+      ],
+      "consequence": {
+        "world_state": "mq_val_chasing_the_walk_resolved",
+        "flag": "conseq_mq_val_chasing_the_walk",
+        "summary": "A pilgrim of eleven years finally arrived. What he did next was his to choose, and the walking city, patient as ever, moved on."
+      }
+    },
+    {
+      "id": "mq_val_the_season_the_city_forgot",
+      "title": "The Season the City Forgot",
+      "region": "valenwood/malabal_tor",
+      "start": "npc:mq_val_eri",
+      "requires": [
+        "level:14"
+      ],
+      "offer": "Your memory looks heavier than your satchel.",
+      "pitch": "It is, walker. Falinesti has stood on four sites, in four seasons, for a thousand years. But Eri has a fifth in her notes. A season the city stood somewhere none of the sites are, and no chronicle records. A season that was cut out of the record, by someone with a knife and a very good reason. Eri wants to know what the city did during it. Whatever it was, the roots remember.",
+      "desc": "Lorekeeper Eri has found evidence of a fifth season, deliberately cut from the chronicles of the walking city. The autumn site may remember it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "falinesti_autumn_site",
+          "text": "Visit the Autumn site and search for what the chronicles cut"
+        },
+        {
+          "type": "retrieve",
+          "place": "falinesti_autumn_site",
+          "text": "Find the buried Acorn of the Autumn Site",
+          "relic": "mq_val_autumn_acorn"
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_val_eri",
+          "relic": "mq_val_autumn_acorn",
+          "text": "Show the acorn to Eri",
+          "topic": "This acorn grew from a seed the city dropped on a season it did not record. It is a fifth planting.",
+          "reply": "Eri turns the acorn over twice, and her breath catches. \"A planting. The city dropped it deliberately. In the fifth season, it did not walk. It stopped, and grew a thing, and that thing was a grove. Walker, there is a grove somewhere that the city planted for itself. And the Tenders cut the season from the record to stop anyone from finding it.\"",
+          "choices": [
+            {
+              "label": "Write it into the chronicles. Let the grove be found.",
+              "reply": "Eri inks the margin with a steady hand. \"Then it is written, for the first time. Some will go looking. Some should. The city will not mind.\"",
+              "actions": "flag:mq_val_season_written"
+            },
+            {
+              "label": "Keep the secret. The city planted it for itself.",
+              "reply": "Eri closes her notebook gently. \"Then it stays between you, the acorn and me. A walking city is entitled to one thing it has not told. Thank you for the hard choice.\"",
+              "actions": "flag:mq_val_season_kept"
+            }
+          ],
+          "place": "falinesti"
+        }
+      ],
+      "outro": "A fifth season of Falinesti is known to two people, or to everyone, depending on whom you ask.",
+      "rewards": {
+        "gold": 460,
+        "loot": "standard"
+      },
+      "why": [
+        "malabal_tor.L9.lady_succession",
+        "malabal_tor.L9.orc_truce"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_season_the_city_forgot_resolved",
+        "flag": "conseq_mq_val_the_season_the_city_forgot",
+        "summary": "A fifth season of Falinesti is known to two people, or to everyone, depending on whom you ask."
+      }
+    },
+    {
+      "id": "mq_val_the_fraying",
+      "title": "The Fraying",
+      "region": "valenwood/greenshade",
+      "start": "npc:mq_val_tilu",
+      "requires": [
+        "level:14"
+      ],
+      "offer": "Your mallet looks worried.",
+      "pitch": "It is, walker. Three nodes on the Weave have gone soft in a month, and none of them near water, none of them near any rot. A bridge-knot rots when it is helped. Somebody has been feeding them, with a paste that smells of mushrooms, and whoever it is climbs better than any warden. Tilu would catch them herself, but she is afraid of heights. She does not tell anyone.",
+      "desc": "Bridge-Warden Tilu says three of Woodhearth's main bridge-knots have been rotted on purpose. Someone is climbing the Weave and feeding the nodes with a mushroom paste.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "woodhearth",
+          "text": "Climb the Great Weave and inspect the soft node",
+          "actions": "scene:mq_val_woo_node;relic:mq_val_rotted_knot"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Wait in the shadow of the hub until the saboteur climbs",
+          "place": "woodhearth"
+        },
+        {
+          "type": "kill",
+          "place": "woodhearth",
+          "text": "Catch the saboteur on the Weave",
+          "spawn": [
+            {
+              "boss_id": "mq_val_weave_saboteur"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_hush",
+          "text": "Ask Elder Hush why the ground-camp's children were seen on the Weave",
+          "topic": "The saboteur, Raik, said the camp's children have been hauling mushrooms up the Weave. Why would they do that?",
+          "reply": "Hush is silent for the length of a long breath. \"Because nobody listens to those who live below. Raik told the children it would make the bridges sing, and they believed him. They are cubs, walker. They have been told for years the bridges are not for them. Now someone has made the bridges ask for them.\"",
+          "choices": [
+            {
+              "label": "Have the ground-camp rebuild the Weave. Let them earn the right to cross it.",
+              "reply": "Hush's eyes shine. \"A bridge built by the hands that have been told they cannot cross. Yes. The camp will weave a rope that will outlast the Warden herself. And the Warden will have to look at us.\"",
+              "actions": "flag:mq_val_weave_camp_rebuilds"
+            },
+            {
+              "label": "Pay the camp to repair the nodes, and bring Tilu in to oversee.",
+              "reply": "Hush nods. \"A fair wage and a fair eye. Not quite a victory. A beginning. Thank you.\"",
+              "actions": "flag:mq_val_weave_paid;loot:standard"
+            }
+          ],
+          "place": "woodhearth"
+        }
+      ],
+      "outro": "Raik Mushroom-Hand was cut down from the Weave, and the ground-camp's children, to their great astonishment, were handed ropes and told they were wanted.",
+      "rewards": {
+        "gold": 560,
+        "loot": "standard",
+        "items": [
+          {
+            "item": "nirncraft:bosmer_dagger",
+            "name": "Warden's Mallet-Knife",
+            "enchant": {
+              "sharpness": 2,
+              "unbreaking": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "greenshade.L9.maormer_shore",
+        "greenshade.L10.wilderking_spirits"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_fraying_resolved",
+        "flag": "conseq_mq_val_the_fraying",
+        "summary": "Raik Mushroom-Hand was cut down from the Weave, and the ground-camp's children, to their great astonishment, were handed ropes and told they were wanted."
+      }
+    },
+    {
+      "id": "mq_val_the_net_that_caught_nothing",
+      "title": "The Net That Caught Nothing",
+      "region": "valenwood/greenshade",
+      "start": "npc:mq_val_orwen",
+      "requires": [
+        "level:10"
+      ],
+      "offer": "A net-trader who looks bothered is a rare thing.",
+      "pitch": "Orwen has woven nets for forty years, walker. This one he did not weave. It arrived in a crate with no sender, wound around a single stone. It catches nothing. Fish, birds, flies, nothing. A net that catches nothing is not a net. Orwen would like to know what it is a net for.",
+      "desc": "Net-Trader Orwen received an unmarked net that catches nothing. The stone it came wrapped around may tell what it was meant to catch.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "echo_pond",
+          "text": "Cast the net into Echo Pond and see what it does"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Wait at the pond until the net stirs",
+          "place": "echo_pond"
+        },
+        {
+          "type": "kill",
+          "place": "echo_pond",
+          "text": "Kill what the net has caught in the still water",
+          "spawn": [
+            {
+              "type": "nirncraft:will_o_wisp",
+              "count": 1,
+              "name": "Netted Marsh-Light",
+              "target": true
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_orwen",
+          "text": "Tell Orwen what the net was meant to catch",
+          "topic": "It was made to catch lights. A will-o-wisp, a marsh-light. Someone wanted one alive, and sent the net to the best net-trader in Greenshade.",
+          "reply": "Orwen pulls at his ear. \"Lights. Of course. A net for lights does not catch fish. It catches, hm, a different kind of prey. The weaver would be a Wispmother's apprentice, or a bored witch. Orwen will weave a second net, the same, and send it on, for the sender's sake. They will need two.\"",
+          "place": "woodhearth"
+        }
+      ],
+      "outro": "A net that catches nothing has caught something after all, and Orwen has begun to wonder who is knitting at the other end of the string.",
+      "rewards": {
+        "gold": 230,
+        "loot": "minor"
+      },
+      "why": [
+        "greenshade.L10.wilderking_spirits",
+        "greenshade.L10.city_of_ash"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_net_that_caught_nothing_resolved",
+        "flag": "conseq_mq_val_the_net_that_caught_nothing",
+        "summary": "A net that catches nothing has caught something after all, and Orwen has begun to wonder who is knitting at the other end of the string."
+      }
+    },
+    {
+      "id": "mq_val_the_silent_court",
+      "title": "The Silent Court",
+      "region": "valenwood/malabal_tor",
+      "start": "npc:mq_val_scribe",
+      "requires": [
+        "level:16"
+      ],
+      "offer": "You write as if in a hurry.",
+      "pitch": "The Silvenar has not spoken in public for nine days, walker. Ethelwe writes down everything he says, and for nine days the page has been blank. The Court says he is meditating. Ethelwe thinks he is afraid. There is a scroll in the Root Archive that he asked for on the tenth night, and has not returned. If you can enter the Court and reach the Archive, bring it to me. Before anyone else reads what is on it.",
+      "desc": "The Silvenar has been silent for nine days. Ethelwe suspects the cause is a scroll he borrowed from the Root Archive, which she wants retrieved.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "silvenar_vale",
+          "text": "Find the east path to the Firefly Gate",
+          "actions": "scene:mq_val_sil_gate"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_gatewarden",
+          "text": "Win an audience at the Firefly Gate",
+          "topic": "I carry word from the Silvenar's Scribe. I would like to enter, quietly, and speak with the Archivist.",
+          "reply": "Wren looks at you for a very long, flat moment. \"The Scribe's word is the Scribe's. Mine is mine. You will walk the south stair and not the north. You will not touch the fireflies, and you will not, under any circumstances, speak to the root-wrapped thing in the bottom archive.\"",
+          "actions": "relic:mq_val_audience_token",
+          "place": "silvenar"
+        },
+        {
+          "type": "go",
+          "place": "roots_of_silvenar",
+          "text": "Descend the south stair to the Root Archive"
+        },
+        {
+          "type": "kill",
+          "place": "roots_of_silvenar",
+          "text": "Defeat the Root-Wrapped Archivist that guards the lowest stacks",
+          "spawn": [
+            {
+              "boss_id": "mq_val_archive_guardian"
+            }
+          ],
+          "placement": "structure",
+          "actions": "relic:mq_val_silvenar_scroll"
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_val_scribe",
+          "relic": "mq_val_silvenar_scroll",
+          "text": "Bring the scroll to Ethelwe",
+          "topic": "I have your scroll. The page is blank. Whoever wrote it did so for a reader who has not yet been born.",
+          "reply": "Ethelwe takes the scroll with unsteady fingers and does not unroll it. \"Blank. Then it is the Silent Scroll, the one that records what the Silvenar will say, not what he has. He asked for it so he would know. I think he has known, and it frightened him. Will you have me burn it, or put it back?\"",
+          "choices": [
+            {
+              "label": "Burn it. A king should not be told what he will say.",
+              "reply": "Ethelwe lays the scroll on a lamp and watches it curl. \"The page was blank, and now it is ash, and the Silvenar will speak tomorrow, and not know what. It is a mercy. Perhaps.\"",
+              "actions": "flag:mq_val_scroll_burned"
+            },
+            {
+              "label": "Put it back. Let him read it when he is ready.",
+              "reply": "Ethelwe ties the ribbon again with reverent care. \"A kinder cruelty. Perhaps he will read it. Perhaps he will not. It will wait. Thank you.\"",
+              "actions": "flag:mq_val_scroll_returned;loot:standard"
+            }
+          ],
+          "place": "silvenar"
+        }
+      ],
+      "outro": "The Silvenar spoke the next morning, brief and clear, as if a weight had left his shoulders. Whether the scroll was ash or shelf-bound, Silvenar had decided to be unafraid.",
+      "rewards": {
+        "gold": 720,
+        "loot": "major"
+      },
+      "why": [
+        "malabal_tor.L10.tomb_of_the_apostates",
+        "malabal_tor.L10.hoarvor_pit"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_silent_court_resolved",
+        "flag": "conseq_mq_val_the_silent_court",
+        "summary": "The Silvenar spoke the next morning, brief and clear, as if a weight had left his shoulders. Whether the scroll was ash or shelf-bound, Silvenar had decided to be unafraid."
+      }
+    },
+    {
+      "id": "mq_val_a_debt_of_fireflies",
+      "title": "A Debt of Fireflies",
+      "region": "valenwood/malabal_tor",
+      "start": "npc:mq_val_firefly_lantern",
+      "requires": [
+        "level:10"
+      ],
+      "offer": "The jars have gone dim, Pip.",
+      "pitch": "They have, walker, and it is not the glass. The fireflies are sulking, and no firefly sulks for a month unless its relatives have been shut away. Someone has jarred the wild swarm that lives by the audience hall, and the tavern's own flies are sulking in sympathy. Pip has no idea who. Pip is going to be sick.",
+      "desc": "Pip's tavern fireflies are sulking because someone has jarred the wild swarm near the audience hall. He wants the swarm released.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "silvenars_audience_hall",
+          "text": "Search the grounds of the audience hall for the jarred swarm"
+        },
+        {
+          "type": "kill",
+          "place": "silvenars_audience_hall",
+          "text": "Stop the collector who jarred the swarm",
+          "spawn": [
+            {
+              "type": "npc:thief",
+              "count": 1,
+              "name": "Lantern-Seller Thorn",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_firefly_lantern",
+          "text": "Tell Pip the swarm is free",
+          "topic": "The swarm is free. The collector was a lantern-seller who did not care for the midnight ceremony.",
+          "reply": "Pip claps his paws to his chest in relief. \"Free! Oh, the poor things. And Pip, who thought he was the villain! I have been releasing them on the stroke of midnight and they hate it, and I have never asked. Walker, from tonight, they will go out whenever they like. The Firefly Lantern will be as dark as it pleases.\"",
+          "place": "silvenar"
+        }
+      ],
+      "outro": "The fireflies of Silvenar were freed by a stranger and a very contrite tavern-keeper. The midnight ceremony has been quietly retired.",
+      "rewards": {
+        "gold": 190,
+        "loot": "minor"
+      },
+      "why": [
+        "malabal_tor.L10.hoarvor_pit",
+        "malabal_tor.L7.silvenar_court"
+      ],
+      "consequence": {
+        "world_state": "mq_val_a_debt_of_fireflies_resolved",
+        "flag": "conseq_mq_val_a_debt_of_fireflies",
+        "summary": "The fireflies of Silvenar were freed by a stranger and a very contrite tavern-keeper. The midnight ceremony has been quietly retired."
+      }
+    },
+    {
+      "id": "mq_val_a_wagon_through_the_green_pact",
+      "title": "A Wagon Through the Green Pact",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_shaka",
+      "requires": [
+        "level:14"
+      ],
+      "offer": "A wagon full of canvas and a face full of worry.",
+      "pitch": "Wagon, walker. Silk and sugar for Marbruk, three days away, through Pact country. A wagon is made of wood. The Pact forbids a felled tree or a cart wheel that bruises a root. The Pact has patrols. Sha'ka has a waiver, signed by someone who may or may not exist. If the wagon is stopped, say you are with me. If it is not, say nothing, and stay off the rootways.",
+      "desc": "Trader Sha'ka needs her wagon of silk and sugar escorted through Green Pact country to Marbruk without breaking a single root.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_val_shaka",
+          "text": "Take the Waiver of the Green Pact from Sha'ka",
+          "topic": "I will see the wagon through. What is in it, truly, besides silk and sugar?",
+          "reply": "Sha'ka's ears twitch. \"Silk. Sugar. Eleven rolls of Pact-green cloth the Wardens do not know I own. Walker, take the waiver, and if a patrol asks to look, show them the silk, and talk about the weather.\"",
+          "actions": "relic:mq_val_pact_waiver",
+          "place": "rawlkha"
+        },
+        {
+          "type": "go",
+          "place": "reapers_henge",
+          "text": "Cross the Pact's tithe-walk at Reaper's Henge",
+          "actions": "scene:mq_val_raw_ritual"
+        },
+        {
+          "type": "kill",
+          "place": "thibauts_cairn",
+          "text": "Drive off the Hagraven that haunts the cairn road",
+          "spawn": [
+            {
+              "boss_id": "mq_val_wood_witch"
+            }
+          ]
+        },
+        {
+          "type": "go",
+          "place": "marbruk",
+          "text": "Bring the wagon into Marbruk without breaking a root"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_mohr",
+          "text": "Return to Mohr at the Caravan Gate and report the wagon safe",
+          "topic": "The wagon went through. Nobody was stopped. The Pact was not offended, as far as I know.",
+          "reply": "Mohr stretches, which takes a surprisingly long time. \"Through the Pact and out the other side. Sha'ka owes you a bolt of silk and she will not say it. Mohr says it for her. Take this. It is an honest shield, borrowed, and it has never been struck.\"",
+          "choices": [
+            {
+              "label": "Tell the Pact's Wardens about the eleven rolls of green cloth.",
+              "reply": "Mohr nods grimly. \"It is the Pact's cloth by right. A Warden will visit Sha'ka. She will be furious, and she will, I think, forgive you.\"",
+              "actions": "flag:mq_val_wagon_reported"
+            },
+            {
+              "label": "Keep the secret. Sha'ka's cloth is her own.",
+              "reply": "Mohr almost smiles. \"Good. A secret is a better cargo than silk. She will remember it.\"",
+              "actions": "flag:mq_val_wagon_secret;loot:standard"
+            }
+          ],
+          "place": "rawlkha"
+        }
+      ],
+      "outro": "A wagon passed through Green Pact country without bruising a root, and a cloth merchant of Rawlkha now owes a stranger more than she is willing to say aloud.",
+      "rewards": {
+        "gold": 540,
+        "loot": "standard"
+      },
+      "why": [
+        "reapers_march.L10.selenes_web",
+        "reapers_march.L7.mixed_town_rank"
+      ],
+      "consequence": {
+        "world_state": "mq_val_a_wagon_through_the_green_pact_resolved",
+        "flag": "conseq_mq_val_a_wagon_through_the_green_pact",
+        "summary": "A wagon passed through Green Pact country without bruising a root, and a cloth merchant of Rawlkha now owes a stranger more than she is willing to say aloud."
+      }
+    },
+    {
+      "id": "mq_val_fortunes_in_a_bracelet",
+      "title": "Fortunes in a Bracelet",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_pura",
+      "requires": [
+        "level:10"
+      ],
+      "offer": "Your bracelet is pulling at its thread.",
+      "pitch": "It is, walker, and it should not. Pura weaves the fortunes. Pura does not choose them. But three customers have returned with the same fortune, in different threads, the same shape, the same knot at the end. Someone has been tampering with her loom. A fortune is not a thing a tailor should be tampering with.",
+      "desc": "Pura's loom has produced the same fortune for three different customers. Someone is tampering with it, and she wants the tamperer found.",
+      "objectives": [
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Hide among the silk bolts at Pura's loom and wait for the tamperer",
+          "place": "rawlkha"
+        },
+        {
+          "type": "kill",
+          "place": "rawlkha",
+          "text": "Catch the tamperer at the loom",
+          "spawn": [
+            {
+              "type": "npc:thief",
+              "count": 1,
+              "name": "Midnight Weaver",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_pura",
+          "text": "Tell Pura what the tamperer was weaving",
+          "topic": "A rival weaver from Arenthia wanted the same fortune woven for three customers, to make them all travel to the Hanging Gardens. A commercial fortune.",
+          "reply": "Pura laughs behind her paw until she has to wipe her eyes. \"A commercial fortune! Three customers sent to Arenthia for the same pretty garden. Walker, that is the first honest fortune Pura's loom has ever told. She will weave it herself next time, and charge a commission.\"",
+          "place": "rawlkha"
+        }
+      ],
+      "outro": "The Hanging Gardens had a very busy summer, and Pura's loom, for once, was satisfied.",
+      "rewards": {
+        "gold": 200,
+        "loot": "minor"
+      },
+      "why": [
+        "reapers_march.L7.mixed_town_rank",
+        "reapers_march.L7.truce_elders"
+      ],
+      "consequence": {
+        "world_state": "mq_val_fortunes_in_a_bracelet_resolved",
+        "flag": "conseq_mq_val_fortunes_in_a_bracelet",
+        "summary": "The Hanging Gardens had a very busy summer, and Pura's loom, for once, was satisfied."
+      }
+    },
+    {
+      "id": "mq_val_a_garden_lost",
+      "title": "A Garden Lost",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_eld",
+      "requires": [
+        "level:12"
+      ],
+      "offer": "You have the dirt of a hundred terraces under your claws.",
+      "pitch": "The seeds, walker. The old seeds of the Hanging Gardens, kept in a pouch by Eld's grandmother and stolen out of the temple on the last night of winter. A garden may be replanted, but not from nothing. Without the seeds, the oldest terrace stays bare. They went east, over the falls, with a thief who knew a path that Eld has never walked. Waterdancer Falls, the old stairs. Bring the pouch back before dawn, and Eld will tell you where the garden grows best.",
+      "desc": "The seeds of Arenthia's oldest terrace were stolen and carried east across Waterdancer Falls. Gardener Eld wants them replanted at dawn.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "waterdancer_falls",
+          "text": "Cross Waterdancer Falls by the old stair"
+        },
+        {
+          "type": "kill",
+          "place": "waterdancer_falls",
+          "text": "Stop the seed-thief and the Fall-Stalker that guards the stair",
+          "spawn": [
+            {
+              "boss_id": "mq_val_falls_stalker"
+            },
+            {
+              "type": "npc:thief",
+              "count": 1,
+              "name": "Seed-Thief Whin",
+              "hostile": true
+            }
+          ],
+          "actions": "relic:mq_val_garden_seeds"
+        },
+        {
+          "type": "cond",
+          "cond": "day",
+          "text": "Return to Arenthia by dawn",
+          "place": "arenthia"
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_val_eld",
+          "relic": "mq_val_garden_seeds",
+          "text": "Plant the seeds on the bare terrace at dawn",
+          "topic": "The seeds, whole. Let us put them in the earth at the half-sun hour.",
+          "reply": "Eld's hands tremble as she lifts the pouch. \"The half-sun. Quick. Quick. Walker, you plant with me. The garden is half yours.\"",
+          "actions": "scene:mq_val_are_dawn",
+          "choices": [
+            {
+              "label": "Plant them on the old terrace, as the grandmother did.",
+              "reply": "Eld bows and digs. \"The same hole. The same depth. It will be a wonder.\"",
+              "actions": "flag:mq_val_garden_old"
+            },
+            {
+              "label": "Plant half on the old terrace, and half on the poor-quarter's bare wall.",
+              "reply": "Eld looks at you, startled, then grins. \"A garden for the ones who have none. Walker, the old gardeners would have hated it. Eld loves it.\"",
+              "actions": "flag:mq_val_garden_shared;loot:standard"
+            }
+          ],
+          "place": "arenthia"
+        }
+      ],
+      "outro": "The oldest terrace of Arenthia is green again. Within a season there will be roses where there was only wall, and the waterfall sings above them.",
+      "rewards": {
+        "gold": 420,
+        "loot": "standard",
+        "items": [
+          {
+            "item": "nirncraft:bosmer_helmet",
+            "name": "Gardener's Sun-Hood",
+            "enchant": {
+              "protection": 2,
+              "respiration": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "reapers_march.L7.truce_elders",
+        "reapers_march.L8.bone_truce_rite"
+      ],
+      "consequence": {
+        "world_state": "mq_val_a_garden_lost_resolved",
+        "flag": "conseq_mq_val_a_garden_lost",
+        "summary": "The oldest terrace of Arenthia is green again. Within a season there will be roses where there was only wall, and the waterfall sings above them."
+      }
+    },
+    {
+      "id": "mq_val_the_prayer_behind_the_water",
+      "title": "The Prayer Behind the Water",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_sel",
+      "requires": [
+        "level:10"
+      ],
+      "offer": "You pray from behind a curtain of water.",
+      "pitch": "It is easier, walker. Sel has prayed behind the falls for eleven years. Last month, the water changed. It carries an echo now. Sel says a prayer and hears it answered, not in her voice. She does not know if it is Y'ffre or something older. She would like someone to stand where she stands and listen.",
+      "desc": "Priestess Sel hears her prayers answered in someone else's voice from behind the waterfall. She wants a witness.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "lorion_falls",
+          "text": "Stand behind the falls at Lorion Falls and listen"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Wait until night for the voice to answer",
+          "place": "lorion_falls"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_sel",
+          "text": "Tell Sel what you heard",
+          "topic": "It answered. In your own voice, Sel, but a year older. It said: do not stop.",
+          "reply": "Sel is still. Then, very quietly: \"My own voice. A year older. Walker, it is not Y'ffre. It is Sel, the next year's Sel, calling back. She says do not stop. Then Sel will not. Thank you. You have given me a very great gift: a reason to continue.\"",
+          "place": "arenthia"
+        }
+      ],
+      "outro": "Sel prays every morning behind the falls, and every morning the water answers in a voice a year older, with something very like a smile.",
+      "rewards": {
+        "gold": 180,
+        "loot": "minor"
+      },
+      "why": [
+        "reapers_march.L8.bone_truce_rite",
+        "reapers_march.L8.moonmont"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_prayer_behind_the_water_resolved",
+        "flag": "conseq_mq_val_the_prayer_behind_the_water",
+        "summary": "Sel prays every morning behind the falls, and every morning the water answers in a voice a year older, with something very like a smile."
+      }
+    },
+    {
+      "id": "mq_val_the_thorn_wall",
+      "title": "The Thorn Wall",
+      "region": "valenwood/greenshade",
+      "start": "npc:mq_val_cael",
+      "requires": [
+        "level:12"
+      ],
+      "offer": "Your wall looks sound. Your shoulders do not.",
+      "pitch": "The wall is bent, walker. Three places this month. Not cut. Never cut. The Pact forbids it, and the wall would grow back in a week anyway. Someone bends it, and goes through, and goes out again, and takes something each time. A sheep. A sack of salt. Last week, a child's shoes. Cael does not know what they are practising for. He is afraid it is the real thing.",
+      "desc": "The Thorn Wall of Marbruk has been bent in three places by someone who respects the Pact's laws and robs the town regardless. Ranger Cael wants the gap closed and the intruder caught.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "marbruk",
+          "text": "Inspect the bent places in the Thorn Wall",
+          "actions": "scene:mq_val_mar_gap;relic:mq_val_gap_stone"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Hold the gap at night until the intruder returns",
+          "place": "marbruk"
+        },
+        {
+          "type": "kill",
+          "place": "marbruk",
+          "text": "Stop Gurzun Wall-Breaker at the gap",
+          "spawn": [
+            {
+              "boss_id": "mq_val_wall_breaker"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_huln",
+          "text": "Take the gap-stone to Huln and ask what can seal it",
+          "topic": "The wall has been bent in three places and the thief is dead. Can you seal them?",
+          "reply": "Huln looks at the stone for a long while. Then, with the visible effort of a man who spends words like coins: \"No iron. Thorn. Plant a thorn. Let it grow. Let the Pact do the work.\" He nods. That is all seven words. He folds his arms and says nothing more.",
+          "choices": [
+            {
+              "label": "Seal it with new thorn, as the Pact asks.",
+              "reply": "Huln nods once. The thorn will take a season to grow, but it will be the wall's own, and no one will ever bend it.",
+              "actions": "flag:mq_val_wall_thorn"
+            },
+            {
+              "label": "Weave an iron cage over it. The Pact can forgive iron in a crisis.",
+              "reply": "Huln looks pained. He weaves the cage anyway, and the thorn will grow around it. A compromise, and an ugly one, but strong.",
+              "actions": "flag:mq_val_wall_iron;loot:standard"
+            }
+          ],
+          "place": "marbruk"
+        }
+      ],
+      "outro": "The Thorn Wall stands whole. A season from now the new thorn will have grown over the gap, and no one will remember where it was bent.",
+      "rewards": {
+        "gold": 460,
+        "loot": "standard"
+      },
+      "why": [
+        "greenshade.L8.spinners_of_greenshade",
+        "greenshade.L9.wilderking_silent"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_thorn_wall_resolved",
+        "flag": "conseq_mq_val_the_thorn_wall",
+        "summary": "The Thorn Wall stands whole. A season from now the new thorn will have grown over the gap, and no one will remember where it was bent."
+      }
+    },
+    {
+      "id": "mq_val_tevas_tasting_menu",
+      "title": "Teva's Tasting Menu",
+      "region": "valenwood/greenshade",
+      "start": "npc:mq_val_teva",
+      "requires": [
+        "level:8"
+      ],
+      "offer": "You taste like someone who is very hungry.",
+      "pitch": "Hungry is a good start, walker. Teva has been asked to cook a feast for a visiting Warden, and the Warden is a very fussy eater who will only eat meat, which is the Pact, and who will only eat meat that was properly named, which is a thing Teva has never heard of. Find the three beasts she has asked for. A boar, a stag, a hare. Properly named.",
+      "desc": "Cook Teva must serve a fussy Pact-Warden three properly-named beasts. She needs a boar, a stag and a hare from the wilds near Marbruk.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "shrouded_vale",
+          "text": "Hunt a boar in the Shrouded Vale"
+        },
+        {
+          "type": "retrieve",
+          "place": "shrouded_vale",
+          "text": "Bring back three portions of game",
+          "item": "minecraft:porkchop",
+          "count": 3
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_teva",
+          "text": "Deliver the game to Teva",
+          "topic": "Three portions. A boar, a stag, a hare. Named by the hunter, as the Pact demands.",
+          "reply": "Teva looks them over and tastes, very carefully, a single crumb. \"Named. Properly. You have done this before. Walker, you will eat first tonight, and no one at the Warden's table shall be told. It is the best feast Marbruk has had in a decade, and you are not in the book.\"",
+          "place": "marbruk"
+        }
+      ],
+      "outro": "The Warden ate in silence, then asked for the cook. Teva was never seen to blush before or since.",
+      "rewards": {
+        "gold": 160,
+        "loot": "minor"
+      },
+      "why": [
+        "greenshade.L9.wilderking_silent",
+        "greenshade.L9.maormer_shore"
+      ],
+      "consequence": {
+        "world_state": "mq_val_tevas_tasting_menu_resolved",
+        "flag": "conseq_mq_val_tevas_tasting_menu",
+        "summary": "The Warden ate in silence, then asked for the cook. Teva was never seen to blush before or since."
+      }
+    },
+    {
+      "id": "mq_val_the_bough_that_builds",
+      "title": "The Bough That Builds",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_bough_host",
+      "requires": [
+        "level:10"
+      ],
+      "offer": "Your inn seems to be growing without a builder.",
+      "pitch": "Every year, walker. A new floor. No hands. No axes. The bough simply puts out another storey, always on the first night of Rain's Hand. Tamlin has stopped counting rooms. Last night, for the first time, the new floor grew a door facing the sky. A door in the ceiling, with no stair. Tamlin does not wish to open it. He would like you to.",
+      "desc": "The Green Bough inn has grown a door in its new ceiling, with no stair leading up to it. Host Tamlin would like it opened by someone else.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "roadside_green_bough",
+          "text": "Climb to the top floor of the Green Bough"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Wait until night, when the door is said to open on its own",
+          "place": "roadside_green_bough"
+        },
+        {
+          "type": "retrieve",
+          "place": "roadside_green_bough",
+          "text": "Take what waits behind the ceiling door",
+          "relic": "mq_val_boughs_acorn"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_bough_host",
+          "text": "Show Tamlin the acorn",
+          "topic": "There was an acorn behind the door. It twitched. The bough wants it planted.",
+          "reply": "Tamlin turns the acorn in the lamp-light. \"An acorn. That is the whole reason. The bough has been building a floor a year to say: plant me. Plant me nearby, so the bough can have a child to look at. Walker, Tamlin will plant it at the edge of the yard. And the inn will stop growing, I think, when the child is tall.\"",
+          "place": "roadside_green_bough"
+        }
+      ],
+      "outro": "An acorn was planted by the yard-gate at the Green Bough, and the inn has not grown a floor since. The bough, they say, hums in the evenings.",
+      "rewards": {
+        "gold": 240,
+        "loot": "minor"
+      },
+      "why": [
+        "reapers_march.L9.colovian_pressure",
+        "reapers_march.L10.hircine_packs_march"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_bough_that_builds_resolved",
+        "flag": "conseq_mq_val_the_bough_that_builds",
+        "summary": "An acorn was planted by the yard-gate at the Green Bough, and the inn has not grown a floor since. The bough, they say, hums in the evenings."
+      }
+    },
+    {
+      "id": "mq_val_the_truce_of_drabul",
+      "title": "A Truce at Drabul",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_drabul_chief",
+      "requires": [
+        "level:16"
+      ],
+      "offer": "Your hall is quiet for an Orc outpost.",
+      "pitch": "It is, walker, because Borgakh has told his warriors not to touch a thing for three days. A Bosmer hunting-party has gone missing between Drabul and the village across the stream, and both sides think the other has taken them. Borgakh has the truce to think of, and no wish to start a war over a lost sheep-boy. Find the party. Quickly. Quietly.",
+      "desc": "A Bosmer hunting-party has vanished between Drabul and a nearby village, and each side blames the other. Chieftain Borgakh wants the truth found before blood is spilled.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "arorin_ruins",
+          "text": "Search the Arorin Ruins where the hunters were last seen"
+        },
+        {
+          "type": "clear",
+          "place": "arorin_ruins",
+          "text": "Drive off the wolves that have scattered the hunters",
+          "spawn": [
+            {
+              "type": "nirncraft:wolf",
+              "count": 4,
+              "name": "Pack Wolf"
+            },
+            {
+              "type": "nirncraft:werewolf",
+              "count": 1,
+              "name": "Pale Pack-Mother"
+            }
+          ]
+        },
+        {
+          "type": "escort",
+          "npc": "mq_val_drabul_chief",
+          "place": "drabul",
+          "text": "Walk Borgakh to the village to meet the hunters and settle the matter"
+        }
+      ],
+      "outro": "The hunting-party was found alive and half-eaten by embarrassment. Orc and Bosmer shared one very awkward feast, and the truce of Drabul has never been stronger.",
+      "rewards": {
+        "gold": 460,
+        "loot": "standard"
+      },
+      "why": [
+        "reapers_march.L10.hircine_packs_march",
+        "reapers_march.L10.maw_of_lorkhaj"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_truce_of_drabul_resolved",
+        "flag": "conseq_mq_val_the_truce_of_drabul",
+        "summary": "The hunting-party was found alive and half-eaten by embarrassment. Orc and Bosmer shared one very awkward feast, and the truce of Drabul has never been stronger."
+      }
+    },
+    {
+      "id": "mq_val_trial_by_a_stranger",
+      "title": "Trial by a Stranger",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_jath_champion",
+      "requires": [
+        "level:18"
+      ],
+      "offer": "You wish a witness, not a challenger.",
+      "pitch": "A witness. You owe the clan nothing, and so you may see it without a bias. Jathsogur has two sons who each claim the right to lead after Mauhulakh. They will duel at dawn. The loser lives, the winner leads. Mauhulakh has agreed to abide by the stranger's word on whether the duel was fair. He will not say which son he hopes will win. He will say only that he hopes it is fair.",
+      "desc": "Champion Mauhulakh wants a stranger to witness a duel between his two sons and judge whether it was fought fairly.",
+      "objectives": [
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Wait for dawn at the Jathsogur dueling-ground",
+          "place": "jathsogur"
+        },
+        {
+          "type": "kill",
+          "place": "jathsogur",
+          "text": "Stop the duel when the younger son breaks the rules",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 1,
+              "name": "Younger Son Grakhul",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_jath_champion",
+          "text": "Tell Mauhulakh what you saw",
+          "topic": "The younger son struck from behind. The elder gave him a chance to yield. I stopped it before blood.",
+          "reply": "Mauhulakh listens without moving. \"Struck from behind. A thing a son of mine should not do. And the elder gave a chance. That is all a father needs to hear. Walker, the clan owes you nothing, and has never been so grateful.\"",
+          "choices": [
+            {
+              "label": "Name the elder the rightful heir.",
+              "reply": "Mauhulakh bows his head. \"It is as I hoped, and I am sorry for the younger. He will have the forge, and a lesson.\"",
+              "actions": "flag:mq_val_duel_elder"
+            },
+            {
+              "label": "Name neither. Let the clan decide in a month.",
+              "reply": "Mauhulakh grunts, then slowly smiles. \"A month. A cooler head. You are wiser than a hundred witnesses.\"",
+              "actions": "flag:mq_val_duel_wait;loot:standard"
+            }
+          ],
+          "place": "jathsogur"
+        }
+      ],
+      "outro": "The stronghold of Jathsogur has a new heir, or a new month. The stranger who witnessed it was thanked with a full cup and an empty promise.",
+      "rewards": {
+        "gold": 540,
+        "loot": "standard"
+      },
+      "why": [
+        "reapers_march.L10.maw_of_lorkhaj",
+        "reapers_march.L10.septim_forts_march"
+      ],
+      "consequence": {
+        "world_state": "mq_val_trial_by_a_stranger_resolved",
+        "flag": "conseq_mq_val_trial_by_a_stranger",
+        "summary": "The stronghold of Jathsogur has a new heir, or a new month. The stranger who witnessed it was thanked with a full cup and an empty promise."
+      }
+    },
+    {
+      "id": "mq_val_the_hymn_that_wouldnt_end",
+      "title": "The Hymn That Would Not End",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_monk_singer",
+      "requires": [
+        "level:14"
+      ],
+      "offer": "Your voice is a croak.",
+      "pitch": "Three days, walker. The hymn of the third hour. It began at dawn and none of us has been able to stop. We do not know why. If one monk falls silent, the others weep. We sing in shifts and still cannot rest. We think it is the harp in the vault. It began to play on the first morning, and has not been silent since. Silence it. Please.",
+      "desc": "The monks of Dokrin cannot stop singing the same hymn. A harp in the monastery vault seems to be the cause.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "dokrin_monastery",
+          "text": "Descend to the monastery vault where the harp plays"
+        },
+        {
+          "type": "clear",
+          "place": "dokrin_monastery",
+          "text": "Drive off the shades that dance to the harp",
+          "spawn": [
+            {
+              "type": "nirncraft:will_o_wisp",
+              "count": 2,
+              "name": "Hymn-Dancer"
+            },
+            {
+              "type": "minecraft:skeleton",
+              "count": 2,
+              "name": "Harp-Bone"
+            }
+          ],
+          "placement": "structure"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_monk_singer",
+          "text": "Tell Brother Hael the harp is still",
+          "topic": "The harp is silent. I unstrung it. It will not be heard again.",
+          "reply": "Brother Hael tries to speak and nothing comes. He stands, mute, for a very long time. Then he bows low, and the other monks bow, and a silence falls on the monastery for the first time in three days that is not a silence of fear. It is a silence of rest.",
+          "place": "dokrin_monastery"
+        }
+      ],
+      "outro": "The monks of Dokrin slept for a day and a night. When they woke, the first thing they sang was a different hymn: very short, and very grateful.",
+      "rewards": {
+        "gold": 330,
+        "loot": "standard"
+      },
+      "why": [
+        "reapers_march.L10.septim_forts_march",
+        "reapers_march.L10.selenes_web"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_hymn_that_wouldnt_end_resolved",
+        "flag": "conseq_mq_val_the_hymn_that_wouldnt_end",
+        "summary": "The monks of Dokrin slept for a day and a night. When they woke, the first thing they sang was a different hymn: very short, and very grateful."
+      }
+    },
+    {
+      "id": "mq_val_the_line_a_year",
+      "title": "One Line a Year",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_prophecy_hermit",
+      "requires": [
+        "level:12"
+      ],
+      "offer": "Your doorframe is a very long sentence.",
+      "pitch": "Forty years, walker. A line a year. It began as a joke, a hermit's scribble. Then the lines started coming true. A flood in the ninth year. A king's death in the twelfth. A lost brother returned in the twenty-sixth. Orlen has a line for this winter, and he does not want to carve it. He wants you to go and see if it is already true.",
+      "desc": "Hermit Orlen has a line of prophecy he does not wish to carve. He asks a stranger to see whether it has already come true.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_val_prophecy_hermit",
+          "text": "Read the unfinished line on the doorframe",
+          "topic": "What does the line say?",
+          "reply": "Orlen's paws tremble. \"'The stranger at the door will carry the burden of the last line.' Walker, you are the stranger. You are at the door. And Orlen does not know what the last line is, only that it is you who will carve it. Take the chisel. Please. Say what you will.\"",
+          "choices": [
+            {
+              "label": "Carve: 'The hermit rests.'",
+              "reply": "Orlen reads it and sags with relief. \"The hermit rests. Yes. After forty years. Thank you. I will go and see the sea.\"",
+              "actions": "flag:mq_val_line_rest"
+            },
+            {
+              "label": "Carve: 'The doorframe is just wood.'",
+              "reply": "Orlen stares, then laughs until he has to sit. \"Just wood! Yes! Forty years I carved, and was afraid of wood. Walker, you are a very rude and very wise stranger.\"",
+              "actions": "flag:mq_val_line_wood;loot:minor"
+            }
+          ],
+          "place": "supplication_house"
+        },
+        {
+          "type": "go",
+          "place": "supplication_house",
+          "text": "Return to the supplication house at dawn to see what the prophecy has done"
+        }
+      ],
+      "outro": "A prophecy of forty years ended with a stranger at a door. Whatever the last line said, the hermit was free.",
+      "rewards": {
+        "gold": 220,
+        "loot": "minor"
+      },
+      "why": [
+        "reapers_march.L10.selenes_web",
+        "reapers_march.L7.mixed_town_rank"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_line_a_year_resolved",
+        "flag": "conseq_mq_val_the_line_a_year",
+        "summary": "A prophecy of forty years ended with a stranger at a door. Whatever the last line said, the hermit was free."
+      }
+    },
+    {
+      "id": "mq_val_the_plank_of_sren_ja",
+      "title": "The Plank of Sren Ja",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_bridge_feuder",
+      "requires": [
+        "level:8"
+      ],
+      "offer": "You look very tired of sweeping.",
+      "pitch": "Six years, walker. Six years. He sweeps from the east, she from the west, and every dawn they meet in the middle and say nothing, and sweep the dust back where it came from. Each of them knows the other is wrong. The deed says whoever sweeps first. The deed is not clear who that is. A third party might read the smudge at the bottom, and see what is really written there.",
+      "desc": "Two neighbours of Sren Ja have each swept the same bridge-plank for six years. A deed with a smudged stamp might settle it, if someone neutral reads it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "old_sren_ja_docks",
+          "text": "Find the old deed in the flooded record-house at Old Sren Ja Docks"
+        },
+        {
+          "type": "retrieve",
+          "place": "old_sren_ja_docks",
+          "text": "Recover the Deed to the Disputed Plank",
+          "relic": "mq_val_plank_deed"
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_val_bridge_feuder",
+          "relic": "mq_val_plank_deed",
+          "text": "Read the deed aloud to both neighbours",
+          "topic": "The deed says the plank belongs to whoever sweeps first. The smudge, held to the light, is the stamp of a former reeve: it says: both. At the same time. Together.",
+          "reply": "Maral stares at the deed. Across the bridge, her neighbour stares back. A very long silence follows. Then, haltingly, he lifts his broom. She lifts hers. They sweep the plank from opposite ends, and when they meet in the middle, they stop, and look at each other, and neither says a word. But both of them are smiling.",
+          "place": "sren_ja"
+        }
+      ],
+      "outro": "The plank of Sren Ja has been swept by two brooms at once for a month, and it has never been cleaner. They do not speak. They do not need to.",
+      "rewards": {
+        "gold": 210,
+        "loot": "minor"
+      },
+      "why": [
+        "reapers_march.L7.mixed_town_rank",
+        "reapers_march.L7.truce_elders"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_plank_of_sren_ja_resolved",
+        "flag": "conseq_mq_val_the_plank_of_sren_ja",
+        "summary": "The plank of Sren Ja has been swept by two brooms at once for a month, and it has never been cleaner. They do not speak. They do not need to."
+      }
+    },
+    {
+      "id": "mq_val_a_staff_from_a_living_tree",
+      "title": "A Staff from a Living Tree",
+      "region": "valenwood/malabal_tor",
+      "start": "npc:mq_val_maelin",
+      "requires": [
+        "level:14"
+      ],
+      "offer": "Your roots look uneasy, Root-Tender.",
+      "pitch": "They are, walker. A pilgrim cut a young ash on the climb to the Winter site, to make a walking staff. A living tree. In sight of the city. The Pact is not a suggestion. He is old, and lame, and he did it so that he could walk the last mile to see the city before he dies. The Wardens will want his hands. Maelin wants to know what justice looks like, and cannot see it from here.",
+      "desc": "An old, lame pilgrim cut a living ash for a walking staff, breaking the Green Pact. Root-Tender Maelin wants a stranger to find him and decide what is to be done.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "falinesti_winter_site",
+          "text": "Climb to the Winter site and find the lame pilgrim"
+        },
+        {
+          "type": "retrieve",
+          "place": "falinesti_winter_site",
+          "text": "Take the cut staff from the pilgrim",
+          "relic": "mq_val_cut_staff"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_maelin",
+          "text": "Bring the staff to Maelin and speak for the pilgrim",
+          "topic": "The pilgrim is very old and very sorry. He cut one young ash to be able to reach the city. The tree is bleeding. What will you ask of him?",
+          "reply": "Maelin sets the staff upright against his shoulder. The sap runs slowly down it. \"A young ash. Bleeding. A very old man. Walker, the Pact does not say how. It says only: do not cut. And a tree is a person, to us. A very quiet one. What shall be the penance? A year of tending? Or the Wardens, and his hands?\"",
+          "choices": [
+            {
+              "label": "A year of tending the grove where the ash grew.",
+              "reply": "Maelin nods, and his shoulders ease. \"A year of tending. The ash will heal. The pilgrim will heal. And the city will not lose a man to a law that did not wish to be cruel.\"",
+              "actions": "flag:mq_val_staff_tended"
+            },
+            {
+              "label": "Report him to the Wardens. The Pact is the Pact.",
+              "reply": "Maelin lowers the staff very slowly. \"The Pact is the Pact. Yes. It is also the only law that has never failed us. It is a hard answer, walker, and an honest one. The Wardens will come.\"",
+              "actions": "flag:mq_val_staff_reported;loot:standard"
+            }
+          ],
+          "place": "falinesti"
+        }
+      ],
+      "outro": "A walking staff of green ash stands in the Root-Tender's hall, either as a reminder or a warning. The tree it came from has stopped bleeding.",
+      "rewards": {
+        "gold": 420,
+        "loot": "standard"
+      },
+      "why": [
+        "malabal_tor.L8.green_lady_trials",
+        "malabal_tor.L9.lady_succession"
+      ],
+      "consequence": {
+        "world_state": "mq_val_a_staff_from_a_living_tree_resolved",
+        "flag": "conseq_mq_val_a_staff_from_a_living_tree",
+        "summary": "A walking staff of green ash stands in the Root-Tender's hall, either as a reminder or a warning. The tree it came from has stopped bleeding."
+      }
+    },
+    {
+      "id": "mq_val_the_child_on_the_high_node",
+      "title": "The Child on the High Node",
+      "region": "valenwood/greenshade",
+      "start": "npc:mq_val_hush",
+      "requires": [
+        "level:12"
+      ],
+      "offer": "Your camp is quieter than usual, Elder.",
+      "pitch": "Because the youngest cub of the camp has not come down, walker. Twelve stories up the Weave, on a node, since last night. She went up to see whether the bridge-people were really as tall as everyone says. She is stuck. The Warden has a rope and a dislike of heights. The camp has a ladder that is much too short. Hush does not wish to ask the Weave for help. She is asking you.",
+      "desc": "A cub from the Woodhearth ground-camp is stuck on a high node of the Weave. Elder Hush asks a stranger to bring her down.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "woodhearth",
+          "text": "Climb the Great Weave to the high node"
+        },
+        {
+          "type": "clear",
+          "place": "woodhearth",
+          "text": "Drive off the nesting hawks that guard the high node",
+          "spawn": [
+            {
+              "type": "nirncraft:harpy",
+              "count": 2,
+              "name": "Node-Hawk"
+            }
+          ]
+        },
+        {
+          "type": "escort",
+          "npc": "mq_val_hush",
+          "place": "woodhearth",
+          "text": "Escort the cub, and Hush, down to the ground-camp"
+        }
+      ],
+      "outro": "The cub came down the Weave on a stranger's back, and said only that the bridge-people were not nearly as tall as they let on.",
+      "rewards": {
+        "gold": 260,
+        "loot": "minor"
+      },
+      "why": [
+        "greenshade.L8.wilderking_court",
+        "greenshade.L8.spinners_of_greenshade"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_child_on_the_high_node_resolved",
+        "flag": "conseq_mq_val_the_child_on_the_high_node",
+        "summary": "The cub came down the Weave on a stranger's back, and said only that the bridge-people were not nearly as tall as they let on."
+      }
+    },
+    {
+      "id": "mq_val_the_mist_toll_dispute",
+      "title": "The Mist-Toll Dispute",
+      "region": "valenwood/malabal_tor",
+      "start": "npc:mq_val_gatewarden",
+      "requires": [
+        "level:14"
+      ],
+      "offer": "You are the first person I have not turned back today.",
+      "pitch": "Because you did not argue, walker. A Baandari trader is arguing with the Pact's Warden at the south stair about the toll. The Baandari says the toll is a gift. The Warden says it is a tax. Wren does not care which. She wants them to stop. If you can carry an offer from one to the other, and persuade them both, she will pretend that she did not hear a word of it.",
+      "desc": "A Baandari trader and a Pact-Warden quarrel over the mist-toll at Silvenar. Gate-Warden Wren wants a stranger to broker peace.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "mq_val_scribe",
+          "text": "Ask the Silvenar's Scribe for the court's own wording of the toll",
+          "topic": "The Gate-Warden would like a clear ruling. Is the toll a gift or a tax?",
+          "reply": "Ethelwe taps the ink-stain on her finger. \"Both. The court calls it a gift in the first clause and a tax in the third. It has been this way for four hundred years. Whoever reads one clause is right. Whoever reads both is a politician. Tell them to read the whole page, and sign it together.\"",
+          "actions": "relic:mq_val_toll_ribbon",
+          "place": "silvenar"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_gatewarden",
+          "text": "Bring the ribbon to the quarrelling pair at the south stair",
+          "topic": "Here is the court's wording, both clauses. The toll is a gift and a tax. Sign the ribbon together.",
+          "reply": "Wren watches the two of them read, grumble and, at last, tie the ribbon between them with a grim kind of courtesy. \"Together. Huh. Well. Walker, that is the first thing anyone has done at that stair in a year that did not end in blows. Take a seat at the Firefly Lantern. Pip owes me a favour, and I have decided to spend it on you.\"",
+          "choices": [
+            {
+              "label": "Suggest the Baandari pay half in coin and half in song.",
+              "reply": "Wren snorts. \"Song. For a toll. It will not work, and the Silvenar will adore it. Done.\"",
+              "actions": "flag:mq_val_toll_song"
+            },
+            {
+              "label": "Suggest the Warden waive the toll for traders who carry court post.",
+              "reply": "Wren nods slowly. \"A trade, then. Fair. The trader gets his road. The court gets its letters. And the Warden is spared the quarrel.\"",
+              "actions": "flag:mq_val_toll_post;loot:standard"
+            }
+          ],
+          "place": "silvenar"
+        }
+      ],
+      "outro": "The mist-toll of Silvenar is both a gift and a tax, and a silver ribbon with one wrong knot hangs at the south stair for everyone to see.",
+      "rewards": {
+        "gold": 380,
+        "loot": "standard"
+      },
+      "why": [
+        "malabal_tor.L9.orc_truce",
+        "malabal_tor.L10.wild_hunt_grounds_xylo"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_mist_toll_dispute_resolved",
+        "flag": "conseq_mq_val_the_mist_toll_dispute",
+        "summary": "The mist-toll of Silvenar is both a gift and a tax, and a silver ribbon with one wrong knot hangs at the south stair for everyone to see."
+      }
+    },
+    {
+      "id": "mq_val_moon_sugar_in_the_wheel",
+      "title": "Moon-Sugar in the Wheel",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_mohr",
+      "requires": [
+        "level:16"
+      ],
+      "offer": "You have the look of a guard who has found something.",
+      "pitch": "I have, walker, and I wish I had not. A wagon-wheel at the Caravan Gate was too heavy for its size. Mohr rolled it into the guardhouse and cracked the hub. Moon-sugar. A fortune of it. The wagon's owner is a Wheel-Wright called Zar'ha who runs a very honest stall by day. Mohr could report him. The Pact's Wardens would burn the lot and break his hands. Mohr could pour it in the river. Or sell it. He has thought about all three.",
+      "desc": "Guard Mohr found a hoard of moon-sugar hidden in a wagon-wheel hub. The owner, a stall-keeper, is nearby. He asks a stranger to decide what to do with it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "rawlkha",
+          "text": "Take the hub to the Caravan Gate and confront the wheel-wright"
+        },
+        {
+          "type": "kill",
+          "place": "rawlkha",
+          "text": "Face Zar'ha the Wheel-Wright, who will not surrender his hoard quietly",
+          "spawn": [
+            {
+              "boss_id": "mq_val_sugar_runner"
+            }
+          ],
+          "actions": "relic:mq_val_hidden_sugar"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_mohr",
+          "text": "Decide the fate of the moon-sugar with Mohr",
+          "topic": "Zar'ha is dealt with. The sugar is here. Report it, pour it out, or sell it?",
+          "reply": "Mohr turns the hub over, slowly, and the grey crystals glint. \"A fortune, walker. A fortune that would buy Mohr a year of sleep. It would also bring the Wardens down on a hundred Khajiit honest traders who did nothing. What do you say?\"",
+          "choices": [
+            {
+              "label": "Pour it into the river. Let the sugar be forgotten.",
+              "reply": "Mohr nods, and carries the hub to the bridge. The crystals dissolve in a long grey cloud that tastes, faintly, of honey. \"Gone. A pity. But a clean one. Thank you.\"",
+              "actions": "flag:mq_val_sugar_poured"
+            },
+            {
+              "label": "Sell it quietly and give the coin to the Caravan Gate's widows.",
+              "reply": "Mohr hesitates, then, very slowly, smiles. \"Widows. Yes. A fair use for a foul thing. Mohr will see it done.\"",
+              "actions": "flag:mq_val_sugar_widows;loot:major"
+            },
+            {
+              "label": "Report it to the Wardens. The Pact is the Pact.",
+              "reply": "Mohr straightens. \"Reported, then. It is correct. And it will be burned. Mohr will not enjoy it. Thank you for being brave enough to say it.\"",
+              "actions": "flag:mq_val_sugar_reported"
+            }
+          ],
+          "place": "rawlkha"
+        }
+      ],
+      "outro": "A hub of moon-sugar was found in a wagon-wheel at Rawlkha, and was poured, spent or burned, depending on the voice that spoke last.",
+      "rewards": {
+        "gold": 480,
+        "loot": "standard"
+      },
+      "why": [
+        "reapers_march.L9.missing_bone",
+        "reapers_march.L9.colovian_pressure"
+      ],
+      "consequence": {
+        "world_state": "mq_val_moon_sugar_in_the_wheel_resolved",
+        "flag": "conseq_mq_val_moon_sugar_in_the_wheel",
+        "summary": "A hub of moon-sugar was found in a wagon-wheel at Rawlkha, and was poured, spent or burned, depending on the voice that spoke last."
+      }
+    },
+    {
+      "id": "mq_val_the_weavers_three_dyes",
+      "title": "The Weaver's Three Dyes",
+      "region": "valenwood/reapers_march",
+      "start": "npc:mq_val_wynn",
+      "requires": [
+        "level:10"
+      ],
+      "offer": "You have the green of a good weaver on your sleeve.",
+      "pitch": "It is a bad weaver's green, walker, and I am ashamed of it. Wynn has an order from the Silvenar himself, for a banner of three colours: moss-green, falls-silver and dawn-pink. She has only ever managed one. The other two come only where water meets light, and there is a place for each: the falls' mist, the dawn pool and the gardens' lowest terrace. The twist is: if you take them in anger, they run. They must be gathered gladly.",
+      "desc": "Weaver Wynn needs three dyes gathered where water meets light, each of which turns if collected in anger.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "waterdancer_falls",
+          "text": "Gather falls-silver from the mist at Waterdancer Falls"
+        },
+        {
+          "type": "go",
+          "place": "lorion_falls",
+          "text": "Gather dawn-pink at the pool of Lorion Falls",
+          "actions": "relic:mq_val_three_dyes"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_wynn",
+          "text": "Bring the three dyes to Wynn",
+          "topic": "Three dyes: moss, silver, dawn. Gathered gladly. Will they hold?",
+          "reply": "Wynn uncorks the silver and watches it settle. Then, slowly, she begins to laugh. \"They hold! Gladly gathered, and they hold. Walker, you have a gift. Few can gather gladly, in a forest that taxes a smile. Wynn will weave your name into the border, in a thread that only shows at dawn.\"",
+          "place": "arenthia"
+        }
+      ],
+      "outro": "A banner of three colours hangs in the Silvenar's hall, with a border thread that shows only at dawn. It is said to spell a stranger's name.",
+      "rewards": {
+        "gold": 240,
+        "loot": "minor"
+      },
+      "why": [
+        "reapers_march.L9.colovian_pressure",
+        "reapers_march.L10.hircine_packs_march"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_weavers_three_dyes_resolved",
+        "flag": "conseq_mq_val_the_weavers_three_dyes",
+        "summary": "A banner of three colours hangs in the Silvenar's hall, with a border thread that shows only at dawn. It is said to spell a stranger's name."
+      }
+    },
+    {
+      "id": "mq_val_the_wardens_missing_hound",
+      "title": "The Warden's Missing Hound",
+      "region": "valenwood/greenshade",
+      "start": "npc:mq_val_huln",
+      "requires": [
+        "level:10"
+      ],
+      "offer": "You are Huln, and you are not speaking.",
+      "pitch": "Seven words. Spent. The Warden's hound. Gone. Vale. Three days. Please. Find. That is eight words, and Huln is very sorry. He has the look of a man who has run out of gold and is now spending silver. Take the hound's collar from the hook. The vale is the Shrouded Vale, east of the wall. Bring her home.",
+      "desc": "The Warden's hound was lost in the Shrouded Vale three days ago. Smith Huln, who rarely speaks, asks a stranger to find her.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "shrouded_vale",
+          "text": "Search the Shrouded Vale for the Warden's hound"
+        },
+        {
+          "type": "kill",
+          "place": "shrouded_vale",
+          "text": "Stop Gorrun Hound-Taker, who has her in a snare",
+          "spawn": [
+            {
+              "boss_id": "mq_val_hound_stealer"
+            },
+            {
+              "type": "nirncraft:wolf",
+              "count": 2,
+              "name": "Hound-Trap Wolf"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_val_huln",
+          "text": "Return the hound to Huln",
+          "topic": "The hound is safe. She was snared by a poacher. She wishes to be fed.",
+          "reply": "Huln looks at the hound. The hound looks at Huln. He kneels, and something very large moves in his throat. \"Thank you.\" That is two words, and he looks as though they have cost him a week of coin. Then he takes your hand, and does not say anything at all, for a long and perfectly fluent time.",
+          "place": "marbruk"
+        }
+      ],
+      "outro": "The Warden's hound is home, and Smith Huln has a rare and treasured habit of nodding to a stranger in the street.",
+      "rewards": {
+        "gold": 230,
+        "loot": "minor"
+      },
+      "why": [
+        "greenshade.L10.wilderking_spirits",
+        "greenshade.L10.city_of_ash"
+      ],
+      "consequence": {
+        "world_state": "mq_val_the_wardens_missing_hound_resolved",
+        "flag": "conseq_mq_val_the_wardens_missing_hound",
+        "summary": "The Warden's hound is home, and Smith Huln has a rare and treasured habit of nodding to a stranger in the street."
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "nirncraft:block/alchemy_lab"
+    },
+    "facing=east": {
+      "model": "nirncraft:block/alchemy_lab",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "nirncraft:block/alchemy_lab",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nirncraft:block/alchemy_lab",
+      "y": 270
+    }
+  }
+}

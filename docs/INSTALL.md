@@ -1,7 +1,7 @@
-# Installing and playing Skycraft
+# Installing and playing NirnCraft
 
-Skycraft targets **Minecraft 26.3, NeoForge 26.3.0.90 and Java 25**. The full
-client contains Skycraft Core and 22 pinned performance/library/helper artifacts.
+NirnCraft targets **Minecraft 26.3, NeoForge 26.3.0.90 and Java 25**. The full
+client contains NirnCraft Core and 22 pinned performance/library/helper artifacts.
 Start with 6 GB of game memory; actual performance depends on hardware and settings.
 The native port's runtime evidence and remaining gates are recorded in
 [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md).
@@ -13,9 +13,9 @@ Get the tested locally built package from the project owner. Developers use
 to a new release directory under `dist` (or explicit `-OutputDir`). GitHub Actions
 is disabled, so a push does not publish a package.
 
-* `Skycraft-26.3-client-instance.zip`: the full Prism Launcher / MultiMC instance.
-* `Skycraft-26.3-server.zip`: the installed native dedicated server and its 13
-  server-side dependencies, plus Skycraft Core.
+* `NirnCraft-26.3-client-instance.zip`: the full Prism Launcher / MultiMC instance.
+* `NirnCraft-26.3-server.zip`: the installed native dedicated server and its 13
+  server-side dependencies, plus NirnCraft Core.
 
 Use the matching full client/server packages. A core-only diagnostic instance is
 for isolating failures and is not full-pack acceptance. Historical Modrinth and
@@ -24,7 +24,7 @@ CurseForge exports require their own native validation before use.
 ## 2. Install on Prism Launcher
 
 1. Install [Prism Launcher](https://prismlauncher.org/) and sign in with your Microsoft account.
-2. Use **Add Instance ? Import** and choose `Skycraft-26.3-client-instance.zip`.
+2. Use **Add Instance ? Import** and choose `NirnCraft-26.3-client-instance.zip`.
    Prism resolves the exact Minecraft 26.3 and NeoForge 26.3.0.90 libraries/assets.
 3. In **Edit ? Settings ? Java**, select Java 25. The instance starts with 2048 MB
    initial and 6144 MB maximum memory; allow more when hosting if your PC has room.
@@ -52,25 +52,25 @@ installed. Everyone must use the same native full pack.
 
 The host runs the world simulation, so reserve enough RAM for the game and OS.
 Create a party through the Journal (**J**, Party tab), or `/party create` and
-`/party invite <name>`, to use Skycraft's shared quest/travel features.
+`/party invite <name>`, to use NirnCraft's shared quest/travel features.
 
 ## 4. Dedicated server
 
-1. Extract the complete `server/` directory from `Skycraft-26.3-server.zip` to a new
+1. Extract the complete `server/` directory from `NirnCraft-26.3-server.zip` to a new
    location. Keep existing worlds and configurations backed up.
 2. Read the [Minecraft EULA](https://aka.ms/MinecraftEULA) and create `eula.txt`
    containing `eula=true` if you agree.
 3. Use `run.bat`/`run.ps1` on Windows or `./run.sh nogui` on Linux/macOS. The launchers
-   require Java 25 and select `SKYCRAFT_JAVA`, then `JAVA_HOME`, then PATH.
+   require Java 25 and select `NIRNCRAFT_JAVA`, then `JAVA_HOME`, then PATH.
 4. Adjust RAM in `user_jvm_args.txt` (default 2 GB initial, 6 GB maximum). Fresh
    servers use Nirn. The defaults allow flight for shouts/giants and a two-minute
    watchdog for generation; public servers retain `online-mode=true`.
 5. Join using the matching client pack. Use console `stop` and wait for every
    dimension to save before closing the server or upgrading files.
 
-Local settings are in `config/skycraft-*.toml`. Native synced world settings use
+Local settings are in `config/nirncraft-*.toml`. Native synced world settings use
 `world/syncedconfig/`; do not copy old `serverconfig` files without the documented
-migration. Survival Mode uses `/gamerule skycraft:survival_mode false` or its
+migration. Survival Mode uses `/gamerule nirncraft:survival_mode false` or its
 `survival_mode.enabled` configuration. Other gameplay settings retain their
 explicit filenames and authored values.
 
@@ -84,7 +84,7 @@ New players get Skyrim-style keys on first launch: **E** inventory, **Tab** menu
 [CONTROLS.md](CONTROLS.md). In-game, the Controls chapter of *The Traveler's Handbook* shows your current bindings.
 
 **Controller / Steam Deck:** Controllable is preconfigured with Steam button icons, the virtual mouse cursor in menus
-and all button hints (`config/controllable.client.toml`). Every Skycraft screen fits the Deck's 1280×800 screen at GUI
+and all button hints (`config/controllable.client.toml`). Every NirnCraft screen fits the Deck's 1280×800 screen at GUI
 scale 3.
 
 ## 6. Graphics, shaders and Distant Horizons
@@ -98,7 +98,7 @@ scale 3.
 * Distant Horizons and the custom distant renderer are preserved and disabled
   pending their separate native integration. Old LOD presets do not prove that
   the 26.3 client is rendering or generating LODs.
-* Skycraft's visual, atmosphere, audio, arsenal and guide client settings keep
+* NirnCraft's visual, atmosphere, audio, arsenal and guide client settings keep
   their module filenames in `config`. Review the current generated configs in
   the native instance rather than copying an entire old config directory.
 * Dynamic FPS, ImmediatelyFast, Entity Culling, FerriteCore and Lithium are among
@@ -115,14 +115,14 @@ scale 3.
 * Extract the new server to a separate directory, then restore its backed-up,
   supported world, EULA, properties and selected compatible settings. Do not leave
   old mod jars beside the new pinned dependencies.
-* Packwiz source state does not include Skycraft Core; the complete builders inject
+* Packwiz source state does not include NirnCraft Core; the complete builders inject
   the actual tested native core. Installing only `pack/pack.toml` is not the full game.
 * Existing chunks keep their generated terrain; generation changes affect new
   chunks. Visual-test camera poses must be revalidated when map/generation changes.
 
 ## 8. Your own Skyrim audio (optional, personal use)
 
-All of Skycraft's music, sounds and voices are original. If you own Skyrim, you can build a private resource pack
+All of NirnCraft's music, sounds and voices are original. If you own Skyrim, you can build a private resource pack
 from your own copy of the game's music, sound effects and Thu'um voices:
 
 1. Install Python 3 and ffmpeg (built with Vorbis).
@@ -148,7 +148,7 @@ See [MUSIC.md](MUSIC.md) for all the options.
 * **LAN discovery misses the host:** use Direct Connect with the actual local IP and
   LAN port, and check the host's local firewall permissions.
 * **Two actions on one key:** review **Options ? Controls**. The first-launch key
-  pass marker is `config/skycraft-client-keys.done`.
+  pass marker is `config/nirncraft-client-keys.done`.
 * **Tutorial hints:** `/handbook hints off` disables them; `/handbook hints reset`
   enables them again.
 * **Logs:** use the selected native instance's `.minecraft/logs/latest.log`, or the

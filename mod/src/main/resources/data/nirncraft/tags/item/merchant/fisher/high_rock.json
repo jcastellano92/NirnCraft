@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:iliac_tuna",
+      "required": false
+    },
+    {
+      "id": "nirncraft:glenumbra_herring",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bjoulsae_trout",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_pearl",
+      "required": false
+    }
+  ]
+}

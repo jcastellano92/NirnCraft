@@ -1,8 +1,8 @@
-// The shader pack's atmosphere (shaderpack/SkycraftAether/shaders/lib/atmosphere.glsl) must match aether's
-// (native/shaders/aether_shared.slang): the near field fogs into the far field's haze, so a mismatch is a visible
+// The shader pack's atmosphere (shaderpack/InfiniteATLAS/shaders/lib/atmosphere.glsl) must match atlas's
+// (native/shaders/atlas_shared.slang): the near field fogs into the far field's haze, so a mismatch is a visible
 // seam at the hand-off. A GL compute shader built from the pack's own file evaluates skyColor() for every pixel of a
-// camera; aether renders the same camera over an empty world (all sky). They must agree to float precision.
-//   aether_pack_test [shaderpack/SkycraftAether/shaders/lib/atmosphere.glsl]
+// camera; atlas renders the same camera over an empty world (all sky). They must agree to float precision.
+//   atlas_pack_test [shaderpack/InfiniteATLAS/shaders/lib/atmosphere.glsl]
 
 #include <cmath>
 #include <cstdio>
@@ -11,15 +11,15 @@
 #include <string>
 #include <vector>
 
-#include "aether/aether.h"
+#include "atlas/atlas.h"
 #include "camera.hpp"
 #include "gl_api.hpp"
 #include "gl_context.hpp"
 
-using namespace aether;
+using namespace atlas;
 
 int main(int argc, char** argv) {
-    std::string libPath = argc > 1 ? argv[1] : "shaderpack/SkycraftAether/shaders/lib/atmosphere.glsl";
+    std::string libPath = argc > 1 ? argv[1] : "shaderpack/InfiniteATLAS/shaders/lib/atmosphere.glsl";
     std::ifstream in(libPath);
     if (!in) {
         std::printf("SKIP: %s not found\n", libPath.c_str());
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     }
     std::stringstream lib;
     lib << in.rdbuf();
-    aether_test::GlContext glc;
+    atlas_test::GlContext glc;
     GlApi gl;
     std::string err;
     if (!glc.create(err) || !gl.load(err)) {
@@ -72,25 +72,25 @@ void main() {
     gl.AttachShader(prog, sh);
     gl.LinkProgram(prog);
     // a storage buffer through the minimal loader: use a texture-free path with glBindBufferBase
-    auto genBuffers = reinterpret_cast<void(AETHER_GLAPI*)(GLsizei, GLuint*)>(GlApi::proc("glCreateBuffers"));
-    auto bufStorage = reinterpret_cast<void(AETHER_GLAPI*)(GLuint, intptr_t, const void*, unsigned)>(GlApi::proc("glNamedBufferStorage"));
-    auto bindBase = reinterpret_cast<void(AETHER_GLAPI*)(GLenum, GLuint, GLuint)>(GlApi::proc("glBindBufferBase"));
-    auto getSub = reinterpret_cast<void(AETHER_GLAPI*)(GLuint, intptr_t, intptr_t, void*)>(GlApi::proc("glGetNamedBufferSubData"));
+    auto genBuffers = reinterpret_cast<void(ATLAS_GLAPI*)(GLsizei, GLuint*)>(GlApi::proc("glCreateBuffers"));
+    auto bufStorage = reinterpret_cast<void(ATLAS_GLAPI*)(GLuint, intptr_t, const void*, unsigned)>(GlApi::proc("glNamedBufferStorage"));
+    auto bindBase = reinterpret_cast<void(ATLAS_GLAPI*)(GLenum, GLuint, GLuint)>(GlApi::proc("glBindBufferBase"));
+    auto getSub = reinterpret_cast<void(ATLAS_GLAPI*)(GLuint, intptr_t, intptr_t, void*)>(GlApi::proc("glGetNamedBufferSubData"));
     GLuint buf = 0;
     genBuffers(1, &buf);
     bufStorage(buf, intptr_t(W) * H * 16, nullptr, 0x0100 /* GL_DYNAMIC_STORAGE_BIT */);
     bindBase(0x90D2 /* GL_SHADER_STORAGE_BUFFER */, 0, buf);
 
-    AetherContext* ctx = nullptr;
-    aether_create(AETHER_BACKEND_CPU, &ctx);
+    AtlasContext* ctx = nullptr;
+    atlas_create(ATLAS_BACKEND_CPU, &ctx);
     double centre[3] = {0, 120, 0};
-    aether_update(ctx, centre, 0);  // no tiles: every ray misses, the frame is all sky
+    atlas_update(ctx, centre, 0);  // no tiles: every ray misses, the frame is all sky
     int failures = 0;
     for (const Case& c : cases) {
         float l = std::sqrt(c.sun[0] * c.sun[0] + c.sun[1] * c.sun[1] + c.sun[2] * c.sun[2]);
         float sun[3] = {c.sun[0] / l, c.sun[1] / l, c.sun[2] / l};
         gl.ProgramUniformMatrix4fv(prog, gl.GetUniformLocation(prog, "invVP"), 1, 0, inv);
-        auto u3 = reinterpret_cast<void(AETHER_GLAPI*)(GLuint, GLint, float, float, float)>(GlApi::proc("glProgramUniform3f"));
+        auto u3 = reinterpret_cast<void(ATLAS_GLAPI*)(GLuint, GLint, float, float, float)>(GlApi::proc("glProgramUniform3f"));
         u3(prog, gl.GetUniformLocation(prog, "sunDir"), sun[0], sun[1], sun[2]);
         gl.ProgramUniform2f(prog, gl.GetUniformLocation(prog, "size"), float(W), float(H));
         gl.UseProgram(prog);
@@ -99,7 +99,7 @@ void main() {
         std::vector<float> glsl(size_t(W) * H * 4);
         getSub(buf, 0, intptr_t(glsl.size() * 4), glsl.data());
 
-        AetherFrame f{};
+        AtlasFrame f{};
         f.cameraPos[1] = 120;
         std::memcpy(f.invViewProj, inv, sizeof(inv));
         f.width = W;
@@ -109,10 +109,10 @@ void main() {
         f.sunDir[1] = sun[1];
         f.sunDir[2] = sun[2];
         f.lodBias = 1;
-        f.flags = AETHER_FRAME_SKY;
+        f.flags = ATLAS_FRAME_SKY;
         std::vector<float> slang(size_t(W) * H * 4);
-        AetherFrameOutput o{nullptr, nullptr, nullptr, slang.data()};
-        aether_render(ctx, &f, &o);
+        AtlasFrameOutput o{nullptr, nullptr, nullptr, slang.data()};
+        atlas_render(ctx, &f, &o);
         double worst = 0;
         size_t bad = 0;
         for (size_t i = 0; i < size_t(W) * H; i++)
@@ -122,11 +122,11 @@ void main() {
                 worst = std::fmax(worst, rel);
                 if (rel > 2e-3) bad++;
             }
-        std::printf("sun (%.2f, %.2f, %.2f): pack vs aether sky worst rel diff %.2e, %zu channels over 2e-3\n", sun[0],
+        std::printf("sun (%.2f, %.2f, %.2f): pack vs atlas sky worst rel diff %.2e, %zu channels over 2e-3\n", sun[0],
                     sun[1], sun[2], worst, bad);
         if (bad) failures++;
     }
-    aether_destroy(ctx);
+    atlas_destroy(ctx);
     std::printf(failures ? "FAIL\n" : "PASS\n");
     return failures ? 1 : 0;
 }

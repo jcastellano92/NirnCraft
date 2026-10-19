@@ -1,11 +1,11 @@
 # The move-in, rehearsed without touching the main tree: snapshot the main checkout's mod/src/main/java into a
 # scratch dir, run move_in.ps1 -Apply on the copy, and javac the whole mod against the conversion's patched 26.3 jar
-# (NeoForge patches and access transformers applied) and its Gradle dependency cache. Fails when anything aether adds
+# (NeoForge patches and access transformers applied) and its Gradle dependency cache. Fails when anything atlas adds
 # or patches does not compile; errors elsewhere are the conversion's and are only counted.
 #   .\native\java\mod-integration\sandbox_check.ps1 [-Out <dir>] [-Mod <main tree>\mod]
-param([string]$Out = (Join-Path $env:TEMP 'skycraft-aether-sandbox'), [string]$Mod = '',
-      [string]$Patched = 'E:\Skycraft-scratch\migration-26.3\build\moddev\artifacts\minecraft-patched-26.3.0.90-merged.jar',
-      [string]$Deps = 'E:\Skycraft-scratch\migration-26.3\gradle-home\caches\modules-2\files-2.1')
+param([string]$Out = (Join-Path $env:TEMP 'nirncraft-atlas-sandbox'), [string]$Mod = '',
+      [string]$Patched = 'E:\NirnCraft-scratch\migration-26.3\build\moddev\artifacts\minecraft-patched-26.3.0.90-merged.jar',
+      [string]$Deps = 'E:\NirnCraft-scratch\migration-26.3\gradle-home\caches\modules-2\files-2.1')
 $ErrorActionPreference = 'Stop'
 $here = $PSScriptRoot
 if (-not $Mod) {
@@ -14,8 +14,8 @@ if (-not $Mod) {
     $Mod = Join-Path (Split-Path $common -Parent) 'mod'
 }
 if (-not (Test-Path $Patched)) { throw "no patched 26.3 jar at $Patched (the conversion's moddev build)" }
-$ref = 'F:\Projects\Personal\Skycraft\toolchains\ref\mc26.3'
-$jdk = 'F:\Projects\Personal\Skycraft\toolchains\jdk-25.0.4.1+1\bin'
+$ref = (Join-Path (& "$PSScriptRoot\..\..\toolchains.ps1") 'ref\mc26.3')
+$jdk = (Join-Path (& "$PSScriptRoot\..\..\toolchains.ps1") 'jdk-25.0.4.1+1\bin')
 
 Remove-Item -Recurse -Force $Out -ErrorAction SilentlyContinue
 $box = Join-Path $Out 'mod'
@@ -40,7 +40,7 @@ $ErrorActionPreference = 'Continue'
     ForEach-Object { "$_" } | Out-File -Encoding utf8 $log
 $ErrorActionPreference = 'Stop'
 $errors = @(Select-String -Path $log -Pattern ': error:')
-$ours = @($errors | Where-Object { $_.Line -match '\\aether\\|\\Skycraft\.java:|\\network\\SkyNetwork\.java:|\\WeatherFieldTexture\.java:' })
-Write-Host "sandbox: $($errors.Count) javac errors in the converted mod with aether moved in; $($ours.Count) in aether's files or patches ($log)"
+$ours = @($errors | Where-Object { $_.Line -match '\\atlas\\|\\NirnCraft\.java:|\\network\\SkyNetwork\.java:|\\WeatherFieldTexture\.java:' })
+Write-Host "sandbox: $($errors.Count) javac errors in the converted mod with atlas moved in; $($ours.Count) in atlas's files or patches ($log)"
 $ours | Select-Object -First 20 | ForEach-Object { Write-Host "  $($_.Line)" }
-if ($ours.Count) { throw 'aether does not compile inside the converted mod' }
+if ($ours.Count) { throw 'atlas does not compile inside the converted mod' }

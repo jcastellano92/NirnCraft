@@ -1,0 +1,11 @@
+{
+  "type": "nirncraft:fallen_log",
+  "config": {
+    "state": {
+      "id": "nirncraft:graht_oak_log",
+      "properties": {
+        "axis": "x"
+      }
+    }
+  }
+}

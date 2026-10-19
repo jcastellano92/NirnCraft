@@ -1,0 +1,29 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "jungle_tree",
+        "weight": 5
+      },
+      {
+        "species": "jungle_giant",
+        "weight": 2
+      },
+      {
+        "species": "palm",
+        "weight": 2
+      },
+      {
+        "species": "oak",
+        "weight": 1
+      },
+      {
+        "species": "mangrove",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

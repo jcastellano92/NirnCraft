@@ -1,0 +1,63 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "nirncraft:kollop_bed",
+              "condition": {
+                "predicate": {
+                  "predicates": {
+                    "minecraft:enchantments": [
+                      {
+                        "levels": {
+                          "min": 1
+                        },
+                        "enchantments": "minecraft:silk_touch"
+                      }
+                    ]
+                  }
+                },
+                "type": "minecraft:match_tool"
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "nirncraft:pearl",
+              "condition": {
+                "chance": 0.06,
+                "type": "minecraft:random_chance"
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "nirncraft:small_pearl",
+              "condition": {
+                "chance": 0.3,
+                "type": "minecraft:random_chance"
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "nirncraft:nordic_barnacle",
+              "condition": {
+                "chance": 0.15,
+                "type": "minecraft:random_chance"
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "nirncraft:kollop"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:blocks/kollop_bed"
+}

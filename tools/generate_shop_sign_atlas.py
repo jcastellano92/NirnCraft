@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates the 256x256 (16x16 tiles) material atlas for Skycraft 3D regional shop signs."""
+"""Generates the 256x256 (16x16 tiles) material atlas for NirnCraft 3D regional shop signs."""
 
 import math
 import os
@@ -13,7 +13,7 @@ OUT_PATH = os.path.join(
     "main",
     "resources",
     "assets",
-    "skycraft",
+    "nirncraft",
     "textures",
     "entity",
     "settlement",

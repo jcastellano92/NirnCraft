@@ -1,0 +1,46 @@
+{
+  "type": "nirncraft:random_patch",
+  "config": {
+    "tries": 24,
+    "xz_spread": 6,
+    "y_spread": 2,
+    "feature": {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "to_place": {
+          "type": "minecraft:simple",
+          "state": {
+            "id": "nirncraft:soul_gem_cluster",
+            "properties": {
+              "facing": "up",
+              "waterlogged": "false"
+            }
+          }
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:all_of",
+            "predicates": [
+              {
+                "type": "minecraft:matching_blocks",
+                "blocks": "minecraft:air"
+              },
+              {
+                "type": "minecraft:matching_blocks",
+                "offset": [
+                  0,
+                  -1,
+                  0
+                ],
+                "blocks": "nirncraft:soul_stone"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

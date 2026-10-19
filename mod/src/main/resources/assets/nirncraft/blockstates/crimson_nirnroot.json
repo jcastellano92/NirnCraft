@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/crimson_nirnroot"
+      },
+      {
+        "model": "nirncraft:block/crimson_nirnroot",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/crimson_nirnroot",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/crimson_nirnroot",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/crimson_nirnroot_harvested"
+      },
+      {
+        "model": "nirncraft:block/crimson_nirnroot_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/crimson_nirnroot_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/crimson_nirnroot_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

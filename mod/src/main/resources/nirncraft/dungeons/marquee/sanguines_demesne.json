@@ -1,0 +1,312 @@
+{
+ "id": "sanguines_demesne",
+ "why": [
+  "stormhaven.L10.sanguines_demesne",
+  "stormhaven.L8.revel_temptation"
+ ],
+ "kit": "daedric",
+ "entry_depth": 22,
+ "palette": {
+  "wall": [
+   "minecraft:polished_blackstone_bricks*5",
+   "minecraft:red_nether_bricks*4",
+   "minecraft:stone_bricks*3",
+   "minecraft:cracked_polished_blackstone_bricks*3",
+   "minecraft:crying_obsidian*2"
+  ],
+  "floor": [
+   "minecraft:polished_blackstone*5",
+   "minecraft:red_nether_bricks*3",
+   "minecraft:deepslate_tiles*2"
+  ],
+  "ceiling": [
+   "minecraft:polished_blackstone_bricks*4",
+   "minecraft:red_nether_bricks*3"
+  ],
+  "rock": "minecraft:blackstone",
+  "trim": "minecraft:gilded_blackstone",
+  "pillar": "minecraft:polished_basalt",
+  "cap": "minecraft:chiseled_polished_blackstone",
+  "light": "minecraft:shroomlight",
+  "dim": "minecraft:redstone_lamp",
+  "rail": "minecraft:polished_blackstone_brick_wall",
+  "stair": "minecraft:polished_blackstone_brick_stairs"
+ },
+ "boss": {
+  "id": "nirncraft:dremora|minecraft:evoker",
+  "name": "Kulan-dro the Revel-Master"
+ },
+ "books": {
+  "revel": {
+   "title": "The Last Toast of Stormhaven",
+   "author": "Lord Guimard",
+   "pages": [
+    "We came for a single night of masked revelry beneath the ruined keep, where the vintage never sours.\n\nSeven winters have passed above the stairs, yet the musicians still play with bare finger-bones and none of us can set down our goblets."
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "velvet_foyer",
+   "name": "Foyer of the Black Rose",
+   "at": [0, 0],
+   "y": -8,
+   "half": [5, 6],
+   "h": 12,
+   "role": "start",
+   "doors": {"s": 8},
+   "ops": [
+    {"op": "landing", "y": 8, "depth": 3, "stairs": 3},
+    {"op": "pillars", "inset": 2, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:dremora|minecraft:vindicator", "name": "Sanguine Gatekeeper", "mode": "awake", "n": 2},
+     {"id": "nirncraft:scamp|minecraft:vex", "name": "Wine-Scamp", "mode": "awake", "n": 1}
+    ]}
+   ]
+  },
+  {
+   "id": "cloakroom_west",
+   "name": "The Mask Parlor",
+   "at": [-1, 0],
+   "y": -8,
+   "half": [4, 4],
+   "h": 6,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 3},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:bandit|minecraft:vindicator", "name": "Delirious Reveller", "mode": "sleep", "at": [[-3, -3], [-3, 3]]}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "nirncraft:chests/dungeon_common", "face": "w"}
+   ]
+  },
+  {
+   "id": "tasting_east",
+   "name": "The Tasting Cellar",
+   "at": [1, 0],
+   "y": -8,
+   "half": [4, 4],
+   "h": 6,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 3},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:bandit|minecraft:vindicator", "name": "Cask-Guard", "mode": "ambush", "n": 2, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [-3, -3], "table": "nirncraft:chests/dungeon_minor", "face": "e"}
+   ]
+  },
+  {
+   "id": "feast_court",
+   "name": "Court of the Unending Feast",
+   "at": [0, -1],
+   "y": -10,
+   "half": [5, 5],
+   "h": 10,
+   "ops": [
+    {"op": "bowl", "tiers": 2, "width": 2, "step": 1},
+    {"op": "pillars", "inset": 1, "every": 4},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:dremora|minecraft:vindicator", "name": "Banquet Enforcer", "mode": "awake", "n": 2, "where": "ledge"},
+     {"id": "nirncraft:bandit|minecraft:vindicator", "name": "Crazed Noble", "mode": "ambush", "n": 2, "where": "ledge"}
+    ]},
+    {"op": "feature", "id": "setpiece:unending_feast"}
+   ]
+  },
+  {
+   "id": "wine_press",
+   "name": "The Crimson Press",
+   "at": [-1, -1],
+   "y": -14,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "fill", "from": [-3, -3, 0], "to": [-2, -3, 0], "block": "minecraft:barrel[facing=up]"},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:scamp|minecraft:vex", "name": "Press-Scamp", "mode": "sleep", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "nirncraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "minstrel_hall",
+   "name": "Gallery of Bone Lutes",
+   "at": [1, -1],
+   "y": -14,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "scatter", "block": "minecraft:skeleton_skull", "on": "floor", "chance": 16, "salt": 450},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Skeletal Minstrel", "mode": "sleep", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [-3, 3], "table": "nirncraft:chests/dungeon_common", "face": "e"}
+   ]
+  },
+  {
+   "id": "rose_amphitheatre",
+   "name": "Amphitheatre of Indulgence",
+   "at": [0, -2],
+   "y": -13,
+   "half": [5, 5],
+   "h": 12,
+   "ops": [
+    {"op": "pillars", "inset": 1, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "fill", "from": [-2, -2, 0], "to": [2, 2, 0], "block": "minecraft:crimson_nylium"},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:flame_atronach|minecraft:blaze", "name": "Dancer of the Rose", "mode": "elite", "at": [[0, -3]]},
+     {"id": "nirncraft:dremora|minecraft:vindicator", "name": "Revel Churl", "mode": "ambush", "n": 3, "where": "wall"}
+    ]},
+    {"op": "feature", "id": "setpiece:rose_amphitheatre"}
+   ]
+  },
+  {
+   "id": "boudoir_west",
+   "name": "West Velvet Salon",
+   "at": [-1, -2],
+   "y": -17,
+   "half": [4, 5],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:bandit|minecraft:vindicator", "name": "Entranced Guest", "mode": "sleep", "at": [[-3, -3], [-3, 0], [-3, 3], [3, 3]]}
+    ]},
+    {"op": "chest", "at": [3, -3], "table": "nirncraft:chests/dungeon_common", "face": "w"}
+   ]
+  },
+  {
+   "id": "boudoir_east",
+   "name": "East Velvet Salon",
+   "at": [1, -2],
+   "y": -17,
+   "half": [4, 5],
+   "h": 9,
+   "ops": [
+    {"op": "pillars", "inset": 1, "every": 4},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "scatter", "block": "minecraft:skeleton_skull", "on": "floor", "chance": 14, "salt": 451},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:dremora|minecraft:vindicator", "name": "Sanguine Caitiff", "mode": "ambush", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [3, 4], "table": "nirncraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "regret_cells",
+   "name": "Cells of Morning Regret",
+   "at": [-1, -3],
+   "y": -21,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Spent Reveller", "mode": "awake", "n": 2, "where": "any"}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "nirncraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "revel_throne",
+   "name": "Throne of the Blood Rose",
+   "at": [0, -3],
+   "y": -22,
+   "half": [6, 6],
+   "h": 16,
+   "role": "boss",
+   "ops": [
+    {"op": "pillars", "inset": 2, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "walllights", "every": 4, "y": 10},
+    {"op": "boss", "at": [0, -2], "dais": 2},
+    {"op": "fill", "from": [-6, -6, 1], "to": [6, -6, 9], "block": "minecraft:gilded_blackstone"},
+    {"op": "chest", "at": [0, -5], "table": "nirncraft:chests/dungeon_boss", "face": "s", "capstone": true},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:dremora|minecraft:vindicator", "name": "Rose Guard", "mode": "sleep", "at": [[-4, 3], [4, 3], [-4, 0], [4, 0]]}
+    ]}
+   ]
+  },
+  {
+   "id": "toast_study",
+   "name": "Chamber of the Last Toast",
+   "at": [1, -3],
+   "y": -21,
+   "half": [4, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "fill", "from": [3, -3, 0], "to": [3, -3, 0], "block": "trim"},
+    {"op": "lectern", "at": [3, -3, 1], "book": "revel", "candle": true, "face": "w"},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:dremora|minecraft:vindicator", "name": "Cup-Bearer", "mode": "sleep", "n": 2, "where": "wall"}
+    ]}
+   ]
+  },
+  {
+   "id": "wine_cistern",
+   "name": "The Spilled Vat",
+   "at": [-2, -1],
+   "y": -14,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "flood", "sink": 3, "margin": 1, "causeway": 3, "rails": false},
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Drowned Taster", "mode": "awake", "n": 1, "where": "lane"}
+    ]}
+   ]
+  },
+  {
+   "id": "goblet_treasury",
+   "name": "The Goblet Vault",
+   "at": [2, -1],
+   "y": -14,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "chest", "at": [0, -3], "table": "nirncraft:chests/dungeon_cache", "face": "s"},
+    {"op": "mobs", "list": [
+     {"id": "nirncraft:dremora|minecraft:vindicator", "name": "Treasury Guard", "mode": "sleep", "n": 2, "where": "wall"}
+    ]}
+   ]
+  },
+  {
+   "id": "back_stair",
+   "name": "Servants' Wine-Walk",
+   "at": [-2, -2],
+   "y": -18,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Cellar Servant", "mode": "sleep", "n": 2, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [0, 3], "table": "nirncraft:chests/dungeon_minor", "face": "n"}
+   ]
+  }
+ ],
+ "links": [
+  {"a": "velvet_foyer", "b": "cloakroom_west"},
+  {"a": "velvet_foyer", "b": "tasting_east"},
+  {"a": "velvet_foyer", "b": "feast_court"},
+  {"a": "feast_court", "b": "wine_press"},
+  {"a": "feast_court", "b": "minstrel_hall"},
+  {"a": "wine_press", "b": "wine_cistern"},
+  {"a": "minstrel_hall", "b": "goblet_treasury"},
+  {"a": "feast_court", "b": "rose_amphitheatre", "gate": "feast_court"},
+  {"a": "rose_amphitheatre", "b": "boudoir_west"},
+  {"a": "rose_amphitheatre", "b": "boudoir_east"},
+  {"a": "boudoir_west", "b": "regret_cells"},
+  {"a": "boudoir_east", "b": "toast_study"},
+  {"a": "toast_study", "b": "revel_throne", "gate": "toast_study", "trap": true},
+  {"a": "boudoir_west", "b": "back_stair"},
+  {"a": "wine_cistern", "b": "back_stair"}
+ ]
+}

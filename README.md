@@ -1,11 +1,11 @@
-# Skycraft
+# NirnCraft
 
-**Skycraft turns Minecraft into The Elder Scrolls V: Skyrim, and keeps going to the edge of Nirn.** You arrive as a
+**NirnCraft turns Minecraft into The Elder Scrolls V: Skyrim, and keeps going to the edge of Nirn.** You arrive as a
 prisoner on a cart to Helgen. From there you level up skills by using them, look to the heavens to spend perks,
 learn spells from tomes, absorb dragon souls and shout. Along the way you join factions, follow the Dragonborn's
 story, trade, get thrown in jail, buy a house, and explore a whole continent with your friends.
 
-Skycraft Core (`mod/`) is one custom NeoForge mod that builds all of this itself: the world, its people, creatures,
+NirnCraft Core (`mod/`) is one custom NeoForge mod that builds all of this itself: the world, its people, creatures,
 music and rules. The pack (`pack/`) adds only performance mods, a few libraries and helpers such as
 Better Combat, Lootr and Controllable.
 
@@ -62,7 +62,7 @@ Better Combat, Lootr and Controllable.
 ## Install
 
 Build the full Prism instance locally with `tools/build_release.ps1`; the result is
-`Skycraft-26.3-client-instance.zip` in a fresh release directory under `dist`. Import it through
+`NirnCraft-26.3-client-instance.zip` in a fresh release directory under `dist`. Import it through
 **Prism Launcher → Add Instance → Import**. GitHub Actions is disabled. Exact native packaging and acceptance
 commands are documented in [NATIVE-26.3-PREVIEW.md](docs/NATIVE-26.3-PREVIEW.md) and
 [SERVER-26.3.md](docs/SERVER-26.3.md).
@@ -71,10 +71,10 @@ The packaging tools support these outputs:
 
 | Artifact | Use |
 | --- | --- |
-| `Skycraft-26.3-client-instance.zip` | **Prism Launcher / MultiMC** instance with exact NeoForge and pinned mods/configs. Custom shaders and Distant Horizons are preserved and disabled until native acceptance. |
-| `Skycraft-26.3-server.zip` | Complete NeoForge dedicated server with server-side mods and checked Java 25 launchers. Accept the EULA, then run `run.sh` / `run.bat`. |
-| `Skycraft-exports` | `Skycraft.mrpack` (Modrinth App) and `Skycraft-curseforge.zip` (CurseForge App). |
-| `skycraft-core-jar` | Just the Skycraft Core mod. |
+| `NirnCraft-26.3-client-instance.zip` | **Prism Launcher / MultiMC** instance with exact NeoForge and pinned mods/configs. Custom shaders and Distant Horizons are preserved and disabled until native acceptance. |
+| `NirnCraft-26.3-server.zip` | Complete NeoForge dedicated server with server-side mods and checked Java 25 launchers. Accept the EULA, then run `run.sh` / `run.bat`. |
+| `NirnCraft-exports` | `NirnCraft.mrpack` (Modrinth App) and `NirnCraft-curseforge.zip` (CurseForge App). |
+| `nirncraft-core-jar` | Just the NirnCraft Core mod. |
 
 **Playing with friends:** use Minecraft's **Open to LAN** on the same network, or **Multiplayer** with a server's
 address. Everyone needs the matching full client pack. Dedicated-server setup is in
@@ -83,7 +83,7 @@ address. Everyone needs the matching full client pack. Dedicated-server setup is
 ## Controls
 
 These are the defaults for new players (shipped through Default Options). Rebind them in **Options → Controls → Key
-Binds → Skycraft**. If another mod already uses one of these keys, Skycraft moves its own key to a free one on first
+Binds → NirnCraft**. If another mod already uses one of these keys, NirnCraft moves its own key to a free one on first
 launch.
 
 | Key | Action |
@@ -127,7 +127,7 @@ Contributing or continuing development (including a new Claude Code session): st
 
 ## Credits and legal
 
-Skycraft is a fan project. It is not affiliated with or endorsed by Bethesda Softworks, ZeniMax Media or Mojang.
+NirnCraft is a fan project. It is not affiliated with or endorsed by Bethesda Softworks, ZeniMax Media or Mojang.
 *The Elder Scrolls* and *Skyrim* are trademarks of ZeniMax Media Inc.
 
 **Every asset in this repository is original.** Textures and models are drawn by Python scripts, music and sound

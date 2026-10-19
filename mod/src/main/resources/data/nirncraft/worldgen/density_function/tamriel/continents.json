@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:cache",
+    "input": {
+      "type": "nirncraft:tamriel_channel",
+      "channel": "continentalness"
+    }
+  }
+}

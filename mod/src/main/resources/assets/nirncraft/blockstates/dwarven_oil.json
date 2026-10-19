@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/dwarven_oil"
+      },
+      {
+        "model": "nirncraft:block/dwarven_oil",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/dwarven_oil",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/dwarven_oil",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/dwarven_oil_harvested"
+      },
+      {
+        "model": "nirncraft:block/dwarven_oil_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/dwarven_oil_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/dwarven_oil_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

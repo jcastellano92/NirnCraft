@@ -5,7 +5,7 @@
 #include <cstring>
 #include <string_view>
 
-namespace aether {
+namespace atlas {
 namespace {
 
 struct WordsHash {
@@ -209,4 +209,4 @@ uint16_t Svdag::at(int x, int y, int z) const {
     return materialOfRank(rank);
 }
 
-}  // namespace aether
+}  // namespace atlas

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:marshmerrow",
+      "required": false
+    },
+    "minecraft:cod",
+    "minecraft:salmon"
+  ]
+}

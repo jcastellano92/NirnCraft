@@ -1,0 +1,12 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "grove",
+  "where": [
+    "valenwood",
+    "realm"
+  ],
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

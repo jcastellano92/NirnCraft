@@ -11,7 +11,7 @@ def dimension_ids(core_or_resources):
     else:
         with zipfile.ZipFile(source) as archive:
             names = archive.namelist()
-    # The normal world's overworld comes from its world preset; Skycraft ships
+    # The normal world's overworld comes from its world preset; NirnCraft ships
     # explicit Nether/End replacements and its other dimensions as JSON.
     dimensions = {'minecraft:overworld'}
     for name in names:

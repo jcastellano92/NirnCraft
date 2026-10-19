@@ -1,6 +1,6 @@
-"""Decode the bundled Tamriel map rasters into one raw file for aether_core's preview terrain source.
+"""Decode the bundled Tamriel map rasters into one raw file for atlas_core's preview terrain source.
 
-Mirrors MapRaster.load (mod/src/main/java/com/skycraft/tamriel/terrain/MapRaster.java) channel for channel, so the
+Mirrors MapRaster.load (mod/src/main/java/com/nirncraft/tamriel/terrain/MapRaster.java) channel for channel, so the
 native preview reads the same macro values the Java generator starts from. The output is a cache, not source:
 native/data/ is gitignored; rerun after tools/worldgen/tamriel_map.py rewrites the PNGs.
 
@@ -29,7 +29,7 @@ CLIMATES = ["maritime", "skyrim_temperate", "skyrim_cold", "frozen", "desert", "
 
 
 def read(root, name, optional=False):
-    p = root / "mod/src/main/resources/skycraft/tamriel" / name
+    p = root / "mod/src/main/resources/nirncraft/tamriel" / name
     if not p.exists():
         if optional:
             return None
@@ -80,7 +80,7 @@ def main():
         f.write(struct.pack("<IIIIiiI", 2, W, H, len(CHANNELS), MIN_X, MIN_Z, CELL))
         f.write(d.astype("<f4").tobytes())
         f.write(regions.tobytes())
-        table = json.loads((root / "mod/src/main/resources/skycraft/tamriel/regions.json").read_text(encoding="utf-8"))
+        table = json.loads((root / "mod/src/main/resources/nirncraft/tamriel/regions.json").read_text(encoding="utf-8"))
         climate = [0] * (max(r["index"] for r in table) + 1)
         for r in table:
             w = r.get("weather", "temperate")

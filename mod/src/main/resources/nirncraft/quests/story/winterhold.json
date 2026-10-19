@@ -1,0 +1,169 @@
+{
+  "region": "skyrim/winterhold",
+  "why": [
+    "winterhold.L7.town_vs_college",
+    "winterhold.L8.mage_blame",
+    "winterhold.L9.eye_found",
+    "winterhold.L10.saarthal_eye"
+  ],
+  "hook": {
+    "place": "winterhold",
+    "places": [
+      "winterhold",
+      "college_of_winterhold",
+      "alftand",
+      "journeymans_nook",
+      "whistling_mine"
+    ],
+    "npc": "winterhold_hook_npc",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "winterhold_hook_npc",
+      "name": "Cliff-Warden Thonjolf",
+      "role": "guard",
+      "place": "winterhold",
+      "greet": "The sea-cliffs groaned again last night, and the Jarl's guards have barred the College bridge until someone answers for the ward-tremors in Saarthal."
+    },
+    {
+      "id": "winterhold_proctor_npc",
+      "name": "Proctor Mirabelle",
+      "role": "mage",
+      "place": "college_of_winterhold",
+      "greet": "The townsfolk blame our apprentices for every cracked foundation, yet rogue necromancers in the ice-caves are siphoning the coastal anchors."
+    },
+    {
+      "id": "winterhold_miner_npc",
+      "name": "Foreman Gundar",
+      "role": "citizen",
+      "place": "whistling_mine",
+      "greet": "Frost-wraiths have been rising along the iron seams ever since the excavation seals at Saarthal were pried open."
+    }
+  ],
+  "bosses": {
+    "story_winterhold_siphon_mage": {
+      "name": "Valko the Cliff-Siphon",
+      "entity": "minecraft:Evoker",
+      "place": "hobs_fall_cave",
+      "hp": 120
+    },
+    "story_winterhold_saarthal_revenant": {
+      "name": "Jyrik the Unbound Ward",
+      "entity": "minecraft:Stray",
+      "place": "saarthal",
+      "hp": 140
+    }
+  },
+  "scenes": {
+    "winterhold_bridge_compact": [
+      "Proctor Mirabelle: The restored Saarthal anchor-stones and the seized siphon-staves from Hob's Fall prove the College held the cliff-face together.",
+      "Cliff-Warden Thonjolf: And the Ysgramor runestone restores the old crown-oath between the longhouse and the hall of scholars.",
+      "Proctor Mirabelle: Then unbar the bridge—Winterhold and the College keep the northern watch together."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_winterhold_1",
+      "title": "story.nirncraft.winterhold_1.title",
+      "requires": [],
+      "places": [
+        "winterhold",
+        "whistling_mine",
+        "college_of_winterhold"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "winterhold",
+          "objective": "Hear the cliff-warden's complaint at the bridge gate in Winterhold."
+        },
+        {
+          "id": 20,
+          "place": "whistling_mine",
+          "objective": "Inspect the cracked resonance-pillars inside Whistling Mine."
+        },
+        {
+          "id": 30,
+          "place": "college_of_winterhold",
+          "objective": "Present the fractured pillar-core to the proctor at the College of Winterhold."
+        }
+      ],
+      "consequence": "guard_banner:winterhold_bridge_truce",
+      "why": [
+        "winterhold.L7.town_vs_college",
+        "winterhold.L8.mage_blame"
+      ]
+    },
+    {
+      "id": "story_winterhold_2",
+      "title": "story.nirncraft.winterhold_2.title",
+      "requires": [
+        "story_winterhold_1"
+      ],
+      "places": [
+        "college_of_winterhold",
+        "hobs_fall_cave",
+        "saarthal"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "college_of_winterhold",
+          "objective": "Review the coastal ward-readings in the Arcanaeum."
+        },
+        {
+          "id": 20,
+          "place": "hobs_fall_cave",
+          "objective": "Defeat the necromancer cabal siphoning the cliff-anchors in Hob's Fall Cave."
+        },
+        {
+          "id": 30,
+          "place": "saarthal",
+          "objective": "Re-seat the stolen ward-key stone inside the deep vault of Saarthal."
+        }
+      ],
+      "consequence": "court_status:winterhold_anchors_stabilized",
+      "why": [
+        "winterhold.L9.eye_found",
+        "winterhold.L10.saarthal_eye"
+      ]
+    },
+    {
+      "id": "story_winterhold_3",
+      "title": "story.nirncraft.winterhold_3.title",
+      "requires": [
+        "story_winterhold_2"
+      ],
+      "places": [
+        "winterhold",
+        "ysgramors_tomb",
+        "shrine_of_azura"
+      ],
+      "finale": true,
+      "stages": [
+        {
+          "id": 10,
+          "place": "shrine_of_azura",
+          "objective": "Receive the twilight augury at the Shrine of Azura overlooking the glacier."
+        },
+        {
+          "id": 20,
+          "place": "ysgramors_tomb",
+          "objective": "Recover the ancient treaty-tablet from the sea-crypt of Ysgramor's Tomb."
+        },
+        {
+          "id": 30,
+          "place": "winterhold",
+          "objective": "Witness the joint compact between Jarl and Proctor in Winterhold."
+        }
+      ],
+      "consequence": "world_state:winterhold_resolved",
+      "why": [
+        "winterhold.L8.azura_statue",
+        "winterhold.L9.rebel_jarl",
+        "winterhold.L10.harbingers_tomb"
+      ]
+    }
+  ]
+}

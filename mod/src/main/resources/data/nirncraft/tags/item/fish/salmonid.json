@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:salmon",
+    "nirncraft:arctic_char",
+    "nirncraft:arctic_grayling",
+    "nirncraft:brook_trout",
+    "nirncraft:colovian_trout",
+    "nirncraft:redfin_trout",
+    "nirncraft:bjoulsae_trout",
+    "nirncraft:wrothgar_char"
+  ]
+}

@@ -34,8 +34,8 @@ out['whiterun']['upper_tier_entrances']=dict(main_street_x62='cliff 121->127 at 
 out['whiterun']['doorstep_problems']=[
     dict(spec=245,door=[105,-8],problem='back door opens onto a backyard garden fence (spruce_fence y121 at x104..107,z-9, crops behind it); no standable doorstep cell'),
     dict(spec=295,door=[-26,-71],problem='west door opens onto a garden fence (spruce_fence at x-29..-27,z-71, beetroots/cabbages behind); no standable doorstep cell')]
-out['whiterun']['shrine_candle_bug']=[dict(spec=175,at=[40,-60],blocks='y120 grass, y121 candle(3,lit), y122 skycraft:shrine_of_kynareth (lectern fallback)'),
-    dict(spec=176,at=[18,-61],blocks='y120 grass, y121 candle, y122 skycraft:shrine_of_kynareth')]
+out['whiterun']['shrine_candle_bug']=[dict(spec=175,at=[40,-60],blocks='y120 grass, y121 candle(3,lit), y122 nirncraft:shrine_of_kynareth (lectern fallback)'),
+    dict(spec=176,at=[18,-61],blocks='y120 grass, y121 candle, y122 nirncraft:shrine_of_kynareth')]
 out['whiterun']['closed_fence_gates_on_walkways']=40
 json.dump(out,open('truth_summary.json','w'),indent=1)
 print(json.dumps(out['whiterun']['buildings_by_class']),json.dumps(out['whiterun']['by_floor']))

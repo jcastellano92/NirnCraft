@@ -19,10 +19,10 @@ f.npc('hjoldis', 'Factor Hjoldis Seaborn', 'merchant', 'dawnstar', 8, 6,
 f.relic('migration_verse', 'The Unsung Verse', 'A strip of whale-hide inscribed in ancient runes with a single stanza of the Migration Song, longer than any living skald can hold in a breath. Whoever sings it is said to remember a country that has not existed for a thousand years.', 15);
 f.relic('feast_horn', 'The Feast-Horn of Kjolvik', 'A great curved horn of white bone, bound in iron and carved with ships. It has been blown at every feast since the settlement was founded, and has never once been blown in anger.', 22);
 f.relic('barnacled_chart', 'Saarvik\'s Barnacled Chart', 'A sea-chart of waxed hide, stiff with salt and crusted with barnacles. It shows a coast no living Nord has named, and a harbour marked in a red that is not ink, with a single word beside it in the old tongue: HOME.', 11);
-f.boss('winter_wight', { name: 'The Wight of the Ninth Winter', type: 'skycraft:draugr_deathlord', hp: 4.2, dmg: 1.7, level: 36,
-  weapon: 'skycraft:ancient_nord_greatsword', gear: { head: 'skycraft:ancient_nord_helmet', chest: 'skycraft:ancient_nord_chestplate' }, drop: 'loot:major', glow: true });
-f.boss('ice_warden', { name: 'Skjaldborg\'s Last Shieldman', type: 'skycraft:draugr_deathlord', hp: 3.8, dmg: 1.6, level: 34,
-  weapon: 'skycraft:ancient_nord_sword', gear: { head: 'skycraft:ancient_nord_helmet' }, drop: 'loot:major', glow: true });
+f.boss('winter_wight', { name: 'The Wight of the Ninth Winter', type: 'nirncraft:draugr_deathlord', hp: 4.2, dmg: 1.7, level: 36,
+  weapon: 'nirncraft:ancient_nord_greatsword', gear: { head: 'nirncraft:ancient_nord_helmet', chest: 'nirncraft:ancient_nord_chestplate' }, drop: 'loot:major', glow: true });
+f.boss('ice_warden', { name: 'Skjaldborg\'s Last Shieldman', type: 'nirncraft:draugr_deathlord', hp: 3.8, dmg: 1.6, level: 34,
+  weapon: 'nirncraft:ancient_nord_sword', gear: { head: 'nirncraft:ancient_nord_helmet' }, drop: 'loot:major', glow: true });
 f.scene('atm_feast', [
   ['narrator', 'Ten long halls lie half-buried in drifts, their roofs furred with ice. In the one at the centre, a fire the width of a cartwheel burns. Nobody tends it. Everybody is watching.'],
   ['@hrafn', 'It is the last feast, stranger. The ninth winter in a row without a whale. We have meat for one more night. Tomorrow we choose: the ships, or the ice. Tonight we sing.'],
@@ -41,11 +41,11 @@ f.q({
     o.go('kjolvik', 'Attend the gathering at the Elder Longhall', { actions: 'scene:@atm_feast' }),
     o.go('atmoran_giants_cairn', 'Hunt on the shelf near the Giant\'s Cairn, as Grim advises'),
     o.clear('atmoran_giants_cairn', 'Drive off the ice-beasts that guard the herd',
-      [mob('skycraft:frost_giant', 1, 'Cairn-Giant'), mob('skycraft:wolf', 3, 'Rime-Wolf')]),
+      [mob('nirncraft:frost_giant', 1, 'Cairn-Giant'), mob('nirncraft:wolf', 3, 'Rime-Wolf')]),
     o.retrieveItem('atmoran_giants_cairn', 'Bring back meat for the feast', 'minecraft:cooked_beef', 8),
     o.cond('night', 'Return to Kjolvik before the solstice night falls', 'kjolvik', { actions: 'scene:@atm_wight' }),
     o.kill('kjolvik', 'Face the Wight of the Ninth Winter at the feast-table',
-      [{ boss_id: '@winter_wight' }, mob('skycraft:draugr', 3, 'Frost-Shield')]),
+      [{ boss_id: '@winter_wight' }, mob('nirncraft:draugr', 3, 'Frost-Shield')]),
     o.talk('@hrafn', 'Tell Hrafn what the wight asked before it fell',
       'The wight said: the ninth winter does not end. It asks for a hundred and four. Or the hall\'s fire, and a promise to leave.',
       'Hrafn is silent for a long moment. The great fire cracks. "The old law says the ninth winter takes a tithe. I will pay it. But I will not pay it in lives. Stranger, what do you say? The ships are in the harbour. The fire is old. The song has not been finished. Choose, and Kjolvik will follow."',
@@ -55,7 +55,7 @@ f.q({
       ] }),
   ],
   outro: 'The last feast of Kjolvik was held under a sky of green fire. Whether the ships sailed at dawn or the hearth burned on, the Migration Song was sung that night to its four-hundredth verse.',
-  rewards: { gold: 1800, loot: 'legendary', items: [{ item: 'skycraft:ancient_nord_greatsword', name: 'Hrafn\'s Last Oath', enchant: { sharpness: 5, smite: 3, unbreaking: 3 } }] },
+  rewards: { gold: 1800, loot: 'legendary', items: [{ item: 'nirncraft:ancient_nord_greatsword', name: 'Hrafn\'s Last Oath', enchant: { sharpness: 5, smite: 3, unbreaking: 3 } }] },
 });
 
 f.q({
@@ -66,7 +66,7 @@ f.q({
   objectives: [
     o.go('moot_of_the_five_hundred', 'Travel to the Moot of the Five Hundred'),
     o.clear('moot_of_the_five_hundred', 'Drive off the frost-drakes that roost on the moot-stone',
-      [mob('skycraft:ice_wraith', 3, 'Moot-Wraith'), mob('skycraft:frost_giant', 1, 'Stone-Guard Giant')]),
+      [mob('nirncraft:ice_wraith', 3, 'Moot-Wraith'), mob('nirncraft:frost_giant', 1, 'Stone-Guard Giant')]),
     o.retrieve('moot_of_the_five_hundred', 'Take a rubbing of the carved verse', '@migration_verse'),
     o.deliver('@rolla', '@migration_verse', 'Bring the rubbing to Rolla',
       'Here are the lost verses. There are forty. They tell of the first ships, and of a country that was behind them.',
@@ -88,7 +88,7 @@ f.q({
   objectives: [
     o.go('saarvik_landing', 'Sail to Saarvik Landing on the Atmoran coast'),
     o.clear('saarvik_landing', 'Clear the draugr crew that still guard the wreck',
-      [mob('skycraft:draugr', 4, 'Wreck-Crewman'), mob('skycraft:draugr_deathlord', 1, 'First Mate')], { placement: 'structure' }),
+      [mob('nirncraft:draugr', 4, 'Wreck-Crewman'), mob('nirncraft:draugr_deathlord', 1, 'First Mate')], { placement: 'structure' }),
     o.retrieve('saarvik_landing', 'Take the barnacled chart from under the hull', '@barnacled_chart', { placement: 'structure' }),
     o.talk('@hjoldis', 'Bring the chart back to Hjoldis',
       'The chart was where you said. It shows a coast I do not know, with a mark in a red that is not ink.',
@@ -110,7 +110,7 @@ f.q({
   objectives: [
     o.go('skjaldborg', 'Approach the walls of Skjaldborg under a flag of truce'),
     o.kill('skjaldborg', 'Fight through the ghostly garrison to the gate-captain',
-      [{ boss_id: '@ice_warden' }, mob('skycraft:draugr', 4, 'Wall-Sentinel')], { placement: 'structure' }),
+      [{ boss_id: '@ice_warden' }, mob('nirncraft:draugr', 4, 'Wall-Sentinel')], { placement: 'structure' }),
     o.talk('@grim', 'Tell Grim the war at Skjaldborg is over',
       'The garrison would not hear it. I told their captain. The enemy left a thousand years ago. He said: then who are we guarding?',
       'Grim\'s mouth works. "Then who are we guarding. Stranger, that is a good question. Maybe the one who holds the gate is only a gate. Maybe there is nothing behind it. Maybe the fort is the only one left in the world who remembers there was a war. Grim does not know. But he thinks, tonight, the arrows will stop."'),
@@ -137,9 +137,9 @@ f.npc('jin', 'Pirate Jin the Wary', 'thief', 'tang_mo_harbor_village', 8, -4,
 
 f.relic('tiger_seal', 'Seal of the Third Trial', 'A palm-sized jade seal carved with a tiger asleep, paw over its nose. When held to the light, a very small second tiger can be seen in its depths, which is awake, and watching the first.', 26);
 f.relic('lantern_logbook', 'The Silent Junk\'s Logbook', 'A salt-stiff logbook written in the careful characters of an Akaviri captain. The last entry is a single line: \'The lantern on the mast is lit. No one lit it. We are not afraid.\'', 11);
-f.boss('tiger_guardian', { name: 'The Guardian of the Third Trial', type: 'skycraft:tsaesci', hp: 4.0, dmg: 1.7, level: 38,
-  weapon: 'skycraft:akaviri_sword', gear: { head: 'skycraft:akaviri_helmet', chest: 'skycraft:akaviri_chestplate' }, drop: 'loot:major', glow: true });
-f.boss('mast_lantern', { name: 'The Lantern-That-Burns', type: 'skycraft:wispmother', hp: 4.0, dmg: 1.6, level: 36, drop: 'loot:major', glow: true });
+f.boss('tiger_guardian', { name: 'The Guardian of the Third Trial', type: 'nirncraft:tsaesci', hp: 4.0, dmg: 1.7, level: 38,
+  weapon: 'nirncraft:akaviri_sword', gear: { head: 'nirncraft:akaviri_helmet', chest: 'nirncraft:akaviri_chestplate' }, drop: 'loot:major', glow: true });
+f.boss('mast_lantern', { name: 'The Lantern-That-Burns', type: 'nirncraft:wispmother', hp: 4.0, dmg: 1.6, level: 36, drop: 'loot:major', glow: true });
 f.scene('aka_terrace', [
   ['narrator', 'Terrace after terrace of rice-fields climbs the mountain, each one watered by the one above it. At the top stands a vermilion gate, and beyond it, a pagoda with a roof like a lifted eyebrow.'],
   ['@hiro', 'Three trials: the climb, the cut and the choice. The tiger sleeps at the top. If it wakes for you, it is because you are worth waking. If it does not, you are only a person with a sword.'],
@@ -158,7 +158,7 @@ f.q({
     o.go('tiger_plains_village', 'Climb the terraces to the vermilion gate', { actions: 'scene:@aka_terrace' }),
     o.go('hall_of_the_dragon_tigers', 'Pass the first trial, the climb, at the Hall of the Dragon Tigers'),
     o.clear('hall_of_the_dragon_tigers', 'Pass the second trial, the cut, against the hall\'s defenders',
-      [mob('skycraft:tsaesci', 3, 'Trial-Swordsman'), mob('skycraft:kamal', 1, 'Trial-Brute')], { placement: 'structure' }),
+      [mob('nirncraft:tsaesci', 3, 'Trial-Swordsman'), mob('nirncraft:kamal', 1, 'Trial-Brute')], { placement: 'structure' }),
     o.kill('hall_of_the_dragon_tigers', 'Pass the third trial, the choice, against the Guardian',
       [{ boss_id: '@tiger_guardian' }], { placement: 'structure', actions: 'relic:@tiger_seal' }),
     o.talk('@hiro', 'Bring the seal to Hiro and answer his question',
@@ -170,7 +170,7 @@ f.q({
       ] }),
   ],
   outro: 'A tiger that had slept for sixty years woke, looked, and slept again. The village of Tiger Plains has a seal, a student and a very careful teacher.',
-  rewards: { gold: 2000, loot: 'legendary', items: [{ item: 'skycraft:akaviri_sword', name: 'Letter of the Waking Tiger', enchant: { sharpness: 5, looting: 3, unbreaking: 3 } }] },
+  rewards: { gold: 2000, loot: 'legendary', items: [{ item: 'nirncraft:akaviri_sword', name: 'Letter of the Waking Tiger', enchant: { sharpness: 5, looting: 3, unbreaking: 3 } }] },
 });
 
 f.q({
@@ -181,7 +181,7 @@ f.q({
   objectives: [
     o.go('black_lacquer_pagoda', 'Carry the bolt to the old weaver at the Black Lacquer Pagoda'),
     o.clear('black_lacquer_pagoda', 'Drive off the Tsaesci who have taken the weaver\'s loft',
-      [mob('skycraft:tsaesci', 3, 'Loft-Guard')]),
+      [mob('nirncraft:tsaesci', 3, 'Loft-Guard')]),
     o.talk('@mei', 'Return to Mei and tell her what the weaver said',
       'The weaver said: the cloth is not wrong. It was woven for a person who has not yet come. It will not fold until it is worn by them.',
       'Mei sits very still. "A person who has not yet come. Three hundred years. And I have been trying to sell it to people who already have. Stranger, I shall hang it in the window, and let it wait. If it was meant for you, you will know. Try it on. It will not hold a fold. But it will not fall off, either."'),
@@ -198,7 +198,7 @@ f.q({
   objectives: [
     o.go('tang_mo_harbor_village', 'Board the silent junk at the quay', { actions: 'scene:@aka_junk;relic:@lantern_logbook' }),
     o.clear('tang_mo_watch', 'Search the signal-fire at Tang Mo Watch, where the junk\'s light first appeared',
-      [mob('minecraft:drowned', 3, 'Junk-Drowned'), mob('skycraft:sea_serpent', 1, 'Mast-Coil')], { placement: 'structure' }),
+      [mob('minecraft:drowned', 3, 'Junk-Drowned'), mob('nirncraft:sea_serpent', 1, 'Mast-Coil')], { placement: 'structure' }),
     o.kill('tang_mo_watch', 'Put out the Lantern-That-Burns',
       [{ boss_id: '@mast_lantern' }], { placement: 'structure' }),
     o.deliver('@wen', '@lantern_logbook', 'Bring the log to Wen',
@@ -240,8 +240,8 @@ f.npc('anwar', 'Scholar-Captain Anwar', 'scholar', 'sentinel', 8, 6,
   'Anwar has spent forty years in Sentinel\'s archives chasing a single rumour: that the Yokudan Way of the Sword is still taught, on an island no one has charted. He is eighty. He is very impatient.');
 
 f.relic('sahars_stance', 'The Fourth Stance, in Chalk', 'A flat stone with a chalk diagram of a swordsman\'s feet, drawn by the master himself. The fourth stance has never been taught. It is, he says, the one a student invents.', 11);
-f.boss('jai_boss', { name: 'Jai, the Angriest Student', type: 'skycraft:bandit_chief', hp: 3.6, dmg: 1.6, level: 36,
-  weapon: 'skycraft:yokudan_sword', gear: { head: 'skycraft:ancient_nord_helmet' }, drop: 'loot:major', glow: false });
+f.boss('jai_boss', { name: 'Jai, the Angriest Student', type: 'nirncraft:bandit_chief', hp: 3.6, dmg: 1.6, level: 36,
+  weapon: 'nirncraft:yokudan_sword', gear: { head: 'nirncraft:ancient_nord_helmet' }, drop: 'loot:major', glow: false });
 f.scene('yok_court', [
   ['narrator', 'The courtyard is a bowl of white sand, ringed with columns and tiered benches, with a single bright pavilion at the north. Nobody is practising. Everyone is waiting.'],
   ['@sahar', 'The lesson is not the sword. The lesson is the stillness before it. Do not lift your blade until you can say what it is for. Many have drawn. A few have known.'],
@@ -269,7 +269,7 @@ f.q({
       ] }),
   ],
   outro: 'The sword-courtyard of Yokuda has two masters now, or none. The sand bears no print of the fourth stance. It will be invented again.',
-  rewards: { gold: 2200, loot: 'legendary', items: [{ item: 'skycraft:yokudan_sword', name: 'Stillness Before the Cut', enchant: { sharpness: 5, sweeping: 3, unbreaking: 3 } }] },
+  rewards: { gold: 2200, loot: 'legendary', items: [{ item: 'nirncraft:yokudan_sword', name: 'Stillness Before the Cut', enchant: { sharpness: 5, sweeping: 3, unbreaking: 3 } }] },
 });
 
 f.q({
@@ -280,7 +280,7 @@ f.q({
   objectives: [
     o.go('hall_of_the_ansei', 'Reach the Hall of the Ansei across the Yokudan desert'),
     o.clear('hall_of_the_ansei', 'Drive off the sand-wraiths that guard the hall',
-      [mob('skycraft:sand_serpent', 2, 'Hall-Serpent'), mob('minecraft:husk', 3, 'Sand-Wraith')], { placement: 'structure' }),
+      [mob('nirncraft:sand_serpent', 2, 'Hall-Serpent'), mob('minecraft:husk', 3, 'Sand-Wraith')], { placement: 'structure' }),
     o.talk('@anwar', 'Tell Anwar what the Hall holds',
       'The Hall holds a library of one scroll. It is blank. Beneath it is a note: \'The Sword-Singers took the record with them. Ask the ones who still sing.\'',
       'Anwar takes it with a shaking hand. He is old, so very old. Then he laughs, the laugh of a man who has been unexpectedly released. "Blank! A whole life for a blank scroll. Stranger, it is the best answer I could have had. The Singers still sing. Somewhere. Anwar will put down his pen. For the first time in forty years, he will sit in the sun."'),
@@ -300,8 +300,8 @@ f.npc('caelir', 'Coast-Watcher Caelir', 'hunter', 'firsthold', -8, 6,
   'Caelir has watched the Maormer fleet from a rock in the strait for twelve years, and has learned their lamps. She says she knows each ship by its smell. She does not say which smells she prefers.', true);
 
 f.relic('admirals_key', 'Key of the Coral Flagship', 'A key of curling white coral, as long as a hand, that will open any lock on the flagship and, the Admiral says, any lock in the sea. It is cold, and very faintly wet, at all times.', 26);
-f.boss('flagship_warden', { name: 'Warden-of-the-Hold Ssiruun', type: 'skycraft:dremora', hp: 3.8, dmg: 1.6, level: 38,
-  weapon: 'skycraft:maormer_sword', gear: { head: 'skycraft:maormer_helmet', chest: 'skycraft:maormer_chestplate' }, drop: 'loot:major', glow: true });
+f.boss('flagship_warden', { name: 'Warden-of-the-Hold Ssiruun', type: 'nirncraft:dremora', hp: 3.8, dmg: 1.6, level: 38,
+  weapon: 'nirncraft:maormer_sword', gear: { head: 'nirncraft:maormer_helmet', chest: 'nirncraft:maormer_chestplate' }, drop: 'loot:major', glow: true });
 f.scene('pya_raft', [
   ['narrator', 'A city of shell-hulled ships lashed together bobs on a calm black sea, each hull a different shade of pale. Lanterns of green glass hang from every mast. Somewhere below, the sound of a very large, very slow chain.'],
   ['@caelir', 'Do not breathe loudly. Do not step on a line you cannot see the end of. The Maormer are polite to a degree that frightens me. They will thank you for a mistake, and then they will keep you.'],
@@ -316,7 +316,7 @@ f.q({
     o.go('pyandonean_fleet_anchorage', 'Row to the raft-city by night', { actions: 'scene:@pya_raft' }),
     o.cond('night', 'Wait until the fleet is dark and the watch changes', 'pyandonean_fleet_anchorage'),
     o.kill('pyandonean_fleet_anchorage', 'Slip past the Warden-of-the-Hold and take the coral key',
-      [{ boss_id: '@flagship_warden' }, mob('skycraft:bandit', 2, 'Hold-Guard')], { actions: 'relic:@admirals_key' }),
+      [{ boss_id: '@flagship_warden' }, mob('nirncraft:bandit', 2, 'Hold-Guard')], { actions: 'relic:@admirals_key' }),
     o.escort('@captive', 'firsthold', 'Row the freed scholar back to Firsthold before dawn'),
     o.talk('@caelir', 'Tell Caelir the captive is free',
       'The scholar is free. He talked the whole way. He knows where the Queen\'s hidden island is.',
@@ -338,7 +338,7 @@ f.q({
   objectives: [
     o.go('serpent_pens', 'Follow the silence to the Serpent Pens'),
     o.clear('serpent_pens', 'Drive off the pen-keepers who are using the shells as ears',
-      [mob('skycraft:sea_serpent', 2, 'Pen-Serpent'), mob('skycraft:bandit', 2, 'Shell-Listener')], { placement: 'structure' }),
+      [mob('nirncraft:sea_serpent', 2, 'Pen-Serpent'), mob('nirncraft:bandit', 2, 'Shell-Listener')], { placement: 'structure' }),
     o.talk('@ilu', 'Tell Ilu who was listening',
       'The pen-keepers were listening for the Admiral\'s orders. The shells gave them away. They are quiet no longer.',
       'Ilu pulls a shell from the rack and holds it to her ear. After a moment, her whole face changes. "There. The sea. It was only waiting for permission. Stranger, I shall hang a shell for you in the workshop. It will hum a different note from all the others. It will hum the sound of someone who listened to the listeners."'),
@@ -351,7 +351,7 @@ f.q({
 f.npc('ooma', 'Plague-Diver Ooma', 'adventurer', 'sload_spawning_pools', 4, 4,
   'Ooma dives the Sload pools for a living, and is the only person in Thras who will tell you it is a living. She wears a mask of waxed leather and a very large amount of gold. The gold, she says, is not for decoration. It is for the debt she owes the pools.', true);
 f.relic('reef_heart', 'Heart of the Reef', 'A fist-sized lump of living coral that pulses, slowly, in bright pink and poison green. When held to the ear, it sounds like a drowned bell. It is warm. It is, very faintly, afraid.', 20);
-f.boss('reef_tyrant', { name: 'The Reef-Tyrant', type: 'skycraft:swamp_leviathan', hp: 4.6, dmg: 1.8, level: 40, drop: 'loot:major', glow: true });
+f.boss('reef_tyrant', { name: 'The Reef-Tyrant', type: 'nirncraft:swamp_leviathan', hp: 4.6, dmg: 1.8, level: 40, drop: 'loot:major', glow: true });
 f.q({
   id: 'the_heart_of_the_reef', title: 'The Heart of the Reef', region: 'thras/coral_kingdom', start: 'npc:@ooma', requires: ['level:38'],
   offer: 'You have the look of someone about to dive.',
@@ -360,7 +360,7 @@ f.q({
   objectives: [
     o.go('coral_tower_of_thras', 'Reach the Coral Tower of Thras'),
     o.clear('coral_tower_of_thras', 'Fight through the infected coral to the heart chamber',
-      [mob('minecraft:drowned', 4, 'Reef-Drowned'), mob('skycraft:sea_serpent', 1, 'Plague-Serpent')], { placement: 'structure' }),
+      [mob('minecraft:drowned', 4, 'Reef-Drowned'), mob('nirncraft:sea_serpent', 1, 'Plague-Serpent')], { placement: 'structure' }),
     o.kill('coral_tower_of_thras', 'Defeat the Reef-Tyrant that guards the heart',
       [{ boss_id: '@reef_tyrant' }], { placement: 'structure', actions: 'relic:@reef_heart' }),
     o.deliver('@ooma', '@reef_heart', 'Bring the heart to Ooma',

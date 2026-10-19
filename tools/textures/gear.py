@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Generates Skycraft's arms & armour from tools/textures/gear_catalogue.py.
+"""Generates NirnCraft's arms & armour from tools/textures/gear_catalogue.py.
 
     python tools/textures/gear.py [--preview DIR]
 
 Writes (all deterministic):
   * the generated constants of SmithingTier.java and SkyArmorMaterial.java (between the gear: markers);
   * weapon, bow, armour-icon, shield and material textures and their item models;
-  * armour layers (64x32) and the 3D armour geometry skycraft/gear/armor_models.json;
-  * lang (mod/src/main/lang/skycraft/gear.json), gold values (skycraft_values/crafting.json), weights
-    (skycraft_weights/gear.json), item tags (classes, light/heavy, forge tool/armour tags, province gear lists),
+  * armour layers (64x32) and the 3D armour geometry nirncraft/gear/armor_models.json;
+  * lang (mod/src/main/lang/nirncraft/gear.json), gold values (nirncraft_values/crafting.json), weights
+    (nirncraft_weights/gear.json), item tags (classes, light/heavy, forge tool/armour tags, province gear lists),
     Better Combat attributes (via gen_bettercombat.py) and the regional loot table.
 With --preview DIR it also writes contact sheets of every weapon, icon and worn set.
 """
@@ -35,13 +35,13 @@ from gear_px import hexc, mix, ramp, rnd, shade  # noqa: E402
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 MAIN = os.path.join(ROOT, "mod", "src", "main")
 RES = os.path.join(MAIN, "resources")
-ASSETS = os.path.join(RES, "assets", "skycraft")
+ASSETS = os.path.join(RES, "assets", "nirncraft")
 TEX_ITEM = os.path.join(ASSETS, "textures", "item")
 TEX_ARMOR = os.path.join(ASSETS, "textures", "models", "armor")
 MODELS = os.path.join(ASSETS, "models", "item")
-DATA = os.path.join(RES, "data", "skycraft")
-JAVA = os.path.join(MAIN, "java", "com", "skycraft", "crafting")
-LANG = os.path.join(MAIN, "lang", "skycraft")
+DATA = os.path.join(RES, "data", "nirncraft")
+JAVA = os.path.join(MAIN, "java", "com", "nirncraft", "crafting")
+LANG = os.path.join(MAIN, "lang", "nirncraft")
 
 WRITTEN = []
 
@@ -134,7 +134,7 @@ HANDHELD = "minecraft:item/handheld"
 
 
 def weapon_model(item_id, wtype):
-    m = {"parent": HANDHELD, "textures": {"layer0": f"skycraft:item/{item_id}"}}
+    m = {"parent": HANDHELD, "textures": {"layer0": f"nirncraft:item/{item_id}"}}
     if wtype in cat.TWO_HANDED:
         # two-handers are drawn bigger in the hands than one-handers
         m["display"] = {
@@ -166,12 +166,12 @@ def weapons():
             for i in range(3):
                 save_png(gw.bow(t.id, i), TEX_ITEM, f"{item_id}_pulling_{i}")
                 write_json(os.path.join(MODELS, f"{item_id}_pulling_{i}.json"),
-                           {"parent": f"skycraft:item/{item_id}", "textures": {"layer0": f"skycraft:item/{item_id}_pulling_{i}"}})
+                           {"parent": f"nirncraft:item/{item_id}", "textures": {"layer0": f"nirncraft:item/{item_id}_pulling_{i}"}})
             write_json(os.path.join(MODELS, f"{item_id}.json"), {
-                "parent": "minecraft:item/generated", "textures": {"layer0": f"skycraft:item/{item_id}"}, "display": BOW_DISPLAY,
-                "overrides": [{"predicate": {"pulling": 1}, "model": f"skycraft:item/{item_id}_pulling_0"},
-                              {"predicate": {"pulling": 1, "pull": 0.65}, "model": f"skycraft:item/{item_id}_pulling_1"},
-                              {"predicate": {"pulling": 1, "pull": 0.9}, "model": f"skycraft:item/{item_id}_pulling_2"}]})
+                "parent": "minecraft:item/generated", "textures": {"layer0": f"nirncraft:item/{item_id}"}, "display": BOW_DISPLAY,
+                "overrides": [{"predicate": {"pulling": 1}, "model": f"nirncraft:item/{item_id}_pulling_0"},
+                              {"predicate": {"pulling": 1, "pull": 0.65}, "model": f"nirncraft:item/{item_id}_pulling_1"},
+                              {"predicate": {"pulling": 1, "pull": 0.9}, "model": f"nirncraft:item/{item_id}_pulling_2"}]})
         else:
             save_png(gw.weapon(t.id, w, seed(item_id)), TEX_ITEM, item_id)
             write_json(os.path.join(MODELS, f"{item_id}.json"), weapon_model(item_id, w))
@@ -192,14 +192,14 @@ def armour():
             item_id = f"{a.id}_{piece}"
             save_png(img, TEX_ITEM, item_id)
             write_json(os.path.join(MODELS, f"{item_id}.json"),
-                       {"parent": "minecraft:item/generated", "textures": {"layer0": f"skycraft:item/{item_id}"}})
+                       {"parent": "minecraft:item/generated", "textures": {"layer0": f"nirncraft:item/{item_id}"}})
         if a.shield:
             tex = gs.texture(a.id)
             save_png(tex, os.path.join(TEX_ITEM, "shield"), a.id)
-            main, block = gs.model(a.id, f"skycraft:item/shield/{a.id}")
+            main, block = gs.model(a.id, f"nirncraft:item/shield/{a.id}")
             write_json(os.path.join(MODELS, f"{a.id}_shield.json"), main)
             write_json(os.path.join(MODELS, f"{a.id}_shield_blocking.json"), block)
-    write_json(os.path.join(RES, "skycraft", "gear", "armor_models.json"), {"styles": styles})
+    write_json(os.path.join(RES, "nirncraft", "gear", "armor_models.json"), {"styles": styles})
 
 
 # ============================================================================================= materials
@@ -250,7 +250,7 @@ def material_icon(kind):
 def materials():
     for mid in cat.MATERIALS:
         save_png(material_icon(mid), TEX_ITEM, mid)
-        write_json(os.path.join(MODELS, f"{mid}.json"), {"parent": "minecraft:item/generated", "textures": {"layer0": f"skycraft:item/{mid}"}})
+        write_json(os.path.join(MODELS, f"{mid}.json"), {"parent": "minecraft:item/generated", "textures": {"layer0": f"nirncraft:item/{mid}"}})
 
 
 # ============================================================================================= lang
@@ -270,14 +270,14 @@ def all_gear_ids():
 def lang():
     out = {}
     for item_id, t, w in cat.weapon_items():
-        out[f"item.skycraft.{item_id}"] = t.label(w)
+        out[f"item.nirncraft.{item_id}"] = t.label(w)
     for item_id, a, i in cat.armor_items():
-        out[f"item.skycraft.{item_id}"] = a.label(i)
+        out[f"item.nirncraft.{item_id}"] = a.label(i)
     for mid, (name, _, _) in cat.MATERIALS.items():
-        out[f"item.skycraft.{mid}"] = name
+        out[f"item.nirncraft.{mid}"] = name
     for k, v in CATEGORY_NAMES.items():
-        out[f"category.skycraft.smithing.{k}"] = v
-    out["tooltip.skycraft.silver_weapon"] = "Burns the undead"
+        out[f"category.nirncraft.smithing.{k}"] = v
+    out["tooltip.nirncraft.silver_weapon"] = "Burns the undead"
     write_json(os.path.join(LANG, "gear.json"), dict(sorted(out.items())))
     # the old per-item names in crafting.json are superseded
     path = os.path.join(LANG, "crafting.json")
@@ -290,35 +290,35 @@ def lang():
 # ============================================================================================= values & weights
 
 def values():
-    path = os.path.join(DATA, "skycraft_values", "crafting.json")
+    path = os.path.join(DATA, "nirncraft_values", "crafting.json")
     data = read_json(path, {"values": {}})
     vals = data["values"]
     for item_id, t, w in cat.weapon_items():
-        key = f"skycraft:{item_id}"
+        key = f"nirncraft:{item_id}"
         if t.id not in cat.EXISTING_TIERS or key not in vals:
             vals[key] = int(round(t.value * cat.TYPE_VALUE[w]))
     for item_id, a, i in cat.armor_items():
-        vals[f"skycraft:{item_id}"] = a.val[i]
+        vals[f"nirncraft:{item_id}"] = a.val[i]
     for mid, (_, v, _) in cat.MATERIALS.items():
-        vals[f"skycraft:{mid}"] = v
+        vals[f"nirncraft:{mid}"] = v
     data["values"] = dict(sorted(vals.items()))
     write_json(path, data)
 
 
 def weights():
-    default = read_json(os.path.join(DATA, "skycraft_weights", "default.json"), {"weights": {}})["weights"]
+    default = read_json(os.path.join(DATA, "nirncraft_weights", "default.json"), {"weights": {}})["weights"]
     out = {}
     for item_id, t, w in cat.weapon_items():
-        key = f"skycraft:{item_id}"
+        key = f"nirncraft:{item_id}"
         if key in default:
             out[key] = default[key]
         else:
             out[key] = round(cat.TYPE_WEIGHT[w] * t.wfac * 2) / 2
     for item_id, a, i in cat.armor_items():
-        out[f"skycraft:{item_id}"] = a.wt[i]
+        out[f"nirncraft:{item_id}"] = a.wt[i]
     for mid, (_, _, wt) in cat.MATERIALS.items():
-        out[f"skycraft:{mid}"] = wt
-    write_json(os.path.join(DATA, "skycraft_weights", "gear.json"), {"weights": out})
+        out[f"nirncraft:{mid}"] = wt
+    write_json(os.path.join(DATA, "nirncraft_weights", "gear.json"), {"weights": out})
 
 
 # ============================================================================================= tags
@@ -335,13 +335,13 @@ def merge_tag(path, items, owned):
 
 
 def tags():
-    owned = {f"skycraft:{i}" for i in all_gear_ids()}
+    owned = {f"nirncraft:{i}" for i in all_gear_ids()}
     owned |= {"minecraft:iron_helmet", "minecraft:iron_chestplate", "minecraft:iron_leggings", "minecraft:iron_boots"}
     T = os.path.join(DATA, "tags", "item")
     F = os.path.join(RES, "data", "forge", "tags", "item")
     weapons_by = {}
     for item_id, t, w in cat.weapon_items():
-        weapons_by.setdefault(w, []).append(f"skycraft:{item_id}")
+        weapons_by.setdefault(w, []).append(f"nirncraft:{item_id}")
     for w, name in (("dagger", "daggers"), ("mace", "maces"), ("war_axe", "war_axes"), ("greatsword", "greatswords"),
                     ("battleaxe", "battleaxes"), ("warhammer", "warhammers")):
         merge_tag(os.path.join(T, f"{name}.json"), weapons_by[w], owned)
@@ -350,7 +350,7 @@ def tags():
     for item_id, a, i in cat.armor_items():
         if i == 4:
             continue
-        (heavy if a.heavy else light).append(f"skycraft:{item_id}")
+        (heavy if a.heavy else light).append(f"nirncraft:{item_id}")
     merge_tag(os.path.join(T, "heavy_armor.json"), heavy, owned)
     merge_tag(os.path.join(T, "light_armor.json"), light, owned)
     # forge tags
@@ -358,9 +358,9 @@ def tags():
     shields = []
     for item_id, a, i in cat.armor_items():
         if i == 4:
-            shields.append(f"skycraft:{item_id}")
+            shields.append(f"nirncraft:{item_id}")
         else:
-            by_piece[cat.PIECES[i]].append(f"skycraft:{item_id}")
+            by_piece[cat.PIECES[i]].append(f"nirncraft:{item_id}")
     for p, name in (("helmet", "helmets"), ("chestplate", "chestplates"), ("leggings", "leggings"), ("boots", "boots")):
         merge_tag(os.path.join(F, "armors", f"{name}.json"), by_piece[p], owned)
     merge_tag(os.path.join(F, "tools", "shields.json"), shields, owned)
@@ -373,17 +373,17 @@ def tags():
     smith = []
     for item_id, t, w in cat.weapon_items():
         for p in t.provinces:
-            prov[p].append(f"skycraft:{item_id}")
+            prov[p].append(f"nirncraft:{item_id}")
         if "skyrim" in t.provinces and t.craftable:
-            smith.append(f"skycraft:{item_id}")
+            smith.append(f"nirncraft:{item_id}")
     for item_id, a, i in cat.armor_items():
         for p in a.provinces:
-            prov[p].append(f"skycraft:{item_id}")
+            prov[p].append(f"nirncraft:{item_id}")
         if "skyrim" in a.provinces and a.cat not in ("factions",):
-            smith.append(f"skycraft:{item_id}")
+            smith.append(f"nirncraft:{item_id}")
     for p, items in prov.items():
         merge_tag(os.path.join(T, "gear", f"{p}.json"), items, owned)
-    smith += [f"skycraft:{m}" for m in cat.MATERIALS]
+    smith += [f"nirncraft:{m}" for m in cat.MATERIALS]
     merge_tag(os.path.join(T, "smithing_goods.json"), smith, owned)
 
 
@@ -394,10 +394,10 @@ def loot():
         "type": "minecraft:chest",
         "pools": [{"rolls": 1, "bonus_rolls": 0, "entries": [{
             "type": "minecraft:item", "name": "minecraft:iron_ingot",
-            "functions": [{"function": "skycraft:regional_gear", "kind": "any", "enchant_chance": 0.1, "quality_chance": 0.25}]}]}],
-        "random_sequence": "skycraft:gear/regional"})
+            "functions": [{"function": "nirncraft:regional_gear", "kind": "any", "enchant_chance": 0.1, "quality_chance": 0.25}]}]}],
+        "random_sequence": "nirncraft:gear/regional"})
     write_json(os.path.join(DATA, "loot_modifiers", "regional_gear.json"), {
-        "type": "skycraft:add_table", "conditions": [], "table": "skycraft:gear/regional", "prefix": "chests/", "chance": 0.35})
+        "type": "nirncraft:add_table", "conditions": [], "table": "nirncraft:gear/regional", "prefix": "chests/", "chance": 0.35})
     # raw materials of the new sets in the smithing-materials chests
     path = os.path.join(DATA, "loot_table", "chests", "smithing_materials.json")
     table = read_json(path)
@@ -405,8 +405,8 @@ def loot():
         entries = table["pools"][0]["entries"]
         names = {e.get("name") for e in entries}
         for mid, w in (("stalhrim", 2), ("chitin_plate", 3), ("chaurus_chitin", 3), ("netch_leather", 3)):
-            if f"skycraft:{mid}" not in names:
-                entries.append({"type": "minecraft:item", "name": f"skycraft:{mid}", "weight": w, "functions": [
+            if f"nirncraft:{mid}" not in names:
+                entries.append({"type": "minecraft:item", "name": f"nirncraft:{mid}", "weight": w, "functions": [
                     {"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 2}}]})
         write_json(path, table)
 

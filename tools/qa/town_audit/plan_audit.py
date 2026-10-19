@@ -9,7 +9,7 @@ F_OMIT = 8192; F_SEAT = 1024; F_RUINED = 256; F_UPPER = 2; F_GROUND = 2048; F_RI
 F_RESERVED = 4096; F_NOBACK = 16384; F_BURNT = 32768; F_MAJOR = 64
 
 PL = {}
-base = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel', 'places') + os.sep
+base = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'mod', 'src', 'main', 'resources', 'nirncraft', 'tamriel', 'places') + os.sep
 for f in glob.glob(base + '*.json'):
     n = os.path.basename(f).replace('.json', '')
     if n in ('index', 'realms'):

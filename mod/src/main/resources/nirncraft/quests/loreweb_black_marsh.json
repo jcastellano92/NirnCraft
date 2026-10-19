@@ -1,0 +1,433 @@
+{
+  "line": "loreweb_black_marsh",
+  "category": "faction",
+  "bosses": {
+    "lw_bm_1_boss": {
+      "name": "Factor Delvyn Sull",
+      "type": "nirncraft:bandit_chief",
+      "hp": 2.8,
+      "dmg": 1.3,
+      "level": 24,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "lw_bm_2_boss": {
+      "name": "The Lord of the Long Supper",
+      "type": "nirncraft:necromancer",
+      "hp": 3,
+      "dmg": 1.4,
+      "level": 22,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "lw_bm_3_boss": {
+      "name": "The Counted Shade",
+      "type": "nirncraft:will_o_wisp",
+      "hp": 3.2,
+      "dmg": 1.4,
+      "level": 24,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "lw_bm_4_boss": {
+      "name": "Lord Heel of the Dry Fields",
+      "type": "nirncraft:vampire",
+      "hp": 3,
+      "dmg": 1.4,
+      "level": 26,
+      "drop": "loot:standard",
+      "glow": false
+    }
+  },
+  "quests": [
+    {
+      "id": "lw_bm_1_a",
+      "title": "The Tapped Root",
+      "region": "black_marsh/stormhold",
+      "start": "find",
+      "find": {
+        "place": "stay_moist_mansion",
+        "offset": [
+          6,
+          5
+        ],
+        "radius": 4,
+        "clue": "urn",
+        "text": "A sap-barrel behind the mansion's boat-shed is stamped with a golden sun and a tally of casks sold abroad. Beneath, in an Argonian hand: 'The Root is not ours to sell.'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A barrel stamped with a sun and a tally of casks sold abroad, and a scratched warning that the Root is not for sale.",
+      "pitch": "A boatman says the merchant's mansion has more sap than anyone should.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "xal_haj_ei_shrine",
+          "text": "Take the keeper's tear-vial from the shrine to the weeping falls."
+        },
+        {
+          "type": "go",
+          "place": "weeping_wamasu_falls",
+          "text": "Carry the wamasu-tear to the river-fortress of Stormhold."
+        },
+        {
+          "type": "go",
+          "place": "stormhold",
+          "text": "Copy the pharmacists' sap manifest at Stormhold's river gate."
+        }
+      ],
+      "rewards": {
+        "gold": 220,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The tapped root's cries lead from a hollow shrine and a weeping falls through a river fortress to a hag-lair and the black pool.",
+      "why": [
+        "stormhold.L7.tree_minders_and_factors",
+        "stormhold.L8.shadow_sign_vigil"
+      ],
+      "consequence": {
+        "world_state": "lw_bm_1_a_resolved",
+        "flag": "conseq_lw_bm_1_a",
+        "summary": "One thread of the trail ends here and the next begins. The tapped root's cries lead from a hollow shrine and a weeping falls through a river fortress to a hag-lair and the black pool."
+      }
+    },
+    {
+      "id": "lw_bm_1_b",
+      "title": "The Tapped Root (II)",
+      "region": "black_marsh/stormhold",
+      "start": "auto",
+      "requires": [
+        "quest:lw_bm_1_a"
+      ],
+      "desc": "The tapped root's cries lead from a hollow shrine and a weeping falls through a river fortress to a hag-lair and the black pool.",
+      "pitch": "A boatman says the merchant's mansion has more sap than anyone should.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "temple_of_sul",
+          "text": "Take the corrupt priest's licence to the hag-lair in the swamp."
+        },
+        {
+          "type": "go",
+          "place": "bogmother",
+          "text": "Cut the tap-pipe in the hag-lair and quiet the bogmother."
+        },
+        {
+          "type": "kill",
+          "place": "shrine_of_the_black_maw",
+          "text": "Pull the brass tap-fitting from the Black Maw's pool.",
+          "spawn": [
+            {
+              "boss_id": "lw_bm_1_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 540,
+        "loot": "major",
+        "flags": [
+          "lw_bm_1_done"
+        ],
+        "unique": "hist_fang"
+      },
+      "outro": "At the black pool I stopped the tap and the sap ran clear into the pool again. The merchant's coffers will be lighter. The marsh is quieter. The Root remembers who listened.",
+      "why": [
+        "stormhold.L8.shadow_sign_vigil",
+        "stormhold.L9.caravan_toll_dispute"
+      ],
+      "consequence": {
+        "world_state": "lw_bm_1_b_resolved",
+        "flag": "conseq_lw_bm_1_b",
+        "summary": "At the black pool I stopped the tap and the sap ran clear into the pool again. The merchant's coffers will be lighter. The marsh is quieter. The Root remembers who listened."
+      }
+    },
+    {
+      "id": "lw_bm_2_a",
+      "title": "The Warm Count",
+      "region": "black_marsh/lilmoth",
+      "start": "find",
+      "find": {
+        "place": "hatchlings_crown",
+        "offset": [
+          7,
+          -4
+        ],
+        "radius": 4,
+        "clue": "stone",
+        "text": "An egg-shaped stone on the hill has a warm-count carved in it, each season's temperature a notch lower than the last. A fresh notch is chiselled this week, deeper than any."
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A warm-count carved on an egg-shaped stone shows each season's heat a notch lower than the last.",
+      "pitch": "The hatchery keepers say the pools are a degree colder each season.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "hatching_pools",
+          "text": "Follow the steam-thread from the pools into Lilmoth."
+        }
+      ],
+      "rewards": {
+        "gold": 190,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The cooling pools, the capital's ziggurat and a rotting pavilion are all part of the same missing warmth.",
+      "why": [
+        "lilmoth.L9.customhouse_struggle",
+        "lilmoth.L10.drowned_customs_and_hulks"
+      ],
+      "consequence": {
+        "world_state": "lw_bm_2_a_resolved",
+        "flag": "conseq_lw_bm_2_a",
+        "summary": "One thread of the trail ends here and the next begins. The cooling pools, the capital's ziggurat and a rotting pavilion are all part of the same missing warmth."
+      }
+    },
+    {
+      "id": "lw_bm_2_b",
+      "title": "The Warm Count (II)",
+      "region": "black_marsh/lilmoth",
+      "start": "auto",
+      "requires": [
+        "quest:lw_bm_2_a"
+      ],
+      "desc": "The cooling pools, the capital's ziggurat and a rotting pavilion are all part of the same missing warmth.",
+      "pitch": "The hatchery keepers say the pools are a degree colder each season.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "lilmoth",
+          "text": "Follow the cold's direction from Lilmoth's ziggurat into the mire."
+        },
+        {
+          "type": "kill",
+          "place": "the_vile_pavilion",
+          "text": "Take a seat at the pavilion's table and end the supper.",
+          "spawn": [
+            {
+              "boss_id": "lw_bm_2_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 480,
+        "loot": "major",
+        "flags": [
+          "lw_bm_2_done"
+        ]
+      },
+      "outro": "The pavilion's guests rose from their chairs and drifted out into the mire, and the plates cooled. In the warm pools, a week later, the eggs began to hatch with ordinary colour.",
+      "why": [
+        "lilmoth.L10.drowned_customs_and_hulks",
+        "lilmoth.L7.dock_syndicates_and_boatmen"
+      ],
+      "consequence": {
+        "world_state": "lw_bm_2_b_resolved",
+        "flag": "conseq_lw_bm_2_b",
+        "summary": "The pavilion's guests rose from their chairs and drifted out into the mire, and the plates cooled. In the warm pools, a week later, the eggs began to hatch with ordinary colour."
+      }
+    },
+    {
+      "id": "lw_bm_3_a",
+      "title": "The Extra One",
+      "region": "black_marsh/shadowfen",
+      "start": "find",
+      "find": {
+        "place": "jeevu_rice_paddy",
+        "offset": [
+          3,
+          6
+        ],
+        "radius": 4,
+        "clue": "lectern",
+        "text": "A rice-counter's tally: forty-one workers at sunrise, forty-two at dusk. Below, in a careful hand: 'Did I miscount? I never miscount.'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A rice-counter's tally has forty-one workers at sunrise and forty-two at dusk.",
+      "pitch": "The rice-counter says there is always one more to feed at the evening bowl.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "root_whisper_village",
+          "text": "Record the Hist's whisper at Root Whisper and bring it to Thorn."
+        },
+        {
+          "type": "go",
+          "place": "thorn",
+          "text": "Look into the Hist-pool at Thorn and follow the figure to the border."
+        }
+      ],
+      "rewards": {
+        "gold": 210,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The extra one's seat has been kept at a village table, a Hist pool and a border-post, and its owner waits in the xanmeer.",
+      "why": [
+        "shadowfen.L10.slaver_hideouts",
+        "shadowfen.L7.chain_breaker_clans"
+      ],
+      "consequence": {
+        "world_state": "lw_bm_3_a_resolved",
+        "flag": "conseq_lw_bm_3_a",
+        "summary": "One thread of the trail ends here and the next begins. The extra one's seat has been kept at a village table, a Hist pool and a border-post, and its owner waits in the xanmeer."
+      }
+    },
+    {
+      "id": "lw_bm_3_b",
+      "title": "The Extra One (II)",
+      "region": "black_marsh/shadowfen",
+      "start": "auto",
+      "requires": [
+        "quest:lw_bm_3_a"
+      ],
+      "desc": "The extra one's seat has been kept at a village table, a Hist pool and a border-post, and its owner waits in the xanmeer.",
+      "pitch": "The rice-counter says there is always one more to feed at the evening bowl.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "helstrom",
+          "text": "Copy the monolith's unreadable name and carry it into the xanmeer."
+        },
+        {
+          "type": "kill",
+          "place": "ruins_of_mazzatun",
+          "text": "Descend the shaft and speak the founder's name.",
+          "spawn": [
+            {
+              "boss_id": "lw_bm_3_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 520,
+        "loot": "major",
+        "flags": [
+          "lw_bm_3_done"
+        ]
+      },
+      "outro": "I named him, at last, in the flooded hall: not a name of any tribe but a name of the marsh. The last chair at every table was, for the first time in a thousand years, empty. The Hist hummed a note I had not heard.",
+      "why": [
+        "shadowfen.L7.chain_breaker_clans",
+        "shadowfen.L8.shackle_cairns"
+      ],
+      "consequence": {
+        "world_state": "lw_bm_3_b_resolved",
+        "flag": "conseq_lw_bm_3_b",
+        "summary": "I named him, at last, in the flooded hall: not a name of any tribe but a name of the marsh. The last chair at every table was, for the first time in a thousand years, empty. The Hist hummed a note I had not heard."
+      }
+    },
+    {
+      "id": "lw_bm_4_a",
+      "title": "The Rerouted Dirge",
+      "region": "black_marsh/gideon",
+      "start": "find",
+      "find": {
+        "place": "hutan_tzel",
+        "offset": [
+          -8,
+          6
+        ],
+        "radius": 4,
+        "clue": "grave",
+        "text": "A fishing-hamlet grave is empty, its marker moved a hundred paces inland from the shore. Scratched on the stone: 'The dirge doesn't go to the water any more.'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A fishing hamlet's grave, its marker moved inland from the shore, with a note that the dirge no longer goes to the water.",
+      "pitch": "A fisher says the grave-singers no longer sing the dead to the sea, and nobody will tell why.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "grave_singers_lodge",
+          "text": "Take the singers' map to the lone plateau to see the dirge's new road."
+        },
+        {
+          "type": "go",
+          "place": "plateau_of_the_traveler",
+          "text": "Sight the dirge's two routes from the plateau and take the survey to Gideon."
+        },
+        {
+          "type": "go",
+          "place": "gideon",
+          "text": "Take the lord's contract from the plantation courtyard at Gideon."
+        }
+      ],
+      "rewards": {
+        "gold": 230,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The dirge's new path crosses a plateau and a plantation city and ends in a mire ringed by black teeth.",
+      "why": [
+        "gideon.L9.lukiul_and_an_xileel",
+        "gideon.L10.old_governor_vaults"
+      ],
+      "consequence": {
+        "world_state": "lw_bm_4_a_resolved",
+        "flag": "conseq_lw_bm_4_a",
+        "summary": "One thread of the trail ends here and the next begins. The dirge's new path crosses a plateau and a plantation city and ends in a mire ringed by black teeth."
+      }
+    },
+    {
+      "id": "lw_bm_4_b",
+      "title": "The Rerouted Dirge (II)",
+      "region": "black_marsh/gideon",
+      "start": "auto",
+      "requires": [
+        "quest:lw_bm_4_a"
+      ],
+      "desc": "The dirge's new path crosses a plateau and a plantation city and ends in a mire ringed by black teeth.",
+      "pitch": "A fisher says the grave-singers no longer sing the dead to the sea, and nobody will tell why.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "soulrest",
+          "text": "Take the island keepers' chart to the deep mire."
+        },
+        {
+          "type": "go",
+          "place": "murkmire",
+          "text": "Learn the last verse from the Murkmire singer and take it to the ring of teeth."
+        },
+        {
+          "type": "kill",
+          "place": "teeth_of_sithis",
+          "text": "Sing the old verse in the centre of the teeth and restore the dirge.",
+          "spawn": [
+            {
+              "boss_id": "lw_bm_4_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 580,
+        "loot": "major",
+        "flags": [
+          "lw_bm_4_done"
+        ],
+        "unique": "marsh_lords_mace"
+      },
+      "outro": "At the ring of teeth I sang the old verse and the dirge came back to its water. The plantation lord's fields went dry. The marsh knows the debt it owes and the debt it must still collect.",
+      "why": [
+        "gideon.L10.old_governor_vaults",
+        "gideon.L7.lukiul_townsfolk"
+      ],
+      "consequence": {
+        "world_state": "lw_bm_4_b_resolved",
+        "flag": "conseq_lw_bm_4_b",
+        "summary": "At the ring of teeth I sang the old verse and the dirge came back to its water. The plantation lord's fields went dry. The marsh knows the debt it owes and the debt it must still collect."
+      }
+    }
+  ]
+}

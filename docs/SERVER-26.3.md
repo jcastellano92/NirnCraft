@@ -8,7 +8,7 @@ its separate native acceptance gate passes.
 
 `tools/build_server_instance.py` installs the exact official NeoForge server,
 checks its installer SHA256, and selects only the platform lock's server/both mods.
-The current set contains 13 dependencies plus Skycraft core, including Better
+The current set contains 13 dependencies plus NirnCraft core, including Better
 Combat, Player Animation Library and Cloth Config. It checks hashes even when a
 file comes from cache, checks required dependency side closure and the actual
 bundled mod/JarJar descriptors, and requires all four consistent embedded bakes.
@@ -22,13 +22,13 @@ After the full native build, create a candidate on E: without replacing an older
 archive. Use the actual tested core jar explicitly:
 
 ```powershell
-py -3 -I tools/build_server_instance.py --core-jar E:/Skycraft-scratch/migration-26.3/build/libs/skycraft-0.1.0.jar --java E:/Skycraft-scratch/toolchains/jdk-25.0.4.1+1/bin/java.exe --work-root E:/Skycraft-scratch/migration-26.3/server-build --cache E:/Skycraft-scratch/migration-26.3/server-cache --output-zip E:/Skycraft-scratch/migration-26.3/candidates/Skycraft-26.3-server-<build>.zip
+py -3 -I tools/build_server_instance.py --core-jar E:/NirnCraft-scratch/migration-26.3/build/libs/nirncraft-0.1.0.jar --java E:/NirnCraft-scratch/toolchains/jdk-25.0.4.1+1/bin/java.exe --work-root E:/NirnCraft-scratch/migration-26.3/server-build --cache E:/NirnCraft-scratch/migration-26.3/server-cache --output-zip E:/NirnCraft-scratch/migration-26.3/candidates/NirnCraft-26.3-server-<build>.zip
 ```
 
 The output contains a complete `server/` directory and native libraries. Extract
 it to a new location, read the Minecraft EULA and set `eula=true` in `eula.txt` if
 you agree. On Windows use `run.bat` or `run.ps1`; on Linux/macOS use `./run.sh nogui`.
-The launchers select `SKYCRAFT_JAVA`, then `JAVA_HOME`, then PATH and check that the
+The launchers select `NIRNCRAFT_JAVA`, then `JAVA_HOME`, then PATH and check that the
 selected executable reports Java 25 before Minecraft starts. Adjust RAM in
 `user_jvm_args.txt`. Fresh servers use the authored Nirn seed; keep an existing
 world's seed unchanged. Legacy worlds require offline conversion on a backup as
@@ -44,7 +44,7 @@ EULA acceptance, offline loopback networking and disabled empty-server pausing
 only in that disposable copy:
 
 ```powershell
-py -3 -I tools/qa/test_server_package_263.py --archive E:/Skycraft-scratch/migration-26.3/candidates/Skycraft-26.3-server-<build>.zip --java E:/Skycraft-scratch/toolchains/jdk-25.0.4.1+1/bin/java.exe --work-root E:/Skycraft-scratch/migration-26.3/server-qa
+py -3 -I tools/qa/test_server_package_263.py --archive E:/NirnCraft-scratch/migration-26.3/candidates/NirnCraft-26.3-server-<build>.zip --java E:/NirnCraft-scratch/toolchains/jdk-25.0.4.1+1/bin/java.exe --work-root E:/NirnCraft-scratch/migration-26.3/server-qa
 ```
 
 It waits for actual startup, command results, the live bake check, saved-game
@@ -55,7 +55,7 @@ is used. Every run retains its world, console, exact PID/launch identity and res
 `--commands` can add a JSON array of `{ "command": "...", "expect": "regex",
 "timeout": 180 }` checks. A real full-pack client connection and visuals remain
 separate gates; the smoke result records `multiplayerVerified: false`.
-`--dev-control` enables the existing Skycraft development diagnostics only in that
+`--dev-control` enables the existing NirnCraft development diagnostics only in that
 isolated QA copy, while retaining normal spawn ownership. Native clock queries use
 `time query time` or a registered timeline ID; the old `time query daytime` syntax
 is gone. Shutdown validation requires a save line for every packaged dimension,
@@ -64,8 +64,8 @@ the native FML close/clear markers and exit code zero; 26.3 has no old generic
 
 `tools/make-instances.sh` is a thin wrapper over the native server and Prism
 builders. `tools/test-server.sh` wraps the native smoke gate and uses the correct
-`Skycraft-26.3-server.zip` name. Both accept `SKYCRAFT_JAVA`; set
-`SKYCRAFT_PACKAGE_DIR` to preserve previous packages in a fresh output directory.
+`NirnCraft-26.3-server.zip` name. Both accept `NIRNCRAFT_JAVA`; set
+`NIRNCRAFT_PACKAGE_DIR` to preserve previous packages in a fresh output directory.
 
 The normal Windows release entry point is `tools/build_release.ps1`. It runs the
 isolated exact-platform build/tests, `tools/bake/bake.ps1` in a fresh native world,
@@ -74,7 +74,7 @@ server smoke gate. It never launches a client automatically. Outputs go to a new
 timestamped directory under `dist`, or explicit `-OutputDir`. `-SkipQa` creates
 candidates and reports that dedicated-server acceptance was skipped.
 
-The bake script uses the native controller's `skycraft-bake refresh` and records
+The bake script uses the native controller's `nirncraft-bake refresh` and records
 the actual runtime input hash. A stale bundle is independently computed twice;
 an already-current bundle is compared against live computation. It saves/stops
 the server before publication. `tools/bake/publish_263.py` requires the successful

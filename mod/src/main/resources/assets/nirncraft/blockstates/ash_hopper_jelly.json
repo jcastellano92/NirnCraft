@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/ash_hopper_jelly"
+      },
+      {
+        "model": "nirncraft:block/ash_hopper_jelly",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/ash_hopper_jelly",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/ash_hopper_jelly",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/ash_hopper_jelly_harvested"
+      },
+      {
+        "model": "nirncraft:block/ash_hopper_jelly_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/ash_hopper_jelly_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/ash_hopper_jelly_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

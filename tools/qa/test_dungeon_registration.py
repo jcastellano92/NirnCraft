@@ -4,7 +4,7 @@ from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-WORLDGEN = ROOT / 'mod/src/main/resources/data/skycraft/worldgen'
+WORLDGEN = ROOT / 'mod/src/main/resources/data/nirncraft/worldgen'
 
 
 def matches(rule, place):
@@ -22,7 +22,7 @@ class DungeonRegistrationTest(unittest.TestCase):
             with self.subTest(name=name):
                 structure = json.loads((WORLDGEN / 'structure/site' / (name + '.json')).read_text())
                 placement = json.loads((WORLDGEN / 'structure_set/site' / (name + '.json')).read_text())
-                self.assertEqual(['skycraft:site/' + name], [r['structure'] for r in placement['structures']])
+                self.assertEqual(['nirncraft:site/' + name], [r['structure'] for r in placement['structures']])
                 for kind, variant in identities:
                     place = {'type': kind, 'variant': variant}
                     self.assertTrue(matches(structure['place'], place), place)
@@ -52,7 +52,7 @@ class DungeonRegistrationTest(unittest.TestCase):
                 place = {'type': 'dungeon_fixed', 'variant': variant}
                 self.assertTrue(matches(structure['place'], place))
                 self.assertTrue(matches(placement['placement'], place))
-                self.assertEqual('skycraft:site/' + variant, placement['structures'][0]['structure'])
+                self.assertEqual('nirncraft:site/' + variant, placement['structures'][0]['structure'])
                 self.assertEqual((theme, kit, flavor), (structure['theme'], structure['kit'], structure.get('flavor')))
                 self.assertFalse(matches(placement['placement'], dict(place, variant='kwama_egg_mine')))
                 self.assertFalse(matches(structure['place'], dict(place, variant='sea_cave')))

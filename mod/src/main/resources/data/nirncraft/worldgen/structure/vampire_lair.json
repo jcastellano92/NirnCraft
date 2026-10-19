@@ -1,0 +1,8 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "vampire_lair",
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

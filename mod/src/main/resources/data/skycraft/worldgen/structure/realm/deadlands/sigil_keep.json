@@ -1,8 +1,0 @@
-{
-  "type": "skycraft:realm_site",
-  "site": "deadlands/sigil_keep",
-  "biomes": "#skycraft:realm/deadlands",
-  "step": "surface_structures",
-  "spawn_overrides": {},
-  "terrain_adaptation": "none"
-}

@@ -13,7 +13,7 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
-ASSETS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft")
+ASSETS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft")
 ITEM_TEX = os.path.join(ASSETS, "textures", "item")
 MODELS = os.path.join(ASSETS, "models", "item")
 
@@ -405,7 +405,7 @@ ICONS = {
 def model(name):
     os.makedirs(MODELS, exist_ok=True)
     with open(os.path.join(MODELS, name + ".json"), "w", encoding="utf-8") as f:
-        json.dump({"parent": "minecraft:item/generated", "textures": {"layer0": "skycraft:item/" + name}}, f, indent=2)
+        json.dump({"parent": "minecraft:item/generated", "textures": {"layer0": "nirncraft:item/" + name}}, f, indent=2)
         f.write("\n")
 
 

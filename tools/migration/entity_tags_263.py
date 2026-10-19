@@ -22,7 +22,7 @@ def upgrade(root):
         converted["replace"] = False
         converted["values"] = list(converted.get("values", []))
         for member in members:
-            identifier = "skycraft:"+member
+            identifier = "nirncraft:"+member
             if identifier not in converted["values"]: converted["values"].append(identifier)
         if converted != original:
             path.parent.mkdir(parents=True, exist_ok=True)

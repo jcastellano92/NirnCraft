@@ -1,0 +1,28 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:is_forest",
+    "#minecraft:is_taiga",
+    "#minecraft:is_mountain",
+    "#minecraft:is_hill",
+    "#minecraft:is_savanna",
+    "#minecraft:is_badlands",
+    "#minecraft:is_jungle",
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:snowy_plains",
+    "minecraft:ice_spikes",
+    "minecraft:swamp",
+    "minecraft:mangrove_swamp",
+    "minecraft:desert",
+    {
+      "id": "#forge:is_plains",
+      "required": false
+    },
+    "#nirncraft:spawns/plains",
+    "#nirncraft:spawns/tundra",
+    "#nirncraft:spawns/reach",
+    "#nirncraft:spawns/swamp",
+    "#nirncraft:tamriel/land"
+  ]
+}

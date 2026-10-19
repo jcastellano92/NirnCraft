@@ -12,7 +12,7 @@ import math
 import importlib.util
 from pathlib import Path
 
-_DATA_SPEC = importlib.util.spec_from_file_location("skycraft_data_format_263", Path(__file__).resolve().parents[1] / "data_format_263.py")
+_DATA_SPEC = importlib.util.spec_from_file_location("nirncraft_data_format_263", Path(__file__).resolve().parents[1] / "data_format_263.py")
 _DATA = importlib.util.module_from_spec(_DATA_SPEC)
 _DATA_SPEC.loader.exec_module(_DATA)
 
@@ -94,12 +94,12 @@ def tree(value):
         result["type"] = {"minecraft:simple_state_provider": "minecraft:simple", "minecraft:weighted_state_provider": "minecraft:weighted"}[kind]
     if kind in ("minecraft:uniform", "minecraft:biased_to_bottom", "minecraft:clamped", "minecraft:clamped_normal", "minecraft:weighted_list") and isinstance(result.get("value"), dict):
         result.update(result.pop("value"))
-    # 26.3 registers configured features directly. Skycraft's bound codec keeps
+    # 26.3 registers configured features directly. NirnCraft's bound codec keeps
     # its existing config object; native feature codecs have their fields inline.
     if "config" in result and kind.startswith("minecraft:"):
         config = result.pop("config")
         if kind == "minecraft:random_patch":
-            result["type"] = "skycraft:random_patch"
+            result["type"] = "nirncraft:random_patch"
             result["config"] = config
         else:
             if kind == "minecraft:tree":
@@ -170,7 +170,7 @@ def noise_settings(value, path):
     router = result["noise_router"]
     cells = result["noise"]
     xz, y = cells.pop("size_horizontal", 1) * 4, cells.pop("size_vertical", 2) * 4
-    height = "skycraft:tamriel/height" if path.stem == "tamriel" else f"skycraft:realm/{path.stem}/height"
+    height = "nirncraft:tamriel/height" if path.stem == "tamriel" else f"nirncraft:realm/{path.stem}/height"
     router["chunk_surface_level"] = height
     if result.pop("aquifers_enabled", False):
         result["aquifers"] = {k: router.pop(k) for k in ("barrier", "fluid_level_floodedness", "fluid_level_spread", "lava")}
@@ -197,7 +197,7 @@ def noise_settings(value, path):
                 names[old] = expression
             else:
                 relative = f"spawn/{path.stem}/{new}"
-                names[old] = "skycraft:" + relative
+                names[old] = "nirncraft:" + relative
                 extra[relative + ".json"] = tree(expression)
         result["spawn_target"] = [{names[k]: v for k, v in target.items() if k in names} for target in targets]
     result = tree(result)
@@ -228,7 +228,7 @@ def legacy_ambient_light_color(ambient, fixed_time=None):
     return "#%02x%02x%02x" % tuple(round(min(1.0, c) * 255) for c in rgb)
 
 
-# Musics.GAME / CREATIVE / END: 1.20.1 picked them for biomes without music (the only kind Skycraft has)
+# Musics.GAME / CREATIVE / END: 1.20.1 picked them for biomes without music (the only kind NirnCraft has)
 _MUSIC_GAME = {"max_delay": 24000, "min_delay": 12000, "sound": "minecraft:music.game"}
 _MUSIC_CREATIVE = {"max_delay": 24000, "min_delay": 12000, "sound": "minecraft:music.creative"}
 _MUSIC_END = {"max_delay": 24000, "min_delay": 6000, "replace_current_music": True, "sound": "minecraft:music.end"}
@@ -264,15 +264,15 @@ def dimension_type(value, path):
     # A paused clock preserves the visual time, while this independent native
     # flag preserves the old exclusion from day/night gameplay classification.
     result.setdefault("has_fixed_time", False)
-    if result.get("fixed_time") is not None or str(result.get("default_clock", "")).startswith("skycraft:fixed/"):
+    if result.get("fixed_time") is not None or str(result.get("default_clock", "")).startswith("nirncraft:fixed/"):
         result["has_fixed_time"] = True
     realm = {"the_nether": "deadlands", "the_end": "sovngarde"}.get(path.stem, path.stem)
     if path.stem == "overworld":
         attributes = result.setdefault("attributes", {})
-        attributes["neoforge:custom_clouds"] = "skycraft:tamriel_clouds"
+        attributes["neoforge:custom_clouds"] = "nirncraft:tamriel_clouds"
         attributes.setdefault("minecraft:visual/cloud_height", 330.0)
     if realm in {"deadlands", "sovngarde", "coldharbour", "soul_cairn", "apocrypha"}:
-        renderer = "skycraft:" + realm
+        renderer = "nirncraft:" + realm
         result.setdefault("attributes", {}).update({"neoforge:custom_skybox": renderer,
             "neoforge:custom_clouds": renderer, "neoforge:custom_weather_effects": renderer})
     if "effects" not in result:
@@ -295,11 +295,11 @@ def dimension_type(value, path):
             attributes["minecraft:gameplay/" + new] = not state if inverse else state
     result.pop("natural", None)
     fixed = result.pop("fixed_time", None)
-    result["has_ender_dragon_fight"] = effects == "skycraft:sovngarde" or path.stem == "the_end"
+    result["has_ender_dragon_fight"] = effects == "nirncraft:sovngarde" or path.stem == "the_end"
     if fixed is not None:
-        clock = "skycraft:fixed/" + path.stem
+        clock = "nirncraft:fixed/" + path.stem
         result["default_clock"] = clock
-        result["timelines"] = ["skycraft:fixed/" + path.stem + "/day", "skycraft:fixed/" + path.stem + "/moon"]
+        result["timelines"] = ["nirncraft:fixed/" + path.stem + "/day", "nirncraft:fixed/" + path.stem + "/moon"]
     else:
         result["default_clock"] = "minecraft:overworld"
         result["timelines"] = "#minecraft:in_overworld"
@@ -310,8 +310,8 @@ def fixed_timeline(clock, timeline):
     template = Path(__file__).parent / "templates_263" / (timeline + ".json")
     definition = json.loads(template.read_text(encoding="utf-8"))
     definition["clock"] = clock
-    if timeline == "day" and clock in {"skycraft:fixed/the_nether", "skycraft:fixed/the_end",
-            "skycraft:fixed/apocrypha", "skycraft:fixed/soul_cairn", "skycraft:fixed/coldharbour"}:
+    if timeline == "day" and clock in {"nirncraft:fixed/the_nether", "nirncraft:fixed/the_end",
+            "nirncraft:fixed/apocrypha", "nirncraft:fixed/soul_cairn", "nirncraft:fixed/coldharbour"}:
         # Original RealmEffects kept the biome fog unscaled and returned no
         # sunrise color. Native timeline layers run after biome attributes.
         definition["tracks"].pop("minecraft:visual/fog_color", None)
@@ -346,8 +346,8 @@ def prepare(path, value):
     elif "/dimension_type/" in normalized:
         value = dimension_type(value, path)
         clock = value.get("default_clock", "")
-        if clock.startswith("skycraft:fixed/"):
-            data = Path(normalized.split("/data/", 1)[0]) / "data/skycraft"
+        if clock.startswith("nirncraft:fixed/"):
+            data = Path(normalized.split("/data/", 1)[0]) / "data/nirncraft"
             name = clock.split(":", 1)[1]
             clock_file = data / "world_clock" / (name + ".json")
             clock_file.parent.mkdir(parents=True, exist_ok=True)

@@ -1,4 +1,4 @@
-# Skycraft defaults for Distant Horizons 3.3.x. Distant Horizons fills in every other option on first launch.
+# NirnCraft defaults for Distant Horizons 3.3.x. Distant Horizons fills in every other option on first launch.
 # _version must match the mod's config version (5 for 3.3.x), otherwise Distant Horizons deletes the file.
 # Full-pack QA (docs/PLAYTEST-FULLPACK.md): DH's world-gen threads sat idle ~89% of the time at LOW_IMPACT, so a
 # heavier thread preset would not build LODs faster; it would only take CPU from the game.
@@ -14,7 +14,7 @@ _version = 5
 		lodChunkRenderDistanceRadius = 128
 
 	[client.advanced.graphics.fog]
-		# Blend distant LOD terrain into Skycraft's regional and twilight fog color (ClientWeather) without a hard seam.
+		# Blend distant LOD terrain into NirnCraft's regional and twilight fog color (ClientWeather) without a hard seam.
 		colorMode = "USE_WORLD_FOG_COLOR"
 		farFogStart = 0.35
 		farFogMax = 1.0
@@ -25,7 +25,7 @@ _version = 5
 		enableSsao = false
 
 	[client.advanced.graphics.genericRendering]
-		# Complementary Reimagined renders Skycraft's 3D volumetric clouds; disable vanilla-style DH box clouds.
+		# Complementary Reimagined renders NirnCraft's 3D volumetric clouds; disable vanilla-style DH box clouds.
 		enableCloudRendering = false
 
 	[client.advanced.autoUpdater]
@@ -37,7 +37,7 @@ _version = 5
 	# Generate distant terrain with features (trees, plants) but without structures.
 	chunkGeneratorMode = "FEATURES"
 	# Rough surface first (a quick horizon), then real chunks fill in trees and correct heights. The rough pass can
-	# sit a few blocks off Skycraft's real terrain for the first minute in a new area; the chunk pass replaces it.
+	# sit a few blocks off NirnCraft's real terrain for the first minute in a new area; the chunk pass replaces it.
 	generatorPlan = "SURFACE_THEN_CHUNKS"
 
 	[common.logging.warning]

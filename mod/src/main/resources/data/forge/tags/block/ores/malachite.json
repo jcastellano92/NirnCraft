@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:malachite_ore",
-    "skycraft:deepslate_malachite_ore"
+    "nirncraft:malachite_ore",
+    "nirncraft:deepslate_malachite_ore"
   ]
 }

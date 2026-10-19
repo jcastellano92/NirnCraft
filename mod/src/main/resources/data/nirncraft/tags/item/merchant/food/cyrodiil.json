@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:alto_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:spiced_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:jazbay_grapes",
+      "required": false
+    }
+  ]
+}

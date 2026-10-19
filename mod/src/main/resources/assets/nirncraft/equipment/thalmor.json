@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:thalmor"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:thalmor"
+      }
+    ]
+  }
+}

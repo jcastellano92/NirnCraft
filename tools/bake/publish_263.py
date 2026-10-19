@@ -90,9 +90,9 @@ def main():
     parser.add_argument('--done', type=Path, required=True)
     parser.add_argument('--shutdown-log', type=Path, required=True)
     args = parser.parse_args()
-    expected = dimension_ids(ROOT / 'mod/src/main/resources') | {'skycraft:scratch'}
+    expected = dimension_ids(ROOT / 'mod/src/main/resources') | {'nirncraft:scratch'}
     shutdown = shutdown_evidence(args.shutdown_log.read_text(encoding='utf-8-sig'), expected)
-    result = publish(args.staging, ROOT / 'mod/src/main/resources/skycraft/baked', args.expected,
+    result = publish(args.staging, ROOT / 'mod/src/main/resources/nirncraft/baked', args.expected,
                      args.backup, args.evidence, args.done)
     print(json.dumps({**result, 'shutdown': shutdown}, indent=2))
 

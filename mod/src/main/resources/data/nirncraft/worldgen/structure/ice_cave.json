@@ -1,0 +1,14 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "cave",
+  "kit": "ice",
+  "flavor": 7,
+  "where": [
+    "atmora",
+    "realm"
+  ],
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

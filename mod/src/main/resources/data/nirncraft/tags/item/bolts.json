@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:steel_bolt",
+    "nirncraft:dwarven_bolt",
+    "nirncraft:explosive_bolt"
+  ]
+}

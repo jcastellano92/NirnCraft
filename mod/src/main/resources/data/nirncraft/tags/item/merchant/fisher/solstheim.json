@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:ash_perch",
+      "required": false
+    },
+    {
+      "id": "nirncraft:arctic_char",
+      "required": false
+    },
+    {
+      "id": "nirncraft:mudcrab_chitin",
+      "required": false
+    },
+    {
+      "id": "nirncraft:small_pearl",
+      "required": false
+    }
+  ]
+}

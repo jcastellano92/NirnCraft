@@ -1,0 +1,27 @@
+{
+  "feature": "nirncraft:biome/flora/trees_summerset",
+  "placement": [
+    {
+      "type": "nirncraft:flora_scatter",
+      "spacing": 8,
+      "min_distance": 0.8,
+      "density": 0.6,
+      "floor": 0.03,
+      "field": {
+        "salt": 103,
+        "scale": 52,
+        "coverage": 0.42,
+        "softness": 0.16,
+        "kind": "fbm",
+        "mode": "inside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

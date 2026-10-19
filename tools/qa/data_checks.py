@@ -6,7 +6,7 @@ Prints 'ERR ...' lines and a final summary line.
   - places: no duplicate ids across files listed in places/index.json; every file in the index exists
   - quests: index.json lists existing files
   - Java: no item/block/entity id registered twice in the same kind of registry (ITEMS / BLOCKS / ENTITIES)
-  - guards: skycraft/creatures/guard_profiles.json (every profile has its skin, name and item models, every row names
+  - guards: nirncraft/creatures/guard_profiles.json (every profile has its skin, name and item models, every row names
     a profile, no Skyrim hold livery outside Skyrim; see docs/world/GUARDS.md)
   - menus: every menu type of the game and the mod has a Skyrim screen or an explicit `vanilla-allowed` row in
     docs/UI-COVERAGE.md (tools/qa/menu_coverage.py)
@@ -30,7 +30,7 @@ def err(msg):
 
 
 # --- inventory discipline (docs/INVENTORY.md "The facade") ---------------------------------------------------------
-# Gameplay code reads and spends what a player carries through com.skycraft.inventory.Inv (slots + offhand + the
+# Gameplay code reads and spends what a player carries through com.nirncraft.inventory.Inv (slots + offhand + the
 # overflow pack). A rule that reads only the 36 slots misses pack items. This lint fails when a Java file outside the
 # whitelist reads the player's inventory slots directly. Every whitelist entry says why it is allowed; a new entry
 # needs the same: slot-addressed screens (a slot id names the item, virtual pack ids go through Pack.resolveSlot),
@@ -75,8 +75,8 @@ INV_DECL = re.compile(r"getInventory\(\)|\bInventory\s+(inv|inventory)\b")
 
 def inventory_lint():
     bad = 0
-    for f in glob.glob(os.path.join(JAVA, "com", "skycraft", "**", "*.java"), recursive=True):
-        rel = os.path.relpath(f, os.path.join(JAVA, "com", "skycraft")).replace(os.sep, "/")
+    for f in glob.glob(os.path.join(JAVA, "com", "nirncraft", "**", "*.java"), recursive=True):
+        rel = os.path.relpath(f, os.path.join(JAVA, "com", "nirncraft")).replace(os.sep, "/")
         if "/client/" in "/" + rel or rel.startswith("client/"):
             continue  # screens read the client's own mirror
         if any(rel == k or (k.endswith("/") and rel.startswith(k)) for k in INV_WHITELIST):
@@ -92,37 +92,37 @@ def inventory_lint():
             hit = any(p.search(code) for p in INV_PATTERNS) or (has_decl and INV_LOCAL.search(code))
             if hit and "inventory-lint: ok" not in line:
                 bad += 1
-                err(f"inventory: {rel}:{i} reads the player's slots directly; use com.skycraft.inventory.Inv "
+                err(f"inventory: {rel}:{i} reads the player's slots directly; use com.nirncraft.inventory.Inv "
                     f"(count/has/take/give/find/forEach) so pack items count (docs/INVENTORY.md)")
     return bad
 def check_guards(place_ids):
-    """The guard table (skycraft/creatures/guard_profiles.json, docs/world/GUARDS.md) against what it points at.
+    """The guard table (nirncraft/creatures/guard_profiles.json, docs/world/GUARDS.md) against what it points at.
 
     Every profile has its skin and its name; every item it carries has a model; every settlement/region/culture/
     province row names a profile; every place of a major or minor settlement resolves to a guard whose skin exists, and
-    nobody outside Skyrim (and not Nord) wears a Skyrim hold's colours. Mirrors com.skycraft.society.GuardWatch (the
+    nobody outside Skyrim (and not Nord) wears a Skyrim hold's colours. Mirrors com.nirncraft.society.GuardWatch (the
     rule: capital/city and towns of radius 90+ are major, other towns minor, nothing else keeps a watch) and
-    com.skycraft.creatures.GuardProfiles (place > region > culture > province > default).
+    com.nirncraft.creatures.GuardProfiles (place > region > culture > province > default).
     """
-    path = os.path.join(RES, "skycraft", "creatures", "guard_profiles.json")
+    path = os.path.join(RES, "nirncraft", "creatures", "guard_profiles.json")
     table = json.load(open(path, encoding="utf-8"))
     profiles = table["profiles"]
-    tex = os.path.join(RES, "assets", "skycraft", "textures", "entity", "guard")
-    models = os.path.join(RES, "assets", "skycraft", "models", "item")
-    lang = json.load(open(os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft", "creatures.json"), encoding="utf-8"))
+    tex = os.path.join(RES, "assets", "nirncraft", "textures", "entity", "guard")
+    models = os.path.join(RES, "assets", "nirncraft", "models", "item")
+    lang = json.load(open(os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft", "creatures.json"), encoding="utf-8"))
     if table.get("default") not in profiles:
         err(f"guards: default profile {table.get('default')} is not a profile")
     for pid, prof in profiles.items():
         if not os.path.exists(os.path.join(tex, f"guard_{pid}.png")):
             err(f"guards: profile {pid} has no skin guard_{pid}.png")
-        if f"entity.skycraft.guard.{pid}" not in lang:
-            err(f"guards: profile {pid} has no name (entity.skycraft.guard.{pid} in creatures.json)")
+        if f"entity.nirncraft.guard.{pid}" not in lang:
+            err(f"guards: profile {pid} has no name (entity.nirncraft.guard.{pid} in creatures.json)")
         for item in (prof.get("weapon"), prof.get("shield")):
-            if item and item.startswith("skycraft:") and not os.path.exists(os.path.join(models, item.split(":")[1] + ".json")):
+            if item and item.startswith("nirncraft:") and not os.path.exists(os.path.join(models, item.split(":")[1] + ".json")):
                 err(f"guards: profile {pid} carries {item}, which has no item model")
         if "art" not in prof or "tunic" not in prof["art"]:
             err(f"guards: profile {pid} has no art.tunic (the skin generator needs it)")
-    regions = {r["id"] for r in json.load(open(os.path.join(RES, "skycraft", "tamriel", "regions.json"), encoding="utf-8"))}
+    regions = {r["id"] for r in json.load(open(os.path.join(RES, "nirncraft", "tamriel", "regions.json"), encoding="utf-8"))}
     provinces = {r.split("/")[0] for r in regions}
     for key, rows, valid in (("settlements", table["settlements"], place_ids), ("regions", table["regions"], regions),
                              ("provinces", table["provinces"], provinces)):
@@ -147,7 +147,7 @@ def check_guards(place_ids):
         prov = p.get("region", "").split("/")[0]
         return table["provinces"].get(prov, table["default"])
 
-    pdir = os.path.join(RES, "skycraft", "tamriel", "places")
+    pdir = os.path.join(RES, "nirncraft", "tamriel", "places")
     major = minor = 0
     for f in json.load(open(os.path.join(pdir, "index.json"), encoding="utf-8")):
         for p in json.load(open(os.path.join(pdir, f), encoding="utf-8")):
@@ -170,7 +170,7 @@ def check_guards(place_ids):
 
 
 def check_shops():
-    """Shops are data (skycraft/economy/shop_trades.json, com.skycraft.economy.ShopTrades): a shop is a building, its
+    """Shops are data (nirncraft/economy/shop_trades.json, com.nirncraft.economy.ShopTrades): a shop is a building, its
     stock belongs to the building, and every trade has goods that are its own.
 
     Checks the table against the enums it names (AnchorType, ShopType, ItemCategory), that every trade has a stock tag
@@ -178,18 +178,18 @@ def check_shops():
     known gear keys. The runtime half (a rolled stock has at least min_rows kinds, only allowed categories, the cook
     sells a filter over the shared stock) is economy/BarterSelfTest.
     """
-    path = os.path.join(RES, "skycraft", "economy", "shop_trades.json")
+    path = os.path.join(RES, "nirncraft", "economy", "shop_trades.json")
     table = json.load(open(path, encoding="utf-8"))
-    eco = os.path.join(JAVA, "com", "skycraft", "economy")
+    eco = os.path.join(JAVA, "com", "nirncraft", "economy")
 
     shop_types = set(re.findall(r"^    ([A-Z_]+)\(", open(os.path.join(eco, "ShopType.java"), encoding="utf-8").read(), re.M))
-    anchor_src = open(os.path.join(JAVA, "com", "skycraft", "tamriel", "settlement", "AnchorType.java"), encoding="utf-8").read()
+    anchor_src = open(os.path.join(JAVA, "com", "nirncraft", "tamriel", "settlement", "AnchorType.java"), encoding="utf-8").read()
     anchors = set(re.findall(r"^    ([A-Z_]+)[,;]", anchor_src, re.M))
     cats_src = open(os.path.join(eco, "ItemCategory.java"), encoding="utf-8").read()
     cats = set(re.search(r"public enum ItemCategory \{\s*([A-Z_, ]+);", cats_src).group(1).replace(" ", "").split(","))
     gear_keys = set(re.findall(r'"([a-z_]+)"', re.search(r"GEAR_KEYS = List\.of\(([^)]*)\)",
                                                           open(os.path.join(eco, "ShopStock.java"), encoding="utf-8").read(), re.S).group(1)))
-    tags = os.path.join(RES, "data", "skycraft", "tags", "items")
+    tags = os.path.join(RES, "data", "nirncraft", "tags", "items")
 
     def values(rel):
         f = os.path.join(tags, rel + ".json")
@@ -234,7 +234,7 @@ def check_shops():
         elif len(set(vals)) < spec.get("min_rows", 0) + 2:
             err(f"shops: trade {t.lower()} stock tag has {len(set(vals))} goods for a floor of {spec.get('min_rows')} kinds")
         for ref in vals or []:
-            if ref.startswith("#skycraft:") and values(ref[len("#skycraft:"):]) is None:
+            if ref.startswith("#nirncraft:") and values(ref[len("#nirncraft:"):]) is None:
                 err(f"shops: merchant/{t.lower()}.json includes {ref}, which does not exist")
     for t in table["trades"]:
         if t.upper() not in shop_types:
@@ -268,7 +268,7 @@ def main():
             except Exception as e:  # noqa: BLE001
                 err(f"bad json {os.path.relpath(f, ROOT)}: {str(e)[:100]}")
 
-    pdir = os.path.join(RES, "skycraft", "tamriel", "places")
+    pdir = os.path.join(RES, "nirncraft", "tamriel", "places")
     idx = json.load(open(os.path.join(pdir, "index.json"), encoding="utf-8"))
     seen = {}
     places = 0
@@ -284,7 +284,7 @@ def main():
             else:
                 seen[pl["id"]] = f
 
-    qdir = os.path.join(RES, "skycraft", "quests")
+    qdir = os.path.join(RES, "nirncraft", "quests")
     qi = os.path.join(qdir, "index.json")
     if os.path.exists(qi):
         for f in json.load(open(qi, encoding="utf-8")):

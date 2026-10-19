@@ -1,0 +1,668 @@
+{
+  "region": "yokuda/yokudan_desert",
+  "province": "yokuda",
+  "line": "story_yokudan_desert",
+  "category": "main",
+  "title": "The Unstruck Shehai",
+  "summary": "Ansei pilgrims and constellation keepers between Hunding's Dojo, the Hall of the Ansei, and Tall Papa's Spire stop fault-vault seekers from breaking the seal on the Vault of the Pankratosword.",
+  "why": [
+    "yokudan_desert.L7.ansei_pilgrims_and_keepers",
+    "yokudan_desert.L8.constellation_liturgy",
+    "yokudan_desert.L9.fault_vault_seeker"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "hundings_dojo",
+    "places": [
+      "hundings_dojo"
+    ],
+    "npc": "story_yokudan_desert_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "Relic-hunters landed a barge below Tall Papa's Spire with star-charts pointing to the fault-line beneath the Hall of the Ansei, and the keepers at Hunding's Dojo are arming.",
+    "notice": "HUNDING'S DOJO PILGRIM HALL: Sworn blades needed to guard the constellation markers from Tall Papa's Spire to the Hall of the Ansei."
+  },
+  "npcs": [
+    {
+      "id": "story_yokudan_desert_hook_npc",
+      "name": "Warden of Hunding's Dojo",
+      "role": "guard",
+      "place": "hundings_dojo",
+      "greet": "Relic-hunters landed a barge below Tall Papa's Spire with star-charts pointing to the fault-line beneath the Hall of the Ansei, and the keepers at Hunding's Dojo are arming.",
+      "talk": [
+        "The trouble across the Yokudan Desert began when sealed dispatches started bypassing Hunding's Dojo.",
+        "If you mean to help the Ansei Keepers of Yokuda, start by checking the trail between Hundings Dojo and Temple of Satakal."
+      ]
+    },
+    {
+      "id": "story_yokudan_desert_envoy_npc",
+      "name": "Chronicler of Hunding's Dojo",
+      "role": "scholar",
+      "place": "temple_of_satakal",
+      "greet": "Keep your voice low—everyone at Temple of Satakal is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from Temple of Satakal toward Hall of the Ansei before they vanished into the brush.",
+        "Bring any ciphered tallies back to Hunding's Dojo so Sword-Keeper Nazar can see the proof."
+      ]
+    },
+    {
+      "id": "story_yokudan_desert_scout_npc",
+      "name": "Outrider of Hall of the Ansei",
+      "role": "scout",
+      "place": "hall_of_the_ansei",
+      "greet": "You made good time from Temple of Satakal. The saboteurs have fortified the approaches near Sand Drowned Village.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at Sand Drowned Village with a picked guard.",
+        "Once Sand Drowned Village is cleared, return to Hunding's Dojo to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_yokudan_desert_steward_npc",
+      "name": "Speaker of Hunding's Dojo",
+      "role": "steward",
+      "place": "hundings_dojo",
+      "greet": "Sword-Keeper Nazar awaits word on whether the crisis in the Yokudan Desert has been contained.",
+      "talk": [
+        "The elders of Hunding's Dojo have prepared the concord table for your return.",
+        "All of the Yokudan Desert owes you a debt for standing between Hundings Dojo and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_yokudan_desert_boss_01": {
+      "name": "Usurper-Captain of Hundings Dojo (1)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "hundings_dojo",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_yokudan_desert_boss_02": {
+      "name": "Usurper-Captain of Temple of Satakal (2)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "temple_of_satakal",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_yokudan_desert_boss_03": {
+      "name": "Usurper-Captain of Hall of the Ansei (3)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "hall_of_the_ansei",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_yokudan_desert_boss_04": {
+      "name": "Usurper-Captain of Sand Drowned Village (4)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "sand_drowned_village",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_yokudan_desert_boss_05": {
+      "name": "Usurper-Captain of Yokudan Wellspring (5)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "yokudan_wellspring",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_yokudan_desert_boss_06": {
+      "name": "Usurper-Captain of Na Totambu Necropolis (6)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "na_totambu_necropolis",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_yokudan_desert_boss_07": {
+      "name": "Usurper-Captain of Tall Papas Spire (7)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "tall_papas_spire",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_yokudan_desert_boss_08": {
+      "name": "Usurper-Captain of Ra Gada Encampment (8)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "ra_gada_encampment",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_yokudan_desert_scene_01": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hundings Dojo—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hundings Dojo and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hundings Dojo, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_02": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Temple of Satakal—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Temple of Satakal and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Temple of Satakal, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_03": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hall of the Ansei—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hall of the Ansei and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hall of the Ansei, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_04": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Sand Drowned Village—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Sand Drowned Village and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Sand Drowned Village, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_05": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Yokudan Wellspring—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Yokudan Wellspring and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Yokudan Wellspring, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_06": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Na Totambu Necropolis—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Na Totambu Necropolis and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Na Totambu Necropolis, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_07": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Tall Papas Spire—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Tall Papas Spire and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Tall Papas Spire, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_08": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Ra Gada Encampment—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Ra Gada Encampment and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Ra Gada Encampment, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_09": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hundings Dojo—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hundings Dojo and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hundings Dojo, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_10": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Temple of Satakal—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Temple of Satakal and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Temple of Satakal, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_11": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hall of the Ansei—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hall of the Ansei and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hall of the Ansei, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_12": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Sand Drowned Village—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Sand Drowned Village and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Sand Drowned Village, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_13": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Yokudan Wellspring—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Yokudan Wellspring and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Yokudan Wellspring, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_14": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Na Totambu Necropolis—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Na Totambu Necropolis and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Na Totambu Necropolis, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_15": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Tall Papas Spire—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Tall Papas Spire and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Tall Papas Spire, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_16": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Ra Gada Encampment—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Ra Gada Encampment and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Ra Gada Encampment, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_17": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hundings Dojo—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hundings Dojo and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hundings Dojo, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_18": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Temple of Satakal—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Temple of Satakal and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Temple of Satakal, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_19": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hall of the Ansei—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hall of the Ansei and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hall of the Ansei, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_20": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Sand Drowned Village—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Sand Drowned Village and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Sand Drowned Village, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_21": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Yokudan Wellspring—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Yokudan Wellspring and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Yokudan Wellspring, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_22": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Na Totambu Necropolis—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Na Totambu Necropolis and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Na Totambu Necropolis, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_23": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Tall Papas Spire—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Tall Papas Spire and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Tall Papas Spire, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_24": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Ra Gada Encampment—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Ra Gada Encampment and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Ra Gada Encampment, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_25": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hundings Dojo—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hundings Dojo and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hundings Dojo, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_26": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Temple of Satakal—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Temple of Satakal and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Temple of Satakal, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_27": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hall of the Ansei—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hall of the Ansei and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hall of the Ansei, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_28": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Sand Drowned Village—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Sand Drowned Village and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Sand Drowned Village, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_29": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Yokudan Wellspring—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Yokudan Wellspring and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Yokudan Wellspring, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_30": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Na Totambu Necropolis—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Na Totambu Necropolis and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Na Totambu Necropolis, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_31": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Tall Papas Spire—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Tall Papas Spire and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Tall Papas Spire, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_32": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Ra Gada Encampment—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Ra Gada Encampment and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Ra Gada Encampment, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_33": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hundings Dojo—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hundings Dojo and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hundings Dojo, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_34": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Temple of Satakal—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Temple of Satakal and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Temple of Satakal, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_35": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hall of the Ansei—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hall of the Ansei and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hall of the Ansei, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_36": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Sand Drowned Village—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Sand Drowned Village and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Sand Drowned Village, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_37": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Yokudan Wellspring—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Yokudan Wellspring and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Yokudan Wellspring, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_38": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Na Totambu Necropolis—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Na Totambu Necropolis and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Na Totambu Necropolis, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_39": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Tall Papas Spire—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Tall Papas Spire and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Tall Papas Spire, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_40": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Ra Gada Encampment—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Ra Gada Encampment and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Ra Gada Encampment, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_41": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hundings Dojo—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hundings Dojo and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hundings Dojo, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_42": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Temple of Satakal—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Temple of Satakal and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Temple of Satakal, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_43": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Hall of the Ansei—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Hall of the Ansei and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Hall of the Ansei, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_44": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Sand Drowned Village—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Sand Drowned Village and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Sand Drowned Village, then bring the recovered charter back to Hunding's Dojo."
+    ],
+    "story_yokudan_desert_scene_45": [
+      "Warden of Hunding's Dojo: Examine these marks recovered near Yokudan Wellspring—they match the cabal troubling the Yokudan Desert.",
+      "Chronicler of Hunding's Dojo: The seal impressions cite the old charters of the Ansei Keepers of Yokuda word for word.",
+      "Outrider of Hall of the Ansei: Our scouts spotted lantern-signals flashing between Yokudan Wellspring and Sand Drowned Village at dusk.",
+      "Speaker of Hunding's Dojo: Strike swiftly at Yokudan Wellspring, then bring the recovered charter back to Hunding's Dojo."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_yokudan_desert_01_opening",
+      "order": 1,
+      "title": "Star-Charts at Hunding's Dojo",
+      "region": "yokuda/yokudan_desert",
+      "category": "main",
+      "giver": "story_yokudan_desert_hook_npc",
+      "start": "npc:story_yokudan_desert_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "yokudan_desert.L7.ansei_pilgrims_and_keepers",
+        "yokudan_desert.L8.constellation_liturgy"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Hundings Dojo and Temple of Satakal in the Yokudan Desert.",
+      "places": [
+        "hundings_dojo",
+        "temple_of_satakal"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "hundings_dojo",
+          "objective": "Speak with the Warden at Hundings Dojo and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "temple_of_satakal",
+          "objective": "Examine the disturbed boundary markers at Temple of Satakal"
+        },
+        {
+          "id": 30,
+          "place": "hundings_dojo",
+          "objective": "Return the recovered seal-impression to the Chronicler at Hundings Dojo"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "hundings_dojo",
+          "text": "Speak with the Warden at Hundings Dojo and inspect the contested tallies",
+          "scene": "story_yokudan_desert_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "temple_of_satakal",
+          "text": "Examine the disturbed boundary markers at Temple of Satakal"
+        },
+        {
+          "type": "go",
+          "place": "hundings_dojo",
+          "text": "Return the recovered seal-impression to the Chronicler at Hundings Dojo"
+        }
+      ],
+      "consequence": "world_state:yokudan_desert_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_yokudan_desert_02_trail",
+      "order": 2,
+      "title": "Watchfire at Tall Papa's Spire",
+      "region": "yokuda/yokudan_desert",
+      "category": "main",
+      "giver": "story_yokudan_desert_envoy_npc",
+      "start": "auto",
+      "prereq": "story_yokudan_desert_01_opening",
+      "requires": [
+        "story_yokudan_desert_01_opening"
+      ],
+      "why": [
+        "yokudan_desert.L8.constellation_liturgy",
+        "yokudan_desert.L9.fault_vault_seeker"
+      ],
+      "summary": "Follow the conspirators' supply route from Temple of Satakal to Hall of the Ansei and seize their cipher-ledger.",
+      "places": [
+        "temple_of_satakal",
+        "hall_of_the_ansei"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "temple_of_satakal",
+          "objective": "Track the night-couriers departing Temple of Satakal"
+        },
+        {
+          "id": 20,
+          "place": "hall_of_the_ansei",
+          "objective": "Drive off the cabal outriders at Hall of the Ansei and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "temple_of_satakal",
+          "objective": "Deliver the cipher-box to the expedition chronicler at Temple of Satakal"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "temple_of_satakal",
+          "text": "Track the night-couriers departing Temple of Satakal",
+          "scene": "story_yokudan_desert_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "hall_of_the_ansei",
+          "text": "Drive off the cabal outriders at Hall of the Ansei and seize their cipher-box",
+          "boss": "story_yokudan_desert_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "temple_of_satakal",
+          "text": "Deliver the cipher-box to the expedition chronicler at Temple of Satakal"
+        }
+      ],
+      "consequence": "world_state:yokudan_desert_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_yokudan_desert_03_sanctum",
+      "order": 3,
+      "title": "Stones of the Ansei Hall",
+      "region": "yokuda/yokudan_desert",
+      "category": "main",
+      "giver": "story_yokudan_desert_scout_npc",
+      "start": "auto",
+      "prereq": "story_yokudan_desert_02_trail",
+      "requires": [
+        "story_yokudan_desert_02_trail"
+      ],
+      "why": [
+        "yokudan_desert.L9.fault_vault_seeker",
+        "yokudan_desert.L10.vault_of_the_pankratosword"
+      ],
+      "summary": "Secure the outer wards between Hall of the Ansei and Sand Drowned Village to lay bare the cabal's stronghold.",
+      "places": [
+        "hall_of_the_ansei",
+        "sand_drowned_village"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "hall_of_the_ansei",
+          "objective": "Meet the outrider scout at Hall of the Ansei to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "sand_drowned_village",
+          "objective": "Scout the fortified threshold at Sand Drowned Village and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "hundings_dojo",
+          "objective": "Carry the ward-key back to the council table at Hundings Dojo"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "hall_of_the_ansei",
+          "text": "Meet the outrider scout at Hall of the Ansei to decode the sanctum approach",
+          "scene": "story_yokudan_desert_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "sand_drowned_village",
+          "text": "Scout the fortified threshold at Sand Drowned Village and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "hundings_dojo",
+          "text": "Carry the ward-key back to the council table at Hundings Dojo"
+        }
+      ],
+      "consequence": "world_state:yokudan_desert_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_yokudan_desert_04_finale",
+      "order": 4,
+      "title": "Seal of the Fault-Vault",
+      "region": "yokuda/yokudan_desert",
+      "category": "main",
+      "giver": "story_yokudan_desert_steward_npc",
+      "start": "auto",
+      "prereq": "story_yokudan_desert_03_sanctum",
+      "requires": [
+        "story_yokudan_desert_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "yokudan_desert.L7.ansei_pilgrims_and_keepers",
+        "yokudan_desert.L10.vault_of_the_pankratosword"
+      ],
+      "summary": "Storm the cabal stronghold at Sand Drowned Village and witness Sword-Keeper Nazar seal the regional concord at Hunding's Dojo.",
+      "places": [
+        "sand_drowned_village",
+        "hundings_dojo"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "sand_drowned_village",
+          "objective": "Storm the inner chamber at Sand Drowned Village and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "sand_drowned_village",
+          "objective": "Recover the stolen charter-seal of the Yokudan Desert from Sand Drowned Village"
+        },
+        {
+          "id": 30,
+          "place": "hundings_dojo",
+          "objective": "Present the charter-seal at Hundings Dojo to restore peace across the Yokudan Desert"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "sand_drowned_village",
+          "text": "Storm the inner chamber at Sand Drowned Village and defeat the cabal ringleader",
+          "boss": "story_yokudan_desert_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "sand_drowned_village",
+          "text": "Recover the stolen charter-seal of the Yokudan Desert from Sand Drowned Village"
+        },
+        {
+          "type": "go",
+          "place": "hundings_dojo",
+          "text": "Present the charter-seal at Hundings Dojo to restore peace across the Yokudan Desert",
+          "scene": "story_yokudan_desert_scene_04"
+        }
+      ],
+      "consequence": "world_state:yokudan_desert_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Hunding's Dojo"
+      }
+    }
+  ]
+}

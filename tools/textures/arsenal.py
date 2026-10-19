@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Generator for the Skycraft arsenal module (Forge 1.20.1).
+"""Generator for the NirnCraft arsenal module (Forge 1.20.1).
 
 Writes, deterministically:
-  assets/skycraft/textures/item/*.png          arrows, bolts, crossbows (+pull/charged states), staves, artifacts
-  assets/skycraft/models/item/*.json           item models (bow & crossbow overrides)
-  data/skycraft/loot_tables/...                leveled lists and dungeon chests (contract 20)
-  data/skycraft/loot_modifiers/leveled_loot.json
-  data/skycraft/skycraft_values/arsenal.json   gold values (economy)
-  data/skycraft/skycraft_weights/arsenal.json  carry weights (inventory)
-  data/skycraft/tags/items/...                 arsenal_goods, artifacts, bolts, staves, arsenal/<family>
+  assets/nirncraft/textures/item/*.png          arrows, bolts, crossbows (+pull/charged states), staves, artifacts
+  assets/nirncraft/models/item/*.json           item models (bow & crossbow overrides)
+  data/nirncraft/loot_tables/...                leveled lists and dungeon chests (contract 20)
+  data/nirncraft/loot_modifiers/leveled_loot.json
+  data/nirncraft/nirncraft_values/arsenal.json   gold values (economy)
+  data/nirncraft/nirncraft_weights/arsenal.json  carry weights (inventory)
+  data/nirncraft/tags/items/...                 arsenal_goods, artifacts, bolts, staves, arsenal/<family>
   data/minecraft/tags/items/arrows.json        Skyrim arrows count as arrows for bows
-  data/skycraft/weapon_attributes/*.json       Better Combat presets for artifacts
-  data/skycraft/recipes/arsenal/*.json         arrows, bolts, crossbows
-  mod/src/main/lang/skycraft/arsenal.json      English names, tooltips, lore, messages
+  data/nirncraft/weapon_attributes/*.json       Better Combat presets for artifacts
+  data/nirncraft/recipes/arsenal/*.json         arrows, bolts, crossbows
+  mod/src/main/lang/nirncraft/arsenal.json      English names, tooltips, lore, messages
 
     python3 tools/textures/arsenal.py [--preview out.png]
 
@@ -32,10 +32,10 @@ from crafting import Canvas, P, hexc, mix, outline, shade, with_alpha  # noqa: E
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-ITEM_TEX = os.path.join(RES, "assets", "skycraft", "textures", "item")
-MODELS = os.path.join(RES, "assets", "skycraft", "models", "item")
-DATA = os.path.join(RES, "data", "skycraft")
-LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft", "arsenal.json")
+ITEM_TEX = os.path.join(RES, "assets", "nirncraft", "textures", "item")
+MODELS = os.path.join(RES, "assets", "nirncraft", "models", "item")
+DATA = os.path.join(RES, "data", "nirncraft")
+LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft", "arsenal.json")
 PREVIEW = []
 
 
@@ -510,15 +510,15 @@ def enchanter_texture(part):
 
 
 def enchanter_models():
-    tex = os.path.join(RES, "assets", "skycraft", "textures", "block")
+    tex = os.path.join(RES, "assets", "nirncraft", "textures", "block")
     os.makedirs(tex, exist_ok=True)
     for part in ("top", "side", "base"):
         enchanter_texture(part).save(os.path.join(tex, f"staff_enchanter_{part}.png"))
     face = lambda t, uv=None: ({"texture": t, "uv": uv} if uv else {"texture": t})  # noqa: E731
     model = {
         "parent": "minecraft:block/block",
-        "textures": {"particle": "skycraft:block/staff_enchanter_side", "top": "skycraft:block/staff_enchanter_top",
-                     "side": "skycraft:block/staff_enchanter_side", "base": "skycraft:block/staff_enchanter_base"},
+        "textures": {"particle": "nirncraft:block/staff_enchanter_side", "top": "nirncraft:block/staff_enchanter_top",
+                     "side": "nirncraft:block/staff_enchanter_side", "base": "nirncraft:block/staff_enchanter_base"},
         "elements": [
             {"from": [2, 0, 2], "to": [14, 4, 14], "faces": {d: face("#base") for d in ("down", "up", "north", "south", "west", "east")}},
             {"from": [5, 4, 5], "to": [11, 12, 11], "faces": {d: face("#side") for d in ("north", "south", "west", "east")}},
@@ -526,15 +526,15 @@ def enchanter_models():
                                                                 **{d: face("#side", [0, 0, 16, 3]) for d in ("north", "south", "west", "east")}}},
         ],
     }
-    blockmodels = os.path.join(RES, "assets", "skycraft", "models", "block")
+    blockmodels = os.path.join(RES, "assets", "nirncraft", "models", "block")
     write_json(os.path.join(blockmodels, "staff_enchanter.json"), model)
-    write_json(os.path.join(MODELS, "staff_enchanter.json"), {"parent": "skycraft:block/staff_enchanter"})
-    states = {"variants": {f"facing={f}": ({"model": "skycraft:block/staff_enchanter", "y": r} if r else {"model": "skycraft:block/staff_enchanter"})
+    write_json(os.path.join(MODELS, "staff_enchanter.json"), {"parent": "nirncraft:block/staff_enchanter"})
+    states = {"variants": {f"facing={f}": ({"model": "nirncraft:block/staff_enchanter", "y": r} if r else {"model": "nirncraft:block/staff_enchanter"})
                            for f, r in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}}
-    write_json(os.path.join(RES, "assets", "skycraft", "blockstates", "staff_enchanter.json"), states)
+    write_json(os.path.join(RES, "assets", "nirncraft", "blockstates", "staff_enchanter.json"), states)
     write_json(os.path.join(DATA, "loot_table", "blocks", "staff_enchanter.json"), {
         "type": "minecraft:block",
-        "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": "skycraft:staff_enchanter"}],
+        "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": "nirncraft:staff_enchanter"}],
                    "conditions": [{"condition": "minecraft:survives_explosion"}]}],
     })
 
@@ -817,46 +817,46 @@ ARTIFACT_DRAW = {
 # ============================================================================ models
 
 def generated(item_id, parent="minecraft:item/generated"):
-    write_json(os.path.join(MODELS, item_id + ".json"), {"parent": parent, "textures": {"layer0": f"skycraft:item/{item_id}"}})
+    write_json(os.path.join(MODELS, item_id + ".json"), {"parent": parent, "textures": {"layer0": f"nirncraft:item/{item_id}"}})
 
 
 def bow_models(item_id):
     display = BOW_DISPLAY or {}
-    base = {"parent": "minecraft:item/generated", "textures": {"layer0": f"skycraft:item/{item_id}"}}
+    base = {"parent": "minecraft:item/generated", "textures": {"layer0": f"nirncraft:item/{item_id}"}}
     if display:
         base["display"] = display
     base["overrides"] = [
-        {"predicate": {"pulling": 1}, "model": f"skycraft:item/{item_id}_pulling_0"},
-        {"predicate": {"pulling": 1, "pull": 0.65}, "model": f"skycraft:item/{item_id}_pulling_1"},
-        {"predicate": {"pulling": 1, "pull": 0.9}, "model": f"skycraft:item/{item_id}_pulling_2"},
+        {"predicate": {"pulling": 1}, "model": f"nirncraft:item/{item_id}_pulling_0"},
+        {"predicate": {"pulling": 1, "pull": 0.65}, "model": f"nirncraft:item/{item_id}_pulling_1"},
+        {"predicate": {"pulling": 1, "pull": 0.9}, "model": f"nirncraft:item/{item_id}_pulling_2"},
     ]
     write_json(os.path.join(MODELS, item_id + ".json"), base)
     for i in range(3):
         write_json(os.path.join(MODELS, f"{item_id}_pulling_{i}.json"),
-                   {"parent": f"skycraft:item/{item_id}", "textures": {"layer0": f"skycraft:item/{item_id}_pulling_{i}"}})
+                   {"parent": f"nirncraft:item/{item_id}", "textures": {"layer0": f"nirncraft:item/{item_id}_pulling_{i}"}})
 
 
 def crossbow_models(item_id):
     write_json(os.path.join(MODELS, item_id + ".json"), {
         "parent": "minecraft:item/crossbow",
-        "textures": {"layer0": f"skycraft:item/{item_id}_standby"},
+        "textures": {"layer0": f"nirncraft:item/{item_id}_standby"},
         "overrides": [
-            {"predicate": {"pulling": 1}, "model": f"skycraft:item/{item_id}_pulling_0"},
-            {"predicate": {"pulling": 1, "pull": 0.58}, "model": f"skycraft:item/{item_id}_pulling_1"},
-            {"predicate": {"pulling": 1, "pull": 1.0}, "model": f"skycraft:item/{item_id}_pulling_2"},
-            {"predicate": {"charged": 1}, "model": f"skycraft:item/{item_id}_arrow"},
-            {"predicate": {"charged": 1, "firework": 1}, "model": f"skycraft:item/{item_id}_firework"},
+            {"predicate": {"pulling": 1}, "model": f"nirncraft:item/{item_id}_pulling_0"},
+            {"predicate": {"pulling": 1, "pull": 0.58}, "model": f"nirncraft:item/{item_id}_pulling_1"},
+            {"predicate": {"pulling": 1, "pull": 1.0}, "model": f"nirncraft:item/{item_id}_pulling_2"},
+            {"predicate": {"charged": 1}, "model": f"nirncraft:item/{item_id}_arrow"},
+            {"predicate": {"charged": 1, "firework": 1}, "model": f"nirncraft:item/{item_id}_firework"},
         ],
     })
     for state in ("pulling_0", "pulling_1", "pulling_2", "arrow", "firework"):
         write_json(os.path.join(MODELS, f"{item_id}_{state}.json"),
-                   {"parent": "minecraft:item/crossbow", "textures": {"layer0": f"skycraft:item/{item_id}_{state}"}})
+                   {"parent": "minecraft:item/crossbow", "textures": {"layer0": f"nirncraft:item/{item_id}_{state}"}})
 
 
 def shield_model(item_id):
     write_json(os.path.join(MODELS, item_id + ".json"), {
         "parent": "minecraft:item/generated",
-        "textures": {"layer0": f"skycraft:item/{item_id}"},
+        "textures": {"layer0": f"nirncraft:item/{item_id}"},
         "display": {
             "thirdperson_righthand": {"rotation": [0, -90, 0], "translation": [3, 1, 1], "scale": [1.1, 1.1, 1.1]},
             "thirdperson_lefthand": {"rotation": [0, 90, 0], "translation": [3, 1, 1], "scale": [1.1, 1.1, 1.1]},
@@ -868,13 +868,13 @@ def shield_model(item_id):
 
 # ============================================================================ data
 
-GEMS = ["skycraft:garnet", "skycraft:ruby", "skycraft:sapphire", "minecraft:amethyst_shard", "minecraft:emerald"]
-FLAWLESS = ["skycraft:flawless_garnet", "skycraft:flawless_ruby", "skycraft:flawless_sapphire", "skycraft:flawless_diamond",
+GEMS = ["nirncraft:garnet", "nirncraft:ruby", "nirncraft:sapphire", "minecraft:amethyst_shard", "minecraft:emerald"]
+FLAWLESS = ["nirncraft:flawless_garnet", "nirncraft:flawless_ruby", "nirncraft:flawless_sapphire", "nirncraft:flawless_diamond",
             "minecraft:diamond"]
 
 
 def leveled(kind, weight=None, enchant=0.0, quality=0.0, count=None):
-    fn = {"function": "skycraft:leveled_gear", "kind": kind}
+    fn = {"function": "nirncraft:leveled_gear", "kind": kind}
     if enchant:
         fn["enchant_chance"] = enchant
     if quality:
@@ -918,7 +918,7 @@ def pool(rolls, entries):
 
 def loot_table(path, ltype, pools):
     write_json(os.path.join(DATA, "loot_table", path + ".json"),
-               {"type": ltype, "pools": pools, "random_sequence": f"skycraft:{path}"})
+               {"type": ltype, "pools": pools, "random_sequence": f"nirncraft:{path}"})
 
 
 def loot_tables():
@@ -927,39 +927,39 @@ def loot_tables():
     loot_table("leveled/bow", "minecraft:generic", [pool(1, [leveled("bow", enchant=0.1, quality=0.15)])])
     loot_table("leveled/arrows", "minecraft:generic", [pool(1, [leveled("arrow", count=(4, 12))])])
     loot_table("leveled/dungeon_extra", "minecraft:generic", [pool(1, [
-        table_ref("skycraft:leveled/weapon", 35), table_ref("skycraft:leveled/armor", 30),
-        table_ref("skycraft:leveled/bow", 10), table_ref("skycraft:leveled/arrows", 25)])])
-    common_staves = [f"skycraft:{s}" for s in STAVES if s not in ("wabbajack", "staff_of_magnus")]
+        table_ref("nirncraft:leveled/weapon", 35), table_ref("nirncraft:leveled/armor", 30),
+        table_ref("nirncraft:leveled/bow", 10), table_ref("nirncraft:leveled/arrows", 25)])])
+    common_staves = [f"nirncraft:{s}" for s in STAVES if s not in ("wabbajack", "staff_of_magnus")]
     loot_table("arsenal/staves", "minecraft:generic", [pool(1, [item(s) for s in common_staves])])
-    loot_table("arsenal/artifacts", "minecraft:generic", [pool(1, [item(f"skycraft:{a}") for a in ARTIFACTS]
-                                                                 + [item("skycraft:wabbajack"), item("skycraft:staff_of_magnus")])])
+    loot_table("arsenal/artifacts", "minecraft:generic", [pool(1, [item(f"nirncraft:{a}") for a in ARTIFACTS]
+                                                                 + [item("nirncraft:wabbajack"), item("nirncraft:staff_of_magnus")])])
     loot_table("chests/dungeon_minor", "minecraft:chest", [
-        pool((1, 2), [item("skycraft:septim", 60, count=(3, 25)), item(GEMS[0], 4), item(GEMS[1], 3), item(GEMS[2], 2),
-                      item(GEMS[3], 4), table_ref("skycraft:chests/alchemy_ingredients", 30), empty(25)]),
+        pool((1, 2), [item("nirncraft:septim", 60, count=(3, 25)), item(GEMS[0], 4), item(GEMS[1], 3), item(GEMS[2], 2),
+                      item(GEMS[3], 4), table_ref("nirncraft:chests/alchemy_ingredients", 30), empty(25)]),
     ])
     loot_table("chests/dungeon_common", "minecraft:chest", [
-        pool(1, [table_ref("skycraft:chests/gold", 1)]),
+        pool(1, [table_ref("nirncraft:chests/gold", 1)]),
         pool(1, [leveled("weapon", 30, 0.12, 0.15), leveled("armor", 25, 0.12, 0.15), leveled("bow", 8, 0.12, 0.15),
                  leveled("arrow", 20, count=(4, 12)), empty(25)]),
-        pool((1, 3), [table_ref("skycraft:chests/soul_gems", 12), table_ref("skycraft:chests/alchemy_ingredients", 20),
-                      table_ref("skycraft:chests/lockpicks", 10)] + [item(g, 3) for g in GEMS]
-             + [{"type": "minecraft:tag", "name": "skycraft:spell_tomes", "expand": True, "weight": 1},
+        pool((1, 3), [table_ref("nirncraft:chests/soul_gems", 12), table_ref("nirncraft:chests/alchemy_ingredients", 20),
+                      table_ref("nirncraft:chests/lockpicks", 10)] + [item(g, 3) for g in GEMS]
+             + [{"type": "minecraft:tag", "name": "nirncraft:spell_tomes", "expand": True, "weight": 1},
                 item("minecraft:bread", 6, count=(1, 3)), empty(30)]),
     ])
     loot_table("chests/dungeon_boss", "minecraft:chest", [
-        pool(1, [item("skycraft:coin_purse", 40, nbt="{gold:250L}"), item("skycraft:coin_purse", 30, nbt="{gold:400L}"),
-                 item("skycraft:coin_purse", 15, nbt="{gold:650L}"), item("skycraft:coin_purse", 5, nbt="{gold:1000L}")]),
-        pool(1, [item("skycraft:septim", 1, count=(30, 64))]),
+        pool(1, [item("nirncraft:coin_purse", 40, nbt="{gold:250L}"), item("nirncraft:coin_purse", 30, nbt="{gold:400L}"),
+                 item("nirncraft:coin_purse", 15, nbt="{gold:650L}"), item("nirncraft:coin_purse", 5, nbt="{gold:1000L}")]),
+        pool(1, [item("nirncraft:septim", 1, count=(30, 64))]),
         pool((2, 3), [leveled("weapon", 35, 0.35, 0.4), leveled("armor", 35, 0.35, 0.4), leveled("bow", 12, 0.35, 0.4)]),
         pool(1, [leveled("arrow", 1, count=(8, 20))]),
         pool((1, 2), [item(g, 4) for g in GEMS] + [item(g, 1) for g in FLAWLESS]),
-        pool(1, [table_ref("skycraft:chests/soul_gems", 1)]),
-        pool(1, [{"type": "minecraft:tag", "name": "skycraft:spell_tomes", "expand": True, "weight": 3}, empty(7)]),
-        pool(1, [table_ref("skycraft:arsenal/staves", 6), empty(94)]),
-        pool(1, [table_ref("skycraft:arsenal/artifacts", 1), empty(199)]),
+        pool(1, [table_ref("nirncraft:chests/soul_gems", 1)]),
+        pool(1, [{"type": "minecraft:tag", "name": "nirncraft:spell_tomes", "expand": True, "weight": 3}, empty(7)]),
+        pool(1, [table_ref("nirncraft:arsenal/staves", 6), empty(94)]),
+        pool(1, [table_ref("nirncraft:arsenal/artifacts", 1), empty(199)]),
     ])
     write_json(os.path.join(DATA, "loot_modifiers", "leveled_loot.json"), {
-        "type": "skycraft:add_table", "conditions": [], "table": "skycraft:leveled/dungeon_extra", "prefix": "chests/", "chance": 0.5})
+        "type": "nirncraft:add_table", "conditions": [], "table": "nirncraft:leveled/dungeon_extra", "prefix": "chests/", "chance": 0.5})
 
 
 def tags_and_values():
@@ -968,7 +968,7 @@ def tags_and_values():
     crossbows = list(CROSSBOWS)
     staves = [s for s in STAVES if s not in ("wabbajack", "staff_of_magnus")]
     artifacts = list(ARTIFACTS) + ["wabbajack", "staff_of_magnus"]
-    sk = lambda ids: [f"skycraft:{i}" for i in ids]  # noqa: E731
+    sk = lambda ids: [f"nirncraft:{i}" for i in ids]  # noqa: E731
     tag = lambda path, ids: write_json(os.path.join(DATA, "tags", "item", path + ".json"), {"replace": False, "values": ids})  # noqa: E731
     polearms = [f"{t}_{k}" for t in POLEARM_TIERS for k in POLEARMS]
     tag("arsenal_goods", sk(arrows + bolts + crossbows + staves + polearms + ["unenchanted_staff"]))
@@ -988,28 +988,28 @@ def tags_and_values():
 
     values, weights = {}, {}
     for i, v in ARROWS.items():
-        values[f"skycraft:{i}"] = v[4]
-        weights[f"skycraft:{i}"] = 0
+        values[f"nirncraft:{i}"] = v[4]
+        weights[f"nirncraft:{i}"] = 0
     for i, v in BOLTS.items():
-        values[f"skycraft:{i}"] = v[4]
-        weights[f"skycraft:{i}"] = 0
+        values[f"nirncraft:{i}"] = v[4]
+        weights[f"nirncraft:{i}"] = 0
     for i, v in CROSSBOWS.items():
-        values[f"skycraft:{i}"] = v[4]
-        weights[f"skycraft:{i}"] = v[5]
+        values[f"nirncraft:{i}"] = v[4]
+        weights[f"nirncraft:{i}"] = v[5]
     for i, v in STAVES.items():
-        values[f"skycraft:{i}"] = v[4]
-        weights[f"skycraft:{i}"] = 1 if i == "wabbajack" else 8
+        values[f"nirncraft:{i}"] = v[4]
+        weights[f"nirncraft:{i}"] = 1 if i == "wabbajack" else 8
     for i, v in ARTIFACTS.items():
-        values[f"skycraft:{i}"] = v[2]
-        weights[f"skycraft:{i}"] = v[3]
+        values[f"nirncraft:{i}"] = v[2]
+        weights[f"nirncraft:{i}"] = v[3]
     for n, t in enumerate(POLEARM_TIERS):
         for k, (_, vm, w, _, _) in POLEARMS.items():
-            values[f"skycraft:{t}_{k}"] = int(round(SWORD_VALUE[t] * vm))
-            weights[f"skycraft:{t}_{k}"] = int(round(w * (1 + 0.06 * n)))
-    values.update({"skycraft:unenchanted_staff": 100, "skycraft:enchanted_staff": 900, "skycraft:staff_enchanter": 300})
-    weights.update({"skycraft:unenchanted_staff": 8, "skycraft:enchanted_staff": 8, "skycraft:staff_enchanter": 30})
-    write_json(os.path.join(DATA, "skycraft_values", "arsenal.json"), {"values": values})
-    write_json(os.path.join(DATA, "skycraft_weights", "arsenal.json"), {"weights": weights})
+            values[f"nirncraft:{t}_{k}"] = int(round(SWORD_VALUE[t] * vm))
+            weights[f"nirncraft:{t}_{k}"] = int(round(w * (1 + 0.06 * n)))
+    values.update({"nirncraft:unenchanted_staff": 100, "nirncraft:enchanted_staff": 900, "nirncraft:staff_enchanter": 300})
+    weights.update({"nirncraft:unenchanted_staff": 8, "nirncraft:enchanted_staff": 8, "nirncraft:staff_enchanter": 30})
+    write_json(os.path.join(DATA, "nirncraft_values", "arsenal.json"), {"values": values})
+    write_json(os.path.join(DATA, "nirncraft_weights", "arsenal.json"), {"weights": weights})
 
     for i, v in ARTIFACTS.items():
         if v[4]:
@@ -1023,35 +1023,35 @@ def recipes():
         write_json(os.path.join(out, name + ".json"), {
             "type": "minecraft:crafting_shaped", "category": "equipment", "pattern": pattern,
             "key": {k: ({"tag": v[1:]} if v.startswith("#") else {"item": v}) for k, v in key.items()},
-            "result": {"item": f"skycraft:{result}", "count": count}})
+            "result": {"item": f"nirncraft:{result}", "count": count}})
 
     def shapeless(name, ingredients, result, count):
         write_json(os.path.join(out, name + ".json"), {
             "type": "minecraft:crafting_shapeless", "category": "equipment",
             "ingredients": [({"tag": v[1:]} if v.startswith("#") else {"item": v}) for v in ingredients],
-            "result": {"item": f"skycraft:{result}", "count": count}})
+            "result": {"item": f"nirncraft:{result}", "count": count}})
 
-    heads = {"iron_arrow": "minecraft:iron_nugget", "steel_arrow": "skycraft:steel_ingot", "orcish_arrow": "skycraft:orichalcum_ingot",
-             "dwarven_arrow": "skycraft:dwarven_metal_ingot", "elven_arrow": "skycraft:refined_moonstone",
-             "glass_arrow": "skycraft:refined_malachite", "ebony_arrow": "skycraft:ebony_ingot",
-             "dragonbone_arrow": "skycraft:dragon_bone"}
+    heads = {"iron_arrow": "minecraft:iron_nugget", "steel_arrow": "nirncraft:steel_ingot", "orcish_arrow": "nirncraft:orichalcum_ingot",
+             "dwarven_arrow": "nirncraft:dwarven_metal_ingot", "elven_arrow": "nirncraft:refined_moonstone",
+             "glass_arrow": "nirncraft:refined_malachite", "ebony_arrow": "nirncraft:ebony_ingot",
+             "dragonbone_arrow": "nirncraft:dragon_bone"}
     for arrow, head in heads.items():
         shaped(arrow, ["H", "S", "F"], {"H": head, "S": "minecraft:stick", "F": "minecraft:feather"}, arrow, 12 if arrow != "iron_arrow" else 6)
-    shaped("daedric_arrow", ["HD", "S ", "F "], {"H": "skycraft:ebony_ingot", "D": "skycraft:daedra_heart", "S": "minecraft:stick",
+    shaped("daedric_arrow", ["HD", "S ", "F "], {"H": "nirncraft:ebony_ingot", "D": "nirncraft:daedra_heart", "S": "minecraft:stick",
                                                  "F": "minecraft:feather"}, "daedric_arrow", 24)
-    shapeless("fire_arrow", ["skycraft:steel_arrow"] * 4 + ["minecraft:blaze_powder"], "fire_arrow", 4)
-    shapeless("frost_arrow", ["skycraft:steel_arrow"] * 4 + ["minecraft:blue_ice"], "frost_arrow", 4)
-    shapeless("shock_arrow", ["skycraft:steel_arrow"] * 4 + ["minecraft:glowstone_dust"], "shock_arrow", 4)
-    shaped("steel_bolt", ["H", "S"], {"H": "skycraft:steel_ingot", "S": "minecraft:stick"}, "steel_bolt", 10)
-    shaped("dwarven_bolt", ["H", "S"], {"H": "skycraft:dwarven_metal_ingot", "S": "minecraft:stick"}, "dwarven_bolt", 10)
-    shapeless("explosive_bolt", ["skycraft:steel_bolt"] * 4 + ["minecraft:gunpowder", "minecraft:gunpowder"], "explosive_bolt", 4)
-    shaped("imperial_crossbow", ["#I#", "@T@", " # "], {"#": "minecraft:stick", "I": "skycraft:steel_ingot", "@": "minecraft:string",
+    shapeless("fire_arrow", ["nirncraft:steel_arrow"] * 4 + ["minecraft:blaze_powder"], "fire_arrow", 4)
+    shapeless("frost_arrow", ["nirncraft:steel_arrow"] * 4 + ["minecraft:blue_ice"], "frost_arrow", 4)
+    shapeless("shock_arrow", ["nirncraft:steel_arrow"] * 4 + ["minecraft:glowstone_dust"], "shock_arrow", 4)
+    shaped("steel_bolt", ["H", "S"], {"H": "nirncraft:steel_ingot", "S": "minecraft:stick"}, "steel_bolt", 10)
+    shaped("dwarven_bolt", ["H", "S"], {"H": "nirncraft:dwarven_metal_ingot", "S": "minecraft:stick"}, "dwarven_bolt", 10)
+    shapeless("explosive_bolt", ["nirncraft:steel_bolt"] * 4 + ["minecraft:gunpowder", "minecraft:gunpowder"], "explosive_bolt", 4)
+    shaped("imperial_crossbow", ["#I#", "@T@", " # "], {"#": "minecraft:stick", "I": "nirncraft:steel_ingot", "@": "minecraft:string",
                                                         "T": "minecraft:tripwire_hook"}, "imperial_crossbow", 1)
-    shaped("enhanced_crossbow", ["I I", " C ", "I I"], {"I": "skycraft:steel_ingot", "C": "skycraft:imperial_crossbow"},
+    shaped("enhanced_crossbow", ["I I", " C ", "I I"], {"I": "nirncraft:steel_ingot", "C": "nirncraft:imperial_crossbow"},
            "enhanced_crossbow", 1)
-    shaped("dwarven_crossbow", ["#I#", "@T@", " # "], {"#": "skycraft:dwarven_metal_ingot", "I": "skycraft:dwarven_metal_ingot",
+    shaped("dwarven_crossbow", ["#I#", "@T@", " # "], {"#": "nirncraft:dwarven_metal_ingot", "I": "nirncraft:dwarven_metal_ingot",
                                                        "@": "minecraft:string", "T": "minecraft:tripwire_hook"}, "dwarven_crossbow", 1)
-    shaped("enhanced_dwarven_crossbow", ["I I", " C ", "I I"], {"I": "skycraft:dwarven_metal_ingot", "C": "skycraft:dwarven_crossbow"},
+    shaped("enhanced_dwarven_crossbow", ["I I", " C ", "I I"], {"I": "nirncraft:dwarven_metal_ingot", "C": "nirncraft:dwarven_crossbow"},
            "enhanced_dwarven_crossbow", 1)
 
 
@@ -1060,78 +1060,78 @@ def recipes():
 def lang():
     L = {}
     for i, v in {**ARROWS, **BOLTS}.items():
-        L[f"item.skycraft.{i}"] = v[0]
+        L[f"item.nirncraft.{i}"] = v[0]
     for i, v in CROSSBOWS.items():
-        L[f"item.skycraft.{i}"] = v[0]
+        L[f"item.nirncraft.{i}"] = v[0]
     for i, v in STAVES.items():
-        L[f"item.skycraft.{i}"] = v[0]
-        L[f"tooltip.skycraft.staff.{i}"] = v[5]
+        L[f"item.nirncraft.{i}"] = v[0]
+        L[f"tooltip.nirncraft.staff.{i}"] = v[5]
     for i, v in ARTIFACTS.items():
-        L[f"item.skycraft.{i}"] = v[0]
-        L[f"tooltip.skycraft.artifact.{i}"] = v[5]
-        L[f"lore.skycraft.artifact.{i}"] = v[6]
+        L[f"item.nirncraft.{i}"] = v[0]
+        L[f"tooltip.nirncraft.artifact.{i}"] = v[5]
+        L[f"lore.nirncraft.artifact.{i}"] = v[6]
     for t in POLEARM_TIERS:
         for k, v in POLEARMS.items():
-            L[f"item.skycraft.{t}_{k}"] = f"{POLEARM_TIER_NAMES[t]} {v[0]}"
+            L[f"item.nirncraft.{t}_{k}"] = f"{POLEARM_TIER_NAMES[t]} {v[0]}"
     for k, v in POLEARMS.items():
-        L[f"tooltip.skycraft.polearm.{k}"] = v[4]
+        L[f"tooltip.nirncraft.polearm.{k}"] = v[4]
     L.update({
-        "tooltip.skycraft.polearm.one_handed": "One-handed polearm (Polearms skill)",
-        "tooltip.skycraft.polearm.two_handed": "Two-handed polearm (Polearms skill)",
-        "item.skycraft.unenchanted_staff": "Unenchanted Staff",
-        "item.skycraft.enchanted_staff": "Enchanted Staff",
-        "item.skycraft.enchanted_staff.named": "Staff of %s",
-        "tooltip.skycraft.enchanted_staff.blank": "Bind a spell into it at a Staff Enchanter",
-        "item.skycraft.staff_enchanter": "Staff Enchanter",
-        "block.skycraft.staff_enchanter": "Staff Enchanter",
-        "screen.skycraft.staff_enchanter": "Staff Enchanter",
-        "staff_enchanter.skycraft.spells": "Spells",
-        "staff_enchanter.skycraft.no_spells": "You know no spells that can be bound into a staff.",
-        "staff_enchanter.skycraft.enchant": "Enchant",
-        "staff_enchanter.skycraft.need_staff": "Unenchanted Staff in your pack",
-        "staff_enchanter.skycraft.need_gem": "A filled soul gem in your pack",
-        "staff_enchanter.skycraft.charges": "The staff will hold %s charges",
-        "staff_enchanter.skycraft.hint": "Click a spell, then Enchant. The biggest soul you carry is used.",
-        "staff_enchanter.skycraft.made": "Staff enchanted",
-        "staff_enchanter.skycraft.problem.spell": "That spell can't be bound into a staff",
-        "staff_enchanter.skycraft.problem.unknown": "You don't know that spell",
-        "staff_enchanter.skycraft.problem.staff": "You need an Unenchanted Staff",
-        "staff_enchanter.skycraft.problem.gem": "You need a filled soul gem",
+        "tooltip.nirncraft.polearm.one_handed": "One-handed polearm (Polearms skill)",
+        "tooltip.nirncraft.polearm.two_handed": "Two-handed polearm (Polearms skill)",
+        "item.nirncraft.unenchanted_staff": "Unenchanted Staff",
+        "item.nirncraft.enchanted_staff": "Enchanted Staff",
+        "item.nirncraft.enchanted_staff.named": "Staff of %s",
+        "tooltip.nirncraft.enchanted_staff.blank": "Bind a spell into it at a Staff Enchanter",
+        "item.nirncraft.staff_enchanter": "Staff Enchanter",
+        "block.nirncraft.staff_enchanter": "Staff Enchanter",
+        "screen.nirncraft.staff_enchanter": "Staff Enchanter",
+        "staff_enchanter.nirncraft.spells": "Spells",
+        "staff_enchanter.nirncraft.no_spells": "You know no spells that can be bound into a staff.",
+        "staff_enchanter.nirncraft.enchant": "Enchant",
+        "staff_enchanter.nirncraft.need_staff": "Unenchanted Staff in your pack",
+        "staff_enchanter.nirncraft.need_gem": "A filled soul gem in your pack",
+        "staff_enchanter.nirncraft.charges": "The staff will hold %s charges",
+        "staff_enchanter.nirncraft.hint": "Click a spell, then Enchant. The biggest soul you carry is used.",
+        "staff_enchanter.nirncraft.made": "Staff enchanted",
+        "staff_enchanter.nirncraft.problem.spell": "That spell can't be bound into a staff",
+        "staff_enchanter.nirncraft.problem.unknown": "You don't know that spell",
+        "staff_enchanter.nirncraft.problem.staff": "You need an Unenchanted Staff",
+        "staff_enchanter.nirncraft.problem.gem": "You need a filled soul gem",
     })
-    L["lore.skycraft.artifact.wabbajack"] = "Sheogorath's staff. Even he isn't sure what it does."
-    L["lore.skycraft.artifact.staff_of_magnus"] = "The staff of the god of magic, once kept at the College of Winterhold."
+    L["lore.nirncraft.artifact.wabbajack"] = "Sheogorath's staff. Even he isn't sure what it does."
+    L["lore.nirncraft.artifact.staff_of_magnus"] = "The staff of the god of magic, once kept at the College of Winterhold."
     L.update({
-        "entity.skycraft.sky_arrow": "Arrow",
-        "entity.skycraft.staff_bolt": "Staff Spell",
-        "entity.skycraft.familiar": "Familiar",
-        "tooltip.skycraft.arsenal.arrow_damage": "Arrow damage: %s",
-        "tooltip.skycraft.arsenal.arrow.fire": "Sets the target on fire",
-        "tooltip.skycraft.arsenal.arrow.frost": "Frost: slows the target",
-        "tooltip.skycraft.arsenal.arrow.shock": "Shock: extra damage, drains magicka",
-        "tooltip.skycraft.arsenal.arrow.explosive": "Explodes on impact",
-        "tooltip.skycraft.arsenal.bolt": "Crossbow bolt",
-        "tooltip.skycraft.arsenal.crossbow_damage": "Bolt damage %s",
-        "tooltip.skycraft.arsenal.armor_pierce": "Ignores %s%% of armor",
-        "tooltip.skycraft.arsenal.charges": "Charges: %s / %s",
-        "tooltip.skycraft.arsenal.staff_skill": "Skill: %s",
-        "tooltip.skycraft.arsenal.recharge_hint": "Sneak + use with a filled soul gem in the other hand to recharge",
-        "message.skycraft.arsenal.headshot": "Headshot!",
-        "message.skycraft.arsenal.staff_empty": "%s is out of charges",
-        "message.skycraft.arsenal.staff_full": "%s is fully charged",
-        "message.skycraft.arsenal.staff_recharged": "%s recharged",
-        "message.skycraft.arsenal.gem_empty": "That soul gem is empty",
-        "message.skycraft.arsenal.resisted": "%s resisted the spell",
-        "message.skycraft.arsenal.mehrunes_razor": "Mehrunes' Razor claims a soul!",
-        "message.skycraft.arsenal.meridia": "Meridia's light purges the undead!",
-        "message.skycraft.arsenal.wabbajack.0": "Bawk!",
-        "message.skycraft.arsenal.wabbajack.1": "Boom!",
-        "message.skycraft.arsenal.wabbajack.2": "A gift of health. How dull.",
-        "message.skycraft.arsenal.wabbajack.3": "It's raining gold!",
-        "message.skycraft.arsenal.wabbajack.4": "Fire! Lovely fire!",
-        "message.skycraft.arsenal.wabbajack.5": "A bolt from the blue!",
-        "message.skycraft.arsenal.wabbajack.6": "Up, up and away!",
-        "message.skycraft.arsenal.wabbajack.7": "Rabbits. Obviously.",
-        "message.skycraft.arsenal.wabbajack.8": "Madness takes hold!",
+        "entity.nirncraft.sky_arrow": "Arrow",
+        "entity.nirncraft.staff_bolt": "Staff Spell",
+        "entity.nirncraft.familiar": "Familiar",
+        "tooltip.nirncraft.arsenal.arrow_damage": "Arrow damage: %s",
+        "tooltip.nirncraft.arsenal.arrow.fire": "Sets the target on fire",
+        "tooltip.nirncraft.arsenal.arrow.frost": "Frost: slows the target",
+        "tooltip.nirncraft.arsenal.arrow.shock": "Shock: extra damage, drains magicka",
+        "tooltip.nirncraft.arsenal.arrow.explosive": "Explodes on impact",
+        "tooltip.nirncraft.arsenal.bolt": "Crossbow bolt",
+        "tooltip.nirncraft.arsenal.crossbow_damage": "Bolt damage %s",
+        "tooltip.nirncraft.arsenal.armor_pierce": "Ignores %s%% of armor",
+        "tooltip.nirncraft.arsenal.charges": "Charges: %s / %s",
+        "tooltip.nirncraft.arsenal.staff_skill": "Skill: %s",
+        "tooltip.nirncraft.arsenal.recharge_hint": "Sneak + use with a filled soul gem in the other hand to recharge",
+        "message.nirncraft.arsenal.headshot": "Headshot!",
+        "message.nirncraft.arsenal.staff_empty": "%s is out of charges",
+        "message.nirncraft.arsenal.staff_full": "%s is fully charged",
+        "message.nirncraft.arsenal.staff_recharged": "%s recharged",
+        "message.nirncraft.arsenal.gem_empty": "That soul gem is empty",
+        "message.nirncraft.arsenal.resisted": "%s resisted the spell",
+        "message.nirncraft.arsenal.mehrunes_razor": "Mehrunes' Razor claims a soul!",
+        "message.nirncraft.arsenal.meridia": "Meridia's light purges the undead!",
+        "message.nirncraft.arsenal.wabbajack.0": "Bawk!",
+        "message.nirncraft.arsenal.wabbajack.1": "Boom!",
+        "message.nirncraft.arsenal.wabbajack.2": "A gift of health. How dull.",
+        "message.nirncraft.arsenal.wabbajack.3": "It's raining gold!",
+        "message.nirncraft.arsenal.wabbajack.4": "Fire! Lovely fire!",
+        "message.nirncraft.arsenal.wabbajack.5": "A bolt from the blue!",
+        "message.nirncraft.arsenal.wabbajack.6": "Up, up and away!",
+        "message.nirncraft.arsenal.wabbajack.7": "Rabbits. Obviously.",
+        "message.nirncraft.arsenal.wabbajack.8": "Madness takes hold!",
     })
     os.makedirs(os.path.dirname(LANG), exist_ok=True)
     with open(LANG, "w") as f:

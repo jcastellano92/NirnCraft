@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace aether {
+namespace atlas {
 
 constexpr int REGION = 256;
 constexpr int BRICK = 4;
@@ -53,4 +53,4 @@ struct Svdag {
 
 Svdag buildSvdag(VoxelSource& src);
 
-}  // namespace aether
+}  // namespace atlas

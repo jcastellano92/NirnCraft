@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""The biomes of Nirn: one declarative catalogue that generates every Skycraft biome and what hangs off it.
+"""The biomes of Nirn: one declarative catalogue that generates every NirnCraft biome and what hangs off it.
 
 Writes (all generated, never hand-edit the outputs):
-  * mod/src/main/resources/data/skycraft/worldgen/biome/*.json
-  * mod/src/main/resources/data/skycraft/worldgen/{configured,placed}_feature/biome/*.json (the biome features)
-  * mod/src/main/resources/data/{skycraft,minecraft,forge,c}/tags/worldgen/biome/** (biome tags)
-  * mod/src/main/resources/skycraft/tamriel/palettes.json (region -> terrain context -> weighted biomes)
-  * mod/src/main/lang/skycraft/tamriel_biomes.json (biome names; block names come from tools/textures/tamriel.py)
+  * mod/src/main/resources/data/nirncraft/worldgen/biome/*.json
+  * mod/src/main/resources/data/nirncraft/worldgen/{configured,placed}_feature/biome/*.json (the biome features)
+  * mod/src/main/resources/data/{nirncraft,minecraft,forge,c}/tags/worldgen/biome/** (biome tags)
+  * mod/src/main/resources/nirncraft/tamriel/palettes.json (region -> terrain context -> weighted biomes)
+  * mod/src/main/lang/nirncraft/tamriel_biomes.json (biome names; block names come from tools/textures/tamriel.py)
   * tools/worldgen/generated/surface_rule.json (the complete overworld surface rule; the terrain workstream
-    inlines it into the skycraft:tamriel noise settings)
+    inlines it into the nirncraft:tamriel noise settings)
 
 Feature order: every biome's feature lists are filtered from ONE canonical ordered list per generation step
-(vanilla's own order with Skycraft's features slotted in), so a "feature order cycle" cannot happen.
+(vanilla's own order with NirnCraft's features slotted in), so a "feature order cycle" cannot happen.
 
 Run from anywhere:  python3 tools/worldgen/biomes.py
 """
@@ -23,14 +23,14 @@ import zlib
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
 DATA = os.path.join(RES, "data")
-SK = "skycraft"
+SK = "nirncraft"
 
 STEPS = ["raw_generation", "lakes", "local_modifications", "underground_structures", "surface_structures",
          "strongholds", "underground_ores", "underground_decoration", "fluid_springs", "vegetal_decoration",
          "top_layer_modification"]
 
 # Vanilla 1.20.1's feature order per step: a linear extension of every vanilla overworld biome's lists (dumped
-# from the game's registries). Skycraft features are slotted into these lists below; vanilla features keep
+# from the game's registries). NirnCraft features are slotted into these lists below; vanilla features keep
 # their relative order, so vanilla cave biomes (lush/dripstone/deep dark) can share a world with ours.
 VANILLA_ORDER = {
     "raw_generation": [],
@@ -87,12 +87,12 @@ VANILLA_ORDER = {
     "top_layer_modification": ["minecraft:freeze_top_layer"],
 }
 
-# Skycraft features already added by the Phase 1 biome modifiers (data/skycraft/forge/biome_modifier). They must
+# NirnCraft features already added by the Phase 1 biome modifiers (data/nirncraft/forge/biome_modifier). They must
 # never appear in a biome's own lists too, or the feature would be listed twice in one biome.
-MODIFIER_FEATURES = {"skycraft:nirnroot_patch", "skycraft:deathbell_patch", "skycraft:nightshade_patch",
-                     "skycraft:frost_mirriam_patch", "skycraft:bandit_camp", "skycraft:wayside_shrine",
-                     "skycraft:standing_stone_shrine", "skycraft:word_wall_shrine",
-                     "skycraft:word_wall_shrine_highlands"}
+MODIFIER_FEATURES = {"nirncraft:nirnroot_patch", "nirncraft:deathbell_patch", "nirncraft:nightshade_patch",
+                     "nirncraft:frost_mirriam_patch", "nirncraft:bandit_camp", "nirncraft:wayside_shrine",
+                     "nirncraft:standing_stone_shrine", "nirncraft:word_wall_shrine",
+                     "nirncraft:word_wall_shrine_highlands"}
 
 MAX = 1.7976931348623157e308
 
@@ -143,9 +143,9 @@ def rarity(n):
 
 SQUARE = {"type": "minecraft:in_square"}
 BIOME = {"type": "minecraft:biome"}
-# skycraft:placement_mask (com.skycraft.world.PlacementMask): no vegetation where a road, street, plot, pad or site
+# nirncraft:placement_mask (com.nirncraft.world.PlacementMask): no vegetation where a road, street, plot, pad or site
 # will be, so nothing has to be cut afterwards. The Java flora features ask the mask themselves.
-MASK = {"type": "skycraft:placement_mask"}
+MASK = {"type": "nirncraft:placement_mask"}
 
 
 def hm(kind):
@@ -196,7 +196,7 @@ def near_water():
 # ============================================================================================ feature library
 CF = {}           # "biome/x" -> configured feature json
 PF = {}           # "biome/x" -> placed feature json
-MINE = {s: [] for s in STEPS}   # Skycraft placed features per step, in canonical order
+MINE = {s: [] for s in STEPS}   # NirnCraft placed features per step, in canonical order
 
 
 def ref(name):
@@ -303,9 +303,9 @@ def cave_floor_placed(name, cf, n, lo=-56, hi=60, step="vegetal_decoration", ste
 
 
 # ---------------------------------------------------------------------------------------- the lakes step
-# skycraft:map_water belongs to the terrain workstream (lakes and rivers from the Tamriel map); every land biome
+# nirncraft:map_water belongs to the terrain workstream (lakes and rivers from the Tamriel map); every land biome
 # lists it first in the lakes step.
-MAP_WATER = "skycraft:map_water"
+MAP_WATER = "nirncraft:map_water"
 MINE["lakes"].append(MAP_WATER)
 
 configured("hot_spring", SK + ":hot_spring", {})
@@ -446,7 +446,7 @@ placed("palms_dense", "palm_tree", [count_extra(2, 1), SQUARE, water_depth(0), h
 placed("palms_sparse", "palm_tree", [rarity(3), SQUARE, water_depth(0), hm("OCEAN_FLOOR"), BIOME], V)
 placed("palms_rare", "palm_tree", [rarity(10), SQUARE, water_depth(0), hm("OCEAN_FLOOR"), BIOME], V)
 
-# --- trees (vanilla tree feature with Skycraft and vanilla blocks)
+# --- trees (vanilla tree feature with NirnCraft and vanilla blocks)
 SPRUCE_LOG = log("spruce_log")
 tree("tall_spruce", straight(11, 4, 3),
      foliage("spruce_foliage_placer", uniform(2, 3), uniform(0, 1), trunk_height=uniform(4, 7)),
@@ -684,7 +684,7 @@ patch_placed("cacti_rare", "cactus_short", chance=6)
 patch("bamboo_grove", simple("bamboo", age=1, leaves="large", stage=0), tries=32, xz=5)
 patch_placed("bamboo_groves", "bamboo_grove", chance=3)
 
-# --- flowers (all vanilla flowers double as Skycraft alchemy ingredients)
+# --- flowers (all vanilla flowers double as NirnCraft alchemy ingredients)
 def flowers(name, *pairs, tries=48, n=None, chance=None):
     cf = patch("flowers_" + name, weighted(*pairs), tries=tries)
     return patch_placed("flowers_" + name, cf, n=n, chance=chance, heightmap="MOTION_BLOCKING")
@@ -752,7 +752,7 @@ patch("lily_pads", simple("lily_pad"), tries=12, xz=7, y=3)
 placed("lily_pads", "lily_pads", [count(4), SQUARE, hm("WORLD_SURFACE_WG"), BIOME], V)
 placed("lily_pads_dense", "lily_pads", [count(10), SQUARE, hm("WORLD_SURFACE_WG"), BIOME], V)
 
-# --- cave flora (Skycraft cave biomes)
+# --- cave flora (NirnCraft cave biomes)
 cave_floor_placed("glowing_mushrooms", "glowing_mushroom", 18)
 cave_floor_placed("grotto_mushrooms", "grotto_mushroom", 14)
 patch("cave_mushrooms", weighted(("brown_mushroom", 2), ("red_mushroom", 1)), tries=24, xz=5, y=2)
@@ -764,10 +764,10 @@ cave_floor_placed("cave_crystals", "cave_crystals", 10)
 
 # ===================================================================================================== flora
 # Nirn's vegetation, region by region (owned by the flora workstream; see docs/FLORA.md). The Java side is
-# com.skycraft.tamriel.biome.flora: skycraft:flora_tree grows procedural trees of a named species, spaced by
-# skycraft:flora_scatter (blue-noise points thinned by a density field: groves, clearings, forest edges);
-# skycraft:ground_cover places tufts whose kind follows slow per-plant noise (drifts), thinned by skycraft:flora_density;
-# skycraft:flora_rock makes rocks of varied shapes with moss and lichen.
+# com.nirncraft.tamriel.biome.flora: nirncraft:flora_tree grows procedural trees of a named species, spaced by
+# nirncraft:flora_scatter (blue-noise points thinned by a density field: groves, clearings, forest edges);
+# nirncraft:ground_cover places tufts whose kind follows slow per-plant noise (drifts), thinned by nirncraft:flora_density;
+# nirncraft:flora_rock makes rocks of varied shapes with moss and lichen.
 #
 # FLORA[biome] lists each land biome's vegetation. apply_flora() swaps it in for the biome's older vegetation
 # entries (everything this file defines in vegetal_decoration, except cave flora, plus the old boulders), so the
@@ -1289,8 +1289,8 @@ def apply_flora():
 
 
 def canonical(step):
-    """The one ordered list for a step: Skycraft's lake features first (map water before lava lakes), vanilla in
-    vanilla order, then Skycraft's own features."""
+    """The one ordered list for a step: NirnCraft's lake features first (map water before lava lakes), vanilla in
+    vanilla order, then NirnCraft's own features."""
     van = VANILLA_ORDER[step]
     mine = MINE[step]
     if step == "lakes":
@@ -1307,8 +1307,8 @@ def sp(t, w, lo=1, hi=None):
 
 
 def monsters(kind="std", extra=()):
-    """Vanilla night monsters at reduced weights (Skycraft's own creatures come from the biome modifiers and from
-    each biome's extras). No creepers: Skycraft removes them."""
+    """Vanilla night monsters at reduced weights (NirnCraft's own creatures come from the biome modifiers and from
+    each biome's extras). No creepers: NirnCraft removes them."""
     zombie = {"desert": "husk"}.get(kind, "zombie")
     skeleton = {"frozen": "stray"}.get(kind, "skeleton")
     out = [sp("spider", 60, 4), sp(zombie, 60, 4), sp(skeleton, 60, 4), sp("slime", 40, 4),
@@ -1357,15 +1357,15 @@ W_WARM = [sp("squid", 10, 1, 4), sp("dolphin", 2, 1, 2)]
 WA_WARM = [sp("tropical_fish", 25, 8), sp("pufferfish", 15, 1, 3)]
 WA_SWAMP = [sp("tropical_fish", 25, 8)]
 
-# Skycraft creatures that no Phase 1 biome modifier covers
-X_FROSTBITE = [sp("skycraft:frostbite_spider", 6, 1, 2)]
-X_FROSTBITE_CAVE = [sp("skycraft:frostbite_spider", 15, 1, 3)]
-X_FALMER = [sp("skycraft:falmer", 30, 1, 3), sp("skycraft:frostbite_spider", 10, 1, 2)]
-X_DWEMER = [sp("skycraft:falmer", 15, 1, 2)]
-X_HAGRAVEN = [sp("skycraft:hagraven", 2, 1, 1)]
-X_VAMPIRE = [sp("skycraft:vampire", 2, 1, 1)]
-X_NECRO = [sp("skycraft:necromancer", 2, 1, 1)]
-X_ICE_CAVE = [sp("skycraft:ice_wraith", 6, 1, 1), sp("skycraft:frostbite_spider", 10, 1, 2)]
+# NirnCraft creatures that no Phase 1 biome modifier covers
+X_FROSTBITE = [sp("nirncraft:frostbite_spider", 6, 1, 2)]
+X_FROSTBITE_CAVE = [sp("nirncraft:frostbite_spider", 15, 1, 3)]
+X_FALMER = [sp("nirncraft:falmer", 30, 1, 3), sp("nirncraft:frostbite_spider", 10, 1, 2)]
+X_DWEMER = [sp("nirncraft:falmer", 15, 1, 2)]
+X_HAGRAVEN = [sp("nirncraft:hagraven", 2, 1, 1)]
+X_VAMPIRE = [sp("nirncraft:vampire", 2, 1, 1)]
+X_NECRO = [sp("nirncraft:necromancer", 2, 1, 1)]
+X_ICE_CAVE = [sp("nirncraft:ice_wraith", 6, 1, 1), sp("nirncraft:frostbite_spider", 10, 1, 2)]
 
 
 # ======================================================================================== surface rules
@@ -1846,34 +1846,34 @@ LAND = [MAP_WATER, "minecraft:lake_lava_underground", "minecraft:amethyst_geode"
 SEA = [f for f in LAND if f not in ("minecraft:disk_sand", "minecraft:disk_clay", "minecraft:disk_gravel")] + \
       ["minecraft:underwater_magma"]
 
-# What each tag token adds (besides #minecraft:is_overworld and the Skycraft land/sea/underground tags)
+# What each tag token adds (besides #minecraft:is_overworld and the NirnCraft land/sea/underground tags)
 TOKENS = {
-    "plains": ["skycraft:spawns/plains", "forge:is_plains", "c:plains"],
-    "tundra": ["skycraft:spawns/tundra", "c:tundra"],
+    "plains": ["nirncraft:spawns/plains", "forge:is_plains", "c:plains"],
+    "tundra": ["nirncraft:spawns/tundra", "c:tundra"],
     "forest": ["minecraft:is_forest", "c:forest"],
-    "dark_forest": ["skycraft:spawns/dark_forest", "forge:is_dense", "forge:is_dense/overworld"],
+    "dark_forest": ["nirncraft:spawns/dark_forest", "forge:is_dense", "forge:is_dense/overworld"],
     "taiga": ["minecraft:is_taiga", "forge:is_coniferous", "c:taiga"],
-    "snowy_forest": ["skycraft:spawns/snowy_forest"],
+    "snowy_forest": ["nirncraft:spawns/snowy_forest"],
     "snowy": ["forge:is_snowy", "c:snowy", "minecraft:spawns_snow_foxes", "minecraft:spawns_white_rabbits"],
-    "cold": ["skycraft:spawns/cold", "forge:is_cold", "forge:is_cold/overworld", "minecraft:spawns_cold_variant_frogs",
+    "cold": ["nirncraft:spawns/cold", "forge:is_cold", "forge:is_cold/overworld", "minecraft:spawns_cold_variant_frogs",
              "c:climate_cold"],
     "hot": ["forge:is_hot", "forge:is_hot/overworld", "minecraft:snow_golem_melts", "minecraft:spawns_warm_variant_frogs",
             "c:climate_hot"],
     "dry": ["forge:is_dry", "forge:is_dry/overworld", "c:climate_dry"],
     "wet": ["forge:is_wet", "forge:is_wet/overworld", "c:climate_wet"],
     "mountain": ["minecraft:is_mountain", "forge:is_mountain", "c:mountain"],
-    "peak": ["forge:is_peak", "skycraft:spawns/frozen_peaks", "c:mountain_peak"],
+    "peak": ["forge:is_peak", "nirncraft:spawns/frozen_peaks", "c:mountain_peak"],
     "slope": ["forge:is_slope", "c:mountain_slope"],
     "hill": ["minecraft:is_hill", "c:hill"],
-    "reach": ["skycraft:spawns/reach"],
-    "swamp": ["skycraft:spawns/swamp", "forge:is_swamp", "c:swamp", "minecraft:has_closer_water_fog",
+    "reach": ["nirncraft:spawns/reach"],
+    "swamp": ["nirncraft:spawns/swamp", "forge:is_swamp", "c:swamp", "minecraft:has_closer_water_fog",
               "minecraft:allows_surface_slime_spawns"],
     "river": ["minecraft:is_river", "c:river", "minecraft:more_frequent_drowned_spawns",
               "minecraft:reduce_water_ambient_spawns", "forge:is_water"],
     "beach": ["minecraft:is_beach", "c:beach"],
-    # warm beaches are beaches but not #skycraft:spawns/coast (horkers live on cold shores only)
+    # warm beaches are beaches but not #nirncraft:spawns/coast (horkers live on cold shores only)
     "warm_beach": ["minecraft:is_beach", "c:beach"],
-    "coast": ["skycraft:spawns/coast"],
+    "coast": ["nirncraft:spawns/coast"],
     "ocean": ["minecraft:is_ocean", "c:ocean", "minecraft:water_on_map_outlines", "forge:is_water",
               "minecraft:has_structure/shipwreck", "minecraft:has_structure/ruined_portal_ocean"],
     "deep_ocean": ["minecraft:is_deep_ocean", "c:deep_ocean"],
@@ -1895,7 +1895,7 @@ TOKENS = {
     "lush": ["forge:is_lush"],
     "sparse": ["forge:is_sparse", "forge:is_sparse/overworld"],
     "plateau": ["forge:is_plateau"],
-    "underground": ["forge:is_underground", "forge:is_cave", "c:underground", "skycraft:spawns/caves"],
+    "underground": ["forge:is_underground", "forge:is_cave", "c:underground", "nirncraft:spawns/caves"],
 }
 LAND_STRUCTURE_TAGS = ["minecraft:has_structure/mineshaft", "minecraft:stronghold_biased_to"]
 
@@ -1916,15 +1916,15 @@ def biome(bid, name, *, temp, downfall, sky, fog, water, water_fog="#050533", fe
                        ambient=list(BAT if ambient is None else ambient), water_creature=list(water_creature),
                        water_ambient=list(water_ambient),
                        underground=list(GLOW_SQUID if underground is None else underground), tags=set(tags))
-    LANG["biome.skycraft." + bid] = name
+    LANG["biome.nirncraft." + bid] = name
 
 
 def particle(kind, prob):
     return {"options": {"type": "minecraft:" + kind}, "probability": prob}
 
 
-DEER = [sp("skycraft:deer", 8, 2, 4)]
-OUTLAWS = [sp("skycraft:bandit", 8, 1, 3)]
+DEER = [sp("nirncraft:deer", 8, 2, 4)]
+OUTLAWS = [sp("nirncraft:bandit", 8, 1, 3)]
 DROWNED = [sp("drowned", 100, 1)]
 MAGMA_CUBES = [sp("magma_cube", 10, 2, 4)]
 
@@ -3097,10 +3097,10 @@ def biome_json(b, where, order):
         out["temperature_modifier"] = "frozen"
     out["downfall"] = b["downfall"]
     out["effects"] = eff
-    # Skycraft creatures come from the region spawner (data/skycraft/region_spawns), never from biome spawners,
+    # NirnCraft creatures come from the region spawner (data/nirncraft/region_spawns), never from biome spawners,
     # so they don't spawn twice; biomes keep only vanilla wildlife.
     def vanilla(lst):
-        return [e for e in lst if not e["type"].startswith("skycraft:")]
+        return [e for e in lst if not e["type"].startswith("nirncraft:")]
     out["spawners"] = {
         "monster": vanilla(b["monster"]), "creature": vanilla(b["creature"]), "ambient": vanilla(b["ambient"]),
         "axolotls": [], "underground_water_creature": vanilla(b["underground"]),
@@ -3155,7 +3155,7 @@ def build_tags():
                 add(t, full)
         if kind == "ocean":
             add("minecraft:plays_underwater_music", full)
-    # Skycraft dungeons may use every land biome: the dungeon workstreams filter by region culture
+    # NirnCraft dungeons may use every land biome: the dungeon workstreams filter by region culture
     add(SK + ":dungeon_land", "#" + SK + ":tamriel/land")
     return tags
 
@@ -3166,7 +3166,7 @@ def tag_path(tag):
 
 
 def write_tags(tags):
-    """Writes every tag; plain skycraft:<biome> entries are always regenerated (Phase 1 entries are kept), and
+    """Writes every tag; plain nirncraft:<biome> entries are always regenerated (Phase 1 entries are kept), and
     stale tag files that only held generated entries are removed."""
     existing_files = set()
     for ns in ("minecraft", "forge", "c", SK):
@@ -3205,7 +3205,7 @@ def check_tags(tags):
     river = set(tags.get("minecraft:is_river", []))
     swamp = set(tags.get(SK + ":spawns/swamp", []))
     both = river & swamp
-    assert not both, "biomes in both #is_river and #spawns/swamp get skycraft:nirnroot_patch twice: %s" % both
+    assert not both, "biomes in both #is_river and #spawns/swamp get nirncraft:nirnroot_patch twice: %s" % both
 
 
 def apply_ecotones():
@@ -4730,7 +4730,7 @@ SKYRIM_MICRO_RULES = {
                                 63.3
                         ]
                 },
-                "biome": "skycraft:snowy_slopes",
+                "biome": "nirncraft:snowy_slopes",
                 "surface": "alpine_snow_crust_1",
                 "trees": [
                         "snowy_spruce",
@@ -4788,7 +4788,7 @@ SKYRIM_MICRO_RULES = {
                                 103.4
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "snowy_needle_duff_2",
                 "trees": [
                         "alpine_spruce",
@@ -4847,7 +4847,7 @@ SKYRIM_MICRO_RULES = {
                                 130.8
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "granite_scree_loam_3",
                 "trees": [
                         "stunted_spruce",
@@ -4905,7 +4905,7 @@ SKYRIM_MICRO_RULES = {
                                 150.5
                         ]
                 },
-                "biome": "skycraft:skyrim_lake",
+                "biome": "nirncraft:skyrim_lake",
                 "surface": "frosted_lake_shingle_4",
                 "trees": [
                         "alder",
@@ -4963,7 +4963,7 @@ SKYRIM_MICRO_RULES = {
                                 167.1
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "warm_travertine_moss_5",
                 "trees": [
                         "mountain_rowan",
@@ -5021,7 +5021,7 @@ SKYRIM_MICRO_RULES = {
                                 182.4
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "alpine_pasture_turf_6",
                 "trees": [
                         "scattered_spruce",
@@ -5079,7 +5079,7 @@ SKYRIM_MICRO_RULES = {
                                 198.5
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "silver_slag_gravel_7",
                 "trees": [
                         "stunted_pine",
@@ -5136,7 +5136,7 @@ SKYRIM_MICRO_RULES = {
                                 217.2
                         ]
                 },
-                "biome": "skycraft:snowy_slopes",
+                "biome": "nirncraft:snowy_slopes",
                 "surface": "scorched_basalt_ash_8",
                 "trees": [
                         "charred_spruce_snag",
@@ -5193,7 +5193,7 @@ SKYRIM_MICRO_RULES = {
                                 240.0
                         ]
                 },
-                "biome": "skycraft:snowy_slopes",
+                "biome": "nirncraft:snowy_slopes",
                 "surface": "alpine_snow_crust_9",
                 "trees": [
                         "snowy_spruce",
@@ -5251,7 +5251,7 @@ SKYRIM_MICRO_RULES = {
                                 268.7
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "snowy_needle_duff_10",
                 "trees": [
                         "alpine_spruce",
@@ -5310,7 +5310,7 @@ SKYRIM_MICRO_RULES = {
                                 309.8
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "granite_scree_loam_11",
                 "trees": [
                         "stunted_spruce",
@@ -5368,7 +5368,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:skyrim_lake",
+                "biome": "nirncraft:skyrim_lake",
                 "surface": "frosted_lake_shingle_12",
                 "trees": [
                         "alder",
@@ -5426,7 +5426,7 @@ SKYRIM_MICRO_RULES = {
                                 61.5
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "warm_travertine_moss_13",
                 "trees": [
                         "mountain_rowan",
@@ -5484,7 +5484,7 @@ SKYRIM_MICRO_RULES = {
                                 105.2
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "alpine_pasture_turf_14",
                 "trees": [
                         "scattered_spruce",
@@ -5542,7 +5542,7 @@ SKYRIM_MICRO_RULES = {
                                 135.9
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "silver_slag_gravel_15",
                 "trees": [
                         "stunted_pine",
@@ -5599,7 +5599,7 @@ SKYRIM_MICRO_RULES = {
                                 156.7
                         ]
                 },
-                "biome": "skycraft:snowy_slopes",
+                "biome": "nirncraft:snowy_slopes",
                 "surface": "scorched_basalt_ash_16",
                 "trees": [
                         "charred_spruce_snag",
@@ -5656,7 +5656,7 @@ SKYRIM_MICRO_RULES = {
                                 174.6
                         ]
                 },
-                "biome": "skycraft:snowy_slopes",
+                "biome": "nirncraft:snowy_slopes",
                 "surface": "alpine_snow_crust_17",
                 "trees": [
                         "snowy_spruce",
@@ -5714,7 +5714,7 @@ SKYRIM_MICRO_RULES = {
                                 189.3
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "snowy_needle_duff_18",
                 "trees": [
                         "alpine_spruce",
@@ -5773,7 +5773,7 @@ SKYRIM_MICRO_RULES = {
                                 204.1
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "granite_scree_loam_19",
                 "trees": [
                         "stunted_spruce",
@@ -5831,7 +5831,7 @@ SKYRIM_MICRO_RULES = {
                                 219.6
                         ]
                 },
-                "biome": "skycraft:skyrim_lake",
+                "biome": "nirncraft:skyrim_lake",
                 "surface": "frosted_lake_shingle_20",
                 "trees": [
                         "alder",
@@ -5889,7 +5889,7 @@ SKYRIM_MICRO_RULES = {
                                 238.1
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "warm_travertine_moss_21",
                 "trees": [
                         "mountain_rowan",
@@ -5947,7 +5947,7 @@ SKYRIM_MICRO_RULES = {
                                 263.0
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "alpine_pasture_turf_22",
                 "trees": [
                         "scattered_spruce",
@@ -6005,7 +6005,7 @@ SKYRIM_MICRO_RULES = {
                                 300.8
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "silver_slag_gravel_23",
                 "trees": [
                         "stunted_pine",
@@ -6062,7 +6062,7 @@ SKYRIM_MICRO_RULES = {
                                 5.0
                         ]
                 },
-                "biome": "skycraft:snowy_slopes",
+                "biome": "nirncraft:snowy_slopes",
                 "surface": "scorched_basalt_ash_24",
                 "trees": [
                         "charred_spruce_snag",
@@ -6121,7 +6121,7 @@ SKYRIM_MICRO_RULES = {
                                 40.2
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "chalky_downland_turf_1",
                 "trees": [
                         "scattered_pine",
@@ -6179,7 +6179,7 @@ SKYRIM_MICRO_RULES = {
                                 73.1
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "pine_needle_limestone_2",
                 "trees": [
                         "stone_pine",
@@ -6238,7 +6238,7 @@ SKYRIM_MICRO_RULES = {
                                 105.3
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "karst_rubble_loam_3",
                 "trees": [
                         "twisted_juniper",
@@ -6296,7 +6296,7 @@ SKYRIM_MICRO_RULES = {
                                 134.5
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "spring_moss_alluvium_4",
                 "trees": [
                         "alder",
@@ -6355,7 +6355,7 @@ SKYRIM_MICRO_RULES = {
                                 160.6
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "pale_karst_flagstone_5",
                 "trees": [
                         "stunted_yew",
@@ -6413,7 +6413,7 @@ SKYRIM_MICRO_RULES = {
                                 188.6
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "rich_paddock_loam_6",
                 "trees": [
                         "great_oak",
@@ -6471,7 +6471,7 @@ SKYRIM_MICRO_RULES = {
                                 216.4
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "fort_rubble_heath_7",
                 "trees": [
                         "rowan",
@@ -6529,7 +6529,7 @@ SKYRIM_MICRO_RULES = {
                                 245.5
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "damp_doline_humus_8",
                 "trees": [
                         "hazel",
@@ -6587,7 +6587,7 @@ SKYRIM_MICRO_RULES = {
                                 283.6
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "chalky_downland_turf_9",
                 "trees": [
                         "scattered_pine",
@@ -6645,7 +6645,7 @@ SKYRIM_MICRO_RULES = {
                                 324.0
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "pine_needle_limestone_10",
                 "trees": [
                         "stone_pine",
@@ -6704,7 +6704,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "karst_rubble_loam_11",
                 "trees": [
                         "twisted_juniper",
@@ -6762,7 +6762,7 @@ SKYRIM_MICRO_RULES = {
                                 37.0
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "spring_moss_alluvium_12",
                 "trees": [
                         "alder",
@@ -6821,7 +6821,7 @@ SKYRIM_MICRO_RULES = {
                                 61.7
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "pale_karst_flagstone_13",
                 "trees": [
                         "stunted_yew",
@@ -6879,7 +6879,7 @@ SKYRIM_MICRO_RULES = {
                                 83.0
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "rich_paddock_loam_14",
                 "trees": [
                         "great_oak",
@@ -6937,7 +6937,7 @@ SKYRIM_MICRO_RULES = {
                                 105.6
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "fort_rubble_heath_15",
                 "trees": [
                         "rowan",
@@ -6995,7 +6995,7 @@ SKYRIM_MICRO_RULES = {
                                 132.4
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "damp_doline_humus_16",
                 "trees": [
                         "hazel",
@@ -7053,7 +7053,7 @@ SKYRIM_MICRO_RULES = {
                                 161.2
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "chalky_downland_turf_17",
                 "trees": [
                         "scattered_pine",
@@ -7111,7 +7111,7 @@ SKYRIM_MICRO_RULES = {
                                 186.5
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "pine_needle_limestone_18",
                 "trees": [
                         "stone_pine",
@@ -7170,7 +7170,7 @@ SKYRIM_MICRO_RULES = {
                                 211.6
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "karst_rubble_loam_19",
                 "trees": [
                         "twisted_juniper",
@@ -7228,7 +7228,7 @@ SKYRIM_MICRO_RULES = {
                                 236.9
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "spring_moss_alluvium_20",
                 "trees": [
                         "alder",
@@ -7287,7 +7287,7 @@ SKYRIM_MICRO_RULES = {
                                 268.8
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "pale_karst_flagstone_21",
                 "trees": [
                         "stunted_yew",
@@ -7345,7 +7345,7 @@ SKYRIM_MICRO_RULES = {
                                 315.1
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "rich_paddock_loam_22",
                 "trees": [
                         "great_oak",
@@ -7403,7 +7403,7 @@ SKYRIM_MICRO_RULES = {
                                 5.0
                         ]
                 },
-                "biome": "skycraft:jerall_foothills",
+                "biome": "nirncraft:jerall_foothills",
                 "surface": "fort_rubble_heath_23",
                 "trees": [
                         "rowan",
@@ -7463,7 +7463,7 @@ SKYRIM_MICRO_RULES = {
                                 38.8
                         ]
                 },
-                "biome": "skycraft:lake_rumare_shore",
+                "biome": "nirncraft:lake_rumare_shore",
                 "surface": "lacustrine_silt_mud_1",
                 "trees": [
                         "weeping_willow",
@@ -7521,7 +7521,7 @@ SKYRIM_MICRO_RULES = {
                                 70.8
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "parkland_brown_loam_2",
                 "trees": [
                         "english_oak",
@@ -7580,7 +7580,7 @@ SKYRIM_MICRO_RULES = {
                                 109.9
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "ploughed_basin_clay_3",
                 "trees": [
                         "field_elm",
@@ -7638,7 +7638,7 @@ SKYRIM_MICRO_RULES = {
                                 143.8
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "common_pasture_turf_4",
                 "trees": [
                         "hawthorn",
@@ -7696,7 +7696,7 @@ SKYRIM_MICRO_RULES = {
                                 175.2
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "paved_marble_and_turf_5",
                 "trees": [
                         "ornamental_cherry",
@@ -7754,7 +7754,7 @@ SKYRIM_MICRO_RULES = {
                                 207.3
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "lime_flecked_loam_6",
                 "trees": [
                         "field_maple",
@@ -7812,7 +7812,7 @@ SKYRIM_MICRO_RULES = {
                                 236.3
                         ]
                 },
-                "biome": "skycraft:lake_rumare_shore",
+                "biome": "nirncraft:lake_rumare_shore",
                 "surface": "shingle_and_plank_mud_7",
                 "trees": [
                         "crack_willow",
@@ -7870,7 +7870,7 @@ SKYRIM_MICRO_RULES = {
                                 267.0
                         ]
                 },
-                "biome": "skycraft:lake_rumare_shore",
+                "biome": "nirncraft:lake_rumare_shore",
                 "surface": "lacustrine_silt_mud_8",
                 "trees": [
                         "weeping_willow",
@@ -7928,7 +7928,7 @@ SKYRIM_MICRO_RULES = {
                                 299.5
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "parkland_brown_loam_9",
                 "trees": [
                         "english_oak",
@@ -7987,7 +7987,7 @@ SKYRIM_MICRO_RULES = {
                                 329.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "ploughed_basin_clay_10",
                 "trees": [
                         "field_elm",
@@ -8045,7 +8045,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "common_pasture_turf_11",
                 "trees": [
                         "hawthorn",
@@ -8103,7 +8103,7 @@ SKYRIM_MICRO_RULES = {
                                 46.0
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "paved_marble_and_turf_12",
                 "trees": [
                         "ornamental_cherry",
@@ -8161,7 +8161,7 @@ SKYRIM_MICRO_RULES = {
                                 83.6
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "lime_flecked_loam_13",
                 "trees": [
                         "field_maple",
@@ -8219,7 +8219,7 @@ SKYRIM_MICRO_RULES = {
                                 119.2
                         ]
                 },
-                "biome": "skycraft:lake_rumare_shore",
+                "biome": "nirncraft:lake_rumare_shore",
                 "surface": "shingle_and_plank_mud_14",
                 "trees": [
                         "crack_willow",
@@ -8277,7 +8277,7 @@ SKYRIM_MICRO_RULES = {
                                 146.8
                         ]
                 },
-                "biome": "skycraft:lake_rumare_shore",
+                "biome": "nirncraft:lake_rumare_shore",
                 "surface": "lacustrine_silt_mud_15",
                 "trees": [
                         "weeping_willow",
@@ -8335,7 +8335,7 @@ SKYRIM_MICRO_RULES = {
                                 168.4
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "parkland_brown_loam_16",
                 "trees": [
                         "english_oak",
@@ -8394,7 +8394,7 @@ SKYRIM_MICRO_RULES = {
                                 187.7
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "ploughed_basin_clay_17",
                 "trees": [
                         "field_elm",
@@ -8452,7 +8452,7 @@ SKYRIM_MICRO_RULES = {
                                 205.8
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "common_pasture_turf_18",
                 "trees": [
                         "hawthorn",
@@ -8510,7 +8510,7 @@ SKYRIM_MICRO_RULES = {
                                 227.9
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "paved_marble_and_turf_19",
                 "trees": [
                         "ornamental_cherry",
@@ -8568,7 +8568,7 @@ SKYRIM_MICRO_RULES = {
                                 253.5
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "lime_flecked_loam_20",
                 "trees": [
                         "field_maple",
@@ -8626,7 +8626,7 @@ SKYRIM_MICRO_RULES = {
                                 286.2
                         ]
                 },
-                "biome": "skycraft:lake_rumare_shore",
+                "biome": "nirncraft:lake_rumare_shore",
                 "surface": "shingle_and_plank_mud_21",
                 "trees": [
                         "crack_willow",
@@ -8684,7 +8684,7 @@ SKYRIM_MICRO_RULES = {
                                 321.7
                         ]
                 },
-                "biome": "skycraft:lake_rumare_shore",
+                "biome": "nirncraft:lake_rumare_shore",
                 "surface": "lacustrine_silt_mud_22",
                 "trees": [
                         "weeping_willow",
@@ -8742,7 +8742,7 @@ SKYRIM_MICRO_RULES = {
                                 5.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "parkland_brown_loam_23",
                 "trees": [
                         "english_oak",
@@ -8803,7 +8803,7 @@ SKYRIM_MICRO_RULES = {
                                 41.7
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "deep_oak_leaf_mould_1",
                 "trees": [
                         "ancient_oak",
@@ -8863,7 +8863,7 @@ SKYRIM_MICRO_RULES = {
                                 65.6
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "beech_mast_loam_2",
                 "trees": [
                         "tall_beech",
@@ -8922,7 +8922,7 @@ SKYRIM_MICRO_RULES = {
                                 91.1
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "dappled_glade_humus_3",
                 "trees": [
                         "silver_birch",
@@ -8980,7 +8980,7 @@ SKYRIM_MICRO_RULES = {
                                 116.9
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "sooty_coppice_earth_4",
                 "trees": [
                         "coppiced_hazel",
@@ -9038,7 +9038,7 @@ SKYRIM_MICRO_RULES = {
                                 143.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "blessed_glade_turf_5",
                 "trees": [
                         "whitebeam",
@@ -9097,7 +9097,7 @@ SKYRIM_MICRO_RULES = {
                                 166.7
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "pebble_brook_silt_6",
                 "trees": [
                         "black_alder",
@@ -9155,7 +9155,7 @@ SKYRIM_MICRO_RULES = {
                                 197.6
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "mossy_ayleid_paving_7",
                 "trees": [
                         "dark_yew",
@@ -9213,7 +9213,7 @@ SKYRIM_MICRO_RULES = {
                                 234.3
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "deep_oak_leaf_mould_8",
                 "trees": [
                         "ancient_oak",
@@ -9273,7 +9273,7 @@ SKYRIM_MICRO_RULES = {
                                 275.7
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "beech_mast_loam_9",
                 "trees": [
                         "tall_beech",
@@ -9332,7 +9332,7 @@ SKYRIM_MICRO_RULES = {
                                 319.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "dappled_glade_humus_10",
                 "trees": [
                         "silver_birch",
@@ -9390,7 +9390,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "sooty_coppice_earth_11",
                 "trees": [
                         "coppiced_hazel",
@@ -9448,7 +9448,7 @@ SKYRIM_MICRO_RULES = {
                                 40.6
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "blessed_glade_turf_12",
                 "trees": [
                         "whitebeam",
@@ -9507,7 +9507,7 @@ SKYRIM_MICRO_RULES = {
                                 67.8
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "pebble_brook_silt_13",
                 "trees": [
                         "black_alder",
@@ -9565,7 +9565,7 @@ SKYRIM_MICRO_RULES = {
                                 94.4
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "mossy_ayleid_paving_14",
                 "trees": [
                         "dark_yew",
@@ -9623,7 +9623,7 @@ SKYRIM_MICRO_RULES = {
                                 117.7
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "deep_oak_leaf_mould_15",
                 "trees": [
                         "ancient_oak",
@@ -9683,7 +9683,7 @@ SKYRIM_MICRO_RULES = {
                                 139.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "beech_mast_loam_16",
                 "trees": [
                         "tall_beech",
@@ -9742,7 +9742,7 @@ SKYRIM_MICRO_RULES = {
                                 161.5
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "dappled_glade_humus_17",
                 "trees": [
                         "silver_birch",
@@ -9800,7 +9800,7 @@ SKYRIM_MICRO_RULES = {
                                 189.1
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "sooty_coppice_earth_18",
                 "trees": [
                         "coppiced_hazel",
@@ -9858,7 +9858,7 @@ SKYRIM_MICRO_RULES = {
                                 216.5
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "blessed_glade_turf_19",
                 "trees": [
                         "whitebeam",
@@ -9917,7 +9917,7 @@ SKYRIM_MICRO_RULES = {
                                 246.1
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "pebble_brook_silt_20",
                 "trees": [
                         "black_alder",
@@ -9975,7 +9975,7 @@ SKYRIM_MICRO_RULES = {
                                 284.3
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "mossy_ayleid_paving_21",
                 "trees": [
                         "dark_yew",
@@ -10033,7 +10033,7 @@ SKYRIM_MICRO_RULES = {
                                 325.3
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "deep_oak_leaf_mould_22",
                 "trees": [
                         "ancient_oak",
@@ -10093,7 +10093,7 @@ SKYRIM_MICRO_RULES = {
                                 5.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "beech_mast_loam_23",
                 "trees": [
                         "tall_beech",
@@ -10154,7 +10154,7 @@ SKYRIM_MICRO_RULES = {
                                 42.0
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "fertile_alluvial_loam_1",
                 "trees": [
                         "apple_tree",
@@ -10213,7 +10213,7 @@ SKYRIM_MICRO_RULES = {
                                 74.2
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "wet_corbolo_silt_2",
                 "trees": [
                         "weeping_willow",
@@ -10272,7 +10272,7 @@ SKYRIM_MICRO_RULES = {
                                 105.8
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "valus_granite_loam_3",
                 "trees": [
                         "valus_pine",
@@ -10331,7 +10331,7 @@ SKYRIM_MICRO_RULES = {
                                 134.8
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "caldera_tuff_and_silt_4",
                 "trees": [
                         "alder",
@@ -10389,7 +10389,7 @@ SKYRIM_MICRO_RULES = {
                                 163.3
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "cobble_weir_bank_5",
                 "trees": [
                         "willow",
@@ -10448,7 +10448,7 @@ SKYRIM_MICRO_RULES = {
                                 195.2
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "quartz_gold_gravel_6",
                 "trees": [
                         "stunted_pine",
@@ -10507,7 +10507,7 @@ SKYRIM_MICRO_RULES = {
                                 224.8
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "tilled_dye_loam_7",
                 "trees": [
                         "mulberry_tree",
@@ -10565,7 +10565,7 @@ SKYRIM_MICRO_RULES = {
                                 255.1
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "fertile_alluvial_loam_8",
                 "trees": [
                         "apple_tree",
@@ -10624,7 +10624,7 @@ SKYRIM_MICRO_RULES = {
                                 291.3
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "wet_corbolo_silt_9",
                 "trees": [
                         "weeping_willow",
@@ -10683,7 +10683,7 @@ SKYRIM_MICRO_RULES = {
                                 323.7
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "valus_granite_loam_10",
                 "trees": [
                         "valus_pine",
@@ -10742,7 +10742,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "caldera_tuff_and_silt_11",
                 "trees": [
                         "alder",
@@ -10800,7 +10800,7 @@ SKYRIM_MICRO_RULES = {
                                 45.7
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "cobble_weir_bank_12",
                 "trees": [
                         "willow",
@@ -10859,7 +10859,7 @@ SKYRIM_MICRO_RULES = {
                                 80.4
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "quartz_gold_gravel_13",
                 "trees": [
                         "stunted_pine",
@@ -10918,7 +10918,7 @@ SKYRIM_MICRO_RULES = {
                                 114.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "tilled_dye_loam_14",
                 "trees": [
                         "mulberry_tree",
@@ -10976,7 +10976,7 @@ SKYRIM_MICRO_RULES = {
                                 143.2
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "fertile_alluvial_loam_15",
                 "trees": [
                         "apple_tree",
@@ -11035,7 +11035,7 @@ SKYRIM_MICRO_RULES = {
                                 168.2
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "wet_corbolo_silt_16",
                 "trees": [
                         "weeping_willow",
@@ -11094,7 +11094,7 @@ SKYRIM_MICRO_RULES = {
                                 192.7
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "valus_granite_loam_17",
                 "trees": [
                         "valus_pine",
@@ -11153,7 +11153,7 @@ SKYRIM_MICRO_RULES = {
                                 221.2
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "caldera_tuff_and_silt_18",
                 "trees": [
                         "alder",
@@ -11211,7 +11211,7 @@ SKYRIM_MICRO_RULES = {
                                 244.4
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "cobble_weir_bank_19",
                 "trees": [
                         "willow",
@@ -11270,7 +11270,7 @@ SKYRIM_MICRO_RULES = {
                                 263.9
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "quartz_gold_gravel_20",
                 "trees": [
                         "stunted_pine",
@@ -11329,7 +11329,7 @@ SKYRIM_MICRO_RULES = {
                                 287.2
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "tilled_dye_loam_21",
                 "trees": [
                         "mulberry_tree",
@@ -11387,7 +11387,7 @@ SKYRIM_MICRO_RULES = {
                                 319.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "fertile_alluvial_loam_22",
                 "trees": [
                         "apple_tree",
@@ -11446,7 +11446,7 @@ SKYRIM_MICRO_RULES = {
                                 5.0
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "wet_corbolo_silt_23",
                 "trees": [
                         "weeping_willow",
@@ -11507,7 +11507,7 @@ SKYRIM_MICRO_RULES = {
                                 36.8
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "terraced_vineyard_marl_1",
                 "trees": [
                         "fig_tree",
@@ -11565,7 +11565,7 @@ SKYRIM_MICRO_RULES = {
                                 69.0
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "gravel_avenue_loam_2",
                 "trees": [
                         "italian_cypress",
@@ -11623,7 +11623,7 @@ SKYRIM_MICRO_RULES = {
                                 105.9
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "sunny_savanna_loam_3",
                 "trees": [
                         "cork_oak",
@@ -11681,7 +11681,7 @@ SKYRIM_MICRO_RULES = {
                                 135.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "irrigated_garden_loam_4",
                 "trees": [
                         "peach_tree",
@@ -11740,7 +11740,7 @@ SKYRIM_MICRO_RULES = {
                                 162.3
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "dry_limestone_gully_5",
                 "trees": [
                         "wild_olive",
@@ -11799,7 +11799,7 @@ SKYRIM_MICRO_RULES = {
                                 194.0
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "cloister_flagstone_turf_6",
                 "trees": [
                         "cypress",
@@ -11857,7 +11857,7 @@ SKYRIM_MICRO_RULES = {
                                 228.9
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "terraced_vineyard_marl_7",
                 "trees": [
                         "fig_tree",
@@ -11915,7 +11915,7 @@ SKYRIM_MICRO_RULES = {
                                 266.5
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "gravel_avenue_loam_8",
                 "trees": [
                         "italian_cypress",
@@ -11973,7 +11973,7 @@ SKYRIM_MICRO_RULES = {
                                 302.0
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "sunny_savanna_loam_9",
                 "trees": [
                         "cork_oak",
@@ -12031,7 +12031,7 @@ SKYRIM_MICRO_RULES = {
                                 330.8
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "irrigated_garden_loam_10",
                 "trees": [
                         "peach_tree",
@@ -12090,7 +12090,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "dry_limestone_gully_11",
                 "trees": [
                         "wild_olive",
@@ -12149,7 +12149,7 @@ SKYRIM_MICRO_RULES = {
                                 36.4
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "cloister_flagstone_turf_12",
                 "trees": [
                         "cypress",
@@ -12207,7 +12207,7 @@ SKYRIM_MICRO_RULES = {
                                 62.7
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "terraced_vineyard_marl_13",
                 "trees": [
                         "fig_tree",
@@ -12265,7 +12265,7 @@ SKYRIM_MICRO_RULES = {
                                 87.2
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "gravel_avenue_loam_14",
                 "trees": [
                         "italian_cypress",
@@ -12323,7 +12323,7 @@ SKYRIM_MICRO_RULES = {
                                 109.6
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "sunny_savanna_loam_15",
                 "trees": [
                         "cork_oak",
@@ -12381,7 +12381,7 @@ SKYRIM_MICRO_RULES = {
                                 131.8
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "irrigated_garden_loam_16",
                 "trees": [
                         "peach_tree",
@@ -12440,7 +12440,7 @@ SKYRIM_MICRO_RULES = {
                                 153.7
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "dry_limestone_gully_17",
                 "trees": [
                         "wild_olive",
@@ -12499,7 +12499,7 @@ SKYRIM_MICRO_RULES = {
                                 180.1
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "cloister_flagstone_turf_18",
                 "trees": [
                         "cypress",
@@ -12557,7 +12557,7 @@ SKYRIM_MICRO_RULES = {
                                 214.6
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "terraced_vineyard_marl_19",
                 "trees": [
                         "fig_tree",
@@ -12615,7 +12615,7 @@ SKYRIM_MICRO_RULES = {
                                 251.2
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "gravel_avenue_loam_20",
                 "trees": [
                         "italian_cypress",
@@ -12673,7 +12673,7 @@ SKYRIM_MICRO_RULES = {
                                 289.7
                         ]
                 },
-                "biome": "skycraft:west_weald_vineyards",
+                "biome": "nirncraft:west_weald_vineyards",
                 "surface": "sunny_savanna_loam_21",
                 "trees": [
                         "cork_oak",
@@ -12731,7 +12731,7 @@ SKYRIM_MICRO_RULES = {
                                 326.0
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "irrigated_garden_loam_22",
                 "trees": [
                         "peach_tree",
@@ -12790,7 +12790,7 @@ SKYRIM_MICRO_RULES = {
                                 5.0
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "dry_limestone_gully_23",
                 "trees": [
                         "wild_olive",
@@ -12851,7 +12851,7 @@ SKYRIM_MICRO_RULES = {
                                 41.5
                         ]
                 },
-                "biome": "skycraft:gold_coast",
+                "biome": "nirncraft:gold_coast",
                 "surface": "ochre_coastal_marl_1",
                 "trees": [
                         "wind_bent_olive",
@@ -12910,7 +12910,7 @@ SKYRIM_MICRO_RULES = {
                                 83.1
                         ]
                 },
-                "biome": "skycraft:gold_coast",
+                "biome": "nirncraft:gold_coast",
                 "surface": "golden_down_loam_2",
                 "trees": [
                         "holm_oak",
@@ -12968,7 +12968,7 @@ SKYRIM_MICRO_RULES = {
                                 123.6
                         ]
                 },
-                "biome": "skycraft:temperate_beach",
+                "biome": "nirncraft:temperate_beach",
                 "surface": "pale_cove_sand_3",
                 "trees": [
                         "tamarisk",
@@ -13026,7 +13026,7 @@ SKYRIM_MICRO_RULES = {
                                 153.6
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "charred_ash_and_rubble_4",
                 "trees": [
                         "scorched_oak_trunk",
@@ -13084,7 +13084,7 @@ SKYRIM_MICRO_RULES = {
                                 177.1
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "strid_gorge_alluvium_5",
                 "trees": [
                         "holm_oak",
@@ -13143,7 +13143,7 @@ SKYRIM_MICRO_RULES = {
                                 201.0
                         ]
                 },
-                "biome": "skycraft:rocky_shore",
+                "biome": "nirncraft:rocky_shore",
                 "surface": "salt_sprayed_limestone_6",
                 "trees": [
                         "wind_sheared_pine",
@@ -13200,7 +13200,7 @@ SKYRIM_MICRO_RULES = {
                                 230.2
                         ]
                 },
-                "biome": "skycraft:gold_coast",
+                "biome": "nirncraft:gold_coast",
                 "surface": "ochre_coastal_marl_7",
                 "trees": [
                         "wind_bent_olive",
@@ -13259,7 +13259,7 @@ SKYRIM_MICRO_RULES = {
                                 268.9
                         ]
                 },
-                "biome": "skycraft:gold_coast",
+                "biome": "nirncraft:gold_coast",
                 "surface": "golden_down_loam_8",
                 "trees": [
                         "holm_oak",
@@ -13317,7 +13317,7 @@ SKYRIM_MICRO_RULES = {
                                 309.3
                         ]
                 },
-                "biome": "skycraft:temperate_beach",
+                "biome": "nirncraft:temperate_beach",
                 "surface": "pale_cove_sand_9",
                 "trees": [
                         "tamarisk",
@@ -13375,7 +13375,7 @@ SKYRIM_MICRO_RULES = {
                                 336.4
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "charred_ash_and_rubble_10",
                 "trees": [
                         "scorched_oak_trunk",
@@ -13433,7 +13433,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "strid_gorge_alluvium_11",
                 "trees": [
                         "holm_oak",
@@ -13492,7 +13492,7 @@ SKYRIM_MICRO_RULES = {
                                 38.1
                         ]
                 },
-                "biome": "skycraft:rocky_shore",
+                "biome": "nirncraft:rocky_shore",
                 "surface": "salt_sprayed_limestone_12",
                 "trees": [
                         "wind_sheared_pine",
@@ -13549,7 +13549,7 @@ SKYRIM_MICRO_RULES = {
                                 66.2
                         ]
                 },
-                "biome": "skycraft:gold_coast",
+                "biome": "nirncraft:gold_coast",
                 "surface": "ochre_coastal_marl_13",
                 "trees": [
                         "wind_bent_olive",
@@ -13608,7 +13608,7 @@ SKYRIM_MICRO_RULES = {
                                 92.9
                         ]
                 },
-                "biome": "skycraft:gold_coast",
+                "biome": "nirncraft:gold_coast",
                 "surface": "golden_down_loam_14",
                 "trees": [
                         "holm_oak",
@@ -13666,7 +13666,7 @@ SKYRIM_MICRO_RULES = {
                                 121.4
                         ]
                 },
-                "biome": "skycraft:temperate_beach",
+                "biome": "nirncraft:temperate_beach",
                 "surface": "pale_cove_sand_15",
                 "trees": [
                         "tamarisk",
@@ -13724,7 +13724,7 @@ SKYRIM_MICRO_RULES = {
                                 146.8
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "charred_ash_and_rubble_16",
                 "trees": [
                         "scorched_oak_trunk",
@@ -13782,7 +13782,7 @@ SKYRIM_MICRO_RULES = {
                                 174.3
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "strid_gorge_alluvium_17",
                 "trees": [
                         "holm_oak",
@@ -13841,7 +13841,7 @@ SKYRIM_MICRO_RULES = {
                                 199.8
                         ]
                 },
-                "biome": "skycraft:rocky_shore",
+                "biome": "nirncraft:rocky_shore",
                 "surface": "salt_sprayed_limestone_18",
                 "trees": [
                         "wind_sheared_pine",
@@ -13898,7 +13898,7 @@ SKYRIM_MICRO_RULES = {
                                 224.0
                         ]
                 },
-                "biome": "skycraft:gold_coast",
+                "biome": "nirncraft:gold_coast",
                 "surface": "ochre_coastal_marl_19",
                 "trees": [
                         "wind_bent_olive",
@@ -13957,7 +13957,7 @@ SKYRIM_MICRO_RULES = {
                                 254.8
                         ]
                 },
-                "biome": "skycraft:gold_coast",
+                "biome": "nirncraft:gold_coast",
                 "surface": "golden_down_loam_20",
                 "trees": [
                         "holm_oak",
@@ -14015,7 +14015,7 @@ SKYRIM_MICRO_RULES = {
                                 293.6
                         ]
                 },
-                "biome": "skycraft:temperate_beach",
+                "biome": "nirncraft:temperate_beach",
                 "surface": "pale_cove_sand_21",
                 "trees": [
                         "tamarisk",
@@ -14073,7 +14073,7 @@ SKYRIM_MICRO_RULES = {
                                 329.9
                         ]
                 },
-                "biome": "skycraft:colovian_highlands",
+                "biome": "nirncraft:colovian_highlands",
                 "surface": "charred_ash_and_rubble_22",
                 "trees": [
                         "scorched_oak_trunk",
@@ -14131,7 +14131,7 @@ SKYRIM_MICRO_RULES = {
                                 5.0
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "strid_gorge_alluvium_23",
                 "trees": [
                         "holm_oak",
@@ -14192,7 +14192,7 @@ SKYRIM_MICRO_RULES = {
                                 37.8
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "niben_channel_mud_1",
                 "trees": [
                         "weeping_willow",
@@ -14250,7 +14250,7 @@ SKYRIM_MICRO_RULES = {
                                 66.3
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "inundated_silt_loam_2",
                 "trees": [
                         "crack_willow",
@@ -14308,7 +14308,7 @@ SKYRIM_MICRO_RULES = {
                                 99.3
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "waterlogged_carr_peat_3",
                 "trees": [
                         "mossy_willow",
@@ -14367,7 +14367,7 @@ SKYRIM_MICRO_RULES = {
                                 130.8
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "braided_island_sand_4",
                 "trees": [
                         "river_birch",
@@ -14426,7 +14426,7 @@ SKYRIM_MICRO_RULES = {
                                 159.7
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "wet_mudstone_ledge_5",
                 "trees": [
                         "overhanging_willow",
@@ -14484,7 +14484,7 @@ SKYRIM_MICRO_RULES = {
                                 193.9
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "hidden_clearing_silt_6",
                 "trees": [
                         "pollard_willow",
@@ -14542,7 +14542,7 @@ SKYRIM_MICRO_RULES = {
                                 227.4
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "niben_channel_mud_7",
                 "trees": [
                         "weeping_willow",
@@ -14600,7 +14600,7 @@ SKYRIM_MICRO_RULES = {
                                 261.1
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "inundated_silt_loam_8",
                 "trees": [
                         "crack_willow",
@@ -14658,7 +14658,7 @@ SKYRIM_MICRO_RULES = {
                                 297.6
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "waterlogged_carr_peat_9",
                 "trees": [
                         "mossy_willow",
@@ -14717,7 +14717,7 @@ SKYRIM_MICRO_RULES = {
                                 329.4
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "braided_island_sand_10",
                 "trees": [
                         "river_birch",
@@ -14776,7 +14776,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "wet_mudstone_ledge_11",
                 "trees": [
                         "overhanging_willow",
@@ -14834,7 +14834,7 @@ SKYRIM_MICRO_RULES = {
                                 30.3
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "hidden_clearing_silt_12",
                 "trees": [
                         "pollard_willow",
@@ -14892,7 +14892,7 @@ SKYRIM_MICRO_RULES = {
                                 52.7
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "niben_channel_mud_13",
                 "trees": [
                         "weeping_willow",
@@ -14950,7 +14950,7 @@ SKYRIM_MICRO_RULES = {
                                 76.5
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "inundated_silt_loam_14",
                 "trees": [
                         "crack_willow",
@@ -15008,7 +15008,7 @@ SKYRIM_MICRO_RULES = {
                                 105.2
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "waterlogged_carr_peat_15",
                 "trees": [
                         "mossy_willow",
@@ -15067,7 +15067,7 @@ SKYRIM_MICRO_RULES = {
                                 134.3
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "braided_island_sand_16",
                 "trees": [
                         "river_birch",
@@ -15126,7 +15126,7 @@ SKYRIM_MICRO_RULES = {
                                 165.2
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "wet_mudstone_ledge_17",
                 "trees": [
                         "overhanging_willow",
@@ -15184,7 +15184,7 @@ SKYRIM_MICRO_RULES = {
                                 200.3
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "hidden_clearing_silt_18",
                 "trees": [
                         "pollard_willow",
@@ -15242,7 +15242,7 @@ SKYRIM_MICRO_RULES = {
                                 233.3
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "niben_channel_mud_19",
                 "trees": [
                         "weeping_willow",
@@ -15300,7 +15300,7 @@ SKYRIM_MICRO_RULES = {
                                 268.5
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "inundated_silt_loam_20",
                 "trees": [
                         "crack_willow",
@@ -15358,7 +15358,7 @@ SKYRIM_MICRO_RULES = {
                                 305.1
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "waterlogged_carr_peat_21",
                 "trees": [
                         "mossy_willow",
@@ -15417,7 +15417,7 @@ SKYRIM_MICRO_RULES = {
                                 335.5
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "braided_island_sand_22",
                 "trees": [
                         "river_birch",
@@ -15476,7 +15476,7 @@ SKYRIM_MICRO_RULES = {
                                 5.0
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "wet_mudstone_ledge_23",
                 "trees": [
                         "overhanging_willow",
@@ -15536,7 +15536,7 @@ SKYRIM_MICRO_RULES = {
                                 38.2
                         ]
                 },
-                "biome": "skycraft:mangrove_delta",
+                "biome": "nirncraft:mangrove_delta",
                 "surface": "brackish_mangrove_ooze_1",
                 "trees": [
                         "red_mangrove",
@@ -15594,7 +15594,7 @@ SKYRIM_MICRO_RULES = {
                                 66.9
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "black_cypress_muck_2",
                 "trees": [
                         "bald_cypress",
@@ -15653,7 +15653,7 @@ SKYRIM_MICRO_RULES = {
                                 99.9
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "hammock_sandy_peat_3",
                 "trees": [
                         "cabbage_palm",
@@ -15712,7 +15712,7 @@ SKYRIM_MICRO_RULES = {
                                 132.0
                         ]
                 },
-                "biome": "skycraft:murky_river",
+                "biome": "nirncraft:murky_river",
                 "surface": "estuary_tidal_silt_4",
                 "trees": [
                         "swamp_willow",
@@ -15770,7 +15770,7 @@ SKYRIM_MICRO_RULES = {
                                 162.7
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "quaking_sphagnum_peat_5",
                 "trees": [
                         "stunted_bog_cypress",
@@ -15828,7 +15828,7 @@ SKYRIM_MICRO_RULES = {
                                 199.3
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "sunken_marble_and_peat_6",
                 "trees": [
                         "strangler_fig",
@@ -15886,7 +15886,7 @@ SKYRIM_MICRO_RULES = {
                                 230.5
                         ]
                 },
-                "biome": "skycraft:mangrove_delta",
+                "biome": "nirncraft:mangrove_delta",
                 "surface": "brackish_mangrove_ooze_7",
                 "trees": [
                         "red_mangrove",
@@ -15944,7 +15944,7 @@ SKYRIM_MICRO_RULES = {
                                 262.4
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "black_cypress_muck_8",
                 "trees": [
                         "bald_cypress",
@@ -16003,7 +16003,7 @@ SKYRIM_MICRO_RULES = {
                                 298.9
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "hammock_sandy_peat_9",
                 "trees": [
                         "cabbage_palm",
@@ -16062,7 +16062,7 @@ SKYRIM_MICRO_RULES = {
                                 329.1
                         ]
                 },
-                "biome": "skycraft:murky_river",
+                "biome": "nirncraft:murky_river",
                 "surface": "estuary_tidal_silt_10",
                 "trees": [
                         "swamp_willow",
@@ -16120,7 +16120,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "quaking_sphagnum_peat_11",
                 "trees": [
                         "stunted_bog_cypress",
@@ -16178,7 +16178,7 @@ SKYRIM_MICRO_RULES = {
                                 33.9
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "sunken_marble_and_peat_12",
                 "trees": [
                         "strangler_fig",
@@ -16236,7 +16236,7 @@ SKYRIM_MICRO_RULES = {
                                 59.5
                         ]
                 },
-                "biome": "skycraft:mangrove_delta",
+                "biome": "nirncraft:mangrove_delta",
                 "surface": "brackish_mangrove_ooze_13",
                 "trees": [
                         "red_mangrove",
@@ -16294,7 +16294,7 @@ SKYRIM_MICRO_RULES = {
                                 89.3
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "black_cypress_muck_14",
                 "trees": [
                         "bald_cypress",
@@ -16353,7 +16353,7 @@ SKYRIM_MICRO_RULES = {
                                 120.8
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "hammock_sandy_peat_15",
                 "trees": [
                         "cabbage_palm",
@@ -16412,7 +16412,7 @@ SKYRIM_MICRO_RULES = {
                                 146.4
                         ]
                 },
-                "biome": "skycraft:murky_river",
+                "biome": "nirncraft:murky_river",
                 "surface": "estuary_tidal_silt_16",
                 "trees": [
                         "swamp_willow",
@@ -16470,7 +16470,7 @@ SKYRIM_MICRO_RULES = {
                                 173.4
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "quaking_sphagnum_peat_17",
                 "trees": [
                         "stunted_bog_cypress",
@@ -16528,7 +16528,7 @@ SKYRIM_MICRO_RULES = {
                                 203.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "sunken_marble_and_peat_18",
                 "trees": [
                         "strangler_fig",
@@ -16586,7 +16586,7 @@ SKYRIM_MICRO_RULES = {
                                 228.6
                         ]
                 },
-                "biome": "skycraft:mangrove_delta",
+                "biome": "nirncraft:mangrove_delta",
                 "surface": "brackish_mangrove_ooze_19",
                 "trees": [
                         "red_mangrove",
@@ -16644,7 +16644,7 @@ SKYRIM_MICRO_RULES = {
                                 259.0
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "black_cypress_muck_20",
                 "trees": [
                         "bald_cypress",
@@ -16703,7 +16703,7 @@ SKYRIM_MICRO_RULES = {
                                 296.6
                         ]
                 },
-                "biome": "skycraft:nibenay_valley",
+                "biome": "nirncraft:nibenay_valley",
                 "surface": "hammock_sandy_peat_21",
                 "trees": [
                         "cabbage_palm",
@@ -16762,7 +16762,7 @@ SKYRIM_MICRO_RULES = {
                                 329.2
                         ]
                 },
-                "biome": "skycraft:murky_river",
+                "biome": "nirncraft:murky_river",
                 "surface": "estuary_tidal_silt_22",
                 "trees": [
                         "swamp_willow",
@@ -16820,7 +16820,7 @@ SKYRIM_MICRO_RULES = {
                                 5.0
                         ]
                 },
-                "biome": "skycraft:blackwood_swamp",
+                "biome": "nirncraft:blackwood_swamp",
                 "surface": "quaking_sphagnum_peat_23",
                 "trees": [
                         "stunted_bog_cypress",
@@ -16882,7 +16882,7 @@ SKYRIM_MICRO_RULES = {
                                 21.8
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "stonefalls_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -16940,7 +16940,7 @@ SKYRIM_MICRO_RULES = {
                                 37.0
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "stonefalls_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -16999,7 +16999,7 @@ SKYRIM_MICRO_RULES = {
                                 50.5
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "stonefalls_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -17057,7 +17057,7 @@ SKYRIM_MICRO_RULES = {
                                 64.1
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "stonefalls_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -17115,7 +17115,7 @@ SKYRIM_MICRO_RULES = {
                                 76.4
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "stonefalls_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -17173,7 +17173,7 @@ SKYRIM_MICRO_RULES = {
                                 89.4
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "stonefalls_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -17231,7 +17231,7 @@ SKYRIM_MICRO_RULES = {
                                 101.6
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "stonefalls_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -17289,7 +17289,7 @@ SKYRIM_MICRO_RULES = {
                                 117.2
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "stonefalls_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -17347,7 +17347,7 @@ SKYRIM_MICRO_RULES = {
                                 136.5
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "stonefalls_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -17406,7 +17406,7 @@ SKYRIM_MICRO_RULES = {
                                 172.7
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "stonefalls_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -17464,7 +17464,7 @@ SKYRIM_MICRO_RULES = {
                                 224.4
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "stonefalls_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -17522,7 +17522,7 @@ SKYRIM_MICRO_RULES = {
                                 296.1
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "stonefalls_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -17580,7 +17580,7 @@ SKYRIM_MICRO_RULES = {
                                 339.9
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "stonefalls_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -17638,7 +17638,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "stonefalls_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -17696,7 +17696,7 @@ SKYRIM_MICRO_RULES = {
                                 27.8
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "stonefalls_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -17754,7 +17754,7 @@ SKYRIM_MICRO_RULES = {
                                 44.8
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "stonefalls_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -17813,7 +17813,7 @@ SKYRIM_MICRO_RULES = {
                                 59.0
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "stonefalls_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -17871,7 +17871,7 @@ SKYRIM_MICRO_RULES = {
                                 72.0
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "stonefalls_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -17929,7 +17929,7 @@ SKYRIM_MICRO_RULES = {
                                 84.5
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "stonefalls_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -17987,7 +17987,7 @@ SKYRIM_MICRO_RULES = {
                                 98.6
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "stonefalls_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -18045,7 +18045,7 @@ SKYRIM_MICRO_RULES = {
                                 117.3
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "stonefalls_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -18103,7 +18103,7 @@ SKYRIM_MICRO_RULES = {
                                 146.5
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "stonefalls_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -18161,7 +18161,7 @@ SKYRIM_MICRO_RULES = {
                                 195.2
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "stonefalls_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -18220,7 +18220,7 @@ SKYRIM_MICRO_RULES = {
                                 236.2
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "stonefalls_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -18278,7 +18278,7 @@ SKYRIM_MICRO_RULES = {
                                 265.3
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "stonefalls_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -18336,7 +18336,7 @@ SKYRIM_MICRO_RULES = {
                                 288.8
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "stonefalls_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -18394,7 +18394,7 @@ SKYRIM_MICRO_RULES = {
                                 325.8
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "stonefalls_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -18452,7 +18452,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "stonefalls_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -18512,7 +18512,7 @@ SKYRIM_MICRO_RULES = {
                                 24.8
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "deshaan_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -18570,7 +18570,7 @@ SKYRIM_MICRO_RULES = {
                                 44.8
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "deshaan_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -18629,7 +18629,7 @@ SKYRIM_MICRO_RULES = {
                                 66.5
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "deshaan_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -18687,7 +18687,7 @@ SKYRIM_MICRO_RULES = {
                                 93.3
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "deshaan_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -18745,7 +18745,7 @@ SKYRIM_MICRO_RULES = {
                                 121.1
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "deshaan_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -18803,7 +18803,7 @@ SKYRIM_MICRO_RULES = {
                                 146.4
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "deshaan_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -18861,7 +18861,7 @@ SKYRIM_MICRO_RULES = {
                                 176.4
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "deshaan_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -18919,7 +18919,7 @@ SKYRIM_MICRO_RULES = {
                                 206.7
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "deshaan_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -18977,7 +18977,7 @@ SKYRIM_MICRO_RULES = {
                                 235.1
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "deshaan_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -19036,7 +19036,7 @@ SKYRIM_MICRO_RULES = {
                                 266.6
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "deshaan_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -19094,7 +19094,7 @@ SKYRIM_MICRO_RULES = {
                                 296.9
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "deshaan_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -19152,7 +19152,7 @@ SKYRIM_MICRO_RULES = {
                                 320.9
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "deshaan_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -19210,7 +19210,7 @@ SKYRIM_MICRO_RULES = {
                                 340.8
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "deshaan_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -19268,7 +19268,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "deshaan_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -19326,7 +19326,7 @@ SKYRIM_MICRO_RULES = {
                                 30.6
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "deshaan_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -19384,7 +19384,7 @@ SKYRIM_MICRO_RULES = {
                                 53.0
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "deshaan_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -19443,7 +19443,7 @@ SKYRIM_MICRO_RULES = {
                                 76.6
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "deshaan_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -19501,7 +19501,7 @@ SKYRIM_MICRO_RULES = {
                                 102.7
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "deshaan_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -19559,7 +19559,7 @@ SKYRIM_MICRO_RULES = {
                                 129.8
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "deshaan_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -19617,7 +19617,7 @@ SKYRIM_MICRO_RULES = {
                                 156.5
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "deshaan_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -19675,7 +19675,7 @@ SKYRIM_MICRO_RULES = {
                                 184.4
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "deshaan_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -19733,7 +19733,7 @@ SKYRIM_MICRO_RULES = {
                                 210.1
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "deshaan_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -19791,7 +19791,7 @@ SKYRIM_MICRO_RULES = {
                                 233.8
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "deshaan_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -19850,7 +19850,7 @@ SKYRIM_MICRO_RULES = {
                                 258.8
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "deshaan_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -19908,7 +19908,7 @@ SKYRIM_MICRO_RULES = {
                                 286.2
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "deshaan_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -19966,7 +19966,7 @@ SKYRIM_MICRO_RULES = {
                                 311.8
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "deshaan_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -20024,7 +20024,7 @@ SKYRIM_MICRO_RULES = {
                                 336.6
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "deshaan_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -20082,7 +20082,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "deshaan_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -20142,7 +20142,7 @@ SKYRIM_MICRO_RULES = {
                                 28.6
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "molag_amur_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -20200,7 +20200,7 @@ SKYRIM_MICRO_RULES = {
                                 65.4
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "molag_amur_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -20259,7 +20259,7 @@ SKYRIM_MICRO_RULES = {
                                 97.3
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "molag_amur_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -20317,7 +20317,7 @@ SKYRIM_MICRO_RULES = {
                                 120.8
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "molag_amur_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -20375,7 +20375,7 @@ SKYRIM_MICRO_RULES = {
                                 137.8
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "molag_amur_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -20433,7 +20433,7 @@ SKYRIM_MICRO_RULES = {
                                 154.4
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "molag_amur_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -20491,7 +20491,7 @@ SKYRIM_MICRO_RULES = {
                                 170.5
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "molag_amur_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -20549,7 +20549,7 @@ SKYRIM_MICRO_RULES = {
                                 188.9
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "molag_amur_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -20607,7 +20607,7 @@ SKYRIM_MICRO_RULES = {
                                 214.5
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "molag_amur_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -20666,7 +20666,7 @@ SKYRIM_MICRO_RULES = {
                                 257.5
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "molag_amur_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -20724,7 +20724,7 @@ SKYRIM_MICRO_RULES = {
                                 302.5
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "molag_amur_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -20782,7 +20782,7 @@ SKYRIM_MICRO_RULES = {
                                 326.2
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "molag_amur_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -20840,7 +20840,7 @@ SKYRIM_MICRO_RULES = {
                                 345.2
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "molag_amur_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -20898,7 +20898,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "molag_amur_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -20956,7 +20956,7 @@ SKYRIM_MICRO_RULES = {
                                 25.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "molag_amur_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -21014,7 +21014,7 @@ SKYRIM_MICRO_RULES = {
                                 50.7
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "molag_amur_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -21073,7 +21073,7 @@ SKYRIM_MICRO_RULES = {
                                 82.8
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "molag_amur_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -21131,7 +21131,7 @@ SKYRIM_MICRO_RULES = {
                                 112.4
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "molag_amur_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -21189,7 +21189,7 @@ SKYRIM_MICRO_RULES = {
                                 136.7
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "molag_amur_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -21247,7 +21247,7 @@ SKYRIM_MICRO_RULES = {
                                 158.6
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "molag_amur_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -21305,7 +21305,7 @@ SKYRIM_MICRO_RULES = {
                                 179.9
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "molag_amur_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -21363,7 +21363,7 @@ SKYRIM_MICRO_RULES = {
                                 201.3
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "molag_amur_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -21421,7 +21421,7 @@ SKYRIM_MICRO_RULES = {
                                 224.2
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "molag_amur_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -21480,7 +21480,7 @@ SKYRIM_MICRO_RULES = {
                                 254.0
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "molag_amur_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -21538,7 +21538,7 @@ SKYRIM_MICRO_RULES = {
                                 285.6
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "molag_amur_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -21596,7 +21596,7 @@ SKYRIM_MICRO_RULES = {
                                 315.9
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "molag_amur_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -21654,7 +21654,7 @@ SKYRIM_MICRO_RULES = {
                                 341.2
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "molag_amur_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -21712,7 +21712,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "molag_amur_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -21772,7 +21772,7 @@ SKYRIM_MICRO_RULES = {
                                 30.5
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "telvannis_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -21830,7 +21830,7 @@ SKYRIM_MICRO_RULES = {
                                 54.3
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "telvannis_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -21889,7 +21889,7 @@ SKYRIM_MICRO_RULES = {
                                 79.3
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "telvannis_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -21947,7 +21947,7 @@ SKYRIM_MICRO_RULES = {
                                 104.6
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "telvannis_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -22005,7 +22005,7 @@ SKYRIM_MICRO_RULES = {
                                 128.7
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "telvannis_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -22063,7 +22063,7 @@ SKYRIM_MICRO_RULES = {
                                 152.3
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "telvannis_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -22121,7 +22121,7 @@ SKYRIM_MICRO_RULES = {
                                 181.3
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "telvannis_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -22179,7 +22179,7 @@ SKYRIM_MICRO_RULES = {
                                 212.2
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "telvannis_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -22237,7 +22237,7 @@ SKYRIM_MICRO_RULES = {
                                 238.4
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "telvannis_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -22296,7 +22296,7 @@ SKYRIM_MICRO_RULES = {
                                 264.8
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "telvannis_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -22354,7 +22354,7 @@ SKYRIM_MICRO_RULES = {
                                 291.4
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "telvannis_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -22412,7 +22412,7 @@ SKYRIM_MICRO_RULES = {
                                 314.8
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "telvannis_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -22470,7 +22470,7 @@ SKYRIM_MICRO_RULES = {
                                 337.4
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "telvannis_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -22528,7 +22528,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "telvannis_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -22586,7 +22586,7 @@ SKYRIM_MICRO_RULES = {
                                 27.4
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "telvannis_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -22644,7 +22644,7 @@ SKYRIM_MICRO_RULES = {
                                 50.6
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "telvannis_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -22703,7 +22703,7 @@ SKYRIM_MICRO_RULES = {
                                 72.3
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "telvannis_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -22761,7 +22761,7 @@ SKYRIM_MICRO_RULES = {
                                 97.1
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "telvannis_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -22819,7 +22819,7 @@ SKYRIM_MICRO_RULES = {
                                 123.1
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "telvannis_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -22877,7 +22877,7 @@ SKYRIM_MICRO_RULES = {
                                 148.1
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "telvannis_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -22935,7 +22935,7 @@ SKYRIM_MICRO_RULES = {
                                 177.4
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "telvannis_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -22993,7 +22993,7 @@ SKYRIM_MICRO_RULES = {
                                 209.0
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "telvannis_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -23051,7 +23051,7 @@ SKYRIM_MICRO_RULES = {
                                 236.7
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "telvannis_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -23110,7 +23110,7 @@ SKYRIM_MICRO_RULES = {
                                 263.6
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "telvannis_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -23168,7 +23168,7 @@ SKYRIM_MICRO_RULES = {
                                 290.5
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "telvannis_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -23226,7 +23226,7 @@ SKYRIM_MICRO_RULES = {
                                 315.1
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "telvannis_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -23284,7 +23284,7 @@ SKYRIM_MICRO_RULES = {
                                 338.9
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "telvannis_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -23342,7 +23342,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "telvannis_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -23402,7 +23402,7 @@ SKYRIM_MICRO_RULES = {
                                 23.6
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "sheogorad_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -23460,7 +23460,7 @@ SKYRIM_MICRO_RULES = {
                                 45.0
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "sheogorad_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -23519,7 +23519,7 @@ SKYRIM_MICRO_RULES = {
                                 65.5
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "sheogorad_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -23577,7 +23577,7 @@ SKYRIM_MICRO_RULES = {
                                 97.2
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "sheogorad_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -23635,7 +23635,7 @@ SKYRIM_MICRO_RULES = {
                                 125.7
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "sheogorad_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -23693,7 +23693,7 @@ SKYRIM_MICRO_RULES = {
                                 164.2
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "sheogorad_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -23751,7 +23751,7 @@ SKYRIM_MICRO_RULES = {
                                 208.0
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "sheogorad_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -23809,7 +23809,7 @@ SKYRIM_MICRO_RULES = {
                                 236.7
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "sheogorad_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -23867,7 +23867,7 @@ SKYRIM_MICRO_RULES = {
                                 264.3
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "sheogorad_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -23926,7 +23926,7 @@ SKYRIM_MICRO_RULES = {
                                 288.7
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "sheogorad_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -23984,7 +23984,7 @@ SKYRIM_MICRO_RULES = {
                                 311.6
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "sheogorad_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -24042,7 +24042,7 @@ SKYRIM_MICRO_RULES = {
                                 330.3
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "sheogorad_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -24100,7 +24100,7 @@ SKYRIM_MICRO_RULES = {
                                 344.8
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "sheogorad_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -24158,7 +24158,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "sheogorad_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -24216,7 +24216,7 @@ SKYRIM_MICRO_RULES = {
                                 15.0
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "sheogorad_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -24274,7 +24274,7 @@ SKYRIM_MICRO_RULES = {
                                 30.2
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "sheogorad_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -24333,7 +24333,7 @@ SKYRIM_MICRO_RULES = {
                                 48.8
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "sheogorad_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -24391,7 +24391,7 @@ SKYRIM_MICRO_RULES = {
                                 78.1
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "sheogorad_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -24449,7 +24449,7 @@ SKYRIM_MICRO_RULES = {
                                 126.4
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "sheogorad_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -24507,7 +24507,7 @@ SKYRIM_MICRO_RULES = {
                                 169.0
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "sheogorad_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -24565,7 +24565,7 @@ SKYRIM_MICRO_RULES = {
                                 228.4
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "sheogorad_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -24623,7 +24623,7 @@ SKYRIM_MICRO_RULES = {
                                 278.0
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "sheogorad_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -24681,7 +24681,7 @@ SKYRIM_MICRO_RULES = {
                                 309.0
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "sheogorad_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -24740,7 +24740,7 @@ SKYRIM_MICRO_RULES = {
                                 323.5
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "sheogorad_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -24798,7 +24798,7 @@ SKYRIM_MICRO_RULES = {
                                 333.8
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "sheogorad_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -24856,7 +24856,7 @@ SKYRIM_MICRO_RULES = {
                                 343.8
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "sheogorad_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -24914,7 +24914,7 @@ SKYRIM_MICRO_RULES = {
                                 353.6
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "sheogorad_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -24972,7 +24972,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "sheogorad_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -25032,7 +25032,7 @@ SKYRIM_MICRO_RULES = {
                                 25.5
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "vvardenfell_ashlands_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -25090,7 +25090,7 @@ SKYRIM_MICRO_RULES = {
                                 54.0
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "vvardenfell_ashlands_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -25149,7 +25149,7 @@ SKYRIM_MICRO_RULES = {
                                 90.2
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "vvardenfell_ashlands_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -25207,7 +25207,7 @@ SKYRIM_MICRO_RULES = {
                                 157.6
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "vvardenfell_ashlands_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -25265,7 +25265,7 @@ SKYRIM_MICRO_RULES = {
                                 217.3
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "vvardenfell_ashlands_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -25323,7 +25323,7 @@ SKYRIM_MICRO_RULES = {
                                 245.9
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "vvardenfell_ashlands_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -25381,7 +25381,7 @@ SKYRIM_MICRO_RULES = {
                                 265.0
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "vvardenfell_ashlands_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -25439,7 +25439,7 @@ SKYRIM_MICRO_RULES = {
                                 281.4
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "vvardenfell_ashlands_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -25497,7 +25497,7 @@ SKYRIM_MICRO_RULES = {
                                 295.0
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "vvardenfell_ashlands_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -25556,7 +25556,7 @@ SKYRIM_MICRO_RULES = {
                                 307.7
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "vvardenfell_ashlands_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -25614,7 +25614,7 @@ SKYRIM_MICRO_RULES = {
                                 319.8
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "vvardenfell_ashlands_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -25672,7 +25672,7 @@ SKYRIM_MICRO_RULES = {
                                 332.7
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "vvardenfell_ashlands_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -25730,7 +25730,7 @@ SKYRIM_MICRO_RULES = {
                                 346.8
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "vvardenfell_ashlands_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -25788,7 +25788,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "vvardenfell_ashlands_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -25846,7 +25846,7 @@ SKYRIM_MICRO_RULES = {
                                 60.5
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "vvardenfell_ashlands_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -25904,7 +25904,7 @@ SKYRIM_MICRO_RULES = {
                                 94.2
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "vvardenfell_ashlands_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -25963,7 +25963,7 @@ SKYRIM_MICRO_RULES = {
                                 149.4
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "vvardenfell_ashlands_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -26021,7 +26021,7 @@ SKYRIM_MICRO_RULES = {
                                 222.6
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "vvardenfell_ashlands_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -26079,7 +26079,7 @@ SKYRIM_MICRO_RULES = {
                                 252.8
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "vvardenfell_ashlands_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -26137,7 +26137,7 @@ SKYRIM_MICRO_RULES = {
                                 268.6
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "vvardenfell_ashlands_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -26195,7 +26195,7 @@ SKYRIM_MICRO_RULES = {
                                 282.4
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "vvardenfell_ashlands_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -26253,7 +26253,7 @@ SKYRIM_MICRO_RULES = {
                                 294.4
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "vvardenfell_ashlands_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -26311,7 +26311,7 @@ SKYRIM_MICRO_RULES = {
                                 302.2
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "vvardenfell_ashlands_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -26370,7 +26370,7 @@ SKYRIM_MICRO_RULES = {
                                 309.3
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "vvardenfell_ashlands_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -26428,7 +26428,7 @@ SKYRIM_MICRO_RULES = {
                                 318.1
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "vvardenfell_ashlands_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -26486,7 +26486,7 @@ SKYRIM_MICRO_RULES = {
                                 328.6
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "vvardenfell_ashlands_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -26544,7 +26544,7 @@ SKYRIM_MICRO_RULES = {
                                 342.9
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "vvardenfell_ashlands_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -26602,7 +26602,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "vvardenfell_ashlands_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -26662,7 +26662,7 @@ SKYRIM_MICRO_RULES = {
                                 18.8
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "grazelands_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -26720,7 +26720,7 @@ SKYRIM_MICRO_RULES = {
                                 33.3
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "grazelands_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -26779,7 +26779,7 @@ SKYRIM_MICRO_RULES = {
                                 45.8
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "grazelands_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -26837,7 +26837,7 @@ SKYRIM_MICRO_RULES = {
                                 58.3
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "grazelands_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -26895,7 +26895,7 @@ SKYRIM_MICRO_RULES = {
                                 70.7
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "grazelands_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -26953,7 +26953,7 @@ SKYRIM_MICRO_RULES = {
                                 83.0
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "grazelands_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -27011,7 +27011,7 @@ SKYRIM_MICRO_RULES = {
                                 98.4
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "grazelands_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -27069,7 +27069,7 @@ SKYRIM_MICRO_RULES = {
                                 118.4
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "grazelands_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -27127,7 +27127,7 @@ SKYRIM_MICRO_RULES = {
                                 145.8
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "grazelands_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -27186,7 +27186,7 @@ SKYRIM_MICRO_RULES = {
                                 222.5
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "grazelands_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -27244,7 +27244,7 @@ SKYRIM_MICRO_RULES = {
                                 284.1
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "grazelands_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -27302,7 +27302,7 @@ SKYRIM_MICRO_RULES = {
                                 323.7
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "grazelands_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -27360,7 +27360,7 @@ SKYRIM_MICRO_RULES = {
                                 346.1
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "grazelands_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -27418,7 +27418,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "grazelands_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -27476,7 +27476,7 @@ SKYRIM_MICRO_RULES = {
                                 12.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "grazelands_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -27534,7 +27534,7 @@ SKYRIM_MICRO_RULES = {
                                 19.9
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "grazelands_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -27593,7 +27593,7 @@ SKYRIM_MICRO_RULES = {
                                 27.5
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "grazelands_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -27651,7 +27651,7 @@ SKYRIM_MICRO_RULES = {
                                 35.1
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "grazelands_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -27709,7 +27709,7 @@ SKYRIM_MICRO_RULES = {
                                 42.1
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "grazelands_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -27767,7 +27767,7 @@ SKYRIM_MICRO_RULES = {
                                 49.1
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "grazelands_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -27825,7 +27825,7 @@ SKYRIM_MICRO_RULES = {
                                 56.7
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "grazelands_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -27883,7 +27883,7 @@ SKYRIM_MICRO_RULES = {
                                 65.8
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "grazelands_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -27941,7 +27941,7 @@ SKYRIM_MICRO_RULES = {
                                 77.3
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "grazelands_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -28000,7 +28000,7 @@ SKYRIM_MICRO_RULES = {
                                 90.6
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "grazelands_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -28058,7 +28058,7 @@ SKYRIM_MICRO_RULES = {
                                 143.2
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "grazelands_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -28116,7 +28116,7 @@ SKYRIM_MICRO_RULES = {
                                 333.0
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "grazelands_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -28174,7 +28174,7 @@ SKYRIM_MICRO_RULES = {
                                 351.8
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "grazelands_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -28232,7 +28232,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "grazelands_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -28292,7 +28292,7 @@ SKYRIM_MICRO_RULES = {
                                 39.3
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "azuras_coast_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -28350,7 +28350,7 @@ SKYRIM_MICRO_RULES = {
                                 63.0
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "azuras_coast_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -28409,7 +28409,7 @@ SKYRIM_MICRO_RULES = {
                                 81.1
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "azuras_coast_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -28467,7 +28467,7 @@ SKYRIM_MICRO_RULES = {
                                 95.9
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "azuras_coast_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -28525,7 +28525,7 @@ SKYRIM_MICRO_RULES = {
                                 108.2
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "azuras_coast_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -28583,7 +28583,7 @@ SKYRIM_MICRO_RULES = {
                                 121.2
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "azuras_coast_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -28641,7 +28641,7 @@ SKYRIM_MICRO_RULES = {
                                 134.7
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "azuras_coast_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -28699,7 +28699,7 @@ SKYRIM_MICRO_RULES = {
                                 150.8
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "azuras_coast_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -28757,7 +28757,7 @@ SKYRIM_MICRO_RULES = {
                                 172.1
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "azuras_coast_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -28816,7 +28816,7 @@ SKYRIM_MICRO_RULES = {
                                 201.6
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "azuras_coast_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -28874,7 +28874,7 @@ SKYRIM_MICRO_RULES = {
                                 234.7
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "azuras_coast_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -28932,7 +28932,7 @@ SKYRIM_MICRO_RULES = {
                                 286.7
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "azuras_coast_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -28990,7 +28990,7 @@ SKYRIM_MICRO_RULES = {
                                 327.2
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "azuras_coast_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -29048,7 +29048,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "azuras_coast_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -29106,7 +29106,7 @@ SKYRIM_MICRO_RULES = {
                                 69.1
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "azuras_coast_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -29164,7 +29164,7 @@ SKYRIM_MICRO_RULES = {
                                 83.1
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "azuras_coast_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -29223,7 +29223,7 @@ SKYRIM_MICRO_RULES = {
                                 90.6
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "azuras_coast_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -29281,7 +29281,7 @@ SKYRIM_MICRO_RULES = {
                                 96.3
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "azuras_coast_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -29339,7 +29339,7 @@ SKYRIM_MICRO_RULES = {
                                 101.3
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "azuras_coast_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -29397,7 +29397,7 @@ SKYRIM_MICRO_RULES = {
                                 106.7
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "azuras_coast_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -29455,7 +29455,7 @@ SKYRIM_MICRO_RULES = {
                                 113.1
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "azuras_coast_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -29513,7 +29513,7 @@ SKYRIM_MICRO_RULES = {
                                 120.0
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "azuras_coast_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -29571,7 +29571,7 @@ SKYRIM_MICRO_RULES = {
                                 126.9
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "azuras_coast_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -29630,7 +29630,7 @@ SKYRIM_MICRO_RULES = {
                                 133.6
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "azuras_coast_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -29688,7 +29688,7 @@ SKYRIM_MICRO_RULES = {
                                 140.7
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "azuras_coast_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -29746,7 +29746,7 @@ SKYRIM_MICRO_RULES = {
                                 150.1
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "azuras_coast_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -29804,7 +29804,7 @@ SKYRIM_MICRO_RULES = {
                                 170.0
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "azuras_coast_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -29862,7 +29862,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "azuras_coast_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -29922,7 +29922,7 @@ SKYRIM_MICRO_RULES = {
                                 93.8
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "west_gash_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -29980,7 +29980,7 @@ SKYRIM_MICRO_RULES = {
                                 118.2
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "west_gash_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -30039,7 +30039,7 @@ SKYRIM_MICRO_RULES = {
                                 134.8
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "west_gash_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -30097,7 +30097,7 @@ SKYRIM_MICRO_RULES = {
                                 148.4
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "west_gash_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -30155,7 +30155,7 @@ SKYRIM_MICRO_RULES = {
                                 161.3
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "west_gash_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -30213,7 +30213,7 @@ SKYRIM_MICRO_RULES = {
                                 175.9
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "west_gash_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -30271,7 +30271,7 @@ SKYRIM_MICRO_RULES = {
                                 190.3
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "west_gash_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -30329,7 +30329,7 @@ SKYRIM_MICRO_RULES = {
                                 204.5
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "west_gash_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -30387,7 +30387,7 @@ SKYRIM_MICRO_RULES = {
                                 219.1
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "west_gash_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -30446,7 +30446,7 @@ SKYRIM_MICRO_RULES = {
                                 238.1
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "west_gash_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -30504,7 +30504,7 @@ SKYRIM_MICRO_RULES = {
                                 256.1
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "west_gash_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -30562,7 +30562,7 @@ SKYRIM_MICRO_RULES = {
                                 275.1
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "west_gash_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -30620,7 +30620,7 @@ SKYRIM_MICRO_RULES = {
                                 299.6
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "west_gash_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -30678,7 +30678,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "west_gash_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -30736,7 +30736,7 @@ SKYRIM_MICRO_RULES = {
                                 86.9
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "west_gash_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -30794,7 +30794,7 @@ SKYRIM_MICRO_RULES = {
                                 137.6
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "west_gash_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -30853,7 +30853,7 @@ SKYRIM_MICRO_RULES = {
                                 159.7
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "west_gash_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -30911,7 +30911,7 @@ SKYRIM_MICRO_RULES = {
                                 172.6
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "west_gash_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -30969,7 +30969,7 @@ SKYRIM_MICRO_RULES = {
                                 187.2
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "west_gash_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -31027,7 +31027,7 @@ SKYRIM_MICRO_RULES = {
                                 205.5
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "west_gash_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -31085,7 +31085,7 @@ SKYRIM_MICRO_RULES = {
                                 221.9
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "west_gash_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -31143,7 +31143,7 @@ SKYRIM_MICRO_RULES = {
                                 234.3
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "west_gash_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -31201,7 +31201,7 @@ SKYRIM_MICRO_RULES = {
                                 246.4
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "west_gash_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -31260,7 +31260,7 @@ SKYRIM_MICRO_RULES = {
                                 255.5
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "west_gash_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -31318,7 +31318,7 @@ SKYRIM_MICRO_RULES = {
                                 265.8
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "west_gash_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -31376,7 +31376,7 @@ SKYRIM_MICRO_RULES = {
                                 281.4
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "west_gash_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -31434,7 +31434,7 @@ SKYRIM_MICRO_RULES = {
                                 308.7
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "west_gash_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -31492,7 +31492,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "west_gash_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -31552,7 +31552,7 @@ SKYRIM_MICRO_RULES = {
                                 31.8
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "bitter_coast_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -31610,7 +31610,7 @@ SKYRIM_MICRO_RULES = {
                                 56.3
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "bitter_coast_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -31669,7 +31669,7 @@ SKYRIM_MICRO_RULES = {
                                 85.8
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "bitter_coast_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -31727,7 +31727,7 @@ SKYRIM_MICRO_RULES = {
                                 116.5
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "bitter_coast_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -31785,7 +31785,7 @@ SKYRIM_MICRO_RULES = {
                                 143.3
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "bitter_coast_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -31843,7 +31843,7 @@ SKYRIM_MICRO_RULES = {
                                 170.6
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "bitter_coast_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -31901,7 +31901,7 @@ SKYRIM_MICRO_RULES = {
                                 195.8
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "bitter_coast_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -31959,7 +31959,7 @@ SKYRIM_MICRO_RULES = {
                                 221.3
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "bitter_coast_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -32017,7 +32017,7 @@ SKYRIM_MICRO_RULES = {
                                 245.4
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "bitter_coast_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -32076,7 +32076,7 @@ SKYRIM_MICRO_RULES = {
                                 267.8
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "bitter_coast_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -32134,7 +32134,7 @@ SKYRIM_MICRO_RULES = {
                                 290.9
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "bitter_coast_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -32192,7 +32192,7 @@ SKYRIM_MICRO_RULES = {
                                 311.3
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "bitter_coast_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -32250,7 +32250,7 @@ SKYRIM_MICRO_RULES = {
                                 334.2
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "bitter_coast_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -32308,7 +32308,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "bitter_coast_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -32366,7 +32366,7 @@ SKYRIM_MICRO_RULES = {
                                 145.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "bitter_coast_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -32424,7 +32424,7 @@ SKYRIM_MICRO_RULES = {
                                 177.6
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "bitter_coast_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -32483,7 +32483,7 @@ SKYRIM_MICRO_RULES = {
                                 202.7
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "bitter_coast_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -32541,7 +32541,7 @@ SKYRIM_MICRO_RULES = {
                                 218.6
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "bitter_coast_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -32599,7 +32599,7 @@ SKYRIM_MICRO_RULES = {
                                 228.3
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "bitter_coast_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -32657,7 +32657,7 @@ SKYRIM_MICRO_RULES = {
                                 238.3
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "bitter_coast_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -32715,7 +32715,7 @@ SKYRIM_MICRO_RULES = {
                                 245.3
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "bitter_coast_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -32773,7 +32773,7 @@ SKYRIM_MICRO_RULES = {
                                 251.5
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "bitter_coast_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -32831,7 +32831,7 @@ SKYRIM_MICRO_RULES = {
                                 256.6
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "bitter_coast_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -32890,7 +32890,7 @@ SKYRIM_MICRO_RULES = {
                                 261.4
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "bitter_coast_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -32948,7 +32948,7 @@ SKYRIM_MICRO_RULES = {
                                 266.4
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "bitter_coast_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -33006,7 +33006,7 @@ SKYRIM_MICRO_RULES = {
                                 275.1
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "bitter_coast_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -33064,7 +33064,7 @@ SKYRIM_MICRO_RULES = {
                                 288.8
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "bitter_coast_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -33122,7 +33122,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "bitter_coast_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -33182,7 +33182,7 @@ SKYRIM_MICRO_RULES = {
                                 40.8
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "ascadian_isles_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -33240,7 +33240,7 @@ SKYRIM_MICRO_RULES = {
                                 68.0
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "ascadian_isles_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -33299,7 +33299,7 @@ SKYRIM_MICRO_RULES = {
                                 98.7
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "ascadian_isles_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -33357,7 +33357,7 @@ SKYRIM_MICRO_RULES = {
                                 125.9
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "ascadian_isles_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -33415,7 +33415,7 @@ SKYRIM_MICRO_RULES = {
                                 144.3
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "ascadian_isles_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -33473,7 +33473,7 @@ SKYRIM_MICRO_RULES = {
                                 162.4
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "ascadian_isles_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -33531,7 +33531,7 @@ SKYRIM_MICRO_RULES = {
                                 181.6
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "ascadian_isles_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -33589,7 +33589,7 @@ SKYRIM_MICRO_RULES = {
                                 203.9
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "ascadian_isles_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -33647,7 +33647,7 @@ SKYRIM_MICRO_RULES = {
                                 222.1
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "ascadian_isles_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -33706,7 +33706,7 @@ SKYRIM_MICRO_RULES = {
                                 242.6
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "ascadian_isles_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -33764,7 +33764,7 @@ SKYRIM_MICRO_RULES = {
                                 269.3
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "ascadian_isles_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -33822,7 +33822,7 @@ SKYRIM_MICRO_RULES = {
                                 298.3
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "ascadian_isles_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -33880,7 +33880,7 @@ SKYRIM_MICRO_RULES = {
                                 326.7
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "ascadian_isles_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -33938,7 +33938,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "ascadian_isles_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -33996,7 +33996,7 @@ SKYRIM_MICRO_RULES = {
                                 116.2
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "ascadian_isles_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -34054,7 +34054,7 @@ SKYRIM_MICRO_RULES = {
                                 134.7
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "ascadian_isles_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -34113,7 +34113,7 @@ SKYRIM_MICRO_RULES = {
                                 144.4
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "ascadian_isles_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -34171,7 +34171,7 @@ SKYRIM_MICRO_RULES = {
                                 151.6
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "ascadian_isles_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -34229,7 +34229,7 @@ SKYRIM_MICRO_RULES = {
                                 157.5
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "ascadian_isles_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -34287,7 +34287,7 @@ SKYRIM_MICRO_RULES = {
                                 164.0
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "ascadian_isles_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -34345,7 +34345,7 @@ SKYRIM_MICRO_RULES = {
                                 170.1
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "ascadian_isles_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -34403,7 +34403,7 @@ SKYRIM_MICRO_RULES = {
                                 175.9
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "ascadian_isles_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -34461,7 +34461,7 @@ SKYRIM_MICRO_RULES = {
                                 180.6
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "ascadian_isles_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -34520,7 +34520,7 @@ SKYRIM_MICRO_RULES = {
                                 186.1
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "ascadian_isles_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -34578,7 +34578,7 @@ SKYRIM_MICRO_RULES = {
                                 193.1
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "ascadian_isles_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -34636,7 +34636,7 @@ SKYRIM_MICRO_RULES = {
                                 204.4
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "ascadian_isles_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -34694,7 +34694,7 @@ SKYRIM_MICRO_RULES = {
                                 236.7
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "ascadian_isles_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -34752,7 +34752,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "ascadian_isles_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -34812,7 +34812,7 @@ SKYRIM_MICRO_RULES = {
                                 17.7
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "red_mountain_basalt_ash_scree_1",
                 "trees": [
                         "charred_parasol",
@@ -34870,7 +34870,7 @@ SKYRIM_MICRO_RULES = {
                                 39.1
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "red_mountain_spore_humus_loam_2",
                 "trees": [
                         "emperor_parasol",
@@ -34929,7 +34929,7 @@ SKYRIM_MICRO_RULES = {
                                 53.7
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "red_mountain_irrigated_ash_silt_3",
                 "trees": [
                         "ascadian_oak",
@@ -34987,7 +34987,7 @@ SKYRIM_MICRO_RULES = {
                                 78.4
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "red_mountain_hackle_lo_steppe_turf_4",
                 "trees": [
                         "graze_acacia",
@@ -35045,7 +35045,7 @@ SKYRIM_MICRO_RULES = {
                                 96.6
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "red_mountain_warm_tuff_clay_5",
                 "trees": [
                         "west_gash_pine",
@@ -35103,7 +35103,7 @@ SKYRIM_MICRO_RULES = {
                                 113.8
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "red_mountain_acidic_bog_muck_6",
                 "trees": [
                         "bitter_mangrove",
@@ -35161,7 +35161,7 @@ SKYRIM_MICRO_RULES = {
                                 147.0
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "red_mountain_sulfur_obsidian_crust_7",
                 "trees": [
                         "charred_ash_tree",
@@ -35219,7 +35219,7 @@ SKYRIM_MICRO_RULES = {
                                 165.6
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "red_mountain_basalt_ash_scree_8",
                 "trees": [
                         "charred_parasol",
@@ -35277,7 +35277,7 @@ SKYRIM_MICRO_RULES = {
                                 226.7
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "red_mountain_spore_humus_loam_9",
                 "trees": [
                         "emperor_parasol",
@@ -35336,7 +35336,7 @@ SKYRIM_MICRO_RULES = {
                                 271.0
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "red_mountain_irrigated_ash_silt_10",
                 "trees": [
                         "ascadian_oak",
@@ -35394,7 +35394,7 @@ SKYRIM_MICRO_RULES = {
                                 298.9
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "red_mountain_hackle_lo_steppe_turf_11",
                 "trees": [
                         "graze_acacia",
@@ -35452,7 +35452,7 @@ SKYRIM_MICRO_RULES = {
                                 319.5
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "red_mountain_warm_tuff_clay_12",
                 "trees": [
                         "west_gash_pine",
@@ -35510,7 +35510,7 @@ SKYRIM_MICRO_RULES = {
                                 346.1
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "red_mountain_acidic_bog_muck_13",
                 "trees": [
                         "bitter_mangrove",
@@ -35568,7 +35568,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "red_mountain_sulfur_obsidian_crust_14",
                 "trees": [
                         "charred_ash_tree",
@@ -35626,7 +35626,7 @@ SKYRIM_MICRO_RULES = {
                                 33.2
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "red_mountain_basalt_ash_scree_15",
                 "trees": [
                         "charred_parasol",
@@ -35684,7 +35684,7 @@ SKYRIM_MICRO_RULES = {
                                 53.8
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "red_mountain_spore_humus_loam_16",
                 "trees": [
                         "emperor_parasol",
@@ -35743,7 +35743,7 @@ SKYRIM_MICRO_RULES = {
                                 84.6
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "red_mountain_irrigated_ash_silt_17",
                 "trees": [
                         "ascadian_oak",
@@ -35801,7 +35801,7 @@ SKYRIM_MICRO_RULES = {
                                 103.8
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "red_mountain_hackle_lo_steppe_turf_18",
                 "trees": [
                         "graze_acacia",
@@ -35859,7 +35859,7 @@ SKYRIM_MICRO_RULES = {
                                 124.2
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "red_mountain_warm_tuff_clay_19",
                 "trees": [
                         "west_gash_pine",
@@ -35917,7 +35917,7 @@ SKYRIM_MICRO_RULES = {
                                 146.5
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "red_mountain_acidic_bog_muck_20",
                 "trees": [
                         "bitter_mangrove",
@@ -35975,7 +35975,7 @@ SKYRIM_MICRO_RULES = {
                                 168.2
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "red_mountain_sulfur_obsidian_crust_21",
                 "trees": [
                         "charred_ash_tree",
@@ -36033,7 +36033,7 @@ SKYRIM_MICRO_RULES = {
                                 209.1
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "red_mountain_basalt_ash_scree_22",
                 "trees": [
                         "charred_parasol",
@@ -36091,7 +36091,7 @@ SKYRIM_MICRO_RULES = {
                                 252.5
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "red_mountain_spore_humus_loam_23",
                 "trees": [
                         "emperor_parasol",
@@ -36150,7 +36150,7 @@ SKYRIM_MICRO_RULES = {
                                 275.9
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "red_mountain_irrigated_ash_silt_24",
                 "trees": [
                         "ascadian_oak",
@@ -36208,7 +36208,7 @@ SKYRIM_MICRO_RULES = {
                                 292.5
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "red_mountain_hackle_lo_steppe_turf_25",
                 "trees": [
                         "graze_acacia",
@@ -36266,7 +36266,7 @@ SKYRIM_MICRO_RULES = {
                                 315.0
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "red_mountain_warm_tuff_clay_26",
                 "trees": [
                         "west_gash_pine",
@@ -36324,7 +36324,7 @@ SKYRIM_MICRO_RULES = {
                                 338.2
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "red_mountain_acidic_bog_muck_27",
                 "trees": [
                         "bitter_mangrove",
@@ -36382,7 +36382,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "red_mountain_sulfur_obsidian_crust_28",
                 "trees": [
                         "charred_ash_tree",
@@ -36442,7 +36442,7 @@ SKYRIM_MICRO_RULES = {
                                 30.8
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "solstheim_frosted_pine_duff_1",
                 "trees": [
                         "solstheim_pine",
@@ -36500,7 +36500,7 @@ SKYRIM_MICRO_RULES = {
                                 63.1
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "solstheim_warm_grey_ash_sand_2",
                 "trees": [
                         "charred_spruce",
@@ -36558,7 +36558,7 @@ SKYRIM_MICRO_RULES = {
                                 95.3
                         ]
                 },
-                "biome": "skycraft:frozen_shore",
+                "biome": "nirncraft:frozen_shore",
                 "surface": "solstheim_basalt_ice_shingle_3",
                 "trees": [
                         "driftwood_snag",
@@ -36615,7 +36615,7 @@ SKYRIM_MICRO_RULES = {
                                 123.2
                         ]
                 },
-                "biome": "skycraft:snowy_slopes",
+                "biome": "nirncraft:snowy_slopes",
                 "surface": "solstheim_blue_stalhrim_ice_4",
                 "trees": [
                         "stunted_frost_pine",
@@ -36671,7 +36671,7 @@ SKYRIM_MICRO_RULES = {
                                 145.8
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "solstheim_basalt_ash_scree_5",
                 "trees": [
                         "charred_parasol",
@@ -36729,7 +36729,7 @@ SKYRIM_MICRO_RULES = {
                                 166.5
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "solstheim_spore_humus_loam_6",
                 "trees": [
                         "emperor_parasol",
@@ -36788,7 +36788,7 @@ SKYRIM_MICRO_RULES = {
                                 186.2
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "solstheim_irrigated_ash_silt_7",
                 "trees": [
                         "ascadian_oak",
@@ -36846,7 +36846,7 @@ SKYRIM_MICRO_RULES = {
                                 205.2
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "solstheim_hackle_lo_steppe_turf_8",
                 "trees": [
                         "graze_acacia",
@@ -36904,7 +36904,7 @@ SKYRIM_MICRO_RULES = {
                                 224.1
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "solstheim_warm_tuff_clay_9",
                 "trees": [
                         "west_gash_pine",
@@ -36962,7 +36962,7 @@ SKYRIM_MICRO_RULES = {
                                 245.7
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "solstheim_acidic_bog_muck_10",
                 "trees": [
                         "bitter_mangrove",
@@ -37020,7 +37020,7 @@ SKYRIM_MICRO_RULES = {
                                 266.3
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "solstheim_sulfur_obsidian_crust_11",
                 "trees": [
                         "charred_ash_tree",
@@ -37078,7 +37078,7 @@ SKYRIM_MICRO_RULES = {
                                 296.1
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "solstheim_frosted_pine_duff_12",
                 "trees": [
                         "solstheim_pine",
@@ -37136,7 +37136,7 @@ SKYRIM_MICRO_RULES = {
                                 333.2
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "solstheim_warm_grey_ash_sand_13",
                 "trees": [
                         "charred_spruce",
@@ -37194,7 +37194,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "solstheim_basalt_ice_shingle_14",
                 "trees": [
                         "driftwood_snag",
@@ -37251,7 +37251,7 @@ SKYRIM_MICRO_RULES = {
                                 38.7
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "solstheim_blue_stalhrim_ice_15",
                 "trees": [
                         "stunted_frost_pine",
@@ -37307,7 +37307,7 @@ SKYRIM_MICRO_RULES = {
                                 62.5
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "solstheim_basalt_ash_scree_16",
                 "trees": [
                         "charred_parasol",
@@ -37365,7 +37365,7 @@ SKYRIM_MICRO_RULES = {
                                 84.3
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "solstheim_spore_humus_loam_17",
                 "trees": [
                         "emperor_parasol",
@@ -37424,7 +37424,7 @@ SKYRIM_MICRO_RULES = {
                                 108.2
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "solstheim_irrigated_ash_silt_18",
                 "trees": [
                         "ascadian_oak",
@@ -37482,7 +37482,7 @@ SKYRIM_MICRO_RULES = {
                                 124.3
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "solstheim_hackle_lo_steppe_turf_19",
                 "trees": [
                         "graze_acacia",
@@ -37540,7 +37540,7 @@ SKYRIM_MICRO_RULES = {
                                 150.5
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "solstheim_warm_tuff_clay_20",
                 "trees": [
                         "west_gash_pine",
@@ -37598,7 +37598,7 @@ SKYRIM_MICRO_RULES = {
                                 186.9
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "solstheim_acidic_bog_muck_21",
                 "trees": [
                         "bitter_mangrove",
@@ -37656,7 +37656,7 @@ SKYRIM_MICRO_RULES = {
                                 218.7
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "solstheim_sulfur_obsidian_crust_22",
                 "trees": [
                         "charred_ash_tree",
@@ -37714,7 +37714,7 @@ SKYRIM_MICRO_RULES = {
                                 236.2
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "solstheim_frosted_pine_duff_23",
                 "trees": [
                         "solstheim_pine",
@@ -37772,7 +37772,7 @@ SKYRIM_MICRO_RULES = {
                                 251.3
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "solstheim_warm_grey_ash_sand_24",
                 "trees": [
                         "charred_spruce",
@@ -37830,7 +37830,7 @@ SKYRIM_MICRO_RULES = {
                                 277.5
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "solstheim_basalt_ice_shingle_25",
                 "trees": [
                         "driftwood_snag",
@@ -37887,7 +37887,7 @@ SKYRIM_MICRO_RULES = {
                                 315.9
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "solstheim_blue_stalhrim_ice_26",
                 "trees": [
                         "stunted_frost_pine",
@@ -37943,7 +37943,7 @@ SKYRIM_MICRO_RULES = {
                                 335.2
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "solstheim_basalt_ash_scree_27",
                 "trees": [
                         "charred_parasol",
@@ -38001,7 +38001,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "solstheim_spore_humus_loam_28",
                 "trees": [
                         "emperor_parasol",
@@ -38062,7 +38062,7 @@ SKYRIM_MICRO_RULES = {
                                 30.1
                         ]
                 },
-                "biome": "skycraft:hist_grove",
+                "biome": "nirncraft:hist_grove",
                 "surface": "shadowfen_amber_sap_humus_1",
                 "trees": [
                         "ancient_hist_tree",
@@ -38121,7 +38121,7 @@ SKYRIM_MICRO_RULES = {
                                 51.6
                         ]
                 },
-                "biome": "skycraft:deep_mire",
+                "biome": "nirncraft:deep_mire",
                 "surface": "shadowfen_drowned_xanmeer_flagstone_2",
                 "trees": [
                         "strangler_cypress",
@@ -38179,7 +38179,7 @@ SKYRIM_MICRO_RULES = {
                                 75.2
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "shadowfen_black_alluvial_ooze_3",
                 "trees": [
                         "swamp_willow",
@@ -38237,7 +38237,7 @@ SKYRIM_MICRO_RULES = {
                                 103.1
                         ]
                 },
-                "biome": "skycraft:mangrove_delta",
+                "biome": "nirncraft:mangrove_delta",
                 "surface": "shadowfen_brackish_tidal_mud_4",
                 "trees": [
                         "red_mangrove",
@@ -38296,7 +38296,7 @@ SKYRIM_MICRO_RULES = {
                                 130.2
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "shadowfen_sulfurous_peat_mire_5",
                 "trees": [
                         "dead_cypress_snag",
@@ -38354,7 +38354,7 @@ SKYRIM_MICRO_RULES = {
                                 152.8
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "shadowfen_sandy_jungle_peat_6",
                 "trees": [
                         "tree_fern",
@@ -38413,7 +38413,7 @@ SKYRIM_MICRO_RULES = {
                                 180.4
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "shadowfen_amber_sap_humus_7",
                 "trees": [
                         "ancient_hist_tree",
@@ -38472,7 +38472,7 @@ SKYRIM_MICRO_RULES = {
                                 208.8
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "shadowfen_drowned_xanmeer_flagstone_8",
                 "trees": [
                         "strangler_cypress",
@@ -38530,7 +38530,7 @@ SKYRIM_MICRO_RULES = {
                                 233.3
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "shadowfen_black_alluvial_ooze_9",
                 "trees": [
                         "swamp_willow",
@@ -38588,7 +38588,7 @@ SKYRIM_MICRO_RULES = {
                                 259.4
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "shadowfen_brackish_tidal_mud_10",
                 "trees": [
                         "red_mangrove",
@@ -38647,7 +38647,7 @@ SKYRIM_MICRO_RULES = {
                                 288.2
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "shadowfen_sulfurous_peat_mire_11",
                 "trees": [
                         "dead_cypress_snag",
@@ -38705,7 +38705,7 @@ SKYRIM_MICRO_RULES = {
                                 313.6
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "shadowfen_sandy_jungle_peat_12",
                 "trees": [
                         "tree_fern",
@@ -38764,7 +38764,7 @@ SKYRIM_MICRO_RULES = {
                                 336.1
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "shadowfen_amber_sap_humus_13",
                 "trees": [
                         "ancient_hist_tree",
@@ -38823,7 +38823,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "shadowfen_drowned_xanmeer_flagstone_14",
                 "trees": [
                         "strangler_cypress",
@@ -38881,7 +38881,7 @@ SKYRIM_MICRO_RULES = {
                                 37.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "shadowfen_black_alluvial_ooze_15",
                 "trees": [
                         "swamp_willow",
@@ -38939,7 +38939,7 @@ SKYRIM_MICRO_RULES = {
                                 63.5
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "shadowfen_brackish_tidal_mud_16",
                 "trees": [
                         "red_mangrove",
@@ -38998,7 +38998,7 @@ SKYRIM_MICRO_RULES = {
                                 85.8
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "shadowfen_sulfurous_peat_mire_17",
                 "trees": [
                         "dead_cypress_snag",
@@ -39056,7 +39056,7 @@ SKYRIM_MICRO_RULES = {
                                 107.3
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "shadowfen_sandy_jungle_peat_18",
                 "trees": [
                         "tree_fern",
@@ -39115,7 +39115,7 @@ SKYRIM_MICRO_RULES = {
                                 129.8
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "shadowfen_amber_sap_humus_19",
                 "trees": [
                         "ancient_hist_tree",
@@ -39174,7 +39174,7 @@ SKYRIM_MICRO_RULES = {
                                 148.9
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "shadowfen_drowned_xanmeer_flagstone_20",
                 "trees": [
                         "strangler_cypress",
@@ -39232,7 +39232,7 @@ SKYRIM_MICRO_RULES = {
                                 169.6
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "shadowfen_black_alluvial_ooze_21",
                 "trees": [
                         "swamp_willow",
@@ -39290,7 +39290,7 @@ SKYRIM_MICRO_RULES = {
                                 190.0
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "shadowfen_brackish_tidal_mud_22",
                 "trees": [
                         "red_mangrove",
@@ -39349,7 +39349,7 @@ SKYRIM_MICRO_RULES = {
                                 211.5
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "shadowfen_sulfurous_peat_mire_23",
                 "trees": [
                         "dead_cypress_snag",
@@ -39407,7 +39407,7 @@ SKYRIM_MICRO_RULES = {
                                 232.9
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "shadowfen_sandy_jungle_peat_24",
                 "trees": [
                         "tree_fern",
@@ -39466,7 +39466,7 @@ SKYRIM_MICRO_RULES = {
                                 260.9
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "shadowfen_amber_sap_humus_25",
                 "trees": [
                         "ancient_hist_tree",
@@ -39525,7 +39525,7 @@ SKYRIM_MICRO_RULES = {
                                 295.1
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "shadowfen_drowned_xanmeer_flagstone_26",
                 "trees": [
                         "strangler_cypress",
@@ -39583,7 +39583,7 @@ SKYRIM_MICRO_RULES = {
                                 326.7
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "shadowfen_black_alluvial_ooze_27",
                 "trees": [
                         "swamp_willow",
@@ -39641,7 +39641,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "shadowfen_brackish_tidal_mud_28",
                 "trees": [
                         "red_mangrove",
@@ -39702,7 +39702,7 @@ SKYRIM_MICRO_RULES = {
                                 32.3
                         ]
                 },
-                "biome": "skycraft:hist_grove",
+                "biome": "nirncraft:hist_grove",
                 "surface": "stormhold_amber_sap_humus_1",
                 "trees": [
                         "ancient_hist_tree",
@@ -39761,7 +39761,7 @@ SKYRIM_MICRO_RULES = {
                                 56.5
                         ]
                 },
-                "biome": "skycraft:deep_mire",
+                "biome": "nirncraft:deep_mire",
                 "surface": "stormhold_drowned_xanmeer_flagstone_2",
                 "trees": [
                         "strangler_cypress",
@@ -39819,7 +39819,7 @@ SKYRIM_MICRO_RULES = {
                                 83.3
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "stormhold_black_alluvial_ooze_3",
                 "trees": [
                         "swamp_willow",
@@ -39877,7 +39877,7 @@ SKYRIM_MICRO_RULES = {
                                 111.1
                         ]
                 },
-                "biome": "skycraft:mangrove_delta",
+                "biome": "nirncraft:mangrove_delta",
                 "surface": "stormhold_brackish_tidal_mud_4",
                 "trees": [
                         "red_mangrove",
@@ -39936,7 +39936,7 @@ SKYRIM_MICRO_RULES = {
                                 136.1
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "stormhold_sulfurous_peat_mire_5",
                 "trees": [
                         "dead_cypress_snag",
@@ -39994,7 +39994,7 @@ SKYRIM_MICRO_RULES = {
                                 159.2
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "stormhold_sandy_jungle_peat_6",
                 "trees": [
                         "tree_fern",
@@ -40053,7 +40053,7 @@ SKYRIM_MICRO_RULES = {
                                 186.6
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "stormhold_amber_sap_humus_7",
                 "trees": [
                         "ancient_hist_tree",
@@ -40112,7 +40112,7 @@ SKYRIM_MICRO_RULES = {
                                 213.7
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "stormhold_drowned_xanmeer_flagstone_8",
                 "trees": [
                         "strangler_cypress",
@@ -40170,7 +40170,7 @@ SKYRIM_MICRO_RULES = {
                                 235.1
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "stormhold_black_alluvial_ooze_9",
                 "trees": [
                         "swamp_willow",
@@ -40228,7 +40228,7 @@ SKYRIM_MICRO_RULES = {
                                 259.9
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "stormhold_brackish_tidal_mud_10",
                 "trees": [
                         "red_mangrove",
@@ -40287,7 +40287,7 @@ SKYRIM_MICRO_RULES = {
                                 287.3
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "stormhold_sulfurous_peat_mire_11",
                 "trees": [
                         "dead_cypress_snag",
@@ -40345,7 +40345,7 @@ SKYRIM_MICRO_RULES = {
                                 313.2
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "stormhold_sandy_jungle_peat_12",
                 "trees": [
                         "tree_fern",
@@ -40404,7 +40404,7 @@ SKYRIM_MICRO_RULES = {
                                 335.9
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "stormhold_amber_sap_humus_13",
                 "trees": [
                         "ancient_hist_tree",
@@ -40463,7 +40463,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "stormhold_drowned_xanmeer_flagstone_14",
                 "trees": [
                         "strangler_cypress",
@@ -40521,7 +40521,7 @@ SKYRIM_MICRO_RULES = {
                                 33.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "stormhold_black_alluvial_ooze_15",
                 "trees": [
                         "swamp_willow",
@@ -40579,7 +40579,7 @@ SKYRIM_MICRO_RULES = {
                                 56.0
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "stormhold_brackish_tidal_mud_16",
                 "trees": [
                         "red_mangrove",
@@ -40638,7 +40638,7 @@ SKYRIM_MICRO_RULES = {
                                 79.8
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "stormhold_sulfurous_peat_mire_17",
                 "trees": [
                         "dead_cypress_snag",
@@ -40696,7 +40696,7 @@ SKYRIM_MICRO_RULES = {
                                 103.4
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "stormhold_sandy_jungle_peat_18",
                 "trees": [
                         "tree_fern",
@@ -40755,7 +40755,7 @@ SKYRIM_MICRO_RULES = {
                                 126.0
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "stormhold_amber_sap_humus_19",
                 "trees": [
                         "ancient_hist_tree",
@@ -40814,7 +40814,7 @@ SKYRIM_MICRO_RULES = {
                                 145.4
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "stormhold_drowned_xanmeer_flagstone_20",
                 "trees": [
                         "strangler_cypress",
@@ -40872,7 +40872,7 @@ SKYRIM_MICRO_RULES = {
                                 170.1
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "stormhold_black_alluvial_ooze_21",
                 "trees": [
                         "swamp_willow",
@@ -40930,7 +40930,7 @@ SKYRIM_MICRO_RULES = {
                                 198.8
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "stormhold_brackish_tidal_mud_22",
                 "trees": [
                         "red_mangrove",
@@ -40989,7 +40989,7 @@ SKYRIM_MICRO_RULES = {
                                 225.2
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "stormhold_sulfurous_peat_mire_23",
                 "trees": [
                         "dead_cypress_snag",
@@ -41047,7 +41047,7 @@ SKYRIM_MICRO_RULES = {
                                 249.8
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "stormhold_sandy_jungle_peat_24",
                 "trees": [
                         "tree_fern",
@@ -41106,7 +41106,7 @@ SKYRIM_MICRO_RULES = {
                                 279.9
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "stormhold_amber_sap_humus_25",
                 "trees": [
                         "ancient_hist_tree",
@@ -41165,7 +41165,7 @@ SKYRIM_MICRO_RULES = {
                                 308.5
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "stormhold_drowned_xanmeer_flagstone_26",
                 "trees": [
                         "strangler_cypress",
@@ -41223,7 +41223,7 @@ SKYRIM_MICRO_RULES = {
                                 333.5
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "stormhold_black_alluvial_ooze_27",
                 "trees": [
                         "swamp_willow",
@@ -41281,7 +41281,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "stormhold_brackish_tidal_mud_28",
                 "trees": [
                         "red_mangrove",
@@ -41342,7 +41342,7 @@ SKYRIM_MICRO_RULES = {
                                 30.4
                         ]
                 },
-                "biome": "skycraft:hist_grove",
+                "biome": "nirncraft:hist_grove",
                 "surface": "helstrom_amber_sap_humus_1",
                 "trees": [
                         "ancient_hist_tree",
@@ -41401,7 +41401,7 @@ SKYRIM_MICRO_RULES = {
                                 53.2
                         ]
                 },
-                "biome": "skycraft:deep_mire",
+                "biome": "nirncraft:deep_mire",
                 "surface": "helstrom_drowned_xanmeer_flagstone_2",
                 "trees": [
                         "strangler_cypress",
@@ -41459,7 +41459,7 @@ SKYRIM_MICRO_RULES = {
                                 78.7
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "helstrom_black_alluvial_ooze_3",
                 "trees": [
                         "swamp_willow",
@@ -41517,7 +41517,7 @@ SKYRIM_MICRO_RULES = {
                                 107.7
                         ]
                 },
-                "biome": "skycraft:mangrove_delta",
+                "biome": "nirncraft:mangrove_delta",
                 "surface": "helstrom_brackish_tidal_mud_4",
                 "trees": [
                         "red_mangrove",
@@ -41576,7 +41576,7 @@ SKYRIM_MICRO_RULES = {
                                 133.5
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "helstrom_sulfurous_peat_mire_5",
                 "trees": [
                         "dead_cypress_snag",
@@ -41634,7 +41634,7 @@ SKYRIM_MICRO_RULES = {
                                 157.3
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "helstrom_sandy_jungle_peat_6",
                 "trees": [
                         "tree_fern",
@@ -41693,7 +41693,7 @@ SKYRIM_MICRO_RULES = {
                                 185.7
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "helstrom_amber_sap_humus_7",
                 "trees": [
                         "ancient_hist_tree",
@@ -41752,7 +41752,7 @@ SKYRIM_MICRO_RULES = {
                                 213.1
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "helstrom_drowned_xanmeer_flagstone_8",
                 "trees": [
                         "strangler_cypress",
@@ -41810,7 +41810,7 @@ SKYRIM_MICRO_RULES = {
                                 235.7
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "helstrom_black_alluvial_ooze_9",
                 "trees": [
                         "swamp_willow",
@@ -41868,7 +41868,7 @@ SKYRIM_MICRO_RULES = {
                                 262.0
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "helstrom_brackish_tidal_mud_10",
                 "trees": [
                         "red_mangrove",
@@ -41927,7 +41927,7 @@ SKYRIM_MICRO_RULES = {
                                 291.0
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "helstrom_sulfurous_peat_mire_11",
                 "trees": [
                         "dead_cypress_snag",
@@ -41985,7 +41985,7 @@ SKYRIM_MICRO_RULES = {
                                 315.7
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "helstrom_sandy_jungle_peat_12",
                 "trees": [
                         "tree_fern",
@@ -42044,7 +42044,7 @@ SKYRIM_MICRO_RULES = {
                                 337.6
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "helstrom_amber_sap_humus_13",
                 "trees": [
                         "ancient_hist_tree",
@@ -42103,7 +42103,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "helstrom_drowned_xanmeer_flagstone_14",
                 "trees": [
                         "strangler_cypress",
@@ -42161,7 +42161,7 @@ SKYRIM_MICRO_RULES = {
                                 31.0
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "helstrom_black_alluvial_ooze_15",
                 "trees": [
                         "swamp_willow",
@@ -42219,7 +42219,7 @@ SKYRIM_MICRO_RULES = {
                                 54.4
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "helstrom_brackish_tidal_mud_16",
                 "trees": [
                         "red_mangrove",
@@ -42278,7 +42278,7 @@ SKYRIM_MICRO_RULES = {
                                 80.4
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "helstrom_sulfurous_peat_mire_17",
                 "trees": [
                         "dead_cypress_snag",
@@ -42336,7 +42336,7 @@ SKYRIM_MICRO_RULES = {
                                 109.0
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "helstrom_sandy_jungle_peat_18",
                 "trees": [
                         "tree_fern",
@@ -42395,7 +42395,7 @@ SKYRIM_MICRO_RULES = {
                                 132.9
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "helstrom_amber_sap_humus_19",
                 "trees": [
                         "ancient_hist_tree",
@@ -42454,7 +42454,7 @@ SKYRIM_MICRO_RULES = {
                                 156.8
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "helstrom_drowned_xanmeer_flagstone_20",
                 "trees": [
                         "strangler_cypress",
@@ -42512,7 +42512,7 @@ SKYRIM_MICRO_RULES = {
                                 184.5
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "helstrom_black_alluvial_ooze_21",
                 "trees": [
                         "swamp_willow",
@@ -42570,7 +42570,7 @@ SKYRIM_MICRO_RULES = {
                                 212.2
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "helstrom_brackish_tidal_mud_22",
                 "trees": [
                         "red_mangrove",
@@ -42629,7 +42629,7 @@ SKYRIM_MICRO_RULES = {
                                 235.2
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "helstrom_sulfurous_peat_mire_23",
                 "trees": [
                         "dead_cypress_snag",
@@ -42687,7 +42687,7 @@ SKYRIM_MICRO_RULES = {
                                 260.2
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "helstrom_sandy_jungle_peat_24",
                 "trees": [
                         "tree_fern",
@@ -42746,7 +42746,7 @@ SKYRIM_MICRO_RULES = {
                                 288.9
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "helstrom_amber_sap_humus_25",
                 "trees": [
                         "ancient_hist_tree",
@@ -42805,7 +42805,7 @@ SKYRIM_MICRO_RULES = {
                                 313.9
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "helstrom_drowned_xanmeer_flagstone_26",
                 "trees": [
                         "strangler_cypress",
@@ -42863,7 +42863,7 @@ SKYRIM_MICRO_RULES = {
                                 336.3
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "helstrom_black_alluvial_ooze_27",
                 "trees": [
                         "swamp_willow",
@@ -42921,7 +42921,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "helstrom_brackish_tidal_mud_28",
                 "trees": [
                         "red_mangrove",
@@ -42982,7 +42982,7 @@ SKYRIM_MICRO_RULES = {
                                 30.4
                         ]
                 },
-                "biome": "skycraft:hist_grove",
+                "biome": "nirncraft:hist_grove",
                 "surface": "gideon_amber_sap_humus_1",
                 "trees": [
                         "ancient_hist_tree",
@@ -43041,7 +43041,7 @@ SKYRIM_MICRO_RULES = {
                                 52.8
                         ]
                 },
-                "biome": "skycraft:deep_mire",
+                "biome": "nirncraft:deep_mire",
                 "surface": "gideon_drowned_xanmeer_flagstone_2",
                 "trees": [
                         "strangler_cypress",
@@ -43099,7 +43099,7 @@ SKYRIM_MICRO_RULES = {
                                 77.9
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "gideon_black_alluvial_ooze_3",
                 "trees": [
                         "swamp_willow",
@@ -43157,7 +43157,7 @@ SKYRIM_MICRO_RULES = {
                                 105.5
                         ]
                 },
-                "biome": "skycraft:mangrove_delta",
+                "biome": "nirncraft:mangrove_delta",
                 "surface": "gideon_brackish_tidal_mud_4",
                 "trees": [
                         "red_mangrove",
@@ -43216,7 +43216,7 @@ SKYRIM_MICRO_RULES = {
                                 131.5
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "gideon_sulfurous_peat_mire_5",
                 "trees": [
                         "dead_cypress_snag",
@@ -43274,7 +43274,7 @@ SKYRIM_MICRO_RULES = {
                                 154.9
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "gideon_sandy_jungle_peat_6",
                 "trees": [
                         "tree_fern",
@@ -43333,7 +43333,7 @@ SKYRIM_MICRO_RULES = {
                                 182.2
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "gideon_amber_sap_humus_7",
                 "trees": [
                         "ancient_hist_tree",
@@ -43392,7 +43392,7 @@ SKYRIM_MICRO_RULES = {
                                 211.3
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "gideon_drowned_xanmeer_flagstone_8",
                 "trees": [
                         "strangler_cypress",
@@ -43450,7 +43450,7 @@ SKYRIM_MICRO_RULES = {
                                 234.0
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "gideon_black_alluvial_ooze_9",
                 "trees": [
                         "swamp_willow",
@@ -43508,7 +43508,7 @@ SKYRIM_MICRO_RULES = {
                                 259.4
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "gideon_brackish_tidal_mud_10",
                 "trees": [
                         "red_mangrove",
@@ -43567,7 +43567,7 @@ SKYRIM_MICRO_RULES = {
                                 288.1
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "gideon_sulfurous_peat_mire_11",
                 "trees": [
                         "dead_cypress_snag",
@@ -43625,7 +43625,7 @@ SKYRIM_MICRO_RULES = {
                                 313.4
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "gideon_sandy_jungle_peat_12",
                 "trees": [
                         "tree_fern",
@@ -43684,7 +43684,7 @@ SKYRIM_MICRO_RULES = {
                                 335.5
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "gideon_amber_sap_humus_13",
                 "trees": [
                         "ancient_hist_tree",
@@ -43743,7 +43743,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "gideon_drowned_xanmeer_flagstone_14",
                 "trees": [
                         "strangler_cypress",
@@ -43801,7 +43801,7 @@ SKYRIM_MICRO_RULES = {
                                 30.8
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "gideon_black_alluvial_ooze_15",
                 "trees": [
                         "swamp_willow",
@@ -43859,7 +43859,7 @@ SKYRIM_MICRO_RULES = {
                                 54.8
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "gideon_brackish_tidal_mud_16",
                 "trees": [
                         "red_mangrove",
@@ -43918,7 +43918,7 @@ SKYRIM_MICRO_RULES = {
                                 80.2
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "gideon_sulfurous_peat_mire_17",
                 "trees": [
                         "dead_cypress_snag",
@@ -43976,7 +43976,7 @@ SKYRIM_MICRO_RULES = {
                                 108.0
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "gideon_sandy_jungle_peat_18",
                 "trees": [
                         "tree_fern",
@@ -44035,7 +44035,7 @@ SKYRIM_MICRO_RULES = {
                                 134.7
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "gideon_amber_sap_humus_19",
                 "trees": [
                         "ancient_hist_tree",
@@ -44094,7 +44094,7 @@ SKYRIM_MICRO_RULES = {
                                 158.3
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "gideon_drowned_xanmeer_flagstone_20",
                 "trees": [
                         "strangler_cypress",
@@ -44152,7 +44152,7 @@ SKYRIM_MICRO_RULES = {
                                 185.7
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "gideon_black_alluvial_ooze_21",
                 "trees": [
                         "swamp_willow",
@@ -44210,7 +44210,7 @@ SKYRIM_MICRO_RULES = {
                                 213.3
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "gideon_brackish_tidal_mud_22",
                 "trees": [
                         "red_mangrove",
@@ -44269,7 +44269,7 @@ SKYRIM_MICRO_RULES = {
                                 234.5
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "gideon_sulfurous_peat_mire_23",
                 "trees": [
                         "dead_cypress_snag",
@@ -44327,7 +44327,7 @@ SKYRIM_MICRO_RULES = {
                                 258.3
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "gideon_sandy_jungle_peat_24",
                 "trees": [
                         "tree_fern",
@@ -44386,7 +44386,7 @@ SKYRIM_MICRO_RULES = {
                                 285.9
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "gideon_amber_sap_humus_25",
                 "trees": [
                         "ancient_hist_tree",
@@ -44445,7 +44445,7 @@ SKYRIM_MICRO_RULES = {
                                 312.2
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "gideon_drowned_xanmeer_flagstone_26",
                 "trees": [
                         "strangler_cypress",
@@ -44503,7 +44503,7 @@ SKYRIM_MICRO_RULES = {
                                 335.9
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "gideon_black_alluvial_ooze_27",
                 "trees": [
                         "swamp_willow",
@@ -44561,7 +44561,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "gideon_brackish_tidal_mud_28",
                 "trees": [
                         "red_mangrove",
@@ -44622,7 +44622,7 @@ SKYRIM_MICRO_RULES = {
                                 31.0
                         ]
                 },
-                "biome": "skycraft:hist_grove",
+                "biome": "nirncraft:hist_grove",
                 "surface": "lilmoth_amber_sap_humus_1",
                 "trees": [
                         "ancient_hist_tree",
@@ -44681,7 +44681,7 @@ SKYRIM_MICRO_RULES = {
                                 53.6
                         ]
                 },
-                "biome": "skycraft:deep_mire",
+                "biome": "nirncraft:deep_mire",
                 "surface": "lilmoth_drowned_xanmeer_flagstone_2",
                 "trees": [
                         "strangler_cypress",
@@ -44739,7 +44739,7 @@ SKYRIM_MICRO_RULES = {
                                 78.7
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "lilmoth_black_alluvial_ooze_3",
                 "trees": [
                         "swamp_willow",
@@ -44797,7 +44797,7 @@ SKYRIM_MICRO_RULES = {
                                 107.2
                         ]
                 },
-                "biome": "skycraft:mangrove_delta",
+                "biome": "nirncraft:mangrove_delta",
                 "surface": "lilmoth_brackish_tidal_mud_4",
                 "trees": [
                         "red_mangrove",
@@ -44856,7 +44856,7 @@ SKYRIM_MICRO_RULES = {
                                 132.0
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "lilmoth_sulfurous_peat_mire_5",
                 "trees": [
                         "dead_cypress_snag",
@@ -44914,7 +44914,7 @@ SKYRIM_MICRO_RULES = {
                                 153.5
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "lilmoth_sandy_jungle_peat_6",
                 "trees": [
                         "tree_fern",
@@ -44973,7 +44973,7 @@ SKYRIM_MICRO_RULES = {
                                 179.7
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "lilmoth_amber_sap_humus_7",
                 "trees": [
                         "ancient_hist_tree",
@@ -45032,7 +45032,7 @@ SKYRIM_MICRO_RULES = {
                                 207.5
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "lilmoth_drowned_xanmeer_flagstone_8",
                 "trees": [
                         "strangler_cypress",
@@ -45090,7 +45090,7 @@ SKYRIM_MICRO_RULES = {
                                 230.6
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "lilmoth_black_alluvial_ooze_9",
                 "trees": [
                         "swamp_willow",
@@ -45148,7 +45148,7 @@ SKYRIM_MICRO_RULES = {
                                 255.6
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "lilmoth_brackish_tidal_mud_10",
                 "trees": [
                         "red_mangrove",
@@ -45207,7 +45207,7 @@ SKYRIM_MICRO_RULES = {
                                 283.7
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "lilmoth_sulfurous_peat_mire_11",
                 "trees": [
                         "dead_cypress_snag",
@@ -45265,7 +45265,7 @@ SKYRIM_MICRO_RULES = {
                                 310.8
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "lilmoth_sandy_jungle_peat_12",
                 "trees": [
                         "tree_fern",
@@ -45324,7 +45324,7 @@ SKYRIM_MICRO_RULES = {
                                 335.5
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "lilmoth_amber_sap_humus_13",
                 "trees": [
                         "ancient_hist_tree",
@@ -45383,7 +45383,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "lilmoth_drowned_xanmeer_flagstone_14",
                 "trees": [
                         "strangler_cypress",
@@ -45441,7 +45441,7 @@ SKYRIM_MICRO_RULES = {
                                 31.6
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "lilmoth_black_alluvial_ooze_15",
                 "trees": [
                         "swamp_willow",
@@ -45499,7 +45499,7 @@ SKYRIM_MICRO_RULES = {
                                 54.6
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "lilmoth_brackish_tidal_mud_16",
                 "trees": [
                         "red_mangrove",
@@ -45558,7 +45558,7 @@ SKYRIM_MICRO_RULES = {
                                 81.1
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "lilmoth_sulfurous_peat_mire_17",
                 "trees": [
                         "dead_cypress_snag",
@@ -45616,7 +45616,7 @@ SKYRIM_MICRO_RULES = {
                                 109.1
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "lilmoth_sandy_jungle_peat_18",
                 "trees": [
                         "tree_fern",
@@ -45675,7 +45675,7 @@ SKYRIM_MICRO_RULES = {
                                 132.6
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "lilmoth_amber_sap_humus_19",
                 "trees": [
                         "ancient_hist_tree",
@@ -45734,7 +45734,7 @@ SKYRIM_MICRO_RULES = {
                                 153.1
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "lilmoth_drowned_xanmeer_flagstone_20",
                 "trees": [
                         "strangler_cypress",
@@ -45792,7 +45792,7 @@ SKYRIM_MICRO_RULES = {
                                 179.5
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "lilmoth_black_alluvial_ooze_21",
                 "trees": [
                         "swamp_willow",
@@ -45850,7 +45850,7 @@ SKYRIM_MICRO_RULES = {
                                 206.7
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "lilmoth_brackish_tidal_mud_22",
                 "trees": [
                         "red_mangrove",
@@ -45909,7 +45909,7 @@ SKYRIM_MICRO_RULES = {
                                 231.5
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "lilmoth_sulfurous_peat_mire_23",
                 "trees": [
                         "dead_cypress_snag",
@@ -45967,7 +45967,7 @@ SKYRIM_MICRO_RULES = {
                                 257.1
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "lilmoth_sandy_jungle_peat_24",
                 "trees": [
                         "tree_fern",
@@ -46026,7 +46026,7 @@ SKYRIM_MICRO_RULES = {
                                 285.6
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "lilmoth_amber_sap_humus_25",
                 "trees": [
                         "ancient_hist_tree",
@@ -46085,7 +46085,7 @@ SKYRIM_MICRO_RULES = {
                                 311.4
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "lilmoth_drowned_xanmeer_flagstone_26",
                 "trees": [
                         "strangler_cypress",
@@ -46143,7 +46143,7 @@ SKYRIM_MICRO_RULES = {
                                 334.3
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "lilmoth_black_alluvial_ooze_27",
                 "trees": [
                         "swamp_willow",
@@ -46201,7 +46201,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "lilmoth_brackish_tidal_mud_28",
                 "trees": [
                         "red_mangrove",
@@ -46262,7 +46262,7 @@ SKYRIM_MICRO_RULES = {
                                 31.1
                         ]
                 },
-                "biome": "skycraft:hist_grove",
+                "biome": "nirncraft:hist_grove",
                 "surface": "murkmire_amber_sap_humus_1",
                 "trees": [
                         "ancient_hist_tree",
@@ -46321,7 +46321,7 @@ SKYRIM_MICRO_RULES = {
                                 54.5
                         ]
                 },
-                "biome": "skycraft:deep_mire",
+                "biome": "nirncraft:deep_mire",
                 "surface": "murkmire_drowned_xanmeer_flagstone_2",
                 "trees": [
                         "strangler_cypress",
@@ -46379,7 +46379,7 @@ SKYRIM_MICRO_RULES = {
                                 80.3
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "murkmire_black_alluvial_ooze_3",
                 "trees": [
                         "swamp_willow",
@@ -46437,7 +46437,7 @@ SKYRIM_MICRO_RULES = {
                                 109.5
                         ]
                 },
-                "biome": "skycraft:mangrove_delta",
+                "biome": "nirncraft:mangrove_delta",
                 "surface": "murkmire_brackish_tidal_mud_4",
                 "trees": [
                         "red_mangrove",
@@ -46496,7 +46496,7 @@ SKYRIM_MICRO_RULES = {
                                 133.8
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "murkmire_sulfurous_peat_mire_5",
                 "trees": [
                         "dead_cypress_snag",
@@ -46554,7 +46554,7 @@ SKYRIM_MICRO_RULES = {
                                 156.1
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "murkmire_sandy_jungle_peat_6",
                 "trees": [
                         "tree_fern",
@@ -46613,7 +46613,7 @@ SKYRIM_MICRO_RULES = {
                                 181.6
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "murkmire_amber_sap_humus_7",
                 "trees": [
                         "ancient_hist_tree",
@@ -46672,7 +46672,7 @@ SKYRIM_MICRO_RULES = {
                                 208.6
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "murkmire_drowned_xanmeer_flagstone_8",
                 "trees": [
                         "strangler_cypress",
@@ -46730,7 +46730,7 @@ SKYRIM_MICRO_RULES = {
                                 231.0
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "murkmire_black_alluvial_ooze_9",
                 "trees": [
                         "swamp_willow",
@@ -46788,7 +46788,7 @@ SKYRIM_MICRO_RULES = {
                                 255.4
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "murkmire_brackish_tidal_mud_10",
                 "trees": [
                         "red_mangrove",
@@ -46847,7 +46847,7 @@ SKYRIM_MICRO_RULES = {
                                 286.0
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "murkmire_sulfurous_peat_mire_11",
                 "trees": [
                         "dead_cypress_snag",
@@ -46905,7 +46905,7 @@ SKYRIM_MICRO_RULES = {
                                 311.7
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "murkmire_sandy_jungle_peat_12",
                 "trees": [
                         "tree_fern",
@@ -46964,7 +46964,7 @@ SKYRIM_MICRO_RULES = {
                                 334.5
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "murkmire_amber_sap_humus_13",
                 "trees": [
                         "ancient_hist_tree",
@@ -47023,7 +47023,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "murkmire_drowned_xanmeer_flagstone_14",
                 "trees": [
                         "strangler_cypress",
@@ -47081,7 +47081,7 @@ SKYRIM_MICRO_RULES = {
                                 31.7
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "murkmire_black_alluvial_ooze_15",
                 "trees": [
                         "swamp_willow",
@@ -47139,7 +47139,7 @@ SKYRIM_MICRO_RULES = {
                                 52.7
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "murkmire_brackish_tidal_mud_16",
                 "trees": [
                         "red_mangrove",
@@ -47198,7 +47198,7 @@ SKYRIM_MICRO_RULES = {
                                 76.9
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "murkmire_sulfurous_peat_mire_17",
                 "trees": [
                         "dead_cypress_snag",
@@ -47256,7 +47256,7 @@ SKYRIM_MICRO_RULES = {
                                 104.5
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "murkmire_sandy_jungle_peat_18",
                 "trees": [
                         "tree_fern",
@@ -47315,7 +47315,7 @@ SKYRIM_MICRO_RULES = {
                                 130.9
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "murkmire_amber_sap_humus_19",
                 "trees": [
                         "ancient_hist_tree",
@@ -47374,7 +47374,7 @@ SKYRIM_MICRO_RULES = {
                                 154.4
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "murkmire_drowned_xanmeer_flagstone_20",
                 "trees": [
                         "strangler_cypress",
@@ -47432,7 +47432,7 @@ SKYRIM_MICRO_RULES = {
                                 182.4
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "murkmire_black_alluvial_ooze_21",
                 "trees": [
                         "swamp_willow",
@@ -47490,7 +47490,7 @@ SKYRIM_MICRO_RULES = {
                                 210.5
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "murkmire_brackish_tidal_mud_22",
                 "trees": [
                         "red_mangrove",
@@ -47549,7 +47549,7 @@ SKYRIM_MICRO_RULES = {
                                 233.5
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "murkmire_sulfurous_peat_mire_23",
                 "trees": [
                         "dead_cypress_snag",
@@ -47607,7 +47607,7 @@ SKYRIM_MICRO_RULES = {
                                 258.7
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "murkmire_sandy_jungle_peat_24",
                 "trees": [
                         "tree_fern",
@@ -47666,7 +47666,7 @@ SKYRIM_MICRO_RULES = {
                                 286.5
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "murkmire_amber_sap_humus_25",
                 "trees": [
                         "ancient_hist_tree",
@@ -47725,7 +47725,7 @@ SKYRIM_MICRO_RULES = {
                                 313.4
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "murkmire_drowned_xanmeer_flagstone_26",
                 "trees": [
                         "strangler_cypress",
@@ -47783,7 +47783,7 @@ SKYRIM_MICRO_RULES = {
                                 336.7
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "murkmire_black_alluvial_ooze_27",
                 "trees": [
                         "swamp_willow",
@@ -47841,7 +47841,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "murkmire_brackish_tidal_mud_28",
                 "trees": [
                         "red_mangrove",
@@ -47902,7 +47902,7 @@ SKYRIM_MICRO_RULES = {
                                 32.3
                         ]
                 },
-                "biome": "skycraft:anequina_badlands",
+                "biome": "nirncraft:anequina_badlands",
                 "surface": "anequina_red_mesa_sandstone_1",
                 "trees": [
                         "bleached_acacia",
@@ -47960,7 +47960,7 @@ SKYRIM_MICRO_RULES = {
                                 57.3
                         ]
                 },
-                "biome": "skycraft:sugar_fields",
+                "biome": "nirncraft:sugar_fields",
                 "surface": "anequina_sweet_alluvial_silt_2",
                 "trees": [
                         "date_palm",
@@ -48018,7 +48018,7 @@ SKYRIM_MICRO_RULES = {
                                 80.5
                         ]
                 },
-                "biome": "skycraft:elsweyr_savanna",
+                "biome": "nirncraft:elsweyr_savanna",
                 "surface": "anequina_golden_savanna_loam_3",
                 "trees": [
                         "umbrella_acacia",
@@ -48076,7 +48076,7 @@ SKYRIM_MICRO_RULES = {
                                 105.0
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "anequina_monsoon_jungle_humus_4",
                 "trees": [
                         "teak_giant",
@@ -48135,7 +48135,7 @@ SKYRIM_MICRO_RULES = {
                                 129.8
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "anequina_rippled_amber_sand_5",
                 "trees": [
                         "oasis_date_palm",
@@ -48193,7 +48193,7 @@ SKYRIM_MICRO_RULES = {
                                 153.2
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "anequina_red_mesa_sandstone_6",
                 "trees": [
                         "bleached_acacia",
@@ -48251,7 +48251,7 @@ SKYRIM_MICRO_RULES = {
                                 177.7
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "anequina_sweet_alluvial_silt_7",
                 "trees": [
                         "date_palm",
@@ -48309,7 +48309,7 @@ SKYRIM_MICRO_RULES = {
                                 202.2
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "anequina_golden_savanna_loam_8",
                 "trees": [
                         "umbrella_acacia",
@@ -48367,7 +48367,7 @@ SKYRIM_MICRO_RULES = {
                                 224.8
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "anequina_monsoon_jungle_humus_9",
                 "trees": [
                         "teak_giant",
@@ -48426,7 +48426,7 @@ SKYRIM_MICRO_RULES = {
                                 246.6
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "anequina_rippled_amber_sand_10",
                 "trees": [
                         "oasis_date_palm",
@@ -48484,7 +48484,7 @@ SKYRIM_MICRO_RULES = {
                                 272.0
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "anequina_red_mesa_sandstone_11",
                 "trees": [
                         "bleached_acacia",
@@ -48542,7 +48542,7 @@ SKYRIM_MICRO_RULES = {
                                 300.2
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "anequina_sweet_alluvial_silt_12",
                 "trees": [
                         "date_palm",
@@ -48600,7 +48600,7 @@ SKYRIM_MICRO_RULES = {
                                 329.4
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "anequina_golden_savanna_loam_13",
                 "trees": [
                         "umbrella_acacia",
@@ -48658,7 +48658,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "anequina_monsoon_jungle_humus_14",
                 "trees": [
                         "teak_giant",
@@ -48717,7 +48717,7 @@ SKYRIM_MICRO_RULES = {
                                 25.7
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "anequina_rippled_amber_sand_15",
                 "trees": [
                         "oasis_date_palm",
@@ -48775,7 +48775,7 @@ SKYRIM_MICRO_RULES = {
                                 46.9
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "anequina_red_mesa_sandstone_16",
                 "trees": [
                         "bleached_acacia",
@@ -48833,7 +48833,7 @@ SKYRIM_MICRO_RULES = {
                                 69.4
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "anequina_sweet_alluvial_silt_17",
                 "trees": [
                         "date_palm",
@@ -48891,7 +48891,7 @@ SKYRIM_MICRO_RULES = {
                                 96.7
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "anequina_golden_savanna_loam_18",
                 "trees": [
                         "umbrella_acacia",
@@ -48949,7 +48949,7 @@ SKYRIM_MICRO_RULES = {
                                 132.1
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "anequina_monsoon_jungle_humus_19",
                 "trees": [
                         "teak_giant",
@@ -49008,7 +49008,7 @@ SKYRIM_MICRO_RULES = {
                                 166.8
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "anequina_rippled_amber_sand_20",
                 "trees": [
                         "oasis_date_palm",
@@ -49066,7 +49066,7 @@ SKYRIM_MICRO_RULES = {
                                 193.2
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "anequina_red_mesa_sandstone_21",
                 "trees": [
                         "bleached_acacia",
@@ -49124,7 +49124,7 @@ SKYRIM_MICRO_RULES = {
                                 215.0
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "anequina_sweet_alluvial_silt_22",
                 "trees": [
                         "date_palm",
@@ -49182,7 +49182,7 @@ SKYRIM_MICRO_RULES = {
                                 234.1
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "anequina_golden_savanna_loam_23",
                 "trees": [
                         "umbrella_acacia",
@@ -49240,7 +49240,7 @@ SKYRIM_MICRO_RULES = {
                                 255.9
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "anequina_monsoon_jungle_humus_24",
                 "trees": [
                         "teak_giant",
@@ -49299,7 +49299,7 @@ SKYRIM_MICRO_RULES = {
                                 284.7
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "anequina_rippled_amber_sand_25",
                 "trees": [
                         "oasis_date_palm",
@@ -49357,7 +49357,7 @@ SKYRIM_MICRO_RULES = {
                                 314.5
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "anequina_red_mesa_sandstone_26",
                 "trees": [
                         "bleached_acacia",
@@ -49415,7 +49415,7 @@ SKYRIM_MICRO_RULES = {
                                 339.7
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "anequina_sweet_alluvial_silt_27",
                 "trees": [
                         "date_palm",
@@ -49473,7 +49473,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "anequina_golden_savanna_loam_28",
                 "trees": [
                         "umbrella_acacia",
@@ -49533,7 +49533,7 @@ SKYRIM_MICRO_RULES = {
                                 27.2
                         ]
                 },
-                "biome": "skycraft:anequina_badlands",
+                "biome": "nirncraft:anequina_badlands",
                 "surface": "rimmen_red_mesa_sandstone_1",
                 "trees": [
                         "bleached_acacia",
@@ -49591,7 +49591,7 @@ SKYRIM_MICRO_RULES = {
                                 47.2
                         ]
                 },
-                "biome": "skycraft:sugar_fields",
+                "biome": "nirncraft:sugar_fields",
                 "surface": "rimmen_sweet_alluvial_silt_2",
                 "trees": [
                         "date_palm",
@@ -49649,7 +49649,7 @@ SKYRIM_MICRO_RULES = {
                                 67.3
                         ]
                 },
-                "biome": "skycraft:elsweyr_savanna",
+                "biome": "nirncraft:elsweyr_savanna",
                 "surface": "rimmen_golden_savanna_loam_3",
                 "trees": [
                         "umbrella_acacia",
@@ -49707,7 +49707,7 @@ SKYRIM_MICRO_RULES = {
                                 85.2
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "rimmen_monsoon_jungle_humus_4",
                 "trees": [
                         "teak_giant",
@@ -49766,7 +49766,7 @@ SKYRIM_MICRO_RULES = {
                                 105.7
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "rimmen_rippled_amber_sand_5",
                 "trees": [
                         "oasis_date_palm",
@@ -49824,7 +49824,7 @@ SKYRIM_MICRO_RULES = {
                                 129.0
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "rimmen_red_mesa_sandstone_6",
                 "trees": [
                         "bleached_acacia",
@@ -49882,7 +49882,7 @@ SKYRIM_MICRO_RULES = {
                                 151.5
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "rimmen_sweet_alluvial_silt_7",
                 "trees": [
                         "date_palm",
@@ -49940,7 +49940,7 @@ SKYRIM_MICRO_RULES = {
                                 179.4
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "rimmen_golden_savanna_loam_8",
                 "trees": [
                         "umbrella_acacia",
@@ -49998,7 +49998,7 @@ SKYRIM_MICRO_RULES = {
                                 211.4
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "rimmen_monsoon_jungle_humus_9",
                 "trees": [
                         "teak_giant",
@@ -50057,7 +50057,7 @@ SKYRIM_MICRO_RULES = {
                                 241.8
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "rimmen_rippled_amber_sand_10",
                 "trees": [
                         "oasis_date_palm",
@@ -50115,7 +50115,7 @@ SKYRIM_MICRO_RULES = {
                                 275.8
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "rimmen_red_mesa_sandstone_11",
                 "trees": [
                         "bleached_acacia",
@@ -50173,7 +50173,7 @@ SKYRIM_MICRO_RULES = {
                                 309.6
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "rimmen_sweet_alluvial_silt_12",
                 "trees": [
                         "date_palm",
@@ -50231,7 +50231,7 @@ SKYRIM_MICRO_RULES = {
                                 338.0
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "rimmen_golden_savanna_loam_13",
                 "trees": [
                         "umbrella_acacia",
@@ -50289,7 +50289,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "rimmen_monsoon_jungle_humus_14",
                 "trees": [
                         "teak_giant",
@@ -50348,7 +50348,7 @@ SKYRIM_MICRO_RULES = {
                                 29.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "rimmen_rippled_amber_sand_15",
                 "trees": [
                         "oasis_date_palm",
@@ -50406,7 +50406,7 @@ SKYRIM_MICRO_RULES = {
                                 52.4
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "rimmen_red_mesa_sandstone_16",
                 "trees": [
                         "bleached_acacia",
@@ -50464,7 +50464,7 @@ SKYRIM_MICRO_RULES = {
                                 73.7
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "rimmen_sweet_alluvial_silt_17",
                 "trees": [
                         "date_palm",
@@ -50522,7 +50522,7 @@ SKYRIM_MICRO_RULES = {
                                 97.7
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "rimmen_golden_savanna_loam_18",
                 "trees": [
                         "umbrella_acacia",
@@ -50580,7 +50580,7 @@ SKYRIM_MICRO_RULES = {
                                 121.6
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "rimmen_monsoon_jungle_humus_19",
                 "trees": [
                         "teak_giant",
@@ -50639,7 +50639,7 @@ SKYRIM_MICRO_RULES = {
                                 146.6
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "rimmen_rippled_amber_sand_20",
                 "trees": [
                         "oasis_date_palm",
@@ -50697,7 +50697,7 @@ SKYRIM_MICRO_RULES = {
                                 173.9
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "rimmen_red_mesa_sandstone_21",
                 "trees": [
                         "bleached_acacia",
@@ -50755,7 +50755,7 @@ SKYRIM_MICRO_RULES = {
                                 200.8
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "rimmen_sweet_alluvial_silt_22",
                 "trees": [
                         "date_palm",
@@ -50813,7 +50813,7 @@ SKYRIM_MICRO_RULES = {
                                 227.5
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "rimmen_golden_savanna_loam_23",
                 "trees": [
                         "umbrella_acacia",
@@ -50871,7 +50871,7 @@ SKYRIM_MICRO_RULES = {
                                 254.6
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "rimmen_monsoon_jungle_humus_24",
                 "trees": [
                         "teak_giant",
@@ -50930,7 +50930,7 @@ SKYRIM_MICRO_RULES = {
                                 283.3
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "rimmen_rippled_amber_sand_25",
                 "trees": [
                         "oasis_date_palm",
@@ -50988,7 +50988,7 @@ SKYRIM_MICRO_RULES = {
                                 311.2
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "rimmen_red_mesa_sandstone_26",
                 "trees": [
                         "bleached_acacia",
@@ -51046,7 +51046,7 @@ SKYRIM_MICRO_RULES = {
                                 336.0
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "rimmen_sweet_alluvial_silt_27",
                 "trees": [
                         "date_palm",
@@ -51104,7 +51104,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "rimmen_golden_savanna_loam_28",
                 "trees": [
                         "umbrella_acacia",
@@ -51164,7 +51164,7 @@ SKYRIM_MICRO_RULES = {
                                 34.3
                         ]
                 },
-                "biome": "skycraft:anequina_badlands",
+                "biome": "nirncraft:anequina_badlands",
                 "surface": "torval_red_mesa_sandstone_1",
                 "trees": [
                         "bleached_acacia",
@@ -51222,7 +51222,7 @@ SKYRIM_MICRO_RULES = {
                                 59.4
                         ]
                 },
-                "biome": "skycraft:sugar_fields",
+                "biome": "nirncraft:sugar_fields",
                 "surface": "torval_sweet_alluvial_silt_2",
                 "trees": [
                         "date_palm",
@@ -51280,7 +51280,7 @@ SKYRIM_MICRO_RULES = {
                                 85.1
                         ]
                 },
-                "biome": "skycraft:elsweyr_savanna",
+                "biome": "nirncraft:elsweyr_savanna",
                 "surface": "torval_golden_savanna_loam_3",
                 "trees": [
                         "umbrella_acacia",
@@ -51338,7 +51338,7 @@ SKYRIM_MICRO_RULES = {
                                 111.0
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "torval_monsoon_jungle_humus_4",
                 "trees": [
                         "teak_giant",
@@ -51397,7 +51397,7 @@ SKYRIM_MICRO_RULES = {
                                 134.1
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "torval_rippled_amber_sand_5",
                 "trees": [
                         "oasis_date_palm",
@@ -51455,7 +51455,7 @@ SKYRIM_MICRO_RULES = {
                                 156.0
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "torval_red_mesa_sandstone_6",
                 "trees": [
                         "bleached_acacia",
@@ -51513,7 +51513,7 @@ SKYRIM_MICRO_RULES = {
                                 180.2
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "torval_sweet_alluvial_silt_7",
                 "trees": [
                         "date_palm",
@@ -51571,7 +51571,7 @@ SKYRIM_MICRO_RULES = {
                                 205.6
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "torval_golden_savanna_loam_8",
                 "trees": [
                         "umbrella_acacia",
@@ -51629,7 +51629,7 @@ SKYRIM_MICRO_RULES = {
                                 230.5
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "torval_monsoon_jungle_humus_9",
                 "trees": [
                         "teak_giant",
@@ -51688,7 +51688,7 @@ SKYRIM_MICRO_RULES = {
                                 255.7
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "torval_rippled_amber_sand_10",
                 "trees": [
                         "oasis_date_palm",
@@ -51746,7 +51746,7 @@ SKYRIM_MICRO_RULES = {
                                 282.2
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "torval_red_mesa_sandstone_11",
                 "trees": [
                         "bleached_acacia",
@@ -51804,7 +51804,7 @@ SKYRIM_MICRO_RULES = {
                                 305.9
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "torval_sweet_alluvial_silt_12",
                 "trees": [
                         "date_palm",
@@ -51862,7 +51862,7 @@ SKYRIM_MICRO_RULES = {
                                 331.5
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "torval_golden_savanna_loam_13",
                 "trees": [
                         "umbrella_acacia",
@@ -51920,7 +51920,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "torval_monsoon_jungle_humus_14",
                 "trees": [
                         "teak_giant",
@@ -51979,7 +51979,7 @@ SKYRIM_MICRO_RULES = {
                                 34.4
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "torval_rippled_amber_sand_15",
                 "trees": [
                         "oasis_date_palm",
@@ -52037,7 +52037,7 @@ SKYRIM_MICRO_RULES = {
                                 60.9
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "torval_red_mesa_sandstone_16",
                 "trees": [
                         "bleached_acacia",
@@ -52095,7 +52095,7 @@ SKYRIM_MICRO_RULES = {
                                 83.7
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "torval_sweet_alluvial_silt_17",
                 "trees": [
                         "date_palm",
@@ -52153,7 +52153,7 @@ SKYRIM_MICRO_RULES = {
                                 105.9
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "torval_golden_savanna_loam_18",
                 "trees": [
                         "umbrella_acacia",
@@ -52211,7 +52211,7 @@ SKYRIM_MICRO_RULES = {
                                 126.5
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "torval_monsoon_jungle_humus_19",
                 "trees": [
                         "teak_giant",
@@ -52270,7 +52270,7 @@ SKYRIM_MICRO_RULES = {
                                 145.2
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "torval_rippled_amber_sand_20",
                 "trees": [
                         "oasis_date_palm",
@@ -52328,7 +52328,7 @@ SKYRIM_MICRO_RULES = {
                                 166.5
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "torval_red_mesa_sandstone_21",
                 "trees": [
                         "bleached_acacia",
@@ -52386,7 +52386,7 @@ SKYRIM_MICRO_RULES = {
                                 193.4
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "torval_sweet_alluvial_silt_22",
                 "trees": [
                         "date_palm",
@@ -52444,7 +52444,7 @@ SKYRIM_MICRO_RULES = {
                                 221.0
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "torval_golden_savanna_loam_23",
                 "trees": [
                         "umbrella_acacia",
@@ -52502,7 +52502,7 @@ SKYRIM_MICRO_RULES = {
                                 246.8
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "torval_monsoon_jungle_humus_24",
                 "trees": [
                         "teak_giant",
@@ -52561,7 +52561,7 @@ SKYRIM_MICRO_RULES = {
                                 275.8
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "torval_rippled_amber_sand_25",
                 "trees": [
                         "oasis_date_palm",
@@ -52619,7 +52619,7 @@ SKYRIM_MICRO_RULES = {
                                 306.5
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "torval_red_mesa_sandstone_26",
                 "trees": [
                         "bleached_acacia",
@@ -52677,7 +52677,7 @@ SKYRIM_MICRO_RULES = {
                                 332.7
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "torval_sweet_alluvial_silt_27",
                 "trees": [
                         "date_palm",
@@ -52735,7 +52735,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "torval_golden_savanna_loam_28",
                 "trees": [
                         "umbrella_acacia",
@@ -52795,7 +52795,7 @@ SKYRIM_MICRO_RULES = {
                                 37.0
                         ]
                 },
-                "biome": "skycraft:anequina_badlands",
+                "biome": "nirncraft:anequina_badlands",
                 "surface": "pellitine_red_mesa_sandstone_1",
                 "trees": [
                         "bleached_acacia",
@@ -52853,7 +52853,7 @@ SKYRIM_MICRO_RULES = {
                                 63.2
                         ]
                 },
-                "biome": "skycraft:sugar_fields",
+                "biome": "nirncraft:sugar_fields",
                 "surface": "pellitine_sweet_alluvial_silt_2",
                 "trees": [
                         "date_palm",
@@ -52911,7 +52911,7 @@ SKYRIM_MICRO_RULES = {
                                 90.4
                         ]
                 },
-                "biome": "skycraft:elsweyr_savanna",
+                "biome": "nirncraft:elsweyr_savanna",
                 "surface": "pellitine_golden_savanna_loam_3",
                 "trees": [
                         "umbrella_acacia",
@@ -52969,7 +52969,7 @@ SKYRIM_MICRO_RULES = {
                                 117.1
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "pellitine_monsoon_jungle_humus_4",
                 "trees": [
                         "teak_giant",
@@ -53028,7 +53028,7 @@ SKYRIM_MICRO_RULES = {
                                 138.5
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "pellitine_rippled_amber_sand_5",
                 "trees": [
                         "oasis_date_palm",
@@ -53086,7 +53086,7 @@ SKYRIM_MICRO_RULES = {
                                 159.5
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "pellitine_red_mesa_sandstone_6",
                 "trees": [
                         "bleached_acacia",
@@ -53144,7 +53144,7 @@ SKYRIM_MICRO_RULES = {
                                 184.4
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "pellitine_sweet_alluvial_silt_7",
                 "trees": [
                         "date_palm",
@@ -53202,7 +53202,7 @@ SKYRIM_MICRO_RULES = {
                                 209.1
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "pellitine_golden_savanna_loam_8",
                 "trees": [
                         "umbrella_acacia",
@@ -53260,7 +53260,7 @@ SKYRIM_MICRO_RULES = {
                                 230.1
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "pellitine_monsoon_jungle_humus_9",
                 "trees": [
                         "teak_giant",
@@ -53319,7 +53319,7 @@ SKYRIM_MICRO_RULES = {
                                 253.6
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "pellitine_rippled_amber_sand_10",
                 "trees": [
                         "oasis_date_palm",
@@ -53377,7 +53377,7 @@ SKYRIM_MICRO_RULES = {
                                 281.7
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "pellitine_red_mesa_sandstone_11",
                 "trees": [
                         "bleached_acacia",
@@ -53435,7 +53435,7 @@ SKYRIM_MICRO_RULES = {
                                 308.3
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "pellitine_sweet_alluvial_silt_12",
                 "trees": [
                         "date_palm",
@@ -53493,7 +53493,7 @@ SKYRIM_MICRO_RULES = {
                                 333.1
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "pellitine_golden_savanna_loam_13",
                 "trees": [
                         "umbrella_acacia",
@@ -53551,7 +53551,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "pellitine_monsoon_jungle_humus_14",
                 "trees": [
                         "teak_giant",
@@ -53610,7 +53610,7 @@ SKYRIM_MICRO_RULES = {
                                 34.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "pellitine_rippled_amber_sand_15",
                 "trees": [
                         "oasis_date_palm",
@@ -53668,7 +53668,7 @@ SKYRIM_MICRO_RULES = {
                                 60.1
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "pellitine_red_mesa_sandstone_16",
                 "trees": [
                         "bleached_acacia",
@@ -53726,7 +53726,7 @@ SKYRIM_MICRO_RULES = {
                                 87.2
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "pellitine_sweet_alluvial_silt_17",
                 "trees": [
                         "date_palm",
@@ -53784,7 +53784,7 @@ SKYRIM_MICRO_RULES = {
                                 114.1
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "pellitine_golden_savanna_loam_18",
                 "trees": [
                         "umbrella_acacia",
@@ -53842,7 +53842,7 @@ SKYRIM_MICRO_RULES = {
                                 136.4
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "pellitine_monsoon_jungle_humus_19",
                 "trees": [
                         "teak_giant",
@@ -53901,7 +53901,7 @@ SKYRIM_MICRO_RULES = {
                                 157.6
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "pellitine_rippled_amber_sand_20",
                 "trees": [
                         "oasis_date_palm",
@@ -53959,7 +53959,7 @@ SKYRIM_MICRO_RULES = {
                                 180.2
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "pellitine_red_mesa_sandstone_21",
                 "trees": [
                         "bleached_acacia",
@@ -54017,7 +54017,7 @@ SKYRIM_MICRO_RULES = {
                                 202.9
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "pellitine_sweet_alluvial_silt_22",
                 "trees": [
                         "date_palm",
@@ -54075,7 +54075,7 @@ SKYRIM_MICRO_RULES = {
                                 225.7
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "pellitine_golden_savanna_loam_23",
                 "trees": [
                         "umbrella_acacia",
@@ -54133,7 +54133,7 @@ SKYRIM_MICRO_RULES = {
                                 249.0
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "pellitine_monsoon_jungle_humus_24",
                 "trees": [
                         "teak_giant",
@@ -54192,7 +54192,7 @@ SKYRIM_MICRO_RULES = {
                                 275.6
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "pellitine_rippled_amber_sand_25",
                 "trees": [
                         "oasis_date_palm",
@@ -54250,7 +54250,7 @@ SKYRIM_MICRO_RULES = {
                                 305.0
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "pellitine_red_mesa_sandstone_26",
                 "trees": [
                         "bleached_acacia",
@@ -54308,7 +54308,7 @@ SKYRIM_MICRO_RULES = {
                                 332.9
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "pellitine_sweet_alluvial_silt_27",
                 "trees": [
                         "date_palm",
@@ -54366,7 +54366,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "pellitine_golden_savanna_loam_28",
                 "trees": [
                         "umbrella_acacia",
@@ -54426,7 +54426,7 @@ SKYRIM_MICRO_RULES = {
                                 36.7
                         ]
                 },
-                "biome": "skycraft:anequina_badlands",
+                "biome": "nirncraft:anequina_badlands",
                 "surface": "senchal_red_mesa_sandstone_1",
                 "trees": [
                         "bleached_acacia",
@@ -54484,7 +54484,7 @@ SKYRIM_MICRO_RULES = {
                                 60.7
                         ]
                 },
-                "biome": "skycraft:sugar_fields",
+                "biome": "nirncraft:sugar_fields",
                 "surface": "senchal_sweet_alluvial_silt_2",
                 "trees": [
                         "date_palm",
@@ -54542,7 +54542,7 @@ SKYRIM_MICRO_RULES = {
                                 82.8
                         ]
                 },
-                "biome": "skycraft:elsweyr_savanna",
+                "biome": "nirncraft:elsweyr_savanna",
                 "surface": "senchal_golden_savanna_loam_3",
                 "trees": [
                         "umbrella_acacia",
@@ -54600,7 +54600,7 @@ SKYRIM_MICRO_RULES = {
                                 104.9
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "senchal_monsoon_jungle_humus_4",
                 "trees": [
                         "teak_giant",
@@ -54659,7 +54659,7 @@ SKYRIM_MICRO_RULES = {
                                 123.6
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "senchal_rippled_amber_sand_5",
                 "trees": [
                         "oasis_date_palm",
@@ -54717,7 +54717,7 @@ SKYRIM_MICRO_RULES = {
                                 140.6
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "senchal_red_mesa_sandstone_6",
                 "trees": [
                         "bleached_acacia",
@@ -54775,7 +54775,7 @@ SKYRIM_MICRO_RULES = {
                                 157.1
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "senchal_sweet_alluvial_silt_7",
                 "trees": [
                         "date_palm",
@@ -54833,7 +54833,7 @@ SKYRIM_MICRO_RULES = {
                                 177.1
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "senchal_golden_savanna_loam_8",
                 "trees": [
                         "umbrella_acacia",
@@ -54891,7 +54891,7 @@ SKYRIM_MICRO_RULES = {
                                 199.5
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "senchal_monsoon_jungle_humus_9",
                 "trees": [
                         "teak_giant",
@@ -54950,7 +54950,7 @@ SKYRIM_MICRO_RULES = {
                                 224.2
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "senchal_rippled_amber_sand_10",
                 "trees": [
                         "oasis_date_palm",
@@ -55008,7 +55008,7 @@ SKYRIM_MICRO_RULES = {
                                 259.6
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "senchal_red_mesa_sandstone_11",
                 "trees": [
                         "bleached_acacia",
@@ -55066,7 +55066,7 @@ SKYRIM_MICRO_RULES = {
                                 299.9
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "senchal_sweet_alluvial_silt_12",
                 "trees": [
                         "date_palm",
@@ -55124,7 +55124,7 @@ SKYRIM_MICRO_RULES = {
                                 332.1
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "senchal_golden_savanna_loam_13",
                 "trees": [
                         "umbrella_acacia",
@@ -55182,7 +55182,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "senchal_monsoon_jungle_humus_14",
                 "trees": [
                         "teak_giant",
@@ -55241,7 +55241,7 @@ SKYRIM_MICRO_RULES = {
                                 35.6
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "senchal_rippled_amber_sand_15",
                 "trees": [
                         "oasis_date_palm",
@@ -55299,7 +55299,7 @@ SKYRIM_MICRO_RULES = {
                                 60.9
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "senchal_red_mesa_sandstone_16",
                 "trees": [
                         "bleached_acacia",
@@ -55357,7 +55357,7 @@ SKYRIM_MICRO_RULES = {
                                 83.7
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "senchal_sweet_alluvial_silt_17",
                 "trees": [
                         "date_palm",
@@ -55415,7 +55415,7 @@ SKYRIM_MICRO_RULES = {
                                 106.1
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "senchal_golden_savanna_loam_18",
                 "trees": [
                         "umbrella_acacia",
@@ -55473,7 +55473,7 @@ SKYRIM_MICRO_RULES = {
                                 126.9
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "senchal_monsoon_jungle_humus_19",
                 "trees": [
                         "teak_giant",
@@ -55532,7 +55532,7 @@ SKYRIM_MICRO_RULES = {
                                 145.2
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "senchal_rippled_amber_sand_20",
                 "trees": [
                         "oasis_date_palm",
@@ -55590,7 +55590,7 @@ SKYRIM_MICRO_RULES = {
                                 164.6
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "senchal_red_mesa_sandstone_21",
                 "trees": [
                         "bleached_acacia",
@@ -55648,7 +55648,7 @@ SKYRIM_MICRO_RULES = {
                                 185.4
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "senchal_sweet_alluvial_silt_22",
                 "trees": [
                         "date_palm",
@@ -55706,7 +55706,7 @@ SKYRIM_MICRO_RULES = {
                                 209.2
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "senchal_golden_savanna_loam_23",
                 "trees": [
                         "umbrella_acacia",
@@ -55764,7 +55764,7 @@ SKYRIM_MICRO_RULES = {
                                 235.9
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "senchal_monsoon_jungle_humus_24",
                 "trees": [
                         "teak_giant",
@@ -55823,7 +55823,7 @@ SKYRIM_MICRO_RULES = {
                                 266.0
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "senchal_rippled_amber_sand_25",
                 "trees": [
                         "oasis_date_palm",
@@ -55881,7 +55881,7 @@ SKYRIM_MICRO_RULES = {
                                 299.7
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "senchal_red_mesa_sandstone_26",
                 "trees": [
                         "bleached_acacia",
@@ -55939,7 +55939,7 @@ SKYRIM_MICRO_RULES = {
                                 330.7
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "senchal_sweet_alluvial_silt_27",
                 "trees": [
                         "date_palm",
@@ -55997,7 +55997,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "senchal_golden_savanna_loam_28",
                 "trees": [
                         "umbrella_acacia",
@@ -56057,7 +56057,7 @@ SKYRIM_MICRO_RULES = {
                                 23.7
                         ]
                 },
-                "biome": "skycraft:graht_oak_forest",
+                "biome": "nirncraft:graht_oak_forest",
                 "surface": "malabal_tor_deep_graht_root_mould_1",
                 "trees": [
                         "colossal_graht_oak",
@@ -56116,7 +56116,7 @@ SKYRIM_MICRO_RULES = {
                                 44.1
                         ]
                 },
-                "biome": "skycraft:valenwood_rainforest",
+                "biome": "nirncraft:valenwood_rainforest",
                 "surface": "malabal_tor_untouched_leaf_humus_2",
                 "trees": [
                         "canopy_mahogany",
@@ -56174,7 +56174,7 @@ SKYRIM_MICRO_RULES = {
                                 74.0
                         ]
                 },
-                "biome": "skycraft:reapers_march",
+                "biome": "nirncraft:reapers_march",
                 "surface": "malabal_tor_border_savanna_loam_3",
                 "trees": [
                         "cork_oak",
@@ -56233,7 +56233,7 @@ SKYRIM_MICRO_RULES = {
                                 116.8
                         ]
                 },
-                "biome": "skycraft:valenwood_mangrove_coast",
+                "biome": "nirncraft:valenwood_mangrove_coast",
                 "surface": "malabal_tor_coastal_mangrove_silt_4",
                 "trees": [
                         "coastal_mangrove",
@@ -56291,7 +56291,7 @@ SKYRIM_MICRO_RULES = {
                                 159.4
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "malabal_tor_deep_graht_root_mould_5",
                 "trees": [
                         "colossal_graht_oak",
@@ -56350,7 +56350,7 @@ SKYRIM_MICRO_RULES = {
                                 206.7
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "malabal_tor_untouched_leaf_humus_6",
                 "trees": [
                         "canopy_mahogany",
@@ -56408,7 +56408,7 @@ SKYRIM_MICRO_RULES = {
                                 237.7
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "malabal_tor_border_savanna_loam_7",
                 "trees": [
                         "cork_oak",
@@ -56467,7 +56467,7 @@ SKYRIM_MICRO_RULES = {
                                 261.1
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "malabal_tor_coastal_mangrove_silt_8",
                 "trees": [
                         "coastal_mangrove",
@@ -56525,7 +56525,7 @@ SKYRIM_MICRO_RULES = {
                                 282.1
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "malabal_tor_deep_graht_root_mould_9",
                 "trees": [
                         "colossal_graht_oak",
@@ -56584,7 +56584,7 @@ SKYRIM_MICRO_RULES = {
                                 300.1
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "malabal_tor_untouched_leaf_humus_10",
                 "trees": [
                         "canopy_mahogany",
@@ -56642,7 +56642,7 @@ SKYRIM_MICRO_RULES = {
                                 315.3
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "malabal_tor_border_savanna_loam_11",
                 "trees": [
                         "cork_oak",
@@ -56701,7 +56701,7 @@ SKYRIM_MICRO_RULES = {
                                 329.3
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "malabal_tor_coastal_mangrove_silt_12",
                 "trees": [
                         "coastal_mangrove",
@@ -56759,7 +56759,7 @@ SKYRIM_MICRO_RULES = {
                                 344.9
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "malabal_tor_deep_graht_root_mould_13",
                 "trees": [
                         "colossal_graht_oak",
@@ -56818,7 +56818,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "malabal_tor_untouched_leaf_humus_14",
                 "trees": [
                         "canopy_mahogany",
@@ -56876,7 +56876,7 @@ SKYRIM_MICRO_RULES = {
                                 28.2
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "malabal_tor_border_savanna_loam_15",
                 "trees": [
                         "cork_oak",
@@ -56935,7 +56935,7 @@ SKYRIM_MICRO_RULES = {
                                 55.8
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "malabal_tor_coastal_mangrove_silt_16",
                 "trees": [
                         "coastal_mangrove",
@@ -56993,7 +56993,7 @@ SKYRIM_MICRO_RULES = {
                                 88.4
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "malabal_tor_deep_graht_root_mould_17",
                 "trees": [
                         "colossal_graht_oak",
@@ -57052,7 +57052,7 @@ SKYRIM_MICRO_RULES = {
                                 116.4
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "malabal_tor_untouched_leaf_humus_18",
                 "trees": [
                         "canopy_mahogany",
@@ -57110,7 +57110,7 @@ SKYRIM_MICRO_RULES = {
                                 144.7
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "malabal_tor_border_savanna_loam_19",
                 "trees": [
                         "cork_oak",
@@ -57169,7 +57169,7 @@ SKYRIM_MICRO_RULES = {
                                 173.9
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "malabal_tor_coastal_mangrove_silt_20",
                 "trees": [
                         "coastal_mangrove",
@@ -57227,7 +57227,7 @@ SKYRIM_MICRO_RULES = {
                                 199.7
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "malabal_tor_deep_graht_root_mould_21",
                 "trees": [
                         "colossal_graht_oak",
@@ -57286,7 +57286,7 @@ SKYRIM_MICRO_RULES = {
                                 224.4
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "malabal_tor_untouched_leaf_humus_22",
                 "trees": [
                         "canopy_mahogany",
@@ -57344,7 +57344,7 @@ SKYRIM_MICRO_RULES = {
                                 247.0
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "malabal_tor_border_savanna_loam_23",
                 "trees": [
                         "cork_oak",
@@ -57403,7 +57403,7 @@ SKYRIM_MICRO_RULES = {
                                 272.9
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "malabal_tor_coastal_mangrove_silt_24",
                 "trees": [
                         "coastal_mangrove",
@@ -57461,7 +57461,7 @@ SKYRIM_MICRO_RULES = {
                                 298.7
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "malabal_tor_deep_graht_root_mould_25",
                 "trees": [
                         "colossal_graht_oak",
@@ -57520,7 +57520,7 @@ SKYRIM_MICRO_RULES = {
                                 321.2
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "malabal_tor_untouched_leaf_humus_26",
                 "trees": [
                         "canopy_mahogany",
@@ -57578,7 +57578,7 @@ SKYRIM_MICRO_RULES = {
                                 341.1
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "malabal_tor_border_savanna_loam_27",
                 "trees": [
                         "cork_oak",
@@ -57637,7 +57637,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "malabal_tor_coastal_mangrove_silt_28",
                 "trees": [
                         "coastal_mangrove",
@@ -57697,7 +57697,7 @@ SKYRIM_MICRO_RULES = {
                                 28.5
                         ]
                 },
-                "biome": "skycraft:graht_oak_forest",
+                "biome": "nirncraft:graht_oak_forest",
                 "surface": "reapers_march_deep_graht_root_mould_1",
                 "trees": [
                         "colossal_graht_oak",
@@ -57756,7 +57756,7 @@ SKYRIM_MICRO_RULES = {
                                 52.8
                         ]
                 },
-                "biome": "skycraft:valenwood_rainforest",
+                "biome": "nirncraft:valenwood_rainforest",
                 "surface": "reapers_march_untouched_leaf_humus_2",
                 "trees": [
                         "canopy_mahogany",
@@ -57814,7 +57814,7 @@ SKYRIM_MICRO_RULES = {
                                 81.4
                         ]
                 },
-                "biome": "skycraft:reapers_march",
+                "biome": "nirncraft:reapers_march",
                 "surface": "reapers_march_border_savanna_loam_3",
                 "trees": [
                         "cork_oak",
@@ -57873,7 +57873,7 @@ SKYRIM_MICRO_RULES = {
                                 115.1
                         ]
                 },
-                "biome": "skycraft:valenwood_mangrove_coast",
+                "biome": "nirncraft:valenwood_mangrove_coast",
                 "surface": "reapers_march_coastal_mangrove_silt_4",
                 "trees": [
                         "coastal_mangrove",
@@ -57931,7 +57931,7 @@ SKYRIM_MICRO_RULES = {
                                 142.0
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "reapers_march_deep_graht_root_mould_5",
                 "trees": [
                         "colossal_graht_oak",
@@ -57990,7 +57990,7 @@ SKYRIM_MICRO_RULES = {
                                 166.4
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "reapers_march_untouched_leaf_humus_6",
                 "trees": [
                         "canopy_mahogany",
@@ -58048,7 +58048,7 @@ SKYRIM_MICRO_RULES = {
                                 192.9
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "reapers_march_border_savanna_loam_7",
                 "trees": [
                         "cork_oak",
@@ -58107,7 +58107,7 @@ SKYRIM_MICRO_RULES = {
                                 217.0
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "reapers_march_coastal_mangrove_silt_8",
                 "trees": [
                         "coastal_mangrove",
@@ -58165,7 +58165,7 @@ SKYRIM_MICRO_RULES = {
                                 238.8
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "reapers_march_deep_graht_root_mould_9",
                 "trees": [
                         "colossal_graht_oak",
@@ -58224,7 +58224,7 @@ SKYRIM_MICRO_RULES = {
                                 263.4
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "reapers_march_untouched_leaf_humus_10",
                 "trees": [
                         "canopy_mahogany",
@@ -58282,7 +58282,7 @@ SKYRIM_MICRO_RULES = {
                                 291.0
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "reapers_march_border_savanna_loam_11",
                 "trees": [
                         "cork_oak",
@@ -58341,7 +58341,7 @@ SKYRIM_MICRO_RULES = {
                                 316.0
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "reapers_march_coastal_mangrove_silt_12",
                 "trees": [
                         "coastal_mangrove",
@@ -58399,7 +58399,7 @@ SKYRIM_MICRO_RULES = {
                                 339.1
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "reapers_march_deep_graht_root_mould_13",
                 "trees": [
                         "colossal_graht_oak",
@@ -58458,7 +58458,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "reapers_march_untouched_leaf_humus_14",
                 "trees": [
                         "canopy_mahogany",
@@ -58516,7 +58516,7 @@ SKYRIM_MICRO_RULES = {
                                 30.3
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "reapers_march_border_savanna_loam_15",
                 "trees": [
                         "cork_oak",
@@ -58575,7 +58575,7 @@ SKYRIM_MICRO_RULES = {
                                 56.1
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "reapers_march_coastal_mangrove_silt_16",
                 "trees": [
                         "coastal_mangrove",
@@ -58633,7 +58633,7 @@ SKYRIM_MICRO_RULES = {
                                 87.5
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "reapers_march_deep_graht_root_mould_17",
                 "trees": [
                         "colossal_graht_oak",
@@ -58692,7 +58692,7 @@ SKYRIM_MICRO_RULES = {
                                 118.9
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "reapers_march_untouched_leaf_humus_18",
                 "trees": [
                         "canopy_mahogany",
@@ -58750,7 +58750,7 @@ SKYRIM_MICRO_RULES = {
                                 147.7
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "reapers_march_border_savanna_loam_19",
                 "trees": [
                         "cork_oak",
@@ -58809,7 +58809,7 @@ SKYRIM_MICRO_RULES = {
                                 175.7
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "reapers_march_coastal_mangrove_silt_20",
                 "trees": [
                         "coastal_mangrove",
@@ -58867,7 +58867,7 @@ SKYRIM_MICRO_RULES = {
                                 202.5
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "reapers_march_deep_graht_root_mould_21",
                 "trees": [
                         "colossal_graht_oak",
@@ -58926,7 +58926,7 @@ SKYRIM_MICRO_RULES = {
                                 224.2
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "reapers_march_untouched_leaf_humus_22",
                 "trees": [
                         "canopy_mahogany",
@@ -58984,7 +58984,7 @@ SKYRIM_MICRO_RULES = {
                                 245.3
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "reapers_march_border_savanna_loam_23",
                 "trees": [
                         "cork_oak",
@@ -59043,7 +59043,7 @@ SKYRIM_MICRO_RULES = {
                                 267.9
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "reapers_march_coastal_mangrove_silt_24",
                 "trees": [
                         "coastal_mangrove",
@@ -59101,7 +59101,7 @@ SKYRIM_MICRO_RULES = {
                                 292.0
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "reapers_march_deep_graht_root_mould_25",
                 "trees": [
                         "colossal_graht_oak",
@@ -59160,7 +59160,7 @@ SKYRIM_MICRO_RULES = {
                                 314.7
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "reapers_march_untouched_leaf_humus_26",
                 "trees": [
                         "canopy_mahogany",
@@ -59218,7 +59218,7 @@ SKYRIM_MICRO_RULES = {
                                 337.6
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "reapers_march_border_savanna_loam_27",
                 "trees": [
                         "cork_oak",
@@ -59277,7 +59277,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "reapers_march_coastal_mangrove_silt_28",
                 "trees": [
                         "coastal_mangrove",
@@ -59337,7 +59337,7 @@ SKYRIM_MICRO_RULES = {
                                 37.2
                         ]
                 },
-                "biome": "skycraft:graht_oak_forest",
+                "biome": "nirncraft:graht_oak_forest",
                 "surface": "grahtwood_deep_graht_root_mould_1",
                 "trees": [
                         "colossal_graht_oak",
@@ -59396,7 +59396,7 @@ SKYRIM_MICRO_RULES = {
                                 67.0
                         ]
                 },
-                "biome": "skycraft:valenwood_rainforest",
+                "biome": "nirncraft:valenwood_rainforest",
                 "surface": "grahtwood_untouched_leaf_humus_2",
                 "trees": [
                         "canopy_mahogany",
@@ -59454,7 +59454,7 @@ SKYRIM_MICRO_RULES = {
                                 97.7
                         ]
                 },
-                "biome": "skycraft:reapers_march",
+                "biome": "nirncraft:reapers_march",
                 "surface": "grahtwood_border_savanna_loam_3",
                 "trees": [
                         "cork_oak",
@@ -59513,7 +59513,7 @@ SKYRIM_MICRO_RULES = {
                                 124.8
                         ]
                 },
-                "biome": "skycraft:valenwood_mangrove_coast",
+                "biome": "nirncraft:valenwood_mangrove_coast",
                 "surface": "grahtwood_coastal_mangrove_silt_4",
                 "trees": [
                         "coastal_mangrove",
@@ -59571,7 +59571,7 @@ SKYRIM_MICRO_RULES = {
                                 146.6
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "grahtwood_deep_graht_root_mould_5",
                 "trees": [
                         "colossal_graht_oak",
@@ -59630,7 +59630,7 @@ SKYRIM_MICRO_RULES = {
                                 167.8
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "grahtwood_untouched_leaf_humus_6",
                 "trees": [
                         "canopy_mahogany",
@@ -59688,7 +59688,7 @@ SKYRIM_MICRO_RULES = {
                                 188.9
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "grahtwood_border_savanna_loam_7",
                 "trees": [
                         "cork_oak",
@@ -59747,7 +59747,7 @@ SKYRIM_MICRO_RULES = {
                                 210.0
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "grahtwood_coastal_mangrove_silt_8",
                 "trees": [
                         "coastal_mangrove",
@@ -59805,7 +59805,7 @@ SKYRIM_MICRO_RULES = {
                                 230.2
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "grahtwood_deep_graht_root_mould_9",
                 "trees": [
                         "colossal_graht_oak",
@@ -59864,7 +59864,7 @@ SKYRIM_MICRO_RULES = {
                                 252.7
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "grahtwood_untouched_leaf_humus_10",
                 "trees": [
                         "canopy_mahogany",
@@ -59922,7 +59922,7 @@ SKYRIM_MICRO_RULES = {
                                 279.4
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "grahtwood_border_savanna_loam_11",
                 "trees": [
                         "cork_oak",
@@ -59981,7 +59981,7 @@ SKYRIM_MICRO_RULES = {
                                 306.3
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "grahtwood_coastal_mangrove_silt_12",
                 "trees": [
                         "coastal_mangrove",
@@ -60039,7 +60039,7 @@ SKYRIM_MICRO_RULES = {
                                 332.8
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "grahtwood_deep_graht_root_mould_13",
                 "trees": [
                         "colossal_graht_oak",
@@ -60098,7 +60098,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "grahtwood_untouched_leaf_humus_14",
                 "trees": [
                         "canopy_mahogany",
@@ -60156,7 +60156,7 @@ SKYRIM_MICRO_RULES = {
                                 32.0
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "grahtwood_border_savanna_loam_15",
                 "trees": [
                         "cork_oak",
@@ -60215,7 +60215,7 @@ SKYRIM_MICRO_RULES = {
                                 59.3
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "grahtwood_coastal_mangrove_silt_16",
                 "trees": [
                         "coastal_mangrove",
@@ -60273,7 +60273,7 @@ SKYRIM_MICRO_RULES = {
                                 88.1
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "grahtwood_deep_graht_root_mould_17",
                 "trees": [
                         "colossal_graht_oak",
@@ -60332,7 +60332,7 @@ SKYRIM_MICRO_RULES = {
                                 116.1
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "grahtwood_untouched_leaf_humus_18",
                 "trees": [
                         "canopy_mahogany",
@@ -60390,7 +60390,7 @@ SKYRIM_MICRO_RULES = {
                                 140.5
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "grahtwood_border_savanna_loam_19",
                 "trees": [
                         "cork_oak",
@@ -60449,7 +60449,7 @@ SKYRIM_MICRO_RULES = {
                                 163.4
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "grahtwood_coastal_mangrove_silt_20",
                 "trees": [
                         "coastal_mangrove",
@@ -60507,7 +60507,7 @@ SKYRIM_MICRO_RULES = {
                                 187.1
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "grahtwood_deep_graht_root_mould_21",
                 "trees": [
                         "colossal_graht_oak",
@@ -60566,7 +60566,7 @@ SKYRIM_MICRO_RULES = {
                                 210.3
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "grahtwood_untouched_leaf_humus_22",
                 "trees": [
                         "canopy_mahogany",
@@ -60624,7 +60624,7 @@ SKYRIM_MICRO_RULES = {
                                 232.7
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "grahtwood_border_savanna_loam_23",
                 "trees": [
                         "cork_oak",
@@ -60683,7 +60683,7 @@ SKYRIM_MICRO_RULES = {
                                 256.3
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "grahtwood_coastal_mangrove_silt_24",
                 "trees": [
                         "coastal_mangrove",
@@ -60741,7 +60741,7 @@ SKYRIM_MICRO_RULES = {
                                 282.8
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "grahtwood_deep_graht_root_mould_25",
                 "trees": [
                         "colossal_graht_oak",
@@ -60800,7 +60800,7 @@ SKYRIM_MICRO_RULES = {
                                 309.8
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "grahtwood_untouched_leaf_humus_26",
                 "trees": [
                         "canopy_mahogany",
@@ -60858,7 +60858,7 @@ SKYRIM_MICRO_RULES = {
                                 335.6
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "grahtwood_border_savanna_loam_27",
                 "trees": [
                         "cork_oak",
@@ -60917,7 +60917,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "grahtwood_coastal_mangrove_silt_28",
                 "trees": [
                         "coastal_mangrove",
@@ -60977,7 +60977,7 @@ SKYRIM_MICRO_RULES = {
                                 36.3
                         ]
                 },
-                "biome": "skycraft:graht_oak_forest",
+                "biome": "nirncraft:graht_oak_forest",
                 "surface": "greenshade_deep_graht_root_mould_1",
                 "trees": [
                         "colossal_graht_oak",
@@ -61036,7 +61036,7 @@ SKYRIM_MICRO_RULES = {
                                 65.8
                         ]
                 },
-                "biome": "skycraft:valenwood_rainforest",
+                "biome": "nirncraft:valenwood_rainforest",
                 "surface": "greenshade_untouched_leaf_humus_2",
                 "trees": [
                         "canopy_mahogany",
@@ -61094,7 +61094,7 @@ SKYRIM_MICRO_RULES = {
                                 101.7
                         ]
                 },
-                "biome": "skycraft:reapers_march",
+                "biome": "nirncraft:reapers_march",
                 "surface": "greenshade_border_savanna_loam_3",
                 "trees": [
                         "cork_oak",
@@ -61153,7 +61153,7 @@ SKYRIM_MICRO_RULES = {
                                 132.8
                         ]
                 },
-                "biome": "skycraft:valenwood_mangrove_coast",
+                "biome": "nirncraft:valenwood_mangrove_coast",
                 "surface": "greenshade_coastal_mangrove_silt_4",
                 "trees": [
                         "coastal_mangrove",
@@ -61211,7 +61211,7 @@ SKYRIM_MICRO_RULES = {
                                 158.1
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "greenshade_deep_graht_root_mould_5",
                 "trees": [
                         "colossal_graht_oak",
@@ -61270,7 +61270,7 @@ SKYRIM_MICRO_RULES = {
                                 184.4
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "greenshade_untouched_leaf_humus_6",
                 "trees": [
                         "canopy_mahogany",
@@ -61328,7 +61328,7 @@ SKYRIM_MICRO_RULES = {
                                 208.5
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "greenshade_border_savanna_loam_7",
                 "trees": [
                         "cork_oak",
@@ -61387,7 +61387,7 @@ SKYRIM_MICRO_RULES = {
                                 227.9
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "greenshade_coastal_mangrove_silt_8",
                 "trees": [
                         "coastal_mangrove",
@@ -61445,7 +61445,7 @@ SKYRIM_MICRO_RULES = {
                                 246.6
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "greenshade_deep_graht_root_mould_9",
                 "trees": [
                         "colossal_graht_oak",
@@ -61504,7 +61504,7 @@ SKYRIM_MICRO_RULES = {
                                 268.0
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "greenshade_untouched_leaf_humus_10",
                 "trees": [
                         "canopy_mahogany",
@@ -61562,7 +61562,7 @@ SKYRIM_MICRO_RULES = {
                                 290.2
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "greenshade_border_savanna_loam_11",
                 "trees": [
                         "cork_oak",
@@ -61621,7 +61621,7 @@ SKYRIM_MICRO_RULES = {
                                 310.0
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "greenshade_coastal_mangrove_silt_12",
                 "trees": [
                         "coastal_mangrove",
@@ -61679,7 +61679,7 @@ SKYRIM_MICRO_RULES = {
                                 332.8
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "greenshade_deep_graht_root_mould_13",
                 "trees": [
                         "colossal_graht_oak",
@@ -61738,7 +61738,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "greenshade_untouched_leaf_humus_14",
                 "trees": [
                         "canopy_mahogany",
@@ -61796,7 +61796,7 @@ SKYRIM_MICRO_RULES = {
                                 34.8
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "greenshade_border_savanna_loam_15",
                 "trees": [
                         "cork_oak",
@@ -61855,7 +61855,7 @@ SKYRIM_MICRO_RULES = {
                                 65.7
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "greenshade_coastal_mangrove_silt_16",
                 "trees": [
                         "coastal_mangrove",
@@ -61913,7 +61913,7 @@ SKYRIM_MICRO_RULES = {
                                 96.1
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "greenshade_deep_graht_root_mould_17",
                 "trees": [
                         "colossal_graht_oak",
@@ -61972,7 +61972,7 @@ SKYRIM_MICRO_RULES = {
                                 123.6
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "greenshade_untouched_leaf_humus_18",
                 "trees": [
                         "canopy_mahogany",
@@ -62030,7 +62030,7 @@ SKYRIM_MICRO_RULES = {
                                 146.8
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "greenshade_border_savanna_loam_19",
                 "trees": [
                         "cork_oak",
@@ -62089,7 +62089,7 @@ SKYRIM_MICRO_RULES = {
                                 171.2
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "greenshade_coastal_mangrove_silt_20",
                 "trees": [
                         "coastal_mangrove",
@@ -62147,7 +62147,7 @@ SKYRIM_MICRO_RULES = {
                                 194.5
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "greenshade_deep_graht_root_mould_21",
                 "trees": [
                         "colossal_graht_oak",
@@ -62206,7 +62206,7 @@ SKYRIM_MICRO_RULES = {
                                 217.7
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "greenshade_untouched_leaf_humus_22",
                 "trees": [
                         "canopy_mahogany",
@@ -62264,7 +62264,7 @@ SKYRIM_MICRO_RULES = {
                                 239.1
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "greenshade_border_savanna_loam_23",
                 "trees": [
                         "cork_oak",
@@ -62323,7 +62323,7 @@ SKYRIM_MICRO_RULES = {
                                 263.2
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "greenshade_coastal_mangrove_silt_24",
                 "trees": [
                         "coastal_mangrove",
@@ -62381,7 +62381,7 @@ SKYRIM_MICRO_RULES = {
                                 287.9
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "greenshade_deep_graht_root_mould_25",
                 "trees": [
                         "colossal_graht_oak",
@@ -62440,7 +62440,7 @@ SKYRIM_MICRO_RULES = {
                                 312.1
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "greenshade_untouched_leaf_humus_26",
                 "trees": [
                         "canopy_mahogany",
@@ -62498,7 +62498,7 @@ SKYRIM_MICRO_RULES = {
                                 335.4
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "greenshade_border_savanna_loam_27",
                 "trees": [
                         "cork_oak",
@@ -62557,7 +62557,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "greenshade_coastal_mangrove_silt_28",
                 "trees": [
                         "coastal_mangrove",
@@ -62617,7 +62617,7 @@ SKYRIM_MICRO_RULES = {
                                 29.4
                         ]
                 },
-                "biome": "skycraft:summerset_meadow",
+                "biome": "nirncraft:summerset_meadow",
                 "surface": "summerset_isle_pearl_chalk_loam_1",
                 "trees": [
                         "summerset_cherry",
@@ -62676,7 +62676,7 @@ SKYRIM_MICRO_RULES = {
                                 54.5
                         ]
                 },
-                "biome": "skycraft:crystal_coast",
+                "biome": "nirncraft:crystal_coast",
                 "surface": "summerset_isle_white_calcite_sand_2",
                 "trees": [
                         "crystal_willow",
@@ -62734,7 +62734,7 @@ SKYRIM_MICRO_RULES = {
                                 81.3
                         ]
                 },
-                "biome": "skycraft:auridon_vineyards",
+                "biome": "nirncraft:auridon_vineyards",
                 "surface": "summerset_isle_terraced_limestone_marl_3",
                 "trees": [
                         "silver_olive",
@@ -62793,7 +62793,7 @@ SKYRIM_MICRO_RULES = {
                                 108.2
                         ]
                 },
-                "biome": "skycraft:artaeum",
+                "biome": "nirncraft:artaeum",
                 "surface": "summerset_isle_enchanted_coral_turf_4",
                 "trees": [
                         "psijic_bloom_tree",
@@ -62851,7 +62851,7 @@ SKYRIM_MICRO_RULES = {
                                 134.2
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "summerset_isle_pearl_chalk_loam_5",
                 "trees": [
                         "summerset_cherry",
@@ -62910,7 +62910,7 @@ SKYRIM_MICRO_RULES = {
                                 159.9
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "summerset_isle_white_calcite_sand_6",
                 "trees": [
                         "crystal_willow",
@@ -62968,7 +62968,7 @@ SKYRIM_MICRO_RULES = {
                                 188.1
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "summerset_isle_terraced_limestone_marl_7",
                 "trees": [
                         "silver_olive",
@@ -63027,7 +63027,7 @@ SKYRIM_MICRO_RULES = {
                                 215.3
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "summerset_isle_enchanted_coral_turf_8",
                 "trees": [
                         "psijic_bloom_tree",
@@ -63085,7 +63085,7 @@ SKYRIM_MICRO_RULES = {
                                 239.9
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "summerset_isle_pearl_chalk_loam_9",
                 "trees": [
                         "summerset_cherry",
@@ -63144,7 +63144,7 @@ SKYRIM_MICRO_RULES = {
                                 266.2
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "summerset_isle_white_calcite_sand_10",
                 "trees": [
                         "crystal_willow",
@@ -63202,7 +63202,7 @@ SKYRIM_MICRO_RULES = {
                                 293.0
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "summerset_isle_terraced_limestone_marl_11",
                 "trees": [
                         "silver_olive",
@@ -63261,7 +63261,7 @@ SKYRIM_MICRO_RULES = {
                                 316.1
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "summerset_isle_enchanted_coral_turf_12",
                 "trees": [
                         "psijic_bloom_tree",
@@ -63319,7 +63319,7 @@ SKYRIM_MICRO_RULES = {
                                 338.9
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "summerset_isle_pearl_chalk_loam_13",
                 "trees": [
                         "summerset_cherry",
@@ -63378,7 +63378,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "summerset_isle_white_calcite_sand_14",
                 "trees": [
                         "crystal_willow",
@@ -63436,7 +63436,7 @@ SKYRIM_MICRO_RULES = {
                                 28.8
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "summerset_isle_terraced_limestone_marl_15",
                 "trees": [
                         "silver_olive",
@@ -63495,7 +63495,7 @@ SKYRIM_MICRO_RULES = {
                                 51.2
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "summerset_isle_enchanted_coral_turf_16",
                 "trees": [
                         "psijic_bloom_tree",
@@ -63553,7 +63553,7 @@ SKYRIM_MICRO_RULES = {
                                 75.0
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "summerset_isle_pearl_chalk_loam_17",
                 "trees": [
                         "summerset_cherry",
@@ -63612,7 +63612,7 @@ SKYRIM_MICRO_RULES = {
                                 104.0
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "summerset_isle_white_calcite_sand_18",
                 "trees": [
                         "crystal_willow",
@@ -63670,7 +63670,7 @@ SKYRIM_MICRO_RULES = {
                                 131.8
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "summerset_isle_terraced_limestone_marl_19",
                 "trees": [
                         "silver_olive",
@@ -63729,7 +63729,7 @@ SKYRIM_MICRO_RULES = {
                                 157.6
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "summerset_isle_enchanted_coral_turf_20",
                 "trees": [
                         "psijic_bloom_tree",
@@ -63787,7 +63787,7 @@ SKYRIM_MICRO_RULES = {
                                 185.2
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "summerset_isle_pearl_chalk_loam_21",
                 "trees": [
                         "summerset_cherry",
@@ -63846,7 +63846,7 @@ SKYRIM_MICRO_RULES = {
                                 211.5
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "summerset_isle_white_calcite_sand_22",
                 "trees": [
                         "crystal_willow",
@@ -63904,7 +63904,7 @@ SKYRIM_MICRO_RULES = {
                                 235.4
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "summerset_isle_terraced_limestone_marl_23",
                 "trees": [
                         "silver_olive",
@@ -63963,7 +63963,7 @@ SKYRIM_MICRO_RULES = {
                                 258.7
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "summerset_isle_enchanted_coral_turf_24",
                 "trees": [
                         "psijic_bloom_tree",
@@ -64021,7 +64021,7 @@ SKYRIM_MICRO_RULES = {
                                 284.0
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "summerset_isle_pearl_chalk_loam_25",
                 "trees": [
                         "summerset_cherry",
@@ -64080,7 +64080,7 @@ SKYRIM_MICRO_RULES = {
                                 310.7
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "summerset_isle_white_calcite_sand_26",
                 "trees": [
                         "crystal_willow",
@@ -64138,7 +64138,7 @@ SKYRIM_MICRO_RULES = {
                                 336.5
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "summerset_isle_terraced_limestone_marl_27",
                 "trees": [
                         "silver_olive",
@@ -64197,7 +64197,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "summerset_isle_enchanted_coral_turf_28",
                 "trees": [
                         "psijic_bloom_tree",
@@ -64257,7 +64257,7 @@ SKYRIM_MICRO_RULES = {
                                 32.0
                         ]
                 },
-                "biome": "skycraft:summerset_meadow",
+                "biome": "nirncraft:summerset_meadow",
                 "surface": "auridon_pearl_chalk_loam_1",
                 "trees": [
                         "summerset_cherry",
@@ -64316,7 +64316,7 @@ SKYRIM_MICRO_RULES = {
                                 55.6
                         ]
                 },
-                "biome": "skycraft:crystal_coast",
+                "biome": "nirncraft:crystal_coast",
                 "surface": "auridon_white_calcite_sand_2",
                 "trees": [
                         "crystal_willow",
@@ -64374,7 +64374,7 @@ SKYRIM_MICRO_RULES = {
                                 80.2
                         ]
                 },
-                "biome": "skycraft:auridon_vineyards",
+                "biome": "nirncraft:auridon_vineyards",
                 "surface": "auridon_terraced_limestone_marl_3",
                 "trees": [
                         "silver_olive",
@@ -64433,7 +64433,7 @@ SKYRIM_MICRO_RULES = {
                                 105.0
                         ]
                 },
-                "biome": "skycraft:artaeum",
+                "biome": "nirncraft:artaeum",
                 "surface": "auridon_enchanted_coral_turf_4",
                 "trees": [
                         "psijic_bloom_tree",
@@ -64491,7 +64491,7 @@ SKYRIM_MICRO_RULES = {
                                 129.2
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "auridon_pearl_chalk_loam_5",
                 "trees": [
                         "summerset_cherry",
@@ -64550,7 +64550,7 @@ SKYRIM_MICRO_RULES = {
                                 153.9
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "auridon_white_calcite_sand_6",
                 "trees": [
                         "crystal_willow",
@@ -64608,7 +64608,7 @@ SKYRIM_MICRO_RULES = {
                                 185.0
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "auridon_terraced_limestone_marl_7",
                 "trees": [
                         "silver_olive",
@@ -64667,7 +64667,7 @@ SKYRIM_MICRO_RULES = {
                                 216.2
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "auridon_enchanted_coral_turf_8",
                 "trees": [
                         "psijic_bloom_tree",
@@ -64725,7 +64725,7 @@ SKYRIM_MICRO_RULES = {
                                 239.2
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "auridon_pearl_chalk_loam_9",
                 "trees": [
                         "summerset_cherry",
@@ -64784,7 +64784,7 @@ SKYRIM_MICRO_RULES = {
                                 262.3
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "auridon_white_calcite_sand_10",
                 "trees": [
                         "crystal_willow",
@@ -64842,7 +64842,7 @@ SKYRIM_MICRO_RULES = {
                                 284.8
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "auridon_terraced_limestone_marl_11",
                 "trees": [
                         "silver_olive",
@@ -64901,7 +64901,7 @@ SKYRIM_MICRO_RULES = {
                                 308.4
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "auridon_enchanted_coral_turf_12",
                 "trees": [
                         "psijic_bloom_tree",
@@ -64959,7 +64959,7 @@ SKYRIM_MICRO_RULES = {
                                 332.2
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "auridon_pearl_chalk_loam_13",
                 "trees": [
                         "summerset_cherry",
@@ -65018,7 +65018,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "auridon_white_calcite_sand_14",
                 "trees": [
                         "crystal_willow",
@@ -65076,7 +65076,7 @@ SKYRIM_MICRO_RULES = {
                                 39.9
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "auridon_terraced_limestone_marl_15",
                 "trees": [
                         "silver_olive",
@@ -65135,7 +65135,7 @@ SKYRIM_MICRO_RULES = {
                                 65.1
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "auridon_enchanted_coral_turf_16",
                 "trees": [
                         "psijic_bloom_tree",
@@ -65193,7 +65193,7 @@ SKYRIM_MICRO_RULES = {
                                 86.5
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "auridon_pearl_chalk_loam_17",
                 "trees": [
                         "summerset_cherry",
@@ -65252,7 +65252,7 @@ SKYRIM_MICRO_RULES = {
                                 106.5
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "auridon_white_calcite_sand_18",
                 "trees": [
                         "crystal_willow",
@@ -65310,7 +65310,7 @@ SKYRIM_MICRO_RULES = {
                                 125.8
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "auridon_terraced_limestone_marl_19",
                 "trees": [
                         "silver_olive",
@@ -65369,7 +65369,7 @@ SKYRIM_MICRO_RULES = {
                                 149.8
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "auridon_enchanted_coral_turf_20",
                 "trees": [
                         "psijic_bloom_tree",
@@ -65427,7 +65427,7 @@ SKYRIM_MICRO_RULES = {
                                 181.9
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "auridon_pearl_chalk_loam_21",
                 "trees": [
                         "summerset_cherry",
@@ -65486,7 +65486,7 @@ SKYRIM_MICRO_RULES = {
                                 216.5
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "auridon_white_calcite_sand_22",
                 "trees": [
                         "crystal_willow",
@@ -65544,7 +65544,7 @@ SKYRIM_MICRO_RULES = {
                                 241.7
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "auridon_terraced_limestone_marl_23",
                 "trees": [
                         "silver_olive",
@@ -65603,7 +65603,7 @@ SKYRIM_MICRO_RULES = {
                                 262.5
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "auridon_enchanted_coral_turf_24",
                 "trees": [
                         "psijic_bloom_tree",
@@ -65661,7 +65661,7 @@ SKYRIM_MICRO_RULES = {
                                 283.4
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "auridon_pearl_chalk_loam_25",
                 "trees": [
                         "summerset_cherry",
@@ -65720,7 +65720,7 @@ SKYRIM_MICRO_RULES = {
                                 303.4
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "auridon_white_calcite_sand_26",
                 "trees": [
                         "crystal_willow",
@@ -65778,7 +65778,7 @@ SKYRIM_MICRO_RULES = {
                                 327.4
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "auridon_terraced_limestone_marl_27",
                 "trees": [
                         "silver_olive",
@@ -65837,7 +65837,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "auridon_enchanted_coral_turf_28",
                 "trees": [
                         "psijic_bloom_tree",
@@ -65897,7 +65897,7 @@ SKYRIM_MICRO_RULES = {
                                 30.5
                         ]
                 },
-                "biome": "skycraft:summerset_meadow",
+                "biome": "nirncraft:summerset_meadow",
                 "surface": "artaeum_pearl_chalk_loam_1",
                 "trees": [
                         "summerset_cherry",
@@ -65956,7 +65956,7 @@ SKYRIM_MICRO_RULES = {
                                 49.2
                         ]
                 },
-                "biome": "skycraft:crystal_coast",
+                "biome": "nirncraft:crystal_coast",
                 "surface": "artaeum_white_calcite_sand_2",
                 "trees": [
                         "crystal_willow",
@@ -66014,7 +66014,7 @@ SKYRIM_MICRO_RULES = {
                                 74.8
                         ]
                 },
-                "biome": "skycraft:auridon_vineyards",
+                "biome": "nirncraft:auridon_vineyards",
                 "surface": "artaeum_terraced_limestone_marl_3",
                 "trees": [
                         "silver_olive",
@@ -66073,7 +66073,7 @@ SKYRIM_MICRO_RULES = {
                                 101.8
                         ]
                 },
-                "biome": "skycraft:artaeum",
+                "biome": "nirncraft:artaeum",
                 "surface": "artaeum_enchanted_coral_turf_4",
                 "trees": [
                         "psijic_bloom_tree",
@@ -66131,7 +66131,7 @@ SKYRIM_MICRO_RULES = {
                                 127.4
                         ]
                 },
-                "biome": "skycraft:warm_ocean",
+                "biome": "nirncraft:warm_ocean",
                 "surface": "artaeum_pearl_chalk_loam_5",
                 "trees": [
                         "summerset_cherry",
@@ -66190,7 +66190,7 @@ SKYRIM_MICRO_RULES = {
                                 153.1
                         ]
                 },
-                "biome": "skycraft:cyrodiil_river",
+                "biome": "nirncraft:cyrodiil_river",
                 "surface": "artaeum_white_calcite_sand_6",
                 "trees": [
                         "crystal_willow",
@@ -66248,7 +66248,7 @@ SKYRIM_MICRO_RULES = {
                                 172.0
                         ]
                 },
-                "biome": "skycraft:warm_beach",
+                "biome": "nirncraft:warm_beach",
                 "surface": "artaeum_terraced_limestone_marl_7",
                 "trees": [
                         "silver_olive",
@@ -66307,7 +66307,7 @@ SKYRIM_MICRO_RULES = {
                                 197.6
                         ]
                 },
-                "biome": "skycraft:vvardenfell_ashlands",
+                "biome": "nirncraft:vvardenfell_ashlands",
                 "surface": "artaeum_enchanted_coral_turf_8",
                 "trees": [
                         "psijic_bloom_tree",
@@ -66365,7 +66365,7 @@ SKYRIM_MICRO_RULES = {
                                 224.1
                         ]
                 },
-                "biome": "skycraft:black_marsh_swamp",
+                "biome": "nirncraft:black_marsh_swamp",
                 "surface": "artaeum_pearl_chalk_loam_9",
                 "trees": [
                         "summerset_cherry",
@@ -66424,7 +66424,7 @@ SKYRIM_MICRO_RULES = {
                                 253.5
                         ]
                 },
-                "biome": "skycraft:alikr_desert",
+                "biome": "nirncraft:alikr_desert",
                 "surface": "artaeum_white_calcite_sand_10",
                 "trees": [
                         "crystal_willow",
@@ -66482,7 +66482,7 @@ SKYRIM_MICRO_RULES = {
                                 284.5
                         ]
                 },
-                "biome": "skycraft:pellitine_jungle",
+                "biome": "nirncraft:pellitine_jungle",
                 "surface": "artaeum_terraced_limestone_marl_11",
                 "trees": [
                         "silver_olive",
@@ -66541,7 +66541,7 @@ SKYRIM_MICRO_RULES = {
                                 308.2
                         ]
                 },
-                "biome": "skycraft:pale_snowfield",
+                "biome": "nirncraft:pale_snowfield",
                 "surface": "artaeum_enchanted_coral_turf_12",
                 "trees": [
                         "psijic_bloom_tree",
@@ -66599,7 +66599,7 @@ SKYRIM_MICRO_RULES = {
                                 338.1
                         ]
                 },
-                "biome": "skycraft:reach_crags",
+                "biome": "nirncraft:reach_crags",
                 "surface": "artaeum_pearl_chalk_loam_13",
                 "trees": [
                         "summerset_cherry",
@@ -66658,7 +66658,7 @@ SKYRIM_MICRO_RULES = {
                                 360.0
                         ]
                 },
-                "biome": "skycraft:great_forest",
+                "biome": "nirncraft:great_forest",
                 "surface": "artaeum_white_calcite_sand_14",
                 "trees": [
                         "crystal_willow",
@@ -66716,7 +66716,7 @@ SKYRIM_MICRO_RULES = {
                                 30.6
                         ]
                 },
-                "biome": "skycraft:heartlands",
+                "biome": "nirncraft:heartlands",
                 "surface": "artaeum_terraced_limestone_marl_15",
                 "trees": [
                         "silver_olive",
@@ -66775,7 +66775,7 @@ SKYRIM_MICRO_RULES = {
                                 51.3
                         ]
                 },
-                "biome": "skycraft:telvanni_mushroom_forest",
+                "biome": "nirncraft:telvanni_mushroom_forest",
                 "surface": "artaeum_enchanted_coral_turf_16",
                 "trees": [
                         "psijic_bloom_tree",
@@ -66833,7 +66833,7 @@ SKYRIM_MICRO_RULES = {
                                 75.4
                         ]
                 },
-                "biome": "skycraft:ascadian_isles",
+                "biome": "nirncraft:ascadian_isles",
                 "surface": "artaeum_pearl_chalk_loam_17",
                 "trees": [
                         "summerset_cherry",
@@ -66892,7 +66892,7 @@ SKYRIM_MICRO_RULES = {
                                 107.2
                         ]
                 },
-                "biome": "skycraft:grazelands",
+                "biome": "nirncraft:grazelands",
                 "surface": "artaeum_white_calcite_sand_18",
                 "trees": [
                         "crystal_willow",
@@ -66950,7 +66950,7 @@ SKYRIM_MICRO_RULES = {
                                 150.8
                         ]
                 },
-                "biome": "skycraft:west_gash",
+                "biome": "nirncraft:west_gash",
                 "surface": "artaeum_terraced_limestone_marl_19",
                 "trees": [
                         "silver_olive",
@@ -67009,7 +67009,7 @@ SKYRIM_MICRO_RULES = {
                                 169.5
                         ]
                 },
-                "biome": "skycraft:bitter_coast_swamp",
+                "biome": "nirncraft:bitter_coast_swamp",
                 "surface": "artaeum_enchanted_coral_turf_20",
                 "trees": [
                         "psijic_bloom_tree",
@@ -67067,7 +67067,7 @@ SKYRIM_MICRO_RULES = {
                                 187.3
                         ]
                 },
-                "biome": "skycraft:stonefalls",
+                "biome": "nirncraft:stonefalls",
                 "surface": "artaeum_pearl_chalk_loam_21",
                 "trees": [
                         "summerset_cherry",
@@ -67126,7 +67126,7 @@ SKYRIM_MICRO_RULES = {
                                 204.1
                         ]
                 },
-                "biome": "skycraft:deshaan_plains",
+                "biome": "nirncraft:deshaan_plains",
                 "surface": "artaeum_white_calcite_sand_22",
                 "trees": [
                         "crystal_willow",
@@ -67184,7 +67184,7 @@ SKYRIM_MICRO_RULES = {
                                 219.9
                         ]
                 },
-                "biome": "skycraft:molag_amur",
+                "biome": "nirncraft:molag_amur",
                 "surface": "artaeum_terraced_limestone_marl_23",
                 "trees": [
                         "silver_olive",
@@ -67243,7 +67243,7 @@ SKYRIM_MICRO_RULES = {
                                 240.0
                         ]
                 },
-                "biome": "skycraft:azuras_coast",
+                "biome": "nirncraft:azuras_coast",
                 "surface": "artaeum_enchanted_coral_turf_24",
                 "trees": [
                         "psijic_bloom_tree",
@@ -67301,7 +67301,7 @@ SKYRIM_MICRO_RULES = {
                                 266.9
                         ]
                 },
-                "biome": "skycraft:sheogorad",
+                "biome": "nirncraft:sheogorad",
                 "surface": "artaeum_pearl_chalk_loam_25",
                 "trees": [
                         "summerset_cherry",
@@ -67360,7 +67360,7 @@ SKYRIM_MICRO_RULES = {
                                 310.2
                         ]
                 },
-                "biome": "skycraft:red_mountain",
+                "biome": "nirncraft:red_mountain",
                 "surface": "artaeum_white_calcite_sand_26",
                 "trees": [
                         "crystal_willow",
@@ -67418,7 +67418,7 @@ SKYRIM_MICRO_RULES = {
                                 337.6
                         ]
                 },
-                "biome": "skycraft:solstheim_pine_forest",
+                "biome": "nirncraft:solstheim_pine_forest",
                 "surface": "artaeum_terraced_limestone_marl_27",
                 "trees": [
                         "silver_olive",
@@ -67477,7 +67477,7 @@ SKYRIM_MICRO_RULES = {
                                 6.0
                         ]
                 },
-                "biome": "skycraft:solstheim_ashlands",
+                "biome": "nirncraft:solstheim_ashlands",
                 "surface": "artaeum_enchanted_coral_turf_28",
                 "trees": [
                         "psijic_bloom_tree",
@@ -67632,7 +67632,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:atmoran_ice_waste",
+            "biome": "nirncraft:atmoran_ice_waste",
             "surface": "ice_waste_polar_blue_ice_1",
             "trees": [
                 "petrified_frost_pine",
@@ -67688,7 +67688,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:atmoran_frozen_forest",
+            "biome": "nirncraft:atmoran_frozen_forest",
             "surface": "ice_waste_deep_hoarfrost_duff_2",
             "trees": [
                 "frozen_giant_pine",
@@ -67746,7 +67746,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:tsaesci_jungle",
+            "biome": "nirncraft:tsaesci_jungle",
             "surface": "ice_waste_emerald_terrace_silt_3",
             "trees": [
                 "golden_bamboo",
@@ -67805,7 +67805,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:kamal_snowfield",
+            "biome": "nirncraft:kamal_snowfield",
             "surface": "ice_waste_frozen_tundra_permafrost_4",
             "trees": [
                 "stunted_kamal_spruce",
@@ -67861,7 +67861,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:warm_ocean",
+            "biome": "nirncraft:warm_ocean",
             "surface": "ice_waste_blossom_karst_loam_5",
             "trees": [
                 "akaviri_cherry",
@@ -67920,7 +67920,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:cyrodiil_river",
+            "biome": "nirncraft:cyrodiil_river",
             "surface": "ice_waste_golden_steppe_loess_6",
             "trees": [
                 "akaviri_pine",
@@ -67978,7 +67978,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:warm_beach",
+            "biome": "nirncraft:warm_beach",
             "surface": "ice_waste_sunken_red_erg_sand_7",
             "trees": [
                 "date_palm",
@@ -68036,7 +68036,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:vvardenfell_ashlands",
+            "biome": "nirncraft:vvardenfell_ashlands",
             "surface": "ice_waste_mist_soaked_kelp_humus_8",
             "trees": [
                 "mist_mahogany",
@@ -68095,7 +68095,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:black_marsh_swamp",
+            "biome": "nirncraft:black_marsh_swamp",
             "surface": "ice_waste_calcified_reef_limestone_9",
             "trees": [
                 "calcified_coral_fan",
@@ -68153,7 +68153,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:alikr_desert",
+            "biome": "nirncraft:alikr_desert",
             "surface": "ice_waste_polar_blue_ice_10",
             "trees": [
                 "petrified_frost_pine",
@@ -68209,7 +68209,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:pellitine_jungle",
+            "biome": "nirncraft:pellitine_jungle",
             "surface": "ice_waste_deep_hoarfrost_duff_11",
             "trees": [
                 "frozen_giant_pine",
@@ -68267,7 +68267,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:pale_snowfield",
+            "biome": "nirncraft:pale_snowfield",
             "surface": "ice_waste_emerald_terrace_silt_12",
             "trees": [
                 "golden_bamboo",
@@ -68326,7 +68326,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:reach_crags",
+            "biome": "nirncraft:reach_crags",
             "surface": "ice_waste_frozen_tundra_permafrost_13",
             "trees": [
                 "stunted_kamal_spruce",
@@ -68382,7 +68382,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:great_forest",
+            "biome": "nirncraft:great_forest",
             "surface": "ice_waste_blossom_karst_loam_14",
             "trees": [
                 "akaviri_cherry",
@@ -68441,7 +68441,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:heartlands",
+            "biome": "nirncraft:heartlands",
             "surface": "ice_waste_golden_steppe_loess_15",
             "trees": [
                 "akaviri_pine",
@@ -68499,7 +68499,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:telvanni_mushroom_forest",
+            "biome": "nirncraft:telvanni_mushroom_forest",
             "surface": "ice_waste_sunken_red_erg_sand_16",
             "trees": [
                 "date_palm",
@@ -68557,7 +68557,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:ascadian_isles",
+            "biome": "nirncraft:ascadian_isles",
             "surface": "ice_waste_mist_soaked_kelp_humus_17",
             "trees": [
                 "mist_mahogany",
@@ -68616,7 +68616,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:grazelands",
+            "biome": "nirncraft:grazelands",
             "surface": "ice_waste_calcified_reef_limestone_18",
             "trees": [
                 "calcified_coral_fan",
@@ -68674,7 +68674,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:west_gash",
+            "biome": "nirncraft:west_gash",
             "surface": "ice_waste_polar_blue_ice_19",
             "trees": [
                 "petrified_frost_pine",
@@ -68730,7 +68730,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:bitter_coast_swamp",
+            "biome": "nirncraft:bitter_coast_swamp",
             "surface": "ice_waste_deep_hoarfrost_duff_20",
             "trees": [
                 "frozen_giant_pine",
@@ -68788,7 +68788,7 @@ FOREIGN_MICRO_RULES = {
                     360.0
                 ]
             },
-            "biome": "skycraft:stonefalls",
+            "biome": "nirncraft:stonefalls",
             "surface": "ice_waste_emerald_terrace_silt_21",
             "trees": [
                 "golden_bamboo",
@@ -68847,7 +68847,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:deshaan_plains",
+            "biome": "nirncraft:deshaan_plains",
             "surface": "ice_waste_frozen_tundra_permafrost_22",
             "trees": [
                 "stunted_kamal_spruce",
@@ -68903,7 +68903,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:molag_amur",
+            "biome": "nirncraft:molag_amur",
             "surface": "ice_waste_blossom_karst_loam_23",
             "trees": [
                 "akaviri_cherry",
@@ -68962,7 +68962,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:azuras_coast",
+            "biome": "nirncraft:azuras_coast",
             "surface": "ice_waste_golden_steppe_loess_24",
             "trees": [
                 "akaviri_pine",
@@ -69020,7 +69020,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:sheogorad",
+            "biome": "nirncraft:sheogorad",
             "surface": "ice_waste_sunken_red_erg_sand_25",
             "trees": [
                 "date_palm",
@@ -69078,7 +69078,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:red_mountain",
+            "biome": "nirncraft:red_mountain",
             "surface": "ice_waste_mist_soaked_kelp_humus_26",
             "trees": [
                 "mist_mahogany",
@@ -69137,7 +69137,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:solstheim_pine_forest",
+            "biome": "nirncraft:solstheim_pine_forest",
             "surface": "ice_waste_calcified_reef_limestone_27",
             "trees": [
                 "calcified_coral_fan",
@@ -69195,7 +69195,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:solstheim_ashlands",
+            "biome": "nirncraft:solstheim_ashlands",
             "surface": "ice_waste_polar_blue_ice_28",
             "trees": [
                 "petrified_frost_pine",
@@ -69251,7 +69251,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:deep_mire",
+            "biome": "nirncraft:deep_mire",
             "surface": "ice_waste_deep_hoarfrost_duff_29",
             "trees": [
                 "frozen_giant_pine",
@@ -69309,7 +69309,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:hist_grove",
+            "biome": "nirncraft:hist_grove",
             "surface": "ice_waste_emerald_terrace_silt_30",
             "trees": [
                 "golden_bamboo",
@@ -69368,7 +69368,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:mangrove_delta",
+            "biome": "nirncraft:mangrove_delta",
             "surface": "ice_waste_frozen_tundra_permafrost_31",
             "trees": [
                 "stunted_kamal_spruce",
@@ -69424,7 +69424,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:shadowfen",
+            "biome": "nirncraft:shadowfen",
             "surface": "ice_waste_blossom_karst_loam_32",
             "trees": [
                 "akaviri_cherry",
@@ -69483,7 +69483,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:murkmire",
+            "biome": "nirncraft:murkmire",
             "surface": "ice_waste_golden_steppe_loess_33",
             "trees": [
                 "akaviri_pine",
@@ -69541,7 +69541,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:anequina_badlands",
+            "biome": "nirncraft:anequina_badlands",
             "surface": "ice_waste_sunken_red_erg_sand_34",
             "trees": [
                 "date_palm",
@@ -69599,7 +69599,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:elsweyr_dunes",
+            "biome": "nirncraft:elsweyr_dunes",
             "surface": "ice_waste_mist_soaked_kelp_humus_35",
             "trees": [
                 "mist_mahogany",
@@ -69658,7 +69658,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:elsweyr_savanna",
+            "biome": "nirncraft:elsweyr_savanna",
             "surface": "ice_waste_calcified_reef_limestone_36",
             "trees": [
                 "calcified_coral_fan",
@@ -69716,7 +69716,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:sugar_fields",
+            "biome": "nirncraft:sugar_fields",
             "surface": "ice_waste_polar_blue_ice_37",
             "trees": [
                 "petrified_frost_pine",
@@ -69772,7 +69772,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:elsweyr_canyons",
+            "biome": "nirncraft:elsweyr_canyons",
             "surface": "ice_waste_deep_hoarfrost_duff_38",
             "trees": [
                 "frozen_giant_pine",
@@ -69830,7 +69830,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:graht_oak_forest",
+            "biome": "nirncraft:graht_oak_forest",
             "surface": "ice_waste_emerald_terrace_silt_39",
             "trees": [
                 "golden_bamboo",
@@ -69889,7 +69889,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:valenwood_rainforest",
+            "biome": "nirncraft:valenwood_rainforest",
             "surface": "ice_waste_frozen_tundra_permafrost_40",
             "trees": [
                 "stunted_kamal_spruce",
@@ -69945,7 +69945,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:valenwood_mangrove_coast",
+            "biome": "nirncraft:valenwood_mangrove_coast",
             "surface": "ice_waste_blossom_karst_loam_41",
             "trees": [
                 "akaviri_cherry",
@@ -70004,7 +70004,7 @@ FOREIGN_MICRO_RULES = {
                     6.0
                 ]
             },
-            "biome": "skycraft:reapers_march",
+            "biome": "nirncraft:reapers_march",
             "surface": "ice_waste_golden_steppe_loess_42",
             "trees": [
                 "akaviri_pine",
@@ -70064,7 +70064,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:atmoran_ice_waste",
+            "biome": "nirncraft:atmoran_ice_waste",
             "surface": "frozen_forest_polar_blue_ice_1",
             "trees": [
                 "petrified_frost_pine",
@@ -70120,7 +70120,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:atmoran_frozen_forest",
+            "biome": "nirncraft:atmoran_frozen_forest",
             "surface": "frozen_forest_deep_hoarfrost_duff_2",
             "trees": [
                 "frozen_giant_pine",
@@ -70178,7 +70178,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:tsaesci_jungle",
+            "biome": "nirncraft:tsaesci_jungle",
             "surface": "frozen_forest_emerald_terrace_silt_3",
             "trees": [
                 "golden_bamboo",
@@ -70237,7 +70237,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:kamal_snowfield",
+            "biome": "nirncraft:kamal_snowfield",
             "surface": "frozen_forest_frozen_tundra_permafrost_4",
             "trees": [
                 "stunted_kamal_spruce",
@@ -70293,7 +70293,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:warm_ocean",
+            "biome": "nirncraft:warm_ocean",
             "surface": "frozen_forest_blossom_karst_loam_5",
             "trees": [
                 "akaviri_cherry",
@@ -70352,7 +70352,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:cyrodiil_river",
+            "biome": "nirncraft:cyrodiil_river",
             "surface": "frozen_forest_golden_steppe_loess_6",
             "trees": [
                 "akaviri_pine",
@@ -70410,7 +70410,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:warm_beach",
+            "biome": "nirncraft:warm_beach",
             "surface": "frozen_forest_sunken_red_erg_sand_7",
             "trees": [
                 "date_palm",
@@ -70468,7 +70468,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:vvardenfell_ashlands",
+            "biome": "nirncraft:vvardenfell_ashlands",
             "surface": "frozen_forest_mist_soaked_kelp_humus_8",
             "trees": [
                 "mist_mahogany",
@@ -70527,7 +70527,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:black_marsh_swamp",
+            "biome": "nirncraft:black_marsh_swamp",
             "surface": "frozen_forest_calcified_reef_limestone_9",
             "trees": [
                 "calcified_coral_fan",
@@ -70585,7 +70585,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:alikr_desert",
+            "biome": "nirncraft:alikr_desert",
             "surface": "frozen_forest_polar_blue_ice_10",
             "trees": [
                 "petrified_frost_pine",
@@ -70641,7 +70641,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:pellitine_jungle",
+            "biome": "nirncraft:pellitine_jungle",
             "surface": "frozen_forest_deep_hoarfrost_duff_11",
             "trees": [
                 "frozen_giant_pine",
@@ -70699,7 +70699,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:pale_snowfield",
+            "biome": "nirncraft:pale_snowfield",
             "surface": "frozen_forest_emerald_terrace_silt_12",
             "trees": [
                 "golden_bamboo",
@@ -70758,7 +70758,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:reach_crags",
+            "biome": "nirncraft:reach_crags",
             "surface": "frozen_forest_frozen_tundra_permafrost_13",
             "trees": [
                 "stunted_kamal_spruce",
@@ -70814,7 +70814,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:great_forest",
+            "biome": "nirncraft:great_forest",
             "surface": "frozen_forest_blossom_karst_loam_14",
             "trees": [
                 "akaviri_cherry",
@@ -70873,7 +70873,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:heartlands",
+            "biome": "nirncraft:heartlands",
             "surface": "frozen_forest_golden_steppe_loess_15",
             "trees": [
                 "akaviri_pine",
@@ -70931,7 +70931,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:telvanni_mushroom_forest",
+            "biome": "nirncraft:telvanni_mushroom_forest",
             "surface": "frozen_forest_sunken_red_erg_sand_16",
             "trees": [
                 "date_palm",
@@ -70989,7 +70989,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:ascadian_isles",
+            "biome": "nirncraft:ascadian_isles",
             "surface": "frozen_forest_mist_soaked_kelp_humus_17",
             "trees": [
                 "mist_mahogany",
@@ -71048,7 +71048,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:grazelands",
+            "biome": "nirncraft:grazelands",
             "surface": "frozen_forest_calcified_reef_limestone_18",
             "trees": [
                 "calcified_coral_fan",
@@ -71106,7 +71106,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:west_gash",
+            "biome": "nirncraft:west_gash",
             "surface": "frozen_forest_polar_blue_ice_19",
             "trees": [
                 "petrified_frost_pine",
@@ -71162,7 +71162,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:bitter_coast_swamp",
+            "biome": "nirncraft:bitter_coast_swamp",
             "surface": "frozen_forest_deep_hoarfrost_duff_20",
             "trees": [
                 "frozen_giant_pine",
@@ -71220,7 +71220,7 @@ FOREIGN_MICRO_RULES = {
                     360.0
                 ]
             },
-            "biome": "skycraft:stonefalls",
+            "biome": "nirncraft:stonefalls",
             "surface": "frozen_forest_emerald_terrace_silt_21",
             "trees": [
                 "golden_bamboo",
@@ -71279,7 +71279,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:deshaan_plains",
+            "biome": "nirncraft:deshaan_plains",
             "surface": "frozen_forest_frozen_tundra_permafrost_22",
             "trees": [
                 "stunted_kamal_spruce",
@@ -71335,7 +71335,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:molag_amur",
+            "biome": "nirncraft:molag_amur",
             "surface": "frozen_forest_blossom_karst_loam_23",
             "trees": [
                 "akaviri_cherry",
@@ -71394,7 +71394,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:azuras_coast",
+            "biome": "nirncraft:azuras_coast",
             "surface": "frozen_forest_golden_steppe_loess_24",
             "trees": [
                 "akaviri_pine",
@@ -71452,7 +71452,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:sheogorad",
+            "biome": "nirncraft:sheogorad",
             "surface": "frozen_forest_sunken_red_erg_sand_25",
             "trees": [
                 "date_palm",
@@ -71510,7 +71510,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:red_mountain",
+            "biome": "nirncraft:red_mountain",
             "surface": "frozen_forest_mist_soaked_kelp_humus_26",
             "trees": [
                 "mist_mahogany",
@@ -71569,7 +71569,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:solstheim_pine_forest",
+            "biome": "nirncraft:solstheim_pine_forest",
             "surface": "frozen_forest_calcified_reef_limestone_27",
             "trees": [
                 "calcified_coral_fan",
@@ -71627,7 +71627,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:solstheim_ashlands",
+            "biome": "nirncraft:solstheim_ashlands",
             "surface": "frozen_forest_polar_blue_ice_28",
             "trees": [
                 "petrified_frost_pine",
@@ -71683,7 +71683,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:deep_mire",
+            "biome": "nirncraft:deep_mire",
             "surface": "frozen_forest_deep_hoarfrost_duff_29",
             "trees": [
                 "frozen_giant_pine",
@@ -71741,7 +71741,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:hist_grove",
+            "biome": "nirncraft:hist_grove",
             "surface": "frozen_forest_emerald_terrace_silt_30",
             "trees": [
                 "golden_bamboo",
@@ -71800,7 +71800,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:mangrove_delta",
+            "biome": "nirncraft:mangrove_delta",
             "surface": "frozen_forest_frozen_tundra_permafrost_31",
             "trees": [
                 "stunted_kamal_spruce",
@@ -71856,7 +71856,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:shadowfen",
+            "biome": "nirncraft:shadowfen",
             "surface": "frozen_forest_blossom_karst_loam_32",
             "trees": [
                 "akaviri_cherry",
@@ -71915,7 +71915,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:murkmire",
+            "biome": "nirncraft:murkmire",
             "surface": "frozen_forest_golden_steppe_loess_33",
             "trees": [
                 "akaviri_pine",
@@ -71973,7 +71973,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:anequina_badlands",
+            "biome": "nirncraft:anequina_badlands",
             "surface": "frozen_forest_sunken_red_erg_sand_34",
             "trees": [
                 "date_palm",
@@ -72031,7 +72031,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:elsweyr_dunes",
+            "biome": "nirncraft:elsweyr_dunes",
             "surface": "frozen_forest_mist_soaked_kelp_humus_35",
             "trees": [
                 "mist_mahogany",
@@ -72090,7 +72090,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:elsweyr_savanna",
+            "biome": "nirncraft:elsweyr_savanna",
             "surface": "frozen_forest_calcified_reef_limestone_36",
             "trees": [
                 "calcified_coral_fan",
@@ -72148,7 +72148,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:sugar_fields",
+            "biome": "nirncraft:sugar_fields",
             "surface": "frozen_forest_polar_blue_ice_37",
             "trees": [
                 "petrified_frost_pine",
@@ -72204,7 +72204,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:elsweyr_canyons",
+            "biome": "nirncraft:elsweyr_canyons",
             "surface": "frozen_forest_deep_hoarfrost_duff_38",
             "trees": [
                 "frozen_giant_pine",
@@ -72262,7 +72262,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:graht_oak_forest",
+            "biome": "nirncraft:graht_oak_forest",
             "surface": "frozen_forest_emerald_terrace_silt_39",
             "trees": [
                 "golden_bamboo",
@@ -72321,7 +72321,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:valenwood_rainforest",
+            "biome": "nirncraft:valenwood_rainforest",
             "surface": "frozen_forest_frozen_tundra_permafrost_40",
             "trees": [
                 "stunted_kamal_spruce",
@@ -72377,7 +72377,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:valenwood_mangrove_coast",
+            "biome": "nirncraft:valenwood_mangrove_coast",
             "surface": "frozen_forest_blossom_karst_loam_41",
             "trees": [
                 "akaviri_cherry",
@@ -72436,7 +72436,7 @@ FOREIGN_MICRO_RULES = {
                     6.0
                 ]
             },
-            "biome": "skycraft:reapers_march",
+            "biome": "nirncraft:reapers_march",
             "surface": "frozen_forest_golden_steppe_loess_42",
             "trees": [
                 "akaviri_pine",
@@ -72496,7 +72496,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:atmoran_ice_waste",
+            "biome": "nirncraft:atmoran_ice_waste",
             "surface": "tsaesci_polar_blue_ice_1",
             "trees": [
                 "petrified_frost_pine",
@@ -72552,7 +72552,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:atmoran_frozen_forest",
+            "biome": "nirncraft:atmoran_frozen_forest",
             "surface": "tsaesci_deep_hoarfrost_duff_2",
             "trees": [
                 "frozen_giant_pine",
@@ -72610,7 +72610,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:tsaesci_jungle",
+            "biome": "nirncraft:tsaesci_jungle",
             "surface": "tsaesci_emerald_terrace_silt_3",
             "trees": [
                 "golden_bamboo",
@@ -72669,7 +72669,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:kamal_snowfield",
+            "biome": "nirncraft:kamal_snowfield",
             "surface": "tsaesci_frozen_tundra_permafrost_4",
             "trees": [
                 "stunted_kamal_spruce",
@@ -72725,7 +72725,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:warm_ocean",
+            "biome": "nirncraft:warm_ocean",
             "surface": "tsaesci_blossom_karst_loam_5",
             "trees": [
                 "akaviri_cherry",
@@ -72784,7 +72784,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:cyrodiil_river",
+            "biome": "nirncraft:cyrodiil_river",
             "surface": "tsaesci_golden_steppe_loess_6",
             "trees": [
                 "akaviri_pine",
@@ -72842,7 +72842,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:warm_beach",
+            "biome": "nirncraft:warm_beach",
             "surface": "tsaesci_sunken_red_erg_sand_7",
             "trees": [
                 "date_palm",
@@ -72900,7 +72900,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:vvardenfell_ashlands",
+            "biome": "nirncraft:vvardenfell_ashlands",
             "surface": "tsaesci_mist_soaked_kelp_humus_8",
             "trees": [
                 "mist_mahogany",
@@ -72959,7 +72959,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:black_marsh_swamp",
+            "biome": "nirncraft:black_marsh_swamp",
             "surface": "tsaesci_calcified_reef_limestone_9",
             "trees": [
                 "calcified_coral_fan",
@@ -73017,7 +73017,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:alikr_desert",
+            "biome": "nirncraft:alikr_desert",
             "surface": "tsaesci_polar_blue_ice_10",
             "trees": [
                 "petrified_frost_pine",
@@ -73073,7 +73073,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:pellitine_jungle",
+            "biome": "nirncraft:pellitine_jungle",
             "surface": "tsaesci_deep_hoarfrost_duff_11",
             "trees": [
                 "frozen_giant_pine",
@@ -73131,7 +73131,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:pale_snowfield",
+            "biome": "nirncraft:pale_snowfield",
             "surface": "tsaesci_emerald_terrace_silt_12",
             "trees": [
                 "golden_bamboo",
@@ -73190,7 +73190,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:reach_crags",
+            "biome": "nirncraft:reach_crags",
             "surface": "tsaesci_frozen_tundra_permafrost_13",
             "trees": [
                 "stunted_kamal_spruce",
@@ -73246,7 +73246,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:great_forest",
+            "biome": "nirncraft:great_forest",
             "surface": "tsaesci_blossom_karst_loam_14",
             "trees": [
                 "akaviri_cherry",
@@ -73305,7 +73305,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:heartlands",
+            "biome": "nirncraft:heartlands",
             "surface": "tsaesci_golden_steppe_loess_15",
             "trees": [
                 "akaviri_pine",
@@ -73363,7 +73363,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:telvanni_mushroom_forest",
+            "biome": "nirncraft:telvanni_mushroom_forest",
             "surface": "tsaesci_sunken_red_erg_sand_16",
             "trees": [
                 "date_palm",
@@ -73421,7 +73421,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:ascadian_isles",
+            "biome": "nirncraft:ascadian_isles",
             "surface": "tsaesci_mist_soaked_kelp_humus_17",
             "trees": [
                 "mist_mahogany",
@@ -73480,7 +73480,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:grazelands",
+            "biome": "nirncraft:grazelands",
             "surface": "tsaesci_calcified_reef_limestone_18",
             "trees": [
                 "calcified_coral_fan",
@@ -73538,7 +73538,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:west_gash",
+            "biome": "nirncraft:west_gash",
             "surface": "tsaesci_polar_blue_ice_19",
             "trees": [
                 "petrified_frost_pine",
@@ -73594,7 +73594,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:bitter_coast_swamp",
+            "biome": "nirncraft:bitter_coast_swamp",
             "surface": "tsaesci_deep_hoarfrost_duff_20",
             "trees": [
                 "frozen_giant_pine",
@@ -73652,7 +73652,7 @@ FOREIGN_MICRO_RULES = {
                     360.0
                 ]
             },
-            "biome": "skycraft:stonefalls",
+            "biome": "nirncraft:stonefalls",
             "surface": "tsaesci_emerald_terrace_silt_21",
             "trees": [
                 "golden_bamboo",
@@ -73711,7 +73711,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:deshaan_plains",
+            "biome": "nirncraft:deshaan_plains",
             "surface": "tsaesci_frozen_tundra_permafrost_22",
             "trees": [
                 "stunted_kamal_spruce",
@@ -73767,7 +73767,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:molag_amur",
+            "biome": "nirncraft:molag_amur",
             "surface": "tsaesci_blossom_karst_loam_23",
             "trees": [
                 "akaviri_cherry",
@@ -73826,7 +73826,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:azuras_coast",
+            "biome": "nirncraft:azuras_coast",
             "surface": "tsaesci_golden_steppe_loess_24",
             "trees": [
                 "akaviri_pine",
@@ -73884,7 +73884,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:sheogorad",
+            "biome": "nirncraft:sheogorad",
             "surface": "tsaesci_sunken_red_erg_sand_25",
             "trees": [
                 "date_palm",
@@ -73942,7 +73942,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:red_mountain",
+            "biome": "nirncraft:red_mountain",
             "surface": "tsaesci_mist_soaked_kelp_humus_26",
             "trees": [
                 "mist_mahogany",
@@ -74001,7 +74001,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:solstheim_pine_forest",
+            "biome": "nirncraft:solstheim_pine_forest",
             "surface": "tsaesci_calcified_reef_limestone_27",
             "trees": [
                 "calcified_coral_fan",
@@ -74059,7 +74059,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:solstheim_ashlands",
+            "biome": "nirncraft:solstheim_ashlands",
             "surface": "tsaesci_polar_blue_ice_28",
             "trees": [
                 "petrified_frost_pine",
@@ -74115,7 +74115,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:deep_mire",
+            "biome": "nirncraft:deep_mire",
             "surface": "tsaesci_deep_hoarfrost_duff_29",
             "trees": [
                 "frozen_giant_pine",
@@ -74173,7 +74173,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:hist_grove",
+            "biome": "nirncraft:hist_grove",
             "surface": "tsaesci_emerald_terrace_silt_30",
             "trees": [
                 "golden_bamboo",
@@ -74232,7 +74232,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:mangrove_delta",
+            "biome": "nirncraft:mangrove_delta",
             "surface": "tsaesci_frozen_tundra_permafrost_31",
             "trees": [
                 "stunted_kamal_spruce",
@@ -74288,7 +74288,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:shadowfen",
+            "biome": "nirncraft:shadowfen",
             "surface": "tsaesci_blossom_karst_loam_32",
             "trees": [
                 "akaviri_cherry",
@@ -74347,7 +74347,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:murkmire",
+            "biome": "nirncraft:murkmire",
             "surface": "tsaesci_golden_steppe_loess_33",
             "trees": [
                 "akaviri_pine",
@@ -74405,7 +74405,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:anequina_badlands",
+            "biome": "nirncraft:anequina_badlands",
             "surface": "tsaesci_sunken_red_erg_sand_34",
             "trees": [
                 "date_palm",
@@ -74463,7 +74463,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:elsweyr_dunes",
+            "biome": "nirncraft:elsweyr_dunes",
             "surface": "tsaesci_mist_soaked_kelp_humus_35",
             "trees": [
                 "mist_mahogany",
@@ -74522,7 +74522,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:elsweyr_savanna",
+            "biome": "nirncraft:elsweyr_savanna",
             "surface": "tsaesci_calcified_reef_limestone_36",
             "trees": [
                 "calcified_coral_fan",
@@ -74580,7 +74580,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:sugar_fields",
+            "biome": "nirncraft:sugar_fields",
             "surface": "tsaesci_polar_blue_ice_37",
             "trees": [
                 "petrified_frost_pine",
@@ -74636,7 +74636,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:elsweyr_canyons",
+            "biome": "nirncraft:elsweyr_canyons",
             "surface": "tsaesci_deep_hoarfrost_duff_38",
             "trees": [
                 "frozen_giant_pine",
@@ -74694,7 +74694,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:graht_oak_forest",
+            "biome": "nirncraft:graht_oak_forest",
             "surface": "tsaesci_emerald_terrace_silt_39",
             "trees": [
                 "golden_bamboo",
@@ -74753,7 +74753,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:valenwood_rainforest",
+            "biome": "nirncraft:valenwood_rainforest",
             "surface": "tsaesci_frozen_tundra_permafrost_40",
             "trees": [
                 "stunted_kamal_spruce",
@@ -74809,7 +74809,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:valenwood_mangrove_coast",
+            "biome": "nirncraft:valenwood_mangrove_coast",
             "surface": "tsaesci_blossom_karst_loam_41",
             "trees": [
                 "akaviri_cherry",
@@ -74868,7 +74868,7 @@ FOREIGN_MICRO_RULES = {
                     6.0
                 ]
             },
-            "biome": "skycraft:reapers_march",
+            "biome": "nirncraft:reapers_march",
             "surface": "tsaesci_golden_steppe_loess_42",
             "trees": [
                 "akaviri_pine",
@@ -74928,7 +74928,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:atmoran_ice_waste",
+            "biome": "nirncraft:atmoran_ice_waste",
             "surface": "kamal_polar_blue_ice_1",
             "trees": [
                 "petrified_frost_pine",
@@ -74984,7 +74984,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:atmoran_frozen_forest",
+            "biome": "nirncraft:atmoran_frozen_forest",
             "surface": "kamal_deep_hoarfrost_duff_2",
             "trees": [
                 "frozen_giant_pine",
@@ -75042,7 +75042,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:tsaesci_jungle",
+            "biome": "nirncraft:tsaesci_jungle",
             "surface": "kamal_emerald_terrace_silt_3",
             "trees": [
                 "golden_bamboo",
@@ -75101,7 +75101,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:kamal_snowfield",
+            "biome": "nirncraft:kamal_snowfield",
             "surface": "kamal_frozen_tundra_permafrost_4",
             "trees": [
                 "stunted_kamal_spruce",
@@ -75157,7 +75157,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:warm_ocean",
+            "biome": "nirncraft:warm_ocean",
             "surface": "kamal_blossom_karst_loam_5",
             "trees": [
                 "akaviri_cherry",
@@ -75216,7 +75216,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:cyrodiil_river",
+            "biome": "nirncraft:cyrodiil_river",
             "surface": "kamal_golden_steppe_loess_6",
             "trees": [
                 "akaviri_pine",
@@ -75274,7 +75274,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:warm_beach",
+            "biome": "nirncraft:warm_beach",
             "surface": "kamal_sunken_red_erg_sand_7",
             "trees": [
                 "date_palm",
@@ -75332,7 +75332,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:vvardenfell_ashlands",
+            "biome": "nirncraft:vvardenfell_ashlands",
             "surface": "kamal_mist_soaked_kelp_humus_8",
             "trees": [
                 "mist_mahogany",
@@ -75391,7 +75391,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:black_marsh_swamp",
+            "biome": "nirncraft:black_marsh_swamp",
             "surface": "kamal_calcified_reef_limestone_9",
             "trees": [
                 "calcified_coral_fan",
@@ -75449,7 +75449,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:alikr_desert",
+            "biome": "nirncraft:alikr_desert",
             "surface": "kamal_polar_blue_ice_10",
             "trees": [
                 "petrified_frost_pine",
@@ -75505,7 +75505,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:pellitine_jungle",
+            "biome": "nirncraft:pellitine_jungle",
             "surface": "kamal_deep_hoarfrost_duff_11",
             "trees": [
                 "frozen_giant_pine",
@@ -75563,7 +75563,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:pale_snowfield",
+            "biome": "nirncraft:pale_snowfield",
             "surface": "kamal_emerald_terrace_silt_12",
             "trees": [
                 "golden_bamboo",
@@ -75622,7 +75622,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:reach_crags",
+            "biome": "nirncraft:reach_crags",
             "surface": "kamal_frozen_tundra_permafrost_13",
             "trees": [
                 "stunted_kamal_spruce",
@@ -75678,7 +75678,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:great_forest",
+            "biome": "nirncraft:great_forest",
             "surface": "kamal_blossom_karst_loam_14",
             "trees": [
                 "akaviri_cherry",
@@ -75737,7 +75737,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:heartlands",
+            "biome": "nirncraft:heartlands",
             "surface": "kamal_golden_steppe_loess_15",
             "trees": [
                 "akaviri_pine",
@@ -75795,7 +75795,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:telvanni_mushroom_forest",
+            "biome": "nirncraft:telvanni_mushroom_forest",
             "surface": "kamal_sunken_red_erg_sand_16",
             "trees": [
                 "date_palm",
@@ -75853,7 +75853,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:ascadian_isles",
+            "biome": "nirncraft:ascadian_isles",
             "surface": "kamal_mist_soaked_kelp_humus_17",
             "trees": [
                 "mist_mahogany",
@@ -75912,7 +75912,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:grazelands",
+            "biome": "nirncraft:grazelands",
             "surface": "kamal_calcified_reef_limestone_18",
             "trees": [
                 "calcified_coral_fan",
@@ -75970,7 +75970,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:west_gash",
+            "biome": "nirncraft:west_gash",
             "surface": "kamal_polar_blue_ice_19",
             "trees": [
                 "petrified_frost_pine",
@@ -76026,7 +76026,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:bitter_coast_swamp",
+            "biome": "nirncraft:bitter_coast_swamp",
             "surface": "kamal_deep_hoarfrost_duff_20",
             "trees": [
                 "frozen_giant_pine",
@@ -76084,7 +76084,7 @@ FOREIGN_MICRO_RULES = {
                     360.0
                 ]
             },
-            "biome": "skycraft:stonefalls",
+            "biome": "nirncraft:stonefalls",
             "surface": "kamal_emerald_terrace_silt_21",
             "trees": [
                 "golden_bamboo",
@@ -76143,7 +76143,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:deshaan_plains",
+            "biome": "nirncraft:deshaan_plains",
             "surface": "kamal_frozen_tundra_permafrost_22",
             "trees": [
                 "stunted_kamal_spruce",
@@ -76199,7 +76199,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:molag_amur",
+            "biome": "nirncraft:molag_amur",
             "surface": "kamal_blossom_karst_loam_23",
             "trees": [
                 "akaviri_cherry",
@@ -76258,7 +76258,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:azuras_coast",
+            "biome": "nirncraft:azuras_coast",
             "surface": "kamal_golden_steppe_loess_24",
             "trees": [
                 "akaviri_pine",
@@ -76316,7 +76316,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:sheogorad",
+            "biome": "nirncraft:sheogorad",
             "surface": "kamal_sunken_red_erg_sand_25",
             "trees": [
                 "date_palm",
@@ -76374,7 +76374,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:red_mountain",
+            "biome": "nirncraft:red_mountain",
             "surface": "kamal_mist_soaked_kelp_humus_26",
             "trees": [
                 "mist_mahogany",
@@ -76433,7 +76433,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:solstheim_pine_forest",
+            "biome": "nirncraft:solstheim_pine_forest",
             "surface": "kamal_calcified_reef_limestone_27",
             "trees": [
                 "calcified_coral_fan",
@@ -76491,7 +76491,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:solstheim_ashlands",
+            "biome": "nirncraft:solstheim_ashlands",
             "surface": "kamal_polar_blue_ice_28",
             "trees": [
                 "petrified_frost_pine",
@@ -76547,7 +76547,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:deep_mire",
+            "biome": "nirncraft:deep_mire",
             "surface": "kamal_deep_hoarfrost_duff_29",
             "trees": [
                 "frozen_giant_pine",
@@ -76605,7 +76605,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:hist_grove",
+            "biome": "nirncraft:hist_grove",
             "surface": "kamal_emerald_terrace_silt_30",
             "trees": [
                 "golden_bamboo",
@@ -76664,7 +76664,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:mangrove_delta",
+            "biome": "nirncraft:mangrove_delta",
             "surface": "kamal_frozen_tundra_permafrost_31",
             "trees": [
                 "stunted_kamal_spruce",
@@ -76720,7 +76720,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:shadowfen",
+            "biome": "nirncraft:shadowfen",
             "surface": "kamal_blossom_karst_loam_32",
             "trees": [
                 "akaviri_cherry",
@@ -76779,7 +76779,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:murkmire",
+            "biome": "nirncraft:murkmire",
             "surface": "kamal_golden_steppe_loess_33",
             "trees": [
                 "akaviri_pine",
@@ -76837,7 +76837,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:anequina_badlands",
+            "biome": "nirncraft:anequina_badlands",
             "surface": "kamal_sunken_red_erg_sand_34",
             "trees": [
                 "date_palm",
@@ -76895,7 +76895,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:elsweyr_dunes",
+            "biome": "nirncraft:elsweyr_dunes",
             "surface": "kamal_mist_soaked_kelp_humus_35",
             "trees": [
                 "mist_mahogany",
@@ -76954,7 +76954,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:elsweyr_savanna",
+            "biome": "nirncraft:elsweyr_savanna",
             "surface": "kamal_calcified_reef_limestone_36",
             "trees": [
                 "calcified_coral_fan",
@@ -77012,7 +77012,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:sugar_fields",
+            "biome": "nirncraft:sugar_fields",
             "surface": "kamal_polar_blue_ice_37",
             "trees": [
                 "petrified_frost_pine",
@@ -77068,7 +77068,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:elsweyr_canyons",
+            "biome": "nirncraft:elsweyr_canyons",
             "surface": "kamal_deep_hoarfrost_duff_38",
             "trees": [
                 "frozen_giant_pine",
@@ -77126,7 +77126,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:graht_oak_forest",
+            "biome": "nirncraft:graht_oak_forest",
             "surface": "kamal_emerald_terrace_silt_39",
             "trees": [
                 "golden_bamboo",
@@ -77185,7 +77185,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:valenwood_rainforest",
+            "biome": "nirncraft:valenwood_rainforest",
             "surface": "kamal_frozen_tundra_permafrost_40",
             "trees": [
                 "stunted_kamal_spruce",
@@ -77241,7 +77241,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:valenwood_mangrove_coast",
+            "biome": "nirncraft:valenwood_mangrove_coast",
             "surface": "kamal_blossom_karst_loam_41",
             "trees": [
                 "akaviri_cherry",
@@ -77300,7 +77300,7 @@ FOREIGN_MICRO_RULES = {
                     6.0
                 ]
             },
-            "biome": "skycraft:reapers_march",
+            "biome": "nirncraft:reapers_march",
             "surface": "kamal_golden_steppe_loess_42",
             "trees": [
                 "akaviri_pine",
@@ -77360,7 +77360,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:atmoran_ice_waste",
+            "biome": "nirncraft:atmoran_ice_waste",
             "surface": "tang_mo_polar_blue_ice_1",
             "trees": [
                 "petrified_frost_pine",
@@ -77416,7 +77416,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:atmoran_frozen_forest",
+            "biome": "nirncraft:atmoran_frozen_forest",
             "surface": "tang_mo_deep_hoarfrost_duff_2",
             "trees": [
                 "frozen_giant_pine",
@@ -77474,7 +77474,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:tsaesci_jungle",
+            "biome": "nirncraft:tsaesci_jungle",
             "surface": "tang_mo_emerald_terrace_silt_3",
             "trees": [
                 "golden_bamboo",
@@ -77533,7 +77533,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:kamal_snowfield",
+            "biome": "nirncraft:kamal_snowfield",
             "surface": "tang_mo_frozen_tundra_permafrost_4",
             "trees": [
                 "stunted_kamal_spruce",
@@ -77589,7 +77589,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:warm_ocean",
+            "biome": "nirncraft:warm_ocean",
             "surface": "tang_mo_blossom_karst_loam_5",
             "trees": [
                 "akaviri_cherry",
@@ -77648,7 +77648,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:cyrodiil_river",
+            "biome": "nirncraft:cyrodiil_river",
             "surface": "tang_mo_golden_steppe_loess_6",
             "trees": [
                 "akaviri_pine",
@@ -77706,7 +77706,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:warm_beach",
+            "biome": "nirncraft:warm_beach",
             "surface": "tang_mo_sunken_red_erg_sand_7",
             "trees": [
                 "date_palm",
@@ -77764,7 +77764,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:vvardenfell_ashlands",
+            "biome": "nirncraft:vvardenfell_ashlands",
             "surface": "tang_mo_mist_soaked_kelp_humus_8",
             "trees": [
                 "mist_mahogany",
@@ -77823,7 +77823,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:black_marsh_swamp",
+            "biome": "nirncraft:black_marsh_swamp",
             "surface": "tang_mo_calcified_reef_limestone_9",
             "trees": [
                 "calcified_coral_fan",
@@ -77881,7 +77881,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:alikr_desert",
+            "biome": "nirncraft:alikr_desert",
             "surface": "tang_mo_polar_blue_ice_10",
             "trees": [
                 "petrified_frost_pine",
@@ -77937,7 +77937,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:pellitine_jungle",
+            "biome": "nirncraft:pellitine_jungle",
             "surface": "tang_mo_deep_hoarfrost_duff_11",
             "trees": [
                 "frozen_giant_pine",
@@ -77995,7 +77995,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:pale_snowfield",
+            "biome": "nirncraft:pale_snowfield",
             "surface": "tang_mo_emerald_terrace_silt_12",
             "trees": [
                 "golden_bamboo",
@@ -78054,7 +78054,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:reach_crags",
+            "biome": "nirncraft:reach_crags",
             "surface": "tang_mo_frozen_tundra_permafrost_13",
             "trees": [
                 "stunted_kamal_spruce",
@@ -78110,7 +78110,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:great_forest",
+            "biome": "nirncraft:great_forest",
             "surface": "tang_mo_blossom_karst_loam_14",
             "trees": [
                 "akaviri_cherry",
@@ -78169,7 +78169,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:heartlands",
+            "biome": "nirncraft:heartlands",
             "surface": "tang_mo_golden_steppe_loess_15",
             "trees": [
                 "akaviri_pine",
@@ -78227,7 +78227,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:telvanni_mushroom_forest",
+            "biome": "nirncraft:telvanni_mushroom_forest",
             "surface": "tang_mo_sunken_red_erg_sand_16",
             "trees": [
                 "date_palm",
@@ -78285,7 +78285,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:ascadian_isles",
+            "biome": "nirncraft:ascadian_isles",
             "surface": "tang_mo_mist_soaked_kelp_humus_17",
             "trees": [
                 "mist_mahogany",
@@ -78344,7 +78344,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:grazelands",
+            "biome": "nirncraft:grazelands",
             "surface": "tang_mo_calcified_reef_limestone_18",
             "trees": [
                 "calcified_coral_fan",
@@ -78402,7 +78402,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:west_gash",
+            "biome": "nirncraft:west_gash",
             "surface": "tang_mo_polar_blue_ice_19",
             "trees": [
                 "petrified_frost_pine",
@@ -78458,7 +78458,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:bitter_coast_swamp",
+            "biome": "nirncraft:bitter_coast_swamp",
             "surface": "tang_mo_deep_hoarfrost_duff_20",
             "trees": [
                 "frozen_giant_pine",
@@ -78516,7 +78516,7 @@ FOREIGN_MICRO_RULES = {
                     360.0
                 ]
             },
-            "biome": "skycraft:stonefalls",
+            "biome": "nirncraft:stonefalls",
             "surface": "tang_mo_emerald_terrace_silt_21",
             "trees": [
                 "golden_bamboo",
@@ -78575,7 +78575,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:deshaan_plains",
+            "biome": "nirncraft:deshaan_plains",
             "surface": "tang_mo_frozen_tundra_permafrost_22",
             "trees": [
                 "stunted_kamal_spruce",
@@ -78631,7 +78631,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:molag_amur",
+            "biome": "nirncraft:molag_amur",
             "surface": "tang_mo_blossom_karst_loam_23",
             "trees": [
                 "akaviri_cherry",
@@ -78690,7 +78690,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:azuras_coast",
+            "biome": "nirncraft:azuras_coast",
             "surface": "tang_mo_golden_steppe_loess_24",
             "trees": [
                 "akaviri_pine",
@@ -78748,7 +78748,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:sheogorad",
+            "biome": "nirncraft:sheogorad",
             "surface": "tang_mo_sunken_red_erg_sand_25",
             "trees": [
                 "date_palm",
@@ -78806,7 +78806,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:red_mountain",
+            "biome": "nirncraft:red_mountain",
             "surface": "tang_mo_mist_soaked_kelp_humus_26",
             "trees": [
                 "mist_mahogany",
@@ -78865,7 +78865,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:solstheim_pine_forest",
+            "biome": "nirncraft:solstheim_pine_forest",
             "surface": "tang_mo_calcified_reef_limestone_27",
             "trees": [
                 "calcified_coral_fan",
@@ -78923,7 +78923,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:solstheim_ashlands",
+            "biome": "nirncraft:solstheim_ashlands",
             "surface": "tang_mo_polar_blue_ice_28",
             "trees": [
                 "petrified_frost_pine",
@@ -78979,7 +78979,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:deep_mire",
+            "biome": "nirncraft:deep_mire",
             "surface": "tang_mo_deep_hoarfrost_duff_29",
             "trees": [
                 "frozen_giant_pine",
@@ -79037,7 +79037,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:hist_grove",
+            "biome": "nirncraft:hist_grove",
             "surface": "tang_mo_emerald_terrace_silt_30",
             "trees": [
                 "golden_bamboo",
@@ -79096,7 +79096,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:mangrove_delta",
+            "biome": "nirncraft:mangrove_delta",
             "surface": "tang_mo_frozen_tundra_permafrost_31",
             "trees": [
                 "stunted_kamal_spruce",
@@ -79152,7 +79152,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:shadowfen",
+            "biome": "nirncraft:shadowfen",
             "surface": "tang_mo_blossom_karst_loam_32",
             "trees": [
                 "akaviri_cherry",
@@ -79211,7 +79211,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:murkmire",
+            "biome": "nirncraft:murkmire",
             "surface": "tang_mo_golden_steppe_loess_33",
             "trees": [
                 "akaviri_pine",
@@ -79269,7 +79269,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:anequina_badlands",
+            "biome": "nirncraft:anequina_badlands",
             "surface": "tang_mo_sunken_red_erg_sand_34",
             "trees": [
                 "date_palm",
@@ -79327,7 +79327,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:elsweyr_dunes",
+            "biome": "nirncraft:elsweyr_dunes",
             "surface": "tang_mo_mist_soaked_kelp_humus_35",
             "trees": [
                 "mist_mahogany",
@@ -79386,7 +79386,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:elsweyr_savanna",
+            "biome": "nirncraft:elsweyr_savanna",
             "surface": "tang_mo_calcified_reef_limestone_36",
             "trees": [
                 "calcified_coral_fan",
@@ -79444,7 +79444,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:sugar_fields",
+            "biome": "nirncraft:sugar_fields",
             "surface": "tang_mo_polar_blue_ice_37",
             "trees": [
                 "petrified_frost_pine",
@@ -79500,7 +79500,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:elsweyr_canyons",
+            "biome": "nirncraft:elsweyr_canyons",
             "surface": "tang_mo_deep_hoarfrost_duff_38",
             "trees": [
                 "frozen_giant_pine",
@@ -79558,7 +79558,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:graht_oak_forest",
+            "biome": "nirncraft:graht_oak_forest",
             "surface": "tang_mo_emerald_terrace_silt_39",
             "trees": [
                 "golden_bamboo",
@@ -79617,7 +79617,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:valenwood_rainforest",
+            "biome": "nirncraft:valenwood_rainforest",
             "surface": "tang_mo_frozen_tundra_permafrost_40",
             "trees": [
                 "stunted_kamal_spruce",
@@ -79673,7 +79673,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:valenwood_mangrove_coast",
+            "biome": "nirncraft:valenwood_mangrove_coast",
             "surface": "tang_mo_blossom_karst_loam_41",
             "trees": [
                 "akaviri_cherry",
@@ -79732,7 +79732,7 @@ FOREIGN_MICRO_RULES = {
                     6.0
                 ]
             },
-            "biome": "skycraft:reapers_march",
+            "biome": "nirncraft:reapers_march",
             "surface": "tang_mo_golden_steppe_loess_42",
             "trees": [
                 "akaviri_pine",
@@ -79792,7 +79792,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:atmoran_ice_waste",
+            "biome": "nirncraft:atmoran_ice_waste",
             "surface": "ka_po_tun_polar_blue_ice_1",
             "trees": [
                 "petrified_frost_pine",
@@ -79848,7 +79848,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:atmoran_frozen_forest",
+            "biome": "nirncraft:atmoran_frozen_forest",
             "surface": "ka_po_tun_deep_hoarfrost_duff_2",
             "trees": [
                 "frozen_giant_pine",
@@ -79906,7 +79906,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:tsaesci_jungle",
+            "biome": "nirncraft:tsaesci_jungle",
             "surface": "ka_po_tun_emerald_terrace_silt_3",
             "trees": [
                 "golden_bamboo",
@@ -79965,7 +79965,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:kamal_snowfield",
+            "biome": "nirncraft:kamal_snowfield",
             "surface": "ka_po_tun_frozen_tundra_permafrost_4",
             "trees": [
                 "stunted_kamal_spruce",
@@ -80021,7 +80021,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:warm_ocean",
+            "biome": "nirncraft:warm_ocean",
             "surface": "ka_po_tun_blossom_karst_loam_5",
             "trees": [
                 "akaviri_cherry",
@@ -80080,7 +80080,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:cyrodiil_river",
+            "biome": "nirncraft:cyrodiil_river",
             "surface": "ka_po_tun_golden_steppe_loess_6",
             "trees": [
                 "akaviri_pine",
@@ -80138,7 +80138,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:warm_beach",
+            "biome": "nirncraft:warm_beach",
             "surface": "ka_po_tun_sunken_red_erg_sand_7",
             "trees": [
                 "date_palm",
@@ -80196,7 +80196,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:vvardenfell_ashlands",
+            "biome": "nirncraft:vvardenfell_ashlands",
             "surface": "ka_po_tun_mist_soaked_kelp_humus_8",
             "trees": [
                 "mist_mahogany",
@@ -80255,7 +80255,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:black_marsh_swamp",
+            "biome": "nirncraft:black_marsh_swamp",
             "surface": "ka_po_tun_calcified_reef_limestone_9",
             "trees": [
                 "calcified_coral_fan",
@@ -80313,7 +80313,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:alikr_desert",
+            "biome": "nirncraft:alikr_desert",
             "surface": "ka_po_tun_polar_blue_ice_10",
             "trees": [
                 "petrified_frost_pine",
@@ -80369,7 +80369,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:pellitine_jungle",
+            "biome": "nirncraft:pellitine_jungle",
             "surface": "ka_po_tun_deep_hoarfrost_duff_11",
             "trees": [
                 "frozen_giant_pine",
@@ -80427,7 +80427,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:pale_snowfield",
+            "biome": "nirncraft:pale_snowfield",
             "surface": "ka_po_tun_emerald_terrace_silt_12",
             "trees": [
                 "golden_bamboo",
@@ -80486,7 +80486,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:reach_crags",
+            "biome": "nirncraft:reach_crags",
             "surface": "ka_po_tun_frozen_tundra_permafrost_13",
             "trees": [
                 "stunted_kamal_spruce",
@@ -80542,7 +80542,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:great_forest",
+            "biome": "nirncraft:great_forest",
             "surface": "ka_po_tun_blossom_karst_loam_14",
             "trees": [
                 "akaviri_cherry",
@@ -80601,7 +80601,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:heartlands",
+            "biome": "nirncraft:heartlands",
             "surface": "ka_po_tun_golden_steppe_loess_15",
             "trees": [
                 "akaviri_pine",
@@ -80659,7 +80659,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:telvanni_mushroom_forest",
+            "biome": "nirncraft:telvanni_mushroom_forest",
             "surface": "ka_po_tun_sunken_red_erg_sand_16",
             "trees": [
                 "date_palm",
@@ -80717,7 +80717,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:ascadian_isles",
+            "biome": "nirncraft:ascadian_isles",
             "surface": "ka_po_tun_mist_soaked_kelp_humus_17",
             "trees": [
                 "mist_mahogany",
@@ -80776,7 +80776,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:grazelands",
+            "biome": "nirncraft:grazelands",
             "surface": "ka_po_tun_calcified_reef_limestone_18",
             "trees": [
                 "calcified_coral_fan",
@@ -80834,7 +80834,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:west_gash",
+            "biome": "nirncraft:west_gash",
             "surface": "ka_po_tun_polar_blue_ice_19",
             "trees": [
                 "petrified_frost_pine",
@@ -80890,7 +80890,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:bitter_coast_swamp",
+            "biome": "nirncraft:bitter_coast_swamp",
             "surface": "ka_po_tun_deep_hoarfrost_duff_20",
             "trees": [
                 "frozen_giant_pine",
@@ -80948,7 +80948,7 @@ FOREIGN_MICRO_RULES = {
                     360.0
                 ]
             },
-            "biome": "skycraft:stonefalls",
+            "biome": "nirncraft:stonefalls",
             "surface": "ka_po_tun_emerald_terrace_silt_21",
             "trees": [
                 "golden_bamboo",
@@ -81007,7 +81007,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:deshaan_plains",
+            "biome": "nirncraft:deshaan_plains",
             "surface": "ka_po_tun_frozen_tundra_permafrost_22",
             "trees": [
                 "stunted_kamal_spruce",
@@ -81063,7 +81063,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:molag_amur",
+            "biome": "nirncraft:molag_amur",
             "surface": "ka_po_tun_blossom_karst_loam_23",
             "trees": [
                 "akaviri_cherry",
@@ -81122,7 +81122,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:azuras_coast",
+            "biome": "nirncraft:azuras_coast",
             "surface": "ka_po_tun_golden_steppe_loess_24",
             "trees": [
                 "akaviri_pine",
@@ -81180,7 +81180,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:sheogorad",
+            "biome": "nirncraft:sheogorad",
             "surface": "ka_po_tun_sunken_red_erg_sand_25",
             "trees": [
                 "date_palm",
@@ -81238,7 +81238,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:red_mountain",
+            "biome": "nirncraft:red_mountain",
             "surface": "ka_po_tun_mist_soaked_kelp_humus_26",
             "trees": [
                 "mist_mahogany",
@@ -81297,7 +81297,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:solstheim_pine_forest",
+            "biome": "nirncraft:solstheim_pine_forest",
             "surface": "ka_po_tun_calcified_reef_limestone_27",
             "trees": [
                 "calcified_coral_fan",
@@ -81355,7 +81355,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:solstheim_ashlands",
+            "biome": "nirncraft:solstheim_ashlands",
             "surface": "ka_po_tun_polar_blue_ice_28",
             "trees": [
                 "petrified_frost_pine",
@@ -81411,7 +81411,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:deep_mire",
+            "biome": "nirncraft:deep_mire",
             "surface": "ka_po_tun_deep_hoarfrost_duff_29",
             "trees": [
                 "frozen_giant_pine",
@@ -81469,7 +81469,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:hist_grove",
+            "biome": "nirncraft:hist_grove",
             "surface": "ka_po_tun_emerald_terrace_silt_30",
             "trees": [
                 "golden_bamboo",
@@ -81528,7 +81528,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:mangrove_delta",
+            "biome": "nirncraft:mangrove_delta",
             "surface": "ka_po_tun_frozen_tundra_permafrost_31",
             "trees": [
                 "stunted_kamal_spruce",
@@ -81584,7 +81584,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:shadowfen",
+            "biome": "nirncraft:shadowfen",
             "surface": "ka_po_tun_blossom_karst_loam_32",
             "trees": [
                 "akaviri_cherry",
@@ -81643,7 +81643,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:murkmire",
+            "biome": "nirncraft:murkmire",
             "surface": "ka_po_tun_golden_steppe_loess_33",
             "trees": [
                 "akaviri_pine",
@@ -81701,7 +81701,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:anequina_badlands",
+            "biome": "nirncraft:anequina_badlands",
             "surface": "ka_po_tun_sunken_red_erg_sand_34",
             "trees": [
                 "date_palm",
@@ -81759,7 +81759,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:elsweyr_dunes",
+            "biome": "nirncraft:elsweyr_dunes",
             "surface": "ka_po_tun_mist_soaked_kelp_humus_35",
             "trees": [
                 "mist_mahogany",
@@ -81818,7 +81818,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:elsweyr_savanna",
+            "biome": "nirncraft:elsweyr_savanna",
             "surface": "ka_po_tun_calcified_reef_limestone_36",
             "trees": [
                 "calcified_coral_fan",
@@ -81876,7 +81876,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:sugar_fields",
+            "biome": "nirncraft:sugar_fields",
             "surface": "ka_po_tun_polar_blue_ice_37",
             "trees": [
                 "petrified_frost_pine",
@@ -81932,7 +81932,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:elsweyr_canyons",
+            "biome": "nirncraft:elsweyr_canyons",
             "surface": "ka_po_tun_deep_hoarfrost_duff_38",
             "trees": [
                 "frozen_giant_pine",
@@ -81990,7 +81990,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:graht_oak_forest",
+            "biome": "nirncraft:graht_oak_forest",
             "surface": "ka_po_tun_emerald_terrace_silt_39",
             "trees": [
                 "golden_bamboo",
@@ -82049,7 +82049,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:valenwood_rainforest",
+            "biome": "nirncraft:valenwood_rainforest",
             "surface": "ka_po_tun_frozen_tundra_permafrost_40",
             "trees": [
                 "stunted_kamal_spruce",
@@ -82105,7 +82105,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:valenwood_mangrove_coast",
+            "biome": "nirncraft:valenwood_mangrove_coast",
             "surface": "ka_po_tun_blossom_karst_loam_41",
             "trees": [
                 "akaviri_cherry",
@@ -82164,7 +82164,7 @@ FOREIGN_MICRO_RULES = {
                     6.0
                 ]
             },
-            "biome": "skycraft:reapers_march",
+            "biome": "nirncraft:reapers_march",
             "surface": "ka_po_tun_golden_steppe_loess_42",
             "trees": [
                 "akaviri_pine",
@@ -82224,7 +82224,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:atmoran_ice_waste",
+            "biome": "nirncraft:atmoran_ice_waste",
             "surface": "yokudan_desert_polar_blue_ice_1",
             "trees": [
                 "petrified_frost_pine",
@@ -82280,7 +82280,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:atmoran_frozen_forest",
+            "biome": "nirncraft:atmoran_frozen_forest",
             "surface": "yokudan_desert_deep_hoarfrost_duff_2",
             "trees": [
                 "frozen_giant_pine",
@@ -82338,7 +82338,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:tsaesci_jungle",
+            "biome": "nirncraft:tsaesci_jungle",
             "surface": "yokudan_desert_emerald_terrace_silt_3",
             "trees": [
                 "golden_bamboo",
@@ -82397,7 +82397,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:kamal_snowfield",
+            "biome": "nirncraft:kamal_snowfield",
             "surface": "yokudan_desert_frozen_tundra_permafrost_4",
             "trees": [
                 "stunted_kamal_spruce",
@@ -82453,7 +82453,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:warm_ocean",
+            "biome": "nirncraft:warm_ocean",
             "surface": "yokudan_desert_blossom_karst_loam_5",
             "trees": [
                 "akaviri_cherry",
@@ -82512,7 +82512,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:cyrodiil_river",
+            "biome": "nirncraft:cyrodiil_river",
             "surface": "yokudan_desert_golden_steppe_loess_6",
             "trees": [
                 "akaviri_pine",
@@ -82570,7 +82570,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:warm_beach",
+            "biome": "nirncraft:warm_beach",
             "surface": "yokudan_desert_sunken_red_erg_sand_7",
             "trees": [
                 "date_palm",
@@ -82628,7 +82628,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:vvardenfell_ashlands",
+            "biome": "nirncraft:vvardenfell_ashlands",
             "surface": "yokudan_desert_mist_soaked_kelp_humus_8",
             "trees": [
                 "mist_mahogany",
@@ -82687,7 +82687,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:black_marsh_swamp",
+            "biome": "nirncraft:black_marsh_swamp",
             "surface": "yokudan_desert_calcified_reef_limestone_9",
             "trees": [
                 "calcified_coral_fan",
@@ -82745,7 +82745,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:alikr_desert",
+            "biome": "nirncraft:alikr_desert",
             "surface": "yokudan_desert_polar_blue_ice_10",
             "trees": [
                 "petrified_frost_pine",
@@ -82801,7 +82801,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:pellitine_jungle",
+            "biome": "nirncraft:pellitine_jungle",
             "surface": "yokudan_desert_deep_hoarfrost_duff_11",
             "trees": [
                 "frozen_giant_pine",
@@ -82859,7 +82859,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:pale_snowfield",
+            "biome": "nirncraft:pale_snowfield",
             "surface": "yokudan_desert_emerald_terrace_silt_12",
             "trees": [
                 "golden_bamboo",
@@ -82918,7 +82918,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:reach_crags",
+            "biome": "nirncraft:reach_crags",
             "surface": "yokudan_desert_frozen_tundra_permafrost_13",
             "trees": [
                 "stunted_kamal_spruce",
@@ -82974,7 +82974,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:great_forest",
+            "biome": "nirncraft:great_forest",
             "surface": "yokudan_desert_blossom_karst_loam_14",
             "trees": [
                 "akaviri_cherry",
@@ -83033,7 +83033,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:heartlands",
+            "biome": "nirncraft:heartlands",
             "surface": "yokudan_desert_golden_steppe_loess_15",
             "trees": [
                 "akaviri_pine",
@@ -83091,7 +83091,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:telvanni_mushroom_forest",
+            "biome": "nirncraft:telvanni_mushroom_forest",
             "surface": "yokudan_desert_sunken_red_erg_sand_16",
             "trees": [
                 "date_palm",
@@ -83149,7 +83149,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:ascadian_isles",
+            "biome": "nirncraft:ascadian_isles",
             "surface": "yokudan_desert_mist_soaked_kelp_humus_17",
             "trees": [
                 "mist_mahogany",
@@ -83208,7 +83208,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:grazelands",
+            "biome": "nirncraft:grazelands",
             "surface": "yokudan_desert_calcified_reef_limestone_18",
             "trees": [
                 "calcified_coral_fan",
@@ -83266,7 +83266,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:west_gash",
+            "biome": "nirncraft:west_gash",
             "surface": "yokudan_desert_polar_blue_ice_19",
             "trees": [
                 "petrified_frost_pine",
@@ -83322,7 +83322,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:bitter_coast_swamp",
+            "biome": "nirncraft:bitter_coast_swamp",
             "surface": "yokudan_desert_deep_hoarfrost_duff_20",
             "trees": [
                 "frozen_giant_pine",
@@ -83380,7 +83380,7 @@ FOREIGN_MICRO_RULES = {
                     360.0
                 ]
             },
-            "biome": "skycraft:stonefalls",
+            "biome": "nirncraft:stonefalls",
             "surface": "yokudan_desert_emerald_terrace_silt_21",
             "trees": [
                 "golden_bamboo",
@@ -83439,7 +83439,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:deshaan_plains",
+            "biome": "nirncraft:deshaan_plains",
             "surface": "yokudan_desert_frozen_tundra_permafrost_22",
             "trees": [
                 "stunted_kamal_spruce",
@@ -83495,7 +83495,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:molag_amur",
+            "biome": "nirncraft:molag_amur",
             "surface": "yokudan_desert_blossom_karst_loam_23",
             "trees": [
                 "akaviri_cherry",
@@ -83554,7 +83554,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:azuras_coast",
+            "biome": "nirncraft:azuras_coast",
             "surface": "yokudan_desert_golden_steppe_loess_24",
             "trees": [
                 "akaviri_pine",
@@ -83612,7 +83612,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:sheogorad",
+            "biome": "nirncraft:sheogorad",
             "surface": "yokudan_desert_sunken_red_erg_sand_25",
             "trees": [
                 "date_palm",
@@ -83670,7 +83670,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:red_mountain",
+            "biome": "nirncraft:red_mountain",
             "surface": "yokudan_desert_mist_soaked_kelp_humus_26",
             "trees": [
                 "mist_mahogany",
@@ -83729,7 +83729,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:solstheim_pine_forest",
+            "biome": "nirncraft:solstheim_pine_forest",
             "surface": "yokudan_desert_calcified_reef_limestone_27",
             "trees": [
                 "calcified_coral_fan",
@@ -83787,7 +83787,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:solstheim_ashlands",
+            "biome": "nirncraft:solstheim_ashlands",
             "surface": "yokudan_desert_polar_blue_ice_28",
             "trees": [
                 "petrified_frost_pine",
@@ -83843,7 +83843,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:deep_mire",
+            "biome": "nirncraft:deep_mire",
             "surface": "yokudan_desert_deep_hoarfrost_duff_29",
             "trees": [
                 "frozen_giant_pine",
@@ -83901,7 +83901,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:hist_grove",
+            "biome": "nirncraft:hist_grove",
             "surface": "yokudan_desert_emerald_terrace_silt_30",
             "trees": [
                 "golden_bamboo",
@@ -83960,7 +83960,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:mangrove_delta",
+            "biome": "nirncraft:mangrove_delta",
             "surface": "yokudan_desert_frozen_tundra_permafrost_31",
             "trees": [
                 "stunted_kamal_spruce",
@@ -84016,7 +84016,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:shadowfen",
+            "biome": "nirncraft:shadowfen",
             "surface": "yokudan_desert_blossom_karst_loam_32",
             "trees": [
                 "akaviri_cherry",
@@ -84075,7 +84075,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:murkmire",
+            "biome": "nirncraft:murkmire",
             "surface": "yokudan_desert_golden_steppe_loess_33",
             "trees": [
                 "akaviri_pine",
@@ -84133,7 +84133,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:anequina_badlands",
+            "biome": "nirncraft:anequina_badlands",
             "surface": "yokudan_desert_sunken_red_erg_sand_34",
             "trees": [
                 "date_palm",
@@ -84191,7 +84191,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:elsweyr_dunes",
+            "biome": "nirncraft:elsweyr_dunes",
             "surface": "yokudan_desert_mist_soaked_kelp_humus_35",
             "trees": [
                 "mist_mahogany",
@@ -84250,7 +84250,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:elsweyr_savanna",
+            "biome": "nirncraft:elsweyr_savanna",
             "surface": "yokudan_desert_calcified_reef_limestone_36",
             "trees": [
                 "calcified_coral_fan",
@@ -84308,7 +84308,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:sugar_fields",
+            "biome": "nirncraft:sugar_fields",
             "surface": "yokudan_desert_polar_blue_ice_37",
             "trees": [
                 "petrified_frost_pine",
@@ -84364,7 +84364,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:elsweyr_canyons",
+            "biome": "nirncraft:elsweyr_canyons",
             "surface": "yokudan_desert_deep_hoarfrost_duff_38",
             "trees": [
                 "frozen_giant_pine",
@@ -84422,7 +84422,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:graht_oak_forest",
+            "biome": "nirncraft:graht_oak_forest",
             "surface": "yokudan_desert_emerald_terrace_silt_39",
             "trees": [
                 "golden_bamboo",
@@ -84481,7 +84481,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:valenwood_rainforest",
+            "biome": "nirncraft:valenwood_rainforest",
             "surface": "yokudan_desert_frozen_tundra_permafrost_40",
             "trees": [
                 "stunted_kamal_spruce",
@@ -84537,7 +84537,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:valenwood_mangrove_coast",
+            "biome": "nirncraft:valenwood_mangrove_coast",
             "surface": "yokudan_desert_blossom_karst_loam_41",
             "trees": [
                 "akaviri_cherry",
@@ -84596,7 +84596,7 @@ FOREIGN_MICRO_RULES = {
                     6.0
                 ]
             },
-            "biome": "skycraft:reapers_march",
+            "biome": "nirncraft:reapers_march",
             "surface": "yokudan_desert_golden_steppe_loess_42",
             "trees": [
                 "akaviri_pine",
@@ -84656,7 +84656,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:atmoran_ice_waste",
+            "biome": "nirncraft:atmoran_ice_waste",
             "surface": "sunken_isles_polar_blue_ice_1",
             "trees": [
                 "petrified_frost_pine",
@@ -84712,7 +84712,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:atmoran_frozen_forest",
+            "biome": "nirncraft:atmoran_frozen_forest",
             "surface": "sunken_isles_deep_hoarfrost_duff_2",
             "trees": [
                 "frozen_giant_pine",
@@ -84770,7 +84770,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:tsaesci_jungle",
+            "biome": "nirncraft:tsaesci_jungle",
             "surface": "sunken_isles_emerald_terrace_silt_3",
             "trees": [
                 "golden_bamboo",
@@ -84829,7 +84829,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:kamal_snowfield",
+            "biome": "nirncraft:kamal_snowfield",
             "surface": "sunken_isles_frozen_tundra_permafrost_4",
             "trees": [
                 "stunted_kamal_spruce",
@@ -84885,7 +84885,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:warm_ocean",
+            "biome": "nirncraft:warm_ocean",
             "surface": "sunken_isles_blossom_karst_loam_5",
             "trees": [
                 "akaviri_cherry",
@@ -84944,7 +84944,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:cyrodiil_river",
+            "biome": "nirncraft:cyrodiil_river",
             "surface": "sunken_isles_golden_steppe_loess_6",
             "trees": [
                 "akaviri_pine",
@@ -85002,7 +85002,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:warm_beach",
+            "biome": "nirncraft:warm_beach",
             "surface": "sunken_isles_sunken_red_erg_sand_7",
             "trees": [
                 "date_palm",
@@ -85060,7 +85060,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:vvardenfell_ashlands",
+            "biome": "nirncraft:vvardenfell_ashlands",
             "surface": "sunken_isles_mist_soaked_kelp_humus_8",
             "trees": [
                 "mist_mahogany",
@@ -85119,7 +85119,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:black_marsh_swamp",
+            "biome": "nirncraft:black_marsh_swamp",
             "surface": "sunken_isles_calcified_reef_limestone_9",
             "trees": [
                 "calcified_coral_fan",
@@ -85177,7 +85177,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:alikr_desert",
+            "biome": "nirncraft:alikr_desert",
             "surface": "sunken_isles_polar_blue_ice_10",
             "trees": [
                 "petrified_frost_pine",
@@ -85233,7 +85233,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:pellitine_jungle",
+            "biome": "nirncraft:pellitine_jungle",
             "surface": "sunken_isles_deep_hoarfrost_duff_11",
             "trees": [
                 "frozen_giant_pine",
@@ -85291,7 +85291,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:pale_snowfield",
+            "biome": "nirncraft:pale_snowfield",
             "surface": "sunken_isles_emerald_terrace_silt_12",
             "trees": [
                 "golden_bamboo",
@@ -85350,7 +85350,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:reach_crags",
+            "biome": "nirncraft:reach_crags",
             "surface": "sunken_isles_frozen_tundra_permafrost_13",
             "trees": [
                 "stunted_kamal_spruce",
@@ -85406,7 +85406,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:great_forest",
+            "biome": "nirncraft:great_forest",
             "surface": "sunken_isles_blossom_karst_loam_14",
             "trees": [
                 "akaviri_cherry",
@@ -85465,7 +85465,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:heartlands",
+            "biome": "nirncraft:heartlands",
             "surface": "sunken_isles_golden_steppe_loess_15",
             "trees": [
                 "akaviri_pine",
@@ -85523,7 +85523,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:telvanni_mushroom_forest",
+            "biome": "nirncraft:telvanni_mushroom_forest",
             "surface": "sunken_isles_sunken_red_erg_sand_16",
             "trees": [
                 "date_palm",
@@ -85581,7 +85581,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:ascadian_isles",
+            "biome": "nirncraft:ascadian_isles",
             "surface": "sunken_isles_mist_soaked_kelp_humus_17",
             "trees": [
                 "mist_mahogany",
@@ -85640,7 +85640,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:grazelands",
+            "biome": "nirncraft:grazelands",
             "surface": "sunken_isles_calcified_reef_limestone_18",
             "trees": [
                 "calcified_coral_fan",
@@ -85698,7 +85698,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:west_gash",
+            "biome": "nirncraft:west_gash",
             "surface": "sunken_isles_polar_blue_ice_19",
             "trees": [
                 "petrified_frost_pine",
@@ -85754,7 +85754,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:bitter_coast_swamp",
+            "biome": "nirncraft:bitter_coast_swamp",
             "surface": "sunken_isles_deep_hoarfrost_duff_20",
             "trees": [
                 "frozen_giant_pine",
@@ -85812,7 +85812,7 @@ FOREIGN_MICRO_RULES = {
                     360.0
                 ]
             },
-            "biome": "skycraft:stonefalls",
+            "biome": "nirncraft:stonefalls",
             "surface": "sunken_isles_emerald_terrace_silt_21",
             "trees": [
                 "golden_bamboo",
@@ -85871,7 +85871,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:deshaan_plains",
+            "biome": "nirncraft:deshaan_plains",
             "surface": "sunken_isles_frozen_tundra_permafrost_22",
             "trees": [
                 "stunted_kamal_spruce",
@@ -85927,7 +85927,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:molag_amur",
+            "biome": "nirncraft:molag_amur",
             "surface": "sunken_isles_blossom_karst_loam_23",
             "trees": [
                 "akaviri_cherry",
@@ -85986,7 +85986,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:azuras_coast",
+            "biome": "nirncraft:azuras_coast",
             "surface": "sunken_isles_golden_steppe_loess_24",
             "trees": [
                 "akaviri_pine",
@@ -86044,7 +86044,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:sheogorad",
+            "biome": "nirncraft:sheogorad",
             "surface": "sunken_isles_sunken_red_erg_sand_25",
             "trees": [
                 "date_palm",
@@ -86102,7 +86102,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:red_mountain",
+            "biome": "nirncraft:red_mountain",
             "surface": "sunken_isles_mist_soaked_kelp_humus_26",
             "trees": [
                 "mist_mahogany",
@@ -86161,7 +86161,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:solstheim_pine_forest",
+            "biome": "nirncraft:solstheim_pine_forest",
             "surface": "sunken_isles_calcified_reef_limestone_27",
             "trees": [
                 "calcified_coral_fan",
@@ -86219,7 +86219,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:solstheim_ashlands",
+            "biome": "nirncraft:solstheim_ashlands",
             "surface": "sunken_isles_polar_blue_ice_28",
             "trees": [
                 "petrified_frost_pine",
@@ -86275,7 +86275,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:deep_mire",
+            "biome": "nirncraft:deep_mire",
             "surface": "sunken_isles_deep_hoarfrost_duff_29",
             "trees": [
                 "frozen_giant_pine",
@@ -86333,7 +86333,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:hist_grove",
+            "biome": "nirncraft:hist_grove",
             "surface": "sunken_isles_emerald_terrace_silt_30",
             "trees": [
                 "golden_bamboo",
@@ -86392,7 +86392,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:mangrove_delta",
+            "biome": "nirncraft:mangrove_delta",
             "surface": "sunken_isles_frozen_tundra_permafrost_31",
             "trees": [
                 "stunted_kamal_spruce",
@@ -86448,7 +86448,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:shadowfen",
+            "biome": "nirncraft:shadowfen",
             "surface": "sunken_isles_blossom_karst_loam_32",
             "trees": [
                 "akaviri_cherry",
@@ -86507,7 +86507,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:murkmire",
+            "biome": "nirncraft:murkmire",
             "surface": "sunken_isles_golden_steppe_loess_33",
             "trees": [
                 "akaviri_pine",
@@ -86565,7 +86565,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:anequina_badlands",
+            "biome": "nirncraft:anequina_badlands",
             "surface": "sunken_isles_sunken_red_erg_sand_34",
             "trees": [
                 "date_palm",
@@ -86623,7 +86623,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:elsweyr_dunes",
+            "biome": "nirncraft:elsweyr_dunes",
             "surface": "sunken_isles_mist_soaked_kelp_humus_35",
             "trees": [
                 "mist_mahogany",
@@ -86682,7 +86682,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:elsweyr_savanna",
+            "biome": "nirncraft:elsweyr_savanna",
             "surface": "sunken_isles_calcified_reef_limestone_36",
             "trees": [
                 "calcified_coral_fan",
@@ -86740,7 +86740,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:sugar_fields",
+            "biome": "nirncraft:sugar_fields",
             "surface": "sunken_isles_polar_blue_ice_37",
             "trees": [
                 "petrified_frost_pine",
@@ -86796,7 +86796,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:elsweyr_canyons",
+            "biome": "nirncraft:elsweyr_canyons",
             "surface": "sunken_isles_deep_hoarfrost_duff_38",
             "trees": [
                 "frozen_giant_pine",
@@ -86854,7 +86854,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:graht_oak_forest",
+            "biome": "nirncraft:graht_oak_forest",
             "surface": "sunken_isles_emerald_terrace_silt_39",
             "trees": [
                 "golden_bamboo",
@@ -86913,7 +86913,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:valenwood_rainforest",
+            "biome": "nirncraft:valenwood_rainforest",
             "surface": "sunken_isles_frozen_tundra_permafrost_40",
             "trees": [
                 "stunted_kamal_spruce",
@@ -86969,7 +86969,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:valenwood_mangrove_coast",
+            "biome": "nirncraft:valenwood_mangrove_coast",
             "surface": "sunken_isles_blossom_karst_loam_41",
             "trees": [
                 "akaviri_cherry",
@@ -87028,7 +87028,7 @@ FOREIGN_MICRO_RULES = {
                     6.0
                 ]
             },
-            "biome": "skycraft:reapers_march",
+            "biome": "nirncraft:reapers_march",
             "surface": "sunken_isles_golden_steppe_loess_42",
             "trees": [
                 "akaviri_pine",
@@ -87088,7 +87088,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:atmoran_ice_waste",
+            "biome": "nirncraft:atmoran_ice_waste",
             "surface": "maormer_isles_polar_blue_ice_1",
             "trees": [
                 "petrified_frost_pine",
@@ -87144,7 +87144,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:atmoran_frozen_forest",
+            "biome": "nirncraft:atmoran_frozen_forest",
             "surface": "maormer_isles_deep_hoarfrost_duff_2",
             "trees": [
                 "frozen_giant_pine",
@@ -87202,7 +87202,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:tsaesci_jungle",
+            "biome": "nirncraft:tsaesci_jungle",
             "surface": "maormer_isles_emerald_terrace_silt_3",
             "trees": [
                 "golden_bamboo",
@@ -87261,7 +87261,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:kamal_snowfield",
+            "biome": "nirncraft:kamal_snowfield",
             "surface": "maormer_isles_frozen_tundra_permafrost_4",
             "trees": [
                 "stunted_kamal_spruce",
@@ -87317,7 +87317,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:warm_ocean",
+            "biome": "nirncraft:warm_ocean",
             "surface": "maormer_isles_blossom_karst_loam_5",
             "trees": [
                 "akaviri_cherry",
@@ -87376,7 +87376,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:cyrodiil_river",
+            "biome": "nirncraft:cyrodiil_river",
             "surface": "maormer_isles_golden_steppe_loess_6",
             "trees": [
                 "akaviri_pine",
@@ -87434,7 +87434,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:warm_beach",
+            "biome": "nirncraft:warm_beach",
             "surface": "maormer_isles_sunken_red_erg_sand_7",
             "trees": [
                 "date_palm",
@@ -87492,7 +87492,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:vvardenfell_ashlands",
+            "biome": "nirncraft:vvardenfell_ashlands",
             "surface": "maormer_isles_mist_soaked_kelp_humus_8",
             "trees": [
                 "mist_mahogany",
@@ -87551,7 +87551,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:black_marsh_swamp",
+            "biome": "nirncraft:black_marsh_swamp",
             "surface": "maormer_isles_calcified_reef_limestone_9",
             "trees": [
                 "calcified_coral_fan",
@@ -87609,7 +87609,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:alikr_desert",
+            "biome": "nirncraft:alikr_desert",
             "surface": "maormer_isles_polar_blue_ice_10",
             "trees": [
                 "petrified_frost_pine",
@@ -87665,7 +87665,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:pellitine_jungle",
+            "biome": "nirncraft:pellitine_jungle",
             "surface": "maormer_isles_deep_hoarfrost_duff_11",
             "trees": [
                 "frozen_giant_pine",
@@ -87723,7 +87723,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:pale_snowfield",
+            "biome": "nirncraft:pale_snowfield",
             "surface": "maormer_isles_emerald_terrace_silt_12",
             "trees": [
                 "golden_bamboo",
@@ -87782,7 +87782,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:reach_crags",
+            "biome": "nirncraft:reach_crags",
             "surface": "maormer_isles_frozen_tundra_permafrost_13",
             "trees": [
                 "stunted_kamal_spruce",
@@ -87838,7 +87838,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:great_forest",
+            "biome": "nirncraft:great_forest",
             "surface": "maormer_isles_blossom_karst_loam_14",
             "trees": [
                 "akaviri_cherry",
@@ -87897,7 +87897,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:heartlands",
+            "biome": "nirncraft:heartlands",
             "surface": "maormer_isles_golden_steppe_loess_15",
             "trees": [
                 "akaviri_pine",
@@ -87955,7 +87955,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:telvanni_mushroom_forest",
+            "biome": "nirncraft:telvanni_mushroom_forest",
             "surface": "maormer_isles_sunken_red_erg_sand_16",
             "trees": [
                 "date_palm",
@@ -88013,7 +88013,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:ascadian_isles",
+            "biome": "nirncraft:ascadian_isles",
             "surface": "maormer_isles_mist_soaked_kelp_humus_17",
             "trees": [
                 "mist_mahogany",
@@ -88072,7 +88072,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:grazelands",
+            "biome": "nirncraft:grazelands",
             "surface": "maormer_isles_calcified_reef_limestone_18",
             "trees": [
                 "calcified_coral_fan",
@@ -88130,7 +88130,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:west_gash",
+            "biome": "nirncraft:west_gash",
             "surface": "maormer_isles_polar_blue_ice_19",
             "trees": [
                 "petrified_frost_pine",
@@ -88186,7 +88186,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:bitter_coast_swamp",
+            "biome": "nirncraft:bitter_coast_swamp",
             "surface": "maormer_isles_deep_hoarfrost_duff_20",
             "trees": [
                 "frozen_giant_pine",
@@ -88244,7 +88244,7 @@ FOREIGN_MICRO_RULES = {
                     360.0
                 ]
             },
-            "biome": "skycraft:stonefalls",
+            "biome": "nirncraft:stonefalls",
             "surface": "maormer_isles_emerald_terrace_silt_21",
             "trees": [
                 "golden_bamboo",
@@ -88303,7 +88303,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:deshaan_plains",
+            "biome": "nirncraft:deshaan_plains",
             "surface": "maormer_isles_frozen_tundra_permafrost_22",
             "trees": [
                 "stunted_kamal_spruce",
@@ -88359,7 +88359,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:molag_amur",
+            "biome": "nirncraft:molag_amur",
             "surface": "maormer_isles_blossom_karst_loam_23",
             "trees": [
                 "akaviri_cherry",
@@ -88418,7 +88418,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:azuras_coast",
+            "biome": "nirncraft:azuras_coast",
             "surface": "maormer_isles_golden_steppe_loess_24",
             "trees": [
                 "akaviri_pine",
@@ -88476,7 +88476,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:sheogorad",
+            "biome": "nirncraft:sheogorad",
             "surface": "maormer_isles_sunken_red_erg_sand_25",
             "trees": [
                 "date_palm",
@@ -88534,7 +88534,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:red_mountain",
+            "biome": "nirncraft:red_mountain",
             "surface": "maormer_isles_mist_soaked_kelp_humus_26",
             "trees": [
                 "mist_mahogany",
@@ -88593,7 +88593,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:solstheim_pine_forest",
+            "biome": "nirncraft:solstheim_pine_forest",
             "surface": "maormer_isles_calcified_reef_limestone_27",
             "trees": [
                 "calcified_coral_fan",
@@ -88651,7 +88651,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:solstheim_ashlands",
+            "biome": "nirncraft:solstheim_ashlands",
             "surface": "maormer_isles_polar_blue_ice_28",
             "trees": [
                 "petrified_frost_pine",
@@ -88707,7 +88707,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:deep_mire",
+            "biome": "nirncraft:deep_mire",
             "surface": "maormer_isles_deep_hoarfrost_duff_29",
             "trees": [
                 "frozen_giant_pine",
@@ -88765,7 +88765,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:hist_grove",
+            "biome": "nirncraft:hist_grove",
             "surface": "maormer_isles_emerald_terrace_silt_30",
             "trees": [
                 "golden_bamboo",
@@ -88824,7 +88824,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:mangrove_delta",
+            "biome": "nirncraft:mangrove_delta",
             "surface": "maormer_isles_frozen_tundra_permafrost_31",
             "trees": [
                 "stunted_kamal_spruce",
@@ -88880,7 +88880,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:shadowfen",
+            "biome": "nirncraft:shadowfen",
             "surface": "maormer_isles_blossom_karst_loam_32",
             "trees": [
                 "akaviri_cherry",
@@ -88939,7 +88939,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:murkmire",
+            "biome": "nirncraft:murkmire",
             "surface": "maormer_isles_golden_steppe_loess_33",
             "trees": [
                 "akaviri_pine",
@@ -88997,7 +88997,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:anequina_badlands",
+            "biome": "nirncraft:anequina_badlands",
             "surface": "maormer_isles_sunken_red_erg_sand_34",
             "trees": [
                 "date_palm",
@@ -89055,7 +89055,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:elsweyr_dunes",
+            "biome": "nirncraft:elsweyr_dunes",
             "surface": "maormer_isles_mist_soaked_kelp_humus_35",
             "trees": [
                 "mist_mahogany",
@@ -89114,7 +89114,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:elsweyr_savanna",
+            "biome": "nirncraft:elsweyr_savanna",
             "surface": "maormer_isles_calcified_reef_limestone_36",
             "trees": [
                 "calcified_coral_fan",
@@ -89172,7 +89172,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:sugar_fields",
+            "biome": "nirncraft:sugar_fields",
             "surface": "maormer_isles_polar_blue_ice_37",
             "trees": [
                 "petrified_frost_pine",
@@ -89228,7 +89228,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:elsweyr_canyons",
+            "biome": "nirncraft:elsweyr_canyons",
             "surface": "maormer_isles_deep_hoarfrost_duff_38",
             "trees": [
                 "frozen_giant_pine",
@@ -89286,7 +89286,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:graht_oak_forest",
+            "biome": "nirncraft:graht_oak_forest",
             "surface": "maormer_isles_emerald_terrace_silt_39",
             "trees": [
                 "golden_bamboo",
@@ -89345,7 +89345,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:valenwood_rainforest",
+            "biome": "nirncraft:valenwood_rainforest",
             "surface": "maormer_isles_frozen_tundra_permafrost_40",
             "trees": [
                 "stunted_kamal_spruce",
@@ -89401,7 +89401,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:valenwood_mangrove_coast",
+            "biome": "nirncraft:valenwood_mangrove_coast",
             "surface": "maormer_isles_blossom_karst_loam_41",
             "trees": [
                 "akaviri_cherry",
@@ -89460,7 +89460,7 @@ FOREIGN_MICRO_RULES = {
                     6.0
                 ]
             },
-            "biome": "skycraft:reapers_march",
+            "biome": "nirncraft:reapers_march",
             "surface": "maormer_isles_golden_steppe_loess_42",
             "trees": [
                 "akaviri_pine",
@@ -89520,7 +89520,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:atmoran_ice_waste",
+            "biome": "nirncraft:atmoran_ice_waste",
             "surface": "coral_kingdom_polar_blue_ice_1",
             "trees": [
                 "petrified_frost_pine",
@@ -89576,7 +89576,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:atmoran_frozen_forest",
+            "biome": "nirncraft:atmoran_frozen_forest",
             "surface": "coral_kingdom_deep_hoarfrost_duff_2",
             "trees": [
                 "frozen_giant_pine",
@@ -89634,7 +89634,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:tsaesci_jungle",
+            "biome": "nirncraft:tsaesci_jungle",
             "surface": "coral_kingdom_emerald_terrace_silt_3",
             "trees": [
                 "golden_bamboo",
@@ -89693,7 +89693,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:kamal_snowfield",
+            "biome": "nirncraft:kamal_snowfield",
             "surface": "coral_kingdom_frozen_tundra_permafrost_4",
             "trees": [
                 "stunted_kamal_spruce",
@@ -89749,7 +89749,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:warm_ocean",
+            "biome": "nirncraft:warm_ocean",
             "surface": "coral_kingdom_blossom_karst_loam_5",
             "trees": [
                 "akaviri_cherry",
@@ -89808,7 +89808,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:cyrodiil_river",
+            "biome": "nirncraft:cyrodiil_river",
             "surface": "coral_kingdom_golden_steppe_loess_6",
             "trees": [
                 "akaviri_pine",
@@ -89866,7 +89866,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:warm_beach",
+            "biome": "nirncraft:warm_beach",
             "surface": "coral_kingdom_sunken_red_erg_sand_7",
             "trees": [
                 "date_palm",
@@ -89924,7 +89924,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:vvardenfell_ashlands",
+            "biome": "nirncraft:vvardenfell_ashlands",
             "surface": "coral_kingdom_mist_soaked_kelp_humus_8",
             "trees": [
                 "mist_mahogany",
@@ -89983,7 +89983,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:black_marsh_swamp",
+            "biome": "nirncraft:black_marsh_swamp",
             "surface": "coral_kingdom_calcified_reef_limestone_9",
             "trees": [
                 "calcified_coral_fan",
@@ -90041,7 +90041,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:alikr_desert",
+            "biome": "nirncraft:alikr_desert",
             "surface": "coral_kingdom_polar_blue_ice_10",
             "trees": [
                 "petrified_frost_pine",
@@ -90097,7 +90097,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:pellitine_jungle",
+            "biome": "nirncraft:pellitine_jungle",
             "surface": "coral_kingdom_deep_hoarfrost_duff_11",
             "trees": [
                 "frozen_giant_pine",
@@ -90155,7 +90155,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:pale_snowfield",
+            "biome": "nirncraft:pale_snowfield",
             "surface": "coral_kingdom_emerald_terrace_silt_12",
             "trees": [
                 "golden_bamboo",
@@ -90214,7 +90214,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:reach_crags",
+            "biome": "nirncraft:reach_crags",
             "surface": "coral_kingdom_frozen_tundra_permafrost_13",
             "trees": [
                 "stunted_kamal_spruce",
@@ -90270,7 +90270,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:great_forest",
+            "biome": "nirncraft:great_forest",
             "surface": "coral_kingdom_blossom_karst_loam_14",
             "trees": [
                 "akaviri_cherry",
@@ -90329,7 +90329,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:heartlands",
+            "biome": "nirncraft:heartlands",
             "surface": "coral_kingdom_golden_steppe_loess_15",
             "trees": [
                 "akaviri_pine",
@@ -90387,7 +90387,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:telvanni_mushroom_forest",
+            "biome": "nirncraft:telvanni_mushroom_forest",
             "surface": "coral_kingdom_sunken_red_erg_sand_16",
             "trees": [
                 "date_palm",
@@ -90445,7 +90445,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:ascadian_isles",
+            "biome": "nirncraft:ascadian_isles",
             "surface": "coral_kingdom_mist_soaked_kelp_humus_17",
             "trees": [
                 "mist_mahogany",
@@ -90504,7 +90504,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:grazelands",
+            "biome": "nirncraft:grazelands",
             "surface": "coral_kingdom_calcified_reef_limestone_18",
             "trees": [
                 "calcified_coral_fan",
@@ -90562,7 +90562,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:west_gash",
+            "biome": "nirncraft:west_gash",
             "surface": "coral_kingdom_polar_blue_ice_19",
             "trees": [
                 "petrified_frost_pine",
@@ -90618,7 +90618,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:bitter_coast_swamp",
+            "biome": "nirncraft:bitter_coast_swamp",
             "surface": "coral_kingdom_deep_hoarfrost_duff_20",
             "trees": [
                 "frozen_giant_pine",
@@ -90676,7 +90676,7 @@ FOREIGN_MICRO_RULES = {
                     360.0
                 ]
             },
-            "biome": "skycraft:stonefalls",
+            "biome": "nirncraft:stonefalls",
             "surface": "coral_kingdom_emerald_terrace_silt_21",
             "trees": [
                 "golden_bamboo",
@@ -90735,7 +90735,7 @@ FOREIGN_MICRO_RULES = {
                     20.6
                 ]
             },
-            "biome": "skycraft:deshaan_plains",
+            "biome": "nirncraft:deshaan_plains",
             "surface": "coral_kingdom_frozen_tundra_permafrost_22",
             "trees": [
                 "stunted_kamal_spruce",
@@ -90791,7 +90791,7 @@ FOREIGN_MICRO_RULES = {
                     37.8
                 ]
             },
-            "biome": "skycraft:molag_amur",
+            "biome": "nirncraft:molag_amur",
             "surface": "coral_kingdom_blossom_karst_loam_23",
             "trees": [
                 "akaviri_cherry",
@@ -90850,7 +90850,7 @@ FOREIGN_MICRO_RULES = {
                     54.9
                 ]
             },
-            "biome": "skycraft:azuras_coast",
+            "biome": "nirncraft:azuras_coast",
             "surface": "coral_kingdom_golden_steppe_loess_24",
             "trees": [
                 "akaviri_pine",
@@ -90908,7 +90908,7 @@ FOREIGN_MICRO_RULES = {
                     72.1
                 ]
             },
-            "biome": "skycraft:sheogorad",
+            "biome": "nirncraft:sheogorad",
             "surface": "coral_kingdom_sunken_red_erg_sand_25",
             "trees": [
                 "date_palm",
@@ -90966,7 +90966,7 @@ FOREIGN_MICRO_RULES = {
                     89.2
                 ]
             },
-            "biome": "skycraft:red_mountain",
+            "biome": "nirncraft:red_mountain",
             "surface": "coral_kingdom_mist_soaked_kelp_humus_26",
             "trees": [
                 "mist_mahogany",
@@ -91025,7 +91025,7 @@ FOREIGN_MICRO_RULES = {
                     106.4
                 ]
             },
-            "biome": "skycraft:solstheim_pine_forest",
+            "biome": "nirncraft:solstheim_pine_forest",
             "surface": "coral_kingdom_calcified_reef_limestone_27",
             "trees": [
                 "calcified_coral_fan",
@@ -91083,7 +91083,7 @@ FOREIGN_MICRO_RULES = {
                     123.5
                 ]
             },
-            "biome": "skycraft:solstheim_ashlands",
+            "biome": "nirncraft:solstheim_ashlands",
             "surface": "coral_kingdom_polar_blue_ice_28",
             "trees": [
                 "petrified_frost_pine",
@@ -91139,7 +91139,7 @@ FOREIGN_MICRO_RULES = {
                     140.6
                 ]
             },
-            "biome": "skycraft:deep_mire",
+            "biome": "nirncraft:deep_mire",
             "surface": "coral_kingdom_deep_hoarfrost_duff_29",
             "trees": [
                 "frozen_giant_pine",
@@ -91197,7 +91197,7 @@ FOREIGN_MICRO_RULES = {
                     157.8
                 ]
             },
-            "biome": "skycraft:hist_grove",
+            "biome": "nirncraft:hist_grove",
             "surface": "coral_kingdom_emerald_terrace_silt_30",
             "trees": [
                 "golden_bamboo",
@@ -91256,7 +91256,7 @@ FOREIGN_MICRO_RULES = {
                     174.9
                 ]
             },
-            "biome": "skycraft:mangrove_delta",
+            "biome": "nirncraft:mangrove_delta",
             "surface": "coral_kingdom_frozen_tundra_permafrost_31",
             "trees": [
                 "stunted_kamal_spruce",
@@ -91312,7 +91312,7 @@ FOREIGN_MICRO_RULES = {
                     192.1
                 ]
             },
-            "biome": "skycraft:shadowfen",
+            "biome": "nirncraft:shadowfen",
             "surface": "coral_kingdom_blossom_karst_loam_32",
             "trees": [
                 "akaviri_cherry",
@@ -91371,7 +91371,7 @@ FOREIGN_MICRO_RULES = {
                     209.2
                 ]
             },
-            "biome": "skycraft:murkmire",
+            "biome": "nirncraft:murkmire",
             "surface": "coral_kingdom_golden_steppe_loess_33",
             "trees": [
                 "akaviri_pine",
@@ -91429,7 +91429,7 @@ FOREIGN_MICRO_RULES = {
                     226.4
                 ]
             },
-            "biome": "skycraft:anequina_badlands",
+            "biome": "nirncraft:anequina_badlands",
             "surface": "coral_kingdom_sunken_red_erg_sand_34",
             "trees": [
                 "date_palm",
@@ -91487,7 +91487,7 @@ FOREIGN_MICRO_RULES = {
                     243.5
                 ]
             },
-            "biome": "skycraft:elsweyr_dunes",
+            "biome": "nirncraft:elsweyr_dunes",
             "surface": "coral_kingdom_mist_soaked_kelp_humus_35",
             "trees": [
                 "mist_mahogany",
@@ -91546,7 +91546,7 @@ FOREIGN_MICRO_RULES = {
                     260.6
                 ]
             },
-            "biome": "skycraft:elsweyr_savanna",
+            "biome": "nirncraft:elsweyr_savanna",
             "surface": "coral_kingdom_calcified_reef_limestone_36",
             "trees": [
                 "calcified_coral_fan",
@@ -91604,7 +91604,7 @@ FOREIGN_MICRO_RULES = {
                     277.8
                 ]
             },
-            "biome": "skycraft:sugar_fields",
+            "biome": "nirncraft:sugar_fields",
             "surface": "coral_kingdom_polar_blue_ice_37",
             "trees": [
                 "petrified_frost_pine",
@@ -91660,7 +91660,7 @@ FOREIGN_MICRO_RULES = {
                     294.9
                 ]
             },
-            "biome": "skycraft:elsweyr_canyons",
+            "biome": "nirncraft:elsweyr_canyons",
             "surface": "coral_kingdom_deep_hoarfrost_duff_38",
             "trees": [
                 "frozen_giant_pine",
@@ -91718,7 +91718,7 @@ FOREIGN_MICRO_RULES = {
                     312.1
                 ]
             },
-            "biome": "skycraft:graht_oak_forest",
+            "biome": "nirncraft:graht_oak_forest",
             "surface": "coral_kingdom_emerald_terrace_silt_39",
             "trees": [
                 "golden_bamboo",
@@ -91777,7 +91777,7 @@ FOREIGN_MICRO_RULES = {
                     329.2
                 ]
             },
-            "biome": "skycraft:valenwood_rainforest",
+            "biome": "nirncraft:valenwood_rainforest",
             "surface": "coral_kingdom_frozen_tundra_permafrost_40",
             "trees": [
                 "stunted_kamal_spruce",
@@ -91833,7 +91833,7 @@ FOREIGN_MICRO_RULES = {
                     346.4
                 ]
             },
-            "biome": "skycraft:valenwood_mangrove_coast",
+            "biome": "nirncraft:valenwood_mangrove_coast",
             "surface": "coral_kingdom_blossom_karst_loam_41",
             "trees": [
                 "akaviri_cherry",
@@ -91892,7 +91892,7 @@ FOREIGN_MICRO_RULES = {
                     6.0
                 ]
             },
-            "biome": "skycraft:reapers_march",
+            "biome": "nirncraft:reapers_march",
             "surface": "coral_kingdom_golden_steppe_loess_42",
             "trees": [
                 "akaviri_pine",

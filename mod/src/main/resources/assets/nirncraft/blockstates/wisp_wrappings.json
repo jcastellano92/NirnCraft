@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/wisp_wrappings"
+      },
+      {
+        "model": "nirncraft:block/wisp_wrappings",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/wisp_wrappings",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/wisp_wrappings",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/wisp_wrappings_harvested"
+      },
+      {
+        "model": "nirncraft:block/wisp_wrappings_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/wisp_wrappings_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/wisp_wrappings_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

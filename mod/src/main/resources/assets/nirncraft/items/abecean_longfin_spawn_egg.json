@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/abecean_longfin_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 4881056
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 14729312
+      }
+    ]
+  }
+}

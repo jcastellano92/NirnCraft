@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:roadside_tavern",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 56,
+    "separation": 20,
+    "salt": 731205,
+    "exclusion_zone": {
+      "other_set": "nirncraft:generic_villages",
+      "chunk_count": 6
+    }
+  }
+}

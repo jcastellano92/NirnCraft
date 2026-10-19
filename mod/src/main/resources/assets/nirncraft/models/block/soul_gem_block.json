@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "nirncraft:block/soul_gem_block"
+  },
+  "render_type": "minecraft:translucent"
+}

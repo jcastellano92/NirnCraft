@@ -1,0 +1,11 @@
+{
+  "type": "nirncraft:dead_tree",
+  "config": {
+    "state": {
+      "id": "minecraft:acacia_log",
+      "properties": {
+        "axis": "y"
+      }
+    }
+  }
+}

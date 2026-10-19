@@ -1,14 +1,14 @@
 {
   "replace": false,
   "values": [
-    "skycraft:ash_shore",
-    "skycraft:frozen_shore",
-    "skycraft:rocky_shore",
-    "skycraft:skyrim_coast",
-    "skycraft:stros_mkai_coast",
-    "skycraft:summerset_shore",
-    "skycraft:temperate_beach",
-    "skycraft:tropical_beach",
-    "skycraft:warm_beach"
+    "nirncraft:ash_shore",
+    "nirncraft:frozen_shore",
+    "nirncraft:rocky_shore",
+    "nirncraft:skyrim_coast",
+    "nirncraft:stros_mkai_coast",
+    "nirncraft:summerset_shore",
+    "nirncraft:temperate_beach",
+    "nirncraft:tropical_beach",
+    "nirncraft:warm_beach"
   ]
 }

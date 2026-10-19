@@ -13,11 +13,11 @@ Currently:
 
 ## 2. Write Set
 
-* `mod/src/main/java/com/skycraft/tamriel/settlement/plan/{Cities,CityPlans}.java`
-* `mod/src/main/java/com/skycraft/tamriel/settlement/grammar/{Zoning,Fabric,Nets}.java`
-* `mod/src/main/resources/skycraft/tamriel/cityplans/*.json`
-* `mod/src/main/resources/skycraft/tamriel/places/*.json`
-* `mod/src/main/lang/skycraft/settlements.json`
+* `mod/src/main/java/com/nirncraft/tamriel/settlement/plan/{Cities,CityPlans}.java`
+* `mod/src/main/java/com/nirncraft/tamriel/settlement/grammar/{Zoning,Fabric,Nets}.java`
+* `mod/src/main/resources/nirncraft/tamriel/cityplans/*.json`
+* `mod/src/main/resources/nirncraft/tamriel/places/*.json`
+* `mod/src/main/lang/nirncraft/settlements.json`
 * `tools/qa/parity.py`
 
 ## 3. Implementation Steps

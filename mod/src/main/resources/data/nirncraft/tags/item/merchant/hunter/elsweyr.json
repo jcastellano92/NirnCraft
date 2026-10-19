@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:sabre_cat_tooth",
+      "required": false
+    },
+    {
+      "id": "nirncraft:scorpion_stinger",
+      "required": false
+    }
+  ]
+}

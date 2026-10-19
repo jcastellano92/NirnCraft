@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Deterministic generator for R8 Black Marsh, R9 Elsweyr, R10 Valenwood, R11 Summerset,
 and R12 Foreign Lands (Atmora, Akavir, Yokuda, Pyandonea, Thras) Step V6:
-1. Expands mod/src/main/resources/skycraft/tamriel/styles/{xanmeer,argonian,khajiit,bosmer,altmer,atmoran,akaviri,maormer,sload,yokudan}.json (>= 485 leaves each)
-2. Generates 60 regional & seat overlays in mod/src/main/resources/skycraft/tamriel/styles/overlays/*.json (>= 540 leaves each)
+1. Expands mod/src/main/resources/nirncraft/tamriel/styles/{xanmeer,argonian,khajiit,bosmer,altmer,atmoran,akaviri,maormer,sload,yokudan}.json (>= 485 leaves each)
+2. Generates 60 regional & seat overlays in mod/src/main/resources/nirncraft/tamriel/styles/overlays/*.json (>= 540 leaves each)
 3. Generates bespoke cityplans for all 73 named towns (capitals, cities, towns) + 60 villages/seats across all 28 regions
-4. Registers all plans and overlays in mod/src/main/resources/skycraft/tamriel/cityplans/index.json
+4. Registers all plans and overlays in mod/src/main/resources/nirncraft/tamriel/cityplans/index.json
 """
 
 import json
@@ -16,7 +16,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "tools", "qa"))
 import parity
 
-TAMRIEL_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft", "tamriel")
+TAMRIEL_DIR = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft", "tamriel")
 STYLES_DIR = os.path.join(TAMRIEL_DIR, "styles")
 OVERLAY_DIR = os.path.join(STYLES_DIR, "overlays")
 CITYPLAN_DIR = os.path.join(TAMRIEL_DIR, "cityplans")

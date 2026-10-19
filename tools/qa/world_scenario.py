@@ -25,7 +25,7 @@ def assertion(value,check):
 
 
 def run(qa,file,modes,variant):
-    scene=qa.read(file);world=qa.read(qa.ROOT/'mod/src/main/resources/skycraft/tamriel/regions.json')
+    scene=qa.read(file);world=qa.read(qa.ROOT/'mod/src/main/resources/nirncraft/tamriel/regions.json')
     spec=qa.read(qa.SPEC)
     systems=qa.selected(spec['systems'],','.join(scene['systems']))
     regions=qa.selected(world,scene['region'])

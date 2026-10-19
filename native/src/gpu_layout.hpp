@@ -1,9 +1,9 @@
-// C++ mirror of native/shaders/aether_shared.slang and the global parameter block of aether_far.slang.
+// C++ mirror of native/shaders/atlas_shared.slang and the global parameter block of atlas_far.slang.
 #pragma once
 #include <cstddef>
 #include <cstdint>
 
-namespace aether {
+namespace atlas {
 
 constexpr int MAX_LODS = 8;
 
@@ -35,7 +35,7 @@ struct alignas(16) FrameGpu {
     float prevViewProj[16];
     float prevCam[4];
     uint32_t temporal[4];  // frame index, history valid, now (nowMs), fade duration ms
-    // sun map (aether_set_sun_map): centre camera-relative + half extent; basis X, Y (perpendicular to the key
+    // sun map (atlas_set_sun_map): centre camera-relative + half extent; basis X, Y (perpendicular to the key
     // light) and the key light L; rows: first row, row count, size, flags (1 = enabled)
     float sunMapCentre[4];
     float sunMapX[4];
@@ -71,7 +71,7 @@ struct CpuBuffer {
     size_t count;
 };
 
-// Must list the globals of aether_far.slang in declaration order.
+// Must list the globals of atlas_far.slang in declaration order.
 struct FarGlobals {
     FrameGpu* frame;
     CpuBuffer<int32_t> regionTable;
@@ -100,4 +100,4 @@ struct FarGlobals {
     CpuBuffer<Float2> sunMap;
 };
 
-}  // namespace aether
+}  // namespace atlas

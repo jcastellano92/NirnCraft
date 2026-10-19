@@ -24,8 +24,8 @@ class CoverageTest(unittest.TestCase):
     def test_region_bucket_requires_actual_world_receipt_not_a_manual_label(self):
         self.assertEqual('unverified_region',coverage.region_evidence_state(
             {'id':'skyrim/falkreath','kind':'authored_region'},{'regionId':'skyrim/whiterun'}))
-        realm={'kind':'realm_role','biomes':['skycraft:coldharbour_hollow_city']}
-        self.assertEqual('unverified_biome_role',coverage.region_evidence_state(realm,{'biomeId':'skycraft:coldharbour_lava_rift'}))
+        realm={'kind':'realm_role','biomes':['nirncraft:coldharbour_hollow_city']}
+        self.assertEqual('unverified_biome_role',coverage.region_evidence_state(realm,{'biomeId':'nirncraft:coldharbour_lava_rift'}))
         procedural={'kind':'procedural_archetype','archetype':'frozen'}
         self.assertEqual('unverified_archetype',coverage.region_evidence_state(procedural,{'regionArchetype':'frozen','regionId':'skyrim/winterhold'}))
         self.assertIsNone(coverage.region_evidence_state(procedural,{'regionArchetype':'frozen','regionId':'realm/x9_z-9/1'}))
@@ -35,10 +35,10 @@ class CoverageTest(unittest.TestCase):
             image=Path(folder)/'realm.png';image.write_bytes(b'actual realm image')
             identity={'seed':1,'dimension':'minecraft:overworld','generationInputs':'geometry'}
             row={'status':'passed','tier':'visual','evidence':str(image),'_shaderHash':'shader',
-                 'receipt':{**identity,'dimension':'skycraft:coldharbour','coreSha256':'core',
+                 'receipt':{**identity,'dimension':'nirncraft:coldharbour','coreSha256':'core',
                             'shaders':True,'cameraClear':True,'readinessPassed':True,'nightVision':False},
                  'review':{'imageSha256':hashlib.sha256(image.read_bytes()).hexdigest()}}
-            self.assertEqual('current_visual',coverage.evidence_state(row,identity,'core','shader',Path(folder),'skycraft:coldharbour'))
+            self.assertEqual('current_visual',coverage.evidence_state(row,identity,'core','shader',Path(folder),'nirncraft:coldharbour'))
             self.assertEqual('stale_generation',coverage.evidence_state(row,identity,'core','shader',Path(folder),'minecraft:the_end'))
 
     def test_current_visual_requires_unchanged_actual_image_and_geometry(self):

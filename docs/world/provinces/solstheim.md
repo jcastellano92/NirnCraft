@@ -43,7 +43,7 @@ cross-check (never below it where the island's systems can carry it).
 
 ## 1. World model sheet
 
-Data home: `skycraft/tamriel/world/solstheim.json` (MS22): one province block (`so`) and seven area blocks. The areas
+Data home: `nirncraft/tamriel/world/solstheim.json` (MS22): one province block (`so`) and seven area blocks. The areas
 are **sheet areas, not `regions.json` regions**: Solstheim stays one region (`morrowind/solstheim`, 0.976 km2; splitting
 would churn `regions.png` indices and save data for no gain). Each area is a rule on the macro raster (below), so the
 generators can resolve `why` ids to the area under a block. Each field is `{id, text, cites}`; a cite in the same block

@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:echatere_hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:durzog_hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hide",
+      "required": false
+    },
+    {
+      "id": "nirncraft:leather_strips",
+      "required": false
+    }
+  ]
+}

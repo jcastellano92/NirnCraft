@@ -42,15 +42,15 @@ def group_errors(group):
 
 
 def main():
-    regions=json.loads((RES/'skycraft/tamriel/regions.json').read_text())
-    dimensions={'minecraft:the_nether','minecraft:the_end'}|{'skycraft:'+p.stem for p in (RES/'data/skycraft/dimension').glob('*.json')}
+    regions=json.loads((RES/'nirncraft/tamriel/regions.json').read_text())
+    dimensions={'minecraft:the_nether','minecraft:the_end'}|{'nirncraft:'+p.stem for p in (RES/'data/nirncraft/dimension').glob('*.json')}
     ids={r['id'] for r in regions}|dimensions
     # Regions.dimensionRegion uses the actual dimension path as its province.
     # Beyond.build creates procedural overworld regions with province="realm".
     # These are distinct from Regions.dimensionRegion's dimension-path provinces.
     provinces={r['province'] for r in regions}|{d.split(':',1)[1] for d in dimensions}|{'realm'}
     rules=[]; errors=[]; groups=0
-    for path in sorted((RES/'data/skycraft/region_spawns').glob('*.json')):
+    for path in sorted((RES/'data/nirncraft/region_spawns').glob('*.json')):
         value=json.loads(path.read_text())
         for index,rule in enumerate(value if isinstance(value,list) else [value]):
             name=path.stem+'#'+str(index)

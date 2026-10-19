@@ -1,5 +1,5 @@
 """
-Shared helpers for the Skycraft audio tools: locating ffmpeg and writing Ogg Vorbis.
+Shared helpers for the NirnCraft audio tools: locating ffmpeg and writing Ogg Vorbis.
 
 ffmpeg is looked up in this order:
   1. the FFMPEG environment variable (path to the executable),
@@ -79,7 +79,7 @@ def write_ogg(x: np.ndarray, out: pathlib.Path, sr: int, quality: float = 2.0, o
         cmd += ["-ar", str(out_sr)]
     cmd += ["-c:a", "libvorbis", "-q:a", str(quality), "-map_metadata", "-1"]
     if title:
-        cmd += ["-metadata", f"title={title}", "-metadata", "artist=Skycraft (procedural, original)"]
+        cmd += ["-metadata", f"title={title}", "-metadata", "artist=NirnCraft (procedural, original)"]
     cmd.append(str(out))
     subprocess.run(cmd, input=to_pcm16(x), check=True)
     return out

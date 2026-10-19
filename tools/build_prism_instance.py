@@ -1,4 +1,4 @@
-"""Builds dist/Skycraft-26.3-client-instance.zip (Prism Launcher / MultiMC) locally, without packwiz.
+"""Builds dist/NirnCraft-26.3-client-instance.zip (Prism Launcher / MultiMC) locally, without packwiz.
 
 Usage: python3 tools/build_prism_instance.py [--core-jar PATH] [--output-zip PATH]
 
@@ -7,7 +7,7 @@ Usage: python3 tools/build_prism_instance.py [--core-jar PATH] [--output-zip PAT
   (run tools/refresh_packwiz.py after editing pack/).
 * Mods and shader packs are downloaded from their .pw.toml metadata (Modrinth URL, or the CurseForge CDN for
   CurseForge-only files) and their sha1/sha512 is verified every time, including when they come from dist/.cache.
-* Skycraft Core is not part of the committed pack. It comes from --core-jar, or else the newest jar in mod/build/libs
+* NirnCraft Core is not part of the committed pack. It comes from --core-jar, or else the newest jar in mod/build/libs
   (run `./gradlew build` in mod/ first).
 """
 import argparse
@@ -31,7 +31,7 @@ CACHE_DIR = os.path.join(DIST_DIR, ".cache")
 WORK_DIR = os.path.join(DIST_DIR, "tmp_prism_26.3_build")
 INST_DIR = os.path.join(WORK_DIR, TARGET["instanceName"])
 MC_DIR = os.path.join(INST_DIR, ".minecraft")
-OUT_ZIP = os.path.join(DIST_DIR, "Skycraft-26.3-client-instance.zip")
+OUT_ZIP = os.path.join(DIST_DIR, "NirnCraft-26.3-client-instance.zip")
 
 MC_VERSION = TARGET["minecraft"]
 NEOFORGE_VERSION = TARGET["neoforge"]
@@ -39,7 +39,7 @@ NEOFORGE_VERSION = TARGET["neoforge"]
 # Heap comes from Min/MaxMemAlloc (Prism adds -Xms/-Xmx itself).
 JVM_ARGS = "-XX:+UseG1GC -XX:MaxGCPauseMillis=200"
 
-HEADERS = {"User-Agent": "skycraft-pack-tools/1.0 (+https://github.com/jcastellano92/Skycraft)"}
+HEADERS = {"User-Agent": "nirncraft-pack-tools/1.0 (+https://github.com/jcastellano92/NirnCraft)"}
 
 
 def file_hash(path, fmt):
@@ -90,7 +90,7 @@ def find_core_jar(arg):
     jars = [j for j in glob.glob(os.path.join(ROOT, "mod", "build", "libs", "*.jar"))
             if not j.endswith(("-sources.jar", "-slim.jar"))]
     if not jars:
-        sys.exit("No Skycraft Core jar: run `./gradlew build` in mod/ or pass --core-jar PATH")
+        sys.exit("No NirnCraft Core jar: run `./gradlew build` in mod/ or pass --core-jar PATH")
     return max(jars, key=os.path.getmtime)
 
 
@@ -113,7 +113,7 @@ def read_index():
 
 
 def build_prism_package(core_jar_arg, output_zip=None):
-    print("=== Building the Skycraft instance for Prism Launcher ===")
+    print("=== Building the NirnCraft instance for Prism Launcher ===")
     output_zip = os.path.abspath(output_zip or OUT_ZIP)
     try:
         inside_work = os.path.commonpath((WORK_DIR, output_zip)) == WORK_DIR
@@ -156,9 +156,9 @@ def build_prism_package(core_jar_arg, output_zip=None):
         target = os.path.join(MC_DIR, os.path.dirname(rel), meta["filename"])
         tasks.append((meta.get("name", meta["filename"]), target, url, dl["hash"], dl["hash-format"]))
 
-    print(f"\n[2/4] Installing Skycraft Core from {core_jar}")
+    print(f"\n[2/4] Installing NirnCraft Core from {core_jar}")
     os.makedirs(os.path.join(MC_DIR, "mods"), exist_ok=True)
-    shutil.copyfile(core_jar, os.path.join(MC_DIR, "mods", "skycraft-core.jar"))
+    shutil.copyfile(core_jar, os.path.join(MC_DIR, "mods", "nirncraft-core.jar"))
 
     print(f"\n[3/4] Downloading {len(tasks)} mods and shader packs (hash-checked)...")
 
@@ -185,7 +185,7 @@ def build_prism_package(core_jar_arg, output_zip=None):
         f.write(f"""InstanceType=OneSix
 name={TARGET['instanceName']}
 iconKey=default
-notes=Skycraft migration: Minecraft {MC_VERSION}, NeoForge {NEOFORGE_VERSION}, Java 25. Separate from the preserved Forge instance. Custom shaders and Distant Horizons await integration acceptance.
+notes=NirnCraft migration: Minecraft {MC_VERSION}, NeoForge {NEOFORGE_VERSION}, Java 25. Separate from the preserved Forge instance. Custom shaders and Distant Horizons await integration acceptance.
 OverrideJavaLocation=false
 JavaVersion=25
 OverrideJavaArgs=true
@@ -219,7 +219,7 @@ MaxMemAlloc=6144
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--core-jar", help="Skycraft Core jar (default: newest jar in mod/build/libs)")
-    ap.add_argument("--output-zip", help="Candidate archive path (default: dist/Skycraft-26.3-client-instance.zip)")
+    ap.add_argument("--core-jar", help="NirnCraft Core jar (default: newest jar in mod/build/libs)")
+    ap.add_argument("--output-zip", help="Candidate archive path (default: dist/NirnCraft-26.3-client-instance.zip)")
     args = ap.parse_args()
     build_prism_package(args.core_jar, args.output_zip)

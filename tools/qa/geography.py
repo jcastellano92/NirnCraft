@@ -12,9 +12,9 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[2]
 TARGET=ROOT/'dist/world-tests/geography.json'
-PATTERNS=['mod/src/main/java/com/skycraft/tamriel/**/*.java',
-          'mod/src/main/java/com/skycraft/world/WorldConfig.java',
-          'mod/src/main/resources/skycraft/tamriel/**/*',
+PATTERNS=['mod/src/main/java/com/nirncraft/tamriel/**/*.java',
+          'mod/src/main/java/com/nirncraft/world/WorldConfig.java',
+          'mod/src/main/resources/nirncraft/tamriel/**/*',
           'tools/qa/GeographyAudit.java','tools/qa/geography_audit.gradle','tools/qa/geography.py']
 
 

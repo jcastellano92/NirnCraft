@@ -1,4 +1,4 @@
-Skycraft wire protocol maintenance
+NirnCraft wire protocol maintenance
 
 SkyNetwork accepts only exact protocol equality on both sides. The identity includes the mod version,
 WireProtocol.SCHEMA, SHA-256 of ordered packet registrations and their count. Registration IDs remain ordered.

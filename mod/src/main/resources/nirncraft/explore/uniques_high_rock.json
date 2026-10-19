@@ -1,0 +1,1719 @@
+[
+  {
+    "id": "chrysamere_blade_of_paladins",
+    "kind": "breton_menhir",
+    "x": -8330,
+    "z": 1548,
+    "place": "castle_llugwych",
+    "item": "nirncraft:breton_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:fire_protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "The Paladin's Blade of High Rock, an ancient claymore of defensive warding recovered near Castle Llugwych.",
+    "why": [
+      "high_rock.L7.orders_as_police",
+      "anticlere.L10.castle_llugwych"
+    ]
+  },
+  {
+    "id": "king_lysandus_spectral_greatsword",
+    "kind": "breton_menhir",
+    "x": -9560,
+    "z": 2350,
+    "place": "lysanduss_tomb",
+    "item": "nirncraft:breton_greatsword",
+    "enchant": {
+      "minecraft:smite": 5,
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Cold-iron royal claymore bound to the restless vengeance of King Lysandus of Daggerfall.",
+    "why": [
+      "daggerfall.L8.lysandus_memory",
+      "wayrest.L10.lysandus_tomb"
+    ]
+  },
+  {
+    "id": "bloodthorn_ritual_blade",
+    "kind": "stone_circle",
+    "x": -9450,
+    "z": -950,
+    "place": "cath_bedraud",
+    "item": "nirncraft:breton_dagger",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:looting": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Briar-etched sacrificial dagger of Angof the Gravesinger from the barrows of Cath Bedraud.",
+    "why": [
+      "glenumbra.L10.cath_bedraud",
+      "high_rock.L8.crypt_dead"
+    ]
+  },
+  {
+    "id": "privateers_corsair_cutlass",
+    "kind": "treasure_cache",
+    "x": -9859,
+    "z": 2183,
+    "place": "privateers_hold",
+    "item": "nirncraft:breton_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:looting": 3
+    },
+    "note": "Salt-tempered boarding blade cached in the sea-caves outside Privateer's Hold.",
+    "why": [
+      "daggerfall.L10.privateers_hold",
+      "high_rock.L10.sea_caves"
+    ]
+  },
+  {
+    "id": "beldama_wyrd_heartstaff",
+    "kind": "herb_garden",
+    "x": -4840,
+    "z": 3160,
+    "place": "wyrd_tree",
+    "item": "nirncraft:elven_bow",
+    "enchant": {
+      "minecraft:power": 5,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Living heartwood bow blessed by the Beldama Wyrd sisters beneath the Great Wyrd Tree.",
+    "why": [
+      "glenumbra.L4.wyrd_grove",
+      "glenumbra.L8.wyrd_rites"
+    ]
+  },
+  {
+    "id": "cambray_lost_kings_crown",
+    "kind": "breton_menhir",
+    "x": -6744,
+    "z": 2536,
+    "place": "tomb_of_lost_kings",
+    "item": "nirncraft:gold_circlet",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Gilded First Era diadem of the petty kings of Cambray Hills.",
+    "why": [
+      "glenumbra.L10.tomb_of_lost_kings",
+      "high_rock.L11.nedic_barrows"
+    ]
+  },
+  {
+    "id": "hag_fen_blood_cauldron_talisman",
+    "kind": "rare_reagent",
+    "x": -10450,
+    "z": -800,
+    "place": "hag_fen",
+    "item": "nirncraft:silver_garnet_ring",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:thorns": 2
+    },
+    "note": "Peat-stained garnet talisman steeped in the witch-pools of Hag Fen.",
+    "why": [
+      "glenumbra.L3.peat_bogs",
+      "high_rock.L10.covens"
+    ]
+  },
+  {
+    "id": "camlorn_wolf_banner_shield",
+    "kind": "ancient_battlefield",
+    "x": -9048,
+    "z": 1656,
+    "place": "dresan_keep",
+    "item": "nirncraft:breton_shield",
+    "enchant": {
+      "minecraft:unbreaking": 3,
+      "minecraft:thorns": 2
+    },
+    "note": "Heater shield bearing the silver wolf crest of the royal house of Camlorn.",
+    "why": [
+      "glenumbra.L10.werewolf_packs",
+      "glenumbra.L11.old_crown_of_camlorn"
+    ]
+  },
+  {
+    "id": "doomcrag_lightless_remnant_shard",
+    "kind": "ayleid_well",
+    "x": -6800,
+    "z": -2200,
+    "place": "doomcrag",
+    "item": "nirncraft:silver_circlet",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:blast_protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Splinter of the Lightless Remnant set into an Ayleid-Direnni crown atop Doomcrag.",
+    "why": [
+      "rivenspire.L10.doomcrag",
+      "rivenspire.L11.doomcrag_fall"
+    ]
+  },
+  {
+    "id": "crypt_of_hearts_ebony_blade",
+    "kind": "mage_ruin",
+    "x": -8800,
+    "z": -2200,
+    "place": "crypt_of_hearts",
+    "item": "nirncraft:ebony_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:looting": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Shadow-forged greatsword from the cursed marital vault of the Crypt of Hearts.",
+    "why": [
+      "rivenspire.L10.crag_barrows",
+      "high_rock.L10.undercrofts"
+    ]
+  },
+  {
+    "id": "sanguines_revelry_goblet",
+    "kind": "realm_monolith",
+    "x": -7350,
+    "z": 1050,
+    "place": "sanguines_demesne",
+    "item": "minecraft:totem_of_undying",
+    "enchant": {
+      "minecraft:unbreaking": 3
+    },
+    "note": "Overflowing ruby chalice of the Prince of Hedonism from Sanguine's Demesne.",
+    "why": [
+      "stormhaven.L8.revel_temptation",
+      "stormhaven.L10.sanguines_demesne"
+    ]
+  },
+  {
+    "id": "ravenwatch_vampire_hunter_crossbow",
+    "kind": "overlook",
+    "x": -7100,
+    "z": -1650,
+    "place": "ravenwatch_castle",
+    "item": "minecraft:crossbow",
+    "enchant": {
+      "minecraft:quick_charge": 3,
+      "minecraft:piercing": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Silver-inlaid repeater crossbow of House Ravenwatch in Rivenspire.",
+    "why": [
+      "rivenspire.L7.three_houses",
+      "high_rock.L10.bloodlines"
+    ]
+  },
+  {
+    "id": "northpoint_dorell_admiral_saber",
+    "kind": "sea_shrine",
+    "x": -7450,
+    "z": -2450,
+    "place": "northpoint",
+    "item": "nirncraft:breton_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:knockback": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Dress broadsword of House Dorell's northern fleet admirals at Northpoint.",
+    "why": [
+      "rivenspire.L5.northpoint_shipping",
+      "rivenspire.L6.northpoint_port"
+    ]
+  },
+  {
+    "id": "shornhelm_fevered_crown",
+    "kind": "wayshrine",
+    "x": -7608,
+    "z": -1336,
+    "place": "castle_shornhelm",
+    "item": "nirncraft:breton_helmet",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:respiration": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Black-slate visored crown of the High Guard of Shornhelm.",
+    "why": [
+      "rivenspire.L6.shornhelm_city",
+      "rivenspire.L9.house_rivalry"
+    ]
+  },
+  {
+    "id": "erokii_direnni_aegis",
+    "kind": "ayleid_well",
+    "x": -6731,
+    "z": -1891,
+    "place": "erokii_ruins",
+    "item": "nirncraft:breton_shield",
+    "enchant": {
+      "minecraft:unbreaking": 3,
+      "minecraft:protection": 4
+    },
+    "note": "Alabaster-trimmed Direnni ward shield unearthed in the Erokii vaults.",
+    "why": [
+      "high_rock.L10.direnni_vaults",
+      "high_rock.L11.direnni_hegemony"
+    ]
+  },
+  {
+    "id": "lorkrata_montclair_signet",
+    "kind": "dead_adventurer",
+    "x": -8750,
+    "z": -1800,
+    "place": "lorkrata_ruins",
+    "item": "nirncraft:gold_ruby_necklace",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Crimson signet chain of Baron Wylon Montclair lost below Lorkrata.",
+    "why": [
+      "rivenspire.L6.crag_watch_keeps",
+      "rivenspire.L9.house_rivalry"
+    ]
+  },
+  {
+    "id": "citadel_of_hearthsly_flame_lance",
+    "kind": "wayshrine",
+    "x": -7300,
+    "z": 1150,
+    "place": "firebrand_keep",
+    "item": "nirncraft:breton_greatsword",
+    "enchant": {
+      "minecraft:fire_aspect": 2,
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Consecrated flame-greatsword of the Order of the Flame at Firebrand Keep and Hearth's-Ly.",
+    "why": [
+      "anticlere.L9.flame_crusade",
+      "dwynnen.L10.hearthsly_citadel"
+    ]
+  },
+  {
+    "id": "pariah_abbey_dreamwalkers_hood",
+    "kind": "hermit_hut",
+    "x": -8050,
+    "z": 1800,
+    "place": "pariah_abbey",
+    "item": "nirncraft:silver_circlet",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:aqua_affinity": 1,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Twilight-blessed circlet of the abbey stewards at Pariah Abbey.",
+    "why": [
+      "stormhaven.L6.abbey_prioris",
+      "stormhaven.L8.mara_heartland"
+    ]
+  },
+  {
+    "id": "bonesnap_goblin_king_maul",
+    "kind": "ancient_battlefield",
+    "x": -7150,
+    "z": -200,
+    "place": "bonesnap_ruins",
+    "item": "nirncraft:breton_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:knockback": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Heavy iron-bound maul seized from the war-chieftains of Bonesnap Ruins.",
+    "why": [
+      "dwynnen.L5.bhoriane_mines",
+      "dwynnen.L10.karst_vaults"
+    ]
+  },
+  {
+    "id": "alcaire_dukes_chivalric_plate",
+    "kind": "breton_menhir",
+    "x": -7650,
+    "z": 2150,
+    "place": "alcaire_castle",
+    "item": "nirncraft:breton_chestplate",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Fluted tournament breastplate of the Dukes of Alcaire.",
+    "why": [
+      "high_rock.L7.feudal_ladder",
+      "dwynnen.L6.frontier_keeps"
+    ]
+  },
+  {
+    "id": "koeglin_beacon_lantern_ring",
+    "kind": "sea_shrine",
+    "x": -8100,
+    "z": 2900,
+    "place": "koeglin_lighthouse",
+    "item": "nirncraft:gold_ring",
+    "enchant": {
+      "minecraft:protection": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Harbormaster's signet ring from the shipyards of Koeglin Village.",
+    "why": [
+      "stormhaven.L6.koeglin_village",
+      "high_rock.L5.bay_shipping"
+    ]
+  },
+  {
+    "id": "norvulk_ayleid_starlight_bow",
+    "kind": "ayleid_well",
+    "x": -8100,
+    "z": 750,
+    "place": "norvulk_ruins",
+    "item": "nirncraft:breton_bow",
+    "enchant": {
+      "minecraft:power": 4,
+      "minecraft:punch": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Varla-tipped longbow salvaged from the collapsed vaults of Norvulk Ruins.",
+    "why": [
+      "high_rock.L8.direnni_nostalgia",
+      "high_rock.L10.direnni_vaults"
+    ]
+  },
+  {
+    "id": "direnni_tower_zero_stone_circlet",
+    "kind": "mage_ruin",
+    "x": -6136,
+    "z": 2941,
+    "place": "direnni_tower",
+    "item": "nirncraft:gold_circlet",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:thorns": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Argent-and-gold Castellan's diadem attuned to the Zero Stone of Adamantine Tower.",
+    "why": [
+      "wayrest.L10.direnni_tower",
+      "wayrest.L11.direnni_seat"
+    ]
+  },
+  {
+    "id": "ring_of_phynaster_balfiera",
+    "kind": "ayleid_well",
+    "x": -6120,
+    "z": 2900,
+    "place": "isle_of_balfiera",
+    "item": "nirncraft:silver_garnet_ring",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:feather_falling": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Elven hero-ring of Phynaster kept by the Direnni castellans on the Isle of Balfiera.",
+    "why": [
+      "wayrest.L1.balfiera",
+      "wayrest.L8.direnni_awe"
+    ]
+  },
+  {
+    "id": "lords_mail_of_wayrest",
+    "kind": "treasure_cache",
+    "x": -5300,
+    "z": 3250,
+    "place": "castle_wayrest",
+    "item": "nirncraft:breton_chestplate",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:fire_protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Gilded ceremonial armor of the Royal Court of Wayrest.",
+    "why": [
+      "wayrest.L6.harbour_capital",
+      "wayrest.L11.covenant_capital"
+    ]
+  },
+  {
+    "id": "wayrest_sewers_necromancer_cowl",
+    "kind": "dead_adventurer",
+    "x": -5250,
+    "z": 3340,
+    "place": "wayrest_sewers",
+    "item": "nirncraft:breton_helmet",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:respiration": 3
+    },
+    "note": "Damp bone-stitched hood worn by the necromancer cabals beneath Wayrest's canals.",
+    "why": [
+      "high_rock.L10.city_shadows",
+      "wayrest.L3.harbour_chain"
+    ]
+  },
+  {
+    "id": "wayrest_corsair_admirals_rapier",
+    "kind": "bandit_lookout",
+    "x": -7112,
+    "z": 1608,
+    "place": "wayrest_outlaws_refuge",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:looting": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Basket-hilted silver dueling sword from the merchant consortiums of Wayrest.",
+    "why": [
+      "wayrest.L5.guild_shipping",
+      "wayrest.L7.guild_lords"
+    ]
+  },
+  {
+    "id": "evermor_undercroft_ducal_mace",
+    "kind": "wayshrine",
+    "x": -6966,
+    "z": 2299,
+    "place": "bhoriane",
+    "item": "nirncraft:breton_mace",
+    "enchant": {
+      "minecraft:smite": 5,
+      "minecraft:knockback": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Flanged scepter-mace of the Dukes of Evermor guarding the Bjoulsae river tolls.",
+    "why": [
+      "bjoulsae.L7.evermor_nobles",
+      "bjoulsae.L10.drowned_undercroft"
+    ]
+  },
+  {
+    "id": "farrun_sea_keep_frost_halberd",
+    "kind": "overlook",
+    "x": -6152,
+    "z": -1688,
+    "place": "farrun",
+    "item": "nirncraft:steel_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:knockback": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Salt-rusted pole-hammer of the cliff-watch garrison at Farrun.",
+    "why": [
+      "wrothgar.L1.high_passes",
+      "wrothgar.L6.newing_shelf_city"
+    ]
+  },
+  {
+    "id": "bjoulsae_horse_lords_recurve",
+    "kind": "hunters_camp",
+    "x": -5576,
+    "z": 2907,
+    "place": "menevia",
+    "item": "nirncraft:breton_bow",
+    "enchant": {
+      "minecraft:power": 5,
+      "minecraft:punch": 1,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Horn-laminated saddle bow of the Bjoulsae River Horse-Tribes.",
+    "why": [
+      "bjoulsae.L5.horse_breeding",
+      "bjoulsae.L8.horsemens_oaths"
+    ]
+  },
+  {
+    "id": "winterborn_briar_totem_axe",
+    "kind": "bandit_lookout",
+    "x": -6419,
+    "z": 1996,
+    "place": "wyngate_outpost",
+    "item": "nirncraft:orcish_war_axe",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:fire_aspect": 1,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Jagged Reach-forged war axe carried by Winterborn raiders above the Bjoulsae.",
+    "why": [
+      "bjoulsae.L9.reachfolk_raids",
+      "bjoulsae.L10.reach_redoubts"
+    ]
+  },
+  {
+    "id": "old_orsinium_maul_of_malacath",
+    "kind": "mineral_vein",
+    "x": -3797,
+    "z": -1434,
+    "place": "old_orsinium",
+    "item": "nirncraft:orcish_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:knockback": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Orichalcum war-maul forged on the eternal grudge-hearths of Old Orsinium.",
+    "why": [
+      "wrothgar.L8.malacath",
+      "wayrest.L10.old_orsinium"
+    ]
+  },
+  {
+    "id": "shedungent_witch_queens_greatsword",
+    "kind": "mage_ruin",
+    "x": -4900,
+    "z": 1900,
+    "place": "castle_necromoghan",
+    "item": "nirncraft:orcish_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:fire_aspect": 2,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Rune-seared borderland claymore from the mountain keep of Shedungent.",
+    "why": [
+      "wrothgar.L10.shedungent",
+      "daggerfall.L10.castle_necromoghan"
+    ]
+  },
+  {
+    "id": "trinimacs_golden_aegis_of_orsinium",
+    "kind": "stone_circle",
+    "x": -4650,
+    "z": -350,
+    "place": "paragons_remembrance",
+    "item": "nirncraft:orsinium_shield",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:thorns": 3,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Sun-burnished Orsinium parma dedicated to Trinimac at Paragon's Remembrance.",
+    "why": [
+      "wrothgar.L8.trinimac_memory",
+      "wrothgar.L11.paragons_memorial"
+    ]
+  },
+  {
+    "id": "jehanna_whalers_harpoon_blade",
+    "kind": "abandoned_camp",
+    "x": -4700,
+    "z": -1950,
+    "place": "jehanna",
+    "item": "nirncraft:orsinium_chestplate",
+    "enchant": {
+      "minecraft:protection": 4,
+      "minecraft:projectile_protection": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Fur-lined iron-scale hauberk of the northern sea-traders of Jehanna.",
+    "why": [
+      "wrothgar.L2.alpine_cold",
+      "wrothgar.L6.pass_inns"
+    ]
+  },
+  {
+    "id": "morkul_blood_forged_gauntlets",
+    "kind": "mineral_vein",
+    "x": -5150,
+    "z": -650,
+    "place": "morkul_stronghold_high_rock",
+    "item": "nirncraft:orcish_battleaxe",
+    "enchant": {
+      "minecraft:sharpness": 5,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Blood-quenched double-bitted battleaxe of Clan Morkul's master smiths.",
+    "why": [
+      "wrothgar.L5.orichalcum_forges",
+      "wrothgar.L6.stronghold_per_mine"
+    ]
+  },
+  {
+    "id": "merovecs_folly_relic_cache",
+    "kind": "breton_menhir",
+    "x": -9624,
+    "z": 2136,
+    "place": "merovecs_folly",
+    "item": "nirncraft:breton_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.merovecs_folly in Daggerfall.",
+    "why": [
+      "daggerfall.L8.kynareth_patron",
+      "daggerfall.L3.bridge_toll"
+    ]
+  },
+  {
+    "id": "woodborne_hall_relic_cache",
+    "kind": "stone_circle",
+    "x": -8800,
+    "z": 1350,
+    "place": "woodborne_hall",
+    "item": "nirncraft:breton_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.woodborne_hall in Daggerfall.",
+    "why": [
+      "daggerfall.L8.bluff_sisters",
+      "daggerfall.L9.court_vs_barons"
+    ]
+  },
+  {
+    "id": "castle_daggerfall_relic_cache",
+    "kind": "treasure_cache",
+    "x": -9300,
+    "z": 2560,
+    "place": "castle_daggerfall",
+    "item": "nirncraft:breton_dagger",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.castle_daggerfall in Daggerfall.",
+    "why": [
+      "daggerfall.L8.lysandus_memory",
+      "daggerfall.L4.bluff_harpies"
+    ]
+  },
+  {
+    "id": "ilessan_tower_relic_cache",
+    "kind": "herb_garden",
+    "x": -8536,
+    "z": 1512,
+    "place": "ilessan_tower",
+    "item": "nirncraft:breton_mace",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.ilessan_tower in Anticlere.",
+    "why": [
+      "anticlere.L10.skeffington_coven",
+      "anticlere.L5.grain_and_mills"
+    ]
+  },
+  {
+    "id": "yeorth_burrowland_relic_cache",
+    "kind": "mage_ruin",
+    "x": -8600,
+    "z": 2100,
+    "place": "yeorth_burrowland",
+    "item": "nirncraft:breton_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.yeorth_burrowland in Anticlere.",
+    "why": [
+      "anticlere.L10.phrygias_orc_bands",
+      "anticlere.L11.petty_kingdoms"
+    ]
+  },
+  {
+    "id": "shinjis_scarp_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -7050,
+    "z": 1600,
+    "place": "shinjis_scarp",
+    "item": "nirncraft:breton_bow",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.shinjis_scarp in Dwynnen.",
+    "why": [
+      "dwynnen.L7.ex_soldiers",
+      "dwynnen.L11.raven_defeat"
+    ]
+  },
+  {
+    "id": "bad_mans_hallows_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -6232,
+    "z": 2376,
+    "place": "bad_mans_hallows",
+    "item": "nirncraft:breton_helmet",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.bad_mans_hallows in Dwynnen.",
+    "why": [
+      "dwynnen.L8.dibella_patron",
+      "dwynnen.L8.raven_omens"
+    ]
+  },
+  {
+    "id": "frostbreak_fortress_relic_cache",
+    "kind": "breton_menhir",
+    "x": -5300,
+    "z": -2450,
+    "place": "frostbreak_fortress",
+    "item": "nirncraft:breton_chestplate",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.frostbreak_fortress in Wrothgar.",
+    "why": [
+      "wrothgar.L7.chief_and_wives",
+      "wrothgar.L9.orsinium_succession"
+    ]
+  },
+  {
+    "id": "watchers_hold_relic_cache",
+    "kind": "stone_circle",
+    "x": -4500,
+    "z": -1250,
+    "place": "watchers_hold",
+    "item": "nirncraft:breton_shield",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.watchers_hold in Wrothgar.",
+    "why": [
+      "wrothgar.L7.clanless",
+      "wrothgar.L10.daughters_of_wroth"
+    ]
+  },
+  {
+    "id": "morkul_plain_relic_cache",
+    "kind": "treasure_cache",
+    "x": -5400,
+    "z": -350,
+    "place": "morkul_plain",
+    "item": "nirncraft:orcish_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.morkul_plain in Wrothgar.",
+    "why": [
+      "wrothgar.L8.malacath",
+      "wrothgar.L1.high_passes"
+    ]
+  },
+  {
+    "id": "sorrow_relic_cache",
+    "kind": "herb_garden",
+    "x": -4000,
+    "z": -800,
+    "place": "sorrow",
+    "item": "nirncraft:orcish_battleaxe",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.sorrow in Wrothgar.",
+    "why": [
+      "wrothgar.L8.trinimac_memory",
+      "wrothgar.L3.snowmelt_streams"
+    ]
+  },
+  {
+    "id": "wrothgarian_mountains_relic_cache",
+    "kind": "mage_ruin",
+    "x": -4500,
+    "z": -800,
+    "place": "wrothgarian_mountains",
+    "item": "nirncraft:orsinium_chestplate",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.wrothgarian_mountains in Wrothgar.",
+    "why": [
+      "wrothgar.L8.names_matter",
+      "wrothgar.L4.troll_ledges"
+    ]
+  },
+  {
+    "id": "merchants_gate_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -4400,
+    "z": 700,
+    "place": "merchants_gate",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.merchants_gate in Wrothgar.",
+    "why": [
+      "wrothgar.L9.ore_rights",
+      "wrothgar.L8.trinimac_memory"
+    ]
+  },
+  {
+    "id": "bonerock_pass_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -3600,
+    "z": -850,
+    "place": "bonerock_pass",
+    "item": "nirncraft:silver_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.bonerock_pass in Wrothgar.",
+    "why": [
+      "wrothgar.L9.orsinium_succession",
+      "wrothgar.L11.three_sieges"
+    ]
+  },
+  {
+    "id": "two_rivers_relic_cache",
+    "kind": "breton_menhir",
+    "x": -5100,
+    "z": 600,
+    "place": "two_rivers",
+    "item": "nirncraft:silver_garnet_ring",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.two_rivers in Wrothgar.",
+    "why": [
+      "wrothgar.L9.recognition",
+      "wrothgar.L1.granite_peaks"
+    ]
+  },
+  {
+    "id": "frozen_coast_relic_cache",
+    "kind": "stone_circle",
+    "x": -5700,
+    "z": -2550,
+    "place": "frozen_coast",
+    "item": "nirncraft:gold_circlet",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.frozen_coast in Wrothgar.",
+    "why": [
+      "wrothgar.L10.clanless_raiders",
+      "wrothgar.L1.ore_veins"
+    ]
+  },
+  {
+    "id": "orsinium_outlaws_refuge_relic_cache",
+    "kind": "treasure_cache",
+    "x": -4250,
+    "z": 340,
+    "place": "orsinium_outlaws_refuge",
+    "item": "nirncraft:sapphire_pendant",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.orsinium_outlaws_refuge in Wrothgar.",
+    "why": [
+      "wrothgar.L10.daughters_of_wroth",
+      "wrothgar.L3.stronghold_springs"
+    ]
+  },
+  {
+    "id": "exiles_barrow_relic_cache",
+    "kind": "herb_garden",
+    "x": -4548,
+    "z": -1884,
+    "place": "exiles_barrow",
+    "item": "nirncraft:breton_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.exiles_barrow in Wrothgar.",
+    "why": [
+      "wrothgar.L10.dwemer_halls",
+      "wrothgar.L8.kynareth_newing"
+    ]
+  },
+  {
+    "id": "zthenganaz_relic_cache",
+    "kind": "mage_ruin",
+    "x": -5000,
+    "z": -2050,
+    "place": "zthenganaz",
+    "item": "nirncraft:breton_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.zthenganaz in Wrothgar.",
+    "why": [
+      "wrothgar.L10.lyrezi_heights",
+      "wrothgar.L8.kynareth_newing"
+    ]
+  },
+  {
+    "id": "argent_mine_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -5050,
+    "z": -1650,
+    "place": "argent_mine",
+    "item": "nirncraft:breton_dagger",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.argent_mine in Wrothgar.",
+    "why": [
+      "wrothgar.L11.three_sieges",
+      "wrothgar.L1.ore_veins"
+    ]
+  },
+  {
+    "id": "graystone_quarry_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -5500,
+    "z": 750,
+    "place": "graystone_quarry",
+    "item": "nirncraft:breton_mace",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.graystone_quarry in Wrothgar.",
+    "why": [
+      "wrothgar.L11.paragons_memorial",
+      "wrothgar.L10.daughters_of_wroth"
+    ]
+  },
+  {
+    "id": "coldperch_cavern_relic_cache",
+    "kind": "breton_menhir",
+    "x": -5450,
+    "z": -1850,
+    "place": "coldperch_cavern",
+    "item": "nirncraft:breton_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.coldperch_cavern in Wrothgar.",
+    "why": [
+      "wrothgar.L11.covenant_orcs",
+      "wrothgar.L10.lyrezi_heights"
+    ]
+  },
+  {
+    "id": "coldwinds_den_relic_cache",
+    "kind": "stone_circle",
+    "x": -5500,
+    "z": -2250,
+    "place": "coldwinds_den",
+    "item": "nirncraft:breton_bow",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.coldwinds_den in Wrothgar.",
+    "why": [
+      "wrothgar.L5.stronghold_mines",
+      "wrothgar.L11.covenant_orcs"
+    ]
+  },
+  {
+    "id": "nikolvaras_kennel_relic_cache",
+    "kind": "treasure_cache",
+    "x": -5300,
+    "z": -1200,
+    "place": "nikolvaras_kennel",
+    "item": "nirncraft:breton_helmet",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.nikolvaras_kennel in Wrothgar.",
+    "why": [
+      "wrothgar.L5.orichalcum_forges",
+      "wrothgar.L8.kynareth_newing"
+    ]
+  },
+  {
+    "id": "thukhozods_sanctum_relic_cache",
+    "kind": "herb_garden",
+    "x": -3900,
+    "z": 750,
+    "place": "thukhozods_sanctum",
+    "item": "nirncraft:breton_chestplate",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.thukhozods_sanctum in Wrothgar.",
+    "why": [
+      "wrothgar.L5.newing_barons",
+      "wrothgar.L9.orsinium_succession"
+    ]
+  },
+  {
+    "id": "mad_urkazburs_lair_relic_cache",
+    "kind": "mage_ruin",
+    "x": -4450,
+    "z": 1250,
+    "place": "mad_urkazburs_lair",
+    "item": "nirncraft:breton_shield",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.mad_urkazburs_lair in Wrothgar.",
+    "why": [
+      "wrothgar.L4.pine_larch_slopes",
+      "wrothgar.L10.daughters_of_wroth"
+    ]
+  },
+  {
+    "id": "bonerock_cavern_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -3700,
+    "z": -1050,
+    "place": "bonerock_cavern",
+    "item": "nirncraft:orcish_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.bonerock_cavern in Wrothgar.",
+    "why": [
+      "wrothgar.L4.alpine_meadow",
+      "wrothgar.L10.lyrezi_heights"
+    ]
+  },
+  {
+    "id": "bloodroot_forge_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -4226,
+    "z": -1632,
+    "place": "bloodroot_forge",
+    "item": "nirncraft:orcish_battleaxe",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.bloodroot_forge in Wrothgar.",
+    "why": [
+      "wrothgar.L4.scree_fields",
+      "wrothgar.L8.kynareth_newing"
+    ]
+  },
+  {
+    "id": "lion_guard_redoubt_relic_cache",
+    "kind": "breton_menhir",
+    "x": -9750,
+    "z": 250,
+    "place": "lion_guard_redoubt",
+    "item": "nirncraft:orsinium_chestplate",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.lion_guard_redoubt in Glenumbra.",
+    "why": [
+      "glenumbra.L7.bog_tenants",
+      "glenumbra.L11.old_crown_of_camlorn"
+    ]
+  },
+  {
+    "id": "cryptwatch_fort_relic_cache",
+    "kind": "stone_circle",
+    "x": -8800,
+    "z": -1200,
+    "place": "cryptwatch_fort",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.cryptwatch_fort in Glenumbra.",
+    "why": [
+      "glenumbra.L8.mara_cathedral",
+      "glenumbra.L8.moor_cairns"
+    ]
+  },
+  {
+    "id": "sentinel_of_rkugamz_relic_cache",
+    "kind": "treasure_cache",
+    "x": -10070,
+    "z": -1690,
+    "place": "sentinel_of_rkugamz",
+    "item": "nirncraft:silver_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.sentinel_of_rkugamz in Glenumbra.",
+    "why": [
+      "glenumbra.L8.wyrd_rites",
+      "glenumbra.L4.wyrd_grove"
+    ]
+  },
+  {
+    "id": "baelborne_rock_relic_cache",
+    "kind": "herb_garden",
+    "x": -9656,
+    "z": 856,
+    "place": "baelborne_rock",
+    "item": "nirncraft:silver_garnet_ring",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.baelborne_rock in Glenumbra.",
+    "why": [
+      "glenumbra.L8.moor_cairns",
+      "glenumbra.L11.old_crown_of_camlorn"
+    ]
+  },
+  {
+    "id": "burial_mound_relic_cache",
+    "kind": "mage_ruin",
+    "x": -9050,
+    "z": -800,
+    "place": "burial_mound",
+    "item": "nirncraft:gold_circlet",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.burial_mound in Glenumbra.",
+    "why": [
+      "glenumbra.L9.northern_pride",
+      "glenumbra.L10.tomb_of_lost_kings"
+    ]
+  },
+  {
+    "id": "enduum_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -9950,
+    "z": -1350,
+    "place": "enduum",
+    "item": "nirncraft:sapphire_pendant",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.enduum in Glenumbra.",
+    "why": [
+      "glenumbra.L10.cath_bedraud",
+      "glenumbra.L10.tomb_of_lost_kings"
+    ]
+  },
+  {
+    "id": "mines_of_khuras_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -10200,
+    "z": -450,
+    "place": "mines_of_khuras",
+    "item": "nirncraft:breton_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.mines_of_khuras in Glenumbra.",
+    "why": [
+      "glenumbra.L10.tomb_of_lost_kings",
+      "glenumbra.L11.alessian_defeat"
+    ]
+  },
+  {
+    "id": "spindleclutch_relic_cache",
+    "kind": "breton_menhir",
+    "x": -9592,
+    "z": 888,
+    "place": "spindleclutch",
+    "item": "nirncraft:breton_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.spindleclutch in Glenumbra.",
+    "why": [
+      "glenumbra.L10.mthartzel",
+      "glenumbra.L8.wyrd_rites"
+    ]
+  },
+  {
+    "id": "wynbrook_stones_relic_cache",
+    "kind": "stone_circle",
+    "x": -10158,
+    "z": -790,
+    "place": "wynbrook_stones",
+    "item": "nirncraft:breton_dagger",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.wynbrook_stones in Glenumbra.",
+    "why": [
+      "glenumbra.L11.alessian_defeat",
+      "glenumbra.L4.moor_wolves"
+    ]
+  },
+  {
+    "id": "eaglemarsh_hole_relic_cache",
+    "kind": "treasure_cache",
+    "x": -10120,
+    "z": -275,
+    "place": "eaglemarsh_hole",
+    "item": "nirncraft:breton_mace",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.eaglemarsh_hole in Glenumbra.",
+    "why": [
+      "glenumbra.L11.old_crown_of_camlorn",
+      "glenumbra.L7.wyrd_sisters"
+    ]
+  },
+  {
+    "id": "balbrook_burrow_relic_cache",
+    "kind": "herb_garden",
+    "x": -9479,
+    "z": -598,
+    "place": "balbrook_burrow",
+    "item": "nirncraft:breton_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.balbrook_burrow in Glenumbra.",
+    "why": [
+      "glenumbra.L5.peat_cutting",
+      "glenumbra.L10.cath_bedraud"
+    ]
+  },
+  {
+    "id": "tor_draioch_relic_cache",
+    "kind": "mage_ruin",
+    "x": -8250,
+    "z": -1750,
+    "place": "tor_draioch",
+    "item": "nirncraft:breton_bow",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.tor_draioch in Rivenspire.",
+    "why": [
+      "rivenspire.L8.second_lamp_custom",
+      "rivenspire.L4.crag_ravens"
+    ]
+  },
+  {
+    "id": "westmark_moor_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -9200,
+    "z": -2050,
+    "place": "westmark_moor",
+    "item": "nirncraft:breton_helmet",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.westmark_moor in Rivenspire.",
+    "why": [
+      "rivenspire.L9.house_rivalry",
+      "rivenspire.L1.northpoint_cliffs"
+    ]
+  },
+  {
+    "id": "shrouded_pass_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -7650,
+    "z": -2150,
+    "place": "shrouded_pass",
+    "item": "nirncraft:breton_chestplate",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.shrouded_pass in Rivenspire.",
+    "why": [
+      "rivenspire.L10.doomcrag",
+      "rivenspire.L8.stendarr_and_arkay"
+    ]
+  },
+  {
+    "id": "shornhelm_outlaws_refuge_relic_cache",
+    "kind": "breton_menhir",
+    "x": -7560,
+    "z": -1270,
+    "place": "shornhelm_outlaws_refuge",
+    "item": "nirncraft:breton_shield",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.shornhelm_outlaws_refuge in Rivenspire.",
+    "why": [
+      "rivenspire.L10.crag_barrows",
+      "rivenspire.L11.nedic_crag_kings"
+    ]
+  },
+  {
+    "id": "tamrith_camp_relic_cache",
+    "kind": "stone_circle",
+    "x": -8150,
+    "z": -2000,
+    "place": "tamrith_camp",
+    "item": "nirncraft:orcish_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.tamrith_camp in Rivenspire.",
+    "why": [
+      "rivenspire.L11.nedic_crag_kings",
+      "rivenspire.L6.crag_watch_keeps"
+    ]
+  },
+  {
+    "id": "wind_keep_relic_cache",
+    "kind": "treasure_cache",
+    "x": -7400,
+    "z": 400,
+    "place": "wind_keep",
+    "item": "nirncraft:orcish_battleaxe",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.wind_keep in Stormhaven.",
+    "why": [
+      "stormhaven.L7.abbey_stewards",
+      "stormhaven.L10.sanguines_demesne"
+    ]
+  },
+  {
+    "id": "bearclaw_mine_relic_cache",
+    "kind": "herb_garden",
+    "x": -7350,
+    "z": -450,
+    "place": "bearclaw_mine",
+    "item": "nirncraft:orsinium_chestplate",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.bearclaw_mine in Stormhaven.",
+    "why": [
+      "stormhaven.L8.mara_heartland",
+      "stormhaven.L10.moiras_hope"
+    ]
+  },
+  {
+    "id": "farangels_delve_relic_cache",
+    "kind": "mage_ruin",
+    "x": -7050,
+    "z": 850,
+    "place": "farangels_delve",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.farangels_delve in Stormhaven.",
+    "why": [
+      "stormhaven.L8.revel_temptation",
+      "stormhaven.L8.mara_heartland"
+    ]
+  },
+  {
+    "id": "hawkgate_hollow_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -5816,
+    "z": -135,
+    "place": "hawkgate_hollow",
+    "item": "nirncraft:silver_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.hawkgate_hollow in Bjoulsae.",
+    "why": [
+      "bjoulsae.L6.druadach_border_fort",
+      "bjoulsae.L8.horsemens_oaths"
+    ]
+  },
+  {
+    "id": "fairbury_lookout_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -6547,
+    "z": -437,
+    "place": "fairbury_lookout",
+    "item": "nirncraft:silver_garnet_ring",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.fairbury_lookout in Bjoulsae.",
+    "why": [
+      "bjoulsae.L6.barge_landings",
+      "bjoulsae.L8.old_gods_in_the_hills"
+    ]
+  },
+  {
+    "id": "montclair_catacombs_relic_cache",
+    "kind": "breton_menhir",
+    "x": -6584,
+    "z": 614,
+    "place": "montclair_catacombs",
+    "item": "nirncraft:gold_circlet",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.montclair_catacombs in Bjoulsae.",
+    "why": [
+      "bjoulsae.L7.evermor_nobles",
+      "bjoulsae.L10.drowned_undercroft"
+    ]
+  },
+  {
+    "id": "fairwold_outpost_relic_cache",
+    "kind": "stone_circle",
+    "x": -6488,
+    "z": -1034,
+    "place": "fairwold_outpost",
+    "item": "nirncraft:sapphire_pendant",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.fairwold_outpost in Bjoulsae.",
+    "why": [
+      "bjoulsae.L7.barge_men_and_riders",
+      "bjoulsae.L6.evermor_city"
+    ]
+  },
+  {
+    "id": "eagleham_ruins_relic_cache",
+    "kind": "treasure_cache",
+    "x": -5800,
+    "z": -1261,
+    "place": "eagleham_ruins",
+    "item": "nirncraft:breton_sword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.eagleham_ruins in Bjoulsae.",
+    "why": [
+      "bjoulsae.L7.reachfolk_bands",
+      "bjoulsae.L3.upper_bjoulsae"
+    ]
+  },
+  {
+    "id": "westham_cavern_relic_cache",
+    "kind": "herb_garden",
+    "x": -5946,
+    "z": 780,
+    "place": "westham_cavern",
+    "item": "nirncraft:breton_greatsword",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.westham_cavern in Bjoulsae.",
+    "why": [
+      "bjoulsae.L8.water_relic_veneration",
+      "bjoulsae.L9.barge_tolls"
+    ]
+  },
+  {
+    "id": "bramholt_hollow_relic_cache",
+    "kind": "mage_ruin",
+    "x": -6417,
+    "z": 983,
+    "place": "bramholt_hollow",
+    "item": "nirncraft:breton_dagger",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.bramholt_hollow in Bjoulsae.",
+    "why": [
+      "bjoulsae.L8.horsemens_oaths",
+      "bjoulsae.L10.reach_redoubts"
+    ]
+  },
+  {
+    "id": "sorel_crypt_relic_cache",
+    "kind": "dead_adventurer",
+    "x": -6837,
+    "z": -648,
+    "place": "sorel_crypt",
+    "item": "nirncraft:breton_mace",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.sorel_crypt in Bjoulsae.",
+    "why": [
+      "bjoulsae.L8.old_gods_in_the_hills",
+      "bjoulsae.L8.water_relic_veneration"
+    ]
+  },
+  {
+    "id": "benoit_catacombs_relic_cache",
+    "kind": "abandoned_camp",
+    "x": -6168,
+    "z": -406,
+    "place": "benoit_catacombs",
+    "item": "nirncraft:breton_warhammer",
+    "enchant": {
+      "minecraft:sharpness": 4,
+      "minecraft:unbreaking": 3
+    },
+    "note": "Warded relic arm cached within the precincts of place.nirncraft.benoit_catacombs in Bjoulsae.",
+    "why": [
+      "bjoulsae.L9.reachfolk_raids",
+      "bjoulsae.L5.barge_trade"
+    ]
+  },
+  {
+    "id": "ex_daenia_reliquary",
+    "title": "Reliquary of place.nirncraft.daenia",
+    "kind": "shrine",
+    "x": -7959,
+    "z": 1866,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.daenia.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_crosshelm_wyrd_grove_reliquary",
+    "title": "Reliquary of place.nirncraft.crosshelm_wyrd_grove",
+    "kind": "shrine",
+    "x": -6745,
+    "z": 754,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.crosshelm_wyrd_grove.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_glenpoint_reliquary",
+    "title": "Reliquary of place.nirncraft.glenpoint",
+    "kind": "shrine",
+    "x": -9465,
+    "z": 1926,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.glenpoint.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_alcaire_reliquary",
+    "title": "Reliquary of place.nirncraft.alcaire",
+    "kind": "shrine",
+    "x": -6135,
+    "z": 2366,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.alcaire.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_aldcroft_reliquary",
+    "title": "Reliquary of place.nirncraft.aldcroft",
+    "kind": "shrine",
+    "x": -9250,
+    "z": 650,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.aldcroft.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_crestshade_reliquary",
+    "title": "Reliquary of place.nirncraft.crestshade",
+    "kind": "shrine",
+    "x": -7900,
+    "z": -650,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.crestshade.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_koeglin_village_reliquary",
+    "title": "Reliquary of place.nirncraft.koeglin_village",
+    "kind": "shrine",
+    "x": -7450,
+    "z": 950,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.koeglin_village.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_dreughside_reliquary",
+    "title": "Reliquary of place.nirncraft.dreughside",
+    "kind": "shrine",
+    "x": -6950,
+    "z": 1150,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.dreughside.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_fharun_stronghold_reliquary",
+    "title": "Reliquary of place.nirncraft.fharun_stronghold",
+    "kind": "shrine",
+    "x": -4200,
+    "z": -1720,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.fharun_stronghold.",
+    "item": "nirncraft:elven_sword"
+  },
+  {
+    "id": "ex_tumnosh_stronghold_reliquary",
+    "title": "Reliquary of place.nirncraft.tumnosh_stronghold",
+    "kind": "shrine",
+    "x": -4650,
+    "z": 950,
+    "radius": 24,
+    "xp": 110,
+    "gold": 80,
+    "loot": "standard",
+    "lore": "An ancient wayfarer's reliquary and carved boundary stone standing beside place.nirncraft.tumnosh_stronghold.",
+    "item": "nirncraft:elven_sword"
+  }
+]

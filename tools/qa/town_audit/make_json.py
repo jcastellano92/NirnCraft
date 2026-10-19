@@ -16,7 +16,7 @@ for sid in ('whiterun', 'helgen'):
 ROLE_FACTS = {
     'JARL': dict(npc_role='JARL', workplace_kind='PALACE', work_hours='06-20', spawn_cap='capital/city only (tier 0)', routine='stands near throne block, no sit', anchor_from=['PALACE', 'KEEP', 'LONGHOUSE+SEAT']),
     'HOUSECARL': dict(npc_role='HOUSECARL', workplace_kind=None, work_hours=None, spawn_cap='capital/city only', routine='none (default WANDER 06-19, INN 19-22)', anchor_from=['PALACE', 'KEEP', 'LONGHOUSE+SEAT']),
-    'STEWARD': dict(npc_role='COURIER+skycraft_steward', workplace_kind=None, work_hours=None, spawn_cap='1 where a PALACE/KEEP is built', routine='none by day (not townsfolk; sleeps at night)', anchor_from=['PALACE', 'KEEP']),
+    'STEWARD': dict(npc_role='COURIER+nirncraft_steward', workplace_kind=None, work_hours=None, spawn_cap='1 where a PALACE/KEEP is built', routine='none by day (not townsfolk; sleeps at night)', anchor_from=['PALACE', 'KEEP']),
     'WIZARD': dict(npc_role='MAGE', workplace_kind=None, work_hours=None, spawn_cap='1 where a PALACE/KEEP/MAGE_TOWER is built', routine='none (default WANDER)', anchor_from=['PALACE', 'KEEP', 'MAGE_TOWER']),
     'INN': dict(npc_role='INNKEEPER', workplace_kind='INN', work_hours='06-24', spawn_cap=3, routine='works', anchor_from=['INN']),
     'BARD': dict(npc_role='BARD', workplace_kind='INN', work_hours='12-14,17-02', spawn_cap='3 (tier 0-1), 1 (village)', routine='works', anchor_from=['INN']),
@@ -74,7 +74,7 @@ def providers(kb_list, specs_by_idx):
 
 
 import glob
-UNIQUE = {os.path.basename(f)[:-5] for f in glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel', 'cityplans', '*.json'))} - {'index'}
+UNIQUE = {os.path.basename(f)[:-5] for f in glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'mod', 'src', 'main', 'resources', 'nirncraft', 'tamriel', 'cityplans', '*.json'))} - {'index'}
 UNIQUE |= {'whiterun','solitude','windhelm','riften','markarth','winterhold','falkreath','morthal','dawnstar','college_of_winterhold','helgen',
            'dragon_bridge','imperial_city','mournhold','vivec','alinor','sentinel','torval','wayrest','orsinium','elden_root','lilmoth','raven_rock'}
 

@@ -1,0 +1,297 @@
+package com.nirncraft.crime;
+
+import com.nirncraft.NirnCraft;
+import com.nirncraft.core.Holds;
+import com.nirncraft.dialogue.Dialogue;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Crime detection: who counts as a witness, reporting crimes to a hold, and the violent crimes (assault, murder).
+ * A crime is only added to the bounty when someone sees it. Victims always witness their own assault.
+ */
+@net.neoforged.fml.common.EventBusSubscriber(modid = NirnCraft.MODID)
+public final class Crimes {
+    public static final TagKey<EntityType<?>> GUARDS = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(NirnCraft.MODID, "guards"));
+    public static final double WITNESS_RANGE = 20;
+    /** Assaulting the same victim again only counts once per this many ticks (30 s). */
+    private static final long ASSAULT_THROTTLE = 600;
+    /** Guards fight a player who just assaulted someone for this long before coming to arrest them. */
+    private static final int ASSAULT_HOSTILE_TICKS = 600;
+
+    /** Killing someone who hurt the player within this many ticks (30 s) is self-defense. */
+    private static final long SELF_DEFENSE_TICKS = 600;
+
+    private static final Map<String, Long> LAST_ASSAULT = new HashMap<>();
+    /** "aggressor uuid|player uuid" -> game time the aggressor last hurt the player. */
+    private static final Map<String, Long> AGGRESSORS = new HashMap<>();
+
+    private Crimes() {}
+
+    // ------------------------------------------------------------------ who's who
+
+    public static boolean isGuard(Entity entity) {
+        return entity.getType().builtInRegistryHolder().is(GUARDS);
+    }
+
+    /** Townsfolk whose murder or assault is a crime, and who report crimes they see. */
+    public static boolean isCivilian(Entity entity) {
+        if (!(entity instanceof LivingEntity)) return false;
+        if (entity instanceof AbstractVillager || isGuard(entity)) return true;
+        return entity.getType().builtInRegistryHolder().is(Dialogue.TALKERS) && !(entity instanceof Enemy);
+    }
+
+    /** Whether crimes are possible where the player is (not in creative, not in jail). */
+    public static boolean canCommitCrime(ServerPlayer player) {
+        return !player.isCreative() && !player.isSpectator() && !Jail.isJailDimension(player.level());
+    }
+
+    // ------------------------------------------------------------------ witnesses
+
+    /** Whether anyone (other than {@code exclude}) sees the player right now. */
+    public static boolean witnessed(ServerPlayer player, @Nullable LivingEntity exclude) {
+        return findWitness(player, exclude) != null;
+    }
+
+    @Nullable
+    public static LivingEntity findWitness(ServerPlayer player, @Nullable LivingEntity exclude) {
+        return find(player, exclude, false);
+    }
+
+    /** A guard that sees the player right now (sneaking and darkness shorten how far), or null. */
+    @Nullable
+    public static LivingEntity findGuardWitness(ServerPlayer player) {
+        return find(player, null, true);
+    }
+
+    @Nullable
+    private static LivingEntity find(ServerPlayer player, @Nullable LivingEntity exclude, boolean guardsOnly) {
+        var level = player.level();
+        boolean dark = level.getMaxLocalRawBrightness(player.blockPosition()) < 5;
+        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WITNESS_RANGE),
+                e -> e != exclude && e != player && e.isAlive() && (guardsOnly ? isGuard(e) : isCivilian(e)))) {
+            if (e.isSleeping()) continue;
+            double range = WITNESS_RANGE * Math.max(0.1, player.getVisibilityPercent(level, e));
+            if (dark && player.isCrouching()) range *= 0.5;
+            double dist = e.distanceTo(player);
+            if (dist > Math.max(2.5, range)) continue;
+            // a sneaking player behind someone isn't noticed unless they're right next to them
+            if (player.isCrouching() && dist > 3 && !facing(e, player)) continue;
+            if (e.hasLineOfSight(player)) return e;
+        }
+        return null;
+    }
+
+    /** Whether {@code looker} faces {@code target} (within ~110 degrees of its view direction). */
+    public static boolean facing(LivingEntity looker, Entity target) {
+        Vec3 view = looker.getViewVector(1f);
+        Vec3 to = target.position().subtract(looker.position());
+        Vec3 flatView = new Vec3(view.x, 0, view.z);
+        Vec3 flatTo = new Vec3(to.x, 0, to.z);
+        if (flatView.lengthSqr() < 1e-6 || flatTo.lengthSqr() < 1e-6) return true;
+        return flatView.normalize().dot(flatTo.normalize()) > -0.35;
+    }
+
+    // ------------------------------------------------------------------ reporting
+
+    /**
+     * Reports a crime committed at {@code where} if it was witnessed. {@code alwaysSeen} is for crimes the victim
+     * notices (assault, caught pickpocketing). Returns whether a bounty was added.
+     */
+    public static boolean report(ServerPlayer player, BlockPos where, int bounty, boolean alwaysSeen, @Nullable LivingEntity exclude) {
+        if (!canCommitCrime(player) || bounty <= 0) return false;
+        if (!alwaysSeen && !witnessed(player, exclude)) return false;
+        String hold = Holds.holdAt(player.level(), where);
+        Bounty.add(player, hold, bounty);
+        Guards.alert(player);
+        // townsfolk who saw it think less of the player (society relationships)
+        com.nirncraft.society.Relationships.onCrimeWitnessed(player, where, bounty);
+        return true;
+    }
+
+    // ------------------------------------------------------------------ violent crimes
+
+    /**
+     * The player answerable for a blow: the attacker itself, or the owner of the conjured summon, ally, follower or
+     * tamed pet that struck (resolved even when the owner is far away, so a summon cannot be used as a weapon).
+     */
+    @Nullable
+    private static ServerPlayer attacker(net.minecraft.world.damagesource.DamageSource source) {
+        Entity e = source.getEntity();
+        if (e == null) return null;
+        if (e instanceof ServerPlayer sp) return sp;
+        if (!(e.level() instanceof net.minecraft.server.level.ServerLevel level)) return null;
+        var server = level.getServer();
+        ServerPlayer owner = com.nirncraft.quest.Quests.asPlayer(server, e);
+        if (owner != null) return owner;
+        java.util.UUID id = com.nirncraft.magic.spell.Summons.ownerOf(e);
+        if (id == null) id = com.nirncraft.society.Followers.getOwnerId(e);
+        return id == null ? null : server.getPlayerList().getPlayer(id);
+    }
+
+    /** Whether the victim was already fighting the one who struck it (a summon or pet's target), not the player. */
+    private static boolean provokedBy(LivingEntity victim, Entity striker) {
+        return striker != null && victim instanceof Mob mob && mob.getTarget() == striker && !isGuard(victim);
+    }
+
+    /** Remembers a civilian (or any NPC) hurting a player, for self-defense. */
+    private static void noteAggression(LivingEntity aggressor, ServerPlayer player) {
+        long now = player.level().getGameTime();
+        if (AGGRESSORS.size() > 2048) AGGRESSORS.entrySet().removeIf(e -> now - e.getValue() > SELF_DEFENSE_TICKS);
+        AGGRESSORS.put(aggressor.getUUID() + "|" + player.getUUID(), now);
+    }
+
+    /**
+     * Whether killing/hurting {@code victim} is self-defense: it attacked the player recently, is fighting them right
+     * now, or accepted a duel with them. Guards are never fair game.
+     */
+    public static boolean selfDefense(LivingEntity victim, ServerPlayer player) {
+        if (isGuard(victim)) return false;
+        var data = victim.getPersistentData();
+        if (data.read(com.nirncraft.society.NpcDialogue.DUEL_TAG, net.minecraft.core.UUIDUtil.CODEC).isPresent() && player.getUUID().equals(data.read(com.nirncraft.society.NpcDialogue.DUEL_TAG, net.minecraft.core.UUIDUtil.CODEC).orElseThrow())) return true;
+        // the player started it: fighting back doesn't make the victim fair game
+        Long assaulted = LAST_ASSAULT.get(victim.getUUID() + "|" + player.getUUID());
+        if (assaulted != null && player.level().getGameTime() - assaulted < 6000) return false;
+        if (victim instanceof Mob mob && mob.getTarget() == player) return true;
+        if (victim instanceof com.nirncraft.society.entity.NpcEntity npc && npc.isHostileTo(player)) return true;
+        Long last = AGGRESSORS.get(victim.getUUID() + "|" + player.getUUID());
+        return last != null && player.level().getGameTime() - last <= SELF_DEFENSE_TICKS;
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onHurt(com.nirncraft.combat.BeforeArmorDamageEvent event) {
+        if (event.isCanceled() || event.getAmount() <= 0) return;
+        LivingEntity victim = event.getEntity();
+        if (victim.level().isClientSide()) return;
+        if (victim instanceof ServerPlayer hurtPlayer && event.getSource().getEntity() instanceof LivingEntity aggressor
+                && !(aggressor instanceof net.minecraft.world.entity.player.Player)) {
+            noteAggression(aggressor, hurtPlayer);
+            return;
+        }
+        ServerPlayer player = attacker(event.getSource());
+        if (player == null || !canCommitCrime(player)) return;
+
+        // Attacking an owned farm animal in a settlement
+        if (victim instanceof net.minecraft.world.entity.animal.Animal animal && Ownership.isOwnedByOther(player, animal)) {
+            report(player, victim.blockPosition(), 15, false, null);
+            return;
+        }
+
+        if (!isCivilian(victim)) return;
+
+        // Attacking a guard: assault and resisting arrest. The only leeway is one stray punch (weapon sheathed) per
+        // guard per minute, and never while already fighting the guards.
+        if (isGuard(victim)) {
+            // a guard cut down where nobody else can see is no report: no bounty, no alarm (until his body is found)
+            if (event.getAmount() >= victim.getHealth() && !witnessed(player, victim)) return;
+            if (victim instanceof Mob mob) {
+                if (event.getSource().getEntity() == player && com.nirncraft.combat.Sheathe.isSheathed(player) && !Bounty.isHostile(player)
+                        && !Guards.hitRecently(victim, player, 1200) && Guards.allowAccident(victim, player)) {
+                    Guards.handleAccidentalHit(player, mob);
+                    return;
+                }
+                mob.setTarget(player);
+            }
+            Guards.noteHit(victim, player);
+            long now = victim.level().getGameTime();
+            String key = victim.getUUID() + "|" + player.getUUID();
+            Long last = LAST_ASSAULT.get(key);
+            if (last == null || now - last >= ASSAULT_THROTTLE) {
+                LAST_ASSAULT.put(key, now);
+                Bounty.increment(player, "assaults", 1);
+                report(player, victim.blockPosition(), Bounty.ASSAULT, true, null);
+            }
+            Guards.resist(player);
+            return;
+        }
+
+        // fighting back against someone who's already attacking you (or your summon, follower or pet) isn't a new crime
+        if (selfDefense(victim, player) || provokedBy(victim, event.getSource().getEntity())) return;
+
+        long now = victim.level().getGameTime();
+        String key = victim.getUUID() + "|" + player.getUUID();
+        Long last = LAST_ASSAULT.get(key);
+        if (last != null && now - last < ASSAULT_THROTTLE) return;
+        if (LAST_ASSAULT.size() > 2048) LAST_ASSAULT.entrySet().removeIf(e -> now - e.getValue() > ASSAULT_THROTTLE);
+        LAST_ASSAULT.put(key, now);
+
+        // Fear tracking: victim and nearby civilians fear the attacker until the player leaves
+        if (victim instanceof com.nirncraft.society.entity.NpcEntity ne) {
+            ne.setFearedPlayer(player.getUUID());
+        }
+        for (com.nirncraft.society.entity.NpcEntity nearbyCivilian : victim.level().getEntitiesOfClass(com.nirncraft.society.entity.NpcEntity.class, victim.getBoundingBox().inflate(12), e -> e.role().civilian)) {
+            nearbyCivilian.setFearedPlayer(player.getUUID());
+        }
+
+        // Only report immediately if witnessed by other bystanders or guards are nearby
+        boolean witnessedByOther = witnessed(player, victim);
+        boolean guardsNearby = !victim.level().getEntitiesOfClass(Mob.class, victim.getBoundingBox().inflate(24), Crimes::isGuard).isEmpty();
+
+        if (witnessedByOther || guardsNearby) {
+            Bounty.increment(player, "assaults", 1);
+            report(player, victim.blockPosition(), Bounty.ASSAULT, true, null);
+            Bounty.makeHostile(player, ASSAULT_HOSTILE_TICKS);
+            Guards.attack(player, 24);
+        } else {
+            // Unwitnessed: no immediate bounty! Queue report if victim flees to a guard
+            Theft.queueWitnessReport(player, victim, victim.blockPosition(), Bounty.ASSAULT);
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onDeath(LivingDeathEvent event) {
+        if (event.isCanceled()) return;
+        LivingEntity victim = event.getEntity();
+        if (victim.level().isClientSide()) return;
+        ServerPlayer player = attacker(event.getSource());
+        if (player == null || !canCommitCrime(player)) return;
+
+        // Killing an owned farm animal in a settlement
+        if (victim instanceof net.minecraft.world.entity.animal.Animal animal && Ownership.isOwnedByOther(player, animal)) {
+            if (witnessed(player, victim)) {
+                String hold = Holds.holdAt(player.level(), victim.blockPosition());
+                Bounty.add(player, hold, 50);
+                Guards.alert(player);
+            }
+            return;
+        }
+
+        if (!isCivilian(victim)) return;
+        // killing someone who attacked you (or who accepted your duel) isn't murder
+        if (selfDefense(victim, player) || provokedBy(victim, event.getSource().getEntity())) return;
+
+        // the Dark Brotherhood always knows
+        Bounty.increment(player, "murders", 1);
+        if (witnessed(player, victim)) {
+            String hold = Holds.holdAt(player.level(), victim.blockPosition());
+            Bounty.add(player, hold, Bounty.MURDER);
+            Bounty.markViolent(player, hold);
+            Guards.attack(player, 32);
+        }
+    }
+
+    static void forget(java.util.UUID player) {
+        String suffix = "|" + player;
+        LAST_ASSAULT.keySet().removeIf(k -> k.endsWith(suffix));
+        AGGRESSORS.keySet().removeIf(k -> k.endsWith(suffix));
+    }
+}

@@ -21,7 +21,7 @@ amplifier—water structure, canopy layers, Hist rises, and raised stone/timber 
 
 ## 1. World model sheet
 
-Data home: `skycraft/tamriel/world/black_marsh.json` (MS22): one province block (`bm`) and six region sub-sheets
+Data home: `nirncraft/tamriel/world/black_marsh.json` (MS22): one province block (`bm`) and six region sub-sheets
 (`shadowfen`, `stormhold`, `helstrom`, `gideon`, `lilmoth`, `murkmire`).
 
 | Region (id) | km2 | Seat | Character | Level band |

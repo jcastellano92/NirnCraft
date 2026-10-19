@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "nirncraft:steel_arrow",
+    "nirncraft:steel_arrow",
+    "nirncraft:steel_arrow",
+    "nirncraft:steel_arrow",
+    "minecraft:glowstone_dust"
+  ],
+  "result": {
+    "count": 4,
+    "id": "nirncraft:shock_arrow"
+  }
+}

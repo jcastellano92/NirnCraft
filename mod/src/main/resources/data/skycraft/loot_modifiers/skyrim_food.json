@@ -1,7 +1,0 @@
-{
-  "type": "skycraft:add_table",
-  "table": "skycraft:chests/skyrim_food",
-  "prefix": "chests/",
-  "chance": 0.4,
-  "priority": 11
-}

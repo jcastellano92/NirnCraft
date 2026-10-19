@@ -1,6 +1,6 @@
 # Flora: the trees and plants of Nirn
 
-Skycraft grows its own vegetation. Every tree is built procedurally from a species definition, so no two trees are
+NirnCraft grows its own vegetation. Every tree is built procedurally from a species definition, so no two trees are
 the same. Trees, shrubs, ground cover and rocks are spaced by world-wide noise fields, not per-chunk random patches.
 The result is groves, clearings, forest edges, meadows and rock fields that run across chunk borders without
 repeating.
@@ -13,19 +13,19 @@ The work answers the owner's playtest feedback:
 
 ## How it works
 
-### Java: `com.skycraft.tamriel.biome.flora`
+### Java: `com.nirncraft.tamriel.biome.flora`
 
 | Class | Registered as | What it does |
 | --- | --- | --- |
-| `FloraTreeFeature` | feature `skycraft:flora_tree` | Grows one tree. The species comes from a weighted list. `stands` makes the weights follow a slow noise per species, so species gather in stands (a knot of aspens in a pine wood) instead of a salt-and-pepper mix. |
+| `FloraTreeFeature` | feature `nirncraft:flora_tree` | Grows one tree. The species comes from a weighted list. `stands` makes the weights follow a slow noise per species, so species gather in stands (a knot of aspens in a pine wood) instead of a salt-and-pepper mix. |
 | `TreeSpecies` | (data in code) | About 70 species. Each has a growth form, its wood, foliage and accent foliage, and its proportions. |
 | `TreeShapes` | | The growth forms (see below). Every proportion is sampled per tree. |
 | `TreeBuilder` | | Collects one tree's blocks and writes them in one go, through `GenBox`. Logs are oriented along their branch. Thin branches are face-connected chains. Leaves get their real decay distance (breadth-first from the logs), so felled trees drop their crowns like vanilla ones; leaves too far for vanilla's rule become persistent. It also handles hanging vines, willow curtains and waterlogging. |
-| `ScatterPlacement` | placement `skycraft:flora_scatter` | Natural spacing for trees. It replaces `count + in_square`. The points are a world-wide jittered grid of cell size `spacing`, thinned by priority so no two kept points are closer than `spacing × min_distance` (blue noise). Each point lives with probability `floor + (density − floor) × field`. Points depend only on the seed and position, so neighbouring chunks agree. |
-| `DensityFilter` | placement `skycraft:flora_density` | Keeps a position with probability `floor + (density − floor) × field`. Used after `count + in_square` for ground cover and rocks. |
+| `ScatterPlacement` | placement `nirncraft:flora_scatter` | Natural spacing for trees. It replaces `count + in_square`. The points are a world-wide jittered grid of cell size `spacing`, thinned by priority so no two kept points are closer than `spacing × min_distance` (blue noise). Each point lives with probability `floor + (density − floor) × field`. Points depend only on the seed and position, so neighbouring chunks agree. |
+| `DensityFilter` | placement `nirncraft:flora_density` | Keeps a position with probability `floor + (density − floor) × field`. Used after `count + in_square` for ground cover and rocks. |
 | `FloraField` | (codec) | A density field. `fbm` is rotated fractal value noise: groves and clearings. `worley` is cellular: tufts, rings and rock fields. It has `scale`, `coverage` and `softness`. `mode` is `inside` (forest), `outside` (clearing meadows), `edge` (forest-edge shrubs) or `any`. Layers that share a salt and shape describe the same forest. |
-| `GroundCoverFeature` | feature `skycraft:ground_cover` | One tuft of `cluster` plants within `spread` blocks. The plant is picked by a slow noise per entry, sharpened by `patchiness`, so each plant keeps to its own drifts. It handles double plants. `near_water` keeps reeds to the shore. |
-| `RockFeature` | feature `skycraft:flora_rock` | Rocks that each look different. Each is an ellipsoid with its own three radii, yaw and tilt, warped by noise and half sunk into the ground, with its columns filled down so nothing floats. Moss and lichen sit on the upper faces. Styles: `boulder`, `slab`, `standing`, `rubble`, `mixed`. |
+| `GroundCoverFeature` | feature `nirncraft:ground_cover` | One tuft of `cluster` plants within `spread` blocks. The plant is picked by a slow noise per entry, sharpened by `patchiness`, so each plant keeps to its own drifts. It handles double plants. `near_water` keeps reeds to the shore. |
+| `RockFeature` | feature `nirncraft:flora_rock` | Rocks that each look different. Each is an ellipsoid with its own three radii, yaw and tilt, warped by noise and half sunk into the ground, with its columns filled down so nothing floats. Moss and lichen sit on the upper faces. Styles: `boulder`, `slab`, `standing`, `rubble`, `mixed`. |
 | `FloraNoise` | | Allocation-free hash, value, fbm and Worley noise. |
 
 **Chunk safety.**
@@ -186,7 +186,7 @@ composites show two spots side by side.
 3. Run:
 
    ```
-   $env:JAVA_TOOL_OPTIONS="-Xmx4G -Dskycraft.autotest=true -Dskycraft.autotest.createflow=true -Dskycraft.autotest.load=flora -Dskycraft.autotest.tourWait=500 -Dskycraft.autotest.tourUp=18 -Dskycraft.autotest.tourPitch=14 -Dskycraft.autotest.tour=WhiterunTundra:-256:-192,Falkreath:-731:1058,Rift:2435:1802,ReachCrags:-2910:-255,Hjaalmarch:-1120:-1240,PaleSnowForest:110:-1609,GreatForest:64:5092,Ascadian:7336:1108,BitterCoast:5792:736,BlackMarsh:5608:8364,ElsweyrSavanna:-408:11312,Valenwood:-4192:11236,Summerset:-11392:12936,Alikr:-8392:4964,Glenumbra:-9192:-264"
+   $env:JAVA_TOOL_OPTIONS="-Xmx4G -Dnirncraft.autotest=true -Dnirncraft.autotest.createflow=true -Dnirncraft.autotest.load=flora -Dnirncraft.autotest.tourWait=500 -Dnirncraft.autotest.tourUp=18 -Dnirncraft.autotest.tourPitch=14 -Dnirncraft.autotest.tour=WhiterunTundra:-256:-192,Falkreath:-731:1058,Rift:2435:1802,ReachCrags:-2910:-255,Hjaalmarch:-1120:-1240,PaleSnowForest:110:-1609,GreatForest:64:5092,Ascadian:7336:1108,BitterCoast:5792:736,BlackMarsh:5608:8364,ElsweyrSavanna:-408:11312,Valenwood:-4192:11236,Summerset:-11392:12936,Alikr:-8392:4964,Glenumbra:-9192:-264"
    ./gradlew runClient
    ```
 
@@ -195,7 +195,7 @@ composites show two spots side by side.
 
 ## Known limits and ideas
 
-* Leaf colours come from vanilla and Skycraft leaf blocks. A few dedicated textures would widen the palette: pine
+* Leaf colours come from vanilla and NirnCraft leaf blocks. A few dedicated textures would widen the palette: pine
   needles with a blue cast, red Reach foliage, Ascadian purple blossom, hanging Spanish moss.
 * Species are defined in code (`TreeSpecies`). Moving them to a data file would allow tuning without a rebuild.
 * Ground cover stays inside the decorated chunk, because only its heightmaps are ready. Clusters near a chunk edge

@@ -1,0 +1,8 @@
+{
+  "type": "nirncraft:realm_site",
+  "site": "soul_cairn/arrival",
+  "biomes": "#nirncraft:realm/soul_cairn",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

@@ -1,7 +1,0 @@
-{
-  "type": "skycraft:add_table",
-  "table": "skycraft:chests/lockpicks",
-  "prefix": "chests/",
-  "chance": 0.35,
-  "priority": 15
-}

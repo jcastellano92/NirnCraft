@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/hackle_lo"
+      },
+      {
+        "model": "nirncraft:block/hackle_lo",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/hackle_lo",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/hackle_lo",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/hackle_lo_harvested"
+      },
+      {
+        "model": "nirncraft:block/hackle_lo_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/hackle_lo_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/hackle_lo_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

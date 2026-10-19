@@ -7,12 +7,12 @@
 #include <string>
 
 #if defined(_WIN32)
-#define AETHER_GLAPI __stdcall
+#define ATLAS_GLAPI __stdcall
 #else
-#define AETHER_GLAPI
+#define ATLAS_GLAPI
 #endif
 
-namespace aether {
+namespace atlas {
 
 using GLenum = unsigned int;
 using GLuint = unsigned int;
@@ -46,76 +46,76 @@ constexpr GLenum GL_TEXTURE_2D = 0x0DE1, GL_RGBA8 = 0x8058, GL_RGBA16F = 0x881A,
                  GL_UNPACK_LSB_FIRST = 0x0CF1;
 
 struct GlApi {
-    const GLubyte*(AETHER_GLAPI* GetString)(GLenum) = nullptr;
-    GLenum(AETHER_GLAPI* GetError)() = nullptr;
-    void(AETHER_GLAPI* Flush)() = nullptr;
-    void(AETHER_GLAPI* Finish)() = nullptr;
-    void(AETHER_GLAPI* GetIntegerv)(GLenum, GLint*) = nullptr;
-    void(AETHER_GLAPI* DeleteTextures)(GLsizei, const GLuint*) = nullptr;
-    void(AETHER_GLAPI* CreateTextures)(GLenum, GLsizei, GLuint*) = nullptr;
-    void(AETHER_GLAPI* TextureParameteri)(GLuint, GLenum, GLint) = nullptr;
-    void(AETHER_GLAPI* GetTextureImage)(GLuint, GLint, GLenum, GLenum, GLsizei, void*) = nullptr;
-    void(AETHER_GLAPI* ClearTexImage)(GLuint, GLint, GLenum, GLenum, const void*) = nullptr;
-    void(AETHER_GLAPI* ClearTexSubImage)(GLuint, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum,
+    const GLubyte*(ATLAS_GLAPI* GetString)(GLenum) = nullptr;
+    GLenum(ATLAS_GLAPI* GetError)() = nullptr;
+    void(ATLAS_GLAPI* Flush)() = nullptr;
+    void(ATLAS_GLAPI* Finish)() = nullptr;
+    void(ATLAS_GLAPI* GetIntegerv)(GLenum, GLint*) = nullptr;
+    void(ATLAS_GLAPI* DeleteTextures)(GLsizei, const GLuint*) = nullptr;
+    void(ATLAS_GLAPI* CreateTextures)(GLenum, GLsizei, GLuint*) = nullptr;
+    void(ATLAS_GLAPI* TextureParameteri)(GLuint, GLenum, GLint) = nullptr;
+    void(ATLAS_GLAPI* GetTextureImage)(GLuint, GLint, GLenum, GLenum, GLsizei, void*) = nullptr;
+    void(ATLAS_GLAPI* ClearTexImage)(GLuint, GLint, GLenum, GLenum, const void*) = nullptr;
+    void(ATLAS_GLAPI* ClearTexSubImage)(GLuint, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum,
                                       const void*) = nullptr;
-    void(AETHER_GLAPI* CreateMemoryObjectsEXT)(GLsizei, GLuint*) = nullptr;
-    void(AETHER_GLAPI* DeleteMemoryObjectsEXT)(GLsizei, const GLuint*) = nullptr;
-    void(AETHER_GLAPI* MemoryObjectParameterivEXT)(GLuint, GLenum, const GLint*) = nullptr;
-    void(AETHER_GLAPI* ImportMemoryWin32HandleEXT)(GLuint, GLuint64, GLenum, void*) = nullptr;
-    void(AETHER_GLAPI* TextureStorageMem2DEXT)(GLuint, GLsizei, GLenum, GLsizei, GLsizei, GLuint, GLuint64) = nullptr;
-    void(AETHER_GLAPI* GenSemaphoresEXT)(GLsizei, GLuint*) = nullptr;
-    void(AETHER_GLAPI* DeleteSemaphoresEXT)(GLsizei, const GLuint*) = nullptr;
-    void(AETHER_GLAPI* ImportSemaphoreWin32HandleEXT)(GLuint, GLenum, void*) = nullptr;
-    void(AETHER_GLAPI* SignalSemaphoreEXT)(GLuint, GLuint, const GLuint*, GLuint, const GLuint*, const GLenum*) = nullptr;
-    void(AETHER_GLAPI* WaitSemaphoreEXT)(GLuint, GLuint, const GLuint*, GLuint, const GLuint*, const GLenum*) = nullptr;
-    void(AETHER_GLAPI* GetUnsignedBytei_vEXT)(GLenum, GLuint, GLubyte*) = nullptr;
+    void(ATLAS_GLAPI* CreateMemoryObjectsEXT)(GLsizei, GLuint*) = nullptr;
+    void(ATLAS_GLAPI* DeleteMemoryObjectsEXT)(GLsizei, const GLuint*) = nullptr;
+    void(ATLAS_GLAPI* MemoryObjectParameterivEXT)(GLuint, GLenum, const GLint*) = nullptr;
+    void(ATLAS_GLAPI* ImportMemoryWin32HandleEXT)(GLuint, GLuint64, GLenum, void*) = nullptr;
+    void(ATLAS_GLAPI* TextureStorageMem2DEXT)(GLuint, GLsizei, GLenum, GLsizei, GLsizei, GLuint, GLuint64) = nullptr;
+    void(ATLAS_GLAPI* GenSemaphoresEXT)(GLsizei, GLuint*) = nullptr;
+    void(ATLAS_GLAPI* DeleteSemaphoresEXT)(GLsizei, const GLuint*) = nullptr;
+    void(ATLAS_GLAPI* ImportSemaphoreWin32HandleEXT)(GLuint, GLenum, void*) = nullptr;
+    void(ATLAS_GLAPI* SignalSemaphoreEXT)(GLuint, GLuint, const GLuint*, GLuint, const GLuint*, const GLenum*) = nullptr;
+    void(ATLAS_GLAPI* WaitSemaphoreEXT)(GLuint, GLuint, const GLuint*, GLuint, const GLuint*, const GLenum*) = nullptr;
+    void(ATLAS_GLAPI* GetUnsignedBytei_vEXT)(GLenum, GLuint, GLubyte*) = nullptr;
     // near-depth linearisation pass and destination copies
-    GLuint(AETHER_GLAPI* CreateShader)(GLenum) = nullptr;
-    void(AETHER_GLAPI* ShaderSource)(GLuint, GLsizei, const char* const*, const GLint*) = nullptr;
-    void(AETHER_GLAPI* CompileShader)(GLuint) = nullptr;
-    void(AETHER_GLAPI* GetShaderiv)(GLuint, GLenum, GLint*) = nullptr;
-    void(AETHER_GLAPI* GetShaderInfoLog)(GLuint, GLsizei, GLsizei*, char*) = nullptr;
-    void(AETHER_GLAPI* DeleteShader)(GLuint) = nullptr;
-    GLuint(AETHER_GLAPI* CreateProgram)() = nullptr;
-    void(AETHER_GLAPI* AttachShader)(GLuint, GLuint) = nullptr;
-    void(AETHER_GLAPI* LinkProgram)(GLuint) = nullptr;
-    void(AETHER_GLAPI* GetProgramiv)(GLuint, GLenum, GLint*) = nullptr;
-    void(AETHER_GLAPI* DeleteProgram)(GLuint) = nullptr;
-    void(AETHER_GLAPI* UseProgram)(GLuint) = nullptr;
-    GLint(AETHER_GLAPI* GetUniformLocation)(GLuint, const char*) = nullptr;
-    void(AETHER_GLAPI* ProgramUniformMatrix4fv)(GLuint, GLint, GLsizei, unsigned char, const float*) = nullptr;
-    void(AETHER_GLAPI* ProgramUniform2f)(GLuint, GLint, float, float) = nullptr;
-    void(AETHER_GLAPI* ProgramUniform1i)(GLuint, GLint, GLint) = nullptr;
-    void(AETHER_GLAPI* ProgramUniform1f)(GLuint, GLint, float) = nullptr;
-    void(AETHER_GLAPI* BindTextureUnit)(GLuint, GLuint) = nullptr;
-    void(AETHER_GLAPI* BindImageTexture)(GLuint, GLuint, GLint, unsigned char, GLint, GLenum, GLenum) = nullptr;
-    void(AETHER_GLAPI* DispatchCompute)(GLuint, GLuint, GLuint) = nullptr;
-    void(AETHER_GLAPI* MemoryBarrierGL)(unsigned int) = nullptr;  // glMemoryBarrier (MemoryBarrier is a Windows macro)
-    void(AETHER_GLAPI* CopyImageSubData)(GLuint, GLenum, GLint, GLint, GLint, GLint, GLuint, GLenum, GLint, GLint, GLint,
+    GLuint(ATLAS_GLAPI* CreateShader)(GLenum) = nullptr;
+    void(ATLAS_GLAPI* ShaderSource)(GLuint, GLsizei, const char* const*, const GLint*) = nullptr;
+    void(ATLAS_GLAPI* CompileShader)(GLuint) = nullptr;
+    void(ATLAS_GLAPI* GetShaderiv)(GLuint, GLenum, GLint*) = nullptr;
+    void(ATLAS_GLAPI* GetShaderInfoLog)(GLuint, GLsizei, GLsizei*, char*) = nullptr;
+    void(ATLAS_GLAPI* DeleteShader)(GLuint) = nullptr;
+    GLuint(ATLAS_GLAPI* CreateProgram)() = nullptr;
+    void(ATLAS_GLAPI* AttachShader)(GLuint, GLuint) = nullptr;
+    void(ATLAS_GLAPI* LinkProgram)(GLuint) = nullptr;
+    void(ATLAS_GLAPI* GetProgramiv)(GLuint, GLenum, GLint*) = nullptr;
+    void(ATLAS_GLAPI* DeleteProgram)(GLuint) = nullptr;
+    void(ATLAS_GLAPI* UseProgram)(GLuint) = nullptr;
+    GLint(ATLAS_GLAPI* GetUniformLocation)(GLuint, const char*) = nullptr;
+    void(ATLAS_GLAPI* ProgramUniformMatrix4fv)(GLuint, GLint, GLsizei, unsigned char, const float*) = nullptr;
+    void(ATLAS_GLAPI* ProgramUniform2f)(GLuint, GLint, float, float) = nullptr;
+    void(ATLAS_GLAPI* ProgramUniform1i)(GLuint, GLint, GLint) = nullptr;
+    void(ATLAS_GLAPI* ProgramUniform1f)(GLuint, GLint, float) = nullptr;
+    void(ATLAS_GLAPI* BindTextureUnit)(GLuint, GLuint) = nullptr;
+    void(ATLAS_GLAPI* BindImageTexture)(GLuint, GLuint, GLint, unsigned char, GLint, GLenum, GLenum) = nullptr;
+    void(ATLAS_GLAPI* DispatchCompute)(GLuint, GLuint, GLuint) = nullptr;
+    void(ATLAS_GLAPI* MemoryBarrierGL)(unsigned int) = nullptr;  // glMemoryBarrier (MemoryBarrier is a Windows macro)
+    void(ATLAS_GLAPI* CopyImageSubData)(GLuint, GLenum, GLint, GLint, GLint, GLint, GLuint, GLenum, GLint, GLint, GLint,
                                       GLint, GLsizei, GLsizei, GLsizei) = nullptr;
-    void(AETHER_GLAPI* GetIntegeri_v)(GLenum, GLuint, GLint*) = nullptr;
-    void(AETHER_GLAPI* ActiveTexture)(GLenum) = nullptr;
-    void(AETHER_GLAPI* BindTexture)(GLenum, GLuint) = nullptr;
-    void(AETHER_GLAPI* TextureStorage2D)(GLuint, GLsizei, GLenum, GLsizei, GLsizei) = nullptr;
-    void(AETHER_GLAPI* CreateSamplers)(GLsizei, GLuint*) = nullptr;
-    void(AETHER_GLAPI* DeleteSamplers)(GLsizei, const GLuint*) = nullptr;
-    void(AETHER_GLAPI* SamplerParameteri)(GLuint, GLenum, GLint) = nullptr;
-    void(AETHER_GLAPI* BindSampler)(GLuint, GLuint) = nullptr;
-    void(AETHER_GLAPI* TextureSubImage2D)(GLuint, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const void*) = nullptr;
-    void(AETHER_GLAPI* GetNamedFramebufferAttachmentParameteriv)(GLuint, GLenum, GLenum, GLint*) = nullptr;
-    void(AETHER_GLAPI* CreateFramebuffers)(GLsizei, GLuint*) = nullptr;
-    void(AETHER_GLAPI* DeleteFramebuffers)(GLsizei, const GLuint*) = nullptr;
-    void(AETHER_GLAPI* NamedFramebufferTexture)(GLuint, GLenum, GLuint, GLint) = nullptr;
-    void(AETHER_GLAPI* BindFramebuffer)(GLenum, GLuint) = nullptr;
-    const GLubyte*(AETHER_GLAPI* GetStringi)(GLenum, GLuint) = nullptr;
-    void(AETHER_GLAPI* GetUnsignedBytevEXT)(GLenum, GLubyte*) = nullptr;
-    void(AETHER_GLAPI* ImportMemoryFdEXT)(GLuint, GLuint64, GLenum, GLint) = nullptr;
-    void(AETHER_GLAPI* ImportSemaphoreFdEXT)(GLuint, GLenum, GLint) = nullptr;
-    void(AETHER_GLAPI* PixelStorei)(GLenum, GLint) = nullptr;
-    void(AETHER_GLAPI* BindBuffer)(GLenum, GLuint) = nullptr;
+    void(ATLAS_GLAPI* GetIntegeri_v)(GLenum, GLuint, GLint*) = nullptr;
+    void(ATLAS_GLAPI* ActiveTexture)(GLenum) = nullptr;
+    void(ATLAS_GLAPI* BindTexture)(GLenum, GLuint) = nullptr;
+    void(ATLAS_GLAPI* TextureStorage2D)(GLuint, GLsizei, GLenum, GLsizei, GLsizei) = nullptr;
+    void(ATLAS_GLAPI* CreateSamplers)(GLsizei, GLuint*) = nullptr;
+    void(ATLAS_GLAPI* DeleteSamplers)(GLsizei, const GLuint*) = nullptr;
+    void(ATLAS_GLAPI* SamplerParameteri)(GLuint, GLenum, GLint) = nullptr;
+    void(ATLAS_GLAPI* BindSampler)(GLuint, GLuint) = nullptr;
+    void(ATLAS_GLAPI* TextureSubImage2D)(GLuint, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const void*) = nullptr;
+    void(ATLAS_GLAPI* GetNamedFramebufferAttachmentParameteriv)(GLuint, GLenum, GLenum, GLint*) = nullptr;
+    void(ATLAS_GLAPI* CreateFramebuffers)(GLsizei, GLuint*) = nullptr;
+    void(ATLAS_GLAPI* DeleteFramebuffers)(GLsizei, const GLuint*) = nullptr;
+    void(ATLAS_GLAPI* NamedFramebufferTexture)(GLuint, GLenum, GLuint, GLint) = nullptr;
+    void(ATLAS_GLAPI* BindFramebuffer)(GLenum, GLuint) = nullptr;
+    const GLubyte*(ATLAS_GLAPI* GetStringi)(GLenum, GLuint) = nullptr;
+    void(ATLAS_GLAPI* GetUnsignedBytevEXT)(GLenum, GLubyte*) = nullptr;
+    void(ATLAS_GLAPI* ImportMemoryFdEXT)(GLuint, GLuint64, GLenum, GLint) = nullptr;
+    void(ATLAS_GLAPI* ImportSemaphoreFdEXT)(GLuint, GLenum, GLint) = nullptr;
+    void(ATLAS_GLAPI* PixelStorei)(GLenum, GLint) = nullptr;
+    void(ATLAS_GLAPI* BindBuffer)(GLenum, GLuint) = nullptr;
 
     // What the context offers (filled by load). Interop needs memoryObject + semaphore and the platform's handle
-    // flavour (win32 on Windows, fd on Linux); without them aether falls back to copying frames through the host.
+    // flavour (win32 on Windows, fd on Linux); without them atlas falls back to copying frames through the host.
     int major = 0, minor = 0;
     bool memoryObject = false, memoryObjectWin32 = false, memoryObjectFd = false;
     bool semaphore = false, semaphoreWin32 = false, semaphoreFd = false;
@@ -136,4 +136,4 @@ struct GlApi {
     static void* proc(const char* name);
 };
 
-}  // namespace aether
+}  // namespace atlas

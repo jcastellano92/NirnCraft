@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "nirncraft:block/splintered_wreckage",
+        "y": 0
+      },
+      {
+        "model": "nirncraft:block/splintered_wreckage",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/splintered_wreckage",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/splintered_wreckage",
+        "y": 270
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 // The Vulkan loader, opened at run time (vulkan-1.dll / libvulkan.so.1) instead of linked: the library then has no
-// link-time Vulkan dependency, so one libaether_core.so built on an old sysroot loads on every distro, and a machine
-// without a loader gets an aether_create error (the CPU backend still works) instead of a library that will not load.
-// Every entry point the backend calls is a pointer in namespace aether with the usual vk* name.
+// link-time Vulkan dependency, so one libatlas_core.so built on an old sysroot loads on every distro, and a machine
+// without a loader gets an atlas_create error (the CPU backend still works) instead of a library that will not load.
+// Every entry point the backend calls is a pointer in namespace atlas with the usual vk* name.
 #pragma once
 #ifndef VK_NO_PROTOTYPES
 #define VK_NO_PROTOTYPES
@@ -10,9 +10,9 @@
 
 #include <string>
 
-#define AETHER_VK_GLOBAL_FNS(X) X(vkCreateInstance) X(vkEnumerateInstanceExtensionProperties)
+#define ATLAS_VK_GLOBAL_FNS(X) X(vkCreateInstance) X(vkEnumerateInstanceExtensionProperties)
 
-#define AETHER_VK_INSTANCE_FNS(X)                                                                                      \
+#define ATLAS_VK_INSTANCE_FNS(X)                                                                                      \
     X(vkDestroyInstance) X(vkEnumeratePhysicalDevices) X(vkGetPhysicalDeviceFeatures) X(vkGetPhysicalDeviceProperties)                                \
     X(vkGetPhysicalDeviceProperties2) X(vkGetPhysicalDeviceQueueFamilyProperties)                                    \
     X(vkGetPhysicalDeviceMemoryProperties) X(vkGetPhysicalDeviceMemoryProperties2) X(vkGetPhysicalDeviceImageFormatProperties2)                        \
@@ -32,17 +32,17 @@
     X(vkCmdCopyBuffer) X(vkCmdCopyBufferToImage) X(vkCmdCopyImageToBuffer) X(vkCmdFillBuffer)                        \
     X(vkCmdResetQueryPool) X(vkCmdWriteTimestamp)
 
-namespace aether {
+namespace atlas {
 
-#define AETHER_VK_DECLARE(name) extern PFN_##name name;
+#define ATLAS_VK_DECLARE(name) extern PFN_##name name;
 extern PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
-AETHER_VK_GLOBAL_FNS(AETHER_VK_DECLARE)
-AETHER_VK_INSTANCE_FNS(AETHER_VK_DECLARE)
-#undef AETHER_VK_DECLARE
+ATLAS_VK_GLOBAL_FNS(ATLAS_VK_DECLARE)
+ATLAS_VK_INSTANCE_FNS(ATLAS_VK_DECLARE)
+#undef ATLAS_VK_DECLARE
 
 // Opens the loader and resolves the global entry points (once per process). False + err when there is none.
 bool vkLoadGlobal(std::string& err);
 // Resolves everything else through the instance (loader trampolines: valid for every instance, any thread).
 bool vkLoadInstance(VkInstance instance, std::string& err);
 
-}  // namespace aether
+}  // namespace atlas

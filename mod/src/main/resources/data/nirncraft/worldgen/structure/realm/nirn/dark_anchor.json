@@ -1,0 +1,8 @@
+{
+  "type": "nirncraft:realm_site",
+  "site": "nirn/dark_anchor",
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

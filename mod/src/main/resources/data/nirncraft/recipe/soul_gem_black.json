@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "nirncraft:soul_gem_grand",
+    "minecraft:echo_shard",
+    "minecraft:wither_rose"
+  ],
+  "result": {
+    "id": "nirncraft:soul_gem_black"
+  }
+}

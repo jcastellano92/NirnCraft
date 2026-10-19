@@ -27,7 +27,7 @@ import time
 import numpy as np
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-PLACES = os.path.join(ROOT, "mod", "src", "main", "resources", "skycraft", "tamriel", "places")
+PLACES = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft", "tamriel", "places")
 OUT = os.path.join(ROOT, "tools", "qa", "out", "layout_lint.txt")
 
 MIN_SPACING = 24        # blocks, between any two non-complex places (their centres)
@@ -45,9 +45,9 @@ MINOR_LINK, FARM_LINK = 2400, 3200
 
 
 def load_provinces():
-    spec = importlib.util.spec_from_file_location("skycraft_provinces", os.path.join(ROOT, "tools", "provinces.py"))
+    spec = importlib.util.spec_from_file_location("nirncraft_provinces", os.path.join(ROOT, "tools", "provinces.py"))
     mod = importlib.util.module_from_spec(spec)
-    sys.modules["skycraft_provinces"] = mod
+    sys.modules["nirncraft_provinces"] = mod
     spec.loader.exec_module(mod)
     return mod
 

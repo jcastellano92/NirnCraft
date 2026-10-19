@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/sixth_house_base",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274520,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "sixth_house_base"
+    ]
+  }
+}

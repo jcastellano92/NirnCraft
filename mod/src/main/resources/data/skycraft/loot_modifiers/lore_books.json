@@ -1,7 +1,0 @@
-{
-  "type": "skycraft:add_table",
-  "table": "skycraft:chests/lore_books",
-  "prefix": "chests/",
-  "chance": 0.35,
-  "priority": 12
-}

@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:moon_sugar",
+      "required": false
+    },
+    {
+      "id": "nirncraft:skooma",
+      "required": false
+    },
+    {
+      "id": "nirncraft:elsweyr_fondue",
+      "required": false
+    },
+    {
+      "id": "nirncraft:khajiit_sword",
+      "required": false
+    },
+    {
+      "id": "nirncraft:khajiit_chestplate",
+      "required": false
+    }
+  ]
+}

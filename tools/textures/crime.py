@@ -13,7 +13,7 @@ import os
 from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures", "item")
+TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures", "item")
 
 OUTLINE = (0x26, 0x22, 0x1E, 255)
 STEEL_HI = (0xE6, 0xE8, 0xEA, 255)

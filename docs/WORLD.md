@@ -1,6 +1,6 @@
 # The world of Nirn
 
-Skycraft builds its own overworld: terrain, biomes, rivers, settlements, ruins and roads. It uses no third-party
+NirnCraft builds its own overworld: terrain, biomes, rivers, settlements, ruins and roads. It uses no third-party
 terrain or structure mods. This page is the player's view of that world. The technical plan, with the Java contracts
 and data formats, is in [TAMRIEL.md](TAMRIEL.md).
 
@@ -21,8 +21,8 @@ and data formats, is in [TAMRIEL.md](TAMRIEL.md).
 
 There are **83 regions** (75 land regions across 11 province groupings plus 8 seas). Each has its own 11-layer causal
 world-model sheet (`WorldSheets`), biome palette, 6+ micro-biomes, weather, music, culture, festival calendar, and a
-level band (`max - min <= 20`). Danger rises with distance from Whiterun. `/skycraft-tamriel where` and
-`/skycraft-world sheet <region>` (operators) inspect the region you stand in.
+level band (`max - min <= 20`). Danger rises with distance from Whiterun. `/nirncraft-tamriel where` and
+`/nirncraft-world sheet <region>` (operators) inspect the region you stand in.
 
 | Province | Regions (level band) |
 | --- | --- |
@@ -104,7 +104,7 @@ There are **7,546 named places**, each at its real position and linked to its re
   **Thras** to the south-west (jungle isles and coral).
 * **Outer ocean and world loop.** Beyond Tamriel and the fixed foreign lands, new terrain stays ocean.
   Far-ocean travel wraps to the opposite east/west or north/south edge, including diagonal crossings.
-  The default seam is 29,360,128 blocks from the origin; `skycraft-ocean-server.toml` controls the travel
+  The default seam is 29,360,128 blocks from the origin; `nirncraft-ocean-server.toml` controls the travel
   distance. Destination chunks are prewarmed asynchronously. Existing saved chunks are preserved; this
   policy does not erase previously explored land. The former Endless Lands planner is dormant.
 
@@ -134,7 +134,7 @@ There are **7,546 named places**, each at its real position and linked to its re
     roadside inn, and nearby dungeons) and lanterns.
   * Khajiit caravans, travellers and guard patrols walk them, and 125+ regional encounter scenes (including non-hostile
     wonder moments) unfold along them while keeping road hostility quiet (`<= 5%` day, `<= 20%` night).
-  * Road building runs on a per-tick budget (`skycraft-roads.toml`).
+  * Road building runs on a per-tick budget (`nirncraft-roads.toml`).
 
 ## Weather and sky
 

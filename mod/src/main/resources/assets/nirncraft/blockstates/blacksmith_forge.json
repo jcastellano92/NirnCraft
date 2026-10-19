@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "nirncraft:block/blacksmith_forge"
+    },
+    "facing=east": {
+      "model": "nirncraft:block/blacksmith_forge",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "nirncraft:block/blacksmith_forge",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nirncraft:block/blacksmith_forge",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:realm/sovngarde/whalebone_bridge",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:realm_grid",
+    "salt": 23,
+    "spacing": 0,
+    "fixed": [
+      [
+        0,
+        -8
+      ]
+    ]
+  }
+}

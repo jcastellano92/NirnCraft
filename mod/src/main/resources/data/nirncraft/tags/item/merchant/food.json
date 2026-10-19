@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:bread",
+    "minecraft:apple",
+    "minecraft:carrot",
+    "minecraft:potato",
+    "minecraft:beetroot",
+    "minecraft:wheat",
+    "minecraft:egg",
+    "minecraft:milk_bucket",
+    "minecraft:honey_bottle",
+    "minecraft:sugar",
+    "minecraft:cooked_beef",
+    "minecraft:cooked_mutton",
+    "minecraft:cooked_chicken",
+    "minecraft:cooked_salmon",
+    "minecraft:pumpkin",
+    "minecraft:sweet_berries",
+    {
+      "id": "#nirncraft:food_goods",
+      "required": false
+    }
+  ]
+}

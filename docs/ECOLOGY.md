@@ -42,7 +42,7 @@ so the same table is gentle in Whiterun (1-10) and fierce in Winterhold (10-30) 
   `landmark` places. Humanoid threats are placed at camps (`Camps`, `BanditCampFeature`); random spawns of them are
   rare: bandits only on roads far from any settlement (`road: on`, `townMin: 300`), Forsworn only far from towns.
 
-## Encounters (`skycraft/creatures/scenes.json`, `WildScenes`)
+## Encounters (`nirncraft/creatures/scenes.json`, `WildScenes`)
 
 Small, low-frequency, daylight-biased scenes built from existing NPC roles and creatures. One roll per player every
 15-25 minutes (first one after 4-8), skipped 70% of the time at night, never while another scene or a society
@@ -97,7 +97,7 @@ All optional JSON fields; existing tables are unaffected.
 * `RegionSpawner`: applies the above; hostile attempts are also scaled by `CreaturesConfig.ROAD_PLAYER_FACTOR`
   (`roadPlayerFactor`) when the player stands on a road.
 * `SpawnPacing.settlementWithin`.
-* `WildScenes` + `skycraft/creatures/scenes.json` (new): the scene table above.
+* `WildScenes` + `nirncraft/creatures/scenes.json` (new): the scene table above.
 
 Not done / for later: no bird species exist (no flocks); hunters' camps place only a campfire (no tents); the
 per-player scene cooldown is in the data file, not a config option; the other provinces still use the old tables.

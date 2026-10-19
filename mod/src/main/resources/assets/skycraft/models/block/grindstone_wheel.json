@@ -1,9 +1,0 @@
-{
-  "parent": "minecraft:block/orientable_with_bottom",
-  "textures": {
-    "top": "skycraft:block/grindstone_wheel_top",
-    "bottom": "skycraft:block/grindstone_wheel_bottom",
-    "front": "skycraft:block/grindstone_wheel_front",
-    "side": "skycraft:block/grindstone_wheel_side"
-  }
-}

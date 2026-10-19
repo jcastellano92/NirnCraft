@@ -1,0 +1,1618 @@
+{
+  "province": "akavir",
+  "why": [
+    "tsaesci.L1.red_earth_basin",
+    "tsaesci.L2.warm_monsoon_haze",
+    "kamal.L1.volcanic_ice_peaks",
+    "kamal.L2.annual_thaw_gale",
+    "tang_mo.L1.karst_spire_isles",
+    "tang_mo.L2.monsoon_cloud_mist"
+  ],
+  "modes": [
+    "boat",
+    "caravan",
+    "wayshrine",
+    "foot"
+  ],
+  "nodes": [
+    {
+      "id": "black_lacquer_pagoda",
+      "place": "black_lacquer_pagoda",
+      "name": "place.nirncraft.black_lacquer_pagoda",
+      "region": "akavir/tsaesci",
+      "x": 16400,
+      "z": 6200,
+      "mode": "caravan",
+      "modes": [
+        "caravan",
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "hub",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_tsaesci_01",
+      "name": "travel.nirncraft.wayshrine.tsaesci.01",
+      "region": "akavir/tsaesci",
+      "x": 15000,
+      "z": 4000,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_tsaesci_02",
+      "name": "travel.nirncraft.wayshrine.tsaesci.02",
+      "region": "akavir/tsaesci",
+      "x": 15200,
+      "z": 5400,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_tsaesci_03",
+      "name": "travel.nirncraft.wayshrine.tsaesci.03",
+      "region": "akavir/tsaesci",
+      "x": 16800,
+      "z": 7000,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_tsaesci_04",
+      "name": "travel.nirncraft.wayshrine.tsaesci.04",
+      "region": "akavir/tsaesci",
+      "x": 16448,
+      "z": 6152,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_tsaesci_05",
+      "name": "travel.nirncraft.wayshrine.tsaesci.05",
+      "region": "akavir/tsaesci",
+      "x": 16752,
+      "z": 6976,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_tsaesci_06",
+      "name": "travel.nirncraft.wayshrine.tsaesci.06",
+      "region": "akavir/tsaesci",
+      "x": 15176,
+      "z": 5376,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "id": "adasooms_gate",
+      "place": "adasooms_gate",
+      "name": "place.nirncraft.adasooms_gate",
+      "region": "akavir/kamal",
+      "x": 16800,
+      "z": -800,
+      "mode": "caravan",
+      "modes": [
+        "caravan",
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "hub",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "id": "wayshrine_kamal_01",
+      "name": "travel.nirncraft.wayshrine.kamal.01",
+      "region": "akavir/kamal",
+      "x": 15200,
+      "z": 300,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "id": "wayshrine_kamal_02",
+      "name": "travel.nirncraft.wayshrine.kamal.02",
+      "region": "akavir/kamal",
+      "x": 18803,
+      "z": -1584,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "id": "wayshrine_kamal_03",
+      "name": "travel.nirncraft.wayshrine.kamal.03",
+      "region": "akavir/kamal",
+      "x": 16824,
+      "z": -848,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "id": "wayshrine_kamal_04",
+      "name": "travel.nirncraft.wayshrine.kamal.04",
+      "region": "akavir/kamal",
+      "x": 15248,
+      "z": 252,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "id": "wayshrine_kamal_05",
+      "name": "travel.nirncraft.wayshrine.kamal.05",
+      "region": "akavir/kamal",
+      "x": 18755,
+      "z": -1608,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "id": "wayshrine_kamal_06",
+      "name": "travel.nirncraft.wayshrine.kamal.06",
+      "region": "akavir/kamal",
+      "x": 16776,
+      "z": -824,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "id": "tang_mo_harbor_village",
+      "place": "tang_mo_harbor_village",
+      "name": "place.nirncraft.tang_mo_harbor_village",
+      "region": "akavir/tang_mo",
+      "x": 22600,
+      "z": 6000,
+      "mode": "caravan",
+      "modes": [
+        "caravan",
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "hub",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "id": "wayshrine_tang_mo_01",
+      "name": "travel.nirncraft.wayshrine.tang_mo.01",
+      "region": "akavir/tang_mo",
+      "x": 21198,
+      "z": 4444,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "id": "wayshrine_tang_mo_02",
+      "name": "travel.nirncraft.wayshrine.tang_mo.02",
+      "region": "akavir/tang_mo",
+      "x": 22207,
+      "z": 4668,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "id": "wayshrine_tang_mo_03",
+      "name": "travel.nirncraft.wayshrine.tang_mo.03",
+      "region": "akavir/tang_mo",
+      "x": 22624,
+      "z": 5952,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "id": "wayshrine_tang_mo_04",
+      "name": "travel.nirncraft.wayshrine.tang_mo.04",
+      "region": "akavir/tang_mo",
+      "x": 21246,
+      "z": 4396,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "id": "wayshrine_tang_mo_05",
+      "name": "travel.nirncraft.wayshrine.tang_mo.05",
+      "region": "akavir/tang_mo",
+      "x": 22159,
+      "z": 4644,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "id": "wayshrine_tang_mo_06",
+      "name": "travel.nirncraft.wayshrine.tang_mo.06",
+      "region": "akavir/tang_mo",
+      "x": 22576,
+      "z": 5976,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "id": "ka_po_tun_steppe_fort",
+      "place": "ka_po_tun_steppe_fort",
+      "name": "place.nirncraft.ka_po_tun_steppe_fort",
+      "region": "akavir/ka_po_tun",
+      "x": 19600,
+      "z": 5800,
+      "mode": "caravan",
+      "modes": [
+        "caravan",
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "hub",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "id": "tiger_plains_village",
+      "place": "tiger_plains_village",
+      "name": "place.nirncraft.tiger_plains_village",
+      "region": "akavir/ka_po_tun",
+      "x": 20000,
+      "z": 3600,
+      "mode": "caravan",
+      "modes": [
+        "caravan",
+        "boat",
+        "wayshrine",
+        "foot"
+      ],
+      "kind": "hub",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "id": "tosh_rakas_palace",
+      "place": "tosh_rakas_palace",
+      "name": "place.nirncraft.tosh_rakas_palace",
+      "region": "akavir/ka_po_tun",
+      "x": 18200,
+      "z": 3600,
+      "mode": "caravan",
+      "modes": [
+        "caravan",
+        "boat",
+        "wayshrine",
+        "foot"
+      ],
+      "kind": "hub",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "id": "wayshrine_ka_po_tun_01",
+      "name": "travel.nirncraft.wayshrine.ka_po_tun.01",
+      "region": "akavir/ka_po_tun",
+      "x": 19448,
+      "z": 1319,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "id": "wayshrine_ka_po_tun_02",
+      "name": "travel.nirncraft.wayshrine.ka_po_tun.02",
+      "region": "akavir/ka_po_tun",
+      "x": 17000,
+      "z": 2200,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "id": "wayshrine_ka_po_tun_03",
+      "name": "travel.nirncraft.wayshrine.ka_po_tun.03",
+      "region": "akavir/ka_po_tun",
+      "x": 17024,
+      "z": 2152,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "id": "wayshrine_ka_po_tun_04",
+      "name": "travel.nirncraft.wayshrine.ka_po_tun.04",
+      "region": "akavir/ka_po_tun",
+      "x": 20048,
+      "z": 3552,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "id": "wayshrine_ka_po_tun_05",
+      "name": "travel.nirncraft.wayshrine.ka_po_tun.05",
+      "region": "akavir/ka_po_tun",
+      "x": 19400,
+      "z": 1295,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "id": "wayshrine_ka_po_tun_06",
+      "name": "travel.nirncraft.wayshrine.ka_po_tun.06",
+      "region": "akavir/ka_po_tun",
+      "x": 19576,
+      "z": 5776,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "id": "port_telvannis",
+      "region": "morrowind/telvannis",
+      "x": 11450,
+      "z": -400,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "akavir.L6.tang_mo_harbor_village"
+      ],
+      "place": "port_telvannis"
+    },
+    {
+      "id": "tear",
+      "region": "morrowind/deshaan",
+      "x": 7300,
+      "z": 3850,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "akavir.L6.tsaesci_treaty_post"
+      ],
+      "place": "tear"
+    },
+    {
+      "id": "vivec",
+      "region": "morrowind/ascadian_isles",
+      "x": 7400,
+      "z": 1300,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "akavir.L6.tang_mo_harbor_village"
+      ],
+      "place": "vivec"
+    },
+    {
+      "id": "lilmoth",
+      "region": "black_marsh/lilmoth",
+      "x": 7700,
+      "z": 10000,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "akavir.L6.tang_mo_harbor_village"
+      ],
+      "place": "lilmoth"
+    }
+  ],
+  "routes": [
+    {
+      "from": "black_lacquer_pagoda",
+      "to": "wayshrine_tsaesci_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_black_lacquer_pagoda_to_wayshrine_tsaesci_04",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "black_lacquer_pagoda",
+      "to": "wayshrine_tsaesci_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_black_lacquer_pagoda_to_wayshrine_tsaesci_05",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_01",
+      "to": "wayshrine_tsaesci_06",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_01_to_wayshrine_tsaesci_06",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_01",
+      "to": "wayshrine_tsaesci_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_01_to_wayshrine_tsaesci_02",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_02",
+      "to": "wayshrine_tsaesci_06",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_02_to_wayshrine_tsaesci_06",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_02",
+      "to": "wayshrine_tsaesci_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_02_to_wayshrine_tsaesci_01",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_03",
+      "to": "wayshrine_tsaesci_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_03_to_wayshrine_tsaesci_05",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_03",
+      "to": "black_lacquer_pagoda",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_03_to_black_lacquer_pagoda",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_04",
+      "to": "black_lacquer_pagoda",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_04_to_black_lacquer_pagoda",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_04",
+      "to": "wayshrine_tsaesci_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_04_to_wayshrine_tsaesci_05",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_05",
+      "to": "wayshrine_tsaesci_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_05_to_wayshrine_tsaesci_03",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_05",
+      "to": "black_lacquer_pagoda",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_05_to_black_lacquer_pagoda",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_06",
+      "to": "wayshrine_tsaesci_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_06_to_wayshrine_tsaesci_02",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_tsaesci_06",
+      "to": "wayshrine_tsaesci_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_06_to_wayshrine_tsaesci_01",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "adasooms_gate",
+      "to": "wayshrine_kamal_06",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_adasooms_gate_to_wayshrine_kamal_06",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "adasooms_gate",
+      "to": "wayshrine_kamal_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_adasooms_gate_to_wayshrine_kamal_03",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_01",
+      "to": "wayshrine_kamal_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_01_to_wayshrine_kamal_04",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_01",
+      "to": "wayshrine_kamal_06",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_01_to_wayshrine_kamal_06",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_02",
+      "to": "wayshrine_kamal_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_02_to_wayshrine_kamal_05",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_02",
+      "to": "wayshrine_kamal_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_02_to_wayshrine_kamal_03",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_03",
+      "to": "adasooms_gate",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_03_to_adasooms_gate",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_03",
+      "to": "wayshrine_kamal_06",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_03_to_wayshrine_kamal_06",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_04",
+      "to": "wayshrine_kamal_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_04_to_wayshrine_kamal_01",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_04",
+      "to": "wayshrine_kamal_06",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_04_to_wayshrine_kamal_06",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_05",
+      "to": "wayshrine_kamal_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_05_to_wayshrine_kamal_02",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_05",
+      "to": "wayshrine_kamal_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_05_to_wayshrine_kamal_03",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_06",
+      "to": "adasooms_gate",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_06_to_adasooms_gate",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "wayshrine_kamal_06",
+      "to": "wayshrine_kamal_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_06_to_wayshrine_kamal_03",
+      "why": [
+        "kamal.L1.volcanic_ice_peaks",
+        "kamal.L2.annual_thaw_gale"
+      ]
+    },
+    {
+      "from": "tang_mo_harbor_village",
+      "to": "wayshrine_tang_mo_06",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_tang_mo_harbor_village_to_wayshrine_tang_mo_06",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "tang_mo_harbor_village",
+      "to": "wayshrine_tang_mo_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_tang_mo_harbor_village_to_wayshrine_tang_mo_03",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_01",
+      "to": "wayshrine_tang_mo_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_01_to_wayshrine_tang_mo_04",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_01",
+      "to": "wayshrine_tang_mo_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_01_to_wayshrine_tang_mo_05",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_02",
+      "to": "wayshrine_tang_mo_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_02_to_wayshrine_tang_mo_05",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_02",
+      "to": "wayshrine_tang_mo_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_02_to_wayshrine_tang_mo_04",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_03",
+      "to": "tang_mo_harbor_village",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_03_to_tang_mo_harbor_village",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_03",
+      "to": "wayshrine_tang_mo_06",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_03_to_wayshrine_tang_mo_06",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_04",
+      "to": "wayshrine_tang_mo_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_04_to_wayshrine_tang_mo_01",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_04",
+      "to": "wayshrine_tang_mo_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_04_to_wayshrine_tang_mo_05",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_05",
+      "to": "wayshrine_tang_mo_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_05_to_wayshrine_tang_mo_02",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_05",
+      "to": "wayshrine_tang_mo_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_05_to_wayshrine_tang_mo_04",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_06",
+      "to": "tang_mo_harbor_village",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_06_to_tang_mo_harbor_village",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_tang_mo_06",
+      "to": "wayshrine_tang_mo_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_06_to_wayshrine_tang_mo_03",
+      "why": [
+        "tang_mo.L1.karst_spire_isles",
+        "tang_mo.L2.monsoon_cloud_mist"
+      ]
+    },
+    {
+      "from": "ka_po_tun_steppe_fort",
+      "to": "wayshrine_ka_po_tun_06",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_ka_po_tun_steppe_fort_to_wayshrine_ka_po_tun_06",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "ka_po_tun_steppe_fort",
+      "to": "tiger_plains_village",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_ka_po_tun_steppe_fort_to_tiger_plains_village",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "tiger_plains_village",
+      "to": "wayshrine_ka_po_tun_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_tiger_plains_village_to_wayshrine_ka_po_tun_04",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "tiger_plains_village",
+      "to": "tosh_rakas_palace",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_tiger_plains_village_to_tosh_rakas_palace",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "tosh_rakas_palace",
+      "to": "tiger_plains_village",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_tosh_rakas_palace_to_tiger_plains_village",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "tosh_rakas_palace",
+      "to": "wayshrine_ka_po_tun_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_tosh_rakas_palace_to_wayshrine_ka_po_tun_02",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_01",
+      "to": "wayshrine_ka_po_tun_05",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_01_to_wayshrine_ka_po_tun_05",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_01",
+      "to": "wayshrine_ka_po_tun_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_01_to_wayshrine_ka_po_tun_04",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_02",
+      "to": "wayshrine_ka_po_tun_03",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_02_to_wayshrine_ka_po_tun_03",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_02",
+      "to": "tosh_rakas_palace",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_02_to_tosh_rakas_palace",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_03",
+      "to": "wayshrine_ka_po_tun_02",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_03_to_wayshrine_ka_po_tun_02",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_03",
+      "to": "tosh_rakas_palace",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_03_to_tosh_rakas_palace",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_04",
+      "to": "tiger_plains_village",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_04_to_tiger_plains_village",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_04",
+      "to": "tosh_rakas_palace",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_04_to_tosh_rakas_palace",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_05",
+      "to": "wayshrine_ka_po_tun_01",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_05_to_wayshrine_ka_po_tun_01",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_05",
+      "to": "wayshrine_ka_po_tun_04",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_05_to_wayshrine_ka_po_tun_04",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_06",
+      "to": "ka_po_tun_steppe_fort",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_06_to_ka_po_tun_steppe_fort",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_ka_po_tun_06",
+      "to": "tiger_plains_village",
+      "mode": "wayshrine",
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_06_to_tiger_plains_village",
+      "why": [
+        "ka_po_tun.L1.golden_steppe_mesa",
+        "ka_po_tun.L2.continental_sun_heat"
+      ]
+    },
+    {
+      "from": "black_lacquer_pagoda",
+      "to": "tosh_rakas_palace",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_black_lacquer_pagoda_to_tosh_rakas_palace",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "black_lacquer_pagoda",
+      "to": "ka_po_tun_steppe_fort",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_black_lacquer_pagoda_to_ka_po_tun_steppe_fort",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "black_lacquer_pagoda",
+      "to": "tiger_plains_village",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_black_lacquer_pagoda_to_tiger_plains_village",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "adasooms_gate",
+      "to": "tosh_rakas_palace",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_adasooms_gate_to_tosh_rakas_palace",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "adasooms_gate",
+      "to": "tiger_plains_village",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_adasooms_gate_to_tiger_plains_village",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "adasooms_gate",
+      "to": "black_lacquer_pagoda",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_adasooms_gate_to_black_lacquer_pagoda",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "tang_mo_harbor_village",
+      "to": "ka_po_tun_steppe_fort",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_tang_mo_harbor_village_to_ka_po_tun_steppe_fort",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "tang_mo_harbor_village",
+      "to": "tiger_plains_village",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_tang_mo_harbor_village_to_tiger_plains_village",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "tang_mo_harbor_village",
+      "to": "tosh_rakas_palace",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_tang_mo_harbor_village_to_tosh_rakas_palace",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "ka_po_tun_steppe_fort",
+      "to": "tosh_rakas_palace",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_ka_po_tun_steppe_fort_to_tosh_rakas_palace",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "ka_po_tun_steppe_fort",
+      "to": "tang_mo_harbor_village",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_ka_po_tun_steppe_fort_to_tang_mo_harbor_village",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "tiger_plains_village",
+      "to": "ka_po_tun_steppe_fort",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_tiger_plains_village_to_ka_po_tun_steppe_fort",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "tiger_plains_village",
+      "to": "tang_mo_harbor_village",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_tiger_plains_village_to_tang_mo_harbor_village",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "tosh_rakas_palace",
+      "to": "ka_po_tun_steppe_fort",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_tosh_rakas_palace_to_ka_po_tun_steppe_fort",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "tosh_rakas_palace",
+      "to": "black_lacquer_pagoda",
+      "mode": "caravan",
+      "cost": 0,
+      "path": "akavir_caravan_tosh_rakas_palace_to_black_lacquer_pagoda",
+      "why": [
+        "tsaesci.L1.red_earth_basin",
+        "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "tang_mo_harbor_village",
+      "to": "port_telvannis",
+      "mode": "boat",
+      "cost": 125,
+      "path": "padomaic_spice_junk_passage",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "port_telvannis",
+      "to": "tang_mo_harbor_village",
+      "mode": "boat",
+      "cost": 125,
+      "path": "padomaic_spice_junk_passage",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "adasooms_gate",
+      "to": "tear",
+      "mode": "boat",
+      "cost": 130,
+      "path": "ionith_expedition_sea_lane",
+      "why": [
+        "akavir.L6.kamal_watch_camp",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "tear",
+      "to": "adasooms_gate",
+      "mode": "boat",
+      "cost": 130,
+      "path": "ionith_expedition_sea_lane",
+      "why": [
+        "akavir.L6.kamal_watch_camp",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "black_lacquer_pagoda",
+      "to": "vivec",
+      "mode": "boat",
+      "cost": 135,
+      "path": "serpent_treaty_carrack_route",
+      "why": [
+        "akavir.L6.tsaesci_treaty_post",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "vivec",
+      "to": "black_lacquer_pagoda",
+      "mode": "boat",
+      "cost": 135,
+      "path": "serpent_treaty_carrack_route",
+      "why": [
+        "akavir.L6.tsaesci_treaty_post",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "tang_mo_harbor_village",
+      "to": "lilmoth",
+      "mode": "boat",
+      "cost": 120,
+      "path": "southern_padomaic_monsoon_route",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "lilmoth",
+      "to": "tang_mo_harbor_village",
+      "mode": "boat",
+      "cost": 120,
+      "path": "southern_padomaic_monsoon_route",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "tang_mo_harbor_village",
+      "to": "black_lacquer_pagoda",
+      "mode": "boat",
+      "cost": 45,
+      "path": "thousand_monkey_archipelago_junk",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "akavir.L6.tsaesci_treaty_post"
+      ]
+    },
+    {
+      "from": "black_lacquer_pagoda",
+      "to": "tang_mo_harbor_village",
+      "mode": "boat",
+      "cost": 45,
+      "path": "thousand_monkey_archipelago_junk",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "akavir.L6.tsaesci_treaty_post"
+      ]
+    },
+    {
+      "from": "tiger_plains_village",
+      "to": "tosh_rakas_palace",
+      "mode": "foot",
+      "cost": 0,
+      "path": "golden_steppe_dragon_tiger_way",
+      "why": [
+        "ka_po_tun.L6.tiger_plains_shrine_town",
+        "ka_po_tun.L5.bronze_and_jade_tribute"
+      ]
+    },
+    {
+      "from": "tosh_rakas_palace",
+      "to": "tiger_plains_village",
+      "mode": "foot",
+      "cost": 0,
+      "path": "golden_steppe_dragon_tiger_way",
+      "why": [
+        "ka_po_tun.L6.tiger_plains_shrine_town",
+        "ka_po_tun.L5.bronze_and_jade_tribute"
+      ]
+    }
+  ]
+}

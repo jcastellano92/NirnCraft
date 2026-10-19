@@ -8,12 +8,12 @@ module.exports = function (f) {
   f.relic('knot_string', 'Tor\'s Knotted String', 'A length of coloured twine, knotted in a code of seventeen colours and a hundred and four knots. It is a navigator\'s memory, and it is wrong by exactly one knot in the middle.', 11);
   f.relic('drowned_bell_clapper', 'Clapper of the Drowned Bell', 'A bronze bell-clapper green with weed, still faintly ringing a note too low to hear. When held to the ear it sounds like a church on the sea-floor.', 22);
   f.relic('dune_lantern', 'Dune-Ghost\'s Lantern', 'A very small lantern of pale glass, its wick burnt black but never consumed. It gives off no light at all in the dark, and a very faint pearly glow in sunlight.', 17);
-  f.boss('dune_wraith', { name: 'The Pale Dune-Wraith', type: 'skycraft:draugr_deathlord', hp: 3.4, dmg: 1.5, level: 26,
-    weapon: 'skycraft:elven_sword', drop: 'loot:standard', glow: true });
-  f.boss('knot_cutter', { name: 'Sethis Knot-Cutter', type: 'skycraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 24,
-    weapon: 'skycraft:maormer_sword', gear: { chest: 'skycraft:maormer_chestplate' }, drop: 'loot:standard', glow: false });
-  f.boss('sinking_bell_keeper', { name: 'The Bell-Warden Below', type: 'skycraft:draugr_deathlord', hp: 3.2, dmg: 1.5, level: 24,
-    weapon: 'skycraft:elven_mace', drop: 'loot:standard', glow: true });
+  f.boss('dune_wraith', { name: 'The Pale Dune-Wraith', type: 'nirncraft:draugr_deathlord', hp: 3.4, dmg: 1.5, level: 26,
+    weapon: 'nirncraft:elven_sword', drop: 'loot:standard', glow: true });
+  f.boss('knot_cutter', { name: 'Sethis Knot-Cutter', type: 'nirncraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 24,
+    weapon: 'nirncraft:maormer_sword', gear: { chest: 'nirncraft:maormer_chestplate' }, drop: 'loot:standard', glow: false });
+  f.boss('sinking_bell_keeper', { name: 'The Bell-Warden Below', type: 'nirncraft:draugr_deathlord', hp: 3.2, dmg: 1.5, level: 24,
+    weapon: 'nirncraft:elven_mace', drop: 'loot:standard', glow: true });
 
   // Cloudrest: escort/rescue
   f.q({
@@ -25,7 +25,7 @@ module.exports = function (f) {
       o.go('cloudrest', 'Examine the sea-lift and take the lord\'s signet', { actions: 'relic:@lost_signet' }),
       o.go('wreck_of_the_bent_stag', 'Search the sea-caves and wreck below Cloudrest'),
       o.clear('wreck_of_the_bent_stag', 'Drive off the smugglers holding the young lord',
-        [mob('skycraft:bandit', 3, 'Cave Smuggler'), mob('npc:thug', 1, 'Hostage-Keeper', { hostile: true })], { placement: 'structure' }),
+        [mob('nirncraft:bandit', 3, 'Cave Smuggler'), mob('npc:thug', 1, 'Hostage-Keeper', { hostile: true })], { placement: 'structure' }),
       o.escort('@ewen', 'cloudrest', 'Bring the young lord home through the sea-lift'),
     ],
     outro: 'A young lord of a very minor house rose by sea-lift at dawn, pale, damp and apologetic. Ewen looked at the water again that day, for the first time in a week.',
@@ -92,7 +92,7 @@ module.exports = function (f) {
         { actions: 'relic:@knot_string' }),
       o.go('galorne_obelisk', 'Follow the broker\'s trail to Galorne Obelisk'),
       o.kill('galorne_obelisk', 'Take down Sethis Knot-Cutter, the Maormer agent',
-        [{ boss_id: '@knot_cutter' }, mob('skycraft:bandit', 2, 'Wave-Mark Guard')]),
+        [{ boss_id: '@knot_cutter' }, mob('nirncraft:bandit', 2, 'Wave-Mark Guard')]),
       o.deliver('@tor', '@knot_string', 'Return the string and tell Tor who tied it',
         'The knot was tied by a Maormer agent who hoped to wreck your ship on the Galorne rocks. He is dead. The string is whole.',
         'Tor holds the string and does not speak for a long time. He runs his thumb along the wrong knot, and then, very deliberately, ties it right. "Thirty years. A Maormer in my cabin. Walker, shall Tor tell the Dock-Master, and have every cabin searched? Or keep it, and use the string to lead them somewhere the Maormer wish they had not gone?"',

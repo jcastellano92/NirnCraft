@@ -1,0 +1,805 @@
+{
+  "region": "morrowind/sheogorad",
+  "province": "morrowind",
+  "line": "story_sheogorad",
+  "category": "main",
+  "title": "False Beacons on the Sea of Ghosts",
+  "why": [
+    "morrowind/sheogorad.L7.nord_dunmer_mix",
+    "morrowind/sheogorad.L8.sanctus_shrine",
+    "morrowind/sheogorad.L9.wreckers_suspected",
+    "morrowind/sheogorad.L10.shipwrecks",
+    "morrowind/sheogorad.L10.daedric_island_fortress"
+  ],
+  "hook": {
+    "place": "dagon_fel",
+    "rumour": "Fishermen at Dagon Fel's End of the World tavern swear someone is lighting false storm-lanterns on the basalt skerries to lure cogs onto the rocks while blaming the Urshilaku hunters.",
+    "notice": "DAGON FEL HARBOUR WATCH — Reward posted for uncovering who tends the false wrecking-fires between Dagon Fel, Sanctus Shrine, and Vas.",
+    "context": "Sheogorad's jagged islands shelter a stubborn mix of Nord whalers, Dunmer hermits, and silent Temple pilgrims; when ships break on the reefs, old suspicions flare fast.",
+    "places": [
+      "dagon_fel",
+      "lonely_shipwreck",
+      "urshilaku_camp",
+      "shushishi"
+    ],
+    "npc": "story_sheogorad_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_sheogorad_01_lanterns_on_the_skerries",
+      "order": 1,
+      "title": "Oil on the Basalt Reefs",
+      "region": "morrowind/sheogorad",
+      "category": "main",
+      "start": "hook",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "morrowind/sheogorad.L7.nord_dunmer_mix",
+        "morrowind/sheogorad.L9.wreckers_suspected"
+      ],
+      "places": [
+        "dagon_fel",
+        "lonely_shipwreck",
+        "urshilaku_camp",
+        "shushishi"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "dagon_fel",
+          "objective": "Inspect the salvaged rudder and whale-oil casks on the quay at Dagon Fel"
+        },
+        {
+          "id": 20,
+          "place": "sanctus_shrine",
+          "objective": "Speak with the vowed hermit at Sanctus Shrine regarding the night-signals on the western rocks"
+        },
+        {
+          "id": 30,
+          "place": "urshilaku_camp",
+          "objective": "Compare the Ashlander coast-patrol reports at Urshilaku Camp"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "dagon_fel",
+          "text": "Inspect the salvaged rudder and whale-oil casks on the quay at Dagon Fel"
+        },
+        {
+          "type": "go",
+          "place": "sanctus_shrine",
+          "text": "Speak with the vowed hermit at Sanctus Shrine regarding the night-signals on the western rocks"
+        },
+        {
+          "type": "go",
+          "place": "urshilaku_camp",
+          "text": "Compare the Ashlander coast-patrol reports at Urshilaku Camp"
+        }
+      ],
+      "consequence": "world_state:sheogorad_urshilaku_cleared_of_blame",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "consequence_detail": {
+        "world_state": "sheogorad_urshilaku_cleared_of_blame",
+        "flag": "story_sh_urshilaku_cleared",
+        "summary": "The Sanctus Shrine hermit and Urshilaku scouts prove the wrecking-lanterns burn refined pitch brought from the old towers near Vas."
+      }
+    },
+    {
+      "id": "story_sheogorad_02_signal_at_sulipund",
+      "order": 2,
+      "title": "The Shutters of Sulipund",
+      "region": "morrowind/sheogorad",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_sheogorad_01_lanterns_on_the_skerries",
+      "requires": [
+        "story_sheogorad_01_lanterns_on_the_skerries"
+      ],
+      "why": [
+        "morrowind/sheogorad.L8.sanctus_shrine",
+        "morrowind/sheogorad.L10.shipwrecks"
+      ],
+      "places": [
+        "sulipund",
+        "valenvaryon",
+        "ald_redaynia"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "sulipund",
+          "objective": "Search the cliff-top gallery at Sulipund for the brass signal-mirror"
+        },
+        {
+          "id": 20,
+          "place": "valenvaryon",
+          "objective": "Defeat the wrecker lookouts camped in the stronghold ruins of Valenvaryon"
+        },
+        {
+          "id": 30,
+          "place": "ald_redaynia",
+          "objective": "Inspect the hidden boat-landing beneath the tower of Ald Redaynia"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "sulipund",
+          "text": "Search the cliff-top gallery at Sulipund for the brass signal-mirror"
+        },
+        {
+          "type": "clear",
+          "place": "valenvaryon",
+          "text": "Defeat the wrecker lookouts camped in the stronghold ruins of Valenvaryon"
+        },
+        {
+          "type": "go",
+          "place": "ald_redaynia",
+          "text": "Inspect the hidden boat-landing beneath the tower of Ald Redaynia"
+        }
+      ],
+      "consequence": "world_state:sheogorad_wrecker_landing_found",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "sheogorad_wrecker_landing_found",
+        "flag": "story_sh_landing_found",
+        "summary": "The brass signal-mirror and boat-landing logs show the wreckers haul their plunder into the island fortress of Vas and Addadshashanammu."
+      }
+    },
+    {
+      "id": "story_sheogorad_03_coven_of_vas",
+      "order": 3,
+      "title": "The Wreckers of Vas",
+      "region": "morrowind/sheogorad",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_sheogorad_02_signal_at_sulipund",
+      "requires": [
+        "story_sheogorad_02_signal_at_sulipund"
+      ],
+      "why": [
+        "morrowind/sheogorad.L8.mad_god_shrine",
+        "morrowind/sheogorad.L10.daedric_island_fortress"
+      ],
+      "places": [
+        "vas",
+        "addadshashanammu",
+        "shushishi"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "vas",
+          "objective": "Storm the Daedric island tower of Vas and break the wrecker captain's coven"
+        },
+        {
+          "id": 20,
+          "place": "addadshashanammu",
+          "objective": "Smash the false beacon-brazier atop the shrine of Addadshashanammu"
+        },
+        {
+          "id": 30,
+          "place": "shushishi",
+          "objective": "Recover the stolen Dagon Fel harbour-bell from the cavern cache at Shushishi"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "vas",
+          "text": "Storm the Daedric island tower of Vas and break the wrecker captain's coven"
+        },
+        {
+          "type": "clear",
+          "place": "addadshashanammu",
+          "text": "Smash the false beacon-brazier atop the shrine of Addadshashanammu"
+        },
+        {
+          "type": "go",
+          "place": "shushishi",
+          "text": "Recover the stolen Dagon Fel harbour-bell from the cavern cache at Shushishi"
+        }
+      ],
+      "consequence": "world_state:vas_wrecker_coven_broken",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "vas_wrecker_coven_broken",
+        "flag": "story_sh_vas_cleared",
+        "summary": "The wrecker coven at Vas is broken, the false brazier at Addadshashanammu is dark, and Dagon Fel's harbour-bell is recovered."
+      }
+    },
+    {
+      "id": "story_sheogorad_04_bell_of_dagon_fel",
+      "order": 4,
+      "title": "True Light on the Northern Watchtower",
+      "region": "morrowind/sheogorad",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_sheogorad_03_coven_of_vas",
+      "requires": [
+        "story_sheogorad_03_coven_of_vas"
+      ],
+      "finale": true,
+      "why": [
+        "morrowind/sheogorad.L7.nord_dunmer_mix",
+        "morrowind/sheogorad.L10.shipwrecks"
+      ],
+      "places": [
+        "sanctus_shrine",
+        "dagon_fel"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "sanctus_shrine",
+          "objective": "Have the recovered harbour-bell blessed in silence at Sanctus Shrine"
+        },
+        {
+          "id": 20,
+          "place": "dagon_fel",
+          "objective": "Rehang the harbour-bell and light the true sea-beacon at Dagon Fel"
+        },
+        {
+          "id": 30,
+          "place": "dagon_fel",
+          "objective": "Share the peace-feast between the Nord whalers and Dunmer scouts at Dagon Fel"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "sanctus_shrine",
+          "text": "Have the recovered harbour-bell blessed in silence at Sanctus Shrine"
+        },
+        {
+          "type": "go",
+          "place": "dagon_fel",
+          "text": "Rehang the harbour-bell and light the true sea-beacon at Dagon Fel"
+        },
+        {
+          "type": "go",
+          "place": "dagon_fel",
+          "text": "Share the peace-feast between the Nord whalers and Dunmer scouts at Dagon Fel"
+        }
+      ],
+      "consequence": "world_state:dagon_fel_true_beacon_lit",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Beacon-Keeper of Sheogorad",
+        "unique_item": "nirncraft:nordic_war_axe"
+      },
+      "consequence_detail": {
+        "world_state": "dagon_fel_true_beacon_lit",
+        "flag": "story_sh_finale_complete",
+        "summary": "The true beacon shines over Dagon Fel, ships pass the Sheogorad reefs safely, and peace holds between the village and the Urshilaku."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_sheogorad_hook_npc",
+      "name": "Warden of Dagon Fel",
+      "role": "guard",
+      "place": "dagon_fel",
+      "greet": "Fishermen at Dagon Fel's End of the World tavern swear someone is lighting false storm-lanterns on the basalt skerries to lure cogs onto the rocks while blaming the Urshilaku hunters."
+    }
+  ],
+  "scenes": {
+    "story_sheogorad_scene_01": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (1).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_02": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (2).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_03": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (3).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_04": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (4).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_05": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (5).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_06": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (6).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_07": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (7).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_08": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (8).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_09": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (9).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_10": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (10).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_11": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (11).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_12": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (12).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_13": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (13).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_14": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (14).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_15": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (15).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_16": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (16).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_17": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (17).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_18": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (18).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_19": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (19).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_20": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (20).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_21": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (21).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_22": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (22).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_23": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (23).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_24": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (24).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_25": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (25).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_26": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (26).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_27": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (27).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_28": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (28).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_29": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (29).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_30": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (30).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_31": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (31).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_32": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (32).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_33": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (33).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_34": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (34).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_35": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (35).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_36": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (36).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_37": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (37).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_38": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (38).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_39": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (39).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_40": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (40).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_41": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (41).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_42": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (42).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_43": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (43).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_44": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (44).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_45": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (45).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_46": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (46).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_47": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (47).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_48": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (48).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_49": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (49).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_50": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (50).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_51": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (51).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_52": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (52).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_53": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (53).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_54": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (54).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_55": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (55).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_56": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (56).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_57": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (57).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_58": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (58).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_59": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (59).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_60": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (60).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_61": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (61).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_62": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (62).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_63": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (63).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_64": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (64).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_65": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (65).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_66": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (66).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_67": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (67).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_68": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (68).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_69": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (69).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_70": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (70).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_71": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (71).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_72": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (72).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_73": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (73).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_74": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (74).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_75": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (75).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_76": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (76).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_77": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (77).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_78": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (78).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_79": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (79).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_80": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (80).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ],
+    "story_sheogorad_scene_81": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Dagon Fel (81).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Dagon Fel at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Dagon Fel and report back to the seat."
+    ],
+    "story_sheogorad_scene_82": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Lonely Shipwreck (82).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Lonely Shipwreck at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Lonely Shipwreck and report back to the seat."
+    ],
+    "story_sheogorad_scene_83": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Urshilaku Camp (83).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Urshilaku Camp at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Urshilaku Camp and report back to the seat."
+    ],
+    "story_sheogorad_scene_84": [
+      "Warden of Dagon Fel: Examine the ash-wax seals recovered near Shushishi (84).",
+      "Watch-Captain of Sheogorad: The ledger entries match the dispatches troubling Sheogorad.",
+      "Watch-Captain of Sheogorad: Our scouts tracked the courier column past Shushishi at dusk.",
+      "Watch-Captain of Sheogorad: Secure the approaches around Shushishi and report back to the seat."
+    ]
+  }
+}

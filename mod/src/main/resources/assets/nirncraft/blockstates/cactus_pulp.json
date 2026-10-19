@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/cactus_pulp"
+      },
+      {
+        "model": "nirncraft:block/cactus_pulp",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/cactus_pulp",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/cactus_pulp",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/cactus_pulp_harvested"
+      },
+      {
+        "model": "nirncraft:block/cactus_pulp_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/cactus_pulp_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/cactus_pulp_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

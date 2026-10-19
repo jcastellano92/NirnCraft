@@ -7,10 +7,10 @@
 #include <string>
 #include <vector>
 
-#include "aether/aether.h"
+#include "atlas/atlas.h"
 #include "world.hpp"
 
-namespace aether {
+namespace atlas {
 
 // Default palette ids used by the preview source (the game sends its own palette).
 enum PreviewMat : uint16_t {
@@ -21,7 +21,7 @@ enum PreviewMat : uint16_t {
     M_FLOW0, M_SNOWCANOPY = M_FLOW0 + 24, M_COUNT
 };
 constexpr int FLOW_DIRS = 8, FLOW_SPEEDS = 3;
-std::vector<AetherMaterial> previewPalette();
+std::vector<AtlasMaterial> previewPalette();
 // Writes the flow (heading radians, speed class) of the flowing-water ids into their palette entries (emisClass.zw).
 void applyWaterFlow(std::vector<MaterialGpu>& palette);
 
@@ -64,4 +64,4 @@ private:
     std::vector<uint8_t> regions_, climate_;
 };
 
-}  // namespace aether
+}  // namespace atlas

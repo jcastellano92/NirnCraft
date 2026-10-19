@@ -1,4 +1,4 @@
-Concurrent Skycraft work - 2026-10-18
+Concurrent NirnCraft work - 2026-10-18
 
 Target: Minecraft26.3 / NeoForge26.3.0.90 / Java25.
 This is a coordination record, not a claim that the full port is accepted.
@@ -45,7 +45,7 @@ Ownership
 
 Concrete isolated entity correction
 The full proposed NPC/humanoid fix is ready and Java25-native-compiled in
-E:/Skycraft-scratch/migration-26.3/isolated-npc-fix-20261018-144627.
+E:/NirnCraft-scratch/migration-26.3/isolated-npc-fix-20261018-144627.
 Shared Java files were not edited; all eight original hashes still match.
 The durable complete patch and input/candidate hash sidecar are under
 tools/migration/patches/entity-render-state-263.unapplied.patch and
@@ -68,7 +68,7 @@ terrain-aware cameras, genuine TCP mode, evidence and orderly shutdown.
 Preserved checkpoints
 Full build38:238 tests, zero failures/errors/skips;1m26s.
 Core SHA256:6bbb5bc65c129fb92106223c39118e6e612bb22c392d19b8a92650336baa8fa9.
-Candidate client/server archives are on E:/Skycraft-scratch/migration-26.3.
+Candidate client/server archives are on E:/NirnCraft-scratch/migration-26.3.
 They are candidates, not a completed release. Build38's loaded Helgen overhead
 capture passed strict readiness in about1.6s. Ground-NPC diagnostic captures did
 not complete the sustained readiness gate; do not reuse them as fog-quality

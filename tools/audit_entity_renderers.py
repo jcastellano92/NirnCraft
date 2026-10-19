@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Audits all registered entity types in Skycraft and ensures every entity has a
+Audits all registered entity types in NirnCraft and ensures every entity has a
 registered client entity renderer and valid textures. Fails with exit code 1 if
 any registered entity lacks a renderer.
 """

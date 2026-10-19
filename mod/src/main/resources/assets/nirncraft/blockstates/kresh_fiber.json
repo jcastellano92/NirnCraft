@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/kresh_fiber"
+      },
+      {
+        "model": "nirncraft:block/kresh_fiber",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/kresh_fiber",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/kresh_fiber",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/kresh_fiber_harvested"
+      },
+      {
+        "model": "nirncraft:block/kresh_fiber_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/kresh_fiber_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/kresh_fiber_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

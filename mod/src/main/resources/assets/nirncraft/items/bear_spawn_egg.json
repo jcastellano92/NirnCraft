@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/bear_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 5913122
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 2759184
+      }
+    ]
+  }
+}

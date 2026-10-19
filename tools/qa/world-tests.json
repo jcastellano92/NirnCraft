@@ -2,7 +2,7 @@
   "version": 1,
   "defaultInputs": [
     "mod/src/main/resources/**/*",
-    "mod/src/main/java/com/skycraft/**/*.java",
+    "mod/src/main/java/com/nirncraft/**/*.java",
     "mod/build.gradle",
     "tools/qa/*.py",
     "tools/qa/scenarios/**/*.json",
@@ -459,7 +459,7 @@
         "ui"
       ],
       "commands": [
-        "execute as @p at @p run skycraft magic selftest"
+        "execute as @p at @p run nirncraft magic selftest"
       ],
       "requireRegex": [
         "selftest OK"
@@ -473,7 +473,7 @@
         "ui"
       ],
       "commands": [
-        "execute as @p at @p run skycraft-inventory selftest"
+        "execute as @p at @p run nirncraft-inventory selftest"
       ],
       "requireRegex": [
         "0 problems"
@@ -489,7 +489,7 @@
         "settlements"
       ],
       "commands": [
-        "execute as @p at @p run skycraft-protect selftest"
+        "execute as @p at @p run nirncraft-protect selftest"
       ],
       "requireRegex": [
         "0 problems"
@@ -504,10 +504,10 @@
         "settlements"
       ],
       "commands": [
-        "skycraft-calendar selftest"
+        "nirncraft-calendar selftest"
       ],
       "requireRegex": [
-        "\\[PASS\\] skycraft-calendar selftest:"
+        "\\[PASS\\] nirncraft-calendar selftest:"
       ],
       "failureRegex": "\\[FAIL\\]"
     },
@@ -520,7 +520,7 @@
         "npcs"
       ],
       "commands": [
-        "skycraft-travel selftest"
+        "nirncraft-travel selftest"
       ],
       "requireRegex": [
         "Travel selftest: \\d+/\\d+ checks passed, 0 problems"

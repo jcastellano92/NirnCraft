@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "nirncraft:block/hist_sap_block"
+  },
+  "render_type": "minecraft:translucent"
+}

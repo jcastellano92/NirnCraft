@@ -1,6 +1,6 @@
 """Regenerate mod/.classpath (+ Java 25 compiler prefs) for the VS Code / Eclipse Java tooling from the REAL Gradle
 compile classpath of the NeoForge 26.3 build. Gradle's own `eclipse` task cannot be used: the build keeps its
-outputs on E: (skycraftBuildDir) and the Eclipse plugin cannot relativise across drives.
+outputs on E: (nirncraftBuildDir) and the Eclipse plugin cannot relativise across drives.
 
     py -3 tools/dev/ide_classpath.py
 

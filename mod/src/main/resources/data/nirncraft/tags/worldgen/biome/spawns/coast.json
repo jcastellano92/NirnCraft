@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:beach",
+    "minecraft:snowy_beach",
+    "minecraft:stony_shore",
+    "nirncraft:ash_shore",
+    "nirncraft:azuras_coast",
+    "nirncraft:frozen_shore",
+    "nirncraft:rocky_shore",
+    "nirncraft:sheogorad",
+    "nirncraft:skyrim_coast"
+  ]
+}

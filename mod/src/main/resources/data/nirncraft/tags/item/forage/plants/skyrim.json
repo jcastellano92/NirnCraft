@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:canis_root",
+      "required": false
+    },
+    {
+      "id": "nirncraft:elves_ear",
+      "required": false
+    },
+    {
+      "id": "nirncraft:thistle_branch",
+      "required": false
+    },
+    {
+      "id": "nirncraft:juniper_berries",
+      "required": false
+    },
+    {
+      "id": "nirncraft:creep_cluster",
+      "required": false
+    },
+    {
+      "id": "nirncraft:jazbay_grapes",
+      "required": false
+    },
+    {
+      "id": "nirncraft:giant_lichen",
+      "required": false
+    }
+  ]
+}

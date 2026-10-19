@@ -1,0 +1,17 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "fort",
+  "flavor": 2,
+  "place": {
+    "types": [
+      "fort"
+    ],
+    "variants": [
+      "fort_vampire"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

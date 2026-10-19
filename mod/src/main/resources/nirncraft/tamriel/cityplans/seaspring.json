@@ -1,0 +1,405 @@
+{
+  "id": "seaspring",
+  "why": [
+    "helstrom.L1.helstrom_root_dome",
+    "helstrom.L4.elder_hist_canopy",
+    "helstrom.L6.helstrom_ring_and_thorn_port"
+  ],
+  "sil": "black-marsh-seaspring-plan",
+  "base": "none",
+  "overlay": "helstrom",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "helstrom",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "helstrom",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "seaspring_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        -1,
+        -28
+      ],
+      "name": "seaspring_landmark",
+      "overlay": "helstrom"
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          53
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          -6,
+          -29
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -53,
+          0
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          39,
+          2
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        6,
+        -2
+      ],
+      "rx": 29,
+      "rz": 27,
+      "wobble": 3,
+      "lobes": 4,
+      "phase": 0.51,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        24,
+        3
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "seaspring_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        46,
+        18
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "seaspring_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        17,
+        27
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "seaspring_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        12,
+        44
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "seaspring_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "seaspring_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "seaspring_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -22,
+        12
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "seaspring_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "seaspring_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -17,
+        -1
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "seaspring_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -33
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "seaspring_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -25,
+        -17
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "seaspring_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        25,
+        -41
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "seaspring_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        24,
+        -21
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "seaspring_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        38,
+        -22
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "seaspring_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "pond",
+      "theme": "seaspring_pond",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "seaspring_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "seaspring_lamps",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "seaspring_b_5",
+    "store": "seaspring_b_10",
+    "smithy": "seaspring_b_7"
+  },
+  "titles": {
+    "seaspring_b_1": "place.nirncraft.seaspring Council & Seat Hall",
+    "seaspring_b_2": "place.nirncraft.seaspring High Sanctuary",
+    "seaspring_b_3": "place.nirncraft.seaspring Fighters & Wayfarers Hall",
+    "seaspring_b_4": "place.nirncraft.seaspring Mages & Chroniclers Spire",
+    "seaspring_b_5": "place.nirncraft.seaspring The Lantern & Hearth Inn",
+    "seaspring_b_6": "place.nirncraft.seaspring The Traveler's Rest Tavern",
+    "seaspring_b_7": "place.nirncraft.seaspring Master Forge & Armorer",
+    "seaspring_b_8": "place.nirncraft.seaspring Botanicals & Remedies",
+    "seaspring_b_9": "place.nirncraft.seaspring Scriptorium & Charts",
+    "seaspring_b_10": "place.nirncraft.seaspring Grand Provisioner & Sundries",
+    "seaspring_b_11": "place.nirncraft.seaspring Silk & Hide Clothier",
+    "seaspring_b_12": "place.nirncraft.seaspring Lapidary & Signets",
+    "seaspring_b_13": "place.nirncraft.seaspring Wayfarer Stables & Post",
+    "seaspring_b_14": "place.nirncraft.seaspring Bonded Factor Warehouse",
+    "seaspring_landmark": "High Seat of place.nirncraft.seaspring",
+    "seaspring_plaza": "place.nirncraft.seaspring Central Plaza"
+  },
+  "innKey": "seaspring_b_5",
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -39,
+        4
+      ],
+      "to": [
+        39,
+        10
+      ],
+      "width": 6
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        6,
+        -2
+      ],
+      "to": [
+        6,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        6,
+        -21
+      ],
+      "r": 19,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        20,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 49,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

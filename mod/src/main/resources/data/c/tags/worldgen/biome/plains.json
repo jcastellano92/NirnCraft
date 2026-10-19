@@ -1,10 +1,10 @@
 {
   "replace": false,
   "values": [
-    "skycraft:ash_heath",
-    "skycraft:eastmarch_volcanic_tundra",
-    "skycraft:warm_steppe",
-    "skycraft:whiterun_plains",
-    "skycraft:whiterun_tundra"
+    "nirncraft:ash_heath",
+    "nirncraft:eastmarch_volcanic_tundra",
+    "nirncraft:warm_steppe",
+    "nirncraft:whiterun_plains",
+    "nirncraft:whiterun_tundra"
   ]
 }

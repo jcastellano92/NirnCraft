@@ -3,7 +3,7 @@
 //     Windows: a hidden window + wglCreateContext (a compatibility context at the driver's newest version; what a Mesa
 //              opengl32.dll placed next to the exe also answers).
 //     Linux:   a 4.5 core context, EGL surfaceless (works headless, on Wayland, on gamescope, in WSL with llvmpipe) by
-//              default, or GLX with a pbuffer when AETHER_TEST_GL=glx (X11 / XWayland: what GLFW uses unless it runs
+//              default, or GLX with a pbuffer when ATLAS_TEST_GL=glx (X11 / XWayland: what GLFW uses unless it runs
 //              on native Wayland).
 //  Profile::Core33   the production context: Minecraft (GLFW) asks for an OpenGL 3.3 core, forward-compatible profile.
 //     Windows: WGL_ARB_create_context(_profile) through a throwaway legacy context. Linux: the same EGL / GLX paths
@@ -24,7 +24,7 @@
 #include <dlfcn.h>
 #endif
 
-namespace aether_test {
+namespace atlas_test {
 
 enum class Profile { Default, Core33 };
 
@@ -41,9 +41,9 @@ struct GlContext {
         WNDCLASSA wc{};
         wc.lpfnWndProc = DefWindowProcA;
         wc.hInstance = GetModuleHandleA(nullptr);
-        wc.lpszClassName = "aether_gl_context";
+        wc.lpszClassName = "atlas_gl_context";
         RegisterClassA(&wc);  // fails harmlessly when a previous context registered it
-        wnd = CreateWindowA("aether_gl_context", "aether", WS_OVERLAPPEDWINDOW, 0, 0, 64, 64, nullptr, nullptr,
+        wnd = CreateWindowA("atlas_gl_context", "atlas", WS_OVERLAPPEDWINDOW, 0, 0, 64, 64, nullptr, nullptr,
                             wc.hInstance, nullptr);
         dc = GetDC(wnd);
         PIXELFORMATDESCRIPTOR pfd{sizeof(pfd), 1, PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, PFD_TYPE_RGBA, 32};
@@ -107,7 +107,7 @@ struct GlContext {
     unsigned long pbuf = 0;
 
     bool create(std::string& err, Profile profile = Profile::Default) {
-        const char* want = std::getenv("AETHER_TEST_GL");
+        const char* want = std::getenv("ATLAS_TEST_GL");
         if (want && std::strcmp(want, "glx") == 0) return createGlx(err, profile);
         return createEgl(err, profile);
     }
@@ -216,4 +216,4 @@ struct GlContext {
 
 #endif
 
-}  // namespace aether_test
+}  // namespace atlas_test

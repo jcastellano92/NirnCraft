@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column_horizontal",
-  "textures": {
-    "end": "skycraft:block/charred_beam_top",
-    "side": "skycraft:block/charred_beam"
-  }
-}

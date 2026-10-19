@@ -1,6 +1,0 @@
-{
-  "parent": "skycraft:item/auriels_bow",
-  "textures": {
-    "layer0": "skycraft:item/auriels_bow_pulling_1"
-  }
-}

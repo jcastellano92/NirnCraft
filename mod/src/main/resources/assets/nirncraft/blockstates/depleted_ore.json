@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "host=stone": {
+      "model": "nirncraft:block/depleted_ore_stone"
+    },
+    "host=deepslate": {
+      "model": "nirncraft:block/depleted_ore_deepslate"
+    },
+    "host=netherrack": {
+      "model": "nirncraft:block/depleted_ore_netherrack"
+    }
+  }
+}

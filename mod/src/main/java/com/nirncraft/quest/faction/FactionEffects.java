@@ -1,0 +1,212 @@
+package com.nirncraft.quest.faction;
+
+import com.nirncraft.NirnCraft;
+import com.nirncraft.core.Buffs;
+import com.nirncraft.core.Notifier;
+import com.nirncraft.core.PlayerData;
+import com.nirncraft.core.Race;
+import com.nirncraft.core.SkyData;
+import com.nirncraft.quest.Faction;
+import com.nirncraft.quest.Factions;
+import com.nirncraft.quest.story.Story;
+import com.nirncraft.society.NpcRole;
+import com.nirncraft.society.Reputation;
+import com.nirncraft.society.entity.NpcEntity;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.block.state.BlockState;
+
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+/**
+ * How the factions of Tamriel react to each other and to the player: joining one side sours its enemies
+ * (the Thalmor and the Talos-worshipping Blades and Stormcloaks, the Morag Tong and the Dark Brotherhood, the
+ * Vigilants and the vampires, the Forsworn and the Reach's guards), praying to Talos is heresy the Thalmor punish on
+ * sight, killing a guild brother gets the killer thrown out, Orcs are Blood-Kin of the strongholds by birth, the
+ * Greybeards accept whoever walked the Way of the Voice, and the Imperial Cult's faithful keep a Divine's blessing
+ * twice as long.
+ *
+ * <p>State in {@code module("quest")}: {@code faction_expelled} (faction id -> true; cleared by penance at a hall).</p>
+ */
+@net.neoforged.fml.common.EventBusSubscriber(modid = NirnCraft.MODID)
+public final class FactionEffects {
+    private static final String EXPELLED = "faction_expelled";
+    /** Story flag: the player has prayed at a shrine of Talos. */
+    public static final String TALOS_FLAG = "talos_worshipper";
+
+    /** Shrine blessings to lengthen for the Imperial Cult, by player: the divine and the tick to apply it. */
+    private static final Map<UUID, Pending> PENDING = new HashMap<>();
+
+    private record Pending(String divine, long at) {
+    }
+
+    private FactionEffects() {}
+
+    // ------------------------------------------------------------------ expulsion
+
+    public static boolean expelled(PlayerData data, Faction f) {
+        return data.module("quest").getCompoundOrEmpty(EXPELLED).getBooleanOr(f.id, false);
+    }
+
+    public static void markExpelled(PlayerData data, Faction f) {
+        CompoundTag mod = data.module("quest");
+        CompoundTag t = mod.getCompoundOrEmpty(EXPELLED);
+        t.putBoolean(f.id, true);
+        mod.put(EXPELLED, t);
+        data.markDirty();
+    }
+
+    /** Penance paid: the faction will take the player back. */
+    public static void forgive(PlayerData data, Faction f) {
+        CompoundTag mod = data.module("quest");
+        CompoundTag t = mod.getCompoundOrEmpty(EXPELLED);
+        t.remove(f.id);
+        mod.put(EXPELLED, t);
+        data.markDirty();
+    }
+
+    // ------------------------------------------------------------------ joining
+
+    /** Standing changes with the other powers when the player joins {@code f}. */
+    public static void onJoined(ServerPlayer p, Faction f) {
+        switch (f) {
+            case THALMOR, ALDMERI_DOMINION -> {
+                Reputation.add(p, Reputation.THALMOR, 30);
+                Reputation.add(p, Reputation.STORMCLOAKS, -25);
+            }
+            case BLADES -> Reputation.add(p, Reputation.THALMOR, -40);
+            case MORAG_TONG -> Reputation.add(p, Reputation.DARK_BROTHERHOOD, -40);
+            case VIGILANTS_OF_STENDARR, KNIGHTS_OF_THE_NINE -> Reputation.add(p, Reputation.VAMPIRES, -40);
+            case FORSWORN -> {
+                Reputation.add(p, Reputation.FORSWORN, 90);
+                Reputation.add(p, Reputation.GUARDS, -10);
+            }
+            case CAMONNA_TONG -> Reputation.add(p, Reputation.THIEVES_GUILD, -30);
+            case FIGHTERS_GUILD, UNDAUNTED, ARENA -> Reputation.add(p, Reputation.TOWNSFOLK, 5);
+            case IMPERIAL_CULT, TRIBUNAL_TEMPLE -> Reputation.add(p, Reputation.TOWNSFOLK, 8);
+            default -> {
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ events
+
+    /** Every five seconds per player: birthright and Way of the Voice memberships, pending blessings. */
+    @SubscribeEvent
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer p)) return;
+        Pending pending = PENDING.get(p.getUUID());
+        if (pending != null && p.level().getGameTime() >= pending.at()) {
+            PENDING.remove(p.getUUID());
+            lengthenBlessing(p, pending.divine());
+        }
+        if (p.tickCount % 100 != 37 || p.isSpectator()) return;
+        PlayerData data = SkyData.get(p);
+        if (data.getRace() == null) return;
+        if (data.getRace() == Race.ORSIMER && !Factions.isMember(data, Faction.ORC_STRONGHOLDS) && !expelled(data, Faction.ORC_STRONGHOLDS)
+                && !data.module("quest").getBooleanOr("orc_blood_kin",false)) {
+            data.module("quest").putBoolean("orc_blood_kin", true);
+            data.markDirty();
+            Factions.join(p, Faction.ORC_STRONGHOLDS);
+            Notifier.message(p, Component.translatable("faction.nirncraft.orc_strongholds.birthright").withStyle(ChatFormatting.GOLD));
+        }
+        if (!Factions.isMember(data, Faction.GREYBEARDS) && !expelled(data, Faction.GREYBEARDS)
+                && Story.completed(data, "main_way_of_the_voice") && !data.module("quest").getBooleanOr("greybeards_joined",false)) {
+            data.module("quest").putBoolean("greybeards_joined", true);
+            data.markDirty();
+            Factions.join(p, Faction.GREYBEARDS);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        PENDING.remove(event.getEntity().getUUID());
+    }
+
+    /** Prayers at the shrines of the Divines: Talos worship and the Imperial Cult's longer blessings. */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer p) || p.isSpectator()) return;
+        BlockState state = event.getLevel().getBlockState(event.getPos());
+        Identifier id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+        if (!NirnCraft.MODID.equals(id.getNamespace()) || !id.getPath().startsWith("shrine_of_")) return;
+        String divine = id.getPath().substring("shrine_of_".length());
+        PlayerData data = SkyData.get(p);
+        if (Factions.isMember(data, Faction.IMPERIAL_CULT) || Factions.isMember(data, Faction.KNIGHTS_OF_THE_NINE)) {
+            PENDING.put(p.getUUID(), new Pending(divine, p.level().getGameTime() + 2));
+        }
+        if (divine.equals("talos")) talosPrayer(p, event.getPos());
+    }
+
+    /** Talos worship: the Thalmor's heresy. Their members are cast out, their agents nearby attack. */
+    static void talosPrayer(ServerPlayer p, BlockPos at) {
+        PlayerData data = SkyData.get(p);
+        boolean first = !Story.hasFlag(data, TALOS_FLAG);
+        Story.setFlag(data, TALOS_FLAG, true);
+        if (Factions.isMember(data, Faction.THALMOR)) Factions.expel(p, Faction.THALMOR, "faction.nirncraft.reason.heresy");
+        if (Factions.isMember(data, Faction.ALDMERI_DOMINION) && Factions.rank(data, Faction.ALDMERI_DOMINION) >= 2) {
+            Factions.expel(p, Faction.ALDMERI_DOMINION, "faction.nirncraft.reason.heresy");
+        }
+        boolean seen = false;
+        for (Mob m : p.level().getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(32),
+                e -> e.isAlive() && e instanceof NpcEntity n && n.role() == NpcRole.THALMOR)) {
+            if (m.hasLineOfSight(p)) {
+                seen = true;
+                m.setTarget(p);
+            }
+        }
+        if (seen) {
+            Reputation.add(p, Reputation.THALMOR, -60);
+            Notifier.message(p, Component.translatable("faction.nirncraft.talos_seen").withStyle(ChatFormatting.RED));
+        } else if (first) {
+            Reputation.add(p, Reputation.THALMOR, -10);
+            Notifier.message(p, Component.translatable("faction.nirncraft.talos_prayer").withStyle(ChatFormatting.GRAY));
+        }
+    }
+
+    /** Doubles the blessing a faithful member of the Imperial Cult (or a Knight of the Nine) just received. */
+    static void lengthenBlessing(ServerPlayer p, String divine) {
+        MobEffect effect = BuiltInRegistries.MOB_EFFECT.getValue(Identifier.fromNamespaceAndPath(NirnCraft.MODID, "blessing_" + divine));
+        if (effect == null) return;
+        MobEffectInstance cur = p.getEffect(com.nirncraft.platform.Effects.holder(effect));
+        if (cur == null || cur.getDuration() <= 0) return;
+        int ticks = cur.getDuration() * 2;
+        p.addEffect(new MobEffectInstance(com.nirncraft.platform.Effects.holder(effect), ticks, cur.getAmplifier(), false, false, true));
+        Buffs.apply(p, "blessing_" + divine, ticks);
+        Notifier.message(p, Component.translatable("faction.nirncraft.imperial_cult.blessing").withStyle(ChatFormatting.GOLD));
+    }
+
+    /** Killing one of a faction's own people gets a member thrown out (and the Thalmor remember a dead justiciar). */
+    @SubscribeEvent
+    public static void onDeath(LivingDeathEvent event) {
+        LivingEntity victim = event.getEntity();
+        if (victim.level().isClientSide() || !(event.getSource().getEntity() instanceof ServerPlayer killer)) return;
+        String fid = victim.getPersistentData().getStringOr(FactionStaff.TAG, "");
+        Faction f = fid.isEmpty() ? null : Faction.byId(fid);
+        if (f == null && victim instanceof NpcEntity n && n.role() == NpcRole.THALMOR) f = Faction.THALMOR;
+        if (f == null) return;
+        PlayerData data = SkyData.get(killer);
+        if (Factions.isMember(data, f)) {
+            Factions.expel(killer, f, "faction.nirncraft.reason.kinslayer");
+        }
+    }
+}

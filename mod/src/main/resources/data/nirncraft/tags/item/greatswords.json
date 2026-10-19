@@ -1,0 +1,32 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:iron_greatsword",
+    "nirncraft:steel_greatsword",
+    "nirncraft:orcish_greatsword",
+    "nirncraft:dwarven_greatsword",
+    "nirncraft:elven_greatsword",
+    "nirncraft:glass_greatsword",
+    "nirncraft:ebony_greatsword",
+    "nirncraft:daedric_greatsword",
+    "nirncraft:dragonbone_greatsword",
+    "nirncraft:silver_greatsword",
+    "nirncraft:ancient_nord_greatsword",
+    "nirncraft:forsworn_greatsword",
+    "nirncraft:imperial_greatsword",
+    "nirncraft:falmer_greatsword",
+    "nirncraft:nordic_greatsword",
+    "nirncraft:skyforge_greatsword",
+    "nirncraft:akaviri_greatsword",
+    "nirncraft:stalhrim_greatsword",
+    "nirncraft:redguard_greatsword",
+    "nirncraft:yokudan_greatsword",
+    "nirncraft:khajiit_greatsword",
+    "nirncraft:breton_greatsword",
+    "nirncraft:atmoran_greatsword",
+    {
+      "id": "#nirncraft:arsenal/greatswords",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:soul_gem_petty",
+    "nirncraft:soul_gem_lesser",
+    "nirncraft:soul_gem_common",
+    "nirncraft:soul_gem_greater",
+    "nirncraft:soul_gem_grand",
+    "nirncraft:soul_gem_black"
+  ]
+}

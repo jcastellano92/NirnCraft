@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 1,
+          "modifier": {
+            "id": "goldbrand",
+            "type": "nirncraft:unique"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:uniques/goldbrand"
+}

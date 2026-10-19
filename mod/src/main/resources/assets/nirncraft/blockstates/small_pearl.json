@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/small_pearl"
+      },
+      {
+        "model": "nirncraft:block/small_pearl",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/small_pearl",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/small_pearl",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/small_pearl_harvested"
+      },
+      {
+        "model": "nirncraft:block/small_pearl_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/small_pearl_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/small_pearl_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

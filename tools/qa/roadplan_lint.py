@@ -1,7 +1,7 @@
-"""Lint and render the baked road plan (pipeline P1, com.skycraft.worldplan.RoadPlan).
+"""Lint and render the baked road plan (pipeline P1, com.nirncraft.worldplan.RoadPlan).
 
 usage: py -3 -I tools/qa/roadplan_lint.py [roadplan.bin] [--render] [--screens]
-       default file: mod/src/main/resources/skycraft/baked/roadplan.bin (written by tools/bake/bake.ps1)
+       default file: mod/src/main/resources/nirncraft/baked/roadplan.bin (written by tools/bake/bake.ps1)
 
 Checks (exit code 1 on any ERR):
   profile   every planned link has segments whose vertical profile keeps to its class's grade cap
@@ -19,7 +19,7 @@ import sys
 import zlib
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
-DEFAULT = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'baked', 'roadplan.bin')
+DEFAULT = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'baked', 'roadplan.bin')
 SPANS = ['normal', 'cut', 'fill', 'bridge', 'culvert', 'ford', 'switchback', 'stairs', 'tunnel']
 CLASSES = ['highway', 'road', 'lane', 'trail']
 CAPS = [1 / 8, 1 / 8, 1 / 5, 1.0]
@@ -251,7 +251,7 @@ def backdrop(x0, z0, x1, z1, scale):
     from PIL import Image
     import numpy as np
     w, h = int((x1 - x0) / scale), int((z1 - z0) / scale)
-    tam = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel')
+    tam = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'nirncraft', 'tamriel')
     try:  # the map rasters as MapRaster reads them: elevation y = v/32 - 64, coast distance = v - 32768
         el = np.array(Image.open(os.path.join(tam, 'elevation.png')), dtype=np.float32) / 32 - 64
         coast = np.array(Image.open(os.path.join(tam, 'coast.png')), dtype=np.float32) - 32768

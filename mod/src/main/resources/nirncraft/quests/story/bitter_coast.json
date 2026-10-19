@@ -1,0 +1,805 @@
+{
+  "region": "morrowind/bitter_coast",
+  "province": "morrowind",
+  "line": "story_bitter_coast",
+  "category": "main",
+  "title": "Lanterns in the Mangrove Mire",
+  "why": [
+    "morrowind/bitter_coast.L7.smugglers_and_tax_men",
+    "morrowind/bitter_coast.L8.bitter_superstitions",
+    "morrowind/bitter_coast.L9.customs_corruption",
+    "morrowind/bitter_coast.L10.smuggler_caves",
+    "morrowind/bitter_coast.L10.daedric_mire_ruins"
+  ],
+  "hook": {
+    "place": "gnaar_mok",
+    "rumour": "On the wooden boardwalks of Gnaar Mok, net-fishers whisper that an Imperial revenue cutter vanished in the fog off Khartag Point while bribed excise clerks look the other way.",
+    "notice": "COASTAL EXCISE NOTICE AT GNAAR MOK — Reward offered for locating the missing revenue cutter crew and auditing the smuggler coves between Gnaar Mok and Zainsipilu.",
+    "context": "In the Bitter Coast's mosquito-ridden mangroves, every hollow stump and sea-grotto hides moon-sugar or Dwemer brass, and half the customs patrols are on the smugglers' payroll.",
+    "places": [
+      "gnaar_mok",
+      "dralas_ancestral_tomb",
+      "sarano_ancestral_tomb",
+      "nammu"
+    ],
+    "npc": "story_bitter_coast_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_bitter_coast_01_wreck_at_khartag",
+      "order": 1,
+      "title": "Fog Over Khartag Point",
+      "region": "morrowind/bitter_coast",
+      "category": "main",
+      "start": "hook",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "morrowind/bitter_coast.L7.smugglers_and_tax_men",
+        "morrowind/bitter_coast.L8.bitter_superstitions"
+      ],
+      "places": [
+        "gnaar_mok",
+        "dralas_ancestral_tomb",
+        "sarano_ancestral_tomb",
+        "nammu"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "gnaar_mok",
+          "objective": "Question the net-fishers on the stilt-piers of Gnaar Mok about the missing revenue cutter"
+        },
+        {
+          "id": 20,
+          "place": "khartag_point",
+          "objective": "Search the rocky headland at Khartag Point for the cutter's shattered lantern-box"
+        },
+        {
+          "id": 30,
+          "place": "dubdil_alar_tower",
+          "objective": "Inspect the coastal watch-platform at Dubdil Alar Tower for signal-ash"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "gnaar_mok",
+          "text": "Question the net-fishers on the stilt-piers of Gnaar Mok about the missing revenue cutter"
+        },
+        {
+          "type": "go",
+          "place": "khartag_point",
+          "text": "Search the rocky headland at Khartag Point for the cutter's shattered lantern-box"
+        },
+        {
+          "type": "go",
+          "place": "dubdil_alar_tower",
+          "text": "Inspect the coastal watch-platform at Dubdil Alar Tower for signal-ash"
+        }
+      ],
+      "consequence": "world_state:khartag_point_cutter_traced",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "consequence_detail": {
+        "world_state": "khartag_point_cutter_traced",
+        "flag": "story_bc_cutter_traced",
+        "summary": "The shattered lantern-box at Khartag Point proves the revenue cutter was lured into the sea-caves of Nammu and Mannammu by a bribed clerk."
+      }
+    },
+    {
+      "id": "story_bitter_coast_02_coves_of_nammu",
+      "order": 2,
+      "title": "The Grottoes of Nammu",
+      "region": "morrowind/bitter_coast",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_bitter_coast_01_wreck_at_khartag",
+      "requires": [
+        "story_bitter_coast_01_wreck_at_khartag"
+      ],
+      "why": [
+        "morrowind/bitter_coast.L9.customs_corruption",
+        "morrowind/bitter_coast.L10.smuggler_caves"
+      ],
+      "places": [
+        "nammu",
+        "mannammu",
+        "zainsipilu"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "nammu",
+          "objective": "Clear the smuggler lookouts inside the sea-caverns of Nammu and free the captive oarsmen"
+        },
+        {
+          "id": 20,
+          "place": "mannammu",
+          "objective": "Seize the bribed customs-cipher book from the tide-cache at Mannammu"
+        },
+        {
+          "id": 30,
+          "place": "zainsipilu",
+          "objective": "Track the syndicate's quartermaster to the mangrove grotto of Zainsipilu"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "nammu",
+          "text": "Clear the smuggler lookouts inside the sea-caverns of Nammu and free the captive oarsmen"
+        },
+        {
+          "type": "go",
+          "place": "mannammu",
+          "text": "Seize the bribed customs-cipher book from the tide-cache at Mannammu"
+        },
+        {
+          "type": "go",
+          "place": "zainsipilu",
+          "text": "Track the syndicate's quartermaster to the mangrove grotto of Zainsipilu"
+        }
+      ],
+      "consequence": "world_state:nammu_cutter_crew_freed",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "nammu_cutter_crew_freed",
+        "flag": "story_bc_nammu_cleared",
+        "summary": "The captive revenue oarsmen are freed from Nammu, and the cipher book reveals the corrupt excise chief hides at Ashalmimilkala."
+      }
+    },
+    {
+      "id": "story_bitter_coast_03_altar_in_the_mire",
+      "order": 3,
+      "title": "Sunken Stones of Ashalmimilkala",
+      "region": "morrowind/bitter_coast",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_bitter_coast_02_coves_of_nammu",
+      "requires": [
+        "story_bitter_coast_02_coves_of_nammu"
+      ],
+      "why": [
+        "morrowind/bitter_coast.L10.smuggler_caves",
+        "morrowind/bitter_coast.L10.daedric_mire_ruins"
+      ],
+      "places": [
+        "ashalmimilkala",
+        "ashurnibibi",
+        "ulummusa"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "ashalmimilkala",
+          "objective": "Storm the Daedric mire-ruin of Ashalmimilkala and defeat the corrupt excise-master's guard"
+        },
+        {
+          "id": 20,
+          "place": "ashurnibibi",
+          "objective": "Recover the Imperial Excise Brass Seal from the flooded vaults of Ashurnibibi"
+        },
+        {
+          "id": 30,
+          "place": "ulummusa",
+          "objective": "Burn the contraband moon-sugar depot hidden inside Ulummusa"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "ashalmimilkala",
+          "text": "Storm the Daedric mire-ruin of Ashalmimilkala and defeat the corrupt excise-master's guard"
+        },
+        {
+          "type": "clear",
+          "place": "ashurnibibi",
+          "text": "Recover the Imperial Excise Brass Seal from the flooded vaults of Ashurnibibi"
+        },
+        {
+          "type": "clear",
+          "place": "ulummusa",
+          "text": "Burn the contraband moon-sugar depot hidden inside Ulummusa"
+        }
+      ],
+      "consequence": "world_state:bitter_coast_excise_seal_recovered",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "bitter_coast_excise_seal_recovered",
+        "flag": "story_bc_seal_recovered",
+        "summary": "The corrupt excise-master's ring is broken at Ashalmimilkala and the Imperial Excise Brass Seal is recovered."
+      }
+    },
+    {
+      "id": "story_bitter_coast_04_safe_harbour_at_gnaar_mok",
+      "order": 4,
+      "title": "Safe Harbour at Gnaar Mok",
+      "region": "morrowind/bitter_coast",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_bitter_coast_03_altar_in_the_mire",
+      "requires": [
+        "story_bitter_coast_03_altar_in_the_mire"
+      ],
+      "finale": true,
+      "why": [
+        "morrowind/bitter_coast.L7.smugglers_and_tax_men",
+        "morrowind/bitter_coast.L9.customs_corruption"
+      ],
+      "places": [
+        "khartag_point",
+        "gnaar_mok"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "khartag_point",
+          "objective": "Relight the true coast-lantern atop Khartag Point"
+        },
+        {
+          "id": 20,
+          "place": "gnaar_mok",
+          "objective": "Return the Imperial Excise Brass Seal to the freed cutter captain at Gnaar Mok"
+        },
+        {
+          "id": 30,
+          "place": "gnaar_mok",
+          "objective": "Accept the gratitude of Gnaar Mok's fishers on the boardwalk pier"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "khartag_point",
+          "text": "Relight the true coast-lantern atop Khartag Point"
+        },
+        {
+          "type": "go",
+          "place": "gnaar_mok",
+          "text": "Return the Imperial Excise Brass Seal to the freed cutter captain at Gnaar Mok"
+        },
+        {
+          "type": "go",
+          "place": "gnaar_mok",
+          "text": "Accept the gratitude of Gnaar Mok's fishers on the boardwalk pier"
+        }
+      ],
+      "consequence": "world_state:gnaar_mok_harbour_accord_restored",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Reef-Warden of the Bitter Coast",
+        "unique_item": "nirncraft:glass_sword"
+      },
+      "consequence_detail": {
+        "world_state": "gnaar_mok_harbour_accord_restored",
+        "flag": "story_bc_finale_complete",
+        "summary": "The Khartag Point beacon shines clearly through the marsh fog and Gnaar Mok's fishers trade free of corrupt shakedowns."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_bitter_coast_hook_npc",
+      "name": "Warden of Gnaar Mok",
+      "role": "guard",
+      "place": "gnaar_mok",
+      "greet": "On the wooden boardwalks of Gnaar Mok, net-fishers whisper that an Imperial revenue cutter vanished in the fog off Khartag Point while bribed excise clerks look the other way."
+    }
+  ],
+  "scenes": {
+    "story_bitter_coast_scene_01": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (1).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_02": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (2).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_03": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (3).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_04": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (4).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_05": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (5).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_06": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (6).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_07": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (7).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_08": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (8).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_09": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (9).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_10": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (10).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_11": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (11).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_12": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (12).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_13": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (13).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_14": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (14).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_15": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (15).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_16": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (16).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_17": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (17).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_18": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (18).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_19": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (19).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_20": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (20).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_21": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (21).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_22": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (22).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_23": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (23).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_24": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (24).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_25": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (25).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_26": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (26).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_27": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (27).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_28": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (28).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_29": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (29).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_30": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (30).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_31": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (31).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_32": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (32).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_33": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (33).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_34": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (34).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_35": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (35).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_36": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (36).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_37": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (37).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_38": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (38).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_39": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (39).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_40": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (40).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_41": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (41).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_42": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (42).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_43": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (43).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_44": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (44).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_45": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (45).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_46": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (46).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_47": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (47).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_48": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (48).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_49": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (49).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_50": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (50).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_51": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (51).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_52": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (52).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_53": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (53).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_54": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (54).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_55": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (55).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_56": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (56).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_57": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (57).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_58": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (58).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_59": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (59).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_60": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (60).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_61": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (61).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_62": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (62).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_63": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (63).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_64": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (64).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_65": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (65).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_66": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (66).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_67": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (67).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_68": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (68).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_69": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (69).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_70": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (70).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_71": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (71).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_72": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (72).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_73": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (73).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_74": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (74).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_75": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (75).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_76": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (76).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_77": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (77).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_78": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (78).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_79": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (79).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_80": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (80).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ],
+    "story_bitter_coast_scene_81": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Gnaar Mok (81).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Gnaar Mok at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Gnaar Mok and report back to the seat."
+    ],
+    "story_bitter_coast_scene_82": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Dralas Ancestral Tomb (82).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Dralas Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Dralas Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_83": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Sarano Ancestral Tomb (83).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Sarano Ancestral Tomb at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Sarano Ancestral Tomb and report back to the seat."
+    ],
+    "story_bitter_coast_scene_84": [
+      "Warden of Gnaar Mok: Examine the ash-wax seals recovered near Nammu (84).",
+      "Watch-Captain of Bitter Coast: The ledger entries match the dispatches troubling Bitter Coast.",
+      "Watch-Captain of Bitter Coast: Our scouts tracked the courier column past Nammu at dusk.",
+      "Watch-Captain of Bitter Coast: Secure the approaches around Nammu and report back to the seat."
+    ]
+  }
+}

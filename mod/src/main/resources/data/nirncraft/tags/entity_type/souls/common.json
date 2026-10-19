@@ -1,0 +1,73 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:troll",
+      "required": false
+    },
+    {
+      "id": "nirncraft:chaurus_hunter",
+      "required": false
+    },
+    {
+      "id": "nirncraft:flame_atronach",
+      "required": false
+    },
+    {
+      "id": "nirncraft:draugr",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dwarven_sphere",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gargoyle",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ogre",
+      "required": false
+    },
+    {
+      "id": "nirncraft:land_dreugh",
+      "required": false
+    },
+    {
+      "id": "nirncraft:netch",
+      "required": false
+    },
+    {
+      "id": "nirncraft:echatere",
+      "required": false
+    },
+    {
+      "id": "nirncraft:kamal",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ash_spawn",
+      "required": false
+    },
+    {
+      "id": "nirncraft:giant_scorpion",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dwarven_ballista",
+      "required": false
+    },
+    {
+      "id": "nirncraft:realm_wyrm",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hagraven",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dreugh",
+      "required": false
+    }
+  ]
+}

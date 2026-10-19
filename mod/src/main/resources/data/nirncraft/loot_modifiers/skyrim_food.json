@@ -1,0 +1,7 @@
+{
+  "type": "nirncraft:add_table",
+  "table": "nirncraft:chests/skyrim_food",
+  "prefix": "chests/",
+  "chance": 0.4,
+  "priority": 11
+}

@@ -1,7 +1,7 @@
 # World testing workflow
 
 Read `docs/START-HERE.md` and `docs/LIVE-WORLD-PREVIEW.md`. Operate only the disposable
-Skycraft-autotest instance; check status and reuse its world. Preserve the owner's normal instance.
+NirnCraft-autotest instance; check status and reuse its world. Preserve the owner's normal instance.
 Do not run a headless server alongside its integrated server or two drivers against the live queue.
 
 `tools/qa/world_test.py` composes existing audits and real preview controls. Its manifest,
@@ -76,15 +76,15 @@ The named disposable actors use real server entities; stationary targets explici
 `cast start/stop` sends the normal Cast packet; `fx` remains a synthetic renderer-only exercise.
 `use down/up` uses the ordinary client game-mode use-item packet and holds/releases the use key for staffs and items. Both have a200-tick safety release.
 Staff streaming range is8 blocks; the staff fixture target is6 blocks away, while the hand-spell fixture is9 blocks away.
-Use `skycraft:npc` for tracked NPC fixtures: vanilla villagers are intentionally converted by the mod.
+Use `nirncraft:npc` for tracked NPC fixtures: vanilla villagers are intentionally converted by the mod.
 The scenario runner releases inputs and runs named cleanup even on failure. Crashed sessions may
-retain entities tagged `skycraft_qa_fixture`; inspect that disposable save before resuming fixtures.
+retain entities tagged `nirncraft_qa_fixture`; inspect that disposable save before resuming fixtures.
 
-`skycraft-dev route TAG X Y Z TARGET_X TARGET_Y TARGET_Z` uses the engine's real villager navigation,
+`nirncraft-dev route TAG X Y Z TARGET_X TARGET_Y TARGET_Z` uses the engine's real villager navigation,
 with loaded search bounds and no spawned probe entity. It records nodes, reachability, seed, dimension,
 bake inputs and duration in `world-preview/routes/`. This proves bounded path existence with opening
 doors allowed; it does not prove a live NPC completed a schedule or door interaction. Test both.
-`skycraft-dev save` provides an observed save completion in integrated previews, where vanilla
+`nirncraft-dev save` provides an observed save completion in integrated previews, where vanilla
 `save-all` is not registered.
 
 Foreign-region flow audits consume `geography.py refresh`, a headless Java survey of the actual map
@@ -96,7 +96,7 @@ stand in for it. Validate X/Z seams, diagonal crossings, boats/passengers and de
 Missing/stale geography produces unavailable metrics, never an invented0.01km2 land area.
 
 
-`skycraft-dev scenario move TAG X Y Z` starts actual mob navigation for a named actor (loaded goal within64m).
+`nirncraft-dev scenario move TAG X Y Z` starts actual mob navigation for a named actor (loaded goal within64m).
 `cave-navigation.json` waits for observed arrival; this supplements the read-only path probe without pretending
 that a short walkway covers schedules, doors or whole dungeons. Explicit command rejection aborts a scenario
 immediately. An assertion deadline is only for an active operation with no completion signal yet.
@@ -125,7 +125,7 @@ installation/save is moved. Runtime roots are restricted to owned QA folders and
 For exact headless-world visual review, first stop the server and disposable client, then:
 
 ```powershell
-py -3 tools/dev/preview_world.py import E:/Skycraft-scratch/world-benchmark/RUN/world qa_road_review
+py -3 tools/dev/preview_world.py import E:/NirnCraft-scratch/world-benchmark/RUN/world qa_road_review
 py -3 tools/dev/live_world.py launch
 # Inspect real plan/route, scout, approve camera for this actual seed and generation, then capture.
 py -3 tools/dev/live_world.py close
@@ -139,7 +139,7 @@ from another seed are correctly stale in this road world. Never change their see
 The same core's remapped/runtime bake bytecode hashes can differ from mapped headless bakes; retain the original
 world snapshot and runtime identity and verify actual geometry. Do not regenerate away a bug before reproducing it.
 
-Navigation fixtures use native Skycraft NPCs with active physics, wait for actual `onGround`, and repeatedly
+Navigation fixtures use native NirnCraft NPCs with active physics, wait for actual `onGround`, and repeatedly
 request the goal only while arrival remains unobserved. This is controlled locomotion, not autonomous schedules.
 MINE room3's actual walking height is88; the camera at89 is clear and aims at body height89. Target actors must
 stand at88, not float one block above the floor. The staff target is6m away; the hand-spell target9m away.

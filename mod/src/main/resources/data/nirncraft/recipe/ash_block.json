@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": "nirncraft:ash_layer"
+  },
+  "result": {
+    "id": "nirncraft:ash_block"
+  }
+}

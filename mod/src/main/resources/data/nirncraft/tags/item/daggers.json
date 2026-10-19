@@ -1,0 +1,36 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:iron_dagger",
+    "nirncraft:steel_dagger",
+    "nirncraft:orcish_dagger",
+    "nirncraft:dwarven_dagger",
+    "nirncraft:elven_dagger",
+    "nirncraft:glass_dagger",
+    "nirncraft:ebony_dagger",
+    "nirncraft:daedric_dagger",
+    "nirncraft:dragonbone_dagger",
+    "nirncraft:silver_dagger",
+    "nirncraft:ancient_nord_dagger",
+    "nirncraft:forsworn_dagger",
+    "nirncraft:imperial_dagger",
+    "nirncraft:falmer_dagger",
+    "nirncraft:nordic_dagger",
+    "nirncraft:skyforge_dagger",
+    "nirncraft:akaviri_dagger",
+    "nirncraft:stalhrim_dagger",
+    "nirncraft:chitin_dagger",
+    "nirncraft:redguard_dagger",
+    "nirncraft:yokudan_dagger",
+    "nirncraft:khajiit_dagger",
+    "nirncraft:bosmer_dagger",
+    "nirncraft:breton_dagger",
+    "nirncraft:argonian_dagger",
+    "nirncraft:atmoran_dagger",
+    "nirncraft:maormer_dagger",
+    {
+      "id": "#nirncraft:arsenal/daggers",
+      "required": false
+    }
+  ]
+}

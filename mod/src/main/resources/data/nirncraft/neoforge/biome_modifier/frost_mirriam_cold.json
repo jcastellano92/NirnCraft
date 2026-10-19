@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#nirncraft:spawns/cold",
+  "features": "nirncraft:frost_mirriam_patch",
+  "step": "vegetal_decoration"
+}

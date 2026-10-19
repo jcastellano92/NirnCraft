@@ -19,19 +19,19 @@ spec.loader.exec_module(live)
 NATIVE_CORE = {
     'META-INF/neoforge.mods.toml': b'''license="MIT"
 [[mods]]
-modId="skycraft"
+modId="nirncraft"
 version="0.1.0"
-[[dependencies.skycraft]]
+[[dependencies.nirncraft]]
 modId="minecraft"
 type="required"
 versionRange="[26.3]"
-[[dependencies.skycraft]]
+[[dependencies.nirncraft]]
 modId="neoforge"
 type="required"
 versionRange="[26.3.0.90,26.4)"
 ''',
     # Only the class header is inspected by the offline platform validator.
-    'com/skycraft/Skycraft.class': b'\xca\xfe\xba\xbe\0\0\0\x45',
+    'com/nirncraft/NirnCraft.class': b'\xca\xfe\xba\xbe\0\0\0\x45',
 }
 
 
@@ -40,16 +40,16 @@ class PreviewTest(unittest.TestCase):
         for valid in (True,False):
             with self.subTest(valid=valid),tempfile.TemporaryDirectory() as folder:
                 root=Path(folder);game=root/'game';dev=game/'world-preview';(dev/'outbox').mkdir(parents=True)
-                core=game/'mods/skycraft-core.jar';core.parent.mkdir();new=root/'new.jar'
+                core=game/'mods/nirncraft-core.jar';core.parent.mkdir();new=root/'new.jar'
                 expected='a'*64;stale='b'*64
                 for path,key in ((core,stale),(new,expected if valid else stale)):
                     raw=b'\x00\x40'+key.encode()+zlib.compress(b'plan')
                     names=[n+'.bin' for n in ('landmass','roadplan','streetplan','sceneplan')]
                     with zipfile.ZipFile(path,'w') as z:
                         for name,data in NATIVE_CORE.items():z.writestr(name,data)
-                        z.writestr('com/skycraft/bake/Bake.class',b'same-validator')
-                        z.writestr('skycraft/baked/manifest.json',json.dumps({'format':1,'inputs':key,'files':names}))
-                        for name in names:z.writestr('skycraft/baked/'+name,raw)
+                        z.writestr('com/nirncraft/bake/Bake.class',b'same-validator')
+                        z.writestr('nirncraft/baked/manifest.json',json.dumps({'format':1,'inputs':key,'files':names}))
+                        for name in names:z.writestr('nirncraft/baked/'+name,raw)
                 original=core.read_bytes()
                 (dev/'outbox/runtime.json').write_text(json.dumps({'coreSha256':hashlib.sha256(original).hexdigest()}))
                 (dev/'outbox/bake-packaged-inputs').write_text(expected)
@@ -61,12 +61,12 @@ class PreviewTest(unittest.TestCase):
                         self.assertEqual(original,core.read_bytes())
                 if valid:
                     with zipfile.ZipFile(core) as z:
-                        self.assertEqual(expected,json.loads(z.read('skycraft/baked/manifest.json'))['inputs'])
+                        self.assertEqual(expected,json.loads(z.read('nirncraft/baked/manifest.json'))['inputs'])
 
     def test_staging_runtime_bakes_requires_exact_dependencies_and_does_not_touch_installed_core(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);game=root/'game';dev=game/'world-preview';(dev/'outbox').mkdir(parents=True)
-            core=game/'mods/skycraft-core.jar';core.parent.mkdir();candidate=root/'candidate.jar'
+            core=game/'mods/nirncraft-core.jar';core.parent.mkdir();candidate=root/'candidate.jar'
             expected='b'*64;bakes=root/'bakes';bakes.mkdir()
             names=[n+'.bin' for n in ('landmass','roadplan','streetplan','sceneplan')]
             raw=b'\x00\x40'+expected.encode()+zlib.compress(b'verified plan')
@@ -75,9 +75,9 @@ class PreviewTest(unittest.TestCase):
             for path in (core,candidate):
                 with zipfile.ZipFile(path,'w') as archive:
                     for name,data in NATIVE_CORE.items():archive.writestr(name,data)
-                    archive.writestr('com/skycraft/bake/Bake.class',b'same-validator')
+                    archive.writestr('com/nirncraft/bake/Bake.class',b'same-validator')
                     archive.writestr('dependency',expected)
-                    archive.writestr('skycraft/baked/manifest.json',b'stale')
+                    archive.writestr('nirncraft/baked/manifest.json',b'stale')
                     archive.writestr('unrelated-rendering',b'new' if path==candidate else b'old')
             original=core.read_bytes();old_digest=hashlib.sha256(original).hexdigest()
             (dev/'outbox/runtime.json').write_text(json.dumps({'coreSha256':old_digest}))
@@ -89,23 +89,23 @@ class PreviewTest(unittest.TestCase):
                 self.assertEqual(original,core.read_bytes())
                 with zipfile.ZipFile(staged) as archive:
                     self.assertEqual(b'new',archive.read('unrelated-rendering'))
-                    self.assertEqual(raw,archive.read('skycraft/baked/roadplan.bin'))
+                    self.assertEqual(raw,archive.read('nirncraft/baked/roadplan.bin'))
                 with self.assertRaises(ValueError):live.stage_core(candidate,bakes,staged)
                 with patch.object(live,'jar_bake_inputs',return_value='changed'):
                     with self.assertRaises(ValueError):live.stage_core(candidate,bakes,root/'rejected.jar')
                 self.assertFalse((root/'rejected.jar').exists())
 
     def test_install_preserves_runtime_bakes_only_when_every_other_change_is_qa(self):
-        for changed in ('com/skycraft/client/autotest/VisualCamera.class', 'com/skycraft/dungeons/world/Builder.class'):
+        for changed in ('com/nirncraft/client/autotest/VisualCamera.class', 'com/nirncraft/dungeons/world/Builder.class'):
             with self.subTest(changed=changed), tempfile.TemporaryDirectory() as temp:
                 root=Path(temp); game=root/'game'; dev=game/'world-preview'
-                core=game/'mods/skycraft-core.jar'; core.parent.mkdir(parents=True)
+                core=game/'mods/nirncraft-core.jar'; core.parent.mkdir(parents=True)
                 (dev/'outbox').mkdir(parents=True)
                 inputs='a'*64
                 names=[n+'.bin' for n in ('landmass','roadplan','streetplan','sceneplan')]
                 raw=b'\x00\x40'+inputs.encode()+zlib.compress(b'verified runtime payload')
-                entries={**NATIVE_CORE,**{'skycraft/baked/'+n:raw for n in names},
-                         'skycraft/baked/manifest.json':json.dumps({'format':1,'inputs':inputs,'files':names}).encode(),
+                entries={**NATIVE_CORE,**{'nirncraft/baked/'+n:raw for n in names},
+                         'nirncraft/baked/manifest.json':json.dumps({'format':1,'inputs':inputs,'files':names}).encode(),
                          changed:b'old class'}
                 with zipfile.ZipFile(core,'w') as z:
                     for name,data in entries.items(): z.writestr(name,data)
@@ -113,38 +113,38 @@ class PreviewTest(unittest.TestCase):
                 (dev/'outbox/bake-packaged-inputs').write_text(inputs)
                 fresh=root/'new.jar'
                 entries[changed]=b'new class'
-                entries['skycraft/baked/roadplan.bin']=b'source mapped bake'
+                entries['nirncraft/baked/roadplan.bin']=b'source mapped bake'
                 with zipfile.ZipFile(fresh,'w') as z:
                     for name,data in entries.items(): z.writestr(name,data)
                 with patch.object(live,'GAME',game), patch.object(live,'DEV',dev), patch.object(live,'processes',return_value=[]):
                     with contextlib.redirect_stdout(io.StringIO()): live.install_core(fresh)
                 with zipfile.ZipFile(core) as z:
                     expected=raw if '/autotest/' in changed else b'source mapped bake'
-                    self.assertEqual(expected,z.read('skycraft/baked/roadplan.bin'))
+                    self.assertEqual(expected,z.read('nirncraft/baked/roadplan.bin'))
                     self.assertEqual(b'new class',z.read(changed))
 
     def test_bake_dependency_digest_includes_paths_code_and_data_but_not_unrelated_code(self):
         with tempfile.TemporaryDirectory() as temp:
-            root=Path(temp);source=root/'mod/src/main/java/com/skycraft/bake/Bake.java';source.parent.mkdir(parents=True)
-            source.write_text('private static final int FORMAT=1; String[] MAP_FILES={"regions.json"}; String[] DATA_FILES={"/skycraft/rules.json"}; String[] CLASSES={"com.skycraft.Plan"};')
-            entries={'skycraft/tamriel/regions.json':b'[]','skycraft/rules.json':b'{}',
-                     'com/skycraft/Plan.class':b'planner','com/skycraft/client/UI.class':b'ui'}
+            root=Path(temp);source=root/'mod/src/main/java/com/nirncraft/bake/Bake.java';source.parent.mkdir(parents=True)
+            source.write_text('private static final int FORMAT=1; String[] MAP_FILES={"regions.json"}; String[] DATA_FILES={"/nirncraft/rules.json"}; String[] CLASSES={"com.nirncraft.Plan"};')
+            entries={'nirncraft/tamriel/regions.json':b'[]','nirncraft/rules.json':b'{}',
+                     'com/nirncraft/Plan.class':b'planner','com/nirncraft/client/UI.class':b'ui'}
             def hashed():
                 path=root/'test.jar'
                 with zipfile.ZipFile(path,'w') as jar:
                     for name,value in entries.items():jar.writestr(name,value)
                 with zipfile.ZipFile(path) as jar,patch.object(live,'REPO',root):return live.jar_bake_inputs(jar)
-            original=hashed();entries['com/skycraft/client/UI.class']=b'new ui'
+            original=hashed();entries['com/nirncraft/client/UI.class']=b'new ui'
             self.assertEqual(original,hashed())
-            entries['com/skycraft/Plan.class']=b'changed planner'
+            entries['com/nirncraft/Plan.class']=b'changed planner'
             self.assertNotEqual(original,hashed())
-            entries['com/skycraft/Plan.class']=b'planner';entries['skycraft/rules.json']=b'{"road":2}'
+            entries['com/nirncraft/Plan.class']=b'planner';entries['nirncraft/rules.json']=b'{"road":2}'
             self.assertNotEqual(original,hashed())
 
     def test_invalid_json_preserves_active_pointer(self):
         with tempfile.TemporaryDirectory() as temp:
             repo, dev = Path(temp) / "repo", Path(temp) / "dev"
-            source = repo / "mod/src/main/resources/skycraft/tamriel/palettes.json"
+            source = repo / "mod/src/main/resources/nirncraft/tamriel/palettes.json"
             source.parent.mkdir(parents=True)
             source.write_text('{"palettes": {}}')
             with patch.object(live, "REPO", repo), patch.object(live, "DEV", dev):
@@ -158,8 +158,8 @@ class PreviewTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             repo, dev = Path(temp) / "repo", Path(temp) / "dev"
             root = repo / "mod/src/main/resources"
-            palette = root / "skycraft/tamriel/palettes.json"
-            scene = root / "skycraft/scatter/kinds.json"
+            palette = root / "nirncraft/tamriel/palettes.json"
+            scene = root / "nirncraft/scatter/kinds.json"
             for file in (palette, scene):
                 file.parent.mkdir(parents=True, exist_ok=True)
                 file.write_text('{}')
@@ -169,8 +169,8 @@ class PreviewTest(unittest.TestCase):
                 scene.unlink()
                 live.snapshot("scenes")
                 files = live.read_json(dev / "resources/current.json")["files"]
-                self.assertIn("/skycraft/tamriel/palettes.json", files)
-                self.assertNotIn("/skycraft/scatter/kinds.json", files)
+                self.assertIn("/nirncraft/tamriel/palettes.json", files)
+                self.assertNotIn("/nirncraft/scatter/kinds.json", files)
 
     def test_bundle_rejects_corrupt_mixed_and_stale_bakes(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -195,7 +195,7 @@ class PreviewTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             repo, dev = Path(temp) / "repo", Path(temp) / "dev"
             root = repo / "mod/src/main/resources"
-            for rel in ("skycraft/tamriel/palettes.json", "skycraft/scatter/kinds.json"):
+            for rel in ("nirncraft/tamriel/palettes.json", "nirncraft/scatter/kinds.json"):
                 path = root / rel
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text('{}')
@@ -207,7 +207,7 @@ class PreviewTest(unittest.TestCase):
                 ready.write_text('456\nsecond boot\n')
                 live.snapshot("palettes")
                 files = live.read_json(dev / "resources/current.json")["files"]
-                self.assertEqual(["/skycraft/tamriel/palettes.json"], list(files))
+                self.assertEqual(["/nirncraft/tamriel/palettes.json"], list(files))
 
 
 if __name__ == "__main__":

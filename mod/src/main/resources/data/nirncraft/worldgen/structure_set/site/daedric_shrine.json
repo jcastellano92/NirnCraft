@@ -1,0 +1,33 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/daedric_shrine",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274042,
+    "types": [
+      "daedric_shrine"
+    ],
+    "variants": [
+      "azura",
+      "boethiah",
+      "clavicus_vile",
+      "hermaeus_mora",
+      "hircine",
+      "malacath",
+      "mehrunes_dagon",
+      "mephala",
+      "meridia",
+      "molag_bal",
+      "namira",
+      "nocturnal",
+      "peryite",
+      "sanguine",
+      "sheogorath",
+      "vaermina"
+    ]
+  }
+}

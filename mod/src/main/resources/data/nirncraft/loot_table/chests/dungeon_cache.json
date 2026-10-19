@@ -1,0 +1,121 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:chests/gold"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:septim",
+          "weight": 1,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 15,
+              "max": 45
+            },
+            "type": "minecraft:set_count"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 30,
+          "modifier": {
+            "kind": "weapon",
+            "enchant_chance": 0.25,
+            "quality_chance": 0.3,
+            "type": "nirncraft:regional_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_chestplate",
+          "weight": 30,
+          "modifier": {
+            "kind": "armor",
+            "enchant_chance": 0.25,
+            "quality_chance": 0.3,
+            "type": "nirncraft:regional_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bow",
+          "weight": 10,
+          "modifier": {
+            "kind": "bow",
+            "enchant_chance": 0.25,
+            "quality_chance": 0.3,
+            "type": "nirncraft:leveled_gear"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 12,
+          "value": "nirncraft:chests/spell_tomes"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 8,
+          "value": "nirncraft:chests/skill_books"
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 14,
+          "value": "nirncraft:chests/soul_gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 10,
+          "value": "nirncraft:chests/lockpicks"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:ruby",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:sapphire",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:emerald",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 12,
+          "value": "nirncraft:chests/alchemy_ingredients"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:chests/dungeon_cache"
+}

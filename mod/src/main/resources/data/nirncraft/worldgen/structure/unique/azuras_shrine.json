@@ -1,0 +1,17 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "prince_shrine",
+  "special": "azura",
+  "place": {
+    "types": [
+      "daedric_shrine"
+    ],
+    "variants": [
+      "azura_great"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

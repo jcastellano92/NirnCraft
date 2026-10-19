@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:magma_volcanic_rock",
-    "skycraft:deadlands_magma_rock"
+    "nirncraft:magma_volcanic_rock",
+    "nirncraft:deadlands_magma_rock"
   ]
 }

@@ -35,10 +35,10 @@ class IsolatedNativePreviewTest(unittest.TestCase):
         (self.instance / "instance.cfg").write_text("name=Fixture\nJvmArgs=-XX:+UseG1GC\nOverrideJavaLocation=false\n")
         (self.instance / "mmc-pack.json").write_text(json.dumps({"components": [
             {"uid": "net.minecraft", "version": "26.3"}, {"uid": "net.neoforged", "version": "26.3.0.90"}]}))
-        metadata = '[[mods]]\nmodId="skycraft"\n[[dependencies.skycraft]]\nmodId="minecraft"\nversionRange="[26.3]"\n[[dependencies.skycraft]]\nmodId="neoforge"\n'
-        with zipfile.ZipFile(game / "mods/skycraft-core.jar", "w") as jar:
+        metadata = '[[mods]]\nmodId="nirncraft"\n[[dependencies.nirncraft]]\nmodId="minecraft"\nversionRange="[26.3]"\n[[dependencies.nirncraft]]\nmodId="neoforge"\n'
+        with zipfile.ZipFile(game / "mods/nirncraft-core.jar", "w") as jar:
             jar.writestr("META-INF/neoforge.mods.toml", metadata)
-            jar.writestr("com/skycraft/Skycraft.class", bytes.fromhex("cafebabe00000045"))
+            jar.writestr("com/nirncraft/NirnCraft.class", bytes.fromhex("cafebabe00000045"))
         (game / "mods/dependency.jar").write_bytes(b"temporary fixture")
         self.lock = {"target": prepare.TARGET, "active": [{"filename": "dependency.jar", "side": "both",
             "hashFormat": "sha256", "hash": hashlib.sha256(b"temporary fixture").hexdigest()}]}
@@ -81,7 +81,7 @@ class IsolatedNativePreviewTest(unittest.TestCase):
     def test_prepare_preserves_old_instances_and_backs_up_native_saves(self):
         prism = self.root / "Prism"
         instances = prism / "instances"
-        for name in ("Skycraft", "Skycraft-autotest", prepare.INSTANCE_NAME):
+        for name in ("NirnCraft", "NirnCraft-autotest", prepare.INSTANCE_NAME):
             (instances / name).mkdir(parents=True)
             (instances / name / "keep").write_text(name)
         with patch.object(prepare, "validate_pack", return_value=self.lock), \
@@ -89,14 +89,14 @@ class IsolatedNativePreviewTest(unittest.TestCase):
              patch.object(prepare, "exact_processes", return_value=[]):
             result = prepare.prepare(self.archive, prism, None, live=True, tour="Épic:0:0:180")
         self.assertFalse(result["launched"])
-        for name in ("Skycraft", "Skycraft-autotest"):
+        for name in ("NirnCraft", "NirnCraft-autotest"):
             self.assertEqual(name, (instances / name / "keep").read_text())
         self.assertEqual(prepare.INSTANCE_NAME, (Path(result["backup"]) / "keep").read_text())
         native = Path(result["instance"])
         cfg = (native / "instance.cfg").read_text()
         self.assertIn("OverrideJavaLocation=true", cfg)
-        self.assertIn("-Dskycraft.dev=world-preview", cfg)
-        self.assertIn("\\u00c9pic", (native / ".minecraft/skycraft_autotest.properties").read_text())
+        self.assertIn("-Dnirncraft.dev=world-preview", cfg)
+        self.assertIn("\\u00c9pic", (native / ".minecraft/nirncraft_autotest.properties").read_text())
 
     def test_busy_instance_is_never_replaced(self):
         prism = self.root / "Prism"
@@ -118,9 +118,9 @@ class IsolatedNativePreviewTest(unittest.TestCase):
             result = prepare.prepare(self.archive, prism, None, live=True, server="127.0.0.1:25576")
         native = Path(result["instance"])
         prepare.validate_instance(native, self.lock)
-        props = (native / ".minecraft/skycraft_autotest.properties").read_text()
-        self.assertIn("skycraft.autotest.server=127.0.0.1:25576", props)
-        self.assertIn("skycraft.autotest.world=\n", props)
+        props = (native / ".minecraft/nirncraft_autotest.properties").read_text()
+        self.assertIn("nirncraft.autotest.server=127.0.0.1:25576", props)
+        self.assertIn("nirncraft.autotest.world=\n", props)
         receipt = json.loads((native / ".minecraft/migration/preview-receipt.json").read_text())
         self.assertEqual("tcp", receipt["expectedTransport"])
         self.assertFalse(receipt["runtimeVerified"])

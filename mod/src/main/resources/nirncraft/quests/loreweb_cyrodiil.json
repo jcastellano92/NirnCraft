@@ -1,0 +1,392 @@
+{
+  "line": "loreweb_cyrodiil",
+  "category": "side",
+  "bosses": {
+    "lw_cyr_1_boss": {
+      "name": "The Warden of Names",
+      "type": "nirncraft:necromancer",
+      "hp": 3,
+      "dmg": 1.4,
+      "level": 20,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "lw_cyr_2_boss": {
+      "name": "Maelis the Candle-Bearer",
+      "type": "nirncraft:dremora",
+      "hp": 3.2,
+      "dmg": 1.5,
+      "level": 22,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "lw_cyr_3_boss": {
+      "name": "Hatsu the Unrung",
+      "type": "nirncraft:draugr_deathlord",
+      "hp": 3.4,
+      "dmg": 1.5,
+      "level": 24,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "lw_cyr_4_boss": {
+      "name": "Auditor Vell Corvus",
+      "type": "nirncraft:vampire",
+      "hp": 2.8,
+      "dmg": 1.3,
+      "level": 22,
+      "drop": "loot:standard",
+      "glow": false
+    }
+  },
+  "quests": [
+    {
+      "id": "lw_cyr_1_a",
+      "title": "The Debt of Names",
+      "region": "cyrodiil/blackwood",
+      "start": "find",
+      "find": {
+        "place": "shardiuss_excavation",
+        "offset": [
+          18,
+          12
+        ],
+        "radius": 4,
+        "clue": "stone",
+        "text": "A scaffold post has been chalked with a tally of a thousand strokes, and beneath it, scratched deep: 'Do not say them aloud. Take the rubbing to the Alessian gate.' A grape leaf is pinned through the tally."
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A tally of a thousand names at an abandoned Ayleid dig led me toward an Alessian gate and a family of winemakers.",
+      "pitch": "Diggers at the cut-away stopped work when someone read a name aloud. They were paid in wine, not coin.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "gate_of_alma_ruma",
+          "text": "At the Gate of Alma Ruma, match the rubbing to the cut-out page and follow it to a winery."
+        },
+        {
+          "type": "go",
+          "place": "thalaras_winery",
+          "text": "Drink the Remembrance vintage at Thalaras Winery and follow what it shows."
+        }
+      ],
+      "rewards": {
+        "gold": 170,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The wine, the pool and the Count's silent castle all point at the vault of names under Miscarcand.",
+      "why": [
+        "blackwood.L9.mercenary_company",
+        "blackwood.L8.zenithar_chapel"
+      ]
+    },
+    {
+      "id": "lw_cyr_1_b",
+      "title": "The Debt of Names (II)",
+      "region": "cyrodiil/blackwood",
+      "start": "auto",
+      "requires": [
+        "quest:lw_cyr_1_a"
+      ],
+      "desc": "The wine, the pool and the Count's silent castle all point at the vault of names under Miscarcand.",
+      "pitch": "Diggers at the cut-away stopped work when someone read a name aloud. They were paid in wine, not coin.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "mist_mirror_refuge",
+          "text": "Read the names in the mirror pool at night, then carry them to Skingrad."
+        },
+        {
+          "type": "go",
+          "place": "skingrad",
+          "text": "Slip into the Count's cellar at Skingrad and take the steward's key."
+        },
+        {
+          "type": "kill",
+          "place": "miscarcand",
+          "text": "Reach the vault under Miscarcand and settle the Warden's debt.",
+          "spawn": [
+            {
+              "boss_id": "lw_cyr_1_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 420,
+        "loot": "major",
+        "flags": [
+          "lw_cyr_1_done"
+        ],
+        "unique": "welkynd_sliver"
+      },
+      "outro": "The last warden fell silent and the plate of names lay in my hands. I could carry it to a priest, a vintner or a flame. What is owed to the dead is a hard thing to settle.",
+      "why": [
+        "blackwood.L9.mercenary_company",
+        "blackwood.L8.zenithar_chapel"
+      ]
+    },
+    {
+      "id": "lw_cyr_2_a",
+      "title": "The Gate That Was Opened",
+      "region": "cyrodiil/nibenay_valley",
+      "start": "find",
+      "find": {
+        "place": "lunar_fang_docks",
+        "offset": [
+          10,
+          -6
+        ],
+        "radius": 4,
+        "clue": "lectern",
+        "text": "A dock lectern holds a salt-stained prayer-sheet to 'the ones the water kept', every line struck through but the last: 'Light the Candle when the tide is out. The door is only latched, not locked.'"
+      },
+      "requires": [
+        "level:20"
+      ],
+      "desc": "A drowned-men's prayer at the Lunar Fang Docks speaks of a door that was only latched. It led me to a hidden sanctuary and a ruined city.",
+      "pitch": "Fishermen at the Lunar Fang Docks light a single candle each low tide and will not say for whom.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "dark_brotherhood_sanctuary_cyrodiil",
+          "text": "Break the inner coffin-room at the Cyrodiil Sanctuary and read the dead priest's letter."
+        },
+        {
+          "type": "go",
+          "place": "anvil",
+          "text": "Climb the Anvil lighthouse and ask who has been lighting it."
+        }
+      ],
+      "rewards": {
+        "gold": 210,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The trail of the Ashen Candle ends at the crater edge where the Gate first opened.",
+      "why": [
+        "nibenay_valley.L9.corrupt_clerk",
+        "nibenay_valley.L8.mara_chapel"
+      ]
+    },
+    {
+      "id": "lw_cyr_2_b",
+      "title": "The Gate That Was Opened (II)",
+      "region": "cyrodiil/nibenay_valley",
+      "start": "auto",
+      "requires": [
+        "quest:lw_cyr_2_a"
+      ],
+      "desc": "The trail of the Ashen Candle ends at the crater edge where the Gate first opened.",
+      "pitch": "Fishermen at the Lunar Fang Docks light a single candle each low tide and will not say for whom.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "deepscorn_hollow",
+          "text": "Wade the Hollow at low tide and carry its bone candle to Kvatch."
+        },
+        {
+          "type": "go",
+          "place": "kvatch",
+          "text": "Dig through the north ward of Kvatch for the register of the night the Gate opened."
+        },
+        {
+          "type": "kill",
+          "place": "kvatch_gate",
+          "text": "At the crater lip of Kvatch Gate, face the last keeper of the door.",
+          "spawn": [
+            {
+              "boss_id": "lw_cyr_2_boss"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 520,
+        "loot": "major",
+        "flags": [
+          "lw_cyr_2_done"
+        ],
+        "unique": "umbra"
+      },
+      "outro": "At the crater lip I found the last candle still burning in a ring of lava glass. Whoever latched the door is long dead, but the debt they left is the city's to settle, not theirs.",
+      "why": [
+        "nibenay_valley.L9.corrupt_clerk",
+        "nibenay_valley.L8.mara_chapel"
+      ]
+    },
+    {
+      "id": "lw_cyr_3_a",
+      "title": "The Dragon-Hunters' Vigil",
+      "region": "cyrodiil/colovian_highlands",
+      "start": "find",
+      "find": {
+        "place": "weynon_priory",
+        "offset": [
+          -14,
+          20
+        ],
+        "radius": 4,
+        "clue": "stone",
+        "text": "A bell without a clapper hangs from the priory orchard wall. Scratched on its rim: 'Seven bells keep the door shut. Four are missing. Ask the statue what it watches.'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A clapperless bell in a priory orchard says seven bells keep a door shut and four are gone. It points to a statue on the Valus road.",
+      "pitch": "A priory brother says the bell in the orchard rings once a night with no hand on it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "the_sentinel",
+          "text": "Read the line of the Sentinel's hand and follow it to Bruma."
+        },
+        {
+          "type": "go",
+          "place": "bruma",
+          "text": "Find the old Bruma chapel bell and carry its clapper up to the Cloud Ruler."
+        }
+      ],
+      "rewards": {
+        "gold": 220,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The missing bells led from Bruma to a cliff-top keep and a wizard's rock, and on to the old Akaviri fortress.",
+      "why": [
+        "colovian_highlands.L9.guild_rivalry",
+        "colovian_highlands.L8.stendarr_chapel"
+      ]
+    },
+    {
+      "id": "lw_cyr_3_b",
+      "title": "The Dragon-Hunters' Vigil (II)",
+      "region": "cyrodiil/colovian_highlands",
+      "start": "auto",
+      "requires": [
+        "quest:lw_cyr_3_a"
+      ],
+      "desc": "The missing bells led from Bruma to a cliff-top keep and a wizard's rock, and on to the old Akaviri fortress.",
+      "pitch": "A priory brother says the bell in the orchard rings once a night with no hand on it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "cloud_ruler_temple",
+          "text": "Ask the Cloud Ruler archivist for the lowest ledger and follow it to the wizard's rock."
+        },
+        {
+          "type": "go",
+          "place": "frostcrag_spire",
+          "text": "Take the Frostcrag bell from the storm-room, or persuade its keeper to part with it."
+        },
+        {
+          "type": "kill",
+          "place": "sancre_tor",
+          "text": "Hang the seven bells in the deepest nave of Sancre Tor and face what answers.",
+          "spawn": [
+            {
+              "boss_id": "lw_cyr_3_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 560,
+        "loot": "major",
+        "flags": [
+          "lw_cyr_3_done"
+        ],
+        "unique": "dragonguard_katana"
+      },
+      "outro": "I set the last bell in its cradle at Sancre Tor and the air, which had been humming for days, went still. Whatever sleeps beneath the barrow, it sleeps for now.",
+      "why": [
+        "colovian_highlands.L9.guild_rivalry",
+        "colovian_highlands.L8.stendarr_chapel"
+      ]
+    },
+    {
+      "id": "lw_cyr_4_a",
+      "title": "The Ring Beneath the Rings",
+      "region": "cyrodiil/blackwood",
+      "start": "find",
+      "find": {
+        "place": "imperial_bridge_inn",
+        "offset": [
+          4,
+          9
+        ],
+        "radius": 4,
+        "clue": "lectern",
+        "text": "The innkeeper's accounts hang on a hook: a column headed 'water' where the bridge-inn pays more every season, in a hand that signs only 'by order of the Ring'."
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "An inn on a bridge pays a water-tax to something called the Ring. The same signature shows up in three cities.",
+      "pitch": "The innkeeper at the Imperial Bridge Inn says the river is falling, though it rained all week.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "chorrol",
+          "text": "Find the clerk's cipher in Chorrol's oak and read the sluice-list."
+        },
+        {
+          "type": "go",
+          "place": "cheydinhal",
+          "text": "Lower a bucket in Cheydinhal's refugee well and read the gate-list on the stone."
+        }
+      ],
+      "rewards": {
+        "gold": 190,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The Ring's water runs under every great city and ends beneath the Imperial City itself.",
+      "why": [
+        "blackwood.L9.mercenary_company",
+        "blackwood.L8.zenithar_chapel"
+      ]
+    },
+    {
+      "id": "lw_cyr_4_b",
+      "title": "The Ring Beneath the Rings (II)",
+      "region": "cyrodiil/blackwood",
+      "start": "auto",
+      "requires": [
+        "quest:lw_cyr_4_a"
+      ],
+      "desc": "The Ring's water runs under every great city and ends beneath the Imperial City itself.",
+      "pitch": "The innkeeper at the Imperial Bridge Inn says the river is falling, though it rained all week.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bravil",
+          "text": "Cut the welded hatch under the Lucky Old Lady and follow the water upriver."
+        },
+        {
+          "type": "kill",
+          "place": "imperial_city",
+          "text": "Open the sealed grate under the Waterfront and close the Ring.",
+          "spawn": [
+            {
+              "boss_id": "lw_cyr_4_boss"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 480,
+        "loot": "major",
+        "flags": [
+          "lw_cyr_4_done"
+        ]
+      },
+      "outro": "Below the Waterfront the old reservoir lay black and still, ringed by sluice-gates stamped with a clerk's seal. I closed one. It was a start, and I left proof for the Palace.",
+      "why": [
+        "blackwood.L9.mercenary_company",
+        "blackwood.L8.zenithar_chapel"
+      ]
+    }
+  ]
+}

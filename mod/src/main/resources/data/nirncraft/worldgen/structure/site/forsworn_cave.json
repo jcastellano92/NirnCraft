@@ -1,0 +1,18 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "cave",
+  "kit": "forsworn",
+  "flavor": 5,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "forsworn_cave"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

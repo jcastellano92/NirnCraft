@@ -1,0 +1,27 @@
+{
+  "feature": "nirncraft:biome/flora/trees_atmora_waste",
+  "placement": [
+    {
+      "type": "nirncraft:flora_scatter",
+      "spacing": 20,
+      "min_distance": 0.8,
+      "density": 0.2,
+      "floor": 0.0,
+      "field": {
+        "salt": 104,
+        "scale": 90,
+        "coverage": 0.22,
+        "softness": 0.2,
+        "kind": "fbm",
+        "mode": "inside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "OCEAN_FLOOR"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

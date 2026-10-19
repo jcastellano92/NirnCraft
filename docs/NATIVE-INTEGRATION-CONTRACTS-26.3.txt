@@ -1,14 +1,14 @@
-Skycraft data contracts for the external native visual integration
+NirnCraft data contracts for the external native visual integration
 Baseline: Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25
 
 This handoff describes existing data entry points. It does not certify the new
 external lighting/shader/distant-visual mod, enable preserved legacy integrations,
-or transfer ownership of Skycraft's authoritative gameplay simulation. No new
+or transfer ownership of NirnCraft's authoritative gameplay simulation. No new
 cross-mod snapshot facade is implemented by this document.
 
 Ownership and threading
 
-Skycraft owns weather decisions, regional climate, terrain/settlement plans,
+NirnCraft owns weather decisions, regional climate, terrain/settlement plans,
 dungeon metadata, spell gameplay and persistent player/world data. The external
 mod owns its rendering implementation. Consume data without advancing weather,
 forcing terrain loads, changing server clocks or editing saved plans to render.
@@ -49,20 +49,20 @@ the interpretation of already synchronized and persisted weather values.
 Weather data
 
 Common/server:
- com.skycraft.atmosphere.weather.RegionalWeather
+ com.nirncraft.atmosphere.weather.RegionalWeather
   kindOf(MinecraftServer,String regionId)
   kindAt(ServerLevel,BlockPos)
   windAt(ServerLevel,BlockPos) -- degrees in the existing yaw convention
   remaining(MinecraftServer,String regionId) -- ticks
   fronts(MinecraftServer) -- detached WeatherFront copies
   sampleFront(MinecraftServer,double x,double z) -- live selected front
- com.skycraft.atmosphere.weather.WeatherProfile.of(Region)
- com.skycraft.atmosphere.WeatherFront
+ com.nirncraft.atmosphere.weather.WeatherProfile.of(Region)
+ com.nirncraft.atmosphere.WeatherFront
   center/radius, velocity, WeatherKind, intensity, lifetime;
   intensityAt, rainBandAt and curtainDensityAt provide existing spatial weights.
 
 Physical client only:
- com.skycraft.atmosphere.client.ClientWeather
+ com.nirncraft.atmosphere.client.ClientWeather
   active(), kind(), profile(), region(), kindOf(String regionId)
   rain(), snow(), ash(), sand(), clouds(), fog(), wind()
   windDegrees(), windX(), windZ(), fronts(), sampleFront(double,double)
@@ -73,12 +73,12 @@ first update; kindOf may return null for an unknown region. active=false is a re
 state, not permission to create an independent authoritative weather simulation.
 
 WeatherPackets.Sync currently transmits full/delta regional entries and an
-optional front list. Skycraft applies these to ClientWeather. External rendering
-should consume that maintained state rather than decode skycraft:packet_N IDs.
+optional front list. NirnCraft applies these to ClientWeather. External rendering
+should consume that maintained state rather than decode nirncraft:packet_N IDs.
 
 Pure celestial/latitude helpers
 
-com.skycraft.atmosphere.AtmosphereMath contains thread-safe pure helpers for
+com.nirncraft.atmosphere.AtmosphereMath contains thread-safe pure helpers for
 latitude, aurora elevation/strength, moonCycle, moonLight and nightSkyVisibility.
 moonCycle takes clock ticks; moonLight takes solar angle in radians plus clock
 ticks and the Secunda flag. MoonLight is an immutable direction/illumination
@@ -88,7 +88,7 @@ Package-private NightSkyState and renderer texture layouts are internal details.
 
 Dungeon/interior data
 
-com.skycraft.atmosphere.DungeonAir.Volume is immutable metadata from actual saved
+com.nirncraft.atmosphere.DungeonAir.Volume is immutable metadata from actual saved
 dungeon pieces: x0/y0/z0 are minima, x1/y1/z1 are exclusive maxima, floor is a block
 height, and style identifies the existing local atmosphere profile. The current
 styles are 0 dust/mine/Dwemer, 1 ordinary underground, 2 ice/snow, 3 bioluminescent.
@@ -105,7 +105,7 @@ owning developer; do not read its private collections or duplicate simulation.
 
 Terrain and distant data
 
-com.skycraft.tamriel.TamrielMap and MapSample are existing project contracts:
+com.nirncraft.tamriel.TamrielMap and MapSample are existing project contracts:
  sample(int x,int z,MapSample out), region(x,z), regionIndex(x,z), elevation(x,z).
 Reuse one caller-owned MapSample per worker/thread. sampleScratch returns a
 read-only borrowed per-thread object, overwritten by later sampling: copy needed
@@ -120,7 +120,7 @@ can change the realized surface. Use actually loaded chunk/mesh data where exact
 geometry, occlusion, shadows or capture readiness matters; do not force generation
 from rendering or call ServerLevel services on generation/worker threads.
 
-com.skycraft.bake.Bake.inputsHash() identifies the current map/plan/code inputs.
+com.nirncraft.bake.Bake.inputsHash() identifies the current map/plan/code inputs.
 The landmass, roadplan, streetplan and sceneplan bakes are seed-independent plans;
 their format/input hash must match before reuse. That hash is not an entire
 world/session identity, final chunk data version, or a version for the external
@@ -129,7 +129,7 @@ world/session/dimension identity and source-data revision.
 
 Native generation and world coverage
 
-The normal generator remains native NoiseBasedChunkGenerator with Skycraft's
+The normal generator remains native NoiseBasedChunkGenerator with NirnCraft's
 density/material/biome inputs. 26.3 compiles noise/density samplers for the current
 world's seeded CompileContext; WorldNoise.bind is an internal bridge to that real
 sampler. Do not retain a previous world's compiled sampler or registry holders.
@@ -196,7 +196,7 @@ readiness checks until those inputs change. Keep atomic PNG/receipt publication
 and real readiness flags; a plausible image cannot override a failing witness.
 See VISUAL-TEST-CAMERAS.md and NATIVE-26.3-RENDER-HANDOFF.md for the existing frame
 and pass ownership. External lighting/shader/distant-renderer ownership remains
-separate from Skycraft's authoritative world generation and gameplay.
+separate from NirnCraft's authoritative world generation and gameplay.
 
 Network compatibility
 
@@ -206,7 +206,7 @@ Source 37 registers 124 payload types; always query the actual running catalogue
 Body-layout changes still require an explicit schema/version change. Do not append
 external registrations after SkyNetwork.init or depend on numeric packet_N names.
 A separate external protocol should own its own namespace/version and use native
-payload registration, while reading Skycraft data through an agreed adapter.
+payload registration, while reading NirnCraft data through an agreed adapter.
 
 Registry-bearing item/text codecs require the actual current connection/world
 registry context. Explicit HolderLookup.Provider overloads are required for

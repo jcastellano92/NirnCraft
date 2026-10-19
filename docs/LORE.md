@@ -12,10 +12,10 @@ Every region (and province) also has **rumours**, **local legends** and **folk s
 
 All of it is original writing. Lore facts and names come from the Elder Scrolls; no game text is copied.
 
-* Code: `com.skycraft.lore.place`.
+* Code: `com.nirncraft.lore.place`.
   * `PlaceLore`: the data and the API.
   * `PlaceLoreEvents`: reading hooks (reveal, mini-quest) and the discovery line.
-  * `StoryReader`: right-click / [F] on a story lectern, clue sign or note barrel opens the Skycraft reading screen.
+  * `StoryReader`: right-click / [F] on a story lectern, clue sign or note barrel opens the NirnCraft reading screen.
   * `PlaceLoreLoot`: the notes in containers.
   * `PlaceLorePlacer`: lecterns.
   * `PlaceLoreDialogue`: townsfolk topics.
@@ -23,10 +23,10 @@ All of it is original writing. Lore facts and names come from the Elder Scrolls;
   * `client/PlaceLoreClient`: map tooltips.
   * `client/PlaceLoreAutotest`: screenshots.
 * Data:
-  * Lore: `mod/src/main/resources/skycraft/lore/places/*.json`, listed in that folder's `index.json`.
-  * Mini-quests: `mod/src/main/resources/skycraft/quests/place_*.json`, listed in `quests/index.json`.
+  * Lore: `mod/src/main/resources/nirncraft/lore/places/*.json`, listed in that folder's `index.json`.
+  * Mini-quests: `mod/src/main/resources/nirncraft/quests/place_*.json`, listed in `quests/index.json`.
 * Tooling: `node tools/place_lore.js` validates the lore, prints the coverage and writes
-  `lang/skycraft/place_lore.json`. Then run `node tools/quest_lang.js`, which writes the quest texts into
+  `lang/nirncraft/place_lore.json`. Then run `node tools/quest_lang.js`, which writes the quest texts into
   `quest_story.json`. Run both after every edit.
 
 ## 1. Where players meet it
@@ -43,7 +43,7 @@ All of it is original writing. Lore facts and names come from the Elder Scrolls;
 | readables | the place's containers, or a lectern at the place | `PlaceLoreLoot`, `PlaceLorePlacer` |
 | treasure note | reading it marks the cache's place on the map (`Discovery.revealPlace`), and its quest's last step digs the cache up | `PlaceLoreEvents.onRead` |
 
-The readables are ordinary lore books (`skycraft:book`) whose id is `place.<place>.<note>`:
+The readables are ordinary lore books (`nirncraft:book`) whose id is `place.<place>.<note>`:
 
 * `LoreBooks.get` resolves the id through `PlaceLore.book`. These books have loot weight 0, so they never show up as
   random shelf books.
@@ -57,8 +57,8 @@ Letters and notes open as a loose sheet. A `book` or `poem` opens as a bound boo
 **The default placer** puts every note where players will find it, with no builder involved.
 
 * **Containers** (`PlaceLoreLoot`).
-  * Every Skycraft container table that named places' chests roll gets one more pool with the function
-    `skycraft:place_lore_note`. This covers `containers/dungeon/boss|standard`, `camp/*`, `site/*`, `household/*`,
+  * Every NirnCraft container table that named places' chests roll gets one more pool with the function
+    `nirncraft:place_lore_note`. This covers `containers/dungeon/boss|standard`, `camp/*`, `site/*`, `household/*`,
     `shop/*`, `strongbox/*`, and `misc/satchel|knapsack|sarcophagus`. The pool is added on `LootTableLoadEvent`, so
     no data file changes.
   * The pool hands the opening player one note they haven't found yet from the place whose radius covers the
@@ -72,7 +72,7 @@ Letters and notes open as a loose sheet. A `book` or `poem` opens as a bound boo
     chests, so all of their notes count as site notes.
   * The lectern holds the first site note. Right-clicking it reads the note and gives the reader copies of every
     lectern note of the place they haven't found.
-  * This happens once per world and place (world data `skycraft_place_lore`). If no loaded free spot exists yet, it
+  * This happens once per world and place (world data `nirncraft_place_lore`). If no loaded free spot exists yet, it
     retries on the next visit.
 * **Per player** (`module("place_lore").found`). A note that has been handed over or read is never handed over again.
 
@@ -88,8 +88,8 @@ PlaceLore.hook(placeId) / rumour(placeId) / region(regionId) / regionalRumour(re
 ```
 
 To place a note, put the stack in any container, or on a vanilla lectern with
-`LecternBlockEntity.setBook(stack)` and `HAS_BOOK` set. `StoryReader` opens the Skycraft reading screen (the one lore
-books use) for a lectern that holds a `skycraft:book`, a written book tagged `SkyNote` (the place note id) or `SkyStory`,
+`LecternBlockEntity.setBook(stack)` and `HAS_BOOK` set. `StoryReader` opens the NirnCraft reading screen (the one lore
+books use) for a lectern that holds a `nirncraft:book`, a written book tagged `SkyNote` (the place note id) or `SkyStory`,
 or any written book on a lectern no player placed. The vanilla lectern menu is never reached, so the book stays (set
 `lore.storyLecternTakeable` and sneak to take it). A sign or barrel is readable the same way when its block entity has
 the `SkyRead` marker (`StoryReader.mark` / `markNoteContainer`); the scene realiser marks its clue signs and note
@@ -140,15 +140,15 @@ barrels. `/skylore selftest lecterns` simulates the clicks headless (run by `qa.
 
   | text | key |
   | --- | --- |
-  | hook | `place_lore.skycraft.<place>.hook` |
-  | rumour | `place_lore.skycraft.<place>.rumour` |
-  | note title | `book.skycraft.place.<place>.<note>` |
-  | note author | `place_lore.skycraft.<place>.<note>.author` |
-  | note pages | `place_lore.skycraft.<place>.<note>.p<i>` |
-  | regional rumours | `place_lore.skycraft.region.<region with / as .>.rumour.<i>` |
-  | regional legends | `place_lore.skycraft.region.<region with / as .>.legend.<i>` |
-  | song title | `place_lore.skycraft.region.<region with / as .>.song.<i>.title` |
-  | song lines | `place_lore.skycraft.region.<region with / as .>.song.<i>.line.<j>` |
+  | hook | `place_lore.nirncraft.<place>.hook` |
+  | rumour | `place_lore.nirncraft.<place>.rumour` |
+  | note title | `book.nirncraft.place.<place>.<note>` |
+  | note author | `place_lore.nirncraft.<place>.<note>.author` |
+  | note pages | `place_lore.nirncraft.<place>.<note>.p<i>` |
+  | regional rumours | `place_lore.nirncraft.region.<region with / as .>.rumour.<i>` |
+  | regional legends | `place_lore.nirncraft.region.<region with / as .>.legend.<i>` |
+  | song title | `place_lore.nirncraft.region.<region with / as .>.song.<i>.title` |
+  | song lines | `place_lore.nirncraft.region.<region with / as .>.song.<i>.line.<j>` |
 
 * A place id the world doesn't list yet needs `"future": true`. It is kept, and shows up once the place exists.
 
@@ -174,7 +174,7 @@ Mini-quests use the story engine format (`quest/story/StoryData`) with these con
 * **Rewards.**
   * Skyrim quests pay 60–400 gold, scaled by the region's level band, and province quests 150–600.
   * A quest can add one or two items from the list in `tools/place_lore.js`. The list is all items that the other
-    questlines already give, so it passes `/skycraft-quest selftest`.
+    questlines already give, so it passes `/nirncraft-quest selftest`.
   * A lost heirloom can be a legendary unique: `"unique:<id>"` in `rewards.items` or as a retrieve `item`.
     `Story.stack` builds it with `LegendaryUniques.create`, so the collection tracker counts it.
 
@@ -191,7 +191,7 @@ PROVINCES adds hundreds of province places. To write lore for them:
    treasure notes at nearby ruins.
 4. Run `node tools/place_lore.js`. It must report no problems, and its coverage line lists every place still
    without lore. Then run `node tools/quest_lang.js`.
-5. In game, run `/skycraft-quest selftest` and `/skycraft-quest selftest flow`. Both must report 0 problems.
+5. In game, run `/nirncraft-quest selftest` and `/nirncraft-quest selftest flow`. Both must report 0 problems.
    `/skylore stats`, `/skylore show <place>` and `/skylore read <place> <note>` check the result.
 
 The writers' brief used for the first pass covers voice, lengths and the allowed creatures and items. It is
@@ -202,10 +202,10 @@ summarised in section 3 and in the checks of `tools/place_lore.js`.
 * `node tools/place_lore.js` validates the data and prints the coverage:
   * place ids, kinds, lengths, `reveals`, `starts` and region ids;
   * each quest's objective types, creatures, items, uniques, NPC roles, relics and starters.
-* In game, `/skycraft-quest selftest` builds every quest, and `/skycraft-quest selftest flow` plays every quest to
+* In game, `/nirncraft-quest selftest` builds every quest, and `/nirncraft-quest selftest flow` plays every quest to
   completion. Both include the place quests.
 * `/skylore stats|show|give|read|lectern` checks the lore directly.
-* Client screenshots: set `JAVA_TOOL_OPTIONS=-Dskycraft.autotest.placelore=<place>`, then run
+* Client screenshots: set `JAVA_TOOL_OPTIONS=-Dnirncraft.autotest.placelore=<place>`, then run
   `tools/autotest.ps1 -World <name>`.
   * It reads each note of the place through the server and screenshots the reading screen, the journal and the map.
   * The shots are saved as `pl_*.png` in `mod/run/build/autotest-screenshots`.

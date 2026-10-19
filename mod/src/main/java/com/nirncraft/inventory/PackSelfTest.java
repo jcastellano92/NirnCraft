@@ -1,0 +1,564 @@
+package com.nirncraft.inventory;
+
+import com.mojang.authlib.GameProfile;
+import com.nirncraft.NirnCraft;
+import com.nirncraft.core.SkyData;
+import com.nirncraft.perf.PerfAutorun;
+import com.nirncraft.quest.QuestItems;
+import com.nirncraft.vitals.ActionHandler;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.network.Connection;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import io.netty.buffer.Unpooled;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
+
+/**
+ * Headless self-test of the overflow pack and what hangs on it: the real {@code Player#saveWithoutId} /
+ * {@code Entity#load} path (with the capability data), the packet encoding the client mirror uses, a full container
+ * taken into a full inventory, actions on virtual slots, and (in {@code economy.BarterSelfTest}) selling: quest items
+ * refused, equipped rows confirmed, buy-back. Runs as {@code /nirncraft-inventory selftest} and as the autorun task
+ * {@code inventory}; the log line is {@code Inventory selftest: n/m checks passed, k problems}.
+ */
+public final class PackSelfTest {
+    private static final GameProfile PROFILE_A = new GameProfile(UUID.nameUUIDFromBytes("nirncraft-pack-selftest-a".getBytes()), "[PackTestA]");
+    private static final GameProfile PROFILE_B = new GameProfile(UUID.nameUUIDFromBytes("nirncraft-pack-selftest-b".getBytes()), "[PackTestB]");
+    private static final GameProfile PROFILE_C = new GameProfile(UUID.nameUUIDFromBytes("nirncraft-pack-selftest-c".getBytes()), "[PackTestC]");
+    private static final ThreadLocal<java.util.Set<UUID>> PRESERVED_DROPS=new ThreadLocal<>();
+
+    private PackSelfTest() {}
+
+    /** Collects checks. */
+    public static final class Checks {
+        public final List<String> lines = new ArrayList<>();
+        public final List<String> failed = new ArrayList<>();
+        public int passed, total;
+
+        public void check(String name, boolean ok, String detail) {
+            total++;
+            if (ok) passed++;
+            else failed.add(name);
+            lines.add((ok ? "ok   " : "FAIL ") + name + ": " + detail);
+        }
+    }
+
+    public record Report(int passed, int total, List<String> lines, List<String> failed) {
+        public int problems() {
+            return total - passed;
+        }
+
+        public String summary() {
+            return "Inventory selftest: " + passed + "/" + total + " checks passed, " + problems() + " problems"
+                    + (failed.isEmpty() ? "" : " (" + String.join("; ", failed) + ")");
+        }
+    }
+
+    public static void registerAutorun() {
+        PerfAutorun.register("inventory", (t, done) -> {
+            Report r;
+            try {
+                r = run(t.server());
+            } catch (RuntimeException e) {
+                NirnCraft.LOGGER.error("Inventory selftest crashed", e);
+                r = new Report(0, 1, List.of(), List.of("crashed: " + e));
+            }
+            for (String l : r.lines()) NirnCraft.LOGGER.info("[inventory] {}", l);
+            NirnCraft.LOGGER.info("{}", r.summary());
+            done.run();
+        });
+    }
+
+    public static Report run(MinecraftServer server) {
+        Checks checks = new Checks();
+        ServerLevel level = server.overworld();
+        if (level == null) {
+            checks.check("fixture: actual overworld exists", false, "data-only server has no playable level");
+            return new Report(checks.passed, checks.total, checks.lines, checks.failed);
+        }
+        try (FixtureArea area = new FixtureArea(level)) {
+            area.awaitReady();
+            checks.check("fixture: actual entity area is loaded and ticking", true, "49 chunks; prior forced states restored afterward");
+            return runReady(server, checks);
+        } catch (RuntimeException failure) {
+            NirnCraft.LOGGER.error("Inventory fixture readiness/cleanup failed", failure);
+            checks.check("fixture: native world readiness and cleanup", false, failure.toString());
+            return new Report(checks.passed, checks.total, checks.lines, checks.failed);
+        }
+    }
+
+    /** A headless dev server deliberately drops spawn tickets. FULL terrain alone does not expose entity queries. */
+    private static final class FixtureArea implements AutoCloseable {
+        private static final int RADIUS = 3;
+        private final ServerLevel level;
+        private final net.minecraft.world.level.ChunkPos center;
+        private final List<net.minecraft.world.level.ChunkPos> chunks;
+        private final List<net.minecraft.world.level.ChunkPos> newlyForced = new ArrayList<>();
+        private final long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(30);
+
+        FixtureArea(ServerLevel level) {
+            this.level = level;
+            center = net.minecraft.world.level.ChunkPos.containing(OverflowSelfTest.testAnchor(level));
+            chunks = net.minecraft.world.level.ChunkPos.rangeClosed(center, RADIUS).toList();
+            try {
+                for (var pos : chunks) {
+                    if (!level.getForceLoadedChunks().contains(pos.pack())) {
+                        // Record ownership before native loading, which can throw after inserting the ticket.
+                        newlyForced.add(pos);
+                        level.setChunkForced(pos.x(), pos.z(), true);
+                    }
+                }
+            } catch (RuntimeException | Error failure) {
+                close();
+                throw failure;
+            }
+        }
+
+        private boolean ready() {
+            for (var pos : chunks) if (!level.areEntitiesActuallyLoadedAndTicking(pos)) return false;
+            return true;
+        }
+
+        void awaitReady() {
+            // These are the same genuine public native stages used during normal load/teleport.
+            // waitForEntities processes actual storage completions; no synthetic ticks or fixed sleep.
+            level.getChunkSource().tick(() -> System.nanoTime() < deadline, false);
+            level.waitForEntities(center, RADIUS);
+            level.getServer().managedBlock(() -> ready() || System.nanoTime() >= deadline);
+            if (!ready()) throw new IllegalStateException("Inventory fixture chunks did not become entity-ready: " + level.gatherChunkSourceStats());
+        }
+
+        @Override public void close() {
+            for (var pos : newlyForced) level.setChunkForced(pos.x(), pos.z(), false);
+            newlyForced.clear();
+        }
+    }
+
+    private static Report runReady(MinecraftServer server, Checks c) {
+        ServerLevel level = server.overworld();
+        FakePlayer a = new FakePlayer(level, PROFILE_A);
+        connect(server, a);
+        var at=OverflowSelfTest.testAnchor(level);
+        a.snapTo(at.getX()+0.5,at.getY()+1,at.getZ()+0.5);
+        var existing=new java.util.HashSet<UUID>();
+        for(var e:level.getEntitiesOfClass(ItemEntity.class,new AABB(a.blockPosition()).inflate(16))) existing.add(e.getUUID());
+        PRESERVED_DROPS.set(existing);
+        try {
+            NativeComponentChecks.run(level, c);
+            com.nirncraft.combat.DamageStageChecks.run(level, c);
+            roundTrip(server, level, a, c);
+            virtualSlots(level, a, c);
+            containerTake(a, c);
+            grouping(a, c);
+            OverflowSelfTest.run(server, level, a, c); // bulk store, container overflow, block entities, corpse, file, facade
+            round6Fixes(server, level, a, c);
+            try {
+                com.nirncraft.economy.BarterSelfTest.run(server, level, a, c);
+            } catch (RuntimeException e) {
+                NirnCraft.LOGGER.error("Barter selftest threw", e);
+                c.check("barter selftest ran to the end", false, e.toString());
+            }
+        } catch (RuntimeException e) {
+            NirnCraft.LOGGER.error("Inventory selftest threw", e);
+            c.check("selftest ran to the end", false, e.toString());
+        } finally {
+            a.getInventory().clearContent();
+            Pack.clear(a);
+            a.containerMenu = a.inventoryMenu;
+            sweepDrops(level, a);
+            PRESERVED_DROPS.remove();
+        }
+        return new Report(c.passed, c.total, c.lines, c.failed);
+    }
+
+    /** Records the actual listener boundary after PacketDistributor chooses recipients; no fake channel negotiation. */
+    public static final class RecordingPacketListener extends ServerGamePacketListenerImpl {
+        public int packets;
+        public RecordingPacketListener(MinecraftServer server, ServerPlayer player) {
+            super(server, new Connection(PacketFlow.SERVERBOUND), player,
+                    net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false));
+        }
+        @Override public void send(net.minecraft.network.protocol.Packet<?> packet) { packets++; }
+        @Override public void send(net.minecraft.network.protocol.Packet<?> packet, io.netty.channel.ChannelFutureListener listener) { packets++; }
+        @Override public boolean hasChannel(Identifier payloadId) { return false; }
+    }
+
+    /** Preserve NeoForge FakePlayer's native no-op listener; other isolated fixtures get a recording endpoint. */
+    public static void connect(MinecraftServer server, ServerPlayer fake) {
+        if (fake.connection == null) new RecordingPacketListener(server, fake);
+    }
+
+    /** Uses native ServerPlayer.openMenu; NeoForge FakePlayer deliberately refuses all menus in 26.3. */
+    public static ServerPlayer menuPlayer(MinecraftServer server, ServerLevel level, GameProfile profile) {
+        ServerPlayer player = new ServerPlayer(server, level, profile, net.minecraft.server.level.ClientInformation.createDefault());
+        connect(server, player);
+        return player;
+    }
+
+    private static void sweepDrops(ServerLevel level, ServerPlayer p) {
+        for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, new AABB(p.blockPosition()).inflate(16))) {
+            if(PRESERVED_DROPS.get()!=null && PRESERVED_DROPS.get().contains(e.getUUID())) continue;
+            if (com.nirncraft.inventory.ItemData.hasCustom(e.getItem()) && (com.nirncraft.inventory.ItemData.custom(e.getItem()).contains("pack_test") || com.nirncraft.inventory.ItemData.custom(e.getItem()).contains("slot_t")
+                    || com.nirncraft.inventory.ItemData.custom(e.getItem()).contains("chest_t"))) e.discard();
+            else if (e.getItem().is(Items.ARROW)) e.discard();
+        }
+    }
+
+    // ------------------------------------------------------------------ helpers
+
+    /** item+NBT -> total count over slots, armor, offhand and the pack: the player's whole carried content. */
+    public static Map<String, Integer> snapshot(ServerPlayer p) {
+        Map<String, Integer> m = new TreeMap<>();
+        Inventory inv = p.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) add(m, inv.getItem(i));
+        for (ItemStack s : Pack.entries(p)) add(m, s);
+        return m;
+    }
+
+    private static void add(Map<String, Integer> m, ItemStack s) {
+        if (s.isEmpty()) return;
+        m.merge(BuiltInRegistries.ITEM.getKey(s.getItem()) + "|" + com.nirncraft.inventory.ItemData.custom(s), s.getCount(), Integer::sum);
+    }
+
+    private static long total(Map<String, Integer> m) {
+        long n = 0;
+        for (int v : m.values()) n += v;
+        return n;
+    }
+
+    private static String diff(Map<String, Integer> a, Map<String, Integer> b) {
+        if (a.equals(b)) return "identical (" + a.size() + " kinds, " + total(a) + " items)";
+        for (Map.Entry<String, Integer> e : a.entrySet()) {
+            if (!e.getValue().equals(b.get(e.getKey()))) return "first difference at " + e.getKey() + ": " + e.getValue() + " vs " + b.get(e.getKey());
+        }
+        return "different key sets: " + a.size() + " vs " + b.size();
+    }
+
+    private static int slotsUsed(Inventory inv) {
+        int n = 0;
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) if (!inv.getItem(i).isEmpty()) n++;
+        return n;
+    }
+
+    private static ItemStack distinct(int i, String tag) {
+        Item[] kinds = {Items.IRON_SWORD, Items.DIAMOND_PICKAXE, Items.BOW, Items.SHIELD, Items.LEATHER_HELMET, Items.POTION};
+        ItemStack s = new ItemStack(kinds[i % kinds.length]);
+        com.nirncraft.inventory.ItemData.updateCustom(s, customData263 -> customData263.putInt(tag, i)); // a different NBT each: like 300 differently enchanted weapons, never merged
+        return s;
+    }
+
+    // ------------------------------------------------------------------ checks
+
+    /** Fill 36 slots, add 300 more distinct items and 1000 arrows; weight, save, reload, wire format, refill. */
+    private static void roundTrip(MinecraftServer server, ServerLevel level, FakePlayer a, Checks c) {
+        a.getInventory().clearContent();
+        Pack.clear(a);
+        List<ItemStack> given = new ArrayList<>();
+        int refused = 0;
+        for (int i = 0; i < 336; i++) {
+            ItemStack s = distinct(i, "pack_test");
+            given.add(s.copy());
+            if (!Pack.give(a, s).isEmpty()) refused++;
+        }
+        ItemStack arrows = new ItemStack(Items.ARROW, 1000);
+        given.add(arrows.copy());
+        if (!Pack.give(a, arrows).isEmpty()) refused++;
+        Inventory inv = a.getInventory();
+        c.check("pack: 336 distinct items and 1000 arrows are all accepted", refused == 0, refused + " refused");
+        c.check("pack: the slots are full and the rest overflowed", slotsUsed(inv) >= 35 && Pack.size(a) >= 300,
+                slotsUsed(inv) + " slots used, " + Pack.size(a) + " pack entries");
+        float expected = 0f;
+        for (ItemStack s : given) expected += ItemWeights.getStack(s);
+        float have = CarryWeight.current(a);
+        c.check("pack: carry weight is the sum of everything (slots + pack)", Math.abs(have - expected) < 0.05f * Math.max(1f, expected / 100f),
+                "expected " + expected + ", CarryWeight.current " + have + ", capacity " + CarryWeight.capacity(a));
+        Map<String, Integer> before = snapshot(a);
+        c.check("pack: nothing lost or merged on the way in", total(before) == 336 + 1000, total(before) + " items");
+        c.check("pack: the arrow count is an int, not a byte", Pack.count(a, Items.ARROW) + countSlots(inv, Items.ARROW) == 1000,
+                (Pack.count(a, Items.ARROW) + countSlots(inv, Items.ARROW)) + " arrows");
+
+        // the real player save/load path (capability data included), through compressed NBT bytes
+        CompoundTag tag = new CompoundTag();
+        tag.merge(com.nirncraft.platform.EntityData.saveWithoutId(a));
+        CompoundTag back;
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            NbtIo.writeCompressed(tag, bos);
+            back = NbtIo.readCompressed(new ByteArrayInputStream(bos.toByteArray()), net.minecraft.nbt.NbtAccounter.create(268435456L));
+            c.check("pack: the player's NBT is " + bos.size() + " bytes compressed", bos.size() > 0 && tag.contains("neoforge:attachments"),
+                    "NeoForge attachments present: " + tag.contains("neoforge:attachments"));
+        } catch (IOException e) {
+            c.check("pack: player NBT serialises", false, e.toString());
+            return;
+        }
+        FakePlayer b = new FakePlayer(level, PROFILE_B);
+        connect(server, b);
+        com.nirncraft.platform.EntityData.load(b, back);
+        Map<String, Integer> after = snapshot(b);
+        c.check("pack: save and reload through Player#saveWithoutId / Entity#load keeps every count", before.equals(after), diff(before, after));
+        c.check("pack: the reloaded pack weighs the same", Math.abs(CarryWeight.current(b) - have) < 0.01f,
+                CarryWeight.current(b) + " vs " + have);
+        b.getInventory().clearContent();
+        Pack.clear(b);
+
+        // the wire format of the client mirror: chunked packets, encoded and decoded like the network does
+        FakePlayer m = new FakePlayer(level, PROFILE_C);
+        List<InventoryPackets.PackSync> packets = Pack.syncPackets(a);
+        for (InventoryPackets.PackSync p : packets) {
+            net.minecraft.network.RegistryFriendlyByteBuf buf = new net.minecraft.network.RegistryFriendlyByteBuf(Unpooled.buffer(), a.registryAccess());
+            InventoryPackets.PackSync.encode(p, buf);
+            InventoryPackets.PackSync q = InventoryPackets.PackSync.decode(buf);
+            Pack.applyClientSync(m, q.start(), q.total(), q.rows());
+        }
+        Map<String, Integer> mirror = new TreeMap<>();
+        for (ItemStack s : Pack.entries(m)) add(mirror, s);
+        Map<String, Integer> packOnly = new TreeMap<>();
+        for (ItemStack s : Pack.entries(a)) add(packOnly, s);
+        c.check("pack: the client mirror built from " + packets.size() + " packets equals the server pack", mirror.equals(packOnly),
+                diff(packOnly, mirror));
+        c.check("pack: client and server compute the same pack weight", Math.abs(Pack.weight(m) - Pack.weight(a)) < 0.01f,
+                Pack.weight(m) + " vs " + Pack.weight(a));
+
+        // refill: a freed slot is filled from the pack on the tick
+        int packBefore = Pack.size(a);
+        inv.setItem(9, ItemStack.EMPTY);
+        Pack.refill(a);
+        c.check("pack: a freed slot is refilled from the pack", !inv.getItem(9).isEmpty() && Pack.size(a) == packBefore - 1,
+                "slot 9 " + inv.getItem(9).isEmpty() + ", pack " + packBefore + " -> " + Pack.size(a));
+        // that slot's stack left the player's content: restore the invariant for the next checks
+        a.getInventory().clearContent();
+        Pack.clear(a);
+    }
+
+    private static int countSlots(Inventory inv, Item item) {
+        int n = 0;
+        for (int i = 0; i < inv.getContainerSize(); i++) if (inv.getItem(i).is(item)) n += inv.getItem(i).getCount();
+        return n;
+    }
+
+    /** Actions on pack rows (virtual slots): nothing is lost, favorite and drop act on the pack, quest items stay. */
+    private static void virtualSlots(ServerLevel level, FakePlayer a, Checks c) {
+        a.getInventory().clearContent();
+        Pack.clear(a);
+        Inventory inv = a.getInventory();
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) inv.setItem(i, distinct(i, "slot_t"));
+        ItemStack arrows = new ItemStack(Items.ARROW, 300);
+        Pack.give(a, arrows);
+        ItemStack letter = QuestItems.letter("selftest");
+        Pack.give(a, letter);
+        c.check("virtual: arrows and a quest letter overflow into the pack", Pack.count(a, Items.ARROW) == 300 && Pack.size(a) == 2,
+                Pack.size(a) + " entries");
+        int arrowIndex = Pack.find(a, s -> s.is(Items.ARROW));
+        Identifier arrowId = BuiltInRegistries.ITEM.getKey(Items.ARROW);
+        Map<String, Integer> before = snapshot(a);
+
+        InventoryActions.handle(a, InventoryPackets.InvAction.DROP_ONE, Pack.VIRTUAL_BASE + arrowIndex, arrowId);
+        c.check("virtual: dropping one arrow from a pack row takes one", Pack.count(a, Items.ARROW) == 299, Pack.count(a, Items.ARROW) + " arrows");
+        sweepDrops(level, a);
+
+        int letterIndex = Pack.find(a, s -> QuestItems.isQuestItem(s));
+        Identifier letterId = BuiltInRegistries.ITEM.getKey(QuestItems.COURIER_LETTER.get());
+        InventoryActions.handle(a, InventoryPackets.InvAction.DROP_ALL, Pack.VIRTUAL_BASE + letterIndex, letterId);
+        c.check("virtual: a quest item in the pack is not dropped", Pack.find(a, s -> QuestItems.isQuestItem(s)) >= 0, "still in the pack");
+
+        arrowIndex = Pack.find(a, s -> s.is(Items.ARROW));
+        InventoryActions.handle(a, InventoryPackets.InvAction.FAVORITE, Pack.VIRTUAL_BASE + arrowIndex, arrowId);
+        arrowIndex = Pack.find(a, s -> s.is(Items.ARROW));
+        c.check("virtual: favorite marks the pack row", arrowIndex >= 0 && InvCategory.isFavorite(Pack.get(a, arrowIndex))
+                && Pack.count(a, Items.ARROW) == 299, "arrows " + Pack.count(a, Items.ARROW));
+
+        Map<String, Integer> mid = snapshot(a);
+        int idx0 = Pack.find(a, s -> !QuestItems.isQuestItem(s));
+        int real = Pack.materialize(a, idx0, null);
+        c.check("virtual: a pack entry is pulled into a slot when all 36 are full (the displaced stack goes to the pack)",
+                real >= 0 && real < Inventory.INVENTORY_SIZE && !inv.getItem(real).isEmpty(), "slot " + real);
+        c.check("virtual: pulling a pack entry loses and duplicates nothing", snapshot(a).equals(mid), diff(mid, snapshot(a)));
+        c.check("virtual: the overall content only changed by the dropped arrow", total(before) - 1 == total(mid), total(before) + " -> " + total(mid));
+        a.getInventory().clearContent();
+        Pack.clear(a);
+    }
+
+    /** Grouped takes (five apples in three slots are one click) and graded encumbrance. */
+    private static void grouping(FakePlayer a, Checks c) {
+        a.getInventory().clearContent();
+        Pack.clear(a);
+        Inventory inv = a.getInventory();
+        SimpleContainer chest = new SimpleContainer(27);
+        chest.setItem(2, new ItemStack(Items.APPLE, 2));
+        chest.setItem(5, new ItemStack(Items.BREAD, 1));
+        chest.setItem(9, new ItemStack(Items.APPLE, 2));
+        chest.setItem(20, new ItemStack(Items.APPLE, 1));
+        ChestMenu menu = new ChestMenu(MenuType.GENERIC_9x3, 78, inv, chest, 3);
+        a.containerMenu = menu;
+        ActionHandler.handleContainerTake(a, 78, 9, false); // one click on one of the three apple slots
+        int apples = 0;
+        for (int i = 0; i < 27; i++) if (chest.getItem(i).is(Items.APPLE)) apples += chest.getItem(i).getCount();
+        c.check("grouping: one take request takes every apple stack in the container", apples == 0 && countSlots(inv, Items.APPLE) + Pack.count(a, Items.APPLE) == 5
+                && chest.getItem(5).is(Items.BREAD), apples + " apples left, " + (countSlots(inv, Items.APPLE) + Pack.count(a, Items.APPLE)) + " taken");
+        // and back: one store request stores all apples (slots and pack)
+        ActionHandler.handleContainerStore(a, 78, findSlot(inv, Items.APPLE), false);
+        int stored = 0;
+        for (int i = 0; i < 27; i++) if (chest.getItem(i).is(Items.APPLE)) stored += chest.getItem(i).getCount();
+        c.check("grouping: one store request stores every stack of that item", stored == 5 && countSlots(inv, Items.APPLE) == 0, stored + " stored");
+        a.containerMenu = a.inventoryMenu;
+        a.getInventory().clearContent();
+        Pack.clear(a);
+
+        c.check("encumbrance: no slowdown at or under capacity", CarryWeight.speedFactor(300f, 300f) == 1f && CarryWeight.speedFactor(10f, 300f) == 1f, "1.0");
+        c.check("encumbrance: graded, +50% over is half speed", Math.abs(CarryWeight.speedFactor(450f, 300f) - 0.5f) < 0.001f,
+                String.valueOf(CarryWeight.speedFactor(450f, 300f)));
+        c.check("encumbrance: no floor, at double capacity you cannot move", CarryWeight.speedFactor(600f, 300f) == 0f
+                && CarryWeight.speedFactor(5000f, 300f) == 0f, String.valueOf(CarryWeight.speedFactor(600f, 300f)));
+        c.check("encumbrance: a little over is only a little slower", Math.abs(CarryWeight.speedFactor(315f, 300f) - 0.95f) < 0.001f,
+                String.valueOf(CarryWeight.speedFactor(315f, 300f)));
+        c.check("encumbrance: the movement attribute never reaches zero (the inventory stays usable to drop things)",
+                CarryWeight.speedModifier(0f) > -1.0 && CarryWeight.speedModifier(0f) < -0.9 && CarryWeight.speedModifier(1f) == 0.0,
+                "modifier at factor 0: " + CarryWeight.speedModifier(0f));
+        c.check("capacity: strong peoples carry more than average, slight ones less",
+                CarryWeight.raceBonus(com.nirncraft.core.Race.ORSIMER) > CarryWeight.raceBonus(com.nirncraft.core.Race.NORD)
+                        && CarryWeight.raceBonus(com.nirncraft.core.Race.NORD) > CarryWeight.raceBonus(com.nirncraft.core.Race.IMPERIAL)
+                        && CarryWeight.raceBonus(com.nirncraft.core.Race.IMPERIAL) > CarryWeight.raceBonus(com.nirncraft.core.Race.BOSMER),
+                "orsimer " + CarryWeight.raceBonus(com.nirncraft.core.Race.ORSIMER) + ", bosmer " + CarryWeight.raceBonus(com.nirncraft.core.Race.BOSMER));
+        // capacity is the sum of its sources, with a race and carry perks really read from the player's data
+        com.nirncraft.core.PlayerData data = com.nirncraft.core.SkyData.get(a);
+        com.nirncraft.core.Race saved = data.getRace();
+        float plain = CarryWeight.capacity(a);
+        data.setRace(com.nirncraft.core.Race.ORSIMER);
+        CarryWeight.CapacityParts parts = CarryWeight.parts(a);
+        c.check("capacity: the race bonus is part of the capacity", Math.abs(parts.race() - 60f) < 0.01f
+                && Math.abs(CarryWeight.capacity(a) - parts.total()) < 0.01f, "race " + parts.race() + ", capacity " + CarryWeight.capacity(a));
+        data.setRace(saved);
+        c.check("capacity: the carry perks exist in the perk tree (reachable in the Athletics screen)",
+                com.nirncraft.perk.Perks.get("athletics.strong_back") != null && com.nirncraft.perk.Perks.get("athletics.pack_mule") != null
+                        && com.nirncraft.perk.Perks.get("athletics.beast_of_burden") != null
+                        && com.nirncraft.perk.Perks.of(com.nirncraft.core.Skill.ATHLETICS).contains(com.nirncraft.perk.Perks.get("athletics.pack_mule")),
+                "plain capacity " + plain);
+    }
+
+    /** ChestMenu slot index (27 container slots, then inventory 9-35, then the hotbar) of the first stack of {@code item}. */
+    private static int findSlot(Inventory inv, Item item) {
+        for (int i = 9; i < 36; i++) if (inv.getItem(i).is(item)) return 27 + (i - 9);
+        for (int i = 0; i < 9; i++) if (inv.getItem(i).is(item)) return 54 + i;
+        return 27;
+    }
+
+    /** A 27-stack container taken into a completely full inventory: every item lands, nothing is dropped or left. */
+    private static void containerTake(FakePlayer a, Checks c) {
+        a.getInventory().clearContent();
+        Pack.clear(a);
+        Inventory inv = a.getInventory();
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) inv.setItem(i, distinct(i, "slot_t"));
+        SimpleContainer chest = new SimpleContainer(27);
+        for (int i = 0; i < 27; i++) chest.setItem(i, distinct(i, "chest_t"));
+        Map<String, Integer> before = snapshot(a);
+        for (int i = 0; i < 27; i++) add(before, chest.getItem(i));
+        ChestMenu menu = new ChestMenu(MenuType.GENERIC_9x3, 77, inv, chest, 3);
+        a.containerMenu = menu;
+        ActionHandler.handleContainerTake(a, 77, -1, true);
+        boolean empty = true;
+        for (int i = 0; i < 27; i++) empty &= chest.getItem(i).isEmpty();
+        c.check("container: Take All from a full container into a full inventory empties the container", empty, empty ? "empty" : "items left behind");
+        c.check("container: all 27 stacks are in the pack and none was lost", Pack.size(a) >= 27 && snapshot(a).equals(before),
+                Pack.size(a) + " pack entries, " + diff(before, snapshot(a)));
+
+        // and one entry back into the container from the pack (a virtual slot id)
+        int idx = Pack.find(a, s -> com.nirncraft.inventory.ItemData.hasCustom(s) && com.nirncraft.inventory.ItemData.custom(s).contains("chest_t"));
+        int packBefore = Pack.size(a);
+        ActionHandler.handleContainerStore(a, 77, Pack.VIRTUAL_BASE + idx, false);
+        int stored = 0;
+        for (int i = 0; i < 27; i++) if (!chest.getItem(i).isEmpty()) stored++;
+        c.check("container: storing a pack entry puts it in the container", stored == 1 && Pack.size(a) == packBefore - 1,
+                stored + " stored, pack " + packBefore + " -> " + Pack.size(a));
+        a.containerMenu = a.inventoryMenu;
+        a.getInventory().clearContent();
+        Pack.clear(a);
+    }
+
+    /** Live checks for Round 6 gameplay & multiplayer fixes (dual-wield/spells/bound/consumables/poisons/XP/Sanies Lupinus). */
+    private static void round6Fixes(MinecraftServer server, ServerLevel level, FakePlayer a, Checks c) {
+        a.getInventory().clearContent();
+        Pack.clear(a);
+        Inventory inv = a.getInventory();
+        inv.setSelectedSlot(0);
+
+        // 1. 1H weapon equip right / equip left / toggle unequip
+        ItemStack ironSword = new ItemStack(Items.IRON_SWORD);
+        ItemStack steelDagger = new ItemStack(Items.STONE_SWORD);
+        inv.setItem(10, ironSword);
+        inv.setItem(11, steelDagger);
+        Identifier ironId = BuiltInRegistries.ITEM.getKey(Items.IRON_SWORD);
+        Identifier daggerId = BuiltInRegistries.ITEM.getKey(Items.STONE_SWORD);
+
+        InventoryActions.handle(a, InventoryPackets.InvAction.EQUIP, 10, ironId);
+        c.check("r6: LMB equips 1H weapon to right hand", a.getMainHandItem().is(Items.IRON_SWORD), a.getMainHandItem().toString());
+        InventoryActions.handle(a, InventoryPackets.InvAction.EQUIP_LEFT, 11, daggerId);
+        c.check("r6: RMB equips second 1H weapon to left hand (dual-wield)", a.getOffhandItem().is(Items.STONE_SWORD) && a.getMainHandItem().is(Items.IRON_SWORD),
+                "main=" + a.getMainHandItem().getItem() + ", off=" + a.getOffhandItem().getItem());
+
+        // 2. Eating food from bag does not unequip right-hand or left-hand weapons
+        inv.setItem(12, new ItemStack(Items.COOKED_BEEF, 2));
+        a.getFoodData().setFoodLevel(10);
+        InventoryActions.handle(a, InventoryPackets.InvAction.USE, 12, BuiltInRegistries.ITEM.getKey(Items.COOKED_BEEF));
+        c.check("r6: eating food from inventory keeps both weapons equipped",
+                a.getMainHandItem().is(Items.IRON_SWORD) && a.getOffhandItem().is(Items.STONE_SWORD) && inv.getItem(12).getCount() == 1,
+                "remaining beef=" + inv.getItem(12).getCount());
+
+        // 3. Applying poison to equipped weapon coats it and shrinks the poison
+        ItemStack harmPotion = net.minecraft.world.item.alchemy.PotionContents.createItemStack(Items.SPLASH_POTION, net.minecraft.world.item.alchemy.Potions.HARMING);
+        inv.setItem(13, harmPotion);
+        InventoryActions.handle(a, InventoryPackets.InvAction.APPLY_POISON, 13, BuiltInRegistries.ITEM.getKey(Items.SPLASH_POTION));
+        CompoundTag pTag = com.nirncraft.inventory.ItemData.custom(a.getMainHandItem()) != null ? com.nirncraft.inventory.ItemData.custom(a.getMainHandItem()).getCompoundOrEmpty(com.nirncraft.crafting.arcane.ArcaneEvents.WEAPON_POISON) : null;
+        c.check("r6: applying harming potion coats right-hand weapon with hits and clean display name",
+                pTag != null && pTag.getIntOr(com.nirncraft.crafting.arcane.ArcaneEvents.POISON_HITS, 0) > 0
+                        && !com.nirncraft.crafting.arcane.ArcaneEvents.poisonDisplayName(pTag).startsWith("{"),
+                pTag != null ? com.nirncraft.crafting.arcane.ArcaneEvents.poisonDisplayName(pTag) + " (" + pTag.getIntOr(com.nirncraft.crafting.arcane.ArcaneEvents.POISON_HITS, 0) + ")" : "null");
+
+        // 4. Bound weapon saves displaced weapon and restores it on expiry
+        ItemStack boundSword = new ItemStack(com.nirncraft.magic.MagicRegistry.BOUND_SWORD.get());
+        com.nirncraft.magic.Hands.equipBound(a, boundSword, false);
+        c.check("r6: conjuring bound sword places it in right hand and stows iron sword",
+                com.nirncraft.magic.bound.BoundWeapons.isBound(a.getMainHandItem()), a.getMainHandItem().toString());
+        CompoundTag bTag = com.nirncraft.inventory.ItemData.custom(a.getMainHandItem()) != null ? com.nirncraft.inventory.ItemData.custom(a.getMainHandItem()).copy() : new CompoundTag();
+        inv.setItem(inv.getSelectedSlot(), ItemStack.EMPTY);
+        com.nirncraft.magic.Hands.restoreAfterBound(a, bTag);
+        c.check("r6: bound weapon expiry restores displaced iron sword to right hand",
+                a.getMainHandItem().is(Items.IRON_SWORD), a.getMainHandItem().toString());
+
+        // 5. Skyrim XP curve & Sanies Lupinus stage 1 + cure
+        c.check("r6: Skyrim leveling curve starts at 35 XP at level 1 and scales by +25 per level",
+                com.nirncraft.core.PlayerData.levelXpToNext(1) == 35f && com.nirncraft.core.PlayerData.levelXpToNext(10) == 260f,
+                "L1=" + com.nirncraft.core.PlayerData.levelXpToNext(1) + ", L10=" + com.nirncraft.core.PlayerData.levelXpToNext(10));
+        com.nirncraft.curse.Curses.infectLycanthropy(a);
+        boolean infected = com.nirncraft.curse.Curses.hasSaniesLupinus(a);
+        com.nirncraft.survival.Diseases.cureAll(a);
+        c.check("r6: Sanies Lupinus Stage 1 contracts and is cured by Diseases.cureAll before Beast Blood",
+                infected && !com.nirncraft.curse.Curses.hasSaniesLupinus(a), "infected=" + infected + ", afterCure=" + com.nirncraft.curse.Curses.hasSaniesLupinus(a));
+
+        a.getInventory().clearContent();
+        Pack.clear(a);
+    }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "nirncraft:realm_site",
+  "site": "soul_cairn/mausoleum",
+  "biomes": "#nirncraft:realm/soul_cairn",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

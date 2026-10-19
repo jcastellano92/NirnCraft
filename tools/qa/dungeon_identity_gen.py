@@ -2,13 +2,13 @@
 
   py -3 -I tools/qa/dungeon_identity_gen.py [--check]
 
-Reads   mod/src/main/resources/skycraft/tamriel/places/skyrim_landmarks.json   (dungeon_fixed and fort places)
-        mod/src/main/resources/skycraft/lore/places/*.json                      (hook, notes, authors)
-        mod/src/main/lang/skycraft/*.json                                       (place display names)
-Writes  mod/src/main/resources/skycraft/dungeons/identity/skyrim.json          (per place: family, boss, sign, notes, motif, loot)
-        mod/src/main/resources/skycraft/dungeons/blueprints/motif_*.json       (set-piece furnishings by motif)
-        mod/src/main/resources/skycraft/dungeons/blueprints/index.json         (motif entries appended, existing kept)
-        mod/src/main/resources/data/skycraft/loot_tables/chests/story_*.json   (themed loot of each family)
+Reads   mod/src/main/resources/nirncraft/tamriel/places/skyrim_landmarks.json   (dungeon_fixed and fort places)
+        mod/src/main/resources/nirncraft/lore/places/*.json                      (hook, notes, authors)
+        mod/src/main/lang/nirncraft/*.json                                       (place display names)
+Writes  mod/src/main/resources/nirncraft/dungeons/identity/skyrim.json          (per place: family, boss, sign, notes, motif, loot)
+        mod/src/main/resources/nirncraft/dungeons/blueprints/motif_*.json       (set-piece furnishings by motif)
+        mod/src/main/resources/nirncraft/dungeons/blueprints/index.json         (motif entries appended, existing kept)
+        mod/src/main/resources/data/nirncraft/loot_tables/chests/story_*.json   (themed loot of each family)
 
 Everything is original text and data. The identity of a place comes from its lore: the first reader note's author is
 "the person" on the entrance sign and lectern; a chief's own notes name the boss of a bandit, forsworn, vampire,
@@ -25,10 +25,10 @@ import zlib
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-SKY = os.path.join(RES, "skycraft")
-LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft")
+SKY = os.path.join(RES, "nirncraft")
+LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft")
 BP = os.path.join(SKY, "dungeons", "blueprints")
-LOOT = os.path.join(RES, "data", "skycraft", "loot_table", "chests")
+LOOT = os.path.join(RES, "data", "nirncraft", "loot_table", "chests")
 IDENT = os.path.join(SKY, "dungeons", "identity", "skyrim.json")
 
 # ---------------------------------------------------------------------------------------------------- families
@@ -290,22 +290,22 @@ NOT_A_PERSON = re.compile(r"^(office of|told by|chalked|the |a |an |unsigned|unk
 # ---------------------------------------------------------------------------------------------------- loot tables
 LOOT_RECIPES = {
     # key: (theme table, relic/second table, signature items [(item, weight, min, max)])
-    "barrow": ("containers/dungeon/theme/nordic", "chests/relic_barrow", [("skycraft:bone_meal_draugr", 4, 1, 3), ("minecraft:gold_ingot", 2, 1, 2)]),
+    "barrow": ("containers/dungeon/theme/nordic", "chests/relic_barrow", [("nirncraft:bone_meal_draugr", 4, 1, 3), ("minecraft:gold_ingot", 2, 1, 2)]),
     "ruin": ("containers/dungeon/theme/nordic", "chests/relic_ruin", [("minecraft:amethyst_shard", 3, 1, 3), ("minecraft:gold_nugget", 3, 3, 8)]),
-    "dwemer": ("containers/dungeon/theme/dwemer", "chests/relic_dwemer", [("skycraft:dwarven_metal_ingot", 3, 1, 3), ("skycraft:dwarven_oil", 2, 1, 2)]),
-    "bandit": ("containers/camp/bandit", "containers/corpse/bandit_boss", [("skycraft:gold_ring", 1, 1, 1), ("skycraft:steel_ingot", 3, 1, 3)]),
-    "necromancer": ("containers/dungeon/theme/necromancer", "containers/corpse/mage_boss", [("skycraft:soul_gem_black", 1, 1, 1), ("skycraft:deathbell", 3, 1, 3)]),
-    "vampire": ("containers/dungeon/theme/vampire", "containers/corpse/vampire", [("skycraft:vampire_dust", 4, 1, 4), ("minecraft:book", 2, 1, 1)]),
-    "hagraven": ("containers/dungeon/theme/forsworn", "chests/relic_lair", [("skycraft:hagraven_feathers", 4, 1, 3), ("skycraft:briar_heart", 1, 1, 1)]),
-    "forsworn": ("containers/camp/forsworn", "containers/dungeon/theme/forsworn", [("skycraft:hagraven_feathers", 3, 1, 2), ("skycraft:hide", 4, 1, 3)]),
-    "falmer": ("containers/dungeon/theme/falmer", "chests/relic_cave", [("skycraft:chaurus_eggs", 3, 1, 2), ("skycraft:falmer_ear", 3, 1, 2)]),
-    "den": ("containers/camp/hunter", "chests/relic_cave", [("skycraft:hide", 5, 1, 3), ("minecraft:bone", 4, 2, 5)]),
+    "dwemer": ("containers/dungeon/theme/dwemer", "chests/relic_dwemer", [("nirncraft:dwarven_metal_ingot", 3, 1, 3), ("nirncraft:dwarven_oil", 2, 1, 2)]),
+    "bandit": ("containers/camp/bandit", "containers/corpse/bandit_boss", [("nirncraft:gold_ring", 1, 1, 1), ("nirncraft:steel_ingot", 3, 1, 3)]),
+    "necromancer": ("containers/dungeon/theme/necromancer", "containers/corpse/mage_boss", [("nirncraft:soul_gem_black", 1, 1, 1), ("nirncraft:deathbell", 3, 1, 3)]),
+    "vampire": ("containers/dungeon/theme/vampire", "containers/corpse/vampire", [("nirncraft:vampire_dust", 4, 1, 4), ("minecraft:book", 2, 1, 1)]),
+    "hagraven": ("containers/dungeon/theme/forsworn", "chests/relic_lair", [("nirncraft:hagraven_feathers", 4, 1, 3), ("nirncraft:briar_heart", 1, 1, 1)]),
+    "forsworn": ("containers/camp/forsworn", "containers/dungeon/theme/forsworn", [("nirncraft:hagraven_feathers", 3, 1, 2), ("nirncraft:hide", 4, 1, 3)]),
+    "falmer": ("containers/dungeon/theme/falmer", "chests/relic_cave", [("nirncraft:chaurus_eggs", 3, 1, 2), ("nirncraft:falmer_ear", 3, 1, 2)]),
+    "den": ("containers/camp/hunter", "chests/relic_cave", [("nirncraft:hide", 5, 1, 3), ("minecraft:bone", 4, 2, 5)]),
     "ice": ("chests/relic_cave", "containers/dungeon/theme/falmer", [("minecraft:blue_ice", 2, 1, 3), ("minecraft:amethyst_shard", 3, 1, 4)]),
-    "mine": ("containers/site/mine", "chests/relic_mine", [("skycraft:raw_malachite", 2, 1, 3), ("skycraft:raw_silver", 3, 1, 4)]),
-    "grove": ("containers/camp/hunter", "chests/relic_cave", [("skycraft:glowing_mushroom", 4, 1, 3), ("minecraft:moss_block", 3, 1, 4)]),
-    "smuggler": ("containers/camp/smuggler", "chests/relic_cave", [("skycraft:moon_sugar", 3, 1, 3), ("skycraft:skooma", 2, 1, 1)]),
+    "mine": ("containers/site/mine", "chests/relic_mine", [("nirncraft:raw_malachite", 2, 1, 3), ("nirncraft:raw_silver", 3, 1, 4)]),
+    "grove": ("containers/camp/hunter", "chests/relic_cave", [("nirncraft:glowing_mushroom", 4, 1, 3), ("minecraft:moss_block", 3, 1, 4)]),
+    "smuggler": ("containers/camp/smuggler", "chests/relic_cave", [("nirncraft:moon_sugar", 3, 1, 3), ("nirncraft:skooma", 2, 1, 1)]),
     "cave": ("chests/relic_cave", "containers/dungeon/standard", [("minecraft:bone", 3, 1, 3), ("minecraft:iron_ingot", 3, 1, 3)]),
-    "giant": ("containers/camp/giant", "containers/dungeon/standard", [("skycraft:giants_toe", 1, 1, 1), ("minecraft:leather", 4, 2, 5)]),
+    "giant": ("containers/camp/giant", "containers/dungeon/standard", [("nirncraft:giants_toe", 1, 1, 1), ("minecraft:leather", 4, 2, 5)]),
     "dragon": ("containers/site/dragon_lair", "chests/relic_barrow", [("minecraft:bone", 5, 2, 6), ("minecraft:gold_ingot", 2, 1, 3)]),
     "tower": ("containers/dungeon/standard", "chests/relic_ruin", [("minecraft:book", 3, 1, 2), ("minecraft:spyglass", 1, 1, 1)]),
     "cabin": ("containers/household/common", "containers/camp/hunter", [("minecraft:cooked_beef", 3, 1, 3), ("minecraft:leather", 2, 1, 3)]),
@@ -431,8 +431,8 @@ def lang_names():
     out = {}
     for f in glob.glob(os.path.join(LANG, "*.json")):
         for k, v in load_json(f).items():
-            if k.startswith("place.skycraft."):
-                out[k[len("place.skycraft."):]] = v
+            if k.startswith("place.nirncraft."):
+                out[k[len("place.nirncraft."):]] = v
     return out
 
 
@@ -743,13 +743,13 @@ def loot_table(key):
     return {
         "type": "minecraft:chest",
         "pools": [
-            {"rolls": 1, "entries": [{"type": "minecraft:loot_table", "name": "skycraft:" + theme, "weight": 1}]},
+            {"rolls": 1, "entries": [{"type": "minecraft:loot_table", "name": "nirncraft:" + theme, "weight": 1}]},
             {"rolls": {"type": "minecraft:uniform", "min": 1, "max": 2},
-             "entries": [{"type": "minecraft:loot_table", "name": "skycraft:" + second, "weight": 3},
-                         {"type": "minecraft:loot_table", "name": "skycraft:chests/gold", "weight": 1}]},
+             "entries": [{"type": "minecraft:loot_table", "name": "nirncraft:" + second, "weight": 3},
+                         {"type": "minecraft:loot_table", "name": "nirncraft:chests/gold", "weight": 1}]},
             {"rolls": 1, "entries": entries},
         ],
-        "random_sequence": "skycraft:chests/story_" + key,
+        "random_sequence": "nirncraft:chests/story_" + key,
     }
 
 

@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/bow_of_shadows",
+  "textures": {
+    "layer0": "nirncraft:item/bow_of_shadows_pulling_2"
+  }
+}

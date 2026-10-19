@@ -1,12 +1,12 @@
-# Skycraft worldgen benchmark (headless).
+# NirnCraft worldgen benchmark (headless).
 #
 #   tools/bake/bench.ps1 [-Radius 5] [-Tasks "columns,bench:5"] [-Port 25747] [-Keep] [-Label before]
 #
-# Boots the dev server (./gradlew runServer, only Skycraft loaded) on a FRESH world with the fixed Nirn seed, runs the
-# autorun tasks (see com.skycraft.perf.PerfAutorun), then stops. The chunk benchmark generates five fixed areas
+# Boots the dev server (./gradlew runServer, only NirnCraft loaded) on a FRESH world with the fixed Nirn seed, runs the
+# autorun tasks (see com.nirncraft.perf.PerfAutorun), then stops. The chunk benchmark generates five fixed areas
 # (Whiterun, Throat of the World, Skingrad, Balmora, a far realm) and prints chunks/s, chunks/s per worker, the
-# per-stage CPU split and the Skycraft hot spots (Java Flight Recorder, in process). Results:
-#   mod/run/skycraft-perf/bench-<time>.txt  (+ .jfr: open it in JDK Mission Control or `jfr print`)
+# per-stage CPU split and the NirnCraft hot spots (Java Flight Recorder, in process). Results:
+#   mod/run/nirncraft-perf/bench-<time>.txt  (+ .jfr: open it in JDK Mission Control or `jfr print`)
 #   tools/bake/out/bench-<label>.log        (the [perf] lines)
 # Only one Gradle run per worktree at a time. Use -Keep to reuse the existing world (generation is then mostly loading).
 param(
@@ -30,14 +30,14 @@ Set-Content -Path (Join-Path $run "eula.txt") -Value "eula=true" -Encoding ascii
 $props = Join-Path $run "server.properties"
 $lines = @()
 if (Test-Path $props) { $lines = Get-Content $props | Where-Object { $_ -notmatch '^(level-seed|server-port|online-mode|level-type|max-tick-time)=' } }
-$lines += "level-seed=2428247"   # the fixed Nirn seed ("Nirn".hashCode()), see com.skycraft.bake.WorldSeed
+$lines += "level-seed=2428247"   # the fixed Nirn seed ("Nirn".hashCode()), see com.nirncraft.bake.WorldSeed
 $lines += "server-port=$Port"
 $lines += "online-mode=false"
 $lines += "level-type=minecraft\:normal"
 $lines += "max-tick-time=-1"
 Set-Content -Path $props -Value $lines -Encoding ascii
 
-$env:SKYCRAFT_AUTORUN = $Tasks
+$env:NIRNCRAFT_AUTORUN = $Tasks
 # deep stacks so JFR samples keep their root frames (stage attribution)
 $env:JAVA_TOOL_OPTIONS = "-XX:FlightRecorderOptions:stackdepth=1024 $JvmOpts"
 $log = Join-Path $out "bench-$Label.full.log"
@@ -51,7 +51,7 @@ try {
     Get-Content "$log.err" -ErrorAction SilentlyContinue | Add-Content $log
 } finally {
     Pop-Location
-    Remove-Item Env:SKYCRAFT_AUTORUN -ErrorAction SilentlyContinue
+    Remove-Item Env:NIRNCRAFT_AUTORUN -ErrorAction SilentlyContinue
     Remove-Item Env:JAVA_TOOL_OPTIONS -ErrorAction SilentlyContinue
 }
 $summary = Join-Path $out "bench-$Label.log"

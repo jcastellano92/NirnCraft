@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "group": "refined_moonstone",
+  "ingredient": "nirncraft:raw_moonstone",
+  "result": {
+    "id": "nirncraft:refined_moonstone"
+  },
+  "experience": 0.7,
+  "cookingtime": 100
+}

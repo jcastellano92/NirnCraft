@@ -1,0 +1,18 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "cave",
+  "kit": "falmer",
+  "flavor": 4,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "falmer_cave"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

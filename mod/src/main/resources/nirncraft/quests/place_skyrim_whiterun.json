@@ -1,0 +1,1401 @@
+{
+  "line": "place_skyrim_whiterun",
+  "category": "side",
+  "npcs": [
+    {
+      "id": "pln_skyrim_whiterun_thyra",
+      "name": "Thyra Stone-Brow",
+      "role": "fisher",
+      "place": "riverwood",
+      "offset": [
+        6,
+        -4
+      ],
+      "female": true,
+      "greet": "Mind the pool below the bridge. Something in there has teeth and no manners."
+    },
+    {
+      "id": "pln_skyrim_whiterun_hjalla",
+      "name": "Hjalla",
+      "role": "farmer",
+      "place": "rorikstead",
+      "offset": [
+        -5,
+        3
+      ],
+      "female": true,
+      "greet": "Have you come down from the north-west hills? Did you pass a hut? A tall man with a grey beard?"
+    },
+    {
+      "id": "pln_skyrim_whiterun_svala",
+      "name": "Svala",
+      "role": "farmer",
+      "place": "rorikstead",
+      "offset": [
+        6,
+        -6
+      ],
+      "female": true,
+      "greet": "Sorry, I can't stop. The field won't plough itself, and my brother can't help any more."
+    },
+    {
+      "id": "pln_skyrim_whiterun_eirik",
+      "name": "Eirik Mead-Hand",
+      "role": "merchant",
+      "place": "honningbrew_meadery",
+      "offset": [
+        4,
+        4
+      ],
+      "female": false,
+      "greet": "If you've come to buy mead, buy it quick. Whatever I don't sell, the bandits will drink."
+    },
+    {
+      "id": "pln_skyrim_whiterun_gunnvor",
+      "name": "Gunnvor Half-Wool",
+      "role": "farmer",
+      "place": "pelagia_farm",
+      "offset": [
+        3,
+        -5
+      ],
+      "female": true,
+      "greet": "You haven't seen a brown cow with a white face, have you? Answers to Brindle. Probably answers to giants too, now."
+    },
+    {
+      "id": "pln_skyrim_whiterun_hildrun",
+      "name": "Sister Hildrun",
+      "role": "priest",
+      "place": "whiterun",
+      "offset": [
+        -6,
+        5
+      ],
+      "female": true,
+      "greet": "Kynareth keep you, traveller. Forgive me if I seem distracted. The Temple has lost one of its own."
+    },
+    {
+      "id": "pln_skyrim_whiterun_kjeld",
+      "name": "Kjeld the Rider",
+      "role": "courier",
+      "place": "whiterun_stables",
+      "offset": [
+        5,
+        2
+      ],
+      "female": false,
+      "greet": "Twenty years carrying letters and the first time I lose a satchel it's the one with the Steward's seal on it."
+    },
+    {
+      "id": "pln_skyrim_whiterun_arcadia",
+      "name": "Arcadia",
+      "role": "apothecary",
+      "place": "whiterun",
+      "offset": [
+        4,
+        -6
+      ],
+      "female": true,
+      "greet": "Potions, salves, tinctures. And if you happen to be going west, I have a favour or two to ask."
+    }
+  ],
+  "relics": [
+    {
+      "id": "plr_riverwood_net_charm",
+      "name": "Thyra's Iron Fish",
+      "desc": "A little fish of black iron, worn smooth by a father's thumb, with a broken loop where it once hung from a net."
+    },
+    {
+      "id": "plr_crabbers_shanty_purse",
+      "name": "Grisvar's Crusted Purse",
+      "desc": "A leather purse stiff with salt and river mud, heavy with a lifetime of crab money."
+    },
+    {
+      "id": "plr_drelas_cottage_alembic",
+      "name": "Arcadia's Breton Alembic",
+      "desc": "A fine alembic of Breton glass with a silver stopper, faintly sooty from a fire atronach's breath."
+    },
+    {
+      "id": "plr_rannveigs_fast_oath_ring",
+      "name": "Rannveig's Oath-Ring",
+      "desc": "A heavy band of black iron shaped as a wolf's mouth closing on a grey stone. It is cold, and stays cold."
+    },
+    {
+      "id": "plr_hamvirs_rest_skeggi_charm",
+      "name": "Skeggi's Rope-Charm",
+      "desc": "A knot of red cord twisted around a wolf's tooth, the kind a young Nord wears for luck. It did not work."
+    },
+    {
+      "id": "plr_halted_stream_camp_key",
+      "name": "Brattvar's Shackle Key",
+      "desc": "A crude iron key on a loop of chain, greasy from a bandit chief's belt. It opens the miners' chains."
+    },
+    {
+      "id": "plr_shimmermist_cave_horn",
+      "name": "Elk-Carved Hunting Horn",
+      "desc": "A horn carved from mammoth tusk, a running elk cut along its side. It still sounds a clear, deep note."
+    },
+    {
+      "id": "plr_fellglow_keep_amulet",
+      "name": "Alvi's Hawk Amulet",
+      "desc": "A wooden amulet of Kynareth carved as a hawk in flight, its cord blackened and its wood scorched at one wing."
+    },
+    {
+      "id": "plr_redorans_retreat_satchel",
+      "name": "Kjeld's Courier Satchel",
+      "desc": "A battered leather satchel stamped with the Whiterun courier's mark. The Steward's sealed letter is still inside, unbroken."
+    },
+    {
+      "id": "plr_moldering_ruins_knife",
+      "name": "Agnar's Little Knife",
+      "desc": "A child's whittling knife with a birch handle, his name scratched on the blade in uneven letters."
+    },
+    {
+      "id": "plr_swindlers_den_case",
+      "name": "Legion Dispatch Case",
+      "desc": "A leather case closed with the red seal of the Fourth Legion. The seal is still unbroken."
+    },
+    {
+      "id": "plr_bleakwind_basin_bell",
+      "name": "Brindle's Cow-Bell",
+      "desc": "A dented copper cow-bell on a leather strap that has been very carefully, very gently untied by enormous fingers."
+    },
+    {
+      "id": "plr_graywinter_watch_bow",
+      "name": "Ulfgar's Hunting Bow",
+      "desc": "A yew longbow with a chewed grip and a hunter's tally of kills cut into the limb. The troll did not care for it."
+    },
+    {
+      "id": "plr_serpents_bluff_redoubt_heart",
+      "name": "Thorn-Mother's Heart Box",
+      "desc": "A box of woven briar and bone. Something inside it still beats, slowly, when held."
+    },
+    {
+      "id": "plr_fort_greymoor_paychest",
+      "name": "Greymoor Pay Chest",
+      "desc": "A small iron-bound chest stamped with the Legion eagle, rusted shut. Coins rattle within."
+    },
+    {
+      "id": "plr_sleeping_tree_camp_sap",
+      "name": "Flask of Sleeping Tree Sap",
+      "desc": "A stoppered flask of thick golden sap. Even the smell of it makes your eyelids heavy."
+    },
+    {
+      "id": "plr_the_ritual_stone_grimoire",
+      "name": "Moriva's Grave-Book",
+      "desc": "A small black book of rituals and names, with grave dust pressed between its pages."
+    },
+    {
+      "id": "plr_lunds_hut_ring",
+      "name": "Lund's Marriage Ring",
+      "desc": "A plain silver band, worn thin. Inside, scratched by hand: 'H. and L., Rorikstead.'"
+    },
+    {
+      "id": "plr_white_river_watch_key",
+      "name": "Kolskegg's Store-Room Key",
+      "desc": "A big brass key on a belt loop, sticky with spilled mead."
+    }
+  ],
+  "quests": [
+    {
+      "id": "pl_riverwood",
+      "title": "The Iron Fish",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "Thyra Stone-Brow, a fisher of Riverwood, lost her late father's iron net-charm to something lurking in the pool below the bridge.",
+      "pitch": "Thyra lost her father's charm in the river, the little iron fish he carved. The slaughterfish in that pool took it, or near enough. She'd be grateful to anyone who got it back.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "riverwood",
+          "offset": [
+            0,
+            24
+          ],
+          "relic": "plr_riverwood_net_charm",
+          "text": "Search the pool below Riverwood's bridge for the iron fish",
+          "spawn": [
+            {
+              "type": "nirncraft:slaughterfish",
+              "count": 3
+            }
+          ],
+          "journal": "The iron fish was wedged between two stones on the riverbed, the slaughterfish circling it like a treasure."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_whiterun_thyra",
+          "relic": "plr_riverwood_net_charm",
+          "text": "Return the iron fish to Thyra",
+          "topic": "I found your father's charm.",
+          "reply": "Oh. Oh, look at it. He carved this the winter I was born. I'll put it on a new line tonight, and the fish can bite somebody else's thumb."
+        }
+      ],
+      "rewards": {
+        "gold": 80,
+        "items": [
+          "nirncraft:iron_dagger"
+        ]
+      },
+      "outro": "Thyra hung the iron fish back on her net. She says the salmon have come back to the pool since.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_crabbers_shanty",
+      "title": "Grisvar's Purse",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "The journal of Grisvar, a dead crabber, says his life's savings lie buried under the third trap from his shanty door, the one with the blue rope.",
+      "pitch": "Old Grisvar the crabber never spent a coin. When he died, nobody found a septim. If you're bold enough to wade in among his crabs, the purse is yours.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "crabbers_shanty",
+          "text": "Go to Crabber's Shanty"
+        },
+        {
+          "type": "retrieve",
+          "place": "crabbers_shanty",
+          "offset": [
+            8,
+            -6
+          ],
+          "relic": "plr_crabbers_shanty_purse",
+          "text": "Dig under the trap with the blue rope",
+          "spawn": [
+            {
+              "type": "nirncraft:mudcrab",
+              "count": 2
+            },
+            {
+              "type": "nirncraft:mudcrab",
+              "name": "Jarl",
+              "hp": 1.5
+            }
+          ],
+          "journal": "The purse was there, an arm deep in the shingle. So was Jarl, the biggest mudcrab I have ever seen. Grisvar was right. He bites."
+        }
+      ],
+      "rewards": {
+        "gold": 110
+      },
+      "outro": "Grisvar's purse held a lifetime of crab money. He would probably want it spent on something better than crabs.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_drelas_cottage",
+      "title": "Borrowed Glass",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "Arcadia of Whiterun lent a Dunmer mage named Drelas her best alembic and never got it back. Drelas answers letters with fire.",
+      "pitch": "Arcadia lent the witch out west a fancy alembic and the witch won't give it back. Arcadia says she'll pay anyone who fetches it. Mind the fire spirit.",
+      "requires": [
+        "level:4"
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "drelas_cottage",
+          "text": "Go to Drelas' Cottage"
+        },
+        {
+          "type": "kill",
+          "place": "drelas_cottage",
+          "text": "Deal with Drelas and her atronach",
+          "spawn": [
+            {
+              "type": "npc:mage",
+              "name": "Drelas",
+              "target": true,
+              "boss": true,
+              "hp": 1.2
+            },
+            {
+              "type": "nirncraft:flame_atronach",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "drelas_cottage",
+          "relic": "plr_drelas_cottage_alembic",
+          "text": "Find Arcadia's alembic in the cottage",
+          "journal": "The alembic was on Drelas' workbench, still warm from the summoning salts."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_whiterun_arcadia",
+          "relic": "plr_drelas_cottage_alembic",
+          "text": "Return the alembic to Arcadia in Whiterun",
+          "topic": "Your alembic, from Drelas' cottage.",
+          "reply": "Not a crack in it! Sooty, but whole. I would have settled for an apology, you know. This is better."
+        }
+      ],
+      "rewards": {
+        "gold": 120,
+        "items": [
+          "nirncraft:spell_tome_firebolt"
+        ]
+      },
+      "outro": "Arcadia's alembic is back on her shelf. She has stopped lending things to anyone who lives outside the walls.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_rannveigs_fast",
+      "title": "The Oath-Ring",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "Sigrid Gray-Mane went into Rannveig's Fast after an iron oath-ring she believed belonged to her clan. She did not come out. Her journal asks that the ring be taken home to the Gray-Manes.",
+      "pitch": "Rannveig's oath-ring is still in that barrow, they say, and a Gray-Mane girl went in after it. If you find it, the Gray-Manes at Jorrvaskr would want to know. Eorlund especially.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "rannveigs_fast",
+          "text": "Enter Rannveig's Fast"
+        },
+        {
+          "type": "kill",
+          "place": "rannveigs_fast",
+          "placement": "structure",
+          "text": "Lay the ring's warden to rest",
+          "spawn": [
+            {
+              "type": "nirncraft:draugr",
+              "count": 2
+            },
+            {
+              "type": "nirncraft:draugr",
+              "name": "Hjalti the Ring-Warden",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            }
+          ],
+          "journal": "The warden fell, and the halls went quiet. Rannveig's fast is over."
+        },
+        {
+          "type": "retrieve",
+          "place": "rannveigs_fast",
+          "placement": "structure",
+          "relic": "plr_rannveigs_fast_oath_ring",
+          "text": "Take Rannveig's oath-ring from the inner hall",
+          "journal": "The ring lay on the stone of the inner hall. Beside it lay Sigrid, her hand still reaching for it."
+        },
+        {
+          "type": "deliver",
+          "npc": "eorlund",
+          "relic": "plr_rannveigs_fast_oath_ring",
+          "text": "Bring the ring to Eorlund Gray-Mane at Jorrvaskr",
+          "topic": "This was Rannveig's. Sigrid died bringing it home.",
+          "reply": "Sigrid. My brother's granddaughter. Stubborn as stone, like all of us. I'll forge a place for this ring above our hearth, and her name beside it. Thank you."
+        }
+      ],
+      "rewards": {
+        "gold": 160,
+        "items": [
+          "nirncraft:steel_war_axe"
+        ]
+      },
+      "outro": "Rannveig's oath-ring hangs in the Gray-Mane house in Whiterun now, and Sigrid's name is cut beneath it.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_hamvirs_rest",
+      "title": "Hamvir Does Not Rest",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "A grave-robber's notes tell of his friend Skeggi, left behind in Hamvir's Rest when the dead chieftain woke. He begs anyone brave enough to put Hamvir down.",
+      "pitch": "Two robbers went into Hamvir's Rest after an old axe. One came out screaming. If you've got a strong arm, the dead in there need putting back to bed.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "hamvirs_rest",
+          "placement": "structure",
+          "text": "Fight through Hamvir's risen guard",
+          "spawn": [
+            {
+              "type": "nirncraft:draugr",
+              "count": 2
+            },
+            {
+              "type": "minecraft:skeleton",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "hamvirs_rest",
+          "placement": "structure",
+          "text": "Put Hamvir the Patient back to rest",
+          "spawn": [
+            {
+              "type": "nirncraft:draugr",
+              "name": "Hamvir the Patient",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "hamvirs_rest",
+          "placement": "structure",
+          "relic": "plr_hamvirs_rest_skeggi_charm",
+          "text": "Find what became of Skeggi",
+          "journal": "Skeggi lay at the foot of Hamvir's throne. I left the axe across the chieftain's knees, where it belongs, and took only the boy's luck-charm."
+        }
+      ],
+      "rewards": {
+        "gold": 110,
+        "items": [
+          "nirncraft:soul_gem_lesser"
+        ]
+      },
+      "outro": "Hamvir waits again, his axe across his knees. Skeggi's charm should go to someone who will bury it.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_halted_stream_camp",
+      "title": "The Stone Hand's Mine",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "Bandits at Halted Stream Camp are working an old mine with farmhands taken from Loreius Farm. Their chief, Brattvar Stone-Hand, keeps the key to the chains on his belt.",
+      "pitch": "Vantus Loreius thinks his missing farmhands ran off. They didn't. The bandits at Halted Stream have them digging in chains. Someone ought to go and break those chains.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "halted_stream_camp",
+          "text": "Clear the bandits from Halted Stream Camp",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "halted_stream_camp",
+          "text": "Defeat Brattvar Stone-Hand",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit_chief",
+              "name": "Brattvar Stone-Hand",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "halted_stream_camp",
+          "placement": "structure",
+          "relic": "plr_halted_stream_camp_key",
+          "text": "Take the shackle key and free the miners",
+          "journal": "Ulf and Asbjorn of Loreius Farm are free. They ran for home without stopping to thank me, which I can hardly blame them for."
+        }
+      ],
+      "rewards": {
+        "gold": 150,
+        "items": [
+          "nirncraft:steel_dagger"
+        ]
+      },
+      "outro": "The miners of Loreius Farm made it home. The mine at Halted Stream has fallen silent.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_silent_moons_camp",
+      "title": "Moonsliver",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "Hrodna, the bandit smith at Silent Moons Camp, forged a blade under both moons from the pale ore of Halted Stream. She calls it Moonsliver and keeps it locked by the lunar forge.",
+      "pitch": "The bandits at Silent Moons have a smith who's made something special, a blade that shines like the moons. I'd sooner it were in honest hands than hers.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "silent_moons_camp",
+          "text": "Fight past the bandits at Silent Moons Camp",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "silent_moons_camp",
+          "text": "Defeat Hrodna the Smith",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit_chief",
+              "name": "Hrodna the Smith",
+              "target": true,
+              "boss": true,
+              "hp": 1.2
+            }
+          ],
+          "journal": "Hrodna fought with a smith's hammer, not her fine blade. She never meant to use Moonsliver on anyone. She meant to sell it and be free."
+        }
+      ],
+      "rewards": {
+        "gold": 90,
+        "items": [
+          {
+            "item": "nirncraft:steel_sword",
+            "name": "Moonsliver",
+            "enchant": {
+              "sharpness": 1
+            }
+          }
+        ]
+      },
+      "outro": "Moonsliver is mine now. Under the moons, its edge gleams faintly blue.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_greenspring_hollow",
+      "title": "The Keeper's Bargain",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "A hunter's journal tells of the spriggan that keeps Greenspring Hollow, and the poachers whose greed has turned it wild. The hunter says it is the men who need killing, not the spriggan.",
+      "pitch": "Poachers have camped in Greenspring Hollow, leaving deer to rot for the pelts. The hollow's keeper is angry, and the trees close the paths behind you. Drive the poachers out and maybe it'll calm.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "greenspring_hollow",
+          "text": "Go to Greenspring Hollow"
+        },
+        {
+          "type": "clear",
+          "place": "greenspring_hollow",
+          "text": "Drive out the poachers",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "greenspring_hollow",
+          "text": "Defeat Skuli the Snare-Setter",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Skuli the Snare-Setter",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            }
+          ],
+          "journal": "With the poachers gone, the trees of the hollow seemed to breathe out. Something watched me leave and did not follow."
+        }
+      ],
+      "rewards": {
+        "gold": 100,
+        "items": [
+          "nirncraft:fur_boots"
+        ]
+      },
+      "outro": "The keeper of Greenspring Hollow has the bargain back: one deer, a word to Kynareth, and no more.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_whitewatch_tower",
+      "title": "Red Shields",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "Bandits under Red Ingjald have turned Whitewatch Tower into a toll-gate on the north road, and keep a tally of every purse they empty.",
+      "pitch": "Whitewatch Tower's bandits paint their shields red and rob anyone on the north road. Loreius lost farmhands to them. There's coin in it for whoever pulls down their red shields.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "whitewatch_tower",
+          "text": "Clear the bandits from Whitewatch Tower",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "whitewatch_tower",
+          "text": "Defeat Red Ingjald",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit_chief",
+              "name": "Red Ingjald",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            }
+          ],
+          "journal": "Red Ingjald is dead. Whitewatch Tower watches the road again, for whoever comes next."
+        }
+      ],
+      "rewards": {
+        "gold": 130,
+        "items": [
+          "nirncraft:studded_helmet"
+        ]
+      },
+      "outro": "The red shields of Whitewatch Tower are down. The north road is safe, for now.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_shimmermist_cave",
+      "title": "Father's Horn",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "Bodvar the hunter's brother Eyvind went into Shimmermist Cave after a wounded elk and never came out. Bodvar heard their father's horn deep below, once, and then nothing.",
+      "pitch": "Bodvar's brother went into Shimmermist Cave and never came back. The pale folk took him. If you find their father's hunting horn, Bodvar will know what happened, one way or the other.",
+      "requires": [
+        "level:5"
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "shimmermist_cave",
+          "text": "Enter Shimmermist Cave"
+        },
+        {
+          "type": "retrieve",
+          "place": "shimmermist_cave",
+          "placement": "structure",
+          "relic": "plr_shimmermist_cave_horn",
+          "text": "Find Eyvind's hunting horn",
+          "spawn": [
+            {
+              "type": "nirncraft:falmer",
+              "count": 2
+            }
+          ],
+          "journal": "The horn lay beside Eyvind's bones in a Falmer nest. He had blown it to the end."
+        },
+        {
+          "type": "kill",
+          "place": "shimmermist_cave",
+          "placement": "structure",
+          "text": "Kill the Falmer who led the hunt",
+          "spawn": [
+            {
+              "type": "nirncraft:falmer",
+              "name": "The Pale Sniffer",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 150,
+        "items": [
+          "nirncraft:fur_chestplate"
+        ]
+      },
+      "outro": "Eyvind's horn is out of the dark. Bodvar can bury his brother in the hunters' way now, with a last note on the horn.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_fellglow_keep",
+      "title": "The Acolyte of Fellglow",
+      "region": "skyrim/whiterun",
+      "start": "npc:pln_skyrim_whiterun_hildrun",
+      "offer": "Who has the Temple lost?",
+      "pitch": "Brother Alvi, one of our acolytes. His mother died this spring and the grief ate him. Then mages from Fellglow Keep came promising to bring the dead back, and he went with them. Please, find him. Bring him home, or bring me the truth.",
+      "desc": "Brother Alvi of the Temple of Kynareth went to Fellglow Keep, lured by necromancers who promised to raise his dead mother. Sister Hildrun wants him found.",
+      "requires": [
+        "level:4"
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "fellglow_keep",
+          "placement": "structure",
+          "text": "Fight through the necromancers of Fellglow Keep",
+          "spawn": [
+            {
+              "type": "nirncraft:necromancer",
+              "count": 2
+            },
+            {
+              "type": "minecraft:skeleton",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "fellglow_keep",
+          "placement": "structure",
+          "text": "Find Brother Alvi in the lower cells",
+          "spawn": [
+            {
+              "type": "minecraft:zombie",
+              "name": "Alvi, Risen",
+              "target": true,
+              "boss": true,
+              "hp": 1.2
+            }
+          ],
+          "actions": "relic:plr_fellglow_keep_amulet",
+          "journal": "The necromancers made Alvi one of their thralls. I put him to rest and took the hawk amulet from his neck."
+        },
+        {
+          "type": "talk",
+          "npc": "pln_skyrim_whiterun_hildrun",
+          "text": "Tell Sister Hildrun what became of Alvi",
+          "topic": "I found Alvi.",
+          "reply": "Your face tells me before your words do. What happened to him?",
+          "actions": "take:plr_fellglow_keep_amulet",
+          "choices": [
+            {
+              "label": "Tell her the truth: they made him a thrall, and I had to put him down.",
+              "reply": "Kynareth forgive them, because I cannot. Thank you for not sparing me. I would rather grieve the truth than a kind story.",
+              "actions": "flag:pl_fellglow_truth"
+            },
+            {
+              "label": "Tell her he died fighting them, trying to escape.",
+              "reply": "Fighting. Yes. That was Alvi, at the end. He was always braver than he knew. Thank you. I will tell the others he came back to us.",
+              "actions": "flag:pl_fellglow_mercy"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 150,
+        "items": [
+          "nirncraft:spell_tome_lesser_ward"
+        ]
+      },
+      "outro": "Alvi's hawk amulet hangs beneath the Gildergreen now, where Sister Hildrun prays for him each morning.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_redorans_retreat",
+      "title": "The Courier's Satchel",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "Bandits at Redoran's Retreat robbed Kjeld the courier of his satchel, including a letter sealed by the Steward of Whiterun. Their leader, Astrid Half-Ear, means to ransom it.",
+      "pitch": "Kjeld the courier got robbed by the cave-bandits at Redoran's Retreat. They took a letter with the Steward's seal on it. Kjeld's at the stables, cursing anyone who'll listen. He'd pay to get it back.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "redorans_retreat",
+          "placement": "structure",
+          "text": "Clear the bandits from Redoran's Retreat",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "redorans_retreat",
+          "placement": "structure",
+          "text": "Defeat Astrid Half-Ear",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit_chief",
+              "name": "Astrid Half-Ear",
+              "target": true,
+              "boss": true,
+              "hp": 1.2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "redorans_retreat",
+          "placement": "structure",
+          "relic": "plr_redorans_retreat_satchel",
+          "text": "Recover the courier's satchel from the iron box"
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_whiterun_kjeld",
+          "relic": "plr_redorans_retreat_satchel",
+          "text": "Return the satchel to Kjeld at Whiterun Stables",
+          "topic": "Your satchel. The Steward's seal is unbroken.",
+          "reply": "Unbroken! Ha! Proventus will never know how close he came to a scandal. Here, take this, and if you ever need a ride, it's free. Once. Don't push it."
+        }
+      ],
+      "rewards": {
+        "gold": 120,
+        "items": [
+          "nirncraft:leather_chestplate"
+        ]
+      },
+      "outro": "Kjeld delivered every letter in the satchel, late but whole. He has bought new boots.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_moldering_ruins",
+      "title": "Agnar's Knife",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "A Rorikstead boy named Agnar came back from the Moldering Ruins struck silent, leaving his father's knife behind. His sister Svala believes that if the knife returns, some of Agnar will too.",
+      "pitch": "Svala's little brother went into the Moldering Ruins after a lamb and came out not speaking. He left his knife in there. She thinks getting it back might help him. Children are funny that way.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "moldering_ruins",
+          "placement": "structure",
+          "relic": "plr_moldering_ruins_knife",
+          "text": "Find Agnar's knife in the Moldering Ruins",
+          "spawn": [
+            {
+              "type": "nirncraft:draugr",
+              "count": 2
+            }
+          ],
+          "journal": "The knife lay at the foot of a stone throne. On the throne sat a draugr in a bronze crown, eyes open, watching. I did not close them."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_whiterun_svala",
+          "relic": "plr_moldering_ruins_knife",
+          "text": "Bring the knife to Svala in Rorikstead",
+          "topic": "Agnar's knife. I found it.",
+          "reply": "You went in there? For a little knife? I'll give it to him tonight. Even if he doesn't speak, I know he'll hold it. Thank you, truly."
+        }
+      ],
+      "rewards": {
+        "gold": 90,
+        "items": [
+          "nirncraft:silver_ring"
+        ]
+      },
+      "outro": "Svala says Agnar spoke one word the night he got his knife back: 'Watching.' Then he slept through till morning for the first time in weeks.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_swindlers_den",
+      "title": "The Sealed Case",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "Grelka, the fence at Swindler's Den, bought a sealed Legion dispatch case from deserters. She means to sell it to the Stormcloaks. The Legion camp near Rorikstead wants it back unopened.",
+      "pitch": "The Legion lost a dispatch case and the fence at Swindler's Den has it, sitting on it till a Stormcloak comes along with coin. The captain at the Imperial camp will pay to see it home.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "swindlers_den",
+          "placement": "structure",
+          "text": "Clear out the thieves of Swindler's Den",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "swindlers_den",
+          "placement": "structure",
+          "text": "Defeat Grelka the Fence",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit_chief",
+              "name": "Grelka the Fence",
+              "target": true,
+              "boss": true,
+              "hp": 1.2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "swindlers_den",
+          "placement": "structure",
+          "relic": "plr_swindlers_den_case",
+          "text": "Take the Legion dispatch case from Grelka's strongbox"
+        },
+        {
+          "type": "go",
+          "place": "whiterun_imperial_camp",
+          "text": "Return the case to the Whiterun Imperial Camp",
+          "actions": "take:plr_swindlers_den_case",
+          "journal": "Captain Vell checked the seal twice before he believed it. He paid from his own purse, as he promised."
+        }
+      ],
+      "rewards": {
+        "gold": 160,
+        "items": [
+          "nirncraft:imperial_sword"
+        ]
+      },
+      "outro": "The Legion's dispatches reached Whiterun with their seal unbroken. Grelka's ledger has been closed for good.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_bleakwind_basin",
+      "title": "Brindle",
+      "region": "skyrim/whiterun",
+      "start": "npc:pln_skyrim_whiterun_gunnvor",
+      "offer": "What happened to your cow?",
+      "pitch": "A giant from Bleakwind Basin stepped over our fence and walked off with Brindle under his arm. I watched them for days. They're good to her. But she's ours. Could you go and see? Bring me her bell, at least, so I know she's well.",
+      "desc": "A giant from Bleakwind Basin took Brindle, a cow from Pelagia Farm. Farmhand Gunnvor wants to know the cow is alive and well, and wants her bell back.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bleakwind_basin",
+          "text": "Look in on Brindle at Bleakwind Basin, quietly",
+          "journal": "Brindle stood by the giants' fire, fat and content, a young giant scratching her ears. Her bell lay on a rock nearby, very carefully untied."
+        },
+        {
+          "type": "retrieve",
+          "place": "bleakwind_basin",
+          "offset": [
+            10,
+            6
+          ],
+          "relic": "plr_bleakwind_basin_bell",
+          "text": "Take Brindle's bell without waking the giants"
+        },
+        {
+          "type": "talk",
+          "npc": "pln_skyrim_whiterun_gunnvor",
+          "text": "Tell Gunnvor what you saw",
+          "topic": "Brindle is alive. Here's her bell.",
+          "reply": "Alive! Gods. Is she well? Tell me true, should I go and fetch her?",
+          "actions": "take:plr_bleakwind_basin_bell",
+          "choices": [
+            {
+              "label": "She's happy there. The young giant loves her. Let her stay.",
+              "reply": "...A giant's pet. Well. There are worse lives for a cow. I'll hang the bell on the barn door so I remember her. Severio will grumble, but he grumbles at everything.",
+              "actions": "flag:pl_brindle_stays"
+            },
+            {
+              "label": "Take cheese. The old herders say giants will trade.",
+              "reply": "Cheese! I knew it. I'll take a wheel up there myself at dawn, and if they won't trade, at least they'll know we came politely.",
+              "actions": "flag:pl_brindle_trade"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 70,
+        "items": [
+          "nirncraft:leather_chestplate"
+        ]
+      },
+      "outro": "Whatever became of Brindle in the end, Gunnvor says she has stopped losing sleep over giants.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_graywinter_watch",
+      "title": "The Graywinter Troll",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "A troll in Graywinter Watch has been taking hounds, hunters and even a giant's mammoth calf. The hunter Ulfgar says the Jarl's bounty of 100 septims still stands.",
+      "pitch": "There's a troll in Graywinter Watch, east of the river. The Jarl put a bounty on it and the hunters can't collect. Bring fire. Lots of fire.",
+      "requires": [
+        "level:6"
+      ],
+      "objectives": [
+        {
+          "type": "kill",
+          "place": "graywinter_watch",
+          "placement": "structure",
+          "text": "Kill the troll of Graywinter Watch",
+          "spawn": [
+            {
+              "type": "nirncraft:troll",
+              "name": "Graywinter",
+              "target": true,
+              "boss": true,
+              "hp": 1.2
+            }
+          ],
+          "journal": "The troll is dead. Its den was littered with arrows it had pulled out of itself."
+        },
+        {
+          "type": "retrieve",
+          "place": "graywinter_watch",
+          "placement": "structure",
+          "relic": "plr_graywinter_watch_bow",
+          "text": "Recover Ulfgar's bow from the troll's den"
+        }
+      ],
+      "rewards": {
+        "gold": 150,
+        "items": [
+          "minecraft:arrow*16"
+        ]
+      },
+      "outro": "The bounty on the Graywinter troll has been paid. Ulfgar says he'll carve the troll's tally into his bow.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_serpents_bluff_redoubt",
+      "title": "The Thorn-Mother",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "Forsworn at Serpent's Bluff Redoubt hold Lemkil's daughter Sissel captive. Their matriarch, Kaie Thorn-Mother, is preparing a briar heart to lead a raid that will burn Rorikstead's fields.",
+      "pitch": "The Forsworn at Serpent's Bluff took Lemkil's girl, and their witch-mother means to burn Rorikstead. The Legion says they're stretched thin. Somebody has to go.",
+      "requires": [
+        "level:6"
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "serpents_bluff_redoubt",
+          "text": "Fight through the Forsworn of Serpent's Bluff",
+          "spawn": [
+            {
+              "type": "nirncraft:forsworn",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "serpents_bluff_redoubt",
+          "text": "Defeat Kaie Thorn-Mother",
+          "spawn": [
+            {
+              "type": "npc:forsworn",
+              "name": "Kaie Thorn-Mother",
+              "target": true,
+              "boss": true,
+              "hp": 1.4
+            }
+          ],
+          "actions": "relic:plr_serpents_bluff_redoubt_heart",
+          "journal": "Kaie Thorn-Mother is dead and her heart box is in my pack. Sissel's cage is open. She ran for Rorikstead without looking back."
+        },
+        {
+          "type": "go",
+          "place": "rorikstead",
+          "text": "Make sure Sissel got home to Rorikstead",
+          "journal": "Sissel made it home. Lemkil, for once in his life, was speechless."
+        }
+      ],
+      "rewards": {
+        "gold": 180,
+        "items": [
+          "nirncraft:forsworn_helmet"
+        ]
+      },
+      "outro": "Rorikstead's barley still stands, and its luck holds. This time, luck had help.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_fort_greymoor",
+      "title": "The Buried Pay",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "The last paymaster of Fort Greymoor buried the garrison's back pay outside the walls, thirty paces from the south-west tower, under a stone marked with the Legion eagle. He never returned for it.",
+      "pitch": "Old soldiers swear the Legion buried two months' pay outside Fort Greymoor when they pulled out. Under a stone with the eagle on it, south-west of the fort. Mind the Silver Hand on the walls.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "fort_greymoor",
+          "offset": [
+            -28,
+            26
+          ],
+          "relic": "plr_fort_greymoor_paychest",
+          "text": "Dig under the eagle stone south-west of the fort",
+          "spawn": [
+            {
+              "type": "nirncraft:wolf",
+              "count": 2
+            }
+          ],
+          "journal": "The eagle stone was half sunk in the turf. Beneath it lay the pay chest, rusted but whole, and inside it the garrison's silver ring of service."
+        }
+      ],
+      "rewards": {
+        "gold": 160,
+        "items": [
+          "nirncraft:silver_ring"
+        ]
+      },
+      "outro": "Optio Gratian Sabe wanted the pay to go to whoever served the Empire best. I suppose I'll have to decide whether that's me.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_sleeping_tree_camp",
+      "title": "Sap of the Sleeping Tree",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "Arcadia of Whiterun wants a flask of sap from the great tree at Sleeping Tree Camp, guarded by giants. She advises approaching from the south, downwind, just after sundown.",
+      "pitch": "Arcadia will split a fat price for a flask of sap from the Sleeping Tree. You just have to tiptoe past a camp of giants. Quietly. Very quietly.",
+      "requires": [
+        "level:5"
+      ],
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "sleeping_tree_camp",
+          "relic": "plr_sleeping_tree_camp_sap",
+          "text": "Tap a flask of sap from the Sleeping Tree",
+          "journal": "The giants snored by their fire while I filled the flask. One of them smiled in his sleep. I did not stay to find out what he was dreaming."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_whiterun_arcadia",
+          "relic": "plr_sleeping_tree_camp_sap",
+          "text": "Bring the sap to Arcadia in Whiterun",
+          "topic": "One flask of Sleeping Tree sap, as promised.",
+          "reply": "And not a giant's footprint on you! Here is your half, and a little more, for the quiet feet. Don't tell my Solitude buyer what I paid you."
+        }
+      ],
+      "rewards": {
+        "gold": 150
+      },
+      "outro": "Arcadia's buyer in Solitude has his sap. Arcadia has a new respect for adventurers who know how to walk softly.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_the_ritual_stone",
+      "title": "The Grave-Singer",
+      "region": "skyrim/whiterun",
+      "start": "manual",
+      "desc": "A necromancer called Moriva has been raising the dead buried around the Ritual Stone, sending grave dust to Fellglow Keep. She plans to raise them all at once.",
+      "pitch": "Someone's raising the dead around the Ritual Stone. Sister Hildrun at the temple tried singing them back to sleep and nearly got killed for it. Put a stop to it, will you?",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "the_ritual_stone",
+          "text": "Put down the risen dead around the Ritual Stone",
+          "spawn": [
+            {
+              "type": "minecraft:skeleton",
+              "count": 3
+            },
+            {
+              "type": "nirncraft:draugr",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "the_ritual_stone",
+          "text": "Stop Moriva the Grave-Singer",
+          "spawn": [
+            {
+              "type": "nirncraft:necromancer",
+              "name": "Moriva the Grave-Singer",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            }
+          ],
+          "actions": "relic:plr_the_ritual_stone_grimoire",
+          "journal": "Moriva is dead. Her grave-book names Fellglow Keep as the buyer of her grave dust."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_whiterun_hildrun",
+          "relic": "plr_the_ritual_stone_grimoire",
+          "text": "Bring Moriva's grave-book to Sister Hildrun",
+          "topic": "The dead at the Ritual Stone are quiet. This was the necromancer's.",
+          "reply": "Fellglow. Of course it leads back to Fellglow. I'll burn this book at the altar, and pray the stone's dead forgive us for being slow."
+        }
+      ],
+      "rewards": {
+        "gold": 140,
+        "items": [
+          "nirncraft:amulet_of_mara"
+        ]
+      },
+      "outro": "The graves around the Ritual Stone are closed again. Sister Hildrun goes out once a month to sing over them.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_lunds_hut",
+      "title": "The Trapper's Wife",
+      "region": "skyrim/whiterun",
+      "start": "npc:pln_skyrim_whiterun_hjalla",
+      "offer": "Who are you looking for?",
+      "pitch": "My husband, Lund. He went up to his hut in the hills to deal with a wolf pack and he hasn't come down. It's been two weeks. Nobody here will go. Please. Even if it's bad news, I need to know.",
+      "desc": "Lund the trapper went to deal with a bold wolf pack near his hut north-west of Rorikstead and never returned. His wife Hjalla needs to know what happened.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "lunds_hut",
+          "text": "Search Lund's Hut",
+          "journal": "The hut was empty, the fire long cold. Lund's journal speaks of a wolf den in the rocks above, and a grey leader with a white blaze."
+        },
+        {
+          "type": "kill",
+          "place": "lunds_hut",
+          "offset": [
+            -20,
+            -14
+          ],
+          "text": "Hunt down the white-blazed pack leader",
+          "spawn": [
+            {
+              "type": "nirncraft:wolf",
+              "count": 2
+            },
+            {
+              "type": "nirncraft:wolf",
+              "name": "White-Blaze",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            }
+          ],
+          "actions": "relic:plr_lunds_hut_ring",
+          "journal": "At the den lay what was left of Lund, his bow still strung. I took his ring for Hjalla."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_whiterun_hjalla",
+          "relic": "plr_lunds_hut_ring",
+          "text": "Bring Lund's ring to Hjalla in Rorikstead",
+          "topic": "I'm sorry. I found Lund.",
+          "reply": "I knew. I knew when the snow came and he didn't. But knowing and being told are different things. Thank you for bringing him back to me, this much of him."
+        }
+      ],
+      "rewards": {
+        "gold": 100,
+        "items": [
+          "nirncraft:fur_chestplate"
+        ]
+      },
+      "outro": "Hjalla wears Lund's ring on a cord now. She has sold his traps, but not his bow.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    },
+    {
+      "id": "pl_white_river_watch",
+      "title": "Mead Thieves",
+      "region": "skyrim/whiterun",
+      "start": "npc:pln_skyrim_whiterun_eirik",
+      "offer": "Bandits drinking your stock?",
+      "pitch": "Every cask that leaves this meadery gets stolen at the ford and carried off to White River Watch. Their chief, Kolskegg, keeps what he doesn't sell in a locked store-room. Get me his key and I'll make it worth your while.",
+      "desc": "Bandits at White River Watch have been stealing Honningbrew's mead casks at the river ford. Eirik Mead-Hand wants their chief Kolskegg stopped and the store-room key brought back.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "white_river_watch",
+          "placement": "structure",
+          "text": "Clear the bandits from White River Watch",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "white_river_watch",
+          "placement": "structure",
+          "text": "Defeat Kolskegg Mead-Belly",
+          "spawn": [
+            {
+              "type": "nirncraft:bandit_chief",
+              "name": "Kolskegg Mead-Belly",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            }
+          ],
+          "actions": "relic:plr_white_river_watch_key",
+          "journal": "Kolskegg fought like a drunk, which is to say badly and with great enthusiasm. His store-room key is mine."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_whiterun_eirik",
+          "relic": "plr_white_river_watch_key",
+          "text": "Bring the store-room key to Eirik at Honningbrew Meadery",
+          "topic": "Kolskegg's key. Your mead's in his store-room.",
+          "reply": "Ha! I'll send a cart at dawn. What's left of the mead is yours to drink, but I'd sooner you took coin. Honningbrew doesn't forget its friends."
+        }
+      ],
+      "rewards": {
+        "gold": 140,
+        "items": [
+          "nirncraft:steel_mace"
+        ]
+      },
+      "outro": "Honningbrew's carts cross the ford safely again. Eirik has started drawing smiling faces on the casks.",
+      "why": [
+        "whiterun.L9.neutral_jarl",
+        "whiterun.L8.kynareth_tree"
+      ]
+    }
+  ]
+}

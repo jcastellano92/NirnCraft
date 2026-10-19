@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Exports every text of the story quests (mod/src/main/resources/skycraft/quests/*.json) into
-// mod/src/main/lang/skycraft/quest_story.json, with the same keys com.skycraft.quest.story.StoryData derives,
+// Exports every text of the story quests (mod/src/main/resources/nirncraft/quests/*.json) into
+// mod/src/main/lang/nirncraft/quest_story.json, with the same keys com.nirncraft.quest.story.StoryData derives,
 // so translations and resource packs can replace any line. Also validates the files (JSON syntax, ids, NPC and
 // relic references). Run from anywhere after editing the quest data:  node tools/quest_lang.js
 'use strict';
@@ -8,8 +8,8 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..', 'mod', 'src', 'main');
-const dir = path.join(root, 'resources', 'skycraft', 'quests');
-const out = path.join(root, 'lang', 'skycraft', 'quest_story.json');
+const dir = path.join(root, 'resources', 'nirncraft', 'quests');
+const out = path.join(root, 'lang', 'nirncraft', 'quest_story.json');
 
 const lang = {};
 const problems = [];
@@ -42,32 +42,32 @@ for (const f of files) {
     if (filePlaces[id]) problems.push(`${f}: place ${id} is also declared in ${filePlaces[id]}`);
     filePlaces[id] = f;
   }
-  for (const [id, name] of Object.entries(j.speakers || {})) put(`story.skycraft.speaker.${id}`, name);
+  for (const [id, name] of Object.entries(j.speakers || {})) put(`story.nirncraft.speaker.${id}`, name);
   for (const n of j.npcs || []) {
     if (npcs[n.id]) problems.push(`${f}: duplicate npc ${n.id}`);
     npcs[n.id] = n;
-    put(`story.skycraft.npc.${n.id}`, n.name);
-    put(`story.skycraft.npc.${n.id}.greet`, n.greet);
+    put(`story.nirncraft.npc.${n.id}`, n.name);
+    put(`story.nirncraft.npc.${n.id}.greet`, n.greet);
   }
   for (const r of j.relics || []) {
     relics[r.id] = r;
-    put(`item.skycraft.relic.${r.id}`, r.name);
-    put(`item.skycraft.relic.${r.id}.desc`, r.desc);
+    put(`item.nirncraft.relic.${r.id}`, r.name);
+    put(`item.nirncraft.relic.${r.id}.desc`, r.desc);
   }
   for (const [bid, b] of Object.entries(j.bosses || {})) {
     if (bosses[bid]) problems.push(`${f}: duplicate boss ${bid}`);
     bosses[bid] = b;
-    put(`story.skycraft.boss.${bid}`, b.name);
+    put(`story.nirncraft.boss.${bid}`, b.name);
     if (!b.name || !b.type) problems.push(`${f}: boss ${bid} needs a name and a type`);
   }
   for (const [sid, lines] of Object.entries(j.scenes || {})) {
     scenes[sid] = true;
-    lines.forEach((l, i) => put(`story.skycraft.scene.${sid}.${i}`, l[1]));
+    lines.forEach((l, i) => put(`story.nirncraft.scene.${sid}.${i}`, l[1]));
   }
   for (const q of j.quests || []) {
     if (quests[q.id]) problems.push(`${f}: duplicate quest ${q.id}`);
     quests[q.id] = q;
-    const k = `story.skycraft.q.${q.id}`;
+    const k = `story.nirncraft.q.${q.id}`;
     for (const field of ['title', 'desc', 'offer', 'pitch', 'outro']) put(`${k}.${field}`, q[field]);
     if (q.find) put(`${k}.find`, q.find.text);
     (q.objectives || []).forEach((o, i) => {
@@ -84,7 +84,7 @@ for (const f of files) {
   }
 }
 
-// radiant archetype templates (com.skycraft.quest.story.RadiantTemplates)
+// radiant archetype templates (com.nirncraft.quest.story.RadiantTemplates)
 const radiantFile = path.join(dir, 'radiant_templates.json');
 let radiantCount = 0;
 if (fs.existsSync(radiantFile)) {
@@ -94,7 +94,7 @@ if (fs.existsSync(radiantFile)) {
       radiantCount++;
       if (seen.has(t.id)) problems.push(`radiant_templates.json: duplicate template ${t.id}`);
       seen.add(t.id);
-      const k = `story.skycraft.radiant.${t.id}`;
+      const k = `story.nirncraft.radiant.${t.id}`;
       for (const field of ['title', 'desc', 'pitch']) {
         if (!t[field]) problems.push(`radiant_templates.json: ${t.id} has no ${field}`);
         put(`${k}.${field}`, t[field]);
@@ -114,15 +114,15 @@ if (fs.existsSync(radiantFile)) {
 // references
 const places =JSON.parse(fs.readFileSync(path.join(dir, 'places.json'), 'utf8'));
 const worldPlaces = new Set();
-const pdir = path.join(root, 'resources', 'skycraft', 'tamriel', 'places');
+const pdir = path.join(root, 'resources', 'nirncraft', 'tamriel', 'places');
 for (const f of JSON.parse(fs.readFileSync(path.join(pdir, 'index.json'), 'utf8'))) {
   try {
     for (const p of JSON.parse(fs.readFileSync(path.join(pdir, f), 'utf8'))) worldPlaces.add(p.id);
   } catch (e) { /* not ours */ }
 }
 const known = id => !id || id.startsWith('@') || places[id] || worldPlaces.has(id) || filePlaces[id];
-// side quests: legendary unique ids (com.skycraft.loot.LegendaryUniques), loot tiers, bosses, hidden clues
-const uniqueSrc = fs.readFileSync(path.join(root, 'java', 'com', 'skycraft', 'loot', 'LegendaryUniques.java'), 'utf8');
+// side quests: legendary unique ids (com.nirncraft.loot.LegendaryUniques), loot tiers, bosses, hidden clues
+const uniqueSrc = fs.readFileSync(path.join(root, 'java', 'com', 'nirncraft', 'loot', 'LegendaryUniques.java'), 'utf8');
 const uniques = new Set([...uniqueSrc.matchAll(/^\s+def\("([a-z_]+)"/gm)].map(m => m[1]));
 const tiers = new Set(['minor', 'standard', 'major', 'legendary']);
 const clueKinds = new Set(['skeleton', 'stone', 'lever', 'altar', 'grave', 'lectern', 'urn', 'totem']);
@@ -132,18 +132,18 @@ function checkDrop(where, drop) {
     if (d.startsWith('loot:') && !tiers.has(d.slice(5))) problems.push(`${where}: unknown loot tier ${d}`);
   }
 }
-// skycraft item ids: everything with an item/block name in the merged lang files
+// nirncraft item ids: everything with an item/block name in the merged lang files
 const skyItems = new Set();
-for (const lf of fs.readdirSync(path.join(root, 'lang', 'skycraft'))) {
+for (const lf of fs.readdirSync(path.join(root, 'lang', 'nirncraft'))) {
   try {
-    for (const k of Object.keys(JSON.parse(fs.readFileSync(path.join(root, 'lang', 'skycraft', lf), 'utf8')))) {
-      const m = k.match(/^(?:item|block)\.skycraft\.([a-z0-9_]+)$/);
+    for (const k of Object.keys(JSON.parse(fs.readFileSync(path.join(root, 'lang', 'nirncraft', lf), 'utf8')))) {
+      const m = k.match(/^(?:item|block)\.nirncraft\.([a-z0-9_]+)$/);
       if (m) skyItems.add(m[1]);
     }
   } catch (e) { /* not ours */ }
 }
 function checkItem(where, spec) {
-  if (typeof spec !== 'string' || !spec.startsWith('skycraft:')) return;
+  if (typeof spec !== 'string' || !spec.startsWith('nirncraft:')) return;
   const id = spec.slice(9).replace(/\*\d+$/, '');
   if (!skyItems.has(id)) problems.push(`${where}: unknown item ${spec}`);
 }
@@ -188,8 +188,8 @@ for (const [f, j] of data) {
     }
   }
 }
-// faction ids (enum com.skycraft.quest.Faction): file/quest factions, NPC halls and faction actions must name one
-const factionSrc = fs.readFileSync(path.join(root, 'java', 'com', 'skycraft', 'quest', 'Faction.java'), 'utf8');
+// faction ids (enum com.nirncraft.quest.Faction): file/quest factions, NPC halls and faction actions must name one
+const factionSrc = fs.readFileSync(path.join(root, 'java', 'com', 'nirncraft', 'quest', 'Faction.java'), 'utf8');
 const factions = new Set([...factionSrc.matchAll(/^\s+[A-Z_]+\("([a-z_]+)", \d+/gm)].map(m => m[1]));
 for (const [f, j] of data) {
   if (j.faction && !factions.has(j.faction)) problems.push(`${f}: unknown faction ${j.faction}`);

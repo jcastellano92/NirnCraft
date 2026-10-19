@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/kagouti_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 8018490
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 14733488
+      }
+    ]
+  }
+}

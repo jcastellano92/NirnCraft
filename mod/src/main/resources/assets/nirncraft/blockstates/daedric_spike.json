@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "nirncraft:block/daedric_spike"
+    },
+    "facing=down": {
+      "model": "nirncraft:block/daedric_spike",
+      "x": 180
+    },
+    "facing=north": {
+      "model": "nirncraft:block/daedric_spike",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "nirncraft:block/daedric_spike",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east": {
+      "model": "nirncraft:block/daedric_spike",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west": {
+      "model": "nirncraft:block/daedric_spike",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

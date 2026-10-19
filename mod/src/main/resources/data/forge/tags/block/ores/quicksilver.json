@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:quicksilver_ore",
-    "skycraft:deepslate_quicksilver_ore"
+    "nirncraft:quicksilver_ore",
+    "nirncraft:deepslate_quicksilver_ore"
   ]
 }

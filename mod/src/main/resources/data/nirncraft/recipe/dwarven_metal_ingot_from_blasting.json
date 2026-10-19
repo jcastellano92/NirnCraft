@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "group": "dwarven_metal_ingot",
+  "ingredient": "nirncraft:dwarven_scrap",
+  "result": {
+    "id": "nirncraft:dwarven_metal_ingot"
+  },
+  "experience": 0.5,
+  "cookingtime": 100
+}

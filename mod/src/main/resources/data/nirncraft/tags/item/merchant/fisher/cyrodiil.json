@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:cyrodilic_spadetail",
+      "required": false
+    },
+    {
+      "id": "nirncraft:niben_eel",
+      "required": false
+    },
+    {
+      "id": "nirncraft:rumare_bass",
+      "required": false
+    },
+    {
+      "id": "nirncraft:colovian_trout",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gold_coast_snapper",
+      "required": false
+    },
+    {
+      "id": "nirncraft:abecean_longfin",
+      "required": false
+    }
+  ]
+}

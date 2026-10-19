@@ -24,7 +24,7 @@ import sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 JAVA = os.path.join(ROOT, "mod", "src", "main", "java")
 DOC = os.path.join(ROOT, "docs", "UI-COVERAGE.md")
-SKINS = os.path.join(JAVA, "com", "skycraft", "inventory", "client", "MenuSkins.java")
+SKINS = os.path.join(JAVA, "com", "nirncraft", "inventory", "client", "MenuSkins.java")
 
 # MenuType field -> registry id, Minecraft 1.20.1 (cross-checked against the jar below when it can be found)
 VANILLA = {
@@ -38,7 +38,7 @@ VANILLA = {
     "CARTOGRAPHY_TABLE": "minecraft:cartography_table", "STONECUTTER": "minecraft:stonecutter",
 }
 KIND_SCREEN = {"CONTAINER": "SkyrimContainerScreen", "MACHINE": "SkyrimMachineScreen", "BOOK": "SkyrimLecternScreen"}
-MODID = "skycraft"
+MODID = "nirncraft"
 
 
 def _jar_fields():

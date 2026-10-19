@@ -1,0 +1,1431 @@
+{
+  "line": "marquee_foreign",
+  "category": "faction",
+  "npcs": [
+    {
+      "id": "mq_for_hrafn",
+      "name": "Jarl Hrafn the Last",
+      "role": "jarl",
+      "place": "kjolvik",
+      "offset": [
+        4,
+        4
+      ],
+      "greet": "Hrafn rules the last longhall on the ice. He has no steward, no housecarl and no heir. He has a very large axe and ten dozen stories, and he gives all of them away to strangers, for stories are lighter to carry than sorrow."
+    },
+    {
+      "id": "mq_for_rolla",
+      "name": "Skald Rolla Whale-Voice",
+      "role": "bard",
+      "place": "kjolvik",
+      "offset": [
+        -5,
+        5
+      ],
+      "female": true,
+      "greet": "Rolla sings the Migration Song, which is four hundred verses long and has been sung without pause, in shifts, since the first Nords sailed. She is on verse three hundred and sixty, and her voice has begun to sound like the sea itself."
+    },
+    {
+      "id": "mq_for_grim",
+      "name": "Hunter Grim Ice-Scar",
+      "role": "hunter",
+      "place": "kjolvik",
+      "offset": [
+        8,
+        -4
+      ],
+      "greet": "Grim hunts on the shelf where the ice cracks. He has seen a dragon there, once, asleep under a skin of ice with its eye open. He says it winked. Nobody else believes him, and he does not mind."
+    },
+    {
+      "id": "mq_for_ysa",
+      "name": "Mead-Wife Ysa of the Last Hearth",
+      "role": "innkeeper",
+      "place": "kjolvik",
+      "offset": [
+        -2,
+        -7
+      ],
+      "female": true,
+      "greet": "The Last Hearth is a half-buried longhall where the fire has not been out in nine hundred years. Ysa keeps it fed with driftwood and whale-oil and a quiet, stubborn refusal to be the one who lets it die."
+    },
+    {
+      "id": "mq_for_hjoldis",
+      "name": "Factor Hjoldis Seaborn",
+      "role": "merchant",
+      "place": "dawnstar",
+      "offset": [
+        8,
+        6
+      ],
+      "female": true,
+      "greet": "Hjoldis buys, sells and sponsors anything that has ever been rumoured to come from Atmora. She keeps a map with a very big blank in the north, and a very small ship in her ledger that has not yet returned."
+    },
+    {
+      "id": "mq_for_hiro",
+      "name": "Master Hiro of the Tiger Shrine",
+      "role": "mage",
+      "place": "tiger_plains_village",
+      "offset": [
+        4,
+        4
+      ],
+      "greet": "Hiro teaches blades by never touching one. He says a sword is a letter, and a swordsman is a person who has learned to read. His students are very quiet, and extremely well-read."
+    },
+    {
+      "id": "mq_for_mei",
+      "name": "Lady Mei the Weaver",
+      "role": "merchant",
+      "place": "tiger_plains_village",
+      "offset": [
+        -6,
+        5
+      ],
+      "female": true,
+      "greet": "Mei weaves cloth in white and vermillion that is sold as far as Tamriel, and no one there has ever worn it correctly. She has a pleasant, patient way of correcting strangers by smiling at them."
+    },
+    {
+      "id": "mq_for_ghost_monk",
+      "name": "The Ghost Tiger-Monk",
+      "role": "priest",
+      "place": "tiger_plains_village",
+      "offset": [
+        8,
+        -3
+      ],
+      "greet": "The tiger-monk stands at the shrine gate and does not move, and does not breathe, and does not speak. Villagers say he has been there for four hundred years. They greet him anyway. It is only polite."
+    },
+    {
+      "id": "mq_for_nine_kettles",
+      "name": "Host Aoi of the Nine Kettles",
+      "role": "innkeeper",
+      "place": "tiger_plains_village",
+      "offset": [
+        -2,
+        -7
+      ],
+      "female": true,
+      "greet": "The Teahouse of the Nine Kettles has, as promised, nine kettles. Each one boils a different tea, each one has a different name and each one, Aoi says, has a mood. She does not take sides in their disputes."
+    },
+    {
+      "id": "mq_for_wen",
+      "name": "Captain Wen of the Silent Junk",
+      "role": "adventurer",
+      "place": "tang_mo_harbor_village",
+      "offset": [
+        4,
+        4
+      ],
+      "greet": "Wen sails a dragon-prowed junk and a very small grudge. The grudge is against a ship. The ship has not been seen in nine years. He thinks about it every morning, and says this is the secret of his good health."
+    },
+    {
+      "id": "mq_for_li",
+      "name": "Tea-Master Li",
+      "role": "apothecary",
+      "place": "tang_mo_harbor_village",
+      "offset": [
+        -5,
+        5
+      ],
+      "female": true,
+      "greet": "Li serves tea to sailors and says what each one needs to hear. Most of it is tea. Some of it is not. She has a very good memory and a very short temper for lies."
+    },
+    {
+      "id": "mq_for_jin",
+      "name": "Pirate Jin the Wary",
+      "role": "thief",
+      "place": "tang_mo_harbor_village",
+      "offset": [
+        8,
+        -4
+      ],
+      "greet": "Jin was a pirate once, and now keeps a stall of knotted cords. He says each cord is a good memory he has bottled, and sells them at a fair price. He does not say what he does with the bad ones."
+    },
+    {
+      "id": "mq_for_sahar",
+      "name": "Master Sahar of the Sword Courtyard",
+      "role": "mage",
+      "place": "hundings_dojo",
+      "offset": [
+        4,
+        4
+      ],
+      "greet": "Sahar teaches the Way of the Sword in a sunken courtyard of sand, with no walls, no weapons rack and no rules. He says the first rule is that you may walk away. The second is that you never will."
+    },
+    {
+      "id": "mq_for_jai",
+      "name": "Student Jai",
+      "role": "adventurer",
+      "place": "hundings_dojo",
+      "offset": [
+        -5,
+        5
+      ],
+      "greet": "Jai is the finest of Sahar's students and the angriest. He has not won a bout against his master in nine years. He does not intend to lose the tenth."
+    },
+    {
+      "id": "mq_for_witness",
+      "name": "The Ghost Who Witnesses",
+      "role": "priest",
+      "place": "hundings_dojo",
+      "offset": [
+        7,
+        -4
+      ],
+      "greet": "A pale figure sits on the highest bench and has never been seen to leave it. Students say the ghost keeps the score. The ghost says nothing at all. Nobody has ever won an argument with a ghost who is simply watching."
+    },
+    {
+      "id": "mq_for_anwar",
+      "name": "Scholar-Captain Anwar",
+      "role": "scholar",
+      "place": "sentinel",
+      "offset": [
+        8,
+        6
+      ],
+      "greet": "Anwar has spent forty years in Sentinel's archives chasing a single rumour: that the Yokudan Way of the Sword is still taught, on an island no one has charted. He is eighty. He is very impatient."
+    },
+    {
+      "id": "mq_for_nehra",
+      "name": "Admiral Nehra of the Coral Flagship",
+      "role": "steward",
+      "place": "pyandonean_fleet_anchorage",
+      "offset": [
+        4,
+        4
+      ],
+      "female": true,
+      "greet": "Nehra commands the fleet from a throne of fused coral and says nothing that has not already been decided. Her officers are terrified of her. Her cabin-boy is not, and has been told never to say so."
+    },
+    {
+      "id": "mq_for_ilu",
+      "name": "Shell-Smith Ilu",
+      "role": "blacksmith",
+      "place": "pyandonean_fleet_anchorage",
+      "offset": [
+        -5,
+        5
+      ],
+      "female": true,
+      "greet": "Ilu grinds shells into armour and ships' fittings in a workshop that smells of rain and old teeth. She is the only artisan the Admiral has never once overruled, and she is very careful to keep it that way."
+    },
+    {
+      "id": "mq_for_captive",
+      "name": "The Captive of the Brine Tank",
+      "role": "citizen",
+      "place": "pyandonean_fleet_anchorage",
+      "offset": [
+        8,
+        -4
+      ],
+      "greet": "A thin man in a ragged Altmer cloak is held in a tank of brine, up to his chin. He says he is a scholar. He says it quickly, and often, and with great sincerity."
+    },
+    {
+      "id": "mq_for_caelir",
+      "name": "Coast-Watcher Caelir",
+      "role": "hunter",
+      "place": "firsthold",
+      "offset": [
+        -8,
+        6
+      ],
+      "female": true,
+      "greet": "Caelir has watched the Maormer fleet from a rock in the strait for twelve years, and has learned their lamps. She says she knows each ship by its smell. She does not say which smells she prefers."
+    },
+    {
+      "id": "mq_for_ooma",
+      "name": "Plague-Diver Ooma",
+      "role": "adventurer",
+      "place": "sload_spawning_pools",
+      "offset": [
+        4,
+        4
+      ],
+      "female": true,
+      "greet": "Ooma dives the Sload pools for a living, and is the only person in Thras who will tell you it is a living. She wears a mask of waxed leather and a very large amount of gold. The gold, she says, is not for decoration. It is for the debt she owes the pools."
+    }
+  ],
+  "relics": [
+    {
+      "id": "mq_for_migration_verse",
+      "name": "The Unsung Verse",
+      "desc": "A strip of whale-hide inscribed in ancient runes with a single stanza of the Migration Song, longer than any living skald can hold in a breath. Whoever sings it is said to remember a country that has not existed for a thousand years.",
+      "icon": 15
+    },
+    {
+      "id": "mq_for_feast_horn",
+      "name": "The Feast-Horn of Kjolvik",
+      "desc": "A great curved horn of white bone, bound in iron and carved with ships. It has been blown at every feast since the settlement was founded, and has never once been blown in anger.",
+      "icon": 22
+    },
+    {
+      "id": "mq_for_barnacled_chart",
+      "name": "Saarvik's Barnacled Chart",
+      "desc": "A sea-chart of waxed hide, stiff with salt and crusted with barnacles. It shows a coast no living Nord has named, and a harbour marked in a red that is not ink, with a single word beside it in the old tongue: HOME.",
+      "icon": 11
+    },
+    {
+      "id": "mq_for_tiger_seal",
+      "name": "Seal of the Third Trial",
+      "desc": "A palm-sized jade seal carved with a tiger asleep, paw over its nose. When held to the light, a very small second tiger can be seen in its depths, which is awake, and watching the first.",
+      "icon": 26
+    },
+    {
+      "id": "mq_for_lantern_logbook",
+      "name": "The Silent Junk's Logbook",
+      "desc": "A salt-stiff logbook written in the careful characters of an Akaviri captain. The last entry is a single line: 'The lantern on the mast is lit. No one lit it. We are not afraid.'",
+      "icon": 11
+    },
+    {
+      "id": "mq_for_sahars_stance",
+      "name": "The Fourth Stance, in Chalk",
+      "desc": "A flat stone with a chalk diagram of a swordsman's feet, drawn by the master himself. The fourth stance has never been taught. It is, he says, the one a student invents.",
+      "icon": 11
+    },
+    {
+      "id": "mq_for_admirals_key",
+      "name": "Key of the Coral Flagship",
+      "desc": "A key of curling white coral, as long as a hand, that will open any lock on the flagship and, the Admiral says, any lock in the sea. It is cold, and very faintly wet, at all times.",
+      "icon": 26
+    },
+    {
+      "id": "mq_for_reef_heart",
+      "name": "Heart of the Reef",
+      "desc": "A fist-sized lump of living coral that pulses, slowly, in bright pink and poison green. When held to the ear, it sounds like a drowned bell. It is warm. It is, very faintly, afraid.",
+      "icon": 20
+    }
+  ],
+  "bosses": {
+    "mq_for_winter_wight": {
+      "name": "The Wight of the Ninth Winter",
+      "type": "nirncraft:draugr_deathlord",
+      "hp": 4.2,
+      "dmg": 1.7,
+      "level": 36,
+      "weapon": "nirncraft:ancient_nord_greatsword",
+      "gear": {
+        "head": "nirncraft:ancient_nord_helmet",
+        "chest": "nirncraft:ancient_nord_chestplate"
+      },
+      "drop": "loot:major",
+      "glow": true
+    },
+    "mq_for_ice_warden": {
+      "name": "Skjaldborg's Last Shieldman",
+      "type": "nirncraft:draugr_deathlord",
+      "hp": 3.8,
+      "dmg": 1.6,
+      "level": 34,
+      "weapon": "nirncraft:ancient_nord_sword",
+      "gear": {
+        "head": "nirncraft:ancient_nord_helmet"
+      },
+      "drop": "loot:major",
+      "glow": true
+    },
+    "mq_for_tiger_guardian": {
+      "name": "The Guardian of the Third Trial",
+      "type": "nirncraft:tsaesci",
+      "hp": 4,
+      "dmg": 1.7,
+      "level": 38,
+      "weapon": "nirncraft:akaviri_sword",
+      "gear": {
+        "head": "nirncraft:akaviri_helmet",
+        "chest": "nirncraft:akaviri_chestplate"
+      },
+      "drop": "loot:major",
+      "glow": true
+    },
+    "mq_for_mast_lantern": {
+      "name": "The Lantern-That-Burns",
+      "type": "nirncraft:wispmother",
+      "hp": 4,
+      "dmg": 1.6,
+      "level": 36,
+      "drop": "loot:major",
+      "glow": true
+    },
+    "mq_for_jai_boss": {
+      "name": "Jai, the Angriest Student",
+      "type": "nirncraft:bandit_chief",
+      "hp": 3.6,
+      "dmg": 1.6,
+      "level": 36,
+      "weapon": "nirncraft:yokudan_sword",
+      "gear": {
+        "head": "nirncraft:ancient_nord_helmet"
+      },
+      "drop": "loot:major",
+      "glow": false
+    },
+    "mq_for_flagship_warden": {
+      "name": "Warden-of-the-Hold Ssiruun",
+      "type": "nirncraft:dremora",
+      "hp": 3.8,
+      "dmg": 1.6,
+      "level": 38,
+      "weapon": "nirncraft:maormer_sword",
+      "gear": {
+        "head": "nirncraft:maormer_helmet",
+        "chest": "nirncraft:maormer_chestplate"
+      },
+      "drop": "loot:major",
+      "glow": true
+    },
+    "mq_for_reef_tyrant": {
+      "name": "The Reef-Tyrant",
+      "type": "nirncraft:swamp_leviathan",
+      "hp": 4.6,
+      "dmg": 1.8,
+      "level": 40,
+      "drop": "loot:major",
+      "glow": true
+    }
+  },
+  "scenes": {
+    "mq_for_atm_feast": [
+      [
+        "narrator",
+        "Ten long halls lie half-buried in drifts, their roofs furred with ice. In the one at the centre, a fire the width of a cartwheel burns. Nobody tends it. Everybody is watching."
+      ],
+      [
+        "mq_for_hrafn",
+        "It is the last feast, stranger. The ninth winter in a row without a whale. We have meat for one more night. Tomorrow we choose: the ships, or the ice. Tonight we sing."
+      ]
+    ],
+    "mq_for_atm_wight": [
+      [
+        "narrator",
+        "The wind drops. Across the ice, in a line, stand eleven figures wrapped in frost, each carrying a shield, each with a candle where a heart should be. The candles gutter, one by one."
+      ],
+      [
+        "mq_for_rolla",
+        "They are the ones the ninth winter took. They have come to the feast, as the old law says they may. Do not strike the first. They have not yet decided if we are guests, or the meal."
+      ]
+    ],
+    "mq_for_aka_terrace": [
+      [
+        "narrator",
+        "Terrace after terrace of rice-fields climbs the mountain, each one watered by the one above it. At the top stands a vermilion gate, and beyond it, a pagoda with a roof like a lifted eyebrow."
+      ],
+      [
+        "mq_for_hiro",
+        "Three trials: the climb, the cut and the choice. The tiger sleeps at the top. If it wakes for you, it is because you are worth waking. If it does not, you are only a person with a sword."
+      ]
+    ],
+    "mq_for_aka_junk": [
+      [
+        "narrator",
+        "The junk drifts into the harbour at dawn, sails furled, decks bare. Every hatch is shut. On the mast, a single lantern burns with a pale green flame, and its light does not fall on the water."
+      ],
+      [
+        "mq_for_wen",
+        "That lantern was not on the mast when she left. It is not any lantern I have ever seen. Do not look at it more than you must."
+      ]
+    ],
+    "mq_for_yok_court": [
+      [
+        "narrator",
+        "The courtyard is a bowl of white sand, ringed with columns and tiered benches, with a single bright pavilion at the north. Nobody is practising. Everyone is waiting."
+      ],
+      [
+        "mq_for_sahar",
+        "The lesson is not the sword. The lesson is the stillness before it. Do not lift your blade until you can say what it is for. Many have drawn. A few have known."
+      ]
+    ],
+    "mq_for_pya_raft": [
+      [
+        "narrator",
+        "A city of shell-hulled ships lashed together bobs on a calm black sea, each hull a different shade of pale. Lanterns of green glass hang from every mast. Somewhere below, the sound of a very large, very slow chain."
+      ],
+      [
+        "mq_for_caelir",
+        "Do not breathe loudly. Do not step on a line you cannot see the end of. The Maormer are polite to a degree that frightens me. They will thank you for a mistake, and then they will keep you."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "mq_for_the_last_winter_feast",
+      "title": "The Last Winter Feast",
+      "region": "atmora/frozen_forest",
+      "start": "npc:mq_for_hrafn",
+      "requires": [
+        "level:32"
+      ],
+      "offer": "You have the look of a jarl who is counting his stores.",
+      "pitch": "Counting, stranger, and finding a long road at the end of the number. Kjolvik has ten halls and a hundred and four mouths. Nine winters ago the whales stopped coming. Seven winters ago the seals. Hrafn will hold the last feast on the solstice. Bring meat for it, or ships will carry us out of the ice. Which, is your decision, and the hall's. Grim has seen things on the shelf that may help.",
+      "desc": "Jarl Hrafn of Kjolvik will hold a last feast on the winter solstice. The settlement must decide whether to leave the ice. He needs meat and a witness to the choice.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "kjolvik",
+          "text": "Attend the gathering at the Elder Longhall",
+          "actions": "scene:mq_for_atm_feast"
+        },
+        {
+          "type": "go",
+          "place": "atmoran_giants_cairn",
+          "text": "Hunt on the shelf near the Giant's Cairn, as Grim advises"
+        },
+        {
+          "type": "clear",
+          "place": "atmoran_giants_cairn",
+          "text": "Drive off the ice-beasts that guard the herd",
+          "spawn": [
+            {
+              "type": "nirncraft:frost_giant",
+              "count": 1,
+              "name": "Cairn-Giant"
+            },
+            {
+              "type": "nirncraft:wolf",
+              "count": 3,
+              "name": "Rime-Wolf"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "atmoran_giants_cairn",
+          "text": "Bring back meat for the feast",
+          "item": "minecraft:cooked_beef",
+          "count": 8
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Return to Kjolvik before the solstice night falls",
+          "place": "kjolvik",
+          "actions": "scene:mq_for_atm_wight"
+        },
+        {
+          "type": "kill",
+          "place": "kjolvik",
+          "text": "Face the Wight of the Ninth Winter at the feast-table",
+          "spawn": [
+            {
+              "boss_id": "mq_for_winter_wight"
+            },
+            {
+              "type": "nirncraft:draugr",
+              "count": 3,
+              "name": "Frost-Shield"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_for_hrafn",
+          "text": "Tell Hrafn what the wight asked before it fell",
+          "topic": "The wight said: the ninth winter does not end. It asks for a hundred and four. Or the hall's fire, and a promise to leave.",
+          "reply": "Hrafn is silent for a long moment. The great fire cracks. \"The old law says the ninth winter takes a tithe. I will pay it. But I will not pay it in lives. Stranger, what do you say? The ships are in the harbour. The fire is old. The song has not been finished. Choose, and Kjolvik will follow.\"",
+          "choices": [
+            {
+              "label": "Go. Take the ships. The song can be sung anywhere.",
+              "reply": "Hrafn nods slowly. \"Then the fire goes out, tonight, with a song. And a hundred and four will see a green country they have never known. It is a hard kindness, and I thank you for it.\"",
+              "actions": "flag:mq_for_feast_leave"
+            },
+            {
+              "label": "Stay. Feed the fire. The hall is the people.",
+              "reply": "Hrafn laughs, a great hoarse bark. \"Stay! Then we shall have a feast every night, and no whale, and a spite for the winter that will keep us warm. Stranger, you are a fool. Kjolvik loves you for it.\"",
+              "actions": "flag:mq_for_feast_stay;loot:major"
+            }
+          ],
+          "place": "kjolvik"
+        }
+      ],
+      "outro": "The last feast of Kjolvik was held under a sky of green fire. Whether the ships sailed at dawn or the hearth burned on, the Migration Song was sung that night to its four-hundredth verse.",
+      "rewards": {
+        "gold": 1800,
+        "loot": "legendary",
+        "items": [
+          {
+            "item": "nirncraft:ancient_nord_greatsword",
+            "name": "Hrafn's Last Oath",
+            "enchant": {
+              "sharpness": 5,
+              "smite": 3,
+              "unbreaking": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "frozen_forest.L7.chroniclers_and_delvers",
+        "frozen_forest.L8.dragon_totem_orthodoxy"
+      ],
+      "consequence": {
+        "world_state": "mq_for_the_last_winter_feast_resolved",
+        "flag": "conseq_mq_for_the_last_winter_feast",
+        "summary": "The last feast of Kjolvik was held under a sky of green fire. Whether the ships sailed at dawn or the hearth burned on, the Migration Song was sung that night to its four-hundredth verse."
+      }
+    },
+    {
+      "id": "mq_for_the_unsung_verse",
+      "title": "The Unsung Verse",
+      "region": "atmora/frozen_forest",
+      "start": "npc:mq_for_rolla",
+      "requires": [
+        "level:30"
+      ],
+      "offer": "Your voice is as old as the ice.",
+      "pitch": "The Migration Song has four hundred verses, stranger, and Rolla sings three hundred and sixty of them. The other forty were lost on the crossing. There is a stone at the Moot of the Five Hundred where the skalds of the first ships carved a record. If any verse survives, it is there. If Rolla sings them all, the Song may be finished, and she does not know what a finished song is for.",
+      "desc": "Skald Rolla wants the lost verses of the Migration Song, said to be carved on a stone at the Moot of the Five Hundred.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "moot_of_the_five_hundred",
+          "text": "Travel to the Moot of the Five Hundred"
+        },
+        {
+          "type": "clear",
+          "place": "moot_of_the_five_hundred",
+          "text": "Drive off the frost-drakes that roost on the moot-stone",
+          "spawn": [
+            {
+              "type": "nirncraft:ice_wraith",
+              "count": 3,
+              "name": "Moot-Wraith"
+            },
+            {
+              "type": "nirncraft:frost_giant",
+              "count": 1,
+              "name": "Stone-Guard Giant"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "moot_of_the_five_hundred",
+          "text": "Take a rubbing of the carved verse",
+          "relic": "mq_for_migration_verse"
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_for_rolla",
+          "relic": "mq_for_migration_verse",
+          "text": "Bring the rubbing to Rolla",
+          "topic": "Here are the lost verses. There are forty. They tell of the first ships, and of a country that was behind them.",
+          "reply": "Rolla reads, lips moving. Her hands shake. \"The last verse. 'And when the song is done, the singer shall go home.' Stranger, I do not know where home is. It is not here. It is not Skyrim. It is... the song. It was always the song. Shall I finish it, and see what it is for? Or let it run on, and never know?\"",
+          "choices": [
+            {
+              "label": "Sing it to the end. A song is for finishing.",
+              "reply": "Rolla straightens. Her voice rises, vast and ancient, and the walls of the Elder Longhall hum. When it ends there is a silence that is not empty. It is rest. \"Thank you. The song is done. The singer is home.\"",
+              "actions": "flag:mq_for_verse_finished"
+            },
+            {
+              "label": "Leave the last verse unsung. Keep the song alive.",
+              "reply": "Rolla closes her eyes and smiles. \"A song that is never finished is a song that is never lost. Very well. I shall go on, at three hundred and ninety-nine, and the last verse shall be yours.\"",
+              "actions": "flag:mq_for_verse_kept;loot:major"
+            }
+          ],
+          "place": "kjolvik"
+        }
+      ],
+      "outro": "The Migration Song has its forty lost verses back. Whether the singer sang the last, or kept it, the hall of Kjolvik has never been so quiet, nor so full.",
+      "rewards": {
+        "gold": 1400,
+        "loot": "major"
+      },
+      "why": [
+        "frozen_forest.L8.dragon_totem_orthodoxy",
+        "frozen_forest.L9.barrow_king_stirring"
+      ],
+      "consequence": {
+        "world_state": "mq_for_the_unsung_verse_resolved",
+        "flag": "conseq_mq_for_the_unsung_verse",
+        "summary": "The Migration Song has its forty lost verses back. Whether the singer sang the last, or kept it, the hall of Kjolvik has never been so quiet, nor so full."
+      }
+    },
+    {
+      "id": "mq_for_saarviks_barnacled_map",
+      "title": "The Barnacled Map",
+      "region": "atmora/frozen_forest",
+      "start": "npc:mq_for_hjoldis",
+      "requires": [
+        "level:30"
+      ],
+      "offer": "Your map has a very large blank.",
+      "pitch": "It does, and Hjoldis would like it filled. A captain of the old ships, Saarvik, left a chart under the hull of his wreck at Saarvik Landing. A barnacled thing, in oilskin. It records a coast no Nord has seen since the First Era. Hjoldis does not ask for the treasure it may lead to. She only wants the map, intact, and your word that you will not use it before she does. The ice is cold, the wind is vile, and the ships are very old.",
+      "desc": "Factor Hjoldis of Dawnstar wants a captain's chart from under the hull of a wreck at Saarvik Landing on the Atmoran coast.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "saarvik_landing",
+          "text": "Sail to Saarvik Landing on the Atmoran coast"
+        },
+        {
+          "type": "clear",
+          "place": "saarvik_landing",
+          "text": "Clear the draugr crew that still guard the wreck",
+          "spawn": [
+            {
+              "type": "nirncraft:draugr",
+              "count": 4,
+              "name": "Wreck-Crewman"
+            },
+            {
+              "type": "nirncraft:draugr_deathlord",
+              "count": 1,
+              "name": "First Mate"
+            }
+          ],
+          "placement": "structure"
+        },
+        {
+          "type": "retrieve",
+          "place": "saarvik_landing",
+          "text": "Take the barnacled chart from under the hull",
+          "relic": "mq_for_barnacled_chart",
+          "placement": "structure"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_for_hjoldis",
+          "text": "Bring the chart back to Hjoldis",
+          "topic": "The chart was where you said. It shows a coast I do not know, with a mark in a red that is not ink.",
+          "reply": "Hjoldis spreads the chart and for a moment says nothing at all. \"A coast. A harbour. A mountain with a name. Stranger, there is a country on this map that no one has named since the world was young. And at the mark in red there is a word: HOME. Shall I sail for it, or shall I hang it on my wall, and let it keep being a mystery?\"",
+          "choices": [
+            {
+              "label": "Sail for it. A map is for following.",
+              "reply": "Hjoldis laughs aloud. \"Then we sail. Hjoldis has not been out of Dawnstar in thirty years. She will need a coat. She will need two.\"",
+              "actions": "flag:mq_for_map_sailed"
+            },
+            {
+              "label": "Hang it. Let the mystery be the reward.",
+              "reply": "Hjoldis smiles slowly. \"Wise. A map you do not follow is a map you can keep. It will hang above my desk, and I will look at it every morning, and be very happy.\"",
+              "actions": "flag:mq_for_map_hung;loot:major"
+            }
+          ],
+          "place": "dawnstar"
+        }
+      ],
+      "outro": "A chart from the oldest ship in the world hangs in a counting-house in Dawnstar, or leads a ship north. Either way it has finally been read.",
+      "rewards": {
+        "gold": 1500,
+        "loot": "major"
+      },
+      "why": [
+        "frozen_forest.L9.barrow_king_stirring",
+        "frozen_forest.L10.jylkurfyk_great_barrow"
+      ],
+      "consequence": {
+        "world_state": "mq_for_saarviks_barnacled_map_resolved",
+        "flag": "conseq_mq_for_saarviks_barnacled_map",
+        "summary": "A chart from the oldest ship in the world hangs in a counting-house in Dawnstar, or leads a ship north. Either way it has finally been read."
+      }
+    },
+    {
+      "id": "mq_for_the_siege_that_never_ended",
+      "title": "The Siege That Never Ended",
+      "region": "atmora/frozen_forest",
+      "start": "npc:mq_for_grim",
+      "requires": [
+        "level:30"
+      ],
+      "offer": "Your eyes are on the south.",
+      "pitch": "The fort, stranger. Skjaldborg. A shield-wall of stone with a siege-ring of ghosts around it. A thousand years ago an enemy came and left, and the fort has been under siege since, because nobody told the garrison. They man the walls. They shoot arrows at nothing. They have never run out of arrows. Grim has hunted past it a hundred times. He wishes someone would go and tell them the war is over.",
+      "desc": "The shield-fort of Skjaldborg is still under siege by an enemy that left a thousand years ago. Hunter Grim wants someone to tell the garrison it is over.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "skjaldborg",
+          "text": "Approach the walls of Skjaldborg under a flag of truce"
+        },
+        {
+          "type": "kill",
+          "place": "skjaldborg",
+          "text": "Fight through the ghostly garrison to the gate-captain",
+          "spawn": [
+            {
+              "boss_id": "mq_for_ice_warden"
+            },
+            {
+              "type": "nirncraft:draugr",
+              "count": 4,
+              "name": "Wall-Sentinel"
+            }
+          ],
+          "placement": "structure"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_for_grim",
+          "text": "Tell Grim the war at Skjaldborg is over",
+          "topic": "The garrison would not hear it. I told their captain. The enemy left a thousand years ago. He said: then who are we guarding?",
+          "reply": "Grim's mouth works. \"Then who are we guarding. Stranger, that is a good question. Maybe the one who holds the gate is only a gate. Maybe there is nothing behind it. Maybe the fort is the only one left in the world who remembers there was a war. Grim does not know. But he thinks, tonight, the arrows will stop.\"",
+          "place": "kjolvik"
+        }
+      ],
+      "outro": "The arrows from the walls of Skjaldborg stopped that night. The garrison stands to this day on the ramparts, looking south, and no one knows if they are waiting or resting.",
+      "rewards": {
+        "gold": 1100,
+        "loot": "major"
+      },
+      "why": [
+        "frozen_forest.L10.jylkurfyk_great_barrow",
+        "frozen_forest.L7.chroniclers_and_delvers"
+      ],
+      "consequence": {
+        "world_state": "mq_for_the_siege_that_never_ended_resolved",
+        "flag": "conseq_mq_for_the_siege_that_never_ended",
+        "summary": "The arrows from the walls of Skjaldborg stopped that night. The garrison stands to this day on the ramparts, looking south, and no one knows if they are waiting or resting."
+      }
+    },
+    {
+      "id": "mq_for_the_tigers_test",
+      "title": "The Tiger's Test",
+      "region": "akavir/ka_po_tun",
+      "start": "npc:mq_for_hiro",
+      "requires": [
+        "level:34"
+      ],
+      "offer": "You have a way of standing that is almost correct.",
+      "pitch": "Almost. Hiro does not say that lightly. Stranger, the shrine on the mountain has been asleep for sixty years. A tiger is asleep inside it. Every student of the village has tried the three trials and failed the third. Hiro has no student left. If you wish to try, he will not stop you. If you fail, he will carry you down. If you succeed, he will ask a very small question. Be ready to answer it.",
+      "desc": "Master Hiro of Tiger Plains invites a stranger to attempt the three trials of the Tiger Shrine, which no student has passed in sixty years.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "tiger_plains_village",
+          "text": "Climb the terraces to the vermilion gate",
+          "actions": "scene:mq_for_aka_terrace"
+        },
+        {
+          "type": "go",
+          "place": "hall_of_the_dragon_tigers",
+          "text": "Pass the first trial, the climb, at the Hall of the Dragon Tigers"
+        },
+        {
+          "type": "clear",
+          "place": "hall_of_the_dragon_tigers",
+          "text": "Pass the second trial, the cut, against the hall's defenders",
+          "spawn": [
+            {
+              "type": "nirncraft:tsaesci",
+              "count": 3,
+              "name": "Trial-Swordsman"
+            },
+            {
+              "type": "nirncraft:kamal",
+              "count": 1,
+              "name": "Trial-Brute"
+            }
+          ],
+          "placement": "structure"
+        },
+        {
+          "type": "kill",
+          "place": "hall_of_the_dragon_tigers",
+          "text": "Pass the third trial, the choice, against the Guardian",
+          "spawn": [
+            {
+              "boss_id": "mq_for_tiger_guardian"
+            }
+          ],
+          "placement": "structure",
+          "actions": "relic:mq_for_tiger_seal"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_for_hiro",
+          "text": "Bring the seal to Hiro and answer his question",
+          "topic": "The tiger woke. It asked nothing. It only looked. Then it closed its eyes again. Here is the seal.",
+          "reply": "Hiro lays the seal on the low table and for the first time in your acquaintance, he bows. \"It woke for you. In sixty years it has woken for no one. The question is small. What will you do with what the tiger gave you? Teach, or keep?\"",
+          "choices": [
+            {
+              "label": "Teach. A tiger is for the village.",
+              "reply": "Hiro closes his eyes. \"Then it is the village's. You shall have a class of one, and a tiger for every student after. Thank you. The shrine has not been so awake in sixty years.\"",
+              "actions": "flag:mq_for_tiger_taught"
+            },
+            {
+              "label": "Keep it. Some things are not meant to be shared.",
+              "reply": "Hiro nods slowly. \"A hard answer. A fair one. The tiger is yours. It will wait for you wherever you go. And Hiro will teach his own class with his own blade.\"",
+              "actions": "flag:mq_for_tiger_kept;loot:legendary"
+            }
+          ],
+          "place": "tiger_plains_village"
+        }
+      ],
+      "outro": "A tiger that had slept for sixty years woke, looked, and slept again. The village of Tiger Plains has a seal, a student and a very careful teacher.",
+      "rewards": {
+        "gold": 2000,
+        "loot": "legendary",
+        "items": [
+          {
+            "item": "nirncraft:akaviri_sword",
+            "name": "Letter of the Waking Tiger",
+            "enchant": {
+              "sharpness": 5,
+              "looting": 3,
+              "unbreaking": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "ka_po_tun.L7.tiger_monk_retainers",
+        "ka_po_tun.L8.tosh_raka_apotheosis"
+      ],
+      "consequence": {
+        "world_state": "mq_for_the_tigers_test_resolved",
+        "flag": "conseq_mq_for_the_tigers_test",
+        "summary": "A tiger that had slept for sixty years woke, looked, and slept again. The village of Tiger Plains has a seal, a student and a very careful teacher."
+      }
+    },
+    {
+      "id": "mq_for_ladys_unwearable_cloth",
+      "title": "The Cloth That Cannot Be Worn",
+      "region": "akavir/ka_po_tun",
+      "start": "npc:mq_for_mei",
+      "requires": [
+        "level:30"
+      ],
+      "offer": "You are looking at my cloth as if it were a riddle.",
+      "pitch": "It is, stranger. Mei weaves cloth that can be worn only one way, and in three hundred years, no foreigner has worn it correctly. She has begun to wonder if the cloth wishes to be worn differently. She has a bolt of white that she cannot sell, because it will not hold a fold. It refuses. She would like you to take it to the old weaver at the black lacquer pagoda, who may know why.",
+      "desc": "Lady Mei has a bolt of white cloth that will not hold a fold. She asks a stranger to carry it to an old weaver at the Black Lacquer Pagoda.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "black_lacquer_pagoda",
+          "text": "Carry the bolt to the old weaver at the Black Lacquer Pagoda"
+        },
+        {
+          "type": "clear",
+          "place": "black_lacquer_pagoda",
+          "text": "Drive off the Tsaesci who have taken the weaver's loft",
+          "spawn": [
+            {
+              "type": "nirncraft:tsaesci",
+              "count": 3,
+              "name": "Loft-Guard"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "mq_for_mei",
+          "text": "Return to Mei and tell her what the weaver said",
+          "topic": "The weaver said: the cloth is not wrong. It was woven for a person who has not yet come. It will not fold until it is worn by them.",
+          "reply": "Mei sits very still. \"A person who has not yet come. Three hundred years. And I have been trying to sell it to people who already have. Stranger, I shall hang it in the window, and let it wait. If it was meant for you, you will know. Try it on. It will not hold a fold. But it will not fall off, either.\"",
+          "place": "tiger_plains_village"
+        }
+      ],
+      "outro": "A bolt of white cloth hangs in a window in Tiger Plains, unfolded and unworn. The weaver at the pagoda has begun to expect a visitor.",
+      "rewards": {
+        "gold": 700,
+        "loot": "standard"
+      },
+      "why": [
+        "ka_po_tun.L8.tosh_raka_apotheosis",
+        "ka_po_tun.L9.serpent_border_standoff"
+      ],
+      "consequence": {
+        "world_state": "mq_for_ladys_unwearable_cloth_resolved",
+        "flag": "conseq_mq_for_ladys_unwearable_cloth",
+        "summary": "A bolt of white cloth hangs in a window in Tiger Plains, unfolded and unworn. The weaver at the pagoda has begun to expect a visitor."
+      }
+    },
+    {
+      "id": "mq_for_the_silent_junk",
+      "title": "The Silent Junk",
+      "region": "akavir/tang_mo",
+      "start": "npc:mq_for_wen",
+      "requires": [
+        "level:34"
+      ],
+      "offer": "You are looking at the harbour as if it owed you something.",
+      "pitch": "A junk drifted in at dawn, stranger. Not mine. Not any I know. Every hatch shut, every sail furled, and a lantern on the mast burning green. Nobody will go aboard. Nobody will go within a rope's length. A junk that sails itself home is either a miracle or a mistake, and in Tang Mo we are very fond of miracles and very wary of mistakes. Go aboard. Read the log. Tell me whose ship she is.",
+      "desc": "A silent junk drifted into Tang Mo harbour at dawn with a pale green lantern burning on the mast. Captain Wen wants a stranger to board and read its log.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "tang_mo_harbor_village",
+          "text": "Board the silent junk at the quay",
+          "actions": "scene:mq_for_aka_junk;relic:mq_for_lantern_logbook"
+        },
+        {
+          "type": "clear",
+          "place": "tang_mo_watch",
+          "text": "Search the signal-fire at Tang Mo Watch, where the junk's light first appeared",
+          "spawn": [
+            {
+              "type": "minecraft:drowned",
+              "count": 3,
+              "name": "Junk-Drowned"
+            },
+            {
+              "type": "nirncraft:sea_serpent",
+              "count": 1,
+              "name": "Mast-Coil"
+            }
+          ],
+          "placement": "structure"
+        },
+        {
+          "type": "kill",
+          "place": "tang_mo_watch",
+          "text": "Put out the Lantern-That-Burns",
+          "spawn": [
+            {
+              "boss_id": "mq_for_mast_lantern"
+            }
+          ],
+          "placement": "structure"
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_for_wen",
+          "relic": "mq_for_lantern_logbook",
+          "text": "Bring the log to Wen",
+          "topic": "The junk was the Nine Winds, lost nine years ago. The lantern on her mast was the keeper's last light. The keeper is at rest. Here is her log.",
+          "reply": "Wen takes the log, and his hands are very still. \"The Nine Winds. My grudge. Nine years. I thought she had been taken by a rival, and instead she was lost. Stranger, I have been angry at the wrong person for nine years. Shall I sink her, and be done? Or sail her home, and see her afloat?\"",
+          "choices": [
+            {
+              "label": "Sail her home. A ship is for the harbour.",
+              "reply": "Wen draws a long breath. \"Then I sail her. And I shall be very polite to every ship I meet from now on, in case it is one that came home late.\"",
+              "actions": "flag:mq_for_junk_sailed"
+            },
+            {
+              "label": "Sink her. Let the keeper rest beneath the waves.",
+              "reply": "Wen closes his eyes. \"A good answer. A cold one. She will rest. And I will put a lantern on my own mast, lit by my own hand, so that the sea knows who I am.\"",
+              "actions": "flag:mq_for_junk_sunk;loot:major"
+            }
+          ],
+          "place": "tang_mo_harbor_village"
+        }
+      ],
+      "outro": "The Nine Winds came home at last, or went down with her keeper. A very old grudge in Tang Mo lay down and was quiet.",
+      "rewards": {
+        "gold": 1700,
+        "loot": "major"
+      },
+      "why": [
+        "tang_mo.L9.strait_bridge_defense",
+        "tang_mo.L10.mist_pillar_sanctums"
+      ],
+      "consequence": {
+        "world_state": "mq_for_the_silent_junk_resolved",
+        "flag": "conseq_mq_for_the_silent_junk",
+        "summary": "The Nine Winds came home at last, or went down with her keeper. A very old grudge in Tang Mo lay down and was quiet."
+      }
+    },
+    {
+      "id": "mq_for_the_monkey_tree_wager",
+      "title": "A Wager with a Thousand Monkeys",
+      "region": "akavir/tang_mo",
+      "start": "npc:mq_for_jin",
+      "requires": [
+        "level:34"
+      ],
+      "offer": "You have a cord to sell.",
+      "pitch": "Not to sell, stranger. To wager. Jin has been trying for ten years to steal a single fruit from the Thousand Monkey Tree. He has failed every time. The monkeys are clever. They are clever in a way that a man who calls himself Wary cannot match. Go to the tree. Take a fruit. Do not hurt a monkey. If you do, Jin will pay you double. If you do not, Jin will pay you half, and the fruit.",
+      "desc": "Pirate Jin has failed for ten years to steal a fruit from the Thousand Monkey Tree. He wagers that a stranger can do it without harming a monkey.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "thousand_monkey_tree",
+          "text": "Reach the Thousand Monkey Tree"
+        },
+        {
+          "type": "retrieve",
+          "place": "thousand_monkey_tree",
+          "text": "Take a single fruit from the tree without harming a monkey",
+          "item": "minecraft:apple",
+          "count": 1
+        },
+        {
+          "type": "talk",
+          "npc": "mq_for_jin",
+          "text": "Bring the fruit to Jin",
+          "topic": "The fruit, whole. A monkey handed it to me. I do not know why.",
+          "reply": "Jin stares at the fruit for a very long time. \"Handed it. Handed. Ten years I have been stealing, and they would have given it to a stranger for the asking? Stranger, I am an old, wary fool. Take it. It is yours. It is a good fruit, and it is the first one I ever wanted that I did not try to hold.\"",
+          "place": "tang_mo_harbor_village"
+        }
+      ],
+      "outro": "A fruit from the Thousand Monkey Tree was brought out of the branches by a monkey's own hand. Jin has stopped stealing. He now sells cords of kindness instead, at a very small price.",
+      "rewards": {
+        "gold": 600,
+        "loot": "standard"
+      },
+      "why": [
+        "tang_mo.L10.mist_pillar_sanctums",
+        "tang_mo.L7.island_ranger_clans"
+      ],
+      "consequence": {
+        "world_state": "mq_for_the_monkey_tree_wager_resolved",
+        "flag": "conseq_mq_for_the_monkey_tree_wager",
+        "summary": "A fruit from the Thousand Monkey Tree was brought out of the branches by a monkey's own hand. Jin has stopped stealing. He now sells cords of kindness instead, at a very small price."
+      }
+    },
+    {
+      "id": "mq_for_the_final_lesson",
+      "title": "The Final Lesson",
+      "region": "yokuda/yokudan_desert",
+      "start": "npc:mq_for_sahar",
+      "requires": [
+        "level:36"
+      ],
+      "offer": "You have the stillness of someone who has had to wait.",
+      "pitch": "A little. Stranger, the Way is passed from master to student, and from student to the next. Sahar has taught for sixty years. Jai is his best, and the angriest, and the Way will die with them unless one of them learns what the other knows. Sahar is old. He wishes to be beaten, and to know it was fair. He cannot ask Jai. Jai will take it as an insult. You are a stranger. Spar with Jai. Lose, if you must. Win, if you can. But make him use the fourth stance.",
+      "desc": "Master Sahar wishes to be beaten fairly by his best student, Jai, but cannot ask. He wants a stranger to spar with Jai and draw out the fourth stance.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "hundings_dojo",
+          "text": "Enter the Sword Courtyard",
+          "actions": "scene:mq_for_yok_court"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_for_sahar",
+          "text": "Receive the three stances from Sahar",
+          "topic": "Teach me. I will carry your Way to the student who needs it.",
+          "reply": "Sahar sets down his cup. \"The first stance is waiting. The second is cutting. The third is listening, which most never learn. The fourth is the one you invent. Take this chalk. When you spar with Jai, he will use all four. Do not be afraid of his rage. It is the only honest thing about him.\"",
+          "actions": "relic:mq_for_sahars_stance",
+          "place": "hundings_dojo"
+        },
+        {
+          "type": "kill",
+          "place": "hundings_dojo",
+          "text": "Spar with Jai until he draws the fourth stance",
+          "spawn": [
+            {
+              "boss_id": "mq_for_jai_boss"
+            }
+          ],
+          "actions": "flag:mq_for_jai_sparred"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_for_sahar",
+          "text": "Tell Sahar what the fourth stance was",
+          "topic": "Jai drew the fourth. It was not the stance of any master I know. It was his own. He won. Then he sat down, and wept.",
+          "reply": "Sahar is silent for a very long time. Then, slowly, he bows to you, and then to the empty bench where the ghost sits, and then, at last, to the sand. \"Then the Way is passed. Not to Jai. Not to you. To the sand. Stranger, it will be there for the next student. Shall I stay, and teach, or go with the ghost, and rest?\"",
+          "choices": [
+            {
+              "label": "Stay. A teacher is never finished.",
+              "reply": "Sahar laughs, a very small, very old laugh. \"Never finished. No. Very well. I shall teach until the sand tells me otherwise. And Jai will teach beside me. And the courtyard will have two masters, and neither will be sure which is the student.\"",
+              "actions": "flag:mq_for_dojo_stay"
+            },
+            {
+              "label": "Rest. The Way has a new keeper.",
+              "reply": "Sahar nods and closes his eyes. The pale figure on the bench rises, and for the first time, speaks one word: 'Good.' Sahar takes his hand. They sit together on the highest bench, and are, quite gently, no longer there.",
+              "actions": "flag:mq_for_dojo_rest;loot:legendary"
+            }
+          ],
+          "place": "hundings_dojo"
+        }
+      ],
+      "outro": "The sword-courtyard of Yokuda has two masters now, or none. The sand bears no print of the fourth stance. It will be invented again.",
+      "rewards": {
+        "gold": 2200,
+        "loot": "legendary",
+        "items": [
+          {
+            "item": "nirncraft:yokudan_sword",
+            "name": "Stillness Before the Cut",
+            "enchant": {
+              "sharpness": 5,
+              "sweeping": 3,
+              "unbreaking": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "yokudan_desert.L7.ansei_pilgrims_and_keepers",
+        "yokudan_desert.L8.constellation_liturgy"
+      ],
+      "consequence": {
+        "world_state": "mq_for_the_final_lesson_resolved",
+        "flag": "conseq_mq_for_the_final_lesson",
+        "summary": "The sword-courtyard of Yokuda has two masters now, or none. The sand bears no print of the fourth stance. It will be invented again."
+      }
+    },
+    {
+      "id": "mq_for_the_ansei_hall_remembered",
+      "title": "What the Hall of the Ansei Remembers",
+      "region": "yokuda/yokudan_desert",
+      "start": "npc:mq_for_anwar",
+      "requires": [
+        "level:34"
+      ],
+      "offer": "You are looking for a very old thing.",
+      "pitch": "Forty years, stranger. A rumour in an archive, and a shred of a chart. The Hall of the Ansei, on an island in a desert sea. It is said to hold the last true record of the Sword-Singers. Anwar is too old for the voyage. He is not too old for the questions. Go. See what is there. Tell him whether the stories are true. If they are, he will die happy. If they are not, he will die informed.",
+      "desc": "Scholar-Captain Anwar of Sentinel wants someone to reach the Hall of the Ansei in Yokuda and report whether the rumours of the Sword-Singers' record are true.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "hall_of_the_ansei",
+          "text": "Reach the Hall of the Ansei across the Yokudan desert"
+        },
+        {
+          "type": "clear",
+          "place": "hall_of_the_ansei",
+          "text": "Drive off the sand-wraiths that guard the hall",
+          "spawn": [
+            {
+              "type": "nirncraft:sand_serpent",
+              "count": 2,
+              "name": "Hall-Serpent"
+            },
+            {
+              "type": "minecraft:husk",
+              "count": 3,
+              "name": "Sand-Wraith"
+            }
+          ],
+          "placement": "structure"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_for_anwar",
+          "text": "Tell Anwar what the Hall holds",
+          "topic": "The Hall holds a library of one scroll. It is blank. Beneath it is a note: 'The Sword-Singers took the record with them. Ask the ones who still sing.'",
+          "reply": "Anwar takes it with a shaking hand. He is old, so very old. Then he laughs, the laugh of a man who has been unexpectedly released. \"Blank! A whole life for a blank scroll. Stranger, it is the best answer I could have had. The Singers still sing. Somewhere. Anwar will put down his pen. For the first time in forty years, he will sit in the sun.\"",
+          "place": "sentinel"
+        }
+      ],
+      "outro": "A scholar who spent forty years chasing a rumour has put down his pen. The Sword-Singers sing on, somewhere past the edge of every chart.",
+      "rewards": {
+        "gold": 1200,
+        "loot": "major"
+      },
+      "why": [
+        "yokudan_desert.L8.constellation_liturgy",
+        "yokudan_desert.L9.fault_vault_seeker"
+      ],
+      "consequence": {
+        "world_state": "mq_for_the_ansei_hall_remembered_resolved",
+        "flag": "conseq_mq_for_the_ansei_hall_remembered",
+        "summary": "A scholar who spent forty years chasing a rumour has put down his pen. The Sword-Singers sing on, somewhere past the edge of every chart."
+      }
+    },
+    {
+      "id": "mq_for_the_flagship",
+      "title": "The Flagship",
+      "region": "pyandonea/maormer_isles",
+      "start": "npc:mq_for_caelir",
+      "requires": [
+        "level:36"
+      ],
+      "offer": "You have been looking at the sea for some time.",
+      "pitch": "Twelve years, and tonight is the first night the Admiral's fleet has been alone. Her flagship has a hold. In the hold, in a brine tank, there is a captive. An Altmer scholar, they say, who knew too much about the Queen's own island. Caelir wants him out. Not for the Dominion. For her own sake. She is tired of knowing what she knows, and doing nothing. A small boat. A dark night. A key, if you can find one. The Admiral sleeps lightly.",
+      "desc": "Coast-Watcher Caelir asks a stranger to infiltrate the Maormer flagship at night and free an Altmer scholar held in a brine tank.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "pyandonean_fleet_anchorage",
+          "text": "Row to the raft-city by night",
+          "actions": "scene:mq_for_pya_raft"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Wait until the fleet is dark and the watch changes",
+          "place": "pyandonean_fleet_anchorage"
+        },
+        {
+          "type": "kill",
+          "place": "pyandonean_fleet_anchorage",
+          "text": "Slip past the Warden-of-the-Hold and take the coral key",
+          "spawn": [
+            {
+              "boss_id": "mq_for_flagship_warden"
+            },
+            {
+              "type": "nirncraft:bandit",
+              "count": 2,
+              "name": "Hold-Guard"
+            }
+          ],
+          "actions": "relic:mq_for_admirals_key"
+        },
+        {
+          "type": "escort",
+          "npc": "mq_for_captive",
+          "place": "firsthold",
+          "text": "Row the freed scholar back to Firsthold before dawn"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_for_caelir",
+          "text": "Tell Caelir the captive is free",
+          "topic": "The scholar is free. He talked the whole way. He knows where the Queen's hidden island is.",
+          "reply": "Caelir listens, and for a long moment does not move. \"The Queen's hidden island. He knows where it is. Stranger, that is a dangerous thing. The Dominion would pay for it. The Maormer would kill for it. And Caelir would very much like to keep him alive until he forgets. What shall we do?\"",
+          "choices": [
+            {
+              "label": "Tell the Dominion. The island should be known.",
+              "reply": "Caelir nods slowly. \"Then it is known. A thing that is known can be defended, or conquered. It is out of our hands. Thank you for the honesty.\"",
+              "actions": "flag:mq_for_flagship_dominion"
+            },
+            {
+              "label": "Keep it between you. A secret kept is a life saved.",
+              "reply": "Caelir breathes out. \"A secret. Yes. Between us two, and one scholar who forgets. It will be the loneliest knowledge in Tamriel. But it will be ours.\"",
+              "actions": "flag:mq_for_flagship_secret;loot:major"
+            }
+          ],
+          "place": "firsthold"
+        }
+      ],
+      "outro": "A scholar was carried out of the Maormer fleet in a rowing boat, talking all the way. Whether the Queen's island is known to the Dominion or only to two, it is no longer safe.",
+      "rewards": {
+        "gold": 1900,
+        "loot": "major"
+      },
+      "why": [
+        "maormer_isles.L9.storm_spire_sabotage",
+        "maormer_isles.L10.sanctum_of_the_coiled_king"
+      ],
+      "consequence": {
+        "world_state": "mq_for_the_flagship_resolved",
+        "flag": "conseq_mq_for_the_flagship",
+        "summary": "A scholar was carried out of the Maormer fleet in a rowing boat, talking all the way. Whether the Queen's island is known to the Dominion or only to two, it is no longer safe."
+      }
+    },
+    {
+      "id": "mq_for_the_shell_that_listens",
+      "title": "The Shell That Listens",
+      "region": "pyandonea/maormer_isles",
+      "start": "npc:mq_for_ilu",
+      "requires": [
+        "level:34"
+      ],
+      "offer": "Your shells are very quiet.",
+      "pitch": "They are, stranger. They should not be. A good shell hums the sea it was grown in. The ones in Ilu's workshop have been quiet for a week. All of them. Not a note. She believes someone is listening to them, and the listening has stopped the singing. She would very much like to know who, and why, and whether to be flattered.",
+      "desc": "All the shells in Ilu's workshop have gone silent. She believes someone is eavesdropping on them and wants the listener found.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "serpent_pens",
+          "text": "Follow the silence to the Serpent Pens"
+        },
+        {
+          "type": "clear",
+          "place": "serpent_pens",
+          "text": "Drive off the pen-keepers who are using the shells as ears",
+          "spawn": [
+            {
+              "type": "nirncraft:sea_serpent",
+              "count": 2,
+              "name": "Pen-Serpent"
+            },
+            {
+              "type": "nirncraft:bandit",
+              "count": 2,
+              "name": "Shell-Listener"
+            }
+          ],
+          "placement": "structure"
+        },
+        {
+          "type": "talk",
+          "npc": "mq_for_ilu",
+          "text": "Tell Ilu who was listening",
+          "topic": "The pen-keepers were listening for the Admiral's orders. The shells gave them away. They are quiet no longer.",
+          "reply": "Ilu pulls a shell from the rack and holds it to her ear. After a moment, her whole face changes. \"There. The sea. It was only waiting for permission. Stranger, I shall hang a shell for you in the workshop. It will hum a different note from all the others. It will hum the sound of someone who listened to the listeners.\"",
+          "place": "pyandonean_fleet_anchorage"
+        }
+      ],
+      "outro": "The shells of the fleet hum again. In a rack of silent white, one sings a single, odd note, and Ilu says it is for you.",
+      "rewards": {
+        "gold": 900,
+        "loot": "standard"
+      },
+      "why": [
+        "maormer_isles.L10.sanctum_of_the_coiled_king",
+        "maormer_isles.L7.truce_captains_and_storm_caste"
+      ],
+      "consequence": {
+        "world_state": "mq_for_the_shell_that_listens_resolved",
+        "flag": "conseq_mq_for_the_shell_that_listens",
+        "summary": "The shells of the fleet hum again. In a rack of silent white, one sings a single, odd note, and Ilu says it is for you."
+      }
+    },
+    {
+      "id": "mq_for_the_heart_of_the_reef",
+      "title": "The Heart of the Reef",
+      "region": "thras/coral_kingdom",
+      "start": "npc:mq_for_ooma",
+      "requires": [
+        "level:38"
+      ],
+      "offer": "You have the look of someone about to dive.",
+      "pitch": "The Plague, stranger. It started in the Tower. The coral is infected, pink and poison-green, and it spreads a handspan a day. Ooma has dived to the heart of the reef three times, and three times she came up without it. The heart is the only thing that can be carried out. Without it, the Plague spreads until Thras is a sea of pulsing polyps. With it, a cure might be made. Dive. Take it. Come back alive, and Ooma will tell you what she owes the pools.",
+      "desc": "The Plague of Thras spreads from the Coral Tower. Plague-Diver Ooma wants a stranger to dive to the heart of the reef and carry it out.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "coral_tower_of_thras",
+          "text": "Reach the Coral Tower of Thras"
+        },
+        {
+          "type": "clear",
+          "place": "coral_tower_of_thras",
+          "text": "Fight through the infected coral to the heart chamber",
+          "spawn": [
+            {
+              "type": "minecraft:drowned",
+              "count": 4,
+              "name": "Reef-Drowned"
+            },
+            {
+              "type": "nirncraft:sea_serpent",
+              "count": 1,
+              "name": "Plague-Serpent"
+            }
+          ],
+          "placement": "structure"
+        },
+        {
+          "type": "kill",
+          "place": "coral_tower_of_thras",
+          "text": "Defeat the Reef-Tyrant that guards the heart",
+          "spawn": [
+            {
+              "boss_id": "mq_for_reef_tyrant"
+            }
+          ],
+          "placement": "structure",
+          "actions": "relic:mq_for_reef_heart"
+        },
+        {
+          "type": "deliver",
+          "npc": "mq_for_ooma",
+          "relic": "mq_for_reef_heart",
+          "text": "Bring the heart to Ooma",
+          "topic": "The heart. It pulses. It is afraid. It does not wish to be carried further.",
+          "reply": "Ooma presses it to her chest, and for a moment, she is quiet. \"Afraid. Of course. A heart that has been in a tower for a thousand years does not wish to be carried out. Stranger, shall I make the cure, and kill it? Or shall I return it, and let the Plague take what it will?\"",
+          "choices": [
+            {
+              "label": "Make the cure. The living should come first.",
+              "reply": "Ooma bows her head. \"Then it will be done. It will be painful. It will be necessary. And I shall say a word for the heart, in the language of the pools. Thank you.\"",
+              "actions": "flag:mq_for_reef_cured"
+            },
+            {
+              "label": "Return it. Let the reef take its own course.",
+              "reply": "Ooma nods slowly. \"A hard answer. A kind one. The Plague will go on, and the heart will rest. Perhaps that is what the pools wanted all along.\"",
+              "actions": "flag:mq_for_reef_returned;loot:major"
+            }
+          ],
+          "place": "sload_spawning_pools"
+        }
+      ],
+      "outro": "The heart of the reef was carried out of the Coral Tower, and whether it was used or returned, the polyps of Thras have turned, a little, toward the light.",
+      "rewards": {
+        "gold": 2100,
+        "loot": "legendary"
+      },
+      "why": [
+        "coral_kingdom.L7.literal_contract_factors",
+        "coral_kingdom.L8.unsentimental_mastery"
+      ],
+      "consequence": {
+        "world_state": "mq_for_the_heart_of_the_reef_resolved",
+        "flag": "conseq_mq_for_the_heart_of_the_reef",
+        "summary": "The heart of the reef was carried out of the Coral Tower, and whether it was used or returned, the polyps of Thras have turned, a little, toward the light."
+      }
+    }
+  ]
+}

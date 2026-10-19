@@ -221,7 +221,7 @@ def sheet(style_id, layer1, layer2, views=((25, 8), (-35, 8), (180 + 30, 8)), sc
 if __name__ == "__main__":
     sid, path = sys.argv[1], sys.argv[2]
     import os
-    root = os.path.join(os.path.dirname(__file__), "..", "..", "mod", "src", "main", "resources", "assets", "skycraft", "textures", "models", "armor")
+    root = os.path.join(os.path.dirname(__file__), "..", "..", "mod", "src", "main", "resources", "assets", "nirncraft", "textures", "models", "armor")
     l1 = Image.open(os.path.join(root, f"{sid}_layer_1.png")).convert("RGBA")
     l2 = Image.open(os.path.join(root, f"{sid}_layer_2.png")).convert("RGBA")
     sheet(sid, l1, l2).save(path)

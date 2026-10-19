@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:orichalcum_ingot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_orichalcum",
+      "required": false
+    },
+    {
+      "id": "nirncraft:troll_fat",
+      "required": false
+    },
+    "minecraft:cooked_beef"
+  ]
+}

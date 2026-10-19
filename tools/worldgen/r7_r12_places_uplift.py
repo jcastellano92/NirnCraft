@@ -23,14 +23,14 @@ import parity
 import worldsheet_lint
 
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-SKY = os.path.join(RES, "skycraft")
+SKY = os.path.join(RES, "nirncraft")
 TAM = os.path.join(SKY, "tamriel")
 PLACES_DIR = os.path.join(TAM, "places")
 IDENT_DIR = os.path.join(SKY, "dungeons", "identity")
 LORE_PLACES_DIR = os.path.join(SKY, "lore", "places")
 EXPLORE_DIR = os.path.join(SKY, "explore")
 SOCIETY_DIR = os.path.join(SKY, "society")
-LANG_DIR = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft")
+LANG_DIR = os.path.join(ROOT, "mod", "src", "main", "lang", "nirncraft")
 
 TARGET_FILES = ["morrowind.json", "black_marsh.json", "elsweyr.json", "valenwood.json", "summerset.json", "foreign.json"]
 TARGET_PROVS = {
@@ -159,16 +159,16 @@ REQUIRED_LANDMARK_SPECS = [
 ]
 
 UNIQUE_ITEMS = [
-    ("skycraft:ebony_sword", {"sharpness": 5}),
-    ("skycraft:glass_greatsword", {"sharpness": 4}),
-    ("skycraft:daedric_dagger", {"sharpness": 5}),
-    ("skycraft:dwarven_warhammer", {"smite": 5}),
-    ("skycraft:stalhrim_battleaxe", {"sharpness": 5}),
-    ("skycraft:elven_bow", {"power": 5}),
-    ("skycraft:bonemold_chestplate", {"protection": 4}),
-    ("skycraft:chitin_helmet", {"protection": 4}),
-    ("skycraft:orcish_mace", {"smite": 4}),
-    ("skycraft:ebony_war_axe", {"sharpness": 4}),
+    ("nirncraft:ebony_sword", {"sharpness": 5}),
+    ("nirncraft:glass_greatsword", {"sharpness": 4}),
+    ("nirncraft:daedric_dagger", {"sharpness": 5}),
+    ("nirncraft:dwarven_warhammer", {"smite": 5}),
+    ("nirncraft:stalhrim_battleaxe", {"sharpness": 5}),
+    ("nirncraft:elven_bow", {"power": 5}),
+    ("nirncraft:bonemold_chestplate", {"protection": 4}),
+    ("nirncraft:chitin_helmet", {"protection": 4}),
+    ("nirncraft:orcish_mace", {"smite": 4}),
+    ("nirncraft:ebony_war_axe", {"sharpness": 4}),
 ]
 UNIQUE_KINDS = ["pedestal", "corpse", "chest", "shrine", "camp", "barrow", "ruin", "cairn"]
 
@@ -450,7 +450,7 @@ def main():
                 x, z = alloc_point(rid, 42.0)
                 new_p = {
                     "id": pid,
-                    "name": f"place.skycraft.{pid}",
+                    "name": f"place.nirncraft.{pid}",
                     "type": stype,
                     "variant": svar,
                     "culture": cult,
@@ -477,7 +477,7 @@ def main():
             x, z = alloc_point(rid, 42.0)
             new_p = {
                 "id": pid,
-                "name": f"place.skycraft.{pid}",
+                "name": f"place.nirncraft.{pid}",
                 "type": stype,
                 "variant": svar,
                 "culture": cult,
@@ -517,7 +517,7 @@ def main():
                 x, z = alloc_point(rid, 38.0)
                 new_p = {
                     "id": pid,
-                    "name": f"place.skycraft.{pid}",
+                    "name": f"place.nirncraft.{pid}",
                     "type": dtype,
                     "variant": dvar,
                     "class": "minor",
@@ -555,7 +555,7 @@ def main():
             x, z = alloc_point(rid, 36.0)
             new_p = {
                 "id": pid,
-                "name": f"place.skycraft.{pid}",
+                "name": f"place.nirncraft.{pid}",
                 "type": dtype,
                 "variant": dvar,
                 "class": "minor",
@@ -592,7 +592,7 @@ def main():
                 x, z = alloc_point(rid, 36.0)
                 new_p = {
                     "id": pid,
-                    "name": f"place.skycraft.{pid}",
+                    "name": f"place.nirncraft.{pid}",
                     "type": ltype,
                     "variant": lvar,
                     "culture": cult,
@@ -655,7 +655,7 @@ def main():
                 cur["why"] = valid_whys_for(rid, all_fields, by_scope, cur.get("why") or whys)
         jsave(ident_path, ident_data, indent=1)
 
-    # 4. Update lore/places/{morrowind,black_marsh,elsweyr,valenwood,summerset,foreign}.json & lang/skycraft/lore.json
+    # 4. Update lore/places/{morrowind,black_marsh,elsweyr,valenwood,summerset,foreign}.json & lang/nirncraft/lore.json
     lore_lang_path = os.path.join(LANG_DIR, "lore.json")
     lore_lang = jload(lore_lang_path, {})
 
@@ -759,7 +759,7 @@ def main():
         else:
             jsave(upath, kept_u, indent=2)
 
-    # 6. Update society/morrowind_residents.json and lang/skycraft/society_morrowind.json
+    # 6. Update society/morrowind_residents.json and lang/nirncraft/society_morrowind.json
     mw_res_path = os.path.join(SOCIETY_DIR, "morrowind_residents.json")
     mw_res = jload(mw_res_path, {"schema_version": 1, "province": "morrowind", "settlements": {}})
     smap = mw_res.setdefault("settlements", {})

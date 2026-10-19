@@ -1,0 +1,21 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "autumn_bush",
+        "weight": 3
+      },
+      {
+        "species": "berry_bush",
+        "weight": 1
+      },
+      {
+        "species": "pine_sapling",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

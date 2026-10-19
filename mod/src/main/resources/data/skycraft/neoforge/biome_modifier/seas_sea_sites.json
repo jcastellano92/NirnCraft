@@ -1,6 +1,0 @@
-{
-  "type": "neoforge:add_features",
-  "biomes": "#skycraft:tamriel/sea",
-  "features": "skycraft:sea_site",
-  "step": "surface_structures"
-}

@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "nirncraft:block/timber_debris_a",
+        "y": 0
+      },
+      {
+        "model": "nirncraft:block/timber_debris_a",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/timber_debris_a",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/timber_debris_a",
+        "y": 270
+      },
+      {
+        "model": "nirncraft:block/timber_debris_b",
+        "y": 0
+      },
+      {
+        "model": "nirncraft:block/timber_debris_b",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/timber_debris_b",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/timber_debris_b",
+        "y": 270
+      }
+    ]
+  }
+}

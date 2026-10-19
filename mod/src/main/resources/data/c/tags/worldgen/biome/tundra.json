@@ -1,14 +1,14 @@
 {
   "replace": false,
   "values": [
-    "skycraft:atmoran_ice_waste",
-    "skycraft:eastmarch_hot_springs",
-    "skycraft:eastmarch_volcanic_tundra",
-    "skycraft:kamal_snowfield",
-    "skycraft:pale_heath",
-    "skycraft:pale_snowfield",
-    "skycraft:skyrim_highlands",
-    "skycraft:whiterun_tundra",
-    "skycraft:winterhold_glacier"
+    "nirncraft:atmoran_ice_waste",
+    "nirncraft:eastmarch_hot_springs",
+    "nirncraft:eastmarch_volcanic_tundra",
+    "nirncraft:kamal_snowfield",
+    "nirncraft:pale_heath",
+    "nirncraft:pale_snowfield",
+    "nirncraft:skyrim_highlands",
+    "nirncraft:whiterun_tundra",
+    "nirncraft:winterhold_glacier"
   ]
 }

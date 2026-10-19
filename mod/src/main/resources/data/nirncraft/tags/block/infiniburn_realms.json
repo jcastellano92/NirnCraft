@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:infiniburn_overworld",
+    "minecraft:blackstone",
+    "minecraft:basalt",
+    "nirncraft:deadlands_rock",
+    "nirncraft:deadlands_magma_rock",
+    "nirncraft:deadlands_ash",
+    "nirncraft:coldharbour_stone",
+    "nirncraft:soul_stone"
+  ]
+}

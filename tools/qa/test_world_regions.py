@@ -30,16 +30,16 @@ class WorldRegionTest(unittest.TestCase):
         with self.assertRaises(ValueError):qa.selected(regions,'endless')
         self.assertEqual(1,len(qa.selected(regions,'ocean_wrap')))
         self.assertEqual(84, len(qa.selected(regions, 'minecraft:overworld')))
-        self.assertEqual(5, len(qa.selected(regions, 'skycraft:coldharbour')))
+        self.assertEqual(5, len(qa.selected(regions, 'nirncraft:coldharbour')))
         self.assertEqual(6, len(qa.selected(regions, 'sovngarde')))
         self.assertEqual(7, len(qa.selected(regions, 'shivering_isles')))
         dimensions = {r['dimension'] for r in regions}
         self.assertEqual(8, len(dimensions))
         self.assertEqual(qa.selected(regions, 'deadlands'), qa.selected(regions, 'minecraft:the_nether'))
-        jail = qa.selected(regions, 'skycraft:jail')[0]
+        jail = qa.selected(regions, 'nirncraft:jail')[0]
         self.assertIn('weather', jail['excludedSystems'])
         self.assertNotIn('magic', jail['excludedSystems'])
-        with self.assertRaises(ValueError): qa.selected(regions, 'skycraft:unregistered')
+        with self.assertRaises(ValueError): qa.selected(regions, 'nirncraft:unregistered')
 
 
 if __name__ == '__main__': unittest.main()

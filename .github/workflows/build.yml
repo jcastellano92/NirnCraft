@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   mod:
-    name: Skycraft Core mod
+    name: NirnCraft Core mod
     runs-on: ubuntu-latest
     timeout-minutes: 60
     defaults:
@@ -39,7 +39,7 @@ jobs:
           grep -E "FAILURE|What went wrong" -A6 build.log | head -40 || true
       - uses: actions/upload-artifact@v4
         with:
-          name: skycraft-core-jar
+          name: nirncraft-core-jar
           path: mod/build/libs/*.jar
 
   pack:
@@ -65,29 +65,29 @@ jobs:
         run: go install github.com/packwiz/packwiz@v0.0.0-20260906154125-ef87d964f8cb && echo "$HOME/go/bin" >> "$GITHUB_PATH"
       - uses: actions/download-artifact@v4
         with:
-          name: skycraft-core-jar
+          name: nirncraft-core-jar
           path: mod-jar
-      - name: Locate Skycraft Core jar
+      - name: Locate NirnCraft Core jar
         run: |
           JAR="$(ls mod-jar/*.jar | grep -v -- '-sources' | head -n1)"
           test -n "$JAR" && echo "CORE_JAR=$PWD/$JAR" >> "$GITHUB_ENV"
       - name: Resolve mods
-        # Fails if any tools/modlist.txt entry can't be resolved. Skycraft Core is not part of the committed pack.
+        # Fails if any tools/modlist.txt entry can't be resolved. NirnCraft Core is not part of the committed pack.
         run: bash tools/build-pack.sh
       - name: Build client instance and server
-        # Also creates dist/pack-build: the pack with Skycraft Core injected (tools/prepare-build-pack.sh).
+        # Also creates dist/pack-build: the pack with NirnCraft Core injected (tools/prepare-build-pack.sh).
         run: bash tools/make-instances.sh "$CORE_JAR"
       - name: Export Modrinth & CurseForge packs
         working-directory: dist/pack-build
         run: |
-          packwiz modrinth export -o ../Skycraft.mrpack \
-            || echo "::warning::Modrinth export (Skycraft.mrpack) failed; see the log above."
-          packwiz curseforge export -o ../Skycraft-curseforge.zip \
+          packwiz modrinth export -o ../NirnCraft.mrpack \
+            || echo "::warning::Modrinth export (NirnCraft.mrpack) failed; see the log above."
+          packwiz curseforge export -o ../NirnCraft-curseforge.zip \
             || echo "::warning::CurseForge export failed (Modrinth-only mods can't be referenced); see the log above."
       - name: Server smoke test (boot the full pack and generate the world)
         timeout-minutes: 30
         run: bash tools/test-server.sh
-      - name: Client smoke test (Skycraft dev client under Xvfb with software GL)
+      - name: Client smoke test (NirnCraft dev client under Xvfb with software GL)
         if: ${{ !cancelled() }}
         timeout-minutes: 30
         run: |
@@ -107,17 +107,17 @@ jobs:
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
-          name: Skycraft-client-instance
-          path: dist/Skycraft-client-instance.zip
+          name: NirnCraft-client-instance
+          path: dist/NirnCraft-client-instance.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: Skycraft-server
-          path: dist/Skycraft-server.zip
+          name: NirnCraft-server
+          path: dist/NirnCraft-server.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: Skycraft-exports
+          name: NirnCraft-exports
           if-no-files-found: warn
           path: |
-            dist/Skycraft.mrpack
-            dist/Skycraft-curseforge.zip
+            dist/NirnCraft.mrpack
+            dist/NirnCraft-curseforge.zip
             pack/RESOLVE_REPORT.md

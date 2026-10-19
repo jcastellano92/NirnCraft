@@ -1,9 +1,0 @@
-{
-  "parent": "minecraft:block/orientable_with_bottom",
-  "textures": {
-    "top": "skycraft:block/smelter_top",
-    "bottom": "skycraft:block/smelter_bottom",
-    "front": "skycraft:block/smelter_front",
-    "side": "skycraft:block/smelter_side"
-  }
-}

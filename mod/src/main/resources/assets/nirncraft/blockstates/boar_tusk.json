@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/boar_tusk"
+      },
+      {
+        "model": "nirncraft:block/boar_tusk",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/boar_tusk",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/boar_tusk",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/boar_tusk_harvested"
+      },
+      {
+        "model": "nirncraft:block/boar_tusk_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/boar_tusk_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/boar_tusk_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

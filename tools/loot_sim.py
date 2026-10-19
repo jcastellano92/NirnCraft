@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Progression simulator for Skycraft's loot economy (docs/LOOT.md).
+"""Progression simulator for NirnCraft's loot economy (docs/LOOT.md).
 
-Rolls the generated loot tables (mod/src/main/resources/data/skycraft/loot_tables) with Python models of the Java
+Rolls the generated loot tables (mod/src/main/resources/data/nirncraft/loot_tables) with Python models of the Java
 loot functions (scaled_gold, leveled/regional gear on the LootTiers ladders, the level-scaled enchant chance, tempering,
-potions, tomes...) and values every item with the skycraft_values data, like ItemValues does. For each level band it
+potions, tomes...) and values every item with the nirncraft_values data, like ItemValues does. For each level band it
 simulates a character clearing N dungeons (1 boss chest, 3 chests, 6 urns/barrels, 2 picked locks, 7 enemies and a
 boss creature) and looting N houses of each wealth tier, then compares with the Skyrim reference curve:
 
@@ -11,11 +11,11 @@ boss creature) and looting N houses of each wealth tier, then compares with the 
     best material = the leveled-list unlock (Iron 1, Steel 6, Orcish 12, Dwarven 18, Elven 22, Glass 27, Ebony 32,
     Daedric 46, Dragon 50); never above the level.
 
-    py -3 tools/loot_sim.py [--dungeons 400] [--seed 1] [--table skycraft:containers/dungeon/boss]
+    py -3 tools/loot_sim.py [--dungeons 400] [--seed 1] [--table nirncraft:containers/dungeon/boss]
 
 Checks (exit 1 on failure): value and coins within 0.6-1.6x of the reference at every level, the curves rising from
 band to band (no drought), no single container (bar quest rewards) whose 99th percentile beats 1.5x a whole dungeon's
-reference value at that level (no jackpot), and no gear above the level. The in-game counterpart is /skyloot curve <table> (and skycraft-loot-sample.txt).
+reference value at that level (no jackpot), and no gear above the level. The in-game counterpart is /skyloot curve <table> (and nirncraft-loot-sample.txt).
 """
 import argparse
 import json
@@ -25,15 +25,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "mod" / "src" / "main" / "resources" / "data"
-AFFIX_DIR = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "loot" / "affixes"
-LOOT = DATA / "skycraft" / "loot_table"
-SK = "skycraft:"
+AFFIX_DIR = ROOT / "mod" / "src" / "main" / "resources" / "nirncraft" / "loot" / "affixes"
+LOOT = DATA / "nirncraft" / "loot_table"
+SK = "nirncraft:"
 LEVELS = [1, 3, 6, 9, 12, 15, 18, 22, 27, 32, 36, 40, 46, 50, 55, 60]
 
 # ---------------------------------------------------------------------------------------------- data
 
 VALUES = {}
-for f in (DATA / "skycraft" / "skycraft_values").glob("*.json"):
+for f in (DATA / "nirncraft" / "nirncraft_values").glob("*.json"):
     for k, v in json.loads(f.read_text(encoding="utf-8")).get("values", {}).items():
         if not k.startswith("#"):
             VALUES[k] = v
@@ -48,7 +48,7 @@ STORIED_DATA = json.loads((AFFIX_DIR / "storied.json").read_text(encoding="utf-8
 
 
 def roll_affix_mult(source_kind, rnd):
-    """Mirrors com.skycraft.loot.affix.ItemAffixes value multiplier for a gear drop."""
+    """Mirrors com.nirncraft.loot.affix.ItemAffixes value multiplier for a gear drop."""
     pairs = [(q, max(0, q.get("weights", {}).get(source_kind, 0))) for q in QUALITIES_DATA]
     q = weighted(rnd, [p for p in pairs if p[1] > 0]) if any(w > 0 for _, w in pairs) else QUALITIES_DATA[3]
     mult = float(q.get("value_mult", 1.0))
@@ -65,7 +65,7 @@ def value_of(item):
     return VALUES.get(item, 2)
 
 
-# LootTiers ladders (mirror of com.skycraft.loot.LootTiers): (material, unlock, weight)
+# LootTiers ladders (mirror of com.nirncraft.loot.LootTiers): (material, unlock, weight)
 WEAPONS = [("iron", 1, 1), ("steel", 6, 1), ("silver", 6, .25), ("orcish", 12, 1), ("dwarven", 18, 1), ("elven", 22, 1),
            ("glass", 27, 1), ("nordic", 27, .4), ("ebony", 32, 1), ("stalhrim", 40, .35), ("daedric", 46, 1), ("dragonbone", 50, .6)]
 HEAVY = [("iron", 1, 1), ("banded_iron", 3, .6), ("steel", 6, 1), ("orcish", 12, 1), ("dwarven", 18, 1), ("steel_plate", 22, 1),
@@ -195,8 +195,8 @@ def apply(d, fns, ctx, rnd):
             d.count = rnd.randint(int(c["min"]), int(c["max"])) if isinstance(c, dict) else int(c)
         elif fn == "minecraft:set_nbt":
             tag = f["tag"]
-            if "skycraft_value:" in tag:
-                d.value = int(tag.split("skycraft_value:")[1].split("}")[0].split(",")[0])
+            if "nirncraft_value:" in tag:
+                d.value = int(tag.split("nirncraft_value:")[1].split("}")[0].split(",")[0])
             if "gold:" in tag:
                 d.gold = int(tag.split("gold:")[1].split("L")[0])
                 d.value = 0

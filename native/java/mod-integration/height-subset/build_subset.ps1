@@ -5,7 +5,7 @@
 # path (see each stub's comment). Run from the repo root (any worktree).
 #   .\native\java\mod-integration\height-subset\build_subset.ps1 [-Out <dir>] [-Mod <main tree>\mod]
 # Writes <Out>\classes (compiled subset + stubs) and <Out>\res (the resources the height path reads).
-param([string]$Out = (Join-Path $env:TEMP 'skycraft-aether-height'), [string]$Mod = '')
+param([string]$Out = (Join-Path $env:TEMP 'nirncraft-atlas-height'), [string]$Mod = '')
 $ErrorActionPreference = 'Stop'
 $here = $PSScriptRoot
 if (-not $Mod) {
@@ -14,8 +14,8 @@ if (-not $Mod) {
     try { $common = (Resolve-Path (& git rev-parse --git-common-dir).Trim()).Path } finally { Pop-Location }
     $Mod = Join-Path (Split-Path $common -Parent) 'mod'
 }
-$ref = 'F:\Projects\Personal\Skycraft\toolchains\ref\mc26.3'
-$jdk = 'F:\Projects\Personal\Skycraft\toolchains\jdk-25.0.4.1+1\bin'
+$ref = (Join-Path (& "$PSScriptRoot\..\..\..\toolchains.ps1") 'ref\mc26.3')
+$jdk = (Join-Path (& "$PSScriptRoot\..\..\..\toolchains.ps1") 'jdk-25.0.4.1+1\bin')
 $cp = ((@("$ref\client.jar", "$ref\neoforge-universal.jar") + (Get-ChildItem "$ref\libs" -Filter *.jar | ForEach-Object FullName)) -join ';')
 
 Remove-Item -Recurse -Force $Out -ErrorAction SilentlyContinue
@@ -34,7 +34,7 @@ $all = @(Get-ChildItem "$here\stubs", $src -Recurse -Filter *.java | ForEach-Obj
 if ($LASTEXITCODE) { throw 'height subset does not compile against 26.3 (see the errors above: the mod changed?)' }
 
 $res = Join-Path $Out 'res'
-foreach ($r in 'skycraft\tamriel', 'skycraft\baked', 'data\skycraft\worldgen\noise') {
+foreach ($r in 'nirncraft\tamriel', 'nirncraft\baked', 'data\nirncraft\worldgen\noise') {
     New-Item -ItemType Directory -Force (Split-Path "$res\$r" -Parent) | Out-Null
     Copy-Item -Recurse "$Mod\src\main\resources\$r" "$res\$r"
 }

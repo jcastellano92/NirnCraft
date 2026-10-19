@@ -1,9 +1,9 @@
 # Tamriel: the world plan
 
-Skycraft's overworld is Nirn. You spawn in Skyrim, outside Whiterun. The nine holds and the other provinces of
+NirnCraft's overworld is Nirn. You spawn in Skyrim, outside Whiterun. The nine holds and the other provinces of
 Tamriel sit where they do on the real map. Past Tamriel's seas the world keeps going: Atmora, Akavir, Yokuda,
 Pyandonea and Thras, then open ocean. Far beyond the fixed lands, ocean travel wraps to the opposite
-edge of the overworld. Procedural expansion continents are disabled. Skycraft generates the fixed world
+edge of the overworld. Procedural expansion continents are disabled. NirnCraft generates the fixed world
 itself: terrain, biomes, surface, vegetation, structures and towns. No third-party terrain, structure or village
 mods are used.
 
@@ -24,7 +24,7 @@ of them.
 
 ## 2. The map assets (class-path resources, used by server and client)
 
-These live under `mod/src/main/resources/skycraft/tamriel/`. They are not datapack files: the map is needed
+These live under `mod/src/main/resources/nirncraft/tamriel/`. They are not datapack files: the map is needed
 before datapacks load, and the client map screen needs it too.
 
 | File | What it holds |
@@ -83,7 +83,7 @@ before datapacks load, and the client map screen needs it too.
 
 * **Overrides.**
   * `data/minecraft/worldgen/world_preset/normal.json` (and `large_biomes`) points the overworld at
-    `skycraft:tamriel` noise settings and the `skycraft:tamriel` biome source. Amplified stays vanilla.
+    `nirncraft:tamriel` noise settings and the `nirncraft:tamriel` biome source. Amplified stays vanilla.
   * `data/minecraft/dimension_type/overworld.json` raises the world top: `min_y` −64, `height` 704 (top at
     y 639). The terrain noise fills up to y 575 (`noise.height` 640); above that is open sky.
 * **Heights.** Sea level is y 63. Ordinary hills are y 90–180; the Rift and Falkreath are highlands at y 150–190;
@@ -92,7 +92,7 @@ before datapacks load, and the client map screen needs it too.
   peaks near y 560 with High Hrothgar on a ledge at about y 434. The client draws the overworld's clouds at y 330
   (`terrain/client/TamrielSkyEffects`), so the big peaks rise through them.
 * **Custom density function types.** These are registered in `Registries.DENSITY_FUNCTION_TYPE`.
-  * `skycraft:tamriel_channel` has a `channel` field: `continentalness`, `erosion`, `ridges`, `elevation`,
+  * `nirncraft:tamriel_channel` has a `channel` field: `continentalness`, `erosion`, `ridges`, `elevation`,
     `river` or `lake`. It samples the map with bilinear interpolation plus a small seeded domain warp, so
     borders and coasts aren't on a 32-block grid.
   * It must be **thread-safe and allocation-free**: Distant Horizons and worldgen workers call it from many
@@ -108,7 +108,7 @@ before datapacks load, and the client map screen needs it too.
   * Marshes (wetland) hover round sea level with a maze of channels that the `map_water` feature fills.
 * **Surface rules** come from the biome catalogue (section 5). Each biome has a surface preset: grass, snow,
   ash, sand, red sand, mud, moss, podzol, gravel, stone, crystal or coral.
-* **Caves.** Vanilla noise caves stay. Aquifers and ore veins stay on, using Skycraft ores.
+* **Caves.** Vanilla noise caves stay. Aquifers and ore veins stay on, using NirnCraft ores.
 
 ## 5. Regions and biomes
 
@@ -116,7 +116,7 @@ before datapacks load, and the client map screen needs it too.
 
 ```json
 { "id": "skyrim/whiterun", "province": "skyrim", "kind": "hold", "culture": "nord",
-  "name": "region.skycraft.skyrim.whiterun", "levels": [1, 12], "palette": "whiterun_tundra",
+  "name": "region.nirncraft.skyrim.whiterun", "levels": [1, 12], "palette": "whiterun_tundra",
   "music": "skyrim", "weather": "skyrim_temperate", "capital": "whiterun" }
 ```
 
@@ -131,12 +131,12 @@ before datapacks load, and the client map screen needs it too.
 * **Region level bands** rise with distance from Whiterun along the lore's danger gradient. Leveling,
   loot and quests use `Regions.at(...).levels()`.
 
-### Biomes (`skycraft:*`)
+### Biomes (`nirncraft:*`)
 
 * **The catalogue is generated.** `tools/worldgen/biomes.py` holds a declarative table and writes:
-  * `data/skycraft/worldgen/biome/*.json`;
-  * the surface-rule section of `skycraft:tamriel` noise settings;
-  * biome tags (Skycraft's `skycraft:spawns/*` and `skycraft:has_structure/*`, plus vanilla and Forge tags
+  * `data/nirncraft/worldgen/biome/*.json`;
+  * the surface-rule section of `nirncraft:tamriel` noise settings;
+  * biome tags (NirnCraft's `nirncraft:spawns/*` and `nirncraft:has_structure/*`, plus vanilla and Forge tags
     such as `#minecraft:is_forest` and `#forge:is_snowy`, so other code keeps working);
   * lang names.
 * **Feature order.** Every biome's feature lists come from one canonical ordered feature list per generation
@@ -145,7 +145,7 @@ before datapacks load, and the client map screen needs it too.
   terrain context: coast/beach, river, lowland, hill, peak, and cave depth.
   * Every region's palette must cover ocean, beach and river, so coasts and rivers always get a sensible
     biome.
-  * Palettes live in `skycraft/tamriel/palettes.json`. Keys are region ids, `province/<province>`, `realm/<archetype>`
+  * Palettes live in `nirncraft/tamriel/palettes.json`. Keys are region ids, `province/<province>`, `realm/<archetype>`
     and `default`; a region finds its palette by id, then by its `palette` field (a key, or an archetype name such
     as `frozen`), then by province. Missing contexts fall back along `fallback`. Contexts: `ocean`, `deep_ocean`,
     `beach`, `river`, `lake`, `marsh`, `lowland`, `upland`, `peak`, `summit`, `cave`, `deep_cave`.
@@ -186,7 +186,7 @@ dune sand, and swamp mud reeds.
 ## 6. Places (`places.json`)
 
 ```json
-{ "id": "whiterun", "name": "place.skycraft.whiterun", "type": "capital", "culture": "nord",
+{ "id": "whiterun", "name": "place.nirncraft.whiterun", "type": "capital", "culture": "nord",
   "region": "skyrim/whiterun", "x": 0, "z": 0, "radius": 160 }
 ```
 
@@ -206,7 +206,7 @@ dune sand, and swamp mud reeds.
 * **Generic towns, villages, farms, forts and dungeons** are not listed. They come from random-spread
   structure sets filtered by region culture.
 
-## 7. Java contracts (package `com.skycraft.tamriel`)
+## 7. Java contracts (package `com.nirncraft.tamriel`)
 
 All methods are static, thread-safe and usable on both logical sides, unless noted.
 
@@ -239,9 +239,9 @@ Existing callers keep compiling.
 
 ## 8. Structures
 
-* **Fixed places.** The structure placement type `skycraft:places` makes a chunk a structure start exactly when
+* **Fixed places.** The structure placement type `nirncraft:places` makes a chunk a structure start exactly when
   `Places.inChunk` holds a place of the structure's place type. One structure type,
-  `skycraft:settlement` (`culture`, `size`), builds capitals, cities, towns and villages procedurally with a
+  `nirncraft:settlement` (`culture`, `size`), builds capitals, cities, towns and villages procedurally with a
   culture kit. It follows the same paint-per-chunk design as `dungeons/world/DungeonStructure`.
 * **Culture kits** are building archetypes plus block palettes:
   * The archetypes: house, longhouse, inn, smithy, general store, temple, palace or keep, barracks, stables,
@@ -258,7 +258,7 @@ Existing callers keep compiling.
   `findGenerationPoint`, and painting clipped to the chunk.
 * **Building grammar and zoning** (`tamriel/settlement/grammar`). Ordinary buildings are derived, not drawn by hand:
   a `Blueprint` (footprint rect/L/T/U, storeys, roof, foundation, porch, annex, balcony, outside stairs, materials)
-  comes from the culture style sheet `skycraft/tamriel/styles/<culture>.json`, the building's `Use` and its
+  comes from the culture style sheet `nirncraft/tamriel/styles/<culture>.json`, the building's `Use` and its
   `Wealth`, deterministically from its spec. `Zoning` lays out every generic settlement (and fills round the unique
   capitals): a seeded form per culture and site, tensor-field lanes, quarters, compact street frontage, squares,
   street furniture, organic or partial walls only where warranted, farms and works outside. Contracts for other
@@ -271,7 +271,7 @@ Existing callers keep compiling.
   * Jails and guild halls (`plan/Halls`) and player-home plots (`plan/HousePlots`) get their lots before the
     houses are packed in.
   * `/skysettle` (operators): galleries, plan/top/isometric images and density/variety metrics in
-    `skycraft-previews/`.
+    `nirncraft-previews/`.
 
 ## 9. Authoritative region ids and city anchors
 
@@ -380,7 +380,7 @@ fit. `CELL` stays at 32.
 2. **Phase 3: Skyrim content.**
    * Nord settlements and capitals, region-based houses and carriages, the standing stones, dragon mounds and
      word walls.
-   * Skycraft NPC townsfolk, which replace the third-party villager mod (done: society module).
+   * NirnCraft NPC townsfolk, which replace the third-party villager mod (done: society module).
    * The ambient-sound engine and boss music, the creature roster, animations, UI and visuals.
    * Remove the remaining structure and village mods.
 3. **Phase 4: Tamriel and beyond.** Each province's culture kit, dungeons, creatures and NPC races; every race

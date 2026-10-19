@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:skooma",
+      "required": false
+    },
+    {
+      "id": "nirncraft:moon_sugar",
+      "required": false
+    },
+    {
+      "id": "nirncraft:raw_ebony",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dwarven_scrap",
+      "required": false
+    },
+    {
+      "id": "nirncraft:dwemer_gear",
+      "required": false
+    }
+  ]
+}

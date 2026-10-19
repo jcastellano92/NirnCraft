@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:deep_sea_of_ghosts",
-    "skycraft:sea_of_ghosts"
+    "nirncraft:deep_sea_of_ghosts",
+    "nirncraft:sea_of_ghosts"
   ]
 }

@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/eye_of_sabre_cat"
+      },
+      {
+        "model": "nirncraft:block/eye_of_sabre_cat",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/eye_of_sabre_cat",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/eye_of_sabre_cat",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/eye_of_sabre_cat_harvested"
+      },
+      {
+        "model": "nirncraft:block/eye_of_sabre_cat_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/eye_of_sabre_cat_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/eye_of_sabre_cat_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

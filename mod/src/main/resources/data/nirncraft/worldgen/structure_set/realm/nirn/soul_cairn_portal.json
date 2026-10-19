@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:realm/nirn/soul_cairn_portal",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 2041512,
+    "types": [
+      "landmark"
+    ],
+    "variants": [
+      "soul_cairn_portal"
+    ]
+  }
+}

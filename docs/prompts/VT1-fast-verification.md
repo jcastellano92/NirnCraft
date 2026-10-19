@@ -10,7 +10,7 @@ and mood.
    weights, `must`, `resolution`, `binding`, `derived`, `why`); `tools/visual/target_lint.py` checks ids resolve
    (regions, places, cityplans, dungeons, cavern profiles), `why` resolve, probe names exist, every disagreement has a
    resolution. Wire into `world_test.py --tier fast`.
-2. **SiteExport** (`VT1.00.export`): `com.skycraft.dev.SiteExport` run by `tools/qa/site_export.gradle` (JavaExec like
+2. **SiteExport** (`VT1.00.export`): `com.nirncraft.dev.SiteExport` run by `tools/qa/site_export.gradle` (JavaExec like
    `GeographyAudit`, no Minecraft world): for a list of sites (place, dungeon, cave, or an x/z window) it evaluates the
    real height function, map water, the street plan (planned live: no bake needed), `SettlementPiece` builders,
    landmarks, scatter and dungeon/cave builders into an in-memory block canvas (reuse the canvas `DungeonQa` paints

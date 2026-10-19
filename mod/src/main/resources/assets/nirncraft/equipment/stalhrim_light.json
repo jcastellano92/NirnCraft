@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:stalhrim_light"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:stalhrim_light"
+      }
+    ]
+  }
+}

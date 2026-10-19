@@ -1,8 +1,8 @@
 {
   "replace": false,
   "values": [
-    "skycraft:artaeum",
-    "skycraft:crystal_spires",
+    "nirncraft:artaeum",
+    "nirncraft:crystal_spires",
     "minecraft:sunflower_plains",
     "minecraft:flower_forest",
     "minecraft:old_growth_birch_forest",

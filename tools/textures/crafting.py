@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Procedural pixel art for the Skycraft smithing module (Forge 1.20.1).
+"""Procedural pixel art for the NirnCraft smithing module (Forge 1.20.1).
 
 Writes 16x16 item/block textures and 64x32 armor layers into
-mod/src/main/resources/assets/skycraft/textures/{item,block,models/armor}.
+mod/src/main/resources/assets/nirncraft/textures/{item,block,models/armor}.
 
     python3 tools/textures/crafting.py [--preview out.png]
 
@@ -18,7 +18,7 @@ import sys
 from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures")
+TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures")
 ITEM = os.path.join(TEX, "item")
 BLOCK = os.path.join(TEX, "block")
 ARMOR = os.path.join(TEX, "models", "armor")

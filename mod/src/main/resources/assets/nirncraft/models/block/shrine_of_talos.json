@@ -1,0 +1,8 @@
+{
+  "parent": "nirncraft:block/shrine",
+  "textures": {
+    "stone": "nirncraft:block/shrine_stone",
+    "symbol": "nirncraft:block/shrine_talos",
+    "top": "nirncraft:block/shrine_talos_top"
+  }
+}

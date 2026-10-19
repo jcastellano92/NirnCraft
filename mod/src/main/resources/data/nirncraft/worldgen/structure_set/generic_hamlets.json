@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:hamlet",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 64,
+    "separation": 22,
+    "salt": 731203,
+    "exclusion_zone": {
+      "other_set": "nirncraft:generic_villages",
+      "chunk_count": 6
+    }
+  }
+}

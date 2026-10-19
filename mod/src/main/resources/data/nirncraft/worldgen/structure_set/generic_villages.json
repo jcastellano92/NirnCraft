@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:village",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 110,
+    "separation": 40,
+    "salt": 731202,
+    "exclusion_zone": {
+      "other_set": "nirncraft:generic_towns",
+      "chunk_count": 8
+    }
+  }
+}

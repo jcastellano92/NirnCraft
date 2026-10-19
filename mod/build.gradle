@@ -6,8 +6,8 @@ plugins {
 }
 
 // Opt-in fast scratch storage. Keep the default path for existing QA/dev tools.
-if (providers.gradleProperty('skycraftBuildDir').isPresent()) {
-    layout.buildDirectory.set(file(providers.gradleProperty('skycraftBuildDir').get()))
+if (providers.gradleProperty('nirncraftBuildDir').isPresent()) {
+    layout.buildDirectory.set(file(providers.gradleProperty('nirncraftBuildDir').get()))
 }
 
 version = mod_version
@@ -25,10 +25,10 @@ neoForge {
     version = neo_version
     runs {
         configureEach {
-            gameDirectory = project.file(project.findProperty('skycraftRunDir') ?: 'run/26.3')
+            gameDirectory = project.file(project.findProperty('nirncraftRunDir') ?: 'run/26.3')
             systemProperty 'forge.logging.markers', 'REGISTRIES'
-            if (project.findProperty('skycraftDevDir')) {
-                systemProperty 'skycraft.dev', project.file(project.property('skycraftDevDir')).absolutePath
+            if (project.findProperty('nirncraftDevDir')) {
+                systemProperty 'nirncraft.dev', project.file(project.property('nirncraftDevDir')).absolutePath
             }
             logLevel = org.slf4j.event.Level.DEBUG
         }
@@ -48,11 +48,11 @@ neoForge {
             programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').absolutePath, '--existing', file('src/main/resources/').absolutePath
         }
     }
-    mods { skycraft { sourceSet(sourceSets.main) } }
+    mods { nirncraft { sourceSet(sourceSets.main) } }
     unitTest {
         // Real FML bootstrap and registry ownership, supplied by this exact NeoForge userdev artifact.
         enable()
-        testedMod = mods.skycraft
+        testedMod = mods.nirncraft
     }
 }
 
@@ -83,6 +83,7 @@ tasks.register('mergeLang') {
     inputs.dir 'src/main/lang'
     outputs.dir mergedLangDir
     doLast {
+        project.delete(mergedLangDir) // a removed or renamed namespace must not linger in the jar
         def slurper = new groovy.json.JsonSlurper()
         file('src/main/lang').eachDir { nsDir ->
             def merged = new TreeMap<String, Object>()
@@ -104,13 +105,13 @@ sourceSets.main.resources.srcDir(files(mergedLangDir).builtBy('mergeLang'))
 // Camera reuse needs the dungeon/terrain builders too: a road-bake hash alone
 // does not change when a cave ceiling or structure painter changes.
 def generationIdentityDir = layout.buildDirectory.dir('generated/generation-identity')
-def generationSources = fileTree('src/main/java/com/skycraft') {
+def generationSources = fileTree('src/main/java/com/nirncraft') {
     include 'tamriel/**', 'worldplan/**', 'dungeons/**', 'roads/**', 'landmarks/**', 'scatter/**', 'worldgen/**'
     exclude '**/client/**'
 }
 def generationData = fileTree('src/main/resources') {
-    include 'skycraft/tamriel/**', 'skycraft/dungeons/**', 'skycraft/landmarks/**', 'skycraft/scatter/**'
-    include 'skycraft/worldplan/**', 'skycraft/roads/**', 'data/skycraft/worldgen/**'
+    include 'nirncraft/tamriel/**', 'nirncraft/dungeons/**', 'nirncraft/landmarks/**', 'nirncraft/scatter/**'
+    include 'nirncraft/worldplan/**', 'nirncraft/roads/**', 'data/nirncraft/worldgen/**'
 }
 tasks.register('generationIdentity') {
     inputs.files generationSources, generationData
@@ -121,7 +122,7 @@ tasks.register('generationIdentity') {
             digest.update(project.relativePath(f).replace('\\', '/').getBytes('UTF-8'))
             digest.update(java.security.MessageDigest.getInstance('SHA-256').digest(f.bytes))
         }
-        def out = generationIdentityDir.get().file('skycraft/generation-identity.txt').asFile
+        def out = generationIdentityDir.get().file('nirncraft/generation-identity.txt').asFile
         out.parentFile.mkdirs()
         out.setText('v1:' + digest.digest().encodeHex().toString() + '\n', 'UTF-8')
     }

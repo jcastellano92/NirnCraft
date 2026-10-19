@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "nirncraft:block/scorched_stone",
+        "y": 0
+      },
+      {
+        "model": "nirncraft:block/scorched_stone",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/scorched_stone",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/scorched_stone",
+        "y": 270
+      }
+    ]
+  }
+}

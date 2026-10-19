@@ -1,0 +1,21 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "marsh_snag",
+        "weight": 2
+      },
+      {
+        "species": "bald_cypress",
+        "weight": 1
+      },
+      {
+        "species": "swamp_hist",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

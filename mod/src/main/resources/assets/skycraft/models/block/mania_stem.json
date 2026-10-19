@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column",
-  "textures": {
-    "end": "skycraft:block/mania_stem_top",
-    "side": "skycraft:block/mania_stem"
-  }
-}

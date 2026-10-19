@@ -1,0 +1,8 @@
+{
+  "type": "nirncraft:realm_site",
+  "site": "deadlands/bridge",
+  "biomes": "#nirncraft:realm/deadlands",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

@@ -2,7 +2,7 @@
 #pragma once
 #include <cmath>
 
-namespace aether {
+namespace atlas {
 
 // Camera-relative inverse view-projection (column-major), GL clip conventions.
 inline void cameraMatrix(double yawDeg, double pitchDeg, double fovDeg, double aspect, float out[16]) {
@@ -23,4 +23,4 @@ inline void cameraMatrix(double yawDeg, double pitchDeg, double fovDeg, double a
         }
 }
 
-}  // namespace aether
+}  // namespace atlas

@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/spawn_ash"
+      },
+      {
+        "model": "nirncraft:block/spawn_ash",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/spawn_ash",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/spawn_ash",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/spawn_ash_harvested"
+      },
+      {
+        "model": "nirncraft:block/spawn_ash_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/spawn_ash_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/spawn_ash_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

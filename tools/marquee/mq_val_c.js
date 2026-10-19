@@ -7,10 +7,10 @@ module.exports = function (f) {
   f.relic('toll_ribbon', 'Toll-Ribbon of the Mist', 'A strip of silver ribbon the Silvenar\'s court ties round a passer\'s wrist when they have paid the mist-toll. Both ends are knotted. One is knotted wrongly, with a Baandari hand.', 11);
   f.relic('hidden_sugar', 'Moon-Sugar in a Wagon-Wheel', 'A hollow wagon-wheel hub packed with grey-white crystals of moon-sugar. A Bosmer tongue would find it strange; a Khajiit would weep. It is worth a very large sum, and a very small sentence.', 11);
   f.relic('three_dyes', 'Three Dyes of Arenthia', 'Three stoppered vials: moss-green, falls-silver and dawn-pink. Each was gathered where the water meets the light, and each shifts hue when you look at it from the side.', 20);
-  f.boss('hound_stealer', { name: 'Gorrun Hound-Taker', type: 'skycraft:bandit_chief', hp: 2.8, dmg: 1.3, level: 18,
-    weapon: 'skycraft:bosmer_sword', gear: { chest: 'skycraft:bosmer_chestplate' }, drop: 'loot:standard', glow: false });
-  f.boss('sugar_runner', { name: 'Zar\'ha the Wheel-Wright', type: 'skycraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 22,
-    weapon: 'skycraft:khajiit_dagger', drop: 'loot:standard', glow: false });
+  f.boss('hound_stealer', { name: 'Gorrun Hound-Taker', type: 'nirncraft:bandit_chief', hp: 2.8, dmg: 1.3, level: 18,
+    weapon: 'nirncraft:bosmer_sword', gear: { chest: 'nirncraft:bosmer_chestplate' }, drop: 'loot:standard', glow: false });
+  f.boss('sugar_runner', { name: 'Zar\'ha the Wheel-Wright', type: 'nirncraft:bandit_chief', hp: 3.0, dmg: 1.4, level: 22,
+    weapon: 'nirncraft:khajiit_dagger', drop: 'loot:standard', glow: false });
 
   // Falinesti: a Green Pact dilemma
   f.q({
@@ -42,7 +42,7 @@ module.exports = function (f) {
     objectives: [
       o.go('woodhearth', 'Climb the Great Weave to the high node'),
       o.clear('woodhearth', 'Drive off the nesting hawks that guard the high node',
-        [mob('skycraft:harpy', 2, 'Node-Hawk')]),
+        [mob('nirncraft:harpy', 2, 'Node-Hawk')]),
       o.escort('@hush', 'woodhearth', 'Escort the cub, and Hush, down to the ground-camp'),
     ],
     outro: 'The cub came down the Weave on a stranger\'s back, and said only that the bridge-people were not nearly as tall as they let on.',
@@ -121,7 +121,7 @@ module.exports = function (f) {
     objectives: [
       o.go('shrouded_vale', 'Search the Shrouded Vale for the Warden\'s hound'),
       o.kill('shrouded_vale', 'Stop Gorrun Hound-Taker, who has her in a snare',
-        [{ boss_id: '@hound_stealer' }, mob('skycraft:wolf', 2, 'Hound-Trap Wolf')]),
+        [{ boss_id: '@hound_stealer' }, mob('nirncraft:wolf', 2, 'Hound-Trap Wolf')]),
       o.talk('@huln', 'Return the hound to Huln',
         'The hound is safe. She was snared by a poacher. She wishes to be fed.',
         'Huln looks at the hound. The hound looks at Huln. He kneels, and something very large moves in his throat. "Thank you." That is two words, and he looks as though they have cost him a week of coin. Then he takes your hand, and does not say anything at all, for a long and perfectly fluent time.'),

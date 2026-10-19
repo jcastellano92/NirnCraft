@@ -1,0 +1,8 @@
+{
+  "message.nirncraft.protect.break": "This isn't yours to break.",
+  "message.nirncraft.protect.place": "You can't build here. Raise a homestead first.",
+  "message.nirncraft.protect.terrain": "The ground here isn't yours to dig.",
+  "message.nirncraft.protect.tree": "These trees aren't yours to fell.",
+  "message.nirncraft.protect.foreign": "This land belongs to someone else.",
+  "message.nirncraft.protect.fluid": "You can't pour that out here."
+}

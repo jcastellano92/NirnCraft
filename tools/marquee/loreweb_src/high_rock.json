@@ -31,7 +31,7 @@
         "outro": "The eighth king's name was almost gone, scraped to a ghost in the stone. I traced it in charcoal before the masons returned. What three crowns do with it is theirs to decide.",
         "boss": {
           "name": "Master-Mason Orvane",
-          "type": "skycraft:necromancer",
+          "type": "nirncraft:necromancer",
           "hp": 3.0,
           "dmg": 1.4,
           "level": 22
@@ -71,7 +71,7 @@
         "outro": "The hall was warm, music still playing, the table laid. No one asked me to leave. It was the hardest door I have ever closed behind me.",
         "boss": {
           "name": "The Host of Plums",
-          "type": "skycraft:dremora",
+          "type": "nirncraft:dremora",
           "hp": 3.4,
           "dmg": 1.5,
           "level": 26
@@ -111,7 +111,7 @@
         "outro": "The forge-spirit stilled its hammer as I broke the last unlit name on the anvil. I do not know whether it will begin again, but the names on the column are, for now, only names.",
         "boss": {
           "name": "Hargruk the Unwritten",
-          "type": "skycraft:troll",
+          "type": "nirncraft:troll",
           "hp": 3.6,
           "dmg": 1.6,
           "level": 26
@@ -152,7 +152,7 @@
         "outro": "The pump fell silent and the great stone chest of the giant sighed one last time. In the bay, the ring of towers on Balfiera slowly lifted toward the sun.",
         "boss": {
           "name": "The Keeper of the Pump",
-          "type": "skycraft:dwarven_centurion",
+          "type": "nirncraft:dwarven_centurion",
           "hp": 3.0,
           "dmg": 1.5,
           "level": 24

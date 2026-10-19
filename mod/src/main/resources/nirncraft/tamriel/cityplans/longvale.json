@@ -1,0 +1,361 @@
+{
+  "id": "longvale",
+  "why": [
+    "reapers_march.L1.knolls",
+    "reapers_march.L5.grain_road",
+    "reapers_march.L6.arenthia_seat"
+  ],
+  "sil": "valenwood-longvale-plan",
+  "base": "none",
+  "overlay": "reapers_march",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "reapers_march",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "reapers_march",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "longvale_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        -12,
+        -37
+      ],
+      "name": "longvale_landmark",
+      "overlay": "reapers_march"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        -6,
+        -6
+      ],
+      "spokes": 6,
+      "r0": 14,
+      "r1": 42,
+      "wobble": 6,
+      "offset": 2.13,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        31
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          53
+        ],
+        [
+          -6,
+          -6
+        ],
+        [
+          6,
+          -29
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        4
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "longvale_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        42,
+        18
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "longvale_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        12,
+        28
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "longvale_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        12,
+        44
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "longvale_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "longvale_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "longvale_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -22,
+        12
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "longvale_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "longvale_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -17,
+        -1
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "longvale_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -49,
+        -17
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "longvale_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        23,
+        -20
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "longvale_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        25,
+        -41
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "longvale_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        41,
+        -16
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "longvale_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        35,
+        38
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "longvale_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "longvale_great_tree",
+      "count": 1
+    },
+    {
+      "type": "garden",
+      "theme": "longvale_garden",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "longvale_lamps",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "longvale_b_5",
+    "store": "longvale_b_10",
+    "smithy": "longvale_b_7"
+  },
+  "titles": {
+    "longvale_b_1": "place.nirncraft.longvale Council & Seat Hall",
+    "longvale_b_2": "place.nirncraft.longvale High Sanctuary",
+    "longvale_b_3": "place.nirncraft.longvale Fighters & Wayfarers Hall",
+    "longvale_b_4": "place.nirncraft.longvale Mages & Chroniclers Spire",
+    "longvale_b_5": "place.nirncraft.longvale The Lantern & Hearth Inn",
+    "longvale_b_6": "place.nirncraft.longvale The Traveler's Rest Tavern",
+    "longvale_b_7": "place.nirncraft.longvale Master Forge & Armorer",
+    "longvale_b_8": "place.nirncraft.longvale Botanicals & Remedies",
+    "longvale_b_9": "place.nirncraft.longvale Scriptorium & Charts",
+    "longvale_b_10": "place.nirncraft.longvale Grand Provisioner & Sundries",
+    "longvale_b_11": "place.nirncraft.longvale Silk & Hide Clothier",
+    "longvale_b_12": "place.nirncraft.longvale Lapidary & Signets",
+    "longvale_b_13": "place.nirncraft.longvale Wayfarer Stables & Post",
+    "longvale_b_14": "place.nirncraft.longvale Bonded Factor Warehouse",
+    "longvale_landmark": "High Seat of place.nirncraft.longvale",
+    "longvale_plaza": "place.nirncraft.longvale Central Plaza"
+  },
+  "innKey": "longvale_b_5",
+  "zones": [
+    {
+      "at": [
+        -6,
+        -21
+      ],
+      "r": 19,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -6,
+        -6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        20,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 49,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

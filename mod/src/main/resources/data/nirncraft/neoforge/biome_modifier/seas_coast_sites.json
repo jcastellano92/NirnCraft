@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#nirncraft:tamriel/coast",
+  "features": "nirncraft:coast_site",
+  "step": "surface_structures"
+}

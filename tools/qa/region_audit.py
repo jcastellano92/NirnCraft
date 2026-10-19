@@ -2,7 +2,7 @@
 
 Usage: py -3 -I tools/qa/region_audit.py [--json OUT.json]
 
-Reads the Tamriel rasters (mod/src/main/resources/skycraft/tamriel), regions.json, palettes.json, the biome and
+Reads the Tamriel rasters (mod/src/main/resources/nirncraft/tamriel), regions.json, palettes.json, the biome and
 feature JSON, structure JSON and the place lists, and prints/dumps:
 
 * per-region variety (distinct surface biomes, tree + flora species, structure kinds, place types and places per
@@ -30,8 +30,8 @@ from scipy.spatial import cKDTree
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.environ.get("REGION_AUDIT_ROOT") or os.path.abspath(os.path.join(HERE, "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-TAM = os.path.join(RES, "skycraft", "tamriel")
-DATA = os.path.join(RES, "data", "skycraft", "worldgen")
+TAM = os.path.join(RES, "nirncraft", "tamriel")
+DATA = os.path.join(RES, "data", "nirncraft", "worldgen")
 VEC = os.path.join(ROOT, "tools", "worldgen", "tamriel_vectors.json")
 OUT = os.environ.get("REGION_AUDIT_OUT") or os.path.join(HERE, "out", "regions")
 
@@ -57,7 +57,7 @@ def load_biomes():
     out = {}
     for f in glob.glob(os.path.join(DATA, "biome", "*.json")):
         j = json.load(open(f, encoding="utf-8"))
-        out["skycraft:" + os.path.basename(f)[:-5]] = j
+        out["nirncraft:" + os.path.basename(f)[:-5]] = j
     return out
 
 
@@ -94,9 +94,9 @@ def feature_names(fid, depth=0):
                 elif any(w in short for w in PLANT_WORDS) and "ore" not in short.split("_"):
                     plants.add(n)
             for sp in re.findall(r'"species":\s*"([a-z_0-9]+)"', s):
-                trees.add("skycraft:" + sp)
+                trees.add("nirncraft:" + sp)
             for ref in set(re.findall(r'"([a-z_]+:[a-z0-9_]+/[a-z0-9_/]+)"', s)):
-                if ref != fid and depth < 6 and ref.split(":")[0] in ("skycraft", "minecraft"):
+                if ref != fid and depth < 6 and ref.split(":")[0] in ("nirncraft", "minecraft"):
                     t, pl = feature_names(ref, depth + 1)
                     trees |= t
                     plants |= pl
@@ -111,7 +111,7 @@ def biome_flora(bid, biomes):
         trees, plants = set(), set()
         for step in biomes[bid]["features"]:
             for f in step:
-                if f.startswith("skycraft:biome/") or f.split(":")[0] == "minecraft":
+                if f.startswith("nirncraft:biome/") or f.split(":")[0] == "minecraft":
                     t, p = feature_names(f)
                     trees |= t
                     plants |= p

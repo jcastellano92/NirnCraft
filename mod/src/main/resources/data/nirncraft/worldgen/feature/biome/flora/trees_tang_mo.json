@@ -1,0 +1,29 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "cherry",
+        "weight": 3
+      },
+      {
+        "species": "plum",
+        "weight": 2
+      },
+      {
+        "species": "akaviri_pine",
+        "weight": 3
+      },
+      {
+        "species": "bamboo",
+        "weight": 2
+      },
+      {
+        "species": "palm",
+        "weight": 1
+      }
+    ],
+    "stands": 0.8,
+    "stand_scale": 48
+  }
+}

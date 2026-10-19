@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace aether {
+namespace atlas {
 
 inline uint32_t crc32(const uint8_t* p, size_t n, uint32_t c = 0xFFFFFFFFu) {
     static uint32_t table[256];
@@ -81,4 +81,4 @@ inline bool writePng(const std::string& path, const uint32_t* rgba, uint32_t w, 
     return std::fclose(f) == 0;
 }
 
-}  // namespace aether
+}  // namespace atlas

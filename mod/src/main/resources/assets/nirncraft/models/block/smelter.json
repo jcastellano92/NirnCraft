@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "top": "nirncraft:block/smelter_top",
+    "bottom": "nirncraft:block/smelter_bottom",
+    "front": "nirncraft:block/smelter_front",
+    "side": "nirncraft:block/smelter_side"
+  }
+}

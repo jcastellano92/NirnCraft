@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:emperor_parasol_moss",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ash_creep_cluster",
+      "required": false
+    },
+    {
+      "id": "nirncraft:white_cap",
+      "required": false
+    }
+  ]
+}

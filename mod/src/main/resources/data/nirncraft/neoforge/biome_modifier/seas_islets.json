@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#nirncraft:tamriel/sea",
+  "features": "nirncraft:islet",
+  "step": "surface_structures"
+}

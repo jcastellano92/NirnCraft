@@ -1,0 +1,17 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "prince_shrine",
+  "special": "meridia",
+  "place": {
+    "types": [
+      "daedric_shrine"
+    ],
+    "variants": [
+      "meridia_great"
+    ]
+  },
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

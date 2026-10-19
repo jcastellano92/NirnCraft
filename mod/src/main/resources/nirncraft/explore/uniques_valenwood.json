@@ -1,0 +1,1108 @@
+[
+  {
+    "id": "valenwood_malabal_tor_unique_1",
+    "name": "Relic of place.nirncraft.abamath",
+    "region": "malabal_tor",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L4.jungle_understorey"
+    ],
+    "place": "abamath",
+    "x": -5000,
+    "z": 10500,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.abamath in Malabal Tor from the elder days."
+  },
+  {
+    "id": "valenwood_malabal_tor_unique_2",
+    "name": "Relic of place.nirncraft.athorin_hollow",
+    "region": "malabal_tor",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L4.jungle_understorey"
+    ],
+    "place": "athorin_hollow",
+    "x": -5687,
+    "z": 10512,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.athorin_hollow in Malabal Tor from the elder days."
+  },
+  {
+    "id": "valenwood_malabal_tor_unique_3",
+    "name": "Relic of place.nirncraft.belarata",
+    "region": "malabal_tor",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L4.jungle_understorey"
+    ],
+    "place": "belarata",
+    "x": -4763,
+    "z": 10454,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.belarata in Malabal Tor from the elder days."
+  },
+  {
+    "id": "valenwood_malabal_tor_unique_4",
+    "name": "Relic of place.nirncraft.black_vine_ruins",
+    "region": "malabal_tor",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L4.jungle_understorey"
+    ],
+    "place": "black_vine_ruins",
+    "x": -4950,
+    "z": 9400,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.black_vine_ruins in Malabal Tor from the elder days."
+  },
+  {
+    "id": "valenwood_malabal_tor_unique_5",
+    "name": "Relic of place.nirncraft.bone_grapplers_nest",
+    "region": "malabal_tor",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L4.jungle_understorey"
+    ],
+    "place": "bone_grapplers_nest",
+    "x": -5150,
+    "z": 10800,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.bone_grapplers_nest in Malabal Tor from the elder days."
+  },
+  {
+    "id": "valenwood_malabal_tor_unique_6",
+    "name": "Relic of place.nirncraft.chancel_of_divine_entreaty",
+    "region": "malabal_tor",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L4.jungle_understorey"
+    ],
+    "place": "chancel_of_divine_entreaty",
+    "x": -5100,
+    "z": 9800,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.chancel_of_divine_entreaty in Malabal Tor from the elder days."
+  },
+  {
+    "id": "valenwood_malabal_tor_unique_7",
+    "name": "Relic of place.nirncraft.crimson_cove",
+    "region": "malabal_tor",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L4.jungle_understorey"
+    ],
+    "place": "crimson_cove",
+    "x": -5656,
+    "z": 9537,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.crimson_cove in Malabal Tor from the elder days."
+  },
+  {
+    "id": "valenwood_malabal_tor_unique_8",
+    "name": "Relic of place.nirncraft.dead_mans_drop",
+    "region": "malabal_tor",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L4.jungle_understorey"
+    ],
+    "place": "dead_mans_drop",
+    "x": -6000,
+    "z": 9660,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.dead_mans_drop in Malabal Tor from the elder days."
+  },
+  {
+    "id": "valenwood_malabal_tor_unique_9",
+    "name": "Relic of place.nirncraft.falinesti_summer_site",
+    "region": "malabal_tor",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L4.jungle_understorey"
+    ],
+    "place": "falinesti_summer_site",
+    "x": -6150,
+    "z": 10150,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.falinesti_summer_site in Malabal Tor from the elder days."
+  },
+  {
+    "id": "valenwood_malabal_tor_unique_10",
+    "name": "Relic of place.nirncraft.hoarvor_pit",
+    "region": "malabal_tor",
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L4.jungle_understorey"
+    ],
+    "place": "hoarvor_pit",
+    "x": -5550,
+    "z": 9850,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.hoarvor_pit in Malabal Tor from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_1",
+    "name": "Relic of place.nirncraft.arara_grove",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "arara_grove",
+    "x": -2104,
+    "z": 10664,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.arara_grove in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_2",
+    "name": "Relic of place.nirncraft.belwasten_root_tomb",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "belwasten_root_tomb",
+    "x": -2458,
+    "z": 10709,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.belwasten_root_tomb in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_3",
+    "name": "Relic of place.nirncraft.big_ozurs_valley",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "big_ozurs_valley",
+    "x": -2350,
+    "z": 10850,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.big_ozurs_valley in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_4",
+    "name": "Relic of place.nirncraft.broken_arch",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "broken_arch",
+    "x": -2850,
+    "z": 12100,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.broken_arch in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_5",
+    "name": "Relic of place.nirncraft.ceoth_outpost",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "ceoth_outpost",
+    "x": -2732,
+    "z": 9608,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ceoth_outpost in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_6",
+    "name": "Relic of place.nirncraft.claws_strike",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "claws_strike",
+    "x": -2750,
+    "z": 11300,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.claws_strike in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_7",
+    "name": "Relic of place.nirncraft.dawnmead_brigand_camp",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "dawnmead_brigand_camp",
+    "x": -2000,
+    "z": 11050,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.dawnmead_brigand_camp in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_8",
+    "name": "Relic of place.nirncraft.dawnmead_ruin_camp",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "dawnmead_ruin_camp",
+    "x": -1850,
+    "z": 11350,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.dawnmead_ruin_camp in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_9",
+    "name": "Relic of place.nirncraft.deathsong_cleft",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "deathsong_cleft",
+    "x": -3850,
+    "z": 10300,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.deathsong_cleft in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_10",
+    "name": "Relic of place.nirncraft.drainor_grove",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "drainor_grove",
+    "x": -2989,
+    "z": 9807,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.drainor_grove in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_11",
+    "name": "Relic of place.nirncraft.fardirs_folly",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "fardirs_folly",
+    "x": -2000,
+    "z": 9750,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.fardirs_folly in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_12",
+    "name": "Relic of place.nirncraft.fort_grimwatch",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "fort_grimwatch",
+    "x": -3800,
+    "z": 9500,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.fort_grimwatch in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_13",
+    "name": "Relic of place.nirncraft.fort_sphinxmoth",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "fort_sphinxmoth",
+    "x": -1950,
+    "z": 10100,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.fort_sphinxmoth in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_14",
+    "name": "Relic of place.nirncraft.gilelle_vault",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "gilelle_vault",
+    "x": -4176,
+    "z": 10285,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.gilelle_vault in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_reapers_march_unique_15",
+    "name": "Relic of place.nirncraft.goloria_hollow",
+    "region": "reapers_march",
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L4.savanna_grove_mosaic"
+    ],
+    "place": "goloria_hollow",
+    "x": -3031,
+    "z": 10026,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.goloria_hollow in Reapers March from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_1",
+    "name": "Relic of place.nirncraft.ardar_grove",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "ardar_grove",
+    "x": -2257,
+    "z": 12658,
+    "kind": "pedestal",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ardar_grove in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_2",
+    "name": "Relic of place.nirncraft.athara_caverns",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "athara_caverns",
+    "x": -4757,
+    "z": 12906,
+    "kind": "corpse",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.athara_caverns in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_3",
+    "name": "Relic of place.nirncraft.athdar_grove",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "athdar_grove",
+    "x": -3021,
+    "z": 13418,
+    "kind": "pedestal",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.athdar_grove in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_4",
+    "name": "Relic of place.nirncraft.athinor_encampment",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "athinor_encampment",
+    "x": -4912,
+    "z": 12632,
+    "kind": "corpse",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.athinor_encampment in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_5",
+    "name": "Relic of place.nirncraft.athuvar_grove",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "athuvar_grove",
+    "x": -3721,
+    "z": 11801,
+    "kind": "pedestal",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.athuvar_grove in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_6",
+    "name": "Relic of place.nirncraft.balarata_grove",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "balarata_grove",
+    "x": -2287,
+    "z": 13716,
+    "kind": "corpse",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.balarata_grove in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_7",
+    "name": "Relic of place.nirncraft.balath_keep",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "balath_keep",
+    "x": -3220,
+    "z": 13814,
+    "kind": "pedestal",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.balath_keep in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_8",
+    "name": "Relic of place.nirncraft.balorin_grove",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "balorin_grove",
+    "x": -3401,
+    "z": 11919,
+    "kind": "corpse",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.balorin_grove in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_9",
+    "name": "Relic of place.nirncraft.belarata_camp",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "belarata_camp",
+    "x": -4109,
+    "z": 13581,
+    "kind": "pedestal",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.belarata_camp in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_10",
+    "name": "Relic of place.nirncraft.beldar_root_tomb",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "beldar_root_tomb",
+    "x": -2731,
+    "z": 13769,
+    "kind": "corpse",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.beldar_root_tomb in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_11",
+    "name": "Relic of place.nirncraft.belwasten_hole",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "belwasten_hole",
+    "x": -2033,
+    "z": 12934,
+    "kind": "pedestal",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.belwasten_hole in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_12",
+    "name": "Relic of place.nirncraft.boars_run_overlook",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "boars_run_overlook",
+    "x": -3200,
+    "z": 11300,
+    "kind": "corpse",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.boars_run_overlook in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_13",
+    "name": "Relic of place.nirncraft.bone_orchard",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "bone_orchard",
+    "x": -4300,
+    "z": 13600,
+    "kind": "pedestal",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.bone_orchard in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_14",
+    "name": "Relic of place.nirncraft.brackenleaf",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "brackenleaf",
+    "x": -2400,
+    "z": 13150,
+    "kind": "corpse",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.brackenleaf in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_15",
+    "name": "Relic of place.nirncraft.burroot_kwama_mine",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "burroot_kwama_mine",
+    "x": -4450,
+    "z": 11650,
+    "kind": "pedestal",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.burroot_kwama_mine in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_16",
+    "name": "Relic of place.nirncraft.cave_of_broken_sails",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "cave_of_broken_sails",
+    "x": -3100,
+    "z": 13950,
+    "kind": "corpse",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.cave_of_broken_sails in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_17",
+    "name": "Relic of place.nirncraft.cearata_vault",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "cearata_vault",
+    "x": -4935,
+    "z": 13322,
+    "kind": "pedestal",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.cearata_vault in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_18",
+    "name": "Relic of place.nirncraft.ceestia_outpost",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "ceestia_outpost",
+    "x": -4983,
+    "z": 11080,
+    "kind": "corpse",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ceestia_outpost in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_19",
+    "name": "Relic of place.nirncraft.ceinor_barrow",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "ceinor_barrow",
+    "x": -3887,
+    "z": 13000,
+    "kind": "pedestal",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.ceinor_barrow in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_20",
+    "name": "Relic of place.nirncraft.cororin_grove",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "cororin_grove",
+    "x": -4664,
+    "z": 13528,
+    "kind": "corpse",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.cororin_grove in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_21",
+    "name": "Relic of place.nirncraft.elathil_barrow",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "elathil_barrow",
+    "x": -2010,
+    "z": 12661,
+    "kind": "pedestal",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.elathil_barrow in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_22",
+    "name": "Relic of place.nirncraft.elden_grove",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "elden_grove",
+    "x": -3300,
+    "z": 12200,
+    "kind": "corpse",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.elden_grove in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_23",
+    "name": "Relic of place.nirncraft.elorin_hollow",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "elorin_hollow",
+    "x": -3322,
+    "z": 12498,
+    "kind": "pedestal",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.elorin_hollow in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_grahtwood_unique_24",
+    "name": "Relic of place.nirncraft.falith_grotto",
+    "region": "grahtwood",
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L4.graht_grove"
+    ],
+    "place": "falith_grotto",
+    "x": -3636,
+    "z": 13082,
+    "kind": "corpse",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.falith_grotto in Grahtwood from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_1",
+    "name": "Relic of place.nirncraft.arananga",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "arananga",
+    "x": -5450,
+    "z": 12800,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.arananga in Greenshade from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_2",
+    "name": "Relic of place.nirncraft.ararata_hollow",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "ararata_hollow",
+    "x": -5910,
+    "z": 11431,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.ararata_hollow in Greenshade from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_3",
+    "name": "Relic of place.nirncraft.barrow_trench",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "barrow_trench",
+    "x": -6500,
+    "z": 10950,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.barrow_trench in Greenshade from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_4",
+    "name": "Relic of place.nirncraft.belarata_lair",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "belarata_lair",
+    "x": -5459,
+    "z": 11668,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.belarata_lair in Greenshade from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_5",
+    "name": "Relic of place.nirncraft.carac_dena",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "carac_dena",
+    "x": -5350,
+    "z": 13500,
+    "kind": "pedestal",
+    "item": "nirncraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.nirncraft.carac_dena in Greenshade from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_6",
+    "name": "Relic of place.nirncraft.city_of_ash",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "city_of_ash",
+    "x": -6200,
+    "z": 11550,
+    "kind": "corpse",
+    "item": "nirncraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.city_of_ash in Greenshade from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_7",
+    "name": "Relic of place.nirncraft.draenwe_cave",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "draenwe_cave",
+    "x": -6902,
+    "z": 11030,
+    "kind": "pedestal",
+    "item": "nirncraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.draenwe_cave in Greenshade from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_8",
+    "name": "Relic of place.nirncraft.falayas_cove",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "falayas_cove",
+    "x": -5036,
+    "z": 14228,
+    "kind": "corpse",
+    "item": "nirncraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.nirncraft.falayas_cove in Greenshade from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_9",
+    "name": "Relic of place.nirncraft.gurzags_mine",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "gurzags_mine",
+    "x": -5350,
+    "z": 12350,
+    "kind": "pedestal",
+    "item": "nirncraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.gurzags_mine in Greenshade from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_10",
+    "name": "Relic of place.nirncraft.harridans_lair",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "harridans_lair",
+    "x": -5550,
+    "z": 11850,
+    "kind": "corpse",
+    "item": "nirncraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.harridans_lair in Greenshade from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_11",
+    "name": "Relic of place.nirncraft.hectahame",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "hectahame",
+    "x": -5800,
+    "z": 11150,
+    "kind": "pedestal",
+    "item": "nirncraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.nirncraft.hectahame in Greenshade from the elder days."
+  },
+  {
+    "id": "valenwood_greenshade_unique_12",
+    "name": "Relic of place.nirncraft.hollow_den",
+    "region": "greenshade",
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L4.mire_fen"
+    ],
+    "place": "hollow_den",
+    "x": -5850,
+    "z": 12650,
+    "kind": "corpse",
+    "item": "nirncraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.nirncraft.hollow_den in Greenshade from the elder days."
+  }
+]

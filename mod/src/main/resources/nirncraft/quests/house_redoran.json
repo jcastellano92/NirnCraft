@@ -1,0 +1,588 @@
+{
+  "line": "house_redoran",
+  "category": "faction",
+  "faction": "house_redoran",
+  "region": "morrowind/vvardenfell_ashlands",
+  "speakers": {
+    "narrator": "Narrator"
+  },
+  "places": {
+    "shulk_egg_mine": {
+      "x": 6360,
+      "z": -660,
+      "r": 30,
+      "name": "Shulk Egg Mine"
+    },
+    "bal_isra": {
+      "x": 5800,
+      "z": -860,
+      "r": 40,
+      "name": "Bal Isra"
+    },
+    "kaushtababi_grotto": {
+      "x": 5760,
+      "z": -260,
+      "r": 28,
+      "name": "Kaushtababi Grotto"
+    }
+  },
+  "npcs": [
+    {
+      "id": "neminda",
+      "name": "Neminda",
+      "role": "housecarl",
+      "place": "aldruhn",
+      "offset": [
+        4,
+        -5
+      ],
+      "female": true,
+      "hall": "house_redoran",
+      "greet": "House Redoran asks three things of its people: duty, honor and endurance. The ash will test the third. I will test the other two."
+    },
+    {
+      "id": "athyn_sarethi",
+      "name": "Athyn Sarethi",
+      "role": "jarl",
+      "place": "aldruhn",
+      "offset": [
+        -8,
+        10
+      ],
+      "greet": "Councilor Sarethi. Forgive the bare walls; Redoran spends its coin on swords and grain, not tapestries."
+    },
+    {
+      "id": "bolvyn_venim",
+      "name": "Bolvyn Venim",
+      "role": "jarl",
+      "place": "aldruhn",
+      "offset": [
+        8,
+        -10
+      ],
+      "hall": "house_redoran",
+      "greet": "I am Archmaster of this House. Whatever you want, say it plainly, and do not waste the Archmaster's time."
+    },
+    {
+      "id": "varvur_sarethi",
+      "name": "Varvur Sarethi",
+      "role": "citizen",
+      "place": "aldruhn",
+      "offset": [
+        12,
+        -12
+      ],
+      "greet": "They say I killed a man. I didn't. But nobody listens to the accused, only to the accuser."
+    },
+    {
+      "id": "dulnea_ralaal",
+      "name": "Dulnea Ralaal",
+      "role": "miner",
+      "place": "shulk_egg_mine",
+      "offset": [
+        4,
+        3
+      ],
+      "female": true,
+      "greet": "The kwama are restless and something bigger is down there with them. I've been hiding in this side tunnel for a day."
+    }
+  ],
+  "relics": [
+    {
+      "id": "duel_glove",
+      "name": "Challenger's Glove",
+      "desc": "A formal glove of challenge, thrown at your feet by a Hlaalu who thinks Redoran honor is a joke.",
+      "icon": 11
+    },
+    {
+      "id": "indarys_charter",
+      "name": "Charter of Indarys Manor",
+      "desc": "Councilor Sarethi's grant of land at Bal Isra, to raise a Redoran stronghold in the House's name.",
+      "icon": 7
+    },
+    {
+      "id": "ervyn_confession",
+      "name": "Ervyn Faryon's Purse",
+      "desc": "A purse of fresh coin and a note: 'For the Sarethi matter. Make sure the boy is seen near the body.' Signed only with a V.",
+      "icon": 11
+    }
+  ],
+  "scenes": {
+    "rd_varvur_freed": [
+      [
+        "athyn_sarethi",
+        "My son is free. And the coin that framed him came from a hand signing itself 'V'. We both know whose hand that is."
+      ],
+      [
+        "athyn_sarethi",
+        "Venim has led this House toward pride and petty vengeance for too long. When the Council meets, I will name you as his challenger."
+      ]
+    ],
+    "rd_archmaster": [
+      [
+        "narrator",
+        "The Council Hall of Ald'ruhn falls silent. Bolvyn Venim kneels in the dust of the duelling floor, his blade beside him."
+      ],
+      [
+        "neminda",
+        "By the old law, the challenge is answered. House Redoran has a new Archmaster."
+      ],
+      [
+        "athyn_sarethi",
+        "Duty, honor, endurance. You have shown all three. Lead us well."
+      ]
+    ]
+  },
+  "quests": [
+    {
+      "id": "rd_weight_of_duty",
+      "title": "The Weight of Duty",
+      "start": "npc:neminda",
+      "requires": [
+        "!faction:house_redoran",
+        "!faction:house_hlaalu",
+        "!faction:house_telvanni"
+      ],
+      "offer": "I want to serve House Redoran.",
+      "pitch": "Then serve. Cliff racers have been diving at our caravans on the Ald'ruhn road and the guards can't keep up. Kill four of them, then report to the Warden. A Redoran does the work in front of them without asking whether it's beneath them.",
+      "desc": "Neminda of the Redoran Council Hall in Ald'ruhn will accept me into House Redoran if I prove I can do my duty: thin out the cliff racers harassing the caravan road, then report to the Warden.",
+      "objectives": [
+        {
+          "type": "kill_type",
+          "entity": "nirncraft:cliff_racer",
+          "count": 4,
+          "text": "Kill four cliff racers"
+        },
+        {
+          "type": "talk",
+          "npc": "redoran_warden",
+          "text": "Report to the Warden of Ald'ruhn",
+          "topic": "Neminda sent me. The cliff racers on the caravan road are dead.",
+          "reply": "Four fewer to dive at the carts. Good. Neminda will want to hear it from you, not me. Go."
+        },
+        {
+          "type": "talk",
+          "npc": "neminda",
+          "text": "Return to Neminda",
+          "topic": "The Warden is satisfied.",
+          "reply": "Then so am I. Kneel. You are a hireling of House Redoran. Remember: your actions are the House's actions now, for good or ill.",
+          "place": "aldruhn"
+        }
+      ],
+      "outro": "I joined House Redoran in Ald'ruhn. The House values duty over glory, and I mean to learn what that costs.",
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "nirncraft:bonemold_chestplate",
+          "nirncraft:chitin_war_axe"
+        ]
+      },
+      "region": "morrowind/vvardenfell_ashlands",
+      "why": [
+        "morrowind/vvardenfell_ashlands.L7.redoran_duty",
+        "morrowind/vvardenfell_ashlands.L8.redoran_temple_piety"
+      ],
+      "exclusive_group": "great_house",
+      "exclusive_with": [
+        "house_hlaalu",
+        "house_telvanni"
+      ],
+      "consequence": {
+        "world_state": "rd_weight_of_duty_resolved",
+        "flag": "conseq_rd_weight_of_duty",
+        "summary": "I joined House Redoran in Ald'ruhn. The House values duty over glory, and I mean to learn what that costs."
+      }
+    },
+    {
+      "id": "rd_trapped_in_shulk",
+      "title": "Trapped in Shulk",
+      "start": "npc:neminda",
+      "requires": [
+        "quest:rd_weight_of_duty|faction:house_redoran"
+      ],
+      "offer": "Is there work for a hireling?",
+      "pitch": "Shulk Egg Mine, east of the city. The kwama have turned on the miners, and something else came up from the deep tunnels with them. One miner is still inside. Bring her out.",
+      "desc": "The kwama in Shulk Egg Mine have turned on their miners, and ash creatures have followed them up from the deep tunnels. Neminda sent me to rescue a trapped miner, Dulnea Ralaal.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "shulk_egg_mine",
+          "text": "Travel to Shulk Egg Mine"
+        },
+        {
+          "type": "clear",
+          "place": "shulk_egg_mine",
+          "placement": "structure",
+          "text": "Fight through the mine",
+          "spawn": [
+            {
+              "type": "nirncraft:kagouti",
+              "count": 2
+            },
+            {
+              "type": "nirncraft:alit",
+              "count": 2
+            },
+            {
+              "type": "nirncraft:ash_spawn",
+              "count": 2
+            }
+          ],
+          "journal": "Ash spawn in an egg mine. They don't belong this far from the mountain. Something is stirring under Vvardenfell."
+        },
+        {
+          "type": "talk",
+          "npc": "dulnea_ralaal",
+          "text": "Find Dulnea Ralaal",
+          "topic": "House Redoran sent me. Can you walk?",
+          "reply": "Walk? I can run, if you go first. Get me to Ald'ruhn and I'll never complain about the ash again.",
+          "place": "shulk_egg_mine"
+        },
+        {
+          "type": "escort",
+          "npc": "dulnea_ralaal",
+          "place": "aldruhn",
+          "text": "Escort Dulnea Ralaal to Ald'ruhn"
+        },
+        {
+          "type": "talk",
+          "npc": "neminda",
+          "text": "Report to Neminda",
+          "topic": "Dulnea is safe. There were ash spawn in the mine.",
+          "reply": "Ash spawn. I'll tell the Council. You did well. A miner alive is worth more to the House than a mine full of eggs.",
+          "actions": "relocate:dulnea_ralaal:aldruhn:14:6",
+          "place": "aldruhn"
+        }
+      ],
+      "outro": "I rescued Dulnea Ralaal from Shulk Egg Mine. The ash spawn I found there worry Neminda more than she shows.",
+      "rewards": {
+        "gold": 300,
+        "faction_points": 3
+      },
+      "region": "morrowind/vvardenfell_ashlands",
+      "why": [
+        "morrowind/vvardenfell_ashlands.L7.ashlander_traders_at_the_gate",
+        "morrowind/vvardenfell_ashlands.L8.urshilaku_prophecy"
+      ],
+      "consequence": {
+        "world_state": "rd_trapped_in_shulk_resolved",
+        "flag": "conseq_rd_trapped_in_shulk",
+        "summary": "I rescued Dulnea Ralaal from Shulk Egg Mine. The ash spawn I found there worry Neminda more than she shows."
+      }
+    },
+    {
+      "id": "rd_duel_of_honor",
+      "title": "A Duel of Honor",
+      "start": "auto",
+      "requires": [
+        "quest:rd_trapped_in_shulk"
+      ],
+      "desc": "A Hlaalu swordsman named Ravos Andarys has been mocking Redoran honor in Ald'ruhn's taverns. Today he threw his glove at my feet. Redoran custom says a challenge must be answered.",
+      "on_start": "relic:duel_glove",
+      "objectives": [
+        {
+          "type": "deliver",
+          "npc": "neminda",
+          "relic": "duel_glove",
+          "text": "Show the challenger's glove to Neminda",
+          "topic": "A Hlaalu threw this at my feet.",
+          "reply": "Ravos Andarys. He has been begging for this for a month. A formal duel, outside the gate, before witnesses. Win, and the House's name is clean.",
+          "place": "aldruhn"
+        },
+        {
+          "type": "kill",
+          "place": "aldruhn",
+          "offset": [
+            60,
+            40
+          ],
+          "placement": "near",
+          "text": "Defeat Ravos Andarys in a formal duel",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Ravos Andarys",
+              "target": true,
+              "boss": true,
+              "hp": 2.0,
+              "dmg": 1.3,
+              "hostile": true,
+              "weapon": "nirncraft:steel_sword"
+            }
+          ],
+          "journal": "Ravos Andarys fought well and talked better. The witnesses carried him off afterwards, and no one in Ald'ruhn has mocked Redoran honor since."
+        },
+        {
+          "type": "talk",
+          "npc": "neminda",
+          "text": "Report to Neminda",
+          "topic": "The duel is done.",
+          "reply": "I watched. Clean and correct. Councilor Sarethi watched too. He wants to see you.",
+          "place": "aldruhn"
+        }
+      ],
+      "outro": "I won a formal duel against the Hlaalu braggart Ravos Andarys. Councilor Athyn Sarethi has taken an interest in me.",
+      "rewards": {
+        "gold": 400,
+        "faction_points": 5
+      },
+      "region": "morrowind/vvardenfell_ashlands",
+      "why": [
+        "morrowind/vvardenfell_ashlands.L8.redoran_temple_piety",
+        "morrowind/vvardenfell_ashlands.L9.council_of_ald_ruhn"
+      ],
+      "consequence": {
+        "world_state": "rd_duel_of_honor_resolved",
+        "flag": "conseq_rd_duel_of_honor",
+        "summary": "I won a formal duel against the Hlaalu braggart Ravos Andarys. Councilor Athyn Sarethi has taken an interest in me."
+      }
+    },
+    {
+      "id": "rd_indarys_manor",
+      "title": "Indarys Manor",
+      "start": "npc:athyn_sarethi",
+      "requires": [
+        "quest:rd_duel_of_honor"
+      ],
+      "offer": "Neminda said you wished to see me, Councilor.",
+      "pitch": "The Hlaalu are building strongholds in the west, and the Telvanni in the east. Redoran must answer. Take this charter to Bal Isra and raise Indarys Manor. It will be yours to hold for the House.",
+      "desc": "Councilor Athyn Sarethi granted me a charter to build Indarys Manor, a Redoran stronghold at Bal Isra, northwest of Ald'ruhn.",
+      "on_start": "relic:indarys_charter",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bal_isra",
+          "text": "Travel to Bal Isra"
+        },
+        {
+          "type": "clear",
+          "place": "bal_isra",
+          "text": "Clear the kagouti and alit from the building site",
+          "spawn": [
+            {
+              "type": "nirncraft:kagouti",
+              "count": 2
+            },
+            {
+              "type": "nirncraft:alit",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "hours": 24,
+          "text": "Wait while Redoran masons raise the first walls",
+          "journal": "Redoran masons build the way Redoran soldiers fight: without fuss, without rest, and in perfectly straight lines."
+        },
+        {
+          "type": "deliver",
+          "npc": "athyn_sarethi",
+          "relic": "indarys_charter",
+          "text": "Return the sealed charter to Athyn Sarethi",
+          "topic": "Indarys Manor's walls stand at Bal Isra.",
+          "reply": "Then Redoran has a new stronghold, and you have a seat to defend. There is one thing more I must ask of you, and it is not for the House. It is for my son.",
+          "place": "aldruhn"
+        }
+      ],
+      "outro": "The walls of Indarys Manor stand at Bal Isra. Councilor Sarethi has a personal favour to ask.",
+      "rewards": {
+        "gold": 500,
+        "faction_points": 6
+      },
+      "region": "morrowind/vvardenfell_ashlands",
+      "why": [
+        "morrowind/vvardenfell_ashlands.L8.urshilaku_prophecy",
+        "morrowind/vvardenfell_ashlands.L9.sleepers_in_the_north"
+      ],
+      "consequence": {
+        "world_state": "rd_indarys_manor_resolved",
+        "flag": "conseq_rd_indarys_manor",
+        "summary": "The walls of Indarys Manor stand at Bal Isra. Councilor Sarethi has a personal favour to ask."
+      }
+    },
+    {
+      "id": "rd_innocence_of_varvur",
+      "title": "The Innocence of Varvur Sarethi",
+      "start": "auto",
+      "requires": [
+        "quest:rd_indarys_manor"
+      ],
+      "desc": "Varvur Sarethi, the Councilor's son, stands accused of murder. His father swears he is innocent. I mean to find the truth before the Council passes sentence.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "varvur_sarethi",
+          "text": "Speak with Varvur Sarethi",
+          "topic": "Your father asked me to help. What happened?",
+          "reply": "I found the body. That's all. A man in a grey hood ran from the alley, east, toward the old grotto by the river bed. I told the guards. They didn't write it down.",
+          "place": "aldruhn"
+        },
+        {
+          "type": "go",
+          "place": "aldruhn",
+          "text": "Search Kaushtababi Grotto"
+        },
+        {
+          "type": "clear",
+          "place": "aldruhn",
+          "placement": "structure",
+          "text": "Deal with the cutthroats hiding in the grotto",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Grotto Cutthroat",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "aldruhn",
+          "placement": "structure",
+          "text": "Kill the real murderer, Ervyn Faryon",
+          "spawn": [
+            {
+              "type": "npc:assassin",
+              "name": "Ervyn Faryon",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4,
+              "hostile": true
+            }
+          ],
+          "actions": "relic:ervyn_confession"
+        },
+        {
+          "type": "deliver",
+          "npc": "athyn_sarethi",
+          "relic": "ervyn_confession",
+          "text": "Bring the proof to Athyn Sarethi",
+          "topic": "The man who framed Varvur was paid for it. Look at the signature.",
+          "reply": "A single letter. V. Thank you. You have given me back my son.",
+          "actions": "scene:rd_varvur_freed",
+          "place": "aldruhn"
+        }
+      ],
+      "outro": "I proved Varvur Sarethi innocent of murder. The man who framed him was paid by someone signing as 'V', and Councilor Sarethi believes it was Archmaster Venim.",
+      "rewards": {
+        "gold": 700,
+        "faction_points": 8,
+        "items": [
+          {
+            "item": "nirncraft:bonemold_helmet",
+            "name": "Sarethi Family Helm",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "region": "morrowind/vvardenfell_ashlands",
+      "why": [
+        "morrowind/vvardenfell_ashlands.L9.council_of_ald_ruhn",
+        "morrowind/vvardenfell_ashlands.L10.kogoruhn"
+      ],
+      "consequence": {
+        "world_state": "rd_innocence_of_varvur_resolved",
+        "flag": "conseq_rd_innocence_of_varvur",
+        "summary": "I proved Varvur Sarethi innocent of murder. The man who framed him was paid by someone signing as 'V', and Councilor Sarethi believes it was Archmaster Venim."
+      }
+    },
+    {
+      "id": "rd_venims_challenge",
+      "title": "Venim's Challenge",
+      "start": "auto",
+      "requires": [
+        "quest:rd_innocence_of_varvur"
+      ],
+      "desc": "Athyn Sarethi has named me challenger to Archmaster Bolvyn Venim. By Redoran law, the Archmaster must answer a formal challenge on the duelling floor.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "bolvyn_venim",
+          "text": "Face Bolvyn Venim",
+          "topic": "Sarethi has named me your challenger.",
+          "reply": "A hireling with borrowed honor. Very well. The old law gives you the right to die on the duelling floor. I'll grant it gladly.",
+          "place": "aldruhn"
+        },
+        {
+          "type": "kill",
+          "place": "aldruhn",
+          "offset": [
+            0,
+            20
+          ],
+          "placement": "near",
+          "text": "Defeat Archmaster Bolvyn Venim in the duel",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Archmaster Bolvyn Venim",
+              "target": true,
+              "boss": true,
+              "hp": 4.0,
+              "dmg": 1.6,
+              "hostile": true,
+              "weapon": "nirncraft:ebony_greatsword"
+            }
+          ],
+          "actions": "retire:bolvyn_venim;scene:rd_archmaster"
+        },
+        {
+          "type": "talk",
+          "npc": "athyn_sarethi",
+          "text": "Speak with Athyn Sarethi",
+          "topic": "It's over.",
+          "reply": "It is. Venim's pride was his undoing. Yours, I hope, will be tempered by duty. Archmaster.",
+          "place": "aldruhn"
+        }
+      ],
+      "outro": "I defeated Bolvyn Venim in a formal duel and became Archmaster of House Redoran.",
+      "rewards": {
+        "gold": 2000,
+        "faction_points": 50,
+        "flags": [
+          "rd_archmaster"
+        ],
+        "perks": 1,
+        "items": [
+          {
+            "item": "nirncraft:bonemold_chestplate",
+            "name": "Redoran Archmaster's Cuirass",
+            "enchant": {
+              "protection": 4,
+              "fire_protection": 3
+            }
+          },
+          {
+            "item": "nirncraft:ebony_sword",
+            "name": "Blade of Indarys",
+            "enchant": {
+              "sharpness": 4,
+              "unbreaking": 3
+            }
+          }
+        ]
+      },
+      "region": "morrowind/vvardenfell_ashlands",
+      "why": [
+        "morrowind/vvardenfell_ashlands.L9.sleepers_in_the_north",
+        "morrowind/vvardenfell_ashlands.L10.missamsi"
+      ],
+      "consequence": {
+        "world_state": "rd_venims_challenge_resolved",
+        "flag": "conseq_rd_venims_challenge",
+        "summary": "I defeated Bolvyn Venim in a formal duel and became Archmaster of House Redoran."
+      }
+    }
+  ],
+  "exclusive_group": "great_house",
+  "exclusive_with": [
+    "house_hlaalu",
+    "house_telvanni"
+  ]
+}

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Build a personal resource pack that plays YOUR OWN copy of the Skyrim soundtrack in Skycraft, from a folder of music
+Build a personal resource pack that plays YOUR OWN copy of the Skyrim soundtrack in NirnCraft, from a folder of music
 files you already exported from your installation.
 
 This is the music-only front end of tools/music/import_skyrim_audio.py, kept for people who already have the
 soundtrack as loose files. If Skyrim is installed, import_skyrim_audio.py can read the game archives directly and also
 imports creature, magic, UI, ambience and shout sounds.
 
-  * It never downloads anything and only reads the input folder; the zip is written outside the Skycraft repository
+  * It never downloads anything and only reads the input folder; the zip is written outside the NirnCraft repository
     (an output path inside the repository is refused).
   * The resulting pack contains copyrighted music: it is for your personal use only. Do not share or upload it.
 
@@ -20,7 +20,7 @@ by keyword (town, tavern, night, dungeon, combat, boss ...). Use --map 'regex=mu
 
 Usage:
     python3 tools/music/import_skyrim_ost.py ~/SkyrimMusic
-    python3 tools/music/import_skyrim_ost.py ~/SkyrimMusic -o ~/.minecraft/resourcepacks/skycraft_personal_ost.zip
+    python3 tools/music/import_skyrim_ost.py ~/SkyrimMusic -o ~/.minecraft/resourcepacks/nirncraft_personal_ost.zip
     python3 tools/music/import_skyrim_ost.py ~/SkyrimMusic --dry-run --map 'mus_special_.*=music.sovngarde'
 """
 from __future__ import annotations
@@ -34,10 +34,10 @@ sys.path.insert(0, str(HERE))
 import import_skyrim_audio  # noqa: E402
 import sound_catalog  # noqa: E402
 
-PACK_NAME = "Skycraft – Personal Skyrim OST"
-ZIP_NAME = "skycraft_personal_skyrim_ost.zip"
+PACK_NAME = "NirnCraft – Personal Skyrim OST"
+ZIP_NAME = "nirncraft_personal_skyrim_ost.zip"
 
-# Skycraft music events (see tools/music/sound_catalog.py).
+# NirnCraft music events (see tools/music/sound_catalog.py).
 EVENTS = [e.name for e in sound_catalog.EVENTS if e.category == "music"]
 
 

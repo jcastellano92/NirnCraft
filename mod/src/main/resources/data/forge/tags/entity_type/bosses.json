@@ -1,16 +1,16 @@
 {
   "replace": false,
   "values": [
-    "skycraft:dragon",
-    "skycraft:draugr_deathlord",
+    "nirncraft:dragon",
+    "nirncraft:draugr_deathlord",
     {
-      "id": "#skycraft:dungeon_bosses",
+      "id": "#nirncraft:dungeon_bosses",
       "required": false
     },
-    "skycraft:dragon_priest",
-    "skycraft:miraak",
+    "nirncraft:dragon_priest",
+    "nirncraft:miraak",
     {
-      "id": "#skycraft:sea_bosses",
+      "id": "#nirncraft:sea_bosses",
       "required": false
     },
     "minecraft:ender_dragon",

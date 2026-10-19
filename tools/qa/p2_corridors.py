@@ -3,7 +3,7 @@
 usage:
   py -3 -I tools/qa/p2_corridors.py tiles <roadplan.bin> <a>:<b> [<a>:<b> ...]
         prints the autorun command list ('forceload add' tiles of 10x10 chunks along the corridors, '|'-separated,
-        '+' for spaces; use as -Dskycraft.autorun=<list>|stop) and the tile count
+        '+' for spaces; use as -Dnirncraft.autorun=<list>|stop) and the tile count
   py -3 -I tools/qa/p2_corridors.py measure <world_dir> <roadplan.bin> <a>:<b> [<a>:<b> ...] [--json out.json]
         for every planned vertex of those links (and lateral offsets within the half width): the top solid block of the
         SAVED chunk against floor(profile); also drops > 1 block between consecutive vertices. Run it on a world

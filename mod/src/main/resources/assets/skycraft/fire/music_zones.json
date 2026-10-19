@@ -1,6 +1,0 @@
-{
-  "_comment": "Places with a piece of music of their own. place = a Tamriel place id; margin = blocks added to its radius; event = a skycraft sound event (tools/music/sound_catalog.py).",
-  "zones": [
-    {"place": "helgen", "margin": 36, "radius": 70, "event": "music.helgen_aftermath"}
-  ]
-}

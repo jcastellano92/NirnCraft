@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 
 const repo = path.join(__dirname, '..', '..');
-const res = path.join(repo, 'mod', 'src', 'main', 'resources', 'skycraft');
+const res = path.join(repo, 'mod', 'src', 'main', 'resources', 'nirncraft');
 const readJson = f => JSON.parse(fs.readFileSync(f, 'utf8'));
 const problems = [];
 const bad = m => problems.push(m);

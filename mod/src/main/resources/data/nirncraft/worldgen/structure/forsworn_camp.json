@@ -1,0 +1,12 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "forsworn_camp",
+  "kit": "forsworn",
+  "where": [
+    "high_rock"
+  ],
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/dremora_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 1708048
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 12591120
+      }
+    ]
+  }
+}

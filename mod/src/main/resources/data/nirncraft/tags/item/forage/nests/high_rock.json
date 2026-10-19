@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:pine_thrush_egg",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hawks_egg",
+      "required": false
+    }
+  ]
+}

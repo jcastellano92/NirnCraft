@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/comberry"
+      },
+      {
+        "model": "nirncraft:block/comberry",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/comberry",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/comberry",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/comberry_harvested"
+      },
+      {
+        "model": "nirncraft:block/comberry_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/comberry_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/comberry_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

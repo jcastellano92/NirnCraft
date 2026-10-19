@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:moon_sugar",
+      "required": false
+    },
+    {
+      "id": "nirncraft:skooma",
+      "required": false
+    },
+    "minecraft:sugar",
+    {
+      "id": "nirncraft:elsweyr_fondue",
+      "required": false
+    },
+    {
+      "id": "nirncraft:jazbay_grapes",
+      "required": false
+    },
+    "minecraft:cocoa_beans"
+  ]
+}

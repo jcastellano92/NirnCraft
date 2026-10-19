@@ -2,11 +2,11 @@
 import re
 from imports_263 import ROOT
 from java_text import matching,arguments
-p=ROOT/'mod/src/main/java/com/skycraft/atmosphere/client/SkyGeometry.java'
+p=ROOT/'mod/src/main/java/com/nirncraft/atmosphere/client/SkyGeometry.java'
 s=p.read_text(encoding='utf8')
 if 'VertexBuffer' not in s:raise SystemExit('Sky geometry is already migrated')
-s=s.replace('import com.mojang.blaze3d.vertex.Tesselator;','import com.skycraft.render.client.CpuMesh;')
-s=s.replace('import com.mojang.blaze3d.vertex.VertexBuffer;','import com.skycraft.render.client.WorldMesh;')
+s=s.replace('import com.mojang.blaze3d.vertex.Tesselator;','import com.nirncraft.render.client.CpuMesh;')
+s=s.replace('import com.mojang.blaze3d.vertex.VertexBuffer;','import com.nirncraft.render.client.WorldMesh;')
 s=s.replace('import com.mojang.blaze3d.vertex.VertexFormat;','import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;')
 s=s.replace('BufferBuilder.RenderedBuffer','CpuMesh').replace('VertexBuffer','WorldMesh')
 s=s.replace('!buffer.isInvalid()','!buffer.isClosed()').replace('.getFormat().getVertexSize()', '.format().getVertexSize()')

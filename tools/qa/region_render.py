@@ -27,8 +27,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 def load_tree(root):
     """All the inputs from one repo tree (so 'before' can be a git archive of HEAD)."""
-    tam = os.path.join(root, "mod", "src", "main", "resources", "skycraft", "tamriel")
-    data = os.path.join(root, "mod", "src", "main", "resources", "data", "skycraft", "worldgen")
+    tam = os.path.join(root, "mod", "src", "main", "resources", "nirncraft", "tamriel")
+    data = os.path.join(root, "mod", "src", "main", "resources", "data", "nirncraft", "worldgen")
     meta = json.load(open(os.path.join(root, "tools", "worldgen", "tamriel_vectors.json"), encoding="utf-8"))["meta"]
     t = {"meta": meta, "cell": meta["cell"], "min_x": meta["min_x"], "min_z": meta["min_z"]}
     t["reg"] = np.array(Image.open(os.path.join(tam, "regions.png")))
@@ -43,7 +43,7 @@ def load_tree(root):
     import glob
     for f in glob.glob(os.path.join(data, "biome", "*.json")):
         j = json.load(open(f, encoding="utf-8"))
-        bio["skycraft:" + os.path.basename(f)[:-5]] = j
+        bio["nirncraft:" + os.path.basename(f)[:-5]] = j
     t["biomes"] = bio
     return t
 
@@ -120,7 +120,7 @@ class Sampler:
         out = {"upland": get("upland_y", 115), "peak": get("peak_y", 175), "summit": get("summit_y", 270),
                "bias": pj[key].get("bias") or {}, "ctx": {}}
         for c in ("ocean", "deep_ocean", "beach", "river", "lake", "marsh", "lowland", "upland", "peak", "summit"):
-            ch = [e for e in ctx(c) if e["biome"] in self.t["biomes"]] or [{"biome": "skycraft:temperate_ocean",
+            ch = [e for e in ctx(c) if e["biome"] in self.t["biomes"]] or [{"biome": "nirncraft:temperate_ocean",
                                                                               "weight": 1}]
             tot = float(sum(e["weight"] for e in ch))
             out["ctx"][c] = (np.cumsum([0.0] + [e["weight"] / tot for e in ch])[1:],

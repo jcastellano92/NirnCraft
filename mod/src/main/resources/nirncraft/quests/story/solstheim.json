@@ -1,0 +1,807 @@
+{
+  "region": "morrowind/solstheim",
+  "province": "morrowind",
+  "line": "story_solstheim",
+  "category": "main",
+  "title": "Ash and All-Maker's Stone",
+  "why": [
+    "morrowind.L9.house_politics",
+    "morrowind.L9.imperial_presence",
+    "morrowind.L8.ancestor_worship",
+    "morrowind.L10.dwemer_citadels",
+    "morrowind.L10.daedric_ruins"
+  ],
+  "solstheim_why": [
+    "so.L9.first_dragonborn_returns",
+    "raven_rock.L9.mine_or_farm",
+    "skaal.L9.stones_poisoned",
+    "isinfier.L10.nchardak_ice_city",
+    "raven_rock.L10.ash_spawn_wall"
+  ],
+  "hook": {
+    "place": "raven_rock",
+    "rumour": "Behind the bulwark of Raven Rock, Redoran guards battle ash-spawn from the southern waste while Skaal hunters report sleep-walking villagers chanting around the Earth Stone.",
+    "notice": "COUNCILOR MORVAYN'S MANOR, RAVEN ROCK — Aid requested to defend the ash-bulwark, consult Master Neloth at Tel Mithryn, and parley with the Skaal.",
+    "context": "Solstheim is a single island split between two ages: ash-choked Redoran Raven Rock and Tel Mithryn in the south, and the pine-clad Nord Skaal lands in the north.",
+    "places": [
+      "raven_rock"
+    ],
+    "npc": "story_solstheim_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_solstheim_01_bulwark_in_the_ash",
+      "order": 1,
+      "title": "Watchfires on the Bulwark",
+      "region": "morrowind/solstheim",
+      "category": "main",
+      "start": "hook",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "morrowind.L9.house_politics",
+        "morrowind.L9.imperial_presence"
+      ],
+      "places": [
+        "raven_rock"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "raven_rock",
+          "objective": "Speak with Councilor Morvayn's guard-captain at the southern bulwark of Raven Rock"
+        },
+        {
+          "id": 20,
+          "place": "old_attius_farm",
+          "objective": "Clear the ash-spawn patrol advancing past Old Attius Farm"
+        },
+        {
+          "id": 30,
+          "place": "allmaker_earth_stone",
+          "objective": "Inspect the entranced stone-workers gathered around the Earth Stone"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "raven_rock",
+          "text": "Speak with Councilor Morvayn's guard-captain at the southern bulwark of Raven Rock"
+        },
+        {
+          "type": "clear",
+          "place": "old_attius_farm",
+          "text": "Clear the ash-spawn patrol advancing past Old Attius Farm"
+        },
+        {
+          "type": "go",
+          "place": "allmaker_earth_stone",
+          "text": "Inspect the entranced stone-workers gathered around the Earth Stone"
+        }
+      ],
+      "consequence": "world_state:solstheim_bulwark_ash_traced",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "consequence_detail": {
+        "world_state": "solstheim_bulwark_ash_traced",
+        "flag": "story_so_bulwark_traced",
+        "summary": "Heartstones taken from the ash-spawn at Old Attius Farm and the chant at the Earth Stone point to Tel Mithryn and Fort Frostmoth."
+      }
+    },
+    {
+      "id": "story_solstheim_02_heartstones_of_tel_mithryn",
+      "order": 2,
+      "title": "Heartstones of Tel Mithryn",
+      "region": "morrowind/solstheim",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_solstheim_01_bulwark_in_the_ash",
+      "requires": [
+        "story_solstheim_01_bulwark_in_the_ash"
+      ],
+      "why": [
+        "morrowind.L8.ancestor_worship",
+        "morrowind.L10.blighted_mines"
+      ],
+      "places": [
+        "tel_mithryn",
+        "ashfallow_citadel",
+        "fort_frostmoth"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "tel_mithryn",
+          "objective": "Consult Master Neloth inside the giant mushroom tower of Tel Mithryn"
+        },
+        {
+          "id": 20,
+          "place": "ashfallow_citadel",
+          "objective": "Disrupt the Morag Tong renegade cell fortifying Ashfallow Citadel"
+        },
+        {
+          "id": 30,
+          "place": "fort_frostmoth",
+          "objective": "Shatter the heartstone-resonator hidden in the curtain wall of Fort Frostmoth"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "tel_mithryn",
+          "text": "Consult Master Neloth inside the giant mushroom tower of Tel Mithryn"
+        },
+        {
+          "type": "clear",
+          "place": "ashfallow_citadel",
+          "text": "Disrupt the Morag Tong renegade cell fortifying Ashfallow Citadel"
+        },
+        {
+          "type": "clear",
+          "place": "fort_frostmoth",
+          "text": "Shatter the heartstone-resonator hidden in the curtain wall of Fort Frostmoth"
+        }
+      ],
+      "consequence": "world_state:fort_frostmoth_resonator_shattered",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "fort_frostmoth_resonator_shattered",
+        "flag": "story_so_frostmoth_cleared",
+        "summary": "The heartstone-resonator at Fort Frostmoth is shattered, Stemming the ash-spawn raids on Raven Rock's southern wall."
+      }
+    },
+    {
+      "id": "story_solstheim_03_steam_and_skaal",
+      "order": 3,
+      "title": "The Greathall and the Steam-City",
+      "region": "morrowind/solstheim",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_solstheim_02_heartstones_of_tel_mithryn",
+      "requires": [
+        "story_solstheim_02_heartstones_of_tel_mithryn"
+      ],
+      "why": [
+        "morrowind.L8.ashlander_old_ways",
+        "morrowind.L10.dwemer_citadels"
+      ],
+      "places": [
+        "skaal_village",
+        "thirsk_mead_hall",
+        "nchardak"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "skaal_village",
+          "objective": "Take counsel with the Skaal elders at Skaal Village on the corrupted All-Maker conduits"
+        },
+        {
+          "id": 20,
+          "place": "thirsk_mead_hall",
+          "objective": "Rally the Nord warriors at Thirsk Mead Hall to guard the northern pass"
+        },
+        {
+          "id": 30,
+          "place": "nchardak",
+          "objective": "Enter the sunken Dwemer city of Nchardak and release the steam-aqueduct locks"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "skaal_village",
+          "text": "Take counsel with the Skaal elders at Skaal Village on the corrupted All-Maker conduits"
+        },
+        {
+          "type": "go",
+          "place": "thirsk_mead_hall",
+          "text": "Rally the Nord warriors at Thirsk Mead Hall to guard the northern pass"
+        },
+        {
+          "type": "clear",
+          "place": "nchardak",
+          "text": "Enter the sunken Dwemer city of Nchardak and release the steam-aqueduct locks"
+        }
+      ],
+      "consequence": "world_state:nchardak_aqueduct_locks_released",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "nchardak_aqueduct_locks_released",
+        "flag": "story_so_nchardak_opened",
+        "summary": "With Nchardak's steam-locks opened and Thirsk holding the pass, the outer cult sanctuary at the Temple of Miraak is exposed."
+      }
+    },
+    {
+      "id": "story_solstheim_04_accord_of_ash_and_pine",
+      "order": 4,
+      "title": "Accord of Ash and Pine",
+      "region": "morrowind/solstheim",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_solstheim_03_steam_and_skaal",
+      "requires": [
+        "story_solstheim_03_steam_and_skaal"
+      ],
+      "finale": true,
+      "why": [
+        "morrowind.L9.house_politics",
+        "morrowind.L10.daedric_ruins"
+      ],
+      "places": [
+        "temple_of_miraak",
+        "skaal_village",
+        "raven_rock"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "temple_of_miraak",
+          "objective": "Defeat the cult overseers in the outer sanctum of the Temple of Miraak"
+        },
+        {
+          "id": 20,
+          "place": "skaal_village",
+          "objective": "Bring word of the cleansed sanctum to the Greathall of Skaal Village"
+        },
+        {
+          "id": 30,
+          "place": "raven_rock",
+          "objective": "Witness Councilor Morvayn and the Skaal envoys seal the Solstheim Island Accord in Raven Rock"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "temple_of_miraak",
+          "text": "Defeat the cult overseers in the outer sanctum of the Temple of Miraak"
+        },
+        {
+          "type": "go",
+          "place": "skaal_village",
+          "text": "Bring word of the cleansed sanctum to the Greathall of Skaal Village"
+        },
+        {
+          "type": "go",
+          "place": "raven_rock",
+          "text": "Witness Councilor Morvayn and the Skaal envoys seal the Solstheim Island Accord in Raven Rock"
+        }
+      ],
+      "consequence": "world_state:solstheim_island_accord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Hearth-Friend of Raven Rock and Skaal",
+        "unique_item": "nirncraft:stalhrim_greatsword"
+      },
+      "consequence_detail": {
+        "world_state": "solstheim_island_accord_sealed",
+        "flag": "story_so_finale_complete",
+        "summary": "The cult overseers at the Temple of Miraak are broken, the sleep-curse lifts, and Redoran Raven Rock and the Skaal seal a lasting island pact."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_solstheim_hook_npc",
+      "name": "Warden of Raven Rock",
+      "role": "guard",
+      "place": "raven_rock",
+      "greet": "Behind the bulwark of Raven Rock, Redoran guards battle ash-spawn from the southern waste while Skaal hunters report sleep-walking villagers chanting around the Earth Stone."
+    }
+  ],
+  "scenes": {
+    "story_solstheim_scene_01": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (1).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_02": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (2).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_03": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (3).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_04": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (4).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_05": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (5).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_06": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (6).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_07": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (7).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_08": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (8).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_09": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (9).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_10": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (10).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_11": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (11).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_12": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (12).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_13": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (13).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_14": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (14).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_15": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (15).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_16": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (16).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_17": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (17).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_18": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (18).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_19": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (19).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_20": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (20).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_21": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (21).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_22": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (22).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_23": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (23).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_24": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (24).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_25": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (25).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_26": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (26).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_27": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (27).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_28": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (28).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_29": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (29).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_30": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (30).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_31": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (31).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_32": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (32).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_33": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (33).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_34": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (34).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_35": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (35).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_36": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (36).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_37": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (37).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_38": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (38).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_39": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (39).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_40": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (40).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_41": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (41).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_42": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (42).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_43": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (43).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_44": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (44).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_45": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (45).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_46": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (46).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_47": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (47).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_48": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (48).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_49": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (49).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_50": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (50).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_51": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (51).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_52": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (52).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_53": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (53).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_54": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (54).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_55": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (55).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_56": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (56).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_57": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (57).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_58": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (58).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_59": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (59).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_60": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (60).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_61": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (61).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_62": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (62).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_63": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (63).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_64": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (64).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_65": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (65).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_66": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (66).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_67": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (67).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_68": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (68).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_69": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (69).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_70": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (70).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_71": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (71).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_72": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (72).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_73": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (73).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_74": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (74).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_75": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (75).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_76": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (76).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_77": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (77).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_78": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (78).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_79": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (79).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_80": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (80).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_81": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (81).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_82": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (82).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_83": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (83).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ],
+    "story_solstheim_scene_84": [
+      "Warden of Raven Rock: Examine the ash-wax seals recovered near Raven Rock (84).",
+      "Watch-Captain of Solstheim: The ledger entries match the dispatches troubling Solstheim.",
+      "Watch-Captain of Solstheim: Our scouts tracked the courier column past Raven Rock at dusk.",
+      "Watch-Captain of Solstheim: Secure the approaches around Raven Rock and report back to the seat."
+    ]
+  }
+}

@@ -25,8 +25,8 @@ Thumbs.db
 dist/
 *.args
 __pycache__/
-# Skycraft Core is a build output; packaging tools inject it into build copies of the pack
-pack/mods/skycraft-core.jar
+# NirnCraft Core is a build output; packaging tools inject it into build copies of the pack
+pack/mods/nirncraft-core.jar
 
 # Local game/server output and generated resolver reports (keep source assets and bakes tracked)
 /mod/logs/

@@ -9,10 +9,10 @@ the bay joins them (ferries, the Betony claim, the Orsinium sieges, the knightly
 counts and the building mix of towns. Every description below is our own. No game text, raster or asset enters the
 repo. Invented people are ours. Lore facts are summarised in our own words.
 
-**Era.** Skycraft is set in 4E 201. Every older era is a **history layer** (L11) that must be visible in the world
+**Era.** NirnCraft is set in 4E 201. Every older era is a **history layer** (L11) that must be visible in the world
 today: a ruin, a monument, a place name, a grudge, a song.
 
-**Scope.** High Rock is 40.8 km² in Skycraft today, 1.54 times Skyrim (`SCALE-AND-GEOGRAPHY.md` 2.4). We add no more
+**Scope.** High Rock is 40.8 km² in NirnCraft today, 1.54 times Skyrim (`SCALE-AND-GEOGRAPHY.md` 2.4). We add no more
 towns beyond the Iliac selection. Its interior is filled with highland, moor and crag, not new dots. Orsinium and
 Wrothgar sit in this province (region `high_rock/wrothgar`, binding anchor Orsinium at -4300, 300).
 
@@ -409,12 +409,12 @@ night hunters on the moor roads, Orc raiders on the Wrothgar pass, harpies on th
 ## 5. Settlements
 
 **Rules.** The Daggerfall data says every city is walled with four gates (N, E, S, W) at known grid positions, and no
-town or village is walled. In Skycraft every capital, city and town keeps its four gates (`townplan_seeds.json`
+town or village is walled. In NirnCraft every capital, city and town keeps its four gates (`townplan_seeds.json`
 gives the u, v of each), with the main gate turned to the nearest road end. Fief keeps are walled at the keep only
 (a bailey); their villages are open. The Daggerfall block grid is a zoning hint, never a footprint (ILIAC 6).
 
 **Culture.** Breton towns are tavern-dense: 14-20 taverns per city in Daggerfall's data against 6-12 in coastal
-Hammerfell. Each Skycraft capital has 3 inns and each city 2. Guild halls, banks and libraries mark the burgher
+Hammerfell. Each NirnCraft capital has 3 inns and each city 2. Guild halls, banks and libraries mark the burgher
 class. Every seat has a knightly-order hall where the fief has an order.
 
 ### 5.1 Settlements by realm (window)
@@ -472,7 +472,7 @@ into the Breton grammar.
 
 ### 6.1 Daggerfall dungeon types to High Rock themes
 
-| Daggerfall type (where it clusters in DF data) | Skycraft variant | High Rock reason |
+| Daggerfall type (where it clusters in DF data) | NirnCraft variant | High Rock reason |
 | --- | --- | --- |
 | Ruined castle (Daggerfall 24, Dwynnen 23, Ilessan 18) | New `breton_keep_ruin` kit | Each one is a former petty kingdom's seat (hr.L11.warp_in_the_west); High Rock's barrow equivalent |
 | Crypt, cemetery (Daggerfall 72 cemeteries) | `breton_crypt`; cemeteries become settlement-edge scenes | hr.L8.crypt_dead |
@@ -634,10 +634,10 @@ rises into Orc mountains. Every realm has one main road, one seat, one marquee p
 | --- | --- | --- | --- |
 | World sheet | `tamriel/world/high_rock.json` (MS22) | Province block, 5 realm blocks (Wrothgar with two halves), 4 frame blocks | before IB3 |
 | Regions and polygons | `tools/worldgen/tamriel_vectors.json`, `regions.json` | 3 new realms, re-cut `wayrest`, extended `wrothgar`, shrunk frames | IB1, IB2 |
-| Fiefs | `skycraft/tamriel/fiefs.json`, `com.skycraft.tamriel.Fiefs` | 24 fiefs with seat, lord title, temple, order, coven, bloodline, banner | IB2 |
+| Fiefs | `nirncraft/tamriel/fiefs.json`, `com.nirncraft.tamriel.Fiefs` | 24 fiefs with seat, lord title, temple, order, coven, bloodline, banner | IB2 |
 | Biomes | `tools/worldgen/biomes.py`, `palettes.json` | `haunted_wood` plus micro tables (section 2) | IB2, MS21 |
 | Places | `places/high_rock.json`, `places/provinces.json` | About 100 window places, the moves, `variant: fief_keep` | IB3 |
-| City plans | `skycraft/tamriel/cityplans/*.json` | Daggerfall, Wayrest (replacing `castleCapital`), Anticlere, Dwynnen, Newing, Glenpoint; Orsinium's `stepped-orc-bastions`; style overlays per realm | IB4 |
+| City plans | `nirncraft/tamriel/cityplans/*.json` | Daggerfall, Wayrest (replacing `castleCapital`), Anticlere, Dwynnen, Newing, Glenpoint; Orsinium's `stepped-orc-bastions`; style overlays per realm | IB4 |
 | Roads, ports | `roads/named_roads.json`, `tamriel/ports.json` | Section 4 | IB5 |
 | Terrain | vectors, `hydrology*.py` inputs | Section 3 | IB6 |
 | Dungeons | `places` variants, `dungeons/marquee/**`, kits `breton_keep_ruin` | Section 6 | IB7 |

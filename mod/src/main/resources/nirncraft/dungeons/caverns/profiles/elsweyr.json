@@ -1,0 +1,518 @@
+[
+ {
+  "id": "elsweyr_salt_cave",
+  "name": "Salt Cave",
+  "lore": "The sea dried here ten thousand years ago and left its bones: white columns, white floors, and a glare that makes you squint.",
+  "weight": 1.6,
+  "match": {
+   "provinces": [
+    "elsweyr",
+    "hammerfell"
+   ],
+   "weather": [
+    "desert",
+    "savanna"
+   ]
+  },
+  "shapes": {
+   "karst": 3,
+   "bowl_bridges": 2,
+   "canyon": 2,
+   "cathedral": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:calcite@20",
+    "minecraft:diorite@10",
+    "minecraft:white_terracotta@6",
+    "minecraft:sandstone@8",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:calcite@36",
+    "minecraft:diorite@14",
+    "minecraft:quartz_block@8",
+    "minecraft:white_terracotta@10",
+    "rock@26"
+   ],
+   "spike": [
+    "minecraft:calcite@2",
+    "minecraft:quartz_block@1"
+   ],
+   "platform": [
+    "minecraft:smooth_quartz@2",
+    "minecraft:calcite@2"
+   ]
+  },
+  "fluid": {
+   "kind": "pool",
+   "block": [
+    "minecraft:calcite"
+   ],
+   "chance": 0.3
+  },
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:calcite",
+     "minecraft:quartz_block"
+    ],
+    "density": 20,
+    "len": [
+     3,
+     7
+    ],
+    "tip": [
+     "minecraft:small_amethyst_bud[facing=up]"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:calcite"
+    ],
+    "density": 20
+   },
+   {
+    "type": "column",
+    "block": [
+     "minecraft:calcite"
+    ],
+    "density": 20,
+    "len": [
+     1,
+     3
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "boulders",
+    "block": [
+     "minecraft:calcite"
+    ],
+    "count": [
+     3,
+     6
+    ],
+    "size": [
+     2,
+     3
+    ]
+   },
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:quartz_block"
+    ],
+    "scale": 5.0,
+    "amount": 0.04
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:ochre_froglight"
+   ],
+   "density": 56,
+   "cluster": 1
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "nirncraft:giant_scorpion"
+  ],
+  "loot": {
+   "relic": "nirncraft:chests/relic_cave",
+   "platform": "nirncraft:chests/cavern/crystal",
+   "minor": "nirncraft:chests/cavern/crystal"
+  },
+  "lightColor": "white"
+ },
+ {
+  "id": "elsweyr_moon_sugar_grotto",
+  "name": "Moon-Sugar Grotto",
+  "lore": "Pale crystals grow like frost on the walls, pink and white in the lamplight. The Khajiit say it hums; the Khajiit would know.",
+  "weight": 1.8,
+  "match": {
+   "provinces": [
+    "elsweyr"
+   ],
+   "weather": [
+    "savanna",
+    "tropical",
+    "jungle",
+    "desert"
+   ]
+  },
+  "shapes": {
+   "karst": 3,
+   "bowl_bridges": 2,
+   "amphitheatre": 1,
+   "floating_islands": 1,
+   "cathedral": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:white_terracotta@12",
+    "minecraft:pink_terracotta@10",
+    "minecraft:calcite@10",
+    "minecraft:sandstone@8",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:calcite@24",
+    "minecraft:white_terracotta@16",
+    "minecraft:pink_terracotta@16",
+    "minecraft:amethyst_block@6",
+    "rock@28"
+   ],
+   "spike": [
+    "minecraft:calcite@2",
+    "minecraft:pink_terracotta@1"
+   ],
+   "platform": [
+    "minecraft:smooth_sandstone@2",
+    "minecraft:calcite@2"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.4
+  },
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:calcite",
+     "minecraft:pink_terracotta",
+     "minecraft:white_terracotta"
+    ],
+    "density": 14,
+    "len": [
+     3,
+     7
+    ],
+    "cap": [
+     "minecraft:pearlescent_froglight"
+    ],
+    "tip": [
+     "minecraft:amethyst_cluster[facing=up]"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:amethyst_cluster[facing=up]",
+     "minecraft:small_amethyst_bud[facing=up]"
+    ],
+    "density": 50
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.03
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:pearlescent_froglight",
+    "minecraft:sea_lantern"
+   ],
+   "density": 44,
+   "cluster": 3
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "nirncraft:sabre_cat"
+  ],
+  "loot": {
+   "relic": "nirncraft:chests/relic_cave",
+   "platform": "nirncraft:chests/cavern/crystal",
+   "minor": "nirncraft:chests/cavern/crystal"
+  },
+  "lightColor": "violet"
+ },
+ {
+  "id": "elsweyr_sandstone_canyon",
+  "name": "Sandstone Canyon",
+  "lore": "Sun never reaches the bottom, which is why the Khajiit trade there. The walls are banded like a slice of cake.",
+  "weight": 1.6,
+  "match": {
+   "provinces": [
+    "elsweyr",
+    "hammerfell"
+   ],
+   "weather": [
+    "desert",
+    "savanna",
+    "tropical"
+   ]
+  },
+  "shapes": {
+   "canyon": 4,
+   "crevasse": 2,
+   "bowl_bridges": 1,
+   "sea_cave": 1,
+   "floating_islands": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:sandstone@22",
+    "minecraft:sand@12",
+    "minecraft:red_sandstone@8",
+    "rock@30"
+   ],
+   "wall": [
+    "minecraft:sandstone@30",
+    "minecraft:red_sandstone@20",
+    "minecraft:orange_terracotta@8",
+    "minecraft:smooth_sandstone@14",
+    "rock@16"
+   ],
+   "spike": [
+    "minecraft:sandstone@2",
+    "minecraft:red_sandstone@1"
+   ],
+   "platform": [
+    "minecraft:cut_sandstone@3",
+    "minecraft:chiseled_sandstone@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.35
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:dead_bush",
+     "minecraft:sand"
+    ],
+    "density": 40
+   },
+   {
+    "type": "column",
+    "block": [
+     "minecraft:cut_sandstone"
+    ],
+    "density": 10,
+    "len": [
+     2,
+     4
+    ]
+   },
+   {
+    "type": "float",
+    "block": [
+     "minecraft:lily_pad"
+    ],
+    "density": 20
+   }
+  ],
+  "features": [
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:cut_sandstone",
+     "minecraft:sandstone"
+    ],
+    "count": [
+     3,
+     6
+    ]
+   },
+   {
+    "type": "boulders",
+    "block": [
+     "minecraft:sandstone"
+    ],
+    "count": [
+     3,
+     5
+    ],
+    "size": [
+     2,
+     3
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:glowstone",
+    "minecraft:ochre_froglight"
+   ],
+   "density": 52,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "nirncraft:sabre_cat",
+   "nirncraft:giant_scorpion"
+  ],
+  "loot": {
+   "relic": "nirncraft:chests/relic_cave",
+   "platform": "nirncraft:chests/cavern/desert",
+   "minor": "nirncraft:chests/cavern/desert"
+  },
+  "lightColor": "orange"
+ },
+ {
+  "id": "elsweyr_overgrown_temple",
+  "name": "Overgrown Temple",
+  "lore": "A temple of the cats, swallowed by the jungle's patient green. Sunlight comes in through the roots.",
+  "weight": 1.7,
+  "match": {
+   "regions": [
+    "elsweyr/pellitine",
+    "elsweyr/senchal",
+    "elsweyr/torval",
+    "elsweyr/rimmen"
+   ],
+   "themes": [
+    "ruin",
+    "barrow",
+    "cave"
+   ]
+  },
+  "shapes": {
+   "collapsed_city": 3,
+   "root_cavern": 2,
+   "cathedral": 1,
+   "karst": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:mossy_stone_bricks@14",
+    "minecraft:stone_bricks@8",
+    "minecraft:moss_block@12",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:mossy_stone_bricks@22",
+    "minecraft:moss_block@16",
+    "minecraft:jungle_log@6",
+    "minecraft:stone_bricks@12",
+    "rock@30"
+   ],
+   "spike": [
+    "minecraft:mossy_cobblestone@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:chiseled_stone_bricks@1",
+    "minecraft:mossy_stone_bricks@4"
+   ],
+   "pillar": [
+    "minecraft:mossy_stone_bricks@3",
+    "minecraft:jungle_log@1"
+   ],
+   "ruin": [
+    "minecraft:mossy_stone_bricks@3",
+    "minecraft:cracked_stone_bricks@1",
+    "minecraft:moss_block@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.6
+  },
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:vine"
+    ],
+    "density": 60,
+    "len": [
+     3,
+     9
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fern",
+     "minecraft:large_fern"
+    ],
+    "density": 60
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 50
+   },
+   {
+    "type": "float",
+    "block": [
+     "minecraft:lily_pad"
+    ],
+    "density": 30
+   }
+  ],
+  "features": [
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:mossy_stone_bricks"
+    ],
+    "count": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:lantern"
+    ]
+   },
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:mossy_stone_bricks"
+    ],
+    "count": [
+     5,
+     8
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:verdant_froglight",
+    "minecraft:ochre_froglight"
+   ],
+   "density": 54,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "statue",
+   "block": [
+    "minecraft:mossy_stone_bricks"
+   ],
+   "accent": [
+    "minecraft:lantern"
+   ]
+  },
+  "foes": [
+   "nirncraft:sabre_cat"
+  ],
+  "loot": {
+   "relic": "nirncraft:chests/relic_ruin",
+   "platform": "nirncraft:chests/cavern/ancient",
+   "minor": "nirncraft:chests/cavern/ancient"
+  },
+  "lightColor": "green"
+ }
+]

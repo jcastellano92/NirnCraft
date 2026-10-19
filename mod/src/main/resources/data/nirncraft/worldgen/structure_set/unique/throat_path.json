@@ -1,0 +1,13 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:unique/throat_path",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:sites",
+    "salt": 718274057,
+    "sites": "throat_path"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "dragon_lair",
+  "where": [
+    "atmora",
+    "akavir",
+    "realm"
+  ],
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

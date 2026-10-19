@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generates the quest module's 16x16 item textures (pixel art from character maps).
 
-Writes PNGs into mod/src/main/resources/assets/skycraft/textures/item/:
+Writes PNGs into mod/src/main/resources/assets/nirncraft/textures/item/:
 ancient_tome, monster_trophy, black_hand_letter, courier_letter.
 
 Usage: python3 tools/textures/quest.py
@@ -11,7 +11,7 @@ import os
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures", "item")
+OUT = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures", "item")
 
 
 def hexc(rgb, a=255):

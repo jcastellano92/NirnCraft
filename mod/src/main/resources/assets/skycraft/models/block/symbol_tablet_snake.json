@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "skycraft:block/symbol_tablet_snake",
-    "side": "skycraft:block/puzzle_stone_side",
-    "top": "skycraft:block/puzzle_stone_side"
-  }
-}

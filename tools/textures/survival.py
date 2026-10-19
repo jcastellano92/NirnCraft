@@ -2,7 +2,7 @@
 """Pixel-art textures for the survival module: Skyrim food & drink, crops, the cooking pot, cheese wheel, shrines of
 the Nine Divines, depleted ore veins and the disease / blessing / food effect icons.
 
-Writes PNGs into mod/src/main/resources/assets/skycraft/textures/{item,block,mob_effect}/.
+Writes PNGs into mod/src/main/resources/assets/nirncraft/textures/{item,block,mob_effect}/.
 Run from anywhere:  python3 tools/textures/survival.py
 """
 import math
@@ -12,7 +12,7 @@ import random
 from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures")
+TEX = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures")
 
 
 # ============================================================================ helpers
@@ -993,7 +993,7 @@ def blocks():
 
 import json
 
-ASSETS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft")
+ASSETS = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft")
 
 
 def write_json(rel, data):
@@ -1005,7 +1005,7 @@ def write_json(rel, data):
 
 
 def item_model(name, tex=None, parent="minecraft:item/generated", overrides=None):
-    m = {"parent": parent, "textures": {"layer0": "skycraft:item/" + (tex or name)}}
+    m = {"parent": parent, "textures": {"layer0": "nirncraft:item/" + (tex or name)}}
     if overrides:
         m["overrides"] = overrides
     write_json(f"models/item/{name}.json", m)
@@ -1347,7 +1347,7 @@ def rods():
         rod_sprite(name, w, wd, fit, True)
         item_model(name + "_cast", parent="minecraft:item/handheld_rod")
         item_model(name, parent="minecraft:item/handheld_rod",
-                   overrides=[{"predicate": {"cast": 1}, "model": f"skycraft:item/{name}_cast"}])
+                   overrides=[{"predicate": {"cast": 1}, "model": f"nirncraft:item/{name}_cast"}])
     # bait: a twist of worms in a scrap of cloth; glow bait: glowing grubs
     for name, worm, glow in (("fishing_bait", hexc("c86a6a"), False), ("glow_bait", hexc("b8f060"), True)):
         img = new()
@@ -1487,20 +1487,20 @@ def camping():
                "faces": {d: {"texture": "#fur" if d == "up" else "#hide", "uv": [1, 0, 15, 16] if d in ("up", "down") else [0, 13, 16, 15]}
                          for d in ("up", "down", "north", "south", "east", "west")}}
     write_json("models/block/bedroll_head.json", {
-        "parent": "minecraft:block/block", "textures": {"particle": "skycraft:block/bedroll_fur", "fur": "skycraft:block/bedroll_fur",
-                                                        "hide": "skycraft:block/bedroll_hide", "pillow": "skycraft:block/bedroll_pillow"},
+        "parent": "minecraft:block/block", "textures": {"particle": "nirncraft:block/bedroll_fur", "fur": "nirncraft:block/bedroll_fur",
+                                                        "hide": "nirncraft:block/bedroll_hide", "pillow": "nirncraft:block/bedroll_pillow"},
         "elements": [blanket, {"from": [2, 2, 1], "to": [14, 4.5, 6],
                                "faces": {d: {"texture": "#pillow"} for d in ("up", "down", "north", "south", "east", "west")}}]})
     write_json("models/block/bedroll_foot.json", {
-        "parent": "minecraft:block/block", "textures": {"particle": "skycraft:block/bedroll_fur", "fur": "skycraft:block/bedroll_fur",
-                                                        "hide": "skycraft:block/bedroll_hide"},
+        "parent": "minecraft:block/block", "textures": {"particle": "nirncraft:block/bedroll_fur", "fur": "nirncraft:block/bedroll_fur",
+                                                        "hide": "nirncraft:block/bedroll_hide"},
         "elements": [blanket, {"from": [1, 2, 11], "to": [15, 5, 15],
                                "faces": {d: {"texture": "#hide"} for d in ("up", "down", "north", "south", "east", "west")}}]})
     variants = {}
     rot = {"north": 0, "east": 90, "south": 180, "west": 270}
     for facing, y in rot.items():
         for part in ("head", "foot"):
-            v = {"model": f"skycraft:block/bedroll_{part}"}
+            v = {"model": f"nirncraft:block/bedroll_{part}"}
             if y:
                 v["y"] = y
             variants[f"facing={facing},part={part}"] = v
@@ -1526,8 +1526,8 @@ def camping():
 
     ridge = {"from": [22.5, 22.5, 0], "to": [25.5, 25.5, 16],
              "faces": {d: {"texture": "#pole"} for d in ("up", "down", "north", "south", "east", "west")}}
-    tex = {"particle": "skycraft:block/tent_canvas", "canvas": "skycraft:block/tent_canvas", "pole": "skycraft:block/tent_pole",
-           "pack": "skycraft:block/tent_pack"}
+    tex = {"particle": "nirncraft:block/tent_canvas", "canvas": "nirncraft:block/tent_canvas", "pole": "nirncraft:block/tent_pole",
+           "pack": "nirncraft:block/tent_pack"}
     side_a = [plane(0, 24, 0, 45), ridge]
     side_b = [plane(-8, 16, 16, -45)]
     write_json("models/block/tent_side_a.json", {"textures": tex, "elements": side_a})
@@ -1542,7 +1542,7 @@ def camping():
               "b_front": "tent_side_b", "b_mid": "tent_side_b", "b_back": "tent_side_b_back", "back": "tent_back"}
     for facing, y in rot.items():
         for part, model in models.items():
-            v = {"model": "skycraft:block/" + model}
+            v = {"model": "nirncraft:block/" + model}
             if y:
                 v["y"] = y
             variants[f"facing={facing},part={part}"] = v
@@ -1656,9 +1656,9 @@ def homestead():
         put(img, x, 3 + int(1.5 * math.sin(x / 2.0)), hexc("8a4a30"))
     out("block", "clay_deposit", img)
     for name in ("stone_deposit", "clay_deposit"):
-        write_json(f"models/block/{name}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": f"skycraft:block/{name}"}})
-        write_json(f"blockstates/{name}.json", {"variants": {"": {"model": f"skycraft:block/{name}"}}})
-        write_json(f"models/item/{name}.json", {"parent": f"skycraft:block/{name}"})
+        write_json(f"models/block/{name}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": f"nirncraft:block/{name}"}})
+        write_json(f"blockstates/{name}.json", {"variants": {"": {"model": f"nirncraft:block/{name}"}}})
+        write_json(f"models/item/{name}.json", {"parent": f"nirncraft:block/{name}"})
 
 
 # ---------------------------------------------------------------------------- HUD icons & effects

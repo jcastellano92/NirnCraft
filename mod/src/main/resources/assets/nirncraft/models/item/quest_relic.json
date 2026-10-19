@@ -1,0 +1,182 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "nirncraft:item/ancient_tome"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1
+      },
+      "model": "nirncraft:item/relic/1"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 2
+      },
+      "model": "nirncraft:item/relic/2"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 3
+      },
+      "model": "nirncraft:item/relic/3"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 4
+      },
+      "model": "nirncraft:item/relic/4"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 5
+      },
+      "model": "nirncraft:item/relic/5"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 6
+      },
+      "model": "nirncraft:item/relic/6"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7
+      },
+      "model": "nirncraft:item/relic/7"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 8
+      },
+      "model": "nirncraft:item/relic/8"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 9
+      },
+      "model": "nirncraft:item/relic/9"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 10
+      },
+      "model": "nirncraft:item/relic/10"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 11
+      },
+      "model": "nirncraft:item/relic/11"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 12
+      },
+      "model": "nirncraft:item/relic/12"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 13
+      },
+      "model": "nirncraft:item/relic/13"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 14
+      },
+      "model": "nirncraft:item/relic/14"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 15
+      },
+      "model": "nirncraft:item/relic/15"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 16
+      },
+      "model": "nirncraft:item/relic/16"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 17
+      },
+      "model": "nirncraft:item/relic/17"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 18
+      },
+      "model": "nirncraft:item/relic/18"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 19
+      },
+      "model": "nirncraft:item/relic/19"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 20
+      },
+      "model": "nirncraft:item/relic/20"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 21
+      },
+      "model": "nirncraft:item/relic/21"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 22
+      },
+      "model": "nirncraft:item/relic/22"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 23
+      },
+      "model": "nirncraft:item/relic/23"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 24
+      },
+      "model": "nirncraft:item/relic/24"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 25
+      },
+      "model": "nirncraft:item/relic/25"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 26
+      },
+      "model": "nirncraft:item/relic/26"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 27
+      },
+      "model": "nirncraft:item/relic/27"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 28
+      },
+      "model": "nirncraft:item/relic/28"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 29
+      },
+      "model": "nirncraft:item/relic/29"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:silver_ring",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gold_ring",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silver_necklace",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gold_necklace",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silver_garnet_ring",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gold_ruby_necklace",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gold_diamond_ring",
+      "required": false
+    },
+    {
+      "id": "nirncraft:copper_circlet",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silver_circlet",
+      "required": false
+    },
+    {
+      "id": "nirncraft:gold_circlet",
+      "required": false
+    },
+    {
+      "id": "nirncraft:jade_circlet",
+      "required": false
+    },
+    {
+      "id": "nirncraft:amulet_of_talos",
+      "required": false
+    },
+    {
+      "id": "nirncraft:amulet_of_mara",
+      "required": false
+    },
+    {
+      "id": "nirncraft:jade_pendant",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sapphire_pendant",
+      "required": false
+    }
+  ]
+}

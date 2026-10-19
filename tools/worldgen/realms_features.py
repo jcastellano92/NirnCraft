@@ -1,7 +1,7 @@
 """The realms' configured and placed features, in one canonical order per generation step (see realms.py).
 
 Every realm biome's feature lists are filtered from ORDER, so no "feature order cycle" can ever happen. Procedural
-decorations are the Java feature skycraft:realm_decor (com.skycraft.realms.worldgen.decor) with a "kind".
+decorations are the Java feature nirncraft:realm_decor (com.nirncraft.realms.worldgen.decor) with a "kind".
 """
 from realms import SK, st
 
@@ -47,7 +47,7 @@ def height_range(lo, hi):
 
 
 def decor(kind, size=1):
-    return {"type": "skycraft:realm_decor", "config": {"kind": kind, "size": size}}
+    return {"type": "nirncraft:realm_decor", "config": {"kind": kind, "size": size}}
 
 
 def simple(name, **props):

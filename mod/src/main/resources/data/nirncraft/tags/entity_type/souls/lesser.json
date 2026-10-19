@@ -1,0 +1,90 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:frostbite_spider",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bear",
+      "required": false
+    },
+    {
+      "id": "nirncraft:horker",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sabre_cat",
+      "required": false
+    },
+    {
+      "id": "nirncraft:chaurus",
+      "required": false
+    },
+    {
+      "id": "nirncraft:ice_wraith",
+      "required": false
+    },
+    {
+      "id": "nirncraft:spriggan",
+      "required": false
+    },
+    {
+      "id": "nirncraft:guar",
+      "required": false
+    },
+    {
+      "id": "nirncraft:kagouti",
+      "required": false
+    },
+    {
+      "id": "nirncraft:alit",
+      "required": false
+    },
+    {
+      "id": "nirncraft:harpy",
+      "required": false
+    },
+    {
+      "id": "nirncraft:durzog",
+      "required": false
+    },
+    {
+      "id": "nirncraft:death_hound",
+      "required": false
+    },
+    {
+      "id": "nirncraft:scamp",
+      "required": false
+    },
+    {
+      "id": "nirncraft:will_o_wisp",
+      "required": false
+    },
+    {
+      "id": "nirncraft:senche_tiger",
+      "required": false
+    },
+    {
+      "id": "nirncraft:realm_stalker",
+      "required": false
+    },
+    {
+      "id": "nirncraft:realm_grazer",
+      "required": false
+    },
+    "minecraft:wolf",
+    "minecraft:polar_bear",
+    "minecraft:spider",
+    "minecraft:zombie",
+    "minecraft:skeleton",
+    {
+      "id": "nirncraft:giant_slaughterfish",
+      "required": false
+    },
+    {
+      "id": "nirncraft:sea_crab",
+      "required": false
+    }
+  ]
+}

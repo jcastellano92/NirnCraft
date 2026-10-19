@@ -4,9 +4,9 @@
       "type": "minecraft:overworld",
       "generator": {
         "type": "minecraft:noise",
-        "settings": "skycraft:tamriel",
+        "settings": "nirncraft:tamriel",
         "biome_source": {
-          "type": "skycraft:tamriel"
+          "type": "nirncraft:tamriel"
         }
       }
     },

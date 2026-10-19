@@ -1,0 +1,17 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "jungle_bush",
+        "weight": 5
+      },
+      {
+        "species": "bamboo",
+        "weight": 1
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

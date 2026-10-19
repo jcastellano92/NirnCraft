@@ -11,6 +11,6 @@ hash = "2ad3584995acc8bc7693942a150d674a9147651c2103f6d8225eb61203c04cd19c8cd8f0
 mod-id = "5sy6g3kz"
 version = "RbEnSa47"
 
-[skycraft]
+[nirncraft]
 minecraft = "26.3"
 loader = "neoforge"

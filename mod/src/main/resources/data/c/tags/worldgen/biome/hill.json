@@ -1,11 +1,11 @@
 {
   "replace": false,
   "values": [
-    "skycraft:bangkorai",
-    "skycraft:colovian_highlands",
-    "skycraft:craglorn",
-    "skycraft:reach_valley",
-    "skycraft:skyrim_highlands",
-    "skycraft:west_gash"
+    "nirncraft:bangkorai",
+    "nirncraft:colovian_highlands",
+    "nirncraft:craglorn",
+    "nirncraft:reach_valley",
+    "nirncraft:skyrim_highlands",
+    "nirncraft:west_gash"
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:ash_yam",
+      "required": false
+    },
+    {
+      "id": "nirncraft:kwama_egg",
+      "required": false
+    },
+    {
+      "id": "nirncraft:boar_tusk",
+      "required": false
+    }
+  ]
+}

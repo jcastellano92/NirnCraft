@@ -1,0 +1,32 @@
+{
+  "feature": "nirncraft:biome/flora/cover_savanna_grass",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 46
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "nirncraft:flora_density",
+      "density": 1.0,
+      "floor": 0.25,
+      "field": {
+        "salt": 116,
+        "scale": 26,
+        "coverage": 0.6,
+        "softness": 0.2,
+        "kind": "fbm",
+        "mode": "inside"
+      }
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

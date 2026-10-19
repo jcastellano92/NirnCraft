@@ -1,0 +1,190 @@
+{
+  "_doc": "Nord style sheet: material variants per wealth tier (overrides on the hold's kit palette), roofs, footprints, storeys, settlement forms and decoration rules. See com.nirncraft.tamriel.settlement.grammar.Style.",
+  "windows": "fence",
+  "horns": true,
+  "faith": ["talos", "kynareth", "mara", "arkay", "dibella", "akatosh", "stendarr"],
+  "crops": ["wheat", "cabbage", "potatoes", "leek", "garlic", "carrots", "honey"],
+  "animals": ["chicken", "goat", "cow", "sheep", "dog", "cat"],
+  "colors": ["blue", "red", "yellow", "green", "brown"],
+  "forms": {"linear": 4, "crossroads": 3, "hilltop": 2, "cluster": 1},
+  "roofs": {
+    "poor": {"thatch": 3, "gable": 3, "steep": 1},
+    "common": {"gable": 4, "steep": 3, "thatch": 1},
+    "wealthy": {"steep": 4, "gable": 2},
+    "noble": {"steep": 4, "hip": 1}
+  },
+  "halls": {"steep": 1},
+  "footprints": {
+    "poor": {"rect": 1},
+    "common": {"rect": 4, "l": 1},
+    "wealthy": {"rect": 2, "l": 2, "t": 1},
+    "noble": {"l": 2, "t": 2, "u": 1}
+  },
+  "storeys": {"poor": [1, 1], "common": [1, 2], "wealthy": [2, 2], "noble": [2, 3]},
+  "rules": {"timber": 0.8, "porch": 0.35, "balcony": 0.15, "outsideStairs": 0.0, "shutters": 0.35, "flowerBoxes": 0.2,
+    "chimney": 0.9, "annex": 0.45, "banners": 0.5, "lanterns": 0.6, "awning": 0.25, "dormers": 0.1, "tower": 0.4, "plinth": 3},
+  "tiers": {
+    "poor": [
+      {"name": "log cabin", "wall": "spruce_log", "low": "cobblestone", "roof": "spruce", "wood": "spruce", "timber": false, "accent": "brown"},
+      {"name": "rough planks", "wall": "spruce_planks", "wall2": "stripped_spruce_wood", "low": "mossy_cobblestone", "roof": "spruce", "wood": "spruce", "accent": "brown"},
+      {"name": "fieldstone hut", "wall": "cobblestone", "wall2": "mossy_cobblestone", "low": "cobblestone", "roof": "dark_oak", "wood": "dark_oak", "timber": false, "accent": "gray"}
+    ],
+    "common": [
+      {"name": "spruce frame", "wall": "spruce_planks", "wall2": "stripped_spruce_wood", "low": "cobblestone", "roof": "dark_oak", "wood": "spruce", "accent": "blue"},
+      {"name": "log house", "wall": "spruce_log", "low": "stone_bricks", "roof": "spruce", "wood": "spruce", "timber": false, "accent": "red"},
+      {"name": "dark timber", "wall": "dark_oak_planks", "wall2": "stripped_dark_oak_wood", "low": "cobblestone", "roof": "spruce", "wood": "dark_oak", "accent": "green"},
+      {"name": "daub and beam", "wall": "packed_mud", "wall2": "mud_bricks", "low": "cobblestone", "roof": "spruce", "wood": "dark_oak", "accent": "yellow"}
+    ],
+    "wealthy": [
+      {"name": "stone hall", "wall": "stone_bricks", "wall2": "cracked_stone_bricks", "low": "cobblestone", "roof": "deepslate_tile", "wood": "spruce", "window": "glass_pane", "accent": "blue"},
+      {"name": "carved timber", "wall": "spruce_planks", "wall2": "stripped_spruce_wood", "low": "stone_bricks", "roof": "dark_oak", "wood": "dark_oak", "window": "glass_pane", "accent": "red"},
+      {"name": "grey stone", "wall": "andesite", "wall2": "stone", "low": "stone_bricks", "roof": "spruce", "wood": "spruce", "timber": false, "accent": "yellow"}
+    ],
+    "noble": [
+      {"name": "jarl's kin", "wall": "stone_bricks", "wall2": "chiseled_stone_bricks", "low": "polished_andesite", "roof": "deepslate_tile", "wood": "dark_oak", "window": "glass_pane", "column": "stripped_dark_oak_log", "accent": "red"},
+      {"name": "old clan hall", "wall": "stripped_spruce_wood", "wall2": "spruce_planks", "low": "stone_bricks", "roof": "dark_oak", "wood": "dark_oak", "window": "glass_pane", "accent": "blue"},
+      {"name": "deep stone", "wall": "deepslate_bricks", "wall2": "cracked_deepslate_bricks", "low": "cobbled_deepslate", "roof": "spruce", "wood": "spruce", "timber": false, "window": "glass_pane", "accent": "yellow"}
+    ]
+  },
+  "styles": {
+    "windhelm": {
+      "forms": {"hilltop": 3, "crossroads": 3, "linear": 2},
+      "roofs": {"poor": {"steep": 2, "gable": 1}, "common": {"steep": 3}, "wealthy": {"steep": 3}, "noble": {"steep": 2, "hip": 1}},
+      "tiers": {
+        "poor": [
+          {"wall": "cobbled_deepslate", "low": "cobbled_deepslate", "roof": "dark_oak", "wood": "dark_oak", "timber": false},
+          {"wall": "deepslate_bricks", "wall2": "cracked_deepslate_bricks", "low": "cobbled_deepslate", "roof": "spruce", "wood": "spruce", "timber": false},
+          {"wall": "dark_oak_planks", "low": "cobbled_deepslate", "roof": "deepslate_tile", "wood": "dark_oak", "timber": true}
+        ],
+        "common": [
+          {"wall": "deepslate_bricks", "wall2": "cracked_deepslate_bricks", "low": "cobbled_deepslate", "roof": "deepslate_tile", "wood": "dark_oak", "timber": false},
+          {"wall": "polished_deepslate", "low": "deepslate_bricks", "roof": "deepslate_tile", "wood": "spruce", "timber": false, "accent": "blue"},
+          {"wall": "deepslate_tiles", "low": "cobbled_deepslate", "roof": "dark_oak", "wood": "dark_oak", "timber": false, "accent": "red"}
+        ],
+        "wealthy": [
+          {"wall": "deepslate_bricks", "low": "polished_deepslate", "roof": "deepslate_tile", "wood": "dark_oak", "window": "iron_bars", "timber": false},
+          {"wall": "polished_deepslate", "wall2": "deepslate_bricks", "low": "cobbled_deepslate", "roof": "blackstone", "wood": "spruce", "timber": false},
+          {"wall": "stone_bricks", "low": "deepslate_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "timber": false}
+        ],
+        "noble": [
+          {"wall": "deepslate_bricks", "wall2": "chiseled_deepslate", "low": "polished_deepslate", "roof": "deepslate_tile", "wood": "dark_oak", "timber": false, "window": "glass_pane"},
+          {"wall": "polished_blackstone_bricks", "low": "polished_deepslate", "roof": "deepslate_tile", "wood": "dark_oak", "timber": false},
+          {"wall": "deepslate_tiles", "wall2": "deepslate_bricks", "low": "polished_deepslate", "roof": "polished_blackstone_brick", "wood": "spruce", "timber": false}
+        ]
+      }
+    },
+    "markarth": {
+      "forms": {"hilltop": 4, "cluster": 2},
+      "windows": "bars",
+      "horns": false,
+      "roofs": {"poor": {"flat": 1}, "common": {"flat": 3, "crenel": 1}, "wealthy": {"flat": 2, "crenel": 1}, "noble": {"crenel": 2, "dome": 1}},
+      "halls": {"crenel": 1},
+      "tiers": {
+        "poor": [
+          {"wall": "sandstone", "low": "sandstone", "roof": "sandstone", "wood": "spruce", "timber": false},
+          {"wall": "cobblestone", "low": "sandstone", "roof": "sandstone", "wood": "spruce", "timber": false},
+          {"wall": "smooth_sandstone", "wall2": "sandstone", "low": "cobblestone", "roof": "smooth_sandstone", "wood": "dark_oak", "timber": false}
+        ],
+        "common": [
+          {"wall": "cut_sandstone", "low": "smooth_sandstone", "roof": "smooth_sandstone", "wood": "spruce", "timber": false},
+          {"wall": "smooth_sandstone", "wall2": "chiseled_sandstone", "low": "sandstone", "roof": "sandstone", "wood": "dark_oak", "timber": false},
+          {"wall": "granite", "wall2": "polished_granite", "low": "smooth_sandstone", "roof": "smooth_sandstone", "wood": "spruce", "timber": false}
+        ],
+        "wealthy": [
+          {"wall": "cut_sandstone", "wall2": "chiseled_sandstone", "low": "smooth_sandstone", "roof": "smooth_sandstone", "wood": "dark_oak", "timber": false, "column": "waxed_oxidized_cut_copper"},
+          {"wall": "polished_granite", "low": "cut_sandstone", "roof": "smooth_sandstone", "wood": "spruce", "timber": false},
+          {"wall": "smooth_sandstone", "low": "waxed_cut_copper", "roof": "waxed_cut_copper", "wood": "dark_oak", "timber": false}
+        ],
+        "noble": [
+          {"wall": "chiseled_sandstone", "wall2": "cut_sandstone", "low": "waxed_oxidized_cut_copper", "roof": "waxed_weathered_cut_copper", "wood": "dark_oak", "timber": false},
+          {"wall": "cut_sandstone", "low": "waxed_cut_copper", "roof": "waxed_cut_copper", "wood": "spruce", "timber": false},
+          {"wall": "smooth_sandstone", "wall2": "chiseled_sandstone", "low": "polished_granite", "roof": "smooth_sandstone", "wood": "dark_oak", "timber": false}
+        ]
+      }
+    },
+    "solitude": {
+      "forms": {"crossroads": 3, "grid": 2, "hilltop": 2},
+      "windows": "pane",
+      "rules": {"timber": 0.9, "balcony": 0.3, "flowerBoxes": 0.4, "dormers": 0.3, "shutters": 0.5},
+      "roofs": {"poor": {"steep": 2, "gable": 1}, "common": {"steep": 3, "slate": 1}, "wealthy": {"slate": 2, "steep": 2}, "noble": {"slate": 2, "hip": 1}},
+      "tiers": {
+        "poor": [
+          {"wall": "calcite", "low": "stone_bricks", "roof": "spruce", "wood": "dark_oak"},
+          {"wall": "cobblestone", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "spruce", "timber": false},
+          {"wall": "diorite", "low": "cobblestone", "roof": "dark_oak", "wood": "dark_oak"}
+        ],
+        "common": [
+          {"wall": "calcite", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "dark_oak"},
+          {"wall": "smooth_stone", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "spruce"},
+          {"wall": "white_terracotta", "low": "andesite", "roof": "dark_oak", "wood": "dark_oak"}
+        ],
+        "wealthy": [
+          {"wall": "calcite", "low": "chiseled_stone_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "window": "glass_pane"},
+          {"wall": "polished_diorite", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "spruce", "window": "glass_pane"},
+          {"wall": "stone_bricks", "wall2": "calcite", "low": "polished_andesite", "roof": "blackstone", "wood": "dark_oak", "timber": false}
+        ],
+        "noble": [
+          {"wall": "calcite", "low": "polished_andesite", "roof": "deepslate_tile", "wood": "dark_oak", "window": "glass_pane", "accent": "red"},
+          {"wall": "smooth_quartz", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "window": "glass_pane", "timber": false},
+          {"wall": "polished_diorite", "wall2": "calcite", "low": "chiseled_stone_bricks", "roof": "polished_blackstone_brick", "wood": "spruce", "window": "glass_pane"}
+        ]
+      }
+    },
+    "riften": {
+      "forms": {"canal": 3, "riverside": 3, "linear": 1},
+      "rules": {"timber": 0.9, "porch": 0.4, "balcony": 0.3},
+      "tiers": {
+        "poor": [
+          {"wall": "spruce_planks", "low": "mossy_cobblestone", "roof": "spruce", "wood": "spruce", "timber": false},
+          {"wall": "dark_oak_planks", "wall2": "stripped_dark_oak_wood", "low": "mossy_cobblestone", "roof": "dark_oak", "wood": "dark_oak"},
+          {"wall": "mossy_cobblestone", "low": "cobblestone", "roof": "spruce", "wood": "spruce", "timber": false}
+        ],
+        "common": [
+          {"wall": "dark_oak_planks", "wall2": "stripped_dark_oak_wood", "low": "mossy_stone_bricks", "roof": "dark_oak", "wood": "dark_oak"},
+          {"wall": "spruce_planks", "wall2": "stripped_spruce_wood", "low": "mossy_cobblestone", "roof": "dark_oak", "wood": "spruce"},
+          {"wall": "stripped_dark_oak_wood", "low": "stone_bricks", "roof": "spruce", "wood": "dark_oak", "timber": false}
+        ],
+        "wealthy": [
+          {"wall": "dark_oak_planks", "low": "mossy_stone_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "window": "glass_pane"},
+          {"wall": "stone_bricks", "wall2": "mossy_stone_bricks", "low": "mossy_cobblestone", "roof": "dark_oak", "wood": "dark_oak"},
+          {"wall": "spruce_planks", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "spruce", "window": "glass_pane"}
+        ],
+        "noble": [
+          {"wall": "stone_bricks", "wall2": "mossy_stone_bricks", "low": "polished_andesite", "roof": "deepslate_tile", "wood": "dark_oak", "window": "glass_pane", "accent": "purple"},
+          {"wall": "dark_oak_planks", "low": "chiseled_stone_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "window": "glass_pane", "accent": "purple"},
+          {"wall": "stripped_dark_oak_wood", "low": "mossy_stone_bricks", "roof": "blackstone", "wood": "dark_oak", "timber": false}
+        ]
+      }
+    },
+    "marsh": {
+      "stilts": true,
+      "forms": {"riverside": 3, "linear": 2, "ring": 1},
+      "tiers": {
+        "poor": [
+          {"wall": "dark_oak_planks", "low": "dark_oak_planks", "roof": "spruce", "wood": "dark_oak", "timber": false},
+          {"wall": "spruce_log", "low": "spruce_planks", "roof": "spruce", "wood": "spruce", "timber": false},
+          {"wall": "mud_bricks", "low": "dark_oak_planks", "roof": "dark_oak", "wood": "dark_oak"}
+        ],
+        "common": [
+          {"wall": "dark_oak_planks", "wall2": "spruce_planks", "low": "dark_oak_planks", "roof": "dark_oak", "wood": "dark_oak"},
+          {"wall": "spruce_planks", "low": "spruce_planks", "roof": "spruce", "wood": "spruce"},
+          {"wall": "stripped_spruce_wood", "low": "dark_oak_planks", "roof": "mangrove", "wood": "spruce", "timber": false}
+        ],
+        "wealthy": [
+          {"wall": "dark_oak_planks", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "dark_oak"},
+          {"wall": "spruce_planks", "wall2": "stripped_spruce_wood", "low": "cobblestone", "roof": "dark_oak", "wood": "spruce"},
+          {"wall": "mud_bricks", "low": "dark_oak_planks", "roof": "spruce", "wood": "dark_oak"}
+        ],
+        "noble": [
+          {"wall": "stone_bricks", "low": "dark_oak_planks", "roof": "deepslate_tile", "wood": "dark_oak"},
+          {"wall": "dark_oak_planks", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "window": "glass_pane"},
+          {"wall": "stripped_dark_oak_wood", "low": "stone_bricks", "roof": "spruce", "wood": "dark_oak", "timber": false}
+        ]
+      }
+    },
+    "winterhold": {
+      "roofs": {"poor": {"steep": 2, "gable": 1}, "common": {"steep": 3}, "wealthy": {"steep": 2}, "noble": {"steep": 2}},
+      "rules": {"porch": 0.1, "flowerBoxes": 0.0}
+    }
+  }
+}

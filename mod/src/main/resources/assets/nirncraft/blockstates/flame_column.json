@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "nirncraft:block/flame_column",
+        "y": 0
+      },
+      {
+        "model": "nirncraft:block/flame_column",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/flame_column",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/flame_column",
+        "y": 270
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/stalhrim_bow",
+  "textures": {
+    "layer0": "nirncraft:item/stalhrim_bow_pulling_2"
+  }
+}

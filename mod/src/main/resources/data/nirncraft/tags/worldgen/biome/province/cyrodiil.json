@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:blackwood_swamp",
+    "nirncraft:colovian_highlands",
+    "nirncraft:cyrodiil_river",
+    "nirncraft:gold_coast",
+    "nirncraft:great_forest",
+    "nirncraft:heartlands",
+    "nirncraft:jerall_foothills",
+    "nirncraft:lake_rumare_shore",
+    "nirncraft:nibenay_valley",
+    "nirncraft:temperate_beach",
+    "nirncraft:west_weald_vineyards"
+  ]
+}

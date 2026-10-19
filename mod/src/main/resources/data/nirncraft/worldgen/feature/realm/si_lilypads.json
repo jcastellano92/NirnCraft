@@ -1,0 +1,40 @@
+{
+  "type": "nirncraft:random_patch",
+  "config": {
+    "tries": 24,
+    "xz_spread": 7,
+    "y_spread": 3,
+    "feature": {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "to_place": {
+          "type": "minecraft:simple",
+          "state": "minecraft:lily_pad"
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:all_of",
+            "predicates": [
+              {
+                "type": "minecraft:matching_blocks",
+                "blocks": "minecraft:air"
+              },
+              {
+                "type": "minecraft:matching_fluids",
+                "offset": [
+                  0,
+                  -1,
+                  0
+                ],
+                "fluids": "minecraft:water"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

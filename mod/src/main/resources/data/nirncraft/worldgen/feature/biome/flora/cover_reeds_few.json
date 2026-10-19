@@ -1,0 +1,26 @@
+{
+  "type": "nirncraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": {
+          "id": "nirncraft:swamp_reeds",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 1
+      }
+    ],
+    "scale": 24,
+    "patchiness": 0.6,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 2,
+      "max_inclusive": 5
+    },
+    "spread": 2,
+    "salt": 6265,
+    "near_water": true
+  }
+}

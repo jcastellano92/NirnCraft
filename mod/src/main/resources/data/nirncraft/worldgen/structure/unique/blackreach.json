@@ -1,0 +1,9 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "blackreach",
+  "sites": "blackreach",
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

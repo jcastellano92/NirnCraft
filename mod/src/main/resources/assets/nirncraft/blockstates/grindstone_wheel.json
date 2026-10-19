@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "nirncraft:block/grindstone_wheel"
+    },
+    "facing=east": {
+      "model": "nirncraft:block/grindstone_wheel",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "nirncraft:block/grindstone_wheel",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nirncraft:block/grindstone_wheel",
+      "y": 270
+    }
+  }
+}

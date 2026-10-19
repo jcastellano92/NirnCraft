@@ -1,0 +1,43 @@
+{
+  "type": "nirncraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:short_grass",
+        "weight": 5
+      },
+      {
+        "state": "minecraft:fern",
+        "weight": 2
+      },
+      {
+        "state": {
+          "id": "minecraft:tall_grass",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 3
+      },
+      {
+        "state": {
+          "id": "minecraft:large_fern",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 1
+      }
+    ],
+    "scale": 24,
+    "patchiness": 0.6,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 2,
+      "max_inclusive": 5
+    },
+    "spread": 2,
+    "salt": 4802,
+    "near_water": false
+  }
+}

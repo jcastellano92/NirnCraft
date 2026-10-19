@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "nirncraft:item/realm_wyrm_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 8026746
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 15790320
+      }
+    ]
+  }
+}

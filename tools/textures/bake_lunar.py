@@ -13,7 +13,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
 CACHE = ROOT / "dist/.cache/lunar"
-DEST = ROOT / "mod/src/main/resources/assets/skycraft/textures/environment"
+DEST = ROOT / "mod/src/main/resources/assets/nirncraft/textures/environment"
 BASE = "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/"
 
 

@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:boar_tusk",
+      "required": false
+    },
+    {
+      "id": "nirncraft:netch_leather",
+      "required": false
+    },
+    {
+      "id": "nirncraft:hide",
+      "required": false
+    }
+  ]
+}

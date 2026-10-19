@@ -9,7 +9,7 @@
 #include <cstdio>
 #include <cstring>
 
-namespace aether {
+namespace atlas {
 namespace {
 
 enum Ch { ELEV, COAST, RIV_D, RIV_HW, LAKE_SD, WATER, RIDGE, ROUGH, CRAG, DUNES, WET, ROAD, RAIN, HEAT };
@@ -50,48 +50,48 @@ double smoothstep(double e0, double e1, double x) {
     return t * t * (3 - 2 * t);
 }
 
-AetherMaterial mat(float r, float g, float b, float rough, uint32_t cls, float emis = 0) {
+AtlasMaterial mat(float r, float g, float b, float rough, uint32_t cls, float emis = 0) {
     // authored in sRGB-ish block colours as seen from afar; stored linear
     auto lin = [](float c) { return std::pow(c, 2.2f); };
-    return AetherMaterial{{lin(r), lin(g), lin(b)}, rough, emis, cls};
+    return AtlasMaterial{{lin(r), lin(g), lin(b)}, rough, emis, cls};
 }
 
 }  // namespace
 
-std::vector<AetherMaterial> previewPalette() {
-    std::vector<AetherMaterial> p(M_COUNT - 1);
-    auto set = [&](PreviewMat id, AetherMaterial m) { p[id - 1] = m; };
-    set(M_STONE, mat(0.47f, 0.47f, 0.47f, 0.9f, AETHER_CLASS_TERRAIN));
-    set(M_GRASS, mat(0.36f, 0.52f, 0.24f, 0.9f, AETHER_CLASS_TERRAIN));
-    set(M_DIRT, mat(0.45f, 0.33f, 0.23f, 0.9f, AETHER_CLASS_TERRAIN));
-    set(M_SAND, mat(0.84f, 0.79f, 0.6f, 0.8f, AETHER_CLASS_TERRAIN));
-    set(M_SNOW, mat(0.93f, 0.95f, 0.98f, 0.6f, AETHER_CLASS_TERRAIN));
-    set(M_WATER, mat(0.16f, 0.27f, 0.42f, 0.05f, AETHER_CLASS_WATER));
-    set(M_GRAVEL, mat(0.55f, 0.52f, 0.5f, 0.9f, AETHER_CLASS_TERRAIN));
-    set(M_FOLIAGE, mat(0.22f, 0.36f, 0.14f, 0.95f, AETHER_CLASS_FOLIAGE));
-    set(M_ASH, mat(0.33f, 0.28f, 0.25f, 0.95f, AETHER_CLASS_TERRAIN));
-    set(M_SANDSTONE, mat(0.78f, 0.66f, 0.45f, 0.85f, AETHER_CLASS_TERRAIN));
-    set(M_MUD, mat(0.33f, 0.3f, 0.2f, 0.7f, AETHER_CLASS_TERRAIN));
-    set(M_DRYGRASS, mat(0.62f, 0.58f, 0.32f, 0.9f, AETHER_CLASS_TERRAIN));
-    set(M_CONIFER, mat(0.16f, 0.27f, 0.17f, 0.95f, AETHER_CLASS_FOLIAGE));
-    set(M_JUNGLE, mat(0.15f, 0.36f, 0.1f, 0.95f, AETHER_CLASS_FOLIAGE));
-    set(M_REDSAND, mat(0.72f, 0.45f, 0.28f, 0.85f, AETHER_CLASS_TERRAIN));
-    set(M_ICE, mat(0.66f, 0.78f, 0.9f, 0.2f, AETHER_CLASS_TERRAIN));
+std::vector<AtlasMaterial> previewPalette() {
+    std::vector<AtlasMaterial> p(M_COUNT - 1);
+    auto set = [&](PreviewMat id, AtlasMaterial m) { p[id - 1] = m; };
+    set(M_STONE, mat(0.47f, 0.47f, 0.47f, 0.9f, ATLAS_CLASS_TERRAIN));
+    set(M_GRASS, mat(0.36f, 0.52f, 0.24f, 0.9f, ATLAS_CLASS_TERRAIN));
+    set(M_DIRT, mat(0.45f, 0.33f, 0.23f, 0.9f, ATLAS_CLASS_TERRAIN));
+    set(M_SAND, mat(0.84f, 0.79f, 0.6f, 0.8f, ATLAS_CLASS_TERRAIN));
+    set(M_SNOW, mat(0.93f, 0.95f, 0.98f, 0.6f, ATLAS_CLASS_TERRAIN));
+    set(M_WATER, mat(0.16f, 0.27f, 0.42f, 0.05f, ATLAS_CLASS_WATER));
+    set(M_GRAVEL, mat(0.55f, 0.52f, 0.5f, 0.9f, ATLAS_CLASS_TERRAIN));
+    set(M_FOLIAGE, mat(0.22f, 0.36f, 0.14f, 0.95f, ATLAS_CLASS_FOLIAGE));
+    set(M_ASH, mat(0.33f, 0.28f, 0.25f, 0.95f, ATLAS_CLASS_TERRAIN));
+    set(M_SANDSTONE, mat(0.78f, 0.66f, 0.45f, 0.85f, ATLAS_CLASS_TERRAIN));
+    set(M_MUD, mat(0.33f, 0.3f, 0.2f, 0.7f, ATLAS_CLASS_TERRAIN));
+    set(M_DRYGRASS, mat(0.62f, 0.58f, 0.32f, 0.9f, ATLAS_CLASS_TERRAIN));
+    set(M_CONIFER, mat(0.16f, 0.27f, 0.17f, 0.95f, ATLAS_CLASS_FOLIAGE));
+    set(M_JUNGLE, mat(0.15f, 0.36f, 0.1f, 0.95f, ATLAS_CLASS_FOLIAGE));
+    set(M_REDSAND, mat(0.72f, 0.45f, 0.28f, 0.85f, ATLAS_CLASS_TERRAIN));
+    set(M_ICE, mat(0.66f, 0.78f, 0.9f, 0.2f, ATLAS_CLASS_TERRAIN));
     // grass by climate, roughly how the holds and provinces read from a distance
-    set(M_TUNDRA, mat(0.51f, 0.52f, 0.34f, 0.9f, AETHER_CLASS_TERRAIN));      // Whiterun's golden tundra
-    set(M_COLDGRASS, mat(0.43f, 0.48f, 0.37f, 0.9f, AETHER_CLASS_TERRAIN));   // the Pale, Eastmarch, Haafingar
-    set(M_LUSHGRASS, mat(0.33f, 0.47f, 0.22f, 0.9f, AETHER_CLASS_TERRAIN));   // Cyrodiil, High Rock, the jungles
-    set(M_MARSHGRASS, mat(0.36f, 0.40f, 0.24f, 0.85f, AETHER_CLASS_TERRAIN)); // Black Marsh, Hjaalmarch
+    set(M_TUNDRA, mat(0.51f, 0.52f, 0.34f, 0.9f, ATLAS_CLASS_TERRAIN));      // Whiterun's golden tundra
+    set(M_COLDGRASS, mat(0.43f, 0.48f, 0.37f, 0.9f, ATLAS_CLASS_TERRAIN));   // the Pale, Eastmarch, Haafingar
+    set(M_LUSHGRASS, mat(0.33f, 0.47f, 0.22f, 0.9f, ATLAS_CLASS_TERRAIN));   // Cyrodiil, High Rock, the jungles
+    set(M_MARSHGRASS, mat(0.36f, 0.40f, 0.24f, 0.85f, ATLAS_CLASS_TERRAIN)); // Black Marsh, Hjaalmarch
     // flowing water: the water colour (the kernel adds the white water of fast runs and rapids from the flow)
-    for (int k = 0; k < FLOW_DIRS * FLOW_SPEEDS; k++) set(PreviewMat(M_FLOW0 + k), mat(0.16f, 0.27f, 0.42f, 0.05f, AETHER_CLASS_WATER));
-    set(M_SNOWCANOPY, mat(0.6f, 0.66f, 0.64f, 0.9f, AETHER_CLASS_FOLIAGE));  // snow on conifer crowns
+    for (int k = 0; k < FLOW_DIRS * FLOW_SPEEDS; k++) set(PreviewMat(M_FLOW0 + k), mat(0.16f, 0.27f, 0.42f, 0.05f, ATLAS_CLASS_WATER));
+    set(M_SNOWCANOPY, mat(0.6f, 0.66f, 0.64f, 0.9f, ATLAS_CLASS_FOLIAGE));  // snow on conifer crowns
     return p;
 }
 
 void applyWaterFlow(std::vector<MaterialGpu>& palette) {
     for (int k = 0; k < FLOW_DIRS * FLOW_SPEEDS; k++) {
         size_t id = size_t(M_FLOW0 + k);
-        if (id >= palette.size() || palette[id].emisClass[1] != float(AETHER_CLASS_WATER)) continue;
+        if (id >= palette.size() || palette[id].emisClass[1] != float(ATLAS_CLASS_WATER)) continue;
         palette[id].emisClass[2] = float(k / FLOW_SPEEDS) * (6.2831853f / FLOW_DIRS);  // heading: atan2(z, x)
         palette[id].emisClass[3] = float(k % FLOW_SPEEDS + 1);                        // 1 calm, 2 fast, 3 rapids
     }
@@ -431,7 +431,7 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd, const Overrides&
             t->top[c] = top;
             t->fill[c] = fill;
             if (!std::isnan(wl)) {
-                uint16_t wm = (flags & AETHER_COLUMN_FROZEN) ? uint16_t(M_ICE) : flowMaterial(x, z, sm, wl, *t, i, j);
+                uint16_t wm = (flags & ATLAS_COLUMN_FROZEN) ? uint16_t(M_ICE) : flowMaterial(x, z, sm, wl, *t, i, j);
                 if (wm) t->waterMat[c] = wm;  // (allocated by dress before the rows run)
             }
 
@@ -478,7 +478,7 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd, const Overrides&
                         t->canopy[c] = ht;
                         t->canopyMat[c] = conifer ? M_CONIFER : cl == JUNGLE || cl == TROPICAL ? M_JUNGLE : M_FOLIAGE;
                         if (!conifer && foliageMat && foliageMat[c]) t->canopyMat[c] = foliageMat[c];  // biome foliage
-                        if (flags & AETHER_COLUMN_SNOW) t->canopyMat[c] = M_SNOWCANOPY;
+                        if (flags & ATLAS_COLUMN_SNOW) t->canopyMat[c] = M_SNOWCANOPY;
                     }
                 }
             }
@@ -486,4 +486,4 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd, const Overrides&
     }
 }
 
-}  // namespace aether
+}  // namespace atlas

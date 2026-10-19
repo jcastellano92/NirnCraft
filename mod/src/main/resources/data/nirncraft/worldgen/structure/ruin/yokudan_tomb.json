@@ -1,0 +1,14 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "ruin",
+  "kit": "redguard",
+  "where": [
+    "hammerfell",
+    "yokuda",
+    "realm"
+  ],
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

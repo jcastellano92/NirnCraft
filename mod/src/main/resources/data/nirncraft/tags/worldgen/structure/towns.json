@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:settlement_city",
+    "nirncraft:settlement_town",
+    "nirncraft:settlement_village",
+    "nirncraft:settlement_tavern",
+    "nirncraft:settlement_farm",
+    "nirncraft:town",
+    "nirncraft:village",
+    "nirncraft:hamlet",
+    "nirncraft:farmstead",
+    "nirncraft:roadside_tavern"
+  ]
+}

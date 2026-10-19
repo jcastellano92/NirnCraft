@@ -1,4 +1,4 @@
-"""Generates mod/src/main/lang/skycraft/core.json (skills, races, perks, HUD and UI strings)."""
+"""Generates mod/src/main/lang/nirncraft/core.json (skills, races, perks, HUD and UI strings)."""
 import json, os
 
 L = {}
@@ -31,9 +31,9 @@ skills = {
  "athletics": ("Athletics", "Running, climbing, swimming, and dodging agility.")
 }
 for k, (n, d) in skills.items():
-    t(f"skill.skycraft.{k}", n); t(f"skill.skycraft.{k}.desc", d)
+    t(f"skill.nirncraft.{k}", n); t(f"skill.nirncraft.{k}.desc", d)
 for g, n in {"warrior": "The Warrior", "mage": "The Mage", "thief": "The Thief", "life": "The Steed (Life Skills)"}.items():
-    t(f"skillgroup.skycraft.{g}", n)
+    t(f"skillgroup.nirncraft.{g}", n)
 
 races = {
  "nord": ("Nord", "Citizens of Skyrim, tall and fair-haired. Strong and hardy, Nords are famous for their resistance to cold and their talent as warriors. 50% resistance to frost.", "Battle Cry", "Nearby enemies flee in terror and are weakened for 30 seconds."),
@@ -48,12 +48,12 @@ races = {
  "argonian": ("Argonian", "Reptilian natives of Black Marsh, at home in water (they can breathe underwater) and adept at lockpicking.", "Histskin", "Health regenerates ten times faster for 60 seconds."),
 }
 for k, (n, d, p, pd) in races.items():
-    t(f"race.skycraft.{k}", n); t(f"race.skycraft.{k}.desc", d)
+    t(f"race.nirncraft.{k}", n); t(f"race.nirncraft.{k}.desc", d)
 pmap = {"nord": "battle_cry", "imperial": "voice_of_the_emperor", "breton": "dragonskin", "redguard": "adrenaline_rush",
         "altmer": "highborn", "bosmer": "command_animal", "dunmer": "ancestors_wrath", "orsimer": "berserker_rage",
         "khajiit": "night_eye", "argonian": "histskin"}
 for k, (n, d, p, pd) in races.items():
-    t(f"power.skycraft.{pmap[k]}", p); t(f"power.skycraft.{pmap[k]}.desc", pd)
+    t(f"power.nirncraft.{pmap[k]}", p); t(f"power.nirncraft.{pmap[k]}.desc", pd)
 
 def tiers(skill, suffix, school):
     names = [("novice", "Novice"), ("apprentice", "Apprentice"), ("adept", "Adept"), ("expert", "Expert"), ("master", "Master")]
@@ -64,7 +64,7 @@ def tiers(skill, suffix, school):
             perk(f"{skill}.{key}_{suffix}", f"{title} {school}", f"Cast {title}-level {school} spells for half magicka.")
 
 def perk(pid, name, desc):
-    t(f"perk.skycraft.{pid}", name); t(f"perk.skycraft.{pid}.desc", desc)
+    t(f"perk.nirncraft.{pid}", name); t(f"perk.nirncraft.{pid}.desc", desc)
 
 P = perk
 P("one_handed.armsman", "Armsman", "One-handed weapons do 20% more damage per rank.")
@@ -260,88 +260,88 @@ for k, n in {"skills": "Skills (Look to the Heavens)", "journal": "Journal", "ma
              "shout": "Shout / Power", "power_attack": "Power Attack (hold while attacking)", "block": "Block with Weapon (hold)",
              "racial_power": "Racial Power", "wait": "Wait / Sleep", "party": "Party", "map": "Map & Fast Travel",
              "sheathe": "Ready / Sheathe Weapon", "dodge": "Dodge Roll"}.items():
-    t(f"key.skycraft.{k}", n)
-t("key.categories.skycraft", "Skycraft")
-t("itemGroup.skycraft", "Skycraft")
-t("item.skycraft.septim", "Septim")
-t("item.skycraft.coin_purse", "Coin Purse")
-t("item.skycraft.legendary_fish", "Legendary Fish")
-t("effect.skycraft.well_rested", "Well Rested")
-t("effect.skycraft.lovers_comfort", "Lover's Comfort")
-t("effect.skycraft.paralysis", "Paralysis")
-t("effect.skycraft.stagger", "Staggered")
-t("effect.skycraft.bleeding", "Bleeding")
-t("tooltip.skycraft.gold_value", "Worth %s gold")
-t("stat.skycraft.health", "Health"); t("stat.skycraft.magicka", "Magicka"); t("stat.skycraft.stamina", "Stamina")
-t("screen.skycraft.skills", "Skills")
-t("screen.skycraft.level", "Level %s")
-t("screen.skycraft.perks_to_increase", "Perks to increase: %s")
-t("screen.skycraft.requires", "Requires %s %s")
-t("screen.skycraft.unlock_confirm", "Unlock %s?")
-t("screen.skycraft.level_up_title", "Level %s")
-t("screen.skycraft.level_up_choose", "Choose an attribute to increase by 10")
-t("screen.skycraft.make_legendary", "Make Legendary")
-t("screen.skycraft.legendary_count", "Legendary x%s")
-t("screen.skycraft.race", "Choose your race")
-t("screen.skycraft.race_header", "Who are you?")
-t("screen.skycraft.race_confirm", "This is who I am")
-t("screen.skycraft.hub", "Menu")
-t("screen.skycraft.hub_skills", "Skills")
-t("screen.skycraft.hub_items", "Items")
-t("screen.skycraft.hub_magic", "Magic")
-t("screen.skycraft.hub_map", "Map")
-t("screen.skycraft.hub_character", "Character")
-t("screen.skycraft.hub_hint", "W/A/S/D or Mouse to navigate | Esc or Tab to close")
-t("screen.skycraft.character_status", "Character & Status")
-t("screen.skycraft.character_status_header", "CHARACTER STATUS")
-t("screen.skycraft.power_ready", "Ready to use")
-t("screen.skycraft.active_effects", "Active Effects")
-t("screen.skycraft.no_active_effects", "None")
-t("key.skycraft.hub", "Menu Hub")
-t("key.skycraft.call_horse", "Call Horse")
-t("screen.skycraft.race_skills", "Skill bonuses")
-t("screen.skycraft.race_power", "Greater Power (H)")
-t("hud.skycraft.hidden", "HIDDEN"); t("hud.skycraft.detected", "DETECTED")
-t("hud.skycraft.perks_available", "Perk points: %s  (K)")
-t("notify.skycraft.skill_increased", "%s increased to %s")
-t("notify.skycraft.level_up", "LEVEL UP")
-t("notify.skycraft.level_up_hint", "Press K to choose Health, Magicka or Stamina")
-t("notify.skycraft.race_chosen", "Your journey begins")
-t("notify.skycraft.legendary", "%s is now Legendary")
+    t(f"key.nirncraft.{k}", n)
+t("key.categories.nirncraft", "NirnCraft")
+t("itemGroup.nirncraft", "NirnCraft")
+t("item.nirncraft.septim", "Septim")
+t("item.nirncraft.coin_purse", "Coin Purse")
+t("item.nirncraft.legendary_fish", "Legendary Fish")
+t("effect.nirncraft.well_rested", "Well Rested")
+t("effect.nirncraft.lovers_comfort", "Lover's Comfort")
+t("effect.nirncraft.paralysis", "Paralysis")
+t("effect.nirncraft.stagger", "Staggered")
+t("effect.nirncraft.bleeding", "Bleeding")
+t("tooltip.nirncraft.gold_value", "Worth %s gold")
+t("stat.nirncraft.health", "Health"); t("stat.nirncraft.magicka", "Magicka"); t("stat.nirncraft.stamina", "Stamina")
+t("screen.nirncraft.skills", "Skills")
+t("screen.nirncraft.level", "Level %s")
+t("screen.nirncraft.perks_to_increase", "Perks to increase: %s")
+t("screen.nirncraft.requires", "Requires %s %s")
+t("screen.nirncraft.unlock_confirm", "Unlock %s?")
+t("screen.nirncraft.level_up_title", "Level %s")
+t("screen.nirncraft.level_up_choose", "Choose an attribute to increase by 10")
+t("screen.nirncraft.make_legendary", "Make Legendary")
+t("screen.nirncraft.legendary_count", "Legendary x%s")
+t("screen.nirncraft.race", "Choose your race")
+t("screen.nirncraft.race_header", "Who are you?")
+t("screen.nirncraft.race_confirm", "This is who I am")
+t("screen.nirncraft.hub", "Menu")
+t("screen.nirncraft.hub_skills", "Skills")
+t("screen.nirncraft.hub_items", "Items")
+t("screen.nirncraft.hub_magic", "Magic")
+t("screen.nirncraft.hub_map", "Map")
+t("screen.nirncraft.hub_character", "Character")
+t("screen.nirncraft.hub_hint", "W/A/S/D or Mouse to navigate | Esc or Tab to close")
+t("screen.nirncraft.character_status", "Character & Status")
+t("screen.nirncraft.character_status_header", "CHARACTER STATUS")
+t("screen.nirncraft.power_ready", "Ready to use")
+t("screen.nirncraft.active_effects", "Active Effects")
+t("screen.nirncraft.no_active_effects", "None")
+t("key.nirncraft.hub", "Menu Hub")
+t("key.nirncraft.call_horse", "Call Horse")
+t("screen.nirncraft.race_skills", "Skill bonuses")
+t("screen.nirncraft.race_power", "Greater Power (H)")
+t("hud.nirncraft.hidden", "HIDDEN"); t("hud.nirncraft.detected", "DETECTED")
+t("hud.nirncraft.perks_available", "Perk points: %s  (K)")
+t("notify.nirncraft.skill_increased", "%s increased to %s")
+t("notify.nirncraft.level_up", "LEVEL UP")
+t("notify.nirncraft.level_up_hint", "Press K to choose Health, Magicka or Stamina")
+t("notify.nirncraft.race_chosen", "Your journey begins")
+t("notify.nirncraft.legendary", "%s is now Legendary")
 for k, n in {"quest_started": "QUEST STARTED", "quest_updated": "QUEST UPDATED", "quest_completed": "QUEST COMPLETED",
              "quest_failed": "QUEST FAILED", "location_discovered": "DISCOVERED", "location_cleared": "CLEARED",
              "big_title": "", "skill_up": "", "level_up_banner": "", "message": "", "crime": "", "skill_xp": ""}.items():
-    t(f"notify.skycraft.{k}", n)
-t("message.skycraft.gold_added", "%s Septims added")
-t("message.skycraft.not_enough_gold", "You don't have enough gold")
-t("message.skycraft.power_cooldown", "You can only use %s once a day (%s hours left)")
-t("message.skycraft.power_used", "%s")
-t("message.skycraft.critical", "Critical strike!")
-t("message.skycraft.sneak_attack", "Sneak attack for %sx damage!")
-t("message.skycraft.evaded", "Evaded!")
-t("message.skycraft.disarmed", "Disarmed!")
-t("message.skycraft.need_pickaxe", "You need a pickaxe to mine this vein")
-t("message.skycraft.need_axe", "You need an axe to chop wood")
-t("message.skycraft.need_excavator", "You can't dig here. (Mining perk: Excavator)")
-t("message.skycraft.need_stonebreaker", "This rock is too hard for you. (Mining perk: Stonebreaker)")
-t("message.skycraft.need_deep_delver", "This rock is beyond your skill. (Mining perk: Deep Delver)")
-t("message.skycraft.legendary_fish", "You caught a legendary fish!")
-t("message.skycraft.sheathed", "Weapons sheathed")
-t("message.skycraft.drawn", "Weapons drawn")
-t("message.skycraft.unstuck_combat", "Cannot unstuck while in combat!")
-t("message.skycraft.unstuck_cooldown", "Unstuck is on cooldown (%s seconds left)")
-t("message.skycraft.unstuck_success", "Teleported to rest point")
-t("menu.skycraft.unstuck", "Unstuck / Respawn")
-t("command.skycraft.gold", "You have %s Septims")
-t("dialogue.skycraft.chat", "Let's talk.")
-t("dialogue.skycraft.goodbye", "Goodbye.")
-t("command.skycraft.paid", "Paid %s Septims to %s")
+    t(f"notify.nirncraft.{k}", n)
+t("message.nirncraft.gold_added", "%s Septims added")
+t("message.nirncraft.not_enough_gold", "You don't have enough gold")
+t("message.nirncraft.power_cooldown", "You can only use %s once a day (%s hours left)")
+t("message.nirncraft.power_used", "%s")
+t("message.nirncraft.critical", "Critical strike!")
+t("message.nirncraft.sneak_attack", "Sneak attack for %sx damage!")
+t("message.nirncraft.evaded", "Evaded!")
+t("message.nirncraft.disarmed", "Disarmed!")
+t("message.nirncraft.need_pickaxe", "You need a pickaxe to mine this vein")
+t("message.nirncraft.need_axe", "You need an axe to chop wood")
+t("message.nirncraft.need_excavator", "You can't dig here. (Mining perk: Excavator)")
+t("message.nirncraft.need_stonebreaker", "This rock is too hard for you. (Mining perk: Stonebreaker)")
+t("message.nirncraft.need_deep_delver", "This rock is beyond your skill. (Mining perk: Deep Delver)")
+t("message.nirncraft.legendary_fish", "You caught a legendary fish!")
+t("message.nirncraft.sheathed", "Weapons sheathed")
+t("message.nirncraft.drawn", "Weapons drawn")
+t("message.nirncraft.unstuck_combat", "Cannot unstuck while in combat!")
+t("message.nirncraft.unstuck_cooldown", "Unstuck is on cooldown (%s seconds left)")
+t("message.nirncraft.unstuck_success", "Teleported to rest point")
+t("menu.nirncraft.unstuck", "Unstuck / Respawn")
+t("command.nirncraft.gold", "You have %s Septims")
+t("dialogue.nirncraft.chat", "Let's talk.")
+t("dialogue.nirncraft.goodbye", "Goodbye.")
+t("command.nirncraft.paid", "Paid %s Septims to %s")
 for h, n in {"whiterun": "Whiterun Hold", "the_rift": "The Rift", "eastmarch": "Eastmarch", "the_pale": "The Pale",
              "winterhold": "Winterhold", "haafingar": "Haafingar", "hjaalmarch": "Hjaalmarch", "the_reach": "The Reach",
              "falkreath": "Falkreath Hold", "the_nether": "Oblivion", "the_end": "Sovngarde"}.items():
-    t(f"hold.skycraft.{h}", n)
+    t(f"hold.nirncraft.{h}", n)
 
-out = os.path.join(os.path.dirname(__file__), "..", "mod", "src", "main", "lang", "skycraft", "core.json")
+out = os.path.join(os.path.dirname(__file__), "..", "mod", "src", "main", "lang", "nirncraft", "core.json")
 with open(out, "w") as f:
     json.dump(L, f, indent=2, sort_keys=True)
 print(len(L), "keys")

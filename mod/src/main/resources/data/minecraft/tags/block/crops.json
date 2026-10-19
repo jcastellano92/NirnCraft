@@ -1,9 +1,9 @@
 {
   "replace": false,
   "values": [
-    "skycraft:cabbage_crop",
-    "skycraft:leek_crop",
-    "skycraft:tomato_crop",
-    "skycraft:garlic_crop"
+    "nirncraft:cabbage_crop",
+    "nirncraft:leek_crop",
+    "nirncraft:tomato_crop",
+    "nirncraft:garlic_crop"
   ]
 }

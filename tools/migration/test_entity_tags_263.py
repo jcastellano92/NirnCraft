@@ -19,8 +19,8 @@ class EntityTagsTest(unittest.TestCase):
                 data = json.loads((path.parent/(tag+".json")).read_text())
                 self.assertFalse(data["replace"])
                 for entity in ("keeper","boneman","mistman","wrathman"):
-                    self.assertIn("skycraft:"+entity,data["values"])
-                self.assertNotIn("skycraft:clannfear",data["values"])
+                    self.assertIn("nirncraft:"+entity,data["values"])
+                self.assertNotIn("nirncraft:clannfear",data["values"])
             self.assertEqual("other:ancestor",json.loads(path.read_text())["values"][0])
 
 if __name__ == "__main__": unittest.main()

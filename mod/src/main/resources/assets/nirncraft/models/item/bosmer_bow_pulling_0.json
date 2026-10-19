@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/bosmer_bow",
+  "textures": {
+    "layer0": "nirncraft:item/bosmer_bow_pulling_0"
+  }
+}

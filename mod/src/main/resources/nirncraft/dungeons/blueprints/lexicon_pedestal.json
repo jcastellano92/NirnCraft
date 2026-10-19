@@ -1,0 +1,33 @@
+{
+ "id": "lexicon_pedestal",
+ "themes": [
+  "dwemer"
+ ],
+ "beats": [
+  "elite",
+  "setpiece",
+  "cache"
+ ],
+ "layers": [
+  [
+   "g#g",
+   "rCr"
+  ],
+  [
+   ".A.",
+   "..."
+  ],
+  [
+   ".F.",
+   "..."
+  ]
+ ],
+ "key": {
+  "#": "minecraft:waxed_copper_block",
+  "g": "minecraft:grindstone[face=floor]",
+  "r": "minecraft:lightning_rod",
+  "C": "loot:chest:nirncraft:chests/dwemer_scrap",
+  "A": "minecraft:waxed_cut_copper",
+  "F": "minecraft:ochre_froglight"
+ }
+}

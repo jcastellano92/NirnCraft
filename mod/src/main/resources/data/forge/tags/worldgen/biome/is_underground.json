@@ -1,11 +1,11 @@
 {
   "replace": false,
   "values": [
-    "skycraft:dwemer_caverns",
-    "skycraft:falmer_glow_caves",
-    "skycraft:ice_caves",
-    "skycraft:lava_caves",
-    "skycraft:mushroom_grottos",
+    "nirncraft:dwemer_caverns",
+    "nirncraft:falmer_glow_caves",
+    "nirncraft:ice_caves",
+    "nirncraft:lava_caves",
+    "nirncraft:mushroom_grottos",
     "#c:is_cave"
   ]
 }

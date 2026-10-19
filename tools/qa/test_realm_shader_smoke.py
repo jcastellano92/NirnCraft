@@ -10,7 +10,7 @@ smoke=importlib.util.module_from_spec(spec);spec.loader.exec_module(smoke)
 
 class RealmSmokeTest(unittest.TestCase):
     def test_home_is_only_requested_for_actual_supported_realm(self):
-        for dimension,calls in [('minecraft:overworld',0),('skycraft:shivering_isles',1),('other:unknown',0)]:
+        for dimension,calls in [('minecraft:overworld',0),('nirncraft:shivering_isles',1),('other:unknown',0)]:
             with self.subTest(dimension=dimension):
                 live=Mock();live.DEV=Path('preview');live.read_json.return_value={'dimension':dimension}
                 if dimension=='other:unknown':

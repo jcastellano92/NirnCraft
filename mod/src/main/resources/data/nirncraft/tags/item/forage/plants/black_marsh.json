@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:bittergreen_petals",
+      "required": false
+    },
+    {
+      "id": "nirncraft:marshmerrow",
+      "required": false
+    }
+  ]
+}

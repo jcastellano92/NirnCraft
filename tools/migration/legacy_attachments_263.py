@@ -1,4 +1,4 @@
-"""Copy an OFFLINE legacy world and import Skycraft attachments and synced config overrides.
+"""Copy an OFFLINE legacy world and import NirnCraft attachments and synced config overrides.
 
 Usage: py -3 tools/migration/legacy_attachments_263.py INPUT_WORLD NEW_OUTPUT_WORLD
 Never edits the source or overwrites an existing destination. Only the copied random-sequence
@@ -12,10 +12,10 @@ import argparse, contextlib, gzip, json, os, shutil, struct, uuid, zlib
 
 LIMIT = 256 * 1024 * 1024
 ATTACHMENTS = b"neoforge:attachments"
-OWNED = {b"skycraft:player_data": (10, b"data"), b"skycraft:overflow": (10, b"data"), b"skycraft:placed_blocks": (12, b"positions")}
+OWNED = {b"nirncraft:player_data": (10, b"data"), b"nirncraft:overflow": (10, b"data"), b"nirncraft:placed_blocks": (12, b"positions")}
 # These exact explicit filenames remain registered as SYNCED in 26.3. FML 12.0.12
 # reads world/syncedconfig, not the former world/serverconfig override directory.
-SYNCED_CONFIGS = frozenset({"skycraft-atmosphere-server.toml", "skycraft-ocean-server.toml", "skycraft-perf-server.toml"})
+SYNCED_CONFIGS = frozenset({"nirncraft-atmosphere-server.toml", "nirncraft-ocean-server.toml", "nirncraft-perf-server.toml"})
 
 @dataclass
 class Node:
@@ -157,17 +157,17 @@ def convert_survival_rule(root, counts):
     if data is None or data.kind != 10: return
     rules = child(data, b"GameRules")
     if rules is None or rules.kind != 10: return
-    legacy = child(rules, b"skycraftSurvivalMode")
+    legacy = child(rules, b"nirncraftSurvivalMode")
     if legacy is None: return
     if legacy.kind != 8 or legacy.value.lower() not in (b"true", b"false"):
-        raise ValueError("Invalid legacy skycraftSurvivalMode boolean")
+        raise ValueError("Invalid legacy nirncraftSurvivalMode boolean")
     # Native GameRuleRegistryFix preserves already namespaced typed values, then the
     # native LevelDatToSavedDataFileFix extracts this map to data/minecraft/game_rules.dat.
     # Remove the obsolete unregistered key only in the copied world; the source retains it.
-    if child(rules, b"skycraft:survival_mode") is None:
-        put(rules, b"skycraft:survival_mode", Node(1, b"\x01" if legacy.value.lower() == b"true" else b"\x00"))
-    rules.value = [(key, value) for key, value in rules.value if key != b"skycraftSurvivalMode"]
-    key = "game_rule:skycraft:survival_mode"
+    if child(rules, b"nirncraft:survival_mode") is None:
+        put(rules, b"nirncraft:survival_mode", Node(1, b"\x01" if legacy.value.lower() == b"true" else b"\x00"))
+    rules.value = [(key, value) for key, value in rules.value if key != b"nirncraftSurvivalMode"]
+    key = "game_rule:nirncraft:survival_mode"
     counts[key] = counts.get(key, 0) + 1
 
 def region(path, counts):
@@ -259,12 +259,12 @@ def migrate(source, destination):
                     "vanilla_schema_repairs": {key.removeprefix("vanilla_schema:"):value for key,value in counts.items() if key.startswith("vanilla_schema:")},
                     "changed_files": files, "synced_configs": configs,
                     "vanilla_data_version": "unchanged except copied random_sequences.dat advances to exact schema3565; native upgrade still required" if counts.get("vanilla_schema:random_sequences_3565") else "unchanged; native Minecraft upgrade still required", "source_modified": False}
-        (staging / "skycraft-26.3-migration.json").write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
+        (staging / "nirncraft-26.3-migration.json").write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
         staging.rename(destination)  # completed copies only; never publish an incomplete world under the requested name
         return manifest
     except Exception as error:
         if staging.is_dir():
-            (staging / "skycraft-26.3-migration-failed.txt").write_text(str(error)+"\nDo not open this incomplete copy. Original world was not modified.\n", encoding="utf-8")
+            (staging / "nirncraft-26.3-migration-failed.txt").write_text(str(error)+"\nDo not open this incomplete copy. Original world was not modified.\n", encoding="utf-8")
         raise
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ import live_world as live
 def owned_source(path):
     path=path.resolve()
     default=(live.REPO/'mod/run/devworld/world').resolve()
-    roots=[(live.REPO/'dist/world-tests/runtimes').resolve(),Path('E:/Skycraft-scratch/world-benchmark').resolve()]
+    roots=[(live.REPO/'dist/world-tests/runtimes').resolve(),Path('E:/NirnCraft-scratch/world-benchmark').resolve()]
     if path!=default and not any(path.is_relative_to(root) and path.name=='world' for root in roots):
         raise ValueError('Source must be an owned devworld or storage-benchmark runtime world')
     if not (path/'level.dat').is_file():raise ValueError('Source is not a saved world')
@@ -36,7 +36,7 @@ def select(name):
     if not (live.GAME/'saves'/name/'level.dat').is_file():raise ValueError('World absent from disposable instance')
     close_launcher()
     config=live.INSTANCE/'instance.cfg';text=config.read_text()
-    updated,count=re.subn(r'-Dskycraft\.autotest\.load=[^\s"]+', '-Dskycraft.autotest.load='+name,text)
+    updated,count=re.subn(r'-Dnirncraft\.autotest\.load=[^\s"]+', '-Dnirncraft.autotest.load='+name,text)
     if count!=1:raise ValueError('Expected one existing autotest load setting')
     backup=live.DEV/'config-backups'/(str(time.time_ns())+'.instance.cfg');backup.parent.mkdir(parents=True,exist_ok=True)
     shutil.copy2(config,backup);live.atomic(config,updated.encode())
@@ -82,7 +82,7 @@ def main():
             digest.update(file.relative_to(destination).as_posix().encode());digest.update(hashlib.sha256(file.read_bytes()).digest());count+=1
     receipt={'source':str(source),'copy':str(destination),'files':count,'snapshotSha256':digest.hexdigest(),
              'note':'Copied while stopped. Core/generation identity and camera readiness must still be checked in Minecraft.'}
-    (destination/'skycraft-qa-import.json').write_text(json.dumps(receipt,indent=2)+'\n')
+    (destination/'nirncraft-qa-import.json').write_text(json.dumps(receipt,indent=2)+'\n')
     select(args.name);print(json.dumps(receipt,indent=2))
 
 

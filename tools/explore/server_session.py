@@ -19,7 +19,7 @@ import time
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MOD = os.path.join(ROOT, "mod")
 RUN = os.path.join(MOD, "run")
-RCON_PORT, RCON_PASS = 25612, "skycraft-explore"
+RCON_PORT, RCON_PASS = 25612, "nirncraft-explore"
 
 
 class Rcon:

@@ -53,7 +53,7 @@ def create(source, legacy, converted, report):
     if len(found) != 1 or probe.string(nbt.child(found[0], b"id")) != "minecraft:barrel":
         raise ValueError("Archived real barrel fixture moved or changed")
     be = found[0]
-    if probe.attachment(be, b"skycraft:overflow") or probe.attachment(chunk, b"skycraft:placed_blocks"):
+    if probe.attachment(be, b"nirncraft:overflow") or probe.attachment(chunk, b"nirncraft:placed_blocks"):
         raise ValueError("Fixture must start from the original LEGACY archive, before native conversion")
     caps = nbt.child(be, b"ForgeCaps")
     if caps is None:
@@ -67,13 +67,13 @@ def create(source, legacy, converted, report):
             nbt.put(custom, b"Enchantments", nbt.Node(9, (10, [nbt.compound(id=text("minecraft:sharpness"), lvl=scalar(2, 2))])))
         stack = nbt.compound(id=text(item), Count=scalar(1, 1), tag=custom)
         rows.append(nbt.compound(s=stack, n=scalar(3, count)))
-    nbt.put(caps, b"skycraft:overflow", nbt.compound(v=scalar(3, 1), e=nbt.Node(9, (10, rows))))
+    nbt.put(caps, b"nirncraft:overflow", nbt.compound(v=scalar(3, 1), e=nbt.Node(9, (10, rows))))
     chunk_caps = nbt.child(chunk, b"ForgeCaps")
     if chunk_caps is None:
         chunk_caps = nbt.Node(10, [])
         nbt.put(chunk, b"ForgeCaps", chunk_caps)
     positions = [position(*BARREL), position(BARREL[0], BARREL[1] - 1, BARREL[2]), position(BARREL[0] - 1, BARREL[1], BARREL[2])]
-    nbt.put(chunk_caps, b"skycraft:placed_blocks", nbt.Node(12, struct.pack(">i", len(positions)) + b"".join(struct.pack(">q", value) for value in positions)))
+    nbt.put(chunk_caps, b"nirncraft:placed_blocks", nbt.Node(12, struct.pack(">i", len(positions)) + b"".join(struct.pack(">q", value) for value in positions)))
     payload = zlib.compress(nbt.write_nbt(name, chunk))
     record = struct.pack(">I", len(payload) + 1) + bytes([2]) + payload
     sectors = (len(record) + 4095) // 4096
@@ -88,7 +88,7 @@ def create(source, legacy, converted, report):
                   "barrel": BARREL, "overflow_items": 300, "overflow_rows": 2, "placed_positions": sorted(positions),
                   "marker": MARKER, "data_version": "unchanged; actual native upgrader must still run",
                   "playerdata": "not fabricated; no original player payload exists; native inventory selftest covers real player attachment round trips"}
-    (legacy / "skycraft-populated-legacy-fixture.json").write_text(json.dumps(provenance, indent=2) + "\n")
+    (legacy / "nirncraft-populated-legacy-fixture.json").write_text(json.dumps(provenance, indent=2) + "\n")
     nbt.migrate(legacy, converted)
     result = probe.scan(converted, {"probes": [{"region": REGION, "chunk": list(CHUNK)}]})
     result["fixture_provenance"] = provenance

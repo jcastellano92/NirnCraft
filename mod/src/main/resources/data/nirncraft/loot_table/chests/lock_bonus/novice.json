@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "nirncraft:containers/lock_bonus/novice"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:chests/lock_bonus/novice"
+}

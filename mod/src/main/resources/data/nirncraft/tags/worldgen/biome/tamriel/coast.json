@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:ash_shore",
+    "nirncraft:frozen_shore",
+    "nirncraft:rocky_shore",
+    "nirncraft:skyrim_coast",
+    "nirncraft:stros_mkai_coast",
+    "nirncraft:summerset_shore",
+    "nirncraft:temperate_beach",
+    "nirncraft:tropical_beach",
+    "nirncraft:warm_beach"
+  ]
+}

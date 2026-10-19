@@ -1,0 +1,20 @@
+{
+  "item.nirncraft.skill_book_acrobatics": "A Dance in Fire, v1",
+  "item.nirncraft.skill_book_cooking": "Uncommon Taste",
+  "item.nirncraft.skill_book_mysticism": "Withershins",
+  "item.nirncraft.skill_book_polearm": "The Spear of Bitter Mercy",
+  "item.nirncraft.skill_book_riding": "Hooves of the Reach",
+  "screen.nirncraft.level_up_pending": "%s level-ups to choose",
+  "skill.nirncraft.acrobatics": "Acrobatics",
+  "skill.nirncraft.acrobatics.desc": "Jumping higher and farther, and landing from great heights without harm.",
+  "skill.nirncraft.cooking": "Cooking",
+  "skill.nirncraft.cooking.desc": "Cooking meals at a cooking pot that heal, refresh and fortify whoever eats them.",
+  "skill.nirncraft.mysticism": "Mysticism",
+  "skill.nirncraft.mysticism.desc": "The school of the unseen: telekinesis, dispelling, reflecting and absorbing magic, Mark and Recall, interventions and levitation.",
+  "skill.nirncraft.polearm": "Polearms",
+  "skill.nirncraft.polearm.desc": "Fighting with spears, halberds and glaives: long reach, sweeping blows and pinning thrusts.",
+  "skill.nirncraft.riding": "Riding",
+  "skill.nirncraft.riding.desc": "Riding horses faster and farther, and fighting from the saddle.",
+  "tooltip.nirncraft.meal": "Cooked with Cooking %s: restores more when eaten",
+  "tooltip.nirncraft.meal_perks": "A master cook's dish"
+}

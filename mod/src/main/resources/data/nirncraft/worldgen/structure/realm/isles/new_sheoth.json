@@ -1,0 +1,8 @@
+{
+  "type": "nirncraft:realm_site",
+  "site": "isles/new_sheoth",
+  "biomes": "#nirncraft:realm/shivering_isles",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

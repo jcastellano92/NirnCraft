@@ -1,0 +1,6 @@
+{
+  "parent": "nirncraft:item/yokudan_bow",
+  "textures": {
+    "layer0": "nirncraft:item/yokudan_bow_pulling_0"
+  }
+}

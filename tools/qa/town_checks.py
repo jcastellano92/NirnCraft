@@ -1,7 +1,7 @@
 """Offline town audit data + automated checks, working on a SAVED world folder (no Minecraft needed).
 
 Reads settlement plan pieces out of chunk structure starts (kind, footprint, wealth, use, yard variant), the road
-network out of world/data/skycraft_roads*.dat, and real blocks via mca.World.  Used by render_town.py too.
+network out of world/data/nirncraft_roads*.dat, and real blocks via mca.World.  Used by render_town.py too.
 
 usage: py -3 -I tools/qa/town_checks.py <world_dir> [samples.json] [--json out.json]
 """
@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mca import World, _nbt  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-JAVA = os.path.join(ROOT, 'mod', 'src', 'main', 'java', 'com', 'skycraft', 'tamriel', 'settlement')
+JAVA = os.path.join(ROOT, 'mod', 'src', 'main', 'java', 'com', 'nirncraft', 'tamriel', 'settlement')
 
 
 def _enum_names(path, stop=';'):
@@ -128,7 +128,7 @@ class Roads:
         self.settlements = {}  # id -> dict
         self.features = []
         d = os.path.join(world_dir, 'data')
-        for f in glob.glob(os.path.join(d, 'skycraft_roads*.dat')):
+        for f in glob.glob(os.path.join(d, 'nirncraft_roads*.dat')):
             try:
                 data = _nbt(gzip.decompress(open(f, 'rb').read())).get('data', {})
             except Exception:
@@ -244,7 +244,7 @@ def natural_ids(names):
     out = np.zeros(len(names), bool)
     for i, n in enumerate(names):
         s = n.split(':')[-1]
-        out[i] = s in NATURAL_EXACT or any(k in s for k in NATURAL_SUB) or s.endswith('_log') and 'skycraft' in n and 'tree' in n
+        out[i] = s in NATURAL_EXACT or any(k in s for k in NATURAL_SUB) or s.endswith('_log') and 'nirncraft' in n and 'tree' in n
     return out
 
 

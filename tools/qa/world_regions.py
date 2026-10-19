@@ -16,9 +16,9 @@ def read(path):
 def registry(root=ROOT):
     resources = root / 'mod/src/main/resources'
     regions = [{**r, 'dimension': 'minecraft:overworld', 'kind': 'authored_region',
-                'source': 'skycraft/tamriel/regions.json'}
-               for r in read(resources / 'skycraft/tamriel/regions.json')]
-    beyond_path = root / 'mod/src/main/java/com/skycraft/tamriel/terrain/Beyond.java'
+                'source': 'nirncraft/tamriel/regions.json'}
+               for r in read(resources / 'nirncraft/tamriel/regions.json')]
+    beyond_path = root / 'mod/src/main/java/com/nirncraft/tamriel/terrain/Beyond.java'
     beyond = beyond_path.read_text(encoding='utf-8')
     policy = re.search(r'public static final boolean ENDLESS_LANDS_ENABLED = (true|false);', beyond)
     if policy is None:raise ValueError('Cannot identify active outer-world geography policy')
@@ -48,13 +48,13 @@ def registry(root=ROOT):
         dimension = path.parent.parent.name + ':' + path.stem
         definition = read(path)
         source = definition.get('generator', {}).get('biome_source', {})
-        if source.get('type') == 'skycraft:realm':
+        if source.get('type') == 'nirncraft:realm':
             realm = source['realm']
             for role, biome in source['biomes'].items():
                 regions.append({'id': realm + '/' + role, 'province': realm, 'name': role.replace('_', ' ').title(),
                                 'dimension': dimension, 'kind': 'realm_role', 'biomes': [biome],
                                 'source': path.relative_to(resources).as_posix()})
-        elif dimension == 'skycraft:jail':
+        elif dimension == 'nirncraft:jail':
             regions.append({'id': 'jail/cells', 'province': 'jail', 'name': 'Instanced jail cells',
                             'dimension': dimension, 'kind': 'interior_dimension',
                             'biomes': [definition['generator']['settings']['biome']],

@@ -53,9 +53,9 @@ Status `skyrim` names the screen class; `vanilla-allowed` needs a reason.
 | `minecraft:merchant` | skyrim | `SkyrimMachineScreen` |
 | `minecraft:crafting` | skyrim | `SkyrimMachineScreen` |
 | `minecraft:lectern` | skyrim | `SkyrimLecternScreen` |
-| `skycraft:smithing_station` | skyrim | `StationScreen` |
-| `skycraft:homestead_table` | skyrim | `HomesteadScreen` |
-| `skycraft:cooking_pot` | skyrim | `CookingScreen` |
+| `nirncraft:smithing_station` | skyrim | `StationScreen` |
+| `nirncraft:homestead_table` | skyrim | `HomesteadScreen` |
+| `nirncraft:cooking_pot` | skyrim | `CookingScreen` |
 <!-- menu-map:end -->
 
 Adding a menu type (a new `MENUS.register`, or a Minecraft upgrade that adds one) without a row fails the check. A new
@@ -64,7 +64,7 @@ vanilla type needs a `skin(MenuType.X, Kind.Y)` line in `MenuSkins` too.
 ## Audit: every menu and screen a player can open
 
 Triggers say what the server does first: the vanilla blocks are intercepted in `crafting/CraftingEvents` (not sneaking,
-or sneaking with nothing in either hand, opens the Skycraft station; sneaking with an item in hand places it as in
+or sneaking with nothing in either hand, opens the NirnCraft station; sneaking with an item in hand places it as in
 vanilla and opens nothing).
 
 ### Containers (menus with items inside)
@@ -91,24 +91,24 @@ reached by sneaking with empty hands, and that menu now looks like the other Sky
 
 | Menu | Trigger | Current screen | Target Skyrim screen | Status |
 | --- | --- | --- | --- | --- |
-| Furnace, blast furnace | use: Skycraft smelter station (`StationScreen`); sneak + empty hands: vanilla menu | vanilla `FurnaceScreen` / `BlastFurnaceScreen` | `SkyrimMachineScreen`: Ingredient / Fuel / Output rows, fuel and progress meters, "My Items" tab shows what the furnace accepts first | DONE (needs playtest) |
-| Smoker | use: Skycraft cooking pot (`CookingScreen`); sneak + empty hands: vanilla menu | vanilla `SmokerScreen` | `SkyrimMachineScreen` (same as furnace, smoking recipes) | DONE (needs playtest) |
-| Campfire, soul campfire | empty hand: Skycraft cooking pot; item in hand: vanilla (cooking on the fire) | `CookingScreen` (no menu) | n/a: no container menu | DONE (before) |
-| Brewing stand | use (also sneaking): Skycraft Alchemy Lab (`AlchemyScreen`); the vanilla menu is unreachable by right-click | vanilla `BrewingStandScreen` | `SkyrimMachineScreen`: three Bottle rows, Ingredient, Blaze Powder, brewing and blaze meters | DONE (only reachable by other mods or commands) |
-| Anvil (all three damages) | use: Skycraft forge (`StationScreen`); sneak + empty hands: vanilla menu | vanilla `AnvilScreen` | `SkyrimMachineScreen`: Item / Material / Result, level cost line (red when you cannot pay or "Too expensive!"), N renames | DONE (needs playtest) |
-| Grindstone | use: Skycraft grindstone tempering (`StationScreen`); sneak + empty hands: vanilla menu | vanilla `GrindstoneScreen` | `SkyrimMachineScreen`: Item / Second Item / Result | DONE (needs playtest) |
-| Smithing table | use: Skycraft armor workbench (`StationScreen`); sneak + empty hands: vanilla menu | vanilla `SmithingScreen` | `SkyrimMachineScreen`: Template / Base Item / Addition / Result | DONE (needs playtest) |
-| Crafting table | use: Skycraft armor workbench (`StationScreen`); sneak + empty hands: vanilla 3x3 | vanilla `CraftingScreen` (recipe book) | `SkyrimMachineScreen`: a 3x3 grid plus result (arrow keys move, F fills a cell from My Items one item at a time, F on a filled cell takes it out). No recipe book | DONE (recipe book intentionally absent: recipes are in the Skyrim stations) |
+| Furnace, blast furnace | use: NirnCraft smelter station (`StationScreen`); sneak + empty hands: vanilla menu | vanilla `FurnaceScreen` / `BlastFurnaceScreen` | `SkyrimMachineScreen`: Ingredient / Fuel / Output rows, fuel and progress meters, "My Items" tab shows what the furnace accepts first | DONE (needs playtest) |
+| Smoker | use: NirnCraft cooking pot (`CookingScreen`); sneak + empty hands: vanilla menu | vanilla `SmokerScreen` | `SkyrimMachineScreen` (same as furnace, smoking recipes) | DONE (needs playtest) |
+| Campfire, soul campfire | empty hand: NirnCraft cooking pot; item in hand: vanilla (cooking on the fire) | `CookingScreen` (no menu) | n/a: no container menu | DONE (before) |
+| Brewing stand | use (also sneaking): NirnCraft Alchemy Lab (`AlchemyScreen`); the vanilla menu is unreachable by right-click | vanilla `BrewingStandScreen` | `SkyrimMachineScreen`: three Bottle rows, Ingredient, Blaze Powder, brewing and blaze meters | DONE (only reachable by other mods or commands) |
+| Anvil (all three damages) | use: NirnCraft forge (`StationScreen`); sneak + empty hands: vanilla menu | vanilla `AnvilScreen` | `SkyrimMachineScreen`: Item / Material / Result, level cost line (red when you cannot pay or "Too expensive!"), N renames | DONE (needs playtest) |
+| Grindstone | use: NirnCraft grindstone tempering (`StationScreen`); sneak + empty hands: vanilla menu | vanilla `GrindstoneScreen` | `SkyrimMachineScreen`: Item / Second Item / Result | DONE (needs playtest) |
+| Smithing table | use: NirnCraft armor workbench (`StationScreen`); sneak + empty hands: vanilla menu | vanilla `SmithingScreen` | `SkyrimMachineScreen`: Template / Base Item / Addition / Result | DONE (needs playtest) |
+| Crafting table | use: NirnCraft armor workbench (`StationScreen`); sneak + empty hands: vanilla 3x3 | vanilla `CraftingScreen` (recipe book) | `SkyrimMachineScreen`: a 3x3 grid plus result (arrow keys move, F fills a cell from My Items one item at a time, F on a filled cell takes it out). No recipe book | DONE (recipe book intentionally absent: recipes are in the Skyrim stations) |
 | Stonecutter | use the block | vanilla `StonecutterScreen` | `SkyrimMachineScreen`: Stone / Result rows and a "Cuts" list of the recipes for the stone in the input | DONE (needs playtest) |
 | Loom | use the block | vanilla `LoomScreen` | `SkyrimMachineScreen`: Banner / Dye / Pattern Item / Result rows and a "Patterns" list | DONE (needs playtest) |
 | Cartography table | use: opens the world map; sneak: vanilla menu | vanilla `CartographyTableScreen` | `SkyrimMachineScreen`: Map / Paper, Compass or Glass / Result | DONE (needs playtest) |
-| Enchanting table | use (also sneaking): Skycraft Arcane Enchanter (`ArcaneEnchanterScreen`); the vanilla menu is unreachable by right-click | vanilla `EnchantmentScreen` | `SkyrimMachineScreen`: Item / Lapis rows and the three offers (clue, level, lapis) | DONE (only reachable by other mods or commands) |
+| Enchanting table | use (also sneaking): NirnCraft Arcane Enchanter (`ArcaneEnchanterScreen`); the vanilla menu is unreachable by right-click | vanilla `EnchantmentScreen` | `SkyrimMachineScreen`: Item / Lapis rows and the three offers (clue, level, lapis) | DONE (only reachable by other mods or commands) |
 | Beacon | use the block | vanilla `BeaconScreen` | `SkyrimMachineScreen`: Payment row and a "Powers" list (primary, secondary, Confirm sends the vanilla beacon packet) | DONE (needs playtest) |
-| Villager / wandering trader trade | [F] / use: Skycraft dialogue then barter (`BarterScreen`); vanilla trade only for an NPC tagged `no_dialogue` | vanilla `MerchantScreen` | `SkyrimMachineScreen`: Payment rows, Result, a "Trades" list with cost and stock (the barter screen is the Skyrim one) | DONE (fallback only) |
+| Villager / wandering trader trade | [F] / use: NirnCraft dialogue then barter (`BarterScreen`); vanilla trade only for an NPC tagged `no_dialogue` | vanilla `MerchantScreen` | `SkyrimMachineScreen`: Payment rows, Result, a "Trades" list with cost and stock (the barter screen is the Skyrim one) | DONE (fallback only) |
 | Lectern with a book | use: the lore module's reading screen for the world's story lecterns; placed lecterns open the vanilla menu | vanilla `LecternScreen` | `SkyrimLecternScreen` (`BookScreen` parchment, [T] takes the book) | DONE (needs playtest) |
 | Jukebox, composter, bell, respawn anchor, bed | use the block | no menu | n/a | DONE (no menu) |
 
-### Skycraft's own menus and screens
+### NirnCraft's own menus and screens
 
 | Menu / screen | Trigger | Current screen | Target Skyrim screen | Status |
 | --- | --- | --- | --- | --- |
@@ -148,7 +148,7 @@ reached by sneaking with empty hands, and that menu now looks like the other Sky
 | Screen | Trigger | Current screen | Status |
 | --- | --- | --- | --- |
 | Creative inventory, creative-mode chests and machines | creative players | vanilla (`MenuSkins` leaves creative and spectator alone) | vanilla-allowed: operator / testing tool, not part of the survival game |
-| Book and Quill editor | use a writable book | vanilla `BookEditScreen` | vanilla-allowed: player-written text; the lectern and every Skycraft book already read on the parchment |
+| Book and Quill editor | use a writable book | vanilla `BookEditScreen` | vanilla-allowed: player-written text; the lectern and every NirnCraft book already read on the parchment |
 | Sign editing | place or use a sign | vanilla `SignEditScreen` | vanilla-allowed: a text field, nothing to list |
 | Command block, structure block, jigsaw | operator use | vanilla editors | vanilla-allowed: operator tools |
 | Chat, advancements, stats | keys | vanilla | vanilla-allowed: not part of the Skyrim game (advancements and stats are replaced by the journal and the hub) |

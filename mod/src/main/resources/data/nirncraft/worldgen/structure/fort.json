@@ -1,0 +1,9 @@
+{
+  "type": "nirncraft:dungeon",
+  "theme": "fort",
+  "regional_kit": true,
+  "biomes": "#nirncraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

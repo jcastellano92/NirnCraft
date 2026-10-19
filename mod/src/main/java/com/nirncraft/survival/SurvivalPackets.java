@@ -1,0 +1,117 @@
+package com.nirncraft.survival;
+
+import com.nirncraft.network.SkyNetwork;
+import com.nirncraft.survival.cooking.Cooking;
+import com.nirncraft.survival.cooking.CookingMenu;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.api.distmarker.Dist;
+import com.nirncraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+
+
+/** Survival packets (registered in this order). */
+public final class SurvivalPackets {
+    private SurvivalPackets() {}
+
+    public static void register() {
+        SkyNetwork.register(Cook.class, PacketFlow.SERVERBOUND, Cook::encode, Cook::decode, Cook::handle);
+        SkyNetwork.register(Meters.class, PacketFlow.CLIENTBOUND, Meters::encode, Meters::decode, Meters::handle);
+        SkyNetwork.register(Bite.class, PacketFlow.CLIENTBOUND, Bite::encode, Bite::decode, Bite::handle);
+        SkyNetwork.register(ReelResult.class, PacketFlow.SERVERBOUND, ReelResult::encode, ReelResult::decode, ReelResult::handle);
+    }
+
+    /** C2S: client completed the Stardew-style fishing catch bar minigame (caught = 100% progress, false = 0% escaped). */
+    public record ReelResult(boolean caught) {
+        static void encode(ReelResult m, RegistryFriendlyByteBuf buf) {
+            buf.writeBoolean(m.caught);
+        }
+
+        static ReelResult decode(RegistryFriendlyByteBuf buf) {
+            return new ReelResult(buf.readBoolean());
+        }
+
+        static void handle(ReelResult m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
+            if (player != null && player.fishing instanceof com.nirncraft.survival.fishing.SkyFishingHook hook) {
+                hook.completeMinigame(player, m.caught);
+            }
+        }
+    }
+
+    /** C2S: cook {@code times} of a cooking pot recipe at the open cooking pot. */
+    public record Cook(String recipeId, int times) {
+        static void encode(Cook m, RegistryFriendlyByteBuf buf) {
+            buf.writeUtf(m.recipeId, 128);
+            buf.writeVarInt(m.times);
+        }
+
+        static Cook decode(RegistryFriendlyByteBuf buf) {
+            return new Cook(buf.readUtf(128), buf.readVarInt());
+        }
+
+        static void handle(Cook m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
+            if (player != null && player.containerMenu instanceof CookingMenu menu && menu.stillValid(player)) {
+                Cooking.cook(player, menu, m.recipeId, m.times);
+            }
+        }
+    }
+
+    /**
+     * S2C: the Survival Mode meters for the HUD ({@code survival/mode/SurvivalMode}); sent when they change.
+     *
+     * @param trend cold meter: 0 steady, 1 getting colder, 2 warming up
+     */
+    public record Meters(short hunger, short fatigue, short cold, short warmth, byte flags, byte trend) {
+        public static final int ACTIVE = 1, HEAT = 2, WET = 4, WELL_FED = 8;
+
+        static void encode(Meters m, RegistryFriendlyByteBuf buf) {
+            buf.writeShort(m.hunger);
+            buf.writeShort(m.fatigue);
+            buf.writeShort(m.cold);
+            buf.writeShort(m.warmth);
+            buf.writeByte(m.flags);
+            buf.writeByte(m.trend);
+        }
+
+        static Meters decode(RegistryFriendlyByteBuf buf) {
+            return new Meters(buf.readShort(), buf.readShort(), buf.readShort(), buf.readShort(), buf.readByte(), buf.readByte());
+        }
+
+        static void handle(Meters m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.nirncraft.survival.client.ClientSurvival.receive(m));
+        }
+
+        public boolean has(int flag) {
+            return (flags & flag) != 0;
+        }
+    }
+
+    /**
+     * S2C: the fishing minigame ({@code survival/fishing}). {@code phase} 1 = a fish took the bait: a marker sweeps over
+     * the reel bar ({@code periodTicks} per pass, the catch zone from {@code zoneStart} to {@code zoneEnd} in 0..1000,
+     * {@code windowTicks} until it gets away); 0 = the bite is over ({@code result}: 0 gone, 1 caught, 2 too early,
+     * 3 too late).
+     */
+    public record Bite(byte phase, short zoneStart, short zoneEnd, short periodTicks, short windowTicks, byte result, String fish) {
+        static void encode(Bite m, RegistryFriendlyByteBuf buf) {
+            buf.writeByte(m.phase);
+            buf.writeShort(m.zoneStart);
+            buf.writeShort(m.zoneEnd);
+            buf.writeShort(m.periodTicks);
+            buf.writeShort(m.windowTicks);
+            buf.writeByte(m.result);
+            buf.writeUtf(m.fish, 64);
+        }
+
+        static Bite decode(RegistryFriendlyByteBuf buf) {
+            return new Bite(buf.readByte(), buf.readShort(), buf.readShort(), buf.readShort(), buf.readShort(), buf.readByte(), buf.readUtf(64));
+        }
+
+        static void handle(Bite m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.nirncraft.survival.client.FishingHud.receive(m));
+        }
+    }
+}

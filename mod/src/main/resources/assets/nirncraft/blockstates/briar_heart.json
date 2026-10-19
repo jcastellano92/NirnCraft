@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/briar_heart"
+      },
+      {
+        "model": "nirncraft:block/briar_heart",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/briar_heart",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/briar_heart",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/briar_heart_harvested"
+      },
+      {
+        "model": "nirncraft:block/briar_heart_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/briar_heart_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/briar_heart_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

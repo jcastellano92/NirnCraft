@@ -16,10 +16,10 @@ Per road (planned polyline points, 2 blocks apart, outside settlement zones, in 
   (a point under a cover (gatehouse arch, deck, roof) is judged on the surface walked under it when that surface
   continues the previous point's within a block)
   unloaded  points in chunks that are not saved (not judged)
-  Reproduce: (1) boot a headless server on a fresh world with JAVA_TOOL_OPTIONS=-Dskycraft.autorun=<cmds separated by |,
-  spaces as +> -Dskycraft.autorun.wait=<ticks>, cmds = 'forceload add x1 z1 x2 z2' (10x10-chunk tiles along the
-  road polylines), then 'skycraft-roads stats' x N to idle while the planner/paver work, then 'stop'; (2) run this
-  script on mod/run/world. Needs the planned roads (world/data/skycraft_roads*.dat) and saved chunks. Corridors used:
+  Reproduce: (1) boot a headless server on a fresh world with JAVA_TOOL_OPTIONS=-Dnirncraft.autorun=<cmds separated by |,
+  spaces as +> -Dnirncraft.autorun.wait=<ticks>, cmds = 'forceload add x1 z1 x2 z2' (10x10-chunk tiles along the
+  road polylines), then 'nirncraft-roads stats' x N to idle while the planner/paver work, then 'stop'; (2) run this
+  script on mod/run/world. Needs the planned roads (world/data/nirncraft_roads*.dat) and saved chunks. Corridors used:
   whiterun:riverwood riverwood:helgen whiterun:rorikstead dragon_bridge:karthwasten.
   doors     doors within 70 blocks of the road's settlements; 'nopath' = no road/path material within 3 blocks;
             'unconnected' = none connected (8-neighbour, steps <= 2) to the planned road points
@@ -255,7 +255,7 @@ def main():
     world = World(world_dir)
     roads = Roads(world_dir)
     here = os.path.dirname(os.path.abspath(__file__))
-    places = load_places(os.path.join(here, '..', '..', 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel',
+    places = load_places(os.path.join(here, '..', '..', 'mod', 'src', 'main', 'resources', 'nirncraft', 'tamriel',
                                       'places', 'skyrim_settlements.json'))
     inzone = zone_fn(roads, places)
     by_place = {}

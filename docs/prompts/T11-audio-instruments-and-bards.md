@@ -14,14 +14,14 @@ Currently:
 ## 2. Write Set
 
 * `tools/music/synth_ambience.py`
-* `mod/src/main/resources/assets/skycraft/sounds/ambience/**/*.ogg`
-* `mod/src/main/java/com/skycraft/audio/{AudioSounds,InstrumentItem,AudioItems}.java`
-* `mod/src/main/java/com/skycraft/audio/client/AmbienceEngine.java`
-* `mod/src/main/java/com/skycraft/society/{Npcs,Chatter,SocietySelftest}.java`
-* `mod/src/main/java/com/skycraft/society/entity/NpcGoals.java`
-* `mod/src/main/java/com/skycraft/society/client/NpcModel.java`
-* `mod/src/main/resources/assets/skycraft/{models,textures}/item/**`
-* `mod/src/main/lang/skycraft/society*.json`
+* `mod/src/main/resources/assets/nirncraft/sounds/ambience/**/*.ogg`
+* `mod/src/main/java/com/nirncraft/audio/{AudioSounds,InstrumentItem,AudioItems}.java`
+* `mod/src/main/java/com/nirncraft/audio/client/AmbienceEngine.java`
+* `mod/src/main/java/com/nirncraft/society/{Npcs,Chatter,SocietySelftest}.java`
+* `mod/src/main/java/com/nirncraft/society/entity/NpcGoals.java`
+* `mod/src/main/java/com/nirncraft/society/client/NpcModel.java`
+* `mod/src/main/resources/assets/nirncraft/{models,textures}/item/**`
+* `mod/src/main/lang/nirncraft/society*.json`
 
 ## 3. Implementation Steps
 
@@ -30,20 +30,20 @@ Currently:
    * Re-run `py -3 -I tools/music/synth_ambience.py` and clear `SILENCED_BEDS` and `SILENCED_CALLS` in `AmbienceEngine.java` (`lines 204–205`).
 2. **Register 10 3D Cultural Musical Instrument Items (`InstrumentItem.java`, `Npcs.java`, `NpcModel.java`):**
    * Register 10 cultural instruments:
-     1. `skycraft:lute` (Nord / Imperial / Breton wooden lute)
-     2. `skycraft:wooden_flute` (Pastoral flute)
-     3. `skycraft:frame_drum` (Tundra / caravan hand drum)
-     4. `skycraft:nord_war_horn` (Carved horn of Skyrim/Atmora)
-     5. `skycraft:velothi_ash_flute` (Dunmer hollow chitin/reed flute)
-     6. `skycraft:redguard_oud` (Hammerfell/Yokudan pear-bodied oud)
-     7. `skycraft:altmer_crystal_harp` (Summerset harmonic glass-strung lyre)
-     8. `skycraft:bosmer_bone_pipe` (Valenwood antler panpipe)
-     9. `skycraft:khajiit_sitar` (Elsweyr long-necked gourd lute)
-     10. `skycraft:argonian_reed_marimba` (Black Marsh resonant bog-reed chime)
+     1. `nirncraft:lute` (Nord / Imperial / Breton wooden lute)
+     2. `nirncraft:wooden_flute` (Pastoral flute)
+     3. `nirncraft:frame_drum` (Tundra / caravan hand drum)
+     4. `nirncraft:nord_war_horn` (Carved horn of Skyrim/Atmora)
+     5. `nirncraft:velothi_ash_flute` (Dunmer hollow chitin/reed flute)
+     6. `nirncraft:redguard_oud` (Hammerfell/Yokudan pear-bodied oud)
+     7. `nirncraft:altmer_crystal_harp` (Summerset harmonic glass-strung lyre)
+     8. `nirncraft:bosmer_bone_pipe` (Valenwood antler panpipe)
+     9. `nirncraft:khajiit_sitar` (Elsweyr long-necked gourd lute)
+     10. `nirncraft:argonian_reed_marimba` (Black Marsh resonant bog-reed chime)
    * Equip `NpcRole.BARD` with their culture's instrument in `Npcs.equip()` (`Npcs.java:179-244`), render the held item in `NpcModel.java` (`lines 78–85`), and allow players to play a short cultural melody Phrase when right-clicking an `InstrumentItem`.
 3. **Cultural Melodies, Regional Song Lyrics & Travelling Bards (`NpcGoals.java`, `Chatter.java`, `scenes.json`):**
    * In `NpcGoals.Work.composeSong()`, select a structured cultural scale, motif progression, rhythm cadence, and timbre matching the bard's culture/instrument.
-   * Expand `Chatter.SONGS` into a culture/province-keyed repertoire (`nord`, `imperial`, `breton`, `redguard`, `dunmer`, `altmer`, `bosmer`, `khajiit`, `argonian`, `orc`, `foreign`) with `>= 4` original multi-line songs per culture in `lang/skycraft/society*.json`.
+   * Expand `Chatter.SONGS` into a culture/province-keyed repertoire (`nord`, `imperial`, `breton`, `redguard`, `dunmer`, `altmer`, `bosmer`, `khajiit`, `argonian`, `orc`, `foreign`) with `>= 4` original multi-line songs per culture in `lang/nirncraft/society*.json`.
    * Add travelling bard road encounters in `scenes.json` / `Encounters.java` who walk between inns along `RoadPlan` highways/roads, performing songs and sharing regional rumours.
 
 ## 4. Verification Gates

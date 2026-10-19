@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "skycraft:corundum_ore",
-    "skycraft:deepslate_corundum_ore"
+    "nirncraft:corundum_ore",
+    "nirncraft:deepslate_corundum_ore"
   ]
 }

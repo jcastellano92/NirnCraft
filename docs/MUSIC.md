@@ -1,6 +1,6 @@
-# Skycraft audio
+# NirnCraft audio
 
-Skycraft has its own audio: a situational soundtrack with music for every province of Tamriel, an ambience engine,
+NirnCraft has its own audio: a situational soundtrack with music for every province of Tamriel, an ambience engine,
 environmental reverb and occlusion, and sound effects for creatures, dragons, shouts, spells and menus. Every sound
 that ships with the mod is **original**. Small Python programs in `tools/music/` compose and synthesise all of it. None
 of it is sampled from, transcribed from or derived from Skyrim's audio.
@@ -11,15 +11,15 @@ of it is sampled from, transcribed from or derived from Skyrim's audio.
 | Ambience beds and calls | `audio/client/AmbienceEngine.java` | `tools/music/synth_ambience.py` |
 | Reverb and occlusion | `audio/client/Acoustics.java`, `ListenerEnvironment.java` | none |
 | Creature, shout, spell and UI sounds | `audio/AudioSounds.java` | `tools/music/synth_skyrim_sfx.py` |
-| Sound events, files and subtitles | `assets/skycraft/sounds.json`, `lang/skycraft/audio.json` | `tools/music/sound_catalog.py` |
+| Sound events, files and subtitles | `assets/nirncraft/sounds.json`, `lang/nirncraft/audio.json` | `tools/music/sound_catalog.py` |
 | Your own Skyrim audio (personal use) | none | `tools/music/import_skyrim_audio.py` |
 
-Client settings live in `config/skycraft-audio-client.toml`. The soundtrack's master switch is `world/atmosphere.music`
-in `skycraft-world-client.toml`.
+Client settings live in `config/nirncraft-audio-client.toml`. The soundtrack's master switch is `world/atmosphere.music`
+in `nirncraft-world-client.toml`.
 
 ## The soundtrack
 
-The `MusicController` checks the situation once a second and plays a `skycraft:music.*` event.
+The `MusicController` checks the situation once a second and plays a `nirncraft:music.*` event.
 
 * **Exploration** plays by day and by night, using the music set of the region you are in (`Region.music()`).
   * Each set has its own day and night piece:
@@ -54,9 +54,9 @@ The `MusicController` checks the situation once a second and plays a `skycraft:m
 * **Oblivion** (the Nether) and **Sovngarde** (the End) have their own music.
 * **Place zones:** the footprint of a place that was just attacked has a piece of its own, chosen before the town and
   exploration music and crossfaded like any change of mood (`fire/client/MusicZones`, data
-  `assets/skycraft/fire/music_zones.json`: place id, margin, event). Helgen plays `music.helgen_aftermath`
+  `assets/nirncraft/fire/music_zones.json`: place id, margin, event). Helgen plays `music.helgen_aftermath`
   (`helgen_aftermath` in `compose.py`: Phrygian, 46 bpm, low strings that never resolve, a double reed over a low
-  choir, a toll of bells, a muffled heartbeat; config `skycraft-fire-client.toml` `ambience.aftermathMusic`). Its
+  choir, a toll of bells, a muffled heartbeat; config `nirncraft-fire-client.toml` `ambience.aftermathMusic`). Its
   ambience (`ambient.fire_crackle`, `fire_roar`, `timber_creak`, `timber_collapse`, `sobbing`, `mourning`) is played
   by the fire module, positional and quiet, with per-site and per-person cooldowns.
 * **Stings:**
@@ -140,8 +140,8 @@ The seeds are fixed, so a run reproduces the same pieces. To get a new piece, ch
 The `AmbienceEngine` mixes looping **beds** (stereo, streamed, on the *Ambient/Environment* slider). It reads the
 surroundings twice a second:
 
-* the biome under you and in a ring 24 blocks around you. `Soundscapes` maps every one of Skycraft's 113 biomes
-  (`data/skycraft/worldgen/biome`, from `tools/worldgen/biomes.py`) onto a weighted mix of soundscape families:
+* the biome under you and in a ring 24 blocks around you. `Soundscapes` maps every one of NirnCraft's 113 biomes
+  (`data/nirncraft/worldgen/biome`, from `tools/worldgen/biomes.py`) onto a weighted mix of soundscape families:
   forest, pine, plains (tundra and meadows), cold marsh, warm swamp, jungle, desert, savanna, ash, volcanic, snow,
   glacier, mountain, mushroom, crystal, hot springs, ocean, river and beach. Biomes it doesn't know (vanilla, other
   mods) are classified by their vanilla and Forge tags and by keywords in their names;
@@ -195,7 +195,7 @@ Indoors and underground, the outdoor beds drop and are low-passed (see Acoustics
 * in the realms: daedric wails in Oblivion and a distant horn in Sovngarde;
 * very rarely in Skyrim's wilds, a far-away dragon roar (`distantDragons`).
 
-Vanilla wolves use Skycraft's howl and growl.
+Vanilla wolves use NirnCraft's howl and growl.
 
 `synth_ambience.py` synthesises everything:
 
@@ -210,7 +210,7 @@ py -3 tools/music/synth_ambience.py wind cave  # only matching stems
 
 ## Acoustics: reverb and occlusion
 
-`Acoustics` is Skycraft's own "sound physics". It uses OpenAL EFX:
+`Acoustics` is NirnCraft's own "sound physics". It uses OpenAL EFX:
 
 * **Listener space.** Once a second, `ListenerEnvironment` casts 14 rays from the camera. It works out how enclosed
   the space is, how large it is, whether there is a roof, and whether the walls are hard (stone, metal) or soft (wood,
@@ -226,7 +226,7 @@ py -3 tools/music/synth_ambience.py wind cave  # only matching stems
   `Channel`, and the OpenAL source id is read from its private field `source` (SRG `f_83642_`) through
   `ObfuscationReflectionHelper`.
 * **Failure handling.** If EFX is missing or anything fails, it logs once and switches itself off.
-* **Settings:** `acoustics.reverb`, `reverbAmount` and `occlusion` in `skycraft-audio-client.toml`.
+* **Settings:** `acoustics.reverb`, `reverbAmount` and `occlusion` in `nirncraft-audio-client.toml`.
 
 ## Sound effects
 
@@ -274,7 +274,7 @@ Loudness is set per category: UI is quiet (about −24 dBFS) and shouts are loud
     cry when a move starts: `attack` (bites and blows, now and then), `roar` (roars, war cries, charges), `cast`
     (spells and bolts) and `breath`. Creature bolts and breath use the spell sounds; summons use the conjuring portal;
     ground slams the giant's stomp; a dragon priest's Unrelenting Force the Thu'um chant.
-* **Shouts:** every shout of `com.skycraft.magic.shout.Shout` (all 26) has a one-, two- and three-word chant (`shout.<shout>.<words>`). A phoneme parser builds
+* **Shouts:** every shout of `com.nirncraft.magic.shout.Shout` (all 26) has a one-, two- and three-word chant (`shout.<shout>.<words>`). A phoneme parser builds
   each dragon word (plosives, sibilants, trilled R, vowels) as a deep chanted voice with a sub-octave and doubled
   voices. A concussive impact and an echoing tail follow, both scaling with the word count. Draugr deathlords use the
   same "Fus Ro Dah". The old `shout.fus_ro_dah` events still work.
@@ -287,7 +287,7 @@ Loudness is set per category: UI is quiet (about −24 dBFS) and shouts are loud
 * **UI:** menu open, close, select and back; quest updated and completed; skill up; level up; location discovered;
   and lockpicking.
 
-Every event has a subtitle. The keys are `subtitles.skycraft.<event>` in `lang/skycraft/audio.json`.
+Every event has a subtitle. The keys are `subtitles.nirncraft.<event>` in `lang/nirncraft/audio.json`.
 
 ```
 py -3 tools/music/synth_skyrim_sfx.py               # everything
@@ -300,13 +300,13 @@ py -3 tools/music/synth_skyrim_sfx.py dragon shout  # only matching stems
 streams. After changing it:
 
 ```
-py -3 tools/music/sound_catalog.py --write   # regenerate sounds.json and lang/skycraft/audio.json
+py -3 tools/music/sound_catalog.py --write   # regenerate sounds.json and lang/nirncraft/audio.json
 py -3 tools/music/sound_catalog.py --check   # missing or unused files, Java registration both ways, sizes per category
 ```
 
 ## Replacing sounds with your own resource pack
 
-Any resource pack can override the events in `assets/skycraft/sounds.json`. For example:
+Any resource pack can override the events in `assets/nirncraft/sounds.json`. For example:
 
 ```json
 { "music.explore.cyrodiil": { "replace": true, "sounds": [ { "name": "mypack:music/heartlands", "stream": true } ] } }
@@ -315,7 +315,7 @@ Any resource pack can override the events in `assets/skycraft/sounds.json`. For 
 ## Using your own copy of Skyrim's audio (personal use only)
 
 If you own *The Elder Scrolls V: Skyrim*, you can hear its real music, creature sounds, spells, menus and your
-character's actual Thu'um in Skycraft. Skycraft can't ship any of that because it is copyrighted.
+character's actual Thu'um in NirnCraft. NirnCraft can't ship any of that because it is copyrighted.
 `tools/music/import_skyrim_audio.py` reads **your own installation** and builds a **private** resource pack. Nothing
 is downloaded or uploaded.
 
@@ -325,14 +325,14 @@ How the script works:
   and `Data/Sound` files. It decodes `.xwm`, `.wav` and `.fuz` voice files with ffmpeg (for `.fuz`, the lip-sync data
   is stripped) and converts them to Ogg Vorbis: music in stereo, effects and voices in mono so they can be
   positioned.
-* **Mapping.** A rule table of regular expressions on archive paths maps files onto Skycraft's events. You can add
+* **Mapping.** A rule table of regular expressions on archive paths maps files onto NirnCraft's events. You can add
   your own rules with `--map 'REGEX=EVENT'`.
 * **Shouts.** The Thu'um comes from the player's voice lines in `Skyrim - Voices_en0.bsa`. The script finds out which
   line says which word by reading the dialogue records and strings. It then joins them into one, two and three words,
   and mixes the shout's effect in at the last word.
-* **Unmapped events.** Events Skyrim has no equivalent for, such as the other provinces' music, keep Skycraft's own
+* **Unmapped events.** Events Skyrim has no equivalent for, such as the other provinces' music, keep NirnCraft's own
   sounds. `--palettes` maps some regional fragments onto province sets.
-* **Output.** The script refuses to write inside the Skycraft repository. By default it writes to
+* **Output.** The script refuses to write inside the NirnCraft repository. By default it writes to
   `.minecraft/resourcepacks`.
 
 ```
@@ -342,7 +342,7 @@ py -3 tools/music/import_skyrim_audio.py --only music --out <resourcepacks folde
 py -3 tools/music/import_skyrim_audio.py --list-archive "npc/dragon/"  # browse the archive paths
 ```
 
-In Minecraft, open *Options → Resource Packs* and enable **"Skycraft – Personal Skyrim audio"**.
+In Minecraft, open *Options → Resource Packs* and enable **"NirnCraft – Personal Skyrim audio"**.
 
 `tools/music/import_skyrim_ost.py` is the older music-only tool, for music you already extracted to a folder. It keeps
 its command line and now runs the new script in music-only mode.
@@ -353,4 +353,4 @@ performers. The pack you build holds a copy of audio you own, for your personal 
 * Don't share, upload or redistribute it, and don't put it in modpacks.
 * Never commit it.
 
-Skycraft does not include or link to any of that audio.
+NirnCraft does not include or link to any of that audio.

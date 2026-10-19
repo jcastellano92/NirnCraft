@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:wolf_pelt",
+      "required": false
+    },
+    {
+      "id": "nirncraft:fur_helmet",
+      "required": false
+    },
+    {
+      "id": "nirncraft:fur_chestplate",
+      "required": false
+    },
+    {
+      "id": "nirncraft:fur_leggings",
+      "required": false
+    },
+    {
+      "id": "nirncraft:fur_boots",
+      "required": false
+    }
+  ]
+}

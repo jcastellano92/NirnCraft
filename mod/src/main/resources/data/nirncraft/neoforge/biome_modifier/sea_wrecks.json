@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#minecraft:is_ocean",
+  "features": "nirncraft:sea_wreck",
+  "step": "surface_structures"
+}

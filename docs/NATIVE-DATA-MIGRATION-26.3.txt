@@ -1,4 +1,4 @@
-Skycraft saved data and configuration migration to exact Minecraft 26.3
+NirnCraft saved data and configuration migration to exact Minecraft 26.3
 Verified against NeoForge 26.3.0.90 / FancyModLoader 12.0.12, 2026-10-18
 
 Never open the only copy of a legacy save in a new Minecraft version. Keep the
@@ -8,28 +8,28 @@ From the repository root, create a separate upgraded copy:
 py -3 tools/migration/legacy_attachments_263.py OLD_WORLD NEW_WORLD
 
 The command refuses existing destinations and running-world session locks. It
-copies the complete world before importing Skycraft's player, container-overflow
+copies the complete world before importing NirnCraft's player, container-overflow
 and placed-block attachments. Original ForgeCaps payloads and unknown NBT remain;
 the original source files are never edited. The manifest in the new world records
 the conversions. A failed conversion retains a separately named incomplete copy;
 it is never published under NEW_WORLD. Minecraft's normal vanilla DataVersion
 upgrade still runs when loading the finished new copy. Custom legacy item stacks
-inside our data use Minecraft's real item DataFixer when decoded by Skycraft.
+inside our data use Minecraft's real item DataFixer when decoded by NirnCraft.
 Native 26.3 world load/save/reload remains a required acceptance check.
 
-The converter also changes the copied world's old skycraftSurvivalMode string
-gamerule to the typed boolean skycraft:survival_mode. An existing native value
+The converter also changes the copied world's old nirncraftSurvivalMode string
+gamerule to the typed boolean nirncraft:survival_mode. An existing native value
 wins. All vanilla rules remain for Minecraft's own GameRuleRegistryFix and
 LevelDatToSavedDataFileFix, which move the upgraded map into
-data/minecraft/game_rules.dat. The obsolete unregistered Skycraft key is removed
+data/minecraft/game_rules.dat. The obsolete unregistered NirnCraft key is removed
 from the copy; the source remains intact. Invalid legacy boolean values fail
 conversion instead of silently changing a world's survival setting.
 
 Configuration changes that the enum rename alone does not cover
 
-FML LOCAL was formerly COMMON; SYNCED was formerly SERVER. Skycraft retains the
-explicit existing filenames, including skycraft-common.toml and the three
-skycraft-*-server.toml files. They must not be renamed to local/synced suffixes.
+FML LOCAL was formerly COMMON; SYNCED was formerly SERVER. NirnCraft retains the
+explicit existing filenames, including nirncraft-common.toml and the three
+nirncraft-*-server.toml files. They must not be renamed to local/synced suffixes.
 
 The real 26.3 server resolves each SYNCED file in this order:
 1. WORLD/syncedconfig/EXACT_FILENAME, if that file exists.
@@ -43,12 +43,12 @@ also apply to missing LOCAL/CLIENT/STARTUP files through the same ConfigTracker
 setup path. Synced files are sent to connecting players by the actual loader.
 
 WORLD/serverconfig is no longer an override source in this exact release. The
-offline converter copies the three registered Skycraft legacy overrides into
+offline converter copies the three registered NirnCraft legacy overrides into
 WORLD/syncedconfig, retaining filenames and exact bytes. Existing native overrides
 win and are recorded in the migration manifest. It retains the old directory and
 does not import unrelated disabled mods' server settings into active overrides.
 
-For an existing instance configuration directory, copy the owner's Skycraft
+For an existing instance configuration directory, copy the owner's NirnCraft
 configuration files to the new instance's config directory without replacing
 customized destination files. The active migration pack currently has no
 defaultconfigs directory; archived Forge configs remain in pack/disabled and are
@@ -79,7 +79,7 @@ Native JUnit resource acceptance
 
 ModDevGradle unitTest.enable() supplies genuine FML loading. Tests that inspect
 item default components or dynamic worldgen/loot/recipe registries must use
-@ExtendWith(com.skycraft.testing.BoundedServerProvider.class) and take the actual
+@ExtendWith(com.nirncraft.testing.BoundedServerProvider.class) and take the actual
 MinecraftServer parameter. Static Bootstrap alone cannot bind 26.3 default item
 components. World mutation still requires a real playable server/GameTest.
 
@@ -162,9 +162,9 @@ A singleplayer memory connection can bypass serialization. Use an actual native
 dedicated server and remote client on loopback, and prove Connection is connected
 and isMemoryConnection is false. Successful required-channel negotiation covers
 the registered type/version catalogue, not every message body's encoding.
-With skycraft.dev or skycraft.autotest enabled, SkyNetwork.diagnostics() records
+With nirncraft.dev or nirncraft.autotest enabled, SkyNetwork.diagnostics() records
 successful actual StreamCodec encodes/decodes and codec exceptions per registered
-class/direction. /skycraft-dev network reports the dedicated endpoint snapshot;
+class/direction. /nirncraft-dev network reports the dedicated endpoint snapshot;
 the client can record the same JSON. Distinct exercised types remain separate
 from registeredPayloads. Counters retain no payload content, are thread-safe and
 are absent in the default runtime. Record both endpoints after representative

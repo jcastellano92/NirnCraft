@@ -38,14 +38,14 @@ named='''public static MapCodec<Named> codecFor(Op op) {
             };
         }'''
 strings='Codec.STRING.listOf().xmap(v -> (Set<String>) new LinkedHashSet<>(v.stream().map(s -> s.toLowerCase(Locale.ROOT)).toList()), v -> new java.util.ArrayList<>(v))'
-schools='com.skycraft.platform.SkyCodecs.enumNames(School.class).listOf().xmap(v -> (Set<School>) new java.util.HashSet<>(v), v -> new java.util.ArrayList<>(v))'
+schools='com.nirncraft.platform.SkyCodecs.enumNames(School.class).listOf().xmap(v -> (Set<School>) new java.util.HashSet<>(v), v -> new java.util.ArrayList<>(v))'
 CODECS={
     'ScaledGold':function('ScaledGold',', '.join([optional('Codec.INT','min','1'),optional('Codec.INT','max','10'),optional('Codec.FLOAT','growth','0.04f')])),
     'Simple':simple,
     'Named':named,
     'LevelCondition':condition('LevelCondition',', '.join([optional('Codec.INT','min','1'),optional('Codec.INT','max','Integer.MAX_VALUE')])),
     'CompleteCondition':condition('CompleteCondition',required('Codec.STRING','collection')),
-    'LeveledGear':function('LeveledGear',', '.join([optional('com.skycraft.platform.SkyCodecs.enumNames(Kind.class)','kind','Kind.WEAPON'),optional('Codec.FLOAT','enchant_chance','0f','enchantChance'),optional('Codec.FLOAT','quality_chance','0f','qualityChance')])),
+    'LeveledGear':function('LeveledGear',', '.join([optional('com.nirncraft.platform.SkyCodecs.enumNames(Kind.class)','kind','Kind.WEAPON'),optional('Codec.FLOAT','enchant_chance','0f','enchantChance'),optional('Codec.FLOAT','quality_chance','0f','qualityChance')])),
     'LegendaryItemFunction':function('LegendaryItemFunction'),
     'RegionCondition':condition('RegionCondition',', '.join(optional(strings,k,'Set.of()') for k in ['provinces','gear_keys','regions']).replace('f.gear_keys','f.gearKeys')),
     'RegionalTag':function('RegionalTag',required('Codec.STRING','tag')),
@@ -58,7 +58,7 @@ CODECS={
 
 FILES=['loot/LootFunctions.java','arsenal/LeveledGear.java','combat/LegendaryItemFunction.java','economy/EconomyLoot.java','explore/ExploreLoot.java','lore/place/PlaceLoreLoot.java']
 for filename in FILES:
-    path=ROOT/'mod/src/main/java/com/skycraft'/filename
+    path=ROOT/'mod/src/main/java/com/nirncraft'/filename
     if owner(path)!='root':raise ValueError('Another owner: '+filename)
     source=path.read_text(encoding='utf8')
     if 'LootItemFunctionType' not in source:continue

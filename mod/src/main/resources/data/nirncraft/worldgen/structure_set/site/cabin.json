@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:site/cabin",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 718274026,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "cabin"
+    ]
+  }
+}

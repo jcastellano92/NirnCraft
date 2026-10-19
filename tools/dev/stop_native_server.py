@@ -15,7 +15,7 @@ def main() -> None:
     parser.add_argument("--pid", type=int, required=True)
     parser.add_argument("--java", type=Path, required=True)
     parser.add_argument("--runtime", type=Path, required=True)
-    parser.add_argument("--control", type=Path, help="Exact skycraft.dev directory; defaults to runtime sibling server-control")
+    parser.add_argument("--control", type=Path, help="Exact nirncraft.dev directory; defaults to runtime sibling server-control")
     parser.add_argument("--scratch", type=Path, required=True)
     args = parser.parse_args()
     java, runtime, scratch = args.java.resolve(strict=True), args.runtime.resolve(strict=True), args.scratch.resolve()
@@ -28,19 +28,19 @@ def main() -> None:
     scratch.mkdir(parents=True, exist_ok=True)
     classes = scratch / "classes"
     classes.mkdir(exist_ok=True)
-    source = Path(__file__).with_name("SkycraftServerStop.java")
+    source = Path(__file__).with_name("NirnCraftServerStop.java")
     subprocess.run([str(java.with_name("javac.exe")), "--release", "25", "--add-modules", "jdk.attach",
                     "-d", str(classes), str(source)], check=True, timeout=30)
     manifest = scratch / "MANIFEST.MF"
-    manifest.write_text("Manifest-Version: 1.0\nAgent-Class: SkycraftServerStop\n"
+    manifest.write_text("Manifest-Version: 1.0\nAgent-Class: NirnCraftServerStop\n"
                         "Can-Redefine-Classes: false\nCan-Retransform-Classes: false\n\n", encoding="ascii")
-    agent = scratch / "skycraft-orderly-stop.jar"
+    agent = scratch / "nirncraft-orderly-stop.jar"
     subprocess.run([str(java.with_name("jar.exe")), "--create", "--file", str(agent), "--manifest", str(manifest),
                     "-C", str(classes), "."], check=True, timeout=30)
     receipt = scratch / f"stop-{args.pid}.txt"
     if receipt.exists():
         parser.error(f"Existing stop receipt must be retained: choose a fresh --scratch directory ({receipt})")
-    subprocess.run([str(java), "--add-modules", "jdk.attach", "-cp", str(agent), "SkycraftServerStop",
+    subprocess.run([str(java), "--add-modules", "jdk.attach", "-cp", str(agent), "NirnCraftServerStop",
                     str(args.pid), str(java), str(runtime), str(control), str(agent), str(receipt)], check=True, timeout=30)
     print(f"Orderly stop dispatched. Verify world-save logs and process exit. Receipt: {receipt}")
 

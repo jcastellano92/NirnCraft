@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:hanging_moss",
+          "weight": 1
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:forage/hanging_moss"
+}

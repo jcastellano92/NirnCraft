@@ -5,7 +5,7 @@
 #include <cstring>
 #include <unordered_map>
 
-namespace aether {
+namespace atlas {
 
 namespace {
 constexpr int CELL = 1024;    // index cell (blocks)
@@ -89,11 +89,11 @@ void finish(LightIndex::Cell& c) {
 
 // Only the cells the group had or now has are rebuilt (a settlement's lights touch one or two): uploading hundreds of
 // groups as a far field fills costs each one its own size, not the whole index.
-void Lights::setGroup(uint32_t group, const AetherLight* l, uint32_t n) {
+void Lights::setGroup(uint32_t group, const AtlasLight* l, uint32_t n) {
     std::lock_guard<std::mutex> lock(mu_);
     std::unordered_map<int64_t, std::vector<Rec>> fresh;
     for (uint32_t i = 0; l && i < n; i++) {
-        const AetherLight& a = l[i];
+        const AtlasLight& a = l[i];
         if (!std::isfinite(a.pos[0]) || !std::isfinite(a.pos[1]) || !std::isfinite(a.pos[2]) || !(a.intensity > 0)) continue;
         int cx = int(std::floor(a.pos[0] / CELL)), cz = int(std::floor(a.pos[2] / CELL));
         fresh[cellKey(cx, cz)].push_back(Rec{a.pos[0], a.pos[1], a.pos[2], std::max(0.25f, a.radius), a.intensity, lin(a.rgb),
@@ -195,8 +195,8 @@ uint32_t Lights::frame(const LightView& v, std::vector<ActorGpu>& out) {
         if (far < v.nearEnd) continue;
         const std::vector<Rec>& list = near > clusterDist ? c.coarse : c.fine;
         for (const Rec& r : list) {
-            if (r.kind == AETHER_LIGHT_NIGHT && !nightLights) continue;
-            if (r.kind == AETHER_LIGHT_MIST && !mist) continue;
+            if (r.kind == ATLAS_LIGHT_NIGHT && !nightLights) continue;
+            if (r.kind == ATLAS_LIGHT_MIST && !mist) continue;
             double rx = r.x - v.cam[0], ry = r.y - v.cam[1], rz = r.z - v.cam[2];
             double h2 = rx * rx + rz * rz;
             if (v.planetRadius > 0) ry -= h2 / (2.0 * v.planetRadius);
@@ -278,4 +278,4 @@ uint32_t Lights::frame(const LightView& v, std::vector<ActorGpu>& out) {
     return n;
 }
 
-}  // namespace aether
+}  // namespace atlas

@@ -1,0 +1,8 @@
+{
+  "type": "nirncraft:realm_site",
+  "site": "sovngarde/whalebone_bridge",
+  "biomes": "#nirncraft:realm/sovngarde",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

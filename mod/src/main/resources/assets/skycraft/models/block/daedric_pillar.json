@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column",
-  "textures": {
-    "end": "skycraft:block/daedric_pillar_top",
-    "side": "skycraft:block/daedric_pillar"
-  }
-}

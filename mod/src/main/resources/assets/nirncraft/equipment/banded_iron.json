@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:banded_iron"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:banded_iron"
+      }
+    ]
+  }
+}

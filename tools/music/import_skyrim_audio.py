@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-Build a PRIVATE resource pack that plays the audio of YOUR OWN copy of The Elder Scrolls V: Skyrim in Skycraft.
+Build a PRIVATE resource pack that plays the audio of YOUR OWN copy of The Elder Scrolls V: Skyrim in NirnCraft.
 
-Skycraft ships its own original music and synthesised sound effects. If you own Skyrim you may prefer the real thing:
+NirnCraft ships its own original music and synthesised sound effects. If you own Skyrim you may prefer the real thing:
 this tool reads the game's archives on your disk (Data/*.bsa plus loose Data/Music and Data/Sound files), decodes the
 audio with ffmpeg (.xwm, .wav and .fuz voice files), re-encodes it to Ogg Vorbis and writes a resource pack zip whose
-assets/skycraft/sounds.json overrides Skycraft's sound events with "replace": true.
+assets/nirncraft/sounds.json overrides NirnCraft's sound events with "replace": true.
 
   PERSONAL USE ONLY. The pack contains Bethesda's copyrighted audio. Never share or upload it.
   * Nothing is downloaded or uploaded; the game install is only read.
-  * The pack is written OUTSIDE the Skycraft repository (an output path inside the repo is refused), so the
+  * The pack is written OUTSIDE the NirnCraft repository (an output path inside the repo is refused), so the
     extracted audio can never end up in the mod's sources.
 
 How the mapping works
@@ -23,7 +23,7 @@ How the mapping works
     Shout01b = word 1 leading on ("Fus..."), Shout02 = word 2 alone ("Ro!"), Shout03 = words 2+3 ("Ro...Da!").
     One word = 01a, two words = 01b + 02, three words = 01b + 03 (concatenated with ffmpeg), and the matching
     shout effect (sound/fx/voc/shout/fx/...) is mixed in at the last word unless --no-shout-fx.
-  * Events with no Skyrim equivalent keep Skycraft's own sounds (the dry run lists them).
+  * Events with no Skyrim equivalent keep NirnCraft's own sounds (the dry run lists them).
 
 Usage (Windows: py -3, elsewhere python3):
     py -3 tools/music/import_skyrim_audio.py --dry-run                         # what would be mapped
@@ -57,25 +57,25 @@ import zlib
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 sys.path.insert(0, str(HERE))
-import sound_catalog  # noqa: E402  (the list of Skycraft sound events)
+import sound_catalog  # noqa: E402  (the list of NirnCraft sound events)
 
 PACK_FORMAT = [97, 1]  # Minecraft 26.3 client resources
-PACK_DESCRIPTION = "Skycraft \u2013 Personal Skyrim audio (personal use only, do not share)"
-ZIP_NAME = "skycraft_personal_skyrim_audio.zip"
+PACK_DESCRIPTION = "NirnCraft \u2013 Personal Skyrim audio (personal use only, do not share)"
+ZIP_NAME = "nirncraft_personal_skyrim_audio.zip"
 AUDIO_EXT = (".xwm", ".wav", ".fuz")
 EXTRA_EXT = (".xwm", ".wav", ".fuz", ".mp3", ".flac", ".ogg", ".wma", ".m4a", ".opus")
 SKIP_BSA = re.compile(r"textures|meshes|animations|shaders", re.I)
 
-README = """Skycraft - Personal Skyrim audio
+README = """NirnCraft - Personal Skyrim audio
 =================================
 
-This resource pack was generated on the owner's computer by Skycraft's tools/music/import_skyrim_audio.py from
+This resource pack was generated on the owner's computer by NirnCraft's tools/music/import_skyrim_audio.py from
 the owner's own installation of The Elder Scrolls V: Skyrim. The music, sound effects and voices it contains are
 (c) Bethesda Softworks LLC / ZeniMax Media and their composers and voice actors.
 
 PERSONAL USE ONLY. Do not share, upload, re-host or redistribute this pack or any file in it.
 
-Enable it above the Skycraft resources in Options > Resource Packs. Events it does not override keep Skycraft's
+Enable it above the NirnCraft resources in Options > Resource Packs. Events it does not override keep NirnCraft's
 own original sounds.
 """
 
@@ -922,7 +922,7 @@ def print_plan(events, per_event, unmatched_music, notes, only):
         print(f"{e.name}  [{len(its)}]")
         for it in its:
             print(f"    {it.describe()}")
-    print("\n=== Skycraft events that keep Skycraft's own sounds (no Skyrim equivalent found / filtered) ===")
+    print("\n=== NirnCraft events that keep NirnCraft's own sounds (no Skyrim equivalent found / filtered) ===")
     cats: dict[str, list[int]] = {}
     for e in sound_catalog.EVENTS:
         g = group_of(e.name, e.category)
@@ -968,7 +968,7 @@ def protected_roots() -> list[pathlib.Path]:
 def refuse_repo(path: pathlib.Path, what: str):
     hit = next((r for r in protected_roots() if inside(path, r)), None)
     if hit is not None:
-        raise SystemExit(f"error: refusing to write {what} inside the Skycraft repository ({hit}).\n"
+        raise SystemExit(f"error: refusing to write {what} inside the NirnCraft repository ({hit}).\n"
                          "The pack contains copyrighted game audio and must never end up in the mod's sources: "
                          "write it to your Minecraft resourcepacks folder or anywhere outside the repository.")
 
@@ -1147,7 +1147,7 @@ def run(args) -> int:
                 used.add(name)
                 it.name = name
 
-    tmp_root = pathlib.Path(tempfile.mkdtemp(prefix="skycraft_skyrim_audio_"))
+    tmp_root = pathlib.Path(tempfile.mkdtemp(prefix="nirncraft_skyrim_audio_"))
     refuse_repo(tmp_root, "temporary files")
     lock = threading.Lock()
     done, failed = [0], []
@@ -1190,7 +1190,7 @@ def run(args) -> int:
             for it in per_event.get(e.name, []):
                 if id(it) not in ok:
                     continue
-                s = {"name": "skycraft:" + it.name}
+                s = {"name": "nirncraft:" + it.name}
                 if e.category in ("music", "bed"):
                     s["stream"] = True
                 if e.distance:
@@ -1211,10 +1211,10 @@ def run(args) -> int:
         with zipfile.ZipFile(part, "w", compression=zipfile.ZIP_DEFLATED) as z:
             z.writestr("pack.mcmeta", json.dumps(mcmeta, indent=2, ensure_ascii=False))
             z.writestr("README.txt", README)
-            z.writestr("assets/skycraft/sounds.json", json.dumps(sounds, indent=2))
+            z.writestr("assets/nirncraft/sounds.json", json.dumps(sounds, indent=2))
             for it in items:
                 if id(it) in ok:
-                    z.write(oggs / (it.name + ".ogg"), f"assets/skycraft/sounds/{it.name}.ogg",
+                    z.write(oggs / (it.name + ".ogg"), f"assets/nirncraft/sounds/{it.name}.ogg",
                             compress_type=zipfile.ZIP_STORED)
         os.replace(part, out_zip)
     finally:
@@ -1222,7 +1222,7 @@ def run(args) -> int:
 
     print(f"\nwrote {out_zip}  ({out_zip.stat().st_size / 1e6:.1f} MB, {len(sounds)} events, {len(ok)} files"
           f"{f', {len(failed)} failed' if failed else ''}, {time.time() - t0:.0f} s)")
-    print("Enable it above the Skycraft resources in Options > Resource Packs.")
+    print("Enable it above the NirnCraft resources in Options > Resource Packs.")
     print("Reminder: the pack contains copyrighted audio from your copy of Skyrim - personal use only, never share it.")
     return 0
 

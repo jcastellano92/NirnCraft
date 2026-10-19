@@ -64,17 +64,17 @@ class ServerPackageIntegrity(unittest.TestCase):
 
     def test_native_eight_dimension_save_evidence_and_command_failures(self):
         dimensions = {'minecraft:overworld', 'minecraft:the_end', 'minecraft:the_nether',
-                      'skycraft:apocrypha', 'skycraft:coldharbour', 'skycraft:soul_cairn',
-                      'skycraft:shivering_isles', 'skycraft:jail'}
+                      'nirncraft:apocrypha', 'nirncraft:coldharbour', 'nirncraft:soul_cairn',
+                      'nirncraft:shivering_isles', 'nirncraft:jail'}
         log = 'Stopping server\nSaving worlds\n'
         log += ''.join("Saving chunks for level 'ServerLevel[world]'/" + name + '\n' for name in sorted(dimensions))
         log += 'Closing FML Loader 123\nClearing ModLoader\n'
         self.assertEqual(set(shutdown_evidence(log, dimensions)['savedDimensions']), dimensions)
         with self.assertRaisesRegex(ValueError, 'Missing native shutdown saves'):
-            shutdown_evidence(log.replace('/skycraft:jail', '/skycraft:other'), dimensions)
+            shutdown_evidence(log.replace('/nirncraft:jail', '/nirncraft:other'), dimensions)
         self.assertTrue(command_failure("System chat: Can't find element 'minecraft:daytime' of type 'minecraft:timeline'"))
         self.assertTrue(command_failure('System chat: ...ry daytime<--[HERE]'))
-        self.assertFalse(command_failure('System chat: Clock skycraft:fixed/apocrypha is at 18000 tick(s)'))
+        self.assertFalse(command_failure('System chat: Clock nirncraft:fixed/apocrypha is at 18000 tick(s)'))
 
     def test_real_mod_descriptors_include_nested_server_dependencies(self):
         server = self.root / 'server'
@@ -115,7 +115,7 @@ class ServerPackageIntegrity(unittest.TestCase):
             archive.writestr('server/migration/installer.log', 'official installer completed')
             for name in ('win_args.txt', 'unix_args.txt'):
                 archive.writestr('server/' + (builder.NATIVE_ARGS / name).as_posix(), text)
-            archive.writestr('server/mods/skycraft-core.jar', b'old core must not propagate')
+            archive.writestr('server/mods/nirncraft-core.jar', b'old core must not propagate')
             archive.writestr('server/world/level.dat', b'old world must not propagate')
         target = self.root / 'fresh'
         target.mkdir()
@@ -134,10 +134,10 @@ class ServerPackageIntegrity(unittest.TestCase):
         expected = 'a' * 64
         def write(mixed):
             with zipfile.ZipFile(path, 'w') as archive:
-                archive.writestr('skycraft/baked/manifest.json', json.dumps({'format': 1, 'inputs': expected, 'files': names}))
+                archive.writestr('nirncraft/baked/manifest.json', json.dumps({'format': 1, 'inputs': expected, 'files': names}))
                 for name in names:
                     digest = 'b' * 64 if mixed and name == 'sceneplan.bin' else expected
-                    archive.writestr('skycraft/baked/' + name, b'\x00\x40' + digest.encode() + zlib.compress(b'actual plan bytes'))
+                    archive.writestr('nirncraft/baked/' + name, b'\x00\x40' + digest.encode() + zlib.compress(b'actual plan bytes'))
         write(False)
         self.assertEqual(builder.baked_bundle(path)['inputs'], expected)
         write(True)

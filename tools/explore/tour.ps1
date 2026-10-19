@@ -21,6 +21,6 @@ if (Test-Path $Options) {
     New-Item -ItemType Directory -Force (Join-Path $ModDir "run") | Out-Null
     Set-Content -Encoding ascii $Options "onboardAccessibility:false`npauseOnLostFocus:false"
 }
-$env:JAVA_TOOL_OPTIONS = "-Dskycraft.autotest=true -Dskycraft.autotest.world=exploretour -Dskycraft.autotest.tour=$Stops -Dskycraft.autotest.tourWait=$Wait"
+$env:JAVA_TOOL_OPTIONS = "-Dnirncraft.autotest=true -Dnirncraft.autotest.world=exploretour -Dnirncraft.autotest.tour=$Stops -Dnirncraft.autotest.tourWait=$Wait"
 & .\gradlew.bat runClient --console=plain "-Dorg.gradle.jvmargs=-Xmx2G"
 Get-ChildItem (Join-Path $ModDir "run\build\autotest-screenshots") -ErrorAction SilentlyContinue | Select-Object Name

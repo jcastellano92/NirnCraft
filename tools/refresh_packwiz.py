@@ -7,7 +7,7 @@ Usage: python3 tools/refresh_packwiz.py [--pack DIR] [--with-core]
   shaderpacks/*.pw.toml, shaderpacks/*.zip.txt (a shader pack's option preset, read by Oculus from
   shaderpacks/<pack file name>.txt) and mods/*.jar. Everything else in the folder (RESOLVE_REPORT.md, README, editor files) is
   ignored.
-* mods/skycraft-core.jar is a build output that is never committed. It is only indexed with --with-core, which the
+* mods/nirncraft-core.jar is a build output that is never committed. It is only indexed with --with-core, which the
   build (tools/prepare-build-pack.sh) uses on its throwaway copy of the pack.
 * Hashes are SHA-256 of the raw bytes on disk. .gitattributes keeps pack/** byte-identical across OSes (LF), so the
   index matches what packwiz-installer downloads from GitHub.
@@ -18,7 +18,7 @@ import os
 import re
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-CORE_JAR = "mods/skycraft-core.jar"
+CORE_JAR = "mods/nirncraft-core.jar"
 
 
 def wanted(rel):
@@ -30,7 +30,7 @@ def wanted(rel):
     if top in ("mods", "resourcepacks", "shaderpacks") and "/" not in rest:
         return (rest.endswith(".pw.toml") or (top == "mods" and rest.endswith(".jar"))
                 or (top == "shaderpacks" and rest.endswith(".zip.txt"))
-                or (top == "shaderpacks" and rest == "SkycraftAether.zip"))  # Skycraft's own pack, built in-repo
+                or (top == "shaderpacks" and rest == "InfiniteATLAS.zip"))  # NirnCraft's own pack, built in-repo
     return False
 
 

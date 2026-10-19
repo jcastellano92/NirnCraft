@@ -1,0 +1,55 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    {
+      "id": "#forge:is_plains",
+      "required": false
+    },
+    {
+      "id": "#terralith:shrublands",
+      "required": false
+    },
+    {
+      "id": "terralith:steppe",
+      "required": false
+    },
+    {
+      "id": "terralith:valley_clearing",
+      "required": false
+    },
+    {
+      "id": "terralith:shield_clearing",
+      "required": false
+    },
+    {
+      "id": "terralith:blooming_plateau",
+      "required": false
+    },
+    {
+      "id": "terralith:lavender_valley",
+      "required": false
+    },
+    {
+      "id": "terralith:highlands",
+      "required": false
+    },
+    {
+      "id": "terralith:temperate_highlands",
+      "required": false
+    },
+    {
+      "id": "terralith:brushland",
+      "required": false
+    },
+    "nirncraft:ash_heath",
+    "nirncraft:eastmarch_volcanic_tundra",
+    "nirncraft:warm_steppe",
+    "nirncraft:whiterun_plains",
+    "nirncraft:whiterun_tundra"
+  ]
+}

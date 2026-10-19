@@ -20,11 +20,11 @@ public final class RegistrationIds263 {
                 String id=text(source,call.getArgument(0));var lambda=call.getArgument(1).asLambdaExpr();
                 for(var creation:lambda.findAll(ObjectCreationExpr.class)) {
                     if(!creation.getType().toString().equals("Item.Properties")||!creation.getArguments().isEmpty())continue;
-                    var r=creation.getRange().orElseThrow();int start=offset(source,r.begin);edits.put(start,new Edit(start,offset(source,r.end)+1,"com.skycraft.platform.SkyProperties.item("+id+")"));
+                    var r=creation.getRange().orElseThrow();int start=offset(source,r.begin);edits.put(start,new Edit(start,offset(source,r.end)+1,"com.nirncraft.platform.SkyProperties.item("+id+")"));
                 }
                 for(var properties:lambda.findAll(MethodCallExpr.class)) {
                     if(!properties.getScope().map(n->n.toString().equals("BlockBehaviour.Properties")).orElse(false)||!Set.of("of","ofFullCopy").contains(properties.getNameAsString()))continue;
-                    var r=properties.getRange().orElseThrow();int start=offset(source,r.begin);String value="com.skycraft.platform.SkyProperties.block("+id+(properties.getNameAsString().equals("of")?"":", "+text(source,properties))+")";
+                    var r=properties.getRange().orElseThrow();int start=offset(source,r.begin);String value="com.nirncraft.platform.SkyProperties.block("+id+(properties.getNameAsString().equals("of")?"":", "+text(source,properties))+")";
                     edits.put(start,new Edit(start,offset(source,r.end)+1,value));
                 }
             }

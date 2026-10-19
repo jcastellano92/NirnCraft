@@ -38,7 +38,7 @@ def main():
         if evidence:
             b = evidence["box"]
             actions.append(f"front {(b[0]+b[3])//2} {(b[2]+b[5])//2} 2200 clear")
-        actions += [f"command execute as @p at @p run skycraft-dungeon-qa view {place} {view}",
+        actions += [f"command execute as @p at @p run nirncraft-dungeon-qa view {place} {view}",
                     "settle 1200", "command effect clear @p minecraft:night_vision", "settle 1200", "capture " + tag]
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "capture-actions.txt").write_text("\n".join(actions) + "\n")

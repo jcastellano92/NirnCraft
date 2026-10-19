@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nirncraft:dragonscale"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "nirncraft:dragonscale"
+      }
+    ]
+  }
+}

@@ -3,17 +3,17 @@ import pathlib
 import re
 import zipfile
 
-PREFIX="shaders/skycraftRealm/"
+PREFIX="shaders/nirncraftRealm/"
 REALMS={
-    "skycraftIsles":("world0","skycraft:shivering_isles",True),
-    "skycraftApocrypha":("world-1","skycraft:apocrypha",False),
-    "skycraftSoulCairn":("world-1","skycraft:soul_cairn",False),
-    "skycraftColdharbour":("world-1","skycraft:coldharbour",False),
+    "nirncraftIsles":("world0","nirncraft:shivering_isles",True),
+    "nirncraftApocrypha":("world-1","nirncraft:apocrypha",False),
+    "nirncraftSoulCairn":("world-1","nirncraft:soul_cairn",False),
+    "nirncraftColdharbour":("world-1","nirncraft:coldharbour",False),
 }
 
 
 def includes(text):
-    return re.sub(r'(#include\s+")/(lib|program)/',r'\1/skycraftRealm/\2/',text)
+    return re.sub(r'(#include\s+")/(lib|program)/',r'\1/nirncraftRealm/\2/',text)
 
 
 def required_once(text,anchor,replacement,label):
@@ -37,22 +37,22 @@ def program_properties(text):
 
 
 def sky_passthrough(textured):
-    varying="in vec2 skycraftRealmUV;\n" if textured else ""
-    sample="texture2D(tex,skycraftRealmUV)*skycraftRealmColor" if textured else "skycraftRealmColor"
-    output_uv="out vec2 skycraftRealmUV;\n" if textured else ""
-    assign_uv="skycraftRealmUV=(gl_TextureMatrix[0]*gl_MultiTexCoord0).xy;" if textured else ""
-    return f'''#include "/skycraftRealm/lib/common.glsl"
-// SKYCRAFT_AUTHORED_REALM_SKY: preserve RealmSky's dome, sprites and emission.
+    varying="in vec2 nirncraftRealmUV;\n" if textured else ""
+    sample="texture2D(tex,nirncraftRealmUV)*nirncraftRealmColor" if textured else "nirncraftRealmColor"
+    output_uv="out vec2 nirncraftRealmUV;\n" if textured else ""
+    assign_uv="nirncraftRealmUV=(gl_TextureMatrix[0]*gl_MultiTexCoord0).xy;" if textured else ""
+    return f'''#include "/nirncraftRealm/lib/common.glsl"
+// NIRNCRAFT_AUTHORED_REALM_SKY: preserve RealmSky's dome, sprites and emission.
 #ifdef FRAGMENT_SHADER
-{varying}in vec4 skycraftRealmColor;
+{varying}in vec4 nirncraftRealmColor;
 void main() {{
     /* DRAWBUFFERS:0 */
     gl_FragData[0]={sample};
 }}
 #endif
 #ifdef VERTEX_SHADER
-{output_uv}out vec4 skycraftRealmColor;
-void main() {{ gl_Position=ftransform();skycraftRealmColor=gl_Color;{assign_uv} }}
+{output_uv}out vec4 nirncraftRealmColor;
+void main() {{ gl_Position=ftransform();nirncraftRealmColor=gl_Color;{assign_uv} }}
 #endif
 '''
 
@@ -66,28 +66,28 @@ def build(upstream):
             text=pack.read(name).decode("utf-8").replace("\r\n","\n")
             text=includes(text)
             if name=="shaders/lib/uniforms.glsl":
-                text+='\n// SKYCRAFT_REALM_LOCAL_UNIFORMS\n'
-                for sampler in ("skycraftFogRadianceTex","skycraftCloudNoiseTex","skycraftLocalOcclusionTex"):
+                text+='\n// NIRNCRAFT_REALM_LOCAL_UNIFORMS\n'
+                for sampler in ("nirncraftFogRadianceTex","nirncraftCloudNoiseTex","nirncraftLocalOcclusionTex"):
                     text+="uniform sampler2D "+sampler+";\n"
             elif name=="shaders/lib/lighting/mainLighting.glsl":
-                text='#include "/lib/atmospherics/skycraftInterior.glsl"\n'+text
+                text='#include "/lib/atmospherics/nirncraftInterior.glsl"\n'+text
                 anchor="    // Vanilla Ambient Occlusion"
                 text=required_once(text,anchor,
-                    "    // SKYCRAFT_REALM_LOCAL_LIGHT: independent of sun, weather and moon phase.\n"
-                    "    sceneLighting += SkycraftLocalLight(playerPos,normalize(mat3(gbufferModelViewInverse)*normalM),true);\n\n"+anchor,
+                    "    // NIRNCRAFT_REALM_LOCAL_LIGHT: independent of sun, weather and moon phase.\n"
+                    "    sceneLighting += NirnCraftLocalLight(playerPos,normalize(mat3(gbufferModelViewInverse)*normalM),true);\n\n"+anchor,
                     "local receiver")
             elif name=="shaders/program/composite1.glsl":
                 anchor="//Program//\nvoid main() {\n    vec3 color = texelFetch(colortex0, texelCoord, 0).rgb;"
-                text=required_once(text,anchor,'#include "/lib/atmospherics/skycraftLocalMedia.glsl"\n\n'+anchor,"local medium include")
+                text=required_once(text,anchor,'#include "/lib/atmospherics/nirncraftLocalMedia.glsl"\n\n'+anchor,"local medium include")
                 anchor="    color = pow(color, vec3(2.2));"
                 text=required_once(text,anchor,
-                    "    // SKYCRAFT_REALM_LOCAL_INTEGRAL: clipped by native and LOD scene depth.\n"
-                    "    if(isEyeInWater==0) color=SkycraftRealmLocalMedia(color,normalize(mat3(gbufferModelViewInverse)*nViewPos),min(lViewPos,lViewPos1));\n\n"+anchor,
+                    "    // NIRNCRAFT_REALM_LOCAL_INTEGRAL: clipped by native and LOD scene depth.\n"
+                    "    if(isEyeInWater==0) color=NirnCraftRealmLocalMedia(color,normalize(mat3(gbufferModelViewInverse)*nViewPos),min(lViewPos,lViewPos1));\n\n"+anchor,
                     "local medium integral")
             elif name=="shaders/lib/common.glsl":
                 anchor="    #if NETHER_COLOR_MODE == 3"
                 text=required_once(text,anchor,
-                    "    // SKYCRAFT_REALM_PALETTE: respect the authored biome rather than a vanilla Nether lookup.\n"
+                    "    // NIRNCRAFT_REALM_PALETTE: respect the authored biome rather than a vanilla Nether lookup.\n"
                     "    #undef NETHER_COLOR_MODE\n    #define NETHER_COLOR_MODE 2\n"+anchor,"realm palette")
                 text=required_once(text,"const vec3 endSkyColor = vec3(0.095, 0.07, 0.15) * 1.65;",
                     "vec3 endSkyColor = fogColor;","Sovngarde sky palette")
@@ -95,7 +95,7 @@ def build(upstream):
                 text=required_once(text,"vec3 endLightColor = vec3(0.68, 0.51, 1.07);",
                     "vec3 endLightColor = fogColor/max(length(fogColor),0.0001)*1.35;","Sovngarde light palette")
             elif name in ("shaders/program/gbuffers_skybasic.glsl","shaders/program/gbuffers_skytextured.glsl"):
-                text="#ifdef SKYCRAFT_REALM_DAYNIGHT\n"+text+"\n#else\n"+sky_passthrough("skytextured" in name)+"#endif\n"
+                text="#ifdef NIRNCRAFT_REALM_DAYNIGHT\n"+text+"\n#else\n"+sky_passthrough("skytextured" in name)+"#endif\n"
             output[PREFIX+name.removeprefix("shaders/")]=text.encode()
         folders={"world-1":("world-1",False),"world1":("world1",False)}
         folders.update({folder:(base,daynight) for folder,(base,dimension,daynight) in REALMS.items()})
@@ -105,7 +105,7 @@ def build(upstream):
                 text=includes(pack.read(name).decode("utf-8").replace("\r\n","\n"))
                 if name.endswith((".fsh",".vsh",".csh",".gsh",".tcs",".tes")):
                     first,rest=text.split("\n",1)
-                    flags="\n#define SKYCRAFT_REALM\n"+("#define SKYCRAFT_REALM_DAYNIGHT\n" if daynight else "")
+                    flags="\n#define NIRNCRAFT_REALM\n"+("#define NIRNCRAFT_REALM_DAYNIGHT\n" if daynight else "")
                     text=first+flags+rest
                 output["shaders/"+folder+"/"+name.rsplit("/",1)[1]]=text.encode()
         dimensions=pack.read("shaders/dimension.properties").decode("utf-8")

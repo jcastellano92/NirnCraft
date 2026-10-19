@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "nirncraft:iron_war_axe",
+    "nirncraft:steel_war_axe",
+    "nirncraft:orcish_war_axe",
+    "nirncraft:dwarven_war_axe",
+    "nirncraft:elven_war_axe",
+    "nirncraft:glass_war_axe",
+    "nirncraft:ebony_war_axe",
+    "nirncraft:daedric_war_axe",
+    "nirncraft:dragonbone_war_axe",
+    "nirncraft:silver_war_axe",
+    "nirncraft:ancient_nord_war_axe",
+    "nirncraft:forsworn_war_axe",
+    "nirncraft:imperial_war_axe",
+    "nirncraft:falmer_war_axe",
+    "nirncraft:nordic_war_axe",
+    "nirncraft:skyforge_war_axe",
+    "nirncraft:akaviri_war_axe",
+    "nirncraft:stalhrim_war_axe",
+    "nirncraft:chitin_war_axe",
+    "nirncraft:redguard_war_axe",
+    "nirncraft:khajiit_war_axe",
+    "nirncraft:bosmer_war_axe",
+    "nirncraft:argonian_war_axe",
+    "nirncraft:atmoran_war_axe",
+    "nirncraft:maormer_war_axe"
+  ]
+}

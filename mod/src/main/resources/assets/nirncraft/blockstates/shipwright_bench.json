@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "nirncraft:block/shipwright_bench"
+    },
+    "facing=east": {
+      "model": "nirncraft:block/shipwright_bench",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "nirncraft:block/shipwright_bench",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nirncraft:block/shipwright_bench",
+      "y": 270
+    }
+  }
+}

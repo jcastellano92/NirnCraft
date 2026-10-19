@@ -1,13 +1,13 @@
 <#
-Skycraft QA harness: one command, a short report. Built so automated sessions read ~40 lines instead of raw logs.
+NirnCraft QA harness: one command, a short report. Built so automated sessions read ~40 lines instead of raw logs.
 
   tools\qa\qa.ps1                 # build + static checks (fast, ~3-5 min)
   tools\qa\qa.ps1 -Unit           # Tier 0 plan-layer unit tests only (gradlew test --console=plain, no MC boot, <90s)
   tools\qa\qa.ps1 -Server         # + headless dedicated server: worldgen, all selftests, clean stop
-  tools\qa\qa.ps1 -Server -Bake   # server run + STRICT check that the baked data (skycraft/baked) is up to date
+  tools\qa\qa.ps1 -Server -Bake   # server run + STRICT check that the baked data (nirncraft/baked) is up to date
                                   # (fails when stale; build_release.ps1 uses this after baking explicitly)
   tools\qa\qa.ps1 -Server -Rebake # ONE boot: when the bake is stale the same server run re-bakes (and verifies against a
-                                  # second live computation), the files are copied into resources/skycraft/baked and the
+                                  # second live computation), the files are copied into resources/nirncraft/baked and the
                                   # jar is rebuilt; reports PASS "rebaked". The recommended command after a merge.
   tools\qa\qa.ps1 -Server -Client # + client autotest tour and a single contact-sheet image of all screenshots
   tools\qa\qa.ps1 -NoBuild ...    # skip the Gradle build (reuse the last one)
@@ -35,7 +35,7 @@ param(
     [string]$Tour = "",
     [int]$ServerTimeout = 900,
     [int]$ClientTimeout = 1500,
-    [string]$Xmx = ""   # server/client JVM heap (default 4G or $env:SKYCRAFT_SERVER_XMX): several JVMs at once ran the PC out of memory
+    [string]$Xmx = ""   # server/client JVM heap (default 4G or $env:NIRNCRAFT_SERVER_XMX): several JVMs at once ran the PC out of memory
 )
 $ErrorActionPreference = "Continue"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
@@ -50,7 +50,7 @@ function Result([string]$name, [bool]$ok, [string]$detail) {
     Add(("{0,-6} {1,-18} {2}" -f ($(if ($ok) { "PASS" } else { "FAIL" })), $name, $detail))
 }
 $py = "py"
-if (-not $Xmx) { $Xmx = $(if ($env:SKYCRAFT_SERVER_XMX) { $env:SKYCRAFT_SERVER_XMX } else { "4G" }) }
+if (-not $Xmx) { $Xmx = $(if ($env:NIRNCRAFT_SERVER_XMX) { $env:NIRNCRAFT_SERVER_XMX } else { "4G" }) }
 
 # ------------------------------------------------------------------ unit tests (Tier 0)
 if ($Unit) {
@@ -114,7 +114,7 @@ $a = & $py -3 -I tools/check_assets.py 2>&1 | Select-Object -Last 1
 Result "assets" ($a -match " 0 problems") "$a"
 # the whole asset chain (tools/qa/asset_audit.py): blockstates (every state has a variant), model syntax (a bad element
 # rotation makes the loader drop the model: magenta cube), parents, texture variables, PNGs, item models, texture
-# literals, unregistered skycraft: ids. With -Server it runs after the boot against that boot's registry dump instead.
+# literals, unregistered nirncraft: ids. With -Server it runs after the boot against that boot's registry dump instead.
 if (-not ($Server -or $Bake -or $Rebake)) {
     $aa = @(& $py -3 -I tools/qa/asset_audit.py --list 25 2>&1)
     $aaerr = @($aa | Where-Object { $_ -match "^ERR" })
@@ -178,8 +178,8 @@ if ($Server) {
     Set-Content (Join-Path $Run "eula.txt") "eula=true" -Encoding ascii
     $props = Join-Path $Run "server.properties"
     if (-not (Test-Path $props)) { Set-Content $props "online-mode=false`nserver-port=25601`n" -Encoding ascii }
-    $baked = Join-Path $Mod "src\main\resources\skycraft\baked"
-    $stage = Join-Path $Run "skycraft-bake"
+    $baked = Join-Path $Mod "src\main\resources\nirncraft\baked"
+    $stage = Join-Path $Run "nirncraft-bake"
     if ($Rebake) {
         Remove-Item -Recurse -Force $stage -ErrorAction SilentlyContinue
         # the rebake runs on the server thread for a while: no watchdog
@@ -188,21 +188,21 @@ if ($Server) {
     }
     Remove-Item -Recurse -Force (Join-Path $Run "world") -ErrorAction SilentlyContinue
     Remove-Item -Recurse -Force (Join-Path $Run "crash-reports") -ErrorAction SilentlyContinue
-    # the registry dump of this boot (com.skycraft.dev.AssetDump) feeds the asset audit below
-    Remove-Item (Join-Path $Run "skycraft-asset-audit.json") -ErrorAction SilentlyContinue
+    # the registry dump of this boot (com.nirncraft.dev.AssetDump) feeds the asset audit below
+    Remove-Item (Join-Path $Run "nirncraft-asset-audit.json") -ErrorAction SilentlyContinue
     # society selftest is async (about 40 s of server time: crowd cap, gate guards, night sleepers, respawn); the housing
     # dumps that follow give it the time, one command every 300 ticks
-    $cmds = @("forceload add -96 -96 96 96", "skycraft-quest selftest flow", "skycraft magic selftest", "skycraft-protect selftest", "skycraft-inventory selftest",
-        "skycraft-quest intro selftest", "skycraft-mounts selftest", "skycraft-fire selftest", "skycraft-fire census helgen generate", "skycraft-society selftest", "skylore selftest lecterns")
+    $cmds = @("forceload add -96 -96 96 96", "nirncraft-quest selftest flow", "nirncraft magic selftest", "nirncraft-protect selftest", "nirncraft-inventory selftest",
+        "nirncraft-quest intro selftest", "nirncraft-mounts selftest", "nirncraft-fire selftest", "nirncraft-fire census helgen generate", "nirncraft-society selftest", "skylore selftest lecterns")
     # housing model dump for the population lint (tools/qa/population_lint.py): no building, no chunk loads
     $popSample = @("whiterun", "riverwood", "helgen", "rorikstead", "dragon_bridge", "falkreath", "old_hroldan")
     $popSample | ForEach-Object { $cmds += "skypop $_" }
-    Remove-Item (Join-Path $Run "skycraft-previews\population_*.json") -ErrorAction SilentlyContinue
-    if ($Rebake) { $cmds += "skycraft-bake refresh" } elseif ($Bake) { $cmds += "skycraft-bake check" }
+    Remove-Item (Join-Path $Run "nirncraft-previews\population_*.json") -ErrorAction SilentlyContinue
+    if ($Rebake) { $cmds += "nirncraft-bake refresh" } elseif ($Bake) { $cmds += "nirncraft-bake check" }
     if ($ServerCmds) { $cmds += ($ServerCmds -split "\|") }
     $cmds += "stop"
     $auto = (($cmds | ForEach-Object { $_.Trim().Replace(' ', '+') }) -join "|")
-    $env:JAVA_TOOL_OPTIONS = "-Xmx$Xmx -Dskycraft.autorun=$auto -Dskycraft.autorun.wait=300"
+    $env:JAVA_TOOL_OPTIONS = "-Xmx$Xmx -Dnirncraft.autorun=$auto -Dnirncraft.autorun.wait=300"
     $out = Join-Path $Run "qa-server.log"
     $start = Get-Date
     $p = Start-Process -FilePath (Join-Path $Mod "gradlew.bat") -ArgumentList "runServer", "--console=plain" -WorkingDirectory $Mod `
@@ -219,7 +219,7 @@ if ($Server) {
     $sfail = @($summary | Where-Object { $_ -match "^FAIL" })
     Result "server" ($sfail.Count -eq 0) "ran ${secs}s"
     $summary | ForEach-Object { Add("       $_") }
-    # world protection self-test (com.skycraft.protect.ProtectSelfTest): glass/bed in town cancelled, homestead/vein/tree allowed...
+    # world protection self-test (com.nirncraft.protect.ProtectSelfTest): glass/bed in town cancelled, homestead/vein/tree allowed...
     $pt = Select-String -Path $out -Pattern "Protect selftest:" | Select-Object -Last 1
     if ($pt) {
         $ptl = ($pt.Line -replace "^.*?Protect selftest: ", "")
@@ -227,7 +227,7 @@ if ($Server) {
     } else {
         Result "protect" $false "no 'Protect selftest' line in the server log"
     }
-    # mount system self-test (com.skycraft.mounts.MountsSelfTest): saddles, barding, weight-limited bags, stamina bar swap, taming rules
+    # mount system self-test (com.nirncraft.mounts.MountsSelfTest): saddles, barding, weight-limited bags, stamina bar swap, taming rules
     $mt = Select-String -Path $out -Pattern "Mounts selftest:" | Select-Object -Last 1
     if ($mt) {
         $mtl = ($mt.Line -replace "^.*?Mounts selftest: ", "")
@@ -236,7 +236,7 @@ if ($Server) {
     } else {
         Result "mounts" $false "no 'Mounts selftest' line in the server log"
     }
-    # inventory self-test (com.skycraft.inventory.PackSelfTest): overflow pack save/load/sync, full container take,
+    # inventory self-test (com.nirncraft.inventory.PackSelfTest): overflow pack save/load/sync, full container take,
     # quest-item sale refusal, equipped confirmation, buy-back
     $it = Select-String -Path $out -Pattern "Inventory selftest:" | Select-Object -Last 1
     if ($it) {
@@ -246,7 +246,7 @@ if ($Server) {
     } else {
         Result "inventory" $false "no 'Inventory selftest' line in the server log"
     }
-    # Helgen aftermath census (com.skycraft.fire.FireCommands): the scene exists and nothing in it floats
+    # Helgen aftermath census (com.nirncraft.fire.FireCommands): the scene exists and nothing in it floats
     $fc = Select-String -Path $out -Pattern "\[fire\] +fire sites \d+.*burnt blocks \(charred\+scorched\) (\d+)" | Select-Object -Last 1
     $ff = Select-String -Path $out -Pattern "floating fire/decal/bed blocks (\d+)" | Select-Object -Last 1
     if ($fc -and $ff) {
@@ -254,9 +254,9 @@ if ($Server) {
         $float = [int]$ff.Matches[0].Groups[1].Value
         Result "fire-census" ($burnt -gt 0 -and $float -eq 0) ("helgen: {0} burnt blocks, {1} floating fire/decal/bed blocks" -f $burnt, $float)
     } else {
-        Result "fire-census" $false "no 'skycraft-fire census helgen' output in the server log"
+        Result "fire-census" $false "no 'nirncraft-fire census helgen' output in the server log"
     }
-    # society self-test (com.skycraft.society.SocietySelfTest): crowd cap, gate guards, night sleepers, races, respawn
+    # society self-test (com.nirncraft.society.SocietySelfTest): crowd cap, gate guards, night sleepers, races, respawn
     $st = Select-String -Path $out -Pattern "Society selftest: \d+/" | Select-Object -Last 1
     if ($st) {
         $stl = ($st.Line -replace "^.*?Society selftest: ", "")
@@ -265,13 +265,13 @@ if ($Server) {
     } else {
         Result "society" $false "no 'Society selftest' line in the server log"
     }
-    $popDir =Join-Path $Run "skycraft-previews"
+    $popDir =Join-Path $Run "nirncraft-previews"
     $pl = @(& $py -3 -I (Join-Path $PSScriptRoot "population_lint.py") $popDir --require ($popSample -join ",") 2>&1)
     $plerr = @($pl | Where-Object { $_ -match "^ERR" })
     Result "population" ($plerr.Count -eq 0) ("{0}" -f ($pl | Select-Object -Last 1))
     $pl | Where-Object { $_ -match "^(ERR|WARN)" } | Select-Object -First 12 | ForEach-Object { Add("       $_") }
     # asset audit against the registry this boot dumped: every registered block/item has a working blockstate/model/texture
-    $dumpFile = Join-Path $Run "skycraft-asset-audit.json"
+    $dumpFile = Join-Path $Run "nirncraft-asset-audit.json"
     if (Test-Path $dumpFile) {
         Push-Location $Root
         $aa = @(& $py -3 -I tools/qa/asset_audit.py --dump $dumpFile --list 25 2>&1)
@@ -281,7 +281,7 @@ if ($Server) {
         Result "asset-audit" ($aarc -eq 0) ("{0}" -f ($aa | Select-Object -Last 1))
         $aaerr | Select-Object -First 15 | ForEach-Object { Add("       $_") }
     } else {
-        Result "asset-audit" $false "the server wrote no skycraft-asset-audit.json (com.skycraft.dev.AssetDump)"
+        Result "asset-audit" $false "the server wrote no nirncraft-asset-audit.json (com.nirncraft.dev.AssetDump)"
     }
     if ($Bake) {
         $b = Select-String -Path $out -Pattern "Bake is up to date|Bake problems|Bake was stale: rebaked" | Select-Object -Last 1
@@ -294,7 +294,7 @@ if ($Server) {
                 New-Item -ItemType Directory -Force $baked | Out-Null
                 Get-ChildItem $baked -File | Remove-Item -Force
                 Copy-Item (Join-Path $stage "*") $baked
-                $detail = "rebaked ($n files into resources/skycraft/baked, verified against a second live computation)"
+                $detail = "rebaked ($n files into resources/nirncraft/baked, verified against a second live computation)"
                 if (-not $NoBuild) {
                     $t0 = Get-Date
                     Push-Location $Mod
@@ -317,8 +317,8 @@ if ($Server) {
 if ($Client) {
     $shots = Join-Path $Run "build\autotest-screenshots"
     Remove-Item -Recurse -Force $shots -ErrorAction SilentlyContinue
-    $flags = "-Xmx$Xmx -Dskycraft.autotest=true -Dskycraft.autotest.world=qa_world"
-    if ($Tour) { $flags += " -Dskycraft.autotest.tour=" + $Tour.Replace(' ', '+') }
+    $flags = "-Xmx$Xmx -Dnirncraft.autotest=true -Dnirncraft.autotest.world=qa_world"
+    if ($Tour) { $flags += " -Dnirncraft.autotest.tour=" + $Tour.Replace(' ', '+') }
     $env:JAVA_TOOL_OPTIONS = $flags
     $out = Join-Path $Run "qa-client.log"
     $p = Start-Process -FilePath (Join-Path $Mod "gradlew.bat") -ArgumentList "runClient", "--console=plain" -WorkingDirectory $Mod `

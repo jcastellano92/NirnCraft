@@ -3,7 +3,7 @@
 Usage:
   py -3 -I tools/qa/story_lint.py [--province <P>] [--region <R>] [--selftest]
 
-Validates every file in mod/src/main/resources/skycraft/quests/story/*.json:
+Validates every file in mod/src/main/resources/nirncraft/quests/story/*.json:
   1. Valid land region in regions.json.
   2. Non-empty "why" on story root and each quest citing existing World Sheet
      L7-L10 fields in tamriel/world/<province>.json.
@@ -25,7 +25,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
-SKY = os.path.join(RES, "skycraft")
+SKY = os.path.join(RES, "nirncraft")
 STORY_DIR = os.path.join(SKY, "quests", "story")
 WORLD_DIR = os.path.join(SKY, "tamriel", "world")
 

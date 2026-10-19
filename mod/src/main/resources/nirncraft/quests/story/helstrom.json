@@ -1,0 +1,692 @@
+{
+  "region": "black_marsh/helstrom",
+  "province": "black_marsh",
+  "line": "story_helstrom",
+  "category": "main",
+  "title": "The Sap-Council of Helstrom",
+  "summary": "As the Elder Tree Council gathers in the labyrinth channels between Thorn and Helstrom, an illicit sap-siphoning ring threatens the sacred Sap-Naming Rite at the Elder Root Sanctum.",
+  "why": [
+    "helstrom.L7.root_heart_tribes",
+    "helstrom.L8.sap_naming_rite",
+    "helstrom.L9.elder_tree_council"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "helstrom",
+    "places": [
+      "helstrom",
+      "long_throat_hist_grove",
+      "sweet_egg_burrow",
+      "forsaken_hamlet",
+      "still_fang_hist_grove",
+      "drift_claw_burrow",
+      "root_whisper_hollow",
+      "dead_pool_hist_grove",
+      "sap_fen_cave",
+      "alten_corimont",
+      "xal_thak",
+      "cold_tree_grotto",
+      "tsonashap_mine",
+      "archon",
+      "greenglade",
+      "greenspring",
+      "seaspring",
+      "riverbridge",
+      "rockpoint",
+      "alten_markmont",
+      "portdun_mont",
+      "seafalls",
+      "sweet_vine_village",
+      "moss_stride_village",
+      "mire_heart_village"
+    ],
+    "npc": "story_helstrom_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "Boatmen coming through the labyrinth channels from Thorn say the inner Hist roots around Helstrom are weeping amber into the dark water before the Sap-Naming Rite has even begun.",
+    "notice": "ELDER TREE COUNCIL OF HELSTROM: Trusted guides needed to patrol the root-channels between Thorn, Archon, and Helstrom before the Sap-Naming Rite."
+  },
+  "npcs": [
+    {
+      "id": "story_helstrom_hook_npc",
+      "name": "Warden of Helstrom",
+      "role": "guard",
+      "place": "helstrom",
+      "greet": "Boatmen coming through the labyrinth channels from Thorn say the inner Hist roots around Helstrom are weeping amber into the dark water before the Sap-Naming Rite has even begun.",
+      "talk": [
+        "The trouble across Helstrom began when sealed dispatches started bypassing Helstrom.",
+        "If you mean to help the Elder Tree Council of Helstrom, start by checking the trail between Helstrom and Green Whisper Camp."
+      ]
+    },
+    {
+      "id": "story_helstrom_envoy_npc",
+      "name": "Chronicler of Helstrom",
+      "role": "scholar",
+      "place": "green_whisper_camp",
+      "greet": "Keep your voice low—everyone at Green Whisper Camp is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from Green Whisper Camp toward Deep Whisper Camp before they vanished into the brush.",
+        "Bring any ciphered tallies back to Helstrom so Arch-Speaker Teeh-La can see the proof."
+      ]
+    },
+    {
+      "id": "story_helstrom_scout_npc",
+      "name": "Outrider of Deep Whisper Camp",
+      "role": "scout",
+      "place": "deep_whisper_camp",
+      "greet": "You made good time from Green Whisper Camp. The saboteurs have fortified the approaches near Moss Marsh Hist Grove.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at Moss Marsh Hist Grove with a picked guard.",
+        "Once Moss Marsh Hist Grove is cleared, return to Helstrom to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_helstrom_steward_npc",
+      "name": "Speaker of Helstrom",
+      "role": "steward",
+      "place": "helstrom",
+      "greet": "Arch-Speaker Teeh-La awaits word on whether the crisis in Helstrom has been contained.",
+      "talk": [
+        "The elders of Helstrom have prepared the concord table for your return.",
+        "All of Helstrom owes you a debt for standing between Helstrom and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_helstrom_boss_01": {
+      "name": "Usurper-Captain of Helstrom (1)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "helstrom",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_helstrom_boss_02": {
+      "name": "Usurper-Captain of Green Whisper Camp (2)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "green_whisper_camp",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_helstrom_boss_03": {
+      "name": "Usurper-Captain of Deep Whisper Camp (3)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "deep_whisper_camp",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_helstrom_boss_04": {
+      "name": "Usurper-Captain of Moss Marsh Hist Grove (4)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "moss_marsh_hist_grove",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_helstrom_boss_05": {
+      "name": "Usurper-Captain of Soft Eye Cave (5)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "soft_eye_cave",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_helstrom_boss_06": {
+      "name": "Usurper-Captain of Old Egg Hollow (6)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "old_egg_hollow",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_helstrom_boss_07": {
+      "name": "Usurper-Captain of Looks Too Longs Hut (7)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "looks_too_longs_hut",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_helstrom_boss_08": {
+      "name": "Usurper-Captain of Mud Fen Hollow (8)",
+      "rank": "boss",
+      "type": "nirncraft:bandit_chief",
+      "place": "mud_fen_hollow",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_helstrom_scene_01": [
+      "Warden of Helstrom: Examine these marks recovered near Helstrom—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Helstrom and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Helstrom, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_02": [
+      "Warden of Helstrom: Examine these marks recovered near Green Whisper Camp—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Green Whisper Camp and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Green Whisper Camp, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_03": [
+      "Warden of Helstrom: Examine these marks recovered near Deep Whisper Camp—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Deep Whisper Camp and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Deep Whisper Camp, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_04": [
+      "Warden of Helstrom: Examine these marks recovered near Moss Marsh Hist Grove—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Moss Marsh Hist Grove and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Moss Marsh Hist Grove, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_05": [
+      "Warden of Helstrom: Examine these marks recovered near Soft Eye Cave—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Soft Eye Cave and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Soft Eye Cave, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_06": [
+      "Warden of Helstrom: Examine these marks recovered near Old Egg Hollow—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Old Egg Hollow and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Old Egg Hollow, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_07": [
+      "Warden of Helstrom: Examine these marks recovered near Looks Too Longs Hut—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Looks Too Longs Hut and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Looks Too Longs Hut, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_08": [
+      "Warden of Helstrom: Examine these marks recovered near Mud Fen Hollow—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Mud Fen Hollow and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Mud Fen Hollow, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_09": [
+      "Warden of Helstrom: Examine these marks recovered near Cold Mist Pit—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Cold Mist Pit and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Cold Mist Pit, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_10": [
+      "Warden of Helstrom: Examine these marks recovered near Moss Shell Crag—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Moss Shell Crag and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Moss Shell Crag, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_11": [
+      "Warden of Helstrom: Examine these marks recovered near Soft Scale Clearing—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Soft Scale Clearing and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Soft Scale Clearing, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_12": [
+      "Warden of Helstrom: Examine these marks recovered near Sun Egg Ruins—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Sun Egg Ruins and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Sun Egg Ruins, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_13": [
+      "Warden of Helstrom: Examine these marks recovered near Glow Tooth Spring—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Glow Tooth Spring and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Glow Tooth Spring, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_14": [
+      "Warden of Helstrom: Examine these marks recovered near Moss Stride Village—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Moss Stride Village and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Moss Stride Village, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_15": [
+      "Warden of Helstrom: Examine these marks recovered near Sweet Vine Village—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Sweet Vine Village and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Sweet Vine Village, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_16": [
+      "Warden of Helstrom: Examine these marks recovered near Deep Eye Hist Grove—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Deep Eye Hist Grove and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Deep Eye Hist Grove, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_17": [
+      "Warden of Helstrom: Examine these marks recovered near Liven—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Liven and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Liven, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_18": [
+      "Warden of Helstrom: Examine these marks recovered near Dark Eye Hist Grove—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Dark Eye Hist Grove and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Dark Eye Hist Grove, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_19": [
+      "Warden of Helstrom: Examine these marks recovered near The Graceful Dominator—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between The Graceful Dominator and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at The Graceful Dominator, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_20": [
+      "Warden of Helstrom: Examine these marks recovered near Black Tail Camp—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Black Tail Camp and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Black Tail Camp, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_21": [
+      "Warden of Helstrom: Examine these marks recovered near Black Claw Hist Grove—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Black Claw Hist Grove and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Black Claw Hist Grove, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_22": [
+      "Warden of Helstrom: Examine these marks recovered near Long Song Ruins—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Long Song Ruins and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Long Song Ruins, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_23": [
+      "Warden of Helstrom: Examine these marks recovered near Soft Marsh Camp—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Soft Marsh Camp and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Soft Marsh Camp, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_24": [
+      "Warden of Helstrom: Examine these marks recovered near Tsavaka Vusa—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Tsavaka Vusa and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Tsavaka Vusa, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_25": [
+      "Warden of Helstrom: Examine these marks recovered near Still Root Hist Grove—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Still Root Hist Grove and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Still Root Hist Grove, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_26": [
+      "Warden of Helstrom: Examine these marks recovered near Cold Wallow Hollow—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Cold Wallow Hollow and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Cold Wallow Hollow, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_27": [
+      "Warden of Helstrom: Examine these marks recovered near Captain Bones Ship—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Captain Bones Ship and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Captain Bones Ship, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_28": [
+      "Warden of Helstrom: Examine these marks recovered near Vuh Naats Hut—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Vuh Naats Hut and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Vuh Naats Hut, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_29": [
+      "Warden of Helstrom: Examine these marks recovered near Gray Mist Kwama Mine—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Gray Mist Kwama Mine and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Gray Mist Kwama Mine, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_30": [
+      "Warden of Helstrom: Examine these marks recovered near Greenspring—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Greenspring and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Greenspring, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_31": [
+      "Warden of Helstrom: Examine these marks recovered near Still Marsh Hist Grove—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Still Marsh Hist Grove and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Still Marsh Hist Grove, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_32": [
+      "Warden of Helstrom: Examine these marks recovered near Alten Markmont—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Alten Markmont and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Alten Markmont, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_33": [
+      "Warden of Helstrom: Examine these marks recovered near Warm Fen Spring—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Warm Fen Spring and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Warm Fen Spring, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_34": [
+      "Warden of Helstrom: Examine these marks recovered near Rockpoint—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Rockpoint and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Rockpoint, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_35": [
+      "Warden of Helstrom: Examine these marks recovered near Warm Tail Spring—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Warm Tail Spring and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Warm Tail Spring, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_36": [
+      "Warden of Helstrom: Examine these marks recovered near Vakakot Xanmeer—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Vakakot Xanmeer and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Vakakot Xanmeer, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_37": [
+      "Warden of Helstrom: Examine these marks recovered near Moss Throat Hollow—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Moss Throat Hollow and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Moss Throat Hollow, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_38": [
+      "Warden of Helstrom: Examine these marks recovered near Vaults of Gemin—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Vaults of Gemin and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Vaults of Gemin, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_39": [
+      "Warden of Helstrom: Examine these marks recovered near Jeesul Xanmeer—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Jeesul Xanmeer and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Jeesul Xanmeer, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_40": [
+      "Warden of Helstrom: Examine these marks recovered near Dead Pool Hist Grove—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Dead Pool Hist Grove and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Dead Pool Hist Grove, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_41": [
+      "Warden of Helstrom: Examine these marks recovered near Deep Egg Burrow—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Deep Egg Burrow and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Deep Egg Burrow, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_42": [
+      "Warden of Helstrom: Examine these marks recovered near Atanaz Ruins—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Atanaz Ruins and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Atanaz Ruins, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_43": [
+      "Warden of Helstrom: Examine these marks recovered near Glow Vine Crypt—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Glow Vine Crypt and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Glow Vine Crypt, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_44": [
+      "Warden of Helstrom: Examine these marks recovered near Long Throat Hist Grove—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Long Throat Hist Grove and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Long Throat Hist Grove, then bring the recovered charter back to Helstrom."
+    ],
+    "story_helstrom_scene_45": [
+      "Warden of Helstrom: Examine these marks recovered near Dead Wallow Kwama Mine—they match the cabal troubling Helstrom.",
+      "Chronicler of Helstrom: The seal impressions cite the old charters of the Elder Tree Council of Helstrom word for word.",
+      "Outrider of Deep Whisper Camp: Our scouts spotted lantern-signals flashing between Dead Wallow Kwama Mine and Moss Marsh Hist Grove at dusk.",
+      "Speaker of Helstrom: Strike swiftly at Dead Wallow Kwama Mine, then bring the recovered charter back to Helstrom."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_helstrom_01_opening",
+      "order": 1,
+      "title": "Weeping Bark in the Labyrinth",
+      "region": "black_marsh/helstrom",
+      "category": "main",
+      "giver": "story_helstrom_hook_npc",
+      "start": "npc:story_helstrom_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "helstrom.L7.root_heart_tribes",
+        "helstrom.L8.sap_naming_rite"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Helstrom and Green Whisper Camp in Helstrom.",
+      "places": [
+        "helstrom",
+        "green_whisper_camp"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "helstrom",
+          "objective": "Speak with the Warden at Helstrom and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "green_whisper_camp",
+          "objective": "Examine the disturbed boundary markers at Green Whisper Camp"
+        },
+        {
+          "id": 30,
+          "place": "helstrom",
+          "objective": "Return the recovered seal-impression to the Chronicler at Helstrom"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "helstrom",
+          "text": "Speak with the Warden at Helstrom and inspect the contested tallies",
+          "scene": "story_helstrom_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "green_whisper_camp",
+          "text": "Examine the disturbed boundary markers at Green Whisper Camp"
+        },
+        {
+          "type": "go",
+          "place": "helstrom",
+          "text": "Return the recovered seal-impression to the Chronicler at Helstrom"
+        }
+      ],
+      "consequence": "world_state:helstrom_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_helstrom_02_trail",
+      "order": 2,
+      "title": "The Thorn-Port Manifest",
+      "region": "black_marsh/helstrom",
+      "category": "main",
+      "giver": "story_helstrom_envoy_npc",
+      "start": "auto",
+      "prereq": "story_helstrom_01_opening",
+      "requires": [
+        "story_helstrom_01_opening"
+      ],
+      "why": [
+        "helstrom.L8.sap_naming_rite",
+        "helstrom.L9.elder_tree_council"
+      ],
+      "summary": "Follow the conspirators' supply route from Green Whisper Camp to Deep Whisper Camp and seize their cipher-ledger.",
+      "places": [
+        "green_whisper_camp",
+        "deep_whisper_camp"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "green_whisper_camp",
+          "objective": "Track the night-couriers departing Green Whisper Camp"
+        },
+        {
+          "id": 20,
+          "place": "deep_whisper_camp",
+          "objective": "Drive off the cabal outriders at Deep Whisper Camp and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "green_whisper_camp",
+          "objective": "Deliver the cipher-box to the expedition chronicler at Green Whisper Camp"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "green_whisper_camp",
+          "text": "Track the night-couriers departing Green Whisper Camp",
+          "scene": "story_helstrom_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "deep_whisper_camp",
+          "text": "Drive off the cabal outriders at Deep Whisper Camp and seize their cipher-box",
+          "boss": "story_helstrom_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "green_whisper_camp",
+          "text": "Deliver the cipher-box to the expedition chronicler at Green Whisper Camp"
+        }
+      ],
+      "consequence": "world_state:helstrom_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_helstrom_03_sanctum",
+      "order": 3,
+      "title": "Rite of the Naming Pool",
+      "region": "black_marsh/helstrom",
+      "category": "main",
+      "giver": "story_helstrom_scout_npc",
+      "start": "auto",
+      "prereq": "story_helstrom_02_trail",
+      "requires": [
+        "story_helstrom_02_trail"
+      ],
+      "why": [
+        "helstrom.L9.elder_tree_council",
+        "helstrom.L10.elder_root_sanctum"
+      ],
+      "summary": "Secure the outer wards between Deep Whisper Camp and Moss Marsh Hist Grove to lay bare the cabal's stronghold.",
+      "places": [
+        "deep_whisper_camp",
+        "moss_marsh_hist_grove"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "deep_whisper_camp",
+          "objective": "Meet the outrider scout at Deep Whisper Camp to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "moss_marsh_hist_grove",
+          "objective": "Scout the fortified threshold at Moss Marsh Hist Grove and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "helstrom",
+          "objective": "Carry the ward-key back to the council table at Helstrom"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "deep_whisper_camp",
+          "text": "Meet the outrider scout at Deep Whisper Camp to decode the sanctum approach",
+          "scene": "story_helstrom_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "moss_marsh_hist_grove",
+          "text": "Scout the fortified threshold at Moss Marsh Hist Grove and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "helstrom",
+          "text": "Carry the ward-key back to the council table at Helstrom"
+        }
+      ],
+      "consequence": "world_state:helstrom_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_helstrom_04_finale",
+      "order": 4,
+      "title": "Judgment of the Elder Root",
+      "region": "black_marsh/helstrom",
+      "category": "main",
+      "giver": "story_helstrom_steward_npc",
+      "start": "auto",
+      "prereq": "story_helstrom_03_sanctum",
+      "requires": [
+        "story_helstrom_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "helstrom.L7.root_heart_tribes",
+        "helstrom.L10.elder_root_sanctum"
+      ],
+      "summary": "Storm the cabal stronghold at Moss Marsh Hist Grove and witness Arch-Speaker Teeh-La seal the regional concord at Helstrom.",
+      "places": [
+        "moss_marsh_hist_grove",
+        "helstrom"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "moss_marsh_hist_grove",
+          "objective": "Storm the inner chamber at Moss Marsh Hist Grove and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "moss_marsh_hist_grove",
+          "objective": "Recover the stolen charter-seal of Helstrom from Moss Marsh Hist Grove"
+        },
+        {
+          "id": 30,
+          "place": "helstrom",
+          "objective": "Present the charter-seal at Helstrom to restore peace across Helstrom"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "moss_marsh_hist_grove",
+          "text": "Storm the inner chamber at Moss Marsh Hist Grove and defeat the cabal ringleader",
+          "boss": "story_helstrom_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "moss_marsh_hist_grove",
+          "text": "Recover the stolen charter-seal of Helstrom from Moss Marsh Hist Grove"
+        },
+        {
+          "type": "go",
+          "place": "helstrom",
+          "text": "Present the charter-seal at Helstrom to restore peace across Helstrom",
+          "scene": "story_helstrom_scene_04"
+        }
+      ],
+      "consequence": "world_state:helstrom_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Helstrom"
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "nirncraft:settlement_farm",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "nirncraft:places",
+    "salt": 520104,
+    "types": [
+      "farm"
+    ]
+  }
+}

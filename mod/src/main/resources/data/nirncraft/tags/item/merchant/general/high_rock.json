@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:spiced_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:goat_cheese_wedge",
+      "required": false
+    },
+    {
+      "id": "nirncraft:juniper_berries",
+      "required": false
+    },
+    {
+      "id": "nirncraft:silver_ingot",
+      "required": false
+    }
+  ]
+}

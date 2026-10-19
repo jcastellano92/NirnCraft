@@ -1,0 +1,33 @@
+{
+  "type": "nirncraft:flora_tree",
+  "config": {
+    "species": [
+      {
+        "species": "crag_tree",
+        "weight": 3
+      },
+      {
+        "species": "oak",
+        "weight": 2
+      },
+      {
+        "species": "birch",
+        "weight": 2
+      },
+      {
+        "species": "skyrim_pine",
+        "weight": 2
+      },
+      {
+        "species": "juniper",
+        "weight": 1
+      },
+      {
+        "species": "forest_bush",
+        "weight": 2
+      }
+    ],
+    "stands": 0.6,
+    "stand_scale": 48
+  }
+}

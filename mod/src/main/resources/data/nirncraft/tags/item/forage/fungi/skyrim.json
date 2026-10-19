@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:imp_stool",
+      "required": false
+    },
+    {
+      "id": "nirncraft:namiras_rot",
+      "required": false
+    },
+    {
+      "id": "nirncraft:white_cap",
+      "required": false
+    },
+    {
+      "id": "nirncraft:bleeding_crown",
+      "required": false
+    },
+    {
+      "id": "nirncraft:mora_tapinella",
+      "required": false
+    },
+    {
+      "id": "nirncraft:glowing_mushroom",
+      "required": false
+    },
+    {
+      "id": "nirncraft:swamp_fungal_pod",
+      "required": false
+    },
+    {
+      "id": "nirncraft:creep_cluster",
+      "required": false
+    }
+  ]
+}

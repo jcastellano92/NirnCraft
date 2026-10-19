@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "nirncraft:alto_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:spiced_wine",
+      "required": false
+    },
+    {
+      "id": "nirncraft:goat_cheese_wedge",
+      "required": false
+    },
+    {
+      "id": "nirncraft:eidar_cheese_wedge",
+      "required": false
+    },
+    {
+      "id": "nirncraft:jazbay_grapes",
+      "required": false
+    },
+    "minecraft:apple",
+    {
+      "id": "nirncraft:elves_ear",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,256 @@
+{
+  "id": "fullers_break",
+  "why": [
+    "malabal_tor.L1.xylo_gorge",
+    "malabal_tor.L4.jungle_understorey",
+    "malabal_tor.L6.silvenar_seat"
+  ],
+  "sil": "valenwood-fullers-break-plan",
+  "base": "none",
+  "overlay": "malabal_tor",
+  "radius": 26,
+  "reach": 38,
+  "gates": [
+    [
+      0,
+      24
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        12
+      ],
+      "overlay": "malabal_tor",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        12,
+        26
+      ],
+      "overlay": "malabal_tor",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "fullers_break_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -7
+      ],
+      "name": "fullers_break_landmark",
+      "overlay": "malabal_tor"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        -4,
+        4
+      ],
+      "spokes": 6,
+      "r0": 10,
+      "r1": 22,
+      "wobble": 6,
+      "offset": 2.37,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        18
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          21
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          4,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "fullers_break_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        12,
+        15
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "fullers_break_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -2,
+        9
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "fullers_break_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -17,
+        8
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "fullers_break_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        -4
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "fullers_break_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -4,
+        -18
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "fullers_break_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        6,
+        -7
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "fullers_break_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "fullers_break_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "fullers_break_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "fullers_break_b_5",
+    "smithy": "fullers_break_b_7"
+  },
+  "titles": {
+    "fullers_break_b_1": "place.nirncraft.fullers_break Council & Seat Hall",
+    "fullers_break_b_2": "place.nirncraft.fullers_break High Sanctuary",
+    "fullers_break_b_3": "place.nirncraft.fullers_break Fighters & Wayfarers Hall",
+    "fullers_break_b_4": "place.nirncraft.fullers_break Mages & Chroniclers Spire",
+    "fullers_break_b_5": "place.nirncraft.fullers_break The Lantern & Hearth Inn",
+    "fullers_break_b_6": "place.nirncraft.fullers_break The Traveler's Rest Tavern",
+    "fullers_break_b_7": "place.nirncraft.fullers_break Master Forge & Armorer",
+    "fullers_break_landmark": "High Seat of place.nirncraft.fullers_break",
+    "fullers_break_plaza": "place.nirncraft.fullers_break Central Plaza"
+  },
+  "innKey": "fullers_break_b_5",
+  "zones": [
+    {
+      "at": [
+        -4,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -4,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        9,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 22,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
+}

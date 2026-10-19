@@ -11,11 +11,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 MAIN = ROOT / "mod" / "src" / "main"
-DATA = MAIN / "resources" / "data" / "skycraft"
-JAVA = MAIN / "java" / "com" / "skycraft"
+DATA = MAIN / "resources" / "data" / "nirncraft"
+JAVA = MAIN / "java" / "com" / "nirncraft"
 TAGS = DATA / "tags" / "item"
 LOOT = DATA / "loot_table"
-SK = "skycraft:"
+SK = "nirncraft:"
 
 
 def write(path, obj):
@@ -37,7 +37,7 @@ def ids(*names):
 
 
 def tag(path, values, optional=True):
-    """Item tag; skycraft entries from other workstreams' modules are optional so a missing item never breaks it."""
+    """Item tag; nirncraft entries from other workstreams' modules are optional so a missing item never breaks it."""
     vals = []
     for v in values:
         if optional and (v.startswith("#") or v.startswith(SK)):
@@ -200,8 +200,8 @@ MERCHANT = {
                    "leek", "tomato", "sweetroll", "nord_mead", "ale", "goat_cheese_wedge", "raw_venison",
                    "minecraft:wheat"),
     "fence": ids("lockpick", "minecraft:gold_ingot", "silver_ingot", "minecraft:gold_nugget", "minecraft:splash_potion",
-                 "minecraft:splash_potion", "skooma", "moon_sugar", "#skycraft:thief_goods", "#skycraft:merchant/gems",
-                 "#skycraft:jewelry", "minecraft:name_tag", "minecraft:spyglass", "minecraft:clock"),
+                 "minecraft:splash_potion", "skooma", "moon_sugar", "#nirncraft:thief_goods", "#nirncraft:merchant/gems",
+                 "#nirncraft:jewelry", "minecraft:name_tag", "minecraft:spyglass", "minecraft:clock"),
     "fletcher": ids("iron_arrow", "steel_arrow", "orcish_arrow", "dwarven_arrow", "elven_arrow", "steel_bolt",
                     "dwarven_bolt", "minecraft:feather", "minecraft:flint", "minecraft:string", "firewood",
                     "leather_strips", "imperial_crossbow", "hunting_bow"),
@@ -216,7 +216,7 @@ MERCHANT = {
     "food": ids("minecraft:bread", "minecraft:apple", "minecraft:carrot", "minecraft:potato", "minecraft:beetroot",
                 "minecraft:wheat", "minecraft:egg", "minecraft:milk_bucket", "minecraft:honey_bottle",
                 "minecraft:sugar", "minecraft:cooked_beef", "minecraft:cooked_mutton", "minecraft:cooked_chicken",
-                "minecraft:cooked_salmon", "minecraft:pumpkin", "minecraft:sweet_berries", "#skycraft:food_goods"),
+                "minecraft:cooked_salmon", "minecraft:pumpkin", "minecraft:sweet_berries", "#nirncraft:food_goods"),
     "library": ids("minecraft:book", "minecraft:paper", "minecraft:writable_book", "minecraft:ink_sac",
                    "minecraft:feather", "minecraft:candle", "minecraft:lantern", "minecraft:bookshelf",
                    "minecraft:glow_ink_sac", "minecraft:map"),
@@ -231,7 +231,7 @@ MERCHANT = {
                   "fur_leggings", "fur_boots"),
 }
 
-# province goods: #skycraft:merchant/<type>/<gear key>
+# province goods: #nirncraft:merchant/<type>/<gear key>
 PROVINCE_GOODS = {
     "tailor": {
         "morrowind": ids("netch_leather", "guar_hide", "kagouti_hide", "alit_hide"),
@@ -305,7 +305,7 @@ def merchant_tags():
             tag(f"merchant/{t}/{key}", values)
     # apothecaries everywhere carry their province's ingredients
     for key in REGIONAL_ING:
-        tag(f"merchant/apothecary/{key}", ["#skycraft:loot/ingredients/" + key])
+        tag(f"merchant/apothecary/{key}", ["#nirncraft:loot/ingredients/" + key])
     tag("merchant/gems", GEMS)
     tag("jewelry", JEWELRY)
     tag("contraband", CONTRABAND)
@@ -320,9 +320,9 @@ def merchant_tags():
 
 def skill_books():
     out = set()
-    for f in (MAIN / "lang" / "skycraft").glob("*.json"):
+    for f in (MAIN / "lang" / "nirncraft").glob("*.json"):
         for k in json.loads(f.read_text(encoding="utf-8")):
-            m = re.fullmatch(r"item\.skycraft\.(skill_book_[a-z_]+)", k)
+            m = re.fullmatch(r"item\.nirncraft\.(skill_book_[a-z_]+)", k)
             if m:
                 out.add(SK + m.group(1))
     return sorted(out)
@@ -477,12 +477,12 @@ def chest_tables():
         "chests/skyrim_gear"))
 
     # the dungeon chests (boss, common, minor), the bandit camp and every other container now come from
-    # tools/loot_data.py (skycraft:containers/*; the old ids are aliases)
+    # tools/loot_data.py (nirncraft:containers/*; the old ids are aliases)
 
 
 def entity_tables():
     # people (bandits, draugr, mages, vampires...) roll their corpse rank table from tools/loot_data.py
-    # (skycraft:containers/corpse/*) plus their own parts, which that script keeps
+    # (nirncraft:containers/corpse/*) plus their own parts, which that script keeps
 
     # creature parts that are Skyrim ingredients
     add_pool_once("entities/frostbite_spider", SK + "spider_egg", pool([item(SK + "spider_egg")], conditions=[chance_looting(0.35, 0.05)]))
@@ -506,7 +506,7 @@ def flora_tables():
 
     def set_extra(block, entries, c):
         def fn(data):
-            data["pools"] = [p for p in data["pools"] if "skycraft:forage" not in json.dumps(p.get("conditions", []))
+            data["pools"] = [p for p in data["pools"] if "nirncraft:forage" not in json.dumps(p.get("conditions", []))
                              and not any(e.get("name") in [x["name"] for x in entries] for e in p.get("entries", []))]
             data["pools"].append(pool(entries, conditions=[chance(c), no_shears()]))
         edit_loot("blocks/" + block, fn)
@@ -523,7 +523,7 @@ def forage_modifiers():
     """Global loot modifiers: wild herbs from grass and ferns, fungi from mushrooms, eggs from tree crowns,
     moon sugar from Elsweyr's cane fields, trama root from the ashlands' dead shrubs, saltrice from Morrowind's
     fields, hanging moss from moss carpets."""
-    gl = MAIN / "resources" / "data" / "skycraft" / "loot_modifiers"
+    gl = MAIN / "resources" / "data" / "nirncraft" / "loot_modifiers"
     entries = []
 
     def modifier(name, tables, table_id, chance_, extra_conditions=()):
@@ -542,8 +542,8 @@ def forage_modifiers():
     modifier("forage_fungi", ["minecraft:blocks/brown_mushroom", "minecraft:blocks/red_mushroom"], "forage/fungi", 0.3)
     modifier("forage_nests", ["minecraft:blocks/spruce_leaves", "minecraft:blocks/oak_leaves",
                               "minecraft:blocks/birch_leaves", "minecraft:blocks/dark_oak_leaves",
-                              "skycraft:blocks/snowy_spruce_leaves", "skycraft:blocks/golden_aspen_leaves",
-                              "skycraft:blocks/orange_aspen_leaves"], "forage/nests", 0.012, [not_shears])
+                              "nirncraft:blocks/snowy_spruce_leaves", "nirncraft:blocks/golden_aspen_leaves",
+                              "nirncraft:blocks/orange_aspen_leaves"], "forage/nests", 0.012, [not_shears])
     modifier("forage_moss", ["minecraft:blocks/moss_carpet", "minecraft:blocks/hanging_roots"], "forage/hanging_moss", 0.2)
     modifier("forage_moon_sugar", ["minecraft:blocks/sugar_cane"], "forage/moon_sugar", 0.35,
              [{"condition": SK + "region", "provinces": ["elsweyr"]}])
@@ -610,8 +610,8 @@ JEWELRY_WEIGHTS = {"copper_circlet": 2, "silver_circlet": 2, "gold_circlet": 2, 
 
 
 def values_weights():
-    write(DATA / "skycraft_values" / "alchemy.json", {"values": {SK + k: v for k, v in sorted(NEW_VALUES.items())}})
-    write(DATA / "skycraft_weights" / "alchemy.json", {"weights": {SK + k: v for k, v in sorted(NEW_WEIGHTS.items())}})
+    write(DATA / "nirncraft_values" / "alchemy.json", {"values": {SK + k: v for k, v in sorted(NEW_VALUES.items())}})
+    write(DATA / "nirncraft_weights" / "alchemy.json", {"weights": {SK + k: v for k, v in sorted(NEW_WEIGHTS.items())}})
     values, weights = {}, {}
     values.update({SK + k: v for k, v in CREATURE_VALUES.items()})
     weights.update({SK + k: v for k, v in CREATURE_WEIGHTS.items()})
@@ -632,17 +632,17 @@ def values_weights():
         weights[SK + b] = w
     weights.update({SK + k: v for k, v in STATION_WEIGHTS.items()})
     weights.update({SK + k: v for k, v in JEWELRY_WEIGHTS.items()})
-    values.update({"#skycraft:merchant/skill_books": 50, SK + "septim": 1, SK + "coin_purse": 0, SK + "jail_key": 0,
+    values.update({"#nirncraft:merchant/skill_books": 50, SK + "septim": 1, SK + "coin_purse": 0, SK + "jail_key": 0,
                    SK + "quest_relic": 50})
     # other modules' items the item audit found without data: keys, boats, deposits
     values.update({SK + "house_key": 0, SK + "rowboat": 60, SK + "longship": 1500, SK + "cog": 2500, SK + "shipwright_bench": 150,
                    SK + "clay_deposit": 0, SK + "stone_deposit": 0})
     weights.update({SK + "house_key": 0, SK + "rowboat": 30, SK + "longship": 80, SK + "cog": 100, SK + "shipwright_bench": 30,
                     SK + "clay_deposit": 5, SK + "stone_deposit": 5})
-    weights.update({"#skycraft:merchant/skill_books": 1, SK + "jail_key": 0, SK + "quest_relic": 1,
+    weights.update({"#nirncraft:merchant/skill_books": 1, SK + "jail_key": 0, SK + "quest_relic": 1,
                     SK + "bound_sword": 0, SK + "bound_dagger": 0, SK + "bound_battleaxe": 0, SK + "bound_bow": 0})
-    write(DATA / "skycraft_values" / "economy.json", {"values": dict(sorted(values.items()))})
-    write(DATA / "skycraft_weights" / "economy.json", {"weights": dict(sorted(weights.items()))})
+    write(DATA / "nirncraft_values" / "economy.json", {"values": dict(sorted(values.items()))})
+    write(DATA / "nirncraft_weights" / "economy.json", {"weights": dict(sorted(weights.items()))})
 
 
 def main():

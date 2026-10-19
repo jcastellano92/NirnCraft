@@ -13,10 +13,10 @@ Currently:
 
 ## 2. Write Set
 
-* `mod/src/main/java/com/skycraft/atmosphere/{AtmosphereConfig,RegionalWeather,WeatherFront,WeatherPackets,WeatherProfile}.java`
-* `mod/src/main/java/com/skycraft/atmosphere/client/{SkyRenderer,SkyGeometry,CloudRenderer,CloudBuilder,CloudClimate,ClientWeather,AtmosphereClientEvents,DistantStorms,ShaderCompat}.java`
-* `mod/src/main/java/com/skycraft/society/{Schedule,ContextualDialogue}.java`
-* `mod/src/main/java/com/skycraft/creatures/spawn/RegionSpawner.java`
+* `mod/src/main/java/com/nirncraft/atmosphere/{AtmosphereConfig,RegionalWeather,WeatherFront,WeatherPackets,WeatherProfile}.java`
+* `mod/src/main/java/com/nirncraft/atmosphere/client/{SkyRenderer,SkyGeometry,CloudRenderer,CloudBuilder,CloudClimate,ClientWeather,AtmosphereClientEvents,DistantStorms,ShaderCompat}.java`
+* `mod/src/main/java/com/nirncraft/society/{Schedule,ContextualDialogue}.java`
+* `mod/src/main/java/com/nirncraft/creatures/spawn/RegionSpawner.java`
 * `pack/config/{ComplementaryReimagined_r5.9.3.zip.txt,DistantHorizons.toml}`
 
 ## 3. Implementation Steps

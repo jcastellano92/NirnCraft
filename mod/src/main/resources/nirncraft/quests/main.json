@@ -1,0 +1,665 @@
+{
+  "line": "main",
+  "category": "main",
+  "region": "skyrim/whiterun",
+  "speakers": {
+    "alduin": "Alduin",
+    "paarthurnax": "Paarthurnax",
+    "odahviing": "Odahviing",
+    "greybeards": "The Greybeards",
+    "guard": "Whiterun Guard",
+    "tsun": "Tsun",
+    "gormlaith": "Gormlaith Golden-Hilt",
+    "felldir": "Felldir the Old",
+    "hakon": "Hakon One-Eye",
+    "nahkriin": "Nahkriin",
+    "sahloknir": "Sahloknir",
+    "headsman": "The Headsman",
+    "captain": "Imperial Captain"
+  },
+  "npcs": [
+    {"id": "ralof", "name": "Ralof", "role": "stormcloak_soldier", "place": "helgen", "offset": [3, 27], "greet": "Gerdur's cooking, a roof, and a dragon somewhere to the north. Talos keep us, what a day."},
+    {"id": "hadvar", "name": "Hadvar", "role": "imperial_soldier", "place": "helgen", "offset": [10, 27], "greet": "Mind the keep, the walls are still coming down. Whatever that thing was, the Legion will need every sword."},
+    {"id": "gerdur", "name": "Gerdur", "role": "lumberjack", "place": "riverwood", "offset": [-12, 8], "female": true, "greet": "The mill doesn't run itself. But for a friend of my brother's, I can spare a minute."},
+    {"id": "alvor", "name": "Alvor", "role": "adventurer", "place": "riverwood", "offset": [10, -6], "greet": "Iron, steel, a bit of leather. If you need it mended, my forge is warm."},
+    {"id": "balgruuf", "name": "Jarl Balgruuf the Greater", "role": "jarl", "place": "dragonsreach", "offset": [0, 0], "greet": "Whiterun stands at the heart of Skyrim, and I intend to keep it standing. What brings you before me?"},
+    {"id": "irileth", "name": "Irileth", "role": "housecarl", "place": "dragonsreach", "offset": [3, 2], "female": true, "greet": "Keep your hands where I can see them. The Jarl has had enough surprises this year."},
+    {"id": "farengar", "name": "Farengar Secret-Fire", "role": "mage", "place": "dragonsreach", "offset": [-5, -3], "greet": "Unless you've brought me a dragon, or something about dragons, I'm rather busy."},
+    {"id": "arngeir", "name": "Arngeir", "role": "priest", "place": "high_hrothgar", "offset": [0, 0], "greet": "The Voice is a gift of the gods. We spend our lives learning to use it rightly. Few have the patience."},
+    {"id": "delphine", "name": "Delphine", "role": "innkeeper", "place": "riverwood", "offset": [-8, 4], "female": true, "greet": "Rooms are ten septims. Mead is cheaper. Questions cost more."},
+    {"id": "malborn", "name": "Malborn", "role": "innkeeper", "place": "solitude", "offset": [14, 10], "greet": "I don't know you. Unless Delphine sent you, in which case, keep your voice down."},
+    {"id": "esbern", "name": "Esbern", "role": "mage", "place": "ratway", "offset": [0, 0], "greet": "Forty years I've been waiting for the world to end. You'll forgive me if I'm not good company."},
+    {"id": "septimus", "name": "Septimus Signus", "role": "mage", "place": "septimus_outpost", "offset": [0, 0], "greet": "The box, the lock, the heart within... Hm? A visitor. How dreadfully interruptive."}
+  ],
+  "relics": [
+    {"id": "dragonstone", "name": "Dragonstone", "desc": "A slab of carved stone mapping the burial mounds of dragons across Skyrim.", "icon": 1},
+    {"id": "delphine_note", "name": "Note from the Empty Tomb", "desc": "'If you want the horn, rent the attic room at the Sleeping Giant Inn. Your friend.'", "icon": 11},
+    {"id": "horn_of_jurgen", "name": "Horn of Jurgen Windcaller", "desc": "The plain war horn of the founder of the Greybeards' order.", "icon": 2},
+    {"id": "thalmor_dossier", "name": "Thalmor Dossier: Esbern", "desc": "Thalmor notes on an old Blades archivist believed to hide beneath Riften.", "icon": 11},
+    {"id": "attunement_sphere", "name": "Attunement Sphere", "desc": "A humming Dwemer device that Septimus says will open the way to the Tower of Mzark.", "icon": 17},
+    {"id": "elder_scroll_dragon", "name": "Elder Scroll (Dragon)", "desc": "To look upon it is to see time itself, bent and folded. Handle with reverence.", "icon": 25},
+    {"id": "nahkriin_staff", "name": "Dragon Priest Staff of Skuldafn", "desc": "Nahkriin's staff, the key that opens the portal to Sovngarde.", "icon": 6}
+  ],
+  "scenes": {
+    "helgen_cart": [
+      ["narrator", "A cart rattles over frozen ruts. Your wrists are bound; the man beside you wears the blue of a rebel."],
+      ["ralof", "Awake at last. You walked into an Imperial ambush meant for us. Bad luck, friend."],
+      ["captain", "Prisoners off the cart! Step up to the block when your name is called."],
+      ["headsman", "Next."],
+      ["narrator", "Before the axe can fall, a roar splits the sky. Something vast and black lands on the watchtower."],
+      ["hadvar", "Dragon! Everyone, to the keep! You, prisoner, with me or with him, but MOVE!"]
+    ],
+    "helgen_wake": [
+      ["narrator", "You wake on a quiet stretch of the old road, the cold sun on your face. No one is chasing you. Far off to the north, smoke stains the sky."],
+      ["narrator", "A dragon crosses the mountains, a black shape and a sound like tearing cloth. Whatever it is, the villages ahead will need warning."],
+      ["narrator", "Follow the road to Riverwood. Your journal marks the way, and the compass points to it."]
+    ],
+    "helgen_escape": [
+      ["narrator", "Daylight. Behind you, smoke climbs from what was Helgen. Far off, the black dragon wheels north over the mountains."],
+      ["ralof", "Riverwood is just down the road. My sister Gerdur will help us, if you sided with me back there."],
+      ["hadvar", "My uncle Alvor is the smith in Riverwood. He'll put us up. And someone has to warn Whiterun."]
+    ],
+    "dragon_rising_soul": [
+      ["narrator", "The dragon's flesh burns away like paper. A storm of light pours out of the bones and into you."],
+      ["guard", "By the Nine... it went into you. You're Dragonborn! The old stories said the Dragonborn could steal a dragon's power."],
+      ["guard", "My grandmother told me about the Dragonborn. I never thought I'd see one."]
+    ],
+    "greybeards_summons": [
+      ["greybeards", "DOVAHKIIN!"],
+      ["narrator", "The word rolls down from the Throat of the World like thunder. Every soul in Whiterun hears it."]
+    ],
+    "greybeards_ro": [
+      ["arngeir", "You have the Voice, untrained but strong. Hear now the second word of Force: RO, Balance. Let it steady the first."],
+      ["arngeir", "And one more, for the trial of the gate: WULD, Whirlwind. Run where no feet could carry you."]
+    ],
+    "sahloknir_rises": [
+      ["narrator", "A black shape blots out the sun and settles on the burial mound. It speaks to the earth in its own tongue."],
+      ["alduin", "Sahloknir, ziil gro dovah ulse!"],
+      ["narrator", "The mound breaks apart. Bones knit and scales grow over them. A second dragon rises, and the black one turns to you."],
+      ["alduin", "You do not even know what you are, little mortal. Sahloknir, kill it."]
+    ],
+    "alduins_wall": [
+      ["esbern", "There, in the center: Alduin himself, cast down. Not slain! Cast out, by the ancient tongues with a Shout of their own making."],
+      ["esbern", "They called it Dragonrend. A Shout that forces a dragon to understand mortality. It is the only weapon the wall shows."],
+      ["delphine", "Then the Greybeards must know it. They know everything about the Voice."]
+    ],
+    "paarthurnax_meet": [
+      ["narrator", "Wings beat out of the cloud. An ancient grey dragon lands on the word wall at the summit and lowers its head."],
+      ["paarthurnax", "Drem yol lok. Greetings, wunduniik, traveler. Before we speak, let us speak in the old way. Show me your Thu'um."],
+      ["paarthurnax", "Here is a word for you: YOL. Fire. Speak it to me."]
+    ],
+    "paarthurnax_yol": [
+      ["paarthurnax", "Yes. You have the gift of our kind. Now hear me. Dragonrend cannot be taught: it was born of the hatred of mortals."],
+      ["paarthurnax", "Long ago an Elder Scroll was used here, at this place, and time was wounded. Bring a Scroll back to the wound and you will see the heroes who first spoke it."]
+    ],
+    "time_wound": [
+      ["narrator", "The Scroll unrolls itself. The world goes grey; the snow freezes in the air. You stand among three warriors of an age long past, watching Alduin fall from the sky."],
+      ["felldir", "Dragonrend has struck him! Now, while he is grounded!"],
+      ["gormlaith", "For Skyrim! For the dead!"],
+      ["hakon", "It isn't enough. He won't die. Felldir, the Scroll! Use it now!"],
+      ["narrator", "The vision tears apart. The three words of Dragonrend ring in your skull: JOOR, ZAH, FRUL. And above the summit, a black dragon descends."],
+      ["alduin", "Dovahkiin. You are too late. Your Shout is a toy in my claws."]
+    ],
+    "alduin_flees": [
+      ["alduin", "Krosis... this is not over, joor. I will feast on the dead of Sovngarde and return stronger than ever."],
+      ["narrator", "Alduin hurls himself into the clouds and is gone."]
+    ],
+    "paarthurnax_after": [
+      ["paarthurnax", "He fled to Sovngarde, to feed on the souls of the honored dead. Only the dovah know the way there."],
+      ["paarthurnax", "Trap one of his own. Make it carry you. A dragon called with its own name cannot refuse to come."]
+    ],
+    "odahviing_name": [
+      ["paarthurnax", "The name you need is Odahviing: Snow, Hunter, Wing. He is Alduin's lieutenant, and proud. Call him, and he will come."]
+    ],
+    "call_odahviing": [
+      ["narrator", "You call the name into the open sky above Whiterun. For a long moment, nothing."],
+      ["odahviing", "Dovahkiin! I accept your challenge!"]
+    ],
+    "odahviing_deal": [
+      ["odahviing", "Hah! The great yoke. You are clever, for a joor. Alduin's eyrie is Skuldafn, far east, beyond the reach of your feet."],
+      ["odahviing", "Free me and I will carry you there. Alduin has shown himself weak. Perhaps it is time the dov chose a stronger master."]
+    ],
+    "odahviing_flight": [
+      ["odahviing", "Hold fast. I will not fly gently. Skuldafn waits in the mountains where the snow never melts."],
+      ["narrator", "The ground falls away. Skyrim spreads beneath you like a map, white and green and grey, and then the eastern peaks rush up."]
+    ],
+    "sovngarde_portal": [
+      ["narrator", "The staff slots into the pedestal. A column of light swallows the sky, and the stones of Skuldafn fall away beneath you."]
+    ],
+    "sovngarde_heroes": [
+      ["tsun", "I am Tsun, shield-thane of Shor. None enter the Hall of Valor without facing me, but you, you have come for other business."],
+      ["gormlaith", "We have waited a long age to finish what we began on the mountain. Lead us, Dragonborn."],
+      ["narrator", "The mist thins. Alduin circles the Hall, devouring the lost. Clear the sky with your Voice and bring him down."]
+    ],
+    "alduin_dies": [
+      ["alduin", "Zu'u unslaad! Zu'u nis oblaan... I am eternal... I cannot end..."],
+      ["narrator", "The World-Eater breaks apart into light, and his soul scatters across Sovngarde like sparks on the wind. Even the honored dead fall silent."]
+    ],
+    "dragonslayer": [
+      ["narrator", "When you step back into Skyrim, every dragon in the land seems to be gathered on the Throat of the World, circling."],
+      ["paarthurnax", "The World-Eater is gone. Dovahkiin, you have done what none of us could. The dov will remember this."],
+      ["odahviing", "Dovahkiin. When you call, I will come. Alduin was never your equal."]
+    ],
+    "paarthurnax_slain": [
+      ["paarthurnax", "So be it. Perhaps it was always meant to end this way. Remember what I taught you, Dovahkiin."]
+    ],
+    "council": [
+      ["arngeir", "Jarl Ulfric. General Tullius. You are here because the Dragonborn asked it. Sit. Speak. Shout if you must, but not here."],
+      ["narrator", "The talk goes long into the night. In the end the generals sign: a truce until the dragon is dealt with."]
+    ]
+  },
+  "quests": [
+    {
+      "id": "main_unbound",
+      "title": "Unbound",
+      "region": "skyrim/falkreath",
+      "why": ["falkreath.L9.helgen_burned", "skyrim.L9.dragon_crisis"],
+      "stage": 1,
+      "start": "auto",
+      "on_start": "intro:helgen_wake;relocate:ralof:riverwood:-10:6",
+      "desc": "I woke in a cottage on the hill to the sound of a landslide, and watched a dragon burn Helgen from afar. Somebody down there may still be alive.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "helgen",
+          "text": "Follow the road down to Helgen",
+          "label": "Helgen",
+          "journal": "The walls are still standing, but the roofs are gone and the whole town smells of burning. People are crawling out of the ruins."
+        },
+        {
+          "type": "talk",
+          "npc": "hadvar",
+          "text": "Find a survivor in the ruins: Hadvar, the Legion soldier by the gate",
+          "topic": "What happened here?",
+          "reply": "It came out of the sky as if the sky had split. It took the keep first, then the roofs. Half the garrison is under that rubble. If it flew north it will come to Riverwood next, and Riverwood has no walls and no soldiers. Go. Warn Gerdur at the mill, or my uncle Alvor at the forge. I can't leave my men.",
+          "journal": "A Legion soldier named Hadvar held what is left of the gate. He wants me to carry the warning to Riverwood before the dragon finds it."
+        },
+        {
+          "type": "go",
+          "place": "riverwood",
+          "text": "Follow the road north to Riverwood",
+          "label": "Riverwood",
+          "journal": "I left Helgen to its dead and took the road toward the nearest village, the smoke behind me."
+        },
+        {
+          "type": "talk",
+          "npc": "gerdur|alvor",
+          "text": "Find help in Riverwood: Gerdur at the mill, or Alvor the smith",
+          "choices": [
+            {
+              "npc": "gerdur",
+              "label": "A dragon is burning the north. Riverwood needs to know.",
+              "reply": "A dragon? Shor's bones. Then Riverwood is next and we have no walls. Take what you need from the mill. And go to Whiterun, tell the Jarl we need soldiers.",
+              "actions": "flag:helgen_ralof;give:minecraft:bread*3,minecraft:leather_boots"
+            },
+            {
+              "npc": "alvor",
+              "label": "I saw a dragon in the north. Riverwood needs to know.",
+              "reply": "A dragon! The Nine preserve us. Here, take some iron from the forge and something to eat. Someone has to warn Jarl Balgruuf. Will you go?",
+              "actions": "flag:helgen_hadvar;give:minecraft:bread*3,minecraft:iron_helmet"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 50,
+        "items": [
+          "minecraft:iron_sword",
+          "minecraft:leather_chestplate"
+        ]
+      }
+    },
+    {
+      "id": "main_before_the_storm",
+      "title": "Before the Storm",
+      "region": "skyrim/whiterun",
+      "why": ["whiterun.L9.neutral_jarl", "whiterun.L9.first_dragon"],
+      "stage": 1,
+      "start": "auto",
+      "requires": ["quest:main_unbound"],
+      "desc": "The dragon flew north toward Whiterun. Riverwood asked me to carry word to Jarl Balgruuf and beg him for soldiers; the village has no walls and no garrison.",
+      "objectives": [
+        {"type": "go", "place": "whiterun", "text": "Travel to Whiterun"},
+        {"type": "talk", "npc": "balgruuf", "text": "Speak to Jarl Balgruuf in Dragonsreach",
+         "topic": "Riverwood needs protection. A dragon destroyed Helgen.",
+         "reply": "A dragon? So the rumors are true. Irileth, send a detachment to Riverwood at once. You've done Whiterun a service, friend. Stay a moment. My court wizard has a task that wants someone with your nerve.",
+         "journal": "The Jarl sent soldiers to Riverwood. He has another task for me, something about his court wizard and dragons."}
+      ],
+      "rewards": {"gold": 100, "items": [{"item": "minecraft:iron_chestplate", "name": "Whiterun Steel Cuirass"}]}
+    },
+    {
+      "id": "main_bleak_falls_barrow",
+      "title": "Bleak Falls Barrow",
+      "region": "skyrim/falkreath",
+      "why": ["falkreath.L10.barrow_above_riverwood", "skyrim.L10.draugr_barrows"],
+      "stage": 2,
+      "start": "auto",
+      "giver": "farengar",
+      "requires": ["quest:main_before_the_storm"],
+      "desc": "Farengar Secret-Fire, the Jarl's court wizard, believes there is a record of the dragons' resting places carved on a tablet in Bleak Falls Barrow, the old tomb on the mountain above Riverwood.",
+      "objectives": [
+        {"type": "talk", "npc": "farengar", "text": "Speak to Farengar about the Dragonstone",
+         "topic": "The Jarl says you need help with dragons.",
+         "reply": "Help is a strong word. I need legs. In Bleak Falls Barrow lies a carved tablet: the Dragonstone. It maps their burial mounds, I'm sure of it. Bring it to me and the Jarl will pay you."},
+        {"type": "go", "place": "bleak_falls_barrow", "text": "Climb to Bleak Falls Barrow"},
+        {"type": "clear", "place": "bleak_falls_barrow", "placement": "structure", "text": "Clear the barrow's restless dead",
+         "spawn": [{"type": "nirncraft:draugr", "count": 4, "name": "Restless Draugr"}],
+         "journal": "The dead don't stay down in Bleak Falls Barrow. I put four of them back in their alcoves."},
+        {"type": "kill", "place": "bleak_falls_barrow", "placement": "structure", "text": "Defeat the Draugr Overlord guarding the inner chamber",
+         "spawn": [{"type": "nirncraft:draugr_deathlord", "name": "Draugr Overlord", "target": true, "boss": true}, {"type": "nirncraft:draugr", "count": 1}],
+         "actions": "word:unrelenting_force:1:0",
+         "journal": "Behind the overlord's sarcophagus stood a curved wall carved in claw-marks. One of the marks burned and I knew it: FUS. Force. I can't make it mean anything yet."},
+        {"type": "retrieve", "place": "bleak_falls_barrow", "relic": "dragonstone", "radius": 10, "text": "Take the Dragonstone from the overlord's tomb"},
+        {"type": "deliver", "npc": "farengar", "relic": "dragonstone", "text": "Bring the Dragonstone to Farengar",
+         "topic": "Here is your Dragonstone.",
+         "reply": "Remarkable. A map of mounds, every one marked. My colleague will be delighted. And you should go to the Jarl; a guard just came in shouting about the western watchtower."}
+      ],
+      "rewards": {"gold": 300, "items": ["nirncraft:spell_tome_firebolt"]}
+    },
+    {
+      "id": "main_dragon_rising",
+      "title": "Dragon Rising",
+      "region": "skyrim/whiterun",
+      "why": ["whiterun.L9.first_dragon", "whiterun.L8.voice_pilgrims"],
+      "stage": 3,
+      "start": "auto",
+      "giver": "balgruuf",
+      "requires": ["quest:main_bleak_falls_barrow"],
+      "desc": "A dragon attacked the western watchtower. The Jarl sent his housecarl Irileth with a band of guards, and asked me to go with them. If a dragon can die, we will learn it today.",
+      "objectives": [
+        {"type": "go", "place": "western_watchtower", "text": "Join Irileth at the western watchtower", "actions": "summon:irileth"},
+        {"type": "kill", "place": "western_watchtower", "text": "Slay the dragon",
+         "spawn": [{"type": "nirncraft:dragon", "name": "Mirmulnir", "target": true, "boss": true}]},
+        {"type": "go", "place": "western_watchtower", "radius": 24, "text": "Approach the dragon's remains",
+         "actions": "absorb_soul;scene:dragon_rising_soul",
+         "journal": "When the dragon died, its soul poured into me. The guards say only the Dragonborn of legend could do that."},
+        {"type": "talk", "npc": "balgruuf", "text": "Report to Jarl Balgruuf",
+         "topic": "The dragon is dead, and I took its soul.",
+         "reply": "Then the old tales are true. And did you hear the mountain? The Greybeards called a name from High Hrothgar, and I believe it was yours. By my right as Jarl, I name you Thane of Whiterun. Take this axe from my armory. And go to them: one does not keep the Greybeards waiting.",
+         "actions": "thunder;scene:greybeards_summons"}
+      ],
+      "rewards": {"gold": 500, "house": "breezehome", "flags": ["thane_whiterun"],
+                  "items": [{"item": "minecraft:iron_axe", "name": "Axe of Whiterun", "enchant": {"sharpness": 2}}]}
+    },
+    {
+      "id": "main_way_of_the_voice",
+      "title": "The Way of the Voice",
+      "region": "skyrim/the_rift",
+      "why": ["the_rift.L8.voice_pilgrims", "skyrim.L8.way_of_the_voice"],
+      "stage": 4,
+      "start": "auto",
+      "giver": "arngeir",
+      "requires": ["quest:main_dragon_rising"],
+      "desc": "The Greybeards have summoned me to High Hrothgar, their monastery high on the Throat of the World. The pilgrims' road starts at Ivarstead: seven thousand steps cut into the mountain.",
+      "objectives": [
+        {"type": "go", "place": "ivarstead", "text": "Travel to Ivarstead"},
+        {"type": "go", "place": "seven_thousand_steps", "text": "Begin the climb of the Seven Thousand Steps"},
+        {"type": "go", "place": "high_hrothgar", "text": "Reach High Hrothgar"},
+        {"type": "talk", "npc": "arngeir", "text": "Speak to the Greybeards",
+         "topic": "I've come at your summons.",
+         "reply": "So. A Dragonborn appears in our time. Let us see whether the blood speaks true. Show us your Voice."},
+        {"type": "shout", "shout": "unrelenting_force", "place": "high_hrothgar", "radius": 40, "text": "Use Unrelenting Force before the Greybeards",
+         "actions": "scene:greybeards_ro;word:unrelenting_force:2:2;word:whirlwind_sprint:1:1"},
+        {"type": "shout", "shout": "whirlwind_sprint", "place": "high_hrothgar", "radius": 40, "text": "Use Whirlwind Sprint to pass the gate in the courtyard"},
+        {"type": "talk", "npc": "arngeir", "text": "Ask Arngeir about the final trial",
+         "topic": "I'm ready for the last trial.",
+         "reply": "Then hear it. In the barrow of Ustengrav lies the Horn of Jurgen Windcaller, founder of our order. Bring it to us. The way is long and the dead do not sleep there."}
+      ],
+      "rewards": {"gold": 200}
+    },
+    {
+      "id": "main_horn_of_jurgen",
+      "title": "The Horn of Jurgen Windcaller",
+      "region": "skyrim/hjaalmarch",
+      "why": ["hjaalmarch.L10.voice_tomb", "skyrim.L8.way_of_the_voice"],
+      "stage": 4,
+      "start": "auto",
+      "giver": "arngeir",
+      "requires": ["quest:main_way_of_the_voice"],
+      "desc": "The Greybeards' final trial: recover the horn of their founder from his tomb in Ustengrav, deep in the bogs of Hjaalmarch.",
+      "objectives": [
+        {"type": "go", "place": "ustengrav", "text": "Travel to Ustengrav"},
+        {"type": "clear", "place": "ustengrav", "placement": "structure", "text": "Fight through the depths of Ustengrav",
+         "spawn": [{"type": "nirncraft:draugr", "count": 3}, {"type": "nirncraft:necromancer", "count": 1, "name": "Grave Robber Necromancer"}]},
+        {"type": "retrieve", "place": "ustengrav", "relic": "delphine_note", "radius": 10, "text": "Search Jurgen Windcaller's tomb",
+         "journal": "The horn was gone. Someone had beaten me to it and left a note: 'If you want the horn, rent the attic room at the Sleeping Giant Inn in Riverwood. Your friend.'"},
+        {"type": "go", "place": "riverwood", "text": "Go to the Sleeping Giant Inn in Riverwood"},
+        {"type": "talk", "npc": "delphine", "text": "Ask the innkeeper about the attic room",
+         "topic": "I'd like to rent the attic room.",
+         "reply": "The attic? We don't have... Close the door. So you're the one the Greybeards were shouting for. Here's your horn. I needed to see who'd come for it before I trusted them with anything.",
+         "actions": "take:delphine_note;relic:horn_of_jurgen"},
+        {"type": "deliver", "npc": "arngeir", "relic": "horn_of_jurgen", "text": "Return the horn to the Greybeards",
+         "topic": "Here is the Horn of Jurgen Windcaller.",
+         "reply": "You have passed the trials. Stand with us, and receive the last word of Force: DAH. Push. Let your Voice break what stands before it."}
+      ],
+      "rewards": {"gold": 300, "words": ["unrelenting_force:3:3"]}
+    },
+    {
+      "id": "main_blade_in_the_dark",
+      "title": "A Blade in the Dark",
+      "region": "skyrim/eastmarch",
+      "why": ["skyrim.L9.dragon_crisis", "whiterun.L10.dragon_mounds"],
+      "stage": 4,
+      "start": "auto",
+      "giver": "delphine",
+      "requires": ["quest:main_horn_of_jurgen"],
+      "desc": "Delphine is one of the last Blades, the order that once guarded the Dragonborn emperors. She thinks the dragons are not returning on their own: something is raising them from their mounds. Kynesgrove is next on her map.",
+      "objectives": [
+        {"type": "talk", "npc": "delphine", "text": "Speak to Delphine",
+         "topic": "What do you know about the dragons?",
+         "reply": "That map Farengar copied for me marks every burial mound in Skyrim. If I'm right, a dragon will rise from the one at Kynesgrove. Meet me there. Bring your Voice.",
+         "actions": "relocate:delphine:kynesgrove_dragon_mound:-8:6"},
+        {"type": "go", "place": "kynesgrove", "text": "Travel to Kynesgrove"},
+        {"type": "go", "place": "kynesgrove_dragon_mound", "text": "Climb to the dragon mound", "actions": "flyover:nirncraft:alduin:alduin;scene:sahloknir_rises"},
+        {"type": "kill", "place": "kynesgrove_dragon_mound", "text": "Slay Sahloknir",
+         "spawn": [{"type": "nirncraft:dragon", "name": "Sahloknir", "target": true, "boss": true, "hp": 1.3}]},
+        {"type": "talk", "npc": "delphine", "text": "Speak to Delphine",
+         "topic": "So the dragons are being raised.",
+         "reply": "By Alduin himself. The World-Eater, out of the old prophecies. I hoped it was a story. The Thalmor will know something; they always do. I have a way into their embassy.",
+         "actions": "relocate:delphine:riverwood:-8:4"}
+      ],
+      "rewards": {"gold": 400}
+    },
+    {
+      "id": "main_diplomatic_immunity",
+      "title": "Diplomatic Immunity",
+      "region": "skyrim/haafingar",
+      "why": ["haafingar.L9.thalmor_embassy", "haafingar.L10.embassy_dossiers"],
+      "stage": 4,
+      "start": "auto",
+      "giver": "delphine",
+      "requires": ["quest:main_blade_in_the_dark"],
+      "desc": "Delphine is sure the Thalmor know who is raising the dragons. Their embassy outside Solitude holds a reception tonight, and a friend of the Blades works in the kitchen.",
+      "objectives": [
+        {"type": "go", "place": "solitude", "text": "Go to Solitude"},
+        {"type": "talk", "npc": "malborn", "text": "Find Delphine's contact, Malborn",
+         "topic": "Delphine sent me.",
+         "reply": "Keep your voice down. I'll smuggle your gear into the embassy kitchen. Get in, find their files, get out. If anyone asks, you've never met me."},
+        {"type": "go", "place": "thalmor_embassy", "text": "Infiltrate the Thalmor Embassy"},
+        {"type": "clear", "place": "thalmor_embassy", "placement": "structure", "text": "Deal with the embassy guards",
+         "spawn": [{"type": "npc:thalmor", "count": 3, "name": "Thalmor Guard", "hostile": true}]},
+        {"type": "retrieve", "place": "thalmor_embassy", "relic": "thalmor_dossier", "radius": 10, "text": "Search the embassy for the Thalmor's files",
+         "journal": "The Thalmor don't know who raises the dragons either. But they are hunting an old Blade named Esbern, and their file says he hides in the Ratway beneath Riften."},
+        {"type": "deliver", "npc": "delphine", "relic": "thalmor_dossier", "text": "Bring the dossier to Delphine",
+         "topic": "The Thalmor are as lost as we are.",
+         "reply": "But they're hunting Esbern. If that old man is still alive, he knows more about Alduin than anyone living. Find him in the Ratway before they do."}
+      ],
+      "rewards": {"gold": 400}
+    },
+    {
+      "id": "main_cornered_rat",
+      "title": "A Cornered Rat",
+      "region": "skyrim/the_rift",
+      "why": ["the_rift.L10.thieves_below", "skyrim.L9.thalmor_watch"],
+      "stage": 4,
+      "start": "auto",
+      "giver": "delphine",
+      "requires": ["quest:main_diplomatic_immunity"],
+      "desc": "Esbern, an archivist of the Blades, is hiding somewhere in the Ratway beneath Riften. The Thalmor are looking for him too.",
+      "objectives": [
+        {"type": "go", "place": "riften", "text": "Travel to Riften"},
+        {"type": "talk", "npc": "brynjolf", "text": "Ask around Riften about the old man in the Ratway",
+         "topic": "I'm looking for an old man hiding in the Ratway.",
+         "reply": "An old man jumping at shadows? Lad, half the Ratway fits that. But there's one locked in the Warrens like he owes the world money. Watch yourself down there; you're not the only one asking."},
+        {"type": "go", "place": "ratway", "text": "Enter the Ratway"},
+        {"type": "clear", "place": "ratway", "placement": "structure", "text": "Deal with the Thalmor hunting Esbern",
+         "spawn": [{"type": "npc:thalmor", "count": 2, "name": "Thalmor Agent", "hostile": true}, {"type": "nirncraft:skeever", "count": 2}]},
+        {"type": "talk", "npc": "esbern", "text": "Find Esbern in the Ratway Warrens",
+         "topic": "Delphine sent me.",
+         "reply": "Delphine? Alive? Then the world isn't entirely lost. Alduin has come back, and nothing can stop him but a Dragonborn. Take me to her. I know where the Blades hid their secrets."},
+        {"type": "escort", "npc": "esbern", "place": "riverwood", "text": "Bring Esbern to Delphine in Riverwood"},
+        {"type": "talk", "npc": "delphine", "text": "Speak with Delphine",
+         "topic": "Esbern is here.",
+         "reply": "Old fool, I thought you dead. Esbern says the lost Sky Haven Temple holds Alduin's Wall, the Blades' record of how he was beaten. It's in Karthspire, in the Reach. We go now."}
+      ],
+      "rewards": {"gold": 300}
+    },
+    {
+      "id": "main_alduins_wall",
+      "title": "Alduin's Wall",
+      "region": "skyrim/the_reach",
+      "why": ["the_reach.L10.blades_temple", "the_reach.L10.forsworn_redoubts"],
+      "stage": 4,
+      "start": "auto",
+      "giver": "esbern",
+      "requires": ["quest:main_cornered_rat"],
+      "on_start": "relocate:delphine:karthspire:6:6;relocate:esbern:karthspire:8:2",
+      "desc": "Esbern believes Alduin's Wall, carved in the lost Sky Haven Temple, shows how the ancient Nords defeated the World-Eater. The temple lies hidden inside Karthspire, in the Reach, where the Forsworn now camp.",
+      "objectives": [
+        {"type": "go", "place": "karthspire", "text": "Meet Delphine and Esbern at Karthspire"},
+        {"type": "clear", "place": "karthspire", "text": "Clear the Forsworn camp at Karthspire",
+         "spawn": [{"type": "nirncraft:forsworn", "count": 3}, {"type": "nirncraft:hagraven", "count": 1, "name": "Briarheart Matriarch"}]},
+        {"type": "go", "place": "sky_haven_temple", "text": "Enter Sky Haven Temple",
+         "actions": "relocate:delphine:sky_haven_temple:4:4;relocate:esbern:sky_haven_temple:-4:4"},
+        {"type": "talk", "npc": "esbern", "text": "Study Alduin's Wall with Esbern",
+         "topic": "What does the wall show?",
+         "reply": "Look, look! The heroes didn't kill him. They cast him out of time, with a Shout made for the purpose.",
+         "actions": "scene:alduins_wall"},
+        {"type": "talk", "npc": "delphine", "text": "Speak with Delphine",
+         "topic": "We have to ask the Greybeards about Dragonrend.",
+         "reply": "Then go. Take this blade from the old Blades' armory: it was forged for exactly this kind of work. You're one of us now, whatever the Greybeards say."}
+      ],
+      "rewards": {"gold": 300, "items": ["nirncraft:dragonbane"], "flags": ["blades"]}
+    },
+    {
+      "id": "main_throat_of_the_world",
+      "title": "The Throat of the World",
+      "region": "skyrim/whiterun",
+      "why": ["skyrim.L8.way_of_the_voice", "whiterun.L8.voice_pilgrims"],
+      "stage": 4,
+      "start": "auto",
+      "giver": "arngeir",
+      "requires": ["quest:main_alduins_wall"],
+      "desc": "Arngeir must tell me about Dragonrend, though the Greybeards will not thank me for keeping company with the Blades.",
+      "objectives": [
+        {"type": "talk", "npc": "arngeir", "text": "Ask Arngeir about Dragonrend",
+         "topic": "I need to learn Dragonrend.",
+         "reply": "That Shout was made from hatred, and we will not teach it. Our master may answer you. Paarthurnax dwells on the summit. Take this Shout to part the winds that guard the path: LOK VAH KOOR. Clear Skies.",
+         "actions": "word:clear_skies:3:3"},
+        {"type": "shout", "shout": "clear_skies", "place": "throat_of_the_world", "radius": 260, "text": "Use Clear Skies to part the storm on the path to the summit"},
+        {"type": "go", "place": "throat_of_the_world", "text": "Climb to the summit of the Throat of the World",
+         "actions": "scene:paarthurnax_meet;word:fire_breath:1:1"},
+        {"type": "shout", "shout": "fire_breath", "place": "throat_of_the_world", "radius": 48, "text": "Speak Fire Breath to Paarthurnax",
+         "actions": "scene:paarthurnax_yol",
+         "journal": "Paarthurnax, master of the Greybeards, is a dragon. He says Dragonrend can only be learned by seeing it, through an Elder Scroll read at the time-wound on this summit."}
+      ],
+      "rewards": {"gold": 200}
+    },
+    {
+      "id": "main_elder_knowledge",
+      "title": "Elder Knowledge",
+      "region": "skyrim/winterhold",
+      "why": ["winterhold.L10.glacier_dwemer", "the_pale.L10.great_lifts"],
+      "stage": 4,
+      "start": "auto",
+      "giver": "septimus",
+      "requires": ["quest:main_throat_of_the_world"],
+      "desc": "I need an Elder Scroll. The only person in Skyrim who might know where one lies is Septimus Signus, a scholar of the Scrolls who lives alone in the ice north of Winterhold.",
+      "objectives": [
+        {"type": "go", "place": "septimus_outpost", "text": "Find Septimus Signus north of Winterhold"},
+        {"type": "talk", "npc": "septimus", "text": "Ask Septimus about the Elder Scroll",
+         "topic": "I'm looking for an Elder Scroll.",
+         "reply": "The Scroll! Under the earth, in the Dwemer's hidden city, it waits inside the Tower of Mzark. Go down through Alftand into Blackreach. Take this sphere; the tower will listen to it.",
+         "actions": "relic:attunement_sphere"},
+        {"type": "go", "place": "alftand", "text": "Descend into Alftand"},
+        {"type": "clear", "place": "alftand", "placement": "structure", "text": "Survive the Falmer and the machines of Alftand",
+         "spawn": [{"type": "nirncraft:falmer", "count": 3}, {"type": "nirncraft:dwarven_spider", "count": 2, "name": "Dwarven Spider"}]},
+        {"type": "go", "place": "blackreach", "text": "Find the way into Blackreach"},
+        {"type": "go", "place": "tower_of_mzark", "text": "Reach the Tower of Mzark"},
+        {"type": "retrieve", "place": "tower_of_mzark", "relic": "elder_scroll_dragon", "radius": 12, "text": "Take the Elder Scroll from the tower's lens",
+         "spawn": [{"type": "nirncraft:dwarven_centurion", "count": 1, "name": "Dwarven Centurion Guardian"}],
+         "actions": "take:attunement_sphere",
+         "journal": "The tower's lenses focused a beam of starlight, and a cylinder rose from the floor. Inside lay an Elder Scroll."}
+      ],
+      "rewards": {"gold": 500, "perks": 1}
+    },
+    {
+      "id": "main_alduins_bane",
+      "title": "Alduin's Bane",
+      "region": "skyrim/the_pale",
+      "why": ["the_pale.L10.great_lifts", "skyrim.L9.dragon_crisis"],
+      "stage": 4,
+      "start": "auto",
+      "requires": ["quest:main_elder_knowledge"],
+      "desc": "With the Elder Scroll I return to the summit of the Throat of the World. At the time-wound, where Alduin was cast out long ago, the Scroll will show me the Shout I need.",
+      "objectives": [
+        {"type": "go", "place": "throat_of_the_world", "text": "Return to the summit of the Throat of the World"},
+        {"type": "go", "place": "throat_of_the_world", "radius": 14, "text": "Read the Elder Scroll at the time-wound",
+         "actions": "scene:time_wound;word:dragonrend:3:1;effect:darkness:6:0;take:elder_scroll_dragon"},
+        {"type": "shout", "shout": "dragonrend", "place": "throat_of_the_world", "radius": 96, "text": "Bring Alduin down with Dragonrend",
+         "spawn": [{"type": "nirncraft:alduin", "name": "Alduin", "decor": true, "circle": [30, 28, 2400]}]},
+        {"type": "kill", "place": "throat_of_the_world", "text": "Defeat Alduin", "flee_at": 0.35,
+         "spawn": [{"type": "nirncraft:alduin", "name": "Alduin", "target": true, "boss": true, "hp": 4.0, "dmg": 1.4}],
+         "actions": "scene:alduin_flees",
+         "journal": "Grounded by Dragonrend, Alduin fought like a cornered wolf, and when he was beaten he fled into the sky. He is not dead. Not yet."}
+      ],
+      "rewards": {"gold": 800, "souls": 1},
+      "on_complete": "scene:paarthurnax_after"
+    },
+    {
+      "id": "main_the_fallen",
+      "title": "The Fallen",
+      "region": "skyrim/whiterun",
+      "why": ["whiterun.L9.neutral_jarl", "whiterun.L9.first_dragon"],
+      "stage": 4,
+      "start": "auto",
+      "giver": "balgruuf",
+      "requires": ["quest:main_alduins_bane"],
+      "desc": "Alduin fled to Sovngarde, through a portal no mortal can reach on foot. Paarthurnax says one of Alduin's own dragons could carry me, if I could trap one. Dragonsreach was built to hold a dragon once. Jarl Balgruuf will need persuading.",
+      "objectives": [
+        {"type": "talk", "npc": "balgruuf", "text": "Ask Jarl Balgruuf to let you trap a dragon in Dragonsreach",
+         "topic": "I need Dragonsreach to trap a dragon.",
+         "reply": "You want me to invite a dragon into my palace? ...You've never asked me for anything, and you saved this city once already. Very well. The great porch, and the old yoke. Gods help us."},
+        {"type": "go", "place": "throat_of_the_world", "text": "Learn from Paarthurnax which dragon to call",
+         "actions": "scene:odahviing_name;word:call_dragon:3:3"},
+        {"type": "go", "place": "dragonsreach", "radius": 20, "text": "Go to the great porch of Dragonsreach and call the dragon's name",
+         "actions": "scene:call_odahviing"},
+        {"type": "kill", "place": "dragonsreach", "text": "Wear Odahviing down until he can be caught in the yoke", "flee_at": 0.5,
+         "spawn": [{"type": "nirncraft:odahviing", "name": "Odahviing", "target": true, "boss": true, "hp": 2.0}],
+         "journal": "Odahviing came, and when he was spent the yoke slammed shut over his neck. Trapped, he offered a bargain."}
+      ],
+      "rewards": {"gold": 500},
+      "on_complete": "scene:odahviing_deal"
+    },
+    {
+      "id": "main_worldeaters_eyrie",
+      "title": "The World-Eater's Eyrie",
+      "region": "skyrim/whiterun",
+      "why": ["skyrim.L9.dragon_crisis", "skyrim.L10.draugr_barrows"],
+      "stage": 5,
+      "start": "auto",
+      "requires": ["quest:main_the_fallen"],
+      "desc": "Odahviing agreed to carry me to Skuldafn, a temple in the eastern mountains where Alduin's portal to Sovngarde stands. In return, I set him free.",
+      "objectives": [
+        {"type": "go", "place": "dragonsreach", "radius": 30, "text": "Climb onto Odahviing's back", "actions": "scene:odahviing_flight;flight:skuldafn"},
+        {"type": "clear", "place": "skuldafn", "text": "Fight through the temple of Skuldafn",
+         "spawn": [{"type": "nirncraft:draugr", "count": 4}, {"type": "nirncraft:draugr_deathlord", "count": 1}]},
+        {"type": "kill", "place": "skuldafn", "text": "Defeat Nahkriin, the dragon priest",
+         "spawn": [{"type": "nirncraft:dragon_priest", "name": "Nahkriin", "target": true, "boss": true, "hp": 2.0}],
+         "actions": "relic:nahkriin_staff"},
+        {"type": "go", "place": "skuldafn", "offset": [0, -30], "radius": 10, "text": "Open the portal with the dragon priest's staff and step through",
+         "actions": "take:nahkriin_staff;scene:sovngarde_portal;teleport_dim:minecraft:the_end"}
+      ],
+      "rewards": {"gold": 400}
+    },
+    {
+      "id": "main_sovngarde",
+      "title": "Sovngarde",
+      "region": "skyrim/whiterun",
+      "why": ["whiterun.L8.honour_and_sovngarde", "skyrim.L9.dragon_crisis"],
+      "stage": 5,
+      "start": "auto",
+      "requires": ["quest:main_worldeaters_eyrie"],
+      "desc": "Sovngarde. The mist here is Alduin's: he hunts the souls of the dead as they arrive. The heroes who first cast him out wait in the Hall of Valor.",
+      "objectives": [
+        {"type": "dimension", "dim": "minecraft:the_end", "text": "Enter Sovngarde"},
+        {"type": "go", "place": "sovngarde_arena", "radius": 24, "text": "Follow the old road through the mist and find the heroes of old",
+         "actions": "scene:sovngarde_heroes"},
+        {"type": "kill_type", "entity": "minecraft:ender_dragon,nirncraft:alduin", "count": 1, "dim": "minecraft:the_end", "at_player": true, "text": "Defeat Alduin, World-Eater",
+         "spawn": [{"type": "minecraft:ender_dragon", "name": "Alduin", "boss": true, "hp": 4.0, "if": "end_dragon_slain"}],
+         "actions": "scene:alduin_dies",
+         "journal": "Alduin is gone. His soul broke apart over Sovngarde like sparks on the wind."},
+        {"type": "cond", "cond": "!dim:minecraft:the_end", "place": "sovngarde_bridge", "radius": 12,
+         "text": "Ask Tsun at the Whalebone Bridge to send you home (or take the golden way at the misty vale)"}
+      ],
+      "rewards": {"gold": 5000, "title": "dragonborn", "items": ["minecraft:elytra"]},
+      "on_complete": "victory"
+    },
+    {
+      "id": "main_dragonslayer",
+      "title": "Dragonslayer",
+      "region": "skyrim/whiterun",
+      "why": ["whiterun.L8.honour_and_sovngarde", "skyrim.L8.way_of_the_voice"],
+      "stage": 5,
+      "start": "auto",
+      "requires": ["quest:main_sovngarde"],
+      "desc": "The World-Eater is no more. Paarthurnax will want to hear it from me, on the mountain where it began.",
+      "objectives": [
+        {"type": "go", "place": "throat_of_the_world", "text": "Return to the Throat of the World", "actions": "scene:dragonslayer"}
+      ],
+      "rewards": {"gold": 1000, "perks": 2, "souls": 2, "flags": ["dragonslayer"]}
+    },
+    {
+      "id": "main_paarthurnax",
+      "title": "Paarthurnax",
+      "region": "skyrim/whiterun",
+      "why": ["the_reach.L10.blades_temple", "skyrim.L8.way_of_the_voice"],
+      "category": "side",
+      "start": "npc:delphine",
+      "requires": ["quest:main_alduins_bane", "flag:blades", "!flag:paarthurnax_spared", "!flag:paarthurnax_slain"],
+      "offer": "You look like you want to say something, Delphine.",
+      "pitch": "I'll say it plainly. Paarthurnax is a dragon. He was Alduin's lieutenant once, and he did unspeakable things. The Blades will not help you again until he's dead.",
+      "desc": "Delphine and Esbern have learned what Paarthurnax is. They demand his death as the price of the Blades' help.",
+      "objectives": [
+        {"type": "talk", "npc": "delphine", "text": "Decide Paarthurnax's fate",
+         "choices": [
+           {"label": "I won't kill him. He taught me, and he's earned his peace.", "reply": "Then the Blades have nothing more to say to you. I hope you're right about him.", "actions": "flag:paarthurnax_spared"},
+           {"label": "Fine. He dies.", "reply": "Good. Esbern will see to it that the Blades remember this.", "actions": "flag:paarthurnax_doomed"}
+         ]}
+      ],
+      "rewards": {"gold": 100}
+    },
+    {
+      "id": "main_paarthurnax_slain",
+      "title": "Old Debts",
+      "region": "skyrim/whiterun",
+      "why": ["the_reach.L10.blades_temple", "skyrim.L8.way_of_the_voice"],
+      "category": "side",
+      "start": "auto",
+      "requires": ["flag:paarthurnax_doomed", "!flag:paarthurnax_slain"],
+      "desc": "I agreed to kill Paarthurnax at the Blades' demand. He waits on the summit, as he always has.",
+      "objectives": [
+        {"type": "go", "place": "throat_of_the_world", "text": "Climb to the summit"},
+        {"type": "kill", "place": "throat_of_the_world", "text": "Kill Paarthurnax",
+         "spawn": [{"type": "nirncraft:paarthurnax", "name": "Paarthurnax", "target": true, "boss": true, "hp": 2.5}],
+         "actions": "scene:paarthurnax_slain"},
+        {"type": "talk", "npc": "delphine", "text": "Tell Delphine it is done", "topic": "Paarthurnax is dead.",
+         "reply": "Then the Blades stand with you again, Dragonborn. Some debts take a thousand years to collect."}
+      ],
+      "rewards": {"gold": 500, "flags": ["paarthurnax_slain"]}
+    },
+    {
+      "id": "main_season_unending",
+      "title": "Season Unending",
+      "region": "skyrim/whiterun",
+      "why": ["skyrim.L9.civil_war", "whiterun.L9.neutral_jarl"],
+      "category": "side",
+      "start": "npc:arngeir",
+      "requires": ["quest:main_alduins_bane", "!quest:cw_legion_capital", "!quest:cw_storm_capital"],
+      "offer": "Could the Greybeards host a truce between Ulfric and Tullius?",
+      "pitch": "This is a strange request to bring to High Hrothgar. But if the war hinders the fight against Alduin, we will open our doors. Bring them here. Let them talk.",
+      "desc": "The civil war gets in the way of the fight against Alduin. Arngeir agreed to host a council at High Hrothgar, if both sides come.",
+      "objectives": [
+        {"type": "talk", "npc": "tullius", "text": "Persuade General Tullius to attend the council",
+         "topic": "The Greybeards are holding a council. You should be there.",
+         "reply": "A truce with that rebel? ...If it frees my soldiers to fight dragons, I'll listen. I promise nothing."},
+        {"type": "talk", "npc": "ulfric", "text": "Persuade Jarl Ulfric to attend the council",
+         "topic": "The Greybeards want both sides at High Hrothgar.",
+         "reply": "I'd sooner not sit at a table with the Empire's dog. But I owe the Greybeards that much. I'll come."},
+        {"type": "go", "place": "high_hrothgar", "text": "Return to High Hrothgar for the council", "actions": "scene:council"},
+        {"type": "wait", "hours": 2, "place": "high_hrothgar", "text": "Wait while the council argues"}
+      ],
+      "rewards": {"gold": 400, "flags": ["civil_war_truce"]}
+    }
+  ]
+}

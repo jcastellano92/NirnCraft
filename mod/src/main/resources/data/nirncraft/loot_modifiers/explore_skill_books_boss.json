@@ -1,0 +1,9 @@
+{
+  "type": "nirncraft:explore_skill_books",
+  "tables": [
+    "nirncraft:chests/dungeon_boss"
+  ],
+  "table": "nirncraft:chests/skill_books",
+  "chance": 0.3,
+  "priority": 1
+}

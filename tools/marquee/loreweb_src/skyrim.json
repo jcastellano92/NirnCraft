@@ -20,7 +20,7 @@
         "desc2": "The four barrow tallies converge on Eldersblood Peak, where a tally-warden still waits for the final count.",
         "pitch": "A bridge-mason's mark at Valtheim says the barrows of Whiterun are a single ledger in stone.",
         "outro": "At the peak I cut the missing notch into the frost-rimed slate. The barrow-fires along the ridge flared once in answer, and the plain's oldest debt was balanced.",
-        "boss": {"name": "The Tally-Warden of the Peak", "type": "skycraft:draugr_deathlord", "hp": 3.4, "dmg": 1.5, "level": 20},
+        "boss": {"name": "The Tally-Warden of the Peak", "type": "nirncraft:draugr_deathlord", "hp": 3.4, "dmg": 1.5, "level": 20},
         "reward": {"gold": 520, "loot": "major"}
       }
     },
@@ -43,7 +43,7 @@
         "desc2": "Tracing the salvaged hulls leads through Brinewater Grotto to the quartermaster's counting-room in Broken Oar Grotto.",
         "pitch": "Someone has been timing the lighthouse shutters to the arrival of insured merchantmen.",
         "outro": "Below the grotto's tide-line I took the double-entry salvage ledger from the quartermaster's chest. Every ship on the rocks had been sold before it ever left port.",
-        "boss": {"name": "Quartermaster Vane of the Grotto", "type": "skycraft:bandit_chief", "hp": 3.2, "dmg": 1.4, "level": 22},
+        "boss": {"name": "Quartermaster Vane of the Grotto", "type": "nirncraft:bandit_chief", "hp": 3.2, "dmg": 1.4, "level": 22},
         "reward": {"gold": 540, "loot": "major"}
       }
     },
@@ -66,7 +66,7 @@
         "desc2": "The wagon-waybills run from Fort Neugrad and Helgen to Halldir's Cairn and the pyres of Sunderstone Gorge.",
         "pitch": "Fresh graves in Falkreath carry names no family in the hold has ever heard.",
         "outro": "In Sunderstone Gorge I burned the false burial charters and left the true name-rolls on Arkay's altar so the dead would at last be known by their own names.",
-        "boss": {"name": "The Gravedigger-Lord of Sunderstone", "type": "skycraft:necromancer", "hp": 3.4, "dmg": 1.5, "level": 22},
+        "boss": {"name": "The Gravedigger-Lord of Sunderstone", "type": "nirncraft:necromancer", "hp": 3.4, "dmg": 1.5, "level": 22},
         "reward": {"gold": 520, "loot": "major"}
       }
     },
@@ -89,7 +89,7 @@
         "desc2": "Following the broken ring-stones through Fort Snowhawk, Kjenstag, and Lost Valkygg leads to the maze-keeper at Labyrinthian.",
         "pitch": "The ruined shrines of the marsh are all aligned to the walls of Labyrinthian.",
         "outro": "At the center of the stone maze I turned the keystone back into its socket. The footsteps behind the walls stopped at the fourth ring.",
-        "boss": {"name": "The Maze-Keeper of Bromjunaar", "type": "skycraft:draugr_deathlord", "hp": 3.6, "dmg": 1.5, "level": 24},
+        "boss": {"name": "The Maze-Keeper of Bromjunaar", "type": "nirncraft:draugr_deathlord", "hp": 3.6, "dmg": 1.5, "level": 24},
         "reward": {"gold": 560, "loot": "major"}
       }
     },
@@ -112,7 +112,7 @@
         "desc2": "Tracing the counterweight cables through Mzinchaleft and Irkngthand reveals the phantom shaft's governor at the Great Lift at Alftand.",
         "pitch": "Every Dwemer lift in the Pale clicks in answer to a seventh cage that no surface map records.",
         "outro": "When I locked the phantom governor at Alftand, a sealed sub-shaft sighed shut far below the ice, and the six surface lifts finally kept an honest count.",
-        "boss": {"name": "The Lift-Warden Automaton", "type": "skycraft:dwarven_centurion", "hp": 3.8, "dmg": 1.6, "level": 26},
+        "boss": {"name": "The Lift-Warden Automaton", "type": "nirncraft:dwarven_centurion", "hp": 3.8, "dmg": 1.6, "level": 26},
         "reward": {"gold": 580, "loot": "major"}
       }
     },
@@ -135,7 +135,7 @@
         "desc2": "The apiary ledgers trace the winter feed from Black-Briar Lodge and Honeystrand Cave to a hidden cellar beneath Riften.",
         "pitch": "The reserve honey of the Rift never crystallises, even in midwinter frost.",
         "outro": "Beneath the canal vaults I sealed the fungal amber-spring that fed the queen-hives. The next vintage will age like honest mead.",
-        "boss": {"name": "The Amber-Hive Matron", "type": "skycraft:spriggan", "hp": 3.4, "dmg": 1.5, "level": 22},
+        "boss": {"name": "The Amber-Hive Matron", "type": "nirncraft:spriggan", "hp": 3.4, "dmg": 1.5, "level": 22},
         "reward": {"gold": 540, "loot": "major"}
       }
     },
@@ -158,7 +158,7 @@
         "desc2": "Comparing the rudder-chains at Hela's Folly, Pilgrim's Trench, and the Pride of Tel Vos points up the cliff to Snowpoint Beacon.",
         "pitch": "Four ships went down on the same ice-reef bearing salvage bonds signed by the same hand.",
         "outro": "At Snowpoint Beacon I took the factor's false chart-glass and restored the true coastal bearing. The Sea of Ghosts takes enough ships without help from the shore.",
-        "boss": {"name": "Captain Varek the Salvager", "type": "skycraft:bandit_chief", "hp": 3.4, "dmg": 1.5, "level": 24},
+        "boss": {"name": "Captain Varek the Salvager", "type": "nirncraft:bandit_chief", "hp": 3.4, "dmg": 1.5, "level": 24},
         "reward": {"gold": 550, "loot": "major"}
       }
     },
@@ -181,7 +181,7 @@
         "desc2": "Following the buried bronze conduits from Kagrenzel through Eldergleam and Witchmist Grove leads to the capped relief engine at Steamcrag Camp.",
         "pitch": "The geysers of Eastmarch have been boiling higher each week since a bronze valve was jammed in the caldera.",
         "outro": "When I opened the relief manifold at Steamcrag Camp, a column of white steam roared into the frosty sky and the boiling pools around the Sanctuary settled back to warmth.",
-        "boss": {"name": "The Vent-Engine Overseer", "type": "skycraft:dwarven_centurion", "hp": 3.8, "dmg": 1.6, "level": 26},
+        "boss": {"name": "The Vent-Engine Overseer", "type": "nirncraft:dwarven_centurion", "hp": 3.8, "dmg": 1.6, "level": 26},
         "reward": {"gold": 580, "loot": "major"}
       }
     },
@@ -204,7 +204,7 @@
         "desc2": "Tracing the flooded adits through Karthwasten, Left Hand Mine, and Bthardamz leads to the master sluice-warden in Arkngthamz.",
         "pitch": "Independent silver shafts in the Reach flood overnight while syndicate mines stay bone-dry.",
         "outro": "In the lower gallery of Arkngthamz I pinned the master sluice-wheel at level gauge. The Karth's water runs equal through every shaft again.",
-        "boss": {"name": "The Sluice-Warden of Arkngthamz", "type": "skycraft:dwarven_centurion", "hp": 3.8, "dmg": 1.6, "level": 26},
+        "boss": {"name": "The Sluice-Warden of Arkngthamz", "type": "nirncraft:dwarven_centurion", "hp": 3.8, "dmg": 1.6, "level": 26},
         "reward": {"gold": 580, "loot": "major"}
       }
     }

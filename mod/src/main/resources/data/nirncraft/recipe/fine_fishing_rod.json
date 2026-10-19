@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "nirncraft:fishing_rod",
+    "minecraft:iron_ingot",
+    "minecraft:string",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "nirncraft:fine_fishing_rod"
+  }
+}

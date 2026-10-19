@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "harvested=false": [
+      {
+        "model": "nirncraft:block/juniper_berries"
+      },
+      {
+        "model": "nirncraft:block/juniper_berries",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/juniper_berries",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/juniper_berries",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "nirncraft:block/juniper_berries_harvested"
+      },
+      {
+        "model": "nirncraft:block/juniper_berries_harvested",
+        "y": 90
+      },
+      {
+        "model": "nirncraft:block/juniper_berries_harvested",
+        "y": 180
+      },
+      {
+        "model": "nirncraft:block/juniper_berries_harvested",
+        "y": 270
+      }
+    ]
+  }
+}

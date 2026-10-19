@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "#I#",
+    "@T@",
+    " # "
+  ],
+  "key": {
+    "#": "minecraft:stick",
+    "I": "nirncraft:steel_ingot",
+    "@": "minecraft:string",
+    "T": "minecraft:tripwire_hook"
+  },
+  "result": {
+    "count": 1,
+    "id": "nirncraft:imperial_crossbow"
+  }
+}

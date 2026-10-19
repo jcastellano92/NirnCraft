@@ -1,0 +1,1496 @@
+[
+ {
+  "id": "skyrim_blackreach_forest",
+  "name": "Glowing Mushroom Forest",
+  "lore": "Beneath the holds, a second forest: caps the height of towers, lit from inside, and the quiet of a place that has never had weather.",
+  "weight": 1.3,
+  "match": {
+   "provinces": [
+    "skyrim"
+   ],
+   "themes": [
+    "cave",
+    "ruin",
+    "hagraven_lair"
+   ]
+  },
+  "shapes": {
+   "bowl_bridges": 3,
+   "root_cavern": 2,
+   "karst": 2,
+   "canyon": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:moss_block@20",
+    "minecraft:mycelium@10",
+    "minecraft:podzol@8",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:moss_block@30",
+    "minecraft:mud@14",
+    "minecraft:shroomlight@8",
+    "minecraft:dripstone_block@22",
+    "minecraft:tuff@10"
+   ],
+   "spike": [
+    "minecraft:dripstone_block@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:mossy_stone_bricks@2",
+    "minecraft:stone_bricks@3"
+   ],
+   "patch": [
+    "minecraft:mycelium"
+   ],
+   "patchAt": 0.3
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "mushroom",
+    "block": [
+     "minecraft:mushroom_stem"
+    ],
+    "cap": [
+     "minecraft:red_mushroom_block",
+     "minecraft:brown_mushroom_block"
+    ],
+    "tip": [
+     "minecraft:shroomlight"
+    ],
+    "density": 26,
+    "radius": 3
+   },
+   {
+    "type": "mushroom",
+    "block": [
+     "minecraft:mushroom_stem"
+    ],
+    "cap": [
+     "minecraft:brown_mushroom_block"
+    ],
+    "tip": [
+     "minecraft:glowstone"
+    ],
+    "density": 14,
+    "radius": 2
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:red_mushroom",
+     "minecraft:brown_mushroom"
+    ],
+    "density": 80
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:glow_lichen[down=true]"
+    ],
+    "density": 70
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 60
+   },
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:cave_vines_plant[berries=true]"
+    ],
+    "density": 20,
+    "len": [
+     3,
+     8
+    ],
+    "tip": [
+     "minecraft:cave_vines[berries=true]"
+    ]
+   },
+   {
+    "type": "float",
+    "block": [
+     "minecraft:lily_pad"
+    ],
+    "density": 30
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.06
+   },
+   {
+    "type": "pool",
+    "fluid": "water",
+    "count": [
+     2,
+     3
+    ],
+    "size": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:sea_lantern"
+    ],
+    "block": [
+     "minecraft:moss_block"
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:shroomlight",
+    "minecraft:verdant_froglight"
+   ],
+   "density": 36,
+   "cluster": 2
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "nirncraft:falmer",
+   "nirncraft:chaurus"
+  ],
+  "loot": {
+   "relic": "nirncraft:chests/relic_cave",
+   "platform": "nirncraft:chests/cavern/fungal",
+   "minor": "nirncraft:chests/cavern/fungal"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     2,
+     5
+    ],
+    "where": "air"
+   },
+   {
+    "entity": "minecraft:glow_squid",
+    "count": [
+     2,
+     4
+    ],
+    "where": "water"
+   }
+  ],
+  "particle": "spore",
+  "lightColor": "cyan"
+ },
+ {
+  "id": "skyrim_falmer_hive",
+  "name": "Falmer Hive",
+  "lore": "Chitin plate and tallow-wax, cell upon cell. The Snow Elves did not go blind by accident.",
+  "weight": 1.6,
+  "match": {
+   "rosters": [
+    "falmer",
+    "spider"
+   ],
+   "provinces": [
+    "skyrim"
+   ]
+  },
+  "shapes": {
+   "honeycomb": 4,
+   "pillar_maze": 2,
+   "bowl_bridges": 1,
+   "collapsed_city": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:dripstone_block@16",
+    "minecraft:tuff@16",
+    "minecraft:mud@8",
+    "rock@60"
+   ],
+   "wall": [
+    "minecraft:dripstone_block@30",
+    "minecraft:tuff@20",
+    "minecraft:honeycomb_block@14",
+    "minecraft:brown_terracotta@10",
+    "rock@26"
+   ],
+   "spike": [
+    "minecraft:dripstone_block@2",
+    "minecraft:tuff@1"
+   ],
+   "platform": [
+    "minecraft:brown_terracotta@2",
+    "minecraft:dripstone_block@2"
+   ],
+   "pillar": [
+    "minecraft:dripstone_block@3",
+    "minecraft:brown_terracotta@1"
+   ],
+   "ruin": [
+    "minecraft:brown_terracotta@2",
+    "minecraft:dripstone_block@2",
+    "minecraft:honeycomb_block@1"
+   ]
+  },
+  "fluid": {
+   "kind": "pool",
+   "block": [
+    "minecraft:mud"
+   ],
+   "chance": 0.55
+  },
+  "flora": [
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:cobweb"
+    ],
+    "density": 40
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:cobweb"
+    ],
+    "density": 16
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:turtle_egg[eggs=4]"
+    ],
+    "density": 8
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:brown_mushroom"
+    ],
+    "density": 40
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:bone_block"
+    ],
+    "density": 10
+   }
+  ],
+  "features": [
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:dripstone_block",
+     "minecraft:brown_terracotta"
+    ],
+    "count": [
+     3,
+     6
+    ]
+   },
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:honeycomb_block"
+    ],
+    "scale": 5.0,
+    "amount": 0.04
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:shroomlight",
+    "minecraft:ochre_froglight"
+   ],
+   "density": 60,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "shrine",
+   "block": [
+    "minecraft:dripstone_block"
+   ],
+   "accent": [
+    "minecraft:lantern"
+   ]
+  },
+  "foes": [
+   "nirncraft:falmer",
+   "nirncraft:chaurus",
+   "nirncraft:frostbite_spider"
+  ],
+  "elite": "Falmer Warmonger",
+  "loot": {
+   "relic": "nirncraft:chests/relic_cave",
+   "platform": "nirncraft:chests/cavern/hive",
+   "minor": "nirncraft:chests/cavern/hive"
+  },
+  "lightColor": "orange"
+ },
+ {
+  "id": "skyrim_frost_cavern",
+  "name": "Frost Cavern",
+  "lore": "Meltwater ran down these walls once and stopped, mid-fall. The blue in the ice is old.",
+  "weight": 1.3,
+  "match": {
+   "provinces": [
+    "skyrim"
+   ],
+   "weather": [
+    "frozen",
+    "skyrim_cold"
+   ]
+  },
+  "shapes": {
+   "crevasse": 3,
+   "bowl_bridges": 2,
+   "canyon": 2,
+   "amphitheatre": 1,
+   "cathedral": 1,
+   "karst": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:packed_ice@20",
+    "minecraft:blue_ice@8",
+    "minecraft:snow_block@14",
+    "rock@58"
+   ],
+   "wall": [
+    "minecraft:packed_ice@40",
+    "minecraft:blue_ice@30",
+    "minecraft:sea_lantern@6",
+    "minecraft:snow_block@10",
+    "minecraft:stone@14"
+   ],
+   "spike": [
+    "minecraft:packed_ice@3",
+    "minecraft:blue_ice@2"
+   ],
+   "platform": [
+    "minecraft:polished_diorite@3",
+    "minecraft:blue_ice@1",
+    "minecraft:stone_bricks@1"
+   ],
+   "patch": [
+    "minecraft:snow_block"
+   ],
+   "patchAt": 0.1
+  },
+  "fluid": {
+   "kind": "ice"
+  },
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:blue_ice"
+    ],
+    "density": 14,
+    "len": [
+     4,
+     9
+    ],
+    "cap": [
+     "minecraft:sea_lantern"
+    ],
+    "tip": [
+     "minecraft:packed_ice"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:snow"
+    ],
+    "density": 100
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:snow"
+    ],
+    "density": 40
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.05
+   },
+   {
+    "type": "pool",
+    "fluid": "powder_snow",
+    "count": [
+     1,
+     2
+    ],
+    "size": [
+     2,
+     2
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:blue_ice"
+   ],
+   "density": 50,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "nirncraft:ice_wraith",
+   "nirncraft:frost_atronach"
+  ],
+  "loot": {
+   "relic": "nirncraft:chests/relic_cave",
+   "platform": "nirncraft:chests/cavern/frost",
+   "minor": "nirncraft:chests/cavern/frost"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     1,
+     3
+    ],
+    "where": "air"
+   }
+  ],
+  "lightColor": "blue"
+ },
+ {
+  "id": "skyrim_nordic_vault",
+  "name": "Nordic Burial Vault",
+  "lore": "Stone ribs, iron-bound doors and the carved prayers of a people who meant to keep their dead where they put them.",
+  "weight": 1.5,
+  "match": {
+   "provinces": [
+    "skyrim",
+    "atmora"
+   ],
+   "themes": [
+    "barrow",
+    "ruin",
+    "fort"
+   ]
+  },
+  "shapes": {
+   "cathedral": 4,
+   "amphitheatre": 2,
+   "collapsed_city": 2,
+   "pillar_maze": 1,
+   "bone_cavern": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:stone_bricks@20",
+    "minecraft:cracked_stone_bricks@10",
+    "minecraft:gravel@8",
+    "rock@62"
+   ],
+   "wall": [
+    "minecraft:stone_bricks@26",
+    "minecraft:mossy_stone_bricks@10",
+    "minecraft:cracked_stone_bricks@10",
+    "minecraft:andesite@16",
+    "rock@38"
+   ],
+   "spike": [
+    "minecraft:andesite@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:chiseled_stone_bricks@1",
+    "minecraft:stone_bricks@5"
+   ],
+   "pillar": [
+    "minecraft:stone_bricks@4",
+    "minecraft:chiseled_stone_bricks@1",
+    "minecraft:cracked_stone_bricks@1"
+   ],
+   "ruin": [
+    "minecraft:cracked_stone_bricks@2",
+    "minecraft:stone_bricks@2",
+    "minecraft:mossy_stone_bricks@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.35
+  },
+  "flora": [
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:cobweb"
+    ],
+    "density": 22
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:bone_block",
+     "minecraft:skeleton_skull"
+    ],
+    "density": 8
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:candle[lit=true]"
+    ],
+    "density": 8
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 30
+   }
+  ],
+  "features": [
+   {
+    "type": "statue",
+    "block": [
+     "minecraft:stone_bricks"
+    ],
+    "count": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:soul_lantern"
+    ]
+   },
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:cracked_stone_bricks",
+     "minecraft:stone_bricks"
+    ],
+    "count": [
+     4,
+     8
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:shroomlight"
+   ],
+   "density": 70,
+   "cluster": 0,
+   "post": [
+    "minecraft:soul_lantern"
+   ]
+  },
+  "setpiece": {
+   "type": "altar",
+   "block": [
+    "minecraft:stone_bricks"
+   ],
+   "accent": [
+    "minecraft:soul_lantern"
+   ]
+  },
+  "foes": [
+   "nirncraft:draugr"
+  ],
+  "elite": "Draugr Overlord",
+  "loot": {
+   "relic": "nirncraft:chests/relic_barrow",
+   "platform": "nirncraft:chests/cavern/ancient",
+   "minor": "nirncraft:chests/cavern/ancient"
+  },
+  "lightColor": "cyan"
+ },
+ {
+  "id": "skyrim_reach_crystal_mine",
+  "name": "Reach Crystal Mine",
+  "lore": "The Reachmen cut here with bone picks. The crystal veins are thick, and the bones of the miners are thicker.",
+  "weight": 1.6,
+  "match": {
+   "regions": [
+    "skyrim/the_reach"
+   ],
+   "themes": [
+    "mine",
+    "cave",
+    "ruin",
+    "hagraven_lair"
+   ]
+  },
+  "shapes": {
+   "shaft": 3,
+   "canyon": 2,
+   "bowl_bridges": 2,
+   "karst": 1,
+   "floating_islands": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:tuff@18",
+    "minecraft:calcite@8",
+    "minecraft:andesite@12",
+    "rock@62"
+   ],
+   "wall": [
+    "minecraft:tuff@28",
+    "minecraft:calcite@18",
+    "minecraft:amethyst_block@8",
+    "minecraft:iron_ore@5",
+    "minecraft:gold_ore@3",
+    "rock@38"
+   ],
+   "spike": [
+    "minecraft:calcite@1",
+    "minecraft:tuff@2"
+   ],
+   "platform": [
+    "minecraft:polished_andesite@3",
+    "minecraft:calcite@1"
+   ],
+   "pillar": [
+    "minecraft:oak_log@2",
+    "minecraft:calcite@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.5
+  },
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:amethyst_block"
+    ],
+    "density": 12,
+    "len": [
+     4,
+     8
+    ],
+    "cap": [
+     "minecraft:glowstone"
+    ],
+    "tip": [
+     "minecraft:amethyst_cluster[facing=up]"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:amethyst_cluster[facing=up]"
+    ],
+    "density": 50
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:bone_block",
+     "minecraft:skeleton_skull"
+    ],
+    "density": 6
+   },
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:iron_chain"
+    ],
+    "density": 6,
+    "len": [
+     3,
+     5
+    ],
+    "tip": [
+     "minecraft:lantern[hanging=true]"
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:gold_ore",
+     "minecraft:iron_ore"
+    ],
+    "scale": 5.0,
+    "amount": 0.04
+   },
+   {
+    "type": "ruin",
+    "block": [
+     "minecraft:oak_planks"
+    ],
+    "count": [
+     3,
+     5
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:glowstone",
+    "minecraft:pearlescent_froglight"
+   ],
+   "density": 56,
+   "cluster": 2
+  },
+  "setpiece": {
+   "type": "shrine",
+   "block": [
+    "minecraft:polished_andesite"
+   ],
+   "accent": [
+    "minecraft:lantern"
+   ]
+  },
+  "foes": [
+   "nirncraft:forsworn"
+  ],
+  "loot": {
+   "relic": "nirncraft:chests/relic_mine",
+   "platform": "nirncraft:chests/cavern/crystal",
+   "minor": "nirncraft:chests/cavern/crystal"
+  },
+  "lightColor": "violet"
+ },
+ {
+  "id": "skyrim_glacial_sea_cave",
+  "name": "Glacier Sea Cave",
+  "lore": "Where the northern sea eats the glacier from underneath, the ice goes hollow and blue-black and the water tastes of iron.",
+  "weight": 1.6,
+  "match": {
+   "regions": [
+    "skyrim/winterhold",
+    "skyrim/haafingar",
+    "skyrim/the_pale"
+   ]
+  },
+  "shapes": {
+   "sea_cave": 4,
+   "crevasse": 2,
+   "floating_islands": 1,
+   "bowl_bridges": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:gravel@14",
+    "minecraft:snow_block@12",
+    "minecraft:packed_ice@12",
+    "rock@62"
+   ],
+   "wall": [
+    "minecraft:packed_ice@34",
+    "minecraft:blue_ice@30",
+    "minecraft:stone@20",
+    "minecraft:snow_block@10",
+    "minecraft:sea_lantern@4"
+   ],
+   "spike": [
+    "minecraft:packed_ice@2",
+    "minecraft:blue_ice@1"
+   ],
+   "platform": [
+    "minecraft:blue_ice@1",
+    "minecraft:stone_bricks@3"
+   ],
+   "terrace": [
+    "minecraft:gravel@2",
+    "minecraft:snow_block@1"
+   ]
+  },
+  "fluid": {
+   "kind": "ice",
+   "chance": 1.0
+  },
+  "flora": [
+   {
+    "type": "spire",
+    "block": [
+     "minecraft:blue_ice"
+    ],
+    "density": 10,
+    "len": [
+     4,
+     8
+    ],
+    "cap": [
+     "minecraft:sea_lantern"
+    ],
+    "tip": [
+     "minecraft:packed_ice"
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:snow"
+    ],
+    "density": 90
+   },
+   {
+    "type": "bed",
+    "block": [
+     "minecraft:kelp"
+    ],
+    "density": 20
+   }
+  ],
+  "features": [
+   {
+    "type": "pool",
+    "fluid": "water",
+    "count": [
+     2,
+     3
+    ],
+    "size": [
+     2,
+     3
+    ]
+   },
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.04
+   },
+   {
+    "type": "boulders",
+    "block": [
+     "minecraft:packed_ice"
+    ],
+    "count": [
+     3,
+     5
+    ],
+    "size": [
+     2,
+     3
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:sea_lantern",
+    "minecraft:blue_ice"
+   ],
+   "density": 48,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "nirncraft:ice_wraith",
+   "nirncraft:horker"
+  ],
+  "loot": {
+   "relic": "nirncraft:chests/relic_cave",
+   "platform": "nirncraft:chests/cavern/sea",
+   "minor": "nirncraft:chests/cavern/sea"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:glow_squid",
+    "count": [
+     2,
+     4
+    ],
+    "where": "water"
+   },
+   {
+    "entity": "minecraft:cod",
+    "count": [
+     3,
+     6
+    ],
+    "where": "water"
+   }
+  ],
+  "lightColor": "blue"
+ },
+ {
+  "id": "skyrim_geothermal_cave",
+  "name": "Geothermal Cave",
+  "lore": "Hot springs steam under the tundra, and where the steam meets cold stone, the walls drip and stain red and gold.",
+  "weight": 1.8,
+  "match": {
+   "regions": [
+    "skyrim/eastmarch",
+    "skyrim/winterhold"
+   ],
+   "provinces": [
+    "skyrim"
+   ]
+  },
+  "shapes": {
+   "karst": 3,
+   "bowl_bridges": 2,
+   "lava_river": 1,
+   "amphitheatre": 1,
+   "canyon": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:tuff@18",
+    "minecraft:calcite@10",
+    "minecraft:terracotta@6",
+    "rock@50"
+   ],
+   "wall": [
+    "minecraft:tuff@28",
+    "minecraft:calcite@16",
+    "minecraft:orange_terracotta@10",
+    "minecraft:yellow_terracotta@6",
+    "rock@30"
+   ],
+   "spike": [
+    "minecraft:calcite@2",
+    "minecraft:dripstone_block@2"
+   ],
+   "platform": [
+    "minecraft:polished_andesite@3",
+    "minecraft:calcite@1"
+   ]
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fern"
+    ],
+    "density": 40
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 30
+   },
+   {
+    "type": "column",
+    "block": [
+     "minecraft:calcite"
+    ],
+    "density": 10,
+    "len": [
+     1,
+     3
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "pool",
+    "fluid": "water",
+    "count": [
+     3,
+     5
+    ],
+    "size": [
+     2,
+     3
+    ],
+    "accent": [
+     "minecraft:glowstone"
+    ],
+    "block": [
+     "minecraft:calcite"
+    ]
+   },
+   {
+    "type": "smoke",
+    "count": [
+     2,
+     4
+    ],
+    "block": [
+     "minecraft:calcite"
+    ]
+   },
+   {
+    "type": "bubbles",
+    "amount": 0.05
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:ochre_froglight",
+    "minecraft:glowstone"
+   ],
+   "density": 56,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "well",
+   "block": [
+    "minecraft:calcite"
+   ],
+   "accent": [
+    "minecraft:lantern"
+   ]
+  },
+  "foes": [],
+  "loot": {
+   "relic": "nirncraft:chests/relic_cave",
+   "platform": "nirncraft:chests/cavern/ember",
+   "minor": "nirncraft:chests/cavern/ember"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     2,
+     4
+    ],
+    "where": "air"
+   }
+  ],
+  "particle": "steam",
+  "lightColor": "orange"
+ },
+ {
+  "id": "skyrim_giant_bone_hall",
+  "name": "Hall of Old Bones",
+  "lore": "The giants and the mammoths came here to die, or were brought. Their ribs make a roof no mason could.",
+  "weight": 1.5,
+  "match": {
+   "regions": [
+    "skyrim/whiterun",
+    "skyrim/the_pale",
+    "skyrim/hjaalmarch",
+    "skyrim/the_rift"
+   ],
+   "themes": [
+    "cave",
+    "ruin",
+    "barrow"
+   ]
+  },
+  "shapes": {
+   "bone_cavern": 4,
+   "canyon": 1,
+   "cathedral": 1,
+   "karst": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:gravel@12",
+    "minecraft:coarse_dirt@10",
+    "minecraft:bone_block@4",
+    "rock@60"
+   ],
+   "wall": [
+    "minecraft:stone@30",
+    "minecraft:tuff@16",
+    "minecraft:bone_block@10",
+    "minecraft:andesite@20",
+    "minecraft:gravel@6"
+   ],
+   "spike": [
+    "minecraft:bone_block@1",
+    "minecraft:andesite@2"
+   ],
+   "platform": [
+    "minecraft:stone_bricks@3",
+    "minecraft:bone_block@1"
+   ],
+   "pillar": [
+    "minecraft:bone_block@4",
+    "minecraft:stone@1"
+   ]
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.3
+  },
+  "flora": [
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:bone_block",
+     "minecraft:skeleton_skull"
+    ],
+    "density": 20
+   },
+   {
+    "type": "ceil",
+    "block": [
+     "minecraft:cobweb"
+    ],
+    "density": 14
+   }
+  ],
+  "features": [
+   {
+    "type": "ribs",
+    "block": [
+     "minecraft:bone_block"
+    ],
+    "count": [
+     6,
+     6
+    ]
+   },
+   {
+    "type": "boulders",
+    "block": [
+     "minecraft:bone_block"
+    ],
+    "count": [
+     3,
+     5
+    ],
+    "size": [
+     1,
+     2
+    ]
+   },
+   {
+    "type": "boulders",
+    "block": [
+     "minecraft:stone"
+    ],
+    "count": [
+     2,
+     4
+    ],
+    "size": [
+     2,
+     3
+    ]
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:glowstone",
+    "minecraft:shroomlight"
+   ],
+   "density": 60,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [
+   "nirncraft:troll",
+   "nirncraft:giant",
+   "nirncraft:sabre_cat"
+  ],
+  "elite": "Bonecrusher",
+  "loot": {
+   "relic": "nirncraft:chests/relic_cave",
+   "platform": "nirncraft:chests/cavern/bone",
+   "minor": "nirncraft:chests/cavern/bone"
+  },
+  "lightColor": "warm"
+ },
+ {
+  "id": "skyrim_bog_grotto",
+  "name": "Fen Grotto",
+  "lore": "The marsh gets in everywhere: mud to the knee, mist at the roof, and the lazy glow of rot.",
+  "weight": 1.5,
+  "match": {
+   "regions": [
+    "skyrim/hjaalmarch",
+    "skyrim/falkreath"
+   ],
+   "provinces": [
+    "skyrim"
+   ]
+  },
+  "shapes": {
+   "pillar_maze": 3,
+   "root_cavern": 2,
+   "bowl_bridges": 1,
+   "karst": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:mud@28",
+    "minecraft:muddy_mangrove_roots@4",
+    "minecraft:clay@8",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:mud@26",
+    "minecraft:moss_block@22",
+    "minecraft:mangrove_roots@10",
+    "minecraft:clay@8",
+    "rock@34"
+   ],
+   "spike": [
+    "minecraft:mud@1",
+    "minecraft:mangrove_roots@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:mud_bricks@3",
+    "minecraft:stone_bricks@2"
+   ],
+   "pillar": [
+    "minecraft:mangrove_log@3",
+    "minecraft:mangrove_roots@2"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.3
+  },
+  "fluid": "water",
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:hanging_roots"
+    ],
+    "density": 30,
+    "len": [
+     2,
+     6
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:brown_mushroom",
+     "minecraft:fern"
+    ],
+    "density": 70
+   },
+   {
+    "type": "float",
+    "block": [
+     "minecraft:lily_pad"
+    ],
+    "density": 60
+   },
+   {
+    "type": "bed",
+    "block": [
+     "minecraft:seagrass"
+    ],
+    "density": 60
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 50
+   }
+  ],
+  "features": [
+   {
+    "type": "bedlight",
+    "block": [
+     "minecraft:sea_lantern"
+    ],
+    "amount": 0.04
+   },
+   {
+    "type": "bubbles",
+    "amount": 0.03
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:verdant_froglight",
+    "minecraft:shroomlight"
+   ],
+   "density": 56,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "camp"
+  },
+  "foes": [],
+  "loot": {
+   "relic": "nirncraft:chests/relic_cave",
+   "platform": "nirncraft:chests/cavern/root",
+   "minor": "nirncraft:chests/cavern/root"
+  },
+  "ambient": [
+   {
+    "entity": "minecraft:frog",
+    "count": [
+     2,
+     4
+    ],
+    "where": "floor"
+   },
+   {
+    "entity": "minecraft:bat",
+    "count": [
+     1,
+     3
+    ],
+    "where": "air"
+   }
+  ],
+  "particle": "mist",
+  "lightColor": "green"
+ },
+ {
+  "id": "skyrim_autumn_roots",
+  "name": "Autumn Root Cave",
+  "lore": "The trees up top turn gold and rust every year; down here, their roots go on without noticing, pale and wet and thick as a man.",
+  "weight": 1.6,
+  "match": {
+   "regions": [
+    "skyrim/the_rift",
+    "skyrim/falkreath"
+   ]
+  },
+  "shapes": {
+   "root_cavern": 4,
+   "karst": 2,
+   "bowl_bridges": 1,
+   "cathedral": 1
+  },
+  "palette": {
+   "floor": [
+    "minecraft:rooted_dirt@18",
+    "minecraft:podzol@14",
+    "minecraft:coarse_dirt@8",
+    "rock@40"
+   ],
+   "wall": [
+    "minecraft:rooted_dirt@24",
+    "minecraft:podzol@16",
+    "minecraft:mangrove_roots@8",
+    "minecraft:moss_block@12",
+    "rock@40"
+   ],
+   "spike": [
+    "minecraft:mangrove_roots@1",
+    "minecraft:dripstone_block@1",
+    "rock@2"
+   ],
+   "platform": [
+    "minecraft:mossy_stone_bricks@2",
+    "minecraft:stone_bricks@3"
+   ],
+   "pillar": [
+    "minecraft:oak_log@3",
+    "minecraft:dark_oak_log@1",
+    "minecraft:mangrove_roots@1"
+   ],
+   "patch": [
+    "minecraft:moss_block"
+   ],
+   "patchAt": 0.25
+  },
+  "fluid": {
+   "kind": "water",
+   "chance": 0.7
+  },
+  "flora": [
+   {
+    "type": "hang",
+    "block": [
+     "minecraft:hanging_roots"
+    ],
+    "density": 50,
+    "len": [
+     3,
+     8
+    ]
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:fern",
+     "minecraft:brown_mushroom",
+     "minecraft:orange_tulip"
+    ],
+    "density": 70
+   },
+   {
+    "type": "plant",
+    "block": [
+     "minecraft:moss_carpet"
+    ],
+    "density": 50
+   },
+   {
+    "type": "tree",
+    "block": [
+     "minecraft:oak_log"
+    ],
+    "cap": [
+     "minecraft:azalea_leaves[persistent=true]"
+    ],
+    "density": 6,
+    "len": [
+     9,
+     14
+    ],
+    "radius": 3,
+    "tip": [
+     "minecraft:shroomlight"
+    ]
+   }
+  ],
+  "features": [
+   {
+    "type": "vein",
+    "block": [
+     "minecraft:mangrove_roots"
+    ],
+    "scale": 5.0,
+    "amount": 0.03
+   }
+  ],
+  "lights": {
+   "roof": [
+    "minecraft:ochre_froglight",
+    "minecraft:shroomlight"
+   ],
+   "density": 52,
+   "cluster": 0
+  },
+  "setpiece": {
+   "type": "tree",
+   "block": [
+    "minecraft:oak_log"
+   ],
+   "accent": [
+    "minecraft:azalea_leaves[persistent=true]"
+   ]
+  },
+  "foes": [
+   "nirncraft:spriggan"
+  ],
+  "loot": {
+   "relic": "nirncraft:chests/relic_cave",
+   "platform": "nirncraft:chests/cavern/root",
+   "minor": "nirncraft:chests/cavern/root"
+  },
+  "lightColor": "orange"
+ }
+]

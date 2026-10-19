@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """World module textures: aged parchment for the world map and the hand-inked location icon sheet.
 
-Writes into mod/src/main/resources/assets/skycraft/textures/gui/:
+Writes into mod/src/main/resources/assets/nirncraft/textures/gui/:
   map_parchment.png  256x256  tileable aged paper (stains, fibres, darker edges are drawn by the screen)
   map_icons.png      128x64   8x4 grid of 16x16 ink icons, index = LocationKind.icon
 Run: python3 tools/textures/world.py
@@ -13,7 +13,7 @@ import random
 from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-OUT = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "skycraft", "textures", "gui")
+OUT = os.path.join(ROOT, "mod", "src", "main", "resources", "assets", "nirncraft", "textures", "gui")
 
 INK = (58, 40, 24, 255)
 INK_SOFT = (92, 66, 40, 255)

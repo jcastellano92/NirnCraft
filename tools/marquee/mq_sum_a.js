@@ -15,7 +15,7 @@ module.exports = function (f) {
 
   f.relic('sixteenth_prism', 'The Sixteenth Prism', 'A prism of rose quartz no larger than a thumb, cut with sixteen faces. One face is blank. Held to the light, it throws a seventeenth colour that no one has a name for.', 20);
   f.relic('precedent_leaf', 'Leaf of the Ledger of Precedent', 'A single unbound page, gilded at the edges, written in the Chancellery\'s hand. It records a ruling nobody remembers and a judgment nobody has overturned. The ink has not faded in three thousand years.', 11);
-  f.boss('gate_warden', { name: 'The Warden of the Sixteenth Gate', type: 'skycraft:dwarven_centurion', hp: 3.8, dmg: 1.6, level: 34,
+  f.boss('gate_warden', { name: 'The Warden of the Sixteenth Gate', type: 'nirncraft:dwarven_centurion', hp: 3.8, dmg: 1.6, level: 34,
     drop: 'loot:major', glow: true });
   f.scene('ali_avenue', [
     ['narrator', 'Fifteen avenues of white garden-lined stone radiate from the Crystal Tower. Between the fourteenth and the fifteenth the pavement forms a seam you would take for decoration, unless you held a prism to it.'],
@@ -43,7 +43,7 @@ module.exports = function (f) {
         ] }),
     ],
     outro: 'Alinor has sixteen avenues now, or has always had, depending on who is asked. The mourning garden is quiet, and the prism is back in its smith\'s window.',
-    rewards: { gold: 1100, loot: 'major', items: [{ item: 'skycraft:elven_gilded_helmet', name: 'Circlet of the Sixteenth Face', enchant: { protection: 3, unbreaking: 3 } }] },
+    rewards: { gold: 1100, loot: 'major', items: [{ item: 'nirncraft:elven_gilded_helmet', name: 'Circlet of the Sixteenth Face', enchant: { protection: 3, unbreaking: 3 } }] },
   });
 
   f.q({
@@ -72,7 +72,7 @@ module.exports = function (f) {
     objectives: [
       o.go('direnni_acropolis', 'Follow the missing rainbow\'s colour to the Direnni Acropolis'),
       o.cond('day', 'Wait for noon, when the forty-first colour appears', 'direnni_acropolis'),
-      o.retrieveItem('direnni_acropolis', 'Gather a shard of lens-quartz from the Acropolis columns', 'skycraft:refined_moonstone', 1),
+      o.retrieveItem('direnni_acropolis', 'Gather a shard of lens-quartz from the Acropolis columns', 'nirncraft:refined_moonstone', 1),
       o.talk('@prism_plover', 'Return the shard to Ondolemar',
         'The rainbow was caught on a column of the Acropolis, which hung it like a banner. Here is the shard that kept it there.',
         'Ondolemar holds the shard to the roof and a fortieth rainbow blooms across the ceiling, bright and slightly smug. "Ha! Home. Walker, you have cost me no more than a small shard and a half-day\'s work. The house owes you, and the house always pays."'),
@@ -93,8 +93,8 @@ module.exports = function (f) {
 
   f.relic('missing_folio', 'The Folio of Unbound Years', 'A single folio bound in grey buckram, its pages written in a hand that is somehow always slightly ahead of the reader. It lists dates that have not yet happened and names that do not yet exist.', 15);
   f.relic('catalogue_slip', 'Catalogue Slip, Third Hand', 'A card-slip filed by a librarian who is not on the staff roll. The shelf-mark is correct. The library it refers to is not this one.', 11);
-  f.boss('stack_keeper', { name: 'The Unlent Reader', type: 'skycraft:draugr_deathlord', hp: 3.4, dmg: 1.5, level: 30,
-    weapon: 'skycraft:elven_sword', gear: { head: 'skycraft:elven_gilded_helmet' }, drop: 'loot:major', glow: true });
+  f.boss('stack_keeper', { name: 'The Unlent Reader', type: 'nirncraft:draugr_deathlord', hp: 3.4, dmg: 1.5, level: 30,
+    weapon: 'nirncraft:elven_sword', gear: { head: 'nirncraft:elven_gilded_helmet' }, drop: 'loot:major', glow: true });
 
   f.scene('lil_stacks', [
     ['narrator', 'The terraced stacks climb the rock in rings, open to the sky, each shelf labelled in a silver hand. Wind turns pages somewhere you cannot see.'],
@@ -135,7 +135,7 @@ module.exports = function (f) {
     objectives: [
       o.go('direnni_acropolis', 'Search the private collection at the Direnni Acropolis'),
       o.clear('direnni_acropolis', 'Drive off the collection\'s guardians',
-        [mob('skycraft:gargoyle', 2, 'Reading-Room Gargoyle'), mob('minecraft:skeleton', 2, 'Silent Attendant')]),
+        [mob('nirncraft:gargoyle', 2, 'Reading-Room Gargoyle'), mob('minecraft:skeleton', 2, 'Silent Attendant')]),
       o.talk('@rilen', 'Tell Rilen what the volume says',
         'The volume was there. I read the first page. It describes a colour the eye cannot hold, and ends: \'if you have read this far, you have already seen it.\'',
         'Rilen sits down hard on a step. "Already seen it. Walker, did you... did you feel anything? No. Of course not. It was only a joke. It was only a very good joke, from a very old scholar who wished to be remembered for one clever sentence. Rilen is nineteen. He will remember it for a very long time."'),
@@ -152,7 +152,7 @@ module.exports = function (f) {
     objectives: [
       o.cond('night', 'Wait in the Orrery Court until the fourth ring sighs', 'lillandril'),
       o.clear('lillandril', 'Drive off the bronze things that crawl from the fourth ring',
-        [mob('skycraft:dwarven_spider', 3, 'Ring-Mite'), mob('skycraft:dwarven_sphere', 1, 'Sighing Sphere')]),
+        [mob('nirncraft:dwarven_spider', 3, 'Ring-Mite'), mob('nirncraft:dwarven_sphere', 1, 'Sighing Sphere')]),
       o.talk('@thalor', 'Tell Thalor what the ring wanted',
         'It was not a person. It was the ring itself. It is tired of turning the same orbit and wishes to turn one other way.',
         'Thalor listens in profound silence. "Tired. Of turning. Walker, a ring may wish to rest, may it not? May it rest in a different place? It is a heavy thing, to ask the heavens to change a little, to please a machine. But we have asked greater things of heaven for worse reasons. Thalor will turn the ring. Slowly. And see."'),
@@ -172,7 +172,7 @@ module.exports = function (f) {
     'The Wall-Less Inn has a roof and a floor and no walls whatever. It is therefore always in a draught. Ariadwe serves hot drinks in cups with lids, and warns every patron, kindly, not to lean back.', true);
 
   f.relic('floor_crack_shard', 'Shard of the Cracked Pane', 'A thumb-wide sliver of balcony glass, thick as a coin, its edge as sharp as a razor. A line of fine, grey sediment runs through it that is not frost, not dust and not salt.', 20);
-  f.boss('glass_stalker', { name: 'The Glass-Walker', type: 'skycraft:wispmother', hp: 3.8, dmg: 1.6, level: 30, drop: 'loot:major', glow: true });
+  f.boss('glass_stalker', { name: 'The Glass-Walker', type: 'nirncraft:wispmother', hp: 3.8, dmg: 1.6, level: 30, drop: 'loot:major', glow: true });
   f.scene('clo_crack', [
     ['narrator', 'The Balcony Walk is a pane of clear glass three hundred feet above a restless sea. Halfway across, a hair-thin line runs from rail to rail, and below it, in the dark water, something pale has turned over and is looking up.'],
     ['@aviel', 'Seventeen thousand, four hundred and eleven panes. Seventeen thousand, four hundred and ten. Walker, the count has changed. I have counted this walk for fifteen years. A pane is missing, and the sea has begun to notice.'],
@@ -234,8 +234,8 @@ module.exports = function (f) {
     'The Seventh Ring is a round tavern at the top of the Orrery, where the tables turn very slowly on a hidden gear. Eilis says it makes one full turn per night, so everyone sees every view. She has never explained who winds the gear.', true);
 
   f.relic('orrery_gear', 'The Seventh Gear', 'A palm-sized gear of bronze with seventeen teeth, one of them filed down and replaced by a stranger\'s metal. It still spins freely, though no axle is anywhere near it.', 18);
-  f.boss('ring_saboteur', { name: 'Valdis the Unwinder', type: 'skycraft:necromancer', hp: 3.2, dmg: 1.5, level: 28,
-    weapon: 'skycraft:staff_of_sparks', gear: { head: 'skycraft:elven_helmet' }, drop: 'loot:standard', glow: true });
+  f.boss('ring_saboteur', { name: 'Valdis the Unwinder', type: 'nirncraft:necromancer', hp: 3.2, dmg: 1.5, level: 28,
+    weapon: 'nirncraft:staff_of_sparks', gear: { head: 'nirncraft:elven_helmet' }, drop: 'loot:standard', glow: true });
   f.scene('sky_slip', [
     ['narrator', 'The Great Orrery is a lattice of nine bronze rings turning in a stone well, each a degree behind where the last one ought to be. The shadows on the ring-walks do not agree with the sun.'],
     ['@taleth', 'Seven minutes behind. Every day for a week. It should be impossible: the rings are wound by gravity and a single weight. Walker, someone has put a hand inside the sky.'],
