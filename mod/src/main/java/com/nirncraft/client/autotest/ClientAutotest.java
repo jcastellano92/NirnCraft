@@ -220,7 +220,7 @@ public final class ClientAutotest {
     private static volatile boolean liveVisualSettle, visualPending;
     private static volatile float[] visualPrev;
     private static volatile int visualStable;
-    private static volatile double visualDiff = 99;
+    private static volatile double visualDiff = 99, visualDrift = 99, visualMean;
     private static int visualSince;
     private static final WorldReadiness READINESS = new WorldReadiness();
     private static String liveCapture;
@@ -391,26 +391,35 @@ public final class ClientAutotest {
             return;
         }
         if (liveSettleUntil > 0 && liveVisualSettle) {
-            // settled when the picture stops changing (what a person sees), not when every chunk to the edge of view
-            // is meshed: a tiny copy of the frame twice a second; 4 near-identical samples in a row (~2 s), at least
-            // 3 s after the move, with the chunks around the camera present
+            // settled when RENDERING has finished, not when the world stops moving: a coarse copy of the frame twice a
+            // second (each cell averages a 32 x 32 block, so swaying leaves, rain, particles, flicker and walking
+            // entities average out); settled when < 3 % of cells change structurally (chunks / far tiles popping in, a
+            // shader still compiling) AND the overall brightness has stopped drifting (eye adaptation done: shaders
+            // fully engaged), 3 samples in a row (~1.5 s), at least 3 s after the move, chunks around the camera present
             if (tick % 10 == 0 && !visualPending) {
                 visualPending = true;
-                net.minecraft.client.Screenshot.takeScreenshot(mc.gameRenderer.mainRenderTarget(), 16, img -> {
+                net.minecraft.client.Screenshot.takeScreenshot(mc.gameRenderer.mainRenderTarget(), 32, img -> {
                     try {
                         int w = img.getWidth(), h = img.getHeight();
                         float[] cur = new float[w * h];
+                        double mean = 0;
                         for (int y = 0; y < h; y++)
                             for (int x = 0; x < w; x++) {
                                 int p = img.getPixel(x, y);
-                                cur[y * w + x] = ((p >> 16) & 255) + ((p >> 8) & 255) + (p & 255);
+                                cur[y * w + x] = (((p >> 16) & 255) + ((p >> 8) & 255) + (p & 255)) / 3f;
+                                mean += cur[y * w + x];
                             }
+                        mean /= cur.length;
                         if (visualPrev != null && visualPrev.length == cur.length) {
-                            double d = 0;
-                            for (int i = 0; i < cur.length; i++) d += Math.abs(cur[i] - visualPrev[i]);
-                            visualDiff = d / cur.length / 3.0;
-                            visualStable = visualDiff < 1.5 ? visualStable + 1 : 0;
+                            int changed = 0;
+                            for (int i = 0; i < cur.length; i++) if (Math.abs(cur[i] - visualPrev[i]) > 10) changed++;
+                            double structural = 100.0 * changed / cur.length;
+                            double drift = Math.abs(mean - visualMean);
+                            visualDiff = structural;
+                            visualDrift = drift;
+                            visualStable = structural < 3.0 && drift < 0.8 ? visualStable + 1 : 0;
                         }
+                        visualMean = mean;
                         visualPrev = cur;
                     } finally {
                         img.close();
@@ -422,15 +431,17 @@ public final class ClientAutotest {
             boolean near = true;
             for (int i = -1; i <= 1 && near; i++)
                 for (int j = -1; j <= 1 && near; j++) near = mc.level.getChunkSource().hasChunk(cx + i, cz + j);
-            if (visualStable >= 4 && near && tick >= visualSince + 60) {
+            if (visualStable >= 3 && near && tick >= visualSince + 60) {
                 liveSettleUntil = 0;
-                NirnCraft.LOGGER.info("Autotest live: settled visually after {} ticks (frame change {})",
-                        tick - visualSince, String.format(java.util.Locale.ROOT, "%.2f", visualDiff));
+                NirnCraft.LOGGER.info("Autotest live: render settled after {} ticks (structural {}% , exposure drift {})",
+                        tick - visualSince, String.format(java.util.Locale.ROOT, "%.1f", visualDiff),
+                        String.format(java.util.Locale.ROOT, "%.2f", visualDrift));
             } else if (tick >= liveSettleUntil) {
                 liveSettleUntil = 0;
                 liveSettlePartial++;
-                NirnCraft.LOGGER.warn("Autotest live: picture still changing at the deadline, continuing (partial): change {}",
-                        String.format(java.util.Locale.ROOT, "%.2f", visualDiff));
+                NirnCraft.LOGGER.warn("Autotest live: render still changing at the deadline, continuing (partial): "
+                        + "structural {}%, exposure drift {}", String.format(java.util.Locale.ROOT, "%.1f", visualDiff),
+                        String.format(java.util.Locale.ROOT, "%.2f", visualDrift));
             }
             return;
         }
