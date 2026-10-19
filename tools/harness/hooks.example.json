@@ -1,0 +1,7 @@
+{
+ "_comment": "Copy to .work/harness/hooks.json (this machine) or tools/harness/hooks.json (everyone). Each event maps to commands run from the repo root with the event JSON in HARNESS_EVENT. Events: test_failed, test_crashed, client_crashed, client_restarted, test_quarantined, group_skipped, run_finished; \"*\" = every event. Every event is also appended to .work/harness/events.jsonl.",
+ "client_crashed": ["py -3 tools/harness/hooks/notify.py"],
+ "test_quarantined": ["py -3 tools/harness/hooks/notify.py"],
+ "group_skipped": ["py -3 tools/harness/hooks/notify.py"],
+ "run_finished": ["py -3 tools/harness/hooks/notify.py"]
+}

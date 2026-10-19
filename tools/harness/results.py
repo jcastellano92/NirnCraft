@@ -22,7 +22,8 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[2]
 STORE = ROOT / ".work/harness"
 SCENES = STORE / "results"
-RUNS = STORE / "runs"
+RUNS = STORE / "runs"  # (older layout; removed by the next report)
+LATEST = STORE / "latest"
 
 
 def _font(size):
@@ -44,12 +45,15 @@ def metrics(img, before=None):
     t = 16
     tiles = luma[: h - h % t, : w - w % t].reshape(h // t, t, w // t, t).max(axis=(1, 3))
     mean = float(luma.mean())
+    black = tiles < 3
     out = {
         "luma": round(mean, 1),
         "p1": round(float(np.percentile(luma, 1)), 1),
         "p99": round(float(np.percentile(luma, 99)), 1),
-        # tiles that are pure black in a frame that is not dark overall: the NaN / black-box signature
-        "blackTiles": int((tiles < 3).sum()) if mean > 40 else 0,
+        # pure-black 16 px tiles (dark scenery, silhouettes, crushed shadows: a number to watch, not a flag)
+        "blackTiles": int(black.sum()),
+        # solid rectangles of them in a frame that is not dark overall: the NaN-in-a-mip-chain black-box signature
+        "blackBoxes": _boxes(black) if mean > 40 else 0,
         "clipped": round(float((a.max(axis=2) >= 254).mean()) * 100, 2),
     }
     if before is not None:
@@ -58,14 +62,40 @@ def metrics(img, before=None):
         out["diff"] = round(float(d.mean()), 2)
         out["changed"] = round(float((d > 24).mean()) * 100, 1)
     flags = []
-    if out["blackTiles"]:
-        flags.append(f"{out['blackTiles']} black tiles")
+    if out["blackBoxes"]:
+        flags.append(f"{out['blackBoxes']} black box(es)")
     if mean < 6:
         flags.append("black frame")
     if out["clipped"] > 25:
         flags.append("blown out")
     out["flags"] = flags
     return out
+
+
+def _boxes(black):
+    """Connected groups of pure-black tiles that fill their bounding rectangle (>= 2x2 tiles, >= 90 % full): bloom
+    smears one NaN pixel into exactly such blocks, while dark scenery is ragged."""
+    h, w = black.shape
+    seen = np.zeros_like(black, dtype=bool)
+    n = 0
+    for y in range(h):
+        for x in range(w):
+            if not black[y, x] or seen[y, x]:
+                continue
+            stack, cells = [(y, x)], []
+            seen[y, x] = True
+            while stack:
+                cy, cx = stack.pop()
+                cells.append((cy, cx))
+                for ny, nx in ((cy + 1, cx), (cy - 1, cx), (cy, cx + 1), (cy, cx - 1)):
+                    if 0 <= ny < h and 0 <= nx < w and black[ny, nx] and not seen[ny, nx]:
+                        seen[ny, nx] = True
+                        stack.append((ny, nx))
+            ys, xs = [c[0] for c in cells], [c[1] for c in cells]
+            bh, bw = max(ys) - min(ys) + 1, max(xs) - min(xs) + 1
+            if bh >= 2 and bw >= 2 and len(cells) >= 0.9 * bh * bw:
+                n += 1
+    return n
 
 
 # ------------------------------------------------------------------------------------------------------- storage
@@ -226,10 +256,9 @@ def stack(images, gap=10):
 def report(run_name, rows, title="NirnCraft harness"):
     """Write the run folder (only the latest run is kept): compare images, sheet.png, combos.png, report.html.
     rows: [{"scene", "variant", "metrics", "tags", "title"}] in run order."""
-    RUNS.mkdir(parents=True, exist_ok=True)
-    for old in RUNS.iterdir():  # older runs go; their captures live on as `before` in scenes/
-        shutil.rmtree(old, ignore_errors=True)
-    run = RUNS / run_name
+    shutil.rmtree(RUNS, ignore_errors=True)  # older runs go; their captures live on as `before` in results/
+    run = LATEST  # always the same place: .work/harness/latest/report.html (harness.py open)
+    shutil.rmtree(run, ignore_errors=True)
     (run / "compare").mkdir(parents=True)
     cmp_imgs = []
     for r in rows:
@@ -258,7 +287,7 @@ def report(run_name, rows, title="NirnCraft harness"):
     html = [f"<!doctype html><meta charset=utf-8><title>{title}</title>",
             "<style>body{background:#111;color:#ddd;font:14px system-ui;margin:16px}img{max-width:100%}"
             "td,th{padding:4px 10px;text-align:left}tr.bad{color:#ffb74d}a{color:#8cf}</style>",
-            f"<h1>{title}</h1><p>{len(rows)} capture(s), {len(flagged)} flagged. Sheets: "
+            f"<h1>{title}</h1><p>{run_name}: {len(rows)} result(s), {len(flagged)} flagged. Sheets: "
             + " ".join(f"<a href='{s}'>{s}</a>" for s in sheets)
             + (" <a href='combos.png'>combos.png</a>" if c is not None else "")
             + f" Agent pages: {agent_n} capture(s) in <a href='agent/index.txt'>agent/</a></p>",
@@ -269,7 +298,9 @@ def report(run_name, rows, title="NirnCraft harness"):
         html.append(f"<tr class='{'bad' if m.get('flags') else ''}'><td><a href='#{r['scene']}-{r['variant']}'>"
                     f"{r['scene']}</a></td><td>{r['variant']}</td><td>{' '.join(r.get('tags', []))}</td>"
                     f"<td>{m.get('luma')}</td><td>{m.get('diff', '-')}</td><td>{m.get('changed', '-')}</td>"
-                    f"<td>{', '.join(m.get('flags', []))}</td></tr>")
+                    f"<td>{', '.join(m.get('flags', []))}"
+                    + (f" <a href='file:///{r['crashLog']}'>crash log</a>" if r.get("crashLog") else "")
+                    + "</td></tr>")
     html.append("</table>")
     for r in rows:
         if r.get("compare"):

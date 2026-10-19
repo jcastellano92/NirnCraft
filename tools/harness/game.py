@@ -17,6 +17,9 @@ sys.path.insert(0, str(ROOT / "tools/dev"))
 sys.path.insert(0, str(ROOT / "tools"))
 import live_world as lw  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import trace as tr  # noqa: E402
+
 GAME = lw.GAME
 SHOTS = GAME / "build/autotest-screenshots"
 PERF = GAME / "build/autotest-performance"
@@ -125,6 +128,7 @@ def _enable_overlay():
 
 
 def launch(group, groups, limit=900):
+    tr.step("launch", group=group)
     cfg = groups.get(group, {})
     _set_group_flags(cfg.get("jvm", {}))
     _enable_overlay()
@@ -138,6 +142,7 @@ def launch(group, groups, limit=900):
             STATE.write_text(json.dumps({"group": group, "pid": (lw.processes() or [{}])[0].get("pid"),
                                          "shaders": True, "since": time.time()}), encoding="utf-8")
             log(f"  client ready ({group}) after {time.monotonic() - t0:.0f} s")
+            tr.step("client_ready", group=group, seconds=round(time.monotonic() - t0, 1))
             return
         gone = gone + 1 if not running() else 0
         if gone >= 10 and time.monotonic() - t0 > 60:
@@ -147,6 +152,7 @@ def launch(group, groups, limit=900):
 
 
 def close():
+    tr.step("close", running=running())
     if not running():
         STATE.unlink(missing_ok=True)
         return
@@ -182,7 +188,21 @@ def ensure(group, groups):
 
 
 def actions(lines, timeout=900):
-    lw.live_actions(lines, timeout=timeout)
+    """One batch to the live client, traced: the verbs, how long, the outcome, the client status after."""
+    t0 = time.monotonic()
+    try:
+        lw.live_actions(lines, timeout=timeout)
+        tr.step("actions", lines=lines, seconds=round(time.monotonic() - t0, 1), ok=True, status=_status_brief())
+    except Exception as e:
+        tr.step("actions", lines=lines, seconds=round(time.monotonic() - t0, 1), ok=False, error=str(e)[-600:],
+                status=_status_brief(), running=running())
+        raise
+
+
+def _status_brief():
+    s = lw.read_json(GAME / "nirncraft-live-status.json") or {}
+    return {k: s.get(k) for k in ("lastAction", "screen", "queued", "settling", "commandPending", "error",
+                                  "worldLoaded") if k in s}
 
 
 def shaders(on):
@@ -230,6 +250,7 @@ def sync_overlay(paths=None):
 
 
 def reload_shaders():
+    tr.step("reload", kind="shaders")
     since = (GAME / "logs/latest.log").stat().st_size if (GAME / "logs/latest.log").exists() else 0
     changed = sync_pack()
     if changed and running():
@@ -238,6 +259,7 @@ def reload_shaders():
 
 
 def reload_resources(paths=None):
+    tr.step("reload", kind="resources", files=len(paths or []))
     n = sync_overlay(paths)
     if n and running():
         actions(["resources"], timeout=900)
@@ -245,6 +267,7 @@ def reload_resources(paths=None):
 
 
 def reload_data(target):
+    tr.step("reload", kind="data", target=target)
     r = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "reload", target],
                        capture_output=True, text=True)
     if r.returncode:
@@ -253,6 +276,7 @@ def reload_data(target):
 
 def rebuild_jar():
     """Gradle build (with tests) + install into the preview; the client must restart to load it."""
+    tr.step("rebuild_jar")
     r = subprocess.run([sys.executable, str(ROOT / "tools/dev/build_263.py"), "--offline", "build"],
                        capture_output=True, text=True)
     if r.returncode:
@@ -287,6 +311,93 @@ def shader_errors(since):
     return out
 
 
+# ----------------------------------------------------------------------------------------------- crashes
+def crashed():
+    """True when the client the harness launched is gone without the harness closing it (close() clears STATE)."""
+    st = client_state()
+    return bool(st.get("pid")) and not running()
+
+
+def crash_evidence(dest, since):
+    """Copy what explains a crash next to the test's result: the newest crash report, a JVM native crash file
+    (hs_err_pid*.log), the last 400 log lines. Returns (path, one-line cause)."""
+    parts, cause = [], ""
+    reports = sorted((GAME / "crash-reports").glob("*.txt"), key=lambda f: f.stat().st_mtime) \
+        if (GAME / "crash-reports").exists() else []
+    reports = [r for r in reports if r.stat().st_mtime >= since - 5]
+    if reports:
+        text = reports[-1].read_text(encoding="utf-8", errors="replace")
+        parts.append(f"===== {reports[-1].name}\n{text}")
+        m = re.search(r"^Description: (.*)$", text, re.M)
+        ex = re.search(r"^([\w.$]+(?:Exception|Error)[^\n]*)", text, re.M)
+        cause = (m.group(1) if m else "") + (": " + ex.group(1)[:160] if ex else "")
+    natives = [f for d in (GAME, lw.INSTANCE) for f in d.glob("hs_err_pid*.log") if f.stat().st_mtime >= since - 5]
+    for f in natives[-1:]:
+        text = f.read_text(encoding="utf-8", errors="replace")
+        parts.append(f"===== {f.name}\n{text[:60000]}")
+        m = re.search(r"^# Problematic frame:\n# (.*)$", text, re.M)
+        cause = cause or ("native crash: " + (m.group(1) if m else "see hs_err"))
+    log_file = GAME / "logs/latest.log"
+    if log_file.exists():
+        lines = log_file.read_text(encoding="utf-8", errors="replace").splitlines()
+        parts.append("===== logs/latest.log (last 400 lines)\n" + "\n".join(lines[-400:]))
+        if not cause:
+            err = [l for l in lines[-400:] if "ERROR" in l or "Exception" in l]
+            cause = err[-1][-200:] if err else "the client exited without a crash report"
+    tr.step("crash_evidence", dest=str(dest), cause=cause[:300])
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if dest.exists():  # like images: the newest crash log and the one before it, nothing older
+        dest.replace(dest.with_name(dest.stem + ".before.txt"))
+    dest.write_text("\n\n".join(parts) or "no evidence found", encoding="utf-8")
+    STATE.unlink(missing_ok=True)  # the crashed client is gone; the next ensure() launches a fresh one
+    return dest, cause
+
+
+def trim_instance(keep_reports=5, keep_native=3, keep_logs=10):
+    """The test instance's own crash reports, JVM crash files, rotated logs and stray harness screenshots stay few
+    (the evidence that matters was copied next to the test results)."""
+    def keep_newest(files, n):
+        for f in sorted(files, key=lambda f: f.stat().st_mtime, reverse=True)[n:]:
+            f.unlink(missing_ok=True)
+    if (GAME / "crash-reports").exists():
+        keep_newest(list((GAME / "crash-reports").glob("*.txt")), keep_reports)
+    keep_newest([f for d in (GAME, lw.INSTANCE) for f in d.glob("hs_err_pid*.log")], keep_native)
+    keep_newest([f for d in (GAME, lw.INSTANCE) for f in d.glob("replay_pid*.log")], 0)
+    if (GAME / "logs").exists():
+        keep_newest(list((GAME / "logs").glob("*.log.gz")), keep_logs)
+    if SHOTS.exists():
+        keep_newest(list(SHOTS.glob("h-*")), 0)  # harness captures are moved into results; leftovers go
+        keep_newest([f for f in SHOTS.iterdir() if f.is_file()], 60)
+    if PERF.exists():
+        keep_newest([f for f in PERF.iterdir() if f.is_file()], 60)
+
+
+# ----------------------------------------------------------------------------------------------- failure policy
+RESET = ["ui close", "perspective first", "try difficulty peaceful", "try effect clear @p"]
+DEFAULT_TIMEOUT = 240  # seconds per test; overrunning is a failure, not a hang
+
+
+def tolerant(lines):
+    """A scene's cleanup as best-effort verbs (after a failure, nothing it undoes may be there to undo)."""
+    return ["try " + l[8:] if l.startswith("command ") else l for l in lines]
+
+
+def recover(scene=None):
+    """After any failure or timeout: cancel what is still queued, run the scene's own cleanup (it never ran) and the
+    standard reset, so the next test starts clean. Never raises."""
+    try:
+        lw.live_actions(["# harness: cancelled after a failure"], timeout=120, cancel=True)
+    except Exception:  # noqa: BLE001
+        pass
+    lines = tolerant((scene or {}).get("cleanup", [])) + RESET
+    if "realm" in ((scene or {}).get("pose") or {}):
+        lines.append("try nirncraft-realm home")
+    try:
+        actions(lines, timeout=120)
+    except Exception:  # noqa: BLE001
+        pass
+
+
 # ----------------------------------------------------------------------------------------------- one scene
 BLOCKING = {"RaceScreen", "IntroLoadingScreen", "ReceivingLevelScreen", "LevelLoadingScreen", "GenericMessageScreen",
             "DisconnectedScreen", "TitleScreen"}
@@ -297,7 +408,7 @@ def screen_blocking():
     s = (lw.read_json(GAME / "nirncraft-live-status.json") or {}).get("screen")
     return s if s in BLOCKING else None
 
-def capture(scene, variant, pose_lines, capture_lines, timeout=900):
+def capture(scene, variant, pose_lines, capture_lines):
     """Run one scene + variant; returns (png path, receipt dict, perf dict or None)."""
     tag = f"h-{scene['id']}-{variant}"
     for ext in ("png", "json"):
@@ -306,11 +417,19 @@ def capture(scene, variant, pose_lines, capture_lines, timeout=900):
     if blocked and scene.get("capture") != "ui":
         raise RuntimeError(f"the client is stuck on {blocked} (the world cannot load behind it); is the installed "
                            f"jar current? (harness.py run --rebuild)")
-    shaders(variant != "vanilla")
+    want = variant != "vanilla"
+    st = client_state()
+    # the shader toggle settles where the camera is: move to this scene first, then toggle (in one batch)
+    toggle = [] if st.get("shaders", True) == want else [f"shaders {'on' if want else 'off'}"]
+    lead = ["ui close", "perspective first"]  # nothing left over from an earlier scene (an open map pauses the world)
     try:
-        actions(pose_lines + capture_lines(tag), timeout=timeout)
+        actions(lead + pose_lines + toggle + capture_lines(tag), timeout=scene.get("timeout", DEFAULT_TIMEOUT))
+        if toggle:
+            st["shaders"] = want
+            STATE.write_text(json.dumps(st), encoding="utf-8")
     except RuntimeError as e:
         blocked = screen_blocking()
+        recover(scene)  # a failed scene cleans up after itself, then the run moves on
         raise RuntimeError(f"{e} [blocked by {blocked}]" if blocked else str(e)) from None
     png = SHOTS / f"{tag}.png"
     frames = [SHOTS / f"{tag}-f{i}.png" for i in range(scene["frames"][0])] if scene.get("frames") else [png]

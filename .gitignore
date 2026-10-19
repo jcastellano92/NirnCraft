@@ -58,7 +58,8 @@ venv/
 *.pyo
 
 # Claude Code agent worktrees
-.claude/
+.claude/*
+!.claude/agents/
 
 # generated previews (large; regenerate with the tools)
 tools/worldgen/preview_places*.png

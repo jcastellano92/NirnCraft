@@ -269,7 +269,8 @@
     "mod/src/main/resources/nirncraft",
     "tools/qa/spawn_audit.py"
    ],
-   "timeout": 600
+   "timeout": 600,
+   "fail_regex": "^\\s*ERR\\b"
   },
   {
    "id": "check-player-flow",
@@ -314,7 +315,8 @@
     "mod/src/main/resources/data",
     "tools/qa/data_checks.py"
    ],
-   "timeout": 600
+   "timeout": 600,
+   "fail_regex": "^\\s*ERR\\b"
   },
   {
    "id": "check-asset-chain",
@@ -333,7 +335,8 @@
     "mod/src/main/resources/assets",
     "tools/qa/asset_audit.py"
    ],
-   "timeout": 600
+   "timeout": 600,
+   "fail_regex": "^\\s*ERR\\b"
   },
   {
    "id": "check-assets-items",
@@ -370,7 +373,8 @@
     "mod/src/main/resources/nirncraft/tamriel",
     "tools/qa/layout_lint.py"
    ],
-   "timeout": 600
+   "timeout": 600,
+   "fail_regex": "^\\s*ERR\\b"
   },
   {
    "id": "check-reach",
@@ -388,7 +392,8 @@
     "mod/src/main/resources/nirncraft/tamriel",
     "tools/qa/reach_lint.py"
    ],
-   "timeout": 600
+   "timeout": 600,
+   "fail_regex": "^\\s*ERR\\b"
   },
   {
    "id": "check-roadplan",
@@ -467,7 +472,8 @@
     "docs/world",
     "tools/qa/worldsheet_lint.py"
    ],
-   "timeout": 600
+   "timeout": 600,
+   "fail_regex": "^\\s*ERR\\b"
   },
   {
    "id": "check-menus",
@@ -485,7 +491,8 @@
     "mod/src/main/java/com/nirncraft",
     "tools/qa/menu_coverage.py"
    ],
-   "timeout": 600
+   "timeout": 600,
+   "fail_regex": "^\\s*ERR\\b"
   },
   {
    "id": "check-dungeon-stats",

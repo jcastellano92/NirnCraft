@@ -22,6 +22,7 @@ harness.py watch --suite smoke                 # live reload: edit shaders / tex
 harness.py plan --suite dungeons               # what would run, in what order, what is cached
 harness.py list --tag feature:water            # what exists
 harness.py gate                                # the merge / push gate (below);  gate --install-hook
+harness.py open                                # the latest report in your browser (also .work/harness/latest/ in VS Code)
 ```
 
 Selection: `--suite --tag --exclude --tier --group --variant --changed [REF] --limit N --seed N`.
@@ -31,12 +32,15 @@ Tags match by prefix (`region:skyrim` matches `region:skyrim/falkreath`).
 
 Every test (visual or not) keeps two records: `results/<test>/<variant>.after.json` (+ `.png`) is the newest,
 `.before` the one before it; a new result shifts after to before and drops the older one. Each run writes one
-report (older runs are deleted): `runs/<stamp>/report.html`, `sheet*.png` (before | after | change),
+report, always at the same place (older runs are deleted): `.work/harness/latest/report.html` (`harness.py open`), `sheet*.png` (before | after | change),
 `combos.png` (every variant of a scene side by side) and `agent/` (below). Metrics on every image: luma, black tiles
 (the NaN / black-box signature), clipping, and how much changed since the previous capture.
 
 ## For agents
 
+* **Claude agents: hand visual review to the `visual-reviewer` subagent** (`.claude/agents/visual-reviewer.md`, runs on
+  Haiku): it reads `agent/index.txt` and the pages and answers in a fixed BROKEN / REGRESSION / CHECK / OK format, so
+  screenshots never fill the main conversation. Other AIs use whatever model they like on the same pages.
 * **Read `agent/index.txt`, then only the pages it lists.** Agent pages hold at most 3 before|after rows of 760 px
   per image (problems first, unchanged captures left out), about what one image read can actually resolve. Do not
   shrink more onto a page; ask for detail instead:
@@ -58,6 +62,36 @@ after 20 minutes without a harness action (`-Dnirncraft.autotest.idleExitMinutes
 character screen or the opening's covers (`ClientAutotest.automated()`; `-Dnirncraft.autotest.intro=true` keeps the
 opening, to test it). The harness refuses to wait behind a blocking screen and says which one, and warns when the
 installed core is older than the latest build (`--rebuild` builds, installs and restarts).
+
+## When a test fails: clean up, record, move on
+
+Every test has a time limit (`timeout`, default 240 s; checks and lab commands are killed when they overrun). Any
+failure or timeout is recorded (`error` / `fail` with the reason) and the run continues. For live tests the harness
+first cancels what is still queued, runs the scene's own cleanup (made tolerant: it never ran) and a standard reset
+(close screens, first person, peaceful, clear effects, home from a realm), so the next test starts clean. A circuit
+breaker watches live failures: three in a row with the same error restart the client once; if the group still
+fails, its remaining tests are skipped with the reason instead of each burning its time limit. A client that cannot
+start skips its group the same way.
+
+## Crashes, quarantine, hooks, trace
+
+* **Crash:** the client dying during a test is detected; the crash report, any JVM `hs_err` file and the last 400
+  log lines are saved as `results/<test>/<variant>.crash.txt` (the previous one as `.crash.before.txt`, nothing older),
+  linked from the report. The client is relaunched and the same test runs once more at its own pose; a second crash
+  records `crash` and the run moves on; 3 crashes in a run skip the group. The instance's own crash reports and logs
+  are trimmed to the newest few after each run.
+* **Quarantine:** a test that errors or crashes in 3 runs in a row (same fingerprint) is skipped by itself with the
+  reason until its inputs change; `harness.py quarantine` lists, `--clear [keys]` releases, naming a test by id or
+  `--include-quarantined` runs it anyway. Content failures (`fail`) are real results and never quarantine.
+* **Hooks:** every failure, crash, restart, quarantine, skipped group and finished run is appended to
+  `.work/harness/events.jsonl` (rotated at 2 MB) and runs the commands in `tools/harness/hooks.json` /
+  `.work/harness/hooks.json` (event JSON in `HARNESS_EVENT`); `hooks.example.json` + `hooks/notify.py` give desktop
+  notifications.
+* **Trace:** every step (action batches with their verbs, duration, outcome and the client status after; launches,
+  closes, reloads, check commands, crashes, harness tracebacks) goes to `.work/harness/trace/run.jsonl` (previous run
+  kept). A failed test's record carries its last 25 steps. `harness.py trace <test>` prints what led up to it,
+  interleaved with the game's log lines of the same seconds; `--previous` for the run before.
+* Checks that print problems but exit 0 use `fail_regex` (e.g. `^ERR`) so they cannot pass falsely.
 
 ## Hot reload kinds (watch mode and `--changed`)
 

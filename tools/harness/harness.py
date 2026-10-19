@@ -38,6 +38,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 import cameras  # noqa: E402
+import trace as tr  # noqa: E402
 import catalog  # noqa: E402
 import results  # noqa: E402
 
@@ -173,6 +174,69 @@ def order(items, pos=(0, 0), group="live", shaders=True):
     return out
 
 
+# ================================================================================================ events, hooks, quarantine
+EVENTS = STORE / "events.jsonl"
+QUARANTINE = STORE / "quarantine.json"
+QUARANTINE_AFTER = 3  # runs in a row a test errors / crashes (same fingerprint) before it is skipped by itself
+
+
+def event(kind, **data):
+    """Append to .work/harness/events.jsonl and run the hooks for this event: tools/harness/hooks.json (shared) and
+    .work/harness/hooks.json (this machine): {"test_failed": ["cmd ..."], "*": [...]}; the event JSON is in
+    HARNESS_EVENT. Events: test_failed, test_crashed, client_crashed, client_restarted, test_quarantined,
+    group_skipped, run_finished."""
+    rec = {"event": kind, "at": time.strftime("%Y-%m-%dT%H:%M:%S"), **data}
+    STORE.mkdir(parents=True, exist_ok=True)
+    if EVENTS.exists() and EVENTS.stat().st_size > 2_000_000:  # rotate: this file and one previous, like results
+        EVENTS.replace(EVENTS.with_name("events.previous.jsonl"))
+    with open(EVENTS, "a", encoding="utf-8") as f:
+        f.write(json.dumps(rec) + "\n")
+    for hooks_file in (HERE / "hooks.json", STORE / "hooks.json"):
+        try:
+            hooks = json.loads(hooks_file.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for cmd in hooks.get(kind, []) + hooks.get("*", []):
+            try:
+                subprocess.run(cmd, shell=True, cwd=ROOT, timeout=60, env=dict(os.environ, HARNESS_EVENT=json.dumps(rec)))
+            except (OSError, subprocess.SubprocessError) as e:
+                say(f"  ! hook failed ({cmd}): {e}")
+
+
+def quarantine():
+    try:
+        return json.loads(QUARANTINE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def note_outcome(k, fp, status, reason=""):
+    """Track errors / crashes per test across runs; QUARANTINE_AFTER in a row with an unchanged fingerprint quarantine
+    it (content failures, status fail, are real results and never quarantine)."""
+    q = quarantine()
+    e = q.get(k, {})
+    if status in ("error", "crash"):
+        e = e if e.get("fingerprint") == fp else {}
+        e.update(fingerprint=fp, count=e.get("count", 0) + 1, reason=(reason or "")[:300], last=time.time())
+        if e["count"] >= QUARANTINE_AFTER and not e.get("quarantined"):
+            e["quarantined"] = True
+            e["since"] = time.time()
+            event("test_quarantined", test=k, count=e["count"], reason=e["reason"])
+            say(f"  ! quarantined {k} after {e['count']} failing runs: {e['reason'][:120]}")
+        q[k] = e
+    elif status in ("pass", "flag", "fail") and k in q:
+        del q[k]
+    else:
+        return
+    STORE.mkdir(parents=True, exist_ok=True)
+    QUARANTINE.write_text(json.dumps(q, indent=1), encoding="utf-8")
+
+
+def quarantined(k, fp):
+    e = quarantine().get(k)
+    return e if e and e.get("quarantined") and e.get("fingerprint") == fp else None
+
+
 # ================================================================================================ runners
 class Runner:
     def __init__(self, a):
@@ -184,6 +248,10 @@ class Runner:
         self._game = None
         self._inputs = None
         self.pos = None
+        self.streak = ("", 0)      # (error kind, consecutive live failures with it)
+        self.restarted = set()     # groups already restarted once for a failure streak
+        self.disabled = {}         # group -> reason: its remaining live tests are skipped
+        self.crashes = 0           # client crashes this run (3: the group stops)
 
     @property
     def game(self):
@@ -217,14 +285,96 @@ class Runner:
         return None
 
     def run(self, s, v, fp):
+        """Any test, any failure: record why, clean up, move on. Live failures feed a circuit breaker: three in a row
+        with the same error restart the client once; if that does not help, the group's remaining tests are skipped
+        with the reason instead of each burning its timeout."""
+        k = key(s, v)
+        if s["tier"] == "live" and s["group"] in self.disabled:
+            return results.record(s["id"], v, s["kind"], "skip", {}, fp, extra={"error": self.disabled[s["group"]]})
+        asked = s["id"] in (getattr(self.a, "ids", None) or [])
+        q = None if getattr(self.a, "include_quarantined", False) or asked else quarantined(k, fp)
+        if q:
+            return results.record(s["id"], v, s["kind"], "skip", {}, fp, extra={
+                "error": f"quarantined after {q['count']} failing runs ({q['reason'][:120]}); "
+                         f"run it by id or with --include-quarantined to try again"})
+        tr.test(k)
+        tr.step("test_start", tier=s["tier"], group=s.get("group"), fingerprint=fp)
+        t0 = time.monotonic()
+        rec = self._run(s, v, fp)
+        tr.step("test_end", status=rec.get("status"), seconds=round(time.monotonic() - t0, 1),
+                error=(rec.get("error") or "")[:300])
+        if rec.get("status") in ("error", "crash"):  # what led up to it travels with the result
+            rec["trace"] = tr.tail(25)
+            Path(f"{results.stem(s['id'], v)}.after.json").write_text(json.dumps(rec, indent=1, default=str),
+                                                                       encoding="utf-8")
+        tr.test(None)
+        if rec.get("status") in ("error", "crash", "fail"):
+            event("test_crashed" if rec["status"] == "crash" else "test_failed", test=k, status=rec["status"],
+                  reason=(rec.get("error") or "; ".join(rec.get("fails", [])))[:300])
+        note_outcome(k, fp, rec.get("status"), rec.get("error", ""))
+        return rec
+
+    def _run(self, s, v, fp):
         try:
             if s["tier"] == "check":
                 return self.run_check(s, v, fp)
             if s["tier"] == "lab":
                 return self.run_lab(s, v, fp)
-            return self.run_live(s, v, fp)
+            return self.run_live_restarting(s, v, fp)
         except Exception as e:  # one broken test never stops the run
-            return results.record(s["id"], v, s["kind"], "error", {}, fp, extra={"error": str(e)[-1500:]})
+            msg = str(e)[-1500:]
+            tr.error("test_exception", e)
+            if s["tier"] == "live":
+                self.trip(s, msg)
+            return results.record(s["id"], v, s["kind"], "error", {}, fp, extra={"error": msg})
+
+    def run_live_restarting(self, s, v, fp):
+        """A client crash during a test: keep the evidence next to the result, relaunch, and run the same test again
+        once (it goes back to its own location); a second crash records it as `crash` and the run moves on."""
+        for attempt in (1, 2):
+            started = time.time()
+            try:
+                rec = self.run_live(s, v, fp)
+                self.streak = ("", 0)
+                return rec
+            except Exception:
+                if self._game is None or not self.game.crashed():
+                    raise
+                self.crashes += 1
+                tr.step("client_crashed", attempt=attempt)
+                path, cause = self.game.crash_evidence(results.stem(s["id"], v).with_name(f"{v}.crash.txt"), started)
+                event("client_crashed", test=key(s, v), attempt=attempt, cause=cause, evidence=str(path))
+                say(f"  ! client crashed during {s['id']} ({cause[:120]}); evidence {path}")
+                if self.crashes >= 3:
+                    self.disabled[s["group"]] = f"skipped: {self.crashes} client crashes this run"
+                    event("group_skipped", group=s["group"], reason=self.disabled[s["group"]])
+                    return results.record(s["id"], v, s["kind"], "crash", {}, fp,
+                                          extra={"error": cause, "crashLog": str(path)})
+                if attempt == 2:
+                    return results.record(s["id"], v, s["kind"], "crash", {}, fp,
+                                          extra={"error": f"crashed twice: {cause}", "crashLog": str(path)})
+                event("client_restarted", test=key(s, v))
+                say("  restarting the client and trying the same test again")
+
+    def trip(self, s, msg):
+        kind = re.sub(r"[0-9]+", "#", msg.split(";")[0])[:80]
+        n = self.streak[1] + 1 if self.streak[0] == kind else 1
+        self.streak = (kind, n)
+        if n < 3:
+            return
+        g = s["group"]
+        if g not in self.restarted:
+            say(f"  ! 3 failures in a row ({kind}); restarting the client once")
+            self.restarted.add(g)
+            self.streak = ("", 0)
+            try:
+                self.game.close()
+            except Exception as e:  # noqa: BLE001
+                say(f"  ! close failed: {e}")
+        else:
+            self.disabled[g] = f"skipped: group {g} kept failing after a restart ({kind})"
+            event("group_skipped", group=g, reason=self.disabled[g])
+            say(f"  ! {self.disabled[g]}")
 
     # ---------------------------------------------------------------------------------------- check
     def run_check(self, s, v, fp):
@@ -232,6 +382,8 @@ class Runner:
         t0 = time.monotonic()
         r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=s.get("timeout", 900))
         out = (r.stdout + r.stderr)
+        tr.step("check_command", cmd=cmd, exit=r.returncode, seconds=round(time.monotonic() - t0, 1),
+                tail=out.strip().splitlines()[-3:] if out.strip() else [])
         m = {"seconds": round(time.monotonic() - t0, 1), "exit": r.returncode}
         for name, rx in (s.get("metrics") or {}).items():
             hit = re.findall(rx, out)
@@ -244,8 +396,15 @@ class Runner:
         d = results.stem(s["id"], v).parent
         d.mkdir(parents=True, exist_ok=True)
         (d / f"{v}.output.txt").write_text(out[-20000:], encoding="utf-8")
-        return results.record(s["id"], v, "check", "pass" if r.returncode == 0 else "fail", m, fp,
-                              extra={"error": out.strip().splitlines()[-1][:300] if r.returncode and out.strip() else ""})
+        failed = r.returncode != 0
+        if s.get("fail_regex"):  # tools that report problems as lines but exit 0 (e.g. "^ERR")
+            hits = [l for l in out.splitlines() if re.search(s["fail_regex"], l)]
+            if hits:
+                failed = True
+                m["problems"] = max(m.get("problems", 0) or 0, len(hits))
+                out = out + "\n" + hits[0]  # the first offending line becomes the reason
+        return results.record(s["id"], v, "check", "fail" if failed else "pass", m, fp,
+                              extra={"error": out.strip().splitlines()[-1][:300] if failed and out.strip() else ""})
 
     # ---------------------------------------------------------------------------------------- lab
     def run_lab(self, s, v, fp):
@@ -265,6 +424,7 @@ class Runner:
             cmd = [str(exe), str(png)] + kv if tool == "pack_lab" else [str(exe), f"out={png}"] + kv
             r = subprocess.run(cmd, cwd=ROOT / "native", capture_output=True, text=True, timeout=900,
                                creationflags=0x00004000 if os.name == "nt" else 0)
+            tr.step("lab_command", cmd=cmd, exit=r.returncode)
             if r.returncode or not png.exists():
                 raise RuntimeError(f"{tool} failed: " + (r.stdout + r.stderr)[-800:])
             rec = results.store(s["id"], v, png, meta={"tool": tool, "args": kv}, fingerprint=fp)
@@ -278,11 +438,15 @@ class Runner:
                                   extra={"error": f"absolute pose made on seed {s['seed']}; this world is {self.seed}"})
         if not g.running():
             self.launched = True
-        g.ensure(s["group"], self.groups)
+        try:
+            g.ensure(s["group"], self.groups)
+        except Exception as e:  # noqa: BLE001  the client cannot start: skip the group, do not hang on it
+            self.disabled[s["group"]] = f"skipped: the client did not start ({str(e)[:160]})"
+            raise
         if s.get("measure_command"):
             return self.run_measure(s, v, fp)
         p = s.get("pose") or {}
-        tries = 3 if p.get("shot") else 1
+        tries = 3 if p.get("shot") or "visit" in p or "camera" in p else 1  # next planned pose / higher
         err = None
         for cand in range(tries):
             try:
@@ -292,9 +456,9 @@ class Runner:
             except ValueError as e:  # no (more) planned cameras
                 err = e
                 break
-            except RuntimeError as e:  # the camera verb refuses poses inside blocks: try the next planned one
+            except RuntimeError as e:  # the camera refuses poses inside blocks: next planned pose / higher visit
                 err = e
-                if not g.running():
+                if not g.running() or "intersects" not in str(e):
                     raise
         else:
             raise err
@@ -314,8 +478,12 @@ class Runner:
         g = self.game
         out = g.GAME / s["measure_file"]
         out.unlink(missing_ok=True)
-        g.actions(catalog.pose_actions(s, self.plan) + ["settle 1800"] + list(s.get("setup", []))
-                  + [s["measure_command"]] + list(s.get("cleanup", [])), timeout=900)
+        try:
+            g.actions(["ui close"] + catalog.pose_actions(s, self.plan) + ["settle 1800"] + list(s.get("setup", []))
+                      + [s["measure_command"]] + list(s.get("cleanup", [])), timeout=s.get("timeout", g.DEFAULT_TIMEOUT))
+        except RuntimeError:
+            g.recover(s)
+            raise
         t0 = time.monotonic()
         while not out.exists() and time.monotonic() - t0 < 60:
             time.sleep(0.5)
@@ -335,8 +503,8 @@ class Runner:
     def judge(self, s, v, rec):
         m, c = rec["metrics"], s.get("checks") or {}
         fails = []
-        if "maxBlackTiles" in c and m.get("blackTiles", 0) > c["maxBlackTiles"]:
-            fails.append(f"blackTiles {m['blackTiles']} > {c['maxBlackTiles']}")
+        if "maxBlackTiles" in c and m.get("blackBoxes", 0) > c["maxBlackTiles"]:  # boxes: the NaN signature
+            fails.append(f"black boxes {m['blackBoxes']} > {c['maxBlackTiles']}")
         if "lumaMin" in c and m.get("luma", 0) < c["lumaMin"]:
             fails.append(f"luma {m['luma']} < {c['lumaMin']}")
         if "lumaMax" in c and m.get("luma", 0) > c["lumaMax"]:
@@ -468,7 +636,7 @@ def summary(rec):
     m = rec.get("metrics", {})
     return {"status": rec.get("status"), "luma": m.get("luma"), "diff": m.get("diff"), "changed": m.get("changed"),
             "flags": m.get("flags", []) + rec.get("fails", []), "error": rec.get("error", ""),
-            "perf": rec.get("perf"), "cached": rec.get("_cached", False)}
+            "perf": rec.get("perf"), "cached": rec.get("_cached", False), "crashLog": rec.get("crashLog", "")}
 
 
 def process_queue(runner, serve=False, on_item=None):
@@ -562,6 +730,8 @@ def line(k, d):
         bits.append("! " + "; ".join(d["flags"]))
     if d.get("error"):
         bits.append("! " + d["error"].splitlines()[-1][:160])
+    if d.get("crashLog"):
+        bits.append(f"(crash log {d['crashLog']})")
     return "  " + "  ".join(bits)
 
 
@@ -590,7 +760,8 @@ def build_report(keys, title):
             rows.append({"scene": sid, "variant": v, "metrics": {**rec.get("metrics", {}),
                          "flags": rec.get("metrics", {}).get("flags", []) + rec.get("fails", []) +
                          ([rec["error"][-120:]] if rec.get("error") else [])},
-                         "tags": s.get("tags", []), "title": s.get("title", sid)})
+                         "tags": s.get("tags", []), "title": s.get("title", sid),
+                         "crashLog": rec.get("crashLog", ""), "status": rec.get("status")})
     return results.report(time.strftime("%Y%m%d-%H%M%S"), rows, title)
 
 
@@ -663,6 +834,7 @@ def cmd_run(a, watch=False):
     jid = submit(keys, force=a.force, who="watch" if watch else "cli")
     if acquire():
         owned = True
+        tr.start_run(items=len(keys), argv=sys.argv[1:], job=jid)
         try:
             if any(s["tier"] == "live" for s, _ in items):
                 runner.game.take_lease()
@@ -671,6 +843,10 @@ def cmd_run(a, watch=False):
             process_queue(runner, on_item=on)
             st = read_status(jid) or {"done": {}}
             print_summary(st["done"], lines=not (VERBOSE or watch))
+            counts = {}
+            for d in st["done"].values():
+                counts[d.get("status")] = counts.get(d.get("status"), 0) + 1
+            event("run_finished", items=len(keys), counts=counts, report=str(results.LATEST / "report.html"))
             run = build_report(keys, "NirnCraft harness")
             pages = run / "agent/index.txt"
             n = len(pages.read_text(encoding="utf-8").splitlines()) if pages.exists() else 0
@@ -868,9 +1044,85 @@ def cmd_seed_legacy(a):
     say(f"seeded {n} legacy capture(s) as `before`")
 
 
+def cmd_open(a):
+    """Open the latest report (or an agent page / sheet) in the default viewer."""
+    target = results.LATEST / (a.what or "report.html")
+    if not target.exists():
+        say(f"nothing yet at {target}; run something first")
+        return 1
+    say(f"opening {target}")
+    os.startfile(str(target)) if os.name == "nt" else subprocess.run(["xdg-open", str(target)])
+
+
+def cmd_quarantine(a):
+    q = quarantine()
+    if a.clear is not None:
+        keys = a.clear or list(q)
+        for k in keys:
+            q.pop(k, None)
+        QUARANTINE.parent.mkdir(parents=True, exist_ok=True)
+        QUARANTINE.write_text(json.dumps(q, indent=1), encoding="utf-8")
+        say(f"cleared {len(keys)} quarantine entries")
+        return
+    live = {k: e for k, e in q.items() if e.get("quarantined")}
+    say(f"{len(live)} quarantined, {len(q) - len(live)} on watch (failing, not yet quarantined)")
+    for k, e in sorted(q.items(), key=lambda kv: -kv[1].get("count", 0)):
+        say(f"  {'Q' if e.get('quarantined') else ' '} {e.get('count')}x {k}: {e.get('reason', '')[:120]}")
+
+
+def cmd_trace(a):
+    """What led up to a test's failure (or the whole run): harness steps interleaved with the game's log lines of the
+    same seconds. --previous reads the run before."""
+    steps = tr.load(previous=a.previous)
+    if not steps:
+        say("no trace yet")
+        return 1
+    if a.test:
+        mine = [i for i, s in enumerate(steps) if s.get("test") and (s["test"] == a.test or s["test"].startswith(a.test + "|"))]
+        if not mine:
+            say(f"no steps for {a.test} in this trace")
+            return 1
+        lo, hi = max(0, mine[0] - a.before), mine[-1] + 1
+        steps = steps[lo:hi]
+    else:
+        steps = steps[-a.last:]
+    t_lo, t_hi = steps[0]["t"] - 2, steps[-1]["t"] + 2
+    game_lines = []
+    log_file = Path(os.environ.get("APPDATA", "")) / "PrismLauncher/instances/NirnCraft-26.3-autotest/.minecraft/logs/latest.log"
+    if log_file.exists() and not a.no_game_log:
+        day = time.strftime("%Y-%m-%d", time.localtime(t_lo))
+        for line in log_file.read_text(encoding="utf-8", errors="replace").splitlines():
+            m = re.match(r"^\[\d+\w+\d+ (\d\d:\d\d:\d\d)\.\d+\]", line)
+            if not m:
+                continue
+            try:
+                ts = time.mktime(time.strptime(f"{day} {m.group(1)}", "%Y-%m-%d %H:%M:%S"))
+            except ValueError:
+                continue
+            if t_lo <= ts <= t_hi and ("ERROR" in line or "WARN" in line or "Autotest" in line or "Exception" in line):
+                game_lines.append((ts, "game  " + line[line.find("]", 1) + 1:].strip()[:220]))
+    rows = [(s["t"], fmt_step(s)) for s in steps] + game_lines
+    for _, text in sorted(rows, key=lambda r: r[0]):
+        say(text)
+    tb = [s for s in steps if s.get("traceback") and "NoneType: None" not in s["traceback"]]
+    if tb:
+        say("\nlast harness traceback:\n" + tb[-1]["traceback"])
+
+
+def fmt_step(s):
+    head = f"{s.get('at')} {s.get('step'):15} {s.get('test') or '':42}"
+    if s["step"] == "actions":
+        verbs = "; ".join(s.get("lines", []))[:200]
+        out = "ok" if s.get("ok") else "FAILED " + (s.get("error") or "")[:160]
+        st = s.get("status") or {}
+        return f"{head} {s.get('seconds')}s {out} | {verbs} | screen={st.get('screen')} last={st.get('lastAction')}"
+    extra = {k: v for k, v in s.items() if k not in ("t", "at", "step", "test", "traceback")}
+    return f"{head} {json.dumps(extra, default=str)[:260]}"
+
+
 def cmd_clean(a):
     import shutil
-    for d in ("results", "runs", "queue", "jobs"):
+    for d in ("results", "runs", "latest", "queue", "jobs"):
         shutil.rmtree(STORE / d, ignore_errors=True)
     say("harness results cleared")
 
@@ -902,6 +1154,11 @@ def prune(log=True):
             if d.is_dir() and d.name not in known and now - d.stat().st_mtime > STALE_DAYS * 86400:
                 shutil.rmtree(d, ignore_errors=True)
                 removed += 1
+    try:
+        import game
+        game.trim_instance()
+    except Exception as e:  # noqa: BLE001
+        say(f"  ! could not trim the instance's logs: {e}")
     z = STORE / "zoom"
     if z.exists():
         for f in z.iterdir():
@@ -1065,6 +1322,7 @@ def main():
         p.add_argument("--force", action="store_true", help="ignore cached results")
         p.add_argument("--keep", action="store_true", help="leave a client this run launched open")
         p.add_argument("--rebuild", action="store_true", help="rebuild + install the jar when Java changed")
+        p.add_argument("--include-quarantined", action="store_true", help="also run tests quarantined for failing")
     selection(sub.add_parser("serve"))
     sub.add_parser("status")
     selection(sub.add_parser("report"))
@@ -1105,6 +1363,15 @@ def main():
     p.add_argument("--keep", action="store_true")
     p.add_argument("--rebuild", action="store_true")
     p.add_argument("--force", action="store_true")
+    sub.add_parser("open").add_argument("what", nargs="?", help="report.html (default), agent/page-01.png, sheet.png ...")
+    p = sub.add_parser("trace")
+    p.add_argument("test", nargs="?", help="test id or test|variant (default: the end of the run)")
+    p.add_argument("--before", type=int, default=15, help="steps before the test's first step")
+    p.add_argument("--last", type=int, default=40)
+    p.add_argument("--previous", action="store_true", help="the run before this one")
+    p.add_argument("--no-game-log", action="store_true")
+    p = sub.add_parser("quarantine")
+    p.add_argument("--clear", nargs="*", help="test|variant keys (none: all)")
     sub.add_parser("seed-legacy")
     sub.add_parser("clean")
     a = ap.parse_args()
@@ -1115,8 +1382,14 @@ def main():
     {"list": cmd_list, "plan": cmd_plan, "run": cmd_run, "watch": cmd_watch, "serve": cmd_serve,
      "status": cmd_status, "report": cmd_report, "cameras": cmd_cameras, "export-tour": cmd_export_tour,
      "seed-legacy": cmd_seed_legacy, "clean": cmd_clean, "probe": cmd_probe, "zoom": cmd_zoom,
-     "gate": cmd_gate}[a.cmd](a)
+     "gate": cmd_gate, "open": cmd_open, "quarantine": cmd_quarantine, "trace": cmd_trace}[a.cmd](a)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit:
+        raise
+    except BaseException as e:  # the harness itself failed: the traceback goes into the trace for the next agent
+        tr.error("harness_exception", e, argv=sys.argv[1:])
+        raise

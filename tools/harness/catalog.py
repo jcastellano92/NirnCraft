@@ -305,13 +305,16 @@ def pose_actions(s, plan=None, candidate=0):
     weather = s.get("weather")
     lines = []
     if s.get("time") is not None:
-        lines.append(f"command time set {int(s['time'])}")
+        lines.append(f"try time set {int(s['time'])}")  # 26.3 reports 0 for it: not a failure
     if "visit" in p:
         x, z, h, yaw, pitch = p["visit"]
-        lines.append(f"visit {int(x)} {int(z)} {int(h)} {yaw} {pitch} {weather or 'clear'}")
+        h = int(h) + 25 * candidate  # a retry after "camera intersects terrain" goes higher
+        lines.append(f"visit {int(x)} {int(z)} {h} {yaw} {pitch} {weather or 'clear'}")
         weather = None  # visit sets it
     elif "camera" in p:
-        lines.append("camera " + " ".join(str(v) for v in p["camera"]))
+        x, y, z, lx, ly, lz = p["camera"]
+        up = 4 * candidate  # a retry after "camera intersects terrain" lifts the camera (and its aim) a little
+        lines.append(f"camera {x} {y + up} {z} {lx} {ly + up} {lz}")
     elif "place" in p and p.get("shot"):
         cands = [(e["camera"], e["look"]) for e in ((plan or {}).get(p["place"]) or {}).get(p["shot"], [])]
         if candidate >= len(cands):
@@ -338,6 +341,9 @@ def pose_actions(s, plan=None, candidate=0):
         lines.append(f"command nirncraft-realm go {p['realm']}")
         if p.get("look"):
             lines.append(f"command nirncraft-realm look {p['look']}")
+    elif "spawn" in p:  # the live spawn can sit inside terrain: screens and spawn shots get a clear spot above (0, 0)
+        lines.append(f"visit 0 0 {30 + 25 * candidate} 180 10 {weather or 'clear'}")
+        weather = None
     if weather:
         if weather not in WEATHERS:
             raise ValueError(f"{s['id']}: unknown weather {weather}")
@@ -349,7 +355,7 @@ def pose_actions(s, plan=None, candidate=0):
 
 
 def capture_actions(s, tag):
-    lines = ["settle 1800"]
+    lines = ["settle 1800"]  # the world behind a screen is part of the picture too
     if s.get("wait"):
         lines.append(f"wait {int(s['wait'])}")
     lines += list(s.get("setup", []))
