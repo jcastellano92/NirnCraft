@@ -134,6 +134,9 @@ The full checklist from R1, every item checked live; the owner flies it.
   The far field starts past the loaded chunks (no predicted trees floating beside the real ones). Near water: the far
   field's water look (Fresnel sky, glint, waves). Lightmap in our look for the hand; atlas's clouds while it lights the
   frame. Harness: stale dev-overlay copies dropped at launch (one crashed the client).
+  Milestone review (10 scenes, ours vs vanilla, Haiku): no defects at High Hrothgar and Winterhold; the horizon is
+  crisp where vanilla fogs it (LOOK_HAZE x2.5 since); far hill tops read brown in places (medium-low, open); lamp glow a
+  little weaker at night (low); far fields missing right after a teleport were capture timing, not the renderer.
   Still open: terrain in water reflections, shadows on forward-lit things, eye exposure from the frame, the aurora over
   our night sky, OIT, caves (agent), far life (R5), scale (R6).
 - **R2 stage B live (2026-10-20, 2002d7db, 70f3dae9).** Falkreath, live A/B against vanilla: one light near and far
