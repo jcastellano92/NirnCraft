@@ -33,8 +33,11 @@ extern "C" {
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. 0.11 = 0.10 far content (lights, sites, actor
    flags, tile codec 3) + 0.10 failure handling (status codes, memory query, fault hook). 0.12 the moon, fill near;
-   0.13 primary-ray jitter (atlas_set_jitter); 0.14 material shapes (atlas_set_material_shapes), ATLAS_FRAME_GROUPS. */
-#define ATLAS_ABI_VERSION 0x000E00
+   0.13 primary-ray jitter (atlas_set_jitter); 0.14 material shapes (atlas_set_material_shapes), ATLAS_FRAME_GROUPS;
+   0.15 the near light (ATLAS_FRAME_NEAR_LIGHT: AtlasFrame.nearInfo, AtlasFrameOutput.nearLight, AtlasGlFrameIO
+   nearInfoTex / dstNearLight; every new field is read only when the frame sets the flag, so a 0.14 caller's smaller
+   structs stay valid). */
+#define ATLAS_ABI_VERSION 0x000F00
 
 typedef struct AtlasContext AtlasContext;
 
@@ -121,6 +124,10 @@ typedef struct AtlasFrame {
        top; pixels nearer than nearFieldEnd are covered and skip the far march. The GL path reads them from the
        shared nearDepth image instead. */
     const float* nearDepth;
+    /* (abi 0.15; read only with ATLAS_FRAME_NEAR_LIGHT, host path): width*height texels of the near field's surface
+       info, laid out as nearDepth, in the encoding of AtlasGlFrameIO.nearInfoTex (RGBA8 packed, r in the low byte).
+       NULL: no near light this frame (the flag is dropped). */
+    const uint32_t* nearInfo;
 } AtlasFrame;
 
 #define ATLAS_FRAME_CLOUDS   0x1u
@@ -158,6 +165,28 @@ typedef struct AtlasFrame {
                                                  traced sky visibility, binary sun shadows that foliage stops, block
                                                  lights unshadowed. Without it (the default) the far field traces its
                                                  light (docs/ATLAS-LOD.md, "Far light"). An older core ignores the bit. */
+/*
+ * (abi 0.15, optional) The near light: one light for near and far. With ATLAS_FRAME_NEAR_DEPTH, for every pixel the near
+ * field covers atlas lights the near surface with the far field's own lighting functions: from the surface point
+ * p = camera + dir x nearDepth (the view ray, curvature as the far field's) and its normal N (nearInfo), what reaches a
+ * WHITE diffuse surface there: the key light (sun, or the moon at night) x max(N.L, 0) x its traced visibility (the far
+ * field's secondary rays from p nudged off the surface along N, cloud shadows with ATLAS_FRAME_CLOUDS), plus the traced
+ * sky ambient (sky visibility over the hemisphere about N, plus the pack's ambient floor), plus far lights; NOT block
+ * light (the host adds it from its own light data). ATLAS_FRAME_LIGHT_LOW takes the far field's cheap terms (binary sun
+ * shadow, constant sky occlusion). ATLAS_FRAME_VANILLA_LIGHT does not change it (the near pass replaces vanilla's light).
+ * Outputs per covered pixel:
+ *   nearLight  RGBA16F (GL) / RGBA32F (host): rgb = that irradiance (linear, the far field's radiance units), a = the key
+ *              light's visibility 0..1 (shadows x cloud shadow); 0 at every pixel the near field does not cover
+ *   color      (the frame's colour output, at covered pixels only) rgb = aerial inscatter for the distance, a = its
+ *              transmittance T, with any cloud in front of the surface folded in (rgb = cloud + inscatter x cloud
+ *              transmittance, a = T x cloud transmittance), so the host composites
+ *                  final = albedo x nearLight.rgb x color.a + color.rgb   (+ block light x albedo x color.a)
+ *              Pixels the near field does not cover keep the old meaning (premultiplied radiance, a = coverage), and
+ *              without the flag a covered pixel stays the premultiplied cloud (rgb, coverage) as before.
+ * Host path: AtlasFrame.nearInfo in, AtlasFrameOutput.nearLight out; GL path: AtlasGlFrameIO.nearInfoTex in,
+ * .dstNearLight out (both needed, else the flag is dropped for the frame). An older core ignores the bit and the fields.
+ */
+#define ATLAS_FRAME_NEAR_LIGHT 0x20000u
 
 /*
  * Frame outputs (any pointer may be NULL to skip). Layout matches the shared G-buffer images:
@@ -173,6 +202,7 @@ typedef struct AtlasFrameOutput {
     uint32_t* normal;
     float* depth;
     float* colorLinear;
+    float* nearLight;  /* (abi 0.15; read only with ATLAS_FRAME_NEAR_LIGHT) RGBA32F, see the flag; may be NULL */
 } AtlasFrameOutput;
 
 /* Weather fields exactly as WeatherFieldTexture uploads them (RGBA8, 128 x 128, world-fixed toroidal). */
@@ -285,7 +315,21 @@ ATLAS_API AtlasStatus atlas_gl_render(AtlasContext* ctx, const AtlasFrame* frame
  *  nearInvProjection inverse of the projection used for that depth, column-major, camera-relative view space
  *  dstColor/Normal/Depth  GL textures (same size and format as the shared ones) that receive copies once the
  *                    frame is done, e.g. the textures a shader pack samples through customTexture.
- * atlas restores every piece of GL state it touches (program, texture/sampler unit 15, image unit 7).
+ *  nearInfoTex       (abi 0.15, read only with ATLAS_FRAME_NEAR_LIGHT) the near field's surface info, a GL texture
+ *                    the size of nearDepthTex's (bottom-up rows), internal format RGBA8 (GL_RGBA8 / UNORM):
+ *                      r = block light level / 15, g = sky light level / 15 (atlas does not read r and g yet),
+ *                      b, a = the surface's world-space unit normal, octahedral, as atlas_shared.slang octEncode:
+ *                        p = n.xz / (|n.x| + |n.y| + |n.z|);
+ *                        if (n.y < 0) p = (1 - |p.yx|) * (p.x >= 0 ? 1 : -1, p.y >= 0 ? 1 : -1);
+ *                        (b, a) = p * 0.5 + 0.5
+ *                      (decoded e = (b, a) * 2 - 1, n = (e.x, 1 - |e.x| - |e.y|, e.y), if n.y < 0 then
+ *                      n.xz = (1 - |n.zx|) * sign(n.xz), normalised). atlas takes the texel its near depth took
+ *                      (the farthest of the four samples over its pixel), 0 = none (no near light).
+ *  dstNearLight      (abi 0.15, read only with ATLAS_FRAME_NEAR_LIGHT) GL texture, RGBA16F at atlas's resolution, that
+ *                    receives the near light (see ATLAS_FRAME_NEAR_LIGHT); 0 = none (no near light). On host copies
+ *                    the near depth and info are read back to the CPU for it (the CPU waits for the GL near pass).
+ * atlas restores every piece of GL state it touches (program, texture/sampler units 14 and 15, image units 6 and 7,
+ * pixel pack state).
  */
 #define ATLAS_GL_BOUND_DEPTH 0xFFFFFFFFu
 #define ATLAS_GL_DEPTH_AUTO 0xFFFFFFFFu
@@ -297,6 +341,7 @@ typedef struct AtlasGlFrameIO {
     float nearInvProjection[16];
     uint32_t dstColor, dstNormal, dstDepth;
     uint32_t dstSunMap; /* RG32F size x size+1 (atlas_set_sun_map), or 0 */
+    uint32_t nearInfoTex, dstNearLight; /* (abi 0.15, read only with ATLAS_FRAME_NEAR_LIGHT) */
 } AtlasGlFrameIO;
 ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* frame, const AtlasGlFrameIO* io);
 ATLAS_API void atlas_gl_detach(AtlasContext* ctx);
@@ -309,7 +354,8 @@ ATLAS_API void atlas_gl_detach(AtlasContext* ctx);
  *   "host-copy"   the driver pair cannot share memory (no EXT_memory_object_{win32,fd} / VK_KHR_external_memory_*,
  *                 formats not exportable, or the GL context on another GPU): frames are read back and uploaded with
  *                 glTextureSubImage2D (interopReason says why; hostCopy.waitMs / uploadMs the last frame's CPU cost;
- *                 the near-depth skip is off, the composite's depth test still orders near over far)
+ *                 the near-depth skip is off, the composite's depth test still orders near over far; with
+ *                 ATLAS_FRAME_NEAR_LIGHT the near depth and info are read back for it and the skip is on)
  * plus the GL renderer / version / window system ("wgl", "egl", "glx") and every Vulkan device seen. Static storage
  * per context until the next call. Forcing a mode for tests: ATLAS_INTEROP=hostcopy|zerocopy in the environment.
  */

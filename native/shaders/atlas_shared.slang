@@ -19,7 +19,8 @@ static const uint FRAME_FILL_NEAR = 0x2000u;   // (abi 0.12) fill pixels the nea
 static const uint FRAME_LOD_DITHER = 0x1000u;  // dithered LOD transitions (per-pixel segment phase)
 static const uint FRAME_GROUPS = 0x4000u;      // (abi 0.14) primary rays trace the content-shaped groups
 static const uint FRAME_VANILLA_LIGHT = 0x10000u;  // (abi 0.14, optional) Minecraft's own light: no pack, the near field vanilla
-static const uint FRAME_LIGHT_LOW = 0x8000u;   // (abi 0.15) cheap far light: constant sky occlusion, unshadowed block light
+static const uint FRAME_LIGHT_LOW = 0x8000u;   // (abi 0.14) cheap far light: constant sky occlusion, unshadowed block light
+static const uint FRAME_NEAR_LIGHT = 0x20000u; // (abi 0.15) light the near field's covered pixels with the far light
 // the shader pack's ambient floor (deferred.fsh: albedo x (sky + floor)), under every far land surface as under the near
 static const float3 FAR_AMBIENT_FLOOR = float3(0.012, 0.012, 0.016);
 static const int MAX_LODS = 8;
@@ -173,6 +174,12 @@ float3 applyAerial(float3 c, float3 dir, float3 sun, float t, FrameGpu f) {
     return lerp(aerialFog(dir, sun), c, aerialTransmittance(t, f));
 }
 
+// applyAerial split for a host that composites the surface itself (the near light): applyAerial(c) == c * T + this,
+// T = aerialTransmittance(t, f)
+float3 aerialInscatter(float3 dir, float3 sun, float t, FrameGpu f) {
+    return aerialFog(dir, sun) * (1.0 - aerialTransmittance(t, f));
+}
+
 // Smooth value noise on a world-space grid (stable under camera motion and LOD changes).
 // A per-pixel threshold in [0, 1): interleaved gradient noise (Jimenez 2014), spread evenly over small
 // neighbourhoods so a dissolve at any progress reads as a fine even stipple; `salt` decorrelates several uses.
@@ -209,6 +216,19 @@ float2 octEncode(float3 n) {
     float2 e = n.xz;
     if (n.y < 0.0) e = (1.0 - abs(e.yx)) * float2(e.x >= 0.0 ? 1.0 : -1.0, e.y >= 0.0 ? 1.0 : -1.0);
     return e * 0.5 + 0.5;
+}
+
+// octEncode's inverse (atlas.h AtlasGlFrameIO.nearInfoTex): e in [0, 1]^2 -> unit normal
+float3 octDecode(float2 e01) {
+    float2 e = e01 * 2.0 - 1.0;
+    float3 n = float3(e.x, 1.0 - abs(e.x) - abs(e.y), e.y);
+    if (n.y < 0.0) {
+        float nx = (1.0 - abs(n.z)) * (n.x >= 0.0 ? 1.0 : -1.0);
+        float nz = (1.0 - abs(n.x)) * (n.z >= 0.0 ? 1.0 : -1.0);
+        n.x = nx;
+        n.z = nz;
+    }
+    return normalize(n);
 }
 
 uint packNormal(float3 n, uint cls, float shadow) {

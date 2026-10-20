@@ -30,14 +30,18 @@ using namespace atlas;
 // The Java binding (com.nirncraft.atlas.AtlasNative) declares these layouts by hand; any change is an ABI bump.
 static_assert(sizeof(AtlasMaterial) == 24);
 static_assert(sizeof(AtlasColumnTile) == 64 && offsetof(AtlasColumnTile, surface) == 16);
-static_assert(sizeof(AtlasFrame) == 144 && offsetof(AtlasFrame, invViewProj) == 24 && offsetof(AtlasFrame, width) == 88 &&
+// (0.15 appended AtlasFrame.nearInfo, AtlasFrameOutput.nearLight and AtlasGlFrameIO.nearInfoTex / dstNearLight; they
+// are read only under ATLAS_FRAME_NEAR_LIGHT, so a 0.14 caller's 144 / 32 / 96-byte structs are never read past)
+static_assert(sizeof(AtlasFrame) == 152 && offsetof(AtlasFrame, invViewProj) == 24 && offsetof(AtlasFrame, width) == 88 &&
               offsetof(AtlasFrame, sunDir) == 108 && offsetof(AtlasFrame, flags) == 128 &&
-              offsetof(AtlasFrame, nearDepth) == 136);
-static_assert(sizeof(AtlasFrameOutput) == 32 && offsetof(AtlasFrameOutput, colorLinear) == 24);
+              offsetof(AtlasFrame, nearDepth) == 136 && offsetof(AtlasFrame, nearInfo) == 144);
+static_assert(sizeof(AtlasFrameOutput) == 40 && offsetof(AtlasFrameOutput, colorLinear) == 24 &&
+              offsetof(AtlasFrameOutput, nearLight) == 32);
 static_assert(sizeof(AtlasWeather) == 40 && offsetof(AtlasWeather, rainFactor) == 32);
 static_assert(sizeof(AtlasActor) == 48 && offsetof(AtlasActor, kind) == 36);
-static_assert(sizeof(AtlasGlFrameIO) == 96 && offsetof(AtlasGlFrameIO, nearInvProjection) == 16 &&
-              offsetof(AtlasGlFrameIO, dstColor) == 80);
+static_assert(sizeof(AtlasGlFrameIO) == 104 && offsetof(AtlasGlFrameIO, nearInvProjection) == 16 &&
+              offsetof(AtlasGlFrameIO, dstColor) == 80 && offsetof(AtlasGlFrameIO, nearInfoTex) == 96 &&
+              offsetof(AtlasGlFrameIO, dstNearLight) == 100);
 static_assert(sizeof(AtlasLight) == 40 && offsetof(AtlasLight, radius) == 24 && offsetof(AtlasLight, kind) == 36);
 static_assert(sizeof(AtlasStats) == 56 && offsetof(AtlasStats, nodeBytes) == 8 && offsetof(AtlasStats, raySteps) == 48);
 static_assert(sizeof(AtlasSurfaceCard) == 1552 && offsetof(AtlasSurfaceCard, texels) == 16);
@@ -434,12 +438,20 @@ ATLAS_API AtlasStatus atlas_render(AtlasContext* ctx, const AtlasFrame* f, const
     FrameInputs in{};
     AtlasStatus st = buildInputs(ctx, f, in);
     if (st != ATLAS_OK) return st;
+    if (!in.nearDepth || !in.nearInfo) in.frame.dims[2] &= ~ATLAS_FRAME_NEAR_LIGHT;  // the near light needs both
     double ms = 0;
     std::string err;
     if (!ctx->backend->render(in, ctx->targets, &ms, err)) return backendFailure(ctx, err, ATLAS_ERR_GPU);
     rememberFrame(ctx, f);
     size_t n = size_t(f->width) * f->height;
     if (out->colorLinear) std::memcpy(out->colorLinear, ctx->targets.color.data(), n * 16);
+    // (out->nearLight exists only in a 0.15 caller's struct, which is the one that sets the flag)
+    if ((f->flags & ATLAS_FRAME_NEAR_LIGHT) && out->nearLight) {
+        if ((in.frame.dims[2] & ATLAS_FRAME_NEAR_LIGHT) && ctx->targets.nearLight.size() >= n * 4)
+            std::memcpy(out->nearLight, ctx->targets.nearLight.data(), n * 16);
+        else
+            std::memset(out->nearLight, 0, n * 16);  // the flag was dropped (no near depth or info): no near light
+    }
     if (out->color) {
         // harness tonemapper (the game composite tonemaps near and far together instead)
         static const auto lut = [] {
@@ -507,7 +519,15 @@ ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f,
         g.dstDepth = io->dstDepth;
         g.dstSunMap = io->dstSunMap;
         if (g.nearDepthTex) in.wantNearDepth = true;
+        // (abi 0.15: the fields exist only in a caller that sets the flag)
+        if (f->flags & ATLAS_FRAME_NEAR_LIGHT) {
+            g.nearInfoTex = io->nearInfoTex;
+            g.dstNearLight = io->dstNearLight;
+        }
     }
+    // the near light needs the near field's depth, its info and somewhere to put the result (the backend also drops
+    // it where it cannot read the near depth this frame)
+    if (!io || !g.nearDepthTex || !g.nearInfoTex || !g.dstNearLight) in.frame.dims[2] &= ~ATLAS_FRAME_NEAR_LIGHT;
     double ms = ctx->stats.lastFrameMs;
     std::string err;
     if (!ctx->backend->glRender(in, io ? &g : nullptr, &ms, err)) return backendFailure(ctx, err, ATLAS_ERR_GPU);
@@ -722,6 +742,8 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         in.nearDepth = ctx->nearDepthHost.data();
     }
     if ((f->flags & ATLAS_FRAME_NEAR_DEPTH) && !f->nearDepth) g.dims[2] &= ~ATLAS_FRAME_NEAR_DEPTH;  // GL path sets it back
+    // (abi 0.15) the near light's surface info (host path; AtlasFrame.nearInfo exists only in a caller with the flag)
+    in.nearInfo = (f->flags & ATLAS_FRAME_NEAR_LIGHT) ? f->nearInfo : nullptr;
     return ATLAS_OK;
 }
 

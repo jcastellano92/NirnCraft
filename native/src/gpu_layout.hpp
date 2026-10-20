@@ -109,6 +109,8 @@ struct FarGlobals {
     CpuBuffer<float> prevCloudDepth;
     CpuBuffer<Float2> sunMap;
     CpuBuffer<Uint4> groupData;  // (atlas_groups.slang) PackedScene::groups
+    CpuBuffer<uint32_t> nearInfo;   // (abi 0.15) the near field's surface info per pixel, RGBA8 packed
+    CpuBuffer<Float4> outNearLight; // (abi 0.15) the near light per pixel (FRAME_NEAR_LIGHT)
 };
 
 }  // namespace atlas
