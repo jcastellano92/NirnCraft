@@ -275,7 +275,8 @@ float secondarySigma(uint mat, uint cls) {
     // every surface under water was black to the near light (its sun and sky rays stopped at the surface)
     float sg = cls == 1u ? FOLIAGE_SIGMA : cls == 2u ? WATER_SIGMA : -1.0;
     uint sh = shapeOf(mat);
-    if (sh != 0u) {
+    // (water's shape is a full cube, the fluid's: its class decides, not the shape, which made it a shaped solid)
+    if (sh != 0u && cls != 2u) {
         uint4 head = groupData[sh >> 2];
         if ((head.z & 1u) != 0u) {
             float a = 0.0;
@@ -933,6 +934,42 @@ float3 reflectedSky(float3 p, float3 r, float3 sun) {
     float3 up = float3(0, 1, 0);
     float3 cloud = keyLightRadiance(sun) * 0.28 * (1.0 - 0.6 * c.weather.g) + skyAmbient(up, sun) * 0.85;
     return lerp(sky, cloud, dens * 0.85);
+}
+
+// Water as a medium (as near_forward.fsh's near water): the bed seen through the surface along the refracted ray,
+// absorbed over the path (WATER_ABSORB a block, up to five times that in murky water: the biome's water colour, the
+// material's albedo, dull and green), the water's own scattering of the sky and the sun filling what is lost.
+// 64 blocks of water or more: deep, its own colour alone. The far water was an opaque sheet (the near field's clear
+// shallows ended at the hand-off in a stark line).
+static const float3 WATER_ABSORB = float3(0.30, 0.075, 0.045);
+float waterMurk(float3 tint) {
+    float mx = max(tint.r, max(tint.g, tint.b)), mn = min(tint.r, min(tint.g, tint.b));
+    float sat = mx > 1e-3 ? (mx - mn) / mx : 0.0;
+    float greenish = saturate((tint.g - tint.b) * 3.0 + 0.3);
+    return saturate((1.0 - sat) * 1.3 + greenish * 0.6 - 0.35);
+}
+float3 waterBody(float3 p, float3 dir, float3 wn, int lod, float3 sun, float3 tint) {
+    float3 t = refract(dir, wn, 1.0 / 1.333);
+    if (dot(t, t) < 1e-6) t = float3(dir.x, -abs(dir.y), dir.z);
+    t = normalize(t);
+    float s = float(1 << lod);
+    float vis = traceSecondary(p - wn * (0.05 * s) + t * 0.01, t, 64.0, lod);
+    float path = vis > 0.0 ? 64.0 : gSecHitT;
+    float3 up = float3(0, 1, 0);
+    float3 L = keyLightDir(sun);
+    float3 bed = float3(0, 0, 0);
+    if (vis <= 0.0 && gSecHitMat != 0xFFFFFFFFu) {
+        // the bed lit simply: the sun through the water above it (as deep as the path down, near enough), the sky
+        float3 a = palette[gSecHitMat].albedoRough.rgb;
+        float down = path * max(-t.y, 0.2);
+        float3 Tsun = exp(-WATER_ABSORB * down);
+        bed = a * (keyLightRadiance(sun) * max(L.y, 0.0) * Tsun + skyAmbient(up, sun) * LOOK_AMBIENT * 0.6 * Tsun);
+    }
+    float mk = waterMurk(tint);
+    float3 T = exp(-WATER_ABSORB * (1.0 + 4.0 * mk) * path - 0.04 * (1.0 + 6.0 * mk) * path);
+    float3 inLight = (skyAmbient(up, sun) * LOOK_AMBIENT + keyLightRadiance(sun) * max(L.y, 0.0) * 0.5)
+                   * lerp(float3(0.05, 0.11, 0.13), float3(0.09, 0.11, 0.08), mk) * saturate(tint * 2.0);
+    return bed * T + inLight * (float3(1, 1, 1) - T);
 }
 
 // What a far water surface mirrors: a straight reflected ray through the same scene (coarser LOD, no shadows), shaded
@@ -1791,6 +1828,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             }
             m.albedoRough.a = farWaterAlpha(wind.y, tHit) + foam * 0.2;
             reflection = (ablate & 16u) != 0u ? float3(0, 0, 0) : waterReflection(p, dir, k, tHit, res.lod, sun, n);
+            // (ATLAS_ABLATE 2097152: the opaque sheet, as before)
+            if ((ablate & 2097152u) == 0u && !cheapLight) gWaterBody = waterBody(p, dir, n, res.lod, sun, m.albedoRough.rgb);
         }
         float3 ambient;
         float skyVis = 1.0;

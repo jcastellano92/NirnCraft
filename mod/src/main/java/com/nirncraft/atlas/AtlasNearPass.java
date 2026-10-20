@@ -560,7 +560,9 @@ public final class AtlasNearPass {
             com.mojang.blaze3d.buffers.Std140Builder.intoBuffer(view.data())
                     .putVec4(look[0], look[1], !lit ? 0f : traced ? 1f : 2f, AtlasClient.farLags() ? 1f : 0f)
                     .putVec4(k[0], k[1], k[2], lit ? 1f : 0f)
-                    .putVec4(k[3], k[4], k[5], 0f)
+                    // (w: the eye is in water: the resolve and the water take the medium's absorption)
+                    .putVec4(k[3], k[4], k[5], mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState.fogType
+                            == net.minecraft.world.level.material.FogType.WATER ? 1f : 0f)
                     .putVec4(k[6], k[7], k[8], 0f)
                     .putVec4(k[9], k[10], k[11], 0f)
                     .putVec4(sun[0], sun[1], sun[2], seconds)

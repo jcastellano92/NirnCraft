@@ -7,6 +7,7 @@
 #include <minecraft:dynamictransforms.glsl>
 #include <minecraft:oit.glsl>
 #include <nirncraft:atlas_light.glsl>
+#include <nirncraft:atlas_water.glsl>
 
 uniform sampler2D Sampler0;
 
@@ -36,6 +37,10 @@ void main() {
     vec4 fogColor = vec4(FogColor.rgb * color.a, FogColor.a);
 #else
     vec4 fogColor = FogColor;
+    if (atlasEyeInWater()) {  // seen through the water between (atlas_water.glsl), not vanilla's linear fog
+        fragColor = vec4(atlasUnderwater(color.rgb, sphericalVertexDistance), color.a);
+        return;
+    }
 #endif
     fragColor = apply_fog(color, sphericalVertexDistance, cylindricalVertexDistance, FogEnvironmentalStart,
                           FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, fogColor);

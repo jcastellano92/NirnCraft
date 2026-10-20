@@ -74,10 +74,17 @@ public final class AtlasSections {
      * layers and carpets: without them a far snowfield is the bare ground under its snow; fences and walls: the
      * outlines of yards and towns, and what lanterns hang on, which floated without them).
      */
+    /** Grass, ferns, flowers, crops, saplings, tall plants, sugar cane: thin cutout plants (AtlasMaterials: foliage). */
+    static boolean plant(BlockState s) {
+        return s.getBlock() instanceof net.minecraft.world.level.block.VegetationBlock
+                || s.getBlock() instanceof net.minecraft.world.level.block.SugarCaneBlock;
+    }
+
     static boolean kept(BlockState s) {
         if (s.isAir()) return false;
         if (s.isSolidRender() || s.is(BlockTags.LEAVES) || !s.getFluidState().isEmpty()) return true;
         if (s.getLightEmission() >= 10) return true;
+        if (plant(s)) return true;  // their shapes' coverage lets light through in part: flowers' and grass's shadows
         return s.getBlock() instanceof SlabBlock || s.getBlock() instanceof StairBlock
                 || s.getBlock() instanceof net.minecraft.world.level.block.SnowLayerBlock
                 || s.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock

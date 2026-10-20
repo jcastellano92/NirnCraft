@@ -79,6 +79,8 @@ static float4 gMoonRad = float4(0.0, 0.0, 0.0, 0.0);
 // the surfaces the sky rays met send back (their own light, averaged over the rays), a the share of rays that met
 // none, over which the look's constant bounce stands in for the lit ground (all of it where nothing was traced)
 static float4 gBounce = float4(0.0, 0.0, 0.0, 1.0);
+// the water's body for shadeSurfaceAmb (negative: the material lit as a surface): what the far kernel traced through it
+static float3 gWaterBody = float3(-1.0, -1.0, -1.0);
 
 float3 unproject(FrameGpu f, float2 ndc) {
     float4 p = f.invViewProj[0] * ndc.x + f.invViewProj[1] * ndc.y + f.invViewProj[2] * 0.5 + f.invViewProj[3];
@@ -154,6 +156,9 @@ float3 shadeSurfaceAmb(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 
     float3 bounce = gBounce.rgb + keyLightRadiance(sun) * (max(L.y, 0.0) * LOOK_BOUNCE * (0.6 - 0.4 * n.y) * open * gBounce.a);
     gBounce = float4(0.0, 0.0, 0.0, 1.0);
     float3 c = albedo * (direct + ambient * LOOK_AMBIENT + bounce);
+    // (water: the body seen through the surface, when the caller traced it: the bed through the water, gWaterBody)
+    if (cls == 2u && gWaterBody.x >= 0.0) c = gWaterBody;
+    gWaterBody = float3(-1.0, -1.0, -1.0);
     if (cls == 2u) {
         // water: Schlick Fresnel against what it reflects, plus the key light's glint; m.albedoRough.a carries the
         // glint's alpha (the far field sets it from the waves it can no longer draw: a sun path widening with distance)

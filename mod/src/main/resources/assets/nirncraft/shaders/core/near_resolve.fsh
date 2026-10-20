@@ -27,6 +27,7 @@ layout(std140) uniform NearInfo {
     vec4 SkyUp;
     vec4 Ground;
 };
+#include <nirncraft:atlas_water.glsl>
 layout(location = 0) in vec2 texCoord;
 layout(location = 0) out vec4 fragColor;
 
@@ -90,7 +91,10 @@ vec3 untracedRadiance(vec3 albedo, vec3 n, vec2 lm) {
     return atlasSrgbToLinear(albedo) * (direct + ambient + atlasBlockLight(lm.x));
 }
 
+// the eye in water: whatever lies dist blocks away is seen through that much water (atlas_water.glsl); vanilla's
+// linear water fog left far things untouched
 vec3 environmentalFog(vec3 rgb, float dist) {
+    if (atlasEyeInWater()) return atlasUnderwater(rgb, dist);
     return mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
 }
 
@@ -147,7 +151,8 @@ void main() {
     // the near field's environmental fog as it stands at the edge of the loaded terrain (AtlasFallback's rule)
     float edge = max(FogRenderDistanceEnd, 16.0);
     float f = clamp(linear_fog_value(min(d, edge), FogEnvironmentalStart, FogEnvironmentalEnd), 0.0, 1.0) * FogColor.a;
-    fragColor = vec4(mix(ldr, FogColor.rgb, f) * c.a, c.a);
+    vec3 fogged = atlasEyeInWater() ? atlasUnderwater(ldr, d) : mix(ldr, FogColor.rgb, f);
+    fragColor = vec4(fogged * c.a, c.a);
     // its depth: the point at that distance along this pixel's ray (beyond the projection's far plane: 0)
     vec4 clip = ProjMat * vec4(normalize(viewRay(texCoord, 0.5)) * d, 1.0);
     gl_FragDepth = clamp(clip.z / clip.w, 0.0, 1.0);

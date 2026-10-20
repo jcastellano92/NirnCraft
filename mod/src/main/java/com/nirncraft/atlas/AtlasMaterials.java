@@ -192,7 +192,7 @@ final class AtlasMaterials {
         int light = s.getLightEmission();
         int cls = !s.getFluidState().isEmpty() && light == 0 ? AtlasNative.CLASS_WATER
                 : light >= 10 ? AtlasNative.CLASS_EMISSIVE
-                : s.is(BlockTags.LEAVES) ? AtlasNative.CLASS_FOLIAGE : AtlasNative.CLASS_TERRAIN;
+                : s.is(BlockTags.LEAVES) || AtlasSections.plant(s) ? AtlasNative.CLASS_FOLIAGE : AtlasNative.CLASS_TERRAIN;
         float rough = cls == AtlasNative.CLASS_WATER ? 0.05f : key.contains("ice") ? 0.2f : key.contains("snow") ? 0.6f : 0.85f;
         return new float[] {r, g, b, rough, light >= 10 ? light / 15f : 0f, cls};
     }
