@@ -156,6 +156,13 @@ public:
     // its window moves); and one section's ids (false: none)
     void sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const;
     bool sectionMats(int sx, int sy, int sz, uint16_t out[4096]) const;
+    // The GPU's level-0 grid (voxgrid.hpp) owns level 0 (ATLAS_VOXGRID_LEVEL0=1): a section it holds (inside its window)
+    // no longer rebuilds its level-0 region on the CPU (the grid is rebuilt on the GPU; the region stays as it was, the
+    // fallback past the grid). setGridWindow (the grid's window moved: x, z origin and size in sections) rebuilds the
+    // regions skipped so whose sections the window has left. Levels 1-4 are rebuilt as before.
+    std::atomic<bool> gridOwnsLevel0{false};
+    void setGridWindow(int ox, int oz, int d);
+    size_t gridSkippedCount() const;
     // the palette's material classes (for the sections' generated levels); set when the palette changes
     void setClasses(std::vector<uint8_t> cls);
     void markSectionDirty(int sx, int sy, int sz);  // caller holds mu_
@@ -252,6 +259,14 @@ private:
     std::atomic<size_t> lastPending_{0};
     std::atomic<int> lastHidden_{0};  // wanted regions the last update found behind the horizon
     std::unordered_set<Key3, Key3Hash> treeDirty_;  // regions whose groups only are out of date (levels 5+: sections)
+    // (gridOwnsLevel0) level-0 regions whose sections changed while the grid held them, and the grid's window
+    std::unordered_set<Key3, Key3Hash> gridSkipped_;
+    std::atomic<int> gridOx_{0}, gridOz_{0}, gridD_{0};
+    bool gridHolds(int sx, int sz) const {
+        int d = gridD_.load(std::memory_order_relaxed), ox = gridOx_.load(std::memory_order_relaxed),
+            oz = gridOz_.load(std::memory_order_relaxed);
+        return d > 0 && sx >= ox && sx < ox + d && sz >= oz && sz < oz + d;
+    }
     mutable std::mutex snapMu_;
     std::shared_ptr<const PackedScene> packed_ = std::make_shared<PackedScene>();
     int lastCentre_[MAX_LODS][2] = {};

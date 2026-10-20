@@ -62,6 +62,7 @@ void VoxGrid::frame(const int32_t camBlock[3], World& world) {
     slotsUsed_ = 0;
     pending_.clear();
     clearPending_ = true;
+    world.setGridWindow(ox_, oz_, D);
     std::vector<std::pair<Key3, std::shared_ptr<const Section>>> secs;
     world.sectionsIn(ox_, oz_, ox_ + D, oz_ + D, secs);
     for (auto& [k, s] : secs)

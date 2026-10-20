@@ -516,6 +516,28 @@ bool World::sectionMats(int sx, int sy, int sz, uint16_t out[4096]) const {
     return true;
 }
 
+void World::setGridWindow(int ox, int oz, int d) {
+    std::lock_guard<std::mutex> lock(mu_);
+    gridOx_ = ox;
+    gridOz_ = oz;
+    gridD_ = d;
+    for (auto it = gridSkipped_.begin(); it != gridSkipped_.end();) {
+        // a level-0 region: 16 x 16 columns of sections; rebuilt once any of them lies outside the window
+        int sx0 = it->x * 16, sz0 = it->z * 16;
+        if (sx0 >= ox && sx0 + 16 <= ox + d && sz0 >= oz && sz0 + 16 <= oz + d) {
+            ++it;
+            continue;
+        }
+        dirty_.insert(*it);
+        it = gridSkipped_.erase(it);
+    }
+}
+
+size_t World::gridSkippedCount() const {
+    std::lock_guard<std::mutex> lock(mu_);
+    return gridSkipped_.size();
+}
+
 void World::markSectionDirty(int sx, int sy, int sz) {
     // the section's region at every level that reads sections (0..4); with groups also the region across a border it
     // touches (whose border voxels' exposure it decides). (Levels 5 and up read it through the coarse levels: their
@@ -523,7 +545,9 @@ void World::markSectionDirty(int sx, int sy, int sz) {
     // seen past the near light's cone and from far off, once the uploads pause: a chunk's sections each rebuilt the
     // same five regions again (a level-4 region spans 4096 blocks), and the client's feed kept a core busy for minutes
     bool nbrs = groupsWanted.load(std::memory_order_relaxed);
-    markRegions(sx, sy, sz, 0, 0, dirty_, nbrs);
+    // (the GPU's grid holds it: its level-0 region waits until the grid's window leaves it, setGridWindow)
+    bool grid = gridOwnsLevel0.load(std::memory_order_relaxed) && gridHolds(sx, sz);
+    markRegions(sx, sy, sz, 0, 0, grid ? gridSkipped_ : dirty_, nbrs);
     markRegions(sx, sy, sz, 1, 4, sectionDirty_, nbrs);
     lastSectionMs_ = nowMs();
 }

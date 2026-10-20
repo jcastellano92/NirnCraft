@@ -476,8 +476,9 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
     uncExit = 1e30;
     // level 0: the GPU-built grid first, the regions only past where it has no data
     float uGrid = 0.0;
-    // (the content-shaped groups keep primary rays where a frame asks for them: the grid has no shapes yet)
-    if (lod == 0 && vgOn() && !gGroups) {
+    // (the content-shaped groups keep primary rays where a frame asks for them, the grid having no shapes yet, unless
+    // the grid owns level 0: vgDims.w, ATLAS_VOXGRID_LEVEL0, where the SVDAG level 0 no longer follows the sections)
+    if (lod == 0 && vgOn() && (!gGroups || frame.vgDims.w != 0u)) {
         gLeafGap = 0.3;
         int g = traceVoxGrid(p0, d, 0.0, len, res, uGrid);
         if (g != TRACE_UNCOVERED) return g;
@@ -578,8 +579,28 @@ int traceLodRegions(int lod, float3 p0, float3 d, float len, inout TraceResult r
     return TRACE_MISS;
 }
 
+// The level-0 grid's id at camera-relative p: -1 where it has no data (outside its window, a chunk without data), else
+// the voxel's material (0: air)
+int vgVoxel(float3 p) {
+    if (!vgOn()) return -1;
+    int3 v = int3(floor(p)) + frame.camInt.xyz - frame.vgOrigin.xyz * 16;
+    int X = int(frame.vgDims.x), Y = int(frame.vgDims.y), Z = int(frame.vgDims.z);
+    if (v.x < 0 || v.y < 0 || v.z < 0 || v.x >= X * 16 || v.y >= Y * 16 || v.z >= Z * 16) return -1;
+    int3 c = v >> 4;
+    uint cw = vgChunks[uint((c.y * Z + c.z) * X + c.x)];
+    if ((cw & 3u) == VG_UNLOADED) return -1;
+    if ((cw & 3u) == VG_EMPTY) return 0;
+    int3 l = v & 15;
+    uint i = uint(l.x + 16 * (l.z + 16 * l.y));
+    return int((vgPool[(cw >> 2) * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu);
+}
+
 // Solid voxel at camera-relative point p in a given LOD (false where that LOD has no data).
 bool occupiedAt(int lod, float3 p) {
+    if (lod == 0) {
+        int g = vgVoxel(p);
+        if (g >= 0) return g != 0;
+    }
     LodGpu L = frame.lods[lod];
     float s = float(1 << lod);
     int3 cell0 = L.origin.xyz * int(256 << lod) + int3(0, L.origin.w, 0);
@@ -607,6 +628,10 @@ bool occupiedAt(int lod, float3 p) {
 
 // (measurements) the material of the voxel path's solid voxel at camera-relative p in a LOD, 0xFFFFFFFF where empty
 uint materialAt(int lod, float3 p) {
+    if (lod == 0) {
+        int g = vgVoxel(p);
+        if (g >= 0) return g != 0 ? uint(g) : 0xFFFFFFFFu;
+    }
     LodGpu L = frame.lods[lod];
     float s = float(1 << lod);
     int3 cell0 = L.origin.xyz * int(256 << lod) + int3(0, L.origin.w, 0);

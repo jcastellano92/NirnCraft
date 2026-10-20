@@ -522,8 +522,32 @@ int main(int argc, char** argv) {
         // the level-0 grid built before anything is timed or compared (a few frames: the backend builds a budget a frame)
         {
             AtlasFrameOutput none{color.data(), normal.data(), depth.data(), linear.data()};
-            for (int k = 0; k < 256 && voxgridPending(ctx) > 0; k++)
+            // (the first frame places the grid's window: before it there is nothing pending to see)
+            for (int k = 0; k < 256; k++) {
                 if (atlas_render(ctx, &f, &none) != ATLAS_OK) return 4;
+                if (voxgridPending(ctx) <= 0) break;
+            }
+        }
+        // reupload=1: every section the core holds sent again (as a burst of edits would), then the CPU update that follows
+        // timed, and the frames until the GPU grid has them again
+        if (num(a, "reupload", 0) > 0 && haveExport) {
+            size_t n = 0;
+            auto u0 = std::chrono::steady_clock::now();
+            for (const exportdata::Held& hs : ex.held)
+                if (hs.sent && atlas_upload_section(ctx, hs.cx, hs.sy, hs.cz, hs.mats.data()) == ATLAS_OK) n++;
+            double upMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - u0).count();
+            u0 = std::chrono::steady_clock::now();
+            if (atlas_update(ctx, c, 0) != ATLAS_OK) return 3;
+            double updMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - u0).count();
+            atlas_get_stats(ctx, &st);
+            AtlasFrameOutput none{color.data(), normal.data(), depth.data(), linear.data()};
+            int frames2 = 0;
+            for (; frames2 < 256 && voxgridPending(ctx) > 0; frames2++)
+                if (atlas_render(ctx, &f, &none) != ATLAS_OK) return 4;
+            std::string info = atlas_info(ctx);
+            auto vg = info.find("\"totalGpuMs\":");
+            std::printf("{\"reupload\":{\"sections\":%zu,\"uploadMs\":%.1f,\"cpuUpdateMs\":%.1f,\"buildMs\":%.1f,\"gridFrames\":%d,%s}}\n", n,
+                        upMs, updMs, st.lastBuildMs, frames2, vg == std::string::npos ? "\"grid\":null" : info.substr(vg, info.find('}', vg) - vg).c_str());
         }
         best = 1e30;
         std::vector<double> times;
