@@ -128,6 +128,9 @@ public final class AtlasClient {
                 () -> AtlasFallback.register(e)));
         NeoForge.EVENT_BUS.addListener(AtlasClient::afterOpaque);
         AtlasNearPass.init(modBus);
+        modBus.addListener((RegisterRenderPipelinesEvent e) -> AtlasGuard.run(AtlasNearPass.FEATURE, () -> AtlasSky.register(e)));
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent e) ->
+                AtlasGuard.run(AtlasNearPass.FEATURE, () -> AtlasSky.extract(e)));
         // after atlas's frame (or its absence): our near terrain into the frame, atlas's far frame behind it
         NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.LOW,
                 (RenderLevelStageEvent.AfterOpaqueBlocks e) -> AtlasGuard.run(AtlasNearPass.FEATURE,
@@ -200,6 +203,11 @@ public final class AtlasClient {
     public static String farTimelineJson() {
         AtlasFarField f = farField;
         return f == null ? "[]" : f.timelineJson();
+    }
+
+    /** The loaded core lights the near pass's pixels (ABI 0.15: ATLAS_FRAME_NEAR_LIGHT, AtlasGlIO near info / light). */
+    static boolean nearLightSupported() {
+        return lib != null && ctx != null && !failed && lib.abi() >= 0x000F00;
     }
 
     public static boolean active() {
