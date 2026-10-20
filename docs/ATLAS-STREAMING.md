@@ -110,6 +110,22 @@ What the pipeline does (the full map with file:line: the "far-field loading pipe
 7. **One renderer**: the client's renderer takes over terrain from vanilla, from just beyond the player inward, until
    vanilla only simulates; no line, nothing changes renderer as you approach.
 
+8. **Operations, not results, where they are deterministic**: a change that is the output of known code (a spell
+   carving terrain, a settlement placing a building plan) goes out as the operation, its parameters and seed, a few
+   bytes; every client applies it with the same code. Where the result is not deterministic (vanilla explosions,
+   fluids), the edited blocks go out instead; the hash check catches either way.
+
+### Own all of it: one spectrum, no vanilla terrain (owner, 2026-10-19)
+
+No near and far at all: one representation whose detail follows each part's importance on screen and its visibility,
+so distance stops mattering. Vanilla's terrain rendering is removed, not turned down (it gets no terrain geometry; it
+keeps entities until those are ours too; if owning it all needs mixins, that rule is the owner's to revisit). Drawing
+picks its method per piece, not per ring: the groups' rectangles raster as meshes where that is cheapest (close, on a
+weak GPU) and are traced where that wins (far, many blocks a pixel), with the same cards and light, so nothing shows
+where the method changes. Owning the drawing means owning the look: what vanilla would draw does not bind us (smooth or
+stylised terrain is a rendering choice; smooth collision would change the server's world and is a later experiment).
+A research survey of games and papers grounds the plan before the build.
+
 Order: deterministic generation with a test (client-generated vs server-real per chunk), then the client-generated far
 field with the hash tree and the change log, then interest-driven live state, then the near field.
 
