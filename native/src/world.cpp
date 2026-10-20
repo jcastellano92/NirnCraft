@@ -60,12 +60,18 @@ public:
 
     uint16_t voxel(int x, int y, int z) const {
         if (sections_) {
-            // the voxel's first block in world blocks, its section, its coordinates in that section's level
+            // the voxel's first block in world blocks, its section, its coordinates in that section's level (the last
+            // section found is kept: a region's 16 M voxels looked each one up in the map, seconds a region at level 4)
             int s = 1 << lod_;
             int wx = (bx_ + x) * s, wy = WORLD_MIN_Y + (by_ - WORLD_MIN_Y + y) * s, wz = (bz_ + z) * s;
-            auto it = sections_->find({0, floorDiv(wx, 16), floorDiv(wy, 16), floorDiv(wz, 16)});
-            if (it != sections_->end() && (lod_ == 0 || !it->second->mip[0].empty()))
-                return it->second->at(lod_, (wx & 15) >> lod_, (wy & 15) >> lod_, (wz & 15) >> lod_);
+            Key3 key{0, floorDiv(wx, 16), floorDiv(wy, 16), floorDiv(wz, 16)};
+            if (!haveLast_ || !(key == lastKey_)) {
+                auto it = sections_->find(key);
+                last_ = it != sections_->end() && (lod_ == 0 || !it->second->mip[0].empty()) ? it->second.get() : nullptr;
+                lastKey_ = key;
+                haveLast_ = true;
+            }
+            if (last_) return last_->at(lod_, (wx & 15) >> lod_, (wy & 15) >> lod_, (wz & 15) >> lod_);
         }
         if (!t_) return 0;
         size_t c = size_t(z) * TILE + size_t(x);
@@ -125,6 +131,9 @@ private:
     const Tile* t_;
     uint16_t stone_, water_;
     const SectionMap* sections_;
+    mutable Key3 lastKey_{};
+    mutable const Section* last_ = nullptr;
+    mutable bool haveLast_ = false;
     int lod_ = 0;
     float s_, y0_;
     int bx_, by_, bz_;
@@ -496,8 +505,13 @@ void World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
 void World::markSectionDirty(int sx, int sy, int sz) {
     // the section's region at every level that reads sections (0..4); with groups also the region across a border it
     // touches (whose border voxels' exposure it decides). (Levels 5 and up read it through the coarse levels: their
-    // trees are marked when it is digested, World::digest.)
-    markRegions(sx, sy, sz, 0, 4, dirty_, groupsWanted.load(std::memory_order_relaxed));
+    // trees are marked when it is digested, World::digest.) Level 0 at once (what the near light traces); levels 1-4,
+    // seen past the near light's cone and from far off, once the uploads pause: a chunk's sections each rebuilt the
+    // same five regions again (a level-4 region spans 4096 blocks), and the client's feed kept a core busy for minutes
+    bool nbrs = groupsWanted.load(std::memory_order_relaxed);
+    markRegions(sx, sy, sz, 0, 0, dirty_, nbrs);
+    markRegions(sx, sy, sz, 1, 4, sectionDirty_, nbrs);
+    lastSectionMs_ = nowMs();
 }
 
 void World::markRegions(int sx, int sy, int sz, int lo, int hi, std::unordered_set<Key3, Key3Hash>& d, bool nbrs) {
@@ -1406,6 +1420,12 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
     if (groups) digest(centreRegion, budgetMs);
     {
         std::lock_guard<std::mutex> lock(mu_);
+        // the coarser levels the sections dirtied, once the uploads have paused (or a region is missing outright)
+        constexpr uint32_t SECTION_QUIET_MS = 2000;
+        if (!sectionDirty_.empty() && int32_t(nowMs() - lastSectionMs_) >= int32_t(SECTION_QUIET_MS)) {
+            dirty_.insert(sectionDirty_.begin(), sectionDirty_.end());
+            sectionDirty_.clear();
+        }
         for (int lod = 0; lod < lodCount; lod++) {
             int span = 256 << lod;
             int cx = int(std::floor(centre[0] / span)), cz = int(std::floor(centre[2] / span));

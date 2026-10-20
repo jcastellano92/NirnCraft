@@ -242,6 +242,9 @@ private:
     std::vector<uint8_t> classes_;  // material -> class (setClasses), for the sections' generated levels
     std::unordered_map<Key3, std::shared_ptr<const Region>, Key3Hash> regions_;
     std::unordered_set<Key3, Key3Hash> dirty_;
+    // levels 1-4 a section upload dirtied: rebuilt once the uploads pause (SECTION_QUIET_MS), not after every one
+    std::unordered_set<Key3, Key3Hash> sectionDirty_;
+    uint32_t lastSectionMs_ = 0;
     std::atomic<size_t> lastPending_{0};
     std::atomic<int> lastHidden_{0};  // wanted regions the last update found behind the horizon
     std::unordered_set<Key3, Key3Hash> treeDirty_;  // regions whose groups only are out of date (levels 5+: sections)
