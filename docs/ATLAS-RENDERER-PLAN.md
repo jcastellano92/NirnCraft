@@ -365,6 +365,18 @@ The full checklist from R1, every item checked live; the owner flies it.
   - every light: the drawn sky (aurora, stars, moon glow) integrated into the ambient (an aurora night tints the snow),
     the moon as key at night (have), torches and lamps bouncing (voxel GI on the GPU structure).
 
+- **Night: the owner's notes (2026-10-20).** Moonlight is filtered light, the aurora emitted light; contrast decides what
+  shows. The moons (Masser, Secunda: each its phase and height) light the land through the air like the sun (orange low,
+  whiter high, dimmed by dust and haze; a new moon or one below the horizon lights nothing); moon beams and moonlit
+  shadows exist but are faint: any torch, lantern or interior light overpowers them (keep the real ratio: night exposure
+  may open up to read moonlit terrain, but never flatten torch against moon). The aurora: its own colours from the
+  gases high up (oxygen green and red, nitrogen blue-purple), unrelated to the biome below; strong moonlight washes out
+  faint displays, a strong display lights snow when the moon is down (the drawn sky into the ambient). Snow throws
+  moonlight back brightly; a canopy keeps the floor dark but for its gaps; ridges lit, valleys in the moon's mountain
+  shadow. Low light: rod vision (faint aurora greyish to the eye, colour returning as it brightens): a desaturation in
+  very low light, a look choice. Order of influence for a night's look: darkness and cloud, whether a moon is up, its
+  phase and height, the aurora's strength, then haze and the land's reflectivity or cover.
+
 ## Parked (off the renderer goal, for later)
 
 - Client-owned world: x-ray from a client that generates the world (the public and secret split decides it), the hash
