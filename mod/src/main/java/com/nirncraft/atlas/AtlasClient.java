@@ -845,8 +845,18 @@ public final class AtlasClient {
 
     /** Tears atlas down (start() brings it back with fresh tiles). The library stays loaded. */
     private static void stop() {
+        AtlasNative.Context c = ctx;
+        // the context goes only once the far-field worker is out of it (it may still be mid-pass after close()'s
+        // join: destroyed under it, its next atlas_update crashed the game); the GL side goes now, on this thread
+        Runnable destroy = () -> {
+            try {
+                if (c != null) c.close();
+            } catch (Throwable ignored) {
+                // best effort
+            }
+        };
         try {
-            if (farField != null) farField.close();
+            if (farField != null) farField.stopWorker();
         } catch (Throwable ignored) {
             // best effort: the session continues without atlas
         }
@@ -856,12 +866,15 @@ public final class AtlasClient {
             // best effort
         }
         try {
-            if (ctx != null) {
-                ctx.glDetach();
-                ctx.close();
-            }
+            if (c != null) c.glDetach();
         } catch (Throwable ignored) {
             // best effort
+        }
+        try {
+            if (farField != null) farField.close(destroy);  // now, or when the worker leaves
+            else destroy.run();
+        } catch (Throwable ignored) {
+            // best effort (the context is left to the worker, or leaked)
         }
         farField = null;
         AtlasEditsClient.clear();  // the next world's changes come from its own server
