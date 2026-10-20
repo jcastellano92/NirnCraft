@@ -35,7 +35,7 @@ Each phase ends with its exit check; the next phase starts when it passes.
 
 Exit: a shader edit is on screen in under 2 s, offline and in game.
 
-### R1. The inventory
+### R1. The inventory (done: docs/ATLAS-RENDER-INVENTORY.md)
 
 Every item the 26.3 client frame draws, from vanilla's source (GameRenderer, LevelRenderer and its passes, feature
 and entity renderers, every block entity renderer, particles, sky, weather, overlays, post chains, light texture,
@@ -107,6 +107,24 @@ The full checklist from R1, every item checked live; the owner flies it.
 ## Experiments and decisions
 
 (Recorded as they are made: what was measured, the numbers, what was chosen.)
+
+- **R0 loop (2026-10-20).** A shader save reaches a scored side by side in about 2.5 s (slangc -O1 1.9 s, the
+  reload and frame 0.5 s): `py -3 tools/dev/shader_watch.py` beside `element_lab.py <element> --renderer far-game
+  --truth exact --view 128 --watch`. Without watch, one view is 3.6 s cold.
+- **R1 inventory (2026-10-20)**: docs/ATLAS-RENDER-INVENTORY.md, 80 items from the 26.3 sources, with each item's
+  hooks.
+- **E2 vanilla terrain off, no mixin (from the inventory).** Wrap every block model (`ModelEvent.ModifyBakingResult`,
+  a delegate whose parts are empty when the getter is a `RenderSectionRegion`): sections still compile, so
+  entity visibility (it needs the section at the entity's feet compiled), block entities (listed by compiled
+  sections), cave culling and the loading screen keep working, and nothing is drawn. Vanilla water and lava cannot
+  be replaced that way; clearing `levelRenderer.visibleSections()` at `RenderFrameEvent.Pre` and restoring it at
+  `AfterLevel` drops their draws too. Render distance 2 is not a route (it cuts the server's entity tracking to 32
+  blocks). Sodium replaces vanilla's section renderer, so it leaves the instance with this step; the harness's
+  readiness gate (rendered-section counts) changes with it.
+- **E3 handoff (from the inventory).** Depth is reverse-Z (far = 0) and the projection reaches 2048 blocks; our
+  terrain writes colour and reverse-Z depth in `AfterOpaqueBlocks` (the stage the far field uses), so entities,
+  block entities, particles, translucents, clouds and weather that follow depth-test against it. Today's fallback
+  writes no depth (things behind far terrain are not hidden): fixed by the same step.
 
 ## Parked (off the renderer goal, for later)
 
