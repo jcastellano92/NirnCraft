@@ -179,7 +179,7 @@ class Sky:
         self.ubo_air = gl.buffer(reserve=7 * 16)
         self.ubo_night = gl.buffer(reserve=120 * 4)
         self.ubo_signs = gl.buffer(reserve=(13 + 364 + 40) * 16)  # NirnCelestial.CATALOGUE_FLOATS
-        self.ubo_cel = gl.buffer(reserve=208 * 4)  # NirnCelestial.BLOCK_FLOATS
+        self.ubo_cel = gl.buffer(reserve=228 * 4)  # NirnCelestial.BLOCK_FLOATS
         self.ubo_sky = gl.buffer(reserve=112)
         self.coeffs = self.core.coeffs()
 
@@ -440,8 +440,16 @@ SCENES = {
     "xero_lyg": {**midnight(28), "z": 0, "kp": 0, "brightness": 0, "look": ("xero-lyg", 0, 6), "res": HD},
     # Julianos in the Mage's eye (Frostfall 16th of year 1)
     "mage_eye": {**midnight(645), "z": 0, "kp": 0, "brightness": 0, "look": ("julianos", -2, 50), "res": HD},
-    # a great comet (the dev hook's: perihelion on day 22), a week past perihelion on a moonless night
-    "comet": {**midnight(28), "z": 0, "kp": 0, "brightness": 0, "comet": 22, "look": ("comet", 10, 90), "res": HD},
+    # a great comet (the dev hook's, perihelion on day 28) from Skyrim, moonless nights: a week before its peak, the
+    # peak night, a week after; the coma close up
+    "comet_before": {**midnight(21), "z": -2000, "kp": 0, "brightness": 0, "comet": 28, "look": ("comet", 18, 100),
+                     "res": HD},
+    "comet_peak": {**midnight(28), "z": -2000, "kp": 0, "brightness": 0, "comet": 28, "look": ("comet", 18, 100),
+                   "res": HD},
+    "comet_after": {**midnight(35), "z": -2000, "kp": 0, "brightness": 0, "comet": 28, "look": ("comet", 18, 100),
+                    "res": HD},
+    "comet_coma": {**midnight(28), "z": -2000, "kp": 0, "brightness": 0, "comet": 28, "look": ("comet", 0.8, 4),
+                   "res": HD},
 }
 
 
