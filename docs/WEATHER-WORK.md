@@ -1,8 +1,11 @@
-# Weather work: what the renderer left for it
+# Weather work: the hooks the renderer gives it
 
-The owner's order (2026-10-20): the renderer first, then weather, then the world and biome rework. This file collects
-everything the renderer work found that needs weather, so nothing is lost. Each item says what exists, what is missing,
-and where it plugs in. Keep it current: when a renderer change defers something to weather, add it here.
+The owner's order (2026-10-20): the renderer first, then weather, then the world and biome rework. The renderer owns the
+sky and the light: it builds every capability now (layered and regional air, clouds lit as the low sun's screen, overcast
+diffusion, crepuscular rays, fog as a medium, wind-driven water, wetness, snow) with inputs that default to clear,
+calm weather. Weather and clouds only feed those inputs, through the hooks below. This file is that interface: what
+each hook is, what the renderer does with it, and what weather must supply. Keep it current: when a renderer change
+adds an input weather will drive, list it here.
 
 ## The air (sky, sun, haze, the light): the inputs it waits for
 
