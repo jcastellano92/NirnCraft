@@ -1,5 +1,6 @@
 // The far-field world: column tiles and chunk sections in, a clipmap of SVDAG regions out, packed for the kernels.
 #pragma once
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <cstdint>
@@ -63,6 +64,48 @@ struct Section {
         int n = 16 >> level;
         return mip[size_t(level - 1)][size_t(lx + n * (lz + n * ly))];
     }
+};
+
+// ---- coarse levels of real content (docs/ATLAS-LOD.md, "Coarse levels from real blocks") ---------------------------
+// The levels 2..6 of real sections, derived from each section when it arrives and kept after the section itself is
+// dropped, so a real chunk, tree or building is drawn from its own blocks at every distance. Per level a clipmap of
+// cubes of 256 blocks (COARSE_CUBE: an LOD-0 region's side), each holding that level's voxels made from real blocks as
+// buildGroups makes them (a material, 64 micro-voxels, the sub-voxels of those only partly covered: their content a
+// quarter finer, groups.hpp SubVoxels; the content's box) and which of its 4096 sections it has seen. A level's voxel is at most 16 blocks (levels 2-4) or its micro-voxels are (5:
+// 8 blocks, 6: 16): either way each lies in one section, so a section that arrives again replaces exactly its part.
+constexpr int COARSE_CUBE = 256;
+constexpr int COARSE_MIN = 2, COARSE_MAX = 6;  // the levels kept (0 and 1 are read from the sections themselves)
+constexpr uint32_t BOX_NONE = 0xFFFFFFFFu;     // (CoarseCube::kidBoxes) a child with nothing in it
+
+struct CoarseCube {
+    struct Entry {
+        uint32_t idx;  // the voxel in the cube: x + n * (z + n * y), n = COARSE_CUBE >> level
+        uint16_t mat;  // its material (levels >= 5: from its children's, kids)
+        uint16_t pad;
+        uint64_t mask;  // its micro-voxels, bit x + 4 * (z + 4 * y) (SHAPE_FULL: all); 0 with a material: too sparse to
+                        // show at this level, kept for the level above's material
+        uint32_t box;   // its content's box (groups.hpp packBox: 16ths of the voxel; levels >= 5 its children's union)
+        uint32_t faceAt;  // its sub-voxels in `faces`: one per micro-voxel of `partial`, in order
+        uint64_t partial;  // its micro-voxels only partly covered (groups.hpp SubVoxels)
+    };
+    std::vector<Entry> entries;  // sorted by idx
+    std::vector<uint16_t> kids;  // levels >= 5: per entry its 8 children's materials (level 5: sections' level-4
+                                 // voxels; 6: level-5 voxels), octant x + 2 z + 4 y
+    std::vector<uint32_t> kidBoxes;  // and their content's boxes in this voxel's 16ths (BOX_NONE: nothing)
+    std::vector<uint64_t> faces;     // the entries' sub-voxels (Entry::faceAt)
+    void facesOf(const Entry& e, SubVoxels& f) const {  // an entry's sub-voxels, whole
+        f.partial = e.partial;
+        uint32_t at = e.faceAt;
+        for (int b = 0; b < 64; b++)
+            if ((e.partial >> b) & 1) f.sub[size_t(b)] = faces[at++];
+    }
+    uint64_t seen[64] = {};      // the sections this level has data of (bit sx + 16 * (sz + 16 * sy), cube-local)
+    bool sawSection(int lx, int ly, int lz) const {
+        int b = lx + 16 * (lz + 16 * ly);
+        return (seen[b >> 6] >> (b & 63)) & 1;
+    }
+    const Entry* find(uint32_t idx) const;
+    size_t bytes() const { return sizeof(CoarseCube) + entries.size() * sizeof(Entry) + kids.size() * 6 + faces.size() * 8; }
 };
 
 struct Region {
@@ -156,18 +199,35 @@ public:
     };
     GroupStats groupStats() const;
 
+    // ---- coarse levels of real content (CoarseCube)
+    // their memory budget (ATLAS_COARSE_BUDGET_MB): over it the cubes farthest from the camera for their level's size
+    // go first (a fine level's far cubes before a coarse level's), never one within its level's window + 1 region
+    uint64_t coarseBudget = 256ull << 20;
+    struct CoarseStats {
+        uint64_t bytes = 0;
+        uint32_t cubes[MAX_LODS] = {}, entries = 0;
+        uint64_t levelBytes[MAX_LODS] = {};
+        uint32_t digested = 0, evicted = 0;  // sections taken in by the last update; cubes it dropped
+        double digestMs = 0;                 // what that cost (summed over threads)
+    };
+    CoarseStats coarseStats() const;
+
+    using CubeMap = std::unordered_map<Key3, std::shared_ptr<const CoarseCube>, Key3Hash>;
+
 private:
     using SectionMap = std::unordered_map<Key3, std::shared_ptr<const Section>, Key3Hash>;
     struct Job {
         Key3 key;
         std::shared_ptr<const Tile> tile;
         SectionMap sections;
+        CubeMap coarse;  // groups: the coarse levels' cubes over the region and its ring (levels >= max(lod, 2))
         // groups: the neighbour tiles (x - 1, x + 1, z - 1, z + 1: the exposure of the region's border voxels), the
         // region whose SVDAG stays (a tree-only job), whether to build the tree
         std::shared_ptr<const Tile> nbr[4];
         std::shared_ptr<const Region> keep;
         bool groups = false;
         bool wasDirty = false;  // taken off the dirty set when snapshot (put back if the budget runs out first)
+        bool wasTreeDirty = false;  // (treeDirty_)
     };
     Job snapshot(const Key3& k, bool groups) const;  // caller holds mu_
     Region buildRegion(const Job& j) const;
@@ -184,6 +244,7 @@ private:
     std::unordered_set<Key3, Key3Hash> dirty_;
     std::atomic<size_t> lastPending_{0};
     std::atomic<int> lastHidden_{0};  // wanted regions the last update found behind the horizon
+    std::unordered_set<Key3, Key3Hash> treeDirty_;  // regions whose groups only are out of date (levels 5+: sections)
     mutable std::mutex snapMu_;
     std::shared_ptr<const PackedScene> packed_ = std::make_shared<PackedScene>();
     int lastCentre_[MAX_LODS][2] = {};
@@ -201,6 +262,23 @@ private:
     uint64_t packedCards_ = 0;
     uint32_t lastGroupsBuilt_ = 0;
     double lastGroupsMs_ = 0;
+    // the coarse levels (CoarseCube): key (level, cube x, y, z), cube y from the world floor; copy on write
+    CubeMap coarse_;
+    std::unordered_set<Key3, Key3Hash> undigested_;  // sections (level 0 keys) not yet taken into coarse_
+    uint64_t digestShapes_ = ~0ull;                  // the shape revision the digests were made with
+    uint64_t coarseBytes_ = 0;
+    uint32_t lastDigested_ = 0, lastEvicted_ = 0;
+    double lastDigestMs_ = 0;
+    // takes undigested_ into coarse_ (within half the update's budget: nearest first) and enforces the memory budget
+    void digest(const int centreRegion[MAX_LODS][2], double budgetMs);
+    double digestMsPerSection_ = 0;
+    // marks section (sx, sy, sz)'s regions at levels lo..hi in d, and with nbrs the ones across a border it touches
+    void markRegions(int sx, int sy, int sz, int lo, int hi, std::unordered_set<Key3, Key3Hash>& d, bool nbrs);
+    int coarseTop() const { return std::min(COARSE_MAX, lodCount - 1); }
+    // the cubes a level-k.lod region's groups read (levels max(lod, COARSE_MIN)..coarseTop over the region and its
+    // ring of one voxel; caller holds mu_)
+    template <class F> void forCoarse(const Key3& k, F&& f) const;
+    bool coarseNear(const Key3& k) const;  // any of them (caller holds mu_)
 };
 
 // Milliseconds on a steady clock (wraps after 49 days; compared as signed differences).

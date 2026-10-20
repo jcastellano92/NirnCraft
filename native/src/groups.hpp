@@ -12,6 +12,7 @@
 // shaped block) when they are bigger than its pixel. Layouts: GroupTree below; the kernel reads them through one
 // buffer of uint4 (PackedScene::groups).
 #pragma once
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -70,6 +71,21 @@ constexpr uint32_t CELL_SHAPED = 0x8000u;
 constexpr uint32_t CELL_MASKED = 0x4000u;
 constexpr uint32_t CELL_MATERIAL = 0x3FFFu;
 constexpr uint32_t SLOT_MASKS = 0x80000000u;  // a slot whose brick carries a mask table
+// A masked voxel's sub-voxels (GroupInput::faces; built by World's Coverage): per micro-voxel only partly covered
+// (`partial`), its content a quarter of a micro-voxel finer, a 4 x 4 x 4 occupancy (bit x + 4 (z + 4 y)), each quarter
+// there by its own coverage of what its blocks hold (hashed in world space). A ray meets such a micro-voxel where it
+// meets one of its quarters (the kernel marches them: gSubRay; a drawn node's face walk, the column under the texel):
+// so far away a micro-voxel of 8 or 16 blocks keeps the shape of its content to 2 or 4. (Three face masks, one projection
+// per axis, were tried first: read on the face the ray entered by they showed a round crown at 1.6 times its area, read
+// across the ray they lost a slope's top, and their visual hull overstated a stepped surface by a third.)
+struct SubVoxels {
+    uint64_t partial = 0;
+    std::array<uint64_t, 64> sub{};  // per micro-voxel b
+};
+// a masked voxel's data in a brick: its micro-voxels (2 words) and where its sub-voxels are (1: the brick-relative word of
+// its table, 0 none); a table is `partial` (2 words), then per partial micro-voxel in order its sub-voxels (2 words, low
+// first)
+constexpr uint32_t MASKED_WORDS = 3;
 
 // Node types (bits 30-31 of a node's w): an inner node (its two children at w & CHILD_MASK and the one after), a flat
 // solid leaf (every face covered at depth 0: drawn as its box), a voxel leaf (at most 4 x 4 x 4 voxels: drawn as its
@@ -92,9 +108,23 @@ inline uint32_t errCode(uint32_t e) {
     return c;
 }
 
+// A voxel's content box (GroupInput::boxes), in 16ths of the voxel a side (quarter micro-voxels): lo x, y, z in bits
+// 0-11 and hi - 1 x, y, z in bits 12-23, 4 bits each. A coarse voxel's micro-voxels are 2^lod / 4 blocks (8 at level 5);
+// drawn to their cells' edges a 9-block chunk stood 12 blocks tall and a far tree a cell wider each way (+25 - 60 % of
+// a one-pixel element's coverage); clipped to the content's box they end where its blocks do (to a block at level 4).
+constexpr uint32_t BOX_FULL = 0xFFF000u;
+inline uint32_t packBox(const int lo[3], const int hi[3]) {  // lo 0..15, hi 1..16
+    return uint32_t(lo[0]) | uint32_t(lo[1]) << 4 | uint32_t(lo[2]) << 8 | uint32_t(hi[0] - 1) << 12 |
+           uint32_t(hi[1] - 1) << 16 | uint32_t(hi[2] - 1) << 20;
+}
+inline void unpackBox(uint32_t b, int lo[3], int hi[3]) {
+    for (int a = 0; a < 3; a++) lo[a] = int((b >> (4 * a)) & 15u), hi[a] = int((b >> (12 + 4 * a)) & 15u) + 1;
+}
+
 struct GroupTree {
     std::vector<uint32_t> nodes;   // 4 words a node, node 0 the root; empty = no content
-    // x / y / z: lo | hi << 12 (micro-voxels, region-local, [lo, hi)) | low face's error code << 24 | high face's << 28
+    // x / y / z: lo | (hi - 1) << 12 (quarter micro-voxels, region-local, [lo, hi): the content's box to a quarter of a
+    // micro-voxel, BOX_FULL) | low face's error code << 24 | high face's << 28 (errors in micro-voxels)
     // w: type << 30 | first child (inner nodes; relative to the region's first node)
     std::vector<uint32_t> dir;     // the brick pool: 64 x 64 columns of 4 x 4 voxels (x fastest): slot offset (18 bits)
                                    // | first brick row << 18 (6 bits) | rows << 24 (7 bits; 0 = none)
@@ -102,7 +132,8 @@ struct GroupTree {
     std::vector<uint32_t> bricks;  // a brick: which of its 64 voxels (x + 4 * (z + 4 * y)) hold something (2 words), with
                                    // SLOT_MASKS which of those carry their own micro-voxels (2 words), then the occupied
                                    // voxels' 16-bit cells in that order, two to a word (low half first), then (SLOT_MASKS)
-                                   // the masked ones' micro-voxels (2 words each, in that order)
+                                   // the masked ones' micro-voxels and sub-voxels (MASKED_WORDS each, in that order),
+                                   // then their sub-voxel tables (SubVoxels)
     uint32_t prims = 0;            // content voxels
     uint32_t brickCount = 0;       // distinct bricks
     int depth = 0;
@@ -123,6 +154,9 @@ struct GroupInput {
     std::vector<uint32_t> start;  // per column: its first voxel in vox
     std::vector<uint32_t> vox;    // material | VOXEL_SHAPED | VOXEL_MASKED
     std::unordered_map<uint32_t, uint64_t> masks;  // VOXEL_MASKED voxels (by their index in vox): their micro-voxels
+    std::unordered_map<uint32_t, uint32_t> boxes;  // VOXEL_MASKED voxels whose content is less than the voxel: its box
+    // VOXEL_MASKED voxels with micro-voxels a ray only partly meets: their sub-voxels
+    std::unordered_map<uint32_t, SubVoxels> faces;
     static int col(int x, int z) { return (z + 1) * 258 + (x + 1); }
     int64_t index(int x, int row, int z) const {  // world row; -1 above what was evaluated (air), -2 below (solid)
         int c = col(x, z);

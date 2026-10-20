@@ -262,6 +262,17 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           (unsigned long long)g.prims, (unsigned long long)g.nodes, (unsigned long long)g.bricks, g.buildMs,
                           g.maxBuildMs, g.built, g.lastUpdateMs, ctx->world.groupLods, g.maxDepth);
             ctx->info.insert(ctx->info.size() - 1, b);
+            // the coarse levels of real content (CoarseCube): memory, cubes per level, the last update's digest
+            World::CoarseStats c = ctx->world.coarseStats();
+            std::snprintf(b, sizeof b,
+                          ",\"coarse\":{\"bytes\":%llu,\"budget\":%llu,\"entries\":%u,\"cubes\":[%u,%u,%u,%u,%u,%u,%u],"
+                          "\"levelBytes\":[%llu,%llu,%llu,%llu,%llu],\"digested\":%u,\"evicted\":%u,\"digestMs\":%.1f}",
+                          (unsigned long long)c.bytes, (unsigned long long)ctx->world.coarseBudget, c.entries, c.cubes[0],
+                          c.cubes[1], c.cubes[2], c.cubes[3], c.cubes[4], c.cubes[5], c.cubes[6],
+                          (unsigned long long)c.levelBytes[2], (unsigned long long)c.levelBytes[3],
+                          (unsigned long long)c.levelBytes[4], (unsigned long long)c.levelBytes[5],
+                          (unsigned long long)c.levelBytes[6], c.digested, c.evicted, c.digestMs);
+            ctx->info.insert(ctx->info.size() - 1, b);
         }
         return ctx->info.c_str();
     } catch (...) {
@@ -291,6 +302,10 @@ ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {
     // ATLAS_SECTION_KEEP=<n>: keep real sections n LOD-0 regions either side (tools: an element seen from 64 km and
     // back has no server to send it again; 256 regions is 64 km)
     if (const char* sk = std::getenv("ATLAS_SECTION_KEEP")) ctx->world.sectionKeep = std::clamp(std::atoi(sk), 0, 1024);
+    // ATLAS_COARSE_BUDGET_MB=<n>: the coarse levels of real content's memory (World::coarseBudget; measurements of the
+    // eviction and of a level borrowing a coarser one's micro-voxels)
+    if (const char* cb = std::getenv("ATLAS_COARSE_BUDGET_MB"))
+        ctx->world.coarseBudget = uint64_t(std::clamp(std::atoll(cb), 0ll, 1ll << 20)) << 20;
     auto pal = previewPalette();
     setPalette(ctx.get(), pal.data(), uint32_t(pal.size()));
     ctx->weather.assign(4 * 128 * 128, 0);
@@ -577,7 +592,8 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.jitter[2] = ctx->jitter[0] != 0.0f || ctx->jitter[1] != 0.0f ? 1.0f : 0.0f;
     // ATLAS_ABLATE=<bits>: measurements only, leave parts of the shading out (1 AO, 2 smooth normals, 4 shadows, 8 far
     // lights, 16 water reflections, 32 the trace itself after the first hit's distance; the groups: 64 draw every node
-    // whole, 128 a drawn box without its texel walk, 256 never draw a node whole for its error)
+    // whole, 128 a drawn box without its texel walk, 256 never draw a node whole for its error, bits 9-11 the level
+    // their primary rays start from: a coarse level seen up close)
     {
         static const uint32_t ablate = [] {
             const char* v = std::getenv("ATLAS_ABLATE");
@@ -919,14 +935,17 @@ ATLAS_API AtlasStatus atlas_set_surface_cards(AtlasContext* ctx, const AtlasSurf
         SurfaceCard& c = set->cards[i];
         c.x = a.x, c.y = a.y, c.z = a.z, c.face = a.face % 6;
         // the mip chain of the covered texels (atlas_lab's loadCards): means of what shows, the face's mean elsewhere
-        float rgb[341][3] = {}, w[341] = {}, mean[3] = {};
+        // (and per texel its alpha, the top byte: what a translucent face, water, lets through; the mean of the shown
+        // ones in the coarser levels)
+        float rgb[341][4] = {}, w[341] = {}, mean[4] = {};
         int k = 0;
         for (int t = 0; t < 256; t++) {
             uint32_t v = a.texels[t];
             for (int ch = 0; ch < 3; ch++) rgb[t][ch] = float((v >> (16 - 8 * ch)) & 255);
+            rgb[t][3] = float(v >> 24);
             w[t] = (v >> 24) ? 1.0f : 0.0f;
             if (v >> 24) {
-                for (int ch = 0; ch < 3; ch++) mean[ch] += rgb[t][ch];
+                for (int ch = 0; ch < 4; ch++) mean[ch] += rgb[t][ch];
                 k++;
             }
         }
@@ -935,21 +954,22 @@ ATLAS_API AtlasStatus atlas_set_surface_cards(AtlasContext* ctx, const AtlasSurf
             int n2 = 16 >> l;
             for (int v = 0; v < n2; v++)
                 for (int u = 0; u < n2; u++) {
-                    float acc[3] = {}, ws = 0;
+                    float acc[4] = {}, ws = 0;
                     for (int j = 0; j < 4; j++) {
                         int src = at[l - 1] + (2 * u + (j & 1)) + (2 * n2) * (2 * v + (j >> 1));
-                        for (int ch = 0; ch < 3; ch++) acc[ch] += rgb[src][ch] * w[src];
+                        for (int ch = 0; ch < 4; ch++) acc[ch] += rgb[src][ch] * w[src];
                         ws += w[src];
                     }
                     int dst = at[l] + u + n2 * v;
                     w[dst] = ws * 0.25f;
-                    for (int ch = 0; ch < 3; ch++) rgb[dst][ch] = ws > 0 ? acc[ch] / ws : mean[ch];
+                    for (int ch = 0; ch < 4; ch++) rgb[dst][ch] = ws > 0 ? acc[ch] / ws : mean[ch];
                 }
         }
         for (int t = 0; t < 341; t++) {
-            if (t < 256 && w[t] == 0) for (int ch = 0; ch < 3; ch++) rgb[t][ch] = mean[ch];
+            if (t < 256 && w[t] == 0) for (int ch = 0; ch < 4; ch++) rgb[t][ch] = mean[ch];
             uint32_t v = 0;
             for (int ch = 0; ch < 3; ch++) v |= uint32_t(std::lround(std::clamp(rgb[t][ch], 0.0f, 255.0f))) << (16 - 8 * ch);
+            v |= uint32_t(std::lround(std::clamp(rgb[t][3], 0.0f, 255.0f))) << 24;
             c.mip[t] = v;
         }
     }

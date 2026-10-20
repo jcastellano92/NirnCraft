@@ -374,7 +374,9 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
     for (int seg = 0; seg < 768; seg++) {
         if (t >= t1) break;
         // (the groups choose their own level per node, draw-or-open: the finest level resident is the best source)
-        int want = gGroups ? 0 : int(clamp(floor(log2(max(t * pixelAngle, 1.0))), 0.0, float(lodCount - 1)));
+        // (ATLAS_ABLATE bits 9-11, measurements: the groups start from that level, to look at a coarse level up close)
+        int want = gGroups ? min(int((gAblate >> 9u) & 7u), lodCount - 1)
+                           : int(clamp(floor(log2(max(t * pixelAngle, 1.0))), 0.0, float(lodCount - 1)));
         if (!finer) lod = pinLeft > 0 ? pinned : max(lod, want);
         float s = float(1 << lod);
         if (lodDither > 0.0 && lod != phasedLod) {
@@ -429,6 +431,28 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
         gapEnd = 1e30;
     }
     return -1.0;
+}
+
+// The colour the offline vanilla look shows for a hit (FRAME_DEBUG_ALBEDO, linear): its surface card, else its albedo
+// times its face's vanilla shade.
+float3 vanillaLook(float3 o, float3 dir, float tHit, TraceResult r) {
+    float R = frame.camFrac.w;
+    float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
+    float3 slope = dir + float3(0, 2.0 * k * tHit, 0);
+    int ax = r.axis;
+    if (ax < 0) ax = abs(slope.y) > abs(slope.x) && abs(slope.y) > abs(slope.z) ? 1 : (abs(slope.x) > abs(slope.z) ? 0 : 2);
+    float3 fn0 = float3(ax == 0 ? (slope.x > 0 ? -1.0 : 1.0) : 0.0, ax == 1 ? (slope.y > 0 ? -1.0 : 1.0) : 0.0,
+                        ax == 2 ? (slope.z > 0 ? -1.0 : 1.0) : 0.0);
+    float3 pw = worldAt(o, dir, k, tHit) + float3(frame.camInt.xyz);
+    int3 blk = int3(floor(pw - fn0 * 0.01));
+    int f = ax == 1 ? (fn0.y < 0.0 ? 0 : 1) : ax == 2 ? (fn0.z < 0.0 ? 2 : 3) : (fn0.x < 0.0 ? 4 : 5);
+    const float SHADE[6] = { 0.5, 1.0, 0.8, 0.8, 0.6, 0.6 };
+    uint card = cardOf(blk, f);
+    if (card == 0u) return (r.hasAlbedo != 0u ? r.albedo : palette[r.mat].albedoRough.rgb) * pow(SHADE[f], 2.2);
+    int a1 = (ax + 1) % 3, a2 = (ax + 2) % 3;
+    float3 lp = pw - float3(blk);
+    float fp = tHit * frame.params.w / max(abs(dot(dir, fn0)), 0.2);
+    return cardColour(card, clamp(lp[a1], 0.0, 0.9999), clamp(lp[a2], 0.0, 0.9999), fp);
 }
 
 // Straight ray (sun shadows): 1 if lit.
@@ -1029,6 +1053,25 @@ void farMain(uint3 id : SV_DispatchThreadID) {
                 const float SHADE[6] = { 0.5, 1.0, 0.8, 0.8, 0.6, 0.6 };
                 albedo = (frame.dims.z & FRAME_DEBUG_ALBEDO) != 0 ? cc : cc / SHADE[f];
                 carded = true;
+                // translucent water as the game blends it (the offline vanilla look, where the cards are): the card at
+                // its alpha over what the ray meets without the water (a second trace, water voxels skipped); the
+                // game draws no faces between water blocks, so what is behind is the first thing that is not water
+                float wa = cls == 2u && (frame.dims.z & (FRAME_DEBUG_ALBEDO | FRAME_GROUPS)) == (FRAME_DEBUG_ALBEDO | FRAME_GROUPS)
+                         ? cardAlpha(card, clamp(lp[a1], 0.0, 0.9999), clamp(lp[a2], 0.0, 0.9999), fp) : 1.0;
+                if (wa < 0.99) {
+                    TraceResult r2;
+                    r2.t = 0; r2.mat = 0; r2.axis = -1; r2.lod = 0; r2.steps = 0; r2.dither = res.dither;
+                    r2.albedo = float3(0, 0, 0); r2.hasAlbedo = 0u;
+                    gGroups = true;
+                    gSkipWater = true;
+                    float t2 = traceView(o, dir, tStart, frame.params.y, lodDither, r2);
+                    gSkipWater = false;
+                    gGroups = false;
+                    if (t2 >= 0.0) {  // (blended as the game's framebuffer does: on the sRGB values)
+                        const float3 g = float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2), G = float3(2.2, 2.2, 2.2);
+                        albedo = pow(lerp(pow(max(vanillaLook(o, dir, t2, r2), 0.0), g), pow(max(cc, 0.0), g), wa), G);
+                    }
+                }
             }
         }
         // ambient occlusion: solid neighbours around the air voxel in front of the face (4 taps in the face plane)

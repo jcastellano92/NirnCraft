@@ -191,9 +191,11 @@ def camera(box, dist, yaw_deg=30.0, pitch_deg=25.0, size=256):
 def run(tool, args, out=None):
     cmd = [str(EXE / f"{tool}.exe")] + ([f"out={out}"] if out else []) + [f"{k}={v}" for k, v in args.items()]
     env = dict(os.environ)
-    # the far field drops real sections a few regions from the camera and the game's server sends them again on
-    # return; atlas_render has no server, so after a far rung every later frame was sky: keep them all
-    env["ATLAS_SECTION_KEEP"] = "320"  # regions of 256 blocks: past the 65 km rung
+    # the far field drops real sections a few regions from the camera, as in game: atlas_render sends them as the
+    # game's server does (its sections window around the camera, again on return; atlas_render server=1), and what is
+    # drawn from farther away comes from the coarse levels the core kept of them (docs/ATLAS-LOD.md, "Coarse levels
+    # from real blocks"). (It once kept every section for the whole run, ATLAS_SECTION_KEEP=320: no game does.)
+    env.pop("ATLAS_SECTION_KEEP", None)
     r = subprocess.run(cmd, capture_output=True, text=True, env=env, creationflags=0x00004000 if sys.platform == "win32" else 0)
     if r.returncode:
         raise RuntimeError(f"{tool} failed: {(r.stdout + r.stderr)[-400:]}")
