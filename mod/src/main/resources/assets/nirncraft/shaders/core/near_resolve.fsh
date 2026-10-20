@@ -52,25 +52,30 @@ float sunVisAt(vec3 p) {
 vec3 airBeams(vec3 dir, float dist) {
     vec3 L = normalize(KeyDir.xyz);
     if (KeyDir.w < 0.5 || L.y < 0.02 || ShadowMat[3][3] == 0.0) return vec3(0.0);
-    float len = min(dist, 72.0);
+    // the shadowing is probed over the same 72 blocks for every pixel (so a ray stopped by a tree and its neighbour that
+    // passes it agree on how much the air glows: per-ray weights drew an outline round every silhouette); the light is
+    // gathered only up to what the pixel sees
+    const float PROBE = 72.0;
+    float len = min(dist, PROBE);
     const int N = 24;
-    float dt = len / float(N);
+    float dt = PROBE / float(N);
     // interleaved gradient noise, shifted each frame
     float f = fract(SunDir.w * 7.31);
     float jit = fract(52.9829189 * fract(dot(gl_FragCoord.xy + f * 113.0, vec2(0.06711056, 0.00583715))));
-    float lit = 0.0, inside = 0.0;
+    float lit = 0.0, probeLit = 0.0, inside = 0.0;
     for (int k = 0; k < N; k++) {
         float t = (float(k) + jit) * dt;
         float v = sunVisAt(dir * t);
         if (v < 0.0) continue;  // past the shadow map: atlas's aerial haze has that air
-        lit += v;
+        probeLit += v;
         inside += 1.0;
+        if (t < len) lit += v;
     }
     if (inside < 0.5) return vec3(0.0);
     // the beams are the lit air among shadows: where nothing along the ray is shadowed the air's light is the haze atlas
     // already draws, so only a little of the uniform part stays (open views stay clear); a ray through a canopy, a
     // window or a cave's mouth keeps all of it, lit stretches between dark ones
-    float shadowed = 1.0 - lit / inside;
+    float shadowed = 1.0 - probeLit / inside;
     float keep = clamp(0.15 + shadowed * 3.0, 0.15, 1.0);
     float sigma = 0.004;  // the air's scattering a block (dust and moisture; the weather sets it later)
     float c = dot(dir, L);

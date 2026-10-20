@@ -225,13 +225,16 @@ void main() {
         // the frame does in the reflected direction (its parallax is nothing at that range); the sky where the frame
         // has none there (the frame's alpha: our resolve leaves the sky out)
         vec4 cd = vp * vec4(r * 4000.0, 1.0);
-        vec3 distant = skyShown;
+        // the sky a sheltered reflection shows is partly hidden (trees and banks over the water): vanilla's sky light
+        vec3 distant = skyShown * mix(0.55, 1.0, lm.y * lm.y);
         if (cd.w > 0.0) {
             vec2 ud = cd.xy / cd.w * 0.5 + 0.5;
-            if (all(greaterThan(ud, vec2(0.0))) && all(lessThan(ud, vec2(1.0)))) {
+            // off the screen's sides: the frame's edge column stands in (the shore and trees go on past it), not the sky
+            // (a bright unshadowed glow at the left and right edges); above its top the sky
+            ud.x = clamp(ud.x, 0.003, 0.997);
+            if (ud.y > 0.0 && ud.y < 1.0) {
                 vec4 f = texture(SceneColor, ud);
-                float edge = smoothstep(0.0, 0.06, min(min(ud.x, 1.0 - ud.x), min(ud.y, 1.0 - ud.y)));
-                distant = mix(skyShown, f.rgb / max(f.a, 1e-3), clamp(f.a, 0.0, 1.0) * edge);
+                distant = mix(distant, f.rgb / max(f.a, 1e-3), clamp(f.a, 0.0, 1.0) * smoothstep(1.0, 0.94, ud.y));
             }
         }
         vec3 mirrored = mix(distant, hit.rgb, hit.a);
