@@ -150,12 +150,15 @@ void main() {
             float ct = max(dot(t, -wb), 0.0);
             R = 0.02 + 0.98 * pow(1.0 - ct, 5.0);
             mat4 vp = ProjMat * ModelViewMat;
-            vec4 ct4 = vp * vec4(viewPos + t * 4.0, 1.0);
-            vec2 uvT = clamp(ct4.xy / ct4.w * 0.5 + 0.5, vec2(0.0), vec2(1.0));
+            vec4 ct4 = vp * vec4(t * 1000.0, 1.0);
+            vec2 uvT = clamp(ct4.xy / max(ct4.w, 1e-3) * 0.5 + 0.5, vec2(0.0), vec2(1.0));
             above = texture(SceneDepth, uvT).r > 0.0 ? texture(SceneColor, uvT).rgb
                                                        : atlasDisplay(atlasSkyColor(normalize(t), SunDir.xyz), Look.x, Look.y);
         }
-        rgb = atlasUnderwater(mix(above, atlasWaterLight(), R), dist);
+        // outside the window the surface mirrors the water under it (total internal reflection)
+        vec4 under = screenReflection(viewPos - wb * 0.05, reflect(v, wb));
+        vec3 mirrorBelow = mix(atlasWaterLightAt(atlasEyeDepth() + 4.0), under.rgb, under.a);
+        rgb = atlasUnderwater(mix(above, mirrorBelow, R), dist, v);
         fragColor = vec4(rgb, 1.0);
         return;
     }
@@ -170,12 +173,13 @@ void main() {
             vec2 fu = vec2(dot(world.xz, vec2(-n.z, n.x)), world.y);
             float streak = valueNoise(vec2(fu.x * 4.0, fu.y * 0.6 + SunDir.w * 3.5)) * 0.6
                          + valueNoise(vec2(fu.x * 9.0, fu.y * 1.5 + SunDir.w * 6.0)) * 0.4;
-            vec3 white = mix(vec3(0.55, 0.68, 0.75), vec3(1.0), smoothstep(0.35, 0.8, streak));
-            vec3 litW = atlasForwardRadianceShadowed(white * clamp(vertexColor.rgb * 1.3, 0.4, 1.0), n, lm,
-                                                     atlasShadow(viewPos, n));
+            // white water: aerated, nearly colourless (a breath of the water's tint in the streaks' shade)
+            vec3 tintW = mix(vec3(1.0), clamp(vertexColor.rgb * 1.5, 0.0, 1.0), 0.18);
+            vec3 white = mix(vec3(0.62, 0.70, 0.74), vec3(0.95), smoothstep(0.3, 0.75, streak)) * tintW;
+            vec3 litW = atlasForwardRadianceShadowed(white, n, lm, atlasShadow(viewPos, n));
             rgb = atlasDisplay(litW, Look.x, Look.y);
             float dist2 = length(viewPos);
-            rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist2)
+            rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist2, viewPos / max(dist2, 1e-3))
                 : mix(rgb, FogColor.rgb, linear_fog_value(dist2, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
             fragColor = vec4(rgb, mix(0.75, 0.95, smoothstep(0.3, 0.8, streak)));
             return;
@@ -232,8 +236,11 @@ void main() {
         vec3 mirrored = mix(distant, hit.rgb, hit.a);
         rgb = mix(seen, mirrored, fresnel);
         // the shore: where the water is a hand deep or less, a wet foamy edge drifting with the waves
-        float foam = (1.0 - smoothstep(0.05, 0.5, path)) * smoothstep(0.35, 0.75, valueNoise(world.xz * 3.0 + SunDir.w * 0.4));
-        foam += (1.0 - smoothstep(0.0, 0.12, path)) * 0.5;
+        // the shore: a thin broken lace of foam where the waves lap in and out over the shallows (the bed shows through
+        // the rest of it), never a band
+        float lap = 0.12 + 0.1 * sin(SunDir.w * 1.3 + dot(world.xz, vec2(0.7, 0.4)));
+        float edge = 1.0 - smoothstep(0.0, lap + 0.12, path);
+        float foam = edge * smoothstep(0.55, 0.85, valueNoise(world.xz * 4.0 + SunDir.w * 0.5)) * 0.55;
         // foam is white: lit by the sky's brightness, not its blue (tinted it read as purple squares)
         float skyLum = dot(SkyUp.rgb, vec3(0.2126, 0.7152, 0.0722));
         rgb = mix(rgb, atlasDisplay((vec3(skyLum) * 2.0 + KeyRad.rgb * max(KeyDir.y, 0.0) * lit) * 0.9, Look.x, Look.y),
@@ -243,7 +250,7 @@ void main() {
         rgb = atlasForwardLitAt(color.rgb, n, lm, viewPos);
     }
     float dist = length(viewPos);
-    rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist)
+    rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist, viewPos / max(dist, 1e-3))
         : mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
     fragColor = vec4(rgb, color.a);
 }

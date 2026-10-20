@@ -26,6 +26,13 @@ layout(std140) uniform NearInfo {
     vec4 KeyRad;
     vec4 SkyUp;
     vec4 Ground;
+    vec4 SunDir;      // w: time in seconds
+    vec4 WaterStill;
+    vec4 WaterFlow;
+    mat4 ShadowMat;
+    mat4 InvViewRot;  // view -> camera-relative world
+    vec4 CamPos;      // camera world position, x z modulo 6144
+    vec4 WaterTint;   // the biomes' water colour around the camera
 };
 #include <nirncraft:atlas_water.glsl>
 layout(location = 0) in vec2 texCoord;
@@ -47,6 +54,12 @@ vec3 octDecode(vec2 e) {
 // in a) stays per pixel, crisp shadow edges; the rest (the sky, traced with one dithered ray a pixel, which a TAA would
 // average over frames) is averaged over 5 x 5 neighbours on the same surface (normal and depth alike), so the shade
 // is smooth instead of a stippled pattern
+// the near light's sun visibility: a <= 1 as traced; a > 1: the sun reached the point through a - 1 blocks of water
+// (atlas_far.slang nearLightAt), its visibility the water's transmission, shaped by caustics here (full rate)
+float nlVis(float a) {
+    return a > 1.0 ? exp(-0.083 * (a - 1.0)) : a;
+}
+
 vec3 nearLightFiltered(vec2 uv, vec4 nl, vec3 n, float depth) {
     vec2 texel = 1.0 / vec2(textureSize(Sampler6, 0));
     vec2 gtexel = 1.0 / vec2(textureSize(Sampler3, 0));
@@ -65,17 +78,22 @@ vec3 nearLightFiltered(vec2 uv, vec4 nl, vec3 n, float depth) {
             float wz = exp(-abs(1.0 / d - z0) / (0.02 * z0));
             float w = wn * wz;
             if (dot(q.rgb, vec3(1.0)) < 1e-6) continue;  // a texel atlas did not light (sky, or past a silhouette)
-            vec3 skyQ = max(q.rgb - KeyRad.rgb * max(dot(nq, KeyDir.xyz), 0.0) * q.a, vec3(0.0));
+            float qv = nlVis(q.a);
+            vec3 skyQ = max(q.rgb - KeyRad.rgb * max(dot(nq, KeyDir.xyz), 0.0) * qv, vec3(0.0));
             sum += skyQ * w;
             wsum += w;
-            visSum += q.a * w;
+            visSum += qv * w;
             visW += w;
         }
     }
     // atlas lights at its own resolution: at a silhouette the nearest of its texels can be one it did not light (the
     // sky behind a crown): the sun's visibility then comes from the same surface's neighbours (dark fringes otherwise)
     bool centre = dot(nl.rgb, vec3(1.0)) >= 1e-6;
-    float vis = centre ? nl.a : (visW > 1e-4 ? visSum / visW : 1.0);
+    float vis = centre ? nlVis(nl.a) : (visW > 1e-4 ? visSum / visW : 1.0);
+    if (centre && nl.a > 1.0) {
+        vec3 pw = (InvViewRot * vec4(viewRay(uv, depth), 1.0)).xyz + vec3(CamPos.x, 0.0, CamPos.z);
+        vis *= atlasCausticFactor(pw, nl.a - 1.0);
+    }
     vec3 sunPart = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * vis;
     vec3 sky = wsum > 1e-4 ? sum / wsum : max(nl.rgb - sunPart, vec3(0.0));
     return sunPart + sky;
@@ -93,8 +111,8 @@ vec3 untracedRadiance(vec3 albedo, vec3 n, vec2 lm) {
 
 // the eye in water: whatever lies dist blocks away is seen through that much water (atlas_water.glsl); vanilla's
 // linear water fog left far things untouched
-vec3 environmentalFog(vec3 rgb, float dist) {
-    if (atlasEyeInWater()) return atlasUnderwater(rgb, dist);
+vec3 environmentalFog(vec3 rgb, float dist, vec3 dir) {
+    if (atlasEyeInWater()) return atlasUnderwater(rgb, dist, dir) + atlasWaterShafts(dir, dist);
     return mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
 }
 
@@ -138,20 +156,31 @@ void main() {
             float shade = max(a.x, max(a.y, a.z)) > 0.99 ? (n.y > 0.5 ? 1.0 : n.y < -0.5 ? 0.5 : a.z > 0.5 ? 0.8 : 0.6) : 1.0;
             rgb = albedo * shade * texture(Sampler2, clamp(levels * (15.0 / 16.0) + 0.5 / 16.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0))).rgb;
         }
-        fragColor = vec4(environmentalFog(rgb, dist), 1.0);
+        vec3 dirW = normalize((InvViewRot * vec4(viewRay(texCoord, nearDepth), 0.0)).xyz);
+        fragColor = vec4(environmentalFog(rgb, dist, dirW), 1.0);
         gl_FragDepth = nearDepth;
         return;
     }
     vec4 c = texture(Sampler4, texCoord);
     float d = texture(Sampler5, texCoord).r;
-    if (c.a <= 0.002 || d > 1e29) discard;  // the sky: what the sky pass drew stays
+    if (c.a <= 0.002 || d > 1e29) {
+        if (atlasEyeInWater()) {
+            // nothing along this ray under water: the water itself as far as it goes (the sky pass's sky is not seen)
+            vec3 dirW = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
+            fragColor = vec4(atlasUnderwater(vec3(0.0), 1e4, dirW) + atlasWaterShafts(dirW, 60.0), 1.0);
+            gl_FragDepth = 0.0;
+            return;
+        }
+        discard;  // the sky: what the sky pass drew stays
+    }
     vec3 straight = max(c.rgb / max(c.a, 1e-4), vec3(0.0));
     // own: the same display as the near pixels; stage A: atlas's harness tonemapper (c / (1 + c), gamma 2.2)
     vec3 ldr = own ? atlasDisplay(straight, Look.x, Look.y) : pow(straight / (1.0 + straight), vec3(1.0 / 2.2));
     // the near field's environmental fog as it stands at the edge of the loaded terrain (AtlasFallback's rule)
     float edge = max(FogRenderDistanceEnd, 16.0);
     float f = clamp(linear_fog_value(min(d, edge), FogEnvironmentalStart, FogEnvironmentalEnd), 0.0, 1.0) * FogColor.a;
-    vec3 fogged = atlasEyeInWater() ? atlasUnderwater(ldr, d) : mix(ldr, FogColor.rgb, f);
+    vec3 dirF = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
+    vec3 fogged = atlasEyeInWater() ? atlasUnderwater(ldr, d, dirF) + atlasWaterShafts(dirF, d) : mix(ldr, FogColor.rgb, f);
     fragColor = vec4(fogged * c.a, c.a);
     // its depth: the point at that distance along this pixel's ray (beyond the projection's far plane: 0)
     vec4 clip = ProjMat * vec4(normalize(viewRay(texCoord, 0.5)) * d, 1.0);

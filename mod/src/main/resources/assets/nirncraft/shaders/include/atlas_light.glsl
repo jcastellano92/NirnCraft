@@ -16,6 +16,9 @@ layout(std140) uniform NearInfo {
     vec4 WaterStill;  // the block atlas's water sprites (u0, v0, u1, v1): water fragments are found by their texels
     vec4 WaterFlow;
     mat4 ShadowMat;   // camera-relative world -> the key light's shadow map (reverse-Z depth: nearer the light = larger)
+    mat4 InvViewRot;  // view space -> camera-relative world
+    vec4 CamPos;      // the camera's world position, x and z modulo 6144 (world-anchored patterns)
+    vec4 WaterTint;   // the biomes' water colour around the camera, eased (atlas_water.glsl)
 };
 uniform sampler2D ShadowMap;  // the near terrain seen from the key light (AtlasNearPass's shadow pass)
 

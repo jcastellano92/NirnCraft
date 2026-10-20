@@ -1,28 +1,113 @@
 #ifndef NIRNCRAFT_ATLAS_WATER_GLSL
 #define NIRNCRAFT_ATLAS_WATER_GLSL
 // Water as a medium, one definition for everything seen from inside it (the near pass's resolve, the water surface from
-// below, entities, particles): absorbed per channel along the path (red first, then green), filled with the water's own
-// light, the sky and the sun scattered in it (atlas_far.slang's waterBody and near_forward's surface use the same
-// constants). Needs NearInfo (Look, KeyDir, KeyRad, SkyUp) and atlas_look.glsl declared before it. KeyRad.w: the eye
-// is in water.
+// below, entities, particles) and for the light under it (caustics, shafts). Needs NearInfo (Look, KeyDir, KeyRad, SkyUp,
+// SunDir, CamPos) and minecraft:fog.glsl declared before it.
+//  KeyRad.w: 0 the eye is in air, else 1 + its depth under the water's surface (blocks)
+//  WaterTint.rgb: the biomes' water colour around the camera (averaged over ~150 blocks and eased over seconds, so a
+//  biome border is a long blend): the water's character, its hue and how murky it is
+//  CamPos.xyz: the camera's world position modulo 6144 (world-anchored patterns without float precision loss)
+// More water between the eye and a thing: thicker, filled with the water's own lit colour (fog); deeper under the
+// surface: darker, the light that gets down there (drop-offs go dark, the shallows stay bright).
 
-const vec3 ATLAS_WATER_ABSORB = vec3(0.30, 0.075, 0.045);
-const vec3 ATLAS_WATER_SCATTER = vec3(0.05, 0.11, 0.13);
+const vec3 ATLAS_WATER_ABSORB = vec3(0.30, 0.075, 0.045);  // clear water, per block (as atlas_far.slang's)
 
 bool atlasEyeInWater() {
     return KeyRad.w > 0.5;
 }
 
-// the water's own light as displayed: what fills a view through water as it grows long
-vec3 atlasWaterLight() {
-    vec3 inLight = (SkyUp.rgb * 3.0 + KeyRad.rgb * max(KeyDir.y, 0.0) * 0.5) * ATLAS_WATER_SCATTER;
-    return atlasDisplay(inLight, Look.x, Look.y);
+float atlasEyeDepth() {
+    return max(KeyRad.w - 1.0, 0.0);
 }
 
-// displayed colour rgb seen through dist blocks of water
-vec3 atlasUnderwater(vec3 rgb, float dist) {
-    vec3 T = exp(-(ATLAS_WATER_ABSORB + 0.04) * dist);
-    return rgb * T + atlasWaterLight() * (vec3(1.0) - T);
+// how murky the water is (1 a clear mountain lake .. 5 a swamp): a clear water colour is a saturated blue, murky
+// water a dull green, brown or grey
+float atlasWaterMurk() {
+    vec3 t = WaterTint.rgb;
+    float mx = max(t.r, max(t.g, t.b)), mn = min(t.r, min(t.g, t.b));
+    float sat = mx > 1e-3 ? (mx - mn) / mx : 0.0;
+    float greenish = clamp((t.g - t.b) * 3.0 + 0.3, 0.0, 1.0);
+    return 1.0 + 4.0 * clamp((1.0 - sat) * 1.3 + greenish * 0.6 - 0.35, 0.0, 1.0);
+}
+
+// what a block of this water scatters back per channel: clear water's blue-green, turned towards the biome's hue
+vec3 atlasWaterScatter() {
+    vec3 t = WaterTint.rgb / max(max(WaterTint.r, max(WaterTint.g, WaterTint.b)), 1e-3);
+    return vec3(0.05, 0.11, 0.13) * mix(vec3(1.0), t * 1.3, 0.55);
+}
+
+vec3 atlasWaterExtinction() {
+    return (ATLAS_WATER_ABSORB + 0.04) * atlasWaterMurk();
+}
+
+// the water's own light at depth d under the surface, as displayed: the sky and the sun let in at the surface, scattered
+// in the water's colour, dimmed by the light lost on the way down (drop-offs go dark; the shallows stay bright)
+vec3 atlasWaterLightAt(float d) {
+    vec3 L = normalize(KeyDir.xyz);
+    vec3 inLight = (SkyUp.rgb * 3.0 + KeyRad.rgb * max(L.y, 0.0) * 0.6) * atlasWaterScatter();
+    return atlasDisplay(inLight * exp(-ATLAS_WATER_ABSORB * atlasWaterMurk() * max(d, 0.0) * 0.6), Look.x, Look.y);
+}
+
+// displayed colour rgb seen from the eye through dist blocks of water along unit camera-relative direction dir
+vec3 atlasUnderwater(vec3 rgb, float dist, vec3 dir) {
+    vec3 T = exp(-atlasWaterExtinction() * dist);
+    float mid = atlasEyeDepth() - dir.y * min(dist, 48.0) * 0.5;
+    return rgb * T + atlasWaterLightAt(mid) * (vec3(1.0) - T);
+}
+
+// water caustics (a tileable pattern, after Dave Hoskins' "Tileable Water Caustic"): bright lines where the waves
+// focus the sun, 0..~1, at world xz (blocks), time t (seconds)
+float atlasCaustic(vec2 xz, float t) {
+    const float TAU = 6.28318530718;
+    vec2 p = mod(xz / 7.0 * TAU, TAU) - 250.0;
+    vec2 i = p;
+    float c = 1.0;
+    const float inten = 0.005;
+    for (int n = 0; n < 4; n++) {
+        float tt = t * 0.45 * (1.0 - (3.5 / float(n + 1)));
+        i = p + vec2(cos(tt - i.x) + sin(tt + i.y), sin(tt - i.y) + cos(tt + i.x));
+        c += 1.0 / length(vec2(p.x / (sin(i.x + tt) / inten), p.y / (cos(i.y + tt) / inten)));
+    }
+    c /= 4.0;
+    c = 1.17 - pow(c, 1.4);
+    return clamp(pow(abs(c), 8.0), 0.0, 1.5);
+}
+
+// how the sun reaching a point under chord blocks of water is shaped by the waves over it: focused lines near the
+// surface, evening out deeper (mean about 1)
+float atlasCausticFactor(vec3 pWorld, float chord) {
+    vec3 L = normalize(KeyDir.xyz);
+    vec2 s = (pWorld + L * chord).xz;  // where the sun ray left the water
+    float c = atlasCaustic(s, SunDir.w);
+    return mix(1.0, 0.25 + 4.0 * c, exp(-chord / 16.0));
+}
+
+// light shafts: the sun scattered towards the eye inside the water, shaped by the waves overhead (the caustic pattern
+// seen edge-on), lost with depth; additive, displayed. dir unit camera-relative, dist blocks along it
+vec3 atlasWaterShafts(vec3 dir, float dist) {
+    vec3 L = normalize(KeyDir.xyz);
+    if (L.y <= 0.05) return vec3(0.0);
+    float len = min(dist, 40.0);
+    const int N = 10;
+    float dt = len / float(N);
+    float jitter = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+    vec3 ext = atlasWaterExtinction();
+    vec3 sum = vec3(0.0);
+    float eye = atlasEyeDepth();
+    for (int k = 0; k < N; k++) {
+        float t = (float(k) + jitter) * dt;
+        vec3 x = dir * t;
+        float d = eye - x.y;  // depth under the surface there
+        if (d < 0.0) continue;
+        float up = d / L.y;   // the sun's path down to it
+        vec2 s = CamPos.xz + x.xz + L.xz * up;
+        float beam = smoothstep(0.15, 0.9, atlasCaustic(s * 0.35, SunDir.w * 0.5) * 2.0);
+        sum += exp(-ext * (up + t)) * beam;
+    }
+    float g = 0.6, cosT = dot(dir, L);
+    float phase = (1.0 - g * g) / pow(1.0 + g * g - 2.0 * g * cosT, 1.5) / 12.566;
+    vec3 inLight = KeyRad.rgb * sum * dt * phase * 0.35 * atlasWaterMurk();
+    return atlasDisplay(inLight * atlasWaterScatter() * 8.0, Look.x, Look.y);
 }
 
 #endif

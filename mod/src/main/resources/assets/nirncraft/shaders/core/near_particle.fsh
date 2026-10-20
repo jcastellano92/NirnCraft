@@ -38,7 +38,7 @@ void main() {
 #else
     vec4 fogColor = FogColor;
     if (atlasEyeInWater()) {  // seen through the water between (atlas_water.glsl), not vanilla's linear fog
-        fragColor = vec4(atlasUnderwater(color.rgb, sphericalVertexDistance), color.a);
+        fragColor = vec4(atlasUnderwater(color.rgb, sphericalVertexDistance, vec3(0.0)), color.a);
         return;
     }
 #endif

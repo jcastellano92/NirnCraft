@@ -98,6 +98,7 @@ static bool gSecondary = false;
 static float gTrans = 1.0;
 static float gThrough = 0.0;
 static float gSecT = 0.0;
+static float gWaterChord = 0.0;  // blocks of water the last secondary ray passed through
 
 bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps, inout TraceResult res) {
     float3 inv = float3(abs(rd.x) > 1e-12 ? 1.0 / rd.x : 1e30, abs(rd.y) > 1e-12 ? 1.0 / rd.y : 1e30,
@@ -217,6 +218,7 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
                     // E[exp(-0.45 x)] over where in this stretch the first opaque texel lies, weighted by what got here
                     gThrough += gTrans * exp(-0.45 * x0) * (sigma / (sigma + 0.45)) * (1.0 - exp(-(sigma + 0.45) * chord));
                     gTrans *= exp(-sigma * chord);
+                    if (hitCls == 2u) gWaterChord += chord;
                     passWater = gTrans > 0.004;
                     if (!passWater) gTrans = 0.0;
                 }
@@ -657,6 +659,7 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
     gTrans = 1.0;
     gThrough = 0.0;
     gStopFoliage = false;
+    gWaterChord = 0.0;
     float t = 0;
     float vis = 1.0;
     for (int seg = 0; seg < 48; seg++) {
@@ -1367,6 +1370,8 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
         else if (cheapLight) sunVis = traceShadow(p + N * 1.01 + L * 0.5, L, 0);
         else sunVis = traceSecondary(so + L * 0.05, L, 2048.0, 0);
     }
+    // the sun reached it through water alone: a = 1 + the water's chord (the resolve draws its caustics at full rate)
+    float waterChord = sunVis > 0.0 && gWaterChord > 0.05 && sunVis >= 0.98 * exp(-WATER_SIGMA * gWaterChord) ? gWaterChord : 0.0;
     if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, L);
     float3 ambient;
     gNearRoofed = false;
@@ -1387,7 +1392,7 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     float3 irr = shadeSurfaceAmb(float3(1, 1, 1), white, N, dir, sun, sunVis, 0u, ambient, float3(0, 0, 0));
     gSecCone = 0.0;
     if ((ablate & 8u) == 0u) irr += farLightsOn(px, p, so, N, 0, sun, false, cheapLight);
-    return float4(irr, sunVis);
+    return float4(irr, waterChord > 0.0 ? 1.0 + waterChord : sunVis);
 }
 
 // ---- the near light at half resolution (FRAME_NEAR_SPLIT) -------------------------------------------------------
