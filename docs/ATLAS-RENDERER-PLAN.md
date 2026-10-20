@@ -142,6 +142,10 @@ The full checklist from R1, every item checked live; the owner flies it.
   light (it took 81 % in a tunnel's first 48 blocks); chunks vanilla re-meshes are read again, so a shaft cut after
   load lights the floor within 5 s. Arrival frames: our light untraced (mode 2) while atlas streams a new place (they
   had switched to vanilla's look); shadows still come and go during those seconds (open).
+  R5 far edits live: a 70-block diamond column built 500 m away (force-loaded chunks) showed in the far field within
+  about 15 s (the server's journal pushed 35 tile updates; atlas-edits-why), drawn from the column summaries (sides in
+  the column's under material) until the section re-record reaches it. Far plains around Whiterun turn orange-brown
+  once the exact tiles arrive (agent investigating).
   Still open: terrain in water reflections, shadows on forward-lit things, eye exposure from the frame, the aurora over
   our night sky, OIT, caves (agent), far life (R5), scale (R6).
 - **R2 stage B live (2026-10-20, 2002d7db, 70f3dae9).** Falkreath, live A/B against vanilla: one light near and far
