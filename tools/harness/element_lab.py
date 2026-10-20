@@ -323,6 +323,13 @@ def renderer_args(renderer, el, tmp):
         return "atlas_render", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv",
                                 "box": truth_inputs(el)["box"], "surface": bake_cards(el, tmp), "shade": "mc",
                                 "spp": 16, "radius": 0, "groups": 1 if renderer == "far-groups" else 0, **sky}
+    if renderer in ("far-game", "far-game-lit"):  # the far field as the game draws it without a shader pack: its
+        # groups, its own materials (no cards: the game sends none), FRAME_VANILLA_LIGHT (AtlasClient); far-game-lit:
+        # its own light, shadows and haze as before (the stark line's A/B); scored against Minecraft itself, so no
+        # clouds (the reference has none; the far fly-in camera passes above the deck)
+        return "atlas_render", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv",
+                                "box": truth_inputs(el)["box"], "shade": "game" if renderer == "far-game" else "lit",
+                                "flags": "shadows,atmos,sky,actors", "spp": 16, "radius": 0, "groups": 1}
     if renderer == "far-lit":  # the far field's own light (atlas_core: its sun / moon and shadows, sky ambient, AO, far
         # lights) on the faces' albedo (cards), through the reference's tonemap: where its lighting falls short
         if not realistic():

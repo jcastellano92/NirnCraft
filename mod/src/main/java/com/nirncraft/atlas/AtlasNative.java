@@ -40,6 +40,7 @@ public final class AtlasNative {
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_FLAT_NORMALS = 0x40, FRAME_CLOUDS_QUARTER = 0x80,
             FRAME_DEBUG_LOD = 0x100, FRAME_DEBUG_WEATHER = 0x200, FRAME_LOD_DITHER = 0x1000,
             FRAME_FILL_NEAR = 0x2000,  // (abi 0.12) the far field fills what the near field has not loaded yet
+            FRAME_VANILLA_LIGHT = 0x10000,  // (abi 0.14, optional) Minecraft's own light, no pack (an older core ignores it)
             FRAME_GROUPS = 0x4000;     // (abi 0.14) primary rays trace the content-shaped groups (an older core ignores it)
     /** (abi 0.14) AtlasMaterialShape.flags: texel alpha is coverage (cut-out leaves). */
     public static final int SHAPE_CUTOUT = 0x1;

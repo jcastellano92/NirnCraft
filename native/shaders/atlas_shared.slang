@@ -18,6 +18,7 @@ static const float FAR_AMBIENT_OCCLUSION = 0.78;
 static const uint FRAME_FILL_NEAR = 0x2000u;   // (abi 0.12) fill pixels the near field left empty, from the camera
 static const uint FRAME_LOD_DITHER = 0x1000u;  // dithered LOD transitions (per-pixel segment phase)
 static const uint FRAME_GROUPS = 0x4000u;      // (abi 0.14) primary rays trace the content-shaped groups
+static const uint FRAME_VANILLA_LIGHT = 0x10000u;  // (abi 0.14, optional) Minecraft's own light: no pack, the near field vanilla
 static const uint FRAME_LIGHT_LOW = 0x8000u;   // (abi 0.15) cheap far light: constant sky occlusion, unshadowed block light
 // the shader pack's ambient floor (deferred.fsh: albedo x (sky + floor)), under every far land surface as under the near
 static const float3 FAR_AMBIENT_FLOOR = float3(0.012, 0.012, 0.016);

@@ -328,6 +328,13 @@ public final class AtlasClient {
             if (com.nirncraft.atmosphere.client.WeatherFieldTexture.isOff())
                 frame.flags &= ~(AtlasNative.FRAME_CLOUDS | AtlasNative.FRAME_CLOUDS_QUARTER);
             if (AtlasTruthView.noFog) frame.flags &= ~AtlasNative.FRAME_ATMOS;  // ground-truth views: no aerial haze
+            // no shader pack: the near field is vanilla's, so the far field lights as vanilla does (face shade and the
+            // lightmap's sky brightness), without the sun shadows and haze it drew before: a stark line where vanilla's
+            // chunks met it (the owner, flying the build); with the pack both sides take the pack's light
+            if (!pack) {
+                frame.flags |= AtlasNative.FRAME_VANILLA_LIGHT;
+                frame.flags &= ~(AtlasNative.FRAME_SHADOWS | AtlasNative.FRAME_ATMOS);
+            }
             // in the open, chunks still loading show the far field instead of a hole (never underground: the far
             // field has no caves, it would cover a cave mouth)
             if (mc.player != null && mc.level != null

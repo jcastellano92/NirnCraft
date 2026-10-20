@@ -441,6 +441,9 @@ int main(int argc, char** argv) {
         f.flags = flagsOf(str(a, "flags", mcShade ? "flatnormals" : "shadows,atmos,clouds,sky,actors"));
         if (mcShade) f.flags |= ATLAS_FRAME_DEBUG_ALBEDO | ATLAS_FRAME_FLAT_NORMALS;
         if (groups) f.flags |= ATLAS_FRAME_GROUPS;
+        // shade=game: the far field as the game draws it without a shader pack (FRAME_VANILLA_LIGHT, as AtlasClient
+        // asks): the core's own vanilla light, not the tool's albedo composite (shade=mc)
+        if (str(a, "shade", "") == "game") f.flags = (f.flags | ATLAS_FRAME_VANILLA_LIGHT) & ~(ATLAS_FRAME_SHADOWS | ATLAS_FRAME_ATMOS);
 
         color.assign(size_t(w) * h, 0);
         normal.assign(size_t(w) * h, 0);

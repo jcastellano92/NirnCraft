@@ -689,6 +689,17 @@ float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, out flo
     return max(lerp(ground, skyUp, faceN.y * 0.5 + 0.5) - sum / float(rays), float3(0, 0, 0));
 }
 
+// Minecraft's own look without a shader pack (FRAME_VANILLA_LIGHT: the near field is vanilla, the far field must read
+// the same at the hand-off): the texel times the fixed face shade (down 0.5, up 1, north / south 0.8, west / east 0.6)
+// times the lightmap at full sky light for the time of day (1 by day; at night the sky factor 0.24 under the moon's
+// blue, through the brightness option's 0.5 gamma: about 0.28, 0.28, 0.5, as atlas_truth's lightmap gives); emitters
+// stay at full brightness. No sun shadows, sky visibility, light through leaves or haze: vanilla has none of them.
+float3 vanillaLit(float3 albedo, float3 faceN, uint cls, float3 sun) {
+    float shade = faceN.y > 0.5 ? 1.0 : faceN.y < -0.5 ? 0.5 : abs(faceN.z) > 0.5 ? 0.8 : 0.6;
+    float3 sky = lerp(float3(0.28, 0.28, 0.5), float3(1.0, 1.0, 1.0), smoothstep(-0.2, 0.15, sun.y));
+    return cls == 3u ? albedo : albedo * shade * sky;
+}
+
 // Far water continues the shader pack's waves (shaderpack lib/waves.glsl waveField at its default 12 waves, open
 // water): the same wind-aligned spread table, spectrum, wave-group envelope, drag and footprint fade, so the swell runs
 // on across the near/far hand-off until it shrinks under a few pixels. The wind (heading, windiness) comes from the
@@ -1247,7 +1258,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         uint ablate = asuint(frame.jitter.w);  // (ATLAS_ABLATE, measurements)
         // cheap far light (FRAME_LIGHT_LOW, a quality setting; ATLAS_ABLATE 256 measures it): the constant sky occlusion,
         // the 4-tap AO and the binary sun shadow of before, unshadowed block light
-        bool cheapLight = (frame.dims.z & FRAME_LIGHT_LOW) != 0u || (ablate & 256u) != 0u;
+        bool vanillaLight = (frame.dims.z & FRAME_VANILLA_LIGHT) != 0u;
+        bool cheapLight = vanillaLight || (frame.dims.z & FRAME_LIGHT_LOW) != 0u || (ablate & 256u) != 0u;
         // (0.55: smoothed slopes caught more light than the stepped blocks they stand for, the far field read brighter)
         // The groups' hits are real faces at every distance (a slope is a staircase of tops and sides, and so are its
         // blocks): their true face normals light them as the blocks are lit (smoothing brightened slopes the blocks do
@@ -1403,8 +1415,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         if (cls == 3u && (res.hasAlbedo != 0u || carded) && !cheapLight)
             m.emisClass.x = max(m.emisClass.x, 2.0 * smoothstep(0.35, 0.8, dot(albedo, float3(0.2126, 0.7152, 0.0722))));
         color = shadeSurfaceAmb(albedo, m, n, dir, sun, sunVis, cls, ambient, reflection);
+        if (vanillaLight && cls != 2u) color = vanillaLit(albedo, faceN, cls, sun);
         // light through leaves (the pack's FOLIAGE_SSS, deferred.fsh): strongest looking towards the light through them
-        if (fol && !cheapLight && (ablate & 1024u) == 0u && (frame.dims.z & FRAME_SHADOWS) != 0) {
+        if (fol && !cheapLight && !vanillaLight && (ablate & 1024u) == 0u && (frame.dims.z & FRAME_SHADOWS) != 0) {
             float3 L = keyLightDir(sun);
             float back = pow(max(dot(dir, L), 0.0), 4.0) * 0.8 + 0.25;
             color += albedo * keyLightRadiance(sun) * (through * 0.6 * back * 0.5);
@@ -1419,7 +1432,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             color = lerp(color, white, foam);
         }
         depth = tHit;
-        color = applyAerial(color, dir, sun, tHit, frame);
+        if (!vanillaLight) color = applyAerial(color, dir, sun, tHit, frame);
         // (ATLAS_ABLATE 4096, measurements: the secondary rays' origin solid in the voxel path, sun and sky visibility)
         // (ATLAS_ABLATE 4096, measurements: one grey value past the shading, readable through any tonemap: the sky
         // visibility; with 2048 whether the secondary rays' origin is in a voxel-path solid)
