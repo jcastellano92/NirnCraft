@@ -23,7 +23,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SHADERS = ROOT / "mod/src/main/resources/assets/nirncraft/shaders"
 WORK = ROOT / ".work/mcshaders"
-GLSLANG = ROOT.parent / "toolchains/VulkanSDK/1.4.357.0/Bin/glslangValidator.exe"
+# the toolchains folder beside the checkout (a worktree under .claude/worktrees: beside the main checkout, further up)
+GLSLANG = next((p / "toolchains/VulkanSDK/1.4.357.0/Bin/glslangValidator.exe" for p in ROOT.parents
+                if (p / "toolchains/VulkanSDK/1.4.357.0/Bin/glslangValidator.exe").exists()),
+               ROOT.parent / "toolchains/VulkanSDK/1.4.357.0/Bin/glslangValidator.exe")
 CLIENT_JAR = Path.home() / "AppData/Roaming/PrismLauncher/libraries/com/mojang/minecraft/26.3/minecraft-26.3-client.jar"
 INCLUDE = re.compile(r'^\s*#include\s*<([a-z0-9_]+):([^>]+)>', re.M)
 VARIANTS = [{}, {"ALPHA_CUTOUT": "0.5"}, {"MULTIDRAW_TERRAIN": "1"}]
