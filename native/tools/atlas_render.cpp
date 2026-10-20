@@ -24,6 +24,12 @@
 // lighting=realistic draws it (the element tier's far-lit). lights=1: the export's emitters (light 8 and up, inside
 // box=) as far lights, as the game registers a real chunk's lights (AtlasEditsClient.lights: fires, intensity
 // level / 15).
+//
+// The export's sections reach the core as the game's server sends them (server=1, the default; AtlasSections.push):
+// those of the 256-block tiles within RADIUS_TILES (4) of the camera's tile, each once, sent again after its tile has
+// left that window and come back; the core keeps them as it does in game (World::sectionKeep: windowRadius + 3 regions)
+// and draws what it dropped from its coarse levels of real content. server=0 uploads them all at once and keeps them
+// however far the camera goes (ATLAS_SECTION_KEEP=64: the old element tier, which no game reproduces).
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -175,8 +181,9 @@ int main(int argc, char** argv) {
     }
     uint32_t skyMc = uint32_t(std::strtoul(str(a, "sky", "9CC4EC").c_str(), nullptr, 16));
 
-    // one element: its sections stay however far the camera goes (the world drops sections ~1.2 km out)
-    if (boxed && !std::getenv("ATLAS_SECTION_KEEP")) {
+    bool server = num(a, "server", 1) > 0;
+    // server=0: one element's sections stay however far the camera goes (the world drops sections ~1.2 km out)
+    if (boxed && !server && !std::getenv("ATLAS_SECTION_KEEP")) {
 #ifdef _WIN32
         _putenv_s("ATLAS_SECTION_KEEP", "64");
 #else
@@ -244,7 +251,7 @@ int main(int argc, char** argv) {
                  water = exportdata::jsonColour(side, "water", 0x3F76E4);
         std::string why;
         if (!exportdata::upload(ctx, lib, secs, str(a, "keep", "far") == "all", grass, foliage, water, 64, ex, why,
-                                boxed ? box : nullptr, num(a, "cutout", 1) > 0)) {
+                                boxed ? box : nullptr, num(a, "cutout", 1) > 0, server)) {
             std::fprintf(stderr, "export: %s\n", why.c_str());
             return 2;
         }
@@ -327,6 +334,28 @@ int main(int argc, char** argv) {
         cardCount = cards.size();
         std::fprintf(stderr, "atlas_render: %zu surface cards\n", cardCount);
     }
+    // the server's sections window around a camera (AtlasSections.push / outside): each section of a tile in the window
+    // once; a tile that left it is forgotten, so it comes again on return
+    auto serverWindow = [&](double cxw, double czw) -> bool {
+        auto fd = [](int v, int d) { return v >= 0 ? v / d : -((-v + d - 1) / d); };
+        int ptx = fd(int(std::floor(cxw)), 256), ptz = fd(int(std::floor(czw)), 256);
+        for (exportdata::Held& hs : ex.held) {
+            int tx = fd(hs.cx * 16, 256), tz = fd(hs.cz * 16, 256);
+            bool inside = std::abs(tx - ptx) <= 4 && std::abs(tz - ptz) <= 4;
+            if (!inside) {
+                hs.sent = false;
+                continue;
+            }
+            if (hs.sent) continue;
+            if (atlas_upload_section(ctx, hs.cx, hs.sy, hs.cz, hs.mats.data()) != ATLAS_OK) {
+                std::fprintf(stderr, "section: %s\n", atlas_last_error(ctx));
+                return false;
+            }
+            hs.sent = true;
+        }
+        return true;
+    };
+    if (!serverWindow(x, z)) return 2;
     // stream=N budget=B: a loading simulation (docs/ATLAS-STREAMING.md): no build up front; N frames, each after one
     // update within B ms (B 0: everything at once, as the game asks today), each written as <out>_sNN.png
     int streamFrames = int(num(a, "stream", 0));
@@ -415,6 +444,7 @@ int main(int argc, char** argv) {
                          uint32_t w, uint32_t h) -> int {
         double c[3] = {x, y, z};
         if (boxed) emptyTiles(x, z);
+        if (!serverWindow(x, z)) return 2;
         if (atlas_update(ctx, c, updateBudget) != ATLAS_OK) {  // the window follows the camera (nothing to do when it stays)
             std::fprintf(stderr, "update: %s\n", atlas_last_error(ctx));
             return 3;
@@ -550,9 +580,11 @@ int main(int argc, char** argv) {
                     for (int r = 0; r < 4; r++) q[r] = inv[r] * nx + inv[4 + r] * ny + inv[8 + r] * 0.5f + inv[12 + r];
                     float l = std::sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2]);
                     double hx = x + q[0] / l * d, hy = y + q[1] / l * d, hz = z + q[2] / l * d;
-                    bool in = boxed ? hx >= box[0] - 0.5 && hx <= box[3] + 1.5 && hy >= box[1] - 0.5 && hy <= box[4] + 1.5 &&
-                                          hz >= box[2] - 0.5 && hz <= box[5] + 1.5
-                                    : ex.inExport(hx, hz);
+                    // boxed: the world holds nothing but the element (empty tiles, its sections), so every hit is it
+                    // (a coarse level's micro-voxel of 8 or 16 blocks reaches past the box: its hits are the element's
+                    // coverage at that level, counted as such, not dropped as outside)
+                    bool in = boxed || ex.inExport(hx, hz);
+                    (void)hy;
                     if (in) share[i] += 1.0 / spp, minDepth[i] = std::min(minDepth[i], d);
                 }
         }
@@ -571,6 +603,14 @@ int main(int argc, char** argv) {
         median = times.empty() ? 0 : times[times.size() / 2];
         atlas::writePng(out, color.data(), w, h);
         base = out.size() > 4 ? out.substr(0, out.size() - 4) : out;
+        if (num(a, "classpng", 0) > 0) {  // (debugging) the last sample's surface class per pixel: 6 (white) a surface card
+            std::vector<uint32_t> cl(size_t(w) * h);
+            for (size_t i = 0; i < cl.size(); i++) {
+                uint32_t c = (normal[i] >> 16) & 255, v = depth[i] > 1e29f ? 0 : c == 6 ? 255 : 40 + 20 * std::min(c, 6u);
+                cl[i] = 0xFF000000u | v << 16 | v << 8 | v;
+            }
+            atlas::writePng(base + "_class.png", cl.data(), w, h);
+        }
         shown.assign(size_t(w) * h, 0);  // where this frame shows the export (its mask: most samples)
         if (haveExport) {
             // where the frame shows exported content (the share of its samples), and how far (atlas_truth's encodings)
@@ -607,7 +647,11 @@ int main(int argc, char** argv) {
             if (rc) return rc;
             std::string oj = op;
             for (char& ch2 : oj) ch2 = ch2 == '\\' ? '/' : ch2;
-            std::printf("{\"frame\":%d,\"out\":\"%s\",\"frameMs\":%.2f}\n", n++, oj.c_str(), best);
+            // with the coarse levels' state after it (what the core kept of real content, cubes per level)
+            std::string info = atlas_info(ctx), coarse;
+            auto cs = info.find("\"coarse\":{");
+            if (cs != std::string::npos) coarse = "," + info.substr(cs, info.find('}', cs) - cs + 1);
+            std::printf("{\"frame\":%d,\"out\":\"%s\",\"frameMs\":%.2f%s}\n", n++, oj.c_str(), best, coarse.c_str());
         }
         std::fclose(cf);
         std::printf("{\"backend\":\"%s\",\"frames\":%d,\"groupsOn\":%s,\"groupsBuildMs\":%.1f}\n", backendName.c_str(), n,
@@ -763,6 +807,8 @@ int main(int argc, char** argv) {
         auto g = info.find("\"groups\":{");
         for (char& c : outJson) c = c == '\\' ? '/' : c;  // a JSON string
         if (g != std::string::npos) extra += "," + info.substr(g, info.find('}', g) - g + 1);
+        auto cs = info.find("\"coarse\":{");  // the coarse levels of real content (memory, cubes per level)
+        if (cs != std::string::npos) extra += "," + info.substr(cs, info.find('}', cs) - cs + 1);
         char buf[512];
         if (haveExport) {
             std::snprintf(buf, sizeof buf, ",\"export\":{\"sections\":%zu,\"materials\":%zu,\"shaped\":%zu,\"loadMs\":%.0f}", ex.sections,

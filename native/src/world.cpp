@@ -2,6 +2,7 @@
 #include "parallel.hpp"
 
 #include <algorithm>
+#include <bit>
 #include <atomic>
 #include <chrono>
 #include <climits>
@@ -10,6 +11,7 @@
 #include <cstdlib>
 #include <unordered_set>
 #include <cstring>
+#include <map>
 #include <thread>
 
 namespace atlas {
@@ -128,7 +130,253 @@ private:
     int bx_, by_, bz_;
 };
 
+// Real blocks at a coarse level (docs/ATLAS-LOD.md, "Coarse levels from real blocks"): each micro-voxel of a level-lod
+// voxel (2^lod / 4 blocks a side) that its blocks only partly fill keeps their content a quarter finer, its 4 x 4 x 4
+// sub-voxels (groups.hpp SubVoxels; GroupInput::faces), each there by its own coverage of what its blocks hold (a
+// shaped block by its shape, cut-out leaves by their texels' alpha), hashed in world space; a ray meets the micro-voxel
+// where it meets one of them. So a crown's edge, a trunk, a roof, the top of a slope keep their outline as they coarsen
+// (one coverage value a micro-voxel, whatever its rule, drew a far tree at 1.3 - 2 times its area: docs). buildGroups
+// (sections at hand) and the coarse levels' digest (World::digest) share it, so a level made from the store is the level
+// made from the sections, bit for bit.
+class Coverage {
+public:
+    explicit Coverage(const ShapeSet& shapes) : shapes_(shapes) {}
+
+    // a block's alpha per micro-voxel (its shape; 255 solid, 0 none), and its opacity along each axis (the mean over its
+    // 4 x 4 micro columns of 1 - the product of (1 - alpha))
+    struct Block {
+        uint8_t alpha[64];
+        float op[3];
+    };
+    const Block& block(uint16_t m) {
+        if (m >= blocks_.size()) blocks_.resize(size_t(m) + 1), known_.resize(size_t(m) + 1, 0);
+        Block& b = blocks_[m];
+        if (!known_[m]) {
+            known_[m] = 1;
+            const MaterialShape* s = shapes_.at(m);
+            for (int i = 0; i < 64; i++) b.alpha[i] = !m ? 0 : !s ? 255 : ((s->mask >> i) & 1) ? s->alpha[i] : 0;
+            for (int a = 0; a < 3; a++) {
+                float sum = 0;
+                for (int v = 0; v < 4; v++)
+                    for (int u = 0; u < 4; u++) {
+                        float t = 1.0f;
+                        for (int k = 0; k < 4; k++) {
+                            int q[3];
+                            q[a] = k, q[(a + 1) % 3] = u, q[(a + 2) % 3] = v;
+                            t *= 1.0f - float(b.alpha[q[0] + 4 * (q[2] + 4 * q[1])]) / 255.0f;
+                        }
+                        sum += 1.0f - t;
+                    }
+                b.op[a] = sum / 16.0f;
+            }
+        }
+        return b;
+    }
+    // whether a sub-voxel of coverage v is there: by a hash of its world position (level, quarter micro-voxel)
+    static bool keepSub(float v, int lod, int wx, int wy, int wz) {
+        if (v <= 0.0f) return false;
+        if (v >= 0.999f) return true;
+        return (cutHash(wx + lod * 1000003, wy, wz ^ 0x51ED) >> 24) < uint32_t(v * 255.0f + 0.5f);
+    }
+    // The sub-voxels of a micro-voxel of level lod >= 1 whose first corner is section quarter-block q0 (world quarter
+    // block w0): its 4 x 4 x 4 quarters (bit x + 4 (z + 4 y)), each there by its coverage of the blocks inside the
+    // section box [clo, chi) (section blocks): from level 4 up a quarter is whole blocks (1, 8, 64 of them: the mean over
+    // the axes of the share of its block columns a ray along that axis is stopped in, by the blocks' opacity), below it
+    // part of one block (its own micro-voxels' alpha).
+    uint64_t micro(const Section& sec, int lod, const int q0[3], const int w0[3], const int clo[3], const int chi[3]) {
+        int N = 1 << lod;  // quarter blocks a side
+        auto mat = [&](int bx, int by, int bz) -> uint16_t {
+            if (bx < clo[0] || by < clo[1] || bz < clo[2] || bx >= chi[0] || by >= chi[1] || bz >= chi[2]) return 0;
+            return sec.mats[size_t(bx + 16 * (bz + 16 * by))];
+        };
+        if (lod >= 2) {  // all air or all solid cubes (most of them): nothing to look at
+            int n = N / 4, empty = 0, solid = 0;
+            for (int y = 0; y < n; y++)
+                for (int z = 0; z < n; z++)
+                    for (int x = 0; x < n; x++) {
+                        const Block& b = block(mat(q0[0] / 4 + x, q0[1] / 4 + y, q0[2] / 4 + z));
+                        empty += b.op[0] + b.op[1] + b.op[2] <= 0.0f;
+                        solid += b.op[0] >= 1.0f && b.op[1] >= 1.0f && b.op[2] >= 1.0f;
+                    }
+            if (empty == n * n * n) return 0;
+            if (solid == n * n * n) return ~0ull;
+        }
+        uint64_t out = 0;
+        for (int i = 0; i < 64; i++) {
+            int s[3] = {i & 3, i >> 4, (i >> 2) & 3};
+            float val = 0;
+            int wq[3];
+            if (lod >= 4) {
+                int B = N / 16;  // blocks a side of a quarter
+                int p0[3] = {q0[0] / 4 + s[0] * B, q0[1] / 4 + s[1] * B, q0[2] / 4 + s[2] * B};
+                if (B == 1) {
+                    const Block& b = block(mat(p0[0], p0[1], p0[2]));
+                    val = (b.op[0] + b.op[1] + b.op[2]) / 3.0f;
+                } else {
+                    for (int a = 0; a < 3; a++) {
+                        int a1 = (a + 1) % 3, a2 = (a + 2) % 3;
+                        float cov = 0;
+                        for (int v = 0; v < B; v++)
+                            for (int u = 0; u < B; u++) {
+                                float t = 1.0f;
+                                for (int k = 0; k < B && t > 0.0f; k++) {
+                                    int p[3];
+                                    p[a] = p0[a] + k, p[a1] = p0[a1] + u, p[a2] = p0[a2] + v;
+                                    t *= 1.0f - block(mat(p[0], p[1], p[2])).op[a];
+                                }
+                                cov += 1.0f - t;
+                            }
+                        val += cov / float(B * B);
+                    }
+                    val /= 3.0f;
+                }
+                for (int a = 0; a < 3; a++) wq[a] = w0[a] / (N / 4) + s[a];
+            } else {
+                // a quarter of S x S x S of a block's own micro-voxels (lod 1: half of one, the one holding it)
+                int S = std::max(1, N / 4), cnt = 0;
+                for (int k = 0; k < S; k++)
+                    for (int j = 0; j < S; j++)
+                        for (int h = 0; h < S; h++) {
+                            int q[3] = {lod == 1 ? q0[0] + (s[0] >> 1) : q0[0] + s[0] * S + h,
+                                        lod == 1 ? q0[1] + (s[1] >> 1) : q0[1] + s[1] * S + k,
+                                        lod == 1 ? q0[2] + (s[2] >> 1) : q0[2] + s[2] * S + j};
+                            const Block& b = block(mat(q[0] >> 2, q[1] >> 2, q[2] >> 2));
+                            val += float(b.alpha[(q[0] & 3) + 4 * ((q[2] & 3) + 4 * (q[1] & 3))]) / 255.0f;
+                            cnt++;
+                        }
+                val /= float(cnt);
+                for (int a = 0; a < 3; a++) wq[a] = lod == 1 ? w0[a] * 2 + s[a] : w0[a] / S + s[a];
+            }
+            if (keepSub(val, lod, wq[0], wq[1], wq[2])) out |= 1ull << i;
+        }
+        return out;
+    }
+    // the section blocks [lo, hi) holding anything inside the n^3 from section block b (false: none)
+    static bool contentBox(const Section& sec, int bx, int by, int bz, int n, int lo[3], int hi[3]) {
+        for (int a = 0; a < 3; a++) lo[a] = 1 << 20, hi[a] = -1;
+        for (int y = by; y < by + n; y++)
+            for (int z = bz; z < bz + n; z++)
+                for (int x = bx; x < bx + n; x++) {
+                    if (!sec.mats[size_t(x + 16 * (z + 16 * y))]) continue;
+                    int q[3] = {x, y, z};
+                    for (int a = 0; a < 3; a++) lo[a] = std::min(lo[a], q[a]), hi[a] = std::max(hi[a], q[a] + 1);
+                }
+        return hi[0] > lo[0];
+    }
+    // A section's voxel of level lod (1..4) whose first block is world (wx, wy, wz): its material (`mip`, the section's
+    // generated level there, or where that vote left it air its blocks' commonest; 0: nothing), its micro-voxels, their
+    // face masks and its content's box (groups.hpp packBox: 16ths of the voxel, from its blocks' bounds).
+    uint16_t voxel(const Section& sec, int lod, int wx, int wy, int wz, uint16_t mip, uint64_t& mask, uint32_t& box,
+                   SubVoxels& fm) {
+        fm.partial = 0;
+        int bx = wx & 15, by = wy & 15, bz = wz & 15;  // its first block in the section
+        int n = 1 << lod;
+        mask = 0;
+        box = BOX_FULL;
+        int clo[3], chi[3];
+        if (!contentBox(sec, bx, by, bz, n, clo, chi)) return 0;
+        {
+            int u = 16 / n, lo[3], hi[3];  // its 16ths a block
+            int b0[3] = {bx, by, bz};
+            for (int a = 0; a < 3; a++) lo[a] = (clo[a] - b0[a]) * u, hi[a] = (chi[a] - b0[a]) * u;
+            box = packBox(lo, hi);
+        }
+        uint16_t common = 0;
+        if (!mip) {
+            uint16_t seen[8] = {};
+            int counts[8] = {};
+            for (int y = 0; y < n; y++)
+                for (int z = 0; z < n; z++)
+                    for (int x = 0; x < n; x++) {
+                        uint16_t m = sec.mats[size_t((bx + x) + 16 * ((bz + z) + 16 * (by + y)))];
+                        if (!m) continue;
+                        int k = 0;
+                        while (k < 8 && seen[k] && seen[k] != m) k++;
+                        if (k == 8) continue;
+                        seen[k] = m;
+                        counts[k]++;
+                    }
+            int best = 0;
+            for (int k = 0; k < 8; k++)
+                if (counts[k] > best) best = counts[k], common = seen[k];
+        }
+        uint16_t mat = mip ? mip : common;
+        if (!mat) return 0;
+        int N = 1 << lod;  // a micro-voxel's quarter blocks
+        for (int b = 0; b < 64; b++) {
+            int m3[3] = {b & 3, b >> 4, (b >> 2) & 3};
+            int q0[3] = {bx * 4 + m3[0] * N, by * 4 + m3[1] * N, bz * 4 + m3[2] * N};
+            int w0[3] = {wx * 4 + m3[0] * N, wy * 4 + m3[1] * N, wz * 4 + m3[2] * N};
+            setMicro(mask, fm, b, micro(sec, lod, q0, w0, clo, chi));
+        }
+        return mask ? mat : 0;
+    }
+    // a micro-voxel's sub-voxels into a voxel's micro-voxels and sub-voxels (all there: solid, none kept)
+    static void setMicro(uint64_t& mask, SubVoxels& fm, int b, uint64_t sub) {
+        if (sub) mask |= 1ull << b;
+        else mask &= ~(1ull << b);
+        if (sub && sub != ~0ull) fm.partial |= 1ull << b;
+        else fm.partial &= ~(1ull << b);
+        fm.sub[size_t(b)] = sub;
+    }
+
+private:
+    const ShapeSet& shapes_;
+    std::vector<Block> blocks_;
+    std::vector<uint8_t> known_;
+};
+
+// the voxel of (lod, cube) holding world block (x, y, z): its index in the cube
+uint32_t cubeIndex(int level, int x, int y, int z) {
+    int n = COARSE_CUBE >> level;
+    int lx = (x - floorDiv(x, COARSE_CUBE) * COARSE_CUBE) >> level, lz = (z - floorDiv(z, COARSE_CUBE) * COARSE_CUBE) >> level;
+    int yy = y - WORLD_MIN_Y, ly = (yy - floorDiv(yy, COARSE_CUBE) * COARSE_CUBE) >> level;
+    return uint32_t(lx + n * (lz + n * ly));
+}
+Key3 cubeKey(int level, int x, int y, int z) {
+    return {level, floorDiv(x, COARSE_CUBE), floorDiv(y - WORLD_MIN_Y, COARSE_CUBE), floorDiv(z, COARSE_CUBE)};
+}
+// a section's position in its cube (16 a side)
+void sectionInCube(int sx, int sy, int sz, int& lx, int& ly, int& lz) {
+    lx = sx - floorDiv(sx, 16) * 16;
+    lz = sz - floorDiv(sz, 16) * 16;
+    int yy = sy - WORLD_MIN_Y / 16;
+    ly = yy - floorDiv(yy, 16) * 16;
+}
+Key3 sectionCube(int level, int sx, int sy, int sz) {
+    return {level, floorDiv(sx, 16), floorDiv(sy - WORLD_MIN_Y / 16, 16), floorDiv(sz, 16)};
+}
+
+// the material of a coarse voxel from its 8 children's (Section::buildMips' vote: solid when 3 or more are, foliage
+// when 2, water when 4; the commonest of the winning kind, ties up), or where the vote is air the commonest child
+// with anything (its coverage decides whether it shows)
+uint16_t voteKids(const uint16_t ch[8], const std::vector<uint8_t>& cls) {
+    auto kind = [&](uint16_t m) -> int {
+        if (m == 0) return -1;
+        uint8_t c = m < cls.size() ? cls[m] : 0;
+        return c == 1 ? 1 : c == 2 ? 2 : 0;
+    };
+    int counts[3] = {0, 0, 0};
+    for (int k = 0; k < 8; k++)
+        if (kind(ch[k]) >= 0) counts[kind(ch[k])]++;
+    int want = counts[0] >= 3 ? 0 : counts[1] >= 2 ? 1 : counts[2] >= 4 ? 2 : -1;
+    uint16_t best = 0;
+    int bestN = 0;
+    for (int a = 7; a >= 0; a--) {  // the upper children first: ties go up
+        if (!ch[a] || (want >= 0 && kind(ch[a]) != want)) continue;
+        int c = 0;
+        for (int b = 0; b < 8; b++) c += ch[b] == ch[a] ? 1 : 0;
+        if (c > bestN) bestN = c, best = ch[a];
+    }
+    return best;
+}
+
 }  // namespace
+
+const CoarseCube::Entry* CoarseCube::find(uint32_t idx) const {
+    auto it = std::lower_bound(entries.begin(), entries.end(), idx, [](const Entry& e, uint32_t i) { return e.idx < i; });
+    return it != entries.end() && it->idx == idx ? &*it : nullptr;
+}
 
 void Tile::buildPyramids() {
     for (int lv = 0; lv <= 8; lv++) {
@@ -231,25 +479,30 @@ void World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
     std::lock_guard<std::mutex> lock(mu_);
     s->buildMips(classes_);
     sections_[{0, sx, sy, sz}] = std::move(s);
+    undigested_.insert({0, sx, sy, sz});  // its coarse levels (World::digest)
     markSectionDirty(sx, sy, sz);
 }
 
 void World::markSectionDirty(int sx, int sy, int sz) {
     // the section's region at every level that reads sections (0..4); with groups also the region across a border it
-    // touches (whose border voxels' exposure it decides)
-    bool nbrs = groupsWanted.load(std::memory_order_relaxed);
-    for (int lod = 0; lod <= 4; lod++) {
+    // touches (whose border voxels' exposure it decides). (Levels 5 and up read it through the coarse levels: their
+    // trees are marked when it is digested, World::digest.)
+    markRegions(sx, sy, sz, 0, 4, dirty_, groupsWanted.load(std::memory_order_relaxed));
+}
+
+void World::markRegions(int sx, int sy, int sz, int lo, int hi, std::unordered_set<Key3, Key3Hash>& d, bool nbrs) {
+    for (int lod = lo; lod <= hi; lod++) {
         int span = 256 << lod, per = span / 16;
         int rx = floorDiv(sx * 16, span), ry = floorDiv(sy * 16 - WORLD_MIN_Y, span), rz = floorDiv(sz * 16, span);
-        dirty_.insert({lod, rx, ry, rz});
+        d.insert({lod, rx, ry, rz});
         if (!nbrs) continue;
         int ix = sx - rx * per, iz = sz - rz * per, iy = sy - floorDiv(WORLD_MIN_Y, 16) - ry * per;
-        if (ix == 0) dirty_.insert({lod, rx - 1, ry, rz});
-        if (ix == per - 1) dirty_.insert({lod, rx + 1, ry, rz});
-        if (iz == 0) dirty_.insert({lod, rx, ry, rz - 1});
-        if (iz == per - 1) dirty_.insert({lod, rx, ry, rz + 1});
-        if (iy == 0 && ry > 0) dirty_.insert({lod, rx, ry - 1, rz});
-        if (iy == per - 1 && ry + 1 < regionRows(lod)) dirty_.insert({lod, rx, ry + 1, rz});
+        if (ix == 0) d.insert({lod, rx - 1, ry, rz});
+        if (ix == per - 1) d.insert({lod, rx + 1, ry, rz});
+        if (iz == 0) d.insert({lod, rx, ry, rz - 1});
+        if (iz == per - 1) d.insert({lod, rx, ry, rz + 1});
+        if (iy == 0 && ry > 0) d.insert({lod, rx, ry - 1, rz});
+        if (iy == per - 1 && ry + 1 < regionRows(lod)) d.insert({lod, rx, ry + 1, rz});
     }
 }
 
@@ -328,7 +581,372 @@ void World::editBlock(int x, int y, int z, uint16_t mat) {
     s->mats[size_t((x & 15) + 16 * ((z & 15) + 16 * (y & 15)))] = mat;
     s->buildMips(classes_);
     sections_[sk] = std::move(s);
+    undigested_.insert(sk);
     markSectionDirty(sx, sy, sz);
+}
+
+// ---- the coarse levels of real content (CoarseCube) ------------------------------------------------------------------
+
+template <class F> void World::forCoarse(const Key3& k, F&& f) const {
+    if (coarse_.empty()) return;
+    int s = 1 << k.lod, span = 256 << k.lod;
+    // the region's columns and its ring (one voxel), every row (a column is evaluated over all its content)
+    int x0 = floorDiv(k.x * span - s, COARSE_CUBE), x1 = floorDiv(k.x * span + span + s - 1, COARSE_CUBE);
+    int z0 = floorDiv(k.z * span - s, COARSE_CUBE), z1 = floorDiv(k.z * span + span + s - 1, COARSE_CUBE);
+    int rows = (WORLD_TOP_Y - WORLD_MIN_Y + COARSE_CUBE - 1) / COARSE_CUBE;
+    int first = std::max(k.lod, COARSE_MIN), top = coarseTop();
+    if (first > top) return;
+    size_t keys = size_t(x1 - x0 + 1) * size_t(z1 - z0 + 1) * size_t(rows) * size_t(top - first + 1);
+    if (keys > coarse_.size()) {
+        for (auto& [ck, c] : coarse_)
+            if (ck.lod >= first && ck.lod <= top && ck.x >= x0 && ck.x <= x1 && ck.z >= z0 && ck.z <= z1) f(ck, c);
+        return;
+    }
+    for (int l = first; l <= top; l++)
+        for (int cz = z0; cz <= z1; cz++)
+            for (int cx = x0; cx <= x1; cx++)
+                for (int cy = 0; cy < rows; cy++) {
+                    auto it = coarse_.find({l, cx, cy, cz});
+                    if (it != coarse_.end()) f(it->first, it->second);
+                }
+}
+
+bool World::coarseNear(const Key3& k) const {
+    bool any = false;
+    forCoarse(k, [&](const Key3&, const std::shared_ptr<const CoarseCube>&) { any = true; });
+    return any;
+}
+
+// Takes the sections that arrived (undigested_) into the coarse levels and keeps them under the budget. Per section,
+// in parallel: its voxels at levels 2..4 exactly as buildGroups makes them from it (Coverage::voxel), its level-5 and
+// level-6 micro-voxels (8 and 1 of them: 8 and 16 blocks), its level-4 material (the level-5 voxel's child there).
+// Then, under the lock, every touched cube is copied once and the changes merged in: a level-2..4 voxel replaced
+// whole, a level-5 voxel's bits and child slot, then the level-6 voxels' from the level-5 voxels that changed.
+void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
+    auto t0 = std::chrono::steady_clock::now();
+    std::vector<std::pair<Key3, std::shared_ptr<const Section>>> todo;
+    std::shared_ptr<const ShapeSet> shapes;
+    std::vector<uint8_t> cls;
+    int top;
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        top = coarseTop();
+        if (top < COARSE_MIN) {
+            undigested_.clear();
+            return;
+        }
+        if (shapes_->revision != digestShapes_) {  // new shapes: every section at hand again
+            digestShapes_ = shapes_->revision;
+            for (auto& [sk, sec] : sections_) undigested_.insert(sk);
+        }
+        for (const Key3& sk : undigested_) {
+            auto it = sections_.find(sk);
+            if (it != sections_.end()) todo.emplace_back(sk, it->second);
+        }
+        undigested_.clear();
+        // within the update's budget (half of it, by the last digests' cost a section): the nearest first, the rest
+        // the next updates'
+        if (budgetMs > 0 && digestMsPerSection_ > 0) {
+            size_t most = size_t(std::max(64.0, 0.5 * budgetMs / digestMsPerSection_));
+            if (todo.size() > most) {
+                auto d = [&](const Key3& k) {
+                    return std::max(std::abs(floorDiv(k.x * 16, 256) - centreRegion[0][0]), std::abs(floorDiv(k.z * 16, 256) - centreRegion[0][1]));
+                };
+                std::nth_element(todo.begin(), todo.begin() + long(most), todo.end(),
+                                 [&](const auto& a, const auto& b) { return d(a.first) < d(b.first); });
+                for (size_t i = most; i < todo.size(); i++) undigested_.insert(todo[i].first);
+                todo.resize(most);
+            }
+        }
+        shapes = shapes_;
+        cls = classes_;
+    }
+    lastDigested_ = uint32_t(todo.size());
+    struct Vox {
+        int level, x, y, z;  // its first block
+        uint16_t mat;
+        uint64_t mask;
+        uint32_t box;
+        SubVoxels fm;
+    };
+    struct D {
+        std::vector<Vox> vox;
+        uint16_t m4 = 0;
+        uint64_t f5[8] = {};  // its level-5 micro-voxels' sub-voxels, cx + 2 cz + 4 cy
+        uint64_t f6 = 0;      // its level-6 micro-voxel's
+        bool any = false;   // anything in it: its content's box (section blocks [lo, hi))
+        int lo[3] = {}, hi[3] = {};
+    };
+    std::vector<D> ds(todo.size());
+    if (!todo.empty()) {
+        std::atomic<size_t> next{0};
+        parallelRun([&] {
+            Coverage cov(*shapes);
+            for (size_t i; (i = next.fetch_add(1)) < todo.size();) {
+                const Key3& sk = todo[i].first;
+                const Section& sec = *todo[i].second;
+                D& d = ds[i];
+                int bx = sk.x * 16, by = sk.y * 16, bz = sk.z * 16;
+                for (int level = COARSE_MIN; level <= std::min(4, top); level++) {
+                    int n = 16 >> level;
+                    for (int y = 0; y < n; y++)
+                        for (int z = 0; z < n; z++)
+                            for (int x = 0; x < n; x++) {
+                                int wx = bx + (x << level), wy = by + (y << level), wz = bz + (z << level);
+                                uint64_t mask;
+                                uint32_t box;
+                                SubVoxels fm;
+                                uint16_t mat = cov.voxel(sec, level, wx, wy, wz, sec.at(level, x, y, z), mask, box, fm);
+                                d.vox.push_back({level, wx, wy, wz, mat, mask, box, fm});
+                                if (level == 4) d.m4 = mat;
+                            }
+                }
+                d.any = Coverage::contentBox(sec, 0, 0, 0, 16, d.lo, d.hi);
+                if (top >= 5 && d.any) {
+                    for (int c = 0; c < 8; c++) {
+                        int cx = c & 1, cz = (c >> 1) & 1, cy = c >> 2;
+                        int q0[3] = {cx * 32, cy * 32, cz * 32}, w0[3] = {bx * 4 + q0[0], by * 4 + q0[1], bz * 4 + q0[2]};
+                        d.f5[c] = cov.micro(sec, 5, q0, w0, d.lo, d.hi);
+                    }
+                }
+                if (top >= 6 && d.any) {
+                    int q0[3] = {0, 0, 0}, w0[3] = {bx * 4, by * 4, bz * 4};
+                    d.f6 = cov.micro(sec, 6, q0, w0, d.lo, d.hi);
+                }
+            }
+        });
+    }
+    if (std::getenv("ATLAS_COARSE_DEBUG"))
+        std::fprintf(stderr, "[atlas] coarse digest: %zu sections computed in %.0f ms\n", todo.size(),
+                     std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count());
+    std::lock_guard<std::mutex> lock(mu_);
+    // copies of the touched cubes (copy on write: jobs hold the old ones)
+    std::unordered_map<Key3, std::shared_ptr<CoarseCube>, Key3Hash> work;
+    auto edit = [&](const Key3& key) -> CoarseCube& {
+        auto w = work.find(key);
+        if (w != work.end()) return *w->second;
+        auto it = coarse_.find(key);
+        auto c = it == coarse_.end() ? std::make_shared<CoarseCube>() : std::make_shared<CoarseCube>(*it->second);
+        work.emplace(key, c);
+        return *c;
+    };
+    // a voxel's new state per cube and index (levels 2..4: replaced whole; 5, 6: from the old one, edited)
+    struct Next {
+        uint16_t mat = 0;
+        uint64_t mask = 0;
+        uint32_t box = BOX_FULL;
+        SubVoxels fm;
+        uint16_t kids[8] = {};
+        uint32_t kidBoxes[8] = {BOX_NONE, BOX_NONE, BOX_NONE, BOX_NONE, BOX_NONE, BOX_NONE, BOX_NONE, BOX_NONE};
+    };
+    // children's boxes (16ths of the voxel) to the voxel's: their union
+    auto unionOf = [](const uint32_t kb[8]) {
+        int lo[3] = {16, 16, 16}, hi[3] = {0, 0, 0};
+        bool any = false;
+        for (int k = 0; k < 8; k++) {
+            if (kb[k] == BOX_NONE) continue;
+            int l[3], h[3];
+            unpackBox(kb[k], l, h);
+            for (int a = 0; a < 3; a++) lo[a] = std::min(lo[a], l[a]), hi[a] = std::max(hi[a], h[a]);
+            any = true;
+        }
+        return any ? packBox(lo, hi) : BOX_FULL;
+    };
+    // a child's box in its parent's 16ths: the child's [lo, hi) in units of `unit` from the parent's first one, at
+    // `off` units, the parent's 16th being `step` of them (rounded outwards)
+    auto scaled = [](const int lo[3], const int hi[3], const int off[3], int step) {
+        int l[3], h[3];
+        for (int a = 0; a < 3; a++) {
+            l[a] = std::clamp(floorDiv(off[a] + lo[a], step), 0, 15);
+            h[a] = std::clamp(-floorDiv(-(off[a] + hi[a]), step), l[a] + 1, 16);
+        }
+        return packBox(l, h);
+    };
+    std::unordered_map<Key3, std::map<uint32_t, Next>, Key3Hash> next;
+    auto touch = [&](int level, int x, int y, int z) -> Next& {
+        Key3 key = cubeKey(level, x, y, z);
+        uint32_t idx = cubeIndex(level, x, y, z);
+        auto& m = next[key];
+        auto it = m.find(idx);
+        if (it != m.end()) return it->second;
+        Next n;
+        CoarseCube& c = edit(key);
+        if (const CoarseCube::Entry* e = c.find(idx)) {
+            n.mat = e->mat, n.mask = e->mask, n.box = e->box;
+            c.facesOf(*e, n.fm);
+            if (level >= 5) {
+                std::copy_n(&c.kids[size_t(e - c.entries.data()) * 8], 8, n.kids);
+                std::copy_n(&c.kidBoxes[size_t(e - c.entries.data()) * 8], 8, n.kidBoxes);
+            }
+        }
+        return m.emplace(idx, n).first->second;
+    };
+    std::vector<std::array<int, 3>> changed5;  // level-5 voxels (first block) whose material may have changed
+    for (size_t i = 0; i < todo.size(); i++) {
+        const Key3& sk = todo[i].first;
+        const D& d = ds[i];
+        int lx, ly, lz;
+        sectionInCube(sk.x, sk.y, sk.z, lx, ly, lz);
+        int bit = lx + 16 * (lz + 16 * ly);
+        for (int level = COARSE_MIN; level <= top; level++) edit(sectionCube(level, sk.x, sk.y, sk.z)).seen[bit >> 6] |= 1ull << (bit & 63);
+        // the trees of the levels that read it only from here (5 and up)
+        if (top >= 5) markRegions(sk.x, sk.y, sk.z, 5, lodCount - 1, treeDirty_, true);
+        for (const Vox& v : d.vox) {
+            Next& n = touch(v.level, v.x, v.y, v.z);
+            n.mat = v.mat, n.mask = v.mat ? v.mask : 0, n.box = v.box, n.fm = v.fm;
+        }
+        int bx = sk.x * 16, by = sk.y * 16, bz = sk.z * 16;
+        if (top >= 5) {
+            Next& n = touch(5, bx, by, bz);
+            int ox = sk.x & 1, oy = (sk.y - WORLD_MIN_Y / 16) & 1, oz = sk.z & 1;  // the section's octant
+            for (int c = 0; c < 8; c++) {
+                int b = (ox * 2 + (c & 1)) + 4 * ((oz * 2 + ((c >> 1) & 1)) + 4 * (oy * 2 + (c >> 2)));
+                Coverage::setMicro(n.mask, n.fm, b, d.f5[c]);
+            }
+            n.kids[ox + 2 * oz + 4 * oy] = d.m4;
+            // its content's box in the level-5 voxel's 16ths (2 blocks)
+            int off[3] = {ox * 16, oy * 16, oz * 16};
+            n.kidBoxes[ox + 2 * oz + 4 * oy] = d.any ? scaled(d.lo, d.hi, off, 2) : BOX_NONE;
+            changed5.push_back({floorDiv(bx, 32) * 32, WORLD_MIN_Y + floorDiv(by - WORLD_MIN_Y, 32) * 32, floorDiv(bz, 32) * 32});
+        }
+        if (top >= 6) {
+            Next& n = touch(6, bx, by, bz);
+            int b = (sk.x & 3) + 4 * ((sk.z & 3) + 4 * ((sk.y - WORLD_MIN_Y / 16) & 3));
+            Coverage::setMicro(n.mask, n.fm, b, d.f6);
+        }
+    }
+    // level 5's materials from their children, then level 6's children from them
+    std::sort(changed5.begin(), changed5.end());
+    changed5.erase(std::unique(changed5.begin(), changed5.end()), changed5.end());
+    for (auto& v : changed5) {
+        Next& n5 = touch(5, v[0], v[1], v[2]);
+        n5.mat = voteKids(n5.kids, cls);
+        n5.box = unionOf(n5.kidBoxes);
+        bool any5 = false;
+        for (uint32_t kb : n5.kidBoxes) any5 |= kb != BOX_NONE;
+        if (top >= 6) {
+            Next& n6 = touch(6, v[0], v[1], v[2]);
+            int ox = (v[0] >> 5) & 1, oy = ((v[1] - WORLD_MIN_Y) >> 5) & 1, oz = (v[2] >> 5) & 1;
+            n6.kids[ox + 2 * oz + 4 * oy] = n5.mat;
+            // the level-5 voxel's box (its 16ths: 2 blocks) in the level-6 voxel's (4 blocks)
+            int l5[3], h5[3];
+            unpackBox(n5.box, l5, h5);
+            int off[3] = {ox * 16, oy * 16, oz * 16};
+            n6.kidBoxes[ox + 2 * oz + 4 * oy] = any5 ? scaled(l5, h5, off, 2) : BOX_NONE;
+            n6.mat = voteKids(n6.kids, cls);
+            n6.box = unionOf(n6.kidBoxes);
+        }
+    }
+    if (std::getenv("ATLAS_COARSE_DEBUG"))  // (measurements) the level-5 and 6 voxels this digest changed
+        for (auto& [key, changes] : next)
+            for (auto& [idx, n] : changes) {
+                if (key.lod < 5) continue;
+                int lo[3], hi[3];
+                unpackBox(n.box, lo, hi);
+                std::string q;
+                for (int b = 0; b < 64; b++)
+                    if ((n.mask >> b) & 1)
+                        q += std::to_string(b) + ":" + std::to_string(((n.fm.partial >> b) & 1) ? std::popcount(n.fm.sub[size_t(b)]) : 64) + " ";
+                std::fprintf(stderr, "[atlas] coarse L%d cube (%d,%d,%d) voxel %u mat %u box %d-%d %d-%d %d-%d micro %s\n", key.lod, key.x,
+                             key.y, key.z, idx, n.mat, lo[0], hi[0], lo[1], hi[1], lo[2], hi[2], q.c_str());
+            }
+    // merge each cube's changes into its sorted entries
+    for (auto& [key, changes] : next) {
+        CoarseCube& c = edit(key);
+        bool big = key.lod >= 5;
+        std::vector<CoarseCube::Entry> es;
+        std::vector<uint16_t> ks;
+        std::vector<uint64_t> fs;
+        std::vector<uint32_t> kb;
+        es.reserve(c.entries.size() + changes.size());
+        auto faces = [&](const SubVoxels& f) {  // appended: where they start
+            uint32_t at = uint32_t(fs.size());
+            for (int b = 0; b < 64; b++)
+                if ((f.partial >> b) & 1) fs.push_back(f.sub[size_t(b)]);
+            return at;
+        };
+        auto ch = changes.begin();
+        auto put = [&](uint32_t idx, const Next& n) {
+            bool kids = false;
+            for (uint16_t q : n.kids) kids |= q != 0;
+            if (!n.mat && !(big && kids)) return;  // nothing there (a level-5/6 voxel stays while it has children)
+            es.push_back({idx, n.mat, 0, n.mask, n.box, faces(n.fm), n.fm.partial});
+            if (big) ks.insert(ks.end(), n.kids, n.kids + 8), kb.insert(kb.end(), n.kidBoxes, n.kidBoxes + 8);
+        };
+        for (size_t i = 0; i <= c.entries.size(); i++) {
+            uint32_t idx = i < c.entries.size() ? c.entries[i].idx : UINT32_MAX;
+            for (; ch != changes.end() && ch->first < idx; ++ch) put(ch->first, ch->second);
+            if (i == c.entries.size()) break;
+            if (ch != changes.end() && ch->first == idx) {
+                put(ch->first, ch->second);
+                ++ch;
+                continue;
+            }
+            es.push_back(c.entries[i]);
+            {
+                SubVoxels f;
+                c.facesOf(c.entries[i], f);
+                es.back().faceAt = faces(f);
+            }
+            if (big) {
+                ks.insert(ks.end(), c.kids.begin() + long(i * 8), c.kids.begin() + long(i * 8 + 8));
+                kb.insert(kb.end(), c.kidBoxes.begin() + long(i * 8), c.kidBoxes.begin() + long(i * 8 + 8));
+            }
+        }
+        c.entries.swap(es);
+        c.kids.swap(ks);
+        c.kidBoxes.swap(kb);
+        c.faces.swap(fs);
+    }
+    for (auto& [key, c] : work) {
+        auto it = coarse_.find(key);
+        if (it != coarse_.end()) coarseBytes_ -= it->second->bytes();
+        coarseBytes_ += c->bytes();
+        coarse_[key] = std::move(c);
+    }
+    // the budget: the cubes farthest from the camera for their level's size go first, never one within its level's
+    // window + 1 region (what the level draws now); levels the clipmap no longer has go at once
+    lastEvicted_ = 0;
+    std::vector<std::pair<float, Key3>> far;
+    for (auto& [key, c] : coarse_) {
+        if (key.lod > top) {
+            far.push_back({1e30f, key});
+            continue;
+        }
+        if (coarseBytes_ <= coarseBudget) continue;
+        int span = 256 << key.lod;
+        int rx = floorDiv(key.x * COARSE_CUBE, span), rz = floorDiv(key.z * COARSE_CUBE, span);
+        int dx = std::abs(rx - centreRegion[key.lod][0]), dz = std::abs(rz - centreRegion[key.lod][1]);
+        if (std::max(dx, dz) <= windowRadius + 1) continue;
+        // its centre's distance from the camera's region centre, in this level's regions
+        float cx = (float(key.x) + 0.5f) * COARSE_CUBE / float(span) - (float(centreRegion[key.lod][0]) + 0.5f);
+        float cz = (float(key.z) + 0.5f) * COARSE_CUBE / float(span) - (float(centreRegion[key.lod][1]) + 0.5f);
+        far.push_back({std::max(std::fabs(cx), std::fabs(cz)), key});
+    }
+    std::sort(far.begin(), far.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
+    for (auto& [score, key] : far) {
+        if (score < 1e29f && coarseBytes_ <= coarseBudget - coarseBudget / 8) break;  // (an eighth of slack: no churn)
+        auto it = coarse_.find(key);
+        coarseBytes_ -= it->second->bytes();
+        coarse_.erase(it);
+        lastEvicted_++;
+    }
+    lastDigestMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+    if (!todo.empty()) digestMsPerSection_ = lastDigestMs_ / double(todo.size());
+}
+
+World::CoarseStats World::coarseStats() const {
+    std::lock_guard<std::mutex> lock(mu_);
+    CoarseStats st;
+    st.bytes = coarseBytes_;
+    for (auto& [key, c] : coarse_) {
+        if (key.lod < MAX_LODS) st.cubes[key.lod]++, st.levelBytes[key.lod] += c->bytes();
+        st.entries += uint32_t(c->entries.size());
+    }
+    st.digested = lastDigested_;
+    st.evicted = lastEvicted_;
+    st.digestMs = lastDigestMs_;
+    return st;
 }
 
 World::Job World::snapshot(const Key3& k, bool groups) const {
@@ -362,7 +980,9 @@ World::Job World::snapshot(const Key3& k, bool groups) const {
             for (auto& [sk, sec] : sections_)
                 if (sk.x >= sx0 && sk.x <= sx1 && sk.z >= sz0 && sk.z <= sz1) j.sections.emplace(sk, sec);
         }
-    } else if (k.lod <= 4 && !sections_.empty()) {
+    }
+    if (groups) forCoarse(k, [&](const Key3& ck, const std::shared_ptr<const CoarseCube>& c) { j.coarse.emplace(ck, c); });
+    if (!groups && k.lod <= 4 && !sections_.empty()) {
         int per = 16 << k.lod;  // sections per region side at this level
         int sx0 = k.x * per, sy0 = floorDiv(WORLD_MIN_Y + k.y * 256 * (1 << k.lod), 16), sz0 = k.z * per;
         if (k.lod > 0 || sections_.size() < 4096) {
@@ -389,9 +1009,190 @@ Region World::buildRegion(const Job& j) const {
     return r;
 }
 
+namespace {
+
+// What the coarse levels (CoarseCube) hold for one region job: a voxel's real content from the finest level >= max(its
+// level, COARSE_MIN) that saw its sections, resampled when that level is coarser (a level whose cubes were dropped
+// for memory borrows the next one's micro-voxels: rougher, never gone).
+class CoarseView {
+public:
+    CoarseView(const World::CubeMap& cubes, int lod) : cubes_(cubes), lod_(lod), first_(std::max(lod, COARSE_MIN)) {
+        for (auto& [k, c] : cubes) top_ = std::max(top_, k.lod);
+    }
+    bool empty() const { return cubes_.empty(); }
+
+    // the section rows (sy0..sy1) the coarse levels saw in chunk column (sx, sz)
+    bool seenRows(int sx, int sz, int& sy0, int& sy1) {
+        sy0 = INT_MAX, sy1 = INT_MIN;
+        int lx = sx - floorDiv(sx, 16) * 16, lz = sz - floorDiv(sz, 16) * 16;
+        for (int l = first_; l <= top_; l++)
+            for (int cy = 0; cy * COARSE_CUBE < WORLD_TOP_Y - WORLD_MIN_Y; cy++) {
+                auto it = cubes_.find({l, floorDiv(sx, 16), cy, floorDiv(sz, 16)});
+                if (it == cubes_.end()) continue;
+                for (int ly = 0; ly < 16; ly++)
+                    if (it->second->sawSection(lx, ly, lz)) {
+                        int sy = cy * 16 + ly + WORLD_MIN_Y / 16;
+                        sy0 = std::min(sy0, sy), sy1 = std::max(sy1, sy);
+                    }
+            }
+        return sy1 >= sy0;
+    }
+
+    // The level-lod voxel whose first block is world (wx, wy, wz): which of its micro-voxels the coarse levels know
+    // (0: none, the tile's), and there its material and micro-voxels.
+    uint64_t voxel(int wx, int wy, int wz, uint16_t& mat, uint64_t& mask, uint32_t& box, SubVoxels& fm) {
+        mat = 0;
+        mask = 0;
+        box = BOX_FULL;
+        fm.partial = 0;
+        if (lod_ <= 4) {  // in one section
+            int level;
+            const CoarseCube* c = source(floorDiv(wx, 16), floorDiv(wy, 16), floorDiv(wz, 16), level);
+            if (!c) return 0;
+            const CoarseCube::Entry* e = c->find(cubeIndex(level, wx, wy, wz));
+            if (!e || !e->mask) return ~0ull;  // seen: air (or too sparse to show)
+            box = level == lod_ ? e->box : rebox(e->box, level, wx, wy, wz);
+            if (box == BOX_NONE) return ~0ull;  // its content lies elsewhere in the coarser voxel
+            mat = e->mat;
+            if (level == lod_) {
+                mask = e->mask;
+                c->facesOf(*e, fm);
+            } else {
+                SubVoxels cf;
+                c->facesOf(*e, cf);
+                mask = resample(e->mask, cf, level, wx, wy, wz, fm, ~0ull);
+            }
+            return ~0ull;
+        }
+        // levels 5, 6: several sections, each holding whole micro-voxels of this one
+        int per = 1 << (lod_ - 4), mps = 64 >> lod_;  // sections a side; micro-voxels a side of a section
+        uint64_t known = 0;
+        bool own = false;
+        uint32_t ubox = BOX_NONE;
+        for (int i = 0; i < per; i++)
+            for (int k = 0; k < per; k++)
+                for (int j = 0; j < per; j++) {
+                    int sx = floorDiv(wx, 16) + i, sy = floorDiv(wy, 16) + k, sz = floorDiv(wz, 16) + j;
+                    int level;
+                    const CoarseCube* c = source(sx, sy, sz, level);
+                    if (!c) continue;
+                    const CoarseCube::Entry* e = c->find(cubeIndex(level, sx * 16, sy * 16, sz * 16));
+                    uint64_t mine = 0;
+                    for (int c2 = 0; c2 < mps * mps * mps; c2++) {
+                        int mx = i * mps + c2 % mps, mz = j * mps + (c2 / mps) % mps, my = k * mps + c2 / (mps * mps);
+                        mine |= 1ull << (mx + 4 * (mz + 4 * my));
+                    }
+                    known |= mine;
+                    if (!e || !e->mask) continue;
+                    SubVoxels ef;
+                    c->facesOf(*e, ef);
+                    if (level == lod_) {
+                        uint64_t got = e->mask & mine;
+                        mask |= got;
+                        fm.partial |= ef.partial & got;
+                        for (int b = 0; b < 64; b++)
+                            if ((got >> b) & 1) fm.sub[size_t(b)] = ef.sub[size_t(b)];
+                    } else {
+                        mask |= resample(e->mask, ef, level, wx, wy, wz, fm, mine);
+                    }
+                    ubox = unionBox(ubox, level == lod_ ? e->box : rebox(e->box, level, wx, wy, wz));
+                    if (level == lod_ && !own) mat = e->mat, own = true;
+                    else if (!own && !mat) mat = e->mat;
+                }
+        box = ubox == BOX_NONE ? BOX_FULL : ubox;
+        return known;
+    }
+
+private:
+    // the finest level from first_ that saw section (sx, sy, sz): its cube, or null
+    const CoarseCube* source(int sx, int sy, int sz, int& level) {
+        int lx, ly, lz;
+        sectionInCube(sx, sy, sz, lx, ly, lz);
+        for (int l = first_; l <= top_; l++) {
+            Key3 k = sectionCube(l, sx, sy, sz);
+            Cache& c = cache_[size_t(l)];
+            if (!c.valid || !(c.key == k)) {
+                auto it = cubes_.find(k);
+                c = {k, it == cubes_.end() ? nullptr : it->second.get(), true};
+            }
+            if (c.cube && c.cube->sawSection(lx, ly, lz)) {
+                level = l;
+                return c.cube;
+            }
+        }
+        return nullptr;
+    }
+    // a level-lod_ voxel's micro-voxels (first block world w) from the micro-voxels of the level-`level` voxel holding
+    // it (each fine micro-voxel lies in one coarse one, and takes the part of its face masks over it), those of `only`
+    uint64_t resample(uint64_t coarse, const SubVoxels& cf, int level, int wx, int wy, int wz, SubVoxels& fm, uint64_t only) const {
+        int S = 1 << level;
+        int ox = floorDiv(wx, S) * S, oy = WORLD_MIN_Y + floorDiv(wy - WORLD_MIN_Y, S) * S, oz = floorDiv(wz, S) * S;
+        uint64_t out = 0;
+        for (int b = 0; b < 64; b++) {
+            if (!((only >> b) & 1)) continue;
+            int mx = b & 3, my = b >> 4, mz = (b >> 2) & 3;
+            // in quarter blocks: this micro-voxel's first corner, the coarse voxel's, the coarse micro-voxel's size
+            int qx = (wx - ox) * 4 + mx * (1 << lod_), qy = (wy - oy) * 4 + my * (1 << lod_), qz = (wz - oz) * 4 + mz * (1 << lod_);
+            int cb = (qx >> level) + 4 * ((qz >> level) + 4 * (qy >> level));
+            if (!((coarse >> cb) & 1)) continue;
+            out |= 1ull << b;
+            fm.partial &= ~(1ull << b);
+            if (!((cf.partial >> cb) & 1)) continue;  // solid there
+            // each of its quarters from the coarse quarter under its centre (quarter blocks from the coarse micro-voxel)
+            int q[3] = {qx, qy, qz}, cq[3] = {(qx >> level) << level, (qy >> level) << level, (qz >> level) << level};
+            float Sf = float(1 << lod_) * 0.25f, Sc = float(1 << level) * 0.25f;
+            uint64_t cs = cf.sub[size_t(cb)], f = 0;
+            for (int i = 0; i < 64; i++) {
+                int c3[3], e[3] = {i & 3, i >> 4, (i >> 2) & 3};
+                for (int a = 0; a < 3; a++) c3[a] = std::clamp(int((float(q[a] - cq[a]) + (float(e[a]) + 0.5f) * Sf) / Sc), 0, 3);
+                if ((cs >> (c3[0] + 4 * (c3[2] + 4 * c3[1]))) & 1) f |= 1ull << i;
+            }
+            fm.sub[size_t(b)] = f;
+            if (f != ~0ull) fm.partial |= 1ull << b;
+        }
+        return out;
+    }
+    // a level-`level` voxel's box (its 16ths) as the 16ths of the level-lod_ voxel from block w inside it (BOX_NONE:
+    // it holds none of that content), in 16ths of a block
+    uint32_t rebox(uint32_t coarse, int level, int wx, int wy, int wz) const {
+        if (coarse == BOX_NONE) return BOX_NONE;
+        int S = 1 << level, s = 1 << lod_;
+        int o[3] = {floorDiv(wx, S) * S, WORLD_MIN_Y + floorDiv(wy - WORLD_MIN_Y, S) * S, floorDiv(wz, S) * S};
+        int w[3] = {wx, wy, wz}, clo[3], chi[3], lo[3], hi[3];
+        unpackBox(coarse, clo, chi);
+        for (int a = 0; a < 3; a++) {
+            int l = (o[a] - w[a]) * 16 + clo[a] * S, h = (o[a] - w[a]) * 16 + chi[a] * S;  // 16ths of a block from w
+            lo[a] = std::max(0, floorDiv(l, s)), hi[a] = std::min(16, -floorDiv(-h, s));
+            if (hi[a] <= lo[a]) return BOX_NONE;
+        }
+        return packBox(lo, hi);
+    }
+    static uint32_t unionBox(uint32_t a, uint32_t b) {
+        if (a == BOX_NONE) return b;
+        if (b == BOX_NONE) return a;
+        int al[3], ah[3], bl[3], bh[3];
+        unpackBox(a, al, ah);
+        unpackBox(b, bl, bh);
+        for (int k = 0; k < 3; k++) al[k] = std::min(al[k], bl[k]), ah[k] = std::max(ah[k], bh[k]);
+        return packBox(al, ah);
+    }
+    struct Cache {
+        Key3 key{};
+        const CoarseCube* cube = nullptr;
+        bool valid = false;
+    };
+    const World::CubeMap& cubes_;
+    int lod_, first_, top_ = -1;
+    Cache cache_[MAX_LODS];
+};
+
+}  // namespace
+
 // The voxels a region's groups are built from (GroupInput): every column of the region and its border ring, each
 // evaluated over the rows where it may hold exposed content or decide a neighbour's exposure, exactly as TileVoxels
-// evaluates them (real blocks where sections are, LOD 0 voxels marked VOXEL_SHAPED, the column tiles elsewhere).
+// evaluates them (real blocks where sections are, LOD 0 voxels marked VOXEL_SHAPED, the column tiles elsewhere), and
+// where the sections are gone (or at levels 5 and 6, which never read them) the coarse levels of real content they
+// left (CoarseCube): real data wins over the tile wherever a section was seen, micro-voxel by micro-voxel.
 std::shared_ptr<const GroupTree> World::buildGroups(const Job& j, const ShapeSet& shapes) const {
     const Key3& k = j.key;
     int lod = k.lod, s = 1 << lod;
@@ -416,6 +1217,16 @@ std::shared_ptr<const GroupTree> World::buildGroups(const Job& j, const ShapeSet
             auto [it, fresh] = secRows.try_emplace(ckey(sk.x, sk.z), sk.y, sk.y);
             if (!fresh) it->second.first = std::min(it->second.first, sk.y), it->second.second = std::max(it->second.second, sk.y);
         }
+    // the coarse levels: per chunk column the section rows they saw
+    CoarseView view(j.coarse, lod);
+    bool coarse = !view.empty();
+    std::unordered_map<uint64_t, std::pair<int, int>> seenRows;
+    auto seen = [&](int sx, int sz, int& sy0, int& sy1) {
+        auto [it, fresh] = seenRows.try_emplace(ckey(sx, sz), INT_MAX, INT_MIN);
+        if (fresh) view.seenRows(sx, sz, it->second.first, it->second.second);
+        sy0 = it->second.first, sy1 = it->second.second;
+        return sy1 >= sy0;
+    };
     auto tileOf = [&](int x, int z, size_t& c) -> const Tile* {
         c = size_t((z & 255) * 256 + (x & 255));
         if (x < 0) return j.nbr[0].get();
@@ -427,7 +1238,7 @@ std::shared_ptr<const GroupTree> World::buildGroups(const Job& j, const ShapeSet
     auto corner = [](int x, int z) { return (x < 0 || x > 255) && (z < 0 || z > 255); };  // no region voxel touches it
     auto rowOf = [&](float y) { return (y - float(WORLD_MIN_Y)) / sf; };
     // pass 1: per column the rows that may hold content: from just under its solid top to above its highest structure,
-    // canopy or water, and all its sections
+    // canopy or water, and all its sections (present, or seen by the coarse levels)
     std::vector<int32_t> clo(size_t(N) * N, 0), chi(size_t(N) * N, 0);
     for (int z = -1; z <= 256; z++)
         for (int x = -1; x <= 256; x++) {
@@ -440,13 +1251,23 @@ std::shared_ptr<const GroupTree> World::buildGroups(const Job& j, const ShapeSet
                 lo = vs - 1;
                 hi = std::max(vs, int(std::floor(rowOf(t->maxTop[0][c]))) + 2);
             }
+            int wx = (k.x * 256 + x) * s, wz = (k.z * 256 + z) * s;
             if (secs) {
-                int wx = (k.x * 256 + x) * s, wz = (k.z * 256 + z) * s;
                 auto it = secRows.find(ckey(floorDiv(wx, 16), floorDiv(wz, 16)));
                 if (it != secRows.end()) {
                     lo = std::min(lo, floorDiv(it->second.first * 16 - WORLD_MIN_Y, s));
                     hi = std::max(hi, ((it->second.second + 1) * 16 - WORLD_MIN_Y + s - 1) / s);
                 }
+            }
+            if (coarse) {
+                int per = std::max(1, s / 16);  // chunk columns a side of this column
+                for (int b = 0; b < per; b++)
+                    for (int a = 0; a < per; a++) {
+                        int sy0, sy1;
+                        if (!seen(floorDiv(wx, 16) + a, floorDiv(wz, 16) + b, sy0, sy1)) continue;
+                        lo = std::min(lo, floorDiv(sy0 * 16 - WORLD_MIN_Y, s));
+                        hi = std::max(hi, ((sy1 + 1) * 16 - WORLD_MIN_Y + s - 1) / s);
+                    }
             }
             if (lo == INT_MAX) lo = hi = 0;
             int ci = GroupInput::col(x, z);
@@ -476,108 +1297,22 @@ std::shared_ptr<const GroupTree> World::buildGroups(const Job& j, const ShapeSet
             total += size_t(hi - lo);
         }
     in.vox.resize(total);
-    // A coarser level's voxel from real blocks: the mip's material (or, where the mip's vote left it air, its blocks'
-    // commonest), and its own micro-voxels by coverage: each micro-voxel is there with the probability that a ray across
-    // it meets what its blocks hold (a shaped block by its shape, cut-out leaves by their texels' alpha), hashed in world
-    // space. Solid parts count by the share they fill; cut-out parts as a ray crossing 2^lod of the finest micro-voxels
-    // sees them (1 - (1 - share)^(2^lod): a crown keeps its opacity as it coarsens instead of thinning or filling its
-    // voxels), so a thin wall or a trunk keeps its share (coverage, docs/ATLAS-LOD.md's plan of record step 1, in the
-    // groups' micro-voxels).
-    struct Cover {
-        float solid = -1, cut = 0;  // shares of a block: what is solid, what is cut-out (by alpha)
-    };
-    std::vector<Cover> covOf;  // per material (solid < 0: not known yet)
-    auto blockCover = [&](uint16_t m) -> Cover {
-        if (!m) return {0, 0};
-        if (m >= covOf.size()) covOf.resize(size_t(m) + 1);
-        Cover& c = covOf[m];
-        if (c.solid < 0) {
-            const MaterialShape* s = shapes.at(m);
-            c = {1.0f, 0.0f};
-            if (s) {
-                float sum = 0;
-                for (int b = 0; b < 64; b++)
-                    if ((s->mask >> b) & 1) sum += float(s->alpha[b]) / 255.0f;
-                c = (s->flags & SHAPE_CUTOUT) ? Cover{0.0f, sum / 64.0f} : Cover{sum / 64.0f, 0.0f};
-            }
+    Coverage cover(shapes);
+    // a voxel with its own micro-voxels: its cell (or 0 / the plain material when they are none / all)
+    auto masked = [&](uint16_t mat, uint64_t mask, uint32_t box, const SubVoxels& fm, uint32_t idx) -> uint32_t {
+        if (!mat || !mask) return 0;
+        bool partial = (fm.partial & mask) != 0;
+        if (mask == SHAPE_FULL && box == BOX_FULL && !partial) return mat;
+        in.masks[idx] = mask;
+        if (box != BOX_FULL) in.boxes[idx] = box;
+        if (partial) {
+            SubVoxels& f = in.faces[idx];
+            f = fm;
+            f.partial &= mask;
         }
-        return c;
-    };
-    auto effective = [&](float solid, float cut) {
-        solid = std::min(solid, 1.0f);
-        if (solid >= 0.999f) return 1.0f;
-        float rest = std::min(cut / (1.0f - solid), 1.0f);
-        return solid + (1.0f - solid) * (1.0f - std::pow(1.0f - rest, float(1 << lod)));
-    };
-    auto coarseVoxel = [&](const Section& sec, int wx, int wy, int wz, uint16_t mip, GroupInput& gi, uint32_t idx) -> uint32_t {
-        int bx = wx & 15, by = wy & 15, bz = wz & 15;  // its first block in the section
-        int n = 1 << lod;
-        uint64_t mask = 0;
-        uint16_t common = 0;
-        {
-            // the commonest kept block, where the mip voted air
-            uint16_t seen[8] = {};
-            int counts[8] = {};
-            if (!mip)
-                for (int y = 0; y < n; y++)
-                    for (int z = 0; z < n; z++)
-                        for (int x = 0; x < n; x++) {
-                            uint16_t m = sec.mats[size_t((bx + x) + 16 * ((bz + z) + 16 * (by + y)))];
-                            if (!m) continue;
-                            int k = 0;
-                            while (k < 8 && seen[k] && seen[k] != m) k++;
-                            if (k == 8) continue;
-                            seen[k] = m;
-                            counts[k]++;
-                        }
-            int best = 0;
-            for (int k = 0; k < 8; k++)
-                if (counts[k] > best) best = counts[k], common = seen[k];
-        }
-        uint16_t mat = mip ? mip : common;
-        if (!mat) return 0;
-        for (int b = 0; b < 64; b++) {
-            int mx = b & 3, my = b >> 4, mz = (b >> 2) & 3;
-            float c = 0;
-            if (lod == 1) {
-                // a micro-voxel is half a block: the 2 x 2 x 2 of that block's own micro-voxels under it
-                uint16_t m = sec.mats[size_t((bx + (mx >> 1)) + 16 * ((bz + (mz >> 1)) + 16 * (by + (my >> 1))))];
-                if (m) {
-                    const MaterialShape* sh = shapes.at(m);
-                    bool cutout = sh && (sh->flags & SHAPE_CUTOUT);
-                    float sum = 0;
-                    for (int q = 0; q < 8; q++) {
-                        int ux = (mx & 1) * 2 + (q & 1), uy = (my & 1) * 2 + (q >> 2), uz = (mz & 1) * 2 + ((q >> 1) & 1);
-                        int ub = ux + 4 * (uz + 4 * uy);
-                        sum += !sh ? 1.0f : ((sh->mask >> ub) & 1) ? float(sh->alpha[ub]) / 255.0f : 0.0f;
-                    }
-                    c = cutout ? effective(0.0f, sum / 8.0f) : sum / 8.0f;
-                }
-            } else {
-                int kb = n / 4;  // blocks a side of a micro-voxel
-                float solid = 0, cut = 0;
-                for (int y = 0; y < kb; y++)
-                    for (int z = 0; z < kb; z++)
-                        for (int x = 0; x < kb; x++) {
-                            Cover cv = blockCover(sec.mats[size_t((bx + mx * kb + x) + 16 * ((bz + mz * kb + z) + 16 * (by + my * kb + y)))]);
-                            solid += cv.solid, cut += cv.cut;
-                        }
-                float nb = float(kb * kb * kb);
-                c = effective(solid / nb, cut / nb);
-            }
-            if (c <= 0.0f) continue;
-            if (c < 0.999f) {
-                // hashed at its world micro-voxel of this level (stable across rebuilds and regions)
-                uint32_t h = cutHash((wx >> lod) * 4 + mx + lod * 1000003, (wy >> lod) * 4 + my, (wz >> lod) * 4 + mz);
-                if ((h >> 24) >= uint32_t(c * 255.0f + 0.5f)) continue;
-            }
-            mask |= 1ull << b;
-        }
-        if (!mask) return 0;
-        if (mask == SHAPE_FULL) return mat;
-        gi.masks[idx] = mask;
         return uint32_t(mat) | VOXEL_MASKED;
     };
+    float micro = sf * 0.25f;
     // pass 3: the voxels
     for (int z = -1; z <= 256; z++)
         for (int x = -1; x <= 256; x++) {
@@ -591,6 +1326,7 @@ std::shared_ptr<const GroupTree> World::buildGroups(const Job& j, const ShapeSet
             uint32_t* out = in.vox.data() + in.start[size_t(ci)];
             for (int row = in.lo[size_t(ci)]; row < in.hi[size_t(ci)]; row++) {
                 int wy = WORLD_MIN_Y + row * s;
+                uint32_t idx = uint32_t(out - in.vox.data()) + uint32_t(row - in.lo[size_t(ci)]);
                 uint32_t v = 0;
                 bool done = false;
                 if (secs) {
@@ -603,8 +1339,39 @@ std::shared_ptr<const GroupTree> World::buildGroups(const Job& j, const ShapeSet
                     if (sec) {
                         uint16_t m = sec->at(lod, (wx & 15) >> lod, (wy & 15) >> lod, (wz & 15) >> lod);
                         v = m && lod == 0 ? (uint32_t(m) | VOXEL_SHAPED) : m;
-                        if (lod > 0) v = coarseVoxel(*sec, wx, wy, wz, m, in, uint32_t(out - in.vox.data()) +
-                                                     uint32_t(row - in.lo[size_t(ci)]));
+                        if (lod > 0) {
+                            uint64_t mask;
+                            uint32_t box;
+                            SubVoxels fm;
+                            uint16_t mat = cover.voxel(*sec, lod, wx, wy, wz, m, mask, box, fm);
+                            v = masked(mat, mask, box, fm, idx);
+                        }
+                        done = true;
+                    }
+                }
+                if (!done && coarse) {
+                    uint16_t mat;
+                    uint64_t mask;
+                    uint32_t box;
+                    SubVoxels fm;
+                    uint64_t known = view.voxel(wx, wy, wz, mat, mask, box, fm);
+                    if (known) {
+                        if (known != ~0ull && t) {
+                            uint64_t before = mask;
+                            // a voxel only partly seen (levels 5 and 6, at the edge of what was sent): the tile's
+                            // content in the rest, sampled at its micro-voxels' centres
+                            for (int b = 0; b < 64; b++) {
+                                if ((known >> b) & 1) continue;
+                                float yc = float(wy) + (float(b >> 4) + 0.5f) * micro;
+                                uint16_t tm = TileVoxels::columnVoxel(*t, c, yc, micro, stoneMat, waterMat);
+                                if (!tm) continue;
+                                mask |= 1ull << b;
+                                fm.partial &= ~(1ull << b);
+                                if (!mat) mat = tm;
+                            }
+                            if (mask != before) box = BOX_FULL;  // (the tile's part has no box of its own)
+                        }
+                        v = masked(mat, mask, box, fm, idx);
                         done = true;
                     }
                 }
@@ -631,6 +1398,13 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
     std::vector<Job> jobs;
     bool groups = groupsWanted.load();
     std::shared_ptr<const ShapeSet> shapes;
+    for (int lod = 0; lod < lodCount; lod++) {
+        int span = 256 << lod;
+        centreRegion[lod][0] = int(std::floor(centre[0] / span));
+        centreRegion[lod][1] = int(std::floor(centre[2] / span));
+    }
+    // the sections that arrived, into the coarse levels (before the regions they dirtied are snapshot)
+    if (groups) digest(centreRegion, budgetMs);
     {
         std::lock_guard<std::mutex> lock(mu_);
         for (int lod = 0; lod < lodCount; lod++) {
@@ -645,8 +1419,9 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
                         Key3 k{lod, cx + dx, ry, cz + dz};
                         auto r = regions_.find(k);
                         // with groups wanted, a region without its tree yet gets one (its SVDAG kept)
-                        if (r == regions_.end() || dirty_.count(k) ||
-                            (groups && lod < groupLods && !r->second->groups && (!r->second->empty() || (lod <= 4 && !sections_.empty()))))
+                        if (r == regions_.end() || dirty_.count(k) || (groups && treeDirty_.count(k)) ||
+                            (groups && lod < groupLods && !r->second->groups &&
+                             (!r->second->empty() || (lod <= 4 && !sections_.empty()) || coarseNear(k))))
                             want.push_back(k);
                     }
                 }
@@ -761,6 +1536,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
                 jobs[i] = snapshot(k, groups && k.lod < groupLods);
                 auto r = regions_.find(k);
                 jobs[i].wasDirty = dirty_.erase(k) != 0;  // an edit while it builds marks it again (built next time)
+                jobs[i].wasTreeDirty = treeDirty_.erase(k) != 0;
                 if (r != regions_.end() && !jobs[i].wasDirty) jobs[i].keep = r->second;  // only its tree is missing
             }
             const Job& j = jobs[i];
@@ -771,7 +1547,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             } else {
                 r = buildRegion(j);
             }
-            if (j.groups && (!r.empty() || !j.sections.empty())) {
+            if (j.groups && (!r.empty() || !j.sections.empty() || !j.coarse.empty())) {
                 r.groups = buildGroups(j, *shapes);
                 treesBuilt++;
                 treeUs += int64_t(r.groups->buildMs * 1000.0);
@@ -792,6 +1568,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             auto& [k, r] = results[i];
             if (!r) {
                 if (jobs[i].wasDirty) dirty_.insert(want[i]);  // not built within the budget: still to do
+                if (jobs[i].wasTreeDirty) treeDirty_.insert(want[i]);
                 continue;
             }
             auto old = regions_.find(k);
@@ -827,6 +1604,12 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             if (k.lod >= lodCount || dx > windowRadius + 1 || dz > windowRadius + 1) it = regions_.erase(it);
             else ++it;
         }
+        for (auto it = treeDirty_.begin(); it != treeDirty_.end();) {  // (a region built anew there reads it all)
+            const Key3& k = *it;
+            int dx = std::abs(k.x - centreRegion[k.lod][0]), dz = std::abs(k.z - centreRegion[k.lod][1]);
+            if (k.lod >= lodCount || dx > windowRadius + 1 || dz > windowRadius + 1) it = treeDirty_.erase(it);
+            else ++it;
+        }
         for (auto it = tiles_.begin(); it != tiles_.end();) {
             const Key3& k = it->first;
             int dx = std::abs(k.x - centreRegion[k.lod][0]), dz = std::abs(k.z - centreRegion[k.lod][1]);
@@ -846,7 +1629,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         for (auto it = sections_.begin(); it != sections_.end();) {
             int rx = floorDiv(it->first.x * 16, 256), rz = floorDiv(it->first.z * 16, 256);
             if (std::abs(rx - centreRegion[0][0]) > keep || std::abs(rz - centreRegion[0][1]) > keep)
-                it = sections_.erase(it);
+                undigested_.erase(it->first), it = sections_.erase(it);
             else ++it;
         }
         for (int lod = 0; lod < lodCount; lod++)

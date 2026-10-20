@@ -785,9 +785,10 @@ material's face tiles; a material without a shape is a cube in its palette colou
 first within its budget, once a frame has asked for groups; a dirty section rebuilds its regions (and the one across
 a border it touches); a region whose voxels are clean only builds its tree. Content is the region's exposed voxels
 (an open 6-neighbour: air, a shaped block's empty part, cut-out), read column by column from sections and tiles with
-a ring of the neighbours' columns. At LOD 1-4 the voxels made from real blocks carry their own micro-voxels by
-coverage (solid parts by share, cut-out parts by the opacity a ray across them meets: 1 - (1 - share)^(2^lod)), so a
-crown neither fattens nor thins as it coarsens; such a region exists even where the voxels' mip vote left it empty.
+a ring of the neighbours' columns. At LOD 1 and coarser the voxels made from real blocks carry their own micro-voxels,
+their content's box and, where a micro-voxel is only partly covered, its face masks (what of it each axis sees; "Coarse
+levels from real blocks" below), so a crown neither fattens nor thins as it coarsens; such a region exists even where the
+voxels' mip vote left it empty.
 The tree: binary SAH over voxel planes (exact sweep over presorted lists), per face a flattening error (4-bit codes,
 rounded up), leaves flat solid boxes (every face covered at depth 0) or boxes of at most 4 x 4 x 4 voxels. 16-byte
 nodes (`src/groups.hpp`), a brick pool per region (64 x 64 columns -> slots -> bricks of the occupied voxels' 16-bit
@@ -803,6 +804,35 @@ ground hits it at once). Same outputs; shading, shadows (voxel path), sun map, j
 cards (`atlas_set_surface_cards`, atlas_truth bake=) colour a hit from the game's own rendering of that face, filtered
 by footprint; the game does not send them yet.
 
+**See-through holes and pops in the far pass** (2026-10-19; element tier, far-groups). Three defects of the trace, none
+in the data (the CPU bench drew the same elements clean):
+* *Drawn by a face with holes.* A node was drawn whole when the face the ray enters by had a small error, but that error
+  only bounds the columns that have content: through a hole (a door, a window, the gap under a roof) the ray reached the
+  content deep inside, which drawing skipped (a house seen through its front wall, the lit stairs inside). A node now
+  carries a hole bit per axis and its largest face error (w bits 23-29, `groups.hpp`): through a face with holes it is
+  drawn only when every face's error is under the pixel (the bench's one error a group).
+* *Drawn past the chord.* A drawn box whose texel walks missed and whose exit lay past the chord's end gave up; the next
+  chord started inside it, so a hollow closed box (a room: every face covered, a flat leaf) was stepped from inside. A
+  node the ray leaves past its chord is now opened, not drawn.
+* *A face on a region's face.* A box whose face lies on the region's face, entered there, compared its entry with the
+  region's entry in float and could count as "the chord starts inside it": stepped with the dominant axis as its
+  entry face, a chunk wall on a region border lost its surface card and its normal (bright, unlit walls from 128 m on
+  some elements). Now within 1e-4 of the entry it is entered by its face.
+
+| element (far-groups) | dE 64 / 128 / 256 m before | after | fly-in pop fast / slow before | after |
+|---|---|---|---|---|
+| high-hrothgar-mountains-chunk | 4.2 / 9.5 / 11.4 | 0.83 / 0.60 / 0.91 | 0.34 / 1.05 | 0.007 / 0.030 |
+| whiterun-night-tree | 2.5 / 2.4 / 2.4 | 0.7 / 0.7 / 0.8 | 0.29 / 0.55 | 0.003 / 0.004 |
+| whiterun-day-tree | 2.1 / 2.0 / 2.0 | 0.9 / 0.8 / 0.9 | 0.13 / 0.27 | 0.006 / 0.020 |
+| cave-mouth-near-chunk | 2.1 / 1.3 / 1.3 | 1.2 / 0.7 / 0.7 | 0.13 / 0.18 | 0.016 / 0.007 |
+| whiterun-night-chunk | 1.5 / 1.4 / 3.8 | 1.2 / 1.1 / 3.7 | 0.07 / 0.12 | 0.024 / 0.028 |
+
+Every element's fly-ins passed but snow-winterhold-tree's slow one (0.28): its windows are dark oak fences, whose posts
+(4/16 wide, off the quarter grid) filled no micro-voxel of the 4 x 4 x 4 shape library; since fences and walls are kept
+and thin blocks get the visual hull of their face tiles (atlas-render, AtlasShapes.hull) it passes too. `ATLAS_ABLATE`
+32768 (never draw a node whole for its error; 256 until the far light took that bit) measures the drawn boxes against
+stepping everything; bits 16-18 make the groups' primary rays start at that level (a coarse level seen up close).
+
 **Measured** (offline, `atlas_render` with the Falkreath exports; harness scenes `tools/harness/scenes/atlasgroups.json`):
 
 | Falkreath view, the live camera, 4 spp, vs atlas_truth (dE) | 0-64 | 64-192 | 192-512 | 512-1024 |
@@ -815,8 +845,8 @@ What is left there is mostly what face tiles under a fixed shade cannot carry (t
 smooth light, 4 x 4 against 16 x 16 texels); the element tier with surface cards (`atlas_render camera=mc box=
 cameras= surface=`, 16 spp against the intended reference) measures the representation itself: falkreath-wide-chunk
 dE 2.6-5.2 and iou 0.97-0.999 from 32 m to 2 km, 0.90-0.94 at 4-8 km; the trees 0.7-5.8 and 0.93-0.999 to 2 km;
-fly-ins pop 0.0. Elements beyond the LOD 4 window (~10 km) are gone: real sections only feed LOD 0-4, and the world
-keeps them ~1.2 km out (the server sends them to ~1.5 km); in game far trees and buildings come from the tiles.
+fly-ins pop 0.0. Elements beyond the LOD 4 window (~10 km) were gone: real sections fed LOD 0-4 only, and the world
+keeps them ~1.2 km out (the server sends them to ~1.5 km); "Coarse levels from real blocks" below keeps them.
 
 Vulkan (RTX 3090, 1920 x 1080, GPU timestamps, outputs on the device, the voxel path in alternate frames of the same
 process): the Falkreath view from 200 blocks up with the near field's 192 blocks left out, groups 13-19 ms against the
@@ -826,12 +856,136 @@ steps (a chain of brick-pool lookups a voxel) are what to cut next. CPU backend 
 way. Builds: every tree of the clipmap 24-31 s of CPU (2.9-4.9 s on 10 threads), the slowest region 0.5-0.7 s, 59 MB
 for 191 regions (largest 1.9 MB).
 
+## Coarse levels from real blocks (2026-10-19)
+
+Real sections fed the groups at LOD 0-4 only, and the core drops them a few regions from the camera (World::sectionKeep,
+windowRadius + 3; the server sends them within 4 tiles of the player). Past ~1.3 km a region rebuilt for any reason lost
+its real content, and past the LOD 4 window (~8 km) none was ever there: a real chunk, tree or building was gone, and
+only the column tiles drew.
+
+**The choice.** Three ways were weighed: summaries of each region's group tree (its upper levels with coverage and
+colours), a summary the server sends for far regions, and coarse voxels cached on the client. The server keeps every
+recorded section on disk, but coverage needs the block shapes and cut-out alpha, which only the client has (AtlasShapes,
+from models and textures), and a region's tree depends on the tiles and neighbours around it, so a tree is no unit to
+keep or send. Coarse voxels are the groups' own input (GroupInput: per voxel a material, 64 micro-voxels and what they
+hold), made by the same code from the same sections, so a level made from them is the level made from the sections, and
+nothing pops when the sections go. So: **a clipmap of coarse real voxels on the client** (World::coarse_, CoarseCube),
+the server unchanged. (A server summary is the step after: it would bring what other players saw, and a place visited
+in an earlier session; it needs the shapes on the server or block counts per cell sent instead.)
+
+**What is kept.** Per level 2..6, cubes of 256 blocks, each with that level's voxels made from real blocks (a material,
+the micro-voxels, the 4 x 4 x 4 sub-voxels of those only partly covered, the content's box) and which of its 4096 sections it has
+seen. A voxel of levels 2-4 lies in one section, and so does a micro-voxel of levels 5 and 6 (8 and 16 blocks), so a
+section that arrives again replaces exactly its part (World::digest: per section in parallel, merged under the lock,
+copy on write; within half the update's budget, nearest first). Levels 0 and 1 read the sections, which are there
+wherever those levels draw (their windows lie inside the sections' keep). A level whose cube was dropped borrows the next
+coarser level's (CoarseView: rougher, never gone). Where a section was never seen the tile draws, micro-voxel by
+micro-voxel at levels 5 and 6, so real data and the procedural tiles meet at section borders with no seam of their own.
+Memory: a budget (World::coarseBudget, 256 MB by default; ATLAS_COARSE_BUDGET_MB); over it the cubes farthest from the
+camera for their level's size go first (a fine level's far cubes before a coarse level's), never one within its level's
+window + 1 region.
+
+**Coverage: what a ray meets of a coarse voxel.** This is where the work went, measured on the element tier from 4 to
+32 km and by forcing a level up close (ATLAS_ABLATE bits 16-18). Each step, with the cave-mouth tree's mass against the
+reference (riften-day-tree's at 150 m with level 4 forced in brackets):
+1. *The volume rule* (a micro-voxel there with the probability 1 - (1 - share)^(2^lod) of its blocks' share, hashed):
+   a clump of leaves filling a quarter of an 8-block cell filled all of it, a one-block roof showed an eighth of it: the
+   tree 2.2x at 16 km, 3.5x at 32 km.
+2. *The content's box* (per voxel to a 16th of it, node boxes in quarter micro-voxels: the 12-bit fields hold 4096 a
+   region side): a 9-block chunk no longer stands 12 blocks tall in 4-block cells; whiterun-day-chunk 1.29x -> 1.00 at
+   8 km, the cave tree 0.845 -> 0.905 IoU at 4 km. Levels 5 and 6 clip to their sections' union of boxes.
+3. *Projected coverage per axis* (the share of a cell's block columns a ray along each axis is stopped in, realised per
+   texel): exact for one direction, but summed over the faces a ray can enter by, a round clump shows about 1.6 times its
+   silhouette; per-axis values and a Cauchy factor (a convex body's mean projection is its surface over 4) brought the
+   tree to 1.32x (1.30x).
+4. *Face masks*: per partly covered micro-voxel and axis the 4 x 4 mask of its content's own projection (a texel only
+   partly covered hashed by its share, in world space, the same along the axis): cells side by side add up as the content
+   does. Tested on the face the ray enters by: 1.21x; across the ray at the cell's middle: 0.94x, but a slope's top seen
+   from above went missing (swamp-leyawiin-chunk 0.72x at 16 km). Their visual hull (a quarter there where all three
+   projections cover it): exact for walls, slabs and heightfield tops, but a round clump's hull is fuller than the clump
+   (level 4 forced at 150 m: presence 1.035, level 5 1.20).
+5. *Sub-voxels* (what is kept): per partly covered micro-voxel a 4 x 4 x 4 occupancy, 64 bits (groups.hpp SubVoxels;
+   the brick's table: 2 words a micro-voxel), each sub-voxel there by its own coverage of what its blocks hold (a shaped
+   block by its shape, cut-out leaves by their texels' alpha, Coverage::block), hashed in world space; the ray marches
+   them (gHullRay, at most 10 steps), a drawn node's face walk takes the column under its texel (gHullColumn). Forced at
+   150 m, riften-day-tree: level 4 IoU 0.996 / presence 1.000, level 5 1.27 (8-block micro-voxels seen at 150 m: one
+   sub-voxel is 2 blocks, so a crown's edge is 2 blocks coarse there, as the level means it to be; from 16 km on, where
+   level 5 draws, the elements' presence holds).
+6. *Small nodes are stepped, not drawn whole*: a non-flat node smaller than two pixel footprints (drawn whole, its content
+   is flattened onto one face, an error the node's own size: a pixel-sized tree 1.3x); few rays meet such a node.
+
+It is the design of ATLAS-STREAMING.md's "Hidden things and small things" (coverage from a few directions, baked from
+the real geometry) with the directions the three axes and the realisation deterministic in world space (sub-voxels
+marched by the ray) instead of a pass probability averaged by the temporal resolve; colours still come from the material's face
+tiles or the surface cards at the hit, not from mips (next).
+
+**The element tier, faithfully.** In game the core has an element's sections only while the player is within the
+server's sections window; atlas_render now sends them that way (server=1, the default: the 256-block tiles within 4 of
+the camera's tile, once, again after the tile left the window and came back; AtlasSections.push), and the core keeps and
+drops them as in game. element_lab no longer keeps every section for the whole run (ATLAS_SECTION_KEEP=320, which no game
+does). In boxed mode every hit counts in our mask: the world holds nothing but the element (empty tiles, its sections),
+and a coarse micro-voxel reaching past the box is the element's coverage at that level, which the box test dropped and
+so hid fattening. server=0 restores the old upload-all.
+
+**Cost.** Falkreath's view export (13,243 sections, 4,227 chunk columns: 1.08 km^2) through atlas_render: 31.8 MB of
+coarse levels, 727 k entries; by level 2 / 3 / 4 / 5 / 6: 24.7 / 5.4 / 1.2 / 0.42 / 0.12 MB. So about 29 MB a km^2 of real
+land, four fifths of it level 2 (the default 256 MB budget keeps all levels of ~9 km^2, then the far level-2 cubes go
+first and those places borrow level 3). The digest computes 13 k sections in 0.52 s on 10 threads (air and solid
+micro-voxels skip the texel work) and merges them in 0.8 s; a game spreads that over updates (half the update's budget,
+nearest first), and each batch rebuilds the level-5 and 6 trees over it. Brick pools grow by 3 words a masked voxel and 2
+words a partly covered micro-voxel. Trace (Vulkan, RTX 3090 idle, 1920 x 1080, groups on, the fastest of 16 frames by
+GPU timestamps, the same export and cameras): above Falkreath 12.1 ms against the base far pass's 29.2, 4 km east
+looking back 2.8 against 15.5, 8 km east 1.5 against 11.4; the hull costs at most 10 steps in a partly covered
+micro-voxel, and the trace fixes above (no more chords restarted inside boxes, no face walks through holes) more than pay
+for it.
+
+**Where it touches the scheduler** (World::update, the streaming side's): before the lock, `digest(centreRegion,
+budgetMs)` takes the sections that arrived into the coarse levels; a region is wanted also when its groups only are out of
+date (`treeDirty_`: levels 5 and 6, which the digest marks) or a coarse cube lies under it (`coarseNear`); a job records
+`wasTreeDirty` and puts it back when the budget ran out before it; a pass after the region eviction drops `treeDirty_`
+keys outside the window; the section eviction also forgets the section's pending digest (`undigested_`). Nothing else in
+the ordering, budget or repack changed.
+
+**A Vulkan race (not the coarse levels').** At random rungs one of the 16 jittered samples of an element comes back empty
+(presence ~15/16 = 0.94); the base far pass, groups off, shows it too. It looks like staging (an upload and a frame in
+flight); left to the streaming side.
+
+**Measured** (2026-10-20, element tier, far-groups against the intended reference, CPU backend, server=1; before the
+coarse levels nothing was drawn past the LOD 4 window, presence 0 from 16 km on):
+
+| element | iou 1 / 4 / 8 km | presence 4 / 8 / 16 / 32 km | fly-in pop fast / slow (max) |
+|---|---|---|---|
+| whiterun-day-chunk | 0.998 / 0.971 / 1.000 | 1.03 / 1.00 / 1.62 / 1.50 | 0.039 / 0.000 (0.48 / 0.001) |
+| cave-mouth-near-tree | 0.992 / 0.979 / 1.000 | 0.98 / 1.00 / 1.06 / 1.50 | 0.001 / 0.001 (0.009 / 0.006) |
+| riften-day-tree | 0.996 / 0.989 / 1.000 | 0.99 / 1.00 / 1.50 / 1.00 | 0.026 / 0.019 (0.26 / 0.17) |
+| swamp-leyawiin-chunk | 0.979 / 0.950 / 0.965 | 1.05 / 1.04 / 1.07 / 1.33 | 0.007 / 0.012 (0.05 / 0.20) |
+| snow-winterhold-tree | 1.000 / 1.000 / 1.000 | 1.00 / 1.00 / 1.12 / 2.00 | 0.045 / 0.055 (0.37 / 0.40) |
+
+At 16 km an element covers 4 pixels of the frame and at 32 km 2-3, so the ratios there are of masses under a pixel:
+the cave-mouth tree's 1.06 at 16 km against the volume rule's 2.2x, swamp-leyawiin-chunk's 1.07 against the face
+masks' 0.72x. Every element passes but whiterun-day-chunk at 16 km (0.82 px of coverage against 0.50, the limit 0.25
+px). The fly-in pops stay under the limit (0.1) but are above the earlier table's (0.003-0.03, every section kept): on
+snow-winterhold-tree they grow over the last six steps of the approach, not at one step, so they are no hand-off
+between the sections and the coarse levels; not chased here. Against the exact reference (1 sample a pixel) the same
+elements agree to 512 m (iou 0.95-1.00) and drop below 0.9 from 2-4 km, and from 16 km that reference draws nothing:
+the sub-pixel case the intended reference exists for. On Vulkan the race above shows on whiterun-day-chunk (presence
+0.93-0.95 at 256 m to 2 km, fly-in steps to 0.82), which the CPU backend does not have.
+
+**Translucent water in the offline look** (the element tier's water elements). The far pass drew a lake opaque blue over
+its stone-brick bed; the reference blends the water's texels at their alpha over what lies under it, as the game does.
+The cards now keep their texels' alpha (the mips' top byte, the mean of the shown texels'), and a groups hit on water
+whose card is translucent traces again with water voxels skipped (gSkipWater) and blends the card over what that second
+ray meets, on the sRGB values as the game's framebuffer does: riften-day-water at 48 m dE 5.75 -> 3.56 (the bench: 3.4).
+Only where cards are (offline today); the lit far water keeps its own model.
+
 ## Status (branch atlas-render)
 
 * Done: trees at level 0 grown by their real features (AtlasTrees); real chunks' columns in the change feed (ground,
   one span, lights).
 * Done (native): generated coarser levels from sections, LOD 1..4 (Section::buildMips with the rules above; sections
   are read up to LOD 4, where a section is one voxel).
+* Done (native): coarse levels of real content kept after the sections go, levels 2..6 (World::coarse_, "Coarse levels
+  from real blocks"): a real element is drawn from its own blocks out to the clipmap's edge.
 * Next: sections from real chunks pushed by the server (the change feed); predicted land's objects as sections
   (generators into a capture level); buildings by their builders
   (AtlasCapture for every piece, not massing); surface attributes for ground cover.

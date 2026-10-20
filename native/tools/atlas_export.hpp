@@ -208,8 +208,16 @@ inline uint32_t mulTint(uint32_t argb, uint32_t tint) {
 
 // ---- the export in atlas_core ---------------------------------------------------------------------------------------
 
+// a section held back for the server's sections window (atlas_render's emulation of AtlasSections.push)
+struct Held {
+    int cx, sy, cz;
+    std::vector<uint16_t> mats;  // far materials, x + 16 * (z + 16 * y)
+    bool sent = false;
+};
+
 struct Loaded {
     std::unordered_map<uint32_t, uint16_t> matOf;  // state id -> far material (0: not kept)
+    std::vector<Held> held;  // upload(..., hold = true): the sections, not uploaded
     std::unordered_map<uint64_t, std::pair<int, int>> chunks;  // exported chunk columns -> (lowest, highest) section
     size_t sections = 0, states = 0, shaped = 0;
     int x0 = 0, z0 = 0, x1 = 0, z1 = 0;  // block bounds of the exported chunks
@@ -224,7 +232,7 @@ struct Loaded {
 // box (world blocks, inclusive; null: everything): only the blocks inside it exist (one element cut from the export)
 inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector<Section>& secs, bool keepAll,
                    uint32_t grass, uint32_t foliage, uint32_t water, uint16_t firstMat, Loaded& out, std::string& why,
-                   const int* box = nullptr, bool cutouts = true) {
+                   const int* box = nullptr, bool cutouts = true, bool hold = false) {
     if (box) {
         std::vector<Section> kept;
         for (Section& s : secs) {
@@ -309,9 +317,13 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
         bool any = false;
         for (uint16_t v : conv[k]) any |= v != 0;
         if (!any) continue;
+        out.sections++;
+        if (hold) {
+            out.held.push_back({secs[k].cx, secs[k].sy, secs[k].cz, conv[k], false});
+            continue;
+        }
         if (atlas_upload_section(ctx, secs[k].cx, secs[k].sy, secs[k].cz, conv[k].data()) != ATLAS_OK)
             return why = atlas_last_error(ctx), false;
-        out.sections++;
     }
     out.states = mats.size();
     return true;

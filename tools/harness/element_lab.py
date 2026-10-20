@@ -222,9 +222,11 @@ def camera(box, dist, yaw_deg=30.0, pitch_deg=25.0, size=256):
 def run(tool, args, out=None):
     cmd = [str(EXE / f"{tool}.exe")] + ([f"out={out}"] if out else []) + [f"{k}={v}" for k, v in args.items()]
     env = dict(os.environ)
-    # the far field drops real sections a few regions from the camera and the game's server sends them again on
-    # return; atlas_render has no server, so after a far rung every later frame was sky: keep them all
-    env["ATLAS_SECTION_KEEP"] = "320"  # regions of 256 blocks: past the 65 km rung
+    # the far field drops real sections a few regions from the camera, as in game: atlas_render sends them as the
+    # game's server does (its sections window around the camera, again on return; atlas_render server=1), and what is
+    # drawn from farther away comes from the coarse levels the core kept of them (docs/ATLAS-LOD.md, "Coarse levels
+    # from real blocks"). (It once kept every section for the whole run, ATLAS_SECTION_KEEP=320: no game does.)
+    env.pop("ATLAS_SECTION_KEEP", None)
     r = subprocess.run(cmd, capture_output=True, text=True, env=env, creationflags=0x00004000 if sys.platform == "win32" else 0)
     if r.returncode:
         raise RuntimeError(f"{tool} failed: {(r.stdout + r.stderr)[-400:]}")
@@ -388,6 +390,10 @@ def render_all(renderer, el, frames, tmp):
     tool, args = renderer_args(renderer, el, tmp)
     if tool == "atlas_render" and "backend" not in args:
         args["backend"] = backend()
+    if tool == "atlas_render" and len(frames) == 1:
+        # one camera has no approach: a server would never have sent a far element's sections (server=1), so they
+        # are uploaded and kept (server=0), as for a place visited before
+        args["server"] = 0
     try:
         r = run(tool, {**args, "cameras": lst.as_posix()})
     except RuntimeError:
@@ -566,8 +572,8 @@ def view(a, el):
         print("element_lab: --watch drives atlas_render (a far-* renderer)")
         return 2
     shaders = ROOT / ".work/shaders"
-    env = {**os.environ, "ATLAS_SECTION_KEEP": "320", "ATLAS_SHADER_DIR": str(shaders)}
-    cmd = [str(EXE / "atlas_render.exe"), f"out={ours}", "watch=1", "backend=vulkan"] + \
+    env = {**os.environ, "ATLAS_SHADER_DIR": str(shaders)}
+    cmd = [str(EXE / "atlas_render.exe"), f"out={ours}", "watch=1", "backend=vulkan", "server=0"] + \
           [f"{k}={v}" for k, v in {**args, **cam}.items()]
     print(f"element_lab: watching; run tools/dev/shader_watch.py and edit native/shaders (ctrl-c ends)", flush=True)
     p = subprocess.Popen(cmd, env=env, stderr=subprocess.PIPE, text=True)

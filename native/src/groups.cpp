@@ -23,14 +23,17 @@ int bitOf(int x, int y, int z) { return x + 4 * (z + 4 * y); }
 struct Prim {
     uint8_t v[3];
     uint32_t cell;      // material | VOXEL_SHAPED
-    uint64_t mask;      // resolved micro-voxels (cut-out applied)
+    uint64_t mask;      // resolved micro-voxels (cut-out applied; with face masks: those with any)
+    const SubVoxels* faces = nullptr;  // (masked) its sub-voxels, where it has micro-voxels only partly covered
+    bool partial = false;
     uint16_t lo[3], hi[3];  // its tight box, region micro-voxels
+    uint16_t qlo[3], qhi[3];  // the same in quarter micro-voxels, clipped to its content's box (GroupInput::boxes)
     uint32_t weight;    // micro-voxels: the SAH's content
     uint16_t cover[3];  // per axis a: the micro columns along a with content, bit u + 4 * v over ((a + 1) % 3, (a + 2) % 3)
     uint32_t dlo[3], dhi[3];  // per axis, 2 bits a column: how deep the first content lies from the low / high face
 };
 
-void describe(Prim& p) {
+void describe(Prim& p, uint32_t box = BOX_FULL) {
     uint64_t m = p.mask;
     int lo[3] = {4, 4, 4}, hi[3] = {-1, -1, -1};
     for (int b = 0; b < 64; b++) {
@@ -67,18 +70,39 @@ void describe(Prim& p) {
             }
     }
     p.weight = uint32_t(std::popcount(m));
+    int blo[3], bhi[3];
+    unpackBox(box, blo, bhi);
+    for (int a = 0; a < 3; a++) {
+        int ql = std::max(p.lo[a] * 4, p.v[a] * 16 + blo[a]), qh = std::min(p.hi[a] * 4, p.v[a] * 16 + bhi[a]);
+        if (qh <= ql) ql = p.lo[a] * 4, qh = p.hi[a] * 4;  // (a box that misses its micro-voxels: theirs)
+        p.qlo[a] = uint16_t(ql), p.qhi[a] = uint16_t(qh);
+    }
 }
 
+// a node's box: its content's in quarter micro-voxels (what is written and drawn; the SAH), and its prims'
+// micro-voxels' (what the errors and holes are measured on)
 struct Box {
     int lo[3], hi[3];
+    int mlo[3], mhi[3];
     void clear() {
-        for (int a = 0; a < 3; a++) lo[a] = 1 << 20, hi[a] = -1;
+        for (int a = 0; a < 3; a++) lo[a] = mlo[a] = 1 << 20, hi[a] = mhi[a] = -1;
     }
     void add(const Prim& p) {
-        for (int a = 0; a < 3; a++) lo[a] = std::min(lo[a], int(p.lo[a])), hi[a] = std::max(hi[a], int(p.hi[a]));
+        for (int a = 0; a < 3; a++) {
+            lo[a] = std::min(lo[a], int(p.qlo[a])), hi[a] = std::max(hi[a], int(p.qhi[a]));
+            mlo[a] = std::min(mlo[a], int(p.lo[a])), mhi[a] = std::max(mhi[a], int(p.hi[a]));
+        }
+    }
+    Box micro() const {
+        Box m = *this;
+        for (int a = 0; a < 3; a++) m.lo[a] = mlo[a], m.hi[a] = mhi[a];
+        return m;
     }
     void add(const Box& b) {
-        for (int a = 0; a < 3; a++) lo[a] = std::min(lo[a], b.lo[a]), hi[a] = std::max(hi[a], b.hi[a]);
+        for (int a = 0; a < 3; a++) {
+            lo[a] = std::min(lo[a], b.lo[a]), hi[a] = std::max(hi[a], b.hi[a]);
+            mlo[a] = std::min(mlo[a], b.mlo[a]), mhi[a] = std::max(mhi[a], b.mhi[a]);
+        }
     }
     float area() const {
         if (hi[0] < lo[0]) return 0;
@@ -119,8 +143,10 @@ public:
 
 private:
     // the flattening error of each face of the node (micro-voxels: how deep the first content lies under it, the
-    // deepest over the face) and whether each axis' faces have holes (columns with nothing in them)
-    void analyze(uint32_t b, uint32_t e, const Box& box, uint32_t err[6], bool holes[3]) {
+    // deepest over the face) and whether each axis' faces have holes (columns with nothing in them); qbox in quarter
+    // micro-voxels, measured on the micro-voxels it touches
+    void analyze(uint32_t b, uint32_t e, const Box& qbox, uint32_t err[6], bool holes[3]) {
+        Box box = qbox.micro();
         for (int a = 0; a < 3; a++) {
             int a1 = (a + 1) % 3, a2 = (a + 2) % 3;
             int vlo1 = box.lo[a1] >> 2, vlo2 = box.lo[a2] >> 2;
@@ -167,11 +193,15 @@ private:
         }
     }
 
-    void write(uint32_t at, const Box& box, const uint32_t err[6], uint32_t type, uint32_t child) {
+    void write(uint32_t at, const Box& box, const uint32_t err[6], const bool holes[3], uint32_t type, uint32_t child) {
         uint32_t* w = &out_->nodes[size_t(at) * 4];
-        for (int a = 0; a < 3; a++)
-            w[a] = uint32_t(box.lo[a]) | uint32_t(box.hi[a]) << 12 | errCode(err[2 * a]) << 24 | errCode(err[2 * a + 1]) << 28;
-        w[3] = type << 30 | child;
+        uint32_t most = 0, hb = 0;
+        for (int a = 0; a < 3; a++) {
+            w[a] = uint32_t(box.lo[a]) | uint32_t(box.hi[a] - 1) << 12 | errCode(err[2 * a]) << 24 | errCode(err[2 * a + 1]) << 28;
+            most = std::max(most, std::max(err[2 * a], err[2 * a + 1]));
+            hb |= holes[a] ? 1u << a : 0u;
+        }
+        w[3] = type << 30 | hb << NODE_HOLES_SHIFT | errCode(most) << NODE_MAXERR_SHIFT | child;
     }
 
     void build(uint32_t at, uint32_t b, uint32_t e, const Box& box, int depth) {
@@ -182,10 +212,10 @@ private:
         analyze(b, e, box, err, holes);
         bool flat = !holes[0] && !holes[1] && !holes[2];
         for (int f = 0; f < 6; f++) flat = flat && err[f] == 0;
-        if (flat) return write(at, box, err, NODE_FLAT, 0);
+        if (flat) return write(at, box, err, holes, NODE_FLAT, 0);
         bool small = true;
-        for (int a = 0; a < 3; a++) small = small && ((box.hi[a] + 3) >> 2) - (box.lo[a] >> 2) <= 4;
-        if (small || e - b == 1 || depth >= GROUP_STACK - 4) return write(at, box, err, NODE_VOXELS, 0);
+        for (int a = 0; a < 3; a++) small = small && ((box.mhi[a] + 3) >> 2) - (box.mlo[a] >> 2) <= 4;  // (voxels)
+        if (small || e - b == 1 || depth >= GROUP_STACK - 4) return write(at, box, err, holes, NODE_VOXELS, 0);
         // the SAH over every voxel plane of every axis: each side's tight box surface times what it holds
         float best = 3.4e38f;
         int bestAxis = -1, bestPlane = 0;
@@ -219,7 +249,7 @@ private:
                 }
             }
         }
-        if (bestAxis < 0) return write(at, box, err, NODE_VOXELS, 0);
+        if (bestAxis < 0) return write(at, box, err, holes, NODE_VOXELS, 0);
         // partition every axis' order stably: the left side first
         uint32_t nl = 0;
         for (uint32_t i = b; i < e; i++) {
@@ -234,12 +264,12 @@ private:
             std::copy(scratch_.begin(), scratch_.begin() + (e - b), ord.begin() + b);
         }
         uint32_t first = uint32_t(out_->nodes.size() / 4);
-        if (first + 2 > lim_.maxNodes) {
+        if (first + 2 > std::min<uint32_t>(lim_.maxNodes, CHILD_MASK)) {
             failed_ = true;
             return;
         }
         out_->nodes.resize(out_->nodes.size() + 8);
-        write(at, box, err, NODE_INNER, first);
+        write(at, box, err, holes, NODE_INNER, first);
         build(first, b, b + nl, bestL, depth + 1);
         build(first + 1, b + nl, e, bestR, depth + 1);
     }
@@ -275,6 +305,7 @@ void buildPool(const std::vector<Prim>& prims, GroupTree& out) {
     std::vector<int32_t> at(64 * 64 * 64, -1);  // brick (x + 64 * (z + 64 * y)) -> its cells in raw
     std::vector<std::array<uint32_t, 32>> raw;
     std::vector<uint64_t> rawMasks;  // per raw brick 64 voxels' own micro-voxels (masked ones)
+    std::vector<const SubVoxels*> rawFaces;  // and their sub-voxels
     for (const Prim& p : prims) {
         int bx = p.v[0] >> 2, by = p.v[1] >> 2, bz = p.v[2] >> 2;
         int32_t& k = at[size_t(bx + 64 * (bz + 64 * by))];
@@ -282,14 +313,18 @@ void buildPool(const std::vector<Prim>& prims, GroupTree& out) {
             k = int32_t(raw.size());
             raw.push_back({});
             rawMasks.resize(rawMasks.size() + 64, 0);
+            rawFaces.resize(rawFaces.size() + 64, nullptr);
         }
         uint32_t m = p.cell & 0xFFFFu;
-        bool masked = (p.cell & VOXEL_MASKED) && p.mask != SHAPE_FULL;
+        bool masked = (p.cell & VOXEL_MASKED) && (p.mask != SHAPE_FULL || p.partial);
         uint32_t cell = (m & CELL_MATERIAL) | ((p.cell & VOXEL_SHAPED) && m <= CELL_MATERIAL ? CELL_SHAPED : 0u) |
                         (masked ? CELL_MASKED : 0u);
         int i = (p.v[0] & 3) + 4 * ((p.v[2] & 3) + 4 * (p.v[1] & 3));
         raw[size_t(k)][size_t(i >> 1)] |= cell << (16 * (i & 1));
-        if (masked) rawMasks[size_t(k) * 64 + size_t(i)] = p.mask;
+        if (masked) {
+            rawMasks[size_t(k) * 64 + size_t(i)] = p.mask;
+            rawFaces[size_t(k) * 64 + size_t(i)] = p.partial ? p.faces : nullptr;
+        }
     }
     // a brick as stored: which of its 64 voxels hold something (2 words), then only those cells, two to a word, in
     // order (most bricks of a terrain skin hold a third of their voxels); identical ones once
@@ -316,12 +351,28 @@ void buildPool(const std::vector<Prim>& prims, GroupTree& out) {
             packed.back() |= cell << (16 * (n & 1));
             n++;
         }
+        // the masked voxels' micro-voxels and where their sub-voxels are, then those tables (MASKED_WORDS, SubVoxels)
+        std::vector<size_t> tableSlot;
+        std::vector<const SubVoxels*> tables;
         for (int i = 0; i < 64; i++)
             if ((mocc >> i) & 1) {
                 uint64_t m = rawMasks[k * 64 + size_t(i)];
                 packed.push_back(uint32_t(m));
                 packed.push_back(uint32_t(m >> 32));
+                packed.push_back(0);
+                if (const SubVoxels* f = rawFaces[k * 64 + size_t(i)]) tableSlot.push_back(packed.size() - 1), tables.push_back(f);
             }
+        for (size_t t = 0; t < tables.size(); t++) {
+            const SubVoxels& f = *tables[t];
+            packed[tableSlot[t]] = uint32_t(packed.size());  // (brick-relative)
+            packed.push_back(uint32_t(f.partial));
+            packed.push_back(uint32_t(f.partial >> 32));
+            for (int b = 0; b < 64; b++)
+                if ((f.partial >> b) & 1) {
+                    packed.push_back(uint32_t(f.sub[size_t(b)]));
+                    packed.push_back(uint32_t(f.sub[size_t(b)] >> 32));
+                }
+        }
         auto it = unique.find(packed);
         if (it == unique.end()) {
             it = unique.emplace(packed, uint32_t(out.bricks.size())).first;
@@ -379,9 +430,10 @@ GroupTree buildGroupTree(const GroupInput& in, const ShapeSet& shapes, const Gro
         if (i == -2) return false;
         uint32_t c = in.vox[size_t(i)];
         if (c == 0) return true;
-        if (c & VOXEL_MASKED) {
+        if (c & VOXEL_MASKED) {  // (its micro-voxels, or a content box short of the voxel's)
             auto m = in.masks.find(uint32_t(i));
-            return m != in.masks.end() && m->second != SHAPE_FULL;
+            return (m != in.masks.end() && m->second != SHAPE_FULL) || in.boxes.count(uint32_t(i)) != 0 ||
+                   in.faces.count(uint32_t(i)) != 0;
         }
         if (!(c & VOXEL_SHAPED)) return false;
         const MaterialShape* s = shapes.at(c & 0xFFFFu);
@@ -405,8 +457,11 @@ GroupTree buildGroupTree(const GroupInput& in, const ShapeSet& shapes, const Gro
                 p.cell = cell;
                 p.mask = SHAPE_FULL;
                 if (cell & VOXEL_MASKED) {
-                    auto m = in.masks.find(uint32_t(in.index(x, row, z)));
+                    uint32_t vi = uint32_t(in.index(x, row, z));
+                    auto m = in.masks.find(vi);
                     if (m != in.masks.end()) p.mask = m->second;
+                    auto fc = in.faces.find(vi);
+                    if (fc != in.faces.end() && fc->second.partial) p.faces = &fc->second, p.partial = true;
                 } else if (cell & VOXEL_SHAPED) {
                     const MaterialShape* s = shapes.at(cell & 0xFFFFu);
                     if (s) {
@@ -422,7 +477,12 @@ GroupTree buildGroupTree(const GroupInput& in, const ShapeSet& shapes, const Gro
                     }
                 }
                 if (!p.mask) continue;
-                describe(p);
+                uint32_t vb = BOX_FULL;
+                if (cell & VOXEL_MASKED) {
+                    auto bx = in.boxes.find(uint32_t(in.index(x, row, z)));
+                    if (bx != in.boxes.end()) vb = bx->second;
+                }
+                describe(p, vb);
                 prims.push_back(p);
             }
         }
