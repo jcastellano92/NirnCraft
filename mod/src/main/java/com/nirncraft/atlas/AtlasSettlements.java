@@ -124,6 +124,7 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
         int span = AtlasNative.TILE << lod;
         g = ground != null ? ground : (x, z) -> (int) Math.floor(ctx.previewHeight(x + 0.5, z + 0.5));
         refreshNatural();
+        refreshFacings();
         java.util.Set<Long> window = new HashSet<>();
         // nearest the window's centre first (the camera's tile), so a time-boxed pass fills what is close
         double ctx0 = (Math.floorDiv(x0, span) + Math.floorDiv(x1 - 1, span)) / 2.0, ctz0 = (Math.floorDiv(z0, span) + Math.floorDiv(z1 - 1, span)) / 2.0;
@@ -300,12 +301,47 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
         for (int k = 0; k < now.count(); k++) {
             int nx = now.xz()[k * 2], nz = now.xz()[k * 2 + 1];
             if (before.contains(nx + "," + nz)) continue;
-            for (int lod = 0; lod < AtlasFarField.LODS; lod++) {
-                int span = AtlasNative.TILE << lod;
-                for (int tz = Math.floorDiv(nz - 32, span); tz <= Math.floorDiv(nz + 32, span); tz++)
-                    for (int tx = Math.floorDiv(nx - 32, span); tx <= Math.floorDiv(nx + 32, span); tx++)
-                        uploaded.remove(AtlasRefiningSource.key(lod, tx, tz));
+            restamp(nx, nz, 32);
+        }
+    }
+
+    /** The resident tiles within r blocks of (x, z) are stamped again at every level. */
+    private void restamp(int x, int z, int r) {
+        for (int lod = 0; lod < AtlasFarField.LODS; lod++) {
+            int span = AtlasNative.TILE << lod;
+            for (int tz = Math.floorDiv(z - r, span); tz <= Math.floorDiv(z + r, span); tz++)
+                for (int tx = Math.floorDiv(x - r, span); tx <= Math.floorDiv(x + r, span); tx++)
+                    uploaded.remove(AtlasRefiningSource.key(lod, tx, tz));
+        }
+    }
+
+    /** The facing each wild site's silhouette was built with, and its lights (to take them back). */
+    private final Map<String, Direction> siteFacing = new HashMap<>();
+    private final Map<String, List<AtlasLights.Light>> lightsOfSite = new HashMap<>();
+    private Map<String, Direction> facingsSeen = Map.of();
+
+    /**
+     * New facings from the server (AtlasSites.acceptFacings): a wild site already drawn the other way is built again
+     * (its lights taken out of its cell's group) and the tiles it touches stamped again.
+     */
+    private void refreshFacings() {
+        Map<String, Direction> now = AtlasSites.seededFacings();
+        if (now == facingsSeen) return;
+        facingsSeen = now;
+        for (Map.Entry<String, Direction> e : now.entrySet()) {
+            Direction used = siteFacing.get(e.getKey());
+            if (used == null || used == e.getValue()) continue;
+            Place p = Places.byId(e.getKey()).orElse(null);
+            if (p == null) continue;
+            sites.remove(p.id());
+            siteFacing.remove(p.id());
+            List<AtlasLights.Light> old = lightsOfSite.remove(p.id());
+            long cell = (long) Math.floorDiv(p.x(), 4096) << 32 | (Math.floorDiv(p.z(), 4096) & 0xFFFFFFFFL);
+            if (old != null && siteLights.containsKey(cell)) {
+                siteLights.get(cell).removeAll(old);
+                if (!siteLightsPending.contains(cell)) siteLightsPending.add(cell);
             }
+            restamp(p.x(), p.z(), 64);
         }
     }
 
@@ -348,6 +384,7 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
             AtlasCapture.Shape sh = null;
             long t0 = System.nanoTime();
             try {
+                if (AtlasSites.faced(p)) siteFacing.put(p.id(), AtlasSites.facing(p));
                 sh = AtlasSites.shape(p, g);
             } catch (RuntimeException e) {
                 // one odd site must not cost the far field
@@ -360,9 +397,11 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
                 long cell = (long) Math.floorDiv(p.x(), 4096) << 32 | (Math.floorDiv(p.z(), 4096) & 0xFFFFFFFFL);
                 List<AtlasLights.Light> l = siteLights.computeIfAbsent(cell, k -> new ArrayList<>());
                 boolean volcano = p.id().equals("red_mountain") || p.id().equals("dagoth_ur");
+                int from = l.size();
                 for (int[] q : sh.lights)
                     l.add(volcano && q[3] >= 15 ? AtlasLights.lava(q[0] + 0.5, q[1] + 0.5, q[2] + 0.5, 4f)
                             : AtlasLights.fire(q[0] + 0.5, q[1] + 0.5, q[2] + 0.5, q[3] / 15f));
+                if (siteFacing.containsKey(p.id())) lightsOfSite.put(p.id(), new ArrayList<>(l.subList(from, l.size())));
                 if (p.id().equals("red_mountain")) {
                     // the caldera's glow: the crater floor's lava lighting the ash and smoke over it, so it reads above
                     // the rim from anywhere on Vvardenfell (the rim hides the floor itself from below)
@@ -569,6 +608,11 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
 
     private void piece(Spec s, List<Object> out, List<AtlasLights.Light> lights, String settlement, long pieceSeed) {
         if (s.has(Spec.OMIT) || s.floor == Spec.UNSET || s.kind == null) return;
+        // a provincial home plot (HousePlots) is only levelled ground until a player comes within 260 blocks and
+        // economy.homes builds the home in its own style: the plot's ground is what stands. Whether a home has been
+        // built is server state the client does not have; once built, its block changes come through the change feed
+        // (docs/ATLAS-DELTAS.md)
+        if (s.has(Spec.RESERVED)) return;
         Archetype k = s.kind;
         float floor = s.floor + 1;  // floor is the y of the floor block: walls stand on top of it
         lightsOf(s, floor, lights);

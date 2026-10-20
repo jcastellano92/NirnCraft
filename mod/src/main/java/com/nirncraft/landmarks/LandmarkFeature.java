@@ -29,10 +29,18 @@ public class LandmarkFeature extends ConfiguredFeature<NoneFeatureConfiguration>
         if (sites.isEmpty()) return false;
         boolean any = false;
         for (LandmarkSite site : sites) {
+            boolean built = false;
             try {
-                any |= LandmarkBuilder.build(level, site, false, null);
+                built = LandmarkBuilder.build(level, site, false, null);
             } catch (RuntimeException e) {
                 NirnCraft.LOGGER.warn("NirnCraft landmarks: failed to place {} at {} {}", site.kind().id(), site.x(), site.z(), e);
+            }
+            any |= built;
+            // the far field trusts this over its prediction: a site that threw counts as refused
+            try {
+                LandmarkWorldData.record(level, site, built);
+            } catch (RuntimeException e) {
+                NirnCraft.LOGGER.debug("NirnCraft landmarks: could not record {} at {} {}", site.kind().id(), site.x(), site.z(), e);
             }
         }
         return any;

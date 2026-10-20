@@ -222,12 +222,8 @@ public final class PlacementMask {
         long seed = owner.getSeed();
         boolean overworld = owner.dimension() == Level.OVERWORLD;
         try {
-            if (overworld) {
-                if (mapRoadChannel) roads(p, x0, z0);
-                places(p, x0, z0);
-            }
+            bakedPlans(p, seed, cx, cz, overworld);
             structures(level, p, cx, cz);
-            for (Source s : SOURCES) s.contribute(seed, cx, cz, p);
         } catch (RuntimeException e) {
             NirnCraft.LOGGER.warn("PlacementMask: could not build the plan grid of chunk {} {}", cx, cz, e);
         }
@@ -251,6 +247,28 @@ public final class PlacementMask {
         long n = BUILDS.sum();
         if (n % 2000 == 0) NirnCraft.LOGGER.info(stats());
         return m;
+    }
+
+    /** The plans that need no generated chunk: the map's road corridors, settlement cores, the registered sources. */
+    private static void bakedPlans(byte[] p, long seed, int cx, int cz, boolean overworld) {
+        int x0 = cx << 4, z0 = cz << 4;
+        if (overworld) {
+            if (mapRoadChannel) roads(p, x0, z0);
+            places(p, x0, z0);
+        }
+        for (Source s : SOURCES) s.contribute(seed, cx, cz, p);
+    }
+
+    /**
+     * {@link #clearOfPlans} in the overworld without a generation region (the far field, before the chunk exists): the
+     * baked plans only. Structure pieces are not known here (their starts exist once generation reaches them).
+     * Allocates one chunk grid per call; not counted in the statistics.
+     */
+    public static boolean clearOfBakedPlans(long seed, int x, int z, int radius) {
+        byte[] p = new byte[256];
+        Arrays.fill(p, (byte) CAP);
+        bakedPlans(p, seed, x >> 4, z >> 4, true);
+        return p[(z & 15) << 4 | (x & 15)] > radius;
     }
 
     /** Developer aid: {@code -Dnirncraft.mask.dump=<file>} appends "chunkX chunkZ minClearance maskedColumns" per grid. */

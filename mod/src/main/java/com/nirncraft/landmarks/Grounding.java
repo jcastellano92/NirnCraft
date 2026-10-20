@@ -138,8 +138,71 @@ public final class Grounding {
                 }
             }
         }
+        return finish(f, hs, hs.isEmpty() ? b.groundAt(b.cx, b.cz) : 0);
+    }
+
+    /**
+     * A column source for {@link #predict}: the terrain without chunks (the seeded height function and the map's
+     * water, as the far field sees them).
+     */
+    public interface Columns {
+        /** Marks a column that stands in water (sea, river, lake). */
+        int WET = Integer.MIN_VALUE;
+
+        /** Y of the column's top solid block, or {@link #WET}. */
+        int ground(int x, int z);
+    }
+
+    /**
+     * {@link #sample}'s measurement of the circle of {@code radius} around (cx, cz) from predicted columns instead of
+     * blocks (no trees to skip, no carver or decoration changes: what the noise terrain says).
+     */
+    public static Footprint predict(int cx, int cz, int radius, Columns c) {
+        IntArrayList hs = new IntArrayList();
+        Footprint f = new Footprint();
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                if (dx * dx + dz * dz > radius * radius) continue;
+                int g = c.ground(cx + dx, cz + dz);
+                if (g == Columns.WET) {
+                    f.wet++;
+                } else {
+                    f.dry++;
+                    hs.add(g);
+                }
+            }
+        }
+        return finish(f, hs, 0);
+    }
+
+    /** SiteBuilder.footprintWet over predicted columns: water at the centre or at 8 points at radius/2 and radius. */
+    public static boolean footprintWet(int cx, int cz, int radius, Columns c) {
+        if (c.ground(cx, cz) == Columns.WET) return true;
+        for (int d : new int[]{radius / 2, radius}) {
+            for (int[] o : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}}) {
+                if (c.ground(cx + o[0] * d, cz + o[1] * d) == Columns.WET) return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * The terrain refusal a site of {@code kind} gets on this footprint ("slope", "water", "deep"), or null when it
+     * may be built. {@code footprintWet} is asked only when the slope passed (the builder's order).
+     */
+    public static String refusal(Kind kind, Footprint fp, java.util.function.BooleanSupplier footprintWet) {
+        boolean coastal = kind.needs().contains("coast") || kind.needs().contains("shore");
+        if (fp.spread() > kind.maxSpread()) return "slope";
+        if (!coastal && footprintWet.getAsBoolean()) return "water";
+        if (!coastal && fp.wetShare() > MAX_WET_SHARE) return "water";
+        if (fp.depth() > MAX_FILL || fp.tooDeep > Math.max(1, fp.dry / 20)) return "deep";
+        return null;
+    }
+
+    /** The statistics of the dry columns' heights hs ({@code fallbackTop}: the base when every column is wet). */
+    private static Footprint finish(Footprint f, IntArrayList hs, int fallbackTop) {
         if (hs.isEmpty()) {
-            f.baseTop = b.groundAt(b.cx, b.cz);
+            f.baseTop = fallbackTop;
             f.lowest = f.highest = f.p05 = f.p95 = f.baseTop;
             return f;
         }

@@ -249,17 +249,11 @@ public class DungeonStructure extends Structure {
         }
         if (pl == null) return Optional.empty();
         WorldgenRandom random = ctx.random();
+        // the first two draws are siteFacing's too (keep them in step)
         long seed = random.nextLong() ^ pl.id().hashCode();
         Direction rolled = Direction.Plane.HORIZONTAL.getRandomDirection(random);
-        // Labyrinthian's stair opens towards the city's main street
-        // a dungeon's mouth opens towards the trail that leads to it; with no trail, downhill, never into the slope above it
-        int h0 = theme.underground() && !theme.hasUndercroft() && special != Special.LABYRINTHIAN ? surface(ctx, pl.x(), pl.z()) : WATER;
+        Direction out = mouth(ctx, pl, rolled);
         com.nirncraft.worldplan.TrailEnds.Arrival arrival = com.nirncraft.worldplan.TrailEnds.of(pl.id());
-        Direction toTrail = arrival == null ? null
-                : Math.abs(arrival.x() - pl.x()) + Math.abs(arrival.z() - pl.z()) < 4 ? null
-                : Direction.getApproximateNearest(arrival.x() - pl.x(), 0, arrival.z() - pl.z());
-        Direction out = special == Special.LABYRINTHIAN ? Direction.NORTH : toTrail != null ? toTrail
-                : h0 != WATER ? downhill(ctx, pl.x(), pl.z(), h0, rolled) : rolled;
         int fl = flavor >= 0 ? flavor : randomFlavor(random);
         Kit placeKit = Kit.forCulture(pl.culture());
         Kit k = placeKit != null ? placeKit : regionalKit ? Cultures.kitFor(TamrielMap.region(pl.x(), pl.z()), pl.x(), pl.z()) : kit;
@@ -342,6 +336,35 @@ public class DungeonStructure extends Structure {
             Layout.underground(builder, site, fx, surface, fz, fOut, fDepth, seed, minY + 10, false, g, 3);
             if (special != Special.NONE && special != Special.LABYRINTHIAN && wonder == null) Layout.exterior(builder, site, fx, surface, fz, fOut, seed);
         }));
+    }
+
+    /**
+     * The way a named place's site opens: Labyrinthian's stair towards the city's main street (north); a dungeon's
+     * mouth towards the trail that leads to it; with no trail, downhill, never into the slope above it; else rolled.
+     */
+    private Direction mouth(GenerationContext ctx, Place pl, Direction rolled) {
+        int h0 = theme.underground() && !theme.hasUndercroft() && special != Special.LABYRINTHIAN ? surface(ctx, pl.x(), pl.z()) : WATER;
+        com.nirncraft.worldplan.TrailEnds.Arrival arrival = com.nirncraft.worldplan.TrailEnds.of(pl.id());
+        Direction toTrail = arrival == null ? null
+                : Math.abs(arrival.x() - pl.x()) + Math.abs(arrival.z() - pl.z()) < 4 ? null
+                : Direction.getApproximateNearest(arrival.x() - pl.x(), 0, arrival.z() - pl.z());
+        return special == Special.LABYRINTHIAN ? Direction.NORTH : toTrail != null ? toTrail
+                : h0 != WATER ? downhill(ctx, pl.x(), pl.z(), h0, rolled) : rolled;
+    }
+
+    /**
+     * The facing placeStart gives the site of place {@code pl} (a place this structure's filter matches), without
+     * building it: for the far field's silhouettes (atlas.AtlasSites), on the server (the seed never leaves it).
+     * {@code ctx} must be a fresh context for the place's chunk (its random is the structure's: world seed + chunk).
+     */
+    public Direction siteFacing(GenerationContext ctx, Place pl) {
+        WorldgenRandom random = ctx.random();
+        random.nextLong();
+        Direction out = mouth(ctx, pl, Direction.Plane.HORIZONTAL.getRandomDirection(random));
+        // shipwrecks, undercrofts (forts), the great lifts and underground mouths face `out`; other surface sites
+        // facingFor's (uniques fixed)
+        if (theme == Theme.SHIPWRECK || theme.hasUndercroft() || theme.underground() || theme == Theme.GREAT_LIFT) return out;
+        return facingFor(pl, out);
     }
 
     private static void addWonderSurface(net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder builder,

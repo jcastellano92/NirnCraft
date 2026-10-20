@@ -2,25 +2,41 @@ package com.nirncraft.atlas;
 
 // atlas:sandbox-only (compiled against the real mod by sandbox_check.ps1, not by compile_check.ps1's stubs)
 
+import com.nirncraft.dungeons.world.DungeonStructure;
 import com.nirncraft.tamriel.MapSample;
 import com.nirncraft.tamriel.Place;
 import com.nirncraft.tamriel.PlaceType;
+import com.nirncraft.tamriel.Places;
 import com.nirncraft.tamriel.TamrielMap;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.IntBinaryOperator;
 
 /**
  * Far silhouettes of the named wild sites (Places outside the street plan: forts, watchtowers, lighthouses, mage
  * towers, shrines, groves, dragon lairs, the Greybeards' monastery, Labyrinthian, the world wonders and every dungeon
  * entrance) as the mod's builders make them (dungeons/world: SurfaceBuilder, Towers, Sacred, Statues, Uniques,
- * Landmarks, Portals; dimensions transcribed from the builder code). Positions are the Place's, nudged off water the
- * way DungeonStructure does; the base is the ground there + 1. The few seeded choices (most sites' facing) are taken
- * from the place's trail where it has one, else north: every built shape is symmetric or nearly so, which is what reads
- * from afar. Seed-free, so multiplayer clients draw the same.
+ * Landmarks, Portals; dimensions transcribed from the builder code: the builders write their sizes as literals in
+ * their geometry, there are no constants to share). Positions are the Place's, nudged off water the way
+ * DungeonStructure does; the base is the ground there + 1. A site's facing is the builder's: the server works it out
+ * with DungeonStructure.siteFacing (the trail, a mouth's downhill side, else the direction rolled from the world seed,
+ * which never leaves the server) and sends it (AtlasNet.FarFacings, see {@link #facings}); until it arrives, or from a
+ * server that sends none, the trail's direction, else north.
  */
 final class AtlasSites {
     private AtlasSites() {}
@@ -85,8 +101,7 @@ final class AtlasSites {
             }
             default -> { }
         }
-        if (t == PlaceType.FORT || t == PlaceType.DUNGEON_FIXED && Set.of("fort", "akaviri_fort", "dunmer_stronghold",
-                "imperial_prison_fort", "tsaesci_fortress", "breton_keep_ruin").contains(v)) {
+        if (t == PlaceType.FORT || t == PlaceType.DUNGEON_FIXED && FORTS.contains(v)) {
             int[] c = centre(p, g, false);
             boolean ruin = v.equals("breton_keep_ruin");
             BlockState wall = switch (v) {
@@ -166,8 +181,111 @@ final class AtlasSites {
         return m.inWater() && m.waterLevel > g.applyAsInt(x, z);
     }
 
-    /** The trail's direction where the place has one (seed-free), else north. */
+    /** Fixed dungeon variants drawn as forts (symmetric: no facing). */
+    private static final Set<String> FORTS = Set.of("fort", "akaviri_fort", "dunmer_stronghold", "imperial_prison_fort",
+            "tsaesci_fortress", "breton_keep_ruin");
+
+    /** Places whose silhouette is drawn with a facing (shape's facing(p) calls). */
+    static boolean faced(Place p) {
+        if (BUILT_WONDERS.contains(p.id())) return false;
+        String v = p.variant() == null ? "" : p.variant();
+        PlaceType t = p.type();
+        return t == PlaceType.DUNGEON_FIXED && !FORTS.contains(v) || t == PlaceType.WORD_WALL
+                || t == PlaceType.DAEDRIC_SHRINE && !v.equals("altar") && !v.equals("daedric_ruin");
+    }
+
+    // ---- the seeded facings: the server works them out, the client keeps what it was sent ----------------------
+
+    /** Client: facings the server sent, by place id (an immutable snapshot, replaced when one changes). */
+    private static volatile Map<String, Direction> seeded = Map.of();
+
+    /** Client: the facings the server last sent, merged into those it sent before. */
+    static synchronized void acceptFacings(AtlasNet.FarFacings m) {
+        Map<String, Direction> next = new HashMap<>(seeded);
+        boolean changed = false;
+        for (int i = 0; i < m.ids().length; i++) {
+            Direction d = Direction.from2DDataValue(m.facing()[i]);
+            if (next.put(m.ids()[i], d) != d) changed = true;
+        }
+        if (changed) seeded = Map.copyOf(next);
+    }
+
+    /** Client: left the server (its facings belong to its world). */
+    static void clearFacings() {
+        seeded = Map.of();
+    }
+
+    /** Client: the current snapshot (identity changes when a facing does). */
+    static Map<String, Direction> seededFacings() {
+        return seeded;
+    }
+
+    /** Server: place id -> 2D facing value, -1 when no named-place structure builds it. Deterministic per world. */
+    private static final Map<String, Byte> SERVER_FACINGS = new ConcurrentHashMap<>();
+    private static volatile List<DungeonStructure> namedStructures;
+
+    /**
+     * Server (any thread): the facings of the faced wild places within {@code range} of (x, z), nearest first, as
+     * their builders decide them (DungeonStructure.siteFacing with a fresh structure context for the place's chunk:
+     * the same random draws and terrain probes as placeStart). Each place is worked out once per world.
+     */
+    static AtlasNet.FarFacings facings(ServerLevel level, int x, int z, int range) {
+        List<Place> near = new ArrayList<>();
+        for (Place p : Places.overlapping(x - range, z - range, x + range, z + range))
+            if (!p.type().isSettlement() && faced(p)) near.add(p);
+        near.sort(java.util.Comparator.comparingLong(p -> (long) (p.x() - x) * (p.x() - x) + (long) (p.z() - z) * (p.z() - z)));
+        List<String> ids = new ArrayList<>();
+        List<Byte> fs = new ArrayList<>();
+        for (Place p : near) {
+            if (ids.size() >= AtlasNet.MAX_SITES) break;
+            byte f = SERVER_FACINGS.computeIfAbsent(p.id(), k -> {
+                try {
+                    return facingOf(level, p);
+                } catch (RuntimeException e) {
+                    return (byte) -1;  // the client keeps its trail / north guess
+                }
+            });
+            if (f < 0) continue;
+            ids.add(p.id());
+            fs.add(f);
+        }
+        byte[] facing = new byte[fs.size()];
+        for (int i = 0; i < facing.length; i++) facing[i] = fs.get(i);
+        return new AtlasNet.FarFacings(ids.toArray(new String[0]), facing);
+    }
+
+    private static byte facingOf(ServerLevel level, Place p) {
+        List<DungeonStructure> all = namedStructures;
+        if (all == null) {
+            all = new ArrayList<>();
+            for (Structure s : level.registryAccess().lookupOrThrow(Registries.STRUCTURE))
+                if (s instanceof DungeonStructure ds && ds.place.isPresent() && ds.sites.isEmpty()) all.add(ds);
+            namedStructures = all;
+        }
+        for (DungeonStructure ds : all) {
+            if (!ds.place.get().matches(p)) continue;
+            ServerChunkCache cs = level.getChunkSource();
+            ChunkGenerator gen = cs.getGenerator();
+            RandomState rs = cs.randomState();
+            Structure.GenerationContext ctx = new Structure.GenerationContext(level.registryAccess(), gen, gen.getBiomeSource(),
+                    rs.createClimateSampler(net.minecraft.world.level.levelgen.densityfunction.SamplerContext.builder().build()),
+                    rs, level.getServer().getStructureTemplateManager(), cs.getGeneratorState().getLevelSeed(),
+                    new ChunkPos(p.x() >> 4, p.z() >> 4), level, b -> true);
+            return (byte) ds.siteFacing(ctx, p).get2DDataValue();
+        }
+        return -1;
+    }
+
+    /** Server stopped: the next world works its facings out again. */
+    static void stopServer() {
+        SERVER_FACINGS.clear();
+        namedStructures = null;
+    }
+
+    /** The builder's facing as the server sent it; else the trail's direction where the place has one, else north. */
     static Direction facing(Place p) {
+        Direction known = seeded.get(p.id());
+        if (known != null) return known;
         com.nirncraft.worldplan.TrailEnds.Arrival a = com.nirncraft.worldplan.TrailEnds.of(p.id());
         if (a == null || Math.abs(a.x() - p.x()) + Math.abs(a.z() - p.z()) < 4) return Direction.NORTH;
         return Direction.getApproximateNearest(a.x() - p.x(), 0, a.z() - p.z());

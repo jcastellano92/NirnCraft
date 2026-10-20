@@ -38,8 +38,7 @@ public final class LandmarkBuilder {
         if (!force && site.pinned() == null && surfaceStructureHere(level, chunk, kind.tier() == Tier.XL ? 1 : 1)) return false;
         // a site gives way to a planned road corridor, street, plot or pad (named pinned sites are placed on purpose)
         if (!force && site.pinned() == null
-                && !com.nirncraft.world.PlacementMask.clearOfPlans(level, site.x(), site.z(),
-                        Grounding.enabled ? kind.radius() + 2 : Math.min(kind.radius(), 10))) return false;
+                && !com.nirncraft.world.PlacementMask.clearOfPlans(level, site.x(), site.z(), planRadius(kind))) return false;
         LandCtx ctx = LandCtx.of(site.x(), site.z());
         if (family != null) ctx.base = family;
         RandomSource random = RandomSource.create(site.seed());
@@ -52,10 +51,8 @@ public final class LandmarkBuilder {
         if (Grounding.enabled) {
             Grounding.Footprint fp = Grounding.sample(b, kind.radius());
             if (!force) {
-                if (fp.spread() > kind.maxSpread()) return Grounding.refuse("slope");
-                if (!coastal && b.footprintWet(kind.radius())) return Grounding.refuse("water");
-                if (!coastal && fp.wetShare() > Grounding.MAX_WET_SHARE) return Grounding.refuse("water");
-                if (fp.depth() > Grounding.MAX_FILL || fp.tooDeep > Math.max(1, fp.dry / 20)) return Grounding.refuse("deep");
+                String why = Grounding.refusal(kind, fp, () -> b.footprintWet(kind.radius()));
+                if (why != null) return Grounding.refuse(why);
             }
             b.y = fp.baseTop + 1;
             if (!Grounding.WATER_BUILDERS.contains(kind.builder()) && !coastal) footed = Grounding.foundation(b, fp.baseTop, kind.radius());
@@ -100,6 +97,32 @@ public final class LandmarkBuilder {
         BlockPos at = b.at(0, my - b.y, 0);
         if (b.writable(at)) level.setBlock(at, Blocks.SKELETON_SKULL.defaultBlockState().setValue(SkullBlock.ROTATION, 0), 2);
         return true;
+    }
+
+    /** Blocks around the centre that must be clear of planned roads, streets, plots and pads. */
+    private static int planRadius(Kind kind) {
+        return Grounding.enabled ? kind.radius() + 2 : Math.min(kind.radius(), 10);
+    }
+
+    /**
+     * The refusals of {@link #build} that can be told before the site's chunk is generated (the far field asks, so it
+     * draws no landmark the builder will not build): the baked plans (map road corridors, settlement cores, the road
+     * plan's sources: deterministic) and the terrain checks on predicted columns (the seeded height function). Returns
+     * the reason ("plans", "slope", "water", "deep") or null when the site is expected to stand.
+     *
+     * <p>Not predictable here: a surface structure over the site (structure starts are rolled per chunk from the seed
+     * and exist only once generation reached them), structure pieces in the plan mask, trees and decoration in the
+     * footprint, and builder exceptions. Those are covered by the outcomes recorded when the chunk is generated
+     * ({@link LandmarkWorldData#outcome}).</p>
+     */
+    @Nullable
+    public static String predictRefusal(LandmarkSite site, long worldSeed, @Nullable Grounding.Columns ground) {
+        Kind kind = site.kind();
+        if (site.pinned() == null && !com.nirncraft.world.PlacementMask.clearOfBakedPlans(worldSeed, site.x(), site.z(), planRadius(kind)))
+            return "plans";
+        if (!Grounding.enabled || ground == null) return null;
+        Grounding.Footprint fp = Grounding.predict(site.x(), site.z(), kind.radius(), ground);
+        return Grounding.refusal(kind, fp, () -> Grounding.footprintWet(site.x(), site.z(), kind.radius(), ground));
     }
 
     /** A signpost at the foot of a landmark with its name. */

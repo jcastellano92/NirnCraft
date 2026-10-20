@@ -46,6 +46,12 @@ public final class AtlasNet {
     public record FarSites(int count, int[] xz, String[] kinds, long[] seeds, byte[] facing) {}
 
     /**
+     * S->C with FarSites: the facing (2D value) of the named wild sites around the player whose facing the seed decides
+     * (DungeonStructure.siteFacing via AtlasSites.facings), by place id.
+     */
+    public record FarFacings(String[] ids, byte[] facing) {}
+
+    /**
      * S->C: changes to one 256-block tile the far field's prediction cannot know (docs/ATLAS-DELTAS.md), newer than what
      * this player has. cols: per column (AtlasEdits.COL ints) x, z, top (y of the ground's top block), top block id,
      * under block id, water top (MIN_VALUE: dry), span top (exclusive; MIN_VALUE: none), span base (MIN_VALUE: from the
@@ -61,6 +67,7 @@ public final class AtlasNet {
     static volatile Consumer<TileData> onTile = m -> {};
     static volatile Consumer<FarActors> onFarActors = m -> {};
     static volatile Consumer<FarSites> onFarSites = m -> {};
+    static volatile Consumer<FarFacings> onFarFacings = m -> {};
     static volatile Consumer<FarEdits> onFarEdits = m -> {};
     static volatile Consumer<FarSections> onFarSections = m -> {};
 
@@ -89,6 +96,24 @@ public final class AtlasNet {
 
         SkyNetwork.register(FarSites.class, PacketFlow.CLIENTBOUND, AtlasNet::writeSites, AtlasNet::readSites,
                 (m, ctx) -> onFarSites.accept(m));
+
+        SkyNetwork.register(FarFacings.class, PacketFlow.CLIENTBOUND, (m, b) -> {
+            b.writeVarInt(m.ids.length);
+            for (int i = 0; i < m.ids.length; i++) {
+                b.writeUtf(m.ids[i], 128);
+                b.writeByte(m.facing[i]);
+            }
+        }, b -> {
+            int n = b.readVarInt();
+            if (n < 0 || n > MAX_SITES) throw new IllegalArgumentException("atlas far facings: " + n);
+            String[] ids = new String[n];
+            byte[] facing = new byte[n];
+            for (int i = 0; i < n; i++) {
+                ids[i] = b.readUtf(128);
+                facing[i] = (byte) (b.readByte() & 3);
+            }
+            return new FarFacings(ids, facing);
+        }, (m, ctx) -> onFarFacings.accept(m));
 
         SkyNetwork.register(FarEdits.class, PacketFlow.CLIENTBOUND, (m, b) -> {
             b.writeInt(m.tx);
