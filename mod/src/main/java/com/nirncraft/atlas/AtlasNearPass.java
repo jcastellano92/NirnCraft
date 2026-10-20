@@ -71,6 +71,7 @@ public final class AtlasNearPass {
     static final ResourceKey<PipelineModifier> ENTITY = ResourceKey.create(PipelineModifier.MODIFIERS_KEY,
             id("near_entity"));
     private static final Identifier VANILLA_ENTITY = Identifier.withDefaultNamespace("core/entity");
+    private static final Identifier VANILLA_PARTICLE = Identifier.withDefaultNamespace("core/particle");
     private static boolean entityPushed;  // the entity modifier is on the stack (from the resolve to AfterLevel)
     private static final Set<Identifier> TRANSLUCENT = Set.of(RenderPipelines.TRANSLUCENT_TERRAIN.getLocation(),
             RenderPipelines.TRANSLUCENT_TERRAIN_MULTIDRAW.getLocation());
@@ -161,15 +162,18 @@ public final class AtlasNearPass {
     }
 
     /**
-     * Every pipeline drawn with vanilla's entity shader (mobs, players, block entities, items, armour) with ours: the
-     * same defines, our light and look (near_entity), so entities stand in the frame lit as the terrain is.
+     * Every pipeline drawn with vanilla's entity shader (mobs, players, block entities, items, armour) or its particle
+     * shader with ours: the same defines, our light and look (near_entity, near_particle), so they stand in the frame
+     * lit as the terrain is.
      */
     private static RenderPipeline entityPipeline(RenderPipeline p, Identifier name) {
-        if (!VANILLA_ENTITY.equals(p.getShaders().get(com.mojang.renderpearl.api.pipeline.ShaderType.VERTEX))) return p;
+        Identifier vs = p.getShaders().get(com.mojang.renderpearl.api.pipeline.ShaderType.VERTEX);
+        String ours = VANILLA_ENTITY.equals(vs) ? "core/near_entity" : VANILLA_PARTICLE.equals(vs) ? "core/near_particle" : null;
+        if (ours == null) return p;
         return p.toBuilder()
                 .withLocation(name)
-                .withVertexShader(id("core/near_entity"))
-                .withFragmentShader(id("core/near_entity"))
+                .withVertexShader(id(ours))
+                .withFragmentShader(id(ours))
                 .withBindGroupLayout(NEAR_INFO)
                 .build();
     }
