@@ -108,6 +108,17 @@ public final class AtlasNearPass {
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT_PREMULTIPLIED_ALPHA))
             .build();
 
+    static final RenderPipeline COMPOSITE = RenderPipeline.builder()
+            .withLocation(id("pipeline/near_composite"))
+            .withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
+            .withFragmentShader(id("core/near_composite"))
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER0_SAMPLER1)
+            .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+            .withCull(false)
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true))
+            .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT_PREMULTIPLIED_ALPHA))
+            .build();
+
     static final RenderPipeline LIGHTMAP = RenderPipeline.builder()
             .withLocation(id("pipeline/near_lightmap"))
             .withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
@@ -129,6 +140,7 @@ public final class AtlasNearPass {
     private static ChunkSectionsToRender chunks;
     private static TextureTarget gbuffer;  // albedo + depth
     private static TextureTarget light;    // light levels
+    private static TextureTarget frame;    // the resolved frame (displayed colour, premultiplied; depth), composited
     private static net.minecraft.client.renderer.MappableRingBuffer info;  // the resolve's NearInfo (one vec4)
 
     private AtlasNearPass() {}
@@ -140,6 +152,7 @@ public final class AtlasNearPass {
     static void init(IEventBus modBus) {
         modBus.addListener((RegisterRenderPipelinesEvent e) -> {
             e.registerPipeline(RESOLVE);
+            e.registerPipeline(COMPOSITE);
             e.registerPipeline(LIGHTMAP);
         });
         modBus.addListener((RegisterPipelineModifiersEvent e) -> {
@@ -277,6 +290,9 @@ public final class AtlasNearPass {
             RenderSystem.popPipelineModifier();
         }
         drawn = true;
+        // atlas's frame now, on our depth (outside vanilla's main pass), then our resolve into our own frame
+        AtlasClient.renderFar(e.getLevelRenderState(), null);
+        resolve(AtlasClient.farTargetsThisFrame(), AtlasClient.nearLitThisFrame());
     }
 
     private static com.mojang.renderpearl.api.textures.GpuSampler terrainSampler;
@@ -304,9 +320,13 @@ public final class AtlasNearPass {
      * targets when it drew this frame; nearLight: it lit our pixels too (ATLAS_FRAME_NEAR_LIGHT: one light near and far,
      * the pack's look for both), else stage A's vanilla light.
      */
-    static void resolve(RenderPass pass, AtlasTargets far, boolean nearLight) {
+    static void resolve(AtlasTargets far, boolean nearLight) {
         if (!owns()) return;
         Minecraft mc = Minecraft.getInstance();
+        if (frame == null || frame.width != gbuffer.width || frame.height != gbuffer.height) {
+            if (frame != null) frame.destroyBuffers();
+            frame = new TextureTarget("atlas near frame", gbuffer.width, gbuffer.height, GpuFormat.RGBA8_UNORM, GpuFormat.D32_FLOAT);
+        }
         lit = nearLight && far != null;
         if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 80);
         float[] look = AtlasLook.frame(mc), k = AtlasLook.light(mc);
@@ -322,6 +342,11 @@ public final class AtlasNearPass {
                 FilterMode.NEAREST, FilterMode.NEAREST, false);
         var linear = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
                 FilterMode.LINEAR, FilterMode.LINEAR, false);
+        var desc = RenderPassDescriptor.builder(() -> "Infinite ATLAS resolve")
+                .withColorAttachment(frame.getColorTextureView(), Optional.of(new Vector4f(0, 0, 0, 0)))
+                .withDepthAttachment(frame.getDepthTextureView(), OptionalDouble.of(0.0))
+                .build();
+        try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(desc)) {
         pass.setPipeline(RenderSystem.getCompiledPipeline(RESOLVE));
         RenderSystem.bindDefaultUniforms(pass);
         pass.setUniform("Sampler0", gbuffer.getColorTextureView(), nearest);
@@ -339,8 +364,21 @@ public final class AtlasNearPass {
         }
         pass.setUniform("NearInfo", info.currentBuffer());
         pass.draw(3, 1, 0, 0);
+        }
+    }
+
+    /** In vanilla's main pass after opaque terrain: our resolved frame into it, colour and depth. */
+    static void composite(RenderPass pass) {
+        if (!owns() || frame == null) return;
+        var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
+                FilterMode.NEAREST, FilterMode.NEAREST, false);
+        pass.setPipeline(RenderSystem.getCompiledPipeline(COMPOSITE));
+        pass.setUniform("Sampler0", frame.getColorTextureView(), nearest);
+        pass.setUniform("Sampler1", frame.getDepthTextureView(), nearest);
+        pass.draw(3, 1, 0, 0);
         // what vanilla draws next in this pass (entities, block entities, items) takes our light while we own the frame
         if (lit) {
+            pass.setUniform("NearInfo", info.currentBuffer());
             RenderSystem.pushPipelineModifier(ENTITY);
             entityPushed = true;
         }

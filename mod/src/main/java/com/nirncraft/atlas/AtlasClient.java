@@ -134,7 +134,7 @@ public final class AtlasClient {
         // after atlas's frame (or its absence): our near terrain into the frame, atlas's far frame behind it
         NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.LOW,
                 (RenderLevelStageEvent.AfterOpaqueBlocks e) -> AtlasGuard.run(AtlasNearPass.FEATURE,
-                        () -> AtlasNearPass.resolve(e.getRenderPass(), farThisFrame ? targets : null, nearLitThisFrame)));
+                        () -> AtlasNearPass.composite(e.getRenderPass())));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) ->
                 AtlasGuard.run("atlas client tick", () -> {
                     AtlasTargets.flushClear();
@@ -207,6 +207,16 @@ public final class AtlasClient {
         return f == null ? "[]" : f.timelineJson();
     }
 
+    /** Atlas's targets when it drew this frame (else null): the near pass composites them. */
+    static AtlasTargets farTargetsThisFrame() {
+        return farThisFrame ? targets : null;
+    }
+
+    /** Atlas lit the near pass's pixels this frame (ATLAS_FRAME_NEAR_LIGHT). */
+    static boolean nearLitThisFrame() {
+        return nearLitThisFrame;
+    }
+
     /** The loaded core lights the near pass's pixels (ABI 0.15: ATLAS_FRAME_NEAR_LIGHT, AtlasGlIO near info / light). */
     static boolean nearLightSupported() {
         return ctx != null && !failed && ctx.hasNearLight();
@@ -220,6 +230,16 @@ public final class AtlasClient {
     public static volatile boolean suspended;
 
     private static void afterOpaque(RenderLevelStageEvent.AfterOpaqueBlocks event) {
+        // the near pass owns the frame: atlas already drew after our G-buffer (AtlasNearPass, at AfterSky)
+        if (AtlasNearPass.owns()) return;
+        renderFar(event.getLevelRenderState(), event.getRenderPass());
+    }
+
+    /**
+     * Atlas's frame. pass: the main pass atlas is drawn in (vanilla's AfterOpaqueBlocks: the fallback compositor draws
+     * there), or null when the near pass calls it right after its G-buffer (it composites atlas itself).
+     */
+    static void renderFar(LevelRenderState state, com.mojang.renderpearl.api.commands.RenderPass pass) {
         farThisFrame = false;
         nearLitThisFrame = false;
         if (failed) return;
@@ -284,7 +304,6 @@ public final class AtlasClient {
                 com.nirncraft.render.quality.QualityClient.atlasFrame(false, 0);
                 return;
             }
-            LevelRenderState state = event.getLevelRenderState();
             CameraRenderState cam = state.cameraRenderState;
             Vec3 p = cam.pos;
             farField.follow(p.x, p.y, p.z);
@@ -388,9 +407,9 @@ public final class AtlasClient {
             ctx.glRender(frame, io);
             farThisFrame = true;
             nearLitThisFrame = nearLit;
-            if (!pack && !nearOwned && !AtlasFallback.fogHidesFarField(cam.fogData)) {
+            if (pass != null && !pack && !nearOwned && !AtlasFallback.fogHidesFarField(cam.fogData)) {
                 AtlasTargets t = targets;
-                AtlasGuard.run(AtlasFallback.FEATURE, () -> AtlasFallback.draw(event.getRenderPass(), t));
+                AtlasGuard.run(AtlasFallback.FEATURE, () -> AtlasFallback.draw(pass, t));
             }
             if (guard != null) guard.frame(now);
             if (firstFrame) {
