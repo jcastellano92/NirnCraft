@@ -25,7 +25,11 @@ GAME = lw.GAME
 SHOTS = GAME / "build/autotest-screenshots"
 PERF = GAME / "build/autotest-performance"
 STATE = ROOT / ".work/harness/client.json"
-LEASE = ROOT / ".work/lease/live.json"
+# the live lease beside the one Prism instance, not in a checkout: every checkout (the agents' worktrees) sees who holds
+# the game client (each worktree had its own lease and could start the client under another's run)
+LEASE = GAME / "nirncraft-live-lease.json"
+LEASE_OWNER = f"harness:{ROOT.resolve()}"
+LEASE_STALE_S = 600  # a holder that has not refreshed its heartbeat for this long is gone
 PACK_SRC = ROOT / "shaderpack"
 PACK_ZIP = GAME / "shaderpacks/InfiniteATLAS.zip"
 OVERLAY = GAME / "resourcepacks/nirncraft-dev"
@@ -55,24 +59,41 @@ def inputs():
 
 
 # ----------------------------------------------------------------------------------------------- lease + state
-def take_lease(owner="harness"):
-    now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    if LEASE.exists():
-        try:
-            held = json.loads(LEASE.read_text(encoding="utf-8"))
-            age = time.time() - time.mktime(time.strptime(held.get("heartbeat", now), "%Y-%m-%dT%H:%M:%SZ")) + time.timezone
-            mine = held.get("owner", "").startswith(("harness", "aether/shader", "atlas/shader"))
-            if not mine and age < 600:
-                raise SystemExit(f"live lease held by {held.get('owner')} ({int(age)} s ago); wait or ask its owner")
-        except ValueError:
-            pass
-    LEASE.parent.mkdir(parents=True, exist_ok=True)
-    LEASE.write_text(json.dumps({"owner": owner, "system": "claude-code", "job": "harness",
-                                 "instance": lw.INSTANCE_NAME, "heartbeat": now}), encoding="utf-8")
+def lease_holder(path=None):
+    """The live lease's holder while it is fresh ({"owner", "heartbeat", ...}), else None."""
+    path = path or LEASE
+    try:
+        held = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if time.time() - float(held.get("beat", 0)) > LEASE_STALE_S:
+        return None
+    return held
 
 
-def drop_lease():
-    LEASE.unlink(missing_ok=True)
+def take_lease(owner=None, path=None):
+    """The game client for this checkout's harness; SystemExit while another checkout's run holds it."""
+    owner, path = owner or LEASE_OWNER, Path(path or LEASE)
+    held = lease_holder(path)
+    if held and held.get("owner") != owner:
+        raise SystemExit(f"live lease held by {held.get('owner')} ({int(time.time() - float(held['beat']))} s ago); wait or ask its owner")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"owner": owner, "system": "claude-code", "job": "harness", "instance": lw.INSTANCE_NAME,
+                                "beat": time.time(), "heartbeat": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}),
+                    encoding="utf-8")
+
+
+def refresh_lease(path=None):
+    """Keeps this checkout's lease fresh (a run longer than LEASE_STALE_S looked abandoned: its heartbeat was the take's)."""
+    held = lease_holder(path)
+    if held and held.get("owner") == LEASE_OWNER:
+        take_lease(path=path)
+
+
+def drop_lease(path=None):
+    held = lease_holder(path)
+    if not held or held.get("owner") == LEASE_OWNER:
+        Path(path or LEASE).unlink(missing_ok=True)
 
 
 def client_state():

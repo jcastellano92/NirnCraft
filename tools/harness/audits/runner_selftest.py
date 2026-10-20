@@ -326,6 +326,23 @@ expect(not any(l.startswith("atlaslab") for l in _cl) and "capture tag" in _cl,
 expect(catalog.deferred_exports(_vs) == ["atlaslab here t 48 12 40", "atlaslab view t-view 1024 light"],
        "its exports wait for the pose review, in their order")
 
+# --- the live lease is machine-wide: another checkout's fresh lease blocks, a stale one does not ------------------
+with tempfile.TemporaryDirectory() as _td:
+    _lp = Path(_td) / "lease.json"
+    _lp.write_text(json.dumps({"owner": "harness:F:/other/worktree", "beat": time.time()}), encoding="utf-8")
+    try:
+        _game.take_lease(path=_lp)
+        expect(False, "another checkout's fresh live lease blocks this harness")
+    except SystemExit:
+        expect(True, "another checkout's fresh live lease blocks this harness")
+    _game.drop_lease(path=_lp)
+    expect(_lp.exists(), "a harness never drops another checkout's lease")
+    _lp.write_text(json.dumps({"owner": "harness:F:/other/worktree", "beat": time.time() - 3600}), encoding="utf-8")
+    _game.take_lease(path=_lp)
+    expect(_game.lease_holder(_lp)["owner"] == _game.LEASE_OWNER, "a stale lease (no heartbeat for 10 min) is taken over")
+    _game.drop_lease(path=_lp)
+    expect(not _lp.exists(), "this harness drops its own lease")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth

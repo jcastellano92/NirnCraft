@@ -29,6 +29,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 import numpy as np
@@ -459,6 +460,42 @@ def outside_light(el, alc):
     return round(float(np.mean(levels)), 2) if levels else 15.0
 
 
+LANE_WAIT_S = 1800  # the longest an element run waits for its lane before it goes ahead anyway (and says so)
+
+
+def lane(wait_s=LANE_WAIT_S, poll_s=20):
+    """The machine's element lane, for the length of this run (an OS file lock beside the shared Prism instance: one
+    element sweep at a time across every checkout, released by the OS if the process dies). Before taking it, waits
+    while another checkout's live run holds the game client: agents' CPU sweeps had run beside a live run, slowing
+    both (the owner: "are we getting something useful out of that test for the time it's taking?")."""
+    import game
+    t0 = time.monotonic()
+    while time.monotonic() - t0 < wait_s:
+        held = game.lease_holder()
+        if not held or held.get("owner") == game.LEASE_OWNER:
+            break
+        print(f"element_lab: {held.get('owner')} holds the game client (a live run): waiting", file=sys.stderr, flush=True)
+        time.sleep(poll_s)
+    path = export_dir().parent / "nirncraft-element-lane.lock"
+    f = open(path, "a+b")
+    while True:
+        try:
+            if sys.platform == "win32":
+                import msvcrt
+                f.seek(0)
+                msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return f  # held while the file stays open (this run)
+        except OSError:
+            if time.monotonic() - t0 > wait_s:
+                print("element_lab: the element lane stayed busy: going ahead", file=sys.stderr, flush=True)
+                return f
+            print("element_lab: another element run holds the lane: waiting", file=sys.stderr, flush=True)
+            time.sleep(poll_s)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("element", nargs="?")
@@ -497,6 +534,7 @@ def main():
     report = {"element": el, "renderer": a.renderer, "truth": TRUTH_MODE, "time": TIME if TIME is not None or not realistic() else 6000,
               "distances": []}
     rows = []
+    held_lane = lane() if not a.list else None  # noqa: F841  kept open: the lane is ours until the run ends
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         ladder = {r: [(tmp / f"{r}-{d}.png", camera(el["box"], d, size=a.size)) for d in dists] for r in ("truth", a.renderer)}
