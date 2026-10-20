@@ -276,7 +276,7 @@ void unifiedMain() {
     vec4 c = texture(Sampler4, texCoord);
     float z = texture(Sampler5, texCoord).r;
     vec3 dirU = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
-    if (c.a <= 0.002 || z <= 0.0) {
+    if (c.a <= 0.002) {
         if (atlasEyeInWater()) {  // nothing along this ray under water: the water as far as it goes
             fragColor = vec4(atlasUnderwater(vec3(0.0), 1e4, dirU), 1.0);
             gl_FragDepth = 0.0;
@@ -290,7 +290,8 @@ void unifiedMain() {
         gl_FragDepth = 0.0;
         return;
     }
-    float dist = length(viewRay(texCoord, z));
+    // (past the projection's far plane atlas writes minus the distance: behind everything rastered)
+    float dist = z < 0.0 ? -z : length(viewRay(texCoord, z));
     vec3 radiance = max(c.rgb / Ground.w / max(c.a, 1e-4), vec3(0.0));  // (pre-exposed: back to physical)
     vec3 rgb;
     if (atlasEyeInWater()) {
@@ -303,7 +304,7 @@ void unifiedMain() {
             + atlasDisplay(airBeams(dirU, dist) + sunGlare(dirU) * 0.15, Look.x, Look.y);
         fragColor = vec4(rgb * c.a, c.a);
     }
-    gl_FragDepth = z;
+    gl_FragDepth = max(z, 0.0);
 }
 
 void main() {

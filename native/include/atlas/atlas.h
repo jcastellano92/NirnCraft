@@ -207,7 +207,8 @@ typedef struct AtlasFrame {
  * Every other pixel (hits at or past nearFieldEnd, sky) is a FAR pixel exactly as without the flag (premultiplied
  * radiance with the air applied, a = coverage; class without 0x80). Under either flag the depth output of EVERY pixel
  * is the NDC depth (clip z / w) in the host's own projection (the inverse of AtlasFrame.invViewProj: reverse-Z if that
- * is), the sky the value at infinity.
+ * is); a point past its far plane (or the sky) MINUS its distance (blocks; the sky -1e7): behind all the host rasters,
+ * its distance kept for the host's haze. Near primary rays pass water (the host rasters the water surface itself).
  */
 #define ATLAS_FRAME_PRIMARY_NEAR 0x80000u
 #define ATLAS_FRAME_PRIMARY_NEAR_LIT 0x100000u

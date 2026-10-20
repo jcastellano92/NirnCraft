@@ -140,7 +140,7 @@ int entryAxis(int3 v, float3 ro, float3 rd, float3 inv, float3 stepPos) {
 bool voxelStops(uint hitMat, int3 v, int3 wv, int rl, float3 ro, float3 rd, float3 inv, float3 stepPos, float t) {
     uint hitCls = uint(palette[hitMat].emisClass.y);
     secCount(5u, rl);
-    bool pass = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && hitCls == 2u;
+    bool pass = ((frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && hitCls == 2u) || primaryPassesWater(hitCls, t);
     if (gSecondary && hitCls == 1u && (gSecAblate & 4194304u) != 0u) pass = true;  // (free foliage)
     if (gSecondary && !pass && rl == 0 && secondaryShapeMisses(hitMat, ro + rd * t - float3(v), rd)) pass = true;
     float sigma = gSecondary && !pass ? secondarySigma(hitMat, hitCls) : -1.0;
@@ -526,7 +526,8 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
                     // a primary ray meets a shaped block (a slab, a stair, a fence, a plant, cut-out leaves) by its
                     // micro-voxels, textured by its face tiles, as the groups draw it (ATLAS_ABLATE 268435456: cubes)
                     uint sh = gSecondary || (asuint(frame.jitter.w) & 268435456u) != 0u ? 0u : shapeOf(mat);
-                    bool seeWater = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && uint(palette[mat].emisClass.y) == 2u;
+                    uint wcls = uint(palette[mat].emisClass.y);
+                    bool seeWater = ((frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && wcls == 2u) || primaryPassesWater(wcls, t);
                     if (sh != 0u && !seeWater) {
                         float tHit;
                         int ax = entryAxis(v, ro, d, inv, stepPos);
@@ -1853,7 +1854,16 @@ void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
 float hostDepth(float3 dir, float t) {
     float3 X = dir * min(t, 1e7);
     float4 clip = frame.viewProj[0] * X.x + frame.viewProj[1] * X.y + frame.viewProj[2] * X.z + frame.viewProj[3];
-    return abs(clip.w) > 1e-20 ? clip.z / clip.w : 0.0;
+    float z = abs(clip.w) > 1e-20 ? clip.z / clip.w : -1.0;
+    // past the host's far plane (the far field goes on to the horizon): minus the distance, so the host still knows
+    // how far (its haze) and that it is behind everything it rasters (the sky: -1e7)
+    return z >= 0.0 && z <= 1.0 ? z : -min(t, 1e7);
+}
+
+// (ATLAS_FRAME_PRIMARY_NEAR / _LIT) a primary ray in the near field passes water: the host rasters the water surface
+// itself (its waves, reflections, refraction of the bed atlas draws under it)
+bool primaryPassesWater(uint cls, float t) {
+    return !gSecondary && cls == 2u && t < frame.params.x && (frame.dims.z & (FRAME_PRIMARY_NEAR | FRAME_PRIMARY_NEAR_LIT)) != 0u;
 }
 
 [shader("compute")]
