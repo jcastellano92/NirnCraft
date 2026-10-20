@@ -139,7 +139,9 @@ public final class AtlasClient {
                 AtlasGuard.run("atlas client tick", () -> {
                     AtlasTargets.flushClear();
                     AtlasFarField.restMs = com.nirncraft.render.quality.QualityClient.workerRestMs();
+                    if (farField != null) AtlasClientSections.tick(Minecraft.getInstance());  // the loaded chunks' blocks
                 }));
+        AtlasClientSections.init();
         NeoForge.EVENT_BUS.addListener((ClientStoppingEvent e) -> AtlasGuard.run("atlas shutdown", () -> {
             if (guard != null) guard.stopped();  // a clean exit is not a crash
             stop();
@@ -382,10 +384,12 @@ public final class AtlasClient {
                 frame.flags |= AtlasNative.FRAME_VANILLA_LIGHT;
                 frame.flags &= ~(AtlasNative.FRAME_SHADOWS | AtlasNative.FRAME_ATMOS);
             }
-            // in the open, chunks still loading show the far field instead of a hole (never underground: the far
-            // field has no caves, it would cover a cave mouth)
+            // chunks still loading show the far field instead of a hole: in the open, and underground once atlas holds
+            // the real blocks around the eye (AtlasClientSections: the trace starts in the cave, not in the tiles'
+            // stone, which would cover a cave mouth)
             if (mc.player != null && mc.level != null
-                    && mc.level.canSeeSky(net.minecraft.core.BlockPos.containing(mc.player.getEyePosition())))
+                    && (mc.level.canSeeSky(net.minecraft.core.BlockPos.containing(mc.player.getEyePosition()))
+                    || AtlasClientSections.coversEye(p.x, p.z)))
                 frame.flags |= AtlasNative.FRAME_FILL_NEAR;
             if (groups) frame.flags |= AtlasNative.FRAME_GROUPS;
 
@@ -512,6 +516,7 @@ public final class AtlasClient {
                     ? AtlasTrees.forServer(mc.getSingleplayerServer(), e) : null;
             AtlasTrees.activeLod = trees != null ? AtlasTrees.APPROX_LOD : -1;  // before the first tile goes up
             farField = new AtlasFarField(ctx, source, () -> AtlasSettlements.create(ground, mats, trees), lods);
+            AtlasClientSections.reset();  // a new context holds no real blocks: the loaded chunks go up again
             lightBudget = -1;
             startedFor = mc.level;
             retryAt = 0;

@@ -83,31 +83,47 @@ final class AtlasEditsClient {
         return viewNear > 0 && Math.hypot(dx, dz) < viewNear - 16;
     }
 
-    /** Sections held while the near field covers their chunk (far-field worker only). */
+    /** Sections held while the near field covers their chunk (far-field worker only; without the client's feed). */
     private static final List<AtlasSections.Decoded> HELD = new ArrayList<>();
     private static volatile boolean clearHeld;  // clear() runs on other threads: the worker empties HELD itself
+    /**
+     * Per section up (SectionPos.asLong): a hash of its blocks and tints (far-field worker only). The client's feed and
+     * the server's recording both carry the near field's chunks; a section the core already has is not put up again
+     * (each upload rebuilds its regions at five levels).
+     */
+    private static final it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap UPLOADED = new it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap();
+    private static long prunedAt;
 
     static int applySections(AtlasNative.Context ctx, AtlasMaterials mats, long deadline) {
         int n = 0;
         short[] out = new short[4096];
         Map<Integer, Short> local = new HashMap<>();
-        // a chunk wholly inside the near field changes nothing on screen (vanilla draws it there): its sections wait
-        // until the camera has moved away from it (around a fresh place the server sent 13-24 a pass for 40 s, each
-        // rebuilding regions no one could see)
+        // without the client's feed: a chunk wholly inside the near field changes nothing on screen (vanilla draws it
+        // there), its sections wait until the camera has moved away from it (around a fresh place the server sent
+        // 13-24 a pass for 40 s, each rebuilding regions no one could see). With it the near field's blocks are what
+        // atlas lights the near pass with: nothing waits
         if (clearHeld) {
             HELD.clear();
+            UPLOADED.clear();
             clearHeld = false;
         }
+        pruneUploaded();
+        boolean hold = !AtlasClientSections.ON;
         java.util.ArrayDeque<AtlasSections.Decoded> ready = new java.util.ArrayDeque<>();
         for (java.util.Iterator<AtlasSections.Decoded> it = HELD.iterator(); it.hasNext(); ) {
             AtlasSections.Decoded d = it.next();
-            if (!underNearField(d.cx() * 16, d.cz() * 16, d.cx() * 16 + 16, d.cz() * 16 + 16)) {
+            if (!hold || !underNearField(d.cx() * 16, d.cz() * 16, d.cx() * 16 + 16, d.cz() * 16 + 16)) {
                 ready.add(d);
                 it.remove();
             }
         }
         for (; System.nanoTime() < deadline; ) {
             AtlasSections.Decoded d = ready.poll();
+            boolean client = false;
+            if (d == null) {
+                d = AtlasClientSections.poll();  // the loaded chunks first: what the near light traces
+                client = d != null;
+            }
             if (d == null) {
                 byte[] b = SECTIONS.poll();
                 if (b == null) break;
@@ -116,7 +132,7 @@ final class AtlasEditsClient {
                 } catch (java.io.IOException e) {
                     continue;
                 }
-                if (underNearField(d.cx() * 16, d.cz() * 16, d.cx() * 16 + 16, d.cz() * 16 + 16)) {
+                if (hold && underNearField(d.cx() * 16, d.cz() * 16, d.cx() * 16 + 16, d.cz() * 16 + 16)) {
                     HELD.add(d);
                     continue;
                 }
@@ -124,6 +140,12 @@ final class AtlasEditsClient {
             local.clear();
             for (int s = 0; s < d.sections().length; s++) {
                 int[] ids = d.sections()[s];
+                if (ids == null) continue;  // solid rock: the tiles' stone
+                long key = net.minecraft.core.SectionPos.asLong(d.cx(), d.sy0() + s, d.cz());
+                long h = 0xcbf29ce484222325L ^ ((long) d.grass() << 24 ^ d.foliage());
+                for (int id : ids) h = (h ^ id) * 0x100000001b3L;
+                if (UPLOADED.containsKey(key) && UPLOADED.get(key) == h) continue;  // the core has these blocks
+                UPLOADED.put(key, h);
                 for (int i = 0; i < 4096; i++) {
                     int id = ids[i];
                     if (id == 0) {
@@ -143,9 +165,26 @@ final class AtlasEditsClient {
                 mats.flush(ctx);
                 ctx.uploadSection(d.cx(), d.sy0() + s, d.cz(), out);
             }
+            if (client) AtlasClientSections.up(d.cx(), d.cz());
             n++;
         }
         return n;
+    }
+
+    /**
+     * Forgets the sections far from the camera (every few seconds): past the server's sections window the core drops
+     * them (World::sectionKeep lies further out), and a forgotten one that comes again must go up again.
+     */
+    private static void pruneUploaded() {
+        long now = System.nanoTime();
+        if (now - prunedAt < 2_000_000_000L || UPLOADED.isEmpty()) return;
+        prunedAt = now;
+        int ptx = Math.floorDiv((int) Math.floor(viewX), AtlasEdits.TILE), ptz = Math.floorDiv((int) Math.floor(viewZ), AtlasEdits.TILE);
+        UPLOADED.keySet().removeIf((long k) -> {
+            int tx = Math.floorDiv(net.minecraft.core.SectionPos.x(k) * 16, AtlasEdits.TILE);
+            int tz = Math.floorDiv(net.minecraft.core.SectionPos.z(k) * 16, AtlasEdits.TILE);
+            return Math.abs(tx - ptx) > AtlasSections.RADIUS_TILES || Math.abs(tz - ptz) > AtlasSections.RADIUS_TILES;
+        });
     }
 
     /** Forget everything (another world, another server). */
@@ -155,7 +194,7 @@ final class AtlasEditsClient {
         LIGHTS.clear();
         DIRTY.clear();
         LIGHTS_DIRTY.clear();
-        clearHeld = true;
+        clearHeld = true;  // (and the sections up: a new context holds none)
     }
 
     static boolean any() {

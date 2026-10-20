@@ -200,6 +200,20 @@ The full checklist from R1, every item checked live; the owner flies it.
   tiles (no colour mips; the town's 50 px still 13 dE inside). far-game's growth against `exact` (15 at 256 m, 25 at
   4 km) is not materials: against `intended` (16 spp) it is 12.9 / 15.6, the 1-spp reference's aliasing and the vanilla
   light's emulation.
+- **Underground (2026-10-20).** Atlas held only surface sections (the server's from 16 under the lowest ground), and
+  none under the near field (held until the camera left), so the near light traced caves as the tiles' stone and the
+  far trace past the loaded chunks started in it. Now every chunk the client loads goes up whole except deep solid rock
+  (AtlasClientSections; the server records the same: AtlasSections, re-recorded on edits), deduplicated per section,
+  never held; FILL_NEAR also underground once the eye's 3 x 3 chunks are up. Under solid cover (solidRoof) the sky rays
+  reach 64 voxels, a far hit counting only if it is under cover too, unbiased (the clamped control variate made closed
+  cave walls glow), and no aerial inscatter with the eye under cover too (ATLAS_ABLATE 512 = before). Measured
+  (test_main caves: a tunnel 30 under ground opening into a sunlit pit; near-light irradiance, the ambient floor
+  0.037): deep inside 0.214 -> 0.062 (sun 0), inscatter 6e-4 -> 0, first 24 blocks 0.076, the pit 1.86 (0.29 / 0.05
+  without the cave's sections); past a 24-block near field the far trace meets the tunnel at its own depth on 100 % of
+  pixels (0 % with surface sections only: tile stone at the hand-off). The resolve's sky-light cap still takes 81 % of
+  the light atlas traces in the tunnel's first 48 blocks (vanilla's sky light is 0 from 6 blocks in): what dropping it
+  would give back. Near light cost on open terrain (atlas_gl_test, GPU shared with the game): +0.56-0.62 ms ablated,
+  +0.70-1.09 ms with the roof rays.
 
 ## Parked (off the renderer goal, for later)
 

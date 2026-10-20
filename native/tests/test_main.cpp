@@ -1669,8 +1669,240 @@ static void testGroups() {
     atlas_destroy(gpu);
 }
 
+// Caves (docs/ATLAS-LOD.md "Underground"): a tunnel 30 blocks under flat ground (y 62..69, x -8..199, z -4..3) whose
+// west end opens into a pit open to the sky (x -40..-9, z -12..11, from y 62 up). The scene's sections: the chunks'
+// surface ones (16 under the ground to its top, as the server recorded before) always, and with `underground` the deep
+// ones that are not solid rock (the client's feed and the server's recording now). Tiles: stone under the ground.
+static bool caveAir(int x, int y, int z) {
+    if (y < 62) return false;
+    if (x >= -40 && x < -8 && z >= -12 && z < 12) return true;  // the pit
+    return x >= -8 && x < 200 && y < 70 && z >= -4 && z < 4;     // the tunnel
+}
+
+static AtlasContext* caveScene(AtlasBackend be, bool underground) {
+    AtlasContext* ctx = nullptr;
+    if (atlas_create(be, &ctx) != ATLAS_OK) return nullptr;
+    std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
+        }
+    std::vector<uint16_t> sec(4096);
+    for (int cz = -1; cz <= 0; cz++)
+        for (int cx = -3; cx <= 12; cx++)
+            for (int sy = 3; sy <= 6; sy++) {
+                bool air = false;
+                for (int y = 0; y < 16; y++)
+                    for (int z = 0; z < 16; z++)
+                        for (int x = 0; x < 16; x++) {
+                            int wx = cx * 16 + x, wy = sy * 16 + y, wz = cz * 16 + z;
+                            // the tiles' own materials where solid (top, fill, stone), so only the cave differs
+                            uint16_t m = wy >= 100 || caveAir(wx, wy, wz) ? 0 : wy == 99 ? 2 : wy >= 96 ? 3 : 1;
+                            sec[size_t(x + 16 * (z + 16 * y))] = m;
+                            air |= m == 0 && wy < 100;
+                        }
+                bool deep = sy * 16 + 16 <= 100 - 16;  // AtlasSections.deep: solid rock there is the tiles' stone
+                if (deep && (!underground || !air)) continue;
+                atlas_upload_section(ctx, cx, sy, cz, sec.data());
+            }
+    double centre[3] = {150.5, 65.5, 0.5};
+    atlas_update(ctx, centre, 0);
+    return ctx;
+}
+
+static void testCaves() {
+    std::printf("caves\n");
+    const uint32_t W = 160, H = 90;
+    const size_t px = size_t(W) * H;
+    AtlasContext* after = caveScene(ATLAS_BACKEND_CPU, true);
+    AtlasContext* before = caveScene(ATLAS_BACKEND_CPU, false);
+    CHECK(after && before);
+    if (!after || !before) return;
+    // a camera in the tunnel (eye y 65.5, z 0.5) at x, looking along it (yaw 270 west, 90 east); the near field's depth
+    // and normal are the tunnel's surfaces as atlas traces them with its sections (every hit, as if all were loaded)
+    struct View {
+        AtlasFrame f{}, fn{};
+        std::vector<float> farD, nd;
+        std::vector<uint32_t> farN, ni;
+        double x0 = 0, dirX[160 * 90] = {};
+    };
+    auto makeView = [&](View& v, double camX, double yaw, double fov) {
+        const double pitch = -6, aspect = double(W) / H;
+        v.x0 = camX;
+        v.f.cameraPos[0] = camX;
+        v.f.cameraPos[1] = 65.5;
+        v.f.cameraPos[2] = 0.5;
+        cameraMatrix(yaw, pitch, fov, aspect, v.f.invViewProj);
+        v.f.width = W;
+        v.f.height = H;
+        v.f.maxDistance = 4000;
+        v.f.lodBias = 1;
+        // the sun high in the east: down the shaft onto its west wall and the west of its foot, nowhere in the tunnel
+        double sl = std::sqrt(0.15 * 0.15 + 1.0);
+        v.f.sunDir[0] = float(0.15 / sl);
+        v.f.sunDir[1] = float(1.0 / sl);
+        v.f.flags = ATLAS_FRAME_SHADOWS | ATLAS_FRAME_ATMOS;
+        // per pixel: the view direction's x (cameraMatrix's basis), for the surfaces' world x
+        double yr = yaw * 3.14159265358979323846 / 180, pr = pitch * 3.14159265358979323846 / 180;
+        double fw[3] = {std::sin(yr) * std::cos(pr), std::sin(pr), -std::cos(yr) * std::cos(pr)};
+        double rt[3] = {std::cos(yr), 0, std::sin(yr)};
+        double up[3] = {rt[1] * fw[2] - rt[2] * fw[1], rt[2] * fw[0] - rt[0] * fw[2], rt[0] * fw[1] - rt[1] * fw[0]};
+        double tf = std::tan(fov * 3.14159265358979323846 / 360);
+        for (size_t i = 0; i < px; i++) {
+            double nx = ((i % W) + 0.5) / W * 2 - 1, ny = 1 - ((i / W) + 0.5) / H * 2;
+            double d[3], len = 0;
+            for (int k = 0; k < 3; k++) {
+                d[k] = fw[k] + rt[k] * nx * tf * aspect + up[k] * ny * tf;
+                len += d[k] * d[k];
+            }
+            v.dirX[i] = d[0] / std::sqrt(len);
+        }
+        v.farD.assign(px, 0);
+        v.farN.assign(px, 0);
+        std::vector<float> farC(px * 4);
+        AtlasFrameOutput of{nullptr, v.farN.data(), v.farD.data(), farC.data()};
+        CHECK(atlas_render(after, &v.f, &of) == ATLAS_OK);
+        size_t inTunnel = 0;
+        v.nd.assign(px, 1e30f);
+        v.ni.assign(px, 0);
+        for (size_t i = 0; i < px; i++) {
+            inTunnel += v.farD[i] < 200.0f;
+            if (v.farD[i] < 1e29f) {
+                v.nd[i] = v.farD[i];
+                v.ni[i] = (255u << 8) | ((v.farN[i] & 0xFFFFu) << 16);
+            }
+        }
+        CHECK(inTunnel > px * 9 / 10);  // the tunnel fills the view
+        v.fn = v.f;
+        v.fn.nearFieldEnd = 256;
+        v.fn.flags |= ATLAS_FRAME_NEAR_DEPTH | ATLAS_FRAME_NEAR_LIGHT;
+        v.fn.nearDepth = v.nd.data();
+        v.fn.nearInfo = v.ni.data();
+    };
+    View* mouth = new View, * deep = new View, * along = new View;
+    makeView(*mouth, 24.5, 270, 60);  // west, out of the mouth into the pit
+    makeView(*deep, 40.5, 90, 70);    // east, down the tunnel
+    makeView(*along, 150.5, 270, 70); // west from deep inside, 158 blocks to the mouth
+    // the near light by the surface's x: the pit (open to the sky), the tunnel's first 24 blocks, deep
+    struct Bin { double sun = 0, irr = 0, haze = 0; size_t n = 0; };
+    double capped = 0, tunnelIrr = 0;  // what the resolve's cap by vanilla's sky light takes of atlas's light in the tunnel
+    auto measure = [&](AtlasContext* c, const View& v, Bin bins[3]) {
+        std::vector<float> nl(px * 4), col(px * 4);
+        AtlasFrameOutput o{nullptr, nullptr, nullptr, col.data(), nl.data()};
+        CHECK(atlas_render(c, &v.fn, &o) == ATLAS_OK);
+        for (size_t i = 0; i < px; i++) {
+            if (v.nd[i] > 1e29f) continue;
+            double x = v.x0 + v.dirX[i] * v.nd[i];
+            if (x >= -8 && x < 48) {
+                // vanilla's sky light: 15 in the pit, one less a block into the tunnel (14 at x -8); the resolve's
+                // open = smoothstep(0.05, 0.35, level / 15) scales atlas's light (above the ambient floor,
+                // FAR_AMBIENT_FLOOR x LOOK_AMBIENT, which the resolve adds back as its own)
+                double lv = std::max(0.0, 6.0 - std::floor(x)) / 15.0, s = std::clamp((lv - 0.05) / 0.3, 0.0, 1.0);
+                double e = std::max(0.0, 0.2126 * nl[i * 4] + 0.7152 * nl[i * 4 + 1] + 0.0722 * nl[i * 4 + 2] - 3.0 * 0.01229);
+                tunnelIrr += e;
+                capped += e * (1.0 - s * s * (3.0 - 2.0 * s));
+            }
+            int b = x < -8 ? 0 : x < 16 ? 1 : x >= 48 ? 2 : -1;
+            if (b < 0) continue;
+            bins[b].sun += nl[i * 4 + 3];
+            bins[b].irr += 0.2126 * nl[i * 4] + 0.7152 * nl[i * 4 + 1] + 0.0722 * nl[i * 4 + 2];
+            bins[b].haze += 0.2126 * col[i * 4] + 0.7152 * col[i * 4 + 1] + 0.0722 * col[i * 4 + 2];
+            bins[b].n++;
+        }
+    };
+    Bin a[3], bf[3];
+    for (const View* v : {mouth, deep}) measure(after, *v, a);
+    std::printf("  the resolve's sky-light cap takes %.1f%% of the light atlas traces in the tunnel's first 48 blocks "
+                "(above the ambient floor)\n", tunnelIrr > 0 ? 100.0 * capped / tunnelIrr : 0.0);
+    for (const View* v : {mouth, deep}) measure(before, *v, bf);
+    for (Bin* bins : {a, bf})
+        for (int b = 0; b < 3; b++)
+            if (bins[b].n) bins[b].sun /= double(bins[b].n), bins[b].irr /= double(bins[b].n), bins[b].haze /= double(bins[b].n);
+    const char* names[3] = {"pit (open)", "tunnel, first 24", "deep (x >= 48)"};
+    for (int b = 0; b < 3; b++)
+        std::printf("  near light, %-16s (%5zu px): sun %.3f / %.3f, irradiance %.4f / %.4f, inscatter %.5f / %.5f "
+                    "(with / without the cave's sections)\n", names[b], a[b].n, a[b].sun, bf[b].sun, a[b].irr, bf[b].irr,
+                    a[b].haze, bf[b].haze);
+    CHECK(a[0].n > 100 && a[1].n > 100 && a[2].n > 1000);
+    CHECK(a[2].sun == 0.0);               // no sun deep under rock
+    CHECK(a[0].sun > 0.3);                // the sun in the pit
+    // deep inside: the ambient floor (FAR_AMBIENT_FLOOR x LOOK_AMBIENT, 0.037) and the look's bounce scaled by it, no sky
+    CHECK(a[2].irr < 0.075);
+    CHECK(a[1].irr > 1.2 * a[2].irr);     // the sky through the mouth, falling off into the tunnel
+    CHECK(a[0].irr > 8.0 * a[2].irr);
+    CHECK(a[0].irr > 2.0 * bf[0].irr);    // without the cave's sections the pit's floor was in the tiles' stone
+    CHECK(a[2].haze < 1e-6);              // under cover at both ends: no aerial inscatter
+
+    // past the near field: the loaded chunks end 24 blocks out (the hand-off at 16); the far trace goes on down the
+    // tunnel instead of starting in the tiles' stone
+    const std::vector<float>& farD = along->farD;
+    std::vector<float> nd2(px, 1e30f);
+    for (size_t i = 0; i < px; i++)
+        if (farD[i] < 24.0f) nd2[i] = farD[i];
+    AtlasFrame fp = along->fn;
+    fp.nearFieldEnd = 16;
+    fp.nearDepth = nd2.data();
+    for (AtlasContext* c : {after, before}) {
+        std::vector<float> d(px), col(px * 4), nl(px * 4);
+        AtlasFrameOutput o{nullptr, nullptr, d.data(), col.data(), nl.data()};
+        CHECK(atlas_render(c, &fp, &o) == ATLAS_OK);
+        size_t far = 0, match = 0;
+        double lum = 0;
+        for (size_t i = 0; i < px; i++) {
+            if (nd2[i] < 1e29f || farD[i] > 1e29f) continue;
+            far++;
+            match += std::abs(d[i] - farD[i]) < 0.5f;
+            lum += 0.2126 * col[i * 4] + 0.7152 * col[i * 4 + 1] + 0.0722 * col[i * 4 + 2];
+        }
+        std::printf("  past the near field (%s): %zu px, %.1f%% at the tunnel's own depth, mean colour %.5f\n",
+                    c == after ? "with the cave's sections" : "surface sections only", far,
+                    far ? 100.0 * match / far : 0.0, far ? lum / far : 0.0);
+        if (c == after) {
+            CHECK(far > px / 40);
+            CHECK(match > far * 99 / 100);
+        }
+    }
+
+    // CPU and Vulkan agree in the cave (the enclosed reach, the roof rays)
+    AtlasContext* gpu = caveScene(ATLAS_BACKEND_VULKAN, true);
+    if (gpu) {
+        std::vector<float> nlc(px * 4), nlg(px * 4);
+        AtlasFrameOutput oc{nullptr, nullptr, nullptr, nullptr, nlc.data()}, og{nullptr, nullptr, nullptr, nullptr, nlg.data()};
+        CHECK(atlas_render(after, &mouth->fn, &oc) == ATLAS_OK);
+        CHECK(atlas_render(gpu, &mouth->fn, &og) == ATLAS_OK);
+        // (under cover one sky ray a pixel either meets the mouth or not, so a hair of float difference flips a pixel
+        // whole: the pixels may differ a little more than in the open, the means not)
+        size_t off = 0;
+        double sc = 0, sg = 0;
+        for (size_t i = 0; i < px; i++) {
+            sc += nlc[i * 4] + nlc[i * 4 + 1] + nlc[i * 4 + 2];
+            sg += nlg[i * 4] + nlg[i * 4 + 1] + nlg[i * 4 + 2];
+            for (int k = 0; k < 4; k++)
+                if (std::abs(nlc[i * 4 + k] - nlg[i * 4 + k]) > 0.02 + 0.02 * std::abs(nlc[i * 4 + k])) {
+                    off++;
+                    break;
+                }
+        }
+        std::printf("  cpu/vulkan near light in the cave: %.3f%% px differ, mean irradiance %.5f / %.5f\n",
+                    100.0 * off / px, sc / (3.0 * px), sg / (3.0 * px));
+        CHECK(off < px / 50);
+        CHECK(std::abs(sc - sg) < 0.01 * sc);
+        atlas_destroy(gpu);
+    } else {
+        std::printf("  SKIP parity: no Vulkan device\n");
+    }
+    delete mouth;
+    delete deep;
+    delete along;
+    atlas_destroy(after);
+    atlas_destroy(before);
+}
+
 int main(int argc, char** argv) {
     testSvdag();
+    testCaves();
     testGroups();
     testAbi();
     testStreamingGap();

@@ -612,7 +612,8 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.jitter[2] = ctx->jitter[0] != 0.0f || ctx->jitter[1] != 0.0f ? 1.0f : 0.0f;
     // ATLAS_ABLATE=<bits>: measurements only, leave parts of the shading out (1 AO, 2 smooth normals, 4 shadows, 8 far
     // lights, 16 water reflections, 32 the trace itself after the first hit's distance; the far light: 256 the cheap
-    // light of ATLAS_FRAME_LIGHT_LOW, 1024 no light through leaves, 4096 a grey of the sky visibility (| 2048: the
+    // light of ATLAS_FRAME_LIGHT_LOW, 512 never enclosed (the sky's short reach and the aerial haze under solid cover as
+    // in the open), 1024 no light through leaves, 4096 a grey of the sky visibility (| 2048: the
     // secondary rays' origin in a solid), 8192 two sky rays, 16384 half their reach; the groups: 64 draw every node
     // whole, 128 a drawn box without its texel walk, 32768 never draw a node whole for its error, bits 16-18 the level
     // their primary rays start from: a coarse level seen up close)

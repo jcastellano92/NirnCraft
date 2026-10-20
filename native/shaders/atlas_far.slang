@@ -632,6 +632,7 @@ float traceShadow(float3 p, float3 dir, int lod) {
 // where the hit's level has no data, as traceShadow; gStopFoliage: stopped by foliage alone (its light still comes
 // through for FOLIAGE_SSS).
 static bool gStopFoliage = false;
+static float gSecHitT = 0.0;  // where the last secondary ray was stopped (blocks from its origin; set on a hit)
 float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
     TraceResult res;
     res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.dither = 0.5; res.albedo = float3(0, 0, 0); res.hasAlbedo = 0u;
@@ -652,6 +653,7 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
         int r = traceLod(lod, p + dir * t, dir, len, res, uncExit);
         if (r == TRACE_HIT) {
             gStopFoliage = gTrans <= 0.0;
+            gSecHitT = t + res.t;
             vis = 0.0;
             break;
         }
@@ -672,6 +674,13 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
     return gTrans;
 }
 
+// Whether camera-relative p lies under solid cover (rock over a cave, a roof; leaves are no cover): a ray straight up
+// stopped by something solid before the world top. A point the key light reaches is never under it (callers ask only
+// where it does not). Clobbers traceSecondary's globals.
+bool solidRoof(float3 p, int lod) {
+    return traceSecondary(p, float3(0, 1, 0), 2048.0, lod) <= 0.0 && !gStopFoliage;
+}
+
 // Cosine-weighted direction about n from (u, v) in [0, 1)^2 (Duff et al. 2017 basis, as atlas_truth's)
 float3 cosineDir(float3 n, float u, float v) {
     float sg = n.z >= 0.0 ? 1.0 : -1.0;
@@ -688,9 +697,14 @@ float3 cosineDir(float3 n, float u, float v) {
 // cone that widens with the level, so far away valleys and ridges darken, up close eaves and crevices), stratified
 // over the TAA's frames (R2 per pixel rotation). The constant FAR_AMBIENT_OCCLUSION and the 4-tap AO stand in when
 // the frame asks for cheap light (FRAME_LIGHT_LOW), as before.
+// enclosed (the point lies under solid cover: solidRoof) the rays reach ENCLOSED_REACH voxels: in a cave, a mine or a
+// hall the sky is what its mouth or its windows show, not whatever lies past 16 blocks of the floor (a cavern's far
+// wall, an unlit tunnel). In the open the reach stays short: what hides the sky from a valley floor further out is sunlit
+// ground, whose bounce the short reach stands in for.
 static const int SKY_RAYS = 1;
 static const float SKY_REACH = 16.0;
-float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, out float vis) {
+static const float ENCLOSED_REACH = 64.0;
+float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool enclosed, out float vis) {
     float day = smoothstep(-0.12, 0.25, sun.y);
     float3 skyUp = lerp(float3(0.02, 0.025, 0.05), float3(0.33, 0.45, 0.7), day);
     float3 ground = lerp(float3(0.01, 0.01, 0.012), float3(0.2, 0.18, 0.14), day);
@@ -700,21 +714,45 @@ float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, out flo
     uint ab = asuint(frame.jitter.w);  // (ATLAS_ABLATE 8192: two rays, 16384: half the reach; measurements)
     int rays = (ab & 8192u) != 0u ? 2 : SKY_RAYS;
     float reach = (ab & 16384u) != 0u ? 0.5 * SKY_REACH : SKY_REACH;
-    float3 sum = float3(0, 0, 0);
+    float3 sum = float3(0, 0, 0), seen = float3(0, 0, 0);
     vis = 0.0;
     for (int k = 0; k < rays; k++) {
         uint j = fi * uint(rays) + uint(k);
         float u = frac(ru + float(j) * 0.7548776662), v = frac(rv + float(j) * 0.5698402909);
         float3 w = cosineDir(faceN, u, v);
         float T = traceSecondary(o, w, reach * s, lod);
-        sum += (w.y >= 0.0 ? skyUp : ground) * (1.0 - T);
+        if (enclosed && T > 0.0) {
+            // on to the enclosed reach; what stops it there counts only when it lies under cover too (a cavern's far
+            // wall): a face open to the sky out there (a pit's sunlit wall beyond a tunnel's mouth) is what the short
+            // reach stands in for in the open, its bounce
+            float3 o2 = o + w * (reach * s);
+            float T2 = traceSecondary(o2, w, (ENCLOSED_REACH - reach) * s, lod);
+            if (T2 <= 0.0 && !gStopFoliage && !solidRoof(o2 + w * (gSecHitT - 0.05 * s), lod)) T2 = 1.0;
+            T *= T2;
+        }
+        float3 rad = w.y >= 0.0 ? skyUp : ground;
+        sum += rad * (1.0 - T);
+        seen += rad * T;
         vis += T;
     }
     vis /= float(rays);
+    // under cover: what the rays see, unbiased (the control variate below, clamped at 0 per sample, leaves a wall that
+    // sees nothing a quarter of the sky's excess over the ground: a closed cave's walls glowed); the resolve's filter
+    // and the TAA average its noise
+    if (enclosed) return seen / float(rays);
     // a control variate: the open hemisphere's light is known exactly (skyAmbient: the cosine-weighted split of sky
     // and ground radiance about the face), the rays only estimate what is taken from it, so an open face (most of the
     // far field) is exact and noise-free, and only occluded ones carry the rays' noise
     return max(lerp(ground, skyUp, faceN.y * 0.5 + 0.5) - sum / float(rays), float3(0, 0, 0));
+}
+
+// The camera under solid cover (the eye in a cave, a mine, a hall), asked once per pixel at most (coherent: the same ray
+// for every pixel). With a surface under cover too, the air between them is not sunlit: no aerial inscatter (a cave's far
+// end showed the sky's haze, opened up by the eye's exposure underground), the extinction stays.
+static int gEyeRoofed = -1;
+bool eyeRoofed() {
+    if (gEyeRoofed < 0) gEyeRoofed = solidRoof(frame.camFrac.xyz, 0) ? 1 : 0;
+    return gEyeRoofed == 1;
 }
 
 // Minecraft's own look without a shader pack (FRAME_VANILLA_LIGHT: the near field is vanilla, the far field must read
@@ -1179,7 +1217,8 @@ void sunMapMain(uint3 id : SV_DispatchThreadID) {
 // LOD 0 (below): the key light x N.L through the traced secondary ray and the cloud shadow, the traced sky plus the
 // pack's floor, the far lights; the cheap terms under FRAME_LIGHT_LOW. Block light is the host's. The albedo factors out
 // of shadeSurfaceAmb exactly (a diffuse class, no emission): albedo x this == farMain's colour before the haze.
-// rgb: irradiance; a: the key light's visibility.
+// rgb: irradiance; a: the key light's visibility. gNearRoofed: the surface lies under solid cover (solidRoof).
+static bool gNearRoofed = false;
 float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 sun) {
     float R = frame.camFrac.w;
     float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
@@ -1208,11 +1247,14 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     }
     if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, L);
     float3 ambient;
+    gNearRoofed = false;
     if (cheapLight) {
         ambient = skyAmbient(N, sun) * FAR_AMBIENT_OCCLUSION + FAR_AMBIENT_FLOOR;
     } else {
         float skyVis;
-        ambient = skyVisible(px, so, N, 0, sun, skyVis) + FAR_AMBIENT_FLOOR;
+        // (ATLAS_ABLATE 512, measurements: never enclosed, the sky's short reach and the haze everywhere as before)
+        gNearRoofed = sunVis <= 0.0 && (ablate & 512u) == 0u && solidRoof(so, 0);
+        ambient = skyVisible(px, so, N, 0, sun, gNearRoofed, skyVis) + FAR_AMBIENT_FLOOR;
     }
     MaterialGpu white;
     white.albedoRough = float4(1, 1, 1, 0.8);
@@ -1227,6 +1269,7 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
 void farMain(uint3 id : SV_DispatchThreadID) {
     gMoonDir = frame.moonDir;
     gMoonRad = frame.moonRad;
+    gEyeRoofed = -1;
     uint w = frame.dims.x, h = frame.dims.y;
     if (id.x >= w || id.y >= h) return;
     uint pix = id.y * w + id.x;
@@ -1264,6 +1307,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
                 if ((frame.dims.z & FRAME_GROUPS) != 0u) gHead = groupData[0];  // (the secondary rays' material shapes)
                 outNearLight[pix] = nearLightAt(id.xy, o, dir, nd, nearInfo[pix], sun);
                 c = float4(aerialInscatter(dir, sun, nd, frame), aerialTransmittance(nd, frame));
+                if (gNearRoofed && eyeRoofed()) c.rgb = float3(0, 0, 0);  // under cover at both ends: unlit air
             }
             float cd = 1e30;
             if ((frame.dims.z & FRAME_CLOUDS) != 0) {
@@ -1507,6 +1551,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         }
         float3 ambient;
         float skyVis = 1.0;
+        bool roofed = false;  // under solid cover (a cave past the near field): the sky's long reach, no haze
         if (cls == 2u) {
             ambient = skyAmbient(n, sun) * ao;
         } else if (cheapLight) {
@@ -1514,8 +1559,10 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             // land takes their average (FAR_AMBIENT_OCCLUSION, calibrated against fid-* near / far pairs)
             ambient = skyAmbient(n, sun) * (ao * FAR_AMBIENT_OCCLUSION) + FAR_AMBIENT_FLOOR;
         } else {
-            // the sky this face sees (traced visibility of the hemisphere), the pack's floor under it
-            ambient = skyVisible(id.xy, so, faceN, res.lod, sun, skyVis) + FAR_AMBIENT_FLOOR;
+            // the sky this face sees (traced visibility of the hemisphere), the pack's floor under it; at levels 0 and
+            // 1 under solid cover over the enclosed reach (coarser levels' 16 voxels reach far enough already)
+            roofed = res.lod <= 1 && sunVis <= 0.0 && (ablate & 512u) == 0u && solidRoof(so, res.lod);
+            ambient = skyVisible(id.xy, so, faceN, res.lod, sun, roofed, skyVis) + FAR_AMBIENT_FLOOR;
         }
         // an emitter's texels glow by their own brightness, as the pack's light blocks do (lib/materials.glsl MAT_LIGHT:
         // 4 x smoothstep(0.35, 0.8, luminance): a lantern's flame bright, its iron frame dark); never below the flat
@@ -1540,7 +1587,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             color = lerp(color, white, foam);
         }
         depth = tHit;
-        if (!vanillaLight) color = applyAerial(color, dir, sun, tHit, frame);
+        if (roofed && eyeRoofed()) color *= aerialTransmittance(tHit, frame);  // under cover at both ends: unlit air
+        else if (!vanillaLight) color = applyAerial(color, dir, sun, tHit, frame);
         // (ATLAS_ABLATE 4096, measurements: the secondary rays' origin solid in the voxel path, sun and sky visibility)
         // (ATLAS_ABLATE 4096, measurements: one grey value past the shading, readable through any tonemap: the sky
         // visibility; with 2048 whether the secondary rays' origin is in a voxel-path solid)
