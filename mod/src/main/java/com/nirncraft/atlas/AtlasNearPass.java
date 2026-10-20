@@ -282,8 +282,7 @@ public final class AtlasNearPass {
         return p.toBuilder()
                 .withLocation(name)
                 .withVertexShader(id("core/near_gbuffer"))
-                .withFragmentShader(id("core/near_shadow"))
-                .withUnusedColorTargetState(0)
+                .withFragmentShader(id("core/near_shadow"))  // (vanilla's colour state kept: the dummy target matches it)
                 .build();
     }
 
