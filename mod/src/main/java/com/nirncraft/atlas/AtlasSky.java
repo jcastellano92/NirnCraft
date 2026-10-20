@@ -18,6 +18,8 @@ import com.mojang.renderpearl.api.GpuFormat;
 import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.nirncraft.NirnCraft;
 import com.nirncraft.atmosphere.NightSkyMath;
+import com.nirncraft.atmosphere.NirnCelestial;
+import com.nirncraft.atmosphere.client.CelestialSky;
 import com.nirncraft.atmosphere.client.NightSky;
 import com.nirncraft.atmosphere.client.SkyCube;
 import java.nio.ByteBuffer;
@@ -70,6 +72,7 @@ final class AtlasSky implements CustomSkyboxRenderer {
                 .withUniform("AirMs", UniformType.COMBINED_IMAGE_SAMPLER)
                 .withUniform("NightInfo", UniformType.UNIFORM_BUFFER)
                 .withUniform("NightSigns", UniformType.UNIFORM_BUFFER)
+                .withUniform("CelestialInfo", UniformType.UNIFORM_BUFFER)
                 .withUniform("NightGalaxy", UniformType.COMBINED_IMAGE_SAMPLER)
                 .withUniform("NightMasser", UniformType.COMBINED_IMAGE_SAMPLER)
                 .withUniform("NightSecunda", UniformType.COMBINED_IMAGE_SAMPLER);
@@ -132,6 +135,7 @@ final class AtlasSky implements CustomSkyboxRenderer {
             .build();
 
     private MappableRingBuffer info, airInfo, nightInfo;
+    private MappableRingBuffer celInfo;  // CelestialInfo (atlas_celestial.glsl: the stars' frame, the planets, a comet)
     private static GpuBuffer signs;
     private static TextureTarget view, lightTarget;
     private static boolean viewDrawn;
@@ -183,8 +187,9 @@ final class AtlasSky implements CustomSkyboxRenderer {
         if (info == null) info = new MappableRingBuffer(() -> "atlas sky info", 130, 112);
         if (airInfo == null) airInfo = new MappableRingBuffer(() -> "atlas air info", 130, 112);
         if (nightInfo == null) nightInfo = new MappableRingBuffer(() -> "atlas night info", 130, NightSkyMath.BLOCK_FLOATS * 4);
+        if (celInfo == null) celInfo = new MappableRingBuffer(() -> "atlas celestial info", 130, NirnCelestial.BLOCK_FLOATS * 4);
         if (signs == null) {
-            float[] s = NightSkyMath.signs();
+            float[] s = NirnCelestial.catalogue();  // the birthsigns' and the named stars (NightSigns)
             ByteBuffer b = MemoryUtil.memAlloc(s.length * 4).order(ByteOrder.nativeOrder());
             try {
                 for (float v : s) b.putFloat(v);
@@ -214,6 +219,9 @@ final class AtlasSky implements CustomSkyboxRenderer {
                 mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
         nightDrawn = NightSky.drawn();
         NightSkyMath.target(night, look[0], (Math.PI / 2) / SkyCube.FACE);
+        // the stars, the planets, a comet: from the camera's place on the map and the calendar (NirnCelestial)
+        float[] cel = CelestialSky.frame(mc, sky.sunAngle, sun[1], cam.pos.x, cam.pos.z,
+                mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
         var linear = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
                 FilterMode.LINEAR, FilterMode.LINEAR, false);
         var band = RenderSystem.getSamplerCache().getSampler(AddressMode.REPEAT, AddressMode.CLAMP_TO_EDGE,
@@ -231,6 +239,10 @@ final class AtlasSky implements CustomSkyboxRenderer {
         try (var v = nightInfo.currentBuffer().map(false, true)) {
             var b = Std140Builder.intoBuffer(v.data());
             for (int i = 0; i < night.length; i += 4) b.putVec4(night[i], night[i + 1], night[i + 2], night[i + 3]);
+        }
+        try (var v = celInfo.currentBuffer().map(false, true)) {
+            var b = Std140Builder.intoBuffer(v.data());
+            for (int i = 0; i < cel.length; i += 4) b.putVec4(cel[i], cel[i + 1], cel[i + 2], cel[i + 3]);
         }
         var encoder = device.createCommandEncoder();
         // 1. the sky-view LUT: the air marched for each of its directions
@@ -273,6 +285,7 @@ final class AtlasSky implements CustomSkyboxRenderer {
         info.rotate();
         airInfo.rotate();
         nightInfo.rotate();
+        celInfo.rotate();
         return true;
     }
 
@@ -284,6 +297,7 @@ final class AtlasSky implements CustomSkyboxRenderer {
         pass.setUniform("AirMs", ms, linear);
         pass.setUniform("NightInfo", nightInfo.currentBuffer());
         pass.setUniform("NightSigns", signs);
+        pass.setUniform("CelestialInfo", celInfo.currentBuffer());
         pass.setUniform("NightGalaxy", galaxy, band);
         pass.setUniform("NightMasser", masser, linear);
         pass.setUniform("NightSecunda", secunda, linear);
@@ -340,6 +354,10 @@ final class AtlasSky implements CustomSkyboxRenderer {
         float[] meteors = NightSky.meteorLight();
         for (int k = 0; k < 4; k++)
             for (int c = 0; c < 3; c++) sh[k * 3 + c] += meteors[k * 4 + c];
+        // the planets and a bright comet, points of light (CelestialSky: their irradiance, lifted as the sky's)
+        float[] bodies = CelestialSky.light();
+        for (int k = 0; k < 4; k++)
+            for (int c = 0; c < 3; c++) sh[k * 3 + c] += bodies[k * 4 + c];
         // the fill moon: a point of light (its irradiance above the air, through the air's extinction to the eye)
         float[] ml = NightSky.moonlights();
         float fy = ml[7];

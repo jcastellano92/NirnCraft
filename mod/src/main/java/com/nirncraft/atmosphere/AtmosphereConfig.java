@@ -59,7 +59,7 @@ public final class AtmosphereConfig {
                 "off = use the biome temperature limit below.").define("auroraByRegion", true);
         STARS = b.comment("Denser, coloured, gently twinkling star field at night.").define("stars", true);
         GALAXY = b.comment("Faint galaxy band across the night sky.").define("galaxy", true);
-        CONSTELLATIONS = b.comment("The thirteen birthsign constellations, faintly traced among the stars.").define("constellations", true);
+        CONSTELLATIONS = b.comment("The thirteen birthsigns' star figures (their brighter stars among the others, no lines).").define("constellations", true);
         SHOOTING_STARS = b.comment("Occasional shooting stars on clear nights.").define("shootingStars", true);
         METEOR_SHOWERS = b.comment("Nights of meteor showers: days of the year (0..365), comma separated; empty: none.")
                 .define("meteorShowers", "42,221,347");

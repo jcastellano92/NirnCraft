@@ -11,11 +11,9 @@
 //                  distant thing. Curtains: thin sheets along the oval from warped, drifting, folding noise; rays along
 //                  the field lines; oxygen green in the body, oxygen red above ~200 km, a nitrogen blue-purple fringe at
 //                  the lower border. Ray-marched only where the ray crosses the oval's band (dithered: TAA resolves it).
-//   the stars      procedural (two cube grids of cells, a star in most: magnitudes from the real count law, colours by
-//                  temperature), each a point source drawn at the pixel's footprint (flux kept at every resolution),
-//                  twinkling with the air mass; the galaxy band (textures/environment/galaxy.png) and the birthsigns
-//                  (NightSigns: their stars brighter, their figures faintly traced; the Serpent wandering in its own
-//                  frame), all turning with the celestial frame (sidereal: the stars gain a turn a year on the sun)
+//   the stars      atlas_celestial.glsl (included below, its state from atmosphere.NirnCelestial): the stars, the
+//                  galaxy band, the birthsigns as star figures, the named stars, the planets and a comet, seen from
+//                  the observer's latitude, turning with the sun's clock (sidereal: a turn a year on the sun)
 //   the moons      Masser (large, reddish) and Secunda (small, white): discs lit by the sun (their albedo maps, the
 //                  phase from the real geometry: Lommel-Seeliger, the terminator where the sun puts it), occulting the
 //                  stars; by day the air's light lies over them (faint)
@@ -48,13 +46,6 @@ layout(std140) uniform NightInfo {
     vec4 MeteorTail[4];   // xyz the train's end, w the head's colour (0 white .. 1 green)
     vec4 NightTarget;     // x the pre-exposure a half-float target stores (atlas_sky_emit: rgb x it, alpha it), y the
                           // target's texel angle (rad)
-};
-
-layout(std140) uniform NightSigns {
-    vec4 SignCentre[14];  // xyz the figure's centre (celestial frame; 12: the Serpent, in its own), w cos(its radius);
-                          // 13 figures (the 14th slot unused)
-    vec4 SignStar[112];   // 8 a figure: xyz direction, w magnitude (99: none)
-    vec4 SignLine[56];    // 4 a figure, two lines each: star indices (a, b, c, d), -1: none
 };
 
 uniform sampler2D NightGalaxy;  // the galaxy band (u around the band, v across it)
@@ -238,92 +229,12 @@ vec3 nightCubeDir(float face, vec2 uv) {
     return normalize(vec3(uv.x, uv.y, -1.0));
 }
 
-vec3 starColour(float t) {
-    // blue-white, white, yellow, orange (SkyGeometry's mix), luminance 1
-    if (t < 0.22) return vec3(0.72, 0.82, 1.0) / 0.8237;
-    if (t < 0.70) return vec3(0.95, 0.96, 1.0) / 0.9604;
-    if (t < 0.90) return vec3(1.0, 0.92, 0.74) / 0.9246;
-    return vec3(1.0, 0.72, 0.55) / 0.7671;
-}
-
 // a point source of irradiance E (per colour) at direction s, seen at c with the pixel's angular size pix: radiance
 float nightPoint(vec3 c, vec3 s, float pix) {
     float sigma = max(pix * 0.75, 2e-5);
     vec3 x = cross(c, s);
     float a2 = dot(x, x);
     return exp(-0.5 * a2 / (sigma * sigma)) / (6.2831853 * sigma * sigma);
-}
-
-// the star field's radiance at celestial direction c (physical, before the air and NightGain)
-vec3 nightStarField(vec3 c, float pix, float twinkleSeed) {
-    vec3 fc = nightCube(c);
-    float lat = dot(c, GALAXY_N);
-    float crowd = 1.0 + 1.6 * exp(-lat * lat / 0.03);  // crowded towards the galaxy's plane
-    vec3 L = vec3(0.0);
-    for (int layer = 0; layer < 2; layer++) {
-        float n = layer == 0 ? 46.0 : 104.0;
-        vec2 g = (fc.yz * 0.5 + 0.5) * n;
-        vec2 cell = floor(g);
-        vec3 h = nHash3(vec3(cell + fc.x * 311.0, float(layer) * 97.0 + 13.0));
-        float p = (layer == 0 ? 0.36 : 0.30) * crowd;
-        if (h.x > p) continue;
-        vec2 at = (cell + 0.18 + 0.64 * h.yz) / n * 2.0 - 1.0;
-        vec3 s = nightCubeDir(fc.x, at);
-        // magnitudes after the real count law (N(< m) ~ 10^(0.5 m)): the layer's faintest, two magnitudes per decade
-        float u = max(h.x / p, 1e-5);
-        float m = (layer == 0 ? 6.4 : 8.4) + 2.0 * log(u) / 2.302585;
-        float e = STAR_E0 * exp2(-1.328771 * m);  // 10^(-0.4 m)
-        float tw = 1.0 + NightStars.w * twinkleSeed * (nNoise(vec3(h.yz * 91.0, NightGain.z * 9.0)) - 0.5) * 1.6;
-        L += e * max(tw, 0.0) * nightPoint(c, s, pix) * starColour(fract(h.y * 7.31 + h.z * 3.7));
-    }
-    return L;
-}
-
-// the galaxy band (SkyGeometry.buildGalaxy's mapping, inverted)
-vec3 nightGalaxy(vec3 c) {
-    vec3 a = normalize(cross(GALAXY_N, abs(GALAXY_N.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
-    vec3 b = normalize(cross(GALAXY_N, a));
-    float th = atan(dot(c, b), dot(c, a));
-    if (th < 0.0) th += 6.2831853;
-    float sn = dot(c, GALAXY_N);
-    float w = sn / max(sqrt(1.0 - sn * sn), 1e-4);
-    float hw = 0.30 * (1.0 + 0.25 * sin(th * 3.0 + 1.0));
-    float v = (w / hw + 1.0) * 0.5;
-    if (v <= 0.0 || v >= 1.0) return vec3(0.0);
-    vec4 t = textureLod(NightGalaxy, vec2(th / 6.2831853, v), 0.0);
-    vec3 lin = pow(t.rgb, vec3(2.2)) * t.a;
-    return lin * GALAXY_SCALE * smoothstep(0.0, 0.08, v) * smoothstep(1.0, 0.92, v);
-}
-
-// the birthsigns: their stars (brighter than the field's), their figures' lines faintly
-vec3 nightSigns(vec3 cel, vec3 serp, float pix) {
-    vec3 L = vec3(0.0);
-    for (int f = 0; f < 13; f++) {
-        vec3 c = f == 12 ? serp : cel;
-        if (dot(c, SignCentre[f].xyz) < SignCentre[f].w) continue;
-        for (int k = 0; k < 8; k++) {
-            vec4 s = SignStar[f * 8 + k];
-            if (s.w > 50.0) break;
-            L += STAR_E0 * exp2(-1.328771 * s.w) * nightPoint(c, s.xyz, pix) * vec3(0.92, 0.95, 1.0);
-        }
-        for (int k = 0; k < 4; k++) {
-            ivec4 ln = ivec4(SignLine[f * 4 + k]);
-            for (int j = 0; j < 2; j++) {
-                int ia = j == 0 ? ln.x : ln.z, ib = j == 0 ? ln.y : ln.w;
-                if (ia < 0) continue;
-                vec3 A = SignStar[f * 8 + ia].xyz, B = SignStar[f * 8 + ib].xyz;
-                vec3 n = normalize(cross(A, B));
-                float d = dot(c, n);
-                vec3 pr = c - n * d;
-                // between the stars, trimmed short of them (SkyGeometry.line: 12 % .. 88 %)
-                float t = atan(dot(cross(A, pr), n), dot(A, pr)) / max(acos(clamp(dot(A, B), -1.0, 1.0)), 1e-4);
-                if (t < 0.12 || t > 0.88) continue;
-                float wdt = max(pix, 3.5e-4);
-                L += exp(-0.5 * d * d / (wdt * wdt)) * vec3(0.62, 0.72, 0.95) * (AIRGLOW_ZENITH * 0.25);
-            }
-        }
-    }
-    return L;
 }
 
 // ================================================================================================= the moons
@@ -384,6 +295,8 @@ const int NIGHT_AURORA = 1, NIGHT_STARS = 2, NIGHT_MOONS = 4, NIGHT_METEORS = 8,
 // the diffuse part (what a surface's light integrates by sampling; the point stars' light is NIGHT_STARLIGHT's)
 const int NIGHT_DIFFUSE = NIGHT_AURORA | NIGHT_GLOW_LAYER | NIGHT_STARLIGHT | NIGHT_GALAXY;
 
+#include <nirncraft:atlas_celestial.glsl>
+
 // The sky's emitters along world direction dir (unit, y up), as seen through the air: radiance to add to the air's sky.
 // pix: the pixel's angular size (rad); dither 0..1; what: the NIGHT_* layers; steps: the aurora's samples.
 vec3 nightSky(vec3 dir, float pix, float dither, int what, int steps) {
@@ -400,16 +313,8 @@ vec3 nightSky(vec3 dir, float pix, float dither, int what, int steps) {
     }
     float behind = (1.0 - moonM.a) * (1.0 - moonS.a);  // what the moons leave of the sky behind them
     vec3 far = vec3(0.0);
-    if ((what & (NIGHT_STARS | NIGHT_GALAXY)) != 0 && behind > 0.0) {
-        vec3 cel = mat3(NightCelestial) * dir;
-        // scintillation grows with the air mass
-        float twinkle = clamp(0.25 / max(dir.y + 0.08, 0.06), 0.25, 1.0);
-        if ((what & NIGHT_STARS) != 0) {
-            if (NightStars.x > 0.0) far += NightStars.x * nightStarField(cel, pix, twinkle);
-            if (NightStars.z > 0.0) far += NightStars.z * nightSigns(cel, mat3(NightSerpent) * dir, pix);
-        }
-        if ((what & NIGHT_GALAXY) != 0 && NightStars.y > 0.0) far += NightStars.y * nightGalaxy(cel);
-    }
+    // the stars, the galaxy, the planets, a comet (atlas_celestial.glsl: hidden behind the moons by nightMoonCover)
+    if ((what & (NIGHT_STARS | NIGHT_GALAXY)) != 0) L += celestialSky(dir, pix, what) * gain;
     if ((what & NIGHT_STARLIGHT) != 0) far += vec3(0.85, 0.9, 1.0) * AIRGLOW_ZENITH * 0.5 * NightStars.x;
     // the airglow: a thin layer at 95 km, brighter towards the horizon (the slant path through it: van Rhijn)
     if ((what & NIGHT_GLOW_LAYER) != 0) {
