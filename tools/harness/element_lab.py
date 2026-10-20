@@ -348,13 +348,47 @@ def renderer_args(renderer, el, tmp):
     raise ValueError(f"unknown renderer {renderer}")
 
 
+BACKENDS = set()  # which atlas_core backends rendered this run's frames (the report says)
+FORCE_BACKEND = None  # --backend
+
+
+def gpu_busy():
+    """The GPU's utilisation in percent (0 when nvidia-smi is missing: no NVIDIA GPU, the CPU backend decides then)."""
+    try:
+        out = subprocess.run(["nvidia-smi", "--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"],
+                             capture_output=True, text=True, timeout=10).stdout
+        return max(int(x) for x in out.split())
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return -1
+
+
+def backend():
+    """atlas_core's backend for the far field's frames: Vulkan when the GPU is mostly idle (the game, or another
+    agent's timing, would otherwise share it), else the CPU backend (its pictures are held to Vulkan's by the native
+    parity tests). It had always been the CPU: atlas_render's default, nothing set it."""
+    if FORCE_BACKEND:
+        return FORCE_BACKEND
+    busy = gpu_busy()
+    return "vulkan" if 0 <= busy < 40 else "cpu"
+
+
 def render_all(renderer, el, frames, tmp):
     """Every (png, camera) of `frames` in one process: the mesh, textures, volume and trees loaded once."""
     lst = tmp / f"cameras-{renderer}.txt"
     lst.write_text("".join(f"{png.as_posix()} {c['eye']} {c['yaw']} {c['pitch']} {c['fov']} {c['w']} {c['h']}\n"
                            for png, c in frames), encoding="utf-8")
     tool, args = renderer_args(renderer, el, tmp)
-    r = run(tool, {**args, "cameras": lst.as_posix()})
+    if tool == "atlas_render" and "backend" not in args:
+        args["backend"] = backend()
+    try:
+        r = run(tool, {**args, "cameras": lst.as_posix()})
+    except RuntimeError:
+        if args.get("backend") != "vulkan":
+            raise
+        args["backend"] = "cpu"  # no usable Vulkan device here (the CPU backend is held to the same pictures)
+        r = run(tool, {**args, "cameras": lst.as_posix()})
+    if tool == "atlas_render":
+        BACKENDS.add(args["backend"])
     missing = [png for png, _ in frames if not png.exists()]
     if missing:
         raise RuntimeError(f"{tool} wrote no {missing[0].name}")
@@ -469,7 +503,11 @@ def main():
     ap.add_argument("--time", type=int, default=None,
                     help="day time in ticks (6000 noon, 12500 dusk, 18000 midnight): the reference's light")
     ap.add_argument("--distances", default=",".join(str(d) for d in DISTANCES))
+    ap.add_argument("--backend", choices=("vulkan", "cpu"), default=None,
+                    help="atlas_core's backend for the far field (default: Vulkan when the GPU is mostly idle)")
     a = ap.parse_args()
+    global FORCE_BACKEND
+    FORCE_BACKEND = a.backend
     els = elements()
     if a.list or not a.element:
         for e in els:
@@ -539,6 +577,8 @@ def main():
         if report[f"flyin_{name}"]["pop"] > LIMITS["pop"]:
             fails.append(f"fly-in {name} pops: {report[f'flyin_{name}']['pop']} > {LIMITS['pop']}")
     report["fails"] = fails
+    if BACKENDS:
+        report["backend"] = ",".join(sorted(BACKENDS))
     print(json.dumps(report))
     if report.get("outsideLight", 15) < DARK_LIGHT:  # black on black agrees to dE 0 and says nothing: not a pass
         print(f"SKIP: the element is underground (sky light {report['outsideLight']} of 15 on its faces): judge it "

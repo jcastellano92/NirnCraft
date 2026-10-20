@@ -135,6 +135,23 @@ abstract class AtlasRefiningSource implements AtlasFarField.ColumnSource {
         return pending;
     }
 
+    @Override
+    public final void coverQuick(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1) {
+        int span = AtlasNative.TILE << lod;
+        int tx0 = Math.floorDiv(x0, span), tz0 = Math.floorDiv(z0, span);
+        int tx1 = Math.floorDiv(x1 - 1, span), tz1 = Math.floorDiv(z1 - 1, span);
+        int quick = CACHED_PER_PASS;
+        for (int tz = tz0; tz <= tz1 && quick > 0; tz++)  // ready-made tiles (the disk cache) go up exact
+            for (int tx = tx0; tx <= tx1 && quick > 0; tx++) {
+                long k = key(lod, tx, tz);
+                if (exact.contains(k) && ctx.hasTile(lod, tx, tz)) continue;
+                if (!cached(lod, tx, tz)) continue;
+                quick--;
+                if (refine(ctx, lod, tx, tz) == Refined.DONE) exact.add(k);
+            }
+        ctx.previewGenerate(lod, x0, z0, x1, z1);  // stand-ins for the rest
+    }
+
     enum Refined { DONE, LATER, NEVER }
 
     /** Cached tiles put up per LOD and pass ahead of the budget (each a decode and an upload). */

@@ -267,6 +267,65 @@ expect(_el.wrote_variant(_log, Path("C:/t/a_groups.png"), "groups"), "the groups
 expect(_el.card_path({"slug": "e", "box": [0, 1, 2, 3, 4, 5]}, Path("t")) != _el.card_path({"slug": "e", "box": [0, 1, 2, 3, 4, 6]}, Path("t")),
        "an element's surface cards are keyed by its box, not only its name")
 
+# --- the far field's element frames name their backend; --backend forces it ------------------------------------------
+_el.FORCE_BACKEND = "cpu"
+expect(_el.backend() == "cpu", "--backend cpu renders the far field on the CPU backend")
+_el.FORCE_BACKEND = None
+expect(_el.backend() in ("vulkan", "cpu"), "the far field's backend is Vulkan or the CPU, by how busy the GPU is")
+
+# --- loading scenes: when the view came within reach of the settled one, and the jumps on the way ------------------
+import results as _results
+_frames = []
+for _i in range(6):  # grey until second 3, then the settled picture: a jump at 4 s, loaded from 4 s
+    _a = _np.full((40, 60, 3), 120 if _i < 3 else 30, dtype=_np.uint8)
+    _frames.append(_Image.fromarray(_a))
+_frames.append(_Image.fromarray(_np.full((40, 60, 3), 30, dtype=_np.uint8)))  # settled
+_lm = _results.pop_metrics({"loading": True, "frames": [6, 20]}, _frames)
+expect(_lm["loadConvergeS"] == 4.0 and _lm["loadJumpAtS"] == 4.0, "a loading strip says when it converged and where it jumped")
+expect(any("pop-in" in f for f in _lm.get("popFlags", [])), "a whole-view jump between seconds is flagged as pop-in")
+_ts = _game.timeline_summary([{"t": 900.0, "pass": 50, "cover": 10, "update1": 20, "update2": 15, "streaming": "moved"},
+                              {"t": 1500.0, "pass": 30, "cover": 5, "update2": 5, "streaming": ""}])
+expect(_ts["farFirstMs"] == 900.0 and _ts["farIdleMs"] == 1500.0 and _ts["farTotal_coverMs"] == 15,
+       "the far field's timeline reads as first pass, idle and totals per stage")
+
+# --- loading scenes look at the distance, and their poses are vetted ------------------------------------------------
+import loading as _loading
+for _sc in _loading.scenes():
+    expect(bool(_sc.get("vet_pose")) and _sc["pose"]["height"] >= 30,
+           f"{_sc['id']}: a loading view is vetted and high over the land (at 4 blocks up it faced a wall)")
+
+# --- a build lock held by another build is waited for, not a failed run ---------------------------------------------
+class _R:
+    def __init__(self, rc, out):
+        self.returncode, self.stdout, self.stderr = rc, out, ""
+_calls = []
+def _fake_run(cmd, **kw):
+    _calls.append(cmd)
+    return _R(2, "ERROR: Resource busy: reported owner=build_263.py; no work started") if len(_calls) < 3 else _R(0, "ok")
+_r = _game.build263(["jar"], wait_s=60, poll_s=0, run=_fake_run)
+expect(_r.returncode == 0 and len(_calls) == 3, "a busy build lock is waited for, then the build runs")
+expect("Resource busy" in _game.build_failure(_R(2, "a\nERROR: Resource busy: no work started")),
+       "a build that failed without error lines says why (its last lines)")
+
+# --- a pose check is the scene's pose without its exports (minutes each), never its results --------------------------
+_pc = catalog.pose_checks([{"id": "t", "tier": "live", "vet_pose": "a view", "pose": {"place": "whiterun", "shot": "approach"},
+                            "setup": ["fog-off on", "atlaslab here t 48 12 40", "far-timeline start"],
+                            "cleanup": ["atlaslab view t-view 1024 light", "fog-off off"], "tags": ["suite:truth"],
+                            "frames": [16, 20], "loading": True}])
+expect(len(_pc) == 1 and _pc[0]["id"] == "t-posecheck" and _pc[0]["setup"] == ["fog-off on"]
+       and _pc[0]["cleanup"] == ["fog-off off"] and "frames" not in _pc[0] and _pc[0]["tags"] == ["suite:poses"],
+       "a pose check keeps the pose, drops the exports and frames, and has its own id")
+
+# --- a vetted scene exports only after its pose passed the review (not for every candidate pose) -------------------
+_vs = {"id": "t", "tier": "live", "vet_pose": "a view", "pose": {"place": "whiterun", "height": 4, "yaw": 0, "pitch": 0},
+       "setup": ["fog-off on", "atlaslab here t 48 12 40"], "cleanup": ["atlaslab view t-view 1024 light", "fog-off off"],
+       "tags": []}
+_cl = catalog.capture_actions(_vs, "tag")
+expect(not any(l.startswith("atlaslab") for l in _cl) and "capture tag" in _cl,
+       "a vetted scene's capture sequence carries no exports")
+expect(catalog.deferred_exports(_vs) == ["atlaslab here t 48 12 40", "atlaslab view t-view 1024 light"],
+       "its exports wait for the pose review, in their order")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth

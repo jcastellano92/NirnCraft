@@ -23,7 +23,7 @@ PACK_OPTIONS = _pack_options()
 VERBS = {"wait-dead", "door-file", "frame", "frame-box", "frame-file", "inside-file", "showcase", "reload", "resources", "shaders", "rebuild", "texture-probe", "flash", "cast", "use", "fx", "wait", "settle",
          "measure", "command", "try", "camera", "camera-plan", "camera-travel", "visit", "front", "ui", "capture-ui",
          "capture", "identity", "transport", "stop", "screen", "click", "key", "expect-screen", "perspective",
-         "renderdistance", "hud", "settle-visual", "message", "weather-off", "atlaslab", "atlas-edits-why", "fog-off", "truth-quiet",
+         "renderdistance", "hud", "settle-visual", "message", "weather-off", "atlaslab", "atlas-edits-why", "fog-off", "truth-quiet", "far-timeline",
          "pin", "pin-place", "pin-view", "pin-fly", "pin-shimmer", "pin-export", "pin-hide", "pin-clear", "pin-list",
          "atlas-suspend"}
 ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")

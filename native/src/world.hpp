@@ -129,6 +129,8 @@ public:
     static int regionRows(int lod);  // vertical regions needed to span y -64..640
 
     size_t regionCount() const { return regions_.size(); }
+    // regions waiting for a build: dirty ones, and those the window wants that do not exist yet (last update's count)
+    size_t pendingCount() const { return lastPending_.load(); }
     size_t tileCount() const {
         std::lock_guard<std::mutex> lock(mu_);
         return tiles_.size();
@@ -180,6 +182,8 @@ private:
     std::vector<uint8_t> classes_;  // material -> class (setClasses), for the sections' generated levels
     std::unordered_map<Key3, std::shared_ptr<const Region>, Key3Hash> regions_;
     std::unordered_set<Key3, Key3Hash> dirty_;
+    std::atomic<size_t> lastPending_{0};
+    std::atomic<int> lastHidden_{0};  // wanted regions the last update found behind the horizon
     mutable std::mutex snapMu_;
     std::shared_ptr<const PackedScene> packed_ = std::make_shared<PackedScene>();
     int lastCentre_[MAX_LODS][2] = {};

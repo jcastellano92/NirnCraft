@@ -395,8 +395,9 @@ public final class AtlasNative {
         }
     }
 
+    /** pending: regions the window wants that the last update left unbuilt (a budget ran out; 0 on cores before 0.14). */
     public record Stats(int regions, long nodeBytes, long leafBytes, long materialBytes, double buildMs, double frameMs,
-                        long raySteps) {}
+                        long raySteps, int pending) {}
 
     /** atlas_memory_info (abi 0.10): bytes; budget / usage 0 when the driver lacks VK_EXT_memory_budget. */
     public record MemoryInfo(long deviceLocal, long budget, long usage, long hostHeap, long atlas, boolean integrated,
@@ -884,7 +885,7 @@ public final class AtlasNative {
                 MemorySegment s = a.allocate(STATS_SIZE, 8);
                 check((int) getStats.invokeExact(ptr, s), "atlas_get_stats");
                 return new Stats(s.get(JAVA_INT, 0), s.get(JAVA_LONG, 8), s.get(JAVA_LONG, 16), s.get(JAVA_LONG, 24),
-                        s.get(JAVA_DOUBLE, 32), s.get(JAVA_DOUBLE, 40), s.get(JAVA_LONG, 48));
+                        s.get(JAVA_DOUBLE, 32), s.get(JAVA_DOUBLE, 40), s.get(JAVA_LONG, 48), s.get(JAVA_INT, 4));
             } catch (Throwable t) {
                 throw rethrow(t);
             }

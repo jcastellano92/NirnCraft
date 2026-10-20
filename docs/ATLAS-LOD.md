@@ -283,20 +283,33 @@ every face of every block (inside `box=`): the face seen straight on, 16 x 16 te
 (texture, tint, shade, AO, the lightmap at its light; sky and block light kept per texel for relighting). `atlas_lab
 surface=x.alc` takes every hit's colour from them through a mip chain picked by the pixel's footprint (trilinear).
 This is the surface cache in its simplest form: captured once from the real models with the real light, then the
-grouped voxels only decide shape and coverage. Element tier (lab-groups, 16 samples a pixel like the reference):
+grouped voxels only decide shape and coverage.
 
-| element | near dE, own 4 x 4 tiles, fixed sun | near dE, cards | dE 64 m - 32 km | IoU (16 px and up) | fly-in pop fast / slow |
-|---|---|---|---|---|---|
-| whiterun-day-chunk (32 m) | 29.3 | 3.7 | 1.7 - 4.0 | 0.94 - 1.00 | 0.03 / 0.07 |
-| falkreath-wide-tree (32 m) | 10 - 14 | 6.0; 5.0 with card leaves | 1.2 - 2.8 (card leaves) | 0.91 - 0.997 | 0.014 / 0.005 |
+Correction (2026-10-19, later the same day): until 694bde66 atlas_lab's camera frame put its ref variant (plain
+micro-voxels) at out= whatever was asked, so the first table written here measured micro-voxels with cards, not the
+groups. The camera frame now renders the variants named, and element_lab checks the log that the scored frame is the
+one asked for. With the groups themselves, cards sampled as the game samples its atlas (nearest when magnified,
+bilinear and trilinear when minified: nearest texels at every level had been twice as sharp as the game from 30 to
+300 m, which read as fly-in pop), translucent water composited over what lies under it, and thin blocks shaped by
+the visual hull of their face tiles, over the 54 elements of today's exports (suite:elements, renderer:lab-groups):
 
-Leaves and plants (`leaves=cards`, the default): whole voxels whose cards' alpha is the cutout (per texel up close,
-the mip's coverage further away) instead of micro-voxels hashed by their 4 x 4 tiles' alpha: better at every
-distance and nearly no pop. The bench passes through a transparent texel along the face's own axis (the next block in
+| | median | worst |
+|---|---|---|
+| near dE (32 m or 1.5 radii) | 0.84 | 5.3 (a stepped chunk) |
+| worst dE where the element covers 16 px or more | 4.1 | 11.8 (falkreath-wide-tree, 2-4 km) |
+| lowest IoU (16 px or more) | 0.95 | 0.73 (trees at 2-4 km) |
+| slow fly-in pop | 0.008 | 0.375 (riften-day-water) |
+
+What fails: coverage at 8-16 km (the groups' flattened faces cover a column whenever anything lies along the face's
+axis: 30-90 % too much for a dot of a pixel or two; the prefiltered faces, groupsf, cover 15-35 % too little and lose
+colour), trees in the middle distance, and fly-in pop on small odd models (a campfire as a glowing cube, a chain).
+Before the correction the bench's own 4 x 4 tiles under a fixed sun gave a near dE of 29 on the Whiterun chunk.
+
+Leaves (`leaves=cards`, the default): whole voxels whose cards' alpha is the cutout (per texel up close, the mip's
+coverage further away). The bench passes through a transparent texel along the face's own axis (the next block in
 the column), not along the ray, so a crown's ragged fringe against the sky is solid: the far pass's tracer continues
-the ray itself. What else is left is representation: a snow layer is one micro-voxel thick (1/4 block, not 1/8),
-grazing faces shimmer a little more than the reference's 16 samples. The far pass takes its colour the
-same way (cards from the real quads, light kept apart so day, night and carried lights relight them).
+the ray itself. The far pass takes its colour the same way (cards from the real quads, light kept apart so day,
+night and carried lights relight them).
 
 **Elements by kind, and the far field itself in the tier** (2026-10-19). element_lab finds per export its centre chunk,
 its biggest tree and featured chunks: the chunk with the most water, lights (emissive), built materials and custom

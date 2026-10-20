@@ -638,12 +638,37 @@ def offline_vs_live(live_png, lab_png, mask_png, out_png, near_limit=None):
     return out
 
 
+# loading scenes: within LOAD_NEAR dE of the settled view counts as loaded; slower than LOAD_SLOW_S, or a jump between
+# seconds over LOAD_JUMP dE (a region appearing whole), is flagged
+LOAD_NEAR, LOAD_SLOW_S, LOAD_JUMP = 3.0, 4.0, 6.0
+
+
 def pop_metrics(scene, imgs):
     """Ladder: how much the subject changes between the two rungs that straddle the near/far hand-off (the same view
     16 blocks apart: a big change is a seam or pop). Sweep: frame-to-frame change while flying through the hand-off;
     a spike far above the flight's usual change is a pop-in / pop-out (its frame says where)."""
     p = scene.get("pose") or {}
     m, flags = {}, []
+    if scene.get("loading"):  # frames a second apart after a move, then the settled view (loading.py)
+        every = scene["frames"][1] / 20
+        settled = _lab(imgs[-1])
+        des = [float(np.sqrt(((_lab(im) - settled) ** 2).sum(axis=-1)).mean()) for im in imgs[:-1]]
+        for i, de in enumerate(des):
+            m[f"loadDE_{(i + 1) * every:g}s"] = round(de, 2)
+        # converged: from this second on within LOAD_NEAR of the settled view (never: past the strip)
+        conv = next((i for i in range(len(des)) if all(d <= LOAD_NEAR for d in des[i:])), None)
+        m["loadConvergeS"] = round((conv + 1) * every, 1) if conv is not None else round((len(des) + 1) * every, 1)
+        steps = [float(np.sqrt(((_lab(imgs[i + 1]) - _lab(imgs[i])) ** 2).sum(axis=-1)).mean()) for i in range(len(imgs) - 2)]
+        if steps:
+            k = int(np.argmax(steps))
+            m["loadJumpMax"], m["loadJumpAtS"] = round(steps[k], 2), round((k + 2) * every, 1)
+            if steps[k] > LOAD_JUMP:
+                flags.append(f"pop-in: the view jumped by dE {steps[k]:.1f} at {(k + 2) * every:g} s")
+        if conv is None or (conv + 1) * every > LOAD_SLOW_S:
+            flags.append(f"slow load: {m['loadConvergeS']} s to come within dE {LOAD_NEAR} of the settled view")
+        if flags:
+            m["popFlags"] = flags
+        return m
     if scene.get("fidelity") and "ladder" in p:  # pairs: real chunks, far field only, per height
         hs = p["ladder"].get("heights") or p["ladder"]["distances"]
         worst = (0, 0, 0)

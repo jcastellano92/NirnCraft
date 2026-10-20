@@ -613,7 +613,8 @@ class Runner:
         if s.get("measure_command"):
             return self.run_measure(s, v, fp)
         p = s.get("pose") or {}
-        tries = 3 if p.get("shot") or "visit" in p or "camera" in p else 1  # next planned pose / higher
+        # next planned pose / higher (place poses too: a place pose inside a gate or a roof had no second try)
+        tries = 3 if p.get("shot") or "visit" in p or "camera" in p or "place" in p else 1
         err = None
         for cand in range(tries):
             try:
@@ -631,8 +632,31 @@ class Runner:
             raise err
         if err is not None and "png" not in locals():
             raise err
+        # a vetted pose the reviewer finds useless (inside a building, facing a wall) tries the next candidate before
+        # the result is filed; its verdict goes on to judge() (one review a capture)
+        vet = None
+        if s.get("vet_pose") and s["tier"] == "live":
+            import review
+            subject = s.get("vet_pose") if isinstance(s.get("vet_pose"), str) else s.get("title", s["id"])
+            while True:
+                vet = review.pose(png, subject)
+                if vet.get("verdict") != "USELESS" or cand + 1 >= tries:
+                    break
+                say(f"  {s['id']} [{v}]: pose useless ({str(vet.get('sees', ''))[:80]}); trying pose #{cand + 2}")
+                tr.step("repose_useless", test=key(s, v), sees=vet.get("sees"))
+                try:
+                    png, receipt, perf, popm = g.capture(s, v, catalog.pose_actions(s, self.plan, cand + 1),
+                                                         lambda tag: catalog.capture_actions(s, tag, self.plan))
+                    cand += 1
+                except (ValueError, RuntimeError):  # no further candidate, or it is inside blocks: keep the verdict
+                    break
+        heavy = catalog.deferred_exports(s)
+        if heavy and (vet or {}).get("verdict") != "USELESS":  # the exports, once the pose is worth them
+            g.actions(heavy, timeout=s.get("timeout", 1800))
+        elif heavy:
+            say(f"  {s['id']} [{v}]: no useful pose: its exports skipped")
         self.pos = s.get("_xz") or self.pos
-        extra = {"camera": cand} if p.get("shot") else {}
+        extra = {"camera": cand} if p.get("shot") or cand else {}
         if perf:
             extra["perf"] = {k: perf[k] for k in ("median", "p95", "p99", "stalls", "frames") if k in perf}
         # a framed scene: the game placed the camera from the subject's size; check it framed the right subject
@@ -654,6 +678,8 @@ class Runner:
             pm["reposed"] = True
         rec = results.store(s["id"], v, png, meta=receipt, fingerprint=fp, extra=extra)
         rec["metrics"].update(pm)
+        if vet is not None:
+            rec["_poseReview"] = vet
         if s.get("calibrate"):  # projection calibration: markers projected vs found in the picture
             import calibrate
             cal = calibrate.check({**rec, "calibrate": s["calibrate"]}, Path(f"{results.stem(s['id'], v)}.after.png"))
@@ -877,7 +903,8 @@ class Runner:
                                                  f"{tm['twinSkyline']}%, dE {tm['twinDE']}): not the same view or terrain")
         if s.get("vet_pose") and s["tier"] == "live" and live_png.exists():  # does the capture show what it is for
             import review
-            pv = review.pose(live_png, s.get("vet_pose") if isinstance(s.get("vet_pose"), str) else s.get("title", s["id"]))
+            pv = rec.pop("_poseReview", None) or review.pose(
+                live_png, s.get("vet_pose") if isinstance(s.get("vet_pose"), str) else s.get("title", s["id"]))
             m["pose"] = pv.get("verdict") or "unvetted"
             if pv.get("verdict") == "USELESS":
                 fails.append(f"pose useless (the reviewer sees: {pv.get('sees', '')[:90]}); fix: {pv.get('fix', '')[:120]}")

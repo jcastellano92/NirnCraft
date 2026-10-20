@@ -287,11 +287,9 @@ def ensure_current():
     if not BUILT.exists() or newest > BUILT.stat().st_mtime + 1:
         log("  sources changed since the last build: building the jar (once for this run)")
         tr.step("auto_build")
-        r = subprocess.run([sys.executable, str(ROOT / "tools/dev/build_263.py"), "jar", "--offline"],
-                           capture_output=True, text=True)
+        r = build263(["jar", "--offline"])
         if r.returncode:
-            tail = [l for l in (r.stdout + r.stderr).splitlines() if "error:" in l or "FAILED" in l][:12]
-            raise RuntimeError("jar build failed (tests would run stale code):\n" + "\n".join(tail))
+            raise RuntimeError("jar build failed (tests would run stale code):\n" + build_failure(r))
     inst = GAME / "mods/nirncraft-core.jar"
     if BUILT.exists() and (not inst.exists() or sha(BUILT) != sha(inst)):
         log("  installing the current build (the installed core was older)")
@@ -446,6 +444,28 @@ def reload_resources(paths=None):
     return n
 
 
+BUILD_BUSY_WAIT_S = 1200  # another build holds the lock (an agent, a hand build): wait for it, do not fail the run
+
+
+def build263(args, wait_s=None, poll_s=15, run=subprocess.run):
+    """tools/dev/build_263.py with args; while another build holds its lock ("Resource busy ... no work started"),
+    waits and tries again (a run started next to a hand build failed every scene with "jar build failed")."""
+    deadline = time.monotonic() + (BUILD_BUSY_WAIT_S if wait_s is None else wait_s)
+    while True:
+        r = run([sys.executable, str(ROOT / "tools/dev/build_263.py"), *args], capture_output=True, text=True)
+        if r.returncode == 0 or "Resource busy" not in (r.stdout + r.stderr) or time.monotonic() > deadline:
+            return r
+        log("  another build holds the lock: waiting for it")
+        time.sleep(poll_s)
+
+
+def build_failure(r):
+    """A failed build's reason: its error lines, or (none) its last lines (a busy lock said nothing at all)."""
+    lines = (r.stdout + r.stderr).splitlines()
+    tail = [l for l in lines if "error:" in l or "FAILED" in l][:12]
+    return "\n".join(tail or lines[-8:])
+
+
 def reload_data(target):
     tr.step("reload", kind="data", target=target)
     r = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "reload", target],
@@ -457,8 +477,7 @@ def reload_data(target):
 def rebuild_jar():
     """Gradle build (with tests) + install into the preview; the client must restart to load it."""
     tr.step("rebuild_jar")
-    r = subprocess.run([sys.executable, str(ROOT / "tools/dev/build_263.py"), "--offline", "build"],
-                       capture_output=True, text=True)
+    r = build263(["--offline", "build"])
     if r.returncode:
         tail = [l for l in (r.stdout + r.stderr).splitlines() if "error:" in l or "FAILED" in l][:12]
         raise RuntimeError("jar build failed:\n" + "\n".join(tail))
@@ -747,6 +766,21 @@ def screen_blocking(limit=600):
         time.sleep(0.5)
 
 
+def timeline_summary(passes):
+    """The far field's loading timeline (far-timeline dump: one entry a worker pass since the mark) as metrics: when it
+    first showed, when it went idle, the passes' totals per stage, the slowest pass, and the first 300 passes."""
+    if not passes:
+        return {"farPasses": 0}
+    stages = ("cover", "edits", "sections", "update1", "overlays", "update2")
+    idle = next((p["t"] for p in passes if not p.get("streaming")), None)
+    slow = max(passes, key=lambda p: p["pass"])
+    return {"farPasses": len(passes), "farFirstMs": round(passes[0]["t"], 1),
+            "farIdleMs": round(idle, 1) if idle is not None else None,
+            "farSlowestPassMs": slow["pass"], "farSlowestPassAtMs": round(slow["t"], 1),
+            **{f"farTotal_{k}Ms": round(sum(p.get(k, 0) for p in passes), 1) for k in stages},
+            "farTimeline": passes[:300]}
+
+
 def capture(scene, variant, pose_lines, capture_lines):
     """Run one scene + variant; returns (png path, receipt dict, perf dict or None)."""
     tag = f"h-{scene['id']}-{variant}"
@@ -804,6 +838,13 @@ def capture(scene, variant, pose_lines, capture_lines):
     rec = {}
     if (SHOTS / f"{tag}.json").exists():
         rec = json.loads((SHOTS / f"{tag}.json").read_text(encoding="utf-8"))
+    tl = SHOTS / f"{tag}-timeline.json"  # far-timeline dump (a loading scene): its summary and passes travel with it
+    if tl.exists():
+        try:
+            extra.update(timeline_summary(json.loads(tl.read_text(encoding="utf-8"))))
+        except (ValueError, OSError) as e:
+            extra.setdefault("popFlags", []).append(f"far timeline unreadable: {e}")
+        tl.unlink(missing_ok=True)
     lines = log_since(mark)
     if lines:  # every warning and error the game logged during this test travels with its result
         counts, serious = log_summary(lines)

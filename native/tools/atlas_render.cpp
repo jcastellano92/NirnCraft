@@ -325,14 +325,18 @@ int main(int argc, char** argv) {
         cardCount = cards.size();
         std::fprintf(stderr, "atlas_render: %zu surface cards\n", cardCount);
     }
-    if (atlas_update(ctx, centre, 0) != ATLAS_OK) {
+    // stream=N budget=B: a loading simulation (docs/ATLAS-STREAMING.md): no build up front; N frames, each after one
+    // update within B ms (B 0: everything at once, as the game asks today), each written as <out>_sNN.png
+    int streamFrames = int(num(a, "stream", 0));
+    double updateBudget = num(a, "budget", 0);
+    if (!streamFrames && atlas_update(ctx, centre, 0) != ATLAS_OK) {
         std::fprintf(stderr, "update: %s\n", atlas_last_error(ctx));
         return 3;
     }
     AtlasStats st{};
     atlas_get_stats(ctx, &st);
     double buildMs = st.lastBuildMs, groupsMs = 0;
-    if (groups) {
+    if (groups && !streamFrames) {
         // a frame asking for the groups starts their building; the next update builds every region's tree
         AtlasFrame f1{};
         f1.cameraPos[0] = x, f1.cameraPos[1] = y, f1.cameraPos[2] = z;
@@ -409,7 +413,7 @@ int main(int argc, char** argv) {
                          uint32_t w, uint32_t h) -> int {
         double c[3] = {x, y, z};
         if (boxed) emptyTiles(x, z);
-        if (atlas_update(ctx, c, 0) != ATLAS_OK) {  // the window follows the camera (nothing to do when it stays)
+        if (atlas_update(ctx, c, updateBudget) != ATLAS_OK) {  // the window follows the camera (nothing to do when it stays)
             std::fprintf(stderr, "update: %s\n", atlas_last_error(ctx));
             return 3;
         }
@@ -603,6 +607,23 @@ int main(int argc, char** argv) {
         std::fclose(cf);
         std::printf("{\"backend\":\"%s\",\"frames\":%d,\"groupsOn\":%s,\"groupsBuildMs\":%.1f}\n", backendName.c_str(), n,
                     groups ? "true" : "false", groupsMs);
+        atlas_destroy(ctx);
+        return 0;
+    }
+    if (streamFrames) {
+        std::string sb = out.size() > 4 ? out.substr(0, out.size() - 4) : out;
+        double spent = 0;
+        for (int i = 0; i < streamFrames; i++) {
+            char nm[16];
+            std::snprintf(nm, sizeof nm, "_s%02d.png", i);
+            auto t0 = std::chrono::steady_clock::now();
+            if (int rc = renderOne(sb + nm, x, y, z, num(a, "yaw", 0), num(a, "pitch", mcCam ? 0 : -4), num(a, "fov", 70), w, h))
+                return rc;
+            spent += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+            atlas_get_stats(ctx, &st);
+            std::printf("{\"stream\":%d,\"ms\":%.1f,\"updateMs\":%.1f,\"regions\":%u,\"dirty\":%u}\n", i, spent, st.lastBuildMs,
+                        st.regions, st.regionsDirty);
+        }
         atlas_destroy(ctx);
         return 0;
     }
