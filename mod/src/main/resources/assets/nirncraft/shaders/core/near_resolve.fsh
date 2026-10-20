@@ -35,6 +35,9 @@ layout(std140) uniform NearInfo {
     vec4 WaterTint;   // the biomes' water colour around the camera
     vec4 CamAbs;      // the camera's world position; w the sun map's size S (0: no sun map)
     vec4 Medium;      // the eye's medium: x extinction a block (0: the air), yzw its glow (y < 0: lit white)
+    vec4 InsideMin;   // the eye inside a block's shape: xyz its box's min (camera-relative), w extinction a block (0: not)
+    vec4 InsideMax;   // xyz the box's max, w the kind (0 solid, 1 foliage, 2 glass and the like)
+    vec4 InsideTint;  // rgb the block's colour (linear), what little light is in there tinted by it
 };
 uniform sampler2D SunMap;  // RG32F, S x S + 1: the terrain's depth along the light from the map's centre, cloud transmittance;
                            // the last row: centre (world), half extent, X, Y, L (atlas_far.slang sunMapMain)
@@ -282,6 +285,12 @@ void unifiedMain() {
             gl_FragDepth = 0.0;
             return;
         }
+        if (InsideMin.w > 0.0) {  // inside a block: the sky behind it only through it (premultiplied over the sky pass)
+            float a = 1.0 - exp(-InsideMin.w * atlasInsideChord(dirU));
+            fragColor = vec4(atlasInside(vec3(0.0), 1e4) * a, a);
+            gl_FragDepth = 0.0;
+            return;
+        }
         // the sky: what the sky pass drew stays, the light in the air over it, the terrain's shadow in the air dimming it
         vec3 b = atlasDisplay(airBeams(dirU, 80.0) + sunGlare(dirU), Look.x, Look.y);
         float cr = crepuscular(dirU, 1e30);
@@ -292,6 +301,7 @@ void unifiedMain() {
     }
     // (past the projection's far plane atlas writes minus the distance: behind everything rastered)
     float dist = z < 0.0 ? -z : length(viewRay(texCoord, z));
+    if (InsideMin.w > 0.0) dist = max(dist, atlasInsideChord(dirU));  // (the eye's own block: its way out at least)
     vec3 radiance = max(c.rgb / Ground.w / max(c.a, 1e-4), vec3(0.0));  // (pre-exposed: back to physical)
     vec3 rgb;
     if (atlasEyeInWater()) {

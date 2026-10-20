@@ -386,8 +386,8 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "atlas_render: %zu far lights from the export\n", ls.size());
         }
         loadMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - l0).count();
-        std::fprintf(stderr, "atlas_render: export: %zu sections, %zu materials (%zu shaped) in %.0f ms\n", ex.sections, ex.states,
-                     ex.shaped, loadMs);
+        std::fprintf(stderr, "atlas_render: export: %zu sections, %zu materials (%zu shaped) in %.0f ms, blocks x %d..%d z %d..%d\n", ex.sections, ex.states,
+                     ex.shaped, loadMs, ex.x0, ex.x1, ex.z0, ex.z1);
     }
     // surface cards (atlas_truth bake=: the game's own colour and light per block face): surface= or cards=
     size_t cardCount = 0;
@@ -602,10 +602,18 @@ int main(int argc, char** argv) {
         {
             AtlasFrameOutput none{color.data(), normal.data(), depth.data(), linear.data()};
             // (the first frame places the grid's window: before it there is nothing pending to see)
-            for (int k = 0; k < 256; k++) {
+            // nowarm=1: no warm-up (the frame as the game's first one after a move sees it)
+            int k = 0;
+            for (; k < 256 && num(a, "nowarm", 0) <= 0; k++) {
                 if (atlas_render(ctx, &f, &none) != ATLAS_OK) return 4;
+                double cw[3] = {f.cameraPos[0], f.cameraPos[1], f.cameraPos[2]};
+                if (atlas_update(ctx, cw, 0) != ATLAS_OK) return 3;  // (as the game's worker keeps updating: what the grid gave back)
                 if (voxgridPending(ctx) <= 0) break;
             }
+            std::string inf = atlas_info(ctx);
+            auto vg = inf.find("\"voxgrid\":{");
+            std::fprintf(stderr, "atlas_render: grid warm-up %d frames; %s\n", k,
+                         vg == std::string::npos ? "no grid" : inf.substr(vg, inf.find('}', vg) - vg + 1).c_str());
         }
         // reupload=1: every section the core holds sent again (as a burst of edits would), then the CPU update that follows
         // timed, and the frames until the GPU grid has them again

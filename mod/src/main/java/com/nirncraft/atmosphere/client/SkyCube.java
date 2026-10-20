@@ -33,13 +33,11 @@ public final class SkyCube {
         cleared = true;
     }
 
-    /** The cube texture (6 FACE x FACE faces side by side), cleared to nothing before the first draw. */
+    /**
+     * The cube texture (6 FACE x FACE faces side by side), or null before AtlasSky first drew it (callers bind a stand-in).
+     * Never clears here: callers sit inside render passes (the water's), where no other command may be recorded.
+     */
     public static GpuTextureView view() {
-        TextureTarget t = target();
-        if (!cleared) {
-            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(t.getColorTexture(), new Vector4f(0f));
-            cleared = true;
-        }
-        return t.getColorTextureView();
+        return cube != null && cleared ? cube.getColorTextureView() : null;
     }
 }

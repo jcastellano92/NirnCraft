@@ -162,6 +162,9 @@ public:
     // regions skipped so whose sections the window has left. Levels 1-4 are rebuilt as before.
     std::atomic<bool> gridOwnsLevel0{false};
     void setGridWindow(int ox, int oz, int d);  // (no lock: the skipped regions are looked at by the next update)
+    // sections inside the grid's window it does not hold (its pool full of nearer ones: VoxGrid::takeReleased): their
+    // level-0 regions rebuilt here, and their uploads no longer skipped, until the window moves on
+    void gridReleased(const std::vector<Key3>& secs);
     // sectionsIn, or false without waiting when an update holds the world's lock (the render thread's grid)
     bool trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const;
     size_t gridSkippedCount() const;
@@ -271,6 +274,7 @@ private:
     std::unordered_set<Key3, Key3Hash> gridSkipped_;
     std::atomic<int> gridOx_{0}, gridOz_{0}, gridD_{0};
     std::atomic<bool> gridMoved_{false};
+    std::unordered_set<Key3, Key3Hash> gridNotHeld_;  // (gridReleased; cleared when the window moves)
     void gridWindowMoved();  // (mu_ held) the skipped regions the window left, dirty
     bool gridHolds(int sx, int sz) const {
         int d = gridD_.load(std::memory_order_relaxed), ox = gridOx_.load(std::memory_order_relaxed),
