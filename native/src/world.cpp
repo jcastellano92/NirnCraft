@@ -7,6 +7,8 @@
 #include <climits>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
+#include <unordered_set>
 #include <cstring>
 #include <thread>
 
@@ -649,25 +651,98 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
                     }
                 }
         }
-        // nearest and finest first
-        std::sort(want.begin(), want.end(), [&](const Key3& a, const Key3& b) {
-            auto d = [&](const Key3& k) {
-                return std::abs(k.x - centreRegion[k.lod][0]) + std::abs(k.z - centreRegion[k.lod][1]) + k.lod;
-            };
-            return d(a) < d(b);
-        });
-        jobs.reserve(want.size());
-        for (const Key3& k : want) {
-            bool g = groups && k.lod < groupLods;
-            jobs.push_back(snapshot(k, g));
-            auto r = regions_.find(k);
-            Job& j = jobs.back();
-            j.wasDirty = dirty_.erase(k) != 0;  // an edit while it builds marks it again (built next time)
-            if (r != regions_.end() && !j.wasDirty) j.keep = r->second;  // only its tree is missing
-        }
+        // the horizon around the eye from the tiles' height pyramids: per azimuth bin and ring (distances growing
+        // geometrically), the steepest elevation (tangent) the terrain reaches up to that ring. A region whose top stays
+        // below the horizon formed in front of it, over every bin it spans, is behind a mountain (or, deep underground,
+        // behind the rock above): it is built after everything in view (ATLAS-STREAMING.md, "Hidden things")
+        constexpr int BINS = 128, RINGS = 44;
+        float ringD[RINGS];
+        for (int i = 0; i < RINGS; i++) ringD[i] = 24.0f * std::pow(1.2f, float(i));
+        std::vector<float> horizon(size_t(BINS) * RINGS, -1e9f);
+        double ex = centre[0], ey = centre[1], ez = centre[2];
+        // what blocks the view: the lowest ground across the cell (a peak on one ray hid the far side of a bin whose
+        // edges were lower: 1 % of the view went missing until its regions came last)
+        auto occluderAt = [&](double wx, double wz, double cell) -> float {
+            int lod0 = std::clamp(int(std::floor(std::log2(std::max(1.0, cell)))), 0, lodCount - 1);
+            for (int lod = lod0; lod < lodCount; lod++) {  // the finest tile there whose columns are no wider than the cell
+                int span = 256 << lod;
+                int tx = int(std::floor(wx / span)), tz = int(std::floor(wz / span));
+                const Tile* t = tile(lod, tx, tz);
+                if (!t || t->minSurf[0].empty()) continue;
+                int cx = std::clamp(int((wx - double(tx) * span) / double(1 << lod)), 0, 255);
+                int cz = std::clamp(int((wz - double(tz) * span) / double(1 << lod)), 0, 255);
+                int lv = std::clamp(int(std::floor(std::log2(std::max(1.0, cell / double(1 << lod))))), 0, 8);
+                int per = 256 >> lv;
+                return t->minSurf[size_t(lv)][size_t(cz >> lv) * per + size_t(cx >> lv)];
+            }
+            return -1e9f;
+        };
+        if (!want.empty())
+            for (int b = 0; b < BINS; b++) {
+                double az = (b + 0.5) * 2 * 3.14159265358979 / BINS, dx = std::cos(az), dz = std::sin(az);
+                float run = -1e9f;
+                for (int i = 0; i < RINGS; i++) {
+                    float top = occluderAt(ex + dx * ringD[i], ez + dz * ringD[i], ringD[i] * 2 * 3.14159265358979 / BINS);
+                    if (top > -1e8f) run = std::max(run, float((top - ey) / ringD[i]));
+                    horizon[size_t(b) * RINGS + i] = run;
+                }
+            }
+        auto hidden = [&](const Key3& k) {
+            double span = double(256 << k.lod), x0 = k.x * span, z0 = k.z * span;
+            double nx = std::clamp(ex, x0, x0 + span), nz = std::clamp(ez, z0, z0 + span);
+            double dNear = std::hypot(nx - ex, nz - ez);
+            if (dNear < span * 1.5 || dNear < 48) return false;  // the eye's region and its neighbours: always in view
+            // the region's top: its tile's highest point (a margin for real blocks above it), and its row's ceiling
+            const Tile* t = tile(k.lod, k.x, k.z);
+            double top = t && !t->maxTop[8].empty() ? t->maxTop[8][0] + 8.0 : 1e9;
+            top = std::min(top, double(WORLD_MIN_Y + (k.y + 1) * (256 << k.lod)));
+            double tanTop = (top - ey) / dNear;
+            int ring = 0;  // the horizon formed in front of the region (its rings well short of it)
+            while (ring + 1 < RINGS && ringD[ring + 1] < dNear * 0.8) ring++;
+            double a0 = 1e9, a1 = -1e9;  // the azimuths the region spans (its corners)
+            for (int c = 0; c < 4; c++) {
+                double a = std::atan2(z0 + (c >> 1) * span - ez, x0 + (c & 1) * span - ex);
+                if (a < 0) a += 2 * 3.14159265358979;
+                a0 = std::min(a0, a), a1 = std::max(a1, a);
+            }
+            if (a1 - a0 > 3.14159265358979) return false;  // wraps around the eye's direction: not worth the care
+            for (int b = int(a0 / (2 * 3.14159265358979) * BINS); b <= int(a1 / (2 * 3.14159265358979) * BINS); b++)
+                if (tanTop >= horizon[size_t(std::clamp(b, 0, BINS - 1)) * RINGS + ring]) return false;  // seen over the horizon there
+            return true;
+        };
+        // regions missing altogether first, coarsest first (one coarse region covers what dozens of fine ones do: an
+        // arrival shows the whole view at once, then sharpens), then rebuilds, nearest and finest first; regions hidden
+        // behind the horizon after all of those
+        int hiddenCount = 0;
+        auto order = [&](const Key3& k) {
+            int d = std::abs(k.x - centreRegion[k.lod][0]) + std::abs(k.z - centreRegion[k.lod][1]);
+            bool missing = regions_.find(k) == regions_.end();
+            int coarseFirst = (MAX_LODS - k.lod) * 64 + d;
+            if (hidden(k)) {
+                hiddenCount++;
+                return std::make_pair(2, coarseFirst);
+            }
+            return missing ? std::make_pair(0, coarseFirst) : std::make_pair(1, d + k.lod);
+        };
+        std::vector<std::pair<std::pair<int, int>, Key3>> keyed;
+        keyed.reserve(want.size());
+        for (const Key3& k : want) keyed.push_back({order(k), k});
+        std::stable_sort(keyed.begin(), keyed.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+        for (size_t i = 0; i < want.size(); i++) want[i] = keyed[i].second;
+        lastHidden_ = hiddenCount;
+        // ATLAS_SKIP_HIDDEN (a measurement): hidden regions are never built, so the settled picture shows what the
+        // horizon test hid wrongly
+        static const bool skipHidden = std::getenv("ATLAS_SKIP_HIDDEN") != nullptr;
+        if (skipHidden)
+            while (!keyed.empty() && keyed.back().first.first == 2) keyed.pop_back(), want.pop_back();
+        jobs.resize(want.size());
         shapes = shapes_;
     }
 
+    // each job's inputs are snapshot when a worker takes it, not all up front: with a budget, snapshotting all 250
+    // wanted regions took longer than the budget itself and nothing was built (ATLAS-STREAMING.md); the budget counts
+    // from here
+    auto workStart = std::chrono::steady_clock::now();
     std::atomic<size_t> next{0};
     std::atomic<int> built{0}, treesBuilt{0};
     std::atomic<int64_t> treeUs{0};
@@ -677,8 +752,16 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             size_t i = next.fetch_add(1);
             if (i >= want.size()) return;
             if (budgetMs > 0) {
-                double el = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+                double el = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - workStart).count();
                 if (el > budgetMs) return;
+            }
+            {
+                std::lock_guard<std::mutex> lock(mu_);
+                const Key3& k = want[i];
+                jobs[i] = snapshot(k, groups && k.lod < groupLods);
+                auto r = regions_.find(k);
+                jobs[i].wasDirty = dirty_.erase(k) != 0;  // an edit while it builds marks it again (built next time)
+                if (r != regions_.end() && !jobs[i].wasDirty) jobs[i].keep = r->second;  // only its tree is missing
             }
             const Job& j = jobs[i];
             Region r;
@@ -774,8 +857,20 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         std::lock_guard<std::mutex> lock(mu_);
         reshaped = shapes_->revision != packedShapes_ || cards_->revision != packedCards_;
     }
-    if (built > 0 || moved || reshaped) repack(centreRegion);
-    if (buildMs) *buildMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+    lastPending_ = want.size() - size_t(built.load());
+    auto tBuilt = std::chrono::steady_clock::now();
+    bool repacked = built > 0 || moved || reshaped;
+    if (repacked) repack(centreRegion);
+    auto tEnd = std::chrono::steady_clock::now();
+    if (buildMs) *buildMs = std::chrono::duration<double, std::milli>(tEnd - start).count();
+    static const bool trace = std::getenv("ATLAS_TRACE_UPDATE") != nullptr;  // streaming measurements (ATLAS-STREAMING.md)
+    if (trace && (built > 0 || repacked)) {
+        auto p = packed();
+        std::fprintf(stderr, "[atlas] update: %d of %zu wanted (%d behind the horizon) built in %.1f ms, repack %.1f ms (%zu regions, %.1f MB)\n",
+                     built.load(), want.size(), lastHidden_.load(), std::chrono::duration<double, std::milli>(tBuilt - start).count(),
+                     std::chrono::duration<double, std::milli>(tEnd - tBuilt).count(), p->regions.size(),
+                     double(p->nodes.size() * 4 + p->leaves.size() * 8 + p->groups.size() * 4 + p->heightMip.size() * 4) / 1e6);
+    }
     return built;
 }
 
@@ -924,6 +1019,25 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
         return v;
     };
     int side = 2 * windowRadius + 1;
+    {  // every array's final size first: appended unreserved, an 82 MB scene was reallocated and copied over and over
+        size_t nodes = 0, leaves = 0, runs = 0, hmip = 0, grp = p.groups.size(), regs = 0;
+        std::unordered_set<const Region*> seen;
+        auto count = [&](const Region* r) {
+            if (!r || r->empty() || !seen.insert(r).second) return;
+            regs++;
+            nodes += r->dag->nodes.size(), leaves += r->dag->leaves.size(), runs += r->dag->runEnd.size();
+            hmip += r->dag->heightMip.size();
+            if (r->groups && !r->groups->empty() && !r->groups->refused) {
+                const GroupTree& t = *r->groups;
+                grp += t.nodes.size() + t.dir.size() + t.slots.size() + t.bricks.size() + 3;
+            }
+        };
+        for (auto& [k, r] : regions_) count(r.get());
+        for (auto& [k, f] : fading_) count(f.old.get());
+        p.nodes.reserve(nodes), p.leaves.reserve(leaves), p.runEnd.reserve(runs), p.runMat.reserve(runs);
+        p.heightMip.reserve(hmip), p.groups.reserve(grp), p.regions.reserve(regs + 1);
+        p.table.reserve(size_t(lodCount) * side * side * 16);
+    }
     for (int lod = 0; lod < lodCount; lod++) {
         int rows = regionRows(lod);
         LodGpu& L = p.lods[lod];

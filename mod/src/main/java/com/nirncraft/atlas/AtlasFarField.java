@@ -236,7 +236,7 @@ final class AtlasFarField implements AutoCloseable {
                         source.coverQuick(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span, (cx + WINDOW + 1) * span,
                                 (cz + WINDOW + 1) * span);
                     }
-                    ctx.update(x, y, z, 0);
+                    updateProgressive(x, y, z);
                     updated = true;
                     long tq = System.nanoTime();
                     synchronized (timeline) {
@@ -273,7 +273,7 @@ final class AtlasFarField implements AutoCloseable {
                 // the ground of the new place on screen now: the overlays (buildings, trees) can take a while, and
                 // the old window stayed on screen until they finished (a teleport showed stale far ground)
                 long tSections = System.nanoTime();
-                ctx.update(x, y, z, 0);
+                updateProgressive(x, y, z);
                 long tUpdate1 = System.nanoTime();
                 Overlay ov = overlay();
                 if (ov != null) {
@@ -288,7 +288,7 @@ final class AtlasFarField implements AutoCloseable {
                     }
                 }
                 long tOverlays = System.nanoTime();
-                ctx.update(x, y, z, 0);  // builds what changed and stages it for the next frame
+                updateProgressive(x, y, z);  // builds what changed and stages it for the next frames
                 long tUpdate2 = System.nanoTime();
                 boolean first = !updated;
                 updated = true;
@@ -338,6 +338,23 @@ final class AtlasFarField implements AutoCloseable {
                 }
             }
         }
+    }
+
+    /** Build time per update: each update publishes what it built (coarse regions first), so a view resolves. */
+    static final double UPDATE_BUDGET_MS = 40;
+    /** How long one pass keeps building before the worker goes on to tiles and overlays (the rest: next pass). */
+    static final long PROGRESSIVE_PASS_MS = 1500;
+
+    /**
+     * Builds what the window wants in short budgeted updates, each published as it finishes (the native side builds
+     * missing regions coarsest first), until nothing is pending or the pass's share is spent. One update of everything
+     * (budget 0) published nothing until the slowest region was done: the whole far field appeared at once.
+     */
+    private void updateProgressive(double x, double y, double z) {
+        long until = System.nanoTime() + PROGRESSIVE_PASS_MS * 1_000_000L;
+        do {
+            ctx.update(x, y, z, UPDATE_BUDGET_MS);
+        } while (ctx.stats().pending() > 0 && System.nanoTime() < until && running);
     }
 
     private Overlay overlay() {
