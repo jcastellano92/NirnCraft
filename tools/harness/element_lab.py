@@ -139,7 +139,38 @@ def find_elements(volume_slug):
         if tuple(box) not in picked:
             picked.add(tuple(box))
             out.append({"slug": f"{volume_slug}-{kind}", "volume": volume_slug, "kind": kind, "box": box})
+        if kind == "building":
+            # a town: the blocks around the building chunk too (48 x 48), where buildings shade one another and the
+            # ground between them (sun and moon shadows of casters larger than a chunk, docs/ATLAS-LOD.md)
+            tx0, tz0 = max(0, gx - 16), max(0, gz - 16)
+            tx1, tz1 = min(sx, gx + 32), min(sz, gz + 32)
+            tops = top[tz0:tz1, tx0:tx1]
+            if tx1 - tx0 >= 40 and tz1 - tz0 >= 40 and (tops >= 0).any():
+                lo = max(0, int(tops[tops >= 0].min()) - 4)
+                tb = [x0 + tx0, y0 + lo, z0 + tz0, x0 + tx1 - 1, y0 + int(tops.max()), z0 + tz1 - 1]
+                if tuple(tb) not in picked:
+                    picked.add(tuple(tb))
+                    out.append({"slug": f"{volume_slug}-town", "volume": volume_slug, "kind": "town", "box": tb})
+    # relief: the chunk whose ground rises most across it (a ridge, a cliff, a terrace: land that casts shadows on
+    # itself at a low sun), when it rises RELIEF_LEAST blocks or more
+    best = None
+    for gz in range(0, sz - 15, 4):
+        for gx in range(0, sx - 15, 4):
+            w = top[gz:gz + 16, gx:gx + 16]
+            if (w < 0).any():
+                continue
+            rise = int(w.max() - w.min())
+            if rise >= RELIEF_LEAST and (best is None or rise > best[0]):
+                best = (rise, gx, gz, int(w.min()), int(w.max()))
+    if best:
+        _, gx, gz, lo, hi = best
+        box = [x0 + gx, y0 + max(0, lo - 4), z0 + gz, x0 + gx + 15, y0 + hi, z0 + gz + 15]
+        if tuple(box) not in picked:
+            out.append({"slug": f"{volume_slug}-relief", "volume": volume_slug, "kind": "relief", "box": box})
     return out
+
+
+RELIEF_LEAST = 12
 
 
 BUILT = ("planks", "brick", "glass", "_door", "fence", "_stairs", "_slab", "wool", "terracotta", "trapdoor", "bookshelf",
@@ -294,6 +325,13 @@ def renderer_args(renderer, el, tmp):
         return "atlas_render", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv",
                                 "box": truth_inputs(el)["box"], "surface": bake_cards(el, tmp), "shade": "mc",
                                 "spp": 16, "radius": 0, "groups": 1 if renderer == "far-groups" else 0, **sky}
+    if renderer in ("far-game", "far-game-lit"):  # the far field as the game draws it without a shader pack: its
+        # groups, its own materials (no cards: the game sends none), FRAME_VANILLA_LIGHT (AtlasClient); far-game-lit:
+        # its own light, shadows and haze as before (the stark line's A/B); scored against Minecraft itself, so no
+        # clouds (the reference has none; the far fly-in camera passes above the deck)
+        return "atlas_render", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv",
+                                "box": truth_inputs(el)["box"], "shade": "game" if renderer == "far-game" else "lit",
+                                "flags": "shadows,atmos,sky,actors", "spp": 16, "radius": 0, "groups": 1}
     if renderer == "far-lit":  # the far field's own light (atlas_core: its sun / moon and shadows, sky ambient, AO, far
         # lights) on the faces' albedo (cards), through the reference's tonemap: where its lighting falls short
         if not realistic():
@@ -352,6 +390,10 @@ def render_all(renderer, el, frames, tmp):
     tool, args = renderer_args(renderer, el, tmp)
     if tool == "atlas_render" and "backend" not in args:
         args["backend"] = backend()
+    if tool == "atlas_render" and len(frames) == 1:
+        # one camera has no approach: a server would never have sent a far element's sections (server=1), so they
+        # are uploaded and kept (server=0), as for a place visited before
+        args["server"] = 0
     try:
         r = run(tool, {**args, "cameras": lst.as_posix()})
     except RuntimeError:
@@ -498,6 +540,55 @@ def lane(wait_s=LANE_WAIT_S, poll_s=20):
             time.sleep(poll_s)
 
 
+def view(a, el):
+    """--view DIST: the reference once (kept beside the output, keyed by element, distance and truth), ours every
+    time, scored and put side by side (reference | ours | dE x4) in one png. --watch: atlas_render stays up with
+    watch=1 and every new frame is scored as it lands."""
+    out = a.out or ROOT / ".work/view"
+    out.mkdir(parents=True, exist_ok=True)
+    cam = camera(el["box"], a.view, size=a.size)
+    tag = f"{el['slug']}-{a.view}-{TRUTH_MODE}" + (f"-{TIME}" if TIME is not None else "")
+    ref = out / f"{tag}-truth.png"
+    if not ref.exists() or not Path(str(ref)[:-4] + "_mask.png").exists():
+        render("truth", el, cam, ref)
+    ours = out / f"{tag}-{a.renderer}.png"
+
+    def score():
+        m = compare(ref, ours)
+        ra, oa = (np.asarray(Image.open(p).convert("RGB"), dtype=np.float32) for p in (ref, ours))
+        de = np.sqrt(((lab(ra) - lab(oa)) ** 2).sum(axis=2))
+        heat = np.clip(de * 4, 0, 255).astype(np.uint8)
+        sheet = np.concatenate([ra.astype(np.uint8), oa.astype(np.uint8), np.stack([heat] * 3, axis=2)], axis=1)
+        Image.fromarray(sheet).save(out / f"{tag}-{a.renderer}-sheet.png")
+        print(f"{el['slug']} {a.view} m {a.renderer}: iou {m['iou']:.3f}  dE {m['dE']:.2f}  presence {m['presence']:.2f}  "
+              f"-> {out / (tag + '-' + a.renderer + '-sheet.png')}", flush=True)
+
+    if not a.watch:
+        render(a.renderer, el, cam, ours)
+        score()
+        return 0
+    tool, args = renderer_args(a.renderer, el, out)
+    if tool != "atlas_render":
+        print("element_lab: --watch drives atlas_render (a far-* renderer)")
+        return 2
+    shaders = ROOT / ".work/shaders"
+    env = {**os.environ, "ATLAS_SHADER_DIR": str(shaders)}
+    cmd = [str(EXE / "atlas_render.exe"), f"out={ours}", "watch=1", "backend=vulkan", "server=0"] + \
+          [f"{k}={v}" for k, v in {**args, **cam}.items()]
+    print(f"element_lab: watching; run tools/dev/shader_watch.py and edit native/shaders (ctrl-c ends)", flush=True)
+    p = subprocess.Popen(cmd, env=env, stderr=subprocess.PIPE, text=True)
+    try:
+        for line in p.stderr:
+            if line.startswith("rendered ") or line.startswith("watching "):
+                if ours.exists():
+                    score()
+            elif line.strip():
+                print(line.rstrip(), flush=True)
+    finally:
+        p.kill()
+    return p.wait()
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("element", nargs="?")
@@ -513,6 +604,12 @@ def main():
     ap.add_argument("--distances", default=",".join(str(d) for d in DISTANCES))
     ap.add_argument("--backend", choices=("vulkan", "cpu"), default=None,
                     help="atlas_core's backend for the far field (default: Vulkan when the GPU is mostly idle)")
+    ap.add_argument("--view", type=int, default=None, metavar="DIST",
+                    help="the development loop: one distance, no fly-ins: reference (kept) | ours | dE in --out (default "
+                         ".work/view), seconds a change")
+    ap.add_argument("--watch", action="store_true",
+                    help="with --view: keep atlas_render running and score again on every shader save "
+                         "(tools/dev/shader_watch.py compiles; Vulkan)")
     a = ap.parse_args()
     global FORCE_BACKEND
     FORCE_BACKEND = a.backend
@@ -531,6 +628,8 @@ def main():
     if a.renderer == "far-lit" and not realistic():
         print("element_lab: far-lit is scored against the realistic reference (--truth realistic)")
         return 2
+    if a.view:
+        return view(a, el)
     near = 1.5 * radius(el["box"])  # never from inside or against the element: not a view anyone has of it
     dists = [d for d in (int(x) for x in a.distances.split(",")) if d >= near] or [int(near)]
     report = {"element": el, "renderer": a.renderer, "truth": TRUTH_MODE, "time": TIME if TIME is not None or not realistic() else 6000,

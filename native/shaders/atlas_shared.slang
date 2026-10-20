@@ -18,6 +18,10 @@ static const float FAR_AMBIENT_OCCLUSION = 0.78;
 static const uint FRAME_FILL_NEAR = 0x2000u;   // (abi 0.12) fill pixels the near field left empty, from the camera
 static const uint FRAME_LOD_DITHER = 0x1000u;  // dithered LOD transitions (per-pixel segment phase)
 static const uint FRAME_GROUPS = 0x4000u;      // (abi 0.14) primary rays trace the content-shaped groups
+static const uint FRAME_VANILLA_LIGHT = 0x10000u;  // (abi 0.14, optional) Minecraft's own light: no pack, the near field vanilla
+static const uint FRAME_LIGHT_LOW = 0x8000u;   // (abi 0.15) cheap far light: constant sky occlusion, unshadowed block light
+// the shader pack's ambient floor (deferred.fsh: albedo x (sky + floor)), under every far land surface as under the near
+static const float3 FAR_AMBIENT_FLOOR = float3(0.012, 0.012, 0.016);
 static const int MAX_LODS = 8;
 
 struct LodGpu {
@@ -122,12 +126,13 @@ float3 keyLightRadiance(float3 sun) {
 
 // ao: 0..1 sky-light occlusion (crevices, forest floors), applied to the ambient term only.
 // lightVis: shadowing of the key light. reflection: what water mirrors (the sky, or traced far terrain).
-float3 shadeSurface(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun, float lightVis, uint cls, float ao,
-                    float3 reflection) {
+// ambient: the sky (and floor) light reaching the surface, already occluded (shadeSurface: skyAmbient x ao).
+float3 shadeSurfaceAmb(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun, float lightVis, uint cls,
+                       float3 ambient, float3 reflection) {
     float3 L = keyLightDir(sun);
     float ndl = saturate(dot(n, L));
     float3 direct = keyLightRadiance(sun) * ndl * lightVis;
-    float3 c = albedo * (direct + skyAmbient(n, sun) * ao);
+    float3 c = albedo * (direct + ambient);
     if (cls == 2u) {
         // water: Schlick Fresnel against what it reflects, plus the key light's glint; m.albedoRough.a carries the
         // glint's alpha (the far field sets it from the waves it can no longer draw: a sun path widening with distance)
@@ -141,6 +146,11 @@ float3 shadeSurface(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun
     }
     c += albedo * m.emisClass.x * 2.0;
     return c;
+}
+
+float3 shadeSurface(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun, float lightVis, uint cls, float ao,
+                    float3 reflection) {
+    return shadeSurfaceAmb(albedo, m, n, v, sun, lightVis, cls, skyAmbient(n, sun) * ao, reflection);
 }
 
 // Aerial perspective over kilometres: extinction thins with altitude (scale height ~ 1.2 km in blocks).

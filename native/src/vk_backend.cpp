@@ -25,6 +25,8 @@
 #include <mutex>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -1391,7 +1393,77 @@ private:
 
     // ---- per frame -------------------------------------------------------------------------------------------
 
+    // Development: ATLAS_SHADER_DIR names a folder holding atlas_far.spv, atlas_cloud.spv and atlas_sunmap.spv
+    // (tools/dev/shader_watch.py compiles them on every save, atlas_far.spv last); when atlas_far.spv changes (looked
+    // at every 250 ms) the far, cloud and sun map pipelines are rebuilt from them. The bindings must stay the same (a
+    // layout change needs a build); a file that fails keeps the running pipelines.
+    void hotReload() {
+        static const char* dir = std::getenv("ATLAS_SHADER_DIR");
+        if (!dir || !*dir) return;
+        auto now = std::chrono::steady_clock::now();
+        if (now - reloadCheck_ < std::chrono::milliseconds(250)) return;
+        reloadCheck_ = now;
+        std::error_code ec;
+        std::filesystem::path base(dir);
+        auto stamp = std::filesystem::last_write_time(base / "atlas_far.spv", ec);
+        if (ec || stamp == reloadStamp_) return;
+        bool first = reloadStamp_ == std::filesystem::file_time_type{};
+        reloadStamp_ = stamp;
+        auto read = [&](const char* name, std::vector<uint32_t>& out) {
+            std::ifstream f(base / name, std::ios::binary | std::ios::ate);
+            if (!f) return false;
+            std::streamsize n = f.tellg();
+            if (n < 20 || n % 4) return false;
+            out.resize(size_t(n) / 4);
+            f.seekg(0);
+            return bool(f.read(reinterpret_cast<char*>(out.data()), n)) && out[0] == 0x07230203u;
+        };
+        std::vector<uint32_t> code[3];
+        const char* names[3] = {"atlas_far.spv", "atlas_cloud.spv", "atlas_sunmap.spv"};
+        for (int i = 0; i < 3; i++)
+            if (!read(names[i], code[i])) {
+                std::fprintf(stderr, "[atlas] shader reload: %s unreadable, kept the running shaders\n", names[i]);
+                return;
+            }
+        VkShaderModule mod[3] = {};
+        VkPipeline pipe[3] = {};
+        bool ok = true;
+        for (int i = 0; i < 3 && ok; i++) {
+            VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
+            smci.codeSize = code[i].size() * 4;
+            smci.pCode = code[i].data();
+            ok = vkCreateShaderModule(dev_, &smci, nullptr, &mod[i]) == VK_SUCCESS;
+            if (!ok) break;
+            VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
+            cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+            cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            cp.stage.module = mod[i];
+            cp.stage.pName = "main";
+            cp.layout = farLayout_;
+            ok = vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipe[i]) == VK_SUCCESS;
+        }
+        if (!ok) {
+            for (int i = 0; i < 3; i++) {
+                if (pipe[i]) vkDestroyPipeline(dev_, pipe[i], nullptr);
+                if (mod[i]) vkDestroyShaderModule(dev_, mod[i], nullptr);
+            }
+            std::fprintf(stderr, "[atlas] shader reload: pipeline creation failed, kept the running shaders\n");
+            return;
+        }
+        vkDeviceWaitIdle(dev_);  // frames in flight still use the old pipelines
+        VkPipeline* pipes[3] = {&farPipe_, &cloudPipe_, &sunPipe_};
+        VkShaderModule* mods[3] = {&farShader_, &cloudShader_, &sunShader_};
+        for (int i = 0; i < 3; i++) {
+            if (*pipes[i]) vkDestroyPipeline(dev_, *pipes[i], nullptr);
+            if (*mods[i]) vkDestroyShaderModule(dev_, *mods[i], nullptr);
+            *pipes[i] = pipe[i];
+            *mods[i] = mod[i];
+        }
+        std::fprintf(stderr, "[atlas] shaders %s from %s\n", first ? "loaded" : "reloaded", dir);
+    }
+
     bool prepare(Slot& s, const FrameInputs& in, const FrameGpu& frame, bool readback, std::string& err) {
+        hotReload();
         uint32_t w = frame.dims[0], h = frame.dims[1];
         size_t px = size_t(w) * h;
         const PackedScene& sc = *in.scene;
@@ -2151,6 +2223,8 @@ private:
     bool sunImageFresh_ = false;
     Buf sunReadback_;
     VkShaderModule cloudShader_ = VK_NULL_HANDLE;
+    std::chrono::steady_clock::time_point reloadCheck_{};  // shader hot reload (ATLAS_SHADER_DIR): last look
+    std::filesystem::file_time_type reloadStamp_{};          // and the far kernel's time then
     int prevSlot_ = -1;  // slot of the last recorded frame (its surfaces feed the next cloud pass)
     uint32_t cloudDiv_ = 2;  // cloud pass resolution divisor for the frame being recorded
     VkImage noiseImg_ = VK_NULL_HANDLE;

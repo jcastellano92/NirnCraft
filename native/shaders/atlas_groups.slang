@@ -497,7 +497,7 @@ bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 d
             bool fine = G_ERR[code] <= drawK * (gChordT + te);
             // drawn whole: a flat leaf, or any node whose error is under the pixel (not one the chord starts in);
             // stepped through: a leaf otherwise; opened: an inner node otherwise
-            // (ATLAS_ABLATE 256, measurements: never draw a node whole for its error, open or step it)
+            // (ATLAS_ABLATE 32768, measurements: never draw a node whole for its error, open or step it)
             // A node the ray leaves past this chord's end is opened, never drawn: drawn, a ray entering it through a
             // hole in its face skipped everything inside it for the rest of the chord, and the next chord started
             // inside it (a house seen through its own wall, the lit interior behind: the far pass's see-through holes,
@@ -508,7 +508,7 @@ bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 d
             // times its area); stepped, it is its own (a few rays meet it, so it costs little)
             float3 ext = fhi - flo;
             fits = fits && (type == G_FLAT || max(ext.x, max(ext.y, ext.z)) * microBlocks > 2.0 * gGroupPa * (gChordT + te));
-            bool draw = !inside && (type == G_FLAT || (fine && fits && (gAblate & 256u) == 0u) || (gAblate & 64u) != 0u);
+            bool draw = !inside && (type == G_FLAT || (fine && fits && (gAblate & 32768u) == 0u) || (gAblate & 64u) != 0u);
             if (draw) {
                 if (drawBox(r, n, o, d, inv, lo, hi, flo, fhi, ax, te, u1, dir, res)) return true;
             } else if (type != G_INNER) {

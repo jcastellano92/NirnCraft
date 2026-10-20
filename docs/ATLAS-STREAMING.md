@@ -73,5 +73,173 @@ What the pipeline does (the full map with file:line: the "far-field loading pipe
   probability and the temporal resolve averages it; the few details that carry beyond their size (lights at night,
   landmark silhouettes, water glints) stay explicit, as far lights already do.
 
+## What the owner saw flying the build (2026-10-19), and the architecture it led to
+
+- A stark line where vanilla's near field meets the far field (two renderers, two lights); colours that change when
+  the real chunks arrive; the far field more accurate where the player has been (real sections exist) than where not
+  (stand-ins: the surface painter's guesses, planned settlements: dirt that turns to grass, structures that appear and
+  then are not there); a circle around the player rather than detail where they look; a white glow as regions load
+  (suspected: the traced sky light's 16-frame accumulation starting from open sky on new surfaces, plus the fade from
+  sky; to be measured); deep caves end in haze past render distance (the server records only surface sections).
+- Decided with the owner: rendering and simulation part. Vanilla simulates on real chunks in the small simulation
+  radius (collision, interaction, mobs: the server is the authority); the client's renderer draws everything, near
+  included, from the client's own copy of the world.
+
+### Client-owned world, server-checked
+
+1. **The client generates the world** from the seed with the same generation code as the server (heights, surface,
+   settlements, trees), at the detail each distance needs. Far-field sections and tiles are no longer sent: the
+   client knows the untouched world.
+2. **Hash tree.** The server keeps a hash per section, rolled up to chunk, region and area; the client the same over
+   its copy (generated plus every change applied). Checking is top down: equal area hashes cost one hash, a change
+   costs a few hashes down to it. The server spot-checks what the client looks at; a mismatch means the client is
+   wrong and gets a correction. The server can also hash the untouched generation: generated == real means nothing was
+   ever changed there; a client's baseline that differs from the server's is a generator bug or version mismatch,
+   logged by kind (surface, structure, tree) and corrected with data until fixed (worldgen must be deterministic:
+   "unsafe terrain read during worldgen" is the kind of order dependence that breaks it).
+3. **Changes are edits, not chunks**: blocks in a section that became these states (a few bytes a block, batched,
+   compressed). They replace AtlasSections' whole-chunk blobs and AtlasEdits' column summaries.
+4. **An ordered log**: each change has the server's sequence number; a client applies in order from its own position
+   and asks again from a gap; every interested client gets each change as it happens; old history is compacted into
+   generated plus net changes (a joining player gets that).
+5. **Interest, not radius**: the client reports its view and heading; the server sends changes and live state there
+   (players and creatures far off, lights on and off, doors, fires), ordered by how visible they are at that distance
+   and at a rate that falls with it. Underground the interest is the cave volume and the exits, not the surface.
+6. **Up close, a free check**: vanilla's real chunks in the simulation radius are compared with the client's own
+   generation as they arrive; every chunk walked through tests the generator.
+7. **One renderer**: the client's renderer takes over terrain from vanilla, from just beyond the player inward, until
+   vanilla only simulates; no line, nothing changes renderer as you approach.
+
+8. **Operations, not results, where they are deterministic**: a change that is the output of known code (a spell
+   carving terrain, a settlement placing a building plan) goes out as the operation, its parameters and seed, a few
+   bytes; every client applies it with the same code. Where the result is not deterministic (vanilla explosions,
+   fluids), the edited blocks go out instead; the hash check catches either way.
+
+9. **The log folds into the region; it never grows for years** (owner): a region's state is the generated base plus
+   a compacted layer of differences; operations up to a point every client has passed are merged into the layer and
+   dropped (storage follows how much a region differs, not its history); a heavily built region graduates (the layer
+   is its content, the base no longer matters there); a joining player gets the layer and the few recent operations.
+   Each region records its base's generator version: an untouched region regenerates with a new generator, a changed
+   one keeps its version or is materialised at upgrade (base and layer merged into stored content, the new base).
+10. **Only what is needed is generated**: the far field asks the generator for the detail a region needs at its
+    distance (heights and surface at 16 m spacing for a mountain 10 km off), never whole columns or chunks.
+11. **Secrets and cheaters**: ores, loot, hidden rooms and traps are not in what the client can generate. When
+    something first becomes visible the client asks for it; the server checks against its own world whether that
+    position could see it and only then sends it (a cheater asking for what is behind rock flags itself). The host's
+    policy decides: log, alert the host quietly, warn, kick, ban, or deceive (fake ores, fake safe ground, false
+    directions: Paper's anti-xray engine modes and honeypots are precedents), all without touching the real world. The
+    server keeps simulating the real world (deceptions that should hurt need the server to act, the host's explicit
+    choice); no punishment on one event, evidence accumulates, a log the host can review.
+12. **Order-independent generation**: every feature a pure function of the seed and its position (stateless hashing,
+    counter-based random numbers, bounded footprints), nothing depending on which chunk generated first ("unsafe
+    terrain read during worldgen" at Leyawiin is that kind of dependence). A second survey (deterministic generation,
+    log compaction and generator upgrades, anti-cheat for information leaks, hash-tree sync) grounds the design
+    (docs/ATLAS-RESEARCH.md, survey 2).
+
+### Five decisions before building (from survey 2; proposed, the owner's to confirm)
+
+1. **Arithmetic.** Every discrete generation outcome (a block, a height, a feature placed or not) in integer or fixed
+   point, with one counter RNG (Philox-4x32 keyed by seed, generator version and stage, indexed by position and draw);
+   no `Math.*` or float thresholds in generation, floats only in client-only cosmetics. Only this makes CPU, GPU, Java
+   and C++ agree bit for bit. Gate: one region generated in shuffled orders, 1 and N threads, Java and native, hashes
+   equal.
+2. **Generation contract.** A stage DAG: geography cells, heightfield, carvers, feature anchors (one attempt per cell,
+   with a declared maximum footprint), rasterise in a canonical order. A feature reads the heightfield and anchors,
+   never blocks another feature wrote; large sites are planned as data. Vanilla and mod features that break this are
+   wrapped into the anchor stage or turned off. Every stage answers `sample(x, z, lod)`, so the far field asks only for
+   the detail it needs.
+3. **Public and secret.** Two keys: the public seed drives geometry (what every client generates and the far field
+   draws), a server-only key drives secrets (ores, loot, hidden rooms, traps, quest objects). Clients generate
+   placeholder stone there; the server sends a section's secret overlay once it is in radius and in line of sight,
+   with a look-ahead of ping times speed (Valorant's fog of war). Separate hash roots for the public base and the
+   overlay. Decoys come from the server key and persist; a honeypot hit is evidence for the host's review, never a ban
+   by itself; any action gives a reason and an appeal (EU DSA Article 17, GDPR Article 22). The hardest to retrofit,
+   so decided first.
+4. **Edit semantics.** The edit layer holds absolute overrides (the block's final state with the base value's hash),
+   not deltas; an edit back to the base deletes itself, so dig-and-refill stays bounded. Checkpoint after N entries, B
+   bytes or unload; the log is truncated once every client has acknowledged past it. Doors, crops and similar churn
+   are block-entity state, not log entries. Generator upgrade: untouched regions regenerate; edited ones keep their
+   generator version or are materialised once; a blended band between; stored base hashes flag edits that now
+   conflict with the new base.
+5. **Hash tree v1.** A fixed spatial shape (world, region, chunk, section; one edit is about four rehashes, batched per
+   tick), BLAKE3 with domain separation (leaf and node prefixes, RFC 6962), hash and generator versions in every
+   leaf, a canonical section encoding (palette order and padding fixed). Untouched base hashes are pure functions of
+   seed, version and position, computed lazily. Sync top down from region roots.
+
+### Graduated consequences (owner, 2026-10-19)
+
+We own loot, stores and ores (ores regenerate, so they are server state like loot), and the server decides what each
+container, vein or merchant gives each player when asked. A suspected cheater's yields drop a little (loot tables,
+ore yields, prices), enemies get a little harder and may come looking for them; never a hard stop, never a change to
+anyone else's world.
+
+- **Evidence, not accidents.** Only events lag cannot explain count: asking for a secret from a place whose line of
+  sight is blocked by solid public terrain well beyond the look-ahead (ping times speed plus a margin), tunnels that
+  head for hidden ores far above the chance rate, positions the server's own movement check rejects. Each event adds
+  to a per-player score, weighted by how unambiguous it is.
+- **Multiple offences, time-limited.** The score decays (a half-life of days); effects start above a threshold, grow
+  with the score and fade back to normal as it decays. A single event does nothing.
+- **Host policy and a log.** Thresholds and effects are the host's settings; every event and effect is logged with
+  its reason, reviewable and reversible (honest players caught by a false positive must get it undone; EU servers
+  owe a statement of reasons).
+
+### What checking proves, and what it cannot (owner asked: renderer integrity by peer agreement)
+
+The idea: every renderer change alters a fingerprint, players compare, the odd one out is cheating. The limit: any
+fingerprint a client computes about itself, it can also fake. A modified client keeps an untouched copy (or the
+recorded answers) and reports what an honest one would; peers cannot see each other's code either, and a cheater can
+lie about others too. Challenges (the server sends a random tiny scene, the client renders a few pixels and returns
+their hash in time) are answered by running the honest renderer beside the cheating one. This raises the bar a
+little; it proves nothing. Kernel anti-cheat (Vanguard, EAC) is out of scope.
+
+What does work:
+
+- **Nothing secret reaches the client before it may see it** (decision 3, Valorant's fog of war for far players too:
+  a player behind a mountain is not sent). A wallhacked renderer then shows the public world, which anyone can
+  generate from the seed anyway.
+- **Behaviour the server sees** (above): requests, movement, digging, aim at what was not visible.
+- **The hash tree, for correctness, not honesty**: it catches generator drift (versions, platforms, a float off by 1
+  ulp), corrupt caches and a client's world copy that differs from the server's; it makes sync cheap (only differing
+  branches travel). Region hashes compared among peers can spread that load (the majority agrees, the odd one is
+  re-sent from the server), but the server stays the authority.
+
+### Own all of it: one spectrum, no vanilla terrain (owner, 2026-10-19)
+
+No near and far at all: one representation whose detail follows each part's importance on screen and its visibility,
+so distance stops mattering. Vanilla's terrain rendering is removed, not turned down (it gets no terrain geometry; it
+keeps entities until those are ours too; if owning it all needs mixins, that rule is the owner's to revisit). Drawing
+picks its method per piece, not per ring: the groups' rectangles raster as meshes where that is cheapest (close, on a
+weak GPU) and are traced where that wins (far, many blocks a pixel), with the same cards and light, so nothing shows
+where the method changes. Owning the drawing means owning the look: what vanilla would draw does not bind us (smooth or
+stylised terrain is a rendering choice; smooth collision would change the server's world and is a later experiment).
+A research survey of games and papers grounds the plan before the build.
+
+#### Everything a frame draws (owner: "it also needs entities, particles, arrows... what else?")
+
+Taking terrain from vanilla means everything else in the frame must still sit in it correctly. First step: our
+renderer draws terrain and writes depth; vanilla keeps drawing the rest into the same frame, tested per item; we take
+an item over only where vanilla's version cannot match (light, shadows, distance). Simulation (spawns, AI,
+collision, projectiles' flight, picking) stays on the server and vanilla's client logic: rendering does not touch it.
+
+| group | items | what owning terrain requires |
+|---|---|---|
+| terrain | opaque, cutout (leaves, plants), translucent (water, glass, ice), animated fluids and textures (fire, lava, portals), biome tints, emissive blocks, falling blocks and moving pistons | ours |
+| block entities | chests opening, signs and their text, banners, beds, skulls, lecterns, bells, campfire items, enchanting books, beacon beams, end portals, shulkers, pots | vanilla draws them; depth and light must match ours |
+| entities | mobs, players (skins, armour, held items, capes, name tags), our creatures and NPCs, items on the ground, XP, arrows, tridents, other projectiles, boats, carts, paintings, item frames, armour stands, leads, fishing lines, lightning, fireworks, display entities | vanilla near, lit from our light and hidden by our depth; far players, creatures, ships and lights: ours (impostors, interest-driven) |
+| particles | breaking, splashes, smoke, torches, portals, potions, crits, explosions, our spells | vanilla, sorted against our water and glass |
+| interaction | block outline, breaking cracks, placement, hitboxes, F3 and chunk borders | over our depth (cracks need our surface) |
+| first person and screen | hand and held item, maps, spyglass, pumpkin, underwater, lava, powder snow and fire overlays, nausea, blindness, darkness, damage tilt, FOV, bobbing, third person, spectator | vanilla; underwater and in-fluid fog from our fog |
+| sky and air | sky, sun, moon, stars, clouds, fog, rain, snow, lightning flashes, world border | ours already in part; weather later |
+| light | block and sky light, smooth light and AO, held lights, entity and particle light, shadows both ways (entities on terrain, terrain on entities) | one light for all |
+| dimensions | Nether, End, our realms (Apocrypha, Sovngarde): no sky light, other skies and fog | ours, per dimension |
+| compatibility | Iris shader packs, other mods' block and entity renderers, brightness, render distance settings, screenshots | to check one by one |
+
+Things that rely on vanilla's terrain drawing without being drawing: entity culling (vanilla culls by its chunk
+visibility graph; without its sections, entities need our visibility), map items (map colours), and what counts as
+"loaded" for the render distance setting.
+
+Order: deterministic generation with a test (client-generated vs server-real per chunk), then the client-generated far
+field with the hash tree and the change log, then interest-driven live state, then the near field.
+
 Targets: first far image under 100 ms after arrival (stand-ins), within dE 3 of settled in under 2 s on a GPU, no jump
 between seconds over dE 6; a return to a visited place loads from cache with no visible refinement.

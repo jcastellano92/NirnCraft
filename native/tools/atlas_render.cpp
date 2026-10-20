@@ -36,8 +36,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <map>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "atlas/atlas.h"
@@ -133,6 +135,7 @@ uint32_t flagsOf(const std::string& s) {
     if (s.find("sky") != std::string::npos) f |= ATLAS_FRAME_SKY;
     if (s.find("quarter") != std::string::npos) f |= ATLAS_FRAME_CLOUDS_QUARTER;
     if (s.find("flatnormals") != std::string::npos) f |= ATLAS_FRAME_FLAT_NORMALS;
+    if (s.find("lightlow") != std::string::npos) f |= ATLAS_FRAME_LIGHT_LOW;
     if (s.find("dbgweather") != std::string::npos) f |= ATLAS_FRAME_DEBUG_WEATHER;
     return f;
 }
@@ -431,7 +434,10 @@ int main(int argc, char** argv) {
     std::string base;
     double best = 1e30, median = 0;
     int frames = std::max(1, int(num(a, "frames", 1)));
-    bool interleave = num(a, "interleave", 0) > 0;
+    // interleave=1: timing frames alternate the groups and the voxel path; interleave=light: the far light traced and
+    // cheap (ATLAS_FRAME_LIGHT_LOW), the same clocks for both
+    uint32_t interleaveBits = str(a, "interleave", "") == "light" ? ATLAS_FRAME_LIGHT_LOW : ATLAS_FRAME_GROUPS;
+    bool interleave = num(a, "interleave", 0) > 0 || str(a, "interleave", "") == "light";
     std::vector<double> otherTimes;  // (interleave) the other path's timing frames
     int spp = std::max(1, int(num(a, "spp", 1)));
     auto renderOne = [&](const std::string& out, double x, double y, double z, double yawIn, double pitchIn, double fovIn,
@@ -467,6 +473,9 @@ int main(int argc, char** argv) {
         f.flags = flagsOf(str(a, "flags", mcShade ? "flatnormals" : "shadows,atmos,clouds,sky,actors"));
         if (mcShade) f.flags |= ATLAS_FRAME_DEBUG_ALBEDO | ATLAS_FRAME_FLAT_NORMALS;
         if (groups) f.flags |= ATLAS_FRAME_GROUPS;
+        // shade=game: the far field as the game draws it without a shader pack (FRAME_VANILLA_LIGHT, as AtlasClient
+        // asks): the core's own vanilla light, not the tool's albedo composite (shade=mc)
+        if (str(a, "shade", "") == "game") f.flags = (f.flags | ATLAS_FRAME_VANILLA_LIGHT) & ~(ATLAS_FRAME_SHADOWS | ATLAS_FRAME_ATMOS);
 
         color.assign(size_t(w) * h, 0);
         normal.assign(size_t(w) * h, 0);
@@ -511,7 +520,7 @@ int main(int argc, char** argv) {
                 // interleave=1: timing frames alternate the groups and the voxel path (the same clocks for both)
                 bool other = interleave && smp == 0 && i < frames && (i & 1);
                 uint32_t keepFlags = f.flags;
-                if (other) f.flags ^= ATLAS_FRAME_GROUPS;
+                if (other) f.flags ^= interleaveBits;
                 if (atlas_render(ctx, &f, &o) != ATLAS_OK) {
                     std::fprintf(stderr, "render: %s\n", atlas_last_error(ctx));
                     return 4;
@@ -668,6 +677,30 @@ int main(int argc, char** argv) {
         return 0;
     }
     if (int rc = renderOne(out, x, y, z, num(a, "yaw", 0), num(a, "pitch", mcCam ? 0 : -4), num(a, "fov", 70), w, h)) return rc;
+    // watch=1 (Vulkan, ATLAS_SHADER_DIR set, tools/dev/shader_watch.py running): the scene stays loaded and the same
+    // view is rendered again whenever the shaders change, a frame instead of a run (the backend reloads them)
+    if (num(a, "watch", 0) > 0) {
+        const char* dir = std::getenv("ATLAS_SHADER_DIR");
+        if (!dir || !*dir) {
+            std::fprintf(stderr, "watch=1 needs ATLAS_SHADER_DIR (tools/dev/shader_watch.py)\n");
+            return 2;
+        }
+        std::filesystem::path far = std::filesystem::path(dir) / "atlas_far.spv";
+        std::error_code ec;
+        auto seen = std::filesystem::last_write_time(far, ec);
+        std::fprintf(stderr, "watching %s: %s re-renders on every shader change (ctrl-c ends)\n", far.string().c_str(), out.c_str());
+        for (;;) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            auto t = std::filesystem::last_write_time(far, ec);
+            if (ec || t == seen) continue;
+            seen = t;
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));  // past the backend's 250 ms look
+            auto t0 = std::chrono::steady_clock::now();
+            if (int rc = renderOne(out, x, y, z, num(a, "yaw", 0), num(a, "pitch", mcCam ? 0 : -4), num(a, "fov", 70), w, h)) return rc;
+            double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+            std::fprintf(stderr, "rendered %s in %.0f ms (frame %.2f ms)\n", out.c_str(), ms, best);
+        }
+    }
     // atlas_truth's frame of the same camera, and how far this one is from it (the harness's metric, by distance)
     std::string vsTruth;
     if (a.count("truth") && mcCam) {

@@ -147,6 +147,17 @@ typedef struct AtlasFrame {
                                                  first, on atlas_update); regions without one yet draw as before. The
                                                  outputs, shadows, sun map and hand-off are unchanged. An older core
                                                  ignores the bit. */
+#define ATLAS_FRAME_VANILLA_LIGHT 0x10000u    /* (abi 0.14, optional) Minecraft's own look, for a host without a shader pack (its
+                                                 near field is vanilla): the texel times the fixed face shade and the
+                                                 lightmap's sky brightness for the time of day; no sun shadows, sky
+                                                 visibility, light through leaves or aerial haze (the far field had them
+                                                 in vanilla, a stark line where vanilla's chunks meet it). Older cores
+                                                 ignore the bit. */
+#define ATLAS_FRAME_LIGHT_LOW 0x8000u        /* (abi 0.14, optional) cheap far light, a quality step for the host's
+                                                 adaptive controller: a constant sky occlusion and 4-tap AO instead of
+                                                 traced sky visibility, binary sun shadows that foliage stops, block
+                                                 lights unshadowed. Without it (the default) the far field traces its
+                                                 light (docs/ATLAS-LOD.md, "Far light"). An older core ignores the bit. */
 
 /*
  * Frame outputs (any pointer may be NULL to skip). Layout matches the shared G-buffer images:
