@@ -290,6 +290,22 @@ The full checklist from R1, every item checked live; the owner flies it.
   per ray (an hour); step 1: a level-0 nested grid + AADF built in compute from the raw sections, used by the near
   light's rays, A/B'd live; then the other levels; then primary rays near, which is what makes near and far one
   spectrum instead of raster near and atlas far (primary near rays measured 21-30 ms at 1080p with the SVDAG).
+- **Step 0 and the GPU-built level 0 (2026-10-20, branch atlas-naadf).** Step 0 (Falkreath export, 1280x800, the near
+  light's frame, interleaved best-of-40; ATLAS_ABLATE bits 21-26, atlas_render nlframes / nlcount): 5.0 / 3.9 ms, 0.9
+  without any rays; no height mip at level 0 -6 / -9 %, foliage free 0 %; per secondary ray 6.4 traceRegion steps, 37
+  height-mip probes, 7.2 node loads, 0.44 solid voxels, 0.08 foliage passes: not foliage, the per-ray traversal's loads.
+  Built (voxgrid.hpp, atlas_voxgrid.slang, traceVoxGrid): the raw sections in a GPU pool, a 64 x 44 x 64 window of
+  chunks (state + 5-bit x6 empty boxes), 64 blocks a chunk (2-bit x6 boxes, 64-bit bitmaps), at most three dependent
+  loads a step; compute kernels build a section's blocks and regrow the chunks' boxes over a summed-volume table; the
+  CPU backend builds the same words in C++. traceLod's level 0 takes it first, the SVDAG past it. Primary hits match
+  the SVDAG level 0 within 0.002 blocks (Vulkan and CPU; above a real column's top the grid has air where the tiles had
+  stand-ins). 1080p primary + material to 256 blocks: 2.0-3.1 ms vs 3.6-6.2 (groups off); with shapes and the groups'
+  look at level 0: 4.1 vs 11.1 ms (groups on), to the horizon 6.8 vs 15.2. Near light: 3.7 vs 6.3 ms. GPU build: 4173
+  sections 5.4 ms in all, a 77-section batch with the boxes regrown 0.22 ms; 147 MB at 16384 slots. Then: the grid may
+  own level 0 (ATLAS_VOXGRID_LEVEL0: no CPU level-0 rebuilds for its sections), 16 x 16 textures sampled at level-0
+  hits, and ATLAS_FRAME_PRIMARY_NEAR / _LIT: the near field from atlas's own primary rays (atlas.h). Open: levels 1+
+  still CPU (World::putSection's generated levels are ~35 us a section, the bulk of a section's CPU cost), the shapes'
+  per-hit cost, vanilla block light (far lights stand in), the groups' coarse levels still on the CPU.
 - **Shadows are traced but faint at low sun (2026-10-20).** A sun-visibility view at time 11600 shows the trees' and
   houses' long shadows; the final image barely does. The ambient (LOOK_AMBIENT 3 -> 2 -> 1.5) hardly changes it (the
   exposure follows); the key light at a 15-25 degree sun is weak against the sky (the evening reads blue and flat, not
