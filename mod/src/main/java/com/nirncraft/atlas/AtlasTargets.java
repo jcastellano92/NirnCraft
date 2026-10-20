@@ -118,6 +118,15 @@ final class AtlasTargets implements AutoCloseable {
         return nearLightTarget;
     }
 
+    /** The sun map (the far field's terrain seen from the sun; the resolve's crepuscular rays), and its size. */
+    Target sunTarget() {
+        return sun;
+    }
+
+    int sunMapSize() {
+        return sunSize;
+    }
+
     int nearLightId() {
         return nearLightTarget.glId;
     }

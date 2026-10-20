@@ -21,9 +21,25 @@ void main() {
     vec3 dir = normalize(p.xyz / p.w);
     vec3 sun = normalize(Sun.xyz);
     vec3 c = atlasSky(SkyView, dir, sun);
-    // the sun's disc (about half a degree, a soft limb) over the horizon
-    float mu = dot(dir, sun);
-    float disc = smoothstep(0.99996, 0.99999, mu) * smoothstep(-0.02, 0.02, dir.y);
+    // the sun's disc. High up its glare (near_resolve's sunGlare) swallows it: a bright blob. Low down the long air
+    // path dims it until its edge shows, crisp, darker at the rim (limb darkening), flattened by the air's refraction
+    // (the lower limb lifted more than the upper), and looking larger against the horizon (the eye's horizon illusion: a
+    // gentle enlargement, it is how a sunset looks)
+    float e = sun.y;
+    float lowSun = 1.0 - smoothstep(0.0, 0.25, e);
+    float r0 = 0.0089 * (1.0 + 0.3 * lowSun);              // angular radius, radians
+    float squash = 1.0 - 0.15 * (1.0 - smoothstep(0.0, 0.08, e));
+    vec3 upW = vec3(0.0, 1.0, 0.0);
+    vec3 v = normalize(upW - sun * dot(upW, sun));          // up on the sky, across the disc
+    vec3 h = normalize(cross(sun, v));
+    float dx = dot(dir, h), dy = dot(dir, v) / squash;
+    float along = dot(dir, sun);
+    float d = along > 0.0 ? sqrt(dx * dx + dy * dy) : 1.0;  // angular distance from the centre, the flattened disc's
+    float aa = max(fwidth(d), 1e-5);
+    float inside = 1.0 - smoothstep(r0 - aa, r0 + aa, d);
+    float x = clamp(d / r0, 0.0, 1.0);
+    float limb = 1.0 - 0.6 * (1.0 - sqrt(max(1.0 - x * x, 0.0)));
+    float disc = inside * limb * smoothstep(-0.02, 0.01, dir.y);
     c += SunDisc.rgb * disc * 40.0;
     fragColor = vec4(atlasDisplay(c, Look.x, Look.y), 1.0);
 }

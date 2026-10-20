@@ -107,6 +107,7 @@ public final class AtlasNearPass {
             .withUniform("Sampler4", UniformType.COMBINED_IMAGE_SAMPLER)
             .withUniform("Sampler5", UniformType.COMBINED_IMAGE_SAMPLER)
             .withUniform("Sampler6", UniformType.COMBINED_IMAGE_SAMPLER)
+            .withUniform("SunMap", UniformType.COMBINED_IMAGE_SAMPLER)  // the far field's sun map (crepuscular rays)
             .withUniform("NearInfo", UniformType.UNIFORM_BUFFER)
             .build();
 
@@ -553,7 +554,7 @@ public final class AtlasNearPass {
         // then mode 2, the same light untraced, instead of vanilla's look for that frame: a flicker on arrival)
         boolean traced = nearLight && far != null;
         lit = AtlasClient.nearLightSupported();
-        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 288);
+        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 304);
         var camState = mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
         float eyeWater = eyeWaterDepth(mc, camState);
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
@@ -576,7 +577,10 @@ public final class AtlasNearPass {
                     .putVec4((float) Math.floorMod((long) Math.floor(camState.pos.x), 6144L) + (float) (camState.pos.x - Math.floor(camState.pos.x)),
                             (float) camState.pos.y,
                             (float) Math.floorMod((long) Math.floor(camState.pos.z), 6144L) + (float) (camState.pos.z - Math.floor(camState.pos.z)), 0f)
-                    .putVec4(waterTint(mc, camState)[0], waterTint[1], waterTint[2], 0f);  // WaterTint: the biomes' water colour
+                    .putVec4(waterTint(mc, camState)[0], waterTint[1], waterTint[2], 0f)  // WaterTint: the biomes' water colour
+                    // CamAbs: the camera's world position (the sun map's world frame), w: the sun map's size (0: none)
+                    .putVec4((float) camState.pos.x, (float) camState.pos.y, (float) camState.pos.z,
+                            far != null ? far.sunMapSize() : 0f);
         }
         var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
                 FilterMode.NEAREST, FilterMode.NEAREST, false);
@@ -597,10 +601,12 @@ public final class AtlasNearPass {
             pass.setUniform("Sampler4", far.colorTarget().getTextureView(), linear);
             pass.setUniform("Sampler5", far.depthTarget().getTextureView(), nearest);
             pass.setUniform("Sampler6", far.nearLightTarget().getTextureView(), nearest);
+            pass.setUniform("SunMap", far.sunTarget().getTextureView(), nearest);
         } else {  // no far frame this time: the G-buffer's own (empty) colour stands in, nothing far is composited
             pass.setUniform("Sampler4", light.getColorTextureView(), nearest);
             pass.setUniform("Sampler5", gbuffer.getDepthTextureView(), nearest);
             pass.setUniform("Sampler6", light.getColorTextureView(), nearest);
+            pass.setUniform("SunMap", light.getColorTextureView(), nearest);  // (CamAbs.w 0: not read)
         }
         pass.setUniform("NearInfo", info.currentBuffer());
         bindShadow(pass);

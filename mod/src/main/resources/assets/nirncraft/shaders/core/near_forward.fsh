@@ -154,7 +154,7 @@ void main() {
             vec4 ct4 = vp * vec4(t * 1000.0, 1.0);
             vec2 uvT = clamp(ct4.xy / max(ct4.w, 1e-3) * 0.5 + 0.5, vec2(0.0), vec2(1.0));
             above = texture(SceneDepth, uvT).r > 0.0 ? texture(SceneColor, uvT).rgb
-                                                       : atlasDisplay(atlasSkyColor(normalize(t), SunDir.xyz), Look.x, Look.y);
+                                                       : atlasDisplay(atlasSky(SkyView, normalize(t), SunDir.xyz), Look.x, Look.y);
         }
         // outside the window the surface mirrors the water under it (total internal reflection)
         vec4 under = screenReflection(viewPos - wb * 0.05, reflect(v, wb));

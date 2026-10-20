@@ -33,7 +33,10 @@ layout(std140) uniform NearInfo {
     mat4 InvViewRot;  // view -> camera-relative world
     vec4 CamPos;      // camera world position, x z modulo 6144
     vec4 WaterTint;   // the biomes' water colour around the camera
+    vec4 CamAbs;      // the camera's world position; w the sun map's size S (0: no sun map)
 };
+uniform sampler2D SunMap;  // RG32F, S x S + 1: the terrain's depth along the light from the map's centre, cloud transmittance;
+                           // the last row: centre (world), half extent, X, Y, L (atlas_far.slang sunMapMain)
 #include <nirncraft:atlas_water.glsl>
 uniform sampler2D ShadowMap;  // the key light's shadow map of the near terrain (AtlasNearPass.drawShadow)
 
@@ -81,6 +84,56 @@ vec3 sunGlare(vec3 dir) {
     // low over the horizon the air takes the glare's spread with the light: a smaller, softer blob
     float low = smoothstep(0.0, 0.25, S.y);
     return KeyRad.rgb * vis * (core * 1.6 + halo * mix(0.4, 1.0, low));
+}
+
+// Crepuscular rays: how much of the air along a view ray lies in the shadow of the terrain (mountains, ridges, the far
+// field's own landscape out to the sun map's +-2048 blocks), weighted towards the air near the eye; 0..1. The sky's and
+// the haze's scattered light is dimmed by it: dark shafts fanning across a low sun's sky behind the mountains, the light
+// shooting up between them as the sun sets. dir unit camera-relative, dist blocks (1e30: the sky).
+vec2 sunMapAt(int i) {
+    int S = int(CamAbs.w);
+    return texelFetch(SunMap, ivec2(i, S), 0).rg;
+}
+
+float airShadow(vec3 dir, float dist) {
+    int S = int(CamAbs.w);
+    if (S < 2) return 0.0;
+    vec2 p0 = sunMapAt(0), p1 = sunMapAt(1), p2 = sunMapAt(2), p3 = sunMapAt(3), p4 = sunMapAt(4), p5 = sunMapAt(5),
+         p6 = sunMapAt(6);
+    if (p6.y < 0.5) return 0.0;  // no valid map (the light at the horizon)
+    vec3 C = vec3(p0.x, p0.y, p1.x);
+    float he = p1.y;
+    vec3 X = vec3(p2.x, p2.y, p3.x), Y = vec3(p3.y, p4.x, p4.y), L = vec3(p5.x, p5.y, p6.x);
+    vec3 eye = CamAbs.xyz - C;
+    float len = min(dist, 3000.0);
+    const int N = 20;
+    float f = fract(SunDir.w * 7.31);
+    float jit = fract(52.9829189 * fract(dot(gl_FragCoord.xy + f * 71.0, vec2(0.06711056, 0.00583715))));
+    float shadowed = 0.0, wsum = 0.0;
+    for (int k = 0; k < N; k++) {
+        float s = (float(k) + jit) / float(N);
+        float t = len * s * s;                      // denser near the eye, where the shafts are seen
+        float dt = len * 2.0 * s / float(N);
+        vec3 q = eye + dir * t;
+        float u = dot(q, X) / he, v = dot(q, Y) / he;
+        if (abs(u) > 1.0 || abs(v) > 1.0) continue;
+        vec2 st = texelFetch(SunMap, ivec2(clamp(int((u * 0.5 + 0.5) * float(S)), 0, S - 1),
+                                           clamp(int((v * 0.5 + 0.5) * float(S)), 0, S - 1)), 0).rg;
+        float w = dt * exp(-max(q.y + C.y - 63.0, 0.0) / 1200.0);  // thinner air higher up
+        shadowed += (st.x > dot(q, L) + 2.0 ? 1.0 : 0.0) * w;
+        wsum += w;
+    }
+    return wsum > 0.0 ? shadowed / wsum : 0.0;
+}
+
+// the scattered light of the sky or the haze along dir, dimmed where the terrain shadows the air: most towards a low sun
+// (the forward scattering the shafts are made of), a little away from it (anticrepuscular, opposite the sun)
+float crepuscular(vec3 dir, float dist) {
+    vec3 S = normalize(SunDir.xyz);
+    if (S.y < -0.02) return 1.0;
+    float low = 1.0 - smoothstep(0.05, 0.4, S.y);
+    float towards = 0.35 + 0.65 * pow(max(dot(dir, S), 0.0), 3.0);
+    return 1.0 - airShadow(dir, dist) * (0.15 + 0.5 * low) * towards;
 }
 
 // The sun's light scattered towards the eye by the air between it and what it sees, dist blocks along unit camera-
@@ -268,8 +321,10 @@ void main() {
         // through a canopy or a cave's skylight)
         vec3 dirS = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
         vec3 b = Look.z > 0.5 && !atlasEyeInWater() ? atlasDisplay(airBeams(dirS, 80.0) + sunGlare(dirS), Look.x, Look.y) : vec3(0.0);
-        if (dot(b, vec3(1.0)) < 1e-4) discard;
-        fragColor = vec4(b, 0.0);  // (premultiplied: added over the sky)
+        // the terrain's shadow in the air dims the sky drawn behind (premultiplied blend: dst x (1 - a) + src)
+        float cr = Look.z > 0.5 && !atlasEyeInWater() ? crepuscular(dirS, 1e30) : 1.0;
+        if (dot(b, vec3(1.0)) < 1e-4 && cr > 0.999) discard;
+        fragColor = vec4(b, 1.0 - cr);
         gl_FragDepth = 0.0;
         return;
     }
@@ -281,7 +336,11 @@ void main() {
     float f = clamp(linear_fog_value(min(d, edge), FogEnvironmentalStart, FogEnvironmentalEnd), 0.0, 1.0) * FogColor.a;
     vec3 dirF = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
     vec3 fogged = atlasEyeInWater() ? atlasUnderwater(ldr, d, dirF) + atlasWaterShafts(dirF, d) : mix(ldr, FogColor.rgb, f);
-    if (!atlasEyeInWater() && own) fogged += atlasDisplay(airBeams(dirF, d) + sunGlare(dirF), Look.x, Look.y);
+    if (!atlasEyeInWater() && own) {
+        // the haze in front of far terrain is the sky's light too: dimmed where the terrain shadows the air
+        float crF = crepuscular(dirF, d);
+        fogged = fogged * mix(1.0, crF, 1.0 - exp(-d / 5000.0)) + atlasDisplay(airBeams(dirF, d) + sunGlare(dirF), Look.x, Look.y);  // (the haze's share grows with distance)
+    }
     // (under water nothing behind is seen: partial coverage let the sky pass's sky through, a line and the world far off)
     fragColor = atlasEyeInWater() ? vec4(fogged, 1.0) : vec4(fogged * c.a, c.a);
     // its depth: the point at that distance along this pixel's ray (beyond the projection's far plane: 0)
