@@ -21,7 +21,10 @@
 // sky=RRGGBB: the background of shade=mc (atlas_truth's flat sky by default). shade=pack exposure=<log2> nv=<0.7>
 // skyhdr=r,g,b: atlas_core's own lit frame (its sun / moon light, shadows, sky ambient, AO, far lights) through the
 // shader pack's tonemap (pack_look.hpp: night vision, exposure, ACES, sRGB) over a flat HDR sky, as atlas_truth
-// lighting=realistic draws it (the element tier's far-lit). lights=1: the export's emitters (light 8 and up, inside
+// lighting=realistic draws it (the element tier's far-lit). nearlight=1 (with shade=pack): every surface the frame hits
+// lit as the near pass's pixels are (ATLAS_FRAME_NEAR_LIGHT on the frame's own depth and normals, sky light 15, block
+// light 0: albedo x light x T + inscatter) instead of by the far field's light. lights=1: the export's emitters (light
+// 8 and up, inside
 // box=) as far lights, as the game registers a real chunk's lights (AtlasEditsClient.lights: fires, intensity
 // level / 15).
 //
@@ -171,6 +174,7 @@ int main(int argc, char** argv) {
     bool groups = num(a, "groups", haveExport ? 1 : 0) > 0;
     bool mcShade = str(a, "shade", haveExport && mcCam ? "mc" : "") == "mc";
     bool packShade = str(a, "shade", "") == "pack";
+    bool nearLight = packShade && num(a, "nearlight", 0) > 0;
     packlook::Look look;
     look.exposure = float(num(a, "exposure", 0));
     look.nightVision = float(num(a, "nv", 0.7));
@@ -556,6 +560,38 @@ int main(int argc, char** argv) {
                         px |= uint32_t(std::fmin(255.0f, v * 255.0f + 0.5f)) << (8 * k);
                     }
                     color[i] = px;
+                }
+            }
+            if (nearLight) {
+                // the frame's surfaces as the near field: their albedo (FRAME_DEBUG_ALBEDO), then the near light on
+                // this frame's own depth and normals (as the native tests feed it), composed as the game's resolve does
+                AtlasFrame fa = f;
+                fa.flags |= ATLAS_FRAME_DEBUG_ALBEDO;
+                std::vector<float> alb(linear.size()), nl(linear.size()), nd(depth.size(), 1e30f);
+                std::vector<uint32_t> ni(depth.size(), 0);
+                AtlasFrameOutput oa{nullptr, nullptr, nullptr, alb.data()};
+                float farthest = 0.0f;
+                for (size_t i = 0; i < depth.size(); i++)
+                    if (depth[i] < 1e29f) {
+                        nd[i] = depth[i];
+                        ni[i] = (255u << 8) | ((normal[i] & 0xFFFFu) << 16);
+                        farthest = std::max(farthest, depth[i]);
+                    }
+                AtlasFrame fn = f;
+                fn.nearFieldEnd = farthest + 1.0f;
+                fn.flags |= ATLAS_FRAME_NEAR_DEPTH | ATLAS_FRAME_NEAR_LIGHT;
+                fn.nearDepth = nd.data();
+                fn.nearInfo = ni.data();
+                AtlasFrameOutput on{nullptr, nullptr, nullptr, linear.data(), nl.data()};
+                if (atlas_render(ctx, &fa, &oa) != ATLAS_OK || atlas_render(ctx, &fn, &on) != ATLAS_OK) {
+                    std::fprintf(stderr, "render (near light): %s\n", atlas_last_error(ctx));
+                    return 4;
+                }
+                for (size_t i = 0; i < depth.size(); i++) {
+                    if (depth[i] >= 1e29f) continue;
+                    for (int k = 0; k < 3; k++)
+                        linear[i * 4 + size_t(k)] = alb[i * 4 + size_t(k)] * nl[i * 4 + size_t(k)] * linear[i * 4 + 3] + linear[i * 4 + size_t(k)];
+                    linear[i * 4 + 3] = 1.0f;
                 }
             }
             if (packShade) {

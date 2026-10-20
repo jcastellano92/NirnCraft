@@ -24,6 +24,7 @@ static const uint FRAME_NEAR_LIGHT = 0x20000u; // (abi 0.15) light the near fiel
 // the shader pack's ambient floor (deferred.fsh: albedo x (sky + floor)), under every far land surface as under the near
 static const float3 FAR_AMBIENT_FLOOR = float3(0.012, 0.012, 0.016);
 // the look (shadeSurfaceAmb): how much the sky fills the shade (1: the physical value) and the warm bounce off lit ground
+// where the sky rays did not trace it (the constant; gBounce)
 static const float LOOK_AMBIENT = 3.0;
 static const float LOOK_BOUNCE = 0.25;
 // the look: aerial haze over the physical clear air (distance reads as depth; the horizon softens into the sky)
@@ -72,6 +73,10 @@ struct FrameGpu {
 // the frame's moon, copied by each entry point (the shared lighting has no frame of its own)
 static float4 gMoonDir = float4(0.0, 1.0, 0.0, 0.0);
 static float4 gMoonRad = float4(0.0, 0.0, 0.0, 0.0);
+// One bounce (atlas_far skyVisible, for the next shadeSurfaceAmb, which takes it and puts this default back): rgb what
+// the surfaces the sky rays met send back (their own light, averaged over the rays), a the share of rays that met
+// none, over which the look's constant bounce stands in for the lit ground (all of it where nothing was traced)
+static float4 gBounce = float4(0.0, 0.0, 0.0, 1.0);
 
 float3 unproject(FrameGpu f, float2 ndc) {
     float4 p = f.invViewProj[0] * ndc.x + f.invViewProj[1] * ndc.y + f.invViewProj[2] * 0.5 + f.invViewProj[3];
@@ -139,11 +144,13 @@ float3 shadeSurfaceAmb(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 
     float ndl = saturate(dot(n, L));
     float3 direct = keyLightRadiance(sun) * ndl * lightVis;
     // the look (one for near and far: the near pass's pixels are lit by this too): the sky fills the shade more than
-    // the physical value, and the lit ground bounces warm light into it, from below and the sides, as far as the sky
-    // reaches there (a cave gets none)
+    // the physical value, and the lit ground bounces warm light into it: traced where the sky rays met a surface (its
+    // own light, gBounce: an arch's underside over sunlit ground, a gorge's walls; a cave's unlit walls send none),
+    // over the rest of the rays a constant from below and the sides, as far as the sky reaches there
     float3 sky = skyAmbient(n, sun);
     float open = saturate(dot(ambient, float3(0.2126, 0.7152, 0.0722)) / max(dot(sky, float3(0.2126, 0.7152, 0.0722)), 1e-4));
-    float3 bounce = keyLightRadiance(sun) * (max(L.y, 0.0) * LOOK_BOUNCE * (0.6 - 0.4 * n.y) * open);
+    float3 bounce = gBounce.rgb + keyLightRadiance(sun) * (max(L.y, 0.0) * LOOK_BOUNCE * (0.6 - 0.4 * n.y) * open * gBounce.a);
+    gBounce = float4(0.0, 0.0, 0.0, 1.0);
     float3 c = albedo * (direct + ambient * LOOK_AMBIENT + bounce);
     if (cls == 2u) {
         // water: Schlick Fresnel against what it reflects, plus the key light's glint; m.albedoRough.a carries the

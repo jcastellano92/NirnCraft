@@ -1788,7 +1788,7 @@ static void testCaves() {
     // the near light by the surface's x: the pit (open to the sky), the tunnel's first 24 blocks, deep
     struct Bin { double sun = 0, irr = 0, haze = 0; size_t n = 0; };
     double capped = 0, tunnelIrr = 0;  // what the resolve's cap by vanilla's sky light takes of atlas's light in the tunnel
-    auto measure = [&](AtlasContext* c, const View& v, Bin bins[3]) {
+    auto measure = [&](AtlasContext* c, const View& v, Bin bins[4]) {
         std::vector<float> nl(px * 4), col(px * 4);
         AtlasFrameOutput o{nullptr, nullptr, nullptr, col.data(), nl.data()};
         CHECK(atlas_render(c, &v.fn, &o) == ATLAS_OK);
@@ -1810,27 +1810,34 @@ static void testCaves() {
             bins[b].irr += 0.2126 * nl[i * 4] + 0.7152 * nl[i * 4 + 1] + 0.0722 * nl[i * 4 + 2];
             bins[b].haze += 0.2126 * col[i * 4] + 0.7152 * col[i * 4 + 1] + 0.0722 * col[i * 4 + 2];
             bins[b].n++;
+            if (b == 1 && x < 0) {  // (the mouth's first 8 blocks, also in the first 24)
+                bins[3].irr += 0.2126 * nl[i * 4] + 0.7152 * nl[i * 4 + 1] + 0.0722 * nl[i * 4 + 2];
+                bins[3].n++;
+            }
         }
     };
-    Bin a[3], bf[3];
+    Bin a[4], bf[4];
     for (const View* v : {mouth, deep}) measure(after, *v, a);
     std::printf("  the resolve's sky-light cap takes %.1f%% of the light atlas traces in the tunnel's first 48 blocks "
                 "(above the ambient floor)\n", tunnelIrr > 0 ? 100.0 * capped / tunnelIrr : 0.0);
     for (const View* v : {mouth, deep}) measure(before, *v, bf);
     for (Bin* bins : {a, bf})
-        for (int b = 0; b < 3; b++)
+        for (int b = 0; b < 4; b++)
             if (bins[b].n) bins[b].sun /= double(bins[b].n), bins[b].irr /= double(bins[b].n), bins[b].haze /= double(bins[b].n);
-    const char* names[3] = {"pit (open)", "tunnel, first 24", "deep (x >= 48)"};
-    for (int b = 0; b < 3; b++)
+    const char* names[4] = {"pit (open)", "tunnel, first 24", "deep (x >= 48)", "the mouth, first 8"};
+    for (int b = 0; b < 4; b++)
         std::printf("  near light, %-16s (%5zu px): sun %.3f / %.3f, irradiance %.4f / %.4f, inscatter %.5f / %.5f "
                     "(with / without the cave's sections)\n", names[b], a[b].n, a[b].sun, bf[b].sun, a[b].irr, bf[b].irr,
                     a[b].haze, bf[b].haze);
     CHECK(a[0].n > 100 && a[1].n > 100 && a[2].n > 1000);
     CHECK(a[2].sun == 0.0);               // no sun deep under rock
     CHECK(a[0].sun > 0.3);                // the sun in the pit
-    // deep inside: the ambient floor (FAR_AMBIENT_FLOOR x LOOK_AMBIENT, 0.037) and the look's bounce scaled by it, no sky
-    CHECK(a[2].irr < 0.075);
-    CHECK(a[1].irr > 1.2 * a[2].irr);     // the sky through the mouth, falling off into the tunnel
+    // deep inside: the ambient floor alone (FAR_AMBIENT_FLOOR x LOOK_AMBIENT, 0.0369; 0.0616 before the bounce, when
+    // the look's constant bounce scaled by that floor came on top), no sky, the walls the rays meet unlit
+    CHECK(a[2].irr < 0.040);
+    // the sky and the pit's sunlit floor through the mouth (one bounce), falling off into the tunnel
+    CHECK(a[3].irr > 1.3 * a[2].irr);
+    CHECK(a[1].irr > 1.1 * a[2].irr);
     CHECK(a[0].irr > 8.0 * a[2].irr);
     CHECK(a[0].irr > 2.0 * bf[0].irr);    // without the cave's sections the pit's floor was in the tiles' stone
     CHECK(a[2].haze < 1e-6);              // under cover at both ends: no aerial inscatter
@@ -1900,9 +1907,150 @@ static void testCaves() {
     atlas_destroy(before);
 }
 
+// An overhang (docs/ATLAS-RENDERER-PLAN.md "One bounce"): a stone slab two blocks thick over flat sunlit ground (x 0..7,
+// z 0..7, y 104..105; the ground's top at y 99) and a wall standing in the open (x 20..21, z -8..7, y 100..107). The
+// near light on the slab's underside (lit only by what the sunlit ground around it bounces up), on the wall's shaded
+// face and on open ground, the near field's depth and normals being the surfaces atlas traces.
+static uint16_t overhangMat(int x, int y, int z) {
+    if (y >= 104 && y < 106 && x >= 0 && x < 8 && z >= 0 && z < 8) return 1;
+    if (y >= 100 && y < 108 && x >= 20 && x < 22 && z >= -8 && z < 8) return 1;
+    return y >= 100 ? 0 : y == 99 ? 2 : y >= 96 ? 3 : 1;
+}
+
+static AtlasContext* overhangScene(AtlasBackend be) {
+    AtlasContext* ctx = nullptr;
+    if (atlas_create(be, &ctx) != ATLAS_OK) return nullptr;
+    std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
+        }
+    std::vector<uint16_t> sec(4096);
+    for (int cz = -2; cz <= 2; cz++)
+        for (int cx = -2; cx <= 3; cx++) {
+            for (int y = 0; y < 16; y++)
+                for (int z = 0; z < 16; z++)
+                    for (int x = 0; x < 16; x++)
+                        sec[size_t(x + 16 * (z + 16 * y))] = overhangMat(cx * 16 + x, 96 + y, cz * 16 + z);
+            atlas_upload_section(ctx, cx, 6, cz, sec.data());
+        }
+    double centre[3] = {8.5, 101.5, 4.5};
+    atlas_update(ctx, centre, 0);
+    return ctx;
+}
+
+static void testOverhang() {
+    std::printf("overhang\n");
+    const uint32_t W = 128, H = 96;
+    const size_t px = size_t(W) * H;
+    AtlasContext* cpu = overhangScene(ATLAS_BACKEND_CPU);
+    CHECK(cpu != nullptr);
+    if (!cpu) return;
+    // which surface a pixel's hit lies on: 0 the slab's underside, 1 the wall's shaded face (west), 2 open ground
+    auto classify = [](const double p[3], const double d[3]) {
+        if (d[1] > 0 && std::abs(p[1] - 104.0) < 0.05 && p[0] > 0.5 && p[0] < 7.5 && p[2] > 0.5 && p[2] < 7.5) return 0;
+        if (d[0] > 0 && std::abs(p[0] - 20.0) < 0.05 && p[1] > 100.5 && p[1] < 107.5 && p[2] > -7.5 && p[2] < 7.5) return 1;
+        if (d[1] < 0 && std::abs(p[1] - 100.0) < 0.05 && (p[0] < -10 || p[0] > 26 || p[2] < -14 || p[2] > 14)) return 2;
+        return -1;
+    };
+    struct Bin { double irr = 0, sun = 0; size_t n = 0; } bins[3];
+    struct Cam { double pos[3], yaw, pitch, fov; } cams[3] = {
+        {{3.9, 101.7, 4.1}, 0, 80, 60},      // under the slab, looking up at its underside
+        {{14.5, 103.5, 0.5}, 90, 0, 40},     // west of the wall, looking at its shaded face
+        {{50.5, 112.0, 30.5}, 0, -80, 60},   // over open ground
+    };
+    std::vector<AtlasFrame> nearFrames;
+    std::vector<std::vector<float>> nds;
+    std::vector<std::vector<uint32_t>> nis;
+    for (const Cam& c : cams) {
+        AtlasFrame f{};
+        for (int k = 0; k < 3; k++) f.cameraPos[k] = c.pos[k];
+        cameraMatrix(c.yaw, c.pitch, c.fov, double(W) / H, f.invViewProj);
+        f.width = W;
+        f.height = H;
+        f.maxDistance = 4000;
+        f.lodBias = 1;
+        // the sun high in the south-east: the slab's shadow falls just beside it, the ground around it is lit
+        double sd[3] = {0.3, 1.0, 0.2}, sl = std::sqrt(0.3 * 0.3 + 1.0 + 0.2 * 0.2);
+        for (int k = 0; k < 3; k++) f.sunDir[k] = float(sd[k] / sl);
+        f.flags = ATLAS_FRAME_SHADOWS | ATLAS_FRAME_ATMOS;
+        std::vector<float> farD(px), farC(px * 4);
+        std::vector<uint32_t> farN(px);
+        AtlasFrameOutput of{nullptr, farN.data(), farD.data(), farC.data()};
+        CHECK(atlas_render(cpu, &f, &of) == ATLAS_OK);
+        std::vector<float> nd(px, 1e30f);
+        std::vector<uint32_t> ni(px, 0);
+        for (size_t i = 0; i < px; i++)
+            if (farD[i] < 1e29f) {
+                nd[i] = farD[i];
+                ni[i] = (255u << 8) | ((farN[i] & 0xFFFFu) << 16);
+            }
+        f.nearFieldEnd = 256;
+        f.flags |= ATLAS_FRAME_NEAR_DEPTH | ATLAS_FRAME_NEAR_LIGHT;
+        nds.push_back(std::move(nd));
+        nis.push_back(std::move(ni));
+        nearFrames.push_back(f);
+    }
+    // the per-pixel view directions (cameraMatrix's basis), for the surfaces' positions
+    auto pixelDirs = [&](const Cam& c, std::vector<double>& dirs) {
+        double yr = c.yaw * 3.14159265358979323846 / 180, pr = c.pitch * 3.14159265358979323846 / 180;
+        double fw[3] = {std::sin(yr) * std::cos(pr), std::sin(pr), -std::cos(yr) * std::cos(pr)};
+        double rt[3] = {std::cos(yr), 0, std::sin(yr)};
+        double up[3] = {rt[1] * fw[2] - rt[2] * fw[1], rt[2] * fw[0] - rt[0] * fw[2], rt[0] * fw[1] - rt[1] * fw[0]};
+        double tf = std::tan(c.fov * 3.14159265358979323846 / 360), aspect = double(W) / H;
+        dirs.assign(px * 3, 0);
+        for (size_t i = 0; i < px; i++) {
+            double nx = ((i % W) + 0.5) / W * 2 - 1, ny = 1 - ((i / W) + 0.5) / H * 2, len = 0;
+            for (int k = 0; k < 3; k++) {
+                dirs[i * 3 + k] = fw[k] + rt[k] * nx * tf * aspect + up[k] * ny * tf;
+                len += dirs[i * 3 + k] * dirs[i * 3 + k];
+            }
+            for (int k = 0; k < 3; k++) dirs[i * 3 + k] /= std::sqrt(len);
+        }
+    };
+    for (int v = 0; v < 3; v++) {
+        AtlasFrame f = nearFrames[size_t(v)];
+        f.nearDepth = nds[size_t(v)].data();
+        f.nearInfo = nis[size_t(v)].data();
+        std::vector<float> nl(px * 4), col(px * 4);
+        AtlasFrameOutput o{nullptr, nullptr, nullptr, col.data(), nl.data()};
+        CHECK(atlas_render(cpu, &f, &o) == ATLAS_OK);
+        std::vector<double> dirs;
+        pixelDirs(cams[v], dirs);
+        for (size_t i = 0; i < px; i++) {
+            if (nds[size_t(v)][i] > 1e29f) continue;
+            double p[3];
+            for (int k = 0; k < 3; k++) p[k] = cams[v].pos[k] + dirs[i * 3 + k] * nds[size_t(v)][i];
+            int b = classify(p, &dirs[i * 3]);
+            if (b != v) continue;
+            bins[b].irr += 0.2126 * nl[i * 4] + 0.7152 * nl[i * 4 + 1] + 0.0722 * nl[i * 4 + 2];
+            bins[b].sun += nl[i * 4 + 3];
+            bins[b].n++;
+        }
+    }
+    const char* names[3] = {"slab's underside", "wall, shaded face", "open ground"};
+    for (Bin& b : bins) {
+        if (b.n) b.irr /= double(b.n), b.sun /= double(b.n);
+    }
+    for (int b = 0; b < 3; b++)
+        std::printf("  near light, %-17s (%5zu px): irradiance %.4f, sun %.3f\n", names[b], bins[b].n, bins[b].irr,
+                    bins[b].sun);
+    CHECK(bins[0].n > px / 2 && bins[1].n > px / 2 && bins[2].n > px / 2);
+    CHECK(bins[0].sun < 0.01 && bins[1].sun < 0.01 && bins[2].sun > 0.99);
+    // before the bounce (the sky rays that met a surface brought back nothing, the look's constant scaled by the sky
+    // seen): 0.1615 / 1.0842 / 4.4158. The underside is lit by the ground, the open land's light stays as it was
+    CHECK(bins[0].irr > 2.0 * 0.1615);
+    CHECK(bins[1].irr > 0.95 * 1.0842 && bins[1].irr < 1.15 * 1.0842);
+    CHECK(std::abs(bins[2].irr - 4.4158) < 0.02 * 4.4158);
+    atlas_destroy(cpu);
+}
+
 int main(int argc, char** argv) {
     testSvdag();
     testCaves();
+    testOverhang();
     testGroups();
     testAbi();
     testStreamingGap();

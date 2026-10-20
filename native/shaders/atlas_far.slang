@@ -633,6 +633,9 @@ float traceShadow(float3 p, float3 dir, int lod) {
 // through for FOLIAGE_SSS).
 static bool gStopFoliage = false;
 static float gSecHitT = 0.0;  // where the last secondary ray was stopped (blocks from its origin; set on a hit)
+static uint gSecHitMat = 0xFFFFFFFFu;  // and what stopped it: its material, the axis of the face it entered, its level
+static int gSecHitAxis = 1;
+static int gSecHitLod = 0;
 float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
     TraceResult res;
     res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.dither = 0.5; res.albedo = float3(0, 0, 0); res.hasAlbedo = 0u;
@@ -654,6 +657,9 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
         if (r == TRACE_HIT) {
             gStopFoliage = gTrans <= 0.0;
             gSecHitT = t + res.t;
+            gSecHitMat = res.mat;
+            gSecHitAxis = res.axis;
+            gSecHitLod = res.lod;
             vis = 0.0;
             break;
         }
@@ -691,6 +697,34 @@ float3 cosineDir(float3 n, float u, float v) {
     return normalize(tb * (r * cos(ph)) + bb * (r * sin(ph)) + n * sqrt(max(0.0, 1.0 - u)));
 }
 
+// One bounce of the key light (docs/ATLAS-RENDERER-PLAN.md, "One bounce"): what the surface the last secondary ray
+// (from o along w) met sends back along it, as the look lights that surface: its albedo x (the key light x N.L through one
+// more secondary ray from it, plus its sky where it is open). inOpen: the shading point is out in the open, and so is
+// what it sees; else (under cover) a surface the key light does not reach sends its sky only where no solid cover lies
+// over it (a pit's shaded floor past a tunnel's mouth; a cave's walls send nothing). Clobbers traceSecondary's globals.
+float3 bounceFrom(float3 o, float3 w, float3 sun, bool inOpen) {
+    uint mat = gSecHitMat;
+    int ax = clamp(gSecHitAxis, 0, 2), hl = gSecHitLod;
+    float hs = float(1 << hl);
+    float3 nh = float3(0, 0, 0);
+    nh[ax] = w[ax] > 0.0 ? -1.0 : 1.0;
+    // on the plane of the face the ray entered (a voxel boundary of the hit's level), a hair outside it
+    float3 ci = float3(frame.camInt.xyz);
+    float3 hp = o + w * gSecHitT;
+    hp[ax] = round((hp[ax] + ci[ax]) / hs) * hs - ci[ax] + nh[ax] * (0.02 * hs);
+    float3 alb = mat == 0xFFFFFFFFu ? float3(0.3, 0.3, 0.3) : palette[mat].albedoRough.rgb;
+    float3 L = keyLightDir(sun);
+    float ndl = dot(nh, L);
+    float vis = (frame.dims.z & FRAME_SHADOWS) != 0u ? 0.0 : 1.0;
+    if (ndl > 0.0 && vis == 0.0) {
+        vis = traceSecondary(hp + L * (0.05 * hs), L, 2048.0, hl);
+        if ((frame.dims.z & FRAME_CLOUDS) != 0u && vis > 0.0) vis *= cloudShadow(hp, L);
+    }
+    float sky = 1.0;
+    if (!inOpen && vis <= 0.0 && solidRoof(hp, hl)) sky = 0.0;
+    return alb * (keyLightRadiance(sun) * (max(ndl, 0.0) * vis) + skyAmbient(nh, sun) * (LOOK_AMBIENT * sky));
+}
+
 // The sky a far surface sees (docs/ATLAS-LOD.md, "Where atlas_core's lighting falls short" 1): the pack's skyAmbient
 // split into its two radiances, sky over the horizon and ground under it, each seen through the hemisphere's
 // visibility: SKY_RAYS cosine-weighted secondary rays a pixel and frame, SKY_REACH voxels of the hit's level long (a
@@ -700,11 +734,13 @@ float3 cosineDir(float3 n, float u, float v) {
 // enclosed (the point lies under solid cover: solidRoof) the rays reach ENCLOSED_REACH voxels: in a cave, a mine or a
 // hall the sky is what its mouth or its windows show, not whatever lies past 16 blocks of the floor (a cavern's far
 // wall, an unlit tunnel). In the open the reach stays short: what hides the sky from a valley floor further out is sunlit
-// ground, whose bounce the short reach stands in for.
+// ground, whose bounce the short reach stands in for. withBounce (the near light): a ray that meets a surface brings
+// back its light (bounceFrom, into gBounce for shadeSurfaceAmb); the far field keeps the look's constant (its level-0
+// pixels bouncing too cost 1.8 ms more a frame at 1080p, 43 % of the far pass, where the near light's costs 0.2 ms).
 static const int SKY_RAYS = 1;
 static const float SKY_REACH = 16.0;
 static const float ENCLOSED_REACH = 64.0;
-float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool enclosed, out float vis) {
+float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool enclosed, bool withBounce, out float vis) {
     float day = smoothstep(-0.12, 0.25, sun.y);
     float3 skyUp = lerp(float3(0.02, 0.025, 0.05), float3(0.33, 0.45, 0.7), day);
     float3 ground = lerp(float3(0.01, 0.01, 0.012), float3(0.2, 0.18, 0.14), day);
@@ -714,6 +750,11 @@ float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool en
     uint ab = asuint(frame.jitter.w);  // (ATLAS_ABLATE 8192: two rays, 16384: half the reach; measurements)
     int rays = (ab & 8192u) != 0u ? 2 : SKY_RAYS;
     float reach = (ab & 16384u) != 0u ? 0.5 * SKY_REACH : SKY_REACH;
+    // one bounce (bounceFrom): a ray that meets a surface brings back that surface's own light instead of none
+    // (ATLAS_ABLATE 524288: none, the look's constant bounce alone, as before)
+    bool bounce = withBounce && (ab & 524288u) == 0u;
+    float3 back = float3(0, 0, 0);
+    float traced = 0.0;
     float3 sum = float3(0, 0, 0), seen = float3(0, 0, 0);
     vis = 0.0;
     for (int k = 0; k < rays; k++) {
@@ -721,13 +762,21 @@ float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool en
         float u = frac(ru + float(j) * 0.7548776662), v = frac(rv + float(j) * 0.5698402909);
         float3 w = cosineDir(faceN, u, v);
         float T = traceSecondary(o, w, reach * s, lod);
-        if (enclosed && T > 0.0) {
-            // on to the enclosed reach; what stops it there counts only when it lies under cover too (a cavern's far
-            // wall): a face open to the sky out there (a pit's sunlit wall beyond a tunnel's mouth) is what the short
-            // reach stands in for in the open, its bounce
+        if (T <= 0.0 && bounce) {
+            back += bounceFrom(o, w, sun, !enclosed);
+            traced += 1.0;
+        } else if (enclosed && T > 0.0) {
+            // on to the enclosed reach; what stops it there sends its light back when it is lit or open to the sky (a
+            // pit's sunlit floor beyond a tunnel's mouth), none under cover (a cavern's far wall). Without the bounce:
+            // such an open face counts as the sky, what the short reach stands in for in the open
             float3 o2 = o + w * (reach * s);
             float T2 = traceSecondary(o2, w, (ENCLOSED_REACH - reach) * s, lod);
-            if (T2 <= 0.0 && !gStopFoliage && !solidRoof(o2 + w * (gSecHitT - 0.05 * s), lod)) T2 = 1.0;
+            if (T2 <= 0.0 && bounce) {
+                back += T * bounceFrom(o2, w, sun, false);
+                traced += T;
+            } else if (T2 <= 0.0 && !gStopFoliage && !solidRoof(o2 + w * (gSecHitT - 0.05 * s), lod)) {
+                T2 = 1.0;
+            }
             T *= T2;
         }
         float3 rad = w.y >= 0.0 ? skyUp : ground;
@@ -736,6 +785,7 @@ float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool en
         vis += T;
     }
     vis /= float(rays);
+    if (bounce) gBounce = float4(back / float(rays), 1.0 - traced / float(rays));
     // under cover: what the rays see, unbiased (the control variate below, clamped at 0 per sample, leaves a wall that
     // sees nothing a quarter of the sky's excess over the ground: a closed cave's walls glowed); the resolve's filter
     // and the TAA average its noise
@@ -1216,7 +1266,8 @@ void sunMapMain(uint3 id : SV_DispatchThreadID) {
 // distance nd along this pixel's ray, its normal from the info texel, lit with farMain's own terms for a land hit at
 // LOD 0 (below): the key light x N.L through the traced secondary ray and the cloud shadow, the traced sky plus the
 // pack's floor, the far lights; the cheap terms under FRAME_LIGHT_LOW. Block light is the host's. The albedo factors out
-// of shadeSurfaceAmb exactly (a diffuse class, no emission): albedo x this == farMain's colour before the haze.
+// of shadeSurfaceAmb exactly (a diffuse class, no emission): albedo x this == farMain's colour before the haze, but for
+// the one bounce (skyVisible withBounce), which only the near light traces.
 // rgb: irradiance; a: the key light's visibility. gNearRoofed: the surface lies under solid cover (solidRoof).
 static bool gNearRoofed = false;
 float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 sun) {
@@ -1254,7 +1305,7 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
         float skyVis;
         // (ATLAS_ABLATE 512, measurements: never enclosed, the sky's short reach and the haze everywhere as before)
         gNearRoofed = sunVis <= 0.0 && (ablate & 512u) == 0u && solidRoof(so, 0);
-        ambient = skyVisible(px, so, N, 0, sun, gNearRoofed, skyVis) + FAR_AMBIENT_FLOOR;
+        ambient = skyVisible(px, so, N, 0, sun, gNearRoofed, true, skyVis) + FAR_AMBIENT_FLOOR;
     }
     MaterialGpu white;
     white.albedoRough = float4(1, 1, 1, 0.8);
@@ -1562,7 +1613,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             // the sky this face sees (traced visibility of the hemisphere), the pack's floor under it; at levels 0 and
             // 1 under solid cover over the enclosed reach (coarser levels' 16 voxels reach far enough already)
             roofed = res.lod <= 1 && sunVis <= 0.0 && (ablate & 512u) == 0u && solidRoof(so, res.lod);
-            ambient = skyVisible(id.xy, so, faceN, res.lod, sun, roofed, skyVis) + FAR_AMBIENT_FLOOR;
+            ambient = skyVisible(id.xy, so, faceN, res.lod, sun, roofed, false, skyVis) + FAR_AMBIENT_FLOOR;
         }
         // an emitter's texels glow by their own brightness, as the pack's light blocks do (lib/materials.glsl MAT_LIGHT:
         // 4 x smoothstep(0.35, 0.8, luminance): a lantern's flame bright, its iron frame dark); never below the flat

@@ -233,6 +233,21 @@ The full checklist from R1, every item checked live; the owner flies it.
   Fixed at the source; the journal is edits-v3 (a v2 journal keeps its lights, its chunks are journalled again as they
   load), and a patched grass top wears the tile's biome grass (it took grass_block's untinted id: grey), other
   biome-tinted blocks their grid cell's colours.
+- **One bounce (2026-10-20).** Under an overhang (an arch's underside, a gorge's walls, eaves) the near light was near
+  black: a sky ray that met a surface within reach brought back nothing, and the look's constant bounce (LOOK_BOUNCE)
+  scaled by the sky seen is ~0 there. Now in the near light a sky ray that meets a surface brings back that surface's
+  light as the look draws it (skyVisible / bounceFrom): albedo (palette) x (key light x N.L through one more secondary
+  ray from the hit, cloud shadow, plus its sky x LOOK_AMBIENT where open: always with the point in the open, under
+  cover only where the hit is lit or has no roof over it). The constant stays only for the rays that met nothing, so
+  nothing counts twice; under cover a far hit sends its own light where it counted as the sky before. Measured
+  (test_main overhang: a slab 4 over sunlit ground, a wall in the open; caves; near-light irradiance, before / after):
+  the slab's underside 0.16 / 0.41, a shaded wall in the open 1.08 / 1.18, open ground 4.416 / 4.416; deep in the
+  cave 0.062 / 0.037 (the ambient floor alone: the constant had leaked in under the floor), the tunnel's first 8
+  blocks 0.255 / 0.116 (the pit's walls send their light, not the sky's), its first 24 0.076 / 0.043, the pit 1.86 /
+  2.02. The Solitude arch from beneath (atlas_render nearlight=1, the solitude-sea export, noon): the underside's
+  luminance x1.85. Cost (3090, 1080p, idle GPU): near light +0.16 ms (4.77 -> 4.93 ms the frame), the far pass
+  unchanged; the far field keeps the constant (bouncing its level-0 pixels too cost +1.8 ms, 43 % of the far pass),
+  so a shaded wall at the hand-off is ~8 % lighter near than far. ATLAS_ABLATE 524288 = before.
 
 ## Parked (off the renderer goal, for later)
 
