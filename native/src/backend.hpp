@@ -15,7 +15,12 @@ struct GlFrameIO {
     float nearInvProjection[16] = {};
     uint32_t dstColor = 0, dstNormal = 0, dstDepth = 0;
     uint32_t dstSunMap = 0;  // caller texture (RG32F, size x size + 1) the sun map is copied into, or 0
+    // (abi 0.15, FRAME_NEAR_LIGHT) the near field's surface info (RGBA8) and the caller's near-light texture (RGBA16F)
+    uint32_t nearInfoTex = 0, dstNearLight = 0;
 };
+
+// FRAME_NEAR_LIGHT (atlas.h ATLAS_FRAME_NEAR_LIGHT; the kernels' atlas_shared.slang)
+constexpr uint32_t FRAME_NEAR_LIGHT_BIT = 0x20000u;
 
 struct FrameInputs {
     std::shared_ptr<const PackedScene> sceneHold;  // keeps the snapshot alive for the frame
@@ -26,6 +31,7 @@ struct FrameInputs {
     const std::vector<uint32_t>* cloudNoise;  // 64^3 RGBA8
     const float* nearDepth = nullptr;         // host path: w*h near-field view distances (null: none)
     bool wantNearDepth = false;               // caller asked for the near-depth skip (GL path: shared image)
+    const uint32_t* nearInfo = nullptr;       // host path: w*h near-field surface info, RGBA8 (FRAME_NEAR_LIGHT)
     std::vector<ActorGpu> actors;             // at least one element (count in frame.weatherParams[3])
 };
 
@@ -33,6 +39,7 @@ struct FrameTargets {
     std::vector<float> color;  // linear RGBA, 4 floats per pixel
     std::vector<uint32_t> normal, counters;
     std::vector<float> depth;
+    std::vector<float> nearLight;  // RGBA, 4 floats per pixel (FRAME_NEAR_LIGHT frames only)
 };
 
 // GL texture names of the images shared with the caller's OpenGL context (bottom-up rows, GL convention).

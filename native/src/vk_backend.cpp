@@ -173,29 +173,36 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 26;
+constexpr uint32_t BINDINGS = 28;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
                    B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14, B_ACTORS = 15, B_HEIGHTMIP = 16, B_CLOUD = 17,
                    B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20, B_NOISE_TEX = 21, B_PREV_CLOUD = 22,
-                   B_PREV_CLOUD_DEPTH = 23, B_SUNMAP = 24, B_GROUPS = 25;
+                   B_PREV_CLOUD_DEPTH = 23, B_SUNMAP = 24, B_GROUPS = 25, B_NEAR_INFO = 26, B_NEAR_LIGHT = 27;
 // the scene's buffers (two copies, staged off the render thread)
 constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP, B_GROUPS};
 bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP || b == B_GROUPS; }
-// shared images
-constexpr int IMG_COLOR = 0, IMG_NORMAL = 1, IMG_DEPTH = 2, IMG_NEAR = 3, IMAGES = 4;
+// shared images (the near info and near light: abi 0.15, FRAME_NEAR_LIGHT)
+constexpr int IMG_COLOR = 0, IMG_NORMAL = 1, IMG_DEPTH = 2, IMG_NEAR = 3, IMG_NEAR_INFO = 4, IMG_NEAR_LIGHT = 5,
+              IMAGES = 6;
+// push constants of the publish and ingest passes: width, height, and whether the near light / info rides along
+constexpr uint32_t PASS_PUSH_BYTES = 12;
 
 // GL compute pass: the near field's depth buffer -> view distance in blocks (1e30 for sky) in the shared nearDepth
-// image. Same bottom-up rows as GL; the Vulkan ingest pass flips them for the far kernel.
+// image, and with the near light the near field's surface info of the same sample into the shared nearInfo image.
+// Same bottom-up rows as GL; the Vulkan ingest pass flips them for the far kernel.
 const char* LINEARIZE_GLSL = R"GLSL(#version 430
 layout(local_size_x = 8, local_size_y = 8) in;
 layout(binding = 15) uniform sampler2D atlasNearDepth;
+layout(binding = 14) uniform sampler2D atlasNearInfo;
 layout(r32f, binding = 7) uniform writeonly image2D atlasNearOut;
+layout(rgba8, binding = 6) uniform writeonly image2D atlasInfoOut;
 uniform mat4 atlasInvProj;
 uniform vec2 atlasSize;
 uniform int atlasZeroToOne;
 uniform int atlasReversed;
+uniform int atlasInfo;
 void main() {
     ivec2 p = ivec2(gl_GlobalInvocationID.xy);
     if (p.x >= int(atlasSize.x) || p.y >= int(atlasSize.y)) return;
@@ -206,6 +213,7 @@ void main() {
     vec2 f = vec2(full) / atlasSize;
     float dist = 0.0;
     int skies = 0;
+    ivec2 pick = ivec2(0);
     for (int k = 0; k < 4; k++) {
         vec2 o = vec2(k & 1, k >> 1) * 0.5 + 0.25;
         ivec2 q = clamp(ivec2((vec2(p) + o) * f), ivec2(0), full - 1);
@@ -214,19 +222,27 @@ void main() {
         float z = atlasZeroToOne != 0 ? d : d * 2.0 - 1.0;
         vec2 ndc = (vec2(q) + 0.5) / vec2(full) * 2.0 - 1.0;
         vec4 v = atlasInvProj * vec4(ndc, z, 1.0);
-        dist = max(dist, sky ? 1e30 : length(v.xyz / v.w));
+        float dk = sky ? 1e30 : length(v.xyz / v.w);
+        if (k == 0 || dk > dist) pick = q;
+        dist = max(dist, dk);
         skies += sky ? 1 : 0;
     }
     // all four sky: 2e30 (the near field drew nothing here: a chunk not loaded, the far field may fill from the
     // camera); some sky: 1e30 (a near silhouette's edge: the far field only behind it, never its own copy of the
     // near object, which drew a moving outline around every tree and ridge against the sky)
     imageStore(atlasNearOut, p, vec4(skies == 4 ? 2e30 : dist));
+    // the surface whose distance was taken (the near light lights the point at that distance)
+    if (atlasInfo != 0) {
+        ivec2 fi = textureSize(atlasNearInfo, 0);
+        imageStore(atlasInfoOut, p, texelFetch(atlasNearInfo, clamp(pick * fi / full, ivec2(0), fi - 1), 0));
+    }
 }
 )GLSL";
 
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
-           b == B_COUNTERS || b == B_NEAR || b == B_ACTORS || b == B_CLOUD || b == B_CLOUD_DEPTH || b == B_SURFACE;
+           b == B_COUNTERS || b == B_NEAR || b == B_ACTORS || b == B_CLOUD || b == B_CLOUD_DEPTH || b == B_SURFACE ||
+           b == B_NEAR_INFO || b == B_NEAR_LIGHT;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT,
@@ -332,6 +348,7 @@ struct Slot {
     Buf hostOut;            // host-copy: this slot's frame in host memory (colour, normal, depth, sun map)
     bool hostPending = false;  // hostOut holds a frame not yet uploaded to GL
     bool hostSun = false;      // ... including the sun map
+    bool hostNearLight = false;  // ... and the near light (abi 0.15)
 };
 
 class VulkanBackend final : public Backend {
@@ -457,18 +474,20 @@ public:
         }
         std::vector<VkDescriptorType> pubTypes = {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                                  VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE};
-        if (!createPipe(atlas_publish_spv, atlas_publish_spv_size, pubTypes, 8, publishPipe_, publishLayout_,
-                        publishSetLayout_, publishShader_, err))
+                                                  VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                                  VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE};
+        if (!createPipe(atlas_publish_spv, atlas_publish_spv_size, pubTypes, PASS_PUSH_BYTES, publishPipe_,
+                        publishLayout_, publishSetLayout_, publishShader_, err))
             return false;
-        std::vector<VkDescriptorType> ingTypes = {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER};
-        if (!createPipe(atlas_ingest_spv, atlas_ingest_spv_size, ingTypes, 8, ingestPipe_, ingestLayout_, ingestSetLayout_,
-                        ingestShader_, err))
+        std::vector<VkDescriptorType> ingTypes = {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                                  VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER};
+        if (!createPipe(atlas_ingest_spv, atlas_ingest_spv_size, ingTypes, PASS_PUSH_BYTES, ingestPipe_, ingestLayout_,
+                        ingestSetLayout_, ingestShader_, err))
             return false;
 
         VkDescriptorPoolSize ps[4] = {{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SLOTS},
-                                      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SLOTS * (BINDINGS - 1 + 3 + 1)},
-                                      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, SLOTS * (3 + 1)},
+                                      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SLOTS * (BINDINGS - 1 + 4 + 2)},
+                                      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, SLOTS * (4 + 2)},
                                       {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, SLOTS}};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
         dp.maxSets = SLOTS * 3;
@@ -560,8 +579,12 @@ public:
         // the game's are (no read back: writing a 1080p G-buffer across the bus costs the kernel ~20 ms), the frame
         // returns zeros
         bool deviceOnly = std::getenv("ATLAS_TIMING_DEVICE_OUTPUTS") != nullptr;
+        const bool nearLight = (frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && in.nearDepth && in.nearInfo;
+        if (!nearLight) frame.dims[2] &= ~FRAME_NEAR_LIGHT_BIT;
+        hostNearInputs_ = true;  // (the CPU writes the near inputs here, also when the outputs stay on the device)
         if (!prepare(s, in, frame, !deviceOnly, err)) return false;
         if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, Mem::HostWrite, err)) return false;
+        if (nearLight && !upload(s.bufs[B_NEAR_INFO], in.nearInfo, px * 4, false, Mem::HostWrite, err)) return false;
         refreshDescriptors(s);
         begin(s);
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
@@ -571,6 +594,7 @@ public:
             out.normal.assign(px, 0);
             out.depth.assign(px, 1e30f);
             out.counters.assign(px, 0);
+            if (nearLight) out.nearLight.assign(px * 4, 0.0f);
             return true;
         }
         VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
@@ -587,6 +611,10 @@ public:
         std::memcpy(out.normal.data(), s.bufs[B_NORMAL].map, px * 4);
         std::memcpy(out.depth.data(), s.bufs[B_DEPTH].map, px * 4);
         std::memcpy(out.counters.data(), s.bufs[B_COUNTERS].map, px * 4);
+        if (nearLight) {
+            out.nearLight.resize(px * 4);
+            std::memcpy(out.nearLight.data(), s.bufs[B_NEAR_LIGHT].map, px * 16);
+        }
         return true;
     }
 
@@ -658,18 +686,26 @@ public:
         Slot& s = slots_[frameIndex_ % SLOTS];
         if (!waitSlot(s, gpuMs, err)) return false;  // frame N-2: normally long done
         const bool host = mode_ == Interop::HostCopy;
+        // the near light (abi 0.15): the near field's depth and surface info in, the caller's texture out
+        const bool nearLight = (in.frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && in.wantNearDepth && io && io->nearDepthTex &&
+                               io->nearInfoTex && io->dstNearLight;
         // the near-depth skip reads the near field's distances from the shared image; host copies cannot share it
         // without stalling GL on the near field, so they march every pixel (the composite's depth test still keeps
-        // whatever is nearer)
-        const bool nearOn = in.wantNearDepth && !host;
+        // whatever is nearer). The near light needs those distances: host copies then read them back (the stall)
+        const bool nearOn = in.wantNearDepth && (!host || nearLight);
         FrameGpu frame = in.frame;
         if (nearOn) frame.dims[2] |= 0x20u;  // FRAME_NEAR_DEPTH: read from the shared image
         else frame.dims[2] &= ~0x20u;
+        if (!nearLight) frame.dims[2] &= ~FRAME_NEAR_LIGHT_BIT;
+        hostNearInputs_ = host && nearLight;
+        const Mem nearKind = hostNearInputs_ ? Mem::HostWrite : Mem::DeviceOnly;
         if (!prepare(s, in, frame, false, err)) return false;
-        if (!ensure(s.bufs[B_NEAR], size_t(w) * h * 4, false, Mem::DeviceOnly, err)) return false;
+        if (!ensure(s.bufs[B_NEAR], size_t(w) * h * 4, false, nearKind, err)) return false;
+        if (nearLight && !ensure(s.bufs[B_NEAR_INFO], size_t(w) * h * 4, false, nearKind, err)) return false;
         refreshDescriptors(s);
 
-        if (!host && io && io->nearDepthTex && !linearizeNearDepth(*io, w, h, err)) return false;
+        if (io && io->nearDepthTex && (!host || nearLight) && !linearizeNearDepth(*io, w, h, nearLight, err)) return false;
+        if (hostNearInputs_ && !readNearInputs(s, w, h)) return fail(err, "reading the near depth and info back from GL failed");
         if (sunSize_ != sunImageSize_) {
             for (auto& o : slots_)
                 if (!waitSlot(o, nullptr, err)) return false;
@@ -681,7 +717,7 @@ public:
                 sunImageFresh_ = true;
             }
         }
-        if (host) return hostCopyFrame(s, in, frame, io, gpuMs, err);
+        if (host) return hostCopyFrame(s, in, frame, io, nearLight, gpuMs, err);
 
         // GL releases the shared images to Vulkan (after everything GL queued so far, e.g. last frame's composite)
         GLuint tex[IMAGES + 1];
@@ -701,7 +737,7 @@ public:
 
         begin(s);
         imageBarriers(s.cmd, true);
-        uint32_t pcv[2] = {w, h};
+        uint32_t pcv[3] = {w, h, nearLight ? 1u : 0u};
         if (nearOn) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestPipe_);
             vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestLayout_, 0, 1, &s.ingestSet, 0, nullptr);
@@ -723,18 +759,21 @@ public:
 
         // GL commands after this point wait for the Vulkan frame
         gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, nTex, tex, layouts);
-        copyToCaller(io, w, h);
+        copyToCaller(io, w, h, nearLight);
         return true;
     }
 
     // hand the frame to the caller's own textures (e.g. what a shader pack samples via customTexture)
-    void copyToCaller(const GlFrameIO* io, uint32_t w, uint32_t h) {
+    void copyToCaller(const GlFrameIO* io, uint32_t w, uint32_t h, bool nearLight) {
         if (!io) return;
         const GLuint dst[3] = {io->dstColor, io->dstNormal, io->dstDepth};
         for (int i = 0; i < 3; i++)
             if (dst[i])
                 gl_.CopyImageSubData(images_[i].glTex, GL_TEXTURE_2D, 0, 0, 0, 0, dst[i], GL_TEXTURE_2D, 0, 0, 0, 0,
                                      GLsizei(w), GLsizei(h), 1);
+        if (nearLight && io->dstNearLight)
+            gl_.CopyImageSubData(images_[IMG_NEAR_LIGHT].glTex, GL_TEXTURE_2D, 0, 0, 0, 0, io->dstNearLight, GL_TEXTURE_2D,
+                                 0, 0, 0, 0, GLsizei(w), GLsizei(h), 1);
         if (io->dstSunMap && sunImage_.glTex)
             gl_.CopyImageSubData(sunImage_.glTex, GL_TEXTURE_2D, 0, 0, 0, 0, io->dstSunMap, GL_TEXTURE_2D, 0, 0, 0, 0,
                                  GLsizei(sunSize_), GLsizei(sunSize_ + 1), 1);
@@ -745,33 +784,36 @@ public:
     // zero-copy would), copied into the slot's host buffer, and uploaded with glTextureSubImage2D. By default the
     // CPU waits for this frame's GPU work (no added latency); ATLAS_HOSTCOPY_LATENCY=1 uploads the previous
     // frame instead, so the CPU never waits but the far field lags one frame behind the camera.
-    bool hostCopyFrame(Slot& s, const FrameInputs&, const FrameGpu& frame, const GlFrameIO* io, double* gpuMs,
-                       std::string& err) {
+    bool hostCopyFrame(Slot& s, const FrameInputs&, const FrameGpu& frame, const GlFrameIO* io, bool nearLight,
+                       double* gpuMs, std::string& err) {
         uint32_t w = width_, h = height_;
         size_t px = size_t(w) * h;
         VkDeviceSize sunBytes = sunDispatchRows_ && sunImage_.glTex ? VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8 : 0;
-        VkDeviceSize bytes = VkDeviceSize(px) * 16 + VkDeviceSize(sunSize_ ? VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8 : 0);
+        // colour, normal, depth, the near light (RGBA16F) and the sun map, one after the other
+        VkDeviceSize bytes = VkDeviceSize(px) * 24 + VkDeviceSize(sunSize_ ? VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8 : 0);
         if (!ensure(s.hostOut, bytes, false, Mem::HostRead, err)) return false;
         begin(s);
         hostImageBarrier(s.cmd, true);
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
         computeBarrier(s.cmd);
-        uint32_t pcv[2] = {w, h};
+        uint32_t pcv[3] = {w, h, nearLight ? 1u : 0u};
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
         vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
         vkCmdPushConstants(s.cmd, publishLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
         vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
         hostImageBarrier(s.cmd, false);
-        const VkDeviceSize texel[3] = {8, 4, 4};
+        const int img[4] = {IMG_COLOR, IMG_NORMAL, IMG_DEPTH, IMG_NEAR_LIGHT};
+        const VkDeviceSize texel[4] = {8, 4, 4, 8};
         VkDeviceSize off = 0;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < (nearLight ? 4 : 3); i++) {
             VkBufferImageCopy region{};
             region.bufferOffset = off;
             region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
             region.imageExtent = {w, h, 1};
-            vkCmdCopyImageToBuffer(s.cmd, images_[i].image, VK_IMAGE_LAYOUT_GENERAL, s.hostOut.buf, 1, &region);
+            vkCmdCopyImageToBuffer(s.cmd, images_[img[i]].image, VK_IMAGE_LAYOUT_GENERAL, s.hostOut.buf, 1, &region);
             off += VkDeviceSize(px) * texel[i];
         }
+        off = VkDeviceSize(px) * 24;  // (the sun map's place whether or not the near light came along)
         if (sunBytes) {
             VkBufferCopy rc{0, off, sunBytes};
             vkCmdCopyBuffer(s.cmd, shared_[B_SUNMAP].buf, s.hostOut.buf, 1, &rc);
@@ -784,6 +826,7 @@ public:
         if (!submit(s, nullptr, nullptr, err)) return false;
         s.hostPending = true;
         s.hostSun = sunBytes != 0;
+        s.hostNearLight = nearLight;
         firstGlFrame_ = false;
         frameIndex_++;
         const char* lag = std::getenv("ATLAS_HOSTCOPY_LATENCY");
@@ -797,7 +840,42 @@ public:
         auto t2 = std::chrono::steady_clock::now();
         hostWaitMs_ = std::chrono::duration<double, std::milli>(t1 - t0).count();
         hostUploadMs_ = std::chrono::duration<double, std::milli>(t2 - t1).count();
-        copyToCaller(io, w, h);
+        copyToCaller(io, w, h, nearLight && up.hostNearLight);
+        return true;
+    }
+
+    // Host copies with the near light: the near depth and surface info the GL pass just wrote (atlas's resolution,
+    // bottom-up rows) read back into the slot's near buffers (row 0 top), as the ingest pass does on the device. The
+    // read waits for GL's near pass. The caller's pixel-pack state is saved and restored around it.
+    bool readNearInputs(Slot& s, uint32_t w, uint32_t h) {
+        size_t px = size_t(w) * h;
+        if (!s.bufs[B_NEAR].map || !s.bufs[B_NEAR_INFO].map || s.bufs[B_NEAR].size < px * 4 ||
+            s.bufs[B_NEAR_INFO].size < px * 4)
+            return false;
+        const GLenum keys[] = {GL_PACK_ROW_LENGTH, GL_PACK_SKIP_ROWS, GL_PACK_SKIP_PIXELS, GL_PACK_ALIGNMENT,
+                               GL_PACK_SWAP_BYTES, GL_PACK_LSB_FIRST};
+        const GLint want[] = {0, 0, 0, 4, 0, 0};
+        GLint saved[6] = {}, pbo = 0;
+        gl_.GetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &pbo);
+        for (int i = 0; i < 6; i++) gl_.GetIntegerv(keys[i], &saved[i]);
+        if (pbo) gl_.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        for (int i = 0; i < 6; i++)
+            if (saved[i] != want[i]) gl_.PixelStorei(keys[i], want[i]);
+        nearReadback_.resize(px * 2);
+        gl_.GetTextureImage(images_[IMG_NEAR].glTex, 0, GL_RED, GL_FLOAT, GLsizei(px * 4), nearReadback_.data());
+        gl_.GetTextureImage(images_[IMG_NEAR_INFO].glTex, 0, GL_RGBA, GL_UNSIGNED_BYTE, GLsizei(px * 4),
+                            nearReadback_.data() + px);
+        for (int i = 0; i < 6; i++)
+            if (saved[i] != want[i]) gl_.PixelStorei(keys[i], saved[i]);
+        if (pbo) gl_.BindBuffer(GL_PIXEL_PACK_BUFFER, GLuint(pbo));
+        char* depth = static_cast<char*>(s.bufs[B_NEAR].map);
+        char* info = static_cast<char*>(s.bufs[B_NEAR_INFO].map);
+        const char* src = reinterpret_cast<const char*>(nearReadback_.data());
+        for (uint32_t y = 0; y < h; y++) {
+            size_t from = size_t(h - 1 - y) * w * 4, to = size_t(y) * w * 4;
+            std::memcpy(depth + to, src + from, size_t(w) * 4);
+            std::memcpy(info + to, src + px * 4 + from, size_t(w) * 4);
+        }
         return true;
     }
 
@@ -844,9 +922,12 @@ public:
         gl_.TextureSubImage2D(images_[IMG_COLOR].glTex, 0, 0, 0, GLsizei(w), GLsizei(h), GL_RGBA, GL_HALF_FLOAT, p);
         gl_.TextureSubImage2D(images_[IMG_NORMAL].glTex, 0, 0, 0, GLsizei(w), GLsizei(h), GL_RGBA, GL_UNSIGNED_BYTE, p + px * 8);
         gl_.TextureSubImage2D(images_[IMG_DEPTH].glTex, 0, 0, 0, GLsizei(w), GLsizei(h), GL_RED, GL_FLOAT, p + px * 12);
+        if (s.hostNearLight)
+            gl_.TextureSubImage2D(images_[IMG_NEAR_LIGHT].glTex, 0, 0, 0, GLsizei(w), GLsizei(h), GL_RGBA, GL_HALF_FLOAT,
+                                  p + px * 16);
         if (s.hostSun && sunImage_.glTex)
             gl_.TextureSubImage2D(sunImage_.glTex, 0, 0, 0, GLsizei(sunSize_), GLsizei(sunSize_ + 1), GL_RG, GL_FLOAT,
-                                  p + px * 16);
+                                  p + px * 24);
         for (int i = 0; i < 6; i++)
             if (saved[i] != want[i]) gl_.PixelStorei(keys[i], saved[i]);
         if (pbo) gl_.BindBuffer(GL_PIXEL_UNPACK_BUFFER, GLuint(pbo));
@@ -895,7 +976,8 @@ private:
     }
 
     // GL state the pass touches is saved and restored: Minecraft's renderer caches its own bindings.
-    bool linearizeNearDepth(const GlFrameIO& io, uint32_t w, uint32_t h, std::string& err) {
+    // info: also the near field's surface info (io.nearInfoTex) into the shared nearInfo image (the near light)
+    bool linearizeNearDepth(const GlFrameIO& io, uint32_t w, uint32_t h, bool info, std::string& err) {
         GLuint depthTex = io.nearDepthTex;
         if (depthTex == 0xFFFFFFFFu) {
             // the depth attachment of whatever draw framebuffer the game (or a shader pack) has bound right now
@@ -939,6 +1021,7 @@ private:
             uSize_ = gl_.GetUniformLocation(linProgram_, "atlasSize");
             uZeroToOne_ = gl_.GetUniformLocation(linProgram_, "atlasZeroToOne");
             uReversed_ = gl_.GetUniformLocation(linProgram_, "atlasReversed");
+            uInfo_ = gl_.GetUniformLocation(linProgram_, "atlasInfo");
             gl_.CreateSamplers(1, &linSampler_);
             gl_.SamplerParameteri(linSampler_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl_.SamplerParameteri(linSampler_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -954,19 +1037,32 @@ private:
         }
         gl_.ProgramUniform1i(linProgram_, uZeroToOne_, zeroToOne);
         gl_.ProgramUniform1i(linProgram_, uReversed_, GLint(io.reversedZ));
+        gl_.ProgramUniform1i(linProgram_, uInfo_, info ? 1 : 0);
         GLint prevProgram = 0, prevActive = 0, prevTex = 0, prevSampler = 0, prevImage = 0;
+        GLint prevInfoTex = 0, prevInfoSampler = 0, prevInfoImage = 0;
         gl_.GetIntegerv(GL_CURRENT_PROGRAM, &prevProgram);
         gl_.GetIntegerv(GL_ACTIVE_TEXTURE, &prevActive);
         gl_.ActiveTexture(GL_TEXTURE0 + 15);
         gl_.GetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
         gl_.GetIntegerv(GL_SAMPLER_BINDING, &prevSampler);
         gl_.GetIntegeri_v(GL_IMAGE_BINDING_NAME, 7, &prevImage);
+        if (info) {
+            gl_.ActiveTexture(GL_TEXTURE0 + 14);
+            gl_.GetIntegerv(GL_TEXTURE_BINDING_2D, &prevInfoTex);
+            gl_.GetIntegerv(GL_SAMPLER_BINDING, &prevInfoSampler);
+            gl_.GetIntegeri_v(GL_IMAGE_BINDING_NAME, 6, &prevInfoImage);
+        }
         gl_.ActiveTexture(GLenum(prevActive));
 
         gl_.UseProgram(linProgram_);
         gl_.BindTextureUnit(15, depthTex);
         gl_.BindSampler(15, linSampler_);
         gl_.BindImageTexture(7, images_[IMG_NEAR].glTex, 0, 0, 0, GL_WRITE_ONLY, GL_R32F);
+        if (info) {
+            gl_.BindTextureUnit(14, io.nearInfoTex);
+            gl_.BindSampler(14, linSampler_);
+            gl_.BindImageTexture(6, images_[IMG_NEAR_INFO].glTex, 0, 0, 0, GL_WRITE_ONLY, GL_RGBA8);
+        }
         gl_.DispatchCompute((w + 7) / 8, (h + 7) / 8, 1);
         gl_.MemoryBarrierGL(GL_ALL_BARRIER_BITS);
 
@@ -974,6 +1070,11 @@ private:
         gl_.BindTextureUnit(15, GLuint(prevTex));
         gl_.BindSampler(15, GLuint(prevSampler));
         gl_.BindImageTexture(7, GLuint(prevImage), 0, 0, 0, GL_WRITE_ONLY, GL_R32F);
+        if (info) {
+            gl_.BindTextureUnit(14, GLuint(prevInfoTex));
+            gl_.BindSampler(14, GLuint(prevInfoSampler));
+            gl_.BindImageTexture(6, GLuint(prevInfoImage), 0, 0, 0, GL_WRITE_ONLY, GL_RGBA8);
+        }
         return true;
     }
 
@@ -1522,6 +1623,8 @@ private:
         }
         // host path: outputs in cached system memory (CPU reads from BAR are uncached); GL path: device local only
         Mem outKind = readback ? Mem::Readback : Mem::DeviceOnly;
+        // the near inputs: written by the CPU (host path; host copies with the near light), else by the ingest pass
+        Mem nearKind = readback || hostNearInputs_ ? Mem::HostWrite : Mem::DeviceOnly;
         cloudDiv_ = (frame.dims[2] & 0x80u) ? 4u : 2u;  // FRAME_CLOUDS_QUARTER
         bool ok = upload(s.bufs[B_FRAME], &frame, sizeof(FrameGpu), true, Mem::HostWrite, err) &&
                   upload(s.bufs[B_PALETTE], in.palette->data(), in.palette->size() * sizeof(MaterialGpu), false, Mem::HostWrite, err) &&
@@ -1529,7 +1632,9 @@ private:
                   upload(s.bufs[B_ACTORS], in.actors.data(), in.actors.size() * sizeof(ActorGpu), false, Mem::HostWrite, err) &&
                   ensure(s.bufs[B_COLOR], px * 16, false, outKind, err) && ensure(s.bufs[B_NORMAL], px * 4, false, outKind, err) &&
                   ensure(s.bufs[B_DEPTH], px * 4, false, outKind, err) && ensure(s.bufs[B_COUNTERS], px * 4, false, outKind, err) &&
-                  ensure(s.bufs[B_NEAR], 16, false, readback ? Mem::HostWrite : Mem::DeviceOnly, err) &&
+                  ensure(s.bufs[B_NEAR], 16, false, nearKind, err) && ensure(s.bufs[B_NEAR_INFO], 16, false, nearKind, err) &&
+                  // the near light: a pixel's worth unless the frame lights the near field (the kernel writes it then)
+                  ensure(s.bufs[B_NEAR_LIGHT], (frame.dims[2] & FRAME_NEAR_LIGHT_BIT) ? px * 16 : 16, false, outKind, err) &&
                   ensure(s.bufs[B_CLOUD], size_t((w + 1) / 2) * ((h + 1) / 2) * 16, false, Mem::DeviceOnly, err) &&
                   ensure(s.bufs[B_CLOUD_DEPTH], size_t((w + 1) / 2) * ((h + 1) / 2) * 4, false, Mem::DeviceOnly, err);
         if (ok) {
@@ -1580,42 +1685,55 @@ private:
             if (sharedDirtySlots_ == (1u << SLOTS) - 1) sharedDirty_ = false;
         }
         if (attached_ && s.publishDirty) {
-            VkDescriptorBufferInfo bi[3] = {{s.bufs[B_COLOR].buf, 0, storageRange(s.bufs[B_COLOR])},
-                                            {s.bufs[B_NORMAL].buf, 0, storageRange(s.bufs[B_NORMAL])},
-                                            {s.bufs[B_DEPTH].buf, 0, storageRange(s.bufs[B_DEPTH])}};
-            VkDescriptorImageInfo ii[3];
-            VkWriteDescriptorSet wr[6];
-            for (uint32_t i = 0; i < 6; i++) {
-                wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
-                wr[i].dstSet = s.publishSet;
-                wr[i].dstBinding = i;
-                wr[i].descriptorCount = 1;
-                if (i < 3) {
-                    wr[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-                    wr[i].pBufferInfo = &bi[i];
-                } else {
-                    ii[i - 3] = {VK_NULL_HANDLE, images_[i - 3].view, VK_IMAGE_LAYOUT_GENERAL};
-                    wr[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-                    wr[i].pImageInfo = &ii[i - 3];
-                }
+            // bindings 0-2 the colour, normal and depth buffers, 3-5 their images, 6 the near light buffer, 7 its image
+            const uint32_t bufOf[4] = {B_COLOR, B_NORMAL, B_DEPTH, B_NEAR_LIGHT};
+            const int imgOf[4] = {IMG_COLOR, IMG_NORMAL, IMG_DEPTH, IMG_NEAR_LIGHT};
+            const uint32_t bufAt[4] = {0, 1, 2, 6}, imgAt[4] = {3, 4, 5, 7};
+            VkDescriptorBufferInfo bi[4];
+            VkDescriptorImageInfo ii[4];
+            VkWriteDescriptorSet wr[8];
+            for (uint32_t k = 0; k < 4; k++) {
+                bi[k] = {s.bufs[bufOf[k]].buf, 0, storageRange(s.bufs[bufOf[k]])};
+                ii[k] = {VK_NULL_HANDLE, images_[imgOf[k]].view, VK_IMAGE_LAYOUT_GENERAL};
+                VkWriteDescriptorSet& b = wr[2 * k];
+                VkWriteDescriptorSet& im = wr[2 * k + 1];
+                b = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+                b.dstSet = s.publishSet;
+                b.dstBinding = bufAt[k];
+                b.descriptorCount = 1;
+                b.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                b.pBufferInfo = &bi[k];
+                im = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+                im.dstSet = s.publishSet;
+                im.dstBinding = imgAt[k];
+                im.descriptorCount = 1;
+                im.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+                im.pImageInfo = &ii[k];
             }
-            vkUpdateDescriptorSets(dev_, 6, wr, 0, nullptr);
+            vkUpdateDescriptorSets(dev_, 8, wr, 0, nullptr);
             s.publishDirty = false;
         }
         if (attached_ && s.ingestDirty) {
-            VkDescriptorImageInfo ii{VK_NULL_HANDLE, images_[IMG_NEAR].view, VK_IMAGE_LAYOUT_GENERAL};
-            VkDescriptorBufferInfo bi{s.bufs[B_NEAR].buf, 0, storageRange(s.bufs[B_NEAR])};
-            VkWriteDescriptorSet wr[2] = {{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET}, {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET}};
-            wr[0].dstSet = wr[1].dstSet = s.ingestSet;
-            wr[0].dstBinding = 0;
-            wr[0].descriptorCount = 1;
-            wr[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-            wr[0].pImageInfo = &ii;
-            wr[1].dstBinding = 1;
-            wr[1].descriptorCount = 1;
-            wr[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-            wr[1].pBufferInfo = &bi;
-            vkUpdateDescriptorSets(dev_, 2, wr, 0, nullptr);
+            // bindings 0, 1: the near depth image and buffer; 2, 3: the near info image and buffer
+            VkDescriptorImageInfo ii[2] = {{VK_NULL_HANDLE, images_[IMG_NEAR].view, VK_IMAGE_LAYOUT_GENERAL},
+                                           {VK_NULL_HANDLE, images_[IMG_NEAR_INFO].view, VK_IMAGE_LAYOUT_GENERAL}};
+            VkDescriptorBufferInfo bi[2] = {{s.bufs[B_NEAR].buf, 0, storageRange(s.bufs[B_NEAR])},
+                                            {s.bufs[B_NEAR_INFO].buf, 0, storageRange(s.bufs[B_NEAR_INFO])}};
+            VkWriteDescriptorSet wr[4];
+            for (uint32_t i = 0; i < 4; i++) {
+                wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+                wr[i].dstSet = s.ingestSet;
+                wr[i].dstBinding = i;
+                wr[i].descriptorCount = 1;
+                if (i % 2 == 0) {
+                    wr[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+                    wr[i].pImageInfo = &ii[i / 2];
+                } else {
+                    wr[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                    wr[i].pBufferInfo = &bi[i / 2];
+                }
+            }
+            vkUpdateDescriptorSets(dev_, 4, wr, 0, nullptr);
             s.ingestDirty = false;
         }
     }
@@ -1734,8 +1852,8 @@ private:
             b[i].image = images_[i].image;
             b[i].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
             if (acquire) {
-                // nearDepth was cleared by GL at attach: keep its contents even on the first frame
-                bool undefined = firstGlFrame_ && i != IMG_NEAR;
+                // nearDepth and nearInfo were cleared by GL at attach: keep their contents even on the first frame
+                bool undefined = firstGlFrame_ && i != IMG_NEAR && i != IMG_NEAR_INFO;
                 b[i].oldLayout = undefined ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_GENERAL;
                 b[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
                 b[i].srcQueueFamilyIndex = undefined ? VK_QUEUE_FAMILY_IGNORED : VK_QUEUE_FAMILY_EXTERNAL;
@@ -1863,8 +1981,8 @@ private:
     // The attach targets in the current mode: colour, normal, depth, nearDepth (+ semaphores for zero-copy).
     bool createTargets(uint32_t w, uint32_t h, std::string& err) {
         const VkFormat fmt[IMAGES] = {VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R32_SFLOAT,
-                                      VK_FORMAT_R32_SFLOAT};
-        const GLenum glFmt[IMAGES] = {GL_RGBA16F, GL_RGBA8, GL_R32F, GL_R32F};
+                                      VK_FORMAT_R32_SFLOAT, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R16G16B16A16_SFLOAT};
+        const GLenum glFmt[IMAGES] = {GL_RGBA16F, GL_RGBA8, GL_R32F, GL_R32F, GL_RGBA8, GL_RGBA16F};
         for (int i = 0; i < IMAGES; i++)
             if (!createImage(images_[i], fmt[i], glFmt[i], w, h, err)) return false;
         if (mode_ == Interop::ZeroCopy)
@@ -1873,6 +1991,7 @@ private:
         // nothing covers anything until the GL side writes the near field's distances
         float uncovered = 1e30f, zero[4] = {};
         gl_.ClearTexImage(images_[IMG_NEAR].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
+        gl_.ClearTexImage(images_[IMG_NEAR_INFO].glTex, 0, GL_RGBA, GL_FLOAT, zero);
         if (mode_ == Interop::HostCopy) {
             // the first upload lands a frame late with ATLAS_HOSTCOPY_LATENCY: start empty, not undefined
             gl_.ClearTexImage(images_[IMG_COLOR].glTex, 0, GL_RGBA, GL_FLOAT, zero);
@@ -2115,8 +2234,10 @@ private:
         for (auto& s : slots_)
             if (&b >= s.bufs && &b < s.bufs + BINDINGS) {
                 s.farDirty = true;
-                if (&b == &s.bufs[B_COLOR] || &b == &s.bufs[B_NORMAL] || &b == &s.bufs[B_DEPTH]) s.publishDirty = true;
-                if (&b == &s.bufs[B_NEAR]) s.ingestDirty = true;
+                if (&b == &s.bufs[B_COLOR] || &b == &s.bufs[B_NORMAL] || &b == &s.bufs[B_DEPTH] ||
+                    &b == &s.bufs[B_NEAR_LIGHT])
+                    s.publishDirty = true;
+                if (&b == &s.bufs[B_NEAR] || &b == &s.bufs[B_NEAR_INFO]) s.ingestDirty = true;
             }
         return true;
     }
@@ -2279,7 +2400,9 @@ private:
     SharedImage images_[IMAGES];
     uint32_t width_ = 0, height_ = 0;
     GLuint linProgram_ = 0, linSampler_ = 0;
-    GLint uInvProj_ = -1, uSize_ = -1, uZeroToOne_ = -1, uReversed_ = -1;
+    GLint uInvProj_ = -1, uSize_ = -1, uZeroToOne_ = -1, uReversed_ = -1, uInfo_ = -1;
+    bool hostNearInputs_ = false;      // this frame's near inputs are written by the CPU (prepare's buffer kind)
+    std::vector<float> nearReadback_;  // host copies with the near light: GL's near depth and info, read back
 };
 
 }  // namespace

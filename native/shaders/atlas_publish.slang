@@ -5,6 +5,7 @@
 struct PublishParams {
     uint width;
     uint height;
+    uint nearLight;  // 1: publish the near light too (FRAME_NEAR_LIGHT, abi 0.15)
 };
 
 [[vk::push_constant]] ConstantBuffer<PublishParams> pc;
@@ -14,6 +15,8 @@ struct PublishParams {
 [[vk::binding(3, 0)]] [[vk::image_format("rgba16f")]] RWTexture2D<float4> dstColor;  // linear HDR, premultiplied
 [[vk::binding(4, 0)]] [[vk::image_format("rgba8")]] RWTexture2D<float4> dstNormal;
 [[vk::binding(5, 0)]] [[vk::image_format("r32f")]] RWTexture2D<float> dstDepth;
+[[vk::binding(6, 0)]] StructuredBuffer<float4> srcNearLight;
+[[vk::binding(7, 0)]] [[vk::image_format("rgba16f")]] RWTexture2D<float4> dstNearLight;
 
 float4 unpack8(uint v) {
     return float4(float(v & 255u), float((v >> 8) & 255u), float((v >> 16) & 255u), float(v >> 24)) / 255.0;
@@ -29,4 +32,5 @@ void publishMain(uint3 id : SV_DispatchThreadID) {
     dstColor[dst] = srcColor[i];
     dstNormal[dst] = unpack8(srcNormal[i]);
     dstDepth[dst] = srcDepth[i];
+    if (pc.nearLight != 0u) dstNearLight[dst] = srcNearLight[i];
 }

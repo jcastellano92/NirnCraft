@@ -45,6 +45,10 @@
 [[vk::binding(24, 0)]] RWStructuredBuffer<float2> sunMap;
 // (ATLAS_FRAME_GROUPS) the content-shaped groups: header, material shapes, per region nodes and brick pool
 [[vk::binding(25, 0)]] StructuredBuffer<uint4> groupData;
+// (abi 0.15, FRAME_NEAR_LIGHT) the near field's surface info per pixel (RGBA8 packed, r low: block light, sky light,
+// octahedral normal; row 0 top) and the near light out (irradiance on a white diffuse surface, key light visibility)
+[[vk::binding(26, 0)]] StructuredBuffer<uint> nearInfo;
+[[vk::binding(27, 0)]] RWStructuredBuffer<float4> outNearLight;
 
 #include "atlas_clouds.slang"
 
@@ -1170,6 +1174,54 @@ void sunMapMain(uint3 id : SV_DispatchThreadID) {
     sunMap[j * S + id.x] = sunTexel(id.x, j);
 }
 
+// The near light (FRAME_NEAR_LIGHT, atlas.h): what reaches a WHITE diffuse surface of the rasterised near field at view
+// distance nd along this pixel's ray, its normal from the info texel, lit with farMain's own terms for a land hit at
+// LOD 0 (below): the key light x N.L through the traced secondary ray and the cloud shadow, the traced sky plus the
+// pack's floor, the far lights; the cheap terms under FRAME_LIGHT_LOW. Block light is the host's. The albedo factors out
+// of shadeSurfaceAmb exactly (a diffuse class, no emission): albedo x this == farMain's colour before the haze.
+// rgb: irradiance; a: the key light's visibility.
+float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 sun) {
+    float R = frame.camFrac.w;
+    float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
+    float3 p = worldAt(o, dir, k, nd);  // (the near field's vertices carry the matching curvature drop)
+    float3 N = octDecode(float2(float((info >> 16) & 255u), float(info >> 24)) / 255.0);
+    uint ablate = asuint(frame.jitter.w);
+    bool cheapLight = (frame.dims.z & FRAME_LIGHT_LOW) != 0u || (ablate & 256u) != 0u;
+    // the secondary rays' origin: the surface nudged off along its normal as a groups hit's is, and like a drawn group's
+    // face out of a solid voxel of the voxel path upwards (the near mesh and atlas's voxels may disagree by a hair)
+    float3 ci = float3(frame.camInt.xyz);
+    float3 so = p + N * max(0.02, nd * 3e-5);
+    if (!cheapLight) {
+        for (int i = 0; i < 3; i++) {
+            uint om = materialAt(0, so);
+            if (om == 0xFFFFFFFFu || secondaryShapeMisses(om, frac(so + ci), float3(0, 1, 0)) || secondarySigma(om, uint(palette[om].emisClass.y)) >= 0.0)
+                break;
+            so.y = floor(so.y + ci.y) + 1.02 - ci.y;
+        }
+    }
+    float3 L = keyLightDir(sun);
+    float sunVis = 1.0;
+    if ((frame.dims.z & FRAME_SHADOWS) != 0 && (ablate & 4u) == 0u) {
+        if (dot(N, L) <= 0.0) sunVis = 0.0;
+        else if (cheapLight) sunVis = traceShadow(p + N * 1.01 + L * 0.5, L, 0);
+        else sunVis = traceSecondary(so + L * 0.05, L, 2048.0, 0);
+    }
+    if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, L);
+    float3 ambient;
+    if (cheapLight) {
+        ambient = skyAmbient(N, sun) * FAR_AMBIENT_OCCLUSION + FAR_AMBIENT_FLOOR;
+    } else {
+        float skyVis;
+        ambient = skyVisible(px, so, N, 0, sun, skyVis) + FAR_AMBIENT_FLOOR;
+    }
+    MaterialGpu white;
+    white.albedoRough = float4(1, 1, 1, 0.8);
+    white.emisClass = float4(0, 0, 0, 0);
+    float3 irr = shadeSurfaceAmb(float3(1, 1, 1), white, N, dir, sun, sunVis, 0u, ambient, float3(0, 0, 0));
+    if ((ablate & 8u) == 0u) irr += farLightsOn(px, p, so, N, 0, sun, false, cheapLight);
+    return float4(irr, sunVis);
+}
+
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void farMain(uint3 id : SV_DispatchThreadID) {
@@ -1200,14 +1252,24 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0) {
         float nd = nearDepth[pix];
         if (nd < frame.params.x) {
+            // (FRAME_NEAR_LIGHT) the near surface lit here, and the air in front of it as (inscatter, transmittance):
+            // the host composites albedo x nearLight x a + rgb
+            bool nearLit = (frame.dims.z & FRAME_NEAR_LIGHT) != 0u;
             float4 c = float4(0, 0, 0, 0);
+            if (nearLit) {
+                gAblate = asuint(frame.jitter.w);
+                if ((frame.dims.z & FRAME_GROUPS) != 0u) gHead = groupData[0];  // (the secondary rays' material shapes)
+                outNearLight[pix] = nearLightAt(id.xy, o, dir, nd, nearInfo[pix], sun);
+                c = float4(aerialInscatter(dir, sun, nd, frame), aerialTransmittance(nd, frame));
+            }
             float cd = 1e30;
             if ((frame.dims.z & FRAME_CLOUDS) != 0) {
                 float4 cl;
                 float clDepth;
                 sampleClouds(id.xy, cl, clDepth);
                 if (clDepth < nd) {
-                    c = float4(cl.rgb, 1.0 - cl.a);
+                    // the cloud over the haze in front of the surface (cl: premultiplied, a = transmittance)
+                    c = nearLit ? float4(cl.rgb + c.rgb * cl.a, c.a * cl.a) : float4(cl.rgb, 1.0 - cl.a);
                     if (cl.a < 0.99) cd = clDepth;
                 }
             }
@@ -1518,6 +1580,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         }
     }
     outSurface[pix] = surface;
+    if ((frame.dims.z & FRAME_NEAR_LIGHT) != 0u) outNearLight[pix] = float4(0, 0, 0, 0);  // not the near field's
     outColor[pix] = float4(color, coverage);
     outNormal[pix] = packNormal(n, cls, sunVis);
     outDepth[pix] = depth;

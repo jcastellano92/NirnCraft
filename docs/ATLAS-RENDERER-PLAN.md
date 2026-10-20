@@ -146,6 +146,15 @@ The full checklist from R1, every item checked live; the owner flies it.
   terrain writes colour and reverse-Z depth in `AfterOpaqueBlocks` (the stage the far field uses), so entities,
   block entities, particles, translucents, clouds and weather that follow depth-test against it. Today's fallback
   writes no depth (things behind far terrain are not hidden): fixed by the same step.
+- **Near light (2026-10-20, atlas_core ABI 0.15).** One light near and far: with `ATLAS_FRAME_NEAR_LIGHT` (0x20000) the
+  near pass hands atlas its surface info (`AtlasGlFrameIO.nearInfoTex`, RGBA8: block and sky light, octahedral normal)
+  beside its depth, and atlas lights every covered pixel with the far field's own functions (key light x N.L through
+  traced shadows and cloud shadow, traced sky plus floor, far lights; block light stays the host's) into
+  `dstNearLight` (RGBA16F: irradiance on white, sun visibility), its colour there becoming (aerial inscatter,
+  transmittance) so the resolve does albedo x light x T + inscatter. Both interop modes (host copies read the near
+  inputs back) and the CPU backend. Checked: far surfaces fed back as the near field give the far field's own colour
+  (median relative error 5.6e-4, the normal's 8 bits), CPU and Vulkan agree. Cost on the 3090 at 1920x1080, zero-copy,
+  64 % of the screen near (looking down from 60 blocks): +0.5-0.57 ms GPU (3.7 -> 4.3 ms; atlas_gl_test).
 
 ## Parked (off the renderer goal, for later)
 

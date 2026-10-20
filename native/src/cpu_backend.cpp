@@ -27,6 +27,8 @@ class CpuBackend final : public Backend {
 public:
     const char* name() const override { return "cpu (slang->c++)"; }
     std::vector<float> dummyDepth_ = std::vector<float>(1, 1e30f);
+    std::vector<uint32_t> dummyInfo_ = std::vector<uint32_t>(1, 0u);
+    std::vector<float> dummyLight_ = std::vector<float>(4, 0.0f);
     std::vector<float> cloud_, cloudDepth_, prevSurface_, outSurface_, prevCloud_, prevCloudDepth_;
     std::vector<float> sunMap_ = std::vector<float>(2, 0.0f);
 
@@ -63,6 +65,16 @@ public:
         g.cloudNoise = view(*in.cloudNoise);
         if (in.nearDepth) g.nearDepth = {const_cast<float*>(in.nearDepth), n};
         else g.nearDepth = view(dummyDepth_);
+        // the near light (FRAME_NEAR_LIGHT, kept only with both near inputs): the kernel writes every pixel of it
+        if ((frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && in.nearInfo && in.nearDepth) {
+            g.nearInfo = {const_cast<uint32_t*>(in.nearInfo), n};
+            out.nearLight.assign(n * 4, 0.0f);
+            g.outNearLight = {reinterpret_cast<Float4*>(out.nearLight.data()), n};
+        } else {
+            frame.dims[2] &= ~FRAME_NEAR_LIGHT_BIT;
+            g.nearInfo = view(dummyInfo_);
+            g.outNearLight = {reinterpret_cast<Float4*>(dummyLight_.data()), 1};
+        }
         g.actors = view(in.actors);
         g.heightMip = view(s.heightMip);
         g.groupData = {reinterpret_cast<Uint4*>(const_cast<uint32_t*>(s.groups.data())), s.groups.size() / 4};

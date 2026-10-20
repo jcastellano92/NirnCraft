@@ -28,8 +28,11 @@ public final class AtlasNative {
     /** The ABI this binding is written for (0.11: far content + failure handling); the mod ships matching natives. */
     /** (abi 0.13) Structures that are a tile's real trees: its dressing's canopy goes when they go up. */
     public static final int STRUCTURES_REPLACE_CANOPY = 0x1;
-    // 0.12: atlas_set_moon, 0.13: atlas_set_jitter, 0.14: atlas_set_material_shapes + FRAME_GROUPS (all optional)
-    public static final int ABI_VERSION = 0x000E00, ABI_MIN = 0x000B00;
+    // 0.12: atlas_set_moon, 0.13: atlas_set_jitter, 0.14: atlas_set_material_shapes + FRAME_GROUPS, 0.15: the near
+    // light (FRAME_NEAR_LIGHT, GlFrameIO.nearInfoTex / dstNearLight) (all optional)
+    public static final int ABI_VERSION = 0x000F00, ABI_MIN = 0x000B00;
+    /** The first ABI with the near light (FRAME_NEAR_LIGHT); an older core is never handed the flag or its fields. */
+    public static final int ABI_NEAR_LIGHT = 0x000F00;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     /** AtlasStatus (atlas.h). */
     public static final int OK = 0, ERR_ARG = -1, ERR_STATE = -2, ERR_IO = -3, ERR_GPU = -4, ERR_UNSUPPORTED = -5,
@@ -41,7 +44,10 @@ public final class AtlasNative {
             FRAME_DEBUG_LOD = 0x100, FRAME_DEBUG_WEATHER = 0x200, FRAME_LOD_DITHER = 0x1000,
             FRAME_FILL_NEAR = 0x2000,  // (abi 0.12) the far field fills what the near field has not loaded yet
             FRAME_VANILLA_LIGHT = 0x10000,  // (abi 0.14, optional) Minecraft's own light, no pack (an older core ignores it)
-            FRAME_GROUPS = 0x4000;     // (abi 0.14) primary rays trace the content-shaped groups (an older core ignores it)
+            FRAME_GROUPS = 0x4000,     // (abi 0.14) primary rays trace the content-shaped groups (an older core ignores it)
+            // (abi 0.15, optional) atlas lights the near field's covered pixels with the far light (atlas.h
+            // ATLAS_FRAME_NEAR_LIGHT): GlFrameIO.nearInfoTex in, dstNearLight out; the binding drops it for older cores
+            FRAME_NEAR_LIGHT = 0x20000;
     /** (abi 0.14) AtlasMaterialShape.flags: texel alpha is coverage (cut-out leaves). */
     public static final int SHAPE_CUTOUT = 0x1;
     /** Far actor gaits (AtlasActor.flags bits 8-9): dragons fold their wings, glide or beat them. */
@@ -50,8 +56,10 @@ public final class AtlasNative {
     public static final int TILE = 256;
 
     // struct sizes and offsets (see api.cpp)
-    static final long MATERIAL_SIZE = 24, TILE_SIZE = 64, FRAME_SIZE = 144, OUTPUT_SIZE = 32, WEATHER_SIZE = 40,
-            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 96, LIGHT_SIZE = 40, MEMORY_INFO_SIZE = 48,
+    // (0.15 appended AtlasFrame.nearInfo, AtlasFrameOutput.nearLight and AtlasGlFrameIO's two near-light names, read by
+    // the core only under FRAME_NEAR_LIGHT: the larger structs are what an older core reads the start of)
+    static final long MATERIAL_SIZE = 24, TILE_SIZE = 64, FRAME_SIZE = 152, OUTPUT_SIZE = 40, WEATHER_SIZE = 40,
+            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 104, LIGHT_SIZE = 40, MEMORY_INFO_SIZE = 48,
             SHAPE_SIZE = 400;
     /** Far light kinds (AtlasLight.kind). */
     public static final int LIGHT_NIGHT = 0, LIGHT_FIRE = 1, LIGHT_LAVA = 2, LIGHT_MIST = 3;
@@ -376,7 +384,8 @@ public final class AtlasNative {
         public float sunX, sunY = 1, sunZ, timeSec, lodBias = 1;
         public int flags = FRAME_SHADOWS | FRAME_ATMOS | FRAME_CLOUDS | FRAME_SKY;
 
-        void write(MemorySegment s) {
+        /** nearLight: the core takes FRAME_NEAR_LIGHT (abi 0.15); else the flag is dropped. */
+        void write(MemorySegment s, boolean nearLight) {
             s.set(JAVA_DOUBLE, 0, x);
             s.set(JAVA_DOUBLE, 8, y);
             s.set(JAVA_DOUBLE, 16, z);
@@ -391,8 +400,9 @@ public final class AtlasNative {
             s.set(JAVA_FLOAT, 116, sunZ);
             s.set(JAVA_FLOAT, 120, timeSec);
             s.set(JAVA_FLOAT, 124, lodBias);
-            s.set(JAVA_INT, 128, flags);
+            s.set(JAVA_INT, 128, nearLight ? flags : flags & ~FRAME_NEAR_LIGHT);
             s.set(ADDRESS, 136, MemorySegment.NULL);  // nearDepth: the game path uses the shared GL image
+            s.set(ADDRESS, 144, MemorySegment.NULL);  // (abi 0.15) nearInfo: likewise (GlFrameIO.nearInfoTex)
         }
     }
 
@@ -418,8 +428,18 @@ public final class AtlasNative {
         public int dstColor, dstNormal, dstDepth;
         /** RG32F, sunMapSize x sunMapSize + 1 (Context.setSunMap), or 0. */
         public int dstSunMap;
+        /**
+         * (abi 0.15, with FRAME_NEAR_LIGHT) the near field's surface info, RGBA8 the size of nearDepthTex's: r block light
+         * / 15, g sky light / 15, b a the world-space normal, octahedral (atlas.h AtlasGlFrameIO.nearInfoTex):
+         * p = n.xz / (|n.x| + |n.y| + |n.z|); if n.y &lt; 0: p = (1 - |p.yx|) * (p.x &gt;= 0 ? 1 : -1, p.y &gt;= 0 ? 1 : -1);
+         * (b, a) = p * 0.5 + 0.5. 0 = none.
+         */
+        public int nearInfoTex;
+        /** (abi 0.15, with FRAME_NEAR_LIGHT) RGBA16F at atlas's resolution: the near light (atlas.h); 0 = none. */
+        public int dstNearLight;
 
-        void write(MemorySegment s) {
+        /** nearLight: the core takes the near light's fields (abi 0.15); else they are left zero. */
+        void write(MemorySegment s, boolean nearLight) {
             s.set(JAVA_INT, 0, nearDepthTex);
             s.set(JAVA_INT, 4, depthZeroToOne);
             s.set(JAVA_INT, 8, reversedZ ? 1 : 0);
@@ -429,6 +449,8 @@ public final class AtlasNative {
             s.set(JAVA_INT, 84, dstNormal);
             s.set(JAVA_INT, 88, dstDepth);
             s.set(JAVA_INT, 92, dstSunMap);
+            s.set(JAVA_INT, 96, nearLight ? nearInfoTex : 0);
+            s.set(JAVA_INT, 100, nearLight ? dstNearLight : 0);
         }
     }
 
@@ -556,6 +578,14 @@ public final class AtlasNative {
         /** (abi 0.14) Whether this core takes material shapes (and traces the groups, FRAME_GROUPS). */
         public boolean hasShapes() {
             return setShapes != null;
+        }
+
+        /**
+         * (abi 0.15) Whether this core lights the near field (FRAME_NEAR_LIGHT with GlFrameIO.nearInfoTex and
+         * dstNearLight). An older core is never handed the flag or the fields: they are dropped on the way in.
+         */
+        public boolean hasNearLight() {
+            return abi >= ABI_NEAR_LIGHT;
         }
 
         /**
@@ -866,11 +896,12 @@ public final class AtlasNative {
                 depthSeg = frameArena.allocate(4L * px, 8);
                 outPixels = px;
             }
-            f.write(frameSeg);
+            f.write(frameSeg, false);  // (the harness path hands no near depth: no near light)
             outSeg.set(ADDRESS, 0, color != null ? colorSeg : MemorySegment.NULL);
             outSeg.set(ADDRESS, 8, normal != null ? normalSeg : MemorySegment.NULL);
             outSeg.set(ADDRESS, 16, depth != null ? depthSeg : MemorySegment.NULL);
             outSeg.set(ADDRESS, 24, MemorySegment.NULL);  // colorLinear: not needed by the harness
+            outSeg.set(ADDRESS, 32, MemorySegment.NULL);  // (abi 0.15) nearLight
             try {
                 check((int) render.invokeExact(ptr, frameSeg, outSeg), "atlas_render");
             } catch (Throwable t) {
@@ -908,9 +939,11 @@ public final class AtlasNative {
 
         /** Queues the frame; GL commands issued afterwards see it. The CPU does not wait for the GPU. */
         public void glRender(Frame f, GlFrameIO io) {
-            f.write(frameSeg);
+            // the near light only to a core that has it, and only with both of its textures (atlas.h)
+            boolean nearLight = hasNearLight() && io != null && io.nearInfoTex != 0 && io.dstNearLight != 0;
+            f.write(frameSeg, nearLight);
             if (ioSeg == null) ioSeg = frameArena.allocate(GL_IO_SIZE, 8);
-            if (io != null) io.write(ioSeg);
+            if (io != null) io.write(ioSeg, nearLight);
             try {
                 // a typed local: a conditional passed straight to invokeExact is typed Object (its target), and the
                 // exact-type check then fails on every frame

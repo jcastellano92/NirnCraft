@@ -3,7 +3,8 @@
 // render of the same frame (colour to half-float precision, depth exactly). GL also writes the near field's distances
 // into the shared nearDepth image, and the covered pixels must come back empty. When the driver pair cannot share
 // memory, atlas falls back to host copies (ATLAS_INTEROP=hostcopy forces it): the same frames must still match;
-// the near-depth skip is off there (every pixel is marched, so the references are the plain renders).
+// the near-depth skip is off there (every pixel is marched, so the references are the plain renders), except with the
+// near light (abi 0.15), whose frames read the near inputs back and match the host render in both modes.
 // Two contexts, one after the other (gl_context.hpp): the platform's default one, then the production one, an OpenGL
 // 3.3 core forward-compatible profile like Minecraft's. The second must pass too, and land on the same interop path as
 // the first (zero-copy where the interop extensions exist, host-copy otherwise): a driver that drops an extension, or a
@@ -285,6 +286,152 @@ static Result runSuite(const std::string& data, atlas_test::Profile profile, std
     Compare c5 = compare(refColor, refDepth, glColor, glDepth, W, H);
     std::printf("near depth at twice atlas's resolution: %zu colour, %zu depth pixels differ from host\n", c5.color, c5.depth);
     gl.DeleteTextures(1, &depthTex2);
+    // the near light (abi 0.15): GL hands the near field's surface info beside its depth (the left half at 20 blocks,
+    // normals in four directions), atlas lights the covered pixels with the far light into the caller's RGBA16F
+    // texture and writes (inscatter, transmittance) as their colour; in both interop modes (host copies read the near
+    // inputs back for it) the frame must match the host-path render of the same inputs
+    bool nearLightOk = false;
+    {
+        auto oct = [](float x, float y, float z) {  // atlas_shared.slang octEncode, to bytes
+            float l = std::fabs(x) + std::fabs(y) + std::fabs(z);
+            float ex = x / l, ey = z / l;
+            if (y < 0) {
+                float ox = (1 - std::fabs(ey)) * (ex >= 0 ? 1.0f : -1.0f), oy = (1 - std::fabs(ex)) * (ey >= 0 ? 1.0f : -1.0f);
+                ex = ox;
+                ey = oy;
+            }
+            return uint32_t((ex * 0.5f + 0.5f) * 255.0f + 0.5f) | uint32_t((ey * 0.5f + 0.5f) * 255.0f + 0.5f) << 8;
+        };
+        const uint32_t normals[4] = {oct(0, 1, 0), oct(1, 0, 0), oct(-0.6f, 0.8f, 0), oct(0, 0, -1)};
+        std::vector<uint32_t> infoGl(size_t(W) * H), infoHost(size_t(W) * H);
+        for (uint32_t yy = 0; yy < H; yy++)  // GL rows: yy = 0 is the bottom
+            for (uint32_t xx = 0; xx < W; xx++) {
+                uint32_t v = 7u * 17u | (15u * 17u) << 8 | normals[(xx / 16 + yy / 16) % 4] << 16;  // block 7, sky 15
+                infoGl[size_t(yy) * W + xx] = v;
+                infoHost[size_t(H - 1 - yy) * W + xx] = v;
+            }
+        GLuint infoTex = 0, lightTex = 0;
+        gl.CreateTextures(GL_TEXTURE_2D, 1, &infoTex);
+        gl.TextureStorage2D(infoTex, 1, GL_RGBA8, GLsizei(W), GLsizei(H));
+        gl.TextureSubImage2D(infoTex, 0, 0, 0, GLsizei(W), GLsizei(H), GL_RGBA, GL_UNSIGNED_BYTE, infoGl.data());
+        gl.CreateTextures(GL_TEXTURE_2D, 1, &lightTex);
+        gl.TextureStorage2D(lightTex, 1, GL_RGBA16F, GLsizei(W), GLsizei(H));
+        AtlasFrame fl = f;
+        fl.flags |= ATLAS_FRAME_NEAR_DEPTH | ATLAS_FRAME_NEAR_LIGHT;
+        fl.nearDepth = nearDist.data();
+        fl.nearInfo = infoHost.data();
+        std::vector<float> refLight(size_t(W) * H * 4), nlColor(size_t(W) * H * 4), nlDepth(size_t(W) * H);
+        AtlasFrameOutput ol{nullptr, nullptr, nlDepth.data(), nlColor.data(), refLight.data()};
+        bool rendered = atlas_render(ctx, &fl, &ol) == ATLAS_OK;
+        AtlasGlFrameIO iol = io;
+        iol.nearInfoTex = infoTex;
+        iol.dstNearLight = lightTex;
+        AtlasFrame fg = f;  // the io depth texture turns NEAR_DEPTH on
+        fg.flags |= ATLAS_FRAME_NEAR_LIGHT;
+        for (int i = 0; i < 3 && rendered; i++) rendered = atlas_gl_render_io(ctx, &fg, &iol) == ATLAS_OK;
+        if (!rendered) std::printf("  near light render: %s\n", atlas_last_error(ctx));
+        gl.Finish();
+        std::vector<float> glLight(size_t(W) * H * 4), zeroD(size_t(W) * H, 1e30f);
+        gl.GetTextureImage(lightTex, 0, GL_RGBA, GL_FLOAT, GLsizei(glLight.size() * 4), glLight.data());
+        gl.GetTextureImage(dst[0], 0, GL_RGBA, GL_FLOAT, GLsizei(glColor.size() * 4), glColor.data());
+        gl.GetTextureImage(dst[2], 0, GL_RED, GL_FLOAT, GLsizei(glDepth.size() * 4), glDepth.data());
+        Compare cl = compare(refLight, zeroD, glLight, zeroD, W, H);
+        Compare cc = compare(nlColor, nlDepth, glColor, glDepth, W, H);
+        size_t lit = 0, hazed = 0;
+        for (uint32_t yy = 0; yy < H; yy++)
+            for (uint32_t xx = 0; xx < W / 2; xx++) {
+                size_t i = (size_t(yy) * W + xx) * 4;
+                lit += refLight[i] > 0.0f && refLight[i + 1] > 0.0f && refLight[i + 2] > 0.0f;
+                hazed += nlColor[i + 3] > 0.9f && nlColor[i + 3] < 1.0f && nlColor[i + 2] > 0.0f;  // T < 1, inscatter
+            }
+        std::printf("near light via GL (%s): %zu light and %zu colour pixels differ from host (worst rel %.1e); %zu of %u "
+                    "covered px lit, %zu hazed\n", mode.c_str(), cl.color, cc.color, cl.worstRel, lit, W / 2 * H, hazed);
+        nearLightOk = rendered && cl.color == 0 && cc.color == 0 && cc.depth == 0 && lit == size_t(W / 2) * H &&
+                      hazed == size_t(W / 2) * H;
+        glClean &= glCheck("near light frames");
+        // the cost at 1920x1080 (zero-copy; GPU time of atlas's own work): a view down onto the ground, the near
+        // field covering what lies within 256 blocks with the far field's own surfaces and normals, near light on vs off
+        if (!host && rendered) {
+            const uint32_t BW = 1920, BH = 1080;
+            AtlasFrame fb = f;
+            fb.width = BW;
+            fb.height = BH;
+            fb.nearFieldEnd = 0;
+            cameraMatrix(105, -30, 70, double(BW) / BH, fb.invViewProj);
+            std::vector<float> bd(size_t(BW) * BH);
+            std::vector<uint32_t> bn(size_t(BW) * BH);
+            AtlasFrameOutput ob{nullptr, bn.data(), bd.data(), nullptr};
+            atlas_render(ctx, &fb, &ob);
+            const double fyb = 1.0 / std::tan(70.0 * 3.14159265358979323846 / 360.0), fxb = fyb / (double(BW) / BH);
+            float invProjB[16] = {float(1 / fxb), 0, 0, 0, 0, float(1 / fyb), 0, 0, 0, 0, 0, float((n0 - f0) / (2 * n0 * f0)),
+                                  0, 0, -1, float((n0 + f0) / (2 * n0 * f0))};
+            std::vector<float> bz(size_t(BW) * BH);
+            std::vector<uint32_t> binfo(size_t(BW) * BH);
+            size_t bcov = 0;
+            for (uint32_t yy = 0; yy < BH; yy++)  // GL rows bottom-up; the host frame's top-down
+                for (uint32_t xx = 0; xx < BW; xx++) {
+                    size_t src = size_t(BH - 1 - yy) * BW + xx, dsti = size_t(yy) * BW + xx;
+                    double dist = bd[src];
+                    if (dist >= 256.0) {
+                        bz[dsti] = 1.0f;
+                        continue;
+                    }
+                    double nx = (xx + 0.5) / BW * 2 - 1, ny = (yy + 0.5) / BH * 2 - 1;
+                    double vx = nx / fxb, vy = ny / fyb, l = std::sqrt(vx * vx + vy * vy + 1.0);
+                    double zv = -dist / l;
+                    double zn = ((f0 + n0) / (n0 - f0) * zv + 2 * f0 * n0 / (n0 - f0)) / -zv;
+                    bz[dsti] = float(zn * 0.5 + 0.5);
+                    binfo[dsti] = (255u << 8) | ((bn[src] & 0xFFFFu) << 16);
+                    bcov++;
+                }
+            GLuint bDepth = 0, bInfo = 0, bLight = 0;
+            gl.CreateTextures(GL_TEXTURE_2D, 1, &bDepth);
+            gl.TextureStorage2D(bDepth, 1, GL_DEPTH_COMPONENT32F, GLsizei(BW), GLsizei(BH));
+            gl.TextureSubImage2D(bDepth, 0, 0, 0, GLsizei(BW), GLsizei(BH), GL_DEPTH_COMPONENT, GL_FLOAT, bz.data());
+            gl.CreateTextures(GL_TEXTURE_2D, 1, &bInfo);
+            gl.TextureStorage2D(bInfo, 1, GL_RGBA8, GLsizei(BW), GLsizei(BH));
+            gl.TextureSubImage2D(bInfo, 0, 0, 0, GLsizei(BW), GLsizei(BH), GL_RGBA, GL_UNSIGNED_BYTE, binfo.data());
+            gl.CreateTextures(GL_TEXTURE_2D, 1, &bLight);
+            gl.TextureStorage2D(bLight, 1, GL_RGBA16F, GLsizei(BW), GLsizei(BH));
+            AtlasGlTargets tb{};
+            double ms[2] = {0, 0}, lo[2] = {0, 0}, hi[2] = {0, 0};
+            if (atlas_gl_attach(ctx, BW, BH, &tb) == ATLAS_OK) {
+                AtlasGlFrameIO iob2{};
+                iob2.nearDepthTex = bDepth;
+                std::memcpy(iob2.nearInvProjection, invProjB, sizeof(invProjB));
+                iob2.nearInfoTex = bInfo;
+                iob2.dstNearLight = bLight;
+                fb.nearFieldEnd = 256;
+                for (int pass = 0; pass < 2; pass++) {
+                    AtlasFrame fp = fb;
+                    if (pass == 1) fp.flags |= ATLAS_FRAME_NEAR_LIGHT;
+                    std::vector<double> gpu;
+                    for (int i = 0; i < 24; i++) {
+                        atlas_gl_render_io(ctx, &fp, &iob2);
+                        AtlasStats sb{};
+                        atlas_get_stats(ctx, &sb);
+                        if (i >= 4) gpu.push_back(sb.lastFrameMs);  // (the previous frame's GPU time)
+                    }
+                    gl.Finish();
+                    std::sort(gpu.begin(), gpu.end());
+                    ms[pass] = gpu[gpu.size() / 2];
+                    lo[pass] = gpu.front();
+                    hi[pass] = gpu.back();
+                }
+                std::printf("near light cost, 1920x1080 zero-copy, %.0f%% of the screen near: GPU median %.3f ms without "
+                            "(%.3f..%.3f), %.3f ms with (%.3f..%.3f): +%.3f ms\n", 100.0 * bcov / (double(BW) * BH), ms[0],
+                            lo[0], hi[0], ms[1], lo[1], hi[1], ms[1] - ms[0]);
+                rendered = atlas_gl_attach(ctx, W, H, &t) == ATLAS_OK;  // back to the suite's size
+                nearLightOk &= rendered;
+            }
+            gl.DeleteTextures(1, &bDepth);
+            gl.DeleteTextures(1, &bInfo);
+            gl.DeleteTextures(1, &bLight);
+            glClean &= glCheck("near light timing");
+        }
+        gl.DeleteTextures(1, &infoTex);
+        gl.DeleteTextures(1, &lightTex);
+    }
     // the sun map through GL: copied into the caller's RG32F texture, identical to the device buffer
     const uint32_t SM = 128;
     atlas_set_sun_map(ctx, SM, 512.0f);
@@ -413,7 +560,7 @@ static Result runSuite(const std::string& data, atlas_test::Profile profile, std
     glc.destroy();
     bool ok = c1.color == 0 && c1.depth == 0 && c2.color == 0 && c2.depth == 0 && coveredLit == 0 && glClean &&
               c3.color == 0 && c3.depth == 0 && c4.color == 0 && c4.depth == 0 && c5.color == 0 && c5.depth == 0 && sunOk &&
-              smooth && lossOk;
+              smooth && lossOk && nearLightOk;
     std::printf(ok ? "PASS\n" : "FAIL (gl error 0x%x)\n", e);
     return ok ? PASS : FAIL;
 }

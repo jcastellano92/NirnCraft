@@ -1186,6 +1186,75 @@ static bool parity(const char* raster) {
     CHECK(depthBad / n < 0.002);
     CHECK(colorBad / n < 0.01);
 
+    // the near light (abi 0.15, ATLAS_FRAME_NEAR_LIGHT): the far field's own surfaces handed back as the near field
+    // (their distance, their face normal in the info texel), lit by atlas. CPU and Vulkan agree on it, and on land up
+    // close (LOD 0, no smoothing) albedo x nearLight x T + inscatter is the far field's own colour there: one light
+    {
+        AtlasFrame fl = f;
+        cameraMatrix(90, -40, 70, double(W) / H, fl.invViewProj);  // down onto the ground: most of it within 96 blocks
+        size_t px = size_t(W) * H;
+        std::vector<float> farC(px * 4), alb(px * 4), farD(px);
+        std::vector<uint32_t> farN(px);
+        AtlasFrameOutput of{nullptr, farN.data(), farD.data(), farC.data()};
+        CHECK(atlas_render(cpu, &fl, &of) == ATLAS_OK);
+        AtlasFrame fa = fl;
+        fa.flags |= ATLAS_FRAME_DEBUG_ALBEDO;
+        AtlasFrameOutput oa{nullptr, nullptr, nullptr, alb.data()};
+        CHECK(atlas_render(cpu, &fa, &oa) == ATLAS_OK);
+        std::vector<float> nd(px, 1e30f);
+        std::vector<uint32_t> ni(px, 0);
+        size_t covered = 0;
+        for (size_t i = 0; i < px; i++)
+            if (farD[i] < 96.0f && ((farN[i] >> 16) & 255) == ATLAS_CLASS_TERRAIN) {
+                nd[i] = farD[i];
+                ni[i] = (255u << 8) | ((farN[i] & 0xFFFFu) << 16);  // block 0, sky 15, the far field's normal
+                covered++;
+            }
+        AtlasFrame fn = fl;
+        fn.nearFieldEnd = 96;
+        fn.flags |= ATLAS_FRAME_NEAR_DEPTH | ATLAS_FRAME_NEAR_LIGHT;
+        fn.nearDepth = nd.data();
+        fn.nearInfo = ni.data();
+        std::vector<float> nlc(px * 4, -1.0f), nlg(px * 4, -1.0f), ccol(px * 4), gcol(px * 4);
+        AtlasFrameOutput onc{nullptr, nullptr, nullptr, ccol.data(), nlc.data()};
+        AtlasFrameOutput ong{nullptr, nullptr, nullptr, gcol.data(), nlg.data()};
+        CHECK(atlas_render(cpu, &fn, &onc) == ATLAS_OK);
+        CHECK(atlas_render(gpu, &fn, &ong) == ATLAS_OK);
+        size_t buildsOff = 0, uncoveredLit = 0, unlit = 0;
+        std::vector<double> rel;
+        for (size_t i = 0; i < px; i++) {
+            bool off = false;
+            for (int k = 0; k < 4; k++) {
+                double a = nlc[i * 4 + k], b = nlg[i * 4 + k];
+                if (std::abs(a - b) > 0.02 + 0.02 * std::abs(a)) off = true;
+            }
+            buildsOff += off;
+            if (nd[i] > 1e29f) {
+                uncoveredLit += nlc[i * 4] != 0.0f || nlc[i * 4 + 3] != 0.0f;
+                continue;
+            }
+            unlit += !(nlc[i * 4] > 0.0f);
+            const float T = ccol[i * 4 + 3];
+            double worst = 0;
+            for (int k = 0; k < 3; k++) {
+                double pred = double(alb[i * 4 + k]) * nlc[i * 4 + k] * T + ccol[i * 4 + k], want = farC[i * 4 + k];
+                worst = std::max(worst, std::abs(pred - want) / std::max(std::abs(want), 1e-3));
+            }
+            rel.push_back(worst);
+        }
+        std::sort(rel.begin(), rel.end());
+        double med = rel.empty() ? 1.0 : rel[rel.size() / 2], p90 = rel.empty() ? 1.0 : rel[rel.size() * 9 / 10];
+        std::printf("  near light: %zu covered px; cpu/vulkan %.3f%% px differ; albedo x light x T + inscatter vs the far "
+                    "field's colour: median %.2e, p90 %.2e relative; %zu covered px unlit, %zu uncovered px lit\n",
+                    covered, 100.0 * buildsOff / n, med, p90, unlit, uncoveredLit);
+        CHECK(covered > px / 3);
+        CHECK(buildsOff / n < 0.01);
+        CHECK(med < 0.005);
+        CHECK(p90 < 0.05);
+        CHECK(unlit == 0);
+        CHECK(uncoveredLit == 0);
+    }
+
     // the cloud shell (half-resolution pass, upsampled) through both builds: the baked noise and a fair-weather field
     std::vector<uint32_t> noise(64 * 64 * 64);
     bool haveNoise = false;
