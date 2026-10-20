@@ -30,8 +30,8 @@ public final class AtlasNative {
     public static final int STRUCTURES_REPLACE_CANOPY = 0x1;
     // 0.12: atlas_set_moon, 0.13: atlas_set_jitter, 0.14: atlas_set_material_shapes + FRAME_GROUPS, 0.15: the near
     // light (FRAME_NEAR_LIGHT, GlFrameIO.nearInfoTex / dstNearLight), 0.16: the air (atlas_set_air, atlas_air_*) and
-    // the near field's textures (atlas_set_material_textures) (all optional)
-    public static final int ABI_VERSION = 0x001000, ABI_MIN = 0x000B00;
+    // the near field's textures (atlas_set_material_textures), 0.17: the sky's own light (atlas_set_sky_glow) (all optional)
+    public static final int ABI_VERSION = 0x001100, ABI_MIN = 0x000B00;
     /** The first ABI with the near light (FRAME_NEAR_LIGHT); an older core is never handed the flag or its fields. */
     public static final int ABI_NEAR_LIGHT = 0x000F00;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
@@ -145,6 +145,8 @@ public final class AtlasNative {
     private final MethodHandle memoryInfo, setClipmap, debugFault;
     // abi 0.16, the air (null with an older library)
     private final MethodHandle setAir, airFromClimate, airLight, airCoeffs, airMultiscatter;
+    // abi 0.17, the sky's own light (null with an older library)
+    private final MethodHandle setSkyGlow;
     /** AtlasClimate and AtlasAir (atlas.h) as float arrays: 13 and 11 floats. */
     public static final int CLIMATE_FLOATS = 13, AIR_FLOATS = 11;
     private int abi;
@@ -229,6 +231,7 @@ public final class AtlasNative {
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_FLOAT, ADDRESS));
         airCoeffs = bindOptional(l, lib, "atlas_air_coeffs", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         airMultiscatter = bindOptional(l, lib, "atlas_air_multiscatter", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+        setSkyGlow = bindOptional(l, lib, "atlas_set_sky_glow", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
     }
 
     // ---- the air (abi 0.16; atlas.h AtlasAir, native/src/air.hpp): context-free, any thread ------------------------
@@ -633,6 +636,22 @@ public final class AtlasNative {
             try (Arena a = Arena.ofConfined()) {
                 MemorySegment d = a.allocateFrom(JAVA_FLOAT, dir), r = a.allocateFrom(JAVA_FLOAT, radiance);
                 check((int) setMoon.invokeExact(ptr, d, r), "atlas_set_moon");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * (abi 0.17) The sky's own light (atlas.h atlas_set_sky_glow: the unified sky's emitters, integrated by the host),
+         * added to the air's sky light the far field lights with: up and ground radiance (rgb). A core without it lights
+         * with the air alone; false then.
+         */
+        public boolean setSkyGlow(float[] up, float[] ground) {
+            if (setSkyGlow == null) return false;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment u = a.allocateFrom(JAVA_FLOAT, up), g = a.allocateFrom(JAVA_FLOAT, ground);
+                check((int) setSkyGlow.invokeExact(ptr, u, g), "atlas_set_sky_glow");
                 return true;
             } catch (Throwable t) {
                 throw rethrow(t);

@@ -25,7 +25,7 @@ const float OZONE_PEAK = 25.0;
 const float OZONE_HALF = 15.0;
 const float SUN_HALF_ANGLE = 0.00465;
 const vec3 SUN_IRRADIANCE = vec3(11.181, 11.807, 12.854);
-const vec3 NIGHT_GLOW = vec3(0.0008, 0.0011, 0.0024);
+const vec3 NIGHT_GLOW = vec3(0.0);  // (air.hpp: the night's glow is the sky's emitters', atlas_night.glsl)
 const int MS_SIZE = 32;
 const int SKY_STEPS = 24;
 
