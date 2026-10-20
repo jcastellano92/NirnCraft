@@ -139,11 +139,14 @@ public final class AtlasNearPass {
             .withColorTargetState(ColorTargetState.DEFAULT)
             .build();
 
+    private static final BindGroupLayout NEAR_LIGHT = BindGroupLayout.builder()
+            .withUniform("Sampler6", UniformType.COMBINED_IMAGE_SAMPLER).build();
     static final RenderPipeline LIGHTMAP = RenderPipeline.builder()
             .withLocation(id("pipeline/near_lightmap"))
             .withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
             .withFragmentShader(id("core/near_lightmap"))
             .withBindGroupLayout(NEAR_INFO)
+            .withBindGroupLayout(NEAR_LIGHT)
             .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
             .withCull(false)
             .withDepthStencilState(Optional.empty())
@@ -559,6 +562,10 @@ public final class AtlasNearPass {
         try (RenderPass pass = encoder.createRenderPass(() -> "Infinite ATLAS lightmap", lightmapScratchView, Optional.empty())) {
             pass.setPipeline(RenderSystem.getCompiledPipeline(LIGHTMAP));
             pass.setUniform("NearInfo", info.currentBuffer());
+            AtlasTargets far = AtlasClient.farTargetsThisFrame();
+            var linear = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
+                    FilterMode.LINEAR, FilterMode.LINEAR, false);
+            pass.setUniform("Sampler6", far != null ? far.nearLightTarget().getTextureView() : lightmapScratchView, linear);
             pass.draw(3, 1, 0, 0);
         }
         encoder.copyTextureToTexture(lightmapScratch, lightmap.texture(), 0, 0, 0, 0, 0, 16, 16);
