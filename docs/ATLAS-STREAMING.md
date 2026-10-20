@@ -166,6 +166,43 @@ What the pipeline does (the full map with file:line: the "far-field loading pipe
    leaf, a canonical section encoding (palette order and padding fixed). Untouched base hashes are pure functions of
    seed, version and position, computed lazily. Sync top down from region roots.
 
+### Graduated consequences (owner, 2026-10-19)
+
+We own loot, stores and ores (ores regenerate, so they are server state like loot), and the server decides what each
+container, vein or merchant gives each player when asked. A suspected cheater's yields drop a little (loot tables,
+ore yields, prices), enemies get a little harder and may come looking for them; never a hard stop, never a change to
+anyone else's world.
+
+- **Evidence, not accidents.** Only events lag cannot explain count: asking for a secret from a place whose line of
+  sight is blocked by solid public terrain well beyond the look-ahead (ping times speed plus a margin), tunnels that
+  head for hidden ores far above the chance rate, positions the server's own movement check rejects. Each event adds
+  to a per-player score, weighted by how unambiguous it is.
+- **Multiple offences, time-limited.** The score decays (a half-life of days); effects start above a threshold, grow
+  with the score and fade back to normal as it decays. A single event does nothing.
+- **Host policy and a log.** Thresholds and effects are the host's settings; every event and effect is logged with
+  its reason, reviewable and reversible (honest players caught by a false positive must get it undone; EU servers
+  owe a statement of reasons).
+
+### What checking proves, and what it cannot (owner asked: renderer integrity by peer agreement)
+
+The idea: every renderer change alters a fingerprint, players compare, the odd one out is cheating. The limit: any
+fingerprint a client computes about itself, it can also fake. A modified client keeps an untouched copy (or the
+recorded answers) and reports what an honest one would; peers cannot see each other's code either, and a cheater can
+lie about others too. Challenges (the server sends a random tiny scene, the client renders a few pixels and returns
+their hash in time) are answered by running the honest renderer beside the cheating one. This raises the bar a
+little; it proves nothing. Kernel anti-cheat (Vanguard, EAC) is out of scope.
+
+What does work:
+
+- **Nothing secret reaches the client before it may see it** (decision 3, Valorant's fog of war for far players too:
+  a player behind a mountain is not sent). A wallhacked renderer then shows the public world, which anyone can
+  generate from the seed anyway.
+- **Behaviour the server sees** (above): requests, movement, digging, aim at what was not visible.
+- **The hash tree, for correctness, not honesty**: it catches generator drift (versions, platforms, a float off by 1
+  ulp), corrupt caches and a client's world copy that differs from the server's; it makes sync cheap (only differing
+  branches travel). Region hashes compared among peers can spread that load (the majority agrees, the odd one is
+  re-sent from the server), but the server stays the authority.
+
 ### Own all of it: one spectrum, no vanilla terrain (owner, 2026-10-19)
 
 No near and far at all: one representation whose detail follows each part's importance on screen and its visibility,
