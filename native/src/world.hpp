@@ -3,7 +3,10 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <condition_variable>
 #include <cstdint>
+#include <deque>
+#include <thread>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -138,6 +141,10 @@ struct PackedScene {
 
 class World {
 public:
+    World() = default;
+    World(const World&) = delete;
+    World& operator=(const World&) = delete;
+    ~World();
     int lodCount = 7;
     int windowRadius = 2;  // regions either side of the camera's region, per LOD
     // real sections are kept this many LOD-0 regions either side of the camera (0: windowRadius + 2, ~1.2 km; the
@@ -177,7 +184,16 @@ public:
     // Buildings of tile (lod, tx, tz), kept across later uploads of its ground; null removes them.
     void putStructures(int lod, int tx, int tz, std::shared_ptr<const Structures> s);
 
-    // Build what the window around `centre` needs; returns regions built. budgetMs <= 0: no limit.
+    // Build what the window around `centre` needs; returns regions built. budgetMs <= 0: everything, here (offline,
+    // tests). budgetMs > 0 (the game): the regions are built by a pool of builder threads of the world's own (low
+    // priority), the update only collects what they finished and hands them what is wanted now, in order, and returns
+    // within about its budget: a region's build (a level-1 tree of real content: tens of seconds) never holds it up.
+    // the camera's view (atlas_render, every frame: its forward direction, horizontal): what lies behind it is built
+    // after what it sees
+    void setView(float fx, float fz) {
+        viewX_ = fx;
+        viewZ_ = fz;
+    }
     int update(const double centre[3], double budgetMs, double* buildMs);
     // Immutable snapshot of the packed scene; a frame holds it for as long as it reads it.
     std::shared_ptr<const PackedScene> packed() const {
@@ -293,6 +309,31 @@ private:
     };
     std::unordered_map<Key3, Fade, Key3Hash> fading_;
     std::shared_ptr<const ShapeSet> shapes_ = std::make_shared<ShapeSet>();
+    // (budgeted updates) the builders: they take the queue's first key (mu_), snapshot it, build without the lock and
+    // leave the region in done_ for the next update
+    struct Built {
+        Key3 key;
+        std::shared_ptr<const Region> region;  // null: the build failed (out of memory): still to do
+        bool wasDirty = false, wasTreeDirty = false;
+        std::shared_ptr<const Region> keep;  // a tree-only job's region (replaced meanwhile: dropped)
+    };
+    std::vector<std::thread> builders_;
+    std::condition_variable buildCv_;
+    std::deque<std::pair<Key3, bool>> queue_;      // (mu_) region, with its tree
+    std::unordered_set<Key3, Key3Hash> inFlight_;  // (mu_)
+    std::vector<Built> done_;                      // (mu_)
+    std::atomic<bool> stopBuilders_{false};        // (set under mu_; the packer reads it too)
+    void builder();
+    bool coveredByFiner(const Key3& k, const int centreRegion[MAX_LODS][2]) const;  // its extent inside lod - 1's window
+    // (budgeted updates) the packer thread: the scene packed from the latest centre it was handed, off the update
+    std::thread packerThread_;
+    std::mutex packMu_;
+    std::condition_variable packCv_;
+    bool packWanted_ = false;                   // (packMu_)
+    int packCentre_[MAX_LODS][2] = {};          // (packMu_)
+    void packer();
+    std::vector<std::shared_ptr<const Region>> doneRegions_;  // (update only) the collected regions, by want's index
+    std::atomic<float> viewX_{0.0f}, viewZ_{0.0f};
     std::shared_ptr<const TextureSet> textures_ = std::make_shared<TextureSet>();
     mutable std::mutex texMu_;  // (textures_)
     uint64_t packedShapes_ = 0;  // the shape revision the packed scene carries
