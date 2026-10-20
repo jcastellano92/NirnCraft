@@ -79,6 +79,19 @@ uint lookupMaterial(RegionGpu r, uint rank) {
 // near field, light and sky show between them; 0 at coarse LODs, where a forest reads as a mass)
 static float gLeafGap = 0.0;
 
+// Secondary rays (sun / moon shadows, sky visibility, block light; traceSecondary): foliage does not stop them, it
+// attenuates them by the coverage of its cut-out faces, as light passes a crown's gaps (docs/ATLAS-LOD.md, "A realistic
+// reference": a ray crossing a leaf block meets two cut-out faces, each opaque over FOLIAGE_COVER of its texels; so
+// a block's transmittance is (1 - FOLIAGE_COVER)^2, an extinction of FOLIAGE_SIGMA per block of path). Accumulated:
+// gTrans what passes, gThrough the pack's light-through-leaves estimate E[exp(-0.45 x first leaf)] (FOLIAGE_SSS),
+// gSecT the ray's distance where the current chord starts.
+static const float FOLIAGE_COVER = 0.65;
+static const float FOLIAGE_SIGMA = 2.0996;  // -2 ln(1 - FOLIAGE_COVER)
+static bool gSecondary = false;
+static float gTrans = 1.0;
+static float gThrough = 0.0;
+static float gSecT = 0.0;
+
 bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps, inout TraceResult res) {
     float3 inv = float3(abs(rd.x) > 1e-12 ? 1.0 / rd.x : 1e30, abs(rd.y) > 1e-12 ? 1.0 / rd.y : 1e30,
                         abs(rd.z) > 1e-12 ? 1.0 / rd.z : 1e30);
@@ -182,7 +195,25 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
                 bool passWater = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && hitCls == 2u;
                 // gaps between leaves: a hashed share of foliage voxels lets the ray through (moving with the TAA
                 // phase, so the resolve sees crowns as dappled, not solid; shadow rays get dappled light the same way)
-                if (!passWater && hitCls == 1u && gLeafGap > 0.0) {
+                // a secondary ray meets a level-0 voxel of a shaped material (a snow layer, a slab, a stair, a fence: a
+                // full cube to the voxel path) by its micro-voxels: it passes when the shape's are empty along it
+                if (gSecondary && !passWater && r.origin.w == 0 && secondaryShapeMisses(hitMat, ro + rd * t - float3(v), rd))
+                    passWater = true;
+                float sigma = gSecondary && !passWater ? secondarySigma(hitMat, hitCls) : -1.0;
+                if (sigma >= 0.0) {
+                    // a secondary ray through foliage or a plant: attenuated over its chord through this voxel, then on
+                    float3 tv = (float3(v) + stepPos - ro) * inv;
+                    tv = float3(abs(rd.x) > 1e-12 && tv.x > t ? tv.x : 1e30, abs(rd.y) > 1e-12 && tv.y > t ? tv.y : 1e30,
+                                abs(rd.z) > 1e-12 && tv.z > t ? tv.z : 1e30);
+                    float chord = clamp(min(tv.x, min(tv.y, tv.z)) - t, 0.0, 2.0 * float(1 << r.origin.w));
+                    float x0 = max(gSecT + t, 0.0);
+                    // E[exp(-0.45 x)] over where in this stretch the first opaque texel lies, weighted by what got here
+                    gThrough += gTrans * exp(-0.45 * x0) * (sigma / (sigma + 0.45)) * (1.0 - exp(-(sigma + 0.45) * chord));
+                    gTrans *= exp(-sigma * chord);
+                    passWater = gTrans > 0.004;
+                    if (!passWater) gTrans = 0.0;
+                }
+                if (!passWater && hitCls == 1u && gLeafGap > 0.0 && !gSecondary) {
                     uint phase = frame.jitter.z > 0.5 ? (frame.temporal.x & 7u) : 0u;
                     uint hh = (uint(v.x) * 73856093u) ^ (uint(v.y) * 19349663u) ^ (uint(v.z) * 83492791u) ^ (r.bases.x * 2654435761u) ^ (phase * 374761393u);
                     hh = (hh ^ (hh >> 13)) * 1274126177u;
@@ -223,6 +254,72 @@ float3 regionOriginRel(RegionGpu r) {
 }
 
 #include "atlas_groups.slang"
+
+// What a secondary ray loses per block of path through a voxel of material `mat` (-1: it stops there, solid): a
+// cut-out shape (leaves, plants: the game classes plants as terrain, and a solid cube of grass tuft blocked every
+// shadow and sky ray beside it) by its coverage, the share of its micro-voxels filled times their cut-out alpha
+// (a crossing meets two such faces of a block: -2 ln(1 - c)); foliage without a shape (the voxel path alone) by
+// FOLIAGE_COVER. The last material asked is remembered (a ray crosses a crown of one kind).
+static uint gSigMat = 0xFFFFFFFFu;
+static float gSigVal = -1.0;
+float secondarySigma(uint mat, uint cls) {
+    if (mat == gSigMat) return gSigVal;
+    float sg = cls == 1u ? FOLIAGE_SIGMA : -1.0;
+    uint sh = shapeOf(mat);
+    if (sh != 0u) {
+        uint4 head = groupData[sh >> 2];
+        if ((head.z & 1u) != 0u) {
+            float a = 0.0;
+            for (uint k = 0u; k < 16u; k++) {
+                uint w = gWord(sh + 100u + k);
+                uint bits = (k < 8u ? head.x >> (k * 4u) : head.y >> ((k - 8u) * 4u)) & 15u;
+                for (uint b = 0u; b < 4u; b++)
+                    if (((bits >> b) & 1u) != 0u) a += float((w >> (b * 8u)) & 255u);
+            }
+            float c = a / (64.0 * 255.0);
+            sg = -2.0 * log(max(1.0 - c, 0.02));
+        } else {
+            sg = -1.0;  // a shaped solid (a slab, a stair): solid to the coarse voxel path
+        }
+    }
+    gSigMat = mat;
+    gSigVal = sg;
+    return sg;
+}
+
+// Whether a ray from local point l (0..1 in the voxel) along d misses the micro-voxels (4 x 4 x 4, AtlasLabExport's
+// order) of material `mat`'s partial shape; false for full or unshaped materials and cut-out ones (secondarySigma).
+static uint gMaskMat = 0xFFFFFFFFu;
+static uint2 gMask = uint2(0u, 0u);
+bool secondaryShapeMisses(uint mat, float3 l, float3 d) {
+    if (mat != gMaskMat) {
+        gMaskMat = mat;
+        gMask = uint2(0xFFFFFFFFu, 0xFFFFFFFFu);
+        uint sh = shapeOf(mat);
+        if (sh != 0u) {
+            uint4 head = groupData[sh >> 2];
+            if ((head.z & 1u) == 0u) gMask = head.xy;
+        }
+    }
+    if (gMask.x == 0xFFFFFFFFu && gMask.y == 0xFFFFFFFFu) return false;
+    float3 q = clamp(l * 4.0, float3(0.001, 0.001, 0.001), float3(3.999, 3.999, 3.999));
+    int3 m = int3(floor(q));
+    float3 inv = float3(abs(d.x) > 1e-12 ? 1.0 / d.x : 1e30, abs(d.y) > 1e-12 ? 1.0 / d.y : 1e30,
+                        abs(d.z) > 1e-12 ? 1.0 / d.z : 1e30);
+    int3 st = int3(d.x > 0.0 ? 1 : -1, d.y > 0.0 ? 1 : -1, d.z > 0.0 ? 1 : -1);
+    float3 tn = (float3(m) + float3(d.x > 0.0 ? 1.0 : 0.0, d.y > 0.0 ? 1.0 : 0.0, d.z > 0.0 ? 1.0 : 0.0) - q) * inv;
+    tn = float3(abs(d.x) > 1e-12 ? tn.x : 1e30, abs(d.y) > 1e-12 ? tn.y : 1e30, abs(d.z) > 1e-12 ? tn.z : 1e30);
+    float3 td = abs(inv);
+    for (int k = 0; k < 12; k++) {
+        uint bit = uint(m.x + 4 * (m.z + 4 * m.y));
+        if ((((bit < 32u ? gMask.x >> bit : gMask.y >> (bit - 32u))) & 1u) != 0u) return false;
+        int a = tn.x <= tn.y && tn.x <= tn.z ? 0 : (tn.y <= tn.z ? 1 : 2);
+        m[a] += st[a];
+        if (m[a] < 0 || m[a] > 3) return true;
+        tn[a] += td[a];
+    }
+    return true;
+}
 
 // Walk the regions of one LOD along the chord p0 + d u, u in [0, len].
 // On TRACE_UNCOVERED, uncExit is where the chord leaves the unloaded region cell (1e30 when it left the LOD's
@@ -335,6 +432,53 @@ bool occupiedAt(int lod, float3 p) {
     uint64_t bits = leaves[r.bases.y + ptr];
     uint b = uint((v.x & 3) + 4 * (v.z & 3) + 16 * (v.y & 3));
     return ((bits >> b) & 1) != 0;
+}
+
+// (measurements) the material of the voxel path's solid voxel at camera-relative p in a LOD, 0xFFFFFFFF where empty
+uint materialAt(int lod, float3 p) {
+    LodGpu L = frame.lods[lod];
+    float s = float(1 << lod);
+    int3 cell0 = L.origin.xyz * int(256 << lod) + int3(0, L.origin.w, 0);
+    int3 vq = int3(floor((p - float3(cell0 - frame.camInt.xyz)) / s));
+    int3 c = vq >> 8;
+    if (any(c < int3(0, 0, 0)) || any(c >= L.dim.xyz)) return 0xFFFFFFFFu;
+    int idx = regionTable[L.dim.w + (c.y * L.dim.z + c.z) * L.dim.x + c.x];
+    if (idx < 0) return 0xFFFFFFFFu;
+    RegionGpu r = regions[idx];
+    if (r.bases.z == 0xFFFFFFFFu) return 0xFFFFFFFFu;
+    int3 v = vq & 255;
+    uint ptr = r.bases.z, rank = 0u;
+    for (int size = 256; size > 4; size >>= 1) {
+        int h = size >> 1;
+        uint mask = nodes[r.bases.x + ptr] & 0xFFu;
+        uint ci = ((v.x & h) != 0 ? 1u : 0u) | ((v.z & h) != 0 ? 2u : 0u) | ((v.y & h) != 0 ? 4u : 0u);
+        if ((mask & (1u << ci)) == 0) return 0xFFFFFFFFu;
+        uint k = countbits(mask), j = countbits(mask & ((1u << ci) - 1u));
+        rank += nodes[r.bases.x + ptr + 1 + k + j];
+        ptr = nodes[r.bases.x + ptr + 1 + j];
+    }
+    uint64_t bits = leaves[r.bases.y + ptr];
+    uint b = uint((v.x & 3) + 4 * (v.z & 3) + 16 * (v.y & 3));
+    if (((bits >> b) & 1) == 0) return 0xFFFFFFFFu;
+    rank += popcount64(bits & ((uint64_t(1) << b) - 1));
+    return lookupMaterial(r, rank);
+}
+
+// Whether the far field holds a solid voxel at camera-relative p at the finest level with data there (-1: no level has
+// data there, 0: empty, 1: solid).
+int occupancyAt(float3 p) {
+    int lodCount = min(int(frame.dims.w), 5);
+    for (int lod = 0; lod < lodCount; lod++) {
+        LodGpu L = frame.lods[lod];
+        float s = float(1 << lod);
+        int3 cell0 = L.origin.xyz * int(256 << lod) + int3(0, L.origin.w, 0);
+        int3 c = int3(floor((p - float3(cell0 - frame.camInt.xyz)) / s)) >> 8;
+        if (any(c < int3(0, 0, 0)) || any(c >= L.dim.xyz)) continue;
+        int idx = regionTable[L.dim.w + (c.y * L.dim.z + c.z) * L.dim.x + c.x];
+        if (idx == -2) continue;
+        return occupiedAt(lod, p) ? 1 : 0;
+    }
+    return -1;
 }
 
 // Smoothed surface normal: the negated occupancy gradient by central differences (6 taps, stride `stride` voxels).
@@ -453,6 +597,96 @@ float traceShadow(float3 p, float3 dir, int lod) {
         if (p.y + dir.y * t > 640.0 - float(frame.camInt.y)) break;
     }
     return 1.0;
+}
+
+// A secondary ray from camera-relative p along unit dir, at most maxT blocks: what passes (0 when something solid is in
+// the way, foliage attenuating it on the way; gThrough what the pack's light through leaves keeps). Coarser levels
+// where the hit's level has no data, as traceShadow; gStopFoliage: stopped by foliage alone (its light still comes
+// through for FOLIAGE_SSS).
+static bool gStopFoliage = false;
+float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
+    TraceResult res;
+    res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.dither = 0.5; res.albedo = float3(0, 0, 0); res.hasAlbedo = 0u;
+    int lodCount = int(frame.dims.w);
+    bool prev = gSecondary;
+    gSecondary = true;
+    gTrans = 1.0;
+    gThrough = 0.0;
+    gStopFoliage = false;
+    float t = 0;
+    float vis = 1.0;
+    for (int seg = 0; seg < 48; seg++) {
+        if (t >= maxT) break;
+        float s = float(1 << lod);
+        float len = min(192.0 * s, maxT - t);
+        float uncExit;
+        gSecT = t;
+        int r = traceLod(lod, p + dir * t, dir, len, res, uncExit);
+        if (r == TRACE_HIT) {
+            gStopFoliage = gTrans <= 0.0;
+            vis = 0.0;
+            break;
+        }
+        if (r == TRACE_UNCOVERED) {
+            if (lod + 1 < lodCount) { lod++; continue; }
+            break;
+        }
+        t += len;
+        if (p.y + dir.y * t > 640.0 - float(frame.camInt.y)) break;
+    }
+    gSecondary = prev;
+    if (vis <= 0.0) {
+        if (!gStopFoliage) gThrough = 0.0;
+        gTrans = 0.0;
+        return 0.0;
+    }
+    gThrough += gTrans;  // what crossed every leaf: exp(-0.45 x) of no first leaf at all is 1
+    return gTrans;
+}
+
+// Cosine-weighted direction about n from (u, v) in [0, 1)^2 (Duff et al. 2017 basis, as atlas_truth's)
+float3 cosineDir(float3 n, float u, float v) {
+    float sg = n.z >= 0.0 ? 1.0 : -1.0;
+    float a = -1.0 / (sg + n.z), c = n.x * n.y * a;
+    float3 tb = float3(1.0 + sg * n.x * n.x * a, sg * c, -sg * n.x);
+    float3 bb = float3(c, sg + n.y * n.y * a, -n.y);
+    float r = sqrt(u), ph = 6.2831853 * v;
+    return normalize(tb * (r * cos(ph)) + bb * (r * sin(ph)) + n * sqrt(max(0.0, 1.0 - u)));
+}
+
+// The sky a far surface sees (docs/ATLAS-LOD.md, "Where atlas_core's lighting falls short" 1): the pack's skyAmbient
+// split into its two radiances, sky over the horizon and ground under it, each seen through the hemisphere's
+// visibility: SKY_RAYS cosine-weighted secondary rays a pixel and frame, SKY_REACH voxels of the hit's level long (a
+// cone that widens with the level, so far away valleys and ridges darken, up close eaves and crevices), stratified
+// over the TAA's frames (R2 per pixel rotation). The constant FAR_AMBIENT_OCCLUSION and the 4-tap AO stand in when
+// the frame asks for cheap light (FRAME_LIGHT_LOW), as before.
+static const int SKY_RAYS = 1;
+static const float SKY_REACH = 16.0;
+float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, out float vis) {
+    float day = smoothstep(-0.12, 0.25, sun.y);
+    float3 skyUp = lerp(float3(0.02, 0.025, 0.05), float3(0.33, 0.45, 0.7), day);
+    float3 ground = lerp(float3(0.01, 0.01, 0.012), float3(0.2, 0.18, 0.14), day);
+    uint fi = frame.jitter.z > 0.5 ? (frame.temporal.x & 15u) : 0u;  // a 16-frame cycle: a still pixel converges to one stratified set
+    float ru = pixelDither(px, 11u), rv = pixelDither(px, 13u);
+    float s = float(1 << lod);
+    uint ab = asuint(frame.jitter.w);  // (ATLAS_ABLATE 8192: two rays, 16384: half the reach; measurements)
+    int rays = (ab & 8192u) != 0u ? 2 : SKY_RAYS;
+    float reach = (ab & 16384u) != 0u ? 0.5 * SKY_REACH : SKY_REACH;
+    float3 sum = float3(0, 0, 0);
+    vis = 0.0;
+    for (int k = 0; k < rays; k++) {
+        uint j = fi * uint(rays) + uint(k);
+        float u = frac(ru + float(j) * 0.7548776662), v = frac(rv + float(j) * 0.5698402909);
+        float3 w = cosineDir(faceN, u, v);
+        float T = traceSecondary(o, w, reach * s, lod);
+        sum += (w.y >= 0.0 ? skyUp : ground) * (1.0 - T);
+        vis += T;
+    }
+    vis /= float(rays);
+    // a control variate: the open hemisphere's light is known exactly (skyAmbient: the cosine-weighted split of sky
+    // and ground radiance about the face), the rays only estimate what is taken from it, so an open face (most of the
+    // far field) is exact and noise-free, and only occluded ones carry the rays' noise
+    return max(lerp(ground, skyUp, faceN.y * 0.5 + 0.5) - sum / float(rays), float3(0, 0, 0));
 }
 
 // Far water continues the shader pack's waves (shaderpack lib/waves.glsl waveField at its default 12 waves, open
@@ -640,6 +874,11 @@ float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
         float T = aerialTransmittance(dist, frame);
         float q = apx / sigma;
         float core = exp(-0.5 * q * q);
+        // the glow stands for an emitter the far field cannot draw (a far town's windows and lamps, a block lost in a
+        // coarse level); where the far field holds the emitter's own block, its emissive surface draws it, as Minecraft
+        // draws a lantern near, and a glow over it counted its light twice (a 1.5-block ball at every lamp up close).
+        // Only pixels inside the core ask (a few per light).
+        if (kind != 3u && core > 1e-3 && occupancyAt(l.posYaw.xyz) == 1) core = 0.0;
         float glow = (1.0 - T) * 0.06 * exp(-apx / halo);
         float3 rad = l.shape.xyz;
         // spray: a translucent haze lit by the sun and sky, not a light: its intensity is how much of it there is
@@ -651,12 +890,17 @@ float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
     return sum;
 }
 
-// The far lights on the surfaces around them, as the near field lights them: Minecraft's block light (level 15 x the
-// light's intensity, plus a lava pool's radius, one level less per block; no facing term, like the light map) through
-// the pack's block light curve (lib/lighting.glsl blockLight: pow(l, 3.2) * 1.8 + pow(l, 12) * 2), in the light's
-// colour. What stands between keeps a quarter (the flood fill bends around corners; a wall in the way still shades).
-// p: the hit, camera-relative to camInt; lod: its level (the occlusion trace's).
-float3 farLightsOn(uint2 px, float3 p, int lod, float3 sun) {
+// The far lights on the surfaces around them as point lights (docs/ATLAS-LOD.md, "Where atlas_core's lighting falls
+// short" 3): each light of the pixel's tile within Minecraft's reach R = level + 1 lights it with
+// E = I cos / (d^2 + 0.5^2) x (1 - (d / R)^4)^2, I = 9.4 (level / 15)^2 (the realistic reference's point light, matched
+// to the pack's block-light curve at 3 - 8 blocks from a level-15 light), the cosine both ways on foliage, and its
+// shadow: a secondary ray to a point of the emitter (moving with the TAA's frames: soft), stopping short of the
+// emitter's own voxel. In the pack's warm block-light hue (lib/lighting.glsl blockLight; the game sends every real
+// chunk's emitter as an orange fire, whose colour is its glow's), lava in its own colour at that luminance. Fires and
+// lava light by day as by night (block light is not a time of day); lamps (windows, lanterns) from dusk to dawn.
+// FRAME_LIGHT_LOW: unshadowed. p: the hit, camera-relative to camInt; so: the secondary rays' origin off its face.
+static const float3 BLOCK_LIGHT_HUE = float3(1.0, 0.62, 0.32);
+float3 farLightsOn(uint2 px, float3 p, float3 so, float3 faceN, int lod, float3 sun, bool fol, bool cheap) {
     uint L = uint(frame.weatherParams.y);
     if (L == 0u) return float3(0, 0, 0);
     uint A = uint(frame.weatherParams.w);
@@ -666,7 +910,8 @@ float3 farLightsOn(uint2 px, float3 p, int lod, float3 sun) {
     uint start = actorWord(tableBase + tile / 6u, (tile % 6u) * 2u);
     uint count = min(actorWord(tableBase + tile / 6u, (tile % 6u) * 2u + 1u), 64u);
     float night = smoothstep(0.12, -0.1, sun.y);
-    float t = frame.sunDir.w;
+    uint fi = frame.jitter.z > 0.5 ? (frame.temporal.x & 15u) : 0u;  // a 16-frame cycle: a still pixel converges to one stratified set
+    float s = float(1 << lod);
     float3 sum = float3(0, 0, 0);
     for (uint k = 0u; k < count; k++) {
         uint e = start + k;
@@ -674,9 +919,7 @@ float3 farLightsOn(uint2 px, float3 p, int lod, float3 sun) {
         ActorGpu l = actors[A + li];
         uint kind = uint(l.shape.w + 0.5);
         if (kind == 3u) continue;  // spray is lit, it lights nothing
-        float vis = kind == 0u ? night
-                  : kind == 1u ? (0.1 + 0.9 * night) * (0.82 + 0.18 * sin(t * 11.0 + l.motion.y * 7.0) * sin(t * 4.3 + l.motion.y))
-                  : 0.85 + 0.15 * sin(t * 1.3 + l.motion.y);
+        float vis = kind == 0u ? night : 1.0;
         if (vis <= 0.001) continue;
         // the record's radiance is scaled for the glow (6 x intensity x falloff(dist), lights.cpp): undo it
         float fall = 1.0 / pow(1.0 + l.motion.x / 1500.0, 1.5);
@@ -684,22 +927,31 @@ float3 farLightsOn(uint2 px, float3 p, int lod, float3 sun) {
         float inten = max(base.r, max(base.g, base.b));
         if (inten <= 1e-4) continue;
         float level = 15.0 * min(inten, 1.0) + (kind == 2u ? l.motion.w : 0.0);
+        float R = level + 1.0;
         float3 v = l.posYaw.xyz - p;
         float d = length(v);
-        if (d >= level) continue;
-        float b = (level - d) / 15.0;
-        float3 hue = base / inten;
+        if (d >= R || d < 1e-3) continue;
+        float c = dot(faceN, v / d);
+        if (fol) c = abs(c);
+        if (c <= 0.0) continue;
+        float x = d / R, x4 = x * x * x * x;
+        float E = 9.4 * (level / 15.0) * (level / 15.0) * c / (d * d + 0.25) * (1.0 - x4) * (1.0 - x4);
         float occ = 1.0;
-        if (d > 1.5) {
-            TraceResult rr;
-            rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5; rr.albedo = float3(0, 0, 0); rr.hasAlbedo = 0u;
-            float3 dirL = v / d;
-            float s = float(1 << lod);
-            float unc;
-            // from just off the surface towards the light, stopping a block short of it (its own block)
-            if (traceLod(lod, p + dirL * (0.6 * s), dirL, max(d - 1.2 * s, 0.0), rr, unc) == TRACE_HIT) occ = 0.25;
+        if (!cheap) {
+            // a point of the emitter (a lantern's size), a new one each TAA frame
+            uint hh = hashU(li * 2654435761u ^ (fi * 374761393u) ^ (px.x * 73856093u) ^ (px.y * 19349663u));
+            float3 jit = float3(float(hh & 1023u), float((hh >> 10) & 1023u), float((hh >> 20) & 1023u)) / 1023.0 - 0.5;
+            float3 dv = l.posYaw.xyz + jit * 0.35 - so;
+            float dd = length(dv);
+            float maxT = dd - 0.75 * s;  // short of the emitter's own voxel (solid in the voxel path)
+            if (maxT > 0.05) occ = traceSecondary(so, dv / dd, maxT, lod);
         }
-        sum += hue * (pow(b, 3.2) * 1.8 + pow(b, 12.0) * 2.0) * vis * occ;
+        float3 hue = BLOCK_LIGHT_HUE;
+        if (kind == 2u) {
+            float3 h = base / inten;
+            hue = h * (dot(BLOCK_LIGHT_HUE, float3(0.2126, 0.7152, 0.0722)) / max(dot(h, float3(0.2126, 0.7152, 0.0722)), 1e-4));
+        }
+        sum += hue * (E * vis * occ);
     }
     return sum;
 }
@@ -945,7 +1197,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     // the content-shaped groups for this pixel's primary ray (ATLAS_FRAME_GROUPS): the footprint per block of distance
     // and the threshold, dithered per pixel (and per frame under the host's TAA, which averages the levels)
     gGroups = (frame.dims.z & FRAME_GROUPS) != 0u;
-    if (gGroups) gHead = groupData[0];
+    if (gGroups) gHead = groupData[0];  // (also the secondary rays' material shapes: secondarySigma)
     gAblate = asuint(frame.jitter.w);
     gGroupPa = frame.params.w * frame.params.z;
     gGroupTol = 0.7 + 0.6 * pixelDither(id.xy, phase + 5u);
@@ -992,22 +1244,70 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         // centre of the hit voxel on the world voxel grid (multiples of s; y -64 is a multiple for s <= 64)
         float3 ci = float3(frame.camInt.xyz);
         float3 centre = (floor((p + ci) / s - n * 0.5) + 0.5) * s - ci;
-        // (0.55: smoothed slopes caught more light than the stepped blocks they stand for, the far field read brighter)
-        float wSmooth = res.lod > 0 ? 0.55 : 0.55 * saturate((tHit - 96.0) / 400.0);
-        if ((frame.dims.z & FRAME_FLAT_NORMALS) != 0) wSmooth = 0.0;
         uint ablate = asuint(frame.jitter.w);  // (ATLAS_ABLATE, measurements)
+        // cheap far light (FRAME_LIGHT_LOW, a quality setting; ATLAS_ABLATE 256 measures it): the constant sky occlusion,
+        // the 4-tap AO and the binary sun shadow of before, unshadowed block light
+        bool cheapLight = (frame.dims.z & FRAME_LIGHT_LOW) != 0u || (ablate & 256u) != 0u;
+        // (0.55: smoothed slopes caught more light than the stepped blocks they stand for, the far field read brighter)
+        // The groups' hits are real faces at every distance (a slope is a staircase of tops and sides, and so are its
+        // blocks): their true face normals light them as the blocks are lit (smoothing brightened slopes the blocks do
+        // not have, docs/ATLAS-LOD.md "Where atlas_core's lighting falls short" 4); the voxel path keeps smoothing its
+        // coarse cubes against contour striping
+        float wSmooth = res.lod > 0 ? 0.55 : 0.55 * saturate((tHit - 96.0) / 400.0);
+        if (res.hasAlbedo != 0u && !cheapLight) wSmooth = 0.0;
+        if ((frame.dims.z & FRAME_FLAT_NORMALS) != 0) wSmooth = 0.0;
         if ((ablate & 2u) != 0u) wSmooth = 0.0;
         if (wSmooth > 0.0) {
             float3 sn = smoothNormal(res.lod, centre, 1.0);
             if (dot(sn, -dir) > 0.05) n = normalize(lerp(n, sn, wSmooth));
         }
+        float3 faceN = float3(ax == 0 ? (slope.x > 0 ? -1.0 : 1.0) : 0.0, ax == 1 ? (slope.y > 0 ? -1.0 : 1.0) : 0.0,
+                              ax == 2 ? (slope.z > 0 ? -1.0 : 1.0) : 0.0);
+        // where secondary rays start: the hit, lifted off the face to the plane of its voxel in the voxel path they
+        // trace (a groups hit may lie inside it: a slab's top in a full voxel) and a hair beyond
+        // A groups hit is a face of the real shapes (a snow layer's top a quarter block up its voxel, a drawn box's face up
+        // to its flattening error in front of the content), so the origin is the hit itself, nudged off the face: inside
+        // a shaped voxel's empty part, secondary rays walk its micro-voxels (secondaryShapeMisses); a voxel-path hit is
+        // on its voxel's face. (Lifting it to the voxel's plane picked the wrong voxel whenever the hit was not on one:
+        // black faces along every snow edge.)
+        float3 so = p + faceN * max(0.02, tHit * 3e-5);
+        if (res.hasAlbedo == 0u) {
+            so[ax] = centre[ax] + faceN[ax] * (0.51 * s);
+        } else if (res.lod == 0 && !cheapLight) {
+            // a drawn group's face can lie inside the ground (a box's side between solid blocks, shown where the
+            // box is drawn whole): rays from it start in solid and see nothing (a black bar). Such a face stands for
+            // the surface over it: out of the column upwards, at most three blocks
+            for (int k = 0; k < 3; k++) {
+                uint om = materialAt(0, so);
+                if (om == 0xFFFFFFFFu || secondaryShapeMisses(om, frac(so + ci), float3(0, 1, 0)) || secondarySigma(om, uint(palette[om].emisClass.y)) >= 0.0)
+                    break;
+                so.y = floor(so.y + ci.y) + 1.02 - ci.y;
+            }
+        } else if (res.lod > 0) {
+            // a coarse level's groups hit lies on a micro-voxel face, anywhere in a voxel of the coarse voxel path the
+            // secondary rays trace (whose mip vote may also differ): out of that voxel's solid along the face
+            for (int k = 0; k < 2; k++) {
+                if (!occupiedAt(res.lod, so)) break;
+                float vc = (floor((so[ax] + ci[ax]) / s) + 0.5) * s - ci[ax];
+                so[ax] = vc + faceN[ax] * (0.51 * s);
+            }
+        }
+        bool fol = cls == 1u;
+        float through = 0.0;  // the key light reaching a leaf through the crown (FOLIAGE_SSS)
         if ((frame.dims.z & FRAME_SHADOWS) != 0 && (ablate & 4u) == 0u) {
             // same LOD as the hit (a coarser one is fatter and self-shadows); start one voxel out along the face
-            float3 faceN = float3(ax == 0 ? (slope.x > 0 ? -1.0 : 1.0) : 0.0, ax == 1 ? (slope.y > 0 ? -1.0 : 1.0) : 0.0,
-                                  ax == 2 ? (slope.z > 0 ? -1.0 : 1.0) : 0.0);
             float3 L = keyLightDir(sun);
-            sunVis = dot(n, L) > 0.0 && dot(faceN, L) > -0.2
-                ? traceShadow(p + faceN * (1.01 * s) + L * (0.5 * s), L, res.lod) : 0.0;
+            if (cheapLight) {
+                sunVis = dot(n, L) > 0.0 && dot(faceN, L) > -0.2
+                    ? traceShadow(p + faceN * (1.01 * s) + L * (0.5 * s), L, res.lod) : 0.0;
+            } else if ((dot(n, L) > 0.0 && dot(faceN, L) > -0.2) || fol) {
+                // through foliage by its coverage (dappled light under a crown, light through its leaves)
+                sunVis = traceSecondary(so + L * (0.05 * s), L, 2048.0, res.lod);
+                through = max(sunVis, gThrough);
+                if (dot(n, L) <= 0.0) sunVis = 0.0;
+            } else {
+                sunVis = 0.0;
+            }
         }
         if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, keyLightDir(sun));
         float3 albedo = res.hasAlbedo != 0u ? res.albedo : m.albedoRough.rgb;
@@ -1033,7 +1333,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         }
         // ambient occlusion: solid neighbours around the air voxel in front of the face (4 taps in the face plane)
         float ao = 1.0;
-        if ((ablate & 1u) == 0u) {
+        if ((ablate & 1u) == 0u && (cls == 2u || cheapLight)) {  // (the traced sky has no use for it)
             float3 fn = float3(ax == 0 ? (slope.x > 0 ? -1.0 : 1.0) : 0.0, ax == 1 ? (slope.y > 0 ? -1.0 : 1.0) : 0.0,
                                ax == 2 ? (slope.z > 0 ? -1.0 : 1.0) : 0.0);
             float3 front = centre + fn * s;
@@ -1085,12 +1385,33 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             m.albedoRough.a = farWaterAlpha(wind.y, tHit) + foam * 0.2;
             reflection = (ablate & 16u) != 0u ? float3(0, 0, 0) : waterReflection(p, dir, k, tHit, res.lod, sun, n);
         }
-        // the near field's sky light is darkened by sky occlusion, vertex AO and SSAO that a far voxel cannot see:
-        // land takes their average (FAR_AMBIENT_OCCLUSION, calibrated against fid-* near / far pairs)
-        if (cls != 2u) ao *= FAR_AMBIENT_OCCLUSION;
-        color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls, ao, reflection);
+        float3 ambient;
+        float skyVis = 1.0;
+        if (cls == 2u) {
+            ambient = skyAmbient(n, sun) * ao;
+        } else if (cheapLight) {
+            // the near field's sky light is darkened by sky occlusion, vertex AO and SSAO that a far voxel cannot see:
+            // land takes their average (FAR_AMBIENT_OCCLUSION, calibrated against fid-* near / far pairs)
+            ambient = skyAmbient(n, sun) * (ao * FAR_AMBIENT_OCCLUSION) + FAR_AMBIENT_FLOOR;
+        } else {
+            // the sky this face sees (traced visibility of the hemisphere), the pack's floor under it
+            ambient = skyVisible(id.xy, so, faceN, res.lod, sun, skyVis) + FAR_AMBIENT_FLOOR;
+        }
+        // an emitter's texels glow by their own brightness, as the pack's light blocks do (lib/materials.glsl MAT_LIGHT:
+        // 4 x smoothstep(0.35, 0.8, luminance): a lantern's flame bright, its iron frame dark); never below the flat
+        // glow of a material without texels (lava and fire keep at least that)
+        if (cls == 3u && (res.hasAlbedo != 0u || carded) && !cheapLight)
+            m.emisClass.x = max(m.emisClass.x, 2.0 * smoothstep(0.35, 0.8, dot(albedo, float3(0.2126, 0.7152, 0.0722))));
+        color = shadeSurfaceAmb(albedo, m, n, dir, sun, sunVis, cls, ambient, reflection);
+        // light through leaves (the pack's FOLIAGE_SSS, deferred.fsh): strongest looking towards the light through them
+        if (fol && !cheapLight && (ablate & 1024u) == 0u && (frame.dims.z & FRAME_SHADOWS) != 0) {
+            float3 L = keyLightDir(sun);
+            float back = pow(max(dot(dir, L), 0.0), 4.0) * 0.8 + 0.25;
+            color += albedo * keyLightRadiance(sun) * (through * 0.6 * back * 0.5);
+        }
         // the lamps, torches, fires and lava around it light it (the near field's block light, ATLAS lights)
-        if (cls != 2u && (frame.dims.z & FRAME_DEBUG_ALBEDO) == 0 && (ablate & 8u) == 0u) color += albedo * farLightsOn(id.xy, p, res.lod, sun);
+        if (cls != 2u && (frame.dims.z & FRAME_DEBUG_ALBEDO) == 0 && (ablate & 8u) == 0u)
+            color += albedo * farLightsOn(id.xy, p, so, faceN, res.lod, sun, fol, cheapLight);
         if (foam > 0.0) {
             // white water: a bright rough surface over the river
             float3 up = float3(0, 1, 0);
@@ -1099,6 +1420,13 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         }
         depth = tHit;
         color = applyAerial(color, dir, sun, tHit, frame);
+        // (ATLAS_ABLATE 4096, measurements: the secondary rays' origin solid in the voxel path, sun and sky visibility)
+        // (ATLAS_ABLATE 4096, measurements: one grey value past the shading, readable through any tonemap: the sky
+        // visibility; with 2048 whether the secondary rays' origin is in a voxel-path solid)
+        if ((ablate & 4096u) != 0u) {
+            float vv = (ablate & 2048u) != 0u ? (materialAt(res.lod, so) != 0xFFFFFFFFu ? 1.0 : 0.0) : skyVis;
+            color = float3(vv, vv, vv);
+        }
         if ((frame.dims.z & FRAME_DEBUG_ALBEDO) != 0) color = albedo;
         if ((frame.dims.z & FRAME_DEBUG_ALBEDO) != 0 && carded) cls = 6u;  // (already shaded: the offline tools leave it)
         if ((frame.dims.z & FRAME_DEBUG_WEATHER) != 0) {

@@ -127,6 +127,7 @@ uint32_t flagsOf(const std::string& s) {
     if (s.find("sky") != std::string::npos) f |= ATLAS_FRAME_SKY;
     if (s.find("quarter") != std::string::npos) f |= ATLAS_FRAME_CLOUDS_QUARTER;
     if (s.find("flatnormals") != std::string::npos) f |= ATLAS_FRAME_FLAT_NORMALS;
+    if (s.find("lightlow") != std::string::npos) f |= ATLAS_FRAME_LIGHT_LOW;
     if (s.find("dbgweather") != std::string::npos) f |= ATLAS_FRAME_DEBUG_WEATHER;
     return f;
 }
@@ -402,7 +403,10 @@ int main(int argc, char** argv) {
     std::string base;
     double best = 1e30, median = 0;
     int frames = std::max(1, int(num(a, "frames", 1)));
-    bool interleave = num(a, "interleave", 0) > 0;
+    // interleave=1: timing frames alternate the groups and the voxel path; interleave=light: the far light traced and
+    // cheap (ATLAS_FRAME_LIGHT_LOW), the same clocks for both
+    uint32_t interleaveBits = str(a, "interleave", "") == "light" ? ATLAS_FRAME_LIGHT_LOW : ATLAS_FRAME_GROUPS;
+    bool interleave = num(a, "interleave", 0) > 0 || str(a, "interleave", "") == "light";
     std::vector<double> otherTimes;  // (interleave) the other path's timing frames
     int spp = std::max(1, int(num(a, "spp", 1)));
     auto renderOne = [&](const std::string& out, double x, double y, double z, double yawIn, double pitchIn, double fovIn,
@@ -481,7 +485,7 @@ int main(int argc, char** argv) {
                 // interleave=1: timing frames alternate the groups and the voxel path (the same clocks for both)
                 bool other = interleave && smp == 0 && i < frames && (i & 1);
                 uint32_t keepFlags = f.flags;
-                if (other) f.flags ^= ATLAS_FRAME_GROUPS;
+                if (other) f.flags ^= interleaveBits;
                 if (atlas_render(ctx, &f, &o) != ATLAS_OK) {
                     std::fprintf(stderr, "render: %s\n", atlas_last_error(ctx));
                     return 4;

@@ -576,7 +576,9 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.jitter[1] = f->height > 0 ? ctx->jitter[1] * 2.0f / float(f->height) : 0.0f;
     g.jitter[2] = ctx->jitter[0] != 0.0f || ctx->jitter[1] != 0.0f ? 1.0f : 0.0f;
     // ATLAS_ABLATE=<bits>: measurements only, leave parts of the shading out (1 AO, 2 smooth normals, 4 shadows, 8 far
-    // lights, 16 water reflections, 32 the trace itself after the first hit's distance)
+    // lights, 16 water reflections, 32 the trace itself after the first hit's distance; the far light: 256 the cheap
+    // light of ATLAS_FRAME_LIGHT_LOW, 1024 no light through leaves, 4096 a grey of the sky visibility (| 2048: the
+    // secondary rays' origin in a solid), 8192 two sky rays, 16384 half their reach)
     {
         static const uint32_t ablate = [] {
             const char* v = std::getenv("ATLAS_ABLATE");
