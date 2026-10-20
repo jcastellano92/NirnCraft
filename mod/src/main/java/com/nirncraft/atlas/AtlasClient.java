@@ -64,6 +64,7 @@ public final class AtlasClient {
     private static AtlasNative.Context ctx;
     private static AtlasTargets targets;
     private static boolean farThisFrame;  // atlas drew this frame (its targets hold it): the near pass composites them
+    private static boolean nearLitThisFrame;  // and lit the near pass's pixels (ATLAS_FRAME_NEAR_LIGHT)
     private static AtlasFarField farField;
     private static ClientLevel startedFor;  // the level the far field's tiles belong to
     private static final WeatherFeed WEATHER = new AtlasWeatherFeed();
@@ -130,7 +131,7 @@ public final class AtlasClient {
         // after atlas's frame (or its absence): our near terrain into the frame, atlas's far frame behind it
         NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.LOW,
                 (RenderLevelStageEvent.AfterOpaqueBlocks e) -> AtlasGuard.run(AtlasNearPass.FEATURE,
-                        () -> AtlasNearPass.resolve(e.getRenderPass(), farThisFrame ? targets : null)));
+                        () -> AtlasNearPass.resolve(e.getRenderPass(), farThisFrame ? targets : null, nearLitThisFrame)));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) ->
                 AtlasGuard.run("atlas client tick", () -> {
                     AtlasTargets.flushClear();
@@ -210,6 +211,7 @@ public final class AtlasClient {
 
     private static void afterOpaque(RenderLevelStageEvent.AfterOpaqueBlocks event) {
         farThisFrame = false;
+        nearLitThisFrame = false;
         if (failed) return;
         try {
             Minecraft mc = Minecraft.getInstance();

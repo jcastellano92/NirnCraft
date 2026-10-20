@@ -2,19 +2,31 @@
 #extension GL_ARB_separate_shader_objects : require
 #include <minecraft:fog.glsl>
 #include <minecraft:projection.glsl>
+#include <nirncraft:atlas_look.glsl>
 // Infinite ATLAS near pass, the resolve (com.nirncraft.atlas.AtlasNearPass): one full-screen triangle in the frame's
 // main pass right after opaque terrain would have been drawn. Near pixels are lit from the G-buffer, far pixels take
 // atlas's frame, and both write the frame's depth (reverse-Z, vanilla's projection), so entities, block entities,
 // particles, water, clouds and weather drawn after it depth-test against our terrain, near and far.
-//  Sampler0: G-buffer albedo (alpha 1 where a surface is)     Sampler1: G-buffer light (r block, g sky: level / 15)
-//  Sampler2: vanilla's lightmap (16 x 16: block x sky)        Sampler3: G-buffer depth (reverse-Z, 0 = nothing)
-//  Sampler4: atlas colour (linear HDR, premultiplied)         Sampler5: atlas depth (view distance, 1e30 = none)
+//  Sampler0: G-buffer albedo (sRGB, alpha 1 where a surface is)   Sampler1: G-buffer light (r block, g sky, ba normal)
+//  Sampler2: vanilla's lightmap (16 x 16: block x sky)              Sampler3: G-buffer depth (reverse-Z, 0 = nothing)
+//  Sampler4: atlas colour: far pixels linear HDR premultiplied; near pixels (near light) aerial inscatter, transmittance
+//  Sampler5: atlas depth (view distance, 1e30 = none)               Sampler6: atlas near light (irradiance, sun vis)
+// Look: x exposure (linear), y night vision strength, z mode (0: vanilla's lightmap, stage A; 1: atlas's near light,
+// one light near and far), w unused
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;
 uniform sampler2D Sampler2;
 uniform sampler2D Sampler3;
 uniform sampler2D Sampler4;
 uniform sampler2D Sampler5;
+uniform sampler2D Sampler6;
+layout(std140) uniform NearInfo {
+    vec4 Look;     // x exposure, y night vision, z mode, w unused
+    vec4 KeyDir;   // (near_forward.fsh: the key light, the sky and ground radiance)
+    vec4 KeyRad;
+    vec4 SkyUp;
+    vec4 Ground;
+};
 layout(location = 0) in vec2 texCoord;
 layout(location = 0) out vec4 fragColor;
 
@@ -23,27 +35,54 @@ vec3 viewRay(vec2 uv, float depth) {
     return v.xyz / v.w;
 }
 
+vec3 octDecode(vec2 e) {
+    e = e * 2.0 - 1.0;
+    vec3 n = vec3(e.x, 1.0 - abs(e.x) - abs(e.y), e.y);
+    if (n.y < 0.0) n.xz = (1.0 - abs(n.zx)) * vec2(n.x >= 0.0 ? 1.0 : -1.0, n.z >= 0.0 ? 1.0 : -1.0);
+    return normalize(n);
+}
+
+vec3 environmentalFog(vec3 rgb, float dist) {
+    return mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
+}
+
 void main() {
+    bool own = Look.z > 0.5;
     float nearDepth = texture(Sampler3, texCoord).r;
     if (nearDepth > 0.0) {
         vec3 albedo = texture(Sampler0, texCoord).rgb;
-        vec2 levels = texture(Sampler1, texCoord).rg;
-        // stage A: vanilla's own light curve (the lightmap: day, night, flicker, night vision, effects)
-        vec3 light = texture(Sampler2, clamp(levels * (15.0 / 16.0) + 0.5 / 16.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0))).rgb;
+        vec4 info = texture(Sampler1, texCoord);
+        vec2 levels = info.rg;
         float dist = length(viewRay(texCoord, nearDepth));
-        vec4 lit = vec4(albedo * light, 1.0);
-        fragColor = vec4(mix(lit.rgb, FogColor.rgb,
-                linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a), 1.0);
+        vec3 rgb;
+        if (own) {
+            // one light: what atlas computed reaches this surface (the far field's own sun, traced shadow, traced sky),
+            // capped by the sky light vanilla knows (a cave atlas has no sections for must not see the sky), the block
+            // light from vanilla's levels, the ambient floor; then atlas's aerial perspective for this distance
+            vec4 nl = texture(Sampler6, texCoord);
+            vec4 aerial = texture(Sampler4, texCoord);
+            float open = smoothstep(0.05, 0.35, levels.g);
+            vec3 radiance = atlasSrgbToLinear(albedo) * (nl.rgb * open + atlasBlockLight(levels.r) + vec3(0.012, 0.012, 0.016));
+            radiance = radiance * aerial.a + aerial.rgb;
+            rgb = atlasDisplay(radiance, Look.x, Look.y);
+        } else {
+            // stage A: vanilla's own light curve (the lightmap: day, night, flicker, night vision, effects) and its
+            // fixed face shade (the G-buffer took it out of the albedo)
+            vec3 n = octDecode(info.ba), a = abs(n);
+            float shade = max(a.x, max(a.y, a.z)) > 0.99 ? (n.y > 0.5 ? 1.0 : n.y < -0.5 ? 0.5 : a.z > 0.5 ? 0.8 : 0.6) : 1.0;
+            rgb = albedo * shade * texture(Sampler2, clamp(levels * (15.0 / 16.0) + 0.5 / 16.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0))).rgb;
+        }
+        fragColor = vec4(environmentalFog(rgb, dist), 1.0);
         gl_FragDepth = nearDepth;
         return;
     }
     vec4 c = texture(Sampler4, texCoord);
     float d = texture(Sampler5, texCoord).r;
     if (c.a <= 0.002 || d > 1e29) discard;  // the sky: what the sky pass drew stays
-    // atlas's harness tonemapper (c / (1 + c), gamma 2.2) on the straight colour, then the near field's
-    // environmental fog as it stands at the edge of the loaded terrain (AtlasFallback's rule)
     vec3 straight = max(c.rgb / max(c.a, 1e-4), vec3(0.0));
-    vec3 ldr = pow(straight / (1.0 + straight), vec3(1.0 / 2.2));
+    // own: the same display as the near pixels; stage A: atlas's harness tonemapper (c / (1 + c), gamma 2.2)
+    vec3 ldr = own ? atlasDisplay(straight, Look.x, Look.y) : pow(straight / (1.0 + straight), vec3(1.0 / 2.2));
+    // the near field's environmental fog as it stands at the edge of the loaded terrain (AtlasFallback's rule)
     float edge = max(FogRenderDistanceEnd, 16.0);
     float f = clamp(linear_fog_value(min(d, edge), FogEnvironmentalStart, FogEnvironmentalEnd), 0.0, 1.0) * FogColor.a;
     fragColor = vec4(mix(ldr, FogColor.rgb, f) * c.a, c.a);

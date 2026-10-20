@@ -24,6 +24,7 @@ layout(location = 5) in float ChunkVisibility;
 layout(location = 0) out vec4 vertexColor;
 layout(location = 1) out vec2 texCoord0;
 layout(location = 2) out vec2 lightLevels;
+layout(location = 3) out vec3 viewPos;   // camera-relative world position (the face normal from its derivatives)
 
 void main() {
     vec3 pos = Position + (ChunkPosition - CameraBlockPos) + CameraOffset;
@@ -31,4 +32,5 @@ void main() {
     vertexColor = Color;      // biome tint x ambient occlusion x face shade, as vanilla baked it
     texCoord0 = UV0;
     lightLevels = vec2(UV2);  // block, sky: light level x 16 (0..240), smooth light interpolates them
+    viewPos = pos;
 }

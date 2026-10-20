@@ -33,6 +33,7 @@ final class AtlasTargets implements AutoCloseable {
     static final Identifier SUNMAP = Identifier.fromNamespaceAndPath("nirncraft", "atlas/sunmap");
 
     private static Target colorTarget, depthTarget, sunTarget;
+    private static Target nearLightTarget;  // atlas's light on the near pass's pixels (RGBA16F: irradiance, sun visibility)
 
     private final int width, height, sunSize;
     private final Target color, depth, sun;
@@ -55,6 +56,7 @@ final class AtlasTargets implements AutoCloseable {
         colorTarget.resize(width, height);
         depthTarget.resize(width, height);
         sunTarget.resize(Math.max(1, sunSize), Math.max(2, sunSize + 1));
+        nearLightTarget.resize(width, height);
         AtlasTargets t = new AtlasTargets(width, height, sunSize, colorTarget, depthTarget, sunTarget, shared);
         t.clear();
         return t;
@@ -67,6 +69,7 @@ final class AtlasTargets implements AutoCloseable {
         colorTarget = new Target("atlas color", GpuFormat.RGBA16_FLOAT, 1, 1);
         depthTarget = new Target("atlas depth", GpuFormat.R32_FLOAT, 1, 1);
         sunTarget = new Target("atlas sun map", GpuFormat.RG32_FLOAT, 1, 2);
+        nearLightTarget = new Target("atlas near light", GpuFormat.RGBA16_FLOAT, 1, 1);
         var textures = Minecraft.getInstance().getTextureManager();
         textures.register(COLOR, colorTarget);
         textures.register(DEPTH, depthTarget);
@@ -108,6 +111,15 @@ final class AtlasTargets implements AutoCloseable {
 
     Target depthTarget() {
         return depth;
+    }
+
+    /** atlas's light on the near pass's pixels (AtlasGlIO.dstNearLight; AtlasNearPass's resolve samples it). */
+    Target nearLightTarget() {
+        return nearLightTarget;
+    }
+
+    int nearLightId() {
+        return nearLightTarget.glId;
     }
 
     /** Nothing far (another dimension, or no window built yet): coverage 0, so the pack shows the near field alone.
