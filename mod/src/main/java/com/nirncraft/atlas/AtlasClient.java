@@ -151,6 +151,7 @@ public final class AtlasClient {
             serverWorldId = 0;
             farActors = null;
             farSites = null;
+            AtlasSites.clearFacings();
         });
         AtlasNet.onHello = m -> AtlasGuard.run("atlas server hello", () -> onHello(m));
         AtlasNet.onTile = m -> AtlasGuard.run("atlas server tiles", () -> {
@@ -161,6 +162,7 @@ public final class AtlasClient {
             farActorsAt = System.nanoTime();
         };
         AtlasNet.onFarSites = m -> farSites = m;
+        AtlasNet.onFarFacings = AtlasSites::acceptFacings;
         AtlasNet.onFarEdits = AtlasEditsClient::accept;
         AtlasNet.onFarSections = AtlasEditsClient::acceptSections;
     }

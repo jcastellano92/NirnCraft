@@ -2,13 +2,19 @@ package com.nirncraft.atlas;
 
 // atlas:sandbox-only (compiled against the real mod by sandbox_check.ps1, not by compile_check.ps1's stubs)
 
+import com.nirncraft.landmarks.Grounding;
 import com.nirncraft.landmarks.H;
 import com.nirncraft.landmarks.Kind;
 import com.nirncraft.landmarks.Kinds;
+import com.nirncraft.landmarks.LandmarkBuilder;
 import com.nirncraft.landmarks.LandmarkSite;
+import com.nirncraft.landmarks.LandmarkWorldData;
 import com.nirncraft.landmarks.Landmarks;
 import com.nirncraft.landmarks.Tier;
 import com.nirncraft.network.SkyNetwork;
+import com.nirncraft.tamriel.MapSample;
+import com.nirncraft.tamriel.TamrielMap;
+import com.nirncraft.tamriel.terrain.TamrielHeight;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,8 +34,8 @@ import java.util.function.IntBinaryOperator;
  * The seeded natural landmarks (com.nirncraft.landmarks: colossal trees, fungal and crystal spires, giant ribcages,
  * stone arches, mesas, glacier towers, menhirs, hoodoos ...) in the far field. Where they stand depends on the world
  * seed, which never leaves the server, so the server enumerates them around each player (Landmarks.inRect: XL out to
- * 16 km, the tall L kinds out to 6 km) and sends them (AtlasNet.FarSites; the integrated server does the same for its
- * own player), and the client draws each from its builder's dimensions (build/Giants, Formations: the seeded size
+ * 16 km, the tall L kinds out to 6 km), keeps those that stand or that the builder is expected to build (enumerate)
+ * and sends them (AtlasNet.FarSites; the integrated server does the same for its own player), and the client draws each from its builder's dimensions (build/Giants, Formations: the seeded size
  * factor H.between(seed, 11, 0.75, 1.3), the site's facing), standing on the far ground. A site's random details
  * (satellite spires, roots, the lean of a shaft) are left out: the silhouette is the massing.
  */
@@ -52,6 +58,8 @@ final class AtlasNatural {
         ServerLevel level = server.overworld();
         if (level == null || AtlasTileServer.hello() == null) return;  // not a Tamriel world: no far field to feed
         long seed = level.getSeed();
+        LandmarkWorldData world = level.players().isEmpty() ? null : LandmarkWorldData.get(level);
+        Grounding.Columns ground = level.players().isEmpty() ? null : ground(server);
         for (ServerPlayer p : level.players()) {
             long[] at = sentAt.get(p.getUUID());
             int px = p.getBlockX(), pz = p.getBlockZ();
@@ -66,10 +74,13 @@ final class AtlasNatural {
             UUID id = p.getUUID();
             worker.execute(() -> {
                 try {
-                    AtlasNet.FarSites m = enumerate(seed, px, pz);
+                    AtlasNet.FarSites m = enumerate(seed, px, pz, world, ground);
+                    AtlasNet.FarFacings f = AtlasSites.facings(level, px, pz, XL_RANGE);
                     server.execute(() -> {
                         ServerPlayer sp = server.getPlayerList().getPlayer(id);
-                        if (sp != null && !sp.hasDisconnected()) SkyNetwork.sendToPlayer(sp, m);
+                        if (sp == null || sp.hasDisconnected()) return;
+                        SkyNetwork.sendToPlayer(sp, m);
+                        if (f.ids().length > 0) SkyNetwork.sendToPlayer(sp, f);
                     });
                 } catch (RuntimeException e) {
                     server.execute(() -> sentAt.remove(id));  // try again next round
@@ -89,19 +100,56 @@ final class AtlasNatural {
         sentAt.clear();
         if (worker != null) worker.shutdownNow();
         worker = null;
+        predicted.clear();
+        height = null;
+        heightOf = null;
+        AtlasSites.stopServer();
     }
 
-    /** The XL sites out to XL_RANGE and the tall L ones out to L_RANGE around (x, z), nearest first, capped. */
-    static AtlasNet.FarSites enumerate(long seed, int x, int z) {
-        List<LandmarkSite> out = new ArrayList<>();
-        for (LandmarkSite s : Landmarks.inRect(seed, x - XL_RANGE, z - XL_RANGE, x + XL_RANGE, z + XL_RANGE)) {
-            if (s.tier() == Tier.XL) out.add(s);
-            else if (s.tier() == Tier.L && TALL_L.contains(s.kind().builder())
-                    && Math.abs(s.x() - x) <= L_RANGE && Math.abs(s.z() - z) <= L_RANGE) out.add(s);
+    /** Site key -> the builder's predictable refusals let it stand (deterministic per world: computed once). */
+    private static final Map<Long, Boolean> predicted = new java.util.concurrent.ConcurrentHashMap<>();
+    private static volatile TamrielHeight height;
+    private static volatile MinecraftServer heightOf;
+
+    /** The world's terrain columns without chunks (the seeded height and the map's water), or null off Tamriel. */
+    private static Grounding.Columns ground(MinecraftServer server) {
+        if (heightOf != server) {
+            height = AtlasExactSource.heightOf(server);
+            heightOf = server;
         }
-        out.sort((a, b) -> Long.compare((long) (a.x() - x) * (a.x() - x) + (long) (a.z() - z) * (a.z() - z),
+        TamrielHeight h = height;
+        if (h == null) return null;
+        return (x, z) -> {
+            MapSample m = new MapSample();
+            TamrielMap.sample(x, z, m);
+            double y = h.height(x, z, m);
+            return Float.isNaN(AtlasExactSource.waterAt(y, m)) ? (int) Math.floor(y) : Grounding.Columns.WET;
+        };
+    }
+
+    /**
+     * The XL sites out to XL_RANGE and the tall L ones out to L_RANGE around (x, z) that stand or are expected to,
+     * nearest first, capped. A site whose chunk generation decorated is drawn as it came out (world: built or refused,
+     * an exception counting as refused); any other must pass the refusals LandmarkBuilder.predictRefusal can tell
+     * without the chunk (baked plans, slope / water / depth on the predicted terrain). A surface structure over a site
+     * (a seeded random start) cannot be predicted: such a site is drawn until its chunk generates and is recorded
+     * refused. Chunks generated before outcomes were recorded have none and keep the prediction.
+     */
+    static AtlasNet.FarSites enumerate(long seed, int x, int z, LandmarkWorldData world, Grounding.Columns ground) {
+        List<LandmarkSite> all = new ArrayList<>();
+        for (LandmarkSite s : Landmarks.inRect(seed, x - XL_RANGE, z - XL_RANGE, x + XL_RANGE, z + XL_RANGE)) {
+            if (s.tier() == Tier.XL) all.add(s);
+            else if (s.tier() == Tier.L && TALL_L.contains(s.kind().builder())
+                    && Math.abs(s.x() - x) <= L_RANGE && Math.abs(s.z() - z) <= L_RANGE) all.add(s);
+        }
+        all.sort((a, b) -> Long.compare((long) (a.x() - x) * (a.x() - x) + (long) (a.z() - z) * (a.z() - z),
                 (long) (b.x() - x) * (b.x() - x) + (long) (b.z() - z) * (b.z() - z)));
-        int n = Math.min(out.size(), AtlasNet.MAX_SITES);
+        List<LandmarkSite> out = new ArrayList<>();
+        for (LandmarkSite s : all) {
+            if (out.size() >= AtlasNet.MAX_SITES) break;
+            if (stands(s, seed, world, ground)) out.add(s);
+        }
+        int n = out.size();
         int[] xz = new int[n * 2];
         long[] seeds = new long[n];
         byte[] facing = new byte[n];
@@ -115,6 +163,19 @@ final class AtlasNatural {
             kinds[i] = s.kind().id();
         }
         return new AtlasNet.FarSites(n, xz, kinds, seeds, facing);
+    }
+
+    /** Built or refused as recorded at generation, else as predicted (once per site). */
+    private static boolean stands(LandmarkSite s, long seed, LandmarkWorldData world, Grounding.Columns ground) {
+        Boolean done = world == null ? null : world.outcome(s.key());
+        if (done != null) return done;
+        return predicted.computeIfAbsent(s.key(), k -> {
+            try {
+                return LandmarkBuilder.predictRefusal(s, seed, ground) == null;
+            } catch (RuntimeException e) {
+                return true;  // a prediction that failed draws the site, as before predictions
+            }
+        });
     }
 
     // ---- client: the silhouettes ----------------------------------------------------------------------------------
