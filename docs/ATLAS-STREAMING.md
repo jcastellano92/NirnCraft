@@ -133,7 +133,38 @@ What the pipeline does (the full map with file:line: the "far-field loading pipe
 12. **Order-independent generation**: every feature a pure function of the seed and its position (stateless hashing,
     counter-based random numbers, bounded footprints), nothing depending on which chunk generated first ("unsafe
     terrain read during worldgen" at Leyawiin is that kind of dependence). A second survey (deterministic generation,
-    log compaction and generator upgrades, anti-cheat for information leaks, hash-tree sync) grounds the design.
+    log compaction and generator upgrades, anti-cheat for information leaks, hash-tree sync) grounds the design
+    (docs/ATLAS-RESEARCH.md, survey 2).
+
+### Five decisions before building (from survey 2; proposed, the owner's to confirm)
+
+1. **Arithmetic.** Every discrete generation outcome (a block, a height, a feature placed or not) in integer or fixed
+   point, with one counter RNG (Philox-4x32 keyed by seed, generator version and stage, indexed by position and draw);
+   no `Math.*` or float thresholds in generation, floats only in client-only cosmetics. Only this makes CPU, GPU, Java
+   and C++ agree bit for bit. Gate: one region generated in shuffled orders, 1 and N threads, Java and native, hashes
+   equal.
+2. **Generation contract.** A stage DAG: geography cells, heightfield, carvers, feature anchors (one attempt per cell,
+   with a declared maximum footprint), rasterise in a canonical order. A feature reads the heightfield and anchors,
+   never blocks another feature wrote; large sites are planned as data. Vanilla and mod features that break this are
+   wrapped into the anchor stage or turned off. Every stage answers `sample(x, z, lod)`, so the far field asks only for
+   the detail it needs.
+3. **Public and secret.** Two keys: the public seed drives geometry (what every client generates and the far field
+   draws), a server-only key drives secrets (ores, loot, hidden rooms, traps, quest objects). Clients generate
+   placeholder stone there; the server sends a section's secret overlay once it is in radius and in line of sight,
+   with a look-ahead of ping times speed (Valorant's fog of war). Separate hash roots for the public base and the
+   overlay. Decoys come from the server key and persist; a honeypot hit is evidence for the host's review, never a ban
+   by itself; any action gives a reason and an appeal (EU DSA Article 17, GDPR Article 22). The hardest to retrofit,
+   so decided first.
+4. **Edit semantics.** The edit layer holds absolute overrides (the block's final state with the base value's hash),
+   not deltas; an edit back to the base deletes itself, so dig-and-refill stays bounded. Checkpoint after N entries, B
+   bytes or unload; the log is truncated once every client has acknowledged past it. Doors, crops and similar churn
+   are block-entity state, not log entries. Generator upgrade: untouched regions regenerate; edited ones keep their
+   generator version or are materialised once; a blended band between; stored base hashes flag edits that now
+   conflict with the new base.
+5. **Hash tree v1.** A fixed spatial shape (world, region, chunk, section; one edit is about four rehashes, batched per
+   tick), BLAKE3 with domain separation (leaf and node prefixes, RFC 6962), hash and generator versions in every
+   leaf, a canonical section encoding (palette order and padding fixed). Untouched base hashes are pure functions of
+   seed, version and position, computed lazily. Sync top down from region roots.
 
 ### Own all of it: one spectrum, no vanilla terrain (owner, 2026-10-19)
 
