@@ -87,6 +87,11 @@ struct FrameGpu {
     int4 vgOrigin;
     uint4 vgDims;
     float4 viewProj[4];  // (abi 0.17, FRAME_PRIMARY_NEAR) camera-relative view-projection (columns): the host's NDC depth
+    // (abi 0.17, atlas_set_eclipse) an eclipse's occulters (the moons near the sun): centre relative to the camera (km,
+    // world axes), w radius (km, 0: none); eclipseC x km a world block, y 1 when any is set
+    float4 eclipseA;
+    float4 eclipseB;
+    float4 eclipseC;
 };
 
 // the frame's moon, copied by each entry point (the shared lighting has no frame of its own)

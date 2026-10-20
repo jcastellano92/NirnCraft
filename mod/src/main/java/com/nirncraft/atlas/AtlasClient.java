@@ -354,6 +354,10 @@ public final class AtlasClient {
             frame.sunX = sun[0];
             frame.sunY = sun[1];
             frame.sunZ = sun[2];
+            // an eclipse's shadow on the far field: the moons near the sun, each surface's sun seen from where it is
+            // (the umbra's footprint dark, the land and the air beyond it lit)
+            ctx.setEclipse(com.nirncraft.atmosphere.client.NightSky.occulterBlock(),
+                    (float) com.nirncraft.atmosphere.MoonMath.KM_PER_BLOCK);
             frame.timeSec = (state.gameTime + state.worldPartialTicks) / 20f;
             // visual tests: the clouds (and their shadows) still, so the views of a pair taken seconds apart see one
             // sky (the day time stands still there: the clock of the scene's time of day)

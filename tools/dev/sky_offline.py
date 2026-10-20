@@ -41,6 +41,7 @@ SHADERS = ROOT / "mod/src/main/resources/assets/nirncraft/shaders"
 TEX = ROOT / "mod/src/main/resources/assets/nirncraft/textures/environment"
 PATH_DEG = -25.0
 ECLIPSE_DEPTH = 0.9997  # AtlasLook.ECLIPSE_DEPTH
+ECLIPSE_ADAPT = 6.0  # stops the eye opens in an eclipse's totality (minutes, not a night's adaptation)
 EYE_Y = 120.0
 
 VERT = """#version 330
@@ -205,31 +206,34 @@ class Sky:
         self.masser_relief = self._image(TEX / "masser_relief.png")
         self.secunda = self._image(TEX / "secunda_albedo.png")
         self.secunda_relief = self._image(TEX / "secunda_relief.png")
-        self.ubo_moons = gl.buffer(reserve=16 * 4)
+        self.masser_detail = self._image(TEX / "masser_detail.png", repeat_x=True, repeat_y=True)
+        self.secunda_detail = self._image(TEX / "secunda_detail.png", repeat_x=True, repeat_y=True)
+        self.ubo_moons = gl.buffer(reserve=32 * 4)  # MoonMath.BLOCK_FLOATS
         self.lut = gl.texture((192, 108), 4, dtype="f2")
         self.lut.filter = (moderngl.LINEAR, moderngl.LINEAR)
         self.lut.repeat_y = False
         self.lut_fbo = gl.framebuffer([self.lut])
-        self.ubo_air = gl.buffer(reserve=7 * 16)
+        self.ubo_air = gl.buffer(reserve=9 * 16)  # (AirInfo: 7 vec4 + AirOcculter[2])
         self.ubo_night = gl.buffer(reserve=120 * 4)
         self.ubo_signs = gl.buffer(reserve=(13 + 364 + 40) * 16)  # NirnCelestial.CATALOGUE_FLOATS
         self.ubo_cel = gl.buffer(reserve=208 * 4)  # NirnCelestial.BLOCK_FLOATS
         self.ubo_sky = gl.buffer(reserve=112)
         self.coeffs = self.core.coeffs()
 
-    def _image(self, path: Path, repeat_x=False):
+    def _image(self, path: Path, repeat_x=False, repeat_y=False):
         im = Image.open(path).convert("RGBA")
         t = self.gl.texture(im.size, 4, im.tobytes())  # row 0 at v = 0, as the game uploads
         t.build_mipmaps()
         t.filter = (moderngl.LINEAR_MIPMAP_LINEAR, moderngl.LINEAR)
         t.repeat_x = repeat_x
-        t.repeat_y = False
+        t.repeat_y = repeat_y
         return t
 
     def _bind(self, prog):
         units = {"AirMs": self.ms, "NightGalaxy": self.galaxy, "NightMasser": self.masser,
                  "NightMasserRelief": self.masser_relief, "NightSecunda": self.secunda,
-                 "NightSecundaRelief": self.secunda_relief, "SkyView": self.lut}
+                 "NightSecundaRelief": self.secunda_relief, "NightMasserDetail": self.masser_detail,
+                 "NightSecundaDetail": self.secunda_detail, "SkyView": self.lut}
         for i, (name, tex) in enumerate(units.items()):
             if name in prog:
                 tex.use(i)
@@ -255,7 +259,8 @@ class Sky:
         moons = m["moons"]  # MoonInfo (MoonMath.block): the eclipse, the Dark Moon, the Revenant
         self.ubo_moons.write(np.array(moons, dtype="f4").tobytes())
         # (AirMoonE.w: the sun's share an eclipse hides)
-        self._air_tail = [*sun, args["eyeKm"], *ml[0:3], 1.0, *(e * fade for e in ml[3:6]), moons[0] * ECLIPSE_DEPTH]
+        # (AirMoonE.w unused; AirOcculter[2]: the eclipse's moons, per point along each ray)
+        self._air_tail = [*sun, args["eyeKm"], *ml[0:3], 1.0, *(e * fade for e in ml[3:6]), 0.0, *m["occulters"]]
         self.hidden = moons[0] * ECLIPSE_DEPTH * smooth(-0.12, 0.0, sun[1])
         self.ubo_air.write(np.array(self.coeffs + self._air_tail, dtype="f4").tobytes())
         night = np.array(m["night"], dtype="f4")
@@ -303,12 +308,20 @@ class Sky:
         k = self.air_light
         key = lum(k[3:6]) * max(k[1], 0.0)
         up = lum(k[6:9]) * math.pi
-        e = 0.18 * ((key + up) * (1.0 - getattr(self, "hidden", 0.0)) + extra_up) / math.pi + town
-        s = math.log2(max(e, 1e-12))
-        dayness = smooth(-19.0, -6.0, s)
-        target = math.log2(0.004) + (math.log2(0.18) - math.log2(0.004)) * dayness
         lo, hi = meter_range()
-        return 2.0 ** min(max(target - s, lo), hi)
+
+        def eye(e):
+            s = math.log2(max(e, 1e-12))
+            dayness = smooth(-19.0, -6.0, s)
+            target = math.log2(0.004) + (math.log2(0.18) - math.log2(0.004)) * dayness
+            return 2.0 ** min(max(target - s, lo), hi)
+        hidden = getattr(self, "hidden", 0.0)
+        full = eye(0.18 * ((key + up) * (1.0 - hidden) + extra_up) / math.pi + town)
+        if hidden > 0.3:
+            # (an eclipse's minutes: the eye opens to the dark, but not all the way a night's long adaptation goes,
+            # ECLIPSE_ADAPT stops at most over the day's)
+            full = min(full, eye(0.18 * (key + up + extra_up) / math.pi + town) * 2.0 ** ECLIPSE_ADAPT)
+        return full
 
     def view(self, w, h, yaw, pitch, fov, exposure):
         """A perspective view through the game's core/atlas_sky.fsh (displayed, sRGB 8 bit)."""

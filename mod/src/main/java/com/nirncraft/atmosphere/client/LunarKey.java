@@ -18,8 +18,9 @@ public final class LunarKey {
     public static float[] compute(ClientLevel level, float[] sun, float sunPathRotationDeg, float partialTick) {
         double days = (level.getOverworldClockTime() + partialTick) / 24000.0;
         double[] s = {sun[0], sun[1], sun[2]};
-        var masser = NightSkyMath.moon(false, days, s, sunPathRotationDeg);
-        var secunda = NightSkyMath.moon(true, days, s, sunPathRotationDeg);
+        double[] obs = NightSky.observer();  // (the camera's place: the moons' parallax)
+        var masser = NightSkyMath.moon(false, days, s, sunPathRotationDeg, obs);
+        var secunda = NightSkyMath.moon(true, days, s, sunPathRotationDeg, obs);
         double[] ml = NightSkyMath.moonlights(masser, secunda, AtmosphereConfig.SECUNDA.get());
         return new float[] {(float) ml[0], (float) ml[1], (float) ml[2],
                 (float) (ml[3] / Math.PI), (float) (ml[4] / Math.PI), (float) (ml[5] / Math.PI)};

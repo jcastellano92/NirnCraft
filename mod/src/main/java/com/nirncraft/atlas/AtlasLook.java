@@ -117,9 +117,10 @@ final class AtlasLook {
     static float sunHidden(Minecraft mc, float[] sun) {
         if (mc.level == null || mc.level.dimension() != net.minecraft.world.level.Level.OVERWORLD || sun[1] < -0.12f)
             return 0f;
-        double days = mc.level.getOverworldClockTime() / 24000.0;
+        double days = (mc.level.getOverworldClockTime() + mc.getDeltaTracker().getGameTimeDeltaPartialTick(false)) / 24000.0;
         double vis = com.nirncraft.atmosphere.MoonMath.sunVisible(days, new double[] {sun[0], sun[1], sun[2]},
-                AtlasClient.sunPathRotationDeg, com.nirncraft.atmosphere.AtmosphereConfig.SECUNDA.get());
+                AtlasClient.sunPathRotationDeg, com.nirncraft.atmosphere.AtmosphereConfig.SECUNDA.get(),
+                com.nirncraft.atmosphere.client.NightSky.observer());
         // (the sky's light from beyond the moon's shadow: a total eclipse is a deep dusk, not a night)
         return (float) ((1.0 - vis) * ECLIPSE_DEPTH * smooth(-0.12f, 0.0f, sun[1]));
     }

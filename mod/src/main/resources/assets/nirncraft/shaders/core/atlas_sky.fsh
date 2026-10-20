@@ -48,8 +48,8 @@ void main() {
     float x = clamp(d / r0, 0.0, 1.0);
     float limb = 1.0 - 0.6 * (1.0 - sqrt(max(1.0 - x * x, 0.0)));
     float disc = inside * limb * smoothstep(-0.02, 0.01, dir.y);
-    // (an eclipse: the moons' discs over it, atlas_moons.glsl)
-    if (disc > 0.0) c += SunDisc.rgb * disc * 40.0 * (1.0 - moonCover(dir, pix));
+    // (an eclipse: the moons' discs over it, their limbs' relief breaking the last light into beads: atlas_moons.glsl)
+    if (disc > 0.0) c += SunDisc.rgb * disc * 40.0 * (1.0 - moonCoverSun(dir, pix));
     vec3 shown = atlasDisplay(c, Look.x, Look.y);
     // a little more vibrance in the low sun's sky (the display's shoulder greys the twilight bands): saturation up to
     // 1.25 as the sun nears the horizon, none at noon

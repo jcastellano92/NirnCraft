@@ -14,7 +14,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import java.io.IOException;
 
 /**
- * A moon's baked map (tools/dev/moon_gen.py: albedo or relief, equirectangular) with its full mip chain, box-filtered
+ * A moon's baked map (tools/dev/moon_gen.py: albedo or relief, equirectangular; or its tiling detail) with its full mip chain, box-filtered
  * on load: the discs are drawn a few times smaller than their maps (Masser's 4096 texels round the moon), and a plain
  * {@code SimpleTexture} has no mipmaps, so they would shimmer. atlas_moons.glsl picks the level from the pixel's
  * footprint on the sphere.
@@ -40,6 +40,12 @@ final class AtlasMoonTexture extends ReloadableTexture {
     /** The sampler the moons' maps are read with: trilinear, clamped (the face towards Nirn never meets the seam). */
     static com.mojang.renderpearl.api.textures.GpuSampler mipmapped() {
         return RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
+                FilterMode.LINEAR, FilterMode.LINEAR, true);
+    }
+
+    /** The detail tiles' sampler: trilinear, repeating (they tile the sphere). */
+    static com.mojang.renderpearl.api.textures.GpuSampler mipmappedRepeat() {
+        return RenderSystem.getSamplerCache().getSampler(AddressMode.REPEAT, AddressMode.REPEAT,
                 FilterMode.LINEAR, FilterMode.LINEAR, true);
     }
 

@@ -2,7 +2,8 @@
 //   atlas_render raster=native/data/tamriel_raster.bin out=shot.png x=0 z=0 above=40 yaw=0 pitch=-4 fov=70
 //                 w=1280 h=720 backend=cpu|vulkan sun=35,120 radius=6371000 near=0 far=40000 flags=shadows,atmos,clouds
 //                 weather=off|clear|fair|overcast|storm stormx= stormz= time=<seconds>  (off = clear: no cover,
-//                 the game's weather-off switch)
+//                 the game's weather-off switch) eclipse=x,y,z,r[,..] | umbra=R,L,off,az eclipsekm=0.1 (an eclipse's
+//                 shadow: atlas_set_eclipse)
 // yaw: degrees, 0 = north (-Z), 90 = east (+X). sun=elevation,azimuth degrees (azimuth like yaw).
 // Also writes <out>_depth.png (log depth) and <out>_lod.png when lodpass=1, and prints JSON stats on stdout.
 //
@@ -561,6 +562,27 @@ int main(int argc, char** argv) {
         f.sunDir[0] = float(std::sin(sa) * std::cos(se));
         f.sunDir[1] = float(std::sin(se));
         f.sunDir[2] = float(-std::cos(sa) * std::cos(se));
+        // an eclipse (atlas_set_eclipse): eclipse=x,y,z,r[,x,y,z,r] occulters from the camera (km), or umbra=R,L,off,az: a
+        // sphere of radius R km, L km up the sun's direction from a ground point off km from the camera at azimuth az
+        // (degrees, as yaw): its umbra's footprint centred there; eclipsekm= km a block (0.1)
+        if (a.count("eclipse") || a.count("umbra")) {
+            float occ[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+            if (a.count("eclipse"))
+                std::sscanf(a["eclipse"].c_str(), "%f,%f,%f,%f,%f,%f,%f,%f", &occ[0], &occ[1], &occ[2], &occ[3], &occ[4],
+                            &occ[5], &occ[6], &occ[7]);
+            else {
+                double R = 2633, L = 41340, off = 2300, az = 0;
+                std::sscanf(a["umbra"].c_str(), "%lf,%lf,%lf,%lf", &R, &L, &off, &az);
+                az *= PI / 180;
+                double q[3] = {std::sin(az) * off, 0.0, -std::cos(az) * off};
+                for (int i = 0; i < 3; i++) occ[i] = float(q[i] + f.sunDir[i] * L);
+                occ[3] = float(R);
+            }
+            if (atlas_set_eclipse(ctx, occ, float(num(a, "eclipsekm", 0.1))) != ATLAS_OK) {
+                std::fprintf(stderr, "atlas_set_eclipse: %s\n", atlas_last_error(ctx));
+                return 2;
+            }
+        }
         f.timeSec = float(num(a, "time", 0));
         f.lodBias = float(num(a, "bias", 1));
         {

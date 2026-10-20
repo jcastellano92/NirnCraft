@@ -38,7 +38,7 @@ public final class NightSkyMath {
     public static final double MASSER_RADIUS = Math.atan(0.916 * 20.0 / 100.0);
     public static final double SECUNDA_RADIUS = Math.atan(0.91 * 7.0 / 100.0);
     public static final float[] MASSER_COLOUR = {1.0f, 0.70f, 0.62f};
-    public static final float[] SECUNDA_COLOUR = {0.93f, 0.96f, 1.0f};
+    public static final float[] SECUNDA_COLOUR = {0.975f, 0.95f, 0.895f};  // grey-cream (luminance as before: 0.951)
     public static final double MASSER_SHARE = 0.80, SECUNDA_SHARE = 0.20, MOON_SCALE = 1.0e-5;
     /** By day a moon's disc shows its sunlit regolith, faintly (this share of a real surface's brightness, an
      *  albedo-1 surface under the sun ~ 3.74): a pale disc on the blue. By night its light is its key light's. */
@@ -109,10 +109,13 @@ public final class NightSkyMath {
 
     // ------------------------------------------------------------------------------------------------ the moons
 
-    /** A moon now: towards it, its disc's up, its angular radius, the lit fraction, its light (rgb irradiance above the
-     *  air, LunarKey's scale, faded at its horizon as LunarKey's), the disc's radiance per unit albedo at full, its
-     *  colour over its albedo map's (so the disc's light is its light). */
-    public record Moon(double[] dir, double[] up, double radius, double lit, double[] light, double discScale, double[] tint) {}
+    /** A moon now, seen from an observer: towards it, its disc's up, its angular radius, the lit fraction, its light
+     *  (rgb irradiance above the air, LunarKey's scale, faded at its horizon as LunarKey's), the disc's radiance per
+     *  unit albedo at full, its colour over its albedo map's (so the disc's light is its light), its distance from the
+     *  observer (km), the share of sunlight its face gets past Nirn's shadow (1; less in a lunar eclipse), its centre
+     *  (km from Nirn's) and its radius (km): MoonMath's bodies. */
+    public record Moon(double[] dir, double[] up, double radius, double lit, double[] light, double discScale, double[] tint,
+                       double dist, double sunlit, double[] centre, double body) {}
 
     /** The moons' months (days): about eight and nine, a little over so their phases drift through the hours of the
      *  day (a new moon at noon some months, an eclipse then: MoonMath), full near midnight on day 0. */
@@ -123,7 +126,13 @@ public final class NightSkyMath {
         return c - Math.floor(c);
     }
 
+    /** A moon from the reference observer (on the ground at the world's origin: MoonMath.observer(0, 0, 0)). */
     public static Moon moon(boolean secunda, double days, double[] sun, double pathDeg) {
+        return moon(secunda, days, sun, pathDeg, MoonMath.observer(0, 0, 0));
+    }
+
+    /** Towards a moon's centre from Nirn's (its orbit: the month, the inclination, the node, the year). */
+    public static double[] moonGeocentric(boolean secunda, double days, double[] sun, double pathDeg) {
         double tilt = Math.toRadians(pathDeg);
         double[] axis = {0.0, Math.sin(tilt), Math.cos(tilt)};
         double[] anti = {-sun[0], -sun[1], -sun[2]};
@@ -131,25 +140,43 @@ public final class NightSkyMath {
         double[] d = rotate(anti, axis, cycle * Math.PI * 2);
         // its orbit's inclination (MoonMath: the node, the year): over or under the sun's path, eclipses in their seasons
         double beta = MoonMath.latitude(secunda, days, Math.PI + cycle * Math.PI * 2);
-        d = norm(new double[] {d[0] * Math.cos(beta) + axis[0] * Math.sin(beta), d[1] * Math.cos(beta) + axis[1] * Math.sin(beta),
-                d[2] * Math.cos(beta) + axis[2] * Math.sin(beta)});
-        double[] up = sub(axis, scale(d, dot(axis, d)));
-        up = norm(up);
+        return norm(new double[] {d[0] * Math.cos(beta) + axis[0] * Math.sin(beta),
+                d[1] * Math.cos(beta) + axis[1] * Math.sin(beta), d[2] * Math.cos(beta) + axis[2] * Math.sin(beta)});
+    }
+
+    /** A moon seen from an observer (km from Nirn's centre: MoonMath.observer): its real place in space (MoonMath's
+     *  distances and radii), so near ones shift and grow with where and when they are seen (parallax). */
+    public static Moon moon(boolean secunda, double days, double[] sun, double pathDeg, double[] observer) {
+        double tilt = Math.toRadians(pathDeg);
+        double[] axis = {0.0, Math.sin(tilt), Math.cos(tilt)};
+        double[] g = moonGeocentric(secunda, days, sun, pathDeg);
+        double[] centre = scale(g, MoonMath.distanceKm(secunda, days));
+        double body = MoonMath.bodyKm(secunda);
+        double[] v = sub(centre, observer);
+        double dist = Math.sqrt(dot(v, v));
+        double[] d = scale(v, 1.0 / dist);
+        double radius = Math.asin(Math.min(body / dist, 1.0));
+        double[] up = norm(sub(axis, scale(d, dot(axis, d))));
         double lit = 0.5 - 0.5 * dot(sun, d);
         double horizon = smooth(-0.035, 0.10, d[1]);
+        // Nirn's shadow on it (a lunar eclipse: the umbra keeps only the light bent through Nirn's air)
+        double sunlit = MoonMath.lunarShare(centre, body, d, sun, null, 0);
+        double eclipse = sunlit + (1.0 - sunlit) * MoonMath.UMBRA_GLOW;
         float[] col = secunda ? SECUNDA_COLOUR : MASSER_COLOUR;
         double share = secunda ? SECUNDA_SHARE : MASSER_SHARE;
-        double full = Math.PI * MOON_SCALE * share;  // irradiance per colour at full
-        double w = lit * lit * horizon;  // (LunarKey's phase law: the lit fraction, squared: a quarter moon a quarter)
+        // its light at its mean distance from Nirn's centre (LunarKey's scale), as its solid angle from here
+        double near = MoonMath.meanDistanceKm(secunda) / dist;
+        double full = Math.PI * MOON_SCALE * share * near * near;  // irradiance per colour at full
+        // (LunarKey's phase law: the lit fraction, squared: a quarter moon a quarter)
+        double w = lit * lit * horizon * eclipse;
         double[] light = {full * col[0] * w, full * col[1] * w, full * col[2] * w};
-        double radius = secunda ? SECUNDA_RADIUS : MASSER_RADIUS;
         double omega = 2.0 * Math.PI * (1.0 - Math.cos(radius));
         double[] alb = secunda ? SECUNDA_ALBEDO : MASSER_ALBEDO;
         double albLum = lum(alb[0], alb[1], alb[2]);
         double colLum = lum(col[0], col[1], col[2]);
         double discScale = full * colLum / (omega * albLum);
         double[] tint = {col[0] / colLum / (alb[0] / albLum), col[1] / colLum / (alb[1] / albLum), col[2] / colLum / (alb[2] / albLum)};
-        return new Moon(d, up, radius, lit, light, discScale, tint);
+        return new Moon(d, up, radius, lit, light, discScale, tint, dist, sunlit, centre, body);
     }
 
     /** The night's two moonlights: the brighter moon the key (shadows), the other the fill, each in its own colour
@@ -228,7 +255,9 @@ public final class NightSkyMath {
         int p = 32;
         p = put(o, p, nightGain(sun[1]), f.clear, f.seconds % 3600.0, f.frameIndex % 64);
         p = put(o, p, f.stars, f.galaxy, f.signs, f.twinkle);
-        Moon m = moon(false, f.days, sun, f.pathDeg), s = moon(true, f.days, sun, f.pathDeg);
+        // (seen from the camera's place: the moons' parallax, MoonMath.observer)
+        double[] obs = MoonMath.observer(f.camX, f.camZ, f.eyeKm);
+        Moon m = moon(false, f.days, sun, f.pathDeg, obs), s = moon(true, f.days, sun, f.pathDeg, obs);
         for (Moon moon : new Moon[] {m, s}) {
             boolean on = moon == m || f.secundaOn;
             p = put(o, p, moon.dir[0], moon.dir[1], moon.dir[2], moon.radius);
@@ -324,7 +353,11 @@ public final class NightSkyMath {
         b.append(",\"signs\":").append(Arrays.toString(signs()));
         b.append(String.format(Locale.ROOT, ",\"sun\":[%f,%f,%f]", sun[0], sun[1], sun[2]));
         b.append(",\"moonlights\":").append(Arrays.toString(moonlights(m, s, secundaOn)));
-        b.append(",\"moons\":").append(Arrays.toString(MoonMath.block(MoonMath.eclipse(sun, m, s, secundaOn), null)));
+        double[] obs = MoonMath.observer(x, z, Double.parseDouble(a.getOrDefault("eyeKm", "0.15")));
+        m = moon(false, days, sun, path, obs);
+        s = moon(true, days, sun, path, obs);
+        b.append(",\"moons\":").append(Arrays.toString(MoonMath.block(MoonMath.eclipse(sun, m, s, secundaOn), null, m, s, obs)));
+        b.append(",\"occulters\":").append(Arrays.toString(MoonMath.occulterBlock(m, s, secundaOn, sun, obs)));
         b.append(String.format(Locale.ROOT, ",\"masserDir\":[%f,%f,%f],\"secundaDir\":[%f,%f,%f]", m.dir[0], m.dir[1],
                 m.dir[2], s.dir[0], s.dir[1], s.dir[2]));
         b.append(String.format(Locale.ROOT, ",\"masserLit\":%f,\"secundaLit\":%f,\"gain\":%f}", m.lit, s.lit, nightGain(sun[1])));

@@ -92,8 +92,37 @@ struct AirPath {
     float3 transmittance;
 };
 
+// An eclipse (atlas_set_eclipse): the share of the sun's disc seen past the occulting moons from a point p km from the
+// camera (world axes; api.cpp eclipseShare, the same formula). 1 without one.
+float airSunShareKm(float3 p) {
+    if (frame.eclipseC.y < 0.5) return 1.0;
+    float3 sun = frame.sunDir.xyz;
+    const float rs = 0.0089;  // the sun's angular radius (the host's sky disc)
+    float vis = 1.0;
+    for (int k = 0; k < 2; k++) {
+        float4 o = k == 0 ? frame.eclipseA : frame.eclipseB;
+        if (o.w <= 0.0) continue;
+        float3 v = o.xyz - p;
+        float l = length(v);
+        if (l <= o.w) return 0.0;
+        float3 u = v / l;
+        float c = dot(u, sun);
+        if (c <= 0.0) continue;
+        float ang = asin(min(o.w / l, 1.0));
+        float sep = atan2(length(cross(u, sun)), c);
+        float cover = saturate((ang + rs - sep) / (2.0 * min(ang, rs))) * min(1.0, ang * ang / (rs * rs));
+        vis *= 1.0 - cover * cover * (3.0 - 2.0 * cover);
+    }
+    return vis;
+}
+
+// that share at a point pRel blocks from the camera
+float airSunShareAt(float3 pRel) { return airSunShareKm(pRel * frame.eclipseC.x); }
+
 AirPath airIntegrate(float r, float mu, float nuS, float muS, float3 ES, float nuM, float muM, float3 EM, float tEnd,
-                     int steps, bool quadratic, bool ground) {
+                     int steps, bool quadratic, bool ground, float3 dirW) {
+    // (an eclipse: the sun's share at each point of the path, t km of air = t / airMieExt.w blocks along dirW)
+    float kmGeo = frame.eclipseC.x / max(frame.airMieExt.w, 1e-6);
     bool moon = EM.x + EM.y + EM.z > 0.0;
     float g = frame.airMieScat.w;
     float pRS = airPhaseRayleigh(nuS), pMS = airPhaseMie(nuS, g), pRM = airPhaseRayleigh(nuM), pMM = airPhaseMie(nuM, g);
@@ -115,7 +144,8 @@ AirPath airIntegrate(float r, float mu, float nuS, float muS, float3 ES, float n
         float3 stepT = exp(-ext * dt);
         float3 w = (1.0 - stepT) / max(ext, 1e-7);
         float muSt = (r * muS + t * nuS) / rt;
-        float3 S = ((sR * pRS + sM * pMS) * airLightTransmittance(rt, muSt) + (sR + sM) * airMs(ht, muSt)) * ES;
+        float3 S = ((sR * pRS + sM * pMS) * airLightTransmittance(rt, muSt) + (sR + sM) * airMs(ht, muSt)) * ES
+                   * airSunShareKm(dirW * (t * kmGeo));
         if (moon) {
             float muMt = (r * muM + t * nuM) / rt;
             S += ((sR * pRM + sM * pMM) * airLightTransmittance(rt, muMt) + (sR + sM) * airMs(ht, muMt)) * EM;
@@ -126,7 +156,7 @@ AirPath airIntegrate(float r, float mu, float nuS, float muS, float3 ES, float n
     if (ground) {
         float rg = sqrt(max(r * r + 2.0 * r * mu * tEnd + tEnd * tEnd, 1.0));
         float muG = (r * muS + tEnd * nuS) / rg;
-        float3 lit = airLightTransmittance(rg, muG) * ES * max(muG, 0.0);
+        float3 lit = airLightTransmittance(rg, muG) * ES * max(muG, 0.0) * airSunShareKm(dirW * (tEnd * kmGeo));
         if (moon) {
             float muGM = (r * muM + tEnd * nuM) / rg;
             lit += airLightTransmittance(rg, muGM) * EM * max(muGM, 0.0);
@@ -149,7 +179,7 @@ float3 airSkyRadiance(float3 dir) {
     float tg = airDistanceToGround(r, dir.y);
     float tEnd = tg >= 0.0 ? tg : airDistanceToTop(r, dir.y);
     return airIntegrate(r, dir.y, dot(dir, sun), sun.y, frame.airSun.xyz, dot(dir, moon), moon.y, frame.airMoon.xyz,
-                        tEnd, SKY_STEPS, true, tg >= 0.0).inscatter + NIGHT_GLOW;
+                        tEnd, SKY_STEPS, true, tg >= 0.0, dir).inscatter + NIGHT_GLOW;
 }
 
 // air.hpp aerialPath: the air between the eye and a surface t blocks away along dir
@@ -160,7 +190,7 @@ AirPath airAerial(float3 dir, float t) {
     // (FRAME_LIGHT_LOW, the cheap light: half the steps; the energy-conserving steps keep a long path's total)
     int steps = (frame.dims.z & FRAME_LIGHT_LOW) != 0u ? AERIAL_STEPS / 2 : AERIAL_STEPS;
     AirPath p = airIntegrate(r, dir.y, dot(dir, sun), sun.y, frame.airSun.xyz, dot(dir, moon), moon.y,
-                             frame.airMoon.xyz, tEnd, steps, false, false);
+                             frame.airMoon.xyz, tEnd, steps, false, false, dir);
     p.inscatter += NIGHT_GLOW * (1.0 - p.transmittance);
     return p;
 }
@@ -192,6 +222,13 @@ void airAt(float worldY) {
     gKeyRad = airLightTransmittance(r, moon.y) * moonRad * smoothstep(-0.05, -0.2, sun.y);
 }
 
+// The key light at a point pRel blocks from the camera: airAt at its height, the sun's an eclipse's share there (the
+// umbra's footprint dark, the land outside it lit)
+void airAtPoint(float3 pRel) {
+    airAt(pRel.y + float(frame.camInt.y));
+    if (frame.sunDir.y > -0.05) gKeyRad *= airSunShareAt(pRel);
+}
+
 // The sun's light alone at world height y (the cloud deck's sunlit side)
 float3 airSunAt(float worldY) {
     float r = R_GROUND + max(worldY - SEA_LEVEL_Y, 0.0) * frame.airMieExt.w;
@@ -202,7 +239,7 @@ float3 airSunAt(float worldY) {
 void airBegin() {
     gMoonDir = frame.moonDir;
     gMoonRad = frame.moonRad;
-    airAt(float(frame.camInt.y) + frame.camFrac.y);
+    airAtPoint(float3(0.0, frame.camFrac.y, 0.0));
 }
 
 // ---- the look's names for the air (what the shading calls) ---------------------------------------------------------

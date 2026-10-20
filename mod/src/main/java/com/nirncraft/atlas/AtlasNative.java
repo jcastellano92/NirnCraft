@@ -143,7 +143,7 @@ public final class AtlasNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, setShapes, setTextures, setPreExposure, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setEclipse, setJitter, setShapes, setTextures, setPreExposure, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
     // abi 0.10 (null with a 0.9 library)
     private final MethodHandle memoryInfo, setClipmap, debugFault;
@@ -224,6 +224,7 @@ public final class AtlasNative {
         setClipmap = bindOptional(l, lib, "atlas_set_clipmap", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT));
         debugFault = bindOptional(l, lib, "atlas_debug_fault", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT));
         setMoon = bindOptional(l, lib, "atlas_set_moon", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
+        setEclipse = bindOptional(l, lib, "atlas_set_eclipse", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_FLOAT));
         setJitter = bindOptional(l, lib, "atlas_set_jitter", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT, JAVA_FLOAT));
         setShapes = bindOptional(l, lib, "atlas_set_material_shapes", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         setTextures = bindOptional(l, lib, "atlas_set_material_textures", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
@@ -641,6 +642,23 @@ public final class AtlasNative {
             try (Arena a = Arena.ofConfined()) {
                 MemorySegment d = a.allocateFrom(JAVA_FLOAT, dir), r = a.allocateFrom(JAVA_FLOAT, radiance);
                 check((int) setMoon.invokeExact(ptr, d, r), "atlas_set_moon");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * (abi 0.17, optional) An eclipse's shadow on the land (atlas.h atlas_set_eclipse): the moons near the sun as
+         * spheres, {centre from the camera (km, world axes), radius (km)} x 2 (radius 0: none), and km a world block;
+         * each surface's key light and the air's inscatter take the sun's share seen from where they are. A core
+         * without it lights the far field with the whole sun; false then.
+         */
+        public boolean setEclipse(float[] occulters, float kmPerBlock) {
+            if (setEclipse == null) return false;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment o = a.allocateFrom(JAVA_FLOAT, occulters);
+                check((int) setEclipse.invokeExact(ptr, o, kmPerBlock), "atlas_set_eclipse");
                 return true;
             } catch (Throwable t) {
                 throw rethrow(t);

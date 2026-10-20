@@ -470,6 +470,16 @@ ATLAS_API AtlasStatus atlas_set_materials(AtlasContext* ctx, uint32_t first, con
  */
 ATLAS_API AtlasStatus atlas_set_sun_map(AtlasContext* ctx, uint32_t size, float halfExtent);
 
+/**
+ * (abi 0.17, optional: the host binds it if present) An eclipse's shadow on the land: up to two occulting spheres (the
+ * moons near the sun), each {centre relative to the camera in km (world axes), radius in km}, radius 0: none; and the
+ * km a world block in that geography. Each surface's key light and each point of the air's inscatter take the share of
+ * the sun's disc seen past them from where they are (an umbra's footprint dark, the air outside it lit: a total
+ * eclipse's horizon glow); the sky's light on faces at the eye takes the eye's share (never below a twilight's floor).
+ * All radii 0 (the default): no eclipse. Kept until set again.
+ */
+ATLAS_API AtlasStatus atlas_set_eclipse(AtlasContext* ctx, const float occulters[8], float kmPerBlock);
+
 /*
  * (abi 0.12) The night's key light as the host's sky has it (the shader pack's lunar key: the brighter moon's
  * direction and the moons' light), so the far field lights the night exactly like the near field. dir: unit, world

@@ -179,9 +179,12 @@ struct AtlasContext {
     uint64_t airVersion = 0;
     struct {
         uint64_t version = ~0ull;
-        float sun[3] = {}, moon[3] = {}, moonE[3] = {}, alt = -1;
+        float sun[3] = {}, moon[3] = {}, moonE[3] = {}, alt = -1, share = -1;
         air::V3 up, ground;
     } skyLight;
+    // an eclipse's occulters (atlas_set_eclipse): centre from the camera (km), radius (km) x 2; km a block
+    float eclipse[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    float eclipseKm = 0.1f;
 
     AtlasStatus fail(AtlasStatus s, std::string msg) noexcept {
         try {
@@ -311,6 +314,30 @@ void pixelDir(const float* inv, float px, float py, uint32_t w, uint32_t h, floa
 }
 
 }  // namespace
+
+// The share of the sun's disc seen past an eclipse's occulters from a point p (km from the camera); atlas_air.slang's
+// airSunShareKm, the same formula
+static float eclipseShare(const float occ[8], const float p[3], const float sun[3]) {
+    const float rs = 0.0089f;  // the sun's angular radius (the host's sky disc)
+    float vis = 1.0f;
+    for (int k = 0; k < 2; k++) {
+        const float* o = occ + k * 4;
+        if (!(o[3] > 0.0f)) continue;
+        float v[3] = {o[0] - p[0], o[1] - p[1], o[2] - p[2]};
+        float l = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+        if (l <= o[3]) return 0.0f;
+        float c = (v[0] * sun[0] + v[1] * sun[1] + v[2] * sun[2]) / l;
+        if (c <= 0.0f) continue;
+        float cx = (v[1] * sun[2] - v[2] * sun[1]) / l, cy = (v[2] * sun[0] - v[0] * sun[2]) / l,
+              cz = (v[0] * sun[1] - v[1] * sun[0]) / l;
+        float ang = std::asin(std::fmin(o[3] / l, 1.0f));
+        float sep = std::atan2(std::sqrt(cx * cx + cy * cy + cz * cz), c);
+        float cover = std::fmin(std::fmax((ang + rs - sep) / (2.0f * std::fmin(ang, rs)), 0.0f), 1.0f) *
+                      std::fmin(1.0f, ang * ang / (rs * rs));
+        vis *= 1.0f - cover * cover * (3.0f - 2.0f * cover);
+    }
+    return vis;
+}
 
 extern "C" {
 
@@ -898,11 +925,17 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         float md[3], mr[3];
         moonOf(g.sunDir, ctx->moonSet ? ctx->moonDir : nullptr, ctx->moonSet ? ctx->moonRad : nullptr, md, mr);
         air::Lights l = air::lightsOf(g.sunDir, md, mr);
-        put(g.airSun, l.sunE, alt);
+        put(g.airSun, l.sunE, alt);  // (the GPU takes an eclipse's share per point: atlas_air.slang airSunShareKm)
+        // the sky's light on faces at the eye: an eclipse's share there, above a twilight's floor (the air beyond the
+        // moon's shadow still lights the sky round the horizon)
+        const float origin[3] = {0, 0, 0};
+        const float sunShare = std::fmax(eclipseShare(ctx->eclipse, origin, g.sunDir), 0.004f);
+        l.sunE = l.sunE * sunShare;
         put(g.airMoon, l.moonE, 0.0f);
         auto& s = ctx->skyLight;
         const float me[3] = {l.moonE.x, l.moonE.y, l.moonE.z};
-        bool same = s.version == ctx->airVersion && std::fabs(s.alt - alt) < 0.01f;
+        bool same = s.version == ctx->airVersion && std::fabs(s.alt - alt) < 0.01f &&
+                    std::fabs(s.share - sunShare) < 1e-4f;
         for (int i = 0; i < 3 && same; i++)
             same = std::fabs(s.sun[i] - g.sunDir[i]) < 2e-4f && std::fabs(s.moon[i] - md[i]) < 2e-3f &&
                    std::fabs(s.moonE[i] - me[i]) < 1e-4f;
@@ -910,6 +943,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
             air::skyLight(c, ctx->airLut, alt, l, s.up, s.ground);
             s.version = ctx->airVersion;
             s.alt = alt;
+            s.share = sunShare;
             for (int i = 0; i < 3; i++) {
                 s.sun[i] = g.sunDir[i];
                 s.moon[i] = md[i];
@@ -919,6 +953,13 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         put(g.airSkyUp, s.up + air::V3{ctx->glowUp[0], ctx->glowUp[1], ctx->glowUp[2]}, 0.0f);
         put(g.airGround, s.ground + air::V3{ctx->glowGround[0], ctx->glowGround[1], ctx->glowGround[2]}, 0.0f);
     }
+    for (int i = 0; i < 4; i++) {
+        g.eclipseA[i] = ctx->eclipse[i];
+        g.eclipseB[i] = ctx->eclipse[4 + i];
+    }
+    g.eclipseC[0] = ctx->eclipseKm;
+    g.eclipseC[1] = ctx->eclipse[3] > 0.0f || ctx->eclipse[7] > 0.0f ? 1.0f : 0.0f;
+    g.eclipseC[2] = g.eclipseC[3] = 0.0f;
     g.jitter[0] = f->width > 0 ? ctx->jitter[0] * 2.0f / float(f->width) : 0.0f;
     g.jitter[1] = f->height > 0 ? ctx->jitter[1] * 2.0f / float(f->height) : 0.0f;
     g.jitter[2] = ctx->jitter[0] != 0.0f || ctx->jitter[1] != 0.0f ? 1.0f : 0.0f;
@@ -1250,6 +1291,16 @@ ATLAS_API AtlasStatus atlas_set_sun_map(AtlasContext* ctx, uint32_t size, float 
     ctx->sunMapSize = size;
     ctx->sunMapHalf = halfExtent;
     ctx->sunMapFull = true;
+    return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_set_eclipse(AtlasContext* ctx, const float occulters[8], float kmPerBlock) {
+    if (!ctx || !occulters || !std::isfinite(kmPerBlock) || kmPerBlock <= 0.0f) return ATLAS_ERR_ARG;
+    for (int i = 0; i < 8; i++) {
+        if (!std::isfinite(occulters[i])) return ATLAS_ERR_ARG;
+        ctx->eclipse[i] = occulters[i];
+    }
+    ctx->eclipseKm = kmPerBlock;
     return ATLAS_OK;
 }
 

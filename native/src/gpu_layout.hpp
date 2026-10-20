@@ -63,6 +63,11 @@ struct alignas(16) FrameGpu {
     // (abi 0.17, ATLAS_FRAME_PRIMARY_NEAR) the camera-relative view-projection (the inverse of invViewProj, columns):
     // the host's own NDC depth of a hit
     float viewProj[16];
+    // (abi 0.17, atlas_set_eclipse) an eclipse's occulters: centre relative to the camera (km, world axes), w radius
+    // (km, 0: none); eclipseC: x km a block, y 1 when any is set
+    float eclipseA[4];
+    float eclipseB[4];
+    float eclipseC[4];
 };
 
 struct alignas(16) ActorGpu {
@@ -75,7 +80,7 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 48);
 static_assert(sizeof(RegionGpu) == 64);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64 + 48);
 
 struct Float4 {
     float v[4];

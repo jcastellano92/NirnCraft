@@ -1639,7 +1639,7 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     float R = frame.camFrac.w;
     float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
     float3 p = worldAt(o, dir, k, nd);  // (the near field's vertices carry the matching curvature drop)
-    airAt(p.y + float(frame.camInt.y));
+    airAtPoint(p);  // (an eclipse: the sun's share there)
     float3 N = octDecode(float2(float((info >> 16) & 255u), float(info >> 24)) / 255.0);
     uint ablate = asuint(frame.jitter.w);
     bool cheapLight = (frame.dims.z & FRAME_LIGHT_LOW) != 0u || (ablate & 256u) != 0u;
@@ -2026,7 +2026,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     if (actorFirst) {
         n = ah.n;
         cls = 4u;  // far actor
-        airAt(o.y + dir.y * ah.t + float(frame.camInt.y));
+        airAtPoint(o + dir * ah.t);
         if ((frame.dims.z & FRAME_CLOUDS) != 0) sunVis = cloudShadow(o + dir * ah.t, keyLightDir(sun));
         MaterialGpu am;
         am.albedoRough = float4(ah.albedo, 0.8);
@@ -2047,7 +2047,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         else if (ax == 1) n.y = slope.y > 0 ? -1.0 : 1.0;
         else n.z = slope.z > 0 ? -1.0 : 1.0;
         float3 p = worldAt(o, dir, k, tHit);
-        airAt(p.y + float(frame.camInt.y));  // the key light at the hit's height (a peak keeps the sun longer)
+        airAtPoint(p);  // the key light at the hit (a peak keeps the sun longer; an eclipse's shadow where it falls)
         float s = float(1 << res.lod);
         // blocky up close (it is Minecraft), smooth once voxels shrink towards a pixel: stops contour striping
         // centre of the hit voxel on the world voxel grid (multiples of s; y -64 is a multiple for s <= 64)
