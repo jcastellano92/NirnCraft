@@ -1897,7 +1897,8 @@ static void testCaves() {
         std::printf("  cpu/vulkan near light in the cave: %.3f%% px differ, mean irradiance %.5f / %.5f\n",
                     100.0 * off / px, sc / (3.0 * px), sg / (3.0 * px));
         CHECK(off < px / 50);
-        CHECK(std::abs(sc - sg) < 0.01 * sc);
+        // (1.5 %: the night's floor no longer pads both means, so the same sky-ray flips weigh a little more)
+        CHECK(std::abs(sc - sg) < 0.015 * sc);
         atlas_destroy(gpu);
     } else {
         std::printf("  SKIP parity: no Vulkan device\n");

@@ -27,6 +27,26 @@ the eye's weather column only.
 - **Cost:** a change of air rebuilds the multiple-scattering LUT on the render thread (~10 ms, at most every 3 s): move
   it to a worker or the GPU when weather changes the air often.
 
+## Sun and moon under weather (the owner's notes, 2026-10-20)
+
+Four mechanisms, the same for the sun and the moons (moonlight is reflected sunlight): particles filter, dim and redden;
+clouds block or act as a screen; ice crystals refract into halos and arcs; rain cleans the air.
+
+Renderer capabilities (built in the sky now, inputs default off or clear; weather sets them):
+- **Ice-crystal optics:** the 22 degree halo (white, faint colour), sundogs 22 degrees either side (red nearest the
+  sun), sun and light pillars with a low sun; for the moons too. Input: ice crystals aloft (cirrus, cirrostratus) and
+  near the ground (diamond dust in the cold).
+- **Aerosol layers aloft:** a smoke or dust layer at altitude (e.g. smoke 3-6 km up reddening sunsets far downwind while
+  the air below is clean). Input: layer height, depth, kind, amount.
+- **Already in the air model:** dust, smoke, sea salt, volcanic, rain-washed mixes (the climate input), the reddened
+  dim disc through heavy extinction.
+
+Weather supplies: where cirrus lies (halos often precede warm fronts), smoke plumes and their drift over long
+distances, dust events (desert dust crossing seas), fog and storm cover (the disc hidden, a grey sky), clearing after
+rain (vivid, clean sunsets), cloud breaks near the horizon letting the low light under the clouds, diamond dust in
+the cold. Regional tendencies (dusty, smoky, polluted, maritime, cirrus-prone) are what is in the air, overridden by
+the day's weather.
+
 ## Clouds: the screen for the low sun's colours, and the light's diffuser
 
 - Weather visuals are **off** for the renderer work (WeatherFieldTexture.isOff, the `weather.visuals` option): no

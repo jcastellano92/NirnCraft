@@ -56,7 +56,7 @@ constexpr float SUN_HALF_ANGLE = 0.00465f;  // radians: the disc's share over th
 // air, sea level) is (3.2, 3.07, 2.88) = the look's old noon (1, 0.96, 0.9) x 3.2; times pi: an irradiance
 constexpr V3 SUN_IRRADIANCE = {11.181f, 11.807f, 12.854f};
 // the night's own sky (airglow, starlight): a floor under the moonlit air, radiance
-constexpr V3 NIGHT_GLOW = {0.003f, 0.004f, 0.008f};
+constexpr V3 NIGHT_GLOW = {0.0008f, 0.0011f, 0.0024f};
 constexpr float SEA_LEVEL_Y = 63.0f;  // world y of the air's ground
 constexpr int MS_SIZE = 32;           // the multiple-scattering LUT: MS_SIZE x MS_SIZE (sun zenith x altitude)
 constexpr int SKY_STEPS = 24;         // a sky ray (quadratic spacing)
@@ -120,7 +120,7 @@ inline Params fromClimate(const Climate& k) {
                  {&AEROSOL_SMOKE, k.ash},                 {&AEROSOL_MIST, k.fog},
                  {&AEROSOL_RAIN, k.rain},                 {&AEROSOL_SNOW, k.snow}};
     float rh = std::clamp(k.relativeHumidity, 0.0f, 0.95f);
-    float grow = std::pow(std::max(1.0f - rh, 0.05f) / 0.6f, -0.5f);  // Haenel: (1 - RH)^-gamma, 1 at 40 %
+    float grow = std::min(std::pow(std::max(1.0f - rh, 0.05f) / 0.6f, -0.5f), 1.5f);  // Haenel: (1 - RH)^-gamma, 1 at 40 %; capped (until weather owns humidity)
     float tau = 0, ang = 0, gw = 0, gs = 0, hs = 0;
     V3 sc = v3(0), ex = v3(0);
     for (const Part& p : parts) {

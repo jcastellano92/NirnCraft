@@ -45,7 +45,7 @@ final class AtlasMeter {
             .build();
 
     // the eye's range (log2 exposure) and its speeds (seconds to close most of the gap)
-    static final float MIN = -4.5f, MAX = 5.5f, TAU_BRIGHTER = 0.35f, TAU_DARKER = 3.0f, TAU_DARKER_TAIL = 14f;
+    static final float MIN = -4.5f, MAX = 3.0f, TAU_BRIGHTER = 0.35f, TAU_DARKER = 3.0f, TAU_DARKER_TAIL = 14f;
 
     private static TextureTarget grid;
     private static final GpuBuffer[] ring = new GpuBuffer[3];
@@ -111,7 +111,7 @@ final class AtlasMeter {
         // the display's target for this scene: mid grey (0.18) in daylight, darker in the dark (a moonlit scene
         // stays a night: the eye opens but does not turn it into day); s is log2 of the scene's mean luminance
         float dayness = smooth(-9f, -1.5f, s);
-        float target = log2(0.03f) + (log2(0.18f) - log2(0.03f)) * dayness;
+        float target = log2(0.006f) + (log2(0.18f) - log2(0.006f)) * dayness;  // (a moonlit night reads dark)
         float want = clamp(target - s, MIN, MAX);
         if (Float.isNaN(exposure)) exposure = Float.isNaN(canonical) ? want : canonical;
         float gap = want - exposure;
