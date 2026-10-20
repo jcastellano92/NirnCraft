@@ -76,12 +76,15 @@ CORE = ROOT / "native/build/Release/atlas_core.dll"
 def sync_core(dev):
     """The freshly built core where the game picks it up at its next start (only when it changed)."""
     dst = dev / CORE.name
-    if CORE.exists() and (not dst.exists() or CORE.stat().st_mtime_ns != dst.stat().st_mtime_ns):
-        tmp = dev / (CORE.name + ".tmp")
-        tmp.write_bytes(CORE.read_bytes())
-        os.replace(tmp, dst)
-        os.utime(dst, ns=(CORE.stat().st_atime_ns, CORE.stat().st_mtime_ns))
-        print(f"shader_watch: core copied to {dst} (the game loads it at its next start)", flush=True)
+    try:
+        if CORE.exists() and (not dst.exists() or CORE.stat().st_mtime_ns != dst.stat().st_mtime_ns):
+            tmp = dev / (CORE.name + ".tmp")
+            tmp.write_bytes(CORE.read_bytes())
+            os.replace(tmp, dst)
+            os.utime(dst, ns=(CORE.stat().st_atime_ns, CORE.stat().st_mtime_ns))
+            print(f"shader_watch: core copied to {dst} (the game loads it at its next start)", flush=True)
+    except OSError:
+        pass  # the linker is still writing it (or the game holds the old copy): the next look takes it
 
 
 def stamp():
