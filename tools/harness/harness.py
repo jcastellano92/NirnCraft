@@ -1138,6 +1138,11 @@ def process_queue(runner, serve=False, on_item=None):
     by_id = {s["id"]: s for s in catalog.load()}
     done_now = {}
     while True:
+        try:  # the live lease's heartbeat, every item: other checkouts see this run is alive
+            import game as _g
+            _g.refresh_lease()
+        except (OSError, SystemExit):
+            pass
         if STOP.exists():  # harness.py stop: finish here, mark the rest stopped, close the client
             STOP.unlink(missing_ok=True)
             for j in pending_jobs():
