@@ -173,21 +173,7 @@ final class SkyGeometry {
      * celestial equator (degrees), offset off the equator (-1..1, along the celestial pole axis), star points
      * (x, y in units of {@link #SIGN_UNIT} degrees), then index pairs joined by faint lines.
      */
-    private static final Object[][] SIGNS = {
-            {"warrior", 10f, 0.30f, new float[]{0, -3, 0, -1, 0, 1, 0, 3.5f, -1.5f, 1, 1.5f, 1, 0, 4.5f}, new int[]{0, 1, 1, 2, 2, 3, 4, 2, 2, 5, 3, 6}},
-            {"mage", 38f, -0.25f, new float[]{0, -3.5f, 0, -1, 0, 1.5f, -1, 2.5f, 0, 3.5f, 1, 2.5f}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 2}},
-            {"thief", 66f, 0.40f, new float[]{-2.5f, -1, -1, 1, 0, -0.5f, 1, 1.5f, 2.5f, 0}, new int[]{0, 1, 1, 2, 2, 3, 3, 4}},
-            {"lady", 94f, -0.10f, new float[]{0, 3, -1, 1.5f, 1, 1.5f, -2, -2, 2, -2, 0, 0}, new int[]{0, 1, 0, 2, 1, 5, 2, 5, 5, 3, 5, 4, 3, 4}},
-            {"steed", 122f, 0.35f, new float[]{-3, -1, -1.5f, 0, 0, 0.5f, 1.5f, 2, 2.5f, 1, 1, -1, -1, -2}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 2, 5, 1, 6}},
-            {"lord", 150f, -0.35f, new float[]{-2, 0, -1, 1.5f, 0, 0.5f, 1, 1.5f, 2, 0, 0, -2}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 0}},
-            {"apprentice", 178f, 0.15f, new float[]{0, 0, 0, 2, 1.5f, -1, -1.5f, -1, 0, -2.5f}, new int[]{0, 1, 0, 2, 0, 3, 0, 4}},
-            {"atronach", 206f, -0.30f, new float[]{0, 2, 1.4f, 1.4f, 2, 0, 1.4f, -1.4f, 0, -2, -1.4f, -1.4f, -2, 0, -1.4f, 1.4f}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 0}},
-            {"ritual", 234f, 0.30f, new float[]{-2, 2, -2.5f, 0, -1.5f, -2, 0.5f, -2.5f, 2, -1.5f, 0, 0}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 2, 5}},
-            {"lover", 262f, -0.15f, new float[]{-2, 1, -1, 2, 0, 1, 1, 2, 2, 1, 0, -2}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 0}},
-            {"shadow", 290f, 0.40f, new float[]{0, 2.5f, -2, -2, 2, -2, 0, -0.5f}, new int[]{0, 1, 1, 3, 3, 2, 2, 0}},
-            {"tower", 318f, -0.25f, new float[]{-1, -3, -1, 2, 1, 2, 1, -3, -1, 3, 0, 2.5f, 1, 3}, new int[]{0, 1, 1, 2, 2, 3, 1, 4, 4, 5, 5, 6, 6, 2}},
-            {"serpent", 0f, 0f, new float[]{-4, 0, -3, 1, -1.5f, 0.5f, 0, -0.5f, 1.5f, -0.5f, 3, 0.5f, 4, 1.5f}, new int[]{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6}},
-    };
+    private static final Object[][] SIGNS = com.nirncraft.atmosphere.NightSkyMath.SIGNS;
     private static final float SIGN_UNIT = 1.9F;
 
     /** All signs but the Serpent, or the Serpent alone (centred on the celestial equator at angle 0). */

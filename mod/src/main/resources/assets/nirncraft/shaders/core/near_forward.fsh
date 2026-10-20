@@ -23,9 +23,10 @@ uniform sampler2D SceneColor;  // our resolved frame (displayed), terrain near a
 uniform sampler2D SceneDepth;  // its depth (reverse-Z)
 uniform sampler2D SkyView;
 uniform sampler2D SkyFrame;
-uniform sampler2D SkyCube;    // the sky's layers (stars, moons, aurora) in every direction: six faces side by side
+uniform sampler2D SkyCube;    // the sky's emitters (aurora, stars, moons, meteors) in every direction: six faces side by side
 
-// the sky's layers seen along camera-relative direction d (SkyCube: +X -X +Y -Y +Z -Z, each a 90 degree view)
+// the sky's emitters seen along camera-relative direction d (SkyCube, AtlasSky's atlas_sky_emit: +X -X +Y -Y +Z -Z, each
+// a 90 degree view): linear radiance (stored pre-exposed, the exposure in alpha; nothing where alpha is 0)
 vec3 skyCubeAt(vec3 d) {
     vec3 a = abs(d);
     int f;
@@ -34,8 +35,9 @@ vec3 skyCubeAt(vec3 d) {
     else if (a.y >= a.z) { f = d.y > 0.0 ? 2 : 3; uv = vec2(d.x, d.y > 0.0 ? d.z : -d.z) / a.y; }
     else { f = d.z > 0.0 ? 4 : 5; uv = vec2(d.z > 0.0 ? d.x : -d.x, -d.y) / a.z; }
     uv = clamp(uv * 0.5 + 0.5, vec2(0.01), vec2(0.99));
-    return texture(SkyCube, vec2((float(f) + uv.x) / 6.0, 1.0 - uv.y)).rgb;
-}   // the sky as drawn this frame (aurora, stars, moons; displayed): what reflects where the frame has none    // the air's sky this frame (AtlasSky's sky-view LUT, atlas_sky.glsl)
+    vec4 t = texture(SkyCube, vec2((float(f) + uv.x) / 6.0, 1.0 - uv.y));
+    return t.a > 1e-6 ? t.rgb / t.a : vec3(0.0);
+}
 
 layout(location = 0) in vec4 vertexColor;
 layout(location = 1) in vec2 texCoord0;
@@ -202,7 +204,8 @@ void main() {
             vec4 ct4 = vp * vec4(t * 1000.0, 1.0);
             vec2 uvT = clamp(ct4.xy / max(ct4.w, 1e-3) * 0.5 + 0.5, vec2(0.0), vec2(1.0));
             above = texture(SceneDepth, uvT).r > 0.0 ? texture(SceneColor, uvT).rgb
-                                                       : atlasDisplay(atlasSky(SkyView, normalize(t), SunDir.xyz), Look.x, Look.y);
+                                                       : atlasDisplay(atlasSky(SkyView, normalize(t), SunDir.xyz)
+                                                                      + skyCubeAt(normalize(t)), Look.x, Look.y);
         }
         // outside the window the surface mirrors the water under it (total internal reflection)
         vec4 under = screenReflection(viewPos - wb * 0.05, reflect(v, wb));
@@ -269,7 +272,8 @@ void main() {
         vec3 seen = bed * T + scatter;
         // what the water mirrors: our frame where the reflected ray finds it on screen, the sky model elsewhere
         vec4 hit = screenReflection(viewPos + wn * 0.05, r);
-        vec3 skyShown = atlasDisplay(sky + glint, Look.x, Look.y) + skyCubeAt(r) * (lm.y * lm.y);  // (the layers over the air's sky)
+        // the one sky: the air's and its emitters' (the aurora, the stars, the moons) in the same radiance, one display
+        vec3 skyShown = atlasDisplay(sky + skyCubeAt(r) * (lm.y * lm.y) + glint, Look.x, Look.y);
         // past the march (far mountains, the far shore): what lies that way is far enough that the mirror shows it as
         // the frame does in the reflected direction (its parallax is nothing at that range); the sky where the frame
         // has none there (the frame's alpha: our resolve leaves the sky out)

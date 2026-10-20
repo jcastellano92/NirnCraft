@@ -104,6 +104,9 @@ public final class SkyRenderer {
                 || level.dimensionType().skybox() != DimensionType.Skybox.OVERWORLD || !AtmosphereConfig.SKY.get()) return;
         boolean shadersActive = ShaderCompat.shadersActive();
         if (AtmosphereConfig.SKIP_WITH_SHADERS.get() && shadersActive) return;
+        // the unified sky draws every layer itself (com.nirncraft.atlas.AtlasSky, atlas_night.glsl): this mesh sky is
+        // the fallback where it does not (a shader pack, the near pass off, a core without the air)
+        if (com.nirncraft.atlas.AtlasClient.unifiedSky()) return;
         var camera = event.getCamera();
         if (camera.getFluidInCamera() != FogType.NONE || mc.player.hasEffect(com.nirncraft.platform.Effects.holder(MobEffects.BLINDNESS))
                 || mc.player.hasEffect(com.nirncraft.platform.Effects.holder(MobEffects.DARKNESS)) || mc.gui.hud.getBossOverlay().shouldCreateWorldFog()) return;
@@ -130,7 +133,9 @@ public final class SkyRenderer {
                 pose.pushPose();
                 pose.rotate(Axis.YP.rotationDegrees(-90f));
                 pose.rotate(Axis.ZP.rotationDegrees(AtmosphereMath.starDomeTiltDeg(camZ)));
-                pose.rotate(Axis.XP.rotationDegrees(sunCycle * 360f));
+                // (sidereal: the stars gain a turn a year on the sun, ~4 minutes a day)
+                pose.rotate(Axis.XP.rotationDegrees(sunCycle * 360f
+                        + (float) (dayTime / 24000.0 / com.nirncraft.atmosphere.NightSkyMath.YEAR_DAYS * 360.0 % 360.0)));
                 if (AtmosphereConfig.GALAXY.get()) add(draws, Kind.GALAXY, 0, 0, pose.last().pose(), GALAXY, starAlpha * .24f);
                 if (AtmosphereConfig.STARS.get()) for (int i = 0; i < SkyGeometry.starLayers.length; i++) {
                     float twinkle = .86f + .14f * (float)Math.sin(seconds * (.75 + i * .137) + i * 2.41);
@@ -201,8 +206,6 @@ public final class SkyRenderer {
             try (var pass = WorldDraw.open()) {
                 drawAll(pass, frame.draws, new Matrix4f(event.getModelViewMatrix()), null, textures, meteor);
             }
-            // the same sky into a small cube (the water's reflections of the sky off screen: aurora, stars, moons)
-            if (com.nirncraft.atlas.AtlasClient.wantsSkyCube()) SkyCube.render(frame.draws, textures, meteor);
         } finally { if (meteor != null) meteor.close(); }
     }
 

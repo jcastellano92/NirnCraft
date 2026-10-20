@@ -1,11 +1,16 @@
 #version 330
 #extension GL_ARB_separate_shader_objects : require
 #include <nirncraft:atlas_look.glsl>
+#include <nirncraft:atlas_air.glsl>
 #include <nirncraft:atlas_sky.glsl>
+#include <nirncraft:atlas_night.glsl>
 // Infinite ATLAS's sky (com.nirncraft.atlas.AtlasSky), drawn in place of vanilla's while the near pass owns the frame:
-// the air's sky (the far field's own model: its haze fades into it, so the horizon has no seam), looked up in the
-// sky-view LUT this frame's air was marched into, and the sun's disc in its transmitted light, through the same
-// display as the terrain. NirnCraft's night sky (moons, stars, aurora: atmosphere/client/SkyRenderer) draws over it.
+// one sky, every layer in it: the air's sky (the far field's own model: its haze fades into it, so the horizon has no
+// seam), looked up in the sky-view LUT this frame's air was marched into, the sky's own lights through that air
+// (atlas_night.glsl: the aurora's volume over the auroral oval, the stars, the galaxy and the birthsigns, Masser and
+// Secunda with their phases, meteors, the airglow) and the sun's disc in its transmitted light, through the same
+// display as the terrain. (NirnCraft's mesh sky, atmosphere/client/SkyRenderer, is the fallback where this one does
+// not draw: a shader pack, the near pass off.)
 layout(std140) uniform SkyInfo {
     mat4 InvViewProj;  // clip -> camera-relative world direction
     vec4 Sun;          // xyz towards the sun, w unused
@@ -21,6 +26,8 @@ void main() {
     vec3 dir = normalize(p.xyz / p.w);
     vec3 sun = normalize(Sun.xyz);
     vec3 c = atlasSky(SkyView, dir, sun);
+    // the sky's lights at the pixel's own size (a star's light kept in its footprint), the aurora's march dithered
+    c += nightSky(dir, length(fwidth(dir)) * 0.7071, nightDither(gl_FragCoord.xy), NIGHT_ALL, 24);
     // the sun's disc. High up its glare (near_resolve's sunGlare) swallows it: a bright blob. Low down the long air
     // path dims it until its edge shows, crisp, darker at the rim (limb darkening), flattened by the air's refraction
     // (the lower limb lifted more than the upper), and looking larger against the horizon (the eye's horizon illusion: a

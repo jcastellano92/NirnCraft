@@ -25,6 +25,8 @@ public final class AtmosphereConfig {
     public static final ModConfigSpec.BooleanValue AURORA_BY_REGION;
     public static final ModConfigSpec.BooleanValue CONSTELLATIONS;
     public static final ModConfigSpec.BooleanValue SHOOTING_STARS;
+    public static final ModConfigSpec.ConfigValue<String> METEOR_SHOWERS;
+    public static final ModConfigSpec.DoubleValue METEOR_SHOWER_RATE;
     public static final ModConfigSpec.BooleanValue LOCAL_WEATHER;
     public static final ModConfigSpec.BooleanValue WEATHER_VISUALS;
     public static final ModConfigSpec.BooleanValue WEATHER_FOG;
@@ -59,6 +61,10 @@ public final class AtmosphereConfig {
         GALAXY = b.comment("Faint galaxy band across the night sky.").define("galaxy", true);
         CONSTELLATIONS = b.comment("The thirteen birthsign constellations, faintly traced among the stars.").define("constellations", true);
         SHOOTING_STARS = b.comment("Occasional shooting stars on clear nights.").define("shootingStars", true);
+        METEOR_SHOWERS = b.comment("Nights of meteor showers: days of the year (0..365), comma separated; empty: none.")
+                .define("meteorShowers", "42,221,347");
+        METEOR_SHOWER_RATE = b.comment("How many times more meteors fall on a shower's night.")
+                .defineInRange("meteorShowerRate", 8.0, 1.0, 60.0);
         SKIP_WITH_SHADERS = b.comment("Don't draw the extra sky while an Oculus/Iris shader pack is active.")
                 .define("skipWithShaders", false);
         CLOUD_HEIGHT = b.comment("Overworld cloud layer altitude (vanilla 192). Tamriel's mountains reach far above y 192, so the clouds sit",
