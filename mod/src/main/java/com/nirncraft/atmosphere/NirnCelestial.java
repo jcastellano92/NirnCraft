@@ -529,18 +529,16 @@ public final class NirnCelestial {
 
     /**
      * The sky's bodies for a frame: sunAngle (the game's, radians), days (the clock: day time / 24000), the camera's map
-     * x, z (blocks), the comet (or null), the scintillation's strength (1 typical), the eye's log2 exposure (NaN: none)
-     * the game's sun's height and the moons' light on the land ({@link #eyeGain}).
+     * x, z (blocks), the comet (or null), the scintillation's strength (1 typical).
      */
-    public static Frame frame(double sunAngle, double days, double x, double z, Comet comet, double seeing,
-                              double exposureLog2, double sunY, double moonUp) {
+    public static Frame frame(double sunAngle, double days, double x, double z, Comet comet, double seeing) {
         double lat = Math.toRadians(latitudeDeg(z)), lon = Math.toRadians(longitudeDeg(x));
         double[] m = equatorToWorld(sunAngle, days, lat);
         float[] o = new float[BLOCK_FLOATS];
         float[] light = new float[16];
         putWorldTo(o, 0, m);
         putWorldTo(o, 16, mul(m, serpentFrame(days)));
-        put(o, 32, lat, lon, seeing, eyeGain(exposureLog2, sunY, moonUp));
+        put(o, 32, lat, lon, seeing, 0);
         Planet[] ps = new Planet[PLANETS];
         PlanetShade sh = shade;
         for (int i = 0; i < PLANETS; i++) {
@@ -586,32 +584,6 @@ public final class NirnCelestial {
         }
         return new Frame(o, light, apply(m, ps[ARKAY].dir), cometMag, m, ps, cs);
     }
-
-    /**
-     * The dark-adapted eye beyond the display's reach: the eye's exposure stops at the meter's clamp (AtlasMeter.MAX,
-     * 2^12), where a real eye keeps adapting for many minutes more (its rods: two to three stops past a moonlit
-     * scene's). What the sky shows of the stars, the planets, the galaxy and a comet is lifted by that remainder, so a
-     * dark night shows its stars to about the fifth magnitude as an eye there would. It eases off as the scene
-     * brightens: the eye's exposure falling (a torch, a lit town), the moons' light on the land (the meter stays at its
-     * clamp under a full moon, the eye does not: a full Masser leaves it a stop and a half, as the faint stars go in
-     * moonlight) and twilight (the sun from 6 to 15 degrees down: the sky's own glow, the eye not yet dark-adapted).
-     * The land's light from them is never lifted (atlas_sky_light, the SH: physical). sunY: the game's sun's height
-     * (its direction's y); moonUp: the moons' irradiance on an upward face (units, NightSky.moonlights').
-     */
-    public static double eyeGain(double exposureLog2, double sunY, double moonUp) {
-        if (Double.isNaN(exposureLog2)) return 1.0;
-        double stops = Math.max(0.0, Math.min(EYE_GAIN_STOPS, exposureLog2 - (EYE_CLAMP_LOG2 - EYE_GAIN_STOPS)));
-        double moon = EYE_GAIN_STOPS - 0.35 * Math.log(Math.max(moonUp, 0.0) / DARK_NIGHT + 1.0) / Math.log(2.0);
-        stops = Math.max(0.0, Math.min(stops, moon));
-        double t = Math.max(0.0, Math.min(1.0, (sunY + 0.105) / (-0.259 + 0.105)));
-        return Math.pow(2.0, stops * t * t * (3.0 - 2.0 * t));
-    }
-
-    /** A moonless night's light on the land (~2e-4 lx: the airglow and the stars), in units. */
-    public static final double DARK_NIGHT = 2.0e-4 * NightSkyMath.LUX;
-
-    /** The meter's clamp (AtlasMeter.MAX) and the stops the dark-adapted eye adds there. */
-    public static final double EYE_CLAMP_LOG2 = 12.0, EYE_GAIN_STOPS = 5.0;
 
     /** A point of light above the horizon into the land's SH (faded through the air near the horizon). */
     private static void addLight(float[] sh, double[] d, double e, float[] tint) {
@@ -668,7 +640,7 @@ public final class NirnCelestial {
      * The offline sky's inputs: one line of JSON with CelestialInfo ("celestial"), NightSigns ("catalogue") and a
      * summary (latitude, the planets' places and magnitudes, the comet). key=value: dayTime (ticks), sunAngle (radians,
      * else vanilla's from dayTime), x, z (blocks), comet (a perihelion day for the dev hook's comet; or world=N for a
-     * world's own), exposure (the eye's log2), moonUp (the moons' light on the land: {@link #eyeGain}), seeing.
+     * world's own), seeing.
      */
     public static void main(String[] args) {
         java.util.Map<String, String> a = new java.util.HashMap<>();
@@ -682,9 +654,7 @@ public final class NirnCelestial {
         double x = Double.parseDouble(a.getOrDefault("x", "0")), z = Double.parseDouble(a.getOrDefault("z", "0"));
         Comet c = a.containsKey("comet") ? forcedComet(Double.parseDouble(a.get("comet")))
                 : a.containsKey("world") ? cometFor(Long.parseLong(a.get("world")), days) : null;
-        Frame f = frame(sunAngle, days, x, z, c, Double.parseDouble(a.getOrDefault("seeing", "1")),
-                Double.parseDouble(a.getOrDefault("exposure", "NaN")), NightSkyMath.sunDirection(sunAngle, -25.0)[1],
-                Double.parseDouble(a.getOrDefault("moonUp", "0")));
+        Frame f = frame(sunAngle, days, x, z, c, Double.parseDouble(a.getOrDefault("seeing", "1")));
         StringBuilder b = new StringBuilder("{");
         b.append("\"celestial\":").append(Arrays.toString(f.block));
         b.append(",\"catalogue\":").append(Arrays.toString(catalogue()));

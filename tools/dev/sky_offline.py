@@ -132,6 +132,14 @@ class Core:
         return list(out)
 
 
+def meter_range():
+    """AtlasMeter's MIN, MAX (log2 exposure: the eye's range), from its source."""
+    import re
+    src = (ROOT / "mod/src/main/java/com/nirncraft/atlas/AtlasMeter.java").read_text(encoding="utf-8")
+    m = re.search(r"MIN = (-?[\d.]+)f, MAX = (-?[\d.]+)f", src)
+    return float(m.group(1)), float(m.group(2))
+
+
 def smooth(e0, e1, x):
     t = min(max((x - e0) / (e1 - e0), 0.0), 1.0)
     return t * t * (3 - 2 * t)
@@ -227,16 +235,8 @@ class Sky:
         self.air_light = self.core.light(sun, ml[0:3], [max(e / math.pi, 1e-9) for e in ml[3:6]], EYE_Y)
         self.sh = self.light()
         # the LUT, as AtlasSky draws it: pre-exposed by the eye's exposure (AirMoon.w), read back with the same
-        self.pre = self.exposure(extra_up=float(lum(self.irradiance((0, 1, 0)))))
+        self.pre = self.exposure(extra_up=float(lum(self.irradiance((0, 1, 0)))), town=s.get("town", 0.0))
         self._air_tail[7] = self.pre
-        # the dark-adapted eye's lift of the sky's points (NirnCelestial.eyeGain: the eye's log2 exposure, the moons'
-        # light on the land, the sun)
-        cel = np.array(c["celestial"], dtype="f4")
-        moon_up = lum(ml[3:6]) * max(ml[1], 0.0) + lum(ml[9:12]) * max(ml[7], 0.0)
-        stops = min(max(math.log2(self.pre) - 7.0, 0.0), 5.0)
-        stops = max(0.0, min(stops, 5.0 - 0.35 * math.log2(moon_up / (2.0e-4 / 10830.0) + 1.0)))
-        cel[35] = 2.0 ** (stops * smooth(-0.105, -0.259, sun[1]))
-        self.ubo_cel.write(cel.tobytes())
         self.ubo_air.write(np.array(self.coeffs + self._air_tail, dtype="f4").tobytes())
         self._bind(self.view_prog)
         self.lut_fbo.use()
@@ -258,16 +258,18 @@ class Sky:
         sh = self.sh
         return math.pi * 0.282095 * sh[0] + (2 * math.pi / 3) * 0.488603 * (sh[1] * n[0] + sh[2] * n[1] + sh[3] * n[2])
 
-    def exposure(self, extra_up=0.0):
-        """The eye's exposure (AtlasMeter's target) for a scene lit by this sky: a grey ground's mean luminance."""
+    def exposure(self, extra_up=0.0, town=0.0):
+        """The eye's exposure (AtlasMeter's target, its range read from AtlasMeter.java) for a scene lit by this sky: a
+        grey ground's mean luminance, plus town (a lit town's own mean luminance: its torches and windows)."""
         k = self.air_light
         key = lum(k[3:6]) * max(k[1], 0.0)
         up = lum(k[6:9]) * math.pi
-        e = 0.18 * (key + up + extra_up) / math.pi
-        s = math.log2(max(e, 1e-9))
+        e = 0.18 * (key + up + extra_up) / math.pi + town
+        s = math.log2(max(e, 1e-12))
         dayness = smooth(-19.0, -6.0, s)
         target = math.log2(0.004) + (math.log2(0.18) - math.log2(0.004)) * dayness
-        return 2.0 ** min(max(target - s, -4.5), 12.0)
+        lo, hi = meter_range()
+        return 2.0 ** min(max(target - s, lo), hi)
 
     def view(self, w, h, yaw, pitch, fov, exposure):
         """A perspective view through the game's core/atlas_sky.fsh (displayed, sRGB 8 bit)."""
@@ -424,6 +426,13 @@ SCENES = {
     # Arkay in the Thief's eye (Mid Year 16th of year 0; every second Mid Year), and close up (its disc)
     "thief_eye": {**midnight(165), "z": 0, "kp": 0, "brightness": 0, "look": ("arkay", -2, 50), "res": HD},
     "arkay_close": {**midnight(165), "z": 0, "kp": 0, "brightness": 0, "look": ("arkay", 0, 2), "res": HD},
+    # one exposure for everything (AtlasMeter's range to the scotopic): a moonless night (the land near black, the stars
+    # points to the fifth magnitude and past, the galaxy, a kp 6 aurora green), a full Masser (the land dim, fewer
+    # stars), a torch-lit town (its lights, ~2^-13 of the air's units on average, wash the stars out)
+    "eye_moonless": {**midnight(28), "z": -2000, "kp": 6, "look": (0, 25, 90), "res": HD},
+    "eye_moonless_s": {**midnight(28), "z": -2000, "kp": 6, "look": (170, 40, 70), "res": HD},
+    "eye_full_masser": {**midnight(64), "z": -2000, "kp": 0, "brightness": 0, "look": (170, 40, 70), "res": HD},
+    "eye_town": {**midnight(28), "z": -2000, "kp": 6, "town": 2.0 ** -13, "look": (170, 40, 70), "res": HD},
     # Akatosh, the evening star, a crescent (Rain's Hand 16th): in the dusk, and its disc and phase close up
     "akatosh_dusk": {**dusk(-10, 105), "z": 0, "kp": 0, "brightness": 0, "look": ("akatosh", 12, 70), "res": HD},
     "akatosh_close": {**dusk(-10, 105), "z": 0, "kp": 0, "brightness": 0, "look": ("akatosh", 0, 1.5), "res": HD},

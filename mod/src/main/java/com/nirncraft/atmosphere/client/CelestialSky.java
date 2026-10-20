@@ -8,8 +8,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 /**
  * The celestial sky's state each frame (com.nirncraft.atlas.AtlasSky draws it: shaders/include/atlas_celestial.glsl),
  * from the world: the clock (the stars' frame, the planets' places, the comet's), the camera's place on Tamriel's map
- * (its latitude: what stands above the horizon), the eye's exposure (the dark-adapted eye's lift of what is seen,
- * {@link NirnCelestial#eyeGain}); and their light on the land (the planets and a bright comet, as points: added to the
+ * (its latitude: what stands above the horizon); and their light on the land (the planets and a bright comet, as points: added to the
  * night's light by AtlasSky.nightLight beside the meteors').
  *
  * <p>The comet: one in about six years per world ({@link NirnCelestial#yearComet}, from the world's seed when this
@@ -34,12 +33,7 @@ public final class CelestialSky {
         double dayTime = level != null ? level.getOverworldClockTime() + partialTick : 18000.0;
         double days = dayTime / 24000.0;
         NirnCelestial.Comet comet = comet(mc, days);
-        float exposure = com.nirncraft.atlas.AtlasClient.eyeExposureLog2();
-        // the moons' light on the land (an upward face: the key and the fill, above the air), for the eye's adaptation
-        float[] ml = NightSky.moonlights();
-        double moonUp = NightSkyMath.lum(ml[3], ml[4], ml[5]) * Math.max(ml[1], 0f)
-                + NightSkyMath.lum(ml[9], ml[10], ml[11]) * Math.max(ml[7], 0f);
-        var f = NirnCelestial.frame(sunAngle, days, camX, camZ, comet, 1.0, exposure, sunY, moonUp);
+        var f = NirnCelestial.frame(sunAngle, days, camX, camZ, comet, 1.0);
         // the land's light from them: only while the sky shows its lights, lifted as the sky's other emitters
         boolean shown = NightSky.drawn();
         double gain = NightSkyMath.nightGain(sunY);

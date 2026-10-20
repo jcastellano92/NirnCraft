@@ -45,7 +45,9 @@ final class AtlasMeter {
             .build();
 
     // the eye's range (log2 exposure) and its speeds (seconds to close most of the gap)
-    static final float MIN = -4.5f, MAX = 12.0f, TAU_BRIGHTER = 0.35f, TAU_DARKER = 3.0f, TAU_DARKER_TAIL = 14f;
+    // MAX: the eye's scotopic reach (a clear moonless night, ~2e-8 of the air's units in the sky and less on the land,
+    // adapts fully: the land near black at the night's target, the aurora and the galaxy a glow, the stars points)
+    static final float MIN = -4.5f, MAX = 21.0f, TAU_BRIGHTER = 0.35f, TAU_DARKER = 3.0f, TAU_DARKER_TAIL = 14f;
 
     private static TextureTarget grid;
     private static final GpuBuffer[] ring = new GpuBuffer[3];

@@ -33,8 +33,7 @@ layout(std140) uniform NightSigns {
 layout(std140) uniform CelestialInfo {
     mat4 CelEquator;      // world direction -> equatorial
     mat4 CelSerpent;      // world direction -> the Serpent's own frame
-    vec4 CelObserver;     // x latitude, y longitude (rad), z the seeing (the scintillation's strength, 1 typical),
-                          // w the dark-adapted eye's lift of what is seen (NirnCelestial.eyeGain; never the land's light)
+    vec4 CelObserver;     // x latitude, y longitude (rad), z the seeing (the scintillation's strength, 1 typical), w -
     vec4 PlanetPos[8];    // xyz towards it (world), w its irradiance (0: none)
     vec4 PlanetTint[8];   // rgb colour (luminance 1), w the disc's angular radius (rad)
     vec4 PlanetSun[8];    // xyz from it towards the sun (world), w the lit share of the disc's light (2/3 Lambert)
@@ -65,15 +64,21 @@ float nightMoonCover(vec3 dir, float pix) {
 }
 #endif
 
-// ---- a point of light: irradiance 1 at s, seen at c through a pixel of angular size pix (radiance). The core holds
-// the flux in about a pixel; a faint wide glare (the eye's own scatter round a bright point) carries 4 % of it.
+// ---- a point of light: irradiance 1 at s, seen at c through a pixel of angular size pix (radiance). A point source:
+// its light lands in its pixel, its radiance there its irradiance over the pixel's solid angle (pix^2: the view's and
+// each sky cube face's alike), spread only by the seeing (an energy-conserving core of ~1.5 pixels, so it does not
+// alias as it moves) and the eye's own glare round a bright point (its scatter: 10 % of the light a couple of
+// pixels out, 2 % further): a point past the display's white keeps its rank by its size, the brightest the largest,
+// as the eye sees a bright star. The same exposure as everything else then shows a magnitude-5 star in its pixel on a
+// dark night, as a dark-adapted eye sees it.
 float celPoint(vec3 c, vec3 s, float pix) {
     vec3 x = cross(c, s);
     float a2 = dot(x, x);
     if (dot(c, s) < 0.0) return 0.0;
     float sg = max(pix * 0.6, 2e-5);
-    float sh = max(pix * 3.5, 1e-4);
-    return 0.96 * exp(-0.5 * a2 / (sg * sg)) / (6.2831853 * sg * sg) + 0.04 * exp(-0.5 * a2 / (sh * sh)) / (6.2831853 * sh * sh);
+    float sh = max(pix * 2.2, 6e-5), sw = max(pix * 6.0, 1.6e-4);
+    return (0.88 * exp(-0.5 * a2 / (sg * sg)) / (sg * sg) + 0.10 * exp(-0.5 * a2 / (sh * sh)) / (sh * sh)
+            + 0.02 * exp(-0.5 * a2 / (sw * sw)) / (sw * sw)) / 6.2831853;
 }
 
 // a blackbody's colour (linear sRGB, luminance 1), a little richer than the eye's (NirnCelestial.blackbody)
@@ -122,10 +127,11 @@ vec3 celStarField(vec3 c, vec3 dir, float pix) {
     vec3 L = vec3(0.0);
     for (int layer = 0; layer < 3; layer++) {
         // (cells a face side, the layer's magnitude range: the count law N(< m) ~ 10^(0.5 m) from its faintest; its
-        // brightest folded back into its range, the named stars and the birthsigns own the bright end)
-        float n = layer == 0 ? 32.0 : layer == 1 ? 80.0 : 190.0;
-        float mFaint = layer == 0 ? 5.6 : layer == 1 ? 7.4 : 9.2;
-        float mBright = layer == 0 ? 3.2 : layer == 1 ? 5.0 : 6.6;
+        // brightest folded back into its range, the named stars and the birthsigns own the bright end). The field ends
+        // at the naked eye's limit (6.6): the fainter crowd is the galaxy's glow
+        float n = layer == 0 ? 32.0 : layer == 1 ? 56.0 : 110.0;
+        float mFaint = layer == 0 ? 5.0 : layer == 1 ? 6.0 : 6.6;
+        float mBright = layer == 0 ? 3.2 : layer == 1 ? 4.6 : 5.4;
         float crowd = 1.0 + (0.6 + 1.1 * float(layer)) * band;  // the faint ones crowd towards the galaxy's plane
         vec2 g = (fc.yz * 0.5 + 0.5) * n;
         vec2 cell = floor(g);
@@ -314,10 +320,7 @@ vec3 celestialSky(vec3 dir, float pix, int what) {
     if ((what & NIGHT_GALAXY) != 0 && NightStars.y > 0.0) L += NightStars.y * celGalaxy(c);
     L *= 1.0 - dark;
     if (stars) L += rim + celPlanets(dir, pix) + celComet(dir, pix);
-    // what the eye sees (the sky, the water's mirror: NIGHT_STARS) is lifted by the eye's adaptation past the meter's
-    // clamp; the land's light (atlas_sky_light: NIGHT_DIFFUSE alone) stays physical
-    float eye = stars ? max(CelObserver.w, 1.0) : 1.0;
-    return L * (1.0 - hide) * eye;
+    return L * (1.0 - hide);
 }
 
 #endif
