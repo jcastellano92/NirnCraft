@@ -17,6 +17,7 @@ import com.mojang.renderpearl.api.textures.FilterMode;
 import com.mojang.renderpearl.api.GpuFormat;
 import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.nirncraft.NirnCraft;
+import com.nirncraft.atmosphere.MoonMath;
 import com.nirncraft.atmosphere.NightSkyMath;
 import com.nirncraft.atmosphere.client.NightSky;
 import com.nirncraft.atmosphere.client.SkyCube;
@@ -47,7 +48,8 @@ import org.lwjgl.system.MemoryUtil;
  *       sky-view LUT (atlas_sky_view.fsh: 192 x 108, the elevation gathered at the horizon);</li>
  *   <li>the sky's own lights through that air (atlas_night.glsl, its state from atmosphere.client.NightSky /
  *       NightSkyMath): the aurora's volume over the auroral oval, the stars, the galaxy and the birthsigns, Masser and
- *       Secunda with their phases, meteors, the airglow;</li>
+ *       Secunda (atlas_moons.glsl: lit spheres with their baked maps, AtlasMoonTexture; their eclipses, MoonMath),
+ *       meteors, the airglow;</li>
  *   <li>the sun's disc in its transmitted light.</li>
  * </ul>
  * The sky (atlas_sky.fsh) evaluates all of it per pixel; the water's reflections read the emitters from a small cube
@@ -62,8 +64,11 @@ final class AtlasSky implements CustomSkyboxRenderer {
     static final int VIEW_W = 192, VIEW_H = 108;
 
     private static final Identifier GALAXY = Identifier.fromNamespaceAndPath(NirnCraft.MODID, "textures/environment/galaxy.png");
-    private static final Identifier MASSER = Identifier.fromNamespaceAndPath(NirnCraft.MODID, "textures/environment/masser_phases.png");
-    private static final Identifier SECUNDA = Identifier.fromNamespaceAndPath(NirnCraft.MODID, "textures/environment/secunda_phases.png");
+    // the moons' baked maps (tools/dev/moon_gen.py), mip-mapped (AtlasMoonTexture)
+    private static final Identifier MASSER = Identifier.fromNamespaceAndPath(NirnCraft.MODID, "textures/environment/masser_albedo.png");
+    private static final Identifier MASSER_RELIEF = Identifier.fromNamespaceAndPath(NirnCraft.MODID, "textures/environment/masser_relief.png");
+    private static final Identifier SECUNDA = Identifier.fromNamespaceAndPath(NirnCraft.MODID, "textures/environment/secunda_albedo.png");
+    private static final Identifier SECUNDA_RELIEF = Identifier.fromNamespaceAndPath(NirnCraft.MODID, "textures/environment/secunda_relief.png");
 
     private static BindGroupLayout.Builder night(BindGroupLayout.Builder b) {
         return b.withUniform("AirInfo", UniformType.UNIFORM_BUFFER)
@@ -71,8 +76,11 @@ final class AtlasSky implements CustomSkyboxRenderer {
                 .withUniform("NightInfo", UniformType.UNIFORM_BUFFER)
                 .withUniform("NightSigns", UniformType.UNIFORM_BUFFER)
                 .withUniform("NightGalaxy", UniformType.COMBINED_IMAGE_SAMPLER)
+                .withUniform("MoonInfo", UniformType.UNIFORM_BUFFER)
                 .withUniform("NightMasser", UniformType.COMBINED_IMAGE_SAMPLER)
-                .withUniform("NightSecunda", UniformType.COMBINED_IMAGE_SAMPLER);
+                .withUniform("NightMasserRelief", UniformType.COMBINED_IMAGE_SAMPLER)
+                .withUniform("NightSecunda", UniformType.COMBINED_IMAGE_SAMPLER)
+                .withUniform("NightSecundaRelief", UniformType.COMBINED_IMAGE_SAMPLER);
     }
 
     private static final BindGroupLayout SKY_INFO = night(BindGroupLayout.builder()
@@ -131,8 +139,9 @@ final class AtlasSky implements CustomSkyboxRenderer {
             .withColorTargetState(new ColorTargetState(Optional.empty(), GpuFormat.RGBA32_FLOAT, ColorTargetState.WRITE_ALL))
             .build();
 
-    private MappableRingBuffer info, airInfo, nightInfo;
+    private MappableRingBuffer info, airInfo, nightInfo, moonInfo;
     private static GpuBuffer signs;
+    private static final GpuTextureView[] moons = new GpuTextureView[4];  // Masser's albedo, relief; Secunda's
     private static TextureTarget view, lightTarget;
     private static boolean viewDrawn;
 
@@ -183,6 +192,7 @@ final class AtlasSky implements CustomSkyboxRenderer {
         if (info == null) info = new MappableRingBuffer(() -> "atlas sky info", 130, 112);
         if (airInfo == null) airInfo = new MappableRingBuffer(() -> "atlas air info", 130, 112);
         if (nightInfo == null) nightInfo = new MappableRingBuffer(() -> "atlas night info", 130, NightSkyMath.BLOCK_FLOATS * 4);
+        if (moonInfo == null) moonInfo = new MappableRingBuffer(() -> "atlas moon info", 130, MoonMath.BLOCK_FLOATS * 4);
         if (signs == null) {
             float[] s = NightSkyMath.signs();
             ByteBuffer b = MemoryUtil.memAlloc(s.length * 4).order(ByteOrder.nativeOrder());
@@ -198,8 +208,12 @@ final class AtlasSky implements CustomSkyboxRenderer {
         if (lightTarget == null) lightTarget = new TextureTarget("atlas sky light", 4, 1, GpuFormat.RGBA32_FLOAT, null);
         // (a first lookup uploads the texture: before any pass is open)
         var tm = mc.getTextureManager();
-        GpuTextureView galaxy = tm.getTexture(GALAXY).getTextureView(), masser = tm.getTexture(MASSER).getTextureView(),
-                secunda = tm.getTexture(SECUNDA).getTextureView();
+        AtlasMoonTexture.ensure(mc, MASSER, MASSER_RELIEF, SECUNDA, SECUNDA_RELIEF);
+        GpuTextureView galaxy = tm.getTexture(GALAXY).getTextureView();
+        moons[0] = tm.getTexture(MASSER).getTextureView();
+        moons[1] = tm.getTexture(MASSER_RELIEF).getTextureView();
+        moons[2] = tm.getTexture(SECUNDA).getTextureView();
+        moons[3] = tm.getTexture(SECUNDA_RELIEF).getTextureView();
         var cam = levelRenderState.cameraRenderState;
         Matrix4f inv = AtlasLook.levelProjection(cam).mul(modelView).invert();
         float[] sun = AtlasClient.sunDirection(sky.sunAngle);
@@ -213,6 +227,7 @@ final class AtlasSky implements CustomSkyboxRenderer {
         float[] night = NightSky.frame(mc, sky.sunAngle, AtlasClient.sunPathRotationDeg, cam.pos.x, cam.pos.z, alt,
                 mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
         nightDrawn = NightSky.drawn();
+        float[] moonBlock = NightSky.moonBlock();
         NightSkyMath.target(night, look[0], (Math.PI / 2) / SkyCube.FACE);
         var linear = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
                 FilterMode.LINEAR, FilterMode.LINEAR, false);
@@ -226,11 +241,16 @@ final class AtlasSky implements CustomSkyboxRenderer {
                     .putVec4(coeffs[12], coeffs[13], coeffs[14], coeffs[15])
                     .putVec4(sun[0], sun[1], sun[2], alt)
                     .putVec4(moon[0], moon[1], moon[2], AtlasLook.frame(mc)[0])  // w: the LUT's pre-exposure
-                    .putVec4(moon[3], moon[4], moon[5], 0f);
+                    .putVec4(moon[3], moon[4], moon[5], moonBlock[0] * (float) AtlasLook.ECLIPSE_DEPTH);  // w: the eclipse
         }
         try (var v = nightInfo.currentBuffer().map(false, true)) {
             var b = Std140Builder.intoBuffer(v.data());
             for (int i = 0; i < night.length; i += 4) b.putVec4(night[i], night[i + 1], night[i + 2], night[i + 3]);
+        }
+        try (var v = moonInfo.currentBuffer().map(false, true)) {
+            var b = Std140Builder.intoBuffer(v.data());
+            for (int i = 0; i < moonBlock.length; i += 4)
+                b.putVec4(moonBlock[i], moonBlock[i + 1], moonBlock[i + 2], moonBlock[i + 3]);
         }
         var encoder = device.createCommandEncoder();
         // 1. the sky-view LUT: the air marched for each of its directions
@@ -246,13 +266,13 @@ final class AtlasSky implements CustomSkyboxRenderer {
             var cube = SkyCube.target();
             try (var pass = encoder.createRenderPass(() -> "Infinite ATLAS sky emitters", cube.getColorTextureView(), Optional.empty())) {
                 pass.setPipeline(RenderSystem.getCompiledPipeline(EMIT_PIPELINE));
-                bindNight(pass, ms, linear, band, galaxy, masser, secunda);
+                bindNight(pass, ms, linear, band, galaxy);
                 pass.draw(3, 1, 0, 0);
             }
             SkyCube.drawn();
         }
         // 3. the diffuse emitters' light (read back), every other frame
-        if ((frameCount++ & 1) == 0) light(encoder, ms, linear, band, galaxy, masser, secunda);
+        if ((frameCount++ & 1) == 0) light(encoder, ms, linear, band, galaxy);
         // 4. the sky: the LUT looked up per pixel (repeat across the bearing), the sky's lights, the sun's disc
         // (the eye's own exposure: the night's lights are in the same radiance as the land, one eye for both)
         boolean sunKey = sun[1] > -0.05f && light != null;
@@ -267,32 +287,35 @@ final class AtlasSky implements CustomSkyboxRenderer {
             pass.setPipeline(RenderSystem.getCompiledPipeline(PIPELINE));
             pass.setUniform("SkyInfo", info.currentBuffer());
             pass.setUniform("SkyView", view.getColorTextureView(), band);
-            bindNight(pass, ms, linear, band, galaxy, masser, secunda);
+            bindNight(pass, ms, linear, band, galaxy);
             pass.draw(3, 1, 0, 0);
         }
         info.rotate();
         airInfo.rotate();
         nightInfo.rotate();
+        moonInfo.rotate();
         return true;
     }
 
     private void bindNight(com.mojang.renderpearl.api.commands.RenderPass pass, GpuTextureView ms,
                            com.mojang.renderpearl.api.textures.GpuSampler linear,
-                           com.mojang.renderpearl.api.textures.GpuSampler band, GpuTextureView galaxy,
-                           GpuTextureView masser, GpuTextureView secunda) {
+                           com.mojang.renderpearl.api.textures.GpuSampler band, GpuTextureView galaxy) {
         pass.setUniform("AirInfo", airInfo.currentBuffer());
         pass.setUniform("AirMs", ms, linear);
         pass.setUniform("NightInfo", nightInfo.currentBuffer());
         pass.setUniform("NightSigns", signs);
         pass.setUniform("NightGalaxy", galaxy, band);
-        pass.setUniform("NightMasser", masser, linear);
-        pass.setUniform("NightSecunda", secunda, linear);
+        pass.setUniform("MoonInfo", moonInfo.currentBuffer());
+        var mips = AtlasMoonTexture.mipmapped();
+        pass.setUniform("NightMasser", moons[0], mips);
+        pass.setUniform("NightMasserRelief", moons[1], mips);
+        pass.setUniform("NightSecunda", moons[2], mips);
+        pass.setUniform("NightSecundaRelief", moons[3], mips);
     }
 
     private void light(com.mojang.renderpearl.api.commands.CommandEncoder encoder, GpuTextureView ms,
                        com.mojang.renderpearl.api.textures.GpuSampler linear,
-                       com.mojang.renderpearl.api.textures.GpuSampler band, GpuTextureView galaxy,
-                       GpuTextureView masser, GpuTextureView secunda) {
+                       com.mojang.renderpearl.api.textures.GpuSampler band, GpuTextureView galaxy) {
         int slot = next;
         if (busy[slot]) return;  // (the GPU is three readings behind: skip one rather than wait)
         var device = RenderSystem.getDevice();
@@ -300,7 +323,7 @@ final class AtlasSky implements CustomSkyboxRenderer {
             ring[slot] = device.createBuffer(() -> "atlas sky light readback", GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_MAP_READ, 64L);
         try (var pass = encoder.createRenderPass(() -> "Infinite ATLAS sky light", lightTarget.getColorTextureView(), Optional.empty())) {
             pass.setPipeline(RenderSystem.getCompiledPipeline(LIGHT_PIPELINE));
-            bindNight(pass, ms, linear, band, galaxy, masser, secunda);
+            bindNight(pass, ms, linear, band, galaxy);
             pass.draw(3, 1, 0, 0);
         }
         busy[slot] = true;

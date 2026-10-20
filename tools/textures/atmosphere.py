@@ -3,7 +3,7 @@
 
   assets/minecraft/textures/environment/celestial/moon/*.png   transparent native26.3 vanilla moon overrides
   assets/minecraft/textures/environment/moon_phases.png   preserved legacy transparent moon override
-  assets/nirncraft/textures/environment/{masser,secunda}_phases.png 16 phases, 4x4, baked by bake_lunar.py
+  assets/nirncraft/textures/environment/{masser,secunda}_*.png  the moons: tools/dev/moon_gen.py bakes them
   assets/nirncraft/textures/environment/masser_halo.png    faint shader-off lunar scattering fallback
   assets/nirncraft/textures/environment/galaxy.png         horizontally tiling galaxy band
   assets/nirncraft/textures/environment/clouds.png         cloud sprite atlas (4x4) for atmosphere.client.CloudRenderer
@@ -11,8 +11,8 @@
   assets/nirncraft/textures/particle/*.png + particles/*.json  atmospheric particle sprites (visual package):
       snowflake, ash_flake, ember, sand_dust, falling_leaf, firefly, frost_breath, marsh_wisp, dust_mote
 
-Lunar atlases use public NASA LROC/LOLA data with fictional-body tints; see bake_lunar.py and lunar_sources.txt.
-Phase order: 0 full, 4 quarter, 8 new, 12 opposite quarter. Requires numpy and Pillow.
+The moons' surfaces are simulated from nothing (tools/dev/moon_gen.py: albedo, relief and the 16-phase sheets).
+Requires numpy and Pillow.
 """
 import json
 import pathlib
@@ -531,8 +531,6 @@ def sky():
         write_blur_meta(path, clamp)
     # Both renderer paths draw the same smooth-phased celestial bodies. Suppress the duplicate vanilla moon.
     vanilla_moon_overrides()
-    import runpy
-    runpy.run_path(str(pathlib.Path(__file__).with_name("bake_lunar.py")), run_name="__main__")
     print("wrote the sky textures:", ", ".join(o[0].name for o in out))
 
 

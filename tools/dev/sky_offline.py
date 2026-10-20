@@ -4,11 +4,13 @@ without the game, into images and numbers.
 Runs the mod's own GLSL files (includes expanded as glsl_check does) on a standalone GL context (moderngl): the sky-view
 LUT (core/atlas_sky_view.fsh), the sky as the game shows it (core/atlas_sky.fsh), the emitter cube the water mirrors
 (core/atlas_sky_emit.fsh) and the land's light from the sky's emitters (core/atlas_sky_light.fsh). Their inputs come
-from the game's own code: NightSkyMath (javac'd from the mod's source, run per scene: NightInfo, NightSigns, the moons'
+from the game's own code: NightSkyMath and MoonMath (javac'd from the mod's source, run per scene: NightInfo, NightSigns,
+MoonInfo, the moons'
 lights) and the core (atlas_air_coeffs / atlas_air_multiscatter / atlas_air_light from the built atlas_core). The
 display exposure is the eye's (AtlasMeter's target for the scene's light).
 
     py -3 tools/dev/sky_offline.py [--out DIR] [--dll native/build/Release/atlas_core.dll] [--only NAME]
+    py -3 tools/dev/sky_offline.py --moons   # the moons: full, half, crescent, high and low; eclipses (moons_sheet.png)
 
 Writes DIR/<scene>_view.png (a perspective view through core/atlas_sky.fsh), DIR/<scene>_dome.png (the whole sky,
 zenith at the centre, north up), DIR/<scene>_cube.png (the emitter cube) and DIR/numbers.json; prints a table.
@@ -35,6 +37,7 @@ import moderngl  # noqa: E402
 SHADERS = ROOT / "mod/src/main/resources/assets/nirncraft/shaders"
 TEX = ROOT / "mod/src/main/resources/assets/nirncraft/textures/environment"
 PATH_DEG = -25.0
+ECLIPSE_DEPTH = 0.9997  # AtlasLook.ECLIPSE_DEPTH
 EYE_Y = 120.0
 
 VERT = """#version 330
@@ -89,11 +92,7 @@ def night_math(args: dict) -> dict:
     """NightSkyMath.main for a scene (the mod's own source, compiled once into .work/sky_offline)."""
     jdk = find_up("toolchains/jdk-25.0.4.1+1/bin")
     out = ROOT / ".work/sky_offline/classes"
-    src = ROOT / "mod/src/main/java/com/nirncraft/atmosphere/NightSkyMath.java"
-    cls = out / "com/nirncraft/atmosphere/NightSkyMath.class"
-    if not cls.exists() or cls.stat().st_mtime < src.stat().st_mtime:
-        out.mkdir(parents=True, exist_ok=True)
-        subprocess.run([str(jdk / "javac.exe"), "-d", str(out), str(src)], check=True)
+    compile_math(jdk, out)
     r = subprocess.run([str(jdk / "java.exe"), "-cp", str(out), "com.nirncraft.atmosphere.NightSkyMath",
                         *[f"{k}={v}" for k, v in args.items()]], capture_output=True, text=True, check=True)
     return json.loads(r.stdout)
@@ -128,6 +127,37 @@ class Core:
         return list(out)
 
 
+def compile_math(jdk, out):
+    """NightSkyMath and MoonMath, javac'd into out when either source is newer than its class."""
+    srcs = [ROOT / "mod/src/main/java/com/nirncraft/atmosphere" / f"{n}.java" for n in ("NightSkyMath", "MoonMath")]
+    stale = False
+    for src in srcs:
+        cls = out / "com/nirncraft/atmosphere" / (src.stem + ".class")
+        stale |= not cls.exists() or cls.stat().st_mtime < src.stat().st_mtime
+    if stale:
+        out.mkdir(parents=True, exist_ok=True)
+        subprocess.run([str(jdk / "javac.exe"), "-d", str(out), *map(str, srcs)], check=True)
+
+
+def moon_scan(frm, to, step):
+    """MoonMath's scene finder: the moons every step (days) over [frm, to)."""
+    jdk = find_up("toolchains/jdk-25.0.4.1+1/bin")
+    out = ROOT / ".work/sky_offline/classes"
+    compile_math(jdk, out)
+    r = subprocess.run([str(jdk / "java.exe"), "-cp", str(out), "com.nirncraft.atmosphere.MoonMath", "moons",
+                        str(frm), str(to), str(step)], capture_output=True, text=True, check=True)
+    return [json.loads(line) for line in r.stdout.splitlines() if line.strip()]
+
+
+def eclipse_scan(frm, to):
+    jdk = find_up("toolchains/jdk-25.0.4.1+1/bin")
+    out = ROOT / ".work/sky_offline/classes"
+    compile_math(jdk, out)
+    r = subprocess.run([str(jdk / "java.exe"), "-cp", str(out), "com.nirncraft.atmosphere.MoonMath", "eclipses",
+                        str(frm), str(to)], capture_output=True, text=True, check=True)
+    return [json.loads(line) for line in r.stdout.splitlines() if line.strip()]
+
+
 def smooth(e0, e1, x):
     t = min(max((x - e0) / (e1 - e0), 0.0), 1.0)
     return t * t * (3 - 2 * t)
@@ -158,8 +188,12 @@ class Sky:
         self.ms.filter = (moderngl.LINEAR, moderngl.LINEAR)
         self.ms.repeat_x = self.ms.repeat_y = False
         self.galaxy = self._image(TEX / "galaxy.png", repeat_x=True)
-        self.masser = self._image(TEX / "masser_phases.png")
-        self.secunda = self._image(TEX / "secunda_phases.png")
+        # the moons' baked maps (tools/dev/moon_gen.py), mip-mapped and clamped as AtlasMoonTexture loads them
+        self.masser = self._image(TEX / "masser_albedo.png")
+        self.masser_relief = self._image(TEX / "masser_relief.png")
+        self.secunda = self._image(TEX / "secunda_albedo.png")
+        self.secunda_relief = self._image(TEX / "secunda_relief.png")
+        self.ubo_moons = gl.buffer(reserve=16 * 4)
         self.lut = gl.texture((192, 108), 4, dtype="f2")
         self.lut.filter = (moderngl.LINEAR, moderngl.LINEAR)
         self.lut.repeat_y = False
@@ -181,12 +215,13 @@ class Sky:
 
     def _bind(self, prog):
         units = {"AirMs": self.ms, "NightGalaxy": self.galaxy, "NightMasser": self.masser,
-                 "NightSecunda": self.secunda, "SkyView": self.lut}
+                 "NightMasserRelief": self.masser_relief, "NightSecunda": self.secunda,
+                 "NightSecundaRelief": self.secunda_relief, "SkyView": self.lut}
         for i, (name, tex) in enumerate(units.items()):
             if name in prog:
                 tex.use(i)
                 prog[name].value = i
-        for i, (name, buf) in enumerate({"AirInfo": self.ubo_air, "NightInfo": self.ubo_night,
+        for i, (name, buf) in enumerate({"AirInfo": self.ubo_air, "NightInfo": self.ubo_night, "MoonInfo": self.ubo_moons,
                                          "NightSigns": self.ubo_signs, "SkyInfo": self.ubo_sky}.items()):
             if name in prog:
                 prog[name].binding = i
@@ -203,7 +238,11 @@ class Sky:
         sun = m["sun"]
         ml = m["moonlights"]  # key dir, key E, fill dir, fill E (irradiance above the air)
         fade = smooth(0.1, 0.0, sun[1])
-        self._air_tail = [*sun, args["eyeKm"], *ml[0:3], 1.0, *(e * fade for e in ml[3:6]), 0.0]
+        moons = m["moons"]  # MoonInfo (MoonMath.block): the eclipse, the Dark Moon, the Revenant
+        self.ubo_moons.write(np.array(moons, dtype="f4").tobytes())
+        # (AirMoonE.w: the sun's share an eclipse hides)
+        self._air_tail = [*sun, args["eyeKm"], *ml[0:3], 1.0, *(e * fade for e in ml[3:6]), moons[0] * ECLIPSE_DEPTH]
+        self.hidden = moons[0] * ECLIPSE_DEPTH * smooth(-0.12, 0.0, sun[1])
         self.ubo_air.write(np.array(self.coeffs + self._air_tail, dtype="f4").tobytes())
         night = np.array(m["night"], dtype="f4")
         night[-4] = 1.0  # NightTarget: pre-exposure 1 here, the cube's texel
@@ -245,7 +284,7 @@ class Sky:
         k = self.air_light
         key = lum(k[3:6]) * max(k[1], 0.0)
         up = lum(k[6:9]) * math.pi
-        e = 0.18 * (key + up + extra_up) / math.pi
+        e = 0.18 * ((key + up) * (1.0 - getattr(self, "hidden", 0.0)) + extra_up) / math.pi
         s = math.log2(max(e, 1e-9))
         dayness = smooth(-19.0, -6.0, s)
         target = math.log2(0.004) + (math.log2(0.18) - math.log2(0.004)) * dayness
@@ -356,15 +395,110 @@ SCENES = {
 }
 
 
+def toward(d):
+    """(yaw, pitch) degrees looking along world direction d (yaw 0 north, 90 east)."""
+    return math.degrees(math.atan2(d[0], -d[2])), math.degrees(math.asin(max(-1.0, min(1.0, d[1]))))
+
+
+def pick(rows, key, want):
+    """The scan row that best fits: want(row) -> a score (lower better) or None (unfit)."""
+    best, score = None, None
+    for r in rows:
+        v = want(r)
+        if v is not None and (score is None or v < score):
+            best, score = r, v
+    return best
+
+
+def moon_scenes():
+    """The moons' sheet's scenes, found in MoonMath's scan: each moon full, half and a crescent, high and near the
+    horizon (night unless a crescent needs the dusk), both moons together, and the eclipses (Masser's, Secunda's, the
+    dark one). {name: (scene, aim direction, close-up field of view)}."""
+    rows = moon_scan(0.0, 120.0, 1.0 / 96.0)
+    el = lambda d: math.degrees(math.asin(d[1]))
+    out = {}
+    for body, radius_deg in (("masser", 10.5), ("secunda", 3.6)):
+        for phase, lo, hi, sun_max in (("full", 0.97, 1.01, -0.25), ("half", 0.42, 0.58, -0.2),
+                                       ("crescent", 0.12, 0.3, -0.08)):
+            for where, e0, e1 in (("high", 30, 70), ("low", 4 + radius_deg, 10 + radius_deg)):
+                r = pick(rows, body, lambda r: (abs(r[body][3] - (lo + hi) / 2)
+                         if lo <= r[body][3] <= hi and r["sunY"] < sun_max and e0 <= el(r[body]) <= e1 else None))
+                if r is None:
+                    print(f"  (no scene for {body} {phase} {where})")
+                    continue
+                d = r[body][:3]
+                out[f"{body}_{phase}_{where}"] = ({"dayTime": r["day"] * 24000, "z": 3500, "kp": 0, "brightness": 0},
+                                                  d, radius_deg * 2.0 * 1.35)
+    # both up at night: Masser low and large, Secunda higher beside it
+    r = pick(rows, "both", lambda r: (abs(el(r["masser"]) - 16) + abs(el(r["secunda"]) - 35) * 0.5
+             if r["sunY"] < -0.2 and r["masser"][3] > 0.6 and r["secunda"][3] > 0.5
+             and math.degrees(math.acos(sum(a * b for a, b in zip(r["masser"][:3], r["secunda"][:3])))) < 45 else None))
+    if r is not None:
+        mid = [r["masser"][i] + r["secunda"][i] for i in range(3)]
+        n = math.sqrt(sum(c * c for c in mid))
+        out["both_moons_view"] = ({"dayTime": r["day"] * 24000, "z": 3500, "kp": 0, "brightness": 0},
+                                  [c / n for c in mid], 75.0)
+    # the eclipses: the first of each kind with the sun well up
+    ecl = eclipse_scan(0.0, 1500.0)
+    for name, test in (("eclipse_masser", lambda e: e["masser"] > 0.999 and e["secunda"] == 0),
+                       ("eclipse_secunda", lambda e: e["secunda"] > 0.999 and e["masser"] == 0),
+                       ("eclipse_partial", lambda e: 0.3 < e["hidden"] < 0.8),
+                       ("eclipse_dark", lambda e: e["dark"] > 0.5)):
+        e = next((e for e in ecl if test(e) and e["sunY"] > 0.3), None)
+        if e is None:
+            print(f"  (no scene for {name})")
+            continue
+        out[name] = ({"dayTime": e["day"] * 24000, "z": 3500, "kp": 0, "brightness": 0}, None, 60.0)
+    return out
+
+
+def moons_sheet(sky, out):
+    """Renders the moon scenes (wide and close) into out/moons/, and moons_sheet.png."""
+    from PIL import ImageDraw
+    d = out / "moons"
+    d.mkdir(parents=True, exist_ok=True)
+    tiles = []
+    for name, (scene, aim, fov) in moon_scenes().items():
+        sky.scene(scene)
+        if aim is None:
+            aim = sky.sun
+        yaw, pitch = toward(aim)
+        expo = sky.pre
+        close = sky.view(720, 720, yaw, pitch, fov, expo)
+        close.save(d / f"{name}_close.png")
+        wide = sky.view(1280, 720, yaw, max(pitch - 8, 12) if pitch < 30 else pitch, 80, expo)
+        wide.save(d / f"{name}_wide.png")
+        tile = Image.new("RGB", (720 + 1280 + 8, 740), (20, 20, 20))
+        tile.paste(close, (0, 0))
+        tile.paste(wide, (728, 0))
+        ImageDraw.Draw(tile).text((6, 723), f"{name}  day {scene['dayTime'] / 24000:.3f}  expo {expo:.3g}"
+                                  f"  hidden {sky.m['moons'][0]:.2f} dark {sky.m['moons'][1]:.2f}", fill=(230, 230, 230))
+        tiles.append(tile)
+        print(f"  {name}: day {scene['dayTime'] / 24000:.3f}, aim yaw {yaw:.0f} pitch {pitch:.0f}")
+    if tiles:
+        sheet = Image.new("RGB", (tiles[0].width, sum(t.height for t in tiles)), (0, 0, 0))
+        y = 0
+        for t in tiles:
+            sheet.paste(t, (0, y))
+            y += t.height
+        sheet.save(out / "moons_sheet.png")
+        print("moons sheet:", out / "moons_sheet.png")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(ROOT / ".work/sky_offline"))
-    ap.add_argument("--dll", default=str(ROOT / "native/build/Release/atlas_core.dll"))
+    ap.add_argument("--dll", default="")
     ap.add_argument("--only", default="")
+    ap.add_argument("--moons", action="store_true", help="the moons' sheet (MoonMath's scenes) instead of SCENES")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    sky = Sky(Path(a.dll))
+    # (a worktree has no build of its own: the checkout's, further up)
+    sky = Sky(Path(a.dll) if a.dll else find_up("native/build/Release/atlas_core.dll"))
+    if a.moons:
+        moons_sheet(sky, out)
+        return
     numbers = {}
     print(f"{'scene':18} {'expo':>6} {'zenith':>9} {'N hor':>9} {'S hor':>9} {'aur peak':>9} {'nightUp':>9} "
           f"{'airUp':>9} {'key':>9} {'fill':>9} {'emitE_up':>9}")

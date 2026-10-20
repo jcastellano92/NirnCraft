@@ -13,7 +13,7 @@ layout(std140) uniform AirInfo {
     vec4 AirOzone;     // ozone's absorption at its peak; w = the ground's albedo
     vec4 AirSun;       // xyz towards the sun; w = the eye's altitude, km
     vec4 AirMoon;      // xyz towards the moon; w the exposure the sky-view LUT is written with (half precision)
-    vec4 AirMoonE;     // the moon's irradiance above the air (0 by day)
+    vec4 AirMoonE;     // the moon's irradiance above the air (0 by day); w the sun's share an eclipse hides (MoonMath)
 };
 uniform sampler2D AirMs;  // the multiple-scattering LUT, 32 x 32 (u: sun zenith cosine, v: sqrt(altitude / 100 km))
 
@@ -138,7 +138,8 @@ vec3 airSkyRadiance(vec3 dir) {
     float r = R_GROUND + AirSun.w;
     float tg = airDistanceToGround(r, dir.y);
     float tEnd = tg >= 0.0 ? tg : airDistanceToTop(r, dir.y);
-    return airIntegrate(r, dir.y, dot(dir, sun), sun.y, SUN_IRRADIANCE, dot(dir, moon), moon.y, AirMoonE.rgb, tEnd,
+    return airIntegrate(r, dir.y, dot(dir, sun), sun.y, SUN_IRRADIANCE * (1.0 - AirMoonE.w), dot(dir, moon), moon.y,
+                        AirMoonE.rgb, tEnd,
                         tg >= 0.0) + NIGHT_GLOW;
 }
 

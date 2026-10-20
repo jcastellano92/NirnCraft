@@ -31,9 +31,10 @@ public final class NightSkyMath {
     /** The oval's radius round its pole (km): ~ 22 degrees of a real planet's latitude. */
     public static final double AURORA_OVAL_RADIUS = 2400.0;
 
-    // the moons: angular radii of their discs (the old quads: 20 and 7 at 100 blocks, the disc 0.916 of the quad),
-    // their full light (LunarKey's scale: pi x 1e-5 x the share, physical: Masser full ~ a real full moon), colours,
-    // and their albedo maps' mean (linear, the full phase's cell of masser_phases.png / secunda_phases.png)
+    // the moons: angular radii of their discs (the old quads: 20 and 7 at 100 blocks, the disc 0.916 of the quad: Masser
+    // ~21 degrees across, Secunda ~7, three times its size), their full light (LunarKey's scale: pi x 1e-5 x the share,
+    // physical: Masser full ~ a real full moon), colours, and their albedo maps' mean (linear, over the face towards
+    // Nirn: masser_albedo.png / secunda_albedo.png, tools/dev/moon_gen.py bakes them to these)
     public static final double MASSER_RADIUS = Math.atan(0.916 * 20.0 / 100.0);
     public static final double SECUNDA_RADIUS = Math.atan(0.91 * 7.0 / 100.0);
     public static final float[] MASSER_COLOUR = {1.0f, 0.70f, 0.62f};
@@ -44,8 +45,6 @@ public final class NightSkyMath {
     private static final double DAY_DISC = 0.05, SUNLIT_SURFACE = 3.74;
     private static final double[] MASSER_ALBEDO = {0.1708, 0.1304, 0.1494};
     private static final double[] SECUNDA_ALBEDO = {0.1077, 0.1110, 0.1063};
-    /** Secunda's orbit: inclined to the sun's path (LunarKey: -24 degrees about east). */
-    private static final double SECUNDA_TILT = -0.41887902;
     /** The Serpent drifts once round the sky in this many days, out of step with the other stars. */
     public static final double SERPENT_PERIOD_DAYS = 27.0;
     public static final double YEAR_DAYS = 365.25;
@@ -115,8 +114,12 @@ public final class NightSkyMath {
      *  colour over its albedo map's (so the disc's light is its light). */
     public record Moon(double[] dir, double[] up, double radius, double lit, double[] light, double discScale, double[] tint) {}
 
+    /** The moons' months (days): about eight and nine, a little over so their phases drift through the hours of the
+     *  day (a new moon at noon some months, an eclipse then: MoonMath), full near midnight on day 0. */
+    public static final double MASSER_MONTH = 8.2, SECUNDA_MONTH = 9.15;
+
     public static double moonCycle(double days, boolean secunda) {
-        double c = (days - 0.75) / (secunda ? 9.0 : 8.0) + (secunda ? 0.375 : 0.0);
+        double c = (days - 0.75) / (secunda ? SECUNDA_MONTH : MASSER_MONTH) + (secunda ? 0.375 : 0.0);
         return c - Math.floor(c);
     }
 
@@ -124,8 +127,12 @@ public final class NightSkyMath {
         double tilt = Math.toRadians(pathDeg);
         double[] axis = {0.0, Math.sin(tilt), Math.cos(tilt)};
         double[] anti = {-sun[0], -sun[1], -sun[2]};
-        double[] d = rotate(anti, axis, moonCycle(days, secunda) * Math.PI * 2);
-        if (secunda) d = rotate(d, new double[] {1, 0, 0}, SECUNDA_TILT);
+        double cycle = moonCycle(days, secunda);
+        double[] d = rotate(anti, axis, cycle * Math.PI * 2);
+        // its orbit's inclination (MoonMath: the node, the year): over or under the sun's path, eclipses in their seasons
+        double beta = MoonMath.latitude(secunda, days, Math.PI + cycle * Math.PI * 2);
+        d = norm(new double[] {d[0] * Math.cos(beta) + axis[0] * Math.sin(beta), d[1] * Math.cos(beta) + axis[1] * Math.sin(beta),
+                d[2] * Math.cos(beta) + axis[2] * Math.sin(beta)});
         double[] up = sub(axis, scale(d, dot(axis, d)));
         up = norm(up);
         double lit = 0.5 - 0.5 * dot(sun, d);
@@ -317,6 +324,9 @@ public final class NightSkyMath {
         b.append(",\"signs\":").append(Arrays.toString(signs()));
         b.append(String.format(Locale.ROOT, ",\"sun\":[%f,%f,%f]", sun[0], sun[1], sun[2]));
         b.append(",\"moonlights\":").append(Arrays.toString(moonlights(m, s, secundaOn)));
+        b.append(",\"moons\":").append(Arrays.toString(MoonMath.block(MoonMath.eclipse(sun, m, s, secundaOn), null)));
+        b.append(String.format(Locale.ROOT, ",\"masserDir\":[%f,%f,%f],\"secundaDir\":[%f,%f,%f]", m.dir[0], m.dir[1],
+                m.dir[2], s.dir[0], s.dir[1], s.dir[2]));
         b.append(String.format(Locale.ROOT, ",\"masserLit\":%f,\"secundaLit\":%f,\"gain\":%f}", m.lit, s.lit, nightGain(sun[1])));
         System.out.println(b);
     }
