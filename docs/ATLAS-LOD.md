@@ -438,6 +438,69 @@ cards, the far field's light instead of the reference's). Each by an experiment,
    (the chunk casts little; the tree's crown shades itself solid either way, point 2). By night (the moon) and at
    dusk, the voxel shadows of the coarse levels are the open question for larger elements (a town, a ridge).
 
+**Far light: traced** (2026-10-19, `atlas_far.slang`; ATLAS_FRAME_LIGHT_LOW keeps the light of before). Each shortfall
+above replaced, measured with the element tier (far-lit, realistic reference, 16 samples a pixel; inputs frozen in a
+snapshot of the exports, the "before" built from the commit before):
+
+* *Sky visibility per surface* (1): the hemisphere a face sees, traced: one cosine-weighted secondary ray a pixel and
+  frame through the voxel path, 16 voxels of the hit's level long (a cone widening with the level: eaves and crevices
+  near, valleys and ridges far), its sample stratified over a 16-frame cycle (R2 per pixel), so a still pixel under the
+  host's TAA converges to one fixed set. It is a control variate on the exact open-sky integral (skyAmbient: the
+  cosine-weighted split of sky and ground radiance about the face): the rays estimate only what is taken from it, so
+  open faces (most of the far field) are exact and noise-free. The pack's ambient floor (deferred.fsh) is added under
+  every far land surface. One ray scores within 0.1 dE of two; half the reach (8) the same as 16 on these elements.
+* *Secondary rays see the real shapes* (needed by every term): sun / moon shadows, sky and block-light rays pass foliage
+  and cut-out plants by their coverage (the share of the shape's micro-voxels filled times their cut-out alpha; a
+  crossing meets two faces of a block: an extinction of -2 ln(1 - c) a block; leaves without a shape FOLIAGE_COVER
+  0.65, Minecraft's oak and spruce tiles), and walk a partial shape's 4 x 4 x 4 micro-voxels at level 0: a snow layer,
+  a slab or a stair was a full cube to the light (a full block's shadow in every pit beside a snow layer, black faces
+  where layers of two heights meet). The rays start at the hit nudged off its face (inside a shaped voxel's empty part
+  when it must), out of a coarse level's solid along the face, and out of the column upwards where a drawn group's face
+  lies inside the ground.
+* *Light through foliage* (2): the sun's ray from a leaf carries the pack's light-through-leaves estimate
+  (E[exp(-0.45 x)] of the first leaf texel along it, integrated over the crown's coverage, 0 behind a solid), and
+  leaves take FOLIAGE_SSS (0.6 x (pow(v.l, 4) 0.8 + 0.25) x 0.5); the ground under a crown gets its dappled light as
+  the transmittance.
+* *Block lights as lights* (3): point lights, E = I cos / (d^2 + 0.5^2) x (1 - (d / R)^4)^2, I = 9.4 (level / 15)^2,
+  R = level + 1 (the reference's), the cosine both ways on foliage, shadowed by one secondary ray a pixel and light to
+  a point of the emitter that moves with the TAA's frames (soft), in the pack's block-light hue (real chunks' emitters
+  arrive as orange fires; the orange stays their glow's); fires and lava light by day too. Screen tiles take a light
+  wherever its sphere of light covers the frame (the 96 px cap cut a near lamp's light into a square). The glow is drawn
+  only where the far field does not hold the emitter's block (a far town's windows, a block lost in a coarse level):
+  the far field's own emissive surface draws the rest, which now glows texel by texel as the pack's light blocks do
+  (4 x smoothstep(0.35, 0.8, luminance), never under the flat glow before).
+* *Normals* (4): a groups hit keeps its true face normal at every distance (a slope is a staircase of tops and sides,
+  and so are its blocks); the voxel path still smooths its coarse cubes.
+
+| element | time | before (far-lit) | traced | the representation's floor (far-groups) |
+|---|---|---|---|---|
+| whiterun-night-chunk (the day chunk's blocks) | day | 6.2 / 4.9 / 6.4, worst 8.7, pop 0.09 / 0.20 | 4.1 / 2.4 / 3.5, worst 6.5, pop 0.11 / 0.30 | 4.0 / 2.4 / 4.1, worst 7.3, pop 0.03 / 0.16 |
+| | dusk | 9.0 / 8.0 / 9.2, 10.9, 0.21 / 0.17 | 3.8 / 2.2 / 3.1, 6.0, 0.14 / 0.23 | 3.0 / 1.9 / 2.6, 6.1, 0.03 / 0.08 |
+| | night | 7.7 / 6.8 / 6.7, 7.5, 0.08 / 0.04 | 2.6 / 1.4 / 1.6, 4.3, 0.03 / 0.05 | 2.8 / 1.6 / 4.3, 9.7, 0.06 / 0.11 |
+| falkreath-wide-tree | day | 4.1 / 4.5 / 4.6, 8.2, 0.06 / 0.04 | 3.4 / 2.8 / 2.7, 6.5, 0.04 / 0.01 | 3.3 / 3.0 / 2.9, 6.4, 0.05 / 0.01 |
+| | dusk | 7.1 / 6.2 / 6.8, 9.9, 0.05 / 0.03 | 5.5 / 2.6 / 2.4, 6.4, 0.05 / 0.02 | 7.3 / 3.7 / 3.2, 8.0, 0.25 / 0.41 |
+| | night | 1.5 / 1.4 / 1.3, 3.2, 0.03 / 0.00 | 1.4 / 0.6 / 0.7, 2.7, 0.03 / 0.00 | 1.4 / 1.0 / 1.4, 6.8, 0.05 / 0.06 |
+| whiterun-night-lights | day | 3.3 / 7.0 / 8.9, 8.9, 0.11 / 0.15 | 1.4 / 4.2 / 4.0, 5.4, 0.10 / 0.14 | 1.6 / 4.1 / 4.0, 6.6, 0.25 / 0.36 |
+| | dusk | 6.8 / 11.8 / 11.5, 14.3, 0.48 / 0.37 | 2.4 / 5.9 / 5.5, 7.8, 0.17 / 0.28 | 1.6 / 4.6 / 4.5, 6.7, 0.13 / 0.23 |
+| | night | 12.3 / 23.6 / 22.0, 26.5, 1.63 / 1.55 | 1.1 / 4.4 / 4.1, 7.8, 0.18 / 0.18 | 1.6 / 4.0 / 3.9, 7.1, 0.25 / 0.41 |
+
+(dE at 32 / 128 / 512 m, the worst from 64 m to 2 km, fly-in pop fast / slow. The far-groups floor is the same far
+field coloured from cards baked in the reference's own light: what is left once lighting is perfect. Where the traced
+light beats it, the floor's cards carry baked dusk contrast that its mip levels average badly.) The vanilla look is
+untouched: far-groups under Minecraft's light (shade=mc) renders bit-identical before and after.
+
+Cost (RTX 3090, 1920 x 1080, the Falkreath view from 200 blocks up, near field's 192 blocks left out, Vulkan, the
+traced and the cheap light in alternate frames of one process, `atlas_render interleave=light`; the GPU shared with a
+game client, so ratios over 45 frame pairs): two sky rays at reach 24 1.82x the cheap frame (+4.3 ms on 3.4), one ray
+1.48x, one ray at reach 12 1.41x; of that the sun's secondary ray is ~1 ms over the old binary one. The default is one
+ray at reach 16; ATLAS_FRAME_LIGHT_LOW is the quality step for the host's controller.
+
+Left: the chunk's fly-in pop (0.11 / 0.30 against the floor's 0.03 / 0.16, near the end of the slow fly-in: shadow
+and sky detail resolving as groups open, of which shadows are about a third); the lights' chunk at dusk 1.3 dE over
+the floor at 128 m; secondary rays still trace the voxel path (coarse levels are mip-voted cubes; groups for secondary
+rays, or a surface cache per group face, are next); light through foliage uses one coverage per material, not per
+texel; town and relief elements (element_lab kinds `town`, `relief`) exist for larger casters, not yet scored.
+
 **Calibration against the pack itself** (to run, live): suite:truth-realistic. `truth-<subject>-pack` captures the
 subject (whiterun-day, falkreath-dusk, whiterun-night, the lights-night stage) with the pack on, from the subject's
 pose, time and world without its exports; `truth-<subject>-realistic` renders the reference in that capture's camera
