@@ -250,7 +250,7 @@ vec3 untracedRadiance(vec3 albedo, vec3 n, vec2 lm) {
     float sky = lm.y * lm.y;
     vec3 direct = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * open;
     vec3 bounce = KeyRad.rgb * (max(KeyDir.y, 0.0) * 0.25 * (0.6 - 0.4 * n.y) * sky);
-    vec3 ambient = mix(Ground.rgb, SkyUp.rgb, n.y * 0.5 + 0.5) * (sky * 1.0) + bounce + vec3(0.0025, 0.0025, 0.0035);
+    vec3 ambient = mix(Ground.rgb, SkyUp.rgb, n.y * 0.5 + 0.5) * (sky * 1.0) + bounce + vec3(2.0e-8, 2.0e-8, 3.0e-8);
     return atlasSrgbToLinear(albedo) * (direct + ambient + atlasBlockLight(lm.x));
 }
 
@@ -296,7 +296,7 @@ void main() {
                 // atlas holds every section of the loaded chunks (caves included): its traced light is trusted as it is
                 // (light spills into a cave mouth and fades in), no cap by vanilla's sky light any more
                 vec3 light = nearLightFiltered(texCoord, nl, n, nearDepth);
-                radiance = atlasSrgbToLinear(albedo) * (light + atlasBlockLight(levels.r) + vec3(0.0025, 0.0025, 0.0035));
+                radiance = atlasSrgbToLinear(albedo) * (light + atlasBlockLight(levels.r) + vec3(2.0e-8, 2.0e-8, 3.0e-8));
                 radiance = radiance * aerial.a + aerial.rgb;
             } else {
                 // atlas did not draw this frame (streaming a new place): the same light without its tracing (no cast

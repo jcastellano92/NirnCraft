@@ -24,7 +24,7 @@ static const uint FRAME_NEAR_LIGHT = 0x20000u; // (abi 0.15) light the near fiel
 static const uint FRAME_NEAR_SPLIT = 0x40000u; // (internal: the Vulkan backend) the near light traced at half resolution
                                                // (nearLightMain) and upsampled (nearUpsampleMain), not in farMain
 // the shader pack's ambient floor (deferred.fsh: albedo x (sky + floor)), under every far land surface as under the near
-static const float3 FAR_AMBIENT_FLOOR = float3(0.0025, 0.0025, 0.0035);  // (night: the eye's exposure lifted a brighter floor to a lit ground)
+static const float3 FAR_AMBIENT_FLOOR = float3(2.0e-8, 2.0e-8, 3.0e-8);  // physical: starlight and airglow  // (night: the eye's exposure lifted a brighter floor to a lit ground)
 // the look (shadeSurfaceAmb): how much the sky fills the shade (1: the physical value: the air's sky light, multiple
 // scattering included, against the sun's transmitted light) and the warm bounce off lit ground where the sky rays did
 // not trace it (the constant; gBounce; about the ground's albedo)

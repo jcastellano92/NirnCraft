@@ -56,7 +56,7 @@ constexpr float SUN_HALF_ANGLE = 0.00465f;  // radians: the disc's share over th
 // air, sea level) is (3.2, 3.07, 2.88) = the look's old noon (1, 0.96, 0.9) x 3.2; times pi: an irradiance
 constexpr V3 SUN_IRRADIANCE = {11.181f, 11.807f, 12.854f};
 // the night's own sky (airglow, starlight): a floor under the moonlit air, radiance
-constexpr V3 NIGHT_GLOW = {0.0008f, 0.0011f, 0.0024f};
+constexpr V3 NIGHT_GLOW = {2.0e-8f, 2.6e-8f, 5.0e-8f};
 constexpr float SEA_LEVEL_Y = 63.0f;  // world y of the air's ground
 constexpr int MS_SIZE = 32;           // the multiple-scattering LUT: MS_SIZE x MS_SIZE (sun zenith x altitude)
 constexpr int SKY_STEPS = 24;         // a sky ray (quadratic spacing)

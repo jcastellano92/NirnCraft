@@ -1093,6 +1093,7 @@ float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
 // lava light by day as by night (block light is not a time of day); lamps (windows, lanterns) from dusk to dawn.
 // FRAME_LIGHT_LOW: unshadowed. p: the hit, camera-relative to camInt; so: the secondary rays' origin off its face.
 static const float3 BLOCK_LIGHT_HUE = float3(1.0, 0.62, 0.32);
+static const float BLOCK_LIGHT_SCALE = 0.001;  // physical: a lamp lights its block at ~1/1000 of noon (atlas_look.glsl the same)
 float3 farLightsOn(uint2 px, float3 p, float3 so, float3 faceN, int lod, float3 sun, bool fol, bool cheap) {
     uint L = uint(frame.weatherParams.y);
     if (L == 0u) return float3(0, 0, 0);
@@ -1144,7 +1145,7 @@ float3 farLightsOn(uint2 px, float3 p, float3 so, float3 faceN, int lod, float3 
             float3 h = base / inten;
             hue = h * (dot(BLOCK_LIGHT_HUE, float3(0.2126, 0.7152, 0.0722)) / max(dot(h, float3(0.2126, 0.7152, 0.0722)), 1e-4));
         }
-        sum += hue * (E * vis * occ);
+        sum += hue * (E * vis * occ * BLOCK_LIGHT_SCALE);
     }
     return sum;
 }
