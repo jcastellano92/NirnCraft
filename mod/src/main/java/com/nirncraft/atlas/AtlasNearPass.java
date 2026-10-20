@@ -79,6 +79,9 @@ public final class AtlasNearPass {
             RenderPipelines.TRANSLUCENT_TERRAIN_MULTIDRAW.getLocation());
     private static final BindGroupLayout NEAR_INFO = BindGroupLayout.builder()
             .withUniform("NearInfo", UniformType.UNIFORM_BUFFER).build();
+    private static final BindGroupLayout SCENE = BindGroupLayout.builder()
+            .withUniform("SceneColor", UniformType.COMBINED_IMAGE_SAMPLER)
+            .withUniform("SceneDepth", UniformType.COMBINED_IMAGE_SAMPLER).build();
 
     private static final Set<Identifier> OPAQUE = Set.of(RenderPipelines.SOLID_TERRAIN.getLocation(),
             RenderPipelines.SOLID_TERRAIN_MULTIDRAW.getLocation(), RenderPipelines.CUTOUT_TERRAIN.getLocation(),
@@ -215,6 +218,7 @@ public final class AtlasNearPass {
                 .withVertexShader(id("core/near_gbuffer"))
                 .withFragmentShader(id("core/near_forward"))
                 .withBindGroupLayout(NEAR_INFO)
+                .withBindGroupLayout(SCENE)
                 .build();
     }
 
@@ -519,6 +523,16 @@ public final class AtlasNearPass {
             return;
         }
         pass.setUniform("NearInfo", info.currentBuffer());
+        // the water's reflections read our resolved frame (terrain near and far) and its depth
+        TextureTarget scene = history[historyIndex] != null && historyValid ? history[historyIndex] : frame;
+        var linear = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
+                FilterMode.LINEAR, FilterMode.LINEAR, false);
+        var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
+                FilterMode.NEAREST, FilterMode.NEAREST, false);
+        if (scene != null && frame != null) {
+            pass.setUniform("SceneColor", scene.getColorTextureView(), linear);
+            pass.setUniform("SceneDepth", frame.getDepthTextureView(), nearest);
+        }
         RenderSystem.pushPipelineModifier(FORWARD);
         try {
             chunks.renderGroup(ChunkSectionLayerGroup.TRANSLUCENT, pass, sampler, atlas, false);
