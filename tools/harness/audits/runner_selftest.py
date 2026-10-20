@@ -307,6 +307,15 @@ expect(_r.returncode == 0 and len(_calls) == 3, "a busy build lock is waited for
 expect("Resource busy" in _game.build_failure(_R(2, "a\nERROR: Resource busy: no work started")),
        "a build that failed without error lines says why (its last lines)")
 
+# --- a pose check is the scene's pose without its exports (minutes each), never its results --------------------------
+_pc = catalog.pose_checks([{"id": "t", "tier": "live", "vet_pose": "a view", "pose": {"place": "whiterun", "shot": "approach"},
+                            "setup": ["fog-off on", "atlaslab here t 48 12 40", "far-timeline start"],
+                            "cleanup": ["atlaslab view t-view 1024 light", "fog-off off"], "tags": ["suite:truth"],
+                            "frames": [16, 20], "loading": True}])
+expect(len(_pc) == 1 and _pc[0]["id"] == "t-posecheck" and _pc[0]["setup"] == ["fog-off on"]
+       and _pc[0]["cleanup"] == ["fog-off off"] and "frames" not in _pc[0] and _pc[0]["tags"] == ["suite:poses"],
+       "a pose check keeps the pose, drops the exports and frames, and has its own id")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth
