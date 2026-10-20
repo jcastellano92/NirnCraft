@@ -1499,7 +1499,14 @@ private:
     // at every 250 ms) the far, cloud and sun map pipelines are rebuilt from them. The bindings must stay the same (a
     // layout change needs a build); a file that fails keeps the running pipelines.
     void hotReload() {
-        static const char* dir = std::getenv("ATLAS_SHADER_DIR");
+        // ATLAS_SHADER_DIR, else a folder named atlas-shaders in the working directory (the game's: a dev instance opts
+        // in by having it, where a launcher's environment settings are unreliable)
+        static const char* dir = [] {
+            const char* e = std::getenv("ATLAS_SHADER_DIR");
+            if (e && *e) return e;
+            std::error_code ec;
+            return std::filesystem::is_directory("atlas-shaders", ec) ? "atlas-shaders" : static_cast<const char*>(nullptr);
+        }();
         if (!dir || !*dir) return;
         auto now = std::chrono::steady_clock::now();
         if (now - reloadCheck_ < std::chrono::milliseconds(250)) return;

@@ -23,6 +23,9 @@ static const uint FRAME_LIGHT_LOW = 0x8000u;   // (abi 0.14) cheap far light: co
 static const uint FRAME_NEAR_LIGHT = 0x20000u; // (abi 0.15) light the near field's covered pixels with the far light
 // the shader pack's ambient floor (deferred.fsh: albedo x (sky + floor)), under every far land surface as under the near
 static const float3 FAR_AMBIENT_FLOOR = float3(0.012, 0.012, 0.016);
+// the look (shadeSurfaceAmb): how much the sky fills the shade (1: the physical value) and the warm bounce off lit ground
+static const float LOOK_AMBIENT = 3.0;
+static const float LOOK_BOUNCE = 0.25;
 static const int MAX_LODS = 8;
 
 struct LodGpu {
@@ -133,7 +136,13 @@ float3 shadeSurfaceAmb(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 
     float3 L = keyLightDir(sun);
     float ndl = saturate(dot(n, L));
     float3 direct = keyLightRadiance(sun) * ndl * lightVis;
-    float3 c = albedo * (direct + ambient);
+    // the look (one for near and far: the near pass's pixels are lit by this too): the sky fills the shade more than
+    // the physical value, and the lit ground bounces warm light into it, from below and the sides, as far as the sky
+    // reaches there (a cave gets none)
+    float3 sky = skyAmbient(n, sun);
+    float open = saturate(dot(ambient, float3(0.2126, 0.7152, 0.0722)) / max(dot(sky, float3(0.2126, 0.7152, 0.0722)), 1e-4));
+    float3 bounce = keyLightRadiance(sun) * (max(L.y, 0.0) * LOOK_BOUNCE * (0.6 - 0.4 * n.y) * open);
+    float3 c = albedo * (direct + ambient * LOOK_AMBIENT + bounce);
     if (cls == 2u) {
         // water: Schlick Fresnel against what it reflects, plus the key light's glint; m.albedoRough.a carries the
         // glint's alpha (the far field sets it from the waves it can no longer draw: a sun path widening with distance)

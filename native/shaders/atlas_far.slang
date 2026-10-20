@@ -1251,7 +1251,10 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     // in the deck) is ours. In tunnels and towns that skips most of the screen.
     if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0) {
         float nd = nearDepth[pix];
-        if (nd < frame.params.x) {
+        // (with FRAME_NEAR_LIGHT the host's near pass drew every covered pixel, however far: all of them are its, lit
+        // here; past nearFieldEnd they were traced as far and that colour landed in the host's inscatter, the far
+        // field's own trees and tiles over the near pass's)
+        if (nd < frame.params.x || ((frame.dims.z & FRAME_NEAR_LIGHT) != 0u && nd < 1e29)) {
             // (FRAME_NEAR_LIGHT) the near surface lit here, and the air in front of it as (inscatter, transmittance):
             // the host composites albedo x nearLight x a + rgb
             bool nearLit = (frame.dims.z & FRAME_NEAR_LIGHT) != 0u;
