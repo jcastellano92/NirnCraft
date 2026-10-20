@@ -113,6 +113,18 @@ The full checklist from R1, every item checked live; the owner flies it.
   --truth exact --view 128 --watch`. Without watch, one view is 3.6 s cold.
 - **R1 inventory (2026-10-20)**: docs/ATLAS-RENDER-INVENTORY.md, 80 items from the 26.3 sources, with each item's
   hooks.
+- **E1 near cost (2026-10-20).** The far field's trace at the Falkreath town export, 1920x1080, Vulkan, the camera
+  in the street: the groups (block shapes) 21-30 ms a frame, the plain voxels 1.35 ms (whole blocks, no shapes), no
+  textures either way. Tracing block-exact detail up close costs 15x what it should: **near terrain is rasterised**,
+  far terrain traced, with one material and one light so the change of method does not show. The meshes are
+  vanilla's own section meshes (exact models, mod blocks, fluids, smooth light and tint) drawn by us: the mesher can
+  be replaced later where it limits (distance, LOD), the look is ours from now on.
+- **R2 stage A (2026-10-20, d7c96778).** AtlasNearPass: vanilla draws no terrain (its visible sections are taken at
+  RenderFrameEvent.Pre and given back at AfterLevel), we draw its meshes into a G-buffer (albedo with tint and AO,
+  block and sky light, reverse-Z depth) through a pipeline modifier and light them in a resolve that also composites
+  the far frame and writes the frame's depth. Live A/B with vanilla's own light curve: mean |diff| 2.6 of 255, 6.6 % of
+  pixels over 8 (fade-in, particles), 60 fps both. Sodium and Iris leave the dev instance (Sodium replaces the section
+  renderer; Iris needs Sodium); the harness's pack variant is off until R4.
 - **E2 vanilla terrain off, no mixin (from the inventory).** Wrap every block model (`ModelEvent.ModifyBakingResult`,
   a delegate whose parts are empty when the getter is a `RenderSectionRegion`): sections still compile, so
   entity visibility (it needs the section at the entity's feet compiled), block entities (listed by compiled
