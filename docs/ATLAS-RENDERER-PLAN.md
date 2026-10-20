@@ -266,6 +266,42 @@ The full checklist from R1, every item checked live; the owner flies it.
   near light's traced sky is ~40 %), convert 1.5 ms; render-thread cost per frame 0.2-0.4 ms (p95 1.9; readback copy
   0.2, upload 0.2); 12 ms of render-thread work beside the worker takes 12.9-13.0 ms. ATLAS_CPU_GL=sync: 70-79 ms
   on the render thread. Sync and async frames match the host render (0 pixels differ; colour, near light within half precision).
+- **The near light at half resolution, with its own history (2026-10-20).** Profiled live in Falkreath (1280x800,
+  RTX 3090): atlas 7.3 ms with the near light, 2.3 without; hot-reloaded ablations: the bounce 3.5 ms, the sun ray 3,
+  far lights ~0.3; a cone (a coarser level every 32 or 8 voxels a ray goes) saved 0.4, so the cost is the ray count,
+  not the distance. Now one pixel of each 2 x 2 is traced a frame (rotating with the TAA's phases), the rest filled by
+  depth and normal, and a reprojected history of ~8 frames blends it (the host's TAA could not: its clamp throws the
+  one-ray noise out). Atlas 2-4.5 ms there; a still view's pixels moving by more than 8 levels frame to frame 6.9 % ->
+  0.9 % (the owner: "no flickering"). atlas_gl_test: full trace exact against the host, the split unbiased and 0.0 %
+  apart over 8 x 8 blocks. Roof tests are never cones (rock overhead at a coarse level could be open).
+- **Black sunlit walls were atlas's stand-ins (2026-10-20).** Probes (inside-solid at the ray origin, solid 0.5 / 1.5
+  blocks out and in) showed the walls' voxels a block thick in front of the drawn ones and the houses solid: the tiles'
+  stand-in buildings, because the client's real chunks went to atlas in arrival order at ~1 a second (a teleport left
+  the camera's chunks behind 3,200 others). Now nearest the camera first, ten times the share until the eye's chunks
+  are up, and a near point still inside a solid voxel is lit untraced (the floor alone with the eye under rock). Open:
+  the stand-in buildings are a block wider than the built ones (far silhouettes too).
+- **The worker idles (2026-10-20).** Every uploaded section rebuilt its regions at levels 0-4 in full (one 40 ms update
+  ran 38 s; a third of a core in a still scene). Levels 1-4 now wait for the uploads to pause 2 s; the voxeliser caches
+  its section lookups. 4-7 % of a core after load. Still not zero: make a still scene cost nothing.
+- **Owner direction (2026-10-20): GPU-first.** Scene building (regions, levels, ingest, groups) on the GPU like the
+  tracing; the CPU is the fallback. The direction: a GPU-built structure in the NAADF manner (Ulschmid et al., CGF 2026:
+  nested 16^3 chunks / 4^3 blocks, per-cell axis-aligned distance fields; their numbers: 3-5x the SVDAG's rays per
+  second from the nesting, ~10x with the distance fields, cheap edits). Step 0: ablations of foliage and the height mip
+  per ray (an hour); step 1: a level-0 nested grid + AADF built in compute from the raw sections, used by the near
+  light's rays, A/B'd live; then the other levels; then primary rays near, which is what makes near and far one
+  spectrum instead of raster near and atlas far (primary near rays measured 21-30 ms at 1080p with the SVDAG).
+- **Shadows are traced but faint at low sun (2026-10-20).** A sun-visibility view at time 11600 shows the trees' and
+  houses' long shadows; the final image barely does. The ambient (LOOK_AMBIENT 3 -> 2 -> 1.5) hardly changes it (the
+  exposure follows); the key light at a 15-25 degree sun is weak against the sky (the evening reads blue and flat, not
+  golden). For the owner: the look's key-to-sky balance near sunset. Far shadows exist (A/B: the far forest band and
+  hillsides darken by them) at the hit's own level.
+- **Dev loop: a shared-constant change freezes the client 30-60 s** while the driver rebuilds the six pipelines; the
+  live control heartbeat times out meanwhile (actions fail: retry after the reload).
+- **Open from the owner's questions (2026-10-20):** entities cast no shadows (they receive them: the shadow map's
+  casters are the terrain only); flowers and other plants probably cast none (not solid in atlas's voxels: check);
+  light shafts into caves and rooms (the air under cover is unlit: volumetric shafts), through clouds later; GI from
+  many sources (torches and emitters bounce nothing yet; the far field has no traced bounce): voxel GI in the NAADF /
+  VXGI manner (emissive voxels, spatio-temporal reuse) once the GPU structure exists.
 
 ## Parked (off the renderer goal, for later)
 
