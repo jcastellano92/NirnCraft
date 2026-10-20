@@ -142,11 +142,22 @@ final class AtlasGenNative {
             }
         }
 
+        // the output buffer, kept between calls (a batch's 21 MB would otherwise be allocated and zeroed each time)
+        private Arena outArena;
+        private MemorySegment outSeg;
+        private long outWords;
+
         /** Generates the chunks: ids receives count * CHUNK_WORDS words, flags count words (may be null). */
-        Times chunks(int[] chunkXZ, int outMode, int[] ids, int[] flags) {
+        synchronized Times chunks(int[] chunkXZ, int outMode, int[] ids, int[] flags) {
             int n = chunkXZ.length / 2;
+            if (outSeg == null || outWords < (long) n * CHUNK_WORDS) {
+                if (outArena != null) outArena.close();
+                outArena = Arena.ofShared();
+                outWords = Math.max(64L, n) * CHUNK_WORDS;
+                outSeg = outArena.allocate(JAVA_INT, outWords);
+            }
             try (Arena a = Arena.ofConfined()) {
-                MemorySegment out = a.allocate(JAVA_INT, (long) n * CHUNK_WORDS);
+                MemorySegment out = outSeg;
                 MemorySegment fl = a.allocate(JAVA_INT, n);
                 MemorySegment t = a.allocate(88, 8);
                 check((int) chunks.invokeExact(ptr, a.allocateFrom(JAVA_INT, chunkXZ), n, outMode, out, fl, t), "atlas_gen_chunks");
@@ -175,7 +186,12 @@ final class AtlasGenNative {
         }
 
         @Override
-        public void close() {
+        public synchronized void close() {
+            if (outArena != null) {
+                outArena.close();
+                outArena = null;
+                outSeg = null;
+            }
             try {
                 destroy.invokeExact(ptr);
             } catch (Throwable t) {

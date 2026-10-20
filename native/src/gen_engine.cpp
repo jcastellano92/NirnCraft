@@ -589,7 +589,8 @@ int64_t key(int32_t cx, int32_t cz) { return (int64_t(cx) << 32) ^ int64_t(uint3
 
 struct AtlasGen {
     std::unique_ptr<Engine> engine;
-    std::mutex mu;
+    std::mutex mu;       // the engine (one batch at a time)
+    std::mutex pagesMu;  // the page map: atlas_gen_missing_pages answers while a batch runs
     std::string error;
     std::vector<uint32_t> prog;
     uint32_t pageWords = 0, slots = 4096;
@@ -640,6 +641,7 @@ AtlasStatus generate(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32
         if (w * hgt > (1 << 22)) return h->fail(ATLAS_ERR_ARG, "chunks of one call too far apart");
         b.params = {int32_t(n), minX, minZ, int32_t(w), int32_t(hgt), outMode, 0, 0};
         b.pageIndex.assign(size_t(w * hgt), -1);
+        std::unique_lock<std::mutex> pl(h->pagesMu);
         for (uint32_t i = 0; i < n; i++)
             neededPages(b.chunks[i * 2], b.chunks[i * 2 + 1], [&](int32_t x, int32_t z, bool) {
                 auto it = h->pages.find(key(x, z));
@@ -647,6 +649,7 @@ AtlasStatus generate(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32
                 it->second.used = h->clock;
                 b.pageIndex[size_t(z - minZ) * size_t(w) + size_t(x - minX)] = int32_t(it->second.slot);
             });
+        pl.unlock();
         // the engines write the sections, then n flag words: straight into the caller's array (the flags land on
         // the next batch's first words, which that batch overwrites); only the last batch goes through a copy
         uint32_t* dst = outIds + size_t(c0) * OUT_WORDS;
@@ -707,6 +710,7 @@ ATLAS_API AtlasStatus atlas_gen_set_program(AtlasGen* h, const uint32_t* words, 
     if (!h || !words || count < 128 || words[0] != MAGIC) return ATLAS_ERR_ARG;
     try {
         std::lock_guard<std::mutex> l(h->mu);
+        std::lock_guard<std::mutex> pl(h->pagesMu);
         if (words[H_K] > 16) return h->fail(ATLAS_ERR_ARG, "more than 16 interpolated functions");
         h->prog.assign(words, words + count);
         h->pageWords = pageWordsOf(h->prog);
@@ -727,7 +731,7 @@ ATLAS_API uint32_t atlas_gen_missing_pages(AtlasGen* h, const int32_t* chunkXZ, 
                                            uint32_t capacity) {
     if (!h || !chunkXZ) return 0;
     try {
-        std::lock_guard<std::mutex> l(h->mu);
+        std::lock_guard<std::mutex> l(h->pagesMu);  // not the engine's: answers while a batch runs
         std::unordered_map<int64_t, bool> need;
         for (uint32_t i = 0; i < count; i++)
             neededPages(chunkXZ[i * 2], chunkXZ[i * 2 + 1], [&](int32_t x, int32_t z, bool full) {
@@ -756,6 +760,7 @@ ATLAS_API AtlasStatus atlas_gen_put_page(AtlasGen* h, int32_t cx, int32_t cz, in
     if (!h || !words) return ATLAS_ERR_ARG;
     try {
         std::lock_guard<std::mutex> l(h->mu);
+        std::lock_guard<std::mutex> pl(h->pagesMu);
         if (count != h->pageWords || h->pageWords == 0) return h->fail(ATLAS_ERR_ARG, "page size differs from the program's");
         h->clock++;
         uint32_t slot;

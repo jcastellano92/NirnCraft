@@ -321,6 +321,8 @@ public final class AtlasClient {
             farField.near(mc.options.getEffectiveRenderDistance() * 16.0 - 16.0);
             if (mc.player != null)  // horizontal half-FOV with a margin: what the frame can show
                 farField.look(mc.player.getYRot(), Math.min(85, mc.options.fov().get() * 0.75 + 20));
+            // the client generator follows the camera this frame (not the far field's pass: seconds after a jump)
+            if (clientGen != null) AtlasClientGen.follow(p.x, p.z, mc.player != null ? mc.player.getYRot() : 0f);
             if (!farField.updated()) {
                 targets.clear();  // the worker has not staged the first window yet: nothing far this frame
                 com.nirncraft.render.quality.QualityClient.atlasFrame(false, 0);
@@ -591,7 +593,7 @@ public final class AtlasClient {
             AtlasTrees.activeLod = trees != null ? AtlasTrees.APPROX_LOD : -1;  // before the first tile goes up
             farField = new AtlasFarField(ctx, source, () -> AtlasSettlements.create(ground, mats, trees), lods);
             AtlasClientSections.reset();  // a new context holds no real blocks: the loaded chunks go up again
-            if (AtlasClientGen.ON && mc.hasSingleplayerServer()) clientGen = AtlasClientGen.start(mc.getSingleplayerServer(), libPath);
+            if (AtlasClientGen.ON && mc.hasSingleplayerServer()) clientGen = AtlasClientGen.start(mc.getSingleplayerServer(), libPath, ctx, mats);
             lightBudget = -1;
             startedFor = mc.level;
             retryAt = 0;

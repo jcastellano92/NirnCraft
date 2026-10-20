@@ -341,7 +341,7 @@ class AtlasGenParityTest {
         }
         double fms = (System.nanoTime() - ft) / 1e6;
         report.append(String.format("client decoration: %d chunks in %.0f ms (%.1f ms each), %d feature failures%n",
-                features.decorated, fms, fms / features.decorated, features.failures));
+                features.decorated(), fms, fms / features.decorated(), features.failures()));
         features.failed.forEach((k, v) -> report.append("  failed ").append(k).append(": ").append(v).append(System.lineSeparator()));
         for (int pass = 0; pass < 2; pass++) {
             long total = 0, same = 0;
@@ -377,6 +377,66 @@ class AtlasGenParityTest {
         }
         String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
         if (out != null) Files.writeString(Path.of(out + ".real.txt"), report.toString());
+        System.out.println(report);
+    }
+
+    /**
+     * The live path offline (NIRNCRAFT_TEST_WORLD=tamriel): AtlasClientGen's own threads (GPU terrain, uploads into an
+     * atlas context through atlas_upload_section, parallel features) following a camera that settles at Whiterun and
+     * then jumps 1,600 blocks; the state sampled every 0.6 s as atlas-info shows it, and the jump's times.
+     */
+    @Test
+    void clientGenJump(MinecraftServer server) throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue("tamriel".equals(System.getenv("NIRNCRAFT_TEST_WORLD")), "the flat test world");
+        if (server.overworld() == null) {
+            server.submit(() -> {
+                try {
+                    java.lang.reflect.Method m = MinecraftServer.class.getDeclaredMethod("createLevels");
+                    m.setAccessible(true);
+                    m.invoke(server);
+                } catch (ReflectiveOperationException e) {
+                    throw new IllegalStateException(e);
+                }
+            }).join();
+        }
+        Path lib = Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB"));
+        AtlasNative atlas = AtlasNative.load(lib);
+        StringBuilder report = new StringBuilder();
+        try (AtlasNative.Context ctx = atlas.create(AtlasGenNative.BACKEND_VULKAN)) {
+            AtlasClientGen cg = AtlasClientGen.startFor(server, lib, ctx, new AtlasMaterials());
+            if (cg == null) throw new IllegalStateException("no client generator");
+            try {
+                report.append(String.format("radius %d, features %d on %d threads%n", AtlasClientGen.RADIUS,
+                        AtlasClientGen.FEATURE_RADIUS, AtlasClientGen.FEATURE_THREADS));
+                for (int[] cam : new int[][]{{0, 0}, {1600, 0}}) {
+                    AtlasClientGen.follow(cam[0] + 0.5, cam[1] + 0.5, 0f);
+                    long t0 = System.nanoTime();
+                    report.append(String.format("camera %d, %d%n", cam[0], cam[1]));
+                    long next = 0;
+                    while (true) {
+                        double t = (System.nanoTime() - t0) / 1e9;
+                        double[] j = cg.jumpTimes();
+                        if (t * 1e9 >= next) {
+                            long gcMs = 0;
+                            for (var gc : java.lang.management.ManagementFactory.getGarbageCollectorMXBeans()) gcMs += Math.max(0, gc.getCollectionTime());
+                            Runtime rt = Runtime.getRuntime();
+                            report.append(String.format("  %5.1f s  gc %d ms, heap %d / %d MB  %s%n", t, gcMs,
+                                    (rt.totalMemory() - rt.freeMemory()) >> 20, rt.maxMemory() >> 20, AtlasClientGen.state()));
+                            next += 600_000_000L;
+                        }
+                        if ((j[1] >= 0 && j[2] >= 0) || t > 40) break;
+                        Thread.sleep(20);
+                    }
+                    double[] j = cg.jumpTimes();
+                    report.append(String.format("  jump: first chunk up %.0f ms, the window's terrain up %.0f ms (%d chunks), "
+                                    + "the features' window up %.0f ms (%d chunks)%n", j[0], j[1], (int) j[3], j[2], (int) j[4]));
+                }
+            } finally {
+                cg.close();
+            }
+        }
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".jump.txt"), report.toString());
         System.out.println(report);
     }
 
