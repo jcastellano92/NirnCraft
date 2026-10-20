@@ -212,10 +212,14 @@ uint32_t Lights::frame(const LightView& v, std::vector<ActorGpu>& out) {
             float sigma = std::max(0.5f, 0.3f * r.radius / (d * pa));
             float T = std::exp(-d * v.hazeDensity);
             float halo = 1.5f + 8.0f * (1.0f - T);
-            // its glow, and the ground and walls it lights (block light reaches 15 x intensity blocks)
-            float lit = r.kind == ATLAS_LIGHT_MIST ? 0.0f
-                      : (15.0f * std::min(r.intensity, 1.0f) + (r.kind == ATLAS_LIGHT_LAVA ? r.radius : 0.0f)) / (d * pa);
-            float reach = std::min(96.0f, std::max(3.0f * sigma + 3.0f * halo, lit));
+            // its glow, and the ground and walls it lights: every tile its sphere of light (Minecraft's reach, level + 1
+            // blocks; the kernel's farLightsOn) covers on screen, with the perspective's stretch towards the frame's
+            // edges, the whole frame from inside it (a cap of 96 px cut a near lamp's light into a square)
+            float range = r.kind == ATLAS_LIGHT_MIST ? 0.0f
+                        : 15.0f * std::min(r.intensity, 1.0f) + (r.kind == ATLAS_LIGHT_LAVA ? r.radius : 0.0f) + 1.0f;
+            float screen = float(std::max(v.width, v.height));
+            float lit = range <= 0.0f ? 0.0f : d <= 1.6f * range ? screen : 1.6f * range / ((d - range) * pa);
+            float reach = std::min(screen, std::max(3.0f * sigma + 3.0f * halo, lit));
             if (px + reach < 0 || py + reach < 0 || px - reach > float(v.width) || py - reach > float(v.height)) continue;
             cands.push_back({&r, r.intensity * falloff(d), d, px, py, sigma, halo, reach, rx, ry, rz});
         }

@@ -138,7 +138,38 @@ def find_elements(volume_slug):
         if tuple(box) not in picked:
             picked.add(tuple(box))
             out.append({"slug": f"{volume_slug}-{kind}", "volume": volume_slug, "kind": kind, "box": box})
+        if kind == "building":
+            # a town: the blocks around the building chunk too (48 x 48), where buildings shade one another and the
+            # ground between them (sun and moon shadows of casters larger than a chunk, docs/ATLAS-LOD.md)
+            tx0, tz0 = max(0, gx - 16), max(0, gz - 16)
+            tx1, tz1 = min(sx, gx + 32), min(sz, gz + 32)
+            tops = top[tz0:tz1, tx0:tx1]
+            if tx1 - tx0 >= 40 and tz1 - tz0 >= 40 and (tops >= 0).any():
+                lo = max(0, int(tops[tops >= 0].min()) - 4)
+                tb = [x0 + tx0, y0 + lo, z0 + tz0, x0 + tx1 - 1, y0 + int(tops.max()), z0 + tz1 - 1]
+                if tuple(tb) not in picked:
+                    picked.add(tuple(tb))
+                    out.append({"slug": f"{volume_slug}-town", "volume": volume_slug, "kind": "town", "box": tb})
+    # relief: the chunk whose ground rises most across it (a ridge, a cliff, a terrace: land that casts shadows on
+    # itself at a low sun), when it rises RELIEF_LEAST blocks or more
+    best = None
+    for gz in range(0, sz - 15, 4):
+        for gx in range(0, sx - 15, 4):
+            w = top[gz:gz + 16, gx:gx + 16]
+            if (w < 0).any():
+                continue
+            rise = int(w.max() - w.min())
+            if rise >= RELIEF_LEAST and (best is None or rise > best[0]):
+                best = (rise, gx, gz, int(w.min()), int(w.max()))
+    if best:
+        _, gx, gz, lo, hi = best
+        box = [x0 + gx, y0 + max(0, lo - 4), z0 + gz, x0 + gx + 15, y0 + hi, z0 + gz + 15]
+        if tuple(box) not in picked:
+            out.append({"slug": f"{volume_slug}-relief", "volume": volume_slug, "kind": "relief", "box": box})
     return out
+
+
+RELIEF_LEAST = 12
 
 
 BUILT = ("planks", "brick", "glass", "_door", "fence", "_stairs", "_slab", "wool", "terracotta", "trapdoor", "bookshelf",
