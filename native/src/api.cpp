@@ -614,7 +614,8 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     // lights, 16 water reflections, 32 the trace itself after the first hit's distance; the far light: 256 the cheap
     // light of ATLAS_FRAME_LIGHT_LOW, 512 never enclosed (the sky's short reach and the aerial haze under solid cover as
     // in the open), 1024 no light through leaves, 4096 a grey of the sky visibility (| 2048: the
-    // secondary rays' origin in a solid), 8192 two sky rays, 16384 half their reach; the groups: 64 draw every node
+    // secondary rays' origin in a solid), 8192 two sky rays, 16384 half their reach, 524288 no traced bounce (the
+    // look's constant alone); the groups: 64 draw every node
     // whole, 128 a drawn box without its texel walk, 32768 never draw a node whole for its error, bits 16-18 the level
     // their primary rays start from: a coarse level seen up close)
     {
