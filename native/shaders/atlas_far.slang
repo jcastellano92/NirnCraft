@@ -1359,7 +1359,8 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     }
     float3 L = keyLightDir(sun);
     float sunVis = 1.0;
-    gSecCone = (ablate & 1048576u) != 0u ? 0.0 : 32.0;  // (ATLAS_ABLATE 1048576: lod 0 all the way, as before)
+    // (no cone: past 32 blocks the coarser levels' fat crowns cast blobby shadows off the trees; it saved 0.4 ms)
+    gSecCone = 0.0;
     if ((frame.dims.z & FRAME_SHADOWS) != 0 && (ablate & 4u) == 0u) {
         if (dot(N, L) <= 0.0) sunVis = 0.0;
         else if (untrusted) sunVis = eyeRoofed() ? 0.0 : 1.0;  // (in a cave: rock, most likely)
