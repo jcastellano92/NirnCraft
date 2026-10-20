@@ -362,6 +362,13 @@ The full checklist from R1, every item checked live; the owner flies it.
   detail; vanilla keeps entities and effects, composited by depth. With the client owning the world (it generates;
   the server sends coalesced operations by position and need), atlas builds from the client's own data.
 
+- **The client generates the near field (2026-10-20, docs/ATLAS-CLIENT-GENERATION.md).** atlas_gen: the world's own
+  generator (density router, aquifers, material rules, ore veins, map water) compiled into a GPU program; exact:
+  107 chunks over 10 terrain kinds, 17.5 M blocks, 100 % equal to Minecraft's own generator on Vulkan and C++. With
+  the client's decoration (the real features over the generated blocks) 99.83 % of a real server's fully generated
+  chunks (structures not yet). A 600-block jump: a 32 x 32 chunk window's blocks in 0.64 s (0.016 ms of kernel a
+  section). Behind -Dnirncraft.atlas.clientGen=true; vanilla's chunks become corrections where they differ.
+
 - **The atmosphere and the light: the owner's roadmap (2026-10-20).** One optics everywhere; what the look depends on is
   what is in the air, how it is layered, and whether clouds catch the low light (not biome palettes, not a sunrise colour).
   Have (the air merge): Rayleigh / Mie / ozone, the sun's beam filtered through the path (white at noon, orange at 6

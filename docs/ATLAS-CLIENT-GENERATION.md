@@ -131,3 +131,98 @@ the same pipeline: heights exact, no caves, no overhangs, no aquifers.
 * Seeded only on the server: in multiplayer the client has no seed today (surface noise, biomes' climate, trees,
   generic structures). Client generation is single player first (the integrated server's RandomState, as the far
   field's exact source already does); multiplayer needs the public seed decision (ATLAS-STREAMING.md, decision 3).
+
+## 5. The GPU generator (stage 2, 2026-10-20)
+
+`native/shaders/atlas_gen.slang` + `native/src/gen_engine.cpp` (`atlas_gen_*` in atlas.h), its own Vulkan compute
+device like the height engine, and the same source compiled to C++ (the CPU path and the reference). Whole chunk
+columns, y -64..575 (40 sections; above is air). Under the exact float contract of `atlas_height.slang` (`-fp-mode
+precise`, `spv_exact`: RTE, signed zero / inf / NaN preserved, every arithmetic op NoContraction, no transcendental);
+divisions go through `divF` (float, the residual picks the correctly rounded quotient) and `divI` (integers, long
+division with sticky bit); signed integer division only on non-negative operands (a driver disagreed on
+`floorDiv(y, 40)` for negative y).
+
+**The program** (`AtlasGenProgram`, Java): the world's own objects compiled, nothing re-authored.
+
+* The density functions as Java's `DensityFunctionCompiler` sees them (references inlined, caches and slices
+  transparent, min/max range shortcuts from the same `range()`), into a register VM: 16 registers suffice. Volume and
+  point paths are separate opcodes (`MIN_V` / `MIN_P`, `MUL_V` / `MUL_P`, the noise's coordinate product order).
+  `interpolated` inputs (8 for this router: the terrain, four noodle parts, three ore-vein parts) are evaluated at the
+  5 x 81 x 5 cell corners, then lerped as `InterpolatedFunction.sampleWithBlockStep` does.
+* Noise tables read from the RandomState's seeded `NoiseStack`s (as `AtlasHeightGpu`); the aquifer, ore, surface and
+  vertical-gradient random factories' seeds by reflection; the clay bands from `MaterialSystem`.
+* The material rule tree as rule code (test / jump, block, ore vein, bands) and a condition table; biome sets as
+  bit sets over the 134 possible biomes.
+* The mod's 2D functions (`tamriel_height`, the channels: road, erosion, overhang, river, elevation) become column
+  fields read from pages.
+
+**Pages** (`AtlasGenPages`, Java, per chunk): the fields from the generator's own compiled samplers (exact by
+construction), the map water of each column (`MapWaterFeature`'s test), and for the chunk's 3 x 3 the quart biomes,
+filled as `ChunkGenerator.createBiomes` fills them (fresh climate sampler, sections bottom up). A chunk reads heights
+from chunks x-4..x+2, z-2..z+2 (the aquifer looks up to three chunks west) and biomes from its 3 x 3. Pages stay
+resident on the device (4096, least recently used out).
+
+**Passes** per batch of up to 64 chunks: corners, aquifer cells (3 x 57 x 3 per chunk, plus the chunk's
+`skipSamplingAboveY`), fill (final density, then the aquifer), tops (`WORLD_SURFACE_WG`), surface (the rule walk per
+column, then map water), pack (16-bit ids: generator ids or atlas materials).
+
+**Ingest**: `atlas_gen_into(gen, ctx, ...)` hands each non-air section to the context through `atlas_upload_section`
+(World::putSection and the level-0 grid's `put`): one small function, no grid internals touched. GPU-to-GPU (the
+generator writing the grid's pool directly) needs both on one device: the next step, with the grid's owner.
+
+## 6. Parity (stage 3) and features (stage 4)
+
+`mod/src/test/java/com/nirncraft/atlas/AtlasGenParityTest.java`, a dev tool off by default (the JUnit server, no
+client):
+
+    NIRNCRAFT_GEN_PARITY=1 NIRNCRAFT_ATLAS_LIB=<native/build/Release/atlas_core.dll> NIRNCRAFT_GEN_PARITY_N=<per kind>
+    NIRNCRAFT_GEN_PARITY_OUT=<report> py -3 tools/dev/build_263.py --offline -- test --tests "com.nirncraft.atlas.AtlasGenParityTest"
+    (add NIRNCRAFT_TEST_WORLD=tamriel for realWorld; NIRNCRAFT_GEN_DEBUG=1 dumps where Vulkan and C++ part)
+
+* `gpuChunksMatchJava`: chunks over 10 kinds of terrain (mountain, high peaks, coast, ocean, river, lake, desert,
+  swamp, plains, road) from a scan of the map, made by Minecraft's own `NoiseBasedChunkGenerator` (createBiomes,
+  buildTerrain) plus the mod's `MapWaterFeature`, against the kernel on Vulkan and in C++. **107 chunks,
+  17,530,880 blocks: 100.00000 % on both** (RTX 3090). A control (each GPU chunk against another chunk's Java
+  blocks) gives 90.9 %, so the comparison sees differences.
+* `realWorld` (stage 4): the JUnit server's overworld made Tamriel (seed 1234, structures on); its fully generated
+  chunks (the server's whole pipeline, features and structures, its own order) as the reference. **30 chunks,
+  5,406,720 blocks: GPU terrain alone 95.40 %; GPU terrain plus the client's decoration 99.83 %.** What remains:
+  structures' pieces (stone and mud bricks, cobblestone, fences: not placed by the client yet) and decoration-order
+  overlaps (ore blobs, gravel, dripstone where two chunks' features meet: the server's order is its own).
+* Features (`AtlasGenFeatures`): the decoration driver of `applyBiomeDecoration` replicated over proto chunks filled
+  with the generated blocks; 0 feature failures; 81 ms a chunk in Java, one thread.
+
+## 7. The near field from atlas's own generation (stage 5)
+
+`-Dnirncraft.atlas.clientGen=true` (single player): `AtlasClientGen` generates the window around the camera
+(`.radius`, default 24 chunks), nearest first and in view before behind, pages on all cores, and hands chunks to the
+far-field worker's section path (`AtlasEditsClient.applySections`) as the client feed carries a chunk (far ids, deep
+solid rock left out, the zoomed biome's tints). Features follow on a second thread within `.featureRadius` (16);
+a decorated chunk goes up again and only its changed sections re-upload. Vanilla's chunks and the server's sections
+still come through that path: a section equal to what is up is skipped (its hash), so they only correct what
+differs (structures for now, edits, ore order); a loaded chunk already up is never covered by generated blocks. The
+check offline: every generated section equals the client feed's reading of Java's chunk.
+
+**Measured** (`windowAfterJump`, RTX 3090 shared with a live client): the camera 600 blocks from the last window,
+32 x 32 chunks: 1332 pages in 196 ms (Java, 20 threads), 1024 chunks in 399 ms (kernels 196 ms: corners 43, aquifer
+1.5, fill 43, tops 2.7, surface 104, pack 1.2; readback 61), 12,192 non-air sections, **0.016 ms of kernel a
+section**; all blocks ready **0.64 s** after the jump (vanilla: about 6 chunks a second, three minutes for the
+same window). Through `atlas_gen_into` into a context: 956 ms (ingest through `atlas_upload_section` 599 ms: the
+CPU world build, the grid owner's to move to the GPU). Features for the 16-chunk radius: about 800 chunks at 81 ms
+on one thread, a minute behind the terrain.
+
+## 8. Open
+
+* **Structures from the plans**: starts per chunk (`ChunkGenerator.createStructures` with the server's
+  `ChunkGeneratorStructureState`, named settlements from the street plan) into the proto chunks, their pieces placed
+  in decoration as `applyBiomeDecoration` does; the remaining 0.17 %.
+* **Features are slow and single threaded** (81 ms a chunk): decorate disjoint 3 x 3s in parallel; trees on the GPU
+  later (their placements are pure; shapes need the decoration random).
+* **The surface pass** is the kernel's largest (a thread per column walks it): split the per-block rule work.
+* **GPU-to-GPU ingest** with the level-0 grid (one device), and the CPU world build behind `atlas_upload_section`.
+* **The 2D inputs on the GPU**: the map rasters, hydrology, road and street plans as device data (today Java computes
+  pages: 0.15 ms a chunk on 20 threads).
+* **Multiplayer**: the client has no seed (the public / secret decision, ATLAS-STREAMING.md decision 3).
+* Found on the way, for the owner: the router has no `minecraft:beardifier` (structures' `beard_box` /
+  `beard_thin` do nothing), `nirncraft:tamriel_caves` is dead code, and `TamrielBiomeSource` samples a quart
+  column's climate at the first quart asked (an order dependence; chunk generation asks bottom up).
