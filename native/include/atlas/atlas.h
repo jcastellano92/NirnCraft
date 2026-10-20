@@ -717,6 +717,43 @@ ATLAS_API AtlasStatus atlas_height_batch(AtlasHeight* h, int32_t x0, int32_t z0,
                                             uint32_t count, const uint32_t* slots, float* values, uint32_t* flags,
                                             AtlasHeightTimes* times);
 
+/*
+ * The client's world generator (shaders/atlas_gen.slang, docs/ATLAS-CLIENT-GENERATION.md): whole chunk columns of
+ * real blocks (y -64..575: 40 sections) from a program the mod compiles from the world's own generator objects (the
+ * density router, the aquifer, the material rule, the seeds; AtlasGenProgram) and per-chunk pages of the 2D Tamriel
+ * inputs (AtlasGenPages). Self-contained like atlas_height_* (its own Vulkan device, or the kernels compiled to C++).
+ * A chunk reads the pages of chunks x-4..x+2, z-2..z+2 (heights) and its 3 x 3 (with biomes): atlas_gen_missing_pages
+ * lists those not resident (or resident without biomes where they are needed) as (cx, cz, full) triples; put them,
+ * then generate. Pages stay resident (least recently used evicted past ATLAS_GEN_PAGES, default 4096).
+ */
+typedef struct AtlasGen AtlasGen;
+typedef struct AtlasGenTimes {
+    double uploadMs, kernelMs, readbackMs, ingestMs, totalMs;
+    double passMs[6]; /* corners, aquifer cells, fill, tops, surface + map water, pack (device timestamps or CPU wall) */
+} AtlasGenTimes;
+ATLAS_API AtlasStatus atlas_gen_create(AtlasBackend backend, AtlasGen** out);
+ATLAS_API void atlas_gen_destroy(AtlasGen* h);
+ATLAS_API const char* atlas_gen_last_error(AtlasGen* h);
+ATLAS_API const char* atlas_gen_device(AtlasGen* h);
+/* The program (words[0] 'AGEN'); replaces the pages (another world). Copied. */
+ATLAS_API AtlasStatus atlas_gen_set_program(AtlasGen* h, const uint32_t* words, uint32_t count);
+/* Words of one page for the current program (0 before one is set). */
+ATLAS_API uint32_t atlas_gen_page_words(AtlasGen* h);
+/* Pages the chunks need that are not resident: up to capacity (cx, cz, full) triples into out; returns the count. */
+ATLAS_API uint32_t atlas_gen_missing_pages(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, int32_t* out,
+                                           uint32_t capacity);
+ATLAS_API AtlasStatus atlas_gen_put_page(AtlasGen* h, int32_t cx, int32_t cz, int32_t full, const uint32_t* words,
+                                         uint32_t count);
+/* Generates count chunks (cx, cz pairs): outIds count * 40 * 2048 words, per chunk its sections bottom up, two 16-bit
+   ids to a word (index x + 16 * (z + 16 * y) like atlas_upload_section); outMode 0: generator block ids, 1: atlas
+   materials (the program's table). outFlags (may be NULL): per chunk nonzero when a value could not be proven exact or
+   a page was missing (take the server's blocks there). */
+ATLAS_API AtlasStatus atlas_gen_chunks(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t outMode,
+                                       uint32_t* outIds, uint32_t* outFlags, AtlasGenTimes* times);
+/* Generates and uploads the chunks' non-air sections into ctx (the atlas_upload_section path); outSections: count. */
+ATLAS_API AtlasStatus atlas_gen_into(AtlasGen* h, AtlasContext* ctx, const int32_t* chunkXZ, uint32_t count,
+                                     uint32_t* outFlags, uint32_t* outSections, AtlasGenTimes* times);
+
 #ifdef __cplusplus
 }
 #endif

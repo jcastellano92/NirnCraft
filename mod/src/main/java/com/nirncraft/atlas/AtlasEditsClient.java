@@ -127,7 +127,12 @@ final class AtlasEditsClient {
             boolean client = false;
             if (d == null) {
                 d = AtlasClientSections.poll(viewX, viewZ);  // the loaded chunks first, nearest first: what the near light traces
+                // then atlas's own generation (AtlasClientGen): the window around the camera, long before vanilla's
+                // chunks arrive; those still come here after it and go up only where they differ (the hash below)
+                boolean real = d != null;
+                if (d == null) d = AtlasClientGen.poll(viewX, viewZ);
                 client = d != null;
+                if (real) AtlasClientSections.real(d.cx(), d.cz());
             }
             if (d == null) {
                 byte[] b = SECTIONS.poll();
@@ -147,6 +152,7 @@ final class AtlasEditsClient {
                 int[] ids = d.sections()[s];
                 if (ids == null) continue;  // solid rock: the tiles' stone
                 long key = net.minecraft.core.SectionPos.asLong(d.cx(), d.sy0() + s, d.cz());
+                if (client && AtlasClientGen.skipRock(key, ids)) continue;  // generation's tiles stone holds it
                 long h = 0xcbf29ce484222325L ^ ((long) d.grass() << 24 ^ d.foliage());
                 for (int id : ids) h = (h ^ id) * 0x100000001b3L;
                 if (UPLOADED.containsKey(key) && UPLOADED.get(key) == h) continue;  // the core has these blocks

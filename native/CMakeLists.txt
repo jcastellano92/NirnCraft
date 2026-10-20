@@ -328,6 +328,47 @@ else()
                               "-ffp-contract=off;-fno-fast-math;-w")
 endif()
 
+# The client's world generator (atlas_gen.slang, docs/ATLAS-CLIENT-GENERATION.md): the same exact float contract,
+# one SPIR-V module per pass, and the C++ reference (its generated structs renamed: one library, several kernels)
+set(GEN_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_gen.slang")
+set(GEN_HEADERS)
+set(GEN_CPU_ENTRIES)
+foreach(pass corner aquifer fill top surface pack)
+  set(entry "${pass}Main")
+  set(GEN_VALIDATE)
+  if(SPIRV_VAL)
+    set(GEN_VALIDATE COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/atlas_gen_${pass}.spv")
+  endif()
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_gen_${pass}.spv"
+    COMMAND "${SLANGC}" "${GEN_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise
+            -warnings-disable 41035 -o "${GEN}/atlas_gen_${pass}_raw.spv"
+    COMMAND spv_exact "${GEN}/atlas_gen_${pass}_raw.spv" "${GEN}/atlas_gen_${pass}.spv"
+    ${GEN_VALIDATE}
+    DEPENDS "${GEN_SRC}" spv_exact COMMENT "slangc atlas_gen:${entry} -> SPIR-V (exact float contract)")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_gen_${pass}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_gen_${pass}.spv -DOUT=${GEN}/atlas_gen_${pass}_spv.h
+            -DNAME=atlas_gen_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_gen_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND GEN_HEADERS "${GEN}/atlas_gen_${pass}_spv.h")
+  list(APPEND GEN_CPU_ENTRIES -entry ${entry} -stage compute)
+endforeach()
+add_custom_command(
+  OUTPUT "${GEN}/atlas_gen_cpu.cpp"
+  COMMAND "${SLANGC}" "${GEN_SRC}" -target cpp ${GEN_CPU_ENTRIES} -O3 -fp-mode precise -warnings-disable 41035
+          -o "${GEN}/atlas_gen_cpu.cpp"
+  DEPENDS "${GEN_SRC}" COMMENT "slangc atlas_gen -> C++ (CPU reference)")
+target_sources(atlas_core PRIVATE src/gen_engine.cpp "${GEN}/atlas_gen_cpu.cpp" ${GEN_HEADERS})
+set(GEN_RENAME "GlobalParams_0=GenGlobals_0;KernelContext_0=GenContext_0")
+if(MSVC)
+  set_source_files_properties("${GEN}/atlas_gen_cpu.cpp" PROPERTIES COMPILE_OPTIONS "/fp:strict;/W0"
+                              COMPILE_DEFINITIONS "${GEN_RENAME}")
+else()
+  set_source_files_properties("${GEN}/atlas_gen_cpu.cpp" PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-fast-math;-w"
+                              COMPILE_DEFINITIONS "${GEN_RENAME}")
+endif()
+
 add_executable(atlas_height_test tests/height_test.cpp)
 target_include_directories(atlas_height_test PRIVATE include)
 target_link_libraries(atlas_height_test PRIVATE atlas_core)

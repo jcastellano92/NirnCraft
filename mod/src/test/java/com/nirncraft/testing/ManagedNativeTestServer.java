@@ -114,12 +114,15 @@ final class ManagedNativeTestServer implements ExtensionContext.Store.CloseableR
         try {
             WorldStem stem = Util.blockUntilDone(exec -> WorldLoader.load(init, context -> {
                 Registry<LevelStem> registry = new MappedRegistry<>(Registries.LEVEL_STEM, Lifecycle.stable()).freeze();
+                // NIRNCRAFT_TEST_WORLD=tamriel: the real Tamriel overworld, seed 1234, structures on (the client
+                // generation parity tool compares against its fully generated chunks); else a flat world (fast)
+                boolean tamriel = "tamriel".equals(System.getenv("NIRNCRAFT_TEST_WORLD"));
                 WorldDimensions dimensions = context.datapackWorldRegistries().lookupOrThrow(Registries.WORLD_PRESET)
-                        .getOrThrow(WorldPresets.FLAT).value().createWorldDimensions();
+                        .getOrThrow(tamriel ? WorldPresets.NORMAL : WorldPresets.FLAT).value().createWorldDimensions();
                 WorldDimensions.Complete complete = dimensions.bake(registry);
                 var data = new LevelDataAndDimensions.WorldDataAndGenSettings(
                         new PrimaryLevelData(settings, complete.specialWorldProperty(), complete.lifecycle()),
-                        new WorldGenSettings(new WorldOptions(0L, false, false), dimensions));
+                        new WorldGenSettings(tamriel ? new WorldOptions(1234L, true, false) : new WorldOptions(0L, false, false), dimensions));
                 return new WorldLoader.DataLoadOutput<>(data, complete.dimensionsRegistryAccess());
             }, WorldStem::new, Util.backgroundExecutor(), exec)).get();
             try {

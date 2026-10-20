@@ -40,6 +40,8 @@ final class AtlasClientSections {
     // near light traced the tiles' stand-in houses, solid and a block too wide, for most of an hour)
     private static final java.util.ArrayList<AtlasSections.Decoded> READY = new java.util.ArrayList<>();
     private static final Set<Long> UP = ConcurrentHashMap.newKeySet();  // chunks whose sections are up (and still loaded)
+    // chunks whose loaded (vanilla) blocks went up: atlas's own generation never goes over them (AtlasClientGen)
+    private static final Set<Long> REAL = ConcurrentHashMap.newKeySet();
     private static final IdentityHashMap<BlockState, Integer> IDS = new IdentityHashMap<>();  // (client thread)
 
     static void init() {
@@ -53,6 +55,7 @@ final class AtlasClientSections {
                 long k = e.getChunk().getPos().pack();
                 QUEUED.remove(k);
                 UP.remove(k);
+                REAL.remove(k);
             }
         });
     }
@@ -155,6 +158,16 @@ final class AtlasClientSections {
         }
     }
 
+    /** The loaded chunk's own blocks are going up (far-field worker). */
+    static void real(int cx, int cz) {
+        REAL.add(ChunkPos.pack(cx, cz));
+    }
+
+    /** Whether the loaded chunk's own blocks are up (then generated ones must not replace them). */
+    static boolean isReal(int cx, int cz) {
+        return REAL.contains(ChunkPos.pack(cx, cz));
+    }
+
     /** Its sections went up (far-field worker). */
     static void up(int cx, int cz) {
         UP.add(ChunkPos.pack(cx, cz));
@@ -187,6 +200,7 @@ final class AtlasClientSections {
     static void reset() {
         READY.clear();
         UP.clear();
+        REAL.clear();
         QUEUED.clear();
         IDS.clear();
         Minecraft mc = Minecraft.getInstance();

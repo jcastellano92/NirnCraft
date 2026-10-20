@@ -548,6 +548,11 @@ public final class AtlasNative {
         private MemorySegment frameSeg, outSeg, colorSeg, normalSeg, depthSeg, ioSeg;
         private int outPixels = -1;
 
+        /** The native handle (the client generator hands sections to it: AtlasGenNative.Gen.into). */
+        MemorySegment handle() {
+            return ptr;
+        }
+
         Context(MemorySegment ptr) {
             this.ptr = ptr;
             frameSeg = frameArena.allocate(FRAME_SIZE, 8);
