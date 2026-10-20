@@ -254,9 +254,16 @@ vec3 untracedRadiance(vec3 albedo, vec3 n, vec2 lm) {
 
 // the eye in water: whatever lies dist blocks away is seen through that much water (atlas_water.glsl); vanilla's
 // linear water fog left far things untouched
+// vanilla's fog only where it is a special fog (blindness, darkness, lava, powder snow, a dense biome fog: short ranges)
+// when our look is on: the air's haze is atlas's (aerialInscatter), and vanilla's grey distance fog over it hazed the far
+// field twice (bright, washed mountains at night)
+float vanillaFogShare() {
+    return Look.z > 0.5 ? 1.0 - smoothstep(48.0, 96.0, FogEnvironmentalEnd) : 1.0;
+}
+
 vec3 environmentalFog(vec3 rgb, float dist, vec3 dir) {
     if (atlasEyeInWater()) return atlasUnderwater(rgb, dist, dir) + atlasWaterShafts(dir, dist);
-    return mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
+    return mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a * vanillaFogShare());
 }
 
 void main() {
@@ -334,7 +341,7 @@ void main() {
     vec3 ldr = own ? atlasDisplay(straight, Look.x, Look.y) : pow(straight / (1.0 + straight), vec3(1.0 / 2.2));
     // the near field's environmental fog as it stands at the edge of the loaded terrain (AtlasFallback's rule)
     float edge = max(FogRenderDistanceEnd, 16.0);
-    float f = clamp(linear_fog_value(min(d, edge), FogEnvironmentalStart, FogEnvironmentalEnd), 0.0, 1.0) * FogColor.a;
+    float f = clamp(linear_fog_value(min(d, edge), FogEnvironmentalStart, FogEnvironmentalEnd), 0.0, 1.0) * FogColor.a * vanillaFogShare();
     vec3 dirF = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
     vec3 fogged = atlasEyeInWater() ? atlasUnderwater(ldr, d, dirF) + atlasWaterShafts(dirF, d) : mix(ldr, FogColor.rgb, f);
     if (!atlasEyeInWater() && own) {  // (the far field: the glare a faint veil, as over near geometry)

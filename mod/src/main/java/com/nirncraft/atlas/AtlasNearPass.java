@@ -578,7 +578,7 @@ public final class AtlasNearPass {
                     .putVec4((float) Math.floorMod((long) Math.floor(camState.pos.x), 6144L) + (float) (camState.pos.x - Math.floor(camState.pos.x)),
                             (float) camState.pos.y,
                             (float) Math.floorMod((long) Math.floor(camState.pos.z), 6144L) + (float) (camState.pos.z - Math.floor(camState.pos.z)), 0f)
-                    .putVec4(waterTint(mc, camState)[0], waterTint[1], waterTint[2], 0f)  // WaterTint: the biomes' water colour
+                    .putVec4(waterTint(mc, camState)[0], waterTint[1], waterTint[2], waterTint[3])  // WaterTint: colour, w ocean share
                     // CamAbs: the camera's world position (the sun map's world frame), w: the sun map's size (0: none)
                     .putVec4((float) camState.pos.x, (float) camState.pos.y, (float) camState.pos.z,
                             far != null ? far.sunMapSize() : 0f);
@@ -615,7 +615,7 @@ public final class AtlasNearPass {
         }
     }
 
-    private static final float[] waterTint = {0.25f, 0.46f, 0.89f};
+    private static final float[] waterTint = {0.25f, 0.46f, 0.89f, 0f};
     private static boolean waterTintSet;
     private static long waterTintFrame;
 
@@ -626,13 +626,15 @@ public final class AtlasNearPass {
      */
     private static float[] waterTint(Minecraft mc, net.minecraft.client.renderer.state.level.CameraRenderState cam) {
         if (mc.level == null || (waterTintFrame++ & 7) != 0) return waterTint;
-        float r = 0, g = 0, b = 0;
+        float r = 0, g = 0, b = 0, ocean = 0;
         net.minecraft.core.BlockPos.MutableBlockPos bp = new net.minecraft.core.BlockPos.MutableBlockPos();
         int n = 0;
         for (int dz = -3; dz <= 3; dz++)
             for (int dx = -3; dx <= 3; dx++) {
                 bp.set(cam.pos.x + dx * 24, cam.pos.y, cam.pos.z + dz * 24);
-                int c = mc.level.getBiome(bp).value().getWaterColor();
+                var biome = mc.level.getBiome(bp);
+                if (biome.is(net.minecraft.tags.BiomeTags.IS_OCEAN)) ocean += 1f;
+                int c = biome.value().getWaterColor();
                 r += ((c >> 16) & 255) / 255f;
                 g += ((c >> 8) & 255) / 255f;
                 b += (c & 255) / 255f;
@@ -641,10 +643,12 @@ public final class AtlasNearPass {
         r /= n;
         g /= n;
         b /= n;
+        ocean /= n;
         float k = waterTintSet ? 0.08f : 1f;  // (every 8 frames: about 2 s to settle at 60 fps)
         waterTint[0] += (r - waterTint[0]) * k;
         waterTint[1] += (g - waterTint[1]) * k;
         waterTint[2] += (b - waterTint[2]) * k;
+        waterTint[3] += (ocean - waterTint[3]) * k;
         waterTintSet = true;
         return waterTint;
     }

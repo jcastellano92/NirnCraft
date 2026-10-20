@@ -81,18 +81,52 @@ bool isWater(vec2 uv) {
 // wind waves on a level water surface: six octaves across directions (wavelengths 9 to 0.7 blocks, the shorter
 // steeper), each faded out where it is finer than the pixel's footprint on the water (foot, blocks): far water calms
 // instead of aliasing into a tilted shimmer. The normal at world xz, time in seconds
+float wHash(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
+float wNoise(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(wHash(i), wHash(i + vec2(1, 0)), f.x), mix(wHash(i + vec2(0, 1)), wHash(i + vec2(1, 1)), f.x), f.y);
+}
+
+// Water waves that do not tile: the surface is chop (eight octaves, wavelengths 9 to 0.4 blocks, their directions spread
+// about the wind and rotated by a slow noise, the domain warped so no pattern repeats), its strength set by a gust field
+// drifting downwind at about 40 blocks (cat's paws: rough patches between calm, glassy stretches), plus long swell where
+// the water around is ocean (WaterTint.w: 0 a lake or a pond .. 1 the open sea). Each octave fades where it is finer than
+// the pixel's footprint on the water (foot): far water calms instead of aliasing. The normal at world xz, time seconds.
 vec3 waveNormal(vec2 p, float t, float foot) {
+    vec2 wind = normalize(vec2(0.8, 0.6));
+    float ocean = clamp(WaterTint.w, 0.0, 1.0);
+    vec2 gp = p / 38.0 - wind * t * 0.12;
+    float gust = smoothstep(0.25, 0.85, wNoise(gp) * 0.65 + wNoise(gp * 2.3 + 7.1) * 0.35);
+    float rough = mix(0.12, 1.0, gust);                       // glassy calm .. full chop
+    vec2 q = p + vec2(wNoise(p / 17.0), wNoise(p / 17.0 + 3.7)) * 6.0;  // the warp: no straight repeating rows
+    float turn = (wNoise(p / 60.0 + 11.0) - 0.5) * 1.2;
     vec2 g = vec2(0.0);
-    float k = 0.7, amp = 0.05, w = 0.0;
-    for (int i = 0; i < 6; i++) {
-        float ang = float(i) * 2.399 + 0.6;  // the golden angle: directions that never line up
+    float k = 0.7, amp = 0.05;
+    for (int i = 0; i < 8; i++) {
+        float ang = atan(wind.y, wind.x) + turn + (float(i) * 2.399 - 3.0) * 0.45;  // spread about the wind
         vec2 d = vec2(cos(ang), sin(ang));
-        float speed = sqrt(9.81 * k) * 0.6;  // deep-water dispersion, slowed for blocks
+        float speed = sqrt(9.81 * k) * 0.6;
         float lambda = 6.2832 / k;
         float keep = 1.0 - smoothstep(0.5, 2.0, foot * 2.0 / lambda);
-        g += d * cos(dot(p, d) * k + t * speed + float(i) * 1.7) * amp * k * keep;
-        k *= 1.62;
-        amp *= 0.62;
+        g += d * cos(dot(q, d) * k + t * speed + float(i) * 1.7) * amp * k * keep * rough;
+        k *= 1.5;
+        amp *= 0.66;
+    }
+    // the sea's swell: long, regular, little affected by the gusts
+    if (ocean > 0.01) {
+        float ks = 0.09;
+        for (int i = 0; i < 3; i++) {
+            float ang = atan(wind.y, wind.x) + float(i) * 0.35 - 0.35;
+            vec2 d = vec2(cos(ang), sin(ang));
+            g += d * cos(dot(p, d) * ks + t * sqrt(9.81 * ks) * 0.6 + float(i) * 2.1) * 0.35 * ks * ocean;
+            ks *= 1.6;
+        }
     }
     return normalize(vec3(-g.x, 1.0, -g.y));
 }
@@ -182,7 +216,7 @@ void main() {
             rgb = atlasDisplay(litW, Look.x, Look.y);
             float dist2 = length(viewPos);
             rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist2, viewPos / max(dist2, 1e-3))
-                : mix(rgb, FogColor.rgb, linear_fog_value(dist2, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
+                : mix(rgb, FogColor.rgb, linear_fog_value(dist2, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a * (1.0 - smoothstep(48.0, 96.0, FogEnvironmentalEnd)));
             fragColor = vec4(rgb, mix(0.75, 0.95, smoothstep(0.3, 0.8, streak)));
             return;
         }
@@ -256,6 +290,6 @@ void main() {
     }
     float dist = length(viewPos);
     rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist, viewPos / max(dist, 1e-3))
-        : mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
+        : mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a * (1.0 - smoothstep(48.0, 96.0, FogEnvironmentalEnd)));
     fragColor = vec4(rgb, color.a);
 }
