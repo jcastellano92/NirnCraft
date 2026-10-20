@@ -114,6 +114,17 @@ final class AtlasMemory {
         return new Plan(false, maxScale, sun, quarter, lods, tier, allowance, basis);
     }
 
+    /**
+     * The CPU backend (no usable Vulkan device): what a CPU can render, under the memory plan. Scale at most 0.55 (it
+     * starts at a third: AtlasQuality's CPU scale), quarter-resolution clouds, a 256 sun map (its rows are traced on
+     * the CPU too), the GPU controller's fallback tier 1 (16 km, 512 far lights) from the first frame.
+     */
+    static Plan cpu(Plan p) {
+        if (p.off()) return p;
+        return new Plan(false, Math.min(p.maxScale(), 0.55), Math.min(p.maxSunMap(), 256), true, p.lods(),
+                Math.max(p.initialTier(), 1), p.allowance(), p.reason() + "; CPU backend");
+    }
+
     /** One step down after running out of memory (null: nothing left to give up: the far field goes off). */
     static Plan shrink(Plan p) {
         if (p.off()) return null;

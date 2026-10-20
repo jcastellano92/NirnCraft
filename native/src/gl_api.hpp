@@ -45,7 +45,11 @@ constexpr GLenum GL_TEXTURE_2D = 0x0DE1, GL_RGBA8 = 0x8058, GL_RGBA16F = 0x881A,
                  GL_UNPACK_SKIP_PIXELS = 0x0CF4, GL_UNPACK_ALIGNMENT = 0x0CF5, GL_UNPACK_SWAP_BYTES = 0x0CF0,
                  GL_UNPACK_LSB_FIRST = 0x0CF1, GL_PIXEL_PACK_BUFFER = 0x88EB, GL_PIXEL_PACK_BUFFER_BINDING = 0x88ED,
                  GL_PACK_ROW_LENGTH = 0x0D02, GL_PACK_SKIP_ROWS = 0x0D03, GL_PACK_SKIP_PIXELS = 0x0D04,
-                 GL_PACK_ALIGNMENT = 0x0D05, GL_PACK_SWAP_BYTES = 0x0D00, GL_PACK_LSB_FIRST = 0x0D01;
+                 GL_PACK_ALIGNMENT = 0x0D05, GL_PACK_SWAP_BYTES = 0x0D00, GL_PACK_LSB_FIRST = 0x0D01,
+                 GL_MAP_READ_BIT = 0x0001, GL_MAP_PERSISTENT_BIT = 0x0040, GL_MAP_COHERENT_BIT = 0x0080,
+                 GL_CLIENT_STORAGE_BIT = 0x0200, GL_SYNC_GPU_COMMANDS_COMPLETE = 0x9117, GL_SYNC_FLUSH_COMMANDS_BIT = 0x1,
+                 GL_ALREADY_SIGNALED = 0x911A, GL_CONDITION_SATISFIED = 0x911C;
+using GLsync = void*;  // an opaque handle
 
 struct GlApi {
     const GLubyte*(ATLAS_GLAPI* GetString)(GLenum) = nullptr;
@@ -115,6 +119,16 @@ struct GlApi {
     void(ATLAS_GLAPI* ImportSemaphoreFdEXT)(GLuint, GLenum, GLint) = nullptr;
     void(ATLAS_GLAPI* PixelStorei)(GLenum, GLint) = nullptr;
     void(ATLAS_GLAPI* BindBuffer)(GLenum, GLuint) = nullptr;
+    // the CPU backend's asynchronous readback (optional: without them it reads back synchronously)
+    void(ATLAS_GLAPI* CreateBuffers)(GLsizei, GLuint*) = nullptr;
+    void(ATLAS_GLAPI* DeleteBuffers)(GLsizei, const GLuint*) = nullptr;
+    void(ATLAS_GLAPI* NamedBufferStorage)(GLuint, intptr_t, const void*, unsigned int) = nullptr;
+    void*(ATLAS_GLAPI* MapNamedBufferRange)(GLuint, intptr_t, intptr_t, unsigned int) = nullptr;
+    unsigned char(ATLAS_GLAPI* UnmapNamedBuffer)(GLuint) = nullptr;
+    GLsync(ATLAS_GLAPI* FenceSync)(GLenum, unsigned int) = nullptr;
+    GLenum(ATLAS_GLAPI* ClientWaitSync)(GLsync, unsigned int, GLuint64) = nullptr;
+    void(ATLAS_GLAPI* DeleteSync)(GLsync) = nullptr;
+    bool asyncReadback = false;  // all of the above
 
     // What the context offers (filled by load). Interop needs memoryObject + semaphore and the platform's handle
     // flavour (win32 on Windows, fd on Linux); without them atlas falls back to copying frames through the host.

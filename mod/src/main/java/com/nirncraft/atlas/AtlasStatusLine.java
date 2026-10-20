@@ -32,13 +32,13 @@ final class AtlasStatusLine {
         return m.find() ? m.group(1).replace("\\\"", "\"").replace("\\\\", "\\") : null;
     }
 
-    /** "zero-copy" or "host-copy" from atlas_info's interop field (null when not attached). */
+    /** "zero-copy", "host-copy" or "CPU" (the CPU backend) from atlas_info's interop field (null when not attached). */
     static String interop(String infoJson) {
         if (infoJson == null) return null;
         Matcher m = INTEROP.matcher(infoJson);
         if (!m.find()) return null;
         String v = m.group(1);
-        return v.startsWith("zero-copy") ? "zero-copy" : v.startsWith("host-copy") ? "host-copy" : null;
+        return v.startsWith("zero-copy") ? "zero-copy" : v.startsWith("host-copy") ? "host-copy" : v.startsWith("cpu") ? "CPU" : null;
     }
 
     static String on(String infoJson, boolean fallbackCompositor, String quality) {

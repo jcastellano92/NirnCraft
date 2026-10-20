@@ -251,6 +251,21 @@ The full checklist from R1, every item checked live; the owner flies it.
   luminance x1.85. Cost (3090, 1080p, idle GPU): near light +0.16 ms (4.77 -> 4.93 ms the frame), the far pass
   unchanged; the far field keeps the constant (bouncing its level-0 pixels too cost +1.8 ms, 43 % of the far pass),
   so a shaded wall at the hand-off is ~8 % lighter near than far. ATLAS_ABLATE 524288 = before.
+- **R6 CPU path in game (2026-10-20).** Without a usable Vulkan device (or -Dnirncraft.atlas.backend=cpu) atlas_gl_attach
+  failed on the CPU backend, so the far field went off and the near pass lost its light. Now the CPU backend takes the
+  same GL calls with the same textures: the near pass's depth and info are linearised on the GL side at atlas's
+  resolution (gl_near.hpp, shared with the Vulkan path), read back through a persistent pixel-pack buffer and a fence,
+  rendered on a worker (all hardware threads but two, below normal priority) while the game draws on, converted to
+  half floats there and uploaded when done; the first frame after an attach is rendered in the call. The textures lag
+  the camera (2 frames at best, ~7 at 60 fps below), so the resolve takes no haze where atlas's texel is unlit there
+  (Look.w; no black or far-coloured fringe), and shadows and the far edge trail in fast turns (open: reproject by the
+  shown frame's camera). The sun map is uploaded too (pack path). Atlas's scale on CPU follows the worker's time, not
+  the GPU controller: a third of the window to start, the cheap light (FRAME_LIGHT_LOW) then a smaller scale over
+  25 ms, at most 0.55 (AtlasQuality.observeCpu). Measured (atlas_gl_test, i9-10900K 20 threads, 1920x1080 window,
+  atlas 640x360, 64 % of the screen near and lit): worker 66-72 ms a frame traced, 41 ms with the cheap light (the
+  near light's traced sky is ~40 %), convert 1.5 ms; render-thread cost per frame 0.2-0.4 ms (p95 1.9; readback copy
+  0.2, upload 0.2); 12 ms of render-thread work beside the worker takes 12.9-13.0 ms. ATLAS_CPU_GL=sync: 70-79 ms
+  on the render thread. Sync and async frames match the host render (0 pixels differ; colour, near light within half precision).
 
 ## Parked (off the renderer goal, for later)
 

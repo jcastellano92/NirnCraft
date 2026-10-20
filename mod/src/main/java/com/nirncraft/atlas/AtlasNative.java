@@ -45,6 +45,7 @@ public final class AtlasNative {
             FRAME_FILL_NEAR = 0x2000,  // (abi 0.12) the far field fills what the near field has not loaded yet
             FRAME_VANILLA_LIGHT = 0x10000,  // (abi 0.14, optional) Minecraft's own light, no pack (an older core ignores it)
             FRAME_GROUPS = 0x4000,     // (abi 0.14) primary rays trace the content-shaped groups (an older core ignores it)
+            FRAME_LIGHT_LOW = 0x8000,  // (abi 0.14, optional) the far field's cheap light, near light included (atlas.h)
             // (abi 0.15, optional) atlas lights the near field's covered pixels with the far light (atlas.h
             // ATLAS_FRAME_NEAR_LIGHT): GlFrameIO.nearInfoTex in, dstNearLight out; the binding drops it for older cores
             FRAME_NEAR_LIGHT = 0x20000;

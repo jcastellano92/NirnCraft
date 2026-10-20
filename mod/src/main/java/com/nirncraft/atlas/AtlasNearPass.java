@@ -545,7 +545,7 @@ public final class AtlasNearPass {
         float[] look = AtlasLook.frame(mc), k = AtlasLook.light(mc);
         try (var view = info.currentBuffer().map(false, true)) {
             com.mojang.blaze3d.buffers.Std140Builder.intoBuffer(view.data())
-                    .putVec4(look[0], look[1], !lit ? 0f : traced ? 1f : 2f, 0f)
+                    .putVec4(look[0], look[1], !lit ? 0f : traced ? 1f : 2f, AtlasClient.farLags() ? 1f : 0f)
                     .putVec4(k[0], k[1], k[2], lit ? 1f : 0f)
                     .putVec4(k[3], k[4], k[5], 0f)
                     .putVec4(k[6], k[7], k[8], 0f)

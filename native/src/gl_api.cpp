@@ -206,6 +206,14 @@ bool GlApi::load(std::string& err) {
     OPT(WaitSemaphoreEXT, "glWaitSemaphoreEXT")
     OPT(ImportSemaphoreWin32HandleEXT, "glImportSemaphoreWin32HandleEXT")
     OPT(ImportSemaphoreFdEXT, "glImportSemaphoreFdEXT")
+    OPT(CreateBuffers, "glCreateBuffers")
+    OPT(DeleteBuffers, "glDeleteBuffers")
+    OPT(NamedBufferStorage, "glNamedBufferStorage")
+    OPT(MapNamedBufferRange, "glMapNamedBufferRange")
+    OPT(UnmapNamedBuffer, "glUnmapNamedBuffer")
+    OPT(FenceSync, "glFenceSync")
+    OPT(ClientWaitSync, "glClientWaitSync")
+    OPT(DeleteSync, "glDeleteSync")
 #undef LOAD
 #undef OPT
     if (!missing.empty()) {
@@ -237,6 +245,10 @@ bool GlApi::load(std::string& err) {
                 WaitSemaphoreEXT;
     semaphoreWin32 = semaphore && hasExtension("GL_EXT_semaphore_win32") && ImportSemaphoreWin32HandleEXT;
     semaphoreFd = semaphore && hasExtension("GL_EXT_semaphore_fd") && ImportSemaphoreFdEXT;
+    // persistent mapped buffers (4.4 core / ARB_buffer_storage) and fences (3.2 core)
+    bool storage = major > 4 || (major == 4 && minor >= 4) || hasExtension("GL_ARB_buffer_storage");
+    asyncReadback = storage && CreateBuffers && DeleteBuffers && NamedBufferStorage && MapNamedBufferRange &&
+                    UnmapNamedBuffer && FenceSync && ClientWaitSync && DeleteSync;
     return true;
 }
 
