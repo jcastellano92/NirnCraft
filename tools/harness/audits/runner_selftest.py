@@ -294,6 +294,19 @@ for _sc in _loading.scenes():
     expect(bool(_sc.get("vet_pose")) and _sc["pose"]["height"] >= 30,
            f"{_sc['id']}: a loading view is vetted and high over the land (at 4 blocks up it faced a wall)")
 
+# --- a build lock held by another build is waited for, not a failed run ---------------------------------------------
+class _R:
+    def __init__(self, rc, out):
+        self.returncode, self.stdout, self.stderr = rc, out, ""
+_calls = []
+def _fake_run(cmd, **kw):
+    _calls.append(cmd)
+    return _R(2, "ERROR: Resource busy: reported owner=build_263.py; no work started") if len(_calls) < 3 else _R(0, "ok")
+_r = _game.build263(["jar"], wait_s=60, poll_s=0, run=_fake_run)
+expect(_r.returncode == 0 and len(_calls) == 3, "a busy build lock is waited for, then the build runs")
+expect("Resource busy" in _game.build_failure(_R(2, "a\nERROR: Resource busy: no work started")),
+       "a build that failed without error lines says why (its last lines)")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth
