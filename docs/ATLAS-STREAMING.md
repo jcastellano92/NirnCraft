@@ -115,6 +115,26 @@ What the pipeline does (the full map with file:line: the "far-field loading pipe
    bytes; every client applies it with the same code. Where the result is not deterministic (vanilla explosions,
    fluids), the edited blocks go out instead; the hash check catches either way.
 
+9. **The log folds into the region; it never grows for years** (owner): a region's state is the generated base plus
+   a compacted layer of differences; operations up to a point every client has passed are merged into the layer and
+   dropped (storage follows how much a region differs, not its history); a heavily built region graduates (the layer
+   is its content, the base no longer matters there); a joining player gets the layer and the few recent operations.
+   Each region records its base's generator version: an untouched region regenerates with a new generator, a changed
+   one keeps its version or is materialised at upgrade (base and layer merged into stored content, the new base).
+10. **Only what is needed is generated**: the far field asks the generator for the detail a region needs at its
+    distance (heights and surface at 16 m spacing for a mountain 10 km off), never whole columns or chunks.
+11. **Secrets and cheaters**: ores, loot, hidden rooms and traps are not in what the client can generate. When
+    something first becomes visible the client asks for it; the server checks against its own world whether that
+    position could see it and only then sends it (a cheater asking for what is behind rock flags itself). The host's
+    policy decides: log, alert the host quietly, warn, kick, ban, or deceive (fake ores, fake safe ground, false
+    directions: Paper's anti-xray engine modes and honeypots are precedents), all without touching the real world. The
+    server keeps simulating the real world (deceptions that should hurt need the server to act, the host's explicit
+    choice); no punishment on one event, evidence accumulates, a log the host can review.
+12. **Order-independent generation**: every feature a pure function of the seed and its position (stateless hashing,
+    counter-based random numbers, bounded footprints), nothing depending on which chunk generated first ("unsafe
+    terrain read during worldgen" at Leyawiin is that kind of dependence). A second survey (deterministic generation,
+    log compaction and generator upgrades, anti-cheat for information leaks, hash-tree sync) grounds the design.
+
 ### Own all of it: one spectrum, no vanilla terrain (owner, 2026-10-19)
 
 No near and far at all: one representation whose detail follows each part's importance on screen and its visibility,
