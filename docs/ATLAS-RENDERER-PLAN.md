@@ -303,6 +303,22 @@ The full checklist from R1, every item checked live; the owner flies it.
   many sources (torches and emitters bounce nothing yet; the far field has no traced bounce): voxel GI in the NAADF /
   VXGI manner (emissive voxels, spatio-temporal reuse) once the GPU structure exists.
 
+- **Water: the owner's list (2026-10-20), paused until atlas is GPU-built** (every live test waited on the CPU feed):
+  flowing water poor from every angle; falls are not water (white water, the flow continuing under the surface at the
+  foot, rapids); flow on and under the surface, eventually pushing players and items; depth darkness (drop-offs dark,
+  the shallows bright: deep views still read bright); shafts must be volumetric and follow the waves above, caustics
+  aligned to the ripples and as strong as the light and the weather allow (they show but faint); remove the dark
+  underwater particles; the shore: transparent shallows, a wet edge, foam only where waves lap (no glowing band),
+  shadows on the water, reflection falloff (the owner's photo: a dock on clear shallow water); per-biome underwater look
+  (green lily pond, teal timber lake, glacial blue, tropical turquoise over white sand, tea-brown jungle, deep ocean
+  blue) with long blends at biome borders; looking out of the water from just under the surface.
+- **Atlas draws everything, GPU-built (2026-10-20, the main track).** The near field is still vanilla's chunk raster
+  with atlas past the render distance: the line the owner sees, and after a teleport atlas lacks the real blocks for
+  minutes (~1 chunk/s CPU feed): no tree shadows, light that does not match. The fix: sections to a GPU pool, the voxel
+  structure built in compute per changed section, atlas tracing all terrain near and far with continuous level of
+  detail; vanilla keeps entities and effects, composited by depth. With the client owning the world (it generates;
+  the server sends coalesced operations by position and need), atlas builds from the client's own data.
+
 ## Parked (off the renderer goal, for later)
 
 - Client-owned world: x-ray from a client that generates the world (the public and secret split decides it), the hash
