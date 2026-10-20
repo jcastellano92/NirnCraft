@@ -615,14 +615,15 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     // light of ATLAS_FRAME_LIGHT_LOW, 512 never enclosed (the sky's short reach and the aerial haze under solid cover as
     // in the open), 1024 no light through leaves, 4096 a grey of the sky visibility (| 2048: the
     // secondary rays' origin in a solid), 8192 two sky rays, 16384 half their reach, 524288 no traced bounce (the
-    // look's constant alone); the groups: 64 draw every node
+    // look's constant alone), 2097152 the secondary rays' level 0 without the height mip, 4194304 foliage free to them,
+    // bits 23-25 a counter of the near light's secondary rays per pixel (atlas_far.slang gSecMode), 67108864 its level 0
+    // only; the groups: 64 draw every node
     // whole, 128 a drawn box without its texel walk, 32768 never draw a node whole for its error, bits 16-18 the level
     // their primary rays start from: a coarse level seen up close)
     {
-        static const uint32_t ablate = [] {
-            const char* v = std::getenv("ATLAS_ABLATE");
-            return v ? uint32_t(std::strtoul(v, nullptr, 0)) : 0u;
-        }();
+        // (read every frame: a measurement interleaves its variants in one process, atlas_render nlablate=)
+        const char* v = std::getenv("ATLAS_ABLATE");
+        const uint32_t ablate = v ? uint32_t(std::strtoul(v, nullptr, 0)) : 0u;
         std::memcpy(&g.jitter[3], &ablate, 4);
     }
     float a[3], b[3];

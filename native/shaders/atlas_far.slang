@@ -98,6 +98,17 @@ static bool gSecondary = false;
 static float gTrans = 1.0;
 static float gThrough = 0.0;
 static float gSecT = 0.0;
+// (ATLAS_ABLATE, measurements of the secondary rays, docs/ATLAS-RENDERER-PLAN.md "GPU-first") bit 21: their level-0
+// regions skip the height mip; bit 22: foliage passes them free (no shape, coverage or attenuation work); bits 23-25 a
+// per-pixel counter of the near light's secondary rays into `counters` (gSecCount): 1 traceRegion iterations, 2
+// height-mip skips, 3 height-mip probes, 4 node loads, 5 solid voxels met (material lookups), 6 voxels passed (foliage,
+// water, shapes), 7 rays; bit 26: count in level-0 regions only
+static uint gSecAblate = 0u;
+static uint gSecMode = 0u;
+static uint gSecCount = 0u;
+void secCount(uint mode, int lod) {
+    if (gSecondary && gSecMode == mode && ((gSecAblate & 67108864u) == 0u || lod == 0)) gSecCount++;
+}
 
 bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps, inout TraceResult res) {
     float3 inv = float3(abs(rd.x) > 1e-12 ? 1.0 / rd.x : 1e30, abs(rd.y) > 1e-12 ? 1.0 / rd.y : 1e30,
@@ -119,15 +130,19 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
     uint64_t brickBits = 0;
     uint brickRank = 0;
     uint hmBase = r.bases.w;
+    int rl = r.origin.w;
+    bool useMip = !(gSecondary && rl == 0 && (gSecAblate & 2097152u) != 0u);
     for (int it = 0; it < 1024; it++) {
         if (t >= t1) break;
         res.steps++;
+        secCount(1u, rl);
         float3 p = ro + rd * t;
         // Over terrain: find the largest column cell (whole region down to 4x4 voxels) whose highest voxel the ray
         // stays above until it leaves the cell, and skip straight across it. Far rays spend most of their length here.
         bool over = false;
         int lvlOff = 5460;
-        for (int k = 6; k >= 0; k--) {
+        for (int k = useMip ? 6 : -1; k >= 0; k--) {
+            secCount(3u, rl);
             int per = 64 >> k;
             int sz = 4 << k;
             int2 cxz = clamp(int2(floor(p.xz)) >> (2 + k), int2(0, 0), int2(per - 1, per - 1));
@@ -142,6 +157,7 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
                     axis = te >= t1 ? axis : (tx.x <= tx.y ? 0 : 2);
                     t = te + eps;
                     over = true;
+                    secCount(2u, rl);
                 }
                 break;
             }
@@ -170,6 +186,7 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
             while (size > 4) {
                 int h = size >> 1;
                 uint mask = nodes[nodeBase + ptr] & 0xFFu;
+                secCount(4u, rl);
                 uint c = ((v.x & h) != 0 ? 1u : 0u) | ((v.z & h) != 0 ? 2u : 0u) | ((v.y & h) != 0 ? 4u : 0u);
                 if ((mask & (1u << c)) == 0) { cell = h; break; }
                 uint k = countbits(mask);
@@ -199,7 +216,9 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
                 rank += popcount64(bits & ((uint64_t(1) << b) - 1));
                 uint hitMat = lookupMaterial(r, rank);
                 uint hitCls = uint(palette[hitMat].emisClass.y);
+                secCount(5u, rl);
                 bool passWater = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && hitCls == 2u;
+                if (gSecondary && hitCls == 1u && (gSecAblate & 4194304u) != 0u) passWater = true;  // (free foliage)
                 // gaps between leaves: a hashed share of foliage voxels lets the ray through (moving with the TAA
                 // phase, so the resolve sees crowns as dappled, not solid; shadow rays get dappled light the same way)
                 // a secondary ray meets a level-0 voxel of a shaped material (a snow layer, a slab, a stair, a fence: a
@@ -220,6 +239,7 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
                     passWater = gTrans > 0.004;
                     if (!passWater) gTrans = 0.0;
                 }
+                if (passWater) secCount(6u, rl);
                 if (!passWater && hitCls == 1u && gLeafGap > 0.0 && !gSecondary) {
                     uint phase = frame.jitter.z > 0.5 ? (frame.temporal.x & 7u) : 0u;
                     uint hh = (uint(v.x) * 73856093u) ^ (uint(v.y) * 19349663u) ^ (uint(v.z) * 83492791u) ^ (r.bases.x * 2654435761u) ^ (phase * 374761393u);
@@ -653,6 +673,7 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
     int lodCount = int(frame.dims.w);
     bool prev = gSecondary;
     gSecondary = true;
+    secCount(7u, 0);
     gTrans = 1.0;
     gThrough = 0.0;
     gStopFoliage = false;
@@ -1384,6 +1405,7 @@ void nearLightMain(uint3 id : SV_DispatchThreadID) {
     float nd = nearDepth[pix];
     if (!(nd < 1e29)) return;  // not the near field's (farMain wrote its zero)
     gAblate = asuint(frame.jitter.w);
+    gSecAblate = gAblate;
     if ((frame.dims.z & FRAME_GROUPS) != 0u) gHead = groupData[0];
     float4 nl = nearLightAt(q, frame.camFrac.xyz, pixelRay(q, w, h), nd, nearInfo[pix], frame.sunDir.xyz);
     if (gNearRoofed) nl.a = -1.0;
@@ -1547,6 +1569,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
                 // (FRAME_NEAR_SPLIT: the light comes from nearLightMain, the unlit air from nearUpsampleMain)
                 if ((frame.dims.z & FRAME_NEAR_SPLIT) == 0u) {
                     gAblate = asuint(frame.jitter.w);
+                    gSecAblate = gAblate;
+                    gSecMode = (gAblate >> 23) & 7u;
+                    gSecCount = 0u;
                     if ((frame.dims.z & FRAME_GROUPS) != 0u) gHead = groupData[0];  // (the secondary rays' material shapes)
                     outNearLight[pix] = nearLightAt(id.xy, o, dir, nd, nearInfo[pix], sun);
                     if (gNearRoofed && eyeRoofed()) c.rgb = float3(0, 0, 0);  // under cover at both ends: unlit air
@@ -1567,7 +1592,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             outNormal[pix] = 0;
             outDepth[pix] = cd;
             outSurface[pix] = nd;
-            counters[pix] = 0;
+            counters[pix] = gSecCount;  // (0 unless the secondary rays' counter is asked for: ATLAS_ABLATE bits 23-25)
             return;
         }
     }

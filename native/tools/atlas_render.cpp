@@ -587,6 +587,74 @@ int main(int argc, char** argv) {
                     std::fprintf(stderr, "render (near light): %s\n", atlas_last_error(ctx));
                     return 4;
                 }
+                // nlframes=N nlablate=a,b,..: the near light's frame timed N rounds, the ATLAS_ABLATE variants interleaved
+                // round by round (the same clocks for all); nlcount=1 also sums its secondary rays' counters per
+                // variant (bits 23-25: iterations, mip skips, mip probes, node loads, solid voxels, passes, rays)
+                if (smp == 0 && num(a, "nlframes", 0) > 0) {
+                    std::vector<uint32_t> variants;
+                    {
+                        std::string vs = str(a, "nlablate", "0");
+                        for (size_t p = 0; p < vs.size();) {
+                            size_t q = vs.find(',', p);
+                            if (q == std::string::npos) q = vs.size();
+                            variants.push_back(uint32_t(std::strtoul(vs.substr(p, q - p).c_str(), nullptr, 0)));
+                            p = q + 1;
+                        }
+                    }
+                    auto setAblate = [](uint32_t v) {
+                        std::string s = std::to_string(v);
+#ifdef _WIN32
+                        _putenv_s("ATLAS_ABLATE", s.c_str());
+#else
+                        setenv("ATLAS_ABLATE", s.c_str(), 1);
+#endif
+                    };
+                    size_t nearPx = 0;
+                    for (float d : nd) nearPx += d < 1e29f ? 1 : 0;
+                    int rounds = int(num(a, "nlframes", 0));
+                    std::vector<std::vector<double>> ms(variants.size());
+                    // (timed with the outputs on the device, as in game: written across the bus they cost more than the rays)
+                    auto deviceOutputs = [&](bool on) {
+                        if (be != ATLAS_BACKEND_VULKAN) return;
+#ifdef _WIN32
+                        _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", on ? "1" : "");
+#else
+                        if (on) setenv("ATLAS_TIMING_DEVICE_OUTPUTS", "1", 1); else unsetenv("ATLAS_TIMING_DEVICE_OUTPUTS");
+#endif
+                    };
+                    deviceOutputs(true);
+                    for (int r = 0; r < rounds; r++)
+                        for (size_t k = 0; k < variants.size(); k++) {
+                            setAblate(variants[k]);
+                            if (atlas_render(ctx, &fn, &on) != ATLAS_OK) return 4;
+                            atlas_get_stats(ctx, &st);
+                            ms[k].push_back(st.lastFrameMs);
+                        }
+                    deviceOutputs(false);
+                    for (size_t k = 0; k < variants.size(); k++) {
+                        std::vector<double> t = ms[k];
+                        std::sort(t.begin(), t.end());
+                        std::string counts;
+                        if (num(a, "nlcount", 0) > 0) {
+                            counts = ",\"counts\":{";
+                            const char* names[8] = {"", "iterations", "mipSkips", "mipProbes", "nodeLoads", "solidVoxels", "passes", "rays"};
+                            for (uint32_t m = 1; m < 8; m++) {
+                                setAblate(variants[k] | (m << 23) | (num(a, "nlcount", 0) > 1 ? 67108864u : 0u));
+                                if (atlas_render(ctx, &fn, &on) != ATLAS_OK) return 4;
+                                atlas_get_stats(ctx, &st);
+                                char cb[96];
+                                std::snprintf(cb, sizeof cb, "%s\"%s\":%llu", m > 1 ? "," : "", names[m], (unsigned long long)st.raySteps);
+                                counts += cb;
+                            }
+                            counts += "}";
+                        }
+                        std::printf("{\"nearLight\":{\"ablate\":%u,\"nearPixels\":%zu,\"medianMs\":%.3f,\"p25Ms\":%.3f,\"bestMs\":%.3f,\"rounds\":%d%s}}\n",
+                                    variants[k], nearPx, t[t.size() / 2], t[t.size() / 4], t[0], rounds, counts.c_str());
+                    }
+                    setAblate(0);
+                    // the timed frames wrote the same buffers: the last variant's light stays in `nl` (re-render plain)
+                    if (atlas_render(ctx, &fn, &on) != ATLAS_OK) return 4;
+                }
                 for (size_t i = 0; i < depth.size(); i++) {
                     if (depth[i] >= 1e29f) continue;
                     for (int k = 0; k < 3; k++)
