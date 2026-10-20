@@ -22,7 +22,10 @@ struct GlFrameIO {
 
 // FRAME_NEAR_LIGHT (atlas.h ATLAS_FRAME_NEAR_LIGHT; the kernels' atlas_shared.slang)
 constexpr uint32_t FRAME_NEAR_LIGHT_BIT = 0x20000u;
-constexpr uint32_t FRAME_NEAR_SPLIT_BIT = 0x40000u;  // (internal) the near light at half resolution (atlas_shared.slang)
+constexpr uint32_t FRAME_NEAR_SPLIT_BIT = 0x40000u;
+// (abi 0.17) ATLAS_FRAME_PRIMARY_NEAR / _LIT: atlas's primary rays draw the near field; the near light is then an output
+// without near inputs (the surfaces are atlas's own)
+constexpr uint32_t FRAME_PRIMARY_NEAR_BITS = 0x80000u | 0x100000u;  // (internal) the near light at half resolution (atlas_shared.slang)
 
 struct FrameInputs {
     std::shared_ptr<const PackedScene> sceneHold;  // keeps the snapshot alive for the frame
@@ -36,6 +39,8 @@ struct FrameInputs {
     const uint32_t* nearInfo = nullptr;       // host path: w*h near-field surface info, RGBA8 (FRAME_NEAR_LIGHT)
     std::vector<ActorGpu> actors;             // at least one element (count in frame.weatherParams[3])
     VoxGrid* voxgrid = nullptr;               // the level-0 grid's books: the backend takes its batches (voxgrid.hpp)
+    const std::vector<uint32_t>* textures = nullptr;  // the near field's textures, packed (voxgrid.hpp packTextures)
+    uint64_t texturesRevision = 0;
 };
 
 struct FrameTargets {

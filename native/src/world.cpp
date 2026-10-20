@@ -516,11 +516,23 @@ bool World::sectionMats(int sx, int sy, int sz, uint16_t out[4096]) const {
     return true;
 }
 
+bool World::trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const {
+    std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
+    if (!lock.owns_lock()) return false;
+    for (auto& [k, s] : sections_)
+        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, s);
+    return true;
+}
+
 void World::setGridWindow(int ox, int oz, int d) {
-    std::lock_guard<std::mutex> lock(mu_);
     gridOx_ = ox;
     gridOz_ = oz;
     gridD_ = d;
+    gridMoved_ = true;
+}
+
+void World::gridWindowMoved() {
+    int ox = gridOx_, oz = gridOz_, d = gridD_;
     for (auto it = gridSkipped_.begin(); it != gridSkipped_.end();) {
         // a level-0 region: 16 x 16 columns of sections; rebuilt once any of them lies outside the window
         int sx0 = it->x * 16, sz0 = it->z * 16;
@@ -1453,6 +1465,10 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         int span = 256 << lod;
         centreRegion[lod][0] = int(std::floor(centre[0] / span));
         centreRegion[lod][1] = int(std::floor(centre[2] / span));
+    }
+    if (gridMoved_.exchange(false)) {
+        std::lock_guard<std::mutex> lock(mu_);
+        gridWindowMoved();
     }
     // the sections that arrived, into the coarse levels (before the regions they dirtied are snapshot)
     if (groups) digest(centreRegion, budgetMs);

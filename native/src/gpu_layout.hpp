@@ -60,6 +60,9 @@ struct alignas(16) FrameGpu {
     // the GPU-built level-0 grid (voxgrid.hpp): origin in sections, w = 1 when present; dims in sections
     int32_t vgOrigin[4];
     uint32_t vgDims[4];
+    // (abi 0.17, ATLAS_FRAME_PRIMARY_NEAR) the camera-relative view-projection (the inverse of invViewProj, columns):
+    // the host's own NDC depth of a hit
+    float viewProj[16];
 };
 
 struct alignas(16) ActorGpu {
@@ -72,7 +75,7 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 48);
 static_assert(sizeof(RegionGpu) == 64);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64);
 
 struct Float4 {
     float v[4];
@@ -129,6 +132,7 @@ struct FarGlobals {
     CpuBuffer<uint32_t> vgBlocks;
     CpuBuffer<uint64_t> vgBits;
     CpuBuffer<uint32_t> vgPool;
+    CpuBuffer<uint32_t> texData;  // (abi 0.16) the near field's textures (voxgrid.hpp packTextures)
 };
 
 }  // namespace atlas

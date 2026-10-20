@@ -340,6 +340,29 @@ int main(int argc, char** argv) {
                     }
                 }
         }
+        if (num(a, "textest", 0) > 0 && !ex.shapes.empty()) {
+            // textest=1: stand-in 16 x 16 textures (offline exports carry no textures): each face tile's texel spread
+            // over 4 x 4, a one-texel checker darkening every other one, so the sampling, its (u, v) and mips show
+            size_t n = ex.shapes.size();
+            std::vector<uint32_t> tex(n * 6 * 256 + n, 0u);
+            for (size_t m = 0; m < n; m++) {
+                for (int f = 0; f < 6; f++)
+                    for (int v = 0; v < 16; v++)
+                        for (int u = 0; u < 16; u++) {
+                            uint32_t c = ex.shapes[m].faces[f][(u >> 2) + 4 * (v >> 2)];
+                            if (((u ^ v) & 1) && (c >> 24)) {
+                                uint32_t r = ((c >> 16) & 255) * 3 / 4, g = ((c >> 8) & 255) * 3 / 4, b = (c & 255) * 3 / 4;
+                                c = (c & 0xFF000000u) | r << 16 | g << 8 | b;
+                            }
+                            tex[(m * 6 + size_t(f)) * 256 + size_t(u + 16 * v)] = c;
+                        }
+                tex[n * 6 * 256 + m] = 1u;
+            }
+            if (atlas_set_material_textures(ctx, ex.firstMat, tex.data(), uint32_t(n)) != ATLAS_OK) {
+                std::fprintf(stderr, "textures: %s\n", atlas_last_error(ctx));
+                return 2;
+            }
+        }
         if (num(a, "lights", 0) > 0) {  // the emitters as far lights (AtlasEditsClient.lights)
             std::vector<AtlasLight> ls;
             for (const exportdata::Section& sc : secs)
@@ -485,7 +508,9 @@ int main(int argc, char** argv) {
     // interleave=1: timing frames alternate the groups and the voxel path; interleave=light: the far light traced and
     // cheap (ATLAS_FRAME_LIGHT_LOW), the same clocks for both
     uint32_t interleaveBits = str(a, "interleave", "") == "light" ? ATLAS_FRAME_LIGHT_LOW : ATLAS_FRAME_GROUPS;
-    bool vgAB = str(a, "interleave", "") == "vg";
+    // interleave=vg: the other frames with level 0 from the SVDAG alone; interleave=ablate abbits=N: with ATLAS_ABLATE ^ N
+    bool vgAB = str(a, "interleave", "") == "vg" || str(a, "interleave", "") == "ablate";
+    const uint32_t abBits = str(a, "interleave", "") == "vg" ? ABLATE_NO_VOXGRID : uint32_t(std::strtoul(str(a, "abbits", "0").c_str(), nullptr, 0));
     bool interleave = !vgAB && (num(a, "interleave", 0) > 0 || str(a, "interleave", "") == "light");
     const uint32_t baseAblate = envAblate();
     std::vector<double> otherTimes;  // (interleave) the other path's timing frames
@@ -559,6 +584,16 @@ int main(int argc, char** argv) {
         depth.assign(size_t(w) * h, 0.0f);
         linear.assign(size_t(w) * h * 4, 0.0f);
         AtlasFrameOutput o{color.data(), normal.data(), depth.data(), linear.data()};
+        // primarynear=1|2 near=<blocks>: atlas's primary rays are the near field (ATLAS_FRAME_PRIMARY_NEAR: the G-buffer,
+        // composited here as albedo x light; 2: ATLAS_FRAME_PRIMARY_NEAR_LIT, atlas's own composite), the depth output
+        // the host's NDC depth
+        int primaryNear = int(num(a, "primarynear", 0));
+        std::vector<float> pnLight;
+        if (primaryNear > 0) {
+            f.flags |= ATLAS_FRAME_NEAR_LIGHT | (primaryNear == 2 ? ATLAS_FRAME_PRIMARY_NEAR_LIT : ATLAS_FRAME_PRIMARY_NEAR);
+            pnLight.assign(size_t(w) * h * 4, 0.0f);
+            o.nearLight = pnLight.data();
+        }
 
         // spp=N: N jittered samples a pixel (atlas_set_jitter, Halton 2/3 as atlas_truth's spp), averaged: what the host's
         // TAA converges to (the groups' dithered threshold moves with the jitter), against a truth of as many samples
@@ -629,7 +664,7 @@ int main(int argc, char** argv) {
                 uint32_t keepFlags = f.flags;
                 if (other && interleave) f.flags ^= interleaveBits;
                 // interleave=vg: the other frames trace level 0 from the SVDAG regions (the grid off)
-                if (vgAB) setAblateEnv(other ? baseAblate | ABLATE_NO_VOXGRID : baseAblate);
+                if (vgAB) setAblateEnv(other ? baseAblate ^ abBits : baseAblate);
                 if (atlas_render(ctx, &f, &o) != ATLAS_OK) {
                     std::fprintf(stderr, "render: %s\n", atlas_last_error(ctx));
                     return 4;
@@ -724,6 +759,12 @@ int main(int argc, char** argv) {
                     }
                     color[i] = px;
                 }
+            }
+            if (primaryNear == 1) {
+                // the G-buffer's near pixels (class | 0x80): albedo x light (the air is the host's: left out here)
+                for (size_t i = 0; i < depth.size(); i++)
+                    if ((normal[i] >> 16) & 0x80u)
+                        for (int k = 0; k < 3; k++) linear[i * 4 + size_t(k)] *= pnLight[i * 4 + size_t(k)];
             }
             if (nearLight) {
                 // the frame's surfaces as the near field: their albedo (FRAME_DEBUG_ALBEDO), then the near light on

@@ -184,14 +184,15 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 33;
+constexpr uint32_t BINDINGS = 34;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
                    B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14, B_ACTORS = 15, B_HEIGHTMIP = 16, B_CLOUD = 17,
                    B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20, B_NOISE_TEX = 21, B_PREV_CLOUD = 22,
                    B_PREV_CLOUD_DEPTH = 23, B_SUNMAP = 24, B_GROUPS = 25, B_NEAR_INFO = 26, B_NEAR_LIGHT = 27,
-                   B_PREV_NEAR_LIGHT = 28, B_VG_CHUNKS = 29, B_VG_BLOCKS = 30, B_VG_BITS = 31, B_VG_POOL = 32;
+                   B_PREV_NEAR_LIGHT = 28, B_VG_CHUNKS = 29, B_VG_BLOCKS = 30, B_VG_BITS = 31, B_VG_POOL = 32,
+                   B_TEX = 33;  // (abi 0.16) the near field's textures (voxgrid.hpp packTextures)
 // the level-0 grid's build kernels (atlas_voxgrid.slang): chunks, blocks, bits, pool, jobs, summed-volume table
 constexpr uint32_t VG_BINDINGS = 6;
 // the scene's buffers (two copies, staged off the render thread)
@@ -597,12 +598,14 @@ public:
         // the game's are (no read back: writing a 1080p G-buffer across the bus costs the kernel ~20 ms), the frame
         // returns zeros
         bool deviceOnly = std::getenv("ATLAS_TIMING_DEVICE_OUTPUTS") != nullptr;
-        const bool nearLight = (frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && in.nearDepth && in.nearInfo;
+        // (ATLAS_FRAME_PRIMARY_NEAR: atlas's own near field, the near light an output without near inputs)
+        const bool primaryNear = (frame.dims[2] & FRAME_PRIMARY_NEAR_BITS) != 0;
+        const bool nearLight = (frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && ((in.nearDepth && in.nearInfo) || primaryNear);
         if (!nearLight) frame.dims[2] &= ~FRAME_NEAR_LIGHT_BIT;
         hostNearInputs_ = true;  // (the CPU writes the near inputs here, also when the outputs stay on the device)
         if (!prepare(s, in, frame, !deviceOnly, err)) return false;
         if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, Mem::HostWrite, err)) return false;
-        if (nearLight && !upload(s.bufs[B_NEAR_INFO], in.nearInfo, px * 4, false, Mem::HostWrite, err)) return false;
+        if (nearLight && in.nearInfo && !upload(s.bufs[B_NEAR_INFO], in.nearInfo, px * 4, false, Mem::HostWrite, err)) return false;
         refreshDescriptors(s);
         begin(s);
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
@@ -705,12 +708,14 @@ public:
         if (!waitSlot(s, gpuMs, err)) return false;  // frame N-2: normally long done
         const bool host = mode_ == Interop::HostCopy;
         // the near light (abi 0.15): the near field's depth and surface info in, the caller's texture out
-        const bool nearLight = (in.frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && in.wantNearDepth && io && io->nearDepthTex &&
-                               io->nearInfoTex && io->dstNearLight;
+        // (ATLAS_FRAME_PRIMARY_NEAR: atlas's own near field; the near light is an output only, traced in the far pass)
+        const bool primaryNear = (in.frame.dims[2] & FRAME_PRIMARY_NEAR_BITS) != 0;
+        const bool nearLight = (in.frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && io && io->dstNearLight &&
+                               (primaryNear || (in.wantNearDepth && io->nearDepthTex && io->nearInfoTex));
         // the near-depth skip reads the near field's distances from the shared image; host copies cannot share it
         // without stalling GL on the near field, so they march every pixel (the composite's depth test still keeps
         // whatever is nearer). The near light needs those distances: host copies then read them back (the stall)
-        const bool nearOn = in.wantNearDepth && (!host || nearLight);
+        const bool nearOn = in.wantNearDepth && !primaryNear && (!host || nearLight);
         FrameGpu frame = in.frame;
         if (nearOn) frame.dims[2] |= 0x20u;  // FRAME_NEAR_DEPTH: read from the shared image
         else frame.dims[2] &= ~0x20u;
@@ -719,16 +724,17 @@ public:
         // in the far pass, as the host render does (read each frame: atlas_gl_test switches it for its parity check)
         const char* fullEnv = std::getenv("ATLAS_NEAR_FULLRES");
         const bool nearFull = fullEnv && *fullEnv == '1';
-        if (nearLight && !nearFull) frame.dims[2] |= FRAME_NEAR_SPLIT_BIT;
+        if (nearLight && !nearFull && !primaryNear) frame.dims[2] |= FRAME_NEAR_SPLIT_BIT;
         else frame.dims[2] &= ~FRAME_NEAR_SPLIT_BIT;
-        hostNearInputs_ = host && nearLight;
+        hostNearInputs_ = host && nearLight && !primaryNear;
         const Mem nearKind = hostNearInputs_ ? Mem::HostWrite : Mem::DeviceOnly;
         if (!prepare(s, in, frame, false, err)) return false;
         if (!ensure(s.bufs[B_NEAR], size_t(w) * h * 4, false, nearKind, err)) return false;
         if (nearLight && !ensure(s.bufs[B_NEAR_INFO], size_t(w) * h * 4, false, nearKind, err)) return false;
         refreshDescriptors(s);
 
-        if (io && io->nearDepthTex && (!host || nearLight) && !linearizeNearDepth(*io, w, h, nearLight, err)) return false;
+        if (io && io->nearDepthTex && !primaryNear && (!host || nearLight) && !linearizeNearDepth(*io, w, h, nearLight, err))
+            return false;
         if (hostNearInputs_ && !readNearInputs(s, w, h)) return fail(err, "reading the near depth and info back from GL failed");
         if (sunSize_ != sunImageSize_) {
             for (auto& o : slots_)
@@ -1587,6 +1593,16 @@ private:
             sunDispatchRows_ = S ? frame.sunMapRows[1] : 0;
         }
         if (!stageVoxGrid(s, in, err)) return false;
+        if (!shared_[B_TEX].buf || (in.textures && in.texturesRevision != texRevision_)) {
+            // a new texture set (rare: the host sets them once a session): nothing in flight may read the old one
+            for (auto& o : slots_)
+                if (!waitSlot(o, nullptr, err)) return false;
+            static const uint32_t none = 0u;
+            const uint32_t* src = in.textures && !in.textures->empty() ? in.textures->data() : &none;
+            size_t n = in.textures && !in.textures->empty() ? in.textures->size() : 1;
+            if (!upload(shared_[B_TEX], src, n * 4, false, Mem::HostWrite, err)) return false;
+            texRevision_ = in.textures ? in.texturesRevision : 0;
+        }
         // host path: outputs in cached system memory (CPU reads from BAR are uncached); GL path: device local only
         Mem outKind = readback ? Mem::Readback : Mem::DeviceOnly;
         // the near inputs: written by the CPU (host path; host copies with the near light), else by the ingest pass
@@ -1772,7 +1788,7 @@ private:
         if (g && g->active()) {
             static const int budget = [] {
                 const char* e = std::getenv("ATLAS_VOXGRID_BUDGET");  // sections built a frame at most
-                return e ? std::max(1, std::atoi(e)) : 2048;
+                return e ? std::max(1, std::atoi(e)) : 512;  // (8 KiB each: a 4 MiB copy a frame at most)
             }();
             b = g->take(budget);
         }
@@ -2476,6 +2492,7 @@ private:
     VkDescriptorSetLayout vgSetLayout_ = VK_NULL_HANDLE;
     Buf vgSat_;
     uint32_t vgD_ = 0, vgH_ = 0, vgCap_ = 0;
+    uint64_t texRevision_ = ~0ull;
     double vgLastMs_ = 0, vgMsTotal_ = 0;
     uint32_t vgLastSections_ = 0, vgLastJobs_ = 0;
     bool vgLastStates_ = false;

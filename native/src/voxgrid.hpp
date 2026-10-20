@@ -15,7 +15,9 @@
 // sections to the backend: the Vulkan backend copies them into its pool and builds bitmaps and distance fields with
 // compute shaders (atlas_voxgrid.slang); the CPU backend builds the same words here (applyCpu), the reference.
 #pragma once
+#include <array>
 #include <cstdint>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -44,6 +46,14 @@ struct VgBatch {
     std::vector<uint32_t> data;  // VG_SECTION_WORDS per MIXED job
     int sections() const { return int(data.size() / VG_SECTION_WORDS); }
 };
+
+// (abi 0.16) The near field's textures as the kernels read them (atlas_far.slang vgTexture / texSample): word 0 the
+// table's length N, words 1..N per material its texture's slot + 1 (0: none), then from word 1 + N each slot's six faces
+// (down, up, north, south, west, east) as mip chains of 16, 8, 4, 2, 1 texels a side (341 words a face, ARGB sRGB,
+// alpha the share of texels covered, colour averaged over the covered ones).
+constexpr uint32_t TEX_FACE_WORDS = 341;
+struct TextureSet;
+void packTextures(const TextureSet& t, std::vector<uint32_t>& out);
 
 class VoxGrid {
 public:
@@ -96,14 +106,18 @@ private:
     mutable std::mutex mu_;
     bool centred_ = false;
     int ox_ = 0, oz_ = 0;  // window origin in sections (x, z); y is VG_MIN_SY
-    std::unordered_map<Key, std::vector<uint16_t>, KeyHash> pending_;  // sections waiting for a batch
+    // sections waiting for a batch: the world's own (shared, never copied) or an upload's copy
+    using Ids = std::shared_ptr<const std::array<uint16_t, 4096>>;
+    std::unordered_map<Key, Ids, KeyHash> pending_;
     bool clearPending_ = false;
+    bool refill_ = false;  // the window moved and the world's sections in it are still to be read (frame: when it can)
     std::vector<uint32_t> slotOf_;      // per chunk: its slot or ~0u
     std::vector<uint8_t> state_;        // per chunk: the state its last job gave it
     std::vector<int16_t> colTop_;       // per column (z * D + x): highest section y with data, or INT16_MIN
     std::vector<uint32_t> freeSlots_;
     uint32_t nextSlot_ = 0, slotsUsed_ = 0;
     int camSx_ = 0, camSz_ = 0;
+    void recentre(World& world);  // (mu_ held)
     bool inWindow(int sx, int sy, int sz) const {
         return sx >= ox_ && sx < ox_ + D && sz >= oz_ && sz < oz_ + D && sy >= VG_MIN_SY && sy < VG_MIN_SY + H;
     }

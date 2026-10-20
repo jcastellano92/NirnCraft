@@ -136,6 +136,8 @@ struct AtlasContext {
     std::unique_ptr<Backend> backend;
     World world;
     VoxGrid voxgrid;  // the level-0 grid's books (voxgrid.hpp): sections in, batches to the backend's GPU build
+    std::vector<uint32_t> texturesPacked = std::vector<uint32_t>(1, 0u);  // packTextures of the world's TextureSet
+    uint64_t texturesRevision = 0;
     std::vector<MaterialGpu> palette;
     std::vector<uint32_t> weather;  // near field, near dyn, far field, far dyn (128*128 each)
     std::vector<uint32_t> cloudNoise = std::vector<uint32_t>(64 * 64 * 64, 0);
@@ -682,7 +684,8 @@ ATLAS_API AtlasStatus atlas_render(AtlasContext* ctx, const AtlasFrame* f, const
     FrameInputs in{};
     AtlasStatus st = buildInputs(ctx, f, in);
     if (st != ATLAS_OK) return st;
-    if (!in.nearDepth || !in.nearInfo) in.frame.dims[2] &= ~ATLAS_FRAME_NEAR_LIGHT;  // the near light needs both
+    // the near light needs both (unless atlas's own primary rays are the near field: ATLAS_FRAME_PRIMARY_NEAR)
+    if ((!in.nearDepth || !in.nearInfo) && !(f->flags & FRAME_PRIMARY_NEAR_BITS)) in.frame.dims[2] &= ~ATLAS_FRAME_NEAR_LIGHT;
     double ms = 0;
     std::string err;
     if (!ctx->backend->render(in, ctx->targets, &ms, err)) return backendFailure(ctx, err, ATLAS_ERR_GPU);
@@ -771,7 +774,9 @@ ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f,
     }
     // the near light needs the near field's depth, its info and somewhere to put the result (the backend also drops
     // it where it cannot read the near depth this frame)
-    if (!io || !g.nearDepthTex || !g.nearInfoTex || !g.dstNearLight) in.frame.dims[2] &= ~ATLAS_FRAME_NEAR_LIGHT;
+    // (ATLAS_FRAME_PRIMARY_NEAR: the near field is atlas's own, only the output is needed)
+    bool primaryNear = (f->flags & FRAME_PRIMARY_NEAR_BITS) != 0;
+    if (!io || (!primaryNear && (!g.nearDepthTex || !g.nearInfoTex)) || !g.dstNearLight) in.frame.dims[2] &= ~ATLAS_FRAME_NEAR_LIGHT;
     double ms = ctx->stats.lastFrameMs;
     std::string err;
     if (!ctx->backend->glRender(in, io ? &g : nullptr, &ms, err)) return backendFailure(ctx, err, ATLAS_ERR_GPU);
@@ -1005,6 +1010,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         }
         float vp[16];
         if (invert4(f->invViewProj, vp)) {
+            std::memcpy(g.viewProj, vp, sizeof(vp));  // (ATLAS_FRAME_PRIMARY_NEAR: the host's NDC depth)
             std::memcpy(lv.viewProj, vp, sizeof(vp));
             lv.width = f->width;
             lv.height = f->height;
@@ -1036,6 +1042,16 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     ctx->world.gridOwnsLevel0 = ownLevel0 && ctx->voxgrid.enabled;
     g.vgDims[3] = ctx->world.gridOwnsLevel0 ? 1u : 0u;
     in.voxgrid = &ctx->voxgrid;
+    {
+        // the near field's textures (atlas_set_material_textures), packed for the kernels once each revision
+        std::shared_ptr<const TextureSet> ts = ctx->world.textures();
+        if (ts->revision != ctx->texturesRevision) {
+            packTextures(*ts, ctx->texturesPacked);
+            ctx->texturesRevision = ts->revision;
+        }
+        in.textures = &ctx->texturesPacked;
+        in.texturesRevision = ctx->texturesRevision;
+    }
     in.wantNearDepth = (f->flags & ATLAS_FRAME_NEAR_DEPTH) != 0;
     in.nearDepth = in.wantNearDepth ? f->nearDepth : nullptr;
     if (in.nearDepth && (f->flags & ATLAS_FRAME_FILL_NEAR)) {

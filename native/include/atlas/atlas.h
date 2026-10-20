@@ -190,6 +190,28 @@ typedef struct AtlasFrame {
 #define ATLAS_FRAME_NEAR_LIGHT 0x20000u
 
 /*
+ * (atlas-naadf, ABI 0.17 to be) The near field drawn by atlas's own primary rays (the GPU-built level-0 grid: real
+ * blocks, shapes, the 16 x 16 textures of atlas_set_material_textures) instead of the host's raster. Every pixel is
+ * traced from the camera (AtlasFrame.nearFieldEnd is then only where near ends and far begins: no near depth is read).
+ * Set with ATLAS_FRAME_NEAR_LIGHT and a near-light output (AtlasFrameOutput.nearLight, AtlasGlFrameIO.dstNearLight; the
+ * near inputs are not needed). A hit nearer than nearFieldEnd is a NEAR pixel:
+ *  ATLAS_FRAME_PRIMARY_NEAR (a G-buffer, the host resolves it):
+ *    color     rgb its albedo, LINEAR (textured), a = 1
+ *    nearLight rgb the irradiance on a white diffuse surface there, a = the key light's visibility (the near light as
+ *              ATLAS_FRAME_NEAR_LIGHT computes it: traced sun, sky, one bounce, the far lights; the air left out)
+ *  ATLAS_FRAME_PRIMARY_NEAR_LIT (composited, a reference): color = albedo x light x T + inscatter, premultiplied, a = 1;
+ *    nearLight as above
+ *  normal    octahedral normal in rg, b = the material class (0 solid, 1 foliage, 2 water, 3 emissive, 4 plant, 5 falls)
+ *            | 0x80: a NEAR pixel; a = the key light's visibility
+ * Every other pixel (hits at or past nearFieldEnd, sky) is a FAR pixel exactly as without the flag (premultiplied
+ * radiance with the air applied, a = coverage; class without 0x80). Under either flag the depth output of EVERY pixel
+ * is the NDC depth (clip z / w) in the host's own projection (the inverse of AtlasFrame.invViewProj: reverse-Z if that
+ * is), the sky the value at infinity.
+ */
+#define ATLAS_FRAME_PRIMARY_NEAR 0x80000u
+#define ATLAS_FRAME_PRIMARY_NEAR_LIT 0x100000u
+
+/*
  * Frame outputs (any pointer may be NULL to skip). Layout matches the shared G-buffer images:
  *  colorLinear RGBA32F linear HDR radiance, premultiplied over whatever is drawn behind (near field or the pack's
  *                      sky); a = coverage (1 on far terrain, cloud opacity elsewhere). The GL image is RGBA16F.

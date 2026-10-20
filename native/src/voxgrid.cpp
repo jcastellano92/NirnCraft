@@ -5,7 +5,9 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
+#include "groups.hpp"
 #include "world.hpp"
 
 namespace atlas {
@@ -26,7 +28,9 @@ void VoxGrid::put(int sx, int sy, int sz, const uint16_t* mats) {
     std::lock_guard<std::mutex> lock(mu_);
     // before the window is placed the world keeps them (frame() reads them from there); outside it they wait there too
     if (!centred_ || !inWindow(sx, sy, sz)) return;
-    pending_[{sx, sy, sz}].assign(mats, mats + 4096);
+    auto a = std::make_shared<std::array<uint16_t, 4096>>();
+    std::memcpy(a->data(), mats, 4096 * 2);
+    pending_[{sx, sy, sz}] = std::move(a);
 }
 
 void VoxGrid::origin(int32_t o[4]) const {
@@ -39,7 +43,7 @@ void VoxGrid::origin(int32_t o[4]) const {
 
 size_t VoxGrid::pending() const {
     std::lock_guard<std::mutex> lock(mu_);
-    return pending_.size() + (clearPending_ ? 1 : 0);
+    return pending_.size() + (clearPending_ ? 1 : 0) + (refill_ ? 1 : 0);
 }
 
 void VoxGrid::frame(const int32_t camBlock[3], World& world) {
@@ -48,8 +52,21 @@ void VoxGrid::frame(const int32_t camBlock[3], World& world) {
     camSx_ = fdiv(camBlock[0], 16);
     camSz_ = fdiv(camBlock[2], 16);
     int cx = ox_ + D / 2, cz = oz_ + D / 2;
-    if (centred_ && std::abs(camSx_ - cx) <= D / 4 && std::abs(camSz_ - cz) <= D / 4) return;
-    // (re)centre: every chunk unknown again, the world's sections in the new window queued (nearest first by take)
+    if (!centred_ || std::abs(camSx_ - cx) > D / 4 || std::abs(camSz_ - cz) > D / 4) recentre(world);
+    if (refill_) {
+        // the world's sections in the window (shared, not copied), when its lock is free: the render thread never
+        // waits for an update building regions (until then the window's chunks stay UNLOADED, the SVDAG answers)
+        std::vector<std::pair<Key3, std::shared_ptr<const Section>>> secs;
+        if (!world.trySectionsIn(ox_, oz_, ox_ + D, oz_ + D, secs)) return;
+        refill_ = false;
+        for (auto& [k, s] : secs)
+            if (inWindow(k.x, k.y, k.z) && !pending_.count({k.x, k.y, k.z}))  // (an upload since is newer)
+                pending_[{k.x, k.y, k.z}] = Ids(s, &s->mats);
+    }
+}
+
+void VoxGrid::recentre(World& world) {
+    // every chunk unknown again; the world's sections in the new window queued (frame), nearest first (take)
     ox_ = camSx_ - D / 2;
     oz_ = camSz_ - D / 2;
     centred_ = true;
@@ -62,11 +79,8 @@ void VoxGrid::frame(const int32_t camBlock[3], World& world) {
     slotsUsed_ = 0;
     pending_.clear();
     clearPending_ = true;
+    refill_ = true;
     world.setGridWindow(ox_, oz_, D);
-    std::vector<std::pair<Key3, std::shared_ptr<const Section>>> secs;
-    world.sectionsIn(ox_, oz_, ox_ + D, oz_ + D, secs);
-    for (auto& [k, s] : secs)
-        if (inWindow(k.x, k.y, k.z)) pending_[{k.x, k.y, k.z}].assign(s->mats.begin(), s->mats.end());
 }
 
 VgBatch VoxGrid::take(int maxSections) {
@@ -108,10 +122,11 @@ VgBatch VoxGrid::take(int maxSections) {
     };
     int built = 0;
     for (auto& [dist, k] : order) {
+        if (built >= maxSections) break;  // the rest next time
         auto it = pending_.find(k);
-        const std::vector<uint16_t>& m = it->second;
-        bool mixed = std::any_of(m.begin(), m.end(), [](uint16_t v) { return v != 0; });
-        if (mixed && built >= maxSections) continue;  // the rest next time
+        const std::array<uint16_t, 4096>& m = *it->second;
+        static const std::array<uint16_t, 4096> air{};
+        bool mixed = std::memcmp(m.data(), air.data(), sizeof air) != 0;
         uint32_t c = index(k.x, k.y, k.z);
         if (mixed) {
             uint32_t slot = slotOf_[c];
@@ -132,8 +147,8 @@ VgBatch VoxGrid::take(int maxSections) {
             } else {
                 uint32_t at = uint32_t(b.data.size() / VG_SECTION_WORDS);
                 b.data.resize(b.data.size() + VG_SECTION_WORDS);
-                uint32_t* w = b.data.data() + size_t(at) * VG_SECTION_WORDS;
-                for (int i = 0; i < VG_SECTION_WORDS; i++) w[i] = uint32_t(m[size_t(2 * i)]) | uint32_t(m[size_t(2 * i + 1)]) << 16;
+                // two ids a word, the first low: the ids' own little-endian bytes
+                std::memcpy(b.data.data() + size_t(at) * VG_SECTION_WORDS, m.data(), sizeof m);
                 emit(c, slot << 2 | VG_MIXED, slot, at);
                 built++;
             }
@@ -167,6 +182,55 @@ VgBatch VoxGrid::take(int maxSections) {
     sectionsBuilt += uint64_t(built);
     batches++;
     return b;
+}
+
+void packTextures(const TextureSet& t, std::vector<uint32_t>& out) {
+    uint32_t n = uint32_t(t.byMaterial.size()), slots = 0;
+    out.assign(1 + size_t(n), 0u);
+    out[0] = n;
+    for (uint32_t m = 0; m < n; m++) {
+        const MaterialTexture* tx = t.at(m);
+        if (!tx) continue;
+        out[1 + m] = ++slots;
+        for (int f = 0; f < 6; f++) {
+            // the mip chain: each texel the mean of its four children, colour weighted by their alpha
+            std::vector<float> cur(256 * 4);
+            for (int i = 0; i < 256; i++) {
+                uint32_t c = tx->faces[f][i];
+                cur[size_t(i) * 4 + 0] = float((c >> 16) & 255u);
+                cur[size_t(i) * 4 + 1] = float((c >> 8) & 255u);
+                cur[size_t(i) * 4 + 2] = float(c & 255u);
+                cur[size_t(i) * 4 + 3] = float(c >> 24);
+            }
+            int side = 16;
+            for (;;) {
+                for (int i = 0; i < side * side; i++) {
+                    auto q = [](float v) { return uint32_t(std::clamp(v + 0.5f, 0.0f, 255.0f)); };
+                    out.push_back(q(cur[size_t(i) * 4 + 3]) << 24 | q(cur[size_t(i) * 4]) << 16 | q(cur[size_t(i) * 4 + 1]) << 8 |
+                                  q(cur[size_t(i) * 4 + 2]));
+                }
+                if (side == 1) break;
+                int h = side / 2;
+                std::vector<float> nx(size_t(h) * h * 4, 0.0f);
+                for (int y = 0; y < h; y++)
+                    for (int x = 0; x < h; x++) {
+                        float rgb[3] = {0, 0, 0}, wsum = 0, a = 0;
+                        for (int k = 0; k < 4; k++) {
+                            size_t c = (size_t(2 * y + (k >> 1)) * side + size_t(2 * x + (k & 1))) * 4;
+                            float w = cur[c + 3] + 1e-3f;
+                            for (int j = 0; j < 3; j++) rgb[j] += cur[c + size_t(j)] * w;
+                            wsum += w;
+                            a += cur[c + 3];
+                        }
+                        size_t o = (size_t(y) * h + size_t(x)) * 4;
+                        for (int j = 0; j < 3; j++) nx[o + size_t(j)] = rgb[j] / wsum;
+                        nx[o + 3] = a / 4.0f;
+                    }
+                cur.swap(nx);
+                side = h;
+            }
+        }
+    }
 }
 
 // ---- the CPU reference build -----------------------------------------------------------------------------------

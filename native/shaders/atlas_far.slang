@@ -57,6 +57,8 @@
 [[vk::binding(30, 0)]] StructuredBuffer<uint> vgBlocks;
 [[vk::binding(31, 0)]] StructuredBuffer<uint64_t> vgBits;
 [[vk::binding(32, 0)]] StructuredBuffer<uint> vgPool;
+// (abi 0.16) the near field's textures (voxgrid.hpp packTextures): 16 x 16 a face, as mip chains
+[[vk::binding(33, 0)]] StructuredBuffer<uint> texData;
 
 #include "atlas_air.slang"
 #include "atlas_clouds.slang"
@@ -378,6 +380,85 @@ static const uint VG_UNLOADED = 2u;
 // (ATLAS_ABLATE 134217728, measurements: level 0 from the SVDAG regions alone, as before the grid)
 bool vgOn() { return frame.vgOrigin.w != 0 && (asuint(frame.jitter.w) & 134217728u) == 0u; }
 
+// A primary ray through a level-0 voxel v (grid-local; wv in world blocks) of shaped material `sh` (shapeOf), entered at
+// t through `axis`: its 4 x 4 x 4 micro-voxels as the groups have them (voxelAt / microFilled: the shape's mask, a cut-out
+// shape's alpha hashed per world micro-voxel), walked to where the ray leaves the voxel. True: it met one at tHit, entering
+// through `axis`, micro-voxel qHit (world).
+bool vgShapeHit(uint sh, int3 v, int3 wv, float3 ro, float3 d, float t, out float tHit, inout int axis, out int3 qHit) {
+    uint4 head = groupData[sh >> 2];  // mask lo, mask hi, flags (1: cut-out), mean
+    uint alphaAt = (head.z & 1u) != 0u && (asuint(frame.jitter.w) & 536870912u) == 0u ? sh + 100u : 0u;  // (536870912: no cut-outs)
+    float3 oq = (ro - float3(v)) * 4.0, dq = d * 4.0;  // the voxel's micro-voxels
+    float3 p = oq + dq * t;
+    int3 c = clamp(int3(floor(p)), int3(0, 0, 0), int3(3, 3, 3));
+    int3 st = int3(dq.x > 0.0 ? 1 : -1, dq.y > 0.0 ? 1 : -1, dq.z > 0.0 ? 1 : -1);
+    float3 inv = float3(abs(dq.x) > 1e-12 ? 1.0 / dq.x : 1e30, abs(dq.y) > 1e-12 ? 1.0 / dq.y : 1e30,
+                        abs(dq.z) > 1e-12 ? 1.0 / dq.z : 1e30);
+    float3 nx = (float3(c) + float3(dq.x > 0.0 ? 1.0 : 0.0, dq.y > 0.0 ? 1.0 : 0.0, dq.z > 0.0 ? 1.0 : 0.0) - oq) * inv;
+    nx = float3(abs(dq.x) < 1e-12 ? 1e30 : nx.x, abs(dq.y) < 1e-12 ? 1e30 : nx.y, abs(dq.z) < 1e-12 ? 1e30 : nx.z);
+    float3 dl = abs(inv);
+    float tc = t;
+    tHit = t;
+    qHit = wv * 4 + c;
+    for (int k = 0; k < 12; k++) {
+        uint bit = uint(c.x + 4 * (c.z + 4 * c.y));
+        bool filled = (((bit < 32u ? head.x >> bit : head.y >> (bit - 32u))) & 1u) != 0u;
+        if (filled && alphaAt != 0u) {
+            uint a = (gWord(alphaAt + (bit >> 2)) >> ((bit & 3u) * 8u)) & 255u;
+            filled = a == 255u || (cutHash(wv * 4 + c) >> 24) < a;
+        }
+        if (filled) {
+            tHit = tc;
+            qHit = wv * 4 + c;
+            return true;
+        }
+        int a = nx.x <= nx.y && nx.x <= nx.z ? 0 : (nx.y <= nx.z ? 1 : 2);
+        tc = nx[a];
+        c[a] += st[a];
+        if (c[a] < 0 || c[a] > 3) return false;
+        nx[a] += dl[a];
+        axis = a;
+    }
+    return false;
+}
+
+// (abi 0.16) A material's texture: its first word in texData, or 0 (none: its face tiles or palette colour)
+uint vgTexture(uint mat) {
+    if (mat >= texData[0]) return 0u;
+    uint s = texData[1u + mat];
+    return s == 0u ? 0u : 1u + texData[0] + (s - 1u) * 6u * 341u;
+}
+
+// face f of texture `at` at (u, v) in 0..1 over a footprint of fp blocks: linear rgb, a = coverage; its mip chain (16, 8,
+// 4, 2, 1), nearest within a level, blended between the two nearest levels (as cardColour)
+float4 texSample(uint at, int f, float u, float v, float fp) {
+    static const uint MIP_AT[5] = { 0u, 256u, 320u, 336u, 340u };
+    float lv = clamp(log2(max(fp * 16.0, 1.0)), 0.0, 4.0);
+    int l0 = int(lv), l1 = min(4, l0 + 1);
+    int n0 = 16 >> l0, n1 = 16 >> l1;
+    uint base = at + uint(f) * 341u;
+    uint c0 = texData[base + MIP_AT[l0] + uint(min(int(u * float(n0)), n0 - 1) + n0 * min(int(v * float(n0)), n0 - 1))];
+    uint c1 = texData[base + MIP_AT[l1] + uint(min(int(u * float(n1)), n1 - 1) + n1 * min(int(v * float(n1)), n1 - 1))];
+    float k = lv - float(l0);
+    return float4(lerp(srgbLinear(c0), srgbLinear(c1), k), lerp(float(c0 >> 24), float(c1 >> 24), k) / 255.0);
+}
+
+// A level-0 hit's texel (primary rays): the material's 16 x 16 face texture at the hit point p (voxel-local 0..1) on the
+// face the ray entered by, over the pixel's footprint there; a covered texel replaces res's albedo (a cut-out's
+// uncovered texel keeps its face tile's colour)
+void vgTexel(inout TraceResult res, uint mat, float3 lp, float3 d, int ax, float tView) {
+    uint at = vgTexture(mat);
+    if (at == 0u) return;
+    int f = d[ax] > 0.0 ? G_FACE_LOW[ax] : G_FACE_HIGH[ax];
+    float3 q = clamp(lp, float3(0, 0, 0), float3(0.9999, 0.9999, 0.9999));
+    float2 uv = f <= 1 ? q.xz : (f <= 3 ? float2(q.x, 1.0 - q.y) : float2(q.z, 1.0 - q.y));
+    uv = clamp(uv, float2(0, 0), float2(0.9999, 0.9999));
+    float fp = tView * frame.params.w * frame.params.z / max(abs(d[ax]), 0.2);
+    float4 c = texSample(at, f, uv.x, uv.y, fp);
+    if (c.a < 0.5 && res.hasAlbedo != 0u) return;
+    res.albedo = c.rgb;
+    res.hasAlbedo = 1u;
+}
+
 // The chord p0 + d u (camera-relative), u in [u0, u1), through the grid: TRACE_HIT (res filled), TRACE_MISS (it crossed
 // [u0, u1) through chunks with data), else TRACE_UNCOVERED and uStop where it met a chunk without data or left the
 // window (the SVDAG regions answer from there). A step reads the chunk word; inside a chunk with blocks the block word;
@@ -442,11 +523,31 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
                 if (((bits >> bt) & 1) != 0) {
                     uint i = uint(l.x + 16 * (l.z + 16 * l.y));
                     uint mat = (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
-                    if (voxelStops(mat, v, v + gBlock, 0, ro, d, inv, stepPos, t)) {
+                    // a primary ray meets a shaped block (a slab, a stair, a fence, a plant, cut-out leaves) by its
+                    // micro-voxels, textured by its face tiles, as the groups draw it (ATLAS_ABLATE 268435456: cubes)
+                    uint sh = gSecondary || (asuint(frame.jitter.w) & 268435456u) != 0u ? 0u : shapeOf(mat);
+                    bool seeWater = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && uint(palette[mat].emisClass.y) == 2u;
+                    if (sh != 0u && !seeWater) {
+                        float tHit;
+                        int ax = entryAxis(v, ro, d, inv, stepPos);
+                        int3 q;
+                        if (vgShapeHit(sh, v, v + gBlock, ro, d, t, tHit, ax, q)) {
+                            res.t = tHit;
+                            res.mat = mat;
+                            res.axis = ax;
+                            res.lod = 0;
+                            int f = d[ax] > 0.0 ? G_FACE_LOW[ax] : G_FACE_HIGH[ax];
+                            res.albedo = cellAlbedo(mat | G_CELL_SHAPED, f, q);
+                            res.hasAlbedo = 1u;
+                            vgTexel(res, mat, ro + d * tHit - float3(v), d, ax, gChordT + tHit);
+                            return TRACE_HIT;
+                        }
+                    } else if (voxelStops(mat, v, v + gBlock, 0, ro, d, inv, stepPos, t)) {
                         res.t = t;
                         res.mat = mat;
                         res.axis = entryAxis(v, ro, d, inv, stepPos);
                         res.lod = 0;
+                        if (!gSecondary) vgTexel(res, mat, ro + d * t - float3(v), d, res.axis, gChordT + t);
                         return TRACE_HIT;
                     }
                     lo = v;
@@ -1626,7 +1727,7 @@ void nearLightMain(uint3 id : SV_DispatchThreadID) {
     if (!(nd < 1e29)) return;  // not the near field's (farMain wrote its zero)
     gAblate = asuint(frame.jitter.w);
     gSecAblate = gAblate;
-    if ((frame.dims.z & FRAME_GROUPS) != 0u) gHead = groupData[0];
+    gHead = groupData[0];  // (the material shapes: secondary rays, the grid's level 0)
     float4 nl = nearLightAt(q, frame.camFrac.xyz, pixelRay(q, w, h), nd, nearInfo[pix], frame.sunDir.xyz);
     if (gNearRoofed) nl.a = -1.0;
     outNearLight[pix] = nl;
@@ -1746,6 +1847,14 @@ void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
     outNearLight[pix] = cur;
 }
 
+// (ATLAS_FRAME_PRIMARY_NEAR) the host's NDC depth (clip z / w through frame.viewProj, the inverse of its
+// invViewProj) of the point at view distance t along dir; nothing there (t 1e30): the value at infinity along dir
+float hostDepth(float3 dir, float t) {
+    float3 X = dir * min(t, 1e7);
+    float4 clip = frame.viewProj[0] * X.x + frame.viewProj[1] * X.y + frame.viewProj[2] * X.z + frame.viewProj[3];
+    return abs(clip.w) > 1e-20 ? clip.z / clip.w : 0.0;
+}
+
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void farMain(uint3 id : SV_DispatchThreadID) {
@@ -1773,7 +1882,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
 
     // the rasterised near field already covers this pixel: only the air in front of it (cloud, if the camera is up
     // in the deck) is ours. In tunnels and towns that skips most of the screen.
-    if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0) {
+    // (ATLAS_FRAME_PRIMARY_NEAR / _LIT) atlas's primary rays are the near field: every pixel traced from the camera
+    bool primaryNear = (frame.dims.z & (FRAME_PRIMARY_NEAR | FRAME_PRIMARY_NEAR_LIT)) != 0u;
+    if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0 && !primaryNear) {
         float nd = nearDepth[pix];
         // (with FRAME_NEAR_LIGHT the host's near pass drew every covered pixel, however far: all of them are its, lit
         // here; past nearFieldEnd they were traced as far and that colour landed in the host's inscatter, the far
@@ -1794,7 +1905,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
                     gSecAblate = gAblate;
                     gSecMode = (gAblate >> 23) & 7u;
                     gSecCount = 0u;
-                    if ((frame.dims.z & FRAME_GROUPS) != 0u) gHead = groupData[0];  // (the secondary rays' material shapes)
+                    gHead = groupData[0];  // (the material shapes: secondary rays, the grid's level 0)
                     outNearLight[pix] = nearLightAt(id.xy, o, dir, nd, nearInfo[pix], sun);
                     if (gNearRoofed && eyeRoofed()) c.rgb = float3(0, 0, 0);  // under cover at both ends: unlit air
                 }
@@ -1820,18 +1931,18 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     }
     // the near field drew nothing here (a chunk still loading): fill from the camera so the place shows the far
     // field instead of a hole (only in the open: FRAME_FILL_NEAR)
-    float tStart = frame.params.x;
+    float tStart = primaryNear ? 0.0 : frame.params.x;
     // (2e30: every sample of the pixel's footprint was sky; 1e30 is a near silhouette's edge, never filled)
     // and only below the horizon: a missing chunk is a hole in the ground; above the horizon an empty near pixel is the
     // real sky, and filling it drew the far field's own copies of the buildings and trees around the camera into it
     // (Helgen's keep as a dark slab in the sky)
-    if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0 && (frame.dims.z & FRAME_FILL_NEAR) != 0 && nearDepth[pix] >= 1.5e30
+    if (!primaryNear && (frame.dims.z & FRAME_NEAR_DEPTH) != 0 && (frame.dims.z & FRAME_FILL_NEAR) != 0 && nearDepth[pix] >= 1.5e30
         && dir.y < 0.0)
         tStart = 2.0;
     // the content-shaped groups for this pixel's primary ray (ATLAS_FRAME_GROUPS): the footprint per block of distance
     // and the threshold, dithered per pixel (and per frame under the host's TAA, which averages the levels)
     gGroups = (frame.dims.z & FRAME_GROUPS) != 0u;
-    if (gGroups) gHead = groupData[0];  // (also the secondary rays' material shapes: secondarySigma)
+    gHead = groupData[0];  // (the material shapes: groups, secondary rays, the grid's level 0)
     gAblate = asuint(frame.jitter.w);
     gGroupPa = frame.params.w * frame.params.z;
     gGroupTol = 0.7 + 0.6 * pixelDither(id.xy, phase + 5u);
@@ -1844,6 +1955,37 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     if ((frame.dims.z & FRAME_ACTORS) != 0 && frame.weatherParams.w > 0.5)
         ah = traceActors(o, dir, frame.params.x, tHit >= 0.0 ? tHit : frame.params.y, pixelDither(id.xy, phase + 2u));
     bool actorFirst = ah.t >= 0.0;
+    // (ATLAS_FRAME_PRIMARY_NEAR) a hit nearer than nearFieldEnd is the near field's: its surface, lit by the near light
+    // (nearLightAt, as the host's raster pixels are under FRAME_NEAR_LIGHT); the G-buffer for the host's resolve, or
+    // (_LIT) composited here. atlas.h ATLAS_FRAME_PRIMARY_NEAR has the layout.
+    if (primaryNear && !actorFirst && tHit >= 0.0 && tHit < frame.params.x) {
+        MaterialGpu m = palette[res.mat];
+        uint cls = uint(m.emisClass.y);
+        int ax = res.axis < 0 ? 1 : res.axis;
+        float3 n = float3(0, 0, 0);
+        n[ax] = dir[ax] > 0.0 ? -1.0 : 1.0;  // the face entered (blocks, near: no smoothing)
+        float3 albedo = res.hasAlbedo != 0u ? res.albedo : m.albedoRough.rgb;
+        float2 e = octEncode(n);
+        uint info = (255u << 8) | (uint(saturate(e.x) * 255.0 + 0.5) << 16) | (uint(saturate(e.y) * 255.0 + 0.5) << 24);
+        gSecAblate = gAblate;
+        gSecMode = (gAblate >> 23) & 7u;
+        gSecCount = 0u;
+        float4 nl = nearLightAt(id.xy, o, dir, tHit, info, sun);
+        outNearLight[pix] = nl;
+        float4 c = float4(albedo, 1.0);
+        if ((frame.dims.z & FRAME_PRIMARY_NEAR_LIT) != 0u) {
+            AirPath air = aerialPathTo(dir, tHit);
+            float T = dot(air.transmittance, float3(0.2126, 0.7152, 0.0722));
+            float3 ins = gNearRoofed && eyeRoofed() ? float3(0, 0, 0) : air.inscatter;  // under cover at both ends: unlit air
+            c = float4(albedo * nl.rgb * T + ins, 1.0);
+        }
+        outColor[pix] = c;
+        outNormal[pix] = packNormal(n, (cls & 0x7Fu) | 0x80u, nl.a);
+        outDepth[pix] = hostDepth(dir, tHit);
+        outSurface[pix] = tHit;
+        counters[pix] = res.steps;
+        return;
+    }
 
     float3 color = float3(0, 0, 0);
     float3 n = float3(0, 1, 0);
@@ -2128,6 +2270,6 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     if ((frame.dims.z & FRAME_NEAR_LIGHT) != 0u) outNearLight[pix] = float4(0, 0, 0, 0);  // not the near field's
     outColor[pix] = float4(color, coverage);
     outNormal[pix] = packNormal(n, cls, sunVis);
-    outDepth[pix] = depth;
+    outDepth[pix] = primaryNear ? hostDepth(dir, depth) : depth;  // (PRIMARY_NEAR: the host's NDC depth, every pixel)
     counters[pix] = res.steps;  // per-pixel step count (summed on the host; no atomics so the C++ target matches)
 }

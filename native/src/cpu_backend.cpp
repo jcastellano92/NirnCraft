@@ -232,8 +232,11 @@ public:
         }
         glFrame_++;
         // the near light (abi 0.15): the near field's depth and surface info in, the caller's texture out
-        const bool nearOn = in.wantNearDepth && io && io->nearDepthTex;
-        const bool nearLight = (in.frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && nearOn && io->nearInfoTex && io->dstNearLight;
+        // (ATLAS_FRAME_PRIMARY_NEAR: atlas's own near field, the near light an output only)
+        const bool primaryNear = (in.frame.dims[2] & FRAME_PRIMARY_NEAR_BITS) != 0;
+        const bool nearOn = in.wantNearDepth && io && io->nearDepthTex && !primaryNear;
+        const bool nearLight = (in.frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && io && io->dstNearLight &&
+                               (primaryNear || (nearOn && io->nearInfoTex));
         if (nearOn && !near_.run(gl_, *io, w, h, nearLight, tex_[IMG_NEAR], tex_[IMG_NEAR_INFO], err)) return false;
 
         if (!async_ || !primed_) {
@@ -372,8 +375,9 @@ private:
         if (in.nearDepth) g.nearDepth = {const_cast<float*>(in.nearDepth), n};
         else g.nearDepth = view(dummyDepth_);
         // the near light (FRAME_NEAR_LIGHT, kept only with both near inputs): the kernel writes every pixel of it
-        if ((frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && in.nearInfo && in.nearDepth) {
-            g.nearInfo = {const_cast<uint32_t*>(in.nearInfo), n};
+        const bool primaryNear = (frame.dims[2] & FRAME_PRIMARY_NEAR_BITS) != 0;
+        if ((frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && ((in.nearInfo && in.nearDepth) || primaryNear)) {
+            g.nearInfo = in.nearInfo ? CpuBuffer<uint32_t>{const_cast<uint32_t*>(in.nearInfo), n} : view(dummyInfo_);
             out.nearLight.assign(n * 4, 0.0f);
             g.outNearLight = {reinterpret_cast<Float4*>(out.nearLight.data()), n};
         } else {
@@ -392,6 +396,7 @@ private:
                 in.voxgrid->applyCpu(b);
             }
         }
+        g.texData = in.textures && !in.textures->empty() ? view(*in.textures) : view(dummyU32_);
         if (in.voxgrid && !in.voxgrid->chunks.empty()) {
             VoxGrid& vg = *in.voxgrid;
             g.vgChunks = view(vg.chunks);

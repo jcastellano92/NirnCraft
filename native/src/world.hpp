@@ -130,7 +130,7 @@ struct PackedScene {
     // the groups (shaders/atlas_groups.slang), uint4 aligned: a header (the material shape table's word offset, the
     // shapes' uint4 offset, the table's length), the shapes (SHAPE_UINT4 each), the table (material -> shape + 1), then
     // per region its nodes, brick columns, slots and bricks (RegionGpu.groups)
-    std::vector<uint32_t> groups;
+    std::vector<uint32_t> groups = std::vector<uint32_t>(4, 0u);  // (at least the header: the kernels read it always)
     LodGpu lods[MAX_LODS] = {};
     int lodCount = 0;
     uint64_t revision = 0;
@@ -161,7 +161,9 @@ public:
     // fallback past the grid). setGridWindow (the grid's window moved: x, z origin and size in sections) rebuilds the
     // regions skipped so whose sections the window has left. Levels 1-4 are rebuilt as before.
     std::atomic<bool> gridOwnsLevel0{false};
-    void setGridWindow(int ox, int oz, int d);
+    void setGridWindow(int ox, int oz, int d);  // (no lock: the skipped regions are looked at by the next update)
+    // sectionsIn, or false without waiting when an update holds the world's lock (the render thread's grid)
+    bool trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const;
     size_t gridSkippedCount() const;
     // the palette's material classes (for the sections' generated levels); set when the palette changes
     void setClasses(std::vector<uint8_t> cls);
@@ -267,6 +269,8 @@ private:
     // (gridOwnsLevel0) level-0 regions whose sections changed while the grid held them, and the grid's window
     std::unordered_set<Key3, Key3Hash> gridSkipped_;
     std::atomic<int> gridOx_{0}, gridOz_{0}, gridD_{0};
+    std::atomic<bool> gridMoved_{false};
+    void gridWindowMoved();  // (mu_ held) the skipped regions the window left, dirty
     bool gridHolds(int sx, int sz) const {
         int d = gridD_.load(std::memory_order_relaxed), ox = gridOx_.load(std::memory_order_relaxed),
             oz = gridOz_.load(std::memory_order_relaxed);

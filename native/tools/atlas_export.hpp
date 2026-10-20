@@ -270,6 +270,8 @@ struct Loaded {
     std::vector<Held> held;  // upload(..., hold = true): the sections, not uploaded
     std::unordered_map<uint64_t, std::pair<int, int>> chunks;  // exported chunk columns -> (lowest, highest) section
     size_t sections = 0, states = 0, shaped = 0;
+    std::vector<AtlasMaterialShape> shapes;  // the materials' shapes from firstMat on, as set (textest: their tiles)
+    uint16_t firstMat = 0;
     int x0 = 0, z0 = 0, x1 = 0, z1 = 0;  // block bounds of the exported chunks
     static uint64_t key(int cx, int cz) { return uint64_t(uint32_t(cx)) << 32 | uint32_t(cz); }
     bool inExport(double x, double z) const {
@@ -370,6 +372,8 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
     // the shapes (an older core has no such call: the groups then draw plain cubes)
     if (!shapes.empty() && atlas_set_material_shapes(ctx, firstMat, shapes.data(), uint32_t(shapes.size())) != ATLAS_OK)
         return why = atlas_last_error(ctx), false;
+    out.shapes = shapes;
+    out.firstMat = firstMat;
     for (size_t k = 0; k < secs.size(); k++) {
         bool any = false;
         for (uint16_t v : conv[k]) any |= v != 0;

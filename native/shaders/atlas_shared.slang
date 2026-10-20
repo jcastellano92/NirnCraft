@@ -21,6 +21,8 @@ static const uint FRAME_GROUPS = 0x4000u;      // (abi 0.14) primary rays trace 
 static const uint FRAME_VANILLA_LIGHT = 0x10000u;  // (abi 0.14, optional) Minecraft's own light: no pack, the near field vanilla
 static const uint FRAME_LIGHT_LOW = 0x8000u;   // (abi 0.14) cheap far light: constant sky occlusion, unshadowed block light
 static const uint FRAME_NEAR_LIGHT = 0x20000u; // (abi 0.15) light the near field's covered pixels with the far light
+static const uint FRAME_PRIMARY_NEAR = 0x80000u;      // (abi 0.17) the near field from atlas's primary rays (atlas.h)
+static const uint FRAME_PRIMARY_NEAR_LIT = 0x100000u; // (abi 0.17) ... composited (atlas.h)
 static const uint FRAME_NEAR_SPLIT = 0x40000u; // (internal: the Vulkan backend) the near light traced at half resolution
                                                // (nearLightMain) and upsampled (nearUpsampleMain), not in farMain
 // the shader pack's ambient floor (deferred.fsh: albedo x (sky + floor)), under every far land surface as under the near
@@ -84,6 +86,7 @@ struct FrameGpu {
     // cell 0), w = 1 when there is one; dims in sections (x, y, z)
     int4 vgOrigin;
     uint4 vgDims;
+    float4 viewProj[4];  // (abi 0.17, FRAME_PRIMARY_NEAR) camera-relative view-projection (columns): the host's NDC depth
 };
 
 // the frame's moon, copied by each entry point (the shared lighting has no frame of its own)
