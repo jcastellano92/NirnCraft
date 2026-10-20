@@ -290,10 +290,10 @@ void unifiedMain() {
             gl_FragDepth = 0.0;
             return;
         }
-        if (InsideMin.w > 0.0) {  // inside a block: the sky behind it only through it (premultiplied over the sky pass)
+        if (InsideMin.w > 0.0) {  // inside leaves or glass: the sky behind only through the block (premultiplied)
             float ch = atlasInsideChord(dirU);
-            float a = InsideMax.w < 0.5 ? 1.0 : 1.0 - exp(-InsideMin.w * ch);
-            fragColor = vec4(atlasInside(vec3(0.0), InsideMax.w < 0.5 ? ch : 1e4) * a, a);
+            float a = 1.0 - exp(-InsideMin.w * ch);
+            fragColor = vec4(atlasInsideLeaf(vec3(0.0), ch), a);
             gl_FragDepth = 0.0;
             return;
         }
@@ -307,7 +307,7 @@ void unifiedMain() {
     }
     // (past the projection's far plane atlas writes minus the distance: behind everything rastered)
     float dist = z < 0.0 ? -z : length(viewRay(texCoord, z));
-    if (InsideMin.w > 0.0) dist = max(dist, atlasInsideChord(dirU));  // (the eye's own block: its way out at least)
+    float insideChord = InsideMin.w > 0.0 ? atlasInsideChord(dirU) : 0.0;  // (the eye's own block: its way out)
     vec3 radiance = max(c.rgb / Ground.w / max(c.a, 1e-4), vec3(0.0));  // (pre-exposed: back to physical)
     vec3 rgb;
     if (atlasEyeInWater()) {
@@ -316,8 +316,9 @@ void unifiedMain() {
     } else {
         // the haze in front is the sky's light too: dimmed where the terrain shadows the air (its share grows with distance)
         float cr = mix(1.0, crepuscular(dirU, dist), 1.0 - exp(-dist / 5000.0));
-        rgb = atlasMedium(atlasDisplay(radiance, Look.x, Look.y), dist) * cr
+        rgb = atlasMediumOnly(atlasDisplay(radiance, Look.x, Look.y), dist) * cr
             + atlasDisplay(airBeams(dirU, dist) + sunGlare(dirU) * 0.15, Look.x, Look.y);
+        if (InsideMin.w > 0.0) rgb = atlasInsideLeaf(rgb, insideChord);  // (leaves, glass: through the block's own volume)
         fragColor = vec4(rgb * c.a, c.a);
     }
     gl_FragDepth = max(z, 0.0);

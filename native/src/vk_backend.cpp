@@ -707,7 +707,9 @@ public:
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
         if (w != width_ || h != height_) return fail(err, "frame size differs from the attached targets (re-attach)");
         Slot& s = slots_[frameIndex_ % SLOTS];
+        auto tg0 = std::chrono::steady_clock::now();
         if (!waitSlot(s, gpuMs, err)) return false;  // frame N-2: normally long done
+        auto tg1 = std::chrono::steady_clock::now();
         const bool host = mode_ == Interop::HostCopy;
         // the near light (abi 0.15): the near field's depth and surface info in, the caller's texture out
         // (ATLAS_FRAME_PRIMARY_NEAR: atlas's own near field; the near light is an output only, traced in the far pass)
@@ -749,6 +751,7 @@ public:
                 sunImageFresh_ = true;
             }
         }
+        auto tg2 = std::chrono::steady_clock::now();
         if (host) return hostCopyFrame(s, in, frame, io, nearLight, gpuMs, err);
 
         // GL releases the shared images to Vulkan (after everything GL queued so far, e.g. last frame's composite)
@@ -793,6 +796,13 @@ public:
         // GL commands after this point wait for the Vulkan frame
         gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, nTex, tex, layouts);
         copyToCaller(io, w, h, nearLight);
+        auto tg3 = std::chrono::steady_clock::now();
+        auto ease = [](double& v, std::chrono::steady_clock::time_point a, std::chrono::steady_clock::time_point b) {
+            v += (std::chrono::duration<double, std::milli>(b - a).count() - v) * 0.05;
+        };
+        ease(glTimes_.waitMs, tg0, tg1);
+        ease(glTimes_.prepareMs, tg1, tg2);
+        ease(glTimes_.recordMs, tg2, tg3);
         return true;
     }
 
@@ -1745,6 +1755,8 @@ private:
 
     // ---- the level-0 grid (voxgrid.hpp, atlas_voxgrid.slang) ----------------------------------------------------
 
+    GlTimes glTimes() const override { return glTimes_; }
+
     VoxGridTimes voxgridTimes() const override {
         VoxGridTimes t;
         t.lastMs = vgLastMs_;
@@ -2535,6 +2547,7 @@ private:
     uint64_t texRevision_ = ~0ull;
     double vgStageMs_ = 0, vgStageMaxMs_ = 0;
     double vgLastMs_ = 0, vgMsTotal_ = 0;
+    GlTimes glTimes_;
     uint32_t vgLastSections_ = 0, vgLastJobs_ = 0;
     bool vgLastStates_ = false;
     VkShaderModule nearTempShader_ = VK_NULL_HANDLE;
