@@ -773,6 +773,8 @@ public final class ClientAutotest {
             } else if (action.startsWith("pin ") || action.startsWith("pin-")) {  // pinned ground truth (client/pinned/PinnedTruth)
                 liveCommand = com.nirncraft.client.pinned.PinnedTruth.autotest(action);
                 liveCommandDeadline = System.currentTimeMillis() + 120_000L;
+            } else if (action.startsWith("atlas-near ")) {  // on | off: our near pass owns terrain (vanilla draws none)
+                com.nirncraft.atlas.AtlasNearPass.active = action.substring(11).trim().equals("on");
             } else if (action.startsWith("atlas-suspend ")) {  // on | off: no far field at all (pinned ground-truth captures)
                 com.nirncraft.atlas.AtlasClient.suspended = action.substring(14).trim().equals("on");
             } else if (action.startsWith("atlas-edits-why ")) {  // on | off: log what keeps changing in re-journalled chunks

@@ -63,6 +63,7 @@ public final class AtlasClient {
     private static AtlasNative lib;
     private static AtlasNative.Context ctx;
     private static AtlasTargets targets;
+    private static boolean farThisFrame;  // atlas drew this frame (its targets hold it): the near pass composites them
     private static AtlasFarField farField;
     private static ClientLevel startedFor;  // the level the far field's tiles belong to
     private static final WeatherFeed WEATHER = new AtlasWeatherFeed();
@@ -125,6 +126,11 @@ public final class AtlasClient {
         modBus.addListener((RegisterRenderPipelinesEvent e) -> AtlasGuard.run(AtlasFallback.FEATURE,
                 () -> AtlasFallback.register(e)));
         NeoForge.EVENT_BUS.addListener(AtlasClient::afterOpaque);
+        AtlasNearPass.init(modBus);
+        // after atlas's frame (or its absence): our near terrain into the frame, atlas's far frame behind it
+        NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.LOW,
+                (RenderLevelStageEvent.AfterOpaqueBlocks e) -> AtlasGuard.run(AtlasNearPass.FEATURE,
+                        () -> AtlasNearPass.resolve(e.getRenderPass(), farThisFrame ? targets : null)));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) ->
                 AtlasGuard.run("atlas client tick", () -> {
                     AtlasTargets.flushClear();
@@ -203,6 +209,7 @@ public final class AtlasClient {
     public static volatile boolean suspended;
 
     private static void afterOpaque(RenderLevelStageEvent.AfterOpaqueBlocks event) {
+        farThisFrame = false;
         if (failed) return;
         try {
             Minecraft mc = Minecraft.getInstance();
@@ -342,17 +349,21 @@ public final class AtlasClient {
                 frame.flags |= AtlasNative.FRAME_FILL_NEAR;
             if (groups) frame.flags |= AtlasNative.FRAME_GROUPS;
 
-            io.nearDepthTex = 0xFFFFFFFF;  // ATLAS_GL_BOUND_DEPTH: the bound gbuffer target's depth
+            // the near field's depth: our near pass's G-buffer when terrain is ours (reverse-Z, vanilla's projection),
+            // else the bound target's (ATLAS_GL_BOUND_DEPTH: vanilla's, or the pack's gbuffer)
+            boolean nearOwned = AtlasNearPass.owns();
+            io.nearDepthTex = nearOwned ? AtlasNearPass.depthGlId() : 0xFFFFFFFF;
             new Matrix4f(cam.projectionMatrix).invert().get(io.nearInvProjection);
             io.depthZeroToOne = AtlasTargets.depthZeroToOne();
-            io.reversedZ = reversedZ(pack);  // the depth convention the near field's depth was written with
+            io.reversedZ = nearOwned || reversedZ(pack);  // the depth convention the near field's depth was written with
             io.dstColor = targets.colorId();
             io.dstNormal = 0;
             io.dstDepth = targets.depthId();
             io.dstSunMap = targets.sunId();
             if (firstFrame && guard != null) guard.firstFrames();  // a driver crash from here on is the guard's case
             ctx.glRender(frame, io);
-            if (!pack && !AtlasFallback.fogHidesFarField(cam.fogData)) {
+            farThisFrame = true;
+            if (!pack && !nearOwned && !AtlasFallback.fogHidesFarField(cam.fogData)) {
                 AtlasTargets t = targets;
                 AtlasGuard.run(AtlasFallback.FEATURE, () -> AtlasFallback.draw(event.getRenderPass(), t));
             }
