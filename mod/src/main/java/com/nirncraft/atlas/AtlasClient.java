@@ -870,6 +870,13 @@ public final class AtlasClient {
      * The far field's sub-pixel jitter for the pack's TAA (8 Halton (2, 3) offsets, one per frame), or none: without a
      * temporal resolve a jittered far field would visibly shake by a pixel.
      */
+    /** The autotest's atlas-info: the core's own report (the grid's pool among it) and the feeds' queues. */
+    public static String debugInfo() {
+        var c = ctx;
+        String core = c != null ? c.info() : "no context";
+        return AtlasClientSections.state() + " " + AtlasEditsClient.state() + " core=" + core;
+    }
+
     private static void jitter(AtlasNative.Context ctx, boolean on) {
         try {
             if (on) {

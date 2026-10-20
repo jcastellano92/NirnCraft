@@ -140,10 +140,8 @@ final class AtlasSky implements CustomSkyboxRenderer {
         viewDrawn = true;
         airInfo.rotate();
         // 2. the sky: the LUT looked up per pixel (repeat across the bearing), the sun's disc in its transmitted light
+        // the eye's exposure, the same the LUT was written with (AtlasLook.frame is shared: never written to)
         float[] look = AtlasLook.frame(mc);
-        // the sky is not opened up with the eye at night (a dark night sky; NirnCraft's aurora and stars over it add
-        // light and need the dark to show)
-        look[0] = Math.min(look[0], 1.5f);
         boolean sunKey = sun[1] > -0.05f && light != null;
         try (var v = info.currentBuffer().map(false, true)) {
             Std140Builder.intoBuffer(v.data()).putMat4f(inv).putVec4(sun[0], sun[1], sun[2], 0f)

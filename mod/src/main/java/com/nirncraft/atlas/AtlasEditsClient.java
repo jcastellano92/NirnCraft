@@ -94,6 +94,11 @@ final class AtlasEditsClient {
     private static final it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap UPLOADED = new it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap();
     private static long prunedAt;
 
+    /** The server's sections for atlas-info: queued, held under the near field, uploaded (section keys). */
+    static String state() {
+        return "serverSections{queued=" + SECTIONS.size() + " held=" + HELD.size() + " uploaded=" + UPLOADED.size() + "}";
+    }
+
     static int applySections(AtlasNative.Context ctx, AtlasMaterials mats, long deadline) {
         int n = 0;
         short[] out = new short[4096];

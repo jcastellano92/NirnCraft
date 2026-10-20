@@ -1958,6 +1958,13 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     gGroupPa = frame.params.w * frame.params.z;
     gGroupTol = 0.7 + 0.6 * pixelDither(id.xy, phase + 5u);
     float tHit = traceView(o, dir, tStart, frame.params.y, lodDither, res);
+    // (PRIMARY_NEAR) near water is the host's to raster: a primary ray meeting it in the near field goes on to what is
+    // under it (the groups' cells and the SVDAG have no near-only pass, so a second trace with water skipped)
+    if (primaryNear && tHit >= 0.0 && tHit < frame.params.x && uint(palette[res.mat].emisClass.y) == 2u) {
+        gSkipWater = true;
+        tHit = traceView(o, dir, tStart, frame.params.y, lodDither, res);
+        gSkipWater = false;
+    }
     gGroups = false;  // secondary rays (shadows, reflections, block light) keep the old path
     ActorHit ah;
     ah.t = -1.0;

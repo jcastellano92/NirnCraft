@@ -119,6 +119,15 @@ final class AtlasClientSections {
                 biome.getGrassColor(centre.getX(), centre.getZ()) & 0xFFFFFF, biome.getFoliageColor() & 0xFFFFFF);
     }
 
+    /** The feed's state for atlas-info: queued to read, read and waiting for the worker, up. */
+    static String state() {
+        int ready;
+        synchronized (READY) {
+            ready = READY.size();
+        }
+        return "clientSections{on=" + ON + " queued=" + QUEUED.size() + " ready=" + ready + " up=" + UP.size() + "}";
+    }
+
     /** The read chunk nearest block (x, z) for atlas, or null (far-field worker). */
     static AtlasSections.Decoded poll(double x, double z) {
         synchronized (READY) {
