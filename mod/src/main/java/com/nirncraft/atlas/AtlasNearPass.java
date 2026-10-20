@@ -56,13 +56,15 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
  *
  * <p>Stage A (this): the resolve lights with vanilla's own lightmap (the picture should match vanilla's). Not owned
  * (vanilla draws terrain as before for that frame): a shader pack in use, improved transparency (OIT), frames without
- * a sky pass (lava, powder snow, blindness, darkness: the stage we draw in does not fire). Off unless
- * {@code -Dnirncraft.atlas.near=true} or the autotest action {@code atlas-near on}.</p>
+ * a sky pass (lava, powder snow, blindness, darkness: the stage we draw in does not fire). On by default
+ * where it can own the frame (Sodium, which replaces the section renderer, absent); {@code -Dnirncraft.atlas.near=false}
+ * or the autotest action {@code atlas-near off} turns it off.</p>
  */
 public final class AtlasNearPass {
     static final String FEATURE = "atlas near pass";
     /** Owning terrain on or off (-Dnirncraft.atlas.near, the autotest action atlas-near on | off: side by sides). */
-    public static volatile boolean active = Boolean.getBoolean("nirncraft.atlas.near");
+    public static volatile boolean active = !"false".equals(System.getProperty("nirncraft.atlas.near"))
+            && !net.neoforged.fml.ModList.get().isLoaded("sodium");
 
     static final ResourceKey<PipelineModifier> GBUFFER = ResourceKey.create(PipelineModifier.MODIFIERS_KEY,
             id("near_gbuffer"));

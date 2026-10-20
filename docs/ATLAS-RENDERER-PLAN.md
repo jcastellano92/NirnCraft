@@ -134,6 +134,8 @@ The full checklist from R1, every item checked live; the owner flies it.
   game: shader_watch --game reloads atlas's kernel in the running client (atlas-shaders folder) and stages a fresh core
   (atlas-dev); Java bodies hotswap (client_hotswap). The 01:42 crash: the context destroyed under the far-field worker
   at shutdown (55ced956).
+  Frame time (live, Falkreath, 600 frames each, vsync 60): ours median 16.6 ms p95 25.8, vanilla 16.9 / 25.1; render
+  thread CPU 3.6 vs 2.4 ms (our second prepareChunkRenders and the resolve). On by default where Sodium is absent.
   Open (R3 list): the hand (drawn after AfterLevel: vanilla light), clouds (NirnCraft's deck, vanilla-lit), the far
   field's snowy spruces read whitish, NirnCraft's aurora weaker over our night sky, shadows on forward-lit things
   (entities, water), water reflections near, eye exposure from the frame (canonical now), OIT path not owned.
