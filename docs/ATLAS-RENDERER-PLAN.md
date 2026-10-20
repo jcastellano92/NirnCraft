@@ -146,7 +146,10 @@ The full checklist from R1, every item checked live; the owner flies it.
   about 15 s (the server's journal pushed 35 tile updates; atlas-edits-why), drawn from the column summaries (sides in
   the column's under material) until the section re-record reaches it. Far plains around Whiterun turn orange-brown
   once the exact tiles arrive (agent investigating).
-  Still open: terrain in water reflections, shadows on forward-lit things, eye exposure from the frame, the aurora over
+  Intermittent (open): under the Solitude arch a black patch over lit terrain in 3 captures of 6 (two of them fresh
+  launches, one 10 s after a teleport); not the near light (debug views: lit, no NaN), not the water's forward pass;
+  gone after a resource reload and in later launches. Next time: the debug views at once.
+  Still open: shadows on forward-lit things, eye exposure from the frame, the aurora over
   our night sky, OIT, caves (agent), far life (R5), scale (R6).
 - **R2 stage B live (2026-10-20, 2002d7db, 70f3dae9).** Falkreath, live A/B against vanilla: one light near and far
   (atlas's near light: traced sun shadows under the well, the buildings, the barrels), the look's sky fill (shadeSurfaceAmb
