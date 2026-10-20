@@ -53,8 +53,68 @@ final class AtlasQuality {
     }
 
     float scale() {
+        if (cpu) return (float) Math.min(cpuScale, memory.maxScale());
         float s = tier >= 1 ? 0.33f : (float) Knob.atlasScale(q[Knob.ATLAS_SCALE.ordinal()]);
         return Math.min(s, (float) memory.maxScale());  // the controller already holds it there; a non-adaptive game too
+    }
+
+    // ---- the CPU backend: the GPU controller cannot see atlas's cost there (atlas uses no GPU), so its render scale
+    // follows its worker's time instead: a third of the window to start, the cheap light then a smaller scale when a
+    // frame takes over CPU_TARGET_MS (the textures fall further behind the camera the longer it takes), back up when
+    // well under, at most every 2 s and in 0.05 steps (each size change re-attaches: a synchronous frame)
+    static final double CPU_START = 1 / 3.0, CPU_MIN = 0.2, CPU_TARGET_MS = 25;
+    private boolean cpu;
+    private double cpuScale = CPU_START, cpuEma = -1;
+    private boolean cpuLightLow;
+    private long cpuNextChange;
+
+    void setCpu(boolean on) {
+        if (on != cpu) {
+            cpuScale = CPU_START;
+            cpuLightLow = false;
+            cpuEma = -1;
+            cpuNextChange = 0;
+        }
+        cpu = on;
+    }
+
+    boolean cpu() {
+        return cpu;
+    }
+
+    /** The CPU worker's time for its latest frame (ms; atlas_core's stats), now: System.nanoTime(). */
+    void observeCpu(double ms, long now) {
+        if (!cpu || !(ms > 0) || ms > 5000) return;
+        cpuEma = cpuEma < 0 ? ms : cpuEma * 0.8 + ms * 0.2;
+        if (cpuNextChange == 0) cpuNextChange = now + 2_000_000_000L;  // the first frames (a synchronous one) settle
+        if (now < cpuNextChange) return;
+        double next = cpuScale;
+        boolean low = cpuLightLow;
+        boolean atStart = cpuScale >= CPU_START - 1e-3;
+        // over: the cheap light first (ATLAS_FRAME_LIGHT_LOW, about 0.6 x the traced light's time), then the scale;
+        // under: the scale back to the start first, then the traced light, then the scale beyond
+        if (cpuEma > CPU_TARGET_MS * 1.15) {
+            if (!low && atStart) low = true;
+            else next = Math.max(CPU_MIN, cpuScale * Math.sqrt(CPU_TARGET_MS / cpuEma));
+        } else if (cpuEma < CPU_TARGET_MS * 0.6) {
+            if (low && atStart) low = false;
+            else next = Math.min(low ? CPU_START : memory.maxScale(), cpuScale + 0.05);
+        }
+        next = Math.max(CPU_MIN, Math.abs(next - CPU_START) < 1e-3 ? CPU_START : Math.round(next * 20) / 20.0);
+        if (Math.abs(next - cpuScale) > 1e-3 || low != cpuLightLow) {
+            com.nirncraft.NirnCraft.LOGGER.info("atlas (CPU): render scale {} -> {}, light {} (worker {} ms a frame)",
+                    String.format(java.util.Locale.ROOT, "%.2f", cpuScale), String.format(java.util.Locale.ROOT, "%.2f", next),
+                    low ? "cheap" : "traced", String.format(java.util.Locale.ROOT, "%.1f", cpuEma));
+            cpuScale = next;
+            cpuLightLow = low;
+            cpuEma = -1;
+        }
+        cpuNextChange = now + 2_000_000_000L;
+    }
+
+    /** The CPU backend's cheap far and near light this frame (ATLAS_FRAME_LIGHT_LOW). */
+    boolean cpuLightLow() {
+        return cpu && cpuLightLow;
     }
 
     /** The sun map's size (256 while far shadows are off: the near field still reads the map's clouds; 0 without a pack). */

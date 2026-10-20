@@ -294,6 +294,12 @@ ATLAS_API AtlasStatus atlas_get_stats(AtlasContext* ctx, AtlasStats* out);
  * all shared with that context; it returns their GL texture names (rows bottom-up, GL convention). Each
  * atlas_gl_render queues the frame and a GL-side semaphore wait: GL commands issued after it see the frame,
  * and the CPU never blocks on the GPU. Re-attach on resize; detach before destroying the GL context.
+ * The CPU backend (a machine without a usable Vulkan device) takes the same calls with the same textures and outputs:
+ * the near depth / info are linearised on the GL side and read back through a pixel-pack buffer and a fence, the
+ * frame is rendered on a worker thread (below normal priority, all hardware threads but two) and uploaded when done,
+ * so the textures show a frame two or more calls old (the first frame after an attach is rendered in the call);
+ * ATLAS_CPU_GL=sync renders every frame in the call (no lag; the CPU waits for GL and the render). atlas_info's
+ * "cpuGl" block has the worker's times and the lag. The stats' lastFrameMs is the worker's time per frame.
  */
 typedef struct AtlasGlTargets {
     uint32_t color, normal, depth, nearDepth;

@@ -62,6 +62,8 @@ public final class AtlasClient {
 
     private static AtlasNative lib;
     private static AtlasNative.Context ctx;
+    private static boolean cpuBackend;  // ctx runs on the CPU backend (no usable Vulkan device, or forced)
+    private static long cpuLogAt;       // nanoTime of the next CPU-path log line
     private static AtlasTargets targets;
     private static boolean farThisFrame;  // atlas drew this frame (its targets hold it): the near pass composites them
     private static boolean nearLitThisFrame;  // and lit the near pass's pixels (ATLAS_FRAME_NEAR_LIGHT)
@@ -217,6 +219,11 @@ public final class AtlasClient {
     /** Atlas lit the near pass's pixels this frame (ATLAS_FRAME_NEAR_LIGHT). */
     static boolean nearLitThisFrame() {
         return nearLitThisFrame;
+    }
+
+    /** atlas's targets show a frame a few frames behind the camera (the CPU backend renders on a worker). */
+    static boolean farLags() {
+        return ctx != null && !failed && cpuBackend;
     }
 
     /** The loaded core lights the near pass's pixels (ABI 0.15: ATLAS_FRAME_NEAR_LIGHT, AtlasGlIO near info / light). */
@@ -392,6 +399,7 @@ public final class AtlasClient {
                     || AtlasClientSections.coversEye(p.x, p.z)))
                 frame.flags |= AtlasNative.FRAME_FILL_NEAR;
             if (groups) frame.flags |= AtlasNative.FRAME_GROUPS;
+            if (quality.cpuLightLow()) frame.flags |= AtlasNative.FRAME_LIGHT_LOW;  // the CPU's first step down
 
             // the near field's depth: our near pass's G-buffer when terrain is ours (reverse-Z, vanilla's projection),
             // else the bound target's (ATLAS_GL_BOUND_DEPTH: vanilla's, or the pack's gbuffer)
@@ -430,8 +438,17 @@ public final class AtlasClient {
                 status(AtlasStatusLine.on(ctx.info(), !pack, com.nirncraft.render.quality.QualityClient.qualityName()),
                         null);
             }
-            // atlas's own GPU time (its timestamps, a couple of frames late) for the quality controller's cost model
-            com.nirncraft.render.quality.QualityClient.atlasFrame(true, ctx.stats().frameMs());
+            // atlas's own GPU time (its timestamps, a couple of frames late) for the quality controller's cost model; on
+            // the CPU backend atlas costs the GPU nothing: its worker's time steers its own scale (AtlasQuality.observeCpu)
+            double atlasMs = ctx.stats().frameMs();
+            com.nirncraft.render.quality.QualityClient.atlasFrame(true, cpuBackend ? 0 : atlasMs);
+            if (cpuBackend) {
+                quality.observeCpu(atlasMs, now);
+                if (now >= cpuLogAt) {  // the worker's times (cpuGl: render, convert, upload, latency) every 30 s
+                    cpuLogAt = now + 30_000_000_000L;
+                    com.nirncraft.NirnCraft.LOGGER.info("atlas (CPU, scale {}): {}", quality.scale(), ctx.info());
+                }
+            }
         } catch (Throwable t) {
             frameFailed(t);
         }
@@ -472,8 +489,11 @@ public final class AtlasClient {
             if (lib == null) lib = loadLibrary(mc.gameDirectory.toPath());
             // the GPU when there is one; else (no Vulkan device, a driver that refuses) atlas on the CPU, slower and at
             // a lower resolution but the same picture: the near pass's light and the far field on every machine
-            // (-Dnirncraft.atlas.backend=cpu forces it: what a machine without a GPU sees)
-            if ("cpu".equalsIgnoreCase(System.getProperty("nirncraft.atlas.backend"))) {
+            // (-Dnirncraft.atlas.backend=cpu forces it: what a machine without a GPU sees). On the CPU the frame is
+            // rendered on atlas's worker from the near field's depth and info read back from GL, a few frames behind
+            // the camera (atlas_core's CPU GL path; atlas_info's cpuGl block has its times)
+            cpuBackend = "cpu".equalsIgnoreCase(System.getProperty("nirncraft.atlas.backend"));
+            if (cpuBackend) {
                 ctx = lib.create(AtlasNative.BACKEND_CPU);
             } else {
                 try {
@@ -481,12 +501,16 @@ public final class AtlasClient {
                 } catch (AtlasNative.AtlasException e) {
                     com.nirncraft.NirnCraft.LOGGER.warn("atlas: no GPU backend ({}): the far field runs on the CPU", e.getMessage());
                     ctx = lib.create(AtlasNative.BACKEND_CPU);
+                    cpuBackend = true;
                 }
             }
             firstFrame = true;
             armTestFault(ctx);
-            // memory: what this machine can spare sizes the targets, the sun map, the clouds and the clipmap
+            // memory: what this machine can spare sizes the targets, the sun map, the clouds and the clipmap (on the
+            // CPU also what it can render: a third of the window to start, quarter-resolution clouds, a 256 sun map)
             AtlasMemory.Plan plan = shrunk != null ? shrunk : memoryPlan(mc, ctx);
+            if (cpuBackend) plan = AtlasMemory.cpu(plan);
+            quality.setCpu(cpuBackend);
             if (plan.off()) {
                 stop();
                 offForSession(plan.reason(), AtlasStatusLine.Off.MEMORY, null);

@@ -12,7 +12,7 @@
 //  Sampler4: atlas colour: far pixels linear HDR premultiplied; near pixels (near light) aerial inscatter, transmittance
 //  Sampler5: atlas depth (view distance, 1e30 = none)               Sampler6: atlas near light (irradiance, sun vis)
 // Look: x exposure (linear), y night vision strength, z mode (0: vanilla's lightmap, stage A; 1: atlas's near light,
-// one light near and far), w unused
+// one light near and far), w 1 when atlas's frame lags the camera (the CPU backend)
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;
 uniform sampler2D Sampler2;
@@ -21,7 +21,7 @@ uniform sampler2D Sampler4;
 uniform sampler2D Sampler5;
 uniform sampler2D Sampler6;
 layout(std140) uniform NearInfo {
-    vec4 Look;     // x exposure, y night vision, z mode, w unused
+    vec4 Look;     // x exposure, y night vision, z mode, w atlas lags the camera (CPU backend)
     vec4 KeyDir;   // (near_forward.fsh: the key light, the sky and ground radiance)
     vec4 KeyRad;
     vec4 SkyUp;
@@ -113,6 +113,9 @@ void main() {
             if (traced) {
                 vec4 nl = texture(Sampler6, texCoord);
                 vec4 aerial = texture(Sampler4, texCoord);
+                // atlas's frame a few frames behind the camera (the CPU backend, Look.w): a texel it did not light is
+                // the sky or far terrain of that frame, not this surface's air: no haze rather than black or a ghost
+                if (Look.w > 0.5 && dot(nl.rgb, vec3(1.0)) < 1e-6) aerial = vec4(0.0, 0.0, 0.0, 1.0);
                 // atlas holds every section of the loaded chunks (caves included): its traced light is trusted as it is
                 // (light spills into a cave mouth and fades in), no cap by vanilla's sky light any more
                 vec3 light = nearLightFiltered(texCoord, nl, n, nearDepth);

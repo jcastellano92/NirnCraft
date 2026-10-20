@@ -320,6 +320,39 @@
       },
       "capture": "world",
       "source": "new (farfield vistas; height/pitch after ClientAutotest tourFar shot, pitch 6)"
+    },
+    {
+      "id": "farfield-cpu-whiterun",
+      "title": "Infinite ATLAS on the CPU backend (no GPU for atlas): Whiterun's plains, near light and far field, frame time",
+      "group": "cpu",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:farfield",
+        "feature:perf",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          135,
+          -5
+        ]
+      },
+      "time": 6000,
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "vanilla",
+        "shaders"
+      ],
+      "measure": 300,
+      "checks": {},
+      "capture": "world",
+      "source": "native/src/cpu_backend.cpp:1",
+      "note": "vanilla: the near pass lit by atlas's near light; shaders: the pack composites atlas's colour, depth and sun map. The log's 'atlas (CPU, scale s): {...}' line (every 30 s) has cpuGl (renderMs, convertMs, readbackMs, uploadMs, latencyFrames, dropped); AtlasQuality logs each CPU scale change"
     }
   ]
 }

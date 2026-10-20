@@ -42,6 +42,13 @@
     },
     "server": false
   },
+  "cpu": {
+    "description": "Infinite ATLAS on its CPU backend (-Dnirncraft.atlas.backend=cpu: what a machine without a usable Vulkan device runs): the near light and the far field rendered on atlas's worker from GL readbacks",
+    "jvm": {
+      "nirncraft.atlas.backend": "cpu"
+    },
+    "server": false
+  },
   "lab": {
     "description": "offline tools (native/build/Release/atlas_render.exe, pack_lab.exe); no game client",
     "jvm": {},

@@ -37,6 +37,7 @@
 #include "atlas_publish_spv.h"  // generated
 #include "backend.hpp"
 #include "gl_api.hpp"
+#include "gl_near.hpp"
 
 namespace atlas {
 namespace {
@@ -189,55 +190,8 @@ constexpr int IMG_COLOR = 0, IMG_NORMAL = 1, IMG_DEPTH = 2, IMG_NEAR = 3, IMG_NE
 // push constants of the publish and ingest passes: width, height, and whether the near light / info rides along
 constexpr uint32_t PASS_PUSH_BYTES = 12;
 
-// GL compute pass: the near field's depth buffer -> view distance in blocks (1e30 for sky) in the shared nearDepth
-// image, and with the near light the near field's surface info of the same sample into the shared nearInfo image.
-// Same bottom-up rows as GL; the Vulkan ingest pass flips them for the far kernel.
-const char* LINEARIZE_GLSL = R"GLSL(#version 430
-layout(local_size_x = 8, local_size_y = 8) in;
-layout(binding = 15) uniform sampler2D atlasNearDepth;
-layout(binding = 14) uniform sampler2D atlasNearInfo;
-layout(r32f, binding = 7) uniform writeonly image2D atlasNearOut;
-layout(rgba8, binding = 6) uniform writeonly image2D atlasInfoOut;
-uniform mat4 atlasInvProj;
-uniform vec2 atlasSize;
-uniform int atlasZeroToOne;
-uniform int atlasReversed;
-uniform int atlasInfo;
-void main() {
-    ivec2 p = ivec2(gl_GlobalInvocationID.xy);
-    if (p.x >= int(atlasSize.x) || p.y >= int(atlasSize.y)) return;
-    // atlas may render below the window's resolution (dynamic scale): an atlas pixel takes the farthest of four
-    // samples over its footprint, so it is skipped only where near geometry covers all of it (at scale 1 all four
-    // land on the same texel: the exact depth)
-    ivec2 full = textureSize(atlasNearDepth, 0);
-    vec2 f = vec2(full) / atlasSize;
-    float dist = 0.0;
-    int skies = 0;
-    ivec2 pick = ivec2(0);
-    for (int k = 0; k < 4; k++) {
-        vec2 o = vec2(k & 1, k >> 1) * 0.5 + 0.25;
-        ivec2 q = clamp(ivec2((vec2(p) + o) * f), ivec2(0), full - 1);
-        float d = texelFetch(atlasNearDepth, q, 0).r;
-        bool sky = atlasReversed != 0 ? d <= 0.0 : d >= 1.0;
-        float z = atlasZeroToOne != 0 ? d : d * 2.0 - 1.0;
-        vec2 ndc = (vec2(q) + 0.5) / vec2(full) * 2.0 - 1.0;
-        vec4 v = atlasInvProj * vec4(ndc, z, 1.0);
-        float dk = sky ? 1e30 : length(v.xyz / v.w);
-        if (k == 0 || dk > dist) pick = q;
-        dist = max(dist, dk);
-        skies += sky ? 1 : 0;
-    }
-    // all four sky: 2e30 (the near field drew nothing here: a chunk not loaded, the far field may fill from the
-    // camera); some sky: 1e30 (a near silhouette's edge: the far field only behind it, never its own copy of the
-    // near object, which drew a moving outline around every tree and ridge against the sky)
-    imageStore(atlasNearOut, p, vec4(skies == 4 ? 2e30 : dist));
-    // the surface whose distance was taken (the near light lights the point at that distance)
-    if (atlasInfo != 0) {
-        ivec2 fi = textureSize(atlasNearInfo, 0);
-        imageStore(atlasInfoOut, p, texelFetch(atlasNearInfo, clamp(pick * fi / full, ivec2(0), fi - 1), 0));
-    }
-}
-)GLSL";
+// The GL compute pass that writes the shared nearDepth / nearInfo images: gl_near.hpp (both backends' GL paths). Same
+// bottom-up rows as GL; the Vulkan ingest pass flips them for the far kernel.
 
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
@@ -975,107 +929,10 @@ private:
         return vkOk(vkWaitForFences(dev_, 1, &f, VK_TRUE, FENCE_TIMEOUT_NS), what, err);
     }
 
-    // GL state the pass touches is saved and restored: Minecraft's renderer caches its own bindings.
+    // GL state the pass touches is saved and restored (gl_near.hpp).
     // info: also the near field's surface info (io.nearInfoTex) into the shared nearInfo image (the near light)
     bool linearizeNearDepth(const GlFrameIO& io, uint32_t w, uint32_t h, bool info, std::string& err) {
-        GLuint depthTex = io.nearDepthTex;
-        if (depthTex == 0xFFFFFFFFu) {
-            // the depth attachment of whatever draw framebuffer the game (or a shader pack) has bound right now
-            GLint fbo = 0, type = 0, name = 0;
-            gl_.GetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fbo);
-            if (fbo != 0) {
-                gl_.GetNamedFramebufferAttachmentParameteriv(GLuint(fbo), GL_DEPTH_ATTACHMENT,
-                                                             GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
-                if (GLenum(type) == GL_TEXTURE)  // a renderbuffer cannot be sampled
-                    gl_.GetNamedFramebufferAttachmentParameteriv(GLuint(fbo), GL_DEPTH_ATTACHMENT,
-                                                                 GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
-            }
-            depthTex = GLuint(name);
-            if (!depthTex) {
-                // nothing to read this frame: mark every pixel uncovered rather than reuse a stale image
-                float uncovered = 1e30f;
-                gl_.ClearTexImage(images_[IMG_NEAR].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
-                return true;
-            }
-        }
-        if (!linProgram_) {
-            GLuint sh = gl_.CreateShader(GL_COMPUTE_SHADER);
-            gl_.ShaderSource(sh, 1, &LINEARIZE_GLSL, nullptr);
-            gl_.CompileShader(sh);
-            GLint ok = 0;
-            gl_.GetShaderiv(sh, GL_COMPILE_STATUS, &ok);
-            if (!ok) {
-                char log[1024] = {};
-                gl_.GetShaderInfoLog(sh, sizeof(log), nullptr, log);
-                gl_.DeleteShader(sh);
-                err = std::string("near-depth GL shader: ") + log;
-                return false;
-            }
-            linProgram_ = gl_.CreateProgram();
-            gl_.AttachShader(linProgram_, sh);
-            gl_.LinkProgram(linProgram_);
-            gl_.DeleteShader(sh);
-            gl_.GetProgramiv(linProgram_, GL_LINK_STATUS, &ok);
-            if (!ok) return fail(err, "near-depth GL program link failed");
-            uInvProj_ = gl_.GetUniformLocation(linProgram_, "atlasInvProj");
-            uSize_ = gl_.GetUniformLocation(linProgram_, "atlasSize");
-            uZeroToOne_ = gl_.GetUniformLocation(linProgram_, "atlasZeroToOne");
-            uReversed_ = gl_.GetUniformLocation(linProgram_, "atlasReversed");
-            uInfo_ = gl_.GetUniformLocation(linProgram_, "atlasInfo");
-            gl_.CreateSamplers(1, &linSampler_);
-            gl_.SamplerParameteri(linSampler_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            gl_.SamplerParameteri(linSampler_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            gl_.SamplerParameteri(linSampler_, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-        }
-        gl_.ProgramUniformMatrix4fv(linProgram_, uInvProj_, 1, 0, io.nearInvProjection);
-        gl_.ProgramUniform2f(linProgram_, uSize_, float(w), float(h));
-        GLint zeroToOne = GLint(io.depthZeroToOne);
-        if (io.depthZeroToOne == 0xFFFFFFFFu) {
-            GLint mode = 0;
-            gl_.GetIntegerv(GL_CLIP_DEPTH_MODE, &mode);
-            zeroToOne = GLenum(mode) == GL_ZERO_TO_ONE ? 1 : 0;
-        }
-        gl_.ProgramUniform1i(linProgram_, uZeroToOne_, zeroToOne);
-        gl_.ProgramUniform1i(linProgram_, uReversed_, GLint(io.reversedZ));
-        gl_.ProgramUniform1i(linProgram_, uInfo_, info ? 1 : 0);
-        GLint prevProgram = 0, prevActive = 0, prevTex = 0, prevSampler = 0, prevImage = 0;
-        GLint prevInfoTex = 0, prevInfoSampler = 0, prevInfoImage = 0;
-        gl_.GetIntegerv(GL_CURRENT_PROGRAM, &prevProgram);
-        gl_.GetIntegerv(GL_ACTIVE_TEXTURE, &prevActive);
-        gl_.ActiveTexture(GL_TEXTURE0 + 15);
-        gl_.GetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
-        gl_.GetIntegerv(GL_SAMPLER_BINDING, &prevSampler);
-        gl_.GetIntegeri_v(GL_IMAGE_BINDING_NAME, 7, &prevImage);
-        if (info) {
-            gl_.ActiveTexture(GL_TEXTURE0 + 14);
-            gl_.GetIntegerv(GL_TEXTURE_BINDING_2D, &prevInfoTex);
-            gl_.GetIntegerv(GL_SAMPLER_BINDING, &prevInfoSampler);
-            gl_.GetIntegeri_v(GL_IMAGE_BINDING_NAME, 6, &prevInfoImage);
-        }
-        gl_.ActiveTexture(GLenum(prevActive));
-
-        gl_.UseProgram(linProgram_);
-        gl_.BindTextureUnit(15, depthTex);
-        gl_.BindSampler(15, linSampler_);
-        gl_.BindImageTexture(7, images_[IMG_NEAR].glTex, 0, 0, 0, GL_WRITE_ONLY, GL_R32F);
-        if (info) {
-            gl_.BindTextureUnit(14, io.nearInfoTex);
-            gl_.BindSampler(14, linSampler_);
-            gl_.BindImageTexture(6, images_[IMG_NEAR_INFO].glTex, 0, 0, 0, GL_WRITE_ONLY, GL_RGBA8);
-        }
-        gl_.DispatchCompute((w + 7) / 8, (h + 7) / 8, 1);
-        gl_.MemoryBarrierGL(GL_ALL_BARRIER_BITS);
-
-        gl_.UseProgram(GLuint(prevProgram));
-        gl_.BindTextureUnit(15, GLuint(prevTex));
-        gl_.BindSampler(15, GLuint(prevSampler));
-        gl_.BindImageTexture(7, GLuint(prevImage), 0, 0, 0, GL_WRITE_ONLY, GL_R32F);
-        if (info) {
-            gl_.BindTextureUnit(14, GLuint(prevInfoTex));
-            gl_.BindSampler(14, GLuint(prevInfoSampler));
-            gl_.BindImageTexture(6, GLuint(prevInfoImage), 0, 0, 0, GL_WRITE_ONLY, GL_RGBA8);
-        }
-        return true;
+        return near_.run(gl_, io, w, h, info, images_[IMG_NEAR].glTex, images_[IMG_NEAR_INFO].glTex, err);
     }
 
     // The 64^3 RGBA8 cloud noise as a sampled 3D image (linear filter, repeat): one hardware trilinear fetch per
@@ -2143,12 +2000,7 @@ private:
             }
             sl.hostPending = false;
         }
-        if (glOk) {
-            if (linProgram_) gl_.DeleteProgram(linProgram_);
-            if (linSampler_) gl_.DeleteSamplers(1, &linSampler_);
-        }
-        linProgram_ = 0;
-        linSampler_ = 0;
+        near_.destroy(gl_, glOk);
         attached_ = false;
     }
 
@@ -2406,8 +2258,7 @@ private:
     GlApi gl_;
     SharedImage images_[IMAGES];
     uint32_t width_ = 0, height_ = 0;
-    GLuint linProgram_ = 0, linSampler_ = 0;
-    GLint uInvProj_ = -1, uSize_ = -1, uZeroToOne_ = -1, uReversed_ = -1, uInfo_ = -1;
+    GlNearPass near_;  // the near depth / info pass (gl_near.hpp)
     bool hostNearInputs_ = false;      // this frame's near inputs are written by the CPU (prepare's buffer kind)
     std::vector<float> nearReadback_;  // host copies with the near light: GL's near depth and info, read back
 };
