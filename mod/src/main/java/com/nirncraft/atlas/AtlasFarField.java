@@ -113,6 +113,10 @@ final class AtlasFarField implements AutoCloseable {
     private boolean overlayFailed;
     private final Thread worker;
     private volatile boolean running = true;
+    /** Set once the worker has left run(); then afterExit (close()'s release, when it came first) runs on it. */
+    private final Object exitLock = new Object();
+    private boolean exited;
+    private Runnable afterExit;
     private volatile double camX, camY, camZ, camYaw, camHalf = 80;
     private volatile boolean haveCamera;
     /** True once the worker has staged a first update: atlas renders nothing before that (and says so). */
@@ -221,6 +225,26 @@ final class AtlasFarField implements AutoCloseable {
     }
 
     private void run() {
+        try {
+            loop();
+        } finally {
+            Runnable release;
+            synchronized (exitLock) {
+                exited = true;
+                release = afterExit;
+                afterExit = null;
+            }
+            if (release != null) {
+                try {
+                    release.run();
+                } catch (Throwable t) {
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas far field release: {}", t.toString());
+                }
+            }
+        }
+    }
+
+    private void loop() {
         double lastX = Double.NaN, lastZ = Double.NaN;
         while (running) {
             try {
@@ -373,9 +397,10 @@ final class AtlasFarField implements AutoCloseable {
      */
     private void updateProgressive(double x, double y, double z) {
         long until = System.nanoTime() + PROGRESSIVE_PASS_MS * 1_000_000L;
-        do {
+        while (running) {  // (closing: not even one more)
             ctx.update(x, y, z, UPDATE_BUDGET_MS);
-        } while (ctx.stats().pending() > 0 && System.nanoTime() < until && running);
+            if (ctx.stats().pending() == 0 || System.nanoTime() >= until) break;
+        }
     }
 
     private Overlay overlay() {
@@ -392,6 +417,12 @@ final class AtlasFarField implements AutoCloseable {
 
     @Override
     public void close() {
+        close(null);
+    }
+
+    /** Asks the worker to leave and waits up to 2 s for it (it may still be mid-pass after that: see close). */
+    void stopWorker() {
+        if (!running) return;
         running = false;
         worker.interrupt();
         try {
@@ -399,6 +430,30 @@ final class AtlasFarField implements AutoCloseable {
         } catch (InterruptedException ignored) {
             Thread.currentThread().interrupt();
         }
-        source.close();
+    }
+
+    /**
+     * Stops the worker, then closes the column source and runs `release` (the context's destroy) once the worker is
+     * out: here when it stops within 2 s, else on the worker as it leaves. The worker can be deep in a pass (far trees
+     * took 3.4 s, a tile, an update) and calls the context until it leaves: destroyed after a timed-out join, the
+     * next atlas_update read the freed world and the game crashed on exit (EXCEPTION_ACCESS_VIOLATION in
+     * World::forCoarse, coarse_ already torn down).
+     */
+    void close(Runnable release) {
+        stopWorker();
+        Runnable all = () -> {
+            try {
+                source.close();
+            } finally {
+                if (release != null) release.run();
+            }
+        };
+        synchronized (exitLock) {
+            if (!exited) {
+                afterExit = all;  // still in a pass: it releases on its way out
+                return;
+            }
+        }
+        all.run();
     }
 }
