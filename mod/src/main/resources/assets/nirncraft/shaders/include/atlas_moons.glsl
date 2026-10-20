@@ -219,7 +219,8 @@ vec4 moonDisc(vec3 dir, vec4 pos, vec4 up, vec4 tint, sampler2D albedo, sampler2
     nb = normalize(nb);
     vec3 s = vec3(dot(sun, R), dot(sun, U), -dot(sun, pos.xyz));  // the sun in the body frame
     float mu0g = dot(p, s);
-    float mu0 = max(dot(nb, s), 0.0);
+    // (a pixel holds many facets: those turned from the sun share the ground's light a little, no black specks)
+    float mu0 = mix(max(dot(nb, s), 0.0), max(mu0g, 0.0), 0.12);
     float mud = max(nb.z, 0.5 * mu + 0.02);
     float alpha = acos(clamp(s.z, -1.0, 1.0));  // the phase angle
     float L = photo.x;
@@ -239,16 +240,23 @@ vec4 moonDisc(vec3 dir, vec4 pos, vec4 up, vec4 tint, sampler2D albedo, sampler2
         float detailRange = reliefScale * 0.008;
         float h0 = rel.w + (wd > 0.0 ? wd * moonDetailHeight(detail, p, detailTile / DETAIL_OCTAVE, detailRange) : 0.0);
         float lit = 1.0;
-        float t = max(texel * 0.35, f * 0.5);
+        // (the start jittered a pixel at a time and frame by frame: no stair steps where the TAA averages them)
+        float jit = moonHash(dot(gl_FragCoord.xy, vec2(0.0671, 0.5833)) * 97.0 + NightGain.w * 7.31);
+        float foot = max(f, texel);  // (the heights filtered to what a pixel sees)
+        float t = max(texel * 0.6, f * 0.75) * (0.75 + 0.5 * jit);
+        float bias = 0.35 * foot * max(tanE, 0.05) + 2e-5 * reliefScale / 0.015;
+        h0 = moonRelief(relief, uv, max(log2(foot / texel), 0.0), reliefScale).w
+           + (wd > 0.0 ? wd * moonDetailHeight(detail, p, detailTile / DETAIL_OCTAVE, detailRange) : 0.0);
         for (int k = 0; k < 32; k++) {
             vec2 uk = uv + vec2(sd.x * t / (6.2831853 * max(clat, 0.05)), -sd.y * t * 0.31830989);
-            float hk = moonRelief(relief, uk, max(log2(max(f, t * 0.04) / texel), 0.0), reliefScale).w;
+            float hk = moonRelief(relief, uk, max(log2(max(foot, t * 0.08) / texel), 0.0), reliefScale).w;
             if (wd > 0.0 && k < 12) {
                 vec3 pk = normalize(p + (sd.x * e + sd.y * nn) * t);
                 hk += wd * moonDetailHeight(detail, pk, detailTile / DETAIL_OCTAVE, detailRange);
             }
-            float z = h0 + t * tanE + 0.5 * t * t;
-            lit = min(lit, clamp((z - hk) / (t * MOON_SUN_RADIUS * 2.0) + 0.5, 0.0, 1.0));
+            float z = h0 + bias + t * tanE + 0.5 * t * t;
+            // the penumbra: the sun's disc rising over the caster's edge, a smooth ramp over its angular size
+            lit = min(lit, smoothstep(-1.0, 1.0, (z - hk) / (t * MOON_SUN_RADIUS * 2.0 + foot * 0.5)));
             if (lit <= 0.0) break;
             t *= 1.21;
         }

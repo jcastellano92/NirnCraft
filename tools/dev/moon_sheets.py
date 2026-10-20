@@ -335,14 +335,14 @@ def eclipse_sheets(sky, out):
         if e is None:
             print("  (no", kind, ")")
             continue
-        tr = track(e["day"] - 0.12, e["day"] + 0.12, 1.0 / 1440.0)
+        tr = track(e["day"] - 0.6, e["day"] + 0.6, 1.0 / 720.0)
         hid = [r["hidden"] for r in tr]
         i1 = next(i for i, h in enumerate(hid) if h > 0.0)
         i2 = next(i for i, h in enumerate(hid) if h > 0.999)
         i3 = max(i for i, h in enumerate(hid) if h > 0.999)
         i4 = max(i for i, h in enumerate(hid) if h > 0.0)
         im = (i2 + i3) // 2
-        moments = [("first contact", i1 + 2), ("partial", (i1 + i2) // 2), ("diamond ring", max(i2 - 1, 0)),
+        moments = [("first contact", i1 + 1), ("partial", (i1 + i2) // 2), ("diamond ring", max(i2 - 1, 0)),
                    ("totality", im), ("diamond ring (third contact)", min(i3 + 1, len(tr) - 1)),
                    ("partial, ending", (i3 + i4) // 2)]
         tiles = []
