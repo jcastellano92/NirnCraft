@@ -172,6 +172,14 @@ final class AtlasFarField implements AutoCloseable {
         haveCamera = true;
     }
 
+    /** How far the near field (vanilla's chunks) reaches from the camera: changes wholly inside it wait. */
+    void near(double blocks) {
+        AtlasEditsClient.viewNear = blocks;
+    }
+
+    /** Edited LOD-0 tiles held while the near field covers them wholly (worker only). */
+    private final java.util.Set<Long> heldEdits = new java.util.HashSet<>();
+
     /** Where the camera looks (Minecraft yaw, horizontal half-angle): idle() then only waits for what it can see. */
     void look(double yawDeg, double halfDeg) {
         camYaw = yawDeg;
@@ -253,7 +261,20 @@ final class AtlasFarField implements AutoCloseable {
                 }
                 long tCover = System.nanoTime();
                 // the server's changes (players building, explosions, water, lights): put the tiles they touch up again
-                java.util.List<Long> edited = AtlasEditsClient.takeDirty();
+                AtlasEditsClient.viewX = x;
+                AtlasEditsClient.viewZ = z;
+                // an edited tile wholly inside the near field changes nothing on screen: held until the camera leaves
+                java.util.List<Long> edited = new java.util.ArrayList<>(AtlasEditsClient.takeDirty());
+                edited.addAll(heldEdits);
+                heldEdits.clear();
+                for (java.util.Iterator<Long> it = edited.iterator(); it.hasNext(); ) {
+                    long tk = it.next();
+                    int etx = (int) (tk >> 32), etz = (int) tk, t = AtlasEdits.TILE;
+                    if (AtlasEditsClient.underNearField(etx * t, etz * t, (etx + 1) * t, (etz + 1) * t)) {
+                        heldEdits.add(tk);
+                        it.remove();
+                    }
+                }
                 int sectionsApplied = 0;
                 boolean overlayBusy = false;
                 if (!edited.isEmpty()) {

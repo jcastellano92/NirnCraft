@@ -74,16 +74,52 @@ final class AtlasEditsClient {
      * Puts the queued real sections up (atlas_upload_section: level 0 exactly, the coarser levels generated from them),
      * block ids to far materials (leaves and grass in the chunk's biome colours), until `deadline`. Far-field worker.
      */
+    /** Where the camera is and how far the near field reaches (blocks): changes wholly inside it change nothing seen. */
+    static volatile double viewX, viewZ, viewNear;
+
+    /** Whether box [x0, x1) x [z0, z1) lies wholly inside the near field (vanilla draws it; the far field is behind). */
+    static boolean underNearField(double x0, double z0, double x1, double z1) {
+        double dx = Math.max(Math.abs(x0 - viewX), Math.abs(x1 - viewX)), dz = Math.max(Math.abs(z0 - viewZ), Math.abs(z1 - viewZ));
+        return viewNear > 0 && Math.hypot(dx, dz) < viewNear - 16;
+    }
+
+    /** Sections held while the near field covers their chunk (far-field worker only). */
+    private static final List<AtlasSections.Decoded> HELD = new ArrayList<>();
+    private static volatile boolean clearHeld;  // clear() runs on other threads: the worker empties HELD itself
+
     static int applySections(AtlasNative.Context ctx, AtlasMaterials mats, long deadline) {
         int n = 0;
         short[] out = new short[4096];
         Map<Integer, Short> local = new HashMap<>();
-        for (byte[] b; System.nanoTime() < deadline && (b = SECTIONS.poll()) != null; ) {
-            AtlasSections.Decoded d;
-            try {
-                d = AtlasSections.decode(b);
-            } catch (java.io.IOException e) {
-                continue;
+        // a chunk wholly inside the near field changes nothing on screen (vanilla draws it there): its sections wait
+        // until the camera has moved away from it (around a fresh place the server sent 13-24 a pass for 40 s, each
+        // rebuilding regions no one could see)
+        if (clearHeld) {
+            HELD.clear();
+            clearHeld = false;
+        }
+        java.util.ArrayDeque<AtlasSections.Decoded> ready = new java.util.ArrayDeque<>();
+        for (java.util.Iterator<AtlasSections.Decoded> it = HELD.iterator(); it.hasNext(); ) {
+            AtlasSections.Decoded d = it.next();
+            if (!underNearField(d.cx() * 16, d.cz() * 16, d.cx() * 16 + 16, d.cz() * 16 + 16)) {
+                ready.add(d);
+                it.remove();
+            }
+        }
+        for (; System.nanoTime() < deadline; ) {
+            AtlasSections.Decoded d = ready.poll();
+            if (d == null) {
+                byte[] b = SECTIONS.poll();
+                if (b == null) break;
+                try {
+                    d = AtlasSections.decode(b);
+                } catch (java.io.IOException e) {
+                    continue;
+                }
+                if (underNearField(d.cx() * 16, d.cz() * 16, d.cx() * 16 + 16, d.cz() * 16 + 16)) {
+                    HELD.add(d);
+                    continue;
+                }
             }
             local.clear();
             for (int s = 0; s < d.sections().length; s++) {
@@ -122,6 +158,7 @@ final class AtlasEditsClient {
         LIGHTS.clear();
         DIRTY.clear();
         LIGHTS_DIRTY.clear();
+        clearHeld = true;
     }
 
     static boolean any() {

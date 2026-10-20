@@ -269,6 +269,7 @@ public final class AtlasClient {
             CameraRenderState cam = state.cameraRenderState;
             Vec3 p = cam.pos;
             farField.follow(p.x, p.y, p.z);
+            farField.near(mc.options.getEffectiveRenderDistance() * 16.0 - 16.0);
             if (mc.player != null)  // horizontal half-FOV with a margin: what the frame can show
                 farField.look(mc.player.getYRot(), Math.min(85, mc.options.fov().get() * 0.75 + 20));
             if (!farField.updated()) {
