@@ -42,7 +42,7 @@ def classpath():
         sys.exit("client_hotswap: mod/.classpath missing: py -3 tools/dev/ide_classpath.py")
     libs = []
     for path in re.findall(r'kind="lib" path="([^"]+)"', cp.read_text(encoding="utf-8")):
-        alt = path.replace("Skycraft-scratch", "NirnCraft-scratch")  # the build's own scratch when it has the jar
+        alt = re.sub(r"[A-Za-z]+-scratch", "NirnCraft-scratch", path)  # the build's own scratch when it has the jar
         libs.append(alt if Path(alt).exists() else path)
     # the core the client runs first (the build folder can lag it: classes compiled against it missed newer methods)
     core = INSTANCE.parent / ".minecraft/mods/nirncraft-core.jar"
