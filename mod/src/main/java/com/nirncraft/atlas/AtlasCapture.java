@@ -57,8 +57,8 @@ final class AtlasCapture {
         final List<int[]> lights = new ArrayList<>();
         /** Highest point above the ground at the centre (to skip shapes that vanish at a LOD). */
         float rise;
-        /** Per column the biome tint of its roof block (leaves wearing the biome's foliage), 0 = untinted; may be null. */
-        int[] tint;
+        /** Per column the tint of its roof / wall block as the near field gives it (AtlasMaterials.tint), 0 = untinted; may be null. */
+        int[] tint, wallTint;
 
         Shape(int x0, int z0, int w, int d) {
             this.x0 = x0;

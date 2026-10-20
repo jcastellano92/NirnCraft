@@ -133,12 +133,9 @@ final class AtlasEditsClient {
                     Short m = local.get(id);
                     if (m == null) {
                         BlockState st = Block.stateById(id);
-                        String name = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(st.getBlock()).getPath();
-                        // (shapes on: one id per far block state, its real shape and face tiles; mats.section)
-                        if (AtlasMaterials.biomeTinted(st))
-                            m = mats.section(st, name.contains("birch") ? 0x80A755 : name.contains("spruce") ? 0x619961 : d.foliage());
-                        else if (name.equals("grass_block")) m = mats.section(st, d.grass());
-                        else m = mats.section(st, -1);
+                        // (shapes on: one id per far block state, its real shape and face tiles; mats.section) in the
+                        // tint the near field gives it: the chunk's grass and foliage, a constant, or none
+                        m = mats.section(st, AtlasMaterials.tint(st, d.grass(), d.foliage()));
                         local.put(id, m);
                     }
                     out[i] = m;

@@ -30,7 +30,54 @@ struct State {
     uint64_t mask = 0;
     uint32_t mean = 0;
     uint32_t faces[6][16] = {};
+    // its tint source's answer for tint index 0 (quads.bin; 255: not known, blocks.bin's tint kind decides): 0 none, 1
+    // grass, 2 foliage, 3 water, 4 dry foliage, 5 the constant tintConst
+    uint8_t tintSrc = 255;
+    uint32_t tintConst = 0;
 };
+
+// The tint sources quads.bin records per state (AtlasLabExport.quads), into lib: what the game's far materials take
+// (AtlasMaterials.tint): spruce and birch leaves their constants, NirnCraft's snowy spruce leaves none, plants grass.
+inline bool loadTintSources(const std::string& path, std::vector<State>& lib) {
+    std::ifstream f(path, std::ios::binary);
+    if (!f) return false;
+    std::vector<uint8_t> d((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    size_t p = 4;
+    auto u8 = [&]() { return p < d.size() ? d[p++] : uint8_t(0); };
+    auto u32 = [&]() {
+        uint32_t v = 0;
+        if (p + 4 <= d.size()) std::memcpy(&v, &d[p], 4);
+        p += 4;
+        return v;
+    };
+    if (d.size() < 8 || std::memcmp(d.data(), "ALQ1", 4) != 0) return false;
+    for (uint32_t m = 0, nm = u32(); m < nm && p < d.size(); m++) {
+        p += 1;
+        p += size_t(u32()) * 108;  // a quad: 4 x (x y z u v), 4 normals, sprite, 4 u8, i16 tint, 2 u8
+    }
+    p += size_t(u32()) * 18;  // fluid models
+    for (uint32_t i = 0, ns = u32(); i < ns && p < d.size(); i++) {
+        uint32_t id = u32();
+        uint16_t nl = u8();
+        nl = uint16_t(nl | u8() << 8);
+        p += nl + 4 + 2 + 2 + 4;  // name, block, flags, emission, dampening, shade
+        if (u8()) p += 8;  // offset
+        if (int8_t(u8()) >= 0) p += 6;  // fluid
+        uint8_t full = u8(), partial = u8();
+        (void)full;
+        for (int k = 0; k < 6; k++) p += (partial >> k & 1) ? 32 : 0;
+        p += 1;  // skip-same faces
+        uint8_t nt = u8();
+        for (int t = 0; t < nt; t++) {
+            uint8_t kind = u8();
+            uint32_t c = u32();
+            if (t == 0 && id < lib.size()) lib[id].tintSrc = kind, lib[id].tintConst = c;
+        }
+        p += size_t(u8()) * 4;  // variants
+        if (nt == 0 && id < lib.size()) lib[id].tintSrc = 0;
+    }
+    return p <= d.size();
+}
 
 inline bool loadBlocks(const std::string& path, std::vector<State>& lib) {
     std::ifstream f(path, std::ios::binary);
@@ -69,6 +116,9 @@ inline bool loadBlocks(const std::string& path, std::vector<State>& lib) {
                             s.mask |= 1ull << (x + 4 * (z + 4 * y));
         }
     }
+    // the tint sources, from quads.bin beside it (an export without one keeps blocks.bin's tint kinds)
+    auto slash = path.find_last_of("/\\");
+    loadTintSources((slash == std::string::npos ? std::string() : path.substr(0, slash + 1)) + "quads.bin", lib);
     return true;
 }
 
@@ -265,6 +315,9 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
             const State& s = lib[id];
             bool wat = s.cls == 2 && !(s.flags & 4);
             uint32_t tint = s.tint == 1 ? grass : s.tint == 2 ? foliage : s.tint == 3 ? water : 0xFFFFFFu;
+            // the tint the game's far field gives it (AtlasMaterials.tint: its tint source's answer; water as before)
+            if (s.tintSrc != 255 && !wat)
+                tint = s.tintSrc == 1 ? grass : s.tintSrc == 2 ? foliage : s.tintSrc == 5 ? s.tintConst & 0xFFFFFFu : 0xFFFFFFu;
             uint32_t mean = s.mean & 0xFFFFFFu;
             if (wat) mean = water;
             else if (!mean) mean = 0x808080u;
@@ -282,7 +335,11 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
             for (int f = 0; f < 6; f++)
                 for (int t = 0; t < 16; t++) {
                     uint32_t c = s.faces[f][t];
-                    sh.faces[f][t] = (c >> 24) ? mulTint(c, tint) : 0u;
+                    // the game tints the tinted quads' texels (AtlasShapes.face), which are grey: a grass block's
+                    // overlay, not the dirt beside and under it (blocks.bin's tiles are untinted and do not say)
+                    int r = int((c >> 16) & 255), g = int((c >> 8) & 255), b = int(c & 255);
+                    bool grey = std::max(r, std::max(g, b)) - std::min(r, std::min(g, b)) <= 12;
+                    sh.faces[f][t] = (c >> 24) ? (grey || wat || s.tintSrc == 255 ? mulTint(c, tint) : c) : 0u;
                 }
             // cut-out coverage for leaves and plants only (a grass block's overlay alpha is no hole in it)
             sh.flags = (s.cls == 1 || s.cls == 4) && cutouts ? ATLAS_SHAPE_CUTOUT : 0u;

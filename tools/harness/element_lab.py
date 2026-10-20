@@ -14,7 +14,8 @@ at each distance is what a player would see.
 sun or moon with ray traced shadows, sky visibility, shadowed block lights, the pack's tonemap) at --time (6000 day,
 12500 dusk, 18000 night); the renderers are lit the same way: lab-groups and far-groups sample surface cards baked
 with that light (the representation under realistic light), far-lit is atlas_core's own lighting (its sun shadows,
-sky ambient, AO and far lights on the surfaces' albedo cards) through the same tonemap (where its light falls short).
+sky ambient, AO and far lights on the surfaces' albedo cards) through the same tonemap (where its light falls short);
+far-lit-game is the same light on the game's own far materials (no cards): far-lit against it is the materials alone.
 
 Prints one JSON line (the last) with per-distance dE / IoU and the fly-ins' pop; writes a sheet PNG to --out.
 """
@@ -332,13 +333,15 @@ def renderer_args(renderer, el, tmp):
         return "atlas_render", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv",
                                 "box": truth_inputs(el)["box"], "shade": "game" if renderer == "far-game" else "lit",
                                 "flags": "shadows,atmos,sky,actors", "spp": 16, "radius": 0, "groups": 1}
-    if renderer == "far-lit":  # the far field's own light (atlas_core: its sun / moon and shadows, sky ambient, AO, far
-        # lights) on the faces' albedo (cards), through the reference's tonemap: where its lighting falls short
+    if renderer in ("far-lit", "far-lit-game"):  # the far field's own light (atlas_core: its sun / moon and shadows, sky
+        # ambient, AO, far lights) on the faces' albedo (cards), through the reference's tonemap: where its lighting falls
+        # short; far-lit-game: the same light on the game's own materials (no cards): far-lit against it is the materials
         if not realistic():
             raise ValueError("far-lit is scored against the realistic reference: --truth realistic")
         info = light_info()
+        cards = {"surface": bake_cards(el, tmp, "albedo")} if renderer == "far-lit" else {}
         return "atlas_render", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv",
-                                "box": truth_inputs(el)["box"], "surface": bake_cards(el, tmp, "albedo"), "shade": "pack",
+                                "box": truth_inputs(el)["box"], **cards, "shade": "pack",
                                 "flags": "shadows", "sun": f"{info['sunElevation']:.4f},{info['sunAzimuth']:.4f}",
                                 "exposure": f"{info['exposure']:.5f}", "nv": f"{info['nightVision']:.3f}",
                                 "skyhdr": ",".join(f"{v:.6f}" for v in info["skyHdr"]), "lights": 1,
@@ -625,7 +628,7 @@ def main():
     global TRUTH_MODE, TIME
     TRUTH_MODE = a.truth
     TIME = a.time
-    if a.renderer == "far-lit" and not realistic():
+    if a.renderer in ("far-lit", "far-lit-game") and not realistic():
         print("element_lab: far-lit is scored against the realistic reference (--truth realistic)")
         return 2
     if a.view:

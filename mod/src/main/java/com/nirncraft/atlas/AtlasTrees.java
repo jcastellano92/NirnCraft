@@ -46,7 +46,6 @@ final class AtlasTrees {
     static final byte NO_CANOPY = 4;
     private static final int VEGETAL = 9;  // GenerationStep.Decoration.VEGETAL_DECORATION
     private static final int CACHE = 1024;  // a tile and its border (cropped shapes: a few kB each)
-    private static final int BIRCH = 0x80A755, SPRUCE = 0x619961;  // vanilla's fixed leaf colours
 
     private final ServerLevel level;
     private final ChunkGenerator generator;
@@ -139,9 +138,7 @@ final class AtlasTrees {
                         if (waterTop(x, z) - gy > s.maxWater()) continue;
                         if (!FloraTreeFeature.soilFits(s.soil(), groundBlock(x, z))) continue;
                         if (!com.nirncraft.world.PlacementMask.clear(l, x, z, sp.crownReach())) continue;
-                        int tint = s.leaves() == null || !AtlasMaterials.biomeTinted(s.leaves()) ? 0
-                                : leafTint(s.leaves(), x, gy, z);
-                        v.tree(x, gy, z, s, tint);
+                        v.tree(x, gy, z, s, s.leaves() == null ? 0 : blockTint(s.leaves(), x, gy, z));
                     }
                 }
             }
@@ -153,10 +150,11 @@ final class AtlasTrees {
         return h ^ (h >>> 29);
     }
 
-    private int leafTint(BlockState leaves, int x, int y, int z) {
-        String name = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(leaves.getBlock()).getPath();
-        return name.contains("birch") ? BIRCH : name.contains("spruce") ? SPRUCE
-                : surface.biome(x, y, z).value().getFoliageColor() & 0xFFFFFF;
+    /** The tint the near field gives block b at (x, y, z) (AtlasMaterials.tint: its biome's colours there), 0 = none. */
+    private int blockTint(BlockState b, int x, int y, int z) {
+        if (!AtlasMaterials.biomeTinted(b)) return Math.max(0, AtlasMaterials.tint(b, -1, -1));  // a constant, or none
+        Biome biome = surface.biome(x, y, z).value();
+        return Math.max(0, AtlasMaterials.tint(b, biome.getGrassColor(x, z) & 0xFFFFFF, biome.getFoliageColor() & 0xFFFFFF));
     }
 
     /** The trees of a single-player world's overworld, or null when its generator cannot be read (logged). */
@@ -276,16 +274,23 @@ final class AtlasTrees {
         return has;
     }
 
-    /** Leaves that take the biome's foliage colour wear it (birch and spruce their fixed ones). */
+    /**
+     * Roofs and walls wear the tint the near field gives their blocks (leaves the biome's foliage, spruce and birch their
+     * fixed colours): a crown's wall is its leaves, and untinted they were grey (far spruces read whitish).
+     */
     private void tint(AtlasCapture.Shape s) {
         for (int c = 0; c < s.top.length; c++) {
-            BlockState r = s.roof[c];
-            if (r == null || !AtlasMaterials.biomeTinted(r)) continue;
-            if (s.tint == null) s.tint = new int[s.top.length];
-            String name = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(r.getBlock()).getPath();
-            int x = s.x0 + c % s.w, z = s.z0 + c / s.w;
-            s.tint[c] = name.contains("birch") ? BIRCH : name.contains("spruce") ? SPRUCE
-                    : surface.biome(x, (int) s.top[c], z).value().getFoliageColor() & 0xFFFFFF;
+            if (Float.isNaN(s.top[c])) continue;
+            int x = s.x0 + c % s.w, z = s.z0 + c / s.w, y = (int) s.top[c];
+            int rt = s.roof[c] == null ? 0 : blockTint(s.roof[c], x, y, z), wt = s.wall[c] == null ? 0 : blockTint(s.wall[c], x, y, z);
+            if (rt != 0) {
+                if (s.tint == null) s.tint = new int[s.top.length];
+                s.tint[c] = rt;
+            }
+            if (wt != 0) {
+                if (s.wallTint == null) s.wallTint = new int[s.top.length];
+                s.wallTint[c] = wt;
+            }
         }
         trees++;
     }
