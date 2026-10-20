@@ -1976,7 +1976,10 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     // (ATLAS_FRAME_PRIMARY_NEAR) a hit nearer than nearFieldEnd is the near field's: its surface, lit by the near light
     // (nearLightAt, as the host's raster pixels are under FRAME_NEAR_LIGHT); the G-buffer for the host's resolve, or
     // (_LIT) composited here. atlas.h ATLAS_FRAME_PRIMARY_NEAR has the layout.
-    if (primaryNear && !actorFirst && tHit >= 0.0 && tHit < frame.params.x) {
+    // (_LIT, the unified field) every land hit at any distance takes this one light (traced sun, sky, bounce, haze): no
+    // second model past nearFieldEnd, so no line; water past the near field keeps its medium (waterBody) below
+    bool oneLight = (frame.dims.z & FRAME_PRIMARY_NEAR_LIT) != 0u && tHit >= 0.0 && uint(palette[res.mat].emisClass.y) != 2u;
+    if (primaryNear && !actorFirst && tHit >= 0.0 && (tHit < frame.params.x || oneLight)) {
         MaterialGpu m = palette[res.mat];
         uint cls = uint(m.emisClass.y);
         int ax = res.axis < 0 ? 1 : res.axis;
