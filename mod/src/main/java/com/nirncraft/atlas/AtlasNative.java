@@ -30,7 +30,8 @@ public final class AtlasNative {
     public static final int STRUCTURES_REPLACE_CANOPY = 0x1;
     // 0.12: atlas_set_moon, 0.13: atlas_set_jitter, 0.14: atlas_set_material_shapes + FRAME_GROUPS, 0.15: the near
     // light (FRAME_NEAR_LIGHT, GlFrameIO.nearInfoTex / dstNearLight), 0.16: the air (atlas_set_air, atlas_air_*) and
-    // the near field's textures (atlas_set_material_textures), 0.17: the sky's own light (atlas_set_sky_glow) (all optional)
+    // the near field's textures (atlas_set_material_textures), 0.17: the grid's primary near rays (FRAME_PRIMARY_NEAR)
+    // and the sky's own light (atlas_set_sky_glow) (all optional)
     public static final int ABI_VERSION = 0x001100, ABI_MIN = 0x000B00;
     /** The first ABI with the near light (FRAME_NEAR_LIGHT); an older core is never handed the flag or its fields. */
     public static final int ABI_NEAR_LIGHT = 0x000F00;
@@ -49,7 +50,10 @@ public final class AtlasNative {
             FRAME_LIGHT_LOW = 0x8000,  // (abi 0.14, optional) the far field's cheap light, near light included (atlas.h)
             // (abi 0.15, optional) atlas lights the near field's covered pixels with the far light (atlas.h
             // ATLAS_FRAME_NEAR_LIGHT): GlFrameIO.nearInfoTex in, dstNearLight out; the binding drops it for older cores
-            FRAME_NEAR_LIGHT = 0x20000;
+            FRAME_NEAR_LIGHT = 0x20000,
+            // (abi 0.17) atlas draws the near field too: every pixel traced from the camera, near ones (closer than
+            // nearFieldEnd) lit by the near light; PRIMARY_NEAR: a G-buffer (albedo, the light apart), _LIT: composited
+            FRAME_PRIMARY_NEAR = 0x80000, FRAME_PRIMARY_NEAR_LIT = 0x100000;
     /** (abi 0.14) AtlasMaterialShape.flags: texel alpha is coverage (cut-out leaves). */
     public static final int SHAPE_CUTOUT = 0x1;
     /** Far actor gaits (AtlasActor.flags bits 8-9): dragons fold their wings, glide or beat them. */
@@ -139,7 +143,7 @@ public final class AtlasNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, setShapes, setTextures, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, setShapes, setTextures, setPreExposure, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
     // abi 0.10 (null with a 0.9 library)
     private final MethodHandle memoryInfo, setClipmap, debugFault;
@@ -223,6 +227,7 @@ public final class AtlasNative {
         setJitter = bindOptional(l, lib, "atlas_set_jitter", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT, JAVA_FLOAT));
         setShapes = bindOptional(l, lib, "atlas_set_material_shapes", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         setTextures = bindOptional(l, lib, "atlas_set_material_textures", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
+        setPreExposure = bindOptional(l, lib, "atlas_set_pre_exposure", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT));
         uploadStructures3 = bindOptional(l, lib, "atlas_upload_column_structures3",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT));
         setAir = bindOptional(l, lib, "atlas_set_air", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
@@ -742,6 +747,20 @@ public final class AtlasNative {
                         for (int k = 0; k < 256; k++) m.set(JAVA_INT, per * i + 4L * (f * 256 + k), t[f][k]);
                 }
                 check((int) setTextures.invokeExact(ptr, first, m, textures.length), "atlas_set_material_textures");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * (abi 0.16, optional) The exposure the GL images are written with (radiance and irradiance x this: physical
+         * light within half precision); false when the core does not take it (the images then physical, exposure 1).
+         */
+        public boolean setPreExposure(float exposure) {
+            if (setPreExposure == null) return false;
+            try {
+                check((int) setPreExposure.invokeExact(ptr, exposure), "atlas_set_pre_exposure");
                 return true;
             } catch (Throwable t) {
                 throw rethrow(t);

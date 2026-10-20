@@ -211,6 +211,7 @@ vec3 nearLightFiltered(vec2 uv, vec4 nl, vec3 n, float depth) {
         for (int i = -2; i <= 2; i++) {
             vec2 o = vec2(float(i), float(j));
             vec4 q = texture(Sampler6, uv + o * texel);
+            q.rgb /= Ground.w;  // (pre-exposed: back to physical, in full precision)
             vec2 g = uv + o * gtexel;
             float d = texture(Sampler3, g).r;
             if (d <= 0.0) continue;
@@ -249,7 +250,7 @@ vec3 untracedRadiance(vec3 albedo, vec3 n, vec2 lm) {
     float sky = lm.y * lm.y;
     vec3 direct = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * open;
     vec3 bounce = KeyRad.rgb * (max(KeyDir.y, 0.0) * 0.25 * (0.6 - 0.4 * n.y) * sky);
-    vec3 ambient = mix(Ground.rgb, SkyUp.rgb, n.y * 0.5 + 0.5) * (sky * 1.0) + bounce + vec3(0.0025, 0.0025, 0.0035);
+    vec3 ambient = mix(Ground.rgb, SkyUp.rgb, n.y * 0.5 + 0.5) * (sky * 1.0) + bounce + vec3(2.0e-8, 2.0e-8, 3.0e-8);
     return atlasSrgbToLinear(albedo) * (direct + ambient + atlasBlockLight(lm.x));
 }
 
@@ -268,7 +269,49 @@ vec3 environmentalFog(vec3 rgb, float dist, vec3 dir) {
     return mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
 }
 
+// The unified field (KeyDir.w 2: ATLAS_FRAME_PRIMARY_NEAR_LIT): atlas drew every pixel from the camera, near and far
+// lit and hazed alike; its colour is the finished radiance (pre-exposed, premultiplied), its depth the NDC depth in our
+// projection. Our layers go on top: the light in the air, the sun's glare, the eye's medium.
+void unifiedMain() {
+    vec4 c = texture(Sampler4, texCoord);
+    float z = texture(Sampler5, texCoord).r;
+    vec3 dirU = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
+    if (c.a <= 0.002) {
+        if (atlasEyeInWater()) {  // nothing along this ray under water: the water as far as it goes
+            fragColor = vec4(atlasUnderwater(vec3(0.0), 1e4, dirU), 1.0);
+            gl_FragDepth = 0.0;
+            return;
+        }
+        // the sky: what the sky pass drew stays, the light in the air over it, the terrain's shadow in the air dimming it
+        vec3 b = atlasDisplay(airBeams(dirU, 80.0) + sunGlare(dirU), Look.x, Look.y);
+        float cr = crepuscular(dirU, 1e30);
+        if (dot(b, vec3(1.0)) < 1e-4 && cr > 0.999) discard;
+        fragColor = vec4(b, 1.0 - cr);
+        gl_FragDepth = 0.0;
+        return;
+    }
+    // (past the projection's far plane atlas writes minus the distance: behind everything rastered)
+    float dist = z < 0.0 ? -z : length(viewRay(texCoord, z));
+    vec3 radiance = max(c.rgb / Ground.w / max(c.a, 1e-4), vec3(0.0));  // (pre-exposed: back to physical)
+    vec3 rgb;
+    if (atlasEyeInWater()) {
+        rgb = atlasUnderwater(atlasDisplay(radiance, Look.x, Look.y), dist, dirU);
+        fragColor = vec4(rgb, 1.0);  // (under water nothing behind is seen)
+    } else {
+        // the haze in front is the sky's light too: dimmed where the terrain shadows the air (its share grows with distance)
+        float cr = mix(1.0, crepuscular(dirU, dist), 1.0 - exp(-dist / 5000.0));
+        rgb = atlasMedium(atlasDisplay(radiance, Look.x, Look.y), dist) * cr
+            + atlasDisplay(airBeams(dirU, dist) + sunGlare(dirU) * 0.15, Look.x, Look.y);
+        fragColor = vec4(rgb * c.a, c.a);
+    }
+    gl_FragDepth = max(z, 0.0);
+}
+
 void main() {
+    if (KeyDir.w > 1.5) {
+        unifiedMain();
+        return;
+    }
     bool own = Look.z > 0.5;        // our light and look (1: atlas lit this frame; 2: it did not, our light untraced)
     bool traced = Look.z < 1.5;
     float nearDepth = texture(Sampler3, texCoord).r;
@@ -287,13 +330,15 @@ void main() {
             if (traced) {
                 vec4 nl = texture(Sampler6, texCoord);
                 vec4 aerial = texture(Sampler4, texCoord);
+                nl.rgb /= Ground.w;  // (atlas's images pre-exposed: back to physical, in full precision)
+                aerial.rgb /= Ground.w;
                 // atlas's frame a few frames behind the camera (the CPU backend, Look.w): a texel it did not light is
                 // the sky or far terrain of that frame, not this surface's air: no haze rather than black or a ghost
                 if (Look.w > 0.5 && dot(nl.rgb, vec3(1.0)) < 1e-6) aerial = vec4(0.0, 0.0, 0.0, 1.0);
                 // atlas holds every section of the loaded chunks (caves included): its traced light is trusted as it is
                 // (light spills into a cave mouth and fades in), no cap by vanilla's sky light any more
                 vec3 light = nearLightFiltered(texCoord, nl, n, nearDepth);
-                radiance = atlasSrgbToLinear(albedo) * (light + atlasBlockLight(levels.r) + vec3(0.0025, 0.0025, 0.0035));
+                radiance = atlasSrgbToLinear(albedo) * (light + atlasBlockLight(levels.r) + vec3(2.0e-8, 2.0e-8, 3.0e-8));
                 radiance = radiance * aerial.a + aerial.rgb;
             } else {
                 // atlas did not draw this frame (streaming a new place): the same light without its tracing (no cast
@@ -318,6 +363,7 @@ void main() {
         return;
     }
     vec4 c = texture(Sampler4, texCoord);
+    c.rgb /= Ground.w;  // (pre-exposed)
     float d = texture(Sampler5, texCoord).r;
     if (c.a <= 0.002 || d > 1e29) {
         if (atlasEyeInWater()) {

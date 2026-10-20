@@ -225,7 +225,7 @@ final class AtlasSky implements CustomSkyboxRenderer {
                     .putVec4(coeffs[8], coeffs[9], coeffs[10], coeffs[11])
                     .putVec4(coeffs[12], coeffs[13], coeffs[14], coeffs[15])
                     .putVec4(sun[0], sun[1], sun[2], alt)
-                    .putVec4(moon[0], moon[1], moon[2], 0f)
+                    .putVec4(moon[0], moon[1], moon[2], AtlasLook.frame(mc)[0])  // w: the LUT's pre-exposure
                     .putVec4(moon[3], moon[4], moon[5], 0f);
         }
         try (var v = nightInfo.currentBuffer().map(false, true)) {

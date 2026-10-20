@@ -354,6 +354,16 @@ public final class AtlasNearPass {
     }
 
     /** True when the frame's terrain is ours (AtlasClient: read our depth, skip the fallback, resolve instead). */
+    /**
+     * The unified field (the owner's direction, dev flag nirncraft.atlas.unified=true while it is proven): atlas draws all
+     * terrain, near and far, from the real blocks (the GPU grid), one renderer and no line; vanilla's chunk meshes then
+     * only cast the near shadow map and carry the translucents (water) and the depth entities test against comes from
+     * atlas.
+     */
+    static boolean unified() {
+        return "true".equalsIgnoreCase(System.getProperty("nirncraft.atlas.unified")) && owned;
+    }
+
     static boolean owns() {
         return owned && drawn;
     }
@@ -383,6 +393,7 @@ public final class AtlasNearPass {
     }
 
     private static void takeSections() {
+        AtlasLook.beginFrame(Minecraft.getInstance());
         owned = false;
         drawn = false;
         int ji = (jitterIndex++ & 7) + 1;  // 8 Halton (2, 3) offsets
@@ -485,7 +496,7 @@ public final class AtlasNearPass {
         try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(desc)) {
             RenderSystem.bindDefaultUniforms(pass);
             pass.setUniform("Projection", projUbo.currentBuffer());
-            chunks.renderGroup(ChunkSectionLayerGroup.OPAQUE, pass, sampler, atlas, false);
+            if (!unified()) chunks.renderGroup(ChunkSectionLayerGroup.OPAQUE, pass, sampler, atlas, false);  // (unified: atlas's)
         } finally {
             RenderSystem.popPipelineModifier();
         }
@@ -586,13 +597,13 @@ public final class AtlasNearPass {
         try (var view = info.currentBuffer().map(false, true)) {
             com.mojang.blaze3d.buffers.Std140Builder.intoBuffer(view.data())
                     .putVec4(look[0], look[1], !lit ? 0f : traced ? 1f : 2f, AtlasClient.farLags() ? 1f : 0f)
-                    .putVec4(k[0], k[1], k[2], lit ? 1f : 0f)
+                    .putVec4(k[0], k[1], k[2], lit ? (unified() ? 2f : 1f) : 0f)  // w: 1 the near light, 2 the unified field
                     // (w: the eye is in water: the resolve and the water take the medium's absorption)
                     .putVec4(k[3], k[4], k[5], eyeWater)  // w: 0 in air, else 1 + the eye's depth in water
                     .putVec4(k[6], k[7], k[8], 0f)
                     // w: 1 where a special medium blinds the eye (lava, powder snow, blindness, darkness: vanilla's fog
                     // values stand in for its density), 0 otherwise: the distance haze is the air's alone
-                    .putVec4(k[9], k[10], k[11], specialFog(mc, camState))
+                    .putVec4(k[9], k[10], k[11], AtlasClient.preExposure())  // w: the exposure atlas's images carry
                     .putVec4(sun[0], sun[1], sun[2], seconds)
                     .putVec4(still[0], still[1], still[2], still[3])
                     .putVec4(flow[0], flow[1], flow[2], flow[3])

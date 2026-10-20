@@ -129,6 +129,33 @@ void syntheticWeather(AtlasContext* ctx, const std::string& preset, double camX,
     atlas_set_weather(ctx, &w);
 }
 
+// ATLAS_ABLATE for the frames that follow (read by the core every frame)
+void setAblateEnv(uint32_t v) {
+    std::string s = std::to_string(v);
+#ifdef _WIN32
+    _putenv_s("ATLAS_ABLATE", s.c_str());
+#else
+    setenv("ATLAS_ABLATE", s.c_str(), 1);
+#endif
+}
+
+uint32_t envAblate() {
+    const char* v = std::getenv("ATLAS_ABLATE");
+    return v ? uint32_t(std::strtoul(v, nullptr, 0)) : 0u;
+}
+
+// the level-0 grid's sections still waiting for the GPU (atlas_info "voxgrid"), -1 when there is no grid
+long voxgridPending(AtlasContext* ctx) {
+    std::string info = atlas_info(ctx);
+    auto v = info.find("\"voxgrid\":{");
+    if (v == std::string::npos) return -1;
+    auto p = info.find("\"pending\":", v);
+    return p == std::string::npos ? -1 : std::atol(info.c_str() + p + 10);
+}
+
+// ATLAS_ABLATE 134217728: level 0 from the SVDAG regions alone (the grid off)
+constexpr uint32_t ABLATE_NO_VOXGRID = 134217728u;
+
 uint32_t flagsOf(const std::string& s) {
     uint32_t f = 0;
     if (s.find("clouds") != std::string::npos) f |= ATLAS_FRAME_CLOUDS;
@@ -313,6 +340,29 @@ int main(int argc, char** argv) {
                     }
                 }
         }
+        if (num(a, "textest", 0) > 0 && !ex.shapes.empty()) {
+            // textest=1: stand-in 16 x 16 textures (offline exports carry no textures): each face tile's texel spread
+            // over 4 x 4, a one-texel checker darkening every other one, so the sampling, its (u, v) and mips show
+            size_t n = ex.shapes.size();
+            std::vector<uint32_t> tex(n * 6 * 256 + n, 0u);
+            for (size_t m = 0; m < n; m++) {
+                for (int f = 0; f < 6; f++)
+                    for (int v = 0; v < 16; v++)
+                        for (int u = 0; u < 16; u++) {
+                            uint32_t c = ex.shapes[m].faces[f][(u >> 2) + 4 * (v >> 2)];
+                            if (((u ^ v) & 1) && (c >> 24)) {
+                                uint32_t r = ((c >> 16) & 255) * 3 / 4, g = ((c >> 8) & 255) * 3 / 4, b = (c & 255) * 3 / 4;
+                                c = (c & 0xFF000000u) | r << 16 | g << 8 | b;
+                            }
+                            tex[(m * 6 + size_t(f)) * 256 + size_t(u + 16 * v)] = c;
+                        }
+                tex[n * 6 * 256 + m] = 1u;
+            }
+            if (atlas_set_material_textures(ctx, ex.firstMat, tex.data(), uint32_t(n)) != ATLAS_OK) {
+                std::fprintf(stderr, "textures: %s\n", atlas_last_error(ctx));
+                return 2;
+            }
+        }
         if (num(a, "lights", 0) > 0) {  // the emitters as far lights (AtlasEditsClient.lights)
             std::vector<AtlasLight> ls;
             for (const exportdata::Section& sc : secs)
@@ -458,7 +508,11 @@ int main(int argc, char** argv) {
     // interleave=1: timing frames alternate the groups and the voxel path; interleave=light: the far light traced and
     // cheap (ATLAS_FRAME_LIGHT_LOW), the same clocks for both
     uint32_t interleaveBits = str(a, "interleave", "") == "light" ? ATLAS_FRAME_LIGHT_LOW : ATLAS_FRAME_GROUPS;
-    bool interleave = num(a, "interleave", 0) > 0 || str(a, "interleave", "") == "light";
+    // interleave=vg: the other frames with level 0 from the SVDAG alone; interleave=ablate abbits=N: with ATLAS_ABLATE ^ N
+    bool vgAB = str(a, "interleave", "") == "vg" || str(a, "interleave", "") == "ablate";
+    const uint32_t abBits = str(a, "interleave", "") == "vg" ? ABLATE_NO_VOXGRID : uint32_t(std::strtoul(str(a, "abbits", "0").c_str(), nullptr, 0));
+    bool interleave = !vgAB && (num(a, "interleave", 0) > 0 || str(a, "interleave", "") == "light");
+    const uint32_t baseAblate = envAblate();
     std::vector<double> otherTimes;  // (interleave) the other path's timing frames
     int spp = std::max(1, int(num(a, "spp", 1)));
     auto renderOne = [&](const std::string& out, double x, double y, double z, double yawIn, double pitchIn, double fovIn,
@@ -530,10 +584,56 @@ int main(int argc, char** argv) {
         depth.assign(size_t(w) * h, 0.0f);
         linear.assign(size_t(w) * h * 4, 0.0f);
         AtlasFrameOutput o{color.data(), normal.data(), depth.data(), linear.data()};
+        // primarynear=1|2 near=<blocks>: atlas's primary rays are the near field (ATLAS_FRAME_PRIMARY_NEAR: the G-buffer,
+        // composited here as albedo x light; 2: ATLAS_FRAME_PRIMARY_NEAR_LIT, atlas's own composite), the depth output
+        // the host's NDC depth
+        int primaryNear = int(num(a, "primarynear", 0));
+        std::vector<float> pnLight;
+        if (primaryNear > 0) {
+            f.flags |= ATLAS_FRAME_NEAR_LIGHT | (primaryNear == 2 ? ATLAS_FRAME_PRIMARY_NEAR_LIT : ATLAS_FRAME_PRIMARY_NEAR);
+            pnLight.assign(size_t(w) * h * 4, 0.0f);
+            o.nearLight = pnLight.data();
+        }
 
         // spp=N: N jittered samples a pixel (atlas_set_jitter, Halton 2/3 as atlas_truth's spp), averaged: what the host's
         // TAA converges to (the groups' dithered threshold moves with the jitter), against a truth of as many samples
 
+        // the level-0 grid built before anything is timed or compared (a few frames: the backend builds a budget a frame)
+        {
+            AtlasFrameOutput none{color.data(), normal.data(), depth.data(), linear.data()};
+            // (the first frame places the grid's window: before it there is nothing pending to see)
+            for (int k = 0; k < 256; k++) {
+                if (atlas_render(ctx, &f, &none) != ATLAS_OK) return 4;
+                if (voxgridPending(ctx) <= 0) break;
+            }
+        }
+        // reupload=1: every section the core holds sent again (as a burst of edits would), then the CPU update that follows
+        // timed, and the frames until the GPU grid has them again
+        if (num(a, "reupload", 0) > 0 && haveExport) {
+            size_t n = 0;
+            auto u0 = std::chrono::steady_clock::now();
+            for (const exportdata::Held& hs : ex.held)
+                if (hs.sent && atlas_upload_section(ctx, hs.cx, hs.sy, hs.cz, hs.mats.data()) == ATLAS_OK) n++;
+            double upMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - u0).count();
+            u0 = std::chrono::steady_clock::now();
+            if (atlas_update(ctx, c, 0) != ATLAS_OK) return 3;
+            double updMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - u0).count();
+            atlas_get_stats(ctx, &st);
+            AtlasFrameOutput none{color.data(), normal.data(), depth.data(), linear.data()};
+            int frames2 = 0;
+            std::string stageMs;  // the render thread's share of each frame's grid batch (atlas_info voxgrid stageCpuMs)
+            for (; frames2 < 256 && voxgridPending(ctx) > 0; frames2++) {
+                if (atlas_render(ctx, &f, &none) != ATLAS_OK) return 4;
+                std::string inf = atlas_info(ctx);
+                auto sp = inf.find("\"stageCpuMs\":");
+                if (sp != std::string::npos) stageMs += (stageMs.empty() ? "" : " ") + inf.substr(sp + 13, inf.find(',', sp) - sp - 13);
+            }
+            std::fprintf(stderr, "reupload: grid staging ms per frame: %s\n", stageMs.c_str());
+            std::string info = atlas_info(ctx);
+            auto vg = info.find("\"totalGpuMs\":");
+            std::printf("{\"reupload\":{\"sections\":%zu,\"uploadMs\":%.1f,\"cpuUpdateMs\":%.1f,\"buildMs\":%.1f,\"gridFrames\":%d,%s}}\n", n,
+                        upMs, updMs, st.lastBuildMs, frames2, vg == std::string::npos ? "\"grid\":null" : info.substr(vg, info.find('}', vg) - vg).c_str());
+        }
         best = 1e30;
         std::vector<double> times;
         otherTimes.clear();
@@ -566,9 +666,11 @@ int main(int argc, char** argv) {
 #endif
                 }
                 // interleave=1: timing frames alternate the groups and the voxel path (the same clocks for both)
-                bool other = interleave && smp == 0 && i < frames && (i & 1);
+                bool other = (interleave || vgAB) && smp == 0 && i < frames && (i & 1);
                 uint32_t keepFlags = f.flags;
-                if (other) f.flags ^= interleaveBits;
+                if (other && interleave) f.flags ^= interleaveBits;
+                // interleave=vg: the other frames trace level 0 from the SVDAG regions (the grid off)
+                if (vgAB) setAblateEnv(other ? baseAblate ^ abBits : baseAblate);
                 if (atlas_render(ctx, &f, &o) != ATLAS_OK) {
                     std::fprintf(stderr, "render: %s\n", atlas_last_error(ctx));
                     return 4;
@@ -578,6 +680,64 @@ int main(int argc, char** argv) {
                 if (smp == 0 && i < frames) {
                     (other ? otherTimes : times).push_back(st.lastFrameMs);
                     if (!other) best = std::min(best, st.lastFrameMs);
+                }
+            }
+            // vgcheck=1: the same frame with level 0 from the SVDAG regions (the grid off): where either hits, the hit
+            // distance and the surface word (normal, class) compared pixel by pixel
+            if (smp == 0 && num(a, "vgcheck", 0) > 0) {
+                std::vector<uint32_t> n2(normal.size());
+                std::vector<float> d2(depth.size()), l2(linear.size());
+                AtlasFrameOutput o2{nullptr, n2.data(), d2.data(), l2.data()};
+                setAblateEnv(baseAblate | ABLATE_NO_VOXGRID);
+                AtlasStatus rs = atlas_render(ctx, &f, &o2);
+                setAblateEnv(baseAblate);
+                if (rs != ATLAS_OK) return 4;
+                size_t both = 0, exact = 0, within1 = 0, far1 = 0, onlyGrid = 0, onlyOld = 0, sameWord = 0;
+                double maxDiff = 0;
+                for (size_t i = 0; i < depth.size(); i++) {
+                    bool h1 = depth[i] < 1e29f, h2 = d2[i] < 1e29f;
+                    if (h1 && !h2) onlyGrid++;
+                    if (!h1 && h2) onlyOld++;
+                    if (!h1 || !h2) continue;
+                    both++;
+                    double dd = std::fabs(double(depth[i]) - double(d2[i]));
+                    maxDiff = std::max(maxDiff, dd);
+                    if (dd < 0.01) exact++;
+                    else if (dd < 1.0) within1++;
+                    else far1++;
+                    if (dd >= 0.01 && num(a, "vgcheck", 0) > 2 && within1 + far1 <= 12) {
+                        float nx = (float(i % w) + 0.5f) / float(w) * 2.0f - 1.0f, ny = 1.0f - (float(i / w) + 0.5f) / float(h) * 2.0f, q[4];
+                        for (int r = 0; r < 4; r++) q[r] = inv[r] * nx + inv[4 + r] * ny + inv[8 + r] * 0.5f + inv[12 + r];
+                        float l = std::sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2]);
+                        std::fprintf(stderr, "vgcheck: pixel %zu,%zu grid %.3f (%.2f %.2f %.2f) old %.3f (%.2f %.2f %.2f) words %08x %08x\n", i % w,
+                                     i / w, depth[i], x + q[0] / l * depth[i], y + q[1] / l * depth[i], z + q[2] / l * depth[i], d2[i],
+                                     x + q[0] / l * d2[i], y + q[1] / l * d2[i], z + q[2] / l * d2[i], normal[i], n2[i]);
+                        // what the uploaded sections hold just inside each hit (-1: no section there)
+                        auto heldAt = [&](double t) -> int {
+                            double px = x + q[0] / l * t, py = y + q[1] / l * t, pz = z + q[2] / l * t;
+                            int bx = int(std::floor(px)), by = int(std::floor(py)), bz = int(std::floor(pz));
+                            int cx = bx >> 4, sy = by >> 4, cz = bz >> 4;
+                            for (const exportdata::Held& hs : ex.held)
+                                if (hs.cx == cx && hs.sy == sy && hs.cz == cz)
+                                    return hs.mats[size_t((bx & 15) + 16 * ((bz & 15) + 16 * (by & 15)))];
+                            return -1;
+                        };
+                        std::fprintf(stderr, "vgcheck:   held at grid hit %d, at old hit %d\n", heldAt(depth[i] + 0.02), heldAt(d2[i] + 0.02));
+                    }
+                    sameWord += normal[i] == n2[i];
+                }
+                std::printf("{\"vgcheck\":{\"pixels\":%zu,\"bothHit\":%zu,\"within0.01\":%zu,\"within1\":%zu,\"beyond1\":%zu,"
+                            "\"onlyGrid\":%zu,\"onlyOld\":%zu,\"sameSurfaceWord\":%zu,\"maxDiff\":%.3f}}\n",
+                            depth.size(), both, exact, within1, far1, onlyGrid, onlyOld, sameWord, maxDiff);
+                if (num(a, "vgcheck", 0) > 1) {  // vgcheck=2: <out>_vgdiff.png, red where the hit moved by a block or more
+                    std::vector<uint32_t> im(depth.size());
+                    for (size_t i = 0; i < depth.size(); i++) {
+                        bool h1 = depth[i] < 1e29f, h2 = d2[i] < 1e29f;
+                        float dd = h1 && h2 ? std::fabs(depth[i] - d2[i]) : (h1 != h2 ? 1e9f : 0.0f);
+                        uint32_t g = uint32_t(std::min(255.0f, 40.0f + 200.0f * std::log2(1.0f + (h1 ? depth[i] : 0.0f)) / 12.0f));
+                        im[i] = dd >= 1.0f ? 0xFF0000FFu : dd >= 0.01f ? 0xFF00C0FFu : 0xFF000000u | g << 16 | g << 8 | g;
+                    }
+                    atlas::writePng(out.substr(0, out.size() - 4) + "_vgdiff.png", im.data(), w, h);
                 }
             }
             if (mcShade) {
@@ -606,6 +766,12 @@ int main(int argc, char** argv) {
                     color[i] = px;
                 }
             }
+            if (primaryNear == 1) {
+                // the G-buffer's near pixels (class | 0x80): albedo x light (the air is the host's: left out here)
+                for (size_t i = 0; i < depth.size(); i++)
+                    if ((normal[i] >> 16) & 0x80u)
+                        for (int k = 0; k < 3; k++) linear[i * 4 + size_t(k)] *= pnLight[i * 4 + size_t(k)];
+            }
             if (nearLight) {
                 // the frame's surfaces as the near field: their albedo (FRAME_DEBUG_ALBEDO), then the near light on
                 // this frame's own depth and normals (as the native tests feed it), composed as the game's resolve does
@@ -630,6 +796,98 @@ int main(int argc, char** argv) {
                 if (atlas_render(ctx, &fa, &oa) != ATLAS_OK || atlas_render(ctx, &fn, &on) != ATLAS_OK) {
                     std::fprintf(stderr, "render (near light): %s\n", atlas_last_error(ctx));
                     return 4;
+                }
+                // vgcheck=1: the near light with level 0 from the SVDAG regions (the grid off), compared
+                if (smp == 0 && num(a, "vgcheck", 0) > 0) {
+                    std::vector<float> nl2(nl.size()), lin2(linear.size());
+                    AtlasFrameOutput o2{nullptr, nullptr, nullptr, lin2.data(), nl2.data()};
+                    setAblateEnv(baseAblate | ABLATE_NO_VOXGRID);
+                    AtlasStatus rs = atlas_render(ctx, &fn, &o2);
+                    setAblateEnv(baseAblate);
+                    if (rs != ATLAS_OK) return 4;
+                    size_t px = 0, off2 = 0, off10 = 0, visDiff = 0;
+                    double sumA = 0, sumD = 0;
+                    for (size_t i = 0; i < nd.size(); i++) {
+                        if (nd[i] >= 1e29f) continue;
+                        px++;
+                        double a1 = 0, d1 = 0;
+                        for (int k = 0; k < 3; k++) a1 += nl[i * 4 + k], d1 += std::fabs(double(nl[i * 4 + k]) - nl2[i * 4 + k]);
+                        sumA += a1;
+                        sumD += d1;
+                        if (d1 > 0.02 * std::max(a1, 0.05)) off2++;
+                        if (d1 > 0.10 * std::max(a1, 0.05)) off10++;
+                        visDiff += std::fabs(nl[i * 4 + 3] - nl2[i * 4 + 3]) > 0.01f;
+                    }
+                    std::printf("{\"vgcheckNearLight\":{\"pixels\":%zu,\"meanRelDiff\":%.5f,\"over2pct\":%zu,\"over10pct\":%zu,"
+                                "\"sunVisDiffers\":%zu}}\n", px, sumA > 0 ? sumD / sumA : 0.0, off2, off10, visDiff);
+                }
+                // nlframes=N nlablate=a,b,..: the near light's frame timed N rounds, the ATLAS_ABLATE variants interleaved
+                // round by round (the same clocks for all); nlcount=1 also sums its secondary rays' counters per
+                // variant (bits 23-25: iterations, mip skips, mip probes, node loads, solid voxels, passes, rays)
+                if (smp == 0 && num(a, "nlframes", 0) > 0) {
+                    std::vector<uint32_t> variants;
+                    {
+                        std::string vs = str(a, "nlablate", "0");
+                        for (size_t p = 0; p < vs.size();) {
+                            size_t q = vs.find(',', p);
+                            if (q == std::string::npos) q = vs.size();
+                            variants.push_back(uint32_t(std::strtoul(vs.substr(p, q - p).c_str(), nullptr, 0)));
+                            p = q + 1;
+                        }
+                    }
+                    auto setAblate = [](uint32_t v) {
+                        std::string s = std::to_string(v);
+#ifdef _WIN32
+                        _putenv_s("ATLAS_ABLATE", s.c_str());
+#else
+                        setenv("ATLAS_ABLATE", s.c_str(), 1);
+#endif
+                    };
+                    size_t nearPx = 0;
+                    for (float d : nd) nearPx += d < 1e29f ? 1 : 0;
+                    int rounds = int(num(a, "nlframes", 0));
+                    std::vector<std::vector<double>> ms(variants.size());
+                    // (timed with the outputs on the device, as in game: written across the bus they cost more than the rays)
+                    auto deviceOutputs = [&](bool on) {
+                        if (be != ATLAS_BACKEND_VULKAN) return;
+#ifdef _WIN32
+                        _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", on ? "1" : "");
+#else
+                        if (on) setenv("ATLAS_TIMING_DEVICE_OUTPUTS", "1", 1); else unsetenv("ATLAS_TIMING_DEVICE_OUTPUTS");
+#endif
+                    };
+                    deviceOutputs(true);
+                    for (int r = 0; r < rounds; r++)
+                        for (size_t k = 0; k < variants.size(); k++) {
+                            setAblate(variants[k]);
+                            if (atlas_render(ctx, &fn, &on) != ATLAS_OK) return 4;
+                            atlas_get_stats(ctx, &st);
+                            ms[k].push_back(st.lastFrameMs);
+                        }
+                    deviceOutputs(false);
+                    for (size_t k = 0; k < variants.size(); k++) {
+                        std::vector<double> t = ms[k];
+                        std::sort(t.begin(), t.end());
+                        std::string counts;
+                        if (num(a, "nlcount", 0) > 0) {
+                            counts = ",\"counts\":{";
+                            const char* names[8] = {"", "iterations", "mipSkips", "mipProbes", "nodeLoads", "solidVoxels", "passes", "rays"};
+                            for (uint32_t m = 1; m < 8; m++) {
+                                setAblate(variants[k] | (m << 23) | (num(a, "nlcount", 0) > 1 ? 67108864u : 0u));
+                                if (atlas_render(ctx, &fn, &on) != ATLAS_OK) return 4;
+                                atlas_get_stats(ctx, &st);
+                                char cb[96];
+                                std::snprintf(cb, sizeof cb, "%s\"%s\":%llu", m > 1 ? "," : "", names[m], (unsigned long long)st.raySteps);
+                                counts += cb;
+                            }
+                            counts += "}";
+                        }
+                        std::printf("{\"nearLight\":{\"ablate\":%u,\"nearPixels\":%zu,\"medianMs\":%.3f,\"p25Ms\":%.3f,\"bestMs\":%.3f,\"rounds\":%d%s}}\n",
+                                    variants[k], nearPx, t[t.size() / 2], t[t.size() / 4], t[0], rounds, counts.c_str());
+                    }
+                    setAblate(baseAblate);
+                    // the timed frames wrote the same buffers: the last variant's light stays in `nl` (re-render plain)
+                    if (atlas_render(ctx, &fn, &on) != ATLAS_OK) return 4;
                 }
                 for (size_t i = 0; i < depth.size(); i++) {
                     if (depth[i] >= 1e29f) continue;
@@ -889,6 +1147,8 @@ int main(int argc, char** argv) {
         if (g != std::string::npos) extra += "," + info.substr(g, info.find('}', g) - g + 1);
         auto cs = info.find("\"coarse\":{");  // the coarse levels of real content (memory, cubes per level)
         if (cs != std::string::npos) extra += "," + info.substr(cs, info.find('}', cs) - cs + 1);
+        auto vg = info.find("\"voxgrid\":{");  // the level-0 grid: slots, memory, GPU build times
+        if (vg != std::string::npos) extra += "," + info.substr(vg, info.find('}', vg) - vg + 1);
         char buf[512];
         if (haveExport) {
             std::snprintf(buf, sizeof buf, ",\"export\":{\"sections\":%zu,\"materials\":%zu,\"shaped\":%zu,\"loadMs\":%.0f}", ex.sections,

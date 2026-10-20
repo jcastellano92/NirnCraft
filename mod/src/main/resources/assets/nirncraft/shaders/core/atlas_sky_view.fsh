@@ -9,5 +9,5 @@ layout(location = 0) out vec4 fragColor;
 
 void main() {
     vec3 dir = atlasSkyViewDir(texCoord, AirSun.xyz);
-    fragColor = vec4(airSkyRadiance(dir), 1.0);
+    fragColor = vec4(airSkyRadiance(dir) * AirMoon.w, 1.0);  // (pre-exposed: physical night skies within half precision)
 }

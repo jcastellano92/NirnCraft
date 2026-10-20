@@ -25,7 +25,7 @@ void main() {
     vec4 p = InvViewProj * vec4(texCoord * 2.0 - 1.0, 0.5, 1.0);
     vec3 dir = normalize(p.xyz / p.w);
     vec3 sun = normalize(Sun.xyz);
-    vec3 c = atlasSky(SkyView, dir, sun);
+    vec3 c = atlasSky(SkyView, dir, sun, Look.x);
     // the sky's lights at the pixel's own size (a star's light kept in its footprint), the aurora's march dithered
     c += nightSky(dir, length(fwidth(dir)) * 0.7071, nightDither(gl_FragCoord.xy), NIGHT_ALL, 24);
     // the sun's disc. High up its glare (near_resolve's sunGlare) swallows it: a bright blob. Low down the long air

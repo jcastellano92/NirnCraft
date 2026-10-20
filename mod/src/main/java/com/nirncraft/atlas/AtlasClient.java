@@ -426,6 +426,9 @@ public final class AtlasClient {
                 if (!com.nirncraft.atmosphere.client.WeatherFieldTexture.isOff()) frame.flags |= AtlasNative.FRAME_CLOUDS;
                 frame.flags &= ~AtlasNative.FRAME_VANILLA_LIGHT;
                 if (AtlasTruthView.noFog) frame.flags &= ~AtlasNative.FRAME_ATMOS;
+                // the unified field: atlas traces every pixel from the camera, near and far lit and hazed alike (mode A:
+                // composited; B, the G-buffer, waits for the resolve to haze near pixels itself)
+                if (AtlasNearPass.unified() && lib.abi() >= 0x001100) frame.flags |= AtlasNative.FRAME_PRIMARY_NEAR_LIT;
             }
             io.nearInfoTex = nearLit ? AtlasNearPass.infoGlId() : 0;
             io.dstNearLight = nearLit ? targets.nearLightId() : 0;
@@ -447,6 +450,8 @@ public final class AtlasClient {
             io.dstDepth = targets.depthId();
             io.dstSunMap = targets.sunId();
             if (firstFrame && guard != null) guard.firstFrames();  // a driver crash from here on is the guard's case
+            // the images pre-exposed with this frame's eye (the resolve divides it out at once, in full precision)
+            preExposure = ctx.setPreExposure(AtlasLook.frame(mc)[0]) ? AtlasLook.frame(mc)[0] : 1f;
             ctx.glRender(frame, io);
             farThisFrame = true;
             nearLitThisFrame = nearLit;
@@ -834,6 +839,13 @@ public final class AtlasClient {
     /** Whether the sky's layers should go into the reflection cube this frame (atlas lights the near pass). */
     public static boolean wantsSkyCube() {
         return AtlasNearPass.litThisFrame() || AtlasNearPass.owns();
+    }
+
+    private static float preExposure = 1f;
+
+    /** The exposure atlas's GL images were written with this frame (1: physical). */
+    static float preExposure() {
+        return preExposure;
     }
 
     public static float eyeExposureLog2() {

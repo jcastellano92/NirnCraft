@@ -20,8 +20,22 @@ final class AtlasLook {
 
     private AtlasLook() {}
 
-    /** {exposure (linear multiplier), night vision strength} for this frame. */
+    private static float[] frameLook = {1f, NIGHT_VISION};
+
+    /**
+     * {exposure (linear multiplier), night vision strength} for this frame: the eye advanced once at the frame's start
+     * (beginFrame), the same value for the sky, atlas's pre-exposure and the resolve.
+     */
     static float[] frame(Minecraft mc) {
+        return frameLook;
+    }
+
+    /** At the frame's start (AtlasNearPass.takeSections): the eye adapts once. */
+    static void beginFrame(Minecraft mc) {
+        frameLook = computeFrame(mc);
+    }
+
+    private static float[] computeFrame(Minecraft mc) {
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
         float target = 1f;
         if (mc.level != null && mc.player != null)

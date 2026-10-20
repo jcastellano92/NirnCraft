@@ -32,13 +32,16 @@ public final class NightSkyMath {
     public static final double AURORA_OVAL_RADIUS = 2400.0;
 
     // the moons: angular radii of their discs (the old quads: 20 and 7 at 100 blocks, the disc 0.916 of the quad),
-    // their full light (LunarKey's scale: pi x 0.04 x the share), colours, and their albedo maps' mean (linear, the
-    // full phase's cell of masser_phases.png / secunda_phases.png)
+    // their full light (LunarKey's scale: pi x 1e-5 x the share, physical: Masser full ~ a real full moon), colours,
+    // and their albedo maps' mean (linear, the full phase's cell of masser_phases.png / secunda_phases.png)
     public static final double MASSER_RADIUS = Math.atan(0.916 * 20.0 / 100.0);
     public static final double SECUNDA_RADIUS = Math.atan(0.91 * 7.0 / 100.0);
     public static final float[] MASSER_COLOUR = {1.0f, 0.70f, 0.62f};
     public static final float[] SECUNDA_COLOUR = {0.93f, 0.96f, 1.0f};
-    public static final double MASSER_SHARE = 0.80, SECUNDA_SHARE = 0.20, MOON_SCALE = 0.04;
+    public static final double MASSER_SHARE = 0.80, SECUNDA_SHARE = 0.20, MOON_SCALE = 1.0e-5;
+    /** By day a moon's disc shows its sunlit regolith, faintly (this share of a real surface's brightness, an
+     *  albedo-1 surface under the sun ~ 3.74): a pale disc on the blue. By night its light is its key light's. */
+    private static final double DAY_DISC = 0.05, SUNLIT_SURFACE = 3.74;
     private static final double[] MASSER_ALBEDO = {0.1708, 0.1304, 0.1494};
     private static final double[] SECUNDA_ALBEDO = {0.1077, 0.1110, 0.1063};
     /** Secunda's orbit: inclined to the sun's path (LunarKey: -24 degrees about east). */
@@ -165,7 +168,8 @@ public final class NightSkyMath {
     // ------------------------------------------------------------------------------------------------ the night's lift
 
     /** The emitters' scale: 1 by day (physical against the sun), the moon's lift by night (its light over a real full
-     *  moon's: the emitters keep their real ratios to the host's moon), eased in log while the sun goes down. */
+     *  moon's: the emitters keep their real ratios to the host's moon), eased in log while the sun goes down. With the
+     *  physical moon (LunarKey x 1e-5, pre-exposure carrying the range) it is ~0.8: the emitters at their real levels. */
     public static double nightGain(double sunY) {
         double masserFull = Math.PI * MOON_SCALE * MASSER_SHARE * lum(MASSER_COLOUR[0], MASSER_COLOUR[1], MASSER_COLOUR[2]);
         double g = masserFull / REAL_FULL_MOON;
@@ -221,7 +225,8 @@ public final class NightSkyMath {
         for (Moon moon : new Moon[] {m, s}) {
             boolean on = moon == m || f.secundaOn;
             p = put(o, p, moon.dir[0], moon.dir[1], moon.dir[2], moon.radius);
-            p = put(o, p, moon.up[0], moon.up[1], moon.up[2], moon.discScale);
+            double day = DAY_DISC * SUNLIT_SURFACE * smooth(-0.10, 0.15, sun[1]);
+            p = put(o, p, moon.up[0], moon.up[1], moon.up[2], moon.discScale + day);
             p = put(o, p, moon.tint[0], moon.tint[1], moon.tint[2], on ? 1.0 : 0.0);
         }
         double k = AURORA_KM_PER_BLOCK;

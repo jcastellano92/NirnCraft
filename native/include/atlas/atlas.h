@@ -37,7 +37,8 @@ extern "C" {
    0.15 the near light (ATLAS_FRAME_NEAR_LIGHT: AtlasFrame.nearInfo, AtlasFrameOutput.nearLight, AtlasGlFrameIO
    nearInfoTex / dstNearLight; every new field is read only when the frame sets the flag, so a 0.14 caller's smaller
    structs stay valid); 0.16 the air (AtlasAir, atlas_set_air, atlas_air_*: a physical sky, sun and haze) and the
-   near field's textures (atlas_set_material_textures); 0.17 the sky's own light (atlas_set_sky_glow). */
+   near field's textures (atlas_set_material_textures); 0.17 the near field from atlas's own primary rays
+   (ATLAS_FRAME_PRIMARY_NEAR / _LIT) over the GPU-built level-0 grid, and the sky's own light (atlas_set_sky_glow). */
 #define ATLAS_ABI_VERSION 0x001100
 
 typedef struct AtlasContext AtlasContext;
@@ -188,6 +189,29 @@ typedef struct AtlasFrame {
  * .dstNearLight out (both needed, else the flag is dropped for the frame). An older core ignores the bit and the fields.
  */
 #define ATLAS_FRAME_NEAR_LIGHT 0x20000u
+
+/*
+ * (abi 0.17) The near field drawn by atlas's own primary rays (the GPU-built level-0 grid: real
+ * blocks, shapes, the 16 x 16 textures of atlas_set_material_textures) instead of the host's raster. Every pixel is
+ * traced from the camera (AtlasFrame.nearFieldEnd is then only where near ends and far begins: no near depth is read).
+ * Set with ATLAS_FRAME_NEAR_LIGHT and a near-light output (AtlasFrameOutput.nearLight, AtlasGlFrameIO.dstNearLight; the
+ * near inputs are not needed). A hit nearer than nearFieldEnd is a NEAR pixel:
+ *  ATLAS_FRAME_PRIMARY_NEAR (a G-buffer, the host resolves it):
+ *    color     rgb its albedo, LINEAR (textured), a = 1
+ *    nearLight rgb the irradiance on a white diffuse surface there, a = the key light's visibility (the near light as
+ *              ATLAS_FRAME_NEAR_LIGHT computes it: traced sun, sky, one bounce, the far lights; the air left out)
+ *  ATLAS_FRAME_PRIMARY_NEAR_LIT (composited, a reference): color = albedo x light x T + inscatter, premultiplied, a = 1;
+ *    nearLight as above
+ *  normal    octahedral normal in rg, b = the material class (0 solid, 1 foliage, 2 water, 3 emissive, 4 plant, 5 falls)
+ *            | 0x80: a NEAR pixel; a = the key light's visibility
+ * Every other pixel (hits at or past nearFieldEnd, sky) is a FAR pixel exactly as without the flag (premultiplied
+ * radiance with the air applied, a = coverage; class without 0x80). Under either flag the depth output of EVERY pixel
+ * is the NDC depth (clip z / w) in the host's own projection (the inverse of AtlasFrame.invViewProj: reverse-Z if that
+ * is); a point past its far plane (or the sky) MINUS its distance (blocks; the sky -1e7): behind all the host rasters,
+ * its distance kept for the host's haze. Near primary rays pass water (the host rasters the water surface itself).
+ */
+#define ATLAS_FRAME_PRIMARY_NEAR 0x80000u
+#define ATLAS_FRAME_PRIMARY_NEAR_LIT 0x100000u
 
 /*
  * Frame outputs (any pointer may be NULL to skip). Layout matches the shared G-buffer images:
@@ -561,6 +585,13 @@ typedef struct AtlasMaterialShape {
  */
 ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t first, const uint32_t* textures,
                                                   uint32_t count);
+/*
+ * (abi 0.16) Pre-exposure: the GL path's half-float images (colour: radiance and the near field's inscatter; the near
+ * light's irradiance) are written multiplied by this (the host's exposure for the coming frame), so physical light
+ * spanning sunlight to starlight stays within half precision; transmittances, depths and the near light's visibility
+ * are not scaled. 1 by default (the images in physical units, as before). The host displays them with exposure 1.
+ */
+ATLAS_API AtlasStatus atlas_set_pre_exposure(AtlasContext* ctx, float exposure);
 ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t first, const AtlasMaterialShape* shapes,
                                                 uint32_t count);
 /*

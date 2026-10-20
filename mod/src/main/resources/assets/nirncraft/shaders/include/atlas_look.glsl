@@ -5,13 +5,16 @@
 // the same numbers as native/tools/pack_look.hpp, which the far field's offline tools hold to.
 
 // the light map's block light as colour: warm firelight (lighting.glsl)
+// physical: a torch lights its own block at about a thousandth of noon sunlight (BLOCK_LIGHT_SCALE; atlas_shared.slang's
+// far lights the same): in daylight a torch adds nothing, at night it outshines a full moon by hundreds
+const float BLOCK_LIGHT_SCALE = 0.001;
 vec3 atlasBlockLight(float bl) {
-    return vec3(1.0, 0.62, 0.32) * (pow(bl, 3.2) * 1.8 + pow(bl, 12.0) * 2.0);
+    return vec3(1.0, 0.62, 0.32) * (pow(bl, 3.2) * 1.8 + pow(bl, 12.0) * 2.0) * BLOCK_LIGHT_SCALE;
 }
 
 vec3 atlasNightVision(vec3 c, float strength) {
     float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
-    float m = clamp((log2(0.08) - log2(max(l, 1e-6))) / 3.6, 0.0, 1.0) * strength;
+    float m = clamp((log2(4e-5) - log2(max(l, 1e-12))) / 4.0, 0.0, 1.0) * strength;  // (physical: rods under ~1e-5 of noon)
     float rod = 0.04 * c.r + 0.5 * c.g + 0.46 * c.b;
     return mix(c, vec3(0.6, 0.8, 1.2) * (rod / 0.787), m);
 }

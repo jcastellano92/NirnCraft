@@ -66,7 +66,7 @@ void main() {
     float az = atan(q.x, q.y);
     vec3 dir = vec3(sin(zen) * sin(az), cos(zen), -sin(zen) * cos(az));
     float pix = 1.5707963 / 360.0;
-    vec3 air = atlasSky(SkyView, dir, AirSun.xyz);
+    vec3 air = atlasSky(SkyView, dir, AirSun.xyz, AirMoon.w);
     vec3 night = nightSky(dir, pix, nightDither(gl_FragCoord.xy), NIGHT_ALL, 48);
     vec3 c = Mode == 2 ? night : Mode == 3 ? air : air + night;
     fragColor = Mode == 0 ? vec4(atlasDisplay(c, Exposure, 0.85), 1.0) : vec4(c, 1.0);
@@ -203,8 +203,8 @@ class Sky:
         sun = m["sun"]
         ml = m["moonlights"]  # key dir, key E, fill dir, fill E (irradiance above the air)
         fade = smooth(0.1, 0.0, sun[1])
-        tail = [*sun, args["eyeKm"], *ml[0:3], 0.0, *(e * fade for e in ml[3:6]), 0.0]
-        self.ubo_air.write(np.array(self.coeffs + tail, dtype="f4").tobytes())
+        self._air_tail = [*sun, args["eyeKm"], *ml[0:3], 1.0, *(e * fade for e in ml[3:6]), 0.0]
+        self.ubo_air.write(np.array(self.coeffs + self._air_tail, dtype="f4").tobytes())
         night = np.array(m["night"], dtype="f4")
         night[-4] = 1.0  # NightTarget: pre-exposure 1 here, the cube's texel
         night[-3] = (math.pi / 2) / 96.0
@@ -212,14 +212,17 @@ class Sky:
         self.ubo_signs.write(np.array(m["signs"], dtype="f4").tobytes())
         self.sun = sun
         self.moonlights = ml
-        # the LUT, as AtlasSky draws it
-        self._bind(self.view_prog)
-        self.lut_fbo.use()
-        self.vao[self.view_prog].render(moderngl.TRIANGLES, vertices=3)
         # the air's light at the eye (atlas_air_light: the key moon), the emitters' light (the light pass)
         # (a moonless night: a token light, else the core falls back to its old moonlight; AtlasClient does the same)
         self.air_light = self.core.light(sun, ml[0:3], [max(e / math.pi, 1e-9) for e in ml[3:6]], EYE_Y)
         self.sh = self.light()
+        # the LUT, as AtlasSky draws it: pre-exposed by the eye's exposure (AirMoon.w), read back with the same
+        self.pre = self.exposure(extra_up=float(lum(self.irradiance((0, 1, 0)))))
+        self._air_tail[7] = self.pre
+        self.ubo_air.write(np.array(self.coeffs + self._air_tail, dtype="f4").tobytes())
+        self._bind(self.view_prog)
+        self.lut_fbo.use()
+        self.vao[self.view_prog].render(moderngl.TRIANGLES, vertices=3)
 
     def light(self):
         tex = self.gl.texture((4, 1), 4, dtype="f4")
@@ -244,9 +247,9 @@ class Sky:
         up = lum(k[6:9]) * math.pi
         e = 0.18 * (key + up + extra_up) / math.pi
         s = math.log2(max(e, 1e-9))
-        dayness = smooth(-9.0, -1.5, s)
+        dayness = smooth(-19.0, -6.0, s)
         target = math.log2(0.004) + (math.log2(0.18) - math.log2(0.004)) * dayness
-        return 2.0 ** min(max(target - s, -4.5), 5.0)
+        return 2.0 ** min(max(target - s, -4.5), 12.0)
 
     def view(self, w, h, yaw, pitch, fov, exposure):
         """A perspective view through the game's core/atlas_sky.fsh (displayed, sRGB 8 bit)."""
@@ -375,7 +378,7 @@ def main():
         ml = sky.moonlights
         key_e = lum(ml[3:6]) * max(ml[1], 0)
         fill_e = lum(ml[9:12]) * max(ml[7], 0)
-        expo = sky.exposure(extra_up=e_up)
+        expo = sky.pre  # (the eye's exposure: the LUT's pre-exposure, the display's)
         lin = sky.dome(361, 1)
         nightonly = sky.dome(361, 2)
         air = sky.dome(361, 3)

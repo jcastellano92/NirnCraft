@@ -145,7 +145,7 @@ final class AtlasAir {
      *  while the sun is up), as atlas_air.glsl's AirMoon / AirMoonE take them; the default moonlight opposite the sun. */
     static float[] moonFor(float[] sun) {
         float[] d = moonDir != null ? moonDir : new float[] {-sun[0], -sun[1], -sun[2]};
-        float[] r = moonRad != null ? moonRad : new float[] {0.035f, 0.05f, 0.09f};
+        float[] r = moonRad != null ? moonRad : new float[] {8.7e-6f, 1.25e-5f, 2.2e-5f};  // (physical: ~1/400000 of the sun)
         float fade = (float) Math.PI * smooth(0.1f, 0f, sun[1]);
         return new float[] {d[0], d[1], d[2], r[0] * fade, r[1] * fade, r[2] * fade};
     }

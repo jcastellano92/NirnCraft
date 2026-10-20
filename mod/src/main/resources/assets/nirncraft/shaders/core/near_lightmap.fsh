@@ -16,7 +16,7 @@ void main() {
     vec3 n = normalize(vec3(0.0, 1.0, 0.6));
     vec3 direct = KeyRad.rgb * 0.5 * open;
     vec3 bounce = KeyRad.rgb * (max(KeyDir.y, 0.0) * LOOK_BOUNCE * 0.5 * sky);
-    vec3 ambient = mix(Ground.rgb, SkyUp.rgb, n.y * 0.5 + 0.5) * (sky * LOOK_AMBIENT) + bounce + vec3(0.0025, 0.0025, 0.0035);
+    vec3 ambient = mix(Ground.rgb, SkyUp.rgb, n.y * 0.5 + 0.5) * (sky * LOOK_AMBIENT) + bounce + vec3(2.0e-8, 2.0e-8, 3.0e-8);
     vec3 light = direct + ambient + atlasBlockLight(lm.x);
     // where atlas lit the frame: the light on the ground just in front of the player (the bottom of the screen, a few
     // texels averaged) for the open-sky case, so a hand in a building's shadow is in shadow too
@@ -25,13 +25,14 @@ void main() {
         float found = 0.0;
         for (int i = 0; i < 5; i++) {
             vec4 q = texture(Sampler6, vec2(0.3 + 0.1 * float(i), 0.12));
+            q.rgb /= Ground.w;  // (pre-exposed)
             if (dot(q.rgb, vec3(1.0)) > 1e-6) {
                 near += q.rgb;
                 found += 1.0;
             }
         }
         if (found > 0.0) light = mix(light, near / found * (lm.y > 0.0 ? 1.0 : 0.0) + atlasBlockLight(lm.x)
-                + vec3(0.0025, 0.0025, 0.0035), smoothstep(0.5, 0.9, lm.y));
+                + vec3(2.0e-8, 2.0e-8, 3.0e-8), smoothstep(0.5, 0.9, lm.y));
     }
     fragColor = vec4(atlasDisplay(light, Look.x, Look.y), 1.0);
 }

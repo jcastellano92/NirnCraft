@@ -122,6 +122,8 @@ public:
     const char* name() const override { return "cpu (slang->c++)"; }
     std::vector<float> dummyDepth_ = std::vector<float>(1, 1e30f);
     std::vector<uint32_t> dummyInfo_ = std::vector<uint32_t>(1, 0u);
+    std::vector<uint32_t> dummyU32_ = std::vector<uint32_t>(1, 0u);
+    std::vector<uint64_t> dummyU64_ = std::vector<uint64_t>(1, 0u);
     std::vector<float> dummyLight_ = std::vector<float>(4, 0.0f);
     std::vector<float> cloud_, cloudDepth_, prevSurface_, outSurface_, prevCloud_, prevCloudDepth_;
     std::vector<float> sunMap_ = std::vector<float>(2, 0.0f);
@@ -230,8 +232,11 @@ public:
         }
         glFrame_++;
         // the near light (abi 0.15): the near field's depth and surface info in, the caller's texture out
-        const bool nearOn = in.wantNearDepth && io && io->nearDepthTex;
-        const bool nearLight = (in.frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && nearOn && io->nearInfoTex && io->dstNearLight;
+        // (ATLAS_FRAME_PRIMARY_NEAR: atlas's own near field, the near light an output only)
+        const bool primaryNear = (in.frame.dims[2] & FRAME_PRIMARY_NEAR_BITS) != 0;
+        const bool nearOn = in.wantNearDepth && io && io->nearDepthTex && !primaryNear;
+        const bool nearLight = (in.frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && io && io->dstNearLight &&
+                               (primaryNear || (nearOn && io->nearInfoTex));
         if (nearOn && !near_.run(gl_, *io, w, h, nearLight, tex_[IMG_NEAR], tex_[IMG_NEAR_INFO], err)) return false;
 
         if (!async_ || !primed_) {
@@ -370,8 +375,9 @@ private:
         if (in.nearDepth) g.nearDepth = {const_cast<float*>(in.nearDepth), n};
         else g.nearDepth = view(dummyDepth_);
         // the near light (FRAME_NEAR_LIGHT, kept only with both near inputs): the kernel writes every pixel of it
-        if ((frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && in.nearInfo && in.nearDepth) {
-            g.nearInfo = {const_cast<uint32_t*>(in.nearInfo), n};
+        const bool primaryNear = (frame.dims[2] & FRAME_PRIMARY_NEAR_BITS) != 0;
+        if ((frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && ((in.nearInfo && in.nearDepth) || primaryNear)) {
+            g.nearInfo = in.nearInfo ? CpuBuffer<uint32_t>{const_cast<uint32_t*>(in.nearInfo), n} : view(dummyInfo_);
             out.nearLight.assign(n * 4, 0.0f);
             g.outNearLight = {reinterpret_cast<Float4*>(out.nearLight.data()), n};
         } else {
@@ -382,6 +388,28 @@ private:
         g.actors = view(in.actors);
         g.heightMip = view(s.heightMip);
         g.groupData = {reinterpret_cast<Uint4*>(const_cast<uint32_t*>(s.groups.data())), s.groups.size() / 4};
+        // the level-0 grid: its pending sections built here, the reference of atlas_voxgrid.slang's kernels
+        if (in.voxgrid && in.voxgrid->active()) {
+            for (;;) {
+                VgBatch b = in.voxgrid->take(1 << 30);
+                if (!b.clear && b.jobs.empty()) break;
+                in.voxgrid->applyCpu(b);
+            }
+        }
+        g.texData = in.textures && !in.textures->empty() ? view(*in.textures) : view(dummyU32_);
+        if (in.voxgrid && !in.voxgrid->chunks.empty()) {
+            VoxGrid& vg = *in.voxgrid;
+            g.vgChunks = view(vg.chunks);
+            g.vgBlocks = vg.blocks.empty() ? view(dummyU32_) : view(vg.blocks);
+            g.vgBits = vg.bits.empty() ? view(dummyU64_) : view(vg.bits);
+            g.vgPool = vg.pool.empty() ? view(dummyU32_) : view(vg.pool);
+            frame.vgOrigin[0] = vg.cpuOx;  // (the window these arrays hold: the books may have moved on since)
+            frame.vgOrigin[2] = vg.cpuOz;
+        } else {
+            frame.vgOrigin[3] = 0;  // (no grid here yet)
+            g.vgChunks = g.vgBlocks = g.vgPool = view(dummyU32_);
+            g.vgBits = view(dummyU64_);
+        }
         // the half-resolution cloud pass reads the last frame's surfaces (none yet, or after a resize: no limit)
         uint32_t dv = (frame.dims[2] & 0x80u) ? 4u : 2u;  // FRAME_CLOUDS_QUARTER
         size_t cn = size_t((w + dv - 1) / dv) * ((h + dv - 1) / dv);
@@ -620,11 +648,12 @@ private:
                 size_t from = size_t(y) * w, to = size_t(h - 1 - y) * w;
                 const float* c = targets_.color.data() + from * 4;
                 uint16_t* dc = r.color.data() + to * 4;
-                for (size_t k = 0; k < size_t(w) * 4; k++) dc[k] = toHalf(c[k]);
+                const float e = j.in.preExposure;
+                for (size_t k = 0; k < size_t(w) * 4; k++) dc[k] = toHalf((k & 3) == 3 ? c[k] : c[k] * e);
                 if (r.nearLit) {
                     const float* l = targets_.nearLight.data() + from * 4;
                     uint16_t* dl = r.nearLight.data() + to * 4;
-                    for (size_t k = 0; k < size_t(w) * 4; k++) dl[k] = toHalf(l[k]);
+                    for (size_t k = 0; k < size_t(w) * 4; k++) dl[k] = toHalf((k & 3) == 3 ? l[k] : l[k] * e);
                 }
                 std::memcpy(r.normal.data() + to, targets_.normal.data() + from, size_t(w) * 4);
                 std::memcpy(r.depth.data() + to, targets_.depth.data() + from, size_t(w) * 4);

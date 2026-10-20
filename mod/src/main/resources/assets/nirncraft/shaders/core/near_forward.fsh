@@ -204,7 +204,7 @@ void main() {
             vec4 ct4 = vp * vec4(t * 1000.0, 1.0);
             vec2 uvT = clamp(ct4.xy / max(ct4.w, 1e-3) * 0.5 + 0.5, vec2(0.0), vec2(1.0));
             above = texture(SceneDepth, uvT).r > 0.0 ? texture(SceneColor, uvT).rgb
-                                                       : atlasDisplay(atlasSky(SkyView, normalize(t), SunDir.xyz)
+                                                       : atlasDisplay(atlasSky(SkyView, normalize(t), SunDir.xyz, Look.x)
                                                                       + skyCubeAt(normalize(t)), Look.x, Look.y);
         }
         // outside the window the surface mirrors the water under it (total internal reflection)
@@ -241,7 +241,7 @@ void main() {
         float cosv = max(dot(-v, wn), 0.0);
         float fresnel = 0.02 + 0.98 * pow(1.0 - cosv, 5.0);
         vec3 r = reflect(v, wn);
-        vec3 sky = atlasSky(SkyView, normalize(vec3(r.x, max(r.y, 0.02), r.z)), SunDir.xyz) * (lm.y * lm.y);
+        vec3 sky = atlasSky(SkyView, normalize(vec3(r.x, max(r.y, 0.02), r.z)), SunDir.xyz, Look.x) * (lm.y * lm.y);
         float open = smoothstep(0.05, 0.35, lm.y);
         float lit = atlasShadow(viewPos, n);
         vec3 glint = KeyRad.rgb * pow(max(dot(r, KeyDir.xyz), 0.0), 600.0) * 60.0 * open * lit;
