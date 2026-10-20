@@ -346,6 +346,25 @@ The full checklist from R1, every item checked live; the owner flies it.
   detail; vanilla keeps entities and effects, composited by depth. With the client owning the world (it generates;
   the server sends coalesced operations by position and need), atlas builds from the client's own data.
 
+- **The atmosphere and the light: the owner's roadmap (2026-10-20).** One optics everywhere; what the look depends on is
+  what is in the air, how it is layered, and whether clouds catch the low light (not biome palettes, not a sunrise colour).
+  Have (the air merge): Rayleigh / Mie / ozone, the sun's beam filtered through the path (white at noon, orange at 6
+  degrees, red at 2) lighting land and water; twilight glow after sunset from the planet's shadow; climate-driven aerosol
+  mixes (dust pale or brown, humid milky, smoke a red sun over a dull sky, clean air saturated bands). The sun's glare
+  (a sharp core and a wide halo in the sun's transmitted colour, dimmed by what hides it). Volumetric beams near.
+  To build:
+  - crepuscular and anticrepuscular rays: the sky's scattering shadowed by the terrain along the view ray (the sun map),
+    light shooting up past the mountains as the sun sets behind them;
+  - the sun's disc near the horizon: refraction flattening and distortion through the layered air (the size itself
+    stays; its glow and haze grow);
+  - clouds as the screen: thin and broken clouds lit by the reddened beam, pink undersides after sunset (with weather);
+  - layering: night inversions trapping haze low (morning milky inside the layer, clear above), daytime mixing, rain
+    washing aerosols out (weather drives the air model's inputs);
+  - foliage near: light through leaves (translucency), rim light on leaf edges against the light, shadows softening with
+    the foliage depth the light crosses (atlas's rays measure it); water's diffusion likewise;
+  - every light: the drawn sky (aurora, stars, moon glow) integrated into the ambient (an aurora night tints the snow),
+    the moon as key at night (have), torches and lamps bouncing (voxel GI on the GPU structure).
+
 ## Parked (off the renderer goal, for later)
 
 - Client-owned world: x-ray from a client that generates the world (the public and secret split decides it), the hash
