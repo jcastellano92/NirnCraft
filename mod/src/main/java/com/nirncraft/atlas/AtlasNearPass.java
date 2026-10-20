@@ -438,7 +438,10 @@ public final class AtlasNearPass {
             if (frame != null) frame.destroyBuffers();
             frame = new TextureTarget("atlas near frame", gbuffer.width, gbuffer.height, GpuFormat.RGBA8_UNORM, GpuFormat.D32_FLOAT);
         }
-        lit = nearLight && far != null;
+        // our light whenever the core can light the near pass (atlas may skip a frame while streaming a new place:
+        // then mode 2, the same light untraced, instead of vanilla's look for that frame: a flicker on arrival)
+        boolean traced = nearLight && far != null;
+        lit = AtlasClient.nearLightSupported();
         if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 128);
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
         float[] still = sprite(mc, "block/water_still"), flow = sprite(mc, "block/water_flow");
@@ -446,7 +449,7 @@ public final class AtlasNearPass {
         float[] look = AtlasLook.frame(mc), k = AtlasLook.light(mc);
         try (var view = info.currentBuffer().map(false, true)) {
             com.mojang.blaze3d.buffers.Std140Builder.intoBuffer(view.data())
-                    .putVec4(look[0], look[1], lit ? 1f : 0f, 0f)
+                    .putVec4(look[0], look[1], !lit ? 0f : traced ? 1f : 2f, 0f)
                     .putVec4(k[0], k[1], k[2], lit ? 1f : 0f)
                     .putVec4(k[3], k[4], k[5], 0f)
                     .putVec4(k[6], k[7], k[8], 0f)

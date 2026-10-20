@@ -80,12 +80,23 @@ vec3 nearLightFiltered(vec2 uv, vec4 nl, vec3 n, float depth) {
     return sunPart + sky;
 }
 
+// atlas_light.glsl's forward light (the look's constants kept equal there and in atlas_shared.slang)
+vec3 untracedRadiance(vec3 albedo, vec3 n, vec2 lm) {
+    float open = smoothstep(0.05, 0.35, lm.y);
+    float sky = lm.y * lm.y;
+    vec3 direct = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * open;
+    vec3 bounce = KeyRad.rgb * (max(KeyDir.y, 0.0) * 0.25 * (0.6 - 0.4 * n.y) * sky);
+    vec3 ambient = mix(Ground.rgb, SkyUp.rgb, n.y * 0.5 + 0.5) * (sky * 3.0) + bounce + vec3(0.012, 0.012, 0.016);
+    return atlasSrgbToLinear(albedo) * (direct + ambient + atlasBlockLight(lm.x));
+}
+
 vec3 environmentalFog(vec3 rgb, float dist) {
     return mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
 }
 
 void main() {
-    bool own = Look.z > 0.5;
+    bool own = Look.z > 0.5;        // our light and look (1: atlas lit this frame; 2: it did not, our light untraced)
+    bool traced = Look.z < 1.5;
     float nearDepth = texture(Sampler3, texCoord).r;
     if (nearDepth > 0.0) {
         vec3 albedo = texture(Sampler0, texCoord).rgb;
@@ -97,13 +108,20 @@ void main() {
             // one light: what atlas computed reaches this surface (the far field's own sun, traced shadow, traced sky),
             // capped by the sky light vanilla knows (a cave atlas has no sections for must not see the sky), the block
             // light from vanilla's levels, the ambient floor; then atlas's aerial perspective for this distance
-            vec4 nl = texture(Sampler6, texCoord);
-            vec4 aerial = texture(Sampler4, texCoord);
-            float open = smoothstep(0.05, 0.35, levels.g);
             vec3 n = octDecode(info.ba);
-            vec3 light = nearLightFiltered(texCoord, nl, n, nearDepth);
-            vec3 radiance = atlasSrgbToLinear(albedo) * (light * open + atlasBlockLight(levels.r) + vec3(0.012, 0.012, 0.016));
-            radiance = radiance * aerial.a + aerial.rgb;
+            vec3 radiance;
+            if (traced) {
+                vec4 nl = texture(Sampler6, texCoord);
+                vec4 aerial = texture(Sampler4, texCoord);
+                float open = smoothstep(0.05, 0.35, levels.g);
+                vec3 light = nearLightFiltered(texCoord, nl, n, nearDepth);
+                radiance = atlasSrgbToLinear(albedo) * (light * open + atlasBlockLight(levels.r) + vec3(0.012, 0.012, 0.016));
+                radiance = radiance * aerial.a + aerial.rgb;
+            } else {
+                // atlas did not draw this frame (streaming a new place): the same light without its tracing (no cast
+                // shadows, vanilla's sky light as the sky's visibility), so the look does not switch to vanilla's
+                radiance = untracedRadiance(albedo, n, levels);
+            }
             rgb = atlasDisplay(radiance, Look.x, Look.y);
         } else {
             // stage A: vanilla's own light curve (the lightmap: day, night, flicker, night vision, effects) and its
