@@ -323,6 +323,7 @@ struct Slot {
     VkDescriptorSet vgSet = VK_NULL_HANDLE;
     std::vector<VkBufferCopy> vgCopies;
     uint32_t vgJobCount = 0;
+    int vgOx = 0, vgOz = 0;  // the batch's window origin (sections)
     bool vgClear = false, vgStates = false, vgTimed = false;
     uint32_t vgSections = 0;
 };
@@ -1833,8 +1834,10 @@ private:
         if (jobBytes) std::memcpy(s.vgJobs.map, b.jobs.data(), jobBytes);
         constexpr VkDeviceSize SEC = VkDeviceSize(VG_SECTION_WORDS) * 4;
         for (const VgJob& j : b.jobs)
-            if (j.slot != ~0u) s.vgCopies.push_back({VkDeviceSize(j.data) * SEC, VkDeviceSize(j.slot) * SEC, SEC});
+            if (j.slot != ~0u && j.slot != VG_COLUMN) s.vgCopies.push_back({VkDeviceSize(j.data) * SEC, VkDeviceSize(j.slot) * SEC, SEC});
         s.vgJobCount = uint32_t(b.jobs.size());
+        s.vgOx = b.ox;
+        s.vgOz = b.oz;
         s.vgClear = b.clear || fresh;
         s.vgStates = b.chunkStates || fresh;
         s.vgSections = uint32_t(b.sections());
@@ -1876,7 +1879,8 @@ private:
         vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vgLayout_, 0, 1, &s.vgSet, 0, nullptr);
         const uint32_t D = vgD_, H = vgH_, row = 65535;
-        uint32_t pcv[8] = {D, H, D, s.vgJobCount, row, 0, 0, 0};
+        auto pmod = [](int a, uint32_t d) { return uint32_t(((a % int(d)) + int(d)) % int(d)); };
+        uint32_t pcv[8] = {D, H, D, s.vgJobCount, row, pmod(s.vgOx, D), pmod(s.vgOz, D), 0};
         vkCmdPushConstants(cmd, vgLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
         if (s.vgJobCount) {
             vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vgPipes_[0]);

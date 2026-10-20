@@ -531,8 +531,18 @@ void World::setGridWindow(int ox, int oz, int d) {
     gridMoved_ = true;
 }
 
+void World::gridReleased(const std::vector<Key3>& secs) {
+    std::lock_guard<std::mutex> lock(mu_);
+    bool nbrs = groupsWanted.load(std::memory_order_relaxed);
+    for (const Key3& k : secs) {
+        gridNotHeld_.insert(k);
+        markRegions(k.x, k.y, k.z, 0, 0, dirty_, nbrs);
+    }
+}
+
 void World::gridWindowMoved() {
     int ox = gridOx_, oz = gridOz_, d = gridD_;
+    gridNotHeld_.clear();
     for (auto it = gridSkipped_.begin(); it != gridSkipped_.end();) {
         // a level-0 region: 16 x 16 columns of sections; rebuilt once any of them lies outside the window
         int sx0 = it->x * 16, sz0 = it->z * 16;
@@ -558,7 +568,7 @@ void World::markSectionDirty(int sx, int sy, int sz) {
     // same five regions again (a level-4 region spans 4096 blocks), and the client's feed kept a core busy for minutes
     bool nbrs = groupsWanted.load(std::memory_order_relaxed);
     // (the GPU's grid holds it: its level-0 region waits until the grid's window leaves it, setGridWindow)
-    bool grid = gridOwnsLevel0.load(std::memory_order_relaxed) && gridHolds(sx, sz);
+    bool grid = gridOwnsLevel0.load(std::memory_order_relaxed) && gridHolds(sx, sz) && !gridNotHeld_.count({0, sx, sy, sz});
     markRegions(sx, sy, sz, 0, 0, grid ? gridSkipped_ : dirty_, nbrs);
     markRegions(sx, sy, sz, 1, 4, sectionDirty_, nbrs);
     lastSectionMs_ = nowMs();
