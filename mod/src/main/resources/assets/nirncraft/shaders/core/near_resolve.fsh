@@ -113,9 +113,10 @@ void main() {
             if (traced) {
                 vec4 nl = texture(Sampler6, texCoord);
                 vec4 aerial = texture(Sampler4, texCoord);
-                float open = smoothstep(0.05, 0.35, levels.g);
+                // atlas holds every section of the loaded chunks (caves included): its traced light is trusted as it is
+                // (light spills into a cave mouth and fades in), no cap by vanilla's sky light any more
                 vec3 light = nearLightFiltered(texCoord, nl, n, nearDepth);
-                radiance = atlasSrgbToLinear(albedo) * (light * open + atlasBlockLight(levels.r) + vec3(0.012, 0.012, 0.016));
+                radiance = atlasSrgbToLinear(albedo) * (light + atlasBlockLight(levels.r) + vec3(0.012, 0.012, 0.016));
                 radiance = radiance * aerial.a + aerial.rgb;
             } else {
                 // atlas did not draw this frame (streaming a new place): the same light without its tracing (no cast
