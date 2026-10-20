@@ -36,6 +36,8 @@ struct GenParams {
 [[vk::binding(7, 0)]] RWStructuredBuffer<int> colInfo;     // per chunk COL_WORDS
 [[vk::binding(8, 0)]] RWStructuredBuffer<uint> outIds;     // per chunk 40 * 2048 words; then one flag word per chunk
 
+#include "atlas_exact.slang"
+
 // ---- program layout (AtlasGenProgram writes it; keep in step) --------------------------------------------------
 static const uint MAGIC = 0x4E454741u;  // "AGEN"
 static const uint H_VERSION = 1, H_REGS = 2, H_K = 3, H_LAYERS = 4, H_STACKS = 5, H_CODE = 6, H_RULES = 7,
@@ -1145,4 +1147,31 @@ void packMain(uint3 id : SV_DispatchThreadID) {
         else { b0 = b0 & 0xFFFFu; b1 = b1 & 0xFFFFu; }
     }
     outIds[ci * OUT_WORDS + i] = (b0 & 0xFFFFu) | (b1 << 16);
+}
+
+// ---- the exact math, checked against Java (atlas_gen_math) --------------------------------------------------------
+// prog holds n argument pairs (a, b as double bits), outIds n results (bits) and flags; params.outMode is the op
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void mathMain(uint3 id : SV_DispatchThreadID) {
+    uint i = id.y * 65536u * 64u + id.x;
+    if (i >= uint(params.chunks)) return;
+    double a = asdouble(prog[i * 4u], prog[i * 4u + 1u]), b = asdouble(prog[i * 4u + 2u], prog[i * 4u + 3u]);
+    uint bad = 0u;
+    double r = 0.0l;
+    switch (params.outMode) {
+        case 0u: r = divD(a, b, bad); break;
+        case 1u: r = sqrtD(a, bad); break;
+        case 2u: r = sinS(a, bad); break;
+        case 3u: r = cosS(a, bad); break;
+        case 4u: r = expS(a, bad); break;
+        case 5u: r = powS(a, b, bad); break;
+        case 6u: r = atan2S(a, b, bad); break;
+        case 7u: r = hypotS(a, b, bad); break;
+        case 8u: r = atanS(a, bad); break;
+        default: bad = 2u; break;
+    }
+    outIds[i * 3u] = uint(loW(r));
+    outIds[i * 3u + 1u] = uint(hiW(r));
+    outIds[i * 3u + 2u] = bad;
 }

@@ -750,6 +750,11 @@ ATLAS_API AtlasStatus atlas_gen_put_page(AtlasGen* h, int32_t cx, int32_t cz, in
    a page was missing (take the server's blocks there). */
 ATLAS_API AtlasStatus atlas_gen_chunks(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t outMode,
                                        uint32_t* outIds, uint32_t* outFlags, AtlasGenTimes* times);
+/* The generator's exact math, checked against Java (StrictMath, IEEE division and sqrt): op 0 a / b, 1 sqrt a, 2 sin,
+   3 cos, 4 exp, 5 pow(a, b), 6 atan2(a, b), 7 hypot(a, b), 8 atan; n <= 2^20; flags: nonzero where not proven. Replaces
+   the program: set it again before generating. */
+ATLAS_API AtlasStatus atlas_gen_math(AtlasGen* h, uint32_t op, uint32_t n, const double* a, const double* b, double* out,
+                                     uint32_t* flags);
 /* Generates and uploads the chunks' non-air sections into ctx (the atlas_upload_section path); outSections: count. */
 ATLAS_API AtlasStatus atlas_gen_into(AtlasGen* h, AtlasContext* ctx, const int32_t* chunkXZ, uint32_t count,
                                      uint32_t* outFlags, uint32_t* outSections, AtlasGenTimes* times);
