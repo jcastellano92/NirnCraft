@@ -63,6 +63,12 @@ struct alignas(16) FrameGpu {
     // (abi 0.17, ATLAS_FRAME_PRIMARY_NEAR) the camera-relative view-projection (the inverse of invViewProj, columns):
     // the host's own NDC depth of a hit
     float viewProj[16];
+    // (internal) the light by need (api.cpp lightControl; atlas_shared.slang): footprint scale, tiles' share a frame,
+    // the sun ray's cone, the bounce's
+    float lightCtl[4];
+    // (internal, FRAME_GPU_LIGHTS_BIT) the far lights culled on the GPU: the air's extinction per block at the eye, the
+    // light tiles across and down
+    float farLight[4];
 };
 
 struct alignas(16) ActorGpu {
@@ -75,7 +81,7 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 48);
 static_assert(sizeof(RegionGpu) == 64);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64 + 32);
 
 struct Float4 {
     float v[4];
@@ -133,6 +139,10 @@ struct FarGlobals {
     CpuBuffer<uint64_t> vgBits;
     CpuBuffer<uint32_t> vgPool;
     CpuBuffer<uint32_t> texData;  // (abi 0.16) the near field's textures (voxgrid.hpp packTextures)
+    // (FRAME_GPU_LIGHTS: the Vulkan backend only; empty here, the CPU bins the lights into the actor buffer)
+    CpuBuffer<Float4> lightSrc;
+    CpuBuffer<Float4> lightCand;
+    CpuBuffer<uint32_t> lightList;
 };
 
 }  // namespace atlas

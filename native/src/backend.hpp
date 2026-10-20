@@ -23,9 +23,12 @@ struct GlFrameIO {
 // FRAME_NEAR_LIGHT (atlas.h ATLAS_FRAME_NEAR_LIGHT; the kernels' atlas_shared.slang)
 constexpr uint32_t FRAME_NEAR_LIGHT_BIT = 0x20000u;
 constexpr uint32_t FRAME_NEAR_SPLIT_BIT = 0x40000u;
+// (internal) the far lights culled, ranked and binned on the device (atlas_far.slang lightCullMain): backends that can
+constexpr uint32_t FRAME_GPU_LIGHTS_BIT = 0x80000000u;
 // (abi 0.17) ATLAS_FRAME_PRIMARY_NEAR / _LIT: atlas's primary rays draw the near field; the near light is then an output
 // without near inputs (the surfaces are atlas's own)
-constexpr uint32_t FRAME_PRIMARY_NEAR_BITS = 0x80000u | 0x100000u;  // (internal) the near light at half resolution (atlas_shared.slang)
+constexpr uint32_t FRAME_PRIMARY_NEAR_BITS = 0x80000u | 0x100000u;
+constexpr uint32_t FRAME_PRIMARY_NEAR_LIT_BIT = 0x100000u;  // (internal) the near light at half resolution (atlas_shared.slang)
 
 struct FrameInputs {
     std::shared_ptr<const PackedScene> sceneHold;  // keeps the snapshot alive for the frame
@@ -42,6 +45,11 @@ struct FrameInputs {
     VoxGrid* voxgrid = nullptr;               // the level-0 grid's books: the backend takes its batches (voxgrid.hpp)
     const std::vector<uint32_t>* textures = nullptr;  // the near field's textures, packed (voxgrid.hpp packTextures)
     uint64_t texturesRevision = 0;
+    // (FRAME_GPU_LIGHTS_BIT) the far-light index as lights.cpp packs it for the GPU (Lights::packGpu: header, cells,
+    // records), uploaded when its revision changes; the frame culls and bins it on the device
+    const std::vector<Float4>* lights = nullptr;
+    uint64_t lightsRevision = 0;
+    uint32_t lightRecords = 0;
 };
 
 struct FrameTargets {
@@ -88,6 +96,9 @@ public:
     }
     // One line of JSON for logs: device, driver, interop mode and the features it was chosen from.
     virtual std::string info() const { return std::string("{\"backend\":\"") + name() + "\"}"; }
+    // Whether the frame's far lights may be culled and binned on the device (FRAME_GPU_LIGHTS_BIT, FrameInputs::lights):
+    // the CPU backend bins them on the CPU (Lights::frame)
+    virtual bool gpuLights() const { return false; }
     virtual bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) = 0;
     // Called from the update thread with a new scene revision: a backend may copy it to the GPU here, off the
     // render thread. Returns false when it could not (the frame then uploads it itself).
