@@ -32,6 +32,39 @@ final class AtlasLook {
         return new float[] {(float) Math.pow(2, log2), NIGHT_VISION};
     }
 
+    /**
+     * The projection vanilla draws the level with this frame: the camera's, times the hurt tilt and view bob
+     * (GameRenderer.renderLevel's bobHurt / bobView, reproduced: they are private). Atlas's rays, its near depth and the
+     * sky take this one, so the far field moves with the near terrain while walking instead of swimming against it.
+     * The nausea / portal warp is left out (it is a screen effect, rare, and not invertible as a camera).
+     */
+    static org.joml.Matrix4f levelProjection(net.minecraft.client.renderer.state.level.CameraRenderState cam) {
+        org.joml.Matrix4f m = new org.joml.Matrix4f(cam.projectionMatrix);
+        var e = cam.entityRenderState;
+        var opts = Minecraft.getInstance().gameRenderer.gameRenderState().optionsRenderState;
+        com.mojang.blaze3d.vertex.PoseStack bob = new com.mojang.blaze3d.vertex.PoseStack();
+        if (e.isLiving) {
+            if (e.isDeadOrDying)
+                bob.rotateDegrees(com.mojang.math.Axis.ZP, 40.0F - 8000.0F / (Math.min(e.deathTime, 20.0F) + 200.0F));
+            float hurt = e.hurtTime;
+            if (hurt >= 0.0F && !e.preventFlinch) {
+                hurt /= e.hurtDuration;
+                hurt = net.minecraft.util.Mth.sin(hurt * hurt * hurt * hurt * (float) Math.PI);
+                bob.rotateDegrees(com.mojang.math.Axis.YP, -e.hurtDir);
+                bob.rotateDegrees(com.mojang.math.Axis.ZP, (float) (-hurt * 14.0 * opts.damageTiltStrength));
+                bob.rotateDegrees(com.mojang.math.Axis.YP, e.hurtDir);
+            }
+        }
+        if (opts.bobView && e.isPlayer) {
+            float w = e.backwardsInterpolatedWalkDistance, b = e.bob;
+            bob.translate(net.minecraft.util.Mth.sin(w * (float) Math.PI) * b * 0.5F,
+                    -Math.abs(net.minecraft.util.Mth.cos(w * (float) Math.PI) * b), 0.0F);
+            bob.rotateDegrees(com.mojang.math.Axis.ZP, net.minecraft.util.Mth.sin(w * (float) Math.PI) * b * 3.0F);
+            bob.rotateDegrees(com.mojang.math.Axis.XP, Math.abs(net.minecraft.util.Mth.cos(w * (float) Math.PI - 0.2F) * b) * 5.0F);
+        }
+        return m.mul(bob.last().pose());
+    }
+
     /** {key dir xyz, key radiance rgb, sky-up rgb, ground rgb}: the pack's key light and sky ambient (pack_look.hpp). */
     static float[] light(Minecraft mc) {
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);

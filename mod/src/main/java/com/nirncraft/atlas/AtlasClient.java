@@ -327,7 +327,7 @@ public final class AtlasClient {
             frame.y = p.y;
             frame.z = p.z;
             // camera-relative inverse view-projection: viewRotation has no translation
-            Matrix4f invVP = new Matrix4f(cam.projectionMatrix).mul(cam.viewRotationMatrix).invert();
+            Matrix4f invVP = AtlasLook.levelProjection(cam).mul(cam.viewRotationMatrix).invert();  // vanilla's, bob included
             invVP.get(frame.invViewProj);
             frame.width = w;
             frame.height = h;
@@ -356,7 +356,13 @@ public final class AtlasClient {
                 }
             }
             frame.lodBias = quality.lodBias();  // > 1: coarser levels sooner with distance (far detail goes first)
-            jitter(ctx, pack && packTaa(mc));
+            if (AtlasNearPass.owns()) {
+                // the near pass's temporal resolve: atlas samples the same sub-pixel point as our G-buffer (in its pixels)
+                float sc = (float) farScaleX();
+                jittering = ctx.setJitter(AtlasNearPass.jitterX() * sc, AtlasNearPass.jitterY() * sc);
+            } else {
+                jitter(ctx, pack && packTaa(mc));
+            }
             // the pack draws the sky; atlas adds far terrain, clouds and far actors over it (no pack: no clouds,
             // NirnCraft's own cloud deck draws them)
             frame.flags = quality.flags(AtlasNative.FRAME_SHADOWS | AtlasNative.FRAME_ATMOS | AtlasNative.FRAME_CLOUDS
@@ -396,7 +402,7 @@ public final class AtlasClient {
             }
             io.nearInfoTex = nearLit ? AtlasNearPass.infoGlId() : 0;
             io.dstNearLight = nearLit ? targets.nearLightId() : 0;
-            new Matrix4f(cam.projectionMatrix).invert().get(io.nearInvProjection);
+            AtlasLook.levelProjection(cam).invert().get(io.nearInvProjection);
             io.depthZeroToOne = AtlasTargets.depthZeroToOne();
             io.reversedZ = nearOwned || reversedZ(pack);  // the depth convention the near field's depth was written with
             io.dstColor = targets.colorId();

@@ -70,7 +70,7 @@ final class AtlasSky implements CustomSkyboxRenderer {
         Minecraft mc = Minecraft.getInstance();
         if (info == null) info = new MappableRingBuffer(() -> "atlas sky info", 130, 96);
         var cam = levelRenderState.cameraRenderState;
-        Matrix4f inv = new Matrix4f(cam.projectionMatrix).mul(modelView).invert();
+        Matrix4f inv = AtlasLook.levelProjection(cam).mul(modelView).invert();
         float[] sun = AtlasClient.sunDirection(sky.sunAngle);
         float[] look = AtlasLook.frame(mc);
         // the sky is not opened up with the eye at night (a dark night sky; NirnCraft's aurora and stars over it add

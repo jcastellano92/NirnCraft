@@ -119,6 +119,23 @@ public final class AtlasNearPass {
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT_PREMULTIPLIED_ALPHA))
             .build();
 
+    private static final BindGroupLayout TAA_LAYOUT = BindGroupLayout.builder()
+            .withUniform("Sampler0", UniformType.COMBINED_IMAGE_SAMPLER)
+            .withUniform("Sampler1", UniformType.COMBINED_IMAGE_SAMPLER)
+            .withUniform("Sampler2", UniformType.COMBINED_IMAGE_SAMPLER)
+            .withUniform("TaaInfo", UniformType.UNIFORM_BUFFER)
+            .build();
+    static final RenderPipeline TAA = RenderPipeline.builder()
+            .withLocation(id("pipeline/near_taa"))
+            .withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
+            .withFragmentShader(id("core/near_taa"))
+            .withBindGroupLayout(TAA_LAYOUT)
+            .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+            .withCull(false)
+            .withDepthStencilState(Optional.empty())
+            .withColorTargetState(ColorTargetState.DEFAULT)
+            .build();
+
     static final RenderPipeline LIGHTMAP = RenderPipeline.builder()
             .withLocation(id("pipeline/near_lightmap"))
             .withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
@@ -140,7 +157,15 @@ public final class AtlasNearPass {
     private static ChunkSectionsToRender chunks;
     private static TextureTarget gbuffer;  // albedo + depth
     private static TextureTarget light;    // light levels
-    private static TextureTarget frame;    // the resolved frame (displayed colour, premultiplied; depth), composited
+    private static TextureTarget frame;    // the resolved frame (displayed colour, premultiplied; depth), this frame's
+    private static final TextureTarget[] history = new TextureTarget[2];  // the temporal resolve's results, ping-pong
+    private static int historyIndex;       // the one written this frame
+    private static boolean historyValid;
+    private static final Matrix4f prevViewProj = new Matrix4f();
+    private static double prevX, prevY, prevZ;
+    private static int jitterIndex;
+    private static float jitterX, jitterY;  // this frame's sub-pixel offset, window pixels (atlas's convention: ndc y up)
+    private static net.minecraft.client.renderer.MappableRingBuffer projUbo, taaUbo;
     private static net.minecraft.client.renderer.MappableRingBuffer info;  // the resolve's NearInfo (one vec4)
 
     private AtlasNearPass() {}
@@ -153,6 +178,7 @@ public final class AtlasNearPass {
         modBus.addListener((RegisterRenderPipelinesEvent e) -> {
             e.registerPipeline(RESOLVE);
             e.registerPipeline(COMPOSITE);
+            e.registerPipeline(TAA);
             e.registerPipeline(LIGHTMAP);
         });
         modBus.addListener((RegisterPipelineModifiersEvent e) -> {
@@ -228,9 +254,27 @@ public final class AtlasNearPass {
         return gbuffer == null ? 0 : AtlasTargets.glIdOf(gbuffer.getDepthTexture());
     }
 
+    /** This frame's sub-pixel jitter, window pixels (AtlasClient hands atlas the same, in its pixels). */
+    static float jitterX() {
+        return jitterX;
+    }
+
+    static float jitterY() {
+        return jitterY;
+    }
+
+    private static float halton(int i, int b) {
+        float r = 0, f = 1f / b;
+        for (; i > 0; i /= b, f /= b) r += f * (i % b);
+        return r;
+    }
+
     private static void takeSections() {
         owned = false;
         drawn = false;
+        int ji = (jitterIndex++ & 7) + 1;  // 8 Halton (2, 3) offsets
+        jitterX = halton(ji, 2) - 0.5f;
+        jitterY = halton(ji, 3) - 0.5f;
         Minecraft mc = Minecraft.getInstance();
         if (!active || mc.level == null || AtlasClient.irisPackInUse() || mc.gameRenderer.useImprovedTransparency()) return;
         if (!skyPassRuns(mc)) return;
@@ -282,9 +326,18 @@ public final class AtlasNearPass {
                 .withColorAttachment(light.getColorTextureView(), Optional.of(new Vector4f(0, 0, 0, 0)))
                 .withDepthAttachment(gbuffer.getDepthTextureView(), OptionalDouble.of(0.0))  // reverse-Z: far = 0
                 .build();
+        // vanilla's projection (bob included) moved by this frame's jitter: atlas's rays sample the pixel at centre + j
+        // (ndc y up), so the geometry moves by -j for the same sample point
+        var cam = e.getLevelRenderState().cameraRenderState;
+        Matrix4f jittered = new Matrix4f().translation(-2f * jitterX / w, -2f * jitterY / h, 0f).mul(AtlasLook.levelProjection(cam));
+        if (projUbo == null) projUbo = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near projection", 130, 64);
+        try (var view = projUbo.currentBuffer().map(false, true)) {
+            com.mojang.blaze3d.buffers.Std140Builder.intoBuffer(view.data()).putMat4f(jittered);
+        }
         RenderSystem.pushPipelineModifier(GBUFFER);
         try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(desc)) {
             RenderSystem.bindDefaultUniforms(pass);
+            pass.setUniform("Projection", projUbo.currentBuffer());
             chunks.renderGroup(ChunkSectionLayerGroup.OPAQUE, pass, sampler, atlas, false);
         } finally {
             RenderSystem.popPipelineModifier();
@@ -293,6 +346,50 @@ public final class AtlasNearPass {
         // atlas's frame now, on our depth (outside vanilla's main pass), then our resolve into our own frame
         AtlasClient.renderFar(e.getLevelRenderState(), null);
         resolve(AtlasClient.farTargetsThisFrame(), AtlasClient.nearLitThisFrame());
+        temporal(cam);
+        projUbo.rotate();
+    }
+
+    /** The temporal resolve: this frame blended with the last result reprojected (near_taa), into the history. */
+    private static void temporal(net.minecraft.client.renderer.state.level.CameraRenderState cam) {
+        if (frame == null) return;
+        int w = frame.width, h = frame.height;
+        for (int i = 0; i < 2; i++)
+            if (history[i] == null || history[i].width != w || history[i].height != h) {
+                if (history[i] != null) history[i].destroyBuffers();
+                history[i] = new TextureTarget("atlas near history " + i, w, h, GpuFormat.RGBA8_UNORM, null);
+                historyValid = false;
+            }
+        Matrix4f vp = AtlasLook.levelProjection(cam).mul(cam.viewRotationMatrix);
+        double dx = cam.pos.x - prevX, dy = cam.pos.y - prevY, dz = cam.pos.z - prevZ;
+        boolean valid = historyValid && dx * dx + dy * dy + dz * dz < 32 * 32;  // a teleport starts afresh
+        if (taaUbo == null) taaUbo = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near taa", 130, 160);
+        try (var view = taaUbo.currentBuffer().map(false, true)) {
+            com.mojang.blaze3d.buffers.Std140Builder.intoBuffer(view.data())
+                    .putMat4f(new Matrix4f(vp).invert()).putMat4f(prevViewProj)
+                    .putVec4((float) dx, (float) dy, (float) dz, 0f).putVec4(0.12f, valid ? 1f : 0f, 0f, 0f);
+        }
+        int out = historyIndex ^ 1;
+        var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
+                FilterMode.NEAREST, FilterMode.NEAREST, false);
+        var linear = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
+                FilterMode.LINEAR, FilterMode.LINEAR, false);
+        try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Infinite ATLAS temporal",
+                history[out].getColorTextureView(), Optional.empty())) {
+            pass.setPipeline(RenderSystem.getCompiledPipeline(TAA));
+            pass.setUniform("Sampler0", frame.getColorTextureView(), nearest);
+            pass.setUniform("Sampler1", frame.getDepthTextureView(), nearest);
+            pass.setUniform("Sampler2", history[historyIndex].getColorTextureView(), linear);
+            pass.setUniform("TaaInfo", taaUbo.currentBuffer());
+            pass.draw(3, 1, 0, 0);
+        }
+        taaUbo.rotate();
+        historyIndex = out;
+        historyValid = true;
+        prevViewProj.set(vp);
+        prevX = cam.pos.x;
+        prevY = cam.pos.y;
+        prevZ = cam.pos.z;
     }
 
     private static com.mojang.renderpearl.api.textures.GpuSampler terrainSampler;
@@ -373,7 +470,8 @@ public final class AtlasNearPass {
         var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
                 FilterMode.NEAREST, FilterMode.NEAREST, false);
         pass.setPipeline(RenderSystem.getCompiledPipeline(COMPOSITE));
-        pass.setUniform("Sampler0", frame.getColorTextureView(), nearest);
+        TextureTarget color = history[historyIndex] != null && historyValid ? history[historyIndex] : frame;
+        pass.setUniform("Sampler0", color.getColorTextureView(), nearest);
         pass.setUniform("Sampler1", frame.getDepthTextureView(), nearest);
         pass.draw(3, 1, 0, 0);
         // what vanilla draws next in this pass (entities, block entities, items) takes our light while we own the frame
