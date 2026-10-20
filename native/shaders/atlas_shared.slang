@@ -26,6 +26,8 @@ static const float3 FAR_AMBIENT_FLOOR = float3(0.012, 0.012, 0.016);
 // the look (shadeSurfaceAmb): how much the sky fills the shade (1: the physical value) and the warm bounce off lit ground
 static const float LOOK_AMBIENT = 3.0;
 static const float LOOK_BOUNCE = 0.25;
+// the look: aerial haze over the physical clear air (distance reads as depth; the horizon softens into the sky)
+static const float LOOK_HAZE = 2.5;
 static const int MAX_LODS = 8;
 
 struct LodGpu {
@@ -171,7 +173,7 @@ float aerialTransmittance(float t, FrameGpu f) {
     float camY = float(f.camInt.y) + f.camFrac.y;
     float h = max(camY - 63.0, 0.0);
     float density = exp(-h / 1200.0);
-    float beta = (1.0 / 22000.0) * (1.0 + 3.0 * f.weatherParams.x);
+    float beta = (LOOK_HAZE / 22000.0) * (1.0 + 3.0 * f.weatherParams.x);
     return exp(-t * beta * density);
 }
 
