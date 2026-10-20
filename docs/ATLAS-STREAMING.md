@@ -73,5 +73,45 @@ What the pipeline does (the full map with file:line: the "far-field loading pipe
   probability and the temporal resolve averages it; the few details that carry beyond their size (lights at night,
   landmark silhouettes, water glints) stay explicit, as far lights already do.
 
+## What the owner saw flying the build (2026-10-19), and the architecture it led to
+
+- A stark line where vanilla's near field meets the far field (two renderers, two lights); colours that change when
+  the real chunks arrive; the far field more accurate where the player has been (real sections exist) than where not
+  (stand-ins: the surface painter's guesses, planned settlements: dirt that turns to grass, structures that appear and
+  then are not there); a circle around the player rather than detail where they look; a white glow as regions load
+  (suspected: the traced sky light's 16-frame accumulation starting from open sky on new surfaces, plus the fade from
+  sky; to be measured); deep caves end in haze past render distance (the server records only surface sections).
+- Decided with the owner: rendering and simulation part. Vanilla simulates on real chunks in the small simulation
+  radius (collision, interaction, mobs: the server is the authority); the client's renderer draws everything, near
+  included, from the client's own copy of the world.
+
+### Client-owned world, server-checked
+
+1. **The client generates the world** from the seed with the same generation code as the server (heights, surface,
+   settlements, trees), at the detail each distance needs. Far-field sections and tiles are no longer sent: the
+   client knows the untouched world.
+2. **Hash tree.** The server keeps a hash per section, rolled up to chunk, region and area; the client the same over
+   its copy (generated plus every change applied). Checking is top down: equal area hashes cost one hash, a change
+   costs a few hashes down to it. The server spot-checks what the client looks at; a mismatch means the client is
+   wrong and gets a correction. The server can also hash the untouched generation: generated == real means nothing was
+   ever changed there; a client's baseline that differs from the server's is a generator bug or version mismatch,
+   logged by kind (surface, structure, tree) and corrected with data until fixed (worldgen must be deterministic:
+   "unsafe terrain read during worldgen" is the kind of order dependence that breaks it).
+3. **Changes are edits, not chunks**: blocks in a section that became these states (a few bytes a block, batched,
+   compressed). They replace AtlasSections' whole-chunk blobs and AtlasEdits' column summaries.
+4. **An ordered log**: each change has the server's sequence number; a client applies in order from its own position
+   and asks again from a gap; every interested client gets each change as it happens; old history is compacted into
+   generated plus net changes (a joining player gets that).
+5. **Interest, not radius**: the client reports its view and heading; the server sends changes and live state there
+   (players and creatures far off, lights on and off, doors, fires), ordered by how visible they are at that distance
+   and at a rate that falls with it. Underground the interest is the cave volume and the exits, not the surface.
+6. **Up close, a free check**: vanilla's real chunks in the simulation radius are compared with the client's own
+   generation as they arrive; every chunk walked through tests the generator.
+7. **One renderer**: the client's renderer takes over terrain from vanilla, from just beyond the player inward, until
+   vanilla only simulates; no line, nothing changes renderer as you approach.
+
+Order: deterministic generation with a test (client-generated vs server-real per chunk), then the client-generated far
+field with the hash tree and the change log, then interest-driven live state, then the near field.
+
 Targets: first far image under 100 ms after arrival (stand-ins), within dE 3 of settled in under 2 s on a GPU, no jump
 between seconds over dE 6; a return to a visited place loads from cache with no visible refinement.
