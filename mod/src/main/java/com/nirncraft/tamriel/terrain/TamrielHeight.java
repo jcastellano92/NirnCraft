@@ -114,7 +114,7 @@ public record TamrielHeight(WorldNoise hills, WorldNoise detail,
             double r1 = 1 - Math.abs(ridges.getValue(x, 0, z));
             double r2 = 1 - Math.abs(detail.getValue(x * 2.1, 37, z * 2.1));
             double high = 1 + 0.6 * MapNoise.smoothstep(150, 300, h);
-            h += amp * (1 - own) * Math.pow(s.ridge, 1.3) * high
+            h += amp * (1 - own) * StrictMath.pow(s.ridge, 1.3) * high
                     * (r1 * r1 * 36 + r1 * r2 * r2 * 12 * (0.4 + 0.6 * smooth) - 15);
         }
         if (s.peak > 0) {
