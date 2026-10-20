@@ -125,6 +125,18 @@ The full checklist from R1, every item checked live; the owner flies it.
   the far frame and writes the frame's depth. Live A/B with vanilla's own light curve: mean |diff| 2.6 of 255, 6.6 % of
   pixels over 8 (fade-in, particles), 60 fps both. Sodium and Iris leave the dev instance (Sodium replaces the section
   renderer; Iris needs Sodium); the harness's pack variant is off until R4.
+- **R2 stage B live (2026-10-20, 2002d7db, 70f3dae9).** Falkreath, live A/B against vanilla: one light near and far
+  (atlas's near light: traced sun shadows under the well, the buildings, the barrels), the look's sky fill (shadeSurfaceAmb
+  LOOK_AMBIENT 3, LOOK_BOUNCE 0.25: readable cool shade, warm sun), no line where near meets far at the seam view, torch
+  pools and moonlit shade at night; the sky ours (the far field's model; not opened with the eye at night). Fixed on
+  the way: near-pass pixels past nearFieldEnd were traced as far and their colour landed in the resolve's inscatter
+  (grey leafless spruces, dirt tiles over the near pass's); nearest filtering on the terrain atlas. The dev loop in
+  game: shader_watch --game reloads atlas's kernel in the running client (atlas-shaders folder) and stages a fresh core
+  (atlas-dev); Java bodies hotswap (client_hotswap). The 01:42 crash: the context destroyed under the far-field worker
+  at shutdown (55ced956).
+  Open (R3 list): the hand (drawn after AfterLevel: vanilla light), clouds (NirnCraft's deck, vanilla-lit), the far
+  field's snowy spruces read whitish, NirnCraft's aurora weaker over our night sky, shadows on forward-lit things
+  (entities, water), water reflections near, eye exposure from the frame (canonical now), OIT path not owned.
 - **R2 stage B design (2026-10-20).** One light: atlas lights the near pass's pixels with the far field's own code
   (ABI 0.15 near light: the G-buffer's normal and light levels in, irradiance and aerial perspective out; sun with
   traced shadow, traced sky, far lights), the resolve multiplies the full-resolution albedo by it, adds vanilla's block
