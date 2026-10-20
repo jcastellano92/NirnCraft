@@ -380,15 +380,16 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             Backend::VoxGridTimes t = ctx->backend->voxgridTimes();
             const VoxGrid& v = ctx->voxgrid;
             uint64_t bytes = uint64_t(v.D) * v.H * v.D * 4 + uint64_t(v.slotCap) * (64 * 12 + VG_SECTION_WORDS * 4);
-            char b[512];
+            char b[1024];
             std::snprintf(b, sizeof b,
                           ",\"voxgrid\":{\"window\":[%d,%d,%d],\"slots\":%u,\"slotCap\":%u,\"gpuBytes\":%llu,\"built\":%llu,"
                           "\"batches\":%llu,\"pending\":%zu,\"lastGpuMs\":%.3f,\"lastSections\":%u,\"lastJobs\":%u,"
-                          "\"lastRegrow\":%s,\"totalGpuMs\":%.2f,\"ownsLevel0\":%s,\"level0Skipped\":%zu}",
+                          "\"lastRegrow\":%s,\"totalGpuMs\":%.2f,\"ownsLevel0\":%s,\"level0Skipped\":%zu,"
+                          "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f}",
                           v.D, v.H, v.D, v.slotsUsed(), v.slotCap, (unsigned long long)bytes, (unsigned long long)v.sectionsBuilt,
                           (unsigned long long)v.batches, v.pending(), t.lastMs, t.lastSections, t.lastJobs,
                           t.lastStates ? "true" : "false", t.totalMs, ctx->world.gridOwnsLevel0.load() ? "true" : "false",
-                          ctx->world.gridSkippedCount());
+                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs);
             ctx->info.insert(ctx->info.size() - 1, b);
         }
         return ctx->info.c_str();
@@ -1035,11 +1036,11 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.vgDims[0] = uint32_t(ctx->voxgrid.D);
     g.vgDims[1] = uint32_t(ctx->voxgrid.H);
     g.vgDims[2] = uint32_t(ctx->voxgrid.D);
-    // (ATLAS_VOXGRID_LEVEL0=1) the grid owns level 0: primary rays take it over the groups there too, and the CPU no
+    // the grid owns level 0 (ATLAS_VOXGRID_LEVEL0=0: not): primary rays take it over the groups there too, and the CPU no
     // longer rebuilds the level-0 regions of the sections it holds (World::gridOwnsLevel0)
     static const bool ownLevel0 = [] {
         const char* e = std::getenv("ATLAS_VOXGRID_LEVEL0");
-        return e && std::atoi(e) != 0;
+        return !e || std::atoi(e) != 0;
     }();
     ctx->world.gridOwnsLevel0 = ownLevel0 && ctx->voxgrid.enabled;
     g.vgDims[3] = ctx->world.gridOwnsLevel0 ? 1u : 0u;

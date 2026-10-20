@@ -1740,7 +1740,7 @@ void World::setShapes(uint32_t first, const std::vector<std::shared_ptr<const Ma
 }
 
 void World::setTextures(uint32_t first, const std::vector<std::shared_ptr<const MaterialTexture>>& textures) {
-    std::lock_guard<std::mutex> lock(mu_);
+    std::lock_guard<std::mutex> lock(texMu_);
     auto next = std::make_shared<TextureSet>(*textures_);  // copy on write, as the shapes
     if (next->byMaterial.size() < first + textures.size()) next->byMaterial.resize(first + textures.size());
     for (size_t i = 0; i < textures.size(); i++) next->byMaterial[first + i] = textures[i];

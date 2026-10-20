@@ -98,6 +98,7 @@ public:
         double lastMs = 0, totalMs = 0;
         uint32_t lastSections = 0, lastJobs = 0;
         bool lastStates = false;
+        double stageCpuMs = 0, stageCpuMaxMs = 0;  // the render thread's share (taking a batch, staging it): last, worst
     };
     virtual VoxGridTimes voxgridTimes() const { return {}; }
 

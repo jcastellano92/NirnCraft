@@ -30,12 +30,15 @@ constexpr uint32_t VG_EMPTY = 0, VG_MIXED = 1, VG_UNLOADED = 2;
 constexpr int VG_SECTION_WORDS = 2048;  // a section's 4096 16-bit ids
 constexpr int VG_MIN_SY = -4;           // y -64 (World::WORLD_MIN_Y / 16)
 
+// a section's ids: the world's own Section::mats (shared, never copied) or an upload's copy
+using VgIds = std::shared_ptr<const std::array<uint16_t, 4096>>;
+
 // One chunk to (re)write: its word (EMPTY / UNLOADED: as is; MIXED: built from the slot's ids, which the batch carries)
 struct VgJob {
     uint32_t chunk;  // index in the window: (y * D + z) * D + x
     uint32_t word;   // the chunk's word (for MIXED: slot << 2 | VG_MIXED)
-    uint32_t slot;   // MIXED: the slot (its ids at data[job's data index]); ~0u: no build
-    uint32_t data;   // MIXED: index of its ids in Batch::data, in sections
+    uint32_t slot;   // MIXED: the slot (its ids: Batch::secs[data]); ~0u: no build
+    uint32_t data;   // MIXED: index of its ids in Batch::secs
 };
 
 struct VgBatch {
@@ -43,8 +46,8 @@ struct VgBatch {
     int ox = 0, oz = 0;          // the window these jobs are for (origin in sections)
     bool chunkStates = false;    // some chunk's state changed: the chunk-level distance fields need a rebuild
     std::vector<VgJob> jobs;
-    std::vector<uint32_t> data;  // VG_SECTION_WORDS per MIXED job
-    int sections() const { return int(data.size() / VG_SECTION_WORDS); }
+    std::vector<VgIds> secs;  // the MIXED jobs' ids (two to a word in the pool: their own little-endian bytes)
+    int sections() const { return int(secs.size()); }
 };
 
 // (abi 0.16) The near field's textures as the kernels read them (atlas_far.slang vgTexture / texSample): word 0 the
@@ -107,7 +110,7 @@ private:
     bool centred_ = false;
     int ox_ = 0, oz_ = 0;  // window origin in sections (x, z); y is VG_MIN_SY
     // sections waiting for a batch: the world's own (shared, never copied) or an upload's copy
-    using Ids = std::shared_ptr<const std::array<uint16_t, 4096>>;
+    using Ids = VgIds;
     std::unordered_map<Key, Ids, KeyHash> pending_;
     bool clearPending_ = false;
     bool refill_ = false;  // the window moved and the world's sections in it are still to be read (frame: when it can)
