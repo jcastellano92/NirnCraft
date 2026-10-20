@@ -28,8 +28,30 @@ public class NirnCraft {
 
     private static ModContainer container;
 
+    /**
+     * The test harness's per-run flags (tools/harness/game.py): <game dir>/nirncraft-harness-flags.properties, applied
+     * as system properties before anything reads them, unless the JVM already has one. The launcher's JvmArgs are not a
+     * reliable channel: Prism keeps its own copy of the instance settings and wrote it back over the harness's edit at
+     * launch (flags silently missing from runs).
+     */
+    private static void harnessFlags() {
+        java.nio.file.Path f = net.neoforged.fml.loading.FMLPaths.GAMEDIR.get().resolve("nirncraft-harness-flags.properties");
+        if (!java.nio.file.Files.isRegularFile(f)) return;
+        java.util.Properties props = new java.util.Properties();
+        try (var in = java.nio.file.Files.newBufferedReader(f)) {
+            props.load(in);
+        } catch (java.io.IOException e) {
+            LOGGER.warn("NirnCraft: harness flags not read from {}: {}", f, e.toString());
+            return;
+        }
+        for (String k : props.stringPropertyNames())
+            if (System.getProperty(k) == null) System.setProperty(k, props.getProperty(k));
+        LOGGER.info("NirnCraft: harness flags {}", props);
+    }
+
     public NirnCraft(IEventBus modBus, ModContainer owner) {
         container=owner;
+        harnessFlags();
         config(ModConfig.Type.LOCAL, SkyConfig.SPEC, "nirncraft-common.toml");
         com.nirncraft.core.SkyData.init(modBus);
         PlacedBlocks.init(modBus);

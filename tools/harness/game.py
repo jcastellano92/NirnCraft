@@ -126,6 +126,7 @@ def _set_group_flags(jvm):
         args = f"{args} {MARK[0]} {extra} {MARK[1]}"
     text = text[:m.start()] + f'JvmArgs="{args}"' + text[m.end():]
     lw.atomic(cfg, text.encode())
+    write_flags_file(jvm)
 
 
 def drop_stale_overlay(overlay=None, sources=None):
@@ -145,6 +146,20 @@ def drop_stale_overlay(overlay=None, sources=None):
             f.unlink()
             dropped.append(f)
     return dropped
+
+
+FLAGS_FILE = GAME / "nirncraft-harness-flags.properties"
+
+
+def write_flags_file(jvm, path=None):
+    """The group's flags where the mod reads them at startup (NirnCraft.harnessFlags): Prism keeps its own copy of the
+    instance settings and wrote it back over the JvmArgs edit at launch, so flags went missing from runs silently."""
+    path = Path(path or FLAGS_FILE)
+    if not jvm:
+        path.unlink(missing_ok=True)
+        return
+    lines = [f"{k}={str(v).replace(chr(92), '/')}" for k, v in sorted(jvm.items())]
+    lw.atomic(path, ("\n".join(lines) + "\n").encode())
 
 
 def _enable_overlay():

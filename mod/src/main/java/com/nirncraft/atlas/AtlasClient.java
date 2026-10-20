@@ -470,7 +470,19 @@ public final class AtlasClient {
             }
             if (guard != null) guard.starting();
             if (lib == null) lib = loadLibrary(mc.gameDirectory.toPath());
-            ctx = lib.create(AtlasNative.BACKEND_VULKAN);
+            // the GPU when there is one; else (no Vulkan device, a driver that refuses) atlas on the CPU, slower and at
+            // a lower resolution but the same picture: the near pass's light and the far field on every machine
+            // (-Dnirncraft.atlas.backend=cpu forces it: what a machine without a GPU sees)
+            if ("cpu".equalsIgnoreCase(System.getProperty("nirncraft.atlas.backend"))) {
+                ctx = lib.create(AtlasNative.BACKEND_CPU);
+            } else {
+                try {
+                    ctx = lib.create(AtlasNative.BACKEND_VULKAN);
+                } catch (AtlasNative.AtlasException e) {
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas: no GPU backend ({}): the far field runs on the CPU", e.getMessage());
+                    ctx = lib.create(AtlasNative.BACKEND_CPU);
+                }
+            }
             firstFrame = true;
             armTestFault(ctx);
             // memory: what this machine can spare sizes the targets, the sun map, the clouds and the clipmap

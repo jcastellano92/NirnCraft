@@ -395,5 +395,14 @@ with _tf.TemporaryDirectory() as _td:
     expect([d.name for d in _dropped] == ["stale.glsl"] and (_ov / "assets/x/fresh.glsl").exists(),
            "the overlay drops a copy older than the mod's file and keeps a newer live edit")
 
+# --- the group's flags reach the game by a file the mod reads (the launcher rewrote JvmArgs at launch) ---------------
+with _tf.TemporaryDirectory() as _td:
+    _f = Path(_td) / "flags.properties"
+    _game.write_flags_file({"nirncraft.atlas.backend": "cpu", "nirncraft.x": "a\\b"}, _f)
+    _lines = _f.read_text().splitlines()
+    expect(_lines == ["nirncraft.atlas.backend=cpu", "nirncraft.x=a/b"], f"the flags file holds the group's flags ({_lines})")
+    _game.write_flags_file({}, _f)
+    expect(not _f.exists(), "no flags: no file (a run without flags gets none from the last one)")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)
