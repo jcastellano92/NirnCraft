@@ -94,7 +94,8 @@ public final class AtlasNearPass {
             .withUniform("SceneColor", UniformType.COMBINED_IMAGE_SAMPLER)
             .withUniform("SceneDepth", UniformType.COMBINED_IMAGE_SAMPLER)
             .withUniform("SkyView", UniformType.COMBINED_IMAGE_SAMPLER)  // the air's sky (AtlasSky)
-            .withUniform("SkyFrame", UniformType.COMBINED_IMAGE_SAMPLER).build();  // the drawn sky (aurora, stars, moons)
+            .withUniform("SkyFrame", UniformType.COMBINED_IMAGE_SAMPLER)  // the drawn sky (aurora, stars, moons)
+            .withUniform("SkyCube", UniformType.COMBINED_IMAGE_SAMPLER).build();  // its layers in every direction
 
     private static final Set<Identifier> OPAQUE = Set.of(RenderPipelines.SOLID_TERRAIN.getLocation(),
             RenderPipelines.SOLID_TERRAIN_MULTIDRAW.getLocation(), RenderPipelines.CUTOUT_TERRAIN.getLocation(),
@@ -213,6 +214,9 @@ public final class AtlasNearPass {
         NeoForge.EVENT_BUS.addListener((RenderFrameEvent.Pre e) -> AtlasGuard.run(FEATURE, AtlasNearPass::takeSections));
         NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterSky e) -> AtlasGuard.run(FEATURE,
                 () -> drawGbuffer(e)));
+        // the finished sky (after every sky listener: NirnCraft's stars, moons and aurora), copied for the reflections
+        NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.LOWEST, (RenderLevelStageEvent.AfterSky e) ->
+                AtlasGuard.run(FEATURE, AtlasNearPass::copySky));
         NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterTranslucentFeatures e) -> AtlasGuard.run(FEATURE,
                 () -> drawTranslucent(e.getRenderPass())));
         NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterLevel e) -> AtlasGuard.run(FEATURE,
@@ -428,19 +432,22 @@ public final class AtlasNearPass {
 
     private static TextureTarget skyFrame;  // the sky as the sky pass drew it (aurora, stars, moons): the water mirrors it
 
+    private static void copySky() {
+        if (!owned) return;
+        var main = Minecraft.getInstance().gameRenderer.mainRenderTarget();
+        if (main == null || main.getColorTexture() == null) return;
+        if (skyFrame == null || skyFrame.width != main.width || skyFrame.height != main.height) {
+            if (skyFrame != null) skyFrame.destroyBuffers();
+            skyFrame = new TextureTarget("atlas sky frame", main.width, main.height, main.getColorTexture().getFormat(), null);
+        }
+        RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(main.getColorTexture(),
+                skyFrame.getColorTexture(), 0, 0, 0, 0, 0, main.width, main.height);
+    }
+
     private static void drawGbuffer(RenderLevelStageEvent.AfterSky e) {
         if (!owned) return;
         Minecraft mc = Minecraft.getInstance();
-        // the finished sky, before any terrain: copied once for the water's reflections
-        var main = mc.gameRenderer.mainRenderTarget();
-        if (main != null && main.getColorTexture() != null) {
-            if (skyFrame == null || skyFrame.width != main.width || skyFrame.height != main.height) {
-                if (skyFrame != null) skyFrame.destroyBuffers();
-                skyFrame = new TextureTarget("atlas sky frame", main.width, main.height, main.getColorTexture().getFormat(), null);
-            }
-            RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(main.getColorTexture(),
-                    skyFrame.getColorTexture(), 0, 0, 0, 0, 0, main.width, main.height);
-        }
+
         LevelRenderer lr = mc.levelRenderer;
         // our own draw lists from the sections vanilla would have drawn (the lists are emptied again at once)
         lr.visibleSections().addAll(visible);
@@ -569,8 +576,8 @@ public final class AtlasNearPass {
         boolean traced = nearLight && far != null;
         lit = AtlasClient.nearLightSupported();
         if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 320);
-        float[] medium = medium(mc, camState);
         var camState = mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
+        float[] medium = medium(mc, camState);
         float eyeWater = eyeWaterDepth(mc, camState);
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
         float[] still = sprite(mc, "block/water_still"), flow = sprite(mc, "block/water_flow");
@@ -769,6 +776,8 @@ public final class AtlasNearPass {
             pass.setUniform("SkyView", sky != null ? sky : scene.getColorTextureView(), RenderSystem.getSamplerCache()
                     .getSampler(AddressMode.REPEAT, AddressMode.CLAMP_TO_EDGE, FilterMode.LINEAR, FilterMode.LINEAR, false));
             pass.setUniform("SkyFrame", skyFrame != null ? skyFrame.getColorTextureView() : scene.getColorTextureView(), linear);
+            var cubeView = com.nirncraft.atmosphere.client.SkyCube.view();
+            pass.setUniform("SkyCube", cubeView != null ? cubeView : scene.getColorTextureView(), linear);
         }
         bindShadow(pass);
         RenderSystem.pushPipelineModifier(FORWARD);

@@ -816,6 +816,11 @@ public final class AtlasClient {
      * The eye's adapted log2 exposure (AtlasMeter, from the finished frame: a bright town, the moon, twilight close the
      * eye; a dark forest opens it), or NaN when atlas's look is not metering. What the stars' visibility follows.
      */
+    /** Whether the sky's layers should go into the reflection cube this frame (atlas lights the near pass). */
+    public static boolean wantsSkyCube() {
+        return AtlasNearPass.litThisFrame() || AtlasNearPass.owns();
+    }
+
     public static float eyeExposureLog2() {
         return AtlasNearPass.litThisFrame() ? AtlasLook.lastLog2() : Float.NaN;
     }

@@ -77,9 +77,9 @@ public final class SkyRenderer {
         return AtmosphereMath.auroraElevationMaxDeg(blockZ);
     }
 
-    private enum Kind { VEIL, STARS, GALAXY, CONSTELLATIONS, SERPENT, MOON, MOON_DAY, HALO, AURORA, METEOR }
+    enum Kind { VEIL, STARS, GALAXY, CONSTELLATIONS, SERPENT, MOON, MOON_DAY, HALO, AURORA, METEOR }
     // Matrices, tints and meteor vertices are private immutable frame snapshots; GPU buffers are resolved at draw time.
-    private record Draw(Kind kind, int index, int key, Matrix4f local, Vector4f tint,
+    record Draw(Kind kind, int index, int key, Matrix4f local, Vector4f tint,
                         Identifier texture, float[] vertices) {}
     private record Frame(List<Draw> draws) {}
     private static final ContextKey<Frame> FRAME = new ContextKey<>(id("sky_frame"));
@@ -199,7 +199,18 @@ public final class SkyRenderer {
                 }
             }
             try (var pass = WorldDraw.open()) {
-                for (Draw draw : frame.draws) {
+                drawAll(pass, frame.draws, new Matrix4f(event.getModelViewMatrix()), null, textures, meteor);
+            }
+            // the same sky into a small cube (the water's reflections of the sky off screen: aurora, stars, moons)
+            if (com.nirncraft.atlas.AtlasClient.wantsSkyCube()) SkyCube.render(frame.draws, textures, meteor);
+        } finally { if (meteor != null) meteor.close(); }
+    }
+
+    /** The frame's sky draws into pass, seen through view (camera rotation), projection null: the frame's own. */
+    static void drawAll(WorldDraw.Pass pass, List<Draw> draws, Matrix4f view,
+                        com.mojang.renderpearl.api.buffers.GpuBufferSlice projection,
+                        java.util.Map<Identifier, net.minecraft.client.renderer.texture.AbstractTexture> textures, WorldMesh meteor) {
+                for (Draw draw : draws) {
                     WorldMesh mesh = switch (draw.kind) {
                         case VEIL -> SkyGeometry.veil;
                         case STARS -> SkyGeometry.starLayers[draw.index];
@@ -218,11 +229,9 @@ public final class SkyRenderer {
                         case AURORA, METEOR -> COLOR;
                         default -> TEXTURED;
                     };
-                    pass.draw(mesh, material, new Matrix4f(event.getModelViewMatrix()).mul(draw.local), draw.tint,
-                            draw.texture == null ? null : textures.get(draw.texture));
+                    pass.draw(mesh, material, new Matrix4f(view).mul(draw.local), draw.tint,
+                            draw.texture == null ? null : textures.get(draw.texture), projection);
                 }
-            }
-        } finally { if (meteor != null) meteor.close(); }
     }
     private static final float AURORA_GAIN = 2.5f;
 

@@ -22,7 +22,20 @@ uniform sampler2D Sampler0;
 uniform sampler2D SceneColor;  // our resolved frame (displayed), terrain near and far: what the water reflects
 uniform sampler2D SceneDepth;  // its depth (reverse-Z)
 uniform sampler2D SkyView;
-uniform sampler2D SkyFrame;   // the sky as drawn this frame (aurora, stars, moons; displayed): what reflects where the frame has none    // the air's sky this frame (AtlasSky's sky-view LUT, atlas_sky.glsl)
+uniform sampler2D SkyFrame;
+uniform sampler2D SkyCube;    // the sky's layers (stars, moons, aurora) in every direction: six faces side by side
+
+// the sky's layers seen along camera-relative direction d (SkyCube: +X -X +Y -Y +Z -Z, each a 90 degree view)
+vec3 skyCubeAt(vec3 d) {
+    vec3 a = abs(d);
+    int f;
+    vec2 uv;
+    if (a.x >= a.y && a.x >= a.z) { f = d.x > 0.0 ? 0 : 1; uv = vec2(d.x > 0.0 ? -d.z : d.z, -d.y) / a.x; }
+    else if (a.y >= a.z) { f = d.y > 0.0 ? 2 : 3; uv = vec2(d.x, d.y > 0.0 ? d.z : -d.z) / a.y; }
+    else { f = d.z > 0.0 ? 4 : 5; uv = vec2(d.z > 0.0 ? d.x : -d.x, -d.y) / a.z; }
+    uv = clamp(uv * 0.5 + 0.5, vec2(0.01), vec2(0.99));
+    return texture(SkyCube, vec2((float(f) + uv.x) / 6.0, 1.0 - uv.y)).rgb;
+}   // the sky as drawn this frame (aurora, stars, moons; displayed): what reflects where the frame has none    // the air's sky this frame (AtlasSky's sky-view LUT, atlas_sky.glsl)
 
 layout(location = 0) in vec4 vertexColor;
 layout(location = 1) in vec2 texCoord0;
@@ -256,7 +269,7 @@ void main() {
         vec3 seen = bed * T + scatter;
         // what the water mirrors: our frame where the reflected ray finds it on screen, the sky model elsewhere
         vec4 hit = screenReflection(viewPos + wn * 0.05, r);
-        vec3 skyShown = atlasDisplay(sky + glint, Look.x, Look.y);
+        vec3 skyShown = atlasDisplay(sky + glint, Look.x, Look.y) + skyCubeAt(r) * (lm.y * lm.y);  // (the layers over the air's sky)
         // past the march (far mountains, the far shore): what lies that way is far enough that the mirror shows it as
         // the frame does in the reflected direction (its parallax is nothing at that range); the sky where the frame
         // has none there (the frame's alpha: our resolve leaves the sky out)
