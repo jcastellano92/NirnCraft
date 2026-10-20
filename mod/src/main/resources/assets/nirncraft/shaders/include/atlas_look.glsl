@@ -14,7 +14,9 @@ vec3 atlasBlockLight(float bl) {
 
 vec3 atlasNightVision(vec3 c, float strength) {
     float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
-    float m = clamp((log2(4e-5) - log2(max(l, 1e-12))) / 4.0, 0.0, 1.0) * strength;  // (physical: rods under ~1e-5 of noon)
+    // (physical: the cones' threshold ~ 8e-3 cd/m2, 8e-7 of the air's units; the rods alone four stops under it. A
+    // strong aurora, kp 5 and up, keeps its green, as real ones are seen in colour; a faint one and starlight grey)
+    float m = clamp((log2(8e-7) - log2(max(l, 1e-12))) / 4.0, 0.0, 1.0) * strength;
     float rod = 0.04 * c.r + 0.5 * c.g + 0.46 * c.b;
     return mix(c, vec3(0.6, 0.8, 1.2) * (rod / 0.787), m);
 }

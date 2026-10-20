@@ -402,6 +402,30 @@ The full checklist from R1, every item checked live; the owner flies it.
   (rods over minutes), night vision by luminance. Moonless near black, a full moon dim and grey after adaptation,
   torches dominating by their real ratio, out of a lit town into a moonlit forest blinded for a moment.
 
+- **One field, live (2026-10-20).** `nirncraft.atlas.unified=true` (mode A, ATLAS_FRAME_PRIMARY_NEAR_LIT): atlas traces
+  every pixel from the camera; the resolve takes its colour and depth and adds only our air (beams, glare, crepuscular,
+  the medium, under water); vanilla's opaque chunk meshes are no longer drawn. Every land hit at any distance takes the
+  same light (traced sun, sky, bounce, haze): no second model past nearFieldEnd. Past the host's far plane atlas writes
+  minus the distance (the horizon no longer reads as sky). Near water is the host's raster (atlas's primary rays pass it,
+  a re-trace with water skipped). Found on the way: AtlasSky capped the eye's exposure by writing into the shared look
+  array (white skies), SkyCube cleared inside the water's render pass (a crash). **Stuck at spawn:** the grid's window
+  never refilled after a move (fixed, 83b22b54) and the far-field worker's native update ignores its 40 ms budget after
+  a jump (18 s + 12 s in one pass while 1,700 read chunks and 13,000 server sections waited): being fixed.
+- **The owner's direction for the field (2026-10-20):** no near and far planes at all, one adaptive field; updates by
+  where the camera is, how it moves and where it looks: near and in view first, then out of view, occluded, far. Next
+  after the budget fix: the update order by frustum, distance and occlusion; levels 1-4 built on the GPU from the grid;
+  mode B (the G-buffer, our resolve lighting atlas's surfaces) as the default; vanilla's chunk meshes removed (shadow map
+  and translucents from atlas).
+- **Inside things (the owner, 2026-10-20).** When the camera clips into something it must not see through it, and it
+  must look right: inside dirt or stone close darkness with depth (no x-ray into caves), inside leaves a dense dappled
+  volume of particles of leaf, inside water, lava, glass or powder snow their own media at their opacity, by the block's
+  real bounding box (a slab, a fence, a pane). Only while clipping: the world is never hidden otherwise. Built on our
+  media (atlasMedium) with atlas's primary ray starting inside the voxel: the chord through solid as an absorbing
+  medium. The same volume path later carries fog banks, snow fields and rain shafts (WEATHER-WORK.md hooks).
+- **Nirn's sky (docs/NIRN-SKY.md).** Masser and Secunda as custom baked bodies with relief and cast shadows, eclipses
+  and the Dark Moon, stars placed as the birthsigns (no lines), the named stars, the Dominion planets on orbits, comets;
+  all by place and date, lit physically. Two agents on it.
+
 ## Parked (off the renderer goal, for later)
 
 - Client-owned world: x-ray from a client that generates the world (the public and secret split decides it), the hash

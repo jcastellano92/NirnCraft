@@ -35,11 +35,6 @@ public final class NightSky {
     private static float[] moonlights = new float[12];
     private static float[] moonBlock = new float[MoonMath.BLOCK_FLOATS];
     private static double[][] occulters = new double[0][];
-    /**
-     * Arkay's place for a day (days -> unit world direction, null when below the planets' reach), set by the planets'
-     * ephemeris: the Necromancer's Moon (MoonMath.revenant) hides it, when AtmosphereConfig.NECROMANCER_MOON is on.
-     */
-    public static volatile java.util.function.DoubleFunction<double[]> arkay;
     private static final float[] meteorLight = new float[16];  // SH L1 of the meteors' irradiance (rgb x 4)
     private static boolean drawn;
 
@@ -91,9 +86,9 @@ public final class NightSky {
         for (int i = 0; i < 12; i++) moonlights[i] = (float) ml[i];
         // the eclipses, the Dark Moon, the Necromancer's Moon over Arkay (MoonMath: atlas_moons.glsl's MoonInfo)
         var eclipse = MoonMath.eclipse(sun, m, s, AtmosphereConfig.SECUNDA.get());
-        var planet = arkay;
-        double[] rev = AtmosphereConfig.NECROMANCER_MOON.get() && planet != null
-                ? MoonMath.revenant(days, planet.apply(days)) : null;
+        // (Arkay's place: the planets' ephemeris, CelestialSky's last frame, world direction)
+        double[] rev = AtmosphereConfig.NECROMANCER_MOON.get()
+                ? MoonMath.revenant(days, CelestialSky.arkayDirection()) : null;
         moonBlock = MoonMath.block(eclipse, rev);
         occulters = MoonMath.occulters(m, s, AtmosphereConfig.SECUNDA.get(), eclipse, rev);
         drawn = show;

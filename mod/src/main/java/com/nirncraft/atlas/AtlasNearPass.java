@@ -215,6 +215,11 @@ public final class AtlasNearPass {
         NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterSky e) -> AtlasGuard.run(FEATURE,
                 () -> drawGbuffer(e)));
         // the finished sky (after every sky listener: NirnCraft's stars, moons and aurora), copied for the reflections
+        // inside a block: our volume (atlasInside) instead of vanilla's flat block texture over the screen
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ExtractBlockScreenEffectEvent e) -> {
+            if (e.getOverlayType() == net.neoforged.neoforge.client.event.ExtractBlockScreenEffectEvent.OverlayType.BLOCK && lit)
+                e.setCanceled(true);
+        });
         NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.LOWEST, (RenderLevelStageEvent.AfterSky e) ->
                 AtlasGuard.run(FEATURE, AtlasNearPass::copySky));
         NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterTranslucentFeatures e) -> AtlasGuard.run(FEATURE,
@@ -586,9 +591,11 @@ public final class AtlasNearPass {
         // then mode 2, the same light untraced, instead of vanilla's look for that frame: a flicker on arrival)
         boolean traced = nearLight && far != null;
         lit = AtlasClient.nearLightSupported();
-        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 320);
+        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 368);
         var camState = mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
         float[] medium = medium(mc, camState);
+        float[] inside = inside(mc, camState);
+        insideSolid = inside[3] > 0f && inside[7] < 0.5f;
         float eyeWater = eyeWaterDepth(mc, camState);
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
         float[] still = sprite(mc, "block/water_still"), flow = sprite(mc, "block/water_flow");
@@ -617,7 +624,11 @@ public final class AtlasNearPass {
                     .putVec4((float) camState.pos.x, (float) camState.pos.y, (float) camState.pos.z,
                             far != null ? far.sunMapSize() : 0f)
                     // Medium: extinction a block, its own light (glow, rgb before display)
-                    .putVec4(medium[0], medium[1], medium[2], medium[3]);
+                    .putVec4(medium[0], medium[1], medium[2], medium[3])
+                    // Inside: the block the eye is clipping into (its shape's box, extinction, kind, colour)
+                    .putVec4(inside[0], inside[1], inside[2], inside[3])
+                    .putVec4(inside[4], inside[5], inside[6], inside[7])
+                    .putVec4(inside[8], inside[9], inside[10], 0f);
         }
         var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
                 FilterMode.NEAREST, FilterMode.NEAREST, false);
@@ -678,6 +689,35 @@ public final class AtlasNearPass {
             }
         }
         return new float[] {0f, 0f, 0f, 0f};
+    }
+
+    private static final float[] NOT_INSIDE = new float[11];
+    /** The eye is inside rock or earth this frame (AtlasMeter holds the eye's adaptation: it must not open the dark up). */
+    static volatile boolean insideSolid;
+
+    /**
+     * The block the eye is clipping into (atlas_water.glsl atlasInside): {min xyz camera-relative, extinction a block,
+     * max xyz, kind (0 solid, 1 foliage, 2 glass and the like), colour rgb}, or all 0. Only the shape's box the eye is
+     * actually in (a slab's half, a fence's post): the world is never hidden otherwise. Fluids are the media's.
+     */
+    private static float[] inside(Minecraft mc, net.minecraft.client.renderer.state.level.CameraRenderState cam) {
+        if (mc.level == null) return NOT_INSIDE;
+        net.minecraft.core.BlockPos bp = net.minecraft.core.BlockPos.containing(cam.pos);
+        var st = mc.level.getBlockState(bp);
+        if (st.isAir() || st.liquid()) return NOT_INSIDE;
+        double lx = cam.pos.x - bp.getX(), ly = cam.pos.y - bp.getY(), lz = cam.pos.z - bp.getZ();
+        for (var box : st.getShape(mc.level, bp).toAabbs()) {
+            if (lx < box.minX || lx > box.maxX || ly < box.minY || ly > box.maxY || lz < box.minZ || lz > box.maxZ) continue;
+            boolean leaves = st.is(net.minecraft.tags.BlockTags.LEAVES);
+            float kind = leaves ? 1f : st.canOcclude() ? 0f : 2f;
+            float sigma = kind == 0f ? 7f : kind == 1f ? 2.2f : 0.25f;
+            int c = st.getMapColor(mc.level, bp).col;
+            float r = (float) Math.pow(((c >> 16) & 255) / 255f, 2.2), g = (float) Math.pow(((c >> 8) & 255) / 255f, 2.2),
+                    b = (float) Math.pow((c & 255) / 255f, 2.2);
+            return new float[] {(float) (box.minX - lx), (float) (box.minY - ly), (float) (box.minZ - lz), sigma,
+                    (float) (box.maxX - lx), (float) (box.maxY - ly), (float) (box.maxZ - lz), kind, r, g, b};
+        }
+        return NOT_INSIDE;
     }
 
     /** The medium around the eye (atlas_water.glsl atlasMedium): 0 the air, 1 lava, 2 powder snow, 3 blindness, 4 darkness. */

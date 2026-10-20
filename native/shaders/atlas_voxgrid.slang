@@ -7,7 +7,7 @@
 
 struct VgParams {
     uint4 dims;  // D (x), H (y), D (z), job count
-    uint4 misc;  // groups per dispatch row (vgSectionMain), 0, 0, 0
+    uint4 misc;  // groups per dispatch row (vgSectionMain), the window's origin x mod D, z mod D, 0
 };
 
 [[vk::push_constant]] ConstantBuffer<VgParams> pc;
@@ -86,6 +86,10 @@ void vgSectionMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
     if (j >= pc.dims.w) return;  // (uniform across the group)
     uint4 job = jobs[j];
     uint bi = tid.x;
+    if (job.z == 0xFFFFFFFEu) {  // (VG_COLUMN) a column the window left: its word into every cell of it
+        if (bi < pc.dims.y) chunks[job.x + bi * pc.dims.x * pc.dims.z] = job.y;
+        return;
+    }
     if (bi == 0u) {
         chunks[job.x] = job.y;
         gMaskLo = 0u;
@@ -121,6 +125,12 @@ void vgSectionMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
 // chunks below (x, y, z); three passes, each a running sum along one axis
 uint satIndex(uint x, uint y, uint z) { return (y * (pc.dims.z + 1u) + z) * (pc.dims.x + 1u) + x; }
 
+// the cell of the window's logical chunk (x, y, z) (from its origin): in memory at (x + origin) mod D (voxgrid.hpp phys)
+uint chunkAt(uint x, uint y, uint z) {
+    uint X = pc.dims.x, Z = pc.dims.z;
+    return (y * Z + (z + pc.misc.z) % Z) * X + (x + pc.misc.y) % X;
+}
+
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void vgSatX(uint3 id : SV_DispatchThreadID) {
@@ -129,7 +139,7 @@ void vgSatX(uint3 id : SV_DispatchThreadID) {
     uint y = id.x / Z, z = id.x % Z;
     uint acc = 0u;
     for (uint x = 0u; x < X; x++) {
-        acc += (chunks[(y * Z + z) * X + x] & 3u) != VG_EMPTY ? 1u : 0u;
+        acc += (chunks[chunkAt(x, y, z)] & 3u) != VG_EMPTY ? 1u : 0u;
         sat[satIndex(x + 1u, y + 1u, z + 1u)] = acc;
     }
 }
@@ -165,8 +175,9 @@ void vgSatY(uint3 id : SV_DispatchThreadID) {
 void vgGrowMain(uint3 id : SV_DispatchThreadID) {
     uint X = pc.dims.x, Y = pc.dims.y, Z = pc.dims.z;
     if (id.x >= X * Y * Z) return;
-    uint c = chunks[id.x];
+    int x = int(id.x % X), z = int((id.x / X) % Z), y = int(id.x / (X * Z));  // (logical)
+    uint at = chunkAt(uint(x), uint(y), uint(z));
+    uint c = chunks[at];
     if ((c & 3u) != VG_EMPTY) return;
-    int x = int(id.x % X), z = int((id.x / X) % Z), y = int(id.x / (X * Z));
-    chunks[id.x] = growBox(int3(x, y, z), int3(int(X), int(Y), int(Z)), 31, 5u, 1u, uint2(0u, 0u)) << 2 | VG_EMPTY;
+    chunks[at] = growBox(int3(x, y, z), int3(int(X), int(Y), int(Z)), 31, 5u, 1u, uint2(0u, 0u)) << 2 | VG_EMPTY;
 }

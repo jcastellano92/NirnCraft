@@ -136,6 +136,12 @@ float moonCover(vec3 dir, float pix) {
     return 1.0 - keep;
 }
 
+// atlas_celestial.glsl's hook (its stars, planets and comet hidden behind the moons): this file's moonCover.
+#define NIGHT_MOON_COVER
+float nightMoonCover(vec3 dir, float pix) {
+    return moonCover(dir, pix);
+}
+
 // The moons along dir: rgb radiance, a coverage. Secunda passes in front of Masser; the Dark Moon in front of both.
 vec4 nightMoons(vec3 dir, vec3 sun, float pix) {
     vec4 m = moonDisc(dir, MasserPos, MasserUp, MasserTint, NightMasser, NightMasserRelief, MASSER_RELIEF, MASSER_PHOTO,

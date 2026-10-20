@@ -36,6 +36,16 @@ versionRange="[26.3.0.90,26.4)"
 
 
 class PreviewTest(unittest.TestCase):
+    def test_close_waits_through_the_shutdown_silence(self):
+        # a close: the heartbeat goes stale while the game saves and exits; that is the close working, not a hang
+        fresh = {"fresh": True, "controlVersion": 0}
+        stale = {"controlVersion": 0, "queued": 1, "updated": 0, "screen": "game"}
+        alive = iter([True, True, True, False])
+        with tempfile.TemporaryDirectory() as d, patch.object(live, "GAME", Path(d)),                 patch.object(live, "status", return_value={"client": fresh}),                 patch.object(live, "read_json", return_value=stale),                 patch.object(live, "heartbeat_age", return_value=120.0),                 patch.object(live, "processes", side_effect=lambda: next(alive, True)),                 patch.object(live.time, "sleep", lambda s: None):
+            live._live_actions(["stop"], timeout=30, cancel=True)  # returns once the process is gone, no error
+            with self.assertRaises(RuntimeError):  # an ordinary step still fails fast on a stale heartbeat
+                live._live_actions(["wait 1"], timeout=30, cancel=False)
+
     def test_verified_staged_bake_replaces_stale_embedded_bake_without_weakening_the_guard(self):
         for valid in (True,False):
             with self.subTest(valid=valid),tempfile.TemporaryDirectory() as folder:
@@ -57,8 +67,11 @@ class PreviewTest(unittest.TestCase):
                         patch.object(live,'jar_bake_inputs',return_value=expected),contextlib.redirect_stdout(io.StringIO()):
                     if valid:live.install_core(new)
                     else:
-                        with self.assertRaises(ValueError):live.install_core(new)
-                        self.assertEqual(original,core.read_bytes())
+                        # (a9800b69) a stale bake never blocks a code install: the code goes in with a warning, the
+                        # game computes the plans at start
+                        err=io.StringIO()
+                        with contextlib.redirect_stderr(err):live.install_core(new)
+                        self.assertIn('WARNING: no packaged bake matches',err.getvalue())
                 if valid:
                     with zipfile.ZipFile(core) as z:
                         self.assertEqual(expected,json.loads(z.read('nirncraft/baked/manifest.json'))['inputs'])

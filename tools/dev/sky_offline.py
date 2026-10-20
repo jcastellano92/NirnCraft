@@ -4,9 +4,9 @@ without the game, into images and numbers.
 Runs the mod's own GLSL files (includes expanded as glsl_check does) on a standalone GL context (moderngl): the sky-view
 LUT (core/atlas_sky_view.fsh), the sky as the game shows it (core/atlas_sky.fsh), the emitter cube the water mirrors
 (core/atlas_sky_emit.fsh) and the land's light from the sky's emitters (core/atlas_sky_light.fsh). Their inputs come
-from the game's own code: NightSkyMath and MoonMath (javac'd from the mod's source, run per scene: NightInfo, NightSigns,
-MoonInfo, the moons'
-lights) and the core (atlas_air_coeffs / atlas_air_multiscatter / atlas_air_light from the built atlas_core). The
+from the game's own code: NightSkyMath, MoonMath and NirnCelestial (javac'd from the mod's source, run per scene:
+NightInfo, MoonInfo, the moons' lights; CelestialInfo, NightSigns: the stars, the planets, a comet, from the scene's
+place and date) and the core (atlas_air_coeffs / atlas_air_multiscatter / atlas_air_light from the built atlas_core). The
 display exposure is the eye's (AtlasMeter's target for the scene's light).
 
     py -3 tools/dev/sky_offline.py [--out DIR] [--dll native/build/Release/atlas_core.dll] [--only NAME]
@@ -14,6 +14,9 @@ display exposure is the eye's (AtlasMeter's target for the scene's light).
 
 Writes DIR/<scene>_view.png (a perspective view through core/atlas_sky.fsh), DIR/<scene>_dome.png (the whole sky,
 zenith at the centre, north up), DIR/<scene>_cube.png (the emitter cube) and DIR/numbers.json; prints a table.
+
+A scene's "boost" multiplies the eye's exposure for its images (a darker-adapted eye than the game's clamp: to read the
+faint stars' placement); its "look" may name what to face ("comet", "arkay", "julianos", ...: its place this night).
 """
 from __future__ import annotations
 
@@ -88,12 +91,12 @@ def find_up(rel: str) -> Path:
     raise FileNotFoundError(rel)
 
 
-def night_math(args: dict) -> dict:
-    """NightSkyMath.main for a scene (the mod's own source, compiled once into .work/sky_offline)."""
+def night_math(args: dict, cls_name: str = "NightSkyMath") -> dict:
+    """NightSkyMath.main (or NirnCelestial.main) for a scene (the mod's own source, compiled into .work/sky_offline)."""
     jdk = find_up("toolchains/jdk-25.0.4.1+1/bin")
     out = ROOT / ".work/sky_offline/classes"
     compile_math(jdk, out)
-    r = subprocess.run([str(jdk / "java.exe"), "-cp", str(out), "com.nirncraft.atmosphere.NightSkyMath",
+    r = subprocess.run([str(jdk / "java.exe"), "-cp", str(out), f"com.nirncraft.atmosphere.{cls_name}",
                         *[f"{k}={v}" for k, v in args.items()]], capture_output=True, text=True, check=True)
     return json.loads(r.stdout)
 
@@ -128,8 +131,9 @@ class Core:
 
 
 def compile_math(jdk, out):
-    """NightSkyMath and MoonMath, javac'd into out when either source is newer than its class."""
-    srcs = [ROOT / "mod/src/main/java/com/nirncraft/atmosphere" / f"{n}.java" for n in ("NightSkyMath", "MoonMath")]
+    """NightSkyMath, MoonMath and NirnCelestial, javac'd into out when a source is newer than its class."""
+    srcs = [ROOT / "mod/src/main/java/com/nirncraft/atmosphere" / f"{n}.java"
+            for n in ("NightSkyMath", "MoonMath", "NirnCelestial")]
     stale = False
     for src in srcs:
         cls = out / "com/nirncraft/atmosphere" / (src.stem + ".class")
@@ -156,6 +160,14 @@ def eclipse_scan(frm, to):
     r = subprocess.run([str(jdk / "java.exe"), "-cp", str(out), "com.nirncraft.atmosphere.MoonMath", "eclipses",
                         str(frm), str(to)], capture_output=True, text=True, check=True)
     return [json.loads(line) for line in r.stdout.splitlines() if line.strip()]
+
+
+def meter_range():
+    """AtlasMeter's MIN, MAX (log2 exposure: the eye's range), from its source."""
+    import re
+    src = (ROOT / "mod/src/main/java/com/nirncraft/atlas/AtlasMeter.java").read_text(encoding="utf-8")
+    m = re.search(r"MIN = (-?[\d.]+)f, MAX = (-?[\d.]+)f", src)
+    return float(m.group(1)), float(m.group(2))
 
 
 def smooth(e0, e1, x):
@@ -200,7 +212,8 @@ class Sky:
         self.lut_fbo = gl.framebuffer([self.lut])
         self.ubo_air = gl.buffer(reserve=7 * 16)
         self.ubo_night = gl.buffer(reserve=120 * 4)
-        self.ubo_signs = gl.buffer(reserve=(14 + 112 + 56) * 16)
+        self.ubo_signs = gl.buffer(reserve=(13 + 364 + 40) * 16)  # NirnCelestial.CATALOGUE_FLOATS
+        self.ubo_cel = gl.buffer(reserve=208 * 4)  # NirnCelestial.BLOCK_FLOATS
         self.ubo_sky = gl.buffer(reserve=112)
         self.coeffs = self.core.coeffs()
 
@@ -222,7 +235,8 @@ class Sky:
                 tex.use(i)
                 prog[name].value = i
         for i, (name, buf) in enumerate({"AirInfo": self.ubo_air, "NightInfo": self.ubo_night, "MoonInfo": self.ubo_moons,
-                                         "NightSigns": self.ubo_signs, "SkyInfo": self.ubo_sky}.items()):
+                                         "NightSigns": self.ubo_signs, "SkyInfo": self.ubo_sky,
+                                         "CelestialInfo": self.ubo_cel}.items()):
             if name in prog:
                 prog[name].binding = i
                 buf.bind_to_uniform_block(i)
@@ -248,7 +262,11 @@ class Sky:
         night[-4] = 1.0  # NightTarget: pre-exposure 1 here, the cube's texel
         night[-3] = (math.pi / 2) / 96.0
         self.ubo_night.write(night.tobytes())
-        self.ubo_signs.write(np.array(m["signs"], dtype="f4").tobytes())
+        cargs = {k: s[k] for k in ("sunAngle", "dayTime", "x", "z", "comet", "world") if k in s}
+        c = night_math(cargs, "NirnCelestial")
+        self.cel = c
+        self.ubo_signs.write(np.array(c["catalogue"], dtype="f4").tobytes())
+        self.ubo_cel.write(np.array(c["celestial"], dtype="f4").tobytes())
         self.sun = sun
         self.moonlights = ml
         # the air's light at the eye (atlas_air_light: the key moon), the emitters' light (the light pass)
@@ -256,7 +274,7 @@ class Sky:
         self.air_light = self.core.light(sun, ml[0:3], [max(e / math.pi, 1e-9) for e in ml[3:6]], EYE_Y)
         self.sh = self.light()
         # the LUT, as AtlasSky draws it: pre-exposed by the eye's exposure (AirMoon.w), read back with the same
-        self.pre = self.exposure(extra_up=float(lum(self.irradiance((0, 1, 0)))))
+        self.pre = self.exposure(extra_up=float(lum(self.irradiance((0, 1, 0)))), town=s.get("town", 0.0))
         self._air_tail[7] = self.pre
         self.ubo_air.write(np.array(self.coeffs + self._air_tail, dtype="f4").tobytes())
         self._bind(self.view_prog)
@@ -279,16 +297,18 @@ class Sky:
         sh = self.sh
         return math.pi * 0.282095 * sh[0] + (2 * math.pi / 3) * 0.488603 * (sh[1] * n[0] + sh[2] * n[1] + sh[3] * n[2])
 
-    def exposure(self, extra_up=0.0):
-        """The eye's exposure (AtlasMeter's target) for a scene lit by this sky: a grey ground's mean luminance."""
+    def exposure(self, extra_up=0.0, town=0.0):
+        """The eye's exposure (AtlasMeter's target, its range read from AtlasMeter.java) for a scene lit by this sky: a
+        grey ground's mean luminance, plus town (a lit town's own mean luminance: its torches and windows)."""
         k = self.air_light
         key = lum(k[3:6]) * max(k[1], 0.0)
         up = lum(k[6:9]) * math.pi
-        e = 0.18 * ((key + up) * (1.0 - getattr(self, "hidden", 0.0)) + extra_up) / math.pi
-        s = math.log2(max(e, 1e-9))
+        e = 0.18 * ((key + up) * (1.0 - getattr(self, "hidden", 0.0)) + extra_up) / math.pi + town
+        s = math.log2(max(e, 1e-12))
         dayness = smooth(-19.0, -6.0, s)
         target = math.log2(0.004) + (math.log2(0.18) - math.log2(0.004)) * dayness
-        return 2.0 ** min(max(target - s, -4.5), 12.0)
+        lo, hi = meter_range()
+        return 2.0 ** min(max(target - s, lo), hi)
 
     def view(self, w, h, yaw, pitch, fov, exposure):
         """A perspective view through the game's core/atlas_sky.fsh (displayed, sRGB 8 bit)."""
@@ -344,6 +364,45 @@ class Sky:
         return display(lin, exposure)
 
 
+def chart(img, yaw, pitch, fov, labels):
+    """A view with its sky named (NirnCelestial's labels: the poles with their height, the named stars, the figures,
+    the planets) and the horizon drawn: what to look for in the clean view beside it."""
+    from PIL import ImageDraw
+    im = img.copy()
+    w, h = im.size
+    dr = ImageDraw.Draw(im)
+    cy, sy = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+    cp, sp = math.cos(math.radians(pitch)), math.sin(math.radians(pitch))
+    fwd = np.array([sy * cp, sp, -cy * cp])
+    right = np.cross(fwd, [0, 1, 0])
+    right /= np.linalg.norm(right)
+    up = np.cross(right, fwd)
+    f = 1.0 / math.tan(math.radians(fov) / 2)
+
+    def px(v):
+        z = float(np.dot(v, fwd))
+        if z <= 0.05:
+            return None
+        return ((float(np.dot(v, right)) / z * f / (w / h) + 1) / 2 * w, (1 - float(np.dot(v, up)) / z * f) / 2 * h)
+    horizon = [px(np.array([math.sin(a), 0.0, -math.cos(a)])) for a in np.linspace(0, 2 * math.pi, 721)]
+    for a, b in zip(horizon, horizon[1:]):
+        if a and b and abs(a[0] - b[0]) < w:
+            dr.line([a, b], fill=(90, 70, 40))
+    for lab in labels:
+        p = px(np.array(lab["dir"]))
+        name = lab["name"]
+        if not p or not (0 <= p[0] < w and 0 <= p[1] < h) or (lab["dir"][1] < 0 and "pole" not in name):
+            continue
+        sign = name.isupper()
+        if "pole" in name:
+            name += f" {math.degrees(math.asin(lab['dir'][1])):.0f} deg"
+        col = (150, 150, 230) if sign else (230, 190, 110) if "pole" not in name else (240, 120, 120)
+        if not sign:
+            dr.ellipse((p[0] - 7, p[1] - 7, p[0] + 7, p[1] + 7), outline=col)
+        dr.text((p[0] + 9, p[1] - 6), name, fill=col)
+    return im
+
+
 def display(lin, exposure):
     """atlas_look.glsl's atlasDisplay (ACES fit, sRGB) in numpy (night vision left out: images of the radiance)."""
     inM = np.array([[0.59719, 0.35458, 0.04823], [0.07600, 0.90834, 0.01566], [0.02840, 0.13383, 0.83777]])
@@ -369,6 +428,7 @@ def dusk(elev_deg, day=28):
     return {"sunAngle": a, "dayTime": day * 24000 + 12000 + (elev_deg * -60)}
 
 
+HD = (1920, 1080)
 SCENES = {
     # the aurora from north to south (both moons new, a strong night: kp 6)
     "aurora_atmora": {**midnight(28), "z": -6500, "kp": 6, "look": (0, 35, 100)},
@@ -392,6 +452,35 @@ SCENES = {
     "dusk_m10": {**dusk(-10), "z": 0, "kp": 0, "brightness": 0, "look": (110, 30, 90)},
     "dusk_m14": {**dusk(-14), "z": 0, "kp": 0, "brightness": 0, "look": (110, 30, 90)},
     "day_moon": {"sunAngle": 0.6, "dayTime": 64 * 24000 + 3000, "z": 0, "kp": 0, "brightness": 0, "look": (80, 30, 90)},
+    # the stars, the planets, a comet (NirnCelestial), at the game's resolution (a star's light is held in its pixel:
+    # a coarse view dims them): as the game shows them, the dark-adapted eye's lift included ("_x4": two stops more,
+    # to read the faint placement). One moment from Skyrim (Winterhold's latitude) and from the far south (the Black
+    # Marsh coast): the north pole's height; the Southron Pole Star low in the south from there
+    "stars_skyrim": {**midnight(28), "z": -2400, "kp": 0, "brightness": 0, "look": (0, 35, 100), "res": HD},
+    "stars_south": {**midnight(28), "z": 11000, "kp": 0, "brightness": 0, "look": (0, 35, 100), "res": HD},
+    "stars_south_s": {**midnight(28), "z": 11000, "kp": 0, "brightness": 0, "look": (180, 15, 70), "res": HD},
+    # a birthsign without lines, high in a dark sky (the Warrior, from Whiterun)
+    "warrior": {**midnight(28), "z": 0, "kp": 0, "brightness": 0, "look": (170, 45, 60), "res": HD},
+    "warrior_x4": {**midnight(28), "z": 0, "kp": 0, "brightness": 0, "look": (170, 45, 60), "boost": 4, "res": HD},
+    # Arkay in the Thief's eye (Mid Year 16th of year 0; every second Mid Year), and close up (its disc)
+    "thief_eye": {**midnight(165), "z": 0, "kp": 0, "brightness": 0, "look": ("arkay", -2, 50), "res": HD},
+    "arkay_close": {**midnight(165), "z": 0, "kp": 0, "brightness": 0, "look": ("arkay", 0, 2), "res": HD},
+    # one exposure for everything (AtlasMeter's range to the scotopic): a moonless night (the land near black, the stars
+    # points to the fifth magnitude and past, the galaxy, a kp 6 aurora green), a full Masser (the land dim, fewer
+    # stars), a torch-lit town (its lights, ~2^-13 of the air's units on average, wash the stars out)
+    "eye_moonless": {**midnight(28), "z": -2000, "kp": 6, "look": (0, 25, 90), "res": HD},
+    "eye_moonless_s": {**midnight(28), "z": -2000, "kp": 6, "look": (170, 40, 70), "res": HD},
+    "eye_full_masser": {**midnight(64), "z": -2000, "kp": 0, "brightness": 0, "look": (170, 40, 70), "res": HD},
+    "eye_town": {**midnight(28), "z": -2000, "kp": 6, "town": 2.0 ** -13, "look": (170, 40, 70), "res": HD},
+    # Akatosh, the evening star, a crescent (Rain's Hand 16th): in the dusk, and its disc and phase close up
+    "akatosh_dusk": {**dusk(-10, 105), "z": 0, "kp": 0, "brightness": 0, "look": ("akatosh", 12, 70), "res": HD},
+    "akatosh_close": {**dusk(-10, 105), "z": 0, "kp": 0, "brightness": 0, "look": ("akatosh", 0, 1.5), "res": HD},
+    # Xero-Lyg, the black Coruscation, on the galaxy's band (close: it hides what lies behind it)
+    "xero_lyg": {**midnight(28), "z": 0, "kp": 0, "brightness": 0, "look": ("xero-lyg", 0, 6), "res": HD},
+    # Julianos in the Mage's eye (Frostfall 16th of year 1)
+    "mage_eye": {**midnight(645), "z": 0, "kp": 0, "brightness": 0, "look": ("julianos", -2, 50), "res": HD},
+    # a great comet (the dev hook's: perihelion on day 22), a week past perihelion on a moonless night
+    "comet": {**midnight(28), "z": 0, "kp": 0, "brightness": 0, "comet": 22, "look": ("comet", 10, 90), "res": HD},
 }
 
 
@@ -503,7 +592,7 @@ def main():
     print(f"{'scene':18} {'expo':>6} {'zenith':>9} {'N hor':>9} {'S hor':>9} {'aur peak':>9} {'nightUp':>9} "
           f"{'airUp':>9} {'key':>9} {'fill':>9} {'emitE_up':>9}")
     for name, s in SCENES.items():
-        if a.only and a.only not in name:
+        if a.only and not any(o and o in name for o in a.only.split(",")):  # (names containing any of these)
             continue
         sky.scene(s)
         e_up = float(lum(sky.irradiance((0, 1, 0))))
@@ -532,12 +621,31 @@ def main():
                              air_sky_up_radiance=air_up, key_irradiance=key_e, fill_irradiance=fill_e,
                              gain=sky.m["gain"], sh=sky.sh.tolist(), sun=sky.sun, moonlights=ml,
                              air_zenith=float((air[c, c, :3] * [0.2126, 0.7152, 0.0722]).sum()))
+        # the planets' and a comet's light on an upward face (NirnCelestial's SH, before the night's lift)
+        cl = sky.cel["light"]
+        cel_up = math.pi * 0.282095 * lum(cl[0:3]) + (2 * math.pi / 3) * 0.488603 * lum(cl[8:11])
+        numbers[name]["celestial_up"] = cel_up
+        numbers[name]["latitude"] = sky.cel["latitude"]
+        numbers[name]["planets"] = sky.cel["planets"]
+        if "comet" in sky.cel:
+            numbers[name]["comet"] = sky.cel["comet"]
         print(f"{name:18} {expo:6.2f} {zen:9.2e} {north:9.2e} {south:9.2e} {peak:9.2e} {e_up / math.pi:9.2e} "
-              f"{air_up:9.2e} {key_e:9.2e} {fill_e:9.2e} {e_up:9.2e}")
+              f"{air_up:9.2e} {key_e:9.2e} {fill_e:9.2e} {e_up:9.2e}  lat {sky.cel['latitude']:5.1f} celUp {cel_up:8.2e}"
+              + (f"  comet m {sky.cel['comet']['mag']:.1f} alt {sky.cel['comet']['alt']:.0f}" if "comet" in sky.cel else ""))
         yaw, pitch, fov = s["look"]
-        sky.view(960, 540, yaw, pitch, fov, expo).save(out / f"{name}_view.png")
-        display(lin[..., :3], expo).save(out / f"{name}_dome.png")
-        sky.cube(expo).save(out / f"{name}_cube.png")
+        if isinstance(yaw, str):  # face a body: its place tonight (pitch: degrees above it)
+            body = sky.cel["comet"] if yaw == "comet" else sky.cel["planets"].get(yaw)
+            if body is None:  # a named star or a figure (its label)
+                d = next(lab["dir"] for lab in sky.cel["labels"] if lab["name"] == yaw)
+                body = {"az": math.degrees(math.atan2(d[0], -d[2])) % 360, "alt": math.degrees(math.asin(d[1]))}
+            yaw, pitch = body["az"], body["alt"] + pitch
+        boost = s.get("boost", 1.0)
+        img = sky.view(*s.get("res", (960, 540)), yaw, pitch, fov, expo * boost)
+        img.save(out / f"{name}_view.png")
+        if "labels" in sky.cel:
+            chart(img, yaw, pitch, fov, sky.cel["labels"]).save(out / f"{name}_chart.png")
+        display(lin[..., :3], expo * boost).save(out / f"{name}_dome.png")
+        sky.cube(expo * boost).save(out / f"{name}_cube.png")
     # (a subset run keeps the other scenes' numbers)
     old = json.loads((out / "numbers.json").read_text()) if (out / "numbers.json").exists() else {}
     (out / "numbers.json").write_text(json.dumps({**old, **numbers}, indent=1))

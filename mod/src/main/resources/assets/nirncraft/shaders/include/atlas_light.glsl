@@ -21,6 +21,9 @@ layout(std140) uniform NearInfo {
     vec4 WaterTint;   // the biomes' water colour around the camera, eased (atlas_water.glsl)
     vec4 CamAbs;      // the camera's world position; w the sun map's size
     vec4 Medium;      // the eye's medium: x extinction a block (0: the air), yzw its glow (y < 0: lit white, powder snow)
+    vec4 InsideMin;   // the eye inside a block's shape: xyz its box's min (camera-relative), w extinction a block (0: not)
+    vec4 InsideMax;   // xyz the box's max, w the kind (0 solid, 1 foliage, 2 glass and the like)
+    vec4 InsideTint;  // rgb the block's colour (linear), what little light is in there tinted by it
 };
 uniform sampler2D ShadowMap;  // the near terrain seen from the key light (AtlasNearPass's shadow pass)
 

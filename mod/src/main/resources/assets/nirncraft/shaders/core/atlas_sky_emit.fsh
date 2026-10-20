@@ -24,5 +24,6 @@ void main() {
     d = normalize(d);
     vec3 L = nightSky(d, NightTarget.y, nightDither(gl_FragCoord.xy), NIGHT_ALL, 12);
     float pre = max(NightTarget.x, 1e-6);
-    fragColor = vec4(L * pre, pre);
+    // (a half-float target: a fireball's head or a star under a dark-adapted eye stays finite)
+    fragColor = vec4(min(L * pre, vec3(60000.0)), pre);
 }

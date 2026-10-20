@@ -869,12 +869,14 @@ public final class ClientAutotest {
                 tourTeleport(mc, Integer.parseInt(v[0]), Integer.parseInt(v[1]), Integer.parseInt(v[2]),
                         Float.parseFloat(v[3]), Float.parseFloat(v[4]), v[5]);
                 resetFps();
-            } else if (action.startsWith("capture ") || action.startsWith("capture-ui ")) {
-                // the picture is taken from the eye (the test player is a spectator): only the eye must be clear
-                if(!mc.level.noCollision(mc.player,new net.minecraft.world.phys.AABB(mc.player.getEyePosition(),mc.player.getEyePosition()).inflate(0.12)))
+            } else if (action.startsWith("capture ") || action.startsWith("capture-ui ") || action.startsWith("capture-inside ")) {
+                // the picture is taken from the eye (the test player is a spectator): only the eye must be clear, but
+                // for capture-inside (the clipping tests: the eye inside a block on purpose)
+                boolean insideOk = action.startsWith("capture-inside ");
+                if(!insideOk && !mc.level.noCollision(mc.player,new net.minecraft.world.phys.AABB(mc.player.getEyePosition(),mc.player.getEyePosition()).inflate(0.12)))
                     throw new IllegalStateException("Camera intersects terrain; choose a clear pose before capture");
                 boolean ui=action.startsWith("capture-ui ");
-                String tag = action.substring(ui?11:8).replaceAll("[^A-Za-z0-9_-]", "_");
+                String tag = action.substring(ui?11:insideOk?15:8).replaceAll("[^A-Za-z0-9_-]", "_");
                 if(!ui) {  // a clean frame: no HUD, chat, toasts or screens (UI tests capture with capture-ui)
                     mc.gui.setScreen(null); com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, true);
                     mc.gui.toastManager().clear(); mc.gui.hud.getChat().clearMessages(false);

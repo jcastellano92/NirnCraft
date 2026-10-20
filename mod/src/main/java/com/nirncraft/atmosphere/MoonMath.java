@@ -18,7 +18,8 @@ import java.util.Locale;
  *   cover the sun, a third dark disc stands over it, its rim lit by the corona. Rare: both new moons near the same hour
  *   (every 72 days) and both near their nodes.</li>
  *   <li><b>The Necromancer's Moon</b> (the Revenant): a small dark body that hides the planet Arkay for a day every eight
- *   days ({@link #revenant}); the planets give Arkay's place. Behind AtmosphereConfig.NECROMANCER_MOON (off).</li>
+ *   days ({@link #revenant}); the planets give Arkay's place (CelestialSky.arkayDirection). Behind
+ *   AtmosphereConfig.NECROMANCER_MOON (off).</li>
  * </ul>
  *
  * <p>For the other sky bodies: {@link #occulters} lists every disc that hides what is behind it (direction, angular

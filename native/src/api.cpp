@@ -387,12 +387,24 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           ",\"voxgrid\":{\"window\":[%d,%d,%d],\"slots\":%u,\"slotCap\":%u,\"gpuBytes\":%llu,\"built\":%llu,"
                           "\"batches\":%llu,\"pending\":%zu,\"lastGpuMs\":%.3f,\"lastSections\":%u,\"lastJobs\":%u,"
                           "\"lastRegrow\":%s,\"totalGpuMs\":%.2f,\"ownsLevel0\":%s,\"level0Skipped\":%zu,"
-                          "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f}",
+                          "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f,",
                           v.D, v.H, v.D, v.slotsUsed(), v.slotCap, (unsigned long long)bytes, (unsigned long long)v.sectionsBuilt,
                           (unsigned long long)v.batches, v.pending(), t.lastMs, t.lastSections, t.lastJobs,
                           t.lastStates ? "true" : "false", t.totalMs, ctx->world.gridOwnsLevel0.load() ? "true" : "false",
                           ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs);
-            ctx->info.insert(ctx->info.size() - 1, b);
+            // where the window is against the camera (sections), how it moved, what it still waits for, what the pool
+            // full gave back to the CPU, and how many frames its content took to be complete after its last move
+            VoxGrid::Stats st = v.stats();
+            char c[768];
+            std::snprintf(c, sizeof c,
+                          "\"origin\":[%d,%d],\"cameraSection\":[%d,%d],\"jumps\":%llu,\"shifts\":%llu,\"refills\":%llu,"
+                          "\"freshColumns\":%u,\"pendingSections\":%zu,\"evicted\":%llu,\"overflow\":%llu,"
+                          "\"framesSinceMove\":%llu,\"lastSettleFrames\":%llu,\"settled\":%s}",
+                          st.ox, st.oz, st.camSx, st.camSz, (unsigned long long)st.jumps, (unsigned long long)st.shifts,
+                          (unsigned long long)st.refills, st.freshColumns, st.pending, (unsigned long long)st.evicted,
+                          (unsigned long long)st.overflow, (unsigned long long)(st.frames - st.lastShiftFrame),
+                          (unsigned long long)st.lastSettleFrames, st.settledFrame >= st.lastShiftFrame ? "true" : "false");
+            ctx->info.insert(ctx->info.size() - 1, std::string(b) + c);
         }
         return ctx->info.c_str();
     } catch (...) {
@@ -664,6 +676,13 @@ ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], do
     if (!ctx || !centre) return ATLAS_ERR_ARG;
     ATLAS_TRY
     double ms = 0;
+    // the level-0 grid: the columns its window entered read from the world here when the render thread could not (its
+    // lock busy), and what it gave up rebuilt by the CPU again
+    ctx->voxgrid.refill(ctx->world);
+    {
+        std::vector<Key3> rel = ctx->voxgrid.takeReleased();
+        if (!rel.empty()) ctx->world.gridReleased(rel);
+    }
     ctx->world.update(centre, budgetMs, &ms);
     ctx->stats.lastBuildMs = ms;
     // copy a new revision to the GPU here (the game calls update off the render thread), not in the next frame;
@@ -922,6 +941,11 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     float a[3], b[3];
     pixelDir(f->invViewProj, f->width * 0.5f, f->height * 0.5f, f->width, f->height, a);
     pixelDir(f->invViewProj, f->width * 0.5f + 1, f->height * 0.5f, f->width, f->height, b);
+    {
+        // the view's horizontal forward: the world builds what lies behind the camera after what it sees (World::setView)
+        float hl = std::sqrt(a[0] * a[0] + a[2] * a[2]);
+        if (hl > 1e-4f) ctx->world.setView(a[0] / hl, a[2] / hl);
+    }
     float dot = std::fmin(1.0f, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
     g.params[0] = f->nearFieldEnd;
     g.params[1] = f->maxDistance;

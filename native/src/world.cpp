@@ -1,6 +1,12 @@
 #include "world.hpp"
 #include "parallel.hpp"
 
+#ifdef _WIN32
+// (the builders below the game's threads; windows.h itself would bring its near / far macros in)
+extern "C" __declspec(dllimport) int __stdcall SetThreadPriority(void* thread, int priority);
+extern "C" __declspec(dllimport) void* __stdcall GetCurrentThread();
+#endif
+
 #include <algorithm>
 #include <bit>
 #include <atomic>
@@ -495,8 +501,14 @@ void World::setClasses(std::vector<uint8_t> cls) {
 void World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
     auto s = std::make_unique<Section>();
     std::copy(mats, mats + 4096, s->mats.begin());
+    // (its generated levels outside the world's lock: an upload holds it for the map's update alone)
+    std::vector<uint8_t> cls;
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        cls = classes_;
+    }
+    s->buildMips(cls);
     std::lock_guard<std::mutex> lock(mu_);
-    s->buildMips(classes_);
     sections_[{0, sx, sy, sz}] = std::move(s);
     undigested_.insert({0, sx, sy, sz});  // its coarse levels (World::digest)
     markSectionDirty(sx, sy, sz);
@@ -531,8 +543,18 @@ void World::setGridWindow(int ox, int oz, int d) {
     gridMoved_ = true;
 }
 
+void World::gridReleased(const std::vector<Key3>& secs) {
+    std::lock_guard<std::mutex> lock(mu_);
+    bool nbrs = groupsWanted.load(std::memory_order_relaxed);
+    for (const Key3& k : secs) {
+        gridNotHeld_.insert(k);
+        markRegions(k.x, k.y, k.z, 0, 0, dirty_, nbrs);
+    }
+}
+
 void World::gridWindowMoved() {
     int ox = gridOx_, oz = gridOz_, d = gridD_;
+    gridNotHeld_.clear();
     for (auto it = gridSkipped_.begin(); it != gridSkipped_.end();) {
         // a level-0 region: 16 x 16 columns of sections; rebuilt once any of them lies outside the window
         int sx0 = it->x * 16, sz0 = it->z * 16;
@@ -558,7 +580,7 @@ void World::markSectionDirty(int sx, int sy, int sz) {
     // same five regions again (a level-4 region spans 4096 blocks), and the client's feed kept a core busy for minutes
     bool nbrs = groupsWanted.load(std::memory_order_relaxed);
     // (the GPU's grid holds it: its level-0 region waits until the grid's window leaves it, setGridWindow)
-    bool grid = gridOwnsLevel0.load(std::memory_order_relaxed) && gridHolds(sx, sz);
+    bool grid = gridOwnsLevel0.load(std::memory_order_relaxed) && gridHolds(sx, sz) && !gridNotHeld_.count({0, sx, sy, sz});
     markRegions(sx, sy, sz, 0, 0, grid ? gridSkipped_ : dirty_, nbrs);
     markRegions(sx, sy, sz, 1, 4, sectionDirty_, nbrs);
     lastSectionMs_ = nowMs();
@@ -1458,6 +1480,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
     auto start = std::chrono::steady_clock::now();
     int centreRegion[MAX_LODS][2];
     std::vector<Key3> want;
+    size_t urgent = 0;  // (budgeted) wanted regions short of the deferred trees: what the view still waits for
     std::vector<Job> jobs;
     bool groups = groupsWanted.load();
     std::shared_ptr<const ShapeSet> shapes;
@@ -1471,7 +1494,9 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         gridWindowMoved();
     }
     // the sections that arrived, into the coarse levels (before the regions they dirtied are snapshot)
+    auto tDigest0 = std::chrono::steady_clock::now();
     if (groups) digest(centreRegion, budgetMs);
+    auto tDigest1 = std::chrono::steady_clock::now();
     {
         std::lock_guard<std::mutex> lock(mu_);
         // the coarser levels the sections dirtied, once the uploads have paused (or a region is missing outright)
@@ -1492,6 +1517,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
                         Key3 k{lod, cx + dx, ry, cz + dz};
                         auto r = regions_.find(k);
                         // with groups wanted, a region without its tree yet gets one (its SVDAG kept)
+                        if (inFlight_.count(k)) continue;  // (a builder has it)
                         if (r == regions_.end() || dirty_.count(k) || (groups && treeDirty_.count(k)) ||
                             (groups && lod < groupLods && !r->second->groups &&
                              (!r->second->empty() || (lod <= 4 && !sections_.empty()) || coarseNear(k))))
@@ -1562,27 +1588,50 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         // arrival shows the whole view at once, then sharpens), then rebuilds, nearest and finest first; regions hidden
         // behind the horizon after all of those
         int hiddenCount = 0;
+        // behind the camera (its forward direction from the frames, setView): after everything in view, before what
+        // the horizon hides; the eye's region and its neighbours never count as behind
+        float vfx = viewX_.load(), vfz = viewZ_.load();
+        bool haveView = vfx * vfx + vfz * vfz > 1e-6f;
+        auto behind = [&](const Key3& k) {
+            if (!haveView) return false;
+            double span = double(256 << k.lod), x0 = k.x * span, z0 = k.z * span;
+            double nx = std::clamp(ex, x0, x0 + span), nz = std::clamp(ez, z0, z0 + span);
+            if (std::hypot(nx - ex, nz - ez) < span * 1.5) return false;
+            // every corner behind (the view's half-width at most ~60 degrees off forward: cos < -0.2 is out of it)
+            for (int c = 0; c < 4; c++) {
+                double dx = x0 + (c & 1) * span - ex, dz = z0 + (c >> 1) * span - ez, l = std::hypot(dx, dz);
+                if (l < 1e-6 || (dx * vfx + dz * vfz) / l > -0.2) return false;
+            }
+            return true;
+        };
         auto order = [&](const Key3& k) {
             int d = std::abs(k.x - centreRegion[k.lod][0]) + std::abs(k.z - centreRegion[k.lod][1]);
             bool missing = regions_.find(k) == regions_.end();
             int coarseFirst = (MAX_LODS - k.lod) * 64 + d;
+            // a region with its voxels whose tree alone is wanted, inside the finer level's window: last of all (a
+            // primary ray takes the finer level there; a level-1 tree of real content took 30-60 s on one thread)
+            if (budgetMs > 0 && !missing && !dirty_.count(k) && coveredByFiner(k, centreRegion)) return std::make_pair(4, coarseFirst);
             if (hidden(k)) {
                 hiddenCount++;
-                return std::make_pair(2, coarseFirst);
+                return std::make_pair(3, coarseFirst);
             }
+            if (behind(k)) return std::make_pair(2, missing ? coarseFirst : 1000 + d + k.lod);
             return missing ? std::make_pair(0, coarseFirst) : std::make_pair(1, d + k.lod);
         };
+        // (budgeted) whether a wanted region's job builds its tree too: not for a region the finer level's window
+        // covers (its voxels now, its tree from the last category later)
         std::vector<std::pair<std::pair<int, int>, Key3>> keyed;
         keyed.reserve(want.size());
         for (const Key3& k : want) keyed.push_back({order(k), k});
         std::stable_sort(keyed.begin(), keyed.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
         for (size_t i = 0; i < want.size(); i++) want[i] = keyed[i].second;
+        urgent = size_t(std::count_if(keyed.begin(), keyed.end(), [](const auto& e) { return e.first.first < 4; }));
         lastHidden_ = hiddenCount;
         // ATLAS_SKIP_HIDDEN (a measurement): hidden regions are never built, so the settled picture shows what the
         // horizon test hid wrongly
         static const bool skipHidden = std::getenv("ATLAS_SKIP_HIDDEN") != nullptr;
         if (skipHidden)
-            while (!keyed.empty() && keyed.back().first.first == 2) keyed.pop_back(), want.pop_back();
+            while (!keyed.empty() && keyed.back().first.first == 3) keyed.pop_back(), want.pop_back();
         jobs.resize(want.size());
         shapes = shapes_;
     }
@@ -1591,18 +1640,67 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
     // wanted regions took longer than the budget itself and nothing was built (ATLAS-STREAMING.md); the budget counts
     // from here
     auto workStart = std::chrono::steady_clock::now();
+    if (budgetMs > 0) {
+        // the builders' queue: what is wanted now, in order (replacing the last update's); what they finished since
+        // the last update, collected (as the synchronous path's results below)
+        std::vector<Built> fin;
+        {
+            std::lock_guard<std::mutex> lock(mu_);
+            queue_.clear();
+            for (const Key3& k : want) queue_.push_back({k, !coveredByFiner(k, centreRegion) || (regions_.count(k) && !dirty_.count(k))});
+            fin.swap(done_);
+            if (builders_.empty()) {
+                unsigned n = std::max(1u, std::thread::hardware_concurrency() / 2);
+                if (threadCap()) n = std::min(n, threadCap());
+                try {
+                    for (unsigned i = 0; i < n; i++) builders_.emplace_back([this] { builder(); });
+                } catch (...) {
+                    // (out of threads: those that started do the work; with none, the synchronous path next time)
+                }
+            }
+        }
+        buildCv_.notify_all();
+        want.clear();
+        jobs.clear();
+        for (Built& b : fin) {
+            want.push_back(b.key);
+            Job j;
+            j.key = b.key;
+            j.wasDirty = b.wasDirty;
+            j.wasTreeDirty = b.wasTreeDirty;
+            j.keep = b.keep;
+            jobs.push_back(std::move(j));
+        }
+        budgetMs = -1.0;  // (below: nothing to build here, the collected regions taken as results)
+        for (size_t i = 0; i < fin.size(); i++) doneRegions_.push_back(std::move(fin[i].region));
+    }
     std::atomic<size_t> next{0};
     std::atomic<int> built{0}, treesBuilt{0};
     std::atomic<int64_t> treeUs{0};
     std::vector<std::pair<Key3, std::shared_ptr<const Region>>> results(want.size());
+    // (ATLAS_TRACE_UPDATE) per job: snapshot (under the lock), voxels, tree, ms
+    struct JobTime {
+        Key3 k;
+        double snap = 0, dag = 0, tree = 0;
+        size_t sections = 0, coarse = 0;
+    };
+    std::vector<JobTime> jobTimes(want.size());
+    if (budgetMs < 0) {  // (collected from the builders)
+        for (size_t i = 0; i < want.size(); i++) {
+            if (doneRegions_[i]) results[i] = {want[i], doneRegions_[i]}, built++;
+        }
+        doneRegions_.clear();
+    }
     auto worker = [&] {
         for (;;) {
+            if (budgetMs < 0) return;
             size_t i = next.fetch_add(1);
             if (i >= want.size()) return;
             if (budgetMs > 0) {
                 double el = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - workStart).count();
                 if (el > budgetMs) return;
             }
+            auto js0 = std::chrono::steady_clock::now();
             {
                 std::lock_guard<std::mutex> lock(mu_);
                 const Key3& k = want[i];
@@ -1613,6 +1711,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
                 if (r != regions_.end() && !jobs[i].wasDirty) jobs[i].keep = r->second;  // only its tree is missing
             }
             const Job& j = jobs[i];
+            auto js1 = std::chrono::steady_clock::now();
             Region r;
             if (j.keep) {
                 r.key = j.key;
@@ -1620,20 +1719,29 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             } else {
                 r = buildRegion(j);
             }
+            auto js2 = std::chrono::steady_clock::now();
             if (j.groups && (!r.empty() || !j.sections.empty() || !j.coarse.empty())) {
                 r.groups = buildGroups(j, *shapes);
                 treesBuilt++;
                 treeUs += int64_t(r.groups->buildMs * 1000.0);
+            } else if (j.groups) {
+                r.groups = std::make_shared<const GroupTree>();  // (nothing to draw: wanted no more; it was rebuilt every update)
             }
+            auto js3 = std::chrono::steady_clock::now();
+            auto msOf = [](auto a, auto b) { return std::chrono::duration<double, std::milli>(b - a).count(); };
+            jobTimes[i] = {j.key, msOf(js0, js1), msOf(js1, js2), msOf(js2, js3), j.sections.size(), j.coarse.size()};
             results[i] = {want[i], std::make_shared<const Region>(std::move(r))};
             built++;
         }
     };
-    parallelRun(worker);  // a worker's exception (bad_alloc) comes back here, after all have stopped
+    if (budgetMs >= 0) parallelRun(worker);  // a worker's exception (bad_alloc) comes back here, after all have stopped
 
     bool moved = !havePacked_;
+    auto tLock0 = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point tLock1;
     {
         std::lock_guard<std::mutex> lock(mu_);
+        tLock1 = std::chrono::steady_clock::now();
         lastGroupsBuilt_ = uint32_t(treesBuilt.load());
         lastGroupsMs_ = double(treeUs.load()) / 1000.0;
         uint32_t now = nowMs();
@@ -1713,21 +1821,129 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         std::lock_guard<std::mutex> lock(mu_);
         reshaped = shapes_->revision != packedShapes_ || cards_->revision != packedCards_;
     }
-    lastPending_ = want.size() - size_t(built.load());
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        // (budgeted: what the view still waits for, the deferred trees left out; plus what the builders have in hand)
+        lastPending_ = budgetMs < 0 ? urgent + inFlight_.size() : want.size() - size_t(built.load());
+    }
     auto tBuilt = std::chrono::steady_clock::now();
     bool repacked = built > 0 || moved || reshaped;
-    if (repacked) repack(centreRegion);
+    if (repacked && budgetMs < 0) {
+        // (budgeted: packed by the packer thread; atlas_update stages the new revision once it is there)
+        {
+            std::lock_guard<std::mutex> lock(packMu_);
+            std::memcpy(packCentre_, centreRegion, sizeof packCentre_);
+            packWanted_ = true;
+            if (!packerThread_.joinable()) {
+                try {
+                    packerThread_ = std::thread([this] { packer(); });
+                } catch (...) {
+                    packWanted_ = false;
+                }
+            }
+        }
+        packCv_.notify_one();
+        if (!packerThread_.joinable()) repack(centreRegion);
+    } else if (repacked) {
+        repack(centreRegion);
+    }
     auto tEnd = std::chrono::steady_clock::now();
     if (buildMs) *buildMs = std::chrono::duration<double, std::milli>(tEnd - start).count();
     static const bool trace = std::getenv("ATLAS_TRACE_UPDATE") != nullptr;  // streaming measurements (ATLAS-STREAMING.md)
     if (trace && (built > 0 || repacked)) {
+        auto msOf = [](auto a, auto b) { return std::chrono::duration<double, std::milli>(b - a).count(); };
+        std::fprintf(stderr, "[atlas] update: digest %.1f ms, choose %.1f ms, build %.1f ms (budget %.0f; waiting for the lock %.1f, "
+                     "holding it %.1f), repack %.1f ms\n",
+                     msOf(tDigest0, tDigest1), msOf(tDigest1, workStart), msOf(workStart, tBuilt), budgetMs, msOf(tLock0, tLock1),
+                     msOf(tLock1, tBuilt), msOf(tBuilt, tEnd));
+        std::vector<JobTime> jt;
+        for (const JobTime& t : jobTimes)
+            if (t.snap + t.dag + t.tree > 0) jt.push_back(t);
+        std::sort(jt.begin(), jt.end(), [](const JobTime& a, const JobTime& b) { return a.snap + a.dag + a.tree > b.snap + b.dag + b.tree; });
+        for (size_t i = 0; i < std::min<size_t>(jt.size(), 6); i++)
+            std::fprintf(stderr, "[atlas]   job lod %d (%d,%d,%d): snapshot %.1f ms (%zu sections, %zu cubes), voxels %.1f ms, tree %.1f ms\n",
+                         jt[i].k.lod, jt[i].k.x, jt[i].k.y, jt[i].k.z, jt[i].snap, jt[i].sections, jt[i].coarse, jt[i].dag, jt[i].tree);
         auto p = packed();
         std::fprintf(stderr, "[atlas] update: %d of %zu wanted (%d behind the horizon) built in %.1f ms, repack %.1f ms (%zu regions, %.1f MB)\n",
                      built.load(), want.size(), lastHidden_.load(), std::chrono::duration<double, std::milli>(tBuilt - start).count(),
                      std::chrono::duration<double, std::milli>(tEnd - tBuilt).count(), p->regions.size(),
                      double(p->nodes.size() * 4 + p->leaves.size() * 8 + p->groups.size() * 4 + p->heightMip.size() * 4) / 1e6);
+        for (size_t i = 0; i < std::min<size_t>(want.size(), 4); i++)
+            std::fprintf(stderr, "[atlas]   integrated lod %d (%d,%d,%d)%s\n", want[i].lod, want[i].x, want[i].y, want[i].z,
+                         results[i].second && results[i].second->groups ? " with a tree" : "");
     }
     return built;
+}
+
+World::~World() {
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        stopBuilders_ = true;
+        queue_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(packMu_);  // (the packer waits on its own lock)
+    }
+    buildCv_.notify_all();
+    packCv_.notify_all();
+    for (auto& t : builders_)
+        if (t.joinable()) t.join();
+    if (packerThread_.joinable()) packerThread_.join();
+}
+
+bool World::coveredByFiner(const Key3& k, const int centreRegion[MAX_LODS][2]) const {
+    if (k.lod < 1) return false;
+    int64_t span = int64_t(256) << k.lod, fine = span / 2;
+    int64_t x0 = k.x * span, z0 = k.z * span;
+    int64_t fx0 = (centreRegion[k.lod - 1][0] - windowRadius) * fine, fx1 = (centreRegion[k.lod - 1][0] + windowRadius + 1) * fine;
+    int64_t fz0 = (centreRegion[k.lod - 1][1] - windowRadius) * fine, fz1 = (centreRegion[k.lod - 1][1] + windowRadius + 1) * fine;
+    return x0 >= fx0 && x0 + span <= fx1 && z0 >= fz0 && z0 + span <= fz1;
+}
+
+void World::builder() {
+#ifdef _WIN32
+    SetThreadPriority(GetCurrentThread(), -1);  // THREAD_PRIORITY_BELOW_NORMAL  // (the game's threads first)
+#endif
+    std::unique_lock<std::mutex> lock(mu_);
+    for (;;) {
+        buildCv_.wait(lock, [&] { return stopBuilders_ || !queue_.empty(); });
+        if (stopBuilders_) return;
+        auto [k, withTree] = queue_.front();
+        queue_.pop_front();
+        if (inFlight_.count(k)) continue;
+        bool groups = groupsWanted.load() && k.lod < groupLods && withTree;
+        Job j = snapshot(k, groups);
+        auto r = regions_.find(k);
+        j.wasDirty = dirty_.erase(k) != 0;  // an edit while it builds marks it again (built next time)
+        j.wasTreeDirty = treeDirty_.erase(k) != 0;
+        if (r != regions_.end() && !j.wasDirty) j.keep = r->second;  // only its tree is missing
+        std::shared_ptr<const ShapeSet> shapes = shapes_;
+        inFlight_.insert(k);
+        lock.unlock();
+        Built b;
+        b.key = k;
+        b.wasDirty = j.wasDirty;
+        b.wasTreeDirty = j.wasTreeDirty;
+        b.keep = j.keep;
+        try {
+            Region reg;
+            if (j.keep) {
+                reg.key = j.key;
+                reg.dag = j.keep->dag;
+            } else {
+                reg = buildRegion(j);
+            }
+            if (j.groups && (!reg.empty() || !j.sections.empty() || !j.coarse.empty())) reg.groups = buildGroups(j, *shapes);
+            else if (j.groups) reg.groups = std::make_shared<const GroupTree>();  // (nothing to draw: wanted no more)
+            b.region = std::make_shared<const Region>(std::move(reg));
+        } catch (...) {
+            b.region = nullptr;  // (out of memory: left dirty, the next update queues it again)
+        }
+        j = Job{};  // (its snapshot let go before the lock)
+        lock.lock();
+        inFlight_.erase(k);
+        done_.push_back(std::move(b));
+    }
 }
 
 void World::setShapes(uint32_t first, const std::vector<std::shared_ptr<const MaterialShape>>& shapes) {
@@ -1782,14 +1998,36 @@ World::GroupStats World::groupStats() const {
 }
 
 void World::repack(const int centreRegion[MAX_LODS][2]) {
-    std::lock_guard<std::mutex> lock(mu_);
+    // what the scene is packed from, snapshot under the world's lock (the regions of every level's window, the fades,
+    // shapes and cards: shared, not copied); the packing itself (tens of ms for a large scene) without it, so uploads
+    // and builders never wait for it
+    std::unordered_map<Key3, std::shared_ptr<const Region>, Key3Hash> regions;
+    std::unordered_map<Key3, Fade, Key3Hash> fading;
+    std::shared_ptr<const ShapeSet> shapesSnap;
+    std::shared_ptr<const CardSet> cardsSnap;
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        int side0 = 2 * windowRadius + 1;
+        for (int lod = 0; lod < lodCount; lod++)
+            for (int ry = 0; ry < regionRows(lod); ry++)
+                for (int z = 0; z < side0; z++)
+                    for (int x = 0; x < side0; x++) {
+                        Key3 k{lod, centreRegion[lod][0] - windowRadius + x, ry, centreRegion[lod][1] - windowRadius + z};
+                        auto it = regions_.find(k);
+                        if (it != regions_.end()) regions.emplace(k, it->second);
+                        auto f = fading_.find(k);
+                        if (f != fading_.end()) fading.emplace(k, f->second);
+                    }
+        shapesSnap = shapes_;
+        cardsSnap = cards_;
+    }
     PackedScene p;
     p.lodCount = lodCount;
     p.revision = packed()->revision + 1;
     std::unordered_map<const Region*, int32_t> slot;
     {
         // the groups' header, the material shapes and the material -> shape table (shaders/atlas_groups.slang)
-        const ShapeSet& sh = *shapes_;
+        const ShapeSet& sh = *shapesSnap;
         p.groups.assign(4, 0);
         std::vector<uint32_t> table(sh.byMaterial.size(), 0);
         uint32_t shapeBase = 1, n = 0;
@@ -1813,11 +2051,9 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
         p.groups[0] = tableBase;
         p.groups[1] = shapeBase;
         p.groups[2] = uint32_t(table.size());
-        packedShapes_ = sh.revision;
         // the surface cards: a header (table entries, the table's first uint4, the cards' first word, count), an
         // open-addressing table of (x, y, z, face + 1 | card << 3), then each card's mip chain
-        const CardSet& cs = *cards_;
-        packedCards_ = cs.revision;
+        const CardSet& cs = *cardsSnap;
         if (!cs.cards.empty()) {
             uint32_t size = 1;
             while (size < cs.cards.size() * 2) size <<= 1;
@@ -1897,8 +2133,8 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
                 grp += t.nodes.size() + t.dir.size() + t.slots.size() + t.bricks.size() + 3;
             }
         };
-        for (auto& [k, r] : regions_) count(r.get());
-        for (auto& [k, f] : fading_) count(f.old.get());
+        for (auto& [k, r] : regions) count(r.get());
+        for (auto& [k, f] : fading) count(f.old.get());
         p.nodes.reserve(nodes), p.leaves.reserve(leaves), p.runEnd.reserve(runs), p.runMat.reserve(runs);
         p.heightMip.reserve(hmip), p.groups.reserve(grp), p.regions.reserve(regs + 1);
         p.table.reserve(size_t(lodCount) * side * side * 16);
@@ -1918,9 +2154,9 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
             for (int z = 0; z < side; z++)
                 for (int x = 0; x < side; x++) {
                     Key3 k{lod, L.origin[0] + x, ry, L.origin[2] + z};
-                    auto it = regions_.find(k);
+                    auto it = regions.find(k);
                     int32_t v = -2;
-                    if (it != regions_.end()) {
+                    if (it != regions.end()) {
                         const Region* r = it->second.get();
                         if (r->empty()) {
                             v = -1;
@@ -1930,8 +2166,8 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
                                 v = s->second;
                             } else {
                                 v = pack(r, k);
-                                auto f = fading_.find(k);
-                                if (f != fading_.end()) {
+                                auto f = fading.find(k);
+                                if (f != fading.end()) {
                                     // the kernel dissolves from runs.z (old slot + 1; ~1: it was empty air, walk on at
                                     // this LOD; ~0: new to the window, look coarser) to this region between runs.w
                                     // and runs.w + fadeMs
@@ -1958,11 +2194,35 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
         std::lock_guard<std::mutex> snap(snapMu_);
         packed_ = std::move(next);
     }
+    std::lock_guard<std::mutex> lock(mu_);
+    packedShapes_ = shapesSnap->revision;
+    packedCards_ = cardsSnap->revision;
     for (int lod = 0; lod < lodCount; lod++) {
         lastCentre_[lod][0] = centreRegion[lod][0];
         lastCentre_[lod][1] = centreRegion[lod][1];
     }
     havePacked_ = true;
+}
+
+void World::packer() {
+#ifdef _WIN32
+    SetThreadPriority(GetCurrentThread(), -1);
+#endif
+    std::unique_lock<std::mutex> lock(packMu_);
+    for (;;) {
+        packCv_.wait(lock, [&] { return stopBuilders_ || packWanted_; });
+        if (stopBuilders_) return;
+        packWanted_ = false;
+        int c[MAX_LODS][2];
+        std::memcpy(c, packCentre_, sizeof c);
+        lock.unlock();
+        try {
+            repack(c);
+        } catch (...) {
+            // (out of memory: the scene stays as it was; the next update asks again)
+        }
+        lock.lock();
+    }
 }
 
 uint32_t nowMs() {
