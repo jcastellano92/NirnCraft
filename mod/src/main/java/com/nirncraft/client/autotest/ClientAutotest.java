@@ -773,6 +773,8 @@ public final class ClientAutotest {
             } else if (action.startsWith("pin ") || action.startsWith("pin-")) {  // pinned ground truth (client/pinned/PinnedTruth)
                 liveCommand = com.nirncraft.client.pinned.PinnedTruth.autotest(action);
                 liveCommandDeadline = System.currentTimeMillis() + 120_000L;
+            } else if (action.startsWith("atlas-unified ")) {  // on | off: the unified field (A/B in one session)
+                System.setProperty("nirncraft.atlas.unified", String.valueOf(action.substring(14).trim().equals("on")));
             } else if (action.equals("atlas-info")) {  // the core's report and the section feeds' queues, to the log
                 com.nirncraft.NirnCraft.LOGGER.info("atlas-info: {}", com.nirncraft.atlas.AtlasClient.debugInfo());
             } else if (action.startsWith("atlas-near ")) {  // on | off: our near pass owns terrain (vanilla draws none)
