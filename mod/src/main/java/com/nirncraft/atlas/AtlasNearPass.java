@@ -595,6 +595,7 @@ public final class AtlasNearPass {
         var camState = mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
         float[] medium = medium(mc, camState);
         float[] inside = inside(mc, camState);
+        insideSolid = inside[3] > 0f && inside[7] < 0.5f;
         float eyeWater = eyeWaterDepth(mc, camState);
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
         float[] still = sprite(mc, "block/water_still"), flow = sprite(mc, "block/water_flow");
@@ -691,6 +692,8 @@ public final class AtlasNearPass {
     }
 
     private static final float[] NOT_INSIDE = new float[11];
+    /** The eye is inside rock or earth this frame (AtlasMeter holds the eye's adaptation: it must not open the dark up). */
+    static volatile boolean insideSolid;
 
     /**
      * The block the eye is clipping into (atlas_water.glsl atlasInside): {min xyz camera-relative, extinction a block,

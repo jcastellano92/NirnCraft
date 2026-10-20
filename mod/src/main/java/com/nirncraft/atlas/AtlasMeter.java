@@ -60,6 +60,7 @@ final class AtlasMeter {
 
     /** End of the level's frame: meter the main target (vanilla's, the frame as finished). */
     static void meter(float exposureNow) {
+        if (AtlasNearPass.insideSolid) return;  // (clipping into rock: the eye holds, the dark is not metered)
         Minecraft mc = Minecraft.getInstance();
         var main = mc.gameRenderer.mainRenderTarget();
         if (main == null || main.getColorTexture() == null) return;
