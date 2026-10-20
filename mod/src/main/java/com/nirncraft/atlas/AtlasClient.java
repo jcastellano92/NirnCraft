@@ -62,6 +62,8 @@ public final class AtlasClient {
 
     private static AtlasNative lib;
     private static AtlasNative.Context ctx;
+    private static Path libPath;  // the loaded core (the client generator binds its own calls there)
+    private static AtlasClientGen clientGen;  // -Dnirncraft.atlas.clientGen=true: atlas generates the near field
     private static boolean cpuBackend;  // ctx runs on the CPU backend (no usable Vulkan device, or forced)
     private static long cpuLogAt;       // nanoTime of the next CPU-path log line
     private static AtlasTargets targets;
@@ -580,6 +582,7 @@ public final class AtlasClient {
             AtlasTrees.activeLod = trees != null ? AtlasTrees.APPROX_LOD : -1;  // before the first tile goes up
             farField = new AtlasFarField(ctx, source, () -> AtlasSettlements.create(ground, mats, trees), lods);
             AtlasClientSections.reset();  // a new context holds no real blocks: the loaded chunks go up again
+            if (AtlasClientGen.ON && mc.hasSingleplayerServer()) clientGen = AtlasClientGen.start(mc.getSingleplayerServer(), libPath);
             lightBudget = -1;
             startedFor = mc.level;
             retryAt = 0;
@@ -607,7 +610,9 @@ public final class AtlasClient {
         StringBuilder why = new StringBuilder();
         for (Path p : copies) {
             try {
-                return AtlasNative.load(p);
+                AtlasNative n = AtlasNative.load(p);
+                libPath = p;
+                return n;
             } catch (AtlasNative.NativeAccessDenied e) {
                 throw e;  // the same for every copy
             } catch (UnsatisfiedLinkError | RuntimeException e) {
@@ -891,7 +896,7 @@ public final class AtlasClient {
         String core = c != null ? c.info() : "no context";
         String frame = c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f fps=%d unified=%b} ",
                 c.stats().frameMs(), Minecraft.getInstance().getFps(), AtlasNearPass.unified()) : "";
-        return frame + AtlasClientSections.state() + " " + AtlasEditsClient.state() + " core=" + core;
+        return frame + AtlasClientSections.state() + " " + AtlasEditsClient.state() + " " + AtlasClientGen.state() + " core=" + core;
     }
 
     private static void jitter(AtlasNative.Context ctx, boolean on) {
@@ -1008,6 +1013,10 @@ public final class AtlasClient {
             // best effort
         }
         try {
+            if (clientGen != null) {
+                clientGen.close();
+                clientGen = null;
+            }
             if (farField != null) farField.close(destroy);  // now, or when the worker leaves
             else destroy.run();
         } catch (Throwable ignored) {

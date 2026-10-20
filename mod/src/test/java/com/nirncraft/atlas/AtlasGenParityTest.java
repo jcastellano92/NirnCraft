@@ -143,6 +143,7 @@ class AtlasGenParityTest {
                         t2.passMs()[0], t2.passMs()[1], t2.passMs()[2], t2.passMs()[3], t2.passMs()[4], t2.passMs()[5], t2.readbackMs()));
                 report.append(String.format("   first run %.1f ms%n", t.totalMs()));
                 compare(report, kinds, all, reference, prog, ids, flags);
+                if (backend == AtlasGenNative.BACKEND_VULKAN) feed(report, AtlasClientGen.detached(prog, pages, g, gen, rs, SEED), all, reference, ids);
                 if (backend == AtlasGenNative.BACKEND_VULKAN) {
                     // the control: every GPU chunk against the next chunk's Java blocks must disagree a lot
                     List<ChunkPos> rotated = new ArrayList<>(all.subList(1, all.size()));
@@ -156,11 +157,93 @@ class AtlasGenParityTest {
                 }
             }
         }
-        debugBackends(report, nat, prog, pages, all, reference);
+        if ("1".equals(System.getenv("NIRNCRAFT_GEN_DEBUG"))) debugBackends(report, nat, prog, pages, all, reference);
         String text = report.toString();
         String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
         if (out != null) Files.writeString(Path.of(out), text);
         System.out.println(text);
+    }
+
+    /**
+     * The near window after a jump (stage 2's measure): a square of W x W chunks around a camera, then the camera
+     * 600 blocks east; the pages the new window lacks are computed in Java on all cores, the chunks on the GPU.
+     * NIRNCRAFT_GEN_WINDOW = W (default 32: 512 blocks, a 16-chunk view radius).
+     */
+    @Test
+    void windowAfterJump(MinecraftServer server) throws Exception {
+        RegistryAccess ra = server.registryAccess();
+        LevelStem stem = ra.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL).value()
+                .createWorldDimensions().dimensions().get(LevelStem.OVERWORLD);
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) stem.generator();
+        NoiseGeneratorSettings settings = gen.generatorSettings().value();
+        RandomState rs = RandomState.create(ra.lookupOrThrow(Registries.NOISE), SEED, settings);
+        DimensionType dt = stem.type().value();
+        LevelHeightAccessor heights = LevelHeightAccessor.create(dt.minY(), dt.height());
+        AtlasGenProgram prog = AtlasGenProgram.compile(gen, settings, rs, heights, SEED, null);
+        AtlasGenPages pages = new AtlasGenPages(prog, rs, gen.getBiomeSource(), heights);
+        AtlasNative atlas = AtlasNative.load(Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB")));
+        AtlasGenNative nat = AtlasGenNative.load(Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB")));
+        int w = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_GEN_WINDOW", "32"));
+        StringBuilder report = new StringBuilder();
+        try (AtlasGenNative.Gen g = nat.create(AtlasGenNative.BACKEND_VULKAN); AtlasNative.Context ctx = atlas.create(AtlasGenNative.BACKEND_VULKAN)) {
+            g.setProgram(prog.words);
+            report.append(String.format("window %d x %d chunks, %s, %d threads for pages%n", w, w, g.device(),
+                    java.util.concurrent.ForkJoinPool.commonPool().getParallelism() + 1));
+            // Whiterun, then 600 blocks east (37.5 chunks: a new window that overlaps the old by a sliver)
+            for (int[] cam : new int[][]{{0, 0}, {600, 0}}) {
+                int ccx = cam[0] >> 4, ccz = cam[1] >> 4;
+                int[] xz = new int[w * w * 2];
+                int n = 0;
+                // nearest first, as the near field asks
+                List<int[]> order = new ArrayList<>();
+                for (int dz = -w / 2; dz < w / 2; dz++)
+                    for (int dx = -w / 2; dx < w / 2; dx++) order.add(new int[]{ccx + dx, ccz + dz});
+                order.sort(java.util.Comparator.comparingInt(c -> (c[0] - ccx) * (c[0] - ccx) + (c[1] - ccz) * (c[1] - ccz)));
+                for (int[] c : order) {
+                    xz[n++] = c[0];
+                    xz[n++] = c[1];
+                }
+                long t0 = System.nanoTime();
+                int[] miss = g.missing(xz);
+                int[][] made = new int[miss.length / 3][];
+                java.util.stream.IntStream.range(0, made.length).parallel()
+                        .forEach(i -> made[i] = pages.page(miss[i * 3], miss[i * 3 + 1], miss[i * 3 + 2] != 0));
+                double pageMs = (System.nanoTime() - t0) / 1e6;
+                for (int i = 0; i < made.length; i++) g.putPage(miss[i * 3], miss[i * 3 + 1], miss[i * 3 + 2] != 0, made[i]);
+                double putMs = (System.nanoTime() - t0) / 1e6 - pageMs;
+                long t1 = System.nanoTime();
+                int[] ids = new int[w * w * AtlasGenNative.CHUNK_WORDS];
+                AtlasGenNative.Times t = g.chunks(xz, 0, ids, null);
+                double genMs = (System.nanoTime() - t1) / 1e6;
+                long sections = 0;
+                for (int c = 0; c < w * w; c++)
+                    for (int sy = 0; sy < 40; sy++) {
+                        int base = c * AtlasGenNative.CHUNK_WORDS + sy * 2048;
+                        boolean any = false;
+                        for (int k = 0; k < 2048 && !any; k++) any = ids[base + k] != 0;
+                        if (any) sections++;
+                    }
+                report.append(String.format("camera %d, %d: %d pages in %.0f ms (+ %.0f ms to the device), %d chunks generated in %.0f ms "
+                                + "(kernels %.1f ms: corners %.1f, aquifer %.1f, fill %.1f, tops %.1f, surface %.1f, pack %.1f; readback %.1f); "
+                                + "%d non-air sections (%.4f ms of kernel a section); total %.0f ms%n",
+                        cam[0], cam[1], made.length, pageMs, putMs, w * w, genMs, t.kernelMs(), t.passMs()[0], t.passMs()[1],
+                        t.passMs()[2], t.passMs()[3], t.passMs()[4], t.passMs()[5], t.readbackMs(), sections,
+                        t.kernelMs() / Math.max(1, sections), (System.nanoTime() - t0) / 1e6));
+                // into an atlas context: generate (pages resident now) + the atlas_upload_section path, then its build
+                int[] secs = new int[1];
+                long t2 = System.nanoTime();
+                AtlasGenNative.Times ti = g.into(ctx.handle(), xz, null, secs);
+                double intoMs = (System.nanoTime() - t2) / 1e6;
+                long t3 = System.nanoTime();
+                ctx.update(cam[0], 80, cam[1], 0);
+                double updMs = (System.nanoTime() - t3) / 1e6;
+                report.append(String.format("   into the context: %d sections in %.0f ms (generate %.0f, ingest %.0f); atlas_update to settle %.0f ms%n",
+                        secs[0], intoMs, ti.totalMs() - ti.ingestMs(), ti.ingestMs(), updMs));
+            }
+        }
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".window.txt"), report.toString());
+        System.out.println(report);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -291,6 +374,51 @@ class AtlasGenParityTest {
             report.append(String.format("  %-9s %.5f %%%n", e.getKey(), 100.0 * e.getValue()[1] / Math.max(1, e.getValue()[0])));
         pairs.entrySet().stream().sorted((a, b) -> Long.compare(b.getValue(), a.getValue())).limit(40)
                 .forEach(e -> report.append(String.format("  %8d  %s   (e.g. %s)%n", e.getValue(), e.getKey(), example.get(e.getKey()))));
+    }
+
+    /**
+     * Stage 5's corrections: the generated chunk as the feed carries it (AtlasClientGen.decode) against the client
+     * feed's own reading of Java's chunk (AtlasClientSections.read's rule: far ids, deep solid rock left out). Equal
+     * sections are skipped at upload (AtlasEditsClient's hash), so only differences would go up again.
+     */
+    static void feed(StringBuilder report, AtlasClientGen cg, List<ChunkPos> all, Map<ChunkPos, ProtoChunk> reference, int[] ids) {
+        long same = 0, differ = 0, onlyGen = 0, onlyFeed = 0, staleRock = 0;
+        java.util.IdentityHashMap<BlockState, Integer> cache = new java.util.IdentityHashMap<>();
+        for (int i = 0; i < all.size(); i++) {
+            ChunkPos pos = all.get(i);
+            ProtoChunk c = reference.get(pos);
+            AtlasSections.Decoded g = cg.decode(pos.x(), pos.z(), ids, i);
+            int low = Integer.MAX_VALUE, high = Integer.MIN_VALUE;
+            for (int z = 0; z < 16; z++)
+                for (int x = 0; x < 16; x++) {
+                    low = Math.min(low, c.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z));
+                    high = Math.max(high, c.getHeight(Heightmap.Types.WORLD_SURFACE, x, z));
+                }
+            int minSec = c.getMinSectionY(), sy1 = Math.min(Math.floorDiv(high, 16), c.getMaxSectionY());
+            for (int s = 0; s < 40; s++) {
+                int sy = minSec + s;
+                int[] fed = null;
+                if (sy <= sy1) {
+                    var sec = c.getSection(s);
+                    if (!(AtlasSections.deep(sy, low) && AtlasSections.solidRock(sec)) && !sec.hasOnlyAir()) fed = AtlasSections.ids(sec, cache);
+                }
+                int[] gen = g.sections()[s];
+                if (fed == null && gen == null) continue;
+                if (fed == null) onlyGen++;
+                else if (gen == null) {
+                    onlyFeed++;
+                    // deep rock by content? (solidRock reads the palette, which may list states the blocks no longer have)
+                    var sec = c.getSection(s);
+                    boolean rock = true;
+                    for (int b = 0; b < 4096 && rock; b++) rock = sec.getBlockState(b & 15, b >> 8, b >> 4 & 15).isSolidRender();
+                    if (rock && AtlasSections.deep(sy, low)) staleRock++;
+                }
+                else if (java.util.Arrays.equals(fed, gen)) same++;
+                else differ++;
+            }
+        }
+        report.append(String.format("   feed: %d sections equal to the client feed's, %d differ, %d only generated, %d only in the feed (%d of them deep solid rock by content)%n",
+                same, differ, onlyGen, onlyFeed, staleRock));
     }
 
     /** Where Vulkan and the C++ reference part: the density bits, then the substance before the surface. */

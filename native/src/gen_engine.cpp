@@ -647,10 +647,16 @@ AtlasStatus generate(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32
                 it->second.used = h->clock;
                 b.pageIndex[size_t(z - minZ) * size_t(w) + size_t(x - minX)] = int32_t(it->second.slot);
             });
-        std::vector<uint32_t> out(size_t(n) * OUT_WORDS + n);
-        if (!h->engine->run(b, out.data(), t, err)) return h->fail(ATLAS_ERR_GPU, err);
-        std::memcpy(outIds + size_t(c0) * OUT_WORDS, out.data(), size_t(n) * OUT_WORDS * 4);
-        if (outFlags) std::memcpy(outFlags + c0, out.data() + size_t(n) * OUT_WORDS, size_t(n) * 4);
+        // the engines write the sections, then n flag words: straight into the caller's array (the flags land on
+        // the next batch's first words, which that batch overwrites); only the last batch goes through a copy
+        uint32_t* dst = outIds + size_t(c0) * OUT_WORDS;
+        bool last = c0 + n == count;
+        std::vector<uint32_t> tail;
+        if (last) tail.resize(size_t(n) * OUT_WORDS + n);
+        uint32_t* target = last ? tail.data() : dst;
+        if (!h->engine->run(b, target, t, err)) return h->fail(ATLAS_ERR_GPU, err);
+        if (outFlags) std::memcpy(outFlags + c0, target + size_t(n) * OUT_WORDS, size_t(n) * 4);
+        if (last) std::memcpy(dst, tail.data(), size_t(n) * OUT_WORDS * 4);
     }
     return ATLAS_OK;
 }

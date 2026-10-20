@@ -132,7 +132,7 @@ final class AtlasGenProgram {
 
     /**
      * Compiles the overworld generator. heights: the level's height accessor (vertical anchors resolve against it as
-     * in chunk generation); material: the atlas material of a block state (0 when the caller has none: parity runs).
+     * in chunk generation); material: the atlas material of a block state (null: the generator ids themselves).
      */
     static AtlasGenProgram compile(ChunkGenerator generator, NoiseGeneratorSettings settings, RandomState random,
                                    LevelHeightAccessor heights, long seed, ToIntFunction<BlockState> material) {
@@ -711,7 +711,7 @@ final class AtlasGenProgram {
                 if (net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG.isOpaque().test(s)) flags |= F_MOTION;  // the heightmap's own test
                 if (!fluid && s.canBeReplaced() && !s.isSolid()) flags |= F_SOFT;
                 w.add(flags);
-                w.add(material.applyAsInt(s));
+                w.add(material == null ? blockIds.get(s) : material.applyAsInt(s));  // null: the generator id itself
             }
             // scalars
             w.set(S_SEA, settings.seaLevel());
