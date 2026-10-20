@@ -90,11 +90,13 @@ vec3 nearLightFiltered(vec2 uv, vec4 nl, vec3 n, float depth) {
     // sky behind a crown): the sun's visibility then comes from the same surface's neighbours (dark fringes otherwise)
     bool centre = dot(nl.rgb, vec3(1.0)) >= 1e-6;
     float vis = centre ? nlVis(nl.a) : (visW > 1e-4 ? visSum / visW : 1.0);
+    vec3 visC = vec3(vis);
     if (centre && nl.a > 1.0) {
+        // through water: red lost first, then green (per channel, not the grey 8 % a block), shaped by the caustics
         vec3 pw = (InvViewRot * vec4(viewRay(uv, depth), 1.0)).xyz + vec3(CamPos.x, 0.0, CamPos.z);
-        vis *= atlasCausticFactor(pw, nl.a - 1.0);
+        visC = exp(-ATLAS_WATER_ABSORB * (nl.a - 1.0)) * atlasCausticFactor(pw, nl.a - 1.0);
     }
-    vec3 sunPart = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * vis;
+    vec3 sunPart = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * visC;
     vec3 sky = wsum > 1e-4 ? sum / wsum : max(nl.rgb - sunPart, vec3(0.0));
     return sunPart + sky;
 }

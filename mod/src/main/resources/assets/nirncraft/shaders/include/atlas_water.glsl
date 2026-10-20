@@ -50,9 +50,14 @@ vec3 atlasWaterLightAt(float d) {
 
 // displayed colour rgb seen from the eye through dist blocks of water along unit camera-relative direction dir
 vec3 atlasUnderwater(vec3 rgb, float dist, vec3 dir) {
-    vec3 T = exp(-atlasWaterExtinction() * dist);
-    float mid = atlasEyeDepth() - dir.y * min(dist, 48.0) * 0.5;
-    return rgb * T + atlasWaterLightAt(mid) * (vec3(1.0) - T);
+    vec3 ext = atlasWaterExtinction();
+    vec3 T = exp(-ext * dist);
+    // the water's glow along a ray is its light about one scattering length out that way (it settles within a few
+    // blocks), the same for every distance: things fade into exactly the open water's colour, no edge (the depth
+    // halfway to the thing made a wall 15 blocks off brighter than the water beside it)
+    float reach = 1.0 / max(dot(ext, vec3(0.2126, 0.7152, 0.0722)), 1e-3);
+    float at = atlasEyeDepth() - dir.y * min(reach, 24.0);
+    return rgb * T + atlasWaterLightAt(at) * (vec3(1.0) - T);
 }
 
 // water caustics (a tileable pattern, after Dave Hoskins' "Tileable Water Caustic"): bright lines where the waves
@@ -85,6 +90,9 @@ float atlasCausticFactor(vec3 pWorld, float chord) {
 // light shafts: the sun scattered towards the eye inside the water, shaped by the waves overhead (the caustic pattern
 // seen edge-on), lost with depth; additive, displayed. dir unit camera-relative, dist blocks along it
 vec3 atlasWaterShafts(vec3 dir, float dist) {
+    // (off: a repeating pattern along the view ray read as fake, tiling and resetting, not along the sun; real shafts
+    // need the sun's visibility through the waves at points in the water, from atlas)
+    if (true) return vec3(0.0);
     vec3 L = normalize(KeyDir.xyz);
     if (L.y <= 0.05) return vec3(0.0);
     float len = min(dist, 40.0);

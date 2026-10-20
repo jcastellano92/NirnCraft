@@ -94,6 +94,7 @@ static float gLeafGap = 0.0;
 static const float FOLIAGE_COVER = 0.65;
 static const float FOLIAGE_SIGMA = 2.0996;  // -2 ln(1 - FOLIAGE_COVER)
 static const float WATER_SIGMA = 0.083;  // light lost through water: exp(-0.083) per block (8 %)
+static const float3 WATER_ABSORB = float3(0.30, 0.075, 0.045);  // per block, per channel (red first)
 static bool gSecondary = false;
 static float gTrans = 1.0;
 static float gThrough = 0.0;
@@ -944,7 +945,6 @@ float3 reflectedSky(float3 p, float3 r, float3 sun) {
 // material's albedo, dull and green), the water's own scattering of the sky and the sun filling what is lost.
 // 64 blocks of water or more: deep, its own colour alone. The far water was an opaque sheet (the near field's clear
 // shallows ended at the hand-off in a stark line).
-static const float3 WATER_ABSORB = float3(0.30, 0.075, 0.045);
 float waterMurk(float3 tint) {
     float mx = max(tint.r, max(tint.g, tint.b)), mn = min(tint.r, min(tint.g, tint.b));
     float sat = mx > 1e-3 ? (mx - mn) / mx : 0.0;
@@ -952,6 +952,12 @@ float waterMurk(float3 tint) {
     return saturate((1.0 - sat) * 1.3 + greenish * 0.6 - 0.35);
 }
 float3 waterBody(float3 p, float3 dir, float3 wn, int lod, float3 sun, float3 tint) {
+    // the real sections' water carries Minecraft's grey water texture (the biome tints it near): grey is no murk, clear
+    // lake water then (a grey patch where the real blocks had arrived)
+    {
+        float mx = max(tint.r, max(tint.g, tint.b)), mn = min(tint.r, min(tint.g, tint.b));
+        if (mx < 1e-3 || (mx - mn) / mx < 0.2) tint = float3(0.05, 0.19, 0.78);
+    }
     float3 t = refract(dir, wn, 1.0 / 1.333);
     if (dot(t, t) < 1e-6) t = float3(dir.x, -abs(dir.y), dir.z);
     t = normalize(t);
@@ -1386,6 +1392,9 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
         gNearRoofed = sunVis <= 0.0 && (ablate & 512u) == 0u && solidRoof(so, 0);
         ambient = skyVisible(px, so, N, 0, sun, gNearRoofed, true, skyVis) + FAR_AMBIENT_FLOOR;
     }
+    // under water: the sky's light is what the water above lets down, red first then green (the sky rays reach 16 blocks
+    // and saw the surface's light undimmed past that): its depth from the sun ray's way out of the water
+    if (waterChord > 0.0) ambient *= exp(-WATER_ABSORB * (waterChord * max(L.y, 0.2)));
     MaterialGpu white;
     white.albedoRough = float4(1, 1, 1, 0.8);
     white.emisClass = float4(0, 0, 0, 0);
