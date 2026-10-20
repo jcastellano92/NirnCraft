@@ -93,7 +93,8 @@ public final class AtlasNearPass {
     private static final BindGroupLayout SCENE = BindGroupLayout.builder()
             .withUniform("SceneColor", UniformType.COMBINED_IMAGE_SAMPLER)
             .withUniform("SceneDepth", UniformType.COMBINED_IMAGE_SAMPLER)
-            .withUniform("SkyView", UniformType.COMBINED_IMAGE_SAMPLER).build();  // the air's sky (AtlasSky)
+            .withUniform("SkyView", UniformType.COMBINED_IMAGE_SAMPLER)  // the air's sky (AtlasSky)
+            .withUniform("SkyFrame", UniformType.COMBINED_IMAGE_SAMPLER).build();  // the drawn sky (aurora, stars, moons)
 
     private static final Set<Identifier> OPAQUE = Set.of(RenderPipelines.SOLID_TERRAIN.getLocation(),
             RenderPipelines.SOLID_TERRAIN_MULTIDRAW.getLocation(), RenderPipelines.CUTOUT_TERRAIN.getLocation(),
@@ -425,9 +426,21 @@ public final class AtlasNearPass {
                 : lr.prepareChunkRenders(modelView, sortTranslucent);
     }
 
+    private static TextureTarget skyFrame;  // the sky as the sky pass drew it (aurora, stars, moons): the water mirrors it
+
     private static void drawGbuffer(RenderLevelStageEvent.AfterSky e) {
         if (!owned) return;
         Minecraft mc = Minecraft.getInstance();
+        // the finished sky, before any terrain: copied once for the water's reflections
+        var main = mc.gameRenderer.mainRenderTarget();
+        if (main != null && main.getColorTexture() != null) {
+            if (skyFrame == null || skyFrame.width != main.width || skyFrame.height != main.height) {
+                if (skyFrame != null) skyFrame.destroyBuffers();
+                skyFrame = new TextureTarget("atlas sky frame", main.width, main.height, main.getColorTexture().getFormat(), null);
+            }
+            RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(main.getColorTexture(),
+                    skyFrame.getColorTexture(), 0, 0, 0, 0, 0, main.width, main.height);
+        }
         LevelRenderer lr = mc.levelRenderer;
         // our own draw lists from the sections vanilla would have drawn (the lists are emptied again at once)
         lr.visibleSections().addAll(visible);
@@ -569,7 +582,9 @@ public final class AtlasNearPass {
                     // (w: the eye is in water: the resolve and the water take the medium's absorption)
                     .putVec4(k[3], k[4], k[5], eyeWater)  // w: 0 in air, else 1 + the eye's depth in water
                     .putVec4(k[6], k[7], k[8], 0f)
-                    .putVec4(k[9], k[10], k[11], 0f)
+                    // w: 1 where a special medium blinds the eye (lava, powder snow, blindness, darkness: vanilla's fog
+                    // values stand in for its density), 0 otherwise: the distance haze is the air's alone
+                    .putVec4(k[9], k[10], k[11], specialFog(mc, camState) ? 1f : 0f)
                     .putVec4(sun[0], sun[1], sun[2], seconds)
                     .putVec4(still[0], still[1], still[2], still[3])
                     .putVec4(flow[0], flow[1], flow[2], flow[3])
@@ -616,6 +631,15 @@ public final class AtlasNearPass {
     }
 
     private static final float[] waterTint = {0.25f, 0.46f, 0.89f, 0f};
+
+    private static boolean specialFog(Minecraft mc, net.minecraft.client.renderer.state.level.CameraRenderState cam) {
+        var t = cam.fogType;
+        if (t == net.minecraft.world.level.material.FogType.LAVA || t == net.minecraft.world.level.material.FogType.POWDER_SNOW)
+            return true;
+        var p = mc.player;
+        return p != null && (p.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS)
+                || p.hasEffect(net.minecraft.world.effect.MobEffects.DARKNESS));
+    }
     private static boolean waterTintSet;
     private static long waterTintFrame;
 
@@ -712,6 +736,7 @@ public final class AtlasNearPass {
             var sky = AtlasSky.skyView();
             pass.setUniform("SkyView", sky != null ? sky : scene.getColorTextureView(), RenderSystem.getSamplerCache()
                     .getSampler(AddressMode.REPEAT, AddressMode.CLAMP_TO_EDGE, FilterMode.LINEAR, FilterMode.LINEAR, false));
+            pass.setUniform("SkyFrame", skyFrame != null ? skyFrame.getColorTextureView() : scene.getColorTextureView(), linear);
         }
         bindShadow(pass);
         RenderSystem.pushPipelineModifier(FORWARD);

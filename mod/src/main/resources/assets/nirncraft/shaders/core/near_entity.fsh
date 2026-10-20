@@ -85,6 +85,7 @@ void main() {
         return;
     }
 #endif
+    if (Ground.w < 0.5) { fragColor = color; return; }  // (no vanilla distance fog under our look: the air's haze is the resolve's)
     fragColor = apply_fog(color, sphericalVertexDistance, cylindricalVertexDistance, FogEnvironmentalStart,
                           FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, fogColor);
 #endif

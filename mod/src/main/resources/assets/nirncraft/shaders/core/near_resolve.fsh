@@ -258,7 +258,7 @@ vec3 untracedRadiance(vec3 albedo, vec3 n, vec2 lm) {
 // when our look is on: the air's haze is atlas's (aerialInscatter), and vanilla's grey distance fog over it hazed the far
 // field twice (bright, washed mountains at night)
 float vanillaFogShare() {
-    return Look.z > 0.5 ? 1.0 - smoothstep(48.0, 96.0, FogEnvironmentalEnd) : 1.0;
+    return Look.z > 0.5 ? Ground.w : 1.0;  // (our look: only a special medium; no distance fog of vanilla's)
 }
 
 vec3 environmentalFog(vec3 rgb, float dist, vec3 dir) {

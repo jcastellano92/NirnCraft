@@ -21,7 +21,8 @@
 uniform sampler2D Sampler0;
 uniform sampler2D SceneColor;  // our resolved frame (displayed), terrain near and far: what the water reflects
 uniform sampler2D SceneDepth;  // its depth (reverse-Z)
-uniform sampler2D SkyView;    // the air's sky this frame (AtlasSky's sky-view LUT, atlas_sky.glsl)
+uniform sampler2D SkyView;
+uniform sampler2D SkyFrame;   // the sky as drawn this frame (aurora, stars, moons; displayed): what reflects where the frame has none    // the air's sky this frame (AtlasSky's sky-view LUT, atlas_sky.glsl)
 
 layout(location = 0) in vec4 vertexColor;
 layout(location = 1) in vec2 texCoord0;
@@ -216,7 +217,7 @@ void main() {
             rgb = atlasDisplay(litW, Look.x, Look.y);
             float dist2 = length(viewPos);
             rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist2, viewPos / max(dist2, 1e-3))
-                : mix(rgb, FogColor.rgb, linear_fog_value(dist2, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a * (1.0 - smoothstep(48.0, 96.0, FogEnvironmentalEnd)));
+                : mix(rgb, FogColor.rgb, linear_fog_value(dist2, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a * Ground.w);
             fragColor = vec4(rgb, mix(0.75, 0.95, smoothstep(0.3, 0.8, streak)));
             return;
         }
@@ -269,7 +270,10 @@ void main() {
             ud.x = clamp(ud.x, 0.003, 0.997);
             if (ud.y > 0.0 && ud.y < 1.0) {
                 vec4 f = texture(SceneColor, ud);
-                distant = mix(distant, f.rgb / max(f.a, 1e-3), clamp(f.a, 0.0, 1.0) * smoothstep(1.0, 0.94, ud.y));
+                // where the frame has no geometry: the drawn sky there (aurora, stars, moons, later clouds)
+                vec3 drawnSky = texture(SkyFrame, ud).rgb;
+                distant = mix(drawnSky, f.rgb / max(f.a, 1e-3), clamp(f.a, 0.0, 1.0)) * mix(0.55, 1.0, lm.y * lm.y);
+                distant = mix(skyShown, distant, smoothstep(1.0, 0.94, ud.y));
             }
         }
         vec3 mirrored = mix(distant, hit.rgb, hit.a);
@@ -290,6 +294,6 @@ void main() {
     }
     float dist = length(viewPos);
     rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist, viewPos / max(dist, 1e-3))
-        : mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a * (1.0 - smoothstep(48.0, 96.0, FogEnvironmentalEnd)));
+        : mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a * Ground.w);
     fragColor = vec4(rgb, color.a);
 }

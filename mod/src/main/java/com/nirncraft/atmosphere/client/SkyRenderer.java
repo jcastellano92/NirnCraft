@@ -224,6 +224,14 @@ public final class SkyRenderer {
             }
         } finally { if (meteor != null) meteor.close(); }
     }
+    private static final float AURORA_GAIN = 2.5f;
+
+    private static void addBright(List<Draw> draws, Kind kind, int index, int key, Matrix4f local, float strength) {
+        if (strength <= .002f) return;
+        float s = Math.max(1f, strength);
+        draws.add(new Draw(kind, index, key, new Matrix4f(local), new Vector4f(s, s, s, Math.min(1f, strength)), null, null));
+    }
+
     private static void add(List<Draw> draws, Kind kind, int index, int key, Matrix4f local, Identifier texture, float alpha) {
         if (alpha <= .002f) return;
         draws.add(new Draw(kind, index, key, new Matrix4f(local), new Vector4f(1f, 1f, 1f, Math.min(1f, alpha)), texture, null));
@@ -260,8 +268,9 @@ public final class SkyRenderer {
             pose.rotate(Axis.YP.rotationDegrees((float)Math.sin(seconds * .011 + b * 2.3) * 4f));
             pose.rotate(Axis.XP.rotationDegrees(pitchOffset));
             pose.scale(1f, heightScale, 1f);
-            add(draws, Kind.AURORA, b, key, pose.last().pose(), null, band * (1f - w));
-            add(draws, Kind.AURORA, b, next, pose.last().pose(), null, band * w);
+            // (brighter than an alpha of 1 allows: a strong display outshines the night; additive, so as colour)
+            addBright(draws, Kind.AURORA, b, key, pose.last().pose(), band * (1f - w) * AURORA_GAIN);
+            addBright(draws, Kind.AURORA, b, next, pose.last().pose(), band * w * AURORA_GAIN);
             pose.popPose();
         }
     }
