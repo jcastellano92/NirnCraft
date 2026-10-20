@@ -125,6 +125,15 @@ The full checklist from R1, every item checked live; the owner flies it.
   the far frame and writes the frame's depth. Live A/B with vanilla's own light curve: mean |diff| 2.6 of 255, 6.6 % of
   pixels over 8 (fade-in, particles), 60 fps both. Sodium and Iris leave the dev instance (Sodium replaces the section
   renderer; Iris needs Sodium); the harness's pack variant is off until R4.
+- **R2 stage B design (2026-10-20).** One light: atlas lights the near pass's pixels with the far field's own code
+  (ABI 0.15 near light: the G-buffer's normal and light levels in, irradiance and aerial perspective out; sun with
+  traced shadow, traced sky, far lights), the resolve multiplies the full-resolution albedo by it, adds vanilla's block
+  light, caps sun and sky by vanilla's sky light where atlas may lack a cave's sections, and puts near and far through
+  one display (the pack's eye exposure, night vision, ACES). What is drawn after the resolve takes the same light
+  forward through pipeline modifiers pushed while we own the frame (E4 answered without mixins): translucent terrain
+  (near_forward) and every pipeline on vanilla's entity shader (near_entity: mobs, players, block entities, items).
+  Not yet: the hand (drawn after AfterLevel), particles, the sky (vanilla's pass, NirnCraft's sky over it), shadows on
+  forward-lit things.
 - **E2 vanilla terrain off, no mixin (from the inventory).** Wrap every block model (`ModelEvent.ModifyBakingResult`,
   a delegate whose parts are empty when the getter is a `RenderSectionRegion`): sections still compile, so
   entity visibility (it needs the section at the entity's feet compiled), block entities (listed by compiled
