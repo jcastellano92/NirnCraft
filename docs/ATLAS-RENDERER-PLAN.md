@@ -223,6 +223,16 @@ The full checklist from R1, every item checked live; the owner flies it.
   the light atlas traces in the tunnel's first 48 blocks (vanilla's sky light is 0 from 6 blocks in): what dropping it
   would give back. Near light cost on open terrain (atlas_gl_test, GPU shared with the game): +0.56-0.62 ms ablated,
   +0.70-1.09 ms with the roof rays.
+- **Real ground a block low (2026-10-20).** Far plains turned orange-brown where the server has chunks (Whiterun once
+  the change feed re-put its tiles up, hill caps where the review had been): the feed's columns (AtlasEdits.read) took
+  `LevelChunk.getHeight - 1` as the ground, but a chunk's getHeight is the top block already (26.3 bytecode:
+  getFirstAvailable - 1; Level.getHeight is the free block), so every real column was the dirt under its grass, a block
+  low (harness world, tile 0,0: 48,253 of 51,744 grass columns journalled as dirt at y - 1). Not the materials: the
+  tile cache's tops are grass in the biome tints, the sections' tops grass (id 9), and atlas_core draws a shaped grass
+  block's top green at 300-800 m on CPU and Vulkan (ATLAS_FRAME_DEBUG_ALBEDO, groups: dirt texels 2-6 %, the sides).
+  Fixed at the source; the journal is edits-v3 (a v2 journal keeps its lights, its chunks are journalled again as they
+  load), and a patched grass top wears the tile's biome grass (it took grass_block's untinted id: grey), other
+  biome-tinted blocks their grid cell's colours.
 
 ## Parked (off the renderer goal, for later)
 

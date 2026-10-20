@@ -265,9 +265,10 @@ public final class AtlasEdits {
     static Column read(ServerLevel level, LevelChunk c, int x, int z) {
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
         int lx = x & 15, lz = z & 15, min = level.getMinY();
-        // (heightmaps hold the first free block over the column: the top block is one under)
-        int top = c.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, lx, lz) - 1;
-        int any = c.getHeight(Heightmap.Types.MOTION_BLOCKING, lx, lz) - 1;
+        // (a chunk's getHeight is its top block already, the heightmap's first free block minus one; Level.getHeight is
+        // the free block. One under it was the dirt under every grass top: real ground read a block low and brown)
+        int top = c.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, lx, lz);
+        int any = c.getHeight(Heightmap.Types.MOTION_BLOCKING, lx, lz);
         BlockState t = c.getBlockState(m.set(x, top, z));
         int water = NONE, trunkTop = NONE;
         while (top > min && (!t.getFluidState().isEmpty() || t.is(BlockTags.LOGS) || t.isAir())) {
@@ -409,27 +410,33 @@ public final class AtlasEdits {
     // ---- persistence: the journal next to the world's far tile cache -----------------------------------------------
 
     private static void open(MinecraftServer server) {
-        file = server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT).resolve("data/nirncraft_atlas/edits-v2.dat");
+        java.nio.file.Path dir = server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT).resolve("data/nirncraft_atlas");
+        file = dir.resolve("edits-v3.dat");
         JOURNAL.clear();
         SENT.clear();
         CHUNK_HASH.clear();
         AtlasSections.open(server);
-        if (!Files.isRegularFile(file)) return;
+        // a v2 journal's columns lie a block low (read() took the block under each top): only its lights are kept, its
+        // chunks are journalled again as they load
+        java.nio.file.Path old = dir.resolve("edits-v2.dat");
+        boolean columns = Files.isRegularFile(file);
+        java.nio.file.Path from = columns ? file : old;
+        if (!Files.isRegularFile(from)) return;
         try {
-            CompoundTag root = net.minecraft.nbt.NbtIo.readCompressed(file, net.minecraft.nbt.NbtAccounter.unlimitedHeap());
+            CompoundTag root = net.minecraft.nbt.NbtIo.readCompressed(from, net.minecraft.nbt.NbtAccounter.unlimitedHeap());
             ListTag tiles = root.getListOrEmpty("tiles");
             for (int i = 0; i < tiles.size(); i++) {
                 CompoundTag t = tiles.getCompoundOrEmpty(i);
                 TileJournal j = new TileJournal();
                 j.version = t.getLongOr("v", 0L);
-                int[] cs = t.getIntArray("c").orElse(new int[0]);
+                int[] cs = columns ? t.getIntArray("c").orElse(new int[0]) : new int[0];
                 for (int k = 0; k + COL - 1 < cs.length; k += COL) j.columns.put(colKey(cs[k], cs[k + 1]), unpack(cs, k, j.version));
                 int[] ls = t.getIntArray("l").orElse(new int[0]);
                 for (int k = 0; k + 3 < ls.length; k += 4)
                     j.lights.put(BlockPos.asLong(ls[k], ls[k + 1], ls[k + 2]), new Light(ls[k], ls[k + 1], ls[k + 2], ls[k + 3], j.version));
                 JOURNAL.put(tileKey(t.getIntOr("x", 0), t.getIntOr("z", 0)), j);
             }
-            long[] hashes = root.getLongArray("chunks").orElse(new long[0]);
+            long[] hashes = columns ? root.getLongArray("chunks").orElse(new long[0]) : new long[0];
             for (int k = 0; k + 1 < hashes.length; k += 2) CHUNK_HASH.put(hashes[k], hashes[k + 1]);
             com.nirncraft.NirnCraft.LOGGER.info("atlas: far change journal: {} tiles, {} chunks", JOURNAL.size(), CHUNK_HASH.size());
         } catch (IOException | RuntimeException e) {
