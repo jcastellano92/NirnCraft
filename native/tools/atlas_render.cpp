@@ -30,8 +30,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <map>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "atlas/atlas.h"
@@ -631,6 +633,30 @@ int main(int argc, char** argv) {
         return 0;
     }
     if (int rc = renderOne(out, x, y, z, num(a, "yaw", 0), num(a, "pitch", mcCam ? 0 : -4), num(a, "fov", 70), w, h)) return rc;
+    // watch=1 (Vulkan, ATLAS_SHADER_DIR set, tools/dev/shader_watch.py running): the scene stays loaded and the same
+    // view is rendered again whenever the shaders change, a frame instead of a run (the backend reloads them)
+    if (num(a, "watch", 0) > 0) {
+        const char* dir = std::getenv("ATLAS_SHADER_DIR");
+        if (!dir || !*dir) {
+            std::fprintf(stderr, "watch=1 needs ATLAS_SHADER_DIR (tools/dev/shader_watch.py)\n");
+            return 2;
+        }
+        std::filesystem::path far = std::filesystem::path(dir) / "atlas_far.spv";
+        std::error_code ec;
+        auto seen = std::filesystem::last_write_time(far, ec);
+        std::fprintf(stderr, "watching %s: %s re-renders on every shader change (ctrl-c ends)\n", far.string().c_str(), out.c_str());
+        for (;;) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            auto t = std::filesystem::last_write_time(far, ec);
+            if (ec || t == seen) continue;
+            seen = t;
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));  // past the backend's 250 ms look
+            auto t0 = std::chrono::steady_clock::now();
+            if (int rc = renderOne(out, x, y, z, num(a, "yaw", 0), num(a, "pitch", mcCam ? 0 : -4), num(a, "fov", 70), w, h)) return rc;
+            double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+            std::fprintf(stderr, "rendered %s in %.0f ms (frame %.2f ms)\n", out.c_str(), ms, best);
+        }
+    }
     // atlas_truth's frame of the same camera, and how far this one is from it (the harness's metric, by distance)
     std::string vsTruth;
     if (a.count("truth") && mcCam) {

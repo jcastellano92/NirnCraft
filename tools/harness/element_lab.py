@@ -534,6 +534,55 @@ def lane(wait_s=LANE_WAIT_S, poll_s=20):
             time.sleep(poll_s)
 
 
+def view(a, el):
+    """--view DIST: the reference once (kept beside the output, keyed by element, distance and truth), ours every
+    time, scored and put side by side (reference | ours | dE x4) in one png. --watch: atlas_render stays up with
+    watch=1 and every new frame is scored as it lands."""
+    out = a.out or ROOT / ".work/view"
+    out.mkdir(parents=True, exist_ok=True)
+    cam = camera(el["box"], a.view, size=a.size)
+    tag = f"{el['slug']}-{a.view}-{TRUTH_MODE}" + (f"-{TIME}" if TIME is not None else "")
+    ref = out / f"{tag}-truth.png"
+    if not ref.exists() or not Path(str(ref)[:-4] + "_mask.png").exists():
+        render("truth", el, cam, ref)
+    ours = out / f"{tag}-{a.renderer}.png"
+
+    def score():
+        m = compare(ref, ours)
+        ra, oa = (np.asarray(Image.open(p).convert("RGB"), dtype=np.float32) for p in (ref, ours))
+        de = np.sqrt(((lab(ra) - lab(oa)) ** 2).sum(axis=2))
+        heat = np.clip(de * 4, 0, 255).astype(np.uint8)
+        sheet = np.concatenate([ra.astype(np.uint8), oa.astype(np.uint8), np.stack([heat] * 3, axis=2)], axis=1)
+        Image.fromarray(sheet).save(out / f"{tag}-{a.renderer}-sheet.png")
+        print(f"{el['slug']} {a.view} m {a.renderer}: iou {m['iou']:.3f}  dE {m['dE']:.2f}  presence {m['presence']:.2f}  "
+              f"-> {out / (tag + '-' + a.renderer + '-sheet.png')}", flush=True)
+
+    if not a.watch:
+        render(a.renderer, el, cam, ours)
+        score()
+        return 0
+    tool, args = renderer_args(a.renderer, el, out)
+    if tool != "atlas_render":
+        print("element_lab: --watch drives atlas_render (a far-* renderer)")
+        return 2
+    shaders = ROOT / ".work/shaders"
+    env = {**os.environ, "ATLAS_SECTION_KEEP": "320", "ATLAS_SHADER_DIR": str(shaders)}
+    cmd = [str(EXE / "atlas_render.exe"), f"out={ours}", "watch=1", "backend=vulkan"] + \
+          [f"{k}={v}" for k, v in {**args, **cam}.items()]
+    print(f"element_lab: watching; run tools/dev/shader_watch.py and edit native/shaders (ctrl-c ends)", flush=True)
+    p = subprocess.Popen(cmd, env=env, stderr=subprocess.PIPE, text=True)
+    try:
+        for line in p.stderr:
+            if line.startswith("rendered ") or line.startswith("watching "):
+                if ours.exists():
+                    score()
+            elif line.strip():
+                print(line.rstrip(), flush=True)
+    finally:
+        p.kill()
+    return p.wait()
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("element", nargs="?")
@@ -549,6 +598,12 @@ def main():
     ap.add_argument("--distances", default=",".join(str(d) for d in DISTANCES))
     ap.add_argument("--backend", choices=("vulkan", "cpu"), default=None,
                     help="atlas_core's backend for the far field (default: Vulkan when the GPU is mostly idle)")
+    ap.add_argument("--view", type=int, default=None, metavar="DIST",
+                    help="the development loop: one distance, no fly-ins: reference (kept) | ours | dE in --out (default "
+                         ".work/view), seconds a change")
+    ap.add_argument("--watch", action="store_true",
+                    help="with --view: keep atlas_render running and score again on every shader save "
+                         "(tools/dev/shader_watch.py compiles; Vulkan)")
     a = ap.parse_args()
     global FORCE_BACKEND
     FORCE_BACKEND = a.backend
@@ -567,6 +622,8 @@ def main():
     if a.renderer == "far-lit" and not realistic():
         print("element_lab: far-lit is scored against the realistic reference (--truth realistic)")
         return 2
+    if a.view:
+        return view(a, el)
     near = 1.5 * radius(el["box"])  # never from inside or against the element: not a view anyone has of it
     dists = [d for d in (int(x) for x in a.distances.split(",")) if d >= near] or [int(near)]
     report = {"element": el, "renderer": a.renderer, "truth": TRUTH_MODE, "time": TIME if TIME is not None or not realistic() else 6000,
