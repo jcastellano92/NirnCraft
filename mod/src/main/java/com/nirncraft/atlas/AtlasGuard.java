@@ -34,6 +34,11 @@ final class AtlasGuard {
         } catch (Throwable ignored) {
             // logging must not be what takes the game down
         }
+        try {  // where it came from, to the debug log (the WARN line stays one line)
+            com.nirncraft.NirnCraft.LOGGER.debug(feature + " failure", t);
+        } catch (Throwable ignored) {
+            // (no logger: a unit test)
+        }
         return true;
     }
 
