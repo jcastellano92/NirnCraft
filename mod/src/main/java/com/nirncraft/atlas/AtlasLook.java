@@ -14,7 +14,7 @@ import net.minecraft.world.level.LightLayer;
  */
 final class AtlasLook {
     static final float EXPOSURE_KEY = -0.79f, EXPOSURE_SLOPE = 0.72f, EXPOSURE_MIN = -1.6f, EXPOSURE_MAX = 2.3f;
-    static final float NIGHT_VISION = 0.7f;  // NIGHT_VISION 2 x 0.35
+    static final float NIGHT_VISION = 0.85f;  // (rod vision: little colour by moonlight; the torches keep theirs)
 
     private static float eyeSky = 1f;  // the sky light at the eye, eased (seconds to adapt, as eyes do)
 

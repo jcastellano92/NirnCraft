@@ -111,7 +111,7 @@ final class AtlasMeter {
         // the display's target for this scene: mid grey (0.18) in daylight, darker in the dark (a moonlit scene
         // stays a night: the eye opens but does not turn it into day); s is log2 of the scene's mean luminance
         float dayness = smooth(-9f, -1.5f, s);
-        float target = log2(0.006f) + (log2(0.18f) - log2(0.006f)) * dayness;  // (a moonlit night reads dark)
+        float target = log2(0.004f) + (log2(0.18f) - log2(0.004f)) * dayness;  // (a moonlit night reads dark)
         float want = clamp(target - s, MIN, MAX);
         if (Float.isNaN(exposure)) exposure = Float.isNaN(canonical) ? want : canonical;
         float gap = want - exposure;
