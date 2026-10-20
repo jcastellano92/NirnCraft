@@ -22,6 +22,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "world.hpp"  // (Key3, Section)
+
 namespace atlas {
 
 class World;
@@ -29,6 +31,7 @@ class World;
 constexpr uint32_t VG_EMPTY = 0, VG_MIXED = 1, VG_UNLOADED = 2;
 constexpr int VG_SECTION_WORDS = 2048;  // a section's 4096 16-bit ids
 constexpr int VG_MIN_SY = -4;           // y -64 (World::WORLD_MIN_Y / 16)
+constexpr uint32_t VG_COLUMN = 0xFFFFFFFEu;  // (VgJob::slot)
 
 // a section's ids: the world's own Section::mats (shared, never copied) or an upload's copy
 using VgIds = std::shared_ptr<const std::array<uint16_t, 4096>>;
@@ -37,7 +40,8 @@ using VgIds = std::shared_ptr<const std::array<uint16_t, 4096>>;
 struct VgJob {
     uint32_t chunk;  // index in the window: (y * D + z) * D + x
     uint32_t word;   // the chunk's word (for MIXED: slot << 2 | VG_MIXED)
-    uint32_t slot;   // MIXED: the slot (its ids: Batch::secs[data]); ~0u: no build
+    uint32_t slot;   // MIXED: the slot (its ids: Batch::secs[data]); ~0u: no build; VG_COLUMN: `word` into every cell
+                     // of the column whose lowest cell is `chunk` (a column the window left)
     uint32_t data;   // MIXED: index of its ids in Batch::secs
 };
 
@@ -67,8 +71,22 @@ public:
 
     // a section's ids as World::putSection gets them (any thread)
     void put(int sx, int sy, int sz, const uint16_t* mats);
-    // render thread, once a frame: centre the window on the camera's block (moving it re-reads the world's sections)
+    // render thread, once a frame: the window follows the camera's block (FOLLOW sections behind; the columns it enters
+    // are read from the world when its lock is free); refill: the same read on the update thread (atlas_update), waiting
     void frame(const int32_t camBlock[3], World& world);
+    void refill(World& world);
+    static constexpr int FOLLOW = 4;
+    // the sections the grid gave up or could not take while they lie in its window (the pool full: the farthest go
+    // first): their level 0 is the CPU's again (World::gridReleased, on the update thread)
+    std::vector<Key3> takeReleased();
+    struct Stats {
+        uint64_t frames = 0, jumps = 0, shifts = 0, refills = 0, evicted = 0, overflow = 0;
+        uint64_t lastShiftFrame = 0, lastRefillFrame = 0, settledFrame = 0, lastSettleFrames = 0;
+        int ox = 0, oz = 0, camSx = 0, camSz = 0;
+        size_t pending = 0;
+        uint32_t freshColumns = 0, slots = 0;
+    };
+    Stats stats() const;
     // the next batch, at most maxSections MIXED sections (nearest the camera first); empty when nothing is pending
     VgBatch take(int maxSections);
     // the frame's view of it (FrameGpu::vgOrigin / vgDims)
@@ -113,18 +131,30 @@ private:
     using Ids = VgIds;
     std::unordered_map<Key, Ids, KeyHash> pending_;
     bool clearPending_ = false;
-    bool refill_ = false;  // the window moved and the world's sections in it are still to be read (frame: when it can)
-    std::vector<uint32_t> slotOf_;      // per chunk: its slot or ~0u
-    std::vector<uint8_t> state_;        // per chunk: the state its last job gave it
-    std::vector<int16_t> colTop_;       // per column (z * D + x): highest section y with data, or INT16_MIN
+    // per cell (in memory: chunk (x, y, z) at ((y - VG_MIN_SY) * D + z mod D) * D + x mod D)
+    std::vector<uint32_t> slotOf_;      // its slot or ~0u
+    std::vector<uint8_t> state_;        // the state its last job gave it
+    std::vector<uint32_t> vacated_;     // columns the window left (their lowest cell): UNLOADED with the next batch
+    std::vector<uint32_t> jobAt_;       // (take) per cell its job in the batch being made, ~0u none
+    // per column (z mod D) * D + x mod D: highest section y with data (INT16_MIN: none); entered, the world's
+    // sections not read yet (freshColumns_ of them)
+    std::vector<int16_t> colTop_;
+    std::vector<uint8_t> colFresh_;
+    uint32_t freshColumns_ = 0;
+    std::vector<uint32_t> slotChunk_;   // per slot: its cell or ~0u
     std::vector<uint32_t> freeSlots_;
     uint32_t nextSlot_ = 0, slotsUsed_ = 0;
     int camSx_ = 0, camSz_ = 0;
-    void recentre(World& world);  // (mu_ held)
+    std::vector<Key3> released_;
+    Stats stats_;
+    void shift(int nox, int noz, World& world);    // (mu_ held)
+    void refillLocked(World& world, bool wait);    // (mu_ held)
+    static int pmod(int a, int d) { return ((a % d) + d) % d; }
     bool inWindow(int sx, int sy, int sz) const {
         return sx >= ox_ && sx < ox_ + D && sz >= oz_ && sz < oz_ + D && sy >= VG_MIN_SY && sy < VG_MIN_SY + H;
     }
-    uint32_t index(int sx, int sy, int sz) const { return uint32_t(((sy - VG_MIN_SY) * D + (sz - oz_)) * D + (sx - ox_)); }
+    size_t physCol(int sx, int sz) const { return size_t(pmod(sz, D)) * D + size_t(pmod(sx, D)); }
+    uint32_t phys(int sx, int sy, int sz) const { return uint32_t(size_t(sy - VG_MIN_SY) * D * D + physCol(sx, sz)); }
 };
 
 template <class Occupied>

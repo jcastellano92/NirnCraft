@@ -380,6 +380,16 @@ static const uint VG_UNLOADED = 2u;
 // (ATLAS_ABLATE 134217728, measurements: level 0 from the SVDAG regions alone, as before the grid)
 bool vgOn() { return frame.vgOrigin.w != 0 && (asuint(frame.jitter.w) & 134217728u) == 0u; }
 
+// the cell of the window's chunk c (logical, from its origin): in memory at (c + origin) mod D (voxgrid.hpp phys), so
+// the window follows the camera without moving the chunks it keeps
+uint vgCell(int3 c) {
+    int X = int(frame.vgDims.x), Z = int(frame.vgDims.z);
+    int px = (c.x + frame.vgOrigin.x) % X, pz = (c.z + frame.vgOrigin.z) % Z;
+    px += px < 0 ? X : 0;
+    pz += pz < 0 ? Z : 0;
+    return uint((c.y * Z + pz) * X + px);
+}
+
 // A primary ray through a level-0 voxel v (grid-local; wv in world blocks) of shaped material `sh` (shapeOf), entered at
 // t through `axis`: its 4 x 4 x 4 micro-voxels as the groups have them (voxelAt / microFilled: the shape's mask, a cut-out
 // shape's alpha hashed per world micro-voxel), walked to where the ray leaves the voxel. True: it met one at tHit, entering
@@ -491,7 +501,7 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
             return TRACE_UNCOVERED;
         }
         int3 c = v >> 4;
-        uint cw = vgChunks[uint((c.y * Z + c.z) * X + c.x)];
+        uint cw = vgChunks[vgCell(c)];
         uint st = cw & 3u;
         if (st == VG_UNLOADED) {
             uStop = t;
@@ -694,7 +704,7 @@ int vgVoxel(float3 p) {
     int X = int(frame.vgDims.x), Y = int(frame.vgDims.y), Z = int(frame.vgDims.z);
     if (v.x < 0 || v.y < 0 || v.z < 0 || v.x >= X * 16 || v.y >= Y * 16 || v.z >= Z * 16) return -1;
     int3 c = v >> 4;
-    uint cw = vgChunks[uint((c.y * Z + c.z) * X + c.x)];
+    uint cw = vgChunks[vgCell(c)];
     if ((cw & 3u) == VG_UNLOADED) return -1;
     if ((cw & 3u) == VG_EMPTY) return 0;
     int3 l = v & 15;
