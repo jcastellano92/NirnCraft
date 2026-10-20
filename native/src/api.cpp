@@ -955,6 +955,12 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         const char* v = std::getenv("ATLAS_ABLATE");
         const uint32_t ablate = v ? uint32_t(std::strtoul(v, nullptr, 0)) : 0u;
         std::memcpy(&g.jitter[3], &ablate, 4);
+        // ATLAS_LOD=mode,minCos,bias (measurements): the continuous level's threshold pattern (atlas_far.slang gLodXi),
+        // the grazing widening's least cos (0.5 by default: at most one level), a bias added to every ray's level
+        // (and a fourth: the gain of the light through leaves, 0: 1)
+        float lp[4] = {0.0f, 0.5f, 0.0f, 0.0f};
+        if (const char* e = std::getenv("ATLAS_LOD")) std::sscanf(e, "%f,%f,%f,%f", &lp[0], &lp[1], &lp[2], &lp[3]);
+        for (int i = 0; i < 4; i++) g.lodParams[i] = lp[i];
     }
     float a[3], b[3];
     pixelDir(f->invViewProj, f->width * 0.5f, f->height * 0.5f, f->width, f->height, a);

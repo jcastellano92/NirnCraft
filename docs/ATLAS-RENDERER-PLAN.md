@@ -422,6 +422,25 @@ The full checklist from R1, every item checked live; the owner flies it.
   real bounding box (a slab, a fence, a pane). Only while clipping: the world is never hidden otherwise. Built on our
   media (atlasMedium) with atlas's primary ray starting inside the voxel: the chord through solid as an absorbing
   medium. The same volume path later carries fog banks, snow fields and rain shafts (WEATHER-WORK.md hooks).
+- **Levels 1-6 on the GPU, the continuous level, leaves (2026-10-20, branch atlas-naadf).** The grid has coarse
+  levels: the same structure with voxels of 2^k blocks (voxgrid.hpp), one window per level. They are built on the GPU
+  from the sections' raw ids: a section's levels 1-4 by the mip vote (vgIngestMain), levels 5-6 from the level below
+  (vgDownMain). A chunk is known once every section column it covers has come. The CPU builds those levels' regions
+  from the tiles alone, as the fallback, and a section no longer rebuilds them or is digested.
+  - Offline jump (groups on, budget 40): settled in 1.3 s at A (it was cut off at 60 s) and 0.53 s after the jump
+    (was 41 s). A 768-block walk took 72 update calls, mean 0.8 ms, max 20 ms (CPU levels: 2.7 / 36 ms, and it never
+    settled).
+  - The grid now takes 242 MB in all (level 0 alone took 147).
+  - Every ray's level is continuous, never a ring. It is the larger of log2(footprint) and the residency level,
+    which reaches k + 1 at level k's window radius. The footprint is widened by 1 / cos at the hit, at most 2x.
+  - Each pixel picks floor(level + xi), xi being IGN rotated by the golden ratio under TAA. Shadow, sky and bounce
+    rays use the same rule through the pixel's cone (lodFromFootprint, lodPick, lodResident in atlas_far.slang).
+  - Cost (interleaved medians): +27 % at 1080p and +5 % at 640x360. It comes from SIMT divergence: one threshold for
+    the whole frame costs nothing, one per 8 x 4 tile +3 %.
+  - A still camera keeps 0.0046 MAE of stipple after 4 samples, which TAA has to resolve. Walk and turn frame
+    differences are 5 % below the rings'.
+  - Leaves: a cut-out cube's entered face is tested against its 16 x 16 texture's coverage, so sky shows through the
+    gaps. The unified light adds the key light through the crown.
 - **Nirn's sky (docs/NIRN-SKY.md).** Masser and Secunda as custom baked bodies with relief and cast shadows, eclipses
   and the Dark Moon, stars placed as the birthsigns (no lines), the named stars, the Dominion planets on orbits, comets;
   all by place and date, lit physically. Two agents on it.

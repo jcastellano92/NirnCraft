@@ -148,7 +148,10 @@ typedef struct AtlasFrame {
                                                  loaded yet) the far field marches from the camera and fills it; set
                                                  only when the camera is in the open (the far field has no caves) */
 #define ATLAS_FRAME_LOD_DITHER 0x1000u       /* (abi 0.10) dithered LOD transitions: each pixel's LOD segment grid
-                                                 starts at its own phase, so a level change is a stipple band, not a line */
+                                                 starts at its own phase, so a level change is a stipple band, not a line.
+                                                 Superseded: every ray's level is now continuous (its footprint and what
+                                                 is resident), picked between the two levels around it per pixel (TAA
+                                                 averages it to a gradient), with or without the flag */
 #define ATLAS_FRAME_GROUPS 0x4000u           /* (abi 0.14) primary rays trace the content-shaped groups (docs/ATLAS-LOD.md):
                                                  per region a hierarchy of boxes over its micro-voxels, each drawn whole
                                                  with its face textures where its flattening error is under the pixel,

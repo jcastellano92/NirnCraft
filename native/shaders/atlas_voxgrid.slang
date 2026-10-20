@@ -25,6 +25,7 @@ struct VgParams {
 [[vk::binding(4, 0)]] RWStructuredBuffer<uint4> jobs;  // chunk, word, slot (~0: none), data; then the coarse jobs
 [[vk::binding(5, 0)]] RWStructuredBuffer<uint> sat;
 [[vk::binding(6, 0)]] RWStructuredBuffer<uint> src;  // the batch's sections' raw ids (2048 words each)
+[[vk::binding(7, 0)]] RWStructuredBuffer<uint> gsrc;  // and those that were on the GPU already (VoxGrid::ingestGpu)
 
 static const uint VG_EMPTY = 0u;
 
@@ -254,7 +255,9 @@ void vgIngestMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
     if (j >= pc.dims.w) return;  // (uniform across the group)
     uint4 a = jobs[pc.misc.y + 2u * j], b = jobs[pc.misc.y + 2u * j + 1u];
     uint t = tid.x;
-    for (uint w = t; w < 2048u; w += 64u) gS0[w] = src[a.x * 2048u + w];
+    bool onGpu = (a.x & 0x80000000u) != 0u;  // (VG_GPU_SRC)
+    uint at = (a.x & 0x7FFFFFFFu) * 2048u;
+    for (uint w = t; w < 2048u; w += 64u) gS0[w] = onGpu ? gsrc[at + w] : src[at + w];
     GroupMemoryBarrierWithGroupSync();
     for (uint v = t; v < 512u; v += 64u) {
         uint x = v & 7u, z = (v >> 3) & 7u, y = v >> 6;

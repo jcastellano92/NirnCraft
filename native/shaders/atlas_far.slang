@@ -377,6 +377,9 @@ bool secondaryShapeMisses(uint mat, float3 l, float3 d) {
 static const uint VG_EMPTY = 0u;
 static const uint VG_MIXED = 1u;
 static const uint VG_UNLOADED = 2u;
+// (primary rays) the threshold a cut-out face's texel coverage is tested against (farMain: a per-pixel one, rotated
+// under the host's TAA, which averages a part-covered texel's coverage)
+static float gAlphaXi = 0.5;
 // (ATLAS_ABLATE 134217728, measurements: level 0 from the SVDAG regions alone, as before the grid)
 bool vgOn() { return frame.vgOrigin.w != 0 && (asuint(frame.jitter.w) & 134217728u) == 0u; }
 
@@ -632,7 +635,29 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, inout Trace
                         float tHit;
                         int ax = entryAxis(v, ro, d, inv, stepPos);
                         int3 q;
-                        if (vgShapeHit(sh, v, v + gBlock, ro, d, t, tHit, ax, q)) {
+                        // a whole cube of cut-out texels (leaves) with its 16 x 16 texture: the face it is entered by,
+                        // by the coverage of its texels under the pixel against the pixel's threshold: through the gaps
+                        // the ray goes on to the branches and the sky behind (the shape's 4 x 4 coverage hashed per
+                        // micro-voxel drew the gaps as dark specks); ATLAS_ABLATE 536870912: no cut-outs
+                        uint4 head = groupData[sh >> 2];
+                        uint tex = (head.z & 1u) != 0u && (head.x & head.y) == 0xFFFFFFFFu && (asuint(frame.jitter.w) & 536870912u) == 0u
+                                 ? vgTexture(mat) : 0u;
+                        if (tex != 0u) {
+                            int f = d[ax] > 0.0 ? G_FACE_LOW[ax] : G_FACE_HIGH[ax];
+                            float3 lq = clamp(ro + d * t - float3(v), float3(0, 0, 0), float3(0.9999, 0.9999, 0.9999));
+                            float2 uv = f <= 1 ? lq.xz : (f <= 3 ? float2(lq.x, 1.0 - lq.y) : float2(lq.z, 1.0 - lq.y));
+                            float fp = (gChordT + t) * frame.params.w * frame.params.z / max(abs(d[ax]), 0.2);
+                            float4 c = texSample(tex, f, uv.x, uv.y, fp);
+                            if (c.a > gAlphaXi) {
+                                res.t = t;
+                                res.mat = mat;
+                                res.axis = ax;
+                                res.lod = 0;
+                                res.albedo = c.rgb;
+                                res.hasAlbedo = 1u;
+                                return TRACE_HIT;
+                            }
+                        } else if (vgShapeHit(sh, v, v + gBlock, ro, d, t, tHit, ax, q)) {
                             res.t = tHit;
                             res.mat = mat;
                             res.axis = ax;
@@ -923,57 +948,163 @@ float3 worldAt(float3 o, float3 dir, float k, float t) {
     return o + dir * t + float3(0, k * t * t, 0);
 }
 
+// ---- the level a ray takes: one rule for every ray (primary rays here, secondary rays' cones, the near light) ---------
+// A continuous level, never a ring: what a pixel covers, and what the levels held cover. A ray takes level
+// floor(level + xi) for a per-pixel threshold xi: the stochastic choice between the two levels around it, the share of
+// the coarser one the fraction, so the change from one level to the next spreads over the whole octave of distance
+// (the host's TAA averages it to a gradient). The rings (each level's window of regions, the grid's windows inside
+// them) are what is resident only.
+
+// The continuous level of a footprint: log2 of the blocks a pixel covers there, dist x pixelAngle, widened at grazing
+// angles by 1 / |cos| against the surface (cosTheta 1: face on, or not known yet), at most 2x: one level (a block face's
+// cos is the staircase's, not the slope's: 4x took far fields and shores two levels down, their rivers and beaches lost)
+float lodFromFootprint(float dist, float pixelAngle, float cosTheta) {
+    // (ATLAS_LOD's second and third knobs: the least cos, 0.5 by default; a bias)
+    float minCos = clamp(frame.lodParams.y, 0.05, 1.0);
+    return log2(max(dist * pixelAngle / clamp(abs(cosTheta), minCos, 1.0), 1e-6)) + frame.lodParams.z;
+}
+// the level taken for continuous level `level` at threshold xi (0..1)
+int lodPick(float level, float xi, int lodCount) { return clamp(int(floor(level + xi)), 0, lodCount - 1); }
+// the per-pixel threshold (farMain: interleaved gradient noise, rotated by the golden ratio each frame under the host's
+// TAA; 0.5 elsewhere)
+static float gLodXi = 0.5;
+
+// Residency: each level's window (its region table) as the inner radius r_k it covers around the camera (Chebyshev,
+// blocks). The continuous level a point needs for what is held there: k + 1 at r_k, log-linear between the r_k (and
+// 1 + log2(d / r_0) inside r_0), so a level is left over the octave before its window ends and its successor, whose
+// window is about twice as wide, is always there for the blend: no hole, no ring.
+float lodWindowR(int k) {
+    LodGpu L = frame.lods[k];
+    int span = 256 << k;
+    float lox = float(L.origin.x * span - frame.camInt.x) - frame.camFrac.x;
+    float loz = float(L.origin.z * span - frame.camInt.z) - frame.camFrac.z;
+    float hix = lox + float(L.dim.x * span), hiz = loz + float(L.dim.z * span);
+    return max(min(min(-lox, hix), min(-loz, hiz)), 1.0);
+}
+float lodResident(float3 p) {
+    int n = int(frame.dims.w);
+    float d = max(max(abs(p.x), abs(p.z)), 1.0);
+    float ra = lodWindowR(0);
+    if (d <= ra) return 1.0 + log2(d / ra);
+    for (int k = 0; k + 1 < n; k++) {
+        float rb = max(lodWindowR(k + 1), ra * 1.01);  // (nested: each wider than the one inside it)
+        if (d <= rb) return float(k + 1) + log2(d / ra) / log2(rb / ra);
+        ra = rb;
+    }
+    return float(n);
+}
+// the distance (Chebyshev) at which lodResident reaches `level`
+float lodResidentDist(float level) {
+    int n = int(frame.dims.w);
+    float ra = lodWindowR(0);
+    if (level <= 1.0) return ra * exp2(level - 1.0);
+    for (int k = 0; k + 1 < n; k++) {
+        float rb = max(lodWindowR(k + 1), ra * 1.01);
+        if (level <= float(k + 2)) return ra * pow(rb / ra, level - float(k + 1));
+        ra = rb;
+    }
+    return 1e30;
+}
+
+// the continuous level of the last primary hit (FRAME_DEBUG_LOD shows it)
+static float gHitLod = 0.0;
+
 // Trace the curved view ray from t0 to t1. Returns the hit distance along the view ray or -1.
-// lodDither (0..1 per pixel, 0 = off): the segment grid of every LOD starts at a per-pixel phase. A ray changes LOD
-// only at a segment start (the first segment that leaves a level's window, or whose footprint wants a coarser level),
-// so with a fixed grid every pixel switches on the same jagged line; with the phase spread over one segment the switch
-// becomes a stochastic band a segment wide (dithered LOD transitions, no pop line).
+// Each stretch of the ray takes the level of its continuous level (lodFromFootprint at its distance, lodResident at its
+// place) at the pixel's threshold, to where that pick would change; where the level has no data (a streaming gap) a
+// coarser one, else a finer one. A hit is looked at again with its face's grazing angle: when that footprint wants a
+// coarser level, the coarser level's surface near it is the hit (ATLAS_ABLATE 2147483648: not).
+// (ATLAS_ABLATE 1048576, measurements: the levels by ring as before: the finest level with data (groups: from level 0;
+// else floor(log2(footprint))), its segment grid phased per pixel by lodDither: a stochastic band a segment wide)
 float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout TraceResult res) {
+    bool rings = (gAblate & 1048576u) != 0u;
+    int phasedLod = -1;  // (rings) the level whose segment grid was last phase-shifted
+    float shrink = 0.0;  // (rings) fraction cut off the current segment
     float R = frame.camFrac.w;
     float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
-    float pixelAngle = frame.params.w * frame.params.z;
+    float pa = frame.params.w * frame.params.z;
     int lodCount = int(frame.dims.w);
     float worldTop = 640.0 - float(frame.camInt.y);
+    // (the Chebyshev distance from the camera grows by this a block along the ray)
+    float hz = max(max(abs(dir.x), abs(dir.z)), 1e-4);
+    float xi = gLodXi;
+    int groupsFrom = gGroups ? min(int((gAblate >> 16u) & 7u), lodCount - 1) : 0;  // (ATLAS_ABLATE bits 16-18)
     int lod = 0;
     float t = t0;
-    bool finer = false;  // this segment is searching downwards for any LOD with data
-    int pinned = -1;     // a finer LOD that had data while the wanted one did not (streaming), and for how long
+    bool finer = false;   // this stretch is searching downwards for any level with data
+    int pinned = -1;      // a finer level that had data while the wanted one did not (streaming), and for how long
     int pinLeft = 0;
-    float gapEnd = 1e30;  // nearest end of an unloaded region cell seen while searching this segment
-    int phasedLod = -1;   // the level whose segment grid was last phase-shifted (lodDither)
-    float shrink = 0.0;   // fraction cut off the current segment (its grid's phase)
+    float gapEnd = 1e30;  // nearest end of an unloaded region cell seen while searching this stretch
+    // (a grazing hit's second look: the coarser level over [t, grazeEnd), the finer hit kept for when it has none)
+    bool graze = false;
+    float grazeEnd = 0.0, fineT = 0.0;
+    TraceResult fine = res;
     for (int seg = 0; seg < 768; seg++) {
         if (t >= t1) break;
-        // (the groups choose their own level per node, draw-or-open: the finest level resident is the best source)
-        // (ATLAS_ABLATE bits 16-18, measurements: the groups start from that level, to look at a coarse level up close)
-        int want = gGroups ? min(int((gAblate >> 16u) & 7u), lodCount - 1)
-                           : int(clamp(floor(log2(max(t * pixelAngle, 1.0))), 0.0, float(lodCount - 1)));
-        if (!finer) lod = pinLeft > 0 ? pinned : max(lod, want);
+        float3 a = worldAt(o, dir, k, t);
+        // rising above the world top: the parabola only climbs further from here
+        if (!graze && a.y > worldTop && dir.y + 2.0 * k * t >= 0.0) break;
+        float lc = max(lodFromFootprint(t, pa, 1.0), lodResident(a));
+        int want = graze ? lod : max(lodPick(lc, xi, lodCount), groupsFrom);
+        if (rings) want = gGroups ? groupsFrom : int(clamp(floor(log2(max(t * pa, 1.0))), 0.0, float(lodCount - 1)));
+        if (!finer && !graze) lod = pinLeft > 0 ? pinned : max(lod, want);
         float s = float(1 << lod);
-        if (lodDither > 0.0 && lod != phasedLod) {
+        // where this pick would change: the footprint, or the place, reaching lod + 1 at the threshold
+        float tEnd = graze ? grazeEnd : 1e30;
+        if (rings && lodDither > 0.0 && lod != phasedLod) {
             phasedLod = lod;
             shrink = 0.9 * frac(lodDither + 0.618034 * float(lod));
         }
+        if (!graze && !rings && lod == want && lod + 1 < lodCount) {
+            float target = float(lod + 1) - xi;
+            float tF = exp2(target) / pa;
+            float tR = (lodResidentDist(target) - max(abs(o.x), abs(o.z))) / hz;
+            tEnd = max(min(tF, tR), t + 0.5);
+        }
         // (groups: longer chords, each one re-enters a region's tree from its root; the chord's sag is still a few
         // hundredths of a block at the real radius)
-        float tn = min(t + (gGroups ? 768.0 : 192.0) * s * (1.0 - shrink), t1);
-        float3 a = worldAt(o, dir, k, t);
+        float tn = min(min(t + (gGroups ? 768.0 : 192.0) * s * (1.0 - shrink), tEnd), t1);
         float3 b = worldAt(o, dir, k, tn);
-        // rising above the world top: the parabola only climbs further from here
-        if (a.y > worldTop && dir.y + 2.0 * k * t >= 0.0) break;
         float len = tn - t;
         float3 d = (b - a) / len;
         float uncExit;
         gChordT = t;
         int r = traceLod(lod, a, d, len, res, uncExit);
-        if (r == TRACE_HIT) return t + res.t;
+        if (graze) {
+            // the coarser level's surface near the grazing hit, else the finer hit as it was
+            if (r == TRACE_HIT) return t + res.t;
+            res = fine;
+            return fineT;
+        }
+        if (r == TRACE_HIT) {
+            float th = t + res.t;
+            float3 ph = a + d * res.t;
+            float cs = res.axis >= 0 ? abs(d[res.axis]) : 1.0;
+            float lh = max(lodFromFootprint(th, pa, cs), lodResident(ph));
+            gHitLod = rings ? float(lod) : max(lh, float(lod));
+            int k2 = lodPick(lh, xi, lodCount);
+            if (!rings && (gAblate & 2147483648u) == 0u && k2 > lod && !finer) {
+                // seen at a grazing angle, its footprint wants a coarser level: that level's surface around the hit,
+                // from a little in front of it (the next stretch)
+                float s2 = float(1 << k2);
+                fine = res;
+                fineT = th;
+                graze = true;
+                lod = k2;
+                grazeEnd = min(th + 3.0 * s2, t1);
+                t = max(t0, th - 3.0 * s2);
+                res.axis = -1;
+                continue;
+            }
+            return th;
+        }
         if (r == TRACE_UNCOVERED) {
             res.axis = -1;
             pinLeft = 0;
             // chord parameter equals view distance only to O(k): fine for choosing where to resume
             gapEnd = min(gapEnd, uncExit < 1e29 ? t + uncExit : 1e30);
-            // coarser first (cheaper, and it is what this distance wants); with nothing coarser, settle for finer
-            // data rather than a hole while tiles are still streaming in
+            // coarser first (cheaper, and what lies past this level's data wants); with nothing coarser, settle for
+            // finer data rather than a hole while tiles are still streaming in
             if (!finer && lod + 1 < lodCount) { lod++; continue; }
             if (!finer) {
                 lod = min(lod, want);  // levels from here up were all just found empty-handed
@@ -983,8 +1114,8 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
                 lod--;
                 continue;
             }
-            // no LOD has this stretch (a streaming gap): resume where the nearest unloaded cell ends and look for
-            // land loaded behind it; when every LOD has left its window there is nothing further at all
+            // no level has this stretch (a streaming gap): resume where the nearest unloaded cell ends and look for
+            // land loaded behind it; when every level has left its window there is nothing further at all
             if (gapEnd >= 1e29) break;
             t = min(max(gapEnd, t) + 1e-3, t1);
             gapEnd = 1e30;
@@ -992,8 +1123,8 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
             lod = want;
             continue;
         }
-        // this segment had data at `lod` and missed; when that took a downward search, stay on that level for a
-        // few segments instead of repeating the search every segment
+        // this stretch had data at `lod` and missed; when that took a downward search, stay on that level for a few
+        // stretches instead of repeating the search every one
         if (finer) { pinned = lod; pinLeft = 8; }
         else if (pinLeft > 0) pinLeft--;
         t = tn;
@@ -1026,6 +1157,24 @@ float3 vanillaLook(float3 o, float3 dir, float tHit, TraceResult r) {
     return cardColour(card, clamp(lp[a1], 0.0, 0.9999), clamp(lp[a2], 0.0, 0.9999), fp);
 }
 
+// (secondary rays) their cone, the same rule as the primary rays' (lodFromFootprint, lodPick): the footprint at the
+// ray's origin (blocks) and its growth per block travelled; gSecSpread 0: none, the ray keeps its level (coarser only
+// where that one has no data). The far field's rays start at their hit's footprint and widen as the pixel's cone does.
+static float gSecFoot0 = 0.0;
+static float gSecSpread = 0.0;
+// the level a secondary ray takes at t (never finer than `lod`, the one it is on), and its stretch cut where the pick
+// changes; cap: the coarsest it may take
+int secLevelAt(float3 p, float3 dir, float t, int lod, int cap, float foot0, float spread, inout float len) {
+    if (spread <= 0.0) return lod;
+    float lc = max(log2(max(foot0 + t * spread, 1e-6)), lodResident(p + dir * t));
+    int want = min(max(lod, lodPick(lc, gLodXi, cap + 1)), max(lod, cap));
+    if (want < cap) {
+        float tl = (exp2(float(want + 1) - gLodXi) - foot0) / spread;
+        if (tl > t) len = min(len, tl - t);
+    }
+    return want;
+}
+
 // Straight ray (sun shadows): 1 if lit.
 float traceShadow(float3 p, float3 dir, int lod) {
     TraceResult res;
@@ -1035,8 +1184,10 @@ float traceShadow(float3 p, float3 dir, int lod) {
     float maxT = 2048.0;
     for (int seg = 0; seg < 48; seg++) {
         if (t >= maxT) break;
+        float len = min(192.0 * float(1 << lod), maxT - t);
+        lod = secLevelAt(p, dir, t, lod, lodCount - 1, gSecFoot0, gSecSpread, len);
         float s = float(1 << lod);
-        float len = min(192.0 * s, maxT - t);
+        len = min(len, 192.0 * s);
         float uncExit;
         int r = traceLod(lod, p + dir * t, dir, len, res, uncExit);
         if (r == TRACE_HIT) return 0.0;
@@ -1059,13 +1210,16 @@ static float gSecHitT = 0.0;  // where the last secondary ray was stopped (block
 static uint gSecHitMat = 0xFFFFFFFFu;  // and what stopped it: its material, the axis of the face it entered, its level
 static int gSecHitAxis = 1;
 static int gSecHitLod = 0;
-// gSecCone (the near light's rays): the ray widens as a cone, a level coarser each time it has gone gSecCone voxels of
-// its level (lod 0 to gSecCone blocks, lod 1 to twice that, ... up to SEC_CONE_LOD): what shadows a point from far off
-// needs no finer voxels than its distance resolves, and a 2048-block ray through a forest at lod 0 cost 3 ms a frame at
-// 1280x800 (the near light's sun ray; its bounce's as much again). 0: the ray keeps its level (the far field's rays).
+// gSecCone (the near light's rays): the ray widens as a cone, a level coarser for each doubling of the distance past
+// gSecCone blocks (its footprint t / gSecCone, the same continuous rule as every ray's, up to SEC_CONE_LOD): what
+// shadows a point from far off needs no finer voxels than its distance resolves, and a 2048-block ray through a forest
+// at lod 0 cost 3 ms a frame at 1280x800 (the near light's sun ray; its bounce's as much again). 0: gSecSpread's cone,
+// if any.
 static float gSecCone = 0.0;
 static const int SEC_CONE_LOD = 4;
 float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
+    bool legacyCone = gSecCone > 0.0;
+    float spread = legacyCone ? 1.0 / gSecCone : gSecSpread, foot0 = legacyCone ? float(1 << lod) : gSecFoot0;
     TraceResult res;
     res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.dither = 0.5; res.albedo = float3(0, 0, 0); res.hasAlbedo = 0u;
     int lodCount = int(frame.dims.w);
@@ -1080,13 +1234,9 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
     float vis = 1.0;
     for (int seg = 0; seg < 48; seg++) {
         if (t >= maxT) break;
-        float s = float(1 << lod);
-        float len = min(192.0 * s, maxT - t);
-        if (gSecCone > 0.0 && lod < SEC_CONE_LOD && lod + 1 < lodCount) {
-            float edge = gSecCone * s;
-            if (t >= edge) { lod++; continue; }
-            len = min(len, edge - t);
-        }
+        float len = min(192.0 * float(1 << lod), maxT - t);
+        lod = secLevelAt(p, dir, t, lod, legacyCone ? min(SEC_CONE_LOD, lodCount - 1) : lodCount - 1, foot0, spread, len);
+        len = min(len, 192.0 * float(1 << lod));
         float uncExit;
         gSecT = t;
         int r = traceLod(lod, p + dir * t, dir, len, res, uncExit);
@@ -1121,10 +1271,12 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
 // where it does not). Clobbers traceSecondary's globals.
 bool solidRoof(float3 p, int lod) {
     // (never as a cone: a roof is found at the level the point is lit at, rock overhead at a coarse level can be open)
-    float cone = gSecCone;
+    float cone = gSecCone, spread = gSecSpread;
     gSecCone = 0.0;
+    gSecSpread = 0.0;
     bool roof = traceSecondary(p, float3(0, 1, 0), 2048.0, lod) <= 0.0 && !gStopFoliage;
     gSecCone = cone;
+    gSecSpread = spread;
     return roof;
 }
 
@@ -2013,6 +2165,16 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     // the LOD segment phase stays fixed on screen: moving it per frame at a reduced atlas scale made blobs larger
     // than the TAA's neighbourhood, clipped from the history: a flickering fringe on distant ridges
     float lodDither = (frame.dims.z & FRAME_LOD_DITHER) != 0 ? max(pixelDither(id.xy, 1u), 1e-3) : 0.0;
+    // the threshold of the continuous level (lodPick): even over small neighbourhoods, and under the host's TAA rotated
+    // by the golden ratio each frame, so its resolve averages the two levels' share into a gradient
+    {
+        // (ATLAS_LOD's first knob, measurements: 1 a constant, 2 per 2 x 2 pixels, 3 per 8 x 4: one warp's)
+        int mode = int(frame.lodParams.x);
+        uint2 cell = mode == 2 ? id.xy / 2u : (mode == 3 ? uint2(id.x / 8u, id.y / 4u) : id.xy);
+        gLodXi = mode == 1 ? 0.5
+                           : frac(pixelDither(cell, 11u) + (frame.jitter.z > 0.5 ? 0.618034 * float(frame.temporal.x & 255u) : 0.0));
+        gAlphaXi = frac(pixelDither(id.xy, 13u) + (frame.jitter.z > 0.5 ? 0.618034 * float(frame.temporal.x & 255u) : 0.0));
+    }
     float3 sun = frame.sunDir.xyz;
 
     // the rasterised near field already covers this pixel: only the air in front of it (cloud, if the camera is up
@@ -2123,6 +2285,25 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             float T = dot(air.transmittance, float3(0.2126, 0.7152, 0.0722));
             float3 ins = gNearRoofed && eyeRoofed() ? float3(0, 0, 0) : air.inscatter;  // under cover at both ends: unlit air
             c = float4(albedo * nl.rgb * T + ins, 1.0);
+            // light through leaves (the unified field's FOLIAGE_SSS): the key light (sun, or moon at night) reaching the
+            // leaf through the crown in front of it towards the light (a traced ray, attenuated by every leaf it
+            // crosses, this one's too: a crown's edge passes most, its heart little), sent on through the leaf tissue
+            // in its own colour, strongest looking towards the light: the backlit glow, bright at the crown's rim where
+            // the light crossed few leaves, dim and diffuse inside. ATLAS_ABLATE 1024: none
+            if (cls == 1u && (frame.dims.z & FRAME_SHADOWS) != 0u && (gAblate & 1024u) == 0u) {
+                float3 L = keyLightDir(sun);
+                float3 ph = o + dir * tHit + n * 0.02;
+                gSecSpread = 0.0;
+                gSecCone = 0.0;
+                float vis = traceSecondary(ph + L * 0.05, L, 96.0, res.lod);
+                // (the secondary ray counts a leaf crossed as opaque but for its gaps; its tissue lets about a third
+                // through as well: per crossing 0.09 of the gaps becomes about 0.4, the ray's transmittance to the 0.4)
+                float through = pow(saturate(max(vis, gThrough)), 0.4);
+                float fwd = max(dot(dir, L), 0.0);
+                float back = 0.2 + 1.2 * fwd * fwd * fwd;  // forward scattering: towards the light the most
+                float gain = frame.lodParams.w > 0.0 ? frame.lodParams.w : 1.0;  // (ATLAS_LOD's fourth knob)
+                c.rgb += albedo * keyLightRadiance(sun) * (through * back * 0.5 * gain) * T;
+            }
         }
         outColor[pix] = c;
         outNormal[pix] = packNormal(n, (cls & 0x7Fu) | 0x80u, nl.a);
@@ -2163,6 +2344,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         float3 p = worldAt(o, dir, k, tHit);
         airAt(p.y + float(frame.camInt.y));  // the key light at the hit's height (a peak keeps the sun longer)
         float s = float(1 << res.lod);
+        // the hit's secondary rays (shadow, sky, bounce) go on as the pixel's cone: its footprint here, widening as it does
+        gSecFoot0 = tHit * frame.params.w * frame.params.z;
+        gSecSpread = frame.params.w * frame.params.z;
         // blocky up close (it is Minecraft), smooth once voxels shrink towards a pixel: stops contour striping
         // centre of the hit voxel on the world voxel grid (multiples of s; y -64 is a multiple for s <= 64)
         float3 ci = float3(frame.camInt.xyz);
@@ -2301,7 +2485,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             float v = valueNoise(wxz / 24.0) * 0.6 + valueNoise(wxz / 90.0 + 17.0) * 0.4;
             albedo *= 0.95 + 0.10 * v;  // gentle: stronger tone blotches the near field does not have read as a seam
         }
-        if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTint(res.lod);
+        // (the continuous level at the hit; the level taken is its pick, lodPick)
+        if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTintF(gHitLod);
         float3 reflection = float3(0, 0, 0);
         float foam = 0.0;
         if (cls == 2u) {

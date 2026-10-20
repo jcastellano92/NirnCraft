@@ -197,8 +197,9 @@ constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPT
                    B_PREV_NEAR_LIGHT = 28, B_VG_CHUNKS = 29, B_VG_BLOCKS = 30, B_VG_BITS = 31, B_VG_POOL = 32,
                    B_TEX = 33;  // (abi 0.16) the near field's textures (voxgrid.hpp packTextures)
 // the grid's build kernels (atlas_voxgrid.slang): chunks, blocks, bits, pool, jobs, summed-volume table, the batch's
-// sections' raw ids (the coarse levels' ingest reads them where they were staged)
-constexpr uint32_t VG_BINDINGS = 7;
+// sections' raw ids (the coarse levels' ingest reads them where they were staged), and those that were on the GPU
+// already (VoxGrid::ingestGpu), copied together
+constexpr uint32_t VG_BINDINGS = 8;
 // the scene's buffers (two copies, staged off the render thread)
 constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP, B_GROUPS};
 bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP || b == B_GROUPS; }
@@ -323,7 +324,14 @@ struct Slot {
     bool hostSun = false;      // ... including the sun map
     bool hostNearLight = false;  // ... and the near light (abi 0.15)
     // the level-0 grid's build this frame (voxgrid.hpp): its sections and jobs in host memory, what to record
-    Buf vgStage, vgJobs;
+    Buf vgStage, vgJobs, vgGsrc;
+    // (VoxGrid::ingestGpu) copies from the sections' own buffers: into vgGsrc (the coarse levels' ingest), into the pool
+    struct VgGpuCopy {
+        VkBuffer from;
+        VkBufferCopy region;
+        bool toPool;
+    };
+    std::vector<VgGpuCopy> vgGcopies;
     VkDescriptorSet vgSet = VK_NULL_HANDLE;
     std::vector<VkBufferCopy> vgCopies;
     uint32_t vgJobCount = 0;
@@ -358,6 +366,7 @@ public:
                 release(s.hostOut);
                 release(s.vgStage);
                 release(s.vgJobs);
+                release(s.vgGsrc);
                 if (s.fence) vkDestroyFence(dev_, s.fence, nullptr);
                 if (s.query) vkDestroyQueryPool(dev_, s.query, nullptr);
             }
@@ -1812,6 +1821,7 @@ private:
         s.vgClear = s.vgStates = s.vgTimed = false;
         s.vgSections = 0;
         s.vgClears = s.vgFills = s.vgIngests = 0;
+        s.vgGcopies.clear();
         for (int k = 0; k < VG_LEVELS; k++) s.vgDowns[k] = 0, s.vgLv[k] = {};
         VoxGrid* g = in.voxgrid;
         VgBatch b;
@@ -1878,10 +1888,19 @@ private:
             std::memcpy(jm + size_t(s.vgClassAt) * 16, b.classes->data(), ncls);
         }
         constexpr VkDeviceSize SEC = VkDeviceSize(VG_SECTION_WORDS) * 4;
+        s.vgGcopies.clear();
+        if (!ensure(s.vgGsrc, b.gsecs.size() * SECTION_BYTES, false, Mem::DeviceOnly, err)) return false;
+        for (size_t k = 0; k < b.gsecs.size(); k++)
+            s.vgGcopies.push_back({VkBuffer(b.gsecs[k].buffer), {VkDeviceSize(b.gsecs[k].offset), VkDeviceSize(k) * SEC, SEC}, false});
         for (size_t k = 0; k < b.level0Jobs; k++) {
             const VgJob& j = b.jobs[k];
-            if (j.slot != ~0u && j.slot != VG_COLUMN && j.data != VG_NO_COPY)
+            if (j.slot == ~0u || j.slot == VG_COLUMN || j.data == VG_NO_COPY) continue;
+            if (j.data & VG_GPU_SRC) {
+                const VgGpuRef& g = b.gsecs[j.data & ~VG_GPU_SRC];
+                s.vgGcopies.push_back({VkBuffer(g.buffer), {VkDeviceSize(g.offset), VkDeviceSize(j.slot) * SEC, SEC}, true});
+            } else {
                 s.vgCopies.push_back({VkDeviceSize(j.data) * SEC, VkDeviceSize(j.slot) * SEC, SEC});
+            }
         }
         s.vgJobCount = uint32_t(b.jobs.size());
         s.vgOx = b.ox;
@@ -1897,7 +1916,7 @@ private:
                          b.levels[k].ox, b.levels[k].oz};
         }
         const Buf* bound[VG_BINDINGS] = {&shared_[B_VG_CHUNKS], &shared_[B_VG_BLOCKS], &shared_[B_VG_BITS], &shared_[B_VG_POOL],
-                                         &s.vgJobs, &vgSat_, &s.vgStage};
+                                         &s.vgJobs, &vgSat_, &s.vgStage, &s.vgGsrc};
         VkDescriptorBufferInfo bi[VG_BINDINGS];
         VkWriteDescriptorSet wr[VG_BINDINGS];
         for (uint32_t i = 0; i < VG_BINDINGS; i++) {
@@ -1914,7 +1933,7 @@ private:
     }
 
     void recordVoxGrid(Slot& s) {
-        bool any = s.vgJobCount || s.vgClears || s.vgFills || s.vgIngests;
+        bool any = s.vgJobCount || s.vgClears || s.vgFills || s.vgIngests || !s.vgGcopies.empty();
         for (int k = 0; k < VG_LEVELS; k++) any |= s.vgLv[k].clear || s.vgLv[k].grow || s.vgDowns[k];
         if (!any) return;
         VkCommandBuffer cmd = s.cmd;
@@ -1934,6 +1953,8 @@ private:
         }
         if (!s.vgCopies.empty())
             vkCmdCopyBuffer(cmd, s.vgStage.buf, shared_[B_VG_POOL].buf, uint32_t(s.vgCopies.size()), s.vgCopies.data());
+        for (const Slot::VgGpuCopy& c : s.vgGcopies)  // (the generator's writes are its own to order before the frame)
+            vkCmdCopyBuffer(cmd, c.from, c.toPool ? shared_[B_VG_POOL].buf : s.vgGsrc.buf, 1, &c.region);
         mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
         vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);

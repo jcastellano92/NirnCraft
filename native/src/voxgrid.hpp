@@ -43,6 +43,12 @@ constexpr int VG_SECTION_WORDS = 2048;  // a section's 4096 16-bit ids
 constexpr int VG_MIN_SY = -4;           // y -64 (World::WORLD_MIN_Y / 16)
 constexpr uint32_t VG_COLUMN = 0xFFFFFFFEu;  // (VgJob::slot)
 constexpr uint32_t VG_NO_COPY = 0xFFFFFFFFu;  // (VgJob::data) the slot's ids are in the pool already (a coarse chunk)
+constexpr uint32_t VG_GPU_SRC = 0x80000000u;  // (VgJob::data, VgIngest::src) | index in VgBatch::gsecs: ids on the GPU
+
+// (VoxGrid::ingestGpu) a section's ids in a GPU buffer: the backend's buffer handle (Vulkan: a VkBuffer), byte offset
+struct VgGpuRef {
+    uint64_t buffer = 0, offset = 0;
+};
 constexpr int VG_LEVELS = 7;                  // level 0 and the coarse levels 1..6
 
 // a section's ids: the world's own Section::mats (shared, never copied) or an upload's copy
@@ -82,6 +88,7 @@ struct VgBatch {
     bool chunkStates = false;    // some chunk's state changed: the chunk-level distance fields need a rebuild
     std::vector<VgJob> jobs;     // level 0's, then the coarse levels' (their builds after the ingests)
     std::vector<VgIds> secs;  // the MIXED jobs' ids (two to a word in the pool: their own little-endian bytes)
+    std::vector<VgGpuRef> gsecs;  // ids already on the GPU (ingestGpu): data / src VG_GPU_SRC | index here
     // the coarse levels: whole chunks to air first, then boxes (rock under a column's lowest section, air), the sections'
     // generated levels, the levels 5+ from the level below (in order of level)
     std::vector<VgFill> clears, fills;
@@ -95,7 +102,7 @@ struct VgBatch {
     std::shared_ptr<const std::vector<uint8_t>> classes;  // material -> class, for the ingest's vote
     size_t level0Jobs = 0;  // jobs[0, level0Jobs) are level 0's
     bool coarse() const {
-        if (!clears.empty() || !fills.empty() || !ingests.empty() || jobs.size() > level0Jobs) return true;
+        if (!clears.empty() || !fills.empty() || !ingests.empty() || jobs.size() > level0Jobs || !gsecs.empty()) return true;
         for (int k = 1; k < VG_LEVELS; k++)
             if (levels[k].clear || levels[k].grow || !downs[k].empty()) return true;
         return false;
@@ -120,6 +127,18 @@ public:
 
     // a section's ids as World::putSection gets them (any thread)
     void put(int sx, int sy, int sz, const uint16_t* mats);
+    // (GPU world generation) sections whose ids are already in a GPU buffer, without a round trip through the CPU:
+    // `count` sections of 16^3 block ids as atlas_upload_section takes them (4096 uint16, x + 16 * (z + 16 * y): 8 KiB
+    // each) at byte offsets[i] of `buffer` (the Vulkan backend's VkBuffer as a handle, created on atlas's device with
+    // storage and transfer-source usage; offsets multiples of 16), at world section positions pos[3 i .. 3 i + 2] =
+    // x, y, z. They go into level 0 and the coarse levels as uploads do: the backend copies them device to device
+    // (vkCmdCopyBuffer before the frame's grid build). The books take each as holding blocks (a slot; one the GPU
+    // finds empty is written EMPTY), the column as seen; the CPU's World does not get them (its regions, the tiles'
+    // fallback, stay as they are). Any thread. The buffer's contents at those offsets must stay valid until
+    // gpuSectionsPending() is 0 and two frames more have been rendered (the frames in flight that read them). A later
+    // put() of the same section replaces it. The CPU backend ignores them.
+    void ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count);
+    size_t gpuSectionsPending() const;
     // render thread, once a frame: the window follows the camera's block (FOLLOW sections behind; the columns it enters
     // are read from the world when its lock is free); refill: the same read on the update thread (atlas_update), waiting
     void frame(const int32_t camBlock[3], World& world);
@@ -276,6 +295,7 @@ private:
         uint32_t levels = 0;
     };
     std::unordered_map<Key, CPending, KeyHash> cpending_;
+    std::unordered_map<Key, VgGpuRef, KeyHash> gpuRef_;  // (ingestGpu) sections waiting whose ids are on the GPU
     std::shared_ptr<const std::vector<uint8_t>> classes_ = std::make_shared<std::vector<uint8_t>>();
     float viewX_ = 0.0f, viewZ_ = 0.0f;
     int camSy_ = 0;

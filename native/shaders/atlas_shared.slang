@@ -90,6 +90,8 @@ struct FrameGpu {
     // the grid's coarse levels 1..6 (voxgrid.hpp): origin x, z (chunks of 16 << k blocks), first chunk word,
     // D | H << 8 | 1 << 16 when the level is there
     int4 vgLevel[6];
+    // the continuous level's knobs (ATLAS_LOD, measurements): threshold pattern, the grazing widening's least cos, bias
+    float4 lodParams;
 };
 
 // the frame's moon, copied by each entry point (the shared lighting has no frame of its own)
@@ -111,6 +113,12 @@ float3 lodTint(int lod) {
     float3 t[8] = { float3(0.9, 0.2, 0.2), float3(0.9, 0.6, 0.2), float3(0.85, 0.85, 0.2), float3(0.3, 0.85, 0.3),
                     float3(0.2, 0.8, 0.8), float3(0.25, 0.4, 0.9), float3(0.6, 0.3, 0.9), float3(0.9, 0.9, 0.9) };
     return t[clamp(lod, 0, 7)];
+}
+// a continuous level's tint: the levels' tints blended across it (a gradient, no bands)
+float3 lodTintF(float level) {
+    float l = clamp(level, 0.0, 7.0);
+    int a = int(floor(l));
+    return lerp(lodTint(a), lodTint(min(a + 1, 7)), l - float(a));
 }
 
 // the air and the light (sky, sun, haze, shadeSurfaceAmb): atlas_air.slang
