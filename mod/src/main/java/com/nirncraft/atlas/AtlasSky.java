@@ -73,6 +73,9 @@ final class AtlasSky implements CustomSkyboxRenderer {
         Matrix4f inv = new Matrix4f(cam.projectionMatrix).mul(modelView).invert();
         float[] sun = AtlasClient.sunDirection(sky.sunAngle);
         float[] look = AtlasLook.frame(mc);
+        // the sky is not opened up with the eye at night (a dark night sky; NirnCraft's aurora and stars over it add
+        // light and need the dark to show)
+        look[0] = Math.min(look[0], 1.5f);
         try (var view = info.currentBuffer().map(false, true)) {
             Std140Builder.intoBuffer(view.data()).putMat4f(inv).putVec4(sun[0], sun[1], sun[2], 0f)
                     .putVec4(look[0], look[1], 0f, 0f);
