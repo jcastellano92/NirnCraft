@@ -29,7 +29,18 @@ final class AtlasLook {
         eyeSky += (target - eyeSky) * 0.03f;
         float open = canonicalExposure(sun);
         float log2 = open + (EXPOSURE_MAX - open) * (1f - smooth(0.1f, 0.8f, eyeSky));
+        // the metered eye once it has a reading (AtlasMeter: the finished frame, adapting fast to bright, slowly to dark)
+        float metered = AtlasMeter.exposure(log2);
+        if (!Float.isNaN(metered)) log2 = metered;
+        lastLog2 = log2;
         return new float[] {(float) Math.pow(2, log2), NIGHT_VISION};
+    }
+
+    private static float lastLog2 = 0f;
+
+    /** The log2 exposure the last frame was displayed with (what AtlasMeter's reading was taken under). */
+    static float lastLog2() {
+        return lastLog2;
     }
 
     /**

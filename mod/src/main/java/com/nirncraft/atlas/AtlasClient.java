@@ -812,6 +812,14 @@ public final class AtlasClient {
      * World direction to the sun, as Iris places it: Ry(-90) Rz(sunPathRotation) Rx(sunAngle) applied to +Y, so
      * atlas's light and the pack's (sunPosition) agree.
      */
+    /**
+     * The eye's adapted log2 exposure (AtlasMeter, from the finished frame: a bright town, the moon, twilight close the
+     * eye; a dark forest opens it), or NaN when atlas's look is not metering. What the stars' visibility follows.
+     */
+    public static float eyeExposureLog2() {
+        return AtlasNearPass.litThisFrame() ? AtlasLook.lastLog2() : Float.NaN;
+    }
+
     static float[] sunDirection(float sunAngle) {
         double a = sunAngle, r = Math.toRadians(sunPathRotationDeg);
         double x = -Math.sin(a), y = Math.cos(r) * Math.cos(a), z = -Math.sin(r) * Math.cos(a);

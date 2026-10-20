@@ -80,7 +80,7 @@ vec3 sunGlare(vec3 dir) {
     }
     float th = acos(clamp(dot(dir, S), -1.0, 1.0));  // radians from the sun's centre
     float core = exp(-th / 0.012);
-    float halo = 0.12 / (1.0 + pow(th / 0.06, 2.0));
+    float halo = 0.05 / (1.0 + pow(th / 0.04, 2.0));
     // low over the horizon the air takes the glare's spread with the light: a smaller, softer blob
     float low = smoothstep(0.0, 0.25, S.y);
     return KeyRad.rgb * vis * (core * 1.6 + halo * mix(0.4, 1.0, low));
@@ -293,7 +293,8 @@ void main() {
             }
             // the light in the air in front of it (not under water: the water's own light there)
             vec3 dirB = normalize((InvViewRot * vec4(viewRay(texCoord, nearDepth), 0.0)).xyz);
-            if (!atlasEyeInWater()) radiance += airBeams(dirB, dist) + sunGlare(dirB);
+            // (glare over geometry is a faint veil: full, it washed backlit mountains white)
+            if (!atlasEyeInWater()) radiance += airBeams(dirB, dist) + sunGlare(dirB) * 0.15;
             rgb = atlasDisplay(radiance, Look.x, Look.y);
         } else {
             // stage A: vanilla's own light curve (the lightmap: day, night, flicker, night vision, effects) and its
@@ -336,10 +337,10 @@ void main() {
     float f = clamp(linear_fog_value(min(d, edge), FogEnvironmentalStart, FogEnvironmentalEnd), 0.0, 1.0) * FogColor.a;
     vec3 dirF = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
     vec3 fogged = atlasEyeInWater() ? atlasUnderwater(ldr, d, dirF) + atlasWaterShafts(dirF, d) : mix(ldr, FogColor.rgb, f);
-    if (!atlasEyeInWater() && own) {
+    if (!atlasEyeInWater() && own) {  // (the far field: the glare a faint veil, as over near geometry)
         // the haze in front of far terrain is the sky's light too: dimmed where the terrain shadows the air
         float crF = crepuscular(dirF, d);
-        fogged = fogged * mix(1.0, crF, 1.0 - exp(-d / 5000.0)) + atlasDisplay(airBeams(dirF, d) + sunGlare(dirF), Look.x, Look.y);  // (the haze's share grows with distance)
+        fogged = fogged * mix(1.0, crF, 1.0 - exp(-d / 5000.0)) + atlasDisplay(airBeams(dirF, d) + sunGlare(dirF) * 0.15, Look.x, Look.y);  // (the haze's share grows with distance)
     }
     // (under water nothing behind is seen: partial coverage let the sky pass's sky through, a line and the world far off)
     fragColor = atlasEyeInWater() ? vec4(fogged, 1.0) : vec4(fogged * c.a, c.a);

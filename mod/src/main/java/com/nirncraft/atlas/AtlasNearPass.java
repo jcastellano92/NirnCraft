@@ -198,6 +198,7 @@ public final class AtlasNearPass {
     static void init(IEventBus modBus) {
         modBus.addListener((RegisterRenderPipelinesEvent e) -> {
             e.registerPipeline(RESOLVE);
+            e.registerPipeline(AtlasMeter.PIPELINE);
             e.registerPipeline(COMPOSITE);
             e.registerPipeline(TAA);
             e.registerPipeline(LIGHTMAP);
@@ -746,6 +747,7 @@ public final class AtlasNearPass {
 
     private static void endFrame() {
         chunks = null;
+        if (drawn && lit) AtlasMeter.meter(AtlasLook.lastLog2());  // the eye meters the finished frame
         if (lit) lightmapInOurLook();
         if (entityPushed) {
             RenderSystem.popPipelineModifier();
