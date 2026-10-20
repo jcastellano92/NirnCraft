@@ -37,7 +37,7 @@ lib.atlas_air_sky.argtypes = [ctypes.POINTER(Air), ctypes.POINTER(F), ctypes.c_v
 R_GROUND, R_TOP, H_RAYLEIGH, OZONE_PEAK, OZONE_HALF = 6360.0, 6460.0, 8.0, 25.0, 15.0
 SUN_HALF_ANGLE = 0.00465
 SUN_IRRADIANCE = np.array([11.181, 11.807, 12.854])
-NIGHT_GLOW = np.array([0.003, 0.004, 0.008])
+NIGHT_GLOW = np.array([0.0, 0.0, 0.0])  # (air.hpp: the night's glow is the sky's emitters')
 MS_SIZE, SKY_STEPS, VIEW_W, VIEW_H = 32, 24, 192, 108
 EYE_Y = 120.0
 

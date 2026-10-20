@@ -55,8 +55,11 @@ constexpr float SUN_HALF_ANGLE = 0.00465f;  // radians: the disc's share over th
 // the sun above the air, in the look's units, white-balanced: the noon key light (sun at the zenith, the default
 // air, sea level) is (3.2, 3.07, 2.88) = the look's old noon (1, 0.96, 0.9) x 3.2; times pi: an irradiance
 constexpr V3 SUN_IRRADIANCE = {11.181f, 11.807f, 12.854f};
-// the night's own sky (airglow, starlight): a floor under the moonlit air, radiance
-constexpr V3 NIGHT_GLOW = {2.0e-8f, 2.6e-8f, 5.0e-8f};
+// the night's own sky (airglow, starlight, the aurora): not the air's any more but the sky's emitters (the mod's
+// atlas_night.glsl, at their physical levels; their light reaches the far field through atlas_set_sky_glow). Was a
+// floor of (0.0008, 0.0011, 0.0024), ~20 x the physical dark sky against the host's moon: it hid the galaxy and any
+// faint aurora and lit a moonless night a third as bright as a full moon's sky.
+constexpr V3 NIGHT_GLOW = {0.0f, 0.0f, 0.0f};
 constexpr float SEA_LEVEL_Y = 63.0f;  // world y of the air's ground
 constexpr int MS_SIZE = 32;           // the multiple-scattering LUT: MS_SIZE x MS_SIZE (sun zenith x altitude)
 constexpr int SKY_STEPS = 24;         // a sky ray (quadratic spacing)

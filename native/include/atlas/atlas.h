@@ -38,7 +38,7 @@ extern "C" {
    nearInfoTex / dstNearLight; every new field is read only when the frame sets the flag, so a 0.14 caller's smaller
    structs stay valid); 0.16 the air (AtlasAir, atlas_set_air, atlas_air_*: a physical sky, sun and haze) and the
    near field's textures (atlas_set_material_textures); 0.17 the near field from atlas's own primary rays
-   (ATLAS_FRAME_PRIMARY_NEAR / _LIT) over the GPU-built level-0 grid. */
+   (ATLAS_FRAME_PRIMARY_NEAR / _LIT) over the GPU-built level-0 grid, and the sky's own light (atlas_set_sky_glow). */
 #define ATLAS_ABI_VERSION 0x001100
 
 typedef struct AtlasContext AtlasContext;
@@ -526,6 +526,15 @@ ATLAS_API AtlasStatus atlas_air_from_climate(const AtlasClimate* climate, AtlasA
 /* The air the context's frames are drawn in (from the next frame). Builds the multiple-scattering LUT (~10 ms on all
    threads): set it when the air changes, not every frame. Not called: atlas_air_defaults. */
 ATLAS_API AtlasStatus atlas_set_air(AtlasContext* ctx, const AtlasAir* air);
+/*
+ * (abi 0.17) The sky's own light: what the host's sky emits besides the air's scattering (NirnCraft's unified sky,
+ * atlas_night.glsl: the aurora, the airglow, the stars and the galaxy, the second moon as a fill, meteors), integrated
+ * by the host each frame, added to the air's sky light the far field lights with (skyAmbient): up[3] to the sky's
+ * radiance over the horizon (an upward face's irradiance over pi, as atlas_air_light's [6..8]), ground[3] to the
+ * ground's radiance under it ([9..11]). Set it every frame it changes (a meteor's flash, the aurora's surges); zeros,
+ * the default: the air's light alone.
+ */
+ATLAS_API AtlasStatus atlas_set_sky_glow(AtlasContext* ctx, const float up[3], const float ground[3]);
 /*
  * Context-free (any thread; the LUT of the last air asked for is cached): the light the far field lights with, for the
  * host's own shading of what it draws (entities, translucents): at world height eyeY (blocks) for the sun direction

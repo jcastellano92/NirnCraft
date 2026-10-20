@@ -362,12 +362,22 @@ public final class AtlasClient {
             if (sun[1] < 0f && mc.level != null) {  // night: the pack's moon, not a fixed one (both fields alike)
                 float[] key = com.nirncraft.atmosphere.client.LunarKey.compute(mc.level, sun, sunPathRotationDeg,
                         state.worldPartialTicks);
+                // (moonless: a token light, not none: the core takes none for its old fixed moonlight)
+                for (int i = 3; i < 6; i++) key[i] = Math.max(key[i], 1e-9f);
                 try {
                     ctx.setMoon(new float[] {key[0], key[1], key[2]}, new float[] {key[3], key[4], key[5]});
                     AtlasAir.moon(new float[] {key[0], key[1], key[2]}, new float[] {key[3], key[4], key[5]});
                 } catch (RuntimeException e) {
                     com.nirncraft.NirnCraft.LOGGER.debug("atlas: moon not set: {}", e.toString());
                 }
+            }
+            // the sky's own light (the unified sky's emitters: the aurora, the airglow, the stars, the fill moon, meteors)
+            // in the far field's sky light, as the near pass has it (AtlasLook.light)
+            float[] glow = AtlasSky.nightLight();
+            try {
+                ctx.setSkyGlow(new float[] {glow[0], glow[1], glow[2]}, new float[] {glow[3], glow[4], glow[5]});
+            } catch (RuntimeException e) {
+                com.nirncraft.NirnCraft.LOGGER.debug("atlas: sky glow not set: {}", e.toString());
             }
             frame.lodBias = quality.lodBias();  // > 1: coarser levels sooner with distance (far detail goes first)
             if (AtlasNearPass.owns()) {
@@ -821,6 +831,11 @@ public final class AtlasClient {
      * The eye's adapted log2 exposure (AtlasMeter, from the finished frame: a bright town, the moon, twilight close the
      * eye; a dark forest opens it), or NaN when atlas's look is not metering. What the stars' visibility follows.
      */
+    /** Whether this frame's sky is the unified one (AtlasSky: every layer in one sky; NirnCraft's mesh sky steps aside). */
+    public static boolean unifiedSky() {
+        return AtlasSky.owns(Minecraft.getInstance());
+    }
+
     /** Whether the sky's layers should go into the reflection cube this frame (atlas lights the near pass). */
     public static boolean wantsSkyCube() {
         return AtlasNearPass.litThisFrame() || AtlasNearPass.owns();

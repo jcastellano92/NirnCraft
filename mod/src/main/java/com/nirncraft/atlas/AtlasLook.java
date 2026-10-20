@@ -98,7 +98,13 @@ final class AtlasLook {
     static float[] light(Minecraft mc) {
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
         float[] air = AtlasAir.light(sun, eyeY(mc));
-        return air != null ? air : legacyLight(sun);
+        if (air == null) return legacyLight(sun);
+        // the sky's own light (AtlasSky.nightLight: the aurora, the airglow, the stars, the fill moon, meteors) over the
+        // air's: an aurora night tints the snow, a fireball flashes
+        float[] o = air.clone();
+        float[] glow = AtlasSky.nightLight();
+        for (int i = 0; i < 6; i++) o[6 + i] += glow[i];
+        return o;
     }
 
     private static float eyeY(Minecraft mc) {

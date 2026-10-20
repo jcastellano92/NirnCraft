@@ -167,6 +167,8 @@ struct AtlasContext {
     // the night key light (atlas_set_moon)
     float moonDir[3] = {0, 1, 0}, moonRad[3] = {0, 0, 0};
     bool moonSet = false;
+    // the sky's own light (atlas_set_sky_glow), added to the air's sky light
+    float glowUp[3] = {0, 0, 0}, glowGround[3] = {0, 0, 0};
     // the host path's near depths with its sky marked all-sky (FRAME_FILL_NEAR)
     std::vector<float> nearDepthHost;
     // the host's primary-ray jitter in pixels (atlas_set_jitter)
@@ -895,8 +897,8 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
                 s.moonE[i] = me[i];
             }
         }
-        put(g.airSkyUp, s.up, 0.0f);
-        put(g.airGround, s.ground, 0.0f);
+        put(g.airSkyUp, s.up + air::V3{ctx->glowUp[0], ctx->glowUp[1], ctx->glowUp[2]}, 0.0f);
+        put(g.airGround, s.ground + air::V3{ctx->glowGround[0], ctx->glowGround[1], ctx->glowGround[2]}, 0.0f);
     }
     g.jitter[0] = f->width > 0 ? ctx->jitter[0] * 2.0f / float(f->width) : 0.0f;
     g.jitter[1] = f->height > 0 ? ctx->jitter[1] * 2.0f / float(f->height) : 0.0f;
@@ -1237,6 +1239,16 @@ ATLAS_API AtlasStatus atlas_set_moon(AtlasContext* ctx, const float dir[3], cons
         ctx->moonRad[i] = std::isfinite(radiance[i]) ? std::max(0.0f, radiance[i]) : 0.0f;
     }
     ctx->moonSet = ctx->moonRad[0] + ctx->moonRad[1] + ctx->moonRad[2] > 0.0f;
+    return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_set_sky_glow(AtlasContext* ctx, const float up[3], const float ground[3]) {
+    if (!ctx || !up || !ground) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    for (int i = 0; i < 3; i++) {
+        ctx->glowUp[i] = std::isfinite(up[i]) ? std::max(0.0f, up[i]) : 0.0f;
+        ctx->glowGround[i] = std::isfinite(ground[i]) ? std::max(0.0f, ground[i]) : 0.0f;
+    }
     return ATLAS_OK;
 }
 
