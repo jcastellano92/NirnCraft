@@ -137,6 +137,11 @@ The full checklist from R1, every item checked live; the owner flies it.
   Milestone review (10 scenes, ours vs vanilla, Haiku): no defects at High Hrothgar and Winterhold; the horizon is
   crisp where vanilla fogs it (LOOK_HAZE x2.5 since); far hill tops read brown in places (medium-low, open); lamp glow a
   little weaker at night (low); far fields missing right after a teleport were capture timing, not the renderer.
+  Underground live (after the merge of atlas-underground): a carved test tunnel under Falkreath with sunlit shafts:
+  atlas's traced light reaches the pit and fades along the tunnel; the resolve's sky-light cap dropped for traced
+  light (it took 81 % in a tunnel's first 48 blocks); chunks vanilla re-meshes are read again, so a shaft cut after
+  load lights the floor within 5 s. Arrival frames: our light untraced (mode 2) while atlas streams a new place (they
+  had switched to vanilla's look); shadows still come and go during those seconds (open).
   Still open: terrain in water reflections, shadows on forward-lit things, eye exposure from the frame, the aurora over
   our night sky, OIT, caves (agent), far life (R5), scale (R6).
 - **R2 stage B live (2026-10-20, 2002d7db, 70f3dae9).** Falkreath, live A/B against vanilla: one light near and far
