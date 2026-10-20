@@ -437,6 +437,8 @@ public final class AtlasClient {
             io.dstDepth = targets.depthId();
             io.dstSunMap = targets.sunId();
             if (firstFrame && guard != null) guard.firstFrames();  // a driver crash from here on is the guard's case
+            // the images pre-exposed with this frame's eye (the resolve divides it out at once, in full precision)
+            preExposure = ctx.setPreExposure(AtlasLook.frame(mc)[0]) ? AtlasLook.frame(mc)[0] : 1f;
             ctx.glRender(frame, io);
             farThisFrame = true;
             nearLitThisFrame = nearLit;
@@ -819,6 +821,13 @@ public final class AtlasClient {
     /** Whether the sky's layers should go into the reflection cube this frame (atlas lights the near pass). */
     public static boolean wantsSkyCube() {
         return AtlasNearPass.litThisFrame() || AtlasNearPass.owns();
+    }
+
+    private static float preExposure = 1f;
+
+    /** The exposure atlas's GL images were written with this frame (1: physical). */
+    static float preExposure() {
+        return preExposure;
     }
 
     public static float eyeExposureLog2() {

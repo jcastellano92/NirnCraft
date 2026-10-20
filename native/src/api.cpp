@@ -139,6 +139,7 @@ struct AtlasContext {
     std::vector<uint32_t> weather;  // near field, near dyn, far field, far dyn (128*128 each)
     std::vector<uint32_t> cloudNoise = std::vector<uint32_t>(64 * 64 * 64, 0);
     float rainFactor = 0;
+    float preExposure = 1.0f;  // atlas_set_pre_exposure
     std::vector<AtlasActor> actors;
     Lights lights;
     std::unique_ptr<PreviewSource> preview;
@@ -728,6 +729,7 @@ ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f,
     FrameInputs in{};
     AtlasStatus st = buildInputs(ctx, f, in);
     if (st != ATLAS_OK) return st;
+    in.preExposure = ctx->preExposure;
     GlFrameIO g;
     if (io) {
         g.nearDepthTex = io->nearDepthTex;
@@ -1209,6 +1211,13 @@ ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t firs
     ctx->world.setShapes(first, v);
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_set_pre_exposure(AtlasContext* ctx, float exposure) {
+    if (!ctx || !(exposure > 0.0f) || !std::isfinite(exposure)) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    ctx->preExposure = exposure;
+    return ATLAS_OK;
 }
 
 ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t first, const uint32_t* textures,

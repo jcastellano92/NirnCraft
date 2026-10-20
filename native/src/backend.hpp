@@ -34,6 +34,7 @@ struct FrameInputs {
     bool wantNearDepth = false;               // caller asked for the near-depth skip (GL path: shared image)
     const uint32_t* nearInfo = nullptr;       // host path: w*h near-field surface info, RGBA8 (FRAME_NEAR_LIGHT)
     std::vector<ActorGpu> actors;             // at least one element (count in frame.weatherParams[3])
+    float preExposure = 1.0f;                 // (abi 0.16) the host's exposure, applied when the half-float images are written
 };
 
 struct FrameTargets {

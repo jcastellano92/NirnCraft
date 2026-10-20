@@ -211,6 +211,7 @@ vec3 nearLightFiltered(vec2 uv, vec4 nl, vec3 n, float depth) {
         for (int i = -2; i <= 2; i++) {
             vec2 o = vec2(float(i), float(j));
             vec4 q = texture(Sampler6, uv + o * texel);
+            q.rgb /= Ground.w;  // (pre-exposed: back to physical, in full precision)
             vec2 g = uv + o * gtexel;
             float d = texture(Sampler3, g).r;
             if (d <= 0.0) continue;
@@ -287,6 +288,8 @@ void main() {
             if (traced) {
                 vec4 nl = texture(Sampler6, texCoord);
                 vec4 aerial = texture(Sampler4, texCoord);
+                nl.rgb /= Ground.w;  // (atlas's images pre-exposed: back to physical, in full precision)
+                aerial.rgb /= Ground.w;
                 // atlas's frame a few frames behind the camera (the CPU backend, Look.w): a texel it did not light is
                 // the sky or far terrain of that frame, not this surface's air: no haze rather than black or a ghost
                 if (Look.w > 0.5 && dot(nl.rgb, vec3(1.0)) < 1e-6) aerial = vec4(0.0, 0.0, 0.0, 1.0);
@@ -318,6 +321,7 @@ void main() {
         return;
     }
     vec4 c = texture(Sampler4, texCoord);
+    c.rgb /= Ground.w;  // (pre-exposed)
     float d = texture(Sampler5, texCoord).r;
     if (c.a <= 0.002 || d > 1e29) {
         if (atlasEyeInWater()) {

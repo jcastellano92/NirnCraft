@@ -193,7 +193,7 @@ bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP || b ==
 constexpr int IMG_COLOR = 0, IMG_NORMAL = 1, IMG_DEPTH = 2, IMG_NEAR = 3, IMG_NEAR_INFO = 4, IMG_NEAR_LIGHT = 5,
               IMAGES = 6;
 // push constants of the publish and ingest passes: width, height, and whether the near light / info rides along
-constexpr uint32_t PASS_PUSH_BYTES = 12;
+constexpr uint32_t PASS_PUSH_BYTES = 16;  // width, height, nearLight, pre-exposure (float bits)
 
 // The GL compute pass that writes the shared nearDepth / nearInfo images: gl_near.hpp (both backends' GL paths). Same
 // bottom-up rows as GL; the Vulkan ingest pass flips them for the far kernel.
@@ -733,7 +733,8 @@ public:
 
         begin(s);
         imageBarriers(s.cmd, true);
-        uint32_t pcv[3] = {w, h, nearLight ? 1u : 0u};
+        uint32_t pcv[4] = {w, h, nearLight ? 1u : 0u, 0u};
+        std::memcpy(&pcv[3], &in.preExposure, 4);
         if (nearOn) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestPipe_);
             vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestLayout_, 0, 1, &s.ingestSet, 0, nullptr);
@@ -780,7 +781,7 @@ public:
     // zero-copy would), copied into the slot's host buffer, and uploaded with glTextureSubImage2D. By default the
     // CPU waits for this frame's GPU work (no added latency); ATLAS_HOSTCOPY_LATENCY=1 uploads the previous
     // frame instead, so the CPU never waits but the far field lags one frame behind the camera.
-    bool hostCopyFrame(Slot& s, const FrameInputs&, const FrameGpu& frame, const GlFrameIO* io, bool nearLight,
+    bool hostCopyFrame(Slot& s, const FrameInputs& in, const FrameGpu& frame, const GlFrameIO* io, bool nearLight,
                        double* gpuMs, std::string& err) {
         uint32_t w = width_, h = height_;
         size_t px = size_t(w) * h;
@@ -792,7 +793,8 @@ public:
         hostImageBarrier(s.cmd, true);
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0);
         computeBarrier(s.cmd);
-        uint32_t pcv[3] = {w, h, nearLight ? 1u : 0u};
+        uint32_t pcv[4] = {w, h, nearLight ? 1u : 0u, 0u};
+        std::memcpy(&pcv[3], &in.preExposure, 4);
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
         vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
         vkCmdPushConstants(s.cmd, publishLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);

@@ -21,8 +21,9 @@ vec3 atlasSkyViewDir(vec2 uv, vec3 sun) {
 }
 
 // the sky's radiance along dir from the sky-view LUT (sampled with linear filtering, repeat across u)
-vec3 atlasSky(sampler2D skyView, vec3 dir, vec3 sun) {
-    return textureLod(skyView, atlasSkyViewUv(dir, sun), 0.0).rgb;
+// the air's sky along dir from the sky-view LUT, which is written pre-exposed: divide by the exposure it carries
+vec3 atlasSky(sampler2D skyView, vec3 dir, vec3 sun, float preExposure) {
+    return textureLod(skyView, atlasSkyViewUv(dir, sun), 0.0).rgb / preExposure;
 }
 
 #endif

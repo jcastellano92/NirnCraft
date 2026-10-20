@@ -6,6 +6,7 @@ struct PublishParams {
     uint width;
     uint height;
     uint nearLight;  // 1: publish the near light too (FRAME_NEAR_LIGHT, abi 0.15)
+    float preExposure;  // (abi 0.16) radiance and irradiance scaled by the host's exposure (half precision's range)
 };
 
 [[vk::push_constant]] ConstantBuffer<PublishParams> pc;
@@ -29,12 +30,13 @@ void publishMain(uint3 id : SV_DispatchThreadID) {
     uint i = id.y * pc.width + id.x;
     // GL textures are bottom-up: row 0 of the image is the bottom of the screen
     uint2 dst = uint2(id.x, pc.height - 1 - id.y);
-    dstColor[dst] = srcColor[i];
+    float4 c = srcColor[i];
+    dstColor[dst] = float4(c.rgb * pc.preExposure, c.a);  // (a: coverage or the near field's transmittance, unscaled)
     dstNormal[dst] = unpack8(srcNormal[i]);
     dstDepth[dst] = srcDepth[i];
     // (a < 0: a pixel the half-resolution near light found under cover, atlas_far.slang nearLightMain)
     if (pc.nearLight != 0u) {
         float4 nl = srcNearLight[i];
-        dstNearLight[dst] = float4(nl.rgb, max(nl.a, 0.0));
+        dstNearLight[dst] = float4(nl.rgb * pc.preExposure, max(nl.a, 0.0));
     }
 }

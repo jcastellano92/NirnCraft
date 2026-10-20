@@ -12,7 +12,7 @@ layout(std140) uniform AirInfo {
     vec4 AirMieExt;    // aerosols' extinction; w = km of air per block
     vec4 AirOzone;     // ozone's absorption at its peak; w = the ground's albedo
     vec4 AirSun;       // xyz towards the sun; w = the eye's altitude, km
-    vec4 AirMoon;      // xyz towards the moon
+    vec4 AirMoon;      // xyz towards the moon; w the exposure the sky-view LUT is written with (half precision)
     vec4 AirMoonE;     // the moon's irradiance above the air (0 by day)
 };
 uniform sampler2D AirMs;  // the multiple-scattering LUT, 32 x 32 (u: sun zenith cosine, v: sqrt(altitude / 100 km))

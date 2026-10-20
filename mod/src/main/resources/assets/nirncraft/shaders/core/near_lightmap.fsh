@@ -25,6 +25,7 @@ void main() {
         float found = 0.0;
         for (int i = 0; i < 5; i++) {
             vec4 q = texture(Sampler6, vec2(0.3 + 0.1 * float(i), 0.12));
+            q.rgb /= Ground.w;  // (pre-exposed)
             if (dot(q.rgb, vec3(1.0)) > 1e-6) {
                 near += q.rgb;
                 found += 1.0;

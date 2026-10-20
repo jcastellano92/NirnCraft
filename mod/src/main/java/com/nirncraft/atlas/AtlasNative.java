@@ -139,7 +139,7 @@ public final class AtlasNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, setShapes, setTextures, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, setShapes, setTextures, setPreExposure, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
     // abi 0.10 (null with a 0.9 library)
     private final MethodHandle memoryInfo, setClipmap, debugFault;
@@ -221,6 +221,7 @@ public final class AtlasNative {
         setJitter = bindOptional(l, lib, "atlas_set_jitter", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT, JAVA_FLOAT));
         setShapes = bindOptional(l, lib, "atlas_set_material_shapes", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         setTextures = bindOptional(l, lib, "atlas_set_material_textures", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
+        setPreExposure = bindOptional(l, lib, "atlas_set_pre_exposure", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT));
         uploadStructures3 = bindOptional(l, lib, "atlas_upload_column_structures3",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT));
         setAir = bindOptional(l, lib, "atlas_set_air", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
@@ -723,6 +724,20 @@ public final class AtlasNative {
                         for (int k = 0; k < 256; k++) m.set(JAVA_INT, per * i + 4L * (f * 256 + k), t[f][k]);
                 }
                 check((int) setTextures.invokeExact(ptr, first, m, textures.length), "atlas_set_material_textures");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * (abi 0.16, optional) The exposure the GL images are written with (radiance and irradiance x this: physical
+         * light within half precision); false when the core does not take it (the images then physical, exposure 1).
+         */
+        public boolean setPreExposure(float exposure) {
+            if (setPreExposure == null) return false;
+            try {
+                check((int) setPreExposure.invokeExact(ptr, exposure), "atlas_set_pre_exposure");
                 return true;
             } catch (Throwable t) {
                 throw rethrow(t);

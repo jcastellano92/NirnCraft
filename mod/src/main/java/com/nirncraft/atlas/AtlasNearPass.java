@@ -383,6 +383,7 @@ public final class AtlasNearPass {
     }
 
     private static void takeSections() {
+        AtlasLook.beginFrame(Minecraft.getInstance());
         owned = false;
         drawn = false;
         int ji = (jitterIndex++ & 7) + 1;  // 8 Halton (2, 3) offsets
@@ -592,7 +593,7 @@ public final class AtlasNearPass {
                     .putVec4(k[6], k[7], k[8], 0f)
                     // w: 1 where a special medium blinds the eye (lava, powder snow, blindness, darkness: vanilla's fog
                     // values stand in for its density), 0 otherwise: the distance haze is the air's alone
-                    .putVec4(k[9], k[10], k[11], specialFog(mc, camState))
+                    .putVec4(k[9], k[10], k[11], AtlasClient.preExposure())  // w: the exposure atlas's images carry
                     .putVec4(sun[0], sun[1], sun[2], seconds)
                     .putVec4(still[0], still[1], still[2], still[3])
                     .putVec4(flow[0], flow[1], flow[2], flow[3])

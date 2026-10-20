@@ -20,7 +20,7 @@ void main() {
     vec4 p = InvViewProj * vec4(texCoord * 2.0 - 1.0, 0.5, 1.0);
     vec3 dir = normalize(p.xyz / p.w);
     vec3 sun = normalize(Sun.xyz);
-    vec3 c = atlasSky(SkyView, dir, sun);
+    vec3 c = atlasSky(SkyView, dir, sun, Look.x);
     // the sun's disc. High up its glare (near_resolve's sunGlare) swallows it: a bright blob. Low down the long air
     // path dims it until its edge shows, crisp, darker at the rim (limb darkening), flattened by the air's refraction
     // (the lower limb lifted more than the upper), and looking larger against the horizon (the eye's horizon illusion: a

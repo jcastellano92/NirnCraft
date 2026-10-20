@@ -552,6 +552,13 @@ typedef struct AtlasMaterialShape {
  */
 ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t first, const uint32_t* textures,
                                                   uint32_t count);
+/*
+ * (abi 0.16) Pre-exposure: the GL path's half-float images (colour: radiance and the near field's inscatter; the near
+ * light's irradiance) are written multiplied by this (the host's exposure for the coming frame), so physical light
+ * spanning sunlight to starlight stays within half precision; transmittances, depths and the near light's visibility
+ * are not scaled. 1 by default (the images in physical units, as before). The host displays them with exposure 1.
+ */
+ATLAS_API AtlasStatus atlas_set_pre_exposure(AtlasContext* ctx, float exposure);
 ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t first, const AtlasMaterialShape* shapes,
                                                 uint32_t count);
 /*

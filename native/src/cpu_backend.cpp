@@ -620,11 +620,12 @@ private:
                 size_t from = size_t(y) * w, to = size_t(h - 1 - y) * w;
                 const float* c = targets_.color.data() + from * 4;
                 uint16_t* dc = r.color.data() + to * 4;
-                for (size_t k = 0; k < size_t(w) * 4; k++) dc[k] = toHalf(c[k]);
+                const float e = j.in.preExposure;
+                for (size_t k = 0; k < size_t(w) * 4; k++) dc[k] = toHalf((k & 3) == 3 ? c[k] : c[k] * e);
                 if (r.nearLit) {
                     const float* l = targets_.nearLight.data() + from * 4;
                     uint16_t* dl = r.nearLight.data() + to * 4;
-                    for (size_t k = 0; k < size_t(w) * 4; k++) dl[k] = toHalf(l[k]);
+                    for (size_t k = 0; k < size_t(w) * 4; k++) dl[k] = toHalf((k & 3) == 3 ? l[k] : l[k] * e);
                 }
                 std::memcpy(r.normal.data() + to, targets_.normal.data() + from, size_t(w) * 4);
                 std::memcpy(r.depth.data() + to, targets_.depth.data() + from, size_t(w) * 4);
