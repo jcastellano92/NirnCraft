@@ -130,7 +130,7 @@ struct PackedScene {
     // the groups (shaders/atlas_groups.slang), uint4 aligned: a header (the material shape table's word offset, the
     // shapes' uint4 offset, the table's length), the shapes (SHAPE_UINT4 each), the table (material -> shape + 1), then
     // per region its nodes, brick columns, slots and bricks (RegionGpu.groups)
-    std::vector<uint32_t> groups;
+    std::vector<uint32_t> groups = std::vector<uint32_t>(4, 0u);  // (at least the header: the kernels read it always)
     LodGpu lods[MAX_LODS] = {};
     int lodCount = 0;
     uint64_t revision = 0;
@@ -152,6 +152,19 @@ public:
 
     void putTile(std::unique_ptr<Tile> t);
     void putSection(int sx, int sy, int sz, const uint16_t* mats);
+    // the real sections of columns [sx0, sx1) x [sz0, sz1) (the GPU's level-0 grid, voxgrid.hpp, re-reads them when
+    // its window moves); and one section's ids (false: none)
+    void sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const;
+    bool sectionMats(int sx, int sy, int sz, uint16_t out[4096]) const;
+    // The GPU's level-0 grid (voxgrid.hpp) owns level 0 (ATLAS_VOXGRID_LEVEL0=1): a section it holds (inside its window)
+    // no longer rebuilds its level-0 region on the CPU (the grid is rebuilt on the GPU; the region stays as it was, the
+    // fallback past the grid). setGridWindow (the grid's window moved: x, z origin and size in sections) rebuilds the
+    // regions skipped so whose sections the window has left. Levels 1-4 are rebuilt as before.
+    std::atomic<bool> gridOwnsLevel0{false};
+    void setGridWindow(int ox, int oz, int d);  // (no lock: the skipped regions are looked at by the next update)
+    // sectionsIn, or false without waiting when an update holds the world's lock (the render thread's grid)
+    bool trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const;
+    size_t gridSkippedCount() const;
     // the palette's material classes (for the sections' generated levels); set when the palette changes
     void setClasses(std::vector<uint8_t> cls);
     void markSectionDirty(int sx, int sy, int sz);  // caller holds mu_
@@ -253,6 +266,16 @@ private:
     std::atomic<size_t> lastPending_{0};
     std::atomic<int> lastHidden_{0};  // wanted regions the last update found behind the horizon
     std::unordered_set<Key3, Key3Hash> treeDirty_;  // regions whose groups only are out of date (levels 5+: sections)
+    // (gridOwnsLevel0) level-0 regions whose sections changed while the grid held them, and the grid's window
+    std::unordered_set<Key3, Key3Hash> gridSkipped_;
+    std::atomic<int> gridOx_{0}, gridOz_{0}, gridD_{0};
+    std::atomic<bool> gridMoved_{false};
+    void gridWindowMoved();  // (mu_ held) the skipped regions the window left, dirty
+    bool gridHolds(int sx, int sz) const {
+        int d = gridD_.load(std::memory_order_relaxed), ox = gridOx_.load(std::memory_order_relaxed),
+            oz = gridOz_.load(std::memory_order_relaxed);
+        return d > 0 && sx >= ox && sx < ox + d && sz >= oz && sz < oz + d;
+    }
     mutable std::mutex snapMu_;
     std::shared_ptr<const PackedScene> packed_ = std::make_shared<PackedScene>();
     int lastCentre_[MAX_LODS][2] = {};

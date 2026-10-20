@@ -1609,7 +1609,9 @@ static void testGroups() {
             if (hx > 0.3 && hx < 7.7 && hz > 0.3 && hz < 7.7) {  // the slabs: top at 100.5
                 slabWorst = std::max(slabWorst, std::abs(dGrp[i] - 39.5 * len));
                 slabs++;
-                CHECK(std::abs(dOld[i] - 39.0 * len) < 0.02);  // the voxel path: a full block
+                // the other path: level 0 from the GPU-built grid (voxgrid.hpp), which draws the shapes too (the SVDAG
+                // level 0 alone drew a full block)
+                CHECK(std::abs(dOld[i] - 39.5 * len) < 0.02);
             } else if (hx < -0.3 && (hz < -0.3 || hz > 0.3)) {  // the ground, both paths
                 groundWorst = std::max(groundWorst, double(std::abs(dGrp[i] - dOld[i])));
                 ground++;

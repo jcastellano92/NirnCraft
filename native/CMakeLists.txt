@@ -121,6 +121,24 @@ add_custom_command(
   COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_ingest.spv -DOUT=${GEN}/atlas_ingest_spv.h -DNAME=atlas_ingest_spv
           -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
   DEPENDS "${GEN}/atlas_ingest.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+# the level-0 grid's build kernels (atlas_voxgrid.slang): one SPIR-V module per entry point
+set(VG_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_voxgrid.slang")
+set(VG_HEADERS "")
+foreach(pair "section:vgSectionMain" "satx:vgSatX" "satz:vgSatZ" "saty:vgSatY" "grow:vgGrowMain")
+  string(REPLACE ":" ";" kv "${pair}")
+  list(GET kv 0 short)
+  list(GET kv 1 entry)
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_vg_${short}.spv"
+    COMMAND "${SLANGC}" "${VG_SRC}" -target spirv -entry ${entry} -stage compute -O3 -o "${GEN}/atlas_vg_${short}.spv"
+    DEPENDS "${VG_SRC}" COMMENT "slangc atlas_voxgrid:${entry} -> SPIR-V")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_vg_${short}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_vg_${short}.spv -DOUT=${GEN}/atlas_vg_${short}_spv.h -DNAME=atlas_vg_${short}_spv
+            -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_vg_${short}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND VG_HEADERS "${GEN}/atlas_vg_${short}_spv.h")
+endforeach()
 add_custom_command(
   OUTPUT "${GEN}/atlas_far_cpu.cpp"
   COMMAND "${SLANGC}" "${KERNEL_SRC}" -target cpp -entry farMain -stage compute -entry cloudMain -stage compute -entry sunMapMain -stage compute -O3
@@ -129,10 +147,10 @@ add_custom_command(
 
 add_library(atlas_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/groups.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
-  src/gl_api.cpp src/lights.cpp
+  src/gl_api.cpp src/lights.cpp src/voxgrid.cpp
   "${GEN}/atlas_far_cpu.cpp" "${GEN}/atlas_far_spv.h" "${GEN}/atlas_publish_spv.h" "${GEN}/atlas_ingest_spv.h"
   "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h" "${GEN}/atlas_nearlight_spv.h" "${GEN}/atlas_nearup_spv.h"
-  "${GEN}/atlas_neartemporal_spv.h")
+  "${GEN}/atlas_neartemporal_spv.h" ${VG_HEADERS})
 target_include_directories(atlas_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${ATLAS_VK_INCLUDE}")
 target_compile_definitions(atlas_core PRIVATE ATLAS_BUILD ATLAS_VERSION_STRING="${PROJECT_VERSION}" VK_NO_PROTOTYPES)
 target_link_libraries(atlas_core PRIVATE ${ATLAS_GL_LIBS} Threads::Threads)
