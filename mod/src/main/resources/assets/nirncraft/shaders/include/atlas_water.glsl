@@ -126,6 +126,12 @@ vec3 atlasWaterShafts(vec3 dir, float dist) {
 // faint tint. dist: how far the light comes from (at least the way out of the shape: atlasInsideChord).
 vec3 atlasInside(vec3 rgb, float dist) {
     if (InsideMin.w <= 0.0) return rgb;
+    if (InsideMax.w < 0.5) {
+        // inside rock or earth: nothing past it at all, the block's own dark close round the eye. Shown as is (display
+        // values: the eye's adaptation must not open the dark up into a grey that shows shapes): its colour faintly
+        // where the way out is short (the face just in front), black deeper in
+        return InsideTint.rgb * 0.06 * exp(-2.5 * dist);
+    }
     float T = exp(-InsideMin.w * dist);
     // the little light in there: the sky's and the key light's, a share for the kind (rock: almost none)
     float share = InsideMax.w < 0.5 ? 0.004 : InsideMax.w < 1.5 ? 0.25 : 0.6;

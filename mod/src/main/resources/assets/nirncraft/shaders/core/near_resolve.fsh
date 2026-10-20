@@ -279,6 +279,11 @@ void unifiedMain() {
     vec4 c = texture(Sampler4, texCoord);
     float z = texture(Sampler5, texCoord).r;
     vec3 dirU = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
+    if (InsideMin.w > 0.0 && InsideMax.w < 0.5) {  // the eye inside rock or earth: its dark, nothing else
+        fragColor = vec4(atlasInside(vec3(0.0), atlasInsideChord(dirU)), 1.0);
+        gl_FragDepth = 1.0;  // (nearest: nothing drawn after is seen through it)
+        return;
+    }
     if (c.a <= 0.002) {
         if (atlasEyeInWater()) {  // nothing along this ray under water: the water as far as it goes
             fragColor = vec4(atlasUnderwater(vec3(0.0), 1e4, dirU), 1.0);
@@ -286,8 +291,9 @@ void unifiedMain() {
             return;
         }
         if (InsideMin.w > 0.0) {  // inside a block: the sky behind it only through it (premultiplied over the sky pass)
-            float a = 1.0 - exp(-InsideMin.w * atlasInsideChord(dirU));
-            fragColor = vec4(atlasInside(vec3(0.0), 1e4) * a, a);
+            float ch = atlasInsideChord(dirU);
+            float a = InsideMax.w < 0.5 ? 1.0 : 1.0 - exp(-InsideMin.w * ch);
+            fragColor = vec4(atlasInside(vec3(0.0), InsideMax.w < 0.5 ? ch : 1e4) * a, a);
             gl_FragDepth = 0.0;
             return;
         }

@@ -19,6 +19,20 @@ how the aurora fades going south) and **when** (time of night, day of year, the 
 - Each moon's light lights the land in its own colour (the brighter is the key light, the other a fill).
 - **Eclipses**: the moons can pass in front of the sun several times a year ("Vampire Days"): real occultation geometry,
   the land darkening, the corona and a ring of light round the occulting disc.
+- **Eclipses by place (the owner, 2026-10-20).** Real umbra and penumbra footprints moving across Tamriel: totality
+  only in the path, a partial eclipse elsewhere by how much of the sun is covered from that exact spot. The lead-up
+  dims slowly with strange sharp light (crescent sun images in leaf light). The umbra's edge sweeps over the land
+  (the far field darkens per position), with shadow bands; in totality a 360-degree twilight ring on the horizon from
+  the air lit outside the shadow, stars and planets out, mountains beyond the shadow still glowing.
+  **Secunda** is the beautiful one, like Earth's: just covering the sun, so Baily's beads, the diamond ring, the
+  chromosphere's flash, prominences, a pearly inner corona with streamers and plumes; short totality, a narrow path
+  (annular "ring of fire" eclipses where its distance is far). **Masser** is the alien one: a vast black disc, only
+  the outer corona as a thin rim and long faint rays, many minutes of near-night over a huge swath, a deep red-violet
+  horizon ring. The corona is Magnus's light from Aetherius: brighter, larger and more colourful than Earth's, slowly
+  alive, still through the same physical light, air and eye.
+- **Lunar events.** Lunar eclipses (a moon in Nirn's shadow turning copper-red), one moon passing in front of the other
+  as both move on their orbits, Secunda's shadow crossing Masser's face, Nirnshine on the crescents, conjunctions,
+  double-full nights; all from continuous orbital geometry, every phase and the Khajiit phase pairings.
 - **The Dark Moon** (the Hidden or Ghost Moon, Lorkhaj's corpse): seen only in a **dark eclipse**, when Masser and
   Secunda both cover the sun: a third, dark disc revealed by the corona's rim around it. Rare.
 - **Necromancer's Moon** (the Revenant): a small dark body that eclipses the planet Arkay every eight days, Arkay's light

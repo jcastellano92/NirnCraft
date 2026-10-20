@@ -889,7 +889,9 @@ public final class AtlasClient {
     public static String debugInfo() {
         var c = ctx;
         String core = c != null ? c.info() : "no context";
-        return AtlasClientSections.state() + " " + AtlasEditsClient.state() + " core=" + core;
+        String frame = c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f fps=%d unified=%b} ",
+                c.stats().frameMs(), Minecraft.getInstance().getFps(), AtlasNearPass.unified()) : "";
+        return frame + AtlasClientSections.state() + " " + AtlasEditsClient.state() + " core=" + core;
     }
 
     private static void jitter(AtlasNative.Context ctx, boolean on) {

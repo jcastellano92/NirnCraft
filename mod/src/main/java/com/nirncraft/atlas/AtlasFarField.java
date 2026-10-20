@@ -314,7 +314,8 @@ final class AtlasFarField implements AutoCloseable {
                 if (ovS != null) {
                     // a share of the pass; most of it while the chunks around the eye are not up yet: until they are,
                     // the near light traces the tiles' stand-ins (solid houses a block too wide: sunlit walls black)
-                    long share = AtlasClientSections.coversEye(x, z) ? 40_000_000L : 400_000_000L;
+                    // (uploads are cheap now, ~0.05 ms a section, never behind a build: the feed gets the pass's time)
+                    long share = AtlasClientSections.coversEye(x, z) ? 150_000_000L : 400_000_000L;
                     sectionsApplied = ovS.applySections(ctx, System.nanoTime() + share);
                     overlaid |= sectionsApplied > 0;
                 }
@@ -392,8 +393,12 @@ final class AtlasFarField implements AutoCloseable {
 
     /** Build time per update: each update publishes what it built (coarse regions first), so a view resolves. */
     static final double UPDATE_BUDGET_MS = 40;
-    /** How long one pass keeps building before the worker goes on to tiles and overlays (the rest: next pass). */
-    static final long PROGRESSIVE_PASS_MS = 1500;
+    /**
+     * How long one pass keeps calling update before the worker goes on (sections, tiles, overlays). The core builds on
+     * its own threads now (atlas_update queues work and takes in what finished): waiting here for pending to reach 0
+     * only spun (1.5 s twice a pass while 1,900 read chunks waited); a short slice publishes what is done and moves on.
+     */
+    static final long PROGRESSIVE_PASS_MS = 60;
 
     /**
      * Builds what the window wants in short budgeted updates, each published as it finishes (the native side builds

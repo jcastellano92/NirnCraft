@@ -261,12 +261,14 @@ def _live_actions(lines, timeout=180, cancel=False):
         if c.get("error", "").startswith("client disconnected"):  # lost the world mid-step: say why, at once
             raise RuntimeError(c["error"])
         p = c.get("progress")
-        if watch.stalled_for(p, time.monotonic()) > STALL_S:  # busy but nothing moves: say what, at once
+        if not cancel and watch.stalled_for(p, time.monotonic()) > STALL_S:  # busy but nothing moves: say what, at once
             raise RuntimeError(f"client stalled: no progress for {STALL_S} s on {c.get('lastAction')!r} "
                                f"(queued {c.get('queued')}, settling {c.get('settling')}, command {c.get('commandPending')}, "
                                f"progress {p})")
         age = heartbeat_age(c, GAME / "nirncraft-live-status.json")
-        if age > HEARTBEAT_STALE:  # the client writes its status every second, loading screens included
+        # (a close: the client stops writing its status while it shuts down and saves the world; it is not a hang
+        # while the process is still on its way out; the deadline still bounds it)
+        if age > HEARTBEAT_STALE and not cancel:  # the client writes its status every second, loading screens included
             alive = bool(processes())
             raise RuntimeError(f"client stopped responding: heartbeat {age:.0f} s old (screen {c.get('screen')}, "
                                f"process {'alive' if alive else 'gone'})")
