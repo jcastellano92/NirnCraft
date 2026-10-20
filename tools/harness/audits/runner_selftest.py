@@ -316,6 +316,16 @@ expect(len(_pc) == 1 and _pc[0]["id"] == "t-posecheck" and _pc[0]["setup"] == ["
        and _pc[0]["cleanup"] == ["fog-off off"] and "frames" not in _pc[0] and _pc[0]["tags"] == ["suite:poses"],
        "a pose check keeps the pose, drops the exports and frames, and has its own id")
 
+# --- a vetted scene exports only after its pose passed the review (not for every candidate pose) -------------------
+_vs = {"id": "t", "tier": "live", "vet_pose": "a view", "pose": {"place": "whiterun", "height": 4, "yaw": 0, "pitch": 0},
+       "setup": ["fog-off on", "atlaslab here t 48 12 40"], "cleanup": ["atlaslab view t-view 1024 light", "fog-off off"],
+       "tags": []}
+_cl = catalog.capture_actions(_vs, "tag")
+expect(not any(l.startswith("atlaslab") for l in _cl) and "capture tag" in _cl,
+       "a vetted scene's capture sequence carries no exports")
+expect(catalog.deferred_exports(_vs) == ["atlaslab here t 48 12 40", "atlaslab view t-view 1024 light"],
+       "its exports wait for the pose review, in their order")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth

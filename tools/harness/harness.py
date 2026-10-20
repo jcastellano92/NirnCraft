@@ -650,6 +650,11 @@ class Runner:
                     cand += 1
                 except (ValueError, RuntimeError):  # no further candidate, or it is inside blocks: keep the verdict
                     break
+        heavy = catalog.deferred_exports(s)
+        if heavy and (vet or {}).get("verdict") != "USELESS":  # the exports, once the pose is worth them
+            g.actions(heavy, timeout=s.get("timeout", 1800))
+        elif heavy:
+            say(f"  {s['id']} [{v}]: no useful pose: its exports skipped")
         self.pos = s.get("_xz") or self.pos
         extra = {"camera": cand} if p.get("shot") or cand else {}
         if perf:

@@ -808,7 +808,17 @@ def capture_actions(s, tag, plan=None):
     lines = _capture_actions(s, tag, plan)
     if s.get("settle") == "static":
         lines = [l + " static" if l.startswith("settle-visual ") and not l.endswith(" static") else l for l in lines]
+    if deferred_exports(s):  # a vetted scene exports only once its pose passed the review (deferred_exports)
+        lines = [l for l in lines if not l.startswith(POSE_HEAVY)]
     return lines
+
+
+def deferred_exports(s):
+    """A vetted scene's exports, run after its capture passed the pose review (they were run for every candidate pose,
+    a useless one included: minutes each, with the camera facing a wall), from where the capture was taken."""
+    if not s.get("vet_pose") or s.get("frames"):
+        return []
+    return [l for l in list(s.get("setup", [])) + list(s.get("cleanup", [])) if l.startswith(POSE_HEAVY)]
 
 
 def _capture_actions(s, tag, plan=None):
