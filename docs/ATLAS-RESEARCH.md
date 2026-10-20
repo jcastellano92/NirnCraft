@@ -127,3 +127,87 @@ Teardown went fixed point).
 | 8 | Prefiltered aggregate appearance per node | Nanite Voxels [V]; ABSDF [V]; SGGX [K] |
 | 9 | Hashed sparse world probes (or DDGI on iGPU) plus MegaLights-style fixed-budget direct light; check licensing | arXiv 2607.20384; MegaLights [V] |
 | 10 | Server-secret layer for ores and loot; deterministic generation for anything hashed | Bedrock [V]; Teardown [V] |
+
+# Survey 2 (2026-10-19): deterministic generation, log compaction, information-leak anti-cheat, hash-tree sync
+
+## Deterministic, order-independent generation
+
+- Counter-based RNGs: Philox and Threefry (Salmon et al. SC11, [Random123](https://www.thesalmons.org/john/random123)),
+  Squares (Widynski, [arXiv 2004.06278](https://arxiv.org/abs/2004.06278v6)) [V]: rng(seed, stage, x, z, i) is a pure
+  function, so order and threads cannot matter.
+- Minecraft's `random_spread` structure placement is one attempt per grid cell ([docs](https://learn.microsoft.com/en-us/minecraft/creator/reference/content/worldgenreference/examples/jigsawstructuresets)) [V]:
+  the coarse-cell pattern.
+- Minecraft's order dependence: MC-55596 (chunks differ by generation order, unresolved), MC-272481 (one RNG shared,
+  Won't Fix), MC-241546 [V]; decoration reads and writes a 3x3 neighbourhood "that may or may not be populated"
+  ([LimitedRegion](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/generator/LimitedRegion.html)) [V].
+- Java/Bedrock parity (1.18): terrain and biomes match, decoration and structures do not [V]: pure density functions
+  port, decoration does not.
+- Far terrain from noise without chunks exists for Distant Horizons (Turbo, Tellus fast LOD) [V].
+- Floating point: Java strict since 17 ([JEP 306](https://openjdk.org/jeps/306)) [V] but `Math` transcendentals may
+  differ by 1 ulp per platform (`StrictMath` is reproducible) [V/K]; GCC contracts FMA by default, Clang 14 too [V];
+  SPIR-V `NoContraction` stops fusing, Vulkan allows sin/cos error 2^-11 [V]: integer or fixed point is the only path
+  to GPU = CPU bit for bit.
+- Design: integer arithmetic for every discrete outcome (Philox-4x32 or Squares keyed by seed, generator version and
+  stage; hashed-lattice noise with fixed-point gradients; floats only in cosmetic client-only layers); a stage DAG
+  (geography cells, heightfield, carvers, feature anchors per cell with a declared footprint, rasterise in a canonical
+  order), features never read rasterised blocks (they ask the heightfield); large sites planned as data; every stage
+  `sample(x, z, lod)`; a harness gate: the same region in shuffled orders, 1 and N threads, x86 and ARM, two JVMs,
+  hashes compared. Pitfalls: Math transcendentals, HashMap iteration order, parallel reductions, a shared RNG, injected
+  vanilla or mod features, a 1-ulp difference crossing a threshold.
+
+## Compacting change logs into state
+
+- Event-sourcing snapshots ([Kurrent](https://kurrentdb.kurrent.io/blog/snapshots-in-event-sourcing/)), LSM compaction
+  (RocksDB write amplification 20-30x, space ~1.1x) [V], Git delta chains (depth 50, max 4095) [V], SQLite WAL
+  checkpoints (a long reader starves them) [V]; CRDT tombstones are not needed with an authoritative ordered log [I].
+- Games: Minecraft region files never compact [V]; Space Engineers saves an edited asteroid whole forever [V]; No Man's
+  Sky caps edits and evicts old ones (terrain regrows) [V, community]; Minecraft upgrades chunks with DataVersion and
+  DataFixerUpper, and 1.18 blends new terrain to old chunk borders [V].
+- Design: per region {generator version, base root, edit layer, log tail, checkpoint sequence, state root}; the edit
+  layer holds absolute overrides (the final state, not a delta) with the base value's hash; an edit equal to the base
+  is deleted (dig-and-refill churn stays bounded); checkpoint on N entries, B bytes or unload, then truncate once
+  every client acknowledged; generator upgrades: untouched regions regenerate, edited ones keep their frozen generator
+  or are materialised once, a blending band between; the stored base hashes flag edits that conflict with a new base.
+  Pitfalls: cosmetic churn (doors, crops) belongs in block-entity state, not the log; never evict edits.
+
+## Anti-cheat for information leaks
+
+- Paper anti-xray modes 1-3 ([docs](https://docs.papermc.io/paper/anti-xray)) [V]: hides only ores covered by solid
+  blocks; seed reversing exposes ores; Orebfuscator rewrites packets with line-of-sight checks [V].
+- Valorant Fog of War ([Riot 2020](https://www.riotgames.com/en/news/demolishing-wallhacks-valorants-fog-war)) [V]:
+  a precomputed PVS answering optimistically, the box expanded by velocity times a look-ahead over ping, missed events
+  replayed; under 2 % of server frame. (CS2 server-side occlusion: no primary Valve source found.)
+- Honeypots and decoys: Dota 2 (2023, ~40,000 banned for reading a secret client region), Call of Duty Ricochet's
+  "hallucinations" (decoys only flagged players see; "Quicksand" dropped as too jarring), Fall Guys' cheater island
+  abandoned (too few cheaters to fill matches, escapes by partying) [V, secondary]; innocent CoD players were banned by
+  signature injection [V, secondary].
+- Legal: EU DSA Article 17 wants a statement of reasons for visibility restrictions (a shadowban was held to fall under
+  it) [V, secondary]; GDPR Article 22 covers solely automated decisions [V, secondary]; no case law on deceptive game
+  data found.
+- Design: split the seed: the public seed drives geometry, a server-only key drives secrets (ores, loot, hidden rooms,
+  quest objects); clients generate placeholder stone there, the server streams the secret overlay per section once in
+  radius and in line of sight (look-ahead over ping times speed); separate hash roots (public base vs server overlay);
+  persistent decoys from the server key; the far field draws only the public layer; honeypots are a signal for human
+  review, never the sole basis of a ban; bans with a stated reason and an appeal path. Pitfalls: secrets derived from
+  the public seed; packet size and timing side channels; honeypot data inside a verified hash; small populations.
+
+## Hash-tree sync
+
+- Cassandra Merkle repair (depth 15, overstreaming, validation cost; incremental repair) [V]; rsync, IPFS [K]; Git's
+  SHA-1 to SHA-256 move (version fields had to be in the format) [V]; Merkle pitfalls (CVE-2012-2459 duplicated leaf;
+  RFC 6962 domain separation 0x00 leaves, 0x01 nodes) [V]; BLAKE3 is itself a Merkle tree [V]; Factorio uses per-tick
+  CRCs [V]; no game found using Merkle anti-entropy [V, negative result].
+- Design: a fixed spatial tree (world, region, chunk, section: one edit about 4 rehashes, batched per tick); BLAKE3
+  with domain separation, the hash and generator versions in every leaf; a canonical section encoding; base hashes as
+  pure functions of seed, version and position (lazy, cached); sync top down from region roots, sections as leaves.
+
+## Five decisions first (survey 2)
+
+1. Integer or fixed-point arithmetic and one counter RNG for every discrete generation outcome; no `Math.*` in
+   generation; the shuffled-order and cross-platform harness gate.
+2. The generation contract: stage DAG, maximum feature footprint, no stage reads rasterised neighbours; vanilla and
+   mod features wrapped into the anchor stage or disabled.
+3. The public/secret split (which content moves to a server-keyed overlay): the hardest to retrofit.
+4. Edit semantics: absolute overrides with auto-cancel, checkpoint cadence and truncation, pin or materialise on
+   generator upgrades.
+5. Hash-tree format v1: spatial shape, BLAKE3 with domain separation, canonical encoding, versions in every leaf.
