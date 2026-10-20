@@ -650,6 +650,11 @@ class Runner:
                     cand += 1
                 except (ValueError, RuntimeError):  # no further candidate, or it is inside blocks: keep the verdict
                     break
+        heavy = catalog.deferred_exports(s)
+        if heavy and (vet or {}).get("verdict") != "USELESS":  # the exports, once the pose is worth them
+            g.actions(heavy, timeout=s.get("timeout", 1800))
+        elif heavy:
+            say(f"  {s['id']} [{v}]: no useful pose: its exports skipped")
         self.pos = s.get("_xz") or self.pos
         extra = {"camera": cand} if p.get("shot") or cand else {}
         if perf:
@@ -1133,6 +1138,11 @@ def process_queue(runner, serve=False, on_item=None):
     by_id = {s["id"]: s for s in catalog.load()}
     done_now = {}
     while True:
+        try:  # the live lease's heartbeat, every item: other checkouts see this run is alive
+            import game as _g
+            _g.refresh_lease()
+        except (OSError, SystemExit):
+            pass
         if STOP.exists():  # harness.py stop: finish here, mark the rest stopped, close the client
             STOP.unlink(missing_ok=True)
             for j in pending_jobs():

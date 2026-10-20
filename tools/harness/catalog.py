@@ -530,6 +530,7 @@ def load():
     scenes += pinned.scenes()
     import loading  # how fast the far field shows a place just arrived at, and how it resolves (loading.py)
     scenes += loading.scenes()
+    scenes += pose_checks(scenes)
     seam_core(scenes)
     for s in scenes:
         if s["id"] in seen:
@@ -544,6 +545,28 @@ def load():
         s["_xz"] = position(s)
         settle_weather(s)
     return scenes
+
+
+POSE_HEAVY = ("atlaslab", "far-timeline")  # exports and timelines: what a pose check leaves out
+
+
+def pose_checks(scenes):
+    """<id>-posecheck (suite:poses) for every vetted live scene: the same pose, time and weather, one capture and the pose
+    review, without the scene's exports (a truth scene's 1 km view export is 150-200 MB and minutes; checking whether
+    five poses were good took the better part of an hour that way). Its own id: never overwrites the scene's results."""
+    out = []
+    for s in scenes:
+        if not s.get("vet_pose") or s.get("tier", "live") != "live":
+            continue
+        c = {k: v for k, v in s.items() if k not in ("frames", "loading", "after", "camera_from", "measure")}
+        c.update({"id": f"{s['id']}-posecheck", "title": f"Pose check: {s.get('title', s['id'])}",
+                  "tags": [t for t in s.get("tags", []) if not t.startswith("suite:")] + ["suite:poses"],
+                  "setup": [l for l in s.get("setup", []) if not l.startswith(POSE_HEAVY)],
+                  "cleanup": [l for l in s.get("cleanup", []) if not l.startswith(POSE_HEAVY)],
+                  "vet_pose": s["vet_pose"] if isinstance(s["vet_pose"], str) else s.get("title", s["id"]),
+                  "variants": [s.get("variants", ["vanilla"])[0]], "measure": 0, "timeout": 600})
+        out.append(c)
+    return out
 
 
 WEATHER_TAGS = ("weather:", "suite:weather", "suite:clouds", "feature:clouds", "feature:storm", "feature:weather",
@@ -785,7 +808,17 @@ def capture_actions(s, tag, plan=None):
     lines = _capture_actions(s, tag, plan)
     if s.get("settle") == "static":
         lines = [l + " static" if l.startswith("settle-visual ") and not l.endswith(" static") else l for l in lines]
+    if deferred_exports(s):  # a vetted scene exports only once its pose passed the review (deferred_exports)
+        lines = [l for l in lines if not l.startswith(POSE_HEAVY)]
     return lines
+
+
+def deferred_exports(s):
+    """A vetted scene's exports, run after its capture passed the pose review (they were run for every candidate pose,
+    a useless one included: minutes each, with the camera facing a wall), from where the capture was taken."""
+    if not s.get("vet_pose") or s.get("frames"):
+        return []
+    return [l for l in list(s.get("setup", [])) + list(s.get("cleanup", [])) if l.startswith(POSE_HEAVY)]
 
 
 def _capture_actions(s, tag, plan=None):

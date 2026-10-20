@@ -711,6 +711,7 @@ ATLAS_API AtlasStatus atlas_get_stats(AtlasContext* ctx, AtlasStats* out) {
     if (!ctx || !out) return ATLAS_ERR_ARG;
     ATLAS_TRY
     ctx->stats.regions = uint32_t(ctx->world.regionCount());
+    ctx->stats.regionsDirty = uint32_t(ctx->world.pendingCount());  // was never set (always 0)
     ctx->stats.nodeBytes = ctx->world.nodeBytes();
     ctx->stats.leafBytes = ctx->world.leafBytes();
     ctx->stats.materialBytes = ctx->world.materialBytes();
