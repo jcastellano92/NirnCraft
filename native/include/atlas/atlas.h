@@ -37,8 +37,9 @@ extern "C" {
    0.15 the near light (ATLAS_FRAME_NEAR_LIGHT: AtlasFrame.nearInfo, AtlasFrameOutput.nearLight, AtlasGlFrameIO
    nearInfoTex / dstNearLight; every new field is read only when the frame sets the flag, so a 0.14 caller's smaller
    structs stay valid); 0.16 the air (AtlasAir, atlas_set_air, atlas_air_*: a physical sky, sun and haze) and the
-   near field's textures (atlas_set_material_textures). */
-#define ATLAS_ABI_VERSION 0x001000
+   near field's textures (atlas_set_material_textures); 0.17 the near field from atlas's own primary rays
+   (ATLAS_FRAME_PRIMARY_NEAR / _LIT) over the GPU-built level-0 grid. */
+#define ATLAS_ABI_VERSION 0x001100
 
 typedef struct AtlasContext AtlasContext;
 
@@ -190,7 +191,7 @@ typedef struct AtlasFrame {
 #define ATLAS_FRAME_NEAR_LIGHT 0x20000u
 
 /*
- * (atlas-naadf, ABI 0.17 to be) The near field drawn by atlas's own primary rays (the GPU-built level-0 grid: real
+ * (abi 0.17) The near field drawn by atlas's own primary rays (the GPU-built level-0 grid: real
  * blocks, shapes, the 16 x 16 textures of atlas_set_material_textures) instead of the host's raster. Every pixel is
  * traced from the camera (AtlasFrame.nearFieldEnd is then only where near ends and far begins: no near depth is read).
  * Set with ATLAS_FRAME_NEAR_LIGHT and a near-light output (AtlasFrameOutput.nearLight, AtlasGlFrameIO.dstNearLight; the

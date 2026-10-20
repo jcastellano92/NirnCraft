@@ -349,6 +349,7 @@ public:
             }
             for (auto& b : shared_) release(b);
             release(vgSat_);
+            releaseRetired(true);
             for (auto& p : vgPipes_)
                 if (p) vkDestroyPipeline(dev_, p, nullptr);
             for (auto& m : vgShaders_)
@@ -1592,11 +1593,11 @@ private:
             }
             sunDispatchRows_ = S ? frame.sunMapRows[1] : 0;
         }
+        releaseRetired(false);
         if (!stageVoxGrid(s, in, err)) return false;
         if (!shared_[B_TEX].buf || (in.textures && in.texturesRevision != texRevision_)) {
-            // a new texture set (rare: the host sets them once a session): nothing in flight may read the old one
-            for (auto& o : slots_)
-                if (!waitSlot(o, nullptr, err)) return false;
+            // a new texture set: into a new buffer; frames in flight keep the old one until they are done (no wait)
+            retire(shared_[B_TEX]);
             static const uint32_t none = 0u;
             const uint32_t* src = in.textures && !in.textures->empty() ? in.textures->data() : &none;
             size_t n = in.textures && !in.textures->empty() ? in.textures->size() : 1;
@@ -1748,6 +1749,8 @@ private:
         t.lastSections = vgLastSections_;
         t.lastJobs = vgLastJobs_;
         t.lastStates = vgLastStates_;
+        t.stageCpuMs = vgStageMs_;
+        t.stageCpuMaxMs = vgStageMaxMs_;
         return t;
     }
 
@@ -1779,6 +1782,13 @@ private:
     // Takes the grid's next batch (prepare: the slot was waited) into the slot's host buffers; recordVoxGrid records
     // the copies and kernels. The far set binds the grid's buffers always (16-byte stand-ins until there is a grid).
     bool stageVoxGrid(Slot& s, const FrameInputs& in, std::string& err) {
+        auto c0 = std::chrono::steady_clock::now();
+        bool ok = stageVoxGridTimed(s, in, err);
+        vgStageMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - c0).count();
+        vgStageMaxMs_ = std::max(vgStageMaxMs_, vgStageMs_);
+        return ok;
+    }
+    bool stageVoxGridTimed(Slot& s, const FrameInputs& in, std::string& err) {
         s.vgCopies.clear();
         s.vgJobCount = 0;
         s.vgClear = s.vgStates = s.vgTimed = false;
@@ -1788,19 +1798,18 @@ private:
         if (g && g->active()) {
             static const int budget = [] {
                 const char* e = std::getenv("ATLAS_VOXGRID_BUDGET");  // sections built a frame at most
-                return e ? std::max(1, std::atoi(e)) : 512;  // (8 KiB each: a 4 MiB copy a frame at most)
+                return e ? std::max(1, std::atoi(e)) : 256;  // (8 KiB each: a 2 MiB copy a frame at most, ~0.2 ms)
             }();
             b = g->take(budget);
         }
         bool work = b.clear || !b.jobs.empty();
         bool fresh = false;
         if (!shared_[B_VG_CHUNKS].buf || (work && (vgD_ != uint32_t(g->D) || vgH_ != uint32_t(g->H) || vgCap_ != g->slotCap))) {
-            for (auto& o : slots_)
-                if (!waitSlot(o, nullptr, err)) return false;
+            // (frames in flight keep the old ones until they are done: no wait on the render thread)
             uint32_t D = work ? uint32_t(g->D) : 0, H = work ? uint32_t(g->H) : 0, cap = work ? g->slotCap : 0;
             VkDeviceSize nC = VkDeviceSize(D) * H * D;
-            for (uint32_t i = B_VG_CHUNKS; i <= B_VG_POOL; i++) release(shared_[i]);
-            release(vgSat_);
+            for (uint32_t i = B_VG_CHUNKS; i <= B_VG_POOL; i++) retire(shared_[i]);
+            retire(vgSat_);
             if (!ensure(shared_[B_VG_CHUNKS], nC * 4, false, Mem::DeviceOnly, err) ||
                 !ensure(shared_[B_VG_BLOCKS], VkDeviceSize(cap) * 64 * 4, false, Mem::DeviceOnly, err) ||
                 !ensure(shared_[B_VG_BITS], VkDeviceSize(cap) * 64 * 8, false, Mem::DeviceOnly, err) ||
@@ -1813,10 +1822,12 @@ private:
             fresh = work;  // garbage until cleared
         }
         if (!work) return true;
-        size_t dataBytes = b.data.size() * 4, jobBytes = b.jobs.size() * sizeof(VgJob);
+        constexpr size_t SECTION_BYTES = size_t(VG_SECTION_WORDS) * 4;
+        size_t dataBytes = b.secs.size() * SECTION_BYTES, jobBytes = b.jobs.size() * sizeof(VgJob);
         if (!ensure(s.vgStage, dataBytes, false, Mem::Staging, err) || !ensure(s.vgJobs, jobBytes, false, Mem::HostWrite, err))
             return false;
-        if (dataBytes) std::memcpy(s.vgStage.map, b.data.data(), dataBytes);
+        for (size_t k = 0; k < b.secs.size(); k++)
+            std::memcpy(static_cast<char*>(s.vgStage.map) + k * SECTION_BYTES, b.secs[k]->data(), SECTION_BYTES);
         if (jobBytes) std::memcpy(s.vgJobs.map, b.jobs.data(), jobBytes);
         constexpr VkDeviceSize SEC = VkDeviceSize(VG_SECTION_WORDS) * 4;
         for (const VgJob& j : b.jobs)
@@ -2290,6 +2301,29 @@ private:
         attached_ = false;
     }
 
+    // A buffer frames already submitted may still read: freed once the last of them is done (releaseRetired, at each
+    // frame's prepare), never waited for
+    struct RetiredBuf {
+        Buf b;
+        uint64_t frame;
+    };
+    std::vector<RetiredBuf> retired_;
+    void retire(Buf& b) {
+        if (b.buf) retired_.push_back({b, frameCounter_});
+        b = {};
+    }
+    void releaseRetired(bool all) {
+        for (size_t i = 0; i < retired_.size();) {
+            if (all || retired_[i].frame <= completedFrame_.load()) {
+                release(retired_[i].b);
+                retired_[i] = retired_.back();
+                retired_.pop_back();
+            } else {
+                i++;
+            }
+        }
+    }
+
     void release(Buf& b) {
         if (b.map) vkUnmapMemory(dev_, b.mem);
         if (b.buf) vkDestroyBuffer(dev_, b.buf, nullptr);
@@ -2493,6 +2527,7 @@ private:
     Buf vgSat_;
     uint32_t vgD_ = 0, vgH_ = 0, vgCap_ = 0;
     uint64_t texRevision_ = ~0ull;
+    double vgStageMs_ = 0, vgStageMaxMs_ = 0;
     double vgLastMs_ = 0, vgMsTotal_ = 0;
     uint32_t vgLastSections_ = 0, vgLastJobs_ = 0;
     bool vgLastStates_ = false;

@@ -621,8 +621,14 @@ int main(int argc, char** argv) {
             atlas_get_stats(ctx, &st);
             AtlasFrameOutput none{color.data(), normal.data(), depth.data(), linear.data()};
             int frames2 = 0;
-            for (; frames2 < 256 && voxgridPending(ctx) > 0; frames2++)
+            std::string stageMs;  // the render thread's share of each frame's grid batch (atlas_info voxgrid stageCpuMs)
+            for (; frames2 < 256 && voxgridPending(ctx) > 0; frames2++) {
                 if (atlas_render(ctx, &f, &none) != ATLAS_OK) return 4;
+                std::string inf = atlas_info(ctx);
+                auto sp = inf.find("\"stageCpuMs\":");
+                if (sp != std::string::npos) stageMs += (stageMs.empty() ? "" : " ") + inf.substr(sp + 13, inf.find(',', sp) - sp - 13);
+            }
+            std::fprintf(stderr, "reupload: grid staging ms per frame: %s\n", stageMs.c_str());
             std::string info = atlas_info(ctx);
             auto vg = info.find("\"totalGpuMs\":");
             std::printf("{\"reupload\":{\"sections\":%zu,\"uploadMs\":%.1f,\"cpuUpdateMs\":%.1f,\"buildMs\":%.1f,\"gridFrames\":%d,%s}}\n", n,

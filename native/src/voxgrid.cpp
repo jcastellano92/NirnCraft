@@ -92,14 +92,21 @@ VgBatch VoxGrid::take(int maxSections) {
     b.ox = ox_;
     b.oz = oz_;
     clearPending_ = false;
-    // nearest the camera first (columns, then height: a teleport's own chunks before the ring around it)
+    // nearest the camera first (columns, then height: a teleport's own chunks before the ring around it); only the
+    // batch's share is put in order (a window's thousands of sections wait their turn unsorted)
     std::vector<std::pair<int64_t, Key>> order;
     order.reserve(pending_.size());
     for (auto& [k, v] : pending_) {
         int64_t dx = k.x - camSx_, dz = k.z - camSz_;
         order.push_back({(dx * dx + dz * dz) * 64 + (k.y - VG_MIN_SY), k});
     }
-    std::sort(order.begin(), order.end(), [](const auto& a, const auto& c) { return a.first < c.first; });
+    auto byDist = [](const auto& a, const auto& c) { return a.first < c.first; };
+    size_t share = std::min(order.size(), size_t(std::max(maxSections, 1)) * 2);
+    if (share < order.size()) {
+        std::nth_element(order.begin(), order.begin() + ptrdiff_t(share), order.end(), byDist);
+        order.resize(share);
+    }
+    std::sort(order.begin(), order.end(), byDist);
     std::unordered_map<uint32_t, size_t> jobAt;  // one job per chunk per batch (the GPU builds them in parallel)
     auto emit = [&](uint32_t chunk, uint32_t word, uint32_t slot, uint32_t data) {
         uint8_t st = uint8_t(word & 3u);
@@ -145,10 +152,8 @@ VgBatch VoxGrid::take(int maxSections) {
             if (slot == ~0u) {
                 emit(c, VG_UNLOADED, ~0u, 0);  // the pool is full: the SVDAG levels answer here
             } else {
-                uint32_t at = uint32_t(b.data.size() / VG_SECTION_WORDS);
-                b.data.resize(b.data.size() + VG_SECTION_WORDS);
-                // two ids a word, the first low: the ids' own little-endian bytes
-                std::memcpy(b.data.data() + size_t(at) * VG_SECTION_WORDS, m.data(), sizeof m);
+                uint32_t at = uint32_t(b.secs.size());
+                b.secs.push_back(it->second);  // (shared: the backend copies it once, into its staging)
                 emit(c, slot << 2 | VG_MIXED, slot, at);
                 built++;
             }
@@ -249,7 +254,7 @@ void VoxGrid::applyCpu(const VgBatch& b) {
             blocks.resize((s + 1) * 64);
             bits.resize((s + 1) * 64);
         }
-        std::copy_n(b.data.begin() + ptrdiff_t(j.data) * VG_SECTION_WORDS, VG_SECTION_WORDS, pool.begin() + ptrdiff_t(s * VG_SECTION_WORDS));
+        std::memcpy(pool.data() + s * VG_SECTION_WORDS, b.secs[j.data]->data(), VG_SECTION_WORDS * 4);
         const uint32_t* w = pool.data() + s * VG_SECTION_WORDS;
         uint64_t mask = 0;
         uint64_t bb[64];
