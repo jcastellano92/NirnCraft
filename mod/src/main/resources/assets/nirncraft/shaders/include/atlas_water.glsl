@@ -121,7 +121,34 @@ vec3 atlasWaterShafts(vec3 dir, float dist) {
 // The other media the eye can be in, ours (AtlasNearPass.medium): Medium.x its extinction a block (0: the air), yzw its
 // own light (lava's glow), y < 0 lit white by the sky and the sun (powder snow); blindness and darkness black. Exponential,
 // coloured, lit: no vanilla fog.
+// The eye inside a block (clipping into it): nothing past it is seen through it. Solid rock and earth close dark
+// with depth (the way through the block's shape: the farther out, the darker), leaves a thick dappled volume, glass a
+// faint tint. dist: how far the light comes from (at least the way out of the shape: atlasInsideChord).
+vec3 atlasInside(vec3 rgb, float dist) {
+    if (InsideMin.w <= 0.0) return rgb;
+    float T = exp(-InsideMin.w * dist);
+    // the little light in there: the sky's and the key light's, a share for the kind (rock: almost none)
+    float share = InsideMax.w < 0.5 ? 0.004 : InsideMax.w < 1.5 ? 0.25 : 0.6;
+    vec3 own = InsideTint.rgb * (SkyUp.rgb + KeyRad.rgb * max(KeyDir.y, 0.0) * 0.3) * share;
+    return rgb * T + atlasDisplay(own, Look.x, Look.y) * (1.0 - T);
+}
+
+// the way out of the eye's block along camera-relative dir (blocks); foliage dappled by leaf (gaps and clusters)
+float atlasInsideChord(vec3 dir) {
+    if (InsideMin.w <= 0.0) return 0.0;
+    vec3 inv = 1.0 / max(abs(dir), vec3(1e-5)) * sign(dir + 1e-9);
+    vec3 t = max(InsideMin.xyz * inv, InsideMax.xyz * inv);  // (the eye is inside: the exit planes)
+    float chord = max(min(t.x, min(t.y, t.z)), 0.0);
+    if (InsideMax.w > 0.5 && InsideMax.w < 1.5) {
+        vec3 q = floor(dir * 18.0);
+        float h = fract(sin(dot(q, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
+        chord *= h < 0.35 ? 0.15 : 1.0 + 1.5 * h;  // (gaps between the leaves, clusters thick)
+    }
+    return chord;
+}
+
 vec3 atlasMedium(vec3 rgb, float dist) {
+    rgb = atlasInside(rgb, dist);
     if (Medium.x <= 0.0) return rgb;
     float T = exp(-Medium.x * dist);
     vec3 own = Medium.y < 0.0 ? (SkyUp.rgb + KeyRad.rgb * max(KeyDir.y, 0.0) * 0.4) * 0.9 : Medium.yzw;
