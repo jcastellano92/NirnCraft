@@ -214,6 +214,30 @@ where the method changes. Owning the drawing means owning the look: what vanilla
 stylised terrain is a rendering choice; smooth collision would change the server's world and is a later experiment).
 A research survey of games and papers grounds the plan before the build.
 
+#### Everything a frame draws (owner: "it also needs entities, particles, arrows... what else?")
+
+Taking terrain from vanilla means everything else in the frame must still sit in it correctly. First step: our
+renderer draws terrain and writes depth; vanilla keeps drawing the rest into the same frame, tested per item; we take
+an item over only where vanilla's version cannot match (light, shadows, distance). Simulation (spawns, AI,
+collision, projectiles' flight, picking) stays on the server and vanilla's client logic: rendering does not touch it.
+
+| group | items | what owning terrain requires |
+|---|---|---|
+| terrain | opaque, cutout (leaves, plants), translucent (water, glass, ice), animated fluids and textures (fire, lava, portals), biome tints, emissive blocks, falling blocks and moving pistons | ours |
+| block entities | chests opening, signs and their text, banners, beds, skulls, lecterns, bells, campfire items, enchanting books, beacon beams, end portals, shulkers, pots | vanilla draws them; depth and light must match ours |
+| entities | mobs, players (skins, armour, held items, capes, name tags), our creatures and NPCs, items on the ground, XP, arrows, tridents, other projectiles, boats, carts, paintings, item frames, armour stands, leads, fishing lines, lightning, fireworks, display entities | vanilla near, lit from our light and hidden by our depth; far players, creatures, ships and lights: ours (impostors, interest-driven) |
+| particles | breaking, splashes, smoke, torches, portals, potions, crits, explosions, our spells | vanilla, sorted against our water and glass |
+| interaction | block outline, breaking cracks, placement, hitboxes, F3 and chunk borders | over our depth (cracks need our surface) |
+| first person and screen | hand and held item, maps, spyglass, pumpkin, underwater, lava, powder snow and fire overlays, nausea, blindness, darkness, damage tilt, FOV, bobbing, third person, spectator | vanilla; underwater and in-fluid fog from our fog |
+| sky and air | sky, sun, moon, stars, clouds, fog, rain, snow, lightning flashes, world border | ours already in part; weather later |
+| light | block and sky light, smooth light and AO, held lights, entity and particle light, shadows both ways (entities on terrain, terrain on entities) | one light for all |
+| dimensions | Nether, End, our realms (Apocrypha, Sovngarde): no sky light, other skies and fog | ours, per dimension |
+| compatibility | Iris shader packs, other mods' block and entity renderers, brightness, render distance settings, screenshots | to check one by one |
+
+Things that rely on vanilla's terrain drawing without being drawing: entity culling (vanilla culls by its chunk
+visibility graph; without its sections, entities need our visibility), map items (map colours), and what counts as
+"loaded" for the render distance setting.
+
 Order: deterministic generation with a test (client-generated vs server-real per chunk), then the client-generated far
 field with the hash tree and the change log, then interest-driven live state, then the near field.
 
