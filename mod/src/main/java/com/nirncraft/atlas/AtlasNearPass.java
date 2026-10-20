@@ -72,6 +72,17 @@ public final class AtlasNearPass {
             id("near_forward"));
     static final ResourceKey<PipelineModifier> ENTITY = ResourceKey.create(PipelineModifier.MODIFIERS_KEY,
             id("near_entity"));
+    static final ResourceKey<PipelineModifier> SHADOW = ResourceKey.create(PipelineModifier.MODIFIERS_KEY,
+            id("near_shadow"));
+    private static final BindGroupLayout SHADOW_MAP = BindGroupLayout.builder()
+            .withUniform("ShadowMap", UniformType.COMBINED_IMAGE_SAMPLER).build();
+    static final int SHADOW_SIZE = 2048;
+    static final float SHADOW_HALF = 96f;    // blocks each side of the camera
+    static final float SHADOW_DEPTH = 256f;  // blocks before and behind it along the light
+    private static TextureTarget shadow;
+    private static final Matrix4f shadowMat = new Matrix4f().zero();
+    private static boolean shadowDrawn;
+    private static net.minecraft.client.renderer.MappableRingBuffer shadowProjUbo;
     private static final Identifier VANILLA_ENTITY = Identifier.withDefaultNamespace("core/entity");
     private static final Identifier VANILLA_PARTICLE = Identifier.withDefaultNamespace("core/particle");
     private static boolean entityPushed;  // the entity modifier is on the stack (from the resolve to AfterLevel)
@@ -147,6 +158,7 @@ public final class AtlasNearPass {
             .withFragmentShader(id("core/near_lightmap"))
             .withBindGroupLayout(NEAR_INFO)
             .withBindGroupLayout(NEAR_LIGHT)
+            .withBindGroupLayout(SHADOW_MAP)  // (atlas_light.glsl declares it; unused here)
             .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
             .withCull(false)
             .withDepthStencilState(Optional.empty())
@@ -191,6 +203,7 @@ public final class AtlasNearPass {
             e.register(GBUFFER, AtlasNearPass::gbufferPipeline);
             e.register(FORWARD, AtlasNearPass::forwardPipeline);
             e.register(ENTITY, AtlasNearPass::entityPipeline);
+            e.register(SHADOW, AtlasNearPass::shadowPipeline);
         });
         NeoForge.EVENT_BUS.addListener((RenderFrameEvent.Pre e) -> AtlasGuard.run(FEATURE, AtlasNearPass::takeSections));
         NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterSky e) -> AtlasGuard.run(FEATURE,
@@ -222,6 +235,7 @@ public final class AtlasNearPass {
                 .withFragmentShader(id("core/near_forward"))
                 .withBindGroupLayout(NEAR_INFO)
                 .withBindGroupLayout(SCENE)
+                .withBindGroupLayout(SHADOW_MAP)
                 .build();
     }
 
@@ -239,6 +253,7 @@ public final class AtlasNearPass {
                 .withVertexShader(id(ours))
                 .withFragmentShader(id(ours))
                 .withBindGroupLayout(NEAR_INFO)
+                .withBindGroupLayout(SHADOW_MAP)
                 .build();
     }
 
@@ -259,6 +274,75 @@ public final class AtlasNearPass {
     /** Atlas lit this frame (one light near and far): what draws after in our look (NirnCraft's clouds give way). */
     public static boolean litThisFrame() {
         return lit;
+    }
+
+    /** Vanilla's opaque terrain pipelines as the shadow map's: our vertex shader, depth only (cutout keeps its holes). */
+    private static RenderPipeline shadowPipeline(RenderPipeline p, Identifier name) {
+        if (!OPAQUE.contains(p.getLocation())) return p;
+        return p.toBuilder()
+                .withLocation(name)
+                .withVertexShader(id("core/near_gbuffer"))
+                .withFragmentShader(id("core/near_shadow"))
+                .withUnusedColorTargetState(0)
+                .build();
+    }
+
+    /**
+     * The key light's shadow map of the near terrain (what entities, water and particles are shaded by: the opaque
+     * terrain has atlas's traced shadows): vanilla's section meshes once more, seen from the light in an orthographic
+     * box SHADOW_HALF around the camera, snapped to whole texels so it does not shimmer as the camera moves; reverse-Z
+     * as the terrain pipelines test depth. The sections are the camera's visible ones (a caster behind the camera
+     * casts nothing yet).
+     */
+    private static void drawShadow(LevelRenderer lr, float[] keyDir) {
+        shadowDrawn = false;
+        org.joml.Vector3f L = new org.joml.Vector3f(keyDir[0], keyDir[1], keyDir[2]);
+        if (L.lengthSquared() < 1e-6f || L.y < 0.05f) return;  // the light near or under the horizon: no map
+        L.normalize();
+        org.joml.Vector3f up = Math.abs(L.y) > 0.99f ? new org.joml.Vector3f(0, 0, 1) : new org.joml.Vector3f(0, 1, 0);
+        Matrix4f view = new Matrix4f().lookAlong(-L.x, -L.y, -L.z, up.x, up.y, up.z);
+        // snap: the camera's position in light space to whole texels (the coordinates are camera-relative)
+        var cam = Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
+        org.joml.Vector3f c = view.transformDirection(new org.joml.Vector3f((float) cam.pos.x, (float) cam.pos.y, (float) cam.pos.z));
+        float texel = 2f * SHADOW_HALF / SHADOW_SIZE;
+        float ox = c.x - (float) Math.floor(c.x / texel) * texel, oy = c.y - (float) Math.floor(c.y / texel) * texel;
+        Matrix4f snapped = new Matrix4f().translation(ox, oy, 0).mul(view);
+        // reverse-Z orthographic: nearest the light -> 1, farthest -> 0
+        Matrix4f ortho = new Matrix4f().setOrtho(-SHADOW_HALF, SHADOW_HALF, -SHADOW_HALF, SHADOW_HALF,
+                -SHADOW_DEPTH, SHADOW_DEPTH, true);
+        Matrix4f proj = new Matrix4f().m22(-1f).m32(1f).mul(ortho);
+        // (an RGBA8 colour target, the format vanilla's pipeline declares, which the pipeline's one colour state writes nothing to: the GL backend wants an attachment)
+        if (shadow == null) shadow = new TextureTarget("atlas near shadow", SHADOW_SIZE, SHADOW_SIZE, GpuFormat.RGBA8_UNORM, GpuFormat.D32_FLOAT);
+        if (shadowProjUbo == null) shadowProjUbo = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas shadow projection", 130, 64);
+        try (var v = shadowProjUbo.currentBuffer().map(false, true)) {
+            com.mojang.blaze3d.buffers.Std140Builder.intoBuffer(v.data()).putMat4f(proj);
+        }
+        ChunkSectionsToRender casters = lr.prepareChunkRenders(snapped, false);
+        var mc = Minecraft.getInstance();
+        var atlas = mc.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).getTextureView();
+        var desc = RenderPassDescriptor.builder(() -> "Infinite ATLAS sun shadow")
+                .withColorAttachment(shadow.getColorTextureView(), Optional.empty())
+                .withDepthAttachment(shadow.getDepthTextureView(), OptionalDouble.of(0.0))
+                .build();
+        RenderSystem.pushPipelineModifier(SHADOW);
+        try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(desc)) {
+            RenderSystem.bindDefaultUniforms(pass);
+            pass.setUniform("Projection", shadowProjUbo.currentBuffer());
+            casters.renderGroup(ChunkSectionLayerGroup.OPAQUE, pass, terrainSampler(mc), atlas, false);
+        } finally {
+            RenderSystem.popPipelineModifier();
+        }
+        shadowProjUbo.rotate();
+        shadowMat.set(proj).mul(snapped);
+        shadowDrawn = true;
+    }
+
+    /** The shadow map (or a stand-in when there is none this frame: ShadowMat zero means lit everywhere). */
+    private static void bindShadow(RenderPass pass) {
+        var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
+                FilterMode.NEAREST, FilterMode.NEAREST, false);
+        if (shadow != null) pass.setUniform("ShadowMap", shadow.getDepthTextureView(), nearest);
+        else if (gbuffer != null) pass.setUniform("ShadowMap", gbuffer.getDepthTextureView(), nearest);
     }
 
     /** True when the frame's terrain is ours (AtlasClient: read our depth, skip the fallback, resolve instead). */
@@ -333,6 +417,7 @@ public final class AtlasNearPass {
         lr.nearbyVisibleSections().addAll(nearby);
         try {
             chunks = lr.prepareChunkRenders(new Matrix4f(e.getModelViewMatrix()), true);
+            drawShadow(lr, AtlasLook.light(mc));
         } finally {
             lr.visibleSections().clear();
             lr.nearbyVisibleSections().clear();
@@ -453,7 +538,7 @@ public final class AtlasNearPass {
         // then mode 2, the same light untraced, instead of vanilla's look for that frame: a flicker on arrival)
         boolean traced = nearLight && far != null;
         lit = AtlasClient.nearLightSupported();
-        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 128);
+        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 192);
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
         float[] still = sprite(mc, "block/water_still"), flow = sprite(mc, "block/water_flow");
         float seconds = mc.level == null ? 0f : (float) ((mc.level.getGameTime() % 1_000_000L) / 20.0);
@@ -467,7 +552,8 @@ public final class AtlasNearPass {
                     .putVec4(k[9], k[10], k[11], 0f)
                     .putVec4(sun[0], sun[1], sun[2], seconds)
                     .putVec4(still[0], still[1], still[2], still[3])
-                    .putVec4(flow[0], flow[1], flow[2], flow[3]);
+                    .putVec4(flow[0], flow[1], flow[2], flow[3])
+                    .putMat4f(shadowDrawn ? shadowMat : new Matrix4f().zero());
         }
         var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
                 FilterMode.NEAREST, FilterMode.NEAREST, false);
@@ -511,6 +597,7 @@ public final class AtlasNearPass {
         // what vanilla draws next in this pass (entities, block entities, items) takes our light while we own the frame
         if (lit) {
             pass.setUniform("NearInfo", info.currentBuffer());
+            bindShadow(pass);
             RenderSystem.pushPipelineModifier(ENTITY);
             entityPushed = true;
         }
@@ -536,6 +623,7 @@ public final class AtlasNearPass {
             pass.setUniform("SceneColor", scene.getColorTextureView(), linear);
             pass.setUniform("SceneDepth", frame.getDepthTextureView(), nearest);
         }
+        bindShadow(pass);
         RenderSystem.pushPipelineModifier(FORWARD);
         try {
             chunks.renderGroup(ChunkSectionLayerGroup.TRANSLUCENT, pass, sampler, atlas, false);

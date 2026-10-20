@@ -24,6 +24,7 @@ layout(location = 1) out float cylindricalVertexDistance;
 layout(location = 2) out vec4 vertexColor;
 layout(location = 3) out vec3 worldNormal;
 layout(location = 4) out vec2 lightLevels;
+layout(location = 8) out vec3 worldPos;
 #ifndef NO_OVERLAY
 layout(location = 5) out vec4 overlayColor;
 #endif
@@ -38,6 +39,7 @@ void main() {
     cylindricalVertexDistance = fog_cylindrical_distance(Position);
     vertexColor = Color;
     worldNormal = Normal;
+    worldPos = Position;
     lightLevels = clamp(vec2(UV2) / 240.0, 0.0, 1.0);
 #if !defined(NO_OVERLAY) && !defined(OIT_ALPHA_ONLY)
     overlayColor = texelFetch(Sampler1, UV1, 0);

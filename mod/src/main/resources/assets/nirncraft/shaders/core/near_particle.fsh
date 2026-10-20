@@ -30,7 +30,7 @@ void main() {
     executeAlphaOnlyPhase(gl_FragCoord.z, color.a);
 #else
     vec3 n = normalize(vec3(0.0, 1.0, 0.0) + normalize(toCamera) * 0.6);
-    color.rgb = atlasForwardLit(color.rgb, n, lightLevels);
+    color.rgb = atlasForwardLitAt(color.rgb, n, lightLevels, -toCamera);
 #ifdef OIT_ACCUMULATE
     color = sampleColorForAccumulation(color);
     vec4 fogColor = vec4(FogColor.rgb * color.a, FogColor.a);

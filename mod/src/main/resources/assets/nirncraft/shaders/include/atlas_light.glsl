@@ -15,15 +15,33 @@ layout(std140) uniform NearInfo {
     vec4 SunDir;   // towards the sun (the sky's own; KeyDir is the moon at night), w the time in seconds
     vec4 WaterStill;  // the block atlas's water sprites (u0, v0, u1, v1): water fragments are found by their texels
     vec4 WaterFlow;
+    mat4 ShadowMat;   // camera-relative world -> the key light's shadow map (reverse-Z depth: nearer the light = larger)
 };
+uniform sampler2D ShadowMap;  // the near terrain seen from the key light (AtlasNearPass's shadow pass)
+
+// how much of the key light reaches camera-relative world position p (a little lifted along n): 4 taps of the shadow
+// map; 1 outside it (the near light's traced shadows and the far field cover farther)
+float atlasShadow(vec3 p, vec3 n) {
+    vec4 s = ShadowMat * vec4(p + n * 0.08, 1.0);
+    vec2 uv = s.xy * 0.5 + 0.5;
+    if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0))) || ShadowMat[3][3] == 0.0) return 1.0;
+    vec2 texel = 1.0 / vec2(textureSize(ShadowMap, 0));
+    float d = s.z + 0.0015;  // reverse-Z: an occluder nearer the light has the larger depth
+    float lit = 0.0;
+    lit += texture(ShadowMap, uv + vec2(-0.5, -0.5) * texel).r <= d ? 1.0 : 0.0;
+    lit += texture(ShadowMap, uv + vec2(0.5, -0.5) * texel).r <= d ? 1.0 : 0.0;
+    lit += texture(ShadowMap, uv + vec2(-0.5, 0.5) * texel).r <= d ? 1.0 : 0.0;
+    lit += texture(ShadowMap, uv + vec2(0.5, 0.5) * texel).r <= d ? 1.0 : 0.0;
+    return lit * 0.25;
+}
 
 // albedo sRGB, n world-space unit normal, lm = (block, sky) light 0..1 -> linear radiance
 // the look, as atlas_shared.slang's shadeSurfaceAmb (LOOK_AMBIENT, LOOK_BOUNCE): keep them equal
 const float LOOK_AMBIENT = 3.0;
 const float LOOK_BOUNCE = 0.25;
 
-vec3 atlasForwardRadiance(vec3 albedo, vec3 n, vec2 lm) {
-    float open = smoothstep(0.05, 0.35, lm.y);
+vec3 atlasForwardRadianceShadowed(vec3 albedo, vec3 n, vec2 lm, float keyVis) {
+    float open = smoothstep(0.05, 0.35, lm.y) * keyVis;
     float sky = lm.y * lm.y;
     vec3 direct = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * open;
     vec3 bounce = KeyRad.rgb * (max(KeyDir.y, 0.0) * LOOK_BOUNCE * (0.6 - 0.4 * n.y) * sky);
@@ -31,9 +49,18 @@ vec3 atlasForwardRadiance(vec3 albedo, vec3 n, vec2 lm) {
     return atlasSrgbToLinear(albedo) * (direct + ambient + atlasBlockLight(lm.x));
 }
 
+vec3 atlasForwardRadiance(vec3 albedo, vec3 n, vec2 lm) {
+    return atlasForwardRadianceShadowed(albedo, n, lm, 1.0);
+}
+
 // the same, displayed (sRGB)
 vec3 atlasForwardLit(vec3 albedo, vec3 n, vec2 lm) {
     return atlasDisplay(atlasForwardRadiance(albedo, n, lm), Look.x, Look.y);
+}
+
+// lit at camera-relative world position p, in the key light's shadow
+vec3 atlasForwardLitAt(vec3 albedo, vec3 n, vec2 lm, vec3 p) {
+    return atlasDisplay(atlasForwardRadianceShadowed(albedo, n, lm, atlasShadow(p, n)), Look.x, Look.y);
 }
 
 // emitters (EMISSIVE pipelines: eyes, glowing parts): full brightness through the same display

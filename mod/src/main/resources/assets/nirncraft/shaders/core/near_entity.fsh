@@ -24,6 +24,7 @@ layout(location = 1) in float cylindricalVertexDistance;
 layout(location = 2) in vec4 vertexColor;
 layout(location = 3) in vec3 worldNormal;
 layout(location = 4) in vec2 lightLevels;
+layout(location = 8) in vec3 worldPos;
 #ifndef NO_OVERLAY
 layout(location = 5) in vec4 overlayColor;
 #endif
@@ -67,7 +68,7 @@ void main() {
 #ifdef EMISSIVE
     color.rgb = atlasForwardEmissive(color.rgb);
 #else
-    color.rgb = atlasForwardLit(color.rgb, n, lightLevels);
+    color.rgb = atlasForwardLitAt(color.rgb, n, lightLevels, worldPos);
 #endif
 #ifdef GLINT
     vec4 glintColor = GlintAlpha * texture(GlintSampler, texCoordGlint);

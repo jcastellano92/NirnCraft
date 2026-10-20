@@ -88,7 +88,7 @@ void main() {
         vec3 sky = atlasSkyColor(normalize(vec3(r.x, max(r.y, 0.02), r.z)), SunDir.xyz) * (lm.y * lm.y);
         float open = smoothstep(0.05, 0.35, lm.y);
         vec3 glint = KeyRad.rgb * pow(max(dot(r, KeyDir.xyz), 0.0), 600.0) * 60.0 * open;
-        vec3 body = atlasForwardRadiance(color.rgb, n, lm);
+        vec3 body = atlasForwardRadianceShadowed(color.rgb, n, lm, atlasShadow(viewPos, n));
         // what the water mirrors: our frame where the reflected ray finds it on screen, the sky model elsewhere
         vec4 hit = screenReflection(viewPos + wn * 0.05, r);
         vec3 skyShown = atlasDisplay(sky + glint, Look.x, Look.y);
@@ -96,7 +96,7 @@ void main() {
         rgb = mix(atlasDisplay(body, Look.x, Look.y), mirrored, fresnel);
         color.a = mix(color.a, 1.0, fresnel);
     } else {
-        rgb = atlasForwardLit(color.rgb, n, lm);
+        rgb = atlasForwardLitAt(color.rgb, n, lm, viewPos);
     }
     float dist = length(viewPos);
     rgb = mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
