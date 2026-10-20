@@ -901,7 +901,7 @@ public final class AtlasClient {
         String frame = c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f glRenderWallMs=%.2f frameWallMs=%.2f fps=%d unified=%b loadedChunks=%d t=%d} ",
                 c.stats().frameMs(), glRenderMs, frameWallMs, Minecraft.getInstance().getFps(), AtlasNearPass.unified(),
                 lvl != null ? lvl.getChunkSource().getLoadedChunksCount() : -1, System.currentTimeMillis() % 1_000_000) : "";
-        return frame + AtlasClientSections.state() + " " + AtlasEditsClient.state() + " core=" + core;
+        return frame + "inside{" + AtlasNearPass.insideWhat + "} " + AtlasClientSections.state() + " " + AtlasEditsClient.state() + " core=" + core;
     }
 
     private static void jitter(AtlasNative.Context ctx, boolean on) {
