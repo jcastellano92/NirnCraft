@@ -312,6 +312,11 @@ The full checklist from R1, every item checked live; the owner flies it.
   shadows on the water, reflection falloff (the owner's photo: a dock on clear shallow water); per-biome underwater look
   (green lily pond, teal timber lake, glacial blue, tropical turquoise over white sand, tea-brown jungle, deep ocean
   blue) with long blends at biome borders; looking out of the water from just under the surface.
+- **For atlas's near shading (owner, 2026-10-20):** ambient occlusion at contacts (vanilla's baked AO is lost under our
+  sky light, and goes away with the raster: atlas must trace it, sharp at contacts, not blurred by the half-resolution
+  pass); thin plants (flowers, grass) lit as thin translucent things, from both sides and through their leaves, not flat;
+  the shore and water edge; waterfalls from the real fall height and flow (the white-water rule on side faces also hit
+  the steps between flowing water's levels: off).
 - **Atlas draws everything, GPU-built (2026-10-20, the main track).** The near field is still vanilla's chunk raster
   with atlas past the render distance: the line the owner sees, and after a teleport atlas lacks the real blocks for
   minutes (~1 chunk/s CPU feed): no tree shadows, light that does not match. The fix: sections to a GPU pool, the voxel

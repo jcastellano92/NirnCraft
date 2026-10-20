@@ -158,6 +158,12 @@ final class AtlasShapes {
      * for north and south (x, y), for west and east (z, y); v grows downwards on the side faces.
      */
     static int[] face(Direction d, List<BakedQuad> quads, int tint) {
+        return face(d, quads, tint, TILE);
+    }
+
+    /** Face d's tile at res x res texels (as face(): 4 for the shapes, 16 for the near field's textures). */
+    static int[] face(Direction d, List<BakedQuad> quads, int tint, int TILE) {
+        int sub = Math.max(1, 16 / TILE);  // samples a texel side: a 4x4 tile averages 4x4 of the 16x16 sprite
         int[] tile = new int[TILE * TILE];
         float[] depth = new float[TILE * TILE];
         java.util.Arrays.fill(depth, Float.NEGATIVE_INFINITY);
@@ -200,10 +206,10 @@ final class AtlasShapes {
                     if (ca < a0 || ca > a1 || cb < b0 || cb > b1 || dep < depth[k]) continue;
                     double sr = 0, sg = 0, sb = 0, sa = 0;
                     int n = 0;
-                    for (int sy = 0; sy < 4; sy++)
-                        for (int sx = 0; sx < 4; sx++) {
-                            float aa = (tu + (sx + 0.5f) / 4f) / TILE;
-                            float bb = d.getAxis() == Direction.Axis.Y ? (tv + (sy + 0.5f) / 4f) / TILE : 1f - (tv + (sy + 0.5f) / 4f) / TILE;
+                    for (int sy = 0; sy < sub; sy++)
+                        for (int sx = 0; sx < sub; sx++) {
+                            float aa = (tu + (sx + 0.5f) / sub) / TILE;
+                            float bb = d.getAxis() == Direction.Axis.Y ? (tv + (sy + 0.5f) / sub) / TILE : 1f - (tv + (sy + 0.5f) / sub) / TILE;
                             float s = clamp01((aa - a0) / (a1 - a0)), t = clamp01((bb - b0) / (b1 - b0));
                             float u = lerp2(pu[c00], pu[c10], pu[c01], pu[c11], s, t), v = lerp2(pv[c00], pv[c10], pv[c01], pv[c11], s, t);
                             int px = Math.min(fw - 1, Math.max(0, (int) (u * fw))), py = Math.min(fh - 1, Math.max(0, (int) (v * fh)));
@@ -228,6 +234,21 @@ final class AtlasShapes {
                 }
         }
         return tile;
+    }
+
+    /** The near field's texture size per face (atlas_set_material_textures). */
+    static final int TEX = 16;
+
+    /**
+     * A state's six faces at TEX x TEX texels (down, up, north, south, west, east; ARGB sRGB, `tint` applied to the
+     * tinted quads; the shapes' (u, v) convention), what atlas shades its near hits with; null when it has no model.
+     */
+    static int[][] textures(BlockState st, int tint) {
+        List<BakedQuad> quads = quads(st);
+        if (quads.isEmpty()) return null;
+        int[][] faces = new int[6][];
+        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(d, quads, tint, TEX);
+        return faces;
     }
 
     /** (a, b, depth along d's normal) of a block-space point for face d. */

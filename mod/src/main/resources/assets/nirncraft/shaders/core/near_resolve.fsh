@@ -181,7 +181,8 @@ void main() {
     float f = clamp(linear_fog_value(min(d, edge), FogEnvironmentalStart, FogEnvironmentalEnd), 0.0, 1.0) * FogColor.a;
     vec3 dirF = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
     vec3 fogged = atlasEyeInWater() ? atlasUnderwater(ldr, d, dirF) + atlasWaterShafts(dirF, d) : mix(ldr, FogColor.rgb, f);
-    fragColor = vec4(fogged * c.a, c.a);
+    // (under water nothing behind is seen: partial coverage let the sky pass's sky through, a line and the world far off)
+    fragColor = atlasEyeInWater() ? vec4(fogged, 1.0) : vec4(fogged * c.a, c.a);
     // its depth: the point at that distance along this pixel's ray (beyond the projection's far plane: 0)
     vec4 clip = ProjMat * vec4(normalize(viewRay(texCoord, 0.5)) * d, 1.0);
     gl_FragDepth = clamp(clip.z / clip.w, 0.0, 1.0);

@@ -37,7 +37,7 @@ extern "C" {
    0.15 the near light (ATLAS_FRAME_NEAR_LIGHT: AtlasFrame.nearInfo, AtlasFrameOutput.nearLight, AtlasGlFrameIO
    nearInfoTex / dstNearLight; every new field is read only when the frame sets the flag, so a 0.14 caller's smaller
    structs stay valid). */
-#define ATLAS_ABI_VERSION 0x000F00
+#define ATLAS_ABI_VERSION 0x001000
 
 typedef struct AtlasContext AtlasContext;
 
@@ -482,6 +482,14 @@ typedef struct AtlasMaterialShape {
     uint32_t faces[6][16];
 } AtlasMaterialShape;
 /* Sets the shapes of materials first .. first + count - 1 (first >= 1; any thread; copied). */
+/*
+ * (abi 0.16) The near field's textures: per material its six faces (down, up, north, south, west, east) at 16 x 16 ARGB
+ * texels (sRGB, tints applied), laid out as the shapes' faces at 16 x 16: (u, v) along (x, z) for down / up, (x, 15 - y)
+ * for north / south, (z, 15 - y) for west / east. `textures` holds count * 6 * 256 words, then count words: 1 where the
+ * material has textures (0: none, its face tiles stand in). Sets materials first .. first + count - 1 (first >= 1).
+ */
+ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t first, const uint32_t* textures,
+                                                  uint32_t count);
 ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t first, const AtlasMaterialShape* shapes,
                                                 uint32_t count);
 /*

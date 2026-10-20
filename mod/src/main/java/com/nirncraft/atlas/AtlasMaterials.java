@@ -39,6 +39,7 @@ final class AtlasMaterials {
     private final Map<Long, Short> exact = new HashMap<>();
     private final List<float[]> pendingExact = new ArrayList<>();
     private final List<AtlasShapes.Shape> pendingExactShapes = new ArrayList<>();
+    private final List<int[][]> pendingExactTextures = new ArrayList<>();  // their faces' 16x16 textures (near hits)
     private int nextExact = EXACT_FIRST;
 
     /** Shapes on: the materials handed out from now on carry their shapes, real sections use per-state ids. */
@@ -116,6 +117,13 @@ final class AtlasMaterials {
         if (v != null) return v;
         pendingExact.add(q >= 0 ? tintedMaterial(s, q) : material(s));
         pendingExactShapes.add(shapeOf(s, q));
+        int[][] tex;
+        try {
+            tex = AtlasShapes.textures(s, q);
+        } catch (RuntimeException e) {
+            tex = null;  // a model that cannot say: its face tiles then
+        }
+        pendingExactTextures.add(tex);
         short id = (short) nextExact++;
         exact.put(key, id);
         return id;
@@ -170,8 +178,10 @@ final class AtlasMaterials {
             int first = nextExact - pendingExact.size();
             ctx.setMaterials(first, pendingExact.toArray(new float[0][]));
             ctx.setMaterialShapes(first, pendingExactShapes.toArray(new AtlasShapes.Shape[0]));
+            ctx.setMaterialTextures(first, pendingExactTextures.toArray(new int[0][][]));
             pendingExact.clear();
             pendingExactShapes.clear();
+            pendingExactTextures.clear();
         }
     }
 

@@ -950,6 +950,24 @@ ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t firs
     ATLAS_CATCH(ctx)
 }
 
+ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t first, const uint32_t* textures,
+                                                  uint32_t count) {
+    if (!ctx || first == 0 || (!textures && count)) return ATLAS_ERR_ARG;
+    if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
+    ATLAS_TRY
+    const uint32_t* has = textures + size_t(count) * 6 * 256;
+    std::vector<std::shared_ptr<const MaterialTexture>> v(count);
+    for (uint32_t i = 0; i < count; i++) {
+        if (!has[i]) continue;
+        auto t = std::make_shared<MaterialTexture>();
+        std::memcpy(t->faces, textures + size_t(i) * 6 * 256, sizeof t->faces);
+        v[i] = std::move(t);
+    }
+    ctx->world.setTextures(first, v);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
 ATLAS_API AtlasStatus atlas_set_surface_cards(AtlasContext* ctx, const AtlasSurfaceCard* cards, uint32_t count) {
     if (!ctx || (!cards && count)) return ATLAS_ERR_ARG;
     if (count > (1u << 24)) return ctx->fail(ATLAS_ERR_ARG, "too many surface cards");

@@ -167,7 +167,8 @@ void main() {
         float dist = length(viewPos);
         vec3 v = viewPos / dist;
         float foot = dist * length(fwidth(v)) / max(abs(v.y), 0.05);  // the pixel's footprint on the level surface
-        if (abs(n.y) < 0.5) {
+        if (false && abs(n.y) < 0.5) {  // (off: it also whitened the steps between flowing water's levels; falls wait for
+            // atlas drawing water, which knows a fall's height and its flow)
             // falling water (a flow's side, a fall): white water, streaks running down, mostly opaque, lit like a
             // surface (vanilla's thin sheet over the rock was all but invisible)
             vec2 fu = vec2(dot(world.xz, vec2(-n.z, n.x)), world.y);
