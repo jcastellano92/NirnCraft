@@ -42,6 +42,37 @@ vec3 octDecode(vec2 e) {
     return normalize(n);
 }
 
+// atlas's near light with its sky part filtered: the key light (its radiance x N.L x the traced visibility atlas returns
+// in a) stays per pixel, crisp shadow edges; the rest (the sky, traced with one dithered ray a pixel, which a TAA would
+// average over frames) is averaged over 5 x 5 neighbours on the same surface (normal and depth alike), so the shade
+// is smooth instead of a stippled pattern
+vec3 nearLightFiltered(vec2 uv, vec4 nl, vec3 n, float depth) {
+    vec3 sunPart = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * nl.a;
+    vec2 texel = 1.0 / vec2(textureSize(Sampler6, 0));
+    vec2 gtexel = 1.0 / vec2(textureSize(Sampler3, 0));
+    vec3 sum = vec3(0.0);
+    float wsum = 0.0;
+    float z0 = 1.0 / max(depth, 1e-7);
+    for (int j = -2; j <= 2; j++) {
+        for (int i = -2; i <= 2; i++) {
+            vec2 o = vec2(float(i), float(j));
+            vec4 q = texture(Sampler6, uv + o * texel);
+            vec2 g = uv + o * gtexel;
+            float d = texture(Sampler3, g).r;
+            if (d <= 0.0) continue;
+            vec3 nq = octDecode(texture(Sampler1, g).ba);
+            float wn = pow(max(dot(n, nq), 0.0), 16.0);
+            float wz = exp(-abs(1.0 / d - z0) / (0.02 * z0));
+            float w = wn * wz;
+            vec3 skyQ = max(q.rgb - KeyRad.rgb * max(dot(nq, KeyDir.xyz), 0.0) * q.a, vec3(0.0));
+            sum += skyQ * w;
+            wsum += w;
+        }
+    }
+    vec3 sky = wsum > 1e-4 ? sum / wsum : max(nl.rgb - sunPart, vec3(0.0));
+    return sunPart + sky;
+}
+
 vec3 environmentalFog(vec3 rgb, float dist) {
     return mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
 }
@@ -62,7 +93,9 @@ void main() {
             vec4 nl = texture(Sampler6, texCoord);
             vec4 aerial = texture(Sampler4, texCoord);
             float open = smoothstep(0.05, 0.35, levels.g);
-            vec3 radiance = atlasSrgbToLinear(albedo) * (nl.rgb * open + atlasBlockLight(levels.r) + vec3(0.012, 0.012, 0.016));
+            vec3 n = octDecode(info.ba);
+            vec3 light = nearLightFiltered(texCoord, nl, n, nearDepth);
+            vec3 radiance = atlasSrgbToLinear(albedo) * (light * open + atlasBlockLight(levels.r) + vec3(0.012, 0.012, 0.016));
             radiance = radiance * aerial.a + aerial.rgb;
             rgb = atlasDisplay(radiance, Look.x, Look.y);
         } else {
