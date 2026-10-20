@@ -30,11 +30,12 @@ const vec3 SUN_IRRADIANCE = vec3(11.181, 11.807, 12.854);
 const vec3 NIGHT_GLOW = vec3(0.0);  // (air.hpp: the night's glow is the sky's emitters', atlas_night.glsl)
 const int MS_SIZE = 32;
 const int SKY_STEPS = 24;
-// the eclipse's geometry: the sun's angular radius (atlas_sky.fsh's disc, MoonMath.SUN_RADIUS) and the sky's geography
-// (km a world block, MoonMath.KM_PER_BLOCK): a point of the air AirMieExt.w km of air a block from the eye lies that many
-// blocks, so many km of Nirn, from it
+// the eclipse's geometry: the sun's angular radius (atlas_sky.fsh's disc, MoonMath.SUN_RADIUS), and how far over Nirn
+// (km) a km of the sky's air reaches: the air is drawn thinner than the land's geography (AirMieExt.w km of air a block,
+// 0.1 km of Nirn a block, MoonMath.KM_PER_BLOCK); its sky's paths are taken at 8 km of Nirn a km of air, so the air
+// beyond a moon's shadow lights only the lowest sky: a twilight ring round the horizon in totality, the sky above dark
 const float AIR_SUN_RADIUS = 0.0089;
-const float AIR_GEO_KM_PER_BLOCK = 0.1;
+const float AIR_GEO_PER_AIR_KM = 8.0;
 
 // The share of the sun's disc seen past the eclipse's moons from a point p km (geography) from the eye (1: no eclipse).
 // Each moon a sphere: its disc's overlap with the sun's as seen from there (the umbra and penumbra fall where they do).
@@ -60,7 +61,7 @@ float airSunShare(vec3 p) {
 // that share at a point t km of air along dir from the eye
 float airSunShareAlong(vec3 dir, float t) {
     if (AirOcculter[0].w <= 0.0 && AirOcculter[1].w <= 0.0) return 1.0;
-    return airSunShare(dir * (t / max(AirMieExt.w, 1e-6) * AIR_GEO_KM_PER_BLOCK));
+    return airSunShare(dir * (t * AIR_GEO_PER_AIR_KM));
 }
 
 float airErfcx(float y) { return 1.1283792 / (y + sqrt(y * y + 0.393 * y + 1.2732395)); }

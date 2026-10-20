@@ -64,7 +64,7 @@ public final class MoonMath {
     /** Nirn's albedo (its Nirnshine on the moons). */
     public static final double NIRN_ALBEDO = 0.30;
     /** The sunlight bent through Nirn's air into its umbra (a share of full sunlight, copper-red). */
-    public static final double UMBRA_GLOW = 0.006;
+    public static final double UMBRA_GLOW = 0.015;
     /** The Dark Moon's angular radius. */
     public static final double DARK_MOON_RADIUS = Math.toRadians(6.5);
     /** The Necromancer's Moon: its angular radius, its period (days) and the first day it covers Arkay. */

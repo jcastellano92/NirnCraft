@@ -39,8 +39,10 @@ layout(std140) uniform MoonInfo {
     vec4 NirnBody;     // Nirn's centre from the eye, w its radius (km)
 };
 
-uniform sampler2D NightMasser;          // Masser's albedo (equirectangular, gamma 2.2; masser_albedo.png)
-uniform sampler2D NightMasserRelief;    // its relief: rgb the normal (east, north, up), a the local height
+uniform sampler2D NightMasser;          // Masser's albedo (equirectangular, gamma 2.2; masser_albedo.png), a the
+                                        // detail layer's strength there (its region's roughness)
+uniform sampler2D NightMasserRelief;    // its relief: rg the normal (east, north; up follows), ba the local height
+                                        // (16 bits)
 uniform sampler2D NightMasserDetail;    // its tiling detail: rg the detail normal's slope, b albedo (0.5: x1), a height
 uniform sampler2D NightSecunda;
 uniform sampler2D NightSecundaRelief;
@@ -48,7 +50,7 @@ uniform sampler2D NightSecundaDetail;
 
 // the relief maps' height range (moon radii at a = 0 and 1: h = (a * 2 - 1) * this; moon_gen.py RELIEF)
 const float MASSER_RELIEF = 0.015;
-const float SECUNDA_RELIEF = 0.012;
+const float SECUNDA_RELIEF = 0.016;
 // the detail tiles' size (moon radii a tile; moon_gen.py DETAIL_TILE) and the second, finer octave's ratio
 const float MASSER_DETAIL_TILE = 0.0245;
 const float SECUNDA_DETAIL_TILE = 0.049;
@@ -60,7 +62,7 @@ const vec4 SECUNDA_PHOTO = vec4(0.92, 0.75, 0.05, 0.30);
 // Nirn's albedo (MoonMath.NIRN_ALBEDO): its light on the moons' night side
 const float NIRN_ALBEDO = 0.30;
 // the sunlight bent through Nirn's air into its umbra (MoonMath.UMBRA_GLOW), copper-red (luminance 1)
-const float UMBRA_GLOW = 0.006;
+const float UMBRA_GLOW = 0.015;
 const vec3 UMBRA_COLOUR = vec3(1.0, 0.30, 0.09) / 0.4442;
 // the albedo maps' mean luminance (NightSkyMath.MASSER_ALBEDO / SECUNDA_ALBEDO): a full disc's mean radiance is this
 // times its MasserUp.w
@@ -101,7 +103,30 @@ float moonSunPast(vec3 p, vec4 body, vec3 sun) {
     return 1.0 - cover * cover * (3.0 - 2.0 * cover);
 }
 
-// Triplanar detail on the unit sphere (body frame point p): rg slope, b albedo, a height, averaged over two octaves.
+// 3D value noise (smooth; the detail layer's warp)
+float moonNoise(vec3 x) {
+    vec3 i = floor(x), f = fract(x);
+    f = f * f * (3.0 - 2.0 * f);
+    float n = i.x + i.y * 157.0 + i.z * 113.0;
+    float a = mix(mix(moonHash(n), moonHash(n + 1.0), f.x), mix(moonHash(n + 157.0), moonHash(n + 158.0), f.x), f.y);
+    float b = mix(mix(moonHash(n + 113.0), moonHash(n + 114.0), f.x), mix(moonHash(n + 270.0), moonHash(n + 271.0), f.x),
+                  f.y);
+    return mix(a, b, f.z) * 2.0 - 1.0;
+}
+
+// The relief at uv: xyz the normal in the local frame (east, north, up), w the local height (moon radii). Its texels:
+// rg the normal's x and y (z follows), ba the height in 16 bits (b high, a low: moon_gen.py), so the cast shadows'
+// height has no 8-bit steps.
+vec4 moonRelief(sampler2D relief, vec2 uv, float lod, float scale) {
+    vec4 r = textureLod(relief, uv, lod);
+    vec2 nxy = r.rg * 2.0 - 1.0;
+    vec3 n = vec3(nxy, sqrt(max(1.0 - dot(nxy, nxy), 0.02)));
+    return vec4(normalize(n), ((r.b * 65280.0 + r.a * 255.0) / 65535.0 * 2.0 - 1.0) * scale);
+}
+
+// The detail layer on the unit sphere (body frame point p): rg slope, b albedo, a height. Never a repeat: triplanar,
+// two octaves at incommensurate scales, each warped by its own smooth noise over a few tiles (so no two tiles of
+// the sphere sample the same patch), and the caller scales it by the region (the albedo's alpha).
 vec4 moonDetail(sampler2D detail, vec3 p, float tile, float footprint) {
     vec3 w = pow(abs(p), vec3(4.0));
     w /= w.x + w.y + w.z;
@@ -110,12 +135,26 @@ vec4 moonDetail(sampler2D detail, vec3 p, float tile, float footprint) {
     for (int k = 0; k < 2; k++) {
         float t = k == 0 ? tile : tile / DETAIL_OCTAVE;
         float lod = max(log2(footprint / (t / size)), 0.0);
-        vec3 q = p / t + float(k) * vec3(0.37, 0.61, 0.13);
+        vec3 c = p / (t * 3.1) + float(k) * vec3(17.3, 5.1, 9.7);
+        vec3 warp = vec3(moonNoise(c), moonNoise(c + 31.7), moonNoise(c + 63.1)) * 0.55
+                  + vec3(moonNoise(c * 3.7 + 4.0), moonNoise(c * 3.7 + 9.0), moonNoise(c * 3.7 + 15.0)) * 0.12;
+        vec3 q = p / t + warp + float(k) * vec3(0.37, 0.61, 0.13);
         vec4 a = textureLod(detail, q.yz, lod) * w.x + textureLod(detail, q.zx, lod) * w.y
                + textureLod(detail, q.xy, lod) * w.z;
         o += a * (k == 0 ? 0.6 : 0.4);
     }
     return o;
+}
+
+// The detail's height alone at p (its dominant plane, first octave: the cast shadows close up), moon radii.
+float moonDetailHeight(sampler2D detail, vec3 p, float tile, float range) {
+    vec3 c = p / (tile * 3.1);
+    vec3 warp = vec3(moonNoise(c), moonNoise(c + 31.7), moonNoise(c + 63.1)) * 0.55
+              + vec3(moonNoise(c * 3.7 + 4.0), moonNoise(c * 3.7 + 9.0), moonNoise(c * 3.7 + 15.0)) * 0.12;
+    vec3 q = p / tile + warp;
+    vec3 a = abs(p);
+    vec2 st = a.x > a.y && a.x > a.z ? q.yz : (a.y > a.z ? q.zx : q.xy);
+    return (textureLod(detail, st, 0.0).a - 0.5) * range;
 }
 
 // The disc's pixel along dir: rgb radiance (physical), a its coverage (it hides what is behind it). body: its place
@@ -143,20 +182,36 @@ vec4 moonDisc(vec3 dir, vec4 pos, vec4 up, vec4 tint, sampler2D albedo, sampler2
     vec2 uv = vec2(lon * 0.15915494 + 0.5, 0.5 - lat * 0.31830989);
     float texel = 6.2831853 / float(textureSize(albedo, 0).x);
     float f = pix / rad;  // the pixel's footprint on the disc (radii)
-    float lodRaw = log2(f * max(1.0 / max(mu, 0.15), 1.0 / max(clat, 0.1)) / texel);
+    // the mip level from the footprint's longest side on the sphere along the meridian (the limb's foreshortening);
+    // across it, towards the poles, the map's columns crowd together: there several taps along the parallel stand in
+    // for the footprint (no pinch, no smear at the poles)
+    float lodRaw = log2(f / max(mu, 0.15) / texel);
     float lod = max(lodRaw, 0.0);
-    vec3 alb = pow(textureLod(albedo, uv, lod).rgb, vec3(2.2));
-    vec4 rel = textureLod(relief, uv, lod);
+    float across = f / (texel * exp2(lod) * max(clat, 0.01));  // the footprint in this level's columns
+    int taps = int(clamp(ceil(across), 1.0, 8.0));
+    vec4 alb4 = vec4(0.0);
+    vec4 rel = vec4(0.0);
+    for (int k = 0; k < 8; k++) {
+        if (k >= taps) break;
+        float du = (float(k) + 0.5) / float(taps) - 0.5;
+        vec2 uk = uv + vec2(du * f / max(clat, 0.01) * 0.15915494, 0.0);
+        alb4 += textureLod(albedo, uk, lod);
+        rel += moonRelief(relief, uk, lod, reliefScale);
+    }
+    alb4 /= float(taps);
+    rel /= float(taps);
+    vec3 alb = pow(alb4.rgb, vec3(2.2));
     // the local frame (east, north, up) in the body frame; the relief's normal in it
     float sl = sin(lat), so = sin(lon), co = cos(lon);
     vec3 e = vec3(co, 0.0, -so), nn = vec3(-sl * so, clat, -sl * co);
-    vec3 tn = normalize(rel.xyz * 2.0 - 1.0);
-    // the detail layer, where the disc is magnified past its map (a spyglass, a huge low moon)
-    float wd = smoothstep(0.0, -2.0, lodRaw) * smoothstep(0.1, 0.4, mu);
+    vec3 tn = normalize(rel.xyz);
+    // the detail layer, where the disc is magnified past its map (a spyglass, a huge low moon), as strong as its
+    // region wants it (the albedo's alpha: rough chaos and cracked skin strong, the seas and the salt smooth)
+    float wd = smoothstep(0.0, -2.0, lodRaw) * smoothstep(0.1, 0.4, mu) * (0.3 + 1.4 * alb4.a);
     if (wd > 0.0) {
         vec4 dt = moonDetail(detail, p, detailTile, f);
-        tn = normalize(tn + vec3((dt.rg * 2.0 - 1.0) * wd, 0.0));
-        alb *= mix(1.0, dt.b * 2.0, wd);
+        tn = normalize(tn + vec3((dt.rg * 2.0 - 1.0) * wd * 0.6, 0.0));
+        alb *= max(mix(1.0, dt.b * 2.0, wd), 0.0);
     }
     vec3 nb = tn.x * e + tn.y * nn + tn.z * p;
     nb = p + (nb - p) * smoothstep(0.0, 0.3, mu);  // (the relief fades into the limb: its facets there face away)
@@ -172,22 +227,30 @@ vec4 moonDisc(vec3 dir, vec4 pos, vec4 up, vec4 tint, sampler2D albedo, sampler2
     float norm = 1.0 / (L + (1.0 - L) * 0.6666667);  // (the full disc's mean stays 1: its light is NightSkyMath's)
     float shade = (2.0 * L * mu0 / max(mu0 + mud, 1e-4) + (1.0 - L) * mu0) * surge * exp(-photo.w * alpha) * norm;
     shade *= smoothstep(-0.03, 0.01, mu0g);
-    // cast shadows near the terminator: march the height field towards the sun (the surface falls away with the
-    // sphere's curvature, t^2 / 2), soft by the sun's own size
-    if (shade > 0.0 && mu0g < 0.45 && lod < 4.0) {
+    // cast shadows: march the full-resolution height field towards the sun in fine steps growing slowly (crisp at the
+    // contact, long near the terminator), the surface falling away with the sphere's curvature (t^2 / 2), each step's
+    // penumbra the sun's own angular size at that distance (sharp near the caster, softening away from it); close up
+    // the detail layer's own height casts too
+    if (shade > 0.0 && mu0g < 0.6 && lod < 4.0) {
         vec2 sd = vec2(dot(s, e), dot(s, nn));
         float sl2 = length(sd) + 1e-6;
         sd /= sl2;
         float tanE = dot(s, p) / sl2;
-        float h0 = (rel.a * 2.0 - 1.0) * reliefScale;
+        float detailRange = reliefScale * 0.008;
+        float h0 = rel.w + (wd > 0.0 ? wd * moonDetailHeight(detail, p, detailTile / DETAIL_OCTAVE, detailRange) : 0.0);
         float lit = 1.0;
-        float t = max(texel * 1.5, f * 0.75);
-        for (int k = 0; k < 12; k++) {
+        float t = max(texel * 0.35, f * 0.5);
+        for (int k = 0; k < 32; k++) {
             vec2 uk = uv + vec2(sd.x * t / (6.2831853 * max(clat, 0.05)), -sd.y * t * 0.31830989);
-            float hk = (textureLod(relief, uk, max(log2(max(t * 0.25, f) / texel), 0.0)).a * 2.0 - 1.0) * reliefScale;
+            float hk = moonRelief(relief, uk, max(log2(max(f, t * 0.04) / texel), 0.0), reliefScale).w;
+            if (wd > 0.0 && k < 12) {
+                vec3 pk = normalize(p + (sd.x * e + sd.y * nn) * t);
+                hk += wd * moonDetailHeight(detail, pk, detailTile / DETAIL_OCTAVE, detailRange);
+            }
             float z = h0 + t * tanE + 0.5 * t * t;
             lit = min(lit, clamp((z - hk) / (t * MOON_SUN_RADIUS * 2.0) + 0.5, 0.0, 1.0));
-            t *= 1.55;
+            if (lit <= 0.0) break;
+            t *= 1.21;
         }
         // a shadow shows only where the eye sees past what casts it: from the sun's side (a full moon, towards the
         // limb) the caster hides its own shadow; the relief fades into the limb

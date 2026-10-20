@@ -1,38 +1,43 @@
 """Masser and Secunda, baked: their surfaces simulated from nothing but this code and its seeds.
 
-No photograph, scan, game asset or traced shape goes in. Each moon is a sphere of rock built up through time:
+No photograph, scan, game asset or traced shape goes in. Both moons were once pure white, featureless spheres; they
+died and their skin withered. Each is built up through time on the sphere (every field from its texels' 3D directions:
+noise in 3D, craters by angular distance, blurs and slopes pole-safe), in geological regions laid out by hand-placed
+seeds and rules (moon_gen.py --preview writes the labelled map: .work/moon_gen/<moon>_regions.png):
 
-  1. a crust: long-wave regional relief (fBm on the sphere);
-  2. ancient basins: huge shallow impacts with peak rings and outer scarps;
-  3. epochs of bombardment, each a population drawn from a power-law size-frequency distribution (cumulative
-     N(>r) ~ r^-2): simple bowls below the transition radius, complex craters above it (flat floors, terraced walls,
-     central peaks, peak rings in the largest), irregular polygonal outlines, raised rims, ejecta blankets with radial
-     texture. A new crater excavates what was there (a trace of the old relief survives) and buries its surroundings;
-  4. between epochs, topographic diffusion (creep, micro-impacts, dust) softens everything already there: the older a
-     crater, the more it has been worn, the smaller it is, the sooner it is gone;
-  5. the withered skin: lobate scarps, long sinuous one-sided cliffs where the dead crust shrank, in broken segments;
-     Masser: lava plains flood its low ground in broad mottled patches (ghost craters, wrinkle ridges), then its rift
-     opens: a long branching graben system with ragged walls, raised shoulders and a dark mantle round it;
-     Secunda: a giant basin whose ejecta carved long radial valleys and crater chains across its face;
-  6. a last, young epoch: fresh craters with bright ejecta, rays and chains of secondaries.
-
-Albedo follows the material: highland crust, plains, the rift's dark mantle, fresh (immature) ejecta that weathers
-darker with every epoch, steep walls brighter (fresh exposures), crater floors a touch darker. Masser's palette is
-rose to rust-brown, dusty and low-contrast; Secunda's grey-cream, bright and crisp.
+  1. a crust: long-wave regional relief; ancient basins, the largest with rings of mountains;
+  2. epochs of bombardment from a power-law size-frequency distribution (N(>r) ~ r^-2): simple bowls, complex craters
+     (flat floors, terraced walls, central peaks, peak rings), irregular outlines, oblique impacts (ellipses, their
+     ejecta thrown downrange), doublets and chains; each excavates what was there and buries its surroundings,
+     throwing out deeper material; between epochs topographic diffusion wears the older ones;
+  3. the withered skin: plates of the old white left, raised a little, lipped and peeling at their edges, over the
+     darker strata they bared (redder on Masser, greyer on Secunda), all cracked in polygons like dried hide at several
+     scales; lobate scarps where the dead crust shrank;
+  4. the seas: lava filling a region's low ground to a level (its edge a contour, embaying the highlands, the rims of
+     half-buried craters standing out of it), wrinkle ridges, rilles;
+  5. Masser: Mara's Tear (a basalt teardrop falling from the Eye, a bone-pale salt flat), the Great Rift across both
+     (a faulted graben, branches, side cracks, vents with ash and oxide), chaos where it dies out, pale salt flats, dust
+     fields streaked by old winds; rose and rust highlands, umber, near-black basalt.
+     Secunda: the giant basin's radial valleys and crater chains, dark basins, the Parliament of Craters (a ring of great
+     craters round a central one, their floors drowned dark), the Weeping Star and other young rayed craters whose rays
+     cross the face; warm cream and cool grey highlands;
+  6. a young epoch: fresh craters with bright ejecta, rays, secondaries, boulder fields; texel-scale micro detail.
 
 Outputs (textures/environment), each an equirectangular map, longitude 0 / latitude 0 the face towards Nirn (both
 moons are tidally locked: the shader keeps that face to the planet), north up, east to the right, row 0 the north:
 
   <moon>_albedo.png  rgb albedo (gamma 2.2), its mean over the face Nirn sees (projected) the albedo NightSkyMath
-                     keeps for the moon (MASSER_ALBEDO / SECUNDA_ALBEDO), so the sky's photometry is unchanged
-  <moon>_relief.png  rgb the surface normal in the local (east, north, up) frame, from the height map; a the local
-                     height (the height less its 0.12 rad blur): h = (a * 2 - 1) * RELIEF[moon] in moon radii, the
-                     shader's cast-shadow march (atlas_night.glsl MASSER_RELIEF / SECUNDA_RELIEF)
+                     keeps for the moon (MASSER_ALBEDO / SECUNDA_ALBEDO), so the sky's photometry is unchanged; a the
+                     detail layer's strength there (its region's roughness)
+  <moon>_relief.png  rg the surface normal's east and north components (up follows), ba the local height in 16 bits
+                     (the height less its 0.12 rad blur: h = (b * 256 + a) / 65535 * 2 - 1, x RELIEF[moon] moon radii;
+                     atlas_moons.glsl MASSER_RELIEF / SECUNDA_RELIEF): the cast shadows' height, without 8-bit steps
+  <moon>_detail.png  the detail layer (seamless; the shader warps and blends it so it never repeats)
   <moon>_phases.png  the 16-phase 4 x 4 sheet the shader pack and the mesh fallback sky draw, rendered from the maps
 
     py -3 tools/dev/moon_gen.py                 # both moons at full size, into the mod's textures
     py -3 tools/dev/moon_gen.py --only masser --scale 0.5 --out .work/moon_gen/half   # a quick look
-    py -3 tools/dev/moon_gen.py --preview       # also renders discs and full-zoom crops into .work/moon_gen
+    py -3 tools/dev/moon_gen.py --preview       # also the region maps, discs and full-zoom crops into .work/moon_gen
 
 Deterministic: fixed seeds, numpy and scipy only (threads only split pure interpolation work).
 """
@@ -57,7 +62,7 @@ TAU = 2.0 * math.pi
 POOL = ThreadPoolExecutor(16)
 
 # the height the relief map's alpha spans (moon radii): atlas_night.glsl's MASSER_RELIEF / SECUNDA_RELIEF
-RELIEF = {"masser": 0.015, "secunda": 0.012}
+RELIEF = {"masser": 0.015, "secunda": 0.016}
 # NightSkyMath.MASSER_ALBEDO / SECUNDA_ALBEDO: the linear mean the face towards Nirn keeps
 TARGET = {"masser": (0.1708, 0.1304, 0.1494), "secunda": (0.1077, 0.1110, 0.1063)}
 # NightSkyMath.MASSER_COLOUR / SECUNDA_COLOUR (the previews show the discs in the sky's colour)
@@ -124,7 +129,49 @@ class Grid:
         sx = sigma / (np.maximum(self.clat, 0.02) * (TAU / self.W))  # sigma in this row's pixels
         spec *= np.exp(-2.0 * (math.pi * k[None, :] * sx[:, None] / self.W) ** 2)
         out = fft.irfft(spec, n=self.W, axis=1, workers=-1).astype(np.float32)
-        return ndimage.gaussian_filter1d(out, sigma / self.texel, axis=0, mode="nearest", truncate=3.0)
+        out = ndimage.gaussian_filter1d(out, sigma / self.texel, axis=0, mode="nearest", truncate=3.0)
+        # the polar caps: the rows' blur pinches there (a whole parallel averaged, rings); each cap blurred on its
+        # own azimuthal grid instead and blended in
+        for north in (True, False):
+            self.cap_blur(a, out, sigma, north)
+        return out
+
+    CAP = 0.62  # (rad of colatitude the caps' own grids cover)
+
+    def sample(self, a, lat, lon, order=1):
+        """a (rows north to south, columns west to east) at (lat, lon) arrays: bilinear, longitude wrapping."""
+        r = np.clip((0.5 - np.asarray(lat, np.float64) / math.pi) * self.H - 0.5, 0.0, self.H - 1.0)
+        c = np.mod((np.asarray(lon, np.float64) / TAU + 0.5) * self.W - 0.5, self.W)
+        c = np.where(c >= self.W, 0.0, c)  # (scipy's grid-wrap can spin forever on a coordinate at the edge)
+        out = np.empty(np.shape(lat), np.float32)
+        flat_r, flat_c, flat_o = np.ravel(r), np.ravel(c), out.reshape(-1)
+
+        def job(i):
+            sl = slice(i, min(i + 524288, len(flat_r)))
+            flat_o[sl] = ndimage.map_coordinates(a, np.vstack([flat_r[sl], flat_c[sl]]), order=order, mode="grid-wrap",
+                                                 prefilter=False)
+        list(POOL.map(job, range(0, len(flat_r), 524288)))
+        return out
+
+    def cap_blur(self, a, out, sigma, north):
+        cap = self.CAP
+        n = int(2 * cap / self.texel) // 2 * 2
+        c = (np.arange(n) + 0.5) / n * 2 - 1
+        X, Y = np.meshgrid(c * cap, c * cap)
+        colat = np.sqrt(X * X + Y * Y)
+        lon = np.arctan2(Y, X)
+        lat = (math.pi / 2 - colat) * (1 if north else -1)
+        grid = self.sample(a, lat, lon)
+        grid = ndimage.gaussian_filter(grid, sigma / (2 * cap / n), mode="nearest", truncate=3.0)
+        rows = np.where(self.lat > math.pi / 2 - cap)[0] if north else np.where(self.lat < -(math.pi / 2 - cap))[0]
+        latr = self.lat[rows][:, None] * np.ones((1, self.W), np.float32)
+        lonr = self.lon[None, :] * np.ones((len(rows), 1), np.float32)
+        cr = math.pi / 2 - np.abs(latr)
+        gx = (cr * np.cos(lonr) / cap + 1) * 0.5 * n - 0.5
+        gy = (cr * np.sin(lonr) / cap + 1) * 0.5 * n - 0.5
+        back = ndimage.map_coordinates(grid, np.vstack([gy.ravel(), gx.ravel()]), order=1, mode="nearest").reshape(cr.shape)
+        w = smoothstep(cap, cap * 0.7, cr)
+        out[rows] = out[rows] * (1 - w) + back * w
 
     def point(self, lat0, lon0, az, dist):
         """The point dist (rad) from (lat0, lon0) along azimuth az."""
@@ -200,6 +247,7 @@ class Moon:
         self.Rv = np.zeros_like(self.H)             # ray material (bright, in the young epoch)
         self.Ox = np.zeros_like(self.H)             # the rift's red oxide deposits (Masser) 0..1
         self.Bo = np.zeros_like(self.H)             # boulder fields round fresh craters 0..1
+        self.Ej = np.zeros_like(self.H)             # deep material a large crater threw out 0..1
         self.P = g.xyz()
         self.rmin = spec["rmin_texels"] * g.texel
         self.stats = {"craters": 0}
@@ -210,8 +258,9 @@ class Moon:
         rt = s["rt"]
         ph = rng.uniform(0, TAU, 8)
         if r < rt:
-            depth = 0.30 * r
-            rim = 0.065 * r
+            small = 0.4 + 0.6 * float(smoothstep(1.0, 3.0, r / self.g.texel))
+            depth = 0.30 * r * small
+            rim = 0.065 * r * small
             inner = -depth + (depth + rim) * x ** 2
         else:
             q = r / rt
@@ -252,7 +301,7 @@ class Moon:
 
     def crater(self, lat0, lon0, r, fresh=1.0, inherit=0.9):
         rng = self.rng
-        ext = r * (3.3 if r <= self.s["basin_r"] else 1.8)
+        ext = min(r * 3.3, math.pi * 0.75)
         p = self.g.patch(lat0, lon0, ext)
         if p is None:
             return
@@ -264,7 +313,14 @@ class Moon:
         wob = (amp[:, None, None] * np.cos(kk[:, None, None] * az[None]
                                            + rng.uniform(0, TAU, len(kk)).astype(np.float32)[:, None, None])).sum(0)
         x = x / (1.0 + wob)
+        oblique = rng.uniform() < self.s.get("oblique", 0.0)
+        if oblique:
+            e, phi = rng.uniform(1.15, 1.8), rng.uniform(0, TAU)
+            dd = az - phi
+            x = x * np.sqrt(np.cos(dd) ** 2 / (e * e) + np.sin(dd) ** 2)
         prof, rim, depth = self.profile(x, az, r, rng)
+        if oblique and e > 1.4:
+            prof = np.where(x > 1.0, prof * (1.0 - 0.85 * smoothstep(0.5, 0.95, -np.cos(dd))), prof)
         old = self.H[idx]
         inside = x < 0.8
         ref = float(old[inside].mean()) if inside.any() else float(old.mean())
@@ -278,6 +334,9 @@ class Moon:
         if fresh >= 0.9 and r > self.rmin * 2.5:  # a young crater's blocks: on its rim and walls, thinning outward
             bo = np.where(x < 0.75, 0.25, np.exp(-np.maximum(x - 0.95, 0.0) * 2.2)) * (x < 3.0)
             self.Bo[idx] = np.maximum(self.Bo[idx], bo.astype(np.float32))
+        deep = float(smoothstep(self.s["rt"] * 1.5, self.s["rt"] * 6.0, r))
+        if deep > 0:
+            self.Ej[idx] = np.maximum(self.Ej[idx] * (1 - 0.5 * deep * ej), (deep * ej * (x > 0.9)).astype(np.float32))
         dig = float(smoothstep(self.s["dig_r"] * 0.6, self.s["dig_r"] * 1.6, r))
         if dig > 0:
             self.M[idx] *= (1.0 - dig * ej * 0.9).astype(np.float32)
@@ -295,11 +354,12 @@ class Moon:
         wob = 1.0 + 0.25 * np.cos(3 * az + self.rng.uniform(0, TAU)) + 0.15 * np.cos(5 * az + self.rng.uniform(0, TAU))
         f[idx] = np.maximum(f[idx], (strength * np.exp(-(d / (r * wob)) ** 2)).astype(np.float32))
 
-    def rays(self, lat0, lon0, r, strength, n_rays, secondaries=True):
-        """Bright rays of fine ejecta (and chains of secondary craters along them) from a young crater."""
+    def rays(self, lat0, lon0, r, strength, n_rays, secondaries=True, long=1.0):
+        """Bright rays of fine ejecta (and chains of secondary craters along them) from a young crater; long: how far
+        they reach (x its usual ~7 radii: the Weeping Star's cross the face)."""
         rng = self.rng
-        L = r * rng.lognormal(math.log(7.0), 0.45, n_rays)
-        L = np.minimum(L, r * 16)
+        L = r * rng.lognormal(math.log(7.0 * long), 0.45, n_rays)
+        L = np.minimum(L, r * 16 * long)
         p = self.g.patch(lat0, lon0, float(L.max()))
         if p is None:
             return []
@@ -347,6 +407,16 @@ class Moon:
         t0 = time.time()
         for i in range(n):
             self.crater(float(lat[i]), float(lon[i]), float(r[i]), fresh=fresh)
+            u2 = rng.uniform()
+            if u2 < 0.03:  # a doublet: a binary impactor's twin
+                la, lo = self.g.point(float(lat[i]), float(lon[i]), rng.uniform(0, TAU), float(r[i]) * rng.uniform(1.6, 2.4))
+                self.crater(la, lo, float(r[i]) * rng.uniform(0.5, 1.0), fresh=fresh)
+            elif u2 < 0.033 and r[i] > 3 * rmin:  # a chain: a broken impactor's train
+                head, k = rng.uniform(0, TAU), int(rng.integers(5, 13))
+                rc = float(r[i]) * rng.uniform(0.3, 0.6)
+                for j in range(k):
+                    la, lo = self.g.point(float(lat[i]), float(lon[i]), head + rng.normal(0, 0.05), rc * 1.7 * (j + 1))
+                    self.crater(la, lo, rc * rng.uniform(0.7, 1.2), fresh=fresh)
         print(f"  {self.name} {label}: {n} craters ({r.max():.3f} rad largest) {time.time() - t0:.1f}s")
 
     def withered(self, amp, freq, levels, first):
@@ -442,6 +512,7 @@ class Moon:
             lift[rows] = np.maximum(lift[rows], shoulder.reshape(shape))
             dark[rows] = np.maximum(dark[rows], mantle.reshape(shape))
         self.H += carve + lift
+        self.Tr = np.maximum(getattr(self, "Tr", np.zeros_like(self.H)), smoothstep(0.0, -2e-4, carve).astype(np.float32))
         self.D = np.maximum(self.D, dark)
         self.Ox = np.maximum(self.Ox, oxide)
         self.stats[kind] = len(pts)
@@ -455,59 +526,177 @@ class Moon:
         gy, gx = self.gradients(self.H)
         slope = np.sqrt(gx * gx + gy * gy)
         wr = self.noise.ridged(self.P, 380.0, 2, first=48) - 1.0
-        self.H += g.texel * 0.35 * smoothstep(0.12, 0.5, slope) * wr
+        self.H += g.texel * 0.18 * smoothstep(0.15, 0.6, slope) * wr
         white = rng.standard_normal(self.H.shape).astype(np.float32)
         blocks = ndimage.gaussian_filter(white, 0.6)
-        self.H += g.texel * (0.25 * self.Bo * np.maximum(blocks, 0.0) + 0.04 * white)
+        self.H += g.texel * 0.12 * self.Bo * np.maximum(ndimage.gaussian_filter(white, 1.2), 0.0)
         return np.exp(0.22 * self.Bo * np.clip(blocks * 1.5, -1.5, 1.5) + 0.035 * white)
 
-    def albedo(self):
-        s = self.s
-        P = self.P
-        n = self.noise
-        H = self.H
-        # slopes (fresh exposures on steep walls) and local concavity (fines ponded in floors)
-        gy, gx = self.gradients(H)
-        slope = np.sqrt(gx * gx + gy * gy)
-        low = H - self.g.blur(H, 4 * self.g.texel)
-        hue = n.fbm(P, 2.5, 4, first=5)
-        mott = n.fbm(P, 14.0, 5, first=9)
-        fine = n.fbm(P, 120.0, 4, first=13)
-        hi = np.array(s["highland"], np.float32)
-        hi2 = np.array(s["highland2"], np.float32)
-        pl = np.array(s["plains"], np.float32)
-        pl2 = np.array(s["plains2"], np.float32)
-        dk = np.array(s["dark"], np.float32)
-        fr = np.array(s["fresh"], np.float32)
-        tH = smoothstep(-0.8, 0.8, hue)[..., None]
-        high = hi * (1 - tH) + hi2 * tH
-        tP = smoothstep(-0.7, 0.7, mott)[..., None]
-        plains = pl * (1 - tP) + pl2 * tP
-        M = np.clip(self.M, 0, 1)[..., None]
-        A = high * (1 - M) + plains * M
-        D = np.clip(self.D, 0, 1)[..., None] * s["dark_k"]
-        A = A * (1 - D) + dk * D
-        if "oxide" in s:
-            Ox = np.clip(self.Ox, 0, 1)[..., None] * s["oxide_k"]
-            A = A * (1 - Ox) + np.array(s["oxide"], np.float32) * Ox
-        F = np.clip(self.F * s["fresh_k"] + self.Rv * s["ray_k"], 0, 1.2)[..., None]
-        A = A * (1 - np.minimum(F, 1)) + fr * np.minimum(F, 1) + (F > 1) * (F - 1) * fr
-        A *= (1.0 + s["slope_k"] * smoothstep(0.08, 0.6, slope))[..., None]
-        A *= (1.0 + s["floor_k"] * np.clip(low / (8 * self.g.texel * 0.05), -1, 1))[..., None]
-        A *= np.exp(s["mottle_k"] * mott + s["fine_k"] * fine)[..., None]
-        A *= self.grain[..., None]
-        if s["dust"] > 0:  # a dust mantle: low contrast at the finest scales
-            soft = np.stack([self.g.blur(A[..., c], s["dust"] * self.g.texel) for c in range(3)], -1)
-            A = A * (1 - s["dust_mix"]) + soft * s["dust_mix"]
-        return A
+    # ------------------------------------------------------------------------------------------- regions, skin
+    def cap(self, lat0, lon0, r, edge=0.25, wobble=0.25, first=60):
+        """A soft region round a point: 1 inside r (rad), out to 0 over edge x r, its outline wobbling (noise)."""
+        c = vec(lat0, lon0).astype(np.float32)
+        d = np.arccos(np.clip(self.P @ c, -1, 1))
+        w = self.noise.fbm(self.P, 6.0 / max(r, 0.02), 3, first=first)
+        return smoothstep(1.0 + edge, 1.0, d / r * np.exp(wobble * np.clip(w, -2.5, 2.5))).astype(np.float32)
+
+    def tube(self, pts, radius, edge=0.3, first=62):
+        """A soft region along a path of points (n, 3) with a radius per point."""
+        tree = cKDTree(pts)
+        out = np.zeros(self.H.shape, np.float32)
+        reach = float(np.max(radius)) * (1.0 + edge) * 1.3
+        w = self.noise.fbm(self.P, 18.0, 3, first=first)
+        band = 128
+        for r0 in range(0, self.g.H, band):
+            rows = slice(r0, min(self.g.H, r0 + band))
+            P = self.P[rows].reshape(-1, 3)
+            dist, i = tree.query(P, distance_upper_bound=reach, workers=-1)
+            ok = np.isfinite(dist)
+            rr = np.asarray(radius)[np.where(ok, i, 0)]
+            x = np.where(ok, dist, 1e3) / rr * np.exp(0.2 * np.clip(w[rows].reshape(-1), -2.5, 2.5))
+            out[rows] = smoothstep(1.0 + edge, 1.0, x).reshape(out[rows].shape)
+        return out
+
+    def voronoi(self, n, seed, warp=0.0):
+        """Cells on the sphere: F1, F2 (distances to the nearest two of n random points, rad) and the nearest's index."""
+        rng = np.random.default_rng(seed)
+        pts = rng.standard_normal((n, 3))
+        pts /= np.linalg.norm(pts, axis=1, keepdims=True)
+        tree = cKDTree(pts)
+        f1 = np.empty(self.H.shape, np.float32)
+        f2 = np.empty_like(f1)
+        idx = np.empty(self.H.shape, np.int32)
+        band = 128
+        for r0 in range(0, self.g.H, band):
+            rows = slice(r0, min(self.g.H, r0 + band))
+            q = self.P[rows].reshape(-1, 3)
+            if warp > 0:
+                q = q + self._warp[rows].reshape(-1, 3) * warp
+            d, i = tree.query(q, k=2, workers=-1)
+            f1[rows] = d[:, 0].reshape(f1[rows].shape)
+            f2[rows] = d[:, 1].reshape(f1[rows].shape)
+            idx[rows] = i[:, 0].reshape(f1[rows].shape)
+        return f1, f2, idx
+
+    def cracks(self, strength, scales, depth, first=70):
+        """Polygonal crack networks like dried skin, at several scales: narrow troughs along the cells' edges (where the
+        two nearest cells are equally near), warped, broken; strength a map (0..1) of where they show."""
+        warp = self.noise.fbm(self.P, 30.0, 3, first=first)
+        total = np.zeros(self.H.shape, np.float32)
+        for k, (n, width) in enumerate(scales):
+            spacing = math.sqrt(4 * math.pi / n)
+            fq = 1.2 / spacing
+            self._warp = np.stack([self.noise.fbm(self.P, fq, 3, first=first + 20 + 3 * k + j) for j in range(3)], -1)
+            f1, f2, _ = self.voronoi(n, 0xC0 + k + first, warp=0.45 * spacing)
+            edge = (f2 - f1) * (1.0 + 0.35 * warp)
+            spacing = math.sqrt(4 * math.pi / n)
+            w = width * spacing
+            gap = self.noise.fbm(self.P, 1.5 / spacing, 2, first=first + 3 + k)
+            line = (1.0 - smoothstep(0.0, w, edge)) * smoothstep(-0.6, 0.0, gap)
+            total = np.maximum(total, line * (0.6 + 0.4 * (k == 0)))
+            self.H -= depth * spacing * line * strength
+        self.Cr = np.maximum(self.Cr, total * strength)
+
+    def skin(self, cover, amp, first=80, bias=None):
+        """The withered skin: the old white outer layer, peeled away in flakes. S: where a remnant plate still lies
+        (raised a little, a crisp scarp and an upturned lip at its edge where it lifts); elsewhere the darker strata it
+        exposed, in bands. cover: the share of the surface still skinned."""
+        n = self.noise.fbm(self.P, 2.1, 5, first=first) + 0.22 * self.noise.fbm(self.P, 9.0, 4, first=first + 6)
+        if bias is not None:
+            n = n + bias
+        t = np.quantile(n[::7, ::7], 1.0 - cover)
+        S = smoothstep(t - 0.02, t + 0.02, n).astype(np.float32)  # crisp plates
+        lip = (smoothstep(t - 0.02, t + 0.02, n) * smoothstep(t + 0.12, t + 0.02, n)).astype(np.float32)
+        self.H += amp * S + 0.4 * amp * lip
+        self.Sk = np.maximum(self.Sk, S)
+        self.Lip = np.maximum(self.Lip, lip)
+        # the strata the peeling bared: bands of the deeper layers (their height levels)
+        self.Str = (self.noise.fbm(self.P, 9.0, 3, first=first + 9) * 3.0 + n * 6.0).astype(np.float32)
+
+    def flood(self, mask, fill=0.6, keep=0.12, ridges=0.0004, first=90):
+        """Lava over a region's low ground, to a level: it fills the region's lower share (fill) and stops at that
+        contour, embaying the higher ground (its edge follows the relief, sharp; the rims of craters it half buried
+        stand out of it as islands and arcs, ghosts of the drowned ones show through), flat, with wrinkle ridges."""
+        core = mask > 0.5
+        base = self.g.blur(self.H, 0.004)
+        level = float(np.quantile(base[core], fill)) if core.any() else float(base.mean())
+        eps = 6e-5
+        lava = (mask * smoothstep(level + eps, level - eps, base)).astype(np.float32)
+        a = (1.0 - keep) * lava
+        self.H = self.H * (1 - a) + (level + 0.15 * (base - level)) * a
+        self.H += lava * ridges * np.maximum(self.noise.ridged(self.P, 26.0, 3, first=first) - 1.2, 0)
+        mask = lava
+        self.M = np.maximum(self.M, mask)
+        self.F *= 1 - mask
+        self.Sk *= 1 - mask
+        self.Lip *= 1 - mask
+
+    def ring_mountains(self, lat0, lon0, r, height, first=95):
+        """A basin's ring of mountains: a broken ridge of peaks round it."""
+        c = vec(lat0, lon0).astype(np.float32)
+        d = np.arccos(np.clip(self.P @ c, -1, 1)) / r
+        peaks = np.maximum(self.noise.ridged(self.P, 1.0 / (0.05 * r), 3, first=first) - 0.9, 0.0)
+        broken = smoothstep(-0.3, 0.3, self.noise.fbm(self.P, 0.6 / r, 2, first=first + 2))
+        self.H += height * np.exp(-((d - 1.0) / 0.06) ** 2) * (0.35 + peaks) * broken
+
+    def chaos(self, mask, n, amp, seed=0xC4):
+        """Chaotic terrain: the ground broken into blocks, each lifted, sunk or tilted on its own, slumped gaps."""
+        f1, f2, idx = self.voronoi(n, seed)
+        rng = np.random.default_rng(seed)
+        lift = rng.normal(0, 1, n).astype(np.float32)
+        tilt = rng.normal(0, 1, (n, 3)).astype(np.float32)
+        block = lift[idx] + 4.0 * np.einsum("ijk,ijk->ij", self.P, tilt[idx]) * 0.15
+        gap = 1.0 - smoothstep(0.0, 0.25 * math.sqrt(4 * math.pi / n), f2 - f1)
+        self.H += mask * amp * (block * (1.0 - gap) - 1.5 * gap)
+        self.Ch = np.maximum(self.Ch, mask)
+        self.F = np.maximum(self.F, mask * gap * 0.5)
+
+    def salt(self, mask, first=100, fill=0.9):
+        """Pale salt-like flats: the floor of a closed low ground levelled smooth (nearly free of craters), polygonal
+        desiccation cracks in it."""
+        core = mask > 0.5
+        base = self.g.blur(self.H, 0.004)
+        level = float(np.quantile(base[core], fill)) if core.any() else float(base.mean())
+        eps = 1.5e-4
+        mask = (mask * smoothstep(level + eps, level - eps, self.g.blur(base, 0.003))).astype(np.float32)
+        self.H = self.H * (1 - 0.95 * mask) + level * 0.95 * mask
+        self.Sa = np.maximum(self.Sa, mask)
+        self.F *= 1 - mask
+        self.Rv *= 1 - mask
+        self.cracks(mask, ((120000, 0.06), (12000, 0.04)), 0.0002, first=first)
+
+    def streaks(self, mask, first=110):
+        """Dust fields: a soft mantle, its albedo drawn out into streaks by the old winds (east-west, wavering)."""
+        g = self.g
+        lat = np.asarray(g.lat)[:, None] * np.ones((1, g.W), np.float32)
+        lon = np.asarray(g.lon)[None, :] * np.ones((g.H, 1), np.float32)
+        wav = self.noise.fbm(self.P, 4.0, 3, first=first)
+        q = np.stack([np.cos(lat) * np.sin(lon) * 2.0, (lat + 0.08 * wav) * 60.0, np.cos(lat) * np.cos(lon) * 2.0], -1)
+        st = self.noise.fbm(q.astype(np.float32), 1.0, 4, first=first + 2)
+        self.Du = np.maximum(self.Du, mask)
+        self.St = self.St * (1 - mask) + st * mask
+        self.H = self.H * (1 - 0.5 * mask) + self.g.blur(self.H, 0.004) * 0.5 * mask
+
+    def stamp_fields(self):
+        for f in ("Sk", "Lip", "Cr", "Sa", "Ch", "Du", "St", "Str"):
+            if not hasattr(self, f):
+                setattr(self, f, np.zeros_like(self.H))
 
     def gradients(self, H):
-        """dH/d(north), dH/d(east) per radian of surface."""
+        """dH/d(north), dH/d(east) per radian of surface: from the neighbours a texel away along the great circles
+        north and east of each texel, sampled where they are (no pinch at the poles)."""
         g = self.g
-        gy = np.empty_like(H)
-        gy[1:-1] = (H[:-2] - H[2:]) / (2 * g.texel)
-        gy[0], gy[-1] = gy[1], gy[-2]
-        gx = (np.roll(H, -1, 1) - np.roll(H, 1, 1)) / (2 * (TAU / g.W) * np.maximum(g.clat, 0.02)[:, None])
+        d = g.texel
+        lat = g.lat[:, None] * np.ones((1, g.W), np.float32)
+        lon = g.lon[None, :] * np.ones((g.H, 1), np.float32)
+        sl, cl = np.sin(lat), np.cos(lat)
+
+        def toward(az):
+            la = np.arcsin(np.clip(sl * math.cos(d) + cl * math.sin(d) * math.cos(az), -1, 1))
+            lo = lon + np.arctan2(math.sin(az) * math.sin(d) * cl, math.cos(d) - sl * np.sin(la))
+            return g.sample(H, la, lo)
+        gy = (toward(0.0) - toward(math.pi)) / (2 * d)
+        gx = (toward(math.pi / 2) - toward(-math.pi / 2)) / (2 * d)
         return gy, gx
 
     def normals(self, exaggerate):
@@ -517,76 +706,47 @@ class Moon:
 
 
 # ===================================================================================================== the two moons
-MASSER = dict(
-    rmin_texels=1.0, rt=0.010, basin_r=0.09, ring_r=0.07, dig_r=0.02,
-    highland=(0.50, 0.265, 0.27), highland2=(0.49, 0.29, 0.25),
-    plains=(0.24, 0.105, 0.066), plains2=(0.18, 0.085, 0.060),
-    dark=(0.085, 0.032, 0.028), fresh=(0.60, 0.42, 0.34), oxide=(0.30, 0.075, 0.040), oxide_k=0.55,
-    dark_k=0.92, fresh_k=0.35, ray_k=0.35, slope_k=0.07, floor_k=0.06, mottle_k=0.10, fine_k=0.06,
-    dust=1.2, dust_mix=0.35, exaggerate=1.0,
-)
-SECUNDA = dict(
-    rmin_texels=1.0, rt=0.012, basin_r=0.10, ring_r=0.08, dig_r=0.03,
-    highland=(0.52, 0.50, 0.44), highland2=(0.47, 0.46, 0.43),
-    plains=(0.24, 0.236, 0.228), plains2=(0.29, 0.282, 0.27),
-    dark=(0.30, 0.29, 0.28), fresh=(1.0, 0.98, 0.92),
-    dark_k=0.0, fresh_k=0.6, ray_k=0.8, slope_k=0.22, floor_k=0.06, mottle_k=0.07, fine_k=0.07,
-    dust=0.0, dust_mix=0.0, exaggerate=1.0,
-)
+# Both were once pure white, featureless spheres; they died and their skin withered: plates of the old white still lie
+# here and there, lifted and peeling at their edges, over darker strata (redder on Masser, greyer on Secunda), the
+# whole cracked in polygons like dried hide. Then came the impacts, the seas, the rifts.
+MASSER = dict(rmin_texels=1.0, rt=0.010, basin_r=0.09, ring_r=0.07, dig_r=0.02, exaggerate=1.0, oblique=0.12)
+SECUNDA = dict(rmin_texels=1.0, rt=0.012, basin_r=0.10, ring_r=0.08, dig_r=0.03, exaggerate=1.0, oblique=0.14)
+
+# the regions each moon's label map shows (moon_gen.py --preview: <moon>_regions.png), their colours there
+REGIONS = {
+    "masser": [("rust highlands", (176, 92, 70)), ("old white skin", (236, 214, 206)), ("bared red strata", (130, 40, 30)),
+               ("basalt seas", (40, 26, 24)), ("Mara's Tear", (70, 20, 60)), ("the Eye (salt flat)", (250, 240, 215)),
+               ("salt flats", (220, 210, 180)), ("the Great Rift", (10, 10, 10)), ("chaos", (120, 80, 140)),
+               ("dust fields", (210, 150, 110)), ("old ring basins", (90, 120, 160))],
+    "secunda": [("cream highlands", (225, 215, 190)), ("old white skin", (250, 250, 248)), ("bared grey strata", (120, 120, 125)),
+                ("dark basins", (50, 52, 60)), ("the Parliament of Craters", (120, 160, 210)),
+                ("young rays", (255, 255, 160)), ("sculpted valleys", (160, 120, 90)), ("ring mountains", (90, 150, 110))],
+}
 
 
-def build_masser(width, seed=0x4D41):
-    m = Moon("masser", MASSER, width, seed)
-    rng, n, P = m.rng, m.noise, m.P
-    t = time.time()
-    # the crust: long-wave relief
-    m.H += 0.0030 * n.fbm(P, 1.6, 6, first=0) + 0.0008 * n.fbm(P, 12.0, 5, first=6)
-    # ancient basins, mostly on the face towards Nirn (it is their floors the plains flood)
-    for lat, lon, r in [(0.35, -0.55, 0.36), (-0.30, 0.40, 0.30), (0.62, 0.70, 0.22), (-0.70, -0.45, 0.25),
-                        (0.05, 1.25, 0.20), (-0.05, -1.30, 0.24), (0.95, -1.9, 0.30), (-0.4, 2.4, 0.33),
-                        (0.2, 2.9, 0.20)]:
-        m.crater(lat + rng.normal(0, 0.03), lon + rng.normal(0, 0.03), r * rng.uniform(0.95, 1.05), fresh=0.0)
-    m.degrade(6.0, 0.0)
-    m.epoch(0.55, 0.14, "heavy bombardment I", fresh=0.0)
-    m.degrade(3.0, 0.0)
-    m.epoch(0.45, 0.09, "heavy bombardment II", fresh=0.6)
-    m.degrade(2.2, 0.2)
-    m.withered(0.0011, 3.2, (-0.9, -0.3, 0.35, 1.0), 40)
-    # the plains: lava floods the low ground in broad, mottled, irregular sheets (not round maria)
-    base = m.g.blur(m.H, 0.05)
-    lowness = -(base - base.mean()) / base.std()
-    patch = n.fbm(P, 1.3, 4, first=20)
-    blot = n.fbm(P, 9.0, 4, first=24)
-    near = smoothstep(-0.2, 0.6, P[..., 2])  # (more of it on the face towards Nirn)
-    field = 0.7 * lowness + 0.9 * patch + 0.18 * blot + 0.55 * near - 0.75
-    M = smoothstep(-0.1, 0.55, field)
-    level = m.g.blur(m.H, 0.03) - 0.0002
-    m.H = m.H * (1 - 0.88 * M) + level * (0.88 * M)
-    m.H += M * 0.00035 * np.maximum(n.ridged(P, 26.0, 3, first=30) - 1.2, 0)  # wrinkle ridges
-    m.M = M.astype(np.float32)
-    m.F *= 1 - M
-    # the rift: a long branching graben across the face, ragged, its shoulders raised, a dark mantle round it
+def along(n, scale, rng):
+    """A smooth random factor along a path of n points (variations every ~scale of its length)."""
+    k = max(3, int(1.0 / scale))
+    knots = rng.normal(0.0, 1.0, k + 3)
+    x = np.linspace(0, k, n)
+    i = np.floor(x).astype(int)
+    f = x - i
+    f = f * f * (3 - 2 * f)
+    return knots[i] * (1 - f) + knots[i + 1] * f
+
+
+def masser_rift(m, rng):
+    """The Great Rift: a faulted graben across the face, its width swelling and pinching, branches and side cracks,
+    en-echelon fractures beside it, vents with ash and oxide."""
+    rng = np.random.default_rng(0x8200)  # (its own: the rift's course is designed, below the Eye, across the Tear)
     paths = []
-    main = m.walk(0.42, -0.95, 2.05, 1.95, 0.6, rng)
+    main = m.walk(0.30, -1.05, 1.95, 2.1, 0.6, rng)
     s = np.linspace(0, 1, len(main))
-
-    def along(n, scale, rng):
-        """A smooth random factor along a path of n points (variations every ~scale of its length)."""
-        k = max(3, int(1.0 / scale))
-        knots = rng.normal(0.0, 1.0, k + 3)
-        x = np.linspace(0, k, n)
-        i = np.floor(x).astype(int)
-        f = x - i
-        f = f * f * (3 - 2 * f)
-        return knots[i] * (1 - f) + knots[i + 1] * f
-
-    # the width swells and pinches along it; its depth follows; the mantle comes and goes
-    w = (0.075 * np.sin(np.pi * np.clip(s * 1.05, 0, 1)) ** 0.55 * np.exp(0.35 * along(len(main), 0.08, rng))
-         + 0.004)
+    w = (0.075 * np.sin(np.pi * np.clip(s * 1.05, 0, 1)) ** 0.55 * np.exp(0.35 * along(len(main), 0.08, rng)) + 0.004)
     tone = np.clip(0.9 + 0.25 * along(len(main), 0.12, rng), 0.35, 1.0)
     paths.append((main, w, 0.013 * (w / w.max()) ** 0.5, tone))
-    for _ in range(12):
-        k = int(rng.uniform(0.15, 0.85) * len(main))
+    for _ in range(14):
+        k = int(rng.uniform(0.12, 0.88) * len(main))
         p0 = main[k]
         lat0, lon0 = math.asin(p0[1]), math.atan2(p0[0], p0[2])
         q = main[min(k + 5, len(main) - 1)] - main[max(k - 5, 0)]
@@ -596,11 +756,9 @@ def build_masser(width, seed=0x4D41):
         head += rng.choice([-1, 1]) * rng.uniform(0.35, 0.95)
         br = m.walk(lat0, lon0, head, rng.uniform(0.12, 0.6), 1.6, rng)
         sb = np.linspace(0, 1, len(br))
-        wb = (w[k] * rng.uniform(0.25, 0.55) * (1 - sb) ** 0.7 * np.exp(0.3 * along(len(br), 0.2, rng))
-              + 0.0018)
+        wb = (w[k] * rng.uniform(0.25, 0.55) * (1 - sb) ** 0.7 * np.exp(0.3 * along(len(br), 0.2, rng)) + 0.0018)
         paths.append((br, wb, 0.011 * (wb / w.max()) ** 0.5, np.clip(0.6 + 0.3 * along(len(br), 0.3, rng), 0.2, 1)))
-        # a side crack off the branch, now and then
-        if rng.uniform() < 0.5 and len(br) > 40:
+        if rng.uniform() < 0.6 and len(br) > 40:  # a side crack off the branch
             j = int(rng.uniform(0.3, 0.8) * len(br))
             pj = br[j]
             tw = m.walk(math.asin(pj[1]), math.atan2(pj[0], pj[2]), head + rng.choice([-1, 1]) * rng.uniform(0.5, 1.1),
@@ -608,8 +766,7 @@ def build_masser(width, seed=0x4D41):
             st = np.linspace(0, 1, len(tw))
             wt = wb[j] * 0.6 * (1 - st) ** 0.8 + 0.0015
             paths.append((tw, wt, 0.008 * (wt / w.max()) ** 0.5, np.full(len(tw), 0.5)))
-    # en-echelon fractures beside the main rift
-    for off in (-2.8, 3.4):
+    for off in (-2.8, 3.4):  # en-echelon fractures beside it
         side = np.cross(main, np.gradient(main, axis=0))
         side /= np.linalg.norm(side, axis=1, keepdims=True)
         par = main + side * (w[:, None] * off)
@@ -619,9 +776,7 @@ def build_masser(width, seed=0x4D41):
         if keep.sum() > 10:
             paths.append((par[keep], np.full(keep.sum(), 0.004), np.full(keep.sum(), 0.0010)))
     m.trench(paths, "rift")
-    m.M = np.maximum(m.M, 0.35 * m.D * smoothstep(0.0, 0.6, blot))  # lava welled out along the rift
-    # vents along it: pits on its floor and shoulders, ringed by dark ash (some by red), their ejecta over the walls
-    for _ in range(12):
+    for _ in range(14):  # vents along it: pits ringed by dark ash, some by red
         k = int(rng.uniform(0.05, 0.95) * len(main))
         side = np.cross(main[k], main[min(k + 3, len(main) - 1)] - main[max(k - 3, 0)])
         side /= np.linalg.norm(side) + 1e-12
@@ -630,14 +785,73 @@ def build_masser(width, seed=0x4D41):
         la, lo, r = math.asin(q[1]), math.atan2(q[0], q[2]), w[k] * rng.uniform(0.12, 0.35)
         m.crater(la, lo, r, fresh=0.4)
         m.halo(la, lo, r * rng.uniform(2.5, 4.5), rng.uniform(0.5, 0.9), "D" if rng.uniform() < 0.7 else "Ox")
+    return main, w
+
+
+def build_masser(width, seed=0x4D41):
+    m = Moon("masser", MASSER, width, seed)
+    m.stamp_fields()
+    rng, n, P = m.rng, m.noise, m.P
+    t = time.time()
+    m.H += 0.0030 * n.fbm(P, 1.6, 6, first=0) + 0.0008 * n.fbm(P, 12.0, 5, first=6)
+    # ancient basins; two vast ones on the face with rings of mountains (the old ring basins)
+    old_rings = [(-0.48, 0.32, 0.34), (0.66, 0.85, 0.28)]
+    for lat, lon, r in old_rings + [(0.35, -0.55, 0.30), (-0.70, -0.45, 0.25), (0.05, 1.25, 0.20),
+                                    (-0.05, -1.30, 0.24), (0.95, -1.9, 0.30), (-0.4, 2.4, 0.33), (0.2, 2.9, 0.20)]:
+        m.crater(lat + rng.normal(0, 0.02), lon + rng.normal(0, 0.02), r * rng.uniform(0.97, 1.03), fresh=0.0)
+    m.degrade(6.0, 0.0)
+    m.epoch(0.55, 0.14, "heavy bombardment I", fresh=0.0)
+    m.degrade(3.0, 0.0)
+    for lat, lon, r in old_rings:
+        m.ring_mountains(lat, lon, r * 1.35, 0.0016)
+        m.ring_mountains(lat, lon, r * 0.62, 0.0011, first=97)
+    # the skin withers: plates of the old white left, peeling, over red strata; cracked like dried hide
+    m.skin(0.30, 0.00045, bias=0.6 * smoothstep(-0.2, 0.7, P[..., 2]) - 0.3)
+    m.cracks(0.35 + 0.65 * m.Sk, ((9000, 0.05), (60000, 0.05), (300000, 0.07)), 0.00018)
+    m.epoch(0.40, 0.09, "heavy bombardment II", fresh=0.6)
+    m.degrade(2.2, 0.2)
+    m.withered(0.0011, 3.2, (-0.9, -0.3, 0.35, 1.0), 40)
+    # the seas: dark basalt over two basins' floors and in Mara's Tear, a teardrop falling from the Eye
+    eye = (0.32, -0.30)
+    tear_pts, tear_r = [], []
+    for k in range(60):
+        f = k / 59.0
+        la = eye[0] - 0.12 - 0.42 * f
+        lo = eye[1] - 0.10 * f - 0.06 * math.sin(f * 3.0)
+        tear_pts.append(vec(la, lo))
+        tear_r.append(0.025 + 0.16 * f ** 2.2)
+    tear = m.tube(np.array(tear_pts), np.array(tear_r) * 1.15, edge=0.15)
+    seas = np.maximum(m.cap(-0.48, 0.32, 0.22, edge=0.4, wobble=0.35), m.cap(0.05, 1.25, 0.15, edge=0.5, wobble=0.4))
+    m.flood(seas, fill=0.6)
+    m.flood(tear, fill=0.88)  # (Mara's Tear nearly brim-full: the teardrop, its edge embaying the relief)
+    seas = np.maximum(seas, tear)
+    m.R_tear, m.R_seas = tear, seas
+    # the Great Rift, its chaos at the east end, ring mountains already up
+    main, w = masser_rift(m, rng)
+    end = main[-1]  # (the chaos where the rift dies out in the east)
+    chaos = m.cap(math.asin(end[1]) - 0.03, math.atan2(end[0], end[2]) - 0.05, 0.17, edge=0.5, wobble=0.5, first=64)
+    m.chaos(chaos, 30000, 0.0007)
+    m.R_chaos = chaos
     m.degrade(1.4, 0.25)
-    m.epoch(0.07, 0.05, "after the plains", fresh=0.5)
+    m.epoch(0.07, 0.05, "after the seas", fresh=0.5)
     m.degrade(1.0, 0.3)
     m.epoch(0.05, 0.025, "late", fresh=0.6)
     m.degrade(0.7, 0.35)
+    # the salt flats, young: the Eye above the Tear, two playas at the rift's ends
+    end0, end1 = main[0], main[-1]
+    flats = np.maximum(m.cap(eye[0], eye[1], 0.085, edge=0.3, wobble=0.2, first=66),
+                       np.maximum(m.cap(math.asin(end0[1]) + 0.05, math.atan2(end0[0], end0[2]) - 0.08, 0.06, edge=0.5,
+                                        first=67),
+                                  m.cap(math.asin(end1[1]) - 0.06, math.atan2(end1[0], end1[2]) + 0.05, 0.05, edge=0.5,
+                                        first=68)))
+    m.salt(flats)
+    m.R_eye = m.cap(eye[0], eye[1], 0.085, edge=0.3, wobble=0.2, first=66)
+    # dust fields in the north, streaked
+    dust = smoothstep(0.35, 0.7, P[..., 1] + 0.25 * n.fbm(P, 3.0, 3, first=112)) * (1 - seas) * (1 - flats)
+    m.streaks(dust)
     # the young epoch: a few fresh craters, dim rays (Masser's dust), their secondaries
     sec = []
-    for _ in range(5):
+    for _ in range(6):
         r = rng.uniform(0.010, 0.022)
         la, lo = math.asin(rng.uniform(-0.9, 0.9)), rng.uniform(-1.5, 1.5)
         m.crater(la, lo, r, fresh=1.0)
@@ -646,69 +860,199 @@ def build_masser(width, seed=0x4D41):
     for la, lo, r in sec:
         m.crater(la, lo, r, fresh=0.7)
     m.degrade(0.45, 1.0)
+    m.R_rings = np.maximum(*[m.cap(la, lo, r * 1.5, edge=0.15) * (1 - m.cap(la, lo, r * 1.15, edge=0.1))
+                             for la, lo, r in old_rings])
     print(f"  masser built in {time.time() - t:.0f}s, {m.stats}")
     return m
 
 
+def paint_masser(m):
+    """Masser's colour: rust highlands from rose to umber, the old white skin (bone-pale rose, palest at its peeling
+    edges), the red strata it bared, near-black basalt seas, bone-pale salt flats, the rift's dark mantle and red
+    oxide, chaos mixed, dust fields soft and streaked; fresh ejecta, steep walls, fine mottling."""
+    P, n, H = m.P, m.noise, m.H
+    gy, gx = m.gradients(H)
+    slope = np.sqrt(gx * gx + gy * gy)
+    low = H - m.g.blur(H, 4 * m.g.texel)
+    c = lambda *v: np.array(v, np.float32)
+    hue = smoothstep(-0.8, 0.8, n.fbm(P, 2.5, 4, first=5))[..., None]
+    umber = smoothstep(0.2, 1.0, n.fbm(P, 6.0, 4, first=7))[..., None]
+    A = c(0.50, 0.265, 0.27) * (1 - 0.3 * hue) + c(0.47, 0.29, 0.22) * 0.3 * hue  # rose, a little rust
+    ej = m.Ej[..., None]
+    A = A * (1 - 0.45 * ej) + c(0.40, 0.17, 0.11) * 0.45 * ej                  # thrown-out red strata (rust)
+    A = A * (1 - 0.2 * umber) + c(0.30, 0.17, 0.11) * 0.2 * umber              # umber
+    strata = (0.5 + 0.5 * np.sin(m.Str))[..., None]
+    bared = c(0.36, 0.11, 0.075) * (1 - strata) + c(0.25, 0.085, 0.07) * strata  # red strata in bands
+    Sk = m.Sk[..., None]
+    A = A * (0.55 + 0.45 * Sk) + bared * (0.45 * (1 - Sk))
+    A = A * (1 - 0.6 * Sk) + c(0.66, 0.52, 0.50) * 0.6 * Sk                    # the old white skin (bone-rose)
+    A = A * (1 - m.Lip[..., None]) + c(0.80, 0.70, 0.68) * m.Lip[..., None]    # palest at its peeling edges
+    A *= (1.0 - 0.35 * m.Cr)[..., None]                                         # the cracks (shadowed, fines)
+    sea = np.clip(m.M, 0, 1)[..., None]
+    mott = smoothstep(-0.7, 0.7, n.fbm(P, 14.0, 5, first=9))[..., None]
+    basalt = c(0.075, 0.042, 0.036) * (1 - mott) + c(0.12, 0.062, 0.048) * mott  # near-black basalt
+    A = A * (1 - sea) + basalt * sea
+    D = np.clip(m.D, 0, 1)[..., None] * 0.92
+    A = A * (1 - D) + c(0.075, 0.03, 0.028) * D
+    Ox = np.clip(m.Ox, 0, 1)[..., None] * 0.55
+    A = A * (1 - Ox) + c(0.30, 0.075, 0.040) * Ox
+    ch = m.Ch[..., None] * 0.5
+    A = A * (1 - ch) + (c(0.22, 0.10, 0.08) * mott + c(0.42, 0.22, 0.16) * (1 - mott)) * ch
+    du = m.Du[..., None]
+    streak = (0.5 + 0.5 * np.tanh(m.St * 1.5))[..., None]
+    A = A * (1 - 0.6 * du) + (c(0.55, 0.36, 0.28) * streak + c(0.42, 0.25, 0.19) * (1 - streak)) * 0.6 * du
+    sa = m.Sa[..., None]
+    A = A * (1 - sa) + c(0.80, 0.74, 0.66) * sa                                 # bone-pale salt
+    F = np.clip(m.F * 0.22 + m.Rv * 0.35, 0, 1)[..., None]
+    A = A * (1 - F) + c(0.60, 0.42, 0.34) * F
+    A *= (1.0 + 0.07 * smoothstep(0.08, 0.6, slope))[..., None]
+    A *= (1.0 + 0.06 * np.clip(low / (8 * m.g.texel * 0.05), -1, 1))[..., None]
+    A *= np.exp(0.10 * n.fbm(P, 14.0, 5, first=9) + 0.06 * n.fbm(P, 120.0, 4, first=13))[..., None]
+    A *= m.grain[..., None]
+    soft = np.stack([m.g.blur(A[..., k], 1.2 * m.g.texel) for k in range(3)], -1)  # a dust mantle: soft fine scales
+    A = A * 0.7 + soft * 0.3
+    # the detail layer's strength by region (albedo alpha): rough chaos, cracked skin and rift strong, seas and salt
+    # smooth, dust soft
+    rough = (0.55 + 0.35 * m.Ch + 0.25 * m.Sk + 0.3 * np.clip(m.D, 0, 1) - 0.35 * np.clip(m.M, 0, 1) - 0.4 * m.Sa
+             - 0.25 * m.Du + 0.3 * m.Bo)
+    labels = [1 - np.maximum.reduce([m.Sk, sea[..., 0], m.Sa, m.Ch, m.Du, np.clip(m.D, 0, 1)]),
+              m.Sk, (1 - m.Sk) * 0.6, sea[..., 0], m.R_tear, m.R_eye, m.Sa * (1 - m.R_eye),
+              np.clip(m.D, 0, 1), m.Ch, m.Du, m.R_rings]
+    return A, np.clip(rough, 0, 1), labels
+
+
 def build_secunda(width, seed=0x5345):
     m = Moon("secunda", SECUNDA, width, seed)
+    m.stamp_fields()
     rng, n, P = m.rng, m.noise, m.P
     t = time.time()
     m.H += 0.0035 * n.fbm(P, 1.4, 6, first=0) + 0.001 * n.fbm(P, 10.0, 5, first=6)
-    # the giant basin, off the face's centre, and a few older ones
-    G = (0.42, 0.62, 0.44)
-    for lat, lon, r in [(-0.55, -0.6, 0.20), (0.1, -1.6, 0.26), (-0.3, 2.2, 0.3), (0.9, 2.8, 0.22)]:
+    G = (0.42, 0.62, 0.44)  # the giant basin (its sculpture's valleys), off the face's centre
+    basins = [(-0.45, -0.55, 0.20), (-0.05, -0.15, 0.17), (0.1, -1.6, 0.26), (-0.3, 2.2, 0.3), (0.9, 2.8, 0.22)]
+    for lat, lon, r in basins:
         m.crater(lat, lon, r, fresh=0.0)
     m.degrade(5.0, 0.0)
     m.epoch(0.8, 0.14, "heavy bombardment I", fresh=0.0)
     m.degrade(2.5, 0.0)
+    m.skin(0.22, 0.0005, bias=-0.2 * smoothstep(0.3, 0.9, P[..., 2]))
+    m.cracks(0.3 + 0.7 * m.Sk, ((6000, 0.05), (30000, 0.05), (110000, 0.07)), 0.0002)
     m.epoch(0.55, 0.09, "heavy bombardment II", fresh=0.6)
     m.withered(0.0014, 3.6, (-1.0, -0.4, 0.2, 0.8, 1.4), 40)
     m.degrade(1.6, 0.25)
     m.crater(*G, fresh=0.3)
-    # its sculpture: long radial valleys and crater chains thrown out across the face
+    m.ring_mountains(G[0], G[1], G[2] * 1.3, 0.0018)
+    for lat, lon, r in basins[:2]:
+        m.ring_mountains(lat, lon, r * 1.25, 0.0013, first=96)
+    # the giant basin's sculpture: long radial valleys and crater chains across the face
     paths = []
     for i in range(11):
         az = TAU * i / 11 + rng.normal(0, 0.18)
         start = m.g.point(G[0], G[1], az, G[2] * rng.uniform(1.15, 1.4))
-        length = rng.uniform(0.35, 0.95)
-        v = m.walk(start[0], start[1], az_at(m.g, G, start, az), length, 0.25, rng)
+        v = m.walk(start[0], start[1], az_at(m.g, G, start, az), rng.uniform(0.35, 0.95), 0.25, rng)
         sv = np.linspace(0, 1, len(v))
         wv = rng.uniform(0.014, 0.028) * (1 - 0.7 * sv) + 0.003
-        if i % 3 == 2:  # a chain of craters instead of a valley
+        if i % 3 == 2:
             for j in range(0, len(v), max(1, int(len(v) / rng.uniform(10, 20)))):
                 pj = v[j]
                 m.crater(math.asin(pj[1]), math.atan2(pj[0], pj[2]), float(wv[j] * rng.uniform(0.9, 1.4)), fresh=0.2)
             continue
         paths.append((v, wv, 0.008 * (wv / 0.02)))
     m.trench(paths, "valley")
+    m.R_valleys = m.Tr.copy()
     m.degrade(1.0, 0.3)
-    # a little grey plain in the old basins' floors
-    base = m.g.blur(m.H, 0.04)
-    lowness = -(base - base.mean()) / base.std()
+    # the dark basins: smooth basalt in the two near-side basins and the giant basin's inner floor, sinuous rilles
     gv = vec(G[0], G[1]).astype(np.float32)
-    inG = 1.0 - smoothstep(0.35, 0.7, np.arccos(np.clip(P @ gv, -1, 1)) / G[2])  # the giant basin's inner floor
-    M = np.maximum(smoothstep(1.3, 2.0, lowness + 0.5 * n.fbm(P, 5.0, 4, first=20)),
-                   inG * smoothstep(-0.4, 0.5, n.fbm(P, 4.0, 4, first=21)))
-    level = m.g.blur(m.H, 0.02)
-    m.H = m.H * (1 - 0.7 * M) + level * 0.7 * M
-    m.M = M.astype(np.float32)
-    m.epoch(0.2, 0.05, "after the plains", fresh=0.7)
+    inG = (1.0 - smoothstep(0.35, 0.7, np.arccos(np.clip(P @ gv, -1, 1)) / G[2])).astype(np.float32)
+    dark = np.maximum(np.maximum(m.cap(basins[0][0], basins[0][1], basins[0][2] * 0.8, edge=0.3, wobble=0.3),
+                                 m.cap(basins[1][0], basins[1][1], basins[1][2] * 0.75, edge=0.35, wobble=0.35)),
+                      inG * smoothstep(-0.4, 0.5, n.fbm(P, 4.0, 4, first=21)))
+    m.flood(dark, keep=0.18, ridges=0.0005)
+    rilles = []
+    for lat, lon, r in basins[:2] + [(G[0], G[1], G[2] * 0.5)]:
+        for _ in range(2):
+            a = rng.uniform(0, TAU)
+            st = m.g.point(lat, lon, a, r * rng.uniform(0.2, 0.6))
+            v = m.walk(st[0], st[1], rng.uniform(0, TAU), r * rng.uniform(0.6, 1.2), 6.0, rng, corr=0.03)
+            rilles.append((v, np.full(len(v), 0.0035), np.full(len(v), 0.0012)))
+    m.trench(rilles, "valley")
+    m.R_dark = dark
+    m.epoch(0.2, 0.05, "after the seas", fresh=0.7)
     m.degrade(1.0, 0.35)
     m.epoch(0.1, 0.025, "late", fresh=0.9)
     m.degrade(0.6, 0.45)
+    # the Parliament of Craters, the grave ghosts' seat (a landmark): a ring of great overlapping craters, young
+    # enough to be crisp, their floors drowned in dark cold basalt, their rims bright, round a central one
+    prng = np.random.default_rng(0x9A41)
+    pc = (0.18, 0.52)
+    seats = [(pc[0], pc[1], 0.085)]
+    for k in range(8):
+        a = TAU * k / 8 + prng.normal(0, 0.15)
+        la, lo = m.g.point(pc[0], pc[1], a, prng.uniform(0.11, 0.17))
+        seats.append((la, lo, prng.uniform(0.05, 0.085)))
+    for la, lo, r in sorted(seats, key=lambda q: -q[2]):
+        m.crater(la, lo, r, fresh=0.9, inherit=0.95)
+    floors = np.maximum.reduce([m.cap(la, lo, r * 0.62, edge=0.25, wobble=0.15, first=70 + k)
+                                for k, (la, lo, r) in enumerate(seats)])
+    m.flood(floors, fill=0.92, keep=0.3, ridges=0.0002)
+    m.M = np.maximum(m.M - floors, 0)  # (their floors are the Parliament's own dark, not the basins')
+    m.R_parl = m.cap(pc[0], pc[1], 0.27, edge=0.3, wobble=0.2, first=69)
+    m.R_parl_floor = floors
+    m.degrade(0.3, 0.9)
+    # young bright craters with long ray systems crossing the face; the greatest, the Weeping Star
     sec = []
-    for k in range(6):
-        r = rng.uniform(0.012, 0.03) if k else 0.034
-        la, lo = math.asin(rng.uniform(-0.85, 0.85)), rng.uniform(-1.4, 1.4)
+    stars = [(-0.36, -0.28, 0.032, 1.3, 34)] + [(math.asin(rng.uniform(-0.85, 0.85)), rng.uniform(-1.4, 1.4),
+                                                  rng.uniform(0.012, 0.026), 0.8, int(rng.integers(14, 28))) for _ in range(5)]
+    for la, lo, r, k, nr in stars:
         m.crater(la, lo, r, fresh=1.0)
-        sec += m.rays(la, lo, r, 1.0 if k < 3 else 0.6, int(rng.integers(14, 30)))
+        sec += m.rays(la, lo, r, k, nr, long=2.0 if k > 1 else 1.0)
     m.epoch(0.05, 0.012, "young", fresh=1.0)
     for la, lo, r in sec:
         m.crater(la, lo, r, fresh=0.8)
     m.degrade(0.35, 1.0)
+    m.R_rings = np.maximum(m.cap(G[0], G[1], G[2] * 1.45, edge=0.12) * (1 - m.cap(G[0], G[1], G[2] * 1.15, edge=0.1)),
+                           np.maximum.reduce([m.cap(la, lo, r * 1.4, edge=0.15) * (1 - m.cap(la, lo, r * 1.1, edge=0.1))
+                                              for la, lo, r in basins[:2]]))
     print(f"  secunda built in {time.time() - t:.0f}s, {m.stats}")
     return m
+
+
+def paint_secunda(m):
+    """Secunda's colour: warm cream highlands and cooler grey ones, the old white skin, the grey strata it bared, dark
+    basalt basins, near-white young rays, the Parliament's cool grey floors and bright rims."""
+    P, n, H = m.P, m.noise, m.H
+    gy, gx = m.gradients(H)
+    slope = np.sqrt(gx * gx + gy * gy)
+    low = H - m.g.blur(H, 4 * m.g.texel)
+    c = lambda *v: np.array(v, np.float32)
+    warm = smoothstep(-0.8, 0.8, n.fbm(P, 2.2, 4, first=5))[..., None]
+    A = c(0.53, 0.50, 0.43) * (0.65 + 0.35 * warm) + c(0.46, 0.46, 0.45) * 0.35 * (1 - warm)  # cream .. grey
+    ej = m.Ej[..., None]
+    A = A * (1 - 0.3 * ej) + c(0.40, 0.40, 0.41) * 0.3 * ej                    # thrown-out grey strata
+    strata = (0.5 + 0.5 * np.sin(m.Str))[..., None]
+    bared = c(0.33, 0.33, 0.34) * (1 - strata) + c(0.27, 0.27, 0.29) * strata
+    Sk = m.Sk[..., None]
+    A = A * (0.6 + 0.4 * Sk) + bared * (0.4 * (1 - Sk))
+    A = A * (1 - 0.6 * Sk) + c(0.68, 0.67, 0.64) * 0.6 * Sk
+    A = A * (1 - m.Lip[..., None]) + c(0.80, 0.80, 0.78) * m.Lip[..., None]
+    A *= (1.0 - 0.3 * m.Cr)[..., None]
+    sea = np.clip(m.M, 0, 1)[..., None]
+    mott = smoothstep(-0.7, 0.7, n.fbm(P, 12.0, 5, first=9))[..., None]
+    A = A * (1 - sea) + (c(0.17, 0.17, 0.19) * (1 - mott) + c(0.22, 0.22, 0.235) * mott) * sea
+    par = m.R_parl[..., None] * 0.35
+    A = A * (1 - par) + c(0.44, 0.46, 0.50) * par                                 # the Parliament: cool grey
+    pf = m.R_parl_floor[..., None]
+    A = A * (1 - pf) + c(0.19, 0.20, 0.23) * pf                                   # its drowned floors, cold dark
+    F = np.clip(m.F * 0.6 + m.Rv * 0.8, 0, 1.2)[..., None]
+    fr = c(0.98, 0.97, 0.93)
+    A = A * (1 - np.minimum(F, 1)) + fr * np.minimum(F, 1) + (F > 1) * (F - 1) * fr
+    A *= (1.0 + 0.22 * smoothstep(0.08, 0.6, slope) * (1 + 0.6 * m.R_parl))[..., None]
+    A *= (1.0 + 0.06 * np.clip(low / (8 * m.g.texel * 0.05), -1, 1))[..., None]
+    A *= np.exp(0.07 * n.fbm(P, 14.0, 5, first=9) + 0.07 * n.fbm(P, 120.0, 4, first=13))[..., None]
+    A *= m.grain[..., None]
+    rough = 0.6 + 0.25 * m.Sk + 0.2 * m.R_parl - 0.4 * np.clip(m.M, 0, 1) + 0.3 * m.Bo
+    labels = [1 - np.maximum.reduce([m.Sk, sea[..., 0], m.R_parl, np.clip(m.Rv, 0, 1)]), m.Sk, (1 - m.Sk) * 0.55,
+              sea[..., 0], m.R_parl, np.clip(m.Rv, 0, 1), m.R_valleys, m.R_rings]
+    return A, np.clip(rough, 0, 1), labels
 
 
 def az_at(g, G, start, az0):
@@ -791,7 +1135,8 @@ def shade_disc(albedo_mips, relief_mips, relief_scale, size, sun, photo, pix_sca
 
     alb = sample(albedo_mips, u, v, lod)
     rel = sample(relief_mips, u, v, lod)
-    tn = rel[:, :3] * 2 - 1
+    nxy = rel[:, :2] * 2 - 1
+    tn = np.concatenate([nxy, np.sqrt(np.maximum(1 - (nxy ** 2).sum(1, keepdims=True), 0.02))], 1)
     tn /= np.linalg.norm(tn, axis=1, keepdims=True)
     sl, cl, so, co = np.sin(lat), clat, np.sin(lon), np.cos(lon)
     e = np.stack([co, np.zeros_like(co), -so], 1)
@@ -819,7 +1164,7 @@ def shade_disc(albedo_mips, relief_mips, relief_scale, size, sun, photo, pix_sca
         sl2 = np.sqrt(se * se + sn * sn) + 1e-6
         de, dn = se / sl2, sn / sl2
         tanE = su / sl2
-        h0 = (rel[:, 3] * 2 - 1) * relief_scale
+        h0 = ((rel[:, 2] * 65280 + rel[:, 3] * 255) / 65535 * 2 - 1) * relief_scale
         lit = np.ones_like(h0)
         active = (mu0g > -0.03) & (mu0g < 0.45)
         t = max(texel * 1.5, f * 0.75)
@@ -827,7 +1172,8 @@ def shade_disc(albedo_mips, relief_mips, relief_scale, size, sun, photo, pix_sca
             uu = u + de * t / (TAU * np.maximum(clat, 0.05))
             vv = v - dn * t / math.pi
             lk = np.clip(np.log2(max(t * 0.25, f) / texel) * np.ones_like(u), 0, len(relief_mips) - 1)
-            hk = (sample(relief_mips, uu[active], vv[active], lk[active])[:, 3] * 2 - 1) * relief_scale
+            rk = sample(relief_mips, uu[active], vv[active], lk[active])
+            hk = ((rk[:, 2] * 65280 + rk[:, 3] * 255) / 65535 * 2 - 1) * relief_scale
             z = h0[active] + t * tanE[active] + 0.5 * t * t
             lit[active] = np.minimum(lit[active], np.clip((z - hk) / (t * SUN_RAD * 2) + 0.5, 0, 1))
             t *= 1.55
@@ -861,27 +1207,30 @@ def bake(m: Moon, out: Path, preview: bool):
     name, s = m.name, m.s
     t = time.time()
     m.grain = m.micro()
-    A = m.albedo()
+    A, rough, labels = (paint_masser if name == "masser" else paint_secunda)(m)
+    region_map(name, labels, out if preview else None)
     w = face_weight(m.g)[..., None]
     mean = (A * w).sum((0, 1)) / w.sum()
     A *= np.array(TARGET[name], np.float32) / mean
     print(f"  {name} albedo mean {mean.round(4).tolist()} -> {TARGET[name]}, max {A.max():.3f}")
-    alb8 = to_srgb8(A)
+    alb8 = np.concatenate([to_srgb8(A), (rough[..., None] * 255 + 0.5).astype(np.uint8)], -1)
     n = m.normals(s["exaggerate"])
     hp = m.H - m.g.blur(m.H, 0.12)
     scale = RELIEF[name]
     clip = float(np.mean(np.abs(hp) > scale))
     print(f"  {name} local relief: p99.9 {np.percentile(np.abs(hp), 99.9):.4f}, scale {scale}, clipped {clip:.2%}")
     rel = np.empty(n.shape[:2] + (4,), np.uint8)
-    rel[..., :3] = np.clip(n * 127.5 + 127.5, 0, 255).astype(np.uint8)
-    rel[..., 3] = np.clip((hp / scale * 0.5 + 0.5) * 255 + 0.5, 0, 255).astype(np.uint8)
+    rel[..., :2] = np.clip(n[..., :2] * 127.5 + 127.5, 0, 255).astype(np.uint8)
+    h16 = np.clip((hp / scale * 0.5 + 0.5) * 65535 + 0.5, 0, 65535).astype(np.uint32)
+    rel[..., 2] = (h16 >> 8).astype(np.uint8)
+    rel[..., 3] = (h16 & 255).astype(np.uint8)
     out.mkdir(parents=True, exist_ok=True)
-    Image.fromarray(alb8, "RGB").save(out / f"{name}_albedo.png", optimize=True)
+    Image.fromarray(alb8, "RGBA").save(out / f"{name}_albedo.png", optimize=True)
     Image.fromarray(rel, "RGBA").save(out / f"{name}_relief.png", optimize=True)
     for f in ("albedo", "relief"):
         (out / f"{name}_{f}.png.mcmeta").write_text(json.dumps({"texture": {"blur": True}}) + "\n")
     # the decoded maps as the shader sees them (8 bit, gamma 2.2), their mips
-    am = mips((alb8.astype(np.float32) / 255) ** 2.2, 7)
+    am = mips((alb8[..., :3].astype(np.float32) / 255) ** 2.2, 7)
     rm = mips(rel.astype(np.float32) / 255, 7)
     phases(name, am, rm, out)
     detail(name, out)
@@ -891,15 +1240,19 @@ def bake(m: Moon, out: Path, preview: bool):
 
 
 # the tiling detail layers: a tile's size on the sphere (moon radii: 16 of the map's texels; atlas_moons.glsl
+# the detail layers: a tile's size on the sphere (moon radii: 16 of the map's texels; atlas_moons.glsl
 # MASSER_DETAIL_TILE / SECUNDA_DETAIL_TILE) and its texels
 DETAIL_TILE = {"masser": 16 * 2 * math.pi / 4096, "secunda": 16 * 2 * math.pi / 2048}
-DETAIL_SIZE = 512
+DETAIL_SIZE = 1024
 
 
 def detail(name, out, size=DETAIL_SIZE):
-    """The moon's tiling detail (seamless: periodic noise and craters wrapped round the tile): the surface below the
-    map's texels, for a disc magnified past its map. rg the slope (the detail normal's x, y: 0.5 flat), b the albedo
-    factor (0.5: x 1), a the height. Small craters by a power law, boulders, the regolith's grain."""
+    """The moon's detail layer, below the map's texels (for a disc magnified past its map): seamless (periodic noise,
+    craters and cells wrapped round the tile), sampled in the shader warped and at two scales, its strength by the
+    region (the albedo's alpha), so it never shows a repeat. rg the slope (the detail normal's x, y: 0.5 flat), b the
+    albedo factor (0.5: x 1), a the height. Generations of small craters by a power law (round, oblique ellipses with
+    their ejecta thrown downrange, doublets, chains, secondaries round a larger one; the older worn and some drowned to
+    ghosts), flakes of the withered skin with polygonal cracks and lifted lips, boulders, the regolith's grain."""
     rng = np.random.default_rng(0xD7 if name == "masser" else 0xD9)
     k = np.fft.fftfreq(size) * size
     kk = np.sqrt(k[:, None] ** 2 + k[None, :] ** 2)
@@ -909,29 +1262,87 @@ def detail(name, out, size=DETAIL_SIZE):
         z = rng.standard_normal((size, size)) + 1j * rng.standard_normal((size, size))
         f = np.real(np.fft.ifft2(z * kk ** (-beta / 2.0) * (kk > 0.5)))
         return (f / f.std()).astype(np.float32)
-    h = 1.6 * spectral(2.6) + 0.25 * spectral(1.6)  # (height in texels of the tile)
-    yy, xx = np.mgrid[:size, :size].astype(np.float32)
-    # small craters, power law, wrapped
-    n = 1600 if name == "masser" else 2600
-    u = rng.uniform(0, 1, n)
-    rmin, rmax = 1.2, size / 7.0
-    r = rmin * (1 - u * (1 - (rmin / rmax) ** 2)) ** -0.5
-    for i in np.argsort(-r):
-        cx, cy, ri = rng.uniform(0, size), rng.uniform(0, size), r[i]
-        ext = int(ri * 2.6) + 2
+
+    def wear(a, sigma):  # (periodic diffusion: the older generations softened)
+        return ndimage.gaussian_filter(a, sigma, mode="wrap")
+
+    h = 2.0 * spectral(2.6) + 0.3 * spectral(1.6)  # (height in texels of the tile)
+    alb = np.zeros((size, size), np.float32)
+
+    def crater(cx, cy, ri, e=1.0, phi=0.0, ghost=0.0, fresh=0.0):
+        nonlocal h
+        ext = int(ri * e * 2.8) + 2
         x0, y0 = int(cx) - ext, int(cy) - ext
         ys = np.arange(y0, y0 + 2 * ext + 1) % size
         xs = np.arange(x0, x0 + 2 * ext + 1) % size
         dx = (np.arange(x0, x0 + 2 * ext + 1) - cx)[None, :]
         dy = (np.arange(y0, y0 + 2 * ext + 1) - cy)[:, None]
-        x = np.sqrt(dx * dx + dy * dy) / ri
-        depth, rim = 0.32 * ri, 0.07 * ri
+        ang = np.arctan2(dy, dx)
+        d = np.sqrt(dx * dx + dy * dy) / ri
+        x = d * np.sqrt(np.cos(ang - phi) ** 2 / (e * e) + np.sin(ang - phi) ** 2)
+        depth, rim = 0.32 * ri * (1 - ghost), 0.07 * ri
         prof = np.where(x < 1.0, -depth + (depth + rim) * x ** 2, rim * np.maximum(x, 1.0) ** -3 * (x < 2.6))
+        if e > 1.4:  # (the ejecta thrown downrange)
+            prof = np.where(x > 1.0, prof * (1 - 0.85 * smoothstep(0.5, 0.95, -np.cos(ang - phi))), prof)
         a = 0.9 * (1 - smoothstep(0.8, 1.05, x))
         patch = h[np.ix_(ys, xs)]
         ref = patch[x < 0.8].mean() if (x < 0.8).any() else patch.mean()
         h[np.ix_(ys, xs)] = (1 - a) * (patch + np.where(x < 1, rim, prof)) + a * (ref + prof)
-    # boulders: sparse blocks, bright and dark, each a few texels
+        if fresh > 0:
+            alb[np.ix_(ys, xs)] += fresh * 0.25 * np.exp(-np.maximum(x - 0.9, 0) * 1.5) * (x < 2.5)
+
+    def population(nc, rmin, rmax, fresh, ghosts):
+        u = rng.uniform(0, 1, nc)
+        r = rmin * (1 - u * (1 - (rmin / rmax) ** 2)) ** -0.5
+        for i in np.argsort(-r):
+            cx, cy = rng.uniform(0, size, 2)
+            q = rng.uniform()
+            if q < 0.12:  # oblique
+                crater(cx, cy, r[i], rng.uniform(1.2, 1.9), rng.uniform(0, TAU), fresh=fresh)
+            elif q < 0.15:  # a doublet
+                a = rng.uniform(0, TAU)
+                crater(cx, cy, r[i], fresh=fresh)
+                crater(cx + math.cos(a) * r[i] * 2.0, cy + math.sin(a) * r[i] * 2.0, r[i] * rng.uniform(0.5, 1.0), fresh=fresh)
+            elif q < 0.16 and r[i] > 3:  # a chain
+                a, rc = rng.uniform(0, TAU), r[i] * 0.4
+                for j in range(int(rng.integers(5, 12))):
+                    crater(cx + math.cos(a) * rc * 1.8 * j, cy + math.sin(a) * rc * 1.8 * j, rc * rng.uniform(0.7, 1.2), fresh=fresh)
+            else:
+                crater(cx, cy, r[i], ghost=ghosts * float(rng.uniform() < 0.25), fresh=fresh)
+    # three generations, the older worn and some drowned to ghosts
+    population(500, 2.0, size / 6.0, 0.0, 0.85)
+    h = wear(h, 2.2)
+    # the withered skin's flakes: cells (periodic), each lifted a little or not, cracked at the edges, lips lifted
+    cells = rng.uniform(0, size, (90, 2))
+    yy, xx = np.mgrid[:size, :size].astype(np.float32)
+    d1 = np.full((size, size), 1e9, np.float32)
+    d2 = np.full((size, size), 1e9, np.float32)
+    owner = np.zeros((size, size), np.int32)
+    for i, (cx, cy) in enumerate(cells):
+        ddx = np.abs(xx - cx)
+        ddy = np.abs(yy - cy)
+        dd = np.sqrt(np.minimum(ddx, size - ddx) ** 2 + np.minimum(ddy, size - ddy) ** 2)
+        closer = dd < d1
+        d2 = np.where(closer, d1, np.minimum(d2, dd))
+        owner = np.where(closer, i, owner)
+        d1 = np.where(closer, dd, d1)
+    lifted = (rng.uniform(0, 1, len(cells)) < 0.45)[owner]
+    edge = d2 - d1
+    crack = 1.0 - smoothstep(0.0, 2.5, edge)
+    lip = smoothstep(9.0, 2.0, edge) * lifted
+    h += 3.0 * lifted * smoothstep(1.5, 4.0, edge) + 1.2 * lip - 2.0 * crack
+    alb += 0.12 * lifted + 0.10 * lip - 0.18 * crack
+    population(1400, 1.4, size / 9.0, 0.3, 0.4)
+    h = wear(h, 1.0)
+    population(1800, 1.1, size / 14.0, 0.8, 0.0)
+    # secondaries round one larger young crater
+    cx, cy, rr = size * 0.3, size * 0.6, size / 16.0
+    crater(cx, cy, rr, fresh=1.0)
+    for _ in range(140):
+        a, dd = rng.uniform(0, TAU), rr * rng.uniform(1.8, 5.0)
+        crater(cx + math.cos(a) * dd, cy + math.sin(a) * dd, rr * rng.uniform(0.04, 0.12), rng.uniform(1.0, 1.6), a,
+               fresh=0.6)
+    # boulders: sparse blocks, bright and dark, each a few texels; the grain
     white = rng.standard_normal((size, size)).astype(np.float32)
     bould = np.maximum(np.real(np.fft.ifft2(np.fft.fft2(white) * np.exp(-(kk / (size / 5.0)) ** 2))), 0) ** 3
     bould = (bould / (bould.max() + 1e-6)).astype(np.float32)
@@ -939,15 +1350,39 @@ def detail(name, out, size=DETAIL_SIZE):
     gx = (np.roll(h, -1, 1) - np.roll(h, 1, 1)) * 0.5
     gy = (np.roll(h, 1, 0) - np.roll(h, -1, 0)) * 0.5  # (north up: row 0 the top)
     slope = 0.45
-    alb = np.exp(0.10 * spectral(1.4) + 0.05 * white - 0.25 * bould * np.sign(rng.standard_normal((size, size))))
-    alb /= alb.mean()
+    albf = np.exp(0.10 * spectral(1.4) + 0.05 * white + alb - 0.25 * bould * np.sign(rng.standard_normal((size, size))))
+    albf /= albf.mean()
     img = np.empty((size, size, 4), np.uint8)
     img[..., 0] = np.clip(0.5 - gx * slope * 0.5, 0, 1) * 255
     img[..., 1] = np.clip(0.5 - gy * slope * 0.5, 0, 1) * 255
-    img[..., 2] = np.clip(alb * 0.5, 0, 1) * 255
+    img[..., 2] = np.clip(albf * 0.5, 0, 1) * 255
     img[..., 3] = np.clip((h - h.min()) / (h.max() - h.min() + 1e-6), 0, 1) * 255
     Image.fromarray(img, "RGBA").save(out / f"{name}_detail.png", optimize=True)
     (out / f"{name}_detail.png.mcmeta").write_text(json.dumps({"texture": {"blur": True}}) + "\n")
+
+
+def region_map(name, labels, out):
+    """The moon's regions, labelled: each texel the colour of its strongest region (REGIONS), a legend; into WORK."""
+    WORK.mkdir(parents=True, exist_ok=True)
+    names = REGIONS[name]
+    stack = np.stack([np.asarray(l, np.float32) for l in labels], 0)
+    k = np.argmax(stack, 0)
+    cols = np.array([c for _n, c in names], np.uint8)
+    img = cols[k]
+    h, w = img.shape[:2]
+    sc = 1024 / w
+    im = Image.fromarray(img).resize((1024, int(h * sc)), Image.NEAREST)
+    from PIL import ImageDraw
+    sheet = Image.new("RGB", (1024 + 260, max(im.height, 24 * len(names) + 20)), (16, 16, 16))
+    sheet.paste(im, (0, 0))
+    d = ImageDraw.Draw(sheet)
+    for i, (label, c) in enumerate(names):
+        d.rectangle([1034, 10 + 24 * i, 1052, 28 + 24 * i], fill=tuple(int(v) for v in c))
+        d.text((1060, 12 + 24 * i), label, fill=(230, 230, 230))
+    # the face towards Nirn: longitude -90 .. 90
+    d.rectangle([256, 0, 768, im.height - 1], outline=(255, 255, 255))
+    d.text((262, 4), "face towards Nirn", fill=(255, 255, 255))
+    sheet.save(WORK / f"{name}_regions.png")
 
 
 def phases(name, am, rm, out):

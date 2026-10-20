@@ -53,6 +53,47 @@ void main() {
 }
 """
 # the views the game does not draw (the dome, the linear numbers): the same includes, their own main
+# A moon's disc alone through atlas_moons.glsl's moonDisc (its real shading: phases, relief, shadows, the detail
+# layer), lit by a chosen sun: the phase sheets and the close crops. The disc stands high (no horizon illusion); the
+# window ProbeCenter +- ProbeScale in disc radii (x right, y the moon's north).
+MOON_PROBE = """#version 330
+#extension GL_ARB_separate_shader_objects : require
+#include <nirncraft:atlas_look.glsl>
+#include <nirncraft:atlas_air.glsl>
+#include <nirncraft:atlas_sky.glsl>
+#include <nirncraft:atlas_night.glsl>
+uniform vec3 ProbeSun;     // the sun in the disc's frame: x right, y north, z towards the eye
+uniform int ProbeMoon;     // 0 Masser, 1 Secunda
+uniform vec2 ProbeCenter;
+uniform float ProbeScale;
+uniform float ProbeExposure;
+uniform float ProbeRes;
+layout(location = 0) in vec2 texCoord;
+layout(location = 0) out vec4 fragColor;
+void main() {
+    vec3 pos = normalize(vec3(0.0, 0.5, -1.0));
+    vec3 U = normalize(vec3(0.0, 1.0, 0.0) - pos * pos.y), R = normalize(cross(pos, U));
+    vec4 P = ProbeMoon == 0 ? MasserPos : SecundaPos;
+    vec4 up = ProbeMoon == 0 ? MasserUp : SecundaUp;
+    vec4 tint = ProbeMoon == 0 ? MasserTint : SecundaTint;
+    vec4 body = ProbeMoon == 0 ? MasserBody : SecundaBody;
+    float rad = P.w;
+    vec2 q = ProbeCenter + (texCoord * 2.0 - 1.0) * ProbeScale;
+    vec3 dir = normalize(pos + (q.x * R + q.y * U) * tan(rad));
+    float pix = 2.0 * ProbeScale * tan(rad) / ProbeRes;
+    vec3 sun = normalize(ProbeSun.x * R + ProbeSun.y * U - ProbeSun.z * pos);
+    vec4 b = vec4(pos * length(body.xyz), body.w);
+    vec4 none = vec4(0.0);
+    vec4 c = ProbeMoon == 0
+        ? moonDisc(dir, vec4(pos, rad), vec4(U, up.w), vec4(tint.rgb, 1.0), NightMasser, NightMasserRelief,
+                   NightMasserDetail, MASSER_RELIEF, MASSER_DETAIL_TILE, MASSER_PHOTO, MASSER_ALB_LUM, b, none, sun, pix)
+        : moonDisc(dir, vec4(pos, rad), vec4(U, up.w), vec4(tint.rgb, 1.0), NightSecunda, NightSecundaRelief,
+                   NightSecundaDetail, SECUNDA_RELIEF, SECUNDA_DETAIL_TILE, SECUNDA_PHOTO, SECUNDA_ALB_LUM, b, none, sun,
+                   pix);
+    fragColor = vec4(atlasDisplay(c.rgb, ProbeExposure, 0.0), 1.0);
+}
+"""
+
 PROBE = """#version 330
 #extension GL_ARB_separate_shader_objects : require
 #include <nirncraft:atlas_look.glsl>
@@ -194,8 +235,9 @@ class Sky:
         self.emit_prog = prog((core / "atlas_sky_emit.fsh").read_text(encoding="utf-8"))
         self.light_prog = prog((core / "atlas_sky_light.fsh").read_text(encoding="utf-8"))
         self.probe_prog = prog(PROBE)
+        self.moon_prog = prog(MOON_PROBE)
         self.vao = {p: gl.vertex_array(p, []) for p in
-                    (self.view_prog, self.sky_prog, self.emit_prog, self.light_prog, self.probe_prog)}
+                    (self.view_prog, self.sky_prog, self.emit_prog, self.light_prog, self.probe_prog, self.moon_prog)}
         ms = self.core.multiscatter()
         self.ms = gl.texture((32, 32), 4, ms.tobytes(), dtype="f4")
         self.ms.filter = (moderngl.LINEAR, moderngl.LINEAR)
@@ -349,6 +391,41 @@ class Sky:
         img = Image.frombytes("RGBA", (w, h), fbo.read(components=4)).transpose(Image.FLIP_TOP_BOTTOM)
         fbo.release()
         tex.release()
+        return img.convert("RGB")
+
+    def moon(self, which, sun, size=512, center=(0.0, 0.0), scale=1.05, exposure=None, shadows_off=True):
+        """A moon's disc through the game's shader (MOON_PROBE): sun in the disc's frame (x right, y north, z towards
+        the eye), the window centre +- scale (disc radii). The scene's NightInfo / MoonInfo give its radiance; the
+        exposure by default sets the full disc's mean a little under mid-grey."""
+        night = self.m["night"]
+        upw = night[47] if which == 0 else night[59]
+        alb = 0.1404 if which == 0 else 0.1100
+        if exposure is None:
+            exposure = 0.5 / max(upw * alb, 1e-12)
+        if shadows_off:  # (no Nirn shadow nor transit in the probe's own geometry)
+            moons = list(self.m["moons"])
+            moons[17] = 0.0
+            self.ubo_moons.write(np.array(moons, dtype="f4").tobytes())
+        tail = list(self._air_tail)
+        tail[7] = exposure  # (the eye's exposure: the disc's adaptation knee reads it)
+        self.ubo_air.write(np.array(self.coeffs + tail, dtype="f4").tobytes())
+        prog = self.moon_prog
+        prog["ProbeSun"].value = tuple(float(v) for v in sun)
+        prog["ProbeMoon"].value = int(which)
+        prog["ProbeCenter"].value = tuple(float(v) for v in center)
+        prog["ProbeScale"].value = float(scale)
+        prog["ProbeExposure"].value = float(exposure)
+        prog["ProbeRes"].value = float(size)
+        tex = self.gl.texture((size, size), 4)
+        fbo = self.gl.framebuffer([tex])
+        self._bind(prog)
+        fbo.use()
+        self.vao[prog].render(moderngl.TRIANGLES, vertices=3)
+        img = Image.frombytes("RGBA", (size, size), fbo.read(components=4)).transpose(Image.FLIP_TOP_BOTTOM)
+        fbo.release()
+        tex.release()
+        self.ubo_moons.write(np.array(self.m["moons"], dtype="f4").tobytes())
+        self.ubo_air.write(np.array(self.coeffs + self._air_tail, dtype="f4").tobytes())
         return img.convert("RGB")
 
     def dome(self, size, mode, exposure=1.0):

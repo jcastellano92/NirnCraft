@@ -120,9 +120,8 @@ float airSunShareKm(float3 p) {
 float airSunShareAt(float3 pRel) { return airSunShareKm(pRel * frame.eclipseC.x); }
 
 AirPath airIntegrate(float r, float mu, float nuS, float muS, float3 ES, float nuM, float muM, float3 EM, float tEnd,
-                     int steps, bool quadratic, bool ground, float3 dirW) {
-    // (an eclipse: the sun's share at each point of the path, t km of air = t / airMieExt.w blocks along dirW)
-    float kmGeo = frame.eclipseC.x / max(frame.airMieExt.w, 1e-6);
+                     int steps, bool quadratic, bool ground, float3 dirW, float kmGeo) {
+    // (an eclipse: the sun's share at each point of the path, kmGeo km of Nirn a km of air along dirW)
     bool moon = EM.x + EM.y + EM.z > 0.0;
     float g = frame.airMieScat.w;
     float pRS = airPhaseRayleigh(nuS), pMS = airPhaseMie(nuS, g), pRM = airPhaseRayleigh(nuM), pMM = airPhaseMie(nuM, g);
@@ -179,7 +178,8 @@ float3 airSkyRadiance(float3 dir) {
     float tg = airDistanceToGround(r, dir.y);
     float tEnd = tg >= 0.0 ? tg : airDistanceToTop(r, dir.y);
     return airIntegrate(r, dir.y, dot(dir, sun), sun.y, frame.airSun.xyz, dot(dir, moon), moon.y, frame.airMoon.xyz,
-                        tEnd, SKY_STEPS, true, tg >= 0.0, dir).inscatter + NIGHT_GLOW;
+                        tEnd, SKY_STEPS, true, tg >= 0.0, dir, 8.0).inscatter + NIGHT_GLOW;
+    // (the sky's paths at 8 km of Nirn a km of air: atlas_air.glsl AIR_GEO_PER_AIR_KM, the twilight ring's)
 }
 
 // air.hpp aerialPath: the air between the eye and a surface t blocks away along dir
@@ -190,7 +190,8 @@ AirPath airAerial(float3 dir, float t) {
     // (FRAME_LIGHT_LOW, the cheap light: half the steps; the energy-conserving steps keep a long path's total)
     int steps = (frame.dims.z & FRAME_LIGHT_LOW) != 0u ? AERIAL_STEPS / 2 : AERIAL_STEPS;
     AirPath p = airIntegrate(r, dir.y, dot(dir, sun), sun.y, frame.airSun.xyz, dot(dir, moon), moon.y,
-                             frame.airMoon.xyz, tEnd, steps, false, false, dir);
+                             frame.airMoon.xyz, tEnd, steps, false, false, dir,
+                             frame.eclipseC.x / max(frame.airMieExt.w, 1e-6));  // (the world's own places)
     p.inscatter += NIGHT_GLOW * (1.0 - p.transmittance);
     return p;
 }
