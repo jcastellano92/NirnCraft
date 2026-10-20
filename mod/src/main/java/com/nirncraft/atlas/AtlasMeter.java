@@ -45,7 +45,7 @@ final class AtlasMeter {
             .build();
 
     // the eye's range (log2 exposure) and its speeds (seconds to close most of the gap)
-    static final float MIN = -4.5f, MAX = 3.0f, TAU_BRIGHTER = 0.35f, TAU_DARKER = 3.0f, TAU_DARKER_TAIL = 14f;
+    static final float MIN = -4.5f, MAX = 5.0f, TAU_BRIGHTER = 0.35f, TAU_DARKER = 3.0f, TAU_DARKER_TAIL = 14f;
 
     private static TextureTarget grid;
     private static final GpuBuffer[] ring = new GpuBuffer[3];

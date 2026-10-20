@@ -584,7 +584,7 @@ public final class AtlasNearPass {
                     .putVec4(k[6], k[7], k[8], 0f)
                     // w: 1 where a special medium blinds the eye (lava, powder snow, blindness, darkness: vanilla's fog
                     // values stand in for its density), 0 otherwise: the distance haze is the air's alone
-                    .putVec4(k[9], k[10], k[11], specialFog(mc, camState) ? 1f : 0f)
+                    .putVec4(k[9], k[10], k[11], specialFog(mc, camState))
                     .putVec4(sun[0], sun[1], sun[2], seconds)
                     .putVec4(still[0], still[1], still[2], still[3])
                     .putVec4(flow[0], flow[1], flow[2], flow[3])
@@ -632,13 +632,15 @@ public final class AtlasNearPass {
 
     private static final float[] waterTint = {0.25f, 0.46f, 0.89f, 0f};
 
-    private static boolean specialFog(Minecraft mc, net.minecraft.client.renderer.state.level.CameraRenderState cam) {
+    /** The medium around the eye (atlas_water.glsl atlasMedium): 0 the air, 1 lava, 2 powder snow, 3 blindness, 4 darkness. */
+    private static float specialFog(Minecraft mc, net.minecraft.client.renderer.state.level.CameraRenderState cam) {
         var t = cam.fogType;
-        if (t == net.minecraft.world.level.material.FogType.LAVA || t == net.minecraft.world.level.material.FogType.POWDER_SNOW)
-            return true;
+        if (t == net.minecraft.world.level.material.FogType.LAVA) return 1f;
+        if (t == net.minecraft.world.level.material.FogType.POWDER_SNOW) return 2f;
         var p = mc.player;
-        return p != null && (p.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS)
-                || p.hasEffect(net.minecraft.world.effect.MobEffects.DARKNESS));
+        if (p != null && p.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS)) return 3f;
+        if (p != null && p.hasEffect(net.minecraft.world.effect.MobEffects.DARKNESS)) return 4f;
+        return 0f;
     }
     private static boolean waterTintSet;
     private static long waterTintFrame;

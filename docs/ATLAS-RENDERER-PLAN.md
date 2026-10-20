@@ -377,6 +377,15 @@ The full checklist from R1, every item checked live; the owner flies it.
   very low light, a look choice. Order of influence for a night's look: darkness and cloud, whether a moon is up, its
   phase and height, the aurora's strength, then haze and the land's reflectivity or cover.
 
+- **Physical light with pre-exposure (next lighting foundation, 2026-10-20).** The owner asked why moonlight is
+  compressed: it is (the moon ~1/30 of the sun, torches only ~40x a full moon, since 01105c5a ~160x), because a screen
+  cannot hold the eye's million-to-one range and our RGBA16F buffers cannot hold physical moonlight (about 1e-6 of
+  daylight: below half precision's useful range). The fix: physical values everywhere (sun, moons by phase and height,
+  starlight and airglow, torches at about 1/1000 of daylight, atlas's far lights the same) and the eye's exposure
+  applied while shading (pre-exposure: the stored light always in a displayable range), the eye's real range and speeds
+  (rods over minutes), night vision by luminance. Moonless near black, a full moon dim and grey after adaptation,
+  torches dominating by their real ratio, out of a lit town into a moonlit forest blinded for a moment.
+
 ## Parked (off the renderer goal, for later)
 
 - Client-owned world: x-ray from a client that generates the world (the public and secret split decides it), the hash

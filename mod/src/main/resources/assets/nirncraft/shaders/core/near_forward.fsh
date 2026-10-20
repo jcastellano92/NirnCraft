@@ -217,7 +217,7 @@ void main() {
             rgb = atlasDisplay(litW, Look.x, Look.y);
             float dist2 = length(viewPos);
             rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist2, viewPos / max(dist2, 1e-3))
-                : mix(rgb, FogColor.rgb, linear_fog_value(dist2, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a * Ground.w);
+                : atlasMedium(rgb, dist2);
             fragColor = vec4(rgb, mix(0.75, 0.95, smoothstep(0.3, 0.8, streak)));
             return;
         }
@@ -294,6 +294,6 @@ void main() {
     }
     float dist = length(viewPos);
     rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist, viewPos / max(dist, 1e-3))
-        : mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a * Ground.w);
+        : atlasMedium(rgb, dist);
     fragColor = vec4(rgb, color.a);
 }

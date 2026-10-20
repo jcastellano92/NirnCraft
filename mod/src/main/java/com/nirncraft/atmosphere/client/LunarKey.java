@@ -27,9 +27,9 @@ public final class LunarKey {
         for (int i = 0; i < 3; i++) dir[i] = masser[i] + (secunda[i] - masser[i]) * second;
         double len = Math.max(1e-6, Math.sqrt(dot(dir, dir)));
         return new float[] {(float) (dir[0] / len), (float) (dir[1] / len), (float) (dir[2] / len),
-                (float) ((1.0 * wx * 0.80 + 0.78 * wy * 0.20) * 0.16),
-                (float) ((0.72 * wx * 0.80 + 0.88 * wy * 0.20) * 0.16),
-                (float) ((0.78 * wx * 0.80 + 1.0 * wy * 0.20) * 0.16)};
+                (float) ((1.0 * wx * 0.80 + 0.78 * wy * 0.20) * 0.04),
+                (float) ((0.72 * wx * 0.80 + 0.88 * wy * 0.20) * 0.04),
+                (float) ((0.78 * wx * 0.80 + 1.0 * wy * 0.20) * 0.04)};
     }
 
     private static double[] rotate(double[] p, double[] k, double a) {

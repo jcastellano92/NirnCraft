@@ -118,4 +118,23 @@ vec3 atlasWaterShafts(vec3 dir, float dist) {
     return atlasDisplay(inLight * atlasWaterScatter() * 8.0, Look.x, Look.y);
 }
 
+// The other media the eye can be in (NearInfo Ground.w: 1 lava, 2 powder snow, 3 blindness, 4 darkness), drawn as media
+// (exponential, coloured, lit) rather than vanilla's linear fog: their density from vanilla's fog distance, which carries
+// the effects' fade-in and the darkness effect's pulse. Lava glows orange from within, powder snow scatters the sky's and
+// the sun's light white, blindness and darkness swallow everything.
+int atlasMediumKind() {
+    return int(Ground.w + 0.5);
+}
+
+vec3 atlasMedium(vec3 rgb, float dist) {
+    int k = atlasMediumKind();
+    if (k == 0) return rgb;
+    float ext = 3.0 / max(FogEnvironmentalEnd, 0.25);
+    float T = exp(-ext * dist);
+    vec3 own = vec3(0.0);
+    if (k == 1) own = atlasDisplay(vec3(3.2, 1.0, 0.18), Look.x, Look.y);  // molten rock's own glow
+    else if (k == 2) own = atlasDisplay((SkyUp.rgb + KeyRad.rgb * max(KeyDir.y, 0.0) * 0.4) * 0.9, Look.x, Look.y);
+    return rgb * T + own * (1.0 - T);
+}
+
 #endif

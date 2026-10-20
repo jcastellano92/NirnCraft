@@ -85,7 +85,8 @@ void main() {
         return;
     }
 #endif
-    if (Ground.w < 0.5) { fragColor = color; return; }  // (no vanilla distance fog under our look: the air's haze is the resolve's)
+    // (our look: no vanilla distance fog, the air's haze is the resolve's; a medium if the eye is in one)
+    if (Look.z > 0.5) { fragColor = vec4(atlasMedium(color.rgb, sphericalVertexDistance), color.a); return; }
     fragColor = apply_fog(color, sphericalVertexDistance, cylindricalVertexDistance, FogEnvironmentalStart,
                           FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, fogColor);
 #endif

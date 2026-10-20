@@ -263,7 +263,8 @@ float vanillaFogShare() {
 
 vec3 environmentalFog(vec3 rgb, float dist, vec3 dir) {
     if (atlasEyeInWater()) return atlasUnderwater(rgb, dist, dir) + atlasWaterShafts(dir, dist);
-    return mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a * vanillaFogShare());
+    if (Look.z > 0.5) return atlasMedium(rgb, dist);  // our look: the air's haze is atlas's; a medium if the eye is in one
+    return mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
 }
 
 void main() {
@@ -343,7 +344,8 @@ void main() {
     float edge = max(FogRenderDistanceEnd, 16.0);
     float f = clamp(linear_fog_value(min(d, edge), FogEnvironmentalStart, FogEnvironmentalEnd), 0.0, 1.0) * FogColor.a * vanillaFogShare();
     vec3 dirF = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
-    vec3 fogged = atlasEyeInWater() ? atlasUnderwater(ldr, d, dirF) + atlasWaterShafts(dirF, d) : mix(ldr, FogColor.rgb, f);
+    vec3 fogged = atlasEyeInWater() ? atlasUnderwater(ldr, d, dirF) + atlasWaterShafts(dirF, d)
+                : own ? atlasMedium(ldr, d) : mix(ldr, FogColor.rgb, f);
     if (!atlasEyeInWater() && own) {  // (the far field: the glare a faint veil, as over near geometry)
         // the haze in front of far terrain is the sky's light too: dimmed where the terrain shadows the air
         float crF = crepuscular(dirF, d);
