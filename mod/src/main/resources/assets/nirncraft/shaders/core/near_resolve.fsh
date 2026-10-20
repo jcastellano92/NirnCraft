@@ -45,6 +45,44 @@ float sunVisAt(vec3 p) {
     return texture(ShadowMap, uv).r <= s.z + 0.0015 ? 1.0 : 0.0;  // reverse-Z: an occluder nearer the light is larger
 }
 
+// The sun's glare: the disc is small but so bright the eye (and a camera) sees a large glowing blob round it (the
+// scattering in the eye's lens and the air's forward glow): a sharp core and a wide halo, as bright and as coloured as
+// the sun's light through the air (KeyRad: white and large at midday, dim and red low over the horizon, where the disc
+// itself shows), dimmed by how much of the sun the near and far geometry hides (taps round its place on screen).
+// Linear radiance, added to every pixel; dir unit camera-relative.
+float sunCover(vec2 uv) {
+    float d = texture(Sampler3, uv).r;  // the near field (reverse-Z: 0 = nothing)
+    if (d > 0.0) return 1.0;
+    return texture(Sampler5, uv).r < 1e29 ? 1.0 : 0.0;  // the far field
+}
+
+vec3 sunGlare(vec3 dir) {
+    vec3 S = normalize(SunDir.xyz);
+    if (S.y < -0.06 || dot(normalize(KeyDir.xyz), S) < 0.99) return vec3(0.0);  // (the key is the moon at night)
+    // the sun on screen, and how much of it shows
+    mat4 viewRot = transpose(InvViewRot);  // (a rotation)
+    vec4 c = ProjMat * (viewRot * vec4(S * 1000.0, 1.0));
+    float vis = 1.0;
+    if (c.w > 0.0) {
+        vec2 su = c.xy / c.w * 0.5 + 0.5;
+        if (all(greaterThan(su, vec2(0.0))) && all(lessThan(su, vec2(1.0)))) {
+            float covered = 0.0;
+            const int TAPS = 12;
+            for (int k = 0; k < TAPS; k++) {
+                float a = float(k) * 2.39996, r = 0.012 * sqrt((float(k) + 0.5) / float(TAPS));
+                covered += sunCover(su + vec2(cos(a), sin(a)) * vec2(r * float(textureSize(Sampler3, 0).y) / float(textureSize(Sampler3, 0).x), r));
+            }
+            vis = 1.0 - covered / float(TAPS);
+        }
+    }
+    float th = acos(clamp(dot(dir, S), -1.0, 1.0));  // radians from the sun's centre
+    float core = exp(-th / 0.012);
+    float halo = 0.12 / (1.0 + pow(th / 0.06, 2.0));
+    // low over the horizon the air takes the glare's spread with the light: a smaller, softer blob
+    float low = smoothstep(0.0, 0.25, S.y);
+    return KeyRad.rgb * vis * (core * 1.6 + halo * mix(0.4, 1.0, low));
+}
+
 // The sun's light scattered towards the eye by the air between it and what it sees, dist blocks along unit camera-
 // relative dir, shadowed by everything the shadow map holds: beams through leaves, through windows and doors, down a
 // cave's skylight; a lit haze where nothing is in the way. Linear radiance (before the display). A march through the
@@ -202,7 +240,7 @@ void main() {
             }
             // the light in the air in front of it (not under water: the water's own light there)
             vec3 dirB = normalize((InvViewRot * vec4(viewRay(texCoord, nearDepth), 0.0)).xyz);
-            if (!atlasEyeInWater()) radiance += airBeams(dirB, dist);
+            if (!atlasEyeInWater()) radiance += airBeams(dirB, dist) + sunGlare(dirB);
             rgb = atlasDisplay(radiance, Look.x, Look.y);
         } else {
             // stage A: vanilla's own light curve (the lightmap: day, night, flicker, night vision, effects) and its
@@ -229,7 +267,7 @@ void main() {
         // the sky: what the sky pass drew stays, the light in the air in front of it added (beams against the sky, up
         // through a canopy or a cave's skylight)
         vec3 dirS = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
-        vec3 b = Look.z > 0.5 ? atlasDisplay(airBeams(dirS, 80.0), Look.x, Look.y) : vec3(0.0);
+        vec3 b = Look.z > 0.5 && !atlasEyeInWater() ? atlasDisplay(airBeams(dirS, 80.0) + sunGlare(dirS), Look.x, Look.y) : vec3(0.0);
         if (dot(b, vec3(1.0)) < 1e-4) discard;
         fragColor = vec4(b, 0.0);  // (premultiplied: added over the sky)
         gl_FragDepth = 0.0;
@@ -243,7 +281,7 @@ void main() {
     float f = clamp(linear_fog_value(min(d, edge), FogEnvironmentalStart, FogEnvironmentalEnd), 0.0, 1.0) * FogColor.a;
     vec3 dirF = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
     vec3 fogged = atlasEyeInWater() ? atlasUnderwater(ldr, d, dirF) + atlasWaterShafts(dirF, d) : mix(ldr, FogColor.rgb, f);
-    if (!atlasEyeInWater() && own) fogged += atlasDisplay(airBeams(dirF, d), Look.x, Look.y);
+    if (!atlasEyeInWater() && own) fogged += atlasDisplay(airBeams(dirF, d) + sunGlare(dirF), Look.x, Look.y);
     // (under water nothing behind is seen: partial coverage let the sky pass's sky through, a line and the world far off)
     fragColor = atlasEyeInWater() ? vec4(fogged, 1.0) : vec4(fogged * c.a, c.a);
     // its depth: the point at that distance along this pixel's ray (beyond the projection's far plane: 0)

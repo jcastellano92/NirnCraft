@@ -68,7 +68,10 @@ final class AtlasSky implements CustomSkyboxRenderer {
             .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
             .withCull(false)
             .withDepthStencilState(Optional.empty())
-            .withColorTargetState(ColorTargetState.DEFAULT)
+            // the sky-view LUT's own format (RGBA16F): the default state declares RGBA8, and the pass refused it at the
+            // first sky (the game crashed on loading the world)
+            .withColorTargetState(new ColorTargetState(Optional.empty(), com.mojang.renderpearl.api.GpuFormat.RGBA16_FLOAT,
+                    ColorTargetState.WRITE_ALL))
             .build();
 
     private MappableRingBuffer info, airInfo;
