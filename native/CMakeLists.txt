@@ -69,6 +69,33 @@ add_custom_command(
   COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry sunMapMain -stage compute -O3 -o "${GEN}/atlas_sunmap.spv"
   DEPENDS ${KERNEL_DEPS} COMMENT "slangc atlas_far:sunMapMain -> SPIR-V")
 add_custom_command(
+  OUTPUT "${GEN}/atlas_nearlight.spv"
+  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry nearLightMain -stage compute -O3 -o "${GEN}/atlas_nearlight.spv"
+  DEPENDS ${KERNEL_DEPS} COMMENT "slangc atlas_far:nearLightMain -> SPIR-V")
+add_custom_command(
+  OUTPUT "${GEN}/atlas_nearlight_spv.h"
+  COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_nearlight.spv -DOUT=${GEN}/atlas_nearlight_spv.h -DNAME=atlas_nearlight_spv
+          -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+  DEPENDS "${GEN}/atlas_nearlight.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+add_custom_command(
+  OUTPUT "${GEN}/atlas_nearup.spv"
+  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry nearUpsampleMain -stage compute -O3 -o "${GEN}/atlas_nearup.spv"
+  DEPENDS ${KERNEL_DEPS} COMMENT "slangc atlas_far:nearUpsampleMain -> SPIR-V")
+add_custom_command(
+  OUTPUT "${GEN}/atlas_nearup_spv.h"
+  COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_nearup.spv -DOUT=${GEN}/atlas_nearup_spv.h -DNAME=atlas_nearup_spv
+          -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+  DEPENDS "${GEN}/atlas_nearup.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+add_custom_command(
+  OUTPUT "${GEN}/atlas_neartemporal.spv"
+  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry nearTemporalMain -stage compute -O3 -o "${GEN}/atlas_neartemporal.spv"
+  DEPENDS ${KERNEL_DEPS} COMMENT "slangc atlas_far:nearTemporalMain -> SPIR-V")
+add_custom_command(
+  OUTPUT "${GEN}/atlas_neartemporal_spv.h"
+  COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_neartemporal.spv -DOUT=${GEN}/atlas_neartemporal_spv.h -DNAME=atlas_neartemporal_spv
+          -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+  DEPENDS "${GEN}/atlas_neartemporal.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+add_custom_command(
   OUTPUT "${GEN}/atlas_sunmap_spv.h"
   COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_sunmap.spv -DOUT=${GEN}/atlas_sunmap_spv.h -DNAME=atlas_sunmap_spv
           -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
@@ -103,7 +130,8 @@ add_library(atlas_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/groups.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
   src/gl_api.cpp src/lights.cpp
   "${GEN}/atlas_far_cpu.cpp" "${GEN}/atlas_far_spv.h" "${GEN}/atlas_publish_spv.h" "${GEN}/atlas_ingest_spv.h"
-  "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h")
+  "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h" "${GEN}/atlas_nearlight_spv.h" "${GEN}/atlas_nearup_spv.h"
+  "${GEN}/atlas_neartemporal_spv.h")
 target_include_directories(atlas_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${ATLAS_VK_INCLUDE}")
 target_compile_definitions(atlas_core PRIVATE ATLAS_BUILD ATLAS_VERSION_STRING="${PROJECT_VERSION}" VK_NO_PROTOTYPES)
 target_link_libraries(atlas_core PRIVATE ${ATLAS_GL_LIBS} Threads::Threads)

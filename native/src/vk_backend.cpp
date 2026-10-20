@@ -32,6 +32,9 @@
 
 #include "atlas_cloud_spv.h"
 #include "atlas_sunmap_spv.h"    // generated: the same kernel source's cloudMain entry
+#include "atlas_nearlight_spv.h"  // generated: its nearLightMain and nearUpsampleMain (the half-resolution near light)
+#include "atlas_nearup_spv.h"
+#include "atlas_neartemporal_spv.h"
 #include "atlas_far_spv.h"      // generated: atlas_far_spv[], atlas_far_spv_size (bytes)
 #include "atlas_ingest_spv.h"   // generated
 #include "atlas_publish_spv.h"  // generated
@@ -174,13 +177,14 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 28;
+constexpr uint32_t BINDINGS = 29;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
                    B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14, B_ACTORS = 15, B_HEIGHTMIP = 16, B_CLOUD = 17,
                    B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20, B_NOISE_TEX = 21, B_PREV_CLOUD = 22,
-                   B_PREV_CLOUD_DEPTH = 23, B_SUNMAP = 24, B_GROUPS = 25, B_NEAR_INFO = 26, B_NEAR_LIGHT = 27;
+                   B_PREV_CLOUD_DEPTH = 23, B_SUNMAP = 24, B_GROUPS = 25, B_NEAR_INFO = 26, B_NEAR_LIGHT = 27,
+                   B_PREV_NEAR_LIGHT = 28;
 // the scene's buffers (two copies, staged off the render thread)
 constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP, B_GROUPS};
 bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP || b == B_GROUPS; }
@@ -289,6 +293,7 @@ struct Slot {
     uint64_t frameNumber = 0;  // of its last submission
     int boundCopy = -1;        // scene copy its far descriptor set points at
     VkBuffer boundPrev = VK_NULL_HANDLE;  // the previous frame's surface buffer its cloud pass reads
+    VkBuffer boundPrevNear = VK_NULL_HANDLE;  // and its near light (nearTemporalMain)
     bool surfaceFresh = true;  // its surface buffer was (re)allocated: clear to "no surface" before use
     uint32_t boundGeneration = 0;
     VkCommandBuffer cmd = VK_NULL_HANDLE;
@@ -342,6 +347,12 @@ public:
             if (cloudShader_) vkDestroyShaderModule(dev_, cloudShader_, nullptr);
             if (sunPipe_) vkDestroyPipeline(dev_, sunPipe_, nullptr);
             if (sunShader_) vkDestroyShaderModule(dev_, sunShader_, nullptr);
+            if (nearLightPipe_) vkDestroyPipeline(dev_, nearLightPipe_, nullptr);
+            if (nearLightShader_) vkDestroyShaderModule(dev_, nearLightShader_, nullptr);
+            if (nearUpPipe_) vkDestroyPipeline(dev_, nearUpPipe_, nullptr);
+            if (nearUpShader_) vkDestroyShaderModule(dev_, nearUpShader_, nullptr);
+            if (nearTempPipe_) vkDestroyPipeline(dev_, nearTempPipe_, nullptr);
+            if (nearTempShader_) vkDestroyShaderModule(dev_, nearTempShader_, nullptr);
             destroyPipe(farPipe_, farLayout_, farSetLayout_, farShader_);
             destroyPipe(publishPipe_, publishLayout_, publishSetLayout_, publishShader_);
             destroyPipe(ingestPipe_, ingestLayout_, ingestSetLayout_, ingestShader_);
@@ -425,6 +436,25 @@ public:
             cp.stage.module = sunShader_;
             if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &sunPipe_) != VK_SUCCESS)
                 return fail(err, "sun map pipeline");
+            // and the near light at half resolution, then its upsample
+            smci.codeSize = atlas_nearlight_spv_size;
+            smci.pCode = atlas_nearlight_spv;
+            if (vkCreateShaderModule(dev_, &smci, nullptr, &nearLightShader_) != VK_SUCCESS) return fail(err, "near light shader");
+            cp.stage.module = nearLightShader_;
+            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &nearLightPipe_) != VK_SUCCESS)
+                return fail(err, "near light pipeline");
+            smci.codeSize = atlas_nearup_spv_size;
+            smci.pCode = atlas_nearup_spv;
+            if (vkCreateShaderModule(dev_, &smci, nullptr, &nearUpShader_) != VK_SUCCESS) return fail(err, "near upsample shader");
+            cp.stage.module = nearUpShader_;
+            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &nearUpPipe_) != VK_SUCCESS)
+                return fail(err, "near upsample pipeline");
+            smci.codeSize = atlas_neartemporal_spv_size;
+            smci.pCode = atlas_neartemporal_spv;
+            if (vkCreateShaderModule(dev_, &smci, nullptr, &nearTempShader_) != VK_SUCCESS) return fail(err, "near temporal shader");
+            cp.stage.module = nearTempShader_;
+            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &nearTempPipe_) != VK_SUCCESS)
+                return fail(err, "near temporal pipeline");
         }
         std::vector<VkDescriptorType> pubTypes = {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
@@ -651,6 +681,12 @@ public:
         if (nearOn) frame.dims[2] |= 0x20u;  // FRAME_NEAR_DEPTH: read from the shared image
         else frame.dims[2] &= ~0x20u;
         if (!nearLight) frame.dims[2] &= ~FRAME_NEAR_LIGHT_BIT;
+        // the near light at half resolution (atlas_far.slang nearLightMain); ATLAS_NEAR_FULLRES=1: every pixel traced
+        // in the far pass, as the host render does (read each frame: atlas_gl_test switches it for its parity check)
+        const char* fullEnv = std::getenv("ATLAS_NEAR_FULLRES");
+        const bool nearFull = fullEnv && *fullEnv == '1';
+        if (nearLight && !nearFull) frame.dims[2] |= FRAME_NEAR_SPLIT_BIT;
+        else frame.dims[2] &= ~FRAME_NEAR_SPLIT_BIT;
         hostNearInputs_ = host && nearLight;
         const Mem nearKind = hostNearInputs_ ? Mem::HostWrite : Mem::DeviceOnly;
         if (!prepare(s, in, frame, false, err)) return false;
@@ -699,7 +735,7 @@ public:
             vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
             computeBarrier(s.cmd);
         }
-        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
+        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0);
         computeBarrier(s.cmd);
         if (sunDispatchRows_ && sunImage_.image) copySunToImage(s.cmd);
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
@@ -748,7 +784,7 @@ public:
         if (!ensure(s.hostOut, bytes, false, Mem::HostRead, err)) return false;
         begin(s);
         hostImageBarrier(s.cmd, true);
-        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
+        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0);
         computeBarrier(s.cmd);
         uint32_t pcv[3] = {w, h, nearLight ? 1u : 0u};
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
@@ -1383,17 +1419,19 @@ private:
             f.seekg(0);
             return bool(f.read(reinterpret_cast<char*>(out.data()), n)) && out[0] == 0x07230203u;
         };
-        std::vector<uint32_t> code[3];
-        const char* names[3] = {"atlas_far.spv", "atlas_cloud.spv", "atlas_sunmap.spv"};
-        for (int i = 0; i < 3; i++)
+        constexpr int K = 6;
+        std::vector<uint32_t> code[K];
+        const char* names[K] = {"atlas_far.spv", "atlas_cloud.spv", "atlas_sunmap.spv", "atlas_nearlight.spv",
+                                "atlas_nearup.spv", "atlas_neartemporal.spv"};
+        for (int i = 0; i < K; i++)
             if (!read(names[i], code[i])) {
                 std::fprintf(stderr, "[atlas] shader reload: %s unreadable, kept the running shaders\n", names[i]);
                 return;
             }
-        VkShaderModule mod[3] = {};
-        VkPipeline pipe[3] = {};
+        VkShaderModule mod[K] = {};
+        VkPipeline pipe[K] = {};
         bool ok = true;
-        for (int i = 0; i < 3 && ok; i++) {
+        for (int i = 0; i < K && ok; i++) {
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
             smci.codeSize = code[i].size() * 4;
             smci.pCode = code[i].data();
@@ -1408,7 +1446,7 @@ private:
             ok = vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipe[i]) == VK_SUCCESS;
         }
         if (!ok) {
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < K; i++) {
                 if (pipe[i]) vkDestroyPipeline(dev_, pipe[i], nullptr);
                 if (mod[i]) vkDestroyShaderModule(dev_, mod[i], nullptr);
             }
@@ -1416,9 +1454,10 @@ private:
             return;
         }
         vkDeviceWaitIdle(dev_);  // frames in flight still use the old pipelines
-        VkPipeline* pipes[3] = {&farPipe_, &cloudPipe_, &sunPipe_};
-        VkShaderModule* mods[3] = {&farShader_, &cloudShader_, &sunShader_};
-        for (int i = 0; i < 3; i++) {
+        VkPipeline* pipes[K] = {&farPipe_, &cloudPipe_, &sunPipe_, &nearLightPipe_, &nearUpPipe_, &nearTempPipe_};
+        VkShaderModule* mods[K] = {&farShader_, &cloudShader_, &sunShader_, &nearLightShader_, &nearUpShader_,
+                                   &nearTempShader_};
+        for (int i = 0; i < K; i++) {
             if (*pipes[i]) vkDestroyPipeline(dev_, *pipes[i], nullptr);
             if (*mods[i]) vkDestroyShaderModule(dev_, *mods[i], nullptr);
             *pipes[i] = pipe[i];
@@ -1513,8 +1552,11 @@ private:
         const SceneCopy& sc = copies_[current_];
         int prev = prevSlot_ < 0 ? int(&s - slots_) : prevSlot_;
         VkBuffer prevBuf = slots_[prev].bufs[B_SURFACE].buf;  // (its cloud buffers are allocated with it)
-        if (s.farDirty || s.boundCopy != current_ || s.boundGeneration != sc.generation || sharedDirty_ || s.boundPrev != prevBuf) {
+        VkBuffer prevNear = slots_[prev].bufs[B_NEAR_LIGHT].buf;  // (not: it grows when the near light turns on)
+        if (s.farDirty || s.boundCopy != current_ || s.boundGeneration != sc.generation || sharedDirty_ || s.boundPrev != prevBuf ||
+            s.boundPrevNear != prevNear) {
             s.boundPrev = prevBuf;
+            s.boundPrevNear = prevNear;
             VkDescriptorBufferInfo info[BINDINGS];
             VkWriteDescriptorSet wr[BINDINGS];
             VkDescriptorImageInfo noiseInfo{noiseSampler_, noiseView_, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
@@ -1532,6 +1574,7 @@ private:
                 const Buf& b = i == B_PREV_SURFACE ? ps.bufs[B_SURFACE]
                              : i == B_PREV_CLOUD ? ps.bufs[B_CLOUD]
                              : i == B_PREV_CLOUD_DEPTH ? ps.bufs[B_CLOUD_DEPTH]
+                             : i == B_PREV_NEAR_LIGHT ? (ps.bufs[B_NEAR_LIGHT].buf ? ps.bufs[B_NEAR_LIGHT] : s.bufs[B_NEAR_LIGHT])
                              : perSlot(i) ? s.bufs[i] : (isScene(i) ? sc.bufs[i] : shared_[i]);
                 info[i] = {b.buf, 0, i == B_FRAME ? uniformRange(b) : storageRange(b)};
                 wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
@@ -1617,7 +1660,7 @@ private:
         }
     }
 
-    void recordFar(Slot& s, uint32_t w, uint32_t h, bool clouds) {
+    void recordFar(Slot& s, uint32_t w, uint32_t h, bool clouds, bool nearSplit = false) {
         // the previous frame (other slot) wrote the surfaces this one's cloud pass reads, and will next overwrite
         // ours: order against everything submitted before
         computeBarrier(s.cmd);
@@ -1650,6 +1693,19 @@ private:
         }
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farPipe_);
         vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+        if (nearSplit) {
+            // the near light: one pixel of each 2 x 2 traced, then the other three filled (both after the far pass:
+            // the upsample darkens the air it wrote over covered surfaces)
+            computeBarrier(s.cmd);
+            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, nearLightPipe_);
+            vkCmdDispatch(s.cmd, ((w + 1) / 2 + 7) / 8, ((h + 1) / 2 + 7) / 8, 1);
+            computeBarrier(s.cmd);
+            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, nearUpPipe_);
+            vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+            computeBarrier(s.cmd);  // then its history (every pixel complete before any is blended)
+            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, nearTempPipe_);
+            vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+        }
         if (sunDispatchRows_) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, sunPipe_);
             vkCmdDispatch(s.cmd, (sunSize_ + 7) / 8, (sunDispatchRows_ + 1 + 7) / 8, 1);
@@ -2195,6 +2251,10 @@ private:
     VkPipeline cloudPipe_ = VK_NULL_HANDLE;
     VkPipeline sunPipe_ = VK_NULL_HANDLE;
     VkShaderModule sunShader_ = VK_NULL_HANDLE;
+    VkPipeline nearLightPipe_ = VK_NULL_HANDLE, nearUpPipe_ = VK_NULL_HANDLE;
+    VkShaderModule nearLightShader_ = VK_NULL_HANDLE, nearUpShader_ = VK_NULL_HANDLE;
+    VkPipeline nearTempPipe_ = VK_NULL_HANDLE;
+    VkShaderModule nearTempShader_ = VK_NULL_HANDLE;
     uint32_t sunSize_ = 0;          // size of the sun map buffer / image now
     uint32_t sunDispatchRows_ = 0;  // this frame's sun map rows (0: no pass)
     bool sunFresh_ = false;         // the sun map buffer was (re)allocated: zero it before the next pass

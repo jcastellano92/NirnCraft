@@ -121,7 +121,7 @@ final class AtlasEditsClient {
             AtlasSections.Decoded d = ready.poll();
             boolean client = false;
             if (d == null) {
-                d = AtlasClientSections.poll();  // the loaded chunks first: what the near light traces
+                d = AtlasClientSections.poll(viewX, viewZ);  // the loaded chunks first, nearest first: what the near light traces
                 client = d != null;
             }
             if (d == null) {

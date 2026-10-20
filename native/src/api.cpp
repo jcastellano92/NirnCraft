@@ -638,13 +638,14 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.dims[2] = f->flags;
     g.dims[3] = uint32_t(in.scene->lodCount);
     g.weatherParams[0] = ctx->rainFactor;
-    // temporal clouds: last frame's view-projection (inverted back from its inverse) and camera, if comparable
+    // last frame's view-projection (inverted back from its inverse) and camera, whenever the frames are comparable:
+    // the near light's history reprojects through them (with or without clouds: weather off left it no camera, and
+    // every pixel's history was refused); temporal.y the clouds' own history, which also needs the same cloud pass
     uint32_t cloudFlags = f->flags & (ATLAS_FRAME_CLOUDS | ATLAS_FRAME_CLOUDS_QUARTER);
-    bool valid = ctx->haveHistory && ctx->prevW == f->width && ctx->prevH == f->height &&
-                 ctx->prevCloudFlags == cloudFlags && (cloudFlags & ATLAS_FRAME_CLOUDS);
-    if (valid && invert4(ctx->prevInvVP, g.prevViewProj)) {
+    bool comparable = ctx->haveHistory && ctx->prevW == f->width && ctx->prevH == f->height;
+    if (comparable && invert4(ctx->prevInvVP, g.prevViewProj)) {
         for (int i = 0; i < 3; i++) g.prevCam[i] = float(ctx->prevCam[i] - double(g.camInt[i]));
-        g.temporal[1] = 1;
+        if (ctx->prevCloudFlags == cloudFlags && (cloudFlags & ATLAS_FRAME_CLOUDS)) g.temporal[1] = 1;
     }
     g.temporal[0] = ctx->frameIndex;
     g.temporal[2] = nowMs();  // World's clock: refinement fades (RegionGpu.runs.w) are stamped with it

@@ -32,5 +32,9 @@ void publishMain(uint3 id : SV_DispatchThreadID) {
     dstColor[dst] = srcColor[i];
     dstNormal[dst] = unpack8(srcNormal[i]);
     dstDepth[dst] = srcDepth[i];
-    if (pc.nearLight != 0u) dstNearLight[dst] = srcNearLight[i];
+    // (a < 0: a pixel the half-resolution near light found under cover, atlas_far.slang nearLightMain)
+    if (pc.nearLight != 0u) {
+        float4 nl = srcNearLight[i];
+        dstNearLight[dst] = float4(nl.rgb, max(nl.a, 0.0));
+    }
 }

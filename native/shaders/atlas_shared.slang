@@ -21,6 +21,8 @@ static const uint FRAME_GROUPS = 0x4000u;      // (abi 0.14) primary rays trace 
 static const uint FRAME_VANILLA_LIGHT = 0x10000u;  // (abi 0.14, optional) Minecraft's own light: no pack, the near field vanilla
 static const uint FRAME_LIGHT_LOW = 0x8000u;   // (abi 0.14) cheap far light: constant sky occlusion, unshadowed block light
 static const uint FRAME_NEAR_LIGHT = 0x20000u; // (abi 0.15) light the near field's covered pixels with the far light
+static const uint FRAME_NEAR_SPLIT = 0x40000u; // (internal: the Vulkan backend) the near light traced at half resolution
+                                               // (nearLightMain) and upsampled (nearUpsampleMain), not in farMain
 // the shader pack's ambient floor (deferred.fsh: albedo x (sky + floor)), under every far land surface as under the near
 static const float3 FAR_AMBIENT_FLOOR = float3(0.012, 0.012, 0.016);
 // the look (shadeSurfaceAmb): how much the sky fills the shade (1: the physical value) and the warm bounce off lit ground

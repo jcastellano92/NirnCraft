@@ -417,7 +417,17 @@ public final class AtlasClient {
             }
             io.nearInfoTex = nearLit ? AtlasNearPass.infoGlId() : 0;
             io.dstNearLight = nearLit ? targets.nearLightId() : 0;
-            AtlasLook.levelProjection(cam).invert().get(io.nearInvProjection);
+            // the projection the near field's depth was drawn with: our near pass's carries this frame's TAA jitter
+            // (AtlasNearPass.drawGbuffer), and the linearised distance must be taken along the ray that depth belongs
+            // to; the unjittered inverse put each near point up to a pixel's footprint off along its ray, behind a wall
+            // seen at an angle (its shadow ray started inside it: sunlit faces black, flickering with the jitter)
+            Matrix4f nearProj = AtlasLook.levelProjection(cam);
+            if (nearOwned) {
+                int gw = mc.getWindow().getWidth(), gh = mc.getWindow().getHeight();
+                nearProj = new Matrix4f().translation(-2f * AtlasNearPass.jitterX() / gw, -2f * AtlasNearPass.jitterY() / gh, 0f)
+                        .mul(nearProj);
+            }
+            nearProj.invert().get(io.nearInvProjection);
             io.depthZeroToOne = AtlasTargets.depthZeroToOne();
             io.reversedZ = nearOwned || reversedZ(pack);  // the depth convention the near field's depth was written with
             io.dstColor = targets.colorId();

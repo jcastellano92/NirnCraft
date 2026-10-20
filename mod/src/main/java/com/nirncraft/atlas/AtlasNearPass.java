@@ -316,7 +316,7 @@ public final class AtlasNearPass {
         try (var v = shadowProjUbo.currentBuffer().map(false, true)) {
             com.mojang.blaze3d.buffers.Std140Builder.intoBuffer(v.data()).putMat4f(proj);
         }
-        ChunkSectionsToRender casters = lr.prepareChunkRenders(snapped, false);
+        ChunkSectionsToRender casters = prepareChunks(lr, snapped, false);
         var mc = Minecraft.getInstance();
         var atlas = mc.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).getTextureView();
         var desc = RenderPassDescriptor.builder(() -> "Infinite ATLAS sun shadow")
@@ -407,6 +407,20 @@ public final class AtlasNearPass {
                 && !cam.entityRenderState.doesMobEffectBlockSky;
     }
 
+    /**
+     * Our draw lists by the path vanilla took this frame: its section data lives in one storage that is either a uniform
+     * buffer (prepareChunkRenders) or instanced (prepareChunkRendersIndirect, where the device draws multi-indirect),
+     * and asking for the other kind closes it and starts a new one at two entries. The plain path on a multi-indirect
+     * device did that three times a frame (vanilla's lists, ours, the shadow's): the buffer vanilla's lists point into
+     * closed under them, the new one grown from 2 to 1024 every frame, a log line each time (48 MB in 40 minutes).
+     */
+    private static ChunkSectionsToRender prepareChunks(LevelRenderer lr, Matrix4f modelView, boolean sortTranslucent) {
+        boolean indirect = Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState
+                .shouldUseMultiDrawIndirectForTerrain;
+        return indirect ? lr.prepareChunkRendersIndirect(modelView, sortTranslucent)
+                : lr.prepareChunkRenders(modelView, sortTranslucent);
+    }
+
     private static void drawGbuffer(RenderLevelStageEvent.AfterSky e) {
         if (!owned) return;
         Minecraft mc = Minecraft.getInstance();
@@ -415,7 +429,7 @@ public final class AtlasNearPass {
         lr.visibleSections().addAll(visible);
         lr.nearbyVisibleSections().addAll(nearby);
         try {
-            chunks = lr.prepareChunkRenders(new Matrix4f(e.getModelViewMatrix()), true);
+            chunks = prepareChunks(lr, new Matrix4f(e.getModelViewMatrix()), true);
             drawShadow(lr, AtlasLook.light(mc));
         } finally {
             lr.visibleSections().clear();

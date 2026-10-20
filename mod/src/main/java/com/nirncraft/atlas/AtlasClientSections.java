@@ -15,7 +15,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * The near field's real blocks for atlas (docs/ATLAS-LOD.md "Underground"): every chunk this client loads goes up as
@@ -36,7 +35,10 @@ final class AtlasClientSections {
     private static final long BUDGET_NS = 2_000_000L;  // client thread time a tick for reading chunks
 
     private static final Set<Long> QUEUED = ConcurrentHashMap.newKeySet();  // loaded chunks not read yet (ChunkPos.pack)
-    private static final ConcurrentLinkedQueue<AtlasSections.Decoded> READY = new ConcurrentLinkedQueue<>();
+    // read and waiting for the far-field worker, which takes the one nearest the camera first (poll): in arrival order
+    // a teleport left the chunks around the eye behind the whole of the old place's (3,200 chunks at ~1 a second: the
+    // near light traced the tiles' stand-in houses, solid and a block too wide, for most of an hour)
+    private static final java.util.ArrayList<AtlasSections.Decoded> READY = new java.util.ArrayList<>();
     private static final Set<Long> UP = ConcurrentHashMap.newKeySet();  // chunks whose sections are up (and still loaded)
     private static final IdentityHashMap<BlockState, Integer> IDS = new IdentityHashMap<>();  // (client thread)
 
@@ -69,7 +71,9 @@ final class AtlasClientSections {
         if (!ON || QUEUED.isEmpty() || mc.level == null || mc.player == null) return;
         if (mc.level.dimension() != Level.OVERWORLD) {  // (left without its chunks' unloads: nothing is waiting)
             QUEUED.clear();
-            READY.clear();
+            synchronized (READY) {
+                READY.clear();
+            }
             return;
         }
         long until = System.nanoTime() + BUDGET_NS;
@@ -83,7 +87,12 @@ final class AtlasClientSections {
             if (System.nanoTime() > until) break;
             QUEUED.remove(k);
             LevelChunk c = mc.level.getChunkSource().getChunkNow(ChunkPos.getX(k), ChunkPos.getZ(k));
-            if (c != null) READY.add(read(mc.level, c));
+            if (c != null) {
+                AtlasSections.Decoded d = read(mc.level, c);
+                synchronized (READY) {
+                    READY.add(d);
+                }
+            }
         }
     }
 
@@ -110,9 +119,25 @@ final class AtlasClientSections {
                 biome.getGrassColor(centre.getX(), centre.getZ()) & 0xFFFFFF, biome.getFoliageColor() & 0xFFFFFF);
     }
 
-    /** The next chunk read for atlas, or null (far-field worker). */
-    static AtlasSections.Decoded poll() {
-        return READY.poll();
+    /** The read chunk nearest block (x, z) for atlas, or null (far-field worker). */
+    static AtlasSections.Decoded poll(double x, double z) {
+        synchronized (READY) {
+            int best = -1;
+            double bestD = Double.MAX_VALUE;
+            for (int i = 0; i < READY.size(); i++) {
+                AtlasSections.Decoded d = READY.get(i);
+                double dx = d.cx() * 16 + 8 - x, dz = d.cz() * 16 + 8 - z, dd = dx * dx + dz * dz;
+                if (dd < bestD) {
+                    bestD = dd;
+                    best = i;
+                }
+            }
+            if (best < 0) return null;
+            AtlasSections.Decoded d = READY.get(best);
+            READY.set(best, READY.get(READY.size() - 1));
+            READY.remove(READY.size() - 1);
+            return d;
+        }
     }
 
     /** Its sections went up (far-field worker). */
@@ -122,7 +147,9 @@ final class AtlasClientSections {
 
     /** Chunks read and not yet up (the far field is busy while there are). */
     static int pending() {
-        return QUEUED.size() + READY.size();
+        synchronized (READY) {
+            return QUEUED.size() + READY.size();
+        }
     }
 
     /**

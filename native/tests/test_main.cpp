@@ -1839,7 +1839,9 @@ static void testCaves() {
     CHECK(a[3].irr > 1.3 * a[2].irr);
     CHECK(a[1].irr > 1.1 * a[2].irr);
     CHECK(a[0].irr > 8.0 * a[2].irr);
-    CHECK(a[0].irr > 2.0 * bf[0].irr);    // without the cave's sections the pit's floor was in the tiles' stone
+    // without the cave's sections the pit's floor lies in the tiles' stone: atlas's world disagrees with the drawn one
+    // there (nearLightAt: untrusted), and with the eye in the tunnel that is rock: the ambient floor alone
+    CHECK(a[0].irr > 2.0 * bf[0].irr);
     CHECK(a[2].haze < 1e-6);              // under cover at both ends: no aerial inscatter
 
     // past the near field: the loaded chunks end 24 blocks out (the hand-off at 16); the far trace goes on down the

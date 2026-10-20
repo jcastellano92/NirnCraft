@@ -49,6 +49,8 @@
 // octahedral normal; row 0 top) and the near light out (irradiance on a white diffuse surface, key light visibility)
 [[vk::binding(26, 0)]] StructuredBuffer<uint> nearInfo;
 [[vk::binding(27, 0)]] RWStructuredBuffer<float4> outNearLight;
+// (FRAME_NEAR_SPLIT) the previous frame's near light, for nearTemporalMain (a pixel's worth when it had none)
+[[vk::binding(28, 0)]] StructuredBuffer<float4> prevNearLight;
 
 #include "atlas_clouds.slang"
 
@@ -636,6 +638,12 @@ static float gSecHitT = 0.0;  // where the last secondary ray was stopped (block
 static uint gSecHitMat = 0xFFFFFFFFu;  // and what stopped it: its material, the axis of the face it entered, its level
 static int gSecHitAxis = 1;
 static int gSecHitLod = 0;
+// gSecCone (the near light's rays): the ray widens as a cone, a level coarser each time it has gone gSecCone voxels of
+// its level (lod 0 to gSecCone blocks, lod 1 to twice that, ... up to SEC_CONE_LOD): what shadows a point from far off
+// needs no finer voxels than its distance resolves, and a 2048-block ray through a forest at lod 0 cost 3 ms a frame at
+// 1280x800 (the near light's sun ray; its bounce's as much again). 0: the ray keeps its level (the far field's rays).
+static float gSecCone = 0.0;
+static const int SEC_CONE_LOD = 4;
 float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
     TraceResult res;
     res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.dither = 0.5; res.albedo = float3(0, 0, 0); res.hasAlbedo = 0u;
@@ -651,6 +659,11 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
         if (t >= maxT) break;
         float s = float(1 << lod);
         float len = min(192.0 * s, maxT - t);
+        if (gSecCone > 0.0 && lod < SEC_CONE_LOD && lod + 1 < lodCount) {
+            float edge = gSecCone * s;
+            if (t >= edge) { lod++; continue; }
+            len = min(len, edge - t);
+        }
         float uncExit;
         gSecT = t;
         int r = traceLod(lod, p + dir * t, dir, len, res, uncExit);
@@ -684,7 +697,12 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
 // stopped by something solid before the world top. A point the key light reaches is never under it (callers ask only
 // where it does not). Clobbers traceSecondary's globals.
 bool solidRoof(float3 p, int lod) {
-    return traceSecondary(p, float3(0, 1, 0), 2048.0, lod) <= 0.0 && !gStopFoliage;
+    // (never as a cone: a roof is found at the level the point is lit at, rock overhead at a coarse level can be open)
+    float cone = gSecCone;
+    gSecCone = 0.0;
+    bool roof = traceSecondary(p, float3(0, 1, 0), 2048.0, lod) <= 0.0 && !gStopFoliage;
+    gSecCone = cone;
+    return roof;
 }
 
 // Cosine-weighted direction about n from (u, v) in [0, 1)^2 (Duff et al. 2017 basis, as atlas_truth's)
@@ -1289,17 +1307,32 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
             so.y = floor(so.y + ci.y) + 1.02 - ci.y;
         }
     }
+    // still inside a solid voxel: atlas's world disagrees with the drawn one here (the tiles' stand-in houses, solid
+    // and wider than the real ones, until the loaded chunks' blocks are up; a snow layer atlas holds as a block). Traced
+    // from inside, the sun and sky rays were stopped at once: sunlit walls black. Lit untraced instead (the key light
+    // by the normal, the open sky's ambient), as the cheap light does
+    bool untrusted = false;
+    if (!cheapLight) {
+        uint om = materialAt(0, so);
+        untrusted = om != 0xFFFFFFFFu && !secondaryShapeMisses(om, frac(so + ci), float3(0, 1, 0)) &&
+                    secondarySigma(om, uint(palette[om].emisClass.y)) < 0.0;
+    }
     float3 L = keyLightDir(sun);
     float sunVis = 1.0;
+    gSecCone = (ablate & 1048576u) != 0u ? 0.0 : 32.0;  // (ATLAS_ABLATE 1048576: lod 0 all the way, as before)
     if ((frame.dims.z & FRAME_SHADOWS) != 0 && (ablate & 4u) == 0u) {
         if (dot(N, L) <= 0.0) sunVis = 0.0;
+        else if (untrusted) sunVis = eyeRoofed() ? 0.0 : 1.0;  // (in a cave: rock, most likely)
         else if (cheapLight) sunVis = traceShadow(p + N * 1.01 + L * 0.5, L, 0);
         else sunVis = traceSecondary(so + L * 0.05, L, 2048.0, 0);
     }
     if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, L);
     float3 ambient;
     gNearRoofed = false;
-    if (cheapLight) {
+    if (untrusted && eyeRoofed()) {
+        ambient = FAR_AMBIENT_FLOOR;  // the eye under rock: the floor alone, under cover (unlit air in front of it)
+        gNearRoofed = true;
+    } else if (cheapLight || untrusted) {
         ambient = skyAmbient(N, sun) * FAR_AMBIENT_OCCLUSION + FAR_AMBIENT_FLOOR;
     } else {
         float skyVis;
@@ -1311,8 +1344,161 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     white.albedoRough = float4(1, 1, 1, 0.8);
     white.emisClass = float4(0, 0, 0, 0);
     float3 irr = shadeSurfaceAmb(float3(1, 1, 1), white, N, dir, sun, sunVis, 0u, ambient, float3(0, 0, 0));
+    gSecCone = 0.0;
     if ((ablate & 8u) == 0u) irr += farLightsOn(px, p, so, N, 0, sun, false, cheapLight);
     return float4(irr, sunVis);
+}
+
+// ---- the near light at half resolution (FRAME_NEAR_SPLIT) -------------------------------------------------------
+// The near light's rays (the sun's, the sky's, the bounce's) for every pixel of the near field cost 5 ms a frame at
+// 1280x800 in a forest town (Falkreath), most of atlas's frame: they scale with the pixels traced. nearLightMain traces
+// one pixel of each 2 x 2 block, a different one each frame of the TAA's cycle (so a still view gathers all four),
+// nearUpsampleMain fills the other three from the traced pixels around them on the same surface (the near field's own
+// depth and normal: a shadow edge on one face stays put, light does not leak across a silhouette). A traced pixel under
+// cover carries a = -1 (the publish pass clamps it to 0): with the eye under cover too its air is unlit.
+uint2 nearSplitOffset() {
+    uint k = frame.jitter.z > 0.5 ? (frame.temporal.x & 3u) : 0u;
+    // (0,0) (1,1) (1,0) (0,1): diagonal pairs first, so two frames already cover both rows and columns
+    return uint2((k == 1u || k == 2u) ? 1u : 0u, (k == 1u || k == 3u) ? 1u : 0u);
+}
+
+float3 pixelRay(uint2 px, uint w, uint h) {
+    float2 ndc = float2((float(px.x) + 0.5) / float(w) * 2.0 - 1.0, 1.0 - (float(px.y) + 0.5) / float(h) * 2.0)
+               + frame.jitter.xy;
+    return normalize(unproject(frame, ndc));
+}
+
+[shader("compute")]
+[numthreads(8, 8, 1)]
+void nearLightMain(uint3 id : SV_DispatchThreadID) {
+    gMoonDir = frame.moonDir;
+    gMoonRad = frame.moonRad;
+    gEyeRoofed = -1;
+    uint w = frame.dims.x, h = frame.dims.y;
+    uint2 q = id.xy * 2u + nearSplitOffset();
+    if (q.x >= w || q.y >= h) return;
+    uint pix = q.y * w + q.x;
+    float nd = nearDepth[pix];
+    if (!(nd < 1e29)) return;  // not the near field's (farMain wrote its zero)
+    gAblate = asuint(frame.jitter.w);
+    if ((frame.dims.z & FRAME_GROUPS) != 0u) gHead = groupData[0];
+    float4 nl = nearLightAt(q, frame.camFrac.xyz, pixelRay(q, w, h), nd, nearInfo[pix], frame.sunDir.xyz);
+    if (gNearRoofed) nl.a = -1.0;
+    outNearLight[pix] = nl;
+}
+
+float3 nearInfoNormal(uint info) {
+    return octDecode(float2(float((info >> 16) & 255u), float(info >> 24)) / 255.0);
+}
+
+[shader("compute")]
+[numthreads(8, 8, 1)]
+void nearUpsampleMain(uint3 id : SV_DispatchThreadID) {
+    gEyeRoofed = -1;
+    uint w = frame.dims.x, h = frame.dims.y;
+    if (id.x >= w || id.y >= h) return;
+    uint pix = id.y * w + id.x;
+    float nd = nearDepth[pix];
+    if (!(nd < 1e29)) return;
+    uint2 off = nearSplitOffset();
+    bool traced = (id.x & 1u) == off.x && (id.y & 1u) == off.y;
+    float roofed;
+    if (traced) {
+        roofed = outNearLight[pix].a < 0.0 ? 1.0 : 0.0;
+    } else {
+        // the traced pixels of the 3 x 3 blocks around: weighted by distance on screen, depth and normal alike
+        float3 n = nearInfoNormal(nearInfo[pix]);
+        int2 b = int2(id.xy >> 1);
+        float4 sum = float4(0, 0, 0, 0);
+        float wsum = 0.0, rsum = 0.0, best = 1e30;
+        float4 nearest = float4(0, 0, 0, 0);
+        float nearestRoof = 0.0;
+        for (int j = -1; j <= 1; j++) {
+            for (int i = -1; i <= 1; i++) {
+                int2 r = (b + int2(i, j)) * 2 + int2(off);
+                if (r.x < 0 || r.y < 0 || r.x >= int(w) || r.y >= int(h)) continue;
+                uint rp = uint(r.y) * w + uint(r.x);
+                float rd = nearDepth[rp];
+                if (!(rd < 1e29)) continue;
+                float4 v = outNearLight[rp];
+                float isRoof = v.a < 0.0 ? 1.0 : 0.0;
+                v.a = max(v.a, 0.0);
+                float dz = abs(rd - nd);
+                if (dz < best) { best = dz; nearest = v; nearestRoof = isRoof; }
+                float2 dp = float2(r) - float2(id.xy);
+                float ws = exp(-0.5 * dot(dp, dp));
+                float wz = exp(-dz / (0.02 * nd + 0.05));
+                float wn = pow(max(dot(n, nearInfoNormal(nearInfo[rp])), 0.0), 16.0);
+                float wt = ws * wz * wn;
+                sum += v * wt;
+                rsum += isRoof * wt;
+                wsum += wt;
+            }
+        }
+        // nothing on the same surface around (a lone pixel of a thin thing): the nearest in depth
+        float4 v = wsum > 1e-4 ? sum / wsum : nearest;
+        roofed = wsum > 1e-4 ? rsum / wsum : nearestRoof;
+        outNearLight[pix] = v;
+    }
+    if (roofed > 0.5 && eyeRoofed()) outColor[pix].rgb = float3(0, 0, 0);  // under cover at both ends: unlit air
+}
+
+// The near light's own history (FRAME_NEAR_SPLIT, after nearUpsampleMain): each pixel's light is one ray of each kind,
+// traced at a quarter of the pixels, and the host's TAA cannot average that noise (its neighbourhood clamp throws it
+// out): sky-lit walls under eaves and shaded ground shimmered frame to frame (6 % of the pixels of a still view moved
+// by more than 8 levels). Here the surface point is reprojected into the previous frame (its camera and
+// view-projection, as the clouds' are) and blended with the light found there, where the previous frame's surface lay
+// at the same distance (else the point was hidden or off screen then: this frame's light alone). An exponential
+// average of about NEAR_HISTORY frames: still views converge, a moving camera keeps its history on the surfaces.
+static const float NEAR_HISTORY = 8.0;
+
+[shader("compute")]
+[numthreads(8, 8, 1)]
+void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
+    uint w = frame.dims.x, h = frame.dims.y;
+    if (id.x >= w || id.y >= h) return;
+    uint pix = id.y * w + id.x;
+    float nd = nearDepth[pix];
+    if (!(nd < 1e29)) return;
+    float4 cur = outNearLight[pix];
+    cur.a = max(cur.a, 0.0);  // (the under-cover mark has done its work in the upsample)
+    uint count, stride;
+    prevNearLight.GetDimensions(count, stride);
+    float4 hist = float4(0, 0, 0, 0);
+    float hw = 0.0;
+    if (count >= w * h) {
+        float3 dir = pixelRay(id.xy, w, h);
+        float R = frame.camFrac.w;
+        float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
+        float3 X = worldAt(frame.camFrac.xyz, dir, k, nd) - frame.prevCam.xyz;
+        float4 clip = frame.prevViewProj[0] * X.x + frame.prevViewProj[1] * X.y + frame.prevViewProj[2] * X.z + frame.prevViewProj[3];
+        if (clip.w > 1e-4) {
+            float2 pn = clip.xy / clip.w;
+            float hx = (pn.x * 0.5 + 0.5) * float(w) - 0.5, hy = (0.5 - pn.y * 0.5) * float(h) - 0.5;
+            float dist = length(X), tol = 0.03 * dist + 0.1;
+            int2 b = int2(floor(float2(hx, hy)));
+            float2 fr = float2(hx, hy) - float2(b);
+            for (int j = 0; j <= 1; j++) {
+                for (int i = 0; i <= 1; i++) {
+                    int2 q = b + int2(i, j);
+                    if (q.x < 0 || q.y < 0 || q.x >= int(w) || q.y >= int(h)) continue;
+                    uint qp = uint(q.y) * w + uint(q.x);
+                    if (abs(prevSurface[qp] - dist) > tol) continue;  // another surface there then
+                    float4 v = prevNearLight[qp];
+                    if (dot(v.rgb, float3(1, 1, 1)) <= 0.0 && v.a <= 0.0) continue;  // it was not lit then
+                    float bw = (i == 0 ? 1.0 - fr.x : fr.x) * (j == 0 ? 1.0 - fr.y : fr.y);
+                    hist += v * bw;
+                    hw += bw;
+                }
+            }
+        }
+    }
+    // a traced pixel (one in four each frame) counts for more than the upsampled ones in between
+    uint2 off = nearSplitOffset();
+    bool traced = (id.x & 1u) == off.x && (id.y & 1u) == off.y;
+    float a = traced ? 2.0 / NEAR_HISTORY : 1.0 / NEAR_HISTORY;
+    if (hw > 0.25) cur = lerp(hist / hw, cur, a);
+    outNearLight[pix] = cur;
 }
 
 [shader("compute")]
@@ -1354,11 +1540,14 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             bool nearLit = (frame.dims.z & FRAME_NEAR_LIGHT) != 0u;
             float4 c = float4(0, 0, 0, 0);
             if (nearLit) {
-                gAblate = asuint(frame.jitter.w);
-                if ((frame.dims.z & FRAME_GROUPS) != 0u) gHead = groupData[0];  // (the secondary rays' material shapes)
-                outNearLight[pix] = nearLightAt(id.xy, o, dir, nd, nearInfo[pix], sun);
                 c = float4(aerialInscatter(dir, sun, nd, frame), aerialTransmittance(nd, frame));
-                if (gNearRoofed && eyeRoofed()) c.rgb = float3(0, 0, 0);  // under cover at both ends: unlit air
+                // (FRAME_NEAR_SPLIT: the light comes from nearLightMain, the unlit air from nearUpsampleMain)
+                if ((frame.dims.z & FRAME_NEAR_SPLIT) == 0u) {
+                    gAblate = asuint(frame.jitter.w);
+                    if ((frame.dims.z & FRAME_GROUPS) != 0u) gHead = groupData[0];  // (the secondary rays' material shapes)
+                    outNearLight[pix] = nearLightAt(id.xy, o, dir, nd, nearInfo[pix], sun);
+                    if (gNearRoofed && eyeRoofed()) c.rgb = float3(0, 0, 0);  // under cover at both ends: unlit air
+                }
             }
             float cd = 1e30;
             if ((frame.dims.z & FRAME_CLOUDS) != 0) {

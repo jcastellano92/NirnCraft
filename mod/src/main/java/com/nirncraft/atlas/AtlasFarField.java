@@ -312,7 +312,10 @@ final class AtlasFarField implements AutoCloseable {
                 // the server's real sections (the finest levels' real blocks), within a share of the pass
                 Overlay ovS = overlay();
                 if (ovS != null) {
-                    sectionsApplied = ovS.applySections(ctx, System.nanoTime() + 40_000_000L);
+                    // a share of the pass; most of it while the chunks around the eye are not up yet: until they are,
+                    // the near light traces the tiles' stand-ins (solid houses a block too wide: sunlit walls black)
+                    long share = AtlasClientSections.coversEye(x, z) ? 40_000_000L : 400_000_000L;
+                    sectionsApplied = ovS.applySections(ctx, System.nanoTime() + share);
                     overlaid |= sectionsApplied > 0;
                 }
                 // the ground of the new place on screen now: the overlays (buildings, trees) can take a while, and

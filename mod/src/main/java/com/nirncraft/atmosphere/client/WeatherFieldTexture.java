@@ -271,6 +271,7 @@ public final class WeatherFieldTexture implements AutoCloseable {
         }
 
         // Complete physics snapshots arrive atomically; presentation advances every tick.
+        boolean off = isOff();  // once per tick, not per cell: a config read each
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
                 int i = row * size + col;
@@ -282,14 +283,14 @@ public final class WeatherFieldTexture implements AutoCloseable {
                 displayWindX[i] = Mth.lerp(0.025f, displayWindX[i], targetWindX[i]);
                 displayWindZ[i] = Mth.lerp(0.025f, displayWindZ[i], targetWindZ[i]);
                 displayFog[i] = Mth.lerp(0.035f, displayFog[i], targetFog[i]);
-                if (isOff()) {  // world-gen views: the air's haze band only
+                if (off) {  // world-gen views: the air's haze band only
                     displayR[i] = displayG[i] = displayB[i] = displayFog[i] = 0f;
                 }
                 // Lightning has its own 512-byte 3D packet; never rescan both weather grids per flash.
                 int rgba = packAbgr(displayR[i], displayG[i], displayB[i], baseBand[i]);
                 int alpha = ((rgba >>> 24) & 254) | (smokeColumns[i] ? 1 : 0);
                 image.setPixelABGR(col, row, (rgba & 0x00FFFFFF) | (alpha << 24));
-                int windAngle = clampByte((float) (Math.atan2(displayWindZ[i], displayWindX[i]) / (Math.PI * 2.0) + 1.0) % 1f);
+                int windAngle = clampByte((float) (Mth.atan2(displayWindZ[i], displayWindX[i]) / (Math.PI * 2.0) + 1.0) % 1f);
                 dynamicsImage.setPixelABGR(col, row, (clampByte(displayFog[i]) << 24) | (windAngle << 16)
                         | (clampByte(displaySurface[i] / 1024f) << 8) | clampByte(displayHeight[i] / 1024f));
             }

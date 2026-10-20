@@ -28,6 +28,7 @@
 #include "camera.hpp"
 #include "gl_api.hpp"
 #include "gl_context.hpp"
+static void setEnv(const char* k, const char* v);  // (below)
 
 using namespace atlas;
 
@@ -330,7 +331,10 @@ static Result runSuite(const std::string& data, atlas_test::Profile profile, std
         iol.dstNearLight = lightTex;
         AtlasFrame fg = f;  // the io depth texture turns NEAR_DEPTH on
         fg.flags |= ATLAS_FRAME_NEAR_LIGHT;
+        // every pixel traced, as the host render does: the game's half-resolution near light is compared after
+        setEnv("ATLAS_NEAR_FULLRES", "1");
         for (int i = 0; i < 3 && rendered; i++) rendered = atlas_gl_render_io(ctx, &fg, &iol) == ATLAS_OK;
+        setEnv("ATLAS_NEAR_FULLRES", nullptr);
         if (!rendered) std::printf("  near light render: %s\n", atlas_last_error(ctx));
         gl.Finish();
         std::vector<float> glLight(size_t(W) * H * 4), zeroD(size_t(W) * H, 1e30f);
@@ -350,6 +354,35 @@ static Result runSuite(const std::string& data, atlas_test::Profile profile, std
                     "covered px lit, %zu hazed\n", mode.c_str(), cl.color, cc.color, cl.worstRel, lit, W / 2 * H, hazed);
         nearLightOk = rendered && cl.color == 0 && cc.color == 0 && cc.depth == 0 && lit == size_t(W / 2) * H &&
                       hazed == size_t(W / 2) * H;
+        // the game's near light (zero-copy: traced at half resolution, upsampled, with its history): a reconstruction,
+        // so close to the host's on average rather than equal (the history converges over frames: a few first)
+        if (!host && rendered) {
+            for (int i = 0; i < 8 && rendered; i++) rendered = atlas_gl_render_io(ctx, &fg, &iol) == ATLAS_OK;
+            gl.Finish();
+            std::vector<float> splitLight(size_t(W) * H * 4);
+            gl.GetTextureImage(lightTex, 0, GL_RGBA, GL_FLOAT, GLsizei(splitLight.size() * 4), splitLight.data());
+            // each is one dithered ray of each kind a pixel, so two traces differ pixel by pixel even when both are
+            // right: compared as means (bias) and over 8 x 8 blocks (the noise averaged, the shapes kept)
+            double sumS = 0, sumR = 0, blockDiff = 0, blockRef = 0;
+            size_t splitLit = 0;
+            for (uint32_t by = 0; by + 8 <= H; by += 8)
+                for (uint32_t bx = 0; bx + 8 <= W / 2; bx += 8) {
+                    double bs = 0, br = 0;
+                    for (uint32_t yy = by; yy < by + 8; yy++)
+                        for (uint32_t xx = bx; xx < bx + 8; xx++) {
+                            // (GL rows bottom-up, the host's top-down: as compare)
+                            size_t i = (size_t(yy) * W + xx) * 4, g = (size_t(H - 1 - yy) * W + xx) * 4;
+                            for (int c = 0; c < 3; c++) bs += splitLight[g + c], br += refLight[i + c];
+                            splitLit += splitLight[g] > 0.0f && splitLight[g + 1] > 0.0f && splitLight[g + 2] > 0.0f;
+                        }
+                    sumS += bs, sumR += br, blockDiff += std::fabs(bs - br), blockRef += br;
+                }
+            double bias = sumR > 0 ? sumS / sumR - 1.0 : 1.0, blocks = blockRef > 0 ? blockDiff / blockRef : 1.0;
+            size_t covered = size_t((W / 2) / 8 * 8) * (H / 8 * 8);
+            std::printf("near light at half resolution vs the host's full trace: mean %+.1f%%, 8 x 8 blocks %.1f%% apart; "
+                        "%zu of %zu covered px lit\n", 100.0 * bias, 100.0 * blocks, splitLit, covered);
+            nearLightOk &= rendered && std::fabs(bias) < 0.05 && blocks < 0.10 && splitLit == covered;
+        }
         glClean &= glCheck("near light frames");
         // the cost at 1920x1080 (zero-copy; GPU time of atlas's own work): a view down onto the ground, the near
         // field covering what lies within 256 blocks with the far field's own surfaces and normals, near light on vs off

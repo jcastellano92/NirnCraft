@@ -21,6 +21,7 @@ struct GlFrameIO {
 
 // FRAME_NEAR_LIGHT (atlas.h ATLAS_FRAME_NEAR_LIGHT; the kernels' atlas_shared.slang)
 constexpr uint32_t FRAME_NEAR_LIGHT_BIT = 0x20000u;
+constexpr uint32_t FRAME_NEAR_SPLIT_BIT = 0x40000u;  // (internal) the near light at half resolution (atlas_shared.slang)
 
 struct FrameInputs {
     std::shared_ptr<const PackedScene> sceneHold;  // keeps the snapshot alive for the frame

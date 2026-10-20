@@ -1,8 +1,9 @@
 """Shader hot reload for atlas_core's Vulkan backend: compile the far kernel's entries on every save.
 
-Watches native/shaders/*.slang; on a change compiles farMain, cloudMain and sunMapMain to SPIR-V (the same slangc and
-flags as native/CMakeLists.txt but -O1 by default: 1.9 s for the far kernel against 4.7 s at -O3; the driver
-optimises again, so it draws the same, but time frames on a build) into the output folder, all three at once,
+Watches native/shaders/*.slang; on a change compiles farMain, cloudMain, sunMapMain, nearLightMain and
+nearUpsampleMain, nearTemporalMain to SPIR-V (the same slangc and flags as native/CMakeLists.txt but -O1 by default: 1.9 s for the far
+kernel against 4.7 s at -O3; the driver optimises again, so it draws the same, but time frames on a build) into the
+output folder, all at once,
 atlas_far.spv last and each by an atomic rename, so a reader never sees half a set. A renderer started with ATLAS_SHADER_DIR=<that folder> (atlas_render, or the game client)
 rebuilds its pipelines within 250 ms (vk_backend.cpp hotReload). Bindings must stay the same: a layout change needs
 native/build.ps1. The CPU backend is compiled C++ and does not reload.
@@ -24,7 +25,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SHADERS = ROOT / "native/shaders"
 KERNEL = SHADERS / "atlas_far.slang"
-ENTRIES = (("cloudMain", "atlas_cloud.spv"), ("sunMapMain", "atlas_sunmap.spv"), ("farMain", "atlas_far.spv"))
+ENTRIES = (("cloudMain", "atlas_cloud.spv"), ("sunMapMain", "atlas_sunmap.spv"),
+           ("nearLightMain", "atlas_nearlight.spv"), ("nearUpsampleMain", "atlas_nearup.spv"),
+           ("nearTemporalMain", "atlas_neartemporal.spv"),
+           ("farMain", "atlas_far.spv"))
 
 
 def slangc():
@@ -44,7 +48,7 @@ def compile_all(exe, out, opt):
     runs = [(entry, name, subprocess.Popen([exe, str(KERNEL), "-target", "spirv", "-entry", entry, "-stage", "compute",
                                             opt, "-o", str(out / (name + ".tmp"))],
                                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True))
-            for entry, name in ENTRIES]  # the three entries at once: one entry's time, not three
+            for entry, name in ENTRIES]  # the entries at once: one entry's time, not six
     failed = False
     for entry, name, p in runs:
         text = p.communicate()[0]
