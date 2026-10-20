@@ -55,6 +55,15 @@ final class AtlasClientSections {
         });
     }
 
+    /**
+     * A loaded chunk whose blocks changed (vanilla is rebuilding one of its section meshes: AtlasNearPass hands them
+     * over each frame): read again, so atlas's world, and the light it traces near the player, follow digging and
+     * building (sections that did not change are skipped at upload). Render thread.
+     */
+    static void changed(long chunkPack) {
+        if (ON && UP.contains(chunkPack)) QUEUED.add(chunkPack);
+    }
+
     /** Client thread, each tick while atlas runs: the queued chunks read (nearest first), within the budget. */
     static void tick(Minecraft mc) {
         if (!ON || QUEUED.isEmpty() || mc.level == null || mc.player == null) return;

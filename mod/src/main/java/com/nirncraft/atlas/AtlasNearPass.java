@@ -291,6 +291,10 @@ public final class AtlasNearPass {
         jitterY = halton(ji, 3) - 0.5f;
         Minecraft mc = Minecraft.getInstance();
         if (!active || mc.level == null || AtlasClient.irisPackInUse() || mc.gameRenderer.useImprovedTransparency()) return;
+        // the sections vanilla re-meshes this frame (blocks or light changed): their chunks to atlas again
+        for (var u : mc.gameRenderer.gameRenderState().levelRenderState.sectionUpdateRenderStates)
+            AtlasClientSections.changed(net.minecraft.world.level.ChunkPos.pack(
+                    net.minecraft.core.SectionPos.x(u.sectionNode()), net.minecraft.core.SectionPos.z(u.sectionNode())));
         if (!skyPassRuns(mc)) return;
         LevelRenderer lr = mc.levelRenderer;
         visible.clear();
