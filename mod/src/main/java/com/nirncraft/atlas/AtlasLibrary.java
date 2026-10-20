@@ -73,6 +73,25 @@ final class AtlasLibrary {
      * order of preference.
      */
     static List<Path> candidates(Path gameDir) throws IOException {
+        // development: a freshly built atlas_core instead of the jar's, from -Dnirncraft.atlas.devLibrary=<file> or, with
+        // no launcher settings needed, <game dir>/atlas-dev/<the library's name> (tools/dev/shader_watch.py --game puts
+        // the build there); loaded as a copy, so the build output is never locked and native/build.ps1 can run meanwhile
+        String dev = System.getProperty("nirncraft.atlas.devLibrary");
+        if ((dev == null || dev.isBlank()) && gameDir != null) {
+            String lib = resource();
+            Path p = gameDir.resolve("atlas-dev").resolve(lib.substring(lib.lastIndexOf('/') + 1));
+            if (Files.isRegularFile(p)) dev = p.toString();
+        }
+        if (dev != null && !dev.isBlank() && Files.isRegularFile(Path.of(dev)) && gameDir != null) {
+            Path src = Path.of(dev), dir = gameDir.resolve("nirncraft").resolve("natives");
+            Files.createDirectories(dir);
+            String name = src.getFileName().toString();
+            int dot = name.lastIndexOf('.');
+            Path copy = dir.resolve((dot > 0 ? name.substring(0, dot) : name) + "-dev-"
+                    + Files.getLastModifiedTime(src).toMillis() + (dot > 0 ? name.substring(dot) : ""));
+            if (!Files.exists(copy)) Files.copy(src, copy);
+            return List.of(copy);
+        }
         String res = resource();
         byte[] bytes;
         try (InputStream in = AtlasLibrary.class.getResourceAsStream(res)) {

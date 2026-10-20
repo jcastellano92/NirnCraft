@@ -209,7 +209,7 @@ public final class AtlasClient {
 
     /** The loaded core lights the near pass's pixels (ABI 0.15: ATLAS_FRAME_NEAR_LIGHT, AtlasGlIO near info / light). */
     static boolean nearLightSupported() {
-        return lib != null && ctx != null && !failed && lib.abi() >= 0x000F00;
+        return ctx != null && !failed && ctx.hasNearLight();
     }
 
     public static boolean active() {
@@ -365,6 +365,16 @@ public final class AtlasClient {
             // else the bound target's (ATLAS_GL_BOUND_DEPTH: vanilla's, or the pack's gbuffer)
             boolean nearOwned = AtlasNearPass.owns();
             io.nearDepthTex = nearOwned ? AtlasNearPass.depthGlId() : 0xFFFFFFFF;
+            // our terrain, a core that lights it: one light near and far (the far field's realistic light: sun and
+            // traced shadow, traced sky, haze), the near pass's resolve takes it (no vanilla light any more)
+            boolean nearLit = nearOwned && ctx.hasNearLight();
+            if (nearLit) {
+                frame.flags |= AtlasNative.FRAME_NEAR_LIGHT | AtlasNative.FRAME_SHADOWS | AtlasNative.FRAME_ATMOS;
+                frame.flags &= ~AtlasNative.FRAME_VANILLA_LIGHT;
+                if (AtlasTruthView.noFog) frame.flags &= ~AtlasNative.FRAME_ATMOS;
+            }
+            io.nearInfoTex = nearLit ? AtlasNearPass.infoGlId() : 0;
+            io.dstNearLight = nearLit ? targets.nearLightId() : 0;
             new Matrix4f(cam.projectionMatrix).invert().get(io.nearInvProjection);
             io.depthZeroToOne = AtlasTargets.depthZeroToOne();
             io.reversedZ = nearOwned || reversedZ(pack);  // the depth convention the near field's depth was written with
@@ -375,6 +385,7 @@ public final class AtlasClient {
             if (firstFrame && guard != null) guard.firstFrames();  // a driver crash from here on is the guard's case
             ctx.glRender(frame, io);
             farThisFrame = true;
+            nearLitThisFrame = nearLit;
             if (!pack && !nearOwned && !AtlasFallback.fogHidesFarField(cam.fogData)) {
                 AtlasTargets t = targets;
                 AtlasGuard.run(AtlasFallback.FEATURE, () -> AtlasFallback.draw(event.getRenderPass(), t));

@@ -15,10 +15,16 @@ layout(std140) uniform NearInfo {
 };
 
 // albedo sRGB, n world-space unit normal, lm = (block, sky) light 0..1 -> display sRGB
+// the look, as atlas_shared.slang's shadeSurfaceAmb (LOOK_AMBIENT, LOOK_BOUNCE): keep them equal
+const float LOOK_AMBIENT = 3.0;
+const float LOOK_BOUNCE = 0.25;
+
 vec3 atlasForwardLit(vec3 albedo, vec3 n, vec2 lm) {
     float open = smoothstep(0.05, 0.35, lm.y);
+    float sky = lm.y * lm.y;
     vec3 direct = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * open;
-    vec3 ambient = mix(Ground.rgb, SkyUp.rgb, n.y * 0.5 + 0.5) * (lm.y * lm.y) + vec3(0.012, 0.012, 0.016);
+    vec3 bounce = KeyRad.rgb * (max(KeyDir.y, 0.0) * LOOK_BOUNCE * (0.6 - 0.4 * n.y) * sky);
+    vec3 ambient = mix(Ground.rgb, SkyUp.rgb, n.y * 0.5 + 0.5) * (sky * LOOK_AMBIENT) + bounce + vec3(0.012, 0.012, 0.016);
     return atlasDisplay(atlasSrgbToLinear(albedo) * (direct + ambient + atlasBlockLight(lm.x)), Look.x, Look.y);
 }
 

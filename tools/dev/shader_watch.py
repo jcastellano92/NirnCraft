@@ -7,7 +7,12 @@ atlas_far.spv last and each by an atomic rename, so a reader never sees half a s
 rebuilds its pipelines within 250 ms (vk_backend.cpp hotReload). Bindings must stay the same: a layout change needs
 native/build.ps1. The CPU backend is compiled C++ and does not reload.
 
-    py -3 tools/dev/shader_watch.py [--out .work/shaders] [--once]
+    py -3 tools/dev/shader_watch.py [--out .work/shaders] [--game] [--once]
+
+--game also writes them to the preview instance's .minecraft/atlas-shaders, which the game's atlas_core reloads from
+when it exists (no environment needed), and keeps native/build/Release/atlas_core.dll copied to .minecraft/atlas-dev,
+which the game loads instead of the jar's core at its next start (AtlasLibrary: a native change is a restart, not a
+jar build).
 """
 import argparse
 import os
@@ -55,6 +60,30 @@ def compile_all(exe, out, opt):
     return True
 
 
+def mirror(src, dests):
+    """The compiled set into the other folders the same way (atlas_far.spv last, atomic renames)."""
+    for d in dests:
+        for _, name in ENTRIES:
+            tmp = d / (name + ".tmp")
+            tmp.write_bytes((src / name).read_bytes())
+            os.replace(tmp, d / name)
+    return True
+
+
+CORE = ROOT / "native/build/Release/atlas_core.dll"
+
+
+def sync_core(dev):
+    """The freshly built core where the game picks it up at its next start (only when it changed)."""
+    dst = dev / CORE.name
+    if CORE.exists() and (not dst.exists() or CORE.stat().st_mtime_ns != dst.stat().st_mtime_ns):
+        tmp = dev / (CORE.name + ".tmp")
+        tmp.write_bytes(CORE.read_bytes())
+        os.replace(tmp, dst)
+        os.utime(dst, ns=(CORE.stat().st_atime_ns, CORE.stat().st_mtime_ns))
+        print(f"shader_watch: core copied to {dst} (the game loads it at its next start)", flush=True)
+
+
 def stamp():
     return max(p.stat().st_mtime_ns for p in SHADERS.glob("*.slang"))
 
@@ -63,23 +92,37 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", default=str(ROOT / ".work/shaders"))
     ap.add_argument("--once", action="store_true", help="compile once and exit")
+    ap.add_argument("--game", action="store_true", help="also into the preview instance's .minecraft/atlas-shaders")
     ap.add_argument("--opt", default="-O1", help="slangc optimisation (-O0 0.9 s, -O1 1.9 s, -O3 4.7 s)")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     exe = slangc()
+    outs = [out]
+    if a.game:
+        g = Path.home() / "AppData/Roaming/PrismLauncher/instances/NirnCraft-26.3-autotest/.minecraft/atlas-shaders"
+        g.mkdir(parents=True, exist_ok=True)
+        outs.append(g)
+    dev = None
+    if a.game:
+        dev = Path.home() / "AppData/Roaming/PrismLauncher/instances/NirnCraft-26.3-autotest/.minecraft/atlas-dev"
+        dev.mkdir(parents=True, exist_ok=True)
+        sync_core(dev)
     last = stamp()
-    ok = compile_all(exe, out, a.opt)
+    ok = compile_all(exe, out, a.opt) and mirror(out, outs[1:])
     if a.once:
         sys.exit(0 if ok else 1)
     print(f"shader_watch: watching {SHADERS} (set ATLAS_SHADER_DIR={out})", flush=True)
     while True:
         time.sleep(0.2)
+        if dev:
+            sync_core(dev)
         now = stamp()
         if now != last:
             last = now
             time.sleep(0.1)  # the editor's write settles
-            compile_all(exe, out, a.opt)
+            if compile_all(exe, out, a.opt):
+                mirror(out, outs[1:])
 
 
 if __name__ == "__main__":

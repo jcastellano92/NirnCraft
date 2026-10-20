@@ -240,8 +240,7 @@ public final class AtlasNearPass {
             light = new TextureTarget("atlas near light", w, h, GpuFormat.RGBA8_UNORM, null);
         }
         var atlas = mc.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).getTextureView();
-        var sampler = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
-                FilterMode.NEAREST, FilterMode.NEAREST, true);
+        var sampler = terrainSampler(mc);
         var desc = RenderPassDescriptor.builder(() -> "Infinite ATLAS near G-buffer")
                 .withColorAttachment(gbuffer.getColorTextureView(), Optional.of(new Vector4f(0, 0, 0, 0)))
                 .withColorAttachment(light.getColorTextureView(), Optional.of(new Vector4f(0, 0, 0, 0)))
@@ -255,6 +254,26 @@ public final class AtlasNearPass {
             RenderSystem.popPipelineModifier();
         }
         drawn = true;
+    }
+
+    private static com.mojang.renderpearl.api.textures.GpuSampler terrainSampler;
+    private static int terrainSamplerAniso = -1;
+
+    /**
+     * The sampler vanilla draws terrain with (LevelRenderer's chunkLayerSampler: linear, mipmapped, the anisotropy the
+     * options ask for): the terrain shader's own texel snapping (sampleNearest / RGSS) assumes it. Nearest filtering
+     * picked the wrong texels at a distance (trees and grass turned grey and brown).
+     */
+    private static com.mojang.renderpearl.api.textures.GpuSampler terrainSampler(Minecraft mc) {
+        int aniso = mc.options.textureFiltering().get() == net.minecraft.client.TextureFilteringMethod.ANISOTROPIC
+                ? mc.options.maxAnisotropyValue() : 1;
+        if (terrainSampler == null || aniso != terrainSamplerAniso) {
+            if (terrainSampler != null) terrainSampler.close();
+            terrainSampler = RenderSystem.getDevice().createSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
+                    FilterMode.LINEAR, FilterMode.LINEAR, aniso, OptionalDouble.empty());
+            terrainSamplerAniso = aniso;
+        }
+        return terrainSampler;
     }
 
     /**
@@ -308,8 +327,7 @@ public final class AtlasNearPass {
         if (!owns() || chunks == null) return;
         Minecraft mc = Minecraft.getInstance();
         var atlas = mc.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).getTextureView();
-        var sampler = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
-                FilterMode.NEAREST, FilterMode.NEAREST, true);
+        var sampler = terrainSampler(mc);
         if (!lit) {  // stage A: vanilla's own shader, as the opaque terrain has vanilla's light
             chunks.renderGroup(ChunkSectionLayerGroup.TRANSLUCENT, pass, sampler, atlas, false);
             return;
