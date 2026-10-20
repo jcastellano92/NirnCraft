@@ -12,20 +12,28 @@ layout(std140) uniform NearInfo {
     vec4 KeyRad;   // its radiance
     vec4 SkyUp;    // the sky's radiance over the horizon (skyAmbient = mix(Ground, SkyUp, n.y * 0.5 + 0.5))
     vec4 Ground;   // and the ground's under it
+    vec4 SunDir;   // towards the sun (the sky's own; KeyDir is the moon at night), w the time in seconds
+    vec4 WaterStill;  // the block atlas's water sprites (u0, v0, u1, v1): water fragments are found by their texels
+    vec4 WaterFlow;
 };
 
-// albedo sRGB, n world-space unit normal, lm = (block, sky) light 0..1 -> display sRGB
+// albedo sRGB, n world-space unit normal, lm = (block, sky) light 0..1 -> linear radiance
 // the look, as atlas_shared.slang's shadeSurfaceAmb (LOOK_AMBIENT, LOOK_BOUNCE): keep them equal
 const float LOOK_AMBIENT = 3.0;
 const float LOOK_BOUNCE = 0.25;
 
-vec3 atlasForwardLit(vec3 albedo, vec3 n, vec2 lm) {
+vec3 atlasForwardRadiance(vec3 albedo, vec3 n, vec2 lm) {
     float open = smoothstep(0.05, 0.35, lm.y);
     float sky = lm.y * lm.y;
     vec3 direct = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * open;
     vec3 bounce = KeyRad.rgb * (max(KeyDir.y, 0.0) * LOOK_BOUNCE * (0.6 - 0.4 * n.y) * sky);
     vec3 ambient = mix(Ground.rgb, SkyUp.rgb, n.y * 0.5 + 0.5) * (sky * LOOK_AMBIENT) + bounce + vec3(0.012, 0.012, 0.016);
-    return atlasDisplay(atlasSrgbToLinear(albedo) * (direct + ambient + atlasBlockLight(lm.x)), Look.x, Look.y);
+    return atlasSrgbToLinear(albedo) * (direct + ambient + atlasBlockLight(lm.x));
+}
+
+// the same, displayed (sRGB)
+vec3 atlasForwardLit(vec3 albedo, vec3 n, vec2 lm) {
+    return atlasDisplay(atlasForwardRadiance(albedo, n, lm), Look.x, Look.y);
 }
 
 // emitters (EMISSIVE pipelines: eyes, glowing parts): full brightness through the same display

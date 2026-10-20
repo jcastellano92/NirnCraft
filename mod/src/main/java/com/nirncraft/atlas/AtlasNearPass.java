@@ -235,6 +235,20 @@ public final class AtlasNearPass {
                 .build();
     }
 
+    /** A block-atlas sprite's rectangle (u0, v0, u1, v1), or an empty one (the forward shader then finds no water). */
+    private static float[] sprite(Minecraft mc, String path) {
+        try {
+            var tex = mc.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
+            if (tex instanceof TextureAtlas atlas) {
+                var sp = atlas.getSprite(Identifier.withDefaultNamespace(path));
+                return new float[] {sp.getU0(), sp.getV0(), sp.getU1(), sp.getV1()};
+            }
+        } catch (RuntimeException e) {
+            // no sprite: no water shading
+        }
+        return new float[] {2f, 2f, -1f, -1f};
+    }
+
     /** Atlas lit this frame (one light near and far): what draws after in our look (NirnCraft's clouds give way). */
     public static boolean litThisFrame() {
         return lit;
@@ -425,7 +439,10 @@ public final class AtlasNearPass {
             frame = new TextureTarget("atlas near frame", gbuffer.width, gbuffer.height, GpuFormat.RGBA8_UNORM, GpuFormat.D32_FLOAT);
         }
         lit = nearLight && far != null;
-        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 80);
+        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 128);
+        float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
+        float[] still = sprite(mc, "block/water_still"), flow = sprite(mc, "block/water_flow");
+        float seconds = mc.level == null ? 0f : (float) ((mc.level.getGameTime() % 1_000_000L) / 20.0);
         float[] look = AtlasLook.frame(mc), k = AtlasLook.light(mc);
         try (var view = info.currentBuffer().map(false, true)) {
             com.mojang.blaze3d.buffers.Std140Builder.intoBuffer(view.data())
@@ -433,7 +450,10 @@ public final class AtlasNearPass {
                     .putVec4(k[0], k[1], k[2], lit ? 1f : 0f)
                     .putVec4(k[3], k[4], k[5], 0f)
                     .putVec4(k[6], k[7], k[8], 0f)
-                    .putVec4(k[9], k[10], k[11], 0f);
+                    .putVec4(k[9], k[10], k[11], 0f)
+                    .putVec4(sun[0], sun[1], sun[2], seconds)
+                    .putVec4(still[0], still[1], still[2], still[3])
+                    .putVec4(flow[0], flow[1], flow[2], flow[3]);
         }
         var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
                 FilterMode.NEAREST, FilterMode.NEAREST, false);
