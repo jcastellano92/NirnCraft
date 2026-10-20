@@ -55,5 +55,23 @@ What the pipeline does (the full map with file:line: the "far-field loading pipe
    preloads the coarse levels of the whole map (or ships them), the server pre-generates around spawn.
 7. **Builds on the GPU in game**: the GPU group builder inside atlas_core, the CPU path kept for no-GPU machines.
 
+### Hidden things and small things (owner, 2026-10-19)
+
+- **Occlusion.** Drawing already pays nothing for what is hidden: the far field is ray traced, each pixel's ray walks
+  the hierarchy front to back, skips empty space in big steps and stops at the first surface (Lumen's software ray
+  tracing works the same way; Nanite's two-pass occlusion culling exists because it rasterises). What is not culled
+  is the building and streaming: regions behind a mountain are built and uploaded as eagerly as those in view. Two
+  steps: a horizon test from the heightfield around the camera (regions wholly below the horizon line wait or stay
+  coarse; deep underground the surface waits), then the trace's own feedback (which regions and groups rays reached,
+  and how far off they were) as the build priority. Hidden regions keep a coarse version: a turn, a shadow ray or a
+  reflection can need them.
+- **Small details.** Far away a fence post, flowers or a lantern cannot be drawn as themselves: they merge into their
+  group's surface as colour and coverage (the surface cache does the same). The element tier shows where that is
+  wrong today: coverage counted along a face's axis, not the view (far groups 30-90 % too solid, or prefiltered 15-35
+  % too faint), and thin blocks lost (visual hull: approximate). The aim: per group, coverage seen from a few
+  directions and colour mips, both baked from the real geometry; rays pass a partly covered group with that
+  probability and the temporal resolve averages it; the few details that carry beyond their size (lights at night,
+  landmark silhouettes, water glints) stay explicit, as far lights already do.
+
 Targets: first far image under 100 ms after arrival (stand-ins), within dE 3 of settled in under 2 s on a GPU, no jump
 between seconds over dE 6; a return to a visited place loads from cache with no visible refinement.
