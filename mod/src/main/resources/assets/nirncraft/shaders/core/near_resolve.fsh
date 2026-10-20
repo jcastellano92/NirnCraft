@@ -47,11 +47,10 @@ vec3 octDecode(vec2 e) {
 // average over frames) is averaged over 5 x 5 neighbours on the same surface (normal and depth alike), so the shade
 // is smooth instead of a stippled pattern
 vec3 nearLightFiltered(vec2 uv, vec4 nl, vec3 n, float depth) {
-    vec3 sunPart = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * nl.a;
     vec2 texel = 1.0 / vec2(textureSize(Sampler6, 0));
     vec2 gtexel = 1.0 / vec2(textureSize(Sampler3, 0));
     vec3 sum = vec3(0.0);
-    float wsum = 0.0;
+    float wsum = 0.0, visSum = 0.0, visW = 0.0;
     float z0 = 1.0 / max(depth, 1e-7);
     for (int j = -2; j <= 2; j++) {
         for (int i = -2; i <= 2; i++) {
@@ -64,11 +63,19 @@ vec3 nearLightFiltered(vec2 uv, vec4 nl, vec3 n, float depth) {
             float wn = pow(max(dot(n, nq), 0.0), 16.0);
             float wz = exp(-abs(1.0 / d - z0) / (0.02 * z0));
             float w = wn * wz;
+            if (dot(q.rgb, vec3(1.0)) < 1e-6) continue;  // a texel atlas did not light (sky, or past a silhouette)
             vec3 skyQ = max(q.rgb - KeyRad.rgb * max(dot(nq, KeyDir.xyz), 0.0) * q.a, vec3(0.0));
             sum += skyQ * w;
             wsum += w;
+            visSum += q.a * w;
+            visW += w;
         }
     }
+    // atlas lights at its own resolution: at a silhouette the nearest of its texels can be one it did not light (the
+    // sky behind a crown): the sun's visibility then comes from the same surface's neighbours (dark fringes otherwise)
+    bool centre = dot(nl.rgb, vec3(1.0)) >= 1e-6;
+    float vis = centre ? nl.a : (visW > 1e-4 ? visSum / visW : 1.0);
+    vec3 sunPart = KeyRad.rgb * max(dot(n, KeyDir.xyz), 0.0) * vis;
     vec3 sky = wsum > 1e-4 ? sum / wsum : max(nl.rgb - sunPart, vec3(0.0));
     return sunPart + sky;
 }
