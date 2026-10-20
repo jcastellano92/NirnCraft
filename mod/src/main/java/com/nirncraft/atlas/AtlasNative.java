@@ -31,7 +31,7 @@ public final class AtlasNative {
     // 0.12: atlas_set_moon, 0.13: atlas_set_jitter, 0.14: atlas_set_material_shapes + FRAME_GROUPS, 0.15: the near
     // light (FRAME_NEAR_LIGHT, GlFrameIO.nearInfoTex / dstNearLight), 0.16: the air (atlas_set_air, atlas_air_*) and
     // the near field's textures (atlas_set_material_textures) (all optional)
-    public static final int ABI_VERSION = 0x001000, ABI_MIN = 0x000B00;
+    public static final int ABI_VERSION = 0x001100, ABI_MIN = 0x000B00;
     /** The first ABI with the near light (FRAME_NEAR_LIGHT); an older core is never handed the flag or its fields. */
     public static final int ABI_NEAR_LIGHT = 0x000F00;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
@@ -49,7 +49,10 @@ public final class AtlasNative {
             FRAME_LIGHT_LOW = 0x8000,  // (abi 0.14, optional) the far field's cheap light, near light included (atlas.h)
             // (abi 0.15, optional) atlas lights the near field's covered pixels with the far light (atlas.h
             // ATLAS_FRAME_NEAR_LIGHT): GlFrameIO.nearInfoTex in, dstNearLight out; the binding drops it for older cores
-            FRAME_NEAR_LIGHT = 0x20000;
+            FRAME_NEAR_LIGHT = 0x20000,
+            // (abi 0.17) atlas draws the near field too: every pixel traced from the camera, near ones (closer than
+            // nearFieldEnd) lit by the near light; PRIMARY_NEAR: a G-buffer (albedo, the light apart), _LIT: composited
+            FRAME_PRIMARY_NEAR = 0x80000, FRAME_PRIMARY_NEAR_LIT = 0x100000;
     /** (abi 0.14) AtlasMaterialShape.flags: texel alpha is coverage (cut-out leaves). */
     public static final int SHAPE_CUTOUT = 0x1;
     /** Far actor gaits (AtlasActor.flags bits 8-9): dragons fold their wings, glide or beat them. */

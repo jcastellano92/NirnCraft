@@ -269,7 +269,48 @@ vec3 environmentalFog(vec3 rgb, float dist, vec3 dir) {
     return mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
 }
 
+// The unified field (KeyDir.w 2: ATLAS_FRAME_PRIMARY_NEAR_LIT): atlas drew every pixel from the camera, near and far
+// lit and hazed alike; its colour is the finished radiance (pre-exposed, premultiplied), its depth the NDC depth in our
+// projection. Our layers go on top: the light in the air, the sun's glare, the eye's medium.
+void unifiedMain() {
+    vec4 c = texture(Sampler4, texCoord);
+    float z = texture(Sampler5, texCoord).r;
+    vec3 dirU = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
+    if (c.a <= 0.002 || z <= 0.0) {
+        if (atlasEyeInWater()) {  // nothing along this ray under water: the water as far as it goes
+            fragColor = vec4(atlasUnderwater(vec3(0.0), 1e4, dirU), 1.0);
+            gl_FragDepth = 0.0;
+            return;
+        }
+        // the sky: what the sky pass drew stays, the light in the air over it, the terrain's shadow in the air dimming it
+        vec3 b = atlasDisplay(airBeams(dirU, 80.0) + sunGlare(dirU), Look.x, Look.y);
+        float cr = crepuscular(dirU, 1e30);
+        if (dot(b, vec3(1.0)) < 1e-4 && cr > 0.999) discard;
+        fragColor = vec4(b, 1.0 - cr);
+        gl_FragDepth = 0.0;
+        return;
+    }
+    float dist = length(viewRay(texCoord, z));
+    vec3 radiance = max(c.rgb / Ground.w / max(c.a, 1e-4), vec3(0.0));  // (pre-exposed: back to physical)
+    vec3 rgb;
+    if (atlasEyeInWater()) {
+        rgb = atlasUnderwater(atlasDisplay(radiance, Look.x, Look.y), dist, dirU);
+        fragColor = vec4(rgb, 1.0);  // (under water nothing behind is seen)
+    } else {
+        // the haze in front is the sky's light too: dimmed where the terrain shadows the air (its share grows with distance)
+        float cr = mix(1.0, crepuscular(dirU, dist), 1.0 - exp(-dist / 5000.0));
+        rgb = atlasMedium(atlasDisplay(radiance, Look.x, Look.y), dist) * cr
+            + atlasDisplay(airBeams(dirU, dist) + sunGlare(dirU) * 0.15, Look.x, Look.y);
+        fragColor = vec4(rgb * c.a, c.a);
+    }
+    gl_FragDepth = z;
+}
+
 void main() {
+    if (KeyDir.w > 1.5) {
+        unifiedMain();
+        return;
+    }
     bool own = Look.z > 0.5;        // our light and look (1: atlas lit this frame; 2: it did not, our light untraced)
     bool traced = Look.z < 1.5;
     float nearDepth = texture(Sampler3, texCoord).r;

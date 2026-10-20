@@ -38,7 +38,7 @@ extern "C" {
    nearInfoTex / dstNearLight; every new field is read only when the frame sets the flag, so a 0.14 caller's smaller
    structs stay valid); 0.16 the air (AtlasAir, atlas_set_air, atlas_air_*: a physical sky, sun and haze) and the
    near field's textures (atlas_set_material_textures). */
-#define ATLAS_ABI_VERSION 0x001000
+#define ATLAS_ABI_VERSION 0x001100
 
 typedef struct AtlasContext AtlasContext;
 
