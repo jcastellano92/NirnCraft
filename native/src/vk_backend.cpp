@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <thread>
 #include <cctype>
 #include <chrono>
 #include <cstdio>
@@ -343,6 +344,11 @@ public:
             if (uploadPool_) vkDestroyCommandPool(dev_, uploadPool_, nullptr);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
             if (dpool_) vkDestroyDescriptorPool(dev_, dpool_, nullptr);
+            if (reloadThread_.joinable()) reloadThread_.join();  // a shader reload still building
+            for (int i = 0; i < RELOAD_KERNELS; i++) {  // (built and never swapped in)
+                if (reloadPipe_[i]) vkDestroyPipeline(dev_, reloadPipe_[i], nullptr);
+                if (reloadMod_[i]) vkDestroyShaderModule(dev_, reloadMod_[i], nullptr);
+            }
             if (cloudPipe_) vkDestroyPipeline(dev_, cloudPipe_, nullptr);
             if (cloudShader_) vkDestroyShaderModule(dev_, cloudShader_, nullptr);
             if (sunPipe_) vkDestroyPipeline(dev_, sunPipe_, nullptr);
@@ -942,6 +948,7 @@ public:
             mode_ = Interop::None;
             return;
         }
+        if (reloadThread_.joinable()) reloadThread_.join();  // (a shader reload still building)
         if (dev_) vkDeviceWaitIdle(dev_);
         for (auto& s : slots_) s.inFlight = false;
         destroyInterop();
@@ -1401,6 +1408,28 @@ private:
             return std::filesystem::is_directory("atlas-shaders", ec) ? "atlas-shaders" : static_cast<const char*>(nullptr);
         }();
         if (!dir || !*dir) return;
+        // a build in flight (a thread: the driver's pipeline compiles took 30-60 s for the six kernels, the game froze
+        // and looked crashed): swap its pipelines in once it is done, never wait for it
+        if (reloadThread_.joinable()) {
+            if (!reloadDone_.load(std::memory_order_acquire)) return;
+            reloadThread_.join();
+            constexpr int K = RELOAD_KERNELS;
+            if (reloadOk_) {
+                vkDeviceWaitIdle(dev_);  // frames in flight still use the old pipelines
+                VkPipeline* pipes[K] = {&farPipe_, &cloudPipe_, &sunPipe_, &nearLightPipe_, &nearUpPipe_, &nearTempPipe_};
+                VkShaderModule* mods[K] = {&farShader_, &cloudShader_, &sunShader_, &nearLightShader_, &nearUpShader_,
+                                           &nearTempShader_};
+                for (int i = 0; i < K; i++) {
+                    if (*pipes[i]) vkDestroyPipeline(dev_, *pipes[i], nullptr);
+                    if (*mods[i]) vkDestroyShaderModule(dev_, *mods[i], nullptr);
+                    *pipes[i] = reloadPipe_[i];
+                    *mods[i] = reloadMod_[i];
+                }
+                std::fprintf(stderr, "[atlas] shaders reloaded from %s\n", dir);
+            }
+            for (int i = 0; i < K; i++) reloadPipe_[i] = VK_NULL_HANDLE, reloadMod_[i] = VK_NULL_HANDLE;
+            return;
+        }
         auto now = std::chrono::steady_clock::now();
         if (now - reloadCheck_ < std::chrono::milliseconds(250)) return;
         reloadCheck_ = now;
@@ -1408,8 +1437,21 @@ private:
         std::filesystem::path base(dir);
         auto stamp = std::filesystem::last_write_time(base / "atlas_far.spv", ec);
         if (ec || stamp == reloadStamp_) return;
-        bool first = reloadStamp_ == std::filesystem::file_time_type{};
         reloadStamp_ = stamp;
+        reloadDone_.store(false);
+        reloadThread_ = std::thread([this, base] { buildReload(base); reloadDone_.store(true, std::memory_order_release); });
+    }
+
+    static constexpr int RELOAD_KERNELS = 6;
+    std::thread reloadThread_;
+    std::atomic<bool> reloadDone_{false};
+    bool reloadOk_ = false;
+    VkShaderModule reloadMod_[RELOAD_KERNELS] = {};
+    VkPipeline reloadPipe_[RELOAD_KERNELS] = {};
+
+    // (the reload thread) the folder's kernels into reloadMod_ / reloadPipe_, reloadOk_ when all six built
+    void buildReload(const std::filesystem::path& base) {
+        reloadOk_ = false;
         auto read = [&](const char* name, std::vector<uint32_t>& out) {
             std::ifstream f(base / name, std::ios::binary | std::ios::ate);
             if (!f) return false;
@@ -1419,17 +1461,17 @@ private:
             f.seekg(0);
             return bool(f.read(reinterpret_cast<char*>(out.data()), n)) && out[0] == 0x07230203u;
         };
-        constexpr int K = 6;
+        constexpr int K = RELOAD_KERNELS;
         std::vector<uint32_t> code[K];
         const char* names[K] = {"atlas_far.spv", "atlas_cloud.spv", "atlas_sunmap.spv", "atlas_nearlight.spv",
                                 "atlas_nearup.spv", "atlas_neartemporal.spv"};
         for (int i = 0; i < K; i++)
             if (!read(names[i], code[i])) {
                 std::fprintf(stderr, "[atlas] shader reload: %s unreadable, kept the running shaders\n", names[i]);
-                return;
+                return;  // (reloadOk_ false: nothing to swap)
             }
-        VkShaderModule mod[K] = {};
-        VkPipeline pipe[K] = {};
+        VkShaderModule* mod = reloadMod_;
+        VkPipeline* pipe = reloadPipe_;
         bool ok = true;
         for (int i = 0; i < K && ok; i++) {
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
@@ -1449,21 +1491,13 @@ private:
             for (int i = 0; i < K; i++) {
                 if (pipe[i]) vkDestroyPipeline(dev_, pipe[i], nullptr);
                 if (mod[i]) vkDestroyShaderModule(dev_, mod[i], nullptr);
+                pipe[i] = VK_NULL_HANDLE;
+                mod[i] = VK_NULL_HANDLE;
             }
             std::fprintf(stderr, "[atlas] shader reload: pipeline creation failed, kept the running shaders\n");
             return;
         }
-        vkDeviceWaitIdle(dev_);  // frames in flight still use the old pipelines
-        VkPipeline* pipes[K] = {&farPipe_, &cloudPipe_, &sunPipe_, &nearLightPipe_, &nearUpPipe_, &nearTempPipe_};
-        VkShaderModule* mods[K] = {&farShader_, &cloudShader_, &sunShader_, &nearLightShader_, &nearUpShader_,
-                                   &nearTempShader_};
-        for (int i = 0; i < K; i++) {
-            if (*pipes[i]) vkDestroyPipeline(dev_, *pipes[i], nullptr);
-            if (*mods[i]) vkDestroyShaderModule(dev_, *mods[i], nullptr);
-            *pipes[i] = pipe[i];
-            *mods[i] = mod[i];
-        }
-        std::fprintf(stderr, "[atlas] shaders %s from %s\n", first ? "loaded" : "reloaded", dir);
+        reloadOk_ = true;
     }
 
     bool prepare(Slot& s, const FrameInputs& in, const FrameGpu& frame, bool readback, std::string& err) {

@@ -93,6 +93,7 @@ static float gLeafGap = 0.0;
 // gSecT the ray's distance where the current chord starts.
 static const float FOLIAGE_COVER = 0.65;
 static const float FOLIAGE_SIGMA = 2.0996;  // -2 ln(1 - FOLIAGE_COVER)
+static const float WATER_SIGMA = 0.083;  // light lost through water: exp(-0.083) per block (8 %)
 static bool gSecondary = false;
 static float gTrans = 1.0;
 static float gThrough = 0.0;
@@ -270,7 +271,9 @@ static uint gSigMat = 0xFFFFFFFFu;
 static float gSigVal = -1.0;
 float secondarySigma(uint mat, uint cls) {
     if (mat == gSigMat) return gSigVal;
-    float sg = cls == 1u ? FOLIAGE_SIGMA : -1.0;
+    // water lets light through as it goes (a lake's bed lit by the sun and sky through it, 8 % lost a block): as solid,
+    // every surface under water was black to the near light (its sun and sky rays stopped at the surface)
+    float sg = cls == 1u ? FOLIAGE_SIGMA : cls == 2u ? WATER_SIGMA : -1.0;
     uint sh = shapeOf(mat);
     if (sh != 0u) {
         uint4 head = groupData[sh >> 2];
