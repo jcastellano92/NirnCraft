@@ -125,6 +125,17 @@ The full checklist from R1, every item checked live; the owner flies it.
   the far frame and writes the frame's depth. Live A/B with vanilla's own light curve: mean |diff| 2.6 of 255, 6.6 % of
   pixels over 8 (fade-in, particles), 60 fps both. Sodium and Iris leave the dev instance (Sodium replaces the section
   renderer; Iris needs Sodium); the harness's pack variant is off until R4.
+- **R3 so far (2026-10-20).** Temporal resolve (d5b84712): our frame resolves into our own target after atlas (which now
+  renders right after the G-buffer), 8 Halton jitters shared by the G-buffer's projection and atlas's rays,
+  reprojection by depth and camera motion, neighbourhood clamp; mid-strafe captures clean. One camera: vanilla's bobbed,
+  hurt-tilted projection for atlas, its near depth and the sky (the far field swam against the near terrain when
+  walking). Far materials (merge of d65a3f38: the game's tint sources for far trees and grass, snowy conifers spruce
+  green with half snow, coarse voxels by what is seen from above): spruce dE 6.5 -> 2.3 at 64 m, 6.0 -> 1.3 at 256 m.
+  The far field starts past the loaded chunks (no predicted trees floating beside the real ones). Near water: the far
+  field's water look (Fresnel sky, glint, waves). Lightmap in our look for the hand; atlas's clouds while it lights the
+  frame. Harness: stale dev-overlay copies dropped at launch (one crashed the client).
+  Still open: terrain in water reflections, shadows on forward-lit things, eye exposure from the frame, the aurora over
+  our night sky, OIT, caves (agent), far life (R5), scale (R6).
 - **R2 stage B live (2026-10-20, 2002d7db, 70f3dae9).** Falkreath, live A/B against vanilla: one light near and far
   (atlas's near light: traced sun shadows under the well, the buildings, the barrels), the look's sky fill (shadeSurfaceAmb
   LOOK_AMBIENT 3, LOOK_BOUNCE 0.25: readable cool shade, warm sun), no line where near meets far at the seam view, torch
