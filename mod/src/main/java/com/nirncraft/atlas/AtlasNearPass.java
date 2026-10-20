@@ -92,7 +92,8 @@ public final class AtlasNearPass {
             .withUniform("NearInfo", UniformType.UNIFORM_BUFFER).build();
     private static final BindGroupLayout SCENE = BindGroupLayout.builder()
             .withUniform("SceneColor", UniformType.COMBINED_IMAGE_SAMPLER)
-            .withUniform("SceneDepth", UniformType.COMBINED_IMAGE_SAMPLER).build();
+            .withUniform("SceneDepth", UniformType.COMBINED_IMAGE_SAMPLER)
+            .withUniform("SkyView", UniformType.COMBINED_IMAGE_SAMPLER).build();  // the air's sky (AtlasSky)
 
     private static final Set<Identifier> OPAQUE = Set.of(RenderPipelines.SOLID_TERRAIN.getLocation(),
             RenderPipelines.SOLID_TERRAIN_MULTIDRAW.getLocation(), RenderPipelines.CUTOUT_TERRAIN.getLocation(),
@@ -635,6 +636,10 @@ public final class AtlasNearPass {
         if (scene != null && frame != null) {
             pass.setUniform("SceneColor", scene.getColorTextureView(), linear);
             pass.setUniform("SceneDepth", frame.getDepthTextureView(), nearest);
+            // the sky the water mirrors where no reflected ray finds the frame: this frame's sky-view LUT (bearing repeats)
+            var sky = AtlasSky.skyView();
+            pass.setUniform("SkyView", sky != null ? sky : scene.getColorTextureView(), RenderSystem.getSamplerCache()
+                    .getSampler(AddressMode.REPEAT, AddressMode.CLAMP_TO_EDGE, FilterMode.LINEAR, FilterMode.LINEAR, false));
         }
         bindShadow(pass);
         RenderSystem.pushPipelineModifier(FORWARD);

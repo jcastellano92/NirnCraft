@@ -25,12 +25,12 @@ static const uint FRAME_NEAR_SPLIT = 0x40000u; // (internal: the Vulkan backend)
                                                // (nearLightMain) and upsampled (nearUpsampleMain), not in farMain
 // the shader pack's ambient floor (deferred.fsh: albedo x (sky + floor)), under every far land surface as under the near
 static const float3 FAR_AMBIENT_FLOOR = float3(0.012, 0.012, 0.016);
-// the look (shadeSurfaceAmb): how much the sky fills the shade (1: the physical value) and the warm bounce off lit ground
-// where the sky rays did not trace it (the constant; gBounce)
-static const float LOOK_AMBIENT = 3.0;
+// the look (shadeSurfaceAmb): how much the sky fills the shade (1: the physical value: the air's sky light, multiple
+// scattering included, against the sun's transmitted light) and the warm bounce off lit ground where the sky rays did
+// not trace it (the constant; gBounce; about the ground's albedo)
+static const float LOOK_AMBIENT = 1.0;
 static const float LOOK_BOUNCE = 0.25;
-// the look: aerial haze over the physical clear air (distance reads as depth; the horizon softens into the sky)
-static const float LOOK_HAZE = 2.5;
+// (the aerial haze's strength is the air's scale, AtlasAir.airScale: 2.5 m of air a block)
 static const int MAX_LODS = 8;
 
 struct LodGpu {
@@ -70,6 +70,16 @@ struct FrameGpu {
     float4 moonDir;          // (abi 0.12) night key light towards the moon, w = 1 when the host set it
     float4 moonRad;          // its radiance (before the night fade)
     float4 jitter;           // (abi 0.13) primary-ray NDC offset x, y; z = 1 when the host jitters (TAA)
+    // (abi 0.16) the air (atlas_air.slang; native/src/air.hpp): per-km coefficients at sea level, the lights above the
+    // air, the eye's altitude, and the sky's light the host integrated there
+    float4 airRayleigh;      // molecules' scattering; w = 1 / aerosol scale height (per km)
+    float4 airMieScat;       // aerosols' scattering; w = their asymmetry g
+    float4 airMieExt;        // aerosols' extinction; w = km of air per block
+    float4 airOzone;         // ozone's absorption at its peak; w = the ground's albedo
+    float4 airSun;           // the sun's irradiance above the air; w = the eye's altitude, km
+    float4 airMoon;          // the moon's (0 by day)
+    float4 airSkyUp;         // skyAmbient: the sky's radiance over the horizon at the eye
+    float4 airGround;        // and the ground's under it
 };
 
 // the frame's moon, copied by each entry point (the shared lighting has no frame of its own)
@@ -91,114 +101,7 @@ float3 lodTint(int lod) {
     return t[clamp(lod, 0, 7)];
 }
 
-float3 sunRadiance(float3 sun) {
-    // warmer and dimmer as the sun nears the horizon (air mass), dark below it
-    float e = sun.y;
-    float3 warm = float3(1.0, 0.62, 0.38);
-    float3 noon = float3(1.0, 0.96, 0.9);
-    float a = saturate(e * 3.0);
-    return lerp(warm, noon, a) * (3.2 * smoothstep(-0.04, 0.12, e));
-}
-
-float3 skyColor(float3 dir, float3 sun) {
-    float mu = dot(dir, sun);
-    float up = dir.y;
-    float day = smoothstep(-0.12, 0.25, sun.y);
-    float3 zenith = lerp(float3(0.008, 0.012, 0.03), float3(0.16, 0.34, 0.78), day);
-    float3 horizon = lerp(float3(0.03, 0.035, 0.06), float3(0.62, 0.75, 0.92), day);
-    // sunset band along the horizon on the sun's side
-    float dusk = (1.0 - smoothstep(0.0, 0.3, abs(sun.y))) * smoothstep(-0.2, 0.9, mu);
-    horizon = lerp(horizon, float3(1.0, 0.5, 0.25), dusk * 0.7);
-    float hz = pow(1.0 - saturate(abs(up)), 5.0);
-    float3 c = lerp(zenith, horizon, hz);
-    if (up < 0.0) c = lerp(c, horizon * 0.55, saturate(-up * 6.0));
-    // Mie forward lobe and the disk
-    float g = 0.76;
-    float mie = (1.0 - g * g) / pow(max(1.0 + g * g - 2.0 * g * mu, 1e-4), 1.5) * 0.012;
-    c += sunRadiance(sun) * mie * 0.5;
-    if (mu > 0.99995 && up > -0.01) c += sunRadiance(sun) * 18.0;
-    return c * 1.6;
-}
-
-float3 skyAmbient(float3 n, float3 sun) {
-    float day = smoothstep(-0.12, 0.25, sun.y);
-    float3 skyUp = lerp(float3(0.02, 0.025, 0.05), float3(0.33, 0.45, 0.7), day);
-    float3 ground = lerp(float3(0.01, 0.01, 0.012), float3(0.2, 0.18, 0.14), day);
-    return lerp(ground, skyUp, n.y * 0.5 + 0.5);
-}
-
-// The key light: the sun, or the moon (opposite it) once the sun is below the horizon, with the shader pack's
-// moonlight (shaderpack lib/lighting.glsl shadeForward): the near and far fields light the night identically.
-float3 keyLightDir(float3 sun) { return sun.y > -0.05 ? sun : (gMoonDir.w > 0.5 ? gMoonDir.xyz : -sun); }
-
-float3 keyLightRadiance(float3 sun) {
-    if (sun.y > -0.05) return sunRadiance(sun);
-    float3 moon = gMoonDir.w > 0.5 ? gMoonRad.xyz : float3(0.035, 0.05, 0.09);  // the host's moons, else the old key
-    return moon * smoothstep(-0.05, -0.2, sun.y);
-}
-
-// ao: 0..1 sky-light occlusion (crevices, forest floors), applied to the ambient term only.
-// lightVis: shadowing of the key light. reflection: what water mirrors (the sky, or traced far terrain).
-// ambient: the sky (and floor) light reaching the surface, already occluded (shadeSurface: skyAmbient x ao).
-float3 shadeSurfaceAmb(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun, float lightVis, uint cls,
-                       float3 ambient, float3 reflection) {
-    float3 L = keyLightDir(sun);
-    float ndl = saturate(dot(n, L));
-    float3 direct = keyLightRadiance(sun) * ndl * lightVis;
-    // the look (one for near and far: the near pass's pixels are lit by this too): the sky fills the shade more than
-    // the physical value, and the lit ground bounces warm light into it: traced where the sky rays met a surface (its
-    // own light, gBounce: an arch's underside over sunlit ground, a gorge's walls; a cave's unlit walls send none),
-    // over the rest of the rays a constant from below and the sides, as far as the sky reaches there
-    float3 sky = skyAmbient(n, sun);
-    float open = saturate(dot(ambient, float3(0.2126, 0.7152, 0.0722)) / max(dot(sky, float3(0.2126, 0.7152, 0.0722)), 1e-4));
-    float3 bounce = gBounce.rgb + keyLightRadiance(sun) * (max(L.y, 0.0) * LOOK_BOUNCE * (0.6 - 0.4 * n.y) * open * gBounce.a);
-    gBounce = float4(0.0, 0.0, 0.0, 1.0);
-    float3 c = albedo * (direct + ambient * LOOK_AMBIENT + bounce);
-    if (cls == 2u) {
-        // water: Schlick Fresnel against what it reflects, plus the key light's glint; m.albedoRough.a carries the
-        // glint's alpha (the far field sets it from the waves it can no longer draw: a sun path widening with distance)
-        float cosv = saturate(dot(-v, n));
-        float f = 0.02 + 0.98 * pow(1.0 - cosv, 5.0);
-        float3 r = reflect(v, n);
-        float alpha = clamp(m.albedoRough.a, 0.005, 0.5);
-        float e = 2.0 / (alpha * alpha) - 2.0;  // the Phong lobe matching that alpha, energy-normalised
-        float spec = pow(saturate(dot(r, L)), e) * (e + 8.0) / 25.1327 * 0.37 * lightVis;
-        c = lerp(c, reflection, f) + keyLightRadiance(sun) * spec;
-    }
-    c += albedo * m.emisClass.x * 2.0;
-    return c;
-}
-
-float3 shadeSurface(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun, float lightVis, uint cls, float ao,
-                    float3 reflection) {
-    return shadeSurfaceAmb(albedo, m, n, v, sun, lightVis, cls, skyAmbient(n, sun) * ao, reflection);
-}
-
-// Aerial perspective over kilometres: extinction thins with altitude (scale height ~ 1.2 km in blocks).
-float aerialTransmittance(float t, FrameGpu f) {
-    // no aerial perspective without FRAME_ATMOS (ground-truth views: the game's fog-off; the flag was set by every
-    // caller but read by none, so fog-off left this haze on)
-    if ((f.dims.z & FRAME_ATMOS) == 0u) return 1.0;
-    float camY = float(f.camInt.y) + f.camFrac.y;
-    float h = max(camY - 63.0, 0.0);
-    float density = exp(-h / 1200.0);
-    float beta = (LOOK_HAZE / 22000.0) * (1.0 + 3.0 * f.weatherParams.x);
-    return exp(-t * beta * density);
-}
-
-float3 aerialFog(float3 dir, float3 sun) {
-    return skyColor(normalize(float3(dir.x, max(dir.y, 0.02), dir.z)), sun) * 0.9;
-}
-
-float3 applyAerial(float3 c, float3 dir, float3 sun, float t, FrameGpu f) {
-    return lerp(aerialFog(dir, sun), c, aerialTransmittance(t, f));
-}
-
-// applyAerial split for a host that composites the surface itself (the near light): applyAerial(c) == c * T + this,
-// T = aerialTransmittance(t, f)
-float3 aerialInscatter(float3 dir, float3 sun, float t, FrameGpu f) {
-    return aerialFog(dir, sun) * (1.0 - aerialTransmittance(t, f));
-}
+// the air and the light (sky, sun, haze, shadeSurfaceAmb): atlas_air.slang
 
 // Smooth value noise on a world-space grid (stable under camera motion and LOD changes).
 // A per-pixel threshold in [0, 1): interleaved gradient noise (Jimenez 2014), spread evenly over small

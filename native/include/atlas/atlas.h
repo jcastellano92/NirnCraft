@@ -36,8 +36,8 @@ extern "C" {
    0.13 primary-ray jitter (atlas_set_jitter); 0.14 material shapes (atlas_set_material_shapes), ATLAS_FRAME_GROUPS;
    0.15 the near light (ATLAS_FRAME_NEAR_LIGHT: AtlasFrame.nearInfo, AtlasFrameOutput.nearLight, AtlasGlFrameIO
    nearInfoTex / dstNearLight; every new field is read only when the frame sets the flag, so a 0.14 caller's smaller
-   structs stay valid). */
-#define ATLAS_ABI_VERSION 0x000F00
+   structs stay valid); 0.16 the air (AtlasAir, atlas_set_air, atlas_air_*: a physical sky, sun and haze). */
+#define ATLAS_ABI_VERSION 0x001000
 
 typedef struct AtlasContext AtlasContext;
 
@@ -460,6 +460,67 @@ ATLAS_API AtlasStatus atlas_set_moon(AtlasContext* ctx, const float dir[3], cons
  * (0, 0), the default: no jitter, dithers fixed on screen.
  */
 ATLAS_API AtlasStatus atlas_set_jitter(AtlasContext* ctx, float x, float y);
+
+/*
+ * (abi 0.16) The air: one physical atmosphere for the sky, the sun's colour and strength (the key light is the sun's
+ * transmitted light), the aerial perspective and the sky's light on surfaces (native/src/air.hpp: Rayleigh, Mie and
+ * ozone over a spherical planet, single scattering marched, multiple scattering from Hillaire's LUT). Regional
+ * variation is what is in the air, set by the climate (AtlasAir.java maps temperature, humidity, the aerosol band,
+ * rain): molecules follow pressure and temperature, the aerosols' amount, size (Angstrom exponent), colour (albedo per
+ * channel) and glow (asymmetry) follow humidity and the aerosol's kind (mist and sea salt whitish, dust pale and
+ * tinted, smoke and ash reddening the sun). atlas_air_defaults fills clean continental air.
+ */
+typedef struct AtlasAir {
+    float airDensity;        /* molecules: sea-level density over the standard atmosphere's (1) */
+    float aerosolDepth;      /* aerosol optical depth at 550 nm, the vertical column: 0.05 clean, 0.3 humid haze,
+                                0.8 dust, 1.5 smoke */
+    float angstrom;          /* its Angstrom exponent: 0 coarse dust (grey), 0.4 sea salt / mist, 1.3 haze, 1.8 smoke */
+    float aerosolAlbedo[3];  /* single-scattering albedo per channel (r, g, b): 0.99 water, dust absorbs blue */
+    float aerosolG;          /* Cornette-Shanks asymmetry 0.6 .. 0.9: the glow round the sun */
+    float aerosolHeight;     /* aerosol scale height, km: 0.8 fog, 1.2 boundary layer, 2.5 dust and smoke */
+    float ozone;             /* ozone column over 300 DU (1) */
+    float groundAlbedo;      /* the ground under the sky (0.25) */
+    float airScale;          /* km of air per block (0.0025: the world is a 1 : 2.5 model of its air) */
+} AtlasAir;
+ATLAS_API void atlas_air_defaults(AtlasAir* out);
+/*
+ * The climate's handle on the air (air.hpp fromClimate): the weather at the eye in, the air out. Aerosols are an
+ * external mixture of known kinds: the region's background by its aerosol band (continental haze, clean arctic air,
+ * desert dust, volcanic ash) plus what the weather adds (sea salt by the coast, a dust storm, smoke and ash, mist,
+ * rain, blowing snow); the water-loving ones swell with humidity (more, larger, whiter); molecules follow p / T.
+ */
+typedef struct AtlasClimate {
+    float temperatureC;      /* the air at the eye */
+    float relativeHumidity;  /* 0..1 */
+    float pressure;          /* sea-level pressure over the standard atmosphere's (1) */
+    float background[4];     /* the aerosol band's weights (WeatherFieldTexture.aerosolBand: water, snow, sand, ash),
+                                eased by the host; summing to 1 */
+    float dust, ash, snow, rain, fog, coast;  /* 0..1: a dust storm, smoke and ash, falling snow, rain, mist, the sea */
+} AtlasClimate;
+ATLAS_API AtlasStatus atlas_air_from_climate(const AtlasClimate* climate, AtlasAir* out);
+/* The air the context's frames are drawn in (from the next frame). Builds the multiple-scattering LUT (~10 ms on all
+   threads): set it when the air changes, not every frame. Not called: atlas_air_defaults. */
+ATLAS_API AtlasStatus atlas_set_air(AtlasContext* ctx, const AtlasAir* air);
+/*
+ * Context-free (any thread; the LUT of the last air asked for is cached): the light the far field lights with, for the
+ * host's own shading of what it draws (entities, translucents): at world height eyeY (blocks) for the sun direction
+ * and the moon (NULL dir / radiance: opposite the sun, the default moonlight). out[0..2] the key light's direction,
+ * [3..5] its radiance (the sun's light through the air, or the moon's at night), [6..8] the sky's radiance over the
+ * horizon (an upward face's irradiance over pi), [9..11] the ground's under it (skyAmbient = mix(ground, up, n.y/2+1/2)).
+ */
+ATLAS_API AtlasStatus atlas_air_light(const AtlasAir* air, const float sunDir[3], const float moonDir[3],
+                                      const float moonRad[3], float eyeY, float out[12]);
+/* Context-free: the per-km coefficients the marches take (FrameGpu air*, atlas_sky.glsl's AirRayleigh .. AirOzone):
+   16 floats, rayleigh rgb + 1 / aerosol height, mie scattering rgb + g, mie extinction rgb + km per block, ozone rgb +
+   ground albedo. */
+ATLAS_API AtlasStatus atlas_air_coeffs(const AtlasAir* air, float out[16]);
+/* Context-free: the multiple-scattering LUT for a host's own sky shader: 32 x 32 RGBA float (alpha 1), row-major,
+   x = the sun's zenith cosine * 0.5 + 0.5, y = sqrt(altitude / 100 km), texel centres at both ends of each axis. */
+ATLAS_API AtlasStatus atlas_air_multiscatter(const AtlasAir* air, float* rgba);
+/* Context-free: the sky's radiance (rgb) along n unit directions from world height eyeY (the reference the host's sky
+   shader is checked against: tools/dev/air_check.py). */
+ATLAS_API AtlasStatus atlas_air_sky(const AtlasAir* air, const float sunDir[3], const float moonDir[3],
+                                    const float moonRad[3], float eyeY, const float* dirs, uint32_t n, float* rgb);
 /*
  * (abi 0.14) The shape and faces of a far material (a block state, docs/ATLAS-LOD.md "level -1"), for the content-shaped
  * groups (ATLAS_FRAME_GROUPS): its 4 x 4 x 4 occupancy from its real shape and a 4 x 4 tile of its real textures per

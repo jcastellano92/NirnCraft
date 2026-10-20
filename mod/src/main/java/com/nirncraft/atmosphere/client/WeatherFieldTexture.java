@@ -215,6 +215,7 @@ public final class WeatherFieldTexture implements AutoCloseable {
                     int gx=nearestWorldCell(grid.x,col), gz=nearestWorldCell(grid.z,row);
                     if(gx!=nearestWorldCell(centerCellX,col) || gz!=nearestWorldCell(centerCellZ,row)) continue;
                     var state=grid.columns[i];
+                    if(this==instance && gx==centerCellX && gz==centerCellZ) eyeColumn=state;  // the air at the eye (atlas's sky)
                     boolean fresh=sampledX[i]!=gx || sampledZ[i]!=gz;
                     sampledX[i]=gx; sampledZ[i]=gz;
                     int band=aerosolBand(state.aerosolCode());
@@ -333,7 +334,14 @@ public final class WeatherFieldTexture implements AutoCloseable {
         return base + offset;
     }
 
-    private static int aerosolBand(float code) {
+    /** The column the camera stands in, as last sampled (temperature, humidity, aerosol code: Infinite ATLAS's air), or null. */
+    public static WeatherPhysics.ColumnState eyeColumn() {
+        return eyeColumn;
+    }
+
+    private static volatile WeatherPhysics.ColumnState eyeColumn;
+
+    public static int aerosolBand(float code) {
         if (code >= 0.78f) return 3; // Volcanic ash / blight
         if (code >= 0.55f) return 2; // Desert sand / haboob
         if (code >= 0.26f) return 1; // Snow / blizzard

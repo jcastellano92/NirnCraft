@@ -36,8 +36,9 @@ float atlasShadow(vec3 p, vec3 n) {
 }
 
 // albedo sRGB, n world-space unit normal, lm = (block, sky) light 0..1 -> linear radiance
-// the look, as atlas_shared.slang's shadeSurfaceAmb (LOOK_AMBIENT, LOOK_BOUNCE): keep them equal
-const float LOOK_AMBIENT = 3.0;
+// the look, as atlas_shared.slang's shadeSurfaceAmb (LOOK_AMBIENT, LOOK_BOUNCE): keep them equal. KeyRad, SkyUp and
+// Ground are the air's (AtlasLook.light: atlas_air_light), the sun's transmitted light against the physical sky: 1
+const float LOOK_AMBIENT = 1.0;
 const float LOOK_BOUNCE = 0.25;
 
 vec3 atlasForwardRadianceShadowed(vec3 albedo, vec3 n, vec2 lm, float keyVis) {

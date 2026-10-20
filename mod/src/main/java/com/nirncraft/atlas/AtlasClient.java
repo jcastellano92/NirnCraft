@@ -325,6 +325,7 @@ public final class AtlasClient {
                 return;
             }
             feedWeather();
+            AtlasAir.update(mc, lib, ctx);  // the air at the eye (the sky, the sun through it, the haze)
             feedActors(mc.level);
             int budget = quality.lightBudget();
             if (budget != lightBudget) {
@@ -363,6 +364,7 @@ public final class AtlasClient {
                         state.worldPartialTicks);
                 try {
                     ctx.setMoon(new float[] {key[0], key[1], key[2]}, new float[] {key[3], key[4], key[5]});
+                    AtlasAir.moon(new float[] {key[0], key[1], key[2]}, new float[] {key[3], key[4], key[5]});
                 } catch (RuntimeException e) {
                     com.nirncraft.NirnCraft.LOGGER.debug("atlas: moon not set: {}", e.toString());
                 }
@@ -792,6 +794,11 @@ public final class AtlasClient {
         net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(x - pad, y - 1, z - pad, x + pad, y + h + 1, z + pad);
         return !level.getEntities((net.minecraft.world.entity.Entity) null, box,
                 e -> e.getBbHeight() >= h * 0.5f && e.getBbHeight() <= h * 2f).isEmpty();
+    }
+
+    /** The loaded atlas_core library, or null (AtlasAir's context-free calls). */
+    static AtlasNative library() {
+        return lib;
     }
 
     private static void feedWeather() {
