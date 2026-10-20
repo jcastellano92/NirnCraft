@@ -105,8 +105,15 @@ final class AtlasTileUpload {
             }
             // (the dressing's canopy stays until the tile's real trees replace it: AtlasSettlements uploads them with
             // STRUCTURES_REPLACE_CANOPY, so the tree line never goes bare while they are being built)
-            // what the world did that the prediction cannot know (the server's change feed)
-            AtlasEditsClient.patch(lod, tx, tz, surface, water, topMat, fillMat, m::id);
+            // what the world did that the prediction cannot know (the server's change feed), its blocks worn as the
+            // tile's own: a real grass top in the tile's biome grass (m.id is its untinted texture, grey), another
+            // biome-tinted block in its grid cell's colours, grass under a top as the codec has it (the dressing's fill)
+            AtlasEditsClient.patch(lod, tx, tz, surface, water, topMat, fillMat, (st, c, top) -> {
+                if (st.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK)) return top && tinted ? grassMat[c] : 0;
+                if (!tinted || !AtlasMaterials.biomeTinted(st)) return m.id(st);
+                int per = AtlasNative.TILE / AtlasTints.GRID, g = (c / AtlasNative.TILE / per) * AtlasTints.GRID + c % AtlasNative.TILE / per;
+                return m.leaves(st, AtlasMaterials.tint(st, grassRgb[g], foliageRgb[g]));
+            });
             m.flush(ctx);
             ctx.uploadColumnHeights3(lod, tx, tz, surface, water, topMat, fillMat, tinted ? grassMat : null, tinted ? foliageMat : null, flags);
         } else if (tinted) {

@@ -208,13 +208,18 @@ final class AtlasEditsClient {
         return out;
     }
 
+    /** Palette ids for a patched column's blocks: the column (j * TILE + i) and whether it is its top or under block. */
+    interface ColumnIds {
+        short id(BlockState s, int column, boolean top);
+    }
+
     /**
      * Patches far tile (lod, tx, tz)'s columns with the changes under them: surface (ground top + 1), water and the top
      * and under blocks (palette ids via ids). A coarse column (2^lod blocks) takes a change at its centre block, or any
      * change in its footprint big enough to show at its size (half a column of height). Returns whether any changed.
      */
     static boolean patch(int lod, int tx, int tz, float[] surface, float[] water, short[] topMat, short[] fillMat,
-                         java.util.function.Function<BlockState, Short> ids) {
+                         ColumnIds ids) {
         if (COLUMNS.isEmpty()) return false;
         int n = AtlasNative.TILE, s = 1 << lod;
         int bx = tx * (n << lod), bz = tz * (n << lod);
@@ -237,8 +242,8 @@ final class AtlasEditsClient {
                     surface[c] = now;
                     water[c] = col.water() == Integer.MIN_VALUE ? Float.NaN : col.water() + 1f;
                     BlockState top = Block.stateById(col.topId()), under = Block.stateById(col.underId());
-                    topMat[c] = ids.apply(top);
-                    fillMat[c] = ids.apply(under);
+                    topMat[c] = ids.id(top, c, true);
+                    fillMat[c] = ids.id(under, c, false);
                     any = true;
                 }
             }
