@@ -165,9 +165,9 @@ inline Climate namedClimate(const char* name) {
     Climate k;
     std::string n = name ? name : "";
     if (n == "humid" || n == "misty") {  // a warm wet morning by the sea: swollen haze, mist
-        k.temperatureC = 20, k.relativeHumidity = 0.93f, k.fog = 0.35f, k.coast = 0.6f;
+        k.temperatureC = 20, k.relativeHumidity = 0.9f, k.fog = 0.1f, k.coast = 0.6f;
     } else if (n == "dusty") {  // the desert's air in a breeze (a haboob is dust 1)
-        k.temperatureC = 32, k.relativeHumidity = 0.2f, k.background[0] = 0, k.background[2] = 1, k.dust = 0.4f;
+        k.temperatureC = 32, k.relativeHumidity = 0.2f, k.background[0] = 0, k.background[2] = 1, k.dust = 0.25f;
     } else if (n == "smoke" || n == "ash") {  // the ashlands near a vent
         k.temperatureC = 25, k.relativeHumidity = 0.35f, k.background[0] = 0, k.background[3] = 1, k.ash = 0.5f;
     } else if (n == "snow") {  // a cold clear day over snow

@@ -157,8 +157,10 @@ AirPath airAerial(float3 dir, float t) {
     float3 sun = frame.sunDir.xyz, moon = airMoonDir(sun);
     float r = R_GROUND + frame.airSun.w;
     float tEnd = min(t * frame.airMieExt.w, airDistanceToTop(r, dir.y));
+    // (FRAME_LIGHT_LOW, the cheap light: half the steps; the energy-conserving steps keep a long path's total)
+    int steps = (frame.dims.z & FRAME_LIGHT_LOW) != 0u ? AERIAL_STEPS / 2 : AERIAL_STEPS;
     AirPath p = airIntegrate(r, dir.y, dot(dir, sun), sun.y, frame.airSun.xyz, dot(dir, moon), moon.y,
-                             frame.airMoon.xyz, tEnd, AERIAL_STEPS, false, false);
+                             frame.airMoon.xyz, tEnd, steps, false, false);
     p.inscatter += NIGHT_GLOW * (1.0 - p.transmittance);
     return p;
 }
