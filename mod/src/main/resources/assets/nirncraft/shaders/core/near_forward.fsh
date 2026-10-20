@@ -16,10 +16,12 @@
 #include <minecraft:projection.glsl>
 #include <nirncraft:atlas_light.glsl>
 #include <nirncraft:atlas_sky.glsl>
+#include <nirncraft:atlas_water.glsl>
 
 uniform sampler2D Sampler0;
 uniform sampler2D SceneColor;  // our resolved frame (displayed), terrain near and far: what the water reflects
 uniform sampler2D SceneDepth;  // its depth (reverse-Z)
+uniform sampler2D SkyView;    // the air's sky this frame (AtlasSky's sky-view LUT, atlas_sky.glsl)
 
 layout(location = 0) in vec4 vertexColor;
 layout(location = 1) in vec2 texCoord0;
@@ -98,6 +100,27 @@ vec3 waveNormal(vec2 p, float t, float foot) {
 // water's absorption per block (red first, then green) and its scattering colour per block of path
 const vec3 WATER_ABSORB = vec3(0.30, 0.075, 0.045);
 
+float hash21(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
+float valueNoise(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash21(i), hash21(i + vec2(1, 0)), f.x), mix(hash21(i + vec2(0, 1)), hash21(i + vec2(1, 1)), f.x), f.y);
+}
+
+// how murky this water is (0 a clear mountain lake .. 1 a swamp or a pond), from the biome's water colour (vanilla's
+// tint on the water's vertices): clear water is a saturated blue, murky water a dull green or grey
+float murk(vec3 tint) {
+    float mx = max(tint.r, max(tint.g, tint.b)), mn = min(tint.r, min(tint.g, tint.b));
+    float sat = mx > 1e-3 ? (mx - mn) / mx : 0.0;
+    float greenish = clamp((tint.g - tint.b) * 3.0 + 0.3, 0.0, 1.0);
+    return clamp((1.0 - sat) * 1.3 + greenish * 0.6 - 0.35, 0.0, 1.0);
+}
+
 void main() {
     vec4 color = (UseRgss == 1 ? sampleRGSS(Sampler0, texCoord0, 1.0f / TextureSize)
                                : sampleNearest(Sampler0, texCoord0, 1.0f / TextureSize)) * vertexColor;
@@ -111,16 +134,63 @@ void main() {
     }
     vec2 lm = clamp(lightLevels / 240.0, 0.0, 1.0);
     vec3 rgb;
+    if (isWater(texCoord0) && KeyRad.w > 0.5 && n.y < -0.5) {
+        // the surface seen from below (the eye in water): Snell's window. Inside the critical angle (48.6 degrees off
+        // the vertical) the world above, refracted (our frame where it has geometry, the sky model where it has none:
+        // the frame holds no sky); outside it total internal reflection, the water's own light; then the water
+        // between the eye and the surface
+        vec3 world = viewPos - CameraOffset + vec3(CameraBlockPos);
+        float dist = length(viewPos);
+        vec3 v = viewPos / dist;
+        float foot = dist * length(fwidth(v)) / max(abs(v.y), 0.05);
+        vec3 wb = -waveNormal(world.xz, SunDir.w, foot);  // towards the eye, below
+        vec3 t = refract(v, wb, 1.333);
+        float R = 1.0;
+        vec3 above = vec3(0.0);
+        if (dot(t, t) > 1e-6) {
+            float ct = max(dot(t, -wb), 0.0);
+            R = 0.02 + 0.98 * pow(1.0 - ct, 5.0);
+            mat4 vp = ProjMat * ModelViewMat;
+            vec4 ct4 = vp * vec4(t * 1000.0, 1.0);
+            vec2 uvT = clamp(ct4.xy / max(ct4.w, 1e-3) * 0.5 + 0.5, vec2(0.0), vec2(1.0));
+            above = texture(SceneDepth, uvT).r > 0.0 ? texture(SceneColor, uvT).rgb
+                                                       : atlasDisplay(atlasSkyColor(normalize(t), SunDir.xyz), Look.x, Look.y);
+        }
+        // outside the window the surface mirrors the water under it (total internal reflection)
+        vec4 under = screenReflection(viewPos - wb * 0.05, reflect(v, wb));
+        vec3 mirrorBelow = mix(atlasWaterLightAt(atlasEyeDepth() + 4.0), under.rgb, under.a);
+        rgb = atlasUnderwater(mix(above, mirrorBelow, R), dist, v);
+        fragColor = vec4(rgb, 1.0);
+        return;
+    }
     if (isWater(texCoord0)) {
         vec3 world = viewPos - CameraOffset + vec3(CameraBlockPos);
         float dist = length(viewPos);
         vec3 v = viewPos / dist;
         float foot = dist * length(fwidth(v)) / max(abs(v.y), 0.05);  // the pixel's footprint on the level surface
+        if (false && abs(n.y) < 0.5) {  // (off: it also whitened the steps between flowing water's levels; falls wait for
+            // atlas drawing water, which knows a fall's height and its flow)
+            // falling water (a flow's side, a fall): white water, streaks running down, mostly opaque, lit like a
+            // surface (vanilla's thin sheet over the rock was all but invisible)
+            vec2 fu = vec2(dot(world.xz, vec2(-n.z, n.x)), world.y);
+            float streak = valueNoise(vec2(fu.x * 4.0, fu.y * 0.6 + SunDir.w * 3.5)) * 0.6
+                         + valueNoise(vec2(fu.x * 9.0, fu.y * 1.5 + SunDir.w * 6.0)) * 0.4;
+            // white water: aerated, nearly colourless (a breath of the water's tint in the streaks' shade)
+            vec3 tintW = mix(vec3(1.0), clamp(vertexColor.rgb * 1.5, 0.0, 1.0), 0.18);
+            vec3 white = mix(vec3(0.62, 0.70, 0.74), vec3(0.95), smoothstep(0.3, 0.75, streak)) * tintW;
+            vec3 litW = atlasForwardRadianceShadowed(white, n, lm, atlasShadow(viewPos, n));
+            rgb = atlasDisplay(litW, Look.x, Look.y);
+            float dist2 = length(viewPos);
+            rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist2, viewPos / max(dist2, 1e-3))
+                : mix(rgb, FogColor.rgb, linear_fog_value(dist2, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
+            fragColor = vec4(rgb, mix(0.75, 0.95, smoothstep(0.3, 0.8, streak)));
+            return;
+        }
         vec3 wn = n.y > 0.5 ? waveNormal(world.xz, SunDir.w, foot) : n;
         float cosv = max(dot(-v, wn), 0.0);
         float fresnel = 0.02 + 0.98 * pow(1.0 - cosv, 5.0);
         vec3 r = reflect(v, wn);
-        vec3 sky = atlasSkyColor(normalize(vec3(r.x, max(r.y, 0.02), r.z)), SunDir.xyz) * (lm.y * lm.y);
+        vec3 sky = atlasSky(SkyView, normalize(vec3(r.x, max(r.y, 0.02), r.z)), SunDir.xyz) * (lm.y * lm.y);
         float open = smoothstep(0.05, 0.35, lm.y);
         float lit = atlasShadow(viewPos, n);
         vec3 glint = KeyRad.rgb * pow(max(dot(r, KeyDir.xyz), 0.0), 600.0) * 60.0 * open * lit;
@@ -138,24 +208,54 @@ void main() {
         float dB = behind ? dR : d0;
         float path = dB > 0.0 ? max(length(sceneAt(uvB, dB)) - dist, 0.0) : 64.0;
         vec3 bed = texture(SceneColor, uvB).rgb;
-        vec3 T = exp(-WATER_ABSORB * path);
+        // clear water absorbs as WATER_ABSORB (the bed shows to ~15 blocks in blue), murky water up to five times that
+        // and scatters more of its own colour (a pond's bed is gone within a block or two)
+        vec3 tint = clamp(vertexColor.rgb * 1.2, 0.0, 1.0);
+        float mk = murk(tint);
+        vec3 T = exp(-WATER_ABSORB * (1.0 + 4.0 * mk) * path - 0.04 * (1.0 + 6.0 * mk) * path);
         // the water's own light: the sky over it and the sun through it, scattered back up in the biome's water colour
         // (vanilla's vertex tint), as much as the path is long
-        vec3 tint = clamp(vertexColor.rgb * 1.2, 0.0, 1.0);
-        vec3 inLight = (SkyUp.rgb * 3.0 * (lm.y * lm.y) + KeyRad.rgb * max(KeyDir.y, 0.0) * 0.5 * lit * open)
-                     * vec3(0.05, 0.11, 0.13) * tint;
+        vec3 inLight = (SkyUp.rgb * LOOK_AMBIENT * (lm.y * lm.y) + KeyRad.rgb * max(KeyDir.y, 0.0) * 0.5 * lit * open)
+                     * mix(vec3(0.05, 0.11, 0.13), vec3(0.09, 0.11, 0.08), mk) * tint;
         vec3 scatter = atlasDisplay(inLight, Look.x, Look.y) * (vec3(1.0) - T);
         vec3 seen = bed * T + scatter;
         // what the water mirrors: our frame where the reflected ray finds it on screen, the sky model elsewhere
         vec4 hit = screenReflection(viewPos + wn * 0.05, r);
         vec3 skyShown = atlasDisplay(sky + glint, Look.x, Look.y);
-        vec3 mirrored = mix(skyShown, hit.rgb, hit.a);
+        // past the march (far mountains, the far shore): what lies that way is far enough that the mirror shows it as
+        // the frame does in the reflected direction (its parallax is nothing at that range); the sky where the frame
+        // has none there (the frame's alpha: our resolve leaves the sky out)
+        vec4 cd = vp * vec4(r * 4000.0, 1.0);
+        // the sky a sheltered reflection shows is partly hidden (trees and banks over the water): vanilla's sky light
+        vec3 distant = skyShown * mix(0.55, 1.0, lm.y * lm.y);
+        if (cd.w > 0.0) {
+            vec2 ud = cd.xy / cd.w * 0.5 + 0.5;
+            // off the screen's sides: the frame's edge column stands in (the shore and trees go on past it), not the sky
+            // (a bright unshadowed glow at the left and right edges); above its top the sky
+            ud.x = clamp(ud.x, 0.003, 0.997);
+            if (ud.y > 0.0 && ud.y < 1.0) {
+                vec4 f = texture(SceneColor, ud);
+                distant = mix(distant, f.rgb / max(f.a, 1e-3), clamp(f.a, 0.0, 1.0) * smoothstep(1.0, 0.94, ud.y));
+            }
+        }
+        vec3 mirrored = mix(distant, hit.rgb, hit.a);
         rgb = mix(seen, mirrored, fresnel);
+        // the shore: where the water is a hand deep or less, a wet foamy edge drifting with the waves
+        // the shore: a thin broken lace of foam where the waves lap in and out over the shallows (the bed shows through
+        // the rest of it), never a band
+        float lap = 0.12 + 0.1 * sin(SunDir.w * 1.3 + dot(world.xz, vec2(0.7, 0.4)));
+        float edge = 1.0 - smoothstep(0.0, lap + 0.12, path);
+        float foam = edge * smoothstep(0.55, 0.85, valueNoise(world.xz * 4.0 + SunDir.w * 0.5)) * 0.55;
+        // foam is white: lit by the sky's brightness, not its blue (tinted it read as purple squares)
+        float skyLum = dot(SkyUp.rgb, vec3(0.2126, 0.7152, 0.0722));
+        rgb = mix(rgb, atlasDisplay((vec3(skyLum) * 2.0 + KeyRad.rgb * max(KeyDir.y, 0.0) * lit) * 0.9, Look.x, Look.y),
+                  clamp(foam, 0.0, 0.8) * open);
         color.a = 1.0;  // the whole medium is here: nothing behind is blended in again
     } else {
         rgb = atlasForwardLitAt(color.rgb, n, lm, viewPos);
     }
     float dist = length(viewPos);
-    rgb = mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
+    rgb = atlasEyeInWater() ? atlasUnderwater(rgb, dist, viewPos / max(dist, 1e-3))
+        : mix(rgb, FogColor.rgb, linear_fog_value(dist, FogEnvironmentalStart, FogEnvironmentalEnd) * FogColor.a);
     fragColor = vec4(rgb, color.a);
 }

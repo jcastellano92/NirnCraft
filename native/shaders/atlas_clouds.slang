@@ -302,7 +302,7 @@ CloudResult marchClouds(float3 o, float3 dir, float tLimit, float3 sun, uint2 pi
     if (tb <= ta) return r;
     // interleaved gradient noise: decorrelated per pixel, no moire against the geometric step growth
     float dither = frac(52.9829189 * frac(0.06711056 * float(pixel.x) + 0.00583715 * float(pixel.y)));
-    float3 sunCol = sunRadiance(sun);
+    float3 sunCol = airSunAt(600.0);  // the sun through the air to the deck's middle (pink and gold before the ground's)
     float3 amb = skyAmbient(float3(0, 1, 0), sun);
     float mu = dot(dir, sun);
     float phase = 0.65 + 0.35 * pow(saturate(mu), 8.0);
@@ -355,7 +355,7 @@ RainResult marchRain(float3 o, float3 dir, float tLimit, float3 sun, uint2 pixel
     float maxD = min(tLimit, 14000.0);
     if (maxD <= 200.0) return r;
     float dither = frac(52.9829189 * frac(0.06711056 * float(pixel.x) + 0.00583715 * float(pixel.y)) + 0.37);
-    float3 skyCol = aerialFog(dir, sun);
+    float3 skyCol = float3(-1, -1, -1);  // the sky behind the shafts: marched once, at the first shaft met
     float3 amb = skyAmbient(float3(0, 1, 0), sun);
     float3 lightCol = keyLightRadiance(sun) * 0.35;
     const int N = 28;
@@ -393,6 +393,7 @@ RainResult marchRain(float3 o, float3 dir, float tLimit, float3 sun, uint2 pixel
         float ext = (shaftCore * 0.0018 + shaftHaze * 0.0005) * drive * vFade * dRainFade * (0.75 + 1.8 * skyTower);
         float a = 1.0 - exp(-ext * seg);
         if (a < 0.004) continue;
+        if (skyCol.x < 0.0) skyCol = skyColor(normalize(float3(dir.x, max(dir.y, 0.02), dir.z)), sun) * 0.9;
         float stormDark = smoothstep(0.30, 0.85, skyTower) * drive;
         float3 baseLit = amb * lerp(0.52, 0.30, stormDark) * 2.2 + lightCol * (0.08 * (1.0 - stormDark)) * 2.2;
         float3 coreCol = lerp(skyCol, baseLit * float3(0.48, 0.54, 0.63), 0.82);

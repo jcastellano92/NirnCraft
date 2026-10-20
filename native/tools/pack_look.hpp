@@ -1,11 +1,11 @@
-// pack_look: the InfiniteATLAS shader pack's light and look in C++, for offline references and tools (atlas_truth
-// lighting=realistic, atlas_render shade=pack). A mirror of shaderpack/InfiniteATLAS/shaders:
-//   lib/atmosphere.glsl  sunRadiance, skyColor, skyAmbient (themselves a port of native/shaders/atlas_shared.slang)
-//   lib/keylight.glsl    the key light: the sun by day, the vanilla moon opposite it by night (no mod sky offline)
+// pack_look: the game's light and look in C++, for offline references and tools (atlas_truth lighting=realistic,
+// atlas_render shade=pack). The light is the air's (native/src/air.hpp, the clean default air at sea level: what
+// AtlasLook hands the near pass); the display is the InfiniteATLAS pack's (shaderpack/InfiniteATLAS/shaders):
 //   lib/lighting.glsl    blockLight's warm colour (the hue of a light without the mod's coloured cache)
-//   lib/exposure.glsl    the eye's exposure curve (EXPOSURE_KEY, _SLOPE, _MIN, _MAX)
+//   lib/exposure.glsl    the eye's exposure curve (EXPOSURE_KEY, _SLOPE, _MIN, _MAX; AtlasLook's)
 //   lib/grade.glsl       nightVision (NIGHT_VISION 2: strength 0.7)
 //   final.fsh            exposure x EXPOSURE, the ACES fit (Hill), linear -> sRGB
+// (The pack's own lib/atmosphere.glsl keeps the old analytic sky: the Iris path, retired at R4.)
 // Not mirrored: the regional grade (a LUT per land), bloom and shafts (composite1), fog (element views are fog-free).
 // The sun's path: Minecraft's sky angle (DimensionType.timeOfDay) turned as Iris turns it (CelestialUniforms: Y -90,
 // Z sunPathRotation, X angle x 360), sunPathRotation the pack's default -25.
@@ -13,6 +13,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <thread>
+#include <vector>
+
+#include "air.hpp"
 
 namespace packlook {
 
@@ -49,44 +53,62 @@ inline void sunDirAt(float ticks, float pathRotation, float out[3]) {
     out[2] = -std::cos(th) * std::sin(ph);
 }
 
+// the default air and its multiple-scattering LUT, built once (all threads)
+inline const air::Coeffs& airC() {
+    static const air::Coeffs c = air::coeffs(air::fromClimate(air::Climate{}));
+    return c;
+}
+inline const air::MsLut& airLut() {
+    static const air::MsLut lut = [] {
+        air::MsLut l;
+        air::buildMultiScatter(airC(), l, [](int n, auto f) {
+            std::vector<std::thread> th;
+            unsigned k = std::max(1u, std::thread::hardware_concurrency());
+            for (unsigned i = 0; i < k; i++)
+                th.emplace_back([&, i] {
+                    for (int j = int(i); j < n; j += int(k)) f(j);
+                });
+            for (auto& t : th) t.join();
+        });
+        return l;
+    }();
+    return lut;
+}
+inline C3 c3(air::V3 v) { return {v.x, v.y, v.z}; }
+// the vanilla moon opposite the sun (no mod sky offline), the old moonlight
+inline void moonOf(const float sun[3], float dir[3], float rad[3]) {
+    const float m[3] = {0.035f, 0.05f, 0.09f};
+    for (int i = 0; i < 3; i++) dir[i] = -sun[i], rad[i] = m[i];
+}
+
+// the sun's light at sea level (the air's transmittance)
 inline C3 sunRadiance(const float s[3]) {
-    float e = s[1], a = sat(e * 3);
-    return mix(C3{1.f, 0.62f, 0.38f}, C3{1.f, 0.96f, 0.9f}, a) * (3.2f * smooth(-0.04f, 0.12f, e));
+    return c3(air::lightTransmittance(airC(), air::R_GROUND, s[1]) * air::SUN_IRRADIANCE * (1.0f / air::PI));
 }
 
 inline C3 skyColor(const float dir[3], const float sun[3]) {
-    float mu = dir[0] * sun[0] + dir[1] * sun[1] + dir[2] * sun[2], up = dir[1];
-    float day = smooth(-0.12f, 0.25f, sun[1]);
-    C3 zenith = mix({0.008f, 0.012f, 0.03f}, {0.16f, 0.34f, 0.78f}, day);
-    C3 horizon = mix({0.03f, 0.035f, 0.06f}, {0.62f, 0.75f, 0.92f}, day);
-    float dusk = (1 - smooth(0.f, 0.3f, std::fabs(sun[1]))) * smooth(-0.2f, 0.9f, mu);
-    horizon = mix(horizon, {1.f, 0.5f, 0.25f}, dusk * 0.7f);
-    float hz = std::pow(1 - sat(std::fabs(up)), 5.f);
-    C3 c = mix(zenith, horizon, hz);
-    if (up < 0) c = mix(c, horizon * 0.55f, sat(-up * 6));
-    float g = 0.76f;
-    float mie = (1 - g * g) / std::pow(std::max(1 + g * g - 2 * g * mu, 1e-4f), 1.5f) * 0.012f;
-    c = c + sunRadiance(sun) * (mie * 0.5f);
-    return c * 1.6f;
+    float md[3], mr[3];
+    moonOf(sun, md, mr);
+    return c3(air::skyRadiance(airC(), airLut(), 0.0f, dir, air::lightsOf(sun, md, mr)));
 }
 
-// skyAmbient(n) = mix(ground, skyUp, n.y * 0.5 + 0.5): the irradiance (over pi) of a sky of radiance skyUp over the
-// horizon and a ground of radiance `ground` under it, exactly: what a hemisphere-visibility integral reproduces
+// skyAmbient(n) = mix(ground, skyUp, n.y * 0.5 + 0.5): the irradiance (over pi) of the air's sky over the horizon
+// (skyUp) and the ground under it: what a hemisphere-visibility integral reproduces
 inline void skyAmbientParts(const float sun[3], C3& skyUp, C3& ground) {
-    float day = smooth(-0.12f, 0.25f, sun[1]);
-    skyUp = mix({0.02f, 0.025f, 0.05f}, {0.33f, 0.45f, 0.7f}, day);
-    ground = mix({0.01f, 0.01f, 0.012f}, {0.2f, 0.18f, 0.14f}, day);
+    float md[3], mr[3];
+    moonOf(sun, md, mr);
+    air::V3 u, g;
+    air::skyLight(airC(), airLut(), 0.0f, air::lightsOf(sun, md, mr), u, g);
+    skyUp = c3(u), ground = c3(g);
 }
 
-// the key light (lib/keylight.glsl without the mod's sky): the sun, or the vanilla moon opposite it
+// the key light: the sun through the air, or the vanilla moon opposite it
 inline void keyLight(const float sun[3], float dir[3], C3& rad) {
-    if (sun[1] > -0.05f) {
-        for (int i = 0; i < 3; i++) dir[i] = sun[i];
-        rad = sunRadiance(sun);
-        return;
-    }
-    for (int i = 0; i < 3; i++) dir[i] = -sun[i];
-    rad = C3{0.035f, 0.05f, 0.09f} * smooth(-0.05f, -0.2f, sun[1]);
+    float md[3], mr[3];
+    moonOf(sun, md, mr);
+    air::V3 r;
+    air::keyLight(airC(), air::SEA_LEVEL_Y, sun, md, mr, dir, r);
+    rad = c3(r);
 }
 
 // lib/lighting.glsl blockLight's hue (linear), the pack's ambient floor (deferred.fsh)

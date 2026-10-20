@@ -48,6 +48,15 @@ struct alignas(16) FrameGpu {
     float moonRad[4];
     // (abi 0.13) primary-ray jitter (atlas_set_jitter): NDC offset x, y; z = 1 when set; w unused
     float jitter[4];
+    // (abi 0.16) the air (atlas_shared.slang FrameGpu, atlas_air.slang; filled by api.cpp from air.hpp)
+    float airRayleigh[4];  // w = 1 / aerosol scale height (per km)
+    float airMieScat[4];   // w = asymmetry g
+    float airMieExt[4];    // w = km of air per block
+    float airOzone[4];     // w = ground albedo
+    float airSun[4];       // w = the eye's altitude, km
+    float airMoon[4];
+    float airSkyUp[4];
+    float airGround[4];
     // the GPU-built level-0 grid (voxgrid.hpp): origin in sections, w = 1 when present; dims in sections
     int32_t vgOrigin[4];
     uint32_t vgDims[4];
@@ -63,7 +72,7 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 48);
 static_assert(sizeof(RegionGpu) == 64);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 32);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32);
 
 struct Float4 {
     float v[4];

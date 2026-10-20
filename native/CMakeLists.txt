@@ -43,7 +43,8 @@ file(MAKE_DIRECTORY "${GEN}")
 find_program(SLANGC slangc HINTS "${SLANG_ROOT}/bin" REQUIRED NO_DEFAULT_PATH)
 set(KERNEL_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_far.slang")
 set(KERNEL_DEPS "${KERNEL_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_shared.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_clouds.slang"
-    "${CMAKE_SOURCE_DIR}/shaders/atlas_actors.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_groups.slang")
+    "${CMAKE_SOURCE_DIR}/shaders/atlas_actors.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_groups.slang"
+    "${CMAKE_SOURCE_DIR}/shaders/atlas_air.slang")
 
 # One kernel source, two targets.
 add_custom_command(

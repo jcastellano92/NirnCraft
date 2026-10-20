@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "atlas/atlas.h"
+#include "air.hpp"
 #include "backend.hpp"
 #include "lights.hpp"
 #include "parallel.hpp"
@@ -47,6 +48,89 @@ static_assert(sizeof(AtlasStats) == 56 && offsetof(AtlasStats, nodeBytes) == 8 &
 static_assert(sizeof(AtlasSurfaceCard) == 1552 && offsetof(AtlasSurfaceCard, texels) == 16);
 static_assert(sizeof(AtlasMaterialShape) == 400 && offsetof(AtlasMaterialShape, mean) == 8 &&
               offsetof(AtlasMaterialShape, faces) == 16);
+static_assert(sizeof(AtlasAir) == 44 && offsetof(AtlasAir, aerosolG) == 24 && offsetof(AtlasAir, airScale) == 40);
+static_assert(sizeof(AtlasClimate) == 52 && offsetof(AtlasClimate, background) == 12 && offsetof(AtlasClimate, coast) == 48);
+
+// ---- the air (air.hpp) ---------------------------------------------------------------------------------------------
+
+namespace {
+
+// the weather buffer's tail: the multiple-scattering LUT (rgb float bits and a pad per texel), atlas_air.slang MS_BASE
+constexpr size_t WEATHER_FIELDS = 4 * 128 * 128;
+constexpr size_t WEATHER_WORDS = WEATHER_FIELDS + size_t(air::MS_SIZE) * air::MS_SIZE * 4;
+
+air::Params airParamsOf(const AtlasAir& a) {
+    auto ok = [](float v, float lo, float hi, float d) { return std::isfinite(v) ? std::clamp(v, lo, hi) : d; };
+    air::Params p, d;
+    p.airDensity = ok(a.airDensity, 0.0f, 4.0f, d.airDensity);
+    p.aerosolDepth = ok(a.aerosolDepth, 0.0f, 8.0f, d.aerosolDepth);
+    p.angstrom = ok(a.angstrom, -1.0f, 4.0f, d.angstrom);
+    p.aerosolAlbedo = {ok(a.aerosolAlbedo[0], 0.0f, 1.0f, 0.97f), ok(a.aerosolAlbedo[1], 0.0f, 1.0f, 0.97f),
+                       ok(a.aerosolAlbedo[2], 0.0f, 1.0f, 0.97f)};
+    p.aerosolG = ok(a.aerosolG, 0.0f, 0.95f, d.aerosolG);
+    p.aerosolHeight = ok(a.aerosolHeight, 0.2f, 8.0f, d.aerosolHeight);
+    p.ozone = ok(a.ozone, 0.0f, 4.0f, d.ozone);
+    p.groundAlbedo = ok(a.groundAlbedo, 0.0f, 1.0f, d.groundAlbedo);
+    p.airScale = ok(a.airScale, 1e-5f, 0.1f, d.airScale);
+    return p;
+}
+
+void buildLut(const air::Coeffs& c, air::MsLut& lut) {
+    air::buildMultiScatter(c, lut, [](int n, auto f) {
+        std::atomic<int> next{0};
+        parallelRun([&] {
+            for (int i; (i = next.fetch_add(1)) < n;) f(i);
+        });
+    });
+}
+
+void writeLut(const air::MsLut& lut, std::vector<uint32_t>& weather) {
+    weather.resize(WEATHER_WORDS, 0);
+    for (int k = 0; k < air::MS_SIZE * air::MS_SIZE; k++) {
+        float v[4] = {lut.t[k].x, lut.t[k].y, lut.t[k].z, 1.0f};
+        std::memcpy(weather.data() + WEATHER_FIELDS + size_t(k) * 4, v, 16);
+    }
+}
+
+// the moon the air is lit by: the host's, else the old moonlight opposite the sun (atlas_air.slang airMoonDir / airAt)
+void moonOf(const float sun[3], const float* dir, const float* rad, float outDir[3], float outRad[3]) {
+    static const float fallback[3] = {0.035f, 0.05f, 0.09f};
+    bool set = dir && rad && rad[0] + rad[1] + rad[2] > 0.0f;
+    for (int i = 0; i < 3; i++) {
+        outDir[i] = set ? dir[i] : -sun[i];
+        outRad[i] = set ? rad[i] : fallback[i];
+    }
+}
+
+// The context-free calls' air: the LUT of the last air asked for, kept
+struct AirCache {
+    std::mutex mu;
+    bool have = false;
+    AtlasAir key{};
+    air::Coeffs c;
+    air::MsLut lut;
+};
+AirCache& airCache() {
+    static AirCache cache;
+    return cache;
+}
+void cachedAir(const AtlasAir* a, air::Coeffs& c, air::MsLut& lut) {
+    AtlasAir in{};
+    if (a) in = *a;
+    else atlas_air_defaults(&in);
+    AirCache& k = airCache();
+    std::lock_guard<std::mutex> lock(k.mu);
+    if (!k.have || std::memcmp(&k.key, &in, sizeof(AtlasAir)) != 0) {
+        k.c = air::coeffs(airParamsOf(in));
+        buildLut(k.c, k.lut);
+        k.key = in;
+        k.have = true;
+    }
+    c = k.c;
+    lut = k.lut;
+}
+
+}  // namespace
 
 struct AtlasContext {
     std::unique_ptr<Backend> backend;
@@ -84,6 +168,15 @@ struct AtlasContext {
     std::vector<float> nearDepthHost;
     // the host's primary-ray jitter in pixels (atlas_set_jitter)
     float jitter[2] = {0, 0};
+    // the air (atlas_set_air; its LUT rides in `weather`'s tail) and the sky light last integrated for a frame
+    air::Coeffs airC = air::coeffs(air::Params{});
+    air::MsLut airLut;
+    uint64_t airVersion = 0;
+    struct {
+        uint64_t version = ~0ull;
+        float sun[3] = {}, moon[3] = {}, moonE[3] = {}, alt = -1;
+        air::V3 up, ground;
+    } skyLight;
 
     AtlasStatus fail(AtlasStatus s, std::string msg) noexcept {
         try {
@@ -329,7 +422,13 @@ ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {
         ctx->world.coarseBudget = uint64_t(std::clamp(std::atoll(cb), 0ll, 1ll << 20)) << 20;
     auto pal = previewPalette();
     setPalette(ctx.get(), pal.data(), uint32_t(pal.size()));
-    ctx->weather.assign(4 * 128 * 128, 0);
+    ctx->weather.assign(WEATHER_WORDS, 0);
+    {  // the default air until the host sets one (the context-free cache shares the build)
+        air::Coeffs c;
+        cachedAir(nullptr, c, ctx->airLut);
+        ctx->airC = c;
+        writeLut(ctx->airLut, ctx->weather);
+    }
     *out = ctx.release();
     return ATLAS_OK;
     ATLAS_CATCH(nullptr)
@@ -413,6 +512,127 @@ ATLAS_API AtlasStatus atlas_set_weather(AtlasContext* ctx, const AtlasWeather* w
     }
     ctx->rainFactor = w->rainFactor;
     return ATLAS_OK;
+}
+
+static void airOut(const air::Params& p, AtlasAir* out) {
+    out->airDensity = p.airDensity;
+    out->aerosolDepth = p.aerosolDepth;
+    out->angstrom = p.angstrom;
+    out->aerosolAlbedo[0] = p.aerosolAlbedo.x;
+    out->aerosolAlbedo[1] = p.aerosolAlbedo.y;
+    out->aerosolAlbedo[2] = p.aerosolAlbedo.z;
+    out->aerosolG = p.aerosolG;
+    out->aerosolHeight = p.aerosolHeight;
+    out->ozone = p.ozone;
+    out->groundAlbedo = p.groundAlbedo;
+    out->airScale = p.airScale;
+}
+
+ATLAS_API void atlas_air_defaults(AtlasAir* out) {
+    if (out) airOut(air::fromClimate(air::Climate{}), out);
+}
+
+ATLAS_API AtlasStatus atlas_air_from_climate(const AtlasClimate* k, AtlasAir* out) {
+    if (!k || !out) return ATLAS_ERR_ARG;
+    air::Climate c;
+    auto ok = [](float v, float d) { return std::isfinite(v) ? v : d; };
+    c.temperatureC = ok(k->temperatureC, 15.0f);
+    c.relativeHumidity = ok(k->relativeHumidity, 0.5f);
+    c.pressure = ok(k->pressure, 1.0f);
+    for (int i = 0; i < 4; i++) c.background[i] = ok(k->background[i], i == 0 ? 1.0f : 0.0f);
+    c.dust = ok(k->dust, 0.0f);
+    c.ash = ok(k->ash, 0.0f);
+    c.snow = ok(k->snow, 0.0f);
+    c.rain = ok(k->rain, 0.0f);
+    c.fog = ok(k->fog, 0.0f);
+    c.coast = ok(k->coast, 0.0f);
+    airOut(air::fromClimate(c), out);
+    return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_set_air(AtlasContext* ctx, const AtlasAir* a) {
+    if (!ctx || !a) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    air::Coeffs c;
+    air::MsLut lut;
+    cachedAir(a, c, lut);  // outside the lock (frames go on meanwhile); the host's own LUT (atlas_air_multiscatter) shares it
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    ctx->airC = c;
+    ctx->airLut = lut;
+    writeLut(lut, ctx->weather);
+    ctx->airVersion++;
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_air_coeffs(const AtlasAir* a, float out[16]) {
+    if (!a || !out) return ATLAS_ERR_ARG;
+    air::Coeffs c = air::coeffs(airParamsOf(*a));
+    const air::V3 v[4] = {c.rayleigh, c.mieScat, c.mieExt, c.ozone};
+    const float w[4] = {c.invHMie, c.g, c.airScale, c.groundAlbedo};
+    for (int i = 0; i < 4; i++) {
+        out[i * 4] = v[i].x;
+        out[i * 4 + 1] = v[i].y;
+        out[i * 4 + 2] = v[i].z;
+        out[i * 4 + 3] = w[i];
+    }
+    return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_air_multiscatter(const AtlasAir* a, float* rgba) {
+    if (!a || !rgba) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    air::Coeffs c;
+    air::MsLut lut;
+    cachedAir(a, c, lut);
+    for (int k = 0; k < air::MS_SIZE * air::MS_SIZE; k++) {
+        rgba[k * 4] = lut.t[k].x;
+        rgba[k * 4 + 1] = lut.t[k].y;
+        rgba[k * 4 + 2] = lut.t[k].z;
+        rgba[k * 4 + 3] = 1.0f;
+    }
+    return ATLAS_OK;
+    ATLAS_CATCH(nullptr)
+}
+
+ATLAS_API AtlasStatus atlas_air_light(const AtlasAir* a, const float sunDir[3], const float moonDir[3],
+                                      const float moonRad[3], float eyeY, float out[12]) {
+    if (!a || !sunDir || !out || !std::isfinite(eyeY)) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    air::Coeffs c;
+    air::MsLut lut;
+    cachedAir(a, c, lut);
+    float md[3], mr[3];
+    moonOf(sunDir, moonDir, moonRad, md, mr);
+    float kd[3];
+    air::V3 kr, up, ground;
+    air::keyLight(c, eyeY, sunDir, md, mr, kd, kr);
+    air::skyLight(c, lut, air::altitudeOf(c, eyeY), air::lightsOf(sunDir, md, mr), up, ground);
+    const float v[12] = {kd[0], kd[1], kd[2], kr.x, kr.y, kr.z, up.x, up.y, up.z, ground.x, ground.y, ground.z};
+    std::memcpy(out, v, sizeof(v));
+    return ATLAS_OK;
+    ATLAS_CATCH(nullptr)
+}
+
+ATLAS_API AtlasStatus atlas_air_sky(const AtlasAir* a, const float sunDir[3], const float moonDir[3],
+                                    const float moonRad[3], float eyeY, const float* dirs, uint32_t n, float* rgb) {
+    if (!a || !sunDir || (n && (!dirs || !rgb)) || !std::isfinite(eyeY)) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    air::Coeffs c;
+    air::MsLut lut;
+    cachedAir(a, c, lut);
+    float md[3], mr[3];
+    moonOf(sunDir, moonDir, moonRad, md, mr);
+    air::Lights l = air::lightsOf(sunDir, md, mr);
+    float h = air::altitudeOf(c, eyeY);
+    for (uint32_t i = 0; i < n; i++) {
+        air::V3 s = air::skyRadiance(c, lut, h, dirs + size_t(i) * 3, l);
+        rgb[i * 3] = s.x;
+        rgb[i * 3 + 1] = s.y;
+        rgb[i * 3 + 2] = s.z;
+    }
+    return ATLAS_OK;
+    ATLAS_CATCH(nullptr)
 }
 
 ATLAS_API AtlasStatus atlas_set_cloud_noise(AtlasContext* ctx, const uint32_t* rgba) {
@@ -631,6 +851,45 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     }
     g.moonDir[3] = ctx->moonSet ? 1.0f : 0.0f;
     g.moonRad[3] = 0.0f;
+    // the air (atlas_air.slang): its coefficients, the lights above it, the eye's altitude and the sky's light there
+    // (integrated again when the sun, the moon, the eye's height or the air moved enough to show)
+    {
+        const air::Coeffs& c = ctx->airC;
+        auto put = [](float* d, air::V3 v, float w) {
+            d[0] = v.x;
+            d[1] = v.y;
+            d[2] = v.z;
+            d[3] = w;
+        };
+        put(g.airRayleigh, c.rayleigh, c.invHMie);
+        put(g.airMieScat, c.mieScat, c.g);
+        put(g.airMieExt, c.mieExt, c.airScale);
+        put(g.airOzone, c.ozone, c.groundAlbedo);
+        float alt = air::altitudeOf(c, float(f->cameraPos[1]));
+        float md[3], mr[3];
+        moonOf(g.sunDir, ctx->moonSet ? ctx->moonDir : nullptr, ctx->moonSet ? ctx->moonRad : nullptr, md, mr);
+        air::Lights l = air::lightsOf(g.sunDir, md, mr);
+        put(g.airSun, l.sunE, alt);
+        put(g.airMoon, l.moonE, 0.0f);
+        auto& s = ctx->skyLight;
+        const float me[3] = {l.moonE.x, l.moonE.y, l.moonE.z};
+        bool same = s.version == ctx->airVersion && std::fabs(s.alt - alt) < 0.01f;
+        for (int i = 0; i < 3 && same; i++)
+            same = std::fabs(s.sun[i] - g.sunDir[i]) < 2e-4f && std::fabs(s.moon[i] - md[i]) < 2e-3f &&
+                   std::fabs(s.moonE[i] - me[i]) < 1e-4f;
+        if (!same) {
+            air::skyLight(c, ctx->airLut, alt, l, s.up, s.ground);
+            s.version = ctx->airVersion;
+            s.alt = alt;
+            for (int i = 0; i < 3; i++) {
+                s.sun[i] = g.sunDir[i];
+                s.moon[i] = md[i];
+                s.moonE[i] = me[i];
+            }
+        }
+        put(g.airSkyUp, s.up, 0.0f);
+        put(g.airGround, s.ground, 0.0f);
+    }
     g.jitter[0] = f->width > 0 ? ctx->jitter[0] * 2.0f / float(f->width) : 0.0f;
     g.jitter[1] = f->height > 0 ? ctx->jitter[1] * 2.0f / float(f->height) : 0.0f;
     g.jitter[2] = ctx->jitter[0] != 0.0f || ctx->jitter[1] != 0.0f ? 1.0f : 0.0f;
@@ -754,8 +1013,10 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
             lv.maxDist = f->maxDistance;
             lv.planetRadius = f->planetRadius;
             lv.sunY = g.sunDir[1];
-            double h = std::max(f->cameraPos[1] - 63.0, 0.0);
-            lv.hazeDensity = float(std::exp(-h / 1200.0) * (1.0 / 22000.0) * (1.0 + 3.0 * ctx->rainFactor));
+            // the air's extinction (green) per block at the eye's altitude
+            const air::Coeffs& c = ctx->airC;
+            float h = air::altitudeOf(c, float(f->cameraPos[1]));
+            lv.hazeDensity = (c.rayleigh.y * std::exp(-h / air::H_RAYLEIGH) + c.mieExt.y * std::exp(-h * c.invHMie)) * c.airScale;
             g.weatherParams[1] = float(ctx->lights.frame(lv, in.actors));
         }
     }
@@ -986,6 +1247,24 @@ ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t firs
         v[i] = std::move(s);
     }
     ctx->world.setShapes(first, v);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t first, const uint32_t* textures,
+                                                  uint32_t count) {
+    if (!ctx || first == 0 || (!textures && count)) return ATLAS_ERR_ARG;
+    if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
+    ATLAS_TRY
+    const uint32_t* has = textures + size_t(count) * 6 * 256;
+    std::vector<std::shared_ptr<const MaterialTexture>> v(count);
+    for (uint32_t i = 0; i < count; i++) {
+        if (!has[i]) continue;
+        auto t = std::make_shared<MaterialTexture>();
+        std::memcpy(t->faces, textures + size_t(i) * 6 * 256, sizeof t->faces);
+        v[i] = std::move(t);
+    }
+    ctx->world.setTextures(first, v);
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }

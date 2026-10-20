@@ -46,6 +46,17 @@ struct ShapeSet {
     const MaterialShape* at(uint32_t m) const { return m < byMaterial.size() ? byMaterial[m].get() : nullptr; }
 };
 
+// (abi 0.16) A material's six faces at 16 x 16 texels (ARGB sRGB, tints applied; the shapes' (u, v) convention): what
+// a near hit is shaded with (atlas_set_material_textures)
+struct MaterialTexture {
+    uint32_t faces[6][256];
+};
+struct TextureSet {
+    std::vector<std::shared_ptr<const MaterialTexture>> byMaterial;
+    uint64_t revision = 0;
+    const MaterialTexture* at(uint32_t m) const { return m < byMaterial.size() ? byMaterial[m].get() : nullptr; }
+};
+
 // A surface card (atlas_set_surface_cards): a block face's colour as the game draws it, as a mip chain of its covered
 // texels (16, 8, 4, 2, 1 a side: 341 RGB words; a texel showing nothing takes the face's mean).
 struct SurfaceCard {

@@ -58,6 +58,7 @@
 [[vk::binding(31, 0)]] StructuredBuffer<uint64_t> vgBits;
 [[vk::binding(32, 0)]] StructuredBuffer<uint> vgPool;
 
+#include "atlas_air.slang"
 #include "atlas_clouds.slang"
 
 static const int TRACE_MISS = 0;
@@ -100,10 +101,12 @@ static float gLeafGap = 0.0;
 static const float FOLIAGE_COVER = 0.65;
 static const float FOLIAGE_SIGMA = 2.0996;  // -2 ln(1 - FOLIAGE_COVER)
 static const float WATER_SIGMA = 0.083;  // light lost through water: exp(-0.083) per block (8 %)
+static const float3 WATER_ABSORB = float3(0.30, 0.075, 0.045);  // per block, per channel (red first)
 static bool gSecondary = false;
 static float gTrans = 1.0;
 static float gThrough = 0.0;
 static float gSecT = 0.0;
+static float gWaterChord = 0.0;  // blocks of water the last secondary ray passed through
 // (ATLAS_ABLATE, measurements of the secondary rays, docs/ATLAS-RENDERER-PLAN.md "GPU-first") bit 21: their level-0
 // regions skip the height mip; bit 22: foliage passes them free (no shape, coverage or attenuation work); bits 23-25 a
 // per-pixel counter of the near light's secondary rays into `counters` (gSecCount): 1 traceRegion iterations, 2
@@ -149,6 +152,7 @@ bool voxelStops(uint hitMat, int3 v, int3 wv, int rl, float3 ro, float3 rd, floa
         // E[exp(-0.45 x)] over where in this stretch the first opaque texel lies, weighted by what got here
         gThrough += gTrans * exp(-0.45 * x0) * (sigma / (sigma + 0.45)) * (1.0 - exp(-(sigma + 0.45) * chord));
         gTrans *= exp(-sigma * chord);
+        if (hitCls == 2u) gWaterChord += chord;
         pass = gTrans > 0.004;
         if (!pass) gTrans = 0.0;
     }
@@ -311,7 +315,8 @@ float secondarySigma(uint mat, uint cls) {
     // every surface under water was black to the near light (its sun and sky rays stopped at the surface)
     float sg = cls == 1u ? FOLIAGE_SIGMA : cls == 2u ? WATER_SIGMA : -1.0;
     uint sh = shapeOf(mat);
-    if (sh != 0u) {
+    // (water's shape is a full cube, the fluid's: its class decides, not the shape, which made it a shaped solid)
+    if (sh != 0u && cls != 2u) {
         uint4 head = groupData[sh >> 2];
         if ((head.z & 1u) != 0u) {
             float a = 0.0;
@@ -844,6 +849,7 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
     gTrans = 1.0;
     gThrough = 0.0;
     gStopFoliage = false;
+    gWaterChord = 0.0;
     float t = 0;
     float vis = 1.0;
     for (int seg = 0; seg < 48; seg++) {
@@ -950,10 +956,8 @@ static const int SKY_RAYS = 1;
 static const float SKY_REACH = 16.0;
 static const float ENCLOSED_REACH = 64.0;
 float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool enclosed, bool withBounce, out float vis) {
-    float day = smoothstep(-0.12, 0.25, sun.y);
-    float3 skyUp = lerp(float3(0.02, 0.025, 0.05), float3(0.33, 0.45, 0.7), day);
-    float3 ground = lerp(float3(0.01, 0.01, 0.012), float3(0.2, 0.18, 0.14), day);
-    uint fi = frame.jitter.z > 0.5 ? (frame.temporal.x & 15u) : 0u;  // a 16-frame cycle: a still pixel converges to one stratified set
+    float3 skyUp = frame.airSkyUp.xyz, ground = frame.airGround.xyz;  // skyAmbient's two radiances (the air's light)
+    uint fi =frame.jitter.z > 0.5 ? (frame.temporal.x & 15u) : 0u;  // a 16-frame cycle: a still pixel converges to one stratified set
     float ru = pixelDither(px, 11u), rv = pixelDither(px, 13u);
     float s = float(1 << lod);
     uint ab = asuint(frame.jitter.w);  // (ATLAS_ABLATE 8192: two rays, 16384: half the reach; measurements)
@@ -1123,6 +1127,47 @@ float3 reflectedSky(float3 p, float3 r, float3 sun) {
     return lerp(sky, cloud, dens * 0.85);
 }
 
+// Water as a medium (as near_forward.fsh's near water): the bed seen through the surface along the refracted ray,
+// absorbed over the path (WATER_ABSORB a block, up to five times that in murky water: the biome's water colour, the
+// material's albedo, dull and green), the water's own scattering of the sky and the sun filling what is lost.
+// 64 blocks of water or more: deep, its own colour alone. The far water was an opaque sheet (the near field's clear
+// shallows ended at the hand-off in a stark line).
+float waterMurk(float3 tint) {
+    float mx = max(tint.r, max(tint.g, tint.b)), mn = min(tint.r, min(tint.g, tint.b));
+    float sat = mx > 1e-3 ? (mx - mn) / mx : 0.0;
+    float greenish = saturate((tint.g - tint.b) * 3.0 + 0.3);
+    return saturate((1.0 - sat) * 1.3 + greenish * 0.6 - 0.35);
+}
+float3 waterBody(float3 p, float3 dir, float3 wn, int lod, float3 sun, float3 tint) {
+    // the real sections' water carries Minecraft's grey water texture (the biome tints it near): grey is no murk, clear
+    // lake water then (a grey patch where the real blocks had arrived)
+    {
+        float mx = max(tint.r, max(tint.g, tint.b)), mn = min(tint.r, min(tint.g, tint.b));
+        if (mx < 1e-3 || (mx - mn) / mx < 0.2) tint = float3(0.05, 0.19, 0.78);
+    }
+    float3 t = refract(dir, wn, 1.0 / 1.333);
+    if (dot(t, t) < 1e-6) t = float3(dir.x, -abs(dir.y), dir.z);
+    t = normalize(t);
+    float s = float(1 << lod);
+    float vis = traceSecondary(p - wn * (0.05 * s) + t * 0.01, t, 64.0, lod);
+    float path = vis > 0.0 ? 64.0 : gSecHitT;
+    float3 up = float3(0, 1, 0);
+    float3 L = keyLightDir(sun);
+    float3 bed = float3(0, 0, 0);
+    if (vis <= 0.0 && gSecHitMat != 0xFFFFFFFFu) {
+        // the bed lit simply: the sun through the water above it (as deep as the path down, near enough), the sky
+        float3 a = palette[gSecHitMat].albedoRough.rgb;
+        float down = path * max(-t.y, 0.2);
+        float3 Tsun = exp(-WATER_ABSORB * down);
+        bed = a * (keyLightRadiance(sun) * max(L.y, 0.0) * Tsun + skyAmbient(up, sun) * LOOK_AMBIENT * 0.6 * Tsun);
+    }
+    float mk = waterMurk(tint);
+    float3 T = exp(-WATER_ABSORB * (1.0 + 4.0 * mk) * path - 0.04 * (1.0 + 6.0 * mk) * path);
+    float3 inLight = (skyAmbient(up, sun) * LOOK_AMBIENT + keyLightRadiance(sun) * max(L.y, 0.0) * 0.5)
+                   * lerp(float3(0.05, 0.11, 0.13), float3(0.09, 0.11, 0.08), mk) * saturate(tint * 2.0);
+    return bed * T + inLight * (float3(1, 1, 1) - T);
+}
+
 // What a far water surface mirrors: a straight reflected ray through the same scene (coarser LOD, no shadows), shaded
 // simply, else the sky with its clouds. Only water pixels pay for it.
 float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 sun, float3 wn) {
@@ -1207,7 +1252,7 @@ float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
         float c = dot(dir, v) / max(length(v), 1e-3);
         float apx = sqrt(max(0.0, 2.0 * (1.0 - c))) / pa;
         float sigma = l.posYaw.w, halo = l.motion.z;
-        float T = aerialTransmittance(dist, frame);
+        float T = dot(aerialT(dir, dist), float3(0.2126, 0.7152, 0.0722));
         float q = apx / sigma;
         float core = exp(-0.5 * q * q);
         // the glow stands for an emitter the far field cannot draw (a far town's windows and lamps, a block lost in a
@@ -1313,8 +1358,7 @@ void sampleClouds(uint2 px, out float4 c, out float depth) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void cloudMain(uint3 tid : SV_DispatchThreadID) {
-    gMoonDir = frame.moonDir;
-    gMoonRad = frame.moonRad;
+    airBegin();
     uint2 cd = cloudDims();
     // temporal amortisation: a fresh ray for one pixel of every 2x2 block per frame (rotating); the others reproject
     // last frame's deck through its camera. Off-screen reprojections and frames without history march fresh.
@@ -1391,8 +1435,8 @@ void cloudMain(uint3 tid : SV_DispatchThreadID) {
     if (cl.firstHit >= 0.0) {
         // the deck's own aerial perspective: distant storms fade into the horizon haze like the terrain does
         // (whatever is behind the cloud already carries its own haze)
-        float trA = aerialTransmittance(cl.firstHit, frame);
-        c.rgb = cl.scatter * trA + aerialFog(dir, sun) * (1.0 - trA) * (1.0 - cl.transmittance);
+        AirPath air = aerialPathTo(dir, cl.firstHit);
+        c.rgb = cl.scatter * air.transmittance + air.inscatter * (1.0 - cl.transmittance);
         c.a = cl.transmittance;
         d = cl.transmittance < 0.995 ? cl.firstHit : 1e30;
     }
@@ -1455,8 +1499,7 @@ float2 sunTexel(uint i, uint j) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void sunMapMain(uint3 id : SV_DispatchThreadID) {
-    gMoonDir = frame.moonDir;
-    gMoonRad = frame.moonRad;
+    airBegin();
     uint S = frame.sunMapRows.z, count = frame.sunMapRows.y;
     if (frame.sunMapRows.w == 0u || id.x >= S || id.y > count) return;
     if (id.y == count) {
@@ -1483,6 +1526,7 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     float R = frame.camFrac.w;
     float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
     float3 p = worldAt(o, dir, k, nd);  // (the near field's vertices carry the matching curvature drop)
+    airAt(p.y + float(frame.camInt.y));
     float3 N = octDecode(float2(float((info >> 16) & 255u), float(info >> 24)) / 255.0);
     uint ablate = asuint(frame.jitter.w);
     bool cheapLight = (frame.dims.z & FRAME_LIGHT_LOW) != 0u || (ablate & 256u) != 0u;
@@ -1510,13 +1554,16 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     }
     float3 L = keyLightDir(sun);
     float sunVis = 1.0;
-    gSecCone = (ablate & 1048576u) != 0u ? 0.0 : 32.0;  // (ATLAS_ABLATE 1048576: lod 0 all the way, as before)
+    // (no cone: past 32 blocks the coarser levels' fat crowns cast blobby shadows off the trees; it saved 0.4 ms)
+    gSecCone = 0.0;
     if ((frame.dims.z & FRAME_SHADOWS) != 0 && (ablate & 4u) == 0u) {
         if (dot(N, L) <= 0.0) sunVis = 0.0;
         else if (untrusted) sunVis = eyeRoofed() ? 0.0 : 1.0;  // (in a cave: rock, most likely)
         else if (cheapLight) sunVis = traceShadow(p + N * 1.01 + L * 0.5, L, 0);
         else sunVis = traceSecondary(so + L * 0.05, L, 2048.0, 0);
     }
+    // the sun reached it through water alone: a = 1 + the water's chord (the resolve draws its caustics at full rate)
+    float waterChord = sunVis > 0.0 && gWaterChord > 0.05 && sunVis >= 0.98 * exp(-WATER_SIGMA * gWaterChord) ? gWaterChord : 0.0;
     if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, L);
     float3 ambient;
     gNearRoofed = false;
@@ -1531,13 +1578,20 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
         gNearRoofed = sunVis <= 0.0 && (ablate & 512u) == 0u && solidRoof(so, 0);
         ambient = skyVisible(px, so, N, 0, sun, gNearRoofed, true, skyVis) + FAR_AMBIENT_FLOOR;
     }
+    // under water: the sky's light is what the water above lets down, red first then green (the sky rays reach 16 blocks
+    // and saw the surface's light undimmed past that): its depth from the sun ray's way out of the water
+    if (waterChord > 0.0) ambient *= exp(-WATER_ABSORB * (waterChord * max(L.y, 0.2)));
     MaterialGpu white;
     white.albedoRough = float4(1, 1, 1, 0.8);
     white.emisClass = float4(0, 0, 0, 0);
     float3 irr = shadeSurfaceAmb(float3(1, 1, 1), white, N, dir, sun, sunVis, 0u, ambient, float3(0, 0, 0));
     gSecCone = 0.0;
     if ((ablate & 8u) == 0u) irr += farLightsOn(px, p, so, N, 0, sun, false, cheapLight);
-    return float4(irr, sunVis);
+    // the host composites albedo x this x T + inscatter with one transmittance (its luminance): the air's colour
+    // through it (the blue lost first) rides in the light
+    float3 Tr = aerialT(dir, nd);
+    irr *= Tr / max(dot(Tr, float3(0.2126, 0.7152, 0.0722)), 1e-4);
+    return float4(irr, waterChord > 0.0 ? 1.0 + waterChord : sunVis);
 }
 
 // ---- the near light at half resolution (FRAME_NEAR_SPLIT) -------------------------------------------------------
@@ -1562,8 +1616,7 @@ float3 pixelRay(uint2 px, uint w, uint h) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void nearLightMain(uint3 id : SV_DispatchThreadID) {
-    gMoonDir = frame.moonDir;
-    gMoonRad = frame.moonRad;
+    airBegin();
     gEyeRoofed = -1;
     uint w = frame.dims.x, h = frame.dims.y;
     uint2 q = id.xy * 2u + nearSplitOffset();
@@ -1696,8 +1749,7 @@ void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void farMain(uint3 id : SV_DispatchThreadID) {
-    gMoonDir = frame.moonDir;
-    gMoonRad = frame.moonRad;
+    airBegin();
     gEyeRoofed = -1;
     uint w = frame.dims.x, h = frame.dims.y;
     if (id.x >= w || id.y >= h) return;
@@ -1732,7 +1784,10 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             bool nearLit = (frame.dims.z & FRAME_NEAR_LIGHT) != 0u;
             float4 c = float4(0, 0, 0, 0);
             if (nearLit) {
-                c = float4(aerialInscatter(dir, sun, nd, frame), aerialTransmittance(nd, frame));
+                // (the host's composite takes one transmittance: the path's own, luminance-weighted; chromatic only
+                // past the near field, where the far field composites itself)
+                AirPath air = aerialPathTo(dir, nd);
+                c = float4(air.inscatter, dot(air.transmittance, float3(0.2126, 0.7152, 0.0722)));
                 // (FRAME_NEAR_SPLIT: the light comes from nearLightMain, the unlit air from nearUpsampleMain)
                 if ((frame.dims.z & FRAME_NEAR_SPLIT) == 0u) {
                     gAblate = asuint(frame.jitter.w);
@@ -1798,6 +1853,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     if (actorFirst) {
         n = ah.n;
         cls = 4u;  // far actor
+        airAt(o.y + dir.y * ah.t + float(frame.camInt.y));
         if ((frame.dims.z & FRAME_CLOUDS) != 0) sunVis = cloudShadow(o + dir * ah.t, keyLightDir(sun));
         MaterialGpu am;
         am.albedoRough = float4(ah.albedo, 0.8);
@@ -1818,6 +1874,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         else if (ax == 1) n.y = slope.y > 0 ? -1.0 : 1.0;
         else n.z = slope.z > 0 ? -1.0 : 1.0;
         float3 p = worldAt(o, dir, k, tHit);
+        airAt(p.y + float(frame.camInt.y));  // the key light at the hit's height (a peak keeps the sun longer)
         float s = float(1 << res.lod);
         // blocky up close (it is Minecraft), smooth once voxels shrink towards a pixel: stops contour striping
         // centre of the hit voxel on the world voxel grid (multiples of s; y -64 is a multiple for s <= 64)
@@ -1983,6 +2040,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             }
             m.albedoRough.a = farWaterAlpha(wind.y, tHit) + foam * 0.2;
             reflection = (ablate & 16u) != 0u ? float3(0, 0, 0) : waterReflection(p, dir, k, tHit, res.lod, sun, n);
+            // (ATLAS_ABLATE 2097152: the opaque sheet, as before)
+            if ((ablate & 2097152u) == 0u && !cheapLight) gWaterBody = waterBody(p, dir, n, res.lod, sun, m.albedoRough.rgb);
         }
         float3 ambient;
         float skyVis = 1.0;
@@ -2022,7 +2081,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             color = lerp(color, white, foam);
         }
         depth = tHit;
-        if (roofed && eyeRoofed()) color *= aerialTransmittance(tHit, frame);  // under cover at both ends: unlit air
+        if (roofed && eyeRoofed()) color *= aerialT(dir, tHit);  // under cover at both ends: unlit air
         else if (!vanillaLight) color = applyAerial(color, dir, sun, tHit, frame);
         // (ATLAS_ABLATE 4096, measurements: the secondary rays' origin solid in the voxel path, sun and sky visibility)
         // (ATLAS_ABLATE 4096, measurements: one grey value past the shading, readable through any tonemap: the sky

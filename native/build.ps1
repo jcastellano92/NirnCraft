@@ -44,8 +44,8 @@ if (-not $NoTest) {
         & (Join-Path $build "$Config\atlas_gl_test.exe") (Join-Path $here 'data') --context=both
         if ($LASTEXITCODE) { throw 'gl host-copy test failed' }
     } finally { Remove-Item Env:ATLAS_INTEROP -ErrorAction SilentlyContinue }
-    # the shader pack's atmosphere must match atlas's, or the near/far hand-off shows a seam
-    $atmo = Join-Path $repo 'shaderpack/InfiniteATLAS/shaders/lib/atmosphere.glsl'
+    # the game's GLSL sky (the air, AtlasSky) must match atlas's, or the horizon shows a seam
+    $atmo = Join-Path $repo 'mod/src/main/resources/assets/nirncraft/shaders/include/atlas_air.glsl'
     & (Join-Path $build "$Config/atlas_pack_test.exe") $atmo
     if ($LASTEXITCODE) { throw 'pack parity test failed' }
 }

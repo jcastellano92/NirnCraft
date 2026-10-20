@@ -29,8 +29,9 @@ public final class AtlasNative {
     /** (abi 0.13) Structures that are a tile's real trees: its dressing's canopy goes when they go up. */
     public static final int STRUCTURES_REPLACE_CANOPY = 0x1;
     // 0.12: atlas_set_moon, 0.13: atlas_set_jitter, 0.14: atlas_set_material_shapes + FRAME_GROUPS, 0.15: the near
-    // light (FRAME_NEAR_LIGHT, GlFrameIO.nearInfoTex / dstNearLight) (all optional)
-    public static final int ABI_VERSION = 0x000F00, ABI_MIN = 0x000B00;
+    // light (FRAME_NEAR_LIGHT, GlFrameIO.nearInfoTex / dstNearLight), 0.16: the air (atlas_set_air, atlas_air_*) and
+    // the near field's textures (atlas_set_material_textures) (all optional)
+    public static final int ABI_VERSION = 0x001000, ABI_MIN = 0x000B00;
     /** The first ABI with the near light (FRAME_NEAR_LIGHT); an older core is never handed the flag or its fields. */
     public static final int ABI_NEAR_LIGHT = 0x000F00;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
@@ -138,10 +139,14 @@ public final class AtlasNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, setShapes, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, setShapes, setTextures, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
     // abi 0.10 (null with a 0.9 library)
     private final MethodHandle memoryInfo, setClipmap, debugFault;
+    // abi 0.16, the air (null with an older library)
+    private final MethodHandle setAir, airFromClimate, airLight, airCoeffs, airMultiscatter;
+    /** AtlasClimate and AtlasAir (atlas.h) as float arrays: 13 and 11 floats. */
+    public static final int CLIMATE_FLOATS = 13, AIR_FLOATS = 11;
     private int abi;
 
     private AtlasNative(Path library) {
@@ -215,8 +220,80 @@ public final class AtlasNative {
         setMoon = bindOptional(l, lib, "atlas_set_moon", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
         setJitter = bindOptional(l, lib, "atlas_set_jitter", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT, JAVA_FLOAT));
         setShapes = bindOptional(l, lib, "atlas_set_material_shapes", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
+        setTextures = bindOptional(l, lib, "atlas_set_material_textures", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         uploadStructures3 = bindOptional(l, lib, "atlas_upload_column_structures3",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT));
+        setAir = bindOptional(l, lib, "atlas_set_air", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+        airFromClimate = bindOptional(l, lib, "atlas_air_from_climate", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+        airLight = bindOptional(l, lib, "atlas_air_light",
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_FLOAT, ADDRESS));
+        airCoeffs = bindOptional(l, lib, "atlas_air_coeffs", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+        airMultiscatter = bindOptional(l, lib, "atlas_air_multiscatter", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+    }
+
+    // ---- the air (abi 0.16; atlas.h AtlasAir, native/src/air.hpp): context-free, any thread ------------------------
+
+    private static void airCheck(int status, String what) {
+        if (status != 0) throw new AtlasException(status, what + " failed (" + AtlasException.statusName(status) + ")");
+    }
+
+    /** Whether this core has the air (a physical sky, sun and haze; atlas_set_air and atlas_air_*). */
+    public boolean hasAir() {
+        return airLight != null && airFromClimate != null && airCoeffs != null && airMultiscatter != null;
+    }
+
+    /** atlas_air_from_climate: AtlasClimate (13 floats) to AtlasAir (11 floats); null without the air. */
+    public float[] airFromClimate(float[] climate) {
+        if (airFromClimate == null) return null;
+        try (Arena a = Arena.ofConfined()) {
+            MemorySegment in = a.allocateFrom(JAVA_FLOAT, climate), out = a.allocate(JAVA_FLOAT, AIR_FLOATS);
+            airCheck((int) airFromClimate.invokeExact(in, out), "atlas_air_from_climate");
+            return out.toArray(JAVA_FLOAT);
+        } catch (Throwable t) {
+            throw rethrow(t);
+        }
+    }
+
+    /**
+     * atlas_air_light: {key dir xyz, key radiance rgb, sky up rgb, ground rgb} at world height eyeY for the sun and the
+     * moon (null: the default moonlight opposite the sun), as the far field lights; null without the air.
+     */
+    public float[] airLight(float[] air, float[] sun, float[] moonDir, float[] moonRad, float eyeY) {
+        if (airLight == null) return null;
+        try (Arena a = Arena.ofConfined()) {
+            MemorySegment ai = a.allocateFrom(JAVA_FLOAT, air), s = a.allocateFrom(JAVA_FLOAT, sun);
+            MemorySegment md = moonDir == null ? MemorySegment.NULL : a.allocateFrom(JAVA_FLOAT, moonDir);
+            MemorySegment mr = moonRad == null ? MemorySegment.NULL : a.allocateFrom(JAVA_FLOAT, moonRad);
+            MemorySegment out = a.allocate(JAVA_FLOAT, 12);
+            airCheck((int) airLight.invokeExact(ai, s, md, mr, eyeY, out), "atlas_air_light");
+            return out.toArray(JAVA_FLOAT);
+        } catch (Throwable t) {
+            throw rethrow(t);
+        }
+    }
+
+    /** atlas_air_coeffs: the marches' per-km coefficients (16 floats, atlas_air.glsl's AirRayleigh .. AirOzone). */
+    public float[] airCoeffs(float[] air) {
+        if (airCoeffs == null) return null;
+        try (Arena a = Arena.ofConfined()) {
+            MemorySegment ai = a.allocateFrom(JAVA_FLOAT, air), out = a.allocate(JAVA_FLOAT, 16);
+            airCheck((int) airCoeffs.invokeExact(ai, out), "atlas_air_coeffs");
+            return out.toArray(JAVA_FLOAT);
+        } catch (Throwable t) {
+            throw rethrow(t);
+        }
+    }
+
+    /** atlas_air_multiscatter: the 32 x 32 RGBA multiple-scattering LUT (4096 floats; ~10 ms when the air is new). */
+    public float[] airMultiscatter(float[] air) {
+        if (airMultiscatter == null) return null;
+        try (Arena a = Arena.ofConfined()) {
+            MemorySegment ai = a.allocateFrom(JAVA_FLOAT, air), out = a.allocate(JAVA_FLOAT, 32 * 32 * 4);
+            airCheck((int) airMultiscatter.invokeExact(ai, out), "atlas_air_multiscatter");
+            return out.toArray(JAVA_FLOAT);
+        } catch (Throwable t) {
+            throw rethrow(t);
+        }
     }
 
     private static MethodHandle bindOptional(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd) {
@@ -563,6 +640,20 @@ public final class AtlasNative {
         }
 
         /**
+         * (abi 0.16) The air the frames are drawn in (atlas.h atlas_set_air: AtlasAir, 11 floats); builds its
+         * multiple-scattering LUT (~10 ms when the air is new). A core without it keeps its default air; false then.
+         */
+        public boolean setAir(float[] air) {
+            if (setAir == null) return false;
+            try (Arena a = Arena.ofConfined()) {
+                check((int) setAir.invokeExact(ptr, a.allocateFrom(JAVA_FLOAT, air)), "atlas_set_air");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
          * (abi 0.13) The primary rays' sub-pixel offset in atlas pixels (atlas.h atlas_set_jitter), for the pack's TAA.
          * A core without it renders unjittered; false then.
          */
@@ -608,6 +699,30 @@ public final class AtlasNative {
                         for (int t = 0; t < 16; t++) m.set(JAVA_INT, o + 16 + 4L * (f * 16 + t), v.faces()[f][t]);
                 }
                 check((int) setShapes.invokeExact(ptr, first, m, shapes.length), "atlas_set_material_shapes");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * (abi 0.16, optional) The 16x16 face textures of materials first .. first + n - 1 (null entries: none, their
+         * face tiles stand in): what atlas shades its near hits with. False when the core does not take them.
+         */
+        public boolean setMaterialTextures(int first, int[][][] textures) {
+            if (setTextures == null || textures.length == 0) return false;
+            final long per = 6L * 256L * 4L;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment m = a.allocate(per * textures.length + 4L * textures.length, 8);
+                long flags = per * textures.length;  // then one word per material: 1 when it has textures
+                for (int i = 0; i < textures.length; i++) {
+                    int[][] t = textures[i];
+                    m.set(JAVA_INT, flags + 4L * i, t == null ? 0 : 1);
+                    if (t == null) continue;
+                    for (int f = 0; f < 6; f++)
+                        for (int k = 0; k < 256; k++) m.set(JAVA_INT, per * i + 4L * (f * 256 + k), t[f][k]);
+                }
+                check((int) setTextures.invokeExact(ptr, first, m, textures.length), "atlas_set_material_textures");
                 return true;
             } catch (Throwable t) {
                 throw rethrow(t);

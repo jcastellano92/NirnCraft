@@ -92,7 +92,8 @@ public final class AtlasNearPass {
             .withUniform("NearInfo", UniformType.UNIFORM_BUFFER).build();
     private static final BindGroupLayout SCENE = BindGroupLayout.builder()
             .withUniform("SceneColor", UniformType.COMBINED_IMAGE_SAMPLER)
-            .withUniform("SceneDepth", UniformType.COMBINED_IMAGE_SAMPLER).build();
+            .withUniform("SceneDepth", UniformType.COMBINED_IMAGE_SAMPLER)
+            .withUniform("SkyView", UniformType.COMBINED_IMAGE_SAMPLER).build();  // the air's sky (AtlasSky)
 
     private static final Set<Identifier> OPAQUE = Set.of(RenderPipelines.SOLID_TERRAIN.getLocation(),
             RenderPipelines.SOLID_TERRAIN_MULTIDRAW.getLocation(), RenderPipelines.CUTOUT_TERRAIN.getLocation(),
@@ -114,6 +115,7 @@ public final class AtlasNearPass {
             .withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
             .withFragmentShader(id("core/near_resolve"))
             .withBindGroupLayout(RESOLVE_SAMPLERS)
+            .withBindGroupLayout(SHADOW_MAP)  // the sun's shadow map: the light in the air (near_resolve's beams)
             .withBindGroupLayout(BindGroupLayouts.FOG)
             .withBindGroupLayout(BindGroupLayouts.PROJECTION)
             .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
@@ -551,7 +553,9 @@ public final class AtlasNearPass {
         // then mode 2, the same light untraced, instead of vanilla's look for that frame: a flicker on arrival)
         boolean traced = nearLight && far != null;
         lit = AtlasClient.nearLightSupported();
-        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 192);
+        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 288);
+        var camState = mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
+        float eyeWater = eyeWaterDepth(mc, camState);
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
         float[] still = sprite(mc, "block/water_still"), flow = sprite(mc, "block/water_flow");
         float seconds = mc.level == null ? 0f : (float) ((mc.level.getGameTime() % 1_000_000L) / 20.0);
@@ -560,13 +564,19 @@ public final class AtlasNearPass {
             com.mojang.blaze3d.buffers.Std140Builder.intoBuffer(view.data())
                     .putVec4(look[0], look[1], !lit ? 0f : traced ? 1f : 2f, AtlasClient.farLags() ? 1f : 0f)
                     .putVec4(k[0], k[1], k[2], lit ? 1f : 0f)
-                    .putVec4(k[3], k[4], k[5], 0f)
+                    // (w: the eye is in water: the resolve and the water take the medium's absorption)
+                    .putVec4(k[3], k[4], k[5], eyeWater)  // w: 0 in air, else 1 + the eye's depth in water
                     .putVec4(k[6], k[7], k[8], 0f)
                     .putVec4(k[9], k[10], k[11], 0f)
                     .putVec4(sun[0], sun[1], sun[2], seconds)
                     .putVec4(still[0], still[1], still[2], still[3])
                     .putVec4(flow[0], flow[1], flow[2], flow[3])
-                    .putMat4f(shadowDrawn ? shadowMat : new Matrix4f().zero());
+                    .putMat4f(shadowDrawn ? shadowMat : new Matrix4f().zero())
+                    .putMat4f(new Matrix4f(camState.viewRotationMatrix).invert())  // InvViewRot: view -> camera-relative world
+                    .putVec4((float) Math.floorMod((long) Math.floor(camState.pos.x), 6144L) + (float) (camState.pos.x - Math.floor(camState.pos.x)),
+                            (float) camState.pos.y,
+                            (float) Math.floorMod((long) Math.floor(camState.pos.z), 6144L) + (float) (camState.pos.z - Math.floor(camState.pos.z)), 0f)
+                    .putVec4(waterTint(mc, camState)[0], waterTint[1], waterTint[2], 0f);  // WaterTint: the biomes' water colour
         }
         var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
                 FilterMode.NEAREST, FilterMode.NEAREST, false);
@@ -593,8 +603,60 @@ public final class AtlasNearPass {
             pass.setUniform("Sampler6", light.getColorTextureView(), nearest);
         }
         pass.setUniform("NearInfo", info.currentBuffer());
+        bindShadow(pass);
         pass.draw(3, 1, 0, 0);
         }
+    }
+
+    private static final float[] waterTint = {0.25f, 0.46f, 0.89f};
+    private static boolean waterTintSet;
+    private static long waterTintFrame;
+
+    /**
+     * The water's colour around the camera (linear-ish sRGB 0..1): the biomes' water colours averaged over a 7 x 7 grid
+     * 24 blocks apart (about 150 blocks: a lake reads as one water, a biome edge as a long blend), and eased over a few
+     * seconds as the camera moves (no snap at a border). Sampled every 8 frames.
+     */
+    private static float[] waterTint(Minecraft mc, net.minecraft.client.renderer.state.level.CameraRenderState cam) {
+        if (mc.level == null || (waterTintFrame++ & 7) != 0) return waterTint;
+        float r = 0, g = 0, b = 0;
+        net.minecraft.core.BlockPos.MutableBlockPos bp = new net.minecraft.core.BlockPos.MutableBlockPos();
+        int n = 0;
+        for (int dz = -3; dz <= 3; dz++)
+            for (int dx = -3; dx <= 3; dx++) {
+                bp.set(cam.pos.x + dx * 24, cam.pos.y, cam.pos.z + dz * 24);
+                int c = mc.level.getBiome(bp).value().getWaterColor();
+                r += ((c >> 16) & 255) / 255f;
+                g += ((c >> 8) & 255) / 255f;
+                b += (c & 255) / 255f;
+                n++;
+            }
+        r /= n;
+        g /= n;
+        b /= n;
+        float k = waterTintSet ? 0.08f : 1f;  // (every 8 frames: about 2 s to settle at 60 fps)
+        waterTint[0] += (r - waterTint[0]) * k;
+        waterTint[1] += (g - waterTint[1]) * k;
+        waterTint[2] += (b - waterTint[2]) * k;
+        waterTintSet = true;
+        return waterTint;
+    }
+
+    /**
+     * 0 when the eye is not in water, else 1 + how deep under the water's surface it is (blocks): the water column over
+     * the eye block, up to 64 (atlas_water.glsl: the light the water lets down, caustics, shafts).
+     */
+    private static float eyeWaterDepth(Minecraft mc, net.minecraft.client.renderer.state.level.CameraRenderState cam) {
+        if (cam.fogType != net.minecraft.world.level.material.FogType.WATER || mc.level == null) return 0f;
+        net.minecraft.core.BlockPos.MutableBlockPos bp = net.minecraft.core.BlockPos.containing(cam.pos).mutable();
+        float top = bp.getY() + 1f;
+        for (int i = 0; i < 64; i++) {
+            var fs = mc.level.getFluidState(bp);
+            if (!fs.is(net.minecraft.tags.FluidTags.WATER)) break;
+            top = bp.getY() + fs.getHeight(mc.level, bp);
+            bp.move(net.minecraft.core.Direction.UP);
+        }
+        return 1f + Math.max(0f, top - (float) cam.pos.y);
     }
 
     /** In vanilla's main pass after opaque terrain: our resolved frame into it, colour and depth. */
@@ -635,6 +697,10 @@ public final class AtlasNearPass {
         if (scene != null && frame != null) {
             pass.setUniform("SceneColor", scene.getColorTextureView(), linear);
             pass.setUniform("SceneDepth", frame.getDepthTextureView(), nearest);
+            // the sky the water mirrors where no reflected ray finds the frame: this frame's sky-view LUT (bearing repeats)
+            var sky = AtlasSky.skyView();
+            pass.setUniform("SkyView", sky != null ? sky : scene.getColorTextureView(), RenderSystem.getSamplerCache()
+                    .getSampler(AddressMode.REPEAT, AddressMode.CLAMP_TO_EDGE, FilterMode.LINEAR, FilterMode.LINEAR, false));
         }
         bindShadow(pass);
         RenderSystem.pushPipelineModifier(FORWARD);

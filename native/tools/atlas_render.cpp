@@ -48,6 +48,7 @@
 #include "atlas/atlas.h"
 #include "atlas_export.hpp"
 #include "camera.hpp"
+#include "air.hpp"
 #include "pack_look.hpp"
 #include "png.hpp"
 
@@ -203,6 +204,7 @@ int main(int argc, char** argv) {
     bool packShade = str(a, "shade", "") == "pack";
     bool nearLight = packShade && num(a, "nearlight", 0) > 0;
     packlook::Look look;
+    std::string airJson;  // the air's light and sky at the eye (JSON fragment)
     look.exposure = float(num(a, "exposure", 0));
     look.nightVision = float(num(a, "nv", 0.7));
     packlook::C3 skyHdr{0.358f, 0.636f, 1.286f};  // atlas_truth info=1 time=6000's skyHdr
@@ -234,6 +236,21 @@ int main(int argc, char** argv) {
     double ground = atlas_preview_height(ctx, x, z);
     double y = mcCam ? eye[1] : a.count("y") ? num(a, "y", 100) : std::max(ground, 63.0) + num(a, "above", 40);
     double centre[3] = {x, y, z};
+    // air=clean|humid|dusty|smoke|snow|salt: the climate's air (air.hpp namedClimate -> atlas_air_from_climate), as
+    // the game sets it (AtlasAir.java); default the clean air
+    AtlasAir airUsed;
+    atlas_air_defaults(&airUsed);
+    if (a.count("air")) {
+        air::Climate k = air::namedClimate(a["air"].c_str());
+        AtlasClimate c{};
+        c.temperatureC = k.temperatureC;
+        c.relativeHumidity = k.relativeHumidity;
+        c.pressure = k.pressure;
+        for (int i = 0; i < 4; i++) c.background[i] = k.background[i];
+        c.dust = k.dust, c.ash = k.ash, c.snow = k.snow, c.rain = k.rain, c.fog = k.fog, c.coast = k.coast;
+        atlas_air_from_climate(&c, &airUsed);
+        atlas_set_air(ctx, &airUsed);
+    }
 
     // preview tiles for every LOD window (2 regions of slack either side, matching World::windowRadius); for one element
     // empty ones (no ground: the regions exist, only the element's sections fill them)
@@ -502,6 +519,33 @@ int main(int argc, char** argv) {
         f.sunDir[2] = float(-std::cos(sa) * std::cos(se));
         f.timeSec = float(num(a, "time", 0));
         f.lodBias = float(num(a, "bias", 1));
+        {
+            // the air's light at the eye (the game's AtlasLook: key light, sky light) and the sky there; exposure=auto:
+            // the game's canonical eye (mid grey under the open sky, lit by them)
+            float lt[12];
+            atlas_air_light(&airUsed, f.sunDir, nullptr, nullptr, float(y), lt);
+            float d[5][3] = {{0, 1, 0}, {f.sunDir[0], 0.02f, f.sunDir[2]}, {-f.sunDir[0], 0.02f, -f.sunDir[2]}};
+            for (int i = 1; i < 3; i++) {
+                float l = std::sqrt(d[i][0] * d[i][0] + d[i][1] * d[i][1] + d[i][2] * d[i][2]);
+                if (l < 0.03f) d[i][0] = 1, l = std::sqrt(1 + d[i][1] * d[i][1]);  // (a sun at the zenith)
+                for (float& v : d[i]) v /= l;
+            }
+            float sky[9];
+            atlas_air_sky(&airUsed, f.sunDir, nullptr, nullptr, float(y), &d[0][0], 3, sky);
+            auto lum = [](const float* c) { return 0.2126f * c[0] + 0.7152f * c[1] + 0.0722f * c[2]; };
+            float L = 0.18f * (lum(lt + 3) * std::max(lt[1], 0.0f) + lum(lt + 6));
+            float ev = packlook::exposureTarget(std::log2(std::max(L, 1e-5f)));
+            if (str(a, "exposure", "") == "auto") look.exposure = ev;
+            char b[640];
+            std::snprintf(b, sizeof b,
+                          ",\"air\":{\"aod\":%.3f,\"angstrom\":%.2f,\"key\":[%.4f,%.4f,%.4f],\"skyUp\":[%.4f,%.4f,%.4f],"
+                          "\"zenith\":[%.4f,%.4f,%.4f],\"horizonSun\":[%.4f,%.4f,%.4f],\"horizonAnti\":[%.4f,%.4f,%.4f],"
+                          "\"keySinToSky\":%.3f,\"exposure\":%.2f}",
+                          airUsed.aerosolDepth, airUsed.angstrom, lt[3], lt[4], lt[5], lt[6], lt[7], lt[8], sky[0], sky[1],
+                          sky[2], sky[3], sky[4], sky[5], sky[6], sky[7], sky[8],
+                          lum(lt + 3) * std::max(lt[1], 0.0f) / std::max(lum(lt + 6), 1e-9f), ev);
+            airJson = b;
+        }
         // shade=mc: the surfaces' albedo and face normals only (the vanilla look is put together below)
         f.flags = flagsOf(str(a, "flags", mcShade ? "flatnormals" : "shadows,atmos,clouds,sky,actors"));
         if (mcShade) f.flags |= ATLAS_FRAME_DEBUG_ALBEDO | ATLAS_FRAME_FLAT_NORMALS;
@@ -1074,6 +1118,7 @@ int main(int argc, char** argv) {
                       groupsMs, median, frames);
         extra += buf;
     }
+    extra += airJson;
     std::printf("{\"backend\":\"%s\",\"terrain\":\"%s\",\"camera\":[%.1f,%.1f,%.1f],\"ground\":%.1f,\"w\":%u,\"h\":%u,"
                 "\"regions\":%u,\"nodeBytes\":%llu,\"leafBytes\":%llu,\"materialBytes\":%llu,\"buildMs\":%.1f,"
                 "\"frameMs\":%.2f,\"raySteps\":%llu,\"hitFraction\":%.3f,\"farthestHit\":%.0f,\"out\":\"%s\"%s%s}\n",

@@ -200,6 +200,11 @@ public:
     void setCards(std::shared_ptr<const CardSet> cards);
     // material shapes (atlas_set_material_shapes); first >= 1, null entries remove a shape
     void setShapes(uint32_t first, const std::vector<std::shared_ptr<const MaterialShape>>& shapes);
+    void setTextures(uint32_t first, const std::vector<std::shared_ptr<const MaterialTexture>>& textures);
+    std::shared_ptr<const TextureSet> textures() const {
+        std::lock_guard<std::mutex> lock(mu_);
+        return textures_;
+    }
     struct GroupStats {
         uint32_t regions = 0, refused = 0;  // regions with a tree; regions whose tree was refused (too large)
         uint64_t bytes = 0, maxRegionBytes = 0, prims = 0, nodes = 0, bricks = 0;
@@ -279,6 +284,7 @@ private:
     };
     std::unordered_map<Key3, Fade, Key3Hash> fading_;
     std::shared_ptr<const ShapeSet> shapes_ = std::make_shared<ShapeSet>();
+    std::shared_ptr<const TextureSet> textures_ = std::make_shared<TextureSet>();
     uint64_t packedShapes_ = 0;  // the shape revision the packed scene carries
     std::shared_ptr<const CardSet> cards_ = std::make_shared<CardSet>();
     uint64_t packedCards_ = 0;
