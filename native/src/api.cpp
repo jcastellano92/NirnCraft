@@ -941,6 +941,11 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     float a[3], b[3];
     pixelDir(f->invViewProj, f->width * 0.5f, f->height * 0.5f, f->width, f->height, a);
     pixelDir(f->invViewProj, f->width * 0.5f + 1, f->height * 0.5f, f->width, f->height, b);
+    {
+        // the view's horizontal forward: the world builds what lies behind the camera after what it sees (World::setView)
+        float hl = std::sqrt(a[0] * a[0] + a[2] * a[2]);
+        if (hl > 1e-4f) ctx->world.setView(a[0] / hl, a[2] / hl);
+    }
     float dot = std::fmin(1.0f, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
     g.params[0] = f->nearFieldEnd;
     g.params[1] = f->maxDistance;

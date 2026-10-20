@@ -514,15 +514,34 @@ int main(int argc, char** argv) {
     bool interleave = !vgAB && (num(a, "interleave", 0) > 0 || str(a, "interleave", "") == "light");
     const uint32_t baseAblate = envAblate();
     std::vector<double> otherTimes;  // (interleave) the other path's timing frames
+    std::vector<double> feedMs;      // (feed=) the uploads' times during a warm-up
+    size_t feedAt = 0;
     int spp = std::max(1, int(num(a, "spp", 1)));
     auto renderOne = [&](const std::string& out, double x, double y, double z, double yawIn, double pitchIn, double fovIn,
                          uint32_t w, uint32_t h) -> int {
         double c[3] = {x, y, z};
         if (boxed) emptyTiles(x, z);
         if (!serverWindow(x, z)) return 2;
-        if (atlas_update(ctx, c, updateBudget) != ATLAS_OK) {  // the window follows the camera (nothing to do when it stays)
-            std::fprintf(stderr, "update: %s\n", atlas_last_error(ctx));
-            return 3;
+        {
+            // updates=N (with budget=B): N calls as the game's worker makes them, each timed (the first after a move is
+            // what the worker waits on); otherwise one
+            int nUpd = std::max(1, int(num(a, "updates", 1)));
+            std::string times;
+            for (int u = 0; u < nUpd; u++) {
+                auto u0 = std::chrono::steady_clock::now();
+                if (atlas_update(ctx, c, updateBudget) != ATLAS_OK) {  // the window follows the camera (nothing to do when it stays)
+                    std::fprintf(stderr, "update: %s\n", atlas_last_error(ctx));
+                    return 3;
+                }
+                char tb[32];
+                std::snprintf(tb, sizeof tb, "%s%.0f", u ? " " : "",
+                              std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - u0).count());
+                times += tb;
+            }
+            AtlasStats su{};
+            atlas_get_stats(ctx, &su);
+            std::fprintf(stderr, "atlas_render: update ms (budget %.0f): %s; regions %u, dirty %u\n", updateBudget, times.c_str(),
+                         su.regions, su.regionsDirty);
         }
         f = AtlasFrame{};
         f.cameraPos[0] = x;
@@ -604,11 +623,39 @@ int main(int argc, char** argv) {
             // (the first frame places the grid's window: before it there is nothing pending to see)
             // nowarm=1: no warm-up (the frame as the game's first one after a move sees it)
             int k = 0;
-            for (; k < 256 && num(a, "nowarm", 0) <= 0; k++) {
+            // (with budget=B the regions are built by the world's builders while frames go on: until none is pending,
+            // at most a minute; how long that took is printed)
+            auto w0 = std::chrono::steady_clock::now();
+            double maxUpd = 0;
+            int maxK = updateBudget > 0 ? 100000 : 256;
+            for (; k < maxK && num(a, "nowarm", 0) <= 0; k++) {
                 if (atlas_render(ctx, &f, &none) != ATLAS_OK) return 4;
                 double cw[3] = {f.cameraPos[0], f.cameraPos[1], f.cameraPos[2]};
-                if (atlas_update(ctx, cw, 0) != ATLAS_OK) return 3;  // (as the game's worker keeps updating: what the grid gave back)
-                if (voxgridPending(ctx) <= 0) break;
+                // feed=N: N held sections sent again each frame (as the game's feed keeps sending while it builds),
+                // each upload timed: what an upload waits behind
+                for (int fi = 0, fn = int(num(a, "feed", 0)); fi < fn && !ex.held.empty(); fi++) {
+                    const exportdata::Held& hs = ex.held[feedAt++ % ex.held.size()];
+                    if (!hs.sent) continue;
+                    auto f0 = std::chrono::steady_clock::now();
+                    atlas_upload_section(ctx, hs.cx, hs.sy, hs.cz, hs.mats.data());
+                    feedMs.push_back(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - f0).count());
+                }
+                auto u0 = std::chrono::steady_clock::now();
+                if (atlas_update(ctx, cw, updateBudget) != ATLAS_OK) return 3;  // (as the game's worker keeps updating: what the grid gave back)
+                maxUpd = std::max(maxUpd, std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - u0).count());
+                AtlasStats sw{};
+                atlas_get_stats(ctx, &sw);
+                if (voxgridPending(ctx) <= 0 && (updateBudget <= 0 || sw.regionsDirty == 0)) break;
+                if (std::chrono::duration<double>(std::chrono::steady_clock::now() - w0).count() > 60.0) break;
+                if (updateBudget > 0) std::this_thread::sleep_for(std::chrono::milliseconds(16));  // (a frame's time)
+            }
+            std::fprintf(stderr, "atlas_render: settled in %.0f ms, %d frames, longest update %.1f ms\n",
+                         std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - w0).count(), k, maxUpd);
+            if (!feedMs.empty()) {
+                std::sort(feedMs.begin(), feedMs.end());
+                std::fprintf(stderr, "atlas_render: %zu uploads during it: median %.3f ms, p99 %.3f ms, max %.3f ms\n", feedMs.size(),
+                             feedMs[feedMs.size() / 2], feedMs[feedMs.size() * 99 / 100], feedMs.back());
+                feedMs.clear();
             }
             std::string inf = atlas_info(ctx);
             auto vg = inf.find("\"voxgrid\":{");
