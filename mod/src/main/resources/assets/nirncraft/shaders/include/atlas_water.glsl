@@ -44,7 +44,7 @@ vec3 atlasWaterExtinction() {
 // in the water's colour, dimmed by the light lost on the way down (drop-offs go dark; the shallows stay bright)
 vec3 atlasWaterLightAt(float d) {
     vec3 L = normalize(KeyDir.xyz);
-    vec3 inLight = (SkyUp.rgb * 3.0 + KeyRad.rgb * max(L.y, 0.0) * 0.6) * atlasWaterScatter();
+    vec3 inLight = (SkyUp.rgb + KeyRad.rgb * max(L.y, 0.0) * 0.6) * atlasWaterScatter();  // (the sky physical: the look's ambient 1)
     return atlasDisplay(inLight * exp(-ATLAS_WATER_ABSORB * atlasWaterMurk() * max(d, 0.0) * 0.6), Look.x, Look.y);
 }
 

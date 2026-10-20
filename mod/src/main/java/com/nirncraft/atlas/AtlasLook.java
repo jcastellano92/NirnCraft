@@ -65,9 +65,22 @@ final class AtlasLook {
         return m.mul(bob.last().pose());
     }
 
-    /** {key dir xyz, key radiance rgb, sky-up rgb, ground rgb}: the pack's key light and sky ambient (pack_look.hpp). */
+    /**
+     * {key dir xyz, key radiance rgb, sky-up rgb, ground rgb}: the air's (AtlasAir: atlas_air_light, the far field's own
+     * light at the eye: the sun's light through the air, the sky's light with its multiple scattering), else (a core
+     * without the air) the old analytic look.
+     */
     static float[] light(Minecraft mc) {
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
+        float[] air = AtlasAir.light(sun, eyeY(mc));
+        return air != null ? air : legacyLight(sun);
+    }
+
+    private static float eyeY(Minecraft mc) {
+        return mc.player != null ? (float) mc.player.getEyeY() : 64f;
+    }
+
+    private static float[] legacyLight(float[] sun) {
         float[] o = new float[12];
         float day = smooth(-0.12f, 0.25f, sun[1]);
         if (sun[1] > -0.05f) {
@@ -86,6 +99,12 @@ final class AtlasLook {
 
     /** log2 exposure of the eye adapted to mid grey (albedo 0.18) under the open sky, lit by the key light and sky. */
     static float canonicalExposure(float[] sun) {
+        float[] air = AtlasAir.light(sun, eyeY(Minecraft.getInstance()));
+        if (air != null) {  // the air's light (atlas_render exposure=auto computes the same)
+            float l = 0.18f * (lum(air[3], air[4], air[5]) * Math.max(air[1], 0f) + lum(air[6], air[7], air[8]));
+            float logL = (float) (Math.log(Math.max(l, 1e-5f)) / Math.log(2));
+            return Math.max(EXPOSURE_MIN, Math.min(EXPOSURE_MAX, EXPOSURE_KEY - EXPOSURE_SLOPE * logL));
+        }
         float day = smooth(-0.12f, 0.25f, sun[1]);
         float skyUp = lum(lerp(0.02f, 0.33f, day), lerp(0.025f, 0.45f, day), lerp(0.05f, 0.7f, day));
         float key, keyY;

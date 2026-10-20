@@ -2042,10 +2042,12 @@ static void testOverhang() {
     CHECK(bins[0].n > px / 2 && bins[1].n > px / 2 && bins[2].n > px / 2);
     CHECK(bins[0].sun < 0.01 && bins[1].sun < 0.01 && bins[2].sun > 0.99);
     // before the bounce (the sky rays that met a surface brought back nothing, the look's constant scaled by the sky
-    // seen): 0.1615 / 1.0842 / 4.4158. The underside is lit by the ground, the open land's light stays as it was
-    CHECK(bins[0].irr > 2.0 * 0.1615);
-    CHECK(bins[1].irr > 0.95 * 1.0842 && bins[1].irr < 1.15 * 1.0842);
-    CHECK(std::abs(bins[2].irr - 4.4158) < 0.02 * 4.4158);
+    // seen; ATLAS_ABLATE 524288), in the air's light (2026-10-20: the physical sun and sky, LOOK_AMBIENT 1; under the
+    // old analytic sky and LOOK_AMBIENT 3 they were 0.1615 / 1.0842 / 4.4158 and the bounce 2.5x the underside):
+    // 0.1613 / 0.5990 / 3.4625. The underside is lit by the ground (x1.8), the open land's light stays as it was
+    CHECK(bins[0].irr > 1.6 * 0.1613);
+    CHECK(bins[1].irr > 0.95 * 0.5990 && bins[1].irr < 1.15 * 0.5990);
+    CHECK(std::abs(bins[2].irr - 3.4625) < 0.02 * 3.4625);
     atlas_destroy(cpu);
 }
 

@@ -129,6 +129,8 @@ public final class ClientWeather {
     static java.util.Set<String> regionIds() { return TABLE.keySet(); }
     /** Wind direction (where it blows towards, degrees) as eased on the client. */
     public static float windDegrees() { return windDeg; }
+    /** The weighted distance to the sea around the player, blocks (sea salt in the air: Infinite ATLAS's AtlasAir). */
+    public static float coastDistance() { return localCoastDist; }
 
     /** Thread-safe snapshot of active moving weather fronts synced from the server. */
     public static List<WeatherFront> fronts() {

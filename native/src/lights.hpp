@@ -23,7 +23,7 @@ struct LightView {
     float pixelAngle;    // radians per pixel
     float nearEnd, maxDist, planetRadius;
     float sunY;
-    float hazeDensity;   // aerial extinction per block at the camera's altitude (as the kernel's aerialTransmittance)
+    float hazeDensity;   // aerial extinction per block at the camera's altitude (the air's, air.hpp)
 };
 
 constexpr uint32_t LIGHT_TILE = 32;     // screen tile (pixels) of the light lists

@@ -295,6 +295,28 @@ The full checklist from R1, every item checked live; the owner flies it.
   exposure follows); the key light at a 15-25 degree sun is weak against the sky (the evening reads blue and flat, not
   golden). For the owner: the look's key-to-sky balance near sunset. Far shadows exist (A/B: the far forest band and
   hillsides darken by them) at the hit's own level.
+- **The air (2026-10-20): one physical atmosphere** for the sky, the sun's colour and strength, the haze and the sky's
+  light, near and far (native/src/air.hpp the reference; atlas_air.slang, include/atlas_air.glsl the ports with its
+  constants). Rayleigh, Mie (Cornette-Shanks) and ozone over a spherical planet, single scattering marched (sky 24
+  steps, a path to a surface 8), the higher orders from Hillaire's 32 x 32 LUT, the sun's transmittance analytic
+  (Chapman, erfcx form). The world is a 1 : 2.5 model of its air (AtlasAir.airScale: the haze strength LOOK_HAZE had).
+  The key light is the sun through the air at the point's height; the sky light the air's own sky over the hemisphere;
+  LOOK_AMBIENT 3 -> 1. The game's sky: AtlasSky marches the GLSL port into a 192 x 108 sky-view LUT each frame, the sky
+  and the water's reflections look it up. Regional variation is what is in the air: AtlasClimate (the eye's column:
+  temperature, humidity, aerosol band; ClientWeather's dust, ash, snow, mist; rain; the coast) -> atlas_air_from_climate
+  (an external mixture of aerosol kinds, the water-loving ones swelling with humidity). Measured (clean air, the eye 60
+  over the ground): the key light at 2 / 6 / 15 / 35 / 70 degrees (0.51, 0.11, 0.01) / (1.56, 0.77, 0.24) / (2.50,
+  1.88, 1.21) / (3.03, 2.73, 2.34) / (3.22, 3.09, 2.90); a 10-degree sun's key x sin : sky on a flat 1.52 (lit : shaded
+  2.5 : 1; the old look 0.42 with its LOOK_AMBIENT 3: the blue flat evening); zenith at 35 degrees (0.080, 0.154,
+  0.354), the horizon at the sun at 2 degrees (3.9, 1.0, 0.12). Humid air (AOD 0.39) and dusty (0.50) dim and redden a
+  low sun far more (10 degrees: key x sin : sky 0.28 / 0.13). Checks: atlas_pack_test runs the game's GLSL on GL against
+  atlas's sky (worst 2.4e-3 relative); tools/dev/air_check.py the same formulas in numpy against atlas_air_sky (median
+  2e-5; through the LUT p99 0.6 %). Cost (3090 shared with the game, 1080p, A/B one run): the far frame 5.05 -> 5.34 ms;
+  CPU backend 640 x 360 85.6 -> 104.3 ms, with the cheap light 75.3 -> 84.6 ms. The daytime moon: its lit face added
+  over the sky (the silhouette drew a dark disc on the blue). Open: the air is the eye's (per-cell air for far haze
+  waits for the weather work), a new air rebuilds the LUT on the render thread (~10 ms, at most every 3 s), dusk is at
+  the exposure clamp from a 6-degree sun down (physical, darker than before: a live judgement), the Iris pack keeps
+  its old sky (retired at R4).
 - **Dev loop: a shared-constant change freezes the client 30-60 s** while the driver rebuilds the six pipelines; the
   live control heartbeat times out meanwhile (actions fail: retry after the reload).
 - **Open from the owner's questions (2026-10-20):** entities cast no shadows (they receive them: the shadow map's

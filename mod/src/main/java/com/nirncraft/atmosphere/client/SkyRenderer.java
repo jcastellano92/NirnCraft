@@ -77,7 +77,7 @@ public final class SkyRenderer {
         return AtmosphereMath.auroraElevationMaxDeg(blockZ);
     }
 
-    private enum Kind { VEIL, STARS, GALAXY, CONSTELLATIONS, SERPENT, MOON, HALO, AURORA, METEOR }
+    private enum Kind { VEIL, STARS, GALAXY, CONSTELLATIONS, SERPENT, MOON, MOON_DAY, HALO, AURORA, METEOR }
     // Matrices, tints and meteor vertices are private immutable frame snapshots; GPU buffers are resolved at draw time.
     private record Draw(Kind kind, int index, int key, Matrix4f local, Vector4f tint,
                         Identifier texture, float[] vertices) {}
@@ -151,7 +151,7 @@ public final class SkyRenderer {
             pose.rotate(Axis.YP.rotationDegrees(-90f));
             pose.rotate(Axis.XP.rotationDegrees(sunCycle * 360f + (float)AtmosphereMath.moonCycle(dayTime, false) * 360f));
             if (!shadersActive) {
-                moon(draws, pose.last().pose(), MASSER, MASSER_SIZE, clear, AtmosphereMath.moonCycle(dayTime, false));
+                moon(draws, pose.last().pose(), MASSER, MASSER_SIZE, clear, night, AtmosphereMath.moonCycle(dayTime, false));
                 if (AtmosphereConfig.MASSER_HALO.get() && night > .003f) {
                     Matrix4f halo = new Matrix4f(pose.last().pose()).scale(HALO_SIZE, 1f, HALO_SIZE);
                     add(draws, Kind.HALO, 0, 0, halo, MASSER_HALO, night * clear * NightSkyState.masserLight * .025f);
@@ -164,7 +164,7 @@ public final class SkyRenderer {
                 pose.rotate(Axis.YP.rotationDegrees(-90f));
                 pose.rotate(Axis.ZP.rotationDegrees(SECUNDA_TILT));
                 pose.rotate(Axis.XP.rotationDegrees(sunCycle * 360f + (float)AtmosphereMath.moonCycle(dayTime, true) * 360f));
-                moon(draws, pose.last().pose(), SECUNDA, SECUNDA_SIZE, clear, AtmosphereMath.moonCycle(dayTime, true));
+                moon(draws, pose.last().pose(), SECUNDA, SECUNDA_SIZE, clear, night, AtmosphereMath.moonCycle(dayTime, true));
                 pose.popPose();
             }
             if (AtmosphereConfig.AURORA.get() && !shadersActive) {
@@ -206,7 +206,7 @@ public final class SkyRenderer {
                         case GALAXY -> SkyGeometry.galaxy;
                         case CONSTELLATIONS -> SkyGeometry.constellations;
                         case SERPENT -> SkyGeometry.serpent;
-                        case MOON -> SkyGeometry.moonPhases[draw.index];
+                        case MOON, MOON_DAY -> SkyGeometry.moonPhases[draw.index];
                         case HALO -> SkyGeometry.halo;
                         case AURORA -> SkyGeometry.AURORA[draw.index][draw.key];
                         case METEOR -> meteor;
@@ -228,13 +228,23 @@ public final class SkyRenderer {
         if (alpha <= .002f) return;
         draws.add(new Draw(kind, index, key, new Matrix4f(local), new Vector4f(1f, 1f, 1f, Math.min(1f, alpha)), texture, null));
     }
-    private static void moon(List<Draw> draws, Matrix4f local, Identifier texture, float size, float alpha, double cycle) {
+    /** How much of a moon's lit face shows over the daylit sky (added to it: faint, bright on blue). */
+    private static final float DAY_MOON = .3f;
+
+    // By night the disc hides the stars behind it (its unlit side dark, alpha-blended: a silhouette). By day the sky's
+    // light lies in front of the moon: only the lit face adds to the sky, faintly, and the unlit side is the sky's own
+    // colour (the silhouette there drew a dark disc on the blue). night (the stars' visibility) crosses one into the
+    // other.
+    private static void moon(List<Draw> draws, Matrix4f local, Identifier texture, float size, float alpha, float night, double cycle) {
         double phase = cycle * 16.0;
         int first = (int)phase;
         Matrix4f scaled = new Matrix4f(local).scale(size, 1f, size);
-        add(draws, Kind.MOON, first & 15, 0, scaled, texture, alpha);
         float fraction = (float)(phase - first);
-        if (fraction > .001f) add(draws, Kind.MOON, (first + 1) & 15, 0, scaled, texture, alpha * fraction);
+        float hide = alpha * night, glow = alpha * (1f - night) * DAY_MOON;
+        add(draws, Kind.MOON, first & 15, 0, scaled, texture, hide);
+        if (fraction > .001f) add(draws, Kind.MOON, (first + 1) & 15, 0, scaled, texture, hide * fraction);
+        add(draws, Kind.MOON_DAY, first & 15, 0, scaled, texture, glow);
+        if (fraction > .001f) add(draws, Kind.MOON_DAY, (first + 1) & 15, 0, scaled, texture, glow * fraction);
     }
     private static void aurora(List<Draw> draws, PoseStack pose, float alpha, double seconds, double camZ) {
         double phase = seconds / AURORA_KEY_SECONDS;

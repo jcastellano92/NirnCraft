@@ -52,6 +52,7 @@
 // (FRAME_NEAR_SPLIT) the previous frame's near light, for nearTemporalMain (a pixel's worth when it had none)
 [[vk::binding(28, 0)]] StructuredBuffer<float4> prevNearLight;
 
+#include "atlas_air.slang"
 #include "atlas_clouds.slang"
 
 static const int TRACE_MISS = 0;
@@ -767,10 +768,8 @@ static const int SKY_RAYS = 1;
 static const float SKY_REACH = 16.0;
 static const float ENCLOSED_REACH = 64.0;
 float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool enclosed, bool withBounce, out float vis) {
-    float day = smoothstep(-0.12, 0.25, sun.y);
-    float3 skyUp = lerp(float3(0.02, 0.025, 0.05), float3(0.33, 0.45, 0.7), day);
-    float3 ground = lerp(float3(0.01, 0.01, 0.012), float3(0.2, 0.18, 0.14), day);
-    uint fi = frame.jitter.z > 0.5 ? (frame.temporal.x & 15u) : 0u;  // a 16-frame cycle: a still pixel converges to one stratified set
+    float3 skyUp = frame.airSkyUp.xyz, ground = frame.airGround.xyz;  // skyAmbient's two radiances (the air's light)
+    uint fi =frame.jitter.z > 0.5 ? (frame.temporal.x & 15u) : 0u;  // a 16-frame cycle: a still pixel converges to one stratified set
     float ru = pixelDither(px, 11u), rv = pixelDither(px, 13u);
     float s = float(1 << lod);
     uint ab = asuint(frame.jitter.w);  // (ATLAS_ABLATE 8192: two rays, 16384: half the reach; measurements)
@@ -1065,7 +1064,7 @@ float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
         float c = dot(dir, v) / max(length(v), 1e-3);
         float apx = sqrt(max(0.0, 2.0 * (1.0 - c))) / pa;
         float sigma = l.posYaw.w, halo = l.motion.z;
-        float T = aerialTransmittance(dist, frame);
+        float T = dot(aerialT(dir, dist), float3(0.2126, 0.7152, 0.0722));
         float q = apx / sigma;
         float core = exp(-0.5 * q * q);
         // the glow stands for an emitter the far field cannot draw (a far town's windows and lamps, a block lost in a
@@ -1171,8 +1170,7 @@ void sampleClouds(uint2 px, out float4 c, out float depth) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void cloudMain(uint3 tid : SV_DispatchThreadID) {
-    gMoonDir = frame.moonDir;
-    gMoonRad = frame.moonRad;
+    airBegin();
     uint2 cd = cloudDims();
     // temporal amortisation: a fresh ray for one pixel of every 2x2 block per frame (rotating); the others reproject
     // last frame's deck through its camera. Off-screen reprojections and frames without history march fresh.
@@ -1249,8 +1247,8 @@ void cloudMain(uint3 tid : SV_DispatchThreadID) {
     if (cl.firstHit >= 0.0) {
         // the deck's own aerial perspective: distant storms fade into the horizon haze like the terrain does
         // (whatever is behind the cloud already carries its own haze)
-        float trA = aerialTransmittance(cl.firstHit, frame);
-        c.rgb = cl.scatter * trA + aerialFog(dir, sun) * (1.0 - trA) * (1.0 - cl.transmittance);
+        AirPath air = aerialPathTo(dir, cl.firstHit);
+        c.rgb = cl.scatter * air.transmittance + air.inscatter * (1.0 - cl.transmittance);
         c.a = cl.transmittance;
         d = cl.transmittance < 0.995 ? cl.firstHit : 1e30;
     }
@@ -1313,8 +1311,7 @@ float2 sunTexel(uint i, uint j) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void sunMapMain(uint3 id : SV_DispatchThreadID) {
-    gMoonDir = frame.moonDir;
-    gMoonRad = frame.moonRad;
+    airBegin();
     uint S = frame.sunMapRows.z, count = frame.sunMapRows.y;
     if (frame.sunMapRows.w == 0u || id.x >= S || id.y > count) return;
     if (id.y == count) {
@@ -1341,6 +1338,7 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     float R = frame.camFrac.w;
     float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
     float3 p = worldAt(o, dir, k, nd);  // (the near field's vertices carry the matching curvature drop)
+    airAt(p.y + float(frame.camInt.y));
     float3 N = octDecode(float2(float((info >> 16) & 255u), float(info >> 24)) / 255.0);
     uint ablate = asuint(frame.jitter.w);
     bool cheapLight = (frame.dims.z & FRAME_LIGHT_LOW) != 0u || (ablate & 256u) != 0u;
@@ -1401,6 +1399,10 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     float3 irr = shadeSurfaceAmb(float3(1, 1, 1), white, N, dir, sun, sunVis, 0u, ambient, float3(0, 0, 0));
     gSecCone = 0.0;
     if ((ablate & 8u) == 0u) irr += farLightsOn(px, p, so, N, 0, sun, false, cheapLight);
+    // the host composites albedo x this x T + inscatter with one transmittance (its luminance): the air's colour
+    // through it (the blue lost first) rides in the light
+    float3 Tr = aerialT(dir, nd);
+    irr *= Tr / max(dot(Tr, float3(0.2126, 0.7152, 0.0722)), 1e-4);
     return float4(irr, waterChord > 0.0 ? 1.0 + waterChord : sunVis);
 }
 
@@ -1426,8 +1428,7 @@ float3 pixelRay(uint2 px, uint w, uint h) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void nearLightMain(uint3 id : SV_DispatchThreadID) {
-    gMoonDir = frame.moonDir;
-    gMoonRad = frame.moonRad;
+    airBegin();
     gEyeRoofed = -1;
     uint w = frame.dims.x, h = frame.dims.y;
     uint2 q = id.xy * 2u + nearSplitOffset();
@@ -1559,8 +1560,7 @@ void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void farMain(uint3 id : SV_DispatchThreadID) {
-    gMoonDir = frame.moonDir;
-    gMoonRad = frame.moonRad;
+    airBegin();
     gEyeRoofed = -1;
     uint w = frame.dims.x, h = frame.dims.y;
     if (id.x >= w || id.y >= h) return;
@@ -1595,7 +1595,10 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             bool nearLit = (frame.dims.z & FRAME_NEAR_LIGHT) != 0u;
             float4 c = float4(0, 0, 0, 0);
             if (nearLit) {
-                c = float4(aerialInscatter(dir, sun, nd, frame), aerialTransmittance(nd, frame));
+                // (the host's composite takes one transmittance: the path's own, luminance-weighted; chromatic only
+                // past the near field, where the far field composites itself)
+                AirPath air = aerialPathTo(dir, nd);
+                c = float4(air.inscatter, dot(air.transmittance, float3(0.2126, 0.7152, 0.0722)));
                 // (FRAME_NEAR_SPLIT: the light comes from nearLightMain, the unlit air from nearUpsampleMain)
                 if ((frame.dims.z & FRAME_NEAR_SPLIT) == 0u) {
                     gAblate = asuint(frame.jitter.w);
@@ -1658,6 +1661,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     if (actorFirst) {
         n = ah.n;
         cls = 4u;  // far actor
+        airAt(o.y + dir.y * ah.t + float(frame.camInt.y));
         if ((frame.dims.z & FRAME_CLOUDS) != 0) sunVis = cloudShadow(o + dir * ah.t, keyLightDir(sun));
         MaterialGpu am;
         am.albedoRough = float4(ah.albedo, 0.8);
@@ -1678,6 +1682,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         else if (ax == 1) n.y = slope.y > 0 ? -1.0 : 1.0;
         else n.z = slope.z > 0 ? -1.0 : 1.0;
         float3 p = worldAt(o, dir, k, tHit);
+        airAt(p.y + float(frame.camInt.y));  // the key light at the hit's height (a peak keeps the sun longer)
         float s = float(1 << res.lod);
         // blocky up close (it is Minecraft), smooth once voxels shrink towards a pixel: stops contour striping
         // centre of the hit voxel on the world voxel grid (multiples of s; y -64 is a multiple for s <= 64)
@@ -1884,7 +1889,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             color = lerp(color, white, foam);
         }
         depth = tHit;
-        if (roofed && eyeRoofed()) color *= aerialTransmittance(tHit, frame);  // under cover at both ends: unlit air
+        if (roofed && eyeRoofed()) color *= aerialT(dir, tHit);  // under cover at both ends: unlit air
         else if (!vanillaLight) color = applyAerial(color, dir, sun, tHit, frame);
         // (ATLAS_ABLATE 4096, measurements: the secondary rays' origin solid in the voxel path, sun and sky visibility)
         // (ATLAS_ABLATE 4096, measurements: one grey value past the shading, readable through any tonemap: the sky

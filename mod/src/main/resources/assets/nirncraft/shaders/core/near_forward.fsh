@@ -21,6 +21,7 @@
 uniform sampler2D Sampler0;
 uniform sampler2D SceneColor;  // our resolved frame (displayed), terrain near and far: what the water reflects
 uniform sampler2D SceneDepth;  // its depth (reverse-Z)
+uniform sampler2D SkyView;    // the air's sky this frame (AtlasSky's sky-view LUT, atlas_sky.glsl)
 
 layout(location = 0) in vec4 vertexColor;
 layout(location = 1) in vec2 texCoord0;
@@ -189,7 +190,7 @@ void main() {
         float cosv = max(dot(-v, wn), 0.0);
         float fresnel = 0.02 + 0.98 * pow(1.0 - cosv, 5.0);
         vec3 r = reflect(v, wn);
-        vec3 sky = atlasSkyColor(normalize(vec3(r.x, max(r.y, 0.02), r.z)), SunDir.xyz) * (lm.y * lm.y);
+        vec3 sky = atlasSky(SkyView, normalize(vec3(r.x, max(r.y, 0.02), r.z)), SunDir.xyz) * (lm.y * lm.y);
         float open = smoothstep(0.05, 0.35, lm.y);
         float lit = atlasShadow(viewPos, n);
         vec3 glint = KeyRad.rgb * pow(max(dot(r, KeyDir.xyz), 0.0), 600.0) * 60.0 * open * lit;
@@ -214,7 +215,7 @@ void main() {
         vec3 T = exp(-WATER_ABSORB * (1.0 + 4.0 * mk) * path - 0.04 * (1.0 + 6.0 * mk) * path);
         // the water's own light: the sky over it and the sun through it, scattered back up in the biome's water colour
         // (vanilla's vertex tint), as much as the path is long
-        vec3 inLight = (SkyUp.rgb * 3.0 * (lm.y * lm.y) + KeyRad.rgb * max(KeyDir.y, 0.0) * 0.5 * lit * open)
+        vec3 inLight = (SkyUp.rgb * LOOK_AMBIENT * (lm.y * lm.y) + KeyRad.rgb * max(KeyDir.y, 0.0) * 0.5 * lit * open)
                      * mix(vec3(0.05, 0.11, 0.13), vec3(0.09, 0.11, 0.08), mk) * tint;
         vec3 scatter = atlasDisplay(inLight, Look.x, Look.y) * (vec3(1.0) - T);
         vec3 seen = bed * T + scatter;
