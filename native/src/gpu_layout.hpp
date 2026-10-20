@@ -63,6 +63,9 @@ struct alignas(16) FrameGpu {
     // (abi 0.17, ATLAS_FRAME_PRIMARY_NEAR) the camera-relative view-projection (the inverse of invViewProj, columns):
     // the host's own NDC depth of a hit
     float viewProj[16];
+    // the grid's coarse levels 1..6 (voxgrid.hpp): origin x, z (chunks of 16 << k blocks), first chunk word,
+    // D | H << 8 | 1 << 16 when the level is there
+    int32_t vgLevel[6][4];
 };
 
 struct alignas(16) ActorGpu {
@@ -75,7 +78,7 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 48);
 static_assert(sizeof(RegionGpu) == 64);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64 + 96);
 
 struct Float4 {
     float v[4];

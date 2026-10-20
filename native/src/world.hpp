@@ -168,6 +168,10 @@ public:
     // fallback past the grid). setGridWindow (the grid's window moved: x, z origin and size in sections) rebuilds the
     // regions skipped so whose sections the window has left. Levels 1-4 are rebuilt as before.
     std::atomic<bool> gridOwnsLevel0{false};
+    // The grid's coarse levels (voxgrid.hpp) own levels 1..gridCoarse: their real blocks are built on the GPU, the CPU
+    // builds those levels' regions from the tiles alone (the fallback where the grid has no data), and a section no
+    // longer rebuilds them, nor is digested for them (the coarse cubes: only the levels above gridCoarse)
+    std::atomic<int> gridCoarse{0};
     void setGridWindow(int ox, int oz, int d);  // (no lock: the skipped regions are looked at by the next update)
     // sections inside the grid's window it does not hold (its pool full of nearer ones: VoxGrid::takeReleased): their
     // level-0 regions rebuilt here, and their uploads no longer skipped, until the window moves on

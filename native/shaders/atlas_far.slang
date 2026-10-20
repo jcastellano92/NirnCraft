@@ -390,6 +390,80 @@ uint vgCell(int3 c) {
     return uint((c.y * Z + pz) * X + px);
 }
 
+// A level of the grid: level 0 (blocks) or a coarse level k (voxels of 2^k blocks, chunks of 16 of them; voxgrid.hpp),
+// one structure from level 0 out. (ATLAS_ABLATE 1073741824, measurements: the coarse levels off, the regions alone)
+struct VgGrid {
+    int k;
+    int3 origin;  // world block of the window's first voxel corner
+    int ox, oz;   // the window's origin, chunks (their cells in memory at (c + origin) mod D)
+    int X, Y, Z;  // chunks
+    uint base;    // its first chunk word
+};
+bool vgLevelOn(int k) {
+    if (k == 0) return vgOn();
+    if (k > 6 || !vgOn()) return false;
+    return ((frame.vgLevel[clamp(k, 1, 6) - 1].w >> 16) & 1) != 0 && (asuint(frame.jitter.w) & 1073741824u) == 0u;
+}
+VgGrid vgGrid(int k) {
+    VgGrid g;
+    g.k = k;
+    if (k == 0) {
+        g.origin = frame.vgOrigin.xyz * 16;
+        g.ox = frame.vgOrigin.x;
+        g.oz = frame.vgOrigin.z;
+        g.X = int(frame.vgDims.x);
+        g.Y = int(frame.vgDims.y);
+        g.Z = int(frame.vgDims.z);
+        g.base = 0u;
+    } else {
+        int4 L = frame.vgLevel[k - 1];
+        int cs = 16 << k;
+        g.origin = int3(L.x * cs, -64, L.y * cs);
+        g.ox = L.x;
+        g.oz = L.y;
+        g.X = L.w & 255;
+        g.Y = (L.w >> 8) & 255;
+        g.Z = g.X;
+        g.base = uint(L.z);
+    }
+    return g;
+}
+uint vgCellG(VgGrid g, int3 c) {
+    int px = (c.x + g.ox) % g.X, pz = (c.z + g.oz) % g.Z;
+    px += px < 0 ? g.X : 0;
+    pz += pz < 0 ? g.Z : 0;
+    return g.base + uint((c.y * g.Z + pz) * g.X + px);
+}
+
+// Where a chord p0 + d u standing at u in a chunk without data (or outside the window: `left`) reaches the next chunk
+// with data: the run of unloaded chunks the regions answer for (chunk by chunk, one load each; at most 64)
+float vgUnloadedEnd(VgGrid g, float3 p0, float3 d, float u, float u1, out bool left) {
+    left = false;
+    float cs = float(16 << g.k);
+    float3 ro = (p0 - float3(g.origin - frame.camInt.xyz)) / cs;
+    float3 dc = d / cs;
+    float3 inv = float3(abs(dc.x) > 1e-14 ? 1.0 / dc.x : 1e30, abs(dc.y) > 1e-14 ? 1.0 / dc.y : 1e30,
+                        abs(dc.z) > 1e-14 ? 1.0 / dc.z : 1e30);
+    int3 st = int3(dc.x > 0.0 ? 1 : -1, dc.y > 0.0 ? 1 : -1, dc.z > 0.0 ? 1 : -1);
+    float t = u;
+    int3 c = int3(floor(ro + dc * (u + 1e-3)));
+    for (int it = 0; it < 64; it++) {
+        if (t >= u1) return u1;
+        if (c.x < 0 || c.y < 0 || c.z < 0 || c.x >= g.X || c.y >= g.Y || c.z >= g.Z) {
+            left = true;  // (from here the window has nothing: the regions take the rest)
+            return u1;
+        }
+        if ((vgChunks[vgCellG(g, c)] & 3u) != VG_UNLOADED) return t;
+        float3 tt = (float3(c) + float3(dc.x > 0.0 ? 1.0 : 0.0, dc.y > 0.0 ? 1.0 : 0.0, dc.z > 0.0 ? 1.0 : 0.0) - ro) * inv;
+        tt = float3(abs(dc.x) > 1e-14 ? tt.x : 1e30, abs(dc.y) > 1e-14 ? tt.y : 1e30, abs(dc.z) > 1e-14 ? tt.z : 1e30);
+        float tn = min(tt.x, min(tt.y, tt.z));
+        int a = tt.x <= tn ? 0 : (tt.y <= tn ? 1 : 2);
+        c[a] += st[a];
+        t = max(t, tn);
+    }
+    return min(t, u1);
+}
+
 // A primary ray through a level-0 voxel v (grid-local; wv in world blocks) of shaped material `sh` (shapeOf), entered at
 // t through `axis`: its 4 x 4 x 4 micro-voxels as the groups have them (voxelAt / microFilled: the shape's mask, a cut-out
 // shape's alpha hashed per world micro-voxel), walked to where the ray leaves the voxel. True: it met one at tHit, entering
@@ -473,12 +547,16 @@ void vgTexel(inout TraceResult res, uint mat, float3 lp, float3 d, int ax, float
 // [u0, u1) through chunks with data), else TRACE_UNCOVERED and uStop where it met a chunk without data or left the
 // window (the SVDAG regions answer from there). A step reads the chunk word; inside a chunk with blocks the block word;
 // inside a block with voxels its bitmap: an empty chunk or block is left through the far side of its empty box, an
-// empty voxel through its empty 2^3 octant when it has one, as traceRegion's bricks are.
-int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res, out float uStop) {
+// empty voxel through its empty 2^3 octant when it has one, as traceRegion's bricks are. A coarse level (g.k > 0) the
+// same in its voxels (u still in blocks along dw), its voxels cubes of their material, as the regions' levels are.
+int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, inout TraceResult res, out float uStop) {
     uStop = u0;
-    int3 gBlock = frame.vgOrigin.xyz * 16;
-    float3 ro = p0 - float3(gBlock - frame.camInt.xyz);  // grid-local blocks
-    int X = int(frame.vgDims.x), Y = int(frame.vgDims.y), Z = int(frame.vgDims.z);
+    int3 gBlock = g.origin;
+    float vs = float(1 << g.k);
+    float3 ro = (p0 - float3(gBlock - frame.camInt.xyz)) / vs;  // grid-local voxels
+    float3 d = dw / vs;
+    int3 gVox = int3(gBlock.x >> g.k, gBlock.y >> g.k, gBlock.z >> g.k);  // (world voxel of the first one)
+    int X = g.X, Y = g.Y, Z = g.Z;
     int3 nb = int3(X, Y, Z) * 16;
     float3 inv = float3(abs(d.x) > 1e-12 ? 1.0 / d.x : 1e30, abs(d.y) > 1e-12 ? 1.0 / d.y : 1e30,
                         abs(d.z) > 1e-12 ? 1.0 / d.z : 1e30);
@@ -501,7 +579,7 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
             return TRACE_UNCOVERED;
         }
         int3 c = v >> 4;
-        uint cw = vgChunks[vgCell(c)];
+        uint cw = vgChunks[vgCellG(g, c)];
         uint st = cw & 3u;
         if (st == VG_UNLOADED) {
             uStop = t;
@@ -533,6 +611,18 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
                 if (((bits >> bt) & 1) != 0) {
                     uint i = uint(l.x + 16 * (l.z + 16 * l.y));
                     uint mat = (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
+                    if (g.k > 0) {
+                        // a coarse level's voxel: a cube of its material (the regions' levels' rule)
+                        if (voxelStops(mat, v, v + gVox, g.k, ro, d, inv, stepPos, t)) {
+                            res.t = t;
+                            res.mat = mat;
+                            res.axis = entryAxis(v, ro, d, inv, stepPos);
+                            res.lod = g.k;
+                            return TRACE_HIT;
+                        }
+                        lo = v;
+                        hi = v + 1;
+                    } else {
                     // a primary ray meets a shaped block (a slab, a stair, a fence, a plant, cut-out leaves) by its
                     // micro-voxels, textured by its face tiles, as the groups draw it (ATLAS_ABLATE 268435456: cubes)
                     uint sh = gSecondary || (asuint(frame.jitter.w) & 268435456u) != 0u ? 0u : shapeOf(mat);
@@ -563,6 +653,7 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
                     }
                     lo = v;
                     hi = v + 1;
+                    }
                 } else {
                     uint sb = uint((q.x & 2) + 4 * (q.z & 2) + 16 * (q.y & 2));
                     uint64_t sub = (uint64_t(0x33) << sb) | (uint64_t(0x33) << (sb + 16));
@@ -591,24 +682,45 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
 // window: that LOD has nothing further along this ray at all).
 int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out float uncExit) {
     uncExit = 1e30;
-    // level 0: the GPU-built grid first, the regions only past where it has no data
-    float uGrid = 0.0;
-    // (the content-shaped groups keep primary rays where a frame asks for them, the grid having no shapes yet, unless
-    // the grid owns level 0: vgDims.w, ATLAS_VOXGRID_LEVEL0, where the SVDAG level 0 no longer follows the sections)
-    if (lod == 0 && vgOn() && (!gGroups || frame.vgDims.w != 0u)) {
-        gLeafGap = 0.3;
-        int g = traceVoxGrid(p0, d, 0.0, len, res, uGrid);
-        if (g != TRACE_UNCOVERED) return g;
-        if (uGrid >= len) return TRACE_MISS;
-        p0 += d * uGrid;
-        len -= uGrid;
+    // the GPU-built grid's level first (real blocks), the regions (the tiles; level 0 the sections past the grid) only
+    // over the runs of chunks where it has no data: the grid again past each
+    // (the content-shaped groups keep level-0 primary rays where a frame asks for them unless the grid owns level 0:
+    // vgDims.w, ATLAS_VOXGRID_LEVEL0, where the SVDAG level 0 no longer follows the sections)
+    bool grid = vgLevelOn(lod) && (lod > 0 || !gGroups || frame.vgDims.w != 0u);
+    float u = 0.0;
+    if (grid) {
+        VgGrid g = vgGrid(lod);
+        for (int run = 0; run < 16; run++) {
+            gLeafGap = lod <= 1 ? 0.3 : 0.0;
+            float uStop;
+            int r = traceVoxGrid(g, p0, d, u, len, res, uStop);
+            if (r != TRACE_UNCOVERED) return r;
+            if (uStop >= len) return TRACE_MISS;
+            bool left;
+            float uEnd = vgUnloadedEnd(g, p0, d, uStop, len, left);
+            float ue;
+            gSecT += uStop;  // (the secondary ray's distance where the regions' chord starts)
+            int q = traceLodRegions(lod, p0 + d * uStop, d, uEnd - uStop, res, ue);
+            gSecT -= uStop;
+            if (q == TRACE_HIT) {
+                res.t += uStop;
+                return TRACE_HIT;
+            }
+            if (q == TRACE_UNCOVERED) {
+                uncExit = ue < 1e29 ? ue + uStop : 1e30;
+                return TRACE_UNCOVERED;
+            }
+            if (left || uEnd >= len) return TRACE_MISS;
+            u = uEnd + 1e-3;
+        }
     }
-    gSecT += uGrid;  // (the secondary ray's distance where the chord starts)
-    int r0 = traceLodRegions(lod, p0, d, len, res, uncExit);
-    gSecT -= uGrid;
-    if (uGrid > 0.0) {
-        if (r0 == TRACE_HIT) res.t += uGrid;
-        if (uncExit < 1e29) uncExit += uGrid;
+    // (no grid at this level, or a chord that crossed many runs: the regions for the rest)
+    gSecT += u;
+    int r0 = traceLodRegions(lod, p0 + d * u, d, len - u, res, uncExit);
+    gSecT -= u;
+    if (u > 0.0) {
+        if (r0 == TRACE_HIT) res.t += u;
+        if (uncExit < 1e29) uncExit += u;
     }
     return r0;
 }
@@ -698,13 +810,15 @@ int traceLodRegions(int lod, float3 p0, float3 d, float len, inout TraceResult r
 
 // The level-0 grid's id at camera-relative p: -1 where it has no data (outside its window, a chunk without data), else
 // the voxel's material (0: air)
-int vgVoxel(float3 p) {
-    if (!vgOn()) return -1;
-    int3 v = int3(floor(p)) + frame.camInt.xyz - frame.vgOrigin.xyz * 16;
-    int X = int(frame.vgDims.x), Y = int(frame.vgDims.y), Z = int(frame.vgDims.z);
+int vgVoxel(float3 p) { return vgVoxelL(0, p); }
+int vgVoxelL(int k, float3 p) {
+    if (!vgLevelOn(k)) return -1;
+    VgGrid g = vgGrid(k);
+    int3 v = (int3(floor(p)) + frame.camInt.xyz - g.origin) >> k;
+    int X = g.X, Y = g.Y, Z = g.Z;
     if (v.x < 0 || v.y < 0 || v.z < 0 || v.x >= X * 16 || v.y >= Y * 16 || v.z >= Z * 16) return -1;
     int3 c = v >> 4;
-    uint cw = vgChunks[vgCell(c)];
+    uint cw = vgChunks[vgCellG(g, c)];
     if ((cw & 3u) == VG_UNLOADED) return -1;
     if ((cw & 3u) == VG_EMPTY) return 0;
     int3 l = v & 15;
@@ -714,8 +828,8 @@ int vgVoxel(float3 p) {
 
 // Solid voxel at camera-relative point p in a given LOD (false where that LOD has no data).
 bool occupiedAt(int lod, float3 p) {
-    if (lod == 0) {
-        int g = vgVoxel(p);
+    {
+        int g = vgVoxelL(lod, p);
         if (g >= 0) return g != 0;
     }
     LodGpu L = frame.lods[lod];
@@ -745,8 +859,8 @@ bool occupiedAt(int lod, float3 p) {
 
 // (measurements) the material of the voxel path's solid voxel at camera-relative p in a LOD, 0xFFFFFFFF where empty
 uint materialAt(int lod, float3 p) {
-    if (lod == 0) {
-        int g = vgVoxel(p);
+    {
+        int g = vgVoxelL(lod, p);
         if (g >= 0) return g != 0 ? uint(g) : 0xFFFFFFFFu;
     }
     LodGpu L = frame.lods[lod];

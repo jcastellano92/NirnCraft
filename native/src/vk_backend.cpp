@@ -44,6 +44,9 @@
 #include "atlas_vg_satz_spv.h"
 #include "atlas_vg_saty_spv.h"
 #include "atlas_vg_grow_spv.h"
+#include "atlas_vg_fill_spv.h"
+#include "atlas_vg_ingest_spv.h"
+#include "atlas_vg_down_spv.h"
 #include "backend.hpp"
 #include "gl_api.hpp"
 #include "gl_near.hpp"
@@ -193,8 +196,9 @@ constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPT
                    B_PREV_CLOUD_DEPTH = 23, B_SUNMAP = 24, B_GROUPS = 25, B_NEAR_INFO = 26, B_NEAR_LIGHT = 27,
                    B_PREV_NEAR_LIGHT = 28, B_VG_CHUNKS = 29, B_VG_BLOCKS = 30, B_VG_BITS = 31, B_VG_POOL = 32,
                    B_TEX = 33;  // (abi 0.16) the near field's textures (voxgrid.hpp packTextures)
-// the level-0 grid's build kernels (atlas_voxgrid.slang): chunks, blocks, bits, pool, jobs, summed-volume table
-constexpr uint32_t VG_BINDINGS = 6;
+// the grid's build kernels (atlas_voxgrid.slang): chunks, blocks, bits, pool, jobs, summed-volume table, the batch's
+// sections' raw ids (the coarse levels' ingest reads them where they were staged)
+constexpr uint32_t VG_BINDINGS = 7;
 // the scene's buffers (two copies, staged off the render thread)
 constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP, B_GROUPS};
 bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP || b == B_GROUPS; }
@@ -326,6 +330,15 @@ struct Slot {
     int vgOx = 0, vgOz = 0;  // the batch's window origin (sections)
     bool vgClear = false, vgStates = false, vgTimed = false;
     uint32_t vgSections = 0;
+    // the coarse levels' jobs in vgJobs after the chunk jobs (uint4 offsets and counts), the class table, the levels
+    uint32_t vgClearsAt = 0, vgClears = 0, vgFillsAt = 0, vgFills = 0, vgIngestAt = 0, vgIngests = 0;
+    uint32_t vgDownAt[VG_LEVELS] = {}, vgDowns[VG_LEVELS] = {};
+    uint32_t vgClassAt = 0, vgClassN = 0;
+    struct VgLevelRec {
+        bool clear = false, grow = false;
+        uint32_t D = 0, H = 0, base = 0;
+        int ox = 0, oz = 0;
+    } vgLv[VG_LEVELS];
 };
 
 class VulkanBackend final : public Backend {
@@ -1762,9 +1775,11 @@ private:
         if (!createPipe(atlas_vg_section_spv, atlas_vg_section_spv_size, types, 32, vgPipes_[0], vgLayout_, vgSetLayout_,
                         vgShaders_[0], err))
             return false;
-        const uint32_t* code[VG_KERNELS] = {atlas_vg_section_spv, atlas_vg_satx_spv, atlas_vg_satz_spv, atlas_vg_saty_spv, atlas_vg_grow_spv};
+        const uint32_t* code[VG_KERNELS] = {atlas_vg_section_spv, atlas_vg_satx_spv, atlas_vg_satz_spv, atlas_vg_saty_spv,
+                                            atlas_vg_grow_spv, atlas_vg_fill_spv, atlas_vg_ingest_spv, atlas_vg_down_spv};
         const size_t bytes[VG_KERNELS] = {atlas_vg_section_spv_size, atlas_vg_satx_spv_size, atlas_vg_satz_spv_size,
-                                          atlas_vg_saty_spv_size, atlas_vg_grow_spv_size};
+                                          atlas_vg_saty_spv_size, atlas_vg_grow_spv_size, atlas_vg_fill_spv_size,
+                                          atlas_vg_ingest_spv_size, atlas_vg_down_spv_size};
         for (int k = 1; k < VG_KERNELS; k++) {
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
             smci.codeSize = bytes[k];
@@ -1796,6 +1811,8 @@ private:
         s.vgJobCount = 0;
         s.vgClear = s.vgStates = s.vgTimed = false;
         s.vgSections = 0;
+        s.vgClears = s.vgFills = s.vgIngests = 0;
+        for (int k = 0; k < VG_LEVELS; k++) s.vgDowns[k] = 0, s.vgLv[k] = {};
         VoxGrid* g = in.voxgrid;
         VgBatch b;
         if (g && g->active()) {
@@ -1805,44 +1822,82 @@ private:
             }();
             b = g->take(budget);
         }
-        bool work = b.clear || !b.jobs.empty();
+        bool work = b.clear || !b.jobs.empty() || b.coarse();
         bool fresh = false;
-        if (!shared_[B_VG_CHUNKS].buf || (work && (vgD_ != uint32_t(g->D) || vgH_ != uint32_t(g->H) || vgCap_ != g->slotCap))) {
+        size_t words = g ? g->chunkWords() : 0;
+        uint32_t cap = g ? g->totalSlots() : 0;
+        if (!shared_[B_VG_CHUNKS].buf || (work && (vgWords_ != words || vgCap_ != cap))) {
             // (frames in flight keep the old ones until they are done: no wait on the render thread)
-            uint32_t D = work ? uint32_t(g->D) : 0, H = work ? uint32_t(g->H) : 0, cap = work ? g->slotCap : 0;
-            VkDeviceSize nC = VkDeviceSize(D) * H * D;
+            if (!work) words = 0, cap = 0;
+            VkDeviceSize satBytes = 16;
+            if (work) {
+                satBytes = VkDeviceSize(g->D + 1) * (g->H + 1) * (g->D + 1) * 4;
+                for (int k = 1; k < g->levels(); k++) {
+                    VoxGrid::LevelInfo li = g->levelInfo(k);
+                    satBytes = std::max(satBytes, VkDeviceSize(li.D + 1) * (li.H + 1) * (li.D + 1) * 4);
+                }
+            }
             for (uint32_t i = B_VG_CHUNKS; i <= B_VG_POOL; i++) retire(shared_[i]);
             retire(vgSat_);
-            if (!ensure(shared_[B_VG_CHUNKS], nC * 4, false, Mem::DeviceOnly, err) ||
+            if (!ensure(shared_[B_VG_CHUNKS], VkDeviceSize(words) * 4, false, Mem::DeviceOnly, err) ||
                 !ensure(shared_[B_VG_BLOCKS], VkDeviceSize(cap) * 64 * 4, false, Mem::DeviceOnly, err) ||
                 !ensure(shared_[B_VG_BITS], VkDeviceSize(cap) * 64 * 8, false, Mem::DeviceOnly, err) ||
                 !ensure(shared_[B_VG_POOL], VkDeviceSize(cap) * VG_SECTION_WORDS * 4, false, Mem::DeviceOnly, err) ||
-                !ensure(vgSat_, VkDeviceSize(D + 1) * (H + 1) * (D + 1) * 4, false, Mem::DeviceOnly, err))
+                !ensure(vgSat_, satBytes, false, Mem::DeviceOnly, err))
                 return false;
-            vgD_ = D;
-            vgH_ = H;
+            vgWords_ = words;
             vgCap_ = cap;
+            vgSatBytes_ = satBytes;
             fresh = work;  // garbage until cleared
         }
         if (!work) return true;
         constexpr size_t SECTION_BYTES = size_t(VG_SECTION_WORDS) * 4;
-        size_t dataBytes = b.secs.size() * SECTION_BYTES, jobBytes = b.jobs.size() * sizeof(VgJob);
+        // the jobs buffer (uint4): the chunk jobs, the coarse levels' clears, fills, ingests (2 each), downsamples (3
+        // each, by level), the class table (16 materials a uint4)
+        uint32_t at = uint32_t(b.jobs.size());
+        s.vgClearsAt = at, s.vgClears = uint32_t(b.clears.size()), at += s.vgClears;
+        s.vgFillsAt = at, s.vgFills = uint32_t(b.fills.size()), at += s.vgFills;
+        s.vgIngestAt = at, s.vgIngests = uint32_t(b.ingests.size()), at += 2 * s.vgIngests;
+        for (int k = 0; k < VG_LEVELS; k++) s.vgDownAt[k] = at, s.vgDowns[k] = uint32_t(b.downs[k].size()), at += 3 * s.vgDowns[k];
+        size_t ncls = b.classes ? b.classes->size() : 0;
+        s.vgClassAt = at, s.vgClassN = uint32_t(ncls), at += uint32_t((ncls + 15) / 16);
+        size_t dataBytes = b.secs.size() * SECTION_BYTES, jobBytes = size_t(at) * 16;
         if (!ensure(s.vgStage, dataBytes, false, Mem::Staging, err) || !ensure(s.vgJobs, jobBytes, false, Mem::HostWrite, err))
             return false;
         for (size_t k = 0; k < b.secs.size(); k++)
             std::memcpy(static_cast<char*>(s.vgStage.map) + k * SECTION_BYTES, b.secs[k]->data(), SECTION_BYTES);
-        if (jobBytes) std::memcpy(s.vgJobs.map, b.jobs.data(), jobBytes);
+        char* jm = static_cast<char*>(s.vgJobs.map);
+        if (!b.jobs.empty()) std::memcpy(jm, b.jobs.data(), b.jobs.size() * 16);
+        if (s.vgClears) std::memcpy(jm + size_t(s.vgClearsAt) * 16, b.clears.data(), size_t(s.vgClears) * 16);
+        if (s.vgFills) std::memcpy(jm + size_t(s.vgFillsAt) * 16, b.fills.data(), size_t(s.vgFills) * 16);
+        if (s.vgIngests) std::memcpy(jm + size_t(s.vgIngestAt) * 16, b.ingests.data(), size_t(s.vgIngests) * 32);
+        for (int k = 0; k < VG_LEVELS; k++)
+            if (s.vgDowns[k]) std::memcpy(jm + size_t(s.vgDownAt[k]) * 16, b.downs[k].data(), size_t(s.vgDowns[k]) * 48);
+        if (ncls) {
+            std::memset(jm + size_t(s.vgClassAt) * 16, 0, (ncls + 15) / 16 * 16);
+            std::memcpy(jm + size_t(s.vgClassAt) * 16, b.classes->data(), ncls);
+        }
         constexpr VkDeviceSize SEC = VkDeviceSize(VG_SECTION_WORDS) * 4;
-        for (const VgJob& j : b.jobs)
-            if (j.slot != ~0u && j.slot != VG_COLUMN) s.vgCopies.push_back({VkDeviceSize(j.data) * SEC, VkDeviceSize(j.slot) * SEC, SEC});
+        for (size_t k = 0; k < b.level0Jobs; k++) {
+            const VgJob& j = b.jobs[k];
+            if (j.slot != ~0u && j.slot != VG_COLUMN && j.data != VG_NO_COPY)
+                s.vgCopies.push_back({VkDeviceSize(j.data) * SEC, VkDeviceSize(j.slot) * SEC, SEC});
+        }
         s.vgJobCount = uint32_t(b.jobs.size());
         s.vgOx = b.ox;
         s.vgOz = b.oz;
         s.vgClear = b.clear || fresh;
         s.vgStates = b.chunkStates || fresh;
         s.vgSections = uint32_t(b.sections());
+        for (int k = 0; k < VG_LEVELS; k++) s.vgLv[k] = {};
+        s.vgLv[0] = {s.vgClear, s.vgStates, uint32_t(g->D), uint32_t(g->H), 0u, b.ox, b.oz};
+        for (int k = 1; k < g->levels(); k++) {
+            VoxGrid::LevelInfo li = g->levelInfo(k);
+            s.vgLv[k] = {b.levels[k].clear || fresh, b.levels[k].grow || fresh, uint32_t(li.D), uint32_t(li.H), li.chunkBase,
+                         b.levels[k].ox, b.levels[k].oz};
+        }
         const Buf* bound[VG_BINDINGS] = {&shared_[B_VG_CHUNKS], &shared_[B_VG_BLOCKS], &shared_[B_VG_BITS], &shared_[B_VG_POOL],
-                                         &s.vgJobs, &vgSat_};
+                                         &s.vgJobs, &vgSat_, &s.vgStage};
         VkDescriptorBufferInfo bi[VG_BINDINGS];
         VkWriteDescriptorSet wr[VG_BINDINGS];
         for (uint32_t i = 0; i < VG_BINDINGS; i++) {
@@ -1859,7 +1914,9 @@ private:
     }
 
     void recordVoxGrid(Slot& s) {
-        if (!s.vgJobCount && !s.vgClear) return;
+        bool any = s.vgJobCount || s.vgClears || s.vgFills || s.vgIngests;
+        for (int k = 0; k < VG_LEVELS; k++) any |= s.vgLv[k].clear || s.vgLv[k].grow || s.vgDowns[k];
+        if (!any) return;
         VkCommandBuffer cmd = s.cmd;
         if (s.query) {
             vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, s.query, 2);
@@ -1870,28 +1927,52 @@ private:
         mb.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
         mb.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
-        if (s.vgClear) vkCmdFillBuffer(cmd, shared_[B_VG_CHUNKS].buf, 0, VK_WHOLE_SIZE, VG_UNLOADED);
+        for (int k = 0; k < VG_LEVELS; k++) {
+            const Slot::VgLevelRec& L = s.vgLv[k];
+            if (!L.clear || !L.D) continue;
+            vkCmdFillBuffer(cmd, shared_[B_VG_CHUNKS].buf, VkDeviceSize(L.base) * 4, VkDeviceSize(L.D) * L.H * L.D * 4, VG_UNLOADED);
+        }
         if (!s.vgCopies.empty())
             vkCmdCopyBuffer(cmd, s.vgStage.buf, shared_[B_VG_POOL].buf, uint32_t(s.vgCopies.size()), s.vgCopies.data());
-        if (s.vgStates) vkCmdFillBuffer(cmd, vgSat_.buf, 0, VK_WHOLE_SIZE, 0u);
         mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
         vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vgLayout_, 0, 1, &s.vgSet, 0, nullptr);
-        const uint32_t D = vgD_, H = vgH_, row = 65535;
+        const uint32_t row = 65535;
         auto pmod = [](int a, uint32_t d) { return uint32_t(((a % int(d)) + int(d)) % int(d)); };
-        uint32_t pcv[8] = {D, H, D, s.vgJobCount, row, pmod(s.vgOx, D), pmod(s.vgOz, D), 0};
-        vkCmdPushConstants(cmd, vgLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
-        if (s.vgJobCount) {
-            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vgPipes_[0]);
-            vkCmdDispatch(cmd, std::min(s.vgJobCount, row), (s.vgJobCount + row - 1) / row, 1);
-        }
-        if (s.vgStates) {
+        // one group a job, in passes: the coarse levels' clears, fills, ingests, downsamples by level; then every chunk job
+        auto pass = [&](int kernel, uint32_t count, uint32_t first) {
+            if (!count) return;
+            uint32_t pcv[8] = {s.vgLv[0].D, s.vgLv[0].H, s.vgLv[0].D, count, row, first, s.vgClassAt, s.vgClassN};
+            vkCmdPushConstants(cmd, vgLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
+            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vgPipes_[kernel]);
+            vkCmdDispatch(cmd, std::min(count, row), (count + row - 1) / row, 1);
+            computeBarrier(cmd);
+        };
+        pass(5, s.vgClears, s.vgClearsAt);
+        pass(5, s.vgFills, s.vgFillsAt);
+        pass(6, s.vgIngests, s.vgIngestAt);
+        for (int k = 0; k < VG_LEVELS; k++) pass(7, s.vgDowns[k], s.vgDownAt[k]);
+        pass(0, s.vgJobCount, 0);
+        // the chunk-level boxes of each level whose chunk states may have changed
+        for (int k = 0; k < VG_LEVELS; k++) {
+            const Slot::VgLevelRec& L = s.vgLv[k];
+            if (!L.grow || !L.D) continue;
+            mb.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            mb.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+            vkCmdFillBuffer(cmd, vgSat_.buf, 0, VK_WHOLE_SIZE, 0u);
+            mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+            uint32_t D = L.D, H = L.H;
+            uint32_t pcv[8] = {D, H, D, 0, row, pmod(L.ox, D), pmod(L.oz, D), L.base};
+            vkCmdPushConstants(cmd, vgLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
             const uint32_t lines[4] = {H * D, H * D, D * D, D * H * D};
-            for (int k = 1; k < VG_KERNELS; k++) {
+            for (int q = 1; q <= 4; q++) {
+                vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vgPipes_[q]);
+                vkCmdDispatch(cmd, (lines[q - 1] + 63) / 64, 1, 1);
                 computeBarrier(cmd);
-                vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vgPipes_[k]);
-                vkCmdDispatch(cmd, (lines[k - 1] + 63) / 64, 1, 1);
             }
         }
         if (s.query) vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, s.query, 3);
@@ -2525,13 +2606,16 @@ private:
     VkShaderModule nearLightShader_ = VK_NULL_HANDLE, nearUpShader_ = VK_NULL_HANDLE;
     VkPipeline nearTempPipe_ = VK_NULL_HANDLE;
     // the level-0 grid (voxgrid.hpp): its build kernels, their layout, the summed-volume table, the last build's GPU time
-    static constexpr int VG_KERNELS = 5;  // vgSectionMain, vgSatX, vgSatZ, vgSatY, vgGrowMain
+    // vgSectionMain, vgSatX, vgSatZ, vgSatY, vgGrowMain, vgFillMain, vgIngestMain, vgDownMain
+    static constexpr int VG_KERNELS = 8;
     VkPipeline vgPipes_[VG_KERNELS] = {};
     VkShaderModule vgShaders_[VG_KERNELS] = {};
     VkPipelineLayout vgLayout_ = VK_NULL_HANDLE;
     VkDescriptorSetLayout vgSetLayout_ = VK_NULL_HANDLE;
     Buf vgSat_;
-    uint32_t vgD_ = 0, vgH_ = 0, vgCap_ = 0;
+    size_t vgWords_ = 0;      // chunk words of every level the buffers hold
+    uint32_t vgCap_ = 0;      // slots of every level
+    VkDeviceSize vgSatBytes_ = 0;
     uint64_t texRevision_ = ~0ull;
     double vgStageMs_ = 0, vgStageMaxMs_ = 0;
     double vgLastMs_ = 0, vgMsTotal_ = 0;

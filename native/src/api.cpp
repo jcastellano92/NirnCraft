@@ -197,6 +197,7 @@ struct AtlasContext {
 static void syncClasses(AtlasContext* ctx) {
     std::vector<uint8_t> cls(ctx->palette.size(), 0);
     for (size_t i = 0; i < cls.size(); i++) cls[i] = uint8_t(ctx->palette[i].emisClass[1]);
+    ctx->voxgrid.setClasses(cls);  // (the grid's coarse levels: the same vote, on the GPU)
     ctx->world.setClasses(std::move(cls));
 }
 
@@ -381,7 +382,7 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             // the level-0 grid: slots in use, sections built, what is waiting, the GPU's last build and all of them
             Backend::VoxGridTimes t = ctx->backend->voxgridTimes();
             const VoxGrid& v = ctx->voxgrid;
-            uint64_t bytes = uint64_t(v.D) * v.H * v.D * 4 + uint64_t(v.slotCap) * (64 * 12 + VG_SECTION_WORDS * 4);
+            uint64_t bytes = uint64_t(v.chunkWords()) * 4 + uint64_t(v.totalSlots()) * (64 * 12 + VG_SECTION_WORDS * 4);
             char b[1024];
             std::snprintf(b, sizeof b,
                           ",\"voxgrid\":{\"window\":[%d,%d,%d],\"slots\":%u,\"slotCap\":%u,\"gpuBytes\":%llu,\"built\":%llu,"
@@ -399,12 +400,27 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             std::snprintf(c, sizeof c,
                           "\"origin\":[%d,%d],\"cameraSection\":[%d,%d],\"jumps\":%llu,\"shifts\":%llu,\"refills\":%llu,"
                           "\"freshColumns\":%u,\"pendingSections\":%zu,\"evicted\":%llu,\"overflow\":%llu,"
-                          "\"framesSinceMove\":%llu,\"lastSettleFrames\":%llu,\"settled\":%s}",
+                          "\"framesSinceMove\":%llu,\"lastSettleFrames\":%llu,\"settled\":%s",
                           st.ox, st.oz, st.camSx, st.camSz, (unsigned long long)st.jumps, (unsigned long long)st.shifts,
                           (unsigned long long)st.refills, st.freshColumns, st.pending, (unsigned long long)st.evicted,
                           (unsigned long long)st.overflow, (unsigned long long)(st.frames - st.lastShiftFrame),
                           (unsigned long long)st.lastSettleFrames, st.settledFrame >= st.lastShiftFrame ? "true" : "false");
-            ctx->info.insert(ctx->info.size() - 1, std::string(b) + c);
+            // the coarse levels: window (chunks of 16 << k blocks), slots, sections taken in, waiting, given up
+            std::string coarse = ",\"levels\":[";
+            for (int k = 1; k < v.levels(); k++) {
+                VoxGrid::LevelInfo li = v.levelInfo(k);
+                char q[384];
+                std::snprintf(q, sizeof q,
+                              "%s{\"level\":%d,\"window\":[%d,%d,%d],\"origin\":[%d,%d],\"slots\":%u,\"slotCap\":%u,"
+                              "\"ingested\":%llu,\"pending\":%zu,\"evicted\":%llu,\"overflow\":%llu,\"jumps\":%llu,"
+                              "\"shifts\":%llu}",
+                              k > 1 ? "," : "", k, li.D, li.H, li.D, li.ox, li.oz, li.used, li.cap, (unsigned long long)li.ingested,
+                              li.pending, (unsigned long long)li.evicted, (unsigned long long)li.overflow,
+                              (unsigned long long)li.jumps, (unsigned long long)li.shifts);
+                coarse += q;
+            }
+            coarse += "]}";
+            ctx->info.insert(ctx->info.size() - 1, std::string(b) + c + coarse);
         }
         return ctx->info.c_str();
     } catch (...) {
@@ -683,6 +699,8 @@ ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], do
         std::vector<Key3> rel = ctx->voxgrid.takeReleased();
         if (!rel.empty()) ctx->world.gridReleased(rel);
     }
+    // the grid's coarse levels own their levels' real blocks (before its first frame too: what they will hold)
+    ctx->world.gridCoarse = ctx->voxgrid.enabled ? std::clamp(ctx->voxgrid.coarseLevels, 0, std::max(0, ctx->world.lodCount - 1)) : 0;
     ctx->world.update(centre, budgetMs, &ms);
     ctx->stats.lastBuildMs = ms;
     // copy a new revision to the GPU here (the game calls update off the render thread), not in the next frame;
@@ -944,7 +962,10 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     {
         // the view's horizontal forward: the world builds what lies behind the camera after what it sees (World::setView)
         float hl = std::sqrt(a[0] * a[0] + a[2] * a[2]);
-        if (hl > 1e-4f) ctx->world.setView(a[0] / hl, a[2] / hl);
+        if (hl > 1e-4f) {
+            ctx->world.setView(a[0] / hl, a[2] / hl);
+            ctx->voxgrid.setView(a[0] / hl, a[2] / hl);
+        }
     }
     float dot = std::fmin(1.0f, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
     g.params[0] = f->nearFieldEnd;
@@ -1056,12 +1077,19 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         }
     }
     if (in.actors.empty()) in.actors.push_back(ActorGpu{});
-    // the level-0 grid: its window follows the camera; the backend builds what changed before this frame's passes
+    // the grid: its windows follow the camera; the backend builds what changed before this frame's passes
+    // (its coarse levels up to the world's coarsest, set before the first frame lays them out)
+    ctx->voxgrid.coarseLevels = std::min(ctx->voxgrid.coarseLevels, std::max(0, ctx->world.lodCount - 1));
+    ctx->voxgrid.stoneMat = ctx->world.stoneMat;
     ctx->voxgrid.frame(g.camInt, ctx->world);
     ctx->voxgrid.origin(g.vgOrigin);
     g.vgDims[0] = uint32_t(ctx->voxgrid.D);
     g.vgDims[1] = uint32_t(ctx->voxgrid.H);
     g.vgDims[2] = uint32_t(ctx->voxgrid.D);
+    for (int k = 1; k < VG_LEVELS; k++) ctx->voxgrid.levelFrame(k, g.vgLevel[k - 1]);
+    // the coarse levels own the real blocks at their levels: the CPU builds those levels' regions from the tiles alone
+    // and no longer rebuilds them (nor digests) per section (World::gridCoarse)
+    ctx->world.gridCoarse = ctx->voxgrid.levels() - 1;  // (atlas_update sets it before the first frame too)
     // the grid owns level 0 (ATLAS_VOXGRID_LEVEL0=0: not): primary rays take it over the groups there too, and the CPU no
     // longer rebuilds the level-0 regions of the sections it holds (World::gridOwnsLevel0)
     static const bool ownLevel0 = [] {

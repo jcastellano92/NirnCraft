@@ -87,6 +87,9 @@ struct FrameGpu {
     int4 vgOrigin;
     uint4 vgDims;
     float4 viewProj[4];  // (abi 0.17, FRAME_PRIMARY_NEAR) camera-relative view-projection (columns): the host's NDC depth
+    // the grid's coarse levels 1..6 (voxgrid.hpp): origin x, z (chunks of 16 << k blocks), first chunk word,
+    // D | H << 8 | 1 << 16 when the level is there
+    int4 vgLevel[6];
 };
 
 // the frame's moon, copied by each entry point (the shared lighting has no frame of its own)
