@@ -35,6 +35,50 @@ layout(std140) uniform NearInfo {
     vec4 WaterTint;   // the biomes' water colour around the camera
 };
 #include <nirncraft:atlas_water.glsl>
+uniform sampler2D ShadowMap;  // the key light's shadow map of the near terrain (AtlasNearPass.drawShadow)
+
+// whether the key light reaches camera-relative world point p, from the shadow map: 1 lit, 0 shadowed, -1 outside it
+float sunVisAt(vec3 p) {
+    vec4 s = ShadowMat * vec4(p, 1.0);
+    vec2 uv = s.xy * 0.5 + 0.5;
+    if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0))) || ShadowMat[3][3] == 0.0) return -1.0;
+    return texture(ShadowMap, uv).r <= s.z + 0.0015 ? 1.0 : 0.0;  // reverse-Z: an occluder nearer the light is larger
+}
+
+// The sun's light scattered towards the eye by the air between it and what it sees, dist blocks along unit camera-
+// relative dir, shadowed by everything the shadow map holds: beams through leaves, through windows and doors, down a
+// cave's skylight; a lit haze where nothing is in the way. Linear radiance (before the display). A march through the
+// shadow map's range (80 blocks), a per-pixel and per-frame offset the TAA averages.
+vec3 airBeams(vec3 dir, float dist) {
+    vec3 L = normalize(KeyDir.xyz);
+    if (KeyDir.w < 0.5 || L.y < 0.02 || ShadowMat[3][3] == 0.0) return vec3(0.0);
+    float len = min(dist, 72.0);
+    const int N = 24;
+    float dt = len / float(N);
+    // interleaved gradient noise, shifted each frame
+    float f = fract(SunDir.w * 7.31);
+    float jit = fract(52.9829189 * fract(dot(gl_FragCoord.xy + f * 113.0, vec2(0.06711056, 0.00583715))));
+    float lit = 0.0, inside = 0.0;
+    for (int k = 0; k < N; k++) {
+        float t = (float(k) + jit) * dt;
+        float v = sunVisAt(dir * t);
+        if (v < 0.0) continue;  // past the shadow map: atlas's aerial haze has that air
+        lit += v;
+        inside += 1.0;
+    }
+    if (inside < 0.5) return vec3(0.0);
+    // the beams are the lit air among shadows: where nothing along the ray is shadowed the air's light is the haze atlas
+    // already draws, so only a little of the uniform part stays (open views stay clear); a ray through a canopy, a
+    // window or a cave's mouth keeps all of it, lit stretches between dark ones
+    float shadowed = 1.0 - lit / inside;
+    float keep = clamp(0.15 + shadowed * 3.0, 0.15, 1.0);
+    float sigma = 0.004;  // the air's scattering a block (dust and moisture; the weather sets it later)
+    float c = dot(dir, L);
+    float g = 0.55;
+    float hg = (1.0 - g * g) / pow(1.0 + g * g - 2.0 * g * c, 1.5);
+    float phase = (0.7 * hg + 0.3) / 12.566;  // forward glow towards the sun, some light to the sides
+    return KeyRad.rgb * (lit * dt * sigma * phase * keep);
+}
 layout(location = 0) in vec2 texCoord;
 layout(location = 0) out vec4 fragColor;
 
@@ -150,6 +194,9 @@ void main() {
                 // shadows, vanilla's sky light as the sky's visibility), so the look does not switch to vanilla's
                 radiance = untracedRadiance(albedo, n, levels);
             }
+            // the light in the air in front of it (not under water: the water's own light there)
+            vec3 dirB = normalize((InvViewRot * vec4(viewRay(texCoord, nearDepth), 0.0)).xyz);
+            if (!atlasEyeInWater()) radiance += airBeams(dirB, dist);
             rgb = atlasDisplay(radiance, Look.x, Look.y);
         } else {
             // stage A: vanilla's own light curve (the lightmap: day, night, flicker, night vision, effects) and its
@@ -173,7 +220,14 @@ void main() {
             gl_FragDepth = 0.0;
             return;
         }
-        discard;  // the sky: what the sky pass drew stays
+        // the sky: what the sky pass drew stays, the light in the air in front of it added (beams against the sky, up
+        // through a canopy or a cave's skylight)
+        vec3 dirS = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
+        vec3 b = Look.z > 0.5 ? atlasDisplay(airBeams(dirS, 80.0), Look.x, Look.y) : vec3(0.0);
+        if (dot(b, vec3(1.0)) < 1e-4) discard;
+        fragColor = vec4(b, 0.0);  // (premultiplied: added over the sky)
+        gl_FragDepth = 0.0;
+        return;
     }
     vec3 straight = max(c.rgb / max(c.a, 1e-4), vec3(0.0));
     // own: the same display as the near pixels; stage A: atlas's harness tonemapper (c / (1 + c), gamma 2.2)
@@ -183,6 +237,7 @@ void main() {
     float f = clamp(linear_fog_value(min(d, edge), FogEnvironmentalStart, FogEnvironmentalEnd), 0.0, 1.0) * FogColor.a;
     vec3 dirF = normalize((InvViewRot * vec4(viewRay(texCoord, 0.5), 0.0)).xyz);
     vec3 fogged = atlasEyeInWater() ? atlasUnderwater(ldr, d, dirF) + atlasWaterShafts(dirF, d) : mix(ldr, FogColor.rgb, f);
+    if (!atlasEyeInWater() && own) fogged += atlasDisplay(airBeams(dirF, d), Look.x, Look.y);
     // (under water nothing behind is seen: partial coverage let the sky pass's sky through, a line and the world far off)
     fragColor = atlasEyeInWater() ? vec4(fogged, 1.0) : vec4(fogged * c.a, c.a);
     // its depth: the point at that distance along this pixel's ray (beyond the projection's far plane: 0)

@@ -114,6 +114,7 @@ public final class AtlasNearPass {
             .withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
             .withFragmentShader(id("core/near_resolve"))
             .withBindGroupLayout(RESOLVE_SAMPLERS)
+            .withBindGroupLayout(SHADOW_MAP)  // the sun's shadow map: the light in the air (near_resolve's beams)
             .withBindGroupLayout(BindGroupLayouts.FOG)
             .withBindGroupLayout(BindGroupLayouts.PROJECTION)
             .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
@@ -601,6 +602,7 @@ public final class AtlasNearPass {
             pass.setUniform("Sampler6", light.getColorTextureView(), nearest);
         }
         pass.setUniform("NearInfo", info.currentBuffer());
+        bindShadow(pass);
         pass.draw(3, 1, 0, 0);
         }
     }
