@@ -133,6 +133,8 @@ void cachedAir(const AtlasAir* a, air::Coeffs& c, air::MsLut& lut) {
 }  // namespace
 
 struct AtlasContext {
+    double glInputsMs = 0;  // (atlas_info glRender: building the frame's inputs, eased)
+    double inSnapMs = 0, inSkyMs = 0, inLightsMs = 0, inGridMs = 0, inTexMs = 0;  // (its parts)
     std::unique_ptr<Backend> backend;
     World world;
     VoxGrid voxgrid;  // the level-0 grid's books (voxgrid.hpp): sections in, batches to the backend's GPU build
@@ -375,6 +377,16 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           (unsigned long long)c.levelBytes[2], (unsigned long long)c.levelBytes[3],
                           (unsigned long long)c.levelBytes[4], (unsigned long long)c.levelBytes[5],
                           (unsigned long long)c.levelBytes[6], c.digested, c.evicted, c.digestMs);
+            ctx->info.insert(ctx->info.size() - 1, b);
+        }
+        if (!ctx->info.empty() && ctx->info.back() == '}') {
+            // the game path's wall time on the render thread (eased): building the inputs, waiting, preparing, recording
+            Backend::GlTimes g = ctx->backend->glTimes();
+            char b[256];
+            std::snprintf(b, sizeof b, ",\"glRender\":{\"inputsMs\":%.2f,\"waitMs\":%.2f,\"prepareMs\":%.2f,\"recordMs\":%.2f,"
+                          "\"snapMs\":%.2f,\"skyMs\":%.2f,\"lightsMs\":%.2f,\"gridMs\":%.2f,\"texMs\":%.2f}",
+                          ctx->glInputsMs, g.waitMs, g.prepareMs, g.recordMs, ctx->inSnapMs, ctx->inSkyMs, ctx->inLightsMs,
+                          ctx->inGridMs, ctx->inTexMs);
             ctx->info.insert(ctx->info.size() - 1, b);
         }
         if (ctx->voxgrid.active() && !ctx->info.empty() && ctx->info.back() == '}') {
@@ -776,7 +788,9 @@ ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f,
     AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
     FrameInputs in{};
+    auto tb0 = std::chrono::steady_clock::now();
     AtlasStatus st = buildInputs(ctx, f, in);
+    ctx->glInputsMs += (std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tb0).count() - ctx->glInputsMs) * 0.05;
     if (st != ATLAS_OK) return st;
     in.preExposure = ctx->preExposure;
     GlFrameIO g;
@@ -856,8 +870,14 @@ static void rememberFrame(AtlasContext* ctx, const AtlasFrame* f) {
     ctx->frameIndex++;
 }
 
+static void easeMs(double& v, std::chrono::steady_clock::time_point a) {
+    v += (std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - a).count() - v) * 0.05;
+}
+
 static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInputs& in) {
+    auto tq = std::chrono::steady_clock::now();
     in.sceneHold = ctx->world.packed();
+    easeMs(ctx->inSnapMs, tq);
     in.scene = in.sceneHold.get();
     if (in.scene->lodCount == 0) return ctx->fail(ATLAS_ERR_STATE, "call atlas_update before atlas_render");
     // the first frame that traces the groups starts their building (the next atlas_update, nearest first)
@@ -906,6 +926,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         for (int i = 0; i < 3 && same; i++)
             same = std::fabs(s.sun[i] - g.sunDir[i]) < 2e-4f && std::fabs(s.moon[i] - md[i]) < 2e-3f &&
                    std::fabs(s.moonE[i] - me[i]) < 1e-4f;
+        auto tsk = std::chrono::steady_clock::now();
         if (!same) {
             air::skyLight(c, ctx->airLut, alt, l, s.up, s.ground);
             s.version = ctx->airVersion;
@@ -916,6 +937,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
                 s.moonE[i] = me[i];
             }
         }
+        easeMs(ctx->inSkyMs, tsk);
         put(g.airSkyUp, s.up + air::V3{ctx->glowUp[0], ctx->glowUp[1], ctx->glowUp[2]}, 0.0f);
         put(g.airGround, s.ground + air::V3{ctx->glowGround[0], ctx->glowGround[1], ctx->glowGround[2]}, 0.0f);
     }
@@ -1052,12 +1074,16 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
             const air::Coeffs& c = ctx->airC;
             float h = air::altitudeOf(c, float(f->cameraPos[1]));
             lv.hazeDensity = (c.rayleigh.y * std::exp(-h / air::H_RAYLEIGH) + c.mieExt.y * std::exp(-h * c.invHMie)) * c.airScale;
+            auto tl = std::chrono::steady_clock::now();
             g.weatherParams[1] = float(ctx->lights.frame(lv, in.actors));
+            easeMs(ctx->inLightsMs, tl);
         }
     }
     if (in.actors.empty()) in.actors.push_back(ActorGpu{});
     // the level-0 grid: its window follows the camera; the backend builds what changed before this frame's passes
+    auto tgr = std::chrono::steady_clock::now();
     ctx->voxgrid.frame(g.camInt, ctx->world);
+    easeMs(ctx->inGridMs, tgr);
     ctx->voxgrid.origin(g.vgOrigin);
     g.vgDims[0] = uint32_t(ctx->voxgrid.D);
     g.vgDims[1] = uint32_t(ctx->voxgrid.H);
@@ -1073,7 +1099,9 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     in.voxgrid = &ctx->voxgrid;
     {
         // the near field's textures (atlas_set_material_textures), packed for the kernels once each revision
+        auto ttx = std::chrono::steady_clock::now();
         std::shared_ptr<const TextureSet> ts = ctx->world.textures();
+        easeMs(ctx->inTexMs, ttx);
         if (ts->revision != ctx->texturesRevision) {
             packTextures(*ts, ctx->texturesPacked);
             ctx->texturesRevision = ts->revision;

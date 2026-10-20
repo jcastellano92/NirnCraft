@@ -112,6 +112,12 @@ public:
         double stageCpuMs = 0, stageCpuMaxMs = 0;  // the render thread's share (taking a batch, staging it): last, worst
     };
     virtual VoxGridTimes voxgridTimes() const { return {}; }
+    // The game path's wall time on the render thread, eased (ms): waiting for the slot's previous frame, preparing
+    // (uploads, staging), recording and submitting
+    struct GlTimes {
+        double waitMs = 0, prepareMs = 0, recordMs = 0;
+    };
+    virtual GlTimes glTimes() const { return {}; }
 
     // Game path (render thread, the game's GL context current): zero-copy through shared memory and semaphores
     // when the driver pair supports it, else frames copied through host memory. Default: unsupported.

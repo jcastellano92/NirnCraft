@@ -132,10 +132,22 @@ vec3 atlasInside(vec3 rgb, float dist) {
         // where the way out is short (the face just in front), black deeper in
         return InsideTint.rgb * 0.06 * exp(-2.5 * dist);
     }
-    float T = exp(-InsideMin.w * dist);
+    // leaves, glass: the volume is the block's own (its way out, atlasInsideChord: the gaps between leaves, a pane's
+    // thickness), never the whole way to what lies behind it (that turned the world grey through a leaf block)
+    float T = exp(-InsideMin.w * min(dist, InsideTint.w > 0.0 ? InsideTint.w : dist));
     // the little light in there: the sky's and the key light's, a share for the kind (rock: almost none)
     float share = InsideMax.w < 0.5 ? 0.004 : InsideMax.w < 1.5 ? 0.25 : 0.6;
     vec3 own = InsideTint.rgb * (SkyUp.rgb + KeyRad.rgb * max(KeyDir.y, 0.0) * 0.3) * share;
+    return rgb * T + atlasDisplay(own, Look.x, Look.y) * (1.0 - T);
+}
+
+// through the eye's leaf or glass block along a chord (atlasInsideChord): a leaf in the way is a leaf (its colour in the
+// light that comes through the crown), a gap shows what lies behind; glass a faint tint over it
+vec3 atlasInsideLeaf(vec3 rgb, float chord) {
+    if (InsideMin.w <= 0.0 || InsideMax.w < 0.5) return rgb;
+    float T = exp(-InsideMin.w * chord);
+    float share = InsideMax.w < 1.5 ? 0.35 : 0.6;
+    vec3 own = InsideTint.rgb * (SkyUp.rgb * 0.6 + KeyRad.rgb * max(KeyDir.y, 0.0) * 0.25) * share;
     return rgb * T + atlasDisplay(own, Look.x, Look.y) * (1.0 - T);
 }
 
@@ -153,12 +165,18 @@ float atlasInsideChord(vec3 dir) {
     return chord;
 }
 
-vec3 atlasMedium(vec3 rgb, float dist) {
-    rgb = atlasInside(rgb, dist);
+vec3 atlasMediumOnly(vec3 rgb, float dist) {
     if (Medium.x <= 0.0) return rgb;
     float T = exp(-Medium.x * dist);
     vec3 own = Medium.y < 0.0 ? (SkyUp.rgb + KeyRad.rgb * max(KeyDir.y, 0.0) * 0.4) * 0.9 : Medium.yzw;
     return rgb * T + atlasDisplay(own, Look.x, Look.y) * (1.0 - T);
+}
+
+// the eye's medium with the block it may be clipping into (rock: atlasInside; leaves and glass: about their chord)
+vec3 atlasMedium(vec3 rgb, float dist) {
+    if (InsideMax.w < 0.5) rgb = atlasInside(rgb, dist);
+    else if (InsideMin.w > 0.0) rgb = atlasInsideLeaf(rgb, min(dist, 0.6));
+    return atlasMediumOnly(rgb, dist);
 }
 
 #endif

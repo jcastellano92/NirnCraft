@@ -452,7 +452,12 @@ public final class AtlasClient {
             if (firstFrame && guard != null) guard.firstFrames();  // a driver crash from here on is the guard's case
             // the images pre-exposed with this frame's eye (the resolve divides it out at once, in full precision)
             preExposure = ctx.setPreExposure(AtlasLook.frame(mc)[0]) ? AtlasLook.frame(mc)[0] : 1f;
+            long g0 = System.nanoTime();
             ctx.glRender(frame, io);
+            long g1 = System.nanoTime();
+            glRenderMs += ((g1 - g0) * 1e-6 - glRenderMs) * 0.05;  // (eased: atlas-info's wall time in the call)
+            if (lastFrameNs != 0) frameWallMs += ((g1 - lastFrameNs) * 1e-6 - frameWallMs) * 0.05;
+            lastFrameNs = g1;
             farThisFrame = true;
             nearLitThisFrame = nearLit;
             if (pass != null && !pack && !nearOwned && !AtlasFallback.fogHidesFarField(cam.fogData)) {
@@ -885,12 +890,17 @@ public final class AtlasClient {
      * The far field's sub-pixel jitter for the pack's TAA (8 Halton (2, 3) offsets, one per frame), or none: without a
      * temporal resolve a jittered far field would visibly shake by a pixel.
      */
+    private static double glRenderMs, frameWallMs;
+    private static long lastFrameNs;
+
     /** The autotest's atlas-info: the core's own report (the grid's pool among it) and the feeds' queues. */
     public static String debugInfo() {
         var c = ctx;
         String core = c != null ? c.info() : "no context";
-        String frame = c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f fps=%d unified=%b} ",
-                c.stats().frameMs(), Minecraft.getInstance().getFps(), AtlasNearPass.unified()) : "";
+        var lvl = Minecraft.getInstance().level;
+        String frame = c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f glRenderWallMs=%.2f frameWallMs=%.2f fps=%d unified=%b loadedChunks=%d t=%d} ",
+                c.stats().frameMs(), glRenderMs, frameWallMs, Minecraft.getInstance().getFps(), AtlasNearPass.unified(),
+                lvl != null ? lvl.getChunkSource().getLoadedChunksCount() : -1, System.currentTimeMillis() % 1_000_000) : "";
         return frame + AtlasClientSections.state() + " " + AtlasEditsClient.state() + " core=" + core;
     }
 

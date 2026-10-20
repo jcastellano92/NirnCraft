@@ -1,10 +1,12 @@
 // Far lights (atlas_set_light_group): kept per group, indexed in 1 km cells with pixel-sized clusters for the far
 // distance, and each frame culled, ranked and binned into 32 px screen tiles for the far kernel (farLights).
 #pragma once
+#include <condition_variable>
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <mutex>
+#include <thread>
 #include <vector>
 
 #include "atlas/atlas.h"
@@ -35,10 +37,29 @@ public:
     void setBudget(uint32_t maxPerFrame, float clusterDistance);
     // Appends this frame's lights, then the tile table (6 tiles per record: start, count) and the index lists (12 per
     // record), to `out` after whatever it holds; returns the number of lights (0: nothing appended).
+    // (The binning runs on its own thread from the latest view, a frame or so behind the render thread, which takes
+    // the newest finished result: 25 ms of the render thread's frame before. ATLAS_LIGHTS_SYNC=1: in the call, as it
+    // was. The GPU binning will replace both.)
     uint32_t frame(const LightView& v, std::vector<ActorGpu>& out);
     size_t total() const;
+    ~Lights();
 
 private:
+    uint32_t compute(const LightView& v, std::vector<ActorGpu>& out);
+    void worker();
+    struct Binned {
+        std::vector<ActorGpu> data;  // the lights, then the tile records
+        uint32_t lights = 0;
+        int32_t camInt[3] = {};
+        uint32_t width = 0, height = 0;
+    };
+    std::mutex asyncMu_;
+    std::condition_variable asyncCv_;
+    std::thread thread_;
+    bool stop_ = false, haveView_ = false;
+    LightView view_{};
+    std::shared_ptr<const Binned> binned_;
+
     mutable std::mutex mu_;
     std::map<uint32_t, std::vector<int64_t>> groupCells_;  // the index cells each group has lights in
     std::shared_ptr<const LightIndex> index_;

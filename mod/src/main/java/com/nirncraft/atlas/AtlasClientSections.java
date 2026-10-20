@@ -88,7 +88,10 @@ final class AtlasClientSections {
             QUEUED.remove(k);
             LevelChunk c = mc.level.getChunkSource().getChunkNow(ChunkPos.getX(k), ChunkPos.getZ(k));
             if (c != null) {
+                long r0 = System.nanoTime();
                 AtlasSections.Decoded d = read(mc.level, c);
+                readNs += System.nanoTime() - r0;
+                readCount++;
                 synchronized (READY) {
                     READY.add(d);
                 }
@@ -119,13 +122,16 @@ final class AtlasClientSections {
                 biome.getGrassColor(centre.getX(), centre.getZ()) & 0xFFFFFF, biome.getFoliageColor() & 0xFFFFFF);
     }
 
+    private static long readNs, readCount;
+
     /** The feed's state for atlas-info: queued to read, read and waiting for the worker, up. */
     static String state() {
         int ready;
         synchronized (READY) {
             ready = READY.size();
         }
-        return "clientSections{on=" + ON + " queued=" + QUEUED.size() + " ready=" + ready + " up=" + UP.size() + "}";
+        return "clientSections{on=" + ON + " queued=" + QUEUED.size() + " ready=" + ready + " up=" + UP.size()
+                + " read=" + readCount + String.format(java.util.Locale.ROOT, " readMsEach=%.3f", readCount > 0 ? readNs / 1e6 / readCount : 0.0) + "}";
     }
 
     /** The read chunk nearest block (x, z) for atlas, or null (far-field worker). */
