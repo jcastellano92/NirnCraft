@@ -106,6 +106,19 @@ public final class AtlasNearPass {
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT_PREMULTIPLIED_ALPHA))
             .build();
 
+    static final RenderPipeline LIGHTMAP = RenderPipeline.builder()
+            .withLocation(id("pipeline/near_lightmap"))
+            .withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
+            .withFragmentShader(id("core/near_lightmap"))
+            .withBindGroupLayout(NEAR_INFO)
+            .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+            .withCull(false)
+            .withDepthStencilState(Optional.empty())
+            .withColorTargetState(ColorTargetState.DEFAULT)
+            .build();
+    private static com.mojang.renderpearl.api.textures.GpuTexture lightmapScratch;
+    private static com.mojang.renderpearl.api.textures.GpuTextureView lightmapScratchView;
+
     private static final ObjectArrayList<SectionRenderDispatcher.RenderSection> visible = new ObjectArrayList<>();
     private static final ObjectArrayList<SectionRenderDispatcher.RenderSection> nearby = new ObjectArrayList<>();
     private static boolean owned;          // this frame's terrain is ours (vanilla's lists were taken)
@@ -123,7 +136,10 @@ public final class AtlasNearPass {
     }
 
     static void init(IEventBus modBus) {
-        modBus.addListener((RegisterRenderPipelinesEvent e) -> e.registerPipeline(RESOLVE));
+        modBus.addListener((RegisterRenderPipelinesEvent e) -> {
+            e.registerPipeline(RESOLVE);
+            e.registerPipeline(LIGHTMAP);
+        });
         modBus.addListener((RegisterPipelineModifiersEvent e) -> {
             e.register(GBUFFER, AtlasNearPass::gbufferPipeline);
             e.register(FORWARD, AtlasNearPass::forwardPipeline);
@@ -176,6 +192,11 @@ public final class AtlasNearPass {
                 .withFragmentShader(id(ours))
                 .withBindGroupLayout(NEAR_INFO)
                 .build();
+    }
+
+    /** Atlas lit this frame (one light near and far): what draws after in our look (NirnCraft's clouds give way). */
+    public static boolean litThisFrame() {
+        return lit;
     }
 
     /** True when the frame's terrain is ours (AtlasClient: read our depth, skip the fallback, resolve instead). */
@@ -342,8 +363,31 @@ public final class AtlasNearPass {
     }
 
     /** Vanilla's lists back: it recomputes them only when the camera turns or the graph changes, not every frame. */
+    /**
+     * Vanilla's lightmap in our look (near_lightmap): what is lit by it after the level (the first-person hand and held
+     * items) matches the frame. Vanilla rewrites it whenever its light changes; we rewrite it after each owned frame.
+     */
+    private static void lightmapInOurLook() {
+        var lightmap = Minecraft.getInstance().gameRenderer.levelLightmap();
+        if (lightmap == null || lightmap.isClosed() || info == null) return;
+        var device = RenderSystem.getDevice();
+        if (lightmapScratch == null || lightmapScratch.isClosed()) {
+            lightmapScratch = device.createTexture("atlas near lightmap", com.mojang.renderpearl.api.textures.GpuTexture.USAGE_RENDER_ATTACHMENT
+                    | com.mojang.renderpearl.api.textures.GpuTexture.USAGE_COPY_SRC, GpuFormat.RGBA8_UNORM, 16, 16, 1, 1);
+            lightmapScratchView = device.createTextureView(lightmapScratch);
+        }
+        var encoder = device.createCommandEncoder();
+        try (RenderPass pass = encoder.createRenderPass(() -> "Infinite ATLAS lightmap", lightmapScratchView, Optional.empty())) {
+            pass.setPipeline(RenderSystem.getCompiledPipeline(LIGHTMAP));
+            pass.setUniform("NearInfo", info.currentBuffer());
+            pass.draw(3, 1, 0, 0);
+        }
+        encoder.copyTextureToTexture(lightmapScratch, lightmap.texture(), 0, 0, 0, 0, 0, 16, 16);
+    }
+
     private static void endFrame() {
         chunks = null;
+        if (lit) lightmapInOurLook();
         if (entityPushed) {
             RenderSystem.popPipelineModifier();
             entityPushed = false;

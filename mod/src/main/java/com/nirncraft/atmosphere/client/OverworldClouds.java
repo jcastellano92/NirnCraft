@@ -24,6 +24,8 @@ public final class OverworldClouds implements CustomCloudsRenderer {
     @Override public void prepare(LevelRenderState state, Vec3 position, CloudStatus status, int color,
                                   float height, int range, Matrix4fc modelView) { CloudRenderer.prepare(state); }
     @Override public boolean renderClouds(LevelRenderState state, CloudStatus status, Matrix4fc modelView, RenderPass pass) {
+        // Infinite ATLAS owns the frame with its own light: its clouds (lit and hazed as its sky and terrain) are drawn
+        if (com.nirncraft.atlas.AtlasNearPass.litThisFrame()) return true;
         return CloudRenderer.render(state, modelView, pass, null);
     }
     @Override public boolean renderCloudsOit(LevelRenderState state, CloudStatus status, Matrix4fc modelView,

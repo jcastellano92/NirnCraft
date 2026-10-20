@@ -370,6 +370,8 @@ public final class AtlasClient {
             boolean nearLit = nearOwned && ctx.hasNearLight();
             if (nearLit) {
                 frame.flags |= AtlasNative.FRAME_NEAR_LIGHT | AtlasNative.FRAME_SHADOWS | AtlasNative.FRAME_ATMOS;
+                // atlas's clouds, in its light and haze (NirnCraft's deck steps aside: OverworldClouds), unless weather is off
+                if (!com.nirncraft.atmosphere.client.WeatherFieldTexture.isOff()) frame.flags |= AtlasNative.FRAME_CLOUDS;
                 frame.flags &= ~AtlasNative.FRAME_VANILLA_LIGHT;
                 if (AtlasTruthView.noFog) frame.flags &= ~AtlasNative.FRAME_ATMOS;
             }
