@@ -334,7 +334,10 @@ public final class AtlasClient {
             // the hand-off follows the loaded terrain's radius (what Iris hands the pack as `far`), not the
             // projection's far plane: 26.3's far plane lies well beyond the chunks, which left an empty band out to it
             float handEnd = mc.options.getEffectiveRenderDistance() * 16f - 16f;
-            frame.nearFieldEnd = Math.max(32f, handEnd - handoffBand);
+            // our near pass draws every loaded chunk: atlas takes over only past them (with vanilla's terrain the hand-off
+            // band met its chunks' fade; here it let atlas's own predicted trees float beside the real ones in the last
+            // ring of chunks, wherever the near pass showed sky behind a crown)
+            frame.nearFieldEnd = AtlasNearPass.owns() ? Math.max(32f, handEnd + 16f) : Math.max(32f, handEnd - handoffBand);
             frame.maxDistance = quality.maxDistance();
             frame.planetRadius = planetRadius;
             float[] sun = sunDirection(state.skyRenderState.sunAngle);
