@@ -40,6 +40,25 @@ so a meadow keeps its colour and its drifts at every distance.
 Real sections carry caves, dungeons, mines; their levels are generated the same way, so a cave mouth stays open as far
 as it is bigger than a voxel. Predicted land has no caves except the openings its structures declare.
 
+Which sections reach atlas (2026-10-20): every chunk the client loads goes up whole (AtlasClientSections, nearest first,
+2 ms of the client tick), and the server records every chunk's sections from the bottom of the world to its highest top
+(AtlasSections.record, sent within RADIUS_TILES as before, again when a block the far field keeps changes:
+AtlasEdits.RESECTION). One rule on both sides: a section wholly 16 blocks or more under the chunk's lowest ground that
+is solid rock (no air, only full cubes: AtlasSections.solidRock) is left out, the column tiles' stone stands for it; so
+underground only caves, mines, dungeons and aquifers cost anything. A section already up with the same blocks is not
+put up again (AtlasEditsClient.UPLOADED), so the client's copy and the server's of a loaded chunk cost one upload. The
+core keeps them as any section (World::sectionKeep, then the coarse levels), so a cave walked through stays drawn.
+
+Light under cover: a surface the key light does not reach and that has solid cover straight above it (solidRoof: a ray
+up stopped by something that is not leaves) traces its sky rays on from 16 voxels to 64 (ENCLOSED_REACH), and what
+stops them past 16 counts only when it is under cover too: in a cave the sky is what its mouth shows, not a cavern's
+far wall 20 blocks off, while a sunlit face beyond the mouth (a pit's wall) counts as open as it does in the open (the
+short reach there stands in for the bounce of sunlit ground further out). It takes what the rays see without the control variate
+(clamped at 0 per sample it left a wall that sees nothing a quarter of the sky's excess over the ground: a closed
+cave's walls glowed). With the eye under cover too, the air between is not
+sunlit: no aerial inscatter there (the cave's far end in the sky's haze), only the extinction. Near light and far hits
+(levels 0 and 1) alike; ATLAS_ABLATE 512 turns it off for measurements.
+
 ## Sources, by distance
 
 | where | level-0 source |

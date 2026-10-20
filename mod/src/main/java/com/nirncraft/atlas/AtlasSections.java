@@ -29,9 +29,10 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 /**
- * Real blocks for the far field's finest levels (docs/ATLAS-LOD.md): the sections around each chunk's surface as the
- * server has them (from 16 blocks under its lowest ground to its highest roof or crown), so a tree is that tree, a
- * house that house, at level 0, and the far field generates its coarser levels from them. Kept per chunk as a small
+ * Real blocks for the far field's finest levels (docs/ATLAS-LOD.md): each chunk's sections as the server has them (from
+ * its lowest section to its highest roof or crown; deep under the ground only those that are not solid rock: caves,
+ * mines, dungeons), so a tree is that tree, a house that house, a cave that cave, at level 0, and the far field
+ * generates its coarser levels from them. Kept per chunk as a small
  * compressed blob (a palette and indices per section, the chunk's grass and foliage colours), stored per 256-block
  * tile next to the change journal, and pushed to each player for the chunks in their fine window they have not had.
  * Sub-block things (grass tufts, flowers, torches, fences) are left out: in the far field they are the ground's colour
@@ -46,7 +47,7 @@ public final class AtlasSections {
      * beyond it was lost, and a tile is forgotten here once it leaves this window, so a returning player gets it again.
      */
     static final int RADIUS_TILES = 4;
-    private static final int PER_PACKET = 64;
+    private static final int PER_PACKET = 64, PACKET_BYTES = 256 * 1024;
 
     static final class TileSections {
         long version;
@@ -85,13 +86,54 @@ public final class AtlasSections {
                 || s.getBlock() instanceof net.minecraft.world.level.block.WallBlock;
     }
 
-    /** Chunk c's surface sections (lowest ground - 16 .. highest top), recorded when they changed. Server thread. */
+    /**
+     * Whether section sec is solid rock: no air, nothing but blocks that render as full cubes (stone, ores, dirt). Under
+     * the surface such a section is what the far field's column tiles hold there anyway (stone under the ground), so it
+     * is neither sent nor uploaded: underground only caves, mines, dungeons and aquifers cost anything. (The palette may
+     * still list a state no block has any more: such a section counts as not rock, which only costs its bytes.)
+     */
+    static boolean solidRock(LevelChunkSection sec) {
+        return sec != null && !sec.hasOnlyAir() && !sec.maybeHas(s -> !s.isSolidRender());
+    }
+
+    /**
+     * Section sy of a chunk whose lowest ground is lowY lies deep: wholly 16 blocks or more under it, where the column
+     * tiles are stone (their top and fill materials lie within a few blocks of the ground).
+     */
+    static boolean deep(int sy, int lowY) {
+        return sy * 16 + 16 <= lowY - 16;
+    }
+
+    /**
+     * Section sec's blocks as far state ids (AtlasFarState.farId; 0 for what the far field does not keep), x + 16 * (z +
+     * 16 * y); cache maps a state to its id across calls (one thread).
+     */
+    static int[] ids(LevelChunkSection sec, java.util.IdentityHashMap<BlockState, Integer> cache) {
+        int[] ids = new int[4096];
+        if (sec == null || sec.hasOnlyAir()) return ids;
+        for (int y = 0; y < 16; y++)
+            for (int z = 0; z < 16; z++)
+                for (int x = 0; x < 16; x++) {
+                    BlockState s = sec.getBlockState(x, y, z);
+                    Integer id = cache.get(s);
+                    if (id == null) {
+                        id = kept(s) ? AtlasFarState.farId(s) : 0;
+                        cache.put(s, id);
+                    }
+                    ids[x + 16 * (z + 16 * y)] = id;
+                }
+        return ids;
+    }
+
+    /**
+     * Chunk c's sections, recorded when they changed (server thread): from its lowest section to its highest top
+     * (highY), the deep ones (16 under its lowest ground, lowY) only where they are not solid rock: caves, mines,
+     * dungeons and aquifers reach the far field (docs/ATLAS-LOD.md "Underground"), solid rock is the tiles' stone.
+     */
     static void record(ServerLevel level, LevelChunk c, int lowY, int highY) {
         if (dir == null) open(level.getServer());
-        int sy0 = Math.floorDiv(lowY - 16, 16), sy1 = Math.floorDiv(highY, 16);
         int minSec = c.getMinSectionY();
-        sy0 = Math.max(sy0, minSec);
-        sy1 = Math.min(sy1, c.getMaxSectionY());
+        int sy0 = minSec, sy1 = Math.min(Math.floorDiv(highY, 16), c.getMaxSectionY());
         if (sy1 < sy0) return;
         int cx = c.getPos().x(), cz = c.getPos().z();
         BlockPos centre = new BlockPos((cx << 4) + 8, highY, (cz << 4) + 8);
@@ -107,6 +149,10 @@ public final class AtlasSections {
             out.writeInt(foliage);
             for (int sy = sy0; sy <= sy1; sy++) {
                 LevelChunkSection sec = c.getSection(sy - minSec);
+                if (deep(sy, lowY) && solidRock(sec)) {
+                    out.writeShort(0);  // (palette size 0: not recorded, the tiles' stone)
+                    continue;
+                }
                 Map<Integer, Integer> pal = new HashMap<>();
                 List<Integer> ids = new ArrayList<>();
                 ids.add(0);
@@ -186,8 +232,15 @@ public final class AtlasSections {
                         for (Entry e : t.chunks.values()) if (e.version() > have) blobs.add(e.blob());
                         sent.put(tk, t.version);
                     }
-                    for (int i = 0; i < blobs.size(); i += PER_PACKET)
-                        SkyNetwork.sendToPlayer(p, new AtlasNet.FarSections(blobs.subList(i, Math.min(blobs.size(), i + PER_PACKET)).toArray(new byte[0][])));
+                    // at most PER_PACKET chunks and PACKET_BYTES a packet (a chunk with its caves is a few times a
+                    // surface one; a custom payload must stay under 1 MiB)
+                    for (int i = 0; i < blobs.size(); ) {
+                        int j = i, bytes = 0;
+                        while (j < blobs.size() && j - i < PER_PACKET && (j == i || bytes + blobs.get(j).length <= PACKET_BYTES))
+                            bytes += blobs.get(j++).length;
+                        SkyNetwork.sendToPlayer(p, new AtlasNet.FarSections(blobs.subList(i, j).toArray(new byte[0][])));
+                        i = j;
+                    }
                 }
             // tiles that left the window: the client's core drops their sections, so they count as never sent
             sent.keySet().removeIf(tk -> outside(tk, ptx, ptz));
@@ -257,7 +310,10 @@ public final class AtlasSections {
 
     // ---- decoding (client) --------------------------------------------------------------------------------------
 
-    /** A decoded chunk: its first section y, per section the block state ids (4096, x + 16 * (z + 16 * y)), tints. */
+    /**
+     * A decoded chunk: its first section y, per section the block state ids (4096, x + 16 * (z + 16 * y); null: not
+     * recorded, solid rock the tiles hold), tints.
+     */
     record Decoded(int cx, int cz, int sy0, int[][] sections, int grass, int foliage) {}
 
     static Decoded decode(byte[] blob) throws IOException {
@@ -267,6 +323,7 @@ public final class AtlasSections {
             int[][] secs = new int[n][];
             for (int s = 0; s < n; s++) {
                 int pn = in.readUnsignedShort();
+                if (pn == 0) continue;  // solid rock, not recorded (secs[s] stays null)
                 int[] pal = new int[pn];
                 for (int i = 0; i < pn; i++) pal[i] = in.readInt();
                 int[] ids = new int[4096];

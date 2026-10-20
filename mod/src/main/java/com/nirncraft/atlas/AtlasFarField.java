@@ -344,13 +344,15 @@ final class AtlasFarField implements AutoCloseable {
                 boolean was = streaming;
                 // only what the camera sees counts, and buildings / trees still going up (captures wait for them)
                 boolean tilesPending = source.visiblePending();
-                streaming = moved || tilesPending || overlaid;
+                int nearQueued = AtlasClientSections.pending();  // loaded chunks not up yet (the near light's blocks)
+                streaming = moved || tilesPending || overlaid || nearQueued > 0;
                 if (streaming) {
                     StringBuilder why = new StringBuilder();
                     if (moved) why.append("moved ");
                     if (tilesPending) why.append("tiles ");
                     if (!edited.isEmpty()) why.append("edits ").append(edited.size()).append(' ');
                     if (sectionsApplied > 0) why.append("sections ").append(sectionsApplied).append(' ');
+                    if (nearQueued > 0) why.append("near chunks ").append(nearQueued).append(' ');
                     if (overlayBusy) why.append("overlays ");
                     streamingWhy = why.toString().trim();
                 }

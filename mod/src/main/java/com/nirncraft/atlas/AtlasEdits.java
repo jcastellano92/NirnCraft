@@ -96,6 +96,9 @@ public final class AtlasEdits {
     private static final Map<Long, Integer> LIGHT_DIRTY = new ConcurrentHashMap<>();
     private static final ArrayDeque<Long> CHUNKS = new ArrayDeque<>();  // chunks to scan (ChunkPos.pack)
     private static final java.util.Set<Long> QUEUED = ConcurrentHashMap.newKeySet();
+    // chunks whose kept blocks changed (underground too, where no column does): scanned again, at most every RESECTION_EVERY
+    private static final java.util.Set<Long> RESECTION = ConcurrentHashMap.newKeySet();
+    private static final int RESECTION_EVERY = 40;  // ticks
     private static final Map<UUID, Map<Long, Long>> SENT = new ConcurrentHashMap<>();
     private static Path file;
     private static boolean changedSinceSave;
@@ -115,6 +118,8 @@ public final class AtlasEdits {
         if (!(e.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
         BlockPos p = e.getPos();
         DIRTY.add(colKey(p.getX(), p.getZ()));
+        // a block the far field keeps placed or one taken out (a mine dug, a wall built): the chunk's sections again
+        if (e.getState().isAir() || AtlasSections.kept(e.getState())) RESECTION.add(ChunkPos.pack(p.getX() >> 4, p.getZ() >> 4));
         int light = e.getState().getLightEmission();
         long pk = p.asLong();
         if (light >= 8 || knownLight(p)) LIGHT_DIRTY.put(pk, light);
@@ -142,6 +147,17 @@ public final class AtlasEdits {
         ServerLevel level = server.overworld();
         if (level == null) return;
         if (file == null) open(server);
+        if (server.getTickCount() % RESECTION_EVERY == 0 && !RESECTION.isEmpty()) {
+            for (Long k : new ArrayList<>(RESECTION)) {
+                RESECTION.remove(k);
+                CHUNK_HASH.remove(k);  // (scanned whole again: its columns and its sections, AtlasSections.record)
+                if (QUEUED.add(k)) {
+                    synchronized (CHUNKS) {
+                        CHUNKS.add(k);
+                    }
+                }
+            }
+        }
         scanChunks(level);
         if (!DIRTY.isEmpty() || !LIGHT_DIRTY.isEmpty()) flush(level);
         if (server.getTickCount() % PUSH_EVERY == 0) {
@@ -479,6 +495,7 @@ public final class AtlasEdits {
             CHUNKS.clear();
         }
         QUEUED.clear();
+        RESECTION.clear();
         file = null;
     }
 
