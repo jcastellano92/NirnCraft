@@ -39,9 +39,15 @@
 #include "atlas_far_spv.h"      // generated: atlas_far_spv[], atlas_far_spv_size (bytes)
 #include "atlas_ingest_spv.h"   // generated
 #include "atlas_publish_spv.h"  // generated
+#include "atlas_vg_section_spv.h"  // generated: the level-0 grid's build kernels (atlas_voxgrid.slang)
+#include "atlas_vg_satx_spv.h"
+#include "atlas_vg_satz_spv.h"
+#include "atlas_vg_saty_spv.h"
+#include "atlas_vg_grow_spv.h"
 #include "backend.hpp"
 #include "gl_api.hpp"
 #include "gl_near.hpp"
+#include "voxgrid.hpp"
 
 namespace atlas {
 namespace {
@@ -178,14 +184,16 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 29;
+constexpr uint32_t BINDINGS = 33;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
                    B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14, B_ACTORS = 15, B_HEIGHTMIP = 16, B_CLOUD = 17,
                    B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20, B_NOISE_TEX = 21, B_PREV_CLOUD = 22,
                    B_PREV_CLOUD_DEPTH = 23, B_SUNMAP = 24, B_GROUPS = 25, B_NEAR_INFO = 26, B_NEAR_LIGHT = 27,
-                   B_PREV_NEAR_LIGHT = 28;
+                   B_PREV_NEAR_LIGHT = 28, B_VG_CHUNKS = 29, B_VG_BLOCKS = 30, B_VG_BITS = 31, B_VG_POOL = 32;
+// the level-0 grid's build kernels (atlas_voxgrid.slang): chunks, blocks, bits, pool, jobs, summed-volume table
+constexpr uint32_t VG_BINDINGS = 6;
 // the scene's buffers (two copies, staged off the render thread)
 constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP, B_GROUPS};
 bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP || b == B_GROUPS; }
@@ -309,6 +317,13 @@ struct Slot {
     bool hostPending = false;  // hostOut holds a frame not yet uploaded to GL
     bool hostSun = false;      // ... including the sun map
     bool hostNearLight = false;  // ... and the near light (abi 0.15)
+    // the level-0 grid's build this frame (voxgrid.hpp): its sections and jobs in host memory, what to record
+    Buf vgStage, vgJobs;
+    VkDescriptorSet vgSet = VK_NULL_HANDLE;
+    std::vector<VkBufferCopy> vgCopies;
+    uint32_t vgJobCount = 0;
+    bool vgClear = false, vgStates = false, vgTimed = false;
+    uint32_t vgSections = 0;
 };
 
 class VulkanBackend final : public Backend {
@@ -326,10 +341,19 @@ public:
             for (auto& s : slots_) {
                 for (auto& b : s.bufs) release(b);
                 release(s.hostOut);
+                release(s.vgStage);
+                release(s.vgJobs);
                 if (s.fence) vkDestroyFence(dev_, s.fence, nullptr);
                 if (s.query) vkDestroyQueryPool(dev_, s.query, nullptr);
             }
             for (auto& b : shared_) release(b);
+            release(vgSat_);
+            for (auto& p : vgPipes_)
+                if (p) vkDestroyPipeline(dev_, p, nullptr);
+            for (auto& m : vgShaders_)
+                if (m) vkDestroyShaderModule(dev_, m, nullptr);
+            if (vgLayout_) vkDestroyPipelineLayout(dev_, vgLayout_, nullptr);
+            if (vgSetLayout_) vkDestroyDescriptorSetLayout(dev_, vgSetLayout_, nullptr);
             release(sunReadback_);
             release(noiseStaging_);
             if (noiseSampler_) vkDestroySampler(dev_, noiseSampler_, nullptr);
@@ -474,13 +498,14 @@ public:
         if (!createPipe(atlas_ingest_spv, atlas_ingest_spv_size, ingTypes, PASS_PUSH_BYTES, ingestPipe_, ingestLayout_,
                         ingestSetLayout_, ingestShader_, err))
             return false;
+        if (!createVoxGridPipes(err)) return false;
 
         VkDescriptorPoolSize ps[4] = {{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SLOTS},
-                                      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SLOTS * (BINDINGS - 1 + 4 + 2)},
+                                      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SLOTS * (BINDINGS - 1 + 4 + 2 + VG_BINDINGS)},
                                       {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, SLOTS * (4 + 2)},
                                       {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, SLOTS}};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
-        dp.maxSets = SLOTS * 3;
+        dp.maxSets = SLOTS * 4;
         dp.poolSizeCount = 4;
         dp.pPoolSizes = ps;
         if (vkCreateDescriptorPool(dev_, &dp, nullptr, &dpool_) != VK_SUCCESS) return fail(err, "descriptor pool");
@@ -499,7 +524,7 @@ public:
             if (timestamps_) {
                 VkQueryPoolCreateInfo q{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
                 q.queryType = VK_QUERY_TYPE_TIMESTAMP;
-                q.queryCount = 2;
+                q.queryCount = 4;  // the frame; the level-0 grid's build
                 if (vkCreateQueryPool(dev_, &q, nullptr, &s.query) != VK_SUCCESS) s.query = VK_NULL_HANDLE;  // no GPU timer
             }
             VkDescriptorSetLayout layouts[3] = {farSetLayout_, publishSetLayout_, ingestSetLayout_};
@@ -512,6 +537,9 @@ public:
             s.farSet = sets[0];
             s.publishSet = sets[1];
             s.ingestSet = sets[2];
+            da.descriptorSetCount = 1;
+            da.pSetLayouts = &vgSetLayout_;
+            if (vkAllocateDescriptorSets(dev_, &da, &s.vgSet) != VK_SUCCESS) return fail(err, "descriptor sets (voxgrid)");
         }
         // scene uploads are recorded by whichever thread stages a scene (under sceneMu_): their own pool
         VkCommandPoolCreateInfo upi{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
@@ -1558,6 +1586,7 @@ private:
             }
             sunDispatchRows_ = S ? frame.sunMapRows[1] : 0;
         }
+        if (!stageVoxGrid(s, in, err)) return false;
         // host path: outputs in cached system memory (CPU reads from BAR are uncached); GL path: device local only
         Mem outKind = readback ? Mem::Readback : Mem::DeviceOnly;
         // the near inputs: written by the CPU (host path; host copies with the near light), else by the ingest pass
@@ -1688,13 +1717,155 @@ private:
         bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         vkBeginCommandBuffer(s.cmd, &bi);
         if (s.query) {
-            vkCmdResetQueryPool(s.cmd, s.query, 0, 2);
+            vkCmdResetQueryPool(s.cmd, s.query, 0, 4);
             // at the compute stage, which the GL-ready semaphore wait blocks: the time is atlas's own work only
             vkCmdWriteTimestamp(s.cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, s.query, 0);
         }
     }
 
+    // ---- the level-0 grid (voxgrid.hpp, atlas_voxgrid.slang) ----------------------------------------------------
+
+    VoxGridTimes voxgridTimes() const override {
+        VoxGridTimes t;
+        t.lastMs = vgLastMs_;
+        t.totalMs = vgMsTotal_;
+        t.lastSections = vgLastSections_;
+        t.lastJobs = vgLastJobs_;
+        t.lastStates = vgLastStates_;
+        return t;
+    }
+
+    bool createVoxGridPipes(std::string& err) {
+        std::vector<VkDescriptorType> types(VG_BINDINGS, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+        if (!createPipe(atlas_vg_section_spv, atlas_vg_section_spv_size, types, 32, vgPipes_[0], vgLayout_, vgSetLayout_,
+                        vgShaders_[0], err))
+            return false;
+        const uint32_t* code[VG_KERNELS] = {atlas_vg_section_spv, atlas_vg_satx_spv, atlas_vg_satz_spv, atlas_vg_saty_spv, atlas_vg_grow_spv};
+        const size_t bytes[VG_KERNELS] = {atlas_vg_section_spv_size, atlas_vg_satx_spv_size, atlas_vg_satz_spv_size,
+                                          atlas_vg_saty_spv_size, atlas_vg_grow_spv_size};
+        for (int k = 1; k < VG_KERNELS; k++) {
+            VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
+            smci.codeSize = bytes[k];
+            smci.pCode = code[k];
+            if (vkCreateShaderModule(dev_, &smci, nullptr, &vgShaders_[k]) != VK_SUCCESS) return fail(err, "voxgrid shader");
+            VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
+            cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+            cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            cp.stage.module = vgShaders_[k];
+            cp.stage.pName = "main";
+            cp.layout = vgLayout_;
+            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &vgPipes_[k]) != VK_SUCCESS)
+                return fail(err, "voxgrid pipeline");
+        }
+        return true;
+    }
+
+    // Takes the grid's next batch (prepare: the slot was waited) into the slot's host buffers; recordVoxGrid records
+    // the copies and kernels. The far set binds the grid's buffers always (16-byte stand-ins until there is a grid).
+    bool stageVoxGrid(Slot& s, const FrameInputs& in, std::string& err) {
+        s.vgCopies.clear();
+        s.vgJobCount = 0;
+        s.vgClear = s.vgStates = s.vgTimed = false;
+        s.vgSections = 0;
+        VoxGrid* g = in.voxgrid;
+        VgBatch b;
+        if (g && g->active()) {
+            static const int budget = [] {
+                const char* e = std::getenv("ATLAS_VOXGRID_BUDGET");  // sections built a frame at most
+                return e ? std::max(1, std::atoi(e)) : 2048;
+            }();
+            b = g->take(budget);
+        }
+        bool work = b.clear || !b.jobs.empty();
+        bool fresh = false;
+        if (!shared_[B_VG_CHUNKS].buf || (work && (vgD_ != uint32_t(g->D) || vgH_ != uint32_t(g->H) || vgCap_ != g->slotCap))) {
+            for (auto& o : slots_)
+                if (!waitSlot(o, nullptr, err)) return false;
+            uint32_t D = work ? uint32_t(g->D) : 0, H = work ? uint32_t(g->H) : 0, cap = work ? g->slotCap : 0;
+            VkDeviceSize nC = VkDeviceSize(D) * H * D;
+            for (uint32_t i = B_VG_CHUNKS; i <= B_VG_POOL; i++) release(shared_[i]);
+            release(vgSat_);
+            if (!ensure(shared_[B_VG_CHUNKS], nC * 4, false, Mem::DeviceOnly, err) ||
+                !ensure(shared_[B_VG_BLOCKS], VkDeviceSize(cap) * 64 * 4, false, Mem::DeviceOnly, err) ||
+                !ensure(shared_[B_VG_BITS], VkDeviceSize(cap) * 64 * 8, false, Mem::DeviceOnly, err) ||
+                !ensure(shared_[B_VG_POOL], VkDeviceSize(cap) * VG_SECTION_WORDS * 4, false, Mem::DeviceOnly, err) ||
+                !ensure(vgSat_, VkDeviceSize(D + 1) * (H + 1) * (D + 1) * 4, false, Mem::DeviceOnly, err))
+                return false;
+            vgD_ = D;
+            vgH_ = H;
+            vgCap_ = cap;
+            fresh = work;  // garbage until cleared
+        }
+        if (!work) return true;
+        size_t dataBytes = b.data.size() * 4, jobBytes = b.jobs.size() * sizeof(VgJob);
+        if (!ensure(s.vgStage, dataBytes, false, Mem::Staging, err) || !ensure(s.vgJobs, jobBytes, false, Mem::HostWrite, err))
+            return false;
+        if (dataBytes) std::memcpy(s.vgStage.map, b.data.data(), dataBytes);
+        if (jobBytes) std::memcpy(s.vgJobs.map, b.jobs.data(), jobBytes);
+        constexpr VkDeviceSize SEC = VkDeviceSize(VG_SECTION_WORDS) * 4;
+        for (const VgJob& j : b.jobs)
+            if (j.slot != ~0u) s.vgCopies.push_back({VkDeviceSize(j.data) * SEC, VkDeviceSize(j.slot) * SEC, SEC});
+        s.vgJobCount = uint32_t(b.jobs.size());
+        s.vgClear = b.clear || fresh;
+        s.vgStates = b.chunkStates || fresh;
+        s.vgSections = uint32_t(b.sections());
+        const Buf* bound[VG_BINDINGS] = {&shared_[B_VG_CHUNKS], &shared_[B_VG_BLOCKS], &shared_[B_VG_BITS], &shared_[B_VG_POOL],
+                                         &s.vgJobs, &vgSat_};
+        VkDescriptorBufferInfo bi[VG_BINDINGS];
+        VkWriteDescriptorSet wr[VG_BINDINGS];
+        for (uint32_t i = 0; i < VG_BINDINGS; i++) {
+            bi[i] = {bound[i]->buf, 0, storageRange(*bound[i])};
+            wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+            wr[i].dstSet = s.vgSet;
+            wr[i].dstBinding = i;
+            wr[i].descriptorCount = 1;
+            wr[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            wr[i].pBufferInfo = &bi[i];
+        }
+        vkUpdateDescriptorSets(dev_, VG_BINDINGS, wr, 0, nullptr);
+        return true;
+    }
+
+    void recordVoxGrid(Slot& s) {
+        if (!s.vgJobCount && !s.vgClear) return;
+        VkCommandBuffer cmd = s.cmd;
+        if (s.query) {
+            vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, s.query, 2);
+            s.vgTimed = true;
+        }
+        // earlier frames' passes may still read the slots and chunks rewritten here
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+        if (s.vgClear) vkCmdFillBuffer(cmd, shared_[B_VG_CHUNKS].buf, 0, VK_WHOLE_SIZE, VG_UNLOADED);
+        if (!s.vgCopies.empty())
+            vkCmdCopyBuffer(cmd, s.vgStage.buf, shared_[B_VG_POOL].buf, uint32_t(s.vgCopies.size()), s.vgCopies.data());
+        if (s.vgStates) vkCmdFillBuffer(cmd, vgSat_.buf, 0, VK_WHOLE_SIZE, 0u);
+        mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vgLayout_, 0, 1, &s.vgSet, 0, nullptr);
+        const uint32_t D = vgD_, H = vgH_, row = 65535;
+        uint32_t pcv[8] = {D, H, D, s.vgJobCount, row, 0, 0, 0};
+        vkCmdPushConstants(cmd, vgLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
+        if (s.vgJobCount) {
+            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vgPipes_[0]);
+            vkCmdDispatch(cmd, std::min(s.vgJobCount, row), (s.vgJobCount + row - 1) / row, 1);
+        }
+        if (s.vgStates) {
+            const uint32_t lines[4] = {H * D, H * D, D * D, D * H * D};
+            for (int k = 1; k < VG_KERNELS; k++) {
+                computeBarrier(cmd);
+                vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vgPipes_[k]);
+                vkCmdDispatch(cmd, (lines[k - 1] + 63) / 64, 1, 1);
+            }
+        }
+        if (s.query) vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, s.query, 3);
+    }
+
     void recordFar(Slot& s, uint32_t w, uint32_t h, bool clouds, bool nearSplit = false) {
+        recordVoxGrid(s);  // the level-0 grid's changes first (the barrier below orders them before the far pass)
         // the previous frame (other slot) wrote the surfaces this one's cloud pass reads, and will next overwrite
         // ours: order against everything submitted before
         computeBarrier(s.cmd);
@@ -1791,9 +1962,18 @@ private:
         // frames complete in submission order on our single queue
         if (s.frameNumber > completedFrame_.load()) completedFrame_.store(s.frameNumber);
         if (s.query && gpuMs) {
-            uint64_t ts[2] = {};
-            vkGetQueryPoolResults(dev_, s.query, 0, 2, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
+            uint64_t ts[4] = {};
+            uint32_t nq = s.vgTimed ? 4u : 2u;
+            vkGetQueryPoolResults(dev_, s.query, 0, nq, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
             *gpuMs = double(ts[1] - ts[0]) * timestampPeriod_ / 1e6;
+            if (s.vgTimed) {
+                vgLastMs_ = double(ts[3] - ts[2]) * timestampPeriod_ / 1e6;
+                vgLastSections_ = s.vgSections;
+                vgLastJobs_ = s.vgJobCount;
+                vgLastStates_ = s.vgStates;
+                vgMsTotal_ += vgLastMs_;
+                s.vgTimed = false;
+            }
         }
         return true;
     }
@@ -2288,6 +2468,17 @@ private:
     VkPipeline nearLightPipe_ = VK_NULL_HANDLE, nearUpPipe_ = VK_NULL_HANDLE;
     VkShaderModule nearLightShader_ = VK_NULL_HANDLE, nearUpShader_ = VK_NULL_HANDLE;
     VkPipeline nearTempPipe_ = VK_NULL_HANDLE;
+    // the level-0 grid (voxgrid.hpp): its build kernels, their layout, the summed-volume table, the last build's GPU time
+    static constexpr int VG_KERNELS = 5;  // vgSectionMain, vgSatX, vgSatZ, vgSatY, vgGrowMain
+    VkPipeline vgPipes_[VG_KERNELS] = {};
+    VkShaderModule vgShaders_[VG_KERNELS] = {};
+    VkPipelineLayout vgLayout_ = VK_NULL_HANDLE;
+    VkDescriptorSetLayout vgSetLayout_ = VK_NULL_HANDLE;
+    Buf vgSat_;
+    uint32_t vgD_ = 0, vgH_ = 0, vgCap_ = 0;
+    double vgLastMs_ = 0, vgMsTotal_ = 0;
+    uint32_t vgLastSections_ = 0, vgLastJobs_ = 0;
+    bool vgLastStates_ = false;
     VkShaderModule nearTempShader_ = VK_NULL_HANDLE;
     uint32_t sunSize_ = 0;          // size of the sun map buffer / image now
     uint32_t sunDispatchRows_ = 0;  // this frame's sun map rows (0: no pass)

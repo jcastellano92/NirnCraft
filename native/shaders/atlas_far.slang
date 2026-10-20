@@ -51,6 +51,12 @@
 [[vk::binding(27, 0)]] RWStructuredBuffer<float4> outNearLight;
 // (FRAME_NEAR_SPLIT) the previous frame's near light, for nearTemporalMain (a pixel's worth when it had none)
 [[vk::binding(28, 0)]] StructuredBuffer<float4> prevNearLight;
+// the level-0 grid built on the GPU (native/src/voxgrid.hpp; atlas_voxgrid.slang builds it): chunk words, block words,
+// block bitmaps, the sections' raw ids (two a word); frame.vgOrigin / vgDims place it
+[[vk::binding(29, 0)]] StructuredBuffer<uint> vgChunks;
+[[vk::binding(30, 0)]] StructuredBuffer<uint> vgBlocks;
+[[vk::binding(31, 0)]] StructuredBuffer<uint64_t> vgBits;
+[[vk::binding(32, 0)]] StructuredBuffer<uint> vgPool;
 
 #include "atlas_clouds.slang"
 
@@ -108,6 +114,54 @@ static uint gSecMode = 0u;
 static uint gSecCount = 0u;
 void secCount(uint mode, int lod) {
     if (gSecondary && gSecMode == mode && ((gSecAblate & 67108864u) == 0u || lod == 0)) gSecCount++;
+}
+
+// The face a ray entered voxel v through: the axis whose slab it entered last (robust for rays that graze a boundary
+// plane, unlike the last DDA crossing). ro / rd / inv / stepPos: the ray in the voxel's units.
+int entryAxis(int3 v, float3 ro, float3 rd, float3 inv, float3 stepPos) {
+    float3 tNear = (float3(v) + (float3(1, 1, 1) - stepPos) - ro) * inv;
+    if (abs(rd.x) <= 1e-12) tNear.x = -1e30;
+    if (abs(rd.y) <= 1e-12) tNear.y = -1e30;
+    if (abs(rd.z) <= 1e-12) tNear.z = -1e30;
+    return tNear.x >= tNear.y && tNear.x >= tNear.z ? 0 : (tNear.y >= tNear.z ? 1 : 2);
+}
+
+// Whether a ray stops at the solid voxel v (of level rl; wv: the same voxel in world voxels of that level) it met at t,
+// shared by the SVDAG regions (traceRegion) and the level-0 grid (traceVoxGrid). Water seen through (the lab), foliage
+// free (a measurement); a secondary ray meets a level-0 voxel of a shaped material (a snow layer, a slab, a stair, a
+// fence: a full cube to the voxel path) by its micro-voxels and passes when the shape's are empty along it, and is
+// attenuated through foliage and plants over its chord in the voxel; a primary ray sees gaps between leaves: a hashed
+// share of foliage voxels lets it through (moving with the TAA phase, so the resolve sees crowns as dappled, not solid).
+bool voxelStops(uint hitMat, int3 v, int3 wv, int rl, float3 ro, float3 rd, float3 inv, float3 stepPos, float t) {
+    uint hitCls = uint(palette[hitMat].emisClass.y);
+    secCount(5u, rl);
+    bool pass = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && hitCls == 2u;
+    if (gSecondary && hitCls == 1u && (gSecAblate & 4194304u) != 0u) pass = true;  // (free foliage)
+    if (gSecondary && !pass && rl == 0 && secondaryShapeMisses(hitMat, ro + rd * t - float3(v), rd)) pass = true;
+    float sigma = gSecondary && !pass ? secondarySigma(hitMat, hitCls) : -1.0;
+    if (sigma >= 0.0) {
+        // a secondary ray through foliage or a plant: attenuated over its chord through this voxel, then on
+        float3 tv = (float3(v) + stepPos - ro) * inv;
+        tv = float3(abs(rd.x) > 1e-12 && tv.x > t ? tv.x : 1e30, abs(rd.y) > 1e-12 && tv.y > t ? tv.y : 1e30,
+                    abs(rd.z) > 1e-12 && tv.z > t ? tv.z : 1e30);
+        float chord = clamp(min(tv.x, min(tv.y, tv.z)) - t, 0.0, 2.0 * float(1 << rl));
+        float x0 = max(gSecT + t, 0.0);
+        // E[exp(-0.45 x)] over where in this stretch the first opaque texel lies, weighted by what got here
+        gThrough += gTrans * exp(-0.45 * x0) * (sigma / (sigma + 0.45)) * (1.0 - exp(-(sigma + 0.45) * chord));
+        gTrans *= exp(-sigma * chord);
+        pass = gTrans > 0.004;
+        if (!pass) gTrans = 0.0;
+    }
+    if (pass) secCount(6u, rl);
+    if (!pass && hitCls == 1u && gLeafGap > 0.0 && !gSecondary) {
+        // (hashed by the world voxel and level, so every structure holding the voxel shows the same gaps)
+        uint phase = frame.jitter.z > 0.5 ? (frame.temporal.x & 7u) : 0u;
+        uint hh = (uint(wv.x) * 73856093u) ^ (uint(wv.y) * 19349663u) ^ (uint(wv.z) * 83492791u) ^ (uint(rl) * 2654435761u) ^
+                  (phase * 374761393u);
+        hh = (hh ^ (hh >> 13)) * 1274126177u;
+        pass = float(hh & 0xFFFFu) / 65535.0 < gLeafGap;
+    }
+    return !pass;
 }
 
 bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps, inout TraceResult res) {
@@ -215,49 +269,11 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
             if (((bits >> b) & 1) != 0) {
                 rank += popcount64(bits & ((uint64_t(1) << b) - 1));
                 uint hitMat = lookupMaterial(r, rank);
-                uint hitCls = uint(palette[hitMat].emisClass.y);
-                secCount(5u, rl);
-                bool passWater = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && hitCls == 2u;
-                if (gSecondary && hitCls == 1u && (gSecAblate & 4194304u) != 0u) passWater = true;  // (free foliage)
-                // gaps between leaves: a hashed share of foliage voxels lets the ray through (moving with the TAA
-                // phase, so the resolve sees crowns as dappled, not solid; shadow rays get dappled light the same way)
-                // a secondary ray meets a level-0 voxel of a shaped material (a snow layer, a slab, a stair, a fence: a
-                // full cube to the voxel path) by its micro-voxels: it passes when the shape's are empty along it
-                if (gSecondary && !passWater && r.origin.w == 0 && secondaryShapeMisses(hitMat, ro + rd * t - float3(v), rd))
-                    passWater = true;
-                float sigma = gSecondary && !passWater ? secondarySigma(hitMat, hitCls) : -1.0;
-                if (sigma >= 0.0) {
-                    // a secondary ray through foliage or a plant: attenuated over its chord through this voxel, then on
-                    float3 tv = (float3(v) + stepPos - ro) * inv;
-                    tv = float3(abs(rd.x) > 1e-12 && tv.x > t ? tv.x : 1e30, abs(rd.y) > 1e-12 && tv.y > t ? tv.y : 1e30,
-                                abs(rd.z) > 1e-12 && tv.z > t ? tv.z : 1e30);
-                    float chord = clamp(min(tv.x, min(tv.y, tv.z)) - t, 0.0, 2.0 * float(1 << r.origin.w));
-                    float x0 = max(gSecT + t, 0.0);
-                    // E[exp(-0.45 x)] over where in this stretch the first opaque texel lies, weighted by what got here
-                    gThrough += gTrans * exp(-0.45 * x0) * (sigma / (sigma + 0.45)) * (1.0 - exp(-(sigma + 0.45) * chord));
-                    gTrans *= exp(-sigma * chord);
-                    passWater = gTrans > 0.004;
-                    if (!passWater) gTrans = 0.0;
-                }
-                if (passWater) secCount(6u, rl);
-                if (!passWater && hitCls == 1u && gLeafGap > 0.0 && !gSecondary) {
-                    uint phase = frame.jitter.z > 0.5 ? (frame.temporal.x & 7u) : 0u;
-                    uint hh = (uint(v.x) * 73856093u) ^ (uint(v.y) * 19349663u) ^ (uint(v.z) * 83492791u) ^ (r.bases.x * 2654435761u) ^ (phase * 374761393u);
-                    hh = (hh ^ (hh >> 13)) * 1274126177u;
-                    passWater = float(hh & 0xFFFFu) / 65535.0 < gLeafGap;
-                }
-                if (!passWater) {
-                res.t = t;
-                res.mat = hitMat;
-                // the face we entered through: the axis whose slab the ray entered last (robust for rays that
-                // graze a boundary plane, unlike the last DDA crossing)
-                float3 vv = float3(v);
-                float3 tNear = (vv + (float3(1, 1, 1) - stepPos) - ro) * inv;
-                if (abs(rd.x) <= 1e-12) tNear.x = -1e30;
-                if (abs(rd.y) <= 1e-12) tNear.y = -1e30;
-                if (abs(rd.z) <= 1e-12) tNear.z = -1e30;
-                res.axis = tNear.x >= tNear.y && tNear.x >= tNear.z ? 0 : (tNear.y >= tNear.z ? 1 : 2);
-                return true;
+                if (voxelStops(hitMat, v, (r.origin.xyz >> rl) + v, rl, ro, rd, inv, stepPos, t)) {
+                    res.t = t;
+                    res.mat = hitMat;
+                    res.axis = entryAxis(v, ro, rd, inv, stepPos);
+                    return true;
                 }
             }
             uint sb = uint((l.x & 2) + 4 * (l.z & 2) + 16 * (l.y & 2));
@@ -350,10 +366,136 @@ bool secondaryShapeMisses(uint mat, float3 l, float3 d) {
     return true;
 }
 
+// ---- the level-0 grid (native/src/voxgrid.hpp: layout; atlas_voxgrid.slang builds it on the GPU) -------------------
+static const uint VG_EMPTY = 0u;
+static const uint VG_MIXED = 1u;
+static const uint VG_UNLOADED = 2u;
+// (ATLAS_ABLATE 134217728, measurements: level 0 from the SVDAG regions alone, as before the grid)
+bool vgOn() { return frame.vgOrigin.w != 0 && (asuint(frame.jitter.w) & 134217728u) == 0u; }
+
+// The chord p0 + d u (camera-relative), u in [u0, u1), through the grid: TRACE_HIT (res filled), TRACE_MISS (it crossed
+// [u0, u1) through chunks with data), else TRACE_UNCOVERED and uStop where it met a chunk without data or left the
+// window (the SVDAG regions answer from there). A step reads the chunk word; inside a chunk with blocks the block word;
+// inside a block with voxels its bitmap: an empty chunk or block is left through the far side of its empty box, an
+// empty voxel through its empty 2^3 octant when it has one, as traceRegion's bricks are.
+int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res, out float uStop) {
+    uStop = u0;
+    int3 gBlock = frame.vgOrigin.xyz * 16;
+    float3 ro = p0 - float3(gBlock - frame.camInt.xyz);  // grid-local blocks
+    int X = int(frame.vgDims.x), Y = int(frame.vgDims.y), Z = int(frame.vgDims.z);
+    int3 nb = int3(X, Y, Z) * 16;
+    float3 inv = float3(abs(d.x) > 1e-12 ? 1.0 / d.x : 1e30, abs(d.y) > 1e-12 ? 1.0 / d.y : 1e30,
+                        abs(d.z) > 1e-12 ? 1.0 / d.z : 1e30);
+    float3 stepPos = float3(d.x > 0 ? 1.0 : 0.0, d.y > 0 ? 1.0 : 0.0, d.z > 0 ? 1.0 : 0.0);
+    bool3 up = bool3(d.x > 0, d.y > 0, d.z > 0);
+    float t = u0;
+    int exitAxis = -1, exitTo = 0;
+    for (int it = 0; it < 4096; it++) {
+        if (t >= u1) return TRACE_MISS;
+        res.steps++;
+        secCount(1u, 0);
+        // (a point exactly on a cell face going down that axis lies in the cell below: else that face's exit is at t,
+        // not after it, and the ray left a camera standing on a chunk's floor through the box's far sides instead)
+        float3 p = ro + d * t;
+        float3 pf = floor(p);
+        int3 v = int3(pf) - int3(d.x < 0 && p.x == pf.x ? 1 : 0, d.y < 0 && p.y == pf.y ? 1 : 0, d.z < 0 && p.z == pf.z ? 1 : 0);
+        if (exitAxis >= 0) v[exitAxis] = exitTo;
+        if (v.x < 0 || v.y < 0 || v.z < 0 || v.x >= nb.x || v.y >= nb.y || v.z >= nb.z) {
+            uStop = t;
+            return TRACE_UNCOVERED;
+        }
+        int3 c = v >> 4;
+        uint cw = vgChunks[uint((c.y * Z + c.z) * X + c.x)];
+        uint st = cw & 3u;
+        if (st == VG_UNLOADED) {
+            uStop = t;
+            return TRACE_UNCOVERED;
+        }
+        int3 lo, hi;  // the empty box the ray leaves next, grid-local blocks, [lo, hi)
+        if (st == VG_EMPTY) {
+            int3 en = int3(int((cw >> 2) & 31u), int((cw >> 12) & 31u), int((cw >> 22) & 31u));
+            int3 ep = int3(int((cw >> 7) & 31u), int((cw >> 17) & 31u), int((cw >> 27) & 31u));
+            lo = (c - en) * 16;
+            hi = (c + ep + 1) * 16;
+            secCount(2u, 0);
+        } else {
+            uint slot = cw >> 2;
+            int3 l = v & 15;
+            int3 b = l >> 2;
+            uint bi = uint(b.x + 4 * (b.z + 4 * b.y));
+            uint bw = vgBlocks[slot * 64u + bi];
+            secCount(4u, 0);
+            if ((bw & 1u) == 0u) {
+                int3 en = int3(int((bw >> 2) & 3u), int((bw >> 6) & 3u), int((bw >> 10) & 3u));
+                int3 ep = int3(int((bw >> 4) & 3u), int((bw >> 8) & 3u), int((bw >> 12) & 3u));
+                lo = c * 16 + (b - en) * 4;
+                hi = c * 16 + (b + ep + 1) * 4;
+            } else {
+                uint64_t bits = vgBits[slot * 64u + bi];
+                int3 q = v & 3;
+                uint bt = uint(q.x + 4 * q.z + 16 * q.y);
+                if (((bits >> bt) & 1) != 0) {
+                    uint i = uint(l.x + 16 * (l.z + 16 * l.y));
+                    uint mat = (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
+                    if (voxelStops(mat, v, v + gBlock, 0, ro, d, inv, stepPos, t)) {
+                        res.t = t;
+                        res.mat = mat;
+                        res.axis = entryAxis(v, ro, d, inv, stepPos);
+                        res.lod = 0;
+                        return TRACE_HIT;
+                    }
+                    lo = v;
+                    hi = v + 1;
+                } else {
+                    uint sb = uint((q.x & 2) + 4 * (q.z & 2) + 16 * (q.y & 2));
+                    uint64_t sub = (uint64_t(0x33) << sb) | (uint64_t(0x33) << (sb + 16));
+                    int cell = (bits & sub) == 0 ? 2 : 1;
+                    lo = v & ~(cell - 1);
+                    hi = lo + cell;
+                }
+            }
+        }
+        float3 tt = (float3(up.x ? hi.x : lo.x, up.y ? hi.y : lo.y, up.z ? hi.z : lo.z) - ro) * inv;
+        tt = float3(tt.x > t ? tt.x : 1e30, tt.y > t ? tt.y : 1e30, tt.z > t ? tt.z : 1e30);
+        float tn = min(tt.x, min(tt.y, tt.z));
+        t = max(tn, t) + 1e-3;
+        // the cell across the face it leaves by, by index: at a grazing angle the 1e-3 step moves the point less across
+        // that face than float rounding, flooring it put the ray back in the cell it left, whose exit on that axis then
+        // lay behind: it left through another face and skipped the voxels across the first one
+        exitAxis = tt.x <= tn ? 0 : (tt.y <= tn ? 1 : 2);
+        exitTo = exitAxis == 0 ? (up.x ? hi.x : lo.x - 1) : exitAxis == 1 ? (up.y ? hi.y : lo.y - 1) : (up.z ? hi.z : lo.z - 1);
+    }
+    uStop = t;
+    return TRACE_UNCOVERED;
+}
+
 // Walk the regions of one LOD along the chord p0 + d u, u in [0, len].
 // On TRACE_UNCOVERED, uncExit is where the chord leaves the unloaded region cell (1e30 when it left the LOD's
 // window: that LOD has nothing further along this ray at all).
 int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out float uncExit) {
+    uncExit = 1e30;
+    // level 0: the GPU-built grid first, the regions only past where it has no data
+    float uGrid = 0.0;
+    // (the content-shaped groups keep primary rays where a frame asks for them: the grid has no shapes yet)
+    if (lod == 0 && vgOn() && !gGroups) {
+        gLeafGap = 0.3;
+        int g = traceVoxGrid(p0, d, 0.0, len, res, uGrid);
+        if (g != TRACE_UNCOVERED) return g;
+        if (uGrid >= len) return TRACE_MISS;
+        p0 += d * uGrid;
+        len -= uGrid;
+    }
+    gSecT += uGrid;  // (the secondary ray's distance where the chord starts)
+    int r0 = traceLodRegions(lod, p0, d, len, res, uncExit);
+    gSecT -= uGrid;
+    if (uGrid > 0.0) {
+        if (r0 == TRACE_HIT) res.t += uGrid;
+        if (uncExit < 1e29) uncExit += uGrid;
+    }
+    return r0;
+}
+
+int traceLodRegions(int lod, float3 p0, float3 d, float len, inout TraceResult res, out float uncExit) {
     uncExit = 1e30;
     LodGpu L = frame.lods[lod];
     float s = float(1 << lod);

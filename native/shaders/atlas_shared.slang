@@ -70,6 +70,10 @@ struct FrameGpu {
     float4 moonDir;          // (abi 0.12) night key light towards the moon, w = 1 when the host set it
     float4 moonRad;          // its radiance (before the night fade)
     float4 jitter;           // (abi 0.13) primary-ray NDC offset x, y; z = 1 when the host jitters (TAA)
+    // the GPU-built level-0 grid (voxgrid.hpp, atlas_voxgrid.slang): origin in sections (world section coordinates of
+    // cell 0), w = 1 when there is one; dims in sections (x, y, z)
+    int4 vgOrigin;
+    uint4 vgDims;
 };
 
 // the frame's moon, copied by each entry point (the shared lighting has no frame of its own)

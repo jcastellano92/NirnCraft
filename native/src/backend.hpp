@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "gpu_layout.hpp"
+#include "voxgrid.hpp"
 #include "world.hpp"
 
 namespace atlas {
@@ -34,6 +35,7 @@ struct FrameInputs {
     bool wantNearDepth = false;               // caller asked for the near-depth skip (GL path: shared image)
     const uint32_t* nearInfo = nullptr;       // host path: w*h near-field surface info, RGBA8 (FRAME_NEAR_LIGHT)
     std::vector<ActorGpu> actors;             // at least one element (count in frame.weatherParams[3])
+    VoxGrid* voxgrid = nullptr;               // the level-0 grid's books: the backend takes its batches (voxgrid.hpp)
 };
 
 struct FrameTargets {
@@ -84,6 +86,14 @@ public:
     // Called from the update thread with a new scene revision: a backend may copy it to the GPU here, off the
     // render thread. Returns false when it could not (the frame then uploads it itself).
     virtual bool stageScene(const PackedScene&) { return false; }
+    // the level-0 grid's last build on the device: GPU ms, sections and jobs in it, whether the chunks' boxes were
+    // regrown; and the GPU ms of every build so far
+    struct VoxGridTimes {
+        double lastMs = 0, totalMs = 0;
+        uint32_t lastSections = 0, lastJobs = 0;
+        bool lastStates = false;
+    };
+    virtual VoxGridTimes voxgridTimes() const { return {}; }
 
     // Game path (render thread, the game's GL context current): zero-copy through shared memory and semaphores
     // when the driver pair supports it, else frames copied through host memory. Default: unsupported.

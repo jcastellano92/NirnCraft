@@ -51,6 +51,7 @@ static_assert(sizeof(AtlasMaterialShape) == 400 && offsetof(AtlasMaterialShape, 
 struct AtlasContext {
     std::unique_ptr<Backend> backend;
     World world;
+    VoxGrid voxgrid;  // the level-0 grid's books (voxgrid.hpp): sections in, batches to the backend's GPU build
     std::vector<MaterialGpu> palette;
     std::vector<uint32_t> weather;  // near field, near dyn, far field, far dyn (128*128 each)
     std::vector<uint32_t> cloudNoise = std::vector<uint32_t>(64 * 64 * 64, 0);
@@ -278,6 +279,21 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           (unsigned long long)c.levelBytes[6], c.digested, c.evicted, c.digestMs);
             ctx->info.insert(ctx->info.size() - 1, b);
         }
+        if (ctx->voxgrid.active() && !ctx->info.empty() && ctx->info.back() == '}') {
+            // the level-0 grid: slots in use, sections built, what is waiting, the GPU's last build and all of them
+            Backend::VoxGridTimes t = ctx->backend->voxgridTimes();
+            const VoxGrid& v = ctx->voxgrid;
+            uint64_t bytes = uint64_t(v.D) * v.H * v.D * 4 + uint64_t(v.slotCap) * (64 * 12 + VG_SECTION_WORDS * 4);
+            char b[512];
+            std::snprintf(b, sizeof b,
+                          ",\"voxgrid\":{\"window\":[%d,%d,%d],\"slots\":%u,\"slotCap\":%u,\"gpuBytes\":%llu,\"built\":%llu,"
+                          "\"batches\":%llu,\"pending\":%zu,\"lastGpuMs\":%.3f,\"lastSections\":%u,\"lastJobs\":%u,"
+                          "\"lastRegrow\":%s,\"totalGpuMs\":%.2f}",
+                          v.D, v.H, v.D, v.slotsUsed(), v.slotCap, (unsigned long long)bytes, (unsigned long long)v.sectionsBuilt,
+                          (unsigned long long)v.batches, v.pending(), t.lastMs, t.lastSections, t.lastJobs,
+                          t.lastStates ? "true" : "false", t.totalMs);
+            ctx->info.insert(ctx->info.size() - 1, b);
+        }
         return ctx->info.c_str();
     } catch (...) {
         return "{}";
@@ -367,6 +383,7 @@ ATLAS_API AtlasStatus atlas_upload_section(AtlasContext* ctx, int32_t sx, int32_
     if (!ctx || !mats) return ATLAS_ERR_ARG;
     ATLAS_TRY
     ctx->world.putSection(sx, sy, sz, mats);
+    ctx->voxgrid.put(sx, sy, sz, mats);
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }
@@ -376,6 +393,12 @@ ATLAS_API AtlasStatus atlas_notify_block(AtlasContext* ctx, int32_t x, int32_t y
     if (y < WORLD_MIN_Y || y >= WORLD_TOP_Y) return ATLAS_OK;
     ATLAS_TRY
     ctx->world.editBlock(x, y, z, mat);
+    {
+        // the edited section, whole, to the level-0 grid (rebuilt on the GPU with the next frame)
+        std::vector<uint16_t> m(4096);
+        int sx = x >> 4, sy = y >> 4, sz = z >> 4;
+        if (ctx->world.sectionMats(sx, sy, sz, m.data())) ctx->voxgrid.put(sx, sy, sz, m.data());
+    }
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }
@@ -736,6 +759,14 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         }
     }
     if (in.actors.empty()) in.actors.push_back(ActorGpu{});
+    // the level-0 grid: its window follows the camera; the backend builds what changed before this frame's passes
+    ctx->voxgrid.frame(g.camInt, ctx->world);
+    ctx->voxgrid.origin(g.vgOrigin);
+    g.vgDims[0] = uint32_t(ctx->voxgrid.D);
+    g.vgDims[1] = uint32_t(ctx->voxgrid.H);
+    g.vgDims[2] = uint32_t(ctx->voxgrid.D);
+    g.vgDims[3] = 0;
+    in.voxgrid = &ctx->voxgrid;
     in.wantNearDepth = (f->flags & ATLAS_FRAME_NEAR_DEPTH) != 0;
     in.nearDepth = in.wantNearDepth ? f->nearDepth : nullptr;
     if (in.nearDepth && (f->flags & ATLAS_FRAME_FILL_NEAR)) {

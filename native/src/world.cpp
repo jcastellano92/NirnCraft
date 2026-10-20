@@ -502,6 +502,20 @@ void World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
     markSectionDirty(sx, sy, sz);
 }
 
+void World::sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const {
+    std::lock_guard<std::mutex> lock(mu_);
+    for (auto& [k, s] : sections_)
+        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, s);
+}
+
+bool World::sectionMats(int sx, int sy, int sz, uint16_t out[4096]) const {
+    std::lock_guard<std::mutex> lock(mu_);
+    auto it = sections_.find({0, sx, sy, sz});
+    if (it == sections_.end()) return false;
+    std::copy(it->second->mats.begin(), it->second->mats.end(), out);
+    return true;
+}
+
 void World::markSectionDirty(int sx, int sy, int sz) {
     // the section's region at every level that reads sections (0..4); with groups also the region across a border it
     // touches (whose border voxels' exposure it decides). (Levels 5 and up read it through the coarse levels: their

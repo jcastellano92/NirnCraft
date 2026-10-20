@@ -122,6 +122,8 @@ public:
     const char* name() const override { return "cpu (slang->c++)"; }
     std::vector<float> dummyDepth_ = std::vector<float>(1, 1e30f);
     std::vector<uint32_t> dummyInfo_ = std::vector<uint32_t>(1, 0u);
+    std::vector<uint32_t> dummyU32_ = std::vector<uint32_t>(1, 0u);
+    std::vector<uint64_t> dummyU64_ = std::vector<uint64_t>(1, 0u);
     std::vector<float> dummyLight_ = std::vector<float>(4, 0.0f);
     std::vector<float> cloud_, cloudDepth_, prevSurface_, outSurface_, prevCloud_, prevCloudDepth_;
     std::vector<float> sunMap_ = std::vector<float>(2, 0.0f);
@@ -382,6 +384,27 @@ private:
         g.actors = view(in.actors);
         g.heightMip = view(s.heightMip);
         g.groupData = {reinterpret_cast<Uint4*>(const_cast<uint32_t*>(s.groups.data())), s.groups.size() / 4};
+        // the level-0 grid: its pending sections built here, the reference of atlas_voxgrid.slang's kernels
+        if (in.voxgrid && in.voxgrid->active()) {
+            for (;;) {
+                VgBatch b = in.voxgrid->take(1 << 30);
+                if (!b.clear && b.jobs.empty()) break;
+                in.voxgrid->applyCpu(b);
+            }
+        }
+        if (in.voxgrid && !in.voxgrid->chunks.empty()) {
+            VoxGrid& vg = *in.voxgrid;
+            g.vgChunks = view(vg.chunks);
+            g.vgBlocks = vg.blocks.empty() ? view(dummyU32_) : view(vg.blocks);
+            g.vgBits = vg.bits.empty() ? view(dummyU64_) : view(vg.bits);
+            g.vgPool = vg.pool.empty() ? view(dummyU32_) : view(vg.pool);
+            frame.vgOrigin[0] = vg.cpuOx;  // (the window these arrays hold: the books may have moved on since)
+            frame.vgOrigin[2] = vg.cpuOz;
+        } else {
+            frame.vgOrigin[3] = 0;  // (no grid here yet)
+            g.vgChunks = g.vgBlocks = g.vgPool = view(dummyU32_);
+            g.vgBits = view(dummyU64_);
+        }
         // the half-resolution cloud pass reads the last frame's surfaces (none yet, or after a resize: no limit)
         uint32_t dv = (frame.dims[2] & 0x80u) ? 4u : 2u;  // FRAME_CLOUDS_QUARTER
         size_t cn = size_t((w + dv - 1) / dv) * ((h + dv - 1) / dv);

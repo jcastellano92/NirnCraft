@@ -48,6 +48,9 @@ struct alignas(16) FrameGpu {
     float moonRad[4];
     // (abi 0.13) primary-ray jitter (atlas_set_jitter): NDC offset x, y; z = 1 when set; w unused
     float jitter[4];
+    // the GPU-built level-0 grid (voxgrid.hpp): origin in sections, w = 1 when present; dims in sections
+    int32_t vgOrigin[4];
+    uint32_t vgDims[4];
 };
 
 struct alignas(16) ActorGpu {
@@ -60,7 +63,7 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 48);
 static_assert(sizeof(RegionGpu) == 64);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 32);
 
 struct Float4 {
     float v[4];
@@ -111,6 +114,12 @@ struct FarGlobals {
     CpuBuffer<Uint4> groupData;  // (atlas_groups.slang) PackedScene::groups
     CpuBuffer<uint32_t> nearInfo;   // (abi 0.15) the near field's surface info per pixel, RGBA8 packed
     CpuBuffer<Float4> outNearLight; // (abi 0.15) the near light per pixel (FRAME_NEAR_LIGHT)
+    CpuBuffer<Float4> prevNearLight;  // (nearTemporalMain only: never read on the CPU)
+    // the level-0 grid (voxgrid.hpp): chunk words, block words, block bitmaps, the sections' raw ids
+    CpuBuffer<uint32_t> vgChunks;
+    CpuBuffer<uint32_t> vgBlocks;
+    CpuBuffer<uint64_t> vgBits;
+    CpuBuffer<uint32_t> vgPool;
 };
 
 }  // namespace atlas
