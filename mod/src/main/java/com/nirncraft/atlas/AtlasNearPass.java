@@ -568,7 +568,8 @@ public final class AtlasNearPass {
         // then mode 2, the same light untraced, instead of vanilla's look for that frame: a flicker on arrival)
         boolean traced = nearLight && far != null;
         lit = AtlasClient.nearLightSupported();
-        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 304);
+        if (info == null) info = new net.minecraft.client.renderer.MappableRingBuffer(() -> "atlas near info", 130, 320);
+        float[] medium = medium(mc, camState);
         var camState = mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
         float eyeWater = eyeWaterDepth(mc, camState);
         float[] sun = AtlasClient.sunDirection(mc.gameRenderer.gameRenderState().levelRenderState.skyRenderState.sunAngle);
@@ -596,7 +597,9 @@ public final class AtlasNearPass {
                     .putVec4(waterTint(mc, camState)[0], waterTint[1], waterTint[2], waterTint[3])  // WaterTint: colour, w ocean share
                     // CamAbs: the camera's world position (the sun map's world frame), w: the sun map's size (0: none)
                     .putVec4((float) camState.pos.x, (float) camState.pos.y, (float) camState.pos.z,
-                            far != null ? far.sunMapSize() : 0f);
+                            far != null ? far.sunMapSize() : 0f)
+                    // Medium: extinction a block, its own light (glow, rgb before display)
+                    .putVec4(medium[0], medium[1], medium[2], medium[3]);
         }
         var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
                 FilterMode.NEAREST, FilterMode.NEAREST, false);
@@ -631,6 +634,33 @@ public final class AtlasNearPass {
     }
 
     private static final float[] waterTint = {0.25f, 0.46f, 0.89f, 0f};
+
+    /**
+     * The medium around the eye, ours (atlas_water.glsl atlasMedium): {extinction a block, glow r, g, b}. Lava: about a
+     * block of sight (a few with fire resistance), glowing from within; powder snow: thick white scattering (its light the
+     * sky's and the sun's, added in the shader); blindness: closing in over its fade (sight a few blocks), black; darkness:
+     * pulsing with the effect's own blend (the warden's), black. 0 extinction: the air (its haze is atlas's).
+     */
+    private static float[] medium(Minecraft mc, net.minecraft.client.renderer.state.level.CameraRenderState cam) {
+        var t = cam.fogType;
+        var p = mc.player;
+        float pt = mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+        if (t == net.minecraft.world.level.material.FogType.LAVA) {
+            boolean resist = p != null && p.hasEffect(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE);
+            return new float[] {resist ? 0.6f : 2.5f, 3.2f, 1.0f, 0.18f};
+        }
+        if (t == net.minecraft.world.level.material.FogType.POWDER_SNOW) return new float[] {1.6f, -1f, 0f, 0f};  // (-1: lit white)
+        if (p != null) {
+            var blind = p.getEffect(net.minecraft.world.effect.MobEffects.BLINDNESS);
+            if (blind != null) return new float[] {0.65f * blind.getBlendFactor(p, pt) + 0.001f, 0f, 0f, 0f};
+            var dark = p.getEffect(net.minecraft.world.effect.MobEffects.DARKNESS);
+            if (dark != null) {
+                float pulse = 0.55f + 0.45f * (float) Math.sin((mc.level != null ? mc.level.getGameTime() + pt : 0) * 0.08);
+                return new float[] {0.35f * dark.getBlendFactor(p, pt) * pulse + 0.001f, 0f, 0f, 0f};
+            }
+        }
+        return new float[] {0f, 0f, 0f, 0f};
+    }
 
     /** The medium around the eye (atlas_water.glsl atlasMedium): 0 the air, 1 lava, 2 powder snow, 3 blindness, 4 darkness. */
     private static float specialFog(Minecraft mc, net.minecraft.client.renderer.state.level.CameraRenderState cam) {

@@ -19,6 +19,8 @@ layout(std140) uniform NearInfo {
     mat4 InvViewRot;  // view space -> camera-relative world
     vec4 CamPos;      // the camera's world position, x and z modulo 6144 (world-anchored patterns)
     vec4 WaterTint;   // the biomes' water colour around the camera, eased (atlas_water.glsl)
+    vec4 CamAbs;      // the camera's world position; w the sun map's size
+    vec4 Medium;      // the eye's medium: x extinction a block (0: the air), yzw its glow (y < 0: lit white, powder snow)
 };
 uniform sampler2D ShadowMap;  // the near terrain seen from the key light (AtlasNearPass's shadow pass)
 

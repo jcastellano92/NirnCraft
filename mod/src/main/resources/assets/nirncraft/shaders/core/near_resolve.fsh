@@ -34,6 +34,7 @@ layout(std140) uniform NearInfo {
     vec4 CamPos;      // camera world position, x z modulo 6144
     vec4 WaterTint;   // the biomes' water colour around the camera
     vec4 CamAbs;      // the camera's world position; w the sun map's size S (0: no sun map)
+    vec4 Medium;      // the eye's medium: x extinction a block (0: the air), yzw its glow (y < 0: lit white)
 };
 uniform sampler2D SunMap;  // RG32F, S x S + 1: the terrain's depth along the light from the map's centre, cloud transmittance;
                            // the last row: centre (world), half extent, X, Y, L (atlas_far.slang sunMapMain)
@@ -258,7 +259,7 @@ vec3 untracedRadiance(vec3 albedo, vec3 n, vec2 lm) {
 // when our look is on: the air's haze is atlas's (aerialInscatter), and vanilla's grey distance fog over it hazed the far
 // field twice (bright, washed mountains at night)
 float vanillaFogShare() {
-    return Look.z > 0.5 ? Ground.w : 1.0;  // (our look: only a special medium; no distance fog of vanilla's)
+    return Look.z > 0.5 ? 0.0 : 1.0;  // (our look: no fog of vanilla's at all; media are ours, atlasMedium)
 }
 
 vec3 environmentalFog(vec3 rgb, float dist, vec3 dir) {
