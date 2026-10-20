@@ -377,5 +377,23 @@ try:
 except ValueError:
     pass
 
+# --- the dev overlay: a copy older than the mod's own file is dropped at launch (it hid a newer shader include) -------
+import tempfile as _tf, os as _os, time as _time
+import game as _game
+with _tf.TemporaryDirectory() as _td:
+    _ov, _src = Path(_td) / "ov", Path(_td) / "src"
+    for _b in (_ov, _src):
+        (_b / "assets/x").mkdir(parents=True)
+    (_ov / "assets/x/stale.glsl").write_text("old")
+    (_ov / "assets/x/fresh.glsl").write_text("edit")
+    _t = _time.time()
+    _os.utime(_ov / "assets/x/stale.glsl", (_t - 100, _t - 100))
+    _os.utime(_ov / "assets/x/fresh.glsl", (_t + 100, _t + 100))
+    (_src / "assets/x/stale.glsl").write_text("new")
+    (_src / "assets/x/fresh.glsl").write_text("older source")
+    _dropped = _game.drop_stale_overlay(_ov, _src)
+    expect([d.name for d in _dropped] == ["stale.glsl"] and (_ov / "assets/x/fresh.glsl").exists(),
+           "the overlay drops a copy older than the mod's file and keeps a newer live edit")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)

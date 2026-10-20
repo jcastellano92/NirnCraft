@@ -128,10 +128,30 @@ def _set_group_flags(jvm):
     lw.atomic(cfg, text.encode())
 
 
+def drop_stale_overlay(overlay=None, sources=None):
+    """Overlay files whose source in the mod's resources is newer are gone: the overlay sits above the jar, so a copy
+    left there from an earlier live edit hid the jar's newer file (a stale shader include: undeclared uniforms, the
+    client crashed compiling the pipeline at load). Returns the paths dropped."""
+    overlay = Path(overlay or OVERLAY) / "assets"
+    sources = Path(sources or ROOT / "mod/src/main/resources") / "assets"
+    dropped = []
+    if not overlay.exists():
+        return dropped
+    for f in overlay.rglob("*"):
+        if not f.is_file():
+            continue
+        src = sources / f.relative_to(overlay)
+        if src.exists() and src.stat().st_mtime > f.stat().st_mtime:
+            f.unlink()
+            dropped.append(f)
+    return dropped
+
+
 def _enable_overlay():
     """The dev overlay resource pack sits above the mod's own assets, so edited textures / models / sounds / lang
     reload live (`resources` verb) without a jar rebuild. Enabled in options.txt while the client is closed."""
     (OVERLAY / "assets").mkdir(parents=True, exist_ok=True)
+    drop_stale_overlay()
     meta = OVERLAY / "pack.mcmeta"
     mod_meta = json.loads((ROOT / "mod/src/main/resources/pack.mcmeta").read_text(encoding="utf-8"))["pack"]
     want = {"pack": {"description": "NirnCraft harness dev overlay", "min_format": mod_meta["min_format"],
