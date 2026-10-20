@@ -169,6 +169,23 @@ The full checklist from R1, every item checked live; the owner flies it.
   inputs back) and the CPU backend. Checked: far surfaces fed back as the near field give the far field's own colour
   (median relative error 5.6e-4, the normal's 8 bits), CPU and Vulkan agree. Cost on the 3090 at 1920x1080, zero-copy,
   64 % of the screen near (looking down from 60 blocks): +0.5-0.57 ms GPU (3.7 -> 4.3 ms; atlas_gl_test).
+- **One material near and far (2026-10-20).** element_lab's `far-lit-game` (atlas's own light on the game's far
+  materials, no cards) against `far-lit` (the same light on albedo cards: the textures) is the materials alone. Fixed at
+  the source: far materials wear the tint the near field's tint source gives (AtlasMaterials.tint: the biome's grass and
+  foliage, spruce and birch constants, none where a block has no source, as NirnCraft's snowy spruce leaves): grass,
+  ferns and vines were grey, and the far grown trees' walls (a crown's sides, AtlasTrees / AtlasSettlements) were
+  untinted spruce leaves, grey (dE 33 against the near's green: the whitish far spruces); the dressing's snowy conifer
+  canopy was pale grey (sRGB 153,168,163, dE 30 against a snowy pine's crown), now spruce green with half snowy leaves
+  (74,97,80), plain conifers the spruce leaves' mean x 619961; a coarse voxel took its commonest child, the buried one
+  (dirt under grass, a hillside's stone), now the commonest of those seen from above (world.cpp shownKid). atlas_export
+  mirrors the game (tint sources from quads.bin; only the grey texels of tinted quads: it had tinted a grass block's
+  dirt and spruce by the biome, part of the before). dE cards vs game materials, 64 / 256 / 1024 / 4096 m, CPU:
+  cave-mouth-near-tree (spruce) 6.5 / 6.0 / 6.0 / 6.3 -> 2.3 / 1.3 / 2.1 / 3.8; whiterun-day-chunk 7.1 / 5.2 / 5.7 /
+  6.6 -> 3.9 / 2.4 / 3.9 / 4.4; falkreath-wide-town 2.5 / 1.4 / 6.0 / 10.3 -> 2.5 / 1.2 / 5.1 / 10.4;
+  falkreath-wide-tree 3.5 / 2.7 / 2.5 -> 2.9 / 1.8 / 2.0. Left: from ~4 km a coarse voxel shows one material's face
+  tiles (no colour mips; the town's 50 px still 13 dE inside). far-game's growth against `exact` (15 at 256 m, 25 at
+  4 km) is not materials: against `intended` (16 spp) it is 12.9 / 15.6, the 1-spp reference's aliasing and the vanilla
+  light's emulation.
 
 ## Parked (off the renderer goal, for later)
 

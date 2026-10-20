@@ -73,7 +73,9 @@ std::vector<AtlasMaterial> previewPalette() {
     set(M_SANDSTONE, mat(0.78f, 0.66f, 0.45f, 0.85f, ATLAS_CLASS_TERRAIN));
     set(M_MUD, mat(0.33f, 0.3f, 0.2f, 0.7f, ATLAS_CLASS_TERRAIN));
     set(M_DRYGRASS, mat(0.62f, 0.58f, 0.32f, 0.9f, ATLAS_CLASS_TERRAIN));
-    set(M_CONIFER, mat(0.16f, 0.27f, 0.17f, 0.95f, ATLAS_CLASS_FOLIAGE));
+    // what the near field's spruce crowns average to: the leaves' grey texture (0x838383) x vanilla's fixed spruce tint
+    // (0x619961)
+    set(M_CONIFER, mat(0.195f, 0.308f, 0.195f, 0.95f, ATLAS_CLASS_FOLIAGE));
     set(M_JUNGLE, mat(0.15f, 0.36f, 0.1f, 0.95f, ATLAS_CLASS_FOLIAGE));
     set(M_REDSAND, mat(0.72f, 0.45f, 0.28f, 0.85f, ATLAS_CLASS_TERRAIN));
     set(M_ICE, mat(0.66f, 0.78f, 0.9f, 0.2f, ATLAS_CLASS_TERRAIN));
@@ -84,7 +86,10 @@ std::vector<AtlasMaterial> previewPalette() {
     set(M_MARSHGRASS, mat(0.36f, 0.40f, 0.24f, 0.85f, ATLAS_CLASS_TERRAIN)); // Black Marsh, Hjaalmarch
     // flowing water: the water colour (the kernel adds the white water of fast runs and rapids from the flow)
     for (int k = 0; k < FLOW_DIRS * FLOW_SPEEDS; k++) set(PreviewMat(M_FLOW0 + k), mat(0.16f, 0.27f, 0.42f, 0.05f, ATLAS_CLASS_WATER));
-    set(M_SNOWCANOPY, mat(0.6f, 0.66f, 0.64f, 0.9f, ATLAS_CLASS_FOLIAGE));  // snow on conifer crowns
+    // snowy conifer crowns as the near field shows them: dark green spruce with the snowy species' accent leaves on top
+    // of each layer (NirnCraft's snowy_spruce_leaves, their own mean 0x5C7064), half the crown's exposed leaves in an
+    // exported snowy pine, mixed in linear light; not a white crown (it read whitish where the near spruces are green)
+    set(M_SNOWCANOPY, mat(0.292f, 0.381f, 0.313f, 0.9f, ATLAS_CLASS_FOLIAGE));
     return p;
 }
 

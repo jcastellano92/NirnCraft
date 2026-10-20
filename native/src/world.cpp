@@ -347,9 +347,27 @@ Key3 sectionCube(int level, int sx, int sy, int sz) {
     return {level, floorDiv(sx, 16), floorDiv(sy - WORLD_MIN_Y / 16, 16), floorDiv(sz, 16)};
 }
 
+// The material a coarse voxel shows, of its children (x + 2 z + 4 y) of kind `want` (-1: any): the commonest among
+// those seen from above (in its upper layer, or under a child of another kind or none), ties to the higher child. The
+// commonest of all was the buried one: the dirt under a grass top, a hillside's stone (far land read brown where the
+// near field is green, more so the coarser the level, docs/ATLAS-RENDERER-PLAN.md).
+template <class Kind>
+uint16_t shownKid(const uint16_t ch[8], int want, const Kind& kind) {
+    auto shown = [&](int a) { return a >= 4 || !ch[a + 4] || kind(ch[a + 4]) != kind(ch[a]); };
+    uint16_t best = 0;
+    int bestN = 0;
+    for (int a = 7; a >= 0; a--) {  // the upper children first: ties go up
+        if (!ch[a] || (want >= 0 && kind(ch[a]) != want) || !shown(a)) continue;
+        int c = 0;
+        for (int b = 0; b < 8; b++) c += ch[b] == ch[a] && shown(b) ? 1 : 0;
+        if (c > bestN) bestN = c, best = ch[a];
+    }
+    return best;
+}
+
 // the material of a coarse voxel from its 8 children's (Section::buildMips' vote: solid when 3 or more are, foliage
-// when 2, water when 4; the commonest of the winning kind, ties up), or where the vote is air the commonest child
-// with anything (its coverage decides whether it shows)
+// when 2, water when 4; the commonest of the winning kind's shown children, ties up), or where the vote is air the
+// commonest child with anything (its coverage decides whether it shows)
 uint16_t voteKids(const uint16_t ch[8], const std::vector<uint8_t>& cls) {
     auto kind = [&](uint16_t m) -> int {
         if (m == 0) return -1;
@@ -360,15 +378,7 @@ uint16_t voteKids(const uint16_t ch[8], const std::vector<uint8_t>& cls) {
     for (int k = 0; k < 8; k++)
         if (kind(ch[k]) >= 0) counts[kind(ch[k])]++;
     int want = counts[0] >= 3 ? 0 : counts[1] >= 2 ? 1 : counts[2] >= 4 ? 2 : -1;
-    uint16_t best = 0;
-    int bestN = 0;
-    for (int a = 7; a >= 0; a--) {  // the upper children first: ties go up
-        if (!ch[a] || (want >= 0 && kind(ch[a]) != want)) continue;
-        int c = 0;
-        for (int b = 0; b < 8; b++) c += ch[b] == ch[a] ? 1 : 0;
-        if (c > bestN) bestN = c, best = ch[a];
-    }
-    return best;
+    return shownKid(ch, want, kind);
 }
 
 }  // namespace
@@ -508,7 +518,7 @@ void World::markRegions(int sx, int sy, int sz, int lo, int hi, std::unordered_s
 
 // docs/ATLAS-LOD.md: a coarse voxel from its 2 x 2 x 2 children. Solid (terrain, walls, trunks, emitters' blocks) when
 // 3 or more children are solid; else foliage when 2 or more are leaves; else water when 4 or more are water; else air.
-// Its material: the most common among the children of the winning kind, ties to the higher child.
+// Its material: the most common among the children of the winning kind seen from above (shownKid), ties to the higher.
 void Section::buildMips(const std::vector<uint8_t>& cls) {
     auto kind = [&](uint16_t m) -> int {
         if (m == 0) return -1;
@@ -534,18 +544,7 @@ void Section::buildMips(const std::vector<uint8_t>& cls) {
                     }
                     int want = counts[0] >= 3 ? 0 : counts[1] >= 2 ? 1 : counts[2] >= 4 ? 2 : -1;
                     if (want < 0) continue;
-                    uint16_t best = 0;
-                    int bestN = 0;
-                    for (int a = 7; a >= 0; a--) {  // the upper children first: ties go up
-                        if (kind(ch[a]) != want) continue;
-                        int c = 0;
-                        for (int b = 0; b < 8; b++) c += ch[b] == ch[a] ? 1 : 0;
-                        if (c > bestN) {
-                            bestN = c;
-                            best = ch[a];
-                        }
-                    }
-                    out[size_t(x + m * (z + m * y))] = best;
+                    out[size_t(x + m * (z + m * y))] = shownKid(ch, want, kind);
                 }
         mip[size_t(level - 1)] = out;
         prev.swap(out);

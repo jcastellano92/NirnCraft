@@ -59,21 +59,25 @@ final class AtlasMaterials {
         }
     }
 
-    /** The palette id of a block's far colour, registered on first use (any thread). */
+    /**
+     * The palette id of a block's far colour, registered on first use (any thread). A block the near field tints with a
+     * constant (spruce, birch leaves) wears it; one tinted by the biome needs leaves() / section() with the colour.
+     */
     synchronized short id(BlockState s) {
         Short v = ids.get(s.getBlock());
         if (v != null) return v;
         if (next > LAST) return (short) FIRST;  // full: the first entry (never in practice: a few hundred blocks)
-        pending.add(material(s));
-        pendingShapes.add(shapeOf(s, -1));
+        int t = tint(s, -1, -1);
+        pending.add(t >= 0 ? tintedMaterial(s, t & 0xF8F8F8) : material(s));
+        pendingShapes.add(shapeOf(s, t >= 0 ? t & 0xF8F8F8 : -1));
         short id = (short) next++;
         ids.put(s.getBlock(), id);
         return id;
     }
 
     /**
-     * The palette id of tinted leaves: the block's grey texture mean times the biome's foliage colour rgb (as the near
-     * field tints them), registered per block and tint (quantized to 5 bits a channel: a few dozen per world).
+     * The palette id of a tinted block (leaves, grass): its grey texture mean times the tint rgb (tint(): as the near
+     * field tints it), registered per block and tint (quantized to 5 bits a channel: a few dozen per world).
      */
     synchronized short leaves(BlockState s, int rgb) {
         int q = rgb & 0xF8F8F8;
@@ -117,13 +121,40 @@ final class AtlasMaterials {
         return id;
     }
 
-    /** Whether a leaf block takes the biome's foliage colour in the near field (its texture is grey). */
+    /** Whether the near field tints a block with the biome's grass or foliage colour (tint(): it needs them). */
     static boolean biomeTinted(BlockState s) {
-        if (!s.is(BlockTags.LEAVES)) return false;
-        int c = AtlasBlockColors.rgb(BuiltInRegistries.BLOCK.getKey(s.getBlock()).toString());
-        if (c < 0) return false;
-        int r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
-        return Math.max(r, Math.max(g, b)) - Math.min(r, Math.min(g, b)) < 20;
+        int k = TINT_KINDS.computeIfAbsent(s, AtlasMaterials::probeTint);
+        return k == TINT_GRASS || k == TINT_FOLIAGE;
+    }
+
+    /** Per state its tint source's answer: TINT_* for none or a biome colour, else the constant RGB. */
+    private static final Map<BlockState, Integer> TINT_KINDS = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final int TINT_NONE = -1, TINT_GRASS = -2, TINT_FOLIAGE = -3;
+
+    /**
+     * The tint the near field gives a block's tinted quads, as its tint source answers the chunk mesher: the biome's
+     * grass or foliage colour (`grass` / `foliage` RGB, -1 when not known: untinted then), a constant (spruce 619961,
+     * birch 80A755), or -1 when it has none (a texture coloured already, as NirnCraft's snowy spruce leaves: no source)
+     * and for water and dry foliage (their far colours are their own). Grass, ferns, vines and leaves alike: a far
+     * material is what its textured near version averages to, not its grey texture.
+     */
+    static int tint(BlockState s, int grass, int foliage) {
+        int k = TINT_KINDS.computeIfAbsent(s, AtlasMaterials::probeTint);
+        return k == TINT_GRASS ? grass : k == TINT_FOLIAGE ? foliage : k;
+    }
+
+    private static int probeTint(BlockState s) {
+        try {
+            var sources = net.minecraft.client.Minecraft.getInstance().getBlockColors().getTintSources(s);
+            if (sources.isEmpty() || sources.get(0) == null) return TINT_NONE;
+            int c = sources.get(0).colorInWorld(s, AtlasLabExport.TINT_PROBE, BlockPos.ZERO);
+            int rgb = c & 0xFFFFFF;
+            if (c == -1 || rgb == 0xFFFFFF || rgb == AtlasLabExport.PROBE_WATER || rgb == AtlasLabExport.PROBE_DRY) return TINT_NONE;
+            if (rgb == AtlasLabExport.PROBE_GRASS || rgb == AtlasLabExport.PROBE_OTHER) return TINT_GRASS;
+            return rgb == AtlasLabExport.PROBE_FOLIAGE ? TINT_FOLIAGE : rgb;
+        } catch (RuntimeException e) {
+            return TINT_NONE;  // no client (a test) or a source that needs a real level: as before, untinted
+        }
     }
 
     /** Registers the ids handed out since the last call (before uploading anything that uses them). */

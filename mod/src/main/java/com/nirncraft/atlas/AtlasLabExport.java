@@ -252,9 +252,10 @@ public final class AtlasLabExport {
     // ---- the exact mesh: every state's quads and every sprite (atlas_truth) -----------------------------------------
 
     /** What a tint source answers for each biome colour resolver: the kind it used, found again in its result. */
-    private static final int PROBE_GRASS = 0xFE0101, PROBE_FOLIAGE = 0xFE0102, PROBE_DRY = 0xFE0103, PROBE_WATER = 0xFE0104,
+    static final int PROBE_GRASS = 0xFE0101, PROBE_FOLIAGE = 0xFE0102, PROBE_DRY = 0xFE0103, PROBE_WATER = 0xFE0104,
             PROBE_OTHER = 0xFE0105;
-    private static final net.minecraft.client.renderer.block.BlockAndTintGetter TINT_PROBE = new net.minecraft.client.renderer.block.BlockAndTintGetter() {
+    /** (also AtlasMaterials.tint: the far field's materials take the tint the near field gives a block) */
+    static final net.minecraft.client.renderer.block.BlockAndTintGetter TINT_PROBE =new net.minecraft.client.renderer.block.BlockAndTintGetter() {
         @Override
         public net.minecraft.world.level.CardinalLighting cardinalLighting() {
             return net.minecraft.world.level.CardinalLighting.DEFAULT;

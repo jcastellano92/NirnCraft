@@ -499,7 +499,8 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
                 float top = sh.top[best];
                 float base = grounded ? Float.NaN : lowest;
                 short roof = sh.tint != null && sh.tint[best] != 0 ? mats.leaves(sh.roof[best], sh.tint[best]) : mats.id(sh.roof[best]);
-                put(i, j, top - 1, top, mats.id(sh.wall[best]), roof, base);
+                short wall = sh.wallTint != null && sh.wallTint[best] != 0 ? mats.leaves(sh.wall[best], sh.wallTint[best]) : mats.id(sh.wall[best]);
+                put(i, j, top - 1, top, wall, roof, base);
             }
     }
 
