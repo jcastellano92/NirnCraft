@@ -40,6 +40,7 @@ import java.lang.reflect.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -247,6 +248,137 @@ class AtlasGenParityTest {
     }
 
     // ---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Against the real server (stage 4): with NIRNCRAFT_TEST_WORLD=tamriel the JUnit server's overworld is Tamriel (seed
+     * 1234, structures on); its fully generated chunks (terrain, features, structures, in its own order) against the
+     * GPU's terrain alone and the GPU's terrain plus the client's decoration (AtlasGenFeatures over the 3 x 3).
+     */
+    @Test
+    void realWorld(MinecraftServer server) throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue("tamriel".equals(System.getenv("NIRNCRAFT_TEST_WORLD")), "the flat test world");
+        if (server.overworld() == null) {
+            // the JUnit server loads no levels: create them as a dedicated server does (on its thread)
+            server.submit(() -> {
+                try {
+                    java.lang.reflect.Method m = MinecraftServer.class.getDeclaredMethod("createLevels");
+                    m.setAccessible(true);
+                    m.invoke(server);
+                } catch (ReflectiveOperationException e) {
+                    throw new IllegalStateException(e);
+                }
+            }).join();
+        }
+        net.minecraft.server.level.ServerLevel ow = server.overworld();
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) ow.getChunkSource().getGenerator();
+        RandomState rs = ow.getChunkSource().randomState();
+        long seed = ow.getSeed();
+        AtlasGenProgram prog = AtlasGenProgram.compile(gen, gen.generatorSettings().value(), rs, ow, seed, null);
+        AtlasGenPages pages = new AtlasGenPages(prog, rs, gen.getBiomeSource(), ow);
+        AtlasGenFeatures features = new AtlasGenFeatures(gen, ow, server.registryAccess(), ow, seed, prog, true);
+        int per = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_GEN_PARITY_N", "2"));
+        Map<String, List<ChunkPos>> kinds = pick(per);
+        List<ChunkPos> all = new ArrayList<>();
+        kinds.values().forEach(all::addAll);
+        StringBuilder report = new StringBuilder(String.format("real world: seed %d, %d chunks%n", seed, all.size()));
+        long t0 = System.nanoTime();
+        Map<ChunkPos, ChunkAccess> real = new LinkedHashMap<>();
+        for (ChunkPos p : all) real.put(p, server.submit(() -> (ChunkAccess) ow.getChunk(p.x(), p.z())).join());
+        report.append(String.format("server: %.0f ms for the chunks (and the neighbours they need)%n", (System.nanoTime() - t0) / 1e6));
+        Set<ChunkPos> need = new java.util.LinkedHashSet<>();
+        for (ChunkPos p : all)
+            for (int dz = -2; dz <= 2; dz++) for (int dx = -2; dx <= 2; dx++) need.add(new ChunkPos(p.x() + dx, p.z() + dz));
+        List<ChunkPos> needList = new ArrayList<>(need);
+        int[] xz = new int[needList.size() * 2];
+        for (int i = 0; i < needList.size(); i++) {
+            xz[i * 2] = needList.get(i).x();
+            xz[i * 2 + 1] = needList.get(i).z();
+        }
+        AtlasGenNative nat = AtlasGenNative.load(Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB")));
+        Map<Long, int[]> chunkIds = new HashMap<>();
+        Map<Long, int[]> biomePages = new java.util.concurrent.ConcurrentHashMap<>();
+        try (AtlasGenNative.Gen g = nat.create(AtlasGenNative.BACKEND_VULKAN)) {
+            g.setProgram(prog.words);
+            int[] miss = g.missing(xz);
+            int[][] made = new int[miss.length / 3][];
+            java.util.stream.IntStream.range(0, made.length).parallel().forEach(i -> made[i] = pages.page(miss[i * 3], miss[i * 3 + 1], miss[i * 3 + 2] != 0));
+            for (int i = 0; i < made.length; i++) {
+                g.putPage(miss[i * 3], miss[i * 3 + 1], miss[i * 3 + 2] != 0, made[i]);
+                if (miss[i * 3 + 2] != 0) biomePages.put(ChunkPos.pack(miss[i * 3], miss[i * 3 + 1]), made[i]);
+            }
+            int[] ids = new int[needList.size() * AtlasGenNative.CHUNK_WORDS];
+            g.chunks(xz, 0, ids, null);
+            for (int i = 0; i < needList.size(); i++)
+                chunkIds.put(needList.get(i).pack(), Arrays.copyOfRange(ids, i * AtlasGenNative.CHUNK_WORDS, (i + 1) * AtlasGenNative.CHUNK_WORDS));
+        }
+        need.parallelStream().forEach(p -> biomePages.computeIfAbsent(p.pack(), k -> pages.page(p.x(), p.z(), true)));
+        int biomeAt = prog.fields.size() * 256 + 256;
+        AtlasGenFeatures.Terrain terrain = new AtlasGenFeatures.Terrain() {
+            public int id(int x, int y, int z) {
+                int[] c = chunkIds.get(ChunkPos.pack(x >> 4, z >> 4));
+                if (c == null) return -1;
+                if (y < -64 || y > 575) return 0;
+                int b = (x & 15) + 16 * ((z & 15) + 16 * (y + 64));
+                int w = c[b >> 1];
+                return (b & 1) != 0 ? w >>> 16 : w & 0xFFFF;
+            }
+
+            public int quartBiome(int qx, int qy, int qz) {
+                int[] pg = biomePages.get(ChunkPos.pack(qx >> 2, qz >> 2));
+                if (pg == null) return -1;
+                int y = Math.max(-16, Math.min(159, qy));
+                int i = ((qx & 3) * 4 + (qz & 3)) * AtlasGenProgram.QY + (y + 16);
+                int w = pg[biomeAt + (i >> 1)];
+                return (i & 1) != 0 ? w >>> 16 : w & 0xFFFF;
+            }
+        };
+        long ft = System.nanoTime();
+        Map<ChunkPos, AtlasGenFeatures.Window> windows = new HashMap<>();
+        for (ChunkPos p : all) {
+            AtlasGenFeatures.Window w = features.new Window(terrain);
+            for (int dz = -1; dz <= 1; dz++) for (int dx = -1; dx <= 1; dx++) features.decorate(p.x() + dx, p.z() + dz, w);
+            windows.put(p, w);
+        }
+        double fms = (System.nanoTime() - ft) / 1e6;
+        report.append(String.format("client decoration: %d chunks in %.0f ms (%.1f ms each), %d feature failures%n",
+                features.decorated, fms, fms / features.decorated, features.failures));
+        features.failed.forEach((k, v) -> report.append("  failed ").append(k).append(": ").append(v).append(System.lineSeparator()));
+        for (int pass = 0; pass < 2; pass++) {
+            long total = 0, same = 0;
+            Map<String, Long> pairs = new TreeMap<>();
+            Map<String, long[]> byKind = new LinkedHashMap<>();
+            BlockPos.MutableBlockPos bp = new BlockPos.MutableBlockPos();
+            for (ChunkPos p : all) {
+                String kind = kinds.entrySet().stream().filter(e -> e.getValue().contains(p)).findFirst().map(Map.Entry::getKey).orElse("?");
+                long[] k = byKind.computeIfAbsent(kind, x -> new long[2]);
+                ChunkAccess c = real.get(p);
+                ProtoChunk decorated = windows.get(p).chunk(p.x(), p.z());
+                for (int y = -64; y < 640; y++)
+                    for (int z = 0; z < 16; z++)
+                        for (int x = 0; x < 16; x++) {
+                            int wx = p.getMinBlockX() + x, wz = p.getMinBlockZ() + z;
+                            BlockState mine = pass == 1 ? decorated.getBlockState(new BlockPos(wx, y, wz))
+                                    : prog.blocks.get(y > 575 ? 0 : terrain.id(wx, y, wz));
+                            BlockState theirs = c.getBlockState(bp.set(wx, y, wz));
+                            total++;
+                            k[0]++;
+                            if (theirs == mine) {
+                                same++;
+                                k[1]++;
+                            } else pairs.merge(name(theirs) + " -> " + name(mine), 1L, Long::sum);
+                        }
+            }
+            report.append(String.format("%s: agreement %.4f %% (%d of %d blocks differ)%n", pass == 0 ? "terrain only" : "terrain + client features",
+                    100.0 * same / total, total - same, total));
+            for (var e : byKind.entrySet())
+                report.append(String.format("  %-9s %.4f %%%n", e.getKey(), 100.0 * e.getValue()[1] / Math.max(1, e.getValue()[0])));
+            pairs.entrySet().stream().sorted((a, b) -> Long.compare(b.getValue(), a.getValue())).limit(30)
+                    .forEach(e -> report.append(String.format("  %8d  %s%n", e.getValue(), e.getKey())));
+        }
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".real.txt"), report.toString());
+        System.out.println(report);
+    }
 
     /** Chunks of each terrain kind on a scan of the map (deterministic). */
     static Map<String, List<ChunkPos>> pick(int per) {

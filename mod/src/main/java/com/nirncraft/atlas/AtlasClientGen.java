@@ -15,6 +15,8 @@ import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
@@ -28,11 +30,17 @@ import java.util.stream.IntStream;
  * correct what differs: the features not generated yet (trees, structures: stage 4), and a player's edits.
  *
  * <p>{@code nirncraft.atlas.clientGen.radius} (chunks, default 24) sets the window. A chunk the kernel could not
- * prove exact is left to the server's blocks.</p>
+ * prove exact is left to the server's blocks. Features (stage 4, AtlasGenFeatures: the world's own decoration over
+ * the generated blocks, trees, cover, rocks, ores, snow) follow on a second thread within
+ * {@code nirncraft.atlas.clientGen.featureRadius} chunks (default 16; 0: off): a chunk goes up again once its 3 x 3
+ * are decorated, only its changed sections re-uploading. {@code nirncraft.atlas.clientGen.ores=false} leaves ores to
+ * the server (the public / secret split).</p>
  */
 final class AtlasClientGen implements AutoCloseable {
     static final boolean ON = Boolean.getBoolean("nirncraft.atlas.clientGen");
     static final int RADIUS = Integer.getInteger("nirncraft.atlas.clientGen.radius", 24);
+    static final int FEATURE_RADIUS = Integer.getInteger("nirncraft.atlas.clientGen.featureRadius", 16);
+    static final boolean ORES = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.ores"));
     private static final int BATCH = 64, READY_MAX = 384;
     private static volatile AtlasClientGen active;
 
@@ -47,7 +55,15 @@ final class AtlasClientGen implements AutoCloseable {
     private final Set<Long> done = ConcurrentHashMap.newKeySet();
     private final Set<Long> deepRock = ConcurrentHashMap.newKeySet();  // sections left out as deep solid rock
     private final List<AtlasSections.Decoded> ready = new ArrayList<>();
-    private final Thread worker;
+    private final Thread worker, featureWorker;
+    // features: the generated ids of chunks near the camera (null section: air), the proto chunks over them, progress
+    private final AtlasGenFeatures features;
+    private final AtlasGenFeatures.Window window;
+    private final Map<Long, short[][]> store = new ConcurrentHashMap<>();
+    private final Set<Long> decorated = ConcurrentHashMap.newKeySet(), emitted = ConcurrentHashMap.newKeySet();
+    private final NoiseBasedChunkGenerator generator;
+    private final RandomState random;
+    private volatile long featureChunks, featureMs;
     private volatile boolean running = true;
     // stats (atlas-info)
     private volatile long chunks, flagged, pagesMade;
@@ -55,6 +71,14 @@ final class AtlasClientGen implements AutoCloseable {
 
     private AtlasClientGen(AtlasGenProgram program, AtlasGenPages pages, AtlasGenNative.Gen gen, NoiseBasedChunkGenerator g,
                            RandomState random, long seed) {
+        this(program, pages, gen, g, random, seed, null);
+    }
+
+    private AtlasClientGen(AtlasGenProgram program, AtlasGenPages pages, AtlasGenNative.Gen gen, NoiseBasedChunkGenerator g,
+                           RandomState random, long seed, AtlasGenFeatures features) {
+        this.generator = g;
+        this.random = random;
+        this.features = features;
         this.program = program;
         this.zoomSeed = net.minecraft.world.level.biome.BiomeManager.obfuscateSeed(seed);
         this.pages = pages;
@@ -75,6 +99,10 @@ final class AtlasClientGen implements AutoCloseable {
         worker = new Thread(this::run, "atlas client generation");
         worker.setDaemon(true);
         worker.setPriority(Thread.NORM_PRIORITY - 1);
+        window = features == null ? null : features.new Window(new StoredTerrain());
+        featureWorker = new Thread(this::decorateLoop, "atlas client features");
+        featureWorker.setDaemon(true);
+        featureWorker.setPriority(Thread.MIN_PRIORITY + 1);
     }
 
     /** A generator without its worker (the parity tool decodes with it). */
@@ -101,11 +129,20 @@ final class AtlasClientGen implements AutoCloseable {
             if (gen == null) gen = nat.create(AtlasGenNative.BACKEND_CPU);
             if (gen == null) return null;
             gen.setProgram(prog.words);
-            AtlasClientGen c = new AtlasClientGen(prog, new AtlasGenPages(prog, rs, g.getBiomeSource(), ow), gen, g, rs, ow.getSeed());
+            AtlasGenFeatures feats = null;
+            if (FEATURE_RADIUS > 0) {
+                try {
+                    feats = new AtlasGenFeatures(g, ow, server.registryAccess(), ow, ow.getSeed(), prog, ORES);
+                } catch (ReflectiveOperationException | RuntimeException e) {
+                    com.nirncraft.NirnCraft.LOGGER.info("atlas client features off: {}", e.toString());
+                }
+            }
+            AtlasClientGen c = new AtlasClientGen(prog, new AtlasGenPages(prog, rs, g.getBiomeSource(), ow), gen, g, rs, ow.getSeed(), feats);
             com.nirncraft.NirnCraft.LOGGER.info("atlas client generation on ({}): program {} words, {} fields, radius {} chunks, {} ms",
                     gen.device(), prog.words.length, prog.fields.size(), RADIUS, (System.nanoTime() - t0) / 1_000_000);
             active = c;
             c.worker.start();
+            if (feats != null) c.featureWorker.start();
             return c;
         } catch (Throwable t) {
             com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation unavailable", t);
@@ -156,8 +193,9 @@ final class AtlasClientGen implements AutoCloseable {
         synchronized (c.ready) {
             r = c.ready.size();
         }
-        return String.format("clientGen{%s chunks=%d flagged=%d ready=%d pages=%d genMs=%.0f pageMs=%.0f}", c.gen.device(),
-                c.chunks, c.flagged, r, c.pagesMade, c.genMs, c.pageMs);
+        return String.format("clientGen{%s chunks=%d flagged=%d ready=%d pages=%d genMs=%.0f pageMs=%.0f features=%d featureMs=%.0f failures=%d}",
+                c.gen.device(), c.chunks, c.flagged, r, c.pagesMade, c.genMs, c.pageMs, c.featureChunks, c.featureMs,
+                c.features == null ? 0 : c.features.failures);
     }
 
     // ---- the worker ----
@@ -195,6 +233,8 @@ final class AtlasClientGen implements AutoCloseable {
                         continue;  // not proven exact here: the server's blocks
                     }
                     decoded.add(decode(batch[i * 2], batch[i * 2 + 1], out, i));
+                    if (features != null && near(batch[i * 2], batch[i * 2 + 1], vx, vz, FEATURE_RADIUS + 2))
+                        store.put(ChunkPos.pack(batch[i * 2], batch[i * 2 + 1]), compact(out, i));
                 }
                 synchronized (ready) {
                     ready.addAll(decoded);
@@ -300,13 +340,181 @@ final class AtlasClientGen implements AutoCloseable {
         return (b & 1) != 0 ? w >>> 16 : w & 0xFFFF;
     }
 
+    // ---- features (stage 4) ----
+
+    static boolean near(int cx, int cz, double vx, double vz, int r) {
+        int ccx = (int) Math.floor(vx) >> 4, ccz = (int) Math.floor(vz) >> 4;
+        return Math.abs(cx - ccx) <= r && Math.abs(cz - ccz) <= r;
+    }
+
+    /** Chunk i of a batch as kept for the features: per section 4096 ids, null for air. */
+    private static short[][] compact(int[] out, int i) {
+        short[][] secs = new short[40][];
+        int base = i * AtlasGenNative.CHUNK_WORDS;
+        for (int s = 0; s < 40; s++) {
+            short[] ids = null;
+            for (int k = 0; k < 2048; k++) {
+                int w = out[base + s * 2048 + k];
+                if (w == 0 && ids == null) continue;
+                if (ids == null) ids = new short[4096];
+                ids[k * 2] = (short) (w & 0xFFFF);
+                ids[k * 2 + 1] = (short) (w >>> 16);
+            }
+            secs[s] = ids;
+        }
+        return secs;
+    }
+
+    /** The stored chunks as the features' terrain; biomes as ChunkGenerator.createBiomes fills them. */
+    private final class StoredTerrain implements AtlasGenFeatures.Terrain {
+        @Override
+        public int id(int x, int y, int z) {
+            short[][] c = store.get(ChunkPos.pack(x >> 4, z >> 4));
+            if (c == null) return -1;
+            if (y < -64 || y > 575) return 0;
+            short[] s = c[(y + 64) >> 4];
+            return s == null ? 0 : s[(x & 15) + 16 * ((z & 15) + 16 * (y & 15))] & 0xFFFF;
+        }
+
+        @Override
+        public int quartBiome(int qx, int qy, int qz) {
+            return -1;  // proto chunks carry their biomes (fillBiomes)
+        }
+
+        @Override
+        public void fillBiomes(net.minecraft.world.level.chunk.ProtoChunk c, AtlasGenProgram program) {
+            var climate = random.createClimateSampler(SamplerContext.builder().enableCaches().build());
+            ChunkPos p = c.getPos();
+            c.fillBiomesFromNoise(generator.getBiomeSource().createResolverForChunk(climate,
+                    net.minecraft.core.QuartPos.fromBlock(p.getMinBlockX()), net.minecraft.core.QuartPos.fromBlock(c.getMinY()),
+                    net.minecraft.core.QuartPos.fromBlock(p.getMinBlockZ()), 4, net.minecraft.core.QuartPos.fromBlock(c.getHeight()), 4));
+        }
+    }
+
+    private boolean generated(int cx, int cz) {
+        long k = ChunkPos.pack(cx, cz);
+        return store.containsKey(k) || window.chunks.containsKey(k);
+    }
+
+    /** The features' thread: decorate the nearest chunk whose 3 x 3 are generated; emit chunks whose 3 x 3 are done. */
+    private void decorateLoop() {
+        while (running) {
+            try {
+                double vx = AtlasEditsClient.viewX, vz = AtlasEditsClient.viewZ;
+                int ccx = (int) Math.floor(vx) >> 4, ccz = (int) Math.floor(vz) >> 4;
+                long best = Long.MIN_VALUE;
+                int bestD = Integer.MAX_VALUE;
+                for (int dz = -FEATURE_RADIUS; dz <= FEATURE_RADIUS; dz++)
+                    for (int dx = -FEATURE_RADIUS; dx <= FEATURE_RADIUS; dx++) {
+                        int d = dx * dx + dz * dz;
+                        if (d >= bestD) continue;
+                        int cx = ccx + dx, cz = ccz + dz;
+                        if (decorated.contains(ChunkPos.pack(cx, cz))) continue;
+                        boolean ready3 = true;
+                        for (int j = -1; j <= 1 && ready3; j++)
+                            for (int i = -1; i <= 1 && ready3; i++) ready3 = generated(cx + i, cz + j);
+                        if (!ready3) continue;
+                        best = ChunkPos.pack(cx, cz);
+                        bestD = d;
+                    }
+                if (best == Long.MIN_VALUE) {
+                    pruneFeatures(ccx, ccz);
+                    Thread.sleep(50);
+                    continue;
+                }
+                long t0 = System.nanoTime();
+                int bx = ChunkPos.getX(best), bz = ChunkPos.getZ(best);
+                features.decorate(bx, bz, window);
+                decorated.add(best);
+                for (int j = -1; j <= 1; j++)
+                    for (int i = -1; i <= 1; i++) {
+                        int cx = bx + i, cz = bz + j;
+                        long k = ChunkPos.pack(cx, cz);
+                        if (emitted.contains(k)) continue;
+                        boolean all = true;
+                        for (int b = -1; b <= 1 && all; b++)
+                            for (int a = -1; a <= 1 && all; a++) all = decorated.contains(ChunkPos.pack(cx + a, cz + b));
+                        if (!all) continue;
+                        var chunk = window.chunk(cx, cz);
+                        if (chunk == null) continue;
+                        emitted.add(k);
+                        AtlasSections.Decoded d = decodeProto(chunk);
+                        synchronized (ready) {
+                            ready.removeIf(o -> o.cx() == d.cx() && o.cz() == d.cz());  // its terrain alone, not up yet
+                            ready.add(d);
+                        }
+                    }
+                featureChunks++;
+                featureMs += (System.nanoTime() - t0) / 1e6;
+            } catch (InterruptedException e) {
+                return;
+            } catch (Throwable t) {
+                com.nirncraft.NirnCraft.LOGGER.warn("atlas client features stopped", t);
+                return;
+            }
+        }
+    }
+
+    /** Drops the proto chunks and ids far from the camera (a return decorates them again). */
+    private void pruneFeatures(int ccx, int ccz) {
+        int far = FEATURE_RADIUS + 4;
+        Predicate<Long> gone = k -> Math.abs(ChunkPos.getX(k) - ccx) > far || Math.abs(ChunkPos.getZ(k) - ccz) > far;
+        store.keySet().removeIf(gone);
+        window.chunks.keySet().removeIf(gone);
+        decorated.removeIf(gone);
+        emitted.removeIf(gone);
+    }
+
+    /** A decorated proto chunk as the feed carries a chunk: far ids, deep solid rock (by content) left out. */
+    private AtlasSections.Decoded decodeProto(net.minecraft.world.level.chunk.ProtoChunk c) {
+        int low = Integer.MAX_VALUE, high = Integer.MIN_VALUE;
+        for (int z = 0; z < 16; z++)
+            for (int x = 0; x < 16; x++) {
+                low = Math.min(low, c.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z));
+                high = Math.max(high, c.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z));
+            }
+        var sections = c.getSections();
+        int[][] secs = new int[40][];
+        java.util.IdentityHashMap<BlockState, Integer> ids = new java.util.IdentityHashMap<>();
+        for (int s = 0; s < Math.min(40, sections.length); s++) {
+            var sec = sections[s];
+            if (sec.hasOnlyAir()) continue;
+            int[] far = new int[4096];
+            boolean rock = true;
+            for (int y = 0; y < 16; y++)
+                for (int z = 0; z < 16; z++)
+                    for (int x = 0; x < 16; x++) {
+                        BlockState st = sec.getBlockState(x, y, z);
+                        if (rock && (st.isAir() || !st.isSolidRender())) rock = false;
+                        Integer id = ids.get(st);
+                        if (id == null) {
+                            id = AtlasSections.kept(st) ? AtlasFarState.farId(st) : 0;
+                            ids.put(st, id);
+                        }
+                        far[x + 16 * (z + 16 * y)] = id;
+                    }
+            if (rock && AtlasSections.deep(s - 4, low)) {
+                deepRock.add(net.minecraft.core.SectionPos.asLong(c.getPos().x(), s - 4, c.getPos().z()));
+                continue;
+            }
+            secs[s] = far;
+        }
+        int x = c.getPos().getMinBlockX() + 8, z = c.getPos().getMinBlockZ() + 8;
+        Holder<Biome> b = new net.minecraft.world.level.biome.BiomeManager(biomes.get(), zoomSeed)
+                .getBiome(new net.minecraft.core.BlockPos(x, high, z));
+        return new AtlasSections.Decoded(c.getPos().x(), c.getPos().z(), -4, secs, b.value().getGrassColor(x, z) & 0xFFFFFF,
+                b.value().getFoliageColor() & 0xFFFFFF);
+    }
+
     @Override
     public void close() {
         running = false;
         if (active == this) active = null;
         worker.interrupt();
+        featureWorker.interrupt();
         try {
             worker.join(5000);
+            featureWorker.join(5000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
