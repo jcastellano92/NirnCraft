@@ -194,7 +194,8 @@ final class AtlasClientGen implements AutoCloseable {
             r = c.ready.size();
         }
         return String.format("clientGen{%s chunks=%d flagged=%d ready=%d pages=%d genMs=%.0f pageMs=%.0f features=%d featureMs=%.0f failures=%d}",
-                c.gen.device(), c.chunks, c.flagged, r, c.pagesMade, c.genMs, c.pageMs, c.featureChunks, c.featureMs,
+                c.gen.device(), c.chunks, c.flagged, r, c.pagesMade, (double) c.genMs, (double) c.pageMs, c.featureChunks,
+                (double) c.featureMs,
                 c.features == null ? 0 : c.features.failures);
     }
 
