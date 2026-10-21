@@ -1976,7 +1976,10 @@ private:
         for (int k = 0; k < VG_LEVELS; k++) pass(7, s.vgDowns[k], s.vgDownAt[k]);
         pass(0, s.vgJobCount, 0);
         // the chunk-level boxes of each level whose chunk states may have changed
-        for (int k = 0; k < VG_LEVELS; k++) {
+        // (twice: the EMPTY chunks' boxes of empty chunks, then the UNLOADED chunks' of unloaded ones)
+        for (int round = 0; round < 2 * VG_LEVELS; round++) {
+            int k = round >> 1;
+            uint32_t target = (round & 1) ? VG_UNLOADED : VG_EMPTY;
             const Slot::VgLevelRec& L = s.vgLv[k];
             if (!L.grow || !L.D) continue;
             mb.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
@@ -1987,7 +1990,7 @@ private:
             mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
             vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
             uint32_t D = L.D, H = L.H;
-            uint32_t pcv[8] = {D, H, D, 0, row, pmod(L.ox, D), pmod(L.oz, D), L.base};
+            uint32_t pcv[8] = {D, H, D, target, row, pmod(L.ox, D), pmod(L.oz, D), L.base};
             vkCmdPushConstants(cmd, vgLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
             const uint32_t lines[4] = {H * D, H * D, D * D, D * H * D};
             for (int q = 1; q <= 4; q++) {

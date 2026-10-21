@@ -328,6 +328,7 @@ uint chunkAt(uint x, uint y, uint z) {
     return pc.misc.w + (y * Z + (z + pc.misc.z) % Z) * X + (x + pc.misc.y) % X;  // (misc.w: the level's first word)
 }
 
+// (sat, grow) dims.w: the state whose boxes are grown, EMPTY (0) or UNLOADED (2): the table counts the other cells
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void vgSatX(uint3 id : SV_DispatchThreadID) {
@@ -336,7 +337,7 @@ void vgSatX(uint3 id : SV_DispatchThreadID) {
     uint y = id.x / Z, z = id.x % Z;
     uint acc = 0u;
     for (uint x = 0u; x < X; x++) {
-        acc += (chunks[chunkAt(x, y, z)] & 3u) != VG_EMPTY ? 1u : 0u;
+        acc += (chunks[chunkAt(x, y, z)] & 3u) != pc.dims.w ? 1u : 0u;
         sat[satIndex(x + 1u, y + 1u, z + 1u)] = acc;
     }
 }
@@ -375,6 +376,8 @@ void vgGrowMain(uint3 id : SV_DispatchThreadID) {
     int x = int(id.x % X), z = int((id.x / X) % Z), y = int(id.x / (X * Z));  // (logical)
     uint at = chunkAt(uint(x), uint(y), uint(z));
     uint c = chunks[at];
-    if ((c & 3u) != VG_EMPTY) return;
-    chunks[at] = growBox(int3(x, y, z), int3(int(X), int(Y), int(Z)), 31, 5u, 1u, uint2(0u, 0u)) << 2 | VG_EMPTY;
+    // an EMPTY chunk's box of empty chunks; an UNLOADED one's of unloaded chunks (a ray crosses a run of chunks without
+    // data in one step to where the grid has some again: atlas_far.slang vgUnloadedEnd)
+    if ((c & 3u) != pc.dims.w) return;
+    chunks[at] = growBox(int3(x, y, z), int3(int(X), int(Y), int(Z)), 31, 5u, 1u, uint2(0u, 0u)) << 2 | pc.dims.w;
 }

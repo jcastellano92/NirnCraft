@@ -439,7 +439,8 @@ uint vgCellG(VgGrid g, int3 c) {
 }
 
 // Where a chord p0 + d u standing at u in a chunk without data (or outside the window: `left`) reaches the next chunk
-// with data: the run of unloaded chunks the regions answer for (chunk by chunk, one load each; at most 64)
+// with data: the run of unloaded chunks the regions answer for. An UNLOADED chunk carries a box of unloaded chunks
+// around it (vgGrowMain, as an EMPTY one's of empty ones): left through its far side, one load a box (at most 64).
 float vgUnloadedEnd(VgGrid g, float3 p0, float3 d, float u, float u1, out bool left) {
     left = false;
     float cs = float(16 << g.k);
@@ -456,12 +457,19 @@ float vgUnloadedEnd(VgGrid g, float3 p0, float3 d, float u, float u1, out bool l
             left = true;  // (from here the window has nothing: the regions take the rest)
             return u1;
         }
-        if ((vgChunks[vgCellG(g, c)] & 3u) != VG_UNLOADED) return t;
-        float3 tt = (float3(c) + float3(dc.x > 0.0 ? 1.0 : 0.0, dc.y > 0.0 ? 1.0 : 0.0, dc.z > 0.0 ? 1.0 : 0.0) - ro) * inv;
+        uint cw = vgChunks[vgCellG(g, c)];
+        if ((cw & 3u) != VG_UNLOADED) return t;
+        int3 lo = c - int3(int((cw >> 2) & 31u), int((cw >> 12) & 31u), int((cw >> 22) & 31u));
+        int3 hi = c + int3(int((cw >> 7) & 31u), int((cw >> 17) & 31u), int((cw >> 27) & 31u)) + 1;
+        float3 tt = (float3(dc.x > 0.0 ? hi.x : lo.x, dc.y > 0.0 ? hi.y : lo.y, dc.z > 0.0 ? hi.z : lo.z) - ro) * inv;
         tt = float3(abs(dc.x) > 1e-14 ? tt.x : 1e30, abs(dc.y) > 1e-14 ? tt.y : 1e30, abs(dc.z) > 1e-14 ? tt.z : 1e30);
         float tn = min(tt.x, min(tt.y, tt.z));
         int a = tt.x <= tn ? 0 : (tt.y <= tn ? 1 : 2);
-        c[a] += st[a];
+        // the cell across the box's face it leaves by (by index on that axis, as traceVoxGrid's exit)
+        int3 nc = int3(floor(ro + dc * tn));
+        nc[a] = st[a] > 0 ? hi[a] : lo[a] - 1;
+        c = clamp(nc, lo, hi - 1);  // (the face lies within the box on the other axes)
+        c[a] = nc[a];
         t = max(t, tn);
     }
     return min(t, u1);
@@ -711,7 +719,9 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
     // over the runs of chunks where it has no data: the grid again past each
     // (the content-shaped groups keep level-0 primary rays where a frame asks for them unless the grid owns level 0:
     // vgDims.w, ATLAS_VOXGRID_LEVEL0, where the SVDAG level 0 no longer follows the sections)
-    bool grid = vgLevelOn(lod) && (lod > 0 || !gGroups || frame.vgDims.w != 0u);
+    // (a level holding no data at all, vgOrigin.w / vgLevel.w bit 2 of the second byte pair: the regions alone)
+    bool hasData = lod == 0 ? (frame.vgOrigin.w & 2) != 0 : lod <= 6 && ((frame.vgLevel[clamp(lod, 1, 6) - 1].w >> 17) & 1) != 0;
+    bool grid = hasData && vgLevelOn(lod) && (lod > 0 || !gGroups || frame.vgDims.w != 0u);
     float u = 0.0;
     if (grid) {
         VgGrid g = vgGrid(lod);
@@ -979,31 +989,48 @@ float lodWindowR(int k) {
     float lox = float(L.origin.x * span - frame.camInt.x) - frame.camFrac.x;
     float loz = float(L.origin.z * span - frame.camInt.z) - frame.camFrac.z;
     float hix = lox + float(L.dim.x * span), hiz = loz + float(L.dim.z * span);
-    return max(min(min(-lox, hix), min(-loz, hiz)), 1.0);
+    float r = max(min(min(-lox, hix), min(-loz, hiz)), 1.0);
+    // a level whose real blocks are the grid's alone (its regions the tiles' fallback, vgDims.w bit 2 for level 0):
+    // what it holds is the grid's window
+    if (k <= 6 && (k == 0 ? (frame.vgDims.w & 2u) != 0u && vgOn() : vgLevelOn(k))) {
+        VgGrid g = vgGrid(k);
+        float gs = float(g.X * (16 << k));
+        float gx = float(g.origin.x - frame.camInt.x) - frame.camFrac.x, gz = float(g.origin.z - frame.camInt.z) - frame.camFrac.z;
+        r = min(r, max(min(min(-gx, gx + gs), min(-gz, gz + gs)), 1.0));
+    }
+    return r;
+}
+// (the radii once an invocation: every stretch of every ray asks; computed per call they cost a third of a frame)
+static float gLodR[8];
+static bool gLodRReady = false;
+void lodPrepareR() {
+    if (gLodRReady) return;
+    gLodRReady = true;
+    int n = min(int(frame.dims.w), 8);
+    float prev = 1.0;
+    for (int k = 0; k < 8; k++) {
+        float r = k < n ? max(lodWindowR(k), prev * 1.01) : prev * 2.0;  // (nested: each wider than the one inside it)
+        gLodR[k] = r;
+        prev = r;
+    }
 }
 float lodResident(float3 p) {
+    lodPrepareR();
     int n = int(frame.dims.w);
     float d = max(max(abs(p.x), abs(p.z)), 1.0);
-    float ra = lodWindowR(0);
-    if (d <= ra) return 1.0 + log2(d / ra);
-    for (int k = 0; k + 1 < n; k++) {
-        float rb = max(lodWindowR(k + 1), ra * 1.01);  // (nested: each wider than the one inside it)
-        if (d <= rb) return float(k + 1) + log2(d / ra) / log2(rb / ra);
-        ra = rb;
-    }
+    if (d <= gLodR[0]) return 1.0 + log2(d / gLodR[0]);
+    for (int k = 0; k + 1 < n; k++)
+        if (d <= gLodR[k + 1]) return float(k + 1) + log2(d / gLodR[k]) / log2(gLodR[k + 1] / gLodR[k]);
     return float(n);
 }
 // the distance (Chebyshev) at which lodResident reaches `level`
 float lodResidentDist(float level) {
+    lodPrepareR();
     int n = int(frame.dims.w);
-    float ra = lodWindowR(0);
-    if (level <= 1.0) return ra * exp2(level - 1.0);
-    for (int k = 0; k + 1 < n; k++) {
-        float rb = max(lodWindowR(k + 1), ra * 1.01);
-        if (level <= float(k + 2)) return ra * pow(rb / ra, level - float(k + 1));
-        ra = rb;
-    }
-    return 1e30;
+    if (level <= 1.0) return gLodR[0] * exp2(level - 1.0);
+    int k = min(int(floor(level)) - 1, 6);
+    if (k + 1 >= n) return 1e30;
+    return gLodR[k] * pow(gLodR[k + 1] / gLodR[k], level - float(k + 1));
 }
 
 // the continuous level of the last primary hit (FRAME_DEBUG_LOD shows it)
@@ -1044,7 +1071,7 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
         float3 a = worldAt(o, dir, k, t);
         // rising above the world top: the parabola only climbs further from here
         if (!graze && a.y > worldTop && dir.y + 2.0 * k * t >= 0.0) break;
-        float lc = max(lodFromFootprint(t, pa, 1.0), lodResident(a));
+        float lc = rings || graze ? 0.0 : max(lodFromFootprint(t, pa, 1.0), lodResident(a));
         int want = graze ? lod : max(lodPick(lc, xi, lodCount), groupsFrom);
         if (rings) want = gGroups ? groupsFrom : int(clamp(floor(log2(max(t * pa, 1.0))), 0.0, float(lodCount - 1)));
         if (!finer && !graze) lod = pinLeft > 0 ? pinned : max(lod, want);
@@ -1080,7 +1107,7 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
             float th = t + res.t;
             float3 ph = a + d * res.t;
             float cs = res.axis >= 0 ? abs(d[res.axis]) : 1.0;
-            float lh = max(lodFromFootprint(th, pa, cs), lodResident(ph));
+            float lh = rings ? float(lod) : max(lodFromFootprint(th, pa, cs), lodResident(ph));
             gHitLod = rings ? float(lod) : max(lh, float(lod));
             int k2 = lodPick(lh, xi, lodCount);
             if (!rings && (gAblate & 2147483648u) == 0u && k2 > lod && !finer) {
