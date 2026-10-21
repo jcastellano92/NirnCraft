@@ -395,6 +395,11 @@ private:
     std::unordered_map<Key, uint32_t, KeyHash> gpuUniformHint_;  // (ingestGpu's hint) for the pending GPU sections
     // (edit layers, World::takeBaseWanted) sections whose GPU base the world waits for: packed on the GPU at their build
     std::unordered_set<Key, KeyHash> baseFetch_;
+    // (the full pool's loop) GPU sections asked for again (reportWanted) and the batch: a slot is made for them, their
+    // ingest takes it past the cut-off, and one not taken is asked again only after WANT_AGAIN batches
+    std::unordered_map<Key, uint64_t, KeyHash> wantedAt_;
+    static constexpr uint64_t WANT_AGAIN = 240;
+    uint64_t wantedAgain_ = 0, wantedHeld_ = 0;  // (stats: asks, asks held back)
     std::deque<std::pair<Key3, VgGpuRef>> bake_;  // (lod: 0 a section, k a level-k chunk)
     void putSrc(int sx, int sy, int sz, VgSrc src);  // (caller holds mu_)
     int baseOx_ = INT32_MIN, baseOz_ = INT32_MIN;

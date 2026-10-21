@@ -14,6 +14,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <map>
+#include <tuple>
 #include <set>
 #include <string>
 #include <vector>
@@ -40,6 +42,211 @@ static std::string arg(int argc, char** argv, const char* key, const char* def) 
     for (int i = 3; i < argc; i++)
         if (std::strncmp(argv[i], key, n) == 0 && argv[i][n] == '=') return argv[i] + n + 1;
     return def;
+}
+
+// ---- store=1: AtlasClientGen's store mode (the chunk store and its stages), for the churn ----
+// Two stages of no work at radius 2 and 1 (the decoration and its finishing: the reach the features have), a store of
+// storeSlots chunks; the loop as AtlasClientGen.directBatch: the cache first, then (old=1) every chunk through the
+// store as before the fix, or the misses only with their neighbourhood ensured; claims by hash (AtlasEditsClient); the
+// grid's reports (dropped / wanted) as gridReports. After the window is in, steady=<s> seconds with the camera still:
+// the chunks planned, made into the store, through a stage, packed, a second.
+static int32_t noStage(void*, const AtlasGenStoreBatch*) { return 0; }
+
+static int storeMode(AtlasContext* ctx, AtlasGen* g, AtlasFrame& f, AtlasFrameOutput& out, int ccx, int ccz, int R, bool old,
+                     double steadyS, uint32_t slots) {
+    uint32_t id = 0;
+    if (atlas_gen_store_enable(g, slots) != ATLAS_OK || atlas_gen_add_store_stage(g, 1000, 2, noStage, nullptr, &id) != ATLAS_OK ||
+        atlas_gen_add_store_stage(g, 1100, 1, noStage, nullptr, &id) != ATLAS_OK) {
+        std::fprintf(stderr, "store: %s\n", atlas_gen_last_error(g));
+        return 1;
+    }
+    uint32_t reach = atlas_gen_store_reach(g);
+    const uint32_t INFO = 164;
+    std::set<std::pair<int, int>> done;
+    std::map<std::tuple<int, int, int>, uint64_t> claimed;  // (AtlasEditsClient.UPLOADED)
+    auto inWin = [&](int cx, int cz, int r) { return (cx - ccx) * (cx - ccx) + (cz - ccz) * (cz - ccz) <= r * r; };
+    std::vector<std::pair<int, int>> window;
+    for (int dz = -R; dz <= R; dz++)
+        for (int dx = -R; dx <= R; dx++)
+            if (dx * dx + dz * dz <= R * R) window.push_back({ccx + dx, ccz + dz});
+    // (old: nearest first, a ring; now: 8 x 8 patches nearest first, a patch a batch: what waits in the store, with the
+    // neighbourhood its stages read, stays one patch's (14 x 14) whatever the window's radius)
+    auto d2 = [&](int x, int z) { return (x - ccx) * (x - ccx) + (z - ccz) * (z - ccz); };
+    auto pd = [&](const std::pair<int, int>& c) {
+        int px = (c.first >> 3) * 8 + 4, pz = (c.second >> 3) * 8 + 4;
+        return d2(px, pz);
+    };
+    std::sort(window.begin(), window.end(), [&](auto& a, auto& b) {
+        if (!old) {
+            int pa = pd(a), pb = pd(b);
+            if (pa != pb) return pa < pb;
+            if ((a.first >> 3) != (b.first >> 3) || (a.second >> 3) != (b.second >> 3))
+                return (a.first >> 3) != (b.first >> 3) ? (a.first >> 3) < (b.first >> 3) : (a.second >> 3) < (b.second >> 3);
+        }
+        return d2(a.first, a.second) < d2(b.first, b.second);
+    });
+    uint64_t planned = 0, upChunks = 0, sentSections = 0;
+    std::set<std::pair<int, int>> up;
+    std::vector<uint32_t> info(64 * INFO), flags(64);
+    std::vector<uint8_t> hit(64);
+    std::vector<int32_t> outXZ(128);
+    auto masksOf = [&](int cx, int cz, const uint32_t* row) {
+        int highest = -1;
+        for (int s = 0; s < 40; s++)
+            if (row[4 + s * 4 + 2] == 1) highest = s;
+        uint64_t m = 0;
+        bool started = false;
+        for (int s = 0; s <= highest; s++) {
+            uint32_t kind = row[4 + s * 4 + 2];
+            if (kind == 2 || (kind == 0 && !started)) continue;
+            started = true;
+            uint64_t h = uint64_t(row[4 + s * 4]) | uint64_t(row[4 + s * 4 + 1]) << 32;
+            auto& c = claimed[{cx, s, cz}];
+            if (c == h && h) continue;  // (identical: up already)
+            c = h;
+            m |= uint64_t(1) << s;
+        }
+        return m;
+    };
+    auto unclaimAll = [&](int cx, int cz) {
+        for (int s = 0; s < 40; s++) claimed.erase({cx, s, cz});
+    };
+    double tStart = nowMs(), tWindow = 0, tEnd = 0;
+    uint64_t made0 = 0, runs0 = 0, packs0 = 0, planned0 = 0;
+    for (int iter = 0; iter < 200000; iter++) {
+        // the grid's reports (gridReports): wanted -> made again; dropped inside the window: wait
+        {
+            std::vector<int32_t> dr(4 * 4096), wa(4 * 4096);
+            uint32_t nd = 0, nw = 0;
+            atlas_gen_grid_reports(g, dr.data(), 4096, &nd, wa.data(), 4096, &nw);
+            for (uint32_t i = 0; i < std::min(nw, 4096u); i++)
+                if (wa[i * 4] == 0) {
+                    claimed.erase({wa[i * 4 + 1], wa[i * 4 + 2] + 4, wa[i * 4 + 3]});
+                    done.erase({wa[i * 4 + 1], wa[i * 4 + 3]});
+                }
+            for (uint32_t i = 0; i < std::min(nd, 4096u); i++)
+                if (dr[i * 4] == 0 && !inWin(dr[i * 4 + 1], dr[i * 4 + 3], R + 1)) {
+                    claimed.erase({dr[i * 4 + 1], dr[i * 4 + 2] + 4, dr[i * 4 + 3]});
+                    done.erase({dr[i * 4 + 1], dr[i * 4 + 3]});
+                }
+        }
+        std::vector<int32_t> batch;
+        uint32_t held = 0, waitingNow = 0, readyNow = 0;
+        atlas_gen_store_stats(g, &held, &waitingNow, &readyNow);
+        bool room = old || waitingNow < 64;  // (what waits holds its neighbourhood: (2 reach + 1)^2 chunks at most)
+        int patchX = INT32_MIN, patchZ = INT32_MIN;
+        for (auto& c : window) {
+            if (batch.size() >= 128 || !room) break;
+            if (done.count(c)) continue;
+            if (!old) {
+                // (one patch a batch)
+                if (patchX == INT32_MIN) patchX = c.first >> 3, patchZ = c.second >> 3;
+                if ((c.first >> 3) != patchX || (c.second >> 3) != patchZ) continue;
+            }
+            done.insert(c);
+            batch.push_back(c.first), batch.push_back(c.second);
+        }
+        planned += batch.size() / 2;
+        uint32_t n = uint32_t(batch.size() / 2);
+        // the cache first
+        std::vector<int32_t> miss;
+        if (n) {
+            atlas_gen_cache_lookup(g, batch.data(), n, info.data(), hit.data());
+            std::vector<int32_t> hits;
+            std::vector<uint64_t> hm;
+            for (uint32_t i = 0; i < n; i++) {
+                if (hit[i]) {
+                    hits.push_back(batch[i * 2]), hits.push_back(batch[i * 2 + 1]);
+                    hm.push_back(masksOf(batch[i * 2], batch[i * 2 + 1], info.data() + size_t(i) * INFO));
+                } else {
+                    miss.push_back(batch[i * 2]), miss.push_back(batch[i * 2 + 1]);
+                }
+            }
+            if (!hits.empty()) {
+                std::vector<uint64_t> asked = hm;
+                uint32_t sent = 0;
+                atlas_gen_cache_ingest(g, hits.data(), uint32_t(hits.size() / 2), hm.data(), &sent);
+                sentSections += sent;
+                for (size_t i = 0; i < hm.size(); i++) {
+                    if (asked[i] & ~hm[i]) {
+                        done.erase({hits[i * 2], hits[i * 2 + 1]});
+                        unclaimAll(hits[i * 2], hits[i * 2 + 1]);
+                    } else {
+                        up.insert({hits[i * 2], hits[i * 2 + 1]});
+                    }
+                }
+            }
+        }
+        // into the store: (old) everything asked; (now) the misses, their neighbourhood ensured
+        std::vector<int32_t> toStore = old ? batch : miss;
+        if (false && !old && !miss.empty()) {  // (the store keeps the neighbourhood itself: atlas_gen_run_store 1b)
+            std::set<std::pair<int, int>> nb;
+            for (size_t i = 0; i < miss.size(); i += 2)
+                for (int dz = -int(reach); dz <= int(reach); dz++)
+                    for (int dx = -int(reach); dx <= int(reach); dx++)
+                        if (dx || dz) nb.insert({miss[i] + dx, miss[i + 1] + dz});
+            for (size_t i = 0; i < miss.size(); i += 2) nb.erase({miss[i], miss[i + 1]});
+            std::vector<int32_t> e;
+            for (auto& c : nb) e.push_back(c.first), e.push_back(c.second);
+            for (size_t i = 0; i < e.size(); i += 128)
+                atlas_gen_store_ensure(g, e.data() + i, uint32_t(std::min<size_t>(128, e.size() - i) / 2));
+        }
+        for (size_t i0 = 0; i0 < std::max<size_t>(toStore.size(), 1); i0 += 128) {
+            uint32_t k = uint32_t(std::min<size_t>(128, toStore.size() - std::min(i0, toStore.size())) / 2);
+            uint32_t m = 0;
+            if (atlas_gen_run_store(g, k ? toStore.data() + i0 : nullptr, k, outXZ.data(), &m, nullptr, flags.data(), info.data(), nullptr) != ATLAS_OK) {
+                std::fprintf(stderr, "run_store: %s\n", atlas_gen_last_error(g));
+                return 1;
+            }
+            if (!m) continue;
+            std::vector<uint64_t> masks(m), asked;
+            for (uint32_t i = 0; i < m; i++) {
+                int cx = outXZ[i * 2], cz = outXZ[i * 2 + 1];
+                if (flags[i] || !inWin(cx, cz, R + 1)) {
+                    if (!flags[i]) done.erase({cx, cz});
+                    continue;
+                }
+                masks[i] = masksOf(cx, cz, info.data() + size_t(i) * INFO);
+            }
+            asked = masks;
+            uint32_t sent = 0;
+            AtlasStatus s = atlas_gen_ingest(g, masks.data(), &sent, nullptr);
+            sentSections += sent;
+            for (uint32_t i = 0; i < m; i++) {
+                int cx = outXZ[i * 2], cz = outXZ[i * 2 + 1];
+                if (s != ATLAS_OK || (asked[i] & ~masks[i])) {
+                    done.erase({cx, cz});
+                    for (int q = 0; q < 40; q++)
+                        if ((asked[i] & ~masks[i]) >> q & 1u) claimed.erase({cx, q, cz});
+                } else if (inWin(cx, cz, R)) {
+                    up.insert({cx, cz});
+                }
+            }
+        }
+        atlas_render(ctx, &f, &out);
+        // the window in: steady state from here, the camera still
+        if (!tWindow && up.size() >= window.size()) {
+            tWindow = nowMs();
+            atlas_gen_store_counters(g, &made0, &runs0, &packs0);
+            planned0 = planned;
+        }
+        if (tWindow && nowMs() - tWindow > steadyS * 1000.0) {
+            tEnd = nowMs();
+            break;
+        }
+        if (!tWindow && nowMs() - tStart > 240000.0) break;
+    }
+    uint64_t made = 0, runs = 0, packs = 0;
+    atlas_gen_store_counters(g, &made, &runs, &packs);
+    double s = tEnd && tWindow ? (tEnd - tWindow) / 1000.0 : 0;
+    std::printf("{\"store\":{\"old\":%d,\"reach\":%u,\"slots\":%u,\"window\":%zu,\"up\":%zu,\"windowMs\":%.0f,\"steadyS\":%.1f,"
+                "\"total\":{\"planned\":%llu,\"made\":%llu,\"stageRuns\":%llu,\"packs\":%llu,\"sections\":%llu},"
+                "\"perSecondSteady\":{\"planned\":%.1f,\"made\":%.1f,\"stageRuns\":%.1f,\"packs\":%.1f}}}\n",
+                int(old), reach, slots, window.size(), up.size(), tWindow ? tWindow - tStart : -1.0, s,
+                (unsigned long long)planned, (unsigned long long)made, (unsigned long long)runs, (unsigned long long)packs,
+                (unsigned long long)sentSections, s ? (planned - planned0) / s : 0.0, s ? (made - made0) / s : 0.0,
+                s ? (runs - runs0) / s : 0.0, s ? (packs - packs0) / s : 0.0);
+    return 0;
 }
 
 int main(int argc, char** argv) {
@@ -106,6 +313,13 @@ int main(int argc, char** argv) {
     atlas_render(ctx, &f, &out);
     // the spawn radius's chunks, nearest first
     int ccx = int(std::floor(x / 16)), ccz = int(std::floor(z / 16));
+    if (arg(argc, argv, "store", "0") != "0") {
+        int r = storeMode(ctx, g, f, out, ccx, ccz, R, arg(argc, argv, "old", "0") != "0",
+                          std::atof(arg(argc, argv, "steady", "20").c_str()), uint32_t(std::atoi(arg(argc, argv, "slots", "768").c_str())));
+        atlas_gen_destroy(g);
+        atlas_destroy(ctx);
+        return r;
+    }
     std::vector<std::pair<int, int>> todo;
     for (int dz = -R; dz <= R; dz++)
         for (int dx = -R; dx <= R; dx++)

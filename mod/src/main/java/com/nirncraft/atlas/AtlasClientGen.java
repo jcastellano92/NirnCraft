@@ -754,12 +754,11 @@ final class AtlasClientGen implements AutoCloseable {
         // (the self-baking cache) the chunks it knows go into the grid from disk, not generated; the features' chunks
         // (their ids wanted here) are generated as before
         if (gen.cacheSupported()) {
-            int[] rest = fromCache(batch, info);
-            // (the chunk store) every chunk goes through the store all the same: a chunk's store stages need its
-            // neighbours there, cached or not (else the chunks beside the cached ones never pass them); the cached copy
-            // is up already and the store's, the same blocks, is skipped at the claim (identical hashes) when it comes out
-            if (!storeOn) batch = rest;
-            if (batch.length == 0) return;
+            // (the chunk store) only the misses go into it: it makes the neighbourhood their stages read by itself
+            // (atlas_gen_run_store), so a cached chunk is never made again nor packed again (the churn: every chunk
+            // through the store, its neighbours sent back to the start by each new one)
+            batch = fromCache(batch, info);
+            if (batch.length == 0 && !storeOn) return;
         }
         int n = batch.length / 2;
         boolean wantIds = false;
@@ -969,8 +968,14 @@ final class AtlasClientGen implements AutoCloseable {
         // where the camera will be (chunks from the camera's chunk): what it moves towards comes before what it leaves
         double px = camVx * PREDICT_S / 16.0, pz = camVz * PREDICT_S / 16.0;
         List<long[]> cand = new ArrayList<>();
-        // (the store: three chunks more, so that the window's own chunks have their neighbourhood and come out decorated)
-        int r = RADIUS + (storeOn ? 3 : 0);
+        // (the store makes the neighbourhood the window's chunks need itself; what waits in it is kept to a patch or so:
+        // a batch is one 8 x 8 patch, the nearest, and none while 64 chunks wait: what waits holds its neighbourhood,
+        // 14 x 14 a patch, where a ring of single chunks would want more slots than the store has)
+        if (storeOn) {
+            int[] st = gen.storeStats();
+            if (st != null && st.length > 1 && st[1] >= 64) return null;
+        }
+        int r = RADIUS;
         for (int dz = -r; dz <= r; dz++)
             for (int dx = -r; dx <= r; dx++) {
                 if (dx * dx + dz * dz > r * r) continue;
@@ -985,6 +990,10 @@ final class AtlasClientGen implements AutoCloseable {
             }
         if (cand.isEmpty()) return null;
         cand.sort(java.util.Comparator.comparingLong(c -> c[1]));
+        if (storeOn) {
+            int px0 = ChunkPos.getX(cand.get(0)[0]) >> 3, pz0 = ChunkPos.getZ(cand.get(0)[0]) >> 3;
+            cand.removeIf(c -> (ChunkPos.getX(c[0]) >> 3) != px0 || (ChunkPos.getZ(c[0]) >> 3) != pz0);
+        }
         int n = Math.min(max, cand.size());
         int[] xz = new int[n * 2];
         for (int i = 0; i < n; i++) {
@@ -1009,8 +1018,17 @@ final class AtlasClientGen implements AutoCloseable {
      * One far tile into the grid: of the coarse levels' tiles around the camera (FAR_TILES a side), the nearest one not
      * up yet (distance in tiles of its level, finer levels first at equal distance). Returns false when all are up.
      */
+    private long farRetryNs;
+
     private boolean farStep() {
         double x = camX, z = camZ;
+        // (the camera still: the tiles the grid did not take whole go again every 2 s, not only once it moves a tile)
+        long nowNs = System.nanoTime();
+        if (nowNs - farRetryNs > 2_000_000_000L && !farPartial.isEmpty()) {
+            farRetryNs = nowNs;
+            for (long key : farPartial) farDone.remove(key);
+            farPartial.clear();
+        }
         int best = -1, btx = 0, btz = 0;
         double bestD = Double.MAX_VALUE;
         for (int k = 1; k <= 6; k++) {

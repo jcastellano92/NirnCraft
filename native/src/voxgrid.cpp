@@ -246,6 +246,7 @@ void VoxGrid::dropOutside() {
     auto out = [&](const Key& k) { return !inWindow(k.x, k.y, k.z); };
     for (auto it = standby_.begin(); it != standby_.end();) it = out(it->first) ? standby_.erase(it) : std::next(it);
     for (auto it = gpuStandby_.begin(); it != gpuStandby_.end();) it = out(it->first) ? gpuStandby_.erase(it) : std::next(it);
+    for (auto it = wantedAt_.begin(); it != wantedAt_.end();) it = out(it->first) ? wantedAt_.erase(it) : std::next(it);
     for (auto it = gpuUniformHint_.begin(); it != gpuUniformHint_.end();)
         it = pending_.count(it->first) || cpending_.count(it->first) ? std::next(it) : gpuUniformHint_.erase(it);
 }
@@ -279,7 +280,8 @@ size_t VoxGrid::ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_
             // a full pool takes a new one only within its cut-off; past the footprint's reach level 0 wants none: it
             // waits, asked for again once it ranks (takeGpuWanted)
             float p = priority(sx, sy, sz);
-            if (p >= 1e29f || (slotsUsed_ >= slotCap && freeSlots_.empty() && p > cutoff_)) {
+            bool asked = wantedAt_.count({sx, sy, sz}) != 0;  // (asked for: a slot was made for it)
+            if (p >= 1e29f || (!asked && slotsUsed_ >= slotCap && freeSlots_.empty() && p > cutoff_)) {
                 gpuStandby_[{sx, sy, sz}] = 0;
                 level0 = false;
             }
@@ -1261,7 +1263,7 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
         if (c >= n || slotOf_[c] != ~0u) continue;
         int sx, sy, sz;
         worldOf(c, sx, sy, sz);
-        if (standby_.count({sx, sy, sz})) wantSlots++;
+        if (standby_.count({sx, sy, sz}) || gpuStandby_.count({sx, sy, sz})) wantSlots++;  // (the GPU's too: their slot)
     }
     size_t freeNow = freeSlots_.size() + (slotCap - nextSlot_);
     size_t evictLeft = wantSlots > freeNow ? wantSlots - freeNow : 0;
@@ -1299,7 +1301,14 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
         Key k{sx, sy, sz};
         if (auto g = gpuStandby_.find(k); g != gpuStandby_.end()) {
             if (!g->second) {
+                auto w = wantedAt_.find(k);
+                if (w != wantedAt_.end() && batches - w->second < WANT_AGAIN) {
+                    wantedHeld_++;  // (asked lately and not taken: not again yet, else the generator remakes it each batch)
+                    continue;
+                }
                 g->second = 1;
+                wantedAt_[k] = batches;
+                wantedAgain_++;
                 reportWanted({0, sx, sy, sz});
             }
             continue;
@@ -1371,12 +1380,14 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
             emit(c, uni == 0 ? VG_EMPTY : (uni & 0xFFFFu) << 2 | VG_UNIFORM, ~0u, 0);
             standby_.erase(k);
             gpuStandby_.erase(k);
+            wantedAt_.erase(k);
             setCand(c, 0);
         } else if (fits) {
             uint32_t slot = slotOf_[c] != ~0u ? slotOf_[c] : takeSlot(c);
             build(c, slot, k, ids);
             standby_.erase(k);
             gpuStandby_.erase(k);
+            wantedAt_.erase(k);
             setCand(c, 0);
         } else {
             // waits for the GPU's ranking (unknown here meanwhile: the coarse levels answer)
@@ -1691,8 +1702,11 @@ void VoxGrid::coarseReadmit(VgBatch& b) {
 void VoxGrid::takeCoarse(VgBatch& b) {
     b.classes = classes_;
     coarseJobAt_.clear();
-    // (the coarse standby is ranked again with level 0's waiting: the view moved on, or slots came free)
+    // (the coarse standby is ranked again with level 0's waiting: the view moved on, or slots came free; and, the camera
+    // still, every 8 batches while any wait: a still camera keeps refining, 64 cells a time)
     if (camSx_ != coarseRankedSx_ || camSz_ != coarseRankedSz_) coarseRankDue_ = true, coarseRankedSx_ = camSx_, coarseRankedSz_ = camSz_;
+    if (batches % 8 == 0)
+        for (int k = 1; k <= activeCoarse_ && !coarseRankDue_; k++) coarseRankDue_ = !lostCells_[k].empty();
     coarseReadmit(b);
     for (int k = 1; k <= activeCoarse_; k++) {
         Level& L = lv_[k];

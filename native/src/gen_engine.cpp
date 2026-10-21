@@ -1962,7 +1962,7 @@ private:
     VkPipeline stPipes_[2] = {};
 };
 
-int64_t key(int32_t cx, int32_t cz) { return (int64_t(cx) << 32) ^ int64_t(uint32_t(cz)); }
+int64_t key(int32_t cx, int32_t cz) { return (int64_t(cx) << 32) ^ int64_t(uint32_t(cz)); }  // (cz in the low 32 bits)
 
 }  // namespace
 
@@ -2000,8 +2000,14 @@ struct AtlasGen {
         uint32_t slot, status, flag;
         bool packed;
         uint64_t used;
+        bool wanted = true;  // (asked to come out: atlas_gen_run_store; false: only a neighbourhood, atlas_gen_store_ensure)
     };
     std::unordered_map<int64_t, StoreChunk> store;
+    // (the churn) the chunks the store let go (atlas_gen_store_keep, a slot taken): only one of those, made again, sends
+    // its neighbours' stages back (they wrote its old copy); a chunk never held needs no one's stages again
+    std::unordered_set<int64_t> storeDropped;
+    uint64_t storeMade = 0, storeStageRuns = 0, storePacks = 0;  // (atlas_gen_store_counters)
+    int32_t storeFocusX = 0, storeFocusZ = 0;  // (the last asked chunks' centre: a call asking none drains around it)
     std::vector<uint32_t> storeFree;
     uint32_t storeSlots = 0;
     uint64_t storeClock = 0;
@@ -2145,29 +2151,39 @@ uint32_t storeRadius(AtlasGen* h) {
         if (s.store) r = std::max(r, s.radius);
     return r;
 }
-// a chunk made again (it was dropped): the chunks around it that passed a stage go back to status 0, so that their
-// stages run again and write it (their writes are the same again: the stages' contract)
-void storeReset(AtlasGen* h, int32_t cx, int32_t cz) {
+// a chunk made again (it was dropped): the chunks around it still on their way that passed a stage go back to status 0,
+// so that their stages run again and write it (their writes are the same again: the stages' contract). A chunk packed
+// already is latched: never sent back (that sent its own neighbours' needs round again: the churn); returns whether
+// one was, so that the chunk made again lacks its writes: not proven exact (flagged), the server's blocks there.
+bool storeReset(AtlasGen* h, int32_t cx, int32_t cz) {
     int32_t r = int32_t(storeRadius(h));
+    bool latched = false;
     for (int32_t dz = -r; dz <= r; dz++)
         for (int32_t dx = -r; dx <= r; dx++) {
             auto it = h->store.find(key(cx + dx, cz + dz));
             if (it == h->store.end() || it->second.status == 0) continue;
+            if (it->second.packed) {
+                latched = true;
+                continue;
+            }
             it->second.status = 0;
-            it->second.packed = false;
         }
+    return latched;
 }
 // a slot for a new chunk: a free one; else a packed chunk no waiting one needs (least recently used), any packed one,
 // then the waiting one farthest from (ccx, ccz); never one used at the current clock (this call's)
 bool storeTake(AtlasGen* h, int32_t ccx, int32_t ccz, uint32_t& slot) {
     if (h->storeFree.empty()) {
-        int32_t r = int32_t(storeRadius(h));
+        // (needed: a chunk asked to come out and not yet packed lies within the stages' reach: their whole chain)
+        int32_t r = 0;
+        for (const Stage& s : h->stages)
+            if (s.store) r += int32_t(s.radius);
         auto needed = [&](const AtlasGen::StoreChunk& c) {
             for (int32_t dz = -r; dz <= r; dz++)
                 for (int32_t dx = -r; dx <= r; dx++) {
                     if ((dx | dz) == 0) continue;
                     auto it = h->store.find(key(c.cx + dx, c.cz + dz));
-                    if (it != h->store.end() && !it->second.packed) return true;
+                    if (it != h->store.end() && it->second.wanted && !it->second.packed) return true;
                 }
             return false;
         };
@@ -2180,7 +2196,7 @@ bool storeTake(AtlasGen* h, int32_t ccx, int32_t ccz, uint32_t& slot) {
                 if (c.used >= h->storeClock) continue;
                 int64_t score;
                 if (pass == 0) {
-                    if (!c.packed || needed(c)) continue;
+                    if ((c.wanted && !c.packed) || needed(c)) continue;  // (packed, or only a neighbourhood: no one's now)
                     score = int64_t(c.used);
                 } else if (pass == 1) {
                     if (!c.packed) continue;
@@ -2197,6 +2213,7 @@ bool storeTake(AtlasGen* h, int32_t ccx, int32_t ccz, uint32_t& slot) {
         }
         if (victim == h->store.end()) return false;
         h->storeFree.push_back(victim->second.slot);
+        h->storeDropped.insert(victim->first);
         h->store.erase(victim);
     }
     slot = h->storeFree.back();
@@ -2216,6 +2233,58 @@ bool storeReady(AtlasGen* h, const AtlasGen::StoreChunk& c, uint32_t k, uint32_t
     return true;
 }
 // every store stage wherever it can run, in order, 64 chunks a call
+// the chunks not in the store generated into it (terrain: status 0); held ones touched, and with reask (run_store's
+// own chunks: their sections were not taken) packed again once ready. A chunk made again after the store dropped it
+// sends its neighbours' stages back (storeReset); a chunk never held does not (no neighbour passed a stage that writes
+// it: a stage of radius r needs every chunk within r there). (ccx, ccz): the chunks' centre.
+AtlasStatus storeInsert(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, bool reask, AtlasGenTimes& t, std::string& err,
+                        int32_t& ccx, int32_t& ccz) {
+    std::vector<int32_t> fresh;
+    int64_t sx = 0, sz = 0;
+    for (uint32_t i = 0; i < count; i++) {
+        int32_t cx = chunkXZ[i * 2], cz = chunkXZ[i * 2 + 1];
+        sx += cx;
+        sz += cz;
+        auto it = h->store.find(key(cx, cz));
+        if (it != h->store.end()) {
+            it->second.used = h->storeClock;
+            if (reask) it->second.packed = false, it->second.wanted = true;  // asked again (its sections were not taken)
+            continue;
+        }
+        fresh.push_back(cx);
+        fresh.push_back(cz);
+    }
+    if (count) h->storeFocusX = int32_t(sx / int64_t(count)), h->storeFocusZ = int32_t(sz / int64_t(count));
+    ccx = h->storeFocusX, ccz = h->storeFocusZ;
+    if (fresh.empty()) return ATLAS_OK;
+    uint32_t n = uint32_t(fresh.size() / 2);
+    Batch b;
+    AtlasStatus s = makeBatch(h, fresh.data(), n, 0u, b);
+    if (s != ATLAS_OK) return s;
+    b.mode = 1;
+    std::vector<uint32_t> slots(n);
+    for (uint32_t i = 0; i < n; i++) {
+        if (!storeTake(h, ccx, ccz, slots[i])) {
+            for (uint32_t j = 0; j < i; j++) h->storeFree.push_back(slots[j]);
+            return h->fail(ATLAS_ERR_STATE, "the chunk store is full (atlas_gen_store_enable: more slots, or atlas_gen_store_keep)");
+        }
+        b.storeItems.insert(b.storeItems.end(), {int32_t(i), int32_t(slots[i]), fresh[i * 2], fresh[i * 2 + 1]});
+    }
+    std::vector<uint32_t> flags(n, 0u), jobBad(b.jobs.size() / 4 + 1, 0u);
+    RunOut o;
+    o.flags = flags.data();
+    o.jobBad = jobBad.data();
+    if (!h->engine->run(b, o, t, err)) return h->fail(ATLAS_ERR_GPU, err);
+    pagesRan(h, b, o, flags.data());
+    h->storeMade += n;
+    for (uint32_t i = 0; i < n; i++) {
+        int32_t cx = fresh[i * 2], cz = fresh[i * 2 + 1];
+        bool stale = h->storeDropped.erase(key(cx, cz)) && storeReset(h, cx, cz);
+        h->store[key(cx, cz)] = AtlasGen::StoreChunk{cx, cz, slots[i], 0u, flags[i] | (stale ? 2u : 0u), false, h->storeClock, reask};
+    }
+    return ATLAS_OK;
+}
+
 bool storeAdvance(AtlasGen* h, std::string& err) {
     std::vector<const Stage*> st = storeStages(h);
     for (uint32_t k = 1; k <= st.size(); k++) {
@@ -2248,6 +2317,7 @@ bool storeAdvance(AtlasGen* h, std::string& err) {
             }
             (void)w;
             if (!h->engine->storeStage(stage, uint32_t(ready.size()), list, nb, err)) return false;
+            h->storeStageRuns += ready.size();
             for (const AtlasGen::StoreChunk* c : ready) {
                 auto it = h->store.find(key(c->cx, c->cz));
                 it->second.status = k;
@@ -2724,46 +2794,59 @@ ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, u
         h->last = Batch{};
         h->storeClock++;
         // 1. the new chunks' terrain into the store
-        std::vector<int32_t> fresh;
-        int64_t sx = 0, sz = 0;
-        for (uint32_t i = 0; i < count; i++) {
-            int32_t cx = chunkXZ[i * 2], cz = chunkXZ[i * 2 + 1];
-            sx += cx;
-            sz += cz;
-            auto it = h->store.find(key(cx, cz));
-            if (it != h->store.end()) {
-                it->second.used = h->storeClock;
-                it->second.packed = false;  // asked again (its sections were not taken): packed again once ready
-                continue;
-            }
-            fresh.push_back(cx);
-            fresh.push_back(cz);
-        }
-        int32_t ccx = count ? int32_t(sx / int64_t(count)) : 0, ccz = count ? int32_t(sz / int64_t(count)) : 0;
-        if (!fresh.empty()) {
-            uint32_t n = uint32_t(fresh.size() / 2);
-            Batch b;
-            AtlasStatus s = makeBatch(h, fresh.data(), n, 0u, b);
-            if (s != ATLAS_OK) return s;
-            b.mode = 1;
-            std::vector<uint32_t> slots(n);
-            for (uint32_t i = 0; i < n; i++) {
-                if (!storeTake(h, ccx, ccz, slots[i])) {
-                    for (uint32_t j = 0; j < i; j++) h->storeFree.push_back(slots[j]);
-                    return h->fail(ATLAS_ERR_STATE, "the chunk store is full (atlas_gen_store_enable: more slots, or atlas_gen_store_keep)");
+        int32_t ccx = 0, ccz = 0;
+        AtlasStatus s1 = storeInsert(h, chunkXZ, count, true, t, err, ccx, ccz);
+        if (s1 != ATLAS_OK) return s1;
+        // 1b. the neighbourhood every chunk asked for still waits on (its stages' chain): the missing ones made, nearest
+        // the asked chunks first, a call's worth (the store keeps what waits whole by itself: no caller sends them)
+        {
+            int32_t reach = 0;
+            for (const Stage& st : h->stages)
+                if (st.store) reach += int32_t(st.radius);
+            std::unordered_set<int64_t> missing;
+            std::vector<std::pair<int64_t, int64_t>> order;  // (distance, key)
+            if (reach > 0)
+                for (auto& [k, c] : h->store) {
+                    if (!c.wanted || c.packed) continue;
+                    for (int32_t dz = -reach; dz <= reach; dz++)
+                        for (int32_t dx = -reach; dx <= reach; dx++) {
+                            int64_t nk = key(c.cx + dx, c.cz + dz);
+                            if (h->store.count(nk) || !missing.insert(nk).second) continue;
+                            int64_t ex = c.cx + dx - ccx, ez = c.cz + dz - ccz;
+                            order.push_back({ex * ex + ez * ez, nk});
+                        }
                 }
-                b.storeItems.insert(b.storeItems.end(), {int32_t(i), int32_t(slots[i]), fresh[i * 2], fresh[i * 2 + 1]});
+            // (only into room: free slots and chunks no one waiting needs; taking a needed one would make it again later)
+            size_t spare = h->storeFree.size();
+            if (!order.empty() && spare < MAX_CHUNKS) {
+                std::unordered_set<int64_t> need;
+                for (auto& [k, c] : h->store)
+                    if (c.wanted && !c.packed)
+                        for (int32_t dz = -reach; dz <= reach; dz++)
+                            for (int32_t dx = -reach; dx <= reach; dx++) need.insert(key(c.cx + dx, c.cz + dz));
+                for (auto& [k, c] : h->store)
+                    if (!need.count(k) && c.used < h->storeClock && (c.packed || !c.wanted) && ++spare >= MAX_CHUNKS) break;
             }
-            std::vector<uint32_t> flags(n, 0u), jobBad(b.jobs.size() / 4 + 1, 0u);
-            RunOut o;
-            o.flags = flags.data();
-            o.jobBad = jobBad.data();
-            if (!h->engine->run(b, o, t, err)) return h->fail(ATLAS_ERR_GPU, err);
-            pagesRan(h, b, o, flags.data());
-            for (uint32_t i = 0; i < n; i++) {
-                int32_t cx = fresh[i * 2], cz = fresh[i * 2 + 1];
-                storeReset(h, cx, cz);
-                h->store[key(cx, cz)] = AtlasGen::StoreChunk{cx, cz, slots[i], 0u, flags[i], false, h->storeClock};
+            static const bool dbg = std::getenv("ATLAS_GEN_STORE_DEBUG") != nullptr;
+            static uint64_t calls = 0;
+            if (dbg && (++calls % 50) == 0) {
+                uint32_t w = 0, last = uint32_t(storeStages(h).size());
+                std::vector<uint32_t> byStatus(last + 1, 0);
+                for (auto& [k, c] : h->store)
+                    if (c.wanted && !c.packed) w++, byStatus[std::min(c.status, last)]++;
+                std::string st;
+                for (uint32_t v : byStatus) st += std::to_string(v) + " ";
+                std::fprintf(stderr, "store: held %zu free %zu wanted-waiting %u (by status %s) missing %zu spare %zu dropped %zu\n",
+                             h->store.size(), h->storeFree.size(), w, st.c_str(), order.size(), spare, h->storeDropped.size());
+            }
+            if (!order.empty() && spare > 0) {
+                std::sort(order.begin(), order.end());
+                if (order.size() > std::min<size_t>(MAX_CHUNKS, spare)) order.resize(std::min<size_t>(MAX_CHUNKS, spare));
+                std::vector<int32_t> xz;
+                for (auto& [d, nk] : order) xz.insert(xz.end(), {int32_t(nk >> 32), int32_t(uint32_t(nk))});
+                int32_t ex, ez;
+                AtlasStatus s2 = storeInsert(h, xz.data(), uint32_t(xz.size() / 2), false, t, err, ex, ez);
+                if (s2 != ATLAS_OK) return s2;
             }
         }
         // 2. the store stages wherever they can run
@@ -2774,7 +2857,7 @@ ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, u
         uint32_t last = uint32_t(storeStages(h).size());
         std::vector<AtlasGen::StoreChunk*> ready;
         for (auto& [k, c] : h->store)
-            if (c.status == last && !c.packed) ready.push_back(&c);
+            if (c.status == last && !c.packed && c.wanted) ready.push_back(&c);
         std::sort(ready.begin(), ready.end(), [&](const AtlasGen::StoreChunk* a, const AtlasGen::StoreChunk* b) {
             int64_t da = int64_t(a->cx - ccx) * (a->cx - ccx) + int64_t(a->cz - ccz) * (a->cz - ccz);
             int64_t db = int64_t(b->cx - ccx) * (b->cx - ccx) + int64_t(b->cz - ccz) * (b->cz - ccz);
@@ -2795,6 +2878,7 @@ ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, u
             RunOut o{outIds, flags.data(), outInfo ? info.data() : nullptr, jobBad.data()};
             if (!h->engine->run(b, o, t, err)) return h->fail(ATLAS_ERR_GPU, err);
             pagesRan(h, b, o, flags.data());
+            h->storePacks += m;
             for (uint32_t i = 0; i < m; i++) {
                 flags[i] |= ready[i]->flag;
                 ready[i]->packed = true;
@@ -2853,10 +2937,48 @@ ATLAS_API AtlasStatus atlas_gen_store_keep(AtlasGen* h, int32_t minCx, int32_t m
                 continue;
             }
             h->storeFree.push_back(c.slot);
+            h->storeDropped.insert(it->first);
             it = h->store.erase(it);
         }
+        // (the dropped ones far outside the box: forgotten, their neighbours gone with them)
+        if (h->storeDropped.size() > 65536)
+            for (auto it = h->storeDropped.begin(); it != h->storeDropped.end();) {
+                int32_t cx = int32_t(*it >> 32), cz = int32_t(uint32_t(*it));
+                bool far = cx < minCx - 64 || cx > maxCx + 64 || cz < minCz - 64 || cz > maxCz + 64;
+                it = far ? h->storeDropped.erase(it) : std::next(it);
+            }
         return ATLAS_OK;
     });
+}
+
+ATLAS_API AtlasStatus atlas_gen_store_ensure(AtlasGen* h, const int32_t* chunkXZ, uint32_t count) {
+    if (!h || (count && !chunkXZ) || count > MAX_CHUNKS) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        std::lock_guard<std::mutex> l(h->mu);
+        if (!h->storeSlots) return h->fail(ATLAS_ERR_STATE, "no store (atlas_gen_store_enable)");
+        AtlasGenTimes t{};
+        std::string err;
+        int32_t ccx, ccz;
+        return storeInsert(h, chunkXZ, count, false, t, err, ccx, ccz);
+    });
+}
+
+ATLAS_API uint32_t atlas_gen_store_reach(AtlasGen* h) {
+    if (!h) return 0;
+    std::lock_guard<std::mutex> l(h->mu);
+    uint32_t r = 0;
+    for (const Stage& s : h->stages)
+        if (s.store) r += s.radius;
+    return r;
+}
+
+ATLAS_API AtlasStatus atlas_gen_store_counters(AtlasGen* h, uint64_t* made, uint64_t* stageRuns, uint64_t* packs) {
+    if (!h) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> l(h->mu);
+    if (made) *made = h->storeMade;
+    if (stageRuns) *stageRuns = h->storeStageRuns;
+    if (packs) *packs = h->storePacks;
+    return ATLAS_OK;
 }
 
 ATLAS_API AtlasStatus atlas_gen_store_stats(AtlasGen* h, uint32_t* held, uint32_t* waiting, uint32_t* ready) {
@@ -2865,6 +2987,7 @@ ATLAS_API AtlasStatus atlas_gen_store_stats(AtlasGen* h, uint32_t* held, uint32_
         std::lock_guard<std::mutex> l(h->mu);
         uint32_t last = uint32_t(storeStages(h).size()), w = 0, r = 0;
         for (auto& [k, c] : h->store) {
+            if (!c.wanted) continue;  // (only a neighbourhood: never comes out)
             if (c.status < last) w++;
             else if (!c.packed) r++;
         }

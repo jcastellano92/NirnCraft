@@ -1086,9 +1086,19 @@ ATLAS_API AtlasStatus atlas_gen_add_store_stage(AtlasGen* h, uint32_t order, uin
    again: their sections were not taken). */
 ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, int32_t* outChunks, uint32_t* outCount,
                                           uint32_t* outIds, uint32_t* outFlags, uint32_t* outInfo, AtlasGenTimes* times);
+/* (the churn) Makes sure count (<= 64) chunks are in the store (generated into it if not), without packing them again:
+   the neighbourhood a chunk's store stages read (atlas_gen_store_reach chunks around it) when only it must come out (a
+   self-baking cache miss among cached chunks). */
+ATLAS_API AtlasStatus atlas_gen_store_ensure(AtlasGen* h, const int32_t* chunkXZ, uint32_t count);
+/* The chunks around a chunk its store stages read, through their chain (the sum of their radii): what must be in the
+   store for it to pass them all. */
+ATLAS_API uint32_t atlas_gen_store_reach(AtlasGen* h);
+/* Since the generator was made: chunks generated into the store, store stage runs (per chunk), chunks packed out. */
+ATLAS_API AtlasStatus atlas_gen_store_counters(AtlasGen* h, uint64_t* made, uint64_t* stageRuns, uint64_t* packs);
 /* Drops the store's chunks outside [minCx, maxCx] x [minCz, maxCz] (asked for again, they are generated again). */
 ATLAS_API AtlasStatus atlas_gen_store_keep(AtlasGen* h, int32_t minCx, int32_t minCz, int32_t maxCx, int32_t maxCz);
-/* held: chunks in the store; waiting: not yet through every stage; ready: through every stage, not yet packed. */
+/* held: chunks in the store; waiting: asked for (atlas_gen_run_store), not yet through every stage; ready: through every
+   stage, not yet packed. (A caller keeps waiting well under the store's slots: what waits holds its neighbourhood.) */
 ATLAS_API AtlasStatus atlas_gen_store_stats(AtlasGen* h, uint32_t* held, uint32_t* waiting, uint32_t* ready);
 /* Probes the kernels' pieces at n (x, z) columns (n <= 2^17), 32 words each, the last a flag (nonzero: not proven): kind 0
    TamrielMap.sample (the MapSample fields in declaration order). For the parity checks. */
