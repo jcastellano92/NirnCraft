@@ -359,6 +359,24 @@ batches with the stages (program with the baked states, frozen table: 0 ops drop
 (Riverwood 99.97, Whiterun 99.92, Rorikstead 99.85, Pelagia Farm 100). **Measured**: the passes 0.1 ms a chunk;
 recording 5 ms a piece-chunk in Java, once per world.
 
+**Batch apron** (`atlas_gen_set_apron`, gen_engine.cpp): the overlays name each settlement chunk's missing
+neighbours; the generator makes them with the batch (up to 64 beside the 64 asked for; buffers sized 128), its stages
+see them (`AtlasGenStageBatch.outputCount`, version 2), the caller and the ingest never do. The sweeps then read every
+neighbour as its terrain and pieces left it whatever the batch: each chunk generated alone equals the whole window
+(0 blocks differ on the 4 sets).
+
+**Road paint** (`atlas_overlays_roads.slang`, `RoadPaintGpu`): RoadPaint.Painter ported literally as a stage at
+ATLAS_GEN_STAGE_PAINT (street paint stays at PAINT + 50, after it as on the server): the plan's geometry (at,
+atSegment, junctions), the culture's materials by roll, verges and retaining walls, lamp posts and milestones,
+bridges (stone arches and piers, timber decks, rails), culverts, fords, stairs, tunnels with portals and lamps;
+TamrielMap.sample, the culture's region and PlanGround's pads from the generator's map; MOTION_BLOCKING_NO_LEAVES as
+the server primes it before the decoration (a stage at ATLAS_GEN_STAGE_DECORATION - 1). A workgroup a chunk: the
+columns' plan queries side by side, the painting by one thread in Java's order (lamp arms, rails and felled crowns
+reach the next column). **Checked** (`roadsMatchJava`): 54 road chunks, 6 of each span kind (normal, cut, fill,
+bridge, culvert, ford, switchback, stairs, tunnel): 100 % of 9,594 painted blocks. **Measured**: 5.1 ms a chunk
+(one chunk a batch); the pipeline is 567 KB of SPIR-V, 19 s to JIT the first time. Not done: a felled tree's crown
+in a neighbour chunk (the stage writes only its chunk).
+
 **Not yet**: OrphanSweep / RockSweep (flood fills; the test terrain has no decoration to test them on), one sweep
 per chunk instead of per piece (the last ~0.08 %, with the server's chunk order at chunk borders), a bed's other
 half on a write of air, road paint (`RoadPaint`, `Paver`), generic and seeded structures, tile plans beyond
