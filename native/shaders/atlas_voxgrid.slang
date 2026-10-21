@@ -165,9 +165,11 @@ void setIdAtomic(uint slot, uint i, uint id) {
     InterlockedOr(pool[slot * 2048u + (i >> 1)], id << sh);
 }
 
-// a material's kind for the vote (Section::buildMips): -1 air, 0 solid, 1 foliage, 2 water (the class table: 16 a
-// uint4, a byte each)
-int vKind(uint m) {
+// a material's kind for the vote (Section::buildMips): -1 air, 0 solid, 1 foliage, 2 water, 3 a solid brick, 4 a
+// foliage brick (the class table: 16 a uint4, a byte each; a brick's byte 128 | foliage 64 | its coverage 0..63, api.cpp
+// syncClasses), its coverage in cover (1 for the others)
+int vKind(uint m, out float cover) {
+    cover = 1.0;
     if (m == 0u) return -1;
     uint c = 0u;
     if (m < pc.misc.w) {
@@ -176,34 +178,47 @@ int vKind(uint m) {
         uint w = q == 0u ? w4.x : q == 1u ? w4.y : q == 2u ? w4.z : w4.w;
         c = (w >> ((m & 3u) * 8u)) & 255u;
     }
-    if (c == 255u) return -1;  // (a sparse brick: a rail, a torch, a door; api.cpp syncClasses)
+    if (c >= 128u) {
+        cover = float(c & 63u) / 63.0;
+        return (c & 64u) != 0u ? 4 : 3;
+    }
     return c == 1u ? 1 : (c == 2u ? 2 : 0);
 }
 
-// a coarse voxel from its 8 children (x + 2 z + 4 y): solid when 3 or more are, foliage when 2, water when 4, else air;
-// the commonest of the winning kind's children seen from above, ties to the higher (world.cpp shownKid)
+// a coarse voxel from its 8 children (x + 2 z + 4 y): solid when 3 or more are (bricks by their coverage: a rail or a
+// door barely), foliage when 2 are leaves or half its volume is foliage (leaves and plants, plants by their coverage:
+// a meadow's grass tufts are no 2^k green cube on a hill), water when 4, else air; the commonest of the winning kind's
+// children seen from above, full blocks before bricks, ties to the higher (world.cpp shownKid)
 uint voteMip(uint ch[8]) {
     int kd[8];
-    int c0 = 0, c1 = 0, c2 = 0;
+    float cv[8];
+    float c0 = 0.0, plants = 0.0;
+    int c1 = 0, c2 = 0;
     for (int k = 0; k < 8; k++) {
-        kd[k] = vKind(ch[k]);
-        c0 += kd[k] == 0 ? 1 : 0;
+        kd[k] = vKind(ch[k], cv[k]);
+        c0 += kd[k] == 0 ? 1.0 : (kd[k] == 3 ? cv[k] : 0.0);
         c1 += kd[k] == 1 ? 1 : 0;
+        plants += kd[k] == 4 ? cv[k] : 0.0;
         c2 += kd[k] == 2 ? 1 : 0;
     }
-    int want = c0 >= 3 ? 0 : (c1 >= 2 ? 1 : (c2 >= 4 ? 2 : -1));
+    int want = c0 >= 3.0 ? 0 : (c1 >= 2 || float(c1) + plants >= 4.0 ? 1 : (c2 >= 4 ? 2 : -1));
     if (want < 0) return 0u;
     bool shown[8];
-    for (int a = 0; a < 8; a++) shown[a] = a >= 4 || ch[a + 4] == 0u || kd[a + 4] != kd[a];
+    for (int a = 0; a < 4; a++) shown[a] = ch[a + 4] == 0u || kd[a + 4] != kd[a];
+    for (int a = 4; a < 8; a++) shown[a] = true;
     uint best = 0u;
     int bestN = 0;
-    for (int a = 7; a >= 0; a--) {
-        if (ch[a] == 0u || kd[a] != want || !shown[a]) continue;
-        int c = 0;
-        for (int q = 0; q < 8; q++) c += ch[q] == ch[a] && shown[q] ? 1 : 0;
-        if (c > bestN) {
-            bestN = c;
-            best = ch[a];
+    for (int pass = 0; pass < 2 && best == 0u; pass++) {
+        // (pass 0 the full blocks of the winning kind, pass 1 its bricks)
+        int kindOf = pass == 0 ? want : (want == 0 ? 3 : 4);
+        for (int a = 7; a >= 0; a--) {
+            if (ch[a] == 0u || kd[a] != kindOf || !shown[a]) continue;
+            int c = 0;
+            for (int q = 0; q < 8; q++) c += ch[q] == ch[a] && shown[q] ? 1 : 0;
+            if (c > bestN) {
+                bestN = c;
+                best = ch[a];
+            }
         }
     }
     return best;

@@ -516,7 +516,8 @@ struct Loaded {
 inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector<Section>& secs, bool keepAll,
                    uint32_t grass, uint32_t foliage, uint32_t water, uint16_t firstMat, Loaded& out, std::string& why,
                    const int* box = nullptr, bool cutouts = true, bool hold = false,
-                   const std::vector<uint8_t>* modelled = nullptr) {
+                   const std::vector<uint8_t>* modelled = nullptr, bool perBlock = false) {
+    std::unordered_map<std::string, uint16_t> blockMat;  // (perBlock: a block's first state's material for all of them)
     if (box) {
         std::vector<Section> kept;
         for (Section& s : secs) {
@@ -545,6 +546,16 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
         auto it = out.matOf.find(id);
         if (it != out.matOf.end()) return it->second;
         uint16_t m = 0;
+        // perblock=1 (a measurement): every state of a block takes its first state's material, as the game's per-block
+        // palette ids did once its exact ids ran out (a fence's post for every fence, one half for both of a plant)
+        std::string blk = id < lib.size() ? lib[id].name.substr(0, lib[id].name.find('}')) : std::string();
+        if (perBlock && !blk.empty()) {
+            auto b = blockMat.find(blk);
+            if (b != blockMat.end()) {
+                out.matOf.emplace(id, b->second);
+                return b->second;
+            }
+        }
         // (keep=near, `modelled`: every state with a model, as the game's client feed keeps them: AtlasSections.nearKept)
         bool near = modelled && id < modelled->size() && (*modelled)[id] && id < lib.size() && !isAir(lib[id]);
         if (id < lib.size() && lib[id].present && (near || (keepAll ? anyContent(lib[id]) : keptByGame(lib[id])))) {
@@ -566,7 +577,9 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
             // (keep=near: every emitter at its level, as AtlasMaterials.material now gives the game's; else the old 10)
             int minEmit = modelled ? 1 : 10;
             am.emissive = s.emit >= minEmit ? float(s.emit) / 15.0f : 0.0f;
-            am.cls = wat ? ATLAS_CLASS_WATER : s.emit >= minEmit ? ATLAS_CLASS_EMISSIVE : s.cls == 1 ? ATLAS_CLASS_FOLIAGE : ATLAS_CLASS_TERRAIN;
+            // (keep=near: plants are foliage as AtlasMaterials.material classes them; else blocks.bin's leaves alone)
+            bool fol = s.cls == 1 || (modelled && s.cls == 4);
+            am.cls = wat ? ATLAS_CLASS_WATER : s.emit >= minEmit ? ATLAS_CLASS_EMISSIVE : fol ? ATLAS_CLASS_FOLIAGE : ATLAS_CLASS_TERRAIN;
             AtlasMaterialShape sh{};
             sh.occupancy = wat ? ~0ull : s.mask;
             sh.mean = tm;
@@ -589,6 +602,7 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
             out.shaped += sh.occupancy != ~0ull || sh.flags ? 1 : 0;
         }
         out.matOf.emplace(id, m);
+        if (perBlock && m && !blk.empty()) blockMat.emplace(blk, m);
         return m;
     };
     std::vector<uint16_t> ids(4096);

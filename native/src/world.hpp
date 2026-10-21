@@ -20,6 +20,52 @@
 
 namespace atlas {
 
+// A material's kind for the coarse vote by its class byte (api.cpp syncClasses): -1 air, 0 solid, 1 foliage, 2 water,
+// 3 a solid brick, 4 a foliage brick (128 | foliage 64 | coverage 0..63), its coverage in cover (atlas_voxgrid.slang vKind).
+inline int coarseKind(uint16_t m, const std::vector<uint8_t>& cls, float& cover) {
+    cover = 1.0f;
+    if (m == 0) return -1;
+    uint8_t c = m < cls.size() ? cls[m] : 0;
+    if (c >= 128) {
+        cover = float(c & 63) / 63.0f;
+        return (c & 64) ? 4 : 3;
+    }
+    return c == 1 ? 1 : c == 2 ? 2 : 0;  // emissive and falls count as solid blocks
+}
+
+// A coarse voxel from its 8 children (x + 2 z + 4 y), atlas_voxgrid.slang voteMip's rule: solid when 3 or more are
+// (bricks by their coverage), foliage when 2 are leaves or half its volume is foliage (plants by their coverage), water
+// when 4, else air (0); the commonest of the winning kind's children seen from above, full blocks before bricks, ties up.
+inline uint16_t voteCoarse(const uint16_t ch[8], const std::vector<uint8_t>& cls) {
+    int kd[8];
+    float cv[8], c0 = 0, plants = 0;
+    int c1 = 0, c2 = 0;
+    for (int k = 0; k < 8; k++) {
+        kd[k] = coarseKind(ch[k], cls, cv[k]);
+        c0 += kd[k] == 0 ? 1.0f : kd[k] == 3 ? cv[k] : 0.0f;
+        c1 += kd[k] == 1 ? 1 : 0;
+        plants += kd[k] == 4 ? cv[k] : 0.0f;
+        c2 += kd[k] == 2 ? 1 : 0;
+    }
+    int want = c0 >= 3.0f ? 0 : (c1 >= 2 || float(c1) + plants >= 4.0f) ? 1 : c2 >= 4 ? 2 : -1;
+    if (want < 0) return 0;
+    bool shown[8];
+    for (int a = 0; a < 8; a++) shown[a] = a >= 4 || !ch[a + 4] || kd[a + 4] != kd[a];
+    uint16_t best = 0;
+    int bestN = 0;
+    for (int pass = 0; pass < 2 && !best; pass++) {
+        int kindOf = pass == 0 ? want : (want == 0 ? 3 : 4);
+        for (int a = 7; a >= 0; a--) {
+            if (!ch[a] || kd[a] != kindOf || !shown[a]) continue;
+            int c = 0;
+            for (int b = 0; b < 8; b++) c += ch[b] == ch[a] && shown[b] ? 1 : 0;
+            if (c > bestN) bestN = c, best = ch[a];
+        }
+    }
+    return best;
+}
+
+
 constexpr int WORLD_MIN_Y = -64;
 constexpr int WORLD_TOP_Y = 640;
 constexpr int TILE = 256;

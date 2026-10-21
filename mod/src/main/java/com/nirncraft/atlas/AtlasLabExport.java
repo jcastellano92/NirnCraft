@@ -195,7 +195,7 @@ public final class AtlasLabExport {
                     parts.clear();
                     rnd.setSeed(42L);
                     try {
-                        models.get(st).collectParts(rnd, parts);
+                        models.get(st).collectParts(net.minecraft.client.renderer.block.BlockAndTintGetter.EMPTY, BlockPos.ZERO, st, rnd, parts);
                     } catch (RuntimeException e) {
                         parts.clear();
                     }

@@ -388,16 +388,7 @@ uint16_t shownKid(const uint16_t ch[8], int want, const Kind& kind) {
 // when 2, water when 4; the commonest of the winning kind's shown children, ties up), or where the vote is air the
 // commonest child with anything (its coverage decides whether it shows)
 uint16_t voteKids(const uint16_t ch[8], const std::vector<uint8_t>& cls) {
-    auto kind = [&](uint16_t m) -> int {
-        if (m == 0) return -1;
-        uint8_t c = m < cls.size() ? cls[m] : 0;
-        return c == 1 ? 1 : c == 2 ? 2 : 0;
-    };
-    int counts[3] = {0, 0, 0};
-    for (int k = 0; k < 8; k++)
-        if (kind(ch[k]) >= 0) counts[kind(ch[k])]++;
-    int want = counts[0] >= 3 ? 0 : counts[1] >= 2 ? 1 : counts[2] >= 4 ? 2 : -1;
-    return shownKid(ch, want, kind);
+    return voteCoarse(ch, cls);  // (world.hpp: bricks by their coverage)
 }
 
 }  // namespace
@@ -924,11 +915,6 @@ void World::markRegions(int sx, int sy, int sz, int lo, int hi, std::unordered_s
 // 3 or more children are solid; else foliage when 2 or more are leaves; else water when 4 or more are water; else air.
 // Its material: the most common among the children of the winning kind seen from above (shownKid), ties to the higher.
 void Section::buildMips(const std::vector<uint8_t>& cls) {
-    auto kind = [&](uint16_t m) -> int {
-        if (m == 0) return -1;
-        uint8_t c = m < cls.size() ? cls[m] : 0;
-        return c == 1 ? 1 : c == 2 ? 2 : 0;  // emissive and falls count as solid blocks
-    };
     const uint16_t* src = mats.data();
     int n = 16;
     std::vector<uint16_t> prev(mats.begin(), mats.end());
@@ -939,16 +925,11 @@ void Section::buildMips(const std::vector<uint8_t>& cls) {
             for (int z = 0; z < m; z++)
                 for (int x = 0; x < m; x++) {
                     uint16_t ch[8];
-                    int counts[3] = {0, 0, 0};
                     for (int k = 0; k < 8; k++) {
                         int cx = 2 * x + (k & 1), cz = 2 * z + ((k >> 1) & 1), cy = 2 * y + (k >> 2);
                         ch[k] = prev[size_t(cx + n * (cz + n * cy))];
-                        int kd = kind(ch[k]);
-                        if (kd >= 0) counts[kd]++;
                     }
-                    int want = counts[0] >= 3 ? 0 : counts[1] >= 2 ? 1 : counts[2] >= 4 ? 2 : -1;
-                    if (want < 0) continue;
-                    out[size_t(x + m * (z + m * y))] = shownKid(ch, want, kind);
+                    out[size_t(x + m * (z + m * y))] = voteCoarse(ch, cls);  // (world.hpp: bricks by their coverage)
                 }
         mip[size_t(level - 1)] = out;
         prev.swap(out);
