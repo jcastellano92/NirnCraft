@@ -2097,29 +2097,7 @@ namespace {
 // Section::buildMips' vote over a coarse voxel's 8 children (x + 2 z + 4 y), for the levels made from the level below
 // (atlas_voxgrid.slang voteMip)
 uint16_t voteMip(const uint16_t ch[8], const std::vector<uint8_t>& cls) {
-    auto kind = [&](uint16_t m) -> int {
-        if (m == 0) return -1;
-        uint8_t c = m < cls.size() ? cls[m] : 0;
-        return c == 1 ? 1 : c == 2 ? 2 : 0;
-    };
-    int counts[3] = {0, 0, 0}, kd[8];
-    for (int k = 0; k < 8; k++) {
-        kd[k] = kind(ch[k]);
-        if (kd[k] >= 0) counts[kd[k]]++;
-    }
-    int want = counts[0] >= 3 ? 0 : counts[1] >= 2 ? 1 : counts[2] >= 4 ? 2 : -1;
-    if (want < 0) return 0;
-    bool shown[8];
-    for (int a = 0; a < 8; a++) shown[a] = a >= 4 || !ch[a + 4] || kd[a + 4] != kd[a];
-    uint16_t best = 0;
-    int bestN = 0;
-    for (int a = 7; a >= 0; a--) {
-        if (!ch[a] || kd[a] != want || !shown[a]) continue;
-        int c = 0;
-        for (int q = 0; q < 8; q++) c += ch[q] == ch[a] && shown[q] ? 1 : 0;
-        if (c > bestN) bestN = c, best = ch[a];
-    }
-    return best;
+    return voteCoarse(ch, cls);  // (world.hpp: bricks by their coverage, atlas_voxgrid.slang voteMip)
 }
 }  // namespace
 

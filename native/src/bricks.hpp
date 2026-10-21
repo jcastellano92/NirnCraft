@@ -37,6 +37,7 @@ struct BrickVoxels {
     std::array<uint8_t, 4096> filled{};
     uint32_t count = 0;
     uint32_t lightRgb = 0;  // the emission-weighted mean colour of its glowing micro-voxels (RGB, brightest 255; 0 none)
+    float coverage = 0;     // the share of its volume it fills: its micro-voxels and what they enclose (a shell's inside)
 };
 
 // Voxelises one material's quads (those of quads[] whose material == m) into v; emission 0..1 the material's (its
@@ -56,9 +57,9 @@ public:
     void set(uint32_t m, std::shared_ptr<const std::vector<uint32_t>> record, uint32_t lightRgb = 0);
     // an animated one: a record a frame, `ticks` game ticks each
     void setFrames(uint32_t m, std::vector<std::shared_ptr<const std::vector<uint32_t>>> frames, uint32_t ticks, uint32_t lightRgb);
-    // whether material m's brick fills under a quarter of its micro-voxels (the grid's coarse vote: air)
-    void setSparse(uint32_t m, bool sparse);
-    bool sparse(uint32_t m) const;
+    // material m's brick's coverage for the grid's coarse vote, 0..63 (BrickVoxels.coverage x 63); -1: no brick
+    void setCoverage(uint32_t m, int level);
+    int coverage(uint32_t m) const;
     // material m's light colour from its brick (RGB, 0: none: the caller takes its palette colour)
     uint32_t lightRgb(uint32_t m) const;
     // a record equal to `rec` already held, else rec itself (deduplication)
@@ -75,7 +76,7 @@ private:
     std::vector<uint32_t> lightRgb_;
     std::vector<std::vector<std::shared_ptr<const std::vector<uint32_t>>>> frames_;  // (animated: every frame's)
     std::vector<uint32_t> ticks_;
-    std::vector<uint8_t> sparse_;
+    std::vector<int8_t> coverage_;
     std::unordered_map<uint64_t, std::vector<std::shared_ptr<const std::vector<uint32_t>>>> unique_;
     uint64_t revision_ = 0;
 };

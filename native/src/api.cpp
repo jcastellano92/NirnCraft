@@ -225,12 +225,15 @@ static void syncClasses(AtlasContext* ctx) {
     std::vector<uint8_t> cls(ctx->palette.size(), 0);
     for (size_t i = 0; i < cls.size(); i++) cls[i] = uint8_t(ctx->palette[i].emisClass[1]);
     std::vector<uint8_t> grid = cls;
-    // (the grid's vote: a sparse brick, under a quarter of its micro-voxels filled (a rail, a torch, a door, a ladder),
-    // is no solid block to its coarse voxel: atlas_voxgrid.slang vKind's 255, air; foliage keeps its own kind)
-    for (size_t i = 0; i < grid.size(); i++)
-        if ((grid[i] == ATLAS_CLASS_TERRAIN || grid[i] == ATLAS_CLASS_EMISSIVE) && ctx->bricks.sparse(uint32_t(i))) grid[i] = 255;
+    // (the grid's vote by coverage: a brick (a plant, a rail, a torch, a door, a slab) counts by the share of its block
+    // it fills, 128 | foliage 64 | coverage 0..63 (atlas_voxgrid.slang vKind); leaves and full blocks as before)
+    for (size_t i = 0; i < grid.size(); i++) {
+        int cov = ctx->bricks.coverage(uint32_t(i));
+        bool kind = grid[i] == ATLAS_CLASS_TERRAIN || grid[i] == ATLAS_CLASS_EMISSIVE || grid[i] == ATLAS_CLASS_FOLIAGE;
+        if (cov >= 0 && cov < 60 && kind) grid[i] = uint8_t(128 | (grid[i] == ATLAS_CLASS_FOLIAGE ? 64 : 0) | cov);
+    }
     ctx->voxgrid.setClasses(grid);  // (the grid's coarse levels: the same vote, on the GPU)
-    ctx->world.setClasses(std::move(cls));
+    ctx->world.setClasses(std::move(grid));  // (and the regions' levels: world.hpp voteCoarse)
 }
 
 
@@ -1741,7 +1744,8 @@ ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t firs
     std::vector<std::shared_ptr<const std::vector<uint32_t>>> recs(count);
     std::vector<uint32_t> lightOf(count, 0u);
     std::vector<std::vector<std::shared_ptr<const std::vector<uint32_t>>>> frameRecs(count);
-    std::vector<uint32_t> ticksOf(count, 1u), filledOf(count, 0u);
+    std::vector<uint32_t> ticksOf(count, 1u);
+    std::vector<float> coverOf(count, 1.0f);
     std::vector<std::vector<AtlasBrickQuad>> per(count);
     for (uint32_t q = 0; q < quadCount; q++)
         if (quads[q].material < count) per[quads[q].material].push_back(quads[q]);
@@ -1762,7 +1766,7 @@ ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t firs
                 if (!voxeliseBrick(per[m].data(), uint32_t(per[m].size()), m, sprites, spriteCount, texels, texelCount, e, v, k))
                     break;
                 auto r = ctx->bricks.intern(encodeBrick(v));
-                if (k == 0) recs[m] = r, lightOf[m] = v.lightRgb, filledOf[m] = v.count;
+                if (k == 0) recs[m] = r, lightOf[m] = v.lightRgb, coverOf[m] = v.coverage;
                 if (frames > 1) frameRecs[m].push_back(r);
             }
             ticksOf[m] = ticks;
@@ -1771,11 +1775,11 @@ ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t firs
     for (uint32_t m = 0; m < count; m++) {
         if (frameRecs[m].size() > 1) ctx->bricks.setFrames(first + m, std::move(frameRecs[m]), ticksOf[m], lightOf[m]);
         else ctx->bricks.set(first + m, recs[m], lightOf[m]);
-        ctx->bricks.setSparse(first + m, recs[m] && filledOf[m] < 1024u);
+        ctx->bricks.setCoverage(first + m, recs[m] ? int(coverOf[m] * 63.0f + 0.5f) : -1);
     }
     {
         std::lock_guard<std::mutex> lock(ctx->mu);
-        syncClasses(ctx);  // (the sparse ones vote as air in the grid's coarse levels)
+        syncClasses(ctx);  // (the bricks vote by their coverage in the grid's coarse levels)
     }
     return ATLAS_OK;
     ATLAS_CATCH(ctx)

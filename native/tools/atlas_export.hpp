@@ -577,7 +577,9 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
             // (keep=near: every emitter at its level, as AtlasMaterials.material now gives the game's; else the old 10)
             int minEmit = modelled ? 1 : 10;
             am.emissive = s.emit >= minEmit ? float(s.emit) / 15.0f : 0.0f;
-            am.cls = wat ? ATLAS_CLASS_WATER : s.emit >= minEmit ? ATLAS_CLASS_EMISSIVE : s.cls == 1 ? ATLAS_CLASS_FOLIAGE : ATLAS_CLASS_TERRAIN;
+            // (keep=near: plants are foliage as AtlasMaterials.material classes them; else blocks.bin's leaves alone)
+            bool fol = s.cls == 1 || (modelled && s.cls == 4);
+            am.cls = wat ? ATLAS_CLASS_WATER : s.emit >= minEmit ? ATLAS_CLASS_EMISSIVE : fol ? ATLAS_CLASS_FOLIAGE : ATLAS_CLASS_TERRAIN;
             AtlasMaterialShape sh{};
             sh.occupancy = wat ? ~0ull : s.mask;
             sh.mean = tm;

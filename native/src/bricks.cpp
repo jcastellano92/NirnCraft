@@ -123,6 +123,32 @@ bool voxeliseBrick(const AtlasBrickQuad* quads, uint32_t quadCount, uint32_t m, 
         v.count++;
     }
     if (std::max(lr, std::max(lg, lb)) < 1e-6) lr = er, lg = eg, lb = eb;
+    // its coverage: what the outside's empty micro-voxels do not reach (bounded: one pass a voxel)
+    {
+        std::vector<uint8_t> out(4096, 0);
+        std::vector<uint16_t> stack;
+        stack.reserve(4096);
+        auto push = [&](int x, int y, int z) {
+            if (x < 0 || y < 0 || z < 0 || x > 15 || y > 15 || z > 15) return;
+            size_t i = size_t(x + 16 * (z + 16 * y));
+            if (out[i] || v.filled[i]) return;
+            out[i] = 1;
+            stack.push_back(uint16_t(i));
+        };
+        for (int a = 0; a < 16; a++)
+            for (int b = 0; b < 16; b++) {
+                push(a, b, 0), push(a, b, 15), push(a, 0, b), push(a, 15, b), push(0, a, b), push(15, a, b);
+            }
+        size_t reached = 0;
+        while (!stack.empty()) {
+            int i = stack.back();
+            stack.pop_back();
+            reached++;
+            int x = i & 15, z = (i >> 4) & 15, y = i >> 8;
+            push(x - 1, y, z), push(x + 1, y, z), push(x, y - 1, z), push(x, y + 1, z), push(x, y, z - 1), push(x, y, z + 1);
+        }
+        v.coverage = float(4096 - reached) / 4096.0f;
+    }
     double mx = std::max(lr, std::max(lg, lb));
     if (mx > 1e-6) {
         auto q = [&](double x) { return uint32_t(std::clamp(std::pow(x / mx, 1.0 / 2.2) * 255.0 + 0.5, 0.0, 255.0)); };
@@ -231,18 +257,18 @@ void BrickStore::setFrames(uint32_t m, std::vector<std::shared_ptr<const std::ve
     revision_++;
 }
 
-void BrickStore::setSparse(uint32_t m, bool sparse) {
+void BrickStore::setCoverage(uint32_t m, int level) {
     std::lock_guard<std::mutex> lock(mu_);
-    if (m >= sparse_.size()) {
-        if (!sparse) return;
-        sparse_.resize(size_t(m) + 1, 0);
+    if (m >= coverage_.size()) {
+        if (level < 0) return;
+        coverage_.resize(size_t(m) + 1, int8_t(-1));
     }
-    sparse_[m] = sparse ? 1 : 0;
+    coverage_[m] = int8_t(std::clamp(level, -1, 63));
 }
 
-bool BrickStore::sparse(uint32_t m) const {
+int BrickStore::coverage(uint32_t m) const {
     std::lock_guard<std::mutex> lock(mu_);
-    return m < sparse_.size() && sparse_[m];
+    return m < coverage_.size() ? coverage_[m] : -1;
 }
 
 uint32_t BrickStore::lightRgb(uint32_t m) const {
