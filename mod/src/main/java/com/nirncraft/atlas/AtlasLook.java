@@ -102,9 +102,27 @@ final class AtlasLook {
         // the sky's own light (AtlasSky.nightLight: the aurora, the airglow, the stars, the fill moon, meteors) over the
         // air's: an aurora night tints the snow, a fireball flashes
         float[] o = air.clone();
+        // an eclipse: the sun's hidden share is gone from its light and the air's (by day; the night's key is a moon)
+        float hide = sunHidden(mc, sun);
+        if (hide > 0f) for (int i = 3; i < 12; i++) o[i] *= 1f - hide;
         float[] glow = AtlasSky.nightLight();
         for (int i = 0; i < 6; i++) o[6 + i] += glow[i];
         return o;
+    }
+
+    /** The deepest an eclipse darkens the sun's light (the rest: the sky beyond the moon's shadow). */
+    static final double ECLIPSE_DEPTH = 0.9997;
+
+    /** The sun's share the moons hide now (MoonMath's eclipse), faded out as the sun goes down (the key is a moon). */
+    static float sunHidden(Minecraft mc, float[] sun) {
+        if (mc.level == null || mc.level.dimension() != net.minecraft.world.level.Level.OVERWORLD || sun[1] < -0.12f)
+            return 0f;
+        double days = (mc.level.getOverworldClockTime() + mc.getDeltaTracker().getGameTimeDeltaPartialTick(false)) / 24000.0;
+        double vis = com.nirncraft.atmosphere.MoonMath.sunVisible(days, new double[] {sun[0], sun[1], sun[2]},
+                AtlasClient.sunPathRotationDeg, com.nirncraft.atmosphere.AtmosphereConfig.SECUNDA.get(),
+                com.nirncraft.atmosphere.client.NightSky.observer());
+        // (the sky's light from beyond the moon's shadow: a total eclipse is a deep dusk, not a night)
+        return (float) ((1.0 - vis) * ECLIPSE_DEPTH * smooth(-0.12f, 0.0f, sun[1]));
     }
 
     private static float eyeY(Minecraft mc) {
@@ -133,6 +151,7 @@ final class AtlasLook {
         float[] air = AtlasAir.light(sun, eyeY(Minecraft.getInstance()));
         if (air != null) {  // the air's light (atlas_render exposure=auto computes the same)
             float l = 0.18f * (lum(air[3], air[4], air[5]) * Math.max(air[1], 0f) + lum(air[6], air[7], air[8]));
+            l *= 1f - sunHidden(Minecraft.getInstance(), sun);  // (an eclipse: the eye opens to its dark)
             float logL = (float) (Math.log(Math.max(l, 1e-5f)) / Math.log(2));
             return Math.max(EXPOSURE_MIN, Math.min(EXPOSURE_MAX, EXPOSURE_KEY - EXPOSURE_SLOPE * logL));
         }

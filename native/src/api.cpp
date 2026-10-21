@@ -133,6 +133,8 @@ void cachedAir(const AtlasAir* a, air::Coeffs& c, air::MsLut& lut) {
 }  // namespace
 
 struct AtlasContext {
+    double glInputsMs = 0;  // (atlas_info glRender: building the frame's inputs, eased)
+    double inSnapMs = 0, inSkyMs = 0, inLightsMs = 0, inGridMs = 0, inTexMs = 0;  // (its parts)
     std::unique_ptr<Backend> backend;
     World world;
     VoxGrid voxgrid;  // the level-0 grid's books (voxgrid.hpp): sections in, batches to the backend's GPU build
@@ -145,6 +147,13 @@ struct AtlasContext {
     float preExposure = 1.0f;  // atlas_set_pre_exposure
     std::vector<AtlasActor> actors;
     Lights lights;
+    // (FRAME_GPU_LIGHTS_BIT) the far-light index as the GPU culls it (Lights::packGpu), packed when it changes
+    std::vector<Float4> lightsPacked;
+    uint64_t lightsRevision = 0;
+    uint32_t lightRecords = 0;
+    // the light by need (lightControl): the tiles' share traced a frame and the footprint scale, eased
+    float lightRate = 0.25f, lightFoot = 1.0f, lightBudget = 1.0f;
+    float prevJitterNdc[2] = {0.0f, 0.0f};  // the last frame's jitter (NDC): the histories reproject to its rays
     std::unique_ptr<PreviewSource> preview;
     FrameTargets targets;
     AtlasStats stats{};
@@ -179,9 +188,12 @@ struct AtlasContext {
     uint64_t airVersion = 0;
     struct {
         uint64_t version = ~0ull;
-        float sun[3] = {}, moon[3] = {}, moonE[3] = {}, alt = -1;
+        float sun[3] = {}, moon[3] = {}, moonE[3] = {}, alt = -1, share = -1;
         air::V3 up, ground;
     } skyLight;
+    // an eclipse's occulters (atlas_set_eclipse): centre from the camera (km), radius (km) x 2; km a block
+    float eclipse[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    float eclipseKm = 0.1f;
 
     AtlasStatus fail(AtlasStatus s, std::string msg) noexcept {
         try {
@@ -313,6 +325,30 @@ void pixelDir(const float* inv, float px, float py, uint32_t w, uint32_t h, floa
 
 }  // namespace
 
+// The share of the sun's disc seen past an eclipse's occulters from a point p (km from the camera); atlas_air.slang's
+// airSunShareKm, the same formula
+static float eclipseShare(const float occ[8], const float p[3], const float sun[3]) {
+    const float rs = 0.0089f;  // the sun's angular radius (the host's sky disc)
+    float vis = 1.0f;
+    for (int k = 0; k < 2; k++) {
+        const float* o = occ + k * 4;
+        if (!(o[3] > 0.0f)) continue;
+        float v[3] = {o[0] - p[0], o[1] - p[1], o[2] - p[2]};
+        float l = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+        if (l <= o[3]) return 0.0f;
+        float c = (v[0] * sun[0] + v[1] * sun[1] + v[2] * sun[2]) / l;
+        if (c <= 0.0f) continue;
+        float cx = (v[1] * sun[2] - v[2] * sun[1]) / l, cy = (v[2] * sun[0] - v[0] * sun[2]) / l,
+              cz = (v[0] * sun[1] - v[1] * sun[0]) / l;
+        float ang = std::asin(std::fmin(o[3] / l, 1.0f));
+        float sep = std::atan2(std::sqrt(cx * cx + cy * cy + cz * cz), c);
+        float cover = std::fmin(std::fmax((ang + rs - sep) / (2.0f * std::fmin(ang, rs)), 0.0f), 1.0f) *
+                      std::fmin(1.0f, ang * ang / (rs * rs));
+        vis *= 1.0f - cover * cover * (3.0f - 2.0f * cover);
+    }
+    return vis;
+}
+
 extern "C" {
 
 ATLAS_API uint32_t atlas_abi_version(void) { return ATLAS_ABI_VERSION; }
@@ -376,6 +412,16 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           (unsigned long long)c.levelBytes[2], (unsigned long long)c.levelBytes[3],
                           (unsigned long long)c.levelBytes[4], (unsigned long long)c.levelBytes[5],
                           (unsigned long long)c.levelBytes[6], c.digested, c.evicted, c.digestMs);
+            ctx->info.insert(ctx->info.size() - 1, b);
+        }
+        if (!ctx->info.empty() && ctx->info.back() == '}') {
+            // the game path's wall time on the render thread (eased): building the inputs, waiting, preparing, recording
+            Backend::GlTimes g = ctx->backend->glTimes();
+            char b[256];
+            std::snprintf(b, sizeof b, ",\"glRender\":{\"inputsMs\":%.2f,\"waitMs\":%.2f,\"prepareMs\":%.2f,\"recordMs\":%.2f,"
+                          "\"snapMs\":%.2f,\"skyMs\":%.2f,\"lightsMs\":%.2f,\"gridMs\":%.2f,\"texMs\":%.2f}",
+                          ctx->glInputsMs, g.waitMs, g.prepareMs, g.recordMs, ctx->inSnapMs, ctx->inSkyMs, ctx->inLightsMs,
+                          ctx->inGridMs, ctx->inTexMs);
             ctx->info.insert(ctx->info.size() - 1, b);
         }
         if (ctx->voxgrid.active() && !ctx->info.empty() && ctx->info.back() == '}') {
@@ -798,7 +844,9 @@ ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f,
     AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
     FrameInputs in{};
+    auto tb0 = std::chrono::steady_clock::now();
     AtlasStatus st = buildInputs(ctx, f, in);
+    ctx->glInputsMs += (std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tb0).count() - ctx->glInputsMs) * 0.05;
     if (st != ATLAS_OK) return st;
     in.preExposure = ctx->preExposure;
     GlFrameIO g;
@@ -874,12 +922,77 @@ static void rememberFrame(AtlasContext* ctx, const AtlasFrame* f) {
     ctx->prevW = f->width;
     ctx->prevH = f->height;
     ctx->prevCloudFlags = f->flags & (ATLAS_FRAME_CLOUDS | ATLAS_FRAME_CLOUDS_QUARTER);
+    ctx->prevJitterNdc[0] = f->width > 0 ? ctx->jitter[0] * 2.0f / float(f->width) : 0.0f;
+    ctx->prevJitterNdc[1] = f->height > 0 ? ctx->jitter[1] * 2.0f / float(f->height) : 0.0f;
     ctx->haveHistory = true;
     ctx->frameIndex++;
 }
 
+static void easeMs(double& v, std::chrono::steady_clock::time_point a) {
+    v += (std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - a).count() - v) * 0.05;
+}
+
+// The light by need (docs/ATLAS-RENDERER-PLAN.md "The light by need"; atlas_far.slang nearLightAt, nearLightMain): how
+// much of the near light a frame traces, each knob a smooth function eased frame to frame, never a switch.
+//  x the footprint scale: the secondary rays start at the level whose voxels are the pixel's footprint x this (1: about
+//    a pixel; the budget raises it, coarser past where a voxel is sub-pixel);
+//  y the share of the split's 16 px tiles traced a frame (the rest keep their history: the light is diffuse, the camera's
+//    motion does not change it; a tile with a pixel lacking history is traced anyway): a still or slowly turning view
+//    ATLAS_LIGHT_RATE (0.25: each pixel every 16 frames), up to every tile as the image moves faster (the history's
+//    resampling blurs what it carries), the budget lowering it;
+//  z the sun ray's cone (voxels of a level before the next: 108, about the inverse of the sun's diameter, an occluder's
+//    voxel never wider than its penumbra), w the bounce's sun ray's (24: bounced light is soft).
+// ATLAS_TARGET_MS=<ms>: the budget follows the frame's GPU time towards it (0 or unset: none). ATLAS_LIGHT=full: the
+// full light (level 0 everywhere, no cones, every tile every frame; with ATLAS_NEAR_FULLRES=1 every pixel in the far
+// pass: the reference).
+static void lightControl(AtlasContext* ctx, const AtlasFrame* f, const float fwd[3], FrameGpu& g) {
+    // (read every frame, as ATLAS_ABLATE: a measurement switches them between runs in one process)
+    const char* le = std::getenv("ATLAS_LIGHT");
+    if (le && std::strcmp(le, "full") == 0) {
+        g.lightCtl[0] = 0.0f, g.lightCtl[1] = 1.0f, g.lightCtl[2] = 0.0f, g.lightCtl[3] = 0.0f;
+        return;
+    }
+    const char* re = std::getenv("ATLAS_LIGHT_RATE");
+    float rateStill = re && std::atof(re) > 0.0 ? std::fmin(float(std::atof(re)), 1.0f) : 0.25f;
+    const char* te = std::getenv("ATLAS_TARGET_MS");
+    float target = te ? float(std::atof(te)) : 0.0f;
+    // the image's motion, pixels a frame: the view's turn, and the camera's move as a point 16 blocks off sees it
+    float motion = 0.0f;
+    float pa = std::fmax(g.params[3], 1e-5f);
+    if (ctx->haveHistory && ctx->prevW == f->width && ctx->prevH == f->height) {
+        float b[3];
+        pixelDir(ctx->prevInvVP, f->width * 0.5f, f->height * 0.5f, f->width, f->height, b);
+        float d = std::fmin(1.0f, fwd[0] * b[0] + fwd[1] * b[1] + fwd[2] * b[2]);
+        double dx = f->cameraPos[0] - ctx->prevCam[0], dy = f->cameraPos[1] - ctx->prevCam[1], dz = f->cameraPos[2] - ctx->prevCam[2];
+        motion = std::acos(d) / pa + float(std::sqrt(dx * dx + dy * dy + dz * dz)) / (16.0f * pa);
+    }
+    // the budget: the frame's GPU time against the target, a few percent a frame
+    if (target > 0.0f && ctx->stats.lastFrameMs > 0.0) {
+        float err = float(ctx->stats.lastFrameMs) / target - 1.0f;
+        ctx->lightBudget = std::clamp(ctx->lightBudget - 0.05f * std::clamp(err, -1.0f, 1.0f), 0.25f, 1.0f);
+    }
+    float t = std::clamp((motion - 2.0f) / 22.0f, 0.0f, 1.0f);
+    float want = (rateStill + (1.0f - rateStill) * t * t * (3.0f - 2.0f * t)) * ctx->lightBudget;
+    want = std::clamp(want, 0.0625f, 1.0f);
+    ctx->lightRate += (want - ctx->lightRate) * 0.2f;
+    ctx->lightFoot += (1.0f / std::fmax(ctx->lightBudget, 0.25f) - ctx->lightFoot) * 0.2f;
+    g.lightCtl[0] = ctx->lightFoot;
+    g.lightCtl[1] = ctx->lightRate;
+    g.lightCtl[2] = 108.0f;
+    g.lightCtl[3] = 24.0f;
+    // (measurements: ATLAS_LIGHT_KNOBS=foot,rate,cone,bounce overrides them, a negative entry keeps that one)
+    if (const char* k = std::getenv("ATLAS_LIGHT_KNOBS")) {
+        float v[4] = {-1, -1, -1, -1};
+        std::sscanf(k, "%f,%f,%f,%f", &v[0], &v[1], &v[2], &v[3]);
+        for (int i = 0; i < 4; i++)
+            if (v[i] >= 0.0f) g.lightCtl[i] = v[i];
+    }
+}
+
 static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInputs& in) {
+    auto tq = std::chrono::steady_clock::now();
     in.sceneHold = ctx->world.packed();
+    easeMs(ctx->inSnapMs, tq);
     in.scene = in.sceneHold.get();
     if (in.scene->lodCount == 0) return ctx->fail(ATLAS_ERR_STATE, "call atlas_update before atlas_render");
     // the first frame that traces the groups starts their building (the next atlas_update, nearest first)
@@ -920,30 +1033,48 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         float md[3], mr[3];
         moonOf(g.sunDir, ctx->moonSet ? ctx->moonDir : nullptr, ctx->moonSet ? ctx->moonRad : nullptr, md, mr);
         air::Lights l = air::lightsOf(g.sunDir, md, mr);
-        put(g.airSun, l.sunE, alt);
+        put(g.airSun, l.sunE, alt);  // (the GPU takes an eclipse's share per point: atlas_air.slang airSunShareKm)
+        // the sky's light on faces at the eye: an eclipse's share there, above a twilight's floor (the air beyond the
+        // moon's shadow still lights the sky round the horizon)
+        const float origin[3] = {0, 0, 0};
+        const float sunShare = std::fmax(eclipseShare(ctx->eclipse, origin, g.sunDir), 0.004f);
+        l.sunE = l.sunE * sunShare;
         put(g.airMoon, l.moonE, 0.0f);
         auto& s = ctx->skyLight;
         const float me[3] = {l.moonE.x, l.moonE.y, l.moonE.z};
-        bool same = s.version == ctx->airVersion && std::fabs(s.alt - alt) < 0.01f;
+        bool same = s.version == ctx->airVersion && std::fabs(s.alt - alt) < 0.01f &&
+                    std::fabs(s.share - sunShare) < 1e-4f;
         for (int i = 0; i < 3 && same; i++)
             same = std::fabs(s.sun[i] - g.sunDir[i]) < 2e-4f && std::fabs(s.moon[i] - md[i]) < 2e-3f &&
                    std::fabs(s.moonE[i] - me[i]) < 1e-4f;
+        auto tsk = std::chrono::steady_clock::now();
         if (!same) {
             air::skyLight(c, ctx->airLut, alt, l, s.up, s.ground);
             s.version = ctx->airVersion;
             s.alt = alt;
+            s.share = sunShare;
             for (int i = 0; i < 3; i++) {
                 s.sun[i] = g.sunDir[i];
                 s.moon[i] = md[i];
                 s.moonE[i] = me[i];
             }
         }
+        easeMs(ctx->inSkyMs, tsk);
         put(g.airSkyUp, s.up + air::V3{ctx->glowUp[0], ctx->glowUp[1], ctx->glowUp[2]}, 0.0f);
         put(g.airGround, s.ground + air::V3{ctx->glowGround[0], ctx->glowGround[1], ctx->glowGround[2]}, 0.0f);
     }
+    for (int i = 0; i < 4; i++) {
+        g.eclipseA[i] = ctx->eclipse[i];
+        g.eclipseB[i] = ctx->eclipse[4 + i];
+    }
+    g.eclipseC[0] = ctx->eclipseKm;
+    g.eclipseC[1] = ctx->eclipse[3] > 0.0f || ctx->eclipse[7] > 0.0f ? 1.0f : 0.0f;
+    g.eclipseC[2] = g.eclipseC[3] = 0.0f;
     g.jitter[0] = f->width > 0 ? ctx->jitter[0] * 2.0f / float(f->width) : 0.0f;
     g.jitter[1] = f->height > 0 ? ctx->jitter[1] * 2.0f / float(f->height) : 0.0f;
     g.jitter[2] = ctx->jitter[0] != 0.0f || ctx->jitter[1] != 0.0f ? 1.0f : 0.0f;
+    g.farLight[2] = ctx->prevJitterNdc[0];  // (the near light's history: the last frame's rays went through these)
+    g.farLight[3] = ctx->prevJitterNdc[1];
     // ATLAS_ABLATE=<bits>: measurements only, leave parts of the shading out (1 AO, 2 smooth normals, 4 shadows, 8 far
     // lights, 16 water reflections, 32 the trace itself after the first hit's distance; the far light: 256 the cheap
     // light of ATLAS_FRAME_LIGHT_LOW, 512 never enclosed (the sky's short reach and the aerial haze under solid cover as
@@ -951,7 +1082,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     // secondary rays' origin in a solid), 8192 two sky rays, 16384 half their reach, 524288 no traced bounce (the
     // look's constant alone), 2097152 the secondary rays' level 0 without the height mip, 4194304 foliage free to them,
     // bits 23-25 a counter of the near light's secondary rays per pixel (atlas_far.slang gSecMode), 67108864 its level 0
-    // only; the groups: 64 draw every node
+    // only, 536870912 the counters count the pixels the split traces (raySteps: the light by need's work); the groups: 64 draw every node
     // whole, 128 a drawn box without its texel walk, 32768 never draw a node whole for its error, bits 16-18 the level
     // their primary rays start from: a coarse level seen up close)
     {
@@ -987,6 +1118,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.dims[2] = f->flags;
     g.dims[3] = uint32_t(in.scene->lodCount);
     g.weatherParams[0] = ctx->rainFactor;
+    lightControl(ctx, f, a, g);
     // last frame's view-projection (inverted back from its inverse) and camera, whenever the frames are comparable:
     // the near light's history reprojects through them (with or without clouds: weather off left it no camera, and
     // every pixel's history was refused); temporal.y the clouds' own history, which also needs the same cloud pass
@@ -1083,7 +1215,21 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
             const air::Coeffs& c = ctx->airC;
             float h = air::altitudeOf(c, float(f->cameraPos[1]));
             lv.hazeDensity = (c.rayleigh.y * std::exp(-h / air::H_RAYLEIGH) + c.mieExt.y * std::exp(-h * c.invHMie)) * c.airScale;
-            g.weatherParams[1] = float(ctx->lights.frame(lv, in.actors));
+            auto tl = std::chrono::steady_clock::now();
+            if (ctx->backend->gpuLights()) {
+                // culled, ranked and binned on the GPU (atlas_far.slang lightCullMain): only the index goes up, when it
+                // changes; weatherParams.y says there are lights at all
+                ctx->lights.packGpu(ctx->lightsRevision, ctx->lightsPacked, ctx->lightRecords);
+                in.lights = &ctx->lightsPacked;
+                in.lightsRevision = ctx->lightsRevision;
+                in.lightRecords = ctx->lightRecords;
+                g.dims[2] |= FRAME_GPU_LIGHTS_BIT;
+                g.weatherParams[1] = ctx->lightRecords > 0 ? 1.0f : 0.0f;
+                g.farLight[0] = lv.hazeDensity;
+            } else {
+                g.weatherParams[1] = float(ctx->lights.frame(lv, in.actors));
+            }
+            easeMs(ctx->inLightsMs, tl);
         }
     }
     if (in.actors.empty()) in.actors.push_back(ActorGpu{});
@@ -1091,7 +1237,9 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     // (its coarse levels up to the world's coarsest, set before the first frame lays them out)
     ctx->voxgrid.coarseLevels = std::min(ctx->voxgrid.coarseLevels, std::max(0, ctx->world.lodCount - 1));
     ctx->voxgrid.stoneMat = ctx->world.stoneMat;
+    auto tgr = std::chrono::steady_clock::now();
     ctx->voxgrid.frame(g.camInt, ctx->world);
+    easeMs(ctx->inGridMs, tgr);
     ctx->voxgrid.origin(g.vgOrigin);
     g.vgDims[0] = uint32_t(ctx->voxgrid.D);
     g.vgDims[1] = uint32_t(ctx->voxgrid.H);
@@ -1112,7 +1260,9 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     in.voxgrid = &ctx->voxgrid;
     {
         // the near field's textures (atlas_set_material_textures), packed for the kernels once each revision
+        auto ttx = std::chrono::steady_clock::now();
         std::shared_ptr<const TextureSet> ts = ctx->world.textures();
+        easeMs(ctx->inTexMs, ttx);
         if (ts->revision != ctx->texturesRevision) {
             packTextures(*ts, ctx->texturesPacked);
             ctx->texturesRevision = ts->revision;
@@ -1289,6 +1439,16 @@ ATLAS_API AtlasStatus atlas_set_sun_map(AtlasContext* ctx, uint32_t size, float 
     ctx->sunMapSize = size;
     ctx->sunMapHalf = halfExtent;
     ctx->sunMapFull = true;
+    return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_set_eclipse(AtlasContext* ctx, const float occulters[8], float kmPerBlock) {
+    if (!ctx || !occulters || !std::isfinite(kmPerBlock) || kmPerBlock <= 0.0f) return ATLAS_ERR_ARG;
+    for (int i = 0; i < 8; i++) {
+        if (!std::isfinite(occulters[i])) return ATLAS_ERR_ARG;
+        ctx->eclipse[i] = occulters[i];
+    }
+    ctx->eclipseKm = kmPerBlock;
     return ATLAS_OK;
 }
 

@@ -13,7 +13,9 @@ layout(std140) uniform AirInfo {
     vec4 AirOzone;     // ozone's absorption at its peak; w = the ground's albedo
     vec4 AirSun;       // xyz towards the sun; w = the eye's altitude, km
     vec4 AirMoon;      // xyz towards the moon; w the exposure the sky-view LUT is written with (half precision)
-    vec4 AirMoonE;     // the moon's irradiance above the air (0 by day)
+    vec4 AirMoonE;     // the moon's irradiance above the air (0 by day); w unused
+    vec4 AirOcculter[2];  // an eclipse's moons (MoonMath.occulterBlock): xyz the centre from the eye (km, world axes),
+                          // w the radius (km); 0: none near the sun
 };
 uniform sampler2D AirMs;  // the multiple-scattering LUT, 32 x 32 (u: sun zenith cosine, v: sqrt(altitude / 100 km))
 
@@ -28,6 +30,39 @@ const vec3 SUN_IRRADIANCE = vec3(11.181, 11.807, 12.854);
 const vec3 NIGHT_GLOW = vec3(0.0);  // (air.hpp: the night's glow is the sky's emitters', atlas_night.glsl)
 const int MS_SIZE = 32;
 const int SKY_STEPS = 24;
+// the eclipse's geometry: the sun's angular radius (atlas_sky.fsh's disc, MoonMath.SUN_RADIUS), and how far over Nirn
+// (km) a km of the sky's air reaches: the air is drawn thinner than the land's geography (AirMieExt.w km of air a block,
+// 0.1 km of Nirn a block, MoonMath.KM_PER_BLOCK); its sky's paths are taken at 8 km of Nirn a km of air, so the air
+// beyond a moon's shadow lights only the lowest sky: a twilight ring round the horizon in totality, the sky above dark
+const float AIR_SUN_RADIUS = 0.0089;
+const float AIR_GEO_PER_AIR_KM = 8.0;
+
+// The share of the sun's disc seen past the eclipse's moons from a point p km (geography) from the eye (1: no eclipse).
+// Each moon a sphere: its disc's overlap with the sun's as seen from there (the umbra and penumbra fall where they do).
+float airSunShare(vec3 p) {
+    float vis = 1.0;
+    for (int i = 0; i < 2; i++) {
+        vec4 o = AirOcculter[i];
+        if (o.w <= 0.0) continue;
+        vec3 v = o.xyz - p;
+        float l = length(v);
+        vec3 u = v / l;
+        float c = dot(u, AirSun.xyz);
+        if (c <= 0.0) continue;
+        float ang = asin(min(o.w / l, 1.0));
+        float sep = atan(length(cross(u, AirSun.xyz)), c);
+        float rs = AIR_SUN_RADIUS;
+        float cover = clamp((ang + rs - sep) / (2.0 * min(ang, rs)), 0.0, 1.0) * min(1.0, ang * ang / (rs * rs));
+        vis *= 1.0 - cover * cover * (3.0 - 2.0 * cover);
+    }
+    return vis;
+}
+
+// that share at a point t km of air along dir from the eye
+float airSunShareAlong(vec3 dir, float t) {
+    if (AirOcculter[0].w <= 0.0 && AirOcculter[1].w <= 0.0) return 1.0;
+    return airSunShare(dir * (t * AIR_GEO_PER_AIR_KM));
+}
 
 float airErfcx(float y) { return 1.1283792 / (y + sqrt(y * y + 0.393 * y + 1.2732395)); }
 
@@ -89,7 +124,7 @@ vec3 airMs(float h, float muS) {
 
 // air.hpp integrate: single scattering of both lights, the higher orders from the LUT (quadratic steps: a sky ray)
 vec3 airIntegrate(float r, float mu, float nuS, float muS, vec3 ES, float nuM, float muM, vec3 EM, float tEnd,
-                  bool ground) {
+                  bool ground, vec3 dir) {
     bool moon = EM.x + EM.y + EM.z > 0.0;
     float g = AirMieScat.w;
     float pRS = airPhaseRayleigh(nuS), pMS = airPhaseMie(nuS, g), pRM = airPhaseRayleigh(nuM), pMM = airPhaseMie(nuM, g);
@@ -111,7 +146,9 @@ vec3 airIntegrate(float r, float mu, float nuS, float muS, vec3 ES, float nuM, f
         vec3 stepT = exp(-ext * dt);
         vec3 w = (1.0 - stepT) / max(ext, vec3(1e-7));
         float muSt = (r * muS + t * nuS) / rt;
-        vec3 S = ((sR * pRS + sM * pMS) * airLightTransmittance(rt, muSt) + (sR + sM) * airMs(ht, muSt)) * ES;
+        // (an eclipse: the sun's share at this point of the ray; outside the moon's shadow the air stays lit)
+        vec3 S = ((sR * pRS + sM * pMS) * airLightTransmittance(rt, muSt) + (sR + sM) * airMs(ht, muSt)) * ES
+                 * airSunShareAlong(dir, t);
         if (moon) {
             float muMt = (r * muM + t * nuM) / rt;
             S += ((sR * pRM + sM * pMM) * airLightTransmittance(rt, muMt) + (sR + sM) * airMs(ht, muMt)) * EM;
@@ -122,7 +159,7 @@ vec3 airIntegrate(float r, float mu, float nuS, float muS, vec3 ES, float nuM, f
     if (ground) {
         float rg = sqrt(max(r * r + 2.0 * r * mu * tEnd + tEnd * tEnd, 1.0));
         float muG = (r * muS + tEnd * nuS) / rg;
-        vec3 lit = airLightTransmittance(rg, muG) * ES * max(muG, 0.0);
+        vec3 lit = airLightTransmittance(rg, muG) * ES * max(muG, 0.0) * airSunShareAlong(dir, tEnd);
         if (moon) {
             float muGM = (r * muM + tEnd * nuM) / rg;
             lit += airLightTransmittance(rg, muGM) * EM * max(muGM, 0.0);
@@ -139,7 +176,7 @@ vec3 airSkyRadiance(vec3 dir) {
     float tg = airDistanceToGround(r, dir.y);
     float tEnd = tg >= 0.0 ? tg : airDistanceToTop(r, dir.y);
     return airIntegrate(r, dir.y, dot(dir, sun), sun.y, SUN_IRRADIANCE, dot(dir, moon), moon.y, AirMoonE.rgb, tEnd,
-                        tg >= 0.0) + NIGHT_GLOW;
+                        tg >= 0.0, dir) + NIGHT_GLOW;
 }
 
 #endif

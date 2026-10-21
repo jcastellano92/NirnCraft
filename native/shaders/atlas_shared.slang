@@ -23,6 +23,8 @@ static const uint FRAME_LIGHT_LOW = 0x8000u;   // (abi 0.14) cheap far light: co
 static const uint FRAME_NEAR_LIGHT = 0x20000u; // (abi 0.15) light the near field's covered pixels with the far light
 static const uint FRAME_PRIMARY_NEAR = 0x80000u;      // (abi 0.17) the near field from atlas's primary rays (atlas.h)
 static const uint FRAME_PRIMARY_NEAR_LIT = 0x100000u; // (abi 0.17) ... composited (atlas.h)
+static const uint FRAME_GPU_LIGHTS = 0x80000000u;  // (internal: the Vulkan backend) the far lights culled, ranked and
+                                                    // binned on the GPU (lightCullMain), not by lights.cpp
 static const uint FRAME_NEAR_SPLIT = 0x40000u; // (internal: the Vulkan backend) the near light traced at half resolution
                                                // (nearLightMain) and upsampled (nearUpsampleMain), not in farMain
 // the shader pack's ambient floor (deferred.fsh: albedo x (sky + floor)), under every far land surface as under the near
@@ -87,6 +89,18 @@ struct FrameGpu {
     int4 vgOrigin;
     uint4 vgDims;
     float4 viewProj[4];  // (abi 0.17, FRAME_PRIMARY_NEAR) camera-relative view-projection (columns): the host's NDC depth
+    // (abi 0.17, atlas_set_eclipse) an eclipse's occulters (the moons near the sun): centre relative to the camera (km,
+    // world axes), w radius (km, 0: none); eclipseC x km a world block, y 1 when any is set
+    float4 eclipseA;
+    float4 eclipseB;
+    float4 eclipseC;
+    // (internal) the light by need (api.cpp lightControl): x the footprint scale of the near light's secondary rays (0:
+    // level 0 everywhere, the full light), y the share of the split's tiles traced a frame (1: all), z the sun ray's
+    // cone (voxels of a level before the next: 0 none), w the bounce's sun ray's cone
+    float4 lightCtl;
+    // (internal) x (FRAME_GPU_LIGHTS) the air's extinction per block at the eye, for the far lights culled on the GPU
+    // (lightCullMain); zw the last frame's jitter (NDC), for the near light's history (nearHistoryAt)
+    float4 farLight;
     // the grid's coarse levels 1..6 (voxgrid.hpp): origin x, z (chunks of 16 << k blocks), first chunk word,
     // D | H << 8 | 1 << 16 when the level is there
     int4 vgLevel[6];

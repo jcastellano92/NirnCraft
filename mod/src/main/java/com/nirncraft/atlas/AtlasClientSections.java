@@ -40,6 +40,8 @@ final class AtlasClientSections {
     // near light traced the tiles' stand-in houses, solid and a block too wide, for most of an hour)
     private static final java.util.ArrayList<AtlasSections.Decoded> READY = new java.util.ArrayList<>();
     private static final Set<Long> UP = ConcurrentHashMap.newKeySet();  // chunks whose sections are up (and still loaded)
+    // chunks whose loaded (vanilla) blocks went up: atlas's own generation never goes over them (AtlasClientGen)
+    private static final Set<Long> REAL = ConcurrentHashMap.newKeySet();
     private static final IdentityHashMap<BlockState, Integer> IDS = new IdentityHashMap<>();  // (client thread)
 
     static void init() {
@@ -53,6 +55,7 @@ final class AtlasClientSections {
                 long k = e.getChunk().getPos().pack();
                 QUEUED.remove(k);
                 UP.remove(k);
+                REAL.remove(k);
             }
         });
     }
@@ -88,7 +91,10 @@ final class AtlasClientSections {
             QUEUED.remove(k);
             LevelChunk c = mc.level.getChunkSource().getChunkNow(ChunkPos.getX(k), ChunkPos.getZ(k));
             if (c != null) {
+                long r0 = System.nanoTime();
                 AtlasSections.Decoded d = read(mc.level, c);
+                readNs += System.nanoTime() - r0;
+                readCount++;
                 synchronized (READY) {
                     READY.add(d);
                 }
@@ -119,13 +125,16 @@ final class AtlasClientSections {
                 biome.getGrassColor(centre.getX(), centre.getZ()) & 0xFFFFFF, biome.getFoliageColor() & 0xFFFFFF);
     }
 
+    private static long readNs, readCount;
+
     /** The feed's state for atlas-info: queued to read, read and waiting for the worker, up. */
     static String state() {
         int ready;
         synchronized (READY) {
             ready = READY.size();
         }
-        return "clientSections{on=" + ON + " queued=" + QUEUED.size() + " ready=" + ready + " up=" + UP.size() + "}";
+        return "clientSections{on=" + ON + " queued=" + QUEUED.size() + " ready=" + ready + " up=" + UP.size()
+                + " read=" + readCount + String.format(java.util.Locale.ROOT, " readMsEach=%.3f", readCount > 0 ? readNs / 1e6 / readCount : 0.0) + "}";
     }
 
     /** The read chunk nearest block (x, z) for atlas, or null (far-field worker). */
@@ -147,6 +156,16 @@ final class AtlasClientSections {
             READY.remove(READY.size() - 1);
             return d;
         }
+    }
+
+    /** The loaded chunk's own blocks are going up (far-field worker). */
+    static void real(int cx, int cz) {
+        REAL.add(ChunkPos.pack(cx, cz));
+    }
+
+    /** Whether the loaded chunk's own blocks are up (then generated ones must not replace them). */
+    static boolean isReal(int cx, int cz) {
+        return REAL.contains(ChunkPos.pack(cx, cz));
     }
 
     /** Its sections went up (far-field worker). */
@@ -181,6 +200,7 @@ final class AtlasClientSections {
     static void reset() {
         READY.clear();
         UP.clear();
+        REAL.clear();
         QUEUED.clear();
         IDS.clear();
         Minecraft mc = Minecraft.getInstance();

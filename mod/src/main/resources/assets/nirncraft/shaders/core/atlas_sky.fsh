@@ -8,7 +8,7 @@
 // one sky, every layer in it: the air's sky (the far field's own model: its haze fades into it, so the horizon has no
 // seam), looked up in the sky-view LUT this frame's air was marched into, the sky's own lights through that air
 // (atlas_night.glsl: the aurora's volume over the auroral oval, the stars, the galaxy and the birthsigns, Masser and
-// Secunda with their phases, meteors, the airglow) and the sun's disc in its transmitted light, through the same
+// Secunda with their phases and eclipses, meteors, the airglow) and the sun's disc in its transmitted light, through the same
 // display as the terrain. (NirnCraft's mesh sky, atmosphere/client/SkyRenderer, is the fallback where this one does
 // not draw: a shader pack, the near pass off.)
 layout(std140) uniform SkyInfo {
@@ -27,7 +27,8 @@ void main() {
     vec3 sun = normalize(Sun.xyz);
     vec3 c = atlasSky(SkyView, dir, sun, Look.x);
     // the sky's lights at the pixel's own size (a star's light kept in its footprint), the aurora's march dithered
-    c += nightSky(dir, length(fwidth(dir)) * 0.7071, nightDither(gl_FragCoord.xy), NIGHT_ALL, 24);
+    float pix = length(fwidth(dir)) * 0.7071;
+    c += nightSky(dir, pix, nightDither(gl_FragCoord.xy), NIGHT_ALL, 24);
     // the sun's disc. High up its glare (near_resolve's sunGlare) swallows it: a bright blob. Low down the long air
     // path dims it until its edge shows, crisp, darker at the rim (limb darkening), flattened by the air's refraction
     // (the lower limb lifted more than the upper), and looking larger against the horizon (the eye's horizon illusion: a
@@ -47,7 +48,8 @@ void main() {
     float x = clamp(d / r0, 0.0, 1.0);
     float limb = 1.0 - 0.6 * (1.0 - sqrt(max(1.0 - x * x, 0.0)));
     float disc = inside * limb * smoothstep(-0.02, 0.01, dir.y);
-    c += SunDisc.rgb * disc * 40.0;
+    // (an eclipse: the moons' discs over it, their limbs' relief breaking the last light into beads: atlas_moons.glsl)
+    if (disc > 0.0) c += SunDisc.rgb * disc * 40.0 * (1.0 - moonCoverSun(dir, pix));
     vec3 shown = atlasDisplay(c, Look.x, Look.y);
     // a little more vibrance in the low sun's sky (the display's shoulder greys the twilight bands): saturation up to
     // 1.25 as the sun nears the horizon, none at noon

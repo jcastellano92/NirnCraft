@@ -13,8 +13,9 @@ import net.minecraft.client.multiplayer.ClientLevel;
  *
  * <p>The comet: one in about six years per world ({@link NirnCelestial#yearComet}, from the world's seed when this
  * client runs the world, else from the server's address), seen for weeks round its perihelion. The dev hook:
- * {@code -Dnirncraft.comet=now} brings a great comet to perihelion twelve days after the first night it is asked for;
- * {@code -Dnirncraft.comet=<day>} puts the perihelion on that day (days since the world began: day time / 24000);
+ * {@code -Dnirncraft.comet=now} brings a great comet to its brightest the night after the first one it is asked for
+ * (then waning over the weeks; {@code now-7}: its brightest a week later, waxing till then);
+ * {@code -Dnirncraft.comet=<day>} puts its brightest night on that day (days since the world began: day time / 24000);
  * {@code -Dnirncraft.comet=off} hides comets.</p>
  */
 public final class CelestialSky {
@@ -23,6 +24,8 @@ public final class CelestialSky {
     private static float[] light = new float[16];
     private static double[] arkay = {0, 1, 0};
     private static double forcedAt = Double.NaN;
+    private static NirnCelestial.Comet forced;  // (the dev hook's: its orbit searched once, not each frame)
+    private static double forcedFor = Double.NaN;
     private static long worldKey;
     private static ClientLevel keyLevel;
 
@@ -57,13 +60,30 @@ public final class CelestialSky {
     private static NirnCelestial.Comet comet(Minecraft mc, double days) {
         String hook = System.getProperty("nirncraft.comet", "");
         if (hook.equalsIgnoreCase("off")) return null;
-        if (hook.equalsIgnoreCase("now")) {
-            if (Double.isNaN(forcedAt)) forcedAt = Math.floor(days) + 12.0;
-            return NirnCelestial.forcedComet(forcedAt);
+        if (hook.toLowerCase(java.util.Locale.ROOT).startsWith("now")) {
+            if (Double.isNaN(forcedAt)) {
+                double ahead = 1.0;
+                try {
+                    if (hook.length() > 3) ahead = -Double.parseDouble(hook.substring(3));
+                } catch (NumberFormatException ignored) {
+                    // (now: its brightest tomorrow night)
+                }
+                forcedAt = Math.floor(days) + ahead;
+            }
+            if (forced == null || forcedFor != forcedAt) {
+                forced = NirnCelestial.forcedComet(forcedAt);
+                forcedFor = forcedAt;
+            }
+            return forced;
         }
         if (!hook.isEmpty()) {
             try {
-                return NirnCelestial.forcedComet(Double.parseDouble(hook));
+                double at = Double.parseDouble(hook);
+                if (forced == null || forcedFor != at) {
+                    forced = NirnCelestial.forcedComet(at);
+                    forcedFor = at;
+                }
+                return forced;
             } catch (NumberFormatException ignored) {
                 // (an unreadable hook: the world's own comets)
             }

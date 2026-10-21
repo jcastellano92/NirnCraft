@@ -14,8 +14,9 @@
 //                  ring of bent light round it), Azura's Star, Darumzu, Harakk, the Northern Sisters, the Southron Pole
 //                  Star, the Star of the East, the Three Stars of Locanda
 //   the planets    points of light, their brightest a tiny disc with its phase (lit where the sun is)
-//   a comet        the coma (a bright false nucleus in a greenish glow), the curved warm dust tail and the straight
-//                  blue-violet ion tail, along axes NirnCelestial traces (CometDust / CometIon)
+//   a comet        the coma (a brilliant false nucleus, white-blue, a cyan halo), the broad curved dust tail in
+//                  striations and streamers, the straight blue-violet ion tail with its rays, knots and kinks, the
+//                  anti-tail when seen edge-on, along axes NirnCelestial traces (CometDust / CometIon / CometAnti)
 //
 // The frame: equatorial (x the sun's place on the year's first day, z the north celestial pole), from the observer's
 // latitude and the sun's clock (CelEquator: world -> equatorial). Units: the air's (atlas_night.glsl), physical,
@@ -38,10 +39,13 @@ layout(std140) uniform CelestialInfo {
     vec4 PlanetTint[8];   // rgb colour (luminance 1), w the disc's angular radius (rad)
     vec4 PlanetSun[8];    // xyz from it towards the sun (world), w the lit share of the disc's light (2/3 Lambert)
     vec4 CometHead;       // xyz towards the nucleus, w the coma's irradiance (0: no comet)
-    vec4 CometLook;       // x the coma's angular radius (rad), y the dust tail's irradiance, z the ion tail's
+    vec4 CometLook;       // x the coma's angular radius (rad), y the dust tail's irradiance, z the ion tail's, w the
+                          // anti-tail's
     vec4 CometBound;      // xyz, w cos: a cap holding the whole comet
     vec4 CometDust[8];    // the dust tail's axis from the head: xyz (world), w its half-width (rad)
     vec4 CometIon[8];     // the ion tail's
+    vec4 CometTime;       // x days from perihelion (the tails' structure evolves), y its seed, z its distance from the sun
+    vec4 CometAnti[4];    // the anti-tail's axis (sunward, seen edge-on to the orbit), w its half-width
 };
 
 const vec3 CEL_GALAXY_N = vec3(0.4193, 0.8635, 0.2795);  // NirnCelestial.GALAXY_N (equatorial)
@@ -250,53 +254,91 @@ vec3 celPlanets(vec3 dir, float pix) {
     return L;
 }
 
-// ---- the comet: the closest point of a tail's axis to c: (angular distance, the share along the tail, half-width)
-vec3 celTail(vec3 c, int ion) {
-    float best = 1e9, along = 0.0, width = 1e-3;
+// ---- the comet. The closest point of a tail's axis (0 dust, 1 ion, 2 the anti-tail) to c: (signed angular distance
+// across it, the share along it, its half-width there, its angular length)
+vec4 celTail(vec3 c, int which) {
+    float best = 1e9, side = 0.0, along = 0.0, width = 1e-3, len = 0.0;
+    int n = which == 2 ? 3 : 7;
     for (int k = 0; k < 7; k++) {
-        vec4 A = ion == 1 ? CometIon[k] : CometDust[k];
-        vec4 B = ion == 1 ? CometIon[k + 1] : CometDust[k + 1];
+        if (k >= n) break;
+        vec4 A = which == 1 ? CometIon[k] : which == 2 ? CometAnti[k] : CometDust[k];
+        vec4 B = which == 1 ? CometIon[k + 1] : which == 2 ? CometAnti[k + 1] : CometDust[k + 1];
         vec3 ab = B.xyz - A.xyz;
+        len += length(ab);
         float t = clamp(dot(c - A.xyz, ab) / max(dot(ab, ab), 1e-12), 0.0, 1.0);
         vec3 q = normalize(A.xyz + ab * t);
         float d = length(cross(c, q));
         if (d < best) {
             best = d;
-            along = (float(k) + t) / 7.0;
+            side = sign(dot(c, cross(q, ab)) + 1e-12);
+            along = (float(k) + t) / float(n);
             width = mix(A.w, B.w, t);
         }
     }
-    return vec3(best, along, width);
+    return vec4(best * side, along, max(width, 1e-5), max(len, 1e-4));
 }
 
+// The comet along dir (radiance): the coma (a brilliant false nucleus, its white-blue inner coma, a cyan halo: the
+// gas's glow), the dust tail (sunlight on dust: broad, curved along the orbit, fanned in striations and streamers that
+// shift night to night), the ion tail (straight from the sun on the solar wind, blue-violet with a cyan root, in fine
+// rays, its knots and kinks carried out along it), the anti-tail when Nirn crosses the orbit's plane. Each holds its
+// share of the comet's light (CometLook), spread over its own extent.
 vec3 celComet(vec3 dir, float pix) {
     if (CometHead.w <= 0.0 || dot(dir, CometBound.xyz) < CometBound.w) return vec3(0.0);
     vec3 L = vec3(0.0);
     float E = CometHead.w;
-    // the coma: a false nucleus (a point) in a glow falling off from it (exp: its area holds its light), greenish
-    // (the carbon's emission) in its outer part
+    float age = CometTime.x, seed = CometTime.y;
+    // the coma
     float d = atan(length(cross(dir, CometHead.xyz)), dot(dir, CometHead.xyz));
-    float rc = max(CometLook.x * 0.35, pix);
-    float glow = exp(-d / rc) / (6.2831853 * rc * rc);
-    vec3 green = mix(vec3(1.0, 0.97, 0.9) / 0.9718, vec3(0.62, 1.0, 0.72) / 0.8794, smoothstep(0.2, 1.5, d / rc));
-    L += E * (0.3 * celPoint(dir, CometHead.xyz, pix) * vec3(1.0, 0.98, 0.94) + 0.7 * glow * green);
-    float seconds = NightGain.z;
-    // the dust tail: broad, curved, warm white (sunlight on dust), brightest near the head
-    vec3 td = celTail(dir, 0);
-    float lenD = max(length(CometDust[7].xyz - CometDust[0].xyz), 1e-4);
-    if (td.x < td.z * 4.0) {
-        float g = exp(-0.5 * td.x * td.x / (td.z * td.z)) / (2.5066283 * td.z);
-        float f = 2.2 * pow(1.0 - td.y, 1.6) * smoothstep(0.0, 0.04, td.y);  // (its integral ~ 0.85)
-        L += CometLook.y * g * f / lenD * vec3(1.0, 0.93, 0.80) / 0.9440;
+    float rc = max(CometLook.x * 0.3, pix);
+    float r2 = max(CometLook.x * 1.2, pix * 2.0);
+    float inner = exp(-d / rc) / (6.2831853 * rc * rc);
+    float q2 = 1.0 + (d / r2) * (d / r2);
+    float halo = 1.0 / (q2 * sqrt(q2)) / (6.2831853 * r2 * r2);
+    L += E * (0.35 * celPoint(dir, CometHead.xyz, pix) * vec3(0.90, 0.96, 1.0) / 0.9520
+              + 0.45 * inner * vec3(0.86, 0.95, 1.0) / 0.9348 + 0.20 * halo * vec3(0.50, 0.95, 1.0) / 0.8513);
+    // the dust tail
+    vec4 td = celTail(dir, 0);
+    float u = td.x / td.z;
+    if (abs(u) < 4.0) {
+        // across: a broad flat-topped fan; striations (synchronic bands along it, from bursts of the nucleus) and fine
+        // streamers, slowly sliding as the days go
+        float across = exp(-0.5 * pow(abs(u), 2.6)) / (2.2 * td.z);
+        float stri = 0.45 + 1.1 * pow(nNoise(vec3(u * 3.2 + seed * 17.0, td.y * 1.4 - age * 0.09, 5.1)), 1.4);
+        float fine = 0.75 + 0.5 * nNoise(vec3(u * 11.0 + seed * 5.0, td.y * 4.0 - age * 0.25, 9.7));
+        float f = 2.3 * pow(1.0 - td.y, 1.3) * smoothstep(0.0, 0.03, td.y);
+        vec3 col = mix(vec3(1.0, 0.93, 0.80) / 0.9440, vec3(0.93, 0.92, 1.0) / 0.9269, smoothstep(0.1, 0.9, td.y));
+        col = mix(col, vec3(0.82, 0.76, 1.0) / 0.7905, 0.45 * smoothstep(0.9, 2.0, abs(u)));  // (a violet fringe)
+        L += CometLook.y * across * f * stri * fine / td.w * col;
     }
-    // the ion tail: straight away from the sun, narrow, blue-violet (CO+), streaming in fine rays that drift
-    vec3 ti = celTail(dir, 1);
-    float lenI = max(length(CometIon[7].xyz - CometIon[0].xyz), 1e-4);
-    if (ti.x < ti.z * 4.0) {
-        float g = exp(-0.5 * ti.x * ti.x / (ti.z * ti.z)) / (2.5066283 * ti.z);
-        float f = 1.6 * pow(1.0 - ti.y, 0.8) * smoothstep(0.0, 0.03, ti.y);
-        float rays = 0.55 + 0.9 * nNoise(vec3(ti.x / ti.z * 2.5, ti.y * 5.0 - seconds * 0.01, 3.3));
-        L += CometLook.z * g * f * rays / lenI * vec3(0.50, 0.48, 1.0) / 0.5211;
+    // the ion tail
+    vec4 ti = celTail(dir, 1);
+    // kinks: the solar wind's gusts bend it, more the further out; knots ride outward a day or two apart
+    float kink = (nNoise(vec3(ti.y * 4.0 - age * 1.3, seed * 31.0, 2.2)) - 0.5) * 3.0 * ti.y;
+    float ui = ti.x / ti.z - kink;
+    if (abs(ui) < 6.0) {
+        float spread = 1.0 + ti.y;
+        float rays = 0.0;
+        for (int k = 0; k < 3; k++) {
+            float o = (float(k) - 1.0) * 0.65 * spread + (nNoise(vec3(float(k) * 7.0, age * 0.6, seed * 13.0)) - 0.5) * 0.5;
+            float w = 0.28 + 0.12 * float(k == 1);
+            float x = (ui - o) / w;
+            rays += (k == 1 ? 0.5 : 0.25) * exp(-0.5 * x * x) / (2.5066283 * w);
+        }
+        rays += 0.10 * exp(-0.5 * ui * ui / 4.0) / (2.5066283 * 2.0);  // (the diffuse glow they stand in)
+        float k1 = fract(age * 0.45 + seed), k2 = fract(age * 0.45 + seed + 0.5);
+        float knots = 1.0 + 2.5 * (1.0 - ti.y) * (exp(-pow((ti.y - k1) / 0.035, 2.0)) + exp(-pow((ti.y - k2) / 0.035, 2.0)));
+        float streak = 0.7 + 0.6 * nNoise(vec3(ui * 2.0, ti.y * 6.0 - NightGain.z * 0.004 - age * 0.5, 3.3));
+        float f = 1.7 * pow(1.0 - ti.y, 0.8) * smoothstep(0.0, 0.02, ti.y) * (1.0 - smoothstep(0.6, 1.0, ti.y));
+        vec3 col = mix(vec3(0.40, 0.85, 1.0) / 0.7783, vec3(0.50, 0.44, 1.0) / 0.4936, smoothstep(0.0, 0.35, ti.y));
+        L += CometLook.z * rays / ti.z * f * knots * streak / ti.w * col;
+    }
+    // the anti-tail: a thin sunward spike of the orbit's large grains, when seen edge-on
+    if (CometLook.w > 0.0) {
+        vec4 ta = celTail(dir, 2);
+        float x = ta.x / ta.z;
+        if (abs(x) < 4.0)
+            L += CometLook.w * exp(-0.5 * x * x) / (2.5066283 * ta.z) * 2.0 * (1.0 - ta.y) / ta.w * vec3(1.0, 0.94, 0.84) / 0.9497;
     }
     return L;
 }

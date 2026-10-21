@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
 #include <unordered_map>
 
@@ -149,12 +150,51 @@ void Lights::setGroup(uint32_t group, const AtlasLight* l, uint32_t n) {
     if (now.empty()) groupCells_.erase(group);
     else groupCells_[group] = std::move(now);
     index_ = std::move(idx);
+    revision_++;
 }
 
 void Lights::setBudget(uint32_t maxPerFrame, float clusterDistance) {
     std::lock_guard<std::mutex> lock(mu_);
     maxPerFrame_ = std::min(maxPerFrame, 65536u);
     clusterDistance_ = std::max(0.0f, clusterDistance);
+    revision_++;
+}
+
+bool Lights::packGpu(uint64_t& revision, std::vector<Float4>& out, uint32_t& records) const {
+    std::shared_ptr<const LightIndex> idx;
+    uint32_t budget;
+    float clusterDist;
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        if (revision == revision_) return false;
+        revision = revision_;
+        idx = index_;
+        budget = maxPerFrame_;
+        clusterDist = clusterDistance_;
+    }
+    auto bitsF = [](uint32_t u) {
+        float f;
+        std::memcpy(&f, &u, 4);
+        return f;
+    };
+    size_t cells = idx ? idx->cells.size() : 0, n = 0;
+    for (size_t i = 0; i < cells; i++) n += idx->cells[i]->fine.size() + idx->cells[i]->coarse.size();
+    out.assign(1 + cells + 3 * n, Float4{});
+    out[0] = Float4{{bitsF(uint32_t(cells)), bitsF(uint32_t(n)), clusterDist, bitsF(budget)}};
+    size_t at = 1 + cells;
+    for (size_t i = 0; i < cells; i++) {
+        const LightIndex::Cell& c = *idx->cells[i];
+        out[1 + i] = Float4{{bitsF(uint32_t(c.cx)), bitsF(uint32_t(c.cz)), 0.0f, 0.0f}};
+        double x0 = double(c.cx) * CELL, z0 = double(c.cz) * CELL;
+        for (int coarse = 0; coarse < 2; coarse++)
+            for (const Rec& r : coarse ? c.coarse : c.fine) {
+                out[at++] = Float4{{float(r.x - x0), float(r.y), float(r.z - z0), r.radius}};
+                out[at++] = Float4{{r.r, r.g, r.b, r.intensity}};
+                out[at++] = Float4{{bitsF(r.kind), r.seed, bitsF(uint32_t(i)), bitsF(uint32_t(coarse))}};
+            }
+    }
+    records = uint32_t(n);
+    return true;
 }
 
 size_t Lights::total() const {
@@ -162,7 +202,7 @@ size_t Lights::total() const {
     return index_ ? index_->total : 0;
 }
 
-uint32_t Lights::frame(const LightView& v, std::vector<ActorGpu>& out) {
+uint32_t Lights::compute(const LightView& v, std::vector<ActorGpu>& out) {
     std::shared_ptr<const LightIndex> idx;
     uint32_t budget;
     float clusterDist;
@@ -219,7 +259,8 @@ uint32_t Lights::frame(const LightView& v, std::vector<ActorGpu>& out) {
                         : 15.0f * std::min(r.intensity, 1.0f) + (r.kind == ATLAS_LIGHT_LAVA ? r.radius : 0.0f) + 1.0f;
             float screen = float(std::max(v.width, v.height));
             float lit = range <= 0.0f ? 0.0f : d <= 1.6f * range ? screen : 1.6f * range / ((d - range) * pa);
-            float reach = std::min(screen, std::max(3.0f * sigma + 3.0f * halo, lit));
+            // (+ a tile: the lists are a frame or so behind the camera, binned off the render thread)
+            float reach = std::min(screen, std::max(3.0f * sigma + 3.0f * halo, lit) + float(LIGHT_TILE));
             if (px + reach < 0 || py + reach < 0 || px - reach > float(v.width) || py - reach > float(v.height)) continue;
             cands.push_back({&r, r.intensity * falloff(d), d, px, py, sigma, halo, reach, rx, ry, rz});
         }
@@ -284,6 +325,62 @@ uint32_t Lights::frame(const LightView& v, std::vector<ActorGpu>& out) {
     out.resize(at + recs);
     std::memcpy(&out[at], words.data(), words.size() * 4);
     return n;
+}
+
+Lights::~Lights() {
+    {
+        std::lock_guard<std::mutex> l(asyncMu_);
+        stop_ = true;
+    }
+    asyncCv_.notify_all();
+    if (thread_.joinable()) thread_.join();
+}
+
+void Lights::worker() {
+    for (;;) {
+        LightView v;
+        {
+            std::unique_lock<std::mutex> l(asyncMu_);
+            asyncCv_.wait(l, [&] { return stop_ || haveView_; });
+            if (stop_) return;
+            v = view_;
+            haveView_ = false;
+        }
+        auto b = std::make_shared<Binned>();
+        b->lights = compute(v, b->data);
+        std::memcpy(b->camInt, v.camInt, sizeof(b->camInt));
+        b->width = v.width;
+        b->height = v.height;
+        std::lock_guard<std::mutex> l(asyncMu_);
+        binned_ = std::move(b);
+    }
+}
+
+uint32_t Lights::frame(const LightView& v, std::vector<ActorGpu>& out) {
+    static const bool sync = [] {
+        const char* e = std::getenv("ATLAS_LIGHTS_SYNC");
+        return e && *e == '1';
+    }();
+    if (sync) return compute(v, out);
+    std::shared_ptr<const Binned> b;
+    {
+        std::lock_guard<std::mutex> l(asyncMu_);
+        view_ = v;
+        haveView_ = true;
+        if (!thread_.joinable()) thread_ = std::thread([this] { worker(); });
+        b = binned_;
+    }
+    asyncCv_.notify_one();
+    // nothing binned for this frame size yet (the first frames, a resize): this once in the call
+    if (!b || b->width != v.width || b->height != v.height) return compute(v, out);
+    size_t base = out.size();
+    out.insert(out.end(), b->data.begin(), b->data.end());
+    // positions are relative to the integer camera block they were binned at: to this frame's
+    float d[3] = {float(b->camInt[0] - v.camInt[0]), float(b->camInt[1] - v.camInt[1]), float(b->camInt[2] - v.camInt[2])};
+    if (d[0] != 0 || d[1] != 0 || d[2] != 0)
+        for (uint32_t i = 0; i < b->lights; i++)
+            for (int k = 0; k < 3; k++) out[base + i].posYaw[k] += d[k];
+    return b->lights;
 }
 
 }  // namespace atlas

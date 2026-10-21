@@ -14,9 +14,10 @@
 //   the stars      atlas_celestial.glsl (included below, its state from atmosphere.NirnCelestial): the stars, the
 //                  galaxy band, the birthsigns as star figures, the named stars, the planets and a comet, seen from
 //                  the observer's latitude, turning with the sun's clock (sidereal: a turn a year on the sun)
-//   the moons      Masser (large, reddish) and Secunda (small, white): discs lit by the sun (their albedo maps, the
-//                  phase from the real geometry: Lommel-Seeliger, the terminator where the sun puts it), occulting the
-//                  stars; by day the air's light lies over them (faint)
+//   the moons      Masser (large, rose to rust) and Secunda (smaller, grey-white): lit spheres with their baked
+//                  surfaces (atlas_moons.glsl: relief, cast shadows at the terminator, the phase from the real
+//                  geometry), occulting the stars; by day the air's light lies over them (faint); the eclipses (the
+//                  corona, the ring of light, the Dark Moon) and the Necromancer's Moon
 //   meteors        streaks along great circles, head and fading train (NightInfo's slots, NightSky's simulation)
 //   airglow        the 95 km oxygen layer (brighter towards the horizon: van Rhijn) and the unresolved starlight
 //
@@ -49,8 +50,8 @@ layout(std140) uniform NightInfo {
 };
 
 uniform sampler2D NightGalaxy;  // the galaxy band (u around the band, v across it)
-uniform sampler2D NightMasser;  // Masser's phases (4 x 4: cell 0 the full disc, its albedo map)
-uniform sampler2D NightSecunda;
+
+#include <nirncraft:atlas_moons.glsl>
 
 // ---- physical constants (units per the quantity; the air's units, see above)
 const float NIGHT_KLUX = 1.0 / 10830.0;               // 1 lux in units
@@ -237,31 +238,6 @@ float nightPoint(vec3 c, vec3 s, float pix) {
     return exp(-0.5 * a2 / (sigma * sigma)) / (6.2831853 * sigma * sigma);
 }
 
-// ================================================================================================= the moons
-// A moon's disc along dir: rgb radiance (physical, its own light: not lifted), a its coverage (it hides the stars).
-vec4 nightMoon(vec3 dir, vec4 pos, vec4 up, vec4 tint, sampler2D albedo, vec3 sun, float pix) {
-    if (tint.w <= 0.0) return vec4(0.0);
-    float cosd = dot(dir, pos.xyz);
-    if (cosd <= cos(pos.w * 1.15)) return vec4(0.0);
-    vec3 U = up.xyz, R = normalize(cross(pos.xyz, U));
-    // gnomonic coordinates on the disc (the old quad's projection), in radii
-    vec3 local = dir / cosd;
-    vec2 xy = vec2(dot(local, R), dot(local, U)) / tan(pos.w);
-    float rho2 = dot(xy, xy);
-    float rho = sqrt(rho2);
-    float aa = max(pix / pos.w, 1e-4) * 1.2;
-    float cover = 1.0 - smoothstep(1.0 - aa, 1.0 + aa, rho);
-    if (cover <= 0.0) return vec4(0.0);
-    float mu = sqrt(max(1.0 - rho2, 0.0));
-    vec3 n = xy.x * R + xy.y * U - mu * pos.xyz;  // the sphere's normal there, facing the eye
-    float mu0 = dot(n, sun);
-    // Lommel-Seeliger (the regolith: an even full disc, a sharp terminator), normalised to 1 at full
-    float shade = mu0 > 0.0 ? 2.0 * mu0 / (mu0 + max(mu, 0.05)) : 0.0;
-    // the full phase's cell (0) as its albedo map: the disc fills 0.916 of the cell's half
-    vec2 uv = (vec2(-xy.x, -xy.y) * 0.916 * 0.5 + 0.5) * 0.25;
-    vec3 alb = pow(textureLod(albedo, uv, 0.0).rgb, vec3(2.2));
-    return vec4(alb * shade * up.w * tint.rgb * cover, cover);
-}
 
 // ================================================================================================= meteors
 vec3 nightMeteors(vec3 dir, float pix) {
@@ -306,12 +282,9 @@ vec3 nightSky(vec3 dir, float pix, float dither, int what, int steps) {
     float gain = NightGain.x;
     float clear = NightGain.y;
     vec3 L = vec3(0.0);
-    vec4 moonM = vec4(0.0), moonS = vec4(0.0);
-    if ((what & NIGHT_MOONS) != 0) {
-        moonM = nightMoon(dir, MasserPos, MasserUp, MasserTint, NightMasser, sun, pix);
-        moonS = nightMoon(dir, SecundaPos, SecundaUp, SecundaTint, NightSecunda, sun, pix);
-    }
-    float behind = (1.0 - moonM.a) * (1.0 - moonS.a);  // what the moons leave of the sky behind them
+    vec4 moons = vec4(0.0);
+    if ((what & NIGHT_MOONS) != 0) moons = nightMoons(dir, sun, pix);
+    float behind = 1.0 - moons.a;  // what the moons leave of the sky behind them
     vec3 far = vec3(0.0);
     // the stars, the galaxy, the planets, a comet (atlas_celestial.glsl: hidden behind the moons by nightMoonCover)
     if ((what & (NIGHT_STARS | NIGHT_GALAXY)) != 0) L += celestialSky(dir, pix, what) * gain;
@@ -326,8 +299,9 @@ vec3 nightSky(vec3 dir, float pix, float dither, int what, int steps) {
     if ((what & NIGHT_AURORA) != 0) L += nightAurora(dir, dither, steps) * gain;
     if ((what & NIGHT_METEORS) != 0) L += nightMeteors(dir, pix) * gain * behind;
     L *= clear;
-    // the moons: their own light (the sun's, reflected), not lifted; overcast hides them too
-    L += (moonM.rgb + moonS.rgb) * clear;
+    // the moons: their own light (the sun's, reflected), not lifted; the eclipse's corona and rings; overcast hides
+    // them too
+    if ((what & NIGHT_MOONS) != 0) L += (moons.rgb + nightEclipse(dir, sun, pix, behind)) * clear;
     return L * T;
 }
 

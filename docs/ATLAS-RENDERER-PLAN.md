@@ -362,6 +362,13 @@ The full checklist from R1, every item checked live; the owner flies it.
   detail; vanilla keeps entities and effects, composited by depth. With the client owning the world (it generates;
   the server sends coalesced operations by position and need), atlas builds from the client's own data.
 
+- **The client generates the near field (2026-10-20, docs/ATLAS-CLIENT-GENERATION.md).** atlas_gen: the world's own
+  generator (density router, aquifers, material rules, ore veins, map water) compiled into a GPU program; exact:
+  107 chunks over 10 terrain kinds, 17.5 M blocks, 100 % equal to Minecraft's own generator on Vulkan and C++. With
+  the client's decoration (the real features over the generated blocks) 99.83 % of a real server's fully generated
+  chunks (structures not yet). A 600-block jump: a 32 x 32 chunk window's blocks in 0.64 s (0.016 ms of kernel a
+  section). Behind -Dnirncraft.atlas.clientGen=true; vanilla's chunks become corrections where they differ.
+
 - **The atmosphere and the light: the owner's roadmap (2026-10-20).** One optics everywhere; what the look depends on is
   what is in the air, how it is layered, and whether clouds catch the low light (not biome palettes, not a sunrise colour).
   Have (the air merge): Rayleigh / Mie / ozone, the sun's beam filtered through the path (white at noon, orange at 6
@@ -416,6 +423,48 @@ The full checklist from R1, every item checked live; the owner flies it.
   after the budget fix: the update order by frustum, distance and occlusion; levels 1-4 built on the GPU from the grid;
   mode B (the G-buffer, our resolve lighting atlas's surfaces) as the default; vanilla's chunk meshes removed (shadow map
   and translucents from atlas).
+- **The light by need (2026-10-20).** The owner: the one light adapts to what is needed, full effect, gradual, nothing
+  computed that is never seen or makes no visible difference. Built (atlas_far.slang nearLightMain / nearUpsampleMain /
+  nearTemporalMain, api.cpp lightControl): under PRIMARY_NEAR_LIT on Vulkan the far pass writes its hits (distance,
+  normal, albedo) and the near light's split, extended to atlas's own field, lights them: 16 px tiles, each traced on
+  its own staggered schedule at lightCtl.y a frame (0.25 still, up to every frame as the image moves faster) and every
+  frame while a pixel of it holds fewer than 4 of its own samples (a fresh view, a disocclusion), one pixel of each
+  2 x 2 in turn; the traced pixel flags itself, the upsample fills only pixels with no samples of their own (a
+  neighbour's light blended in made far slopes' shaded steps 4 % too bright), the history holds each pixel's own samples
+  (count in a new age buffer, up to 8, reprojected through the last frame's jitter: no half-pixel blur in a still view)
+  and restarts where the key light's visibility (one deterministic ray, not noise) disagrees with it (an edge the
+  resampling blurred, a moved shadow); then the composite. Secondary rays start at level 0 and go a level coarser every
+  4 voxels while the next level's voxels are no wider than the pixel's footprint (distance x pixel angle; dithered per
+  world point, so stable frame to frame); the sun ray then widens as the sun's cone (108 voxels a level: an occluder's
+  voxel never wider than its penumbra; trees within ~100 blocks stay exact), the bounce's sun ray at 24. Lifting the
+  origin out of a coarse voxel instead (tried first) brightened far mountains by 9 levels: rejected. CPU backend: the
+  full-rate light in farMain, with the same knobs. ATLAS_LIGHT=full (+ ATLAS_NEAR_FULLRES=1: the old path) is the
+  reference; ATLAS_LIGHT_RATE, ATLAS_TARGET_MS (a budget easing the rate down and the footprint up, a few % a frame),
+  ATLAS_LIGHT_KNOBS for measurements. Measured offline (Falkreath view export, 1280 x 800, 3090, atlas_render seq=
+  static,turn,walk with seqvariants interleaved in one process, Halton jitter, outputs on the device), atlas's frame
+  median before / after: still 8.2 / 3.7-4.1 ms, turning 1.5 degrees a frame 7.9 / 4.2, walking 4.3 blocks a second
+  8.6 / 3.9-4.6 (the cheap light's floor 1.6-2.7); traced pixels a frame still 82 k of 920 k (9 %; every tile: 230 k).
+  Against the converged full light (64 frames of the old path averaged), display levels, MAE / worst 1 % mean: still
+  2.25 / 28 (old per-frame 7.1 / 73), turning 3.5-5.1 / 68-80 (old 7.9-18 / 118-154), walking 2.8-3.6 / 64-67 (old
+  7.5-10 / 78-83), far mountains' mean 108.1 vs 107.3; flicker in a still view (land pixels moving more than 8 levels
+  frame to frame) 0.29 % (old 40.9 %), at night with 200 k lights 1.6 % (old 48 %). Found: the tile skipping's
+  saving barely shows in the frame times (full-rate tiles 3.0 ms vs 3.7-4.1 with skipping, interleaved): the idle 3090
+  clocks down between the tool's waited frames, so a lighter frame reads slower; trace counts are the work. The
+  footprint and cones save little here (most of the view is within 1 km, where a pixel is under 2 blocks). Open: a
+  live look (sharpness of moving shadow edges, the 2 x 2 fill at silhouettes in fast turns, night noise), per-pass GPU
+  timestamps, a world-space cache for what leaves the screen and comes back.
+- **Far lights on the GPU (2026-10-20).** Lights::frame cost the render thread 25-28 ms a frame live (every light of
+  every cell in reach projected, sorted, binned into 32 px tiles). Now on Vulkan (FRAME_GPU_LIGHTS, atlas_far.slang
+  lightCullMain / lightAdmitMain / lightBinMain): the index goes up only when it changes (Lights::packGpu: cells, then
+  fine records and far clusters), a thread a record culls it as the CPU did (cluster distance, the kind by the time of
+  day, near field and far plane, projection, reach and halo, score), appends survivors and a log-score histogram; the
+  budget is a histogram threshold (the bin it ends in shared first come), each tile's brightest 64 likewise, its list
+  sorted by record (the same sum every frame: the temporal clouds test is bit-exact again). The kernel reads either
+  lists (lightTile / lightOfTile). The CPU backend keeps Lights::frame (its async thread); the Vulkan path never calls
+  it (ATLAS_CPU_LIGHTS=1: the CPU binning, for comparisons). Measured (the same view at night, 2,742 export emitters
+  + 200,000 synthetic in towns over 24 km): render thread 8.6 ms -> 0.01 ms; GPU +0.3-0.6 ms for the three passes;
+  the image against the CPU binning: 4 pixels of 1,024,000 off by more than 2 levels (worst 7, tie order in a full
+  tile).
 - **Inside things (the owner, 2026-10-20).** When the camera clips into something it must not see through it, and it
   must look right: inside dirt or stone close darkness with depth (no x-ray into caves), inside leaves a dense dappled
   volume of particles of leaf, inside water, lava, glass or powder snow their own media at their opacity, by the block's
@@ -444,6 +493,16 @@ The full checklist from R1, every item checked live; the owner flies it.
 - **Nirn's sky (docs/NIRN-SKY.md).** Masser and Secunda as custom baked bodies with relief and cast shadows, eclipses
   and the Dark Moon, stars placed as the birthsigns (no lines), the named stars, the Dominion planets on orbits, comets;
   all by place and date, lit physically. Two agents on it.
+
+- **Baked light in the voxels, real time only where it changes (the owner, 2026-10-20).** Static emitters (torches,
+  lanterns, lava, glowstone, fires), ambient occlusion and the sky's visibility are baked into the grid's voxels on the
+  GPU, by the same light kernel as the real-time light accumulated over many samples (the baked result is what the
+  real-time light converges to: no visible handover). Placing or removing a light, or building nearby, marks the region
+  dirty: it is lit in real time at once, rebaked when it has settled, and cross-faded. The sun and moon stay live
+  (direct light through the baked sky visibility). Baked light is downsampled with the blocks into the coarse
+  resolutions, so a town's lights glow kilometres off at night with nothing traced there. The real-time budget is left
+  for what moves: spells, lightning, carried torches, creatures' light. The prebake runs on the GPU as regions are
+  generated (client generation), on area load, never a long load screen.
 
 ## Parked (off the renderer goal, for later)
 

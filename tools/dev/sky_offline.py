@@ -4,11 +4,13 @@ without the game, into images and numbers.
 Runs the mod's own GLSL files (includes expanded as glsl_check does) on a standalone GL context (moderngl): the sky-view
 LUT (core/atlas_sky_view.fsh), the sky as the game shows it (core/atlas_sky.fsh), the emitter cube the water mirrors
 (core/atlas_sky_emit.fsh) and the land's light from the sky's emitters (core/atlas_sky_light.fsh). Their inputs come
-from the game's own code: NightSkyMath and NirnCelestial (javac'd from the mod's source, run per scene: NightInfo, the
-moons' lights; CelestialInfo, NightSigns: the stars, the planets, a comet, from the scene's place and date) and the core (atlas_air_coeffs / atlas_air_multiscatter / atlas_air_light from the built atlas_core). The
+from the game's own code: NightSkyMath, MoonMath and NirnCelestial (javac'd from the mod's source, run per scene:
+NightInfo, MoonInfo, the moons' lights; CelestialInfo, NightSigns: the stars, the planets, a comet, from the scene's
+place and date) and the core (atlas_air_coeffs / atlas_air_multiscatter / atlas_air_light from the built atlas_core). The
 display exposure is the eye's (AtlasMeter's target for the scene's light).
 
     py -3 tools/dev/sky_offline.py [--out DIR] [--dll native/build/Release/atlas_core.dll] [--only NAME]
+    py -3 tools/dev/sky_offline.py --moons   # the moons: full, half, crescent, high and low; eclipses (moons_sheet.png)
 
 Writes DIR/<scene>_view.png (a perspective view through core/atlas_sky.fsh), DIR/<scene>_dome.png (the whole sky,
 zenith at the centre, north up), DIR/<scene>_cube.png (the emitter cube) and DIR/numbers.json; prints a table.
@@ -38,6 +40,8 @@ import moderngl  # noqa: E402
 SHADERS = ROOT / "mod/src/main/resources/assets/nirncraft/shaders"
 TEX = ROOT / "mod/src/main/resources/assets/nirncraft/textures/environment"
 PATH_DEG = -25.0
+ECLIPSE_DEPTH = 0.9997  # AtlasLook.ECLIPSE_DEPTH
+ECLIPSE_ADAPT = 6.0  # stops the eye opens in an eclipse's totality (minutes, not a night's adaptation)
 EYE_Y = 120.0
 
 VERT = """#version 330
@@ -49,6 +53,47 @@ void main() {
 }
 """
 # the views the game does not draw (the dome, the linear numbers): the same includes, their own main
+# A moon's disc alone through atlas_moons.glsl's moonDisc (its real shading: phases, relief, shadows, the detail
+# layer), lit by a chosen sun: the phase sheets and the close crops. The disc stands high (no horizon illusion); the
+# window ProbeCenter +- ProbeScale in disc radii (x right, y the moon's north).
+MOON_PROBE = """#version 330
+#extension GL_ARB_separate_shader_objects : require
+#include <nirncraft:atlas_look.glsl>
+#include <nirncraft:atlas_air.glsl>
+#include <nirncraft:atlas_sky.glsl>
+#include <nirncraft:atlas_night.glsl>
+uniform vec3 ProbeSun;     // the sun in the disc's frame: x right, y north, z towards the eye
+uniform int ProbeMoon;     // 0 Masser, 1 Secunda
+uniform vec2 ProbeCenter;
+uniform float ProbeScale;
+uniform float ProbeExposure;
+uniform float ProbeRes;
+layout(location = 0) in vec2 texCoord;
+layout(location = 0) out vec4 fragColor;
+void main() {
+    vec3 pos = normalize(vec3(0.0, 0.5, -1.0));
+    vec3 U = normalize(vec3(0.0, 1.0, 0.0) - pos * pos.y), R = normalize(cross(pos, U));
+    vec4 P = ProbeMoon == 0 ? MasserPos : SecundaPos;
+    vec4 up = ProbeMoon == 0 ? MasserUp : SecundaUp;
+    vec4 tint = ProbeMoon == 0 ? MasserTint : SecundaTint;
+    vec4 body = ProbeMoon == 0 ? MasserBody : SecundaBody;
+    float rad = P.w;
+    vec2 q = ProbeCenter + (texCoord * 2.0 - 1.0) * ProbeScale;
+    vec3 dir = normalize(pos + (q.x * R + q.y * U) * tan(rad));
+    float pix = 2.0 * ProbeScale * tan(rad) / ProbeRes;
+    vec3 sun = normalize(ProbeSun.x * R + ProbeSun.y * U - ProbeSun.z * pos);
+    vec4 b = vec4(pos * length(body.xyz), body.w);
+    vec4 none = vec4(0.0);
+    vec4 c = ProbeMoon == 0
+        ? moonDisc(dir, vec4(pos, rad), vec4(U, up.w), vec4(tint.rgb, 1.0), NightMasser, NightMasserRelief,
+                   NightMasserDetail, MASSER_RELIEF, MASSER_DETAIL_TILE, MASSER_PHOTO, MASSER_ALB_LUM, b, none, sun, pix)
+        : moonDisc(dir, vec4(pos, rad), vec4(U, up.w), vec4(tint.rgb, 1.0), NightSecunda, NightSecundaRelief,
+                   NightSecundaDetail, SECUNDA_RELIEF, SECUNDA_DETAIL_TILE, SECUNDA_PHOTO, SECUNDA_ALB_LUM, b, none, sun,
+                   pix);
+    fragColor = vec4(atlasDisplay(c.rgb, ProbeExposure, 0.0), 1.0);
+}
+"""
+
 PROBE = """#version 330
 #extension GL_ARB_separate_shader_objects : require
 #include <nirncraft:atlas_look.glsl>
@@ -92,12 +137,7 @@ def night_math(args: dict, cls_name: str = "NightSkyMath") -> dict:
     """NightSkyMath.main (or NirnCelestial.main) for a scene (the mod's own source, compiled into .work/sky_offline)."""
     jdk = find_up("toolchains/jdk-25.0.4.1+1/bin")
     out = ROOT / ".work/sky_offline/classes"
-    names = ("NightSkyMath", "NirnCelestial")
-    srcs = [ROOT / f"mod/src/main/java/com/nirncraft/atmosphere/{n}.java" for n in names]
-    clss = [out / f"com/nirncraft/atmosphere/{n}.class" for n in names]
-    if any(not c.exists() or c.stat().st_mtime < src.stat().st_mtime for c, src in zip(clss, srcs)):
-        out.mkdir(parents=True, exist_ok=True)
-        subprocess.run([str(jdk / "javac.exe"), "-d", str(out), *map(str, srcs)], check=True)
+    compile_math(jdk, out)
     r = subprocess.run([str(jdk / "java.exe"), "-cp", str(out), f"com.nirncraft.atmosphere.{cls_name}",
                         *[f"{k}={v}" for k, v in args.items()]], capture_output=True, text=True, check=True)
     return json.loads(r.stdout)
@@ -132,6 +172,38 @@ class Core:
         return list(out)
 
 
+def compile_math(jdk, out):
+    """NightSkyMath, MoonMath and NirnCelestial, javac'd into out when a source is newer than its class."""
+    srcs = [ROOT / "mod/src/main/java/com/nirncraft/atmosphere" / f"{n}.java"
+            for n in ("NightSkyMath", "MoonMath", "NirnCelestial")]
+    stale = False
+    for src in srcs:
+        cls = out / "com/nirncraft/atmosphere" / (src.stem + ".class")
+        stale |= not cls.exists() or cls.stat().st_mtime < src.stat().st_mtime
+    if stale:
+        out.mkdir(parents=True, exist_ok=True)
+        subprocess.run([str(jdk / "javac.exe"), "-d", str(out), *map(str, srcs)], check=True)
+
+
+def moon_scan(frm, to, step):
+    """MoonMath's scene finder: the moons every step (days) over [frm, to)."""
+    jdk = find_up("toolchains/jdk-25.0.4.1+1/bin")
+    out = ROOT / ".work/sky_offline/classes"
+    compile_math(jdk, out)
+    r = subprocess.run([str(jdk / "java.exe"), "-cp", str(out), "com.nirncraft.atmosphere.MoonMath", "moons",
+                        str(frm), str(to), str(step)], capture_output=True, text=True, check=True)
+    return [json.loads(line) for line in r.stdout.splitlines() if line.strip()]
+
+
+def eclipse_scan(frm, to):
+    jdk = find_up("toolchains/jdk-25.0.4.1+1/bin")
+    out = ROOT / ".work/sky_offline/classes"
+    compile_math(jdk, out)
+    r = subprocess.run([str(jdk / "java.exe"), "-cp", str(out), "com.nirncraft.atmosphere.MoonMath", "eclipses",
+                        str(frm), str(to)], capture_output=True, text=True, check=True)
+    return [json.loads(line) for line in r.stdout.splitlines() if line.strip()]
+
+
 def meter_range():
     """AtlasMeter's MIN, MAX (log2 exposure: the eye's range), from its source."""
     import re
@@ -163,43 +235,52 @@ class Sky:
         self.emit_prog = prog((core / "atlas_sky_emit.fsh").read_text(encoding="utf-8"))
         self.light_prog = prog((core / "atlas_sky_light.fsh").read_text(encoding="utf-8"))
         self.probe_prog = prog(PROBE)
+        self.moon_prog = prog(MOON_PROBE)
         self.vao = {p: gl.vertex_array(p, []) for p in
-                    (self.view_prog, self.sky_prog, self.emit_prog, self.light_prog, self.probe_prog)}
+                    (self.view_prog, self.sky_prog, self.emit_prog, self.light_prog, self.probe_prog, self.moon_prog)}
         ms = self.core.multiscatter()
         self.ms = gl.texture((32, 32), 4, ms.tobytes(), dtype="f4")
         self.ms.filter = (moderngl.LINEAR, moderngl.LINEAR)
         self.ms.repeat_x = self.ms.repeat_y = False
         self.galaxy = self._image(TEX / "galaxy.png", repeat_x=True)
-        self.masser = self._image(TEX / "masser_phases.png")
-        self.secunda = self._image(TEX / "secunda_phases.png")
+        # the moons' baked maps (tools/dev/moon_gen.py), mip-mapped and clamped as AtlasMoonTexture loads them
+        self.masser = self._image(TEX / "masser_albedo.png")
+        self.masser_relief = self._image(TEX / "masser_relief.png")
+        self.secunda = self._image(TEX / "secunda_albedo.png")
+        self.secunda_relief = self._image(TEX / "secunda_relief.png")
+        self.masser_detail = self._image(TEX / "masser_detail.png", repeat_x=True, repeat_y=True)
+        self.secunda_detail = self._image(TEX / "secunda_detail.png", repeat_x=True, repeat_y=True)
+        self.ubo_moons = gl.buffer(reserve=32 * 4)  # MoonMath.BLOCK_FLOATS
         self.lut = gl.texture((192, 108), 4, dtype="f2")
         self.lut.filter = (moderngl.LINEAR, moderngl.LINEAR)
         self.lut.repeat_y = False
         self.lut_fbo = gl.framebuffer([self.lut])
-        self.ubo_air = gl.buffer(reserve=7 * 16)
+        self.ubo_air = gl.buffer(reserve=9 * 16)  # (AirInfo: 7 vec4 + AirOcculter[2])
         self.ubo_night = gl.buffer(reserve=120 * 4)
         self.ubo_signs = gl.buffer(reserve=(13 + 364 + 40) * 16)  # NirnCelestial.CATALOGUE_FLOATS
-        self.ubo_cel = gl.buffer(reserve=208 * 4)  # NirnCelestial.BLOCK_FLOATS
+        self.ubo_cel = gl.buffer(reserve=228 * 4)  # NirnCelestial.BLOCK_FLOATS
         self.ubo_sky = gl.buffer(reserve=112)
         self.coeffs = self.core.coeffs()
 
-    def _image(self, path: Path, repeat_x=False):
+    def _image(self, path: Path, repeat_x=False, repeat_y=False):
         im = Image.open(path).convert("RGBA")
         t = self.gl.texture(im.size, 4, im.tobytes())  # row 0 at v = 0, as the game uploads
         t.build_mipmaps()
         t.filter = (moderngl.LINEAR_MIPMAP_LINEAR, moderngl.LINEAR)
         t.repeat_x = repeat_x
-        t.repeat_y = False
+        t.repeat_y = repeat_y
         return t
 
     def _bind(self, prog):
         units = {"AirMs": self.ms, "NightGalaxy": self.galaxy, "NightMasser": self.masser,
-                 "NightSecunda": self.secunda, "SkyView": self.lut}
+                 "NightMasserRelief": self.masser_relief, "NightSecunda": self.secunda,
+                 "NightSecundaRelief": self.secunda_relief, "NightMasserDetail": self.masser_detail,
+                 "NightSecundaDetail": self.secunda_detail, "SkyView": self.lut}
         for i, (name, tex) in enumerate(units.items()):
             if name in prog:
                 tex.use(i)
                 prog[name].value = i
-        for i, (name, buf) in enumerate({"AirInfo": self.ubo_air, "NightInfo": self.ubo_night,
+        for i, (name, buf) in enumerate({"AirInfo": self.ubo_air, "NightInfo": self.ubo_night, "MoonInfo": self.ubo_moons,
                                          "NightSigns": self.ubo_signs, "SkyInfo": self.ubo_sky,
                                          "CelestialInfo": self.ubo_cel}.items()):
             if name in prog:
@@ -217,7 +298,12 @@ class Sky:
         sun = m["sun"]
         ml = m["moonlights"]  # key dir, key E, fill dir, fill E (irradiance above the air)
         fade = smooth(0.1, 0.0, sun[1])
-        self._air_tail = [*sun, args["eyeKm"], *ml[0:3], 1.0, *(e * fade for e in ml[3:6]), 0.0]
+        moons = m["moons"]  # MoonInfo (MoonMath.block): the eclipse, the Dark Moon, the Revenant
+        self.ubo_moons.write(np.array(moons, dtype="f4").tobytes())
+        # (AirMoonE.w: the sun's share an eclipse hides)
+        # (AirMoonE.w unused; AirOcculter[2]: the eclipse's moons, per point along each ray)
+        self._air_tail = [*sun, args["eyeKm"], *ml[0:3], 1.0, *(e * fade for e in ml[3:6]), 0.0, *m["occulters"]]
+        self.hidden = moons[0] * ECLIPSE_DEPTH * smooth(-0.12, 0.0, sun[1])
         self.ubo_air.write(np.array(self.coeffs + self._air_tail, dtype="f4").tobytes())
         night = np.array(m["night"], dtype="f4")
         night[-4] = 1.0  # NightTarget: pre-exposure 1 here, the cube's texel
@@ -264,12 +350,20 @@ class Sky:
         k = self.air_light
         key = lum(k[3:6]) * max(k[1], 0.0)
         up = lum(k[6:9]) * math.pi
-        e = 0.18 * (key + up + extra_up) / math.pi + town
-        s = math.log2(max(e, 1e-12))
-        dayness = smooth(-19.0, -6.0, s)
-        target = math.log2(0.004) + (math.log2(0.18) - math.log2(0.004)) * dayness
         lo, hi = meter_range()
-        return 2.0 ** min(max(target - s, lo), hi)
+
+        def eye(e):
+            s = math.log2(max(e, 1e-12))
+            dayness = smooth(-19.0, -6.0, s)
+            target = math.log2(0.004) + (math.log2(0.18) - math.log2(0.004)) * dayness
+            return 2.0 ** min(max(target - s, lo), hi)
+        hidden = getattr(self, "hidden", 0.0)
+        full = eye(0.18 * ((key + up) * (1.0 - hidden) + extra_up) / math.pi + town)
+        if hidden > 0.3:
+            # (an eclipse's minutes: the eye opens to the dark, but not all the way a night's long adaptation goes,
+            # ECLIPSE_ADAPT stops at most over the day's)
+            full = min(full, eye(0.18 * (key + up + extra_up) / math.pi + town) * 2.0 ** ECLIPSE_ADAPT)
+        return full
 
     def view(self, w, h, yaw, pitch, fov, exposure):
         """A perspective view through the game's core/atlas_sky.fsh (displayed, sRGB 8 bit)."""
@@ -297,6 +391,41 @@ class Sky:
         img = Image.frombytes("RGBA", (w, h), fbo.read(components=4)).transpose(Image.FLIP_TOP_BOTTOM)
         fbo.release()
         tex.release()
+        return img.convert("RGB")
+
+    def moon(self, which, sun, size=512, center=(0.0, 0.0), scale=1.05, exposure=None, shadows_off=True):
+        """A moon's disc through the game's shader (MOON_PROBE): sun in the disc's frame (x right, y north, z towards
+        the eye), the window centre +- scale (disc radii). The scene's NightInfo / MoonInfo give its radiance; the
+        exposure by default sets the full disc's mean a little under mid-grey."""
+        night = self.m["night"]
+        upw = night[47] if which == 0 else night[59]
+        alb = 0.1404 if which == 0 else 0.1100
+        if exposure is None:
+            exposure = 0.5 / max(upw * alb, 1e-12)
+        if shadows_off:  # (no Nirn shadow nor transit in the probe's own geometry)
+            moons = list(self.m["moons"])
+            moons[17] = 0.0
+            self.ubo_moons.write(np.array(moons, dtype="f4").tobytes())
+        tail = list(self._air_tail)
+        tail[7] = exposure  # (the eye's exposure: the disc's adaptation knee reads it)
+        self.ubo_air.write(np.array(self.coeffs + tail, dtype="f4").tobytes())
+        prog = self.moon_prog
+        prog["ProbeSun"].value = tuple(float(v) for v in sun)
+        prog["ProbeMoon"].value = int(which)
+        prog["ProbeCenter"].value = tuple(float(v) for v in center)
+        prog["ProbeScale"].value = float(scale)
+        prog["ProbeExposure"].value = float(exposure)
+        prog["ProbeRes"].value = float(size)
+        tex = self.gl.texture((size, size), 4)
+        fbo = self.gl.framebuffer([tex])
+        self._bind(prog)
+        fbo.use()
+        self.vao[prog].render(moderngl.TRIANGLES, vertices=3)
+        img = Image.frombytes("RGBA", (size, size), fbo.read(components=4)).transpose(Image.FLIP_TOP_BOTTOM)
+        fbo.release()
+        tex.release()
+        self.ubo_moons.write(np.array(self.m["moons"], dtype="f4").tobytes())
+        self.ubo_air.write(np.array(self.coeffs + self._air_tail, dtype="f4").tobytes())
         return img.convert("RGB")
 
     def dome(self, size, mode, exposure=1.0):
@@ -440,20 +569,123 @@ SCENES = {
     "xero_lyg": {**midnight(28), "z": 0, "kp": 0, "brightness": 0, "look": ("xero-lyg", 0, 6), "res": HD},
     # Julianos in the Mage's eye (Frostfall 16th of year 1)
     "mage_eye": {**midnight(645), "z": 0, "kp": 0, "brightness": 0, "look": ("julianos", -2, 50), "res": HD},
-    # a great comet (the dev hook's: perihelion on day 22), a week past perihelion on a moonless night
-    "comet": {**midnight(28), "z": 0, "kp": 0, "brightness": 0, "comet": 22, "look": ("comet", 10, 90), "res": HD},
+    # a great comet (the dev hook's, perihelion on day 28) from Skyrim, moonless nights: a week before its peak, the
+    # peak night, a week after; the coma close up
+    "comet_before": {**midnight(21), "z": -2000, "kp": 0, "brightness": 0, "comet": 28, "look": ("comet", 18, 100),
+                     "res": HD},
+    "comet_peak": {**midnight(28), "z": -2000, "kp": 0, "brightness": 0, "comet": 28, "look": ("comet", 18, 100),
+                   "res": HD},
+    "comet_after": {**midnight(35), "z": -2000, "kp": 0, "brightness": 0, "comet": 28, "look": ("comet", 18, 100),
+                    "res": HD},
+    "comet_coma": {**midnight(28), "z": -2000, "kp": 0, "brightness": 0, "comet": 28, "look": ("comet", 0.8, 4),
+                   "res": HD},
 }
+
+
+def toward(d):
+    """(yaw, pitch) degrees looking along world direction d (yaw 0 north, 90 east)."""
+    return math.degrees(math.atan2(d[0], -d[2])), math.degrees(math.asin(max(-1.0, min(1.0, d[1]))))
+
+
+def pick(rows, key, want):
+    """The scan row that best fits: want(row) -> a score (lower better) or None (unfit)."""
+    best, score = None, None
+    for r in rows:
+        v = want(r)
+        if v is not None and (score is None or v < score):
+            best, score = r, v
+    return best
+
+
+def moon_scenes():
+    """The moons' sheet's scenes, found in MoonMath's scan: each moon full, half and a crescent, high and near the
+    horizon (night unless a crescent needs the dusk), both moons together, and the eclipses (Masser's, Secunda's, the
+    dark one). {name: (scene, aim direction, close-up field of view)}."""
+    rows = moon_scan(0.0, 120.0, 1.0 / 96.0)
+    el = lambda d: math.degrees(math.asin(d[1]))
+    out = {}
+    for body, radius_deg in (("masser", 10.5), ("secunda", 3.6)):
+        for phase, lo, hi, sun_max in (("full", 0.97, 1.01, -0.25), ("half", 0.42, 0.58, -0.2),
+                                       ("crescent", 0.12, 0.3, -0.08)):
+            for where, e0, e1 in (("high", 30, 70), ("low", 4 + radius_deg, 10 + radius_deg)):
+                r = pick(rows, body, lambda r: (abs(r[body][3] - (lo + hi) / 2)
+                         if lo <= r[body][3] <= hi and r["sunY"] < sun_max and e0 <= el(r[body]) <= e1 else None))
+                if r is None:
+                    print(f"  (no scene for {body} {phase} {where})")
+                    continue
+                d = r[body][:3]
+                out[f"{body}_{phase}_{where}"] = ({"dayTime": r["day"] * 24000, "z": 3500, "kp": 0, "brightness": 0},
+                                                  d, radius_deg * 2.0 * 1.35)
+    # both up at night: Masser low and large, Secunda higher beside it
+    r = pick(rows, "both", lambda r: (abs(el(r["masser"]) - 16) + abs(el(r["secunda"]) - 35) * 0.5
+             if r["sunY"] < -0.2 and r["masser"][3] > 0.6 and r["secunda"][3] > 0.5
+             and math.degrees(math.acos(sum(a * b for a, b in zip(r["masser"][:3], r["secunda"][:3])))) < 45 else None))
+    if r is not None:
+        mid = [r["masser"][i] + r["secunda"][i] for i in range(3)]
+        n = math.sqrt(sum(c * c for c in mid))
+        out["both_moons_view"] = ({"dayTime": r["day"] * 24000, "z": 3500, "kp": 0, "brightness": 0},
+                                  [c / n for c in mid], 75.0)
+    # the eclipses: the first of each kind with the sun well up
+    ecl = eclipse_scan(0.0, 1500.0)
+    for name, test in (("eclipse_masser", lambda e: e["masser"] > 0.999 and e["secunda"] == 0),
+                       ("eclipse_secunda", lambda e: e["secunda"] > 0.999 and e["masser"] == 0),
+                       ("eclipse_partial", lambda e: 0.3 < e["hidden"] < 0.8),
+                       ("eclipse_dark", lambda e: e["dark"] > 0.5)):
+        e = next((e for e in ecl if test(e) and e["sunY"] > 0.3), None)
+        if e is None:
+            print(f"  (no scene for {name})")
+            continue
+        out[name] = ({"dayTime": e["day"] * 24000, "z": 3500, "kp": 0, "brightness": 0}, None, 60.0)
+    return out
+
+
+def moons_sheet(sky, out):
+    """Renders the moon scenes (wide and close) into out/moons/, and moons_sheet.png."""
+    from PIL import ImageDraw
+    d = out / "moons"
+    d.mkdir(parents=True, exist_ok=True)
+    tiles = []
+    for name, (scene, aim, fov) in moon_scenes().items():
+        sky.scene(scene)
+        if aim is None:
+            aim = sky.sun
+        yaw, pitch = toward(aim)
+        expo = sky.pre
+        close = sky.view(720, 720, yaw, pitch, fov, expo)
+        close.save(d / f"{name}_close.png")
+        wide = sky.view(1280, 720, yaw, max(pitch - 8, 12) if pitch < 30 else pitch, 80, expo)
+        wide.save(d / f"{name}_wide.png")
+        tile = Image.new("RGB", (720 + 1280 + 8, 740), (20, 20, 20))
+        tile.paste(close, (0, 0))
+        tile.paste(wide, (728, 0))
+        ImageDraw.Draw(tile).text((6, 723), f"{name}  day {scene['dayTime'] / 24000:.3f}  expo {expo:.3g}"
+                                  f"  hidden {sky.m['moons'][0]:.2f} dark {sky.m['moons'][1]:.2f}", fill=(230, 230, 230))
+        tiles.append(tile)
+        print(f"  {name}: day {scene['dayTime'] / 24000:.3f}, aim yaw {yaw:.0f} pitch {pitch:.0f}")
+    if tiles:
+        sheet = Image.new("RGB", (tiles[0].width, sum(t.height for t in tiles)), (0, 0, 0))
+        y = 0
+        for t in tiles:
+            sheet.paste(t, (0, y))
+            y += t.height
+        sheet.save(out / "moons_sheet.png")
+        print("moons sheet:", out / "moons_sheet.png")
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(ROOT / ".work/sky_offline"))
-    ap.add_argument("--dll", default=str(ROOT / "native/build/Release/atlas_core.dll"))
+    ap.add_argument("--dll", default="")
     ap.add_argument("--only", default="")
+    ap.add_argument("--moons", action="store_true", help="the moons' sheet (MoonMath's scenes) instead of SCENES")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    sky = Sky(Path(a.dll))
+    # (a worktree has no build of its own: the checkout's, further up)
+    sky = Sky(Path(a.dll) if a.dll else find_up("native/build/Release/atlas_core.dll"))
+    if a.moons:
+        moons_sheet(sky, out)
+        return
     numbers = {}
     print(f"{'scene':18} {'expo':>6} {'zenith':>9} {'N hor':>9} {'S hor':>9} {'aur peak':>9} {'nightUp':>9} "
           f"{'airUp':>9} {'key':>9} {'fill':>9} {'emitE_up':>9}")

@@ -62,6 +62,8 @@ public final class AtlasClient {
 
     private static AtlasNative lib;
     private static AtlasNative.Context ctx;
+    private static Path libPath;  // the loaded core (the client generator binds its own calls there)
+    private static AtlasClientGen clientGen;  // -Dnirncraft.atlas.clientGen=true: atlas generates the near field
     private static boolean cpuBackend;  // ctx runs on the CPU backend (no usable Vulkan device, or forced)
     private static long cpuLogAt;       // nanoTime of the next CPU-path log line
     private static AtlasTargets targets;
@@ -354,6 +356,10 @@ public final class AtlasClient {
             frame.sunX = sun[0];
             frame.sunY = sun[1];
             frame.sunZ = sun[2];
+            // an eclipse's shadow on the far field: the moons near the sun, each surface's sun seen from where it is
+            // (the umbra's footprint dark, the land and the air beyond it lit)
+            ctx.setEclipse(com.nirncraft.atmosphere.client.NightSky.occulterBlock(),
+                    (float) com.nirncraft.atmosphere.MoonMath.KM_PER_BLOCK);
             frame.timeSec = (state.gameTime + state.worldPartialTicks) / 20f;
             // visual tests: the clouds (and their shadows) still, so the views of a pair taken seconds apart see one
             // sky (the day time stands still there: the clock of the scene's time of day)
@@ -452,7 +458,12 @@ public final class AtlasClient {
             if (firstFrame && guard != null) guard.firstFrames();  // a driver crash from here on is the guard's case
             // the images pre-exposed with this frame's eye (the resolve divides it out at once, in full precision)
             preExposure = ctx.setPreExposure(AtlasLook.frame(mc)[0]) ? AtlasLook.frame(mc)[0] : 1f;
+            long g0 = System.nanoTime();
             ctx.glRender(frame, io);
+            long g1 = System.nanoTime();
+            glRenderMs += ((g1 - g0) * 1e-6 - glRenderMs) * 0.05;  // (eased: atlas-info's wall time in the call)
+            if (lastFrameNs != 0) frameWallMs += ((g1 - lastFrameNs) * 1e-6 - frameWallMs) * 0.05;
+            lastFrameNs = g1;
             farThisFrame = true;
             nearLitThisFrame = nearLit;
             if (pass != null && !pack && !nearOwned && !AtlasFallback.fogHidesFarField(cam.fogData)) {
@@ -580,6 +591,7 @@ public final class AtlasClient {
             AtlasTrees.activeLod = trees != null ? AtlasTrees.APPROX_LOD : -1;  // before the first tile goes up
             farField = new AtlasFarField(ctx, source, () -> AtlasSettlements.create(ground, mats, trees), lods);
             AtlasClientSections.reset();  // a new context holds no real blocks: the loaded chunks go up again
+            if (AtlasClientGen.ON && mc.hasSingleplayerServer()) clientGen = AtlasClientGen.start(mc.getSingleplayerServer(), libPath);
             lightBudget = -1;
             startedFor = mc.level;
             retryAt = 0;
@@ -607,7 +619,9 @@ public final class AtlasClient {
         StringBuilder why = new StringBuilder();
         for (Path p : copies) {
             try {
-                return AtlasNative.load(p);
+                AtlasNative n = AtlasNative.load(p);
+                libPath = p;
+                return n;
             } catch (AtlasNative.NativeAccessDenied e) {
                 throw e;  // the same for every copy
             } catch (UnsatisfiedLinkError | RuntimeException e) {
@@ -885,13 +899,18 @@ public final class AtlasClient {
      * The far field's sub-pixel jitter for the pack's TAA (8 Halton (2, 3) offsets, one per frame), or none: without a
      * temporal resolve a jittered far field would visibly shake by a pixel.
      */
+    private static double glRenderMs, frameWallMs;
+    private static long lastFrameNs;
+
     /** The autotest's atlas-info: the core's own report (the grid's pool among it) and the feeds' queues. */
     public static String debugInfo() {
         var c = ctx;
         String core = c != null ? c.info() : "no context";
-        String frame = c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f fps=%d unified=%b} ",
-                c.stats().frameMs(), Minecraft.getInstance().getFps(), AtlasNearPass.unified()) : "";
-        return frame + AtlasClientSections.state() + " " + AtlasEditsClient.state() + " core=" + core;
+        var lvl = Minecraft.getInstance().level;
+        String frame = c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f glRenderWallMs=%.2f frameWallMs=%.2f fps=%d unified=%b loadedChunks=%d t=%d} ",
+                c.stats().frameMs(), glRenderMs, frameWallMs, Minecraft.getInstance().getFps(), AtlasNearPass.unified(),
+                lvl != null ? lvl.getChunkSource().getLoadedChunksCount() : -1, System.currentTimeMillis() % 1_000_000) : "";
+        return frame + "inside{" + AtlasNearPass.insideWhat + "} " + AtlasClientSections.state() + " " + AtlasEditsClient.state() + " " + AtlasClientGen.state() + " core=" + core;
     }
 
     private static void jitter(AtlasNative.Context ctx, boolean on) {
@@ -1008,6 +1027,10 @@ public final class AtlasClient {
             // best effort
         }
         try {
+            if (clientGen != null) {
+                clientGen.close();
+                clientGen = null;
+            }
             if (farField != null) farField.close(destroy);  // now, or when the worker leaves
             else destroy.run();
         } catch (Throwable ignored) {

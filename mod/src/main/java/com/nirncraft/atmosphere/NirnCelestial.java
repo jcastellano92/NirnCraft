@@ -445,30 +445,67 @@ public final class NirnCelestial {
         return best;
     }
 
-    /** A great comet for the dev hook: perihelion on that day, placed well (well clear of the sun, far north: up all
-     *  night from Tamriel, its tails across the sky). */
-    public static Comet forcedComet(double perihelion) {
+    /**
+     * A great comet for the dev hook, at its brightest on day peak (its nearest pass), placed to be the nights' showpiece
+     * from Tamriel: well clear of the sun and far north (up all night) for the weeks round it, its tails tens of
+     * degrees long. The orbit is searched with its perihelion on that day, then turned with Nirn's year (about the
+     * pole: the same view of it from Nirn, its declination kept) and shifted in time so its brightest night falls there.
+     */
+    public static Comet forcedComet(double peak) {
+        Comet best = null;
+        double bestScore = -1, bestShift = 0;
         for (int k = 0; k < 4096; k++) {
             SplittableRandom r = new SplittableRandom(0x464F524345L + k);
-            Comet c = new Comet(perihelion, 1.0, Math.acos(1 - 2 * r.nextDouble()), r.nextDouble() * 2 * Math.PI,
-                    r.nextDouble() * 2 * Math.PI, -1.0);
-            CometState s = comet(c, perihelion + 6.0);
-            double[] sun = scale(nirn(perihelion + 6.0), -1);
-            double elong = Math.toDegrees(Math.acos(dot(s.dir, sun)));
-            if (elong > 70 && elong < 115 && s.dir[2] > 0.55 && s.delta > 0.35) return c;
+            Comet c = new Comet(peak, 0.9, Math.acos(1 - 2 * r.nextDouble()), r.nextDouble() * 2 * Math.PI,
+                    r.nextDouble() * 2 * Math.PI, GREAT_COMET);
+            double brightest = 0, m = 99;
+            for (int dt = -30; dt <= 30; dt++) {
+                double mag = comet(c, peak + dt).mag;
+                if (mag < m) {
+                    m = mag;
+                    brightest = dt;
+                }
+            }
+            double score = 1e9;
+            for (double dt : new double[] {-7, 0, 7}) {
+                double t = peak + brightest + dt;
+                CometState st = comet(c, t);
+                double[] sun = scale(nirn(t), -1);
+                double elong = Math.toDegrees(Math.acos(dot(st.dir, sun)));
+                double tail = Math.toDegrees(Math.acos(Math.min(1, dot(st.dust[TAIL_POINTS - 1], st.dir))));
+                double dec = Math.toDegrees(Math.asin(st.dir[2]));
+                if (elong < 60 || dec < 30 || st.delta < 0.3 || tail > 65) score = -1;
+                else score = Math.min(score, Math.min(tail, 40.0));
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                best = c;
+                bestShift = brightest;
+            }
+            if (bestScore >= 30) break;
         }
-        return new Comet(perihelion, 1.0, 1.2, 0.5, 0.3, -1.0);
+        if (best == null) return new Comet(peak, 0.9, 1.2, 0.5, 0.3, GREAT_COMET);
+        return new Comet(peak - bestShift, best.q, best.incl, best.node - 2.0 * Math.PI * bestShift / YEAR, best.peri,
+                best.absMag);
     }
 
-    /** A comet now: its direction (equatorial), distances from the sun and Nirn (AU), magnitude, the coma's angular
-     *  radius, and its tails' axes: points (equatorial directions) with their half-widths (radians). */
-    public record CometState(double[] dir, double r, double delta, double mag, double comaRadius, double[][] dust,
-                             double[] dustWidth, double[][] ion, double[] ionWidth) {}
+    /** The dev hook's great comet's absolute magnitude (a once-in-a-century comet's: the brightest stars' match). */
+    public static final double GREAT_COMET = -2.0;
 
-    public static final int TAIL_POINTS = 8;
+    /**
+     * A comet now: its direction (equatorial), distances from the sun and Nirn (AU), magnitude, the coma's angular
+     * radius, its tails' axes (points: equatorial directions, with their half-widths, radians), the anti-tail's (the
+     * large dust left along the orbit, seen sunward when Nirn crosses the orbit's plane) and its strength (0..1), the
+     * days from perihelion (the structure's evolution).
+     */
+    public record CometState(double[] dir, double r, double delta, double mag, double comaRadius, double[][] dust,
+                             double[] dustWidth, double[][] ion, double[] ionWidth, double[][] anti, double antiStrength,
+                             double age) {}
+
+    public static final int TAIL_POINTS = 8, ANTI_POINTS = 4;
     /** The tails' light against the coma's (its magnitude's): the dust's scattered sunlight (a great comet's dust tail
-     *  outshines its head), the ions' faint blue glow. */
-    public static final double DUST_SHARE = 2.5, ION_SHARE = 0.6;
+     *  outshines its head several times over), the ions' blue glow. */
+    public static final double DUST_SHARE = 4.0, ION_SHARE = 1.0, ANTI_SHARE = 0.15;
 
     public static CometState comet(Comet c, double days) {
         // Barker's equation: a parabola about the sun (GM = 4 pi^2 AU^3 a year^2, the calendar's year)
@@ -480,6 +517,7 @@ public final class NirnCelestial {
         double r = c.q * (1.0 + s * s);
         double[] pos = {r * Math.cos(nu), r * Math.sin(nu), 0};
         double[] vel = {-Math.sin(nu), 1.0 + Math.cos(nu), 0};  // (its direction only)
+        double[] normal = orient(new double[] {0, 0, 1}, c);
         pos = orient(pos, c);
         vel = norm(orient(vel, c));
         double[] e = nirn(days);
@@ -488,29 +526,42 @@ public final class NirnCelestial {
         double mag = c.absMag + 5 * Math.log10(delta) + 10 * Math.log10(r);
         // activity: brighter comets, nearer the sun: longer tails, larger comae
         double act = Math.pow(10, -0.2 * (c.absMag - 4.0)) * Math.pow(r, -1.5);
-        double coma = 0.0005 * Math.sqrt(act) / delta;
+        double coma = 0.0006 * Math.sqrt(act) / delta;
         double[] out = norm(pos);
-        double lDust = Math.min(0.035 * act, 0.3), lIon = Math.min(0.06 * act, 0.45);
+        // a great comet's tails reach a large part of an AU (tens of degrees on the sky)
+        double lDust = Math.min(0.04 * act, 0.5), lIon = Math.min(0.07 * act, 0.8);
         double[][] dust = new double[TAIL_POINTS][], ion = new double[TAIL_POINTS][];
         double[] dw = new double[TAIL_POINTS], iw = new double[TAIL_POINTS];
         for (int i = 0; i < TAIL_POINTS; i++) {
             double f = (double) i / (TAIL_POINTS - 1);
-            // the dust: pushed out by the sunlight, lagging behind the comet's motion as it goes (a curve)
+            // the dust: pushed out by the sunlight, lagging behind the comet's motion as it goes (a curve), fanning
             double sd = lDust * f;
             double[] xd = {pos[0] + out[0] * sd - vel[0] * 0.9 * sd * f, pos[1] + out[1] * sd - vel[1] * 0.9 * sd * f,
                     pos[2] + out[2] * sd - vel[2] * 0.9 * sd * f};
             double[] gd = sub(xd, e);
             double dd = Math.sqrt(dot(gd, gd));
             dust[i] = scale(gd, 1 / dd);
-            dw[i] = (0.0005 * Math.sqrt(act) + 0.12 * sd) / dd;
+            dw[i] = (0.0008 * Math.sqrt(act) + 0.22 * sd) / dd;
             // the ions: straight out from the sun on the solar wind
             double si = lIon * f;
             double[] gi = sub(new double[] {pos[0] + out[0] * si, pos[1] + out[1] * si, pos[2] + out[2] * si}, e);
             double di = Math.sqrt(dot(gi, gi));
             ion[i] = scale(gi, 1 / di);
-            iw[i] = (0.0004 * Math.sqrt(act) + 0.02 * si) / di;
+            iw[i] = (0.0004 * Math.sqrt(act) + 0.025 * si) / di;
         }
-        return new CometState(scale(g, 1 / delta), r, delta, mag, coma, dust, dw, ion, iw);
+        // the anti-tail: the large grains strewn behind along the orbit, a thin sunward spike while Nirn is near the
+        // orbit's plane (seen edge-on)
+        double[][] anti = new double[ANTI_POINTS][];
+        double lAnti = Math.min(0.02 * act, 0.15);
+        for (int i = 0; i < ANTI_POINTS; i++) {
+            double sa = lAnti * i / (ANTI_POINTS - 1);
+            double[] ga = sub(new double[] {pos[0] - vel[0] * sa, pos[1] - vel[1] * sa, pos[2] - vel[2] * sa}, e);
+            anti[i] = norm(ga);
+        }
+        double edge = Math.abs(dot(norm(g), normal));
+        double antiStrength = Math.max(0.0, 1.0 - edge / Math.sin(Math.toRadians(6.0)));
+        return new CometState(scale(g, 1 / delta), r, delta, mag, coma, dust, dw, ion, iw, anti,
+                antiStrength * antiStrength, days - c.perihelion);
     }
 
     private static double[] orient(double[] v, Comet c) {
@@ -519,8 +570,9 @@ public final class NirnCelestial {
 
     // ============================================================================================ the frame
 
-    /** CelestialInfo's size in floats (atlas_celestial.glsl): 2 mat4, observer, 3 x 8 planets, 3 comet, 2 x 8 tail. */
-    public static final int BLOCK_FLOATS = 32 + 4 + 3 * PLANETS * 4 + 3 * 4 + 2 * TAIL_POINTS * 4;
+    /** CelestialInfo's size in floats (atlas_celestial.glsl): 2 mat4, observer, 3 x 8 planets, 3 comet, 2 x 8 tail,
+     *  the comet's time, 4 anti-tail. */
+    public static final int BLOCK_FLOATS = 32 + 4 + 3 * PLANETS * 4 + 3 * 4 + 2 * TAIL_POINTS * 4 + 4 + ANTI_POINTS * 4;
 
     /** A frame: the block, the planets' and the comet's light for the land (SH L1 as NightSky.meteorLight: rgb + pad x
      *  4, irradiance above the air, before the night's lift), Arkay's world direction, the comet's magnitude (NaN: none). */
@@ -562,7 +614,13 @@ public final class NirnCelestial {
             double[] h = apply(m, cs.dir);
             put(o, 132, h[0], h[1], h[2], e);
             // the tails' light against the coma's (the dust's sunlight, the ions' faint glow)
-            put(o, 136, cs.comaRadius, e * DUST_SHARE, e * ION_SHARE, 0);
+            put(o, 136, cs.comaRadius, e * DUST_SHARE, e * ION_SHARE, e * ANTI_SHARE * cs.antiStrength);
+            // its time (days from perihelion: the tails' structure evolves night to night), a seed of its own
+            put(o, 208, cs.age, (comet.node * 7.31 + comet.peri * 3.17) % 1.0, cs.r, 0);
+            for (int i = 0; i < ANTI_POINTS; i++) {
+                double[] a = apply(m, cs.anti[i]);
+                put(o, 212 + i * 4, a[0], a[1], a[2], cs.comaRadius * (0.25 + 0.15 * i));
+            }
             double[] centre = {0, 0, 0};
             double[][] dw = new double[TAIL_POINTS][], iw = new double[TAIL_POINTS][];
             for (int i = 0; i < TAIL_POINTS; i++) {
@@ -573,14 +631,14 @@ public final class NirnCelestial {
                 for (int c = 0; c < 3; c++) centre[c] += dw[i][c] + iw[i][c];
             }
             centre = norm(centre);
-            double reach = Math.max(cs.comaRadius * 8.0, 0.002);
+            double reach = Math.max(cs.comaRadius * 10.0, 0.002);
             double cosR = Math.cos(Math.acos(Math.min(1, dot(centre, h))) + reach);
             for (int i = 0; i < TAIL_POINTS; i++) {
                 cosR = Math.min(cosR, Math.cos(Math.acos(Math.min(1, dot(centre, dw[i]))) + cs.dustWidth[i] * 3.5));
                 cosR = Math.min(cosR, Math.cos(Math.acos(Math.min(1, dot(centre, iw[i]))) + cs.ionWidth[i] * 3.5));
             }
             put(o, 140, centre[0], centre[1], centre[2], cosR);
-            addLight(light, h, e * (1.0 + DUST_SHARE + ION_SHARE), new float[] {1.0f, 0.97f, 0.92f});
+            addLight(light, h, e * (1.0 + DUST_SHARE + ION_SHARE), new float[] {0.97f, 0.99f, 1.0f});
         }
         return new Frame(o, light, apply(m, ps[ARKAY].dir), cometMag, m, ps, cs);
     }

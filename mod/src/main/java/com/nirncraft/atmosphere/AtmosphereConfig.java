@@ -12,6 +12,7 @@ public final class AtmosphereConfig {
 
     public static final ModConfigSpec.BooleanValue SKY;
     public static final ModConfigSpec.BooleanValue SECUNDA;
+    public static final ModConfigSpec.BooleanValue NECROMANCER_MOON;
     public static final ModConfigSpec.BooleanValue MASSER_HALO;
     public static final ModConfigSpec.BooleanValue AURORA;
     public static final ModConfigSpec.BooleanValue AURORA_EVERYWHERE;
@@ -45,10 +46,13 @@ public final class AtmosphereConfig {
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
-        b.comment("Skyrim sky: Masser & Secunda, aurora, stars. Masser uses NirnCraft's authored phase atlas",
-                "(assets/nirncraft/textures/environment/masser_phases.png); a resource pack can override it.").push("sky");
+        b.comment("Skyrim sky: Masser & Secunda, aurora, stars. The moons' surfaces are NirnCraft's own bakes",
+                "(assets/nirncraft/textures/environment/masser_albedo.png, masser_relief.png, secunda_*: tools/dev/moon_gen.py);",
+                "a resource pack can override them.").push("sky");
         SKY = b.comment("Master switch for every extra sky element below.").define("enabled", true);
         SECUNDA = b.comment("Draw Secunda, the small white moon, on its own tilted orbit.").define("secunda", true);
+        NECROMANCER_MOON = b.comment("The Necromancer's Moon (from 3E 417): a small dark body that hides the planet Arkay",
+                "for a day every eight days.").define("necromancerMoon", false);
         MASSER_HALO = b.comment("Faint reddish glow around Masser at night.").define("masserHalo", true);
         AURORA = b.comment("Aurora borealis on clear nights in cold biomes.").define("aurora", true);
         AURORA_EVERYWHERE = b.comment("Show the aurora in every biome, not just cold ones.").define("auroraEverywhere", false);

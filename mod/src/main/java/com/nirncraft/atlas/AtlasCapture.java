@@ -396,7 +396,7 @@ final class AtlasCapture {
         }
     }
 
-    private static Object zero(Class<?> t) {
+    static Object zero(Class<?> t) {
         if (!t.isPrimitive() || t == void.class) return null;
         if (t == boolean.class) return false;
         if (t == int.class) return 0;

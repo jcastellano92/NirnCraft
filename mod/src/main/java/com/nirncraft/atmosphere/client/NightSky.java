@@ -1,6 +1,7 @@
 package com.nirncraft.atmosphere.client;
 
 import com.nirncraft.atmosphere.AtmosphereConfig;
+import com.nirncraft.atmosphere.MoonMath;
 import com.nirncraft.atmosphere.NightSkyMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -32,6 +33,10 @@ public final class NightSky {
     private static double nextMeteorAt = -1.0;
     private static int frameIndex;
     private static float[] moonlights = new float[12];
+    private static float[] moonBlock = new float[MoonMath.BLOCK_FLOATS];
+    private static float[] occulterBlock = new float[8];
+    private static double[] observer = MoonMath.observer(0, 0, 0);
+    private static double[][] occulters = new double[0][];
     private static final float[] meteorLight = new float[16];  // SH L1 of the meteors' irradiance (rgb x 4)
     private static boolean drawn;
 
@@ -77,12 +82,45 @@ public final class NightSky {
         double[] sun = NightSkyMath.sunDirection(sunAngle, pathDeg);
         float[] meteors = meteors(seconds, days, sun, show && AtmosphereConfig.SHOOTING_STARS.get(), f);
         float[] block = NightSkyMath.block(f, meteors);
-        var m = NightSkyMath.moon(false, days, sun, pathDeg);
-        var s = NightSkyMath.moon(true, days, sun, pathDeg);
+        // the moons from the camera's place on Nirn (their parallax, their shadows' footprints: MoonMath)
+        double[] obs = MoonMath.observer(camX, camZ, eyeKm);
+        observer = obs;
+        var m = NightSkyMath.moon(false, days, sun, pathDeg, obs);
+        var s = NightSkyMath.moon(true, days, sun, pathDeg, obs);
         double[] ml = NightSkyMath.moonlights(m, s, AtmosphereConfig.SECUNDA.get());
         for (int i = 0; i < 12; i++) moonlights[i] = (float) ml[i];
+        // the eclipses, the Dark Moon, the Necromancer's Moon over Arkay (MoonMath: atlas_moons.glsl's MoonInfo)
+        var eclipse = MoonMath.eclipse(sun, m, s, AtmosphereConfig.SECUNDA.get());
+        // (Arkay's place: the planets' ephemeris, CelestialSky's last frame, world direction)
+        double[] rev = AtmosphereConfig.NECROMANCER_MOON.get()
+                ? MoonMath.revenant(days, CelestialSky.arkayDirection()) : null;
+        moonBlock = MoonMath.block(eclipse, rev, m, s, obs);
+        occulterBlock = MoonMath.occulterBlock(m, s, AtmosphereConfig.SECUNDA.get(), sun, obs);
+        occulters = MoonMath.occulters(m, s, AtmosphereConfig.SECUNDA.get(), eclipse, rev);
         drawn = show;
         return block;
+    }
+
+    /** The moons near the sun in the last frame, for an eclipse's shadow in the air and on the land (AirInfo's
+     *  AirOcculter, atlas_set_eclipse): {centre from the camera (km, world axes), radius (km)} x 2, radius 0: none. */
+    public static float[] occulterBlock() {
+        return occulterBlock.clone();
+    }
+
+    /** Where the last frame was seen from (km from Nirn's centre: MoonMath.observer). */
+    public static double[] observer() {
+        return observer.clone();
+    }
+
+    /** MoonInfo (atlas_moons.glsl) of the last frame: the eclipse, the Dark Moon, the Necromancer's Moon. */
+    public static float[] moonBlock() {
+        return moonBlock.clone();
+    }
+
+    /** The discs that hid what is behind them in the last frame: {dir xyz, angular radius} each (MoonMath.occulters):
+     *  for the stars', planets' and comets' occultation. */
+    public static double[][] occulters() {
+        return occulters;
     }
 
     /** {key dir xyz, key irradiance rgb, fill dir xyz, fill irradiance rgb} (above the air) of the last frame. */

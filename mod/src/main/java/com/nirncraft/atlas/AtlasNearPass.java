@@ -694,6 +694,8 @@ public final class AtlasNearPass {
     private static final float[] NOT_INSIDE = new float[11];
     /** The eye is inside rock or earth this frame (AtlasMeter holds the eye's adaptation: it must not open the dark up). */
     static volatile boolean insideSolid;
+    /** What the eye is inside, for atlas-info: the block and the kind (or "-"). */
+    static volatile String insideWhat = "-";
 
     /**
      * The block the eye is clipping into (atlas_water.glsl atlasInside): {min xyz camera-relative, extinction a block,
@@ -704,12 +706,14 @@ public final class AtlasNearPass {
         if (mc.level == null) return NOT_INSIDE;
         net.minecraft.core.BlockPos bp = net.minecraft.core.BlockPos.containing(cam.pos);
         var st = mc.level.getBlockState(bp);
+        insideWhat = st.toString();
         if (st.isAir() || st.liquid()) return NOT_INSIDE;
         double lx = cam.pos.x - bp.getX(), ly = cam.pos.y - bp.getY(), lz = cam.pos.z - bp.getZ();
         for (var box : st.getShape(mc.level, bp).toAabbs()) {
             if (lx < box.minX || lx > box.maxX || ly < box.minY || ly > box.maxY || lz < box.minZ || lz > box.maxZ) continue;
-            boolean leaves = st.is(net.minecraft.tags.BlockTags.LEAVES);
+            boolean leaves = st.is(net.minecraft.tags.BlockTags.LEAVES) || st.getBlock() instanceof net.minecraft.world.level.block.LeavesBlock;
             float kind = leaves ? 1f : st.canOcclude() ? 0f : 2f;
+            insideWhat = st + " kind=" + kind + " box=" + box;
             float sigma = kind == 0f ? 7f : kind == 1f ? 2.2f : 0.25f;
             int c = st.getMapColor(mc.level, bp).col;
             float r = (float) Math.pow(((c >> 16) & 255) / 255f, 2.2), g = (float) Math.pow(((c >> 8) & 255) / 255f, 2.2),

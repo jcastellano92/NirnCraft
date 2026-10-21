@@ -291,13 +291,28 @@ public final class WeatherFieldTexture implements AutoCloseable {
                 int rgba = packAbgr(displayR[i], displayG[i], displayB[i], baseBand[i]);
                 int alpha = ((rgba >>> 24) & 254) | (smokeColumns[i] ? 1 : 0);
                 image.setPixelABGR(col, row, (rgba & 0x00FFFFFF) | (alpha << 24));
-                int windAngle = clampByte((float) (Mth.atan2(displayWindZ[i], displayWindX[i]) / (Math.PI * 2.0) + 1.0) % 1f);
+                int windAngle = clampByte((turns(displayWindZ[i], displayWindX[i]) + 1f) % 1f);
                 dynamicsImage.setPixelABGR(col, row, (clampByte(displayFog[i]) << 24) | (windAngle << 16)
                         | (clampByte(displaySurface[i] / 1024f) << 8) | clampByte(displayHeight[i] / 1024f));
             }
         }
         uploadAllTargets();
         presentationMillis=(System.nanoTime()-presentationStart)*1e-6;
+    }
+
+    /**
+     * atan2(y, x) in turns (-0.5..0.5), to about 1e-4 turn: the wind's direction is stored as a byte (1/256 turn), and
+     * Mth.atan2 per texel each tick was a third of the render thread's samples.
+     */
+    static float turns(float y, float x) {
+        float ax = Math.abs(x), ay = Math.abs(y);
+        if (ax == 0f && ay == 0f) return 0f;
+        float a = Math.min(ax, ay) / Math.max(ax, ay), s = a * a;
+        float r = ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;  // atan on [0, 1], radians
+        if (ay > ax) r = 1.57079637f - r;
+        if (x < 0f) r = 3.14159274f - r;
+        if (y < 0f) r = -r;
+        return r * 0.159154943f;
     }
 
     public static String diagnostics() {
