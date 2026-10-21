@@ -603,6 +603,10 @@ final class AtlasClientGen implements AutoCloseable {
         if (c.farOn) pagesNow += String.format(", far %d tiles %d/%d chunks taken %.0f ms busy %d, partial %d (retried %d), from the cache %d",
                 c.farTiles, c.farTaken, c.farChunks, c.farMs, c.farBusy, c.farPartial.size(), c.farRetried, c.farCached);
         pagesNow += String.format(", cached chunks %d (%d sections)", c.cachedChunks, c.cachedSections);
+        double[] pace = c.gen.paceStats();
+        if (pace != null)
+            pagesNow += String.format(", budget{frame %.1f ms duty %.2f used %.0f waited %.0f (far %.0f) longest %.0f ms, %d submissions}",
+                    pace[0], pace[1], pace[2], pace[3], pace[4], pace[5], (long) pace[6]);
         return String.format("clientGen{%s%s chunks=%d flagged=%d ready=%d up=%d/%d sections pages=%d (%s) genMs=%.0f pageMs=%.0f "
                         + "(gpu=%.0f: kernels %.0f readback %.0f; decode=%.0f) uploadMs=%.0f features=%d featureMs=%.0f failures=%d jump{firstUp=%.0f windowUp=%.0f features=%.0f ms; %s}}",
                 c.direct ? "gpu->grid " : "", c.gen.device(), c.chunks, c.flagged, r, c.uploadedChunks, c.uploadedSections, c.pagesMade, pagesNow,
@@ -1034,16 +1038,29 @@ final class AtlasClientGen implements AutoCloseable {
      * up yet (distance in tiles of its level, finer levels first at equal distance). Returns false when all are up.
      */
     private long farRetryNs, farRetried;
+    private final Map<Long, long[]> farRetry = new HashMap<>();  // (a partial tile: tries, next try (ns), chunks refused)
 
     private boolean farStep() {
         double x = camX, z = camZ;
-        // (the camera still: the tiles the grid did not take whole go again every 2 s, not only once it moves a tile)
+        // The tiles the grid did not take whole go again with the camera still, but never as a loop: a tile waits 4 s,
+        // 8 s, 16 s between tries, tries only when its level has room for the chunks it was refused, and gives up after
+        // three until the target changes (the camera moves a tile at that level: the code below forgets its tries).
         long nowNs = System.nanoTime();
-        if (nowNs - farRetryNs > 2_000_000_000L && !farPartial.isEmpty()) {
+        if (nowNs - farRetryNs > 1_000_000_000L && !farPartial.isEmpty()) {
             farRetryNs = nowNs;
-            for (long key : farPartial) farDone.remove(key);
-            farRetried += farPartial.size();
-            farPartial.clear();
+            var it = farPartial.iterator();
+            while (it.hasNext()) {
+                long key = it.next();
+                long[] ri = farRetry.computeIfAbsent(key, k -> new long[]{0, nowNs + 4_000_000_000L, 0});
+                if (ri[0] >= 3 || nowNs < ri[1]) continue;
+                int room = gen.coarseRoom((int) (key >>> 56));
+                if (room >= 0 && room < Math.max(16L, ri[2])) continue;
+                ri[0]++;
+                ri[1] = nowNs + (4_000_000_000L << ri[0]);
+                farDone.remove(key);
+                it.remove();
+                farRetried++;
+            }
         }
         int best = -1, btx = 0, btz = 0;
         double bestD = Double.MAX_VALUE;
@@ -1056,6 +1073,7 @@ final class AtlasClientGen implements AutoCloseable {
                 // the camera moved a tile at this level: partial tiles go again, far ones are forgotten (the grid lets
                 // them go with its window)
                 final int lk = k;
+                farRetry.keySet().removeIf(key -> (int) (key >>> 56) == lk);  // (the target changed: tries start again)
                 farPartial.removeIf(key -> {
                     if ((int) (key >>> 56) != lk) return false;
                     farDone.remove(key);
@@ -1102,7 +1120,12 @@ final class AtlasClientGen implements AutoCloseable {
         }
         long key = farKey(best, btx, btz);
         farDone.add(key);
-        if (r.taken() < r.chunks()) farPartial.add(key);
+        if (r.taken() < r.chunks()) {
+            farPartial.add(key);
+            farRetry.computeIfAbsent(key, k -> new long[]{0, System.nanoTime() + 4_000_000_000L, 0})[2] = r.chunks() - r.taken();
+        } else {
+            farRetry.remove(key);
+        }
         farTiles++;
         farChunks += r.chunks();
         farTaken += r.taken();

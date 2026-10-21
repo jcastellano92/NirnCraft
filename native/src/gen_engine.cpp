@@ -3444,6 +3444,12 @@ ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const
     });
 }
 
+ATLAS_API uint32_t atlas_gen_coarse_room(AtlasGen* h, int32_t level) {
+    if (!h || !h->ctx) return 0;
+    VoxGrid* g = contextGrid(h->ctx);
+    return g ? g->coarseFreeSlots(level) : 0;
+}
+
 ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out) {
     if (!h || !out) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> l(h->mu);

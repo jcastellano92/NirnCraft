@@ -37,7 +37,7 @@ final class AtlasGenNative {
     // the pages made on the device (atlas_gen_read_page, atlas_gen_page_stats): null in a library without them
     private final MethodHandle readPage, pageStats, tiles, far, farIngest, gridReports;
     // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
-    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate;
+    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate, coarseRoom, paceStats;
     // the chunk store and the decoration's store stages (atlas_gen_store_*, atlas_feat_attach): null in a library without them
     private final MethodHandle storeEnable, runStore, storeKeep, storeStats, featAttach, featDestroy, featOverlays;
     /** Columns of a far tile (atlas_gen_tiles). */
@@ -81,6 +81,10 @@ final class AtlasGenNative {
         cacheLookup = cache ? bind(l, lib, "atlas_gen_cache_lookup", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS)) : null;
         cacheIngest = cache ? bind(l, lib, "atlas_gen_cache_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS)) : null;
         setFingerprint = cache ? bind(l, lib, "atlas_gen_set_fingerprint", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG)) : null;
+        coarseRoom = lib.find("atlas_gen_coarse_room").isPresent()
+                ? bind(l, lib, "atlas_gen_coarse_room", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT)) : null;
+        paceStats = lib.find("atlas_gen_pace_stats").isPresent()
+                ? bind(l, lib, "atlas_gen_pace_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
         regenerate = lib.find("atlas_gen_regenerate").isPresent()
                 ? bind(l, lib, "atlas_gen_regenerate", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT)) : null;
         farCacheIngest = lib.find("atlas_gen_far_cache_ingest").isPresent()
@@ -305,6 +309,29 @@ final class AtlasGenNative {
          * A far tile from the self-baking cache into the grid's level lod (atlas_gen_far_cache_ingest), as
          * {@link #farIngest} would put it; null when the cache does not know it (generate it then).
          */
+        /** Free slots in the grid's coarse level (a refused far tile is asked for again when there is room); -1: unknown. */
+        int coarseRoom(int level) {
+            if (coarseRoom == null) return -1;
+            try {
+                return (int) coarseRoom.invokeExact(ptr, level);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** The GPU budget's numbers (atlas_gen_pace_stats): period, duty, used, waited, far waited, longest submission (ms). */
+        double[] paceStats() {
+            if (paceStats == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment s = a.allocate(8L * 8);
+                check((int) paceStats.invokeExact(ptr, s), "atlas_gen_pace_stats");
+                return new double[]{s.get(JAVA_DOUBLE, 0), s.get(JAVA_DOUBLE, 8), s.get(JAVA_DOUBLE, 24), s.get(JAVA_DOUBLE, 32),
+                        s.get(JAVA_DOUBLE, 40), s.get(JAVA_DOUBLE, 48), s.get(JAVA_LONG, 56)};
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
         /** Chunks made again (their stages' data changed): out of the self-baking cache, back through the store. */
         synchronized void regenerate(int[] chunkXZ) {
             if (regenerate == null || chunkXZ.length == 0) return;

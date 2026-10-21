@@ -890,6 +890,9 @@ ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const
    that frames keep their target; since the generator was made. periodMs the frames' period seen (0: no frames),
    duty the share of wall time the generator may use now, usedMs the GPU time its submissions took, waitedMs (farWaitedMs
    of it the far field's) the time they waited for the budget, maxSubmissionMs the longest submission. */
+/* Free slots in the grid's coarse level `level` (1..6): a far tile it refused chunks of is asked for again when there is
+   room for them. */
+ATLAS_API uint32_t atlas_gen_coarse_room(AtlasGen* h, int32_t level);
 typedef struct AtlasGenPaceStats {
     double periodMs, duty, tokensMs, usedMs, waitedMs, farWaitedMs, maxSubmissionMs;
     uint64_t submissions;

@@ -194,6 +194,13 @@ public:
     size_t ingestCoarseHost(int level, const int32_t* pos, const uint32_t* kinds, const VgPacked* packed, size_t count,
                             uint8_t* accepted);
     int bakeBudget = 512;
+    // free slots of a coarse level's pool (a refused far chunk is asked for again only when there is room)
+    uint32_t coarseFreeSlots(int k) const {
+        std::lock_guard<std::mutex> lock(mu_);
+        if (k < 1 || k > activeCoarse_) return 0;
+        const Level& L = lv_[k];
+        return L.cap > L.used ? L.cap - L.used : 0;
+    }
     // (atlas_info voxgrid) what is still to refine with the camera still: coarse cells given up and waiting for room, GPU
     // sections asked for again and the asks held back (asked lately), the bake's queue
     std::string refineInfo() const {
