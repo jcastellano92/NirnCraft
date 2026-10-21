@@ -36,18 +36,27 @@ final class AtlasShapes {
 
     /** The model quads the lab's library samples a state's faces from (its parts at a fixed seed, every face and the unculled). */
     static List<BakedQuad> quads(BlockState st) {
-        List<BlockStateModelPart> parts = new ArrayList<>();
-        try {
-            Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(st).collectParts(RandomSource.create(42L), parts);
-        } catch (RuntimeException e) {
-            parts.clear();
-        }
         List<BakedQuad> quads = new ArrayList<>();
-        for (BlockStateModelPart p : parts) {
+        for (BlockStateModelPart p : parts(st)) {
             for (Direction d : Direction.values()) quads.addAll(p.getQuads(d));
             quads.addAll(p.getQuads(null));
         }
         return quads;
+    }
+
+    /** The model parts the state draws (a multipart model's every matching case; a variant's pick at a fixed seed). */
+    static List<BlockStateModelPart> parts(BlockState st) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
+        try {
+            // (NeoForge's overload with the state: the plain one hands the parts the air's state, and a model that
+            // picks its parts by the state it is given drew only its unconditional ones: a fence's or a wall's post,
+            // a pane's centre, no half of a double plant)
+            Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(st).collectParts(
+                    net.minecraft.client.renderer.block.BlockAndTintGetter.EMPTY, BlockPos.ZERO, st, RandomSource.create(42L), parts);
+        } catch (RuntimeException e) {
+            parts.clear();
+        }
+        return parts;
     }
 
     /** The state's outline shape as boxes (none when it cannot say). */

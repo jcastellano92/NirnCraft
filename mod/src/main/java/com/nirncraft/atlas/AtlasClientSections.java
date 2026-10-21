@@ -106,13 +106,14 @@ final class AtlasClientSections {
 
     private static int nearId(BlockState s) {
         if (!nearKept(s)) return 0;
-        Object model;
-        try {
-            model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(s);
-        } catch (RuntimeException e) {
-            model = s;
-        }
-        java.util.List<Object> key = java.util.List.of(s.getBlock(), new Ident(model), AtlasMaterials.tintKind(s), s.getLightEmission());
+        // what it looks like: the model parts it draws (by identity: a fence's arms, a door's half, a crop's age; a model
+        // object can be shared by every state of a block and pick its parts by the state it is given)
+        java.util.List<Object> parts = new java.util.ArrayList<>();
+        for (var part : AtlasShapes.parts(s)) parts.add(new Ident(part));
+        if (parts.isEmpty()) parts.add(new Ident(s));  // (no model parts: a fluid; one look a state)
+        // (and its fluid: a waterlogged fence is the water's too)
+        java.util.List<Object> key = java.util.List.of(s.getBlock(), parts, AtlasMaterials.tintKind(s), s.getLightEmission(),
+                s.getFluidState().isEmpty());
         return LOOKS.computeIfAbsent(key, k -> net.minecraft.world.level.block.Block.getId(s));
     }
 

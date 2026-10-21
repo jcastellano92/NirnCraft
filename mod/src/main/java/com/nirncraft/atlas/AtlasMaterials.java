@@ -68,9 +68,11 @@ final class AtlasMaterials {
     synchronized short id(BlockState s) {
         Short v = ids.get(s.getBlock());
         if (v != null) return v;
-        if (next > LAST) return (short) FIRST;  // full: the first entry (never in practice: a few hundred blocks)
         int t = tint(s, -1, -1);
-        pending.add(t >= 0 ? tintedMaterial(s, t & 0xF8F8F8) : material(s));
+        float[] m = t >= 0 ? tintedMaterial(s, t & 0xF8F8F8) : material(s);
+        if (next > LAST) return nearestColour(m);  // full: the entry nearest its colour (not the first: a green field's)
+        pending.add(m);
+        colours.add(m);
         pendingShapes.add(shapeOf(s, t >= 0 ? t & 0xF8F8F8 : -1));
         short id = (short) next++;
         ids.put(s.getBlock(), id);
@@ -83,16 +85,40 @@ final class AtlasMaterials {
      */
     synchronized short leaves(BlockState s, int rgb) {
         int q = rgb & 0xF8F8F8;
+        if (biomeTinted(s)) q = snapTint(q);  // (a biome's colour from the palette in use: AtlasMaterials.snapTint)
         long key = (long) BuiltInRegistries.BLOCK.getId(s.getBlock()) << 32 | q;
         Short v = tinted.get(key);
         if (v != null) return v;
         if (next > LAST) return id(s);
-        pending.add(tintedMaterial(s, q));
+        float[] m = tintedMaterial(s, q);
+        pending.add(m);
+        colours.add(m);
         pendingShapes.add(shapeOf(s, q));
         short id = (short) next++;
         tinted.put(key, id);
         return id;
     }
+
+    // the colours of the palette ids handed out, FIRST on (id(): a full palette's nearest)
+    private final List<float[]> colours = new ArrayList<>();
+
+    private short nearestColour(float[] m) {
+        int best = 0;
+        double bd = Double.MAX_VALUE;
+        for (int i = 0; i < colours.size(); i++) {
+            float[] c = colours.get(i);
+            double d = (c[0] - m[0]) * (c[0] - m[0]) + (c[1] - m[1]) * (c[1] - m[1]) + (c[2] - m[2]) * (c[2] - m[2])
+                    + (c[5] == m[5] ? 0 : 1);  // (and its class: no leaf for a stone)
+            if (d < bd) {
+                bd = d;
+                best = i;
+            }
+        }
+        paletteFull++;
+        return (short) (FIRST + best);
+    }
+
+    private long paletteFull;
 
     /** A tinted block's far colour: its grey texture mean times the tint rgb (as the near field tints it). */
     private static float[] tintedMaterial(BlockState s, int q) {
@@ -116,10 +142,17 @@ final class AtlasMaterials {
     synchronized short section(BlockState s, int tint) {
         if (!shapes) return tint >= 0 ? leaves(s, tint) : id(s);
         int q = tint >= 0 ? tint & 0xF8F8F8 : -1;
-        long key = (long) net.minecraft.world.level.block.Block.getId(s) << 32 | (q & 0xFFFFFFFFL);
+        if (q >= 0 && biomeTinted(s)) q = snapTint(q);
+        int sid = net.minecraft.world.level.block.Block.getId(s);
+        long key = (long) sid << 32 | (q & 0xFFFFFFFFL);
         Short have = exact.get(key);
         if (have != null) return have;
         if (nextExact > EXACT_LAST) {
+            // full: the same state in its nearest tint (its shape, textures and brick), else the far state's; a plain
+            // block id last (a per-block material wears the first state's shape: a fence's post, one half of a plant)
+            exactFull++;
+            Short near = nearestTint(sid, q);
+            if (near != null) return near;
             Short far = exact.get((long) AtlasFarState.farId(s) << 32 | (q & 0xFFFFFFFFL));
             return far != null ? far : tint >= 0 ? leaves(s, tint) : id(s);
         }
@@ -141,7 +174,61 @@ final class AtlasMaterials {
         pendingExactBricks.add(brick);
         short id = (short) nextExact++;
         exact.put(key, id);
+        byState.computeIfAbsent(sid, k -> new ArrayList<>()).add(new int[] {q, id});
         return id;
+    }
+
+    // (exact ids) per state id its tints and ids, the biome tints in use, how often the range was full
+    private final Map<Integer, List<int[]>> byState = new HashMap<>();
+    private final List<Integer> tintPalette = new ArrayList<>();
+    private long exactFull;
+    /** Distinct biome tints the exact materials take (the rest snap to the nearest): bounds tinted ids per state. */
+    static final int TINT_PALETTE = 40;
+    /** A biome tint within this much a channel of one in use is that one. */
+    static final int TINT_SNAP = 10;
+
+    /**
+     * A biome's grass or foliage colour as the exact materials take it: the one in use within TINT_SNAP a channel, else a
+     * new one while there are fewer than TINT_PALETTE, else the nearest. Vanilla blends tints per column across a
+     * biome's edge: as distinct ids per state and tint they ran past EXACT_LAST, and what came after lost its shape.
+     */
+    private int snapTint(int q) {
+        int best = -1, bd = Integer.MAX_VALUE;
+        for (int t : tintPalette) {
+            int d = Math.max(Math.abs(((t >> 16) & 255) - ((q >> 16) & 255)),
+                    Math.max(Math.abs(((t >> 8) & 255) - ((q >> 8) & 255)), Math.abs((t & 255) - (q & 255))));
+            if (d < bd) {
+                bd = d;
+                best = t;
+            }
+        }
+        if (best >= 0 && (bd <= TINT_SNAP || tintPalette.size() >= TINT_PALETTE)) return best;
+        tintPalette.add(q);
+        return q;
+    }
+
+    /** The exact id of state sid in the tint nearest q, or null when it has none. */
+    private Short nearestTint(int sid, int q) {
+        List<int[]> l = byState.get(sid);
+        if (l == null || l.isEmpty()) return null;
+        int[] best = l.get(0);
+        int bd = Integer.MAX_VALUE;
+        for (int[] e : l) {
+            int t = e[0];
+            int d = q < 0 || t < 0 ? (q == t ? 0 : 1000) : Math.max(Math.abs(((t >> 16) & 255) - ((q >> 16) & 255)),
+                    Math.max(Math.abs(((t >> 8) & 255) - ((q >> 8) & 255)), Math.abs((t & 255) - (q & 255))));
+            if (d < bd) {
+                bd = d;
+                best = e;
+            }
+        }
+        return (short) best[1];
+    }
+
+    /** The exact ids for atlas-info: used of the range, biome tints in use, lookups past a full range. */
+    synchronized String state() {
+        return "exactIds{used=" + (nextExact - EXACT_FIRST) + "/" + (EXACT_LAST - EXACT_FIRST + 1) + " tints=" + tintPalette.size()
+                + " fullLookups=" + exactFull + " palette=" + (next - FIRST) + "/" + (LAST - FIRST + 1) + " paletteFull=" + paletteFull + "}";
     }
 
     /** Whether the near field tints a block with the biome's grass or foliage colour (tint(): it needs them). */

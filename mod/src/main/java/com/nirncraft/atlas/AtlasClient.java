@@ -62,6 +62,7 @@ public final class AtlasClient {
 
     private static AtlasNative lib;
     private static AtlasNative.Context ctx;
+    private static volatile AtlasMaterials materials;  // (atlas-info: the exact ids' use)
     private static Path libPath;  // the loaded core (the client generator binds its own calls there)
     private static AtlasClientGen clientGen;  // -Dnirncraft.atlas.clientGen=true: atlas generates the near field
     private static boolean cpuBackend;  // ctx runs on the CPU backend (no usable Vulkan device, or forced)
@@ -92,8 +93,8 @@ public final class AtlasClient {
     private static final it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap actorOpacity = new it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap();
     private static int lightBudget = -1;
     /**
-     * The content-shaped groups (docs/ATLAS-LOD.md; ATLAS_FRAME_GROUPS, atlas_core 0.14): only with
-     * -Dnirncraft.atlas.groups=true until they are proven in game; the default stays the voxel path.
+     * The content-shaped groups (docs/ATLAS-LOD.md; ATLAS_FRAME_GROUPS, atlas_core 0.14): on by default (the near
+     * field's bricks and textures need them); -Dnirncraft.atlas.groups=false the voxel path.
      */
     private static boolean groups;
     /** Seconds over which an impostor dissolves once the real entity is tracked (and region refinements dissolve). */
@@ -615,7 +616,10 @@ public final class AtlasClient {
             if (noise != null) ctx.setCloudNoise(noise);
             java.util.function.IntBinaryOperator ground = source instanceof AtlasExactSource e ? e::groundAt : null;
             AtlasMaterials mats = new AtlasMaterials();  // one id per block across buildings, landmarks and surfaces
-            groups = "true".equalsIgnoreCase(System.getProperty("nirncraft.atlas.groups")) && ctx.hasShapes();
+            // (on by default: the near field's every block, its brick, its textures; -Dnirncraft.atlas.groups=false the
+            // voxel path, measurements)
+            groups = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.groups")) && ctx.hasShapes();
+            materials = mats;
             if (groups) mats.enableShapes();  // every material's real shape and face tiles; real blocks per state
             if (groups) com.nirncraft.NirnCraft.LOGGER.info("atlas: content-shaped groups on (nirncraft.atlas.groups)");
             if (source instanceof AtlasRefiningSource r) r.materials(mats);
@@ -978,7 +982,7 @@ public final class AtlasClient {
         String frame = c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f glRenderWallMs=%.2f frameWallMs=%.2f fps=%d unified=%b loadedChunks=%d t=%d} ",
                 c.stats().frameMs(), glRenderMs, frameWallMs, Minecraft.getInstance().getFps(), AtlasNearPass.unified(),
                 lvl != null ? lvl.getChunkSource().getLoadedChunksCount() : -1, System.currentTimeMillis() % 1_000_000) : "";
-        return frame + "inside{" + AtlasNearPass.insideWhat + "} " + AtlasClientSections.state() + " " + AtlasEditsClient.state() + " " + AtlasClientGen.state() + " core=" + core;
+        return frame + "inside{" + AtlasNearPass.insideWhat + "} " + AtlasClientSections.state() + " " + (materials != null ? materials.state() + " " : "") + AtlasEditsClient.state() + " " + AtlasClientGen.state() + " core=" + core;
     }
 
     private static void jitter(AtlasNative.Context ctx, boolean on) {
