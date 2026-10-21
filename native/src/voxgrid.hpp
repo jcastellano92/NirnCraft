@@ -84,6 +84,9 @@ struct VgDown {
     uint32_t kid[8];
 };
 constexpr uint32_t VG_KID_AIR = 0xFFFFFFFFu, VG_KID_ROCK = 0xFFFFFFFEu;
+constexpr uint32_t VG_KID_UNIFORM = 0xFD000000u;  // | id: a child of one id throughout (no slot)
+// (VoxGrid::ingestCoarseGpu) a chunk's kind: its ids at the offset; all air; one id (| id << 8), no ids
+constexpr uint32_t VG_GIVEN_MIXED = 0, VG_GIVEN_AIR = 1, VG_GIVEN_UNIFORM = 2;
 
 struct VgBatch {
     bool clear = false;          // the window moved: every level-0 chunk UNLOADED before the jobs
@@ -97,6 +100,8 @@ struct VgBatch {
     std::vector<VgFill> clears, fills;
     std::vector<VgIngest> ingests;
     std::vector<VgDown> downs[VG_LEVELS];
+    // (ingestCoarseGpu) the generator's coarse chunks: pool slot <- its ids on the GPU, copied before the passes
+    std::vector<std::pair<uint32_t, VgGpuRef>> poolCopies;
     struct Level {
         bool clear = false;  // every chunk UNLOADED first (placed, or a jump past the window)
         bool grow = false;   // the chunk-level boxes rebuilt after the jobs
@@ -107,7 +112,9 @@ struct VgBatch {
     // per level-0 job its cell's generation (VoxGrid::gpuUniform: a finding about an older job is not applied)
     std::vector<uint32_t> gens;
     bool coarse() const {
-        if (!clears.empty() || !fills.empty() || !ingests.empty() || jobs.size() > level0Jobs || !gsecs.empty()) return true;
+        if (!clears.empty() || !fills.empty() || !ingests.empty() || jobs.size() > level0Jobs || !gsecs.empty() ||
+            !poolCopies.empty())
+            return true;
         for (int k = 1; k < VG_LEVELS; k++)
             if (levels[k].clear || levels[k].grow || !downs[k].empty()) return true;
         return false;
@@ -164,8 +171,21 @@ public:
     size_t ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count, uint8_t* accepted = nullptr,
                      const uint32_t* uniform = nullptr);
     size_t gpuSectionsPending() const;
-    std::vector<std::array<int32_t, 3>> takeGpuDropped();  // (x, y, z) sections
-    std::vector<std::array<int32_t, 3>> takeGpuWanted();   // (x, y, z) sections level 0 would take now: send again
+    // (level, x, y, z): level 0 sections (section coordinates), level k > 0 the generator's chunks (ingestCoarseGpu)
+    std::vector<std::array<int32_t, 4>> takeGpuDropped();
+    std::vector<std::array<int32_t, 4>> takeGpuWanted();  // what level 0 would take now: send again
+    // (the GPU generator's far terrain) Level-k chunks (k 1..6: 16 voxels of 2^k blocks a side) given whole:
+    // pos[3 i ..] = cx, cy, cz in level-k chunks (block x = cx * 16 * 2^k; cy the level's row from y -64);
+    // kinds[i] VG_GIVEN_MIXED (4096 ids at offsets[i] of `buffer`, a section's layout, 16-aligned: the level's voxel
+    // ids), VG_GIVEN_AIR, or VG_GIVEN_UNIFORM | id << 8 (no buffer, no slot). A chunk given is the level's own until
+    // sections covering it arrive: they refine it in place (their voted voxels over their own part); one whose
+    // columns hold sections already is not taken (sections first). Levels 5-6: until its children change.
+    // Admission by the same priority as level 0's against the level's pool (a full pool's worst slot by a margin).
+    // Returns how many it took; accepted[i] 1 each; not taken: outside the level's window (or no level k): later.
+    // A taken one that the level could not hold, or gives up (its window moved on, a nearer chunk), is listed by
+    // takeGpuDropped with its level. Buffer lifetime as ingestGpu's (gpuPendingOffsets, then two frames).
+    size_t ingestCoarseGpu(int level, uint64_t buffer, const uint64_t* offsets, const int32_t* pos, const uint32_t* kinds,
+                           size_t count, uint8_t* accepted = nullptr);
     // (the client generator) the byte offsets of `buffer` whose sections still wait (it reuses the others)
     void gpuPendingOffsets(uint64_t buffer, std::vector<uint64_t>& out) const;
     // (the Vulkan backend) its build found these level-0 jobs' sections to be one id (atlas_voxgrid.slang
@@ -298,7 +318,7 @@ private:
     // the in-window sections known but not resident: CPU ones by their ids, GPU ones by key (asked for again)
     std::unordered_map<Key, Ids, KeyHash> standby_;
     std::unordered_map<Key, uint8_t, KeyHash> gpuStandby_;  // (1: asked for already)
-    std::vector<std::array<int32_t, 3>> gpuWanted_;
+    std::vector<std::array<int32_t, 4>> gpuWanted_;
     std::unordered_map<Key, uint32_t, KeyHash> gpuUniformHint_;  // (ingestGpu's hint) for the pending GPU sections
     // the view (setView), the footprint's reach, the cut-off of a full pool, when the waiting were last ranked
     float fwd_[3] = {0, 0, -1}, cosView_ = 0.5f, pixelAngle_ = 0.0f, levelBias_ = 0.0f, reach_ = 1e30f, cutoff_ = 1e30f;
@@ -337,6 +357,11 @@ private:
         std::vector<uint32_t> word;      // per cell: the word last sent
         std::vector<uint8_t> lost;       // per cell: its slot taken for a nearer one: unknown until its column leaves
         std::vector<uint8_t> rock;       // per cell: known, and under every column's lowest section (UNLOADED: rock)
+        // per cell: given by the generator (ingestCoarseGpu): 0 not, 1 air, 2 one id (givenMat), 3 its slot holds
+        // the generator's ids (sections arriving since refine it in place)
+        std::vector<uint8_t> given;
+        std::vector<uint16_t> givenMat;
+        bool slotless = false;  // some cell holds blocks without a slot (given, or one id): it holds blocks
         std::vector<uint8_t> touched;    // per cell: written this batch (rebuilt)
         std::vector<uint8_t> dirty;      // per cell: to look at again this batch
         std::vector<uint32_t> dirtyList;
@@ -367,10 +392,18 @@ private:
     };
     std::unordered_map<Key, CPending, KeyHash> cpending_;
     std::unordered_map<Key, VgGpuRef, KeyHash> gpuRef_;  // (ingestGpu) sections waiting whose ids are on the GPU
+    // (ingestCoarseGpu) per level the chunks given and not yet taken into a batch, by cell
+    struct CGiven {
+        uint32_t kind = 0, mat = 0;
+        VgGpuRef ref;
+        int cx = 0, cy = 0, cz = 0;
+    };
+    std::unordered_map<uint32_t, CGiven> cgiven_[VG_LEVELS];
+    float chunkPriority(int k, int cx, int cy, int cz) const;  // (mu_ held) a level-k chunk's priority (blocks)
     // (ingestGpu) the levels holding each section taken (bit k), by column; those no level holds any more
     std::unordered_map<Key, uint32_t, KeyHash> gpuHold_;
     std::unordered_map<uint64_t, std::vector<int16_t>> gpuCol_;
-    std::vector<std::array<int32_t, 3>> gpuDropped_;
+    std::vector<std::array<int32_t, 4>> gpuDropped_;
     void gpuLetGo(int sx, int sy, int sz, uint32_t bits);  // (mu_ held)
     void gpuLetGoColumn(int sx, int sz, uint32_t bits);
     void gpuLetGoAll(uint32_t bits);
@@ -384,8 +417,9 @@ private:
     void takeCoarse(VgBatch& b);                         // (mu_ held)
     // (takeCoarse) a slot for the cell (level-local; ~0u: none), its chunk cleared; the cells whose section columns'
     // rock and air are to be written at the batch's end; the victims for a full pool (farthest last)
-    uint32_t coarseSlot(Level& L, uint32_t cell, VgBatch& b);
-    std::vector<std::pair<int64_t, uint32_t>> victims_[VG_LEVELS];
+    // (raw: no clear, no column fills: a generator chunk's ids are copied in whole)
+    uint32_t coarseSlot(Level& L, uint32_t cell, VgBatch& b, bool raw = false);
+    std::vector<std::pair<float, uint32_t>> victims_[VG_LEVELS];
     bool victimsBuilt_[VG_LEVELS] = {};
     struct ColFill {
         int k;

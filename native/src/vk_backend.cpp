@@ -22,6 +22,7 @@
 #include <thread>
 #include <cctype>
 #include <chrono>
+#include <deque>
 #include <cstdio>
 #include <mutex>
 #include <cstdlib>
@@ -391,6 +392,7 @@ public:
             }
             for (auto& b : shared_) release(b);
             release(vgSat_);
+            for (Buf& b : debugBufs_) release(b);
             releaseRetired(true);
             for (auto& p : vgPipes_)
                 if (p) vkDestroyPipeline(dev_, p, nullptr);
@@ -447,6 +449,13 @@ public:
 
     const char* name() const override { return deviceName_; }
     bool onDevice() const override { return true; }
+    uint64_t debugDeviceBuffer(const void* data, size_t bytes) override {
+        debugBufs_.emplace_back();
+        std::string err;
+        if (!ensure(debugBufs_.back(), bytes, false, Mem::HostWrite, err) || !debugBufs_.back().map) return 0;
+        std::memcpy(debugBufs_.back().map, data, bytes);
+        return uint64_t(debugBufs_.back().buf);
+    }
     // the far lights culled and binned on the device (ATLAS_CPU_LIGHTS=1: on the CPU, as before; measurements)
     bool gpuLights() const override {
         static const bool cpu = [] {
@@ -2047,6 +2056,9 @@ private:
         if (!ensure(s.vgGsrc, b.gsecs.size() * SECTION_BYTES, false, Mem::DeviceOnly, err)) return false;
         for (size_t k = 0; k < b.gsecs.size(); k++)
             s.vgGcopies.push_back({VkBuffer(b.gsecs[k].buffer), {VkDeviceSize(b.gsecs[k].offset), VkDeviceSize(k) * SEC, SEC}, false});
+        // (ingestCoarseGpu) the generator's coarse chunks into their slots whole, before the passes refine them
+        for (const auto& [slot, ref] : b.poolCopies)
+            s.vgGcopies.push_back({VkBuffer(ref.buffer), {VkDeviceSize(ref.offset), VkDeviceSize(slot) * SEC, SEC}, true});
         for (size_t k = 0; k < b.level0Jobs; k++) {
             const VgJob& j = b.jobs[k];
             if (j.slot == ~0u || j.slot == VG_COLUMN || j.data == VG_NO_COPY) continue;
@@ -2808,6 +2820,7 @@ private:
     VkPhysicalDevice phys_ = VK_NULL_HANDLE;
     VkDevice dev_ = VK_NULL_HANDLE;
     VkPipelineCache pipeCache_ = VK_NULL_HANDLE;  // (makePipeline: ATLAS_PIPELINE_CACHE)
+    std::deque<Buf> debugBufs_;                    // (debugDeviceBuffer)
     bool pipeCacheTried_ = false;
     std::string pipeCachePath_;
     VkQueue queue_ = VK_NULL_HANDLE;

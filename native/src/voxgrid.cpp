@@ -118,9 +118,9 @@ VoxGrid::Residency VoxGrid::residency() const {
     return r;
 }
 
-std::vector<std::array<int32_t, 3>> VoxGrid::takeGpuWanted() {
+std::vector<std::array<int32_t, 4>> VoxGrid::takeGpuWanted() {
     std::lock_guard<std::mutex> lock(mu_);
-    std::vector<std::array<int32_t, 3>> r;
+    std::vector<std::array<int32_t, 4>> r;
     r.swap(gpuWanted_);
     return r;
 }
@@ -130,6 +130,49 @@ void VoxGrid::gpuPendingOffsets(uint64_t buffer, std::vector<uint64_t>& out) con
     std::lock_guard<std::mutex> lock(mu_);
     for (auto& [k, g] : gpuRef_)
         if (g.buffer == buffer) out.push_back(g.offset);
+    for (int k = 1; k < VG_LEVELS; k++)
+        for (auto& [c, g] : cgiven_[k])
+            if (g.kind == VG_GIVEN_MIXED && g.ref.buffer == buffer) out.push_back(g.ref.offset);
+}
+
+float VoxGrid::chunkPriority(int k, int cx, int cy, int cz) const {
+    // the eye to the chunk's box (16 << k blocks a side), x VIEW_OUT outside the view's cone (as priority(): one rule)
+    float side = float(16 << k), h = side * 0.5f;
+    float cxr = float(cx) * side + h - float(camB_[0]), cyr = float(cy) * side + h + float(VG_MIN_SY * 16) - float(camB_[1]);
+    float czr = float(cz) * side + h - float(camB_[2]);
+    float ex = std::max(std::fabs(cxr) - h, 0.0f), ey = std::max(std::fabs(cyr) - h, 0.0f), ez = std::max(std::fabs(czr) - h, 0.0f);
+    float d = std::sqrt(ex * ex + ey * ey + ez * ez);
+    if (d <= NEAR_BALL) return d;
+    float c = std::sqrt(cxr * cxr + cyr * cyr + czr * czr);
+    float cosA = (cxr * fwd_[0] + cyr * fwd_[1] + czr * fwd_[2]) / c;
+    float sinM = std::min(1.0f, h * 1.732f / c), cosM = std::sqrt(1.0f - sinM * sinM);
+    float sinV = std::sqrt(std::max(0.0f, 1.0f - cosView_ * cosView_));
+    return cosA >= cosView_ * cosM - sinV * sinM ? d : d * VIEW_OUT;
+}
+
+size_t VoxGrid::ingestCoarseGpu(int k, uint64_t buffer, const uint64_t* offsets, const int32_t* pos, const uint32_t* kinds,
+                                size_t count, uint8_t* accepted) {
+    if (accepted) std::memset(accepted, 0, count);
+    if (!enabled) return 0;
+    std::lock_guard<std::mutex> lock(mu_);
+    if (k < 1 || k > activeCoarse_ || !lv_[k].centred) return 0;
+    Level& L = lv_[k];
+    size_t n = 0;
+    for (size_t i = 0; i < count; i++) {
+        int cx = pos[3 * i], cy = pos[3 * i + 1], cz = pos[3 * i + 2];
+        uint32_t kind = kinds[i] & 255u;
+        if (!L.inWindow(cx, cz) || cy < 0 || cy >= L.H || kind > VG_GIVEN_UNIFORM) continue;
+        if (kind == VG_GIVEN_MIXED && !buffer) continue;
+        CGiven g;
+        g.kind = kind;
+        g.mat = kinds[i] >> 8;
+        g.ref = {buffer, kind == VG_GIVEN_MIXED ? offsets[i] : 0};
+        g.cx = cx, g.cy = cy, g.cz = cz;
+        cgiven_[k][L.cell(cx, cy, cz)] = g;  // (the newest replaces one waiting)
+        if (accepted) accepted[i] = 1;
+        n++;
+    }
+    return n;
 }
 
 void VoxGrid::gpuUniform(const std::vector<UniformHit>& hits) {
@@ -216,12 +259,14 @@ size_t VoxGrid::ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_
 
 size_t VoxGrid::gpuSectionsPending() const {
     std::lock_guard<std::mutex> lock(mu_);
-    return gpuRef_.size();
+    size_t n = gpuRef_.size();
+    for (int k = 1; k < VG_LEVELS; k++) n += cgiven_[k].size();
+    return n;
 }
 
-std::vector<std::array<int32_t, 3>> VoxGrid::takeGpuDropped() {
+std::vector<std::array<int32_t, 4>> VoxGrid::takeGpuDropped() {
     std::lock_guard<std::mutex> lock(mu_);
-    std::vector<std::array<int32_t, 3>> r;
+    std::vector<std::array<int32_t, 4>> r;
     r.swap(gpuDropped_);
     return r;
 }
@@ -232,7 +277,7 @@ void VoxGrid::gpuLetGo(int sx, int sy, int sz, uint32_t bits) {
     it->second &= ~bits;
     if (it->second) return;
     gpuHold_.erase(it);
-    gpuDropped_.push_back({sx, sy, sz});
+    gpuDropped_.push_back({0, sx, sy, sz});
     auto c = gpuCol_.find(colKey(sx, sz));
     if (c != gpuCol_.end()) {
         c->second.erase(std::remove(c->second.begin(), c->second.end(), int16_t(sy)), c->second.end());
@@ -383,6 +428,8 @@ void VoxGrid::layOut() {
         L.word.assign(n, VG_UNLOADED);
         L.lost.assign(n, 0);
         L.rock.assign(n, 0);
+        L.given.assign(n, 0);
+        L.givenMat.assign(n, 0);
         L.touched.assign(n, 0);
         L.dirty.assign(n, 0);
         L.downDirty.assign(n, 0);
@@ -437,7 +484,7 @@ void VoxGrid::levelFrame(int k, int32_t out[4]) const {
     out[1] = L.oz;
     out[2] = int32_t(L.chunkBase);
     // (bit 17: it holds blocks somewhere, or may once this frame's batch is built)
-    out[3] = L.D | L.H << 8 | 1 << 16 | (L.used > 0 || !cpending_.empty() ? 1 << 17 : 0);
+    out[3] = L.D | L.H << 8 | 1 << 16 | (L.used > 0 || L.slotless || !cpending_.empty() || !cgiven_[k].empty() ? 1 << 17 : 0);
 }
 
 void VoxGrid::placeLevel(Level& L, int camSx, int camSz) {
@@ -447,8 +494,20 @@ void VoxGrid::placeLevel(Level& L, int camSx, int camSz) {
     int nox = ccx - L.D / 2, noz = ccz - L.D / 2;
     if (L.centred && std::abs(ccx - (L.ox + L.D / 2)) <= follow && std::abs(ccz - (L.oz + L.D / 2)) <= follow) return;
     size_t n = size_t(L.D) * L.H * L.D;
+    // (the generator's chunks the window gives up, held or still waiting: listed to give again when it returns)
+    auto letGo = [&](uint32_t c) {
+        if (!L.given[c]) return;
+        int gx, gy, gz;
+        cellCoords(L, c, gx, gy, gz);
+        gpuDropped_.push_back({L.k, gx, gy, gz});
+        L.given[c] = 0;
+    };
     if (!L.centred || std::abs(nox - L.ox) >= L.D || std::abs(noz - L.oz) >= L.D) {
         // placed, or a jump past the window: nothing of it known
+        if (L.centred)
+            for (uint32_t c = 0; c < uint32_t(n); c++) letGo(c);
+        for (auto& [c, g] : cgiven_[L.k]) gpuDropped_.push_back({L.k, g.cx, g.cy, g.cz});
+        cgiven_[L.k].clear();
         L.slotOf.assign(n, ~0u);
         L.word.assign(n, VG_UNLOADED);
         L.lost.assign(n, 0);
@@ -457,6 +516,7 @@ void VoxGrid::placeLevel(Level& L, int camSx, int camSz) {
         L.freeSlots.clear();
         L.nextSlot = 0;
         L.used = 0;
+        L.slotless = false;
         L.cols.clear();
         L.vacated.clear();
         L.fresh.assign(size_t(L.D) * L.D, 1);
@@ -480,6 +540,11 @@ void VoxGrid::placeLevel(Level& L, int camSx, int camSz) {
                     }
                     L.lost[c] = 0;
                     L.rock[c] = 0;
+                    letGo(c);
+                    if (auto g = cgiven_[L.k].find(c); g != cgiven_[L.k].end()) {
+                        gpuDropped_.push_back({L.k, g->second.cx, g->second.cy, g->second.cz});
+                        cgiven_[L.k].erase(g);
+                    }
                     if (L.word[c] != VG_UNLOADED) L.vacated.push_back(c);
                     L.word[c] = VG_UNLOADED;
                 }
@@ -801,7 +866,7 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
             auto it = gpuStandby_.find(k);
             if (it == gpuStandby_.end() || it->second || !canTake(cand.p)) continue;
             it->second = 1;
-            gpuWanted_.push_back({k.x, k.y, k.z});
+            gpuWanted_.push_back({0, k.x, k.y, k.z});
             continue;
         }
         // one id throughout (air, rock, a lake's water): no slot, the id in the chunk's word
@@ -922,12 +987,11 @@ void VoxGrid::cellCoords(const Level& L, uint32_t cell, int& cx, int& cy, int& c
     cz = L.oz + pmod(pz - L.oz, L.D);
 }
 
-uint32_t VoxGrid::coarseSlot(Level& L, uint32_t cell, VgBatch& b) {
+uint32_t VoxGrid::coarseSlot(Level& L, uint32_t cell, VgBatch& b, bool raw) {
     int k = L.k;
     int cx, cy, cz;
     cellCoords(L, cell, cx, cy, cz);
-    int ccx = fdiv(camSx_, L.span()), ccz = fdiv(camSz_, L.span());
-    int64_t dist = viewDist(cx - ccx, cz - ccz) * 64 + cy;
+    float dist = chunkPriority(k, cx, cy, cz);
     uint32_t slot = ~0u;
     if (!L.freeSlots.empty()) {
         slot = L.freeSlots.back();
@@ -946,15 +1010,23 @@ uint32_t VoxGrid::coarseSlot(Level& L, uint32_t cell, VgBatch& b) {
                 if (vc == ~0u) continue;
                 int vx, vy, vz;
                 cellCoords(L, vc, vx, vy, vz);
-                vs.push_back({viewDist(vx - ccx, vz - ccz) * 64 + vy, vc});
+                vs.push_back({chunkPriority(k, vx, vy, vz), vc});
             }
             std::sort(vs.begin(), vs.end());
         }
         while (!vs.empty() && (L.slotOf[vs.back().second] == ~0u || L.touched[vs.back().second])) vs.pop_back();
-        if (!vs.empty() && vs.back().first > dist) {
+        // (by a margin, as level 0's: no thrash)
+        if (!vs.empty() && vs.back().first > dist * 1.15f + float(16 << k)) {
             uint32_t vc = vs.back().second;
             vs.pop_back();
             slot = L.slotOf[vc];
+            if (L.given[vc]) {
+                // (a generator's chunk given up: listed, to give again when it ranks)
+                int vx, vy, vz;
+                cellCoords(L, vc, vx, vy, vz);
+                gpuDropped_.push_back({k, vx, vy, vz});
+                L.given[vc] = 0;
+            }
             L.slotOf[vc] = ~0u;
             L.slotCell[slot] = ~0u;
             L.used--;
@@ -977,6 +1049,13 @@ uint32_t VoxGrid::coarseSlot(Level& L, uint32_t cell, VgBatch& b) {
     L.used++;
     L.touched[cell] = 1;
     markDirty(L, cell);
+    if (raw) return slot;
+    if (L.given[cell]) {
+        // a generator's air or one-id chunk that sections now refine: the chunk that, the sections' parts over it
+        b.clears.push_back({L.slotBase + slot, 0, packV(16, 16, 16), L.given[cell] == 2 ? uint32_t(L.givenMat[cell]) : 0u});
+        L.given[cell] = 3;
+        return slot;
+    }
     if (k <= 4) {
         // levels made from sections: the chunk air, then each known column's rock under its lowest section
         b.clears.push_back({L.slotBase + slot, 0, packV(16, 16, 16), 0});
@@ -991,6 +1070,13 @@ uint32_t VoxGrid::coarseSlot(Level& L, uint32_t cell, VgBatch& b) {
 uint32_t VoxGrid::evalCell(Level& L, uint32_t cell, VgBatch& b) {
     L.rock[cell] = 0;
     if (L.lost[cell]) return VG_UNLOADED;
+    if (L.given[cell]) {
+        // the generator's chunk (and the sections' parts over it, in its slot)
+        if (L.slotOf[cell] != ~0u) return (L.slotBase + L.slotOf[cell]) << 2 | VG_MIXED;
+        if (L.given[cell] == 1) return VG_EMPTY;
+        if (L.given[cell] == 2) return uint32_t(L.givenMat[cell]) << 2 | VG_UNIFORM;
+        return VG_UNLOADED;
+    }
     int cx, cy, cz;
     cellCoords(L, cell, cx, cy, cz);
     int s = L.span(), y0 = cy * s, y1 = y0 + s;
@@ -1033,6 +1119,52 @@ void VoxGrid::takeCoarse(VgBatch& b) {
         L.vacated.clear();
     }
     colFills_.clear();
+    // the generator's chunks (ingestCoarseGpu), before the sections, which refine them in place; a chunk any of whose
+    // section columns came already is the sections' (levels 1-4); a coarseBudget of them a level a batch
+    for (int k = 1; k <= activeCoarse_; k++) {
+        Level& L = lv_[k];
+        if (!L.centred || cgiven_[k].empty()) continue;
+        int s = L.span(), budget = coarseBudget;
+        for (auto it = cgiven_[k].begin(); it != cgiven_[k].end() && budget > 0; budget--) {
+            const CGiven g = it->second;
+            uint32_t cell = it->first;
+            it = cgiven_[k].erase(it);
+            bool sections = false;
+            if (k <= 4)
+                for (int dz = 0; dz < s && !sections; dz++)
+                    for (int dx = 0; dx < s && !sections; dx++) sections = L.cols.count(colKey(g.cx * s + dx, g.cz * s + dz)) != 0;
+            if (sections || !L.inWindow(g.cx, g.cz)) {
+                gpuDropped_.push_back({k, g.cx, g.cy, g.cz});
+                continue;
+            }
+            L.lost[cell] = 0;
+            if (g.kind != VG_GIVEN_MIXED) {
+                if (L.slotOf[cell] != ~0u) {
+                    L.freeSlots.push_back(L.slotOf[cell]);
+                    L.slotCell[L.slotOf[cell]] = ~0u;
+                    L.slotOf[cell] = ~0u;
+                    L.used--;
+                }
+                L.given[cell] = g.kind == VG_GIVEN_AIR ? 1 : 2;
+                L.slotless |= g.kind == VG_GIVEN_UNIFORM;
+                L.givenMat[cell] = uint16_t(g.mat);
+            } else {
+                uint32_t slot = L.slotOf[cell];
+                if (slot == ~0u) slot = coarseSlot(L, cell, b, true);
+                if (slot == ~0u) {
+                    // (a pool full of nearer chunks: not held, listed; the cell stays open to its sections)
+                    L.lost[cell] = 0;
+                    L.given[cell] = 0;
+                    gpuDropped_.push_back({k, g.cx, g.cy, g.cz});
+                    continue;
+                }
+                b.poolCopies.push_back({L.slotBase + slot, g.ref});
+                L.given[cell] = 3;
+                L.touched[cell] = 1;
+            }
+            markDirty(L, cell);
+        }
+    }
     // the batch's sections: nearest the camera first, what it sees before what lies behind it
     std::vector<std::pair<int64_t, Key>> order;
     order.reserve(cpending_.size());
@@ -1087,7 +1219,8 @@ void VoxGrid::takeCoarse(VgBatch& b) {
             L.ingested++;
             if (!L.lost[cell]) {
                 uint32_t slot = L.slotOf[cell];
-                if (slot == ~0u && nonAir) slot = coarseSlot(L, cell, b);
+                // (an air section in a generator's one-id chunk needs the chunk's slot too: the hole is real)
+                if (slot == ~0u && (nonAir || L.given[cell] == 2)) slot = coarseSlot(L, cell, b);
                 if (slot != ~0u) {
                     uint32_t gs = L.slotBase + slot;
                     int lx = key.x - cx * s, ly = by - cy * s, lz = key.z - cz * s, n = 16 >> k;
@@ -1109,7 +1242,8 @@ void VoxGrid::takeCoarse(VgBatch& b) {
                 for (int y = 0; y < L.H; y++) {
                     uint32_t c2 = L.cell(cx, y, cz);
                     markDirty(L, c2);
-                    if (bottom != oldBottom && L.slotOf[c2] != ~0u && !L.lost[c2]) colFills_.push_back({k, c2, key.x, key.z});
+                    if (bottom != oldBottom && L.slotOf[c2] != ~0u && !L.lost[c2] && !L.given[c2])
+                        colFills_.push_back({k, c2, key.x, key.z});
                 }
             }
         }
@@ -1147,7 +1281,7 @@ void VoxGrid::takeCoarse(VgBatch& b) {
     colFills_.erase(std::unique(colFills_.begin(), colFills_.end()), colFills_.end());
     for (const ColFill& f : colFills_) {
         Level& L = lv_[f.k];
-        if (L.slotOf[f.cell] == ~0u || L.lost[f.cell]) continue;
+        if (L.slotOf[f.cell] == ~0u || L.lost[f.cell] || L.given[f.cell]) continue;  // (the generator's stands)
         auto it = L.cols.find(colKey(f.sx, f.sz));
         if (it == L.cols.end()) continue;
         int cx, cy, cz;
@@ -1207,7 +1341,9 @@ void VoxGrid::takeCoarse(VgBatch& b) {
             int cx, cy, cz;
             cellCoords(L, parent, cx, cy, cz);
             VgDown d{};
-            int air = 0, rock = 0;
+            int air = 0, rock = 0, uni = 0;
+            uint32_t uniId = ~0u;
+            bool uniSame = true;
             bool incomplete = !C.centred;
             for (int o = 0; o < 8 && !incomplete; o++) {
                 int ccx = 2 * cx + (o & 1), ccz = 2 * cz + ((o >> 1) & 1), ccy = 2 * cy + (o >> 2);
@@ -1222,12 +1358,36 @@ void VoxGrid::takeCoarse(VgBatch& b) {
                 uint32_t cc = C.cell(ccx, ccy, ccz), w = C.word[cc];
                 if ((w & 3u) == VG_MIXED) d.kid[o] = w >> 2;
                 else if ((w & 3u) == VG_EMPTY) d.kid[o] = VG_KID_AIR, air++;
+                else if ((w & 3u) == VG_UNIFORM) {
+                    uint32_t id = (w >> 2) & 0xFFFFu;
+                    d.kid[o] = VG_KID_UNIFORM | id, uni++;
+                    uniSame = uniSame && (uniId == ~0u || uniId == id);
+                    uniId = id;
+                }
                 else if (C.rock[cc]) d.kid[o] = VG_KID_ROCK, rock++;
                 else incomplete = true;
+            }
+            if (L.given[parent]) {
+                // the generator's chunk stands until its children are all known; then it is made from them
+                if (incomplete) {
+                    L.downDirty[parent] = 0;
+                    continue;
+                }
+                L.given[parent] = 0;
             }
             uint32_t word = VG_UNLOADED;
             L.rock[parent] = 0;
             if (L.lost[parent] || incomplete) {
+            } else if (uni == 8 && uniSame) {
+                // eight children of one id: one id, no slot
+                if (L.slotOf[parent] != ~0u) {
+                    L.freeSlots.push_back(L.slotOf[parent]);
+                    L.slotCell[L.slotOf[parent]] = ~0u;
+                    L.slotOf[parent] = ~0u;
+                    L.used--;
+                }
+                word = uniId << 2 | VG_UNIFORM;
+                L.slotless = true;
             } else if (air == 8) {
                 word = VG_EMPTY;
             } else if (rock == 8) {
@@ -1248,6 +1408,9 @@ void VoxGrid::takeCoarse(VgBatch& b) {
             L.downDirty[parent] = 0;
         }
         L.downList.clear();
+        // (the generator's chunks given at this level: their words)
+        for (uint32_t c : L.dirtyList)
+            if (L.given[c] && emit(L, c, evalCell(L, c, b))) markParent(L, c);
         for (uint32_t c : L.dirtyList) L.dirty[c] = 0, L.touched[c] = 0;  // (coarseSlot's marks)
         L.dirtyList.clear();
     }
@@ -1391,7 +1554,7 @@ void VoxGrid::applyCpu(const VgBatch& b) {
         for (const VgDown& d : b.downs[k]) {
             ensureSlot(d.slot);
             for (uint32_t kid : d.kid)
-                if (kid != VG_KID_AIR && kid != VG_KID_ROCK) ensureSlot(kid);
+                if (kid != VG_KID_AIR && kid != VG_KID_ROCK && kid < VG_KID_UNIFORM) ensureSlot(kid);
             for (int y = 0; y < 16; y++)
                 for (int z = 0; z < 16; z++)
                     for (int x = 0; x < 16; x++) {
@@ -1399,7 +1562,8 @@ void VoxGrid::applyCpu(const VgBatch& b) {
                         uint16_t ch[8];
                         for (int c = 0; c < 8; c++) {
                             int cx = 2 * (x & 7) + (c & 1), cz = 2 * (z & 7) + ((c >> 1) & 1), cy = 2 * (y & 7) + (c >> 2);
-                            ch[c] = kid == VG_KID_AIR ? 0 : kid == VG_KID_ROCK ? uint16_t(d.rock) : uint16_t(getId(kid, cx + 16 * (cz + 16 * cy)));
+                            ch[c] = kid == VG_KID_AIR ? 0 : kid == VG_KID_ROCK ? uint16_t(d.rock)
+                                  : kid >= VG_KID_UNIFORM ? uint16_t(kid & 0xFFFFu) : uint16_t(getId(kid, cx + 16 * (cz + 16 * cy)));
                         }
                         setId(d.slot, x + 16 * (z + 16 * y), voteMip(ch, cls));
                     }

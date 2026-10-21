@@ -462,6 +462,7 @@ bool stepLeaf(RegionGpu r, float3 o, float3 d, float3 inv, int3 lo, int3 hi, flo
 }
 
 // One region's groups along the chord ro + rd u, u in [u0, u1] (region voxel units, as traceRegion takes them).
+[noinline]  // (one copy, called: see atlas_far.slang traceLod)
 bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 dir) {
     float3 o = ro * 4.0, d = rd * 4.0;  // micro-voxels
     float3 inv = float3(abs(d.x) > 1e-12 ? 1.0 / d.x : 1e30, abs(d.y) > 1e-12 ? 1.0 / d.y : 1e30,

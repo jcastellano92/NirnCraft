@@ -322,7 +322,9 @@ void vgDownMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
             uint ch[8];
             for (uint c = 0u; c < 8u; c++) {
                 uint cx = 2u * (x & 7u) + (c & 1u), cz = 2u * (z & 7u) + ((c >> 1) & 1u), cy = 2u * (y & 7u) + (c >> 2);
-                ch[c] = kid == 0xFFFFFFFFu ? 0u : (kid == 0xFFFFFFFEu ? h.y : poolId(kid, cx + 16u * (cz + 16u * cy)));
+                // (air, rock, one id throughout: VG_KID_UNIFORM | id, no slot; else the child's slot)
+                ch[c] = kid == 0xFFFFFFFFu ? 0u : (kid == 0xFFFFFFFEu ? h.y : ((kid & 0xFF000000u) == 0xFD000000u ? (kid & 0xFFFFu)
+                                                                                : poolId(kid, cx + 16u * (cz + 16u * cy))));
             }
             ids[e] = voteMip(ch);
         }

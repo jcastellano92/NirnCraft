@@ -1699,6 +1699,21 @@ ATLAS_API AtlasStatus atlas_set_clipmap(AtlasContext* ctx, uint32_t lodCount) {
     return ATLAS_OK;
 }
 
+ATLAS_API AtlasStatus atlas_debug_coarse_chunks(AtlasContext* ctx, int32_t level, uint32_t count, const int32_t* pos,
+                                                const uint32_t* kinds, const uint16_t* ids, uint8_t* accepted) {
+    if (!ctx || !pos || !kinds || (count && !ids)) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    if (!ctx->backend->onDevice()) return ctx->fail(ATLAS_ERR_UNSUPPORTED, "atlas_debug_coarse_chunks: Vulkan only");
+    uint64_t buf = ctx->backend->debugDeviceBuffer(ids, size_t(count) * 8192);
+    if (!buf) return ctx->fail(ATLAS_ERR_UNSUPPORTED, "atlas_debug_coarse_chunks: no device buffer");
+    std::vector<uint64_t> offs(count);
+    for (uint32_t i = 0; i < count; i++) offs[i] = uint64_t(i) * 8192;
+    ctx->voxgrid.ingestCoarseGpu(level, buf, offs.data(), pos, kinds, count, accepted);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
 ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint32_t afterFrames) {
     if (!ctx || fault > ATLAS_FAULT_TIMEOUT) return ATLAS_ERR_ARG;
     ATLAS_TRY
