@@ -732,7 +732,10 @@ void World::packedDone(const std::vector<PackDone>& done, Made* made) {
     std::lock_guard<std::mutex> lock(mu_);
     for (const PackDone& d : done) {
         if (d.gen & BAKE) {
-            if (d.words) genCache_->putSection(d.key, d.words);  // (to disk on the cache's own thread)
+            if (d.words) {
+                if (d.key.lod > 0) genCache_->putCoarse(d.key, d.words, d.hash);  // (a far tile's mixed chunk)
+                else genCache_->putSection(d.key, d.words, d.hash);             // (to disk on the cache's own thread)
+            }
             continue;
         }
         if (d.gen & BASE_FETCH) {

@@ -743,7 +743,7 @@ final class AtlasClientGen implements AutoCloseable {
         }
     }
 
-    private long cachedChunks, cachedSections;
+    private long cachedChunks, cachedSections, farCached;
 
     /** The chunks of batch the cache knows put into the grid from it; returns the others (to generate). */
     private int[] fromCache(int[] batch, int[] info) {
@@ -915,7 +915,10 @@ final class AtlasClientGen implements AutoCloseable {
         long t0 = System.nanoTime();
         AtlasGenNative.Gen.FarIngest r;
         try {
-            r = gen.farIngest(best, new int[]{btx, btz}, 2000);
+            // (the self-baking cache: a tile seen before comes from disk; else made on the device, and baked)
+            r = gen.farCacheIngest(best, btx, btz);
+            if (r != null) farCached++;
+            else r = gen.farIngest(best, new int[]{btx, btz}, 2000);
         } catch (RuntimeException e) {
             com.nirncraft.NirnCraft.LOGGER.warn("atlas far terrain off (the tiles' path stays): {}", e.toString());
             farOn = false;

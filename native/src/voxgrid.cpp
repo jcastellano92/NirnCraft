@@ -171,7 +171,7 @@ void VoxGrid::gpuPendingOffsets(uint64_t buffer, std::vector<uint64_t>& out) con
         if (g.buffer == buffer) out.push_back(g.offset);
     for (int k = 1; k < VG_LEVELS; k++)
         for (auto& [c, g] : cgiven_[k])
-            if (g.kind == VG_GIVEN_MIXED && g.ref.buffer == buffer) out.push_back(g.ref.offset);
+            if (g.kind == VG_GIVEN_MIXED && !g.packed && g.ref.buffer == buffer) out.push_back(g.ref.offset);
 }
 
 float VoxGrid::chunkPriority(int k, int cx, int cy, int cz) const {
@@ -372,10 +372,44 @@ void VoxGrid::putPacked(int sx, int sy, int sz, VgPacked words) {
     putSrc(sx, sy, sz, VgSrc{nullptr, std::move(words)});
 }
 
-void VoxGrid::bakeGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count) {
+void VoxGrid::bakeGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count, int level) {
     if (!enabled || !buffer) return;
     std::lock_guard<std::mutex> lock(mu_);
-    for (size_t i = 0; i < count; i++) bake_.push_back({Key{pos[3 * i], pos[3 * i + 1], pos[3 * i + 2]}, VgGpuRef{buffer, offsets[i]}});
+    for (size_t i = 0; i < count; i++)
+        bake_.push_back({Key3{level, pos[3 * i], pos[3 * i + 1], pos[3 * i + 2]}, VgGpuRef{buffer, offsets[i]}});
+}
+
+size_t VoxGrid::ingestCoarseHost(int k, const int32_t* pos, const uint32_t* kinds, const VgPacked* packed, size_t count,
+                                 uint8_t* accepted) {
+    if (accepted) std::memset(accepted, 0, count);
+    if (!enabled) return 0;
+    std::lock_guard<std::mutex> lock(mu_);
+    if (k < 1 || k > activeCoarse_ || !lv_[k].centred) return 0;
+    Level& L = lv_[k];
+    size_t n = 0;
+    for (size_t i = 0; i < count; i++) {
+        int cx = pos[3 * i], cy = pos[3 * i + 1], cz = pos[3 * i + 2];
+        uint32_t kind = kinds[i] & 255u;
+        if (!L.inWindow(cx, cz) || cy < 0 || cy >= L.H || kind > VG_GIVEN_UNIFORM) continue;
+        if (kind == VG_GIVEN_MIXED && !packed[i]) continue;
+        if (kind == VG_GIVEN_UNIFORM && (kinds[i] >> 8) > 0xFFFFu) continue;
+        bool sections = false;  // (sections first, as ingestCoarseGpu)
+        if (k <= 4) {
+            int s = L.span();
+            for (int dz = 0; dz < s && !sections; dz++)
+                for (int dx = 0; dx < s && !sections; dx++) sections = L.cols.count(colKey(cx * s + dx, cz * s + dz)) != 0;
+        }
+        if (sections) continue;
+        CGiven g;
+        g.kind = kind;
+        g.mat = kinds[i] >> 8;
+        if (kind == VG_GIVEN_MIXED) g.packed = packed[i];
+        g.cx = cx, g.cy = cy, g.cz = cz;
+        cgiven_[k][L.cell(cx, cy, cz)] = g;
+        if (accepted) accepted[i] = 1;
+        n++;
+    }
+    return n;
 }
 
 void VoxGrid::putLocked(int sx, int sy, int sz, VgIds a) {
@@ -799,7 +833,7 @@ VgBatch VoxGrid::take(int maxSections) {
             bake_.pop_front();
             uint32_t at = VG_GPU_SRC | uint32_t(b.gsecs.size());
             b.gsecs.push_back(ref);
-            b.packJobs.push_back({Key3{0, k.x, k.y, k.z}, World::BAKE, at});
+            b.packJobs.push_back({k, World::BAKE, at});
         }
     }
     // (ingestGpu's sections no level waits for any more: their windows moved on)
@@ -1725,7 +1759,12 @@ void VoxGrid::takeCoarse(VgBatch& b) {
                     reportDropped({k, g.cx, g.cy, g.cz});
                     continue;
                 }
-                b.poolCopies.push_back({L.slotBase + slot, g.ref});
+                if (g.packed) {
+                    b.packPool.push_back({L.slotBase + slot, uint32_t(b.packs.size())});
+                    b.packs.push_back(g.packed);
+                } else {
+                    b.poolCopies.push_back({L.slotBase + slot, g.ref});
+                }
                 L.given[cell] = 3;
                 L.touched[cell] = 1;
             }

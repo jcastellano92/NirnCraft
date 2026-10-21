@@ -134,6 +134,8 @@ struct VgBatch {
     std::vector<VgDown> downs[VG_LEVELS];
     // (ingestCoarseGpu) the generator's coarse chunks: pool slot <- its ids on the GPU, copied before the passes
     std::vector<std::pair<uint32_t, VgGpuRef>> poolCopies;
+    // (ingestCoarseHost) pool slot <- packs[index] once expanded
+    std::vector<std::pair<uint32_t, uint32_t>> packPool;
     struct Level {
         bool clear = false;  // every chunk UNLOADED first (placed, or a jump past the window)
         bool grow = false;   // the chunk-level boxes rebuilt after the jobs
@@ -184,7 +186,11 @@ public:
     void putPacked(int sx, int sy, int sz, VgPacked words);
     // (the self-baking cache) generated sections on the GPU to pack for the world's gen cache (World::BAKE): at most
     // bakeBudget a batch; their buffers held (gpuPendingOffsets) until a batch took them
-    void bakeGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count);
+    void bakeGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count, int level = 0);
+    // (the self-baking cache, a known far tile) coarse chunks from the host: kinds as ingestCoarseGpu's, a mixed one's
+    // packed words (expanded on the GPU into its slot); returns how many were taken
+    size_t ingestCoarseHost(int level, const int32_t* pos, const uint32_t* kinds, const VgPacked* packed, size_t count,
+                            uint8_t* accepted);
     int bakeBudget = 512;
     size_t bakeQueued() const {
         std::lock_guard<std::mutex> lock(mu_);
@@ -389,7 +395,7 @@ private:
     std::unordered_map<Key, uint32_t, KeyHash> gpuUniformHint_;  // (ingestGpu's hint) for the pending GPU sections
     // (edit layers, World::takeBaseWanted) sections whose GPU base the world waits for: packed on the GPU at their build
     std::unordered_set<Key, KeyHash> baseFetch_;
-    std::deque<std::pair<Key, VgGpuRef>> bake_;
+    std::deque<std::pair<Key3, VgGpuRef>> bake_;  // (lod: 0 a section, k a level-k chunk)
     void putSrc(int sx, int sy, int sz, VgSrc src);  // (caller holds mu_)
     int baseOx_ = INT32_MIN, baseOz_ = INT32_MIN;
     std::vector<uint16_t> uniId_;  // per cell: its one id while VG_UNIFORM
@@ -469,6 +475,7 @@ private:
     struct CGiven {
         uint32_t kind = 0, mat = 0;
         VgGpuRef ref;
+        VgPacked packed;  // (ingestCoarseHost: a mixed chunk's words from the host, not ref)
         int cx = 0, cy = 0, cz = 0;
     };
     std::unordered_map<uint32_t, CGiven> cgiven_[VG_LEVELS];

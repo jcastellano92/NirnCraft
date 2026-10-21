@@ -216,6 +216,8 @@ public:
     virtual bool ingest(AtlasContext* ctx, const Batch& b, uint64_t* masks, uint32_t& sent, std::string& err) = 0;
     // far chunks into the context's grid (atlas_gen_far_ingest, GPU only): far()'s passes into a slab the grid reads,
     // then VoxGrid::ingestCoarseGpu; kinds as far()'s; taken: the chunks the grid took
+    // (the self-baking cache) where farIngest bakes the tiles it lacks (null: none)
+    GenCache* farBake = nullptr;
     virtual bool farIngest(const std::vector<int32_t>& jobs, int lod, uint32_t rows, uint32_t cap, uint32_t* kinds, uint32_t& mixed,
                            uint32_t& taken, uint32_t* bad, double& ms, std::string& err) {
         (void)jobs, (void)lod, (void)rows, (void)cap, (void)kinds, (void)mixed, (void)taken, (void)bad, (void)ms;
@@ -932,7 +934,35 @@ public:
                                                                 acc.data()));
         bool anyMixed = false;
         for (size_t i = 0; i < kd.size(); i++) anyMixed = anyMixed || (acc[i] && kd[i] == 0u);
-        slab.busy = anyMixed;  // (only mixed chunks are read from the slab)
+        // (the self-baking cache) the tiles it lacks, whole (every chunk had room) and proven exact: their kinds now,
+        // their mixed chunks packed by the grid on the GPU (VoxGrid::bakeGpu at this level), the slab held meanwhile
+        if (farBake && farBake->on())
+            for (uint32_t t = 0; t < n; t++) {
+                int32_t tx = jobs[t * 4 + 1], tz = jobs[t * 4 + 2];
+                if (bad[t] || farBake->farKnown(lod, tx, tz)) continue;
+                std::vector<uint32_t> tk(256 * size_t(rows));
+                std::vector<uint64_t> bo;
+                std::vector<int32_t> bp;
+                bool whole = true;
+                for (uint32_t k = 0; k < 256 * rows && whole; k++) {
+                    size_t c = size_t(t) * 256 * rows + k;
+                    uint32_t kind = kinds[c * 2], slot = kinds[c * 2 + 1];
+                    if (kind == 0xFFFFFFFEu) whole = false;
+                    tk[k] = kind;
+                    if (kind == 0u) {
+                        uint32_t cc = k / rows, cy = k % rows;
+                        bo.push_back((uint64_t(4 + chunks * 2) + uint64_t(slot) * 2048) * 4);
+                        bp.insert(bp.end(), {tx * 16 + int32_t(cc & 15u), int32_t(cy), tz * 16 + int32_t(cc >> 4)});
+                    }
+                }
+                if (!whole) continue;
+                farBake->putFarTile(lod, tx, tz, tk);
+                if (!bo.empty()) {
+                    grid_->bakeGpu(uint64_t(slab.buf.buf), bo.data(), bp.data(), bo.size(), lod);
+                    anyMixed = true;
+                }
+            }
+        slab.busy = anyMixed;  // (only mixed chunks are read from the slab: by the grid's levels, or its bake)
         slab.stamp = 0;
         return true;
     }
@@ -2102,6 +2132,7 @@ ATLAS_API AtlasStatus atlas_gen_far_ingest(AtlasGen* h, int32_t lod, const int32
         uint32_t mixed = 0, taken = 0;
         double ms = 0;
         std::string err;
+        h->engine->farBake = contextWorld(h->ctx)->genCache();
         bool ok = h->engine->farIngest(jobs, lod, rows, capacity, outKinds, mixed, taken, bad.data(), ms, err);
         h->last = Batch{};
         if (!ok) return h->fail(err.rfind("busy:", 0) == 0 ? ATLAS_ERR_TIMEOUT : ATLAS_ERR_GPU, err);
@@ -2409,6 +2440,52 @@ ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ
     });
 }
 
+ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint8_t* outServed,
+                                                 uint32_t* outChunks, uint32_t* outTaken) {
+    if (!h || !txTz || !outServed || lod < 1 || lod > 6) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        std::memset(outServed, 0, count);
+        if (outChunks) *outChunks = 0;
+        if (outTaken) *outTaken = 0;
+        GenCache* gc = h->ctx ? contextWorld(h->ctx)->genCache() : nullptr;
+        VoxGrid* grid = h->ctx ? contextGrid(h->ctx) : nullptr;
+        if (!gc || !gc->on() || !grid) return ATLAS_OK;
+        uint32_t rows = (44u + (1u << uint32_t(lod)) - 1u) >> uint32_t(lod);
+        uint32_t chunks = 0, taken = 0;
+        for (uint32_t t = 0; t < count; t++) {
+            int32_t tx = txTz[t * 2], tz = txTz[t * 2 + 1];
+            std::vector<uint32_t> kinds;
+            if (!gc->farTile(lod, tx, tz, kinds) || kinds.size() != 256 * size_t(rows)) continue;
+            // its chunks as atlas_gen_far_ingest gives them; the mixed ones read and expanded on all cores
+            std::vector<int32_t> pos;
+            std::vector<VgPacked> packed(kinds.size());
+            std::vector<uint32_t> mixedAt;
+            for (uint32_t k = 0; k < kinds.size(); k++) {
+                uint32_t cc = k / rows, cy = k % rows;
+                pos.insert(pos.end(), {tx * 16 + int32_t(cc & 15u), int32_t(cy), tz * 16 + int32_t(cc >> 4)});
+                if (kinds[k] == 0u) mixedAt.push_back(k);
+            }
+            std::atomic<size_t> next{0};
+            std::atomic<bool> lost{false};
+            atlas::parallelRun([&] {
+                for (size_t q; (q = next.fetch_add(1)) < mixedAt.size();) {
+                    uint32_t k = mixedAt[q];
+                    packed[k] = gc->coarse(Key3{lod, pos[k * 3], pos[k * 3 + 1], pos[k * 3 + 2]});
+                    if (!packed[k]) lost = true;
+                }
+            }, 8);
+            if (lost) continue;  // (a record unreadable: generated instead)
+            std::vector<uint8_t> acc(kinds.size(), 0);
+            taken += uint32_t(grid->ingestCoarseHost(lod, pos.data(), kinds.data(), packed.data(), kinds.size(), acc.data()));
+            chunks += uint32_t(kinds.size());
+            outServed[t] = 1;
+        }
+        if (outChunks) *outChunks = chunks;
+        if (outTaken) *outTaken = taken;
+        return ATLAS_OK;
+    });
+}
+
 ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out) {
     if (!h || !out) return ATLAS_ERR_ARG;
     return guarded([&] {
@@ -2428,6 +2505,10 @@ ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out
         out->sectionReads = st.sectionReads;
         out->encodeMs = st.encodeMs;
         out->decodeMs = st.decodeMs;
+        out->farWrites = st.farWrites;
+        out->farHits = st.farHits;
+        out->farMisses = st.farMisses;
+        out->hashErrors = st.hashErrors;
         return ATLAS_OK;
     });
 }

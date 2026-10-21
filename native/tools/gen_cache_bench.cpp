@@ -89,9 +89,9 @@ int main(int argc, char** argv) {
     // the frame: above the spawn, looking down the slope (the grid places its window on the first)
     AtlasFrame f{};
     f.cameraPos[0] = x;
-    f.cameraPos[1] = 160;
+    f.cameraPos[1] = std::atof(arg(argc, argv, "y", "360").c_str());  // (above the build height by default: the ground below)
     f.cameraPos[2] = z;
-    atlas::cameraMatrix(0, -20, 70, 16.0 / 9.0, f.invViewProj);
+    atlas::cameraMatrix(0, -35, 70, 16.0 / 9.0, f.invViewProj);
     f.width = 320;
     f.height = 180;
     f.maxDistance = 4000;
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
     f.lodBias = 1;
     std::vector<uint32_t> color(320 * 180);
     AtlasFrameOutput out{color.data(), nullptr, nullptr};
-    double centre[3] = {x, 160, z};
+    double centre[3] = {x, f.cameraPos[1], z};
     atlas_update(ctx, centre, 0);
     atlas_render(ctx, &f, &out);
     // the spawn radius's chunks, nearest first
@@ -200,28 +200,68 @@ int main(int argc, char** argv) {
         frames++;
     }
     double tFull = nowMs();
+    // the horizon (AtlasClientGen.farStep's tiles: each coarse level's 5 x 5 tiles around the camera): from the cache
+    // when known (atlas_gen_far_cache_ingest), else made on the device (atlas_gen_far_ingest, baked)
+    size_t farTiles = 0, farCached = 0, farMade = 0, farBusy = 0;
+    double tFar0 = nowMs();
+    for (int k = 1; k <= 6; k++) {
+        int span = 256 << k;
+        int ctx0 = int(std::floor(x / span)), ctz0 = int(std::floor(z / span));
+        uint32_t rows = (44u + (1u << k) - 1u) >> k;
+        std::vector<uint32_t> kinds(256 * size_t(rows) * 2), ff(1);
+        for (int dz = -2; dz <= 2; dz++)
+            for (int dx = -2; dx <= 2; dx++) {
+                int32_t t[2] = {ctx0 + dx, ctz0 + dz};
+                farTiles++;
+                uint8_t served = 0;
+                uint32_t ch = 0, tk = 0;
+                atlas_gen_far_cache_ingest(g, k, t, 1, &served, &ch, &tk);
+                if (served) {
+                    farCached++;
+                    continue;
+                }
+                for (int tries = 0; tries < 200; tries++) {
+                    uint32_t mixed = 0, taken = 0;
+                    AtlasStatus s = atlas_gen_far_ingest(g, k, t, 1, 2000, kinds.data(), &mixed, &taken, ff.data(), nullptr);
+                    if (s == ATLAS_OK) {
+                        farMade++;
+                        break;
+                    }
+                    farBusy++;
+                    atlas_render(ctx, &f, &out);  // (every far buffer still read: a frame takes them)
+                    frames++;
+                }
+            }
+        atlas_render(ctx, &f, &out);
+        frames++;
+    }
+    for (int i = 0; i < 2000; i++) {
+        std::string inf = atlas_info(ctx);
+        size_t p = inf.find("\"coarseWaiting\":"), q = inf.find("\"baking\":");
+        if (p != std::string::npos && std::atoi(inf.c_str() + p + 16) == 0 && i > 2 &&
+            (q == std::string::npos || std::atoi(inf.c_str() + q + 9) == 0))
+            break;
+        atlas_render(ctx, &f, &out);
+        frames++;
+    }
+    double tFar = nowMs();
     // (the last batches' packs come back with the next frames: the cache gets them before the stats)
     for (int i = 0; i < 6; i++) atlas_render(ctx, &f, &out), frames++;
-    // depth=<file>: the final frame's depth (f32), to compare a run from the cache with one that generated
-    std::string depthPath = arg(argc, argv, "depth", "");
-    if (!depthPath.empty()) {
-        std::vector<float> depth(320 * 180);
-        AtlasFrameOutput od{nullptr, nullptr, depth.data()};
-        atlas_render(ctx, &f, &od);
-        if (FILE* df = std::fopen(depthPath.c_str(), "wb")) std::fwrite(depth.data(), 4, depth.size(), df), std::fclose(df);
-    }
     AtlasGenCacheStats cs{};
     atlas_gen_cache_stats(g, &cs);
     double km2 = double(todo.size()) * 256.0 / 1e6;
-    std::printf("{\"radius\":%d,\"chunks\":%zu,\"generated\":%zu,\"fromCache\":%zu,\"flagged\":%zu,\"sections\":%zu,\"frames\":%zu,"
+    std::printf("{\"horizon\":{\"tiles\":%zu,\"fromCache\":%zu,\"made\":%zu,\"busy\":%zu,\"ms\":%.0f,\"farWrites\":%llu,"
+                "\"farHits\":%llu},", farTiles, farCached, farMade, farBusy, tFar - tFar0, (unsigned long long)cs.farWrites,
+                (unsigned long long)cs.farHits);
+    std::printf("\"radius\":%d,\"chunks\":%zu,\"generated\":%zu,\"fromCache\":%zu,\"flagged\":%zu,\"sections\":%zu,\"frames\":%zu,"
                 "\"setupMs\":%.0f,\"toFullRadiusMs\":%.0f,\"sentMs\":%.0f,\"genMs\":%.0f,\"cacheMs\":%.0f,\"renderMs\":%.0f,"
                 "\"cache\":{\"on\":%u,\"fingerprint\":\"%016llx\",\"chunks\":%llu,\"sections\":%llu,\"mb\":%.2f,\"mbPerKm2\":%.2f,"
-                "\"hits\":%llu,\"misses\":%llu,\"writes\":%llu,\"reads\":%llu,\"encodeMs\":%.0f,\"decodeMs\":%.0f}}\n",
+                "\"hits\":%llu,\"misses\":%llu,\"writes\":%llu,\"reads\":%llu,\"encodeMs\":%.0f,\"decodeMs\":%.0f,\"hashErrors\":%llu}}\n",
                 R, todo.size(), generated, cached, flagged, sections, frames, tReady - t0, tFull - tReady, tSent - tReady, genMs,
                 cacheMs, renderMs, cs.on, (unsigned long long)cs.fingerprint, (unsigned long long)cs.chunks,
                 (unsigned long long)cs.sections, double(cs.fileBytes) / 1048576.0, double(cs.fileBytes) / 1048576.0 / km2,
                 (unsigned long long)cs.chunkHits, (unsigned long long)cs.chunkMisses, (unsigned long long)cs.sectionWrites,
-                (unsigned long long)cs.sectionReads, cs.encodeMs, cs.decodeMs);
+                (unsigned long long)cs.sectionReads, cs.encodeMs, cs.decodeMs, (unsigned long long)cs.hashErrors);
     atlas_gen_destroy(g);
     atlas_destroy(ctx);
     return 0;

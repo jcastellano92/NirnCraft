@@ -834,10 +834,18 @@ ATLAS_API AtlasStatus atlas_gen_set_fingerprint(AtlasGen* h, uint64_t extra);
 ATLAS_API AtlasStatus atlas_gen_cache_lookup(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t* outInfo, uint8_t* outHit);
 ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint64_t* masks,
                                              uint32_t* outSections);
+/* The far terrain the same way (the coarse horizon): atlas_gen_far_ingest bakes the tiles the cache lacks (their kinds,
+   their mixed chunks packed by the grid); atlas_gen_far_cache_ingest puts known tiles into the grid's level lod from
+   disk instead (outServed[i] 1: tile i came from the cache; outChunks, outTaken as atlas_gen_far_ingest's). The horizon
+   of what was seen, from the first frames. */
+ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint8_t* outServed,
+                                                 uint32_t* outChunks, uint32_t* outTaken);
 typedef struct AtlasGenCacheStats {
     uint32_t on;
     uint64_t fingerprint, chunks, sections, fileBytes, chunkHits, chunkMisses, sectionWrites, sectionReads;
     double encodeMs, decodeMs;
+    uint64_t farWrites, farHits, farMisses;
+    uint64_t hashErrors;  /* records whose ids did not match the GPU's content hash: refused (generated again) */
 } AtlasGenCacheStats;
 /* (waits for the cache's writes first) */
 ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out);

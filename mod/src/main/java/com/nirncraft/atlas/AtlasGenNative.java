@@ -37,7 +37,7 @@ final class AtlasGenNative {
     // the pages made on the device (atlas_gen_read_page, atlas_gen_page_stats): null in a library without them
     private final MethodHandle readPage, pageStats, tiles, far, farIngest, gridReports;
     // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
-    private final MethodHandle cacheLookup, cacheIngest, setFingerprint;
+    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest;
     /** Columns of a far tile (atlas_gen_tiles). */
     static final int TILE_COLS = 65536;
     /** Words per probe (atlas_gen_probe). */
@@ -79,6 +79,9 @@ final class AtlasGenNative {
         cacheLookup = cache ? bind(l, lib, "atlas_gen_cache_lookup", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS)) : null;
         cacheIngest = cache ? bind(l, lib, "atlas_gen_cache_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS)) : null;
         setFingerprint = cache ? bind(l, lib, "atlas_gen_set_fingerprint", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG)) : null;
+        farCacheIngest = lib.find("atlas_gen_far_cache_ingest").isPresent()
+                ? bind(l, lib, "atlas_gen_far_cache_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS))
+                : null;
         tiles = lib.find("atlas_gen_tiles").isPresent()
                 ? bind(l, lib, "atlas_gen_tiles", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
     }
@@ -281,6 +284,22 @@ final class AtlasGenNative {
 
         /** A far call into the grid: chunks taken, chunks made (all of the call's), mixed ones; -1 taken when busy. */
         record FarIngest(int taken, int chunks, int mixed, double kernelMs) {}
+
+        /**
+         * A far tile from the self-baking cache into the grid's level lod (atlas_gen_far_cache_ingest), as
+         * {@link #farIngest} would put it; null when the cache does not know it (generate it then).
+         */
+        synchronized FarIngest farCacheIngest(int lod, int tx, int tz) {
+            if (farCacheIngest == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment served = a.allocate(1), ch = a.allocate(JAVA_INT), tk = a.allocate(JAVA_INT);
+                check((int) farCacheIngest.invokeExact(ptr, lod, a.allocateFrom(JAVA_INT, tx, tz), 1, served, ch, tk), "atlas_gen_far_cache_ingest");
+                if (served.get(JAVA_BYTE, 0) == 0) return null;
+                return new FarIngest(tk.get(JAVA_INT, 0), ch.get(JAVA_INT, 0), 0, 0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
 
         /** Far chunks of lod tiles (tx, tz pairs) into the context's grid (atlas_gen_far_ingest); null when busy. */
         FarIngest farIngest(int lod, int[] txTz, int capacity) {

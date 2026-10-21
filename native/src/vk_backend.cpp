@@ -2231,6 +2231,9 @@ private:
         // (ingestCoarseGpu) the generator's coarse chunks into their slots whole, before the passes refine them
         for (const auto& [slot, ref] : b.poolCopies)
             s.vgGcopies.push_back({VkBuffer(ref.buffer), {VkDeviceSize(ref.offset), VkDeviceSize(slot) * SEC, SEC}, true});
+        // (ingestCoarseHost) a coarse chunk's packed words, expanded into vgGsrc, into its pool slot
+        for (const auto& [slot, idx] : b.packPool)
+            s.vgPackCopies.push_back({VkDeviceSize(G + idx) * SEC, VkDeviceSize(slot) * SEC, SEC});
         for (size_t k = 0; k < b.level0Jobs; k++) {
             const VgJob& j = b.jobs[k];
             if (j.slot == ~0u || j.slot == VG_COLUMN || j.data == VG_NO_COPY) continue;

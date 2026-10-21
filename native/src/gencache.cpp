@@ -17,7 +17,7 @@ namespace {
 // A header's payload: its 3 words (lowest ground, highest top, biome), the 40 sections' kinds (a byte each), how many
 // distinct hashes, then per section the index of its hash (a byte) and the hashes (lo, hi words). A section's: its ids
 // compressed (sectioncodec.hpp).
-constexpr uint32_t MAGIC = 0x3147434Eu;  // "NCG1"
+constexpr uint32_t MAGIC = 0x3247434Eu;  // "NCG2"
 constexpr uint32_t HEAD = 6;
 constexpr uint32_t MAX_PAYLOAD = 64u << 10;
 uint32_t pad4(uint32_t n) { return (n + 3u) & ~3u; }
@@ -45,6 +45,19 @@ void encodeHeader(const uint32_t* info, std::vector<uint8_t>& out) {
     out.push_back(uint8_t(hashes.size()));
     out.insert(out.end(), idx, idx + 40);
     for (uint64_t h : hashes) put32(uint32_t(h)), put32(uint32_t(h >> 32));
+}
+
+// a section's (coarse chunk's) record: its hash, its ids; false when they do not match
+bool decodeChecked(const std::vector<uint8_t>& in, uint16_t* ids) {
+    if (in.size() < 5) return false;
+    uint32_t h = uint32_t(in[0]) | uint32_t(in[1]) << 8 | uint32_t(in[2]) << 16 | uint32_t(in[3]) << 24;
+    uint32_t v[4096];
+    if (!decodeGrid(in.data() + 4, in.size() - 4, v)) return false;
+    for (int i = 0; i < 4096; i++) {
+        if (v[i] > 0xFFFFu) return false;
+        ids[i] = uint16_t(v[i]);
+    }
+    return sectionHash(ids) == h;
 }
 
 bool decodeHeader(const std::vector<uint8_t>& in, uint32_t* info) {
@@ -85,9 +98,45 @@ uint64_t GenCache::regionOf(int cx, int cz) { return uint64_t(uint32_t(fdiv(cx, 
 
 std::string GenCache::regionPath(uint64_t rk) const {
     char b[64];
-    std::snprintf(b, sizeof b, "/r.%d.%d.gch", int32_t(uint32_t(rk >> 32)), int32_t(uint32_t(rk)));
+    if (rk >> 63) {
+        // (a far region: lod, rx, rz sign-extended from 24 / 28 bits)
+        int lod = int((rk >> 56) & 0x7Fu);
+        int32_t rx = int32_t(uint32_t(rk >> 28 & 0xFFFFFFu) << 8) >> 8, rz = int32_t(uint32_t(rk & 0xFFFFFFFu) << 4) >> 4;
+        std::snprintf(b, sizeof b, "/f%d.%d.%d.gch", lod, rx, rz);
+    } else {
+        std::snprintf(b, sizeof b, "/r.%d.%d.gch", int32_t(uint32_t(rk >> 32)), int32_t(uint32_t(rk)));
+    }
     return dir_ + b;
 }
+
+namespace {
+uint64_t tileKey(int tx, int tz) { return uint64_t(uint32_t(tx)) << 32 | uint32_t(tz); }
+int tdiv(int a) { return a >= 0 ? a / 16 : -((-a + 15) / 16); }
+// a far tile's kinds: runs of one value (varint value, varint run)
+void encodeKinds(const std::vector<uint32_t>& k, std::vector<uint8_t>& out) {
+    codec::putVarint(out, uint32_t(k.size()));
+    for (size_t i = 0; i < k.size();) {
+        size_t j = i;
+        while (j < k.size() && k[j] == k[i]) j++;
+        codec::putVarint(out, k[i]);
+        codec::putVarint(out, uint32_t(j - i));
+        i = j;
+    }
+}
+bool decodeKinds(const std::vector<uint8_t>& in, std::vector<uint32_t>& k) {
+    const uint8_t* p = in.data();
+    const uint8_t* e = p + in.size();
+    uint32_t n;
+    if (!codec::getVarint(p, e, n) || n > (1u << 20)) return false;
+    k.clear();
+    while (k.size() < n) {
+        uint32_t v, run;
+        if (!codec::getVarint(p, e, v) || !codec::getVarint(p, e, run) || run == 0 || k.size() + run > n) return false;
+        k.insert(k.end(), run, v);
+    }
+    return true;
+}
+}  // namespace
 
 void GenCache::configure(const std::string& root, uint64_t fingerprint) {
     flush();
@@ -122,8 +171,17 @@ GenCache::Region& GenCache::region(uint64_t rk) {
     uint32_t h[HEAD];
     while (std::fread(h, 4, HEAD, f) == HEAD && h[0] == MAGIC && h[5] <= MAX_PAYLOAD) {
         Loc loc{at + HEAD * 4, h[5]};
-        if ((h[1] & 0xFFu) == 0) r.chunks[chunkKey(int32_t(h[2]), int32_t(h[4]))] = {loc, uint64_t(h[3]) | uint64_t(h[1] >> 8 & 0xFFu) << 32};
-        else r.secs[Key3{0, int32_t(h[2]), int32_t(h[3]), int32_t(h[4])}] = loc;
+        uint32_t type = h[1] & 0xFFu;
+        if (type == 0) {
+            r.chunks[chunkKey(int32_t(h[2]), int32_t(h[4]))] = {loc, uint64_t(h[3]) | uint64_t(h[1] >> 8 & 0xFFu) << 32};
+        } else if (type == 1) {
+            r.secs[Key3{0, int32_t(h[2]), int32_t(h[3]), int32_t(h[4])}] = loc;
+        } else if (type == 2) {
+            r.tiles[tileKey(int32_t(h[2]), int32_t(h[4]))] = {loc, h[1] >> 8};
+        } else if (type == 3) {
+            Key3 k{int32_t(h[3] >> 16), int32_t(h[2]), int32_t(h[3] & 0xFFFFu), int32_t(h[4])};
+            if (r.coarse.emplace(k, loc).second) r.baked[tileKey(tdiv(k.x), tdiv(k.z))]++;
+        }
         at += uint64_t(HEAD) * 4 + pad4(h[5]);
         if (std::fseek(f, long(at), SEEK_SET) != 0) break;
     }
@@ -148,11 +206,12 @@ void GenCache::putChunk(int cx, int cz, const uint32_t* info) {
     cv_.notify_one();
 }
 
-void GenCache::putSection(const Key3& k, std::shared_ptr<const std::vector<uint32_t>> words) {
+void GenCache::putSection(const Key3& k, std::shared_ptr<const std::vector<uint32_t>> words, uint32_t hash) {
     if (!on() || !words) return;
     Job j;
     j.k = k;
     j.words = std::move(words);
+    j.hash = hash;
     {
         std::lock_guard<std::mutex> l(mu_);
         queue_.push_back(std::move(j));
@@ -179,19 +238,51 @@ void GenCache::writerLoop() {
         // (the compression outside the lock)
         std::vector<uint8_t> payload;
         auto t0 = std::chrono::steady_clock::now();
-        if (j.isChunk) {
+        if (j.type == 2) {
+            encodeKinds(j.info, payload);
+        } else if (j.isChunk) {
             encodeHeader(j.info.data(), payload);
         } else {
             uint16_t ids[4096];
             unpackSection(j.words->data(), ids);
             uint32_t v[4096];
             for (int i = 0; i < 4096; i++) v[i] = ids[i];
+            for (int i = 0; i < 4; i++) payload.push_back(uint8_t(j.hash >> (8 * i)));
             encodeGrid(v, payload);
         }
         double ms = msSince(t0);
         l.lock();
         st_.encodeMs += ms;
-        if (on && dir == dir_ && on_) {
+        if (on && dir == dir_ && on_ && j.type >= 2) {
+            // (the far terrain's: a tile's kinds, a coarse chunk)
+            int tx = j.type == 2 ? j.k.x : tdiv(j.k.x), tz = j.type == 2 ? j.k.z : tdiv(j.k.z);
+            uint64_t rk = farRegionOf(j.k.lod, tx, tz);
+            Region& r = region(rk);
+            bool have = j.type == 2 ? r.tiles.count(tileKey(tx, tz)) != 0 : r.coarse.count(j.k) != 0;
+            if (!have) {
+                uint32_t mixed = 0;
+                if (j.type == 2)
+                    for (uint32_t v : j.info) mixed += v == 0u;
+                uint32_t h[HEAD] = {MAGIC, uint32_t(j.type) | (j.type == 2 ? mixed << 8 : 0u), uint32_t(j.k.x),
+                                    j.type == 2 ? uint32_t(j.k.lod) : uint32_t(j.k.y) | uint32_t(j.k.lod) << 16, uint32_t(j.k.z),
+                                    uint32_t(payload.size())};
+                FILE* f = std::fopen(regionPath(rk).c_str(), "ab");
+                static const uint8_t zero[4] = {0, 0, 0, 0};
+                uint32_t padN = pad4(uint32_t(payload.size())) - uint32_t(payload.size());
+                bool ok = f && std::fwrite(h, 4, HEAD, f) == HEAD && std::fwrite(payload.data(), 1, payload.size(), f) == payload.size() &&
+                          std::fwrite(zero, 1, padN, f) == padN;
+                if (f) std::fclose(f);
+                if (ok) {
+                    Loc loc{r.fileBytes + HEAD * 4, uint32_t(payload.size())};
+                    if (j.type == 2) r.tiles[tileKey(tx, tz)] = {loc, mixed};
+                    else if (r.coarse.emplace(j.k, loc).second) r.baked[tileKey(tx, tz)]++;
+                    uint64_t add = uint64_t(HEAD) * 4 + pad4(uint32_t(payload.size()));
+                    r.fileBytes += add;
+                    st_.fileBytes += add;
+                    st_.farWrites++;
+                }
+            }
+        } else if (on && dir == dir_ && on_) {
             int cx = j.isChunk ? j.k.x : fdiv(j.k.x, 1), cz = j.k.z;
             uint64_t rk = regionOf(cx, cz);
             Region& r = region(rk);
@@ -313,16 +404,96 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::section(const Key3& k) {
     std::vector<uint8_t> b;
     if (!readBytes(rk, loc, b)) return nullptr;
     auto t0 = std::chrono::steady_clock::now();
-    uint32_t v[4096];
-    if (!decodeGrid(b.data(), b.size(), v)) return nullptr;
     uint16_t ids[4096];
-    for (int i = 0; i < 4096; i++) ids[i] = uint16_t(v[i]);
+    if (!decodeChecked(b, ids)) {
+        std::lock_guard<std::mutex> l(mu_);
+        st_.hashErrors++;
+        return nullptr;
+    }
     auto w = std::make_shared<const std::vector<uint32_t>>(packSection(ids));
     double ms = msSince(t0);
     std::lock_guard<std::mutex> l(mu_);
     st_.decodeMs += ms;
     st_.sectionReads++;
     return w;
+}
+
+void GenCache::putFarTile(int lod, int tx, int tz, const std::vector<uint32_t>& kinds) {
+    if (!on()) return;
+    Job j;
+    j.type = 2;
+    j.k = Key3{lod, tx, 0, tz};
+    j.info = kinds;
+    {
+        std::lock_guard<std::mutex> l(mu_);
+        queue_.push_back(std::move(j));
+    }
+    cv_.notify_one();
+}
+
+void GenCache::putCoarse(const Key3& k, std::shared_ptr<const std::vector<uint32_t>> words, uint32_t hash) {
+    if (!on() || !words) return;
+    Job j;
+    j.type = 3;
+    j.k = k;
+    j.words = std::move(words);
+    j.hash = hash;
+    {
+        std::lock_guard<std::mutex> l(mu_);
+        queue_.push_back(std::move(j));
+    }
+    cv_.notify_one();
+}
+
+bool GenCache::farKnown(int lod, int tx, int tz) {
+    if (!on()) return false;
+    std::lock_guard<std::mutex> l(mu_);
+    Region& r = region(farRegionOf(lod, tx, tz));
+    auto it = r.tiles.find(tileKey(tx, tz));
+    if (it == r.tiles.end()) return false;
+    auto b = r.baked.find(tileKey(tx, tz));
+    return it->second.mixed == 0 || (b != r.baked.end() && b->second >= it->second.mixed);
+}
+
+bool GenCache::farTile(int lod, int tx, int tz, std::vector<uint32_t>& kinds) {
+    if (!farKnown(lod, tx, tz)) {
+        std::lock_guard<std::mutex> l(mu_);
+        st_.farMisses++;
+        return false;
+    }
+    uint64_t rk = farRegionOf(lod, tx, tz);
+    Loc loc;
+    {
+        std::lock_guard<std::mutex> l(mu_);
+        loc = region(rk).tiles[tileKey(tx, tz)].loc;
+    }
+    std::vector<uint8_t> b;
+    if (!readBytes(rk, loc, b) || !decodeKinds(b, kinds)) return false;
+    std::lock_guard<std::mutex> l(mu_);
+    st_.farHits++;
+    return true;
+}
+
+std::shared_ptr<const std::vector<uint32_t>> GenCache::coarse(const Key3& k) {
+    if (!on()) return nullptr;
+    uint64_t rk = farRegionOf(k.lod, tdiv(k.x), tdiv(k.z));
+    Loc loc;
+    {
+        std::lock_guard<std::mutex> l(mu_);
+        Region& r = region(rk);
+        auto it = r.coarse.find(k);
+        if (it == r.coarse.end()) return nullptr;
+        loc = it->second;
+    }
+    std::vector<uint8_t> b;
+    if (!readBytes(rk, loc, b)) return nullptr;
+    uint16_t ids[4096];
+    if (!decodeChecked(b, ids)) {
+        std::lock_guard<std::mutex> l(mu_);
+        st_.hashErrors++;
+        return nullptr;
+    }
+    return std::make_shared<const std::vector<uint32_t>>(packSection(ids));
 }
 
 GenCache::Stats GenCache::stats() {
