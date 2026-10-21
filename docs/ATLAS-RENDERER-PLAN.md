@@ -475,6 +475,16 @@ The full checklist from R1, every item checked live; the owner flies it.
   and the Dark Moon, stars placed as the birthsigns (no lines), the named stars, the Dominion planets on orbits, comets;
   all by place and date, lit physically. Two agents on it.
 
+- **Baked light in the voxels, real time only where it changes (the owner, 2026-10-20).** Static emitters (torches,
+  lanterns, lava, glowstone, fires), ambient occlusion and the sky's visibility are baked into the grid's voxels on the
+  GPU, by the same light kernel as the real-time light accumulated over many samples (the baked result is what the
+  real-time light converges to: no visible handover). Placing or removing a light, or building nearby, marks the region
+  dirty: it is lit in real time at once, rebaked when it has settled, and cross-faded. The sun and moon stay live
+  (direct light through the baked sky visibility). Baked light is downsampled with the blocks into the coarse
+  resolutions, so a town's lights glow kilometres off at night with nothing traced there. The real-time budget is left
+  for what moves: spells, lightning, carried torches, creatures' light. The prebake runs on the GPU as regions are
+  generated (client generation), on area load, never a long load screen.
+
 ## Parked (off the renderer goal, for later)
 
 - Client-owned world: x-ray from a client that generates the world (the public and secret split decides it), the hash
