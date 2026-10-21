@@ -262,6 +262,93 @@ inline bool brickWorthy(const ModelLib& ml, uint32_t id) {
     return true;
 }
 
+// A state's six 16 x 16 face textures as the game's AtlasShapes.textures makes them (each texel the outermost quad
+// facing that way over it, its sprite there, the quad's tint when it has one; alpha 0 where none shows), into out
+// (6 x 256 ARGB). False when it has no model quads.
+inline bool faceTextures(const ModelLib& ml, uint32_t id, uint32_t grass, uint32_t foliage, uint32_t* out) {
+    if (id >= ml.states.size() || !ml.states[id].present) return false;
+    const auto& s = ml.states[id];
+    if (s.model < 0 || size_t(s.model) >= ml.models.size() || ml.models[size_t(s.model)].empty()) return false;
+    const auto& qs = ml.models[size_t(s.model)];
+    for (int d = 0; d < 6; d++) {
+        float depth[256];
+        for (float& v : depth) v = -1e30f;
+        uint32_t* tile = out + d * 256;
+        std::fill(tile, tile + 256, 0u);
+        for (const auto& q : qs) {
+            if (q.dir != d || q.sprite < 0 || size_t(q.sprite) >= ml.sprites.size()) continue;
+            const auto& sp = ml.sprites[size_t(q.sprite)];
+            // (a, b, depth) in the face's plane, as AtlasShapes.plane
+            auto plane = [&](int i, float& a, float& b, float& dep) {
+                float x = q.p[i][0], y = q.p[i][1], z = q.p[i][2];
+                switch (d) {
+                    case 0: a = x, b = z, dep = -y; break;
+                    case 1: a = x, b = z, dep = y; break;
+                    case 2: a = x, b = y, dep = -z; break;
+                    case 3: a = x, b = y, dep = z; break;
+                    case 4: a = z, b = y, dep = -x; break;
+                    default: a = z, b = y, dep = x; break;
+                }
+            };
+            float pa[4], pb[4], a0 = 1e9f, a1 = -1e9f, b0 = 1e9f, b1 = -1e9f, dep = 0;
+            for (int i = 0; i < 4; i++) {
+                float dd;
+                plane(i, pa[i], pb[i], dd);
+                dep += dd / 4;
+                a0 = std::min(a0, pa[i]), a1 = std::max(a1, pa[i]), b0 = std::min(b0, pb[i]), b1 = std::max(b1, pb[i]);
+            }
+            if (a1 - a0 < 1e-4f || b1 - b0 < 1e-4f) continue;
+            auto corner = [&](float a, float b) {
+                int best = 0;
+                float bd = 1e30f;
+                for (int i = 0; i < 4; i++) {
+                    float dd = (pa[i] - a) * (pa[i] - a) + (pb[i] - b) * (pb[i] - b);
+                    if (dd < bd) bd = dd, best = i;
+                }
+                return best;
+            };
+            int c00 = corner(a0, b0), c10 = corner(a1, b0), c01 = corner(a0, b1), c11 = corner(a1, b1);
+            uint32_t tint = 0xFFFFFFu;
+            if (q.tint >= 0 && size_t(q.tint) < s.tints.size()) {
+                auto [kind, c] = s.tints[size_t(q.tint)];
+                tint = kind == 1 ? grass : kind == 2 ? foliage : kind == 4 ? 0xA0825Au : kind == 5 ? c & 0xFFFFFFu : 0xFFFFFFu;
+            }
+            for (int tv = 0; tv < 16; tv++)
+                for (int tu = 0; tu < 16; tu++) {
+                    int k = tu + 16 * tv;
+                    float ca = (tu + 0.5f) / 16, cb = d <= 1 ? (tv + 0.5f) / 16 : 1.0f - (tv + 0.5f) / 16;
+                    if (ca < a0 || ca > a1 || cb < b0 || cb > b1 || dep < depth[k]) continue;
+                    float ss = (ca - a0) / (a1 - a0), tt = (cb - b0) / (b1 - b0);
+                    auto lerp2 = [&](float v00, float v10, float v01, float v11) {
+                        return (v00 * (1 - ss) + v10 * ss) * (1 - tt) + (v01 * (1 - ss) + v11 * ss) * tt;
+                    };
+                    float u = lerp2(q.uv[c00][0], q.uv[c10][0], q.uv[c01][0], q.uv[c11][0]);
+                    float v = lerp2(q.uv[c00][1], q.uv[c10][1], q.uv[c01][1], q.uv[c11][1]);
+                    int px = std::clamp(int(u * float(sp.w)), 0, int(sp.w) - 1), py = std::clamp(int(v * float(sp.h)), 0, int(sp.h) - 1);
+                    uint32_t c = ml.texels[sp.first + uint32_t(py) * sp.w + uint32_t(px)];
+                    if ((c >> 24) < 26) continue;  // (see-through here: what is behind it shows)
+                    depth[k] = dep;
+                    uint32_t r = ((c >> 16) & 255) * ((tint >> 16) & 255) / 255, g = ((c >> 8) & 255) * ((tint >> 8) & 255) / 255,
+                             b = (c & 255) * (tint & 255) / 255;
+                    tile[k] = 0xFF000000u | r << 16 | g << 8 | b;  // (AtlasShapes.face: a shown texel, opaque)
+                }
+        }
+    }
+    return true;
+}
+
+// The near field's 16 x 16 face textures of materials [first, first + ids.size()) (atlas_set_material_textures), as
+// the game sets them for its exact materials.
+inline bool uploadTextures(AtlasContext* ctx, const ModelLib& ml, uint16_t first, const std::vector<uint32_t>& ids,
+                           uint32_t grass, uint32_t foliage, std::string& why) {
+    size_t n = ids.size();
+    std::vector<uint32_t> tex(n * 6 * 256 + n, 0u);
+    for (size_t m = 0; m < n; m++)
+        if (faceTextures(ml, ids[m], grass, foliage, tex.data() + m * 6 * 256)) tex[n * 6 * 256 + m] = 1u;
+    if (n && atlas_set_material_textures(ctx, first, tex.data(), uint32_t(n)) != ATLAS_OK) return why = atlas_last_error(ctx), false;
+    return true;
+}
+
 // The bricks of materials [first, first + ids.size()) for state ids `ids` (0 / not brick-worthy: none), tinted with
 // the export's colours, through atlas_set_material_bricks.
 inline bool uploadBricks(AtlasContext* ctx, const ModelLib& ml, uint16_t first, const std::vector<uint32_t>& ids,
