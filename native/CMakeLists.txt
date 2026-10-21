@@ -391,7 +391,9 @@ endif()
 # The client's decoration (atlas_features.slang, docs/ATLAS-CLIENT-GENERATION.md stage 4): the same exact float
 # contract, one SPIR-V module per kernel (one a feature type); the big helpers are [noinline] (else the driver inlines
 # them at every call site). Its exact math is a copy of its own (atlas_feat_math.slang: the flag through an argument,
-# see there). -O0: at -O3 the kernels' results change (to check again).
+# see there). -O0, and it ships so: from slangc's -O3 SPIR-V (checked valid and
+# right op for op) NVIDIA's driver 616.56 compiles wrong code (spring: `holes == 1` false with holes 1; its SSA form,
+# not the source, triggers it), while the -O0 SPIR-V matches Java exactly (E:/NirnCraft-scratch/features/o3).
 # GPU only (the CPU fallback is a later job of its own).
 set(FEAT_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_features.slang")
 set(FEAT_HEADERS)

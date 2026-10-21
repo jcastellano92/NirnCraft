@@ -292,7 +292,7 @@ public:
         bool trees = false;
         for (uint32_t rec : dispatch_) trees = trees || (rec < types_.size() && types_[rec] == 4u);
         const char* sd = std::getenv("ATLAS_FEAT_SCRATCH_DUMP");
-        if (sd && trees) {
+        if (sd && (trees || std::getenv("ATLAS_FEAT_SCRATCH_ALL"))) {
             if (FILE* f = std::fopen(sd, "wb")) {
                 std::vector<uint32_t> misc(MISC_W);
                 for (uint32_t o = 0; o < b.origins; o++) {
