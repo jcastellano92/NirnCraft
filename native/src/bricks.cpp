@@ -234,50 +234,88 @@ std::vector<uint32_t> encodeBrick(const BrickVoxels& v) {
 
 std::vector<uint32_t> crossRecord(const AtlasBrickQuad* quads, uint32_t quadCount, uint32_t m, const AtlasBrickSprite* sprites,
                                   uint32_t spriteCount, const uint32_t* texels, uint32_t texelCount, uint32_t frame) {
-    // every quad on a diagonal: x = z (plane 0) or x + z = 1 (plane 1), vertical
-    std::vector<std::pair<int, const AtlasBrickQuad*>> qs;
-    uint32_t used = 0;
-    float ext[2][4] = {{1, 0, 1, 0}, {1, 0, 1, 0}};  // per plane x0, x1, y0, y1 of its quads
+    // the quads off the axes (a cross's diagonals, a coral fan's tilt, a fire's leaning sheets, a custom plant's
+    // turned planes) by their plane; the axis-aligned rest stays voxels (a pot, a stem's box)
+    struct Plane {
+        float n[3], d;
+        std::vector<const AtlasBrickQuad*> qs;
+    };
+    std::vector<Plane> planes;
+    std::vector<AtlasBrickQuad> rest;
     for (uint32_t qi = 0; qi < quadCount; qi++) {
         const AtlasBrickQuad& q = quads[qi];
         if (q.material != m) continue;
-        bool p0 = true, p1 = true;
-        for (int i = 0; i < 4; i++) {
-            p0 &= std::fabs(q.pos[i][0] - q.pos[i][2]) < 2e-3f;
-            p1 &= std::fabs(q.pos[i][0] + q.pos[i][2] - 1.0f) < 2e-3f;
+        float e1[3], e2[3], n[3];
+        for (int k = 0; k < 3; k++) e1[k] = q.pos[1][k] - q.pos[0][k], e2[k] = q.pos[3][k] - q.pos[0][k];
+        n[0] = e1[1] * e2[2] - e1[2] * e2[1], n[1] = e1[2] * e2[0] - e1[0] * e2[2], n[2] = e1[0] * e2[1] - e1[1] * e2[0];
+        float nl = std::sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+        if (nl < 1e-8f) continue;
+        for (float& v : n) v /= nl;
+        if (std::max(std::fabs(n[0]), std::max(std::fabs(n[1]), std::fabs(n[2]))) > 0.999f) {
+            rest.push_back(q);
+            continue;
         }
-        int k = p0 ? 0 : p1 ? 1 : -1;
-        if (k < 0) return {};
-        qs.emplace_back(k, &q);
-        used |= 1u << k;
-        for (int i = 0; i < 4; i++) {
-            ext[k][0] = std::min(ext[k][0], q.pos[i][0]), ext[k][1] = std::max(ext[k][1], q.pos[i][0]);
-            ext[k][2] = std::min(ext[k][2], q.pos[i][1]), ext[k][3] = std::max(ext[k][3], q.pos[i][1]);
+        // (one sign for a plane: its first non-zero component positive; a two-sided sheet is one plane)
+        int lead = std::fabs(n[0]) > 1e-4f ? 0 : std::fabs(n[1]) > 1e-4f ? 1 : 2;
+        if (n[lead] < 0) for (float& v : n) v = -v;
+        float d = n[0] * q.pos[0][0] + n[1] * q.pos[0][1] + n[2] * q.pos[0][2];
+        Plane* hit = nullptr;
+        for (Plane& p : planes)
+            if (p.n[0] * n[0] + p.n[1] * n[1] + p.n[2] * n[2] > 0.999f && std::fabs(p.d - d) < 2e-3f) hit = &p;
+        if (!hit) {
+            if (planes.size() >= 4) return {};  // (more than four sheets: voxels)
+            planes.push_back({{n[0], n[1], n[2]}, d, {}});
+            hit = &planes.back();
         }
+        hit->qs.push_back(&q);
     }
-    if (!used) return {};
-    // per plane its extent (4 floats) and 16 x 16 cells over it: each cell the texel its centre shows, the quads in turn
-    // (a later one's shown texel over an earlier's: an overlay); clear where none shows
-    std::vector<uint32_t> rec(1 + 2 * 260, 0u);
-    rec[0] = used;
-    for (int k = 0; k < 2; k++) {
-        if (!((used >> k) & 1)) continue;
-        float x0 = ext[k][0], x1 = std::max(ext[k][1], x0 + 1e-3f), y0 = ext[k][2], y1 = std::max(ext[k][3], y0 + 1e-3f);
-        size_t base = 1 + size_t(k) * 260;
-        std::memcpy(&rec[base], &x0, 4), std::memcpy(&rec[base + 1], &x1, 4);
-        std::memcpy(&rec[base + 2], &y0, 4), std::memcpy(&rec[base + 3], &y1, 4);
+    if (planes.empty()) return {};
+    // [0] planes | rest << 8, [1] the rest's voxel record (from c), then per plane 13 floats (n, d, its rectangle's
+    // corner O and sides U, V) and 16 x 16 cells over the rectangle
+    const size_t PW = 13 + 256;
+    std::vector<uint32_t> rec(2 + planes.size() * PW, 0u);
+    rec[0] = uint32_t(planes.size()) | (rest.empty() ? 0u : 1u << 8);
+    auto put = [&](size_t at, float v) { std::memcpy(&rec[at], &v, 4); };
+    for (size_t k = 0; k < planes.size(); k++) {
+        const Plane& pl = planes[k];
+        // an in-plane basis: U across (horizontal where it can), V = n x U
+        float U[3], V[3];
+        if (std::fabs(pl.n[1]) < 0.99f) {
+            U[0] = pl.n[2], U[1] = 0, U[2] = -pl.n[0];
+        } else {
+            U[0] = 1, U[1] = 0, U[2] = 0;
+        }
+        float ul = std::sqrt(U[0] * U[0] + U[1] * U[1] + U[2] * U[2]);
+        for (float& v : U) v /= ul;
+        V[0] = pl.n[1] * U[2] - pl.n[2] * U[1], V[1] = pl.n[2] * U[0] - pl.n[0] * U[2], V[2] = pl.n[0] * U[1] - pl.n[1] * U[0];
+        float s0 = 1e9f, s1 = -1e9f, t0 = 1e9f, t1 = -1e9f;
+        for (const AtlasBrickQuad* q : pl.qs)
+            for (int i = 0; i < 4; i++) {
+                float ss = q->pos[i][0] * U[0] + q->pos[i][1] * U[1] + q->pos[i][2] * U[2];
+                float tt = q->pos[i][0] * V[0] + q->pos[i][1] * V[1] + q->pos[i][2] * V[2];
+                s0 = std::min(s0, ss), s1 = std::max(s1, ss), t0 = std::min(t0, tt), t1 = std::max(t1, tt);
+            }
+        s1 = std::max(s1, s0 + 1e-3f), t1 = std::max(t1, t0 + 1e-3f);
+        float O[3], Ue[3], Ve[3];
+        for (int i = 0; i < 3; i++) O[i] = s0 * U[i] + t0 * V[i] + pl.d * pl.n[i], Ue[i] = (s1 - s0) * U[i], Ve[i] = (t1 - t0) * V[i];
+        size_t base = 2 + k * PW;
+        for (int i = 0; i < 3; i++) put(base + size_t(i), pl.n[i]), put(base + 4 + size_t(i), O[i]), put(base + 7 + size_t(i), Ue[i]),
+                                     put(base + 10 + size_t(i), Ve[i]);
+        put(base + 3, pl.d);
         for (int j = 0; j < 16; j++)
             for (int i = 0; i < 16; i++) {
-                float x = x0 + (float(i) + 0.5f) / 16.0f * (x1 - x0), y = y1 - (float(j) + 0.5f) / 16.0f * (y1 - y0);
-                for (auto& [qk, qp] : qs) {
-                    if (qk != k) continue;
+                float sc = s0 + (float(i) + 0.5f) / 16.0f * (s1 - s0), tc = t0 + (float(j) + 0.5f) / 16.0f * (t1 - t0);
+                for (const AtlasBrickQuad* qp : pl.qs) {
                     const AtlasBrickQuad& q = *qp;
-                    // (s, t) of (x, y) on the quad (a rectangle in the plane: P0 + s e1 + t e3)
-                    float e1x = q.pos[1][0] - q.pos[0][0], e1y = q.pos[1][1] - q.pos[0][1];
-                    float e3x = q.pos[3][0] - q.pos[0][0], e3y = q.pos[3][1] - q.pos[0][1];
+                    float c2[4][2];
+                    for (int v = 0; v < 4; v++) {
+                        c2[v][0] = q.pos[v][0] * U[0] + q.pos[v][1] * U[1] + q.pos[v][2] * U[2];
+                        c2[v][1] = q.pos[v][0] * V[0] + q.pos[v][1] * V[1] + q.pos[v][2] * V[2];
+                    }
+                    float e1x = c2[1][0] - c2[0][0], e1y = c2[1][1] - c2[0][1], e3x = c2[3][0] - c2[0][0], e3y = c2[3][1] - c2[0][1];
                     float det = e1x * e3y - e1y * e3x;
                     if (std::fabs(det) < 1e-8f) continue;
-                    float rx = x - q.pos[0][0], ry = y - q.pos[0][1];
+                    float rx = sc - c2[0][0], ry = tc - c2[0][1];
                     float st = (rx * e3y - ry * e3x) / det, tt = (e1x * ry - e1y * rx) / det;
                     if (st < -1e-4f || st > 1.0001f || tt < -1e-4f || tt > 1.0001f) continue;
                     float u = q.uv[0][0] + st * (q.uv[1][0] - q.uv[0][0]) + tt * (q.uv[3][0] - q.uv[0][0]);
@@ -294,9 +332,21 @@ std::vector<uint32_t> crossRecord(const AtlasBrickQuad* quads, uint32_t quadCoun
                     float tr = float((q.tint >> 16) & 255) / 255.0f, tg = float((q.tint >> 8) & 255) / 255.0f, tb = float(q.tint & 255) / 255.0f;
                     uint32_t r = uint32_t(float((cc >> 16) & 255) * tr + 0.5f), g = uint32_t(float((cc >> 8) & 255) * tg + 0.5f),
                              bl = uint32_t(float(cc & 255) * tb + 0.5f);
-                    rec[base + 4 + size_t(i + 16 * j)] = 0xFF000000u | r << 16 | g << 8 | bl;
+                    rec[base + 13 + size_t(i + 16 * j)] = 0xFF000000u | r << 16 | g << 8 | bl;
                 }
             }
+    }
+    if (!rest.empty()) {
+        // the axis-aligned rest as voxels (a pot under its plant), after the planes
+        BrickVoxels v;
+        for (auto& q : rest) q.material = m;
+        if (voxeliseBrick(rest.data(), uint32_t(rest.size()), m, sprites, spriteCount, texels, texelCount, 0.0f, v, frame)) {
+            std::vector<uint32_t> vr = encodeBrick(v);
+            rec[1] = uint32_t(rec.size());
+            rec.insert(rec.end(), vr.begin(), vr.end());
+        } else {
+            rec[0] &= 0xFFu;
+        }
     }
     return rec;
 }
@@ -309,6 +359,16 @@ void BrickStore::setCross(uint32_t m, std::shared_ptr<const std::vector<uint32_t
     }
     if (cross_[m] == record) return;
     cross_[m] = std::move(record);
+    revision_++;
+}
+
+void BrickStore::setCrossFrames(uint32_t m, std::vector<std::shared_ptr<const std::vector<uint32_t>>> frames, uint32_t ticks) {
+    std::lock_guard<std::mutex> lock(mu_);
+    if (m >= cross_.size()) cross_.resize(size_t(m) + 1);
+    if (m >= crossFrames_.size()) crossFrames_.resize(size_t(m) + 1), crossTicks_.resize(size_t(m) + 1, 1u);
+    cross_[m] = frames.empty() ? nullptr : frames[0];
+    crossFrames_[m] = std::move(frames);
+    crossTicks_[m] = std::max(1u, ticks);
     revision_++;
 }
 
@@ -400,8 +460,18 @@ bool BrickStore::pack(uint64_t have, bool force, const std::vector<uint32_t>& li
         return it->second;
     };
     for (uint32_t m = 0; m < M; m++) {
+        if (m < crossFrames_.size() && crossFrames_[m].size() > 1) {
+            // animated sheets: a set (frames | ticks << 16) of flagged sheet records (brickOf picks, brickHit sees bit 30)
+            std::vector<uint32_t> offs;
+            for (const auto& r : crossFrames_[m]) offs.push_back(0x40000000u | place(r));
+            uint32_t set = uint32_t(out.size());
+            out.push_back(uint32_t(offs.size()) | std::min(crossTicks_[m], 0xFFFFu) << 16);
+            out.insert(out.end(), offs.begin(), offs.end());
+            out[1 + m] = 0x80000000u | set;
+            continue;
+        }
         if (m < cross_.size() && cross_[m]) {
-            out[1 + m] = 0x40000000u | place(cross_[m]);  // (a cross: its planes, atlas_bricks.slang crossHit)
+            out[1 + m] = 0x40000000u | place(cross_[m]);  // (sheets: their planes, atlas_bricks.slang sheetsHit)
             continue;
         }
         if (m >= byMat_.size()) continue;

@@ -1747,6 +1747,7 @@ ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t firs
     std::vector<uint32_t> ticksOf(count, 1u);
     std::vector<float> coverOf(count, 1.0f);
     std::vector<std::shared_ptr<const std::vector<uint32_t>>> crossOf(count);
+    std::vector<std::vector<std::shared_ptr<const std::vector<uint32_t>>>> crossFramesOf(count);
     std::vector<std::vector<AtlasBrickQuad>> per(count);
     for (uint32_t q = 0; q < quadCount; q++)
         if (quads[q].material < count) per[quads[q].material].push_back(quads[q]);
@@ -1771,15 +1772,21 @@ ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t firs
                 if (frames > 1) frameRecs[m].push_back(r);
             }
             ticksOf[m] = ticks;
-            // a cross plant (its quads on the two diagonals): traced as its planes (frame 0)
-            std::vector<uint32_t> cr = crossRecord(per[m].data(), uint32_t(per[m].size()), m, sprites, spriteCount, texels, texelCount);
-            if (!cr.empty()) crossOf[m] = ctx->bricks.intern(std::move(cr));
+            // quads off the axes on up to four planes (a cross plant, a coral fan, a fire): traced as those sheets (frame 0)
+            for (uint32_t k = 0; k < frames; k++) {
+                std::vector<uint32_t> cr = crossRecord(per[m].data(), uint32_t(per[m].size()), m, sprites, spriteCount, texels, texelCount, k);
+                if (cr.empty()) break;
+                auto r = ctx->bricks.intern(std::move(cr));
+                if (k == 0) crossOf[m] = r;
+                if (frames > 1) crossFramesOf[m].push_back(r);
+            }
         }
     }, count < 8 ? 1u : 0u);
     for (uint32_t m = 0; m < count; m++) {
         if (frameRecs[m].size() > 1) ctx->bricks.setFrames(first + m, std::move(frameRecs[m]), ticksOf[m], lightOf[m]);
         else ctx->bricks.set(first + m, recs[m], lightOf[m]);
-        ctx->bricks.setCross(first + m, crossOf[m]);
+        if (crossFramesOf[m].size() > 1) ctx->bricks.setCrossFrames(first + m, std::move(crossFramesOf[m]), ticksOf[m]);
+        else ctx->bricks.setCross(first + m, crossOf[m]);
         ctx->bricks.setCoverage(first + m, recs[m] ? int(coverOf[m] * 63.0f + 0.5f) : -1);
     }
     {

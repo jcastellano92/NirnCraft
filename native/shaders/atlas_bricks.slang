@@ -15,7 +15,7 @@
 uint brickOf(uint mat) {
     uint n = brickData[0];
     uint b = mat < n ? brickData[1u + mat] : 0u;
-    if ((b & 0x40000000u) != 0u) return b;  // a cross (crossHit): its planes' record, flagged
+    if ((b & 0x40000000u) != 0u) return b;  // sheets (sheetsHit): their record, flagged
     if ((b & 0x80000000u) != 0u) {
         b &= 0x7FFFFFFFu;
         uint h = brickData[b];
@@ -50,35 +50,44 @@ bool brickCell(uint b, int3 m, uint gLo, uint gHi, out uint rank) {
     return true;
 }
 
-// The ray l + d t through a cross's planes (record c: bit 0 x = z, bit 1 x + z = 1; 16 x 16 texels each): the nearer
-// shown texel inside the block, its axis the one the ray runs more along (the face shading's).
-BrickHit crossHit(uint c, float3 l, float3 d, int axis) {
+// The ray l + d t through a sheets record c (bricks.hpp: up to 4 planes, each a rectangle of 16 x 16 cells; and an
+// axis-aligned rest as voxels): the nearest shown cell inside the block, its axis its plane's main one.
+BrickHit sheetsHit(uint c, float3 l, float3 d, int axis) {
     BrickHit r;
     r.hit = false;
     r.t = 1e30;
     r.axis = axis;
     r.albedo = float3(0, 0, 0);
     r.emission = 0.0;
-    uint used = brickData[c];
-    for (uint k = 0u; k < 2u; k++) {
-        if (((used >> k) & 1u) == 0u) continue;
-        float den = k == 0u ? d.x - d.z : d.x + d.z;
+    uint head = brickData[c];
+    uint np = min(head & 255u, 4u);
+    for (uint k = 0u; k < np; k++) {
+        uint base = c + 2u + k * 269u;
+        float3 n = float3(asfloat(brickData[base]), asfloat(brickData[base + 1u]), asfloat(brickData[base + 2u]));
+        float dp = asfloat(brickData[base + 3u]);
+        float den = dot(n, d);
         if (abs(den) < 1e-6) continue;
-        float t = k == 0u ? -(l.x - l.z) / den : (1.0 - l.x - l.z) / den;
+        float t = (dp - dot(n, l)) / den;
         if (t < 0.0 || t >= r.t) continue;
         float3 p = l + d * t;
         if (any(p < float3(-1e-4, -1e-4, -1e-4)) || any(p > float3(1.0001, 1.0001, 1.0001))) continue;
-        uint base = c + 1u + k * 260u;  // (its extent x0, x1, y0, y1, then its 16 x 16 cells over it)
-        float x0 = asfloat(brickData[base]), x1 = asfloat(brickData[base + 1u]);
-        float y0 = asfloat(brickData[base + 2u]), y1 = asfloat(brickData[base + 3u]);
-        if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) continue;
-        int ti = clamp(int((p.x - x0) / max(x1 - x0, 1e-4) * 16.0), 0, 15), tj = clamp(int((y1 - p.y) / max(y1 - y0, 1e-4) * 16.0), 0, 15);
-        uint cc = brickData[base + 4u + uint(ti + 16 * tj)];
+        float3 O = float3(asfloat(brickData[base + 4u]), asfloat(brickData[base + 5u]), asfloat(brickData[base + 6u]));
+        float3 U = float3(asfloat(brickData[base + 7u]), asfloat(brickData[base + 8u]), asfloat(brickData[base + 9u]));
+        float3 V = float3(asfloat(brickData[base + 10u]), asfloat(brickData[base + 11u]), asfloat(brickData[base + 12u]));
+        float s = dot(p - O, U) / max(dot(U, U), 1e-8), tt = dot(p - O, V) / max(dot(V, V), 1e-8);
+        if (s < 0.0 || s > 1.0 || tt < 0.0 || tt > 1.0) continue;
+        int ti = clamp(int(s * 16.0), 0, 15), tj = clamp(int(tt * 16.0), 0, 15);
+        uint cc = brickData[base + 13u + uint(ti + 16 * tj)];
         if ((cc >> 24) < 128u) continue;
         r.hit = true;
         r.t = t;
-        r.axis = abs(d.x) > abs(d.z) ? 0 : 2;
+        float3 an = abs(n);
+        r.axis = an.x >= an.y && an.x >= an.z ? 0 : (an.y >= an.z ? 1 : 2);
         r.albedo = srgbLinear(cc);
+    }
+    if ((head & 256u) != 0u) {
+        BrickHit v = brickWalk(c + brickData[c + 1u], l, d, axis);
+        if (v.hit && (!r.hit || v.t < r.t)) r = v;
     }
     if (!r.hit) r.t = 0.0;
     return r;
@@ -88,7 +97,13 @@ BrickHit crossHit(uint c, float3 l, float3 d, int axis) {
 // face it entered by (axis); the first filled micro-voxel it meets, or hit = false when it leaves the voxel first.
 [noinline]
 BrickHit brickHit(uint b, float3 l, float3 d, int axis) {
-    if ((b & 0x40000000u) != 0u) return crossHit(b & 0x3FFFFFFFu, l, d, axis);
+    if ((b & 0x40000000u) != 0u) return sheetsHit(b & 0x3FFFFFFFu, l, d, axis);
+    return brickWalk(b, l, d, axis);
+}
+
+// brickHit's voxel walk (a voxel record at b)
+[noinline]
+BrickHit brickWalk(uint b, float3 l, float3 d, int axis) {
     BrickHit r;
     r.hit = false;
     r.t = 0.0;
