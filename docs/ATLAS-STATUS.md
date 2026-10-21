@@ -148,6 +148,10 @@ Not merged into atlas-render yet: everything on atlas-naadf after 424841c5 and t
   in the spring kernel (the -O3 SPIR-V checks correct op for op; -O0 is exact). After the test: try -O1/-O2, rewrite
   the failing comparison, retest on newer drivers, minimal repro for NVIDIA.
 
+- **Cache x chunk store** (integration, 2026-10-21): in store mode every chunk also goes through the store (cache hits
+  go up at once, the store re-makes them in the background, identical hashes skipped), so the cache saves loading time
+  but not GPU work. After the test: send only a cache miss's radius-2 neighbourhood through the store.
+
 ## Open bugs (seen live)
 
 1. **Near shows far stand-ins** (owner, live): the grid's level-0 pool full (`slots 16384/16384, evicted 16915,
