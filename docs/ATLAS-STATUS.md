@@ -94,8 +94,9 @@ Weather and biome work stay paused until the owner says.
 
 **Before the owner's live test (owner, 2026-10-21):** step 1 complete and merged, including the grid's bug-1 fix
 (verified on Vulkan), `VoxGrid::ingestCoarseGpu` (far data from the GPU generator straight into the coarse levels),
-farMain without forwarded inout chains (fast compile and driver JIT), the generator's far chunks, and the features on
-the GPU. The orchestrator then installs the build and boots the client with the passive profiler; the owner plays.
+farMain without forwarded inout chains (fast compile and driver JIT), and all of world generation on the GPU: terrain
+and the 2D inputs (done), far tiles (done), far chunks into the grid and no tile service / CPU World build (generator
+agent), features, settlement and tree overlays and structures from the plans (features agent). The orchestrator then installs the build and boots the client with the passive profiler; the owner plays.
 
 Not merged into atlas-render yet: everything on atlas-naadf after 424841c5 and the generator branch.
 
