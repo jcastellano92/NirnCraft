@@ -17,12 +17,21 @@ def main():
     java=Path(os.environ.get('NIRNCRAFT_JAVA25_HOME') or location.read_text(encoding='utf-8').strip())
     env=os.environ.copy();env['JAVA_HOME']=str(java);env['GRADLE_USER_HOME']=str(scratch/'gradle-home')
     env.pop('DEBUG',None) # Gradle's batch launcher otherwise echoes every command into diagnostic logs.
+    # A git worktree (.claude/worktrees/<name>) builds into its own directory, so agents' builds never recompile over
+    # each other or wait on one machine-wide lock; the Gradle home (dependency cache) stays shared. A new directory is
+    # seeded with the shared one's Minecraft artifacts (moddev, minecraft-junit) instead of regenerating them.
+    out=scratch/'wt'/ROOT.name if ROOT.parent.name=='worktrees' else scratch
+    if out!=scratch and not (out/'build'/'moddev').exists():
+        import shutil
+        for d in ('moddev','minecraft-junit'):
+            if (scratch/'build'/d).exists():shutil.copytree(scratch/'build'/d,out/'build'/d,dirs_exist_ok=True)
     args=[str(ROOT/'mod/gradlew.bat'),*(a.tasks or ['build']),*(['--offline'] if a.offline else []),'--console=plain','-Dorg.gradle.jvmargs=-Xmx3G',
-          '-PnirncraftBuildDir='+str(scratch/'build'),'--project-cache-dir',str(scratch/'project-cache')]
+          '-PnirncraftBuildDir='+str(out/'build'),'--project-cache-dir',str(out/'project-cache')]
     if a.run_dir:args.append('-PnirncraftRunDir='+str(a.run_dir.resolve()))
     if a.dev_dir:args.append('-PnirncraftDevDir='+str(a.dev_dir.resolve()))
     try:
-        with process_guard(scratch/'.native-build.lock','build_263.py'):
+        out.mkdir(parents=True,exist_ok=True)
+        with process_guard(out/'.native-build.lock','build_263.py'):
             if a.log:
                 a.log.parent.mkdir(parents=True,exist_ok=True)
                 with a.log.open('wb') as log:return subprocess.call(args,cwd=ROOT/'mod',env=env,stdout=log,stderr=subprocess.STDOUT)

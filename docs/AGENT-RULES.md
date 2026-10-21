@@ -15,6 +15,15 @@ below apply to every session and agent.
 
 * **One heavy job at a time**: native builds, Gradle, offline renders and the game never run together. Agents run
   one or two at a time, not four.
+* **Every heavy job goes through the shared lock**: `py -3 E:/NirnCraft-scratch/locks/heavy.py "<agent>: <what>" --
+  <command>` (builds share 3 slots; `--exclusive` only for the GPU-heavy part: the game, offline renders, GPU tests;
+  every job and its children capped at 16 GB, `--mem-gb N`). Start it with the Bash tool's `run_in_background` and
+  keep working. It writes a timestamped log per job (`locks/logs/`) and a ledger (`locks/jobs.jsonl`: wait, run, rc,
+  peak memory, phase times); `py -3 E:/NirnCraft-scratch/locks/watch.py --report` shows where time went.
+* **Every test and long job is traceable**: it prints `TRACE begin <phase>` / `TRACE end <phase>` around each phase,
+  `TRACE progress <phase> <i>/<n>` at least every 30 s inside long loops, and `TRACE done <name> <secs>s` for steps it
+  times itself (one per suite / test / feature type, with its result in the line). Gradle tasks and slangc compiles are
+  traced automatically. A job silent for 5 minutes is flagged to the orchestrator.
 * **Check free RAM before a heavy job** (`Get-CimInstance Win32_OperatingSystem` FreePhysicalMemory, or Task Manager);
   wait or close something rather than start one on a full machine.
 * **Heavy outputs go to `E:\NirnCraft-scratch` or the repository's `.work`**, never C: (renders, bakes, traces,

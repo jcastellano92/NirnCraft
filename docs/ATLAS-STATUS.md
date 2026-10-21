@@ -39,7 +39,9 @@ Weather and biome work stay paused until the owner says.
   renders, the game); check free RAM before heavy jobs; heavy outputs (renders, bakes, traces, exports) go to
   `E:\NirnCraft-scratch` or the repo's `.work`, not C:. Up to three agents in parallel (owner, 2026-10-20) only
   because every heavy job goes through the shared lock: `py -3 E:/NirnCraft-scratch/locks/heavy.py "<label>" --
-  <command>` (one at a time, waits for 8 GB free RAM).
+  <command>` (3 build slots, `--exclusive` for GPU-heavy jobs, 16 GB cap per job, a timestamped log and a ledger of
+  wait / run / phases per job; the orchestrator runs `locks/watch.py` under a Monitor for stalls). Every test prints
+  `TRACE` phase lines (AGENT-RULES.md).
 - Close the dev client after each test batch; never run the autotest action queue while the owner plays (it holds the
   player: use the passive profiler instead).
 - The project's pre-rename name never in the tree (a case-insensitive `git grep` for it stays empty); never Bethesda
