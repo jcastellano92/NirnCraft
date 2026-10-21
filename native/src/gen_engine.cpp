@@ -987,7 +987,7 @@ public:
                   ensure(stNb_, size_t(MAX_CHUNKS) * (2 * STORE_RMAX + 1) * (2 * STORE_RMAX + 1) * 4, true, err);
         if (!ok) return false;
         // the store's passes: their own layout (the batch's blocks, the store's buffers, the items, the pages)
-        constexpr uint32_t SNB = 7;
+        constexpr uint32_t SNB = 8;
         VkDescriptorSetLayoutBinding sbnd[SNB];
         for (uint32_t i = 0; i < SNB; i++) sbnd[i] = {i, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1, VK_SHADER_STAGE_COMPUTE_BIT, nullptr};
         VkDescriptorSetLayoutCreateInfo dl{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
@@ -1676,8 +1676,8 @@ private:
         if (storeSlots_) writeStoreSet();
     }
     void writeStoreSet() {
-        constexpr uint32_t SNB = 7;
-        Buf* bs[SNB] = {&blocks_, &stTerrain_, &stBlocks_, &stAux_, &stItems_, &pages_, &pageIdx_};
+        constexpr uint32_t SNB = 8;
+        Buf* bs[SNB] = {&blocks_, &stTerrain_, &stBlocks_, &stAux_, &stItems_, &pages_, &pageIdx_, &map_};
         VkDescriptorBufferInfo bi[SNB];
         VkWriteDescriptorSet w[SNB];
         for (uint32_t i = 0; i < SNB; i++) {
@@ -2488,6 +2488,7 @@ ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, u
             auto it = h->store.find(key(cx, cz));
             if (it != h->store.end()) {
                 it->second.used = h->storeClock;
+                it->second.packed = false;  // asked again (its sections were not taken): packed again once ready
                 continue;
             }
             fresh.push_back(cx);

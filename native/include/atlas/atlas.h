@@ -920,7 +920,9 @@ ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, dou
  */
 #define ATLAS_GEN_STORE_TERRAIN_WORDS (16u * 16u * 640u / 2u) /* per slot: two 16-bit generator ids a word */
 #define ATLAS_GEN_STORE_BLOCK_WORDS (16u * 16u * 640u)        /* per slot: one 32-bit generator id a block */
-#define ATLAS_GEN_STORE_AUX_WORDS 2048u                       /* per slot: [0, 1408) the quart biomes, then 0 */
+#define ATLAS_GEN_STORE_AUX_WORDS 2048u                       /* per slot: [0, 1408) the quart biomes, [1408, 1664) each
+                                                                 column's map region index, [1664, 1920) its map elevation
+                                                                 (float: TamrielMap.sample), then 0 */
 typedef struct AtlasGenStoreBatch {
     uint32_t version;              /* 1 */
     uint32_t order;                /* the stage being called */
@@ -942,7 +944,7 @@ typedef struct AtlasGenStoreBatch {
                                       (the low 16 bits the generator id; a stage may use the high bits until a later
                                       stage of its own clears them) */
     uint64_t aux;                  /* VkBuffer: per slot ATLAS_GEN_STORE_AUX_WORDS (the quart biomes, generator ids,
-                                      atlas_gen.slang quartBiome's layout) */
+                                      atlas_gen.slang quartBiome's layout; the columns' map region and elevation) */
     uint64_t program;              /* VkBuffer: the generator program's words */
     uint64_t map;                  /* VkBuffer: the map's words (AtlasGenMap) */
 } AtlasGenStoreBatch;
@@ -954,7 +956,8 @@ ATLAS_API AtlasStatus atlas_gen_add_store_stage(AtlasGen* h, uint32_t order, uin
 /* (atlas_gen_remove_stage removes store stages too) Generates count (<= 64, may be 0) chunks into the store, runs the
    store stages, packs up to 64 chunks that passed them all: outChunks (64 pairs) their (cx, cz), outCount how many,
    outFlags / outInfo as atlas_gen_run's for them. outIds (optional, 64 * 40 * 2048 words): their generator ids as
-   atlas_gen_run gives them. Chunks already in the store are not generated again. */
+   atlas_gen_run gives them. Chunks already in the store are not generated again (packed already, they are packed
+   again: their sections were not taken). */
 ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, int32_t* outChunks, uint32_t* outCount,
                                           uint32_t* outIds, uint32_t* outFlags, uint32_t* outInfo, AtlasGenTimes* times);
 /* Drops the store's chunks outside [minCx, maxCx] x [minCz, maxCz] (asked for again, they are generated again). */
@@ -1059,6 +1062,10 @@ ATLAS_API AtlasStatus atlas_feat_set_program(AtlasFeat* h, const uint32_t* words
 ATLAS_API AtlasStatus atlas_feat_run(AtlasFeat* h, uint32_t slots, const uint32_t* ids, const uint32_t* aux, uint32_t origins,
                                      const int32_t* org, uint32_t targets, const int32_t* tgt, uint32_t* outIds,
                                      uint32_t* outTables, AtlasFeatTimes* times);
+/* (checks) The store's aux kernel (atlas_features.slang featAuxMain: Biome's temperature noise, the frozen bits, ...)
+   over n chunks (cx, cz pairs) with the generator's map (AtlasGenMap words): n * ATLAS_FEAT_AUX_WORDS words. */
+ATLAS_API AtlasStatus atlas_feat_probe_aux(AtlasFeat* h, const uint32_t* map, uint32_t mapCount, uint32_t n, const int32_t* chunkXZ,
+                                           uint32_t* outAux);
 /* The decoration as the generator's store stages (atlas_features.slang on the generator's device, GPU to GPU): decoration
    at ATLAS_GEN_STAGE_DECORATION (radius 2: every origin decorated in isolation over its 5 x 5 terrain, its writes into
    the store's blocks of its 3 x 3, each block keeping the write latest in the gather's order), then its finish at

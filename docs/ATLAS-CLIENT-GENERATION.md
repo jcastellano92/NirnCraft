@@ -422,6 +422,18 @@ bake now covers every seeded settlement start of Tamriel and three of each dunge
 farmstead 98.68 %, village 99.25 %: the rest is RockSweep and OrphanSweep removing what the builders left loose on
 rough ground (not on the GPU yet). Not here: the site lists' sets (`nirncraft:sites`: the Steps, Blackreach).
 
+**On the chunk store** (atlas_gen_add_store_stage, the features agent's store): every overlay stage is also a store
+stage with its radius: the heightmap snapshot at DECORATION - 3, the dungeon layers at DECORATION - 2 / - 1 (before the
+decoration, which is one stage for all steps), the pieces at PIECES (r 0; each slot's result kept as the sweeps'
+snapshot), the sweeps at SWEEPS (r 1: Sanity, and the fence shapes, read a neighbour as its pieces left it), roads at
+PAINT and streets at PAINT + 50 (r 0); the batch stages stand down once the store calls. The store sends a chunk's
+stages again when a chunk near it is made; our ops read what they write, so a per-slot mark (the first word's high bits,
+set when the slot's blocks are new) and per-slot stage bits keep a stage from running twice on the same blocks. The
+batch apron is gone. **Checked** (NIRNCRAFT_OVL_STORE=1): Riverwood 99.957 %, Whiterun 99.920 %, Rorikstead 99.854 %,
+Pelagia farm 100 %, a cave 99.99 %, a generic hamlet 99.39 %; the same blocks whatever the batching (64 a call against
+one a call in reverse order: 0 differ on all six). The settlements' and dungeons' piece boxes for the features'
+placement mask: atlas_ovl_store_boxes (the tapes and a record offset per store slot; atlas.h).
+
 **Not yet**: OrphanSweep / RockSweep (flood fills reaching 14 blocks into the neighbour chunks; they wait for the
 shared store of unfinished chunks), one sweep per chunk instead of per piece (the last ~0.08 %, with the server's
 chunk order at chunk borders), a bed's other half on a write of air, tile plans beyond Tamriel for the street

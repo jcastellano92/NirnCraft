@@ -258,6 +258,56 @@ int main(int argc, char** argv) {
             return 1;
         }
         const char* bname = backend ? "vulkan" : "cpu";
+        // ATLAS_FEAT_MAP=<the generator's map words (the dump's .map.bin)>: the store's aux kernel against the dump's aux
+        // (Java's): the temperature noise, the frozen bits and the alchemy classes of every slot
+        if (const char* mp = std::getenv("ATLAS_FEAT_MAP")) {
+            std::printf("TRACE begin aux-check\n");
+            std::fflush(stdout);
+            std::vector<uint32_t> map;
+            if (FILE* mf = std::fopen(mp, "rb")) {
+                std::fseek(mf, 0, SEEK_END);
+                map.resize(size_t(std::ftell(mf)) / 4);
+                std::fseek(mf, 0, SEEK_SET);
+                if (std::fread(map.data(), 4, map.size(), mf) != map.size()) map.clear();
+                std::fclose(mf);
+            }
+            std::vector<uint32_t> got(size_t(slots) * AUX_W);
+            if (map.empty() || atlas_feat_probe_aux(h, map.data(), uint32_t(map.size()), slots, slotXZ.data(), got.data()) != ATLAS_OK) {
+                std::fprintf(stderr, "aux probe: %s\n", map.empty() ? "no map" : atlas_feat_last_error(h));
+                return 1;
+            }
+            // (aux layout: atlas_features.slang AUX_*)
+            const uint32_t A_ALCH = 1472, A_TEMP = 1664, A_FROZEN = 1920;
+            uint64_t tempSame = 0, frozenSame = 0, alchSame = 0, alchKnown = 0;
+            int shown = 0;
+            for (uint32_t sl = 0; sl < slots; sl++) {
+                const uint32_t* g = got.data() + size_t(sl) * AUX_W;
+                const uint32_t* j = aux.data() + size_t(sl) * AUX_W;
+                for (uint32_t c = 0; c < 256; c++) {
+                    if (g[A_TEMP + c] == j[A_TEMP + c]) tempSame++;
+                    else if (shown++ < 5)
+                        std::printf("  temp differs: chunk %d %d column %u gpu %08x java %08x\n", slotXZ[sl * 2], slotXZ[sl * 2 + 1], c,
+                                    g[A_TEMP + c], j[A_TEMP + c]);
+                    bool gf = (g[A_FROZEN + (c >> 5)] >> (c & 31)) & 1u, jf = (j[A_FROZEN + (c >> 5)] >> (c & 31)) & 1u;
+                    if (gf == jf) frozenSame++;
+                    else if (shown++ < 10) std::printf("  frozen differs: chunk %d %d column %u gpu %d java %d\n", slotXZ[sl * 2], slotXZ[sl * 2 + 1], c, gf, jf);
+                }
+                for (uint32_t c = 0; c < 768; c++) {
+                    uint32_t gb = (g[A_ALCH + (c >> 2)] >> ((c & 3) * 8)) & 255u, jb = (j[A_ALCH + (c >> 2)] >> ((c & 3) * 8)) & 255u;
+                    if (jb == 255u) continue;
+                    alchKnown++;
+                    if (gb == jb) alchSame++;
+                }
+            }
+            uint64_t cols = uint64_t(slots) * 256;
+            std::snprintf(line, sizeof(line), "aux (the store's kernel vs Java): temperature %.4f %%, frozen %.4f %%, alchemy %.4f %% of %llu known\n",
+                          100.0 * double(tempSame) / double(cols), 100.0 * double(frozenSame) / double(cols),
+                          alchKnown ? 100.0 * double(alchSame) / double(alchKnown) : 0.0, (unsigned long long)alchKnown);
+            report += line;
+            std::printf("TRACE done aux-check temperature %.4f%% frozen %.4f%% alchemy %.4f%%\n", 100.0 * double(tempSame) / double(cols),
+                        100.0 * double(frozenSame) / double(cols), alchKnown ? 100.0 * double(alchSame) / double(alchKnown) : 0.0);
+            std::fflush(stdout);
+        }
         std::printf("TRACE begin gpu-run:%s\n", bname);
         std::fflush(stdout);
         auto g0 = std::chrono::steady_clock::now();

@@ -543,6 +543,30 @@ class AtlasOverlaysGpuTest {
         rig.ovl().kinds(0);
         storeWindow(rig, keys, ids, flags, false, 64);
         double bare = storeWindow(rig, keys, ids, flags, false, 64);
+        {
+            // the terrain alone in the two batchings (the generator's part of any difference below)
+            int[] o2 = new int[ids.length];
+            storeWindow(rig, keys, o2, new int[n], true, 1);
+            long d = 0;
+            for (int k = 0; k < ids.length; k++) if (ids[k] != o2[k]) d++;
+            report.append(String.format("  the store without the overlays: %d words differ between the batchings%n", d));
+            // each pass alone: the same batching twice, then the other batching
+            int[][] passes = "1".equals(System.getenv("NIRNCRAFT_OVL_STORE_DIAG"))
+                    ? new int[][] {{AtlasOvlNative.KIND_PIECES}, {AtlasOvlNative.KIND_PIECES | AtlasOvlNative.KIND_SWEEPS}, {kindsWith}} : new int[0][];
+            for (int[] kk : passes) {
+                rig.ovl().kinds(kk[0]);
+                int[] a1 = new int[ids.length], a2 = new int[ids.length], a3 = new int[ids.length];
+                storeWindow(rig, keys, a1, new int[n], false, 64);
+                storeWindow(rig, keys, a2, new int[n], false, 64);
+                storeWindow(rig, keys, a3, new int[n], true, 1);
+                long same = 0, other = 0;
+                for (int k = 0; k < ids.length; k++) {
+                    if (a1[k] != a2[k]) same++;
+                    if (a1[k] != a3[k]) other++;
+                }
+                report.append(String.format("  kinds %d: %d words differ running the same batching again, %d in the other%n", kk[0], same, other));
+            }
+        }
         rig.ovl().kinds(kindsWith);
         storeWindow(rig, keys, ids, flags, false, 64);
         long stamped0 = rig.ovl().stamped();
@@ -550,12 +574,23 @@ class AtlasOverlaysGpuTest {
         int[] other = new int[ids.length], otherFlags = new int[n];
         storeWindow(rig, keys, other, otherFlags, true, 1);
         long batchDiff = 0;
+        Map<String, Long> bd = new TreeMap<>();
         for (int k = 0; k < ids.length; k++) {
             int a = ids[k], b2 = other[k];
             if (a == b2) continue;
             batchDiff += ((a ^ b2) & 0xFFFF) != 0 ? 1 : 0;
             batchDiff += ((a ^ b2) >>> 16) != 0 ? 1 : 0;
+            for (int h = 0; h < 2; h++) {
+                int ia = h == 0 ? a & 0xFFFF : a >>> 16, ib = h == 0 ? b2 & 0xFFFF : b2 >>> 16;
+                if (ia == ib) continue;
+                int i = k / AtlasGenNative.CHUNK_WORDS, b = (k % AtlasGenNative.CHUNK_WORDS) * 2 + h;
+                ChunkPos cp = ChunkPos.unpack(keys.get(i));
+                String pk = (ia < tapes.blocks.size() ? tapes.blocks.get(ia) : "?") + " / " + (ib < tapes.blocks.size() ? tapes.blocks.get(ib) : "?");
+                bd.merge(pk + " (e.g. " + (cp.getMinBlockX() + (b & 15)) + " " + (b / 256 - 64) + " " + (cp.getMinBlockZ() + (b >> 4 & 15)) + ")", 1L,
+                        Long::sum);
+            }
         }
+        bd.entrySet().stream().limit(10).forEach(e -> report.append("    batchings: ").append(e.getValue()).append("  ").append(e.getKey()).append("\n"));
         report.append(String.format("  batch independence (the store): 64 a call vs one at a time, reversed: %d blocks differ%n", batchDiff));
         Score sc = new Score();
         Map<String, Long> pairs = new HashMap<>();

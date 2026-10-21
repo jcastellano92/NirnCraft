@@ -120,10 +120,50 @@ class AtlasGenFeaturesGpuTest {
                 + "the features changed %d blocks of the raster's chunks%n", square.size(), a.size(), b.size(), both, same, diffBlocks, featBlocks));
         System.out.println(String.format("TRACE done store-batch-edges alike %d of %d chunks, %d blocks differ, %d blocks by the features", same, both,
                 diffBlocks, featBlocks));
+        // the store's aux (ATLAS_FEAT_AUX_DUMP: the stage engine's records, cx, cz, then the aux words) against Java's
+        boolean auxOk = true;
+        String auxDump = System.getenv("ATLAS_FEAT_AUX_DUMP");
+        if (auxDump != null && Files.exists(Path.of(auxDump))) {
+            java.nio.ByteBuffer bb = java.nio.ByteBuffer.wrap(Files.readAllBytes(Path.of(auxDump))).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+            final int auxW = 1928 + 6 * 256, aAlch = 1472, aTemp = 1664, aFrozen = 1920;
+            long recs = 0, tempSame = 0, frozenSame = 0, alchSame = 0, alchKnown = 0, cols = 0;
+            java.util.Set<Long> seen = new java.util.HashSet<>();
+            int shown = 0;
+            while (bb.remaining() >= (2 + auxW) * 4) {
+                int cx = bb.getInt(), cz = bb.getInt();
+                int[] w = new int[auxW];
+                for (int i = 0; i < auxW; i++) w[i] = bb.getInt();
+                if (!seen.add(ChunkPos.pack(cx, cz))) continue;
+                recs++;
+                for (int c = 0; c < 256; c++) {
+                    int x = cx * 16 + (c & 15), z = cz * 16 + (c >> 4);
+                    cols++;
+                    if (w[aTemp + c] == Float.floatToRawIntBits(AtlasFeatureProgram.temperatureNoise(x, z))) tempSame++;
+                    else if (shown++ < 5) report.append(String.format("  temperature differs at %d %d%n", x, z));
+                    boolean gf = (w[aFrozen + (c >> 5)] >>> (c & 31) & 1) != 0;
+                    if (gf == AtlasFeatureProgram.frozenColumn(x, z)) frozenSame++;
+                    else if (shown++ < 10) report.append(String.format("  frozen differs at %d %d%n", x, z));
+                    for (int v = 0; v < 3; v++) {
+                        int jc = fp.alchemyClass(x, z, v);
+                        if (jc == 255) continue;
+                        alchKnown++;
+                        int idx = v * 256 + c;
+                        int gc = w[aAlch + (idx >> 2)] >>> ((idx & 3) * 8) & 255;
+                        if (gc == jc) alchSame++;
+                        else if (shown++ < 15) report.append(String.format("  alchemy differs at %d %d variant %d: gpu %d java %d%n", x, z, v, gc, jc));
+                    }
+                }
+            }
+            report.append(String.format("store aux (the stage's kernels vs Java) over %d chunks: temperature %.4f %%, frozen %.4f %%, alchemy %.4f %% of %d%n",
+                    recs, 100.0 * tempSame / Math.max(1, cols), 100.0 * frozenSame / Math.max(1, cols), 100.0 * alchSame / Math.max(1, alchKnown), alchKnown));
+            System.out.println(String.format("TRACE done store-aux temperature %.4f%% frozen %.4f%% alchemy %.4f%%", 100.0 * tempSame / Math.max(1, cols),
+                    100.0 * frozenSame / Math.max(1, cols), 100.0 * alchSame / Math.max(1, alchKnown)));
+            auxOk = recs > 0 && tempSame == cols && frozenSame == cols && alchSame == alchKnown;
+        }
         String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
         if (out != null) Files.writeString(Path.of(out + ".store.txt"), report);
         System.out.print(report);
-        if (both == 0 || same != both || featBlocks == 0) throw new AssertionError(report.toString());
+        if (both == 0 || same != both || featBlocks == 0 || !auxOk) throw new AssertionError(report.toString());
     }
 
     /** One generator with the store and the decoration's stages: the chunks in batches of `per`, then drained. */
@@ -411,6 +451,14 @@ class AtlasGenFeaturesGpuTest {
             for (int dz = -1; dz <= 1; dz++) for (int dx = -1; dx <= 1; dx++) origins.putIfAbsent(ChunkPos.pack(p.x() + dx, p.z() + dz), origins.size());
         }
         String out = System.getenv("NIRNCRAFT_FEAT_DUMP");
+        {  // the generator's map beside the dump (the store's aux kernel reads it: atlas_feat_probe_aux, ATLAS_FEAT_MAP)
+            System.out.println("TRACE begin dump-map");
+            int[] map = AtlasGenMap.words(prog, gen.getBiomeSource());
+            java.nio.ByteBuffer bb = java.nio.ByteBuffer.allocate(map.length * 4).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+            bb.asIntBuffer().put(map);
+            Files.write(Path.of(out + ".map.bin"), bb.array());
+            System.out.println("TRACE end dump-map");
+        }
         Out o = new Out(Path.of(out));
         System.out.println("TRACE begin dump-terrain");
         o.i(0x504D4446);

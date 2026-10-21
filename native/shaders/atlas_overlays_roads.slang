@@ -20,6 +20,8 @@ struct OvlParams {
     int levels;
     uint packed;
     uint chunkWords;
+    uint chunkBase;
+    uint stageBit;  // the store: this stage's bit in ovlState (0: no check)
 };
 [[vk::push_constant]] ConstantBuffer<OvlParams> params;
 [[vk::binding(0, 0)]] StructuredBuffer<uint> blocks;   // AtlasOverlayTapes.blockWords
@@ -30,6 +32,7 @@ struct OvlParams {
 [[vk::binding(6, 0)]] StructuredBuffer<uint> roads;    // RoadPaintGpu.words
 [[vk::binding(7, 0)]] StructuredBuffer<uint> mapData;  // the generator's map (AtlasGenMap)
 [[vk::binding(8, 0)]] RWStructuredBuffer<int> mbnl;    // per chunk 256: MOTION_BLOCKING_NO_LEAVES before the decoration
+[[vk::binding(9, 0)]] RWStructuredBuffer<uint> ovlState;  // the store: per slot the stages its chunk has passed (atlas_overlays.slang)
 
 #include "atlas_ovl_javamath.slang"
 #include "atlas_map.slang"
@@ -865,6 +868,7 @@ groupshared uint gsAny;
 [numthreads(256, 1, 1)]
 void roadsMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
     if (int(gid.y) >= params.count) return;  // (the whole group alike)
+    if (params.stageBit != 0u && (ovlState[uint(chunks[gid.y * CHUNK_INTS + 8u])] & params.stageBit) != 0u) return;
     gSlot = gid.y;
     gOwn = uint(chunks[gid.y * CHUNK_INTS + 8u]);
     gBase = gOwn * params.chunkWords;
@@ -949,6 +953,7 @@ void roadsMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
 [numthreads(64, 1, 1)]
 void mbnlMain(uint3 id : SV_DispatchThreadID) {
     if (int(id.y) >= params.count || id.x >= 256u) return;
+    if (params.stageBit != 0u && (ovlState[uint(chunks[id.y * CHUNK_INTS + 8u])] & params.stageBit) != 0u) return;
     gSlot = id.y;
     gOwn = uint(chunks[id.y * CHUNK_INTS + 8u]);
     gBase = gOwn * params.chunkWords;

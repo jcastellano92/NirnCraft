@@ -32,14 +32,16 @@
 #include "atlas_ovl_access_spv.h"
 #include "atlas_ovl_roads_spv.h"
 #include "atlas_ovl_mbnl_spv.h"
+#include "atlas_ovl_mark_spv.h"
+#include "atlas_ovl_done_spv.h"
 
 using namespace atlas;
 
 namespace {
 
 // keep in step with atlas_overlays.slang and AtlasOverlayTapes
-constexpr uint32_t GROUP = 64, NB = 9, PIPES = 7, P_PIECES = 0, P_STREETS = 1, P_SANITY = 2, P_CONNECT = 3, P_ACCESS = 4, P_ROADS = 5,
-                   P_MBNL = 6;
+constexpr uint32_t GROUP = 64, NB = 10, PIPES = 9, P_PIECES = 0, P_STREETS = 1, P_SANITY = 2, P_CONNECT = 3, P_ACCESS = 4, P_ROADS = 5,
+                   P_MBNL = 6, P_MARK = 7, P_DONE = 8;
 // kinds: 1 pieces, 2 streets, 4 sweeps, 8 roads (RoadPaint), 16 the heightmap snapshot the roads read
 constexpr uint32_t K_PIECES = 1, K_STREETS = 2, K_SWEEPS = 4, K_ROADS = 8, K_MBNL = 16, K_UNDER = 32, K_SURFACE = 64, K_ALL = 127;
 // the tapes' layers (AtlasOverlayTapes.LAYER_*): the settlements', the underground structures', the surface structures'
@@ -60,6 +62,7 @@ struct OvlParams {
     int32_t count, levels;
     uint32_t packed, chunkWords;
     uint32_t chunkBase = 0;  // piecesMain: the layer's chunk records (0, n, 2 n records in)
+    uint32_t stageBit = 0;   // the store: the stage's bit in the slots' state (0: a batch, no check)
 };
 
 struct Buf {
@@ -289,7 +292,7 @@ public:
             d[7] = find(cx - 1, cz);
             d[8] = int32_t(i);
         };
-        return core(cmd, blocks, chunkWords, n, fill, kinds, map, false, n, err);
+        return core(cmd, blocks, chunkWords, n, fill, kinds, map, false, 0u, err);
     }
 
     // A store stage (atlas_gen_add_store_stage): the store's chunks given, each in its own slot of the store's blocks,
@@ -303,7 +306,7 @@ public:
             // the store's size: our snapshot and heightmap per slot, and the slots' tape records (the features' masks)
             if (!ensure(snapStore_, size_t(sb->slots) * ATLAS_GEN_STORE_BLOCK_WORDS * 4, Mem::Device, err) ||
                 !ensure(mbnlStore_, size_t(sb->slots) * 256 * 4, Mem::Device, err) ||
-                !ensure(slotRec_, size_t(sb->slots) * 4, Mem::Upload, err))
+                !ensure(slotRec_, size_t(sb->slots) * 4, Mem::Upload, err) || !ensure(state_, size_t(sb->slots) * 4, Mem::Device, err))
                 return false;
             storeSlots_ = sb->slots;
             slotChunk_.assign(storeSlots_, INT64_MIN);
@@ -333,8 +336,31 @@ public:
             d[8] = sb->chunks[i * 3 + 2];
         };
         VkCommandBuffer cmd = static_cast<VkCommandBuffer>(sb->vkCommandBuffer);
-        return core(cmd, reinterpret_cast<VkBuffer>(sb->blocks), ATLAS_GEN_STORE_BLOCK_WORDS, n, fill, kinds,
-                    reinterpret_cast<VkBuffer>(sb->map), true, storeSlots_, err);
+        VkBuffer blocks = reinterpret_cast<VkBuffer>(sb->blocks), map = reinterpret_cast<VkBuffer>(sb->map);
+        // the slots' chunk records (cx, cz, slot) for the mark and done passes
+        std::vector<int32_t> items(size_t(n) * CHUNK_INTS, -1);
+        for (uint32_t i = 0; i < n; i++) fill(i, items.data() + size_t(i) * CHUNK_INTS);
+        auto small = [&](uint32_t pipe, uint32_t bit) {
+            // after core's records (the layers' blocks: the dispatches run after all is recorded, on the buffer as it is
+            // last written), sized for both at once (a buffer replaced after a dispatch is recorded would be gone)
+            if (!ensure(chunks_, items.size() * 4 * (LAYERS + 1), Mem::Upload, err)) return false;
+            std::memcpy(static_cast<int32_t*>(chunks_.map) + items.size() * LAYERS, items.data(), items.size() * 4);
+            if (rebind_ || blocks != boundIds_ || map != boundMap_ || snapStore_.buf != boundSnap_ || mbnlStore_.buf != boundMbnl_)
+                writeSet(blocks, map, snapStore_.buf, mbnlStore_.buf);
+            OvlParams p{int32_t(n), int32_t(GEN_LEVELS), 0u, ATLAS_GEN_STORE_BLOCK_WORDS, uint32_t(items.size() * LAYERS), bit};
+            vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+            vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(OvlParams), &p);
+            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipe]);
+            vkCmdDispatch(cmd, (n + GROUP - 1) / GROUP, 1, 1);
+            barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            return true;
+        };
+        uint32_t bit = stageBit(sb->order);
+        // the first of our stages: blocks made since our last stages here clear the slot's stage bits
+        if (sb->order == STAGES[0].order && !small(P_MARK, 0u)) return false;
+        if (!core(cmd, blocks, ATLAS_GEN_STORE_BLOCK_WORDS, n, fill, kinds, map, true, bit, err)) return false;
+        return small(P_DONE, bit);
     }
 
     // The features' view of the settlements' pieces (atlas_ovl_store_boxes): the tapes and each store slot's record
@@ -348,6 +374,12 @@ public:
     }
 
 private:
+    // a store stage's bit in the slots' state (its index among ours)
+    static uint32_t stageBit(uint32_t order) {
+        for (uint32_t i = 0; i < 7; i++)
+            if (STAGES[i].order == order) return 1u << i;
+        return 0u;
+    }
     static int32_t lookup(const std::unordered_map<int64_t, int32_t>& m, int64_t k) {
         auto it = m.find(k);
         return it == m.end() ? -1 : it->second;
@@ -373,7 +405,7 @@ private:
     // a stage's passes over n chunks of ids (fill: a chunk's cx, cz, neighbours and slot; the records added here)
     template <class Fill>
     bool core(VkCommandBuffer cmd, VkBuffer blocks, uint32_t chunkWords, uint32_t n, Fill fill, uint32_t kinds, VkBuffer map, bool store,
-              uint32_t slots, std::string& err) {
+              uint32_t bit, std::string& err) {
         if (dead_ || !has_[0]) return true;  // nothing to stamp yet
         if ((kinds & (K_ROADS | K_MBNL)) && !has_[3]) return true;
         if (!(kinds & (K_ROADS | K_MBNL)) && !has_[1] && !has_[2]) return true;
@@ -409,8 +441,7 @@ private:
         std::memcpy(chunks_.map, desc.data(), chunkBytes);
         VkBuffer snap = store ? snapStore_.buf : snap_.buf, mbnl = store ? mbnlStore_.buf : mbnl_.buf;
         if (rebind_ || blocks != boundIds_ || map != boundMap_ || snap != boundSnap_ || mbnl != boundMbnl_) writeSet(blocks, map, snap, mbnl);
-        OvlParams p{int32_t(n), int32_t(GEN_LEVELS), 0u, chunkWords, 0u};
-        (void)slots;
+        OvlParams p{int32_t(n), int32_t(GEN_LEVELS), 0u, chunkWords, 0u, bit};
         if (layer) {
             // a dungeon layer: its recorded writes, column by column (piecesMain over the layer's records)
             if (!(kinds_ & kinds)) return true;
@@ -563,10 +594,11 @@ private:
         pl.pPushConstantRanges = &pr;
         if (vkCreatePipelineLayout(dev_, &pl, nullptr, &layout_) != VK_SUCCESS) return fail(err, "pipeline layout");
         const uint32_t* code[PIPES] = {atlas_ovl_pieces_spv, atlas_ovl_streets_spv, atlas_ovl_sanity_spv, atlas_ovl_connect_spv,
-                                       atlas_ovl_access_spv, atlas_ovl_roads_spv, atlas_ovl_mbnl_spv};
+                                       atlas_ovl_access_spv, atlas_ovl_roads_spv, atlas_ovl_mbnl_spv, atlas_ovl_mark_spv, atlas_ovl_done_spv};
         const size_t size[PIPES] = {atlas_ovl_pieces_spv_size, atlas_ovl_streets_spv_size, atlas_ovl_sanity_spv_size,
-                                    atlas_ovl_connect_spv_size, atlas_ovl_access_spv_size, atlas_ovl_roads_spv_size, atlas_ovl_mbnl_spv_size};
-        static const char* names[PIPES] = {"pieces", "streets", "sanity", "connect", "access", "roads", "mbnl"};
+                                    atlas_ovl_connect_spv_size, atlas_ovl_access_spv_size, atlas_ovl_roads_spv_size, atlas_ovl_mbnl_spv_size,
+                                    atlas_ovl_mark_spv_size, atlas_ovl_done_spv_size};
+        static const char* names[PIPES] = {"pieces", "streets", "sanity", "connect", "access", "roads", "mbnl", "mark", "done"};
         for (uint32_t i = 0; i < PIPES; i++) {
             auto p0 = std::chrono::steady_clock::now();
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
@@ -709,7 +741,8 @@ private:
     void writeSet(VkBuffer ids, VkBuffer map = VK_NULL_HANDLE, VkBuffer snap = VK_NULL_HANDLE, VkBuffer mbnl = VK_NULL_HANDLE) {
         if (!snap) snap = snap_.buf;
         if (!mbnl) mbnl = mbnl_.buf;
-        VkBuffer bs[NB] = {blocks_.buf, tapes_.buf, streets_.buf, chunks_.buf, ids, snap, roads_.buf, map ? map : dummy_.buf, mbnl};
+        VkBuffer bs[NB] = {blocks_.buf, tapes_.buf, streets_.buf, chunks_.buf, ids, snap, roads_.buf, map ? map : dummy_.buf, mbnl,
+                           state_.buf ? state_.buf : dummy_.buf};
         VkDescriptorBufferInfo bi[NB];
         VkWriteDescriptorSet w[NB];
         for (uint32_t i = 0; i < NB; i++) {
@@ -789,7 +822,7 @@ private:
     VkCommandBuffer cmd_ = VK_NULL_HANDLE;
     VkFence fence_ = VK_NULL_HANDLE;
     VkQueryPool queries_ = VK_NULL_HANDLE;
-    Buf blocks_, tapes_, streets_, chunks_, ids_, snap_, roads_, mbnl_, dummy_, staging_, snapStore_, mbnlStore_, slotRec_;
+    Buf blocks_, tapes_, streets_, chunks_, ids_, snap_, roads_, mbnl_, dummy_, staging_, snapStore_, mbnlStore_, slotRec_, state_;
 };
 
 }  // namespace

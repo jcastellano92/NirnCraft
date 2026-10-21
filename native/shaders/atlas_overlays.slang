@@ -29,6 +29,7 @@ struct OvlParams {
     uint packed;      // 1: two 16-bit ids a word (atlas_ovl_run); 0: one id a word (the generator's blocks, a stage)
     uint chunkWords;  // words per chunk in ids
     uint chunkBase;   // piecesMain: where this layer's chunk records start in chunks (a layer of the tapes: 0, n, 2 n records in)
+    uint stageBit;    // the store: this stage's bit in ovlState (0: no check, a batch)
 };
 [[vk::push_constant]] ConstantBuffer<OvlParams> params;
 [[vk::binding(0, 0)]] StructuredBuffer<uint> blocks;   // AtlasOverlayTapes.blockWords
@@ -37,9 +38,38 @@ struct OvlParams {
 [[vk::binding(3, 0)]] StructuredBuffer<int> chunks;    // per chunk (CHUNK_INTS): cx, cz, tape record (-1), street bucket (-1), N E S W slots (-1), own slot
 [[vk::binding(4, 0)]] RWStructuredBuffer<uint> ids;    // per chunk levels * 128 words
 [[vk::binding(5, 0)]] StructuredBuffer<uint> snap;     // ids as the pieces left them (the sweeps' neighbour reads)
+[[vk::binding(9, 0)]] RWStructuredBuffer<uint> ovlState;  // the store: per slot the stages its chunk has passed
 
 // (a slot: a chunk's place in ids and snap: the batch's index, or the generator's store slot)
 static const uint CHUNK_INTS = 9u, ID_WORDS = 7u, REC_OPS = 513u;
+
+// ---- the store's re-runs: a stage this slot's chunk has passed since its blocks were made is not run again ----------
+// (the store sends a chunk's stages again when a chunk near it is made: our ops read what they write, so a second run
+// would differ; markMain sets a mark in the slot's first word's high bits when the blocks are new and clears the slot's
+// stage bits, doneMain sets the stage's bit after it; the pack keeps the low 16 bits)
+static const uint FRESH_MARK = 0x40000000u;
+bool skipChunk(uint item) {
+    if (params.stageBit == 0u) return false;
+    return (ovlState[uint(chunks[item * CHUNK_INTS + 8u])] & params.stageBit) != 0u;
+}
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void markMain(uint3 id : SV_DispatchThreadID) {
+    if (id.x >= uint(params.count)) return;
+    uint slot = uint(chunks[params.chunkBase + id.x * CHUNK_INTS + 8u]), w = slot * params.chunkWords;
+    if ((ids[w] & FRESH_MARK) != 0u) return;
+    ids[w] = ids[w] | FRESH_MARK;
+    ovlState[slot] = 0u;
+}
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void doneMain(uint3 id : SV_DispatchThreadID) {
+    if (id.x >= uint(params.count)) return;
+    uint slot = uint(chunks[params.chunkBase + id.x * CHUNK_INTS + 8u]);
+    ovlState[slot] = ovlState[slot] | params.stageBit;
+}
 
 static const uint HEADER = 16u;
 // op kinds (Canvas.Tape) and flags (AtlasOverlayTapes.OF_*)
@@ -181,7 +211,7 @@ uint applyOp(uint i) {
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void piecesMain(uint3 id : SV_DispatchThreadID) {
-    if (int(id.y) >= params.count || id.x >= 256u) return;
+    if (int(id.y) >= params.count || id.x >= 256u || skipChunk(id.y)) return;
     int rec = chunks[params.chunkBase + id.y * CHUNK_INTS + 2u];
     if (rec < 0) return;
     gBase = uint(chunks[id.y * CHUNK_INTS + 8u]) * params.chunkWords;
@@ -381,7 +411,7 @@ void band(uint e, uint a, uint b) {
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void streetsMain(uint3 id : SV_DispatchThreadID) {
-    if (int(id.y) >= params.count || id.x >= 256u) return;
+    if (int(id.y) >= params.count || id.x >= 256u || skipChunk(id.y)) return;
     int bucket = chunks[id.y * CHUNK_INTS + 3u];
     if (bucket < 0) return;
     gBase = uint(chunks[id.y * CHUNK_INTS + 8u]) * params.chunkWords;
@@ -634,7 +664,7 @@ void sweepSetup(uint3 id) {
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void sanityMain(uint3 id : SV_DispatchThreadID) {
-    if (int(id.y) >= params.count || id.x >= 256u) return;
+    if (int(id.y) >= params.count || id.x >= 256u || skipChunk(id.y)) return;
     sweepSetup(id);
     int y0, y1;
     if (!sweepRange(id.y, y0, y1)) return;
@@ -691,7 +721,7 @@ void connectBlock(int y) {
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void connectMain(uint3 id : SV_DispatchThreadID) {
-    if (int(id.y) >= params.count || id.x >= 256u) return;
+    if (int(id.y) >= params.count || id.x >= 256u || skipChunk(id.y)) return;
     sweepSetup(id);
     int y0, y1;
     if (!sweepRange(id.y, y0, y1)) return;
@@ -904,7 +934,7 @@ void accStair(int px, int pz, int py, uint s) {
 [shader("compute")]
 [numthreads(256, 1, 1)]
 void accessMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
-    if (int(gid.y) >= params.count) return;  // (the whole group alike)
+    if (int(gid.y) >= params.count || skipChunk(gid.y)) return;  // (the whole group alike)
     uint3 id = uint3(tid.x, gid.y, 0u);
     sweepSetup(id);
     if (tid.x == 0u) gsCount = 0u;
