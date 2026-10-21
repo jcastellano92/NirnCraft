@@ -75,9 +75,9 @@ inline const air::MsLut& airLut() {
     return lut;
 }
 inline C3 c3(air::V3 v) { return {v.x, v.y, v.z}; }
-// the vanilla moon opposite the sun (no mod sky offline), the old moonlight
+// the vanilla moon opposite the sun (no mod sky offline), a real full moon (the core's fallback, api.cpp moonOf)
 inline void moonOf(const float sun[3], float dir[3], float rad[3]) {
-    const float m[3] = {0.035f, 0.05f, 0.09f};
+    const float m[3] = {8.7e-6f, 1.25e-5f, 2.2e-5f};
     for (int i = 0; i < 3; i++) dir[i] = -sun[i], rad[i] = m[i];
 }
 

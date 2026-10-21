@@ -275,6 +275,8 @@ typedef struct AtlasLight {
 #define ATLAS_LIGHT_FIRE 1u   /* braziers, camp fires: always lit, flickering (they read at night) */
 #define ATLAS_LIGHT_LAVA 2u   /* always lit, a slow pulse */
 #define ATLAS_LIGHT_MIST 3u   /* spray, lit by the sun and the sky: a white haze by day, faint by night */
+#define ATLAS_LIGHT_BLOCK 4u  /* a block's own emitter (the grid's: a torch, a lantern): steady, its own hue, no glow
+                                 drawn over it (its surface draws it) */
 
 typedef struct AtlasStats {
     uint32_t regions, regionsDirty;

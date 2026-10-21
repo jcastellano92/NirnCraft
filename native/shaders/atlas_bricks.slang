@@ -108,8 +108,8 @@ bool brickMisses(uint b, float3 l, float3 d) {
 // level, brickData's light table) in the level-0 grid within GRID_LIGHT_R blocks of the eye (GRID_LIGHT_RY up and down)
 // is a light this frame, found on the GPU from the grid itself (an edit lights or darkens at once, no server journal),
 // in its own colour: each emitter a candidate where a 4 x 4 x 4 of blocks holds up to four, else one for them all
-// (their centroid, their brightest level, their colours' mean), appended to lightCand as lightCullMain appends the index's records (kind 2: the record's
-// own colour; record ids from GRID_LIGHT_ID up). The journal's records inside that box, where the grid holds the
+// (their centroid, their brightest level, their colours' mean), appended to lightCand as lightCullMain appends the index's records (kind 4, LIGHT_BLOCK: steady, the
+// record's own colour; record ids from GRID_LIGHT_ID up). The journal's records inside that box, where the grid holds the
 // chunk, are left out (gridLightsCover): one light a lamp.
 static const int GRID_LIGHT_R = 96;
 static const int GRID_LIGHT_RY = 48;
@@ -181,7 +181,9 @@ void gridLightEmit(uint rid, float3 rp, float3 rgb, float level) {
     uint bin = lightBin(score);
     float k = 6.0 * score;
     lightCand[slotC * 4u] = float4(rp + frame.camFrac.xyz, sigma);
-    lightCand[slotC * 4u + 1u] = float4(rgb * k, 2.0);  // (farLightsOn: rgb x k / (6 falloff) peaks at the intensity)
+    // (kind 4, a block emitter: steady, its own hue, no glow over it (its surface draws it); farLightsOn: rgb x k /
+    // (6 falloff) peaks at the intensity)
+    lightCand[slotC * 4u + 1u] = float4(rgb * k, 4.0);
     lightCand[slotC * 4u + 2u] = float4(d, float(hashU(rid) & 1023u) / 1023.0, halo, 0.0);
     lightCand[slotC * 4u + 3u] = float4(px, py, reach, asfloat(bin | (rid << 8u)));
     InterlockedAdd(lightList[LL_HIST + bin], 1u);

@@ -353,6 +353,7 @@ float3 regionOriginRel(RegionGpu r) {
 }
 
 #include "atlas_groups.slang"
+#include "atlas_bricks.slang"  // (the micro-voxel bricks: non-cube blocks at 1/16 block)
 
 // What a secondary ray loses per block of path through a voxel of material `mat` (-1: it stops there, solid): a
 // cut-out shape (leaves, plants: the game classes plants as terrain, and a solid cube of grass tuft blocked every
@@ -394,6 +395,8 @@ float secondarySigma(uint mat, uint cls) {
 static uint gMaskMat = 0xFFFFFFFFu;
 static uint2 gMask = uint2(0u, 0u);
 bool secondaryShapeMisses(uint mat, float3 l, float3 d) {
+    uint br = brickOf(mat);  // (a block with a brick: its micro-voxels, atlas_bricks.slang)
+    if (br != 0u) return brickMisses(br, l, d);
     if (mat != gMaskMat) {
         gMaskMat = mat;
         gMask = uint2(0xFFFFFFFFu, 0xFFFFFFFFu);
@@ -710,7 +713,22 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                     uint sh = !gPrimary || (asuint(frame.jitter.w) & 268435456u) != 0u ? 0u : shapeOf(mat);
                     uint wcls = uint(palette[mat].emisClass.y);
                     bool seeWater = ((frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && wcls == 2u) || primaryPassesWater(wcls, t);
-                    if (sh != 0u && !seeWater) {
+                    // a block with a micro-voxel brick (a door, a rail, a torch: atlas_bricks.slang): its 1/16 voxels
+                    uint br = gPrimary && !seeWater ? brickOf(mat) : 0u;
+                    if (br != 0u) {
+                        // (its walk is up to 48 micro-voxels: counted against the ray's budget as a few steps)
+                        gTr.steps += 4u;
+                        BrickHit bh = brickHit(br, ro + d * t - float3(v), d, entryAxis(v, ro, d, inv, stepPos));
+                        if (bh.hit) {
+                            gTr.t = t + bh.t;
+                            gTr.mat = mat;
+                            gTr.axis = bh.axis;
+                            gTr.lod = 0;
+                            gTr.albedo = bh.albedo;
+                            gTr.hasAlbedo = 1u;
+                            return TRACE_HIT;
+                        }
+                    } else if (sh != 0u && !seeWater) {
                         float tHit;
                         int ax = entryAxis(v, ro, d, inv, stepPos);
                         int3 q;
@@ -2082,6 +2100,7 @@ float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
         float vis = kind == 0u ? night
                   : kind == 1u ? (0.1 + 0.9 * night) * (0.82 + 0.18 * sin(t * 11.0 + l.motion.y * 7.0) * sin(t * 4.3 + l.motion.y))
                   : kind == 2u ? 0.85 + 0.15 * sin(t * 1.3 + l.motion.y)
+                  : kind == 4u ? 1.0  // (a block's own emitter: steady)
                   : day;
         if (vis <= 0.001) continue;
         float3 v = l.posYaw.xyz - o;
@@ -2097,6 +2116,12 @@ float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
         // Only pixels inside the core ask (a few per light).
         if (kind != 3u && core > 1e-3 && occupancyAt(l.posYaw.xyz) == 1) core = 0.0;
         float glow = (1.0 - T) * 0.06 * exp(-apx / halo);
+        // (a block emitter of the grid, LIGHT_BLOCK: its surface draws it, near as Minecraft draws a lantern; no core
+        // or halo over it, which drew a ring round every lamp)
+        if (kind == 4u) {
+            core = 0.0;
+            glow = 0.0;
+        }
         float3 rad = l.shape.xyz;
         // spray: a translucent haze lit by the sun and sky, not a light: its intensity is how much of it there is
         // (about a third of a lit white surface at full), without the far-visibility boost point lights get
@@ -2137,7 +2162,7 @@ float3 farLightsOn(uint2 px, float3 p, float3 so, float3 faceN, int lod, float3 
         float3 base = l.shape.xyz / (6.0 * fall);
         float inten = max(base.r, max(base.g, base.b));
         if (inten <= 1e-4) continue;
-        float level = 15.0 * min(inten, 1.0) + (kind == 2u ? l.motion.w : 0.0);
+        float level = 15.0 * min(inten, 1.0) + (kind == 2u ? l.motion.w : 0.0);  // (kind 4: its level, steady)
         float R = level + 1.0;
         float3 v = l.posYaw.xyz - p;
         float d = length(v);
@@ -2158,7 +2183,7 @@ float3 farLightsOn(uint2 px, float3 p, float3 so, float3 faceN, int lod, float3 
             if (maxT > 0.05) occ = traceSecondary(so, dv / dd, maxT, lod);
         }
         float3 hue = BLOCK_LIGHT_HUE;
-        if (kind == 2u) {
+        if (kind == 2u || kind == 4u) {  // (lava, a block emitter: the record's own hue at the warm hue's luminance)
             float3 h = base / inten;
             hue = h * (dot(BLOCK_LIGHT_HUE, float3(0.2126, 0.7152, 0.0722)) / max(dot(h, float3(0.2126, 0.7152, 0.0722)), 1e-4));
         }
@@ -2209,6 +2234,9 @@ void lightCullMain(uint3 id : SV_DispatchThreadID) {
     float cnear = sqrt(dx * dx + dz * dz);
     if (cnear > maxDist) return;
     float fx = max(abs(x0), abs(x0 + 1024.0)), fz = max(abs(z0), abs(z0 + 1024.0));
+    // (the unified field has no near field of the host's: every light is atlas's, however near)
+    bool unifiedField = (frame.dims.z & FRAME_PRIMARY_NEAR_LIT) != 0u;
+    if (unifiedField) nearEnd = 0.0;
     if (sqrt(fx * fx + fz * fz) < nearEnd) return;
     if (coarse != (cnear > clusterDist)) return;
     float rx = x0 + r0.x, ry = r0.y - float(frame.camInt.y) - frame.camFrac.y, rz = z0 + r0.z;
@@ -2217,10 +2245,15 @@ void lightCullMain(uint3 id : SV_DispatchThreadID) {
     if (R > 0.0) ry -= h2 / (2.0 * R);
     float d = sqrt(h2 + ry * ry), radius = r0.w;
     if (d < nearEnd + radius || d > maxDist) return;
+    if (gridLightsCover(float3(rx, ry, rz) + frame.camFrac.xyz)) return;  // (the grid's own emitter: gridLightMain)
     float4 clip = frame.viewProj[0] * rx + frame.viewProj[1] * ry + frame.viewProj[2] * rz + frame.viewProj[3];
-    if (clip.w <= 1e-4) return;
+    // (behind the eye: nothing on screen, unless near enough to light what is in front of it: every tile, as
+    // gridLightEmit's; unified field only, where a light that near is atlas's)
+    float behindRange = 15.0 * min(r1.w, 1.0) + (kind == 2u ? radius : 0.0) + 1.0;
+    bool behind = clip.w <= 1e-4;
+    if (behind && !(unifiedField && kind != 3u && d <= 1.6 * behindRange)) return;
     float W = float(frame.dims.x), H = float(frame.dims.y);
-    float px = (clip.x / clip.w * 0.5 + 0.5) * W, py = (0.5 - clip.y / clip.w * 0.5) * H;
+    float px = behind ? 0.5 * W : (clip.x / clip.w * 0.5 + 0.5) * W, py = behind ? 0.5 * H : (0.5 - clip.y / clip.w * 0.5) * H;
     float pa = max(frame.params.w, 1e-5);
     float sigma = max(0.5, 0.3 * radius / (d * pa));
     float T = exp(-d * frame.farLight.x);
@@ -3420,7 +3453,10 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             nearDepth[pix] = tHit;
             nearInfo[pix] = info;
             outColor[pix] = float4(albedo * waterA, 1.0);
-            waterAdd[pix] = float4(waterB, eyeWater ? -1.0 : watered ? tW : 0.0);
+            // (an emitter's own glow rides with the water's light: added after the light, atlas_bricks.slang nearEmission;
+            // through the water over it and the air in front, as the light's composite is)
+            float3 glow = nearEmission(res.mat, albedo) * waterA * (eyeWater ? float3(1, 1, 1) : aerialT(dir, tHit));
+            waterAdd[pix] = float4(waterB + glow, eyeWater ? -1.0 : watered ? tW : 0.0);
             outNormal[pix] = packNormal(n, (cls & 0x7Fu) | 0x80u, 0.0);
             outDepth[pix] = hostDepth(dir, tDepth);
             outSurface[pix] = tHit;
@@ -3436,6 +3472,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             float T = dot(air.transmittance, float3(0.2126, 0.7152, 0.0722));
             float3 ins = gNearRoofed && eyeRoofed() ? float3(0, 0, 0) : air.inscatter;  // under cover at both ends: unlit air
             c = float4(albedo * waterA * nl.rgb * T + ins + waterB, 1.0);
+            c.rgb += nearEmission(res.mat, albedo) * waterA * T;  // (an emitter's own glow, atlas_bricks.slang)
             // light through leaves (the unified field's FOLIAGE_SSS): the key light (sun, or moon at night) reaching the
             // leaf through the crown in front of it towards the light (a traced ray, attenuated by every leaf it
             // crosses, this one's too: a crown's edge passes most, its heart little), sent on through the leaf tissue

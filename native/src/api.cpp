@@ -97,7 +97,7 @@ void writeLut(const air::MsLut& lut, std::vector<uint32_t>& weather) {
 
 // the moon the air is lit by: the host's, else the old moonlight opposite the sun (atlas_air.slang airMoonDir / airAt)
 void moonOf(const float sun[3], const float* dir, const float* rad, float outDir[3], float outRad[3]) {
-    static const float fallback[3] = {0.035f, 0.05f, 0.09f};
+    static const float fallback[3] = {8.7e-6f, 1.25e-5f, 2.2e-5f};  // (a real full moon: AtlasAir's; atlas_air.slang airAt)
     bool set = dir && rad && rad[0] + rad[1] + rad[2] > 0.0f;
     for (int i = 0; i < 3; i++) {
         outDir[i] = set ? dir[i] : -sun[i];
