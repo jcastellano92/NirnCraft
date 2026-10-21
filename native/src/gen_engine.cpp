@@ -24,6 +24,7 @@
 #include "backend.hpp"
 #include "parallel.hpp"
 #include "voxgrid.hpp"
+#include "gen_stage.hpp"  // the overlays agent: a stage before the pack pass (atlas_ovl_create_for_gen)
 #include "atlas_gen_corner_spv.h"  // generated: slangc + spv_exact, one module per pass
 #include "atlas_gen_aquifer_spv.h"
 #include "atlas_gen_fill_spv.h"
@@ -170,6 +171,9 @@ public:
     // the last ingest run's sections (chunk c's section s where masks[c] bit s), to the context: count sent
     // (masks in / out: on return the bits of the sections that went)
     virtual bool ingest(AtlasContext* ctx, const Batch& b, uint64_t* masks, uint32_t& sent, std::string& err) = 0;
+    // the overlays agent (gen_stage.hpp): the Vulkan device, and the stage run before the pack pass (null: none)
+    virtual bool vkHandles(VkPhysicalDevice&, VkDevice&) { return false; }
+    atlas::GenStage* stage = nullptr;
 };
 
 class CpuEngine final : public Engine {
@@ -431,6 +435,11 @@ public:
         if (inst_ && !shared_) vkDestroyInstance(inst_, nullptr);
     }
     const char* device() const override { return name_; }
+    bool vkHandles(VkPhysicalDevice& phys, VkDevice& dev) override {
+        phys = phys_;
+        dev = dev_;
+        return dev_ != VK_NULL_HANDLE && !dead_;
+    }
 
     // its own instance and device (atlas_gen_create)
     bool init(std::string& err) {
@@ -711,6 +720,14 @@ public:
                 vkCmdCopyBuffer(cmd_, out_.buf, readback_.buf, 1, &c);
                 barrier(VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_HOST_READ_BIT,
                         VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_HOST_BIT);
+            }
+            if (p == PASSES - 1 && stage) {
+                // the stage (gen_stage.hpp: the structures from the plans) rewrites the blocks before they are packed
+                if (!stage->record(cmd_, blocks_.buf, BLOCK_WORDS, n, b.chunks.data(), err)) return false;
+                barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+                vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+                vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &b.params);
             }
             vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[p]);
             vkCmdDispatch(cmd_, (PASS_ITEMS[p] + GROUP - 1) / GROUP, n, 1);
@@ -1368,6 +1385,20 @@ AtlasStatus guarded(F f) {
     }
 }
 }  // namespace
+
+// ---- the overlays agent's stage (gen_stage.hpp) ----
+namespace atlas {
+bool genDevice(AtlasGen* gen, VkPhysicalDevice& phys, VkDevice& dev) {
+    if (!gen || !gen->engine) return false;
+    std::lock_guard<std::mutex> lock(gen->mu);
+    return gen->engine->vkHandles(phys, dev);
+}
+void genSetStage(AtlasGen* gen, GenStage* stage) {
+    if (!gen || !gen->engine) return;
+    std::lock_guard<std::mutex> lock(gen->mu);
+    gen->engine->stage = stage;
+}
+}  // namespace atlas
 
 extern "C" {
 

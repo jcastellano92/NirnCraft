@@ -124,6 +124,11 @@ final class AtlasGenNative {
     final class Gen implements AutoCloseable {
         private final MemorySegment ptr;
 
+        /** The native handle (atlas_ovl_create_for_gen attaches the overlays to it). */
+        MemorySegment handle() {
+            return ptr;
+        }
+
         private Gen(MemorySegment ptr) {
             this.ptr = ptr;
         }

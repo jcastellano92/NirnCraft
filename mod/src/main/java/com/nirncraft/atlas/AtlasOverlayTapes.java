@@ -555,7 +555,8 @@ final class AtlasOverlayTapes implements Canvas.Tape {
     }
 
     /**
-     * The tapes' words (atlas_ovl_set, which 1) and each chunk's record offset (offsets: ChunkPos.pack -> word). A
+     * The tapes' words (atlas_ovl_set, which 1) and each chunk's record offset (offsets: ChunkPos.pack -> word):
+     * header (magic, chunks, the index's offset), the records, then the index (cx, cz, record offset per chunk). A
      * record: 257 column starts (words from the record's op area), 256 column sweep ranges (y0 | y1 << 16, empty when
      * y0 > y1), then the ops.
      */
@@ -577,6 +578,12 @@ final class AtlasOverlayTapes implements Canvas.Tape {
             for (int c = 0; c < 256; c++) w.add(e.getValue().sweep[c]);
             for (int c = 0; c < 256; c++) if (cols[c] != null) w.addAll(cols[c]);
         }
+        w.set(2, w.size());
+        for (var e : chunks.long2ObjectEntrySet()) {
+            w.add(net.minecraft.world.level.ChunkPos.getX(e.getLongKey()));
+            w.add(net.minecraft.world.level.ChunkPos.getZ(e.getLongKey()));
+            w.add(offsets.get(e.getLongKey()));
+        }
         return w.toIntArray();
     }
 
@@ -586,15 +593,15 @@ final class AtlasOverlayTapes implements Canvas.Tape {
      * The street plan as the painter reads it (atlas_ovl_set, which 2): header (magic, nodes, edges, plots, buckets,
      * and the offsets of: nodes (x, z, h as float bits, class), edges (a, b, width bits, class, surface), plots
      * (minX, minZ, maxX, maxZ, kind), buckets (edgeFrom, edgeTo, plotFrom, plotTo), the bucket edge list, the bucket
-     * plot list; then the world's lowest and highest painted y). A chunk's bucket is plan.bucket(cx, cz); buckets <= 0:
-     * all of the plan's.
+     * plot list; then the world's lowest and highest painted y, and the offset of the buckets' chunks (bx, bz each)).
+     * A chunk's bucket is plan.bucket(cx, cz); buckets <= 0: all of the plan's.
      */
     static int[] streetWords(StreetPlan p, LevelHeightAccessor heights, int buckets) {
         int nn = p.nodes(), ne = p.edges(), np = p.plots();
         if (buckets <= 0) buckets = p.buckets();
         int edgeList = buckets == 0 ? 0 : p.edgeTo(buckets - 1), plotList = buckets == 0 ? 0 : p.plotTo(buckets - 1);
         int oN = HEADER, oE = oN + nn * 4, oP = oE + ne * 5, oB = oP + np * 5, oEL = oB + buckets * 4, oPL = oEL + edgeList,
-                end = oPL + plotList;
+                oK = oPL + plotList, end = oK + buckets * 2;
         int[] w = new int[end];
         w[0] = STREETS_MAGIC;
         w[1] = nn;
@@ -609,6 +616,9 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         w[10] = oPL;
         w[11] = heights.getMinY() + 1;           // Painter.minY
         w[12] = (heights.getMaxY() + 1) - 4;     // Painter.maxY
+        w[13] = oK;
+        int[] keys = p.bucketChunks();
+        System.arraycopy(keys, 0, w, oK, buckets * 2);
         for (int i = 0; i < nn; i++) {
             w[oN + i * 4] = Float.floatToRawIntBits(p.nx[i]);
             w[oN + i * 4 + 1] = Float.floatToRawIntBits(p.nz[i]);

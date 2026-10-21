@@ -831,6 +831,17 @@ ATLAS_API const char* atlas_ovl_device(AtlasOvl* h);
 ATLAS_API AtlasStatus atlas_ovl_set(AtlasOvl* h, uint32_t which, const uint32_t* words, uint32_t count);
 ATLAS_API AtlasStatus atlas_ovl_run(AtlasOvl* h, uint32_t count, const int32_t* chunks, uint32_t levels, uint32_t kinds,
                                     uint32_t* ids, AtlasOvlTimes* times);
+/* The overlays as a stage of the generator's own batches (GPU to GPU, on its device): every atlas_gen_run / atlas_gen_chunks
+   then stamps its chunks before packing them, finding each chunk's tape record and street bucket from the data's own
+   chunk index and its neighbours in the batch. The block table's first ids must be the generator program's blocks
+   (AtlasOverlayTapes(prog.blocks)); the ingest table (atlas_gen_set_ingest) must cover the whole block table.
+   atlas_ovl_set's data goes up at the generator's next batch. ATLAS_ERR_UNSUPPORTED for a CPU generator. Destroy the
+   overlays before the generator (it detaches itself). atlas_ovl_run is refused on such a handle. */
+ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out);
+/* The passes a stage runs (bit 0 pieces, bit 2 their sweep, bit 1 streets; default all). */
+ATLAS_API AtlasStatus atlas_ovl_set_kinds(AtlasOvl* h, uint32_t kinds);
+/* Chunks a stage has stamped so far (those with a tape record or a street bucket). */
+ATLAS_API uint64_t atlas_ovl_stamped(AtlasOvl* h);
 
 #ifdef __cplusplus
 }

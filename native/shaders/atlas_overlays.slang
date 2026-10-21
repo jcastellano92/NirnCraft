@@ -1,6 +1,8 @@
 // Structures from the plans, stamped on the GPU (atlas_ovl_* in atlas.h, overlays_engine.cpp; the Java side is
 // com.nirncraft.atlas.AtlasOverlayTapes): after the terrain (and the decoration steps before the structures' step),
-// before ingest, in place on chunk columns of 16-bit block ids (the overlay block table's), b = x + 16 z + 256 (y + 64).
+// before ingest, in place on chunk columns of block ids (the overlay block table's, whose first ids are the
+// generator's), b = x + 16 z + 256 (y + 64): two 16-bit ids a word (atlas_ovl_run) or one a word (the generator's
+// blocks buffer, as a stage of its batch: atlas_ovl_create_for_gen).
 //
 // The gather formulation: one thread per chunk column replays only that column's ops, in the server's order (piece
 // order, then op order), reading and writing only its own column; no two threads write one block (two columns share a
@@ -22,10 +24,10 @@
 #include "atlas_exact.slang"
 
 struct OvlParams {
-    int count;    // chunks in this batch
-    int levels;   // y levels per chunk column (from -64)
-    uint kinds;   // unused by the kernels (the host picks the passes)
-    int pad;
+    int count;        // chunks in this batch
+    int levels;       // y levels per chunk column (from -64)
+    uint packed;      // 1: two 16-bit ids a word (atlas_ovl_run); 0: one id a word (the generator's blocks, a stage)
+    uint chunkWords;  // words per chunk in ids
 };
 [[vk::push_constant]] ConstantBuffer<OvlParams> params;
 [[vk::binding(0, 0)]] StructuredBuffer<uint> blocks;   // AtlasOverlayTapes.blockWords
@@ -69,6 +71,7 @@ uint idPlanks() { return blocks[6]; }
 uint getB(int y) {
     if (y < -64 || y >= -64 + params.levels) return 0u;
     uint b = gCol + 256u * uint(y + 64);
+    if (params.packed == 0u) return ids[gBase + b];
     uint w = ids[gBase + (b >> 1)];
     return (b & 1u) != 0u ? w >> 16 : w & 0xFFFFu;
 }
@@ -76,6 +79,10 @@ uint getB(int y) {
 void setB(int y, uint v) {
     if (y < -64 || y >= -64 + params.levels) return;
     uint b = gCol + 256u * uint(y + 64);
+    if (params.packed == 0u) {
+        ids[gBase + b] = v;  // one id a word: this thread's own
+        return;
+    }
     uint i = gBase + (b >> 1);
     uint old;
     if ((b & 1u) != 0u) {
@@ -170,7 +177,7 @@ void piecesMain(uint3 id : SV_DispatchThreadID) {
     if (int(id.y) >= params.count || id.x >= 256u) return;
     int rec = chunks[id.y * CHUNK_INTS + 2u];
     if (rec < 0) return;
-    gBase = id.y * uint(params.levels) * 128u;
+    gBase = id.y * params.chunkWords;
     gCol = id.x;
     gX = chunks[id.y * CHUNK_INTS] * 16 + int(id.x & 15u);
     gZ = chunks[id.y * CHUNK_INTS + 1u] * 16 + int(id.x >> 4);
@@ -370,7 +377,7 @@ void streetsMain(uint3 id : SV_DispatchThreadID) {
     if (int(id.y) >= params.count || id.x >= 256u) return;
     int bucket = chunks[id.y * CHUNK_INTS + 3u];
     if (bucket < 0) return;
-    gBase = id.y * uint(params.levels) * 128u;
+    gBase = id.y * params.chunkWords;
     gCol = id.x;
     int x0 = chunks[id.y * CHUNK_INTS] * 16, z0 = chunks[id.y * CHUNK_INTS + 1u] * 16;
     gX = x0 + int(id.x & 15u);
@@ -442,7 +449,8 @@ uint nbWord(int dx, int dz, int y) {
     if (slot < 0) return UNKNOWN;
     if (y < -64 || y >= -64 + params.levels) return UNKNOWN - 1u;
     uint b = uint(lx) + 16u * uint(lz) + 256u * uint(y + 64);
-    return (uint(slot) * uint(params.levels) * 128u + (b >> 1)) | ((b & 1u) << 31);
+    if (params.packed == 0u) return uint(slot) * params.chunkWords + b;
+    return (uint(slot) * params.chunkWords + (b >> 1)) | ((b & 1u) << 31);
 }
 
 // the block there as the pieces left it (snap); UNKNOWN outside the batch
@@ -450,6 +458,7 @@ uint snapAt(int dx, int dz, int y) {
     uint i = nbWord(dx, dz, y);
     if (i == UNKNOWN) return UNKNOWN;
     if (i == UNKNOWN - 1u) return 0u;
+    if (params.packed == 0u) return snap[i];
     uint w = snap[i & 0x7FFFFFFFu];
     return (i >> 31) != 0u ? w >> 16 : w & 0xFFFFu;
 }
@@ -459,6 +468,7 @@ uint liveAt(int dx, int dz, int y) {
     uint i = nbWord(dx, dz, y);
     if (i == UNKNOWN) return UNKNOWN;
     if (i == UNKNOWN - 1u) return 0u;
+    if (params.packed == 0u) return ids[i];
     uint w = ids[i & 0x7FFFFFFFu];
     return (i >> 31) != 0u ? w >> 16 : w & 0xFFFFu;
 }
@@ -604,7 +614,7 @@ bool sweepRange(uint slot, out int y0, out int y1) {
 
 void sweepSetup(uint3 id) {
     gSlot = id.y;
-    gBase = id.y * uint(params.levels) * 128u;
+    gBase = id.y * params.chunkWords;
     gCol = id.x;
     gNb0 = chunks[id.y * CHUNK_INTS + 4u];
     gNb1 = chunks[id.y * CHUNK_INTS + 5u];

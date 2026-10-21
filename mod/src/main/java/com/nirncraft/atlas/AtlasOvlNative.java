@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import static java.lang.foreign.ValueLayout.ADDRESS;
 import static java.lang.foreign.ValueLayout.JAVA_DOUBLE;
 import static java.lang.foreign.ValueLayout.JAVA_INT;
+import static java.lang.foreign.ValueLayout.JAVA_LONG;
 
 /**
  * The atlas_ovl_* calls of atlas_core (atlas.h: structures from the plans stamped on the GPU,
@@ -22,7 +23,7 @@ final class AtlasOvlNative {
     static final int SET_BLOCKS = 0, SET_TAPES = 1, SET_STREETS = 2;
     static final int KIND_PIECES = 1, KIND_STREETS = 2, KIND_SWEEPS = 4;
 
-    private final MethodHandle create, destroy, lastError, device, set, run;
+    private final MethodHandle create, destroy, lastError, device, set, run, createForGen, setKinds, stamped;
 
     private AtlasOvlNative(SymbolLookup lib) {
         Linker l = Linker.nativeLinker();
@@ -32,6 +33,10 @@ final class AtlasOvlNative {
         device = bind(l, lib, "atlas_ovl_device", FunctionDescriptor.of(ADDRESS, ADDRESS));
         set = bind(l, lib, "atlas_ovl_set", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         run = bind(l, lib, "atlas_ovl_run", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS));
+        boolean stage = lib.find("atlas_ovl_create_for_gen").isPresent();
+        createForGen = stage ? bind(l, lib, "atlas_ovl_create_for_gen", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
+        setKinds = stage ? bind(l, lib, "atlas_ovl_set_kinds", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT)) : null;
+        stamped = stage ? bind(l, lib, "atlas_ovl_stamped", FunctionDescriptor.of(JAVA_LONG, ADDRESS)) : null;
     }
 
     private static MethodHandle bind(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd) {
@@ -59,6 +64,21 @@ final class AtlasOvlNative {
         try (Arena a = Arena.ofConfined()) {
             MemorySegment out = a.allocate(ADDRESS);
             int s = (int) create.invokeExact(BACKEND_VULKAN, out);
+            return s == 0 ? new Ovl(out.get(ADDRESS, 0)) : null;
+        } catch (Throwable t) {
+            throw AtlasGenNative.rethrow(t);
+        }
+    }
+
+    /**
+     * The overlays as a stage of the generator's batches (atlas_ovl_create_for_gen: on its device, GPU to GPU), or null
+     * when that cannot be (no such call, a CPU generator, a device that cannot run the exact kernels).
+     */
+    Ovl createForGen(AtlasGenNative.Gen gen) {
+        if (createForGen == null) return null;
+        try (Arena a = Arena.ofConfined()) {
+            MemorySegment out = a.allocate(ADDRESS);
+            int s = (int) createForGen.invokeExact(gen.handle(), out);
             return s == 0 ? new Ovl(out.get(ADDRESS, 0)) : null;
         } catch (Throwable t) {
             throw AtlasGenNative.rethrow(t);
@@ -116,6 +136,26 @@ final class AtlasOvlNative {
                 return Times.of(tm);
             } catch (RuntimeException e) {
                 throw e;
+            } catch (Throwable t) {
+                throw AtlasGenNative.rethrow(t);
+            }
+        }
+
+        /** A stage's passes (KIND_*). */
+        void kinds(int kinds) {
+            try {
+                check((int) setKinds.invokeExact(ptr, kinds), "atlas_ovl_set_kinds");
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Throwable t) {
+                throw AtlasGenNative.rethrow(t);
+            }
+        }
+
+        /** Chunks a stage has stamped so far. */
+        long stamped() {
+            try {
+                return (long) stamped.invokeExact(ptr);
             } catch (Throwable t) {
                 throw AtlasGenNative.rethrow(t);
             }

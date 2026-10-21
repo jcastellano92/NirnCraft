@@ -1,8 +1,14 @@
 // Structures from the plans stamped on the GPU (atlas_ovl_*, shaders/atlas_overlays.slang; the Java side is
 // com.nirncraft.atlas.AtlasOverlayTapes): the block table, the settlements' op tapes and the street plan stay resident
-// on the device; a batch stamps chunk columns of 16-bit block ids in place, one thread per column (the gather
-// formulation). Vulkan only (GPU only for now; the CPU fallback is a later job). Self-contained like the decoration
-// (its own device); GPU -> GPU between the generator, the decoration and this is the next step.
+// on the device; a batch stamps chunk columns in place, one thread per column (the gather formulation): the pieces,
+// their sweep (Sanity: removals, then fence / wall / pane shapes), the street painter. Vulkan only (GPU only for now;
+// the CPU fallback is a later job).
+//
+// Two modes. Standalone (atlas_ovl_create): its own device, chunks of packed 16-bit ids uploaded and read back
+// (atlas_ovl_run: the parity checks). A stage of the generator (atlas_ovl_create_for_gen, gen_stage.hpp): on the
+// generator's device, recorded into the generator's batch before its pack pass, on its blocks buffer (one 32-bit
+// generator id a block), GPU to GPU; each chunk's tape record and street bucket are looked up here from the batch's
+// chunk positions (the tapes and the street plan carry their chunk index), its neighbours from the batch itself.
 #include "vk_loader.hpp"  // first: VK_NO_PROTOTYPES
 
 #include <algorithm>
@@ -11,10 +17,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "atlas/atlas.h"
+#include "gen_stage.hpp"
 #include "atlas_ovl_pieces_spv.h"  // generated: slangc + spv_exact, one module per kernel
 #include "atlas_ovl_streets_spv.h"
 #include "atlas_ovl_sanity_spv.h"
@@ -28,15 +37,17 @@ namespace {
 constexpr uint32_t GROUP = 64, NB = 6, PIPES = 4, P_PIECES = 0, P_STREETS = 1, P_SANITY = 2, P_CONNECT = 3;
 constexpr uint32_t CHUNK_INTS = ATLAS_OVL_CHUNK_INTS;
 constexpr uint32_t BLOCKS_MAGIC = 0x4C424F41u, TAPES_MAGIC = 0x50544F41u, STREETS_MAGIC = 0x52534F41u;
+constexpr uint32_t GEN_LEVELS = 640;  // the generator's columns: y -64 .. 575
 
 double msSince(std::chrono::steady_clock::time_point t0) {
     return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
 }
 
+int64_t chunkKey(int32_t cx, int32_t cz) { return (int64_t(cx) << 32) ^ int64_t(uint32_t(cz)); }
+
 struct OvlParams {
     int32_t count, levels;
-    uint32_t kinds;
-    int32_t pad;
+    uint32_t packed, chunkWords;
 };
 
 struct Buf {
@@ -46,11 +57,13 @@ struct Buf {
     VkDeviceSize size = 0;
 };
 
-class VulkanEngine {
+enum class Mem { Device, Readback, Upload };
+
+class VulkanEngine final : public GenStage {
 public:
-    ~VulkanEngine() {
+    ~VulkanEngine() override {
         if (dev_) {
-            if (!dead_) vkDeviceWaitIdle(dev_);
+            if (!attached_ && !dead_) vkDeviceWaitIdle(dev_);
             for (Buf* b : {&blocks_, &tapes_, &streets_, &chunks_, &ids_, &snap_, &staging_}) release(*b);
             if (queries_) vkDestroyQueryPool(dev_, queries_, nullptr);
             if (fence_) vkDestroyFence(dev_, fence_, nullptr);
@@ -62,7 +75,7 @@ public:
                 if (m) vkDestroyShaderModule(dev_, m, nullptr);
             if (layout_) vkDestroyPipelineLayout(dev_, layout_, nullptr);
             if (setLayout_) vkDestroyDescriptorSetLayout(dev_, setLayout_, nullptr);
-            vkDestroyDevice(dev_, nullptr);
+            if (!attached_) vkDestroyDevice(dev_, nullptr);
         }
         if (inst_) vkDestroyInstance(inst_, nullptr);
     }
@@ -135,19 +148,51 @@ public:
         return build(err);
     }
 
+    // On the generator's device (a stage of its batch): pipelines and buffers of our own, its queue and command buffer
+    bool attach(VkPhysicalDevice phys, VkDevice dev, std::string& err) {
+        attached_ = true;
+        phys_ = phys;
+        dev_ = dev;
+        std::string reason;
+        if (!usable(phys_, reason)) return fail(err, "the generator's device cannot run the exact overlays: " + reason);
+        VkPhysicalDeviceProperties p;
+        vkGetPhysicalDeviceProperties(phys_, &p);
+        std::snprintf(name_, sizeof(name_), "vulkan (%s, the generator's)", p.deviceName);
+        return build(err);
+    }
+
     // which: 0 the block table, 1 the tapes, 2 the street plan
     bool set(uint32_t which, const uint32_t* words, uint32_t count, std::string& err) {
+        std::lock_guard<std::mutex> lock(mu_);
         if (dead_) return fail(err, "the overlays' device was lost earlier");
+        if (attached_) {
+            // kept here until the generator's next batch (its lock held, its device idle for us) puts it up
+            pending_[which].assign(words, words + count);
+            dirty_[which] = true;
+            if (which == 1) indexTapes();
+            if (which == 2) indexStreets();
+            has_[which] = true;
+            return true;
+        }
         Buf& b = which == 0 ? blocks_ : which == 1 ? tapes_ : streets_;
-        if (!ensure(b, size_t(count) * 4, false, err)) return false;
-        writeSet();
+        if (!ensure(b, size_t(count) * 4, Mem::Device, err)) return false;
+        writeSet(ids_.buf);
         if (!upload(b, words, size_t(count) * 4, err)) return false;
         has_[which] = true;
         return true;
     }
 
+    void setKinds(uint32_t kinds) {
+        std::lock_guard<std::mutex> lock(mu_);
+        kinds_ = kinds;
+    }
+
+    uint64_t stamped() const { return stamped_; }
+
     bool run(uint32_t count, const int32_t* chunks, uint32_t levels, uint32_t kinds, uint32_t* ids, AtlasOvlTimes& t, std::string& err) {
+        std::lock_guard<std::mutex> lock(mu_);
         if (dead_) return fail(err, "the overlays' device was lost earlier");
+        if (attached_) return fail(err, "a stage of the generator: it runs in the generator's batch");
         auto u0 = std::chrono::steady_clock::now();
         size_t idBytes = size_t(count) * levels * 128u * 4u;
         bool grown = false;
@@ -155,48 +200,18 @@ public:
         if (!(chunks_.buf && chunks_.size >= chunkBytes)) grown = true;
         if (!(ids_.buf && ids_.size >= idBytes)) grown = true;
         if ((kinds & 4u) && !(snap_.buf && snap_.size >= idBytes)) grown = true;
-        if (!ensure(chunks_, chunkBytes, false, err) || !ensure(ids_, idBytes, false, err)) return false;
-        if ((kinds & 4u) && !ensure(snap_, idBytes, false, err)) return false;
-        if (grown) writeSet();
+        if (!ensure(chunks_, chunkBytes, Mem::Device, err) || !ensure(ids_, idBytes, Mem::Device, err)) return false;
+        if ((kinds & 4u) && !ensure(snap_, idBytes, Mem::Device, err)) return false;
+        if (grown) writeSet(ids_.buf);
         if (!upload(chunks_, chunks, chunkBytes, err) || !upload(ids_, ids, idBytes, err)) return false;
         t.uploadMs += msSince(u0);
-        OvlParams p{int32_t(count), int32_t(levels), kinds, 0};
+        OvlParams p{int32_t(count), int32_t(levels), 1u, levels * 128u};
         auto k0 = std::chrono::steady_clock::now();
         begin();
         if (timestamps_) vkCmdResetQueryPool(cmd_, queries_, 0, 5);
-        vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
-        vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(OvlParams), &p);
-        // pieces, then the street painter (the server's order: the step's structures, then its features)
-        if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
-        if ((kinds & 1u) && has_[0] && has_[1]) {
-            vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_PIECES]);
-            vkCmdDispatch(cmd_, 256 / GROUP, count, 1);
-        }
-        barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-        if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 1);
-        // the pieces' sweep (Sanity): its neighbour reads from a copy of what the pieces left, then the shapes
-        if ((kinds & 4u) && has_[0] && has_[1]) {
-            barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
-            VkBufferCopy c{0, 0, idBytes};
-            vkCmdCopyBuffer(cmd_, ids_.buf, snap_.buf, 1, &c);
-            barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-            vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_SANITY]);
-            vkCmdDispatch(cmd_, 256 / GROUP, count, 1);
-            barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-            vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_CONNECT]);
-            vkCmdDispatch(cmd_, 256 / GROUP, count, 1);
-            barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-        }
-        if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 3);
-        if ((kinds & 2u) && has_[0] && has_[2]) {
-            vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_STREETS]);
-            vkCmdDispatch(cmd_, 256 / GROUP, count, 1);
-        }
-        barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
-        if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 2);
+        recordPasses(cmd_, p, kinds, ids_.buf, idBytes, timestamps_);
+        barrier(cmd_, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                VK_PIPELINE_STAGE_TRANSFER_BIT);
         if (!submitWait(err)) return false;
         t.kernelMs += msSince(k0);
         if (timestamps_) {
@@ -214,7 +229,119 @@ public:
         return true;
     }
 
+    // GenStage: inside the generator's batch, before its pack pass
+    bool record(VkCommandBuffer cmd, VkBuffer blocks, uint32_t chunkWords, uint32_t n, const int32_t* chunkXZ,
+                std::string& err) override {
+        std::lock_guard<std::mutex> lock(mu_);
+        if (dead_ || !has_[0] || (!has_[1] && !has_[2])) return true;  // nothing to stamp yet
+        // what changed since the last batch goes up now (the generator waited for its last batch: nothing reads ours)
+        bool grown = false;
+        Buf* bufs[3] = {&blocks_, &tapes_, &streets_};
+        for (uint32_t w = 0; w < 3; w++) {
+            if (!dirty_[w]) continue;
+            size_t bytes = pending_[w].size() * 4;
+            if (!(bufs[w]->buf && bufs[w]->size >= bytes)) grown = true;
+            if (!ensure(*bufs[w], bytes, Mem::Upload, err)) return false;
+            std::memcpy(bufs[w]->map, pending_[w].data(), bytes);
+            dirty_[w] = false;
+        }
+        // the batch's chunks: their tape record, street bucket and neighbours in the batch
+        std::unordered_map<int64_t, int32_t> slot;
+        slot.reserve(n * 2);
+        for (uint32_t i = 0; i < n; i++) slot[chunkKey(chunkXZ[i * 2], chunkXZ[i * 2 + 1])] = int32_t(i);
+        std::vector<int32_t> desc(size_t(n) * CHUNK_INTS);
+        uint32_t any = 0;
+        auto find = [](const std::unordered_map<int64_t, int32_t>& m, int64_t k) {
+            auto it = m.find(k);
+            return it == m.end() ? -1 : it->second;
+        };
+        for (uint32_t i = 0; i < n; i++) {
+            int32_t cx = chunkXZ[i * 2], cz = chunkXZ[i * 2 + 1];
+            int32_t* d = desc.data() + size_t(i) * CHUNK_INTS;
+            d[0] = cx;
+            d[1] = cz;
+            d[2] = has_[1] ? find(tapeIndex_, chunkKey(cx, cz)) : -1;
+            d[3] = has_[2] ? find(bucketIndex_, chunkKey(cx, cz)) : -1;
+            d[4] = find(slot, chunkKey(cx, cz - 1));
+            d[5] = find(slot, chunkKey(cx + 1, cz));
+            d[6] = find(slot, chunkKey(cx, cz + 1));
+            d[7] = find(slot, chunkKey(cx - 1, cz));
+            if (d[2] >= 0 || d[3] >= 0) any++;
+        }
+        if (!any) return true;  // no settlement here: nothing recorded
+        size_t chunkBytes = desc.size() * 4, idBytes = size_t(n) * chunkWords * 4;
+        if (!(chunks_.buf && chunks_.size >= chunkBytes)) grown = true;
+        if (!(snap_.buf && snap_.size >= idBytes)) grown = true;
+        if (!ensure(chunks_, chunkBytes, Mem::Upload, err) || !ensure(snap_, idBytes, Mem::Device, err)) return false;
+        std::memcpy(chunks_.map, desc.data(), chunkBytes);
+        if (grown || blocks != boundIds_) writeSet(blocks);
+        OvlParams p{int32_t(n), int32_t(GEN_LEVELS), 0u, chunkWords};
+        recordPasses(cmd, p, kinds_, blocks, idBytes, false);
+        stamped_ += any;
+        return true;
+    }
+
 private:
+    // the passes into cmd, in the server's order: pieces, their sweep, the street painter
+    void recordPasses(VkCommandBuffer cmd, const OvlParams& p, uint32_t kinds, VkBuffer ids, VkDeviceSize idBytes, bool ts) {
+        uint32_t count = uint32_t(p.count);
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+        vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(OvlParams), &p);
+        if (ts) vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
+        if ((kinds & 1u) && has_[0] && has_[1]) {
+            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_PIECES]);
+            vkCmdDispatch(cmd, 256 / GROUP, count, 1);
+        }
+        barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+        if (ts) vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 1);
+        // the pieces' sweep (Sanity): its neighbour reads from a copy of what the pieces left, then the shapes
+        if ((kinds & 4u) && has_[0] && has_[1]) {
+            barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT);
+            VkBufferCopy c{0, 0, idBytes};
+            vkCmdCopyBuffer(cmd, ids, snap_.buf, 1, &c);
+            barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_SANITY]);
+            vkCmdDispatch(cmd, 256 / GROUP, count, 1);
+            barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_CONNECT]);
+            vkCmdDispatch(cmd, 256 / GROUP, count, 1);
+            barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+        }
+        if (ts) vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 3);
+        if ((kinds & 2u) && has_[0] && has_[2]) {
+            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_STREETS]);
+            vkCmdDispatch(cmd, 256 / GROUP, count, 1);
+        }
+        barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+        if (ts) vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 2);
+    }
+
+    // the tapes' chunk index: (cx, cz, record) triples after the records (AtlasOverlayTapes.tapeWords)
+    void indexTapes() {
+        tapeIndex_.clear();
+        const std::vector<uint32_t>& w = pending_[1];
+        if (w.size() < 16) return;
+        uint32_t n = w[1], at = w[2];
+        for (uint32_t i = 0; i < n && at + i * 3 + 2 < w.size(); i++)
+            tapeIndex_[chunkKey(int32_t(w[at + i * 3]), int32_t(w[at + i * 3 + 1]))] = int32_t(w[at + i * 3 + 2]);
+    }
+
+    // the street plan's buckets by chunk (AtlasOverlayTapes.streetWords: word 13)
+    void indexStreets() {
+        bucketIndex_.clear();
+        const std::vector<uint32_t>& w = pending_[2];
+        if (w.size() < 16) return;
+        uint32_t n = w[4], at = w[13];
+        for (uint32_t k = 0; k < n && at + k * 2 + 1 < w.size(); k++)
+            bucketIndex_[chunkKey(int32_t(w[at + k * 2]), int32_t(w[at + k * 2 + 1]))] = int32_t(k);
+    }
+
     static bool fail(std::string& err, std::string m) {
         err = std::move(m);
         return false;
@@ -284,6 +411,14 @@ private:
         da.descriptorSetCount = 1;
         da.pSetLayouts = &setLayout_;
         if (vkAllocateDescriptorSets(dev_, &da, &set_) != VK_SUCCESS) return fail(err, "descriptor set");
+        Mem small = attached_ ? Mem::Upload : Mem::Device;
+        bool ok = ensure(blocks_, 64, small, err) && ensure(tapes_, 64, small, err) && ensure(streets_, 64, small, err) &&
+                  ensure(chunks_, 64, small, err) && ensure(snap_, 64, Mem::Device, err) && ensure(ids_, 64, Mem::Device, err);
+        if (!ok) return false;
+        if (attached_) {
+            writeSet(ids_.buf);  // the generator's blocks take binding 4 at its batches
+            return true;
+        }
         VkCommandPoolCreateInfo cpi{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
         cpi.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         cpi.queueFamilyIndex = family_;
@@ -301,11 +436,9 @@ private:
             qp.queryCount = 5;
             if (vkCreateQueryPool(dev_, &qp, nullptr, &queries_) != VK_SUCCESS) timestamps_ = false;
         }
-        bool ok = ensure(staging_, 32u << 20, true, err) && ensure(blocks_, 64, false, err) && ensure(tapes_, 64, false, err) &&
-                  ensure(streets_, 64, false, err) && ensure(chunks_, 64, false, err) && ensure(ids_, 64, false, err) &&
-                  ensure(snap_, 64, false, err);
-        if (ok) writeSet();
-        return ok;
+        if (!ensure(staging_, 32u << 20, Mem::Readback, err)) return false;
+        writeSet(ids_.buf);
+        return true;
     }
     uint32_t memoryType(uint32_t bits, VkMemoryPropertyFlags want) {
         VkPhysicalDeviceMemoryProperties mp;
@@ -321,10 +454,10 @@ private:
         if (b.mem) vkFreeMemory(dev_, b.mem, nullptr);
         b = {};
     }
-    bool ensure(Buf& b, size_t size, bool host, std::string& err) {
+    bool ensure(Buf& b, size_t size, Mem kind, std::string& err) {
         size = std::max<size_t>(size, 64);
         if (b.buf && b.size >= size) return true;
-        if (b.buf) vkDeviceWaitIdle(dev_);
+        if (b.buf && !attached_) vkDeviceWaitIdle(dev_);  // (attached: the generator's last batch is complete)
         release(b);
         VkBufferCreateInfo bc{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
         bc.size = size;
@@ -333,9 +466,17 @@ private:
         VkMemoryRequirements req;
         vkGetBufferMemoryRequirements(dev_, b.buf, &req);
         VkMemoryPropertyFlags hv = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-        uint32_t type = host ? memoryType(req.memoryTypeBits, hv | VK_MEMORY_PROPERTY_HOST_CACHED_BIT)
-                             : memoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        if (type == UINT32_MAX && host) type = memoryType(req.memoryTypeBits, hv);
+        uint32_t type = UINT32_MAX;
+        if (kind == Mem::Readback) {
+            type = memoryType(req.memoryTypeBits, hv | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
+            if (type == UINT32_MAX) type = memoryType(req.memoryTypeBits, hv);
+        } else if (kind == Mem::Upload) {
+            // host-written, device-read: device memory the host can map when there is some, else host memory
+            type = memoryType(req.memoryTypeBits, hv | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            if (type == UINT32_MAX) type = memoryType(req.memoryTypeBits, hv);
+        } else {
+            type = memoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        }
         if (type == UINT32_MAX) return fail(err, "no suitable memory type");
         VkMemoryAllocateInfo ma{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
         ma.allocationSize = req.size;
@@ -343,10 +484,11 @@ private:
         if (vkAllocateMemory(dev_, &ma, nullptr, &b.mem) != VK_SUCCESS) {
             vkDestroyBuffer(dev_, b.buf, nullptr);
             b.buf = VK_NULL_HANDLE;
+            if (kind == Mem::Upload) return ensure(b, size, Mem::Readback, err);  // the host-visible pool ran out: plain host memory
             return fail(err, "vkAllocateMemory (" + std::to_string(size >> 20) + " MiB)");
         }
         vkBindBufferMemory(dev_, b.buf, b.mem, 0);
-        if (host && vkMapMemory(dev_, b.mem, 0, VK_WHOLE_SIZE, 0, &b.map) != VK_SUCCESS) return fail(err, "vkMapMemory");
+        if (kind != Mem::Device && vkMapMemory(dev_, b.mem, 0, VK_WHOLE_SIZE, 0, &b.map) != VK_SUCCESS) return fail(err, "vkMapMemory");
         b.size = size;
         return true;
     }
@@ -357,7 +499,8 @@ private:
             begin();
             VkBufferCopy c{0, done, n};
             vkCmdCopyBuffer(cmd_, staging_.buf, dst.buf, 1, &c);
-            barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            barrier(cmd_, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
             if (!submitWait(err)) return false;
             done += n;
         }
@@ -369,19 +512,19 @@ private:
             begin();
             VkBufferCopy c{offset + done, 0, n};
             vkCmdCopyBuffer(cmd_, src.buf, staging_.buf, 1, &c);
-            barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
+            barrier(cmd_, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
             if (!submitWait(err)) return false;
             std::memcpy(static_cast<char*>(data) + done, staging_.map, n);
             done += n;
         }
         return true;
     }
-    void writeSet() {
-        Buf* bs[NB] = {&blocks_, &tapes_, &streets_, &chunks_, &ids_, &snap_};
+    void writeSet(VkBuffer ids) {
+        VkBuffer bs[NB] = {blocks_.buf, tapes_.buf, streets_.buf, chunks_.buf, ids, snap_.buf};
         VkDescriptorBufferInfo bi[NB];
         VkWriteDescriptorSet w[NB];
         for (uint32_t i = 0; i < NB; i++) {
-            bi[i] = {bs[i]->buf, 0, VK_WHOLE_SIZE};
+            bi[i] = {bs[i], 0, VK_WHOLE_SIZE};
             w[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
             w[i].dstSet = set_;
             w[i].dstBinding = i;
@@ -390,6 +533,7 @@ private:
             w[i].pBufferInfo = &bi[i];
         }
         vkUpdateDescriptorSets(dev_, NB, w, 0, nullptr);
+        boundIds_ = ids;
     }
     void begin() {
         vkResetCommandBuffer(cmd_, 0);
@@ -415,15 +559,21 @@ private:
         }
         return true;
     }
-    void barrier(VkAccessFlags src, VkAccessFlags dst, VkPipelineStageFlags from, VkPipelineStageFlags to) {
+    static void barrier(VkCommandBuffer cmd, VkAccessFlags src, VkAccessFlags dst, VkPipelineStageFlags from, VkPipelineStageFlags to) {
         VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
         mb.srcAccessMask = src;
         mb.dstAccessMask = dst;
-        vkCmdPipelineBarrier(cmd_, from, to, 0, 1, &mb, 0, nullptr, 0, nullptr);
+        vkCmdPipelineBarrier(cmd, from, to, 0, 1, &mb, 0, nullptr, 0, nullptr);
     }
 
-    bool dead_ = false, timestamps_ = false;
-    bool has_[3] = {false, false, false};
+    std::mutex mu_;
+    bool dead_ = false, timestamps_ = false, attached_ = false;
+    bool has_[3] = {false, false, false}, dirty_[3] = {false, false, false};
+    std::vector<uint32_t> pending_[3];
+    std::unordered_map<int64_t, int32_t> tapeIndex_, bucketIndex_;
+    uint32_t kinds_ = 7u;
+    uint64_t stamped_ = 0;
+    VkBuffer boundIds_ = VK_NULL_HANDLE;
     float timestampPeriod_ = 1.0f;
     char name_[300] = "vulkan";
     VkInstance inst_ = VK_NULL_HANDLE;
@@ -449,6 +599,7 @@ private:
 struct AtlasOvl {
     std::unique_ptr<VulkanEngine> engine;
     std::string error;
+    AtlasGen* gen = nullptr;  // atlas_ovl_create_for_gen's: the stage is detached from it on destroy
     uint32_t blockCount = 0, tapeWords = 0, streetBuckets = 0;
 };
 
@@ -485,7 +636,33 @@ ATLAS_API AtlasStatus atlas_ovl_create(AtlasBackend backend, AtlasOvl** out) {
     });
 }
 
-ATLAS_API void atlas_ovl_destroy(AtlasOvl* h) { delete h; }
+ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out) {
+    if (!out || !gen) return ATLAS_ERR_ARG;
+    *out = nullptr;
+    return guarded(nullptr, [&] {
+        VkPhysicalDevice phys = VK_NULL_HANDLE;
+        VkDevice dev = VK_NULL_HANDLE;
+        if (!atlas::genDevice(gen, phys, dev)) return ATLAS_ERR_UNSUPPORTED;  // a CPU generator
+        auto h = std::make_unique<AtlasOvl>();
+        auto vk = std::make_unique<VulkanEngine>();
+        std::string err;
+        if (!vk->attach(phys, dev, err)) {
+            std::fprintf(stderr, "[atlas] overlays: %s\n", err.c_str());
+            return ATLAS_ERR_UNSUPPORTED;
+        }
+        h->engine = std::move(vk);
+        h->gen = gen;
+        atlas::genSetStage(gen, h->engine.get());
+        *out = h.release();
+        return ATLAS_OK;
+    });
+}
+
+ATLAS_API void atlas_ovl_destroy(AtlasOvl* h) {
+    if (!h) return;
+    if (h->gen) atlas::genSetStage(h->gen, nullptr);  // between batches: nothing of ours is in flight after this
+    delete h;
+}
 ATLAS_API const char* atlas_ovl_last_error(AtlasOvl* h) { return h ? h->error.c_str() : "null handle"; }
 ATLAS_API const char* atlas_ovl_device(AtlasOvl* h) { return h ? h->engine->device() : "null handle"; }
 
@@ -494,6 +671,7 @@ ATLAS_API AtlasStatus atlas_ovl_set(AtlasOvl* h, uint32_t which, const uint32_t*
     static const uint32_t magic[3] = {BLOCKS_MAGIC, TAPES_MAGIC, STREETS_MAGIC};
     if (words[0] != magic[which]) return ATLAS_ERR_ARG;
     if (which == 0 && (words[8] != 5 || count < 16 + words[1] * words[8])) return ATLAS_ERR_ARG;
+    if (which == 1 && (words[2] < 16 || words[2] + words[1] * 3 > count)) return ATLAS_ERR_ARG;
     return guarded(h, [&] {
         if (!h->engine->set(which, words, count, h->error)) return ATLAS_ERR_GPU;
         if (which == 0) h->blockCount = words[1];
@@ -503,9 +681,18 @@ ATLAS_API AtlasStatus atlas_ovl_set(AtlasOvl* h, uint32_t which, const uint32_t*
     });
 }
 
+ATLAS_API AtlasStatus atlas_ovl_set_kinds(AtlasOvl* h, uint32_t kinds) {
+    if (!h) return ATLAS_ERR_ARG;
+    h->engine->setKinds(kinds & 7u);
+    return ATLAS_OK;
+}
+
+ATLAS_API uint64_t atlas_ovl_stamped(AtlasOvl* h) { return h ? h->engine->stamped() : 0; }
+
 ATLAS_API AtlasStatus atlas_ovl_run(AtlasOvl* h, uint32_t count, const int32_t* chunks, uint32_t levels, uint32_t kinds,
                                     uint32_t* ids, AtlasOvlTimes* times) {
     if (!h || !chunks || !ids || count == 0 || levels == 0 || levels > 1024) return ATLAS_ERR_ARG;
+    if (h->gen) return ATLAS_ERR_STATE;  // a stage: it runs in the generator's batches
     if (h->blockCount == 0) return ATLAS_ERR_STATE;
     for (uint32_t c = 0; c < count; c++) {
         int32_t rec = chunks[c * ATLAS_OVL_CHUNK_INTS + 2], bucket = chunks[c * ATLAS_OVL_CHUNK_INTS + 3];

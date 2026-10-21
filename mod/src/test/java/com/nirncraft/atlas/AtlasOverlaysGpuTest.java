@@ -139,7 +139,10 @@ class AtlasOverlaysGpuTest {
                 streetWords.length * 4 / 1e6, buckets, (System.nanoTime() - sw) / 1e6));
         ovl.set(AtlasOvlNative.SET_STREETS, streetWords);
 
+        // the generator with the overlays as a stage of its own batches (GPU to GPU), when the core has both
+        StageRig rig = "0".equals(System.getenv("NIRNCRAFT_OVL_GEN")) ? null : StageRig.open(lib, nat, gen, settings, rs, heights, report);
         Totals all = new Totals();
+        Score stageAll = new Score();
         int si = 0;
         for (TestSet set : sets) {
             si++;
@@ -164,11 +167,16 @@ class AtlasOverlaysGpuTest {
                     set.cx0(), set.cx1(), set.cz0(), set.cz1(), ref.pieces().size(), pieces.size(),
                     refMs > 0 ? String.format("%.1f s (%.0f ms a chunk)", refMs / 1000, refMs / ref.pieces().size()) : "from the cache"));
             compareSet(report, set, pieces, ref, heights, containers, ovl, plan, all);
+            if (rig != null) stageSet(report, set, ref, heights, containers, rig, plan, stageAll);
             trace("end set " + set.place());
         }
         trace("progress sets " + sets.size() + "/" + sets.size());
         report.append(String.format("%n== all sets%n"));
         all.print(report);
+        if (rig != null) {
+            report.append("  the generator's batches with the overlays as a stage (GPU to GPU): ").append(stageAll).append('\n');
+            rig.close();
+        }
         ovl.close();
         String text = report.toString();
         String out = System.getenv("NIRNCRAFT_OVL_OUT");
@@ -176,6 +184,98 @@ class AtlasOverlaysGpuTest {
         System.out.println(text);
         trace(String.format("done overlaysMatchJava %.1fs pieces %.4f%% streets %.4f%%", (System.nanoTime() - t0) / 1e9,
                 all.pieces.pct(), all.streets.pct()));
+    }
+
+    // ---- the overlays as a stage of the generator (atlas_ovl_create_for_gen) ----
+
+    /** A Vulkan generator over seed 1234's program with the overlays attached to its batches. */
+    record StageRig(AtlasGenProgram prog, AtlasGenPages pages, AtlasGenNative.Gen gen, AtlasOvlNative.Ovl ovl) implements AutoCloseable {
+        static StageRig open(Path lib, AtlasOvlNative nat, NoiseBasedChunkGenerator g, NoiseGeneratorSettings settings, RandomState rs,
+                             LevelHeightAccessor heights, StringBuilder report) {
+            AtlasGenNative gn = AtlasGenNative.load(lib);
+            if (gn == null) return null;
+            trace("begin stage rig");
+            AtlasGenProgram prog = AtlasGenProgram.compile(g, settings, rs, heights, SEED, s -> 0);
+            AtlasGenNative.Gen gen = gn.create(AtlasGenNative.BACKEND_VULKAN);
+            if (gen == null) return null;
+            gen.setProgram(prog.words);
+            AtlasOvlNative.Ovl ovl = nat.createForGen(gen);
+            trace("end stage rig");
+            if (ovl == null) {
+                gen.close();
+                report.append("stage: unavailable (no atlas_ovl_create_for_gen, or the generator's device cannot)\n");
+                return null;
+            }
+            report.append("stage: ").append(ovl.device()).append(", generator program ").append(prog.blocks.size()).append(" blocks\n");
+            return new StageRig(prog, new AtlasGenPages(prog, rs, g.getBiomeSource(), heights), gen, ovl);
+        }
+
+        @Override
+        public void close() {
+            ovl.close();  // first: it detaches itself from the generator
+            gen.close();
+        }
+    }
+
+    /**
+     * The window made by the generator with the overlays in its batch: the table's first ids the program's blocks,
+     * tapes recorded over the same terrain, the batch's chunks stamped before they are packed; against Java's terrain +
+     * postProcess + street paint (y -64 .. 575, the generator's columns).
+     */
+    static void stageSet(StringBuilder report, TestSet set, Ref ref, LevelHeightAccessor heights, PalettedContainerFactory containers,
+                         StageRig rig, StreetPlan plan, Score total) {
+        trace("begin stage " + set.place());
+        AtlasOverlayTapes tapes = new AtlasOverlayTapes(rig.prog().blocks);
+        tapes.keep = new BoundingBox(set.cx0() << 4, heights.getMinY(), set.cz0() << 4, (set.cx1() << 4) + 15, heights.getMaxY(),
+                (set.cz1() << 4) + 15);
+        tapes.recordSettlement(set.place(), window(ref.terrain(), heights, containers).level(), tapes.keep);
+        Map<Long, Integer> offsets = new HashMap<>();
+        int[] tapeWords = tapes.tapeWords(offsets);
+        int[] blockWords = tapes.blockWords();
+        rig.ovl().set(AtlasOvlNative.SET_BLOCKS, blockWords);
+        rig.ovl().set(AtlasOvlNative.SET_TAPES, tapeWords);
+        rig.ovl().set(AtlasOvlNative.SET_STREETS, AtlasOverlayTapes.streetWords(plan, heights, 0));
+        List<Long> keys = new ArrayList<>();
+        for (int cz = set.cz0(); cz <= set.cz1(); cz++)
+            for (int cx = set.cx0(); cx <= set.cx1(); cx++) keys.add(ChunkPos.pack(cx, cz));
+        int n = keys.size();
+        int[] xz = new int[n * 2];
+        for (int i = 0; i < n; i++) {
+            xz[i * 2] = ChunkPos.getX(keys.get(i));
+            xz[i * 2 + 1] = ChunkPos.getZ(keys.get(i));
+        }
+        int[] miss = rig.gen().missing(xz);
+        for (int i = 0; i < miss.length; i += 3)
+            rig.gen().putPage(miss[i], miss[i + 1], miss[i + 2] != 0, rig.pages().page(miss[i], miss[i + 1], miss[i + 2] != 0));
+        int[] ids = new int[n * AtlasGenNative.CHUNK_WORDS], flags = new int[n];
+        // without the stage, then with it (twice: the first pays the pipelines): the stage's own cost from the kernels
+        rig.ovl().kinds(0);
+        rig.gen().chunks(xz, 0, ids, flags);
+        AtlasGenNative.Times bare = rig.gen().chunks(xz, 0, ids, flags);
+        rig.ovl().kinds(AtlasOvlNative.KIND_PIECES | AtlasOvlNative.KIND_SWEEPS | AtlasOvlNative.KIND_STREETS);
+        rig.gen().chunks(xz, 0, ids, flags);
+        long stamped0 = rig.ovl().stamped();
+        AtlasGenNative.Times with = rig.gen().chunks(xz, 0, ids, flags);
+        Score sc = new Score();
+        long flagged = 0;
+        int levels = 640;
+        for (int i = 0; i < n; i++) {
+            if (flags[i] != 0) flagged++;
+            int[] t = ref.terrain().get(keys.get(i)), rs = ref.streets().get(keys.get(i));
+            for (int b = 0; b < 256 * levels; b++) {
+                int w = ids[i * AtlasGenNative.CHUNK_WORDS + (b >> 1)];
+                int id = (b & 1) != 0 ? w >>> 16 : w & 0xFFFF;
+                int g = id < tapes.blocks.size() ? Block.getId(tapes.blocks.get(id)) : -1;
+                boolean jc = rs[b] != t[b], gc = g != t[b];
+                if (jc || gc) tally(sc, null, rs[b], g, jc, gc);
+            }
+        }
+        double stageMs = with.kernelMs() - bare.kernelMs();
+        report.append(String.format("  the generator's batch with the overlays as a stage: %s; %d chunks flagged; batch kernels %.2f ms without, %.2f ms with "
+                        + "(the stage %.2f ms, %.4f ms a chunk); %d chunks stamped a batch%n", sc, flagged, bare.kernelMs(), with.kernelMs(), stageMs,
+                stageMs / n, rig.ovl().stamped() - stamped0));
+        total.add(sc);
+        trace(String.format("done stage %s %.4f%%", set.place(), sc.pct()));
     }
 
     // ---- test sets --------------------------------------------------------------------------------------------

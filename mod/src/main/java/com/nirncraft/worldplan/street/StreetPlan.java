@@ -455,6 +455,17 @@ public final class StreetPlan {
 
     // ------------------------------------------------------------------ painter / mask access (public: the atlas overlays upload the buckets)
 
+    /** Per bucket id its chunk (bx, bz) pair (the atlas overlays look buckets up on the GPU's side). */
+    public int[] bucketChunks() {
+        int[] out = new int[buckets() * 2];
+        for (var e : bucketOf.long2IntEntrySet()) {
+            long k = e.getLongKey();
+            out[e.getIntValue() * 2] = (int) (k >> 32);
+            out[e.getIntValue() * 2 + 1] = (int) k;
+        }
+        return out;
+    }
+
     /** The number of chunk buckets (bucket ids are 0 .. buckets() - 1). */
     public int buckets() {
         return bucketEdgeOff.length - 1;
