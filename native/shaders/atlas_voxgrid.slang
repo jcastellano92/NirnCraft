@@ -9,6 +9,9 @@
 //   vgIngestMain   a section's generated levels 1-4 from its raw ids (Section::buildMips' vote), each into its place
 //                  in that level's chunk
 //   vgDownMain     (levels 5+) a chunk from its 8 children of the level below, by the same vote
+// The host's warm tier (native/src/sectionpack.hpp: the format), where the ids pass through the GPU anyway:
+//   vgPackMain     a section's raw ids (staged, or on the GPU) to its packed words and content hash, read back
+//   vgUnpackMain   packed words (staged) to a section's raw ids in gsrc (a level-0 slot's copy, the coarse ingest)
 
 struct VgParams {
     uint4 dims;  // D (x), H (y), D (z), job count
@@ -26,6 +29,8 @@ struct VgParams {
 [[vk::binding(5, 0)]] RWStructuredBuffer<uint> sat;
 [[vk::binding(6, 0)]] RWStructuredBuffer<uint> src;  // the batch's sections' raw ids (2048 words each)
 [[vk::binding(7, 0)]] RWStructuredBuffer<uint> gsrc;  // and those that were on the GPU already (VoxGrid::ingestGpu)
+[[vk::binding(8, 0)]] RWStructuredBuffer<uint> packIn;   // packed sections staged (vgUnpackMain)
+[[vk::binding(9, 0)]] RWStructuredBuffer<uint> packOut;  // packed sections made (vgPackMain): per job its hash, then its words
 
 static const uint VG_EMPTY = 0u;
 
@@ -394,4 +399,135 @@ void vgGrowMain(uint3 id : SV_DispatchThreadID) {
     // data in one step to where the grid has some again: atlas_far.slang vgUnloadedEnd)
     if ((c & 3u) != pc.dims.w) return;
     chunks[at] = growBox(int3(x, y, z), int3(int(X), int(Y), int(Z)), 31, 5u, 1u, uint2(0u, 0u)) << 2 | pc.dims.w;
+}
+
+// ---- the warm tier: packed sections (native/src/sectionpack.hpp) --------------------------------------------------
+
+groupshared uint gPKey[512];   // the palette as an open-addressed table: id, ~0u empty
+groupshared uint gPIdx[512];   // and each id's index in the palette
+groupshared uint gPCount;
+groupshared uint gPOver;       // more than the table holds
+groupshared uint gPHash[64];
+
+uint packSrcWord(uint from, uint w) {
+    uint at = (from & 0x7FFFFFFFu) * 2048u + w;
+    return (from & 0x80000000u) != 0u ? gsrc[at] : src[at];
+}
+
+uint packSlotOf(uint id) { return (id * 2654435761u) >> 23; }  // (9 bits)
+
+uint packIndexOf(uint id) {
+    uint q = packSlotOf(id);
+    for (int i = 0; i < 512; i++) {
+        if (gPKey[q] == id) return gPIdx[q];
+        q = (q + 1u) & 511u;
+    }
+    return 0u;
+}
+
+// one group a job (jobs[misc.y + j]: the section's src as an ingest's (VG_GPU_SRC | gsrc index, else src index), the
+// record's first word in packOut): packOut[o] its hash, packOut[o + 1 ..] its packed words
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void vgPackMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
+    uint j = gid.y * pc.misc.x + gid.x;
+    if (j >= pc.dims.w) return;  // (uniform across the group)
+    uint4 jb = jobs[pc.misc.y + j];
+    uint t = tid.x, o = jb.y;
+    for (uint q = t; q < 512u; q += 64u) gPKey[q] = 0xFFFFFFFFu;
+    if (t == 0u) {
+        gPCount = 0u;
+        gPOver = 0u;
+    }
+    GroupMemoryBarrierWithGroupSync();
+    // thread t: voxels 64 t .. 64 t + 63 (words 32 t ..): their hash, their ids into the table
+    uint h = 2166136261u ^ t;
+    for (uint w = 0u; w < 32u; w++) {
+        uint word = packSrcWord(jb.x, 32u * t + w);
+        for (uint e = 0u; e < 2u; e++) {
+            uint id = (word >> (16u * e)) & 0xFFFFu;
+            h = (h ^ (id & 0xFFu)) * 16777619u;
+            h = (h ^ (id >> 8)) * 16777619u;
+            uint q = packSlotOf(id);
+            for (int i = 0; i < 512; i++) {
+                uint prev;
+                InterlockedCompareExchange(gPKey[q], 0xFFFFFFFFu, id, prev);
+                if (prev == 0xFFFFFFFFu) {
+                    uint k;
+                    InterlockedAdd(gPCount, 1u, k);
+                    gPIdx[q] = k;
+                    break;
+                }
+                if (prev == id) break;
+                q = (q + 1u) & 511u;
+                if (i == 511) InterlockedOr(gPOver, 1u);
+            }
+        }
+    }
+    gPHash[t] = h;
+    GroupMemoryBarrierWithGroupSync();
+    uint n = gPCount;
+    bool over = gPOver != 0u || n > 256u;
+    uint bits = over ? 16u : (n <= 1u ? 0u : n <= 2u ? 1u : n <= 4u ? 2u : n <= 16u ? 4u : 8u);
+    if (over) n = 0u;
+    uint palW = (n + 1u) / 2u, base = o + 2u + palW;
+    for (uint q = t; q < palW; q += 64u) packOut[o + 2u + q] = 0u;
+    if (t == 0u) {
+        uint hh = 2166136261u;
+        for (uint r = 0u; r < 64u; r++) hh = (hh ^ gPHash[r]) * 16777619u;
+        packOut[o] = hh;
+        packOut[o + 1u] = bits | n << 8;
+    }
+    AllMemoryBarrierWithGroupSync();
+    if (!over)
+        for (uint q = t; q < 512u; q += 64u) {
+            uint id = gPKey[q];
+            if (id == 0xFFFFFFFFu) continue;
+            uint k = gPIdx[q];
+            InterlockedOr(packOut[o + 2u + k / 2u], id << (16u * (k & 1u)));
+        }
+    if (bits == 0u) return;
+    if (bits == 16u) {
+        for (uint w = 0u; w < 32u; w++) packOut[base + 32u * t + w] = packSrcWord(jb.x, 32u * t + w);
+        return;
+    }
+    // thread t's 64 indices: 2 bits words (a voxel never straddles two words: 32 is a multiple of bits)
+    uint per = 32u / bits, words = 64u / per;
+    for (uint w = 0u; w < words; w++) {
+        uint acc = 0u;
+        for (uint e = 0u; e < per; e++) {
+            uint v = 64u * t + w * per + e;  // (the voxel)
+            uint word = packSrcWord(jb.x, v >> 1);
+            uint id = (word >> (16u * (v & 1u))) & 0xFFFFu;
+            acc |= packIndexOf(id) << (e * bits);
+        }
+        packOut[base + t * words + w] = acc;
+    }
+}
+
+// one group a job (jobs[misc.y + j]: the packed words' first in packIn, the gsrc section it expands into)
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void vgUnpackMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
+    uint j = gid.y * pc.misc.x + gid.x;
+    if (j >= pc.dims.w) return;
+    uint4 jb = jobs[pc.misc.y + j];
+    uint t = tid.x, in0 = jb.x, out = jb.y * 2048u;
+    uint head = packIn[in0], bits = head & 31u, n = (head >> 8) & 511u;
+    uint pal = in0 + 1u, d = pal + (n + 1u) / 2u;
+    for (uint w = 32u * t; w < 32u * t + 32u; w++) {
+        uint pair = 0u;
+        for (uint e = 0u; e < 2u; e++) {
+            uint v = 2u * w + e, id;
+            if (bits == 0u) id = packIn[pal] & 0xFFFFu;
+            else if (bits == 16u) id = (packIn[d + (v >> 1)] >> (16u * (v & 1u))) & 0xFFFFu;
+            else {
+                uint bit = v * bits;
+                uint k = (packIn[d + bit / 32u] >> (bit & 31u)) & ((1u << bits) - 1u);
+                id = (packIn[pal + k / 2u] >> (16u * (k & 1u))) & 0xFFFFu;
+            }
+            pair |= id << (16u * e);
+        }
+        gsrc[out + w] = pair;
+    }
 }

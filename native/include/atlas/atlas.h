@@ -301,6 +301,20 @@ ATLAS_API AtlasStatus atlas_upload_column_tile(AtlasContext* ctx, const AtlasCol
 /* A 16^3 chunk section of palette material ids (0 = air), index x + 16 * (z + 16 * y) like vanilla. Overrides tiles. */
 ATLAS_API AtlasStatus atlas_upload_section(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz,
                                               const uint16_t* mats);
+/* (abi 0.18, additive) The same with flags: ATLAS_SECTION_REGENERABLE, the client generates it again from the seed
+   (its host copy is dropped, not kept or cached, unless an edit changes it). atlas_upload_section is flags 0: kept in
+   the host's tiers, the cold tier on disk when one is set (atlas_set_cache). */
+#define ATLAS_SECTION_REGENERABLE 1u
+ATLAS_API AtlasStatus atlas_upload_section_flags(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz,
+                                                    const uint16_t* mats, uint32_t flags);
+/* (abi 0.18, additive) The host's tiers of real sections (docs/ATLAS-STATUS.md step 5): `dir` the per-world cache
+   directory of the cold tier (NULL or "": none; in the game e.g. .minecraft/atlas-cache/<world id>), the world's seed
+   and the generator's version (what was cached for another world is another directory), the host RAM budget of the
+   warm tier and the disk budget of the cold one (bytes; 0: the defaults, a 32nd of the host heap atlas_memory_info
+   reports within 256 MiB..2 GiB; 4 GiB). Call before the first frame, or again to change them (the cold tier's index
+   is read again). Environment for tools: ATLAS_CACHE_DIR, ATLAS_HOST_SECTIONS_MB, ATLAS_COLD_MB. */
+ATLAS_API AtlasStatus atlas_set_cache(AtlasContext* ctx, const char* dir, uint64_t seed, uint32_t genVersion,
+                                      uint64_t hostBytes, uint64_t diskBytes);
 /* One block edit (any thread): marks the brick dirty in every LOD that contains it. */
 ATLAS_API AtlasStatus atlas_notify_block(AtlasContext* ctx, int32_t x, int32_t y, int32_t z, uint16_t mat);
 ATLAS_API AtlasStatus atlas_set_weather(AtlasContext* ctx, const AtlasWeather* weather);
@@ -690,6 +704,9 @@ ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint3
  * units, cy from y -64), kinds[i] 0 mixed (ids[4096 i ..] its 16^3 voxel ids, x + 16 (z + 16 y)), 1 air,
  * 2 | id << 8 one id. accepted (optional, count bytes): 1 for each taken. Vulkan only (ATLAS_ERR_UNSUPPORTED else).
  */
+/* Test hook: a section's ids as the host holds them now (out: 4096 ids), and where (*tier: 0 none, 1 raw: an upload
+   not yet packed, 2 packed in the warm tier or read back from the cold one). */
+ATLAS_API AtlasStatus atlas_debug_section(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz, uint16_t* out, uint32_t* tier);
 ATLAS_API AtlasStatus atlas_debug_coarse_chunks(AtlasContext* ctx, int32_t level, uint32_t count, const int32_t* pos,
                                                 const uint32_t* kinds, const uint16_t* ids, uint8_t* accepted);
 

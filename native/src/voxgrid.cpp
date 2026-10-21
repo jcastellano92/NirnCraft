@@ -10,6 +10,7 @@
 #include <cstring>
 
 #include "groups.hpp"
+#include "sectionpack.hpp"
 #include "world.hpp"
 
 namespace atlas {
@@ -26,6 +27,7 @@ VoxGrid::VoxGrid() {
     if (const char* e = std::getenv("ATLAS_VOXGRID_COARSE")) coarseLevels = std::clamp(std::atoi(e), 0, VG_LEVELS - 1);
     if (const char* e = std::getenv("ATLAS_VOXGRID_COARSE_D")) coarseD = std::clamp(std::atoi(e), 8, 128);
     if (const char* e = std::getenv("ATLAS_VOXGRID_COARSE_BUDGET")) coarseBudget = std::max(1, std::atoi(e));
+    if (const char* e = std::getenv("ATLAS_PACK_BUDGET")) packBudget = std::max(0, std::atoi(e));
     if (const char* e = std::getenv("ATLAS_VOXGRID_COARSE_SLOTS")) {
         int k = 1;
         for (const char* p = e; *p && k < VG_LEVELS; k++) {
@@ -109,6 +111,7 @@ VoxGrid::Residency VoxGrid::residency() const {
     r.uniform = uniform_;
     r.waiting = standby_.size();
     r.gpuWaiting = gpuStandby_.size();
+    r.coarseWaiting = cpending_.size();
     r.evicted = stats_.evicted;
     r.misses = misses_;
     r.gpuUniform = gpuUniformHits_;
@@ -123,6 +126,11 @@ std::vector<std::array<int32_t, 4>> VoxGrid::takeGpuWanted() {
     std::vector<std::array<int32_t, 4>> r;
     r.swap(gpuWanted_);
     return r;
+}
+
+void VoxGrid::packedResults(const std::vector<World::PackDone>& done) {
+    // (no grid lock: the world's own)
+    if (world_ && !done.empty()) world_->packedDone(done);
 }
 
 void VoxGrid::gpuPendingOffsets(uint64_t buffer, std::vector<uint64_t>& out) const {
@@ -183,7 +191,7 @@ void VoxGrid::gpuUniform(const std::vector<UniformHit>& hits) {
         if (slotOf_[h.chunk] != h.slot || slotChunk_[h.slot] != h.chunk || cellGen_[h.chunk] != h.gen || state_[h.chunk] != VG_MIXED) continue;
         freeSlots_.push_back(h.slot);
         slotChunk_[h.slot] = ~0u;
-        slotIds_[h.slot] = nullptr;
+        slotCpu_[h.slot] = 0;
         slotOf_[h.chunk] = ~0u;
         slotsUsed_--;
         // (the build wrote its word already: VG_UNIFORM with the id, or VG_EMPTY)
@@ -247,10 +255,10 @@ size_t VoxGrid::ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_
         gpuRef_[key] = {buffer, offsets[i]};
         if (uni != VG_NOT_UNIFORM) gpuUniformHint_[key] = uni;
         else gpuUniformHint_.erase(key);
-        if (level0) pending_[key] = nullptr;  // (null: its ids are gpuRef_'s)
+        if (level0) pending_[key] = VgSrc{};  // (none: its ids are gpuRef_'s)
         if (levels) {
             CPending& p = cpending_[key];
-            p.ids = nullptr;
+            p.ids = VgSrc{};
             p.levels |= levels;
         }
     }
@@ -322,10 +330,10 @@ void VoxGrid::put(int sx, int sy, int sz, VgIds a) {
     standby_.erase({sx, sy, sz});
     gpuStandby_.erase({sx, sy, sz});
     gpuUniformHint_.erase({sx, sy, sz});
-    if (level0) pending_[{sx, sy, sz}] = a;
+    if (level0) pending_[{sx, sy, sz}] = VgSrc{a, nullptr};
     if (levels) {
         CPending& p = cpending_[{sx, sy, sz}];
-        p.ids = std::move(a);
+        p.ids = VgSrc{std::move(a), nullptr};
         p.levels |= levels;
     }
     gpuRef_.erase({sx, sy, sz});  // (an upload replaces a GPU section waiting, and holding it is the world's again)
@@ -575,7 +583,7 @@ void VoxGrid::refillCoarse(World& world, bool wait) {
         x1 = std::max(x1, (L.ox + L.D) * s), z1 = std::max(z1, (L.oz + L.D) * s);
     }
     if (x0 > x1) return;
-    std::vector<std::pair<Key3, std::shared_ptr<const Section>>> secs;
+    std::vector<std::pair<Key3, World::SectionSrc>> secs;
     if (wait) world.sectionsIn(x0, z0, x1, z1, secs);
     else if (!world.trySectionsIn(x0, z0, x1, z1, secs)) return;
     for (auto& [key, sec] : secs) {
@@ -589,7 +597,7 @@ void VoxGrid::refillCoarse(World& world, bool wait) {
         }
         if (!levels) continue;
         CPending& p = cpending_[{key.x, key.y, key.z}];
-        if (!p.ids) p.ids = Ids(sec, &sec->mats);  // (an upload since is newer)
+        if (p.ids.gpu()) p.ids = sec.raw ? VgSrc{VgIds(sec.raw, &sec.raw->mats), nullptr} : VgSrc{nullptr, sec.packed};  // (an upload since is newer)
         p.levels |= levels;
     }
     for (int k = 1; k <= activeCoarse_; k++) {
@@ -603,12 +611,13 @@ void VoxGrid::refillCoarse(World& world, bool wait) {
 void VoxGrid::refillLocked(World& world, bool wait) {
     // the world's sections of the columns the window entered (shared, not copied); on the render thread only when the
     // world's lock is free (never waiting for an update building regions), on the update thread always (refill)
-    std::vector<std::pair<Key3, std::shared_ptr<const Section>>> secs;
+    std::vector<std::pair<Key3, World::SectionSrc>> secs;
     if (wait) world.sectionsIn(ox_, oz_, ox_ + D, oz_ + D, secs);
     else if (!world.trySectionsIn(ox_, oz_, ox_ + D, oz_ + D, secs)) return;
     for (auto& [k, s] : secs) {
         if (!inWindow(k.x, k.y, k.z) || !colFresh_[physCol(k.x, k.z)]) continue;
-        if (!pending_.count({k.x, k.y, k.z})) pending_[{k.x, k.y, k.z}] = Ids(s, &s->mats);  // (an upload since is newer)
+        if (!pending_.count({k.x, k.y, k.z}))  // (an upload since is newer)
+            pending_[{k.x, k.y, k.z}] = s.raw ? VgSrc{VgIds(s.raw, &s.raw->mats), nullptr} : VgSrc{nullptr, s.packed};
     }
     std::fill(colFresh_.begin(), colFresh_.end(), uint8_t(0));
     freshColumns_ = 0;
@@ -626,7 +635,7 @@ void VoxGrid::shift(int nox, int noz, World& world) {
         colFresh_.assign(size_t(D) * D, uint8_t(1));
         freshColumns_ = uint32_t(D * D);
         slotChunk_.assign(slotCap, ~0u);
-        slotIds_.assign(slotCap, nullptr);
+        slotCpu_.assign(slotCap, 0);
         cellGen_.assign(n, 0);
         freeSlots_.clear();
         nextSlot_ = 0;
@@ -650,7 +659,7 @@ void VoxGrid::shift(int nox, int noz, World& world) {
                     if (slotOf_[c] != ~0u) {
                         freeSlots_.push_back(slotOf_[c]);
                         slotChunk_[slotOf_[c]] = ~0u;
-                        slotIds_[slotOf_[c]] = nullptr;
+                        slotCpu_[slotOf_[c]] = 0;
                         slotOf_[c] = ~0u;
                         slotsUsed_--;
                     }
@@ -690,6 +699,23 @@ VgBatch VoxGrid::take(int maxSections) {
     if (centred_) take0(b, maxSections);
     b.level0Jobs = b.jobs.size();
     if (activeCoarse_) takeCoarse(b);
+    // the host's warm tier: uploads packed on the GPU (staged with the batch's raw sections, read back next time)
+    if (world_ && world_->packOnGpu.load(std::memory_order_relaxed) && packBudget > 0) {
+        std::vector<World::PackReq> reqs;
+        // (a backlog: more a batch, up to an eighth of it, 4096 at most: raw sections wait in host RAM until packed)
+        world_->takePackQueue(size_t(packBudget), reqs, 4096);
+        std::unordered_map<const void*, uint32_t> staged;
+        for (size_t i = 0; i < b.secs.size(); i++) staged[b.secs[i].get()] = uint32_t(i);
+        for (World::PackReq& r : reqs) {
+            VgIds ids(r.sec, &r.sec->mats);
+            auto f = staged.find(ids.get());
+            if (f == staged.end()) {
+                f = staged.emplace(ids.get(), uint32_t(b.secs.size())).first;
+                b.secs.push_back(ids);
+            }
+            b.packJobs.push_back({r.key, r.gen, f->second});
+        }
+    }
     // (ingestGpu's sections no level waits for any more: their windows moved on)
     for (auto it = gpuRef_.begin(); it != gpuRef_.end();)
         it = pending_.count(it->first) || cpending_.count(it->first) ? std::next(it) : gpuRef_.erase(it);
@@ -726,7 +752,7 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
     size_t n = size_t(D) * H * D;
     if (jobAt_.size() != n) jobAt_.assign(n, ~0u);
     if (cellGen_.size() != n) cellGen_.assign(n, 0u);
-    if (slotIds_.size() != slotCap) slotIds_.resize(slotCap);
+    if (slotCpu_.size() != slotCap) slotCpu_.resize(slotCap);
     std::vector<uint32_t> touched;  // (jobAt_ put back after the batch)
     auto emit = [&](uint32_t chunk, uint32_t word, uint32_t slot, uint32_t data) {
         uint8_t st = uint8_t(word & 3u);
@@ -752,7 +778,7 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
         if (slotOf_[chunk] == ~0u) return;
         freeSlots_.push_back(slotOf_[chunk]);
         slotChunk_[slotOf_[chunk]] = ~0u;
-        slotIds_[slotOf_[chunk]] = nullptr;
+        slotCpu_[slotOf_[chunk]] = 0;
         slotOf_[chunk] = ~0u;
         slotsUsed_--;
     };
@@ -819,13 +845,13 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
         uint32_t slot = slotOf_[vc];
         int vx, vy, vz;
         worldOf(vc, vx, vy, vz);
-        if (slotIds_[slot]) {
-            standby_[{vx, vy, vz}] = slotIds_[slot];
+        if (slotCpu_[slot]) {
+            standby_[{vx, vy, vz}] = 1;  // (its ids: the world's tiers)
         } else {
             gpuLetGo(vx, vy, vz, 1u);
             gpuStandby_[{vx, vy, vz}] = 0;
         }
-        slotIds_[slot] = nullptr;
+        slotCpu_[slot] = 0;
         slotOf_[vc] = ~0u;
         slotChunk_[slot] = ~0u;
         slotsUsed_--;
@@ -855,12 +881,18 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
             auto it = pending_.find(k);
             if (it == pending_.end()) continue;
             ids = it->second;
-            onGpu = !ids;  // (ingestGpu's: their ids on the GPU)
+            onGpu = ids.gpu();  // (ingestGpu's: their ids on the GPU)
         } else if (cand.from == 1) {
             auto it = standby_.find(k);
             if (it == standby_.end()) continue;
             if (!canTake(cand.p) && slotOf_[c] == ~0u) continue;
-            ids = it->second;
+            // (its ids from the world's tiers: raw, packed warm, or read back from the cold tier; gone: forgotten)
+            World::SectionSrc src = world_ ? world_->sectionSource(k.x, k.y, k.z) : World::SectionSrc{};
+            if (!src) {
+                standby_.erase(it);
+                continue;
+            }
+            ids = src.raw ? VgSrc{VgIds(src.raw, &src.raw->mats), nullptr} : VgSrc{nullptr, src.packed};
         } else {
             // a GPU section level 0 gave up or did not take: asked for again (once) when it would be taken now
             auto it = gpuStandby_.find(k);
@@ -874,8 +906,10 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
         if (onGpu) {
             auto h = gpuUniformHint_.find(k);
             if (h != gpuUniformHint_.end()) uni = h->second;
+        } else if (ids.packed) {
+            uni = packUniform(ids.packed->data());
         } else {
-            uni = uniformIdOf(*ids);
+            uni = uniformIdOf(*ids.ids);
         }
         static const bool uniformOn = [] {  // (ATLAS_VOXGRID_UNIFORM=0, measurements: a slot for every non-air section)
             const char* e = std::getenv("ATLAS_VOXGRID_UNIFORM");
@@ -904,7 +938,7 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
                     gpuLetGo(k.x, k.y, k.z, 1u);
                     gpuStandby_[k] = 0;
                 } else {
-                    standby_[k] = ids;
+                    standby_[k] = 1;
                 }
                 if (cand.p < 1e29f) {
                     misses_++;
@@ -916,10 +950,13 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
                 if (onGpu) {
                     at = VG_GPU_SRC | uint32_t(b.gsecs.size());
                     b.gsecs.push_back(gpuRef_[k]);
+                } else if (ids.packed) {
+                    at = VG_PACK_SRC | uint32_t(b.packs.size());  // (expanded on the GPU, then copied)
+                    b.packs.push_back(ids.packed);
                 } else {
-                    b.secs.push_back(ids);  // (shared: the backend copies it once, into its staging)
+                    b.secs.push_back(ids.ids);  // (shared: the backend copies it once, into its staging)
                 }
-                slotIds_[slot] = onGpu ? nullptr : ids;
+                slotCpu_[slot] = onGpu ? 0 : 1;
                 emit(c, slot << 2 | VG_MIXED, slot, at);
                 standby_.erase(k);
                 built++;
@@ -1177,7 +1214,8 @@ void VoxGrid::takeCoarse(VgBatch& b) {
         ++it;
     }
     auto byDist = [](const auto& a, const auto& c) { return a.first < c.first; };
-    size_t share = std::min(order.size(), size_t(coarseBudget));
+    // (a backlog: more a batch, up to an eighth of it, 4096 at most: what waits pins its sections' ids in host RAM)
+    size_t share = std::min(order.size(), std::max(size_t(coarseBudget), std::min(order.size() / 8, size_t(4096))));
     if (share < order.size()) {
         std::nth_element(order.begin(), order.begin() + ptrdiff_t(share), order.end(), byDist);
         order.resize(share);
@@ -1185,18 +1223,20 @@ void VoxGrid::takeCoarse(VgBatch& b) {
     std::sort(order.begin(), order.end(), byDist);
     std::unordered_map<const void*, uint32_t> staged;  // ids level 0 sends already
     for (size_t i = 0; i < b.secs.size(); i++) staged[b.secs[i].get()] = uint32_t(i);
+    std::unordered_map<const void*, uint32_t> stagedPacks;  // (and packed ones)
+    for (size_t i = 0; i < b.packs.size(); i++) stagedPacks[b.packs[i].get()] = uint32_t(i);
     int sectionLevels = std::min(4, activeCoarse_);
     for (auto& [dist, key] : order) {
         auto pit = cpending_.find(key);
         CPending p = std::move(pit->second);
         cpending_.erase(pit);
-        bool onGpu = !p.ids;  // (ingestGpu's: taken as having blocks unless the caller said it is one id)
+        bool onGpu = p.ids.gpu();  // (ingestGpu's: taken as having blocks unless the caller said it is one id)
         uint32_t uni = VG_NOT_UNIFORM;
         if (onGpu) {
             auto h = gpuUniformHint_.find(key);
             if (h != gpuUniformHint_.end()) uni = h->second;
         } else {
-            uni = uniformIdOf(*p.ids);
+            uni = p.ids.packed ? packUniform(p.ids.packed->data()) : uniformIdOf(*p.ids.ids);
         }
         bool nonAir = uni != 0;
         VgIngest ing{};
@@ -1254,11 +1294,20 @@ void VoxGrid::takeCoarse(VgBatch& b) {
                 b.gsecs.push_back(g->second);
                 b.ingests.push_back(ing);
             }
+        } else if (any && p.ids.packed) {
+            // (packed: expanded on the GPU first, read there as the GPU's own sections are)
+            auto f = stagedPacks.find(p.ids.packed.get());
+            if (f == stagedPacks.end()) {
+                f = stagedPacks.emplace(p.ids.packed.get(), uint32_t(b.packs.size())).first;
+                b.packs.push_back(p.ids.packed);
+            }
+            ing.src = VG_PACK_SRC | f->second;
+            b.ingests.push_back(ing);
         } else if (any) {
-            auto f = staged.find(p.ids.get());
+            auto f = staged.find(p.ids.ids.get());
             if (f == staged.end()) {
-                f = staged.emplace(p.ids.get(), uint32_t(b.secs.size())).first;
-                b.secs.push_back(p.ids);
+                f = staged.emplace(p.ids.ids.get(), uint32_t(b.secs.size())).first;
+                b.secs.push_back(p.ids.ids);
             }
             ing.src = f->second;
             b.ingests.push_back(ing);
@@ -1535,7 +1584,7 @@ void VoxGrid::applyCpu(const VgBatch& b) {
     static const std::vector<uint8_t> noClasses;
     const std::vector<uint8_t>& cls = b.classes ? *b.classes : noClasses;
     for (const VgIngest& ing : b.ingests) {
-        if (ing.src & VG_GPU_SRC) continue;  // (ingestGpu's: the Vulkan backend's alone)
+        if (ing.src & (VG_GPU_SRC | VG_PACK_SRC)) continue;  // (ingestGpu's, packed ones: the Vulkan backend's alone)
         Section sec;
         std::memcpy(sec.mats.data(), b.secs[ing.src]->data(), 4096 * 2);
         sec.buildMips(cls);
@@ -1575,7 +1624,7 @@ void VoxGrid::applyCpu(const VgBatch& b) {
         }
         chunks[j.chunk] = j.word;
         if (j.slot == ~0u) continue;
-        if (j.data != VG_NO_COPY && (j.data & VG_GPU_SRC)) {  // (ingestGpu's: not here)
+        if (j.data != VG_NO_COPY && (j.data & (VG_GPU_SRC | VG_PACK_SRC))) {  // (ingestGpu's, packed ones: not here)
             chunks[j.chunk] = VG_UNLOADED;
             continue;
         }

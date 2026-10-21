@@ -51,9 +51,12 @@
 #include "atlas_vg_fill_spv.h"
 #include "atlas_vg_ingest_spv.h"
 #include "atlas_vg_down_spv.h"
+#include "atlas_vg_pack_spv.h"
+#include "atlas_vg_unpack_spv.h"
 #include "backend.hpp"
 #include "gl_api.hpp"
 #include "gl_near.hpp"
+#include "sectionpack.hpp"
 #include "voxgrid.hpp"
 
 namespace atlas {
@@ -209,8 +212,8 @@ constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPT
 constexpr uint32_t LIGHT_LIST_HEAD = 260, LIGHT_TILE_WORDS = 65;
 // the grid's build kernels (atlas_voxgrid.slang): chunks, blocks, bits, pool, jobs, summed-volume table, the batch's
 // sections' raw ids (the coarse levels' ingest reads them where they were staged), and those that were on the GPU
-// already (VoxGrid::ingestGpu), copied together
-constexpr uint32_t VG_BINDINGS = 8;
+// already (VoxGrid::ingestGpu), copied together; packed sections staged to expand, and those packed for the host
+constexpr uint32_t VG_BINDINGS = 10;
 // the scene's buffers (two copies, staged off the render thread)
 constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP, B_GROUPS};
 bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP || b == B_GROUPS; }
@@ -358,6 +361,12 @@ struct Slot {
     uint32_t vgClearsAt = 0, vgClears = 0, vgFillsAt = 0, vgFills = 0, vgIngestAt = 0, vgIngests = 0;
     uint32_t vgDownAt[VG_LEVELS] = {}, vgDowns[VG_LEVELS] = {};
     uint32_t vgClassAt = 0, vgClassN = 0;
+    // (the host's tiers) packed sections staged and expanded into vgGsrc after the GPU's own (then copied into level
+    // 0's slots), and raw sections packed for the host (read back when this slot comes round again: their keys)
+    Buf vgPackIn, vgPackOut, vgPackBack;
+    uint32_t vgUnpackAt = 0, vgUnpacks = 0, vgPackAt = 0, vgPacks = 0, vgPackRead = 0;
+    std::vector<VkBufferCopy> vgPackCopies;
+    std::vector<std::pair<Key3, uint32_t>> vgPackKeys;
     struct VgLevelRec {
         bool clear = false, grow = false;
         uint32_t D = 0, H = 0, base = 0;
@@ -387,6 +396,9 @@ public:
                 release(s.vgJobs);
                 release(s.vgGsrc);
                 release(s.vgResults);
+                release(s.vgPackIn);
+                release(s.vgPackOut);
+                release(s.vgPackBack);
                 if (s.fence) vkDestroyFence(dev_, s.fence, nullptr);
                 if (s.query) vkDestroyQueryPool(dev_, s.query, nullptr);
             }
@@ -1938,10 +1950,12 @@ private:
                         vgShaders_[0], err, "vgSectionMain"))
             return false;
         const uint32_t* code[VG_KERNELS] = {atlas_vg_section_spv, atlas_vg_satx_spv, atlas_vg_satz_spv, atlas_vg_saty_spv,
-                                            atlas_vg_grow_spv, atlas_vg_fill_spv, atlas_vg_ingest_spv, atlas_vg_down_spv};
+                                            atlas_vg_grow_spv, atlas_vg_fill_spv, atlas_vg_ingest_spv, atlas_vg_down_spv,
+                                            atlas_vg_pack_spv, atlas_vg_unpack_spv};
         const size_t bytes[VG_KERNELS] = {atlas_vg_section_spv_size, atlas_vg_satx_spv_size, atlas_vg_satz_spv_size,
                                           atlas_vg_saty_spv_size, atlas_vg_grow_spv_size, atlas_vg_fill_spv_size,
-                                          atlas_vg_ingest_spv_size, atlas_vg_down_spv_size};
+                                          atlas_vg_ingest_spv_size, atlas_vg_down_spv_size, atlas_vg_pack_spv_size,
+                                          atlas_vg_unpack_spv_size};
         for (int k = 1; k < VG_KERNELS; k++) {
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
             smci.codeSize = bytes[k];
@@ -1980,6 +1994,21 @@ private:
             if (!hits.empty()) in.voxgrid->gpuUniform(hits);
         }
         s.vgResultN = 0;
+        // (and the raw sections it packed: to the world's warm tier)
+        if (s.vgPackRead && in.voxgrid && s.vgPackBack.map) {
+            std::vector<World::PackDone> done;
+            const uint32_t* r = static_cast<const uint32_t*>(s.vgPackBack.map);
+            for (uint32_t k = 0; k < s.vgPackRead && k < s.vgPackKeys.size(); k++) {
+                const uint32_t* rec = r + size_t(k) * (PACK_MAX_WORDS + 1);
+                uint32_t n = packWords(rec + 1);
+                if (n > PACK_MAX_WORDS) continue;
+                done.push_back({s.vgPackKeys[k].first, s.vgPackKeys[k].second, rec[0],
+                                std::make_shared<const std::vector<uint32_t>>(rec + 1, rec + 1 + n)});
+            }
+            in.voxgrid->packedResults(done);
+        }
+        s.vgPackRead = 0;
+        s.vgUnpacks = s.vgPacks = 0;
         s.vgCopies.clear();
         s.vgJobCount = 0;
         s.vgClear = s.vgStates = s.vgTimed = false;
@@ -2035,6 +2064,8 @@ private:
         for (int k = 0; k < VG_LEVELS; k++) s.vgDownAt[k] = at, s.vgDowns[k] = uint32_t(b.downs[k].size()), at += 3 * s.vgDowns[k];
         size_t ncls = b.classes ? b.classes->size() : 0;
         s.vgClassAt = at, s.vgClassN = uint32_t(ncls), at += uint32_t((ncls + 15) / 16);
+        s.vgUnpackAt = at, s.vgUnpacks = uint32_t(b.packs.size()), at += s.vgUnpacks;
+        s.vgPackAt = at, s.vgPacks = uint32_t(b.packJobs.size()), at += s.vgPacks;
         size_t dataBytes = b.secs.size() * SECTION_BYTES, jobBytes = size_t(at) * 16;
         if (!ensure(s.vgStage, dataBytes, false, Mem::Staging, err) || !ensure(s.vgJobs, jobBytes, false, Mem::HostWrite, err))
             return false;
@@ -2044,7 +2075,36 @@ private:
         if (!b.jobs.empty()) std::memcpy(jm, b.jobs.data(), b.jobs.size() * 16);
         if (s.vgClears) std::memcpy(jm + size_t(s.vgClearsAt) * 16, b.clears.data(), size_t(s.vgClears) * 16);
         if (s.vgFills) std::memcpy(jm + size_t(s.vgFillsAt) * 16, b.fills.data(), size_t(s.vgFills) * 16);
-        if (s.vgIngests) std::memcpy(jm + size_t(s.vgIngestAt) * 16, b.ingests.data(), size_t(s.vgIngests) * 32);
+        // (packed sections' ingests read them where they are expanded: after the GPU's own in vgGsrc)
+        const uint32_t G = uint32_t(b.gsecs.size());
+        for (size_t k = 0; k < b.ingests.size(); k++) {
+            VgIngest ing = b.ingests[k];
+            if (ing.src != ~0u && (ing.src & VG_PACK_SRC)) ing.src = VG_GPU_SRC | (G + (ing.src & ~VG_PACK_SRC));
+            std::memcpy(jm + (size_t(s.vgIngestAt) + 2 * k) * 16, &ing, 32);
+        }
+        {
+            // packed sections staged (their words one after the other), each expanded into vgGsrc[G + i]
+            size_t words = 0;
+            for (const VgPacked& p : b.packs) words += p->size();
+            if (!ensure(s.vgPackIn, words * 4, false, Mem::Staging, err)) return false;
+            size_t w = 0;
+            for (size_t i = 0; i < b.packs.size(); i++) {
+                std::memcpy(static_cast<uint32_t*>(s.vgPackIn.map) + w, b.packs[i]->data(), b.packs[i]->size() * 4);
+                uint32_t job[4] = {uint32_t(w), G + uint32_t(i), 0, 0};
+                std::memcpy(jm + (size_t(s.vgUnpackAt) + i) * 16, job, 16);
+                w += b.packs[i]->size();
+            }
+            // raw sections packed for the host's warm tier: a record of PACK_MAX_WORDS + 1 each (its hash, its words)
+            if (!ensure(s.vgPackOut, size_t(b.packJobs.size()) * (PACK_MAX_WORDS + 1) * 4, false, Mem::DeviceOnly, err) ||
+                !ensure(s.vgPackBack, size_t(b.packJobs.size()) * (PACK_MAX_WORDS + 1) * 4, false, Mem::Readback, err))
+                return false;
+            s.vgPackKeys.clear();
+            for (size_t i = 0; i < b.packJobs.size(); i++) {
+                uint32_t job[4] = {b.packJobs[i].src, uint32_t(i) * (PACK_MAX_WORDS + 1), 0, 0};
+                std::memcpy(jm + (size_t(s.vgPackAt) + i) * 16, job, 16);
+                s.vgPackKeys.push_back({b.packJobs[i].key, b.packJobs[i].gen});
+            }
+        }
         for (int k = 0; k < VG_LEVELS; k++)
             if (s.vgDowns[k]) std::memcpy(jm + size_t(s.vgDownAt[k]) * 16, b.downs[k].data(), size_t(s.vgDowns[k]) * 48);
         if (ncls) {
@@ -2053,7 +2113,8 @@ private:
         }
         constexpr VkDeviceSize SEC = VkDeviceSize(VG_SECTION_WORDS) * 4;
         s.vgGcopies.clear();
-        if (!ensure(s.vgGsrc, b.gsecs.size() * SECTION_BYTES, false, Mem::DeviceOnly, err)) return false;
+        if (!ensure(s.vgGsrc, (b.gsecs.size() + b.packs.size()) * SECTION_BYTES, false, Mem::DeviceOnly, err)) return false;
+        s.vgPackCopies.clear();
         for (size_t k = 0; k < b.gsecs.size(); k++)
             s.vgGcopies.push_back({VkBuffer(b.gsecs[k].buffer), {VkDeviceSize(b.gsecs[k].offset), VkDeviceSize(k) * SEC, SEC}, false});
         // (ingestCoarseGpu) the generator's coarse chunks into their slots whole, before the passes refine them
@@ -2065,6 +2126,9 @@ private:
             if (j.data & VG_GPU_SRC) {
                 const VgGpuRef& g = b.gsecs[j.data & ~VG_GPU_SRC];
                 s.vgGcopies.push_back({VkBuffer(g.buffer), {VkDeviceSize(g.offset), VkDeviceSize(j.slot) * SEC, SEC}, true});
+            } else if (j.data & VG_PACK_SRC) {
+                // (expanded into vgGsrc first: then into its slot)
+                s.vgPackCopies.push_back({VkDeviceSize(G + (j.data & ~VG_PACK_SRC)) * SEC, VkDeviceSize(j.slot) * SEC, SEC});
             } else {
                 s.vgCopies.push_back({VkDeviceSize(j.data) * SEC, VkDeviceSize(j.slot) * SEC, SEC});
             }
@@ -2092,7 +2156,7 @@ private:
                          b.levels[k].ox, b.levels[k].oz};
         }
         const Buf* bound[VG_BINDINGS] = {&shared_[B_VG_CHUNKS], &shared_[B_VG_BLOCKS], &shared_[B_VG_BITS], &shared_[B_VG_POOL],
-                                         &s.vgJobs, &vgSat_, &s.vgStage, &s.vgGsrc};
+                                         &s.vgJobs, &vgSat_, &s.vgStage, &s.vgGsrc, &s.vgPackIn, &s.vgPackOut};
         VkDescriptorBufferInfo bi[VG_BINDINGS];
         VkWriteDescriptorSet wr[VG_BINDINGS];
         for (uint32_t i = 0; i < VG_BINDINGS; i++) {
@@ -2109,7 +2173,7 @@ private:
     }
 
     void recordVoxGrid(Slot& s) {
-        bool any = s.vgJobCount || s.vgClears || s.vgFills || s.vgIngests || !s.vgGcopies.empty();
+        bool any = s.vgJobCount || s.vgClears || s.vgFills || s.vgIngests || !s.vgGcopies.empty() || s.vgUnpacks || s.vgPacks;
         for (int k = 0; k < VG_LEVELS; k++) any |= s.vgLv[k].clear || s.vgLv[k].grow || s.vgDowns[k];
         if (!any) return;
         VkCommandBuffer cmd = s.cmd;
@@ -2146,6 +2210,29 @@ private:
             vkCmdDispatch(cmd, std::min(count, row), (count + row - 1) / row, 1);
             computeBarrier(cmd);
         };
+        // (the host's tiers) packed sections expanded, then copied into their level-0 slots; raw ones packed
+        pass(9, s.vgUnpacks, s.vgUnpackAt);
+        if (!s.vgPackCopies.empty()) {
+            mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+            mb.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+            vkCmdCopyBuffer(cmd, s.vgGsrc.buf, shared_[B_VG_POOL].buf, uint32_t(s.vgPackCopies.size()), s.vgPackCopies.data());
+            mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+        }
+        pass(8, s.vgPacks, s.vgPackAt);
+        if (s.vgPacks) {
+            mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+            mb.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+            VkBufferCopy pc{0, 0, VkDeviceSize(s.vgPacks) * (PACK_MAX_WORDS + 1) * 4};
+            vkCmdCopyBuffer(cmd, s.vgPackOut.buf, s.vgPackBack.buf, 1, &pc);
+            mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
+            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+            s.vgPackRead = s.vgPacks;
+        }
         pass(5, s.vgClears, s.vgClearsAt);
         pass(5, s.vgFills, s.vgFillsAt);
         pass(6, s.vgIngests, s.vgIngestAt);
@@ -2845,7 +2932,7 @@ private:
     uint64_t lightRevision_ = ~0ull;
     // the level-0 grid (voxgrid.hpp): its build kernels, their layout, the summed-volume table, the last build's GPU time
     // vgSectionMain, vgSatX, vgSatZ, vgSatY, vgGrowMain, vgFillMain, vgIngestMain, vgDownMain
-    static constexpr int VG_KERNELS = 8;
+    static constexpr int VG_KERNELS = 10;
     VkPipeline vgPipes_[VG_KERNELS] = {};
     VkShaderModule vgShaders_[VG_KERNELS] = {};
     VkPipelineLayout vgLayout_ = VK_NULL_HANDLE;

@@ -9,6 +9,7 @@
 #include <thread>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -28,6 +29,7 @@ struct Key3 {
     int lod, x, y, z;
     bool operator==(const Key3&) const = default;
 };
+class SectionStore;  // (sectionstore.hpp)
 struct Key3Hash {
     size_t operator()(const Key3& k) const {
         uint64_t h = uint64_t(uint32_t(k.x)) * 0x9E3779B97F4A7C15ull ^ uint64_t(uint32_t(k.z)) * 0xC2B2AE3D27D4EB4Full ^
@@ -141,7 +143,7 @@ struct PackedScene {
 
 class World {
 public:
-    World() = default;
+    World();
     World(const World&) = delete;
     World& operator=(const World&) = delete;
     ~World();
@@ -158,12 +160,45 @@ public:
     std::atomic<uint32_t> fadeMs{0};
 
     void putTile(std::unique_ptr<Tile> t);
-    // (returns the stored section: immutable, shared with the GPU grid's books, VoxGrid::put)
-    std::shared_ptr<const Section> putSection(int sx, int sy, int sz, const uint16_t* mats);
+    // (returns the stored section: immutable, shared with the GPU grid's books, VoxGrid::put). flags: SectionStore's
+    // REGEN (the client generates it again when wanted: dropped, not kept, unless edited)
+    std::shared_ptr<const Section> putSection(int sx, int sy, int sz, const uint16_t* mats, uint8_t flags = 0);
+    // A section's ids as the host holds them: raw (an upload not yet packed; the CPU backend's) or packed (the warm or
+    // cold tier: sectionstore.hpp; sectionpack.hpp's words)
+    struct SectionSrc {
+        std::shared_ptr<const Section> raw;
+        std::shared_ptr<const std::vector<uint32_t>> packed;
+        explicit operator bool() const { return raw || packed; }
+    };
     // the real sections of columns [sx0, sx1) x [sz0, sz1) (the GPU's level-0 grid, voxgrid.hpp, re-reads them when
-    // its window moves); and one section's ids (false: none)
-    void sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const;
-    bool sectionMats(int sx, int sy, int sz, uint16_t out[4096]) const;
+    // its window moves; the cold tier's read back); one section's ids (false: none); one section as held (or none)
+    void sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, SectionSrc>>& out);
+    bool sectionMats(int sx, int sy, int sz, uint16_t out[4096]);
+    SectionSrc sectionSource(int sx, int sy, int sz);
+    // The host's tiers (step 5's residency): uploads are packed on the GPU (the grid's batches: packOnGpu, set by the
+    // Vulkan backend's context) into the warm tier; the raw copy goes once its packed words came back. The queue of
+    // raw sections to pack (each with its generation: a newer upload makes an older pack stale), and the results.
+    std::atomic<bool> packOnGpu{false};
+    void setPackOnGpu(bool on);  // (turned on: the raw sections held already are queued too)
+    struct PackReq {
+        Key3 key;
+        uint32_t gen = 0;
+        std::shared_ptr<const Section> sec;
+    };
+    void takePackQueue(size_t max, std::vector<PackReq>& out, size_t burst = 0);  // (burst: up to queue / 8, this many)
+    struct PackDone {
+        Key3 key;
+        uint32_t gen = 0, hash = 0;
+        std::shared_ptr<const std::vector<uint32_t>> words;
+    };
+    void packedDone(const std::vector<PackDone>& done);
+    // the cold tier's directory (empty: none) and the world's identity, the budgets (bytes; 0: the defaults)
+    void configureStore(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBytes, uint64_t coldBytes);
+    struct StoreStats {
+        size_t raw = 0, packQueue = 0;
+        uint64_t rawBytes = 0, packed = 0;
+    };
+    StoreStats storeStats(void* tiers) const;  // (tiers: a SectionStore::Stats to fill, or null)
     // The GPU's level-0 grid (voxgrid.hpp) owns level 0 (ATLAS_VOXGRID_LEVEL0=1): a section it holds (inside its window)
     // no longer rebuilds its level-0 region on the CPU (the grid is rebuilt on the GPU; the region stays as it was, the
     // fallback past the grid). setGridWindow (the grid's window moved: x, z origin and size in sections) rebuilds the
@@ -185,7 +220,7 @@ public:
     // level-0 regions rebuilt here, and their uploads no longer skipped, until the window moves on
     void gridReleased(const std::vector<Key3>& secs);
     // sectionsIn, or false without waiting when an update holds the world's lock (the render thread's grid)
-    bool trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const;
+    bool trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, SectionSrc>>& out);
     size_t gridSkippedCount() const;
     // the palette's material classes (for the sections' generated levels); set when the palette changes
     void setClasses(std::vector<uint8_t> cls);
@@ -289,6 +324,16 @@ private:
     std::unordered_map<Key3, std::shared_ptr<const Tile>, Key3Hash> tiles_;
     std::unordered_map<Key3, std::shared_ptr<const Structures>, Key3Hash> structures_;
     std::unordered_map<Key3, std::shared_ptr<const Section>, Key3Hash> sections_;
+    // (the tiers) per raw section its generation and flags; the raw sections to pack; the warm and cold tiers
+    struct RawMeta {
+        uint32_t gen = 0;
+        uint8_t flags = 0;
+    };
+    std::unordered_map<Key3, RawMeta, Key3Hash> rawMeta_;
+    std::vector<std::pair<Key3, uint32_t>> packQueue_;
+    uint32_t gen_ = 0;
+    uint64_t packedCount_ = 0;
+    std::unique_ptr<SectionStore> store_;
     std::vector<uint8_t> classes_;  // material -> class (setClasses), for the sections' generated levels
     std::unordered_map<Key3, std::shared_ptr<const Region>, Key3Hash> regions_;
     std::unordered_set<Key3, Key3Hash> dirty_;

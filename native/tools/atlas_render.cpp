@@ -44,6 +44,15 @@
 #include <cstring>
 #include <filesystem>
 #include <map>
+#include <set>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <psapi.h>  // (seqgrid: the process's memory; K32GetProcessMemoryInfo, in kernel32)
+#undef near
+#undef far
+#endif
 #include <string>
 #include <thread>
 #include <vector>
@@ -298,40 +307,50 @@ int main(int argc, char** argv) {
     // sent as a server's stream carries them (synthorder=far, the default: farthest first, the arrival order the live
     // pool filled in; near; random): stone under the ground, three of dirt, the top grass (snow above y 200), water to
     // y 62, nothing above; an ore pocket of gravel in a quarter of the sections (so most of a mountain's inside is one id)
-    if (!haveExport && num(a, "synth", 0) > 0) {
+    // a synth column's sections (the preview's ground; see synth= above), appended to out; the count of one id
+    auto synthColumn = [&](int cx, int cz, std::vector<exportdata::Held>& out) {
+        int hgt[256];
+        int top = 62;
+        size_t uniform = 0;
+        for (int i = 0; i < 256; i++) {
+            hgt[i] = int(std::floor(atlas_preview_height(ctx, cx * 16 + (i & 15) + 0.5, cz * 16 + (i >> 4) + 0.5)));
+            top = std::max(top, hgt[i]);
+        }
+        for (int sy = -4; sy * 16 <= top && sy < 40; sy++) {
+            exportdata::Held hs{cx, sy, cz, std::vector<uint16_t>(4096, 0)};
+            uint32_t hsd = uint32_t(cx) * 73856093u ^ uint32_t(sy) * 19349663u ^ uint32_t(cz) * 83492791u;
+            hsd = (hsd ^ (hsd >> 13)) * 1274126177u;
+            bool ore = (hsd >> 30) == 0u;
+            int ox = int((hsd >> 4) & 15u), oy = int((hsd >> 8) & 15u), oz = int((hsd >> 12) & 15u);
+            bool any = false, one = true;
+            for (int y = 0; y < 16; y++)
+                for (int lz = 0; lz < 16; lz++)
+                    for (int lx = 0; lx < 16; lx++) {
+                        int wy = sy * 16 + y, g = hgt[lx + 16 * lz];
+                        uint16_t m = wy < g - 3 ? 1 : wy < g ? 3 : wy == g ? (g > 200 ? 5 : 2) : wy <= 62 ? 6 : 0;
+                        if (m == 1 && ore && std::abs(lx - ox) <= 1 && std::abs(y - oy) <= 1 && std::abs(lz - oz) <= 1) m = 7;
+                        hs.mats[size_t(lx + 16 * (lz + 16 * y))] = m;
+                        any |= m != 0;
+                        one &= m == hs.mats[0];
+                    }
+            if (!any) continue;
+            uniform += one ? 1 : 0;
+            out.push_back(std::move(hs));
+        }
+        return uniform;
+    };
+    // synthstream=1 (with synth=): the sections made a 256-block tile at a time as the server's window (4 tiles either
+    // side of the camera's) enters it, sent again after a tile left and came back (synthonce=1: never again: what
+    // comes back is the core's own, from its tiers); long walks without holding the whole world in the tool
+    bool synthStream = !haveExport && num(a, "synth", 0) > 0 && num(a, "synthstream", 0) > 0;
+    bool synthOnce = num(a, "synthonce", 0) > 0;
+    std::set<std::pair<int, int>> synthSent, synthEver;
+    if (!haveExport && num(a, "synth", 0) > 0 && !synthStream) {
         int R = int(num(a, "synth", 0));
         int csx = int(std::floor(x / 16)), csz = int(std::floor(z / 16));
-        std::vector<int> hgt(256);
         size_t uniform = 0;
         for (int cz = csz - R; cz <= csz + R; cz++)
-            for (int cx = csx - R; cx <= csx + R; cx++) {
-                int top = 62;
-                for (int i = 0; i < 256; i++) {
-                    hgt[size_t(i)] = int(std::floor(atlas_preview_height(ctx, cx * 16 + (i & 15) + 0.5, cz * 16 + (i >> 4) + 0.5)));
-                    top = std::max(top, hgt[size_t(i)]);
-                }
-                for (int sy = -4; sy * 16 <= top && sy < 40; sy++) {
-                    exportdata::Held hs{cx, sy, cz, std::vector<uint16_t>(4096, 0)};
-                    uint32_t hsd = uint32_t(cx) * 73856093u ^ uint32_t(sy) * 19349663u ^ uint32_t(cz) * 83492791u;
-                    hsd = (hsd ^ (hsd >> 13)) * 1274126177u;
-                    bool ore = (hsd >> 30) == 0u;
-                    int ox = int((hsd >> 4) & 15u), oy = int((hsd >> 8) & 15u), oz = int((hsd >> 12) & 15u);
-                    bool any = false, one = true;
-                    for (int y = 0; y < 16; y++)
-                        for (int lz = 0; lz < 16; lz++)
-                            for (int lx = 0; lx < 16; lx++) {
-                                int wy = sy * 16 + y, g = hgt[size_t(lx + 16 * lz)];
-                                uint16_t m = wy < g - 3 ? 1 : wy < g ? 3 : wy == g ? (g > 200 ? 5 : 2) : wy <= 62 ? 6 : 0;
-                                if (m == 1 && ore && std::abs(lx - ox) <= 1 && std::abs(y - oy) <= 1 && std::abs(lz - oz) <= 1) m = 7;
-                                hs.mats[size_t(lx + 16 * (lz + 16 * y))] = m;
-                                any |= m != 0;
-                                one &= m == hs.mats[0];
-                            }
-                    if (!any) continue;
-                    uniform += one ? 1 : 0;
-                    ex.held.push_back(std::move(hs));
-                }
-            }
+            for (int cx = csx - R; cx <= csx + R; cx++) uniform += synthColumn(cx, cz, ex.held);
         std::string so = str(a, "synthorder", "far");
         auto d2 = [&](const exportdata::Held& h) { return (h.cx - csx) * (h.cx - csx) + (h.cz - csz) * (h.cz - csz); };
         if (so == "random") {
@@ -506,6 +525,25 @@ int main(int argc, char** argv) {
     auto serverWindow = [&](double cxw, double czw) -> bool {
         auto fd = [](int v, int d) { return v >= 0 ? v / d : -((-v + d - 1) / d); };
         int ptx = fd(int(std::floor(cxw)), 256), ptz = fd(int(std::floor(czw)), 256);
+        if (synthStream) {
+            // the tiles that left forgotten (sent again on return, unless synthonce), the entering ones made and sent,
+            // nearest first
+            for (auto it = synthSent.begin(); it != synthSent.end();)
+                it = std::abs(it->first - ptx) > 4 || std::abs(it->second - ptz) > 4 ? synthSent.erase(it) : std::next(it);
+            for (int r = 0; r <= 4; r++)
+                for (int tz = ptz - r; tz <= ptz + r; tz++)
+                    for (int tx = ptx - r; tx <= ptx + r; tx++) {
+                        if (std::max(std::abs(tx - ptx), std::abs(tz - ptz)) != r || synthSent.count({tx, tz})) continue;
+                        synthSent.insert({tx, tz});
+                        if (synthOnce && !synthEver.insert({tx, tz}).second) continue;
+                        std::vector<exportdata::Held> secs;
+                        for (int cz = tz * 16; cz < tz * 16 + 16; cz++)
+                            for (int cx = tx * 16; cx < tx * 16 + 16; cx++) synthColumn(cx, cz, secs);
+                        for (const exportdata::Held& hs : secs)
+                            if (atlas_upload_section(ctx, hs.cx, hs.sy, hs.cz, hs.mats.data()) != ATLAS_OK) return false;
+                    }
+            return true;
+        }
         for (exportdata::Held& hs : ex.held) {
             int tx = fd(hs.cx * 16, 256), tz = fd(hs.cz * 16, 256);
             bool inside = std::abs(tx - ptx) <= 4 && std::abs(tz - ptz) <= 4;
@@ -1353,14 +1391,31 @@ int main(int argc, char** argv) {
                                 atlas::writePng(sb + nm, disp.data(), w, h);
                             }
                         }
-                        if (num(a, "seqgrid", 0) > 0) {
-                            // seqgrid=1: the grid's residency each frame (atlas_info voxgrid: resident .. nearestMissing)
-                            std::string inf = atlas_info(ctx);
-                            size_t r0 = inf.find("\"resident\":"), r1 = inf.find("\"nearestMissing\":");
-                            if (r0 != std::string::npos && r1 != std::string::npos) {
-                                size_t e = inf.find(',', r1);
-                                extra += "," + inf.substr(r0, e - r0);
+                        {
+                            // (a TRACE line every 5 s: where a long sequence is)
+                            static auto lastTrace = std::chrono::steady_clock::now();
+                            auto now = std::chrono::steady_clock::now();
+                            if (std::chrono::duration<double>(now - lastTrace).count() > 5.0) {
+                                std::fprintf(stderr, "TRACE progress seq_%s %d/%d\n", kind.c_str(), i, n);
+                                std::fflush(stderr);
+                                lastTrace = now;
                             }
+                        }
+                        if (num(a, "seqgrid", 0) > 0) {
+                            // seqgrid=1: the grid's residency and the tiers each frame (atlas_info voxgrid: resident ..
+                            // the tiers), the process's memory
+                            std::string inf = atlas_info(ctx);
+                            size_t r0 = inf.find("\"resident\":"), r1 = inf.find("\"origin\":", r0 == std::string::npos ? 0 : r0);
+                            if (r0 != std::string::npos && r1 != std::string::npos) extra += "," + inf.substr(r0, r1 - r0 - 1);
+#ifdef _WIN32
+                            PROCESS_MEMORY_COUNTERS_EX pm{};
+                            if (K32GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pm), sizeof pm)) {
+                                char mb[96];
+                                std::snprintf(mb, sizeof mb, ",\"workingSetMb\":%.0f,\"privateMb\":%.0f", double(pm.WorkingSetSize) / 1048576.0,
+                                              double(pm.PrivateUsage) / 1048576.0);
+                                extra += mb;
+                            }
+#endif
                         }
                         std::printf("{\"seq\":\"%s%s\",\"frame\":%d,\"ms\":%.3f,\"steps\":%llu%s}\n", kind.c_str(), tag.c_str(), i, st.lastFrameMs,
                                     (unsigned long long)st.raySteps, extra.c_str());

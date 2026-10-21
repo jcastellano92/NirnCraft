@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <functional>
 #include <random>
 #include <string>
@@ -2135,6 +2136,137 @@ static void testCoarseGiven() {
     atlas_destroy(ctx);
 }
 
+// The host's tiers (step 5; sectionpack.hpp, sectionstore.hpp), on Vulkan: uploads packed on the GPU (one id, 2, 3, 5,
+// 17 and 300 ids: every width), the host's copy the packed one, the same ids back; a frame from packed sections (a
+// jump away and back: the grid takes them from the warm tier, expanded on the GPU) the same as from the uploads; over
+// the warm budget the sections go to the cold tier on disk (the regenerable one dropped) and come back from it, in this
+// context and in a new one (a reload, no stream).
+static void testTiers() {
+    std::printf("tiers\n");
+    namespace fs = std::filesystem;
+    std::error_code ec;
+    fs::path dir = fs::temp_directory_path(ec) / "atlas-tiers-test";
+    fs::remove_all(dir, ec);
+    auto tiles = [&](AtlasContext* ctx) {
+        std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+        std::vector<uint16_t> top(256 * 256, 52), fill(256 * 256, 52);
+        for (int tz = -2; tz <= 2; tz++)
+            for (int tx = -2; tx <= 2; tx++) {
+                AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+                atlas_upload_column_tile(ctx, &t);
+            }
+    };
+    auto scene = [&](AtlasContext*& ctx) {
+        if (atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) return false;
+        tiles(ctx);
+        std::vector<AtlasMaterial> m(400, AtlasMaterial{{0.4f, 0.4f, 0.4f}, 0.9f, 0, ATLAS_CLASS_TERRAIN});
+        for (size_t i = 0; i < m.size(); i++) m[i].albedo[0] = float(i % 7) / 7.0f;
+        atlas_set_materials(ctx, 1, m.data(), uint32_t(m.size()));
+        return true;
+    };
+    AtlasContext* ctx = nullptr;
+    if (!scene(ctx)) {
+        std::printf("  SKIP: no Vulkan device\n");
+        return;
+    }
+    // sections at sy 6 (y 96..112), x 0..6 sections, z 0: n distinct ids each (air in the upper half but for one id)
+    const int counts[7] = {1, 2, 3, 5, 17, 300, 5};
+    std::vector<std::vector<uint16_t>> secs(7, std::vector<uint16_t>(4096));
+    for (int s = 0; s < 7; s++)
+        for (int i = 0; i < 4096; i++) {
+            int y = i >> 8, h = (i * 2654435761u) >> 20;
+            int n = counts[s];
+            secs[size_t(s)][size_t(i)] = n == 1 ? 50 : (y >= 8 && (h & 1)) ? 0 : uint16_t(1 + h % (n - 1 == 0 ? 1 : n - 1));
+        }
+    // (the cold tier from the start: what the window leaves goes to disk)
+    CHECK(atlas_set_cache(ctx, dir.string().c_str(), 7, 1, 0, 0) == ATLAS_OK);
+    for (int s = 0; s < 7; s++)
+        CHECK(atlas_upload_section_flags(ctx, s, 6, 0, secs[size_t(s)].data(), s == 6 ? ATLAS_SECTION_REGENERABLE : 0u) == ATLAS_OK);
+    double centre[3] = {56.0, 300.0, 8.0};
+    atlas_update(ctx, centre, 0);
+    AtlasFrame f{};
+    f.cameraPos[0] = 56.0;
+    f.cameraPos[1] = 300.0;
+    f.cameraPos[2] = 8.0;
+    float inv[16] = {0.4f, 0, 0, 0, 0, 0, 0.4f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};  // straight down, wide
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 64;
+    f.height = 64;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> d1(64 * 64), d2(64 * 64);
+    AtlasFrameOutput o1{nullptr, nullptr, d1.data()}, o2{nullptr, nullptr, d2.data()};
+    for (int i = 0; i < 6; i++) CHECK(atlas_render(ctx, &f, &o1) == ATLAS_OK);  // (packed with a batch, read back later)
+    std::vector<uint16_t> got(4096);
+    int packed = 0, same = 0;
+    for (int s = 0; s < 7; s++) {
+        uint32_t tier = 0;
+        CHECK(atlas_debug_section(ctx, s, 6, 0, got.data(), &tier) == ATLAS_OK);
+        packed += tier == 2u;
+        same += got == secs[size_t(s)];
+    }
+    CHECK(packed == 7 && same == 7);
+    // a jump away and back: the sections left behind go to the cold tier (the regenerable one is dropped), and coming
+    // back the grid takes them from it, packed, expanded on the GPU; the regenerable one the client makes again
+    f.cameraPos[0] = 56.0 + 20000.0;
+    double away[3] = {56.0 + 20000.0, 300.0, 8.0};
+    atlas_update(ctx, away, 0);
+    for (int i = 0; i < 3; i++) atlas_render(ctx, &f, &o2);
+    int awayTier = 0;
+    for (int s = 0; s < 7; s++) {
+        uint32_t tier = 0;
+        CHECK(atlas_debug_section(ctx, s, 6, 0, got.data(), &tier) == ATLAS_OK);  // (a cold read: back into warm)
+        awayTier += tier == 2u;
+    }
+    atlas_update(ctx, away, 0);  // (and out of warm again: still away)
+    f.cameraPos[0] = 56.0;
+    tiles(ctx);  // (the tiles there went with the jump)
+    CHECK(atlas_upload_section_flags(ctx, 6, 6, 0, secs[6].data(), ATLAS_SECTION_REGENERABLE) == ATLAS_OK);
+    atlas_update(ctx, centre, 0);
+    for (int i = 0; i < 12; i++) CHECK(atlas_render(ctx, &f, &o2) == ATLAS_OK);
+    size_t hits = 0, differ = 0;
+    for (size_t i = 0; i < d1.size(); i++) {
+        hits += d1[i] < 250.0f;
+        differ += std::abs(d1[i] - d2[i]) > 1e-3f;
+    }
+    std::string inf = atlas_info(ctx);
+    size_t ch = inf.find("\"cold\":{");
+    std::printf("  %s\n", ch == std::string::npos ? "no tiers" : inf.substr(ch, inf.find('}', ch) - ch + 1).c_str());
+    // over the warm budget: out of warm (on disk already; the regenerable one dropped), and back from the cold tier
+    CHECK(atlas_set_cache(ctx, dir.string().c_str(), 7, 1, 1, 0) == ATLAS_OK);
+    atlas_update(ctx, centre, 0);
+    int cold = 0, gone = 0;
+    for (int s = 0; s < 7; s++) {
+        uint32_t tier = 0;
+        CHECK(atlas_debug_section(ctx, s, 6, 0, got.data(), &tier) == ATLAS_OK);
+        if (s == 6) gone += tier == 0u;
+        else cold += tier == 2u && got == secs[size_t(s)];
+    }
+    atlas_destroy(ctx);
+    // a new context, the same world: read back from disk, nothing streamed
+    AtlasContext* again = nullptr;
+    int reloaded = 0;
+    if (scene(again)) {
+        CHECK(atlas_set_cache(again, dir.string().c_str(), 7, 1, 0, 0) == ATLAS_OK);
+        atlas_update(again, centre, 0);
+        CHECK(atlas_render(again, &f, &o2) == ATLAS_OK);  // (the plan: the cache applied)
+        for (int s = 0; s < 6; s++) {
+            uint32_t tier = 0;
+            CHECK(atlas_debug_section(again, s, 6, 0, got.data(), &tier) == ATLAS_OK);
+            reloaded += tier == 2u && got == secs[size_t(s)];
+        }
+        atlas_destroy(again);
+    }
+    std::printf("  packed on the GPU %d of 7, the same ids %d; away: %d of 6 read back from disk; back: %zu of %zu hits "
+                "differ; over budget: cold %d of 6, regenerable dropped %d; a new context read %d of 6 from disk\n",
+                packed, same, awayTier, differ, hits, cold, gone, reloaded);
+    CHECK(awayTier == 6);
+    CHECK(hits > 500 && differ == 0);
+    CHECK(cold == 6 && gone == 1 && reloaded == 6);
+    fs::remove_all(dir, ec);
+}
+
 int main(int argc, char** argv) {
     std::setvbuf(stdout, nullptr, _IONBF, 0);  // (each line as it comes: a suite stopped part way still shows where)
     // atlas_tests [raster] [only=a,b,..]: the suites named alone (svdag, caves, ..., parity); each prints
@@ -2156,7 +2288,7 @@ int main(int argc, char** argv) {
         {"actormotion", testActorMotion}, {"transitions", testTransitions}, {"lights", testLights}, {"faults", testFaults},
         {"neardepth", [&] { testNearDepth(raster); }}, {"columnheights", [&] { testColumnHeights(raster); }},
         {"grasstint", [&] { testGrassTint(raster); }}, {"surfaceoverrides", [&] { testSurfaceOverrides(raster); }},
-        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven},
+        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"tiers", testTiers},
     };
     for (const Suite& t : suites) {
         if (!only.empty() && only.find("," + std::string(t.name) + ",") == std::string::npos) continue;

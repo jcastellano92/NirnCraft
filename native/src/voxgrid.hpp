@@ -47,6 +47,7 @@ constexpr int VG_MIN_SY = -4;           // y -64 (World::WORLD_MIN_Y / 16)
 constexpr uint32_t VG_COLUMN = 0xFFFFFFFEu;  // (VgJob::slot)
 constexpr uint32_t VG_NO_COPY = 0xFFFFFFFFu;  // (VgJob::data) the slot's ids are in the pool already (a coarse chunk)
 constexpr uint32_t VG_GPU_SRC = 0x80000000u;  // (VgJob::data, VgIngest::src) | index in VgBatch::gsecs: ids on the GPU
+constexpr uint32_t VG_PACK_SRC = 0x40000000u; // (VgJob::data, VgIngest::src) | index in VgBatch::packs: packed ids
 
 // (VoxGrid::ingestGpu) a section's ids in a GPU buffer: the backend's buffer handle (Vulkan: a VkBuffer), byte offset
 struct VgGpuRef {
@@ -56,6 +57,14 @@ constexpr int VG_LEVELS = 7;                  // level 0 and the coarse levels 1
 
 // a section's ids: the world's own Section::mats (shared, never copied) or an upload's copy
 using VgIds = std::shared_ptr<const std::array<uint16_t, 4096>>;
+// a section's ids packed (sectionpack.hpp: the host's tiers), expanded on the GPU (vgUnpackMain)
+using VgPacked = std::shared_ptr<const std::vector<uint32_t>>;
+// where a section's ids are: raw on the host, packed on the host, or (both null) on the GPU (ingestGpu)
+struct VgSrc {
+    VgIds ids;
+    VgPacked packed;
+    bool gpu() const { return !ids && !packed; }
+};
 
 // One chunk to (re)write: its word (EMPTY / UNLOADED: as is; MIXED: built from the slot's ids, which the batch carries)
 struct VgJob {
@@ -94,6 +103,14 @@ struct VgBatch {
     bool chunkStates = false;    // some chunk's state changed: the chunk-level distance fields need a rebuild
     std::vector<VgJob> jobs;     // level 0's, then the coarse levels' (their builds after the ingests)
     std::vector<VgIds> secs;  // the MIXED jobs' ids (two to a word in the pool: their own little-endian bytes)
+    // packed sections to expand on the GPU first (into the GPU sections' buffer after gsecs: VG_PACK_SRC | index here)
+    std::vector<VgPacked> packs;
+    // raw sections to pack on the GPU (the host's warm tier: World::packedDone): staged in secs[src]
+    struct PackJob {
+        Key3 key;
+        uint32_t gen = 0, src = 0;
+    };
+    std::vector<PackJob> packJobs;
     std::vector<VgGpuRef> gsecs;  // ids already on the GPU (ingestGpu): data / src VG_GPU_SRC | index here
     // the coarse levels: whole chunks to air first, then boxes (rock under a column's lowest section, air), the sections'
     // generated levels, the levels 5+ from the level below (in order of level)
@@ -113,7 +130,7 @@ struct VgBatch {
     std::vector<uint32_t> gens;
     bool coarse() const {
         if (!clears.empty() || !fills.empty() || !ingests.empty() || jobs.size() > level0Jobs || !gsecs.empty() ||
-            !poolCopies.empty())
+            !poolCopies.empty() || !packs.empty() || !packJobs.empty())
             return true;
         for (int k = 1; k < VG_LEVELS; k++)
             if (levels[k].clear || levels[k].grow || !downs[k].empty()) return true;
@@ -147,6 +164,11 @@ public:
     void put(int sx, int sy, int sz, const uint16_t* mats);
     // the same with the world's own copy (shared, never copied: World::putSection's, immutable once stored)
     void put(int sx, int sy, int sz, VgIds ids);
+    // the world whose tiers the grid takes its sections back from (standby) and feeds packing (World::packOnGpu)
+    void setWorld(World* w) { world_ = w; }
+    int packBudget = 512;  // sections packed a batch at most (ATLAS_PACK_BUDGET)
+    // (the backend) a batch's packed sections, back from the GPU: to the world's warm tier
+    void packedResults(const std::vector<World::PackDone>& done);
     // (GPU world generation) sections whose ids are already in a GPU buffer, without a round trip through the CPU:
     // `count` sections of 16^3 block ids as atlas_upload_section takes them (4096 uint16, x + 16 * (z + 16 * y): 8 KiB
     // each) at byte offsets[i] of `buffer` (the Vulkan backend's VkBuffer as a handle, created on atlas's device with
@@ -240,6 +262,7 @@ public:
     struct Residency {
         uint32_t resident = 0, cap = 0, uniform = 0;  // slots in use, of the pool; uniform cells (no slot)
         size_t waiting = 0, gpuWaiting = 0;           // known sections not resident (CPU ids kept; GPU ones to ask for)
+        size_t coarseWaiting = 0;                     // sections the coarse levels have yet to take in
         uint64_t evicted = 0, misses = 0, gpuUniform = 0;  // given up for nearer; could not be taken; found by the GPU
         float cutoff = 0, reach = 0;  // the priority (blocks) past which a full pool takes nothing; the footprint's reach
         uint32_t nearestMissing = 0;  // (blocks) the nearest in-reach section known but not resident (0: none)
@@ -298,8 +321,9 @@ private:
     bool centred_ = false;
     int ox_ = 0, oz_ = 0;  // window origin in sections (x, z); y is VG_MIN_SY
     // sections waiting for a batch: the world's own (shared, never copied) or an upload's copy
-    using Ids = VgIds;
+    using Ids = VgSrc;
     std::unordered_map<Key, Ids, KeyHash> pending_;
+    World* world_ = nullptr;
     bool clearPending_ = false;
     // per cell (in memory: chunk (x, y, z) at ((y - VG_MIN_SY) * D + z mod D) * D + x mod D)
     std::vector<uint32_t> slotOf_;      // its slot or ~0u
@@ -312,11 +336,11 @@ private:
     std::vector<uint8_t> colFresh_;
     uint32_t freshColumns_ = 0;
     std::vector<uint32_t> slotChunk_;   // per slot: its cell or ~0u
-    std::vector<VgIds> slotIds_;        // per slot: its section's ids when they came from the CPU (null: the GPU's)
+    std::vector<uint8_t> slotCpu_;      // per slot: its section came from the host (1: the world's tiers hold it)
     std::vector<uint32_t> cellGen_;     // per cell: bumped with each job (gpuUniform's findings are for one job)
     uint32_t uniform_ = 0;              // cells VG_UNIFORM
     // the in-window sections known but not resident: CPU ones by their ids, GPU ones by key (asked for again)
-    std::unordered_map<Key, Ids, KeyHash> standby_;
+    std::unordered_map<Key, uint8_t, KeyHash> standby_;  // (host sections: their ids from World::sectionSource)
     std::unordered_map<Key, uint8_t, KeyHash> gpuStandby_;  // (1: asked for already)
     std::vector<std::array<int32_t, 4>> gpuWanted_;
     std::unordered_map<Key, uint32_t, KeyHash> gpuUniformHint_;  // (ingestGpu's hint) for the pending GPU sections
@@ -387,7 +411,7 @@ private:
     bool laidOut_ = false;
     // sections for the coarse levels: their ids and which levels want them (bit k)
     struct CPending {
-        VgIds ids;
+        VgSrc ids;
         uint32_t levels = 0;
     };
     std::unordered_map<Key, CPending, KeyHash> cpending_;

@@ -1,4 +1,7 @@
 #include "world.hpp"
+
+#include "sectionpack.hpp"
+#include "sectionstore.hpp"
 #include "parallel.hpp"
 
 #ifdef _WIN32
@@ -498,7 +501,9 @@ void World::setClasses(std::vector<uint8_t> cls) {
     classes_ = std::move(cls);
 }
 
-std::shared_ptr<const Section> World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
+World::World() : store_(std::make_unique<SectionStore>()) {}
+
+std::shared_ptr<const Section> World::putSection(int sx, int sy, int sz, const uint16_t* mats, uint8_t flags) {
     auto s = std::make_shared<Section>();
     std::copy(mats, mats + 4096, s->mats.begin());
     // (its generated levels outside the world's lock: an upload holds it for the map's update alone; none when the
@@ -512,32 +517,108 @@ std::shared_ptr<const Section> World::putSection(int sx, int sy, int sz, const u
         s->buildMips(cls);
     }
     std::lock_guard<std::mutex> lock(mu_);
-    sections_[{0, sx, sy, sz}] = s;
-    if (gridCoarse.load(std::memory_order_relaxed) < coarseTop()) undigested_.insert({0, sx, sy, sz});  // (World::digest)
+    Key3 k{0, sx, sy, sz};
+    sections_[k] = s;
+    if (gridCoarse.load(std::memory_order_relaxed) < coarseTop()) undigested_.insert(k);  // (World::digest)
     markSectionDirty(sx, sy, sz);
+    // (the tiers: packed on the GPU, then the raw copy goes; the packed one it replaces is stale)
+    RawMeta& m = rawMeta_[k];
+    m.gen = ++gen_;
+    m.flags = flags;
+    store_->erase(k);
+    if (packOnGpu.load(std::memory_order_relaxed)) packQueue_.push_back({k, m.gen});
     return s;
 }
 
-void World::sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const {
+void World::sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, SectionSrc>>& out) {
     std::lock_guard<std::mutex> lock(mu_);
     for (auto& [k, s] : sections_)
-        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, s);
+        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, SectionSrc{s, nullptr});
+    std::vector<std::pair<Key3, PackedIds>> packed;
+    store_->inRange(sx0, sz0, sx1, sz1, packed);
+    for (auto& [k, w] : packed)
+        if (!sections_.count(k)) out.emplace_back(k, SectionSrc{nullptr, w});
 }
 
-bool World::sectionMats(int sx, int sy, int sz, uint16_t out[4096]) const {
+World::SectionSrc World::sectionSource(int sx, int sy, int sz) {
     std::lock_guard<std::mutex> lock(mu_);
     auto it = sections_.find({0, sx, sy, sz});
-    if (it == sections_.end()) return false;
-    std::copy(it->second->mats.begin(), it->second->mats.end(), out);
+    if (it != sections_.end()) return {it->second, nullptr};
+    return {nullptr, store_->get({0, sx, sy, sz})};
+}
+
+bool World::sectionMats(int sx, int sy, int sz, uint16_t out[4096]) {
+    SectionSrc s = sectionSource(sx, sy, sz);
+    if (s.raw) {
+        std::copy(s.raw->mats.begin(), s.raw->mats.end(), out);
+        return true;
+    }
+    if (!s.packed) return false;
+    unpackSection(s.packed->data(), out);  // (one section: the host's own mirror)
     return true;
 }
 
-bool World::trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const {
+bool World::trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, SectionSrc>>& out) {
     std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
     if (!lock.owns_lock()) return false;
     for (auto& [k, s] : sections_)
-        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, s);
+        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, SectionSrc{s, nullptr});
+    std::vector<std::pair<Key3, PackedIds>> packed;
+    store_->inRange(sx0, sz0, sx1, sz1, packed);
+    for (auto& [k, w] : packed)
+        if (!sections_.count(k)) out.emplace_back(k, SectionSrc{nullptr, w});
     return true;
+}
+
+void World::setPackOnGpu(bool on) {
+    if (packOnGpu.load(std::memory_order_relaxed) == on) return;
+    std::lock_guard<std::mutex> lock(mu_);
+    packOnGpu = on;
+    if (!on) return;
+    for (auto& [k, m] : rawMeta_) packQueue_.push_back({k, m.gen});  // (uploaded before: packed now too)
+}
+
+void World::takePackQueue(size_t max, std::vector<PackReq>& out, size_t burst) {
+    std::lock_guard<std::mutex> lock(mu_);
+    if (burst > max) max = std::max(max, std::min(burst, packQueue_.size() / 8));
+    size_t i = 0;
+    for (; i < packQueue_.size() && out.size() < max; i++) {
+        auto& [k, gen] = packQueue_[i];
+        auto m = rawMeta_.find(k);
+        auto s = sections_.find(k);
+        if (m == rawMeta_.end() || m->second.gen != gen || s == sections_.end()) continue;  // (stale: newer, or gone)
+        out.push_back({k, gen, s->second});
+    }
+    packQueue_.erase(packQueue_.begin(), packQueue_.begin() + ptrdiff_t(i));
+}
+
+void World::packedDone(const std::vector<PackDone>& done) {
+    std::lock_guard<std::mutex> lock(mu_);
+    for (const PackDone& d : done) {
+        auto m = rawMeta_.find(d.key);
+        if (m == rawMeta_.end() || m->second.gen != d.gen || !d.words) continue;  // (an upload since replaced it)
+        store_->put(d.key, d.words, d.hash, m->second.flags);
+        sections_.erase(d.key);
+        undigested_.erase(d.key);
+        rawMeta_.erase(m);
+        packedCount_++;
+    }
+}
+
+void World::configureStore(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBytes, uint64_t coldBytes) {
+    std::lock_guard<std::mutex> lock(mu_);
+    store_->configure(dir, seed, genVersion, warmBytes ? warmBytes : 512ull << 20, coldBytes ? coldBytes : 4ull << 30);
+}
+
+World::StoreStats World::storeStats(void* tiers) const {
+    std::lock_guard<std::mutex> lock(mu_);
+    StoreStats s;
+    s.raw = sections_.size();
+    s.rawBytes = uint64_t(sections_.size()) * sizeof(Section);
+    s.packQueue = packQueue_.size();
+    s.packed = packedCount_;
+    if (tiers) *static_cast<SectionStore::Stats*>(tiers) = store_->stats();
+    return s;
 }
 
 void World::setGridWindow(int ox, int oz, int d) {
@@ -653,8 +734,14 @@ void World::editBlock(int x, int y, int z, uint16_t mat) {
     Key3 sk{0, sx, sy, sz};
     auto it = sections_.find(sk);
     std::shared_ptr<Section> s;
+    uint8_t flags = SectionStore::EDITED;
+    if (auto m = rawMeta_.find(sk); m != rawMeta_.end()) flags |= m->second.flags;
+    PackedIds held = it == sections_.end() ? store_->get(sk) : nullptr;
     if (it != sections_.end()) {
         s = std::make_shared<Section>(*it->second);  // copy on write: builders may hold the old one
+    } else if (held) {
+        s = std::make_shared<Section>();
+        unpackSection(held->data(), s->mats.data());  // (the warm or cold tier's: one section, the host's mirror)
     } else {
         // materialise the section from the LOD 0 tile so the edit sits in consistent surroundings
         s = std::make_shared<Section>();
@@ -674,6 +761,12 @@ void World::editBlock(int x, int y, int z, uint16_t mat) {
     s->mats[size_t((x & 15) + 16 * ((z & 15) + 16 * (y & 15)))] = mat;
     if (!gridOwnsReal()) s->buildMips(classes_);
     sections_[sk] = std::move(s);
+    // (edited: kept whatever its source, packed again, its old packed copy stale)
+    RawMeta& rm = rawMeta_[sk];
+    rm.gen = ++gen_;
+    rm.flags = flags;
+    store_->erase(sk);
+    if (packOnGpu.load(std::memory_order_relaxed)) packQueue_.push_back({sk, rm.gen});
     if (gridCoarse.load(std::memory_order_relaxed) < coarseTop()) undigested_.insert(sk);
     markSectionDirty(sx, sy, sz);
 }
@@ -1826,9 +1919,11 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         for (auto it = sections_.begin(); it != sections_.end();) {
             int rx = floorDiv(it->first.x * 16, 256), rz = floorDiv(it->first.z * 16, 256);
             if (std::abs(rx - centreRegion[0][0]) > keep || std::abs(rz - centreRegion[0][1]) > keep)
-                undigested_.erase(it->first), it = sections_.erase(it);
+                undigested_.erase(it->first), rawMeta_.erase(it->first), it = sections_.erase(it);
             else ++it;
         }
+        // the packed tiers: past the kept regions out of warm (to the cold tier, or dropped), and the warm one's budget
+        store_->enforce(centreRegion[0][0] * 16 + 8, centreRegion[0][1] * 16 + 8, keep);
         for (int lod = 0; lod < lodCount; lod++)
             if (centreRegion[lod][0] != lastCentre_[lod][0] || centreRegion[lod][1] != lastCentre_[lod][1]) moved = true;
     }
@@ -1892,6 +1987,8 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
 }
 
 World::~World() {
+    // (store_ first: its type is complete only here)
+    store_.reset();
     {
         std::lock_guard<std::mutex> lock(mu_);
         stopBuilders_ = true;

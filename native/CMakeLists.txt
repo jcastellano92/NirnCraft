@@ -124,7 +124,8 @@ add_custom_command(
 # the level-0 grid's build kernels (atlas_voxgrid.slang): one SPIR-V module per entry point
 set(VG_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_voxgrid.slang")
 set(VG_HEADERS "")
-foreach(pair "section:vgSectionMain" "satx:vgSatX" "satz:vgSatZ" "saty:vgSatY" "grow:vgGrowMain" "fill:vgFillMain" "ingest:vgIngestMain" "down:vgDownMain")
+foreach(pair "section:vgSectionMain" "satx:vgSatX" "satz:vgSatZ" "saty:vgSatY" "grow:vgGrowMain" "fill:vgFillMain" "ingest:vgIngestMain" "down:vgDownMain"
+             "pack:vgPackMain" "unpack:vgUnpackMain")
   string(REPLACE ":" ";" kv "${pair}")
   list(GET kv 0 short)
   list(GET kv 1 entry)
@@ -163,7 +164,7 @@ foreach(pair "lightCullMain;lightcull" "lightAdmitMain;lightadmit" "lightBinMain
 endforeach()
 add_library(atlas_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/groups.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
-  src/gl_api.cpp src/lights.cpp src/voxgrid.cpp
+  src/gl_api.cpp src/lights.cpp src/voxgrid.cpp src/sectionstore.cpp
   "${GEN}/atlas_far_cpu.cpp" "${GEN}/atlas_far_spv.h" "${GEN}/atlas_publish_spv.h" "${GEN}/atlas_ingest_spv.h"
   "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h" "${GEN}/atlas_nearlight_spv.h" "${GEN}/atlas_nearup_spv.h"
   "${GEN}/atlas_neartemporal_spv.h" ${VG_HEADERS} ${FAR_EXTRA_HEADERS})
