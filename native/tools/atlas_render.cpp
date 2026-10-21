@@ -353,6 +353,7 @@ int main(int argc, char** argv) {
     int synthEdits = int(num(a, "synthedit", 0));
     std::set<std::pair<int, int>> synthBuilt;
     size_t editBlocks = 0, editBuilds = 0;
+    std::set<std::array<int, 3>> editKeys;  // (secdump=: the sections the builds touched)
     auto synthBuild = [&](int tx, int tz) {
         for (int j = 0; j < synthEdits; j++) {
             uint32_t h = uint32_t(tx) * 2654435761u ^ uint32_t(tz) * 2246822519u ^ uint32_t(j) * 3266489917u;
@@ -365,6 +366,8 @@ int main(int argc, char** argv) {
             auto put = [&](int x, int y, int z, uint16_t m) {
                 atlas_notify_block(ctx, x, y, z, m);
                 editBlocks++;
+                auto fdv = [](int v) { return v >= 0 ? v / 16 : -((-v + 15) / 16); };
+                editKeys.insert({fdv(x), fdv(y), fdv(z)});
             };
             for (int x = x0; x < x0 + w; x++)
                 for (int z = z0; z < z0 + d; z++) {
@@ -1678,6 +1681,34 @@ int main(int argc, char** argv) {
                 backendName.c_str(), haveExport ? "export+preview" : "preview", x, y, z, ground, w, h, st.regions,
                 (unsigned long long)st.nodeBytes, (unsigned long long)st.leafBytes, (unsigned long long)st.materialBytes, buildMs,
                 best, (unsigned long long)st.raySteps, double(hits) / depth.size(), far, outJson.c_str(), extra.c_str(), vsTruth.c_str());
+    // secdump=<file>: the sections as the host holds them, voxel-exact (the edit layers' check): the keys of seckeys=<file>
+    // (x y z a line), else those this run's builds touched; written <file> (x, y, z, tier, 4096 ids each) and <file>.keys
+    if (!str(a, "secdump", "").empty()) {
+        std::string path = str(a, "secdump", "");
+        std::vector<std::array<int, 3>> keys;
+        if (!str(a, "seckeys", "").empty()) {
+            FILE* kf = std::fopen(str(a, "seckeys", "").c_str(), "r");
+            int kx, ky, kz;
+            while (kf && std::fscanf(kf, "%d %d %d", &kx, &ky, &kz) == 3) keys.push_back({kx, ky, kz});
+            if (kf) std::fclose(kf);
+        } else {
+            keys.assign(editKeys.begin(), editKeys.end());
+        }
+        FILE* df = std::fopen(path.c_str(), "wb");
+        FILE* kf = std::fopen((path + ".keys").c_str(), "w");
+        std::vector<uint16_t> ids(4096);
+        for (auto& k : keys) {
+            uint32_t tier = 0;
+            std::fill(ids.begin(), ids.end(), uint16_t(0));
+            atlas_debug_section(ctx, k[0], k[1], k[2], ids.data(), &tier);
+            int32_t h[4] = {k[0], k[1], k[2], int32_t(tier)};
+            if (df) std::fwrite(h, 4, 4, df), std::fwrite(ids.data(), 2, 4096, df);
+            if (kf) std::fprintf(kf, "%d %d %d\n", k[0], k[1], k[2]);
+        }
+        if (df) std::fclose(df);
+        if (kf) std::fclose(kf);
+        std::fprintf(stderr, "atlas_render: %zu sections dumped to %s\n", keys.size(), path.c_str());
+    }
     atlas_destroy(ctx);
     return 0;
 }

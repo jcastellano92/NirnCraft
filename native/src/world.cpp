@@ -520,9 +520,11 @@ std::shared_ptr<const Section> World::layerOver(const Key3& k, Section& s, uint8
         return nullptr;
     }
     if (L->replaced || L->baseLost) {
-        // whole elsewhere (a rewrite, a lost base): kept, the regenerated base ignored
+        // whole elsewhere (a rewrite, a lost base): kept, the regenerated base ignored (a raw copy only if edited: an
+        // unedited one is a base uploaded before the layer was known)
         auto it = sections_.find(k);
-        if (it != sections_.end()) return it->second;
+        auto m = rawMeta_.find(k);
+        if (it != sections_.end() && m != rawMeta_.end() && (m->second.flags & SectionStore::EDITED)) return it->second;
         if (PackedIds w = store_->get(k)) {
             auto c = std::make_shared<Section>();
             unpackSection(w->data(), c->mats.data());
@@ -766,6 +768,9 @@ void World::configureStore(const std::string& dir, uint64_t seed, uint32_t genVe
             continue;
         }
         if (std::shared_ptr<const Section> keep = layerOver(k, *s, flags)) {
+            // (the whole copy stands: the raw base uploaded before goes)
+            if (sections_.count(k) && !(rawMeta_[k].flags & SectionStore::EDITED))
+                sections_.erase(k), rawMeta_.erase(k), undigested_.erase(k);
             if (made) made->push_back({k, keep});
             continue;
         }
