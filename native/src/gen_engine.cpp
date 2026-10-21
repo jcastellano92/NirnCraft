@@ -79,6 +79,8 @@ namespace {
 
 constexpr uint32_t GROUP = 64;
 constexpr uint32_t MAX_CHUNKS = 64;     // per submission
+// (the overlays agent) the batch buffers' capacity: a submission's chunks plus its apron (atlas_gen_set_apron)
+constexpr uint32_t BATCH_CAP = 2 * MAX_CHUNKS;
 constexpr uint32_t CORNERS = 2025, AQ_WORDS = 513 * 5 + 4, BLOCK_WORDS = 16 * 16 * 640, COL_WORDS = 256 + 8;
 constexpr uint32_t OUT_WORDS = 40 * 2048;
 constexpr uint32_t INFO_WORDS = 4 + 40 * 4;  // atlas_gen.slang secInfo
@@ -150,6 +152,9 @@ struct Batch {
     std::vector<int32_t> jobs;
     // (atlas_gen_run) each chunk's 40 sections' kinds (SEC_*), for the ingest's uniform hints
     std::vector<uint8_t> kinds;
+    // (the overlays agent) the chunks asked for come first; after them the apron (atlas_gen_set_apron): generated with
+    // the batch for its stages to read, never handed back or ingested. 0: all are asked for
+    uint32_t outputs = 0;
 };
 
 // What a run hands back: ids (null: not wanted) n * OUT_WORDS words; flags n words; info (null: no ingest passes)
@@ -830,8 +835,9 @@ public:
     bool runStages(const Batch& b, uint32_t n, std::string& err) {
         if (stages_.empty()) return true;
         AtlasGenStageBatch sb{};
-        sb.version = 1;
+        sb.version = 2;
         sb.chunkCount = n;
+        sb.outputCount = b.outputs ? b.outputs : n;
         sb.chunks = b.chunks.data();
         sb.vkDevice = dev_;
         sb.vkCommandBuffer = cmd_;
@@ -1000,7 +1006,7 @@ public:
             vkCmdCopyBuffer(cmd_, out_.buf, readback_.buf, 1, &c);
         } else {
             VkBufferCopy c[2] = {{idBytes, idBytes, VkDeviceSize(n) * 4},  // the flags (the ids went before the materials)
-                                 {0, (VkDeviceSize(MAX_CHUNKS) * OUT_WORDS + MAX_CHUNKS) * 4, VkDeviceSize(n) * INFO_WORDS * 4}};
+                                 {0, (VkDeviceSize(BATCH_CAP) * OUT_WORDS + BATCH_CAP) * 4, VkDeviceSize(n) * INFO_WORDS * 4}};
             vkCmdCopyBuffer(cmd_, out_.buf, readback_.buf, 1, &c[0]);
             vkCmdCopyBuffer(cmd_, info_.buf, readback_.buf, 1, &c[1]);
         }
@@ -1033,7 +1039,7 @@ public:
         const uint32_t* rb = static_cast<const uint32_t*>(readback_.map);
         if (o.ids) std::memcpy(o.ids, rb, size_t(idBytes));
         if (o.flags) std::memcpy(o.flags, rb + size_t(n) * OUT_WORDS, size_t(n) * 4);
-        if (ingest) std::memcpy(o.info, rb + size_t(MAX_CHUNKS) * OUT_WORDS + MAX_CHUNKS, size_t(n) * INFO_WORDS * 4);
+        if (ingest) std::memcpy(o.info, rb + size_t(BATCH_CAP) * OUT_WORDS + BATCH_CAP, size_t(n) * INFO_WORDS * 4);
         t.readbackMs += msSince(r0);
         ran_ = ingest ? n : 0;
         return true;
@@ -1319,16 +1325,16 @@ private:
         }
         // the per-batch buffers (fixed: MAX_CHUNKS chunks; K up to 16 interpolated inputs); the readback holds the
         // ids, MAX_CHUNKS flags, then the section infos
-        bool ok = ensure(pageIdx_, 1 << 16, true, err) && ensure(chunks_, MAX_CHUNKS * 8, true, err) &&
-                  ensure(corners_, size_t(MAX_CHUNKS) * CORNERS * 16 * 4, false, err) &&
-                  ensure(aq_, size_t(MAX_CHUNKS) * AQ_WORDS * 4, false, err) &&
-                  ensure(blocks_, size_t(MAX_CHUNKS) * BLOCK_WORDS * 4, false, err) &&
-                  ensure(col_, size_t(MAX_CHUNKS) * COL_WORDS * 4, false, err) &&
-                  ensure(out_, (size_t(MAX_CHUNKS) * OUT_WORDS + MAX_CHUNKS) * 4, false, err) &&
-                  ensure(readback_, (size_t(MAX_CHUNKS) * (OUT_WORDS + INFO_WORDS) + MAX_CHUNKS) * 4, true, err, true) &&
+        bool ok = ensure(pageIdx_, 1 << 16, true, err) && ensure(chunks_, BATCH_CAP * 8, true, err) &&
+                  ensure(corners_, size_t(BATCH_CAP) * CORNERS * 16 * 4, false, err) &&
+                  ensure(aq_, size_t(BATCH_CAP) * AQ_WORDS * 4, false, err) &&
+                  ensure(blocks_, size_t(BATCH_CAP) * BLOCK_WORDS * 4, false, err) &&
+                  ensure(col_, size_t(BATCH_CAP) * COL_WORDS * 4, false, err) &&
+                  ensure(out_, (size_t(BATCH_CAP) * OUT_WORDS + BATCH_CAP) * 4, false, err) &&
+                  ensure(readback_, (size_t(BATCH_CAP) * (OUT_WORDS + INFO_WORDS) + BATCH_CAP) * 4, true, err, true) &&
                   ensure(staging_, 1 << 20, true, err) && ensure(tab_, 64, false, err) && ensure(map_, 64, false, err) &&
                   ensure(jobs_, 1 << 16, true, err) && ensure(bad_, size_t(slots_) * 4, true, err) && ensure(far_, 64, false, err) &&
-                  ensure(info_, size_t(MAX_CHUNKS) * INFO_WORDS * 4, false, err);
+                  ensure(info_, size_t(BATCH_CAP) * INFO_WORDS * 4, false, err);
         if (ok) writeSet();
         return ok;
     }
@@ -1554,6 +1560,9 @@ int64_t key(int32_t cx, int32_t cz) { return (int64_t(cx) << 32) ^ int64_t(uint3
 
 struct AtlasGen {
     std::unique_ptr<Engine> engine;
+    // (the overlays agent) the apron provider (atlas_gen_set_apron), or none
+    AtlasGenApronFn apronFn = nullptr;
+    void* apronUser = nullptr;
     std::mutex mu;       // the engine (one batch at a time)
     std::mutex pagesMu;  // the page map: atlas_gen_missing_pages answers while a batch runs
     std::string error;
@@ -1681,6 +1690,18 @@ void pagesRan(AtlasGen* h, const Batch& b, const RunOut& o, uint32_t* flags) {
     }
 }
 
+// (the overlays agent) the chunks asked for, then their apron (atlas_gen_set_apron: chunks not asked for that the
+// stages must read, generated with the batch), within the batch buffers' capacity
+std::vector<int32_t> withApron(AtlasGen* h, const int32_t* chunkXZ, uint32_t n) {
+    std::vector<int32_t> all(chunkXZ, chunkXZ + size_t(n) * 2);
+    if (!h->apronFn || n >= BATCH_CAP) return all;
+    uint32_t max = BATCH_CAP - n;
+    all.resize(size_t(BATCH_CAP) * 2);
+    uint32_t got = h->apronFn(h->apronUser, chunkXZ, n, all.data() + size_t(n) * 2, max);
+    all.resize(size_t(n + std::min(got, max)) * 2);
+    return all;
+}
+
 AtlasStatus generate(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t outMode, uint32_t* outIds,
                      uint32_t* outFlags, AtlasGenTimes& t, std::string& err) {
     h->last = Batch{};  // the engine's output is this call's now: nothing left to ingest
@@ -1688,16 +1709,22 @@ AtlasStatus generate(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32
     for (uint32_t c0 = 0; c0 < count; c0 += MAX_CHUNKS) {
         uint32_t n = std::min(MAX_CHUNKS, count - c0);
         Batch b;
-        AtlasStatus s = makeBatch(h, chunkXZ + size_t(c0) * 2, n, outMode, b);
+        std::vector<int32_t> all = withApron(h, chunkXZ + size_t(c0) * 2, n);
+        uint32_t total = uint32_t(all.size() / 2);
+        AtlasStatus s = makeBatch(h, all.data(), total, outMode, b);
         if (s != ATLAS_OK) return s;
+        b.outputs = n;
         RunOut o;
-        o.ids = outIds + size_t(c0) * OUT_WORDS;
-        flags.assign(n, 0u);
+        std::vector<uint32_t> apronIds;
+        if (total > n && outIds) apronIds.resize(size_t(total) * OUT_WORDS);
+        o.ids = total > n ? (outIds ? apronIds.data() : nullptr) : outIds + size_t(c0) * OUT_WORDS;
+        flags.assign(total, 0u);
         o.flags = flags.data();
         std::vector<uint32_t> jobBad(b.jobs.size() / 4 + 1, 0u);
         o.jobBad = jobBad.data();
         if (!h->engine->run(b, o, t, err)) return h->fail(ATLAS_ERR_GPU, err);
         pagesRan(h, b, o, flags.data());
+        if (total > n && outIds) std::memcpy(outIds + size_t(c0) * OUT_WORDS, apronIds.data(), size_t(n) * OUT_WORDS * 4);
         if (outFlags) std::memcpy(outFlags + c0, flags.data(), size_t(n) * 4);
     }
     return ATLAS_OK;
@@ -2109,16 +2136,21 @@ ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_
         AtlasGenTimes t{};
         std::string err;
         h->last = Batch{};
-        AtlasStatus s = makeBatch(h, chunkXZ, count, 0u, h->last);
+        std::vector<int32_t> all = withApron(h, chunkXZ, count);
+        uint32_t total = uint32_t(all.size() / 2);
+        AtlasStatus s = makeBatch(h, all.data(), total, 0u, h->last);
         if (s != ATLAS_OK) return s;
-        std::vector<uint32_t> flags(count), info(size_t(count) * INFO_WORDS);
+        h->last.outputs = count;
+        std::vector<uint32_t> flags(total), info(size_t(total) * INFO_WORDS), apronIds;
+        if (total > count && outIds) apronIds.resize(size_t(total) * OUT_WORDS);
         std::vector<uint32_t> jobBad(h->last.jobs.size() / 4 + 1, 0u);
-        RunOut o{outIds, flags.data(), info.data(), jobBad.data()};
+        RunOut o{total > count && outIds ? apronIds.data() : outIds, flags.data(), info.data(), jobBad.data()};
         if (!h->engine->run(h->last, o, t, err)) return h->fail(ATLAS_ERR_GPU, err);
         pagesRan(h, h->last, o, flags.data());
+        if (total > count && outIds) std::memcpy(outIds, apronIds.data(), size_t(count) * OUT_WORDS * 4);
         if (outFlags) std::memcpy(outFlags, flags.data(), size_t(count) * 4);
-        h->last.kinds.assign(size_t(count) * 40, 1);
-        for (uint32_t i = 0; i < count; i++)
+        h->last.kinds.assign(size_t(total) * 40, 1);
+        for (uint32_t i = 0; i < total; i++)
             for (uint32_t k = 0; k < 40; k++) h->last.kinds[size_t(i) * 40 + k] = uint8_t(info[size_t(i) * INFO_WORDS + 4 + k * 4 + 2]);
         // decoded: lowest ground, highest top, the tints' biome, then the sections' (hash lo, hash hi, kind, 0)
         for (uint32_t i = 0; i < count; i++) {
@@ -2141,6 +2173,14 @@ ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_
     });
 }
 
+ATLAS_API AtlasStatus atlas_gen_set_apron(AtlasGen* h, AtlasGenApronFn fn, void* user) {
+    if (!h) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> l(h->mu);
+    h->apronFn = fn;
+    h->apronUser = fn ? user : nullptr;
+    return ATLAS_OK;
+}
+
 ATLAS_API AtlasStatus atlas_gen_ingest(AtlasGen* h, uint64_t* masks, uint32_t* outSections, AtlasGenTimes* times) {
     if (!h || !masks) return ATLAS_ERR_ARG;
     return guarded([&] {
@@ -2150,9 +2190,14 @@ ATLAS_API AtlasStatus atlas_gen_ingest(AtlasGen* h, uint64_t* masks, uint32_t* o
         auto t0 = std::chrono::steady_clock::now();
         uint32_t sent = 0;
         std::string err;
-        bool ok = h->engine->ingest(h->ctx, h->last, masks, sent, err);
+        // (the overlays agent) the apron's chunks are never ingested: their masks stay empty, the caller sees its own
+        size_t total = h->last.chunks.size() / 2, asked = h->last.outputs ? h->last.outputs : total;
+        std::vector<uint64_t> all(total, 0u);
+        std::memcpy(all.data(), masks, asked * 8);
+        bool ok = h->engine->ingest(h->ctx, h->last, all.data(), sent, err);
+        std::memcpy(masks, all.data(), asked * 8);
         if (!ok)
-            for (size_t i = 0; i < h->last.chunks.size() / 2; i++) masks[i] = 0;
+            for (size_t i = 0; i < asked; i++) masks[i] = 0;
         h->last = Batch{};
         if (outSections) *outSections = sent;
         if (times) {

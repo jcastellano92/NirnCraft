@@ -322,6 +322,19 @@ class AtlasOverlaysGpuTest {
         rig.gen().chunks(xz, 0, ids, flags);
         long stamped0 = rig.ovl().stamped();
         AtlasGenNative.Times with = rig.gen().chunks(xz, 0, ids, flags);
+        // batch independence: every chunk again as a batch of its own (its neighbours only in the apron) must equal the
+        // whole window's
+        long batchDiff = 0;
+        int[] one = new int[AtlasGenNative.CHUNK_WORDS], oneFlag = new int[1];
+        for (int i = 0; i < n; i++) {
+            rig.gen().chunks(new int[] {xz[i * 2], xz[i * 2 + 1]}, 0, one, oneFlag);
+            for (int k = 0; k < AtlasGenNative.CHUNK_WORDS; k++) {
+                int a = one[k], b2 = ids[i * AtlasGenNative.CHUNK_WORDS + k];
+                if (a != b2) batchDiff += ((a ^ b2) & 0xFFFF) != 0 ? 1 : 0;
+                if (a != b2) batchDiff += ((a ^ b2) >>> 16) != 0 ? 1 : 0;
+            }
+        }
+        report.append(String.format("  batch independence: each chunk alone vs the whole window: %d blocks differ%n", batchDiff));
         Score sc = new Score();
         long flagged = 0;
         int levels = 640;

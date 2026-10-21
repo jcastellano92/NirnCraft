@@ -876,12 +876,22 @@ typedef struct AtlasGenStageBatch {
     uint32_t pad0;
     uint64_t program;              /* VkBuffer: the program's words (AtlasGenProgram: seeds, noises, the block table) */
     uint64_t map;                  /* VkBuffer: the map's words (AtlasGenMap) */
+    uint32_t outputCount;          /* (version 2) the first outputCount chunks were asked for; the rest are the apron
+                                      (atlas_gen_set_apron): generated for the stages to read, never handed back */
+    uint32_t pad1;
 } AtlasGenStageBatch;
 typedef int32_t (*AtlasGenStageFn)(void* user, const AtlasGenStageBatch* batch);
 /* Registers a stage at `order` (outId: for atlas_gen_remove_stage). Copied: the callback and user stay valid until removed
    or the generator is destroyed. */
 ATLAS_API AtlasStatus atlas_gen_add_stage(AtlasGen* h, uint32_t order, AtlasGenStageFn fn, void* user, uint32_t* outId);
 ATLAS_API AtlasStatus atlas_gen_remove_stage(AtlasGen* h, uint32_t id);
+/* (the overlays agent) A batch's apron: given the chunks asked for, fn writes up to max more (cx, cz) pairs into out and
+   returns how many: chunks the stages must read (the overlays' sweeps read a settlement chunk's four neighbours as
+   their terrain and pieces left them), generated with the batch (up to 64 beside the 64 asked for) but never handed
+   back or ingested, so a chunk's result does not depend on its batch. Called under the generator's lock (never call
+   atlas_gen_* from it). NULL: no apron. */
+typedef uint32_t (*AtlasGenApronFn)(void* user, const int32_t* chunks, uint32_t n, int32_t* out, uint32_t max);
+ATLAS_API AtlasStatus atlas_gen_set_apron(AtlasGen* h, AtlasGenApronFn fn, void* user);
 /* The generator's Vulkan device, for the stages' engines to make their pipelines and buffers on beforehand. */
 typedef struct AtlasGenDevice {
     uint32_t version;              /* 1 */

@@ -194,6 +194,32 @@ public:
 
     uint64_t stamped() const { return stamped_; }
 
+    // The batch's apron (atlas_gen_set_apron): every neighbour of a chunk with a tape record that the batch lacks, so
+    // the sweeps read each neighbour as its terrain and pieces left it whatever the batch (a batch-independent result)
+    uint32_t apron(const int32_t* chunks, uint32_t n, int32_t* out, uint32_t max) {
+        std::lock_guard<std::mutex> lock(mu_);
+        if (!has_[1] || tapeIndex_.empty()) return 0;
+        std::unordered_map<int64_t, int32_t> in;
+        for (uint32_t i = 0; i < n; i++) in[chunkKey(chunks[i * 2], chunks[i * 2 + 1])] = 1;
+        uint32_t got = 0;
+        static const int32_t d[4][2] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
+        for (uint32_t i = 0; i < n && got < max; i++) {
+            int32_t cx = chunks[i * 2], cz = chunks[i * 2 + 1];
+            if (tapeIndex_.find(chunkKey(cx, cz)) == tapeIndex_.end()) continue;
+            for (const auto& o : d) {
+                int64_t k = chunkKey(cx + o[0], cz + o[1]);
+                if (in.count(k) || got >= max) continue;
+                in[k] = 1;
+                out[got * 2] = cx + o[0];
+                out[got * 2 + 1] = cz + o[1];
+                got++;
+            }
+        }
+        apronChunks_ += got;
+        return got;
+    }
+    uint64_t apronChunks() const { return apronChunks_; }
+
     bool run(uint32_t count, const int32_t* chunks, uint32_t levels, uint32_t kinds, uint32_t* ids, AtlasOvlTimes& t, std::string& err) {
         std::lock_guard<std::mutex> lock(mu_);
         if (dead_) return fail(err, "the overlays' device was lost earlier");
@@ -583,7 +609,7 @@ private:
     std::vector<uint32_t> pending_[3];
     std::unordered_map<int64_t, int32_t> tapeIndex_, bucketIndex_;
     uint32_t kinds_ = 7u;
-    uint64_t stamped_ = 0;
+    uint64_t stamped_ = 0, apronChunks_ = 0;
     VkBuffer boundIds_ = VK_NULL_HANDLE;
     float timestampPeriod_ = 1.0f;
     char name_[300] = "vulkan";
@@ -667,6 +693,11 @@ int32_t stageFn(void* user, const AtlasGenStageBatch* b) {
         return -1;
     }
 }
+
+uint32_t apronFn(void* user, const int32_t* chunks, uint32_t n, int32_t* out, uint32_t max) {
+    auto* h = static_cast<AtlasOvl*>(user);
+    return h ? h->engine->apron(chunks, n, out, max) : 0;
+}
 }  // namespace
 
 ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out) {
@@ -692,6 +723,7 @@ ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out) {
                 return s;
             }
         }
+        atlas_gen_set_apron(gen, apronFn, h.get());
         *out = h.release();
         return ATLAS_OK;
     });
@@ -699,8 +731,10 @@ ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out) {
 
 ATLAS_API void atlas_ovl_destroy(AtlasOvl* h) {
     if (!h) return;
-    if (h->gen)
+    if (h->gen) {
+        atlas_gen_set_apron(h->gen, nullptr, nullptr);
         for (uint32_t id : h->stageIds) atlas_gen_remove_stage(h->gen, id);  // between batches: nothing of ours in flight after
+    }
     delete h;
 }
 ATLAS_API const char* atlas_ovl_last_error(AtlasOvl* h) { return h ? h->error.c_str() : "null handle"; }
