@@ -788,8 +788,21 @@ ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_
    (outside the window: cleared, send them again when it comes). ATLAS_ERR_TIMEOUT (masks all cleared) when the grid
    has no window yet or has not taken earlier sections for 2 s (no frames). outSections: how many went. */
 ATLAS_API AtlasStatus atlas_gen_ingest(AtlasGen* h, uint64_t* masks, uint32_t* outSections, AtlasGenTimes* times);
-/* The map of Nirn for the kernels (AtlasGenMap: words[0] = 'AMAP'), uploaded once; copied. */
+/* The map of Nirn for the kernels (AtlasGenMap: words[0] = 'AMAP'), uploaded once; copied. With a program that carries
+   the page passes' inputs (AtlasGenProgram: the climate entries, the fields' kinds, the height noises) the generator
+   then makes every page itself on its device (atlas_page.slang) before each batch's terrain: atlas_gen_missing_pages
+   answers 0 and nothing needs atlas_gen_put_page; a chunk that reads a page with a value not proven exact is flagged. */
 ATLAS_API AtlasStatus atlas_gen_set_map(AtlasGen* h, const uint32_t* words, uint32_t count);
+/* A resident page's words (count = atlas_gen_page_words), for the parity checks. ATLAS_ERR_ARG when not resident. */
+ATLAS_API AtlasStatus atlas_gen_read_page(AtlasGen* h, int32_t cx, int32_t cz, uint32_t* out, uint32_t count);
+/* Far tiles on the device (the map set, atlas_page.slang tileMain): count tiles as (lod, tx, tz) triples, each 256 x 256
+   columns at the centre block of their 2^lod squares (AtlasExactSource.fill): outSurface count * 65536 floats
+   ((float) TamrielHeight.height, row-major), outWater the same (the sea below y 63, the map's rivers and lakes at
+   ceil(level), NaN dry); outFlags (may be NULL) nonzero where a column is not proven exact. */
+ATLAS_API AtlasStatus atlas_gen_tiles(AtlasGen* h, const int32_t* lodTxTz, uint32_t count, float* outSurface, float* outWater,
+                                      uint32_t* outFlags, AtlasGenTimes* times);
+/* Pages the device made so far, the page passes' total time, and whether the device makes them (any may be NULL). */
+ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, double* pageMs, int32_t* onDevice);
 /* Probes the kernels' pieces at n (x, z) columns (n <= 2^17), 32 words each, the last a flag (nonzero: not proven): kind 0
    TamrielMap.sample (the MapSample fields in declaration order). For the parity checks. */
 ATLAS_API AtlasStatus atlas_gen_probe(AtlasGen* h, uint32_t kind, uint32_t n, const int32_t* xz, uint32_t* out);

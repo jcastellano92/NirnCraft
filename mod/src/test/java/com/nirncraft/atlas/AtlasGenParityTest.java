@@ -166,6 +166,244 @@ class AtlasGenParityTest {
     }
 
     /**
+     * The pages on the device (atlas_page.slang): the same chunks generated with the map set (the engine makes every
+     * page itself: TamrielMap.sample, TamrielHeight, the channels, map water, the quart biomes), against Java's blocks;
+     * then every page those chunks read against AtlasGenPages' words, field by field. NIRNCRAFT_GEN_PARITY_OUT gets
+     * ".pages.txt".
+     */
+    @Test
+    void gpuPagesMatchJava(MinecraftServer server) throws Exception {
+        RegistryAccess ra = server.registryAccess();
+        WorldDimensions dims = ra.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL).value().createWorldDimensions();
+        LevelStem stem = dims.dimensions().get(LevelStem.OVERWORLD);
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) stem.generator();
+        NoiseGeneratorSettings settings = gen.generatorSettings().value();
+        RandomState rs = RandomState.create(ra.lookupOrThrow(Registries.NOISE), SEED, settings);
+        DimensionType dt = stem.type().value();
+        LevelHeightAccessor heights = LevelHeightAccessor.create(dt.minY(), dt.height());
+        StringBuilder report = new StringBuilder();
+        AtlasGenProgram prog = AtlasGenProgram.compile(gen, settings, rs, heights, SEED, s -> 0);
+        report.append(String.format("program: %d words, %d fields, page passes %s%n", prog.words.length, prog.fields.size(), prog.pageGen));
+        for (int f = 0; f < prog.fields.size(); f++) report.append("  field ").append(f).append(": ").append(prog.fields.get(f)).append('\n');
+        long mt = System.nanoTime();
+        int[] map = AtlasGenMap.words(prog, gen.getBiomeSource());
+        report.append(String.format("map: %d words (%.0f ms)%n", map.length, (System.nanoTime() - mt) / 1e6));
+
+        int per = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_GEN_PARITY_N", "3"));
+        Map<String, List<ChunkPos>> kinds = pick(per);
+        List<ChunkPos> all = new ArrayList<>();
+        kinds.values().forEach(all::addAll);
+        report.append("chunks: ").append(all.size()).append('\n');
+        Map<ChunkPos, ProtoChunk> biomeChunks = new HashMap<>();
+        Map<ChunkPos, ProtoChunk> reference = new LinkedHashMap<>();
+        PalettedContainerFactory containers = PalettedContainerFactory.create(ra);
+        StructureManager structures = new StructureManager(null, null, null) {
+            @Override
+            public List<StructureStart> startsForStructure(int x, int z, Predicate<Structure> m) {
+                return List.of();
+            }
+        };
+        for (ChunkPos pos : all) reference.put(pos, javaChunk(pos, gen, rs, heights, containers, structures, biomeChunks));
+        AtlasGenPages pages = new AtlasGenPages(prog, rs, gen.getBiomeSource(), heights);
+        int[] xz = new int[all.size() * 2];
+        for (int i = 0; i < all.size(); i++) {
+            xz[i * 2] = all.get(i).x();
+            xz[i * 2 + 1] = all.get(i).z();
+        }
+        // every page the chunks read, and whether with biomes
+        Map<Long, Boolean> need = new LinkedHashMap<>();
+        for (ChunkPos c : all)
+            for (int dz = -2; dz <= 2; dz++)
+                for (int dx = -4; dx <= 2; dx++)
+                    need.merge(ChunkPos.pack(c.x() + dx, c.z() + dz), dx >= -1 && dx <= 1 && dz >= -1 && dz <= 1, Boolean::logicalOr);
+        long jt = System.nanoTime();
+        Map<Long, int[]> javaPages = new HashMap<>();
+        need.entrySet().parallelStream().forEach(e -> {
+            int[] w = pages.page(ChunkPos.getX(e.getKey()), ChunkPos.getZ(e.getKey()), e.getValue());
+            synchronized (javaPages) {
+                javaPages.put(e.getKey(), w);
+            }
+        });
+        report.append(String.format("java pages: %d in %.0f ms (all cores)%n", need.size(), (System.nanoTime() - jt) / 1e6));
+
+        Path lib = Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB"));
+        AtlasGenNative nat = AtlasGenNative.load(lib);
+        int nf = prog.fields.size();
+        for (int backend : new int[]{AtlasGenNative.BACKEND_VULKAN, AtlasGenNative.BACKEND_CPU}) {
+            try (AtlasGenNative.Gen g = nat.create(backend)) {
+                if (g == null) {
+                    report.append("backend ").append(backend).append(": unavailable\n");
+                    continue;
+                }
+                g.setProgram(prog.words);
+                g.setMap(map);
+                double[] st0 = g.pageStats();
+                report.append(String.format("%n== %s: pages on the device %s; java asks for %d pages%n", g.device(), st0[2] != 0,
+                        g.missing(xz).length / 3));
+                int[] ids = new int[all.size() * AtlasGenNative.CHUNK_WORDS];
+                int[] flags = new int[all.size()];
+                long t0 = System.nanoTime();
+                AtlasGenNative.Times t = g.chunks(xz, 0, ids, flags);
+                double wall = (System.nanoTime() - t0) / 1e6;
+                double[] st = g.pageStats();
+                report.append(String.format("   first run (pages made): %.1f ms wall, kernels %.1f ms; %d pages in %.1f ms of page passes (%.4f ms a page)%n",
+                        wall, t.kernelMs(), (long) st[0], st[1], st[1] / Math.max(1, st[0])));
+                AtlasGenNative.Times t2 = g.chunks(xz, 0, ids, flags);
+                report.append(String.format("   second run (pages resident): kernels %.1f ms, %.2f ms a chunk%n", t2.kernelMs(), t2.totalMs() / all.size()));
+                compare(report, kinds, all, reference, prog, ids, flags);
+                // the pages, word for word
+                long[] diff = new long[nf + 2], words = new long[nf + 2];
+                int missing = 0, shown = 0;
+                List<int[]> probeCols = new ArrayList<>();
+                for (var e : need.entrySet()) {
+                    int cx = ChunkPos.getX(e.getKey()), cz = ChunkPos.getZ(e.getKey());
+                    int[] gw = g.readPage(cx, cz, prog.pageWords());
+                    if (gw == null) {
+                        missing++;
+                        continue;
+                    }
+                    int[] jw = javaPages.get(e.getKey());
+                    int biomeWords = e.getValue() ? jw.length - (nf * 256 + 256) : 0;
+                    for (int i = 0; i < nf * 256 + 256 + biomeWords; i++) {
+                        int part = i < nf * 256 ? i / 256 : i < nf * 256 + 256 ? nf : nf + 1;
+                        words[part]++;
+                        if (gw[i] == jw[i]) continue;
+                        diff[part]++;
+                        if (part < nf && probeCols.size() < 12) probeCols.add(new int[]{cx * 16 + (i % 256 & 15), cz * 16 + (i % 256 >> 4)});
+                        if (shown++ < 24) {
+                            int col = i % 256;
+                            report.append(String.format("   page %d,%d part %d word %d (column %d,%d): gpu %08x (%s) java %08x (%s)%n", cx, cz, part, i,
+                                    cx * 16 + (col & 15), cz * 16 + (col >> 4), gw[i], Float.intBitsToFloat(gw[i]), jw[i], Float.intBitsToFloat(jw[i])));
+                        }
+                    }
+                }
+                report.append(String.format("   pages compared: %d (%d not resident)%n", need.size() - missing, missing));
+                if (!probeCols.isEmpty()) {
+                    // the differing columns' parts: overhang, influence, bed / pad / plot weights, road, height
+                    int[] pxz = new int[probeCols.size() * 2];
+                    for (int i = 0; i < probeCols.size(); i++) {
+                        pxz[i * 2] = probeCols.get(i)[0];
+                        pxz[i * 2 + 1] = probeCols.get(i)[1];
+                    }
+                    int[] pr = g.probe(1, pxz);
+                    for (int i = 0; i < probeCols.size(); i++) {
+                        int x = pxz[i * 2], z = pxz[i * 2 + 1], o = i * AtlasGenNative.PROBE_WORDS;
+                        MapSample ms = new MapSample();
+                        TamrielMap.sample(x, z, ms);
+                        com.nirncraft.worldplan.PlanGround pg = com.nirncraft.worldplan.PlanGround.getAt(x, z);
+                        com.nirncraft.worldplan.PlanGround.Bed bb = new com.nirncraft.worldplan.PlanGround.Bed();
+                        float jb = pg.bed(x, z, bb) ? bb.weight : -1f;
+                        float jp = pg.pad(x, z, bb) ? bb.padWeight : -1f;
+                        float jq = pg.plot(x, z, bb) ? bb.plotWeight : -1f;
+                        float inf = com.nirncraft.worldplan.PlanGround.influence(x, z);
+                        double ov = com.nirncraft.tamriel.terrain.TamrielChannel.value(com.nirncraft.tamriel.terrain.TamrielChannel.Channel.OVERHANG, ms) * (1 - inf);
+                        double gov = Double.longBitsToDouble((pr[o] & 0xFFFFFFFFL) | (long) pr[o + 1] << 32);
+                        report.append(String.format("   probe %d %d: overhang gpu %s java %s; influence gpu %s java %s; bed %s/%s pad %s/%s plot %s/%s; ridge %s crag %s calm %s road %s cd %s%n",
+                                x, z, gov, ov, Float.intBitsToFloat(pr[o + 2]), inf, Float.intBitsToFloat(pr[o + 3]), jb, Float.intBitsToFloat(pr[o + 4]), jp,
+                                Float.intBitsToFloat(pr[o + 5]), jq, ms.ridge, ms.crag, ms.calm, ms.road, ms.coastDistance));
+                    }
+                }
+                for (int part = 0; part < nf + 2; part++)
+                    report.append(String.format("     %-40s %d of %d words differ%n",
+                            part < nf ? "field " + part + " " + prog.fields.get(part).getClass().getSimpleName() : part == nf ? "map water" : "quart biomes",
+                            diff[part], words[part]));
+            }
+        }
+        String text = report.toString();
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".pages.txt"), text);
+        System.out.println(text);
+    }
+
+    /**
+     * Far tiles on the device (atlas_gen_tiles) against AtlasExactSource's CPU path (TamrielMap.sample, TamrielHeight,
+     * waterAt), bit for bit, over LODs 0..6 at Whiterun, the sea, the raster's edge, Atmora and Yokuda; and the time a
+     * tile. NIRNCRAFT_GEN_PARITY_OUT gets ".tiles.txt".
+     */
+    @Test
+    void gpuTilesMatchJava(MinecraftServer server) throws Exception {
+        RegistryAccess ra = server.registryAccess();
+        WorldDimensions dims = ra.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL).value().createWorldDimensions();
+        LevelStem stem = dims.dimensions().get(LevelStem.OVERWORLD);
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) stem.generator();
+        NoiseGeneratorSettings settings = gen.generatorSettings().value();
+        RandomState rs = RandomState.create(ra.lookupOrThrow(Registries.NOISE), SEED, settings);
+        DimensionType dt = stem.type().value();
+        LevelHeightAccessor heights = LevelHeightAccessor.create(dt.minY(), dt.height());
+        AtlasGenProgram prog = AtlasGenProgram.compile(gen, settings, rs, heights, SEED, s -> 0);
+        int[] map = AtlasGenMap.words(prog, gen.getBiomeSource());
+        com.nirncraft.worldgen.WorldNoise[] n = new com.nirncraft.worldgen.WorldNoise[4];
+        for (int i = 0; i < 4; i++)
+            n[i] = new com.nirncraft.worldgen.WorldNoise(null, rs.getOrCreateNoise(net.minecraft.resources.ResourceKey.create(Registries.NOISE,
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("nirncraft", AtlasExactSource.NOISES[i]))));
+        StringBuilder report = new StringBuilder();
+        AtlasExactSource cpu = new AtlasExactSource(new com.nirncraft.tamriel.terrain.TamrielHeight(n[0], n[1], n[2], n[3]),
+                () -> null, Runtime.getRuntime().availableProcessors());
+        try {
+            // (lod, block x, block z) of each tile's corner region
+            int[][] spots = {{0, 0, 0}, {0, 1200, -800}, {1, -9000, 2000}, {2, 0, -11000}, {3, -19800, 6300}, {4, 0, 0}, {5, 20000, 4000},
+                    {6, -30000, -20000}, {0, -15400, -5100}, {1, 3000, 9000}, {2, 9000, -3000}, {3, -6000, 14000}};
+            int[] tiles = new int[spots.length * 3];
+            for (int i = 0; i < spots.length; i++) {
+                int lod = spots[i][0], span = AtlasNative.TILE << lod;
+                tiles[i * 3] = lod;
+                tiles[i * 3 + 1] = Math.floorDiv(spots[i][1], span);
+                tiles[i * 3 + 2] = Math.floorDiv(spots[i][2], span);
+            }
+            int cols = AtlasGenNative.TILE_COLS;
+            float[][] cs = new float[spots.length][cols], cw = new float[spots.length][cols];
+            long ct = System.nanoTime();
+            for (int i = 0; i < spots.length; i++) cpu.fillCpu(tiles[i * 3], tiles[i * 3 + 1], tiles[i * 3 + 2], cs[i], cw[i]);
+            double cpuMs = (System.nanoTime() - ct) / 1e6;
+            report.append(String.format("cpu: %d tiles in %.0f ms (%.1f ms a tile, all cores)%n", spots.length, cpuMs, cpuMs / spots.length));
+            AtlasGenNative nat = AtlasGenNative.load(Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB")));
+            for (int backend : new int[]{AtlasGenNative.BACKEND_VULKAN, AtlasGenNative.BACKEND_CPU}) {
+                try (AtlasGenNative.Gen g = nat.create(backend)) {
+                    if (g == null) continue;
+                    g.setProgram(prog.words);
+                    g.setMap(map);
+                    float[] s = new float[spots.length * cols], w = new float[spots.length * cols];
+                    double[] ms = new double[1];
+                    g.tiles(tiles, s, w, ms);  // warm
+                    long t0 = System.nanoTime();
+                    int[] bad = g.tiles(tiles, s, w, ms);
+                    double wall = (System.nanoTime() - t0) / 1e6;
+                    report.append(String.format("%n== %s: %d tiles, kernel %.1f ms (%.2f ms a tile), wall %.1f ms%n", g.device(), spots.length, ms[0],
+                            ms[0] / spots.length, wall));
+                    long diff = 0, total = 0;
+                    int shown = 0;
+                    for (int i = 0; i < spots.length; i++) {
+                        long d = 0;
+                        for (int k = 0; k < cols; k++) {
+                            total++;
+                            float gs = s[i * cols + k], gw = w[i * cols + k];
+                            if (Float.floatToRawIntBits(gs) == Float.floatToRawIntBits(cs[i][k])
+                                    && Float.floatToRawIntBits(gw) == Float.floatToRawIntBits(cw[i][k])) continue;
+                            d++;
+                            if (shown++ < 16) {
+                                int lod = tiles[i * 3], st = 1 << lod;
+                                int x = tiles[i * 3 + 1] * (AtlasNative.TILE << lod) + (st >> 1) + (k & 255) * st;
+                                int z = tiles[i * 3 + 2] * (AtlasNative.TILE << lod) + (st >> 1) + (k >> 8) * st;
+                                report.append(String.format("   lod %d column %d %d: gpu %s / %s cpu %s / %s%n", lod, x, z, gs, gw, cs[i][k], cw[i][k]));
+                            }
+                        }
+                        diff += d;
+                        report.append(String.format("   tile lod %d (%d, %d): %d of %d columns differ%s%n", tiles[i * 3], tiles[i * 3 + 1], tiles[i * 3 + 2],
+                                d, cols, bad[i] != 0 ? " (flagged)" : ""));
+                    }
+                    report.append(String.format("   total: %d of %d columns differ (%.5f %% agree)%n", diff, total, 100.0 * (total - diff) / total));
+                }
+            }
+        } finally {
+            cpu.close();
+        }
+        String text = report.toString();
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".tiles.txt"), text);
+        System.out.println(text);
+    }
+
+    /**
      * The near window after a jump (stage 2's measure): a square of W x W chunks around a camera, then the camera
      * 600 blocks east; the pages the new window lacks are computed in Java on all cores, the chunks on the GPU.
      * NIRNCRAFT_GEN_WINDOW = W (default 32: 512 blocks, a 16-chunk view radius).

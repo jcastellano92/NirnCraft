@@ -10,6 +10,7 @@ import java.nio.file.Path;
 
 import static java.lang.foreign.ValueLayout.ADDRESS;
 import static java.lang.foreign.ValueLayout.JAVA_DOUBLE;
+import static java.lang.foreign.ValueLayout.JAVA_FLOAT;
 import static java.lang.foreign.ValueLayout.JAVA_INT;
 import static java.lang.foreign.ValueLayout.JAVA_LONG;
 
@@ -32,6 +33,10 @@ final class AtlasGenNative {
     private final MethodHandle createFor, setIngest, run, ingest;
     // the map on the GPU (atlas_gen_set_map, atlas_gen_probe): null in a library without them
     private final MethodHandle setMap, probe;
+    // the pages made on the device (atlas_gen_read_page, atlas_gen_page_stats): null in a library without them
+    private final MethodHandle readPage, pageStats, tiles;
+    /** Columns of a far tile (atlas_gen_tiles). */
+    static final int TILE_COLS = 65536;
     /** Words per probe (atlas_gen_probe). */
     static final int PROBE_WORDS = 32;
 
@@ -55,6 +60,11 @@ final class AtlasGenNative {
         boolean map = lib.find("atlas_gen_set_map").isPresent();
         setMap = map ? bind(l, lib, "atlas_gen_set_map", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT)) : null;
         probe = map ? bind(l, lib, "atlas_gen_probe", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS)) : null;
+        boolean dp = lib.find("atlas_gen_page_stats").isPresent();
+        readPage = dp ? bind(l, lib, "atlas_gen_read_page", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS, JAVA_INT)) : null;
+        pageStats = dp ? bind(l, lib, "atlas_gen_page_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
+        tiles = lib.find("atlas_gen_tiles").isPresent()
+                ? bind(l, lib, "atlas_gen_tiles", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
     }
 
     private static MethodHandle bind(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd) {
@@ -215,6 +225,57 @@ final class AtlasGenNative {
                 if (flags != null) MemorySegment.copy(fl, JAVA_INT, 0, flags, 0, n);
                 if (sections != null) sections[0] = sec.get(JAVA_INT, 0);
                 return Times.of(t);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Whether this library makes the pages on the device (it has atlas_gen_page_stats). */
+        boolean devicePagesSupported() {
+            return setMap != null && pageStats != null;
+        }
+
+        /** Whether this library makes far tiles on the device (atlas_gen_tiles). */
+        boolean tilesSupported() {
+            return tiles != null;
+        }
+
+        /**
+         * Far tiles on the device (atlas_gen_tiles): (lod, tx, tz) triples; surface / water count * TILE_COLS floats
+         * each; returns per tile nonzero where a column is not proven exact. Also the kernel ms in times[0].
+         */
+        int[] tiles(int[] lodTxTz, float[] surface, float[] water, double[] times) {
+            int n = lodTxTz.length / 3;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment s = a.allocate(JAVA_FLOAT, (long) n * TILE_COLS), w = a.allocate(JAVA_FLOAT, (long) n * TILE_COLS);
+                MemorySegment f = a.allocate(JAVA_INT, n), t = a.allocate(96);
+                check((int) tiles.invokeExact(ptr, a.allocateFrom(JAVA_INT, lodTxTz), n, s, w, f, t), "atlas_gen_tiles");
+                MemorySegment.copy(s, JAVA_FLOAT, 0, surface, 0, n * TILE_COLS);
+                MemorySegment.copy(w, JAVA_FLOAT, 0, water, 0, n * TILE_COLS);
+                if (times != null && times.length > 0) times[0] = t.get(JAVA_DOUBLE, 8);
+                return f.toArray(JAVA_INT);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** A resident page's words (atlas_gen_read_page), or null when it is not resident. */
+        int[] readPage(int cx, int cz, int words) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment out = a.allocate(JAVA_INT, words);
+                int s = (int) readPage.invokeExact(ptr, cx, cz, out, words);
+                return s == 0 ? out.toArray(JAVA_INT) : null;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Pages made on the device so far, their passes' total ms, and whether the device makes them. */
+        double[] pageStats() {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment n = a.allocate(JAVA_LONG), ms = a.allocate(JAVA_DOUBLE), on = a.allocate(JAVA_INT);
+                check((int) pageStats.invokeExact(ptr, n, ms, on), "atlas_gen_page_stats");
+                return new double[]{n.get(JAVA_LONG, 0), ms.get(JAVA_DOUBLE, 0), on.get(JAVA_INT, 0)};
             } catch (Throwable t) {
                 throw rethrow(t);
             }

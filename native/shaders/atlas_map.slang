@@ -18,7 +18,7 @@ uint mh(uint i) { return mapData[i]; }
 static const int T_CELL = 32, T_MIN_X = -15360, T_MIN_Z = -5120, T_W = 880, T_H = 672;
 static const int T_MAX_X = T_MIN_X + T_W * T_CELL, T_MAX_Z = T_MIN_Z + T_H * T_CELL;
 static const int T_SEA = 63;
-static const uint CH = 16;
+static const uint CH = 15;  // MapRaster.CH: interleaved floats per cell
 static const uint RC_ELEV = 0, RC_COAST = 1, RC_RIV_D = 2, RC_RIV_HW = 3, RC_LAKE_SD = 4, RC_WATER = 5, RC_RIDGE = 6, RC_ROUGH = 7,
                   RC_CRAG = 8, RC_DUNES = 9, RC_WET = 10, RC_ROAD = 11, RC_BORDER = 12, RC_RAINSHADOW = 13, RC_HEAT = 14;
 static const float NO_WATER = -1000.0f;
@@ -265,7 +265,7 @@ double peakReachAt(uint p, double bearing, inout uint bad) {
     double f = divD(bearing + PI_D, TWO_PI_D, bad) * 720.0l;
     int i = floorD(f, bad);
     double t = f - double(i);
-    uint rb = p + 28u;
+    uint rb = p + 24u;  // after 10 doubles and the 4-int box
     float a = mf(rb + uint(floorModI(i, 720))), b = mf(rb + uint(floorModI(i + 1, 720)));
     return double(a) + double(b - a) * t;
 }
@@ -289,7 +289,7 @@ void peaksApply(int x, int z, inout MapS s, inout uint bad) {
         double prof = powS(1.0l - ua, power, bad) * (1.0l - 0.85l * road);
         double dprof = divD(divD(power * powS(jmaxD(1.0e-6l, 1.0l - ua), power - 1.0l, bad) * shape * ua, jmaxD(u, 1.0e-6l), bad), reach, bad);
         s.slope = float(jmaxD(double(s.slope), jmaxD(height - hornHeight - double(s.elevation), 0.0l) * dprof * (1.0l - 0.85l * road)));
-        uint q = p + 28u + 720u;
+        uint q = p + 24u + 720u;
         uint nShelves = mw(q);
         uint shelves = q + 1u;
         uint qc = shelves + nShelves * 8u;

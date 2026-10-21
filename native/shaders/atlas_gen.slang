@@ -27,7 +27,7 @@ struct GenParams {
 };
 [[vk::push_constant]] ConstantBuffer<GenParams> params;
 [[vk::binding(0, 0)]] StructuredBuffer<uint> prog;
-[[vk::binding(1, 0)]] StructuredBuffer<uint> pages;
+[[vk::binding(1, 0)]] RWStructuredBuffer<uint> pages;  // written by the page passes (atlas_page.slang)
 [[vk::binding(2, 0)]] StructuredBuffer<int> pageIndex;
 [[vk::binding(3, 0)]] StructuredBuffer<int> chunkList;     // (cx, cz) per chunk
 [[vk::binding(4, 0)]] RWStructuredBuffer<float> corners;   // per chunk CORNER_WORDS * K
@@ -44,9 +44,13 @@ struct GenParams {
 [[vk::binding(10, 0)]] RWStructuredBuffer<uint> secInfo;
 // the map of Nirn (atlas_map.slang, AtlasGenMap): uploaded once (atlas_gen_set_map)
 [[vk::binding(11, 0)]] StructuredBuffer<uint> mapData;
+// the page passes' jobs (cx, cz, slot, full) and a flag per page slot (nonzero: a value not proven exact)
+[[vk::binding(12, 0)]] StructuredBuffer<int> pageJobs;
+[[vk::binding(13, 0)]] RWStructuredBuffer<uint> pageBad;
 
 #include "atlas_exact.slang"
 #include "atlas_map.slang"
+#include "atlas_page.slang"
 
 // ---- program layout (AtlasGenProgram writes it; keep in step) --------------------------------------------------
 static const uint MAGIC = 0x4E454741u;  // "AGEN"
@@ -380,7 +384,7 @@ static const uint OP_END = 0, OP_CONST = 1, OP_Y = 2, OP_COL = 3, OP_NOISE = 4, 
                   OP_MINC_V = 20, OP_MINC_P = 21, OP_MAXC_V = 22, OP_MAXC_P = 23, OP_ABS = 24, OP_SQUARE = 25,
                   OP_CUBE = 26, OP_SQUEEZE = 27, OP_NEG = 28, OP_LEAKY = 29, OP_RECIP = 30, OP_SIGN = 31,
                   OP_CLAMP = 32, OP_RANGE = 33, OP_RANGEC = 34, OP_ISEL = 35, OP_INTERP = 36, OP_SLICE = 37,
-                  OP_UNSLICE = 38, OP_OUT = 39, OP_MOV = 40;
+                  OP_UNSLICE = 38, OP_OUT = 39, OP_MOV = 40, OP_SNOISE = 41, OP_NOISEB = 42;
 static const int REGS = 96;
 
 // where an INTERP op reads: the chunk's corner block, and the block's chunk-local position
@@ -415,11 +419,15 @@ float interp(InterpCtx c, uint k) {
 
 // runs entry e at block (x, y, z); OP_OUT k writes outv[k]
 void vmRun(uint e, int x0, int y0, int z0, InterpCtx ic, inout float outv[16], inout uint bad) {
+    vmRunRange(entryStart(e), entryEnd(e), x0, y0, z0, ic, outv, bad);
+}
+// the code words start .. end (relative to H_CODE)
+void vmRunRange(uint start, uint stop, int x0, int y0, int z0, InterpCtx ic, inout float outv[16], inout uint bad) {
     float r[REGS];
     int x = x0, y = y0, z = z0;
     int sx[4], sy[4], sz[4];
     int sp = 0;
-    uint pc = hdr(H_CODE) + entryStart(e), end = hdr(H_CODE) + entryEnd(e);
+    uint pc = hdr(H_CODE) + start, end = hdr(H_CODE) + stop;
     while (pc < end) {
         uint w = prog[pc];
         uint op = w & 255u, d = (w >> 8) & 255u, a = (w >> 16) & 255u, b = w >> 24;
@@ -434,6 +442,21 @@ void vmRun(uint e, int x0, int y0, int z0, InterpCtx ic, inout float outv[16], i
                 double xzs = pd(pc + 1), ys = pd(pc + 3);
                 pc += 5;
                 r[d] = noiseAt(stack, point, double(x), double(y), double(z), xzs, ys, bad);
+                break;
+            }
+            case OP_SNOISE: {
+                // NoiseFunction.ShiftedXzSampler.sampleValue (point only): x * xzScale + shift x, y * yScale, z * ...
+                uint stack = prog[pc] & 0xFFFFu;
+                double xzs = pd(pc + 1), ys = pd(pc + 3);
+                pc += 5;
+                r[d] = stackGet(stack, double(x) * xzs + double(r[a]), double(y) * ys, double(z) * xzs + double(r[b]), bad);
+                break;
+            }
+            case OP_NOISEB: {
+                // ShiftNoiseFunction.ShiftB.sampleValue before its * 4: the offset noise at (z / 4, x / 4, 0)
+                uint stack = prog[pc] & 0xFFFFu;
+                pc += 1;
+                r[d] = stackGet(stack, double(z) * 0.25l, double(x) * 0.25l, 0.0l, bad);
                 break;
             }
             case OP_GRAD: {
@@ -530,6 +553,15 @@ void vmRun(uint e, int x0, int y0, int z0, InterpCtx ic, inout float outv[16], i
             default: bad = bad | 8u; pc = end; break;
         }
     }
+}
+
+float vmPointRange(uint start, uint stop, int x, int y, int z, inout uint bad) {
+    InterpCtx ic;
+    ic.base = 0u; ic.lx = 0; ic.ly = 0; ic.lz = 0; ic.valid = false;
+    float o[16];
+    for (int i = 0; i < 16; i++) o[i] = 0.0f;
+    vmRunRange(start, stop, x, y, z, ic, o, bad);
+    return o[0];
 }
 
 float vmPoint(uint e, int x, int y, int z, inout uint bad) {
@@ -1293,6 +1325,28 @@ void probeMain(uint3 id : SV_DispatchThreadID) {
         outIds[o + 22] = asuint(s.heat);
         outIds[o + 23] = asuint(s.aspectX);
         outIds[o + 24] = asuint(s.aspectZ);
+    } else if (params.outMode == 1u) {
+        // the overhang channel's parts (atlas_page.slang): its map value (double), PlanGround's influence and weights
+        MapS s = tamrielSample(x, z, bad);
+        double base = channelValue(CHN_OVERHANG, x, z, s, bad);
+        Bed bd;
+        bedClear(bd);
+        float wb = planBed(x, z, bd, bad) ? bd.weight : -1.0f;
+        float wp = planPad(x, z, bd, bad) ? bd.padWeight : -1.0f;
+        float wq = streetPad(x, z, bd, bad) ? bd.plotWeight : -1.0f;
+        float inf = planInfluence(x, z, bad);
+        double road = channelValue(CHN_ROAD, x, z, s, bad);
+        outIds[o] = uint(loW(base));
+        outIds[o + 1] = uint(hiW(base));
+        outIds[o + 2] = asuint(inf);
+        outIds[o + 3] = asuint(wb);
+        outIds[o + 4] = asuint(wp);
+        outIds[o + 5] = asuint(wq);
+        outIds[o + 6] = uint(loW(road));
+        outIds[o + 7] = uint(hiW(road));
+        double h = tamrielHeight(x, z, s, bad);
+        outIds[o + 8] = uint(loW(h));
+        outIds[o + 9] = uint(hiW(h));
     }
     outIds[o + PROBE_WORDS - 1u] = bad;
 }

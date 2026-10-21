@@ -107,9 +107,9 @@ the same pipeline: heights exact, no caves, no overhangs, no aquifers.
 * **GPU (stage 2):** density, caves, aquifers, map water, the surface paint and the ore veins, for whole chunk columns
   (the surface pass walks a column top down, so a section cannot be painted alone; a column costs little more than its
   sections). Output: per section 4096 ids, either generator block ids (parity) or atlas material ids.
-* **Java, per column (for now):** the 2D inputs the GPU program reads: `TamrielHeight` (already GPU-assisted), the
-  channels, the map water level, and the quart biomes. These are the mod's own code, so they are exact by
-  construction; moving them to the GPU means porting the map rasters, hydrology and the plans (a later stage).
+* **GPU too (2026-10-21, section 7.2):** the 2D inputs the program reads: `TamrielMap.sample`, `TamrielHeight`, the
+  channels, the map water and the quart biomes, from the map's data on the device. Java's `AtlasGenPages` is only the
+  fallback now (a library or program without the page passes).
 * **Java, per chunk (stage 4):** features and structures, run with the real feature code into a capture level over
   the generated blocks, as `AtlasTrees` does, then into the same section path.
 * **Server (stage 5):** only differences: player edits, and generator divergences found by comparison.
@@ -156,7 +156,7 @@ division with sticky bit); signed integer division only on non-negative operands
 * The mod's 2D functions (`tamriel_height`, the channels: road, erosion, overhang, river, elevation) become column
   fields read from pages.
 
-**Pages** (`AtlasGenPages`, Java, per chunk): the fields from the generator's own compiled samplers (exact by
+**Pages** (made on the device since 2026-10-21, section 7.2; `AtlasGenPages`, Java, per chunk, is the fallback): the fields from the generator's own compiled samplers (exact by
 construction), the map water of each column (`MapWaterFeature`'s test), and for the chunk's 3 x 3 the quart biomes,
 filled as `ChunkGenerator.createBiomes` fills them (fresh climate sampler, sections bottom up). A chunk reads heights
 from chunks x-4..x+2, z-2..z+2 (the aquifer looks up to three chunks west) and biomes from its 3 x 3. Pages stay
@@ -248,8 +248,10 @@ material passes add about a third to the terrain kernels.
 * **The surface pass** is the kernel's largest (a thread per column walks it): split the per-block rule work.
 * **The grid and GPU sections**: `VoxGrid::ingestGpu` drops what lies outside its windows and cannot refill it (the
   CPU World never had it); a list of the sections it let go would let the generator resend exactly those.
-* **The 2D inputs on the GPU**: the map rasters, hydrology, road and street plans as device data (today Java computes
-  pages: 0.15 ms a chunk on 20 threads).
+* **Tile plans beyond Tamriel** (`TilePlanner`): Java shapes roads there only where its planner finished a tile, so the
+  kernels (authored plan only) differ where one did. The plans would go up as device data like the authored one.
+* **The far tiles' surface blocks and tints** (`AtlasSurface`, `AtlasBiomes`): still Java per tile; the heights and water
+  come from the device (section 7.3). The rule VM and the biome kernels are on the device already.
 * **Multiplayer**: the client has no seed (the public / secret decision, ATLAS-STREAMING.md decision 3).
 * Found on the way, for the owner: the router has no `minecraft:beardifier` (structures' `beard_box` /
   `beard_thin` do nothing), `nirncraft:tamriel_caves` is dead code, and `TamrielBiomeSource` samples a quart

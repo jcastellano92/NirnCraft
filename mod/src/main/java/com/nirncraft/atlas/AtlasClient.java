@@ -576,6 +576,19 @@ public final class AtlasClient {
                 String why = e.enableGpu(lib);
                 if (why != null) com.nirncraft.NirnCraft.LOGGER.info("atlas exact heights on the CPU: {}", why);
             }
+            // whole far tiles in the generator's kernels (map, height, water on the device; checked per LOD against the
+            // CPU path); -Dnirncraft.atlas.gpuTiles=false keeps the path above
+            if (source instanceof AtlasExactSource e && libPath != null && !"false".equals(System.getProperty("nirncraft.atlas.gpuTiles"))) {
+                // (off the render thread: the program and the map take a while; tiles until then take the path above)
+                net.minecraft.server.MinecraftServer sp = mc.getSingleplayerServer();
+                Path lp = libPath;
+                Thread t = new Thread(() -> {
+                    String why = e.enableGpuTiles(sp, lp);
+                    com.nirncraft.NirnCraft.LOGGER.info("atlas far tiles {}", why == null ? "on the GPU (the generator's kernels)" : "not on the GPU: " + why);
+                }, "atlas far tiles setup");
+                t.setDaemon(true);
+                t.start();
+            }
             if (source == null) source = AtlasFarField.defaultSource();
             if (source.usesBlockPalette()) ctx.setPalette(AtlasPalette.blocks());  // else atlas's preview palette
             int[] noise = AtlasPalette.cloudNoiseVolume();
