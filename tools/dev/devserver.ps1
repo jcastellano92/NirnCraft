@@ -268,7 +268,11 @@ function Start-Dev {
     # MDG's public standalone-launch tasks compile resources/classes and supply the exact native classpath.
     $prepareLog = Join-Path $Dev 'native-prepare.log'
     $prepareStarted = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
+    # PowerShell 5.1 turns a native program's stderr (javac's warnings) into a terminating error under the callers'
+    # 'Stop'; the exit code below is the real verdict
+    $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
     & py -3 -I (Join-Path $PSScriptRoot 'native_server_263.py') --runtime $Dev --control $Dev --jdwp $JdwpPort --xmx $Xmx --output $LaunchFile *> $prepareLog
+    $ErrorActionPreference = $eap
     if ($LASTEXITCODE -ne 0) { Write-Host "Native server preparation failed; see $prepareLog"; Get-Content -LiteralPath $prepareLog -Tail 20 | ForEach-Object { Write-Host $_ }; return $false }
     $launch = Get-Content -LiteralPath $LaunchFile -Raw | ConvertFrom-Json
     if ($launch.minecraft -ne '26.3' -or $launch.neoforge -ne '26.3.0.90' -or $launch.javaVersion -ne 25 -or
