@@ -40,6 +40,7 @@ final class AtlasMaterials {
     private final List<float[]> pendingExact = new ArrayList<>();
     private final List<AtlasShapes.Shape> pendingExactShapes = new ArrayList<>();
     private final List<int[][]> pendingExactTextures = new ArrayList<>();  // their faces' 16x16 textures (near hits)
+    private final List<AtlasShapes.BrickModel> pendingExactBricks = new ArrayList<>();  // their bricks' quads (non-cube blocks)
     private int nextExact = EXACT_FIRST;
 
     /** Shapes on: the materials handed out from now on carry their shapes, real sections use per-state ids. */
@@ -106,15 +107,22 @@ final class AtlasMaterials {
     }
 
     /**
-     * The palette id of a real section's block (AtlasEditsClient): with shapes on one per far block state and tint
-     * (`tint` RGB for the blocks the game tints, -1 none) carrying its shape; else as before (leaves / id).
+     * The palette id of a real section's block (AtlasEditsClient): with shapes on one per block state and tint (`tint`
+     * RGB for the blocks the game tints, -1 none) carrying its shape, its textures and (a block whose model is not a full
+     * cube) its micro-voxel brick; else as before (leaves / id). The state as it comes: the client's feed hands the full
+     * state (a crop's age, redstone's power), the server's the far state (AtlasFarState: what does not tick). Past
+     * EXACT_LAST the far state's id when it has one (a crop at age 0 rather than a plain cube).
      */
     synchronized short section(BlockState s, int tint) {
-        if (!shapes || nextExact > EXACT_LAST) return tint >= 0 ? leaves(s, tint) : id(s);
+        if (!shapes) return tint >= 0 ? leaves(s, tint) : id(s);
         int q = tint >= 0 ? tint & 0xF8F8F8 : -1;
-        long key = (long) AtlasFarState.farId(s) << 32 | (q & 0xFFFFFFFFL);
-        Short v = exact.get(key);
-        if (v != null) return v;
+        long key = (long) net.minecraft.world.level.block.Block.getId(s) << 32 | (q & 0xFFFFFFFFL);
+        Short have = exact.get(key);
+        if (have != null) return have;
+        if (nextExact > EXACT_LAST) {
+            Short far = exact.get((long) AtlasFarState.farId(s) << 32 | (q & 0xFFFFFFFFL));
+            return far != null ? far : tint >= 0 ? leaves(s, tint) : id(s);
+        }
         pendingExact.add(q >= 0 ? tintedMaterial(s, q) : material(s));
         pendingExactShapes.add(shapeOf(s, q));
         int[][] tex;
@@ -124,6 +132,13 @@ final class AtlasMaterials {
             tex = null;  // a model that cannot say: its face tiles then
         }
         pendingExactTextures.add(tex);
+        AtlasShapes.BrickModel brick;
+        try {
+            brick = AtlasShapes.brick(s, q);
+        } catch (RuntimeException e) {
+            brick = null;  // a model that cannot say: its shape then
+        }
+        pendingExactBricks.add(brick);
         short id = (short) nextExact++;
         exact.put(key, id);
         return id;
@@ -133,6 +148,11 @@ final class AtlasMaterials {
     static boolean biomeTinted(BlockState s) {
         int k = TINT_KINDS.computeIfAbsent(s, AtlasMaterials::probeTint);
         return k == TINT_GRASS || k == TINT_FOLIAGE;
+    }
+
+    /** A state's tint source's answer (TINT_* for none or a biome colour, else the constant RGB): states alike in it tint alike. */
+    static int tintKind(BlockState s) {
+        return TINT_KINDS.computeIfAbsent(s, AtlasMaterials::probeTint);
     }
 
     /** Per state its tint source's answer: TINT_* for none or a biome colour, else the constant RGB. */
@@ -179,9 +199,11 @@ final class AtlasMaterials {
             ctx.setMaterials(first, pendingExact.toArray(new float[0][]));
             ctx.setMaterialShapes(first, pendingExactShapes.toArray(new AtlasShapes.Shape[0]));
             ctx.setMaterialTextures(first, pendingExactTextures.toArray(new int[0][][]));
+            ctx.setMaterialBricks(first, pendingExactBricks.toArray(new AtlasShapes.BrickModel[0]));
             pendingExact.clear();
             pendingExactShapes.clear();
             pendingExactTextures.clear();
+            pendingExactBricks.clear();
         }
     }
 
@@ -201,10 +223,10 @@ final class AtlasMaterials {
         float r = lin((rgb >> 16) & 255), g = lin((rgb >> 8) & 255), b = lin(rgb & 255);
         int light = s.getLightEmission();
         int cls = !s.getFluidState().isEmpty() && light == 0 ? AtlasNative.CLASS_WATER
-                : light >= 10 ? AtlasNative.CLASS_EMISSIVE
+                : light >= 1 ? AtlasNative.CLASS_EMISSIVE
                 : s.is(BlockTags.LEAVES) || AtlasSections.plant(s) ? AtlasNative.CLASS_FOLIAGE : AtlasNative.CLASS_TERRAIN;
         float rough = cls == AtlasNative.CLASS_WATER ? 0.05f : key.contains("ice") ? 0.2f : key.contains("snow") ? 0.6f : 0.85f;
-        return new float[] {r, g, b, rough, light >= 10 ? light / 15f : 0f, cls};
+        return new float[] {r, g, b, rough, light >= 1 ? light / 15f : 0f, cls};
     }
 
     static float lin(int c) {

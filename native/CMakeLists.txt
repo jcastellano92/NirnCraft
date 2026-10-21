@@ -44,7 +44,7 @@ find_program(SLANGC slangc HINTS "${SLANG_ROOT}/bin" REQUIRED NO_DEFAULT_PATH)
 set(KERNEL_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_far.slang")
 set(KERNEL_DEPS "${KERNEL_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_shared.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_clouds.slang"
     "${CMAKE_SOURCE_DIR}/shaders/atlas_actors.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_groups.slang"
-    "${CMAKE_SOURCE_DIR}/shaders/atlas_air.slang")
+    "${CMAKE_SOURCE_DIR}/shaders/atlas_air.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_bricks.slang")
 
 # One kernel source, two targets.
 add_custom_command(
@@ -148,7 +148,7 @@ add_custom_command(
 
 # more entry points of the far kernel's module, with its bindings (the far lights on the GPU)
 set(FAR_EXTRA_HEADERS "")
-foreach(pair "lightCullMain;lightcull" "lightAdmitMain;lightadmit" "lightBinMain;lightbin")
+foreach(pair "lightCullMain;lightcull" "lightAdmitMain;lightadmit" "lightBinMain;lightbin" "gridLightMain;gridlight")
   list(GET pair 0 entry)
   list(GET pair 1 short)
   add_custom_command(
@@ -164,7 +164,7 @@ foreach(pair "lightCullMain;lightcull" "lightAdmitMain;lightadmit" "lightBinMain
 endforeach()
 add_library(atlas_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/groups.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
-  src/gl_api.cpp src/lights.cpp src/voxgrid.cpp src/sectionstore.cpp
+  src/gl_api.cpp src/lights.cpp src/voxgrid.cpp src/sectionstore.cpp src/bricks.cpp
   "${GEN}/atlas_far_cpu.cpp" "${GEN}/atlas_far_spv.h" "${GEN}/atlas_publish_spv.h" "${GEN}/atlas_ingest_spv.h"
   "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h" "${GEN}/atlas_nearlight_spv.h" "${GEN}/atlas_nearup_spv.h"
   "${GEN}/atlas_neartemporal_spv.h" ${VG_HEADERS} ${FAR_EXTRA_HEADERS})

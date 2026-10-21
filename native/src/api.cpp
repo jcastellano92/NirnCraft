@@ -17,6 +17,7 @@
 #include "atlas/atlas.h"
 #include "air.hpp"
 #include "backend.hpp"
+#include "bricks.hpp"
 #include "lights.hpp"
 #include "parallel.hpp"
 #include "preview_source.hpp"
@@ -147,6 +148,13 @@ struct AtlasContext {
     uint32_t cacheGenVersion = 0;
     std::vector<uint32_t> texturesPacked = std::vector<uint32_t>(1, 0u);  // packTextures of the world's TextureSet
     uint64_t texturesRevision = 0;
+    // (abi 0.18) the micro-voxel bricks (atlas_set_material_bricks), packed for the kernels once each revision
+    BrickStore bricks;
+    std::vector<uint32_t> bricksPacked = std::vector<uint32_t>(1, 0u);
+    uint64_t bricksRevision = 0, bricksStoreRevision = 0;
+    std::vector<uint32_t> materialLights;  // per material its light word (bricks.hpp), the last packed
+    uint64_t materialLightsHash = 0;
+    bool gridLights = false;  // some material emits: the grid's emitters are lights (gridLightMain)
     std::vector<MaterialGpu> palette;
     std::vector<uint32_t> weather;  // near field, near dyn, far field, far dyn (128*128 each)
     std::vector<uint32_t> cloudNoise = std::vector<uint32_t>(64 * 64 * 64, 0);
@@ -216,7 +224,12 @@ struct AtlasContext {
 static void syncClasses(AtlasContext* ctx) {
     std::vector<uint8_t> cls(ctx->palette.size(), 0);
     for (size_t i = 0; i < cls.size(); i++) cls[i] = uint8_t(ctx->palette[i].emisClass[1]);
-    ctx->voxgrid.setClasses(cls);  // (the grid's coarse levels: the same vote, on the GPU)
+    std::vector<uint8_t> grid = cls;
+    // (the grid's vote: a sparse brick, under a quarter of its micro-voxels filled (a rail, a torch, a door, a ladder),
+    // is no solid block to its coarse voxel: atlas_voxgrid.slang vKind's 255, air; foliage keeps its own kind)
+    for (size_t i = 0; i < grid.size(); i++)
+        if ((grid[i] == ATLAS_CLASS_TERRAIN || grid[i] == ATLAS_CLASS_EMISSIVE) && ctx->bricks.sparse(uint32_t(i))) grid[i] = 255;
+    ctx->voxgrid.setClasses(grid);  // (the grid's coarse levels: the same vote, on the GPU)
     ctx->world.setClasses(std::move(cls));
 }
 
@@ -1332,7 +1345,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
                 in.lightsRevision = ctx->lightsRevision;
                 in.lightRecords = ctx->lightRecords;
                 g.dims[2] |= FRAME_GPU_LIGHTS_BIT;
-                g.weatherParams[1] = ctx->lightRecords > 0 ? 1.0f : 0.0f;
+                g.weatherParams[1] = ctx->lightRecords > 0 || (ctx->gridLights && ctx->voxgrid.enabled) ? 1.0f : 0.0f;  // (gridLightMain: last frame's table)
                 g.farLight[0] = lv.hazeDensity;
             } else {
                 g.weatherParams[1] = float(ctx->lights.frame(lv, in.actors));
@@ -1386,6 +1399,42 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         }
         in.textures = &ctx->texturesPacked;
         in.texturesRevision = ctx->texturesRevision;
+        // the materials' lights (gridLightMain): every emitter at its level in its colour (its brick's glowing
+        // micro-voxels, else its palette colour), checked against the palette each frame (cheap: a word a material)
+        std::vector<uint32_t>& lw = ctx->materialLights;
+        lw.assign(ctx->palette.size(), 0u);
+        uint64_t lh = 0xcbf29ce484222325ull;
+        bool anyLight = false;
+        for (size_t m = 1; m < ctx->palette.size(); m++) {
+            const MaterialGpu& p = ctx->palette[m];
+            uint32_t level = uint32_t(std::clamp(p.emisClass[0] * 15.0f + 0.5f, 0.0f, 15.0f));
+            if (!level || p.emisClass[1] == float(ATLAS_CLASS_WATER)) continue;
+            uint32_t rgb = ctx->bricks.lightRgb(uint32_t(m));
+            if (!rgb) {
+                float mx = std::max(p.albedoRough[0], std::max(p.albedoRough[1], std::max(p.albedoRough[2], 1e-4f)));
+                auto q = [&](float x) { return uint32_t(std::clamp(std::pow(x / mx, 1.0f / 2.2f) * 255.0f + 0.5f, 0.0f, 255.0f)); };
+                rgb = q(p.albedoRough[0]) << 16 | q(p.albedoRough[1]) << 8 | q(p.albedoRough[2]);
+            }
+            lw[m] = level << 24 | rgb;
+            lh = (lh ^ (uint64_t(m) << 32 | lw[m])) * 0x100000001b3ull;
+            anyLight = true;
+        }
+        ctx->gridLights = anyLight;
+        bool lightsMoved = lh != ctx->materialLightsHash;
+        ctx->materialLightsHash = lh;
+        uint64_t sr = ctx->bricksStoreRevision;
+        if (ctx->bricks.pack(sr, lightsMoved, lw, ctx->bricksPacked, sr)) {
+            ctx->bricksStoreRevision = sr;
+            ctx->bricksRevision++;
+        }
+        in.bricks = &ctx->bricksPacked;
+        in.bricksRevision = ctx->bricksRevision;
+        // (ATLAS_GRID_LIGHTS=0, measurements: the grid's emitters light nothing)
+        static const bool gridLightsOn = [] {
+            const char* e = std::getenv("ATLAS_GRID_LIGHTS");
+            return !e || std::atoi(e) != 0;
+        }();
+        in.gridLights = gridLightsOn && ctx->gridLights && ctx->voxgrid.enabled;
     }
     in.wantNearDepth = (f->flags & ATLAS_FRAME_NEAR_DEPTH) != 0;
     in.nearDepth = in.wantNearDepth ? f->nearDepth : nullptr;
@@ -1643,6 +1692,56 @@ ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t fi
         v[i] = std::move(t);
     }
     ctx->world.setTextures(first, v);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t first, uint32_t count, const AtlasBrickQuad* quads,
+                                                uint32_t quadCount, const AtlasBrickSprite* sprites, uint32_t spriteCount,
+                                                const uint32_t* texels, uint32_t texelCount, const float* emission) {
+    if (!ctx || first == 0 || (!quads && quadCount) || (!sprites && spriteCount) || (!texels && texelCount)) return ATLAS_ERR_ARG;
+    if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
+    ATLAS_TRY
+    // each material's quads voxelised on its own (independent: the pool's threads), then interned and set
+    std::vector<std::shared_ptr<const std::vector<uint32_t>>> recs(count);
+    std::vector<uint32_t> lightOf(count, 0u);
+    std::vector<std::vector<std::shared_ptr<const std::vector<uint32_t>>>> frameRecs(count);
+    std::vector<uint32_t> ticksOf(count, 1u), filledOf(count, 0u);
+    std::vector<std::vector<AtlasBrickQuad>> per(count);
+    for (uint32_t q = 0; q < quadCount; q++)
+        if (quads[q].material < count) per[quads[q].material].push_back(quads[q]);
+    std::atomic<uint32_t> next{0};
+    parallelRun([&] {
+        BrickVoxels v;
+        for (uint32_t m; (m = next.fetch_add(1)) < count;) {
+            if (per[m].empty()) continue;
+            float e = emission ? std::clamp(emission[m], 0.0f, 1.0f) : 0.0f;
+            // its animation: the longest of its sprites' (frames, ticks a frame), at most 64 frames
+            uint32_t frames = 1, ticks = 1;
+            for (const AtlasBrickQuad& q : per[m])
+                if (q.sprite < spriteCount && (sprites[q.sprite].frames & 0xFFFFu) > frames) {
+                    frames = std::min(64u, sprites[q.sprite].frames & 0xFFFFu);
+                    ticks = std::max(1u, sprites[q.sprite].frames >> 16);
+                }
+            for (uint32_t k = 0; k < frames; k++) {
+                if (!voxeliseBrick(per[m].data(), uint32_t(per[m].size()), m, sprites, spriteCount, texels, texelCount, e, v, k))
+                    break;
+                auto r = ctx->bricks.intern(encodeBrick(v));
+                if (k == 0) recs[m] = r, lightOf[m] = v.lightRgb, filledOf[m] = v.count;
+                if (frames > 1) frameRecs[m].push_back(r);
+            }
+            ticksOf[m] = ticks;
+        }
+    }, count < 8 ? 1u : 0u);
+    for (uint32_t m = 0; m < count; m++) {
+        if (frameRecs[m].size() > 1) ctx->bricks.setFrames(first + m, std::move(frameRecs[m]), ticksOf[m], lightOf[m]);
+        else ctx->bricks.set(first + m, recs[m], lightOf[m]);
+        ctx->bricks.setSparse(first + m, recs[m] && filledOf[m] < 1024u);
+    }
+    {
+        std::lock_guard<std::mutex> lock(ctx->mu);
+        syncClasses(ctx);  // (the sparse ones vote as air in the grid's coarse levels)
+    }
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }

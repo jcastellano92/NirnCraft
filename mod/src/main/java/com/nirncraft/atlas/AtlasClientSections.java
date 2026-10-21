@@ -27,6 +27,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * Changes reach atlas from the server's recording (AtlasEdits re-records a chunk whose kept blocks change); a section
  * already up with the same blocks is not put up again (AtlasEditsClient.applySections). -Dnirncraft.atlas.clientSections=false
  * turns the feed off (the server's surface sections only, held under the near field, as before).
+ *
+ * <p>Near sections carry every block with a model (nearKept: doors, rails, redstone, ladders, lecterns, torches, crops,
+ * NirnCraft's props; a non-cube one becomes its micro-voxel brick, AtlasMaterials.section), each in its full state (a
+ * crop's age, redstone's power: the far field's stripped state is for the far journal only), and per column the biome
+ * tints vanilla blends there. A block change reaches atlas section by section from the level's neighbour notification
+ * (every server-verified and predicted change on the client fires it), wherever the camera looks.
  */
 final class AtlasClientSections {
     private AtlasClientSections() {}
@@ -43,6 +49,11 @@ final class AtlasClientSections {
     // chunks whose loaded (vanilla) blocks went up: atlas's own generation never goes over them (AtlasClientGen)
     private static final Set<Long> REAL = ConcurrentHashMap.newKeySet();
     private static final IdentityHashMap<BlockState, Integer> IDS = new IdentityHashMap<>();  // (client thread)
+    // sections whose blocks changed (SectionPos.asLong), read again on their own (client thread)
+    private static final Set<Long> DIRTY = ConcurrentHashMap.newKeySet();
+    // per (block, model, tint kind, light) the first state seen with it: states that look alike (a fire's age, a
+    // leaf's distance) share one id, so a ticking block re-uploads nothing (client thread)
+    private static final java.util.Map<java.util.List<Object>, Integer> LOOKS = new java.util.HashMap<>();
 
     static void init() {
         if (!ON) return;
@@ -58,6 +69,74 @@ final class AtlasClientSections {
                 REAL.remove(k);
             }
         });
+        // a block changed on the client (a server update, a prediction, a piston): its section read again, seen or not
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.level.BlockEvent.NeighborNotifyEvent e) -> {
+            if (e.getLevel() instanceof ClientLevel l && l.dimension() == Level.OVERWORLD) {
+                BlockPos p = e.getPos();
+                if (UP.contains(ChunkPos.pack(p.getX() >> 4, p.getZ() >> 4)))
+                    DIRTY.add(net.minecraft.core.SectionPos.asLong(p.getX() >> 4, p.getY() >> 4, p.getZ() >> 4));
+            }
+        });
+    }
+
+    /**
+     * Whether near (client) sections keep a state: what the far field keeps (AtlasSections.kept) and every other block
+     * drawn by a model with quads that is not translucent (glass and ice stay the translucent layer's); a block entity
+     * drawn by its renderer alone (a chest) is not (it would stand as a cube inside its own model).
+     */
+    static boolean nearKept(BlockState s) {
+        if (s.isAir()) return false;
+        if (AtlasSections.kept(s)) return true;
+        if (s.getRenderShape() != net.minecraft.world.level.block.RenderShape.MODEL) return false;
+        try {
+            return AtlasShapes.brickable(s, AtlasShapes.quads(s));
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    /** The near id of a state: its full state id, or that of the first state looking just like it; 0 not kept. */
+    private static int nearId(BlockState s) {
+        if (!nearKept(s)) return 0;
+        Object model;
+        try {
+            model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(s);
+        } catch (RuntimeException e) {
+            model = s;
+        }
+        java.util.List<Object> key = java.util.List.of(s.getBlock(), new Ident(model), AtlasMaterials.tintKind(s), s.getLightEmission());
+        return LOOKS.computeIfAbsent(key, k -> net.minecraft.world.level.block.Block.getId(s));
+    }
+
+    /** An object compared by identity (a model instance). */
+    private record Ident(Object o) {
+        @Override
+        public boolean equals(Object x) {
+            return x instanceof Ident i && i.o == o;
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(o);
+        }
+    }
+
+    /** Section sec's blocks as near ids (nearId), x + 16 * (z + 16 * y). */
+    private static int[] nearIds(net.minecraft.world.level.chunk.LevelChunkSection sec) {
+        int[] ids = new int[4096];
+        if (sec == null || sec.hasOnlyAir()) return ids;
+        for (int y = 0; y < 16; y++)
+            for (int z = 0; z < 16; z++)
+                for (int x = 0; x < 16; x++) {
+                    BlockState s = sec.getBlockState(x, y, z);
+                    Integer id = IDS.get(s);
+                    if (id == null) {
+                        id = nearId(s);
+                        IDS.put(s, id);
+                    }
+                    ids[x + 16 * (z + 16 * y)] = id;
+                }
+        return ids;
     }
 
     /**
@@ -71,7 +150,7 @@ final class AtlasClientSections {
 
     /** Client thread, each tick while atlas runs: the queued chunks read (nearest first), within the budget. */
     static void tick(Minecraft mc) {
-        if (!ON || QUEUED.isEmpty() || mc.level == null || mc.player == null) return;
+        if (!ON || (QUEUED.isEmpty() && DIRTY.isEmpty()) || mc.level == null || mc.player == null) return;
         if (mc.level.dimension() != Level.OVERWORLD) {  // (left without its chunks' unloads: nothing is waiting)
             QUEUED.clear();
             synchronized (READY) {
@@ -80,6 +159,23 @@ final class AtlasClientSections {
             return;
         }
         long until = System.nanoTime() + BUDGET_NS;
+        // the changed sections first, each on its own (a whole chunk queued again is read whole below)
+        for (java.util.Iterator<Long> it = DIRTY.iterator(); it.hasNext() && System.nanoTime() < until; ) {
+            long sk = it.next();
+            it.remove();
+            int cx = net.minecraft.core.SectionPos.x(sk), sy = net.minecraft.core.SectionPos.y(sk), cz = net.minecraft.core.SectionPos.z(sk);
+            if (QUEUED.contains(ChunkPos.pack(cx, cz))) continue;
+            LevelChunk c = mc.level.getChunkSource().getChunkNow(cx, cz);
+            if (c == null || sy < c.getMinSectionY() || sy > c.getMaxSectionY()) continue;
+            int[][] one = {nearIds(c.getSection(sy - c.getMinSectionY()))};
+            int[][] tints = columnTints(mc.level, c, sy * 16 + 8);
+            AtlasSections.Decoded d = new AtlasSections.Decoded(cx, cz, sy, one, tints[0][136], tints[1][136], tints[0], tints[1]);
+            dirtyCount++;
+            synchronized (READY) {
+                READY.add(d);
+            }
+        }
+        if (QUEUED.isEmpty()) return;
         int pcx = mc.player.chunkPosition().x(), pcz = mc.player.chunkPosition().z();
         List<Long> order = new ArrayList<>(QUEUED);
         order.sort(java.util.Comparator.comparingLong(k -> {
@@ -116,16 +212,31 @@ final class AtlasClientSections {
         for (int s = 0; s < n; s++) {
             var sec = c.getSection(s);
             if (AtlasSections.deep(minSec + s, low) && AtlasSections.solidRock(sec)) continue;  // the tiles' stone
-            secs[s] = AtlasSections.ids(sec, IDS);
+            secs[s] = nearIds(sec);
         }
         int cx = c.getPos().x(), cz = c.getPos().z();
-        BlockPos centre = new BlockPos((cx << 4) + 8, high, (cz << 4) + 8);
-        var biome = level.getBiome(centre).value();
-        return new AtlasSections.Decoded(cx, cz, minSec, secs,
-                biome.getGrassColor(centre.getX(), centre.getZ()) & 0xFFFFFF, biome.getFoliageColor() & 0xFFFFFF);
+        int[][] tints = columnTints(level, c, high);
+        return new AtlasSections.Decoded(cx, cz, minSec, secs, tints[0][136], tints[1][136], tints[0], tints[1]);
     }
 
-    private static long readNs, readCount;
+    /**
+     * Chunk c's grass and foliage colours per column (x + 16 z) as vanilla blends them (BiomeColors, its colour cache)
+     * at height y: what the chunk mesher tints each block with.
+     */
+    private static int[][] columnTints(ClientLevel level, LevelChunk c, int y) {
+        int[] grass = new int[256], foliage = new int[256];
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        int bx = c.getPos().x() << 4, bz = c.getPos().z() << 4;
+        for (int z = 0; z < 16; z++)
+            for (int x = 0; x < 16; x++) {
+                p.set(bx + x, y, bz + z);
+                grass[x + 16 * z] = net.minecraft.client.renderer.BiomeColors.getAverageGrassColor(level, p) & 0xFFFFFF;
+                foliage[x + 16 * z] = net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor(level, p) & 0xFFFFFF;
+            }
+        return new int[][] {grass, foliage};
+    }
+
+    private static long readNs, readCount, dirtyCount;
 
     /** The feed's state for atlas-info: queued to read, read and waiting for the worker, up. */
     static String state() {
@@ -134,7 +245,7 @@ final class AtlasClientSections {
             ready = READY.size();
         }
         return "clientSections{on=" + ON + " queued=" + QUEUED.size() + " ready=" + ready + " up=" + UP.size()
-                + " read=" + readCount + String.format(java.util.Locale.ROOT, " readMsEach=%.3f", readCount > 0 ? readNs / 1e6 / readCount : 0.0) + "}";
+                + " read=" + readCount + " dirtySections=" + dirtyCount + " dirtyQueued=" + DIRTY.size() + String.format(java.util.Locale.ROOT, " readMsEach=%.3f", readCount > 0 ? readNs / 1e6 / readCount : 0.0) + "}";
     }
 
     /** The read chunk nearest block (x, z) for atlas, or null (far-field worker). */
@@ -202,7 +313,9 @@ final class AtlasClientSections {
         UP.clear();
         REAL.clear();
         QUEUED.clear();
+        DIRTY.clear();
         IDS.clear();
+        LOOKS.clear();
         Minecraft mc = Minecraft.getInstance();
         if (!ON || mc.level == null || mc.player == null) return;
         int r = mc.options.getEffectiveRenderDistance() + 2;
