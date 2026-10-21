@@ -93,7 +93,7 @@ void VoxGrid::planMemory(uint64_t deviceBytes, uint64_t maxRangeBytes) {
     // the coarse levels' pools from the plan too (their windows' surface chunks: a few a column; fixed small pools
     // evicted and refused all the time, the far field never whole): 5 % of the device, never under the old pools
     if (!coarseCapByHand) {
-        static const double rows[VG_LEVELS] = {0, 3.0, 2.5, 2.0, 1.5, 1.5, 1.0};
+        static const double rows[VG_LEVELS] = {0, 6.0, 4.0, 3.0, 2.5, 2.5, 2.0};  // (chunks a window column, to a full pool)
         double want = 0;
         for (int k = 1; k < VG_LEVELS; k++) want += double(coarseD) * coarseD * rows[k];
         double budget = double(deviceBytes) * 0.05 / SLOT_BYTES;
@@ -104,6 +104,107 @@ void VoxGrid::planMemory(uint64_t deviceBytes, uint64_t maxRangeBytes) {
         for (int k = 1; k < VG_LEVELS; k++)
             coarseCap[k] = std::max(coarseCap[k], uint32_t(double(coarseD) * coarseD * rows[k] * scale));
     }
+}
+
+bool VoxGrid::coarseRefusedForRoom(int k, int cx, int cz) const {
+    std::lock_guard<std::mutex> lock(mu_);
+    if (k < 1 || k > activeCoarse_) return false;
+    if (!lv_[k].centred) return true;  // (not placed yet: the first frame places it; ask again)
+    if (!lv_[k].inWindow(cx, cz)) return false;
+    const Level& L = lv_[k];
+    if (k <= 4) {
+        int s = L.span();
+        for (int dz = 0; dz < s; dz++)
+            for (int dx = 0; dx < s; dx++)
+                if (L.cols.count(colKey(cx * s + dx, cz * s + dz))) return false;
+    }
+    return true;
+}
+
+VoxGrid::Coverage VoxGrid::coverage() const {
+    std::lock_guard<std::mutex> lock(mu_);
+    Coverage c;
+    if (!centred_) return c;
+    constexpr int CELL = 128, RMAX = 20000, N = 2 * RMAX / CELL;
+    // per level the known columns (some row not UNLOADED), by window cell
+    std::vector<uint8_t> known[VG_LEVELS];
+    {
+        known[0].assign(size_t(D) * D, 0);
+        for (int z = 0; z < D; z++)
+            for (int x = 0; x < D; x++) {
+                int unl = 0;
+                for (int y = 0; y < H; y++) unl += state_[size_t(y) * D * D + size_t(z) * D + size_t(x)] == VG_UNLOADED ? 1 : 0;
+                c.columns[0]++;
+                if (unl == H) c.holes[0]++;
+                else if (unl) c.partial[0]++;
+                known[0][size_t(z) * D + size_t(x)] = unl < H ? 1 : 0;
+            }
+    }
+    for (int k = 1; k <= activeCoarse_; k++) {
+        const Level& L = lv_[k];
+        if (!L.centred) continue;
+        known[k].assign(size_t(L.D) * L.D, 0);
+        for (int z = 0; z < L.D; z++)
+            for (int x = 0; x < L.D; x++) {
+                int unl = 0;
+                for (int y = 0; y < L.H; y++) {
+                    uint32_t cl = L.cell(L.ox + x, y, L.oz + z);
+                    unl += (L.word[cl] & 3u) == VG_UNLOADED && !L.rock[cl] ? 1 : 0;  // (rock under the surface is known)
+                }
+                c.columns[k]++;
+                if (unl == L.H) c.holes[k]++;
+                else if (unl) c.partial[k]++;
+                known[k][size_t(z) * L.D + size_t(x)] = unl < L.H ? 1 : 0;
+            }
+    }
+    // the far reach: the nearest sample no level knows
+    float best = float(RMAX);
+    for (int j = 0; j < N; j++)
+        for (int i = 0; i < N; i++) {
+            float dx = float((i - N / 2) * CELL + CELL / 2), dz = float((j - N / 2) * CELL + CELL / 2);
+            float d = std::sqrt(dx * dx + dz * dz);
+            if (d >= best || d > float(RMAX)) continue;
+            int wx = camB_[0] + int(dx), wz = camB_[2] + int(dz);
+            bool seen = false;
+            int sx = fdiv(wx, 16), sz = fdiv(wz, 16);
+            // (level 0's columns by their place in the ring: the window slides over it)
+            if (inWindow(sx, VG_MIN_SY, sz) && known[0][size_t(pmod(sz, D)) * D + size_t(pmod(sx, D))]) seen = true;
+            for (int k = 1; k <= activeCoarse_ && !seen; k++) {
+                const Level& L = lv_[k];
+                if (!L.centred) continue;
+                int cx = fdiv(wx, 16 << k), cz = fdiv(wz, 16 << k);
+                if (L.inWindow(cx, cz) && known[k][size_t(cz - L.oz) * L.D + size_t(cx - L.ox)]) seen = true;
+            }
+            if (!seen) best = d;
+        }
+    c.reach = best;
+    return c;
+}
+
+std::string VoxGrid::coverageJson() const {
+    auto now = std::chrono::steady_clock::now();
+    std::lock_guard<std::mutex> cl(covMu_);
+    if (covAt_ == std::chrono::steady_clock::time_point{} || now - covAt_ > std::chrono::milliseconds(1500)) {
+        covCache_ = coverage();
+        covAt_ = now;
+    }
+    const Coverage& c = covCache_;
+    std::string o = "\"coverage\":{\"farReach\":" + std::to_string(int(c.reach)) + ",\"holes\":[";
+    for (int k = 0; k <= activeCoarse_; k++) o += (k ? "," : "") + std::to_string(c.holes[k]);
+    o += "],\"partial\":[";
+    for (int k = 0; k <= activeCoarse_; k++) o += (k ? "," : "") + std::to_string(c.partial[k]);
+    o += "],\"columns\":[";
+    for (int k = 0; k <= activeCoarse_; k++) o += (k ? "," : "") + std::to_string(c.columns[k]);
+    // (the pools: slots used / of, per coarse level)
+    o += "],\"slotsUsed\":[";
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        o += std::to_string(slotsUsed_);
+        for (int k = 1; k <= activeCoarse_; k++) o += "," + std::to_string(lv_[k].used);
+        o += "],\"slotCap\":[" + std::to_string(slotCap);
+        for (int k = 1; k <= activeCoarse_; k++) o += "," + std::to_string(lv_[k].cap);
+    }
+    return o + "]},";
 }
 
 float VoxGrid::priority(int sx, int sy, int sz) const {
@@ -215,7 +316,9 @@ size_t VoxGrid::ingestCoarseGpu(int k, uint64_t buffer, const uint64_t* offsets,
     for (size_t i = 0; i < count; i++) {
         int cx = pos[3 * i], cy = pos[3 * i + 1], cz = pos[3 * i + 2];
         uint32_t kind = kinds[i] & 255u;
-        if (!L.inWindow(cx, cz) || cy < 0 || cy >= L.H || kind > VG_GIVEN_UNIFORM) continue;
+        if (!L.inWindow(cx, cz) || cy < 0 || cy >= L.H || kind > VG_GIVEN_UNIFORM) {
+            continue;
+        }
         if (kind == VG_GIVEN_MIXED && !buffer) continue;
         if (kind == VG_GIVEN_UNIFORM && (kinds[i] >> 8) > 0xFFFFu) continue;
         bool sections = false;  // (sections first: a chunk any of whose columns came is theirs)
@@ -227,7 +330,9 @@ size_t VoxGrid::ingestCoarseGpu(int k, uint64_t buffer, const uint64_t* offsets,
         if (sections) continue;
         // (a mixed one only where a slot would hold it: counted taken, then dropped at the batch, the tile went again
         // and again)
-        if (kind == VG_GIVEN_MIXED && L.slotOf[L.cell(cx, cy, cz)] == ~0u && !coarseRoom(L, chunkPriority(k, cx, cy, cz))) continue;
+        if (kind == VG_GIVEN_MIXED && L.slotOf[L.cell(cx, cy, cz)] == ~0u && !coarseRoom(L, chunkPriority(k, cx, cy, cz))) {
+            continue;
+        }
         CGiven g;
         g.kind = kind;
         g.mat = kinds[i] >> 8;

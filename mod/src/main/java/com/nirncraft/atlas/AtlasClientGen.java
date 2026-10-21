@@ -1082,7 +1082,8 @@ final class AtlasClientGen implements AutoCloseable {
                 farDone.removeIf(key -> {
                     if ((int) (key >>> 56) != lk) return false;
                     int tx = (int) (key << 8 >> 36), tz = (int) (key << 36 >> 36);
-                    return Math.abs(tx - ctx) > FAR_TILES + 1 || Math.abs(tz - ctz) > FAR_TILES + 1;
+                    // (the outer ring too: its chunks past the old window were not the level's to hold; the window moved)
+                    return Math.abs(tx - ctx) >= FAR_TILES || Math.abs(tz - ctz) >= FAR_TILES;
                 });
             }
             for (int dz = -FAR_TILES; dz <= FAR_TILES; dz++)

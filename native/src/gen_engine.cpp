@@ -1031,6 +1031,10 @@ public:
         std::vector<uint8_t> acc(kd.size(), 0);
         taken = kd.empty() ? 0 : uint32_t(grid_->ingestCoarseGpu(lod, uint64_t(slab.buf.buf), offs.data(), pos.data(), kd.data(), kd.size(),
                                                                 acc.data()));
+        // (a chunk outside the level's window, or whose columns real sections own, is not the level's to hold: done,
+        // not partial; only a refusal for room is asked again)
+        for (size_t i = 0; i < kd.size(); i++)
+            if (!acc[i] && !grid_->coarseRefusedForRoom(lod, pos[3 * i], pos[3 * i + 2])) taken++;
         bool anyMixed = false;
         for (size_t i = 0; i < kd.size(); i++) anyMixed = anyMixed || (acc[i] && kd[i] == 0u);
         // (the self-baking cache) the tiles it lacks, whole (every chunk had room) and proven exact: their kinds now,

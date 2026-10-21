@@ -446,6 +446,7 @@ int main(int argc, char** argv) {
     // the horizon (AtlasClientGen.farStep's tiles: each coarse level's 5 x 5 tiles around the camera): from the cache
     // when known (atlas_gen_far_cache_ingest), else made on the device (atlas_gen_far_ingest, baked)
     size_t farTiles = 0, farCached = 0, farMade = 0, farBusy = 0, farChunks = 0, farTaken = 0;
+    size_t lvChunks[7] = {}, lvTaken[7] = {}, lvFlag[7] = {};
     double tFar0 = nowMs();
     for (int k = 1; k <= 6; k++) {
         int span = 256 << k;
@@ -470,6 +471,7 @@ int main(int argc, char** argv) {
                     if (s == ATLAS_OK) {
                         farMade++;
                         farChunks += 256 * rows, farTaken += taken;
+                        lvChunks[k] += 256 * rows, lvTaken[k] += taken, lvFlag[k] += ff[0] != 0;
                         break;
                     }
                     farBusy++;
@@ -482,9 +484,10 @@ int main(int argc, char** argv) {
     }
     for (int i = 0; i < 2000; i++) {
         std::string inf = atlas_info(ctx);
-        size_t p = inf.find("\"coarseWaiting\":"), q = inf.find("\"baking\":");
+        size_t p = inf.find("\"coarseWaiting\":"), q = inf.find("\"baking\":"), g = inf.find("\"coarseGiven\":");
         if (p != std::string::npos && std::atoi(inf.c_str() + p + 16) == 0 && i > 2 &&
-            (q == std::string::npos || std::atoi(inf.c_str() + q + 9) == 0))
+            (q == std::string::npos || std::atoi(inf.c_str() + q + 9) == 0) &&
+            (g == std::string::npos || std::atoi(inf.c_str() + g + 14) == 0))
             break;
         renderMain();
         frames++;
@@ -492,6 +495,22 @@ int main(int argc, char** argv) {
     double tFar = nowMs();
     // (the last batches' packs come back with the next frames: the cache gets them before the stats)
     for (int i = 0; i < 6; i++) renderMain(), frames++;
+    // the view's coverage (atlas_info voxgrid.coverage) and what reading it cost
+    std::string covJson;
+    for (int i = 0; i < std::atoi(arg(argc, argv, "settle", "0").c_str()); i++) renderMain();  // (settle=<frames> more before reading)
+    std::this_thread::sleep_for(std::chrono::milliseconds(1700));  // (the coverage in atlas_info is cached 1.5 s: a fresh one)
+    {
+        auto c0 = std::chrono::steady_clock::now();
+        std::string inf = atlas_info(ctx);
+        double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - c0).count();
+        size_t p = inf.find("\"coverage\":");
+        if (p != std::string::npos) covJson = inf.substr(p, inf.find("]}", inf.find("\"slotCap\"", p)) + 2 - p) + ",\"infoMs\":" + std::to_string(int(ms)) + ",";
+    }
+    std::string lvJson = "\"levels\":[";
+    for (int k = 1; k <= 6; k++)
+        lvJson += (k > 1 ? "," : "") + std::string("{\"chunks\":") + std::to_string(lvChunks[k]) + ",\"taken\":" + std::to_string(lvTaken[k]) +
+                  ",\"flaggedTiles\":" + std::to_string(lvFlag[k]) + "}";
+    covJson += lvJson + "],";
     std::string bgJson;
     if (bgOn) {
         bgStop = true;
@@ -517,8 +536,8 @@ int main(int argc, char** argv) {
     AtlasGenCacheStats cs{};
     atlas_gen_cache_stats(g, &cs);
     double km2 = double(todo.size()) * 256.0 / 1e6;
-    std::printf("{%s\"horizon\":{\"tiles\":%zu,\"fromCache\":%zu,\"made\":%zu,\"busy\":%zu,\"ms\":%.0f,\"chunks\":%zu,\"taken\":%zu,\"farWrites\":%llu,"
-                "\"farHits\":%llu},", bgJson.c_str(), farTiles, farCached, farMade, farBusy, tFar - tFar0, farChunks, farTaken, (unsigned long long)cs.farWrites,
+    std::printf("{%s%s\"horizon\":{\"tiles\":%zu,\"fromCache\":%zu,\"made\":%zu,\"busy\":%zu,\"ms\":%.0f,\"chunks\":%zu,\"taken\":%zu,\"farWrites\":%llu,"
+                "\"farHits\":%llu},", covJson.c_str(), bgJson.c_str(), farTiles, farCached, farMade, farBusy, tFar - tFar0, farChunks, farTaken, (unsigned long long)cs.farWrites,
                 (unsigned long long)cs.farHits);
     std::printf("\"radius\":%d,\"chunks\":%zu,\"generated\":%zu,\"fromCache\":%zu,\"flagged\":%zu,\"sections\":%zu,\"frames\":%zu,"
                 "\"setupMs\":%.0f,\"toFullRadiusMs\":%.0f,\"sentMs\":%.0f,\"genMs\":%.0f,\"cacheMs\":%.0f,\"renderMs\":%.0f,"

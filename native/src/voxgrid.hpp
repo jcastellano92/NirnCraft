@@ -34,6 +34,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <deque>
+#include <chrono>
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -194,6 +195,9 @@ public:
     size_t ingestCoarseHost(int level, const int32_t* pos, const uint32_t* kinds, const VgPacked* packed, size_t count,
                             uint8_t* accepted);
     int bakeBudget = 512;
+    // whether a far chunk the level refused was refused for want of room (true) or is not this level's to hold: outside
+    // its window, or its columns come from real sections (false: nothing to ask again for)
+    bool coarseRefusedForRoom(int k, int cx, int cz) const;
     // free slots of a coarse level's pool (a refused far chunk is asked for again only when there is room)
     uint32_t coarseFreeSlots(int k) const {
         std::lock_guard<std::mutex> lock(mu_);
@@ -201,16 +205,31 @@ public:
         const Level& L = lv_[k];
         return L.cap > L.used ? L.cap - L.used : 0;
     }
+    // (atlas_info voxgrid) the view's coverage: per level the window's columns with every row UNLOADED (holes: nothing
+    // there at this level) and with some row UNLOADED (partial: a pool gave a cell up); the far reach, the distance
+    // to the nearest place around the camera (128-block samples, to 20 km) that no level knows (20000: none)
+    struct Coverage {
+        uint32_t holes[VG_LEVELS] = {}, partial[VG_LEVELS] = {}, columns[VG_LEVELS] = {};
+        float reach = 0.0f;
+    };
+    Coverage coverage() const;
+    // (cached 1.5 s: the scan is of every window's cells) the coverage as atlas_info's fields
+    std::string coverageJson() const;
+    mutable Coverage covCache_;
+    mutable std::mutex covMu_;
+    mutable std::chrono::steady_clock::time_point covAt_{};
     // (atlas_info voxgrid) what is still to refine with the camera still: coarse cells given up and waiting for room, GPU
     // sections asked for again and the asks held back (asked lately), the bake's queue
     std::string refineInfo() const {
-        std::lock_guard<std::mutex> lock(mu_);
-        size_t lost = 0;
-        for (int k = 1; k < VG_LEVELS; k++) lost += lostCells_[k].size();
         char b[160];
-        std::snprintf(b, sizeof b, "\"coarseLost\":%zu,\"wantedAsked\":%llu,\"wantedHeld\":%llu,", lost,
-                      (unsigned long long)wantedAgain_, (unsigned long long)wantedHeld_);
-        return b;
+        {
+            std::lock_guard<std::mutex> lock(mu_);
+            size_t lost = 0, given = 0;
+            for (int k = 1; k < VG_LEVELS; k++) lost += lostCells_[k].size(), given += cgiven_[k].size();
+            std::snprintf(b, sizeof b, "\"coarseLost\":%zu,\"coarseGiven\":%zu,\"wantedAsked\":%llu,\"wantedHeld\":%llu,", lost,
+                          given, (unsigned long long)wantedAgain_, (unsigned long long)wantedHeld_);
+        }
+        return std::string(b) + coverageJson();  // (its own lock)
     }
     size_t bakeQueued() const {
         std::lock_guard<std::mutex> lock(mu_);
