@@ -154,7 +154,7 @@ public final class AtlasNative {
     // the host's tiers and the self-baking cache's directory (atlas_set_cache; null with an older library)
     private final MethodHandle setCache, setPipelineCache;
     // abi 0.18, the micro-voxel bricks (null with an older library)
-    private final MethodHandle setBricks;
+    private final MethodHandle setBricks, setOffsets;
     /** AtlasClimate and AtlasAir (atlas.h) as float arrays: 13 and 11 floats. */
     public static final int CLIMATE_FLOATS = 13, AIR_FLOATS = 11;
     private int abi;
@@ -245,6 +245,7 @@ public final class AtlasNative {
         setPipelineCache = bindOptional(l, lib, "atlas_set_pipeline_cache", FunctionDescriptor.of(JAVA_INT, ADDRESS));
         setCache = bindOptional(l, lib, "atlas_set_cache",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_LONG, JAVA_INT, JAVA_LONG, JAVA_LONG));
+        setOffsets = bindOptional(l, lib, "atlas_set_material_offsets", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         setBricks = bindOptional(l, lib, "atlas_set_material_bricks", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT,
                 ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS));
     }
@@ -809,6 +810,19 @@ public final class AtlasNative {
                         for (int k = 0; k < 256; k++) m.set(JAVA_INT, per * i + 4L * (f * 256 + k), t[f][k]);
                 }
                 check((int) setTextures.invokeExact(ptr, first, m, textures.length), "atlas_set_material_textures");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** (abi 0.18, optional) Plants' random offsets of materials first .. (atlas.h atlas_set_material_offsets). */
+        public boolean setMaterialOffsets(int first, int[] words) {
+            if (setOffsets == null || words.length == 0) return false;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment m = a.allocate(4L * words.length, 4);
+                MemorySegment.copy(words, 0, m, JAVA_INT, 0, words.length);
+                check((int) setOffsets.invokeExact(ptr, first, m, words.length), "atlas_set_material_offsets");
                 return true;
             } catch (Throwable t) {
                 throw rethrow(t);

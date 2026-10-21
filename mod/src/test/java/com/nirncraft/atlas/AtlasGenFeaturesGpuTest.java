@@ -76,6 +76,10 @@ class AtlasGenFeaturesGpuTest {
         // the leaves: generator ids of leaf states (the far canopy's crowns are leaves; its trunks logs)
         java.util.Set<Integer> leaves = new java.util.HashSet<>();
         for (int i = 0; i < prog.blocks.size(); i++) if (prog.blocks.get(i).is(net.minecraft.tags.BlockTags.LEAVES)) leaves.add(i);
+        // and what is no ground: air, leaves, logs (a far crown floats when its lowest leaf stands far over the ground)
+        java.util.Set<Integer> notGround = new java.util.HashSet<>(leaves);
+        for (int i = 0; i < prog.blocks.size(); i++)
+            if (prog.blocks.get(i).isAir() || prog.blocks.get(i).is(net.minecraft.tags.BlockTags.LOGS)) notGround.add(i);
         StringBuilder report = new StringBuilder();
         try (AtlasGenNative.Gen g = nat.create(AtlasGenNative.BACKEND_VULKAN)) {
             if (g == null || !g.storeSupported()) throw new IllegalStateException("no Vulkan generator with the store");
@@ -105,24 +109,27 @@ class AtlasGenFeaturesGpuTest {
             }
             System.out.println("TRACE end far-trees decoration");
             // the lod-1 tile over the square's centre
-            int lod = 1, span = AtlasNative.TILE << lod, rows = (44 + (1 << lod) - 1) >> lod;
+            int lod = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_FEAT_FAR_LOD", "1")), span = AtlasNative.TILE << lod, rows = (44 + (1 << lod) - 1) >> lod;
             int tx = Math.floorDiv(cx0 * 16, span), tz = Math.floorDiv(cz0 * 16, span);
             long t0 = System.nanoTime();
             AtlasGenNative.Gen.FarChunks fc = g.far(lod, new int[]{tx, tz}, 0, 3000);
             double farMs = (System.nanoTime() - t0) / 1e6;
             if (fc.mixed() > 3000) throw new IllegalStateException("more mixed chunks than the capacity: " + fc.mixed());
             // per 2 x 2 column of the square's finished chunks: leaves in the decoration's blocks / in the far chunks
-            long cells = 0, real = 0, farC = 0, both = 0;
+            long cells = 0, real = 0, farC = 0, both = 0, floating = 0;
             Map<Integer, Long> realMix = new HashMap<>(), farMix = new HashMap<>();
             for (var e : done.entrySet()) {
                 int cx = ChunkPos.getX(e.getKey()), cz = ChunkPos.getZ(e.getKey());
                 if (Math.abs(cx - cx0) > r || Math.abs(cz - cz0) > r) continue;
                 int[] w = e.getValue();
                 int[] top = new int[256];  // the highest leaf id of each column (0 none)
+                int[] ground = new int[256];  // the highest ground block's y of each column
+                java.util.Arrays.fill(ground, -64);
                 for (int s = 0; s < 40; s++)
                     for (int k = 0; k < 4096; k++) {
                         int id = (w[s * 2048 + (k >> 1)] >>> ((k & 1) * 16)) & 0xFFFF;
                         if (id != 0 && leaves.contains(id)) top[k & 255] = id;
+                        if (!notGround.contains(id)) ground[k & 255] = Math.max(ground[k & 255], s * 16 - 64 + (k >> 8));
                     }
                 for (int qz = 0; qz < 16; qz += 2)
                     for (int qx = 0; qx < 16; qx += 2) {
@@ -132,19 +139,30 @@ class AtlasGenFeaturesGpuTest {
                         int bx = cx * 16 + qx - tx * span, bz = cz * 16 + qz - tz * span;
                         if (bx < 0 || bz < 0 || bx >= span || bz >= span) continue;
                         int col = bx >> lod, row = bz >> lod, cc = (row >> 4) * 16 + (col >> 4);
-                        int vx = col & 15, vz = row & 15, fid = 0;
+                        int vx = col & 15, vz = row & 15, fid = 0, fy = 0;
                         for (int cy = 0; cy < rows && fid == 0; cy++) {
                             int kk = cc * rows + cy, kind = fc.kinds()[kk * 2], slot = fc.kinds()[kk * 2 + 1];
                             if (kind != 0) {
-                                if (kind >= 2 && kind != 0xFFFFFFFE && leaves.contains(kind >>> 8)) fid = kind >>> 8;
+                                if (kind >= 2 && kind != 0xFFFFFFFE && leaves.contains(kind >>> 8)) {
+                                    fid = kind >>> 8;
+                                    fy = -64 + ((cy * 16) << lod);
+                                }
                                 continue;
                             }
                             for (int vy = 0; vy < 16 && fid == 0; vy++) {
                                 int v = vy * 256 + vz * 16 + vx;
                                 int id = (fc.ids()[slot * 2048 + (v >> 1)] >>> ((v & 1) * 16)) & 0xFFFF;
-                                if (leaves.contains(id)) fid = id;
+                                if (leaves.contains(id)) {
+                                    fid = id;
+                                    fy = -64 + ((cy * 16 + vy) << lod);
+                                }
                             }
                         }
+                        // a far crown whose lowest leaf stands 14 or more over the decoration's ground where it has no
+                        // leaves: floating (green squares over a slope, a crown from a placement off the ground)
+                        int gy = ground[qz * 16 + qx];
+                        for (int d = 1; d < 4; d++) gy = Math.max(gy, ground[(qz + (d >> 1)) * 16 + qx + (d & 1)]);
+                        if (fid != 0 && rid == 0 && fy - gy >= 14) floating++;
                         cells++;
                         if (rid != 0) { real++; realMix.merge(rid, 1L, Long::sum); }
                         if (fid != 0) { farC++; farMix.merge(fid, 1L, Long::sum); }
@@ -161,9 +179,11 @@ class AtlasGenFeaturesGpuTest {
                 return sb.toString();
             };
             report.append(String.format("far trees at chunk %d, %d (r %d): %d columns of 2 x 2; leaves in the decoration's %.1f %%, in the far "
-                            + "tile's %.1f %%, both %.1f %%; far tile %.0f ms (%d mixed chunks)%n  the decoration's leaves:%s%n  the far tile's:%s%n",
+                            + "tile's %.1f %%, both %.1f %%; floating crowns %d columns (%.2f %%); far tile %.0f ms (%d mixed chunks)%n"
+                            + "  the decoration's leaves:%s%n  the far tile's:%s%n",
                     cx0, cz0, r, cells, 100.0 * real / Math.max(1, cells), 100.0 * farC / Math.max(1, cells), 100.0 * both / Math.max(1, cells),
-                    farMs, fc.mixed(), mix.apply(realMix), mix.apply(farMix)));
+                    floating, 100.0 * floating / Math.max(1, cells), farMs, fc.mixed(), mix.apply(realMix), mix.apply(farMix)));
+            System.out.println("TRACE done far-trees floating " + floating);
             System.out.println(String.format("TRACE done far-trees coverage decoration %.1f%% far %.1f%%", 100.0 * real / Math.max(1, cells),
                     100.0 * farC / Math.max(1, cells)));
             g.detachFeatures(f);

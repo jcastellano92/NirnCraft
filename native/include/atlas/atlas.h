@@ -636,6 +636,12 @@ ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t fi
  *  tint      RGB the texels are multiplied by (0xFFFFFF: none)
  *  dir       the quad's face direction (0 down, 1 up, 2 north, 3 south, 4 west, 5 east; -1: from its winding)
  */
+/*
+ * (abi 0.18, optional) Plants' random offset (vanilla's OffsetType): per material of first .. first + count - 1 a word,
+ * bits 0-1 the type (0 none, 1 XZ, 2 XYZ), bits 8-15 its largest horizontal offset x 255, bits 16-23 its largest
+ * vertical one x 255; its brick is drawn shifted by the block's position hash (Mth.getSeed), as the chunk mesher does.
+ */
+ATLAS_API AtlasStatus atlas_set_material_offsets(AtlasContext* ctx, uint32_t first, const uint32_t* words, uint32_t count);
 typedef struct AtlasBrickQuad {
     float pos[4][3];
     float uv[4][2];

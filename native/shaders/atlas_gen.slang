@@ -1229,7 +1229,11 @@ uint igIds() { return ingestTab[0]; }
 uint igFar(uint id) { return ingestTab[2 + id * 2]; }
 uint igFlags(uint id) { return ingestTab[2 + id * 2 + 1]; }
 uint igTint(uint biome, uint k) { return ingestTab[2 + igIds() * 2 + biome * 2 + k]; }
-uint igMat(uint biome, uint id) { return ingestTab[2 + igIds() * 2 + ingestTab[1] * 2 + biome * igIds() + id]; }
+uint igMat(uint biome, uint id) {
+    // (a biome or id past the table: no material, not another's word)
+    if (id >= igIds() || biome >= ingestTab[1]) return 0u;
+    return ingestTab[2 + igIds() * 2 + ingestTab[1] * 2 + biome * igIds() + id];
+}
 
 [shader("compute")]
 [numthreads(64, 1, 1)]

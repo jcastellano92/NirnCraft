@@ -3831,6 +3831,11 @@ void farTree(uint cfg, int x, int y, int z, uint weight) {
     if (!(farClearance(x, z) > spI(sp, S_REACH))) return;
     int water = imax(0, farHeight(HM_WORLD_SURFACE, c) - y);
     if (water > spI(sp, S_MAXWATER)) return;
+    // on the ground: a placement that left y off the tile's ground (a height range, an offset, a scan whose block tests
+    // the far field cannot make) planted its crown in the air or in the rock: green squares in the sky far off
+    int lodG = int(params.k), groundY = farHeight(HM_OCEAN_FLOOR_WG, c);
+    int dyG = y - groundY, limG = 2 + (1 << lodG);  // (no abs: spv_exact's contract)
+    if (dyG > limG || dyG < -limG) return;
     uint soil = spU(sp, S_SOIL), ground = farGround(c);
     bool fits = ((soil & 1u) != 0u && bis(ground, B_SOIL_DIRT)) || ((soil & 2u) != 0u && bis(ground, B_SOIL_SAND)) ||
                 ((soil & 4u) != 0u && bis(ground, B_SOIL_STONE)) || ((soil & 8u) != 0u && bis(ground, B_SOIL_ASH)) ||
@@ -3865,6 +3870,9 @@ void farTree(uint cfg, int x, int y, int z, uint weight) {
                 float qz = pz < az ? az - pz : (pz > az + float(cs) ? pz - az - float(cs) : 0.0f);
                 if (qx * qx + qz * qz > r * r) continue;
                 uint cc = uint(j * 256 + i);
+                // (not over a column whose ground lies well under the trunk's: the crown hung in the air over the
+                // slope below a ridge, a coarse column's whole height of it)
+                if (float(y) - farSurf(int(cc)) > float(cs) + 3.0f) continue;
                 // the crown's top over this column: a cone (conifers) or a dome, from the trunk's out to the rim
                 float ex = float(X0 + i * cs) + float(cs) * 0.5f - px, ez = float(Z0 + j * cs) + float(cs) * 0.5f - pz;
                 float u = (ex * ex + ez * ez) / (r * r);

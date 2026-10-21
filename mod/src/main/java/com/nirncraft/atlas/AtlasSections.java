@@ -55,7 +55,11 @@ public final class AtlasSections {
         boolean loaded;  // read from disk (lazily)
     }
 
-    record Entry(byte[] blob, long version) {}
+    record Entry(byte[] blob, long version, long farHash) {
+        Entry(byte[] blob, long version) {
+            this(blob, version, 0L);
+        }
+    }
 
     private static final Map<Long, TileSections> TILES = new ConcurrentHashMap<>();
     private static final Map<UUID, Map<Long, Long>> SENT = new ConcurrentHashMap<>();
@@ -147,6 +151,9 @@ public final class AtlasSections {
         var biome = level.getBiome(centre).value();
         int grass = biome.getGrassColor(centre.getX(), centre.getZ()) & 0xFFFFFF, foliage = biome.getFoliageColor() & 0xFFFFFF;
         ByteArrayOutputStream bytes = new ByteArrayOutputStream(4096);
+        // the blob carries the real states (a crop's age, a lever's power, a lectern's book), its change hash the far
+        // states (AtlasFarState: what ticks by itself changes nothing to send)
+        long farHash = 0xcbf29ce484222325L;
         try (DataOutputStream out = new DataOutputStream(new DeflaterOutputStream(bytes))) {
             out.writeInt(cx);
             out.writeInt(cz);
@@ -170,7 +177,9 @@ public final class AtlasSections {
                         for (int z = 0; z < 16; z++)
                             for (int x = 0; x < 16; x++) {
                                 BlockState s = sec.getBlockState(x, y, z);
-                                int id = kept(s) ? AtlasFarState.farId(s) : 0;
+                                boolean keep = kept(s);
+                                int id = keep ? Block.getId(s) : 0;
+                                farHash = (farHash ^ (keep ? AtlasFarState.farId(s) : 0)) * 0x100000001b3L;
                                 Integer k = pal.get(id);
                                 if (k == null) {
                                     k = ids.size();
@@ -197,9 +206,9 @@ public final class AtlasSections {
         TileSections t = tile(tk);
         synchronized (t) {
             Entry old = t.chunks.get(net.minecraft.world.level.ChunkPos.pack(cx, cz));
-            if (old != null && java.util.Arrays.equals(old.blob(), blob)) return;
+            if (old != null && (java.util.Arrays.equals(old.blob(), blob) || old.farHash() == farHash && farHash != 0L)) return;
             t.version++;
-            t.chunks.put(net.minecraft.world.level.ChunkPos.pack(cx, cz), new Entry(blob, t.version));
+            t.chunks.put(net.minecraft.world.level.ChunkPos.pack(cx, cz), new Entry(blob, t.version, farHash));
         }
         DIRTY_TILES.add(tk);
     }

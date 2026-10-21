@@ -178,6 +178,7 @@ final class AtlasEditsClient {
                 synchronized (UPLOADED) {
                     if (UPLOADED.containsKey(key) && UPLOADED.get(key) == h) continue;  // the core has these blocks
                     UPLOADED.put(key, h);
+                    noteUp(key);
                 }
                 for (int i = 0; i < 4096; i++) {
                     int id = ids[i];
@@ -219,7 +220,21 @@ final class AtlasEditsClient {
     }
 
     /** Whether section key with block hash h must go up (the core does not have it): recorded if so. Any thread. */
+    // per chunk (ChunkPos.pack) the highest section put up from any source (generation's crowns may stand over a real
+    // chunk's top: the client's feed clears up to it, AtlasClientSections.read)
+    private static final Map<Long, Integer> HIGHEST = new ConcurrentHashMap<>();
+
+    static int highest(int cx, int cz) {
+        return HIGHEST.getOrDefault(net.minecraft.world.level.ChunkPos.pack(cx, cz), Integer.MIN_VALUE);
+    }
+
+    private static void noteUp(long sectionKey) {
+        HIGHEST.merge(net.minecraft.world.level.ChunkPos.pack(net.minecraft.core.SectionPos.x(sectionKey), net.minecraft.core.SectionPos.z(sectionKey)),
+                net.minecraft.core.SectionPos.y(sectionKey), Math::max);
+    }
+
     static boolean claim(long key, long h) {
+        noteUp(key);
         synchronized (UPLOADED) {
             if (UPLOADED.containsKey(key) && UPLOADED.get(key) == h) return false;
             UPLOADED.put(key, h);

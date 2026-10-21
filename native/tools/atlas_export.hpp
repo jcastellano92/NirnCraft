@@ -94,6 +94,9 @@ struct ModelLib {
         uint8_t emit = 0;
         std::vector<std::pair<uint8_t, uint32_t>> tints;  // per tint index: kind (1 grass, 2 foliage, 5 constant), colour
         int model = -1;  // its first variant
+        std::string name;
+        uint8_t offType = 0;  // (0 none, 1 XZ, 2 XYZ) and its largest offsets
+        float offH = 0, offV = 0;
         int fluid = -1;  // its fluid model (quads.bin), -1 none
         float fluidH = 0;  // the fluid's own height
     };
@@ -160,13 +163,18 @@ inline bool loadModels(const std::string& dir, ModelLib& ml) {
         if (id >= ml.states.size()) ml.states.resize(size_t(id) + 1);
         auto& s = ml.states[id];
         s.present = true;
-        p += u16();  // name
+        {
+            uint16_t nl = u16();
+            if (p + nl <= d.size()) s.name.assign(reinterpret_cast<const char*>(&d[p]), nl);
+            p += nl;
+        }
         u32();       // block
         s.flags = u16();
         s.emit = u8();
         u8();
         f32();
-        if (u8()) p += 8;  // offset
+        s.offType = u8();
+        if (s.offType) s.offH = f32(), s.offV = f32();
         s.fluid = int8_t(u8());
         if (s.fluid >= 0) s.fluidH = f32(), p += 2;  // own height, amount, flags
         u8();
@@ -203,34 +211,145 @@ inline bool loadModels(const std::string& dir, ModelLib& ml) {
     return p <= d.size();
 }
 
+// Whether a model is a plain cube: on each face a quad on the block's boundary covering it whole (AtlasShapes.fullCubeModel).
+inline bool fullCube(const std::vector<ModelLib::Quad>& qs) {
+    int faces = 0;
+    static const int AX[6] = {1, 1, 2, 2, 0, 0};
+    for (const auto& q : qs) {
+        if (q.dir > 5) continue;
+        int a = AX[q.dir];
+        float plane = (q.dir & 1) ? 1.0f : 0.0f;
+        float lo0 = 1, hi0 = 0, lo1 = 1, hi1 = 0;
+        bool on = true;
+        for (int i = 0; i < 4; i++) {
+            if (std::fabs(q.p[i][a] - plane) > 1e-3f) on = false;
+            float u = q.p[i][(a + 1) % 3], v = q.p[i][(a + 2) % 3];
+            lo0 = std::min(lo0, u), hi0 = std::max(hi0, u), lo1 = std::min(lo1, v), hi1 = std::max(hi1, v);
+        }
+        if (on && lo0 < 1e-3f && lo1 < 1e-3f && hi0 > 1 - 1e-3f && hi1 > 1 - 1e-3f) faces |= 1 << q.dir;
+    }
+    return faces == 63;
+}
+
+// Whether state id is a plain cube in the cut-out layer (AtlasShapes.holedCube: a grate, roots; whether its faces show
+// holes is upload's, by the face tiles).
+inline bool holedCube(const ModelLib& ml, uint32_t id) {
+    if (id >= ml.states.size() || !ml.states[id].present) return false;
+    const auto& s = ml.states[id];
+    if (s.model < 0 || size_t(s.model) >= ml.models.size()) return false;
+    const auto& qs = ml.models[size_t(s.model)];
+    bool cut = false;
+    for (const auto& q : qs) cut |= q.layer == 1;
+    return cut && fullCube(qs);
+}
+
 // Whether state id takes a brick (AtlasShapes.brickable / fluidBrick): a fluid other than water, or a block drawn by its
-// model that is not leaves, not a full solid cube unless its texture moves, and not translucent unless its texels are
-// all opaque or clear (redstone dust; glass, panes and ice stay the translucent layer's).
+// model that is not a plain-cube leaves, not a full solid (occluding) cube unless its texture moves, and not glass,
+// a pane, ice, slime or honey in the translucent layer (redstone dust and soft-edged plants are bricks of their texels).
 inline bool brickWorthy(const ModelLib& ml, uint32_t id) {
     if (id >= ml.states.size() || !ml.states[id].present) return false;
     const auto& s = ml.states[id];
     if (!(s.flags & 128) && s.fluid >= 0 && size_t(s.fluid) < ml.fluids.size()) return ml.fluids[size_t(s.fluid)].tintKind != 3;
-    if ((s.flags & (64 | 512)) || !(s.flags & 128) || s.model < 0 || size_t(s.model) >= ml.models.size()) return false;
-    // a full solid cube stays a textured cube unless its texture moves (AtlasShapes.brickable; sprites.bin holds
-    // frame 0 only: offline that is a still brick)
+    if ((s.flags & 512) || !(s.flags & 128) || s.model < 0 || size_t(s.model) >= ml.models.size()) return false;
+    const auto& qs = ml.models[size_t(s.model)];
+    if (qs.empty()) return false;
+    bool cube = fullCube(qs);
+    if ((s.flags & 64) && cube) return false;  // leaves: textured cut-out cubes
     bool animated = false;
-    for (const auto& q : ml.models[size_t(s.model)])
-        animated |= q.sprite >= 0 && size_t(q.sprite) < ml.sprites.size() && ml.sprites[size_t(q.sprite)].animated;
-    if ((s.flags & 1) && !animated) return false;
-    // translucent quads: only with all-opaque-or-clear texels (redstone dust; AtlasShapes.binaryAlpha); glass,
-    // panes, ice stay the translucent layer's
-    bool translucent = false;
-    for (const auto& q : ml.models[size_t(s.model)])
-        if (q.layer == 2 && q.sprite >= 0 && size_t(q.sprite) < ml.sprites.size()) {
+    for (const auto& q : qs) animated |= q.sprite >= 0 && size_t(q.sprite) < ml.sprites.size() && ml.sprites[size_t(q.sprite)].animated;
+    if (((s.flags & 1) || (cube && (s.flags & 32))) && !animated) return false;  // (1 solid render, 32 can occlude)
+    auto has = [&](const char* k) { return s.name.find(k) != std::string::npos; };
+    bool glassy = has("glass") || has("ice}") || has("ice]") || has("_ice") || has("slime_block") || has("honey_block");
+    for (const auto& q : qs)
+        if (q.layer == 2 && glassy) return false;
+    return true;
+}
+
+// A state's six 16 x 16 face textures as the game's AtlasShapes.textures makes them (each texel the outermost quad
+// facing that way over it, its sprite there, the quad's tint when it has one; alpha 0 where none shows), into out
+// (6 x 256 ARGB). False when it has no model quads.
+inline bool faceTextures(const ModelLib& ml, uint32_t id, uint32_t grass, uint32_t foliage, uint32_t* out) {
+    if (id >= ml.states.size() || !ml.states[id].present) return false;
+    const auto& s = ml.states[id];
+    if (s.model < 0 || size_t(s.model) >= ml.models.size() || ml.models[size_t(s.model)].empty()) return false;
+    const auto& qs = ml.models[size_t(s.model)];
+    for (int d = 0; d < 6; d++) {
+        float depth[256];
+        for (float& v : depth) v = -1e30f;
+        uint32_t* tile = out + d * 256;
+        std::fill(tile, tile + 256, 0u);
+        for (const auto& q : qs) {
+            if (q.dir != d || q.sprite < 0 || size_t(q.sprite) >= ml.sprites.size()) continue;
             const auto& sp = ml.sprites[size_t(q.sprite)];
-            size_t n = size_t(sp.w) * sp.h, mid = 0;
-            for (size_t i = 0; i < n; i++) {
-                uint32_t a = ml.texels[sp.first + i] >> 24;
-                mid += a > 8 && a < 247 ? 1 : 0;
+            // (a, b, depth) in the face's plane, as AtlasShapes.plane
+            auto plane = [&](int i, float& a, float& b, float& dep) {
+                float x = q.p[i][0], y = q.p[i][1], z = q.p[i][2];
+                switch (d) {
+                    case 0: a = x, b = z, dep = -y; break;
+                    case 1: a = x, b = z, dep = y; break;
+                    case 2: a = x, b = y, dep = -z; break;
+                    case 3: a = x, b = y, dep = z; break;
+                    case 4: a = z, b = y, dep = -x; break;
+                    default: a = z, b = y, dep = x; break;
+                }
+            };
+            float pa[4], pb[4], a0 = 1e9f, a1 = -1e9f, b0 = 1e9f, b1 = -1e9f, dep = 0;
+            for (int i = 0; i < 4; i++) {
+                float dd;
+                plane(i, pa[i], pb[i], dd);
+                dep += dd / 4;
+                a0 = std::min(a0, pa[i]), a1 = std::max(a1, pa[i]), b0 = std::min(b0, pb[i]), b1 = std::max(b1, pb[i]);
             }
-            translucent |= n == 0 || mid * 50 > n || sp.glassy;
+            if (a1 - a0 < 1e-4f || b1 - b0 < 1e-4f) continue;
+            auto corner = [&](float a, float b) {
+                int best = 0;
+                float bd = 1e30f;
+                for (int i = 0; i < 4; i++) {
+                    float dd = (pa[i] - a) * (pa[i] - a) + (pb[i] - b) * (pb[i] - b);
+                    if (dd < bd) bd = dd, best = i;
+                }
+                return best;
+            };
+            int c00 = corner(a0, b0), c10 = corner(a1, b0), c01 = corner(a0, b1), c11 = corner(a1, b1);
+            uint32_t tint = 0xFFFFFFu;
+            if (q.tint >= 0 && size_t(q.tint) < s.tints.size()) {
+                auto [kind, c] = s.tints[size_t(q.tint)];
+                tint = kind == 1 ? grass : kind == 2 ? foliage : kind == 4 ? 0xA0825Au : kind == 5 ? c & 0xFFFFFFu : 0xFFFFFFu;
+            }
+            for (int tv = 0; tv < 16; tv++)
+                for (int tu = 0; tu < 16; tu++) {
+                    int k = tu + 16 * tv;
+                    float ca = (tu + 0.5f) / 16, cb = d <= 1 ? (tv + 0.5f) / 16 : 1.0f - (tv + 0.5f) / 16;
+                    if (ca < a0 || ca > a1 || cb < b0 || cb > b1 || dep < depth[k]) continue;
+                    float ss = (ca - a0) / (a1 - a0), tt = (cb - b0) / (b1 - b0);
+                    auto lerp2 = [&](float v00, float v10, float v01, float v11) {
+                        return (v00 * (1 - ss) + v10 * ss) * (1 - tt) + (v01 * (1 - ss) + v11 * ss) * tt;
+                    };
+                    float u = lerp2(q.uv[c00][0], q.uv[c10][0], q.uv[c01][0], q.uv[c11][0]);
+                    float v = lerp2(q.uv[c00][1], q.uv[c10][1], q.uv[c01][1], q.uv[c11][1]);
+                    int px = std::clamp(int(u * float(sp.w)), 0, int(sp.w) - 1), py = std::clamp(int(v * float(sp.h)), 0, int(sp.h) - 1);
+                    uint32_t c = ml.texels[sp.first + uint32_t(py) * sp.w + uint32_t(px)];
+                    if ((c >> 24) < 26) continue;  // (see-through here: what is behind it shows)
+                    depth[k] = dep;
+                    uint32_t r = ((c >> 16) & 255) * ((tint >> 16) & 255) / 255, g = ((c >> 8) & 255) * ((tint >> 8) & 255) / 255,
+                             b = (c & 255) * (tint & 255) / 255;
+                    tile[k] = 0xFF000000u | r << 16 | g << 8 | b;  // (AtlasShapes.face: a shown texel, opaque)
+                }
         }
-    return !translucent;
+    }
+    return true;
+}
+
+// The near field's 16 x 16 face textures of materials [first, first + ids.size()) (atlas_set_material_textures), as
+// the game sets them for its exact materials.
+inline bool uploadTextures(AtlasContext* ctx, const ModelLib& ml, uint16_t first, const std::vector<uint32_t>& ids,
+                           uint32_t grass, uint32_t foliage, std::string& why) {
+    size_t n = ids.size();
+    std::vector<uint32_t> tex(n * 6 * 256 + n, 0u);
+    for (size_t m = 0; m < n; m++)
+        if (faceTextures(ml, ids[m], grass, foliage, tex.data() + m * 6 * 256)) tex[n * 6 * 256 + m] = 1u;
+    if (n && atlas_set_material_textures(ctx, first, tex.data(), uint32_t(n)) != ATLAS_OK) return why = atlas_last_error(ctx), false;
+    return true;
 }
 
 // The bricks of materials [first, first + ids.size()) for state ids `ids` (0 / not brick-worthy: none), tinted with
@@ -282,7 +401,7 @@ inline bool uploadBricks(AtlasContext* ctx, const ModelLib& ml, uint16_t first, 
             b.tint = 0xFFFFFFu;
             if (q.tint >= 0 && size_t(q.tint) < s.tints.size()) {
                 auto [kind, c] = s.tints[size_t(q.tint)];
-                b.tint = kind == 1 ? grass : kind == 2 ? foliage : kind == 5 ? c & 0xFFFFFFu : 0xFFFFFFu;
+                b.tint = kind == 1 ? grass : kind == 2 ? foliage : kind == 4 ? 0xA0825Au : kind == 5 ? c & 0xFFFFFFu : 0xFFFFFFu;  // (4 dry foliage: AtlasMaterials.DRY_FOLIAGE)
             }
             quads.push_back(b);
             any = true;
@@ -303,6 +422,15 @@ inline bool uploadBricks(AtlasContext* ctx, const ModelLib& ml, uint16_t first, 
             sp[i].firstTexel = at;
             sp[i].frames = 2u | 1u << 16;
         }
+    // (the plants' random offsets: atlas_set_material_offsets, from quads.bin's offset type)
+    std::vector<uint32_t> offs(ids.size(), 0u);
+    for (size_t m = 0; m < ids.size(); m++)
+        if (ids[m] < ml.states.size() && ml.states[ids[m]].offType) {
+            const auto& s = ml.states[ids[m]];
+            offs[m] = uint32_t(s.offType) | uint32_t(std::clamp(s.offH, 0.0f, 1.0f) * 255.0f + 0.5f) << 8 |
+                      uint32_t(std::clamp(s.offV, 0.0f, 1.0f) * 255.0f + 0.5f) << 16;
+        }
+    if (!offs.empty()) atlas_set_material_offsets(ctx, first, offs.data(), uint32_t(offs.size()));
     if (atlas_set_material_bricks(ctx, first, uint32_t(ids.size()), quads.data(), uint32_t(quads.size()), sp.data(),
                                   uint32_t(sp.size()), texels.data(), uint32_t(texels.size()), emission.data()) != ATLAS_OK)
         return why = atlas_last_error(ctx), false;
@@ -594,6 +722,13 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
                 }
             // cut-out coverage for leaves and plants only (a grass block's overlay alpha is no hole in it)
             sh.flags = (s.cls == 1 || s.cls == 4) && cutouts ? ATLAS_SHAPE_CUTOUT : 0u;
+            // (keep=near: a cut-out cube with holes, modelled 2: AtlasShapes.holedCube)
+            if (modelled && id < modelled->size() && (*modelled)[id] == 2 && cutouts) {
+                bool holes = false;
+                for (int f = 0; f < 6; f++)
+                    for (int t = 0; t < 16; t++) holes |= (s.faces[f][t] >> 24) < 250;
+                if (holes) sh.flags = ATLAS_SHAPE_CUTOUT;
+            }
             if (wat) sh.flags = 0;
             m = uint16_t(firstMat + mats.size());
             out.matState.push_back(id);

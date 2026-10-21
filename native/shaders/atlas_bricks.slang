@@ -15,6 +15,7 @@
 uint brickOf(uint mat) {
     uint n = brickData[0];
     uint b = mat < n ? brickData[1u + mat] : 0u;
+    if ((b & 0x40000000u) != 0u) return b;  // sheets (sheetsHit): their record, flagged
     if ((b & 0x80000000u) != 0u) {
         b &= 0x7FFFFFFFu;
         uint h = brickData[b];
@@ -49,10 +50,60 @@ bool brickCell(uint b, int3 m, uint gLo, uint gHi, out uint rank) {
     return true;
 }
 
+// The ray l + d t through a sheets record c (bricks.hpp: up to 4 planes, each a rectangle of 16 x 16 cells; and an
+// axis-aligned rest as voxels): the nearest shown cell inside the block, its axis its plane's main one.
+BrickHit sheetsHit(uint c, float3 l, float3 d, int axis) {
+    BrickHit r;
+    r.hit = false;
+    r.t = 1e30;
+    r.axis = axis;
+    r.albedo = float3(0, 0, 0);
+    r.emission = 0.0;
+    uint head = brickData[c];
+    uint np = min(head & 255u, 4u);
+    for (uint k = 0u; k < np; k++) {
+        uint base = c + 2u + k * 269u;
+        float3 n = float3(asfloat(brickData[base]), asfloat(brickData[base + 1u]), asfloat(brickData[base + 2u]));
+        float dp = asfloat(brickData[base + 3u]);
+        float den = dot(n, d);
+        if (abs(den) < 1e-6) continue;
+        float t = (dp - dot(n, l)) / den;
+        if (t < 0.0 || t >= r.t) continue;
+        float3 p = l + d * t;
+        if (any(p < float3(-1e-4, -1e-4, -1e-4)) || any(p > float3(1.0001, 1.0001, 1.0001))) continue;
+        float3 O = float3(asfloat(brickData[base + 4u]), asfloat(brickData[base + 5u]), asfloat(brickData[base + 6u]));
+        float3 U = float3(asfloat(brickData[base + 7u]), asfloat(brickData[base + 8u]), asfloat(brickData[base + 9u]));
+        float3 V = float3(asfloat(brickData[base + 10u]), asfloat(brickData[base + 11u]), asfloat(brickData[base + 12u]));
+        float s = dot(p - O, U) / max(dot(U, U), 1e-8), tt = dot(p - O, V) / max(dot(V, V), 1e-8);
+        if (s < 0.0 || s > 1.0 || tt < 0.0 || tt > 1.0) continue;
+        int ti = clamp(int(s * 16.0), 0, 15), tj = clamp(int(tt * 16.0), 0, 15);
+        uint cc = brickData[base + 13u + uint(ti + 16 * tj)];
+        if ((cc >> 24) < 128u) continue;
+        r.hit = true;
+        r.t = t;
+        float3 an = abs(n);
+        r.axis = an.x >= an.y && an.x >= an.z ? 0 : (an.y >= an.z ? 1 : 2);
+        r.albedo = srgbLinear(cc);
+    }
+    if ((head & 256u) != 0u) {
+        BrickHit v = brickWalk(c + brickData[c + 1u], l, d, axis);
+        if (v.hit && (!r.hit || v.t < r.t)) r = v;
+    }
+    if (!r.hit) r.t = 0.0;
+    return r;
+}
+
 // The ray l + d t (l: where it entered the voxel, voxel-local 0..1; d in blocks per t) through brick b, from the voxel
 // face it entered by (axis); the first filled micro-voxel it meets, or hit = false when it leaves the voxel first.
 [noinline]
 BrickHit brickHit(uint b, float3 l, float3 d, int axis) {
+    if ((b & 0x40000000u) != 0u) return sheetsHit(b & 0x3FFFFFFFu, l, d, axis);
+    return brickWalk(b, l, d, axis);
+}
+
+// brickHit's voxel walk (a voxel record at b)
+[noinline]
+BrickHit brickWalk(uint b, float3 l, float3 d, int axis) {
     BrickHit r;
     r.hit = false;
     r.t = 0.0;
@@ -115,6 +166,23 @@ static const int GRID_LIGHT_R = 96;
 static const int GRID_LIGHT_RY = 48;
 static const uint GRID_LIGHT_ID = 0x00800000u;  // (+ 5 a 4 x 4 x 4: four single lights, one cluster)
 static const uint GRID_LIGHT_THREADS = uint((2 * GRID_LIGHT_R / 4) * (2 * GRID_LIGHT_R / 4) * (2 * GRID_LIGHT_RY / 4));
+
+// Material mat's random offset at world block wb (vanilla's OffsetType from Mth.getSeed(x, 0, z), atlas.h
+// atlas_set_material_offsets): where its brick is drawn from, shifted (0 for most)
+float3 brickOffset(uint mat, int3 wb) {
+    uint n = brickData[0];
+    uint w = mat < n ? brickData[1u + 2u * n + mat] : 0u;
+    if ((w & 3u) == 0u) return float3(0, 0, 0);
+    int64_t sx = int64_t(int(uint(wb.x) * 3129871u)), sz = int64_t(wb.z) * int64_t(116129781);
+    int64_t seed = sx ^ sz;
+    seed = seed * seed * int64_t(42317861) + seed * int64_t(11);
+    seed = seed >> 16;
+    float maxH = float((w >> 8) & 255u) / 255.0, maxV = float((w >> 16) & 255u) / 255.0;
+    float ox = clamp((float(int(seed & int64_t(15))) / 15.0 - 0.5) * 0.5, -maxH, maxH);
+    float oz = clamp((float(int((seed >> 8) & int64_t(15))) / 15.0 - 0.5) * 0.5, -maxH, maxH);
+    float oy = (w & 3u) == 2u ? (float(int((seed >> 4) & int64_t(15))) / 15.0 - 1.0) * maxV : 0.0;
+    return float3(ox, oy, oz);
+}
 
 // material mat's light word (bricks.hpp: rgb | level << 24), 0 none
 uint brickLightOf(uint mat) {

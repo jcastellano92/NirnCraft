@@ -147,7 +147,7 @@ final class AtlasShapes {
         List<AABB> boxes = boxes(st);
         long mask = mask(boxes);
         int[][] faces = new int[6][];
-        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(d, quads, tint);
+        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(st, d, quads, tint, TILE);
         // thinner than a micro-voxel (a snow layer, a carpet, a torch, a lantern's chain): its outline fills none of the
         // 4 x 4 x 4, so its shape is the visual hull of its face tiles (a layer's bottom layer, a post's core column;
         // a chain is no floating slab)
@@ -156,7 +156,8 @@ final class AtlasShapes {
         if (fluid) mask = -1L;
         if (mask == 0 || quads.isEmpty() && !fluid) return null;
         // cut-out coverage for leaves and plants only (a grass block's cut-out overlay is no hole in the block)
-        boolean cutout = st.is(BlockTags.LEAVES) || plant(st, quads, boxes);
+        // (and a plain cube with see-through texels: a copper grate, mangrove roots, a cut-out cube's holes)
+        boolean cutout = st.is(BlockTags.LEAVES) || plant(st, quads, boxes) || holedCube(quads, faces);
         return new Shape(mask, mean(faces), cutout ? AtlasNative.SHAPE_CUTOUT : 0, faces);
     }
 
@@ -172,6 +173,11 @@ final class AtlasShapes {
 
     /** Face d's tile at res x res texels (as face(): 4 for the shapes, 16 for the near field's textures). */
     static int[] face(Direction d, List<BakedQuad> quads, int tint, int TILE) {
+        return face(null, d, quads, tint, TILE);
+    }
+
+    /** face() of state st: each quad tinted by its own tint layer (AtlasMaterials.layerTint), not layer 0's for all. */
+    static int[] face(BlockState st, Direction d, List<BakedQuad> quads, int tint, int TILE) {
         int sub = Math.max(1, 16 / TILE);  // samples a texel side: a 4x4 tile averages 4x4 of the 16x16 sprite
         int[] tile = new int[TILE * TILE];
         float[] depth = new float[TILE * TILE];
@@ -185,7 +191,9 @@ final class AtlasShapes {
             } catch (RuntimeException e) {
                 continue;
             }
-            boolean tinted = tint >= 0 && q.materialInfo().tintIndex() >= 0;
+            int qt = tint < 0 || q.materialInfo().tintIndex() < 0 ? -1
+                    : st == null ? tint : AtlasMaterials.layerTint(st, q.materialInfo().tintIndex(), tint);
+            boolean tinted = qt >= 0;
             int fw = sp.contents().width(), fh = sp.contents().height();
             // the quad's extent in the face plane and its depth along d
             float a0 = Float.MAX_VALUE, a1 = -Float.MAX_VALUE, b0 = Float.MAX_VALUE, b1 = -Float.MAX_VALUE, dep = 0;
@@ -234,9 +242,9 @@ final class AtlasShapes {
                     if (sa == 0) continue;  // the quad is see-through here: what is behind it shows
                     depth[k] = dep;
                     if (tinted) {
-                        sr *= ((tint >> 16) & 255) / 255.0;
-                        sg *= ((tint >> 8) & 255) / 255.0;
-                        sb *= (tint & 255) / 255.0;
+                        sr *= ((qt >> 16) & 255) / 255.0;
+                        sg *= ((qt >> 8) & 255) / 255.0;
+                        sb *= (qt & 255) / 255.0;
                     }
                     tile[k] = (int) Math.round(255.0 * sa / n) << 24 | (int) Math.round(sr / sa) << 16 | (int) Math.round(sg / sa) << 8
                             | (int) Math.round(sb / sa);
@@ -256,7 +264,7 @@ final class AtlasShapes {
         List<BakedQuad> quads = quads(st);
         if (quads.isEmpty()) return null;
         int[][] faces = new int[6][];
-        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(d, quads, tint, TEX);
+        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(st, d, quads, tint, TEX);
         return faces;
     }
 
@@ -289,17 +297,20 @@ final class AtlasShapes {
             }
             int w = s.contents().width(), h = s.contents().height();
             int[] frames = {0};
+            int ticks = 1;
             if (s.contents().isAnimated()) {
-                var u = s.contents().getUniqueFrames();
-                frames = new int[Math.min(64, Math.max(1, u.size()))];
-                for (int i = 0; i < frames.length; i++) frames[i] = u.getInt(i);
+                // its .mcmeta's sequence (frames: indices or {index, time}; frametime the default), each frame repeated
+                // by its time over the times' common divisor: one tick rate a sprite, the sequence as the game plays it
+                int[] seq = frameSequence(s.contents().name(), s.contents().getUniqueFrames());
+                frames = java.util.Arrays.copyOfRange(seq, 1, seq.length);
+                ticks = seq[0];
             }
             int perRow = Math.max(1, img.getWidth() / Math.max(1, w));
             int[] t = new int[SPRITE_HEAD + w * h * frames.length];
             t[0] = w;
             t[1] = h;
             t[2] = frames.length;
-            t[3] = frames.length > 1 ? frameTicks(s.contents().name()) : 1;
+            t[3] = ticks;
             for (int f = 0; f < frames.length; f++) {
                 int ox = (frames[f] % perRow) * w, oy = (frames[f] / perRow) * h;
                 if (ox + w > img.getWidth() || oy + h > img.getHeight()) ox = oy = 0;
@@ -321,19 +332,57 @@ final class AtlasShapes {
         return n > 0 && mid * 50 <= n;
     }
 
-    /** An animated texture's frame time in game ticks (its .png.mcmeta's animation.frametime; 1 when it says none). */
-    private static int frameTicks(net.minecraft.resources.Identifier name) {
+    /**
+     * An animated texture's frames as the game plays them: {ticks a frame, frame index, ...}, from its .png.mcmeta
+     * (animation.frames: indices or {index, time}, animation.frametime the default, 1) with each frame repeated by its
+     * time over the times' common divisor (at most 64 entries); its distinct frames in order when it says no sequence.
+     */
+    private static int[] frameSequence(net.minecraft.resources.Identifier name, it.unimi.dsi.fastutil.ints.IntList unique) {
+        java.util.List<int[]> seq = new java.util.ArrayList<>();  // {index, time}
+        int def = 1;
         try {
             var id = net.minecraft.resources.Identifier.fromNamespaceAndPath(name.getNamespace(), "textures/" + name.getPath() + ".png.mcmeta");
             var res = Minecraft.getInstance().getResourceManager().getResource(id);
-            if (res.isEmpty()) return 1;
-            try (var r = res.get().openAsReader()) {
-                var o = com.google.gson.JsonParser.parseReader(r).getAsJsonObject().getAsJsonObject("animation");
-                return o != null && o.has("frametime") ? Math.max(1, o.get("frametime").getAsInt()) : 1;
-            }
+            if (res.isPresent())
+                try (var r = res.get().openAsReader()) {
+                    var o = com.google.gson.JsonParser.parseReader(r).getAsJsonObject().getAsJsonObject("animation");
+                    if (o != null) {
+                        if (o.has("frametime")) def = Math.max(1, o.get("frametime").getAsInt());
+                        if (o.has("frames"))
+                            for (var e : o.getAsJsonArray("frames")) {
+                                if (e.isJsonPrimitive()) seq.add(new int[] {e.getAsInt(), -1});
+                                else {
+                                    var fo = e.getAsJsonObject();
+                                    seq.add(new int[] {fo.get("index").getAsInt(), fo.has("time") ? Math.max(1, fo.get("time").getAsInt()) : -1});
+                                }
+                            }
+                    }
+                }
         } catch (Exception e) {
-            return 1;
+            seq.clear();
         }
+        if (seq.isEmpty()) for (int i = 0; i < unique.size(); i++) seq.add(new int[] {unique.getInt(i), -1});
+        int g = 0;
+        for (int[] f : seq) {
+            if (f[1] < 0) f[1] = def;
+            g = gcd(g, f[1]);
+        }
+        g = Math.max(1, g);
+        long total = 0;
+        for (int[] f : seq) total += f[1] / g;
+        while (total > 64 && g < 4096) {  // (too long a sequence: a coarser tick, frames merged; bounded)
+            g *= 2;
+            total = 0;
+            for (int[] f : seq) total += Math.max(1, f[1] / g);
+        }
+        java.util.List<Integer> out = new java.util.ArrayList<>();
+        out.add(g);
+        for (int[] f : seq) for (int k = 0, n = Math.max(1, f[1] / g); k < n && out.size() <= 64; k++) out.add(f[0]);
+        return out.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
     }
 
     /** Forget the cached sprite texels (resources reloaded). */
@@ -348,17 +397,82 @@ final class AtlasShapes {
      * clear (redstone dust is in the translucent layer: its brick is its opaque texels).
      */
     static boolean brickable(BlockState st, List<BakedQuad> quads) {
-        if (quads.isEmpty() || st.is(BlockTags.LEAVES)) return false;
+        if (quads.isEmpty()) return false;
+        boolean cube = fullCubeModel(quads);
+        // leaves are textured cut-out cubes; a block tagged leaves whose model is no cube (a berry bush, a hedge's
+        // twigs) is a brick like any plant (as a leaves cube it was its texture on six faces)
+        if (st.is(BlockTags.LEAVES) && cube) return false;
         boolean animated = false;
-        boolean glassy = st.is(BlockTags.IMPERMEABLE) || st.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock;
+        // glass, panes, ice, slime, honey stay the translucent layer's; another translucent model (redstone dust, a
+        // plant with soft edges) is a brick of its texels that are half opaque or more
+        boolean glassy = st.is(BlockTags.IMPERMEABLE) || st.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock
+                || st.getBlock() instanceof net.minecraft.world.level.block.HalfTransparentBlock;
         for (BakedQuad q : quads) {
-            if (q.materialInfo().layer() == ChunkSectionLayer.TRANSLUCENT && (glassy || !binaryAlpha(q.materialInfo().sprite())))
-                return false;
+            if (q.materialInfo().layer() == ChunkSectionLayer.TRANSLUCENT && glassy) return false;
             animated |= q.materialInfo().sprite().contents().isAnimated();
         }
         // a full solid cube is a textured cube, unless its texture moves (magma, a sea lantern, prismarine): a brick a
         // frame then (its micro-voxels are its texels)
-        return !st.isSolidRender() || animated;
+        return !(st.isSolidRender() || cube && st.canOcclude()) || animated;
+    }
+
+    /** Whether a plain-cube model shows the background through its faces' tiles (a grate, roots: a cut-out cube). */
+    static boolean holedCube(List<BakedQuad> quads, int[][] faces) {
+        boolean cut = false;
+        for (BakedQuad q : quads) cut |= q.materialInfo().layer() == ChunkSectionLayer.CUTOUT;
+        if (!cut || !fullCubeModel(quads)) return false;
+        for (int[] tile : faces)
+            if (tile != null)
+                for (int c : tile)
+                    if ((c >>> 24) < 250) return true;
+        return false;
+    }
+
+    /**
+     * Whether a model is a plain cube: on each of the six faces a quad lying on the block's boundary that covers it whole
+     * (a stone, a log, leaves; not a bush, a slab, a cross).
+     */
+    static boolean fullCubeModel(List<BakedQuad> quads) {
+        int faces = 0;
+        for (BakedQuad q : quads) {
+            Direction d = q.direction();
+            int a = d.getAxis().ordinal();  // x 0, y 1, z 2
+            float plane = d.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1f : 0f;
+            float lo0 = 1, hi0 = 0, lo1 = 1, hi1 = 0;
+            boolean on = true;
+            for (int i = 0; i < 4; i++) {
+                Vector3fc p = q.position(i);
+                float[] c = {p.x(), p.y(), p.z()};
+                if (Math.abs(c[a] - plane) > 1e-3f) on = false;
+                float u = c[(a + 1) % 3], v = c[(a + 2) % 3];
+                lo0 = Math.min(lo0, u);
+                hi0 = Math.max(hi0, u);
+                lo1 = Math.min(lo1, v);
+                hi1 = Math.max(hi1, v);
+            }
+            if (on && lo0 < 1e-3f && lo1 < 1e-3f && hi0 > 1 - 1e-3f && hi1 > 1 - 1e-3f) faces |= 1 << d.get3DDataValue();
+        }
+        return faces == 63;
+    }
+
+    /**
+     * A state's random offset (vanilla's OffsetType) as atlas.h atlas_set_material_offsets takes it: the type and its
+     * largest offsets, from the offset the state gives positions (0: none).
+     */
+    static int offsetWord(BlockState st) {
+        try {
+            if (!st.hasOffsetFunction()) return 0;
+            double h = 0, v = 0;
+            for (int i = 0; i < 64; i++) {
+                var o = st.getOffset(new BlockPos(i * 7, 0, i * 13));
+                h = Math.max(h, Math.max(Math.abs(o.x), Math.abs(o.z)));
+                v = Math.max(v, -o.y);
+            }
+            if (h <= 0 && v <= 0) return 0;
+            return (v > 0 ? 2 : 1) | (int) Math.min(255, Math.round(h * 255)) << 8 | (int) Math.min(255, Math.round(v * 255)) << 16;
+        } catch (RuntimeException e) {
+            return 0;
+        }
     }
 
     /** A state's brick model (tint RGB for its tinted quads, -1 none), or null when it takes no brick. */
@@ -381,7 +495,8 @@ final class AtlasShapes {
                 uv[2 * i] = (UVPair.unpackU(puv) - sp.getU0()) / (sp.getU1() - sp.getU0());
                 uv[2 * i + 1] = (UVPair.unpackV(puv) - sp.getV0()) / (sp.getV1() - sp.getV0());
             }
-            int t = tint >= 0 && q.materialInfo().tintIndex() >= 0 ? tint & 0xFFFFFF : 0xFFFFFF;
+            int lt = tint >= 0 ? AtlasMaterials.layerTint(st, q.materialInfo().tintIndex(), tint) : -1;
+            int t = lt >= 0 ? lt & 0xFFFFFF : 0xFFFFFF;  // (its own tint layer's colour: AtlasMaterials.layerTint)
             out.add(new BrickQuad(pos, uv, tx, t, q.direction().get3DDataValue()));
         }
         return out.isEmpty() ? null : new BrickModel(out, st.getLightEmission() / 15f);

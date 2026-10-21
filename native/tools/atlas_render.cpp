@@ -439,7 +439,7 @@ int main(int argc, char** argv) {
             }
             modelled.assign(ml.states.size(), 0);
             for (size_t i = 0; i < ml.states.size(); i++)
-                modelled[i] = exportdata::brickWorthy(ml, uint32_t(i)) ? 1 : 0;  // (AtlasClientSections.nearKept)
+                modelled[i] = exportdata::brickWorthy(ml, uint32_t(i)) ? 1 : exportdata::holedCube(ml, uint32_t(i)) ? 2 : 0;  // (nearKept)
         }
         if (!exportdata::upload(ctx, lib, secs, str(a, "keep", "far") == "all", grass, foliage, water, 64, ex, why,
                                 boxed ? box : nullptr, num(a, "cutout", 1) > 0, server, keepNear ? &modelled : nullptr,
@@ -450,6 +450,11 @@ int main(int argc, char** argv) {
         if (keepNear && num(a, "bricks", 1) > 0) {
             size_t bricked = 0;
             auto b0 = std::chrono::steady_clock::now();
+            // (and their 16 x 16 face textures, as the game's exact materials carry them)
+            if (num(a, "textures", 1) > 0 && !exportdata::uploadTextures(ctx, ml, ex.firstMat, ex.matState, grass, foliage, why)) {
+                std::fprintf(stderr, "textures: %s\n", why.c_str());
+                return 2;
+            }
             if (!exportdata::uploadBricks(ctx, ml, ex.firstMat, ex.matState, grass, foliage, bricked, why, num(a, "animtest", 0) > 0)) {
                 std::fprintf(stderr, "bricks: %s\n", why.c_str());
                 return 2;

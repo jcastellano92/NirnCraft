@@ -216,6 +216,9 @@ final class AtlasClientSections {
                 high = Math.max(high, c.getHeight(Heightmap.Types.WORLD_SURFACE, x, z));
             }
         int minSec = c.getMinSectionY(), sy1 = Math.min(Math.floorDiv(high, 16), c.getMaxSectionY());
+        // (and up to the highest section anything put up for this chunk: generation's crowns over its real top go,
+        // as all-air sections, else they floated there for good)
+        sy1 = Math.min(Math.max(sy1, AtlasEditsClient.highest(c.getPos().x(), c.getPos().z())), c.getMaxSectionY());
         int n = Math.max(0, sy1 - minSec + 1);
         int[][] secs = new int[n][];
         for (int s = 0; s < n; s++) {

@@ -1738,6 +1738,15 @@ ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t fi
     ATLAS_CATCH(ctx)
 }
 
+ATLAS_API AtlasStatus atlas_set_material_offsets(AtlasContext* ctx, uint32_t first, const uint32_t* words, uint32_t count) {
+    if (!ctx || first == 0 || (!words && count)) return ATLAS_ERR_ARG;
+    if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
+    ATLAS_TRY
+    for (uint32_t m = 0; m < count; m++) ctx->bricks.setOffset(first + m, words[m]);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
 ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t first, uint32_t count, const AtlasBrickQuad* quads,
                                                 uint32_t quadCount, const AtlasBrickSprite* sprites, uint32_t spriteCount,
                                                 const uint32_t* texels, uint32_t texelCount, const float* emission) {
@@ -1750,6 +1759,8 @@ ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t firs
     std::vector<std::vector<std::shared_ptr<const std::vector<uint32_t>>>> frameRecs(count);
     std::vector<uint32_t> ticksOf(count, 1u);
     std::vector<float> coverOf(count, 1.0f);
+    std::vector<std::shared_ptr<const std::vector<uint32_t>>> crossOf(count);
+    std::vector<std::vector<std::shared_ptr<const std::vector<uint32_t>>>> crossFramesOf(count);
     std::vector<std::vector<AtlasBrickQuad>> per(count);
     for (uint32_t q = 0; q < quadCount; q++)
         if (quads[q].material < count) per[quads[q].material].push_back(quads[q]);
@@ -1774,11 +1785,21 @@ ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t firs
                 if (frames > 1) frameRecs[m].push_back(r);
             }
             ticksOf[m] = ticks;
+            // quads off the axes on up to four planes (a cross plant, a coral fan, a fire): traced as those sheets (frame 0)
+            for (uint32_t k = 0; k < frames; k++) {
+                std::vector<uint32_t> cr = crossRecord(per[m].data(), uint32_t(per[m].size()), m, sprites, spriteCount, texels, texelCount, k);
+                if (cr.empty()) break;
+                auto r = ctx->bricks.intern(std::move(cr));
+                if (k == 0) crossOf[m] = r;
+                if (frames > 1) crossFramesOf[m].push_back(r);
+            }
         }
     }, count < 8 ? 1u : 0u);
     for (uint32_t m = 0; m < count; m++) {
         if (frameRecs[m].size() > 1) ctx->bricks.setFrames(first + m, std::move(frameRecs[m]), ticksOf[m], lightOf[m]);
         else ctx->bricks.set(first + m, recs[m], lightOf[m]);
+        if (crossFramesOf[m].size() > 1) ctx->bricks.setCrossFrames(first + m, std::move(crossFramesOf[m]), ticksOf[m]);
+        else ctx->bricks.setCross(first + m, crossOf[m]);
         ctx->bricks.setCoverage(first + m, recs[m] ? int(coverOf[m] * 63.0f + 0.5f) : -1);
     }
     {
