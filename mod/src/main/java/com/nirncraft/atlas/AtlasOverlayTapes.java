@@ -154,7 +154,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
     }
 
     /** Words per id in the block table: flags, transform, sweep bits, block index and facing and cover, shape table. */
-    static final int ID_WORDS = 5;
+    static final int ID_WORDS = 6;
 
     // sweep bits (word 2; Sanity and its connect step); keep in step with atlas_overlays.slang
     static final int S_DOOR_LOWER = 1, S_DOOR_UPPER = 1 << 1, S_BED = 1 << 2, S_BED_HEAD = 1 << 3, S_TRAPDOOR = 1 << 4, S_STAIR = 1 << 5,
@@ -164,6 +164,10 @@ final class AtlasOverlayTapes implements Canvas.Tape {
             S_POST_OVERRIDE = 1 << 26, S_WALL_UP = 1 << 27, S_COVER_POST = 1 << 28, S_SUPPORTED = 1 << 29;
     // word 3: block index (low 16 bits), horizontal facing (bits 16-17: N, E, S, W), the bottom face's cover of the wall
     // side test shapes (bits 20-23: N, E, S, W)
+    // word 5: Accessibility's classes (A_*); keep in step with atlas_overlays.slang
+    static final int A_CLEAR = 1, A_SOLIDTOP = 1 << 1, A_ROAD = 1 << 2, A_PROP = 1 << 3, A_LOG = 1 << 4, A_PROP_INDOOR = 1 << 5,
+            A_SLAB = 1 << 6, A_WALLISH = 1 << 7, A_POLE = 1 << 8, A_POLETOP = 1 << 9, A_ARM = 1 << 10, A_PATHABLE = 1 << 11,
+            A_COLLIDE = 1 << 12, A_HALF_BOTTOM = 1 << 13;
     private static final Direction[] NESW = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
 
     /**
@@ -230,6 +234,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
             w[o + 2] = sweepBits(s);
             w[o + 3] = blockIndex.computeIfAbsent(s.getBlock(), k -> blockIndex.size() + 1) | facing(s) << 16 | cover(s) << 20;
             w[o + 4] = shapeOf[i] == 0 ? 0 : shapeOffset[shapeOf[i] - 1];
+            w[o + 5] = accessBits(s);
         }
         for (int k = 0; k < shapes.size(); k++) System.arraycopy(shapes.get(k), 0, w, shapeOffset[k], shapes.get(k).length);
         return w;
@@ -320,6 +325,47 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         if (b instanceof WallBlock && s.getValue(WallBlock.UP)) v |= S_WALL_UP;
         if (covered(s, wallTest(null))) v |= S_COVER_POST;
         if (!s.isAir() && s.getFluidState().isEmpty() && !s.canBeReplaced()) v |= S_SUPPORTED;
+        return v;
+    }
+
+    /** Accessibility's block classes (its clear, solidTop, roadLike, isProp, isWall, remove and stair tests). */
+    static int accessBits(BlockState s) {
+        Block b = s.getBlock();
+        int v = 0;
+        boolean collide = !s.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).isEmpty();
+        if (collide) v |= A_COLLIDE;
+        if (s.isAir() || s.canBeReplaced() || b instanceof CarpetBlock || b instanceof PressurePlateBlock || b instanceof DoorBlock
+                || b instanceof FenceGateBlock || b instanceof TrapDoorBlock || !collide) v |= A_CLEAR;
+        if (!s.isAir() && s.getFluidState().isEmpty() && !s.canBeReplaced() && collide) v |= A_SOLIDTOP;
+        if (s.is(Blocks.DIRT_PATH) || s.is(Blocks.GRAVEL) || s.is(Blocks.COBBLESTONE) || s.is(Blocks.MOSSY_COBBLESTONE)
+                || s.is(Blocks.STONE_BRICKS) || s.is(Blocks.STONE) || s.is(Blocks.PACKED_MUD) || s.is(Blocks.MUD_BRICKS)
+                || s.is(Blocks.SMOOTH_STONE) || s.is(Blocks.COBBLED_DEEPSLATE) || s.is(Blocks.POLISHED_ANDESITE)
+                || s.is(Blocks.DEEPSLATE_BRICKS) || s.is(Blocks.BRICKS) || s.is(BlockTags.PLANKS)) v |= A_ROAD;
+        if (b instanceof BedBlock || b instanceof ChestBlock || b instanceof BarrelBlock || b instanceof FenceBlock
+                || b instanceof net.minecraft.world.level.block.FlowerPotBlock || b instanceof net.minecraft.world.level.block.CandleBlock
+                || b instanceof LanternBlock || b instanceof net.minecraft.world.level.block.AbstractCauldronBlock
+                || b instanceof net.minecraft.world.level.block.AbstractFurnaceBlock || b instanceof net.minecraft.world.level.block.CraftingTableBlock
+                || b instanceof net.minecraft.world.level.block.LecternBlock || b instanceof net.minecraft.world.level.block.CampfireBlock
+                || b instanceof net.minecraft.world.level.block.CropBlock || b instanceof net.minecraft.world.level.block.LeavesBlock
+                || b instanceof net.minecraft.world.level.block.HayBlock || b instanceof net.minecraft.world.level.block.LoomBlock
+                || b instanceof net.minecraft.world.level.block.GrindstoneBlock || b instanceof net.minecraft.world.level.block.AnvilBlock
+                || b instanceof net.minecraft.world.level.block.BrewingStandBlock || b instanceof net.minecraft.world.level.block.DecoratedPotBlock
+                || b instanceof net.minecraft.world.level.block.SkullBlock || b instanceof net.minecraft.world.level.block.WallBannerBlock
+                || b instanceof net.minecraft.world.level.block.StandingSignBlock || b instanceof net.minecraft.world.level.block.StemBlock
+                || b instanceof net.minecraft.world.level.block.SweetBerryBushBlock
+                || b instanceof com.nirncraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlock
+                || b instanceof com.nirncraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureContainerBlock) v |= A_PROP;
+        if (s.is(BlockTags.LOGS) && !s.is(BlockTags.PLANKS)) v |= A_LOG;
+        if (s.is(Blocks.BOOKSHELF) || s.is(Blocks.CHISELED_BOOKSHELF) || s.is(Blocks.TARGET)) v |= A_PROP_INDOOR;
+        if (b instanceof net.minecraft.world.level.block.SlabBlock) v |= A_SLAB;
+        if (s.isSolidRender() || b instanceof StairBlock || b instanceof net.minecraft.world.level.block.SlabBlock || s.is(BlockTags.WALLS)
+                || b instanceof IronBarsBlock || b instanceof net.minecraft.world.level.block.TransparentBlock) v |= A_WALLISH;
+        if (b instanceof FenceBlock || s.is(BlockTags.WALLS)) v |= A_POLE;
+        if (b instanceof FenceBlock || s.is(BlockTags.WALLS) || s.is(BlockTags.BANNERS) || s.is(BlockTags.ALL_SIGNS) || s.is(BlockTags.WOOL)
+                || s.is(Blocks.GOLD_BLOCK) || s.is(com.nirncraft.worldgen.VanillaBlocks.LIGHTNING_ROD) || b instanceof LanternBlock) v |= A_POLETOP;
+        if (b instanceof FenceBlock || s.is(BlockTags.BANNERS) || s.is(BlockTags.ALL_SIGNS) || s.is(BlockTags.WOOL)) v |= A_ARM;
+        if (s.is(BlockTags.SUBSTRATE_OVERWORLD) || s.is(BlockTags.SAND) || s.is(Blocks.GRASS_BLOCK)) v |= A_PATHABLE;
+        if (b instanceof StairBlock && s.getValue(StairBlock.HALF) == net.minecraft.world.level.block.state.properties.Half.BOTTOM) v |= A_HALF_BOTTOM;
         return v;
     }
 
@@ -474,6 +520,17 @@ final class AtlasOverlayTapes implements Canvas.Tape {
             case NOT_AIR, PLANT -> {
                 l.add(kind | id(Blocks.AIR.defaultBlockState()) << 16);
                 l.add((y & 0xFFFF) | a << 16);
+            }
+            case ENTRANCE -> {
+                // a = the outward 2D value (S 0, W 1, N 2, E 3) -> N 0, E 1, S 2, W 3
+                int d = switch (a & 3) {
+                    case 0 -> 2;
+                    case 1 -> 3;
+                    case 2 -> 0;
+                    default -> 1;
+                };
+                l.add(kind | d << 4);
+                l.add((y & 0xFFFF) | y << 16);
             }
             case BED -> {
                 int sid = id(s);

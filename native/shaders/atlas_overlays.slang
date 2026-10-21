@@ -37,7 +37,7 @@ struct OvlParams {
 [[vk::binding(4, 0)]] RWStructuredBuffer<uint> ids;    // per chunk levels * 128 words
 [[vk::binding(5, 0)]] StructuredBuffer<uint> snap;     // ids as the pieces left them (the sweeps' neighbour reads)
 
-static const uint CHUNK_INTS = 8u, ID_WORDS = 5u, REC_OPS = 513u;
+static const uint CHUNK_INTS = 8u, ID_WORDS = 6u, REC_OPS = 513u;
 
 static const uint HEADER = 16u;
 // op kinds (Canvas.Tape) and flags (AtlasOverlayTapes.OF_*)
@@ -685,4 +685,275 @@ void connectMain(uint3 id : SV_DispatchThreadID) {
     int y0, y1;
     if (!sweepRange(id.y, y0, y1)) return;
     for (int y = y0; y <= y1; y++) connectBlock(y);
+}
+
+// ---- accessMain: SettlementPiece.postProcess's Accessibility sweep (build/Accessibility.java) ----------------------
+//
+// Every declared entrance (the tapes' ENTRANCE ops) keeps a two-high approach of up to six blocks along its open side
+// (props in the way removed with their poles' tops, a gate opened, a missing floor filled with dirt and paved, the
+// doorstep a path), and every indoor stair run keeps its landings and the cells over its steps free. The server walks
+// these in its box's order (x, z, y), each reading what the ones before it left, and only inside the chunk: so one
+// workgroup a chunk gathers the candidates in parallel (doors that are entrances, bottom stairs, over each column's
+// sweep range), then one thread takes them in that order (the walks are short and few).
+
+static const uint OP_ENTRANCE = 8u;
+static const uint A_CLEAR = 1u, A_SOLIDTOP = 2u, A_ROAD = 4u, A_PROP = 8u, A_LOG = 16u, A_PROP_INDOOR = 32u, A_SLAB = 64u,
+                  A_WALLISH = 128u, A_POLE = 256u, A_POLETOP = 512u, A_ARM = 1024u, A_PATHABLE = 2048u, A_COLLIDE = 4096u,
+                  A_HALF_BOTTOM = 8192u;
+static const uint ACC_MAX = 1024u;
+
+groupshared uint gsCand[1024];
+groupshared uint gsCount;
+
+uint accessOf(uint id) { return idWord(id, 5u); }
+
+// the block at chunk-local (lx, lz, y) of this thread's chunk, and writes there (whichever column)
+uint getAt(int lx, int lz, int y) {
+    uint save = gCol;
+    gCol = uint(lx + 16 * lz);
+    uint v = getB(y);
+    gCol = save;
+    return v;
+}
+void setAt(int lx, int lz, int y, uint v) {
+    uint save = gCol;
+    gCol = uint(lx + 16 * lz);
+    setB(y, v);
+    gCol = save;
+}
+int topY() { return -64 + params.levels - 1; }
+bool inBox(int lx, int lz, int y) { return lx >= 0 && lx < 16 && lz >= 0 && lz < 16 && y >= -63 && y <= topY(); }
+
+// Accessibility.clear / solidTop (outside the chunk: unknown, so yes)
+bool accClear(int lx, int lz, int y) { return !inBox(lx, lz, y) || (accessOf(getAt(lx, lz, y)) & A_CLEAR) != 0u; }
+bool accSolidTop(int lx, int lz, int y) { return !inBox(lx, lz, y) || (accessOf(getAt(lx, lz, y)) & A_SOLIDTOP) != 0u; }
+
+// Accessibility.isProp (indoor: tables, chairs, bookshelves too)
+bool accProp(int lx, int lz, int y, uint s, bool indoor) {
+    uint a = accessOf(s);
+    if ((a & A_PROP) != 0u) return true;
+    if ((a & A_LOG) != 0u) {
+        bool post = (accessOf(getAt(lx, lz, y - 1)) & A_LOG) != 0u && (accessOf(getAt(lx, lz, y + 1)) & A_LOG) != 0u;
+        return !post || (flagsOf(s) & F_NATLOG) != 0u;
+    }
+    if (!indoor) return false;
+    if ((a & (A_PROP_INDOOR | A_SLAB)) != 0u) return true;
+    if ((sweepOf(s) & S_STAIR) != 0u) {
+        uint f = facingOf(s);
+        uint up = getAt(lx + dxOf(f), lz + dzOf(f), y + 1), dn = getAt(lx - dxOf(f), lz - dzOf(f), y - 1);
+        bool run = ((sweepOf(up) & S_STAIR) != 0u && facingOf(up) == f) || ((sweepOf(dn) & S_STAIR) != 0u && facingOf(dn) == f);
+        return !run && (a & A_HALF_BOTTOM) != 0u;
+    }
+    return false;
+}
+
+bool accWall(int lx, int lz, int y, uint s) { return !accProp(lx, lz, y, s, false) && (accessOf(s) & A_WALLISH) != 0u; }
+
+// Accessibility.clearPropBlock: air, and a bed's other half
+void accClearProp(int lx, int lz, int y) {
+    uint s = getAt(lx, lz, y);
+    setAt(lx, lz, y, idAir());
+    if ((sweepOf(s) & S_BED) != 0u) {
+        uint fc = facingOf(s);
+        uint d = (sweepOf(s) & S_BED_HEAD) != 0u ? (fc + 2u) & 3u : fc;
+        int ox = lx + dxOf(d), oz = lz + dzOf(d);
+        if (inBox(ox, oz, y) && (sweepOf(getAt(ox, oz, y)) & S_BED) != 0u) setAt(ox, oz, y, idAir());
+    }
+}
+
+// Accessibility.remove: a prop goes; a pole takes its tops (and their arms) up to nine blocks
+bool accRemove(int lx, int lz, int y) {
+    uint s = getAt(lx, lz, y);
+    if (!accProp(lx, lz, y, s, false)) return false;
+    bool pole = (accessOf(s) & A_POLE) != 0u;
+    accClearProp(lx, lz, y);
+    if (pole) {
+        for (int dy = 1; dy <= 9; dy++) {
+            int uy = y + dy;
+            uint us = getAt(lx, lz, uy);
+            if ((accessOf(us) & A_POLETOP) != 0u) {
+                setAt(lx, lz, uy, idAir());
+                for (uint d = 0u; d < 4u; d++)
+                    for (int step = 1; step <= 2; step++) {
+                        int ax = lx + dxOf(d) * step, az = lz + dzOf(d) * step;
+                        if (!inBox(ax, az, uy)) continue;  // (the server writes there too: the neighbour chunk is not ours)
+                        if ((accessOf(getAt(ax, az, uy)) & A_ARM) != 0u) setAt(ax, az, uy, idAir());
+                    }
+            } else if ((flagsOf(us) & F_AIR) != 0u) {
+                continue;
+            } else {
+                break;
+            }
+        }
+    }
+    return true;
+}
+
+// dirt down from y while nothing solid on top (at most 24), inside the chunk
+void accFill(int lx, int lz, int y) {
+    int g = y;
+    for (int d = 0; d < 24 && inBox(lx, lz, g) && !accSolidTop(lx, lz, g); d++) {
+        setAt(lx, lz, g, idDirt());
+        g--;
+    }
+}
+
+// Accessibility.door: the entrance's approach along its outward direction
+void accDoor(int px, int pz, int py, uint out) {
+    for (int k = 1; k <= 6; k++) {
+        int cx = px + dxOf(out) * k, cz = pz + dzOf(out) * k, cy = py;
+        if (!inBox(cx, cz, cy)) return;
+        int y = cy;
+        uint here = getAt(cx, cz, cy);
+        if (!accClear(cx, cz, cy) && !accProp(cx, cz, cy, here, false) && accClear(cx, cz, cy + 1) && accClear(cx, cz, cy + 2)) {
+            y++;
+        } else if (k > 1 && accClear(cx, cz, cy) && !accSolidTop(cx, cz, cy - 1) && accSolidTop(cx, cz, cy - 2)) {
+            y--;
+        }
+        uint fs = getAt(cx, cz, y);
+        if ((flagsOf(fs) & F_GATE) != 0u && (flagsOf(fs) & F_GATEOPEN) == 0u) setAt(cx, cz, y, xformOf(fs) & 0xFFFFu);
+        if (!accClear(cx, cz, y)) {
+            fs = getAt(cx, cz, y);
+            if (accWall(cx, cz, y, fs)) {
+                if (k <= 2) return;
+                break;
+            }
+            accRemove(cx, cz, y);
+        }
+        if (!accClear(cx, cz, y + 1)) {
+            uint hs = getAt(cx, cz, y + 1);
+            if (!accWall(cx, cz, y + 1, hs)) accRemove(cx, cz, y + 1);
+            else if (k <= 2) return;
+        }
+        uint below = getAt(cx, cz, y - 1);
+        if ((accessOf(below) & A_ROAD) != 0u) break;  // joined the street
+        if (!accSolidTop(cx, cz, y - 1)) {
+            accFill(cx, cz, y - 1);
+            setAt(cx, cz, y - 1, idPath());
+        } else {
+            if (!accSolidTop(cx, cz, y - 2)) accFill(cx, cz, y - 2);
+            if (k <= 2 && (accessOf(below) & A_PATHABLE) != 0u) setAt(cx, cz, y - 1, idPath());
+        }
+    }
+}
+
+bool accSameRun(int lx, int lz, int y, uint f) {
+    if (!inBox(lx, lz, y)) return true;
+    uint s = getAt(lx, lz, y);
+    return (sweepOf(s) & S_STAIR) != 0u && facingOf(s) == f;
+}
+
+// Accessibility.landing: a free landing among the candidates (props cleared from the first that can be)
+bool accLanding(int ry, int c0x, int c0z, int c1x, int c1z, int c2x, int c2z) {
+    int cxs[3] = {c0x, c1x, c2x}, czs[3] = {c0z, c1z, c2z};
+    for (int i = 0; i < 3; i++) {
+        if (!inBox(cxs[i], czs[i], ry) || !inBox(cxs[i], czs[i], ry + 1)) return true;
+        if (!accSolidTop(cxs[i], czs[i], ry - 1)) continue;
+        if (accClear(cxs[i], czs[i], ry) && accClear(cxs[i], czs[i], ry + 1)) return true;
+    }
+    for (int i = 0; i < 3; i++) {
+        if (!accSolidTop(cxs[i], czs[i], ry - 1)) continue;
+        bool fixable = true;
+        for (int q = 0; q <= 1; q++) {
+            if (accClear(cxs[i], czs[i], ry + q)) continue;
+            if (!accProp(cxs[i], czs[i], ry + q, getAt(cxs[i], czs[i], ry + q), true)) fixable = false;
+        }
+        if (!fixable) continue;
+        for (int q = 0; q <= 1; q++)
+            if (!accClear(cxs[i], czs[i], ry + q)) accClearProp(cxs[i], czs[i], ry + q);
+        return true;
+    }
+    return false;
+}
+
+// Accessibility.stair: an indoor run keeps its landings and the cells over its steps
+void accStair(int px, int pz, int py, uint s) {
+    uint f = facingOf(s);
+    bool roofed = false;
+    for (int dy = 3; dy <= 6 && !roofed; dy++) {
+        if (!inBox(px, pz, py + dy)) continue;
+        uint u = getAt(px, pz, py + dy);
+        if ((accessOf(u) & A_COLLIDE) != 0u && (flagsOf(u) & F_LEAVES) == 0u) roofed = true;
+    }
+    if (!roofed) return;
+    uint back = (f + 2u) & 3u, cw = (f + 1u) & 3u, ccw = (f + 3u) & 3u;
+    bool bottom = !accSameRun(px + dxOf(back), pz + dzOf(back), py - 1, f);
+    bool top = !accSameRun(px + dxOf(f), pz + dzOf(f), py + 1, f);
+    if (bottom && top) return;
+    for (int dy = 1; dy <= 2; dy++) {
+        if (inBox(px, pz, py + dy) && accProp(px, pz, py + dy, getAt(px, pz, py + dy), true)) accClearProp(px, pz, py + dy);
+    }
+    if (!bottom && !top) return;
+    if (bottom)
+        accLanding(py, px + dxOf(back), pz + dzOf(back), px + dxOf(cw), pz + dzOf(cw), px + dxOf(ccw), pz + dzOf(ccw));
+    if (top)
+        accLanding(py + 1, px + dxOf(f), pz + dzOf(f), px + dxOf(cw), pz + dzOf(cw), px + dxOf(ccw), pz + dzOf(ccw));
+}
+
+[shader("compute")]
+[numthreads(256, 1, 1)]
+void accessMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
+    if (int(gid.y) >= params.count) return;  // (the whole group alike)
+    uint3 id = uint3(tid.x, gid.y, 0u);
+    sweepSetup(id);
+    if (tid.x == 0u) gsCount = 0u;
+    GroupMemoryBarrierWithGroupSync();
+    int rec = chunks[gid.y * CHUNK_INTS + 2u];
+    int y0, y1;
+    if (rec >= 0 && sweepRange(gid.y, y0, y1)) {
+        // this column's entrances (the tapes' ENTRANCE ops: y, outward direction)
+        uint r = uint(rec);
+        uint a = tapes[r + gCol], e = tapes[r + gCol + 1u], ops = r + REC_OPS;
+        for (int y = y0; y <= y1; y++) {
+            uint s = getB(y), sb = sweepOf(s);
+            uint key = 0u;
+            if ((sb & S_DOOR_LOWER) != 0u) {
+                // an entrance? (its marker in this column at this y)
+                uint i = a;
+                while (i < e) {
+                    uint w0 = tapes[ops + i];
+                    uint kind = w0 & 15u;
+                    if (kind == OP_ENTRANCE && lo16(tapes[ops + i + 1u]) == y) {
+                        key = 1u + ((w0 >> 4) & 3u);
+                        break;
+                    }
+                    if (kind == OP_FOUNDATION) {
+                        int fy0 = lo16(tapes[ops + i + 1u]), fy1 = hi16(tapes[ops + i + 1u]);
+                        i += ((w0 >> 4) & OF_VAR) != 0u ? 3u + (uint(fy0 - fy1) + 2u) / 2u : 3u;
+                    } else i += 2u;
+                }
+            } else if ((sb & S_STAIR) != 0u && (accessOf(s) & A_HALF_BOTTOM) != 0u) {
+                key = 8u;
+            }
+            if (key == 0u) continue;
+            uint slot;
+            InterlockedAdd(gsCount, 1u, slot);
+            // the box's order: x, then z, then y; the kind in the top bits
+            if (slot < ACC_MAX) gsCand[slot] = ((gCol & 15u) << 14) | ((gCol >> 4) << 10) | uint(y + 64) | (key << 28);
+        }
+    }
+    GroupMemoryBarrierWithGroupSync();
+    AllMemoryBarrierWithGroupSync();
+    if (tid.x != 0u) return;
+    uint n = gsCount < ACC_MAX ? gsCount : ACC_MAX;
+    // insertion sort by position (the low 28 bits)
+    for (uint i = 1u; i < n; i++) {
+        uint v = gsCand[i];
+        uint j = i;
+        while (j > 0u && (gsCand[j - 1u] & 0x0FFFFFFFu) > (v & 0x0FFFFFFFu)) {
+            gsCand[j] = gsCand[j - 1u];
+            j--;
+        }
+        gsCand[j] = v;
+    }
+    for (uint i = 0u; i < n; i++) {
+        uint v = gsCand[i], key = v >> 28;
+        int px = int((v >> 14) & 15u), pz = int((v >> 10) & 15u), py = int(v & 1023u) - 64;
+        uint s = getAt(px, pz, py);
+        if (key == 8u) {
+            if ((sweepOf(s) & S_STAIR) != 0u && (accessOf(s) & A_HALF_BOTTOM) != 0u) accStair(px, pz, py, s);
+        } else if ((sweepOf(s) & S_DOOR_LOWER) != 0u) {
+            accDoor(px, pz, py, key - 1u);
+        }
+    }
 }

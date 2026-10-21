@@ -29,13 +29,14 @@
 #include "atlas_ovl_streets_spv.h"
 #include "atlas_ovl_sanity_spv.h"
 #include "atlas_ovl_connect_spv.h"
+#include "atlas_ovl_access_spv.h"
 
 using namespace atlas;
 
 namespace {
 
 // keep in step with atlas_overlays.slang and AtlasOverlayTapes
-constexpr uint32_t GROUP = 64, NB = 6, PIPES = 4, P_PIECES = 0, P_STREETS = 1, P_SANITY = 2, P_CONNECT = 3;
+constexpr uint32_t GROUP = 64, NB = 6, PIPES = 5, P_PIECES = 0, P_STREETS = 1, P_SANITY = 2, P_CONNECT = 3, P_ACCESS = 4;
 constexpr uint32_t CHUNK_INTS = ATLAS_OVL_CHUNK_INTS;
 constexpr uint32_t BLOCKS_MAGIC = 0x4C424F41u, TAPES_MAGIC = 0x50544F41u, STREETS_MAGIC = 0x52534F41u;
 constexpr uint32_t GEN_LEVELS = 640;  // the generator's columns: y -64 .. 575
@@ -308,10 +309,14 @@ private:
             vkCmdCopyBuffer(cmd, ids, snap_.buf, 1, &c);
             barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_SANITY]);
-            vkCmdDispatch(cmd, 256 / GROUP, count, 1);
-            barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            // as postProcess: Sanity, the entrances' approaches and the indoor stairs (Accessibility), Sanity again
+            const uint32_t seq[3] = {P_SANITY, P_ACCESS, P_SANITY};
+            for (uint32_t pipe : seq) {
+                vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipe]);
+                vkCmdDispatch(cmd, pipe == P_ACCESS ? 1 : 256 / GROUP, count, 1);
+                barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            }
             vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_CONNECT]);
             vkCmdDispatch(cmd, 256 / GROUP, count, 1);
             barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
@@ -383,10 +388,11 @@ private:
         pl.pushConstantRangeCount = 1;
         pl.pPushConstantRanges = &pr;
         if (vkCreatePipelineLayout(dev_, &pl, nullptr, &layout_) != VK_SUCCESS) return fail(err, "pipeline layout");
-        const uint32_t* code[PIPES] = {atlas_ovl_pieces_spv, atlas_ovl_streets_spv, atlas_ovl_sanity_spv, atlas_ovl_connect_spv};
+        const uint32_t* code[PIPES] = {atlas_ovl_pieces_spv, atlas_ovl_streets_spv, atlas_ovl_sanity_spv, atlas_ovl_connect_spv,
+                                       atlas_ovl_access_spv};
         const size_t size[PIPES] = {atlas_ovl_pieces_spv_size, atlas_ovl_streets_spv_size, atlas_ovl_sanity_spv_size,
-                                    atlas_ovl_connect_spv_size};
-        static const char* names[PIPES] = {"pieces", "streets", "sanity", "connect"};
+                                    atlas_ovl_connect_spv_size, atlas_ovl_access_spv_size};
+        static const char* names[PIPES] = {"pieces", "streets", "sanity", "connect", "access"};
         for (uint32_t i = 0; i < PIPES; i++) {
             auto p0 = std::chrono::steady_clock::now();
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
@@ -704,7 +710,7 @@ ATLAS_API AtlasStatus atlas_ovl_set(AtlasOvl* h, uint32_t which, const uint32_t*
     if (!h || !words || count < 16 || which > 2) return ATLAS_ERR_ARG;
     static const uint32_t magic[3] = {BLOCKS_MAGIC, TAPES_MAGIC, STREETS_MAGIC};
     if (words[0] != magic[which]) return ATLAS_ERR_ARG;
-    if (which == 0 && (words[8] != 5 || count < 16 + words[1] * words[8])) return ATLAS_ERR_ARG;
+    if (which == 0 && (words[8] != 6 || count < 16 + words[1] * words[8])) return ATLAS_ERR_ARG;
     if (which == 1 && (words[2] < 16 || words[2] + words[1] * 3 > count)) return ATLAS_ERR_ARG;
     return guarded(h, [&] {
         if (!h->engine->set(which, words, count, h->error)) return ATLAS_ERR_GPU;

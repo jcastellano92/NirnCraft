@@ -83,6 +83,8 @@ public final class Canvas {
      */
     public interface Tape {
         int W = 1, OPEN = 2, NOT_AIR = 3, PLANT = 4, FOUNDATION = 5, BED = 6, FURNITURE = 7;
+        /** A declared entrance (Accessibility keeps its approach free): the lower door half, a = the outward 2D value. */
+        int ENTRANCE = 8;
 
         void op(Canvas c, int kind, int x, int y, int z, BlockState s, int a, int b);
     }
@@ -593,6 +595,7 @@ public final class Canvas {
         door(lx, ly, lz, door, face);
         int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
         if (doorSink != null) doorSink.add(new int[]{x, y, z, dir(face.getOpposite()).get2DDataValue()});
+        if (tape != null && tapeMute == 0) tape.op(this, Tape.ENTRANCE, x, y, z, door, dir(face.getOpposite()).get2DDataValue(), 0);
         if (owner != null && !owner.isEmpty()) {
             anchor(AnchorType.BUILDING_DOOR, lx, ly, lz);
         }

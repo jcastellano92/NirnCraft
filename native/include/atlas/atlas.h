@@ -905,7 +905,7 @@ ATLAS_API AtlasStatus atlas_gen_probe(AtlasGen* h, uint32_t kind, uint32_t n, co
  * com.nirncraft.atlas.AtlasOverlayTapes): the named settlements' pieces as op tapes and the street painter's plan,
  * stamped in place on chunk columns of 16-bit ids of the overlay block table (b = x + 16 z + 256 (y + 64), `levels`
  * y levels from -64, two ids a word), one GPU thread per column. Vulkan only. atlas_ovl_set: which 0 the block table
- * ('AOBL': 5 words per id: flags, transforms, sweep classes, block index / facing / cover, shape table; then the shape
+ * ('AOBL': 6 words per id: flags, transforms, sweep classes, block index / facing / cover, shape table, access classes; then the shape
  * tables), 1 the tapes ('AOTP': per chunk record: 257 column starts, 256 column sweep ranges, the ops), 2 the street
  * plan ('AOSR'); resident until replaced. atlas_ovl_run: chunks ATLAS_OVL_CHUNK_INTS ints each (cx, cz, the chunk's
  * tape record word offset or -1, its street plan bucket or -1, the batch slots of its N, E, S, W neighbours or -1);
