@@ -41,7 +41,18 @@ import java.util.stream.IntStream;
  */
 final class AtlasClientGen implements AutoCloseable {
     static final boolean ON = Boolean.getBoolean("nirncraft.atlas.clientGen");
-    static final int RADIUS = Integer.getInteger("nirncraft.atlas.clientGen.radius", 24);
+    /** The window, within the grid's level 0 (ATLAS_VOXGRID_D sections, voxgrid.cpp: 8..128, 64): wider, its edge
+     *  chunks would be dropped and wanted again without end. */
+    static final int RADIUS = Math.min(Integer.getInteger("nirncraft.atlas.clientGen.radius", 24), (gridD() - 3) / 2);
+
+    private static int gridD() {
+        try {
+            String d = System.getenv("ATLAS_VOXGRID_D");
+            return d == null ? 64 : Math.max(8, Math.min(128, Integer.parseInt(d.trim())));
+        } catch (NumberFormatException e) {
+            return 8;  // (atoi: 0, clamped to 8)
+        }
+    }
     static final int FEATURE_RADIUS = Integer.getInteger("nirncraft.atlas.clientGen.featureRadius", 16);
     static final int FEATURE_THREADS = Integer.getInteger("nirncraft.atlas.clientGen.featureThreads",
             Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors() / 4)));
