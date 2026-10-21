@@ -51,6 +51,13 @@ All world-space entities in atlas, the same "immutable asset + mutable state" id
 - Block entities (chests, signs, banners) as static micro-bricks, dynamic only while animating.
 - Stays vanilla: the GUI paperdoll; first-person hand to be decided.
 
+## 4. Non-cube blocks now (owner's method, 2026-10-21)
+
+Doors, ladders, rails, redstone, lecterns and every other non-cube block (vanilla and NirnCraft's custom models):
+16x16x16 micro-voxel bricks (1/16 block), voxelised once at startup from the model JSON and its textures,
+deduplicated per distinct shape and texture, referenced from the grid cell and traced inside it; coarse levels use the
+brick's filtered colour and coverage. Replaces the 4x4x4 group approximation. Block entities use the same bricks later.
+
 ## Order
 
 1. Now: the world renders completely (every block, state and item in the world) on the GPU path, storage and loading
