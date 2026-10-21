@@ -23,6 +23,11 @@ milestone.
    compressed, keyed by seed + generator version + edit hash: back somewhere = instant reload); LRU per tier, bounded
    sizes, reference-counted slots, free lists, compaction, leak checks; uniform (all-stone) sections take no slot.
 
+**Top priority (owner, 2026-10-21 late):** the world renders completely (every block, state and item in the world:
+content agent on `atlas-content`), storing and loading (the self-baking cache, the coarse horizon cache, the loading
+phase: grid agent), all ready for one owner test. Then entities and the rest per
+[ATLAS-WORLD-STORE.md](ATLAS-WORLD-STORE.md). Multiplayer: the seed is shared for now (owner).
+
 **Order change (owner, 2026-10-21):** step 5 (the residency manager) moves up and runs now beside the rest of step 1,
 starting with the unbounded host RAM (the world stores every streamed section). The grid agent owns it on atlas-naadf.
 
