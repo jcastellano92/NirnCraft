@@ -186,7 +186,9 @@ class AtlasGenParityTest {
         report.append(String.format("program: %d words, %d fields, page passes %s%n", prog.words.length, prog.fields.size(), prog.pageGen));
         for (int f = 0; f < prog.fields.size(); f++) report.append("  field ").append(f).append(": ").append(prog.fields.get(f)).append('\n');
         long mt = System.nanoTime();
+        trace("begin map");
         int[] map = AtlasGenMap.words(prog, gen.getBiomeSource());
+        trace("end map");
         report.append(String.format("map: %d words (%.0f ms)%n", map.length, (System.nanoTime() - mt) / 1e6));
 
         int per = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_GEN_PARITY_N", "3"));
@@ -203,7 +205,12 @@ class AtlasGenParityTest {
                 return List.of();
             }
         };
-        for (ChunkPos pos : all) reference.put(pos, javaChunk(pos, gen, rs, heights, containers, structures, biomeChunks));
+        trace("begin java-reference");
+        for (ChunkPos pos : all) {
+            reference.put(pos, javaChunk(pos, gen, rs, heights, containers, structures, biomeChunks));
+            progress("java-reference", reference.size(), all.size());
+        }
+        trace("end java-reference");
         AtlasGenPages pages = new AtlasGenPages(prog, rs, gen.getBiomeSource(), heights);
         int[] xz = new int[all.size() * 2];
         for (int i = 0; i < all.size(); i++) {
@@ -217,6 +224,7 @@ class AtlasGenParityTest {
                 for (int dx = -4; dx <= 2; dx++)
                     need.merge(ChunkPos.pack(c.x() + dx, c.z() + dz), dx >= -1 && dx <= 1 && dz >= -1 && dz <= 1, Boolean::logicalOr);
         long jt = System.nanoTime();
+        trace("begin java-pages");
         Map<Long, int[]> javaPages = new HashMap<>();
         need.entrySet().parallelStream().forEach(e -> {
             int[] w = pages.page(ChunkPos.getX(e.getKey()), ChunkPos.getZ(e.getKey()), e.getValue());
@@ -224,6 +232,7 @@ class AtlasGenParityTest {
                 javaPages.put(e.getKey(), w);
             }
         });
+        trace("end java-pages");
         report.append(String.format("java pages: %d in %.0f ms (all cores)%n", need.size(), (System.nanoTime() - jt) / 1e6));
 
         Path lib = Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB"));
@@ -235,6 +244,7 @@ class AtlasGenParityTest {
                     report.append("backend ").append(backend).append(": unavailable\n");
                     continue;
                 }
+                trace("begin gpu " + g.device());
                 g.setProgram(prog.words);
                 g.setMap(map);
                 double[] st0 = g.pageStats();
@@ -277,6 +287,7 @@ class AtlasGenParityTest {
                         }
                     }
                 }
+                trace("end gpu+compare " + g.device());
                 report.append(String.format("   pages compared: %d (%d not resident)%n", need.size() - missing, missing));
                 if (!probeCols.isEmpty()) {
                     // the differing columns' parts: overhang, influence, bed / pad / plot weights, road, height
@@ -353,13 +364,19 @@ class AtlasGenParityTest {
             int cols = AtlasGenNative.TILE_COLS;
             float[][] cs = new float[spots.length][cols], cw = new float[spots.length][cols];
             long ct = System.nanoTime();
-            for (int i = 0; i < spots.length; i++) cpu.fillCpu(tiles[i * 3], tiles[i * 3 + 1], tiles[i * 3 + 2], cs[i], cw[i]);
+            trace("begin java-tiles");
+            for (int i = 0; i < spots.length; i++) {
+                cpu.fillCpu(tiles[i * 3], tiles[i * 3 + 1], tiles[i * 3 + 2], cs[i], cw[i]);
+                progress("java-tiles", i + 1, spots.length);
+            }
+            trace("end java-tiles");
             double cpuMs = (System.nanoTime() - ct) / 1e6;
             report.append(String.format("cpu: %d tiles in %.0f ms (%.1f ms a tile, all cores)%n", spots.length, cpuMs, cpuMs / spots.length));
             AtlasGenNative nat = AtlasGenNative.load(Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB")));
             for (int backend : new int[]{AtlasGenNative.BACKEND_VULKAN, AtlasGenNative.BACKEND_CPU}) {
                 try (AtlasGenNative.Gen g = nat.create(backend)) {
                     if (g == null) continue;
+                    trace("begin gpu-tiles " + g.device());
                     g.setProgram(prog.words);
                     g.setMap(map);
                     float[] s = new float[spots.length * cols], w = new float[spots.length * cols];
@@ -391,6 +408,7 @@ class AtlasGenParityTest {
                         report.append(String.format("   tile lod %d (%d, %d): %d of %d columns differ%s%n", tiles[i * 3], tiles[i * 3 + 1], tiles[i * 3 + 2],
                                 d, cols, bad[i] != 0 ? " (flagged)" : ""));
                     }
+                    trace("end gpu-tiles " + g.device());
                     report.append(String.format("   total: %d of %d columns differ (%.5f %% agree)%n", diff, total, 100.0 * (total - diff) / total));
                 }
             }
@@ -1194,6 +1212,21 @@ class AtlasGenParityTest {
                 }
             report.append(String.format("vulkan vs cpu: density bits differ %d, substance %d, final %d blocks%n", densDiff, subDiff, finalDiff));
         }
+    }
+
+    /** Progress traces (heavy.py timestamps them; its watcher alerts on a silent job). */
+    static void trace(String what) {
+        System.out.println("TRACE " + what);
+        System.out.flush();
+    }
+
+    private static long lastProgress;
+
+    static void progress(String phase, int i, int n) {
+        long now = System.nanoTime();
+        if (i < n && now - lastProgress < 20_000_000_000L) return;
+        lastProgress = now;
+        trace("progress " + phase + " " + i + "/" + n);
     }
 
     static String name(BlockState s) {

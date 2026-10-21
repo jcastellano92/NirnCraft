@@ -238,6 +238,51 @@ frame identically (depth and colour, 129,600 of 129,600 px). **Measured** (`clie
 1,600-block jump (pages 23, generated 100, sent 103), the radius-24 window (1,793 chunks) 2.0 s; the info and
 material passes add about a third to the terrain kernels.
 
+### 7.2 The pages on the device (2026-10-21)
+
+`atlas_gen_set_map(gen, AtlasGenMap.words(prog, biomeSource))` puts the map of Nirn on the generator's device once; with
+a program that carries the page passes' inputs (`AtlasGenProgram.pageGen`: the climate router's six entries as point
+code, every column field's kind, the four TamrielHeight noises' stacks) the engine then makes every page a batch needs
+itself, before the batch's terrain, in the same submission: `pageColsMain` (a thread per column: fields and map water)
+and `pageBiomesMain` (a thread per quart column: its 176 quart biomes). `atlas_gen_missing_pages` answers 0 and Java
+computes nothing; a page with a value the kernels could not prove flags every chunk that reads it.
+
+The kernels (`atlas_page.slang`, `atlas_map.slang`) are the mod's Java ported term for term (Java's float / double
+promotions, StrictMath through `atlas_exact.slang`, exact division and square root):
+
+| Java | on the device from |
+|---|---|
+| `TamrielMap.sample` (MapRaster, Hydrology, MapPeaks, Beyond) | the raster's channels and regions, the falls' grid, the peaks' records, the lands |
+| `TamrielHeight.height`, `OceanIsles.surfaceHeight` | the program's noise stacks; every 512-block cell's isle (`OceanIsles.cellIsle` itself, at map build) |
+| `PlanGround.bed / pad`, `StreetPlan.pad`, `PlanGround.influence` | the authored road plan, PlanGround's edge and site indices, the street plan (sorted key tables) |
+| `TamrielChannel.value` (+ influence on road / overhang) | the sample |
+| the map water word (`AtlasGenPages`) | the sample |
+| `TamrielBiomeSource.getNoiseBiome` (+ Palettes, BiomeNoise) | the palettes in the program's biome ids, the regions' palettes and cave classes, the climate entries |
+
+Not on the device: `TilePlanner`'s tile plans beyond Tamriel (Java uses one only where its planner finished that
+tile), and the biome source's test modes (`nirncraft.biomeTest`: the pages stay in Java then).
+
+**Checked** (`gpuPagesMatchJava`, NIRNCRAFT_GEN_PARITY_N=11: 100 chunks over the 10 kinds): 16,384,000 of 16,384,000
+blocks equal on Vulkan (RTX 3090) and in C++, no chunk flagged; the 3,497 pages those chunks read equal to
+AtlasGenPages' word for word in every field, the map water and all 1,267,200 quart-biome words (the overhang channel
+after the double-influence fix: re-checked on 30 chunks, 1,050 pages, every word equal). **Measured**: 0.066 ms a page on the device (3,497 in
+229 ms of passes; Java: 373 ms on all 20 cores), a batch with its pages resident 0.42 ms a chunk. The map is 19.6 M
+words (78 MB, the raster most of it), packed in about 0.1 s once the plans are loaded (a fresh dev tree whose road
+and street plan bakes are stale plans them first: 35 s, which the world's own generation needs anyway); it goes up
+from the generator's worker thread, Java's pages serving until then.
+
+### 7.3 Far tiles on the device (2026-10-21)
+
+`atlas_gen_tiles(gen, (lod, tx, tz)..., surface, water, flags)` (`tileMain`): AtlasExactSource.fill's 256 x 256
+columns (TamrielMap.sample, TamrielHeight.height at each 2^lod square's centre block, waterAt) from the same kernels.
+`AtlasExactSource.enableGpuTiles` (single player, `-Dnirncraft.atlas.gpuTiles=false` off) makes the client's far
+tiles there; the first tile of each LOD is also made on the CPU and compared bit for bit (a difference turns the path
+off, logged). **Checked** (`gpuTilesMatchJava`): 12 tiles over LODs 0-6 (Whiterun, sea, the raster's edge, Atmora,
+Yokuda, Hammerfell): 786,432 of 786,432 columns equal on Vulkan and C++. **Measured**: 1.32 ms a tile on the device,
+23.2 ms with all CPU cores. Still Java per tile: the surface blocks (`AtlasSurface`, the material rule at the top) and
+the tints (`AtlasBiomes`), then the tile's encoding and the far World build (`atlas_upload_tile`). Multiplayer clients
+have no seed: their tiles still come from the server's tile service.
+
 ## 8. Open
 
 * **Structures from the plans**: starts per chunk (`ChunkGenerator.createStructures` with the server's

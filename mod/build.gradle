@@ -189,6 +189,8 @@ tasks.named('test', Test).configure {
     testLogging {
         events "passed", "skipped", "failed"
         exceptionFormat "short"
+        // the dev tools' TRACE lines (heavy.py timestamps them, its watcher flags a silent job): NIRNCRAFT_TEST_STDOUT=1
+        showStandardStreams = System.getenv('NIRNCRAFT_TEST_STDOUT') == '1'
     }
 }
 
