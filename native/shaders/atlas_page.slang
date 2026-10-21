@@ -1369,7 +1369,10 @@ uint farVoxel(uint t, uint c, float yc, float s) {
             uint vh = (c * 0x9E3779B1u) ^ (uint(int(yc * 2.0f) + 4096) * 0x85EBCA77u) ^ (t * 0xC2B2AE3Du);
             vh = (vh ^ (vh >> 15)) * 0x2C1B3C6Du;
             bool leaf = fill == 0u || ((vh ^ (vh >> 13)) & 31u) < fill;
-            if (yc >= bottom && yc < top) return leaf ? farMat(biome, tids & 0xFFFFu) : 0u;
+            // (coarser than 2 blocks a voxel the trunk under the crown is no voxel: the crown reaches down to the ground,
+            // else it stood a voxel or more over it, floating: green squares in the sky over a far forest)
+            float from = s >= 4.0f && surf < bottom ? surf : bottom;  // (no min: spv_exact's contract)
+            if (yc >= from && yc < top) return leaf ? farMat(biome, tids & 0xFFFFu) : 0u;
             if (yc < bottom && (tids >> 16) != 0u) return farMat(biome, tids >> 16);
         }
     }
