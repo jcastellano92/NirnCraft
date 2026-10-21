@@ -131,6 +131,10 @@ Not merged into atlas-render yet: everything on atlas-naadf after 424841c5 and t
   returning a result struct with the flag (as atlas_far's TraceIn/SecIn fix), one shared copy, gen and feature parity
   rerun.
 
+- **Feature kernels ship at -O0** (30bea9c8): at -O3 NVIDIA driver 616.56 evaluates `holes == 1` false with holes = 1
+  in the spring kernel (the -O3 SPIR-V checks correct op for op; -O0 is exact). After the test: try -O1/-O2, rewrite
+  the failing comparison, retest on newer drivers, minimal repro for NVIDIA.
+
 ## Open bugs (seen live)
 
 1. **Near shows far stand-ins** (owner, live): the grid's level-0 pool full (`slots 16384/16384, evicted 16915,
