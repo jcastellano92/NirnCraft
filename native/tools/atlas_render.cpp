@@ -442,7 +442,8 @@ int main(int argc, char** argv) {
                 modelled[i] = exportdata::brickWorthy(ml, uint32_t(i)) ? 1 : 0;  // (AtlasClientSections.nearKept)
         }
         if (!exportdata::upload(ctx, lib, secs, str(a, "keep", "far") == "all", grass, foliage, water, 64, ex, why,
-                                boxed ? box : nullptr, num(a, "cutout", 1) > 0, server, keepNear ? &modelled : nullptr)) {
+                                boxed ? box : nullptr, num(a, "cutout", 1) > 0, server, keepNear ? &modelled : nullptr,
+                                num(a, "perblock", 0) > 0)) {
             std::fprintf(stderr, "export: %s\n", why.c_str());
             return 2;
         }
