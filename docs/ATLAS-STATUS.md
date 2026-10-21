@@ -37,7 +37,9 @@ Weather and biome work stay paused until the owner says.
 - Visual claims need evidence (captures, side by sides, metrics); agents' sheets are checked before merging.
 - **Resources (after the 2026-10-20 machine lock-up):** one heavy job at a time (native builds, Gradle, offline
   renders, the game); check free RAM before heavy jobs; heavy outputs (renders, bakes, traces, exports) go to
-  `E:\NirnCraft-scratch` or the repo's `.work`, not C:; agents run one or two at a time, not four.
+  `E:\NirnCraft-scratch` or the repo's `.work`, not C:. Up to three agents in parallel (owner, 2026-10-20) only
+  because every heavy job goes through the shared lock: `py -3 E:/NirnCraft-scratch/locks/heavy.py "<label>" --
+  <command>` (one at a time, waits for 8 GB free RAM).
 - Close the dev client after each test batch; never run the autotest action queue while the owner plays (it holds the
   player: use the passive profiler instead).
 - The project's pre-rename name never in the tree (a case-insensitive `git grep` for it stays empty); never Bethesda
@@ -82,8 +84,9 @@ Weather and biome work stay paused until the owner says.
 
 | Who | Branch / worktree | State |
 |---|---|---|
-| Grid agent | `atlas-naadf`, `.claude/worktrees/agent-ad6de3e70c66603d6` | Committed: 57691c8d GPU coarse levels 1-6, f1579c89 continuous footprint LOD + leaf cut-outs from the texture + light through leaves + `VoxGrid::ingestGpu`, 4b4a59f9 no CPU stage per section. **Mid-merge of atlas-render, unfinished**: MERGE_HEAD d3f2fa85, conflicts unresolved in atlas_far.slang, atlas_shared.slang, api.cpp, gpu_layout.hpp, vk_backend.cpp (the light-by-need lightCtl / farLight and the eclipse eclipseA/B/C fields in FrameGpu must all be kept; static_assert ends `+ 64 + 48 + 32` before its own additions). |
-| Generator agent | `worktree-agent-ad125abe1eb89e706` | Committed: 374da61b exact StrictMath on the GPU (atlas_exact.slang), 705a3096 StrictMath in the Java column path, 7bb3267b merge of atlas-naadf, 20470052 GPU -> GPU ingest (atlas_gen_create_for / ingest into VoxGrid::ingestGpu; `-Dnirncraft.atlas.clientGen.direct=false` the old path). **Uncommitted WIP**: the 2D Tamriel inputs on the GPU (new AtlasGenMap.java, atlas_map.slang; AtlasGenNative, CMakeLists, atlas.h, atlas_gen.slang, gen_engine.cpp modified). |
+| Grid agent | `atlas-naadf`, `.claude/worktrees/agent-ad6de3e70c66603d6` | Committed: 57691c8d GPU coarse levels 1-6, f1579c89 continuous footprint LOD + leaf cut-outs from the texture + light through leaves + `VoxGrid::ingestGpu`, 4b4a59f9 no CPU stage per section. **Mid-merge of atlas-render, unfinished**: MERGE_HEAD d3f2fa85, conflicts unresolved in atlas_far.slang, atlas_shared.slang, api.cpp, gpu_layout.hpp, vk_backend.cpp (the light-by-need lightCtl / farLight and the eclipse eclipseA/B/C fields in FrameGpu must all be kept; static_assert ends `+ 64 + 48 + 32` before its own additions). Markers were resolved; agent resumed 2026-10-20 to verify, commit the merge, then fix bug 1. |
+| Generator agent | `worktree-agent-ad125abe1eb89e706` | Committed: 374da61b exact StrictMath on the GPU (atlas_exact.slang), 705a3096 StrictMath in the Java column path, 7bb3267b merge of atlas-naadf, 20470052 GPU -> GPU ingest (atlas_gen_create_for / ingest into VoxGrid::ingestGpu; `-Dnirncraft.atlas.clientGen.direct=false` the old path). WIP committed as d1a4f690 (2D Tamriel inputs on the GPU, unverified). Agent resumed 2026-10-20: finish the 2D inputs, bug 2, far tiles on the GPU. |
+| Features agent | `atlas-features`, `.claude/worktrees/atlas-features` (from d1a4f690) | Started 2026-10-20: trees, scatter, ores, dripstone on the GPU after terrain (match % against Java), then overlays and structures. |
 | Light agent | `worktree-agent-a9041fbf0158099cd` | Merged (5dc820e7). Was assigned baked voxel light; not started. Deferred until after the five steps. |
 | Moons, stars | merged | Done (moons a158cb48, comet b401de28). |
 
