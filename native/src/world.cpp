@@ -510,7 +510,7 @@ void World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
     s->buildMips(cls);
     std::lock_guard<std::mutex> lock(mu_);
     sections_[{0, sx, sy, sz}] = std::move(s);
-    undigested_.insert({0, sx, sy, sz});  // its coarse levels (World::digest)
+    if (gridCoarse.load(std::memory_order_relaxed) < coarseTop()) undigested_.insert({0, sx, sy, sz});  // (World::digest)
     markSectionDirty(sx, sy, sz);
 }
 
@@ -582,7 +582,9 @@ void World::markSectionDirty(int sx, int sy, int sz) {
     // (the GPU's grid holds it: its level-0 region waits until the grid's window leaves it, setGridWindow)
     bool grid = gridOwnsLevel0.load(std::memory_order_relaxed) && gridHolds(sx, sz) && !gridNotHeld_.count({0, sx, sy, sz});
     markRegions(sx, sy, sz, 0, 0, grid ? gridSkipped_ : dirty_, nbrs);
-    markRegions(sx, sy, sz, 1, 4, sectionDirty_, nbrs);
+    // (levels the grid's coarse levels own: nothing to rebuild here)
+    int owned = gridCoarse.load(std::memory_order_relaxed);
+    if (owned < 4) markRegions(sx, sy, sz, 1 + owned, 4, sectionDirty_, nbrs);
     lastSectionMs_ = nowMs();
 }
 
@@ -666,20 +668,22 @@ void World::editBlock(int x, int y, int z, uint16_t mat) {
     s->mats[size_t((x & 15) + 16 * ((z & 15) + 16 * (y & 15)))] = mat;
     s->buildMips(classes_);
     sections_[sk] = std::move(s);
-    undigested_.insert(sk);
+    if (gridCoarse.load(std::memory_order_relaxed) < coarseTop()) undigested_.insert(sk);
     markSectionDirty(sx, sy, sz);
 }
 
 // ---- the coarse levels of real content (CoarseCube) ------------------------------------------------------------------
 
 template <class F> void World::forCoarse(const Key3& k, F&& f) const {
-    if (coarse_.empty()) return;
+    // (a level the grid's coarse levels own is built from the tiles alone; nor are the cubes they own kept)
+    int owned = gridCoarse.load(std::memory_order_relaxed);
+    if (coarse_.empty() || k.lod <= owned) return;
     int s = 1 << k.lod, span = 256 << k.lod;
     // the region's columns and its ring (one voxel), every row (a column is evaluated over all its content)
     int x0 = floorDiv(k.x * span - s, COARSE_CUBE), x1 = floorDiv(k.x * span + span + s - 1, COARSE_CUBE);
     int z0 = floorDiv(k.z * span - s, COARSE_CUBE), z1 = floorDiv(k.z * span + span + s - 1, COARSE_CUBE);
     int rows = (WORLD_TOP_Y - WORLD_MIN_Y + COARSE_CUBE - 1) / COARSE_CUBE;
-    int first = std::max(k.lod, COARSE_MIN), top = coarseTop();
+    int first = std::max({k.lod, COARSE_MIN, owned + 1}), top = coarseTop();
     if (first > top) return;
     size_t keys = size_t(x1 - x0 + 1) * size_t(z1 - z0 + 1) * size_t(rows) * size_t(top - first + 1);
     if (keys > coarse_.size()) {
@@ -713,10 +717,12 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
     std::shared_ptr<const ShapeSet> shapes;
     std::vector<uint8_t> cls;
     int top;
+    // (the levels the grid's coarse levels own are not kept here: from the next one up)
+    int first = std::max(COARSE_MIN, gridCoarse.load(std::memory_order_relaxed) + 1);
     {
         std::lock_guard<std::mutex> lock(mu_);
         top = coarseTop();
-        if (top < COARSE_MIN) {
+        if (top < first) {
             undigested_.clear();
             return;
         }
@@ -772,7 +778,8 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
                 const Section& sec = *todo[i].second;
                 D& d = ds[i];
                 int bx = sk.x * 16, by = sk.y * 16, bz = sk.z * 16;
-                for (int level = COARSE_MIN; level <= std::min(4, top); level++) {
+                if (first > 4) d.m4 = sec.at(4, 0, 0, 0);  // (level 5's child: the section's generated level)
+                for (int level = first; level <= std::min(4, top); level++) {
                     int n = 16 >> level;
                     for (int y = 0; y < n; y++)
                         for (int z = 0; z < n; z++)
@@ -787,7 +794,7 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
                             }
                 }
                 d.any = Coverage::contentBox(sec, 0, 0, 0, 16, d.lo, d.hi);
-                if (top >= 5 && d.any) {
+                if (top >= 5 && first <= 5 && d.any) {
                     for (int c = 0; c < 8; c++) {
                         int cx = c & 1, cz = (c >> 1) & 1, cy = c >> 2;
                         int q0[3] = {cx * 32, cy * 32, cz * 32}, w0[3] = {bx * 4 + q0[0], by * 4 + q0[1], bz * 4 + q0[2]};
@@ -873,15 +880,15 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
         int lx, ly, lz;
         sectionInCube(sk.x, sk.y, sk.z, lx, ly, lz);
         int bit = lx + 16 * (lz + 16 * ly);
-        for (int level = COARSE_MIN; level <= top; level++) edit(sectionCube(level, sk.x, sk.y, sk.z)).seen[bit >> 6] |= 1ull << (bit & 63);
+        for (int level = first; level <= top; level++) edit(sectionCube(level, sk.x, sk.y, sk.z)).seen[bit >> 6] |= 1ull << (bit & 63);
         // the trees of the levels that read it only from here (5 and up)
-        if (top >= 5) markRegions(sk.x, sk.y, sk.z, 5, lodCount - 1, treeDirty_, true);
+        if (top >= 5) markRegions(sk.x, sk.y, sk.z, std::max(5, first), lodCount - 1, treeDirty_, true);
         for (const Vox& v : d.vox) {
             Next& n = touch(v.level, v.x, v.y, v.z);
             n.mat = v.mat, n.mask = v.mat ? v.mask : 0, n.box = v.box, n.fm = v.fm;
         }
         int bx = sk.x * 16, by = sk.y * 16, bz = sk.z * 16;
-        if (top >= 5) {
+        if (top >= 5 && first <= 5) {
             Next& n = touch(5, bx, by, bz);
             int ox = sk.x & 1, oy = (sk.y - WORLD_MIN_Y / 16) & 1, oz = sk.z & 1;  // the section's octant
             for (int c = 0; c < 8; c++) {
@@ -904,6 +911,7 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
     std::sort(changed5.begin(), changed5.end());
     changed5.erase(std::unique(changed5.begin(), changed5.end()), changed5.end());
     for (auto& v : changed5) {
+        if (first > 5) break;  // (level 6's children are level 5's: not kept)
         Next& n5 = touch(5, v[0], v[1], v[2]);
         n5.mat = voteKids(n5.kids, cls);
         n5.box = unionOf(n5.kidBoxes);
@@ -1047,7 +1055,9 @@ World::Job World::snapshot(const Key3& k, bool groups) const {
             if (n != tiles_.end()) j.nbr[i] = n->second;
         }
     }
-    if (groups && k.lod <= 4 && !sections_.empty()) {
+    // (a level the grid's coarse levels own: its regions from the tiles alone, the real blocks the grid's)
+    bool real = k.lod == 0 || k.lod > gridCoarse.load(std::memory_order_relaxed);
+    if (groups && real && k.lod <= 4 && !sections_.empty()) {
         // the groups read whole section columns around the region (its border ring for exposure, every row: a column
         // is evaluated over all its content)
         int per = 16 << k.lod;
@@ -1067,7 +1077,7 @@ World::Job World::snapshot(const Key3& k, bool groups) const {
         }
     }
     if (groups) forCoarse(k, [&](const Key3& ck, const std::shared_ptr<const CoarseCube>& c) { j.coarse.emplace(ck, c); });
-    if (!groups && k.lod <= 4 && !sections_.empty()) {
+    if (!groups && real && k.lod <= 4 && !sections_.empty()) {
         int per = 16 << k.lod;  // sections per region side at this level
         int sx0 = k.x * per, sy0 = floorDiv(WORLD_MIN_Y + k.y * 256 * (1 << k.lod), 16), sz0 = k.z * per;
         if (k.lod > 0 || sections_.size() < 4096) {

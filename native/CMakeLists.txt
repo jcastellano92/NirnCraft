@@ -124,7 +124,7 @@ add_custom_command(
 # the level-0 grid's build kernels (atlas_voxgrid.slang): one SPIR-V module per entry point
 set(VG_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_voxgrid.slang")
 set(VG_HEADERS "")
-foreach(pair "section:vgSectionMain" "satx:vgSatX" "satz:vgSatZ" "saty:vgSatY" "grow:vgGrowMain")
+foreach(pair "section:vgSectionMain" "satx:vgSatX" "satz:vgSatZ" "saty:vgSatY" "grow:vgGrowMain" "fill:vgFillMain" "ingest:vgIngestMain" "down:vgDownMain")
   string(REPLACE ":" ";" kv "${pair}")
   list(GET kv 0 short)
   list(GET kv 1 entry)

@@ -1,5 +1,6 @@
 // atlas_core tests: SVDAG round trips, sharing, the C ABI, and CPU/Vulkan kernel parity on preview terrain.
 #include <algorithm>
+#include <set>
 #include <array>
 #include <atomic>
 #include <chrono>
@@ -615,16 +616,22 @@ static void testTransitions() {
     CHECK(atlas_render(ctx, &g, &o0) == ATLAS_OK);
     g.flags |= ATLAS_FRAME_LOD_DITHER;
     CHECK(atlas_render(ctx, &g, &o1) == ATLAS_OK);
+    // (the level is continuous now, picked per pixel with or without the flag: the debug view shows it as a gradient,
+    // many tints rather than one a level, and the flag changes nothing)
     size_t hits = 0, depthOff = 0, lodChanged = 0;
+    std::set<uint32_t> tints;
     for (size_t i = 0; i < d0.size(); i++) {
         if (d0[i] > 1e29f) continue;
         hits++;
         depthOff += std::abs(d0[i] - d1[i]) > 0.01f + 1e-4f * d0[i];
         lodChanged += c0[i] != c1[i];
+        tints.insert(c0[i] & 0xFFFFFFu);
     }
-    std::printf("  dither: %zu ground px, %zu change level, %zu change depth\n", hits, lodChanged, depthOff);
+    std::printf("  continuous level: %zu ground px, %zu distinct level tints, %zu change level with the dither flag, %zu change depth\n",
+                hits, tints.size(), lodChanged, depthOff);
     CHECK(hits > 1000);
-    CHECK(lodChanged > 0 && lodChanged < hits / 3);
+    CHECK(tints.size() > 16);
+    CHECK(lodChanged < hits / 100 + 2);
     CHECK(depthOff < hits / 200 + 2);
     atlas_destroy(ctx);
 }

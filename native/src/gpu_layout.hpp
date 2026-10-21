@@ -68,6 +68,13 @@ struct alignas(16) FrameGpu {
     float eclipseA[4];
     float eclipseB[4];
     float eclipseC[4];
+    // the grid's coarse levels 1..6 (voxgrid.hpp): origin x, z (chunks of 16 << k blocks), first chunk word,
+    // D | H << 8 | 1 << 16 when the level is there
+    int32_t vgLevel[6][4];
+    // the continuous level's knobs (ATLAS_LOD=mode,minCos,bias,leafGain; measurements): the threshold's pattern (0 per
+    // pixel, 1 a constant 0.5, 2 per 2 x 2 pixels, 3 per 8 x 4), the grazing widening's least cos, a bias added to the
+    // level; the light through leaves' gain (0: 1)
+    float lodParams[4];
 };
 
 struct alignas(16) ActorGpu {
@@ -80,7 +87,7 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 48);
 static_assert(sizeof(RegionGpu) == 64);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64 + 48);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64 + 48 + 96 + 16);
 
 struct Float4 {
     float v[4];

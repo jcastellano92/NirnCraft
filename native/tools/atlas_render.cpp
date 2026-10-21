@@ -683,6 +683,9 @@ int main(int argc, char** argv) {
             auto vg = inf.find("\"voxgrid\":{");
             std::fprintf(stderr, "atlas_render: grid warm-up %d frames; %s\n", k,
                          vg == std::string::npos ? "no grid" : inf.substr(vg, inf.find('}', vg) - vg + 1).c_str());
+            auto lv = inf.find("\"levels\":[");  // (its coarse levels)
+            if (lv != std::string::npos)
+                std::fprintf(stderr, "atlas_render: grid levels %s\n", inf.substr(lv, inf.find("}]", lv) - lv + 2).c_str());
         }
         // reupload=1: every section the core holds sent again (as a burst of edits would), then the CPU update that follows
         // timed, and the frames until the GPU grid has them again

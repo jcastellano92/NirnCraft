@@ -14,6 +14,16 @@
 // The host only keeps the books (which section sits in which slot, which chunks changed) and hands batches of raw
 // sections to the backend: the Vulkan backend copies them into its pool and builds bitmaps and distance fields with
 // compute shaders (atlas_voxgrid.slang); the CPU backend builds the same words here (applyCpu), the reference.
+//
+// The coarse levels (k = 1 .. coarseLevels): the same grid of 2^k-block voxels, one continuous structure from level 0
+// out. A chunk is 16 voxels a side (2^k sections), its window D x H_k x D chunks around the camera (k: 2^k times level
+// 0's reach), its ids in a pool slot as level 0's. Built on the GPU from the sections' raw ids alone: per section the
+// GPU makes its generated levels 1-4 (Section::buildMips' vote, atlas_voxgrid.slang vgIngestMain) and writes each into
+// its place in that level's chunk (levels 5+: a chunk from its 8 children of the level below, vgDownMain); then the
+// bitmaps and boxes as level 0's. A chunk is known (MIXED / EMPTY) once every section column it covers has come: a
+// column's sections from its lowest sent one up (below it solid rock, the stone material; above its highest air); one
+// with a column not seen yet is UNLOADED (the SVDAG regions, made from the tiles alone, answer there). A level keeps
+// what it was given while its window holds it: what the camera saw stays at the coarser levels as it moves on.
 #pragma once
 #include <array>
 #include <cstdint>
@@ -32,25 +42,71 @@ constexpr uint32_t VG_EMPTY = 0, VG_MIXED = 1, VG_UNLOADED = 2;
 constexpr int VG_SECTION_WORDS = 2048;  // a section's 4096 16-bit ids
 constexpr int VG_MIN_SY = -4;           // y -64 (World::WORLD_MIN_Y / 16)
 constexpr uint32_t VG_COLUMN = 0xFFFFFFFEu;  // (VgJob::slot)
+constexpr uint32_t VG_NO_COPY = 0xFFFFFFFFu;  // (VgJob::data) the slot's ids are in the pool already (a coarse chunk)
+constexpr uint32_t VG_GPU_SRC = 0x80000000u;  // (VgJob::data, VgIngest::src) | index in VgBatch::gsecs: ids on the GPU
+
+// (VoxGrid::ingestGpu) a section's ids in a GPU buffer: the backend's buffer handle (Vulkan: a VkBuffer), byte offset
+struct VgGpuRef {
+    uint64_t buffer = 0, offset = 0;
+};
+constexpr int VG_LEVELS = 7;                  // level 0 and the coarse levels 1..6
 
 // a section's ids: the world's own Section::mats (shared, never copied) or an upload's copy
 using VgIds = std::shared_ptr<const std::array<uint16_t, 4096>>;
 
 // One chunk to (re)write: its word (EMPTY / UNLOADED: as is; MIXED: built from the slot's ids, which the batch carries)
 struct VgJob {
-    uint32_t chunk;  // index in the window: (y * D + z) * D + x
-    uint32_t word;   // the chunk's word (for MIXED: slot << 2 | VG_MIXED)
+    uint32_t chunk;  // index in the chunk words (level 0: (y * D + z) * D + x; a coarse level's after its chunkBase)
+    uint32_t word;   // the chunk's word (for MIXED: slot << 2 | VG_MIXED); a MIXED chunk none of whose voxels is
+                     // solid is written EMPTY by the build (a coarse chunk whose content the vote left out)
     uint32_t slot;   // MIXED: the slot (its ids: Batch::secs[data]); ~0u: no build; VG_COLUMN: `word` into every cell
                      // of the column whose lowest cell is `chunk` (a column the window left)
-    uint32_t data;   // MIXED: index of its ids in Batch::secs
+    uint32_t data;   // MIXED: index of its ids in Batch::secs (VG_NO_COPY: in the pool already)
 };
 
+// (coarse levels) voxels [lo, hi) of a slot's chunk (x | y << 8 | z << 16) set to one id
+struct VgFill {
+    uint32_t slot, lo, hi, mat;
+};
+// (coarse levels 1-4) a section's generated levels, made on the GPU from its ids, into the chunks holding it: per level
+// 1..4 the target slot << 12 | the section's place in that chunk (x | y << 4 | z << 8, sections), ~0u none
+struct VgIngest {
+    uint32_t src;
+    uint32_t target[4];
+    uint32_t pad[3];
+};
+// (coarse levels 5+) a chunk made from its 8 children of the level below (x + 2 z + 4 y): their slots or VG_KID_*
+struct VgDown {
+    uint32_t slot, rock, pad[2];
+    uint32_t kid[8];
+};
+constexpr uint32_t VG_KID_AIR = 0xFFFFFFFFu, VG_KID_ROCK = 0xFFFFFFFEu;
+
 struct VgBatch {
-    bool clear = false;          // the window moved: every chunk UNLOADED before the jobs
+    bool clear = false;          // the window moved: every level-0 chunk UNLOADED before the jobs
     int ox = 0, oz = 0;          // the window these jobs are for (origin in sections)
     bool chunkStates = false;    // some chunk's state changed: the chunk-level distance fields need a rebuild
-    std::vector<VgJob> jobs;
+    std::vector<VgJob> jobs;     // level 0's, then the coarse levels' (their builds after the ingests)
     std::vector<VgIds> secs;  // the MIXED jobs' ids (two to a word in the pool: their own little-endian bytes)
+    std::vector<VgGpuRef> gsecs;  // ids already on the GPU (ingestGpu): data / src VG_GPU_SRC | index here
+    // the coarse levels: whole chunks to air first, then boxes (rock under a column's lowest section, air), the sections'
+    // generated levels, the levels 5+ from the level below (in order of level)
+    std::vector<VgFill> clears, fills;
+    std::vector<VgIngest> ingests;
+    std::vector<VgDown> downs[VG_LEVELS];
+    struct Level {
+        bool clear = false;  // every chunk UNLOADED first (placed, or a jump past the window)
+        bool grow = false;   // the chunk-level boxes rebuilt after the jobs
+        int ox = 0, oz = 0;  // the window (chunks)
+    } levels[VG_LEVELS];
+    std::shared_ptr<const std::vector<uint8_t>> classes;  // material -> class, for the ingest's vote
+    size_t level0Jobs = 0;  // jobs[0, level0Jobs) are level 0's
+    bool coarse() const {
+        if (!clears.empty() || !fills.empty() || !ingests.empty() || jobs.size() > level0Jobs || !gsecs.empty()) return true;
+        for (int k = 1; k < VG_LEVELS; k++)
+            if (levels[k].clear || levels[k].grow || !downs[k].empty()) return true;
+        return false;
+    }
     int sections() const { return int(secs.size()); }
 };
 
@@ -71,6 +127,18 @@ public:
 
     // a section's ids as World::putSection gets them (any thread)
     void put(int sx, int sy, int sz, const uint16_t* mats);
+    // (GPU world generation) sections whose ids are already in a GPU buffer, without a round trip through the CPU:
+    // `count` sections of 16^3 block ids as atlas_upload_section takes them (4096 uint16, x + 16 * (z + 16 * y): 8 KiB
+    // each) at byte offsets[i] of `buffer` (the Vulkan backend's VkBuffer as a handle, created on atlas's device with
+    // storage and transfer-source usage; offsets multiples of 16), at world section positions pos[3 i .. 3 i + 2] =
+    // x, y, z. They go into level 0 and the coarse levels as uploads do: the backend copies them device to device
+    // (vkCmdCopyBuffer before the frame's grid build). The books take each as holding blocks (a slot; one the GPU
+    // finds empty is written EMPTY), the column as seen; the CPU's World does not get them (its regions, the tiles'
+    // fallback, stay as they are). Any thread. The buffer's contents at those offsets must stay valid until
+    // gpuSectionsPending() is 0 and two frames more have been rendered (the frames in flight that read them). A later
+    // put() of the same section replaces it. The CPU backend ignores them.
+    void ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count);
+    size_t gpuSectionsPending() const;
     // render thread, once a frame: the window follows the camera's block (FOLLOW sections behind; the columns it enters
     // are read from the world when its lock is free); refill: the same read on the update thread (atlas_update), waiting
     void frame(const int32_t camBlock[3], World& world);
@@ -94,13 +162,42 @@ public:
     void origin(int32_t o[4]) const;
     size_t pending() const;
 
+    // ---- the coarse levels (above)
+    int coarseLevels = 6;  // levels 1..coarseLevels (ATLAS_VOXGRID_COARSE; 0: none); clamped to the world's LODs - 1
+    int coarseD = 64;      // their windows' side in chunks (ATLAS_VOXGRID_COARSE_D)
+    // per level its pool slots (ATLAS_VOXGRID_COARSE_SLOTS, comma separated from level 1); full: the farthest go
+    uint32_t coarseCap[VG_LEVELS] = {0, 6144, 2048, 1024, 512, 512, 256};
+    int coarseBudget = 512;  // sections taken into the coarse levels a batch at most (ATLAS_VOXGRID_COARSE_BUDGET)
+    uint16_t stoneMat = 1;   // what lies under a column's lowest section
+    void setClasses(const std::vector<uint8_t>& cls);  // the palette's material classes (the vote's kinds)
+    // the camera's view (horizontal forward): what lies behind it is taken after what it sees
+    void setView(float fx, float fz);
+    // the layout of every level in the backend's buffers (fixed once the first frame placed the windows)
+    struct LevelInfo {
+        int D = 0, H = 0;
+        uint32_t chunkBase = 0, slotBase = 0, cap = 0;
+        bool active = false;
+        int ox = 0, oz = 0;  // the window's origin (chunks)
+        uint32_t used = 0;
+        uint64_t evicted = 0, overflow = 0, jumps = 0, shifts = 0, ingested = 0;
+        size_t pending = 0;
+    };
+    LevelInfo levelInfo(int k) const;
+    int levels() const { return 1 + activeCoarse_; }  // level 0 and the coarse ones
+    size_t chunkWords() const;    // all levels' chunk words
+    uint32_t totalSlots() const;  // all levels' slots
+    // FrameGpu::vgLevel[k - 1]: origin x, z (chunks), first chunk word, D | H << 8 | 1 << 16 when active
+    void levelFrame(int k, int32_t out[4]) const;
+
     // ---- the CPU reference (the CPU backend traces these; the tests compare the GPU's against them)
     std::vector<uint32_t> chunks, blocks, pool;
     std::vector<uint64_t> bits;
     int cpuOx = 0, cpuOz = 0;  // the window the CPU arrays hold
+    int cpuLevelO[VG_LEVELS][2] = {};  // and the coarse levels' windows
     void applyCpu(const VgBatch& b);
     // the chunk-level distance fields over the whole window from the chunk words (CPU; the GPU's vgGrow does the same)
     void growChunksCpu();
+    void growLevelCpu(int D, int H, uint32_t base, int ox, int oz);
     size_t verifyCpu() const;  // (ATLAS_VOXGRID_VERIFY) every box empty, every bitmap and block word right: the error count
 
     // stats (atlas_info "voxgrid")
@@ -155,6 +252,76 @@ private:
     }
     size_t physCol(int sx, int sz) const { return size_t(pmod(sz, D)) * D + size_t(pmod(sx, D)); }
     uint32_t phys(int sx, int sy, int sz) const { return uint32_t(size_t(sy - VG_MIN_SY) * D * D + physCol(sx, sz)); }
+
+    // ---- the coarse levels' books
+    struct Col {
+        uint64_t recv = 0, solid = 0;  // its sections that came (bit sy - VG_MIN_SY), and those with blocks
+    };
+    struct Level {
+        int k = 0, D = 0, H = 0;
+        uint32_t cap = 0, slotBase = 0, chunkBase = 0;
+        bool centred = false, clearPending = false;
+        int ox = 0, oz = 0;  // window origin, chunks
+        std::vector<uint32_t> slotOf;    // per cell: its slot (level-local) or ~0u
+        std::vector<uint32_t> word;      // per cell: the word last sent
+        std::vector<uint8_t> lost;       // per cell: its slot taken for a nearer one: unknown until its column leaves
+        std::vector<uint8_t> rock;       // per cell: known, and under every column's lowest section (UNLOADED: rock)
+        std::vector<uint8_t> touched;    // per cell: written this batch (rebuilt)
+        std::vector<uint8_t> dirty;      // per cell: to look at again this batch
+        std::vector<uint32_t> dirtyList;
+        std::vector<uint8_t> fresh;      // per chunk column: entered, the world's sections not read yet
+        uint32_t freshCount = 0;
+        std::vector<uint32_t> vacated;   // cells to send UNLOADED (the columns the window left)
+        std::vector<uint32_t> slotCell;  // per slot: its cell or ~0u
+        std::vector<uint32_t> freeSlots;
+        uint32_t nextSlot = 0, used = 0;
+        std::unordered_map<uint64_t, Col> cols;  // the window's section columns this level was given
+        // (levels 5+) cells whose children changed
+        std::vector<uint8_t> downDirty;
+        std::vector<uint32_t> downList;
+        uint64_t evicted = 0, overflow = 0, jumps = 0, shifts = 0, ingested = 0;
+        int span() const { return 1 << k; }  // sections a chunk side
+        uint32_t cell(int cx, int cy, int cz) const {
+            return uint32_t((size_t(cy) * D + size_t(pmod(cz, D))) * D + size_t(pmod(cx, D)));
+        }
+        bool inWindow(int cx, int cz) const { return cx >= ox && cx < ox + D && cz >= oz && cz < oz + D; }
+    };
+    Level lv_[VG_LEVELS];
+    int activeCoarse_ = 0;  // coarse levels laid out (fixed at the first frame)
+    bool laidOut_ = false;
+    // sections for the coarse levels: their ids and which levels want them (bit k)
+    struct CPending {
+        VgIds ids;
+        uint32_t levels = 0;
+    };
+    std::unordered_map<Key, CPending, KeyHash> cpending_;
+    std::unordered_map<Key, VgGpuRef, KeyHash> gpuRef_;  // (ingestGpu) sections waiting whose ids are on the GPU
+    std::shared_ptr<const std::vector<uint8_t>> classes_ = std::make_shared<std::vector<uint8_t>>();
+    float viewX_ = 0.0f, viewZ_ = 0.0f;
+    int camSy_ = 0;
+    void take0(VgBatch& b, int maxSections);             // (mu_ held) level 0's share of a batch
+    void layOut();                                       // (mu_ held)
+    void placeLevel(Level& L, int camSx, int camSz);     // (mu_ held) follow the camera
+    void refillCoarse(World& world, bool wait);          // (mu_ held) the entered columns' sections from the world
+    void takeCoarse(VgBatch& b);                         // (mu_ held)
+    // (takeCoarse) a slot for the cell (level-local; ~0u: none), its chunk cleared; the cells whose section columns'
+    // rock and air are to be written at the batch's end; the victims for a full pool (farthest last)
+    uint32_t coarseSlot(Level& L, uint32_t cell, VgBatch& b);
+    std::vector<std::pair<int64_t, uint32_t>> victims_[VG_LEVELS];
+    bool victimsBuilt_[VG_LEVELS] = {};
+    struct ColFill {
+        int k;
+        uint32_t cell;
+        int sx, sz;
+        bool operator==(const ColFill&) const = default;
+    };
+    std::vector<ColFill> colFills_;
+    void markDirty(Level& L, uint32_t cell) {
+        if (!L.dirty[cell]) L.dirty[cell] = 1, L.dirtyList.push_back(cell);
+    }
+    void cellCoords(const Level& L, uint32_t cell, int& cx, int& cy, int& cz) const;  // (logical, in the window)
+    uint32_t evalCell(Level& L, uint32_t cell, VgBatch& b);  // its word now (and L.rock)
+    int64_t viewDist(int64_t dx, int64_t dz) const;  // a distance for ordering: squared, 4x behind the camera
 };
 
 template <class Occupied>
