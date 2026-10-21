@@ -30,10 +30,12 @@ float atlasWaterMurk() {
     return 1.0 + 4.0 * clamp((1.0 - sat) * 1.3 + greenish * 0.6 - 0.35, 0.0, 1.0);
 }
 
-// what a block of this water scatters back per channel: clear water's blue-green, turned towards the biome's hue
+// what a deep body of this water sends back of the light let into it, per channel (atlas_far.slang waterInLight, the
+// same numbers: deep water's irradiance reflectance, about 3 % in blue for clear water, 1 % green, almost no red;
+// murky water greener), turned towards the biome's hue
 vec3 atlasWaterScatter() {
-    vec3 t = WaterTint.rgb / max(max(WaterTint.r, max(WaterTint.g, WaterTint.b)), 1e-3);
-    return vec3(0.05, 0.11, 0.13) * mix(vec3(1.0), t * 1.3, 0.55);
+    float mk = (atlasWaterMurk() - 1.0) / 4.0;
+    return mix(vec3(0.002, 0.012, 0.035), vec3(0.01, 0.02, 0.012), mk) * mix(vec3(1.0), clamp(WaterTint.rgb * 2.0, 0.0, 1.0), 0.5);
 }
 
 vec3 atlasWaterExtinction() {
@@ -44,7 +46,7 @@ vec3 atlasWaterExtinction() {
 // in the water's colour, dimmed by the light lost on the way down (drop-offs go dark; the shallows stay bright)
 vec3 atlasWaterLightAt(float d) {
     vec3 L = normalize(KeyDir.xyz);
-    vec3 inLight = (SkyUp.rgb + KeyRad.rgb * max(L.y, 0.0) * 0.6) * atlasWaterScatter();  // (the sky physical: the look's ambient 1)
+    vec3 inLight = (SkyUp.rgb + KeyRad.rgb * max(L.y, 0.0)) * atlasWaterScatter();  // (the sky physical: the look's ambient 1)
     return atlasDisplay(inLight * exp(-ATLAS_WATER_ABSORB * atlasWaterMurk() * max(d, 0.0) * 0.6), Look.x, Look.y);
 }
 
@@ -58,6 +60,18 @@ vec3 atlasUnderwater(vec3 rgb, float dist, vec3 dir) {
     float reach = 1.0 / max(dot(ext, vec3(0.2126, 0.7152, 0.0722)), 1e-3);
     float at = atlasEyeDepth() - dir.y * min(reach, 24.0);
     return rgb * T + atlasWaterLightAt(at) * (vec3(1.0) - T);
+}
+
+// The unified field (atlas draws the water): what is drawn after atlas's frame behind a water surface (a fish, a
+// swimmer, a boat's hull, a particle), seen through the water between the surface and it. a: atlas's near light's
+// alpha at the pixel (atlas_publish.slang: -(2 + the surface's view distance) where water is in front), dist: the
+// thing's own distance. Displayed colour in, displayed colour out.
+vec3 atlasBehindWater(vec3 rgb, float a, float dist) {
+    if (a > -1.5 || atlasEyeInWater()) return rgb;
+    float path = dist - (-a - 2.0);
+    if (path <= 0.0) return rgb;
+    vec3 T = exp(-atlasWaterExtinction() * path);
+    return rgb * T + atlasWaterLightAt(0.5 * path) * (vec3(1.0) - T);
 }
 
 // water caustics (a tileable pattern, after Dave Hoskins' "Tileable Water Caustic"): bright lines where the waves

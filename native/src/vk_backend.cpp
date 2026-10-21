@@ -228,6 +228,11 @@ constexpr uint32_t PASS_PUSH_BYTES = 16;  // width, height, nearLight, pre-expos
 // The GL compute pass that writes the shared nearDepth / nearInfo images: gl_near.hpp (both backends' GL paths). Same
 // bottom-up rows as GL; the Vulkan ingest pass flips them for the far kernel.
 
+// the split under PRIMARY_NEAR_LIT: waterAdd is a buffer per pixel, the publish pass hands its water surface on
+bool unifiedSplit(const FrameGpu& frame) {
+    return (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) && (frame.dims[2] & 0x100000u);  // (ATLAS_FRAME_PRIMARY_NEAR_LIT)
+}
+
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
            b == B_COUNTERS || b == B_NEAR || b == B_ACTORS || b == B_CLOUD || b == B_CLOUD_DEPTH || b == B_SURFACE ||
@@ -582,7 +587,8 @@ public:
         std::vector<VkDescriptorType> pubTypes = {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                                  VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE};
+                                                  VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                                  VK_DESCRIPTOR_TYPE_STORAGE_BUFFER};  // (8: the water's surface)
         if (!createPipe(atlas_publish_spv, atlas_publish_spv_size, pubTypes, PASS_PUSH_BYTES, publishPipe_,
                         publishLayout_, publishSetLayout_, publishShader_, err, "publishMain"))
             return false;
@@ -594,7 +600,7 @@ public:
         if (!createVoxGridPipes(err)) return false;
 
         VkDescriptorPoolSize ps[4] = {{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SLOTS},
-                                      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SLOTS * (BINDINGS - 1 + 4 + 2 + VG_BINDINGS)},
+                                      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SLOTS * (BINDINGS - 1 + 5 + 2 + VG_BINDINGS)},
                                       {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, SLOTS * (4 + 2)},
                                       {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, SLOTS}};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
@@ -873,7 +879,7 @@ public:
 
         begin(s);
         imageBarriers(s.cmd, true);
-        uint32_t pcv[4] = {w, h, nearLight ? 1u : 0u, 0u};
+        uint32_t pcv[4] = {w, h, nearLight ? (unifiedSplit(frame) ? 2u : 1u) : 0u, 0u};
         std::memcpy(&pcv[3], &in.preExposure, 4);
         if (nearOn) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestPipe_);
@@ -940,7 +946,7 @@ public:
         hostImageBarrier(s.cmd, true);
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0);
         computeBarrier(s.cmd);
-        uint32_t pcv[4] = {w, h, nearLight ? 1u : 0u, 0u};
+        uint32_t pcv[4] = {w, h, nearLight ? (unifiedSplit(frame) ? 2u : 1u) : 0u, 0u};
         std::memcpy(&pcv[3], &in.preExposure, 4);
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
         vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
@@ -1869,9 +1875,9 @@ private:
             const uint32_t bufOf[4] = {B_COLOR, B_NORMAL, B_DEPTH, B_NEAR_LIGHT};
             const int imgOf[4] = {IMG_COLOR, IMG_NORMAL, IMG_DEPTH, IMG_NEAR_LIGHT};
             const uint32_t bufAt[4] = {0, 1, 2, 6}, imgAt[4] = {3, 4, 5, 7};
-            VkDescriptorBufferInfo bi[4];
+            VkDescriptorBufferInfo bi[5];
             VkDescriptorImageInfo ii[4];
-            VkWriteDescriptorSet wr[8];
+            VkWriteDescriptorSet wr[9];
             for (uint32_t k = 0; k < 4; k++) {
                 bi[k] = {s.bufs[bufOf[k]].buf, 0, storageRange(s.bufs[bufOf[k]])};
                 ii[k] = {VK_NULL_HANDLE, images_[imgOf[k]].view, VK_IMAGE_LAYOUT_GENERAL};
@@ -1890,7 +1896,15 @@ private:
                 im.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
                 im.pImageInfo = &ii[k];
             }
-            vkUpdateDescriptorSets(dev_, 8, wr, 0, nullptr);
+            // 8: the water's surface (waterAdd; a pixel's worth unless the split under PRIMARY_NEAR_LIT sized it)
+            bi[4] = {s.bufs[B_WATER_ADD].buf, 0, storageRange(s.bufs[B_WATER_ADD])};
+            wr[8] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+            wr[8].dstSet = s.publishSet;
+            wr[8].dstBinding = 8;
+            wr[8].descriptorCount = 1;
+            wr[8].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            wr[8].pBufferInfo = &bi[4];
+            vkUpdateDescriptorSets(dev_, 9, wr, 0, nullptr);
             s.publishDirty = false;
         }
         if (attached_ && s.ingestDirty) {

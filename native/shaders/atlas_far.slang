@@ -72,8 +72,11 @@
 [[vk::binding(37, 0)]] RWStructuredBuffer<uint> outNearAge;
 [[vk::binding(38, 0)]] StructuredBuffer<uint> prevNearAge;
 // (FRAME_NEAR_SPLIT under PRIMARY_NEAR_LIT) the water over a pixel's surface (farMain): its own light, the sky it
-// mirrors and its glint (rgb, physical, through the air in front); a -1: the eye is under water, the air (beyond the
-// surface) already in it and in the albedo's factor. nearTemporalMain adds it to the composite
+// mirrors and its glint (rgb, physical, through the air in front); a: the water's surface, view distance (0: none), or
+// -1: the eye is under water, the air (beyond the surface) already in it and in the albedo's factor. nearTemporalMain
+// adds it to the composite; the publish pass hands the surface's distance to the host (the near light's alpha), whose
+// entities behind it take the water's medium
+
 [[vk::binding(39, 0)]] RWStructuredBuffer<float4> waterAdd;
 
 #include "atlas_air.slang"
@@ -3407,8 +3410,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         float3 albedo = res.hasAlbedo != 0u ? res.albedo : m.albedoRough.rgb;
         float2 e = octEncode(n);
         uint info = (255u << 8) | (uint(saturate(e.x) * 255.0 + 0.5) << 16) | (uint(saturate(e.y) * 255.0 + 0.5) << 24);
-        // (what the host's depth test sees: the water's surface over a bed; under water, where the ray left it)
-        float tDepth = watered ? (eyeWater ? min(tHit, max(airFrom, 0.05)) : tW) : tHit;
+        // (what the host's depth test sees: the bed, so what swims over it shows, the water's medium on it from the
+        // surface's distance, waterAdd.a; under water, where the ray left the water)
+        float tDepth = watered && eyeWater ? min(tHit, max(airFrom, 0.05)) : tHit;
         if (unified && (frame.dims.z & FRAME_NEAR_SPLIT) != 0u) {
             // (the split, the light by need) the hit for the light passes: its distance and normal; its albedo (through
             // the water over it) in the colour until nearTemporalMain composites it, the water's own light and where the
@@ -3416,7 +3420,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             nearDepth[pix] = tHit;
             nearInfo[pix] = info;
             outColor[pix] = float4(albedo * waterA, 1.0);
-            waterAdd[pix] = float4(waterB, eyeWater ? -1.0 : 0.0);
+            waterAdd[pix] = float4(waterB, eyeWater ? -1.0 : watered ? tW : 0.0);
             outNormal[pix] = packNormal(n, (cls & 0x7Fu) | 0x80u, 0.0);
             outDepth[pix] = hostDepth(dir, tDepth);
             outSurface[pix] = tHit;
@@ -3454,12 +3458,13 @@ void farMain(uint3 id : SV_DispatchThreadID) {
                 c.rgb += albedo * waterA * keyLightRadiance(sun) * (through * back * 0.5 * gain) * T;
             }
             // the far lights' glow and the cloud deck in front of it, as the far field's pixels have them
-            c.rgb += farLights(id.xy, o, dir, tDepth, sun);
+            float tFront = watered && !eyeWater ? tW : tDepth;  // (the nearest surface: the water's)
+            c.rgb += farLights(id.xy, o, dir, tFront, sun);
             if ((frame.dims.z & FRAME_CLOUDS) != 0) {
                 float4 cl;
                 float clDepth;
                 sampleClouds(id.xy, cl, clDepth);
-                if (clDepth < tDepth) c.rgb = c.rgb * cl.a + cl.rgb;
+                if (clDepth < tFront) c.rgb = c.rgb * cl.a + cl.rgb;
             }
         }
         outColor[pix] = c;
@@ -3497,7 +3502,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             depth = airFrom > 0.0 ? airFrom : 1e30;
             color = waterB + ((frame.dims.z & FRAME_SKY) != 0 ? skyColor(dir, sun) * waterA : float3(0, 0, 0));
         } else {
-            depth = tW;
+            // (the host's depth: WATER_SEE past the surface, so what swims under it shows, in the water's medium)
+            depth = tW + WATER_SEE;
             color = waterB + aerialPathTo(dir, tW).inscatter;
         }
     } else if (tHit >= 0.0) {
@@ -3758,7 +3764,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     float coverage = tHit >= 0.0 || actorFirst || (frame.dims.z & FRAME_SKY) != 0 ? 1.0 : 0.0;
     if (watered && !actorFirst && coverage < 1.0)  // (under water, the sky through the window: by A's share)
         coverage = eyeWater ? 1.0 - saturate(dot(waterA, float3(0.2126, 0.7152, 0.0722))) : 1.0;
-    float surface = actorFirst ? ah.t : (tHit >= 0.0 ? tHit : watered ? depth : 1e30);
+    float surface = actorFirst ? ah.t : (tHit >= 0.0 ? tHit : watered ? (eyeWater ? depth : tW) : 1e30);
     // far lights, under the cloud deck (clouds in front of the surface veil them with it)
     if ((frame.dims.z & FRAME_DEBUG_ALBEDO) == 0) color += farLights(id.xy, o, dir, surface, sun);
     if ((frame.dims.z & FRAME_CLOUDS) != 0) {
@@ -3778,6 +3784,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     outSurface[pix] = surface;
     if ((frame.dims.z & FRAME_NEAR_LIGHT) != 0u) outNearLight[pix] = float4(0, 0, 0, 0);  // not the near field's
     if (primaryNear && (frame.dims.z & FRAME_NEAR_SPLIT) != 0u) {
+        // (the water's surface for the host, as the split's pixels carry it)
+        if (unified) waterAdd[pix] = float4(0.0, 0.0, 0.0, watered && !eyeWater ? tW : 0.0);
         nearDepth[pix] = 1e30;  // (nor the light passes')
         nearInfo[pix] = 0u;     // (a SPLIT_TRACED mark of a frame before ghosted a silhouette into the sky: nearUpsampleMain)
     }

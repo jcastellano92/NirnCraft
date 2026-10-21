@@ -76,6 +76,9 @@ public final class AtlasNearPass {
             id("near_shadow"));
     private static final BindGroupLayout SHADOW_MAP = BindGroupLayout.builder()
             .withUniform("ShadowMap", UniformType.COMBINED_IMAGE_SAMPLER).build();
+    /** Atlas's near light for entities and particles: its alpha the water's surface in front (atlas_water.glsl atlasBehindWater). */
+    private static final BindGroupLayout ATLAS_WATER = BindGroupLayout.builder()
+            .withUniform("AtlasWater", UniformType.COMBINED_IMAGE_SAMPLER).build();
     static final int SHADOW_SIZE = 2048;
     static final float SHADOW_HALF = 96f;    // blocks each side of the camera
     static final float SHADOW_DEPTH = 256f;  // blocks before and behind it along the light
@@ -268,6 +271,7 @@ public final class AtlasNearPass {
                 .withFragmentShader(id(ours))
                 .withBindGroupLayout(NEAR_INFO)
                 .withBindGroupLayout(SHADOW_MAP)
+                .withBindGroupLayout(ATLAS_WATER)
                 .build();
     }
 
@@ -348,6 +352,19 @@ public final class AtlasNearPass {
         shadowProjUbo.rotate();
         shadowMat.set(proj).mul(snapped);
         shadowDrawn = true;
+    }
+
+    /**
+     * Atlas's near light for what is drawn after the frame (entities, particles): in the unified field its alpha is the
+     * water's surface in front of the pixel (atlas_publish.slang), so a fish, a swimmer or a boat's hull under it is
+     * seen through the water. A stand-in (alpha never negative: no water) without atlas's frame.
+     */
+    private static void bindAtlasWater(RenderPass pass) {
+        var nearest = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
+                FilterMode.NEAREST, FilterMode.NEAREST, false);
+        AtlasTargets far = AtlasClient.farTargetsThisFrame();
+        if (far != null) pass.setUniform("AtlasWater", far.nearLightTarget().getTextureView(), nearest);
+        else if (light != null) pass.setUniform("AtlasWater", light.getColorTextureView(), nearest);
     }
 
     /** The shadow map (or a stand-in when there is none this frame: ShadowMat zero means lit everywhere). */
@@ -802,6 +819,7 @@ public final class AtlasNearPass {
         if (lit) {
             pass.setUniform("NearInfo", info.currentBuffer());
             bindShadow(pass);
+            bindAtlasWater(pass);
             RenderSystem.pushPipelineModifier(ENTITY);
             entityPushed = true;
         }
@@ -835,6 +853,7 @@ public final class AtlasNearPass {
             pass.setUniform("SkyCube", cubeView != null ? cubeView : scene.getColorTextureView(), linear);
         }
         bindShadow(pass);
+        bindAtlasWater(pass);  // (entities and particles drawn in this pass)
         RenderSystem.pushPipelineModifier(FORWARD);
         try {
             chunks.renderGroup(ChunkSectionLayerGroup.TRANSLUCENT, pass, sampler, atlas, false);
