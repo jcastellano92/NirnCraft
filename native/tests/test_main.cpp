@@ -2267,6 +2267,128 @@ static void testTiers() {
     fs::remove_all(dir, ec);
 }
 
+// Edits as layers over the generated base (sectionstore.hpp's EditLayer), on Vulkan: a client-generated section edited
+// (its base on the host), a build in the air above the ground (a base of one id), an edit of a GPU-made section (its
+// base packed on the GPU and read back: never the tile's stand-in), one whose base changes later (a generator change).
+// Over the warm budget they go to disk as deltas; in a new context the air build is back on its own, the others once
+// their bases come again (uploaded, ingested on the GPU), the changed one as it was (its fallback, flagged).
+static void testEdits() {
+    std::printf("edits\n");
+    namespace fs = std::filesystem;
+    std::error_code ec;
+    fs::path dir = fs::temp_directory_path(ec) / "atlas-edits-test";
+    fs::remove_all(dir, ec);
+    auto scene = [&](AtlasContext*& ctx) {
+        if (atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) return false;
+        std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+        std::vector<uint16_t> top(256 * 256, 52), fill(256 * 256, 52);
+        for (int tz = -2; tz <= 2; tz++)
+            for (int tx = -2; tx <= 2; tx++) {
+                AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+                atlas_upload_column_tile(ctx, &t);
+            }
+        std::vector<AtlasMaterial> m(64, AtlasMaterial{{0.4f, 0.4f, 0.4f}, 0.9f, 0, ATLAS_CLASS_TERRAIN});
+        atlas_set_materials(ctx, 1, m.data(), uint32_t(m.size()));
+        return true;
+    };
+    AtlasContext* ctx = nullptr;
+    if (!scene(ctx)) {
+        std::printf("  SKIP: no Vulkan device\n");
+        return;
+    }
+    // bases: A (1,6,0) the client's, G (3,6,0) the GPU's, M (5,6,0) the client's (changed later); ground to y 104
+    auto base = [](int salt) {
+        std::vector<uint16_t> s(4096);
+        for (int i = 0; i < 4096; i++) {
+            int y = i >> 8;
+            uint32_t h = (uint32_t(i) + uint32_t(salt) * 7919u) * 2654435761u;
+            s[size_t(i)] = y < 8 ? uint16_t(1 + (h >> 28) % 3) : 0;
+        }
+        return s;
+    };
+    std::vector<uint16_t> A = base(1), G = base(2), M = base(3), M2 = base(4), air(4096, 0);
+    double centre[3] = {56.0, 170.0, 8.0};
+    AtlasFrame f{};
+    f.cameraPos[0] = 56.0;
+    f.cameraPos[1] = 170.0;
+    f.cameraPos[2] = 8.0;
+    float inv[16] = {0.4f, 0, 0, 0, 0, 0, 0.4f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 64;
+    f.height = 64;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> d(64 * 64);
+    AtlasFrameOutput o{nullptr, nullptr, d.data()};
+    CHECK(atlas_set_cache(ctx, dir.string().c_str(), 11, 1, 0, 0) == ATLAS_OK);
+    atlas_update(ctx, centre, 0);
+    CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);  // (the grid placed: the GPU's section has a window to go in)
+    CHECK(atlas_upload_section_flags(ctx, 1, 6, 0, A.data(), ATLAS_SECTION_REGENERABLE) == ATLAS_OK);
+    CHECK(atlas_upload_section_flags(ctx, 5, 6, 0, M.data(), ATLAS_SECTION_REGENERABLE) == ATLAS_OK);
+    int32_t gp[3] = {3, 6, 0};
+    uint8_t acc = 0;
+    CHECK(atlas_debug_gpu_sections(ctx, 1, gp, G.data(), nullptr, &acc) == ATLAS_OK);
+    for (int i = 0; i < 6; i++) CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
+    // the edits: a wall in each section (x 2..13 at z 5, y 4..11), the air build a pillar (y 136..143)
+    std::vector<uint16_t> eA = A, eG = G, eM = M, eAir = air;
+    auto edit = [&](int sx, int sy, int sz, std::vector<uint16_t>& want, uint16_t mat) {
+        for (int y = 4; y < 12; y++)
+            for (int x = 2; x < 14; x++) {
+                CHECK(atlas_notify_block(ctx, sx * 16 + x, sy * 16 + y, sz * 16 + 5, mat) == ATLAS_OK);
+                want[size_t(x + 16 * (5 + 16 * y))] = mat;
+            }
+    };
+    edit(1, 6, 0, eA, 9);
+    edit(3, 6, 0, eG, 10);
+    edit(5, 6, 0, eM, 11);
+    edit(1, 8, 0, eAir, 12);
+    for (int i = 0; i < 8; i++) CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);  // (G's base packed and read back)
+    std::vector<uint16_t> got(4096);
+    auto is = [&](AtlasContext* c, int sx, int sy, int sz, const std::vector<uint16_t>& want) {
+        uint32_t tier = 0;
+        return atlas_debug_section(c, sx, sy, sz, got.data(), &tier) == ATLAS_OK && tier != 0 && got == want;
+    };
+    bool liveA = is(ctx, 1, 6, 0, eA), liveG = is(ctx, 3, 6, 0, eG), liveM = is(ctx, 5, 6, 0, eM), liveAir = is(ctx, 1, 8, 0, eAir);
+    // over the warm budget: out to disk (the edited ones as deltas)
+    for (int i = 0; i < 4; i++) CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);  // (packed into warm first)
+    CHECK(atlas_set_cache(ctx, dir.string().c_str(), 11, 1, 1, 0) == ATLAS_OK);
+    atlas_update(ctx, centre, 0);
+    std::string inf = atlas_info(ctx);
+    size_t e0 = inf.find("\"edits\":{");
+    std::string edits = e0 == std::string::npos ? "none" : inf.substr(e0, inf.find('}', e0) - e0 + 1);
+    atlas_destroy(ctx);
+    // a new context: the air build on its own; A and G once their bases come again; M's base changed: its old section
+    AtlasContext* again = nullptr;
+    bool backAir = false, backA = false, backG = false, backM = false;
+    std::string edits2 = "none";
+    if (scene(again)) {
+        CHECK(atlas_set_cache(again, dir.string().c_str(), 11, 1, 0, 0) == ATLAS_OK);
+        atlas_update(again, centre, 0);
+        CHECK(atlas_render(again, &f, &o) == ATLAS_OK);
+        backAir = is(again, 1, 8, 0, eAir);
+        CHECK(atlas_upload_section_flags(again, 1, 6, 0, A.data(), ATLAS_SECTION_REGENERABLE) == ATLAS_OK);
+        CHECK(atlas_upload_section_flags(again, 5, 6, 0, M2.data(), ATLAS_SECTION_REGENERABLE) == ATLAS_OK);
+        CHECK(atlas_debug_gpu_sections(again, 1, gp, G.data(), nullptr, &acc) == ATLAS_OK);
+        for (int i = 0; i < 10; i++) CHECK(atlas_render(again, &f, &o) == ATLAS_OK);
+        backA = is(again, 1, 6, 0, eA);
+        backG = is(again, 3, 6, 0, eG);
+        backM = is(again, 5, 6, 0, eM);
+        std::string i2 = atlas_info(again);
+        size_t e1 = i2.find("\"edits\":{");
+        if (e1 != std::string::npos) edits2 = i2.substr(e1, i2.find('}', e1) - e1 + 1);
+        atlas_destroy(again);
+    }
+    std::printf("  live: client-made %d, GPU-made %d, changing %d, air %d; on disk %s\n", liveA, liveG, liveM, liveAir,
+                edits.c_str());
+    std::printf("  a new context: air on its own %d, client-made over its base again %d, GPU-made %d, changed base kept %d; %s\n",
+                backAir, backA, backG, backM, edits2.c_str());
+    CHECK(liveA && liveG && liveM && liveAir);
+    CHECK(backAir && backA && backG && backM);
+    CHECK(edits2.find("\"baseMismatch\":1") != std::string::npos);
+    fs::remove_all(dir, ec);
+}
+
 int main(int argc, char** argv) {
     std::setvbuf(stdout, nullptr, _IONBF, 0);  // (each line as it comes: a suite stopped part way still shows where)
     // atlas_tests [raster] [only=a,b,..]: the suites named alone (svdag, caves, ..., parity); each prints
@@ -2288,7 +2410,7 @@ int main(int argc, char** argv) {
         {"actormotion", testActorMotion}, {"transitions", testTransitions}, {"lights", testLights}, {"faults", testFaults},
         {"neardepth", [&] { testNearDepth(raster); }}, {"columnheights", [&] { testColumnHeights(raster); }},
         {"grasstint", [&] { testGrassTint(raster); }}, {"surfaceoverrides", [&] { testSurfaceOverrides(raster); }},
-        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"tiers", testTiers},
+        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"tiers", testTiers}, {"edits", testEdits},
     };
     for (const Suite& t : suites) {
         if (!only.empty() && only.find("," + std::string(t.name) + ",") == std::string::npos) continue;

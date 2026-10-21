@@ -156,8 +156,10 @@ void VoxGrid::reportWanted(const std::array<int32_t, 4>& r) {
 }
 
 void VoxGrid::packedResults(const std::vector<World::PackDone>& done) {
-    // (no grid lock: the world's own)
-    if (world_ && !done.empty()) world_->packedDone(done);
+    // (no grid lock: the world's own); the sections edit layers made over their bases come back to the grid
+    World::Made made;
+    if (world_ && !done.empty()) world_->packedDone(done, &made);
+    for (auto& [k, s] : made) put(k.x, k.y, k.z, VgIds(s, &s->mats));
 }
 
 void VoxGrid::gpuPendingOffsets(uint64_t buffer, std::vector<uint64_t>& out) const {
@@ -231,6 +233,7 @@ void VoxGrid::gpuUniform(const std::vector<UniformHit>& hits) {
         slotsUsed_--;
         // (the build wrote its word already: VG_UNIFORM with the id, or VG_EMPTY)
         state_[h.chunk] = uint8_t(h.id ? VG_UNIFORM : VG_EMPTY);
+        if (h.id && h.chunk < uniId_.size()) uniId_[h.chunk] = uint16_t(h.id);
         if (h.id) uniform_++;
         gpuUniformHits_++;
         rankDue_ = true;
@@ -265,6 +268,11 @@ size_t VoxGrid::ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_
         uint32_t uni = uniform ? uniform[i] : VG_NOT_UNIFORM;
         if (uni != VG_NOT_UNIFORM && uni > 0xFFFFu) uni = VG_NOT_UNIFORM;  // (ids are 16 bits)
         if (level0) gpuStandby_.erase({sx, sy, sz});
+        // (an edited section: the host's copy stands, the generator's base never replaces it; or the layer waits for
+        // this base: packed on the GPU at its build, the edits applied on the host)
+        int need = world_ ? world_->layerNeed({0, sx, sy, sz}) : 0;
+        if (need == 1) level0 = false;
+        if (need == 2 && level0) baseFetch_.insert({sx, sy, sz});
         if (level0 && uni == VG_NOT_UNIFORM && slotOf_[phys(sx, sy, sz)] == ~0u) {
             // a full pool takes a new one only within its cut-off; past the footprint's reach level 0 wants none: it
             // waits, asked for again once it ranks (takeGpuWanted)
@@ -353,6 +361,11 @@ void VoxGrid::put(int sx, int sy, int sz, const uint16_t* mats) {
 void VoxGrid::put(int sx, int sy, int sz, VgIds a) {
     if (!enabled || !a) return;
     std::lock_guard<std::mutex> lock(mu_);
+    putLocked(sx, sy, sz, std::move(a));
+}
+
+void VoxGrid::putLocked(int sx, int sy, int sz, VgIds a) {
+    if (!enabled || !a) return;
     // before the window is placed the world keeps them (frame() reads them from there); outside it they wait there too
     bool level0 = centred_ && inWindow(sx, sy, sz);
     uint32_t levels = 0;
@@ -671,6 +684,7 @@ void VoxGrid::shift(int nox, int noz, World& world) {
         // placed (or a jump past the whole window): every chunk unknown, every column read again
         slotOf_.assign(n, ~0u);
         state_.assign(n, uint8_t(VG_UNLOADED));
+        uniId_.assign(n, 0);
         colTop_.assign(size_t(D) * D, NO_TOP);
         colFresh_.assign(size_t(D) * D, uint8_t(1));
         freshColumns_ = uint32_t(D * D);
@@ -1071,7 +1085,9 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
     if (!enabled || !centred_) return;
     bool lists = !rankAdmits_.empty() || !rankEvicts_.empty();
     bool waiting = !standby_.empty() || !gpuStandby_.empty();
-    if (pending_.empty() && !clearPending_ && vacated_.empty() && !lists && !waiting) return;
+    bool bases = world_ && world_->layerCount.load(std::memory_order_relaxed) &&
+                 (!baseFetch_.empty() || world_->baseWantedN.load(std::memory_order_relaxed));
+    if (pending_.empty() && !clearPending_ && vacated_.empty() && !lists && !waiting && !bases) return;
     b.clear = clearPending_;
     b.chunkStates = clearPending_;
     b.ox = ox_;
@@ -1101,10 +1117,13 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
     if (jobAt_.size() != n) jobAt_.assign(n, ~0u);
     if (cellGen_.size() != n) cellGen_.assign(n, 0u);
     if (slotCpu_.size() != slotCap) slotCpu_.resize(slotCap);
+    if (uniId_.size() != n) uniId_.assign(n, 0);
+    World::Made made;  // (sections edit layers made over a base the grid knew: put once the batch is made)
     std::vector<uint32_t> touched;  // (jobAt_ put back after the batch)
     auto emit = [&](uint32_t chunk, uint32_t word, uint32_t slot, uint32_t data) {
         uint8_t st = uint8_t(word & 3u);
         if (st == VG_EMPTY && state_[chunk] == VG_EMPTY && !b.clear && jobAt_[chunk] == ~0u) return;
+        if (st == VG_UNIFORM) uniId_[chunk] = uint16_t((word >> 2) & 0xFFFFu);
         if (st != state_[chunk]) b.chunkStates = true;
         if (state_[chunk] == VG_UNIFORM && st != VG_UNIFORM) uniform_--;
         if (st == VG_UNIFORM && state_[chunk] != VG_UNIFORM) uniform_++;
@@ -1158,6 +1177,8 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
         if (ids.gpu()) {
             at = VG_GPU_SRC | uint32_t(b.gsecs.size());
             b.gsecs.push_back(gpuRef_[k]);
+            // (an edit layer waits for this base: packed here, read back, the edits applied on the host)
+            if (baseFetch_.erase(k)) b.packJobs.push_back({Key3{0, k.x, k.y, k.z}, World::BASE_FETCH, at});
         } else if (ids.packed) {
             at = VG_PACK_SRC | uint32_t(b.packs.size());
             b.packs.push_back(ids.packed);
@@ -1228,7 +1249,15 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
         World::SectionSrc src = world_ ? world_->sectionSource(sx, sy, sz) : World::SectionSrc{};
         if (!src) {
             standby_.erase(it);
-            setCand(c, 0);
+            if (world_ && world_->layerNeed({0, sx, sy, sz}) == 2) {
+                // (an edited section whose layer is on disk: its base generated again first, ingestGpu)
+                gpuStandby_[k] = 1;
+                baseFetch_.insert(k);
+                reportWanted({0, sx, sy, sz});
+                setCand(c, 2);
+            } else {
+                setCand(c, 0);
+            }
             continue;
         }
         uint32_t slot = takeSlot(c);
@@ -1270,6 +1299,10 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
             continue;
         }
         done++;
+        if (uni != VG_NOT_UNIFORM && onGpu && world_ && baseFetch_.erase(k)) {
+            // (an edit layer's base of one id: no pack needed; the layer's section replaces it next batch)
+            world_->baseUniform(Key3{0, k.x, k.y, k.z}, uint16_t(uni), made);
+        }
         if (uni != VG_NOT_UNIFORM) {
             freeSlot(c);
             emit(c, uni == 0 ? VG_EMPTY : (uni & 0xFFFFu) << 2 | VG_UNIFORM, ~0u, 0);
@@ -1318,8 +1351,42 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
             gpuUniformHint_.erase(k);
         }
     }
+    // 4. the bases edit layers wait for (World::editBlock): a GPU section in its slot packed (after this batch's copies:
+    // a slot written now holds the same section), one of one id answered at once, the rest at their build
+    if (world_ && world_->layerCount.load(std::memory_order_relaxed)) {
+        std::vector<Key3> want;
+        world_->takeBaseWanted(want);
+        // (those waiting outside the window, or for a cell not known yet: again once the window moved, or now and then)
+        if (ox_ != baseOx_ || oz_ != baseOz_ || batches % 16 == 0) {
+            baseOx_ = ox_, baseOz_ = oz_;
+            for (const Key& k : baseFetch_)
+                if (inWindow(k.x, k.y, k.z) && !gpuRef_.count(k)) want.push_back({0, k.x, k.y, k.z});
+        }
+        for (const Key3& k3 : want) {
+            Key k{k3.x, k3.y, k3.z};
+            if (!inWindow(k.x, k.y, k.z)) {
+                baseFetch_.insert(k);  // (when the window holds it, or its section comes)
+                continue;
+            }
+            uint32_t c = phys(k.x, k.y, k.z);
+            uint32_t slot = slotOf_[c];
+            bool done = true;
+            if (slot != ~0u && !slotCpu_[slot]) {
+                b.packJobs.push_back({k3, World::BASE_FETCH, VG_POOL_SRC | slot});
+            } else if (slot == ~0u && state_[c] == VG_EMPTY) {
+                world_->baseUniform(k3, 0, made);  // (air: above the column's top, or the generator's air)
+            } else if (slot == ~0u && state_[c] == VG_UNIFORM) {
+                world_->baseUniform(k3, uniId_[c], made);
+            } else {
+                done = false;  // (a GPU section waiting: at its build; a cell not known yet: later)
+            }
+            if (done) baseFetch_.erase(k);
+            else baseFetch_.insert(k);
+        }
+    }
+    for (auto& [k3, s] : made) putLocked(k3.x, k3.y, k3.z, VgIds(s, &s->mats));
     for (uint32_t c : touched) jobAt_[c] = ~0u;
-    // 4. this batch's ranking on the GPU (after its jobs: the words it reads are this batch's)
+    // 5. this batch's ranking on the GPU (after its jobs: the words it reads are this batch's)
     b.rank.on = !standby_.empty() || !gpuStandby_.empty();
     // predicted motion (the residency priority's fourth term): the lists come back RANK_LAG frames after they are made,
     // so the view they rank for is where the camera will be by then: the eye moved on by its velocity, the cone widened

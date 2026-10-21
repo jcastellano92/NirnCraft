@@ -467,13 +467,15 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                 SectionStore::Stats ts;
                 World::StoreStats ws = ctx->world.storeStats(&ts);
                 VoxGrid::Residency rs = v.residency();
-                char t[768];
+                char t[1400];
                 std::snprintf(t, sizeof t,
                               "\"tiers\":{\"hot\":{\"slots\":%u,\"uniform\":%u,\"mb\":%.1f},\"raw\":{\"sections\":%zu,\"mb\":%.1f,"
                               "\"packQueue\":%zu,\"packed\":%llu},\"warm\":{\"sections\":%zu,\"mb\":%.1f,\"budgetMb\":%.0f,"
                               "\"hits\":%llu,\"misses\":%llu},\"cold\":{\"on\":%s,\"records\":%zu,\"regions\":%zu,\"mb\":%.1f,"
                               "\"budgetMb\":%.0f,\"hits\":%llu,\"writes\":%llu,\"evicted\":%llu},\"dropped\":%llu,\"spilled\":%llu,"
-                              "\"lost\":%llu},",
+                              "\"lost\":%llu,\"edits\":{\"layers\":%zu,\"waiting\":%zu,\"deltaMb\":%.3f,\"deltaWrites\":%llu,"
+                              "\"rewrites\":%llu,\"writtenMb\":%.3f,\"wholeEquivMb\":%.3f,\"baseApplied\":%llu,"
+                              "\"baseMismatch\":%llu,\"codecMs\":%.1f}},",
                               rs.resident, rs.uniform, double(rs.resident) * VoxGrid::SLOT_BYTES / 1048576.0, ws.raw,
                               double(ws.rawBytes) / 1048576.0, ws.packQueue, (unsigned long long)ws.packed, ts.warm,
                               double(ts.warmBytes) / 1048576.0, double(ts.warmBudget) / 1048576.0,
@@ -481,7 +483,11 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                               ts.coldRecords, ts.coldRegions, double(ts.coldBytes) / 1048576.0, double(ts.coldBudget) / 1048576.0,
                               (unsigned long long)ts.coldHits, (unsigned long long)ts.coldWrites,
                               (unsigned long long)ts.coldEvicted, (unsigned long long)ts.dropped,
-                              (unsigned long long)ts.spilled, (unsigned long long)ts.lost);
+                              (unsigned long long)ts.spilled, (unsigned long long)ts.lost, ts.layers, ts.layersWaiting,
+                              double(ts.deltaBytes) / 1048576.0, (unsigned long long)ts.deltaWrites,
+                              (unsigned long long)ts.rewrites, double(ts.writtenBytes) / 1048576.0,
+                              double(ts.wholeEquivBytes) / 1048576.0, (unsigned long long)ts.baseApplied,
+                              (unsigned long long)ts.baseMismatch, ts.codecMs);
                 tiers = t;
             }
             // where the window is against the camera (sections), how it moved, what it still waits for, what the pool
@@ -640,7 +646,9 @@ void applyCache(AtlasContext* ctx) {
         uint64_t heap = ctx->backend->memoryInfo(m, err) ? m.hostHeapBytes : 0;
         host = std::clamp<uint64_t>(heap / 32, 256ull << 20, 2ull << 30);
     }
-    ctx->world.configureStore(ctx->cacheDir, ctx->cacheSeed, ctx->cacheGenVersion, host, ctx->cacheDiskBytes);
+    World::Made made;
+    ctx->world.configureStore(ctx->cacheDir, ctx->cacheSeed, ctx->cacheGenVersion, host, ctx->cacheDiskBytes, &made);
+    for (auto& [k, s] : made) ctx->voxgrid.put(k.x, k.y, k.z, VgIds(s, &s->mats));
 }
 }  // namespace
 
@@ -663,8 +671,7 @@ ATLAS_API AtlasStatus atlas_notify_block(AtlasContext* ctx, int32_t x, int32_t y
     if (!ctx) return ATLAS_ERR_ARG;
     if (y < WORLD_MIN_Y || y >= WORLD_TOP_Y) return ATLAS_OK;
     ATLAS_TRY
-    ctx->world.editBlock(x, y, z, mat);
-    {
+    if (ctx->world.editBlock(x, y, z, mat)) {
         // the edited section, whole, to the level-0 grid (rebuilt on the GPU with the next frame)
         std::vector<uint16_t> m(4096);
         int sx = x >> 4, sy = y >> 4, sz = z >> 4;
@@ -1786,6 +1793,21 @@ ATLAS_API AtlasStatus atlas_debug_section(AtlasContext* ctx, int32_t sx, int32_t
     *tier = s.raw ? 1u : s.packed ? 2u : 0u;
     if (s.raw) std::copy(s.raw->mats.begin(), s.raw->mats.end(), out);
     else if (s.packed) unpackSection(s.packed->data(), out);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_debug_gpu_sections(AtlasContext* ctx, uint32_t count, const int32_t* pos, const uint16_t* ids,
+                                               const uint32_t* uniform, uint8_t* accepted) {
+    if (!ctx || !pos || (count && !ids)) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    if (!ctx->backend->onDevice()) return ctx->fail(ATLAS_ERR_UNSUPPORTED, "atlas_debug_gpu_sections: Vulkan only");
+    uint64_t buf = ctx->backend->debugDeviceBuffer(ids, size_t(count) * 8192);
+    if (!buf) return ctx->fail(ATLAS_ERR_UNSUPPORTED, "atlas_debug_gpu_sections: no device buffer");
+    std::vector<uint64_t> offs(count);
+    for (uint32_t i = 0; i < count; i++) offs[i] = uint64_t(i) * 8192;
+    ctx->voxgrid.ingestGpu(buf, offs.data(), pos, count, accepted, uniform);
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }

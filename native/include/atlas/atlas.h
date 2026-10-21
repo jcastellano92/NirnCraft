@@ -709,6 +709,11 @@ ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint3
 ATLAS_API AtlasStatus atlas_debug_section(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz, uint16_t* out, uint32_t* tier);
 ATLAS_API AtlasStatus atlas_debug_coarse_chunks(AtlasContext* ctx, int32_t level, uint32_t count, const int32_t* pos,
                                                 const uint32_t* kinds, const uint16_t* ids, uint8_t* accepted);
+/* Test hook (the GPU generator's sections without the generator): `count` sections given to the grid through a buffer
+   on the context's own device (VoxGrid::ingestGpu): pos[3 i ..] the section (sx, sy, sz), ids[4096 i ..] its ids,
+   uniform (optional) each one's one id or 0xFFFFFFFF. accepted (optional, count bytes). Vulkan only. */
+ATLAS_API AtlasStatus atlas_debug_gpu_sections(AtlasContext* ctx, uint32_t count, const int32_t* pos, const uint16_t* ids,
+                                               const uint32_t* uniform, uint8_t* accepted);
 
 /*
  * Exact seeded noise for the terrain height (shaders/atlas_height.slang): the WorldNoise evaluations the mod's

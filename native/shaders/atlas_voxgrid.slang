@@ -415,6 +415,8 @@ groupshared uint gPOver;       // more than the table holds
 groupshared uint gPHash[64];
 
 uint packSrcWord(uint from, uint w) {
+    // (VG_POOL_SRC: a level-0 slot as the pool holds it, an edit layer's GPU base)
+    if ((from & 0xC0000000u) == 0x40000000u) return pool[(from & 0x3FFFFFFFu) * 2048u + w];
     uint at = (from & 0x7FFFFFFFu) * 2048u + w;
     return (from & 0x80000000u) != 0u ? gsrc[at] : src[at];
 }

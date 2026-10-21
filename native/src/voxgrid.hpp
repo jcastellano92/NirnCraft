@@ -32,6 +32,7 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "world.hpp"  // (Key3, Section)
@@ -48,6 +49,7 @@ constexpr uint32_t VG_COLUMN = 0xFFFFFFFEu;  // (VgJob::slot)
 constexpr uint32_t VG_NO_COPY = 0xFFFFFFFFu;  // (VgJob::data) the slot's ids are in the pool already (a coarse chunk)
 constexpr uint32_t VG_GPU_SRC = 0x80000000u;  // (VgJob::data, VgIngest::src) | index in VgBatch::gsecs: ids on the GPU
 constexpr uint32_t VG_PACK_SRC = 0x40000000u; // (VgJob::data, VgIngest::src) | index in VgBatch::packs: packed ids
+constexpr uint32_t VG_POOL_SRC = 0x40000000u; // (VgBatch::PackJob::src) | a level-0 slot: its ids as the pool holds them
 
 // (VoxGrid::ingestGpu) a section's ids in a GPU buffer: the backend's buffer handle (Vulkan: a VkBuffer), byte offset
 struct VgGpuRef {
@@ -176,6 +178,7 @@ public:
     void put(int sx, int sy, int sz, const uint16_t* mats);
     // the same with the world's own copy (shared, never copied: World::putSection's, immutable once stored)
     void put(int sx, int sy, int sz, VgIds ids);
+    void putLocked(int sx, int sy, int sz, VgIds ids);  // (caller holds mu_)
     // the world whose tiers the grid takes its sections back from (standby) and feeds packing (World::packOnGpu)
     void setWorld(World* w) { world_ = w; }
     // level 0's ranking on the GPU (a device backend): the host applies the lists rankResults hands it (no host ranking)
@@ -373,6 +376,10 @@ private:
     int coarseRankedSx_ = INT32_MIN, coarseRankedSz_ = INT32_MIN;
     void coarseReadmit(VgBatch& b);
     std::unordered_map<Key, uint32_t, KeyHash> gpuUniformHint_;  // (ingestGpu's hint) for the pending GPU sections
+    // (edit layers, World::takeBaseWanted) sections whose GPU base the world waits for: packed on the GPU at their build
+    std::unordered_set<Key, KeyHash> baseFetch_;
+    int baseOx_ = INT32_MIN, baseOz_ = INT32_MIN;
+    std::vector<uint16_t> uniId_;  // per cell: its one id while VG_UNIFORM
     // the view (setView), the footprint's reach, the cut-off of a full pool, when the waiting were last ranked
     float fwd_[3] = {0, 0, -1}, cosView_ = 0.5f, pixelAngle_ = 0.0f, levelBias_ = 0.0f, reach_ = 1e30f, cutoff_ = 1e30f;
     int camB_[3] = {0, 0, 0};

@@ -193,9 +193,24 @@ public:
         uint32_t gen = 0, hash = 0;
         std::shared_ptr<const std::vector<uint32_t>> words;
     };
-    void packedDone(const std::vector<PackDone>& done);
+    // (the sections an edit layer's base made: for the grid, VoxGrid::put)
+    using Made = std::vector<std::pair<Key3, std::shared_ptr<const Section>>>;
+    void packedDone(const std::vector<PackDone>& done, Made* made = nullptr);
+    // Edits are kept as layers over their generated base (SectionStore's EditLayer). An edit of a section the host does
+    // not hold (the generator's own, on the GPU) waits for its base: the grid packs it on the GPU and reads it back
+    // (packedDone with BASE_FETCH in its generation), or knows it as one id (baseUniform); the layer applied, the section
+    // is the host's from then on (never the tile's stand-in).
+    static constexpr uint32_t BASE_FETCH = 0x80000000u;
+    void takeBaseWanted(std::vector<Key3>& out);
+    void baseUniform(const Key3& k, uint16_t id, Made& made);
+    // 0: no layer; 1: a layer whose section the host holds (a GPU base must not replace it); 2: a layer waiting for a base
+    int layerNeed(const Key3& k);
+    std::atomic<size_t> layerCount{0};  // (none: no lookups on the hot paths)
+    std::atomic<size_t> baseWantedN{0};
     // the cold tier's directory (empty: none) and the world's identity, the budgets (bytes; 0: the defaults)
-    void configureStore(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBytes, uint64_t coldBytes);
+    // (made: the sections held already that the layers loaded from disk changed, for the grid)
+    void configureStore(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBytes, uint64_t coldBytes,
+                        std::vector<std::pair<Key3, std::shared_ptr<const Section>>>* made = nullptr);
     struct StoreStats {
         size_t raw = 0, packQueue = 0;
         uint64_t rawBytes = 0, packed = 0;
@@ -227,7 +242,8 @@ public:
     // the palette's material classes (for the sections' generated levels); set when the palette changes
     void setClasses(std::vector<uint8_t> cls);
     void markSectionDirty(int sx, int sy, int sz);  // caller holds mu_
-    void editBlock(int x, int y, int z, uint16_t mat);
+    // (false: the section's base is not here yet: the edit shows once it comes)
+    bool editBlock(int x, int y, int z, uint16_t mat);
     const Tile* tile(int lod, int tx, int tz) const;  // caller holds mu_ (or is single threaded)
     bool hasTile(int lod, int tx, int tz) const;      // locks
     // Buildings of tile (lod, tx, tz), kept across later uploads of its ground; null removes them.
@@ -336,6 +352,13 @@ private:
     uint32_t gen_ = 0;
     uint64_t packedCount_ = 0;
     std::unique_ptr<SectionStore> store_;
+    std::vector<Key3> baseWanted_;                  // (edit layers waiting for a base the grid has: asked once)
+    std::unordered_set<Key3, Key3Hash> baseAsked_;
+    // caller holds mu_: a base (regenerated, uploaded, fetched) and the section's layer: s becomes base + edits (flags
+    // EDITED), or the old section when the base's hash differs (BASE_LOST); non-null: a whole copy that stays instead
+    std::shared_ptr<const Section> layerOver(const Key3& k, Section& s, uint8_t& flags);
+    void commitSection(const Key3& k, std::shared_ptr<Section> s, uint8_t flags);  // caller holds mu_
+    void baseIn(const Key3& k, const uint16_t* base, Made* made);                   // caller holds mu_
     std::vector<uint8_t> classes_;  // material -> class (setClasses), for the sections' generated levels
     std::unordered_map<Key3, std::shared_ptr<const Region>, Key3Hash> regions_;
     std::unordered_set<Key3, Key3Hash> dirty_;

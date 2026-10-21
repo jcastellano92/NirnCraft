@@ -345,6 +345,44 @@ int main(int argc, char** argv) {
     bool synthStream = !haveExport && num(a, "synth", 0) > 0 && num(a, "synthstream", 0) > 0;
     bool synthOnce = num(a, "synthonce", 0) > 0;
     std::set<std::pair<int, int>> synthSent, synthEver;
+    // synthregen=1: the synth sections sent as the client's generator's (ATLAS_SECTION_REGENERABLE: dropped when they
+    // leave, not kept); synthedit=N: a builder's edits, N builds a tile the first time it is sent (a house of stone
+    // walls on a gravel floor under a dirt roof, its cellar dug out; every fourth with a 40-block tower), through
+    // atlas_notify_block: the edit layers' test (sectionstore.hpp)
+    bool synthRegen = num(a, "synthregen", 0) > 0;
+    int synthEdits = int(num(a, "synthedit", 0));
+    std::set<std::pair<int, int>> synthBuilt;
+    size_t editBlocks = 0, editBuilds = 0;
+    auto synthBuild = [&](int tx, int tz) {
+        for (int j = 0; j < synthEdits; j++) {
+            uint32_t h = uint32_t(tx) * 2654435761u ^ uint32_t(tz) * 2246822519u ^ uint32_t(j) * 3266489917u;
+            h = (h ^ (h >> 15)) * 2246822519u;
+            h ^= h >> 13;
+            int w = 7 + int(h & 3u), d = 7 + int((h >> 2) & 3u), ht = 5 + int((h >> 4) & 1u);
+            int x0 = tx * 256 + 16 + int((h >> 8) % 200u), z0 = tz * 256 + 16 + int((h >> 16) % 200u);
+            int g = int(std::floor(atlas_preview_height(ctx, x0 + w * 0.5, z0 + d * 0.5)));
+            if (g <= 63 || g > 300) continue;  // (not in water)
+            auto put = [&](int x, int y, int z, uint16_t m) {
+                atlas_notify_block(ctx, x, y, z, m);
+                editBlocks++;
+            };
+            for (int x = x0; x < x0 + w; x++)
+                for (int z = z0; z < z0 + d; z++) {
+                    bool edge = x == x0 || z == z0 || x == x0 + w - 1 || z == z0 + d - 1;
+                    bool door = z == z0 && x == x0 + w / 2;
+                    for (int y = g - 4; y < g; y++) put(x, y, z, edge ? 1 : 0);  // (the cellar)
+                    put(x, g, z, 7);
+                    for (int y = g + 1; y <= g + ht; y++) put(x, y, z, edge && !(door && y <= g + 2) ? 1 : 0);
+                }
+            for (int x = x0 - 1; x <= x0 + w; x++)
+                for (int z = z0 - 1; z <= z0 + d; z++) put(x, g + ht + 1, z, 3);
+            if (j % 4 == 0)
+                for (int y = g + ht + 2; y < g + ht + 42; y++)
+                    for (int x = x0; x < x0 + 3; x++)
+                        for (int z = z0; z < z0 + 3; z++) put(x, y, z, 1);
+            editBuilds++;
+        }
+    };
     if (!haveExport && num(a, "synth", 0) > 0 && !synthStream) {
         int R = int(num(a, "synth", 0));
         int csx = int(std::floor(x / 16)), csz = int(std::floor(z / 16));
@@ -540,7 +578,11 @@ int main(int argc, char** argv) {
                         for (int cz = tz * 16; cz < tz * 16 + 16; cz++)
                             for (int cx = tx * 16; cx < tx * 16 + 16; cx++) synthColumn(cx, cz, secs);
                         for (const exportdata::Held& hs : secs)
-                            if (atlas_upload_section(ctx, hs.cx, hs.sy, hs.cz, hs.mats.data()) != ATLAS_OK) return false;
+                            if ((synthRegen ? atlas_upload_section_flags(ctx, hs.cx, hs.sy, hs.cz, hs.mats.data(),
+                                                                        ATLAS_SECTION_REGENERABLE)
+                                            : atlas_upload_section(ctx, hs.cx, hs.sy, hs.cz, hs.mats.data())) != ATLAS_OK)
+                                return false;
+                        if (synthEdits > 0 && synthBuilt.insert({tx, tz}).second) synthBuild(tx, tz);
                     }
             return true;
         }
@@ -1409,6 +1451,11 @@ int main(int argc, char** argv) {
                             if (r0 != std::string::npos && r1 != std::string::npos) extra += "," + inf.substr(r0, r1 - r0 - 1);
                             size_t sc = inf.find("\"stageCpuMs\":");  // (the render thread's share of the grid's batch)
                             if (sc != std::string::npos) extra += "," + inf.substr(sc, inf.find(',', sc) - sc);
+                            if (synthEdits > 0) {
+                                char eb[96];
+                                std::snprintf(eb, sizeof eb, ",\"editBlocks\":%zu,\"editBuilds\":%zu", editBlocks, editBuilds);
+                                extra += eb;
+                            }
 #ifdef _WIN32
                             PROCESS_MEMORY_COUNTERS_EX pm{};
                             if (K32GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pm), sizeof pm)) {
