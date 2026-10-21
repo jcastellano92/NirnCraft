@@ -283,11 +283,54 @@ Yokuda, Hammerfell): 786,432 of 786,432 columns equal on Vulkan and C++. **Measu
 the tints (`AtlasBiomes`), then the tile's encoding and the far World build (`atlas_upload_tile`). Multiplayer clients
 have no seed: their tiles still come from the server's tile service.
 
+### 7.4 Structures from the plans on the device (2026-10-21)
+
+`atlas_ovl_*` (`native/shaders/atlas_overlays.slang`, `overlays_engine.cpp`; Java `AtlasOverlayTapes`,
+`AtlasOvlNative`), Vulkan only, its own device for now (like the decoration). Survey of what Java did:
+`E:/NirnCraft-scratch/overlays/survey.md`.
+
+* **Tapes.** The named settlements' pieces (`StreetPlan.layout`, the server's `SettlementPiece`: spec, seed, owner)
+  are built once each by their own builders on a `Canvas` over a level holding the terrain. `Canvas.Tape` (a hook,
+  null in the game) records every write primitive as an op: a plain write (`wset`: nothing over
+  FEATURES_CANNOT_REPLACE, no block over a door or bed, grass under a sturdy block to dirt), set-if-open, air, clear,
+  clear-plants, a foundation column down to solid ground, bed halves, furniture. Ops are kept per chunk column in the
+  server's order (piece, then op), with each column's sweep range (the union of the pieces' clips and wide boxes as
+  postProcess sweeps them). The builders' own branches on what they read are taken once, on the terrain.
+* **Kernels**, one thread per chunk column, in the server's order: `piecesMain` replays the column's ops, each
+  predicate tested on the blocks there (a tree or a deeper hollow the client generated counts as on the server);
+  `sanityMain` is `Sanity.sweep` (two passes over the sweep range: unsupported doors, beds, trapdoors, stray stairs,
+  carpets, lanterns, ladders, unreachable chests, fences on nothing, any block with no supported neighbour);
+  `connectMain` gives fences, walls and panes their sides (`Sanity.connect`, wall tall / low / post from the block
+  above); `streetsMain` is `StreetPaint.Painter` (doorstep paths, stone stairs, gate lanes; Java's float expressions
+  under the exact contract). The sweeps read the four neighbour chunks of the batch (`ATLAS_OVL_CHUNK_INTS`).
+* **Block table** (`AtlasOverlayTapes.blockWords`): five words per id (flags, the painter's transforms, sweep classes,
+  block index / facing / the bottom face's cover of the wall test shapes, shape table), then per connectable state
+  its shape table. `new AtlasOverlayTapes(prog.blocks)` makes the generator's ids the table's first ids.
+* **Order in the pipeline**: the settlement structures are at `top_layer_modification`, so after the decoration's
+  steps 0-9 and before freeze_top_layer, road paint and street paint (the decoration engine must call the pieces and
+  sweep between those).
+
+**Checked** (`AtlasOverlaysGpuTest`, NIRNCRAFT_OVL_TEST=1: Java's `SettlementPiece.postProcess` per chunk in piece
+order, then `StreetPaint`, over Minecraft's own terrain, seed 1234, cached under `E:/NirnCraft-scratch/overlays/ref`):
+Riverwood 6 x 6, Whiterun 8 x 8, Rorikstead 6 x 6 and Pelagia Farm 4 x 4 chunks (27.4 M blocks). Of the blocks
+either side changed: pieces without the sweep against the builders alone 99.993 % (120,957); pieces and sweep
+against postProcess 99.13 % (122,577: Whiterun 99.82, Rorikstead 99.79, Pelagia Farm 100, Riverwood 89.76); street
+paint 99.92 % (1,189); whole windows 99.996 %. **Measured**: all four passes 0.00041 ms a column (0.105 ms a chunk);
+pipelines 22-184 KB of SPIR-V, 0.04-0.61 s to create the first time; recording 1 ms a piece in Java, once.
+
+**Not yet**: what remains is the server's own order (one sweep per piece and chunk there, one per chunk here; Sanity's
+removal chains across columns, most of Riverwood's gap along its river), `Accessibility` (door approaches: paths),
+`OrphanSweep` / `RockSweep`, road paint (`RoadPaint`, `Paver`), generic and seeded structures (dungeons, generic
+settlements, working sites). Not wired into `AtlasClientGen` yet: recording a settlement needs its terrain (the
+generator's ids read back, or the plan's terrain for a seed-free bake) and the stamp belongs on the generator's device
+between the decoration's steps (GPU to GPU). Found on the way, for the owner: `Sanity.sweep`'s last rule removes any
+block with no supported neighbour, fluids included, so the server cuts holes in rivers and lakes inside a piece's
+clip (Riverwood's bridge; water flowing back only on a neighbour update).
+
 ## 8. Open
 
-* **Structures from the plans**: starts per chunk (`ChunkGenerator.createStructures` with the server's
-  `ChunkGeneratorStructureState`, named settlements from the street plan) into the proto chunks, their pieces placed
-  in decoration as `applyBiomeDecoration` does; the remaining 0.17 %.
+* **Structures from the plans**: named settlements' pieces, their Sanity sweep and the street painter are on the device
+  (7.4); still to do there: wiring into AtlasClientGen (GPU to GPU), the other sweeps, road paint, seeded structures.
 * **Features are slow and single threaded** (81 ms a chunk): decorate disjoint 3 x 3s in parallel; trees on the GPU
   later (their placements are pure; shapes need the decoration random).
 * **The surface pass** is the kernel's largest (a thread per column walks it): split the per-block rule work.
