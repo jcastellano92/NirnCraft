@@ -886,6 +886,15 @@ ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ
    of what was seen, from the first frames. */
 ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint8_t* outServed,
                                                  uint32_t* outChunks, uint32_t* outTaken);
+/* The generator's GPU budget (docs: gen_engine.cpp, the pacer): its submissions are paced by the frame cadence so
+   that frames keep their target; since the generator was made. periodMs the frames' period seen (0: no frames),
+   duty the share of wall time the generator may use now, usedMs the GPU time its submissions took, waitedMs (farWaitedMs
+   of it the far field's) the time they waited for the budget, maxSubmissionMs the longest submission. */
+typedef struct AtlasGenPaceStats {
+    double periodMs, duty, tokensMs, usedMs, waitedMs, farWaitedMs, maxSubmissionMs;
+    uint64_t submissions;
+} AtlasGenPaceStats;
+ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out);
 typedef struct AtlasGenCacheStats {
     uint32_t on;
     uint64_t fingerprint, chunks, sections, fileBytes, chunkHits, chunkMisses, sectionWrites, sectionReads;

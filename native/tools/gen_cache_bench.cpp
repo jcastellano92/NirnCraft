@@ -16,7 +16,9 @@
 #include <fstream>
 #include <map>
 #include <tuple>
+#include <atomic>
 #include <set>
+#include <thread>
 #include <string>
 #include <vector>
 
@@ -309,10 +311,35 @@ int main(int argc, char** argv) {
     std::vector<uint32_t> color(320 * 180);
     AtlasFrameOutput out{color.data(), nullptr, nullptr};
     double centre[3] = {x, f.cameraPos[1], z};
+    // bg=1: a thread renders frames from here on (the game's cadence: back to back), their wall times kept; the generation
+    // below only waits on them. bgcap=<ms> paces the thread to that period (a 60 Hz game: 16.7).
+    std::atomic<bool> bgOn{false}, bgStop{false};
+    std::vector<float> bgMs;
+    std::thread bgThread;
+    double bgCap = std::atof(arg(argc, argv, "bgcap", "0").c_str());
+    auto renderMain = [&]() {
+        if (bgOn) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        else atlas_render(ctx, &f, &out);
+    };
     atlas_update(ctx, centre, 0);
-    atlas_render(ctx, &f, &out);
+    renderMain();
     // the spawn radius's chunks, nearest first
     int ccx = int(std::floor(x / 16)), ccz = int(std::floor(z / 16));
+    if (arg(argc, argv, "bg", "0") != "0") {
+        for (int i = 0; i < 3; i++) atlas_render(ctx, &f, &out);  // (the grid placed)
+        bgOn = true;
+        bgThread = std::thread([&] {
+            std::vector<uint32_t> img(320 * 180);
+            AtlasFrameOutput o2{img.data(), nullptr, nullptr};
+            while (!bgStop) {
+                auto t0 = std::chrono::steady_clock::now();
+                atlas_render(ctx, &f, &o2);
+                double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+                bgMs.push_back(float(ms));
+                if (bgCap > ms) std::this_thread::sleep_for(std::chrono::microseconds(int64_t((bgCap - ms) * 1000.0)));
+            }
+        });
+    }
     if (arg(argc, argv, "store", "0") != "0") {
         int r = storeMode(ctx, g, f, out, ccx, ccz, R, arg(argc, argv, "old", "0") != "0",
                           std::atof(arg(argc, argv, "steady", "20").c_str()), uint32_t(std::atoi(arg(argc, argv, "slots", "768").c_str())));
@@ -399,7 +426,7 @@ int main(int argc, char** argv) {
             genMs += nowMs() - g0;
         }
         double r0 = nowMs();
-        atlas_render(ctx, &f, &out);
+        renderMain();
         renderMs += nowMs() - r0;
         frames++;
         if (frames > 20000) break;
@@ -412,7 +439,7 @@ int main(int argc, char** argv) {
         if (p != std::string::npos && std::atoi(inf.c_str() + p + 10) == 0 && i > 2 &&
             (q == std::string::npos || std::atoi(inf.c_str() + q + 9) == 0))
             break;
-        atlas_render(ctx, &f, &out);
+        renderMain();
         frames++;
     }
     double tFull = nowMs();
@@ -446,11 +473,11 @@ int main(int argc, char** argv) {
                         break;
                     }
                     farBusy++;
-                    atlas_render(ctx, &f, &out);  // (every far buffer still read: a frame takes them)
+                    renderMain();  // (every far buffer still read: a frame takes them)
                     frames++;
                 }
             }
-        atlas_render(ctx, &f, &out);
+        renderMain();
         frames++;
     }
     for (int i = 0; i < 2000; i++) {
@@ -459,17 +486,39 @@ int main(int argc, char** argv) {
         if (p != std::string::npos && std::atoi(inf.c_str() + p + 16) == 0 && i > 2 &&
             (q == std::string::npos || std::atoi(inf.c_str() + q + 9) == 0))
             break;
-        atlas_render(ctx, &f, &out);
+        renderMain();
         frames++;
     }
     double tFar = nowMs();
     // (the last batches' packs come back with the next frames: the cache gets them before the stats)
-    for (int i = 0; i < 6; i++) atlas_render(ctx, &f, &out), frames++;
+    for (int i = 0; i < 6; i++) renderMain(), frames++;
+    std::string bgJson;
+    if (bgOn) {
+        bgStop = true;
+        bgThread.join();
+        bgOn = false;
+        std::vector<float> v = bgMs;
+        std::sort(v.begin(), v.end());
+        AtlasGenPaceStats ps{};
+        atlas_gen_pace_stats(g, &ps);
+        double sum = 0;
+        for (float q : v) sum += q;
+        char b[512];
+        if (!v.empty())
+            std::snprintf(b, sizeof b,
+                          "\"frames\":{\"n\":%zu,\"p50\":%.1f,\"p90\":%.1f,\"p99\":%.1f,\"max\":%.1f,\"meanFps\":%.1f,"
+                          "\"over25ms\":%zu,\"pace\":{\"periodMs\":%.1f,\"duty\":%.2f,\"usedMs\":%.0f,\"waitedMs\":%.0f,"
+                          "\"farWaitedMs\":%.0f,\"maxSubMs\":%.0f,\"subs\":%llu}},",
+                          v.size(), v[v.size() / 2], v[v.size() * 9 / 10], v[v.size() * 99 / 100], v.back(), 1000.0 * v.size() / sum,
+                          size_t(std::count_if(v.begin(), v.end(), [](float q) { return q > 25.0f; })), ps.periodMs, ps.duty, ps.usedMs,
+                          ps.waitedMs, ps.farWaitedMs, ps.maxSubmissionMs, (unsigned long long)ps.submissions);
+        bgJson = b;
+    }
     AtlasGenCacheStats cs{};
     atlas_gen_cache_stats(g, &cs);
     double km2 = double(todo.size()) * 256.0 / 1e6;
-    std::printf("{\"horizon\":{\"tiles\":%zu,\"fromCache\":%zu,\"made\":%zu,\"busy\":%zu,\"ms\":%.0f,\"chunks\":%zu,\"taken\":%zu,\"farWrites\":%llu,"
-                "\"farHits\":%llu},", farTiles, farCached, farMade, farBusy, tFar - tFar0, farChunks, farTaken, (unsigned long long)cs.farWrites,
+    std::printf("{%s\"horizon\":{\"tiles\":%zu,\"fromCache\":%zu,\"made\":%zu,\"busy\":%zu,\"ms\":%.0f,\"chunks\":%zu,\"taken\":%zu,\"farWrites\":%llu,"
+                "\"farHits\":%llu},", bgJson.c_str(), farTiles, farCached, farMade, farBusy, tFar - tFar0, farChunks, farTaken, (unsigned long long)cs.farWrites,
                 (unsigned long long)cs.farHits);
     std::printf("\"radius\":%d,\"chunks\":%zu,\"generated\":%zu,\"fromCache\":%zu,\"flagged\":%zu,\"sections\":%zu,\"frames\":%zu,"
                 "\"setupMs\":%.0f,\"toFullRadiusMs\":%.0f,\"sentMs\":%.0f,\"genMs\":%.0f,\"cacheMs\":%.0f,\"renderMs\":%.0f,"

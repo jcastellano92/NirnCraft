@@ -254,6 +254,14 @@ public:
     // then VoxGrid::ingestCoarseGpu; kinds as far()'s; taken: the chunks the grid took
     // (the self-baking cache) where farIngest bakes the tiles it lacks (null: none)
     GenCache* farBake = nullptr;
+    // the GPU budget (VulkanEngine's pacer): the class of the work submitted from now (0 the near terrain, 1 the far
+    // field: it takes only what the near work left), and the pacer's numbers (atlas_gen_pace_stats)
+    virtual void paceClass(int c) { (void)c; }
+    struct PaceStats {
+        double periodMs = 0, duty = 1, tokensMs = 0, usedMs = 0, waitedMs = 0, farWaitedMs = 0, maxSubMs = 0;
+        uint64_t submissions = 0;
+    };
+    virtual PaceStats paceStats() const { return {}; }
     virtual bool farIngest(const std::vector<int32_t>& jobs, int lod, uint32_t rows, uint32_t cap, uint32_t* kinds, uint32_t& mixed,
                            uint32_t& taken, uint32_t* bad, double& ms, std::string& err) {
         (void)jobs, (void)lod, (void)rows, (void)cap, (void)kinds, (void)mixed, (void)taken, (void)bad, (void)ms;
@@ -1235,10 +1243,12 @@ public:
             if (timestamps_ && pass >= 0) {
                 uint64_t ts2[2] = {};
                 if (vkGetQueryPoolResults(dev_, queries_, uint32_t(pass), 2, sizeof(ts2), ts2, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS) {
-                    double ms = double(ts2[1] - ts2[0]) * timestampPeriod_ * 1e-6;
+                    // (a sliced pass: the timestamps span the waits between its slices; its submissions' wall times instead)
+                    double ms = slicedMs_ > 0.0 ? slicedMs_ + lastSubMs_ : double(ts2[1] - ts2[0]) * timestampPeriod_ * 1e-6;
                     if (uint32_t(pass) < PASSES) t.passMs[pass] += ms;
                     t.kernelMs += ms;
                 }
+                slicedMs_ = 0.0;
             }
             begin();
             if (timestamps_ && pass >= 0) {
@@ -1269,11 +1279,30 @@ public:
             }
             phase_ = "pass " + std::to_string(p) + (fromStore ? " (from the store)" : "");
             if (p == PACK_PASS && !runStages(b, n, err)) return false;  // the features and overlays (atlas_gen_add_stage)
-            vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[p]);
-            vkCmdDispatch(cmd_, (PASS_ITEMS[p] + GROUP - 1) / GROUP, n, 1);
+            // (the GPU budget) a long pass in slices of chunks, one submission each, so that no submission is longer than a
+            // few ms when the frames are over their target (the chunks of a pass are independent: a row of workgroups
+            // each); the slice from the pass's measured time a chunk
+            uint32_t slice = sliceOf(p, n), gx = (PASS_ITEMS[p] + GROUP - 1) / GROUP;
+            double sliced = 0.0;
+            for (uint32_t c0 = 0; c0 < n; c0 += slice) {
+                uint32_t m = std::min(slice, n - c0);
+                vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[p]);
+                if (slice >= n) vkCmdDispatch(cmd_, gx, n, 1);
+                else vkCmdDispatchBase(cmd_, 0, c0, 0, gx, m, 1);
+                if (c0 + m < n) {
+                    barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+                    if (!submitWait(err)) return false;
+                    sliced += lastSubMs_;
+                    begin();
+                    vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+                    vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &b.params);
+                }
+            }
             barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
             if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, p + 1);
+            slicedMs_ = sliced;
             if (p + 1 < pEnd && !cut(int(p))) return false;
         }
         if (toStore) {
@@ -1654,6 +1683,7 @@ private:
             cp.stage.module = modules_[i];
             cp.stage.pName = "main";
             cp.layout = layout_;
+            cp.flags = VK_PIPELINE_CREATE_DISPATCH_BASE_BIT;  // (a pass in slices of chunks: vkCmdDispatchBase)
             auto p0 = std::chrono::steady_clock::now();
             if (vkCreateComputePipelines(dev_, pipeCache(), 1, &cp, nullptr, &pipes_[i]) != VK_SUCCESS)
                 return fail(err, "pipeline " + std::to_string(i) + " (" + std::to_string(size[i]) + " bytes of SPIR-V) refused");
@@ -1877,7 +1907,111 @@ private:
         bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         vkBeginCommandBuffer(cmd_, &bi);
     }
+    // ---- the GPU budget ----
+    // The generator shares the card with the frames, and a long kernel in front of a frame is a long frame: the
+    // submissions are paced by a token bucket of GPU milliseconds filled by wall time at a duty that follows the frame
+    // cadence (backend_->framesSubmitted over the last 200 ms): a frame period at its target the generator may take
+    // up to 8 ms of every frame, a period 1.5 x over it 2.5 ms, no frames at all (loading) 80 % of the time. Near work
+    // waits for the bucket to be empty or better, far work for it to be 10 ms full (the leftovers). The wait is
+    // bounded (300 ms a submission: a budget, not a stall); ATLAS_GEN_PACE=0 turns it off, ATLAS_GEN_TARGET_MS sets the
+    // target (20), ATLAS_GEN_FRAME_MS the budget at the target (8).
+    struct Pacer {
+        double tokens = 20.0, periodMs = 0.0, duty = 0.8;
+        std::chrono::steady_clock::time_point last = std::chrono::steady_clock::now(), sampleAt = last;
+        uint64_t sampleFrames = 0;
+        double usedMs = 0, waitedMs = 0, farWaitedMs = 0, maxSubMs = 0;
+        uint64_t subs = 0;
+        int cls = 0;
+        bool init = false;
+    } pace_;
+    void paceClass(int c) override { pace_.cls = c; }
+    PaceStats paceStats() const override {
+        return {pace_.periodMs, pace_.duty, pace_.tokens, pace_.usedMs, pace_.waitedMs, pace_.farWaitedMs, pace_.maxSubMs, pace_.subs};
+    }
+    static double envMs(const char* name, double def) {
+        const char* e = std::getenv(name);
+        return e && std::atof(e) > 0 ? std::atof(e) : def;
+    }
+    void paceUpdate() {
+        static const double target = envMs("ATLAS_GEN_TARGET_MS", 20.0), atTarget = envMs("ATLAS_GEN_FRAME_MS", 8.0);
+        auto now = std::chrono::steady_clock::now();
+        double dt = std::chrono::duration<double, std::milli>(now - pace_.last).count();
+        pace_.last = now;
+        uint64_t f = backend_ ? backend_->framesSubmitted() : 0;
+        if (!pace_.init) {
+            pace_.init = true;
+            pace_.sampleFrames = f;
+            pace_.sampleAt = now;
+        }
+        double win = std::chrono::duration<double, std::milli>(now - pace_.sampleAt).count();
+        if (win >= 200.0) {
+            double p = f > pace_.sampleFrames ? win / double(f - pace_.sampleFrames) : 0.0;  // (0: no frames this window)
+            pace_.periodMs = p == 0.0 ? 0.0 : (pace_.periodMs == 0.0 ? p : pace_.periodMs * 0.5 + p * 0.5);
+            pace_.sampleFrames = f;
+            pace_.sampleAt = now;
+        }
+        double per = pace_.periodMs;
+        if (per <= 0.0) {
+            pace_.duty = 0.8;  // (no frames: loading, a paused game: the card is ours)
+        } else {
+            double over = std::min(1.0, std::max(0.0, (per - target) / (0.5 * target)));
+            double perFrame = atTarget + (2.5 - atTarget) * over;
+            pace_.duty = std::min(0.8, std::max(0.08, perFrame / per));
+        }
+        pace_.tokens = std::min(30.0, pace_.tokens + dt * pace_.duty);
+    }
+    double lastSubMs_ = 0.0, slicedMs_ = 0.0;
+    // A pass is latency-bound by one workgroup (the surface pass: ~50 ms however few chunks), so slices do not cut its
+    // time in proportion; they cut the workgroups in flight, leaving the card's multiprocessors to the frames. Only
+    // while the frames are over their target: slices of 16 chunks, 8 when they are 1.5 x over.
+    uint32_t sliceOf(uint32_t p, uint32_t n) {
+        (void)p;
+        static const bool on = [] {
+            const char* e = std::getenv("ATLAS_GEN_PACE");
+            return !e || std::atoi(e) != 0;
+        }();
+        if (!on || !shared_ || !backend_) return n;
+        double target = envMs("ATLAS_GEN_TARGET_MS", 20.0);
+        if (pace_.periodMs <= target) return n;
+        return std::min<uint32_t>(n, pace_.periodMs > 1.5 * target ? 8 : 16);
+    }
+    // before a submission: wait for the budget; returns the wait
+    double paceAcquire() {
+        static const bool on = [] {
+            const char* e = std::getenv("ATLAS_GEN_PACE");
+            return !e || std::atoi(e) != 0;
+        }();
+        if (!on || !shared_ || !backend_) return 0.0;
+        paceUpdate();
+        double need = pace_.cls ? 10.0 : 0.0, waited = 0.0;
+        auto t0 = std::chrono::steady_clock::now();
+        while (pace_.tokens < need && waited < 300.0) {
+            double ms = std::min(8.0, std::max(1.0, (need - pace_.tokens) / std::max(pace_.duty, 0.05)));
+            std::this_thread::sleep_for(std::chrono::microseconds(int64_t(ms * 1000.0)));
+            waited = msSince(t0);
+            paceUpdate();
+        }
+        pace_.waitedMs += waited;
+        if (pace_.cls) pace_.farWaitedMs += waited;
+        return waited;
+    }
     bool submitWait(std::string& err) {
+        paceAcquire();
+        auto sub0 = std::chrono::steady_clock::now();
+        struct Charge {
+            VulkanEngine* e;
+            std::chrono::steady_clock::time_point t;
+            ~Charge() {
+                double ms = msSince(t);
+                e->pace_.tokens -= ms;
+                e->lastSubMs_ = ms;
+                e->pace_.usedMs += ms;
+                e->pace_.maxSubMs = std::max(e->pace_.maxSubMs, ms);
+                e->pace_.subs++;
+                static const double warnMs = envMs("ATLAS_GEN_TRACE_SUBS", 0.0);  // (measurements: submissions over this)
+                if (warnMs > 0.0 && ms > warnMs) std::fprintf(stderr, "TRACE gen submission %.1f ms (%s)\n", ms, e->phase_.c_str());
+            }
+        } charge{this, sub0};
         vkEndCommandBuffer(cmd_);
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
         si.commandBufferCount = 1;
@@ -2655,7 +2789,9 @@ ATLAS_API AtlasStatus atlas_gen_far_ingest(AtlasGen* h, int32_t lod, const int32
         double ms = 0;
         std::string err;
         h->engine->farBake = contextWorld(h->ctx)->genCache();
+        h->engine->paceClass(1);  // (the far field: the leftovers of the GPU budget)
         bool ok = h->engine->farIngest(jobs, lod, rows, capacity, outKinds, mixed, taken, bad.data(), ms, err);
+        h->engine->paceClass(0);
         h->last = Batch{};
         if (!ok) return h->fail(err.rfind("busy:", 0) == 0 ? ATLAS_ERR_TIMEOUT : ATLAS_ERR_GPU, err);
         if (outMixed) *outMixed = mixed;
@@ -3306,6 +3442,16 @@ ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const
         if (outTaken) *outTaken = taken;
         return ATLAS_OK;
     });
+}
+
+ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out) {
+    if (!h || !out) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> l(h->mu);
+    Engine::PaceStats s = h->engine->paceStats();
+    out->periodMs = s.periodMs, out->duty = s.duty, out->tokensMs = s.tokensMs, out->usedMs = s.usedMs;
+    out->waitedMs = s.waitedMs, out->farWaitedMs = s.farWaitedMs, out->maxSubmissionMs = s.maxSubMs;
+    out->submissions = s.submissions;
+    return ATLAS_OK;
 }
 
 ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out) {
