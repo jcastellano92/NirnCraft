@@ -186,6 +186,69 @@ class AtlasOverlaysGpuTest {
                 all.pieces.pct(), all.streets.pct()));
     }
 
+    /**
+     * The bake of the states the settlements' builders place (AtlasOverlayLive.STATES, for the generator program's
+     * table): every piece of every settlement in the street plan built once over the plan's terrain (StreetTerrain:
+     * stone, grass on top, water below the sea), the states its ops would write collected (charred where the piece
+     * burnt), then the kernels' transforms and shapes. NIRNCRAFT_OVL_BAKE=<the resource file to write>.
+     */
+    @Test
+    void bakeStates(MinecraftServer server) throws Exception {
+        String outPath = System.getenv("NIRNCRAFT_OVL_BAKE");
+        org.junit.jupiter.api.Assumptions.assumeTrue(outPath != null, "NIRNCRAFT_OVL_BAKE not set");
+        long t0 = System.nanoTime();
+        trace("begin streetplan");
+        StreetPlan plan = StreetPlan.get();
+        trace("end streetplan");
+        java.util.Set<BlockState> placed = java.util.concurrent.ConcurrentHashMap.newKeySet();
+        Canvas.Tape collect = (c, kind, x, y, z, st, a, b) -> {
+            switch (kind) {
+                case Canvas.Tape.FOUNDATION -> {
+                    for (int yy = a; yy <= y; yy++) placed.add(AtlasOverlayTapes.charred(c, x, yy, z, st));
+                }
+                case Canvas.Tape.BED -> placed.add(st);
+                case Canvas.Tape.NOT_AIR, Canvas.Tape.PLANT -> { }
+                default -> placed.add(AtlasOverlayTapes.charred(c, x, y, z, st));
+            }
+        };
+        long pieces = 0, failed = 0;
+        trace("begin builders");
+        for (int si = 0; si < plan.settlements(); si++) {
+            progress("builders", si, plan.settlements());
+            AtlasCapture.Env env = new AtlasCapture.Env((x, z) -> net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState(),
+                    (x, z) -> com.nirncraft.worldplan.street.StreetTerrain.land(x, z) < 63 ? 62 : Integer.MIN_VALUE, null, null);
+            WorldGenLevel level = AtlasCapture.reader(com.nirncraft.worldplan.street.StreetTerrain::land, SEED, env);
+            for (SettlementPiece p : AtlasOverlayTapes.pieces(plan.sId[si])) {
+                BoundingBox b = p.getBoundingBox();
+                BoundingBox clip = new BoundingBox(b.minX(), Math.max(b.minY() - SettlementPiece.FOUNDATION, -63), b.minZ(), b.maxX(),
+                        Math.min(b.maxY(), 639), b.maxZ());
+                Canvas c = AtlasOverlayTapes.canvas(p, level, clip);
+                c.owner = p.owner();
+                c.tape = collect;
+                try {
+                    Builders.build(c, p);
+                } catch (RuntimeException e) {
+                    failed++;
+                }
+                pieces++;
+            }
+        }
+        progress("builders", plan.settlements(), plan.settlements());
+        trace("end builders");
+        List<BlockState> all = AtlasOverlayTapes.closure(placed);
+        List<String> lines = new ArrayList<>();
+        for (BlockState st : all) lines.add(net.minecraft.commands.arguments.blocks.BlockStateParser.serialize(st));
+        java.util.Collections.sort(lines);
+        List<String> out = new ArrayList<>();
+        out.add("# the block states the settlements' builders place (AtlasOverlaysGpuTest.bakeStates; " + plan.settlements()
+                + " settlements, " + pieces + " pieces), with the overlay kernels' transforms and shapes");
+        out.addAll(lines);
+        Files.createDirectories(Path.of(outPath).getParent());
+        Files.write(Path.of(outPath), out);
+        trace(String.format("done bakeStates %.1fs %d states (%d placed), %d pieces, %d failed", (System.nanoTime() - t0) / 1e9, all.size(),
+                placed.size(), pieces, failed));
+    }
+
     // ---- the overlays as a stage of the generator (atlas_ovl_create_for_gen) ----
 
     /** A Vulkan generator over seed 1234's program with the overlays attached to its batches. */
@@ -195,6 +258,8 @@ class AtlasOverlaysGpuTest {
             AtlasGenNative gn = AtlasGenNative.load(lib);
             if (gn == null) return null;
             trace("begin stage rig");
+            // as in the game: the program carries the overlays' baked states (AtlasOverlayLive.register)
+            AtlasGenProgram.addBlocks(AtlasOverlayLive::states);
             AtlasGenProgram prog = AtlasGenProgram.compile(g, settings, rs, heights, SEED, s -> 0);
             AtlasGenNative.Gen gen = gn.create(AtlasGenNative.BACKEND_VULKAN);
             if (gen == null) return null;
@@ -226,6 +291,7 @@ class AtlasOverlaysGpuTest {
                          StageRig rig, StreetPlan plan, Score total) {
         trace("begin stage " + set.place());
         AtlasOverlayTapes tapes = new AtlasOverlayTapes(rig.prog().blocks);
+        tapes.frozen = true;  // the program's table, as in the game
         tapes.keep = new BoundingBox(set.cx0() << 4, heights.getMinY(), set.cz0() << 4, (set.cx1() << 4) + 15, heights.getMaxY(),
                 (set.cz1() << 4) + 15);
         tapes.recordSettlement(set.place(), window(ref.terrain(), heights, containers), set.cx0(), set.cz0(), set.cx1(), set.cz1());
@@ -271,6 +337,8 @@ class AtlasOverlaysGpuTest {
             }
         }
         double stageMs = with.kernelMs() - bare.kernelMs();
+        report.append(String.format("  frozen table: %d states, %d ops dropped (states it lacks: %s)%n", tapes.blocks.size(), tapes.missing,
+                tapes.missingStates.stream().limit(5).map(Object::toString).toList()));
         report.append(String.format("  the generator's batch with the overlays as a stage: %s; %d chunks flagged; batch kernels %.2f ms without, %.2f ms with "
                         + "(the stage %.2f ms, %.4f ms a chunk); %d chunks stamped a batch%n", sc, flagged, bare.kernelMs(), with.kernelMs(), stageMs,
                 stageMs / n, rig.ovl().stamped() - stamped0));

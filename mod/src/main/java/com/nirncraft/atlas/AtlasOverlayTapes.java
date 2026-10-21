@@ -124,10 +124,23 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         id(Blocks.AIR.defaultBlockState());
     }
 
-    /** The table id of a state (added on first use). */
+    /**
+     * Frozen: the table is the generator program's (its blocks are fixed when it compiles): a state outside it is not
+     * added (id -1) and the ops that would place it are dropped (counted in {@link #missing}).
+     */
+    boolean frozen;
+    long missing;
+    final java.util.Set<BlockState> missingStates = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    /** The table id of a state (added on first use, unless frozen: -1). */
     synchronized int id(BlockState s) {
         int i = ids.getInt(s);
         if (i >= 0) return i;
+        if (frozen) {
+            missing++;
+            if (missingStates.size() < 64) missingStates.add(s);
+            return -1;
+        }
         i = blocks.size();
         if (i > 0xFFFF) throw new IllegalStateException("more than 65536 block states in the overlay table");
         blocks.add(s);
@@ -172,11 +185,11 @@ final class AtlasOverlayTapes implements Canvas.Tape {
             BlockState s = blocks.get(i);
             int x = 0;
             if (s.getBlock() instanceof FenceGateBlock) {
-                x = id(s.setValue(FenceGateBlock.OPEN, true));
+                x = idOr(s.setValue(FenceGateBlock.OPEN, true), i);
             } else if (s.getBlock() instanceof FenceBlock) {
                 BlockState g = gateFor(s);
-                x = id(g.setValue(FenceGateBlock.FACING, Direction.EAST).setValue(FenceGateBlock.OPEN, true))
-                        | id(g.setValue(FenceGateBlock.FACING, Direction.SOUTH).setValue(FenceGateBlock.OPEN, true)) << 16;
+                x = idOr(g.setValue(FenceGateBlock.FACING, Direction.EAST).setValue(FenceGateBlock.OPEN, true), i)
+                        | idOr(g.setValue(FenceGateBlock.FACING, Direction.SOUTH).setValue(FenceGateBlock.OPEN, true), i) << 16;
             }
             if (xform.length <= i) {
                 xform = java.util.Arrays.copyOf(xform, Math.max(i + 1, xform.length * 2 + 64));
@@ -222,14 +235,34 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         return w;
     }
 
+    /** The id of a state (added unless frozen), else {@code fallback} (a frozen table without it: the closest it has). */
+    private int idOr(BlockState s, int fallback) {
+        if (frozen) {
+            int i = idIfPresent(s);
+            return i >= 0 ? i : fallback;
+        }
+        return id(s);
+    }
+
+    /**
+     * Every state the overlays may place, for the generator program's table (AtlasGenProgram.addBlocks): the given
+     * states, the ids the kernels write, and the closure of transforms and shapes. Not frozen.
+     */
+    static List<BlockState> closure(java.util.Collection<BlockState> placed) {
+        AtlasOverlayTapes t = new AtlasOverlayTapes();
+        for (BlockState s : placed) t.id(s);
+        t.blockWords();  // adds the kernels' ids, the gates and every fence / wall / pane shape
+        return List.copyOf(t.blocks);
+    }
+
     /** A connectable state's shapes (see blockWords), or null. */
     private int[] shapeTable(BlockState s) {
         Block b = s.getBlock();
         if (b instanceof FenceBlock || b instanceof IronBarsBlock) {
             int[] t = new int[16];
             for (int m = 0; m < 16; m++)
-                t[m] = id(s.setValue(CrossCollisionBlock.NORTH, (m & 1) != 0).setValue(CrossCollisionBlock.EAST, (m & 2) != 0)
-                        .setValue(CrossCollisionBlock.SOUTH, (m & 4) != 0).setValue(CrossCollisionBlock.WEST, (m & 8) != 0));
+                t[m] = idOr(s.setValue(CrossCollisionBlock.NORTH, (m & 1) != 0).setValue(CrossCollisionBlock.EAST, (m & 2) != 0)
+                        .setValue(CrossCollisionBlock.SOUTH, (m & 4) != 0).setValue(CrossCollisionBlock.WEST, (m & 8) != 0), idIfPresent(s));
             return t;
         }
         if (b instanceof WallBlock) {
@@ -242,7 +275,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                     v = v.setValue(WallBlock.PROPERTY_BY_DIRECTION.get(d), sides[q % 3]);
                     q /= 3;
                 }
-                t[m] = id(v.setValue(WallBlock.UP, q != 0));
+                t[m] = idOr(v.setValue(WallBlock.UP, q != 0), idIfPresent(s));
             }
             return t;
         }
@@ -409,7 +442,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
     }
 
     /** The state wset would write at (x, y, z): the piece's charring filter (Canvas.wset). */
-    private static BlockState charred(Canvas c, int x, int y, int z, BlockState s) {
+    static BlockState charred(Canvas c, int x, int y, int z, BlockState s) {
         return c.burn > 0 && !s.isAir() ? com.nirncraft.fire.aftermath.Charring.apply(s, x, y, z, y - c.oy, c.seed, c.burn) : s;
     }
 
@@ -426,7 +459,9 @@ final class AtlasOverlayTapes implements Canvas.Tape {
             case W, OPEN, FURNITURE -> {
                 BlockState w = charred(c, x, y, z, s);
                 int flags = c.okWorld(x, y - 1, z) ? 0 : OF_NOSMOTHER;
-                int w0 = kind | flags << 4 | id(w) << 16;
+                int sid = id(w);
+                if (sid < 0) return;
+                int w0 = kind | flags << 4 | sid << 16;
                 // a run of plain writes up a column (fill, walls) merges into one range
                 if (kind == W && start > 0 && cs.last[ci] == start - 2 && l.getInt(start - 2) == w0 && (l.getInt(start - 1) >> 16) == y - 1) {
                     int y0 = (short) l.getInt(start - 1);
@@ -441,7 +476,9 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                 l.add((y & 0xFFFF) | a << 16);
             }
             case BED -> {
-                l.add(kind | id(s) << 16);
+                int sid = id(s);
+                if (sid < 0) return;
+                l.add(kind | sid << 16);
                 l.add((y & 0xFFFF) | y << 16);
             }
             case FOUNDATION -> {
@@ -451,6 +488,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                 boolean var = false;
                 for (int i = 0; i < n; i++) {
                     st[i] = id(charred(c, x, y - i, z, s));
+                    if (st[i] < 0) return;
                     var |= st[i] != st[0];
                 }
                 int flags = (var ? OF_VAR : 0) | (c.okWorld(x, a - 1, z) ? 0 : OF_BOTTOMCLIP);
@@ -557,6 +595,47 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         if (s.isLine()) return new Canvas(level, clip, 0, s.floor, 0, Direction.NORTH, p.seed);
         int[] o = SettlementPiece.origin(s);
         return new Canvas(level, clip, o[0], s.floor, o[1], s.facing, p.seed);
+    }
+
+    /** The chunks' tapes (ops in this table's ids, sweep ranges) to a cache: keys (ChunkPos.pack) of chunks this table has. */
+    synchronized void write(java.io.DataOutputStream out, long[] keys) throws java.io.IOException {
+        int n = 0;
+        for (long k : keys) if (chunks.containsKey(k)) n++;
+        out.writeInt(n);
+        for (long k : keys) {
+            Cols c = chunks.get(k);
+            if (c == null) continue;
+            out.writeLong(k);
+            for (int i = 0; i < 256; i++) out.writeInt(c.sweep[i]);
+            for (int i = 0; i < 256; i++) {
+                IntArrayList l = c.ops[i];
+                int len = l == null ? 0 : l.size();
+                out.writeInt(len);
+                for (int j = 0; j < len; j++) out.writeInt(l.getInt(j));
+            }
+        }
+    }
+
+    /** Chunks' tapes from a cache (written by {@link #write} with this table's ids): they replace what this table had. */
+    synchronized long[] read(java.io.DataInputStream in) throws java.io.IOException {
+        int n = in.readInt();
+        long[] keys = new long[n];
+        for (int c = 0; c < n; c++) {
+            long k = in.readLong();
+            keys[c] = k;
+            Cols cs = new Cols();
+            for (int i = 0; i < 256; i++) cs.sweep[i] = in.readInt();
+            for (int i = 0; i < 256; i++) {
+                int len = in.readInt();
+                if (len == 0) continue;
+                IntArrayList l = new IntArrayList(len);
+                for (int j = 0; j < len; j++) l.add(in.readInt());
+                cs.ops[i] = l;
+                cs.last[i] = -1;  // (no merging into a loaded list)
+            }
+            chunks.put(k, cs);
+        }
+        return keys;
     }
 
     /** Chunks with ops (ChunkPos.pack keys). */
