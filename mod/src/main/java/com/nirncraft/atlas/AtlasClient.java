@@ -144,6 +144,7 @@ public final class AtlasClient {
                     AtlasTargets.flushClear();
                     AtlasFarField.restMs = com.nirncraft.render.quality.QualityClient.workerRestMs();
                     if (farField != null) AtlasClientSections.tick(Minecraft.getInstance());  // the loaded chunks' blocks
+                    profileTick();
                 }));
         AtlasClientSections.init();
         NeoForge.EVENT_BUS.addListener((ClientStoppingEvent e) -> AtlasGuard.run("atlas shutdown", () -> {
@@ -901,6 +902,28 @@ public final class AtlasClient {
      */
     private static double glRenderMs, frameWallMs;
     private static long lastFrameNs;
+
+    private static final boolean PROFILE = Boolean.getBoolean("nirncraft.atlas.profile");
+    private static int profileTicks;
+
+    /**
+     * (-Dnirncraft.atlas.profile=true, or the harness flags file) every 2 s one line of atlas-info into
+     * .minecraft/atlas-profile.log, with the player's position: a passive profiler while someone plays (the autotest's
+     * action queue holds the player, so it cannot be used for that).
+     */
+    private static void profileTick() {
+        if (!PROFILE || ++profileTicks % 40 != 0) return;
+        var mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        try {
+            String line = java.time.LocalTime.now() + String.format(java.util.Locale.ROOT, " pos=%.1f,%.1f,%.1f ",
+                    mc.player.getX(), mc.player.getY(), mc.player.getZ()) + debugInfo().replaceAll("\\s+", " ") + "\n";
+            java.nio.file.Files.writeString(mc.gameDirectory.toPath().resolve("atlas-profile.log"), line,
+                    java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+        } catch (Exception e) {
+            // (a profiler never takes the game down)
+        }
+    }
 
     /** The autotest's atlas-info: the core's own report (the grid's pool among it) and the feeds' queues. */
     public static String debugInfo() {
