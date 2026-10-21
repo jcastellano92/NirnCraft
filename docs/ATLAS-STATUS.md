@@ -124,6 +124,17 @@ the passive profiler; the owner plays.
 
 Not merged into atlas-render yet: everything on atlas-naadf after 424841c5 and the generator branch.
 
+## Merge notes (for the step-1 integration into atlas-render)
+
+- With atlas-content a2f5169d, in the generator's AtlasClientGen.java (GPU->GPU path): constructor
+  `farIds[i] = AtlasClientSections.nearIdOf(s);`; ingestTable `far[i] = AtlasClientSections.nearIdOf(s);` and
+  `mats.section(Block.stateById(far[i]), AtlasMaterials.tint(...))` instead of `mats.section(st, ...)`.
+- Far binding numbers: 39 waterAdd (atlas-water), 40 brickData (atlas-content), BINDINGS 41, +1 descriptor pool slot
+  for the publish binding (atlas-water).
+- Feature kernels at -O0 (atlas-features CMake); every other kernel -O3 (the wrapper's default).
+- Rebuild and ship the natives (Windows DLL; Linux .so via build_linux_wsl.py) after the merge; refresh the bakes
+  (stale road / street plans); `atlas-cache/` and `ATLAS_PIPELINE_CACHE` in the instance.
+
 ## Risks to fix after the owner's test
 
 - **atlas_exact.slang's `[noinline]` helpers write the static `g_bad`:** NVIDIA's compiler mixed up repeated calls
