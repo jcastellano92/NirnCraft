@@ -79,6 +79,224 @@ inline bool loadTintSources(const std::string& path, std::vector<State>& lib) {
     return p <= d.size();
 }
 
+// The model quads and sprites of quads.bin / sprites.bin (AtlasLabExport.quads), as the game hands them to
+// atlas_set_material_bricks (AtlasMaterials: a state that is not a full solid cube or leaves gets a brick).
+struct ModelLib {
+    struct Quad {
+        float p[4][3], uv[4][2];
+        int32_t sprite;
+        uint8_t dir, layer;
+        int16_t tint;
+    };
+    struct StateInfo {
+        bool present = false;
+        uint16_t flags = 0;  // 1 solid render, 64 leaves, 128 rendered by its model, 512 air
+        uint8_t emit = 0;
+        std::vector<std::pair<uint8_t, uint32_t>> tints;  // per tint index: kind (1 grass, 2 foliage, 5 constant), colour
+        int model = -1;  // its first variant
+        int fluid = -1;  // its fluid model (quads.bin), -1 none
+        float fluidH = 0;  // the fluid's own height
+    };
+    struct Fluid {
+        int32_t still = -1, flow = -1;
+        uint8_t tintKind = 0;  // 3: water
+    };
+    std::vector<Fluid> fluids;
+    std::vector<std::vector<Quad>> models;
+    std::vector<StateInfo> states;
+    struct Sprite {
+        uint32_t w = 0, h = 0, first = 0;
+        bool animated = false;
+        bool glassy = false;  // (its name: glass, a pane, ice)
+    };
+    std::vector<Sprite> sprites;
+    std::vector<uint32_t> texels;
+};
+
+inline bool loadModels(const std::string& dir, ModelLib& ml) {
+    auto read = [](const std::string& path, std::vector<uint8_t>& d) {
+        std::ifstream f(path, std::ios::binary);
+        if (!f) return false;
+        d.assign((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+        return true;
+    };
+    std::vector<uint8_t> d;
+    if (!read(dir + "quads.bin", d) || d.size() < 8 || std::memcmp(d.data(), "ALQ1", 4) != 0) return false;
+    size_t p = 4;
+    auto u8 = [&]() { return p < d.size() ? d[p++] : uint8_t(0); };
+    auto u16 = [&]() { uint16_t v = 0; if (p + 2 <= d.size()) std::memcpy(&v, &d[p], 2); p += 2; return v; };
+    auto u32 = [&]() { uint32_t v = 0; if (p + 4 <= d.size()) std::memcpy(&v, &d[p], 4); p += 4; return v; };
+    auto f32 = [&]() { float v = 0; if (p + 4 <= d.size()) std::memcpy(&v, &d[p], 4); p += 4; return v; };
+    uint32_t nm = u32();
+    ml.models.resize(nm);
+    for (uint32_t i = 0; i < nm && p < d.size(); i++) {
+        u8();  // AO mode
+        uint32_t nq = u32();
+        ml.models[i].resize(nq);
+        for (auto& q : ml.models[i]) {
+            for (int k = 0; k < 4; k++) {
+                q.p[k][0] = f32(), q.p[k][1] = f32(), q.p[k][2] = f32();
+                q.uv[k][0] = f32(), q.uv[k][1] = f32();
+            }
+            p += 16;  // normals
+            q.sprite = int32_t(u32());
+            q.dir = u8();
+            u8(), u8();  // cull, shade
+            q.layer = u8();
+            q.tint = int16_t(u16());
+            u8(), u8();  // emission, AO flags
+        }
+    }
+    ml.fluids.resize(u32());
+    for (auto& fl : ml.fluids) {
+        fl.still = int32_t(u32()), fl.flow = int32_t(u32());
+        u32(), u8();  // overlay, layer
+        fl.tintKind = u8();
+        u32();
+    }
+    uint32_t ns = u32();
+    for (uint32_t i = 0; i < ns && p < d.size(); i++) {
+        uint32_t id = u32();
+        if (id >= ml.states.size()) ml.states.resize(size_t(id) + 1);
+        auto& s = ml.states[id];
+        s.present = true;
+        p += u16();  // name
+        u32();       // block
+        s.flags = u16();
+        s.emit = u8();
+        u8();
+        f32();
+        if (u8()) p += 8;  // offset
+        s.fluid = int8_t(u8());
+        if (s.fluid >= 0) s.fluidH = f32(), p += 2;  // own height, amount, flags
+        u8();
+        uint8_t partial = u8();
+        for (int k = 0; k < 6; k++) p += (partial >> k & 1) ? 32 : 0;
+        u8();
+        uint8_t nt = u8();
+        for (int t = 0; t < nt; t++) {
+            uint8_t kind = u8();
+            uint32_t c = u32();
+            s.tints.emplace_back(kind, c);
+        }
+        uint8_t nv = u8();
+        for (int v = 0; v < nv; v++) {
+            int32_t m = int32_t(u32());
+            if (v == 0) s.model = m;
+        }
+    }
+    if (!read(dir + "sprites.bin", d) || d.size() < 8 || std::memcmp(d.data(), "ALT1", 4) != 0) return false;
+    p = 4;
+    uint32_t n = u32();
+    ml.sprites.resize(n);
+    for (uint32_t i = 0; i < n && p < d.size(); i++) {
+        uint16_t nl = u16();
+        std::string nm(reinterpret_cast<const char*>(d.data() + std::min(p, d.size())), std::min<size_t>(nl, d.size() - std::min(p, d.size())));
+        p += nl;
+        auto& sp = ml.sprites[i];
+        sp.glassy = nm.find("glass") != std::string::npos || nm.find("ice") != std::string::npos;
+        sp.w = u16(), sp.h = u16();
+        sp.animated = (u8() & 1) != 0;
+        sp.first = uint32_t(ml.texels.size());
+        for (uint32_t k = 0; k < sp.w * sp.h; k++) ml.texels.push_back(u32());
+    }
+    return p <= d.size();
+}
+
+// Whether state id takes a brick (AtlasShapes.brickable / fluidBrick): a fluid other than water, or a block drawn by its
+// model that is not leaves, not a full solid cube unless its texture moves, and not translucent unless its texels are
+// all opaque or clear (redstone dust; glass, panes and ice stay the translucent layer's).
+inline bool brickWorthy(const ModelLib& ml, uint32_t id) {
+    if (id >= ml.states.size() || !ml.states[id].present) return false;
+    const auto& s = ml.states[id];
+    if (!(s.flags & 128) && s.fluid >= 0 && size_t(s.fluid) < ml.fluids.size()) return ml.fluids[size_t(s.fluid)].tintKind != 3;
+    if ((s.flags & (64 | 512)) || !(s.flags & 128) || s.model < 0 || size_t(s.model) >= ml.models.size()) return false;
+    // a full solid cube stays a textured cube unless its texture moves (AtlasShapes.brickable; sprites.bin holds
+    // frame 0 only: offline that is a still brick)
+    bool animated = false;
+    for (const auto& q : ml.models[size_t(s.model)])
+        animated |= q.sprite >= 0 && size_t(q.sprite) < ml.sprites.size() && ml.sprites[size_t(q.sprite)].animated;
+    if ((s.flags & 1) && !animated) return false;
+    // translucent quads: only with all-opaque-or-clear texels (redstone dust; AtlasShapes.binaryAlpha); glass,
+    // panes, ice stay the translucent layer's
+    bool translucent = false;
+    for (const auto& q : ml.models[size_t(s.model)])
+        if (q.layer == 2 && q.sprite >= 0 && size_t(q.sprite) < ml.sprites.size()) {
+            const auto& sp = ml.sprites[size_t(q.sprite)];
+            size_t n = size_t(sp.w) * sp.h, mid = 0;
+            for (size_t i = 0; i < n; i++) {
+                uint32_t a = ml.texels[sp.first + i] >> 24;
+                mid += a > 8 && a < 247 ? 1 : 0;
+            }
+            translucent |= n == 0 || mid * 50 > n || sp.glassy;
+        }
+    return !translucent;
+}
+
+// The bricks of materials [first, first + ids.size()) for state ids `ids` (0 / not brick-worthy: none), tinted with
+// the export's colours, through atlas_set_material_bricks.
+inline bool uploadBricks(AtlasContext* ctx, const ModelLib& ml, uint16_t first, const std::vector<uint32_t>& ids,
+                         uint32_t grass, uint32_t foliage, size_t& bricked, std::string& why) {
+    std::vector<AtlasBrickQuad> quads;
+    std::vector<float> emission(ids.size(), 0.0f);
+    for (size_t m = 0; m < ids.size(); m++) {
+        uint32_t id = ids[m];
+        if (id >= ml.states.size() || !ml.states[id].present) continue;
+        const auto& s = ml.states[id];
+        bool fluidOnly = !(s.flags & 128) && s.fluid >= 0 && size_t(s.fluid) < ml.fluids.size() && ml.fluids[size_t(s.fluid)].tintKind != 3;
+        if (fluidOnly) {
+            // a fluid other than water (lava): a box to its own height, still on top and bottom, flowing on the sides
+            // (AtlasShapes.fluidBrick)
+            const auto& fl = ml.fluids[size_t(s.fluid)];
+            if (fl.still < 0 || fl.flow < 0 || size_t(std::max(fl.still, fl.flow)) >= ml.sprites.size()) continue;
+            emission[m] = float(s.emit) / 15.0f;
+            float h = std::clamp(s.fluidH, 1.0f / 16.0f, 1.0f);
+            auto add = [&](std::initializer_list<float> pos, std::initializer_list<float> uv, int32_t sprite, int dir) {
+                AtlasBrickQuad b{};
+                std::copy(pos.begin(), pos.end(), &b.pos[0][0]);
+                std::copy(uv.begin(), uv.end(), &b.uv[0][0]);
+                b.sprite = uint32_t(sprite), b.tint = 0xFFFFFFu, b.dir = dir, b.material = uint32_t(m);
+                quads.push_back(b);
+            };
+            add({0, h, 0, 1, h, 0, 1, h, 1, 0, h, 1}, {0, 0, 1, 0, 1, 1, 0, 1}, fl.still, 1);
+            add({0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1}, {0, 0, 1, 0, 1, 1, 0, 1}, fl.still, 0);
+            float v = 0.5f * h;
+            add({0, h, 0, 1, h, 0, 1, 0, 0, 0, 0, 0}, {0, 0, 0.5f, 0, 0.5f, v, 0, v}, fl.flow, 2);
+            add({0, h, 1, 1, h, 1, 1, 0, 1, 0, 0, 1}, {0, 0, 0.5f, 0, 0.5f, v, 0, v}, fl.flow, 3);
+            add({0, h, 0, 0, h, 1, 0, 0, 1, 0, 0, 0}, {0, 0, 0.5f, 0, 0.5f, v, 0, v}, fl.flow, 4);
+            add({1, h, 0, 1, h, 1, 1, 0, 1, 1, 0, 0}, {0, 0, 0.5f, 0, 0.5f, v, 0, v}, fl.flow, 5);
+            bricked++;
+            continue;
+        }
+        if (!brickWorthy(ml, id)) continue;
+        emission[m] = float(s.emit) / 15.0f;
+        bool any = false;
+        for (const auto& q : ml.models[size_t(s.model)]) {
+            if (q.sprite < 0 || size_t(q.sprite) >= ml.sprites.size()) continue;
+            AtlasBrickQuad b{};
+            std::memcpy(b.pos, q.p, sizeof b.pos);
+            std::memcpy(b.uv, q.uv, sizeof b.uv);
+            b.sprite = uint32_t(q.sprite);
+            b.dir = q.dir;
+            b.material = uint32_t(m);
+            b.tint = 0xFFFFFFu;
+            if (q.tint >= 0 && size_t(q.tint) < s.tints.size()) {
+                auto [kind, c] = s.tints[size_t(q.tint)];
+                b.tint = kind == 1 ? grass : kind == 2 ? foliage : kind == 5 ? c & 0xFFFFFFu : 0xFFFFFFu;
+            }
+            quads.push_back(b);
+            any = true;
+        }
+        bricked += any ? 1 : 0;
+    }
+    std::vector<AtlasBrickSprite> sp(ml.sprites.size());
+    for (size_t i = 0; i < sp.size(); i++) sp[i] = {ml.sprites[i].w, ml.sprites[i].h, ml.sprites[i].first, 1};
+    if (atlas_set_material_bricks(ctx, first, uint32_t(ids.size()), quads.data(), uint32_t(quads.size()), sp.data(),
+                                  uint32_t(sp.size()), ml.texels.data(), uint32_t(ml.texels.size()), emission.data()) != ATLAS_OK)
+        return why = atlas_last_error(ctx), false;
+    return true;
+}
+
 inline bool loadBlocks(const std::string& path, std::vector<State>& lib) {
     std::ifstream f(path, std::ios::binary);
     if (!f) return false;
@@ -271,6 +489,7 @@ struct Loaded {
     std::unordered_map<uint64_t, std::pair<int, int>> chunks;  // exported chunk columns -> (lowest, highest) section
     size_t sections = 0, states = 0, shaped = 0;
     std::vector<AtlasMaterialShape> shapes;  // the materials' shapes from firstMat on, as set (textest: their tiles)
+    std::vector<uint32_t> matState;  // per material from firstMat on: its state id
     uint16_t firstMat = 0;
     int x0 = 0, z0 = 0, x1 = 0, z1 = 0;  // block bounds of the exported chunks
     static uint64_t key(int cx, int cz) { return uint64_t(uint32_t(cx)) << 32 | uint32_t(cz); }
@@ -284,7 +503,8 @@ struct Loaded {
 // box (world blocks, inclusive; null: everything): only the blocks inside it exist (one element cut from the export)
 inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector<Section>& secs, bool keepAll,
                    uint32_t grass, uint32_t foliage, uint32_t water, uint16_t firstMat, Loaded& out, std::string& why,
-                   const int* box = nullptr, bool cutouts = true, bool hold = false) {
+                   const int* box = nullptr, bool cutouts = true, bool hold = false,
+                   const std::vector<uint8_t>* modelled = nullptr) {
     if (box) {
         std::vector<Section> kept;
         for (Section& s : secs) {
@@ -313,7 +533,9 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
         auto it = out.matOf.find(id);
         if (it != out.matOf.end()) return it->second;
         uint16_t m = 0;
-        if (id < lib.size() && lib[id].present && (keepAll ? anyContent(lib[id]) : keptByGame(lib[id]))) {
+        // (keep=near, `modelled`: every state with a model, as the game's client feed keeps them: AtlasSections.nearKept)
+        bool near = modelled && id < modelled->size() && (*modelled)[id] && id < lib.size() && !isAir(lib[id]);
+        if (id < lib.size() && lib[id].present && (near || (keepAll ? anyContent(lib[id]) : keptByGame(lib[id])))) {
             const State& s = lib[id];
             bool wat = s.cls == 2 && !(s.flags & 4);
             uint32_t tint = s.tint == 1 ? grass : s.tint == 2 ? foliage : s.tint == 3 ? water : 0xFFFFFFu;
@@ -329,8 +551,10 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
             am.albedo[1] = lin8((tm >> 8) & 255);
             am.albedo[2] = lin8(tm & 255);
             am.roughness = wat ? 0.05f : 0.85f;
-            am.emissive = s.emit >= 10 ? float(s.emit) / 15.0f : 0.0f;
-            am.cls = wat ? ATLAS_CLASS_WATER : s.emit >= 10 ? ATLAS_CLASS_EMISSIVE : s.cls == 1 ? ATLAS_CLASS_FOLIAGE : ATLAS_CLASS_TERRAIN;
+            // (keep=near: every emitter at its level, as AtlasMaterials.material now gives the game's; else the old 10)
+            int minEmit = modelled ? 1 : 10;
+            am.emissive = s.emit >= minEmit ? float(s.emit) / 15.0f : 0.0f;
+            am.cls = wat ? ATLAS_CLASS_WATER : s.emit >= minEmit ? ATLAS_CLASS_EMISSIVE : s.cls == 1 ? ATLAS_CLASS_FOLIAGE : ATLAS_CLASS_TERRAIN;
             AtlasMaterialShape sh{};
             sh.occupancy = wat ? ~0ull : s.mask;
             sh.mean = tm;
@@ -347,6 +571,7 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
             sh.flags = (s.cls == 1 || s.cls == 4) && cutouts ? ATLAS_SHAPE_CUTOUT : 0u;
             if (wat) sh.flags = 0;
             m = uint16_t(firstMat + mats.size());
+            out.matState.push_back(id);
             mats.push_back(am);
             shapes.push_back(sh);
             out.shaped += sh.occupancy != ~0ull || sh.flags ? 1 : 0;

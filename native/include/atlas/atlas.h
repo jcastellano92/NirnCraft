@@ -275,6 +275,8 @@ typedef struct AtlasLight {
 #define ATLAS_LIGHT_FIRE 1u   /* braziers, camp fires: always lit, flickering (they read at night) */
 #define ATLAS_LIGHT_LAVA 2u   /* always lit, a slow pulse */
 #define ATLAS_LIGHT_MIST 3u   /* spray, lit by the sun and the sky: a white haze by day, faint by night */
+#define ATLAS_LIGHT_BLOCK 4u  /* a block's own emitter (the grid's: a torch, a lantern): steady, its own hue, no glow
+                                 drawn over it (its surface draws it) */
 
 typedef struct AtlasStats {
     uint32_t regions, regionsDirty;
@@ -616,6 +618,37 @@ typedef struct AtlasMaterialShape {
  */
 ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t first, const uint32_t* textures,
                                                   uint32_t count);
+/*
+ * (abi 0.18, optional) Micro-voxel bricks (docs/ATLAS-WORLD-STORE.md section 4): a material whose block model is not a
+ * full cube (a door, a rail, redstone, a lectern, a torch, a crop) is voxelised from its model quads into a 16 x 16 x 16
+ * brick (1/16 block), deduplicated per distinct content, and primary and shadow rays meet a level-0 grid voxel of that
+ * material by its micro-voxels (their colour; their emission where the material emits). Materials first .. first +
+ * count - 1 (first >= 1) are set: quads[] holds every quad of them (`material` relative to first; a material with no
+ * quad loses its brick), sprites[] the textures the quads sample (texels: ARGB, sRGB, rows from the top; the sprite's
+ * frames stacked: frame k at firstTexel + k * width * height), emission[] per material 0..1 (NULL: none). A material
+ * whose quads sample an animated sprite gets a brick a frame (as many as its longest animation, at most 64), shown by
+ * the frame's time: animated textures move (lava, fire, a campfire's flames, magma). Any thread; copied.
+ *  pos       the quad's corners in block space (0..1 for a plain cube), in the model's order
+ *  uv        each corner's (u, v) in the sprite's own 0..1 space
+ *  tint      RGB the texels are multiplied by (0xFFFFFF: none)
+ *  dir       the quad's face direction (0 down, 1 up, 2 north, 3 south, 4 west, 5 east; -1: from its winding)
+ */
+typedef struct AtlasBrickQuad {
+    float pos[4][3];
+    float uv[4][2];
+    uint32_t sprite;
+    uint32_t tint;
+    int32_t dir;
+    uint32_t material;
+} AtlasBrickQuad;
+typedef struct AtlasBrickSprite {
+    uint32_t width, height;
+    uint32_t firstTexel;  /* into texels[] */
+    uint32_t frames;      /* bits 0-15 its frames (0 or 1: still), bits 16-31 game ticks a frame (0: 1) */
+} AtlasBrickSprite;
+ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t first, uint32_t count, const AtlasBrickQuad* quads,
+                                                uint32_t quadCount, const AtlasBrickSprite* sprites, uint32_t spriteCount,
+                                                const uint32_t* texels, uint32_t texelCount, const float* emission);
 /*
  * (abi 0.16) Pre-exposure: the GL path's half-float images (colour: radiance and the near field's inscatter; the near
  * light's irradiance) are written multiplied by this (the host's exposure for the coming frame), so physical light

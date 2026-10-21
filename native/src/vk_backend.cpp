@@ -40,6 +40,7 @@
 #include "atlas_lightcull_spv.h"   // generated: the far lights culled, admitted and binned on the GPU
 #include "atlas_lightadmit_spv.h"
 #include "atlas_lightbin_spv.h"
+#include "atlas_gridlight_spv.h"
 #include "atlas_far_spv.h"      // generated: atlas_far_spv[], atlas_far_spv_size (bytes)
 #include "atlas_ingest_spv.h"   // generated
 #include "atlas_publish_spv.h"  // generated
@@ -198,7 +199,7 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 39;
+constexpr uint32_t BINDINGS = 41;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
@@ -211,9 +212,16 @@ constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPT
                    // frame's candidates and its tile lists (atlas_far.slang lightCullMain)
                    B_LIGHT_SRC = 34, B_LIGHT_CAND = 35, B_LIGHT_LIST = 36,
                    // the near light's own samples per pixel in its history (nearTemporalMain), this frame's and the last's
-                   B_NEAR_AGE = 37, B_PREV_NEAR_AGE = 38;
+                   B_NEAR_AGE = 37, B_PREV_NEAR_AGE = 38,
+                   // (the split under PRIMARY_NEAR_LIT) the water over each pixel's surface (farMain), for nearTemporalMain
+                   B_WATER_ADD = 39,
+                   // (abi 0.18) the micro-voxel bricks (bricks.hpp BrickStore::pack; atlas_bricks.slang)
+                   B_BRICKS = 40;
 // lightList's words before the tiles' (counters, the score histogram) and a tile's (count + 64 indices)
 constexpr uint32_t LIGHT_LIST_HEAD = 260, LIGHT_TILE_WORDS = 65;
+// gridLightMain (atlas_bricks.slang): its threads (GRID_LIGHT_THREADS: 4 x 4 x 4 blocks each of 192 x 96 x 192) and the
+// candidates' cap (atlas_far.slang LIGHT_CAND_CAP)
+constexpr uint32_t GRID_LIGHT_THREADS = 48u * 48u * 24u, GRID_LIGHT_CAND_CAP = 65536u;
 // the grid's build kernels (atlas_voxgrid.slang): chunks, blocks, bits, pool, jobs, summed-volume table, the batch's
 // sections' raw ids (the coarse levels' ingest reads them where they were staged), and those that were on the GPU
 // already (VoxGrid::ingestGpu), copied together; packed sections staged to expand, and those packed for the host
@@ -232,10 +240,15 @@ constexpr uint32_t PASS_PUSH_BYTES = 16;  // width, height, nearLight, pre-expos
 // The GL compute pass that writes the shared nearDepth / nearInfo images: gl_near.hpp (both backends' GL paths). Same
 // bottom-up rows as GL; the Vulkan ingest pass flips them for the far kernel.
 
+// the split under PRIMARY_NEAR_LIT: waterAdd is a buffer per pixel, the publish pass hands its water surface on
+bool unifiedSplit(const FrameGpu& frame) {
+    return (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) && (frame.dims[2] & 0x100000u);  // (ATLAS_FRAME_PRIMARY_NEAR_LIT)
+}
+
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
            b == B_COUNTERS || b == B_NEAR || b == B_ACTORS || b == B_CLOUD || b == B_CLOUD_DEPTH || b == B_SURFACE ||
-           b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST || b == B_NEAR_AGE;
+           b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST || b == B_NEAR_AGE || b == B_WATER_ADD;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT,
@@ -385,6 +398,7 @@ struct Slot {
     // the far lights on the GPU this frame (FRAME_GPU_LIGHTS_BIT): the index's records, the screen's 32 px tiles
     bool gpuLights = false;
     uint32_t lightRecords = 0, lightTiles = 0;
+    bool gridLights = false;  // gridLightMain this frame
 };
 
 class VulkanBackend final : public Backend {
@@ -454,7 +468,7 @@ public:
             if (nearUpShader_) vkDestroyShaderModule(dev_, nearUpShader_, nullptr);
             if (nearTempPipe_) vkDestroyPipeline(dev_, nearTempPipe_, nullptr);
             if (nearTempShader_) vkDestroyShaderModule(dev_, nearTempShader_, nullptr);
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 4; i++) {
                 if (lightPipe_[i]) vkDestroyPipeline(dev_, lightPipe_[i], nullptr);
                 if (lightShader_[i]) vkDestroyShaderModule(dev_, lightShader_[i], nullptr);
             }
@@ -579,9 +593,11 @@ public:
             if (makePipeline(cp, &nearTempPipe_, "nearTemporalMain") != VK_SUCCESS)
                 return fail(err, "near temporal pipeline");
             // the far lights on the GPU: cull, admit, bin
-            const uint32_t* lcode[3] = {atlas_lightcull_spv, atlas_lightadmit_spv, atlas_lightbin_spv};
-            const size_t lsize[3] = {atlas_lightcull_spv_size, atlas_lightadmit_spv_size, atlas_lightbin_spv_size};
-            for (int i = 0; i < 3; i++) {
+            // (and the grid's emitters as lights, atlas_bricks.slang gridLightMain)
+            const uint32_t* lcode[4] = {atlas_lightcull_spv, atlas_lightadmit_spv, atlas_lightbin_spv, atlas_gridlight_spv};
+            const size_t lsize[4] = {atlas_lightcull_spv_size, atlas_lightadmit_spv_size, atlas_lightbin_spv_size,
+                                     atlas_gridlight_spv_size};
+            for (int i = 0; i < 4; i++) {
                 smci.codeSize = lsize[i];
                 smci.pCode = lcode[i];
                 if (vkCreateShaderModule(dev_, &smci, nullptr, &lightShader_[i]) != VK_SUCCESS) return fail(err, "far light shader");
@@ -593,7 +609,8 @@ public:
         std::vector<VkDescriptorType> pubTypes = {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                                  VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE};
+                                                  VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                                  VK_DESCRIPTOR_TYPE_STORAGE_BUFFER};  // (8: the water's surface)
         if (!createPipe(atlas_publish_spv, atlas_publish_spv_size, pubTypes, PASS_PUSH_BYTES, publishPipe_,
                         publishLayout_, publishSetLayout_, publishShader_, err, "publishMain"))
             return false;
@@ -605,7 +622,7 @@ public:
         if (!createVoxGridPipes(err)) return false;
 
         VkDescriptorPoolSize ps[4] = {{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SLOTS},
-                                      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SLOTS * (BINDINGS - 1 + 4 + 2 + VG_BINDINGS)},
+                                      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SLOTS * (BINDINGS - 1 + 5 + 2 + VG_BINDINGS)},
                                       {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, SLOTS * (4 + 2)},
                                       {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, SLOTS}};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
@@ -908,7 +925,7 @@ public:
 
         begin(s);
         imageBarriers(s.cmd, true);
-        uint32_t pcv[4] = {w, h, nearLight ? 1u : 0u, 0u};
+        uint32_t pcv[4] = {w, h, nearLight ? (unifiedSplit(frame) ? 2u : 1u) : 0u, 0u};
         std::memcpy(&pcv[3], &in.preExposure, 4);
         if (nearOn) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestPipe_);
@@ -975,7 +992,7 @@ public:
         hostImageBarrier(s.cmd, true);
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0);
         computeBarrier(s.cmd);
-        uint32_t pcv[4] = {w, h, nearLight ? 1u : 0u, 0u};
+        uint32_t pcv[4] = {w, h, nearLight ? (unifiedSplit(frame) ? 2u : 1u) : 0u, 0u};
         std::memcpy(&pcv[3], &in.preExposure, 4);
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
         vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
@@ -1836,8 +1853,19 @@ private:
             if (!upload(shared_[B_TEX], src, n * 4, false, Mem::HostWrite, err)) return false;
             texRevision_ = in.textures ? in.texturesRevision : 0;
         }
+        if (!shared_[B_BRICKS].buf || (in.bricks && in.bricksRevision != brickRevision_)) {
+            // new bricks: a new buffer, as the textures (frames in flight keep the old one)
+            retire(shared_[B_BRICKS]);
+            static const uint32_t none = 0u;
+            const uint32_t* src = in.bricks && !in.bricks->empty() ? in.bricks->data() : &none;
+            size_t n = in.bricks && !in.bricks->empty() ? in.bricks->size() : 1;
+            if (!upload(shared_[B_BRICKS], src, n * 4, false, Mem::HostWrite, err)) return false;
+            brickRevision_ = in.bricks ? in.bricksRevision : 0;
+        }
         // the far lights on the GPU: the index when it changed (a new buffer; frames in flight keep the old one)
-        s.gpuLights = (frame.dims[2] & FRAME_GPU_LIGHTS_BIT) != 0 && in.lights && in.lightRecords > 0;
+        // (the grid's emitters, gridLightMain, need the passes too when the index holds nothing: its header, the budget)
+        s.gridLights = (frame.dims[2] & FRAME_GPU_LIGHTS_BIT) != 0 && in.lights && in.gridLights && in.voxgrid;
+        s.gpuLights = (frame.dims[2] & FRAME_GPU_LIGHTS_BIT) != 0 && in.lights && (in.lightRecords > 0 || s.gridLights);
         if (!shared_[B_LIGHT_SRC].buf || (s.gpuLights && in.lightsRevision != lightRevision_)) {
             retire(shared_[B_LIGHT_SRC]);
             static const Float4 none{};
@@ -1848,7 +1876,9 @@ private:
         }
         s.lightRecords = s.gpuLights ? in.lightRecords : 0;
         s.lightTiles = ((w + 31) / 32) * ((h + 31) / 32);
-        if (!ensure(s.bufs[B_LIGHT_CAND], size_t(std::max<uint32_t>(s.lightRecords, 1)) * 64, false, Mem::DeviceOnly, err) ||
+        // (gridLightMain appends up to LIGHT_CAND_CAP: the whole list then)
+        size_t cands = s.gridLights ? size_t(GRID_LIGHT_CAND_CAP) : size_t(std::max<uint32_t>(s.lightRecords, 1));
+        if (!ensure(s.bufs[B_LIGHT_CAND], cands * 64, false, Mem::DeviceOnly, err) ||
             !ensure(s.bufs[B_LIGHT_LIST], (size_t(LIGHT_LIST_HEAD) + size_t(s.lightTiles) * LIGHT_TILE_WORDS) * 4, false,
                     Mem::DeviceOnly, err))
             return false;
@@ -1871,7 +1901,8 @@ private:
                   // the near light: a pixel's worth unless the frame lights the near field (the kernel writes it then)
                   ensure(s.bufs[B_NEAR_LIGHT], (frame.dims[2] & FRAME_NEAR_LIGHT_BIT) ? px * 16 : 16, false, outKind, err) &&
                   ensure(s.bufs[B_CLOUD], size_t((w + 1) / 2) * ((h + 1) / 2) * 16, false, Mem::DeviceOnly, err) &&
-                  ensure(s.bufs[B_CLOUD_DEPTH], size_t((w + 1) / 2) * ((h + 1) / 2) * 4, false, Mem::DeviceOnly, err);
+                  ensure(s.bufs[B_CLOUD_DEPTH], size_t((w + 1) / 2) * ((h + 1) / 2) * 4, false, Mem::DeviceOnly, err) &&
+                  ensure(s.bufs[B_WATER_ADD], pnSplit ? px * 16 : 16, false, Mem::DeviceOnly, err);
         if (ok) {
             VkBuffer before = s.bufs[B_SURFACE].buf;
             VkBuffer ageBefore = s.bufs[B_NEAR_AGE].buf;
@@ -1932,9 +1963,9 @@ private:
             const uint32_t bufOf[4] = {B_COLOR, B_NORMAL, B_DEPTH, B_NEAR_LIGHT};
             const int imgOf[4] = {IMG_COLOR, IMG_NORMAL, IMG_DEPTH, IMG_NEAR_LIGHT};
             const uint32_t bufAt[4] = {0, 1, 2, 6}, imgAt[4] = {3, 4, 5, 7};
-            VkDescriptorBufferInfo bi[4];
+            VkDescriptorBufferInfo bi[5];
             VkDescriptorImageInfo ii[4];
-            VkWriteDescriptorSet wr[8];
+            VkWriteDescriptorSet wr[9];
             for (uint32_t k = 0; k < 4; k++) {
                 bi[k] = {s.bufs[bufOf[k]].buf, 0, storageRange(s.bufs[bufOf[k]])};
                 ii[k] = {VK_NULL_HANDLE, images_[imgOf[k]].view, VK_IMAGE_LAYOUT_GENERAL};
@@ -1953,7 +1984,15 @@ private:
                 im.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
                 im.pImageInfo = &ii[k];
             }
-            vkUpdateDescriptorSets(dev_, 8, wr, 0, nullptr);
+            // 8: the water's surface (waterAdd; a pixel's worth unless the split under PRIMARY_NEAR_LIT sized it)
+            bi[4] = {s.bufs[B_WATER_ADD].buf, 0, storageRange(s.bufs[B_WATER_ADD])};
+            wr[8] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+            wr[8].dstSet = s.publishSet;
+            wr[8].dstBinding = 8;
+            wr[8].descriptorCount = 1;
+            wr[8].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            wr[8].pBufferInfo = &bi[4];
+            vkUpdateDescriptorSets(dev_, 9, wr, 0, nullptr);
             s.publishDirty = false;
         }
         if (attached_ && s.ingestDirty) {
@@ -2462,8 +2501,16 @@ private:
             vkCmdPipelineBarrier(s.cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0,
                                  nullptr, 0, nullptr);
             uint32_t groups = (s.lightRecords + 63) / 64;
-            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lightPipe_[0]);
-            vkCmdDispatch(s.cmd, groups, 1, 1);
+            if (groups) {
+                vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lightPipe_[0]);
+                vkCmdDispatch(s.cmd, groups, 1, 1);
+            }
+            if (s.gridLights) {
+                // the grid's emitters as candidates beside the index's (atlas_bricks.slang gridLightMain)
+                vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lightPipe_[3]);
+                vkCmdDispatch(s.cmd, (GRID_LIGHT_THREADS + 63) / 64, 1, 1);
+                groups = (GRID_LIGHT_CAND_CAP + 63) / 64;  // (up to four candidates a thread: the whole list)
+            }
             computeBarrier(s.cmd);
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lightPipe_[1]);
             vkCmdDispatch(s.cmd, groups, 1, 1);
@@ -3080,8 +3127,8 @@ private:
     VkPipeline nearLightPipe_ = VK_NULL_HANDLE, nearUpPipe_ = VK_NULL_HANDLE;
     VkShaderModule nearLightShader_ = VK_NULL_HANDLE, nearUpShader_ = VK_NULL_HANDLE;
     VkPipeline nearTempPipe_ = VK_NULL_HANDLE;
-    VkPipeline lightPipe_[3] = {};  // the far lights on the GPU: lightCullMain, lightAdmitMain, lightBinMain
-    VkShaderModule lightShader_[3] = {};
+    VkPipeline lightPipe_[4] = {};  // the far lights on the GPU: lightCullMain, lightAdmitMain, lightBinMain
+    VkShaderModule lightShader_[4] = {};
     uint64_t lightRevision_ = ~0ull;
     // the level-0 grid (voxgrid.hpp): its build kernels, their layout, the summed-volume table, the last build's GPU time
     // vgSectionMain, vgSatX, vgSatZ, vgSatY, vgGrowMain, vgFillMain, vgIngestMain, vgDownMain
@@ -3096,6 +3143,7 @@ private:
     uint32_t vgCap_ = 0;      // slots of every level
     VkDeviceSize vgSatBytes_ = 0;
     uint64_t texRevision_ = ~0ull;
+    uint64_t brickRevision_ = ~0ull;
     double vgStageMs_ = 0, vgStageMaxMs_ = 0;
     double vgLastMs_ = 0, vgMsTotal_ = 0;
     GlTimes glTimes_;

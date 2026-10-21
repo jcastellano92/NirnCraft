@@ -219,7 +219,9 @@ void airAt(float worldY) {
         return;
     }
     float3 moon = gMoonDir.w > 0.5 ? gMoonDir.xyz : -sun;
-    float3 moonRad = gMoonDir.w > 0.5 ? gMoonRad.xyz : float3(0.035, 0.05, 0.09);  // the host's moons, else the old key
+    // the host's moons, else a real full moon (its irradiance over pi, ~1/400000 of the sun's: AtlasAir's; the old
+    // key, 0.035 0.05 0.09, was 4000 times that and drowned every torch's pool offline)
+    float3 moonRad = gMoonDir.w > 0.5 ? gMoonRad.xyz : float3(8.7e-6, 1.25e-5, 2.2e-5);
     gKeyRad = airLightTransmittance(r, moon.y) * moonRad * smoothstep(-0.05, -0.2, sun.y);
 }
 

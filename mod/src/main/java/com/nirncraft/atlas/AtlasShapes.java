@@ -251,6 +251,163 @@ final class AtlasShapes {
         return faces;
     }
 
+    /**
+     * A model quad for the micro-voxel bricks (atlas.h AtlasBrickQuad): its corners (12 floats, block space), their
+     * (u, v) in its sprite's own 0..1 (8 floats), the sprite ({width, height, frames, game ticks a frame, then the ARGB
+     * texels of every frame in turn}: one array per sprite, shared), the tint (RGB, 0xFFFFFF none) and its face direction.
+     */
+    record BrickQuad(float[] pos, float[] uv, int[] texels, int tint, int dir) {}
+
+    /** A state's quads for its brick and its emission (light / 15). */
+    record BrickModel(List<BrickQuad> quads, float emission) {}
+
+    private static final java.util.Map<TextureAtlasSprite, int[]> SPRITE_TEXELS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** Texels before the frames in spriteTexels' arrays: width, height, frames, game ticks a frame. */
+    static final int SPRITE_HEAD = 4;
+
+    /**
+     * The sprite's frames as {width, height, frames, ticks a frame, ARGB...} (cached per sprite): an animated sprite's
+     * distinct frames in order (at most 64; its frame time from its .mcmeta, 1 tick by default), else its one image.
+     */
+    static int[] spriteTexels(TextureAtlasSprite sp) {
+        return SPRITE_TEXELS.computeIfAbsent(sp, s -> {
+            NativeImage img;
+            try {
+                img = s.contents().getOriginalImage();
+            } catch (RuntimeException e) {
+                return new int[] {0, 0, 1, 1};
+            }
+            int w = s.contents().width(), h = s.contents().height();
+            int[] frames = {0};
+            if (s.contents().isAnimated()) {
+                var u = s.contents().getUniqueFrames();
+                frames = new int[Math.min(64, Math.max(1, u.size()))];
+                for (int i = 0; i < frames.length; i++) frames[i] = u.getInt(i);
+            }
+            int perRow = Math.max(1, img.getWidth() / Math.max(1, w));
+            int[] t = new int[SPRITE_HEAD + w * h * frames.length];
+            t[0] = w;
+            t[1] = h;
+            t[2] = frames.length;
+            t[3] = frames.length > 1 ? frameTicks(s.contents().name()) : 1;
+            for (int f = 0; f < frames.length; f++) {
+                int ox = (frames[f] % perRow) * w, oy = (frames[f] / perRow) * h;
+                if (ox + w > img.getWidth() || oy + h > img.getHeight()) ox = oy = 0;
+                for (int y = 0; y < h; y++)
+                    for (int x = 0; x < w; x++) t[SPRITE_HEAD + f * w * h + x + w * y] = img.getPixel(ox + x, oy + y);  // ARGB
+            }
+            return t;
+        });
+    }
+
+    /** Whether a sprite's texels (its first frame) are all opaque or clear: under 2 % in between. */
+    static boolean binaryAlpha(TextureAtlasSprite sp) {
+        int[] t = spriteTexels(sp);
+        int n = t[0] * t[1], mid = 0;
+        for (int i = 0; i < n; i++) {
+            int a = t[SPRITE_HEAD + i] >>> 24;
+            if (a > 8 && a < 247) mid++;
+        }
+        return n > 0 && mid * 50 <= n;
+    }
+
+    /** An animated texture's frame time in game ticks (its .png.mcmeta's animation.frametime; 1 when it says none). */
+    private static int frameTicks(net.minecraft.resources.Identifier name) {
+        try {
+            var id = net.minecraft.resources.Identifier.fromNamespaceAndPath(name.getNamespace(), "textures/" + name.getPath() + ".png.mcmeta");
+            var res = Minecraft.getInstance().getResourceManager().getResource(id);
+            if (res.isEmpty()) return 1;
+            try (var r = res.get().openAsReader()) {
+                var o = com.google.gson.JsonParser.parseReader(r).getAsJsonObject().getAsJsonObject("animation");
+                return o != null && o.has("frametime") ? Math.max(1, o.get("frametime").getAsInt()) : 1;
+            }
+        } catch (Exception e) {
+            return 1;
+        }
+    }
+
+    /** Forget the cached sprite texels (resources reloaded). */
+    static void clearSprites() {
+        SPRITE_TEXELS.clear();
+    }
+
+    /**
+     * Whether a state takes a micro-voxel brick (docs/ATLAS-WORLD-STORE.md section 4): a block drawn by its model that is
+     * not a full solid cube (those are textured cubes) nor leaves (a textured cut-out cube). Translucent models stay
+     * vanilla's (the translucent layer: glass, panes, ice, slime, honey) unless their texels are all either opaque or
+     * clear (redstone dust is in the translucent layer: its brick is its opaque texels).
+     */
+    static boolean brickable(BlockState st, List<BakedQuad> quads) {
+        if (quads.isEmpty() || st.is(BlockTags.LEAVES)) return false;
+        boolean animated = false;
+        boolean glassy = st.is(BlockTags.IMPERMEABLE) || st.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock;
+        for (BakedQuad q : quads) {
+            if (q.materialInfo().layer() == ChunkSectionLayer.TRANSLUCENT && (glassy || !binaryAlpha(q.materialInfo().sprite())))
+                return false;
+            animated |= q.materialInfo().sprite().contents().isAnimated();
+        }
+        // a full solid cube is a textured cube, unless its texture moves (magma, a sea lantern, prismarine): a brick a
+        // frame then (its micro-voxels are its texels)
+        return !st.isSolidRender() || animated;
+    }
+
+    /** A state's brick model (tint RGB for its tinted quads, -1 none), or null when it takes no brick. */
+    static BrickModel brick(BlockState st, int tint) {
+        List<BakedQuad> quads = quads(st);
+        if (quads.isEmpty()) return fluidBrick(st);
+        if (!brickable(st, quads)) return null;
+        List<BrickQuad> out = new ArrayList<>(quads.size());
+        for (BakedQuad q : quads) {
+            TextureAtlasSprite sp = q.materialInfo().sprite();
+            int[] tx = spriteTexels(sp);
+            if (tx[0] == 0) continue;
+            float[] pos = new float[12], uv = new float[8];
+            for (int i = 0; i < 4; i++) {
+                Vector3fc p = q.position(i);
+                pos[3 * i] = p.x();
+                pos[3 * i + 1] = p.y();
+                pos[3 * i + 2] = p.z();
+                long puv = q.packedUV(i);
+                uv[2 * i] = (UVPair.unpackU(puv) - sp.getU0()) / (sp.getU1() - sp.getU0());
+                uv[2 * i + 1] = (UVPair.unpackV(puv) - sp.getV0()) / (sp.getV1() - sp.getV0());
+            }
+            int t = tint >= 0 && q.materialInfo().tintIndex() >= 0 ? tint & 0xFFFFFF : 0xFFFFFF;
+            out.add(new BrickQuad(pos, uv, tx, t, q.direction().get3DDataValue()));
+        }
+        return out.isEmpty() ? null : new BrickModel(out, st.getLightEmission() / 15f);
+    }
+
+    /**
+     * A fluid other than water (lava; water is atlas's own medium) as a brick: a box to its surface (the fluid state's
+     * own height: a source 8/9, its flow lower, falling full), its still texture on the top and bottom, its flowing one
+     * on the sides, both animated.
+     */
+    static BrickModel fluidBrick(BlockState st) {
+        var fs = st.getFluidState();
+        if (fs.isEmpty() || fs.is(net.minecraft.tags.FluidTags.WATER)) return null;
+        net.minecraft.client.renderer.block.FluidModel fm;
+        try {
+            fm = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fs);
+        } catch (RuntimeException e) {
+            return null;
+        }
+        if (fm == null) return null;
+        int[] still = spriteTexels(fm.stillMaterial().sprite()), flow = spriteTexels(fm.flowingMaterial().sprite());
+        if (still[0] == 0 || flow[0] == 0) return null;
+        float h = Math.max(1f / 16f, Math.min(1f, fs.getOwnHeight()));
+        List<BrickQuad> out = new ArrayList<>();
+        float[] full = {0, 0, 1, 0, 1, 1, 0, 1};
+        out.add(new BrickQuad(new float[] {0, h, 0, 1, h, 0, 1, h, 1, 0, h, 1}, full, still, 0xFFFFFF, Direction.UP.get3DDataValue()));
+        out.add(new BrickQuad(new float[] {0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1}, full, still, 0xFFFFFF, Direction.DOWN.get3DDataValue()));
+        float[] side = {0, 0, 0.5f, 0, 0.5f, 0.5f * h, 0, 0.5f * h};  // (the flowing texture at half scale, as vanilla's)
+        out.add(new BrickQuad(new float[] {0, h, 0, 1, h, 0, 1, 0, 0, 0, 0, 0}, side, flow, 0xFFFFFF, Direction.NORTH.get3DDataValue()));
+        out.add(new BrickQuad(new float[] {0, h, 1, 1, h, 1, 1, 0, 1, 0, 0, 1}, side, flow, 0xFFFFFF, Direction.SOUTH.get3DDataValue()));
+        out.add(new BrickQuad(new float[] {0, h, 0, 0, h, 1, 0, 0, 1, 0, 0, 0}, side, flow, 0xFFFFFF, Direction.WEST.get3DDataValue()));
+        out.add(new BrickQuad(new float[] {1, h, 0, 1, h, 1, 1, 0, 1, 1, 0, 0}, side, flow, 0xFFFFFF, Direction.EAST.get3DDataValue()));
+        return new BrickModel(out, st.getLightEmission() / 15f);
+    }
+
     /** (a, b, depth along d's normal) of a block-space point for face d. */
     static float[] plane(Direction d, float x, float y, float z) {
         return switch (d) {

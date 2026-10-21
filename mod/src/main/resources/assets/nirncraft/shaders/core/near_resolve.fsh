@@ -274,7 +274,9 @@ vec3 environmentalFog(vec3 rgb, float dist, vec3 dir) {
 
 // The unified field (KeyDir.w 2: ATLAS_FRAME_PRIMARY_NEAR_LIT): atlas drew every pixel from the camera, near and far
 // lit and hazed alike; its colour is the finished radiance (pre-exposed, premultiplied), its depth the NDC depth in our
-// projection. Our layers go on top: the light in the air, the sun's glare, the eye's medium.
+// projection. Our layers go on top: the light in the air, the sun's glare, the eye's medium. Water is atlas's too, the
+// eye under it included (the medium along every ray, the surface from below; where Snell's window shows the sky the
+// coverage lets the sky pass's sky through): nothing of the water is added here.
 void unifiedMain() {
     vec4 c = texture(Sampler4, texCoord);
     float z = texture(Sampler5, texCoord).r;
@@ -285,11 +287,7 @@ void unifiedMain() {
         return;
     }
     if (c.a <= 0.002) {
-        if (atlasEyeInWater()) {  // nothing along this ray under water: the water as far as it goes
-            fragColor = vec4(atlasUnderwater(vec3(0.0), 1e4, dirU), 1.0);
-            gl_FragDepth = 0.0;
-            return;
-        }
+        if (atlasEyeInWater()) discard;  // (the sky through Snell's window, as the sky pass drew it)
         if (InsideMin.w > 0.0) {  // inside leaves or glass: the sky behind only through the block (premultiplied)
             float ch = atlasInsideChord(dirU);
             float a = 1.0 - exp(-InsideMin.w * ch);
@@ -311,8 +309,9 @@ void unifiedMain() {
     vec3 radiance = max(c.rgb / Ground.w / max(c.a, 1e-4), vec3(0.0));  // (pre-exposed: back to physical)
     vec3 rgb;
     if (atlasEyeInWater()) {
-        rgb = atlasUnderwater(atlasDisplay(radiance, Look.x, Look.y), dist, dirU);
-        fragColor = vec4(rgb, 1.0);  // (under water nothing behind is seen)
+        // (atlas's own medium: the water along the ray is in its colour; the sky pass's sky only through the window)
+        rgb = atlasDisplay(radiance, Look.x, Look.y);
+        fragColor = vec4(rgb * c.a, c.a);
     } else {
         // the haze in front is the sky's light too: dimmed where the terrain shadows the air (its share grows with distance)
         float cr = mix(1.0, crepuscular(dirU, dist), 1.0 - exp(-dist / 5000.0));

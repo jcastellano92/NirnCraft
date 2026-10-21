@@ -25,6 +25,7 @@ layout(location = 2) out vec4 vertexColor;
 layout(location = 3) out vec3 worldNormal;
 layout(location = 4) out vec2 lightLevels;
 layout(location = 8) out vec3 worldPos;
+layout(location = 9) out vec4 clipPos;  // (the pixel in atlas's frame: the water in front of it)
 #ifndef NO_OVERLAY
 layout(location = 5) out vec4 overlayColor;
 #endif
@@ -35,6 +36,7 @@ layout(location = 7) out vec2 texCoordGlint;
 
 void main() {
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
+    clipPos = gl_Position;
     sphericalVertexDistance = fog_spherical_distance(Position);
     cylindricalVertexDistance = fog_cylindrical_distance(Position);
     vertexColor = Color;

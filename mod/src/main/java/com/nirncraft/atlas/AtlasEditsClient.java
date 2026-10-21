@@ -148,6 +148,9 @@ final class AtlasEditsClient {
                     HELD.add(d);
                     continue;
                 }
+                // a loaded chunk's own blocks are up (the client's feed: every block, full states): the server's far
+                // recording of it (the far field's blocks only) must not replace them
+                if (AtlasClientSections.isReal(d.cx(), d.cz())) continue;
             }
             put(ctx, mats, d, client, out, local);
             n++;
@@ -170,6 +173,8 @@ final class AtlasEditsClient {
                 if (client && AtlasClientGen.skipRock(key, ids)) continue;  // generation's tiles stone holds it
                 long h = 0xcbf29ce484222325L ^ ((long) d.grass() << 24 ^ d.foliage());
                 for (int id : ids) h = (h ^ id) * 0x100000001b3L;
+                if (d.grassCols() != null)
+                    for (int c = 0; c < 256; c++) h = (h ^ ((long) d.grassCols()[c] << 24 ^ d.foliageCols()[c])) * 0x100000001b3L;
                 synchronized (UPLOADED) {
                     if (UPLOADED.containsKey(key) && UPLOADED.get(key) == h) continue;  // the core has these blocks
                     UPLOADED.put(key, h);
@@ -180,13 +185,21 @@ final class AtlasEditsClient {
                         out[i] = 0;
                         continue;
                     }
-                    Short m = local.get(id);
-                    if (m == null) {
+                    Short m;
+                    if (d.grassCols() != null && AtlasMaterials.biomeTinted(Block.stateById(id))) {
+                        // a biome-tinted block (grass, leaves, vines) in its own column's colours (vanilla's blend)
+                        int col = (i & 15) + 16 * ((i >> 4) & 15);
                         BlockState st = Block.stateById(id);
-                        // (shapes on: one id per far block state, its real shape and face tiles; mats.section) in the
-                        // tint the near field gives it: the chunk's grass and foliage, a constant, or none
-                        m = mats.section(st, AtlasMaterials.tint(st, d.grass(), d.foliage()));
-                        local.put(id, m);
+                        m = mats.section(st, AtlasMaterials.tint(st, d.grassCols()[col], d.foliageCols()[col]));
+                    } else {
+                        m = local.get(id);
+                        if (m == null) {
+                            BlockState st = Block.stateById(id);
+                            // (shapes on: one id per block state, its real shape, face tiles and brick; mats.section) in
+                            // the tint the near field gives it: the chunk's grass and foliage, a constant, or none
+                            m = mats.section(st, AtlasMaterials.tint(st, d.grass(), d.foliage()));
+                            local.put(id, m);
+                        }
                     }
                     out[i] = m;
                 }

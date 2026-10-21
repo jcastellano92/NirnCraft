@@ -397,6 +397,7 @@ private:
             }
         }
         g.texData = in.textures && !in.textures->empty() ? view(*in.textures) : view(dummyU32_);
+        g.brickData = in.bricks && !in.bricks->empty() ? view(*in.bricks) : view(dummyU32_);
         if (in.voxgrid && !in.voxgrid->chunks.empty()) {
             VoxGrid& vg = *in.voxgrid;
             g.vgChunks = view(vg.chunks);

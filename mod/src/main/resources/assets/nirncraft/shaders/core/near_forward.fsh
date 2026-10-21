@@ -1,6 +1,7 @@
 #version 330
 #extension GL_ARB_separate_shader_objects : require
-// Infinite ATLAS near pass: translucent terrain (water, glass, ice) drawn forward over the resolved frame
+// Infinite ATLAS near pass: translucent terrain (water, glass, ice) drawn forward over the resolved frame (in the unified
+// field atlas draws the water: its fragments are discarded here)
 // (com.nirncraft.atlas.AtlasNearPass), lit with the same light and look as the opaque terrain: the key light, the sky
 // over the surface (vanilla's sky light as its visibility), the block light, then the pack's display. Water (its
 // fragments are found by the water sprites' texels) is shaded as the far field's water: small waves, the sky reflected
@@ -175,6 +176,9 @@ void main() {
     vec4 color = (UseRgss == 1 ? sampleRGSS(Sampler0, texCoord0, 1.0f / TextureSize)
                                : sampleNearest(Sampler0, texCoord0, 1.0f / TextureSize)) * vertexColor;
     if (color.a < 0.004) discard;
+    // the unified field (KeyDir.w 2): atlas draws the water, its surface, the medium and the eye under it; vanilla's
+    // water raster stays out (glass, ice and the other translucents are still drawn here)
+    if (KeyDir.w > 1.5 && isWater(texCoord0)) discard;
     vec3 n = normalize(cross(dFdx(viewPos), dFdy(viewPos)));
     if (dot(n, viewPos) > 0.0) n = -n;
     vec3 a = abs(n);

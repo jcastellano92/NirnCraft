@@ -18,9 +18,11 @@ layout(location = 2) out vec2 texCoord0;
 layout(location = 3) out vec4 vertexColor;
 layout(location = 4) out vec2 lightLevels;
 layout(location = 5) out vec3 toCamera;
+layout(location = 6) out vec4 clipPos;  // (the pixel in atlas's frame: the water in front of it)
 
 void main() {
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
+    clipPos = gl_Position;
     sphericalVertexDistance = fog_spherical_distance(Position);
     cylindricalVertexDistance = fog_cylindrical_distance(Position);
     texCoord0 = UV0;
