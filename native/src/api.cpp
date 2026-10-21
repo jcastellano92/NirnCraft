@@ -17,6 +17,7 @@
 #include "atlas/atlas.h"
 #include "air.hpp"
 #include "backend.hpp"
+#include "gencache.hpp"
 #include "atlas_build_hash.h"
 #include "bricks.hpp"
 #include "lights.hpp"
@@ -557,7 +558,24 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                 coarse += q;
             }
             coarse += "]}";
-            ctx->info.insert(ctx->info.size() - 1, std::string(b) + tiers + c + coarse);
+            // the self-baking cache (gencache.hpp): what is on disk for this world and generator, what is waiting to be
+            // written, and what this session read from it (a relaunch: hits > 0 and few generated)
+            std::string genCache = "\"genCache\":{\"on\":false},";
+            if (GenCache* gc = ctx->world.genCache()) {
+                GenCache::Stats gs = gc->stats();
+                char g[512];
+                std::snprintf(g, sizeof g,
+                              "\"genCache\":{\"on\":%s,\"fingerprint\":\"%016llx\",\"chunks\":%llu,\"sections\":%llu,\"mb\":%.2f,"
+                              "\"queuedWrites\":%llu,\"chunkHits\":%llu,\"chunkMisses\":%llu,\"sectionReads\":%llu,"
+                              "\"sectionWrites\":%llu,\"farTileWrites\":%llu,\"farTileHits\":%llu,\"hashErrors\":%llu},",
+                              gs.on ? "true" : "false", (unsigned long long)gs.fingerprint, (unsigned long long)gs.chunks,
+                              (unsigned long long)gs.sections, double(gs.fileBytes) / 1048576.0, (unsigned long long)gs.queued,
+                              (unsigned long long)gs.chunkHits, (unsigned long long)gs.chunkMisses, (unsigned long long)gs.sectionReads,
+                              (unsigned long long)gs.sectionWrites, (unsigned long long)gs.farWrites, (unsigned long long)gs.farHits,
+                              (unsigned long long)gs.hashErrors);
+                genCache = g;
+            }
+            ctx->info.insert(ctx->info.size() - 1, std::string(b) + tiers + genCache + c + coarse);
         }
         return ctx->info.c_str();
     } catch (...) {

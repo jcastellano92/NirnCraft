@@ -3439,6 +3439,9 @@ ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const
             if (lost) continue;  // (a record unreadable: generated instead)
             std::vector<uint8_t> acc(kinds.size(), 0);
             taken += uint32_t(grid->ingestCoarseHost(lod, pos.data(), kinds.data(), packed.data(), kinds.size(), acc.data()));
+            // (as atlas_gen_far_ingest: a chunk that is not this level's to hold is done; only a refusal for room is partial)
+            for (size_t i = 0; i < kinds.size(); i++)
+                if (!acc[i] && !grid->coarseRefusedForRoom(lod, pos[3 * i], pos[3 * i + 2])) taken++;
             chunks += uint32_t(kinds.size());
             outServed[t] = 1;
         }

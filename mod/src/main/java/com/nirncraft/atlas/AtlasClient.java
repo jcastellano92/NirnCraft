@@ -625,6 +625,8 @@ public final class AtlasClient {
             groups = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.groups")) && ctx.hasShapes();
             materials = mats;
             if (groups) mats.enableShapes();  // every material's real shape and face tiles; real blocks per state
+            // the same ids on every launch (the self-baking cache's fingerprint and stored materials depend on them)
+            mats.persistTo(mc.gameDirectory.toPath().resolve("atlas-cache").resolve("materials.log"));
             if (groups) com.nirncraft.NirnCraft.LOGGER.info("atlas: content-shaped groups on (nirncraft.atlas.groups)");
             if (source instanceof AtlasRefiningSource r) r.materials(mats);
             // single player: the world's own trees over the finest LODs (AtlasTrees), else the dressing's canopy
@@ -1081,6 +1083,8 @@ public final class AtlasClient {
 
     /** Tears atlas down (start() brings it back with fresh tiles). The library stays loaded. */
     private static void stop() {
+        AtlasMaterials m = materials;
+        if (m != null) m.flushLog();  // (the material numbering of this session: the next launch replays it)
         AtlasNative.Context c = ctx;
         // the context goes only once the far-field worker is out of it (it may still be mid-pass after close()'s
         // join: destroyed under it, its next atlas_update crashed the game); the GL side goes now, on this thread

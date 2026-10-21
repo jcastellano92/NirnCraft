@@ -44,6 +44,81 @@ final class AtlasMaterials {
     private final List<Integer> pendingExactOffsets = new ArrayList<>();  // their random offsets (plants)
     private int nextExact = EXACT_FIRST;
 
+    // ---- the same ids on every launch ----
+    // Ids are handed out in order of first use, from several threads (the far field, the chunk feed, the generator's
+    // table), so a relaunch could number the same block differently: the generator's ingest table (and the self-baking
+    // cache's fingerprint and its stored materials with it) would differ, and nothing cached would be read again. The
+    // allocations are logged in order (kind, block state id, raw tint) and replayed first on the next launch, before
+    // anything asks: the same calls in the same order give the same ids; new ones go on after.
+    private java.nio.file.Path allocLogPath;
+    private final StringBuilder allocLogBuf = new StringBuilder();
+    private boolean replaying;
+    private int replayed;
+
+    private static String registrySignature() {
+        long sig = 1125899906842597L;
+        for (Block b : BuiltInRegistries.BLOCK) sig = 31 * sig + BuiltInRegistries.BLOCK.getKey(b).toString().hashCode();
+        sig = 31 * sig + Block.BLOCK_STATE_REGISTRY.size();
+        return Long.toHexString(sig);
+    }
+
+    /** Replays the log at `file` (when it is for this block registry and this mode), then logs new allocations to it. */
+    synchronized void persistTo(java.nio.file.Path file) {
+        String header = "NCMAT1 " + registrySignature() + " " + (shapes ? 1 : 0);
+        allocLogPath = file;
+        try {
+            java.nio.file.Files.createDirectories(file.toAbsolutePath().getParent());
+            boolean same = false;
+            if (java.nio.file.Files.isRegularFile(file)) {
+                List<String> lines = java.nio.file.Files.readAllLines(file);
+                same = !lines.isEmpty() && lines.get(0).equals(header);
+                if (same) {
+                    replaying = true;
+                    try {
+                        for (int i = 1; i < lines.size(); i++) {
+                            String[] f = lines.get(i).split(" ");
+                            if (f.length != 3) continue;
+                            BlockState st = Block.stateById(Integer.parseInt(f[1]));
+                            int v = Integer.parseInt(f[2]);
+                            switch (f[0]) {
+                                case "I" -> id(st);
+                                case "L" -> leaves(st, v);
+                                case "S" -> section(st, v);
+                                default -> { }
+                            }
+                            replayed++;
+                        }
+                    } finally {
+                        replaying = false;
+                    }
+                }
+            }
+            if (!same) java.nio.file.Files.writeString(file, header + "\n");  // (another registry or mode: the ids start over)
+            com.nirncraft.NirnCraft.LOGGER.info("atlas materials: {} allocations replayed from {} ({})", replayed, file.getFileName(),
+                    same ? "same ids as the last launch" : "a new numbering");
+        } catch (java.io.IOException | RuntimeException e) {
+            allocLogPath = null;
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas materials: the allocation log is off ({})", e.toString());
+        }
+    }
+
+    private void logAlloc(char kind, BlockState s, int arg) {
+        if (allocLogPath == null || replaying) return;
+        allocLogBuf.append(kind).append(' ').append(Block.getId(s)).append(' ').append(arg).append('\n');
+    }
+
+    /** The allocations since the last call to the file (with each upload of the materials, and at shutdown). */
+    synchronized void flushLog() {
+        if (allocLogPath == null || allocLogBuf.length() == 0) return;
+        try {
+            java.nio.file.Files.writeString(allocLogPath, allocLogBuf.toString(), java.nio.file.StandardOpenOption.APPEND);
+            allocLogBuf.setLength(0);
+        } catch (java.io.IOException e) {
+            allocLogPath = null;
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas materials: the allocation log is off ({})", e.toString());
+        }
+    }
+
     /** Shapes on: the materials handed out from now on carry their shapes, real sections use per-state ids. */
     void enableShapes() {
         shapes = true;
@@ -77,6 +152,7 @@ final class AtlasMaterials {
         pendingShapes.add(shapeOf(s, t >= 0 ? t & 0xF8F8F8 : -1));
         short id = (short) next++;
         ids.put(s.getBlock(), id);
+        logAlloc('I', s, 0);
         return id;
     }
 
@@ -97,6 +173,7 @@ final class AtlasMaterials {
         pendingShapes.add(shapeOf(s, q));
         short id = (short) next++;
         tinted.put(key, id);
+        logAlloc('L', s, rgb);
         return id;
     }
 
@@ -177,6 +254,7 @@ final class AtlasMaterials {
         short id = (short) nextExact++;
         exact.put(key, id);
         byState.computeIfAbsent(sid, k -> new ArrayList<>()).add(new int[] {q, id});
+        logAlloc('S', s, tint);
         return id;
     }
 
@@ -321,6 +399,7 @@ final class AtlasMaterials {
 
     /** Registers the ids handed out since the last call (before uploading anything that uses them). */
     synchronized void flush(AtlasNative.Context ctx) {
+        flushLog();
         if (!pending.isEmpty()) {
             int first = next - pending.size();
             ctx.setMaterials(first, pending.toArray(new float[0][]));
