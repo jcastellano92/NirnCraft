@@ -125,8 +125,8 @@ class AtlasGenFeaturesGpuTest {
         String auxDump = System.getenv("ATLAS_FEAT_AUX_DUMP");
         if (auxDump != null && Files.exists(Path.of(auxDump))) {
             java.nio.ByteBuffer bb = java.nio.ByteBuffer.wrap(Files.readAllBytes(Path.of(auxDump))).order(java.nio.ByteOrder.LITTLE_ENDIAN);
-            final int auxW = 1928 + 6 * 256, aAlch = 1472, aTemp = 1664, aFrozen = 1920;
-            long recs = 0, tempSame = 0, frozenSame = 0, alchSame = 0, alchKnown = 0, cols = 0;
+            final int auxW = 1928 + 6 * 256, aMask = 1408, aAlch = 1472, aTemp = 1664, aFrozen = 1920;
+            long recs = 0, tempSame = 0, frozenSame = 0, alchSame = 0, alchKnown = 0, cols = 0, maskSame = 0, masked = 0;
             java.util.Set<Long> seen = new java.util.HashSet<>();
             int shown = 0;
             while (bb.remaining() >= (2 + auxW) * 4) {
@@ -135,9 +135,15 @@ class AtlasGenFeaturesGpuTest {
                 for (int i = 0; i < auxW; i++) w[i] = bb.getInt();
                 if (!seen.add(ChunkPos.pack(cx, cz))) continue;
                 recs++;
+                // the placement mask: the baked plans (no overlays here: no piece boxes)
+                byte[] jm = com.nirncraft.world.PlacementMask.bakedPlanGrid(seed, cx, cz);
                 for (int c = 0; c < 256; c++) {
                     int x = cx * 16 + (c & 15), z = cz * 16 + (c >> 4);
                     cols++;
+                    int gm = w[aMask + (c >> 2)] >>> ((c & 3) * 8) & 255;
+                    if (jm[c] < 63) masked++;
+                    if (gm == jm[c]) maskSame++;
+                    else if (shown++ < 20) report.append(String.format("  mask differs at %d %d: gpu %d java %d%n", x, z, gm, jm[c]));
                     if (w[aTemp + c] == Float.floatToRawIntBits(AtlasFeatureProgram.temperatureNoise(x, z))) tempSame++;
                     else if (shown++ < 5) report.append(String.format("  temperature differs at %d %d%n", x, z));
                     boolean gf = (w[aFrozen + (c >> 5)] >>> (c & 31) & 1) != 0;
@@ -154,11 +160,13 @@ class AtlasGenFeaturesGpuTest {
                     }
                 }
             }
-            report.append(String.format("store aux (the stage's kernels vs Java) over %d chunks: temperature %.4f %%, frozen %.4f %%, alchemy %.4f %% of %d%n",
-                    recs, 100.0 * tempSame / Math.max(1, cols), 100.0 * frozenSame / Math.max(1, cols), 100.0 * alchSame / Math.max(1, alchKnown), alchKnown));
-            System.out.println(String.format("TRACE done store-aux temperature %.4f%% frozen %.4f%% alchemy %.4f%%", 100.0 * tempSame / Math.max(1, cols),
-                    100.0 * frozenSame / Math.max(1, cols), 100.0 * alchSame / Math.max(1, alchKnown)));
-            auxOk = recs > 0 && tempSame == cols && frozenSame == cols && alchSame == alchKnown;
+            report.append(String.format("store aux (the stage's kernels vs Java) over %d chunks: temperature %.4f %%, frozen %.4f %%, alchemy %.4f %% of %d, "
+                            + "mask %.4f %% (%d columns masked)%n", recs, 100.0 * tempSame / Math.max(1, cols), 100.0 * frozenSame / Math.max(1, cols),
+                    100.0 * alchSame / Math.max(1, alchKnown), alchKnown, 100.0 * maskSame / Math.max(1, cols), masked));
+            System.out.println(String.format("TRACE done store-aux temperature %.4f%% frozen %.4f%% alchemy %.4f%% mask %.4f%% (%d masked)",
+                    100.0 * tempSame / Math.max(1, cols), 100.0 * frozenSame / Math.max(1, cols), 100.0 * alchSame / Math.max(1, alchKnown),
+                    100.0 * maskSame / Math.max(1, cols), masked));
+            auxOk = recs > 0 && tempSame == cols && frozenSame == cols && alchSame == alchKnown && maskSame == cols;
         }
         String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
         if (out != null) Files.writeString(Path.of(out + ".store.txt"), report);

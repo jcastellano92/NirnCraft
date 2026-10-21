@@ -39,7 +39,7 @@ final class AtlasGenNative {
     // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
     private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest;
     // the chunk store and the decoration's store stages (atlas_gen_store_*, atlas_feat_attach): null in a library without them
-    private final MethodHandle storeEnable, runStore, storeKeep, storeStats, featAttach, featDestroy;
+    private final MethodHandle storeEnable, runStore, storeKeep, storeStats, featAttach, featDestroy, featOverlays;
     /** Columns of a far tile (atlas_gen_tiles). */
     static final int TILE_COLS = 65536;
     /** Words per probe (atlas_gen_probe). */
@@ -94,6 +94,8 @@ final class AtlasGenNative {
         featAttach = fa ? bind(l, lib, "atlas_feat_attach", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT,
                 ADDRESS, JAVA_INT, ADDRESS)) : null;
         featDestroy = fa ? bind(l, lib, "atlas_feat_destroy", FunctionDescriptor.ofVoid(ADDRESS)) : null;
+        featOverlays = lib.find("atlas_feat_set_overlays").isPresent()
+                ? bind(l, lib, "atlas_feat_set_overlays", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
         tiles = lib.find("atlas_gen_tiles").isPresent()
                 ? bind(l, lib, "atlas_gen_tiles", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
     }
@@ -608,6 +610,20 @@ final class AtlasGenNative {
                 check((int) featAttach.invokeExact(ptr, a.allocateFrom(JAVA_INT, words), words.length, g2f,
                         gen2feat != null ? gen2feat.length : 0, f2g, feat2gen != null ? feat2gen.length : 0, out), "atlas_feat_attach");
                 return out.get(ADDRESS, 0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * The overlays whose structure pieces the decoration's placement mask keeps clear (atlas_feat_set_overlays; null
+         * none). False when this library has not the call.
+         */
+        boolean setFeatureOverlays(MemorySegment feat, MemorySegment ovl) {
+            if (featOverlays == null) return false;
+            try {
+                check((int) featOverlays.invokeExact(feat, ovl == null ? MemorySegment.NULL : ovl), "atlas_feat_set_overlays");
+                return true;
             } catch (Throwable t) {
                 throw rethrow(t);
             }

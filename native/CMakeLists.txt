@@ -472,7 +472,7 @@ set(FEAT_HEADERS)
 foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:featApplyMain" "pack:featPackMain"
              "ore:featOreMain" "cover:featCoverMain" "rock:featRockMain" "tree:featTreeMain" "freeze:featFreezeMain"
              "disk:featDiskMain" "spring:featSpringMain" "lake:featLakeMain" "aux:featAuxMain"
-             "sapply:featStoreApplyMain")
+             "sapply:featStoreApplyMain" "mask:featMaskMain")
   string(REPLACE ":" ";" pe "${pair}")
   list(GET pe 0 pass)
   list(GET pe 1 entry)
@@ -494,9 +494,14 @@ foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:feat
     DEPENDS "${GEN}/atlas_feat_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
   list(APPEND FEAT_HEADERS "${GEN}/atlas_feat_${pass}_spv.h")
 endforeach()
-target_sources(atlas_core PRIVATE src/features_engine.cpp ${FEAT_HEADERS})
+# one producer of the decoration's kernels (two targets naming the same outputs ran their rules side by side and
+# raced on the same header): atlas_core and atlas_feat depend on it
+add_custom_target(atlas_feat_kernels DEPENDS ${FEAT_HEADERS})
+target_sources(atlas_core PRIVATE src/features_engine.cpp)
+add_dependencies(atlas_core atlas_feat_kernels)
 # the decoration alone (its offline check needs no renderer kernels: a small library of its own)
-add_library(atlas_feat SHARED src/features_engine.cpp src/vk_loader.cpp ${FEAT_HEADERS})
+add_library(atlas_feat SHARED src/features_engine.cpp src/vk_loader.cpp)
+add_dependencies(atlas_feat atlas_feat_kernels)
 target_include_directories(atlas_feat PUBLIC include PRIVATE src "${GEN}" "${ATLAS_VK_INCLUDE}")
 target_compile_definitions(atlas_feat PRIVATE ATLAS_BUILD VK_NO_PROTOTYPES ATLAS_FEAT_ALONE)  # (no generator: no atlas_feat_attach)
 target_link_libraries(atlas_feat PRIVATE Threads::Threads)

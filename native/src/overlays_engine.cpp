@@ -94,7 +94,10 @@ public:
     ~VulkanEngine() {
         if (dev_) {
             if (!attached_ && !dead_) vkDeviceWaitIdle(dev_);
-            for (Buf* b : {&blocks_, &tapes_, &streets_, &chunks_, &ids_, &snap_, &roads_, &mbnl_, &dummy_, &staging_}) release(*b);
+            for (Buf* b : {&blocks_, &tapes_, &streets_, &chunks_, &ids_, &snap_, &roads_, &mbnl_, &dummy_, &staging_, &snapStore_,
+                           &mbnlStore_, &slotRec_, &state_})
+                release(*b);
+            for (Retired& r : retired_) release(r.b);  // (destroyed between the generator's batches: none in flight)
             if (queries_) vkDestroyQueryPool(dev_, queries_, nullptr);
             if (fence_) vkDestroyFence(dev_, fence_, nullptr);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
@@ -179,8 +182,9 @@ public:
     }
 
     // On the generator's device (stages of its batch): pipelines and buffers of our own, its command buffers
-    bool attach(VkPhysicalDevice phys, VkDevice dev, std::string& err) {
+    bool attach(VkPhysicalDevice phys, VkDevice dev, AtlasGen* gen, std::string& err) {
         attached_ = true;
+        gen_ = gen;
         phys_ = phys;
         dev_ = dev;
         std::string reason;
@@ -302,6 +306,7 @@ public:
     bool recordStore(const AtlasGenStoreBatch* sb, uint32_t kinds, std::string& err) {
         std::lock_guard<std::mutex> lock(mu_);
         storeSeen_ = true;
+        collect();
         if (sb->slots != storeSlots_) {
             // the store's size: our snapshot and heightmap per slot, and the slots' tape records (the features' masks)
             if (!ensure(snapStore_, size_t(sb->slots) * ATLAS_GEN_STORE_BLOCK_WORDS * 4, Mem::Device, err) ||
@@ -347,6 +352,7 @@ public:
             std::memcpy(static_cast<int32_t*>(chunks_.map) + items.size() * LAYERS, items.data(), items.size() * 4);
             if (rebind_ || blocks != boundIds_ || map != boundMap_ || snapStore_.buf != boundSnap_ || mbnlStore_.buf != boundMbnl_)
                 writeSet(blocks, map, snapStore_.buf, mbnlStore_.buf);
+            touch();
             OvlParams p{int32_t(n), int32_t(GEN_LEVELS), 0u, ATLAS_GEN_STORE_BLOCK_WORDS, uint32_t(items.size() * LAYERS), bit};
             vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
             vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(OvlParams), &p);
@@ -370,6 +376,7 @@ public:
         out->tapeWords = uint32_t(tapes_.size / 4);
         out->slotRecords = uint64_t(slotRec_.buf);
         out->slots = storeSlots_;
+        touch();  // (the features' decoration records with them: kept until its submission is done)
         return storeSlots_ != 0 && has_[1];
     }
 
@@ -389,9 +396,19 @@ private:
     // new tapes renumber their records: the store slots' records again
     bool uploadDirty(std::string& err) {
         Buf* bufs[4] = {&blocks_, &tapes_, &streets_, &roads_};
+        // (attached) a submission not yet done may read the buffers as they are (recorded by a stage of this batch, or
+        // the features' decoration through atlas_ovl_store_boxes): new ones then, the old retired, never overwritten
+        bool inFlight = attached_ && inUse_ != 0 && inUse_ > completed();
         for (uint32_t w = 0; w < 4; w++) {
             if (!dirty_[w]) continue;
             size_t bytes = pending_[w].size() * 4;
+            if (inFlight) {
+                retire(*bufs[w]);
+                if (w == 1 && storeSlots_) {
+                    retire(slotRec_);
+                    if (!ensure(slotRec_, size_t(storeSlots_) * 4, Mem::Upload, err)) return false;
+                }
+            }
             if (!ensure(*bufs[w], bytes, Mem::Upload, err)) return false;
             std::memcpy(bufs[w]->map, pending_[w].data(), bytes);
             dirty_[w] = false;
@@ -407,6 +424,7 @@ private:
     bool core(VkCommandBuffer cmd, VkBuffer blocks, uint32_t chunkWords, uint32_t n, Fill fill, uint32_t kinds, VkBuffer map, bool store,
               uint32_t bit, std::string& err) {
         if (dead_ || !has_[0]) return true;  // nothing to stamp yet
+        collect();
         if ((kinds & (K_ROADS | K_MBNL)) && !has_[3]) return true;
         if (!(kinds & (K_ROADS | K_MBNL)) && !has_[1] && !has_[2]) return true;
         if ((kinds & (K_UNDER | K_SURFACE)) && !has_[1]) return true;
@@ -441,6 +459,7 @@ private:
         std::memcpy(chunks_.map, desc.data(), chunkBytes);
         VkBuffer snap = store ? snapStore_.buf : snap_.buf, mbnl = store ? mbnlStore_.buf : mbnl_.buf;
         if (rebind_ || blocks != boundIds_ || map != boundMap_ || snap != boundSnap_ || mbnl != boundMbnl_) writeSet(blocks, map, snap, mbnl);
+        touch();
         OvlParams p{int32_t(n), int32_t(GEN_LEVELS), 0u, chunkWords, 0u, bit};
         if (layer) {
             // a dungeon layer: its recorded writes, column by column (piecesMain over the layer's records)
@@ -672,10 +691,49 @@ private:
         if (b.mem) vkFreeMemory(dev_, b.mem, nullptr);
         b = {};
     }
+    // (attached) the generator's submissions done so far (atlas_gen_completed_submissions; the one recording: + 1)
+    uint64_t completed() const {
+        uint64_t c = UINT64_MAX;
+        if (gen_ && atlas_gen_completed_submissions(gen_, &c) != ATLAS_OK) c = UINT64_MAX;
+        return c;
+    }
+    // our buffers are in the submission being recorded (a stage of ours, or the features' with our boxes)
+    void touch() {
+        if (!attached_) return;
+        uint64_t c = completed();
+        if (c != UINT64_MAX) inUse_ = std::max(inUse_, c + 1);
+    }
+    // a buffer replaced while attached: freed once every submission that may have recorded it is done (the
+    // generator's queue runs one at a time: the one recording now is the last that can)
+    void retire(Buf& b) {
+        if (!b.buf) return;
+        uint64_t c = completed();
+        if (c == UINT64_MAX) {
+            release(b);
+            return;
+        }
+        retired_.push_back({b, c + 1});
+        b = {};
+        rebind_ = true;
+    }
+    void collect() {
+        if (retired_.empty()) return;
+        uint64_t c = completed();
+        for (size_t i = 0; i < retired_.size();) {
+            if (c != UINT64_MAX && retired_[i].after > c) {
+                i++;
+                continue;
+            }
+            release(retired_[i].b);
+            retired_[i] = retired_.back();
+            retired_.pop_back();
+        }
+    }
     bool ensure(Buf& b, size_t size, Mem kind, std::string& err) {
         size = std::max<size_t>(size, 64);
         if (b.buf && b.size >= size) return true;
-        if (b.buf && !attached_) vkDeviceWaitIdle(dev_);  // (attached: the generator's last batch is complete)
+        if (b.buf && attached_) retire(b);  // (attached: kept until the generator's submissions that may read it are done)
+        if (b.buf) vkDeviceWaitIdle(dev_);
         release(b);
         rebind_ = true;  // a new buffer: the descriptor set names it at the next writeSet (a stage that returns early leaves it to the next)
         VkBufferCreateInfo bc{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
@@ -823,6 +881,14 @@ private:
     VkFence fence_ = VK_NULL_HANDLE;
     VkQueryPool queries_ = VK_NULL_HANDLE;
     Buf blocks_, tapes_, streets_, chunks_, ids_, snap_, roads_, mbnl_, dummy_, staging_, snapStore_, mbnlStore_, slotRec_, state_;
+    // (attached) the generator, replaced buffers until its submissions pass them, the last submission ours are in
+    AtlasGen* gen_ = nullptr;
+    struct Retired {
+        Buf b;
+        uint64_t after;  // freed once the generator's completed submissions reach this
+    };
+    std::vector<Retired> retired_;
+    uint64_t inUse_ = 0;
 };
 
 }  // namespace
@@ -922,7 +988,7 @@ ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out) {
         auto h = std::make_unique<AtlasOvl>();
         auto vk = std::make_unique<VulkanEngine>();
         std::string err;
-        if (!vk->attach(static_cast<VkPhysicalDevice>(d.vkPhysicalDevice), static_cast<VkDevice>(d.vkDevice), err)) {
+        if (!vk->attach(static_cast<VkPhysicalDevice>(d.vkPhysicalDevice), static_cast<VkDevice>(d.vkDevice), gen, err)) {
             std::fprintf(stderr, "[atlas] overlays: %s\n", err.c_str());
             return ATLAS_ERR_UNSUPPORTED;
         }

@@ -985,6 +985,11 @@ typedef struct AtlasGenDevice {
     void* vkQueue;                 /* the generator's queue: submit nothing of your own on it while a batch may run */
 } AtlasGenDevice;
 ATLAS_API AtlasStatus atlas_gen_device_handles(AtlasGen* h, AtlasGenDevice* out);
+/* The generator's submissions on its queue completed so far (its fence passed): a stage engine that replaces a buffer
+   it handed to a batch's commands keeps the old one until this count passes the submission it was recorded in (the
+   one recording now is completed + 1). No lock: callable from a stage's callback. UINT64_MAX: nothing ever in flight
+   (a CPU generator). */
+ATLAS_API AtlasStatus atlas_gen_completed_submissions(AtlasGen* h, uint64_t* completed);
 /* Pages the device made so far, the page passes' total time, and whether the device makes them (any may be NULL). */
 ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, double* pageMs, int32_t* onDevice);
 /*
@@ -1165,6 +1170,11 @@ ATLAS_API AtlasStatus atlas_feat_probe_aux(AtlasFeat* h, const uint32_t* map, ui
    Calls on the generator must not run meanwhile. atlas_feat_destroy removes the stages. */
 ATLAS_API AtlasStatus atlas_feat_attach(AtlasGen* gen, const uint32_t* words, uint32_t count, const uint32_t* gen2feat, uint32_t nGen,
                                         const uint32_t* feat2gen, uint32_t nFeat, AtlasFeat** out);
+/* The overlays whose structure pieces the decoration's placement mask keeps clear (atlas_ovl_store_boxes, read in every
+   decoration call; until they have tapes, or with null, the mask has the plans alone: the settlements' cores, the
+   roads, the streets). On a handle from atlas_feat_attach; the overlays must outlive it or be unset first. The minor
+   sites' and landmarks' pads are not in the GPU's mask. */
+ATLAS_API AtlasStatus atlas_feat_set_overlays(AtlasFeat* h, AtlasOvl* ovl);
 
 #ifdef __cplusplus
 }
