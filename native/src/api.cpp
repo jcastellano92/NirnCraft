@@ -147,6 +147,13 @@ struct AtlasContext {
     float preExposure = 1.0f;  // atlas_set_pre_exposure
     std::vector<AtlasActor> actors;
     Lights lights;
+    // (FRAME_GPU_LIGHTS_BIT) the far-light index as the GPU culls it (Lights::packGpu), packed when it changes
+    std::vector<Float4> lightsPacked;
+    uint64_t lightsRevision = 0;
+    uint32_t lightRecords = 0;
+    // the light by need (lightControl): the tiles' share traced a frame and the footprint scale, eased
+    float lightRate = 0.25f, lightFoot = 1.0f, lightBudget = 1.0f;
+    float prevJitterNdc[2] = {0.0f, 0.0f};  // the last frame's jitter (NDC): the histories reproject to its rays
     std::unique_ptr<PreviewSource> preview;
     FrameTargets targets;
     AtlasStats stats{};
@@ -740,6 +747,10 @@ ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], do
     }
     // the grid's coarse levels own their levels' real blocks (before its first frame too: what they will hold)
     ctx->world.gridCoarse = ctx->voxgrid.enabled ? std::clamp(ctx->voxgrid.coarseLevels, 0, std::max(0, ctx->world.lodCount - 1)) : 0;
+    {
+        const char* e = std::getenv("ATLAS_VOXGRID_LEVEL0");  // (as buildInputs: before the first frame too)
+        ctx->world.gridOwnsLevel0 = ctx->voxgrid.enabled && (!e || std::atoi(e) != 0);
+    }
     ctx->world.update(centre, budgetMs, &ms);
     ctx->stats.lastBuildMs = ms;
     // copy a new revision to the GPU here (the game calls update off the render thread), not in the next frame;
@@ -911,12 +922,71 @@ static void rememberFrame(AtlasContext* ctx, const AtlasFrame* f) {
     ctx->prevW = f->width;
     ctx->prevH = f->height;
     ctx->prevCloudFlags = f->flags & (ATLAS_FRAME_CLOUDS | ATLAS_FRAME_CLOUDS_QUARTER);
+    ctx->prevJitterNdc[0] = f->width > 0 ? ctx->jitter[0] * 2.0f / float(f->width) : 0.0f;
+    ctx->prevJitterNdc[1] = f->height > 0 ? ctx->jitter[1] * 2.0f / float(f->height) : 0.0f;
     ctx->haveHistory = true;
     ctx->frameIndex++;
 }
 
 static void easeMs(double& v, std::chrono::steady_clock::time_point a) {
     v += (std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - a).count() - v) * 0.05;
+}
+
+// The light by need (docs/ATLAS-RENDERER-PLAN.md "The light by need"; atlas_far.slang nearLightAt, nearLightMain): how
+// much of the near light a frame traces, each knob a smooth function eased frame to frame, never a switch.
+//  x the footprint scale: the secondary rays start at the level whose voxels are the pixel's footprint x this (1: about
+//    a pixel; the budget raises it, coarser past where a voxel is sub-pixel);
+//  y the share of the split's 16 px tiles traced a frame (the rest keep their history: the light is diffuse, the camera's
+//    motion does not change it; a tile with a pixel lacking history is traced anyway): a still or slowly turning view
+//    ATLAS_LIGHT_RATE (0.25: each pixel every 16 frames), up to every tile as the image moves faster (the history's
+//    resampling blurs what it carries), the budget lowering it;
+//  z the sun ray's cone (voxels of a level before the next: 108, about the inverse of the sun's diameter, an occluder's
+//    voxel never wider than its penumbra), w the bounce's sun ray's (24: bounced light is soft).
+// ATLAS_TARGET_MS=<ms>: the budget follows the frame's GPU time towards it (0 or unset: none). ATLAS_LIGHT=full: the
+// full light (level 0 everywhere, no cones, every tile every frame; with ATLAS_NEAR_FULLRES=1 every pixel in the far
+// pass: the reference).
+static void lightControl(AtlasContext* ctx, const AtlasFrame* f, const float fwd[3], FrameGpu& g) {
+    // (read every frame, as ATLAS_ABLATE: a measurement switches them between runs in one process)
+    const char* le = std::getenv("ATLAS_LIGHT");
+    if (le && std::strcmp(le, "full") == 0) {
+        g.lightCtl[0] = 0.0f, g.lightCtl[1] = 1.0f, g.lightCtl[2] = 0.0f, g.lightCtl[3] = 0.0f;
+        return;
+    }
+    const char* re = std::getenv("ATLAS_LIGHT_RATE");
+    float rateStill = re && std::atof(re) > 0.0 ? std::fmin(float(std::atof(re)), 1.0f) : 0.25f;
+    const char* te = std::getenv("ATLAS_TARGET_MS");
+    float target = te ? float(std::atof(te)) : 0.0f;
+    // the image's motion, pixels a frame: the view's turn, and the camera's move as a point 16 blocks off sees it
+    float motion = 0.0f;
+    float pa = std::fmax(g.params[3], 1e-5f);
+    if (ctx->haveHistory && ctx->prevW == f->width && ctx->prevH == f->height) {
+        float b[3];
+        pixelDir(ctx->prevInvVP, f->width * 0.5f, f->height * 0.5f, f->width, f->height, b);
+        float d = std::fmin(1.0f, fwd[0] * b[0] + fwd[1] * b[1] + fwd[2] * b[2]);
+        double dx = f->cameraPos[0] - ctx->prevCam[0], dy = f->cameraPos[1] - ctx->prevCam[1], dz = f->cameraPos[2] - ctx->prevCam[2];
+        motion = std::acos(d) / pa + float(std::sqrt(dx * dx + dy * dy + dz * dz)) / (16.0f * pa);
+    }
+    // the budget: the frame's GPU time against the target, a few percent a frame
+    if (target > 0.0f && ctx->stats.lastFrameMs > 0.0) {
+        float err = float(ctx->stats.lastFrameMs) / target - 1.0f;
+        ctx->lightBudget = std::clamp(ctx->lightBudget - 0.05f * std::clamp(err, -1.0f, 1.0f), 0.25f, 1.0f);
+    }
+    float t = std::clamp((motion - 2.0f) / 22.0f, 0.0f, 1.0f);
+    float want = (rateStill + (1.0f - rateStill) * t * t * (3.0f - 2.0f * t)) * ctx->lightBudget;
+    want = std::clamp(want, 0.0625f, 1.0f);
+    ctx->lightRate += (want - ctx->lightRate) * 0.2f;
+    ctx->lightFoot += (1.0f / std::fmax(ctx->lightBudget, 0.25f) - ctx->lightFoot) * 0.2f;
+    g.lightCtl[0] = ctx->lightFoot;
+    g.lightCtl[1] = ctx->lightRate;
+    g.lightCtl[2] = 108.0f;
+    g.lightCtl[3] = 24.0f;
+    // (measurements: ATLAS_LIGHT_KNOBS=foot,rate,cone,bounce overrides them, a negative entry keeps that one)
+    if (const char* k = std::getenv("ATLAS_LIGHT_KNOBS")) {
+        float v[4] = {-1, -1, -1, -1};
+        std::sscanf(k, "%f,%f,%f,%f", &v[0], &v[1], &v[2], &v[3]);
+        for (int i = 0; i < 4; i++)
+            if (v[i] >= 0.0f) g.lightCtl[i] = v[i];
+    }
 }
 
 static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInputs& in) {
@@ -1003,6 +1073,8 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.jitter[0] = f->width > 0 ? ctx->jitter[0] * 2.0f / float(f->width) : 0.0f;
     g.jitter[1] = f->height > 0 ? ctx->jitter[1] * 2.0f / float(f->height) : 0.0f;
     g.jitter[2] = ctx->jitter[0] != 0.0f || ctx->jitter[1] != 0.0f ? 1.0f : 0.0f;
+    g.farLight[2] = ctx->prevJitterNdc[0];  // (the near light's history: the last frame's rays went through these)
+    g.farLight[3] = ctx->prevJitterNdc[1];
     // ATLAS_ABLATE=<bits>: measurements only, leave parts of the shading out (1 AO, 2 smooth normals, 4 shadows, 8 far
     // lights, 16 water reflections, 32 the trace itself after the first hit's distance; the far light: 256 the cheap
     // light of ATLAS_FRAME_LIGHT_LOW, 512 never enclosed (the sky's short reach and the aerial haze under solid cover as
@@ -1010,7 +1082,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     // secondary rays' origin in a solid), 8192 two sky rays, 16384 half their reach, 524288 no traced bounce (the
     // look's constant alone), 2097152 the secondary rays' level 0 without the height mip, 4194304 foliage free to them,
     // bits 23-25 a counter of the near light's secondary rays per pixel (atlas_far.slang gSecMode), 67108864 its level 0
-    // only; the groups: 64 draw every node
+    // only, 536870912 the counters count the pixels the split traces (raySteps: the light by need's work); the groups: 64 draw every node
     // whole, 128 a drawn box without its texel walk, 32768 never draw a node whole for its error, bits 16-18 the level
     // their primary rays start from: a coarse level seen up close)
     {
@@ -1046,6 +1118,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.dims[2] = f->flags;
     g.dims[3] = uint32_t(in.scene->lodCount);
     g.weatherParams[0] = ctx->rainFactor;
+    lightControl(ctx, f, a, g);
     // last frame's view-projection (inverted back from its inverse) and camera, whenever the frames are comparable:
     // the near light's history reprojects through them (with or without clouds: weather off left it no camera, and
     // every pixel's history was refused); temporal.y the clouds' own history, which also needs the same cloud pass
@@ -1143,7 +1216,19 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
             float h = air::altitudeOf(c, float(f->cameraPos[1]));
             lv.hazeDensity = (c.rayleigh.y * std::exp(-h / air::H_RAYLEIGH) + c.mieExt.y * std::exp(-h * c.invHMie)) * c.airScale;
             auto tl = std::chrono::steady_clock::now();
-            g.weatherParams[1] = float(ctx->lights.frame(lv, in.actors));
+            if (ctx->backend->gpuLights()) {
+                // culled, ranked and binned on the GPU (atlas_far.slang lightCullMain): only the index goes up, when it
+                // changes; weatherParams.y says there are lights at all
+                ctx->lights.packGpu(ctx->lightsRevision, ctx->lightsPacked, ctx->lightRecords);
+                in.lights = &ctx->lightsPacked;
+                in.lightsRevision = ctx->lightsRevision;
+                in.lightRecords = ctx->lightRecords;
+                g.dims[2] |= FRAME_GPU_LIGHTS_BIT;
+                g.weatherParams[1] = ctx->lightRecords > 0 ? 1.0f : 0.0f;
+                g.farLight[0] = lv.hazeDensity;
+            } else {
+                g.weatherParams[1] = float(ctx->lights.frame(lv, in.actors));
+            }
             easeMs(ctx->inLightsMs, tl);
         }
     }
@@ -1170,7 +1255,8 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         return !e || std::atoi(e) != 0;
     }();
     ctx->world.gridOwnsLevel0 = ownLevel0 && ctx->voxgrid.enabled;
-    g.vgDims[3] = ctx->world.gridOwnsLevel0 ? 1u : 0u;
+    // (bit 2: the grid owns every level's real blocks, World::gridOwnsReal: level 0's regions are the tiles' alone)
+    g.vgDims[3] = (ctx->world.gridOwnsLevel0 ? 1u : 0u) | (ctx->world.gridOwnsReal() ? 2u : 0u);
     in.voxgrid = &ctx->voxgrid;
     {
         // the near field's textures (atlas_set_material_textures), packed for the kernels once each revision

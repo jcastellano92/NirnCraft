@@ -336,7 +336,10 @@ class Moon:
             self.Bo[idx] = np.maximum(self.Bo[idx], bo.astype(np.float32))
         deep = float(smoothstep(self.s["rt"] * 1.5, self.s["rt"] * 6.0, r))
         if deep > 0:
-            self.Ej[idx] = np.maximum(self.Ej[idx] * (1 - 0.5 * deep * ej), (deep * ej * (x > 0.9)).astype(np.float32))
+            ph = rng.uniform(0, TAU, 3)
+            xr = x * (1.0 + 0.10 * np.sin(5 * az + ph[0]) + 0.06 * np.sin(13 * az + ph[1]) + 0.03 * np.sin(31 * az + ph[2]))
+            thrown = deep * np.exp(-np.maximum(xr - 1.0, 0.0) * 1.7) * smoothstep(0.75, 1.2, xr) * (xr < 3.2)
+            self.Ej[idx] = np.maximum(self.Ej[idx] * (1 - 0.5 * deep * ej), thrown.astype(np.float32))
         dig = float(smoothstep(self.s["dig_r"] * 0.6, self.s["dig_r"] * 1.6, r))
         if dig > 0:
             self.M[idx] *= (1.0 - dig * ej * 0.9).astype(np.float32)
@@ -464,12 +467,6 @@ class Moon:
         """Carves paths: each (points, half-width per point, depth per point[, the mantle's tone per point]). kind
         'rift' (a graben: a rough floor with tilted blocks, walls stepped down two faults, raised shoulders, the dark
         mantle and red deposits along it) or 'valley' (a V-to-U sculpted valley, low levees)."""
-        pts = np.concatenate([p[0] for p in paths])
-        w = np.concatenate([p[1] for p in paths]).astype(np.float32)
-        dep = np.concatenate([p[2] for p in paths]).astype(np.float32)
-        tone = np.concatenate([p[3] if len(p) > 3 else np.ones(len(p[0])) for p in paths]).astype(np.float32)
-        tree = cKDTree(pts)
-        reach = float(w.max()) * (6.0 if kind == "rift" else 3.0)
         g = self.g
         carve = np.zeros_like(self.H)
         lift = np.zeros_like(self.H)
@@ -478,44 +475,67 @@ class Moon:
         warp = self.noise.fbm(self.P, 9.0, 5, first=17)
         blocks = self.noise.fbm(self.P, 22.0, 3, first=11)
         rough = self.noise.fbm(self.P, 60.0, 4, first=3)
+        fine = self.noise.fbm(self.P, 160.0, 3, first=23)
         band = 64
-        for r0 in range(0, g.H, band):
-            rows = slice(r0, min(g.H, r0 + band))
-            P = self.P[rows].reshape(-1, 3)
-            dist, i = tree.query(P, distance_upper_bound=reach, workers=-1)
-            ok = np.isfinite(dist)
-            ii = np.where(ok, i, 0)
-            ww, dd, tn = w[ii], dep[ii], tone[ii]
-            dist = np.where(ok, dist, 1e3).astype(np.float32)
-            shape = carve[rows].shape
-            wv, rv, bv = warp[rows].reshape(-1), rough[rows].reshape(-1), blocks[rows].reshape(-1)
-            # (a rift's walls run straighter than a valley's banks: faults)
-            ragged = (0.12, 0.035) if kind == "rift" else (0.22, 0.08)
-            u = dist / ww * (1.0 + ragged[0] * wv) + ragged[1] * rv
-            if kind == "rift":
-                # two faults step the walls down (steep scarps, a bench between), the floor broken into tilted
-                # blocks and talus, the shoulders lifted by the rifting
-                step = 0.55 * smoothstep(0.70, 0.78, u) + 0.45 * smoothstep(0.88, 0.95, u)
-                tilt = 0.22 * np.clip(bv, -1, 1) * (1.0 - smoothstep(0.45, 0.7, u))
-                floor = -dd * (1.0 - step) * (1.0 + 0.10 * rv + tilt)
-                shoulder = dd * 0.28 * smoothstep(0.9, 1.05, u) * (1.0 - smoothstep(1.1, 2.6, u))
-                mantle = np.maximum(1.0 - smoothstep(0.55, 0.9, u),
-                                    0.9 * np.exp(-((dist / (4.5 * ww)) ** 2)) * (0.55 + 0.45 * wv))
-                mantle *= np.clip(ww / 0.03, 0.25, 1.0) * tn
-                ox = np.exp(-((dist / (2.2 * ww)) ** 2)) * smoothstep(0.1, 0.7, bv * 0.6 + wv * 0.6) * tn
-                oxide[rows] = np.maximum(oxide[rows], ox.reshape(shape))
-            else:
-                floor = -dd * (1.0 - smoothstep(0.0, 1.0, u)) ** 1.5
-                shoulder = dd * 0.12 * smoothstep(0.85, 1.1, u) * (1.0 - smoothstep(1.1, 1.8, u))
-                mantle = np.zeros_like(u)
-            carve[rows] = np.minimum(carve[rows], floor.reshape(shape))
-            lift[rows] = np.maximum(lift[rows], shoulder.reshape(shape))
-            dark[rows] = np.maximum(dark[rows], mantle.reshape(shape))
+        total = 0
+        # each path on its own (its nearest point's width varies smoothly along it): the nearest point of all the
+        # paths together switched paths, and widths, along straight lines between them
+        for path in paths:
+            pts = np.asarray(path[0], np.float64)
+            w = np.asarray(path[1], np.float32)
+            dep = np.asarray(path[2], np.float32)
+            tone = (np.asarray(path[3]) if len(path) > 3 else np.ones(len(pts))).astype(np.float32)
+            total += len(pts)
+            tree = cKDTree(pts)
+            reach = float(w.max()) * (6.0 if kind == "rift" else 3.0)
+            plat = np.arcsin(np.clip(pts[:, 1], -1, 1))
+            near_rows = np.nonzero((g.lat >= plat.min() - reach * 1.05) & (g.lat <= plat.max() + reach * 1.05))[0]
+            if len(near_rows) == 0:
+                continue
+            for r0 in range(int(near_rows[0]), int(near_rows[-1]) + 1, band):
+                rows = slice(r0, min(int(near_rows[-1]) + 1, r0 + band))
+                P = self.P[rows].reshape(-1, 3)
+                dist, i = tree.query(P, distance_upper_bound=reach, workers=-1)
+                ok = np.isfinite(dist)
+                if not ok.any():
+                    continue
+                ii = np.where(ok, i, 0)
+                ww, dd, tn = w[ii], dep[ii], tone[ii]
+                dist = np.where(ok, dist, 1e3).astype(np.float32)
+                shape = carve[rows].shape
+                wv, rv, bv = warp[rows].reshape(-1), rough[rows].reshape(-1), blocks[rows].reshape(-1)
+                fv = fine[rows].reshape(-1)
+                # (a rift's walls run straighter than a valley's banks: faults)
+                ragged = (0.12, 0.035) if kind == "rift" else (0.22, 0.08)
+                u = dist / ww * (1.0 + ragged[0] * wv) + ragged[1] * rv
+                # (all of it gone before the reach: no circle where the search stopped)
+                fade = smoothstep(reach, reach * 0.75, dist)
+                if kind == "rift":
+                    # two faults step the walls down (steep scarps, a bench between), the floor broken into tilted
+                    # blocks and talus, the shoulders lifted by the rifting
+                    step = 0.55 * smoothstep(0.70, 0.78, u) + 0.45 * smoothstep(0.88, 0.95, u)
+                    tilt = 0.22 * np.clip(bv, -1, 1) * (1.0 - smoothstep(0.45, 0.7, u))
+                    floor = -dd * (1.0 - step) * (1.0 + 0.10 * rv + tilt)
+                    shoulder = dd * 0.28 * smoothstep(0.9, 1.05, u) * (1.0 - smoothstep(1.1, 2.6, u)) * fade
+                    # the ash mantle: its edge ragged at several scales (blown, settled, embayed), not a smooth halo
+                    dm = dist / (4.5 * ww) * np.exp(0.30 * np.clip(wv, -2, 2) + 0.18 * rv + 0.10 * fv)
+                    mantle = np.maximum(1.0 - smoothstep(0.55, 0.9, u + 0.10 * fv + 0.06 * rv),
+                                        0.9 * np.exp(-dm * dm) * (0.55 + 0.45 * wv) * fade)
+                    mantle *= np.clip(ww / 0.03, 0.25, 1.0) * tn
+                    ox = np.exp(-((dist / (2.2 * ww)) ** 2)) * smoothstep(0.1, 0.7, bv * 0.6 + wv * 0.6) * tn * fade
+                    oxide[rows] = np.maximum(oxide[rows], ox.reshape(shape))
+                else:
+                    floor = -dd * (1.0 - smoothstep(0.0, 1.0, u)) ** 1.5
+                    shoulder = dd * 0.12 * smoothstep(0.85, 1.1, u) * (1.0 - smoothstep(1.1, 1.8, u))
+                    mantle = np.zeros_like(u)
+                carve[rows] = np.minimum(carve[rows], floor.reshape(shape))
+                lift[rows] = np.maximum(lift[rows], shoulder.reshape(shape))
+                dark[rows] = np.maximum(dark[rows], mantle.reshape(shape))
         self.H += carve + lift
         self.Tr = np.maximum(getattr(self, "Tr", np.zeros_like(self.H)), smoothstep(0.0, -2e-4, carve).astype(np.float32))
         self.D = np.maximum(self.D, dark)
         self.Ox = np.maximum(self.Ox, oxide)
-        self.stats[kind] = len(pts)
+        self.stats[kind] = total
 
     # ------------------------------------------------------------------------------------------- the bake
     def micro(self):
@@ -586,8 +606,10 @@ class Moon:
         for k, (n, width) in enumerate(scales):
             spacing = math.sqrt(4 * math.pi / n)
             fq = 1.2 / spacing
-            self._warp = np.stack([self.noise.fbm(self.P, fq, 3, first=first + 20 + 3 * k + j) for j in range(3)], -1)
-            f1, f2, _ = self.voronoi(n, 0xC0 + k + first, warp=0.45 * spacing)
+            self._warp = np.stack([self.noise.fbm(self.P, fq, 3, first=first + 20 + 3 * k + j)
+                                   + 0.35 * self.noise.fbm(self.P, fq * 4.0, 2, first=first + 40 + 3 * k + j)
+                                   for j in range(3)], -1)
+            f1, f2, _ = self.voronoi(n, 0xC0 + k + first, warp=1.0 * spacing)
             edge = (f2 - f1) * (1.0 + 0.35 * warp)
             spacing = math.sqrt(4 * math.pi / n)
             w = width * spacing
@@ -605,8 +627,11 @@ class Moon:
         if bias is not None:
             n = n + bias
         t = np.quantile(n[::7, ::7], 1.0 - cover)
-        S = smoothstep(t - 0.02, t + 0.02, n).astype(np.float32)  # crisp plates
-        lip = (smoothstep(t - 0.02, t + 0.02, n) * smoothstep(t + 0.12, t + 0.02, n)).astype(np.float32)
+        wq = self.P + 0.012 * np.stack([self.noise.fbm(self.P, 60.0, 2, first=first + 11 + j) for j in range(3)], -1)
+        edge = (n + 0.07 * self.noise.fbm(wq, 30.0, 3, first=first + 14) + 0.035 * self.noise.fbm(wq, 120.0, 3, first=first + 17)
+                + 0.015 * self.noise.fbm(wq, 420.0, 2, first=first + 20))
+        S = smoothstep(t - 0.012, t + 0.012, edge).astype(np.float32)  # crisp, ragged plates
+        lip = (S * smoothstep(t + 0.09, t + 0.012, edge)).astype(np.float32)  # (their edges curled up)
         self.H += amp * S + 0.4 * amp * lip
         self.Sk = np.maximum(self.Sk, S)
         self.Lip = np.maximum(self.Lip, lip)
@@ -621,7 +646,8 @@ class Moon:
         base = self.g.blur(self.H, 0.004)
         level = float(np.quantile(base[core], fill)) if core.any() else float(base.mean())
         eps = 6e-5
-        lava = (mask * smoothstep(level + eps, level - eps, base)).astype(np.float32)
+        rough = 4e-5 * self.noise.fbm(self.P, 160.0, 3, first=first + 3) + 2e-5 * self.noise.fbm(self.P, 600.0, 2, first=first + 6)
+        lava = (mask * smoothstep(level + eps, level - eps, base + rough)).astype(np.float32)
         a = (1.0 - keep) * lava
         self.H = self.H * (1 - a) + (level + 0.15 * (base - level)) * a
         self.H += lava * ridges * np.maximum(self.noise.ridged(self.P, 26.0, 3, first=first) - 1.2, 0)
@@ -658,7 +684,8 @@ class Moon:
         base = self.g.blur(self.H, 0.004)
         level = float(np.quantile(base[core], fill)) if core.any() else float(base.mean())
         eps = 1.5e-4
-        mask = (mask * smoothstep(level + eps, level - eps, self.g.blur(base, 0.003))).astype(np.float32)
+        rough = 8e-5 * self.noise.fbm(self.P, 120.0, 3, first=first + 3) + 3e-5 * self.noise.fbm(self.P, 500.0, 2, first=first + 6)
+        mask = (mask * smoothstep(level + eps, level - eps, self.g.blur(base, 0.003) + rough)).astype(np.float32)
         self.H = self.H * (1 - 0.95 * mask) + level * 0.95 * mask
         self.Sa = np.maximum(self.Sa, mask)
         self.F *= 1 - mask
@@ -738,9 +765,10 @@ def along(n, scale, rng):
 def masser_rift(m, rng):
     """The Great Rift: a faulted graben across the face, its width swelling and pinching, branches and side cracks,
     en-echelon fractures beside it, vents with ash and oxide."""
-    rng = np.random.default_rng(0x8200)  # (its own: the rift's course is designed, below the Eye, across the Tear)
+    rng = np.random.default_rng(0x8209)  # (its own: the rift's course is designed: under the Eye, through the Tear's
+    # foot, sweeping south then north-east to the chaos)
     paths = []
-    main = m.walk(0.30, -1.05, 1.95, 2.1, 0.6, rng)
+    main = m.walk(0.42, -1.0, 2.2, 2.2, 1.3, rng, corr=0.25)
     s = np.linspace(0, 1, len(main))
     w = (0.075 * np.sin(np.pi * np.clip(s * 1.05, 0, 1)) ** 0.55 * np.exp(0.35 * along(len(main), 0.08, rng)) + 0.004)
     tone = np.clip(0.9 + 0.25 * along(len(main), 0.12, rng), 0.35, 1.0)
@@ -771,7 +799,7 @@ def masser_rift(m, rng):
         side /= np.linalg.norm(side, axis=1, keepdims=True)
         par = main + side * (w[:, None] * off)
         par /= np.linalg.norm(par, axis=1, keepdims=True)
-        keep = np.convolve(rng.uniform(0, 1, len(par)) > 0.5, np.ones(400) / 400, "same") > 0.5
+        keep = np.convolve(rng.uniform(0, 1, len(par)) > 0.5, np.ones(90) / 90, "same") > 0.58
         keep &= (s > 0.1) & (s < 0.9)
         if keep.sum() > 10:
             paths.append((par[keep], np.full(keep.sum(), 0.004), np.full(keep.sum(), 0.0010)))
@@ -887,7 +915,7 @@ def paint_masser(m):
     A = A * (0.55 + 0.45 * Sk) + bared * (0.45 * (1 - Sk))
     A = A * (1 - 0.6 * Sk) + c(0.66, 0.52, 0.50) * 0.6 * Sk                    # the old white skin (bone-rose)
     A = A * (1 - m.Lip[..., None]) + c(0.80, 0.70, 0.68) * m.Lip[..., None]    # palest at its peeling edges
-    A *= (1.0 - 0.35 * m.Cr)[..., None]                                         # the cracks (shadowed, fines)
+    A *= (1.0 - 0.18 * m.Cr)[..., None]                                         # the cracks (shadowed, fines)
     sea = np.clip(m.M, 0, 1)[..., None]
     mott = smoothstep(-0.7, 0.7, n.fbm(P, 14.0, 5, first=9))[..., None]
     basalt = c(0.075, 0.042, 0.036) * (1 - mott) + c(0.12, 0.062, 0.048) * mott  # near-black basalt
@@ -1034,7 +1062,7 @@ def paint_secunda(m):
     A = A * (0.6 + 0.4 * Sk) + bared * (0.4 * (1 - Sk))
     A = A * (1 - 0.6 * Sk) + c(0.68, 0.67, 0.64) * 0.6 * Sk
     A = A * (1 - m.Lip[..., None]) + c(0.80, 0.80, 0.78) * m.Lip[..., None]
-    A *= (1.0 - 0.3 * m.Cr)[..., None]
+    A *= (1.0 - 0.15 * m.Cr)[..., None]
     sea = np.clip(m.M, 0, 1)[..., None]
     mott = smoothstep(-0.7, 0.7, n.fbm(P, 12.0, 5, first=9))[..., None]
     A = A * (1 - sea) + (c(0.17, 0.17, 0.19) * (1 - mott) + c(0.22, 0.22, 0.235) * mott) * sea

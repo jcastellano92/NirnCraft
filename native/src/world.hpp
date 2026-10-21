@@ -172,6 +172,13 @@ public:
     // builds those levels' regions from the tiles alone (the fallback where the grid has no data), and a section no
     // longer rebuilds them, nor is digested for them (the coarse cubes: only the levels above gridCoarse)
     std::atomic<int> gridCoarse{0};
+    // the grid owns every level's real blocks (level 0 and the coarse levels up to the coarsest that reads sections,
+    // 4, or the world's): no CPU stage per section at all (no generated levels, no region rebuilt; level 0's regions,
+    // and every level's, are the tiles' fallback where the grid has no data)
+    bool gridOwnsReal() const {
+        int c = gridCoarse.load(std::memory_order_relaxed);
+        return gridOwnsLevel0.load(std::memory_order_relaxed) && c >= std::min(4, lodCount - 1) && c >= coarseTop();
+    }
     void setGridWindow(int ox, int oz, int d);  // (no lock: the skipped regions are looked at by the next update)
     // sections inside the grid's window it does not hold (its pool full of nearer ones: VoxGrid::takeReleased): their
     // level-0 regions rebuilt here, and their uploads no longer skipped, until the window moves on

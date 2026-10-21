@@ -126,7 +126,8 @@ void VoxGrid::origin(int32_t o[4]) const {
     o[0] = ox_;
     o[1] = VG_MIN_SY;
     o[2] = oz_;
-    o[3] = active() ? 1 : 0;
+    // (bit 2: it holds blocks somewhere, or will once this frame's batch is built: the backend takes it after this)
+    o[3] = active() ? (slotsUsed_ > 0 || !pending_.empty() ? 3 : 1) : 0;
 }
 
 size_t VoxGrid::pending() const {
@@ -255,7 +256,8 @@ void VoxGrid::levelFrame(int k, int32_t out[4]) const {
     out[0] = L.ox;
     out[1] = L.oz;
     out[2] = int32_t(L.chunkBase);
-    out[3] = L.D | L.H << 8 | 1 << 16;
+    // (bit 17: it holds blocks somewhere, or may once this frame's batch is built)
+    out[3] = L.D | L.H << 8 | 1 << 16 | (L.used > 0 || !cpending_.empty() ? 1 << 17 : 0);
 }
 
 void VoxGrid::placeLevel(Level& L, int camSx, int camSz) {
@@ -1206,10 +1208,13 @@ void VoxGrid::growLevelCpu(int Dl, int Hl, uint32_t base, int ox, int oz) {
     };
     std::vector<uint32_t> S(size_t(X + 1) * (Y + 1) * (Z + 1), 0);
     auto at = [&](int x, int y, int z) -> uint32_t& { return S[(size_t(y) * (Z + 1) + size_t(z)) * (X + 1) + size_t(x)]; };
+    // (twice: the EMPTY cells' boxes of empty cells, then the UNLOADED cells' of unloaded ones, as vgGrowMain)
+    for (uint32_t target : {VG_EMPTY, VG_UNLOADED}) {
+    std::fill(S.begin(), S.end(), 0u);
     for (int y = 0; y < Y; y++)
         for (int z = 0; z < Z; z++)
             for (int x = 0; x < X; x++) {
-                uint32_t occ = (cell(x, y, z) & 3u) != VG_EMPTY ? 1u : 0u;
+                uint32_t occ = (cell(x, y, z) & 3u) != target ? 1u : 0u;
                 at(x + 1, y + 1, z + 1) = occ + at(x, y + 1, z + 1) + at(x + 1, y, z + 1) + at(x + 1, y + 1, z) - at(x, y, z + 1) -
                                           at(x, y + 1, z) - at(x + 1, y, z) + at(x, y, z);
             }
@@ -1223,9 +1228,10 @@ void VoxGrid::growLevelCpu(int Dl, int Hl, uint32_t base, int ox, int oz) {
         for (int z = 0; z < Z; z++)
             for (int x = 0; x < X; x++) {
                 uint32_t& c = cell(x, y, z);
-                if ((c & 3u) != VG_EMPTY) continue;
-                c = growBox(x, y, z, X, Y, Z, 31, 5, boxOcc) << 2 | VG_EMPTY;
+                if ((c & 3u) != target) continue;
+                c = growBox(x, y, z, X, Y, Z, 31, 5, boxOcc) << 2 | target;
             }
+    }
 }
 
 }  // namespace atlas

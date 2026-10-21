@@ -68,6 +68,12 @@ struct alignas(16) FrameGpu {
     float eclipseA[4];
     float eclipseB[4];
     float eclipseC[4];
+    // (internal) the light by need (api.cpp lightControl; atlas_shared.slang): footprint scale, tiles' share a frame,
+    // the sun ray's cone, the bounce's
+    float lightCtl[4];
+    // (internal) the air's extinction per block at the eye (FRAME_GPU_LIGHTS_BIT: the far lights culled on the GPU), 0,
+    // the last frame's jitter in NDC (the near light's history)
+    float farLight[4];
     // the grid's coarse levels 1..6 (voxgrid.hpp): origin x, z (chunks of 16 << k blocks), first chunk word,
     // D | H << 8 | 1 << 16 when the level is there
     int32_t vgLevel[6][4];
@@ -87,7 +93,7 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 48);
 static_assert(sizeof(RegionGpu) == 64);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64 + 48 + 96 + 16);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64 + 48 + 32 + 96 + 16);
 
 struct Float4 {
     float v[4];
@@ -145,6 +151,13 @@ struct FarGlobals {
     CpuBuffer<uint64_t> vgBits;
     CpuBuffer<uint32_t> vgPool;
     CpuBuffer<uint32_t> texData;  // (abi 0.16) the near field's textures (voxgrid.hpp packTextures)
+    // (FRAME_GPU_LIGHTS: the Vulkan backend only; empty here, the CPU bins the lights into the actor buffer)
+    CpuBuffer<Float4> lightSrc;
+    CpuBuffer<Float4> lightCand;
+    CpuBuffer<uint32_t> lightList;
+    // (the split's history: the Vulkan backend only) the near light's own samples per pixel, this frame's and the last's
+    CpuBuffer<uint32_t> outNearAge;
+    CpuBuffer<uint32_t> prevNearAge;
 };
 
 }  // namespace atlas
