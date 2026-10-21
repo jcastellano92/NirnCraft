@@ -465,61 +465,71 @@ final class AtlasOverlayTapes implements Canvas.Tape {
     }
 
     /**
-     * Records the named settlement's pieces (the street plan's layout, as SettlementStructure adds them) over a level
-     * holding the terrain (painted by the builders as they go: later pieces see the earlier ones, as on the server).
-     * Only pieces whose box (with its foundations) meets {@code area} are built; only their ops inside {@link #keep}
-     * are kept. Returns the pieces built.
+     * Records the named settlement's pieces (the street plan's layout, as SettlementStructure adds them) over chunks
+     * [cx0, cx1] x [cz0, cz1] of a window holding the terrain, in the server's order: chunk by chunk (z, then x), every
+     * piece whose box meets the chunk in piece order, each through SettlementPiece.postProcess itself on the chunk's
+     * region (its canvas clipped to the chunk and taped here; its sweeps painting the window untaped, so a later
+     * builder's branch reads what the server's would). Returns the (piece, chunk) builds.
      */
-    int recordSettlement(String placeId, WorldGenLevel level, BoundingBox area) {
-        List<Spec> specs = StreetPlan.get().layout(placeId);
-        Place place = Places.byId(placeId).orElse(null);
-        if (specs == null || place == null) return 0;
-        long seed = Cities.seed(place);
-        int built = 0;
-        for (int i = 0; i < specs.size(); i++) {
-            Spec s = specs.get(i);
-            if (s.has(Spec.OMIT)) continue;
-            SettlementPiece piece = new SettlementPiece(s, seed ^ (i * 0x9E3779B97F4A7C15L), place.id(), i);
-            BoundingBox b = piece.getBoundingBox();
-            // as postProcess clips it in a chunk (ChunkGenerator.getWritableArea: from the world's lowest y + 1)
-            BoundingBox clip = new BoundingBox(b.minX(), Math.max(b.minY() - SettlementPiece.FOUNDATION, level.getMinY() + 1), b.minZ(),
-                    b.maxX(), Math.min(b.maxY(), level.getMaxY()), b.maxZ());
-            if (area != null && !clip.intersects(area)) continue;
-            long t0 = System.nanoTime();
-            Canvas c = canvas(piece, level, clip);
-            c.owner = piece.owner();
-            c.tape = this;
-            try {
-                Builders.build(c, piece);
-            } catch (RuntimeException e) {
-                failed++;
-                if (failures.size() < 8) failures.add(placeId + " #" + i + " " + s.kind + ": " + e);
+    int recordSettlement(String placeId, Window w, int cx0, int cz0, int cx1, int cz1) {
+        List<SettlementPiece> list = pieces(placeId);
+        if (list.isEmpty()) return 0;
+        int minY = w.heights.getMinY(), maxY = w.heights.getMaxY(), built = 0;
+        for (int cz = cz0; cz <= cz1; cz++)
+            for (int cx = cx0; cx <= cx1; cx++) {
+                net.minecraft.world.level.ChunkPos cp = new net.minecraft.world.level.ChunkPos(cx, cz);
+                BoundingBox chunkBox = new BoundingBox(cx << 4, minY + 1, cz << 4, (cx << 4) + 15, maxY, (cz << 4) + 15);
+                WorldGenLevel level = w.region(cx, cz);
+                for (SettlementPiece piece : list) {
+                    if (!piece.getBoundingBox().intersects(chunkBox)) continue;
+                    long t0 = System.nanoTime();
+                    SettlementPiece.TAPE.set(this);
+                    try {
+                        piece.postProcess(level, null, null, RandomSource.create(0L), chunkBox, cp, BlockPos.ZERO);
+                    } catch (RuntimeException e) {
+                        failed++;
+                        if (failures.size() < 8) failures.add(placeId + " #" + piece.index + " " + piece.spec.kind + ": " + e);
+                    } finally {
+                        SettlementPiece.TAPE.remove();
+                    }
+                    sweeps(piece.getBoundingBox(), cx, cz, minY, maxY);
+                    nanos += System.nanoTime() - t0;
+                    pieces++;
+                    built++;
+                }
             }
-            sweeps(b, level.getMinY(), level.getMaxY());
-            nanos += System.nanoTime() - t0;
-            pieces++;
-            built++;
-        }
         return built;
     }
 
+    /** The settlement's pieces as SettlementStructure adds them (OMIT left out; the index and seed kept). */
+    static List<SettlementPiece> pieces(String placeId) {
+        List<Spec> specs = StreetPlan.get().layout(placeId);
+        Place place = Places.byId(placeId).orElse(null);
+        List<SettlementPiece> out = new ArrayList<>();
+        if (specs == null || place == null) return out;
+        long seed = Cities.seed(place);
+        for (int i = 0; i < specs.size(); i++) {
+            Spec s = specs.get(i);
+            if (s.has(Spec.OMIT)) continue;
+            out.add(new SettlementPiece(s, seed ^ (i * 0x9E3779B97F4A7C15L), place.id(), i));
+        }
+        return out;
+    }
+
     /**
-     * The y ranges SettlementPiece.postProcess's Sanity sweeps cover for a piece box b, chunk by chunk (the clip with the
-     * foundations, then the box 7 wider and 2 below / 4 above, both within the chunk), joined into the columns'.
+     * The y ranges SettlementPiece.postProcess's Sanity sweeps cover for a piece box b in chunk (cx, cz) (the clip with
+     * the foundations, then the box 7 wider and 2 below / 4 above, both within the chunk), joined into the columns'.
      */
-    private void sweeps(BoundingBox b, int minY, int maxY) {
-        for (int cz = b.minZ() >> 4; cz <= b.maxZ() >> 4; cz++)
-            for (int cx = b.minX() >> 4; cx <= b.maxX() >> 4; cx++) {
-                int x0 = cx << 4, z0 = cz << 4, x1 = x0 + 15, z1 = z0 + 15;
-                int cx0 = Math.max(x0, b.minX()), cx1 = Math.min(x1, b.maxX()), cz0 = Math.max(z0, b.minZ()), cz1 = Math.min(z1, b.maxZ());
-                int cy0 = Math.max(minY + 1, b.minY() - SettlementPiece.FOUNDATION), cy1 = Math.min(maxY, b.maxY());
-                if (cx0 > cx1 || cz0 > cz1 || cy0 > cy1) continue;
-                int top = maxY + 1 - 2;
-                sweep(cx0, cz0, cx1, cz1, Math.max(cy0, minY + 1), Math.min(cy1, top));
-                int wy0 = Math.max(minY + 1, cy0 - 2), wy1 = Math.min(maxY, cy1 + 4);
-                sweep(Math.max(x0, cx0 - 7), Math.max(z0, cz0 - 7), Math.min(x1, cx1 + 7), Math.min(z1, cz1 + 7), Math.max(wy0, minY + 1),
-                        Math.min(wy1, top));
-            }
+    private void sweeps(BoundingBox b, int cx, int cz, int minY, int maxY) {
+        int x0 = cx << 4, z0 = cz << 4, x1 = x0 + 15, z1 = z0 + 15;
+        int cx0 = Math.max(x0, b.minX()), cx1 = Math.min(x1, b.maxX()), cz0 = Math.max(z0, b.minZ()), cz1 = Math.min(z1, b.maxZ());
+        int cy0 = Math.max(minY + 1, b.minY() - SettlementPiece.FOUNDATION), cy1 = Math.min(maxY, b.maxY());
+        if (cx0 > cx1 || cz0 > cz1 || cy0 > cy1) return;
+        int top = maxY + 1 - 2;
+        sweep(cx0, cz0, cx1, cz1, Math.max(cy0, minY + 1), Math.min(cy1, top));
+        int wy0 = Math.max(minY + 1, cy0 - 2), wy1 = Math.min(maxY, cy1 + 4);
+        sweep(Math.max(x0, cx0 - 7), Math.max(z0, cz0 - 7), Math.min(x1, cx1 + 7), Math.min(z1, cz1 + 7), Math.max(wy0, minY + 1),
+                Math.min(wy1, top));
     }
 
     private void sweep(int x0, int z0, int x1, int z1, int y0, int y1) {

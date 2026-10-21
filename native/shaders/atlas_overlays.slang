@@ -415,8 +415,7 @@ void streetsMain(uint3 id : SV_DispatchThreadID) {
 // Over each column's sweep range (the tape record's: the union of the pieces' clips and their wide boxes, as Sanity
 // covers them chunk by chunk), two passes (up, then down) remove what the builders left without support or sense:
 // unsupported doors, beds, trapdoors, stray stairs, carpets, plates, lanterns, ladders, unreachable chests and barrels,
-// fences and walls on nothing, and any block with no supported neighbour (the server's rule includes fluids and
-// terrain: open water in a piece's clip goes). Then connectMain gives every fence, wall and pane its sides from its
+// fences and walls on nothing, and any block but a fluid with no supported neighbour. Then connectMain gives every fence, wall and pane its sides from its
 // neighbours (Sanity.connect: worldgen does no neighbour updates). Differences from the server, by construction:
 // one sweep after all of a chunk's pieces instead of one per piece, and the neighbour columns read as the pieces
 // left them (snap) instead of as the sweep goes (only a chain of removals across columns differs).
@@ -595,7 +594,8 @@ void sanityBlock(int y) {
         else if (!anyNeighbour(y)) setB(y, idAir());
         return;
     }
-    if (!anyNeighbour(y)) setB(y, idAir());
+    // never a fluid (Sanity.java, the owner's decision of 2026-10-21)
+    if ((f & F_FLUID) == 0u && !anyNeighbour(y)) setB(y, idAir());
 }
 
 // this column's sweep range (the tape record's), or false

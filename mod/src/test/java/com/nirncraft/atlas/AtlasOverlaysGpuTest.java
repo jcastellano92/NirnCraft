@@ -68,7 +68,7 @@ import java.util.zip.GZIPOutputStream;
 @ExtendWith(BoundedServerProvider.class)
 class AtlasOverlaysGpuTest {
     static final long SEED = 1234L;
-    static final int REF_VERSION = 1;
+    static final int REF_VERSION = 2;  // 2: Sanity keeps fluids (the owner, 2026-10-21)
 
     /** A test set: a named settlement and the window of chunks [cx0, cx1] x [cz0, cz1] compared. */
     record TestSet(String place, int cx0, int cz0, int cx1, int cz1) {
@@ -228,7 +228,7 @@ class AtlasOverlaysGpuTest {
         AtlasOverlayTapes tapes = new AtlasOverlayTapes(rig.prog().blocks);
         tapes.keep = new BoundingBox(set.cx0() << 4, heights.getMinY(), set.cz0() << 4, (set.cx1() << 4) + 15, heights.getMaxY(),
                 (set.cz1() << 4) + 15);
-        tapes.recordSettlement(set.place(), window(ref.terrain(), heights, containers).level(), tapes.keep);
+        tapes.recordSettlement(set.place(), window(ref.terrain(), heights, containers), set.cx0(), set.cz0(), set.cx1(), set.cz1());
         Map<Long, Integer> offsets = new HashMap<>();
         int[] tapeWords = tapes.tapeWords(offsets);
         int[] blockWords = tapes.blockWords();
@@ -523,10 +523,8 @@ class AtlasOverlaysGpuTest {
         tapes.keep = new BoundingBox(bx0, heights.getMinY(), bz0, bx1, heights.getMaxY(), bz1);
         trace("begin record " + set.place());
         long rt = System.nanoTime();
-        AtlasOverlayTapes.Window w = window(ref.terrain(), heights, containers);
-        WorldGenLevel level = w.level();
-        // the same pieces the reference built (a box meeting the window); in piece order over one level, as the server
-        int built = tapes.recordSettlement(set.place(), level, tapes.keep);
+        // in the server's order over the window's chunks (the reference's order: z, then x)
+        int built = tapes.recordSettlement(set.place(), window(ref.terrain(), heights, containers), set.cx0(), set.cz0(), set.cx1(), set.cz1());
         double recMs = (System.nanoTime() - rt) / 1e6;
         trace(String.format("end record %s", set.place()));
         trace(String.format("done record %s %.1fs (%d pieces, %d ops, %d failed)", set.place(), recMs / 1000, built, tapes.ops, tapes.failed));
