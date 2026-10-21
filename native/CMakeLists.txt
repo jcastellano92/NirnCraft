@@ -124,7 +124,9 @@ add_custom_command(
 # the level-0 grid's build kernels (atlas_voxgrid.slang): one SPIR-V module per entry point
 set(VG_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_voxgrid.slang")
 set(VG_HEADERS "")
-foreach(pair "section:vgSectionMain" "satx:vgSatX" "satz:vgSatZ" "saty:vgSatY" "grow:vgGrowMain")
+foreach(pair "section:vgSectionMain" "satx:vgSatX" "satz:vgSatZ" "saty:vgSatY" "grow:vgGrowMain" "fill:vgFillMain" "ingest:vgIngestMain" "down:vgDownMain"
+             "pack:vgPackMain" "unpack:vgUnpackMain" "cand:vgCandMain" "rank:vgRankMain" "rankcut:vgRankCutMain"
+             "ranklist:vgRankListMain")
   string(REPLACE ":" ";" kv "${pair}")
   list(GET kv 0 short)
   list(GET kv 1 entry)
@@ -163,7 +165,7 @@ foreach(pair "lightCullMain;lightcull" "lightAdmitMain;lightadmit" "lightBinMain
 endforeach()
 add_library(atlas_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/groups.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
-  src/gl_api.cpp src/lights.cpp src/voxgrid.cpp
+  src/gl_api.cpp src/lights.cpp src/voxgrid.cpp src/sectionstore.cpp src/gencache.cpp
   "${GEN}/atlas_far_cpu.cpp" "${GEN}/atlas_far_spv.h" "${GEN}/atlas_publish_spv.h" "${GEN}/atlas_ingest_spv.h"
   "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h" "${GEN}/atlas_nearlight_spv.h" "${GEN}/atlas_nearup_spv.h"
   "${GEN}/atlas_neartemporal_spv.h" ${VG_HEADERS} ${FAR_EXTRA_HEADERS})
@@ -349,7 +351,7 @@ endif()
 set(GEN_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_gen.slang")
 set(GEN_HEADERS)
 set(GEN_CPU_ENTRIES)
-foreach(pass corner aquifer fill top surface pack)
+foreach(pass corner aquifer fill top surface pack cols secs mats math probe pageCols pageBiomes tile tileSurf tileBiome farChunk)
   set(entry "${pass}Main")
   set(GEN_VALIDATE)
   if(SPIRV_VAL)
@@ -361,20 +363,23 @@ foreach(pass corner aquifer fill top surface pack)
             -warnings-disable 41035 -o "${GEN}/atlas_gen_${pass}_raw.spv"
     COMMAND spv_exact "${GEN}/atlas_gen_${pass}_raw.spv" "${GEN}/atlas_gen_${pass}.spv"
     ${GEN_VALIDATE}
-    DEPENDS "${GEN_SRC}" spv_exact COMMENT "slangc atlas_gen:${entry} -> SPIR-V (exact float contract)")
+    DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_page.slang" spv_exact COMMENT "slangc atlas_gen:${entry} -> SPIR-V (exact float contract)")
   add_custom_command(
     OUTPUT "${GEN}/atlas_gen_${pass}_spv.h"
     COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_gen_${pass}.spv -DOUT=${GEN}/atlas_gen_${pass}_spv.h
             -DNAME=atlas_gen_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
     DEPENDS "${GEN}/atlas_gen_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
   list(APPEND GEN_HEADERS "${GEN}/atlas_gen_${pass}_spv.h")
-  list(APPEND GEN_CPU_ENTRIES -entry ${entry} -stage compute)
+  # (GPU-only passes stay out of the C++ reference: its target has no atomics)
+  if(NOT pass STREQUAL "farChunk")
+    list(APPEND GEN_CPU_ENTRIES -entry ${entry} -stage compute)
+  endif()
 endforeach()
 add_custom_command(
   OUTPUT "${GEN}/atlas_gen_cpu.cpp"
   COMMAND "${SLANGC}" "${GEN_SRC}" -target cpp ${GEN_CPU_ENTRIES} -O3 -fp-mode precise -warnings-disable 41035
           -o "${GEN}/atlas_gen_cpu.cpp"
-  DEPENDS "${GEN_SRC}" COMMENT "slangc atlas_gen -> C++ (CPU reference)")
+  DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_page.slang" COMMENT "slangc atlas_gen -> C++ (CPU reference)")
 target_sources(atlas_core PRIVATE src/gen_engine.cpp "${GEN}/atlas_gen_cpu.cpp" ${GEN_HEADERS})
 set(GEN_RENAME "GlobalParams_0=GenGlobals_0;KernelContext_0=GenContext_0")
 if(MSVC)
@@ -384,6 +389,15 @@ else()
   set_source_files_properties("${GEN}/atlas_gen_cpu.cpp" PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-fast-math;-w"
                               COMPILE_DEFINITIONS "${GEN_RENAME}")
 endif()
+
+# the far passes without Java (dev tool: gen_probe <dir> <lod> <tx> <tz> [far], the parity test's dump)
+add_executable(gen_probe tools/gen_probe.cpp)
+target_include_directories(gen_probe PRIVATE include)
+target_link_libraries(gen_probe PRIVATE atlas_core)
+# the self-baking cache without Java (dev tool: gen_cache_bench <dump dir> <cache dir> [x= z= radius= seed=])
+add_executable(gen_cache_bench tools/gen_cache_bench.cpp)
+target_include_directories(gen_cache_bench PRIVATE include)
+target_link_libraries(gen_cache_bench PRIVATE atlas_core)
 
 add_executable(atlas_height_test tests/height_test.cpp)
 target_include_directories(atlas_height_test PRIVATE include)

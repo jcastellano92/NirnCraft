@@ -81,7 +81,20 @@ final class AtlasGenFeatures {
     private final List<FeatureSorter.StepFeatureData> steps;
     private final Set<Holder<Biome>> sourceBiomes;
     private final boolean ores;
-    volatile long decorated, failures, nanos;
+    private final java.util.concurrent.atomic.LongAdder decorated = new java.util.concurrent.atomic.LongAdder(),
+            failures = new java.util.concurrent.atomic.LongAdder(), nanos = new java.util.concurrent.atomic.LongAdder();
+
+    long decorated() {
+        return decorated.sum();
+    }
+
+    long failures() {
+        return failures.sum();
+    }
+
+    double millis() {
+        return nanos.sum() / 1e6;
+    }
     /** The features that failed here: the first failure of each (dev reports). */
     final Map<String, String> failed = new ConcurrentHashMap<>();
 
@@ -107,6 +120,8 @@ final class AtlasGenFeatures {
     final class Window {
         final Terrain terrain;
         final Map<Long, ProtoChunk> chunks = new ConcurrentHashMap<>();
+        /** Told each chunk once it is filled (the terrain's own copy may go then). */
+        volatile java.util.function.LongConsumer filled;
 
         Window(Terrain terrain) {
             this.terrain = terrain;
@@ -118,9 +133,10 @@ final class AtlasGenFeatures {
             ProtoChunk c = chunks.get(k);
             if (c != null) return c;
             if (terrain.id(cx << 4, 0, cz << 4) < 0) return null;
-            c = fill(cx, cz);
-            chunks.put(k, c);
-            return c;
+            ProtoChunk filled = fill(cx, cz);
+            c = chunks.putIfAbsent(k, filled);  // two decorations filling one chunk: both use the first
+            if (c == null && this.filled != null) this.filled.accept(k);
+            return c != null ? c : filled;
         }
 
         private ProtoChunk fill(int cx, int cz) {
@@ -179,7 +195,7 @@ final class AtlasGenFeatures {
                 try {
                     placer.placeWithBiomeCheck(feature, random, origin);
                 } catch (RuntimeException | LinkageError e) {
-                    failures++;  // a feature reading what this level does not offer: the server's blocks correct it
+                    failures.increment();  // a feature reading what this level does not offer: the server's blocks correct it
                     String key = registries.lookupOrThrow(net.minecraft.core.registries.Registries.PLACED_FEATURE)
                             .getResourceKey(feature).map(k -> k.identifier().toString()).orElse("?");
                     failed.computeIfAbsent(key, k -> {
@@ -189,8 +205,8 @@ final class AtlasGenFeatures {
                 }
             }
         }
-        decorated++;
-        nanos += System.nanoTime() - t0;
+        decorated.increment();
+        nanos.add(System.nanoTime() - t0);
     }
 
     /** One decoration's level over the window: writable over the 3 x 3 chunks, as a WorldGenRegion at the features step. */

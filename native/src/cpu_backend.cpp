@@ -392,7 +392,7 @@ private:
         if (in.voxgrid && in.voxgrid->active()) {
             for (;;) {
                 VgBatch b = in.voxgrid->take(1 << 30);
-                if (!b.clear && b.jobs.empty()) break;
+                if (!b.clear && b.jobs.empty() && !b.coarse()) break;
                 in.voxgrid->applyCpu(b);
             }
         }
@@ -405,8 +405,13 @@ private:
             g.vgPool = vg.pool.empty() ? view(dummyU32_) : view(vg.pool);
             frame.vgOrigin[0] = vg.cpuOx;  // (the window these arrays hold: the books may have moved on since)
             frame.vgOrigin[2] = vg.cpuOz;
+            for (int k = 1; k < VG_LEVELS; k++) {
+                frame.vgLevel[k - 1][0] = vg.cpuLevelO[k][0];
+                frame.vgLevel[k - 1][1] = vg.cpuLevelO[k][1];
+            }
         } else {
             frame.vgOrigin[3] = 0;  // (no grid here yet)
+            for (int k = 1; k < VG_LEVELS; k++) frame.vgLevel[k - 1][3] = 0;
             g.vgChunks = g.vgBlocks = g.vgPool = view(dummyU32_);
             g.vgBits = view(dummyU64_);
         }

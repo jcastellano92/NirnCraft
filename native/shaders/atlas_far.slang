@@ -89,6 +89,11 @@ struct TraceResult {
     float3 albedo;   // a groups hit: the texel's albedo (linear), when hasAlbedo
     uint hasAlbedo;
 };
+// the trace's result, thread-private: the chain traceView -> traceLod -> traceVoxGrid / traceLodRegions -> traceRegion /
+// traceGroups -> drawBox / stepLeaf -> groupHit, vgTexel works on it instead of forwarding an inout TraceResult (Slang
+// inlines a callee whose inout parameter is forwarded into another one: farMain's SPIR-V grew to 24 MB at -O1 and its
+// -O3 compile took ~14 min and ~30 GB). Callers outside the chain copy their own in and out.
+static TraceResult gTr;
 
 uint popcount64(uint64_t x) { return countbits(uint(x)) + countbits(uint(x >> 32)); }
 
@@ -182,13 +187,14 @@ bool voxelStops(uint hitMat, int3 v, int3 wv, int rl, float3 ro, float3 rd, floa
     return !pass;
 }
 
-bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps, inout TraceResult res) {
+[noinline]  // (one copy, called: see atlas_far.slang traceLod)
+bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps) {
     float3 inv = float3(abs(rd.x) > 1e-12 ? 1.0 / rd.x : 1e30, abs(rd.y) > 1e-12 ? 1.0 / rd.y : 1e30,
                         abs(rd.z) > 1e-12 ? 1.0 / rd.z : 1e30);
     float3 stepPos = float3(rd.x > 0 ? 1.0 : 0.0, rd.y > 0 ? 1.0 : 0.0, rd.z > 0 ? 1.0 : 0.0);
     uint nodeBase = r.bases.x, leafBase = r.bases.y;
     float t = t0;
-    int axis = res.axis;
+    int axis = gTr.axis;
     // The descent path of the previous step: a step usually stays inside most of its ancestors, so the next descent
     // resumes from the deepest one still containing the new voxel instead of the root; and a step inside the same
     // 4^3 brick reuses its bitmap without touching the tree at all.
@@ -206,7 +212,7 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
     bool useMip = !(gSecondary && rl == 0 && (gSecAblate & 2097152u) != 0u);
     for (int it = 0; it < 1024; it++) {
         if (t >= t1) break;
-        res.steps++;
+        gTr.steps++;
         secCount(1u, rl);
         float3 p = ro + rd * t;
         // Over terrain: find the largest column cell (whole region down to 4x4 voxels) whose highest voxel the ray
@@ -288,9 +294,9 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
                 rank += popcount64(bits & ((uint64_t(1) << b) - 1));
                 uint hitMat = lookupMaterial(r, rank);
                 if (voxelStops(hitMat, v, (r.origin.xyz >> rl) + v, rl, ro, rd, inv, stepPos, t)) {
-                    res.t = t;
-                    res.mat = hitMat;
-                    res.axis = entryAxis(v, ro, rd, inv, stepPos);
+                    gTr.t = t;
+                    gTr.mat = hitMat;
+                    gTr.axis = entryAxis(v, ro, rd, inv, stepPos);
                     return true;
                 }
             }
@@ -306,7 +312,7 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
         axis = tt.x <= tn ? 0 : (tt.y <= tn ? 1 : 2);
         t = max(tn, t) + eps;
     }
-    res.axis = axis;
+    gTr.axis = axis;
     return false;
 }
 
@@ -389,6 +395,10 @@ bool secondaryShapeMisses(uint mat, float3 l, float3 d) {
 static const uint VG_EMPTY = 0u;
 static const uint VG_MIXED = 1u;
 static const uint VG_UNLOADED = 2u;
+static const uint VG_UNIFORM = 3u;  // one id throughout (bits 2-17), no slot: read as a MIXED chunk all of that id
+// (primary rays) the threshold a cut-out face's texel coverage is tested against (farMain: a per-pixel one, rotated
+// under the host's TAA, which averages a part-covered texel's coverage)
+static float gAlphaXi = 0.5;
 // (ATLAS_ABLATE 134217728, measurements: level 0 from the SVDAG regions alone, as before the grid)
 bool vgOn() { return frame.vgOrigin.w != 0 && (asuint(frame.jitter.w) & 134217728u) == 0u; }
 
@@ -400,6 +410,88 @@ uint vgCell(int3 c) {
     px += px < 0 ? X : 0;
     pz += pz < 0 ? Z : 0;
     return uint((c.y * Z + pz) * X + px);
+}
+
+// A level of the grid: level 0 (blocks) or a coarse level k (voxels of 2^k blocks, chunks of 16 of them; voxgrid.hpp),
+// one structure from level 0 out. (ATLAS_ABLATE 1073741824, measurements: the coarse levels off, the regions alone)
+struct VgGrid {
+    int k;
+    int3 origin;  // world block of the window's first voxel corner
+    int ox, oz;   // the window's origin, chunks (their cells in memory at (c + origin) mod D)
+    int X, Y, Z;  // chunks
+    uint base;    // its first chunk word
+};
+bool vgLevelOn(int k) {
+    if (k == 0) return vgOn();
+    if (k > 6 || !vgOn()) return false;
+    return ((frame.vgLevel[clamp(k, 1, 6) - 1].w >> 16) & 1) != 0 && (asuint(frame.jitter.w) & 1073741824u) == 0u;
+}
+VgGrid vgGrid(int k) {
+    VgGrid g;
+    g.k = k;
+    if (k == 0) {
+        g.origin = frame.vgOrigin.xyz * 16;
+        g.ox = frame.vgOrigin.x;
+        g.oz = frame.vgOrigin.z;
+        g.X = int(frame.vgDims.x);
+        g.Y = int(frame.vgDims.y);
+        g.Z = int(frame.vgDims.z);
+        g.base = 0u;
+    } else {
+        int4 L = frame.vgLevel[clamp(k, 1, 6) - 1];  // (clamped: inlined with k 0 this branch is dead, its index -1)
+        int cs = 16 << k;
+        g.origin = int3(L.x * cs, -64, L.y * cs);
+        g.ox = L.x;
+        g.oz = L.y;
+        g.X = L.w & 255;
+        g.Y = (L.w >> 8) & 255;
+        g.Z = g.X;
+        g.base = uint(L.z);
+    }
+    return g;
+}
+uint vgCellG(VgGrid g, int3 c) {
+    int px = (c.x + g.ox) % g.X, pz = (c.z + g.oz) % g.Z;
+    px += px < 0 ? g.X : 0;
+    pz += pz < 0 ? g.Z : 0;
+    return g.base + uint((c.y * g.Z + pz) * g.X + px);
+}
+
+// Where a chord p0 + d u standing at u in a chunk without data (or outside the window: `left`) reaches the next chunk
+// with data: the run of unloaded chunks the regions answer for. An UNLOADED chunk carries a box of unloaded chunks
+// around it (vgGrowMain, as an EMPTY one's of empty ones): left through its far side, one load a box (at most 64).
+float vgUnloadedEnd(VgGrid g, float3 p0, float3 d, float u, float u1, out bool left) {
+    left = false;
+    float cs = float(16 << g.k);
+    float3 ro = (p0 - float3(g.origin - frame.camInt.xyz)) / cs;
+    float3 dc = d / cs;
+    float3 inv = float3(abs(dc.x) > 1e-14 ? 1.0 / dc.x : 1e30, abs(dc.y) > 1e-14 ? 1.0 / dc.y : 1e30,
+                        abs(dc.z) > 1e-14 ? 1.0 / dc.z : 1e30);
+    int3 st = int3(dc.x > 0.0 ? 1 : -1, dc.y > 0.0 ? 1 : -1, dc.z > 0.0 ? 1 : -1);
+    float t = u;
+    int3 c = int3(floor(ro + dc * (u + 1e-3)));
+    for (int it = 0; it < 64; it++) {
+        if (t >= u1) return u1;
+        if (c.x < 0 || c.y < 0 || c.z < 0 || c.x >= g.X || c.y >= g.Y || c.z >= g.Z) {
+            left = true;  // (from here the window has nothing: the regions take the rest)
+            return u1;
+        }
+        uint cw = vgChunks[vgCellG(g, c)];
+        if ((cw & 3u) != VG_UNLOADED) return t;
+        int3 lo = c - int3(int((cw >> 2) & 31u), int((cw >> 12) & 31u), int((cw >> 22) & 31u));
+        int3 hi = c + int3(int((cw >> 7) & 31u), int((cw >> 17) & 31u), int((cw >> 27) & 31u)) + 1;
+        float3 tt = (float3(dc.x > 0.0 ? hi.x : lo.x, dc.y > 0.0 ? hi.y : lo.y, dc.z > 0.0 ? hi.z : lo.z) - ro) * inv;
+        tt = float3(abs(dc.x) > 1e-14 ? tt.x : 1e30, abs(dc.y) > 1e-14 ? tt.y : 1e30, abs(dc.z) > 1e-14 ? tt.z : 1e30);
+        float tn = min(tt.x, min(tt.y, tt.z));
+        int a = tt.x <= tn ? 0 : (tt.y <= tn ? 1 : 2);
+        // the cell across the box's face it leaves by (by index on that axis, as traceVoxGrid's exit)
+        int3 nc = int3(floor(ro + dc * tn));
+        nc[a] = st[a] > 0 ? hi[a] : lo[a] - 1;
+        c = clamp(nc, lo, hi - 1);  // (the face lies within the box on the other axes)
+        c[a] = nc[a];
+        t = max(t, tn);
+    }
+    return min(t, u1);
 }
 
 // A primary ray through a level-0 voxel v (grid-local; wv in world blocks) of shaped material `sh` (shapeOf), entered at
@@ -467,7 +559,7 @@ float4 texSample(uint at, int f, float u, float v, float fp) {
 // A level-0 hit's texel (primary rays): the material's 16 x 16 face texture at the hit point p (voxel-local 0..1) on the
 // face the ray entered by, over the pixel's footprint there; a covered texel replaces res's albedo (a cut-out's
 // uncovered texel keeps its face tile's colour)
-void vgTexel(inout TraceResult res, uint mat, float3 lp, float3 d, int ax, float tView) {
+void vgTexel(uint mat, float3 lp, float3 d, int ax, float tView) {
     uint at = vgTexture(mat);
     if (at == 0u) return;
     int f = d[ax] > 0.0 ? G_FACE_LOW[ax] : G_FACE_HIGH[ax];
@@ -476,21 +568,26 @@ void vgTexel(inout TraceResult res, uint mat, float3 lp, float3 d, int ax, float
     uv = clamp(uv, float2(0, 0), float2(0.9999, 0.9999));
     float fp = tView * frame.params.w * frame.params.z / max(abs(d[ax]), 0.2);
     float4 c = texSample(at, f, uv.x, uv.y, fp);
-    if (c.a < 0.5 && res.hasAlbedo != 0u) return;
-    res.albedo = c.rgb;
-    res.hasAlbedo = 1u;
+    if (c.a < 0.5 && gTr.hasAlbedo != 0u) return;
+    gTr.albedo = c.rgb;
+    gTr.hasAlbedo = 1u;
 }
 
 // The chord p0 + d u (camera-relative), u in [u0, u1), through the grid: TRACE_HIT (res filled), TRACE_MISS (it crossed
 // [u0, u1) through chunks with data), else TRACE_UNCOVERED and uStop where it met a chunk without data or left the
 // window (the SVDAG regions answer from there). A step reads the chunk word; inside a chunk with blocks the block word;
 // inside a block with voxels its bitmap: an empty chunk or block is left through the far side of its empty box, an
-// empty voxel through its empty 2^3 octant when it has one, as traceRegion's bricks are.
-int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res, out float uStop) {
+// empty voxel through its empty 2^3 octant when it has one, as traceRegion's bricks are. A coarse level (g.k > 0) the
+// same in its voxels (u still in blocks along dw), its voxels cubes of their material, as the regions' levels are.
+[noinline]  // (one copy, called: see traceLod)
+int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, out float uStop) {
     uStop = u0;
-    int3 gBlock = frame.vgOrigin.xyz * 16;
-    float3 ro = p0 - float3(gBlock - frame.camInt.xyz);  // grid-local blocks
-    int X = int(frame.vgDims.x), Y = int(frame.vgDims.y), Z = int(frame.vgDims.z);
+    int3 gBlock = g.origin;
+    float vs = float(1 << g.k);
+    float3 ro = (p0 - float3(gBlock - frame.camInt.xyz)) / vs;  // grid-local voxels
+    float3 d = dw / vs;
+    int3 gVox = int3(gBlock.x >> g.k, gBlock.y >> g.k, gBlock.z >> g.k);  // (world voxel of the first one)
+    int X = g.X, Y = g.Y, Z = g.Z;
     int3 nb = int3(X, Y, Z) * 16;
     float3 inv = float3(abs(d.x) > 1e-12 ? 1.0 / d.x : 1e30, abs(d.y) > 1e-12 ? 1.0 / d.y : 1e30,
                         abs(d.z) > 1e-12 ? 1.0 / d.z : 1e30);
@@ -500,7 +597,7 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
     int exitAxis = -1, exitTo = 0;
     for (int it = 0; it < 4096; it++) {
         if (t >= u1) return TRACE_MISS;
-        res.steps++;
+        gTr.steps++;
         secCount(1u, 0);
         // (a point exactly on a cell face going down that axis lies in the cell below: else that face's exit is at t,
         // not after it, and the ray left a camera standing on a chunk's floor through the box's far sides instead)
@@ -513,7 +610,7 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
             return TRACE_UNCOVERED;
         }
         int3 c = v >> 4;
-        uint cw = vgChunks[vgCell(c)];
+        uint cw = vgChunks[vgCellG(g, c)];
         uint st = cw & 3u;
         if (st == VG_UNLOADED) {
             uStop = t;
@@ -527,11 +624,14 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
             hi = (c + ep + 1) * 16;
             secCount(2u, 0);
         } else {
+            // (VG_UNIFORM: every block full, every voxel the id; the same steps as a MIXED chunk's from here, so a
+            // uniform lake, leaf or glass section is cut out, passed and lit as the mixed ones are)
+            bool uni = st == VG_UNIFORM;
             uint slot = cw >> 2;
             int3 l = v & 15;
             int3 b = l >> 2;
             uint bi = uint(b.x + 4 * (b.z + 4 * b.y));
-            uint bw = vgBlocks[slot * 64u + bi];
+            uint bw = uni ? 1u : vgBlocks[slot * 64u + bi];
             secCount(4u, 0);
             if ((bw & 1u) == 0u) {
                 int3 en = int3(int((bw >> 2) & 3u), int((bw >> 6) & 3u), int((bw >> 10) & 3u));
@@ -539,12 +639,24 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
                 lo = c * 16 + (b - en) * 4;
                 hi = c * 16 + (b + ep + 1) * 4;
             } else {
-                uint64_t bits = vgBits[slot * 64u + bi];
+                uint64_t bits = uni ? ~uint64_t(0) : vgBits[slot * 64u + bi];
                 int3 q = v & 3;
                 uint bt = uint(q.x + 4 * q.z + 16 * q.y);
                 if (((bits >> bt) & 1) != 0) {
                     uint i = uint(l.x + 16 * (l.z + 16 * l.y));
-                    uint mat = (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
+                    uint mat = uni ? (cw >> 2) & 0xFFFFu : (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
+                    if (g.k > 0) {
+                        // a coarse level's voxel: a cube of its material (the regions' levels' rule)
+                        if (voxelStops(mat, v, v + gVox, g.k, ro, d, inv, stepPos, t)) {
+                            gTr.t = t;
+                            gTr.mat = mat;
+                            gTr.axis = entryAxis(v, ro, d, inv, stepPos);
+                            gTr.lod = g.k;
+                            return TRACE_HIT;
+                        }
+                        lo = v;
+                        hi = v + 1;
+                    } else {
                     // a primary ray meets a shaped block (a slab, a stair, a fence, a plant, cut-out leaves) by its
                     // micro-voxels, textured by its face tiles, as the groups draw it (ATLAS_ABLATE 268435456: cubes)
                     uint sh = gSecondary || (asuint(frame.jitter.w) & 268435456u) != 0u ? 0u : shapeOf(mat);
@@ -554,27 +666,50 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
                         float tHit;
                         int ax = entryAxis(v, ro, d, inv, stepPos);
                         int3 q;
-                        if (vgShapeHit(sh, v, v + gBlock, ro, d, t, tHit, ax, q)) {
-                            res.t = tHit;
-                            res.mat = mat;
-                            res.axis = ax;
-                            res.lod = 0;
+                        // a whole cube of cut-out texels (leaves) with its 16 x 16 texture: the face it is entered by,
+                        // by the coverage of its texels under the pixel against the pixel's threshold: through the gaps
+                        // the ray goes on to the branches and the sky behind (the shape's 4 x 4 coverage hashed per
+                        // micro-voxel drew the gaps as dark specks); ATLAS_ABLATE 536870912: no cut-outs
+                        uint4 head = groupData[sh >> 2];
+                        uint tex = (head.z & 1u) != 0u && (head.x & head.y) == 0xFFFFFFFFu && (asuint(frame.jitter.w) & 536870912u) == 0u
+                                 ? vgTexture(mat) : 0u;
+                        if (tex != 0u) {
                             int f = d[ax] > 0.0 ? G_FACE_LOW[ax] : G_FACE_HIGH[ax];
-                            res.albedo = cellAlbedo(mat | G_CELL_SHAPED, f, q);
-                            res.hasAlbedo = 1u;
-                            vgTexel(res, mat, ro + d * tHit - float3(v), d, ax, gChordT + tHit);
+                            float3 lq = clamp(ro + d * t - float3(v), float3(0, 0, 0), float3(0.9999, 0.9999, 0.9999));
+                            float2 uv = f <= 1 ? lq.xz : (f <= 3 ? float2(lq.x, 1.0 - lq.y) : float2(lq.z, 1.0 - lq.y));
+                            float fp = (gChordT + t) * frame.params.w * frame.params.z / max(abs(d[ax]), 0.2);
+                            float4 c = texSample(tex, f, uv.x, uv.y, fp);
+                            if (c.a > gAlphaXi) {
+                                gTr.t = t;
+                                gTr.mat = mat;
+                                gTr.axis = ax;
+                                gTr.lod = 0;
+                                gTr.albedo = c.rgb;
+                                gTr.hasAlbedo = 1u;
+                                return TRACE_HIT;
+                            }
+                        } else if (vgShapeHit(sh, v, v + gBlock, ro, d, t, tHit, ax, q)) {
+                            gTr.t = tHit;
+                            gTr.mat = mat;
+                            gTr.axis = ax;
+                            gTr.lod = 0;
+                            int f = d[ax] > 0.0 ? G_FACE_LOW[ax] : G_FACE_HIGH[ax];
+                            gTr.albedo = cellAlbedo(mat | G_CELL_SHAPED, f, q);
+                            gTr.hasAlbedo = 1u;
+                            vgTexel(mat, ro + d * tHit - float3(v), d, ax, gChordT + tHit);
                             return TRACE_HIT;
                         }
                     } else if (voxelStops(mat, v, v + gBlock, 0, ro, d, inv, stepPos, t)) {
-                        res.t = t;
-                        res.mat = mat;
-                        res.axis = entryAxis(v, ro, d, inv, stepPos);
-                        res.lod = 0;
-                        if (!gSecondary) vgTexel(res, mat, ro + d * t - float3(v), d, res.axis, gChordT + t);
+                        gTr.t = t;
+                        gTr.mat = mat;
+                        gTr.axis = entryAxis(v, ro, d, inv, stepPos);
+                        gTr.lod = 0;
+                        if (!gSecondary) vgTexel(mat, ro + d * t - float3(v), d, gTr.axis, gChordT + t);
                         return TRACE_HIT;
                     }
                     lo = v;
                     hi = v + 1;
+                    }
                 } else {
                     uint sb = uint((q.x & 2) + 4 * (q.z & 2) + 16 * (q.y & 2));
                     uint64_t sub = (uint64_t(0x33) << sb) | (uint64_t(0x33) << (sb + 16));
@@ -601,31 +736,119 @@ int traceVoxGrid(float3 p0, float3 d, float u0, float u1, inout TraceResult res,
 // Walk the regions of one LOD along the chord p0 + d u, u in [0, len].
 // On TRACE_UNCOVERED, uncExit is where the chord leaves the unloaded region cell (1e30 when it left the LOD's
 // window: that LOD has nothing further along this ray at all).
-int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out float uncExit) {
+// A run [u0, u1) of the chord p0 + d u through level-0 chunks the grid does not hold yet (the grid owns level 0): at
+// each point the finest of its coarse levels that holds it, never a CPU level 0 or the tiles' stand-in where real
+// blocks are known; the regions (level 0's: the tiles) only over what no grid level holds. TRACE_HIT (gTr, its t from
+// p0), TRACE_MISS, or TRACE_UNCOVERED with uncExit (from p0) as the regions report it.
+int vgCoarseRun(float3 p0, float3 d, float u0, float u1, out float uncExit) {
     uncExit = 1e30;
-    // level 0: the GPU-built grid first, the regions only past where it has no data
-    float uGrid = 0.0;
-    // (the content-shaped groups keep primary rays where a frame asks for them, the grid having no shapes yet, unless
-    // the grid owns level 0: vgDims.w, ATLAS_VOXGRID_LEVEL0, where the SVDAG level 0 no longer follows the sections)
-    if (lod == 0 && vgOn() && (!gGroups || frame.vgDims.w != 0u)) {
-        gLeafGap = 0.3;
-        int g = traceVoxGrid(p0, d, 0.0, len, res, uGrid);
-        if (g != TRACE_UNCOVERED) return g;
-        if (uGrid >= len) return TRACE_MISS;
-        p0 += d * uGrid;
-        len -= uGrid;
+    float u = u0;
+    for (int it = 0; it < 24 && u < u1; it++) {
+        bool on = false;
+        float next = u1;  // (where some level holds data again)
+        for (int k = 1; k <= 6; k++) {
+            if (!vgLevelOn(k) || ((frame.vgLevel[clamp(k, 1, 6) - 1].w >> 17) & 1) == 0) continue;
+            VgGrid gk = vgGrid(k);
+            float uk;
+            int rk = traceVoxGrid(gk, p0, d, u, u1, uk);
+            if (rk == TRACE_HIT) return TRACE_HIT;
+            if (rk == TRACE_MISS) return TRACE_MISS;
+            if (uk > u + 1e-4) {
+                // this level held [u, uk) and missed there: on from the finest level again
+                u = uk;
+                on = true;
+                break;
+            }
+            bool left;
+            next = min(next, vgUnloadedEnd(gk, p0, d, uk, u1, left));
+        }
+        if (on) continue;
+        // no grid level holds u: the regions to where one does
+        float ue;
+        gSecT += u;
+        int q = traceLodRegions(0, p0 + d * u, d, max(next - u, 1e-3), ue);
+        gSecT -= u;
+        if (q == TRACE_HIT) {
+            gTr.t += u;
+            return TRACE_HIT;
+        }
+        if (q == TRACE_UNCOVERED) {
+            uncExit = ue < 1e29 ? ue + u : 1e30;
+            return TRACE_UNCOVERED;
+        }
+        u = max(next, u + 1e-3);
     }
-    gSecT += uGrid;  // (the secondary ray's distance where the chord starts)
-    int r0 = traceLodRegions(lod, p0, d, len, res, uncExit);
-    gSecT -= uGrid;
-    if (uGrid > 0.0) {
-        if (r0 == TRACE_HIT) res.t += uGrid;
-        if (uncExit < 1e29) uncExit += uGrid;
+    return TRACE_MISS;
+}
+
+// ([noinline]: SPIR-V optimisers inline every call; traceLod and what it calls, once per call site, made farMain 26 MB of
+// SPIR-V at -O1, a ~30 GB, 14 min -O3 compile and a driver JIT that stalled: one copy, called. Also traceSecondary,
+// lodPrepareR, cloudNoiseAt.)
+[noinline]
+int traceLod(int lod, float3 p0, float3 d, float len, out float uncExit) {
+    uncExit = 1e30;
+    // the GPU-built grid's level first (real blocks), the regions (the tiles; level 0 the sections past the grid) only
+    // over the runs of chunks where it has no data: the grid again past each
+    // (the content-shaped groups keep level-0 primary rays where a frame asks for them unless the grid owns level 0:
+    // vgDims.w, ATLAS_VOXGRID_LEVEL0, where the SVDAG level 0 no longer follows the sections)
+    // (a level holding no data at all, vgOrigin.w / vgLevel.w bit 2 of the second byte pair: the regions alone)
+    // (level 0 with the coarse levels behind its gaps, vgDims.w bits 1 and 4: traced even holding nothing itself)
+    bool hasData = lod == 0 ? (frame.vgOrigin.w & 2) != 0 || (frame.vgDims.w & 5u) == 5u
+                            : lod <= 6 && ((frame.vgLevel[clamp(lod, 1, 6) - 1].w >> 17) & 1) != 0;
+    bool grid = hasData && vgLevelOn(lod) && (lod > 0 || !gGroups || frame.vgDims.w != 0u);
+    float u = 0.0;
+    if (grid) {
+        VgGrid g = vgGrid(lod);
+        for (int run = 0; run < 16; run++) {
+            gLeafGap = lod <= 1 ? 0.3 : 0.0;
+            float uStop;
+            int r = traceVoxGrid(g, p0, d, u, len, uStop);
+            if (r != TRACE_UNCOVERED) return r;
+            if (uStop >= len) return TRACE_MISS;
+            bool left;
+            float uEnd = vgUnloadedEnd(g, p0, d, uStop, len, left);
+            // (the grid owns level 0: a run of level-0 chunks it does not hold yet inside its window is the best of its
+            // coarse levels that holds it, never a CPU level 0 or the tiles' stand-in where real blocks are known; the
+            // ray stays at level 0 past the run. vgDims.w bit 4, off with ATLAS_VOXGRID_FALLBACK=0: the regions as before)
+            if (lod == 0 && (frame.vgDims.w & 5u) == 5u) {  // (left: to the window's edge, then the coarse levels' own)
+                float ue;
+                int q = vgCoarseRun(p0, d, uStop, uEnd, ue);
+                if (q == TRACE_HIT) return TRACE_HIT;
+                if (q == TRACE_UNCOVERED) {
+                    uncExit = ue;
+                    return TRACE_UNCOVERED;
+                }
+            } else {
+                float ue;
+                gSecT += uStop;  // (the secondary ray's distance where the regions' chord starts)
+                int q = traceLodRegions(lod, p0 + d * uStop, d, uEnd - uStop, ue);
+                gSecT -= uStop;
+                if (q == TRACE_HIT) {
+                    gTr.t += uStop;
+                    return TRACE_HIT;
+                }
+                if (q == TRACE_UNCOVERED) {
+                    uncExit = ue < 1e29 ? ue + uStop : 1e30;
+                    return TRACE_UNCOVERED;
+                }
+            }
+            if (left || uEnd >= len) return TRACE_MISS;
+            u = uEnd + 1e-3;
+        }
+    }
+    // (no grid at this level, or a chord that crossed many runs: the regions for the rest)
+    gSecT += u;
+    int r0 = traceLodRegions(lod, p0 + d * u, d, len - u, uncExit);
+    gSecT -= u;
+    if (u > 0.0) {
+        if (r0 == TRACE_HIT) gTr.t += u;
+        if (uncExit < 1e29) uncExit += u;
     }
     return r0;
 }
 
-int traceLodRegions(int lod, float3 p0, float3 d, float len, inout TraceResult res, out float uncExit) {
+[noinline]  // (one copy, called: see traceLod)
+int traceLodRegions(int lod, float3 p0, float3 d, float len, out float uncExit) {
     uncExit = 1e30;
     LodGpu L = frame.lods[lod];
     float s = float(1 << lod);
@@ -664,7 +887,7 @@ int traceLodRegions(int lod, float3 p0, float3 d, float len, inout TraceResult r
                     // a refinement fade (World::fading_): pixels whose dither is past the fade's progress still see
                     // what the region replaced, or the coarser LOD when it is new to the window
                     float prog = float(int(frame.temporal.z - r.runs.w)) / float(max(frame.temporal.w, 1u));
-                    if (res.dither >= prog) {
+                    if (gTr.dither >= prog) {
                         if (r.runs.z == 0xFFFFFFFFu) {
                             uncExit = uExit;
                             return TRACE_UNCOVERED;
@@ -678,16 +901,16 @@ int traceLodRegions(int lod, float3 p0, float3 d, float len, inout TraceResult r
                 if (!air && gGroups && r.groups.x != 0xFFFFFFFFu) {
                     // the chord's first cell: a ray that starts inside this level's solid (a switch to a coarser level)
                     // hits it at once, as the old path does (the groups hold only what a ray can reach from outside)
-                    if (firstCell && r.bases.z != 0xFFFFFFFFu && traceRegion(r, ro, d / s, u, min(u + 1e-3, uExit), 1e-3, res)) {
-                        res.lod = lod;
+                    if (firstCell && r.bases.z != 0xFFFFFFFFu && traceRegion(r, ro, d / s, u, min(u + 1e-3, uExit), 1e-3)) {
+                        gTr.lod = lod;
                         return TRACE_HIT;
                     }
-                    if (traceGroups(r, ro, d / s, u, uExit, d, res)) {
-                        res.lod = lod;
+                    if (traceGroups(r, ro, d / s, u, uExit, d)) {
+                        gTr.lod = lod;
                         return TRACE_HIT;
                     }
-                } else if (!air && r.bases.z != 0xFFFFFFFFu && traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
-                    res.lod = lod;
+                } else if (!air && r.bases.z != 0xFFFFFFFFu && traceRegion(r, ro, d / s, u, uExit, 1e-3)) {
+                    gTr.lod = lod;
                     return TRACE_HIT;
                 }
             }
@@ -710,15 +933,18 @@ int traceLodRegions(int lod, float3 p0, float3 d, float len, inout TraceResult r
 
 // The level-0 grid's id at camera-relative p: -1 where it has no data (outside its window, a chunk without data), else
 // the voxel's material (0: air)
-int vgVoxel(float3 p) {
-    if (!vgOn()) return -1;
-    int3 v = int3(floor(p)) + frame.camInt.xyz - frame.vgOrigin.xyz * 16;
-    int X = int(frame.vgDims.x), Y = int(frame.vgDims.y), Z = int(frame.vgDims.z);
+int vgVoxel(float3 p) { return vgVoxelL(0, p); }
+int vgVoxelL(int k, float3 p) {
+    if (!vgLevelOn(k)) return -1;
+    VgGrid g = vgGrid(k);
+    int3 v = (int3(floor(p)) + frame.camInt.xyz - g.origin) >> k;
+    int X = g.X, Y = g.Y, Z = g.Z;
     if (v.x < 0 || v.y < 0 || v.z < 0 || v.x >= X * 16 || v.y >= Y * 16 || v.z >= Z * 16) return -1;
     int3 c = v >> 4;
-    uint cw = vgChunks[vgCell(c)];
+    uint cw = vgChunks[vgCellG(g, c)];
     if ((cw & 3u) == VG_UNLOADED) return -1;
     if ((cw & 3u) == VG_EMPTY) return 0;
+    if ((cw & 3u) == VG_UNIFORM) return int((cw >> 2) & 0xFFFFu);
     int3 l = v & 15;
     uint i = uint(l.x + 16 * (l.z + 16 * l.y));
     return int((vgPool[(cw >> 2) * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu);
@@ -726,8 +952,8 @@ int vgVoxel(float3 p) {
 
 // Solid voxel at camera-relative point p in a given LOD (false where that LOD has no data).
 bool occupiedAt(int lod, float3 p) {
-    if (lod == 0) {
-        int g = vgVoxel(p);
+    {
+        int g = vgVoxelL(lod, p);
         if (g >= 0) return g != 0;
     }
     LodGpu L = frame.lods[lod];
@@ -757,8 +983,8 @@ bool occupiedAt(int lod, float3 p) {
 
 // (measurements) the material of the voxel path's solid voxel at camera-relative p in a LOD, 0xFFFFFFFF where empty
 uint materialAt(int lod, float3 p) {
-    if (lod == 0) {
-        int g = vgVoxel(p);
+    {
+        int g = vgVoxelL(lod, p);
         if (g >= 0) return g != 0 ? uint(g) : 0xFFFFFFFFu;
     }
     LodGpu L = frame.lods[lod];
@@ -821,57 +1047,181 @@ float3 worldAt(float3 o, float3 dir, float k, float t) {
     return o + dir * t + float3(0, k * t * t, 0);
 }
 
+// ---- the level a ray takes: one rule for every ray (primary rays here, secondary rays' cones, the near light) ---------
+// A continuous level, never a ring: what a pixel covers, and what the levels held cover. A ray takes level
+// floor(level + xi) for a per-pixel threshold xi: the stochastic choice between the two levels around it, the share of
+// the coarser one the fraction, so the change from one level to the next spreads over the whole octave of distance
+// (the host's TAA averages it to a gradient). The rings (each level's window of regions, the grid's windows inside
+// them) are what is resident only.
+
+// The continuous level of a footprint: log2 of the blocks a pixel covers there, dist x pixelAngle, widened at grazing
+// angles by 1 / |cos| against the surface (cosTheta 1: face on, or not known yet), at most 2x: one level (a block face's
+// cos is the staircase's, not the slope's: 4x took far fields and shores two levels down, their rivers and beaches lost)
+float lodFromFootprint(float dist, float pixelAngle, float cosTheta) {
+    // (ATLAS_LOD's second and third knobs: the least cos, 0.5 by default; a bias)
+    float minCos = clamp(frame.lodParams.y, 0.05, 1.0);
+    return log2(max(dist * pixelAngle / clamp(abs(cosTheta), minCos, 1.0), 1e-6)) + frame.lodParams.z;
+}
+// the level taken for continuous level `level` at threshold xi (0..1)
+int lodPick(float level, float xi, int lodCount) { return clamp(int(floor(level + xi)), 0, lodCount - 1); }
+// the per-pixel threshold (farMain: interleaved gradient noise, rotated by the golden ratio each frame under the host's
+// TAA; 0.5 elsewhere)
+static float gLodXi = 0.5;
+
+// Residency: each level's window (its region table) as the inner radius r_k it covers around the camera (Chebyshev,
+// blocks). The continuous level a point needs for what is held there: k + 1 at r_k, log-linear between the r_k (and
+// 1 + log2(d / r_0) inside r_0), so a level is left over the octave before its window ends and its successor, whose
+// window is about twice as wide, is always there for the blend: no hole, no ring.
+float lodWindowR(int k) {
+    LodGpu L = frame.lods[k];
+    int span = 256 << k;
+    float lox = float(L.origin.x * span - frame.camInt.x) - frame.camFrac.x;
+    float loz = float(L.origin.z * span - frame.camInt.z) - frame.camFrac.z;
+    float hix = lox + float(L.dim.x * span), hiz = loz + float(L.dim.z * span);
+    float r = max(min(min(-lox, hix), min(-loz, hiz)), 1.0);
+    // a level whose real blocks are the grid's alone (its regions the tiles' fallback, vgDims.w bit 2 for level 0):
+    // what it holds is the grid's window
+    if (k <= 6 && (k == 0 ? (frame.vgDims.w & 2u) != 0u && vgOn() : vgLevelOn(k))) {
+        VgGrid g = vgGrid(k);
+        float gs = float(g.X * (16 << k));
+        float gx = float(g.origin.x - frame.camInt.x) - frame.camFrac.x, gz = float(g.origin.z - frame.camInt.z) - frame.camFrac.z;
+        r = min(r, max(min(min(-gx, gx + gs), min(-gz, gz + gs)), 1.0));
+    }
+    return r;
+}
+// (the radii once an invocation: every stretch of every ray asks; computed per call they cost a third of a frame)
+static float gLodR[8];
+static bool gLodRReady = false;
+[noinline]
+void lodPrepareR() {
+    if (gLodRReady) return;
+    gLodRReady = true;
+    int n = min(int(frame.dims.w), 8);
+    float prev = 1.0;
+    for (int k = 0; k < 8; k++) {
+        float r = k < n ? max(lodWindowR(k), prev * 1.01) : prev * 2.0;  // (nested: each wider than the one inside it)
+        gLodR[k] = r;
+        prev = r;
+    }
+}
+float lodResident(float3 p) {
+    lodPrepareR();
+    int n = int(frame.dims.w);
+    float d = max(max(abs(p.x), abs(p.z)), 1.0);
+    if (d <= gLodR[0]) return 1.0 + log2(d / gLodR[0]);
+    for (int k = 0; k + 1 < n; k++)
+        if (d <= gLodR[k + 1]) return float(k + 1) + log2(d / gLodR[k]) / log2(gLodR[k + 1] / gLodR[k]);
+    return float(n);
+}
+// the distance (Chebyshev) at which lodResident reaches `level`
+float lodResidentDist(float level) {
+    lodPrepareR();
+    int n = int(frame.dims.w);
+    if (level <= 1.0) return gLodR[0] * exp2(level - 1.0);
+    int k = min(int(floor(level)) - 1, 6);
+    if (k + 1 >= n) return 1e30;
+    return gLodR[k] * pow(gLodR[k + 1] / gLodR[k], level - float(k + 1));
+}
+
+// the continuous level of the last primary hit (FRAME_DEBUG_LOD shows it)
+static float gHitLod = 0.0;
+
 // Trace the curved view ray from t0 to t1. Returns the hit distance along the view ray or -1.
-// lodDither (0..1 per pixel, 0 = off): the segment grid of every LOD starts at a per-pixel phase. A ray changes LOD
-// only at a segment start (the first segment that leaves a level's window, or whose footprint wants a coarser level),
-// so with a fixed grid every pixel switches on the same jagged line; with the phase spread over one segment the switch
-// becomes a stochastic band a segment wide (dithered LOD transitions, no pop line).
-float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout TraceResult res) {
+// Each stretch of the ray takes the level of its continuous level (lodFromFootprint at its distance, lodResident at its
+// place) at the pixel's threshold, to where that pick would change; where the level has no data (a streaming gap) a
+// coarser one, else a finer one. A hit is looked at again with its face's grazing angle: when that footprint wants a
+// coarser level, the coarser level's surface near it is the hit (ATLAS_ABLATE 2147483648: not).
+// (ATLAS_ABLATE 1048576, measurements: the levels by ring as before: the finest level with data (groups: from level 0;
+// else floor(log2(footprint))), its segment grid phased per pixel by lodDither: a stochastic band a segment wide)
+float traceView(float3 o, float3 dir, float t0, float t1, float lodDither) {
+    bool rings = (gAblate & 1048576u) != 0u;
+    int phasedLod = -1;  // (rings) the level whose segment grid was last phase-shifted
+    float shrink = 0.0;  // (rings) fraction cut off the current segment
     float R = frame.camFrac.w;
     float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
-    float pixelAngle = frame.params.w * frame.params.z;
+    float pa = frame.params.w * frame.params.z;
     int lodCount = int(frame.dims.w);
     float worldTop = 640.0 - float(frame.camInt.y);
+    // (the Chebyshev distance from the camera grows by this a block along the ray)
+    float hz = max(max(abs(dir.x), abs(dir.z)), 1e-4);
+    float xi = gLodXi;
+    int groupsFrom = gGroups ? min(int((gAblate >> 16u) & 7u), lodCount - 1) : 0;  // (ATLAS_ABLATE bits 16-18)
     int lod = 0;
     float t = t0;
-    bool finer = false;  // this segment is searching downwards for any LOD with data
-    int pinned = -1;     // a finer LOD that had data while the wanted one did not (streaming), and for how long
+    bool finer = false;   // this stretch is searching downwards for any level with data
+    int pinned = -1;      // a finer level that had data while the wanted one did not (streaming), and for how long
     int pinLeft = 0;
-    float gapEnd = 1e30;  // nearest end of an unloaded region cell seen while searching this segment
-    int phasedLod = -1;   // the level whose segment grid was last phase-shifted (lodDither)
-    float shrink = 0.0;   // fraction cut off the current segment (its grid's phase)
+    float gapEnd = 1e30;  // nearest end of an unloaded region cell seen while searching this stretch
+    // (a grazing hit's second look: the coarser level over [t, grazeEnd), the finer hit kept for when it has none)
+    bool graze = false;
+    float grazeEnd = 0.0, fineT = 0.0;
+    TraceResult fine = gTr;
     for (int seg = 0; seg < 768; seg++) {
         if (t >= t1) break;
-        // (the groups choose their own level per node, draw-or-open: the finest level resident is the best source)
-        // (ATLAS_ABLATE bits 16-18, measurements: the groups start from that level, to look at a coarse level up close)
-        int want = gGroups ? min(int((gAblate >> 16u) & 7u), lodCount - 1)
-                           : int(clamp(floor(log2(max(t * pixelAngle, 1.0))), 0.0, float(lodCount - 1)));
-        if (!finer) lod = pinLeft > 0 ? pinned : max(lod, want);
+        float3 a = worldAt(o, dir, k, t);
+        // rising above the world top: the parabola only climbs further from here
+        if (!graze && a.y > worldTop && dir.y + 2.0 * k * t >= 0.0) break;
+        float lc = rings || graze ? 0.0 : max(lodFromFootprint(t, pa, 1.0), lodResident(a));
+        int want = graze ? lod : max(lodPick(lc, xi, lodCount), groupsFrom);
+        if (rings) want = gGroups ? groupsFrom : int(clamp(floor(log2(max(t * pa, 1.0))), 0.0, float(lodCount - 1)));
+        if (!finer && !graze) lod = pinLeft > 0 ? pinned : max(lod, want);
         float s = float(1 << lod);
-        if (lodDither > 0.0 && lod != phasedLod) {
+        // where this pick would change: the footprint, or the place, reaching lod + 1 at the threshold
+        float tEnd = graze ? grazeEnd : 1e30;
+        if (rings && lodDither > 0.0 && lod != phasedLod) {
             phasedLod = lod;
             shrink = 0.9 * frac(lodDither + 0.618034 * float(lod));
         }
+        if (!graze && !rings && lod == want && lod + 1 < lodCount) {
+            float target = float(lod + 1) - xi;
+            float tF = exp2(target) / pa;
+            float tR = (lodResidentDist(target) - max(abs(o.x), abs(o.z))) / hz;
+            tEnd = max(min(tF, tR), t + 0.5);
+        }
         // (groups: longer chords, each one re-enters a region's tree from its root; the chord's sag is still a few
         // hundredths of a block at the real radius)
-        float tn = min(t + (gGroups ? 768.0 : 192.0) * s * (1.0 - shrink), t1);
-        float3 a = worldAt(o, dir, k, t);
+        float tn = min(min(t + (gGroups ? 768.0 : 192.0) * s * (1.0 - shrink), tEnd), t1);
         float3 b = worldAt(o, dir, k, tn);
-        // rising above the world top: the parabola only climbs further from here
-        if (a.y > worldTop && dir.y + 2.0 * k * t >= 0.0) break;
         float len = tn - t;
         float3 d = (b - a) / len;
         float uncExit;
         gChordT = t;
-        int r = traceLod(lod, a, d, len, res, uncExit);
-        if (r == TRACE_HIT) return t + res.t;
+        int r = traceLod(lod, a, d, len, uncExit);
+        if (graze) {
+            // the coarser level's surface near the grazing hit, else the finer hit as it was
+            if (r == TRACE_HIT) return t + gTr.t;
+            gTr = fine;
+            return fineT;
+        }
+        if (r == TRACE_HIT) {
+            float th = t + gTr.t;
+            float3 ph = a + d * gTr.t;
+            float cs = gTr.axis >= 0 ? abs(d[gTr.axis]) : 1.0;
+            float lh = rings ? float(lod) : max(lodFromFootprint(th, pa, cs), lodResident(ph));
+            gHitLod = rings ? float(lod) : max(lh, float(lod));
+            int k2 = lodPick(lh, xi, lodCount);
+            if (!rings && (gAblate & 2147483648u) == 0u && k2 > lod && !finer) {
+                // seen at a grazing angle, its footprint wants a coarser level: that level's surface around the hit,
+                // from a little in front of it (the next stretch)
+                float s2 = float(1 << k2);
+                fine = gTr;
+                fineT = th;
+                graze = true;
+                lod = k2;
+                grazeEnd = min(th + 3.0 * s2, t1);
+                t = max(t0, th - 3.0 * s2);
+                gTr.axis = -1;
+                continue;
+            }
+            return th;
+        }
         if (r == TRACE_UNCOVERED) {
-            res.axis = -1;
+            gTr.axis = -1;
             pinLeft = 0;
             // chord parameter equals view distance only to O(k): fine for choosing where to resume
             gapEnd = min(gapEnd, uncExit < 1e29 ? t + uncExit : 1e30);
-            // coarser first (cheaper, and it is what this distance wants); with nothing coarser, settle for finer
-            // data rather than a hole while tiles are still streaming in
+            // coarser first (cheaper, and what lies past this level's data wants); with nothing coarser, settle for
+            // finer data rather than a hole while tiles are still streaming in
             if (!finer && lod + 1 < lodCount) { lod++; continue; }
             if (!finer) {
                 lod = min(lod, want);  // levels from here up were all just found empty-handed
@@ -881,8 +1231,8 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
                 lod--;
                 continue;
             }
-            // no LOD has this stretch (a streaming gap): resume where the nearest unloaded cell ends and look for
-            // land loaded behind it; when every LOD has left its window there is nothing further at all
+            // no level has this stretch (a streaming gap): resume where the nearest unloaded cell ends and look for
+            // land loaded behind it; when every level has left its window there is nothing further at all
             if (gapEnd >= 1e29) break;
             t = min(max(gapEnd, t) + 1e-3, t1);
             gapEnd = 1e30;
@@ -890,8 +1240,8 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
             lod = want;
             continue;
         }
-        // this segment had data at `lod` and missed; when that took a downward search, stay on that level for a
-        // few segments instead of repeating the search every segment
+        // this stretch had data at `lod` and missed; when that took a downward search, stay on that level for a few
+        // stretches instead of repeating the search every one
         if (finer) { pinned = lod; pinLeft = 8; }
         else if (pinLeft > 0) pinLeft--;
         t = tn;
@@ -924,6 +1274,24 @@ float3 vanillaLook(float3 o, float3 dir, float tHit, TraceResult r) {
     return cardColour(card, clamp(lp[a1], 0.0, 0.9999), clamp(lp[a2], 0.0, 0.9999), fp);
 }
 
+// (secondary rays) their cone, the same rule as the primary rays' (lodFromFootprint, lodPick): the footprint at the
+// ray's origin (blocks) and its growth per block travelled; gSecSpread 0: none, the ray keeps its level (coarser only
+// where that one has no data). The far field's rays start at their hit's footprint and widen as the pixel's cone does.
+static float gSecFoot0 = 0.0;
+static float gSecSpread = 0.0;
+// the level a secondary ray takes at t (never finer than `lod`, the one it is on), and its stretch cut where the pick
+// changes; cap: the coarsest it may take
+int secLevelAt(float3 p, float3 dir, float t, int lod, int cap, float foot0, float spread, inout float len) {
+    if (spread <= 0.0) return lod;
+    float lc = max(log2(max(foot0 + t * spread, 1e-6)), lodResident(p + dir * t));
+    int want = min(max(lod, lodPick(lc, gLodXi, cap + 1)), max(lod, cap));
+    if (want < cap) {
+        float tl = (exp2(float(want + 1) - gLodXi) - foot0) / spread;
+        if (tl > t) len = min(len, tl - t);
+    }
+    return want;
+}
+
 // Straight ray (sun shadows): 1 if lit.
 float traceShadow(float3 p, float3 dir, int lod) {
     TraceResult res;
@@ -933,10 +1301,14 @@ float traceShadow(float3 p, float3 dir, int lod) {
     float maxT = 2048.0;
     for (int seg = 0; seg < 48; seg++) {
         if (t >= maxT) break;
+        float len = min(192.0 * float(1 << lod), maxT - t);
+        lod = secLevelAt(p, dir, t, lod, lodCount - 1, gSecFoot0, gSecSpread, len);
         float s = float(1 << lod);
-        float len = min(192.0 * s, maxT - t);
+        len = min(len, 192.0 * s);
         float uncExit;
-        int r = traceLod(lod, p + dir * t, dir, len, res, uncExit);
+        gTr = res;
+        int r = traceLod(lod, p + dir * t, dir, len, uncExit);
+        res = gTr;
         if (r == TRACE_HIT) return 0.0;
         if (r == TRACE_UNCOVERED) {
             if (lod + 1 < lodCount) { lod++; continue; }
@@ -960,7 +1332,8 @@ static int gSecHitLod = 0;
 // gSecCone (the near light's rays): the ray widens as a cone, a level coarser each time it has gone gSecCone voxels of
 // its level (lod 0 to gSecCone blocks, lod 1 to twice that, ... up to SEC_CONE_LOD): what shadows a point from far off
 // needs no finer voxels than its distance resolves, and a 2048-block ray through a forest at lod 0 cost 3 ms a frame at
-// 1280x800 (the near light's sun ray; its bounce's as much again). 0: the ray keeps its level (the far field's rays).
+// 1280x800 (the near light's sun ray; its bounce's as much again). 0 (and no gSecFoot): gSecSpread's cone, if any (the
+// far field's hits: secLevelAt). Every footprint here is lodFromFootprint's.
 static float gSecCone = 0.0;
 static const int SEC_CONE_LOD = 4;
 // (the light by need, nearLightAt) the cone's level steps, each surface point's own: gSecCone x a factor in [1, 2) fixed to
@@ -987,6 +1360,7 @@ float surfaceRand(float3 p, uint salt) {
     uint h = hashU(uint(q.x) * 73856093u ^ (uint(q.y) * 19349663u) ^ (uint(q.z) * 83492791u) ^ (salt * 2654435761u));
     return float(h & 0xFFFFFFu) / 16777216.0;
 }
+[noinline]
 float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
     TraceResult res;
     res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.dither = 0.5; res.albedo = float3(0, 0, 0); res.hasAlbedo = 0u;
@@ -1004,7 +1378,11 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
         if (t >= maxT) break;
         float s = float(1 << lod);
         float len = min(192.0 * s, maxT - t);
-        if ((gSecCone > 0.0 || gSecFoot >= 2.0 * s) && lod < SEC_CONE_LOD && lod + 1 < lodCount) {
+        if (gSecSpread > 0.0 && gSecCone <= 0.0 && gSecFoot <= 0.0) {
+            // (the far field's rays: the pixel's cone, the primary rays' continuous rule: secLevelAt)
+            lod = secLevelAt(p, dir, t, lod, lodCount - 1, gSecFoot0, gSecSpread, len);
+            len = min(len, 192.0 * float(1 << lod));
+        } else if ((gSecCone > 0.0 || gSecFoot >= 2.0 * s) && lod < SEC_CONE_LOD && lod + 1 < lodCount) {
             // (the footprint's coarsening while the next level's voxels are no wider than it, then the sun's cone)
             float edge = (gSecFoot >= 2.0 * s ? SEC_FOOT_VOXELS : (gSecCone > 0.0 ? gSecCone : 1e30)) * s * gSecConeJit;
             if (t >= edge) { lod++; continue; }
@@ -1012,7 +1390,9 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
         }
         float uncExit;
         gSecT = t;
-        int r = traceLod(lod, p + dir * t, dir, len, res, uncExit);
+        gTr = res;
+        int r = traceLod(lod, p + dir * t, dir, len, uncExit);
+        res = gTr;
         if (r == TRACE_HIT) {
             gStopFoliage = gTrans <= 0.0;
             gSecHitT = t + res.t;
@@ -1044,10 +1424,12 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
 // where it does not). Clobbers traceSecondary's globals.
 bool solidRoof(float3 p, int lod) {
     // (never as a cone: a roof is found at the level the point is lit at, rock overhead at a coarse level can be open)
-    float cone = gSecCone;
+    float cone = gSecCone, spread = gSecSpread;
     gSecCone = 0.0;
+    gSecSpread = 0.0;
     bool roof = traceSecondary(p, float3(0, 1, 0), 2048.0, lod) <= 0.0 && !gStopFoliage;
     gSecCone = cone;
+    gSecSpread = spread;
     return roof;
 }
 
@@ -1341,7 +1723,9 @@ float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 s
         if (tr >= maxT) break;
         float len = min(192.0 * float(1 << l), maxT - tr);
         float uncExit;
-        int hit = traceLod(l, o + r * tr, r, len, rr, uncExit);
+        gTr = rr;
+        int hit = traceLod(l, o + r * tr, r, len, uncExit);
+        rr = gTr;
         if (hit == TRACE_HIT) {
             MaterialGpu m = palette[rr.mat];
             // a grazing reflection that skims back into the water sees the water's own sky, not a dark "top"
@@ -1860,7 +2244,9 @@ float2 sunTexel(uint i, uint j) {
         float s = float(1 << l);
         float len = min(192.0 * s, maxT - t);
         float uncExit;
-        int hit = traceLod(l, O + d * t, d, len, rr, uncExit);
+        gTr = rr;
+        int hit = traceLod(l, O + d * t, d, len, uncExit);
+        rr = gTr;
         if (hit == TRACE_HIT) {
             float3 hp = O + d * (t + rr.t);
             return float2(dot(hp - c, L), clouds ? cloudShadow(hp, L) : 1.0);
@@ -1935,7 +2321,8 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     // sub-pixel only past ~1.1 km at 1280 x 800, and a ray takes it only 4 blocks from the surface)
     gSecFoot = 0.0;
     if (frame.lightCtl.x > 0.0 && !cheapLight && (frame.dims.z & (FRAME_PRIMARY_NEAR | FRAME_PRIMARY_NEAR_LIT)) != 0u) {
-        gSecFoot = nd * frame.params.w * frame.lightCtl.x * exp2(surfaceRand(p, 3u) - 0.5);
+        // (the one footprint rule, lodFromFootprint: its level as blocks)
+        gSecFoot = exp2(lodFromFootprint(nd, frame.params.w * frame.lightCtl.x, 1.0)) * exp2(surfaceRand(p, 3u) - 0.5);
     }
     // still inside a solid voxel: atlas's world disagrees with the drawn one here (the tiles' stand-in houses, solid
     // and wider than the real ones, until the loaded chunks' blocks are up; a snow layer atlas holds as a block). Traced
@@ -2351,6 +2738,16 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     // the LOD segment phase stays fixed on screen: moving it per frame at a reduced atlas scale made blobs larger
     // than the TAA's neighbourhood, clipped from the history: a flickering fringe on distant ridges
     float lodDither = (frame.dims.z & FRAME_LOD_DITHER) != 0 ? max(pixelDither(id.xy, 1u), 1e-3) : 0.0;
+    // the threshold of the continuous level (lodPick): even over small neighbourhoods, and under the host's TAA rotated
+    // by the golden ratio each frame, so its resolve averages the two levels' share into a gradient
+    {
+        // (ATLAS_LOD's first knob, measurements: 1 a constant, 2 per 2 x 2 pixels, 3 per 8 x 4: one warp's)
+        int mode = int(frame.lodParams.x);
+        uint2 cell = mode == 2 ? id.xy / 2u : (mode == 3 ? uint2(id.x / 8u, id.y / 4u) : id.xy);
+        gLodXi = mode == 1 ? 0.5
+                           : frac(pixelDither(cell, 11u) + (frame.jitter.z > 0.5 ? 0.618034 * float(frame.temporal.x & 255u) : 0.0));
+        gAlphaXi = frac(pixelDither(id.xy, 13u) + (frame.jitter.z > 0.5 ? 0.618034 * float(frame.temporal.x & 255u) : 0.0));
+    }
     float3 sun = frame.sunDir.xyz;
 
     // the rasterised near field already covers this pixel: only the air in front of it (cloud, if the camera is up
@@ -2419,12 +2816,16 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     gAblate = asuint(frame.jitter.w);
     gGroupPa = frame.params.w * frame.params.z;
     gGroupTol = 0.7 + 0.6 * pixelDither(id.xy, phase + 5u);
-    float tHit = traceView(o, dir, tStart, frame.params.y, lodDither, res);
+    gTr = res;
+    float tHit = traceView(o, dir, tStart, frame.params.y, lodDither);
+    res = gTr;
     // (PRIMARY_NEAR) near water is the host's to raster: a primary ray meeting it in the near field goes on to what is
     // under it (the groups' cells and the SVDAG have no near-only pass, so a second trace with water skipped)
     if (primaryNear && tHit >= 0.0 && tHit < frame.params.x && uint(palette[res.mat].emisClass.y) == 2u) {
         gSkipWater = true;
-        tHit = traceView(o, dir, tStart, frame.params.y, lodDither, res);
+        gTr = res;
+        tHit = traceView(o, dir, tStart, frame.params.y, lodDither);
+        res = gTr;
         gSkipWater = false;
     }
     gGroups = false;  // secondary rays (shadows, reflections, block light) keep the old path
@@ -2474,6 +2875,25 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             float T = dot(air.transmittance, float3(0.2126, 0.7152, 0.0722));
             float3 ins = gNearRoofed && eyeRoofed() ? float3(0, 0, 0) : air.inscatter;  // under cover at both ends: unlit air
             c = float4(albedo * nl.rgb * T + ins, 1.0);
+            // light through leaves (the unified field's FOLIAGE_SSS): the key light (sun, or moon at night) reaching the
+            // leaf through the crown in front of it towards the light (a traced ray, attenuated by every leaf it
+            // crosses, this one's too: a crown's edge passes most, its heart little), sent on through the leaf tissue
+            // in its own colour, strongest looking towards the light: the backlit glow, bright at the crown's rim where
+            // the light crossed few leaves, dim and diffuse inside. ATLAS_ABLATE 1024: none
+            if (cls == 1u && (frame.dims.z & FRAME_SHADOWS) != 0u && (gAblate & 1024u) == 0u) {
+                float3 L = keyLightDir(sun);
+                float3 ph = o + dir * tHit + n * 0.02;
+                gSecSpread = 0.0;
+                gSecCone = 0.0;
+                float vis = traceSecondary(ph + L * 0.05, L, 96.0, res.lod);
+                // (the secondary ray counts a leaf crossed as opaque but for its gaps; its tissue lets about a third
+                // through as well: per crossing 0.09 of the gaps becomes about 0.4, the ray's transmittance to the 0.4)
+                float through = pow(saturate(max(vis, gThrough)), 0.4);
+                float fwd = max(dot(dir, L), 0.0);
+                float back = 0.2 + 1.2 * fwd * fwd * fwd;  // forward scattering: towards the light the most
+                float gain = frame.lodParams.w > 0.0 ? frame.lodParams.w : 1.0;  // (ATLAS_LOD's fourth knob)
+                c.rgb += albedo * keyLightRadiance(sun) * (through * back * 0.5 * gain) * T;
+            }
         }
         outColor[pix] = c;
         outNormal[pix] = packNormal(n, (cls & 0x7Fu) | 0x80u, nl.a);
@@ -2514,6 +2934,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         float3 p = worldAt(o, dir, k, tHit);
         airAtPoint(p);  // the key light at the hit (a peak keeps the sun longer; an eclipse's shadow where it falls)
         float s = float(1 << res.lod);
+        // the hit's secondary rays (shadow, sky, bounce) go on as the pixel's cone: its footprint here, widening as it does
+        gSecFoot0 = tHit * frame.params.w * frame.params.z;
+        gSecSpread = frame.params.w * frame.params.z;
         // blocky up close (it is Minecraft), smooth once voxels shrink towards a pixel: stops contour striping
         // centre of the hit voxel on the world voxel grid (multiples of s; y -64 is a multiple for s <= 64)
         float3 ci = float3(frame.camInt.xyz);
@@ -2615,7 +3038,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
                     r2.albedo = float3(0, 0, 0); r2.hasAlbedo = 0u;
                     gGroups = true;
                     gSkipWater = true;
-                    float t2 = traceView(o, dir, tStart, frame.params.y, lodDither, r2);
+                    gTr = r2;
+                    float t2 = traceView(o, dir, tStart, frame.params.y, lodDither);
+                    r2 = gTr;
                     gSkipWater = false;
                     gGroups = false;
                     if (t2 >= 0.0) {  // (blended as the game's framebuffer does: on the sRGB values)
@@ -2652,7 +3077,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             float v = valueNoise(wxz / 24.0) * 0.6 + valueNoise(wxz / 90.0 + 17.0) * 0.4;
             albedo *= 0.95 + 0.10 * v;  // gentle: stronger tone blotches the near field does not have read as a seam
         }
-        if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTint(res.lod);
+        // (the continuous level at the hit; the level taken is its pick, lodPick)
+        if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTintF(gHitLod);
         float3 reflection = float3(0, 0, 0);
         float foam = 0.0;
         if (cls == 2u) {

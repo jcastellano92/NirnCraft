@@ -54,7 +54,7 @@ public final class BiomeNoise {
 
     /** Standard normal CDF (logistic approximation): spreads a roughly normal value over [0, 1). */
     public static double cdf(double v) {
-        double p = 1.0 / (1.0 + Math.exp(-1.702 * v));
+        double p = 1.0 / (1.0 + StrictMath.exp(-1.702 * v));
         return Math.min(0.99999, Math.max(0.0, p));
     }
 }

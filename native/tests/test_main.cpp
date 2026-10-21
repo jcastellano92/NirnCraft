@@ -1,5 +1,6 @@
 // atlas_core tests: SVDAG round trips, sharing, the C ABI, and CPU/Vulkan kernel parity on preview terrain.
 #include <algorithm>
+#include <set>
 #include <array>
 #include <atomic>
 #include <chrono>
@@ -8,6 +9,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <functional>
 #include <random>
 #include <string>
@@ -615,16 +617,22 @@ static void testTransitions() {
     CHECK(atlas_render(ctx, &g, &o0) == ATLAS_OK);
     g.flags |= ATLAS_FRAME_LOD_DITHER;
     CHECK(atlas_render(ctx, &g, &o1) == ATLAS_OK);
+    // (the level is continuous now, picked per pixel with or without the flag: the debug view shows it as a gradient,
+    // many tints rather than one a level, and the flag changes nothing)
     size_t hits = 0, depthOff = 0, lodChanged = 0;
+    std::set<uint32_t> tints;
     for (size_t i = 0; i < d0.size(); i++) {
         if (d0[i] > 1e29f) continue;
         hits++;
         depthOff += std::abs(d0[i] - d1[i]) > 0.01f + 1e-4f * d0[i];
         lodChanged += c0[i] != c1[i];
+        tints.insert(c0[i] & 0xFFFFFFu);
     }
-    std::printf("  dither: %zu ground px, %zu change level, %zu change depth\n", hits, lodChanged, depthOff);
+    std::printf("  continuous level: %zu ground px, %zu distinct level tints, %zu change level with the dither flag, %zu change depth\n",
+                hits, tints.size(), lodChanged, depthOff);
     CHECK(hits > 1000);
-    CHECK(lodChanged > 0 && lodChanged < hits / 3);
+    CHECK(tints.size() > 16);
+    CHECK(lodChanged < hits / 100 + 2);
     CHECK(depthOff < hits / 200 + 2);
     atlas_destroy(ctx);
 }
@@ -2054,28 +2062,365 @@ static void testOverhang() {
     atlas_destroy(cpu);
 }
 
+// The GPU generator's far terrain into the grid (VoxGrid::ingestCoarseGpu, through atlas_debug_coarse_chunks): level-1
+// chunks given whole over flat tiles (ground y 100) with no sections, the camera straight down from y 300 over the
+// chunk at x, z 0..32, its row y 192..224. A pixel there needs level 0, which has nothing: the trace takes the grid's
+// coarse levels behind the gap (traceLod), so it meets what was given. One id throughout: the chunk's top (y 224); its
+// ids, rock in its lower half: y 208; air: the ground again (y 100).
+static void testCoarseGiven() {
+    std::printf("coarse\n");
+    AtlasContext* ctx = nullptr;
+    if (atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) {
+        std::printf("  SKIP: no Vulkan device\n");
+        return;
+    }
+    std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 52), fill(256 * 256, 52);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
+        }
+    AtlasMaterial m[1] = {{{0.4f, 0.4f, 0.4f}, 0.9f, 0, ATLAS_CLASS_TERRAIN}};
+    atlas_set_materials(ctx, 50, m, 1);
+    double centre[3] = {16.0, 300.0, 16.0};
+    atlas_update(ctx, centre, 0);
+    AtlasFrame f{};
+    f.cameraPos[0] = 16.0;
+    f.cameraPos[1] = 300.0;
+    f.cameraPos[2] = 16.0;
+    float inv[16] = {0.1f, 0, 0, 0, 0, 0, 0.1f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};  // straight down (testAbi)
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 64;
+    f.height = 64;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> depth(64 * 64);
+    AtlasFrameOutput o{nullptr, nullptr, depth.data()};
+    // the centre pixels' median depth after a few frames (the grid takes what was given with the next one)
+    auto look = [&]() {
+        for (int i = 0; i < 3; i++) CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
+        std::vector<float> c;
+        for (int y = 28; y < 36; y++)
+            for (int x = 28; x < 36; x++) c.push_back(depth[size_t(y) * 64 + size_t(x)]);
+        std::sort(c.begin(), c.end());
+        return c[c.size() / 2];
+    };
+    double len = std::sqrt(1.0 + 0.01 * (0.5 / 32) * (0.5 / 32) * 2);  // (the centre rays are almost straight down)
+    float d0 = look();
+    int32_t pos[3] = {0, 8, 0};  // level 1: blocks 0..32, rows of 32 from y -64: y 192..224
+    uint32_t kind = 2u | 50u << 8;
+    std::vector<uint16_t> ids(4096, 0);
+    uint8_t acc = 0;
+    CHECK(atlas_debug_coarse_chunks(ctx, 1, 1, pos, &kind, ids.data(), &acc) == ATLAS_OK);
+    CHECK(acc == 1);
+    float d1 = look();
+    for (int y = 0; y < 8; y++)
+        for (int i = 0; i < 256; i++) ids[size_t(y) * 256 + size_t(i)] = 50;  // rock in the lower half: top y 208
+    kind = 0u;
+    CHECK(atlas_debug_coarse_chunks(ctx, 1, 1, pos, &kind, ids.data(), &acc) == ATLAS_OK);
+    float d2 = look();
+    kind = 1u;
+    CHECK(atlas_debug_coarse_chunks(ctx, 1, 1, pos, &kind, ids.data(), &acc) == ATLAS_OK);
+    float d3 = look();
+    int32_t far[3] = {100000, 8, 0};  // outside the level's window: not taken
+    CHECK(atlas_debug_coarse_chunks(ctx, 1, 1, far, &kind, ids.data(), &acc) == ATLAS_OK);
+    CHECK(acc == 0);
+    std::printf("  centre depth: ground %.2f, one id %.2f, its lower half %.2f, air %.2f (expect 200, 76, 92, 200)\n", d0, d1,
+                d2, d3);
+    CHECK(std::abs(d0 - 200.0 * len) < 0.6);
+    CHECK(std::abs(d1 - 76.0 * len) < 0.6);
+    CHECK(std::abs(d2 - 92.0 * len) < 0.6);
+    CHECK(std::abs(d3 - 200.0 * len) < 0.6);
+    atlas_destroy(ctx);
+}
+
+// The host's tiers (step 5; sectionpack.hpp, sectionstore.hpp), on Vulkan: uploads packed on the GPU (one id, 2, 3, 5,
+// 17 and 300 ids: every width), the host's copy the packed one, the same ids back; a frame from packed sections (a
+// jump away and back: the grid takes them from the warm tier, expanded on the GPU) the same as from the uploads; over
+// the warm budget the sections go to the cold tier on disk (the regenerable one dropped) and come back from it, in this
+// context and in a new one (a reload, no stream).
+static void testTiers() {
+    std::printf("tiers\n");
+    namespace fs = std::filesystem;
+    std::error_code ec;
+    fs::path dir = fs::temp_directory_path(ec) / "atlas-tiers-test";
+    fs::remove_all(dir, ec);
+    auto tiles = [&](AtlasContext* ctx) {
+        std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+        std::vector<uint16_t> top(256 * 256, 52), fill(256 * 256, 52);
+        for (int tz = -2; tz <= 2; tz++)
+            for (int tx = -2; tx <= 2; tx++) {
+                AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+                atlas_upload_column_tile(ctx, &t);
+            }
+    };
+    auto scene = [&](AtlasContext*& ctx) {
+        if (atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) return false;
+        tiles(ctx);
+        std::vector<AtlasMaterial> m(400, AtlasMaterial{{0.4f, 0.4f, 0.4f}, 0.9f, 0, ATLAS_CLASS_TERRAIN});
+        for (size_t i = 0; i < m.size(); i++) m[i].albedo[0] = float(i % 7) / 7.0f;
+        atlas_set_materials(ctx, 1, m.data(), uint32_t(m.size()));
+        return true;
+    };
+    AtlasContext* ctx = nullptr;
+    if (!scene(ctx)) {
+        std::printf("  SKIP: no Vulkan device\n");
+        return;
+    }
+    // sections at sy 6 (y 96..112), x 0..6 sections, z 0: n distinct ids each (air in the upper half but for one id)
+    const int counts[7] = {1, 2, 3, 5, 17, 300, 5};
+    std::vector<std::vector<uint16_t>> secs(7, std::vector<uint16_t>(4096));
+    for (int s = 0; s < 7; s++)
+        for (int i = 0; i < 4096; i++) {
+            int y = i >> 8, h = (i * 2654435761u) >> 20;
+            int n = counts[s];
+            secs[size_t(s)][size_t(i)] = n == 1 ? 50 : (y >= 8 && (h & 1)) ? 0 : uint16_t(1 + h % (n - 1 == 0 ? 1 : n - 1));
+        }
+    // (the cold tier from the start: what the window leaves goes to disk)
+    CHECK(atlas_set_cache(ctx, dir.string().c_str(), 7, 1, 0, 0) == ATLAS_OK);
+    for (int s = 0; s < 7; s++)
+        CHECK(atlas_upload_section_flags(ctx, s, 6, 0, secs[size_t(s)].data(), s == 6 ? ATLAS_SECTION_REGENERABLE : 0u) == ATLAS_OK);
+    double centre[3] = {56.0, 300.0, 8.0};
+    atlas_update(ctx, centre, 0);
+    AtlasFrame f{};
+    f.cameraPos[0] = 56.0;
+    f.cameraPos[1] = 300.0;
+    f.cameraPos[2] = 8.0;
+    float inv[16] = {0.4f, 0, 0, 0, 0, 0, 0.4f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};  // straight down, wide
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 64;
+    f.height = 64;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> d1(64 * 64), d2(64 * 64);
+    AtlasFrameOutput o1{nullptr, nullptr, d1.data()}, o2{nullptr, nullptr, d2.data()};
+    for (int i = 0; i < 6; i++) CHECK(atlas_render(ctx, &f, &o1) == ATLAS_OK);  // (packed with a batch, read back later)
+    std::vector<uint16_t> got(4096);
+    int packed = 0, same = 0;
+    for (int s = 0; s < 7; s++) {
+        uint32_t tier = 0;
+        CHECK(atlas_debug_section(ctx, s, 6, 0, got.data(), &tier) == ATLAS_OK);
+        packed += tier == 2u;
+        same += got == secs[size_t(s)];
+    }
+    CHECK(packed == 7 && same == 7);
+    // a jump away and back: the sections left behind go to the cold tier (the regenerable one is dropped), and coming
+    // back the grid takes them from it, packed, expanded on the GPU; the regenerable one the client makes again
+    f.cameraPos[0] = 56.0 + 20000.0;
+    double away[3] = {56.0 + 20000.0, 300.0, 8.0};
+    atlas_update(ctx, away, 0);
+    for (int i = 0; i < 3; i++) atlas_render(ctx, &f, &o2);
+    int awayTier = 0;
+    for (int s = 0; s < 7; s++) {
+        uint32_t tier = 0;
+        CHECK(atlas_debug_section(ctx, s, 6, 0, got.data(), &tier) == ATLAS_OK);  // (a cold read: back into warm)
+        awayTier += tier == 2u;
+    }
+    atlas_update(ctx, away, 0);  // (and out of warm again: still away)
+    f.cameraPos[0] = 56.0;
+    tiles(ctx);  // (the tiles there went with the jump)
+    CHECK(atlas_upload_section_flags(ctx, 6, 6, 0, secs[6].data(), ATLAS_SECTION_REGENERABLE) == ATLAS_OK);
+    atlas_update(ctx, centre, 0);
+    for (int i = 0; i < 12; i++) CHECK(atlas_render(ctx, &f, &o2) == ATLAS_OK);
+    size_t hits = 0, differ = 0;
+    for (size_t i = 0; i < d1.size(); i++) {
+        hits += d1[i] < 250.0f;
+        differ += std::abs(d1[i] - d2[i]) > 1e-3f;
+    }
+    std::string inf = atlas_info(ctx);
+    size_t ch = inf.find("\"cold\":{");
+    std::printf("  %s\n", ch == std::string::npos ? "no tiers" : inf.substr(ch, inf.find('}', ch) - ch + 1).c_str());
+    // over the warm budget: out of warm (on disk already; the regenerable one dropped), and back from the cold tier
+    CHECK(atlas_set_cache(ctx, dir.string().c_str(), 7, 1, 1, 0) == ATLAS_OK);
+    atlas_update(ctx, centre, 0);
+    int cold = 0, gone = 0;
+    for (int s = 0; s < 7; s++) {
+        uint32_t tier = 0;
+        CHECK(atlas_debug_section(ctx, s, 6, 0, got.data(), &tier) == ATLAS_OK);
+        if (s == 6) gone += tier == 0u;
+        else cold += tier == 2u && got == secs[size_t(s)];
+    }
+    atlas_destroy(ctx);
+    // a new context, the same world: read back from disk, nothing streamed
+    AtlasContext* again = nullptr;
+    int reloaded = 0;
+    if (scene(again)) {
+        CHECK(atlas_set_cache(again, dir.string().c_str(), 7, 1, 0, 0) == ATLAS_OK);
+        atlas_update(again, centre, 0);
+        CHECK(atlas_render(again, &f, &o2) == ATLAS_OK);  // (the plan: the cache applied)
+        for (int s = 0; s < 6; s++) {
+            uint32_t tier = 0;
+            CHECK(atlas_debug_section(again, s, 6, 0, got.data(), &tier) == ATLAS_OK);
+            reloaded += tier == 2u && got == secs[size_t(s)];
+        }
+        atlas_destroy(again);
+    }
+    std::printf("  packed on the GPU %d of 7, the same ids %d; away: %d of 6 read back from disk; back: %zu of %zu hits "
+                "differ; over budget: cold %d of 6, regenerable dropped %d; a new context read %d of 6 from disk\n",
+                packed, same, awayTier, differ, hits, cold, gone, reloaded);
+    CHECK(awayTier == 6);
+    CHECK(hits > 500 && differ == 0);
+    CHECK(cold == 6 && gone == 1 && reloaded == 6);
+    fs::remove_all(dir, ec);
+}
+
+// Edits as layers over the generated base (sectionstore.hpp's EditLayer), on Vulkan: a client-generated section edited
+// (its base on the host), a build in the air above the ground (a base of one id), an edit of a GPU-made section (its
+// base packed on the GPU and read back: never the tile's stand-in), one whose base changes later (a generator change).
+// Over the warm budget they go to disk as deltas; in a new context the air build is back on its own, the others once
+// their bases come again (uploaded, ingested on the GPU), the changed one as it was (its fallback, flagged).
+static void testEdits() {
+    std::printf("edits\n");
+    namespace fs = std::filesystem;
+    std::error_code ec;
+    fs::path dir = fs::temp_directory_path(ec) / "atlas-edits-test";
+    fs::remove_all(dir, ec);
+    auto scene = [&](AtlasContext*& ctx) {
+        if (atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) return false;
+        std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+        std::vector<uint16_t> top(256 * 256, 52), fill(256 * 256, 52);
+        for (int tz = -2; tz <= 2; tz++)
+            for (int tx = -2; tx <= 2; tx++) {
+                AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+                atlas_upload_column_tile(ctx, &t);
+            }
+        std::vector<AtlasMaterial> m(64, AtlasMaterial{{0.4f, 0.4f, 0.4f}, 0.9f, 0, ATLAS_CLASS_TERRAIN});
+        atlas_set_materials(ctx, 1, m.data(), uint32_t(m.size()));
+        return true;
+    };
+    AtlasContext* ctx = nullptr;
+    if (!scene(ctx)) {
+        std::printf("  SKIP: no Vulkan device\n");
+        return;
+    }
+    // bases: A (1,6,0) the client's, G (3,6,0) the GPU's, M (5,6,0) the client's (changed later); ground to y 104
+    auto base = [](int salt) {
+        std::vector<uint16_t> s(4096);
+        for (int i = 0; i < 4096; i++) {
+            int y = i >> 8;
+            uint32_t h = (uint32_t(i) + uint32_t(salt) * 7919u) * 2654435761u;
+            s[size_t(i)] = y < 8 ? uint16_t(1 + (h >> 28) % 3) : 0;
+        }
+        return s;
+    };
+    std::vector<uint16_t> A = base(1), G = base(2), M = base(3), M2 = base(4), air(4096, 0);
+    double centre[3] = {56.0, 170.0, 8.0};
+    AtlasFrame f{};
+    f.cameraPos[0] = 56.0;
+    f.cameraPos[1] = 170.0;
+    f.cameraPos[2] = 8.0;
+    float inv[16] = {0.4f, 0, 0, 0, 0, 0, 0.4f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 64;
+    f.height = 64;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> d(64 * 64);
+    AtlasFrameOutput o{nullptr, nullptr, d.data()};
+    CHECK(atlas_set_cache(ctx, dir.string().c_str(), 11, 1, 0, 0) == ATLAS_OK);
+    atlas_update(ctx, centre, 0);
+    CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);  // (the grid placed: the GPU's section has a window to go in)
+    CHECK(atlas_upload_section_flags(ctx, 1, 6, 0, A.data(), ATLAS_SECTION_REGENERABLE) == ATLAS_OK);
+    CHECK(atlas_upload_section_flags(ctx, 5, 6, 0, M.data(), ATLAS_SECTION_REGENERABLE) == ATLAS_OK);
+    int32_t gp[3] = {3, 6, 0};
+    uint8_t acc = 0;
+    CHECK(atlas_debug_gpu_sections(ctx, 1, gp, G.data(), nullptr, &acc) == ATLAS_OK);
+    for (int i = 0; i < 6; i++) CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
+    // the edits: a wall in each section (x 2..13 at z 5, y 4..11), the air build a pillar (y 136..143)
+    std::vector<uint16_t> eA = A, eG = G, eM = M, eAir = air;
+    auto edit = [&](int sx, int sy, int sz, std::vector<uint16_t>& want, uint16_t mat) {
+        for (int y = 4; y < 12; y++)
+            for (int x = 2; x < 14; x++) {
+                CHECK(atlas_notify_block(ctx, sx * 16 + x, sy * 16 + y, sz * 16 + 5, mat) == ATLAS_OK);
+                want[size_t(x + 16 * (5 + 16 * y))] = mat;
+            }
+    };
+    edit(1, 6, 0, eA, 9);
+    edit(3, 6, 0, eG, 10);
+    edit(5, 6, 0, eM, 11);
+    edit(1, 8, 0, eAir, 12);
+    for (int i = 0; i < 8; i++) CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);  // (G's base packed and read back)
+    std::vector<uint16_t> got(4096);
+    auto is = [&](AtlasContext* c, int sx, int sy, int sz, const std::vector<uint16_t>& want) {
+        uint32_t tier = 0;
+        return atlas_debug_section(c, sx, sy, sz, got.data(), &tier) == ATLAS_OK && tier != 0 && got == want;
+    };
+    bool liveA = is(ctx, 1, 6, 0, eA), liveG = is(ctx, 3, 6, 0, eG), liveM = is(ctx, 5, 6, 0, eM), liveAir = is(ctx, 1, 8, 0, eAir);
+    // over the warm budget: out to disk (the edited ones as deltas)
+    for (int i = 0; i < 4; i++) CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);  // (packed into warm first)
+    CHECK(atlas_set_cache(ctx, dir.string().c_str(), 11, 1, 1, 0) == ATLAS_OK);
+    atlas_update(ctx, centre, 0);
+    std::string inf = atlas_info(ctx);
+    size_t e0 = inf.find("\"edits\":{");
+    std::string edits = e0 == std::string::npos ? "none" : inf.substr(e0, inf.find('}', e0) - e0 + 1);
+    atlas_destroy(ctx);
+    // a new context: the air build on its own; A and G once their bases come again; M's base changed: its old section
+    AtlasContext* again = nullptr;
+    bool backAir = false, backA = false, backG = false, backM = false;
+    std::string edits2 = "none";
+    if (scene(again)) {
+        CHECK(atlas_set_cache(again, dir.string().c_str(), 11, 1, 0, 0) == ATLAS_OK);
+        atlas_update(again, centre, 0);
+        CHECK(atlas_render(again, &f, &o) == ATLAS_OK);
+        backAir = is(again, 1, 8, 0, eAir);
+        CHECK(atlas_upload_section_flags(again, 1, 6, 0, A.data(), ATLAS_SECTION_REGENERABLE) == ATLAS_OK);
+        CHECK(atlas_upload_section_flags(again, 5, 6, 0, M2.data(), ATLAS_SECTION_REGENERABLE) == ATLAS_OK);
+        CHECK(atlas_debug_gpu_sections(again, 1, gp, G.data(), nullptr, &acc) == ATLAS_OK);
+        for (int i = 0; i < 10; i++) CHECK(atlas_render(again, &f, &o) == ATLAS_OK);
+        backA = is(again, 1, 6, 0, eA);
+        backG = is(again, 3, 6, 0, eG);
+        backM = is(again, 5, 6, 0, eM);
+        std::string i2 = atlas_info(again);
+        size_t e1 = i2.find("\"edits\":{");
+        if (e1 != std::string::npos) edits2 = i2.substr(e1, i2.find('}', e1) - e1 + 1);
+        atlas_destroy(again);
+    }
+    std::printf("  live: client-made %d, GPU-made %d, changing %d, air %d; on disk %s\n", liveA, liveG, liveM, liveAir,
+                edits.c_str());
+    std::printf("  a new context: air on its own %d, client-made over its base again %d, GPU-made %d, changed base kept %d; %s\n",
+                backAir, backA, backG, backM, edits2.c_str());
+    CHECK(liveA && liveG && liveM && liveAir);
+    CHECK(backAir && backA && backG && backM);
+    CHECK(edits2.find("\"baseMismatch\":1") != std::string::npos);
+    fs::remove_all(dir, ec);
+}
+
 int main(int argc, char** argv) {
-    testSvdag();
-    testCaves();
-    testOverhang();
-    testGroups();
-    testAbi();
-    testStreamingGap();
-    testFourZones();
-    testRegionSeam();
-    testStructures();
-    testSunMap();
-    testActors();
-    testImpostorShape();
-    testActorMotion();
-    testTransitions();
-    testLights();
-    testFaults();
-    testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
-    testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
-    testGrassTint(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
-    testSurfaceOverrides(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
-    parity(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
+    std::setvbuf(stdout, nullptr, _IONBF, 0);  // (each line as it comes: a suite stopped part way still shows where)
+    // atlas_tests [raster] [only=a,b,..]: the suites named alone (svdag, caves, ..., parity); each prints
+    // "TRACE done <name> <secs>s" when it ends, so a slow or runaway one is named
+    const char* raster = "native/data/tamriel_raster.bin";
+    std::string only;
+    for (int i = 1; i < argc; i++) {
+        if (std::strncmp(argv[i], "only=", 5) == 0) only = "," + std::string(argv[i] + 5) + ",";
+        else raster = argv[i];
+    }
+    struct Suite {
+        const char* name;
+        std::function<void()> run;
+    };
+    const Suite suites[] = {
+        {"svdag", testSvdag}, {"caves", testCaves}, {"overhang", testOverhang}, {"groups", testGroups}, {"abi", testAbi},
+        {"streaminggap", testStreamingGap}, {"fourzones", testFourZones}, {"regionseam", testRegionSeam},
+        {"structures", testStructures}, {"sunmap", testSunMap}, {"actors", testActors}, {"impostor", testImpostorShape},
+        {"actormotion", testActorMotion}, {"transitions", testTransitions}, {"lights", testLights}, {"faults", testFaults},
+        {"neardepth", [&] { testNearDepth(raster); }}, {"columnheights", [&] { testColumnHeights(raster); }},
+        {"grasstint", [&] { testGrassTint(raster); }}, {"surfaceoverrides", [&] { testSurfaceOverrides(raster); }},
+        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"tiers", testTiers}, {"edits", testEdits},
+    };
+    for (const Suite& t : suites) {
+        if (!only.empty() && only.find("," + std::string(t.name) + ",") == std::string::npos) continue;
+        std::printf("TRACE begin %s\n", t.name);
+        auto t0 = std::chrono::steady_clock::now();
+        int before = failures;
+        t.run();
+        std::printf("TRACE done %s %.1fs (%d failures)\n", t.name,
+                    std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(), failures - before);
+    }
     std::printf(failures ? "FAILED (%d)\n" : "PASS\n", failures);
     return failures ? 1 : 0;
 }

@@ -109,7 +109,9 @@ final class AtlasEditsClient {
         // atlas lights the near pass with: nothing waits
         if (clearHeld) {
             HELD.clear();
-            UPLOADED.clear();
+            synchronized (UPLOADED) {
+                UPLOADED.clear();
+            }
             clearHeld = false;
         }
         pruneUploaded();
@@ -130,7 +132,7 @@ final class AtlasEditsClient {
                 // then atlas's own generation (AtlasClientGen): the window around the camera, long before vanilla's
                 // chunks arrive; those still come here after it and go up only where they differ (the hash below)
                 boolean real = d != null;
-                if (d == null) d = AtlasClientGen.poll(viewX, viewZ);
+                if (d == null && !AtlasClientGen.uploadsItself()) d = AtlasClientGen.poll(viewX, viewZ);
                 client = d != null;
                 if (real) AtlasClientSections.real(d.cx(), d.cz());
             }
@@ -147,16 +149,31 @@ final class AtlasEditsClient {
                     continue;
                 }
             }
-            local.clear();
-            for (int s = 0; s < d.sections().length; s++) {
+            put(ctx, mats, d, client, out, local);
+            n++;
+        }
+        return n;
+    }
+
+    /**
+     * Chunk d's sections up (atlas_upload_section), those the core does not have already (their hash): the far-field
+     * worker's feed, and AtlasClientGen's own uploader (any thread: the materials and the hashes are shared safely).
+     */
+    static int put(AtlasNative.Context ctx, AtlasMaterials mats, AtlasSections.Decoded d, boolean client, short[] out,
+                   Map<Integer, Short> local) {
+        int up = 0;
+        local.clear();
+        for (int s = 0; s < d.sections().length; s++) {
                 int[] ids = d.sections()[s];
                 if (ids == null) continue;  // solid rock: the tiles' stone
                 long key = net.minecraft.core.SectionPos.asLong(d.cx(), d.sy0() + s, d.cz());
                 if (client && AtlasClientGen.skipRock(key, ids)) continue;  // generation's tiles stone holds it
                 long h = 0xcbf29ce484222325L ^ ((long) d.grass() << 24 ^ d.foliage());
                 for (int id : ids) h = (h ^ id) * 0x100000001b3L;
-                if (UPLOADED.containsKey(key) && UPLOADED.get(key) == h) continue;  // the core has these blocks
-                UPLOADED.put(key, h);
+                synchronized (UPLOADED) {
+                    if (UPLOADED.containsKey(key) && UPLOADED.get(key) == h) continue;  // the core has these blocks
+                    UPLOADED.put(key, h);
+                }
                 for (int i = 0; i < 4096; i++) {
                     int id = ids[i];
                     if (id == 0) {
@@ -175,11 +192,26 @@ final class AtlasEditsClient {
                 }
                 mats.flush(ctx);
                 ctx.uploadSection(d.cx(), d.sy0() + s, d.cz(), out);
-            }
-            if (client) AtlasClientSections.up(d.cx(), d.cz());
-            n++;
+                up++;
         }
-        return n;
+        if (client) AtlasClientSections.up(d.cx(), d.cz());
+        return up;
+    }
+
+    /** Forgets a claim whose section did not go up after all (it must go up when it comes again). Any thread. */
+    static void unclaim(long key) {
+        synchronized (UPLOADED) {
+            UPLOADED.remove(key);
+        }
+    }
+
+    /** Whether section key with block hash h must go up (the core does not have it): recorded if so. Any thread. */
+    static boolean claim(long key, long h) {
+        synchronized (UPLOADED) {
+            if (UPLOADED.containsKey(key) && UPLOADED.get(key) == h) return false;
+            UPLOADED.put(key, h);
+            return true;
+        }
     }
 
     /**
@@ -188,14 +220,18 @@ final class AtlasEditsClient {
      */
     private static void pruneUploaded() {
         long now = System.nanoTime();
-        if (now - prunedAt < 2_000_000_000L || UPLOADED.isEmpty()) return;
+        if (now - prunedAt < 2_000_000_000L) return;
         prunedAt = now;
-        int ptx = Math.floorDiv((int) Math.floor(viewX), AtlasEdits.TILE), ptz = Math.floorDiv((int) Math.floor(viewZ), AtlasEdits.TILE);
-        UPLOADED.keySet().removeIf((long k) -> {
-            int tx = Math.floorDiv(net.minecraft.core.SectionPos.x(k) * 16, AtlasEdits.TILE);
-            int tz = Math.floorDiv(net.minecraft.core.SectionPos.z(k) * 16, AtlasEdits.TILE);
-            return Math.abs(tx - ptx) > AtlasSections.RADIUS_TILES || Math.abs(tz - ptz) > AtlasSections.RADIUS_TILES;
-        });
+        // around the camera as of this frame (the client generator's), else the far field's last pass
+        double cx = AtlasClientGen.hasCamera() ? AtlasClientGen.cameraX() : viewX, cz = AtlasClientGen.hasCamera() ? AtlasClientGen.cameraZ() : viewZ;
+        int ptx = Math.floorDiv((int) Math.floor(cx), AtlasEdits.TILE), ptz = Math.floorDiv((int) Math.floor(cz), AtlasEdits.TILE);
+        synchronized (UPLOADED) {
+            UPLOADED.keySet().removeIf((long k) -> {
+                int tx = Math.floorDiv(net.minecraft.core.SectionPos.x(k) * 16, AtlasEdits.TILE);
+                int tz = Math.floorDiv(net.minecraft.core.SectionPos.z(k) * 16, AtlasEdits.TILE);
+                return Math.abs(tx - ptx) > AtlasSections.RADIUS_TILES || Math.abs(tz - ptz) > AtlasSections.RADIUS_TILES;
+            });
+        }
     }
 
     /** Forget everything (another world, another server). */

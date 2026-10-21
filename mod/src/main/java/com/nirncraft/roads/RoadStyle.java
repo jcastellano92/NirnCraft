@@ -208,6 +208,14 @@ final class RoadStyle {
         return STYLES[c.ordinal()];
     }
 
+    /** A culture's surface list for a road class (0 highway .. 3 trail), in surface()'s roll order. */
+    static BlockState[] surfaces(Culture c, int kind) {
+        Supplier<BlockState>[] list = style(c).surface()[kind];
+        BlockState[] out = new BlockState[list.length];
+        for (int i = 0; i < list.length; i++) out[i] = list[i].get();
+        return out;
+    }
+
     /** Road surface for a column, or null to leave it alone. */
     static BlockState surface(Culture c, byte kind, int roll) {
         Supplier<BlockState>[] list = style(c).surface()[Math.max(0, Math.min(3, kind))];

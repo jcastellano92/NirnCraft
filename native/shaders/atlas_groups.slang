@@ -288,13 +288,13 @@ float cardAlpha(uint at, float u, float v, float fp) {
 }
 
 // a hit: what the shading needs (the old path's TraceResult, plus the texel's albedo)
-void groupHit(inout TraceResult res, float t, uint cell, int axis, float3 dir, int3 q) {
-    res.t = t;
-    res.mat = cell & G_CELL_MATERIAL;
-    res.axis = axis;
+void groupHit(float t, uint cell, int axis, float3 dir, int3 q) {
+    gTr.t = t;
+    gTr.mat = cell & G_CELL_MATERIAL;
+    gTr.axis = axis;
     int f = dir[axis] > 0.0 ? G_FACE_LOW[axis] : G_FACE_HIGH[axis];
-    res.albedo = cellAlbedo(cell, f, q);
-    res.hasAlbedo = 1u;
+    gTr.albedo = cellAlbedo(cell, f, q);
+    gTr.hasAlbedo = 1u;
 }
 
 // the ray against box [lo, hi): entry, exit and the axis of the entry plane
@@ -356,21 +356,21 @@ void gBox(uint4 n, out float3 flo, out float3 fhi) {
 
 // a node drawn whole: the face the ray enters by; through a hole there, the face it leaves by (seen from outside)
 bool drawBox(RegionGpu r, uint4 n, float3 o, float3 d, float3 inv, int3 lo, int3 hi, float3 flo, float3 fhi, int ax,
-             float te, float u1, float3 dir, inout TraceResult res) {
+             float te, float u1, float3 dir) {
     bool high = d[ax] < 0.0;
     uint code = (n[ax] >> (high ? 28u : 24u)) & 15u;
     int3 q;
     uint cell;
     if ((gAblate & 128u) != 0u) {  // (ATLAS_ABLATE 128, measurements: the box itself, no texel walk)
-        res.t = te;
-        res.mat = 1u;
-        res.axis = ax;
-        res.albedo = float3(0.5, 0.5, 0.5);
-        res.hasAlbedo = 1u;
+        gTr.t = te;
+        gTr.mat = 1u;
+        gTr.axis = ax;
+        gTr.albedo = float3(0.5, 0.5, 0.5);
+        gTr.hasAlbedo = 1u;
         return true;
     }
-    if (faceWalk(r, lo, hi, ax, high, o + d * te, o, d, int(G_ERR[code]) + 1, res.steps, q, cell)) {
-        groupHit(res, te, cell, ax, dir, q);
+    if (faceWalk(r, lo, hi, ax, high, o + d * te, o, d, int(G_ERR[code]) + 1, gTr.steps, q, cell)) {
+        groupHit(te, cell, ax, dir, q);
         return true;
     }
     int ax2 = 0;
@@ -386,16 +386,15 @@ bool drawBox(RegionGpu r, uint4 n, float3 o, float3 d, float3 inv, int3 lo, int3
     if (best > u1) return false;  // it leaves past this chord: the next chord opens the box from inside
     bool high2 = d[ax2] > 0.0;
     uint code2 = (n[ax2] >> (high2 ? 28u : 24u)) & 15u;
-    if (faceWalk(r, lo, hi, ax2, high2, o + d * best, o, d, int(G_ERR[code2]) + 1, res.steps, q, cell)) {
-        groupHit(res, best, cell, ax2, dir, q);
+    if (faceWalk(r, lo, hi, ax2, high2, o + d * best, o, d, int(G_ERR[code2]) + 1, gTr.steps, q, cell)) {
+        groupHit(best, cell, ax2, dir, q);
         return true;
     }
     return false;
 }
 
 // Through a voxel leaf: voxel by voxel from te, micro-voxel by micro-voxel in shaped blocks.
-bool stepLeaf(RegionGpu r, float3 o, float3 d, float3 inv, int3 lo, int3 hi, float te, float tEnd, int ax0, float3 dir,
-              inout TraceResult res) {
+bool stepLeaf(RegionGpu r, float3 o, float3 d, float3 inv, int3 lo, int3 hi, float te, float tEnd, int ax0, float3 dir) {
     int3 vlo = lo >> 2, vhi = (hi + 3) >> 2;
     float3 p = o + d * te;
     int3 v = clamp(int3(floor(p * 0.25)), vlo, vhi - 1);
@@ -409,12 +408,12 @@ bool stepLeaf(RegionGpu r, float3 o, float3 d, float3 inv, int3 lo, int3 hi, flo
     for (int it = 0; it < 48; it++) {
         Vox vx = voxelAt(r, v);
         uint cell = vx.cell;
-        res.steps++;
+        gTr.steps++;
         if (cell != 0u) {
             bool full = voxFull(vx);
             if (full) {
                 int3 q = clamp(int3(floor(o + d * t)), v * 4, v * 4 + 3);
-                groupHit(res, t, cell, axis, dir, q);
+                groupHit(t, cell, axis, dir, q);
                 return true;
             }
             // micro-voxels inside this voxel, until it leaves it
@@ -432,14 +431,14 @@ bool stepLeaf(RegionGpu r, float3 o, float3 d, float3 inv, int3 lo, int3 hi, flo
                 uint f = microFilled(r, vx, q, hm);
                 int a = mNext.x <= mNext.y && mNext.x <= mNext.z ? 0 : (mNext.y <= mNext.z ? 1 : 2);
                 if (f == 1u) {
-                    groupHit(res, tm, cell, am, dir, q);
+                    groupHit(tm, cell, am, dir, q);
                     return true;
                 }
                 if (f == 2u) {
                     float th = tm;
                     int ah = am;
                     if (gHullRay(hm, q, o, d, tm, min(mNext[a], tEnd), th, ah)) {
-                        groupHit(res, th, cell, ah, dir, q);
+                        groupHit(th, cell, ah, dir, q);
                         return true;
                     }
                 }
@@ -463,7 +462,8 @@ bool stepLeaf(RegionGpu r, float3 o, float3 d, float3 inv, int3 lo, int3 hi, flo
 }
 
 // One region's groups along the chord ro + rd u, u in [u0, u1] (region voxel units, as traceRegion takes them).
-bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 dir, inout TraceResult res) {
+[noinline]  // (one copy, called: see atlas_far.slang traceLod)
+bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 dir) {
     float3 o = ro * 4.0, d = rd * 4.0;  // micro-voxels
     float3 inv = float3(abs(d.x) > 1e-12 ? 1.0 / d.x : 1e30, abs(d.y) > 1e-12 ? 1.0 / d.y : 1e30,
                         abs(d.z) > 1e-12 ? 1.0 / d.z : 1e30);
@@ -483,7 +483,7 @@ bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 d
         int ax;
         bool visit = gSlab(o, inv, flo, fhi, tn, tf, ax) && tf >= u0 && tn <= u1;
         if (visit) {
-            res.steps++;
+            gTr.steps++;
             float te = max(tn, u0);
             uint type = n.w >> 30;
             // the chord starts in it: its faces are behind. (A node whose face lies on the region's face, entered there:
@@ -510,9 +510,9 @@ bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 d
             fits = fits && (type == G_FLAT || max(ext.x, max(ext.y, ext.z)) * microBlocks > 2.0 * gGroupPa * (gChordT + te));
             bool draw = !inside && (type == G_FLAT || (fine && fits && (gAblate & 32768u) == 0u) || (gAblate & 64u) != 0u);
             if (draw) {
-                if (drawBox(r, n, o, d, inv, lo, hi, flo, fhi, ax, te, u1, dir, res)) return true;
+                if (drawBox(r, n, o, d, inv, lo, hi, flo, fhi, ax, te, u1, dir)) return true;
             } else if (type != G_INNER) {
-                if (stepLeaf(r, o, d, inv, lo, hi, te, min(tf, u1), inside ? -1 : ax, dir, res)) return true;
+                if (stepLeaf(r, o, d, inv, lo, hi, te, min(tf, u1), inside ? -1 : ax, dir)) return true;
             } else {
                 // open it: the nearer child next, the farther on the stack
                 uint c = base + (n.w & G_CHILD);

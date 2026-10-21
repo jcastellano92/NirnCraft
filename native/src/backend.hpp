@@ -2,6 +2,7 @@
 #pragma once
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -10,6 +11,10 @@
 #include "world.hpp"
 
 namespace atlas {
+
+// (atlas_set_pipeline_cache) the pipeline cache's file: ATLAS_PIPELINE_CACHE, else the one set; "": none
+std::string pipelineCachePath();
+void setPipelineCachePath(const std::string& p);
 
 struct GlFrameIO {
     uint32_t nearDepthTex = 0, depthZeroToOne = 0, reversedZ = 0;
@@ -71,6 +76,7 @@ enum class Fault { None, Error, DeviceLost, OutOfMemory, Timeout };
 // Memory of the device (atlas_memory_info); zeros where unknown.
 struct MemoryInfo {
     uint64_t deviceLocalBytes = 0, deviceLocalBudget = 0, deviceLocalUsage = 0, hostHeapBytes = 0, atlasBytes = 0;
+    uint64_t maxStorageRange = 0;  // (what one storage descriptor sees: the grid's pool is one)
     bool integrated = false, budgetExt = false;
 };
 
@@ -99,6 +105,12 @@ public:
     // Whether the frame's far lights may be culled and binned on the device (FRAME_GPU_LIGHTS_BIT, FrameInputs::lights):
     // the CPU backend bins them on the CPU (Lights::frame)
     virtual bool gpuLights() const { return false; }
+    // Whether it renders on a device (Vulkan): the CPU's own fallbacks (a CPU level 0 for what the grid gave up) are
+    // the CPU backend's alone
+    virtual bool onDevice() const { return false; }
+    // (test hook, atlas_debug_coarse_chunks) a buffer on the device holding `bytes` of data, kept until the backend
+    // goes: its handle as ingestGpu / ingestCoarseGpu take it (0: none on this backend)
+    virtual uint64_t debugDeviceBuffer(const void*, size_t) { return 0; }
     virtual bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) = 0;
     // Called from the update thread with a new scene revision: a backend may copy it to the GPU here, off the
     // render thread. Returns false when it could not (the frame then uploads it itself).
@@ -132,6 +144,21 @@ public:
         return false;
     }
     virtual void glDetach() {}
+    // (the client generator, gen_engine.cpp) the device for kernels that write straight into the grid's sections:
+    // Vulkan handles as void*, a queue of its own when the device has one (else the frames' queue, submitted under
+    // queueMu), 64-bit floats enabled or not. False on a backend without a device.
+    struct SharedDevice {
+        void *instance = nullptr, *physical = nullptr, *device = nullptr, *queue = nullptr;
+        uint32_t family = 0, frameFamily = 0;  // the queue's family; the frames' (buffers both read: concurrent)
+        std::mutex* queueMu = nullptr;         // non-null: the queue is the frames' own
+        bool float64 = false;
+        float timestampPeriod = 1.0f;
+        bool timestamps = false;
+    };
+    virtual bool sharedDevice(SharedDevice&) { return false; }
+    // frames submitted, and the last one known complete (any thread)
+    virtual uint64_t framesSubmitted() const { return 0; }
+    virtual uint64_t framesCompleted() const { return 0; }
     // The sun map as last computed (size * (size + 1) float2, empty when none). Waits for the GPU.
     virtual bool readSunMap(std::vector<float>& out, std::string& err) {
         err = "no sun map";
