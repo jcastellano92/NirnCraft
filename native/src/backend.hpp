@@ -12,6 +12,10 @@
 
 namespace atlas {
 
+// (atlas_set_pipeline_cache) the pipeline cache's file: ATLAS_PIPELINE_CACHE, else the one set; "": none
+std::string pipelineCachePath();
+void setPipelineCachePath(const std::string& p);
+
 struct GlFrameIO {
     uint32_t nearDepthTex = 0, depthZeroToOne = 0, reversedZ = 0;
     float nearInvProjection[16] = {};

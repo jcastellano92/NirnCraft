@@ -56,6 +56,8 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "no prog.bin / map.bin in %s\n", dump.c_str());
         return 2;
     }
+    // pipes=<file>: the pipelines kept between runs (atlas_set_pipeline_cache: the loading phase's warm start)
+    if (!arg(argc, argv, "pipes", "").empty()) atlas_set_pipeline_cache(arg(argc, argv, "pipes", "").c_str());
     double t0 = nowMs();
     AtlasContext* ctx = nullptr;
     if (atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) {

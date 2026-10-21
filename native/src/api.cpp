@@ -356,6 +356,28 @@ static float eclipseShare(const float occ[8], const float p[3], const float sun[
     return vis;
 }
 
+namespace atlas {
+namespace {
+std::mutex& pipeCacheMu() {
+    static std::mutex m;
+    return m;
+}
+std::string& pipeCacheSet() {
+    static std::string s;
+    return s;
+}
+}  // namespace
+std::string pipelineCachePath() {
+    if (const char* e = std::getenv("ATLAS_PIPELINE_CACHE")) return e;
+    std::lock_guard<std::mutex> l(pipeCacheMu());
+    return pipeCacheSet();
+}
+void setPipelineCachePath(const std::string& p) {
+    std::lock_guard<std::mutex> l(pipeCacheMu());
+    pipeCacheSet() = p;
+}
+}  // namespace atlas
+
 extern "C" {
 
 ATLAS_API uint32_t atlas_abi_version(void) { return ATLAS_ABI_VERSION; }
@@ -523,6 +545,11 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
     } catch (...) {
         return "{}";
     }
+}
+
+ATLAS_API AtlasStatus atlas_set_pipeline_cache(const char* path) {
+    atlas::setPipelineCachePath(path ? path : "");
+    return ATLAS_OK;
 }
 
 ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {

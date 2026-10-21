@@ -288,6 +288,10 @@ ATLAS_API uint32_t atlas_abi_version(void);
 ATLAS_API const char* atlas_build_info(void);
 
 ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out);
+/* The file the Vulkan pipelines are kept in between runs (the context's and the generator's: the driver's compile of
+   the big kernels takes seconds to minutes the first time), set before atlas_create / atlas_gen_create*; the
+   ATLAS_PIPELINE_CACHE environment variable wins. NULL or "": none. (The loading phase: the game's instance.) */
+ATLAS_API AtlasStatus atlas_set_pipeline_cache(const char* path);
 ATLAS_API void atlas_destroy(AtlasContext* ctx);
 /* Last error message for this context, static until the next call. NULL: why this thread's last atlas_create
    failed (e.g. no usable Vulkan device, and why each one was rejected). */

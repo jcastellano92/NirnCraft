@@ -487,6 +487,7 @@ public:
             if (descPool_) vkDestroyDescriptorPool(dev_, descPool_, nullptr);
             for (auto& p : pipes_)
                 if (p) vkDestroyPipeline(dev_, p, nullptr);
+            if (pipeCache_) vkDestroyPipelineCache(dev_, pipeCache_, nullptr);
             for (auto& m : modules_)
                 if (m) vkDestroyShaderModule(dev_, m, nullptr);
             if (layout_) vkDestroyPipelineLayout(dev_, layout_, nullptr);
@@ -1282,6 +1283,54 @@ public:
         return true;
     }
 
+    // (atlas_set_pipeline_cache) the generator's pipelines kept between runs, beside the context's (<file>.gen)
+    VkPipelineCache pipeCache_ = VK_NULL_HANDLE;
+    bool pipeCacheTried_ = false, pipeCacheFresh_ = false;
+    std::string pipeCachePath_;
+    VkPipelineCache pipeCache() {
+        if (pipeCacheTried_) return pipeCache_;
+        pipeCacheTried_ = true;
+        std::string base = pipelineCachePath();
+        if (base.empty()) return VK_NULL_HANDLE;
+        pipeCachePath_ = base + ".gen";
+        std::vector<char> data;
+        if (FILE* f = std::fopen(pipeCachePath_.c_str(), "rb")) {
+            std::fseek(f, 0, SEEK_END);
+            long n = std::ftell(f);
+            std::fseek(f, 0, SEEK_SET);
+            if (n > 0) {
+                data.resize(size_t(n));
+                if (std::fread(data.data(), 1, data.size(), f) != data.size()) data.clear();
+            }
+            std::fclose(f);
+        }
+        pipeCacheFresh_ = data.empty();
+        VkPipelineCacheCreateInfo pc{VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO};
+        pc.initialDataSize = data.size();
+        pc.pInitialData = data.empty() ? nullptr : data.data();
+        if (vkCreatePipelineCache(dev_, &pc, nullptr, &pipeCache_) != VK_SUCCESS) {
+            pc.initialDataSize = 0;  // (another driver's or device's: start empty)
+            pc.pInitialData = nullptr;
+            if (vkCreatePipelineCache(dev_, &pc, nullptr, &pipeCache_) != VK_SUCCESS) pipeCache_ = VK_NULL_HANDLE;
+        }
+        return pipeCache_;
+    }
+    void savePipeCache() {
+        size_t n = 0;
+        if (!pipeCache_ || vkGetPipelineCacheData(dev_, pipeCache_, &n, nullptr) != VK_SUCCESS || !n) return;
+        std::vector<char> data(n);
+        if (vkGetPipelineCacheData(dev_, pipeCache_, &n, data.data()) != VK_SUCCESS) return;
+        std::string tmp = pipeCachePath_ + ".tmp";
+        if (FILE* f = std::fopen(tmp.c_str(), "wb")) {
+            bool ok = std::fwrite(data.data(), 1, n, f) == n;
+            std::fclose(f);
+            if (ok) {
+                std::remove(pipeCachePath_.c_str());
+                std::rename(tmp.c_str(), pipeCachePath_.c_str());
+            }
+        }
+    }
+
     // slots in use / held, for atlas_gen_device's line and the tests
     uint32_t slotsBusy() const {
         uint32_t k = 0;
@@ -1383,10 +1432,11 @@ private:
             cp.stage.pName = "main";
             cp.layout = layout_;
             auto p0 = std::chrono::steady_clock::now();
-            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipes_[i]) != VK_SUCCESS)
+            if (vkCreateComputePipelines(dev_, pipeCache(), 1, &cp, nullptr, &pipes_[i]) != VK_SUCCESS)
                 return fail(err, "pipeline " + std::to_string(i) + " (" + std::to_string(size[i]) + " bytes of SPIR-V) refused");
             double pms = msSince(p0);
             if (pms > 500.0) std::fprintf(stderr, "TRACE warn gen pipeline %u: the driver took %.1f s (%zu bytes of SPIR-V)\n", i, pms / 1000.0, size[i]);
+            if (pms > 250.0 || pipeCacheFresh_) savePipeCache();
         }
         VkDescriptorPoolSize ps{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NB};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};

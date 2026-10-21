@@ -156,7 +156,12 @@ public final class AtlasClient {
             AtlasFarField f = farField;
             if (f != null && f.source() instanceof AtlasExactSource s) s.setThreads(n);
         });
+        // the loading phase (AtlasLoadingScreen): armed on joining, opened once vanilla's terrain screen closed
+        NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn e) -> AtlasLoadingScreen.arm());
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) ->
+                AtlasGuard.run("atlas loading phase", () -> AtlasLoadingScreen.tick(Minecraft.getInstance())));
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {
+            AtlasLoadingScreen.disarm();
             serverWorldId = 0;
             farActors = null;
             farSites = null;
@@ -526,7 +531,12 @@ public final class AtlasClient {
                 if (advice != null) com.nirncraft.NirnCraft.LOGGER.info("atlas: {}", advice);
             }
             if (guard != null) guard.starting();
-            if (lib == null) lib = loadLibrary(mc.gameDirectory.toPath());
+            if (lib == null) {
+                lib = loadLibrary(mc.gameDirectory.toPath());
+                // the pipelines warm from the instance's cache (the loading phase): seconds, not minutes, after the first run
+                if (lib != null && lib.setPipelineCache(mc.gameDirectory.toPath().resolve("atlas-cache").resolve("pipelines.bin")))
+                    com.nirncraft.NirnCraft.LOGGER.info("atlas: pipelines kept in atlas-cache/pipelines.bin");
+            }
             // the GPU when there is one; else (no Vulkan device, a driver that refuses) atlas on the CPU, slower and at
             // a lower resolution but the same picture: the near pass's light and the far field on every machine
             // (-Dnirncraft.atlas.backend=cpu forces it: what a machine without a GPU sees). On the CPU the frame is
@@ -746,6 +756,15 @@ public final class AtlasClient {
         retryAt = System.nanoTime() + wait;
         status(AtlasStatusLine.off("the GPU was reset or hung (" + message(t) + "); retrying in " + wait / 1_000_000_000L
                 + " s"), AtlasStatusLine.Off.DEVICE_LOST);
+    }
+
+    /** (the loading phase) atlas's context is up; atlas is off for this session. */
+    static boolean started() {
+        return ctx != null;
+    }
+
+    static boolean failedForSession() {
+        return failed;
     }
 
     /** Off for the rest of the session: one status line (WARN), a notice where the player can act on it. */

@@ -152,7 +152,7 @@ public final class AtlasNative {
     // abi 0.17, the sky's own light (null with an older library)
     private final MethodHandle setSkyGlow;
     // the host's tiers and the self-baking cache's directory (atlas_set_cache; null with an older library)
-    private final MethodHandle setCache;
+    private final MethodHandle setCache, setPipelineCache;
     /** AtlasClimate and AtlasAir (atlas.h) as float arrays: 13 and 11 floats. */
     public static final int CLIMATE_FLOATS = 13, AIR_FLOATS = 11;
     private int abi;
@@ -240,6 +240,7 @@ public final class AtlasNative {
         airCoeffs = bindOptional(l, lib, "atlas_air_coeffs", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         airMultiscatter = bindOptional(l, lib, "atlas_air_multiscatter", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         setSkyGlow = bindOptional(l, lib, "atlas_set_sky_glow", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
+        setPipelineCache = bindOptional(l, lib, "atlas_set_pipeline_cache", FunctionDescriptor.of(JAVA_INT, ADDRESS));
         setCache = bindOptional(l, lib, "atlas_set_cache",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_LONG, JAVA_INT, JAVA_LONG, JAVA_LONG));
     }
@@ -439,6 +440,20 @@ public final class AtlasNative {
     public String buildInfo() {
         try {
             return ((MemorySegment) buildInfo.invokeExact()).reinterpret(512).getString(0);
+        } catch (Throwable t) {
+            throw rethrow(t);
+        }
+    }
+
+    /**
+     * The file atlas keeps its Vulkan pipelines in between runs (the context's and the generator's), before the
+     * first context (atlas_set_pipeline_cache): the loading phase's warm start. False with an older library.
+     */
+    public boolean setPipelineCache(java.nio.file.Path file) {
+        if (setPipelineCache == null) return false;
+        try (Arena a = Arena.ofConfined()) {
+            java.nio.file.Files.createDirectories(file.toAbsolutePath().getParent());
+            return (int) setPipelineCache.invokeExact(a.allocateFrom(file.toAbsolutePath().toString())) == 0;
         } catch (Throwable t) {
             throw rethrow(t);
         }

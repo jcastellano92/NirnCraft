@@ -1598,7 +1598,8 @@ private:
     VkResult makePipeline(const VkComputePipelineCreateInfo& cp, VkPipeline* out, const char* name) {
         if (!pipeCacheTried_) {
             pipeCacheTried_ = true;
-            if (const char* path = std::getenv("ATLAS_PIPELINE_CACHE")) {
+            std::string cachePath = pipelineCachePath();
+            if (const char* path = cachePath.empty() ? nullptr : cachePath.c_str()) {
                 pipeCachePath_ = path;
                 std::vector<char> data;
                 if (FILE* f = std::fopen(path, "rb")) {
@@ -1611,6 +1612,7 @@ private:
                     }
                     std::fclose(f);
                 }
+                pipeCacheFresh_ = data.empty();  // (no file yet: every pipeline written to it, not only the slow ones)
                 VkPipelineCacheCreateInfo pc{VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO};
                 pc.initialDataSize = data.size();
                 pc.pInitialData = data.empty() ? nullptr : data.data();
@@ -1625,7 +1627,7 @@ private:
         VkResult r = vkCreateComputePipelines(dev_, pipeCache_, 1, &cp, nullptr, out);
         double s = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
         std::fprintf(stderr, "TRACE done pipeline:%s %.2fs\n", name, s);
-        if (pipeCache_ && s > 0.25) {
+        if (pipeCache_ && (s > 0.25 || pipeCacheFresh_)) {
             size_t n = 0;
             if (vkGetPipelineCacheData(dev_, pipeCache_, &n, nullptr) == VK_SUCCESS && n) {
                 std::vector<char> data(n);
@@ -3056,6 +3058,7 @@ private:
     VkPhysicalDevice phys_ = VK_NULL_HANDLE;
     VkDevice dev_ = VK_NULL_HANDLE;
     VkPipelineCache pipeCache_ = VK_NULL_HANDLE;  // (makePipeline: ATLAS_PIPELINE_CACHE)
+    bool pipeCacheFresh_ = false;
     std::deque<Buf> debugBufs_;                    // (debugDeviceBuffer)
     bool pipeCacheTried_ = false;
     bool vgOpen_ = false;  // (a grid batch staged and not yet submitted)

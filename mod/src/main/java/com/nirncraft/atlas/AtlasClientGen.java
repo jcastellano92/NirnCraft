@@ -745,6 +745,24 @@ final class AtlasClientGen implements AutoCloseable {
 
     private long cachedChunks, cachedSections, farCached;
 
+    /** The loading phase's view of the generator (AtlasLoadingScreen). */
+    record Progress(boolean running, int near, int nearTotal, boolean nearDone, int far, int farTotal, long cached, long farCached,
+                    long generated) {
+        String describe() {
+            return String.format("spawn area %d / %d chunks (%d from the cache), horizon %d / %d tiles (%d from the cache), %d generated",
+                    near, nearTotal, cached, far, farTotal, farCached, generated);
+        }
+    }
+
+    /** null without an active generator. */
+    static Progress progress() {
+        AtlasClientGen c = active;
+        if (c == null) return null;
+        int farTotal = c.farOn ? 6 * (2 * FAR_TILES + 1) * (2 * FAR_TILES + 1) : 0;
+        return new Progress(camSet, c.upSinceJump.size(), windowChunks(), c.windowUpNs != 0, Math.min(c.farDone.size(), farTotal), farTotal,
+                c.cachedChunks, c.farCached, c.chunks);
+    }
+
     /** The chunks of batch the cache knows put into the grid from it; returns the others (to generate). */
     private int[] fromCache(int[] batch, int[] info) {
         int n = batch.length / 2;
