@@ -42,7 +42,7 @@ static const uint CHUNK_INTS = 8u, ID_WORDS = 6u, REC_OPS = 513u;
 static const uint HEADER = 16u;
 // op kinds (Canvas.Tape) and flags (AtlasOverlayTapes.OF_*)
 static const uint OP_W = 1u, OP_OPEN = 2u, OP_NOT_AIR = 3u, OP_PLANT = 4u, OP_FOUNDATION = 5u, OP_BED = 6u, OP_FURNITURE = 7u;
-static const uint OF_NOSMOTHER = 1u, OF_VAR = 2u, OF_BOTTOMCLIP = 4u;
+static const uint OF_NOSMOTHER = 1u, OF_VAR = 2u, OF_BOTTOMCLIP = 4u, OF_GUARD = 8u;
 // block flags (AtlasOverlayTapes.F_*)
 static const uint F_AIR = 1u, F_FLUID = 2u, F_OPEN = 4u, F_SOLIDGROUND = 8u, F_FCR = 16u, F_BED = 32u, F_DOOR = 64u,
                   F_SNOWY = 128u, F_SMOTHERS = 256u, F_PLANT = 512u, F_CARPET = 1024u, F_REPL = 2048u, F_LEAVES = 4096u,
@@ -100,11 +100,12 @@ int hi16(uint w) { return int(w) >> 16; }
 
 // Canvas.wset: nothing over FEATURES_CANNOT_REPLACE, no block over a door or bed (but a door or bed), then the write,
 // then grass under a sturdy block (or a full fluid) to dirt (smotherGrassBelow, unless y - 1 is outside the clip)
-void wset(int y, uint s, bool nosmother) {
+// (guard: the state meant, before a burnt piece's charring, was neither air nor a door or bed: the op's OF_GUARD)
+void wset(int y, uint s, bool nosmother, bool guard) {
     uint old = getB(y);
     uint fo = flagsOf(old), fs = flagsOf(s);
     if ((fo & F_FCR) != 0u) return;
-    if ((fs & F_AIR) == 0u && (fo & (F_BED | F_DOOR)) != 0u && (fs & (F_BED | F_DOOR)) == 0u) return;
+    if (guard && (fo & (F_BED | F_DOOR)) != 0u) return;
     setB(y, s);
     if ((fs & F_AIR) == 0u && !nosmother && (fs & F_SMOTHERS) != 0u && (flagsOf(getB(y - 1)) & F_SNOWY) != 0u) setB(y - 1, idDirt());
 }
@@ -116,22 +117,22 @@ uint applyOp(uint i) {
     int y0 = lo16(w1), y1 = hi16(w1);
     bool nosm = (fl & OF_NOSMOTHER) != 0u;
     if (kind == OP_W) {
-        for (int y = y0; y <= y1; y++) wset(y, s, nosm && y == y0);
+        for (int y = y0; y <= y1; y++) wset(y, s, nosm && y == y0, (fl & OF_GUARD) != 0u);
         return 2u;
     }
     if (kind == OP_OPEN) {
-        if ((flagsOf(getB(y0)) & F_OPEN) != 0u) wset(y0, s, nosm);
+        if ((flagsOf(getB(y0)) & F_OPEN) != 0u) wset(y0, s, nosm, (fl & OF_GUARD) != 0u);
         return 2u;
     }
     if (kind == OP_NOT_AIR) {
         for (int y = y0; y <= y1; y++)
-            if ((flagsOf(getB(y)) & F_AIR) == 0u) wset(y, s, false);
+            if ((flagsOf(getB(y)) & F_AIR) == 0u) wset(y, s, false, false);
         return 2u;
     }
     if (kind == OP_PLANT) {
         for (int y = y0; y <= y1; y++) {
             uint f = flagsOf(getB(y));
-            if ((f & F_AIR) == 0u && (f & F_PLANT) != 0u) wset(y, s, false);
+            if ((f & F_AIR) == 0u && (f & F_PLANT) != 0u) wset(y, s, false, false);
         }
         return 2u;
     }
@@ -148,7 +149,7 @@ uint applyOp(uint i) {
                     uint w = tapes[i + 3u + (k >> 1)];
                     st = (k & 1u) != 0u ? w >> 16 : w & 0xFFFFu;
                 }
-                wset(y, st, bottomClip && y == y1);
+                wset(y, st, bottomClip && y == y1, (fl & OF_GUARD) != 0u);
             }
         }
         return var ? 3u + (uint(y0 - y1) + 2u) / 2u : 3u;
@@ -164,7 +165,7 @@ uint applyOp(uint i) {
         return 2u;
     }
     if (kind == OP_FURNITURE) {
-        if ((flagsOf(getB(y0)) & (F_OPEN | F_CARPET)) != 0u) wset(y0, s, nosm);
+        if ((flagsOf(getB(y0)) & (F_OPEN | F_CARPET)) != 0u) wset(y0, s, nosm, (fl & OF_GUARD) != 0u);
         return 2u;
     }
     return 2u;  // unknown: skipped

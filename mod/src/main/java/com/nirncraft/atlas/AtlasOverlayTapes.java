@@ -93,6 +93,12 @@ final class AtlasOverlayTapes implements Canvas.Tape {
 
     // op kinds (Canvas.Tape) and op flags; keep in step with atlas_overlays.slang
     static final int OF_NOSMOTHER = 1, OF_VAR = 2, OF_BOTTOMCLIP = 4;
+    /** wset's door / bed guard applies: the state meant (before a burnt piece's charring) is neither air nor a door or bed. */
+    static final int OF_GUARD = 8;
+
+    private static int guard(BlockState meant) {
+        return !meant.isAir() && !(meant.getBlock() instanceof BedBlock) && !(meant.getBlock() instanceof DoorBlock) ? OF_GUARD : 0;
+    }
 
     // block flags; keep in step with atlas_overlays.slang
     static final int F_AIR = 1, F_FLUID = 1 << 1, F_OPEN = 1 << 2, F_SOLIDGROUND = 1 << 3, F_FCR = 1 << 4, F_BED = 1 << 5,
@@ -504,7 +510,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         switch (kind) {
             case W, OPEN, FURNITURE -> {
                 BlockState w = charred(c, x, y, z, s);
-                int flags = c.okWorld(x, y - 1, z) ? 0 : OF_NOSMOTHER;
+                int flags = (c.okWorld(x, y - 1, z) ? 0 : OF_NOSMOTHER) | guard(s);
                 int sid = id(w);
                 if (sid < 0) return;
                 int w0 = kind | flags << 4 | sid << 16;
@@ -548,7 +554,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                     if (st[i] < 0) return;
                     var |= st[i] != st[0];
                 }
-                int flags = (var ? OF_VAR : 0) | (c.okWorld(x, a - 1, z) ? 0 : OF_BOTTOMCLIP);
+                int flags = (var ? OF_VAR : 0) | (c.okWorld(x, a - 1, z) ? 0 : OF_BOTTOMCLIP) | guard(s);
                 l.add(kind | flags << 4 | st[0] << 16);
                 l.add((y & 0xFFFF) | a << 16);
                 l.add(b);
