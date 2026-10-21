@@ -34,6 +34,19 @@ below apply to every session and agent.
   TRACE line.
 * **Reviewers:** the orchestrator puts read-only reviewer agents on new GPU code and on any stuck debugging; their
   findings come to the owning agent through the orchestrator.
+* **Lessons that cost hours (2026-10-21), don't repeat:**
+  - A build or tool setting change gets one end-to-end run of the affected path (e.g. one Vulkan context) before it
+    is rolled out (`-O0` shaders looked fine, then broke every GPU test).
+  - Slow compiles, multi-minute driver JITs or GPU memory blow-ups mean inlining or bloat in the kernel: measure SPIR-V
+    size and per-pipeline JIT time and fix the code; don't tune optimisation levels.
+  - Every GPU submission stays far below the Windows 2 s watchdog (one pass / tile per submission; warn above 500 ms);
+    every loop in a kernel is bounded (an unbounded trace or `while` is a device-lost crash for players).
+  - Exactness ports: read the Java reference line by line (word layouts, RNG call order, `Math` vs `StrictMath`) and
+    get a reviewer early; don't iterate blind on match percentages.
+  - Gradle test JVMs get an explicit heap (default = 1/4 of RAM = the job cap); never pass `--log` to build_263
+    under heavy.py (it hides output from the trace); pass exes or `py -3` / `powershell`, not `bash` (can be WSL).
+  - Cache expensive references (Java dumps, baselines) on E: keyed by inputs; never recompute them every run.
+  - Stay on the critical path: no performance measurement, baselines or tuning before the feature works on the GPU.
 * **Check free RAM before a heavy job** (`Get-CimInstance Win32_OperatingSystem` FreePhysicalMemory, or Task Manager);
   wait or close something rather than start one on a full machine.
 * **Heavy outputs go to `E:\NirnCraft-scratch` or the repository's `.work`**, never C: (renders, bakes, traces,
