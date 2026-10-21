@@ -123,6 +123,14 @@ the passive profiler; the owner plays.
 
 Not merged into atlas-render yet: everything on atlas-naadf after 424841c5 and the generator branch.
 
+## Risks to fix after the owner's test
+
+- **atlas_exact.slang's `[noinline]` helpers write the static `g_bad`:** NVIDIA's compiler mixed up repeated calls
+  in the feature kernels (floorD x6, l2f, nextInt), so features use their own copy (atlas_feat_math.slang). The
+  generator is exact on today's driver, but a driver update could break it, and two copies drift. Fix: pure helpers
+  returning a result struct with the flag (as atlas_far's TraceIn/SecIn fix), one shared copy, gen and feature parity
+  rerun.
+
 ## Open bugs (seen live)
 
 1. **Near shows far stand-ins** (owner, live): the grid's level-0 pool full (`slots 16384/16384, evicted 16915,
