@@ -1,9 +1,12 @@
 # World generation, distant terrain and weather acceleration
 
-> **Status note (2026-10-19).** This audit was written while the pack still pinned Distant Horizons (the Forge
-> 1.20.1-era LOD mod). Distant terrain is now drawn by Infinite ATLAS ([ATLAS.md](ATLAS.md)), which consumes Java's
-> authoritative heights instead of a second generator, so the DH and Voxy points below are history. The CPU-side
-> findings (region stencil, one authoritative terrain batch contract, exact-bit parity) still apply.
+> **Historical: superseded by [ATLAS-CLIENT-GENERATION.md](ATLAS-CLIENT-GENERATION.md) and
+> [ATLAS-STATUS.md](ATLAS-STATUS.md) on 2026-10-20.** This audit was written while the pack still pinned Distant
+> Horizons (the Forge 1.20.1-era LOD mod) and found no GPU terrain generator. Since then Infinite ATLAS draws the world
+> and its GPU generator (`atlas_gen`) compiles the world's own density router, aquifers and material rules and matches
+> Minecraft's generator bit for bit, so the DH, Voxy, C2ME and "GPU density prototype" points below are history. Kept
+> for what still applies: the weather region stencil (`WeatherRegionStencil`), the acceptance-evidence rules (hashes
+> of final blocks across borders, seeds and orders; paired warm and cold runs) and the storage measurement.
 
 Audit date: 2026-10-18. This records source/API inspection and a small exact CPU optimization. It does not claim a GPU terrain generator or a measured frame-rate improvement. The coordinated client/server build and visual pipeline remain the acceptance path in [LIVE-WORLD-PREVIEW.md](LIVE-WORLD-PREVIEW.md) and [WORLD-TESTING.md](WORLD-TESTING.md).
 

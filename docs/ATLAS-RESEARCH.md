@@ -2,7 +2,9 @@
 
 Commissioned by the owner to ground docs/ATLAS-STREAMING.md ("own all of it: one spectrum, client-owned world, server
 checked"). Marks: **[V]** checked against the linked source during the survey, **[K]** well-known published work not
-re-fetched, **[I]** inference. Sources the survey could not verify are left out or marked unknown.
+re-fetched, **[I]** inference. Sources the survey could not verify are left out or marked unknown. Research, kept as
+the grounding for the design; what was decided from it is in [ATLAS-RENDERER-PLAN.md](ATLAS-RENDERER-PLAN.md) and the
+present state in [ATLAS-STATUS.md](ATLAS-STATUS.md).
 
 ## Games
 

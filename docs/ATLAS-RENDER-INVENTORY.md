@@ -1,6 +1,6 @@
 # Infinite ATLAS: the 26.3 client frame, item by item (R1 checklist)
 
-The definition of done for owning the renderer (docs/ATLAS-RENDERER-PLAN.md): every item below is ours, vanilla composited into our frame, or deferred with a reason. Derived from the 26.3.0.90 sources on 2026-10-20 (paths are inside the patched Minecraft and NeoForge sources jars named below). Dispositions are added to the plan as each phase lands.
+The definition of done for owning the renderer (docs/ATLAS-RENDERER-PLAN.md): every item below is ours, vanilla composited into our frame, or deferred with a reason. Derived from the 26.3.0.90 sources on 2026-10-20 (paths are inside the patched Minecraft and NeoForge sources jars named below). Dispositions are added to the plan as each phase lands; what is owned today is in [ATLAS-STATUS.md](ATLAS-STATUS.md) and section 5 below (updated 2026-10-20).
 
 
 Read from source, not memory. Every path below is inside one of these two jars (unzipped copies under
@@ -280,7 +280,8 @@ Everything else in section 2 can be suppressed, replaced or composited through p
 
 | Area | File | Hooks | Notes |
 |---|---|---|---|
-| **Far field (Infinite ATLAS)** | atlas/AtlasClient.java:205-370 | `RenderLevelStageEvent.AfterOpaqueBlocks` only | Runs `ctx.glRender` inside the live Main pass, right after solid+cutout terrain and before all features. `io.nearDepthTex = ATLAS_GL_BOUND_DEPTH`: reads the depth of the currently bound framebuffer (vanilla main, or the Iris gbuffer). Uses inverse projection, `depthZeroToOne`, `reversedZ` (true without a pack; with a pack, Iris's `isReverseZ` via reflection). Writes nirncraft:atlas/color, /depth and the sun map (glCopyImageSubData). Near-field end = RD*16 - 16 - 48 (handoff band). FILL_NEAR when the eye sees sky. Overworld only. Off on non-GL backends. |
+| **Infinite ATLAS frame** | atlas/AtlasClient.java | `RenderLevelStageEvent.AfterOpaqueBlocks` | Runs `ctx.glRender` inside the live Main pass, right after solid+cutout terrain and before all features. `io.nearDepthTex = ATLAS_GL_BOUND_DEPTH`: reads the depth of the currently bound framebuffer (vanilla main, our G-buffer, or the Iris gbuffer). Uses inverse projection, `depthZeroToOne`, `reversedZ` (true without a pack; with a pack, Iris's `isReverseZ` via reflection). Writes nirncraft:atlas/color, /depth and the sun map (glCopyImageSubData). `nearFieldEnd`: RD*16 where the near pass owns the frame, else RD*16 - 16 - 48 (the pack's hand-off band); the unified field sets `FRAME_PRIMARY_NEAR_LIT` (atlas traces every pixel). FILL_NEAR when the eye sees sky. Overworld only. Off on non-GL backends. |
+| **Near pass (owning terrain)** | atlas/AtlasNearPass.java | `RegisterRenderPipelinesEvent` (resolve, composite, TAA, lightmap, AtlasMeter), `RegisterPipelineModifiersEvent` (near_gbuffer, near_forward, near_entity, near_shadow), `RenderFrameEvent.Pre` (takes `visibleSections()`), `AfterSky` (G-buffer from vanilla's opaque meshes; not in the unified field; the sky copied for reflections at LOWEST), `AfterTranslucentFeatures` (translucents forward), `AfterLevel` (sections given back), `ExtractBlockScreenEffectEvent` (in-wall overlay off under our light) | On where Sodium is absent (`-Dnirncraft.atlas.near=false` or the action `atlas-near off` turns it off). The resolve writes the frame's colour and reverse-Z depth, so everything later depth-tests against our terrain (E3 answered). Not owned: a shader pack in use, OIT, frames without a sky pass. |
 | Fallback compositor (no pack) | atlas/AtlasFallback.java | `RegisterRenderPipelinesEvent` (pipeline nirncraft:pipeline/atlas_fallback), draws in the borrowed AfterOpaqueBlocks pass | Full-screen triangle at clip z 0 (far plane), `GREATER_THAN_OR_EQUAL`, **no depth write**, premultiplied blend: lands only where depth is still 0 (sky). Everything later (entities, translucents, clouds, weather, particles) composites on top. Skipped in dense fog. It does **not** write depth, so later features do not depth-test against far terrain. |
 | Shader-pack path | AtlasTargets, render/client/IrisPipelines, atmosphere/client/ShaderCompat | Iris API via reflection (`isShaderPackInUse`, `assignPipeline`, reverse-Z) | The pack composites the atlas custom textures. Iris replaces vanilla's level pipeline, so stage timing under Iris is Iris's. |
 | Fog | atlas/AtlasTruthView.java:22, atmosphere/client/ClientWeather.java:468,491, realms/client/RealmsClient.java:108, world/client/WorldClientEvents.java:131 | `ViewportEvent.RenderFog`, `ComputeFogColor` | The far field removes render-distance fog on the vanilla path. |
@@ -293,8 +294,9 @@ Everything else in section 2 can be suppressed, replaced or composited through p
 | Harness readiness | client/autotest/WorldReadiness.java, TerrainMeshReadiness.java | `AfterLevel`, `hasRenderedAllSections`, parses the section statistics | **Will misread once vanilla terrain is suppressed** (rendered-section counts drop to 0): needs a harness fix and self-test in the same change. |
 | Camera | client/DialogueCamera, arsenal/client/KillCamClient, fauna/client/FaunaClientEvents, world/client/RestClient, quest/client/IntroClient | `ViewportEvent.ComputeCameraAngles/ComputeFov` | -- |
 
-Not used yet: `FrameGraphSetupEvent`, `AddSectionGeometryEvent`, `ModelEvent.ModifyBakingResult`, pipeline modifiers,
-`RenderHandEvent`, `ExtractBlockOutlineRenderStateEvent`, `ExtractBlockScreenEffectEvent`, `RegisterFeatureRenderersEvent`, `RenderFrameEvent.Pre` state edits.
+Not used yet: `FrameGraphSetupEvent`, `AddSectionGeometryEvent`, `ModelEvent.ModifyBakingResult`, `RenderHandEvent`,
+`ExtractBlockOutlineRenderStateEvent`, `RegisterFeatureRenderersEvent`. (Pipeline modifiers, `RenderFrameEvent.Pre`
+state edits and `ExtractBlockScreenEffectEvent` are used by the near pass since 2026-10-20.)
 
 ---
 
@@ -310,4 +312,4 @@ Not used yet: `FrameGraphSetupEvent`, `AddSectionGeometryEvent`, `ModelEvent.Mod
 8. The projection far plane is `max(RD*64, cloudRange*16)` = 2048 blocks by default, and everything is reverse-Z.
 9. Render distance 2 is a trap: it cuts the server's entity tracking to 32 blocks and the chunks it streams.
 10. `FrameGraphSetupEvent` passes run before `clear`. Main-pass compositing has to happen in the stage events.
-11. The fallback compositor writes no depth, so entities and particles behind far terrain are not occluded. Owning near terrain means writing depth in AfterOpaqueBlocks, reverse-Z, with vanilla's projection.
+11. The fallback compositor writes no depth, so entities and particles behind far terrain are not occluded. Owning near terrain means writing depth in AfterOpaqueBlocks, reverse-Z, with vanilla's projection (the near pass's resolve does, 2026-10-20).

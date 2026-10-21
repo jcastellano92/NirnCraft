@@ -2,13 +2,15 @@
 
 The render-side contracts of NirnCraft Core on Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25: who owns which frame
 stage and GPU resource, and the small data textures the mod publishes for the InfiniteATLAS shader pack
-(`shaderpack/InfiniteATLAS/shaders/lib/modtex.glsl` decodes them). The far field itself is in [ATLAS.md](ATLAS.md);
-the gameplay-side data contracts are in [NATIVE-INTEGRATION-CONTRACTS-26.3.txt](NATIVE-INTEGRATION-CONTRACTS-26.3.txt).
+(`shaderpack/InfiniteATLAS/shaders/lib/modtex.glsl` decodes them). Infinite ATLAS itself is in [ATLAS.md](ATLAS.md),
+where it stands in [ATLAS-STATUS.md](ATLAS-STATUS.md), and the frame stages its near pass takes (G-buffer, resolve,
+forward light) in [ATLAS-RENDER-INVENTORY.md](ATLAS-RENDER-INVENTORY.md) section 5; the gameplay-side data contracts
+are in [NATIVE-INTEGRATION-CONTRACTS-26.3.txt](NATIVE-INTEGRATION-CONTRACTS-26.3.txt).
 
 ## Platform
 
 - Minecraft 26.3, NeoForge 26.3.0.90, Java 25; no older-core fallback.
-- Official Sodium 0.9.3-beta.1 (`SS023RVV`) and Iris 1.11.7 (`Ag5S66CF`); the exact artifact/hash-bound dependency exception is in [platform-lock.json](../pack/migration/platform-lock.json) and `tools/validate_pack.py` rejects broader overrides. Iris runs NirnCraft's own pack, `InfiniteATLAS.zip`, enabled by default; it is the only shader pack the pack may ship. Distant Horizons is not part of the pack.
+- Official Sodium 0.9.3-beta.1 (`SS023RVV`) and Iris 1.11.7 (`Ag5S66CF`); the exact artifact/hash-bound dependency exception is in [platform-lock.json](../pack/migration/platform-lock.json) and `tools/validate_pack.py` rejects broader overrides. Iris runs NirnCraft's own pack, `InfiniteATLAS.zip`, enabled by default; it is the only shader pack the pack may ship. Distant Horizons is not part of the pack. Atlas's near pass (owning terrain) runs only without Sodium, as in the renderer's dev instance; the shipped pack takes the shader-pack path.
 - Historical pack metadata/configuration is in `pack/disabled/forge-1.20.1`; the replaced Sodium metadata/lock in `pack/disabled/neoforge-26.3`. Disabled content is outside the active index.
 
 Read the real target sources (the patched `minecraft-patched-26.3.0.90-sources.jar` under the scratch build directory's `moddev/artifacts`, see [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md)) instead of assuming older signatures. Build through `tools/dev/build_263.py`.
@@ -21,6 +23,7 @@ Read the real target sources (the patched `minecraft-patched-26.3.0.90-sources.j
 | `PrepareRenderBuffersEvent` | Upload native mesh buffers, resolve resource textures and reserve shared indices before drawing. `TextureManager.getTexture` can create/upload a previously unseen texture. |
 | `CustomCloudsRenderer` | Normal `renderClouds` receives an active native `RenderPass`. Its OIT callback supplies `OitStage` and an `OitRenderPassProvider`; follow that lifecycle and target/depth ownership. See `atmosphere/client/OverworldClouds.java`. |
 | `RenderLevelStageEvent` | Stages exposing `getRenderPass()` must borrow that pass. Never open a nested pass or upload a buffer/texture from inside it. `AfterSky`/`AfterLevel` permit separately owned passes; inspect the actual event’s documentation before adding another stage. |
+| Pipeline modifiers | `RegisterPipelineModifiersEvent` registers them (atlas's `near_gbuffer`, `near_forward`, `near_entity`, `near_shadow`); `RenderSystem.pushPipelineModifier` swaps pipelines until the matching pop, which must come before `RenderFrameEvent.Post`. Push and pop around one span of drawing. |
 | Native realm environment | `realms/client/RealmEffects.java` implements `CustomSkyboxRenderer`, `CustomCloudsRenderer` and `CustomWeatherEffectRenderer`. `RealmsClient` registers IDs and prepares extracted realm meshes/lightmaps. Keep authored realm atmosphere separate from overworld weather. |
 | Resource reload/world change | Discard stale snapshots, worker results and GPU references; resolve the current texture-manager object after reload. Never overwrite another world’s storage or reuse a closed texture from the previous manager. |
 
@@ -63,6 +66,6 @@ py -3 tools/validate_pack.py --core-jar PATH_TO_ACTUAL_NATIVE_CORE.jar
 py -3 -I shaderpack/build_pack.py --no-zip
 ```
 
-The strict core shader gate covers the mod's own pipelines (106 pipeline configurations, 348 shader units and three backend macro profiles at the time of the port), plus vertex/binding/interface/pack-codec checks; `build_pack.py` compiles every InfiniteATLAS stage with glslang. Static success is not GPU acceptance: visual and frame checks run through the harness ([tools/harness/README.md](../tools/harness/README.md)), whose readiness rules require full local chunks, received lighting, the public light-FIFO witness, idle propagation/renderer queues, stable completed main-camera frames, unchanged view and settled interior/weather state. Screenshot encoding is asynchronous and can affect pacing; measure performance separately. Compare normal and improved/OIT transparency, reloads, reconnects, dimension transitions, near/far motion, mountains, cave openings and exterior-to-interior exposure; a genuine TCP connection (not a memory connection) is required for codec claims.
+The strict core shader gate covers the mod's own pipelines (106 pipeline configurations, 348 shader units and three backend macro profiles at the time of the port), plus vertex/binding/interface/pack-codec checks; `build_pack.py` compiles every InfiniteATLAS stage with glslang. Static success is not GPU acceptance: visual and frame checks run through the harness ([tools/harness/README.md](../tools/harness/README.md)), whose readiness rules require full local chunks, received lighting, the public light-FIFO witness, idle propagation/renderer queues, stable completed main-camera frames, unchanged view and settled interior/weather state. Screenshot encoding is asynchronous and can affect pacing; measure performance separately. Compare normal and improved/OIT transparency, reloads, reconnects, dimension transitions, motion across the hand-off, mountains, cave openings and exterior-to-interior exposure; a genuine TCP connection (not a memory connection) is required for codec claims.
 
 Known upstream library issue: official CreativeCore 2.14.21 eagerly reloads its GUI style during client setup before assets are available, logging `Could not load default style`. Its native resource-reload listener retries after assets load and the jar contains the style. Keep the official artifact unchanged; verify its real config screen after reload. This is separate from NirnCraft’s shader/light integration.

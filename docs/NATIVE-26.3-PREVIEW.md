@@ -6,7 +6,9 @@ For the full installed server ZIP, Java 25 launchers, fresh-world bake/release p
 and actual server-package gate, see [SERVER-26.3.md](SERVER-26.3.md). A DevLaunch
 core-only server does not establish full-pack multiplayer compatibility.
 
-The owner approved official Sodium **0.9.3-beta.1** (`SS023RVV`) after the original 0.9.2 artifact failed against NeoForge's removed render overload. Iris is **1.11.7** (`Ag5S66CF`) and runs NirnCraft's own shader pack, Infinite ATLAS (`pack/shaderpacks/InfiniteATLAS.zip`, enabled by default in `pack/config/iris.properties`); it is the only shader pack the pack may ship, and Distant Horizons is not part of the pack (the atlas far field replaces it). The exact artifact/hash-bound Modrinth dependency exception is recorded in `pack/migration/platform-lock.json` and checked by `validate_pack.py`; it permits only this pair.
+The owner approved official Sodium **0.9.3-beta.1** (`SS023RVV`) after the original 0.9.2 artifact failed against NeoForge's removed render overload. Iris is **1.11.7** (`Ag5S66CF`) and runs NirnCraft's own shader pack, Infinite ATLAS (`pack/shaderpacks/InfiniteATLAS.zip`, enabled by default in `pack/config/iris.properties`); it is the only shader pack the pack may ship, and Distant Horizons is not part of the pack (Infinite ATLAS replaces it). The exact artifact/hash-bound Modrinth dependency exception is recorded in `pack/migration/platform-lock.json` and checked by `validate_pack.py`; it permits only this pair.
+
+Infinite ATLAS owns the frame (`AtlasNearPass`, and the unified field with `nirncraft.atlas.unified=true`) only where Sodium is absent, so the renderer's dev and autotest instance runs without Sodium and Iris, while the shipped pack keeps both and the InfiniteATLAS pack until our own pipeline replaces them (ATLAS-RENDERER-PLAN.md, R4). The renderer's state, flags and test actions: [ATLAS-STATUS.md](ATLAS-STATUS.md).
 
 Run from the repository root. Source checks and packaging preparation do not establish that the game works: complete the full build, tests, dedicated server boot ([SERVER-26.3.md](SERVER-26.3.md)) and the harness gate (`py -3 tools/harness/harness.py gate`).
 
@@ -88,7 +90,7 @@ For scene tours, captures and before/after comparisons use the harness (`harness
 
 The harness plans cameras offline on the seeded terrain (`tools/harness/cameras.py`); the low-level [live controls](LIVE-WORLD-PREVIEW.md) remain available. Commands such as `settle 1800` are readiness deadlines, not mandatory sleeps. They require full nearby terrain, received lighting, idle Sodium queues, completed stable main-camera frames, camera clearance and settled atmosphere. Successful screenshot writes remain pending until their atomic PNG and receipt publication completes. Use `measure` separately from screenshot bursts.
 
-Shader edits go through `py -3 tools/harness/harness.py watch` (rebuilds the InfiniteATLAS zip and reloads Iris); the old `live_world.py shader` patch command is retired.
+Shader-pack edits go through `py -3 tools/harness/harness.py watch` (rebuilds the InfiniteATLAS zip and reloads Iris); the old `live_world.py shader` patch command is retired. atlas_core's own kernels reload in the running client with `py -3 tools/dev/shader_watch.py --game` (it also stages a fresh core in `.minecraft/atlas-dev` for the next start); Java method bodies hot-swap with `tools/dev/client_hotswap.py`.
 
 ## Separate core diagnostics
 
@@ -107,7 +109,7 @@ Choose a fresh archive filename to preserve previous evidence. Preparation has n
 
 After closing it cleanly, restore the default full preview selector with `Remove-Item Env:NIRNCRAFT_NATIVE_INSTANCE`. Full-pack validation still requires all pinned dependencies and their hashes. A successful diagnostic screenshot cannot resolve a third-party compatibility failure or prove the shader pack's integration.
 
-For a genuine network-codec check, the diagnostic preparer also accepts `--server 127.0.0.1:PORT`. It accepts only that explicit loopback literal and a port in1..65535. The prepared client uses native `ConnectScreen` before any automatic world creation and never falls back to a local world if connecting fails. Run this mode only when the dedicated loopback QA server and client are explicitly coordinated; it intentionally requires two Minecraft processes. Grant the test player op through the dedicated server's controlled inbox after login. Live initialization waits for the actual native gamemaster permission.
+For a genuine network-codec check, the diagnostic preparer also accepts `--server 127.0.0.1:PORT`. It accepts only that explicit loopback literal and a port in 1..65535. The prepared client uses native `ConnectScreen` before any automatic world creation and never falls back to a local world if connecting fails. Run this mode only when the dedicated loopback QA server and client are explicitly coordinated; it intentionally requires two Minecraft processes. Grant the test player op through the dedicated server's controlled inbox after login. Live initialization waits for the actual native gamemaster permission.
 
 Use the complete pinned pack for final TCP acceptance: `tools/qa/prism_autotest.ps1 -PrepareOnly -Live -SourceZip PATH_TO_VERIFIED_NATIVE_CANDIDATE.zip -Server 127.0.0.1:PORT -Java PATH_TO_JAVA25.exe`. The full Python preparer exposes the same option as `--server`. It retains full dependency/hash validation, backs up the previous integrated preview and refuses to replace a running client. Remote mode cannot be combined with integrated save copying or automatic terrain tours. Preparation records the intended transport without claiming a connection; launch and verify the actual TCP receipt afterward.
 

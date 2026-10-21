@@ -56,6 +56,22 @@ Prism is launched as a hidden helper; the Minecraft game window remains availabl
 required for file controls. The live controller releases mouse/keyboard input during scripts so desktop activity
 does not spoil fixed camera poses. Always log the actual pose and Night Vision state with captures.
 
+Close the client after each test batch; never leave it open idle. Never run the action queue while the owner plays
+in the instance: it holds the player (use the passive profiler below). One heavy job at a time: no native build,
+Gradle or offline render beside a live client (AGENT-RULES.md, resources).
+
+## Infinite ATLAS controls
+
+Launch flags go in the instance's `.minecraft/nirncraft-harness-flags.properties` (read at start, one
+`key=value` system property a line): `nirncraft.atlas.unified=true` (atlas traces every pixel),
+`nirncraft.atlas.clientGen=true` (the GPU generator), `nirncraft.atlas.profile=true` (the passive profiler: atlas-info
+with the player's position every 2 s into `.minecraft/atlas-profile.log`, safe while someone plays),
+`nirncraft.comet=now`. Actions for the queue: `atlas-info` (frame, glRender phases, inside, feeds, clientGen, voxgrid
+to the log), `atlas-unified on|off`, `atlas-near on|off`, `far-timeline start` / `far-timeline dump NAME`,
+`capture-inside TAG` (clip tests), `camera-travel TAG TICKS X Y Z LX LY LZ` (below). A new core: `install-core JAR`
+with the client closed, or a dll dropped in `.minecraft/atlas-dev/` (loaded instead at the next start). The full list
+and the state of the renderer: [ATLAS-STATUS.md](ATLAS-STATUS.md).
+
 ## Live JSON and world geometry
 
 ```powershell
@@ -145,10 +161,10 @@ py -3 tools/dev/live_world.py capture torch_hall
 py -3 tools/dev/live_world.py actions dist/weather-review/dungeons/capture-actions.txt
 ```
 
-Shader edits: `py -3 tools/harness/harness.py watch` rebuilds the InfiniteATLAS zip (glslang-checked) and reloads Iris
-in the running client, with before|after sheets. The old `live_world.py shader` command (which patched Complementary
-Reimagined) is retired and only prints that pointer. Check `latest.log` for shader compile errors and inspect actual
-frames after each material change.
+Shader-pack edits: `py -3 tools/harness/harness.py watch` rebuilds the InfiniteATLAS zip (glslang-checked) and reloads
+Iris in the running client, with before|after sheets; atlas_core's kernels: `py -3 tools/dev/shader_watch.py --game`.
+The old `live_world.py shader` command (which patched Complementary Reimagined) is retired and only prints that
+pointer. Check `latest.log` for shader compile errors and inspect actual frames after each material change.
 
 The existing `.minecraft/nirncraft-live.txt` accepts `reload`, `shaders on|off`, `command COMMAND`,
 `visit X Z HEIGHT_ABOVE_SURFACE YAW PITCH WEATHER`, `front X Z RADIUS WEATHER [VX VZ]`, `wait TICKS`, `capture TAG`,
@@ -189,8 +205,9 @@ the owner's saves or install directories automatically.
 
 Separate timings for launch/bootstrap, plan loading, terrain/structures/lighting, chunk mesh upload, atlas far-field
 work, shader compilation and frame settling. Report time to first useful view separately from time to fully refined
-view. Distant terrain is drawn by Infinite ATLAS ([ATLAS.md](ATLAS.md)); its own readiness is separate from the near
-field's.
+view. Infinite ATLAS draws the world past the loaded chunks, and every pixel in the unified field
+([ATLAS-STATUS.md](ATLAS-STATUS.md)); its readiness (`AtlasClient.farFieldIdle()`, the far timeline) is separate from
+the loaded chunks'.
 
 For fast side tools, prefer exporting the real Java planner/painter outputs (already supported by dungeon QA) and
 viewing those in Python or another renderer. A second implementation of generation creates a parity burden.
@@ -217,9 +234,9 @@ effect on next launch, and existing terrain still needs bounded regeneration. Ru
 server at boot, not guessed from source timestamps. This is local preview installation, not a remote publish.
 
 If bake inputs/code changed, rebuild and install a matching core first; the upload must not bypass the hash guard.
-New Java classes/fields/method signatures require a restart. The existing JDWP hotswap helper is for the mapped
-Gradle dev server; do not feed mapped `.class` files to the remapped production Prism runtime. No packaged-client
-Java hotswap is claimed by this workflow.
+New Java classes/fields/method signatures require a restart. Method bodies hot-swap into the running preview client
+with `py -3 tools/dev/client_hotswap.py` (its JDWP agent added once with `--install` while the client is closed);
+`tools/dev/hotswap.py` does the same for the Gradle dev server. Classes the client has not loaded yet need the rebuild.
 
 When visuals are accepted, bake/verify from the source tree, run required QA/release gates, rebuild the distributable
 instance and confirm packaged hashes match what was tested. Never ship preview flags/snapshots or claim an older

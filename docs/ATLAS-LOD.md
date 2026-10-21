@@ -6,18 +6,24 @@ the rougher the stand-in, never a different thing. It must hold for everything (
 scatter, paths, water, dungeons, above and underground) and must not depend on someone hand-making a far version of
 each object.
 
+Status (2026-10-20): the design and experiment log of the level-of-detail work. The renderer is now one field with a
+continuous gradient (ATLAS-STATUS.md, standing rules), so "the far field" below means atlas's own levels as they
+were called then, and the near field the loaded chunks; the experiments keep the wording of their day. The present
+state is in [ATLAS-STATUS.md](ATLAS-STATUS.md) and the Status section at the end.
+
 ## The rule
 
-**Every object enters the far field as its real blocks; every coarser level is generated from the level below by one
-set of rules.** No per-type stand-ins (boxes for houses, cones for trees, columns for chunks) except where a type has
+**Every object enters atlas as its real blocks; every coarser level is generated from the level below by one set of
+rules.** No per-type stand-ins (boxes for houses, cones for trees, columns for chunks) except where a type has
 no blocks to give (a far-away place nobody has generated, see Sources).
 
 ### Level 0: real blocks
 
-The far field's finest level is block voxels, exactly what the near field draws. Where the server has a chunk, its
-sections are the truth. Where nobody has generated the land yet, the same generators the server would run produce the
-blocks into a capture level (trees: done, AtlasTrees; buildings, scatter, dungeon entrances: AtlasCapture with each
-piece's builder; terrain: exact heights and the material rules).
+Atlas's finest level is block voxels, exactly the world's blocks. Where the server has a chunk, its sections are the
+truth. Where nobody has generated the land yet, the client generates it: terrain on the GPU (`atlas_gen`, the world's
+own generator compiled, with `nirncraft.atlas.clientGen`: [ATLAS-CLIENT-GENERATION.md](ATLAS-CLIENT-GENERATION.md)),
+features by their real code over it (AtlasGenFeatures, AtlasTrees), buildings, scatter and dungeon entrances by
+AtlasCapture with each piece's builder; past the generated window, exact heights and the material rules.
 
 ### Coarser levels: generated
 
@@ -63,8 +69,9 @@ sunlit: no aerial inscatter there (the cave's far end in the sky's haze), only t
 
 | where | level-0 source |
 |---|---|
+| chunks the client has loaded | their sections (AtlasClientSections, nearest the camera first) |
 | chunks the server has (around players, where anyone has been) | their sections, pushed by the change feed (docs/ATLAS-DELTAS.md) |
-| land not generated yet, within the fine windows | the generators into a capture level (same code, same seed) |
+| land not generated yet, within the fine windows | the GPU generator's sections (clientGen, single player) and the generators into a capture level (same code, same seed) |
 | beyond (coarse levels only) | exact heights + material rules + generated tree / building / scatter silhouettes from the same placements |
 
 ## Specifications every object type must meet
@@ -135,11 +142,11 @@ a leaf's cutout, its texture) is a property of its **block state**, not of the o
 Order: the block-state library and block-id sections first (everything else builds on them), then the coverage
 kernel, templates and GPU stamping, carve volumes, exact tree ports.
 
-### Continuous levels, one representation near and far (owner, 2026-10-19)
+### Continuous levels, one representation (owner, 2026-10-19; the standing rule since 2026-10-20)
 
-The goal beyond the plan: not 4 levels but a continuous one, the same for every kind of thing (no per-type far
-versions), chosen per pixel from the player's position, motion and view, so that the far field is the near field seen
-from further away. If it is exact enough up close it can draw the near field too, with Minecraft's meshes kept only
+Not 4 levels but a continuous one, the same for every kind of thing (no per-type distant versions), chosen per pixel
+from the player's position, motion and view, so that what is far is what is near seen from further away. Exact enough
+up close, it draws the loaded chunks too (the unified field, live since 2026-10-20), with Minecraft's meshes kept only
 where they are needed (interaction, block entities, entities, animated and translucent layers), and then there is no
 seam to hide. It also gives sub-block detail up close (level -1) that block meshes cannot.
 
@@ -1005,6 +1012,10 @@ Only where cards are (offline today); the lit far water keeps its own model.
   are read up to LOD 4, where a section is one voxel).
 * Done (native): coarse levels of real content kept after the sections go, levels 2..6 (World::coarse_, "Coarse levels
   from real blocks"): a real element is drawn from its own blocks out to the clipmap's edge.
-* Next: sections from real chunks pushed by the server (the change feed); predicted land's objects as sections
-  (generators into a capture level); buildings by their builders
-  (AtlasCapture for every piece, not massing); surface attributes for ground cover.
+* Done: sections from real chunks, client and server (AtlasClientSections, AtlasSections through the change feed;
+  deep solid rock left out, "Underground" above); the GPU-built level-0 grid (VoxGrid) that primary rays trace near.
+* Done on atlas-naadf (not merged into atlas-render, ATLAS-STATUS.md "In flight"): GPU coarse levels 1-6, the
+  continuous footprint LOD, leaf cut-outs from the texture, GPU -> GPU ingest (`VoxGrid::ingestGpu`).
+* Open: predicted land's objects as sections (generators into a capture level); buildings by their builders
+  (AtlasCapture for every piece, not massing); surface attributes for ground cover; the level-0 pool's admission and
+  eviction by need (ATLAS-STATUS.md, open bug 1, and step 5: one residency manager).

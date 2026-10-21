@@ -4,6 +4,13 @@ Asked by the owner before the next world work (per-region biomes with weather pa
 dungeons, towns, home and building types), with the client-owned world (docs/ATLAS-STREAMING.md) in mind. Based on a
 read of the code; paths are under `mod/src/main/java/com/nirncraft/` unless noted.
 
+Status (2026-10-20): the choices below wait for the owner (world work is parked until the renderer is done:
+ATLAS-RENDERER-PLAN.md "Parked", ATLAS-STATUS.md). Since the review: order step 1's quick fixes are in (233fcd57: only
+the landmarks, homes and facings the builders make are drawn); the client generates terrain on the GPU bit-exact with
+the Java generator (ATLAS-CLIENT-GENERATION.md), which answers part of point 1 in single player; StrictMath on the
+Java column path is on the generator branch (point 5, not merged); the docs named in point 8 were audited against the
+code on 2026-10-20. "The far field" here is atlas's distant drawing as it was then.
+
 ## What exists
 
 | layer | today | source |

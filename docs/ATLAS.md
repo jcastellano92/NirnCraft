@@ -1,24 +1,42 @@
-# Infinite ATLAS: NirnCraft's native far-field renderer
+# Infinite ATLAS: NirnCraft's native renderer
 
 NirnCraft is powered by Infinite ATLAS: the native library `atlas_core` and the `InfiniteATLAS` Iris shader pack.
-Status date: 2026-10-18. Native code lives in [`native/`](../native/README.md), the Java side in
-`mod/src/main/java/com/nirncraft/atlas`, the shader pack in [`shaderpack/InfiniteATLAS`](../shaderpack/InfiniteATLAS).
-Tests (native suites, offline `lab` renders, live scenes) run through the harness
-([tools/harness/README.md](../tools/harness/README.md)). This doc covers
-what atlas is, what is built and measured, how it joins the NeoForge 26.3 mod, and where it departs from the
-original master plan and why.
+**Where it stands today, the owner's order of work and the open bugs: [ATLAS-STATUS.md](ATLAS-STATUS.md)** (2026-10-20);
+the decisions that led there: [ATLAS-RENDERER-PLAN.md](ATLAS-RENDERER-PLAN.md). Native code lives in
+[`native/`](../native/README.md), the Java side in `mod/src/main/java/com/nirncraft/atlas`, the shader pack in
+[`shaderpack/InfiniteATLAS`](../shaderpack/InfiniteATLAS). Tests (native suites, offline `lab` renders, live scenes)
+run through the harness ([tools/harness/README.md](../tools/harness/README.md)). This doc covers what atlas is, what
+is built and measured, how it joins the NeoForge 26.3 mod, and where it departs from the original master plan and
+why. Sections 2 and 5 are the measurements and content of the far-field build (2026-10-18/19); they still describe
+the code paths named there.
 
 ## 1. What it is
 
-Everything past the rasterised near field is drawn by `atlas_core.dll`, a native library with a plain C ABI
-(version 0.3):
+`atlas_core.dll` (`libatlas_core.so` on Linux) is a native library with a plain C ABI (version 0.17,
+`native/include/atlas/atlas.h`). It is one renderer from the player's feet to the horizon, with detail per pixel
+from its footprint; how much of the frame it owns depends on the instance:
 
-* **Distant terrain.** A clipmap of 256³-voxel regions at seven LODs (1 m to 64 m voxels, ±512 m to ±32 km). Each
+* **The unified field** (`-Dnirncraft.atlas.unified=true`, `ATLAS_FRAME_PRIMARY_NEAR_LIT`): atlas traces every
+  pixel over the GPU-built level-0 grid and the coarser levels; vanilla's opaque chunk meshes are not drawn; one light
+  for every land hit. Water near the eye, the near shadow map and translucents still come from vanilla's chunk meshes
+  (removing them is ATLAS-STATUS.md step 3). It runs inside the near pass below.
+* **The near pass** (`AtlasNearPass`, on where Sodium is absent: the dev / autotest instance): vanilla's section
+  meshes drawn into our G-buffer, lit by atlas's near light (`ATLAS_FRAME_NEAR_LIGHT`), atlas past the loaded
+  chunks, one resolve and one display.
+* **The shader-pack path** (the shipped pack, with Sodium and Iris): the InfiniteATLAS pack lights the loaded chunks,
+  atlas draws past them over a hand-off band and the pack composites it.
+
+Its parts:
+
+* **Terrain.** A clipmap of 256³-voxel regions at seven LODs (1 m to 64 m voxels, ±512 m to ±32 km). Each
   region is a geometry SVDAG with 64-bit 4³ leaf bricks, y-major ordering and an RLE material stream, after Aokana
-  (2025).
+  (2025). Level 0 around the camera is the GPU-built grid of real sections (`voxgrid.hpp`, `atlas_voxgrid.slang`:
+  nested chunks with axis-aligned empty boxes, after NAADF); the coarse levels built on the GPU from it are on
+  atlas-naadf (not merged yet). Levels are storage; a ray's level follows its footprint
+  ([ATLAS-LOD.md](ATLAS-LOD.md)).
 * **Curved planet.** The view frame stays flat. A point at horizontal distance d stands at world altitude
-  y + d²/2R, so rays are walked as parabolic chords. The pack's vertex shaders apply y' = y − d²/2R to the near
-  field, so the two meet seamlessly.
+  y + d²/2R, so rays are walked as parabolic chords. On the shader-pack path the pack's vertex shaders apply
+  y' = y − d²/2R to the chunks it draws, so the two meet seamlessly.
 * **Cloud shell.** A line-for-line port of NirnCraft's cloud model: parcels, buds, anvil profile, overcast floor,
   and the middle and ice layers. It reads `WeatherFieldTexture`'s four fields and the baked noise volume, measured
   above the curved datum, so decks wrap over the horizon. Cloud shadows land on terrain kilometres away.
@@ -27,18 +45,23 @@ Everything past the rasterised near field is drawn by `atlas_core.dll`, a native
 * **One kernel, two builds.** `shaders/atlas_far.slang` compiles to SPIR-V (Vulkan) and to C++ (the CPU
   reference). The tests compare the two builds.
 * **Zero-copy GL bridge.** Images allocated in Vulkan are imported into the game's OpenGL context through
-  EXT_memory_object_win32, with two frame slots and shared semaphores. Near-field depth is read straight from the
-  bound framebuffer (the shader pack's gbuffer target), so covered pixels skip the far march. Finished frames are
-  copied into caller-owned textures that the pack samples through `customTexture`.
+  EXT_memory_object_win32, with two frame slots and shared semaphores. The host's depth (and, for the near light, its
+  surface info) is read straight from the bound framebuffer, so pixels the host already drew skip the march. Finished
+  frames are copied into caller-owned textures: the near pass's resolve samples them, or the pack through
+  `customTexture`.
 * **Java 25 boundary.** `com.nirncraft.atlas.AtlasNative` binds the ABI with `java.lang.foreign`. It needs no JNI
   and no Minecraft types.
-* **InfiniteATLAS shader pack.** NirnCraft's own Iris pack (it replaced the old patched third-party pack). The near field is
-  forward lit with the same sun, sky and aerial functions as atlas (verified equal), with curvature, sun shadows
-  and water. The composite merges near and far over a hand-off band, and one tonemapper serves both.
+* **InfiniteATLAS shader pack** (the shader-pack path). NirnCraft's own Iris pack (it replaced the old patched
+  third-party pack). It forward-lights the loaded chunks with the same sun, sky and aerial functions as atlas
+  (verified equal), with curvature, sun shadows and water, composites atlas over a hand-off band, and one tonemapper
+  serves both. Our own pipeline replaces Iris and the pack at R4 (ATLAS-RENDERER-PLAN.md).
 
-Authority is unchanged. The Java generator and loaded chunks stay the truth and push data in; atlas never invents
-gameplay terrain. The seed-free raster source (for multiplayer clients, which do not know the seed, and for the
-harness) is labelled "preview" everywhere.
+Authority: the server stays authoritative for gameplay. Atlas draws the client's copy of the world: the loaded
+chunks' sections (`AtlasClientSections`), the server's sections and change feed (`AtlasSections`, `AtlasEdits`,
+[ATLAS-DELTAS.md](ATLAS-DELTAS.md)), and with `-Dnirncraft.atlas.clientGen=true` the GPU generator's sections,
+bit-exact with the Java generator ([ATLAS-CLIENT-GENERATION.md](ATLAS-CLIENT-GENERATION.md)); vanilla's chunks correct
+what differs. The seed-free raster source (for multiplayer clients, which do not know the seed, and for the harness)
+is labelled "preview" everywhere.
 
 ## 2. Built and measured (RTX 3090, driver 616.56, Windows 11)
 
@@ -130,32 +153,39 @@ PATH, optional on Linux), and the height reference's MSVC-only `/fp:strict` got 
 
 ## 3. How it joins the mod
 
-The NeoForge 26.3 mod (Sodium 0.9.3, Iris 1.11.7, no Distant Horizons) carries atlas in `com.nirncraft.atlas` with
-the natives under `natives/<platform>/`. The classes were staged in
-[`native/java/mod-integration`](../native/java/mod-integration/README.md) and moved in as follows:
+The NeoForge 26.3 mod carries atlas in `com.nirncraft.atlas` with the natives under `natives/<platform>/`
+(`natives/manifest.json` holds their source hashes; a dll dropped in the instance's `.minecraft/atlas-dev/` is loaded
+instead at the next start). The classes were staged in
+[`native/java/mod-integration`](../native/java/mod-integration/README.md) and moved in once with `move_in.ps1` (the
+hooks: `AtlasServer.init()` and `AtlasClient.init(modBus)` in `NirnCraft.java`, `AtlasNet.register()` in
+`SkyNetwork.init`, `WeatherFieldTexture.copyForAtlas` for the clouds' weather feed). Today:
 
-1. `move_in.ps1` (dry run by default, `-Apply` to write) copies `com.nirncraft.atlas` and `atlas_core.dll`
-   (`natives/windows-x86_64/`) into the mod and makes the hooks: `AtlasServer.init()` and
-   `AtlasClient.init(modBus)` in `NirnCraft.java`, `AtlasNet.register()` in `SkyNetwork.init`, and
-   `WeatherFieldTexture.copyForAtlas` (the clouds' weather feed). `sandbox_check.ps1` rehearses exactly that on a
-   copy of the main tree's sources and compiles the whole mod against the conversion's patched 26.3 jar.
-2. Rendering: `AtlasClient` hooks `RenderLevelStageEvent.AfterOpaqueBlocks`, builds the frame from
-   `CameraRenderState`, reads the near field's depth from the bound target (`ATLAS_GL_BOUND_DEPTH`) and copies the
-   result into `nirncraft:atlas/color` / `nirncraft:atlas/depth`, the pack's `customTexture`s (Iris resolves them
+1. Rendering: `AtlasClient` hooks `RenderLevelStageEvent.AfterOpaqueBlocks`, builds the frame from
+   `CameraRenderState`, reads the host's depth from the bound target (`ATLAS_GL_BOUND_DEPTH`) and renders into
+   `nirncraft:atlas/color` / `nirncraft:atlas/depth`. Where it owns the frame, `AtlasNearPass` takes vanilla's visible
+   sections at `RenderFrameEvent.Pre`, draws them into its G-buffer through pipeline modifiers at `AfterSky` (not in
+   the unified field), resolves and lights the frame, draws translucents and entities forward with the same light and
+   gives the sections back at `AfterLevel` (the hooks: [ATLAS-RENDER-INVENTORY.md](ATLAS-RENDER-INVENTORY.md)
+   section 5). On the shader-pack path the pack samples the two textures as `customTexture`s (Iris resolves them
    through the TextureManager: no Iris internals or mixins). Other dimensions blank them.
-3. Terrain: single player evaluates the server's own `tamriel_height` (exact); a multiplayer server streams the same
-   tiles (bit-identical, cached on both ends); either way the seed-free raster stand-in fills the window first.
-   Grass and foliage wear the biome's colours.
-4. On top: every planned settlement (StreetPlan) and fort as building massing, and far actors from the server.
-5. Ship `shaderpack/build/InfiniteATLAS.zip` in the pack and select it in `iris.properties`. Keep `PLANET_RADIUS`
-   and `sunPathRotation` equal on both sides (`AtlasClient.planetRadius` / `sunPathRotationDeg`).
+2. The world: the loaded chunks' sections, nearest the camera first; the server's sections and change feed; the GPU
+   generator's sections with clientGen. Columns past them: single player evaluates the server's own `tamriel_height`
+   (exact), a multiplayer server streams the same tiles (bit-identical, cached on both ends), and the seed-free raster
+   stand-in fills the window first. Grass and foliage wear the biome's colours.
+3. On top: settlement landmarks and buildings from their own builders, sites, far lights, and far actors from the
+   server (section 5).
+4. The shader-pack path: ship `shaderpack/build/InfiniteATLAS.zip` in the pack and select it in `iris.properties`;
+   keep `PLANET_RADIUS` and `sunPathRotation` equal on both sides (`AtlasClient.planetRadius` /
+   `sunPathRotationDeg`).
 
 ## 4. Departures from the master plan, and why
 
-* **No native terrain generator or chunk "hydrator".** NirnCraft's terrain is plan-driven: roads, town pads, caves,
-  hydrology and seeded noise. A second implementation would drift from the authoritative Java one
-  (docs/GPU-WORLDGEN-PLAN.md, point 3). atlas consumes Java's output instead. The bimodal 00/01/10 idea lives on
-  as the SVDAG builder's interval classification.
+* **No hand-written native terrain generator.** NirnCraft's terrain is plan-driven: roads, town pads, caves,
+  hydrology and seeded noise, and a second implementation would drift from the authoritative Java one. So the GPU
+  generator (`atlas_gen`, 2026-10-20) is not a port: it compiles the world's own objects (the density router, the
+  aquifers, the material rules, the ore veins) into a GPU program and matches Minecraft's generator bit for bit
+  ([ATLAS-CLIENT-GENERATION.md](ATLAS-CLIENT-GENERATION.md)). The bimodal 00/01/10 idea lives on as the SVDAG
+  builder's interval classification.
 * **No hardware SER / `ReorderThread`.** Shader execution reordering applies to ray-tracing pipelines; atlas is a
   compute kernel. The RTX 3090 (Ampere) also has no SER hardware.
 * **26.3 worldgen API.** 26.3 split `DensityFunction` into a registered function plus a compiled `DensitySampler`
@@ -167,12 +197,12 @@ the natives under `natives/<platform>/`. The classes were staged in
   work.
 * **Weather stays CPU-authoritative.** `WeatherPhysics` also serves server logic, so atlas renders its fields and
   does not simulate them.
-* **Split Radiance Cascades** (arXiv 2607.20384) for underground GI is a later phase. It needs the near-field voxel
-  overlay first.
+* **Split Radiance Cascades** (arXiv 2607.20384) for underground GI is a later phase, over the GPU-built voxel grid;
+  the owner's next light step is baked light in the voxels (ATLAS-STATUS.md, "Later").
 
 ## 5. World content in the far field (ABI 0.10, tile codec 3; branch atlas-far2, 2026-10-18)
 
-What the far field now shows is what the near field will build, from the mod's own data and builders:
+What atlas shows past the loaded chunks is what those chunks will be, from the mod's own data and builders:
 
 * **Landmarks.** A settlement landmark is captured from its real builder: `AtlasCapture` runs `Landmarks.build` on a
   `Canvas` (framed and seeded exactly as `SettlementPiece` frames it) over a `WorldGenLevel` proxy whose ground is the
@@ -257,18 +287,17 @@ player); `atlas_bench lights=8000`; `atlas_render actors=demo dragon=near time=<
 
 ## 6. Next
 
-1. Done: atlas is moved into `mod/` and the pack ships as `pack/shaderpacks/InfiniteATLAS.zip`; the owner's checks
-   below remain the visual sign-off.
-2. Later: clouds lit from below over Red Mountain; dungeon surfaces captured from their own builders like the
-   settlement landmarks (they need a DungeonPiece, so the parametric silhouettes stand in); lit windows on landmarks
-   (only their light blocks glow now); SRC GI underground, a Vulkan-to-Vulkan path for the vanilla Vulkan backend.
+The order of work is in [ATLAS-STATUS.md](ATLAS-STATUS.md). Still open from the far-field build: clouds lit from below
+over Red Mountain; dungeon surfaces captured from their own builders like the settlement landmarks (they need a
+DungeonPiece, so the parametric silhouettes stand in); lit windows on landmarks (only their light blocks glow now); a
+Vulkan-to-Vulkan path for the vanilla Vulkan backend.
 
-### Owner checks in game
+### Owner checks in game (the shader-pack path, 2026-10-18)
 
 Start single player in a Tamriel world with the InfiniteATLAS pack, render distance 16-24 chunks:
 
 - **Hand-off seam** at the edge of the render distance: no gap, no double terrain, no colour or brightness jump
-  between the rasterised near field and the far field (the band is `AtlasClient.handoffBand`, 24 blocks).
+  between the pack's chunks and atlas past them (the band is `AtlasClient.handoffBand`, 48 blocks).
 - **Horizon:** terrain to 30-40 km, curving away (planet radius `AtlasClient.planetRadius`); haze and sky like the
   near field's; nothing popping as you fly (the stand-in fills the window at once, exact tiles replace it within a
   few seconds, nearest first).
@@ -287,7 +316,7 @@ Start single player in a Tamriel world with the InfiniteATLAS pack, render dista
   hills glow over them; nothing lit by day (fires barely).
 - **Red Mountain at night** from Balmora / the Ascadian Isles: a red glow over the caldera rim, the citadel's moat.
 - **A river valley with falls** (e.g. near Markarth): rivers continuous, white water on rapids moving downstream, the
-  falls a white sheet with spray at the pool; near/far water joins at the hand-off.
+  falls a white sheet with spray at the pool; the water joins at the hand-off.
 - **Flying a dragon in** (or watching one): wings beating at a distance; no double dragon and no gap as it crosses the
   tracking range (the impostor dissolves out as the real one appears).
 - **Surface blocks:** snow, rock bands, sand, podzol and ash in the far field matching the near field at the
@@ -321,10 +350,15 @@ Run `native/build_linux.sh` (Linux) or `native\build.ps1 -Validate` (Windows) on
 - **A hybrid laptop** (iGPU + dGPU): run the game on each GPU; the log must show the matching device chosen
   (`pickedForGlContext` true) and zero-copy, not a cross-GPU host-copy.
 
-## Testing in the real game (2026-10-18)
+## Testing in the real game
+
+The tools, the autotest actions (`atlas-info`, `atlas-unified on|off`, `far-timeline`, `capture-inside`,
+`camera-travel`), the harness flags file and the passive profiler are listed in ATLAS-STATUS.md "Tools and how to
+test"; its resource rules hold (one heavy job at a time, no autotest queue while the owner plays, close the client
+after a batch).
 
 Single player: use the harness ([tools/harness/README.md](../tools/harness/README.md)). `run --suite seam-core`
-covers the near/far hand-off, `run --tag suite:distance` the distance ladders, pop sweeps and fidelity pairs, `watch`
+covers the shader-pack path's hand-off, `run --tag suite:distance` the distance ladders, pop sweeps and fidelity pairs, `watch`
 rebuilds and reloads the pack on every edit with before|after sheets, and `probe NAME --visit x,z,height,yaw,pitch`
 looks at one spot. It launches the disposable preview on a kept test world, installs a newer core with `--rebuild` and
 closes the client at the end. Captures wait for the render to settle: the chunks in the camera's view built and lit,

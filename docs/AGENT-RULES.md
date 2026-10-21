@@ -7,7 +7,23 @@ replace the dedicated-server and loaded-world visual gates.
 
 Rules every agent/workstream follows. Reference data from the owner's game installs lives in `.reference/` (gitignored, facts only).
 New sessions start at `docs/START-HERE.md`; the roadmap and its state table are in `docs/world/WORLD-PLAN.md`, the
-phase prompts in `docs/prompts/`. The world-building rules at the end of this file apply to every workstream.
+phase prompts in `docs/prompts/`. Renderer work starts at `docs/ATLAS-STATUS.md` (present state, the owner's order of
+work, standing rules). The world-building rules at the end of this file apply to every workstream; the resource rules
+below apply to every session and agent.
+
+## Resources (every session and agent; ATLAS-STATUS.md, after the 2026-10-20 machine lock-up)
+
+* **One heavy job at a time**: native builds, Gradle, offline renders and the game never run together. Agents run
+  one or two at a time, not four.
+* **Check free RAM before a heavy job** (`Get-CimInstance Win32_OperatingSystem` FreePhysicalMemory, or Task Manager);
+  wait or close something rather than start one on a full machine.
+* **Heavy outputs go to `E:\NirnCraft-scratch` or the repository's `.work`**, never C: (renders, bakes, traces,
+  exports, unzipped jars).
+* **Never run the autotest action queue while the owner plays**: it holds the player. Use the passive profiler
+  (`nirncraft.atlas.profile=true`: atlas-info every 2 s to `.minecraft/atlas-profile.log`) instead.
+* **GPU-first, no CPU interim stages**: scene building, generation and ingest go on the GPU; the CPU path is only the
+  CPU backend's fallback. No background CPU threads, Java pages or single-threaded features as steps on the way.
+* **Close the dev client after each test batch**; never leave it open idle.
 
 ## Phase 1 rules (still apply)
 
@@ -101,7 +117,8 @@ Read these first:
 
 ## Coordinates
 * Skyrim's map spans about mcX −3180..2830 and mcZ −2480..1880, with Whiterun at 0,0.
-* Vertical: compress heights so the Throat of the World peaks near y 370 (world top is y 383; sea level 63).
+* Vertical: the world runs from y −64 to y 639 (the terrain noise to y 575); the Throat of the World peaks near y 560,
+  High Hrothgar's ledge at about y 434; sea level 63 (docs/TAMRIEL.md section 4).
 
 ## Test
 

@@ -3,7 +3,9 @@
 **Platform: Minecraft 26.3, NeoForge 26.3.0.90, Java 25.** The map of every doc, with the build, test and ship
 commands, is [README.md](README.md). Build with `py -3 tools/dev/build_263.py --offline build`; test with the harness
 ([tools/harness/README.md](../tools/harness/README.md)); runtime controls are in [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md).
-Preserve the owner's own instances and worlds. Multiplayer uses normal Minecraft server lists and LAN.
+Preserve the owner's own instances and worlds. Multiplayer uses normal Minecraft server lists and LAN. **Working on the
+renderer? Read [ATLAS-STATUS.md](ATLAS-STATUS.md) first**: its present state, the owner's order of work, the rules,
+what is in flight and what is broken.
 
 **If you are a new session, read this first.** It takes five minutes and tells you what NirnCraft is, where everything
 lives, where the work stands, what to run next and the rules you must keep.
@@ -14,10 +16,11 @@ NirnCraft is a Skyrim total conversion for Minecraft 26.3 NeoForge (Java 25, off
 whole of Tamriel and the lands around it: its own terrain, biomes, micro-biomes, roads, towns, NPCs, dungeons, cave
 networks, creatures, quests, magic, music, skybox/weather, and UI, with no third-party content mods (performance and
 library mods are fine). It ships as a Prism Launcher instance and a Modrinth pack. NirnCraft is powered by
-**Infinite ATLAS**: the native far-field renderer `atlas_core` (`native/`, [ATLAS.md](ATLAS.md)) and NirnCraft's own
-Iris shader pack `InfiniteATLAS` (`shaderpack/InfiniteATLAS`). The owner's goal: every province as full, unique and
-purposeful as Skyrim, **measured** against the real game, built from the ground up so that everything in a place is
-explained by its geography, history and people ("world building is king").
+**Infinite ATLAS**: the native renderer `atlas_core` (`native/`; state: [ATLAS-STATUS.md](ATLAS-STATUS.md), design:
+[ATLAS.md](ATLAS.md)) and NirnCraft's own Iris shader pack `InfiniteATLAS` (`shaderpack/InfiniteATLAS`). The owner's
+goal: every province as full, unique and purposeful as Skyrim, **measured** against the real game, built from the
+ground up so that everything in a place is explained by its geography, history and people ("world building is
+king").
 
 ## Where things are
 
@@ -31,7 +34,7 @@ plans its cameras offline on the seeded terrain. Regional coverage bookkeeping i
 | --- | --- |
 | The mod (Java, resources, lang) | `mod/` (`mod/src/main/java/com/nirncraft/<module>`, `mod/src/main/resources/nirncraft/`) |
 | Generators and QA tools | `tools/` (`tools/harness/` is the test harness; `tools/qa/` its audits, `tools/worldgen/`, `tools/marquee/`, `tools/bake/`, `tools/dev/`) |
-| Infinite ATLAS | `native/` (atlas_core, [native/README.md](../native/README.md)), `shaderpack/InfiniteATLAS`, [ATLAS.md](ATLAS.md) |
+| Infinite ATLAS | `native/` (atlas_core, [native/README.md](../native/README.md)), `mod/src/main/java/com/nirncraft/atlas`, `shaderpack/InfiniteATLAS`; **[ATLAS-STATUS.md](ATLAS-STATUS.md)** (where it stands), [ATLAS-RENDERER-PLAN.md](ATLAS-RENDERER-PLAN.md) (decisions), [ATLAS.md](ATLAS.md) |
 | **The master plan, audit & roadmap (`T1`–`T12`)** | [`docs/world/WORLD-PLAN.md`](world/WORLD-PLAN.md) (Sections 7, 8, 9, and 10) |
 | **The rulebook** | [`docs/world/DESIGN-PRINCIPLES.md`](world/DESIGN-PRINCIPLES.md) (world building first, the 11-layer sheet, the measured Skyrim floor) |
 | Per-province designs | `docs/world/provinces/<province>.md` (ten sections each), `docs/world/ILIAC-BAY.md`, `docs/world/SCALE-AND-GEOGRAPHY.md` |
@@ -68,9 +71,12 @@ data, but runtime generation does not use it. See [TAMRIEL.md](TAMRIEL.md) secti
 
 ## Next
 
-T1–T12 are done (WORLD-PLAN section 10). The next programme is the **concept-art-driven Visual Targets pipeline**:
-the plan [`docs/world/VISUAL-TARGETS-PLAN.md`](world/VISUAL-TARGETS-PLAN.md) (owner decisions final in its section
-10) and the phase prompts `docs/prompts/VT0-foundation.md`, `VT1-fast-verification.md`, `VT2-world-knobs.md`,
+**The renderer first** (the owner, 2026-10-20): the order of work is in [ATLAS-STATUS.md](ATLAS-STATUS.md) (finish the
+GPU conversion, a loading phase, vanilla's chunks removed, a tracing profiler, one residency manager); weather, biome
+and world work wait until the owner says. T1–T12 are done (WORLD-PLAN section 10). The world programme queued after
+the renderer is the **concept-art-driven Visual Targets pipeline**: the plan
+[`docs/world/VISUAL-TARGETS-PLAN.md`](world/VISUAL-TARGETS-PLAN.md) (owner decisions final in its section 10) and the
+phase prompts `docs/prompts/VT0-foundation.md`, `VT1-fast-verification.md`, `VT2-world-knobs.md`,
 `VT3-volume-pass.md`. Its live-client queue, captures and before/after sheets are provided by the test harness
 (`tools/harness/`). Start with VT0 once the 12 atlases are in `art/atlases/`.
 
@@ -80,8 +86,9 @@ the plan [`docs/world/VISUAL-TARGETS-PLAN.md`](world/VISUAL-TARGETS-PLAN.md) (ow
    Nothing from any game's files (text, meshes, textures, sounds, music, voice, dialogue, rasters) enters the repo, raw
    or converted. Terrain is hand-traced vectors with our own heights. Every line of text is our own. Reference data
    stays in the gitignored `.reference/`.
-2. **Push only when the owner explicitly requests it.** Commit locally on `tamriel-overhaul`; worktree agents do not commit; the orchestrating
-   session merges and commits. Never force anything; never touch another worktree; never a bare `git stash`.
+2. **Push only when the owner explicitly requests it.** Commit locally on the checked-out branch (the owner picks it;
+   the renderer's is `atlas-render`, see ATLAS-STATUS.md); worktree agents do not commit unless told to; the
+   orchestrating session merges and commits. Never force anything; never touch another worktree; never a bare `git stash`.
 3. **World building first.** Every element of a place expresses and agrees with its history, culture, conflict,
    economy, faith and ecology. Every new content record carries `why: [world-model sheet field ids]` that resolve.
 4. **The floor is Skyrim, measured.** Per region `max(absolute floor, round(median density x km²))`; per settlement
@@ -92,6 +99,8 @@ the plan [`docs/world/VISUAL-TARGETS-PLAN.md`](world/VISUAL-TARGETS-PLAN.md) (ow
    and the persistent dev server (`tools\dev\devserver.ps1 hotswap|run`, `/nirncraft-dev reload`,
    `/nirncraft-dev regen`); run `harness.py gate` before every merge. **Live client**: agents may use only the
    disposable `NirnCraft-26.3-autotest` Prism instance, and only through the harness (one live client and one dev
-   server at a time; a second run queues behind the first). The owner signs off visuals. At most 3 agents at once.
+   server at a time; a second run queues behind the first). The owner signs off visuals. One or two agents at a time,
+   one heavy job at a time (the resource rules in [AGENT-RULES.md](AGENT-RULES.md)); close the client after each test
+   batch, and never run the autotest action queue while the owner plays.
 7. **Gates are measurable and never weakened.** A phase is done when every gate in its prompt passes, measured by the
    named tool, with the numbers in the report.

@@ -16,9 +16,9 @@ of them.
   of the game. The other provinces keep their real proportions to Skyrim, so **Tamriel is about 18,000 × 16,000
   blocks**.
 * **Block (0, 0) is Whiterun.** North is −Z and east is +X, matching Minecraft's compass.
-* **The Tamriel map is a raster of 32-block cells.** Its bounds are x ∈ [−10240, 10240) and z ∈ [−6656, 11264),
-  which is 640 × 560 cells. It includes Tamriel's coastal seas and Solstheim. Everything outside the raster is
-  generated procedurally (section 3).
+* **The Tamriel map is a raster of 32-block cells.** Its bounds are x ∈ [−15360, 12800) and z ∈ [−5120, 16384),
+  which is 880 × 672 cells (`TamrielMap.MIN_X`, `WIDTH_CELLS`, ...). It includes Tamriel's coastal seas and
+  Solstheim. Everything outside the raster is answered by `terrain/Beyond` (section 3).
 * The layout is fixed for every seed. The seed only changes the detail noise: hills, trees, caves and the
   placement of generic sites.
 
@@ -29,9 +29,10 @@ before datapacks load, and the client map screen needs it too.
 
 | File | What it holds |
 | --- | --- |
-| `regions.png` | 640×560, 8-bit indexed. Each pixel is a region index into `regions.json` (0 = open sea). |
-| `elevation.png` | 640×560, 16-bit grey. Macro surface elevation in blocks, offset by +64, so 64 = sea level y 63. |
-| `features.png` | 640×560 RGBA bit flags: R = river strength, G = mountain ridge strength, B = lake, A = road corridor and settlement pad (calms the terrain detail and keeps cave mouths shut). |
+| `regions.png` | 880×672, 8-bit indexed. Each pixel is a region index into `regions.json` (0 = open sea). |
+| `elevation.png` | 880×672, 16-bit grey. Macro surface elevation in blocks, offset by +64, so 64 = sea level y 63. |
+| `features.png` | 880×672 RGBA bit flags: R = river strength, G = mountain ridge strength, B = lake, A = road corridor and settlement pad (calms the terrain detail and keeps cave mouths shut). |
+| `terrain.png`, `water.png`, `coast.png`, `heat.png`, `rainshadow.png` | 880×672: the other layers `terrain/MapRaster` reads (terrain, water, coast, geothermal heat, rain shadow). |
 | `peaks.json` | The sharp peaks (the Throat of the World, Mount Anthor) that `terrain/MapPeaks` draws at full resolution on top of the raster: profile, aretes, High Hrothgar's ledge, and the graded 7,000 Steps. |
 | `regions.json` | Region definitions (section 5). |
 | `places.json` | Named places with block coordinates (section 6). |
@@ -89,14 +90,14 @@ before datapacks load, and the client map screen needs it too.
 * **Heights.** Sea level is y 63. Ordinary hills are y 90–180; the Rift and Falkreath are highlands at y 150–190;
   the great ranges (Jerall, Velothi, Druadach, Wrothgarian, Dragontail) reach y 300–480 with passes at y 180–250
   where the map's roads cross them; Red Mountain stands at about y 480 round its caldera; the Throat of the World
-  peaks near y 560 with High Hrothgar on a ledge at about y 434. The client draws the overworld's clouds at y 330
-  (`terrain/client/TamrielSkyEffects`), so the big peaks rise through them.
+  peaks near y 560 with High Hrothgar on a ledge at about y 434. The overworld's clouds are at y 330 (the dimension
+  type's `minecraft:visual/cloud_height`), so the big peaks rise through them.
 * **Custom density function types.** These are registered in `Registries.DENSITY_FUNCTION_TYPE`.
   * `nirncraft:tamriel_channel` has a `channel` field: `continentalness`, `erosion`, `ridges`, `elevation`,
     `river` or `lake`. It samples the map with bilinear interpolation plus a small seeded domain warp, so
     borders and coasts aren't on a 32-block grid.
-  * It must be **thread-safe and allocation-free**: the atlas far field and worldgen workers call it from many
-    threads.
+  * It must be **thread-safe and allocation-free**: worldgen workers and Infinite ATLAS (its height engine and the
+    client generator's pages, `AtlasGenPages`) call it from many threads.
   * Wrap it in `cache_2d` in the JSON.
 * **How the noise settings combine.**
   * The map supplies the macro shape: land versus sea, mountain ranges and lowlands.

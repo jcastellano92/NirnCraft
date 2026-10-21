@@ -10,8 +10,8 @@ and data formats, is in [TAMRIEL.md](TAMRIEL.md).
   Tamriel keeps its real proportions, about 18,000 × 16,000 blocks.
 * **Whiterun is block 0, 0.** North is −Z and east is +X, as on Minecraft's compass. Skyrim spans about
   x −3180…2830 and z −2480…1880.
-* **The world is taller than vanilla:** from y −64 to y 383. The Throat of the World peaks near y 370, and sea level
-  is y 63.
+* **The world is taller than vanilla:** from y −64 to y 639. The Throat of the World peaks near y 560, the clouds
+  drift at y 330 so the great peaks rise through them, and sea level is y 63.
 * **The layout is the same in every world.** The seed changes only the local detail: hills, trees, caves, and where
   generic sites go.
 * **New players arrive on the road just north of Helgen.** Once a race is chosen, the main quest opens with the

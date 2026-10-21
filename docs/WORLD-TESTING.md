@@ -8,7 +8,8 @@ evidence rules both share.
 
 Operate only the disposable `NirnCraft-26.3-autotest` instance ([LIVE-WORLD-PREVIEW.md](LIVE-WORLD-PREVIEW.md));
 check status and reuse its world. Preserve the owner's normal instance. Do not run a headless server alongside its
-integrated server or two drivers against the live queue.
+integrated server or two drivers against the live queue. Close the client after each test batch, never run the
+live queue while the owner plays, and run one heavy job at a time (AGENT-RULES.md, resources).
 
 `tools/qa/world_test.py` composes existing audits and real preview controls. Its manifest,
 `tools/qa/world-tests.json`, defines fifteen systems and their required regional conditions. `plan`
@@ -85,8 +86,8 @@ Runtime assertions and visual acceptance remain separate. Open every retained im
 The named disposable actors use real server entities; stationary targets explicitly have AI disabled.
 `damageFromObserver` prevents environmental damage being mistaken for the player's spell hit.
 `cast start/stop` sends the normal Cast packet; `fx` remains a synthetic renderer-only exercise.
-`use down/up` uses the ordinary client game-mode use-item packet and holds/releases the use key for staffs and items. Both have a200-tick safety release.
-Staff streaming range is8 blocks; the staff fixture target is6 blocks away, while the hand-spell fixture is9 blocks away.
+`use down/up` uses the ordinary client game-mode use-item packet and holds/releases the use key for staffs and items. Both have a 200-tick safety release.
+Staff streaming range is 8 blocks; the staff fixture target is 6 blocks away, while the hand-spell fixture is 9 blocks away.
 Use `nirncraft:npc` for tracked NPC fixtures: vanilla villagers are intentionally converted by the mod.
 The scenario runner releases inputs and runs named cleanup even on failure. Crashed sessions may
 retain entities tagged `nirncraft_qa_fixture`; inspect that disposable save before resuming fixtures.
@@ -99,15 +100,15 @@ doors allowed; it does not prove a live NPC completed a schedule or door interac
 `save-all` is not registered.
 
 Foreign-region flow audits consume `geography.py refresh`, a headless Java survey of the actual map
-at128-block spacing. Its input/data digest invalidates on map changes. Raster geography stays exact;
+at 128-block spacing. Its input/data digest invalidates on map changes. Raster geography stays exact;
 foreign area is explicitly sampled. Procedural Endless Lands are dormant under the ocean-loop policy.
-The active QA registry has 117 buckets:83 authored regions, one outer-ocean travel bucket,32 realm roles
+The active QA registry has 117 buckets: 83 authored regions, one outer-ocean travel bucket, 32 realm roles
 and jail. The outer-ocean bucket requires actual distant open-sea coordinates; a coast screenshot cannot
 stand in for it. Validate X/Z seams, diagonal crossings, boats/passengers and destination readiness separately.
-Missing/stale geography produces unavailable metrics, never an invented0.01km2 land area.
+Missing/stale geography produces unavailable metrics, never an invented 0.01 km² land area.
 
 
-`nirncraft-dev scenario move TAG X Y Z` starts actual mob navigation for a named actor (loaded goal within64m).
+`nirncraft-dev scenario move TAG X Y Z` starts actual mob navigation for a named actor (loaded goal within 64 m).
 `cave-navigation.json` waits for observed arrival; this supplements the read-only path probe without pretending
 that a short walkway covers schedules, doors or whole dungeons. Explicit command rejection aborts a scenario
 immediately. An assertion deadline is only for an active operation with no completion signal yet.
@@ -152,5 +153,5 @@ world snapshot and runtime identity and verify actual geometry. Do not regenerat
 
 Navigation fixtures use native NirnCraft NPCs with active physics, wait for actual `onGround`, and repeatedly
 request the goal only while arrival remains unobserved. This is controlled locomotion, not autonomous schedules.
-MINE room3's actual walking height is88; the camera at89 is clear and aims at body height89. Target actors must
-stand at88, not float one block above the floor. The staff target is6m away; the hand-spell target9m away.
+MINE room3's actual walking height is 88; the camera at 89 is clear and aims at body height 89. Target actors must
+stand at 88, not float one block above the floor. The staff target is 6 m away; the hand-spell target 9 m away.

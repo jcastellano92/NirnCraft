@@ -1,8 +1,11 @@
 # Infinite ATLAS: the change feed (far deltas)
 
-The far field starts as a prediction: exact heights, the world's material rules, town plans and tree placement, all
-from the seed, built into tiles once per world (and cached). What the prediction cannot know arrives as **changes**:
-small, sparse, pushed by the server only to the players who can see them, before they see them.
+What atlas draws past the client's own chunks starts as a prediction: exact heights, the world's material rules, town
+plans and tree placement, all from the seed, built into tiles once per world (and cached). What the prediction cannot
+know arrives as **changes**: small, sparse, pushed by the server only to the players who can see them, before they
+see them. (The far field, below, is the code's name for that part of atlas: AtlasFarField, its worker and tiles.)
+The client-owned world replaces this with coalesced, position-based operations, hash-checked
+([ATLAS-STREAMING.md](ATLAS-STREAMING.md), "Client-owned world"; [ATLAS-STATUS.md](ATLAS-STATUS.md) standing rules).
 
 ## What changes
 
@@ -12,7 +15,7 @@ small, sparse, pushed by the server only to the players who can see them, before
 | explosions, fire, the volcano, landslides | the same block changes | the same (many columns at once, coalesced per tick) |
 | flowing water, lava | the same | the column's water top |
 | light emitters placed / removed / lit | the block change, by its light emission | a far light (fire, lamp) added or removed |
-| chunk generation (what the prediction missed) | a newly generated chunk | columns whose real ground differs (structure pieces, cave mouths, ponds) |
+| chunk generation (what the prediction missed) | a newly generated or loaded chunk | every column as built (terrain, buildings, props, the real trees), once per chunk content (a hash per chunk), and its sections (AtlasSections: deep solid rock left out), re-recorded when a kept block changes (AtlasEdits.RESECTION) |
 | entities | already streamed (FarActors, every 10 ticks) | impostors; same windows |
 | weather (later, once positional and deterministic) | the weather field's own versions | field patches in the same windows |
 
@@ -21,13 +24,14 @@ small, sparse, pushed by the server only to the players who can see them, before
 Per overworld tile of 256 x 256 blocks (LOD 0's tile), a journal of changed columns: `(x, z) -> top y, top block, under
 block, water top, version` and changed lights `(x, y, z) -> level, colour, version`. A tile's version counts its
 changes. Changes are coalesced per tick (an explosion is one batch). The journal is saved with the world
-(`nirncraft_atlas_edits`), so a server restart, a client reconnect or a new client gets the same far field.
+(`data/nirncraft_atlas/edits-v3.dat`, the sections beside it in `sections/`), so a server restart, a client reconnect
+or a new client gets the same far field.
 
 ## Who gets what (interest)
 
-Each player has a far-field window: 5 x 5 tiles per level, from 1.3 km (LOD 0) out to the horizon. Twice a second the
-server compares each player's window with what it has already sent them (`tile -> version sent`) and sends only newer
-changes of tiles in the window. A player arriving somewhere (joining, teleporting, flying) gets the changes of every
+Each player has a window of 21 x 21 LOD-0 tiles around them (`AtlasEdits.RADIUS_TILES` 10: the LOD 2 window, about
+5 km square). Twice a second the server compares each player's window with what it has already sent them
+(`tile -> version sent`) and sends only newer changes of tiles in the window. A player arriving somewhere (joining, teleporting, flying) gets the changes of every
 tile entering the window at once, ahead of the terrain they will see; a change happening anywhere in the window
 reaches them within half a second. LAN hosts and single player run the same path (the host is a player too).
 
@@ -48,7 +52,9 @@ seed's prediction; the journal is the truth on top.
 
 ## Status
 
-1. Journal, interest, push, client patch of resident tiles and lights: in progress (branch atlas-render).
-2. Chunk-generation corrections.
+1. Journal, interest, push, client patch of resident tiles and lights: done (atlas-render; live: a 70-block column
+   built 500 m away showed within about 15 s, ATLAS-RENDERER-PLAN.md "R5 far edits live").
+2. Chunk-generation corrections: the server's chunks as built, columns and sections (done).
 3. Entities' windows unified with tiles' (FarActors keeps its own 10-tick sender for now).
 4. Weather patches, after the weather rework.
+5. Edits as operations with the hash tree, the client-owned world's form: parked world work (ATLAS-RENDERER-PLAN.md).

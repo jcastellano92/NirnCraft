@@ -4,8 +4,10 @@ NirnCraft Core (`mod/`) targets **Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25*
 The doc map is [README.md](README.md); runtime controls are in [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md) and
 server packaging in [SERVER-26.3.md](SERVER-26.3.md). Tests run through the harness
 ([tools/harness/README.md](../tools/harness/README.md)). Builds and tests run locally; GitHub Actions is disabled in
-the repository settings, so pushes do not run CI. The far field and shader pack (Infinite ATLAS) are documented in
-[ATLAS.md](ATLAS.md) and [native/README.md](../native/README.md).
+the repository settings, so pushes do not run CI. The renderer and shader pack (Infinite ATLAS): start at
+[ATLAS-STATUS.md](ATLAS-STATUS.md) (where it stands, the order of work, the rules), then [ATLAS.md](ATLAS.md) and
+[native/README.md](../native/README.md). Every session keeps the resource rules in [AGENT-RULES.md](AGENT-RULES.md)
+(one heavy job at a time, heavy outputs off C:, the dev client closed after tests).
 
 ## Architecture
 
@@ -77,8 +79,9 @@ Some modules are started by another module rather than by `NirnCraft.java`:
    a `MapSample` from `terrain/MapRaster`, which reads the PNG rasters in `resources/nirncraft/tamriel/` (regions,
    elevation, features, terrain, water, coast). These are class-path resources, not datapack files, because both
    the map screen and worldgen need them before datapacks load.
-2. **Beyond the map.** `terrain/Beyond` answers for everything outside the raster: the fixed foreign lands and the
-   endless super-cell realms. `MapNoise` is seed-independent noise.
+2. **Beyond the map.** `terrain/Beyond` answers for everything outside the raster: the fixed foreign lands, then open
+   ocean (the former endless super-cell lands are off, `Beyond.ENDLESS_LANDS_ENABLED = false`, kept for tools).
+   `MapNoise` is seed-independent noise.
 3. **Density functions.**
    * `terrain/TamrielChannel` (`nirncraft:tamriel_channel`) feeds map channels into the noise router: continentalness,
      erosion, ridges, elevation, river and lake.
@@ -86,7 +89,7 @@ Some modules are started by another module rather than by `NirnCraft.java`:
      river/lake carving.
    * `terrain/MapWaterFeature` (`nirncraft:map_water`) fills lakes and rivers above sea level.
    * The world preset `normal` (and `large_biomes`) points at `nirncraft:tamriel` noise settings. The overworld
-     dimension type is raised to y −64..383.
+     dimension type is raised to y −64..639 (height 704; the terrain noise fills to y 575).
 4. **Biomes.**
    * `biome/TamrielBiomeSource` (`nirncraft:tamriel`) picks the region from a domain-warped position, then the
      terrain context, then a weighted pick from that region's palette (`biome/Palettes`, `palettes.json`).
@@ -457,9 +460,11 @@ and `Carriages` load the 7x7 chunks around the destination with tickets first (t
 chunks ready/needed), then complete the travel (25 s timeout fallback). `Prewarm.hold(...)` keeps an area loaded
 silently. `sailing.Ferries` already requests the destination chunks at departure.
 
-**Distant terrain.** Infinite ATLAS draws everything past the loaded chunks ([ATLAS.md](ATLAS.md)); Java pushes
-authoritative column tiles and chunk sections to it, so pre-generated chunks sharpen the far field like explored ones.
-Distant Horizons is no longer part of the pack.
+**Distant terrain.** Infinite ATLAS draws the world past the loaded chunks, and every pixel in the unified field
+([ATLAS-STATUS.md](ATLAS-STATUS.md)); the server pushes authoritative column tiles, chunk sections and edits to it,
+so pre-generated chunks sharpen distant views like explored ones, and with `nirncraft.atlas.clientGen` the client
+generates the terrain on the GPU ([ATLAS-CLIENT-GENERATION.md](ATLAS-CLIENT-GENERATION.md)). Distant Horizons is no
+longer part of the pack.
 
 **Shipping a starter world (not implemented).** Run `/nirncraft-pregen start <radius> now` on a Nirn server until
 `status` reports it finished, stop the server, zip `world/` (without `playerdata/`, `advancements/`, `stats/`) and host

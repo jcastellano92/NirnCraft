@@ -1,10 +1,11 @@
 # Infinite ATLAS: the client generates the world
 
 The owner's direction (docs/ATLAS-STREAMING.md, "Client-owned world, server-checked"): the client generates and renders
-everything from the seed and the baked plans; the server sends only coalesced, position-based operations. Today the
-near field's real blocks come from vanilla chunks the server loads (about 6 chunks/s after a teleport) and the server's
-section blobs. This document maps the Java generator that produces a chunk's final blocks, says what is portable, what
-the GPU already does, and what stays Java; then the GPU generator built from it (stages 2-5).
+everything from the seed and the baked plans; the server sends only coalesced, position-based operations. Without
+client generation the real blocks around the player come from vanilla chunks the server loads (about 6 chunks/s after
+a teleport) and the server's section blobs. This document maps the Java generator that produces a chunk's final
+blocks, says what is portable, what the GPU already does, and what stays Java; then the GPU generator built from it
+(stages 2-5). Where the work stands (branches, what is still on the CPU): [ATLAS-STATUS.md](ATLAS-STATUS.md).
 
 Sources: the mod (`mod/src/main/java/com/nirncraft`), its data (`data/nirncraft/worldgen`), and Minecraft 26.3's own
 generator read from the NeoForm sources (`net.minecraft.world.level.levelgen`: `NoiseBasedChunkGenerator`,
@@ -84,7 +85,7 @@ at the first quart asked, and derives the surface from the quantised depth there
 surface 0.01 block different and, rarely, another context. Chunk generation asks bottom-up (`fillBiomesFromNoise`), so
 the client must ask in the same order with a fresh sampler per chunk to match.
 
-## 2. What is portable, what the GPU already does
+## 2. What is portable, what the GPU already did (the audit, before stage 2; since then section 5)
 
 | part | deterministic | portable to the GPU | today on the GPU |
 |---|---|---|---|
@@ -192,7 +193,7 @@ client):
 * Features (`AtlasGenFeatures`): the decoration driver of `applyBiomeDecoration` replicated over proto chunks filled
   with the generated blocks; 0 feature failures; 81 ms a chunk in Java, one thread.
 
-## 7. The near field from atlas's own generation (stage 5)
+## 7. The client's world from atlas's own generation (stage 5)
 
 `-Dnirncraft.atlas.clientGen=true` (single player): `AtlasClientGen` generates the window around the camera
 (`.radius`, default 24 chunks), nearest first and in view before behind, pages on all cores, and hands chunks to the
@@ -216,12 +217,17 @@ on one thread, a minute behind the terrain.
 * **Structures from the plans**: starts per chunk (`ChunkGenerator.createStructures` with the server's
   `ChunkGeneratorStructureState`, named settlements from the street plan) into the proto chunks, their pieces placed
   in decoration as `applyBiomeDecoration` does; the remaining 0.17 %.
-* **Features are slow and single threaded** (81 ms a chunk): decorate disjoint 3 x 3s in parallel; trees on the GPU
-  later (their placements are pure; shapes need the decoration random).
+* **Features are slow and single threaded** (81 ms a chunk): on the GPU (the owner's rule: no CPU interim stage, so
+  not a parallel Java decorator first); their placements are pure, shapes need the decoration random.
 * **The surface pass** is the kernel's largest (a thread per column walks it): split the per-block rule work.
-* **GPU-to-GPU ingest** with the level-0 grid (one device), and the CPU world build behind `atlas_upload_section`.
+* **GPU-to-GPU ingest** with the level-0 grid (one device): built on the generator branch (20470052:
+  `atlas_gen_create_for`, ingest into `VoxGrid::ingestGpu`; `-Dnirncraft.atlas.clientGen.direct=false` the old path),
+  not merged into atlas-render yet; the CPU world build behind `atlas_upload_section` goes with it.
 * **The 2D inputs on the GPU**: the map rasters, hydrology, road and street plans as device data (today Java computes
-  pages: 0.15 ms a chunk on 20 threads).
+  pages: 0.15 ms a chunk on 20 threads); in progress on the generator branch (AtlasGenMap, atlas_map.slang).
+* **Exact arithmetic across Java and the GPU**: StrictMath on the Java column path and on the GPU (atlas_exact.slang)
+  on the generator branch (705a3096, 374da61b); heights can move by one ulp against chunks generated before.
+* **Generation after a jump starts ~5 s late** (ATLAS-STATUS.md, open bug 2): requests not triggered on the move.
 * **Multiplayer**: the client has no seed (the public / secret decision, ATLAS-STREAMING.md decision 3).
 * Found on the way, for the owner: the router has no `minecraft:beardifier` (structures' `beard_box` /
   `beard_thin` do nothing), `nirncraft:tamriel_caves` is dead code, and `TamrielBiomeSource` samples a quart

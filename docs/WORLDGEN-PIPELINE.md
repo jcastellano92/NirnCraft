@@ -1,7 +1,9 @@
 # Plan-first world generation (roads, rivers, sites, terrain, scatter)
 
-Status: design, approved for execution in phases P1-P6. Written for a Sonnet session to execute; read section 0 of
-`docs/AGENT-RULES.md` first (the original FINISH-PLAN it cites is retired; its rules live in AGENT-RULES).
+Status (2026-10-20): P1, P2, P3, P5 and P6 done (sections 6-9), P4 in (masks from the baked plans; its gate
+not yet recorded), P7 dormant (section 10). World work is paused while the renderer is finished (ATLAS-STATUS.md); the
+choices for the next world work are in WORLDGEN-REVIEW.md. Written for a Sonnet session to execute; read the Phase 1
+rules in `docs/AGENT-RULES.md` first (the original FINISH-PLAN it cites is retired; its rules live in AGENT-RULES).
 
 ## 1. Why the current approach keeps breaking
 
@@ -75,10 +77,11 @@ whiterun-rorikstead, whiterun-dragon_bridge and one river crossing; plus `reach_
 * **P4 Vegetation masks (S10).** Tree and flora features check the road/street/pad/plot masks before placing; remove the
   clearing code paths that create floating crowns. Gate: floating vegetation within 150 blocks of the sample towns ~0.
   *Status:* `com.nirncraft.world.PlacementMask` is in (per-chunk clearance grid from structure pieces, settlement cores,
-  site pads and the map road channel; trees, huge trees, ground cover, rocks, natural scatter, patches via the
-  `nirncraft:placement_mask` filter). The road corridors are weak until P1: the map channel does not follow the
-  planner's roads, so `roads/worldplan` must `PlacementMask.register(Source)` its baked polylines (class half width + 2).
-  Paver/Canvas clearing and `OrphanSweep` stay as the safety net and as the upgrade path for old saves.
+  site pads and the plans; trees, huge trees, ground cover, rocks, natural scatter, patches via the
+  `nirncraft:placement_mask` filter). The baked plans are registered as mask sources: `roads/RoadMask` (the road plan,
+  class half width + 2 blocks of verge; it switches the map's approximate road channel off) and
+  `worldplan/street/StreetMask`. Paver/Canvas clearing and `OrphanSweep` stay as the safety net and as the upgrade
+  path for old saves. No result for the floating-vegetation gate is recorded here.
 * **P5 Streets to every door (S5). DONE** (section 7c). Settlement plans emit a street graph that reaches every door (and gate lanes that
   meet S4 road ends); plot pads go into S7. Gate: unreachable doors <= 1% on the Skyrim sweep sample.
 * **P6 Planned scenes (S6+S11). DONE** (section 9). Replace per-chunk human-prop rolls with the planned scene list (scene = anchor,
@@ -93,8 +96,9 @@ whiterun-rorikstead, whiterun-dragon_bridge and one river crossing; plus `reach_
 * New worlds only: every phase changes generation. Keep old-save upgrade paths minimal (Paver for P3).
 * Performance budget: the road index lookup must stay well under 1 µs per column; segment buckets, no per-column
   allocation. All baked data immutable and thread-safe.
-* Plan-first terrain is what the generator produces everywhere, so the far field (Infinite ATLAS, fed from the same
-  Java heights and chunks) shows the roads too; post-hoc paving never reached distant views.
+* Plan-first terrain is what the generator produces everywhere, so Infinite ATLAS (fed from the same generator: its
+  heights, the server's chunks and, with client generation, the same density router and material rules compiled for
+  the GPU) shows the roads too; post-hoc paving never reached distant views.
 
 ## 5. Baseline (old pipeline, measured on saved blocks)
 
@@ -211,7 +215,7 @@ generated), `tools/qa/p2_corridors.py` (corridor tiles for headless generation, 
   `overhang` channel is multiplied by `1 - 0.9 * plan weight`. Without both changes 0.4% of bed columns were off by 3 or more (pits in the bed); with them 0.07%.
 * **Cost/safety.** `PlanGround.bed`/`pad` are allocation-free (thread-local scratch `Bed`, own 32-block edge index:
   116k buckets, 2.06M edge entries, built in ~120 ms on the plan loader thread after the plan), deterministic, and
-  independent of the seed (they only read the plan and the macro sample). The far field reads the same plan.
+  independent of the seed (they only read the plan and the macro sample). Infinite ATLAS reads the same plan.
 
 **Numbers** (`NIRNCRAFT_AUTORUN=roadterrain:30000`, Nirn seed; 30,000 columns: a third uniform over Tamriel, a third within 40
 blocks of a road vertex, a third around pads; the height is `getBaseHeight` through the real noise router, old terrain =
@@ -279,7 +283,7 @@ changed: `RoadCells`, `Paver`, `RoadNetwork`, `RoadsData`, `Road`, `RoadsConfig`
 `PlacementMask` (+`structureGrid`, `useMapRoadChannel`), `scatter/RoadProbe`. Nothing the bake hashes changed.
 
 **Painting.** Per column of the chunk being decorated, no neighbour read, no order dependence, idempotent, written only
-inside the chunk (so the far field, fed from the same generator, shows the roads): `RoadPlan.at(x+.5, z+.5)` gives
+inside the chunk (so Infinite ATLAS, fed from the same generator, shows the roads): `RoadPlan.at(x+.5, z+.5)` gives
 distance, class half width, span; the surface height is `floor(profile at the column corner + 0.002)` (the height the
 terrain was shaped to in P2, centre height on steep stretches). Inside the half width: refill below (dirt then stone, until it
 rests on something solid: carver pits, caves, water), clear 4 blocks above (leaves, logs, plants, snow, props), the culture's

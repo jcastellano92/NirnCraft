@@ -9,7 +9,13 @@ fast, talk to the server smartly, preload on first boot, know cheaply what chang
 weigh every update by how much it changes what is seen at that distance. Not chunk by chunk: a Lumen-like system
 breaks the scene into its parts and puts the work exactly where the eye is.
 
-## How it loads today (2026-10-19, measured)
+Status (2026-10-20): the design of 2026-10-19 and its measurements. Its streaming, priority and cache plan is now
+ATLAS-STATUS.md's step 2 (a proper loading phase) and step 5 (one residency manager: one GPU-side priority, hard
+budgets, hot / warm / cold tiers keyed by seed, generator version and edit hash); the client-owned world design below
+stands, and its generation side has started (ATLAS-CLIENT-GENERATION.md). "Far field" here is atlas as it was then,
+before the one field; the present state is [ATLAS-STATUS.md](ATLAS-STATUS.md).
+
+## How it loaded (2026-10-19, measured)
 
 The loading suite (`harness.py run --suite loading`, tools/harness/loading.py) settles at a place, marks the far
 field's timeline (`far-timeline start`), teleports, captures every second for 16 s and once settled, and keeps the
@@ -25,13 +31,13 @@ What the pipeline does (the full map with file:line: the "far-field loading pipe
 
 | | today | consequence |
 |---|---|---|
-| build budget | the Java worker calls `atlas_update` with budget 0: every wanted region in one parallel run | regions appear all at once (pop) |
+| build budget | the Java worker calls `atlas_update` with budget 0: every wanted region in one parallel run | regions appear all at once (pop); fixed since: 40 ms updates in a 60 ms pass, the core building on its own threads, coarsest first |
 | first frame | nothing far is drawn until the worker's first full pass | seconds of nothing |
 | order | tiles: LOD 0 to 6 (fine to coarse), in the view cone first; regions: nearest and finest first; overlays nearest first, no frustum | the horizon comes last |
 | publishing | every revision repacks the whole scene and stages all of it to the GPU, twice a pass | cost grows with the scene, not the change |
 | caches | exact tiles on disk (per world, per generation identity); regions, group trees, settlements, trees, materials rebuilt every session and revisit | a return computes again |
 | lights | time of day and sun are a re-shade; a new light re-uploaded the covering tiles at all 7 LODs | (fixed: lights only) |
-| GPU | the trace, clouds, sun map; builds (regions, groups) on the CPU | the GPU builder (atlas_lod_build.slang) is in a tool only |
+| GPU | the trace, clouds, sun map; builds (regions, groups) on the CPU | the GPU builder (atlas_lod_build.slang) is in a tool only; since: the level-0 grid built on the GPU, the coarse levels on atlas-naadf, the far lights culled and binned on the GPU |
 
 ## Plan (each step measured by the loading suite and the element tier)
 
@@ -238,8 +244,10 @@ Things that rely on vanilla's terrain drawing without being drawing: entity cull
 visibility graph; without its sections, entities need our visibility), map items (map colours), and what counts as
 "loaded" for the render distance setting.
 
-Order: deterministic generation with a test (client-generated vs server-real per chunk), then the client-generated far
-field with the hash tree and the change log, then interest-driven live state, then the near field.
+Order (2026-10-19): deterministic generation with a test (client-generated vs server-real per chunk), then the
+client-generated world with the hash tree and the change log, then interest-driven live state, then the loaded
+chunks. Since 2026-10-20 the renderer side goes first (ATLAS-STATUS.md: the unified field is live, vanilla's chunks are
+step 3); the hash tree, the edit log and secrets are parked world work (ATLAS-RENDERER-PLAN.md, "Parked").
 
 Targets: first far image under 100 ms after arrival (stand-ins), within dE 3 of settled in under 2 s on a GPU, no jump
 between seconds over dE 6; a return to a visited place loads from cache with no visible refinement.

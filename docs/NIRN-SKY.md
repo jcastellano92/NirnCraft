@@ -8,6 +8,11 @@ game's assets or screenshots; the references below are for mood and lore facts o
 Everything changes with **where you are** (latitude and longitude across Tamriel: what is above the horizon, how high,
 how the aurora fades going south) and **when** (time of night, day of year, the moons' months, the planets' periods).
 
+Built (2026-10-20, ATLAS-STATUS.md "What works"): the physical air, the custom baked moons with relief and real orbits,
+phases, eclipses by place and lunar events, Nirnshine, the birthsigns as star placements, the named stars, the
+planets on orbits, the great comet, the aurora volume and meteors, the eye's scotopic range. Open there: a seam at the
+zenith and dark specks in the day sky (open bug 3).
+
 ## The moons
 
 - **Masser** (Jode, Mara's Tear): the greater moon, well over twice Secunda's size. A dead moon whose "skin" withered:
@@ -22,7 +27,7 @@ how the aurora fades going south) and **when** (time of night, day of year, the 
 - **Eclipses by place (the owner, 2026-10-20).** Real umbra and penumbra footprints moving across Tamriel: totality
   only in the path, a partial eclipse elsewhere by how much of the sun is covered from that exact spot. The lead-up
   dims slowly with strange sharp light (crescent sun images in leaf light). The umbra's edge sweeps over the land
-  (the far field darkens per position), with shadow bands; in totality a 360-degree twilight ring on the horizon from
+  (the land darkens per position, to the horizon), with shadow bands; in totality a 360-degree twilight ring on the horizon from
   the air lit outside the shadow, stars and planets out, mountains beyond the shadow still glowing.
   **Secunda** is the beautiful one, like Earth's: just covering the sun, so Baily's beads, the diamond ring, the
   chromosphere's flash, prominences, a pearly inner corona with streamers and plumes; short totality, a narrow path

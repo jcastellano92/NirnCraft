@@ -40,8 +40,8 @@ Weather and biome work stay paused until the owner says.
   `E:\NirnCraft-scratch` or the repo's `.work`, not C:; agents run one or two at a time, not four.
 - Close the dev client after each test batch; never run the autotest action queue while the owner plays (it holds the
   player: use the passive profiler instead).
-- The word "Skycraft" never in the tree (`git grep -i skycraft` empty); never Bethesda assets; no mixins / access
-  transformers; push only when asked.
+- The project's pre-rename name never in the tree (a case-insensitive `git grep` for it stays empty); never Bethesda
+  assets; no mixins / access transformers; push only when asked.
 
 ## What works (atlas-render, 5ffc5489)
 
@@ -131,7 +131,7 @@ Not merged into atlas-render yet: everything on atlas-naadf after 424841c5 and t
 ## Pending owner decisions
 
 - Delete old Claude scratch on C: (this project's 22 old sessions, bash-edit-diff, AppData\Local\Temp\claude, the
-  skycraft-aether-* / skycraft-glsl-* temp folders, old zip extracts; Second-Brain left alone unless told); move the
+  old-name `*-aether-*` / `*-glsl-*` temp folders, old zip extracts; Second-Brain left alone unless told); move the
   Prism instance (13 GB) off C:.
 - Rewrite the two unpushed commits that contain the old name (c29468eb, ae36b77b) once the agents' branches have
   landed (owner said yes; do it at a quiet point and rebase the active branches). Pushed history keeps the pre-rename

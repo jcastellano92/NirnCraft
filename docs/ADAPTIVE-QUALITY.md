@@ -6,6 +6,13 @@ millisecond, measured on this machine, far detail first, nothing popping. Code: 
 (controller, pure Java, unit-tested), `atlas/AtlasQuality` (atlas's side), `shaders/lib/quality.glsl` (the pack's
 side), `native/tools/pack_lab_quality.py` (how the visual weights were measured).
 
+Scope (2026-10-20): this is the controller of the shader-pack path (the shipped pack: the InfiniteATLAS pack near,
+atlas past the loaded chunks), which is where "far field" below comes from. Where atlas owns the frame (the near
+pass, the unified field) the pack's knobs do nothing; atlas's own render scale still follows this controller on the
+GPU and `AtlasQuality.observeCpu` on the CPU backend, and the light by need adapts its rate and footprint per frame
+(`ATLAS_TARGET_MS` for a budget). One set of hard memory and per-frame work budgets for everything is ATLAS-STATUS.md
+step 5 (one residency manager).
+
 ## The knobs
 
 Every knob is continuous, 0..1. For the pack, 1 is the profile's `#define` (now a loop *ceiling*: loops run to the

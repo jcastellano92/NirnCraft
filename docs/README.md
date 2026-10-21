@@ -3,8 +3,10 @@
 **NirnCraft** turns Minecraft into The Elder Scrolls V: Skyrim and keeps going to the edge of Nirn: one custom mod,
 NirnCraft Core (`mod/`, mod id `nirncraft`, Java package `com.nirncraft`), builds the whole of Tamriel with its own
 terrain, towns, people, quests, magic, music and UI. The pack (`pack/`) adds only performance and library mods.
-NirnCraft is powered by **Infinite ATLAS**: the native far-field renderer `atlas_core` (`native/`) and NirnCraft's own
-Iris shader pack `InfiniteATLAS` (`shaderpack/InfiniteATLAS`, shipped as `pack/shaderpacks/InfiniteATLAS.zip`).
+NirnCraft is powered by **Infinite ATLAS**: the native renderer `atlas_core` (`native/`), one renderer from the
+player's feet to the horizon, and NirnCraft's own Iris shader pack `InfiniteATLAS` (`shaderpack/InfiniteATLAS`, shipped
+as `pack/shaderpacks/InfiniteATLAS.zip` until our own pipeline replaces Iris). Where the renderer stands:
+[ATLAS-STATUS.md](ATLAS-STATUS.md).
 
 Platform: **Minecraft 26.3, NeoForge 26.3.0.90, Java 25.** All commands run from the repository root.
 
@@ -57,10 +59,22 @@ Players install with [INSTALL.md](INSTALL.md). Release notes are in `releases/no
 
 ## Infinite ATLAS (rendering)
 
-* [native/README.md](../native/README.md): building `atlas_core`, the C ABI, failure handling, offline renders.
-* [ATLAS.md](ATLAS.md): what atlas is, measurements, how it joins the mod, portability.
-* [ATLAS-VISUALS.md](ATLAS-VISUALS.md): the near/far visual matrix; [ADAPTIVE-QUALITY.md](ADAPTIVE-QUALITY.md): the GPU budget controller.
-* [NATIVE-26.3-RENDER-HANDOFF.md](NATIVE-26.3-RENDER-HANDOFF.md): 26.3 render-pass ownership and the mod's data textures the pack reads.
+* **[ATLAS-STATUS.md](ATLAS-STATUS.md) first**: the renderer's present state, the owner's order of work, the standing
+  and resource rules, branches in flight, open bugs, what is still on the CPU, tools and how to test. Older renderer
+  docs are history where they disagree with it.
+* [ATLAS-RENDERER-PLAN.md](ATLAS-RENDERER-PLAN.md): the decision log (phases R0-R7, experiments, the owner's
+  directions); [ATLAS-RENDER-INVENTORY.md](ATLAS-RENDER-INVENTORY.md): every item the 26.3 frame draws and its hooks.
+* [ATLAS.md](ATLAS.md): what atlas is, measurements, how it joins the mod, portability;
+  [native/README.md](../native/README.md): building `atlas_core`, the C ABI, failure handling, offline renders.
+* The world it draws: [ATLAS-LOD.md](ATLAS-LOD.md) (one representation, generated levels),
+  [ATLAS-CLIENT-GENERATION.md](ATLAS-CLIENT-GENERATION.md) (the GPU generator), [ATLAS-DELTAS.md](ATLAS-DELTAS.md)
+  (the change feed), [ATLAS-STREAMING.md](ATLAS-STREAMING.md) (streaming and the client-owned world design),
+  [ATLAS-RESEARCH.md](ATLAS-RESEARCH.md) (the surveys behind it).
+* The sky and the hooks weather will drive: [NIRN-SKY.md](NIRN-SKY.md), [WEATHER-WORK.md](WEATHER-WORK.md).
+* Machines and budgets: [PLATFORMS.md](PLATFORMS.md), [ADAPTIVE-QUALITY.md](ADAPTIVE-QUALITY.md) (the GPU budget
+  controller of the shader-pack path).
+* The shader-pack path: [NATIVE-26.3-RENDER-HANDOFF.md](NATIVE-26.3-RENDER-HANDOFF.md) (26.3 render-pass ownership and
+  the mod's data textures the pack reads), [ATLAS-VISUALS.md](ATLAS-VISUALS.md) (historical: its effect matrix).
 * [NATIVE-INTEGRATION-CONTRACTS-26.3.txt](NATIVE-INTEGRATION-CONTRACTS-26.3.txt): weather, media, terrain and clock data the renderer may consume.
 * [native/java/mod-integration/README.md](../native/java/mod-integration/README.md): the Java side of atlas.
 
@@ -75,7 +89,9 @@ Players install with [INSTALL.md](INSTALL.md). Release notes are in `releases/no
   [EXPLORATION.md](EXPLORATION.md), [ECOLOGY.md](ECOLOGY.md), [FLORA.md](FLORA.md), [HYDROLOGY.md](HYDROLOGY.md).
 * Systems: [LOOT.md](LOOT.md), [INVENTORY.md](INVENTORY.md), [MOUNTS.md](MOUNTS.md), [HOMESTEAD.md](HOMESTEAD.md),
   [JAIL.md](JAIL.md), [REST.md](REST.md), [MUSIC.md](MUSIC.md), [UI-COVERAGE.md](UI-COVERAGE.md),
-  [NETWORK-PROTOCOL.txt](NETWORK-PROTOCOL.txt), [GPU-WORLDGEN-PLAN.md](GPU-WORLDGEN-PLAN.md).
+  [NETWORK-PROTOCOL.txt](NETWORK-PROTOCOL.txt).
+* World generation reviews: [WORLDGEN-REVIEW.md](WORLDGEN-REVIEW.md) (the choices for the world rework),
+  [GPU-WORLDGEN-PLAN.md](GPU-WORLDGEN-PLAN.md) (historical audit).
 * Players: [FEATURES.md](FEATURES.md), [WORLD.md](WORLD.md), [CONTROLS.md](CONTROLS.md), [INSTALL.md](INSTALL.md).
 * Plans and phase prompts: [world/VISUAL-TARGETS-PLAN.md](world/VISUAL-TARGETS-PLAN.md), [prompts/](prompts/README.md).
 * Old saves: [NATIVE-DATA-MIGRATION-26.3.txt](NATIVE-DATA-MIGRATION-26.3.txt) converts a pre-26.3 world copy.

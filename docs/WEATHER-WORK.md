@@ -5,7 +5,8 @@ sky and the light: it builds every capability now (layered and regional air, clo
 diffusion, crepuscular rays, fog as a medium, wind-driven water, wetness, snow) with inputs that default to clear,
 calm weather. Weather and clouds only feed those inputs, through the hooks below. This file is that interface: what
 each hook is, what the renderer does with it, and what weather must supply. Keep it current: when a renderer change
-adds an input weather will drive, list it here.
+adds an input weather will drive, list it here. Weather work itself is paused until the owner says
+([ATLAS-STATUS.md](ATLAS-STATUS.md)); it starts on its own branch.
 
 ## The air (sky, sun, haze, the light): the inputs it waits for
 
@@ -13,9 +14,9 @@ The physical atmosphere (native/src/air.hpp, native/shaders/atlas_air.slang, sha
 Mie, ozone, multiple scattering) takes a climate description (atlas_air_from_climate, ABI 0.16). Today it is fed from
 the eye's weather column only.
 
-- **Regional air.** Only the eye's air is used: distant haze, sky and light do not vary by region. Needed: the far
-  field's aerial perspective reading the air per region (the weather grid's columns), so a dusty valley ahead and a
-  clear ridge behind look different.
+- **Regional air.** Only the eye's air is used: distant haze, sky and light do not vary by region. Needed: atlas's
+  aerial perspective reading the air per region along the ray (the weather grid's columns), so a dusty valley ahead
+  and a clear ridge behind look different.
 - **Layering.** Night cooling and inversions trap haze low (milky inside the layer, clear above it, a lit layer seen from
   above); daytime mixing lifts and spreads it; rain washes aerosols out. The model takes one homogeneous mix per eye:
   it needs a boundary-layer height and a mix below and above it.
@@ -64,7 +65,8 @@ the day's weather.
 ## Light in the air and in the water
 
 - **Beams** (near_resolve.fsh airBeams): the air's scattering is a constant (0.004 a block). Humidity, dust, mist,
-  smoke and the boundary layer should set it: misty forest mornings full of shafts, dry noon air almost none.
+  smoke and the boundary layer should set it: misty forest mornings full of shafts, dry noon air almost none (also
+  ATLAS-STATUS.md open bug 5: moonbeams not shown).
 - **Fog banks and ground mist:** the weather grid has a ground fog field (WeatherFieldTexture displayFog); render it as
   a medium (lit by the sun and sky, shadowed, with the beams through it).
 - **Underwater shafts and caustics:** their strength follows the light above (overcast: none; clear noon: sharp). The

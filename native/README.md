@@ -1,9 +1,10 @@
-# atlas_core: NirnCraft's native far-field engine
+# atlas_core: NirnCraft's native renderer
 
-A C ABI library (`atlas_core.dll`, `libatlas_core.so`) that renders everything beyond the rasterised near field: distant terrain as
-SVDAG voxel regions on a curved planet, then the cloud shell and far actors. One Slang kernel is compiled twice,
-to SPIR-V for Vulkan and to C++ for a CPU reference, and the tests check that the two agree. Design and status:
-[docs/ATLAS.md](../docs/ATLAS.md).
+A C ABI library (`atlas_core.dll`, `libatlas_core.so`) that traces the world on a curved planet, from the GPU-built
+grid of real sections near the camera to SVDAG voxel regions at the horizon, with its light, the air, the cloud shell
+and far actors; it also holds the GPU world generator (`atlas_gen`). One Slang kernel is compiled twice, to SPIR-V for
+Vulkan and to C++ for a CPU reference, and the tests check that the two agree. Where it stands:
+[docs/ATLAS-STATUS.md](../docs/ATLAS-STATUS.md); design: [docs/ATLAS.md](../docs/ATLAS.md).
 
 ## Build
 

@@ -1,5 +1,9 @@
 # Infinite ATLAS: owning the renderer
 
+The decision log: the owner's directions, the phases as first planned, every experiment and what it decided. The
+present state, the order of work and what is broken are in [ATLAS-STATUS.md](ATLAS-STATUS.md); where the two
+disagree, ATLAS-STATUS.md is the present.
+
 The owner (2026-10-20): own the renderer, all of it, now, before any world, seed, biome or weather work. One
 renderer from the player's feet to the horizon, no near and far; everything a frame draws, derived from vanilla's
 own source so nothing is missed; beautiful at rest and in motion (the Minecraft movie's look, a Nanite-like system
@@ -16,12 +20,27 @@ experiments; work continues until complete, then pauses before weather or biome 
 - **Verification is targeted.** The check that matters for the change, once (one element, one metric, or a side by
   side); a milestone gets a small fixed set of scenes; the end gets the full pass. No tests for tests, no suite that
   grows with every change; a new check replaces a slower one or is not added.
-- **Agents in parallel** where work splits cleanly (separate files or worktrees), merged by me.
+- **Agents in parallel** where work splits cleanly (separate files or worktrees), merged by me: one or two at a time,
+  one heavy job at a time (ATLAS-STATUS.md, resources).
 - **Off-goal findings are parked** below, not chased.
 
 ## Phases
 
-Each phase ends with its exit check; the next phase starts when it passes.
+Each phase ends with its exit check; the next phase starts when it passes. The exit checks stand; the order of work
+since 2026-10-20 is ATLAS-STATUS.md's five steps (the GPU conversion, a loading phase, vanilla's chunks removed, a
+profiler with full tracing, one residency manager), then baked light. Where the phases stand (2026-10-20):
+
+- R0: the loop is in (about 2.5 s from a save to a scored view offline; in game shader_watch --game and the client
+  hot swap); R1: done.
+- R2: stages A and B done (vanilla's meshes in our G-buffer under atlas's light); the unified field (atlas traces
+  every pixel) live behind `nirncraft.atlas.unified=true`; what vanilla's chunks still give (water, the near shadow
+  map, translucents, meshing and sending) is step 3.
+- R3: in progress (the light by need, far lights on the GPU, the physical air, Nirn's sky); open defects in
+  ATLAS-STATUS.md.
+- R4: Iris and Sodium are out of the dev instance only; the shipped pack still carries them and the InfiniteATLAS pack.
+- R5: far edits live (the change feed); far life open.
+- R6: steps 4 and 5 (the profiler, the residency manager and its budgets).
+- R7: after the rest.
 
 ### R0. The loop and what is in flight
 
@@ -29,9 +48,9 @@ Each phase ends with its exit check; the next phase starts when it passes.
   re-renders on change; the game client polls in dev builds).
 - One-view command: an element at one distance, one image and its score, under 2 s.
 - Java hotswap into the live client (JDWP agent on the dev launch; tools/dev/hotswap.py's client mode).
-- In flight: the vanilla light without a pack (done, 7b23ca08), coarse levels from real blocks (agent), the white
-  glow on load (measure the sky-visibility accumulation on new surfaces, start it from the coarser level's light),
-  the far field's phantom landmarks and reserved home plots (data the renderer is given wrongly).
+- In flight then: the vanilla light without a pack (done, 7b23ca08), coarse levels from real blocks (done: ATLAS-LOD.md;
+  on the GPU on atlas-naadf), the white glow on load (measure the sky-visibility accumulation on new surfaces, start
+  it from the coarser level's light), the far field's phantom landmarks and reserved home plots (fixed, 233fcd57).
 
 Exit: a shader edit is on screen in under 2 s, offline and in game.
 
@@ -118,7 +137,9 @@ The full checklist from R1, every item checked live; the owner flies it.
   textures either way. Tracing block-exact detail up close costs 15x what it should: **near terrain is rasterised**,
   far terrain traced, with one material and one light so the change of method does not show. The meshes are
   vanilla's own section meshes (exact models, mod blocks, fluids, smooth light and tint) drawn by us: the mesher can
-  be replaced later where it limits (distance, LOD), the look is ours from now on.
+  be replaced later where it limits (distance, LOD), the look is ours from now on. (Superseded the same day: the
+  GPU-built level-0 grid traced primary rays near at 2.0-3.1 ms, and the owner chose one field: "GPU-first" and "One
+  field, live" below.)
 - **R2 stage A (2026-10-20, d7c96778).** AtlasNearPass: vanilla draws no terrain (its visible sections are taken at
   RenderFrameEvent.Pre and given back at AfterLevel), we draw its meshes into a G-buffer (albedo with tint and AO,
   block and sky light, reverse-Z depth) through a pipeline modifier and light them in a resolve that also composites
@@ -416,13 +437,13 @@ The full checklist from R1, every item checked live; the owner flies it.
   minus the distance (the horizon no longer reads as sky). Near water is the host's raster (atlas's primary rays pass it,
   a re-trace with water skipped). Found on the way: AtlasSky capped the eye's exposure by writing into the shared look
   array (white skies), SkyCube cleared inside the water's render pass (a crash). **Stuck at spawn:** the grid's window
-  never refilled after a move (fixed, 83b22b54) and the far-field worker's native update ignores its 40 ms budget after
-  a jump (18 s + 12 s in one pass while 1,700 read chunks and 13,000 server sections waited): being fixed.
+  never refilled after a move (fixed, 83b22b54) and the far-field worker's native update ignored its 40 ms budget after
+  a jump (18 s + 12 s in one pass while 1,700 read chunks and 13,000 server sections waited): fixed since (atlas_update
+  builds on its own threads within the budget, the worker's pass is a 60 ms slice).
 - **The owner's direction for the field (2026-10-20):** no near and far planes at all, one adaptive field; updates by
-  where the camera is, how it moves and where it looks: near and in view first, then out of view, occluded, far. Next
-  after the budget fix: the update order by frustum, distance and occlusion; levels 1-4 built on the GPU from the grid;
-  mode B (the G-buffer, our resolve lighting atlas's surfaces) as the default; vanilla's chunk meshes removed (shadow map
-  and translucents from atlas).
+  where the camera is, how it moves and where it looks: near and in view first, then out of view, occluded, far. What
+  follows from it (the update order, levels built on the GPU from the grid, vanilla's chunk meshes removed with the
+  shadow map and translucents from atlas) is ATLAS-STATUS.md's order of work (steps 1, 3 and 5).
 - **The light by need (2026-10-20).** The owner: the one light adapts to what is needed, full effect, gradual, nothing
   computed that is never seen or makes no visible difference. Built (atlas_far.slang nearLightMain / nearUpsampleMain /
   nearTemporalMain, api.cpp lightControl): under PRIMARY_NEAR_LIT on Vulkan the far pass writes its hits (distance,
@@ -493,4 +514,5 @@ The full checklist from R1, every item checked live; the owner flies it.
   (WORLDGEN-REVIEW.md).
 - Other dimensions (with the world rework, after weather).
 - Lootr takes our containers by default; ore regrowth shared by all; mob levels from the nearest player.
-- Docs that disagree with the code (TAMRIEL.md, WORLD.md, WORLDGEN-PIPELINE.md, GPU-WORLDGEN-PLAN.md).
+- Docs that disagreed with the code (TAMRIEL.md, WORLD.md, WORLDGEN-PIPELINE.md, GPU-WORLDGEN-PLAN.md): audited
+  against the code and ATLAS-STATUS.md on 2026-10-20.

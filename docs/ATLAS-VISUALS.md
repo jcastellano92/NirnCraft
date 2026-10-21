@@ -1,5 +1,10 @@
 # NirnCraft visuals: the full matrix (near field = the InfiniteATLAS shader pack, far field = atlas_core)
 
+> **Historical: superseded by [ATLAS-STATUS.md](ATLAS-STATUS.md) and [ATLAS-RENDERER-PLAN.md](ATLAS-RENDERER-PLAN.md)
+> on 2026-10-20.** The renderer is one field now (no near / far split); this is the effect matrix of the shader-pack
+> path, which the shipped pack still runs until our own pipeline replaces Iris (R4). Kept as the checklist of effects
+> that pipeline must carry, with what each one reads.
+
 Every effect is designed for both fields so it carries across the hand-off, and each has a cheaper fallback the
 quality controller (adaptive quality v2, docs/ADAPTIVE-QUALITY.md) or the pack profile can drop to. Status: **done**, **building**, *planned*.
 
