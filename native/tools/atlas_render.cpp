@@ -784,7 +784,10 @@ int main(int argc, char** argv) {
             double maxUpd = 0;
             int maxK = updateBudget > 0 ? 100000 : 256;
             for (; k < maxK && num(a, "nowarm", 0) <= 0; k++) {
-                if (atlas_render(ctx, &f, &none) != ATLAS_OK) return 4;
+                if (atlas_render(ctx, &f, &none) != ATLAS_OK) {
+                    std::fprintf(stderr, "render (warm-up): %s\n", atlas_last_error(ctx));
+                    return 4;
+                }
                 double cw[3] = {f.cameraPos[0], f.cameraPos[1], f.cameraPos[2]};
                 // feed=N: N held sections sent again each frame (as the game's feed keeps sending while it builds),
                 // each upload timed: what an upload waits behind

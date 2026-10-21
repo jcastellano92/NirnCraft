@@ -461,9 +461,11 @@ bool stepLeaf(RegionGpu r, float3 o, float3 d, float3 inv, int3 lo, int3 hi, flo
     return false;
 }
 
-// One region's groups along the chord ro + rd u, u in [u0, u1] (region voxel units, as traceRegion takes them).
+// One region's groups along the chord ro + rd u, u in [u0, u1] (region voxel units, as traceRegion takes them): 1 a hit
+// (gTr), 0 none, 2 the walk was cut short (its node stack full, its iteration cap, the ray's step budget): not a miss,
+// the caller answers TRACE_UNCOVERED (a dropped far child was a silent hole)
 [noinline]  // (one copy, called: see atlas_far.slang traceLod)
-bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 dir) {
+int traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 dir) {
     float3 o = ro * 4.0, d = rd * 4.0;  // micro-voxels
     float3 inv = float3(abs(d.x) > 1e-12 ? 1.0 / d.x : 1e30, abs(d.y) > 1e-12 ? 1.0 / d.y : 1e30,
                         abs(d.z) > 1e-12 ? 1.0 / d.z : 1e30);
@@ -474,7 +476,9 @@ bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 d
     uint stack[G_STACK];
     int sp = 0;
     uint node = 0u;
+    bool dropped = false;
     for (int it = 0; it < 4096; it++) {
+        if (gTr.steps >= RAY_STEPS) return 2;
         uint4 n = groupData[base + node];
         float3 flo, fhi;
         gBox(n, flo, fhi);
@@ -510,9 +514,9 @@ bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 d
             fits = fits && (type == G_FLAT || max(ext.x, max(ext.y, ext.z)) * microBlocks > 2.0 * gGroupPa * (gChordT + te));
             bool draw = !inside && (type == G_FLAT || (fine && fits && (gAblate & 32768u) == 0u) || (gAblate & 64u) != 0u);
             if (draw) {
-                if (drawBox(r, n, o, d, inv, lo, hi, flo, fhi, ax, te, u1, dir)) return true;
+                if (drawBox(r, n, o, d, inv, lo, hi, flo, fhi, ax, te, u1, dir)) return 1;
             } else if (type != G_INNER) {
-                if (stepLeaf(r, o, d, inv, lo, hi, te, min(tf, u1), inside ? -1 : ax, dir)) return true;
+                if (stepLeaf(r, o, d, inv, lo, hi, te, min(tf, u1), inside ? -1 : ax, dir)) return 1;
             } else {
                 // open it: the nearer child next, the farther on the stack
                 uint c = base + (n.w & G_CHILD);
@@ -528,6 +532,7 @@ bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 d
                 if (va && vb) {
                     bool aFirst = ta0 <= tb0;
                     if (sp < G_STACK) stack[sp++] = aFirst ? rel + 1u : rel;
+                    else dropped = true;
                     node = aFirst ? rel : rel + 1u;
                     continue;
                 }
@@ -537,8 +542,8 @@ bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 d
                 }
             }
         }
-        if (sp == 0) break;
+        if (sp == 0) return dropped ? 2 : 0;
         node = stack[--sp];
     }
-    return false;
+    return 2;
 }
