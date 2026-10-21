@@ -41,6 +41,11 @@ public:
     // the newest finished result: 25 ms of the render thread's frame before. ATLAS_LIGHTS_SYNC=1: in the call, as it
     // was. The GPU binning will replace both.)
     uint32_t frame(const LightView& v, std::vector<ActorGpu>& out);
+    // The index for the GPU's own culling and binning (atlas_far.slang lightCullMain), when it changed since `revision`
+    // (which it then advances): [0] cells, records (uint bits), the cluster distance, the budget (uint bits); a float4 a
+    // cell (its 1 km coordinates, int bits); three a record: (x, y, z from the cell's corner, radius), (linear rgb,
+    // intensity), (kind, flicker seed, cell, 1 for a far cluster: uint bits but the seed). False: unchanged.
+    bool packGpu(uint64_t& revision, std::vector<Float4>& out, uint32_t& records) const;
     size_t total() const;
     ~Lights();
 
@@ -64,6 +69,7 @@ private:
     std::map<uint32_t, std::vector<int64_t>> groupCells_;  // the index cells each group has lights in
     std::shared_ptr<const LightIndex> index_;
     uint32_t maxPerFrame_ = 4096;
+    uint64_t revision_ = 1;  // (packGpu) bumped by every change of the lights or the budget
     float clusterDistance_ = 6000.0f;
 };
 

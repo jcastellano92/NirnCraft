@@ -140,6 +140,16 @@ void setAblateEnv(uint32_t v) {
 #endif
 }
 
+// an environment variable for what follows (empty: unset)
+void setEnvVar(const std::string& k, const std::string& v) {
+#ifdef _WIN32
+    _putenv_s(k.c_str(), v.c_str());
+#else
+    if (v.empty()) unsetenv(k.c_str());
+    else setenv(k.c_str(), v.c_str(), 1);
+#endif
+}
+
 uint32_t envAblate() {
     const char* v = std::getenv("ATLAS_ABLATE");
     return v ? uint32_t(std::strtoul(v, nullptr, 0)) : 0u;
@@ -385,6 +395,35 @@ int main(int argc, char** argv) {
                 return 2;
             }
             std::fprintf(stderr, "atlas_render: %zu far lights from the export\n", ls.size());
+        }
+        if (num(a, "lightsynth", 0) > 0) {
+            // lightsynth=N: N far lights in towns of 64 scattered over 24 km around the camera (a world's far towns, as the
+            // game registers them: what the far-light binning is measured on), group 2
+            int n = int(num(a, "lightsynth", 0));
+            std::vector<AtlasLight> ls;
+            uint32_t sd = 12345u;
+            auto rnd = [&] {
+                sd = sd * 1664525u + 1013904223u;
+                return double(sd >> 8) / double(1u << 24);
+            };
+            double tx = 0, tz = 0;
+            for (int i = 0; i < n; i++) {
+                if (i % 64 == 0) tx = x + (rnd() - 0.5) * 24000.0, tz = z + (rnd() - 0.5) * 24000.0;
+                AtlasLight l{};
+                l.pos[0] = tx + (rnd() - 0.5) * 120.0;
+                l.pos[2] = tz + (rnd() - 0.5) * 120.0;
+                l.pos[1] = std::fmax(atlas_preview_height(ctx, l.pos[0], l.pos[2]), 63.0) + 1.0 + rnd() * 6.0;
+                l.radius = 1.0f;
+                l.intensity = float(0.3 + 0.7 * rnd());
+                l.rgb = 0xFFu | 0xC0u << 8 | 0x70u << 16;
+                l.kind = i % 5 == 0 ? ATLAS_LIGHT_FIRE : ATLAS_LIGHT_NIGHT;
+                ls.push_back(l);
+            }
+            if (atlas_set_light_group(ctx, 2, ls.data(), uint32_t(ls.size())) != ATLAS_OK) {
+                std::fprintf(stderr, "lights: %s\n", atlas_last_error(ctx));
+                return 2;
+            }
+            std::fprintf(stderr, "atlas_render: %zu synthetic far lights\n", ls.size());
         }
         loadMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - l0).count();
         std::fprintf(stderr, "atlas_render: export: %zu sections, %zu materials (%zu shaped) in %.0f ms, blocks x %d..%d z %d..%d\n", ex.sections, ex.states,
@@ -1071,6 +1110,217 @@ int main(int argc, char** argv) {
         std::fclose(cf);
         std::printf("{\"backend\":\"%s\",\"frames\":%d,\"groupsOn\":%s,\"groupsBuildMs\":%.1f}\n", backendName.c_str(), n,
                     groups ? "true" : "false", groupsMs);
+        atlas_destroy(ctx);
+        return 0;
+    }
+    // seq=static|turn|walk[,...] seqframes=N (the near light's adaptivity, docs/ATLAS-RENDERER-PLAN.md "The light by
+    // need"): the arguments' camera rendered once as usual (the grid settled), then for each kind seqwarm frames (default
+    // 8) of the starting camera, unmeasured, and N frames in a row from one context, as a game's frames come (the
+    // history carries over). static: the camera held; turn: seqrate degrees of yaw a frame (default 1.5); walk: seqrate
+    // blocks forward a frame (default 0.072: 4.3 blocks a second at 60 fps). The host's TAA jitter: taa=tiny (default:
+    // a thousandth of a pixel, so the temporal cycles run without the rays moving) | halton (8 phases, as the game) |
+    // off. seqsave=a,b,..: those frames written as <out>_<kind>NNN.png (the pack's look), seqsave=all every one.
+    // seqref=K: instead of the sequences, each saved frame's converged reference (K frames of its camera held still,
+    // averaged in linear light) as <out>_<kind>NNN_ref.png. Static views report the display's frame-to-frame flicker
+    // (pixels whose largest channel moves by more than 8 levels; the mean absolute change). One JSON line a frame, a
+    // summary a kind. With ATLAS_TIMING_DEVICE_OUTPUTS=1 nothing is read back (timings as in game; no images).
+    if (a.count("seq")) {
+        if (int rc = renderOne(out, x, y, z, num(a, "yaw", 0), num(a, "pitch", mcCam ? 0 : -4), num(a, "fov", 70), w, h)) return rc;
+        std::vector<std::string> kinds;
+        {
+            std::string ks = str(a, "seq", "static");
+            for (size_t p = 0; p <= ks.size();) {
+                size_t q = ks.find(',', p);
+                if (q == std::string::npos) q = ks.size();
+                if (q > p) kinds.push_back(ks.substr(p, q - p));
+                p = q + 1;
+            }
+        }
+        std::string taa = str(a, "taa", "tiny");
+        int n = std::max(1, int(num(a, "seqframes", 60))), warm = int(num(a, "seqwarm", 8));
+        int refK = int(num(a, "seqref", 0));
+        bool readback = std::getenv("ATLAS_TIMING_DEVICE_OUTPUTS") == nullptr;
+        std::string saveList = str(a, "seqsave", "");
+        auto saved = [&](int i) {
+            if (saveList == "all") return true;
+            std::string k = "," + saveList + ",";
+            return k.find("," + std::to_string(i) + ",") != std::string::npos;
+        };
+        std::string sb = out.size() > 4 ? out.substr(0, out.size() - 4) : out;
+        double yaw0 = num(a, "yaw", 0), pitch0 = num(a, "pitch", mcCam ? 0 : -4), fov0 = num(a, "fov", 70);
+        size_t px = size_t(w) * h;
+        std::vector<float> lin(px * 4), nl(px * 4), dep(px);
+        std::vector<uint32_t> nrm(px), disp(px), prevDisp;
+        AtlasFrameOutput so{nullptr, nrm.data(), dep.data(), lin.data(), (f.flags & ATLAS_FRAME_NEAR_LIGHT) ? nl.data() : nullptr};
+        auto halton = [](int i, int b) {
+            float r = 0, fr = 1.0f / float(b);
+            for (; i; i /= b, fr /= float(b)) r += fr * float(i % b);
+            return r;
+        };
+        auto toDisplay = [&](const std::vector<float>& L, std::vector<uint32_t>& d) {
+            for (size_t i = 0; i < px; i++) {
+                float cov = std::fmin(1.0f, std::fmax(0.0f, L[i * 4 + 3]));
+                packlook::C3 c{L[i * 4] + skyHdr.r * (1 - cov), L[i * 4 + 1] + skyHdr.g * (1 - cov), L[i * 4 + 2] + skyHdr.b * (1 - cov)};
+                packlook::C3 ds = packlook::display(c, look);
+                auto q = [](float v) { return uint32_t(std::fmin(255.0f, std::fmax(0.0f, v * 255.0f + 0.5f))); };
+                d[i] = 0xFF000000u | q(ds.r) | q(ds.g) << 8 | q(ds.b) << 16;
+            }
+        };
+        auto camAt = [&](const std::string& kind, int i, double& cx, double& cy, double& cz, double& yw) {
+            double rate = num(a, "seqrate", kind == "turn" ? 1.5 : 0.072);
+            cx = x, cy = y, cz = z, yw = yaw0;
+            double camYaw = (mcCam ? yaw0 + 180.0 : yaw0) * PI / 180;
+            if (kind == "turn") yw = yaw0 + rate * i;
+            if (kind == "walk") cx = x + std::sin(camYaw) * rate * i, cz = z - std::cos(camYaw) * rate * i;
+        };
+        int frameNo = 0;
+        auto frameAt = [&](double cx, double cy, double cz, double yw) -> int {
+            f.cameraPos[0] = cx, f.cameraPos[1] = cy, f.cameraPos[2] = cz;
+            double camYaw = mcCam ? yw + 180.0 : yw, camPitch = mcCam ? -pitch0 : pitch0;
+            atlas::cameraMatrix(camYaw, camPitch, fov0, double(w) / h, f.invViewProj);
+            if (taa == "halton") {
+                int k = frameNo % 8 + 1;
+                atlas_set_jitter(ctx, halton(k, 2) - 0.5f, -(halton(k, 3) - 0.5f));
+            } else if (taa == "tiny") {
+                atlas_set_jitter(ctx, 1e-3f, 0.0f);
+            } else {
+                atlas_set_jitter(ctx, 0.0f, 0.0f);
+            }
+            frameNo++;
+            double c[3] = {cx, cy, cz};
+            if (!serverWindow(cx, cz)) return 2;
+            if (atlas_update(ctx, c, updateBudget) != ATLAS_OK) return 3;
+            if (atlas_render(ctx, &f, &so) != ATLAS_OK) {
+                std::fprintf(stderr, "render: %s\n", atlas_last_error(ctx));
+                return 4;
+            }
+            return 0;
+        };
+        for (const std::string& kind : kinds) {
+            if (refK > 0) {
+                // the converged reference of each saved frame: K frames of its camera, averaged in linear light
+                for (int i = 0; i < n; i++) {
+                    if (!saved(i)) continue;
+                    double cx, cy, cz, yw;
+                    camAt(kind, i, cx, cy, cz, yw);
+                    std::vector<double> accL(px * 4, 0.0);
+                    for (int r = 0; r < refK; r++) {
+                        if (int rc = frameAt(cx, cy, cz, yw)) return rc;
+                        for (size_t p = 0; p < px * 4; p++) accL[p] += lin[p];
+                    }
+                    std::vector<float> avg(px * 4);
+                    for (size_t p = 0; p < px * 4; p++) avg[p] = float(accL[p] / refK);
+                    toDisplay(avg, disp);
+                    char nm[48];
+                    std::snprintf(nm, sizeof nm, "_%s%03d_ref.png", kind.c_str(), i);
+                    atlas::writePng(sb + nm, disp.data(), w, h);
+                    std::printf("{\"seqRef\":\"%s\",\"frame\":%d,\"frames\":%d}\n", kind.c_str(), i, refK);
+                }
+                continue;
+            }
+            // seqvariants=A|B|..: each a comma list of NAME=VALUE environment settings (read by the core every frame:
+            // ATLAS_LIGHT, ATLAS_LIGHT_RATE, ATLAS_NEAR_FULLRES, ATLAS_TARGET_MS, ATLAS_ABLATE), run in turn seqrounds
+            // times (default 1) in this one process, so a GPU shared with others measures every variant alike; images and
+            // lines tagged _v<i>
+            std::vector<std::string> variants;
+            {
+                std::string vs = str(a, "seqvariants", "");
+                for (size_t p = 0; p <= vs.size();) {
+                    size_t q = vs.find('|', p);
+                    if (q == std::string::npos) q = vs.size();
+                    variants.push_back(vs.substr(p, q - p));
+                    p = q + 1;
+                }
+            }
+            int rounds = std::max(1, int(num(a, "seqrounds", 1)));
+            std::vector<std::vector<double>> allMs(variants.size());
+            std::vector<std::string> setNames;
+            for (int round = 0; round < rounds; round++)
+                for (size_t v = 0; v < variants.size(); v++) {
+                    for (const std::string& nm : setNames) setEnvVar(nm, "");
+                    setNames.clear();
+                    for (size_t p = 0; p < variants[v].size();) {
+                        size_t q = variants[v].find(',', p);
+                        if (q == std::string::npos) q = variants[v].size();
+                        std::string kv = variants[v].substr(p, q - p);
+                        size_t eq = kv.find('=');
+                        if (eq != std::string::npos) {
+                            setEnvVar(kv.substr(0, eq), kv.substr(eq + 1));
+                            setNames.push_back(kv.substr(0, eq));
+                        }
+                        p = q + 1;
+                    }
+                    std::string tag = variants.size() > 1 ? "_v" + std::to_string(v) : "";
+                    for (int i = 0; i < warm; i++) {
+                        double cx, cy, cz, yw;
+                        camAt(kind, 0, cx, cy, cz, yw);
+                        if (int rc = frameAt(cx, cy, cz, yw)) return rc;
+                    }
+                    prevDisp.clear();
+                    std::vector<double> ms, flick;
+                    for (int i = 0; i < n; i++) {
+                        double cx, cy, cz, yw;
+                        camAt(kind, i, cx, cy, cz, yw);
+                        if (int rc = frameAt(cx, cy, cz, yw)) return rc;
+                        atlas_get_stats(ctx, &st);
+                        ms.push_back(st.lastFrameMs);
+                        std::string extra;
+                        if (readback) {
+                            toDisplay(lin, disp);
+                            if (kind == "static" && !prevDisp.empty()) {
+                                size_t over = 0, land = 0;
+                                double sum = 0;
+                                for (size_t p = 0; p < px; p++) {
+                                    if (dep[p] < -1e6f) continue;  // (the sky: PRIMARY_NEAR's depth is minus the distance there)
+                                    land++;
+                                    int m = 0;
+                                    for (int k = 0; k < 3; k++) {
+                                        int d = std::abs(int((disp[p] >> (8 * k)) & 255) - int((prevDisp[p] >> (8 * k)) & 255));
+                                        m = std::max(m, d);
+                                        sum += d / 3.0;
+                                    }
+                                    over += m > 8;
+                                }
+                                double o8 = land ? double(over) / land : 0.0;
+                                flick.push_back(o8);
+                                char b[160];
+                                std::snprintf(b, sizeof b, ",\"flickerOver8\":%.5f,\"flickerMean\":%.4f", o8, land ? sum / land : 0.0);
+                                extra = b;
+                            }
+                            prevDisp = disp;
+                            if (saved(i)) {
+                                char nm[48];
+                                std::snprintf(nm, sizeof nm, "_%s%s%03d.png", kind.c_str(), tag.c_str(), i);
+                                atlas::writePng(sb + nm, disp.data(), w, h);
+                            }
+                        }
+                        std::printf("{\"seq\":\"%s%s\",\"frame\":%d,\"ms\":%.3f,\"steps\":%llu%s}\n", kind.c_str(), tag.c_str(), i, st.lastFrameMs,
+                                    (unsigned long long)st.raySteps, extra.c_str());
+                    }
+                    allMs[v].insert(allMs[v].end(), ms.begin(), ms.end());
+                    std::vector<double> t = ms;
+                    std::sort(t.begin(), t.end());
+                    double mean = 0, fl = 0;
+                    for (double v : ms) mean += v / double(ms.size());
+                    for (double v : flick) fl += v / double(flick.size());
+                    // the render thread's far-light cost in building the frame (atlas_info glRender.lightsMs, eased)
+                    std::string inf = atlas_info(ctx), lightsMs = "null";
+                    auto lp = inf.find("\"lightsMs\":");
+                    if (lp != std::string::npos) lightsMs = inf.substr(lp + 11, inf.find_first_of(",}", lp + 11) - lp - 11);
+                    std::printf("{\"seqSummary\":\"%s%s\",\"round\":%d,\"frames\":%d,\"meanMs\":%.3f,\"medianMs\":%.3f,\"p90Ms\":%.3f,\"maxMs\":%.3f,"
+                                "\"flickerOver8\":%.5f,\"cpuLightsMs\":%s}\n",
+                                kind.c_str(), tag.c_str(), round, n, mean, t[t.size() / 2], t[t.size() * 9 / 10], t.back(), fl, lightsMs.c_str());
+                }
+            if (variants.size() > 1 || rounds > 1)
+                for (size_t v = 0; v < variants.size(); v++) {
+                    std::vector<double> t = allMs[v];
+                    std::sort(t.begin(), t.end());
+                    std::printf("{\"seqVariant\":\"%s\",\"kind\":\"%s\",\"variant\":\"%s\",\"frames\":%zu,\"medianMs\":%.3f,\"p25Ms\":%.3f,\"p75Ms\":%.3f}\n",
+                                ("_v" + std::to_string(v)).c_str(), kind.c_str(), variants[v].c_str(), t.size(), t[t.size() / 2],
+                                t[t.size() / 4], t[t.size() * 3 / 4]);
+                }
+            for (const std::string& nm : setNames) setEnvVar(nm, "");
+        }
         atlas_destroy(ctx);
         return 0;
     }

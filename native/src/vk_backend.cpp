@@ -36,6 +36,9 @@
 #include "atlas_nearlight_spv.h"  // generated: its nearLightMain and nearUpsampleMain (the half-resolution near light)
 #include "atlas_nearup_spv.h"
 #include "atlas_neartemporal_spv.h"
+#include "atlas_lightcull_spv.h"   // generated: the far lights culled, admitted and binned on the GPU
+#include "atlas_lightadmit_spv.h"
+#include "atlas_lightbin_spv.h"
 #include "atlas_far_spv.h"      // generated: atlas_far_spv[], atlas_far_spv_size (bytes)
 #include "atlas_ingest_spv.h"   // generated
 #include "atlas_publish_spv.h"  // generated
@@ -184,7 +187,7 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 34;
+constexpr uint32_t BINDINGS = 39;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
@@ -192,7 +195,14 @@ constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPT
                    B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20, B_NOISE_TEX = 21, B_PREV_CLOUD = 22,
                    B_PREV_CLOUD_DEPTH = 23, B_SUNMAP = 24, B_GROUPS = 25, B_NEAR_INFO = 26, B_NEAR_LIGHT = 27,
                    B_PREV_NEAR_LIGHT = 28, B_VG_CHUNKS = 29, B_VG_BLOCKS = 30, B_VG_BITS = 31, B_VG_POOL = 32,
-                   B_TEX = 33;  // (abi 0.16) the near field's textures (voxgrid.hpp packTextures)
+                   B_TEX = 33,  // (abi 0.16) the near field's textures (voxgrid.hpp packTextures)
+                   // the far lights on the GPU (FRAME_GPU_LIGHTS_BIT): the index (shared, uploaded when it changes), this
+                   // frame's candidates and its tile lists (atlas_far.slang lightCullMain)
+                   B_LIGHT_SRC = 34, B_LIGHT_CAND = 35, B_LIGHT_LIST = 36,
+                   // the near light's own samples per pixel in its history (nearTemporalMain), this frame's and the last's
+                   B_NEAR_AGE = 37, B_PREV_NEAR_AGE = 38;
+// lightList's words before the tiles' (counters, the score histogram) and a tile's (count + 64 indices)
+constexpr uint32_t LIGHT_LIST_HEAD = 260, LIGHT_TILE_WORDS = 65;
 // the level-0 grid's build kernels (atlas_voxgrid.slang): chunks, blocks, bits, pool, jobs, summed-volume table
 constexpr uint32_t VG_BINDINGS = 6;
 // the scene's buffers (two copies, staged off the render thread)
@@ -210,7 +220,7 @@ constexpr uint32_t PASS_PUSH_BYTES = 16;  // width, height, nearLight, pre-expos
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
            b == B_COUNTERS || b == B_NEAR || b == B_ACTORS || b == B_CLOUD || b == B_CLOUD_DEPTH || b == B_SURFACE ||
-           b == B_NEAR_INFO || b == B_NEAR_LIGHT;
+           b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST || b == B_NEAR_AGE;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT,
@@ -326,6 +336,9 @@ struct Slot {
     int vgOx = 0, vgOz = 0;  // the batch's window origin (sections)
     bool vgClear = false, vgStates = false, vgTimed = false;
     uint32_t vgSections = 0;
+    // the far lights on the GPU this frame (FRAME_GPU_LIGHTS_BIT): the index's records, the screen's 32 px tiles
+    bool gpuLights = false;
+    uint32_t lightRecords = 0, lightTiles = 0;
 };
 
 class VulkanBackend final : public Backend {
@@ -386,6 +399,10 @@ public:
             if (nearUpShader_) vkDestroyShaderModule(dev_, nearUpShader_, nullptr);
             if (nearTempPipe_) vkDestroyPipeline(dev_, nearTempPipe_, nullptr);
             if (nearTempShader_) vkDestroyShaderModule(dev_, nearTempShader_, nullptr);
+            for (int i = 0; i < 3; i++) {
+                if (lightPipe_[i]) vkDestroyPipeline(dev_, lightPipe_[i], nullptr);
+                if (lightShader_[i]) vkDestroyShaderModule(dev_, lightShader_[i], nullptr);
+            }
             destroyPipe(farPipe_, farLayout_, farSetLayout_, farShader_);
             destroyPipe(publishPipe_, publishLayout_, publishSetLayout_, publishShader_);
             destroyPipe(ingestPipe_, ingestLayout_, ingestSetLayout_, ingestShader_);
@@ -400,6 +417,14 @@ public:
     }
 
     const char* name() const override { return deviceName_; }
+    // the far lights culled and binned on the device (ATLAS_CPU_LIGHTS=1: on the CPU, as before; measurements)
+    bool gpuLights() const override {
+        static const bool cpu = [] {
+            const char* e = std::getenv("ATLAS_CPU_LIGHTS");
+            return e && *e == '1';
+        }();
+        return !cpu;
+    }
 
     std::string info() const override {
         auto q = [](const std::string& s) { return "\"" + jsonEscape(s) + "\""; };
@@ -488,6 +513,17 @@ public:
             cp.stage.module = nearTempShader_;
             if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &nearTempPipe_) != VK_SUCCESS)
                 return fail(err, "near temporal pipeline");
+            // the far lights on the GPU: cull, admit, bin
+            const uint32_t* lcode[3] = {atlas_lightcull_spv, atlas_lightadmit_spv, atlas_lightbin_spv};
+            const size_t lsize[3] = {atlas_lightcull_spv_size, atlas_lightadmit_spv_size, atlas_lightbin_spv_size};
+            for (int i = 0; i < 3; i++) {
+                smci.codeSize = lsize[i];
+                smci.pCode = lcode[i];
+                if (vkCreateShaderModule(dev_, &smci, nullptr, &lightShader_[i]) != VK_SUCCESS) return fail(err, "far light shader");
+                cp.stage.module = lightShader_[i];
+                if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &lightPipe_[i]) != VK_SUCCESS)
+                    return fail(err, "far light pipeline");
+            }
         }
         std::vector<VkDescriptorType> pubTypes = {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
@@ -604,13 +640,20 @@ public:
         const bool primaryNear = (frame.dims[2] & FRAME_PRIMARY_NEAR_BITS) != 0;
         const bool nearLight = (frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && ((in.nearDepth && in.nearInfo) || primaryNear);
         if (!nearLight) frame.dims[2] &= ~FRAME_NEAR_LIGHT_BIT;
+        // (PRIMARY_NEAR_LIT: the light by need, as in game; ATLAS_NEAR_FULLRES=1: every pixel lit in the far pass)
+        {
+            const char* fullEnv = std::getenv("ATLAS_NEAR_FULLRES");
+            const bool nearFull = fullEnv && *fullEnv == '1';
+            if (nearLight && primaryNear && (frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) && !nearFull) frame.dims[2] |= FRAME_NEAR_SPLIT_BIT;
+            else frame.dims[2] &= ~FRAME_NEAR_SPLIT_BIT;
+        }
         hostNearInputs_ = true;  // (the CPU writes the near inputs here, also when the outputs stay on the device)
         if (!prepare(s, in, frame, !deviceOnly, err)) return false;
         if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, Mem::HostWrite, err)) return false;
         if (nearLight && in.nearInfo && !upload(s.bufs[B_NEAR_INFO], in.nearInfo, px * 4, false, Mem::HostWrite, err)) return false;
         refreshDescriptors(s);
         begin(s);
-        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
+        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0);
         if (deviceOnly) {
             if (!submit(s, nullptr, nullptr, err) || !waitSlot(s, gpuMs, err)) return false;
             out.color.assign(px * 4, 0.0f);
@@ -728,7 +771,10 @@ public:
         // in the far pass, as the host render does (read each frame: atlas_gl_test switches it for its parity check)
         const char* fullEnv = std::getenv("ATLAS_NEAR_FULLRES");
         const bool nearFull = fullEnv && *fullEnv == '1';
-        if (nearLight && !nearFull && !primaryNear) frame.dims[2] |= FRAME_NEAR_SPLIT_BIT;
+        // (PRIMARY_NEAR_LIT, the unified field: the light by need, atlas_far.slang nearLightMain; the G-buffer mode keeps
+        // its full-rate light in the far pass)
+        const bool lit = (in.frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) != 0;
+        if (nearLight && !nearFull && (!primaryNear || lit)) frame.dims[2] |= FRAME_NEAR_SPLIT_BIT;
         else frame.dims[2] &= ~FRAME_NEAR_SPLIT_BIT;
         hostNearInputs_ = host && nearLight && !primaryNear;
         const Mem nearKind = hostNearInputs_ ? Mem::HostWrite : Mem::DeviceOnly;
@@ -1617,10 +1663,30 @@ private:
             if (!upload(shared_[B_TEX], src, n * 4, false, Mem::HostWrite, err)) return false;
             texRevision_ = in.textures ? in.texturesRevision : 0;
         }
+        // the far lights on the GPU: the index when it changed (a new buffer; frames in flight keep the old one)
+        s.gpuLights = (frame.dims[2] & FRAME_GPU_LIGHTS_BIT) != 0 && in.lights && in.lightRecords > 0;
+        if (!shared_[B_LIGHT_SRC].buf || (s.gpuLights && in.lightsRevision != lightRevision_)) {
+            retire(shared_[B_LIGHT_SRC]);
+            static const Float4 none{};
+            const Float4* src = s.gpuLights ? in.lights->data() : &none;
+            size_t n = s.gpuLights ? in.lights->size() : 1;
+            if (!upload(shared_[B_LIGHT_SRC], src, n * sizeof(Float4), false, Mem::HostWrite, err)) return false;
+            lightRevision_ = s.gpuLights ? in.lightsRevision : ~0ull;
+        }
+        s.lightRecords = s.gpuLights ? in.lightRecords : 0;
+        s.lightTiles = ((w + 31) / 32) * ((h + 31) / 32);
+        if (!ensure(s.bufs[B_LIGHT_CAND], size_t(std::max<uint32_t>(s.lightRecords, 1)) * 64, false, Mem::DeviceOnly, err) ||
+            !ensure(s.bufs[B_LIGHT_LIST], (size_t(LIGHT_LIST_HEAD) + size_t(s.lightTiles) * LIGHT_TILE_WORDS) * 4, false,
+                    Mem::DeviceOnly, err))
+            return false;
         // host path: outputs in cached system memory (CPU reads from BAR are uncached); GL path: device local only
         Mem outKind = readback ? Mem::Readback : Mem::DeviceOnly;
         // the near inputs: written by the CPU (host path; host copies with the near light), else by the ingest pass
         Mem nearKind = readback || hostNearInputs_ ? Mem::HostWrite : Mem::DeviceOnly;
+        // (PRIMARY_NEAR_LIT's split: the far pass writes its own hits there for the light passes, device memory)
+        const bool pnSplit = (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) && (frame.dims[2] & FRAME_PRIMARY_NEAR_BITS);
+        if (pnSplit) nearKind = Mem::DeviceOnly;
+        const size_t nearBytes = pnSplit ? px * 4 : 16;
         cloudDiv_ = (frame.dims[2] & 0x80u) ? 4u : 2u;  // FRAME_CLOUDS_QUARTER
         bool ok = upload(s.bufs[B_FRAME], &frame, sizeof(FrameGpu), true, Mem::HostWrite, err) &&
                   upload(s.bufs[B_PALETTE], in.palette->data(), in.palette->size() * sizeof(MaterialGpu), false, Mem::HostWrite, err) &&
@@ -1628,15 +1694,18 @@ private:
                   upload(s.bufs[B_ACTORS], in.actors.data(), in.actors.size() * sizeof(ActorGpu), false, Mem::HostWrite, err) &&
                   ensure(s.bufs[B_COLOR], px * 16, false, outKind, err) && ensure(s.bufs[B_NORMAL], px * 4, false, outKind, err) &&
                   ensure(s.bufs[B_DEPTH], px * 4, false, outKind, err) && ensure(s.bufs[B_COUNTERS], px * 4, false, outKind, err) &&
-                  ensure(s.bufs[B_NEAR], 16, false, nearKind, err) && ensure(s.bufs[B_NEAR_INFO], 16, false, nearKind, err) &&
+                  ensure(s.bufs[B_NEAR], nearBytes, false, nearKind, err) && ensure(s.bufs[B_NEAR_INFO], nearBytes, false, nearKind, err) &&
                   // the near light: a pixel's worth unless the frame lights the near field (the kernel writes it then)
                   ensure(s.bufs[B_NEAR_LIGHT], (frame.dims[2] & FRAME_NEAR_LIGHT_BIT) ? px * 16 : 16, false, outKind, err) &&
                   ensure(s.bufs[B_CLOUD], size_t((w + 1) / 2) * ((h + 1) / 2) * 16, false, Mem::DeviceOnly, err) &&
                   ensure(s.bufs[B_CLOUD_DEPTH], size_t((w + 1) / 2) * ((h + 1) / 2) * 4, false, Mem::DeviceOnly, err);
         if (ok) {
             VkBuffer before = s.bufs[B_SURFACE].buf;
-            ok = ensure(s.bufs[B_SURFACE], px * 4, false, Mem::DeviceOnly, err);
-            if (ok && s.bufs[B_SURFACE].buf != before) s.surfaceFresh = true;  // filled with "no surface" in record
+            VkBuffer ageBefore = s.bufs[B_NEAR_AGE].buf;
+            ok = ensure(s.bufs[B_SURFACE], px * 4, false, Mem::DeviceOnly, err) &&
+                 ensure(s.bufs[B_NEAR_AGE], px * 4, false, Mem::DeviceOnly, err);
+            // filled with "no surface" and "no samples" in record
+            if (ok && (s.bufs[B_SURFACE].buf != before || s.bufs[B_NEAR_AGE].buf != ageBefore)) s.surfaceFresh = true;
         }
         return ok;
     }
@@ -1668,6 +1737,7 @@ private:
                              : i == B_PREV_CLOUD ? ps.bufs[B_CLOUD]
                              : i == B_PREV_CLOUD_DEPTH ? ps.bufs[B_CLOUD_DEPTH]
                              : i == B_PREV_NEAR_LIGHT ? (ps.bufs[B_NEAR_LIGHT].buf ? ps.bufs[B_NEAR_LIGHT] : s.bufs[B_NEAR_LIGHT])
+                             : i == B_PREV_NEAR_AGE ? (ps.bufs[B_NEAR_AGE].buf ? ps.bufs[B_NEAR_AGE] : s.bufs[B_NEAR_AGE])
                              : perSlot(i) ? s.bufs[i] : (isScene(i) ? sc.bufs[i] : shared_[i]);
                 info[i] = {b.buf, 0, i == B_FRAME ? uniformRange(b) : storageRange(b)};
                 wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
@@ -1927,6 +1997,7 @@ private:
         }
         if (s.surfaceFresh) {
             vkCmdFillBuffer(s.cmd, s.bufs[B_SURFACE].buf, 0, VK_WHOLE_SIZE, 0x7149F2CAu);  // 1e30f: no surface yet
+            vkCmdFillBuffer(s.cmd, s.bufs[B_NEAR_AGE].buf, 0, VK_WHOLE_SIZE, 0u);
             VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
             mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
             mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
@@ -1935,6 +2006,25 @@ private:
             s.surfaceFresh = false;
         }
         vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farLayout_, 0, 1, &s.farSet, 0, nullptr);
+        if (s.gpuLights) {
+            // the far lights: counters and histogram cleared, every record culled, the budget admitted, the tiles binned
+            vkCmdFillBuffer(s.cmd, s.bufs[B_LIGHT_LIST].buf, 0, LIGHT_LIST_HEAD * 4, 0u);
+            VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+            mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            vkCmdPipelineBarrier(s.cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0,
+                                 nullptr, 0, nullptr);
+            uint32_t groups = (s.lightRecords + 63) / 64;
+            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lightPipe_[0]);
+            vkCmdDispatch(s.cmd, groups, 1, 1);
+            computeBarrier(s.cmd);
+            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lightPipe_[1]);
+            vkCmdDispatch(s.cmd, groups, 1, 1);
+            computeBarrier(s.cmd);
+            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lightPipe_[2]);
+            vkCmdDispatch(s.cmd, s.lightTiles, 1, 1);
+            computeBarrier(s.cmd);
+        }
         if (clouds) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, cloudPipe_);
             uint32_t dv = cloudDiv_;
@@ -2536,6 +2626,9 @@ private:
     VkPipeline nearLightPipe_ = VK_NULL_HANDLE, nearUpPipe_ = VK_NULL_HANDLE;
     VkShaderModule nearLightShader_ = VK_NULL_HANDLE, nearUpShader_ = VK_NULL_HANDLE;
     VkPipeline nearTempPipe_ = VK_NULL_HANDLE;
+    VkPipeline lightPipe_[3] = {};  // the far lights on the GPU: lightCullMain, lightAdmitMain, lightBinMain
+    VkShaderModule lightShader_[3] = {};
+    uint64_t lightRevision_ = ~0ull;
     // the level-0 grid (voxgrid.hpp): its build kernels, their layout, the summed-volume table, the last build's GPU time
     static constexpr int VG_KERNELS = 5;  // vgSectionMain, vgSatX, vgSatZ, vgSatY, vgGrowMain
     VkPipeline vgPipes_[VG_KERNELS] = {};

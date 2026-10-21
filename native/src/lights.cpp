@@ -150,12 +150,51 @@ void Lights::setGroup(uint32_t group, const AtlasLight* l, uint32_t n) {
     if (now.empty()) groupCells_.erase(group);
     else groupCells_[group] = std::move(now);
     index_ = std::move(idx);
+    revision_++;
 }
 
 void Lights::setBudget(uint32_t maxPerFrame, float clusterDistance) {
     std::lock_guard<std::mutex> lock(mu_);
     maxPerFrame_ = std::min(maxPerFrame, 65536u);
     clusterDistance_ = std::max(0.0f, clusterDistance);
+    revision_++;
+}
+
+bool Lights::packGpu(uint64_t& revision, std::vector<Float4>& out, uint32_t& records) const {
+    std::shared_ptr<const LightIndex> idx;
+    uint32_t budget;
+    float clusterDist;
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        if (revision == revision_) return false;
+        revision = revision_;
+        idx = index_;
+        budget = maxPerFrame_;
+        clusterDist = clusterDistance_;
+    }
+    auto bitsF = [](uint32_t u) {
+        float f;
+        std::memcpy(&f, &u, 4);
+        return f;
+    };
+    size_t cells = idx ? idx->cells.size() : 0, n = 0;
+    for (size_t i = 0; i < cells; i++) n += idx->cells[i]->fine.size() + idx->cells[i]->coarse.size();
+    out.assign(1 + cells + 3 * n, Float4{});
+    out[0] = Float4{{bitsF(uint32_t(cells)), bitsF(uint32_t(n)), clusterDist, bitsF(budget)}};
+    size_t at = 1 + cells;
+    for (size_t i = 0; i < cells; i++) {
+        const LightIndex::Cell& c = *idx->cells[i];
+        out[1 + i] = Float4{{bitsF(uint32_t(c.cx)), bitsF(uint32_t(c.cz)), 0.0f, 0.0f}};
+        double x0 = double(c.cx) * CELL, z0 = double(c.cz) * CELL;
+        for (int coarse = 0; coarse < 2; coarse++)
+            for (const Rec& r : coarse ? c.coarse : c.fine) {
+                out[at++] = Float4{{float(r.x - x0), float(r.y), float(r.z - z0), r.radius}};
+                out[at++] = Float4{{r.r, r.g, r.b, r.intensity}};
+                out[at++] = Float4{{bitsF(r.kind), r.seed, bitsF(uint32_t(i)), bitsF(uint32_t(coarse))}};
+            }
+    }
+    records = uint32_t(n);
+    return true;
 }
 
 size_t Lights::total() const {

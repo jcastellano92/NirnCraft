@@ -145,12 +145,28 @@ add_custom_command(
           -o "${GEN}/atlas_far_cpu.cpp"
   DEPENDS ${KERNEL_DEPS} COMMENT "slangc atlas_far -> C++ (CPU reference)")
 
+# more entry points of the far kernel's module, with its bindings (the far lights on the GPU)
+set(FAR_EXTRA_HEADERS "")
+foreach(pair "lightCullMain;lightcull" "lightAdmitMain;lightadmit" "lightBinMain;lightbin")
+  list(GET pair 0 entry)
+  list(GET pair 1 short)
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_${short}.spv"
+    COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry ${entry} -stage compute -O3 -o "${GEN}/atlas_${short}.spv"
+    DEPENDS ${KERNEL_DEPS} COMMENT "slangc atlas_far:${entry} -> SPIR-V")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_${short}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_${short}.spv -DOUT=${GEN}/atlas_${short}_spv.h -DNAME=atlas_${short}_spv
+            -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_${short}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND FAR_EXTRA_HEADERS "${GEN}/atlas_${short}_spv.h")
+endforeach()
 add_library(atlas_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/groups.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
   src/gl_api.cpp src/lights.cpp src/voxgrid.cpp
   "${GEN}/atlas_far_cpu.cpp" "${GEN}/atlas_far_spv.h" "${GEN}/atlas_publish_spv.h" "${GEN}/atlas_ingest_spv.h"
   "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h" "${GEN}/atlas_nearlight_spv.h" "${GEN}/atlas_nearup_spv.h"
-  "${GEN}/atlas_neartemporal_spv.h" ${VG_HEADERS})
+  "${GEN}/atlas_neartemporal_spv.h" ${VG_HEADERS} ${FAR_EXTRA_HEADERS})
 target_include_directories(atlas_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${ATLAS_VK_INCLUDE}")
 target_compile_definitions(atlas_core PRIVATE ATLAS_BUILD ATLAS_VERSION_STRING="${PROJECT_VERSION}" VK_NO_PROTOTYPES)
 target_link_libraries(atlas_core PRIVATE ${ATLAS_GL_LIBS} Threads::Threads)
