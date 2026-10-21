@@ -152,6 +152,14 @@ Not merged into atlas-render yet: everything on atlas-naadf after 424841c5 and t
   go up at once, the store re-makes them in the background, identical hashes skipped), so the cache saves loading time
   but not GPU work. After the test: send only a cache miss's radius-2 neighbourhood through the store.
 
+## Owner's live test of step 1 (2026-10-21)
+
+Findings and their owners are in [ATLAS-ENGINE.md](ATLAS-ENGINE.md) §2: the GPU decoration failed to start (Mth.SIN
+null in the pack, Java fallback on the CPU: stutter and CPU load; features agent); far placeholder trees vanish up
+close (features agent: far trees from the real placement); fences / walls / panes / bars don't connect and vegetation
+is missing (content agent: multipart and cross models); small green squares in the sky (content agent); stutter to
+be re-measured after the first fix.
+
 ## Open bugs (seen live)
 
 1. **Near shows far stand-ins** (owner, live): the grid's level-0 pool full (`slots 16384/16384, evicted 16915,
