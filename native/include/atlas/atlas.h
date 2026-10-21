@@ -808,9 +808,11 @@ ATLAS_API AtlasStatus atlas_gen_read_page(AtlasGen* h, int32_t cx, int32_t cz, u
    columns at the centre block of their 2^lod squares (AtlasExactSource.fill): outSurface count * 65536 floats
    ((float) TamrielHeight.height, row-major), outWater the same (the sea below y 63, the map's rivers and lakes at
    ceil(level), NaN dry); outBlocks (may be NULL: not made) per column the material rule's top block | the one under it
-   << 16 (generator ids, AtlasSurface.column's: ore veins left out, the biomes as chunks store them); outBiomes (with
-   outBlocks, may be NULL) the biome id at the column's top (dry: the ground's top + 1, else the water's top); outFlags
-   (may be NULL) nonzero where a column is not proven exact. */
+   << 16 (generator ids, AtlasSurface.column's: ore veins left out, the biomes as chunks store them; then, with a map
+   that carries the far section (AtlasGenMap.far), freeze_top_layer's snow layer on top where it lies, the ground
+   under it, and a far road's block on top: FarRoads.surface); outBiomes (with outBlocks, may be NULL) the biome id at
+   the column's top block | flags << 16 (ATLAS_COLUMN_SNOW, ATLAS_COLUMN_FROZEN: its water's top freezes, 8: a far
+   road); outFlags (may be NULL) nonzero where a column is not proven exact. */
 ATLAS_API AtlasStatus atlas_gen_tiles(AtlasGen* h, const int32_t* lodTxTz, uint32_t count, float* outSurface, float* outWater,
                                       uint32_t* outBlocks, uint32_t* outBiomes, uint32_t* outFlags, AtlasGenTimes* times);
 /* Far chunks on the device (GPU only; atlas_page.slang farChunkMain): count (<= 16) lod tiles (tx, tz pairs; lod 1..6),

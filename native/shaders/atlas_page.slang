@@ -951,6 +951,262 @@ uint farBiomeAt(int x, int y, int z) {
     int3 q = zoomQuart(x, y, z);
     return quartBiomeFar(q.x, q.y, q.z);
 }
+// ---- the far columns' extras (MH_FAR: AtlasGenMap.far) ----------------------------------------------------------
+// freeze_top_layer as AtlasSurface.column paints it: snow on the ground of a column whose biome is cold enough at
+// top + 1 (Biome.coldEnoughToSnow) where no plant stands (AtlasSnowCover: the ground cover's share, a roll per patch),
+// ice on cold water; and the far roads (com.nirncraft.roads.FarRoads.surface: RoadPlan.at, RoadStyle, Paver.roll).
+// [0] snow layer id, [1] ice id, [2] blocks, [3] their snow-bearing bits, [4] biomes, [5] per biome (temperature,
+// frozen modifier, covers at, cover count), [6..7] the world seed, [8..9] SimplexNoise.F2, [10..11] G2, [12] the
+// TEMPERATURE_NOISE, [13] BIOME_INFO_NOISE, [14] FROZEN_TEMPERATURE_NOISE (layers), [15] regions, [16] their culture,
+// [17] the road styles (37 words a culture), [18] cultures, [19] RoadPlan's buckets, [20] keys, [21] bucketOff,
+// [22] bucketEdges, [23] edgeInvLen2, [24] 1: a road plan
+static const uint MH_FAR = 13;
+static const uint COL_SNOW = 1u, COL_FROZEN = 2u, COL_ROAD = 8u;  // (ATLAS_COLUMN_SNOW, _FROZEN; 8: a far road)
+static const uint FAR_NONE = 0xFFFFFFFFu;
+uint fw(uint k) { return mw(mh(MH_FAR) + k); }
+uint64_t u64c(uint hi, uint lo) { return (uint64_t(hi) << 32) | uint64_t(lo); }
+double twoM24() { return asdouble(0u, 0x3E700000u); }  // 2^-24
+double twoM53() { return asdouble(0u, 0x3CA00000u); }  // 2^-53
+double jPi() { return asdouble(0x54442D18u, 0x400921FBu); }  // Math.PI
+
+// SimplexNoise.get(x, y) (a record: 64 words of permutation, offsetX, offsetY)
+static const int GRAD_X[12] = {1, -1, 1, -1, 1, -1, 1, -1, 0, 0, 0, 0};
+static const int GRAD_Y[12] = {1, 1, -1, -1, 0, 0, 0, 0, 1, -1, 1, -1};
+static const int GRAD_Z[12] = {0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, -1};
+int snPerm(uint rec, int x) {
+    uint i = uint(x & 255);
+    return int((mw(rec + (i >> 2)) >> ((i & 3u) * 8u)) & 255u);
+}
+double snCorner(int gi, double x, double y) {
+    double t0 = 0.5l - x * x - y * y - 0.0l * 0.0l;
+    if (t0 < 0.0l) return 0.0l;
+    t0 = t0 * t0;
+    return t0 * t0 * (double(GRAD_X[gi]) * x + double(GRAD_Y[gi]) * y + double(GRAD_Z[gi]) * 0.0l);
+}
+[noinline]
+float simplex2(uint rec, double xi, double yi) {
+    double xin = xi + md(rec + 64u), yin = yi + md(rec + 66u);
+    double F2 = md(mh(MH_FAR) + 8u), G2 = md(mh(MH_FAR) + 10u);
+    double s = (xin + yin) * F2;
+    int i = floorD(xin + s), j = floorD(yin + s);
+    double t = double(i + j) * G2;
+    double X0 = double(i) - t, Y0 = double(j) - t;
+    double x0 = xin - X0, y0 = yin - Y0;
+    int i1 = x0 > y0 ? 1 : 0, j1 = x0 > y0 ? 0 : 1;
+    double x1 = x0 - double(i1) + G2, y1 = y0 - double(j1) + G2;
+    double x2 = x0 - 1.0l + 2.0l * G2, y2 = y0 - 1.0l + 2.0l * G2;
+    int ii = i & 255, jj = j & 255;
+    int gi0 = snPerm(rec, ii + snPerm(rec, jj)) % 12;
+    int gi1 = snPerm(rec, ii + i1 + snPerm(rec, jj + j1)) % 12;
+    int gi2 = snPerm(rec, ii + 1 + snPerm(rec, jj + 1)) % 12;
+    double n0 = snCorner(gi0, x0, y0), n1 = snCorner(gi1, x1, y1), n2 = snCorner(gi2, x2, y2);
+    return float(70.0l * (n0 + n1 + n2));
+}
+// NoiseStack.get(x, y): count, then per layer the noise, its frequency (double) and amplitude (float)
+float simplexStack2(uint at, double x, double y) {
+    uint n = mw(at);
+    float v = 0.0f;
+    for (uint k = 0u; k < n; k++) {
+        uint L = at + 1u + k * 71u;
+        double f = md(L + 68u);
+        v = v + mf(L + 70u) * simplex2(L, x * f, y * f);
+    }
+    return v;
+}
+// Biome.getHeightAdjustedTemperature (TemperatureModifier.FROZEN included)
+[noinline]
+float biomeTemperature(uint b, int x, int y, int z) {
+    uint rec = fw(5) + b * 4u;
+    float adj = mf(rec);
+    if (mw(rec + 1u) == 1u) {
+        double large = double(simplexStack2(fw(14), double(x) * 0.05l, double(z) * 0.05l) * 7.0f);
+        double edge = double(simplex2(fw(13), double(x) * 0.2l, double(z) * 0.2l));
+        double ice = large + edge;
+        if (ice < 0.3l) {
+            double small = double(simplex2(fw(13), double(x) * 0.09l, double(z) * 0.09l));
+            if (small < 0.8l) adj = 0.2f;
+        }
+    }
+    int snowLevel = int(hdr(S_SEA)) + 17;
+    if (y > snowLevel) {
+        // (x / 8.0F: a power of two, exact as the product)
+        float v = simplex2(fw(12), double(float(x) * 0.125f), double(float(z) * 0.125f)) * 8.0f;
+        return adj - divF((v + float(y) - float(snowLevel)) * 0.05f, 40.0f);
+    }
+    return adj;
+}
+bool coldEnoughToSnow(uint b, int x, int y, int z) { return !(biomeTemperature(b, x, y, z) >= 0.15f); }
+bool farSnowGround(uint id) { return id < fw(2) && ((mw(fw(3) + (id >> 5u)) >> (id & 31u)) & 1u) != 0u; }
+
+// FloraNoise (hash, value, fbm, worley, smoothstep) and FloraField.sample
+int flHash(int x, int z, uint64_t seed) {
+    uint64_t h = seed ^ u64c(0x9E3779B9u, 0x7F4A7C15u);
+    h = h ^ (uint64_t(int64_t(x)) * u64c(0xC2B2AE3Du, 0x27D4EB4Fu));
+    h = ((h << 31) | (h >> 33)) * u64c(0x165667B1u, 0x9E3779F9u);
+    h = h ^ (uint64_t(int64_t(z)) * u64c(0xD6E8FEB8u, 0x6659FD93u));
+    h = h ^ (h >> 29);
+    h = h * u64c(0xBF58476Du, 0x1CE4E5B9u);
+    h = h ^ (h >> 32);
+    return int(uint(h & uint64_t(0xFFFFFFFFu)));
+}
+double flUnit01(int h) { return double(uint(h) >> 8u) * twoM24(); }
+double flUnit(int h) { return flUnit01(h) * 2.0l - 1.0l; }
+double flFade(double t) { return t * t * t * (t * (t * 6.0l - 15.0l) + 10.0l); }
+double flValue(double x, double z, uint64_t seed) {
+    int x0 = floorD(x), z0 = floorD(z);
+    double fx = flFade(x - double(x0)), fz = flFade(z - double(z0));
+    double a = flUnit(flHash(x0, z0, seed)), b = flUnit(flHash(x0 + 1, z0, seed));
+    double c = flUnit(flHash(x0, z0 + 1, seed)), d = flUnit(flHash(x0 + 1, z0 + 1, seed));
+    double ab = a + (b - a) * fx, cd = c + (d - c) * fx;
+    return ab + (cd - ab) * fz;
+}
+double flFbm(double x, double z, uint64_t seed, int octaves) {
+    double sum = 0.0l, amp = 1.0l, norm = 0.0l;
+    for (int o = 0; o < octaves; o++) {
+        sum = sum + flValue(x, z, seed + uint64_t(int64_t(o)) * u64c(0x632BE59Bu, 0xD9B4E019u)) * amp;
+        norm = norm + amp;
+        amp = amp * 0.5l;
+        double nx = (x * 0.799l - z * 0.602l) * 2.03l + 17.3l;
+        double nz = (x * 0.602l + z * 0.799l) * 2.03l - 9.1l;
+        x = nx;
+        z = nz;
+    }
+    return divD(sum, norm);
+}
+double flWorley(double x, double z, uint64_t seed) {
+    int cx = floorD(x), cz = floorD(z);
+    double best = 9.0l;
+    for (int dx = -1; dx <= 1; dx++)
+        for (int dz = -1; dz <= 1; dz++) {
+            int h = flHash(cx + dx, cz + dz, seed);
+            double px = double(cx + dx) + 0.15l + 0.7l * flUnit01(h);
+            double pz = double(cz + dz) + 0.15l + 0.7l * flUnit01(int(uint(h) * 0x2C1B3C6Du + 0x297A2D39u));
+            double d = (px - x) * (px - x) + (pz - z) * (pz - z);
+            if (d < best) best = d;
+        }
+    return sqrtD(best);
+}
+double flSmooth(double lo, double hi, double v) {
+    if (v <= lo) return 0.0l;
+    if (v >= hi) return 1.0l;
+    double t = divD(v - lo, hi - lo);
+    return t * t * (3.0l - 2.0l * t);
+}
+// a cover record (12 words): perChunk (double), has a density filter, density, floor, salt, scale, coverage,
+// softness, kind (0 fbm, 1 worley), mode (0 inside, 1 outside, 2 edge, 3 any)
+double flSample(uint r, uint64_t worldSeed, double x, double z) {
+    uint mode = mw(r + 10u);
+    if (mode == 3u) return 1.0l;
+    uint64_t seed = worldSeed * u64c(0x5u, 0xDEECE66Du) + uint64_t(int64_t(mi(r + 5u))) * u64c(0x9E3779B9u, 0x7F4A7C15u);
+    double scale = double(mf(r + 6u)), coverage = double(mf(r + 7u));
+    double s = jmaxD(0.02l, double(mf(r + 8u)));
+    double f;
+    if (mw(r + 9u) == 1u) {
+        double d = flWorley(divD(x, scale), divD(z, scale), seed);
+        double rr = jminD(0.75l, sqrtD(divD(coverage, jPi())));
+        d = d + flValue(divD(x, scale * 0.4l), divD(z, scale * 0.4l), seed + uint64_t(77u)) * 0.12l;
+        f = 1.0l - flSmooth(rr - s, rr + s, d);
+    } else {
+        double n = flFbm(divD(x, scale), divD(z, scale), seed, 3);
+        double u = divD(1.0l, 1.0l + expS(-n * divD(1.702l, 0.27l)));
+        double t = 1.0l - coverage;
+        f = flSmooth(t - s, t + s, u);
+    }
+    if (mode == 1u) return 1.0l - f;
+    if (mode == 2u) return jminD(1.0l, 4.0l * f * (1.0l - f));
+    return f;
+}
+// AtlasSnowCover.bare: the share of the ground its ground cover leaves bare
+[noinline]
+double snowBare(uint b, int x, int z) {
+    uint rec = fw(5) + b * 4u;
+    uint at = mw(rec + 2u), n = mw(rec + 3u);
+    if (n == 0u) return 1.0l;
+    uint64_t seed = u64c(fw(7), fw(6));
+    double plants = 0.0l;
+    for (uint k = 0u; k < n; k++) {
+        uint r = at + k * 12u;
+        double keep = 1.0l;
+        if (mw(r + 2u) != 0u) {
+            float dens = mf(r + 3u), flo = mf(r + 4u);
+            keep = double(flo) + double(dens - flo) * flSample(r, seed, double(x), double(z));
+        }
+        plants = plants + divD(md(r), 256.0l) * keep;
+    }
+    return expS(-plants);
+}
+uint64_t scHash(int x, int z, uint64_t salt) {
+    uint64_t h = u64c(fw(7), fw(6)) ^ salt ^ (uint64_t(int64_t(x)) * u64c(0x9E3779B9u, 0x7F4A7C15u))
+               ^ (uint64_t(int64_t(z)) * u64c(0xC2B2AE3Du, 0x27D4EB4Fu));
+    h = (h ^ (h >> 31)) * u64c(0xBF58476Du, 0x1CE4E5B9u);
+    return h ^ (h >> 29);
+}
+// AtlasSnowCover.snows: a bare patch of ~3 blocks (cells jittered per column)
+bool snowSnows(double bare, int x, int z) {
+    if (bare >= 1.0l) return true;
+    uint64_t j = scHash(x, z, uint64_t(0x51ED27u));
+    int cx = floorDivI(x + int(uint(j & uint64_t(1u))) + int(uint((j >> 8) & uint64_t(1u))), 3);
+    int cz = floorDivI(z + int(uint((j >> 16) & uint64_t(1u))) + int(uint((j >> 24) & uint64_t(1u))), 3);
+    return double(scHash(cx, cz, uint64_t(0x5A0Eu)) >> 11) * twoM53() < bare;
+}
+
+// Paver.roll
+int paverRoll(int x, int z) {
+    int h = int(uint(x) * 73428767u ^ uint(z) * 912931u);
+    h = h ^ int(uint(h) >> 13u);
+    h = int(uint(h) * 0x5bd1e995u);
+    h = h ^ int(uint(h) >> 15u);
+    return int(uint(h & 0x7fffffff) % 100u);
+}
+// RoadStyle.cultureAt: the region's culture (TamrielMap.regionIndex as regionPalette)
+int farCulture(int x, int z) {
+    int idx;
+    if (rasterCovers(double(x), double(z)) && !nearForeign(x, z)) idx = regionIndexRaster(x, z);
+    else idx = tamrielSample(x, z).region;
+    if (idx >= 0 && idx < int(fw(15))) return mi(fw(16) + uint(idx));
+    g_bad = g_bad | 16u;  // a generated region: the endless lands are off
+    return 0;
+}
+// FarRoads.surface: the road block over the far column centred at (x, z), span blocks wide, or FAR_NONE
+[noinline]
+uint farRoad(int x, int z, int span, bool wet) {
+    if (fw(24) == 0u) return FAR_NONE;
+    int k = keyFind(fw(20), fw(19), x >> 6, z >> 6);
+    if (k < 0) return FAR_NONE;  // (beyond Tamriel RoadPlan.at asks TilePlanner's plans: not on the device)
+    float px = float(double(x) + 0.5l), pz = float(double(z) + 0.5l);
+    float best = 32.0f * 32.0f;
+    int bestEdge = -1;
+    float bestT = 0.0f;
+    int j1 = mi(fw(21) + uint(k) + 1u);
+    for (int j = mi(fw(21) + uint(k)); j < j1; j++) {
+        int i = mi(fw(22) + uint(j));
+        float ax = rdF(4, i), az = rdF(5, i);
+        float dx = rdF(4, i + 1) - ax, dz = rdF(5, i + 1) - az;
+        float t = ((px - ax) * dx + (pz - az) * dz) * mf(fw(23) + uint(i));
+        t = t < 0.0f ? 0.0f : (t > 1.0f ? 1.0f : t);
+        float qx = ax + dx * t - px, qz = az + dz * t - pz;
+        float d2 = qx * qx + qz * qz;
+        if (d2 < best) {
+            best = d2;
+            bestEdge = i;
+            bestT = t;
+        }
+    }
+    if (bestEdge < 0) return FAR_NONE;
+    int s = rdI(10, bestEdge);
+    int kind = rdI(13, s);
+    int spanT = rdI(9, bestT < 0.5f ? bestEdge : bestEdge + 1);
+    float dist = float(sqrtD(double(best)));
+    if (dist > jmaxF(rdF(12, s), float(span) * 0.5f)) return FAR_NONE;
+    if (spanT == SPAN_TUNNEL) return FAR_NONE;  // under the hill: the far field shows the hill
+    uint st = fw(17) + uint(farCulture(x, z)) * 37u;
+    if (spanT == SPAN_BRIDGE) return mw(st);
+    if (wet) return FAR_NONE;  // fords and culverts: the water reads better
+    int kc = kind < 0 ? 0 : (kind > 3 ? 3 : kind);
+    uint L = st + 1u + uint(kc) * 9u;
+    return mw(L + 1u + uint(paverRoll(x, z)) % mw(L));
+}
+
 // AtlasSurface.surfaceH: the WORLD_SURFACE_WG height the surface pass sees (the ground, or the sea over it)
 int farSurfaceH(float surface) {
     int top = -floorD(-double(surface)) - 1;
@@ -1050,7 +1306,35 @@ void tileSurfMain(uint3 id : SV_DispatchThreadID) {
     int under = runRules(sc);
     uint stone = hdr(S_STONE);
     uint tb = topB < 0 ? stone : uint(topB), ub = under < 0 ? stone : uint(under);
-    outIds[t * TILE_COLS * TILE_PLANES + TILE_COLS * 2u + c] = (tb & 0xFFFFu) | (ub << 16);
+    // freeze_top_layer (AtlasSurface.column): snow on cold dry ground where no plant stands, cold water frozen
+    uint P = t * TILE_COLS * TILE_PLANES;
+    uint above = outIds[P + TILE_COLS * 3u + c] & 0xFFFFu;  // the biome at top + 1, or at the water's top
+    uint flags = 0u;
+    if (mh(MH_FAR) != 0u) {
+        if (above >= fw(4)) g_bad = g_bad | 32u;  // (no biome there: not proven)
+        else if (isNaNF(water) || water <= surface) {
+            if (!isSea && farSnowGround(tb) && coldEnoughToSnow(above, x, top + 1, z)) {
+                double bare = jmaxD(1.0e-6l, snowBare(above, x, z));
+                if (snowSnows(bare, x, z)) {
+                    ub = tb;
+                    tb = fw(0);
+                    flags = flags | COL_SNOW;
+                }
+            }
+        } else if (coldEnoughToSnow(above, x, -floorD(-double(water)) - 1, z)) flags = flags | COL_FROZEN;
+        // the far roads (FarRoads.surface) over the top
+        bool wet = isSea || (!isNaNF(water) && water > surface);
+        uint road = farRoad(x, z, s, wet);
+        if (road != FAR_NONE) {
+            tb = road;
+            flags = flags | COL_ROAD;
+        }
+    }
+    // plane 2: the blocks; plane 3: the top block's biome (the ground's tint) | the flags << 16; plane 4: the biome
+    // at top + 1 or the water's top (the water's tint)
+    outIds[P + TILE_COLS * 2u + c] = (tb & 0xFFFFu) | (ub << 16);
+    outIds[P + TILE_COLS * 3u + c] = (biomes & 0xFFFFu) | (flags << 16);
+    outIds[P + TILE_COLS * 4u + c] = above;
     if (g_bad != 0u) pageBad[t] = 1u;
 }
 
@@ -1067,14 +1351,19 @@ uint farMat(uint biome, uint id) { return params.outMode == 1u ? igMat(biome, id
 uint farVoxel(uint t, uint c, float yc, float s) {
     uint P = t * TILE_COLS * TILE_PLANES;
     float surf = asfloat(outIds[P + c]), w = asfloat(outIds[P + TILE_COLS + c]);
-    uint blocks = outIds[P + TILE_COLS * 2u + c], biome = outIds[P + TILE_COLS * 3u + c];
+    uint blocks = outIds[P + TILE_COLS * 2u + c], info = outIds[P + TILE_COLS * 3u + c];
+    uint biome = info & 0xFFFFu;  // the top block's (tileSurfMain)
     if (yc < surf) {
         float depth = surf - yc;
         if (depth <= s) return farMat(biome, blocks & 0xFFFFu);
         if (depth <= s + FAR_FILL_DEPTH) return farMat(biome, blocks >> 16);
         return farMat(biome, hdr(S_STONE));
     }
-    if (!isNaNF(w) && yc < w) return farMat(biome, hdr(S_WATER));
+    if (!isNaNF(w) && yc < w) {
+        // the water's own biome; frozen: ice in its top voxel (freeze_top_layer freezes the top block)
+        uint wb = outIds[P + TILE_COLS * 4u + c] & 0xFFFFu;
+        return farMat(wb, ((info >> 16) & COL_FROZEN) != 0u && w - yc <= s ? fw(1) : hdr(S_WATER));
+    }
     return 0u;
 }
 // one thread per level-k chunk: its kind, and its voxels when mixed (a slot taken from the counter)

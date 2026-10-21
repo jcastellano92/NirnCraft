@@ -40,7 +40,7 @@ final class AtlasGenMap {
     static final int VERSION = 1;
     // header: offsets of the sections (atlas_map.slang keeps the same numbers)
     static final int H_RASTER = 2, H_REGIONS = 3, H_HYDRO = 4, H_PEAKS = 5, H_LANDS = 6, H_TERRAIN = 7, H_ISLES = 8,
-            H_ROADS = 9, H_STREETS = 10, H_PAL = 11, H_CONSTS = 12;
+            H_ROADS = 9, H_STREETS = 10, H_PAL = 11, H_CONSTS = 12, H_FAR = 13;
     static final int HEADER = 32;
     static final int BIOME_NONE = 0xFFFF;
 
@@ -70,6 +70,7 @@ final class AtlasGenMap {
         w.a = java.util.Arrays.copyOf(base, base.length + (1 << 16));
         w.n = base.length;
         palettes(w, prog, biomes);
+        far(w, prog);
         return w.done();
     }
 
@@ -594,6 +595,141 @@ final class AtlasGenMap {
                     w.f(v);
             }
         }
+    }
+
+    // ---- the far columns' extras (atlas_page.slang MH_FAR): freeze_top_layer's snow and ice (AtlasSurface.column,
+    // AtlasSnowCover, Biome.coldEnoughToSnow) and the far roads (FarRoads.surface), in a program's block and biome ids ----
+    static final int FAR_HEADER = 32, COVER_WORDS = 12, NOISE_WORDS = 68, LAYER_WORDS = NOISE_WORDS + 3;
+
+    private static void far(Words w, AtlasGenProgram prog) {
+        int at = w.n;
+        w.set(H_FAR, at);
+        for (int i = 0; i < FAR_HEADER; i++) w.add(0);
+        w.set(at, blockId(prog, net.minecraft.world.level.block.Blocks.SNOW.defaultBlockState()));
+        w.set(at + 1, blockId(prog, net.minecraft.world.level.block.Blocks.ICE.defaultBlockState()));
+        // the blocks snow lies on: isSolidRender, not ice or packed ice
+        int nb = prog.blocks.size();
+        int[] bits = new int[(nb + 31) >> 5];
+        for (int i = 0; i < nb; i++) {
+            net.minecraft.world.level.block.state.BlockState s = prog.blocks.get(i);
+            if (s.isSolidRender() && !s.is(net.minecraft.world.level.block.Blocks.ICE)
+                    && !s.is(net.minecraft.world.level.block.Blocks.PACKED_ICE)) bits[i >> 5] |= 1 << (i & 31);
+        }
+        w.set(at + 2, nb);
+        w.set(at + 3, w.n);
+        ints(w, bits);
+        // the biomes: base temperature, modifier (1 frozen), their ground cover (AtlasSnowCover.covers)
+        int nbio = prog.biomes.size();
+        w.set(at + 4, nbio);
+        w.set(at + 5, w.n);
+        int recs = w.n;
+        for (int i = 0; i < nbio * 4; i++) w.add(0);
+        for (int i = 0; i < nbio; i++) {
+            Holder<Biome> h = prog.biomes.get(i);
+            Biome b = h.value();
+            w.set(recs + i * 4, Float.floatToRawIntBits(b.getBaseTemperature()));
+            w.set(recs + i * 4 + 1, b.getModifiedClimateSettings().temperatureModifier() == Biome.TemperatureModifier.FROZEN ? 1 : 0);
+            AtlasSnowCover.Cover[] covers = AtlasSnowCover.covers(h);
+            w.set(recs + i * 4 + 2, w.n);
+            w.set(recs + i * 4 + 3, covers.length);
+            for (AtlasSnowCover.Cover c : covers) {
+                int r = w.n;
+                for (int k = 0; k < COVER_WORDS; k++) w.add(0);
+                setD(w, r, c.perChunk());
+                com.nirncraft.tamriel.biome.flora.DensityFilter d = c.density();
+                if (d == null) continue;
+                com.nirncraft.tamriel.biome.flora.FloraField f = d.field();
+                w.set(r + 2, 1);
+                w.set(r + 3, Float.floatToRawIntBits(d.density()));
+                w.set(r + 4, Float.floatToRawIntBits(d.floor()));
+                w.set(r + 5, f.salt());
+                w.set(r + 6, Float.floatToRawIntBits(f.scale()));
+                w.set(r + 7, Float.floatToRawIntBits(f.coverage()));
+                w.set(r + 8, Float.floatToRawIntBits(f.softness()));
+                w.set(r + 9, f.kind().ordinal());
+                w.set(r + 10, f.mode().ordinal());
+            }
+        }
+        need(com.nirncraft.tamriel.biome.flora.FloraField.Kind.WORLEY.ordinal() == 1
+                && com.nirncraft.tamriel.biome.flora.FloraField.Mode.ANY.ordinal() == 3
+                && com.nirncraft.tamriel.biome.flora.FloraField.Mode.EDGE.ordinal() == 2, "FloraField's kinds and modes");
+        w.set(at + 6, (int) prog.seed);
+        w.set(at + 7, (int) (prog.seed >>> 32));
+        // Biome's temperature noises (SimplexNoise: F2, G2; TEMPERATURE_NOISE, BIOME_INFO_NOISE, FROZEN_TEMPERATURE_NOISE)
+        String sn = net.minecraft.world.level.levelgen.synth.SimplexNoise.class.getName();
+        setD(w, at + 8, (Double) staticField(sn, "F2"));
+        setD(w, at + 10, (Double) staticField(sn, "G2"));
+        w.set(at + 12, w.n);
+        simplex(w, staticField(Biome.class.getName(), "TEMPERATURE_NOISE"));
+        w.set(at + 13, w.n);
+        simplex(w, Biome.BIOME_INFO_NOISE);
+        w.set(at + 14, w.n);
+        Object stack = Biome.FROZEN_TEMPERATURE_NOISE;
+        if (stack.getClass() != net.minecraft.world.level.levelgen.synth.NoiseStack.class)
+            throw new IllegalStateException("FROZEN_TEMPERATURE_NOISE: " + stack.getClass());
+        Object[] layers = (Object[]) AtlasGenProgram.get(net.minecraft.world.level.levelgen.synth.NoiseStack.class, stack, "layers");
+        w.add(layers.length);
+        try {
+            Class<?> lc = Class.forName(net.minecraft.world.level.levelgen.synth.NoiseStack.class.getName() + "$Layer");
+            for (Object l : layers) {
+                simplex(w, AtlasGenProgram.field(lc, "noise").get(l));
+                w.d(AtlasGenProgram.field(lc, "frequency").getDouble(l));
+                w.f(AtlasGenProgram.field(lc, "amplitude").getFloat(l));
+            }
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("NoiseStack.Layer unavailable", e);
+        }
+        // the far roads: culture per region (RoadStyle.cultureAt), the styles (FarRoads.gpuStyles), RoadPlan.at's index
+        int nr = Regions.count();
+        w.set(at + 15, nr);
+        w.set(at + 16, w.n);
+        for (int i = 0; i < nr; i++) w.add(com.nirncraft.tamriel.settlement.Culture.of(Regions.byIndex(i).culture()).ordinal());
+        need(com.nirncraft.tamriel.settlement.Culture.NORD.ordinal() == 0
+                && com.nirncraft.roads.FarRoads.STYLE_WORDS == 37, "far road styles");
+        w.set(at + 17, w.n);
+        ints(w, com.nirncraft.roads.FarRoads.gpuStyles(s -> blockId(prog, s)));
+        w.set(at + 18, com.nirncraft.tamriel.settlement.Culture.VALUES.length);
+        RoadPlan p = (RoadPlan) AtlasGenProgram.get(PlanGround.class, PlanGround.get(), "plan");
+        need((Integer) staticField(RoadPlan.class.getName(), "BUCKET_SHIFT") == 6 && RoadPlan.REACH == 32f, "RoadPlan's index");
+        if (p != null) {
+            Long2IntOpenHashMap bucketOf = (Long2IntOpenHashMap) AtlasGenProgram.get(RoadPlan.class, p, "bucketOf");
+            long[] keys = new long[bucketOf.size()];
+            int[] ks = new int[keys.length];
+            int n = 0;
+            for (var e : bucketOf.long2IntEntrySet()) {
+                keys[n] = e.getLongKey();
+                ks[n++] = e.getIntValue();
+            }
+            w.set(at + 19, keys.length);
+            w.set(at + 20, w.n);
+            keys(w, keys, ks);
+            w.set(at + 21, w.n);
+            ints(w, (int[]) AtlasGenProgram.get(RoadPlan.class, p, "bucketOff"));
+            w.set(at + 22, w.n);
+            ints(w, (int[]) AtlasGenProgram.get(RoadPlan.class, p, "bucketEdges"));
+            w.set(at + 23, w.n);
+            floats(w, (float[]) AtlasGenProgram.get(RoadPlan.class, p, "edgeInvLen2"));
+            w.set(at + 24, keys.length > 0 ? 1 : 0);
+        }
+    }
+
+    /** A SimplexNoise: its permutation (4 a word), offsetX, offsetY (NOISE_WORDS). */
+    private static void simplex(Words w, Object noise) {
+        if (noise.getClass() != net.minecraft.world.level.levelgen.synth.SimplexNoise.class)
+            throw new IllegalStateException("not a SimplexNoise: " + noise.getClass());
+        Class<?> g = net.minecraft.world.level.levelgen.synth.GradientNoise.class;
+        byte[] perms = (byte[]) AtlasGenProgram.get(g, noise, "perms");
+        int[] p = new int[64];
+        for (int i = 0; i < 256; i++) p[i >> 2] |= (perms[i] & 255) << ((i & 3) * 8);
+        ints(w, p);
+        w.d((Double) AtlasGenProgram.get(g, noise, "offsetX"));
+        w.d((Double) AtlasGenProgram.get(g, noise, "offsetY"));
+    }
+
+    private static int blockId(AtlasGenProgram prog, net.minecraft.world.level.block.state.BlockState s) {
+        Integer id = prog.blockIds.get(s);
+        if (id == null) throw new IllegalStateException("a far block not in the program: " + s);
+        return id;
     }
 
     private static int biomeId(AtlasGenProgram prog, Holder<Biome> h) {
