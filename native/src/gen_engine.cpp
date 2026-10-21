@@ -687,20 +687,24 @@ public:
         const char* names[3] = {"tile", "tileBiome", "tileSurf"};
         uint32_t passes = blocks ? 3 : 1;
         ms = 0;
-        for (uint32_t k = 0; k < passes; k++) {
+        // one submission a pass and tile (the Windows watchdog resets a device whose submission runs ~2 s; on the
+        // context's device that takes the renderer down too)
+        for (uint32_t k = 0; k < passes; k++)
+          for (uint32_t ti = 0; ti < n; ti++) {
             begin();
             if (timestamps_) {
                 vkCmdResetQueryPool(cmd_, queries_, 0, 2);
                 vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
             }
+            p.pad1 = int32_t(ti);
             vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
             vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &p);
             vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipes[k]]);
-            vkCmdDispatch(cmd_, (pipes[k] == TILEBIOME_PIPE ? 3 : 1) * TILE_COLS / GROUP, n, 1);
+            vkCmdDispatch(cmd_, (pipes[k] == TILEBIOME_PIPE ? 3 : 1) * TILE_COLS / GROUP, 1, 1);
             if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 1);
             barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_HOST_READ_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT | VK_PIPELINE_STAGE_HOST_BIT);
-            if (k + 1 == passes) {
+            if (k + 1 == passes && ti + 1 == n) {
                 VkBufferCopy c{0, 0, bytes};
                 vkCmdCopyBuffer(cmd_, out_.buf, readback_.buf, 1, &c);
                 barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
@@ -712,7 +716,7 @@ public:
             if (timestamps_ && vkGetQueryPoolResults(dev_, queries_, 0, 2, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
                 pass = double(ts[1] - ts[0]) * timestampPeriod_ * 1e-6;
             ms += pass;
-            if (std::getenv("ATLAS_GEN_TRACE")) std::fprintf(stderr, "TRACE gen tile pass %s: %.2f ms (%u tiles)\n", names[k], pass, n);
+            if (std::getenv("ATLAS_GEN_TRACE")) std::fprintf(stderr, "TRACE gen tile pass %s: %.2f ms (tile %u of %u)\n", names[k], pass, ti, n);
         }
         std::memcpy(out, readback_.map, size_t(bytes));
         std::memcpy(bad, flags, size_t(n) * 4);
@@ -764,13 +768,16 @@ public:
         ms = 0;
         const uint32_t pipes[4] = {TILE_PIPE, TILEBIOME_PIPE, TILESURF_PIPE, FARCHUNK_PIPE};
         const char* names[4] = {"tile", "tileBiome", "tileSurf", "farChunk"};
-        for (uint32_t k = 0; k < 4; k++) {
+        // one submission a pass and tile (the watchdog: see tiles())
+        for (uint32_t k = 0; k < 4; k++)
+          for (uint32_t ti = 0; ti < n; ti++) {
             begin();
             if (timestamps_) {
                 vkCmdResetQueryPool(cmd_, queries_, 0, 2);
                 vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
             }
-            if (k == 3) {
+            p.pad1 = int32_t(ti);
+            if (k == 3 && ti == 0) {
                 vkCmdFillBuffer(cmd_, far_.buf, 0, 4, 0u);   // the mixed chunks' counter
                 vkCmdFillBuffer(cmd_, far_.buf, 4, 4, cap);  // the capacity
                 barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -779,11 +786,11 @@ public:
             vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
             vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &p);
             vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipes[k]]);
-            vkCmdDispatch(cmd_, k == 1 ? 3 * TILE_COLS / GROUP : k < 3 ? TILE_COLS / GROUP : (256 * rows + GROUP - 1) / GROUP, n, 1);
+            vkCmdDispatch(cmd_, k == 1 ? 3 * TILE_COLS / GROUP : k < 3 ? TILE_COLS / GROUP : (256 * rows + GROUP - 1) / GROUP, 1, 1);
             barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
             if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 1);
-            if (k == 3) {
+            if (k == 3 && ti + 1 == n) {
                 VkBufferCopy c{0, 0, VkDeviceSize(4 + chunks * 2) * 4};
                 vkCmdCopyBuffer(cmd_, far_.buf, readback_.buf, 1, &c);
                 barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
@@ -796,7 +803,7 @@ public:
             if (timestamps_ && vkGetQueryPoolResults(dev_, queries_, 0, 2, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
                 pass = double(ts[1] - ts[0]) * timestampPeriod_ * 1e-6;
             ms += pass;
-            if (std::getenv("ATLAS_GEN_TRACE")) std::fprintf(stderr, "TRACE gen far pass %s: %.2f ms (%u tiles)\n", names[k], pass, n);
+            if (std::getenv("ATLAS_GEN_TRACE")) std::fprintf(stderr, "TRACE gen far pass %s: %.2f ms (tile %u of %u)\n", names[k], pass, ti, n);
         }
         const uint32_t* rb = static_cast<const uint32_t*>(readback_.map);
         mixed = rb[0];
@@ -972,6 +979,30 @@ public:
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_HOST_BIT);
             if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, QUERIES - 1);
         }
+        // one submission a pass (the Windows watchdog resets a device whose submission runs ~2 s, the renderer's too
+        // on a shared device; and the frames get the queue between them)
+        // pass: the one just recorded (its time read now, its end timestamp slot reused as the next one's start), or
+        // -1 (the pages: their own slots)
+        auto cut = [&](int pass) -> bool {
+            if (!submitWait(err)) return false;
+            if (timestamps_ && pass >= 0) {
+                uint64_t ts2[2] = {};
+                if (vkGetQueryPoolResults(dev_, queries_, uint32_t(pass), 2, sizeof(ts2), ts2, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS) {
+                    double ms = double(ts2[1] - ts2[0]) * timestampPeriod_ * 1e-6;
+                    if (uint32_t(pass) < PASSES) t.passMs[pass] += ms;
+                    t.kernelMs += ms;
+                }
+            }
+            begin();
+            if (timestamps_ && pass >= 0) {
+                vkCmdResetQueryPool(cmd_, queries_, uint32_t(pass) + 1, 1);
+                vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, uint32_t(pass) + 1);
+            }
+            vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+            vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &b.params);
+            return true;
+        };
+        if (nj && !cut(-1)) return false;
         if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
         vkCmdFillBuffer(cmd_, out_.buf, VkDeviceSize(n) * OUT_WORDS * 4, VkDeviceSize(n) * 4, 0u);  // the flags
         if (ingest) vkCmdFillBuffer(cmd_, info_.buf, 0, VkDeviceSize(n) * INFO_WORDS * 4, 0xFFFFFFFFu);  // the minima
@@ -994,6 +1025,7 @@ public:
             barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
             if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, p + 1);
+            if (p + 1 < passes && !cut(int(p))) return false;
         }
         if (!ingest) {
             VkBufferCopy c{0, 0, idBytes + VkDeviceSize(n) * 4};  // the sections, then the flags
@@ -1012,7 +1044,7 @@ public:
             if (vkGetQueryPoolResults(dev_, queries_, 0, passes + 2, sizeof(uint64_t) * (passes + 2), ts, 8, VK_QUERY_RESULT_64_BIT) ==
                 VK_SUCCESS) {
                 double k = timestampPeriod_ * 1e-6;
-                for (uint32_t p = 0; p < passes; p++) {
+                for (uint32_t p = passes - 1; p < passes; p++) {  // (the earlier passes: cut())
                     double ms = double(ts[p + 1] - ts[p]) * k;
                     if (p < PASSES) t.passMs[p] += ms;
                     t.kernelMs += ms;
@@ -1505,7 +1537,10 @@ private:
             dead_ = r == VK_ERROR_DEVICE_LOST;
             return fail(err, "vkQueueSubmit failed (" + std::to_string(int(r)) + ")");
         }
+        auto w0 = std::chrono::steady_clock::now();
         VkResult w = vkWaitForFences(dev_, 1, &fence_, VK_TRUE, 20'000'000'000ull);
+        if (double ws = msSince(w0); ws > 500.0)  // (a submission near the watchdog's 2 s: split the work further)
+            std::fprintf(stderr, "TRACE warn gen submission took %.0f ms\n", ws);
         if (w != VK_SUCCESS) {
             dead_ = true;
             hung_ = w == VK_TIMEOUT;
@@ -2227,6 +2262,7 @@ extern "C" ATLAS_API AtlasStatus atlas_gen_math(AtlasGen* h, uint32_t op, uint32
             if (flags) flags[i] = res[size_t(i) * 3 + 2];
         }
         h->prog.clear();  // the program buffer held the arguments: set a program again before generating
+        h->devicePages = false;  // (the page passes, tiles and far chunks would read the arguments as a program)
         h->resetPages();
         return ATLAS_OK;
     });

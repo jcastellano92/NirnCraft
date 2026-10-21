@@ -886,7 +886,7 @@ static const uint TILE_PLANES = 5;
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void tileMain(uint3 id : SV_DispatchThreadID) {
-    uint t = id.y, c = id.x;
+    uint t = id.y + uint(params.pad1), c = id.x;  // (pad1: the first tile of this submission)
     if (c >= TILE_COLS || t >= uint(params.chunks)) return;
     int lod = pageJobs[t * 4u], tx = pageJobs[t * 4u + 1u], tz = pageJobs[t * 4u + 2u];
     int s = 1 << uint(lod);
@@ -968,7 +968,7 @@ float tileSurface(uint t, int i, int j) { return asfloat(outIds[t * TILE_COLS * 
 void tileBiomeMain(uint3 id : SV_DispatchThreadID) {
     // a thread per (column, lookup): 0 the top block's biome (plane 2), 1 the one under it (plane 4), 2 the top + 1 /
     // the water's top (plane 3); one lookup a thread (several in one thread faulted the device: see the commit)
-    uint t = id.y, k = id.x / TILE_COLS, c = id.x % TILE_COLS;
+    uint t = id.y + uint(params.pad1), k = id.x / TILE_COLS, c = id.x % TILE_COLS;
     if (k >= 3u || t >= uint(params.chunks)) return;
     if (params.pad0 > 0 && c >= uint(params.pad0)) return;  // (dev: ATLAS_GEN_DEBUG_COLS)
     int lod = pageJobs[t * 4u], tx = pageJobs[t * 4u + 1u], tz = pageJobs[t * 4u + 2u];
@@ -993,7 +993,7 @@ void tileBiomeMain(uint3 id : SV_DispatchThreadID) {
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void tileSurfMain(uint3 id : SV_DispatchThreadID) {
-    uint t = id.y, c = id.x;
+    uint t = id.y + uint(params.pad1), c = id.x;  // (pad1: the first tile of this submission)
     if (c >= TILE_COLS || t >= uint(params.chunks)) return;
     int lod = pageJobs[t * 4u], tx = pageJobs[t * 4u + 1u], tz = pageJobs[t * 4u + 2u];
     int s = 1 << uint(lod), n = int(TILE_SIDE);
@@ -1081,7 +1081,7 @@ uint farVoxel(uint t, uint c, float yc, float s) {
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void farChunkMain(uint3 id : SV_DispatchThreadID) {
-    uint t = id.y, k = id.x;
+    uint t = id.y + uint(params.pad1), k = id.x;
     if (t >= uint(params.chunks)) return;
     int lod = pageJobs[t * 4u];
     uint rows = farRows(lod);

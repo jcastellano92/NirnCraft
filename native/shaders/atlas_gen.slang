@@ -689,6 +689,10 @@ void computeFluid(int x, int y, int z, out int outLevel, out uint outType) {
         float spreadF = vmPoint(E_AQ_SPREAD, cellX, cellY, cellZ) * 10.0f;
         // Mth.quantize(spread, 3) = floor(spread / 3.0) * 3, exact: floor of the exact quotient
         double sd = double(spreadF);
+        if (!(absF(spreadF) < 1.0e6f)) {  // (inf / NaN: the loops below would not end)
+            g_bad = g_bad | 1u;
+            sd = 0.0l;
+        }
         int q = floorD(sd * (1.0l / 3.0l));
         while (double(q + 1) * 3.0 <= sd) q++;
         while (double(q) * 3.0 > sd) q--;
