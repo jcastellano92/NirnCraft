@@ -428,6 +428,7 @@ public:
             destroyPipe(farPipe_, farLayout_, farSetLayout_, farShader_);
             destroyPipe(publishPipe_, publishLayout_, publishSetLayout_, publishShader_);
             destroyPipe(ingestPipe_, ingestLayout_, ingestSetLayout_, ingestShader_);
+            if (pipeCache_) vkDestroyPipelineCache(dev_, pipeCache_, nullptr);
             vkDestroyDevice(dev_, nullptr);
         }
         if (messenger_) {
@@ -493,7 +494,8 @@ public:
         std::vector<VkDescriptorType> farTypes(BINDINGS, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
         farTypes[B_FRAME] = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         farTypes[B_NOISE_TEX] = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        if (!createPipe(atlas_far_spv, atlas_far_spv_size, farTypes, 0, farPipe_, farLayout_, farSetLayout_, farShader_, err))
+        if (!createPipe(atlas_far_spv, atlas_far_spv_size, farTypes, 0, farPipe_, farLayout_, farSetLayout_, farShader_, err,
+                        "farMain"))
             return false;
         {
             // the cloud pass: same source, same bindings, same descriptor set as the far pass
@@ -507,33 +509,33 @@ public:
             cp.stage.module = cloudShader_;
             cp.stage.pName = "main";
             cp.layout = farLayout_;
-            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &cloudPipe_) != VK_SUCCESS)
+            if (makePipeline(cp, &cloudPipe_, "cloudMain") != VK_SUCCESS)
                 return fail(err, "cloud pipeline");
             // and the sun map pass
             smci.codeSize = atlas_sunmap_spv_size;
             smci.pCode = atlas_sunmap_spv;
             if (vkCreateShaderModule(dev_, &smci, nullptr, &sunShader_) != VK_SUCCESS) return fail(err, "sun map shader");
             cp.stage.module = sunShader_;
-            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &sunPipe_) != VK_SUCCESS)
+            if (makePipeline(cp, &sunPipe_, "sunMapMain") != VK_SUCCESS)
                 return fail(err, "sun map pipeline");
             // and the near light at half resolution, then its upsample
             smci.codeSize = atlas_nearlight_spv_size;
             smci.pCode = atlas_nearlight_spv;
             if (vkCreateShaderModule(dev_, &smci, nullptr, &nearLightShader_) != VK_SUCCESS) return fail(err, "near light shader");
             cp.stage.module = nearLightShader_;
-            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &nearLightPipe_) != VK_SUCCESS)
+            if (makePipeline(cp, &nearLightPipe_, "nearLightMain") != VK_SUCCESS)
                 return fail(err, "near light pipeline");
             smci.codeSize = atlas_nearup_spv_size;
             smci.pCode = atlas_nearup_spv;
             if (vkCreateShaderModule(dev_, &smci, nullptr, &nearUpShader_) != VK_SUCCESS) return fail(err, "near upsample shader");
             cp.stage.module = nearUpShader_;
-            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &nearUpPipe_) != VK_SUCCESS)
+            if (makePipeline(cp, &nearUpPipe_, "nearUpsampleMain") != VK_SUCCESS)
                 return fail(err, "near upsample pipeline");
             smci.codeSize = atlas_neartemporal_spv_size;
             smci.pCode = atlas_neartemporal_spv;
             if (vkCreateShaderModule(dev_, &smci, nullptr, &nearTempShader_) != VK_SUCCESS) return fail(err, "near temporal shader");
             cp.stage.module = nearTempShader_;
-            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &nearTempPipe_) != VK_SUCCESS)
+            if (makePipeline(cp, &nearTempPipe_, "nearTemporalMain") != VK_SUCCESS)
                 return fail(err, "near temporal pipeline");
             // the far lights on the GPU: cull, admit, bin
             const uint32_t* lcode[3] = {atlas_lightcull_spv, atlas_lightadmit_spv, atlas_lightbin_spv};
@@ -543,7 +545,7 @@ public:
                 smci.pCode = lcode[i];
                 if (vkCreateShaderModule(dev_, &smci, nullptr, &lightShader_[i]) != VK_SUCCESS) return fail(err, "far light shader");
                 cp.stage.module = lightShader_[i];
-                if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &lightPipe_[i]) != VK_SUCCESS)
+                if (makePipeline(cp, &lightPipe_[i], "lightKernel") != VK_SUCCESS)
                     return fail(err, "far light pipeline");
             }
         }
@@ -552,12 +554,12 @@ public:
                                                   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE};
         if (!createPipe(atlas_publish_spv, atlas_publish_spv_size, pubTypes, PASS_PUSH_BYTES, publishPipe_,
-                        publishLayout_, publishSetLayout_, publishShader_, err))
+                        publishLayout_, publishSetLayout_, publishShader_, err, "publishMain"))
             return false;
         std::vector<VkDescriptorType> ingTypes = {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER};
         if (!createPipe(atlas_ingest_spv, atlas_ingest_spv_size, ingTypes, PASS_PUSH_BYTES, ingestPipe_, ingestLayout_,
-                        ingestSetLayout_, ingestShader_, err))
+                        ingestSetLayout_, ingestShader_, err, "ingestMain"))
             return false;
         if (!createVoxGridPipes(err)) return false;
 
@@ -1469,7 +1471,7 @@ private:
 
     bool createPipe(const uint32_t* code, size_t bytes, const std::vector<VkDescriptorType>& types, uint32_t pushBytes,
                     VkPipeline& pipe, VkPipelineLayout& layout, VkDescriptorSetLayout& setLayout, VkShaderModule& module,
-                    std::string& err) {
+                    std::string& err, const char* name = "pipe") {
         VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
         smci.codeSize = bytes;
         smci.pCode = code;
@@ -1493,8 +1495,61 @@ private:
         cp.stage.module = module;
         cp.stage.pName = "main";
         cp.layout = layout;
-        if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipe) != VK_SUCCESS) return fail(err, "pipeline");
+        if (makePipeline(cp, &pipe, name) != VK_SUCCESS) return fail(err, "pipeline");
         return true;
+    }
+
+    // Every compute pipeline is made here: timed (a TRACE line each: which one the driver's own compile spends on; a
+    // new far kernel took ~6 min in NVIDIA's JIT once, then its disk cache), and through a pipeline cache of our own
+    // when ATLAS_PIPELINE_CACHE names a file (read once, written back after each pipeline that took long)
+    VkResult makePipeline(const VkComputePipelineCreateInfo& cp, VkPipeline* out, const char* name) {
+        if (!pipeCacheTried_) {
+            pipeCacheTried_ = true;
+            if (const char* path = std::getenv("ATLAS_PIPELINE_CACHE")) {
+                pipeCachePath_ = path;
+                std::vector<char> data;
+                if (FILE* f = std::fopen(path, "rb")) {
+                    std::fseek(f, 0, SEEK_END);
+                    long n = std::ftell(f);
+                    std::fseek(f, 0, SEEK_SET);
+                    if (n > 0) {
+                        data.resize(size_t(n));
+                        if (std::fread(data.data(), 1, data.size(), f) != data.size()) data.clear();
+                    }
+                    std::fclose(f);
+                }
+                VkPipelineCacheCreateInfo pc{VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO};
+                pc.initialDataSize = data.size();
+                pc.pInitialData = data.empty() ? nullptr : data.data();
+                if (vkCreatePipelineCache(dev_, &pc, nullptr, &pipeCache_) != VK_SUCCESS) {
+                    pc.initialDataSize = 0;  // (a cache from another driver or device: start empty)
+                    pc.pInitialData = nullptr;
+                    if (vkCreatePipelineCache(dev_, &pc, nullptr, &pipeCache_) != VK_SUCCESS) pipeCache_ = VK_NULL_HANDLE;
+                }
+            }
+        }
+        auto t0 = std::chrono::steady_clock::now();
+        VkResult r = vkCreateComputePipelines(dev_, pipeCache_, 1, &cp, nullptr, out);
+        double s = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+        std::fprintf(stderr, "TRACE done pipeline:%s %.2fs\n", name, s);
+        if (pipeCache_ && s > 0.25) {
+            size_t n = 0;
+            if (vkGetPipelineCacheData(dev_, pipeCache_, &n, nullptr) == VK_SUCCESS && n) {
+                std::vector<char> data(n);
+                if (vkGetPipelineCacheData(dev_, pipeCache_, &n, data.data()) == VK_SUCCESS) {
+                    std::string tmp = pipeCachePath_ + ".tmp";
+                    if (FILE* f = std::fopen(tmp.c_str(), "wb")) {
+                        bool ok = std::fwrite(data.data(), 1, n, f) == n;
+                        std::fclose(f);
+                        if (ok) {
+                            std::remove(pipeCachePath_.c_str());
+                            std::rename(tmp.c_str(), pipeCachePath_.c_str());
+                        }
+                    }
+                }
+            }
+        }
+        return r;
     }
 
     void destroyPipe(VkPipeline& p, VkPipelineLayout& l, VkDescriptorSetLayout& s, VkShaderModule& m) {
@@ -1601,7 +1656,7 @@ private:
             cp.stage.module = mod[i];
             cp.stage.pName = "main";
             cp.layout = farLayout_;
-            ok = vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipe[i]) == VK_SUCCESS;
+            ok = makePipeline(cp, &pipe[i], "reloaded") == VK_SUCCESS;
         }
         if (!ok) {
             for (int i = 0; i < K; i++) {
@@ -1864,7 +1919,7 @@ private:
     bool createVoxGridPipes(std::string& err) {
         std::vector<VkDescriptorType> types(VG_BINDINGS, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
         if (!createPipe(atlas_vg_section_spv, atlas_vg_section_spv_size, types, 32, vgPipes_[0], vgLayout_, vgSetLayout_,
-                        vgShaders_[0], err))
+                        vgShaders_[0], err, "vgSectionMain"))
             return false;
         const uint32_t* code[VG_KERNELS] = {atlas_vg_section_spv, atlas_vg_satx_spv, atlas_vg_satz_spv, atlas_vg_saty_spv,
                                             atlas_vg_grow_spv, atlas_vg_fill_spv, atlas_vg_ingest_spv, atlas_vg_down_spv};
@@ -1882,7 +1937,7 @@ private:
             cp.stage.module = vgShaders_[k];
             cp.stage.pName = "main";
             cp.layout = vgLayout_;
-            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &vgPipes_[k]) != VK_SUCCESS)
+            if (makePipeline(cp, &vgPipes_[k], "voxgridKernel") != VK_SUCCESS)
                 return fail(err, "voxgrid pipeline");
         }
         return true;
@@ -2714,6 +2769,9 @@ private:
     VkDebugUtilsMessengerEXT messenger_ = VK_NULL_HANDLE;
     VkPhysicalDevice phys_ = VK_NULL_HANDLE;
     VkDevice dev_ = VK_NULL_HANDLE;
+    VkPipelineCache pipeCache_ = VK_NULL_HANDLE;  // (makePipeline: ATLAS_PIPELINE_CACHE)
+    bool pipeCacheTried_ = false;
+    std::string pipeCachePath_;
     VkQueue queue_ = VK_NULL_HANDLE;
     uint32_t family_ = 0;
     uint8_t deviceUuid_[VK_UUID_SIZE] = {};

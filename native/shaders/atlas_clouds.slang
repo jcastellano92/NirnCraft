@@ -29,6 +29,7 @@ float4 noiseTexel(int3 c) {
 // NirnCraftCloudNoise: period 16 world units in p, trilinear over the 64^3 volume, mix(b, r, 0.3).
 // On Vulkan one hardware trilinear fetch with REPEAT (identical up to the filter's 8-bit weights); the C++ reference
 // build does the same filter by hand from the buffer.
+[noinline]  // (one copy: atlas_far.slang traceLod)
 float cloudNoiseAt(float3 p) {
     __target_switch {
     case spirv:
