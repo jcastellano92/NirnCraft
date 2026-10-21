@@ -34,6 +34,8 @@
 // left that window and come back; the core keeps them as it does in game (World::sectionKeep: windowRadius + 3 regions)
 // and draws what it dropped from its coarse levels of real content. server=0 uploads them all at once and keeps them
 // however far the camera goes (ATLAS_SECTION_KEEP=64: the old element tier, which no game reproduces).
+// synth=R (no export) builds sections over the preview terrain instead (stone, dirt, grass, water, some ore pockets),
+// sent farthest first (synthorder=far|near|random); seqgrid=1 adds the grid's residency to every seq frame's line.
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -292,6 +294,60 @@ int main(int argc, char** argv) {
     // the in-game export: its states as far materials, its sections, the ground under them in the column tiles
     exportdata::Loaded ex;
     double loadMs = 0;
+    // synth=R (no export; residency tests): sections built over the preview terrain within R sections of the camera's,
+    // sent as a server's stream carries them (synthorder=far, the default: farthest first, the arrival order the live
+    // pool filled in; near; random): stone under the ground, three of dirt, the top grass (snow above y 200), water to
+    // y 62, nothing above; an ore pocket of gravel in a quarter of the sections (so most of a mountain's inside is one id)
+    if (!haveExport && num(a, "synth", 0) > 0) {
+        int R = int(num(a, "synth", 0));
+        int csx = int(std::floor(x / 16)), csz = int(std::floor(z / 16));
+        std::vector<int> hgt(256);
+        size_t uniform = 0;
+        for (int cz = csz - R; cz <= csz + R; cz++)
+            for (int cx = csx - R; cx <= csx + R; cx++) {
+                int top = 62;
+                for (int i = 0; i < 256; i++) {
+                    hgt[size_t(i)] = int(std::floor(atlas_preview_height(ctx, cx * 16 + (i & 15) + 0.5, cz * 16 + (i >> 4) + 0.5)));
+                    top = std::max(top, hgt[size_t(i)]);
+                }
+                for (int sy = -4; sy * 16 <= top && sy < 40; sy++) {
+                    exportdata::Held hs{cx, sy, cz, std::vector<uint16_t>(4096, 0)};
+                    uint32_t hsd = uint32_t(cx) * 73856093u ^ uint32_t(sy) * 19349663u ^ uint32_t(cz) * 83492791u;
+                    hsd = (hsd ^ (hsd >> 13)) * 1274126177u;
+                    bool ore = (hsd >> 30) == 0u;
+                    int ox = int((hsd >> 4) & 15u), oy = int((hsd >> 8) & 15u), oz = int((hsd >> 12) & 15u);
+                    bool any = false, one = true;
+                    for (int y = 0; y < 16; y++)
+                        for (int lz = 0; lz < 16; lz++)
+                            for (int lx = 0; lx < 16; lx++) {
+                                int wy = sy * 16 + y, g = hgt[size_t(lx + 16 * lz)];
+                                uint16_t m = wy < g - 3 ? 1 : wy < g ? 3 : wy == g ? (g > 200 ? 5 : 2) : wy <= 62 ? 6 : 0;
+                                if (m == 1 && ore && std::abs(lx - ox) <= 1 && std::abs(y - oy) <= 1 && std::abs(lz - oz) <= 1) m = 7;
+                                hs.mats[size_t(lx + 16 * (lz + 16 * y))] = m;
+                                any |= m != 0;
+                                one &= m == hs.mats[0];
+                            }
+                    if (!any) continue;
+                    uniform += one ? 1 : 0;
+                    ex.held.push_back(std::move(hs));
+                }
+            }
+        std::string so = str(a, "synthorder", "far");
+        auto d2 = [&](const exportdata::Held& h) { return (h.cx - csx) * (h.cx - csx) + (h.cz - csz) * (h.cz - csz); };
+        if (so == "random") {
+            uint32_t sd = 777u;
+            for (size_t i = ex.held.size(); i > 1; i--) {
+                sd = sd * 1664525u + 1013904223u;
+                std::swap(ex.held[i - 1], ex.held[size_t(sd >> 8) % i]);
+            }
+        } else {
+            std::stable_sort(ex.held.begin(), ex.held.end(), [&](const exportdata::Held& p, const exportdata::Held& q) {
+                return so == "near" ? d2(p) < d2(q) : d2(p) > d2(q);
+            });
+        }
+        std::fprintf(stderr, "atlas_render: synth %zu sections (%zu of one id) in %d x %d columns, sent %s first\n", ex.held.size(),
+                     uniform, 2 * R + 1, 2 * R + 1, so.c_str());
+    }
     if (haveExport) {
         auto l0 = std::chrono::steady_clock::now();
         std::vector<exportdata::State> lib;
@@ -1297,6 +1353,15 @@ int main(int argc, char** argv) {
                                 atlas::writePng(sb + nm, disp.data(), w, h);
                             }
                         }
+                        if (num(a, "seqgrid", 0) > 0) {
+                            // seqgrid=1: the grid's residency each frame (atlas_info voxgrid: resident .. nearestMissing)
+                            std::string inf = atlas_info(ctx);
+                            size_t r0 = inf.find("\"resident\":"), r1 = inf.find("\"nearestMissing\":");
+                            if (r0 != std::string::npos && r1 != std::string::npos) {
+                                size_t e = inf.find(',', r1);
+                                extra += "," + inf.substr(r0, e - r0);
+                            }
+                        }
                         std::printf("{\"seq\":\"%s%s\",\"frame\":%d,\"ms\":%.3f,\"steps\":%llu%s}\n", kind.c_str(), tag.c_str(), i, st.lastFrameMs,
                                     (unsigned long long)st.raySteps, extra.c_str());
                     }
@@ -1451,6 +1516,13 @@ int main(int argc, char** argv) {
             firstBand = false;
         }
         vsTruth += "}}";
+    }
+    if (num(a, "depthraw", 0) > 0) {
+        // depthraw=1: <out>_depth.f32, the frame's depth as floats (w x h, rows from the top; 1e30 sky), for metrics
+        if (FILE* fp = std::fopen((out.substr(0, out.size() - 4) + "_depth.f32").c_str(), "wb")) {
+            std::fwrite(depth.data(), sizeof(float), depth.size(), fp);
+            std::fclose(fp);
+        }
     }
     if (num(a, "depthpng", 0) > 0 && !haveExport) {
         std::vector<uint32_t> d(size_t(w) * h);

@@ -685,6 +685,15 @@ ATLAS_API AtlasStatus atlas_set_clipmap(AtlasContext* ctx, uint32_t lodCount);
 ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint32_t afterFrames);
 
 /*
+ * Test hook (the GPU generator's far terrain without the generator): `count` level-`level` chunks given to the grid
+ * through a buffer on the context's own device (VoxGrid::ingestCoarseGpu): pos[3 i ..] the chunk (level-k chunk
+ * units, cy from y -64), kinds[i] 0 mixed (ids[4096 i ..] its 16^3 voxel ids, x + 16 (z + 16 y)), 1 air,
+ * 2 | id << 8 one id. accepted (optional, count bytes): 1 for each taken. Vulkan only (ATLAS_ERR_UNSUPPORTED else).
+ */
+ATLAS_API AtlasStatus atlas_debug_coarse_chunks(AtlasContext* ctx, int32_t level, uint32_t count, const int32_t* pos,
+                                                const uint32_t* kinds, const uint16_t* ids, uint8_t* accepted);
+
+/*
  * Exact seeded noise for the terrain height (shaders/atlas_height.slang): the WorldNoise evaluations the mod's
  * TamrielHeight.height makes, for a batch of columns, bit-identical to Minecraft's NoiseStack of PerlinNoise layers
  * (see the kernel's header for the argument). The caller runs height() itself, served these values. Independent of
