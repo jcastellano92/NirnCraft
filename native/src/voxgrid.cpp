@@ -299,13 +299,6 @@ void VoxGrid::gpuLetGoAll(uint32_t bits) {
     for (const Key& k : keys) gpuLetGo(k.x, k.y, k.z, bits);
 }
 
-void VoxGrid::gpuPendingOffsets(uint64_t buffer, std::vector<uint64_t>& out) const {
-    out.clear();
-    std::lock_guard<std::mutex> lock(mu_);
-    for (auto& [k, g] : gpuRef_)
-        if (g.buffer == buffer) out.push_back(g.offset);
-}
-
 void VoxGrid::put(int sx, int sy, int sz, const uint16_t* mats) {
     if (!enabled) return;
     auto a = std::make_shared<std::array<uint16_t, 4096>>();
