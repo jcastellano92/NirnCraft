@@ -3326,7 +3326,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     bool eyeWater = eyeDepth >= 0.0;
     gSkipWater = eyeWater;
     gTr = res;
-    float tHit = traceView(o, dir, tStart, frame.params.y, lodDither);
+    // (under water a ray that does not reach the surface within WATER_SEE blocks sees nothing past that: no further)
+    float tEye = eyeWater && !(dir.y > 1e-3 && eyeDepth / dir.y < WATER_SEE) ? WATER_SEE * 1.5 : frame.params.y;
+    float tHit = traceView(o, dir, tStart, tEye, lodDither);
     res = gTr;
     gSkipWater = false;
     // A water surface met from above: (PRIMARY_NEAR) in the near field the host rasters it, a primary ray goes on to
