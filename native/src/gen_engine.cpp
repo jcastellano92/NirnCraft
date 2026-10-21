@@ -1203,12 +1203,14 @@ private:
     std::vector<FarSlab> farSlabs_;
     void reclaimFar() {
         if (!grid_ || !backend_) return;
-        uint64_t submitted = backend_->framesSubmitted(), completed = backend_->framesCompleted();
+        // completed before pending, submitted after it: a frame submitted between them may have recorded a copy
+        uint64_t completed = backend_->framesCompleted();
         std::vector<uint64_t> pending;
         for (FarSlab& f : farSlabs_) {
             if (!f.busy) continue;
             grid_->gpuPendingOffsets(uint64_t(f.buf.buf), pending);
             if (!pending.empty()) continue;
+            uint64_t submitted = backend_->framesSubmitted();
             if (!f.stamp) f.stamp = submitted + 1;
             if (completed >= f.stamp) {
                 f.busy = false;
@@ -1394,12 +1396,14 @@ private:
     // the slots the grid is done with: not waiting in it any more, and a frame submitted since has completed
     void reclaim() {
         if (!grid_ || !backend_) return;
-        uint64_t submitted = backend_->framesSubmitted(), completed = backend_->framesCompleted();
+        // completed before pending, submitted after it: a frame submitted between them may have recorded a copy
+        uint64_t completed = backend_->framesCompleted();
         std::vector<uint64_t> pending;
         std::unordered_set<uint64_t> wait;
         for (Slab& s : slabs_) {
             if (s.free.size() == SLAB_SLOTS) continue;
             grid_->gpuPendingOffsets(uint64_t(s.buf.buf), pending);
+            uint64_t submitted = backend_->framesSubmitted();
             wait.clear();
             wait.insert(pending.begin(), pending.end());
             for (uint32_t k = 0; k < SLAB_SLOTS; k++) {
