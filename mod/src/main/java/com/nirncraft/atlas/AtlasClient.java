@@ -602,11 +602,13 @@ public final class AtlasClient {
                 t.start();
             }
             if (source == null) source = AtlasFarField.defaultSource();
-            // the far terrain from the client generator straight into the grid's coarse levels (GPU): with
-            // -Dnirncraft.atlas.farTiles=false the far field makes no terrain tiles at all (no tile columns, no CPU
-            // World build of them); its overlays, lights and the server's sections still go up as before
+            // the far terrain from the client generator straight into the grid's coarse levels (GPU) is the far field:
+            // no terrain tiles at all (no tile columns, no CPU World build of them: the old far field, drawn wherever a
+            // coarse cell was not given yet, stale against the generator and never replaced); the lights and the
+            // server's sections still go up. -Dnirncraft.atlas.farTiles=true brings the tiles back (the settlements'
+            // far stand-ins ride on them)
             if (AtlasClientGen.ON && AtlasClientGen.far() && mc.hasSingleplayerServer()
-                    && "false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.farTiles"))) {
+                    && !"true".equalsIgnoreCase(System.getProperty("nirncraft.atlas.farTiles"))) {
                 if (source instanceof AtlasExactSource e) e.close();
                 source = AtlasFarField.noTerrainSource();
                 com.nirncraft.NirnCraft.LOGGER.info("atlas far terrain: the client generator's coarse levels only (no terrain tiles)");
