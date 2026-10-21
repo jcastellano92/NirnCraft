@@ -414,10 +414,24 @@ class AtlasGenFeaturesGpuTest {
             o.i(te.getKey());
             o.s(tn);
             long changed = 0;
+            // the trees' trace (FloraTreeFeature.trace) beside the dump: per origin, each placement's stages
+            StringBuilder treeTrace = "tree".equals(tn) ? new StringBuilder() : null;
             for (long k : origins.keySet()) {
                 int cx = ChunkPos.getX(k), cz = ChunkPos.getZ(k);
                 AtlasGenFeatures.Window w = features.new Window(terrain);
+                if (treeTrace != null) {
+                    treeTrace.append("origin ").append(cx).append(' ').append(cz).append('\n');
+                    Thread me = Thread.currentThread();  // (the server's own generation reports too)
+                    com.nirncraft.tamriel.biome.flora.FloraTreeFeature.trace = e -> {
+                        if (Thread.currentThread() != me) return;
+                        synchronized (treeTrace) {
+                            for (long v : e) treeTrace.append(v).append(' ');
+                            treeTrace.append('\n');
+                        }
+                    };
+                }
                 features.decorate(cx, cz, w);
+                com.nirncraft.tamriel.biome.flora.FloraTreeFeature.trace = null;
                 List<int[]> diff = new ArrayList<>();
                 for (int dz = -1; dz <= 1; dz++)
                     for (int dx = -1; dx <= 1; dx++) {
@@ -439,6 +453,7 @@ class AtlasGenFeaturesGpuTest {
                     o.i(e[1]);
                 }
             }
+            if (treeTrace != null) java.nio.file.Files.writeString(java.nio.file.Path.of(out + ".trees.txt"), treeTrace);
             report.append(String.format("  type %-7s %3d placed features, Java alone %.2f ms an origin (with the diff), %d blocks changed%n", tn,
                     te.getValue().size(), (System.nanoTime() - t0) / 1e6 / origins.size(), changed));
             System.out.println(String.format("TRACE done java-type:%s %.1fs", tn, (System.nanoTime() - t0) / 1e9));

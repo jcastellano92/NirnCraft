@@ -93,7 +93,7 @@ public record FloraField(int salt, float scale, float coverage, float softness, 
         }
         double n = FloraNoise.fbm(x / scale, z / scale, seed, 3);
         // fractal value noise is roughly normal with sigma ~0.27: spread it over 0..1 before thresholding
-        double u = 1.0 / (1.0 + Math.exp(-n * (1.702 / 0.27)));
+        double u = 1.0 / (1.0 + StrictMath.exp(-n * (1.702 / 0.27)));
         double t = 1.0 - coverage;
         return FloraNoise.smoothstep(t - s, t + s, u);
     }

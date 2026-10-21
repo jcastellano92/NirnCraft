@@ -357,7 +357,7 @@ foreach(pass corner aquifer fill top surface pack cols secs mats math probe)
   endif()
   add_custom_command(
     OUTPUT "${GEN}/atlas_gen_${pass}.spv"
-    COMMAND "${SLANGC}" "${GEN_SRC}" -target spirv -entry ${entry} -stage compute -O0 -fp-mode precise
+    COMMAND "${SLANGC}" "${GEN_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise
             -warnings-disable 41035 -o "${GEN}/atlas_gen_${pass}_raw.spv"
     COMMAND spv_exact "${GEN}/atlas_gen_${pass}_raw.spv" "${GEN}/atlas_gen_${pass}.spv"
     ${GEN_VALIDATE}

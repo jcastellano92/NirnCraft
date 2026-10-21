@@ -42,125 +42,125 @@ struct FeatParams {
 
 #include "atlas_exact.slang"
 
-// the exact functions without their flag argument: a call that passed the thread-private sBad itself made Slang
+// the exact functions without their flag argument: a call that passed a thread-private flag word itself made Slang
 // clone the callee for every call site (megabytes of SPIR-V), so the flag goes through a local
-[noinline]
+[ForceInline]
 uint arraySize_X(uint expected) {
     uint lb = 0u;
     uint v = arraySize(expected, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double atan2S_X(double y, double x) {
     uint lb = 0u;
     double v = atan2S(y, x, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 int ceilD_X(double d) {
     uint lb = 0u;
     int v = ceilD(d, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 int ceilF_X(float f) {
     uint lb = 0u;
     int v = ceilF(f, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double cosS_X(double x) {
     uint lb = 0u;
     double v = cosS(x, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double divD_X(double a, double b) {
     uint lb = 0u;
     double v = divD(a, b, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 float divF_X(float a, float b) {
     uint lb = 0u;
     float v = divF(a, b, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double expS_X(double x) {
     uint lb = 0u;
     double v = expS(x, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double fbm_X(double x, double z, int64_t seed, int octaves) {
     uint lb = 0u;
     double v = fbm(x, z, seed, octaves, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double fieldSample_X(uint f, int64_t worldSeed, double x, double z) {
     uint lb = 0u;
     double v = fieldSample(f, worldSeed, x, z, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 int floorD_X(double d) {
     uint lb = 0u;
     int v = floorD(d, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double hypotS_X(double x, double y) {
     uint lb = 0u;
     double v = hypotS(x, y, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double powD_X(double a, double b) {
     uint lb = 0u;
     double v = powD(a, b, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double sinS_X(double x) {
     uint lb = 0u;
     double v = sinS(x, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double sqrtD_X(double x) {
     uint lb = 0u;
     double v = sqrtD(x, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double valueNoise_X(double x, double z, int64_t seed) {
     uint lb = 0u;
     double v = valueNoise(x, z, seed, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
-[noinline]
+[ForceInline]
 double wrapDegrees_X(double a) {
     uint lb = 0u;
     double v = wrapDegrees(a, lb);
-    sBad |= lb;
+    if (lb != 0u) flag(FL_BAD_MATH);
     return v;
 }
 
@@ -180,13 +180,15 @@ static const uint TARGET_W = 12;                     // own slot, 9 origins, cx,
 static const uint HT_CAP = 32768;                    // write table slots (power of two)
 static const uint SCR_META = 0, SCR_HT = 16, SCR_HM = 16 + HT_CAP * 2, SCR_BIOMES = SCR_HM + 4 * 2304,
                   SCR_TESTED = SCR_BIOMES + 8, SCR_TREE = SCR_TESTED + 12288;
-static const uint TREE_W = 272440;                   // atlas_features trees: T_SORT + 4096 * 3
+static const uint TREE_W = 272448;                   // atlas_features trees: T_LAST + 8
 // SCR_MISC: the trunk line (2 x 80 doubles), the ore blob's spheres (64 x 4 doubles), the placement stack (288 x 4
 // ints) and one modifier's outputs (288 x 3 ints): kept out of registers (large local arrays blow the SPIR-V up)
 static const uint SCR_MISC = SCR_TREE + TREE_W, M_LINE = 0, M_ORE = 320, M_STACK = 320 + 512, M_OUT = 320 + 512 + 1152,
-                  M_LAKE = 320 + 512 + 1152 + 864, MISC_W = 320 + 512 + 1152 + 864 + 64;  // M_LAKE: the lake's 2048 bits
+                  M_LAKE = 320 + 512 + 1152 + 864, M_DBG = M_LAKE + 64, MISC_W = M_DBG + 1024;  // M_LAKE: the lake's 2048 bits;
+// M_DBG: the trees' trace (dev; count, then 6 words an entry: stage, x, y, z, draws, extra)
 static const uint SCR_W = SCR_MISC + MISC_W;
-// meta words: [0] table entries, [1] flags (FL_*), [2] ore stamp, [3] writes, [4] reads outside the 5 x 5
+// meta words: [0] table entries, [1] flags (FL_*), [2] ore stamp, [3] writes, [4] reads outside the 5 x 5, [6..9] the
+// random, [10] the feature's state (0 / 1 more to place / 2 done), [11] random draws (next() calls) so far
 static const uint FL_TABLE_FULL = 1, FL_OUTSIDE = 2, FL_UNSUPPORTED = 4, FL_STACK = 8, FL_BAD_MATH = 16;
 
 // fprog header
@@ -262,7 +264,6 @@ int ceilD(double d, inout uint bad) {
 int floorF(float f, inout uint bad) { return floorD(double(f), bad); }
 int ceilF(float f, inout uint bad) { return ceilD(double(f), bad); }
 // (int) of a double (Java: NaN 0, saturating)
-[noinline]
 int d2i(double d) {
     if (d != d) return 0;
     if (d >= 2147483647.0l) return 2147483647;
@@ -298,7 +299,7 @@ float divF(float a, float b, inout uint bad) {
     return best;
 }
 // (float) of a long (round to nearest even), any sign
-[noinline]
+[ForceInline]
 float l2f(int64_t sv) {
     bool neg = sv < 0;
     uint64_t v = neg ? uint64_t(-sv) : uint64_t(sv);
@@ -333,7 +334,6 @@ int jroundF(float a) {
     return int(a);
 }
 // Math.round(double) for |a| < 2^62: floor(a + 0.5) computed exactly (Java's bit version gives the same)
-[noinline]
 int64_t jroundD(double a) {
     int64_t bits = int64_t((uint64_t(uint(hiW(a))) << 32) | uint64_t(uint(loW(a))));
     int64_t biasedExp = (bits & int64_t(0x7FF0000000000000l)) >> 52;
@@ -360,6 +360,9 @@ double dmax(double a, double b) { return (a != a) ? a : (a >= b ? (a == 0.0l && 
 // Private variable for side-effect free and re-evaluated or merged their calls (ore's two nextInt(3) drew three
 // times). A storage buffer write it must keep. It also carries the random from one dispatch to the next.
 static uint sRA;
+// the trees' trace (dev): each placement's stages and marks with the draws so far into M_DBG, against the Java
+// reference's (FloraTreeFeature.trace, the dump's .trees.txt; tools: treecmp.py). Off: it costs a store a draw.
+static const bool TREE_TRACE = false;
 [ForceInline]
 uint64_t rngLo() { return (uint64_t(scratch[sRA + 1u]) << 32) | uint64_t(scratch[sRA]); }
 [ForceInline]
@@ -372,7 +375,6 @@ void rngStore(uint64_t lo, uint64_t hi) {
     scratch[sRA + 3u] = uint(hi >> 32u);
 }
 uint64_t rotl(uint64_t x, uint k) { return (x << k) | (x >> (64u - k)); }
-[noinline]
 uint64_t mixStafford13(uint64_t z) {
     z = (z ^ (z >> 30u)) * ((uint64_t(0xBF58476Du) << 32) | uint64_t(0x1CE4E5B9u));
     z = (z ^ (z >> 27u)) * ((uint64_t(0x94D049BBu) << 32) | uint64_t(0x133111EBu));
@@ -393,6 +395,7 @@ void rngSeed(int64_t seed) {
 [ForceInline]
 uint64_t xoroNext() {
     uint64_t s0 = rngLo(), s1 = rngHi();
+    if (TREE_TRACE) scratch[sRA + 5u] = scratch[sRA + 5u] + 1u;  // the draws (WorldgenRandom.getCount: the trees' trace)
     uint64_t result = rotl(s0 + s1, 17u) + s0;
     s1 = s1 ^ s0;
     rngStore(rotl(s0, 49u) ^ s1 ^ (s1 << 21u), rotl(s1, 28u));
@@ -447,6 +450,7 @@ int64_t decorationSeed(int64_t seed, int x0, int z0) {
     int64_t res = int64_t(uint64_t(int64_t(x0)) * uint64_t(xs) + uint64_t(int64_t(z0)) * uint64_t(zs)) ^ seed;
     return res;
 }
+[ForceInline]
 void featureSeed(int64_t deco, int gi, int step) { rngSeed(deco + int64_t(gi) + int64_t(10000 * step)); }
 
 // ---- per origin state --------------------------------------------------------------------------------------------
@@ -457,8 +461,11 @@ struct Org {
 };
 // FL_* of this thread's call (a thread-private variable: passing a struct member as inout makes Slang inline the
 // callee at every call site, which blew the tree kernel up to megabytes)
-static uint sBad = 0u;
-static Org sG;   // the origin this thread decorates (thread-private; see sBad)
+static Org sG;   // the origin this thread decorates (thread-private)
+// a flag (FL_*) on the origin, straight into its meta word: thread-private statics written in [noinline] callees are
+// not reliable on NVIDIA (see sRA)
+[ForceInline]
+void flag(uint f) { scratch[sG.base + SCR_META + 1u] = scratch[sG.base + SCR_META + 1u] | f; }
 [noinline]
 Org orgOf(uint o) {
     Org g;
@@ -506,7 +513,7 @@ void htPut(uint key, uint id) {
         if (k == key) { scratch[sG.base + SCR_HT + s * 2u + 1u] = id; return; }
         if (k == 0u) {
             uint used = scratch[sG.base + SCR_META];
-            if (used >= HT_CAP * 3u / 4u) { sBad |= FL_TABLE_FULL; return; }
+            if (used >= HT_CAP * 3u / 4u) { flag(FL_TABLE_FULL); return; }
             scratch[sG.base + SCR_META] = used + 1u;
             scratch[sG.base + SCR_HT + s * 2u] = key;
             scratch[sG.base + SCR_HT + s * 2u + 1u] = id;
@@ -518,7 +525,7 @@ void htPut(uint key, uint id) {
 [noinline]
 uint terrainAt(int x, int y, int z) {
     int slot = slotOf(x >> 4, z >> 4);
-    if (slot < 0) { sBad |= FL_OUTSIDE; return AIR; }
+    if (slot < 0) { flag(FL_OUTSIDE); return AIR; }
     uint b = uint(x & 15) + 16u * uint(z & 15) + 256u * uint(y - MIN_Y);
     uint w = chunkIds[uint(slot) * CHUNK_W + (b >> 1)];
     return (b & 1u) != 0u ? (w >> 16) : (w & 0xFFFFu);
@@ -552,7 +559,7 @@ int heightAt(uint type, int x, int z) {
     int f = finalIndex(type);
     if (f >= 0 && inBox(x, z)) return int(scratch[sG.base + SCR_HM + uint(f) * 2304u + hmLocal(x, z)]);
     int slot = slotOf(x >> 4, z >> 4);
-    if (slot < 0) { sBad |= FL_OUTSIDE; return MIN_Y; }
+    if (slot < 0) { flag(FL_OUTSIDE); return MIN_Y; }
     return int(chunkAux[uint(slot) * AUX_W + AUX_HM + type * 256u + uint(z & 15) * 16u + uint(x & 15)]);
 }
 // Heightmap.update after a ProtoChunk write
@@ -588,7 +595,7 @@ bool setBlock(int x, int y, int z, uint id, bool heightmaps) {
 [noinline]
 int quartBiome(int qx, int qy, int qz) {
     int slot = slotOf(qx >> 2, qz >> 2);
-    if (slot < 0) { sBad |= FL_OUTSIDE; return 0; }
+    if (slot < 0) { flag(FL_OUTSIDE); return 0; }
     int y = qy < -16 ? -16 : (qy > 159 ? 159 : qy);
     uint i = uint((((qx & 3) * 4 + (qz & 3)) * int(QY)) + (y + 16));
     uint w = chunkAux[uint(slot) * AUX_W + AUX_QUARTS + (i >> 1)];
@@ -635,7 +642,7 @@ bool biomeBit(uint set, int b) { return b >= 0 && (fprog[set + uint(b >> 5)] >> 
 [noinline]
 int clearance(int x, int z) {
     int slot = slotOf(x >> 4, z >> 4);
-    if (slot < 0) { sBad |= FL_OUTSIDE; return 0; }
+    if (slot < 0) { flag(FL_OUTSIDE); return 0; }
     uint i = uint(z & 15) * 16u + uint(x & 15);
     uint w = chunkAux[uint(slot) * AUX_W + AUX_MASK + (i >> 2)];
     return int((w >> ((i & 3u) * 8u)) & 0xFFu);
@@ -744,7 +751,10 @@ int intProvider(uint w) {
     if (kind == IP_UNIFORM) return rngBetween(a, b);
     if (kind == IP_BIASED) return a + rngIntB(rngIntB(b - a + 1) + 1);
     if (kind == IP_TRAPEZOID) {  // TrapezoidInt(min a, max b, plateau c)
-        if (c == 0 && b == -a) return rngIntB(b + 1) - rngIntB(b + 1);
+        if (c == 0 && b == -a) {
+            int first = rngIntB(b + 1);  // Java: left operand first
+            return first - rngIntB(b + 1);
+        }
         int range = b - a;
         if (c == range) return rngBetween(a, b);
         int plateauStart = (range - c) / 2, plateauEnd = range - plateauStart;
@@ -810,7 +820,7 @@ bool survives(uint s, int x, int y, int z) {
         if (bis(blockAt(x, y + 1, z), B_FLUID)) return false;
         return ok;
     }
-    sBad |= FL_UNSUPPORTED;
+    flag(FL_UNSUPPORTED);
     return false;
 }
 [noinline]
@@ -941,7 +951,7 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
                     double zd = divD_X(double(z) + 0.5l - zz, rr);
                     if (!(xd * xd + yd * yd + zd * zd < 1.0l) || y < MIN_Y || y > MAX_Y) continue;
                     int bi = (x - xStart) + (y - yStart) * sizeXZ + (z - zStart) * sizeXZ * sizeY;
-                    if (bi < 0 || bi >= 12288) { sBad |= FL_STACK; continue; }
+                    if (bi < 0 || bi >= 12288) { flag(FL_STACK); continue; }
                     uint ta = sG.base + SCR_TESTED + uint(bi);
                     if (scratch[ta] == stamp) continue;
                     scratch[ta] = stamp;
@@ -1059,7 +1069,7 @@ int coverPick(uint cfg, int x, int z, double roll) {
 [noinline]
 uint alchClass(int x, int z, uint variant) {
     int slot = slotOf(x >> 4, z >> 4);
-    if (slot < 0) { sBad |= FL_OUTSIDE; return 0u; }
+    if (slot < 0) { flag(FL_OUTSIDE); return 0u; }
     uint i = variant * 256u + uint(z & 15) * 16u + uint(x & 15);
     uint w = chunkAux[uint(slot) * AUX_W + AUX_ALCH + (i >> 2)];
     return (w >> ((i & 3u) * 8u)) & 0xFFu;
@@ -1234,7 +1244,7 @@ float biomeTemperature(int b, int x, int y, int z) {
     uint e = hdr(H_BIOMETAB) + uint(imax(b, 0)) * 4u;
     float base = asfloat(fprog[e]);
     int slot = slotOf(x >> 4, z >> 4);
-    if (slot < 0) { sBad |= FL_OUTSIDE; return 1.0f; }
+    if (slot < 0) { flag(FL_OUTSIDE); return 1.0f; }
     uint c = uint(z & 15) * 16u + uint(x & 15);
     if (fprog[e + 2] != 0u && ((chunkAux[uint(slot) * AUX_W + AUX_FROZEN + (c >> 5)] >> (c & 31u)) & 1u) != 0u) base = 0.2f;
     int snowLevel = int(hdr(H_SEA)) + 17;
@@ -1287,7 +1297,6 @@ int64_t posKey(int x, int y, int z) {
 int keyX(int64_t k) { return int(k >> 38); }
 int keyY(int64_t k) { return int((k << 52) >> 52); }
 int keyZ(int64_t k) { return int((k << 26) >> 38); }
-[noinline]
 uint64_t hmix(int64_t x) {
     uint64_t h = uint64_t(x) * ((uint64_t(0x9E3779B9u) << 32) | uint64_t(0x7F4A7C15u));
     h = h ^ (h >> 32u);
@@ -1339,7 +1348,7 @@ uint maxFillOf(uint n) {
 [noinline]
 void fmInit(FMap m, uint expected) {
     uint n = arraySize_X(expected);
-    if (n > m.cap) { sBad |= FL_TABLE_FULL; n = m.cap; }
+    if (n > m.cap) { flag(FL_TABLE_FULL); n = m.cap; }
     scratch[m.at] = n;
     scratch[m.at + 1] = 0u;
     scratch[m.at + 2] = maxFillOf(n);
@@ -1350,7 +1359,7 @@ void fmInit(FMap m, uint expected) {
 [noinline]
 void fmRehash(FMap m, uint newN, uint tmp) {
     uint n = fmN(m);
-    if (newN > m.cap) { sBad |= FL_TABLE_FULL; return; }
+    if (newN > m.cap) { flag(FL_TABLE_FULL); return; }
     for (uint i = 0; i < n * 3u; i++) scratch[tmp + i] = scratch[m.at + FM_HDR + i];
     for (uint i = 0; i < newN; i++) fmSetSlot(m, i, 0, 0u);
     uint mask = newN - 1u;
@@ -1386,7 +1395,7 @@ uint fmGet(FMap m, int64_t k, uint dflt) {
 // put: true when the key is new
 [noinline]
 bool fmPut(FMap m, int64_t k, uint v, uint tmp) {
-    if (k == 0) { sBad |= FL_UNSUPPORTED; return false; }  // fastutil's null key: not reproduced (BlockPos 0, 0, 0)
+    if (k == 0) { flag(FL_UNSUPPORTED); return false; }  // fastutil's null key: not reproduced (BlockPos 0, 0, 0)
     uint n = fmN(m), mask = n - 1u;
     uint pos = uint(hmix(k) & 0xFFFFFFFFu) & mask;
     for (uint guard = 0; guard <= n; guard++) {
@@ -1437,8 +1446,9 @@ static const uint TM_LEAVES = 0, TC_LEAVES = 16384, TM_LOGS = FM_HDR + 16384 * 3
                   TM_PLACED = TM_KEPT + FM_HDR + 16384 * 3, TC_PLACED = 4096,
                   T_TMP = TM_PLACED + FM_HDR + 4096 * 3,                          // 16384 * 3
                   T_QUEUE = T_TMP + 16384 * 3, TQ_CAP = 16384,                    // 2 words a key
-                  T_SORT = T_QUEUE + 16384 * 2;                                   // 4096 * 3
-// (TREE_W = T_SORT + 4096 * 3)
+                  T_SORT = T_QUEUE + 16384 * 2,                                   // 4096 * 3
+                  T_LAST = T_SORT + 4096 * 3;                                     // the chain's last point
+// (TREE_W = T_LAST + 8)
 
 // block transforms (block table words 2..15): axis x, y, z; waterlogged true, false; leaf distance 1..7 (7 persistent);
 // snowy
@@ -1448,8 +1458,6 @@ uint axisOf(uint id, uint axis) { return btrans(id, T_AX + axis); }  // 0 x, 1 y
 struct TreeB {
     FMap leaves, logs, extras, anchors, root, kept, placed;
     uint tmp, queue, sortAt;
-    int lastX, lastY, lastZ;
-    bool hasLast;
     GBox box;
 };
 static TreeB sB;  // the tree being grown, thread-private
@@ -1467,8 +1475,7 @@ TreeB treeB(GBox box) {
     b.tmp = t + T_TMP;
     b.queue = t + T_QUEUE;
     b.sortAt = t + T_SORT;
-    b.hasLast = false;
-    b.lastX = 0; b.lastY = 0; b.lastZ = 0;
+    scratch[t + T_LAST] = 0u;
     b.box = box;
     return b;
 }
@@ -1510,8 +1517,9 @@ void tDisc(double cx, int y, double cz, double r, uint state) {
 }
 [noinline]
 void tChain(int x, int y, int z, uint state, uint base) {
-    if (sB.hasLast) {
-        int cx = sB.lastX, cy = sB.lastY, cz = sB.lastZ;
+    uint last = sG.base + SCR_TREE + T_LAST;  // has, x, y, z (in scratch: see sRA)
+    if (scratch[last] != 0u) {
+        int cx = int(scratch[last + 1u]), cy = int(scratch[last + 2u]), cz = int(scratch[last + 3u]);
         for (int guard = 0; guard < 4096 && iabs(x - cx) + iabs(y - cy) + iabs(z - cz) > 1; guard++) {
             if (x != cx) {
                 cx += signumI(x - cx);
@@ -1526,8 +1534,8 @@ void tChain(int x, int y, int z, uint state, uint base) {
         }
     }
     if (!tIsLog(x, y, z)) tLog(x, y, z, state);
-    sB.lastX = x; sB.lastY = y; sB.lastZ = z;
-    sB.hasLast = true;
+    scratch[last + 1u] = uint(x); scratch[last + 2u] = uint(y); scratch[last + 3u] = uint(z);
+    scratch[last] = 1u;
 }
 [noinline]
 void tBranch(double x0, double y0, double z0, double x1, double y1, double z1, double r0, double r1, uint log) {
@@ -1536,7 +1544,7 @@ void tBranch(double x0, double y0, double z0, double x1, double y1, double z1, d
     int steps = imax(1, ceilD_X(len * 1.2l));
     uint axis = absD2(dy) >= dmax(absD2(dx), absD2(dz)) ? 1u : (absD2(dx) >= absD2(dz) ? 0u : 2u);
     uint state = axisOf(log, axis);
-    sB.hasLast = false;
+    scratch[sG.base + SCR_TREE + T_LAST] = 0u;
     for (int s = 0; s <= steps; s++) {
         double t = divD_X(double(s), double(steps));
         double x = x0 + dx * t, y = y0 + dy * t, z = z0 + dz * t;
@@ -1552,14 +1560,32 @@ void tBranch(double x0, double y0, double z0, double x1, double y1, double z1, d
             tChain(floorD_X(x), floorD_X(y), floorD_X(z), state, log);
         }
     }
-    sB.hasLast = false;
+    scratch[sG.base + SCR_TREE + T_LAST] = 0u;
 }
 void tLeaf(int x, int y, int z, uint state) {
     int64_t k = posKey(x, y, z);
     if (!fmHas(sB.logs, k)) fmPut(sB.leaves, k, state, sB.tmp);
 }
+uint bitsMix(double a, double b, double c) {
+    uint lo, hi;
+    asuint(a, lo, hi);
+    uint64_t h = (uint64_t(hi) << 32) | uint64_t(lo);
+    asuint(b, lo, hi);
+    h = h * 31u + ((uint64_t(hi) << 32) | uint64_t(lo));
+    asuint(c, lo, hi);
+    h = h * 31u + ((uint64_t(hi) << 32) | uint64_t(lo));
+    return uint(h & 0xFFFFFFFFu);
+}
+[ForceInline]
+void tMark(uint stage, double a, double b, double c) {
+    if (!TREE_TRACE) return;
+    int64_t mk = int64_t(floorD_X(a * 16.0l)) * 1000003 + int64_t(floorD_X(b * 16.0l)) * 1009 + int64_t(floorD_X(c * 16.0l));
+    treeTrace(stage, 0, 0, 0, uint(uint64_t(mk) & 0xFFFFFFFFu));
+}
 [noinline]
 void tClump(double cx, double cy, double cz, double rx, double ry, double rz, uint state, double ragged) {
+    tMark(43u, cx, cy, cz);
+    tMark(44u, rx, ry, rz);
     int x0 = floorD_X(cx - rx), x1 = floorD_X(cx + rx);
     int y0 = floorD_X(cy - ry), y1 = floorD_X(cy + ry);
     int z0 = floorD_X(cz - rz), z1 = floorD_X(cz + rz);
@@ -1575,6 +1601,7 @@ void tClump(double cx, double cy, double cz, double rx, double ry, double rz, ui
 }
 [noinline]
 void tPad(double cx, int y, double cz, double rx, double rz, uint state, double ragged, bool domed) {
+    tMark(45u, cx, double(y), cz);
     int x0 = floorD_X(cx - rx), x1 = floorD_X(cx + rx), z0 = floorD_X(cz - rz), z1 = floorD_X(cz + rz);
     for (int x = x0; x <= x1; x++)
         for (int z = z0; z <= z1; z++) {
@@ -1739,7 +1766,7 @@ bool tCommit(int baseX, int baseY, int baseZ) {
                 qPush(tail, fmKey(sB.root, uint(p)));
             }
         }
-        if (tail - head > TQ_CAP) { sBad |= FL_TABLE_FULL; break; }
+        if (tail - head > TQ_CAP) { flag(FL_TABLE_FULL); break; }
     }
     // write the rooted logs
     nr = fmN(sB.root);
@@ -1768,7 +1795,7 @@ bool tCommit(int baseX, int baseY, int baseZ) {
                 qPush(tail, n);
             }
         }
-        if (tail - head > TQ_CAP) { sBad |= FL_TABLE_FULL; break; }
+        if (tail - head > TQ_CAP) { flag(FL_TABLE_FULL); break; }
     }
     // leaf distances: breadth first from the logs through the kept leaves (logs 0)
     head = 0; tail = 0;
@@ -1792,7 +1819,7 @@ bool tCommit(int baseX, int baseY, int baseZ) {
                 qPush(tail, posKey(nx, ny, nz));
             }
         }
-        if (tail - head > TQ_CAP) { sBad |= FL_TABLE_FULL; break; }
+        if (tail - head > TQ_CAP) { flag(FL_TABLE_FULL); break; }
     }
     uint nk = fmN(sB.kept);
     for (int pos = int(nk) - 1; pos >= 0; pos--) {
@@ -1876,7 +1903,6 @@ struct Grow {
 struct Line {
     uint at;
 };
-[noinline]
 Line lineOf() {
     Line c;
     c.at = sG.base + SCR_MISC + M_LINE;
@@ -1888,17 +1914,22 @@ void setL(Line c, int i, double x, double z) {
     scrSetD(c.at + uint(i) * 4u, x);
     scrSetD(c.at + uint(i) * 4u + 2u, z);
 }
+[ForceInline]
 double gu(double lo, double hi) { return lo + rngDouble() * (hi - lo); }
+[ForceInline]
 int gHeight(Grow t) {
     int lo = spI(t.sp, S_MINH), hi = spI(t.sp, S_MAXH);
     return lo + rngIntB(imax(1, hi - lo + 1));
 }
+[ForceInline]
 double gAngle() { return rngDouble() * PI_D * 2.0l; }
+[ForceInline]
 double gLeanAngle(Grow t) {
     float w = spF(t.sp, S_WIND);
     return w > 0.0f ? t.windAngle + (rngDouble() - 0.5l) * (1.0l - double(w)) * PI_D : gAngle();
 }
 uint leafFor(Grow t, bool accentPick) { return accentPick && t.accent != NO_STATE ? t.accent : t.leaves; }
+[ForceInline]
 uint clumpLeaves(Grow t) {
     bool pick = spU(t.sp, S_ACCENT_TOP) == 0u && t.accent != NO_STATE && rngFloat() < spF(t.sp, S_ACCENT_CH);
     return leafFor(t, pick);
@@ -1928,7 +1959,9 @@ void trunkLine(Grow t, int h, double leanScale, Line c) {
     double la = gLeanAngle(t);
     double lm = double(spF(t.sp, S_LEAN) * float(h)) * gu(0.3l, 1.0l) * leanScale;
     double wob = gu(0.0l, 0.35l), ph = gAngle(), freq = gu(0.25l, 0.5l);
-    if (h + 2 > MAXC) { sBad |= FL_STACK; return; }
+    treeTrace(46u, t.x, t.y, t.z, bitsMix(la, lm, wob));
+    treeTrace(47u, t.x, t.y, t.z, bitsMix(ph, freq, 0.0l));
+    if (h + 2 > MAXC) { flag(FL_STACK); return; }
     double cl = cosS_X(la), sl = sinS_X(la);
     for (int dy = 0; dy <= h + 1; dy++) {
         double tt = divD_X(double(dy), double(imax(1, h)));
@@ -1984,6 +2017,7 @@ void tier(Grow t, double cx, int y, double cz, double rad, double tr) {
                     cz + sinS_X(ang[i]) * bl, 0.0l, 0.0l, spU(t.sp, S_LOG));
         }
     }
+    treeTrace(63u, t.x, t.y, t.z, bitsMix(ang[n - 1], len[n - 1], a0));
     int ri = ceilD_X(rad + tr);
     int bx = floorD_X(cx), bz = floorD_X(cz);
     for (int dx = -ri; dx <= ri; dx++)
@@ -2027,6 +2061,7 @@ void shConifer(Grow t) {
     }
     int cb = imax(1, d2i(double(h) * gu(double(spF(sp, S_BASE0)), double(spF(sp, S_BASE1)))));
     double rMax = double(spF(sp, S_RADIUS)) * gu(0.82l, 1.15l);
+    treeTrace(60u, t.x, t.y, t.z, bitsMix(double(cb), rMax, tr));
     for (int dy = 2; dy < cb; dy += 1 + rngIntB(2)) {
         if (rngFloat() < spF(sp, S_DEAD)) {
             double a = gAngle();
@@ -2046,7 +2081,9 @@ void shConifer(Grow t) {
         else
             rad = 0.9l + rMax * powD_X(1.0l - tt, 0.85l) * gu(0.78l, 1.15l);
         bool gap = tt > 0.12l && tt < 0.8l && rngFloat() < spF(sp, S_GAPS);
+        treeTrace(61u, t.x, t.y, t.z, bitsMix(rad, LX(c, dy), LZ(c, dy)));
         if (!gap) tier(t, LX(c, dy), t.y + dy, LZ(c, dy), rad, tr);
+        treeTrace(62u, t.x, t.y, t.z, uint(dy));
         dy -= rad > 3.2l ? 2 + rngIntB(2) : 2;
     }
     double sx = LX(c, top), sz = LZ(c, top);
@@ -2059,6 +2096,7 @@ void shConifer(Grow t) {
         if (rngIntB(3) > 0) tLeaf(fsx + hdx(d), sy - 1, fsz + hdz(d), t.leaves);
     }
 }
+[ForceInline]
 void leafClump(Grow t, double x, double y, double z, double rr, uint lv) {
     double rx = rr * gu(0.85l, 1.15l), rz = rr * gu(0.85l, 1.15l), ry = rr * gu(0.55l, 0.8l);
     tClump(x, y, z, rx, dmax(1.2l, ry), rz, lv, double(spF(t.sp, S_RAGGED)));
@@ -2069,10 +2107,12 @@ void shBroadleaf(Grow t) {
     int h = gHeight(t);
     Line c = lineOf();
     trunkLine(t, h, 1.0l, c);
+    treeTrace(10u, t.x, t.y, t.z, uint(h));
     int trunk = spI(sp, S_TRUNK);
     double tr = trunk >= 3 ? gu(1.5l, 2.2l) : (trunk == 2 ? gu(0.85l, 1.15l) : 0.0l);
     int fork = imax(2, d2i(double(h) * gu(double(spF(sp, S_BASE0)), double(spF(sp, S_BASE1)))));
     trunkDraw(t, c, 0, fork, tr, tr * 0.8l, tr > 0.0l ? 0.7l + tr * 0.25l : 0.0l);
+    treeTrace(11u, t.x, t.y, t.z, uint(fork));
     if (spF(sp, S_ROOTS) > 0.0f && rngFloat() < spF(sp, S_ROOTS)) {
         int cnt = 3 + rngIntB(3);
         roots(t, LX(c, 0), LZ(c, 0), tr * 0.8l + 0.3l, cnt, 1.2l, 2.5l + tr, tr > 1.0l ? 2 : 1);
@@ -2080,6 +2120,7 @@ void shBroadleaf(Grow t) {
     double crownR = double(spF(sp, S_RADIUS)) * gu(0.85l, 1.15l);
     double fx = LX(c, fork), fz = LZ(c, fork);
     int limbs = spI(sp, S_LIMBS) + rngIntB(2);
+    treeTrace(12u, t.x, t.y, t.z, uint(limbs));
     double a0 = gAngle();
     double wind = double(spF(sp, S_WIND));
     double crownH = double(h - fork);
@@ -2099,8 +2140,13 @@ void shBroadleaf(Grow t) {
         double ca = cosS_X(az), sa = sinS_X(az), ce = cosS_X(elev), se = sinS_X(elev);
         double ex = fx + ca * ce * len, ez = fz + sa * ce * len, ey = sy + se * len;
         bool deadLimb = rngFloat() < spF(sp, S_DEAD);
+        treeTrace(24u, t.x, t.y, t.z, bitsMix(az, elev, len));
+        treeTrace(25u, t.x, t.y, t.z, bitsMix(fx, fz, sy));
+        int64_t mk = int64_t(floorD_X(ex * 16.0l)) * 1000003 + int64_t(floorD_X(ey * 16.0l)) * 1009 + int64_t(floorD_X(ez * 16.0l));
+        treeTrace(20u, t.x, t.y, t.z, uint(uint64_t(mk) & 0xFFFFFFFFu));
         tBranch(fx, sy, fz, ex, ey, ez, tr > 1.0l ? tr * 0.55l : 0.0l, 0.0l, log);
         uint lv = clumpLeaves(t);
+        treeTrace(21u, t.x, t.y, t.z, deadLimb ? 1u : 0u);
         int shoots = 1 + rngIntB(2) + (trunk >= 3 ? 1 : 0);
         for (int k = 0; k < shoots; k++) {
             double tt = gu(0.45l, 0.85l);
@@ -2115,14 +2161,18 @@ void shBroadleaf(Grow t) {
             tBranch(px, py, pz, qx, qy, qz, 0.0l, 0.0l, log);
             if (!deadLimb) leafClump(t, qx, qy + 0.5l, qz, clumpF * gu(0.75l, 1.0l), lv);
         }
+        treeTrace(22u, t.x, t.y, t.z, uint(shoots));
         if (!deadLimb) leafClump(t, ex, ey + 0.5l, ez, clumpF * gu(0.9l, 1.2l), lv);
+        treeTrace(23u, t.x, t.y, t.z, 0u);
     }
     double lx = LX(c, h) + (wind > 0.0l ? cosS_X(t.windAngle) * wind * 1.5l : 0.0l);
     double lz = LZ(c, h) + (wind > 0.0l ? sinS_X(t.windAngle) * wind * 1.5l : 0.0l);
     tBranch(fx, double(t.y + fork), fz, lx, double(t.y + h - 1), lz, tr > 1.0l ? tr * 0.5l : 0.0l, 0.0l, log);
+    treeTrace(30u, t.x, t.y, t.z, 0u);
     double lr = clumpF * gu(0.95l, 1.25l);
     uint llv = clumpLeaves(t);
     leafClump(t, lx, double(t.y + h), lz, lr, llv);
+    treeTrace(31u, t.x, t.y, t.z, 0u);
     double midY = double(t.y + fork) + crownH * 0.65l;
     uint mlv = clumpLeaves(t);
     tClump(fx + (lx - fx) * 0.6l, midY, fz + (lz - fz) * 0.6l, crownR * 0.55l, dmax(1.5l, crownH * 0.35l), crownR * 0.55l, mlv, 0.7l);
@@ -2233,7 +2283,7 @@ void shBaldCypress(Grow t) {
         int py = t.y + h - p * (3 + rngIntB(2));
         double pr = rTop * (1.0l - double(p) * 0.12l) * gu(0.85l, 1.1l);
         int ci = imin(h, py - t.y);
-        if (ci < 0) { sBad |= FL_UNSUPPORTED; return; }  // Java throws here (a feature failure)
+        if (ci < 0) { flag(FL_UNSUPPORTED); return; }  // Java throws here (a feature failure)
         double px = LX(c, ci), pz = LZ(c, ci);
         int arms = 3 + rngIntB(3);
         double a0 = gAngle();
@@ -2445,7 +2495,7 @@ void shTwisted(Grow t) {
     double la = gLeanAngle(t);
     double cx = double(t.x) + 0.5l, cz = double(t.z) + 0.5l;
     int straight = 1 + rngIntB(2);
-    if (h + 1 > MAXC) { sBad |= FL_STACK; return; }
+    if (h + 1 > MAXC) { flag(FL_STACK); return; }
     Line c = lineOf();
     for (int dy = 0; dy <= h; dy++) {
         setL(c, dy, cx, cz);
@@ -2696,12 +2746,30 @@ uint treePick(uint cfg, int x, int z, double roll) {
     }
     return fprog[cfg + 3 + (n - 1u) * 2];
 }
+[ForceInline]
+void treeTrace(uint stage, int x, int y, int z, uint extra) {
+    if (!TREE_TRACE) return;
+    uint at = sG.base + SCR_MISC + M_DBG, n = scratch[at];
+    if (n >= 170u) return;
+    uint w = at + 1u + n * 6u;
+    scratch[w] = stage; scratch[w + 1] = uint(x); scratch[w + 2] = uint(y); scratch[w + 3] = uint(z);
+    scratch[w + 4] = scratch[sRA + 5u]; scratch[w + 5] = extra;
+    scratch[at] = n + 1u;
+}
 [noinline]
 bool placeTree(uint cfg, int x, int y, int z) {
+    treeTrace(0u, x, y, z, 0u);
+    bool placed = placeTreeAt(cfg, x, y, z);
+    treeTrace(3u, x, y, z, placed ? 1u : 0u);
+    return placed;
+}
+[noinline]
+bool placeTreeAt(uint cfg, int x, int y, int z) {
     GBox box = gbox(x, z);
     int64_t seed = int64_t(pfU64(H_SEED));
     uint sp = treePick(cfg, x, z, rngDouble());
     if (sp == NO_STATE) return false;
+    treeTrace(1u, x, y, z, spU(sp, S_SHAPE));
     if (!maskClear(x, z, spI(sp, S_REACH))) return false;
     int water = imax(0, heightAt(HM_WORLD_SURFACE, x, z) - y);
     if (water > spI(sp, S_MAXWATER)) return false;
@@ -2728,7 +2796,7 @@ bool placeTree(uint cfg, int x, int y, int z) {
     t.accent = spU(sp, S_ACCENT);
     // realmTint: the lands beyond Tamriel recolour some foliage (by the map's realm): not here yet
     if (!(x >= int(tconst(TCN_MINX)) && x < int(tconst(TCN_MAXX)) && z >= int(tconst(TCN_MINZ)) && z < int(tconst(TCN_MAXZ)))) {
-        sBad |= FL_UNSUPPORTED;
+        flag(FL_UNSUPPORTED);
         return false;
     }
     uint shape = spU(sp, S_SHAPE);
@@ -2751,6 +2819,7 @@ bool placeTree(uint cfg, int x, int y, int z) {
     else if (shape == SH_BAMBOO) shBamboo(t);
     else shCrystal(t);
     if (spU(sp, S_ACCENT_TOP) != 0u && t.accent != NO_STATE) tTint(t.leaves, t.accent, double(spF(sp, S_ACCENT_CH)), true);
+    treeTrace(2u, x, y, z, 0u);
     return tCommit(x, y, z);
 }
 
@@ -2905,7 +2974,7 @@ bool placeFeature<let T : uint>(uint rec, int x, int y, int z) {
     if (type == FT_DISK) return placeDisk(cfg, x, y, z);
     if (type == FT_SPRING) return placeSpring(cfg, x, y, z);
     if (type == FT_LAKE) return placeLake(cfg, x, y, z);
-    sBad |= FL_UNSUPPORTED;
+    flag(FL_UNSUPPORTED);
     return false;
 }
 
@@ -2914,8 +2983,9 @@ static const int MAXP = 288;
 // ScatterPlacement (flora_scatter): the live, uncrowded points of a world-wide jittered grid inside the chunk
 [noinline]
 bool scatterAlive(uint m, int64_t worldSeed, int h, int x, int z) {
-    float density = pfF(m + 3), floorV = pfF(m + 4);
-    uint field = hdr(H_FIELDS) + fprog[m + 5] * FIELD_W;
+    // the words: spacing, min distance, pad, density, floor, field
+    float density = pfF(m + 4), floorV = pfF(m + 5);
+    uint field = hdr(H_FIELDS) + fprog[m + 6] * FIELD_W;
     double p = double(floorV) + double(density - floorV) * fieldSample_X(field, worldSeed, double(x), double(z));
     return unit01(int(uint(h) * 0x5BD1E995u ^ 0x68E31DA4u)) < p;
 }
@@ -2935,6 +3005,7 @@ void out1(inout PosOut o, int x, int y, int z) {
 // The placement interpreter, resumable: the stack lives in scratch, an entry whose modifier index is the modifier
 // count is a placement. Runs until the stack is empty or `budget` placements are made; true when work is left (the
 // stack depth and the random are kept in the origin's meta words for the next dispatch).
+[ForceInline]
 bool runPlaced<let T : uint>(uint rec, bool first, uint budget) {
     uint nm = fprog[rec + R_NMODS], mods = fprog[rec + R_MODS];
     int ox = sG.cx * 16, oy = MIN_Y, oz = sG.cz * 16;
@@ -2964,7 +3035,7 @@ bool runPlaced<let T : uint>(uint rec, bool first, uint budget) {
         o.n = 0;
         if (kind == M_COUNT) {
             int n = intProvider(m + 1);
-            if (n > MAXP) sBad |= FL_STACK;
+            if (n > MAXP) flag(FL_STACK);
             for (int i = 0; i < n; i++) out1(o, x, y, z);
         } else if (kind == M_IN_SQUARE) {
             int ax = rngIntB(16) + x;
@@ -2983,7 +3054,7 @@ bool runPlaced<let T : uint>(uint rec, bool first, uint budget) {
         } else if (kind == M_FLORA_SCATTER) {
             int s = int(fprog[m + 1]);
             float minDistance = pfF(m + 2);
-            uint field = hdr(H_FIELDS) + fprog[m + 5] * FIELD_W;
+            uint field = hdr(H_FIELDS) + fprog[m + 6] * FIELD_W;
             int64_t seed = fieldSeed(field, worldSeed) ^ int64_t(uint64_t(0x7F4A7C15u) * uint64_t(int64_t(s)));
             int x0 = x & ~15, z0 = z & ~15;
             int ci0 = floorDivI(x0, s), ci1 = floorDivI(x0 + 15, s);
@@ -3042,11 +3113,11 @@ bool runPlaced<let T : uint>(uint rec, bool first, uint budget) {
         } else if (kind == M_BLOCK_PRED) {
             if (predicate(fprog[m + 1], x, y, z)) out1(o, x, y, z);
         } else {
-            sBad |= FL_UNSUPPORTED;
+            flag(FL_UNSUPPORTED);
         }
         // the outputs, reversed so they come off in order (after the last modifier: placements)
         for (int i = o.n - 1; i >= 0; i--) {
-            if (sp >= MAXP) { sBad |= FL_STACK; break; }
+            if (sp >= MAXP) { flag(FL_STACK); break; }
             uint ow = o.at + uint(i) * 3u, nw = stack + uint(sp) * 4u;
             scratch[nw] = scratch[ow]; scratch[nw + 1] = scratch[ow + 1]; scratch[nw + 2] = scratch[ow + 2]; scratch[nw + 3] = uint(mi + 1);
             sp++;
@@ -3096,6 +3167,7 @@ void featInitMain(uint3 id : SV_DispatchThreadID) {
     }
     if (i == 0u) {
         for (uint m = 0; m < 16u; m++) scratch[sG.base + SCR_META + m] = 0u;
+        scratch[sG.base + SCR_MISC + M_DBG] = 0u;
         uint bits[8] = {0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u};
         for (int dz = -1; dz <= 1; dz++)
             for (int dx = -1; dx <= 1; dx++) {
@@ -3115,7 +3187,6 @@ void featInitMain(uint3 id : SV_DispatchThreadID) {
 [noinline]
 void featBody<let T : uint>(uint o) {
     sG = orgOf(o);
-    sBad = 0u;
     uint rec = params.rec;
     uint meta = sG.base + SCR_META;
     sRA = meta + 6u;
@@ -3134,52 +3205,53 @@ void featBody<let T : uint>(uint o) {
     }
     bool more = runPlaced<T>(rec, first, params.budget);
     scratch[meta + 10u] = more ? 1u : 2u;
-    scratch[meta + 1u] = scratch[meta + 1u] | sBad;
     if (more) InterlockedAdd(counters[0], 1u);
 }
 
 // one kernel a feature type (each module holds only its own code): the host picks it by the record's type
+// One origin a warp (a group of 32, one lane working): the decoration is serial code that diverges at once, and
+// origins sharing a warp would run one after the other (a dispatch of trees then outlasted the watchdog)
 [shader("compute")]
-[numthreads(64, 1, 1)]
-void featOreMain(uint3 id : SV_DispatchThreadID) {
-    if (id.x < uint(params.origins)) featBody<FT_ORE>(id.x);
+[numthreads(32, 1, 1)]
+void featOreMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
+    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_ORE>(g.x);
 }
 [shader("compute")]
-[numthreads(64, 1, 1)]
-void featCoverMain(uint3 id : SV_DispatchThreadID) {
-    if (id.x < uint(params.origins)) featBody<FT_COVER>(id.x);
+[numthreads(32, 1, 1)]
+void featCoverMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
+    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_COVER>(g.x);
 }
 [shader("compute")]
-[numthreads(64, 1, 1)]
-void featRockMain(uint3 id : SV_DispatchThreadID) {
-    if (id.x < uint(params.origins)) featBody<FT_ROCK>(id.x);
+[numthreads(32, 1, 1)]
+void featRockMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
+    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_ROCK>(g.x);
 }
 [shader("compute")]
-[numthreads(64, 1, 1)]
-void featTreeMain(uint3 id : SV_DispatchThreadID) {
-    if (id.x < uint(params.origins)) featBody<FT_TREE>(id.x);
+[numthreads(32, 1, 1)]
+void featTreeMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
+    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_TREE>(g.x);
 }
 [shader("compute")]
-[numthreads(64, 1, 1)]
-void featFreezeMain(uint3 id : SV_DispatchThreadID) {
-    if (id.x < uint(params.origins)) featBody<FT_FREEZE>(id.x);
+[numthreads(32, 1, 1)]
+void featFreezeMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
+    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_FREEZE>(g.x);
 }
 [shader("compute")]
-[numthreads(64, 1, 1)]
-void featDiskMain(uint3 id : SV_DispatchThreadID) {
-    if (id.x < uint(params.origins)) featBody<FT_DISK>(id.x);
-}
-
-[shader("compute")]
-[numthreads(64, 1, 1)]
-void featSpringMain(uint3 id : SV_DispatchThreadID) {
-    if (id.x < uint(params.origins)) featBody<FT_SPRING>(id.x);
+[numthreads(32, 1, 1)]
+void featDiskMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
+    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_DISK>(g.x);
 }
 
 [shader("compute")]
-[numthreads(64, 1, 1)]
-void featLakeMain(uint3 id : SV_DispatchThreadID) {
-    if (id.x < uint(params.origins)) featBody<FT_LAKE>(id.x);
+[numthreads(32, 1, 1)]
+void featSpringMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
+    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_SPRING>(g.x);
+}
+
+[shader("compute")]
+[numthreads(32, 1, 1)]
+void featLakeMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
+    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_LAKE>(g.x);
 }
 
 // the C++ build: one origin a group (the host's threads take groups), every type

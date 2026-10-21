@@ -13,13 +13,11 @@
 // Every function takes `inout uint bad` where an argument lies outside what is proven here (subnormal results,
 // sin/cos beyond 2^20 pi / 2): the caller flags the chunk and the server's blocks correct it.
 
-[noinline]
 int hiW(double x) {
     uint lo, hi;
     asuint(x, lo, hi);
     return int(hi);
 }
-[noinline]
 int loW(double x) {
     uint lo, hi;
     asuint(x, lo, hi);
@@ -38,7 +36,6 @@ double nextUpD(double x) {  // finite, nonzero x
     b = x > 0.0l ? b + 1u : b - 1u;
     return asdouble(uint(b & 0xFFFFFFFFu), uint(b >> 32));
 }
-[noinline]
 double nextDownD(double x) {
     uint64_t b = (uint64_t(uint(hiW(x))) << 32) | uint64_t(uint(loW(x)));
     b = x > 0.0l ? b - 1u : b + 1u;
@@ -55,7 +52,6 @@ void twoProd(double a, double b, out double p, out double e) {
     e = ((ah * bh - p) + ah * bl + al * bh) + al * bl;
 }
 // |a - c * b|, exact enough to rank neighbouring c (c * b within a factor 2 of a)
-[noinline]
 double residual(double a, double c, double b) {
     double p, e;
     twoProd(c, b, p, e);
@@ -130,7 +126,6 @@ double kernelSin(double x, double y, int iy) {
 
 static const double C1 = asdouble(0x5555554Cu, 0x3FA55555u), C2 = asdouble(0x16C15177u, 0xBF56C16Cu), C3 = asdouble(0x19CB1590u, 0x3EFA01A0u),
                     C4 = asdouble(0x809C52ADu, 0xBE927E4Fu), C5 = asdouble(0xBDB4B1C4u, 0x3E21EE9Eu), C6 = asdouble(0xBE8838D4u, 0xBDA8FAE9u);
-[noinline]
 double kernelCos(double x, double y) {
     int ix = hiW(x) & EXP_SIGNIF_BITS;
     if (ix < 0x3e400000) {

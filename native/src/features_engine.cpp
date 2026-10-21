@@ -39,8 +39,8 @@ namespace {
 constexpr uint32_t GROUP = 64;
 constexpr uint32_t CHUNK_W = ATLAS_FEAT_CHUNK_WORDS, AUX_W = ATLAS_FEAT_AUX_WORDS, ORIGIN_W = 28, TARGET_W = 12;
 constexpr uint32_t HT_CAP = 32768, SCR_HT = 16, SCR_HM = 16 + HT_CAP * 2, SCR_BIOMES = SCR_HM + 4 * 2304,
-                   SCR_TESTED = SCR_BIOMES + 8, SCR_TREE = SCR_TESTED + 12288, TREE_W = 272440,
-                   MISC_W = 320 + 512 + 1152 + 864 + 64, SCR_W = SCR_TREE + TREE_W + MISC_W;
+                   SCR_TESTED = SCR_BIOMES + 8, SCR_TREE = SCR_TESTED + 12288, TREE_W = 272448,
+                   MISC_W = 320 + 512 + 1152 + 864 + 64 + 1024, SCR_W = SCR_TREE + TREE_W + MISC_W;
 constexpr uint32_t H_DISPATCH = 19, H_NDISPATCH = 20, MAGIC = 0x41454641u;
 constexpr uint32_t TABLE_W = ATLAS_FEAT_TABLE_WORDS;  // meta + the write table, per origin (the isolated check)
 static_assert(TABLE_W == 16 + HT_CAP * 2, "table words");
@@ -249,7 +249,10 @@ public:
                 barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
                 vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
-                dispatch(P_FEAT + type - 1, (b.origins + GROUP - 1) / GROUP, 1);
+                dispatch(P_FEAT + type - 1, b.origins, 1);  // a group (one warp) an origin
+                // the counter's atomic adds made visible to the copy (dispatch()'s barrier covers compute only)
+                barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                        VK_PIPELINE_STAGE_TRANSFER_BIT);
                 VkBufferCopy c{0, 0, 4};
                 vkCmdCopyBuffer(cmd_, cnt_.buf, staging_.buf, 1, &c);
                 barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
@@ -285,7 +288,11 @@ public:
                 if (!download(scratch_, VkDeviceSize(o) * SCR_W * 4, outTables + size_t(o) * TABLE_W, TABLE_W * 4, err)) return false;
         // dev: ATLAS_FEAT_SCRATCH_DUMP=<file> writes each origin's misc scratch (cx, cz, then MISC_W words: the last
         // placement's ore spheres, stack ...), for comparing a kernel's working values with an emulation
-        if (const char* sd = std::getenv("ATLAS_FEAT_SCRATCH_DUMP")) {
+        // (only a run with trees writes it: the trees' trace is what it is read for; per-type runs come later)
+        bool trees = false;
+        for (uint32_t rec : dispatch_) trees = trees || (rec < types_.size() && types_[rec] == 4u);
+        const char* sd = std::getenv("ATLAS_FEAT_SCRATCH_DUMP");
+        if (sd && trees) {
             if (FILE* f = std::fopen(sd, "wb")) {
                 std::vector<uint32_t> misc(MISC_W);
                 for (uint32_t o = 0; o < b.origins; o++) {

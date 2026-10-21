@@ -171,6 +171,23 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "truncated dump\n");
         return 2;
     }
+    // ATLAS_FEAT_ORIGIN0=<k>: leave out the first k origins (no targets); ATLAS_FEAT_ORIGINS=<n>: only n origins (a quick
+    // check, or a bisection)
+    if (const char* o0 = std::getenv("ATLAS_FEAT_ORIGIN0")) {
+        uint32_t k = std::min<uint32_t>(uint32_t(std::atoi(o0)), origins);
+        org.erase(org.begin(), org.begin() + size_t(k) * ORIGIN_W);
+        javaIso.erase(javaIso.begin(), javaIso.begin() + k);
+        for (auto& tr : types) tr.iso.erase(tr.iso.begin(), tr.iso.begin() + k);
+        origins -= k;
+        targets = 0;
+    }
+    if (const char* on = std::getenv("ATLAS_FEAT_ORIGINS")) {
+        uint32_t n = uint32_t(std::atoi(on));
+        if (n > 0 && n < origins) {
+            origins = n;
+            targets = 0;
+        }
+    }
     std::printf("TRACE end load\n");
     std::fflush(stdout);
     std::string report;

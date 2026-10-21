@@ -43,8 +43,29 @@ public class FloraTreeFeature extends ConfiguredFeature<FloraTreeFeature.Config>
         super(codec);
     }
 
+    /**
+     * Dev tracing (the GPU parity check): when set, each placement reports {stage, x, y, z, random draws so far, extra}
+     * at its start (0), once the species is picked (1, extra: shape ordinal), before the commit (2) and at its end
+     * (3, extra: 1 placed). Null in the game.
+     */
+    public static volatile java.util.function.Consumer<long[]> trace;
+
+    private static void trace(FeaturePlaceContext<Config> ctx, int stage, long extra) {
+        java.util.function.Consumer<long[]> t = trace;
+        if (t == null) return;
+        long n = ctx.random() instanceof net.minecraft.world.level.levelgen.WorldgenRandom w ? w.getCount() : -1;
+        t.accept(new long[]{stage, ctx.origin().getX(), ctx.origin().getY(), ctx.origin().getZ(), n, extra});
+    }
+
     @Override
     public boolean place(FeaturePlaceContext<Config> ctx) {
+        trace(ctx, 0, 0);
+        boolean placed = placeTree(ctx);
+        trace(ctx, 3, placed ? 1 : 0);
+        return placed;
+    }
+
+    private boolean placeTree(FeaturePlaceContext<Config> ctx) {
         WorldGenLevel level = ctx.level();
         BlockPos o = ctx.origin();
         int x = o.getX(), y = o.getY(), z = o.getZ();
@@ -52,6 +73,7 @@ public class FloraTreeFeature extends ConfiguredFeature<FloraTreeFeature.Config>
         long seed = level.getSeed();
         TreeSpecies sp = pick(ctx.config(), seed, x, z, ctx.random().nextDouble());
         if (sp == null) return false;
+        trace(ctx, 1, sp.shape.ordinal());
         // no tree (trunk or crown) where a road, street, plot, pad or site will be: skipped whole, never cut later
         if (!com.nirncraft.world.PlacementMask.clear(level, x, z, sp.crownReach())) return false;
         int water = Math.max(0, box.surfaceWithWater(x, z) - y);
@@ -66,6 +88,7 @@ public class FloraTreeFeature extends ConfiguredFeature<FloraTreeFeature.Config>
         TreeShapes.Grow g = new TreeShapes.Grow(b, sp, x, y, z, wind, water);
         realmTint(g, x, z);
         TreeShapes.grow(g);
+        trace(ctx, 2, 0);
         return b.commit(x, y, z);
     }
 
@@ -88,7 +111,7 @@ public class FloraTreeFeature extends ConfiguredFeature<FloraTreeFeature.Config>
         for (int i = 0; i < w.length; i++) {
             double n = cfg.stands() > 0
                     ? FloraNoise.fbm(x / (double) cfg.standScale(), z / (double) cfg.standScale(), seed + 1013L * (i + 1), 2) : 0;
-            w[i] = list.get(i).weight() * Math.exp(cfg.stands() * 3.2 * n);
+            w[i] = list.get(i).weight() * StrictMath.exp(cfg.stands() * 3.2 * n);
             total += w[i];
         }
         double t = roll * total;

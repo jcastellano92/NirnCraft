@@ -162,7 +162,17 @@ final class TreeBuilder {
      * A clump of leaves: an ellipsoid with radii (rx, ry, rz) whose rim is broken up by {@code ragged} (0 a smooth
      * blob, 0.5 very ragged), so no two clumps look alike.
      */
+    /** Dev tracing (FloraTreeFeature.trace): a builder step, with the random draws so far and a hash of its input. */
+    void mark(int stage, double a, double b, double c) {
+        java.util.function.Consumer<long[]> t = FloraTreeFeature.trace;
+        if (t == null) return;
+        long n = random instanceof net.minecraft.world.level.levelgen.WorldgenRandom w ? w.getCount() : -1;
+        t.accept(new long[]{stage, 0, 0, 0, n, (long) Math.floor(a * 16) * 1000003L + (long) Math.floor(b * 16) * 1009L + (long) Math.floor(c * 16)});
+    }
+
     void clump(double cx, double cy, double cz, double rx, double ry, double rz, BlockState state, double ragged) {
+        mark(43, cx, cy, cz);
+        mark(44, rx, ry, rz);
         int x0 = Mth.floor(cx - rx), x1 = Mth.floor(cx + rx);
         int y0 = Mth.floor(cy - ry), y1 = Mth.floor(cy + ry);
         int z0 = Mth.floor(cz - rz), z1 = Mth.floor(cz + rz);
@@ -181,6 +191,7 @@ final class TreeBuilder {
 
     /** A flat pad of leaves (acacia, juniper, bonsai-like crag trees): a ragged disc one or two blocks thick. */
     void pad(double cx, int y, double cz, double rx, double rz, BlockState state, double ragged, boolean domed) {
+        mark(45, cx, y, cz);
         int x0 = Mth.floor(cx - rx), x1 = Mth.floor(cx + rx), z0 = Mth.floor(cz - rz), z1 = Mth.floor(cz + rz);
         for (int x = x0; x <= x1; x++) {
             for (int z = z0; z <= z1; z++) {

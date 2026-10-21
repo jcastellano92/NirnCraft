@@ -272,7 +272,7 @@ public class GroundCoverFeature extends ConfiguredFeature<GroundCoverFeature.Con
         long base = seed + cfg.salt() * 0x2545F4914F6CDD1DL;
         for (int i = 0; i < w.length; i++) {
             double nz = cfg.patchiness() > 0 ? FloraNoise.fbm(x / (double) cfg.scale(), z / (double) cfg.scale(), base + 7919L * (i + 1), 2) : 0;
-            w[i] = list.get(i).weight() * Math.exp(cfg.patchiness() * 7.0 * nz);
+            w[i] = list.get(i).weight() * StrictMath.exp(cfg.patchiness() * 7.0 * nz);
             total += w[i];
         }
         double t = roll * total;
