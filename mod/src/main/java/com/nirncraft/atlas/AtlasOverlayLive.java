@@ -16,6 +16,7 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -53,7 +54,7 @@ final class AtlasOverlayLive {
     /** The block states the settlements' builders place (a dev bake: AtlasOverlaysGpuTest.bakeStates). */
     static final String STATES = "/nirncraft/atlas/overlay_states.txt";
     /** Bumped when the tapes' meaning changes (the cache's key). */
-    static final int TAPE_VERSION = 2;  // 2: the pieces' boxes per chunk
+    static final int TAPE_VERSION = 3;  // 2: the pieces' boxes per chunk; 3: the layers (the dungeons' recorded writes)
     /** Settlements within the client generator's window plus this many blocks are prepared. */
     static final int AHEAD = Integer.getInteger("nirncraft.atlas.overlays.ahead", 384);
     static final boolean ON = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.overlays"));
@@ -150,6 +151,9 @@ final class AtlasOverlayLive {
         volatile String doing = "";
         long recorded, loaded, recordMs;
         AtlasGenNative.Gen rec;  // the recording generator (the terrain alone), made when first needed
+        AtlasOverlayStarts starts;  // the seeded settlements (generic, working sites) and the dungeons, found as the server finds them
+        List<AtlasOverlayStarts.Start> near = List.of();
+        double nearX = Double.NaN, nearZ = Double.NaN;
 
         Live(AtlasGenNative.Gen gen, AtlasGenProgram prog, AtlasOvlNative.Ovl ovl, MinecraftServer server, Path library) {
             this.gen = gen;
@@ -176,7 +180,7 @@ final class AtlasOverlayLive {
         }
 
         String state() {
-            return String.format("overlays: %d settlements (%d recorded in %.1f s, %d from the cache), %d chunks stamped, %d states missing%s",
+            return String.format("overlays: %d settlements and seeded starts (%d recorded in %.1f s, %d from the cache), %d chunks stamped, %d states missing%s",
                     ready.size(), recorded, recordMs / 1000.0, loaded, ovl.stamped(), tapes.missing, doing.isEmpty() ? "" : ", " + doing);
         }
 
@@ -202,7 +206,7 @@ final class AtlasOverlayLive {
                     }
                     double x = AtlasClientGen.cameraX(), z = AtlasClientGen.cameraZ();
                     int reach = AtlasClientGen.RADIUS * 16 + AHEAD;
-                    // the nearest settlement not ready yet
+                    // the nearest settlement or seeded start not ready yet
                     int best = -1;
                     double bestD = Double.MAX_VALUE;
                     for (int s = 0; s < plan.settlements(); s++) {
@@ -213,14 +217,26 @@ final class AtlasOverlayLive {
                             best = s;
                         }
                     }
-                    if (best < 0) {
+                    AtlasOverlayStarts.Start seeded = null;
+                    for (AtlasOverlayStarts.Start st : seededNear(x, z, reach)) {
+                        if (ready.contains(st.key())) continue;
+                        BoundingBox b = st.box();
+                        double d = Math.max(Math.max(b.minX() - x, x - b.maxX()), Math.max(b.minZ() - z, z - b.maxZ()));
+                        if (d <= reach && d < bestD) {
+                            bestD = d;
+                            seeded = st;
+                        }
+                    }
+                    if (best < 0 && seeded == null) {
                         LockSupport.parkNanos(500_000_000L);
                         continue;
                     }
-                    String id = plan.sId[best];
+                    String id = seeded != null ? seeded.key() : plan.sId[best];
+                    List<? extends StructurePiece> pieces = seeded != null ? seeded.pieces() : AtlasOverlayTapes.pieces(id);
+                    int layer = seeded != null ? seeded.layer() : AtlasOverlayTapes.LAYER_SETTLEMENTS;
                     doing = "preparing " + id;
                     long[] keys = load(id);
-                    if (keys == null) keys = record(id);
+                    if (keys == null) keys = record(id, pieces, layer);
                     ready.add(id);
                     Map<Long, Integer> offsets = new HashMap<>();
                     ovl.set(AtlasOvlNative.SET_TAPES, tapes.tapeWords(offsets));
@@ -233,6 +249,23 @@ final class AtlasOverlayLive {
                     return;
                 }
             }
+        }
+
+        /** The seeded starts whose source chunk lies within reach (+ a start's own reach); found again after a move. */
+        List<AtlasOverlayStarts.Start> seededNear(double x, double z, int reach) {
+            if (!Double.isNaN(nearX) && Math.max(Math.abs(x - nearX), Math.abs(z - nearZ)) < 128) return near;
+            if (starts == null) {
+                ServerLevel ow = server.overworld();
+                starts = new AtlasOverlayStarts(server.registryAccess(), ow.getChunkSource().getGenerator(), ow.getChunkSource().getGeneratorState(),
+                        server.getStructureTemplateManager(), ow, AtlasOverlayStarts.ALL);
+            }
+            doing = "finding seeded starts";
+            int r = reach + AtlasOverlayStarts.REACH + 128;
+            near = starts.in((int) x - r, (int) z - r, (int) x + r, (int) z + r);
+            nearX = x;
+            nearZ = z;
+            doing = "";
+            return near;
         }
 
         /** A settlement's cached tapes, or null. */
@@ -250,7 +283,7 @@ final class AtlasOverlayLive {
         }
 
         /** Records a settlement over the GPU generator's terrain and caches it. */
-        long[] record(String id) throws Exception {
+        long[] record(String id, List<? extends StructurePiece> pieces, int layer) throws Exception {
             long t0 = System.nanoTime();
             ServerLevel ow = server.overworld();
             if (rec == null) {
@@ -261,10 +294,9 @@ final class AtlasOverlayLive {
                 AtlasClientGen.devicePages(rec, prog, ow.getChunkSource().getGenerator().getBiomeSource());
             }
             // the chunks the pieces touch, and one round them (a piece reads, a sweep or a bed writes, a chunk out)
-            List<SettlementPiece> pieces = AtlasOverlayTapes.pieces(id);
             Set<Long> touched = new LinkedHashSet<>();
             int cx0 = Integer.MAX_VALUE, cz0 = Integer.MAX_VALUE, cx1 = Integer.MIN_VALUE, cz1 = Integer.MIN_VALUE;
-            for (SettlementPiece p : pieces) {
+            for (StructurePiece p : pieces) {
                 BoundingBox b = p.getBoundingBox();
                 for (int cz = b.minZ() >> 4; cz <= b.maxZ() >> 4; cz++)
                     for (int cx = b.minX() >> 4; cx <= b.maxX() >> 4; cx++) {
@@ -283,7 +315,13 @@ final class AtlasOverlayLive {
             doing = "recording " + id + " (" + touched.size() + " chunks)";
             Map<Long, ProtoChunk> terrain = terrain(new ArrayList<>(need), ow);
             AtlasOverlayTapes.Window w = new AtlasOverlayTapes.Window(ow, ow.getSeed(), k -> terrain.get(k));
-            tapes.recordSettlement(id, w, cx0, cz0, cx1, cz1);
+            if (layer == AtlasOverlayTapes.LAYER_SETTLEMENTS) {
+                List<SettlementPiece> sp = new ArrayList<>();
+                for (StructurePiece p : pieces) if (p instanceof SettlementPiece s) sp.add(s);
+                tapes.record(id, sp, w, cx0, cz0, cx1, cz1);
+            } else {
+                tapes.recordRaw(id, new ArrayList<>(pieces), w, cx0, cz0, cx1, cz1, layer);
+            }
             long[] keys = touched.stream().mapToLong(Long::longValue).toArray();
             Files.createDirectories(cache);
             Path f = cache.resolve(id + ".tape.gz"), tmp = cache.resolve(id + ".tape.gz.tmp");

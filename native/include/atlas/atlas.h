@@ -916,8 +916,9 @@ ATLAS_API AtlasStatus atlas_gen_probe(AtlasGen* h, uint32_t kind, uint32_t n, co
  * stamped in place on chunk columns of 16-bit ids of the overlay block table (b = x + 16 z + 256 (y + 64), `levels`
  * y levels from -64, two ids a word), one GPU thread per column. Vulkan only. atlas_ovl_set: which 0 the block table
  * ('AOBL': 7 words per id: flags, transforms, sweep classes, block index / facing / cover, shape table, access classes, road classes; then the shape
- * tables), 1 the tapes ('AOTP': per chunk record: 257 column starts, 256 column sweep ranges, the ops), 2 the street
- * plan ('AOSR'); resident until replaced. atlas_ovl_run: chunks ATLAS_OVL_CHUNK_INTS ints each (cx, cz, the chunk's
+ * tables), 1 the tapes ('AOTP': per chunk record: 257 column starts, 256 column sweep ranges, the ops; the index after
+ * the records: cx, cz, record, layer (word 3: 4, the stride; layer 0 the settlements', 1 the underground structures',
+ * 2 the surface structures'), 2 the street plan ('AOSR'); resident until replaced. atlas_ovl_run stamps layer 0. atlas_ovl_run: chunks ATLAS_OVL_CHUNK_INTS ints each (cx, cz, the chunk's
  * tape record word offset or -1, its street plan bucket or -1, the batch slots of its N, E, S, W neighbours or -1);
  * kinds bit 0 the pieces, bit 2 their sweep (Sanity, then fence / wall / pane shapes), bit 1 the streets (in that
  * order: the server's).
@@ -940,11 +941,15 @@ ATLAS_API AtlasStatus atlas_ovl_run(AtlasOvl* h, uint32_t count, const int32_t* 
    street bucket from the data's own chunk index and its neighbours in the batch. The block table's first ids must be the generator program's blocks
    (AtlasOverlayTapes(prog.blocks)); the ingest table (atlas_gen_set_ingest) must cover the whole block table. Such a
    handle also runs the road painter (RoadPaint) at ATLAS_GEN_STAGE_PAINT over the generator's map, after a heightmap
-   snapshot at ATLAS_GEN_STAGE_DECORATION - 1, once atlas_ovl_set(which 3: 'AORD', RoadPaintGpu.words) is given.
+   snapshot at ATLAS_GEN_STAGE_DECORATION - 1, once atlas_ovl_set(which 3: 'AORD', RoadPaintGpu.words) is given, and
+   the tapes' dungeon layers (a structure's recorded writes) at its decoration step: ATLAS_GEN_STAGE_DECORATION + 3
+   (underground structures) and + 4 (surface structures), registered before a features engine's stages of those orders
+   so they run first, as the server places a step's structures before its features.
    atlas_ovl_set's data goes up at the generator's next batch. ATLAS_ERR_UNSUPPORTED for a CPU generator. Destroy the
    overlays before the generator (it detaches itself). atlas_ovl_run is refused on such a handle. */
 ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out);
-/* The passes a stage runs (bit 0 pieces, bit 2 their sweep, bit 1 streets; default all). */
+/* The passes a stage runs (bit 0 pieces, bit 2 their sweep, bit 1 streets, bit 3 roads, bit 4 the roads' heightmap,
+   bit 5 the underground structures' layer, bit 6 the surface structures'; default all). */
 ATLAS_API AtlasStatus atlas_ovl_set_kinds(AtlasOvl* h, uint32_t kinds);
 /* Chunks a stage has stamped so far (those with a tape record or a street bucket). */
 ATLAS_API uint64_t atlas_ovl_stamped(AtlasOvl* h);

@@ -377,15 +377,31 @@ bridge, culvert, ford, switchback, stairs, tunnel): 100 % of 9,594 painted block
 (one chunk a batch); the pipeline is 567 KB of SPIR-V, 19 s to JIT the first time. Not done: a felled tree's crown
 in a neighbour chunk (the stage writes only its chunk).
 
-**Not yet**: OrphanSweep / RockSweep (flood fills; the test terrain has no decoration to test them on), one sweep
-per chunk instead of per piece (the last ~0.08 %, with the server's chunk order at chunk borders), a bed's other
-half on a write of air, road paint (`RoadPaint`, `Paver`), generic and seeded structures, tile plans beyond
-Tamriel for the street painter. A batch's edge: a neighbour outside the batch reads as unknown (needs an apron).
+**Seeded structures** (`AtlasOverlayStarts`): the generic settlements and working sites (random spread) and the
+dungeons (the wilds' random spread, the named places' dungeons) found as the server finds them: each set's candidate
+chunks, its placement's isStructureChunk (frequency, exclusion zones), the weighted try-in-turn choice, then
+Structure.generate. Planned on the CPU once per start, near the camera, cached like the named settlements' tapes.
+Settlement starts record through SettlementPiece.postProcess as before. Dungeons record **raw writes**: their
+builders paint through a Painter that reads the world as it goes, so the recording keeps every write the window takes,
+in order per column (op RAW), over the recording generator's terrain; exact for that terrain. The tapes have
+**layers**: the settlements' at ATLAS_GEN_STAGE_PIECES, the underground structures' at DECORATION + 3, the surface
+structures' at DECORATION + 4, the server's steps (structures before the step's features: the overlays register first;
+the features engine must keep that). Spawns and block entities are left out (`Painter.RECORDING`). The frozen block table
+bake now covers every seeded settlement start of Tamriel and three of each dungeon structure, kit and theme
+(4,362 states). **Checked** (stage path, seed 1234): working site, bandit camp, fort, watchtower, cave, mine
+100 %, Nordic barrow 99.998 % (one puzzle keyhole); generic hamlet 99.39 %,
+farmstead 98.68 %, village 99.25 %: the rest is RockSweep and OrphanSweep removing what the builders left loose on
+rough ground (not on the GPU yet). Not here: the site lists' sets (`nirncraft:sites`: the Steps, Blackreach).
+
+**Not yet**: OrphanSweep / RockSweep (flood fills reaching 14 blocks into the neighbour chunks; they wait for the
+shared store of unfinished chunks), one sweep per chunk instead of per piece (the last ~0.08 %, with the server's
+chunk order at chunk borders), a bed's other half on a write of air, tile plans beyond Tamriel for the street
+painter.
 
 ## 8. Open
 
-* **Structures from the plans**: named settlements' pieces, their Sanity sweep and the street painter are on the device
-  (7.5); still to do there: wiring into AtlasClientGen (GPU to GPU), the other sweeps, road paint, seeded structures.
+* **Structures from the plans**: named and seeded settlements, dungeons, road and street paint are stages of the
+  client generator (7.5); still to do there: OrphanSweep / RockSweep, the site lists' structures.
 * **Features are slow and single threaded** (81 ms a chunk): decorate disjoint 3 x 3s in parallel; trees on the GPU
   later (their placements are pure; shapes need the decoration random).
 * **The surface pass** is the kernel's largest (a thread per column walks it): split the per-block rule work.

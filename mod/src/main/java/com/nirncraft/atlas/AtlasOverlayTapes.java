@@ -93,6 +93,16 @@ final class AtlasOverlayTapes implements Canvas.Tape {
 
     // op kinds (Canvas.Tape) and op flags; keep in step with atlas_overlays.slang
     static final int OF_NOSMOTHER = 1, OF_VAR = 2, OF_BOTTOMCLIP = 4;
+    /** A raw write (recordRaw): the state over y0..y1 whatever is there (the recording read the world for it). */
+    static final int RAW = 9;
+    /** The tapes' index: cx, cz, record, layer. */
+    static final int INDEX_STRIDE = 4;
+    /**
+     * The tapes' layers, each stamped at its own stage of the generator's batch (the server's decoration step of its
+     * structures): the settlements' (top layer: ATLAS_GEN_STAGE_PIECES, then their sweeps), the underground structures'
+     * (ATLAS_GEN_STAGE_DECORATION + 3) and the surface structures' (ATLAS_GEN_STAGE_DECORATION + 4).
+     */
+    static final int LAYER_SETTLEMENTS = 0, LAYER_UNDERGROUND = 1, LAYER_SURFACE = 2, LAYERS = 3;
     /** wset's door / bed guard applies: the state meant (before a burnt piece's charring) is neither air nor a door or bed. */
     static final int OF_GUARD = 8;
 
@@ -463,8 +473,12 @@ final class AtlasOverlayTapes implements Canvas.Tape {
 
     // ---- tapes --------------------------------------------------------------------------------------------------
 
-    /** Per chunk (key ChunkPos.pack) the ops of its 256 columns, in the server's order. */
-    private final Long2ObjectLinkedOpenHashMap<Cols> chunks = new Long2ObjectLinkedOpenHashMap<>();
+    /** Per layer, per chunk (key ChunkPos.pack) the ops of its 256 columns, in the server's order. */
+    @SuppressWarnings("unchecked")
+    private final Long2ObjectLinkedOpenHashMap<Cols>[] layers = new Long2ObjectLinkedOpenHashMap[] {new Long2ObjectLinkedOpenHashMap<Cols>(),
+            new Long2ObjectLinkedOpenHashMap<Cols>(), new Long2ObjectLinkedOpenHashMap<Cols>()};
+    /** The layer ops go to (recordRaw sets it for its structure's step). */
+    private int layer = LAYER_SETTLEMENTS;
 
     /** A chunk's column lists, and where each list's last op starts (a run of plain writes merges into it). */
     private static final class Cols {
@@ -490,10 +504,35 @@ final class AtlasOverlayTapes implements Canvas.Tape {
     final List<String> failures = new ArrayList<>();
 
     private Cols cols(int x, int z) {
+        return cols(layer, x, z);
+    }
+
+    private Cols cols(int layer, int x, int z) {
         long k = net.minecraft.world.level.ChunkPos.pack(x >> 4, z >> 4);
-        Cols c = chunks.get(k);
-        if (c == null) chunks.put(k, c = new Cols());
+        Cols c = layers[layer].get(k);
+        if (c == null) layers[layer].put(k, c = new Cols());
         return c;
+    }
+
+    /** A raw write (recordRaw's): merged into the column's last op when it carries on a run of the same state. */
+    private void raw(int x, int y, int z, BlockState s) {
+        if (keep != null && (x < keep.minX() || x > keep.maxX() || z < keep.minZ() || z > keep.maxZ())) return;
+        int sid = id(s);
+        if (sid < 0) return;
+        Cols cs = cols(x, z);
+        int ci = (z & 15) << 4 | (x & 15);
+        IntArrayList l = cs.ops[ci];
+        if (l == null) cs.ops[ci] = l = new IntArrayList(8);
+        ops++;
+        int start = l.size(), w0 = RAW | sid << 16;
+        if (start > 0 && cs.last[ci] == start - 2 && l.getInt(start - 2) == w0 && (l.getInt(start - 1) >> 16) == y - 1) {
+            int y0 = (short) l.getInt(start - 1);
+            l.set(start - 1, (y0 & 0xFFFF) | y << 16);
+            return;
+        }
+        l.add(w0);
+        l.add((y & 0xFFFF) | y << 16);
+        cs.last[ci] = start;
     }
 
     /** The state wset would write at (x, y, z): the piece's charring filter (Canvas.wset). */
@@ -576,7 +615,11 @@ final class AtlasOverlayTapes implements Canvas.Tape {
      * builder's branch reads what the server's would). Returns the (piece, chunk) builds.
      */
     int recordSettlement(String placeId, Window w, int cx0, int cz0, int cx1, int cz1) {
-        List<SettlementPiece> list = pieces(placeId);
+        return record(placeId, pieces(placeId), w, cx0, cz0, cx1, cz1);
+    }
+
+    /** As recordSettlement, for any start's settlement pieces (a generic settlement, a working site: AtlasOverlayStarts). */
+    int record(String placeId, List<SettlementPiece> list, Window w, int cx0, int cz0, int cx1, int cz1) {
         if (list.isEmpty()) return 0;
         int minY = w.heights.getMinY(), maxY = w.heights.getMaxY(), built = 0;
         for (int cz = cz0; cz <= cz1; cz++)
@@ -603,6 +646,54 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                     built++;
                 }
             }
+        return built;
+    }
+
+    /**
+     * Records a start's pieces as raw writes (a dungeon's: DungeonPiece.postProcess paints through a Painter that
+     * reads the world as it goes), over chunks [cx0, cx1] x [cz0, cz1] of a window holding the terrain, in the
+     * server's order (chunk by chunk, z then x; per chunk every piece meeting its writable area, StructureStart's
+     * placeInChunk), every write the window takes kept in order per column, into the layer of the structure's step.
+     * The writes are exact for the terrain the recording reads (the generator's own, before the decoration of the
+     * structure's step). Spawns and block entities are left out (Painter.RECORDING). Returns the (piece, chunk) builds.
+     */
+    int recordRaw(String key, List<net.minecraft.world.level.levelgen.structure.StructurePiece> list, Window w, int cx0, int cz0, int cx1,
+                  int cz1, int layer) {
+        if (list.isEmpty()) return 0;
+        int minY = w.heights.getMinY(), maxY = w.heights.getMaxY(), built = 0;
+        BoundingBox first = list.get(0).getBoundingBox();
+        BlockPos center = first.getCenter(), reference = new BlockPos(center.getX(), first.minY(), center.getZ());
+        int was = this.layer;
+        this.layer = layer;
+        w.sink = (p, st) -> raw(p.getX(), p.getY(), p.getZ(), st);
+        com.nirncraft.dungeons.world.Painter.RECORDING.set(Boolean.TRUE);
+        try {
+            for (int cz = cz0; cz <= cz1; cz++)
+                for (int cx = cx0; cx <= cx1; cx++) {
+                    net.minecraft.world.level.ChunkPos cp = new net.minecraft.world.level.ChunkPos(cx, cz);
+                    BoundingBox chunkBox = new BoundingBox(cx << 4, minY + 1, cz << 4, (cx << 4) + 15, maxY, (cz << 4) + 15);
+                    WorldGenLevel level = null;
+                    for (net.minecraft.world.level.levelgen.structure.StructurePiece piece : list) {
+                        if (!piece.getBoundingBox().intersects(chunkBox)) continue;
+                        if (level == null) level = w.region(cx, cz);
+                        long t0 = System.nanoTime();
+                        try {
+                            piece.postProcess(level, null, null, RandomSource.create(0L), chunkBox, cp, reference);
+                        } catch (RuntimeException e) {
+                            failed++;
+                            if (failures.size() < 8) failures.add(key + " " + piece.getClass().getSimpleName() + ": " + e);
+                        }
+                        box(piece.getBoundingBox(), cx, cz);
+                        nanos += System.nanoTime() - t0;
+                        pieces++;
+                        built++;
+                    }
+                }
+        } finally {
+            com.nirncraft.dungeons.world.Painter.RECORDING.remove();
+            w.sink = null;
+            this.layer = was;
+        }
         return built;
     }
 
@@ -645,7 +736,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         if (b.getXSpan() > PIECE_SPAN_MAX || b.getZSpan() > PIECE_SPAN_MAX) return;
         if (keep != null && ((cx << 4) + 15 < keep.minX() || (cx << 4) > keep.maxX() || (cz << 4) + 15 < keep.minZ() || (cz << 4) > keep.maxZ()))
             return;
-        Cols cs = cols(cx << 4, cz << 4);
+        Cols cs = cols(LAYER_SETTLEMENTS, cx << 4, cz << 4);
         cs.boxes.add(b.minX());
         cs.boxes.add(b.minZ());
         cs.boxes.add(b.maxX());
@@ -682,6 +773,10 @@ final class AtlasOverlayTapes implements Canvas.Tape {
 
     /** The chunks' tapes (ops in this table's ids, sweep ranges) to a cache: keys (ChunkPos.pack) of chunks this table has. */
     synchronized void write(java.io.DataOutputStream out, long[] keys) throws java.io.IOException {
+        for (Long2ObjectLinkedOpenHashMap<Cols> chunks : layers) write(out, keys, chunks);
+    }
+
+    private static void write(java.io.DataOutputStream out, long[] keys, Long2ObjectLinkedOpenHashMap<Cols> chunks) throws java.io.IOException {
         int n = 0;
         for (long k : keys) if (chunks.containsKey(k)) n++;
         out.writeInt(n);
@@ -703,6 +798,12 @@ final class AtlasOverlayTapes implements Canvas.Tape {
 
     /** Chunks' tapes from a cache (written by {@link #write} with this table's ids): they replace what this table had. */
     synchronized long[] read(java.io.DataInputStream in) throws java.io.IOException {
+        it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet all = new it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet();
+        for (Long2ObjectLinkedOpenHashMap<Cols> chunks : layers) for (long k : read(in, chunks)) all.add(k);
+        return all.toLongArray();
+    }
+
+    private static long[] read(java.io.DataInputStream in, Long2ObjectLinkedOpenHashMap<Cols> chunks) throws java.io.IOException {
         int n = in.readInt();
         long[] keys = new long[n];
         for (int c = 0; c < n; c++) {
@@ -727,12 +828,15 @@ final class AtlasOverlayTapes implements Canvas.Tape {
 
     /** Chunks with ops (ChunkPos.pack keys). */
     long[] chunkKeys() {
-        return chunks.keySet().toLongArray();
+        it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet all = new it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet();
+        for (Long2ObjectLinkedOpenHashMap<Cols> chunks : layers) all.addAll(chunks.keySet());
+        return all.toLongArray();
     }
 
     /**
      * The tapes' words (atlas_ovl_set, which 1) and each chunk's record offset (offsets: ChunkPos.pack -> word):
-     * header (magic, chunks, the index's offset), the records, then the index (cx, cz, record offset per chunk). A
+     * header (magic, index entries, the index's offset, the index's stride 4), the records, then the index (cx, cz,
+     * record offset, layer per chunk and layer; offsets: the settlements' layer). A
      * record: 257 column starts (words from the record's op area), 256 column sweep ranges (y0 | y1 << 16, empty when
      * y0 > y1), then the ops.
      */
@@ -740,10 +844,19 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         IntArrayList w = new IntArrayList();
         for (int i = 0; i < HEADER; i++) w.add(0);
         w.set(0, TAPES_MAGIC);
-        w.set(1, chunks.size());
-        for (var e : chunks.long2ObjectEntrySet()) {
+        int entries = 0;
+        for (Long2ObjectLinkedOpenHashMap<Cols> chunks : layers) entries += chunks.size();
+        w.set(1, entries);
+        w.set(3, INDEX_STRIDE);
+        IntArrayList index = new IntArrayList();
+        for (int layer = 0; layer < LAYERS; layer++)
+        for (var e : layers[layer].long2ObjectEntrySet()) {
             int rec = w.size();
-            offsets.put(e.getLongKey(), rec);
+            if (layer == LAYER_SETTLEMENTS) offsets.put(e.getLongKey(), rec);
+            index.add(net.minecraft.world.level.ChunkPos.getX(e.getLongKey()));
+            index.add(net.minecraft.world.level.ChunkPos.getZ(e.getLongKey()));
+            index.add(rec);
+            index.add(layer);
             IntArrayList[] cols = e.getValue().ops;
             int at = 0;
             for (int c = 0; c < 256; c++) {
@@ -758,11 +871,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
             w.addAll(e.getValue().boxes);
         }
         w.set(2, w.size());
-        for (var e : chunks.long2ObjectEntrySet()) {
-            w.add(net.minecraft.world.level.ChunkPos.getX(e.getLongKey()));
-            w.add(net.minecraft.world.level.ChunkPos.getZ(e.getLongKey()));
-            w.add(offsets.get(e.getLongKey()));
-        }
+        w.addAll(index);
         return w.toIntArray();
     }
 
@@ -841,6 +950,8 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         final LongFunction<ProtoChunk> source;
         final Long2ObjectLinkedOpenHashMap<ProtoChunk> chunks = new Long2ObjectLinkedOpenHashMap<>();
         final long seed;
+        /** Every write the window takes, in order (recordRaw's), or null. */
+        java.util.function.BiConsumer<BlockPos, BlockState> sink;
 
         Window(LevelHeightAccessor heights, long seed, LongFunction<ProtoChunk> source) {
             this.heights = heights;
@@ -896,6 +1007,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                             ProtoChunk c = chunk(SectionPos.blockToSectionCoord(p.getX()), SectionPos.blockToSectionCoord(p.getZ()));
                             if (c == null) return false;
                             c.setBlockState(p, s, (int) args[2]);
+                            if (sink != null) sink.accept(p, s);
                             return true;
                         }
                         break;
@@ -903,7 +1015,11 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                     case "destroyBlock":
                         if (n >= 1 && args[0] instanceof BlockPos p && writable.test(p)) {
                             ProtoChunk c = chunk(SectionPos.blockToSectionCoord(p.getX()), SectionPos.blockToSectionCoord(p.getZ()));
-                            if (c != null) c.setBlockState(p, state(p).getFluidState().createLegacyBlock(), 3);
+                            if (c != null) {
+                                BlockState s = state(p).getFluidState().createLegacyBlock();
+                                c.setBlockState(p, s, 3);
+                                if (sink != null) sink.accept(p, s);
+                            }
                             return c != null;
                         }
                         return false;

@@ -62,7 +62,10 @@ import java.util.zip.GZIPOutputStream;
  * the same block for block, AtlasGenParityTest). Java's results are computed once per test set and cached under
  * NIRNCRAFT_OVL_REF (default E:/NirnCraft-scratch/overlays/ref; NIRNCRAFT_OVL_REFRESH=1 recomputes them, needed after
  * a builder changes). A dev tool, off by default: NIRNCRAFT_OVL_TEST=1, NIRNCRAFT_ATLAS_LIB=<atlas_core.dll>, optional
- * NIRNCRAFT_OVL_SETS="place:halfChunks,..." and NIRNCRAFT_OVL_OUT=<report.txt>.
+ * NIRNCRAFT_OVL_SETS="place:halfChunks,..." and NIRNCRAFT_OVL_OUT=<report.txt>. Seeded starts (generic settlements, working
+ * sites; AtlasOverlayStarts, found as the server finds them) join with NIRNCRAFT_OVL_SEEDED="structure,..." (default
+ * none; e.g. working_site,hamlet,farmstead,village): the nearest start of each to (NIRNCRAFT_OVL_SEEDED_AT, default
+ * 6000,6000), its whole box the window.
  */
 @EnabledIfEnvironmentVariable(named = "NIRNCRAFT_OVL_TEST", matches = "1")
 @ExtendWith(BoundedServerProvider.class)
@@ -117,6 +120,7 @@ class AtlasOverlaysGpuTest {
                 plan.nodes(), plan.edges(), plan.plots(), planS));
 
         List<TestSet> sets = sets(plan);
+        sets.addAll(seededSets(server, gen, rs, heights));
         report.append("sets: ").append(sets).append('\n');
         Path refDir = Path.of(System.getenv().getOrDefault("NIRNCRAFT_OVL_REF", "E:/NirnCraft-scratch/overlays/ref"));
         Files.createDirectories(refDir);
@@ -148,15 +152,17 @@ class AtlasOverlaysGpuTest {
             si++;
             trace("begin set " + set.place());
             trace("progress sets " + (si - 1) + "/" + sets.size());
-            Place place = Places.byId(set.place()).orElseThrow();
-            List<SettlementPiece> pieces = pieces(plan, place);
+            AtlasOverlayStarts.Start raw = SEEDED_RAW.get(set.place());
+            List<SettlementPiece> pieces = raw != null ? List.of() : SEEDED.containsKey(set.place()) ? SEEDED.get(set.place())
+                    : pieces(plan, Places.byId(set.place()).orElseThrow());
             Path file = refDir.resolve(set.file());
-            String key = refKey(plan, set, pieces);
+            String key = raw != null ? rawKey(set, raw) : refKey(plan, set, pieces);
             Ref ref = refresh ? null : readRef(file, key);
             double refMs = 0;
             if (ref == null) {
                 long rt = System.nanoTime();
-                ref = reference(set, pieces, gen, rs, heights, containers, structures);
+                ref = raw != null ? referenceRaw(set, raw, gen, rs, heights, containers, structures)
+                        : reference(set, pieces, gen, rs, heights, containers, structures);
                 refMs = (System.nanoTime() - rt) / 1e6;
                 writeRef(file, key, ref);
                 trace(String.format("done reference %s %.1fs (%d chunks, cached in %s)", set.place(), refMs / 1000, ref.pieces().size(), file));
@@ -164,10 +170,10 @@ class AtlasOverlaysGpuTest {
                 trace("done reference " + set.place() + " 0.0s (from the cache " + file + ")");
             }
             report.append(String.format("%n== %s: chunks %d..%d x %d..%d (%d), %d pieces in the plan; Java reference %s%n", set.place(),
-                    set.cx0(), set.cx1(), set.cz0(), set.cz1(), ref.pieces().size(), pieces.size(),
+                    set.cx0(), set.cx1(), set.cz0(), set.cz1(), ref.pieces().size(), raw != null ? raw.pieces().size() : pieces.size(),
                     refMs > 0 ? String.format("%.1f s (%.0f ms a chunk)", refMs / 1000, refMs / ref.pieces().size()) : "from the cache"));
-            compareSet(report, set, pieces, ref, heights, containers, ovl, plan, all);
-            if (rig != null) stageSet(report, set, ref, heights, containers, rig, plan, stageAll);
+            if (raw == null) compareSet(report, set, pieces, ref, heights, containers, ovl, plan, all);
+            if (rig != null) stageSet(report, set, pieces, raw, ref, heights, containers, rig, plan, stageAll);
             trace("end set " + set.place());
         }
         trace("progress sets " + sets.size() + "/" + sets.size());
@@ -235,18 +241,102 @@ class AtlasOverlaysGpuTest {
         }
         progress("builders", plan.settlements(), plan.settlements());
         trace("end builders");
+        // the seeded settlements (generic, working sites) of all Tamriel, found as the server finds them, built over
+        // the same stand-in ground
+        long seeded = 0;
+        {
+            RegistryAccess ra = server.registryAccess();
+            WorldDimensions dims = ra.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL).value().createWorldDimensions();
+            LevelStem stem = dims.dimensions().get(LevelStem.OVERWORLD);
+            NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) stem.generator();
+            RandomState rs = RandomState.create(ra.lookupOrThrow(Registries.NOISE), SEED, gen.generatorSettings().value());
+            DimensionType dt = stem.type().value();
+            LevelHeightAccessor heights = LevelHeightAccessor.create(dt.minY(), dt.height());
+            AtlasOverlayStarts starts = new AtlasOverlayStarts(ra, gen, gen.createState(ra.lookupOrThrow(Registries.STRUCTURE_SET), rs, SEED),
+                    server.getStructureTemplateManager(), heights, AtlasOverlayStarts.ALL);
+            // the dungeons: every start's plan, the first few of each structure, kit and theme painted (their writes)
+            Map<String, Integer> painted = new HashMap<>();
+            int perKind = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_OVL_BAKE_DUNGEONS", "3"));
+            AtlasCapture.Env env = new AtlasCapture.Env((x, z) -> net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState(),
+                    (x, z) -> com.nirncraft.worldplan.street.StreetTerrain.land(x, z) < 63 ? 62 : Integer.MIN_VALUE, null, null);
+            WorldGenLevel level = AtlasCapture.reader(com.nirncraft.worldplan.street.StreetTerrain::land, SEED, env);
+            int x0 = com.nirncraft.tamriel.TamrielMap.MIN_X, x1 = com.nirncraft.tamriel.TamrielMap.MAX_X;
+            int z0 = com.nirncraft.tamriel.TamrielMap.MIN_Z, z1 = com.nirncraft.tamriel.TamrielMap.MAX_Z;
+            int strips = (z1 - z0 + 2047) / 2048;
+            trace("begin seeded");
+            for (int st = 0; st < strips; st++) {
+                progress("seeded", st, strips);
+                int sz0 = z0 + st * 2048, sz1 = Math.min(z1, sz0 + 2047);
+                for (AtlasOverlayStarts.Start start : starts.in(x0, sz0, x1, sz1)) {
+                    seeded++;
+                    if (start.layer() != AtlasOverlayTapes.LAYER_SETTLEMENTS) {
+                        String kind = start.structure();
+                        if (start.pieces().get(0) instanceof com.nirncraft.dungeons.world.DungeonPiece dp) kind += " " + dp.kit + " " + dp.theme;
+                        if (painted.merge(kind, 1, Integer::sum) > perKind) continue;
+                        WorldGenLevel collecting = collecting(level, placed);
+                        com.nirncraft.dungeons.world.Painter.RECORDING.set(Boolean.TRUE);
+                        try {
+                            for (net.minecraft.world.level.levelgen.structure.StructurePiece sp : start.pieces()) {
+                                BoundingBox b = sp.getBoundingBox();
+                                BoundingBox box = new BoundingBox(b.minX(), Math.max(b.minY(), -63), b.minZ(), b.maxX(), Math.min(b.maxY(), 639), b.maxZ());
+                                try {
+                                    sp.postProcess(collecting, null, gen, RandomSource.create(0L), box, new ChunkPos(b.minX() >> 4, b.minZ() >> 4),
+                                            BlockPos.ZERO);
+                                } catch (RuntimeException e) {
+                                    failed++;
+                                }
+                                pieces++;
+                            }
+                        } finally {
+                            com.nirncraft.dungeons.world.Painter.RECORDING.remove();
+                        }
+                        continue;
+                    }
+                    for (net.minecraft.world.level.levelgen.structure.StructurePiece sp : start.pieces()) {
+                        if (!(sp instanceof SettlementPiece p)) continue;
+                        BoundingBox b = p.getBoundingBox();
+                        BoundingBox clip = new BoundingBox(b.minX(), Math.max(b.minY() - SettlementPiece.FOUNDATION, -63), b.minZ(), b.maxX(),
+                                Math.min(b.maxY(), 639), b.maxZ());
+                        Canvas c = AtlasOverlayTapes.canvas(p, level, clip);
+                        c.owner = p.owner();
+                        c.tape = collect;
+                        try {
+                            Builders.build(c, p);
+                        } catch (RuntimeException e) {
+                            failed++;
+                        }
+                        pieces++;
+                    }
+                }
+            }
+            progress("seeded", strips, strips);
+            trace("end seeded");
+        }
         List<BlockState> all = AtlasOverlayTapes.closure(placed);
         List<String> lines = new ArrayList<>();
         for (BlockState st : all) lines.add(net.minecraft.commands.arguments.blocks.BlockStateParser.serialize(st));
         java.util.Collections.sort(lines);
         List<String> out = new ArrayList<>();
         out.add("# the block states the settlements' builders place (AtlasOverlaysGpuTest.bakeStates; " + plan.settlements()
-                + " settlements, " + pieces + " pieces), with the overlay kernels' transforms and shapes");
+                + " settlements and " + seeded + " seeded starts, " + pieces + " pieces), with the overlay kernels' transforms and shapes");
         out.addAll(lines);
         Files.createDirectories(Path.of(outPath).getParent());
         Files.write(Path.of(outPath), out);
         trace(String.format("done bakeStates %.1fs %d states (%d placed), %d pieces, %d failed", (System.nanoTime() - t0) / 1e9, all.size(),
                 placed.size(), pieces, failed));
+    }
+
+    /** The level, every state written to it collected (the bake's dungeons: their writes go through the level). */
+    static WorldGenLevel collecting(WorldGenLevel base, java.util.Set<BlockState> placed) {
+        return (WorldGenLevel) java.lang.reflect.Proxy.newProxyInstance(WorldGenLevel.class.getClassLoader(), new Class<?>[] {WorldGenLevel.class},
+                (proxy, m, args) -> {
+                    if (m.getName().equals("setBlock") && args != null && args.length >= 2 && args[1] instanceof BlockState st) placed.add(st);
+                    try {
+                        return m.invoke(base, args);
+                    } catch (java.lang.reflect.InvocationTargetException e) {
+                        throw e.getCause();
+                    }
+                });
     }
 
     // ---- the overlays as a stage of the generator (atlas_ovl_create_for_gen) ----
@@ -289,14 +379,23 @@ class AtlasOverlaysGpuTest {
      * tapes recorded over the same terrain, the batch's chunks stamped before they are packed; against Java's terrain +
      * postProcess + street paint (y -64 .. 575, the generator's columns).
      */
-    static void stageSet(StringBuilder report, TestSet set, Ref ref, LevelHeightAccessor heights, PalettedContainerFactory containers,
+    static void stageSet(StringBuilder report, TestSet set, List<SettlementPiece> pieces, AtlasOverlayStarts.Start raw, Ref ref,
+                         LevelHeightAccessor heights,
+                         PalettedContainerFactory containers,
                          StageRig rig, StreetPlan plan, Score total) {
         trace("begin stage " + set.place());
         AtlasOverlayTapes tapes = new AtlasOverlayTapes(rig.prog().blocks);
         tapes.frozen = true;  // the program's table, as in the game
         tapes.keep = new BoundingBox(set.cx0() << 4, heights.getMinY(), set.cz0() << 4, (set.cx1() << 4) + 15, heights.getMaxY(),
                 (set.cz1() << 4) + 15);
-        tapes.recordSettlement(set.place(), window(ref.terrain(), heights, containers), set.cx0(), set.cz0(), set.cx1(), set.cz1());
+        if (raw != null) {
+            int built = tapes.recordRaw(set.place(), raw.pieces(), window(ref.terrain(), heights, containers), set.cx0(), set.cz0(), set.cx1(),
+                    set.cz1(), raw.layer());
+            report.append(String.format("  recorded writes (layer %d): %d (piece, chunk) builds, %d ops, %d failed %s%n", raw.layer(), built, tapes.ops,
+                    tapes.failed, tapes.failures));
+        } else {
+            tapes.record(set.place(), pieces, window(ref.terrain(), heights, containers), set.cx0(), set.cz0(), set.cx1(), set.cz1());
+        }
         Map<Long, Integer> offsets = new HashMap<>();
         int[] tapeWords = tapes.tapeWords(offsets);
         int[] blockWords = tapes.blockWords();
@@ -320,7 +419,9 @@ class AtlasOverlaysGpuTest {
         rig.ovl().kinds(0);
         rig.gen().chunks(xz, 0, ids, flags);
         AtlasGenNative.Times bare = rig.gen().chunks(xz, 0, ids, flags);
-        rig.ovl().kinds(AtlasOvlNative.KIND_PIECES | AtlasOvlNative.KIND_SWEEPS | AtlasOvlNative.KIND_STREETS);
+        // (a dungeon's reference has no street paint: its set leaves the street painter out)
+        rig.ovl().kinds(AtlasOvlNative.KIND_PIECES | AtlasOvlNative.KIND_SWEEPS | (raw != null ? 0 : AtlasOvlNative.KIND_STREETS)
+                | AtlasOvlNative.KIND_UNDER | AtlasOvlNative.KIND_SURFACE);
         rig.gen().chunks(xz, 0, ids, flags);
         long stamped0 = rig.ovl().stamped();
         AtlasGenNative.Times with = rig.gen().chunks(xz, 0, ids, flags);
@@ -338,6 +439,8 @@ class AtlasOverlaysGpuTest {
         }
         report.append(String.format("  batch independence: each chunk alone vs the whole window: %d blocks differ%n", batchDiff));
         Score sc = new Score();
+        Map<String, Long> stagePairs = new HashMap<>();
+        Map<String, String> stageEx = new HashMap<>();
         long flagged = 0;
         int levels = 640;
         for (int i = 0; i < n; i++) {
@@ -349,6 +452,12 @@ class AtlasOverlaysGpuTest {
                 int g = id < tapes.blocks.size() ? Block.getId(tapes.blocks.get(id)) : -1;
                 boolean jc = rs[b] != t[b], gc = g != t[b];
                 if (jc || gc) tally(sc, null, rs[b], g, jc, gc);
+                if ((jc || gc) && rs[b] != g) {
+                    String pk = name(t[b]) + ": " + name(rs[b]) + " -> " + (g < 0 ? "?" : name(g));
+                    stagePairs.merge(pk, 1L, Long::sum);
+                    ChunkPos cp = ChunkPos.unpack(keys.get(i));
+                    stageEx.putIfAbsent(pk, (cp.getMinBlockX() + (b & 15)) + " " + (b / 256 - 64) + " " + (cp.getMinBlockZ() + (b >> 4 & 15)));
+                }
             }
         }
         double stageMs = with.kernelMs() - bare.kernelMs();
@@ -357,6 +466,9 @@ class AtlasOverlaysGpuTest {
         report.append(String.format("  the generator's batch with the overlays as a stage: %s; %d chunks flagged; batch kernels %.2f ms without, %.2f ms with "
                         + "(the stage %.2f ms, %.4f ms a chunk); %d chunks stamped a batch%n", sc, flagged, bare.kernelMs(), with.kernelMs(), stageMs,
                 stageMs / n, rig.ovl().stamped() - stamped0));
+        report.append("  stage differences (terrain: Java -> GPU):\n");
+        stagePairs.entrySet().stream().sorted((a, b) -> Long.compare(b.getValue(), a.getValue())).limit(12)
+                .forEach(e -> report.append(String.format("    %8d  %s   (e.g. %s)%n", e.getValue(), e.getKey(), stageEx.get(e.getKey()))));
         total.add(sc);
         trace(String.format("done stage %s %.4f%%", set.place(), sc.pct()));
     }
@@ -414,7 +526,7 @@ class AtlasOverlaysGpuTest {
         Files.createDirectories(refDir);
         Path file = refDir.resolve("roads_n" + per + "_s" + SEED + ".bin.gz");
         String key = "ovlroads v1 seed " + SEED + " " + chunksKind.keySet() + " plan " + roads.vx.length + " " + roads.segStart.length
-                + " states " + Block.BLOCK_STATE_REGISTRY.size();
+                + " states " + Block.BLOCK_STATE_REGISTRY.size() + " order " + registryOrder();
         Ref ref = "1".equals(System.getenv("NIRNCRAFT_OVL_REFRESH")) ? null : readRef(file, key);
         if (ref == null) {
             trace("begin road reference");
@@ -521,6 +633,127 @@ class AtlasOverlaysGpuTest {
             int cx = plan.sX[s] >> 4, cz = plan.sZ[s] >> 4;
             out.add(new TestSet(kv[0], cx - r, cz - r, cx + r - 1, cz + r - 1));
         }
+        return out;
+    }
+
+    /**
+     * The state registry's order (the references hold global state ids, and some mod states take other ids from run
+     * to run: a cached reference read with the new ids would name other states, so it is made again).
+     */
+    static String registryOrder() {
+        long h = 0xcbf29ce484222325L;
+        for (BlockState st : Block.BLOCK_STATE_REGISTRY) {
+            h ^= st.toString().hashCode();
+            h *= 0x100000001b3L;
+        }
+        return Long.toHexString(h);
+    }
+
+    /** The seeded starts' pieces by their key (the test set's place). */
+    static final Map<String, List<SettlementPiece>> SEEDED = new HashMap<>();
+    /** The starts recorded as raw writes (the dungeons) by their key. */
+    static final Map<String, AtlasOverlayStarts.Start> SEEDED_RAW = new HashMap<>();
+
+    /** A raw start's reference key: its pieces' classes and boxes. */
+    static String rawKey(TestSet set, AtlasOverlayStarts.Start raw) {
+        long h = 0xcbf29ce484222325L;
+        for (net.minecraft.world.level.levelgen.structure.StructurePiece p : raw.pieces()) {
+            BoundingBox b = p.getBoundingBox();
+            for (int v : new int[] {p.getClass().getSimpleName().hashCode(), b.minX(), b.minY(), b.minZ(), b.maxX(), b.maxY(), b.maxZ()}) {
+                h ^= v;
+                h *= 0x100000001b3L;
+            }
+        }
+        return "ovlraw v" + REF_VERSION + " seed " + SEED + " " + set + " " + raw.structure() + " " + Long.toHexString(h) + " states "
+                + Block.BLOCK_STATE_REGISTRY.size();
+    }
+
+    /**
+     * A raw start's reference: Java's terrain for the window and two chunks round it, then the server's placeInChunk
+     * per chunk (z, then x): every piece meeting the chunk's writable area, its postProcess on the chunk's region
+     * (spawns left out on both sides: Painter.RECORDING).
+     */
+    static Ref referenceRaw(TestSet set, AtlasOverlayStarts.Start raw, NoiseBasedChunkGenerator gen, RandomState rs, LevelHeightAccessor heights,
+                            PalettedContainerFactory containers, StructureManager structures) throws Exception {
+        Map<ChunkPos, ProtoChunk> biomeCache = new HashMap<>();
+        Map<Long, int[]> terrain = new LinkedHashMap<>();
+        int n = (set.cx1() - set.cx0() + 5) * (set.cz1() - set.cz0() + 5), done = 0;
+        trace("begin terrain " + set.place());
+        for (int cz = set.cz0() - 2; cz <= set.cz1() + 2; cz++)
+            for (int cx = set.cx0() - 2; cx <= set.cx1() + 2; cx++) {
+                ProtoChunk c = AtlasGenParityTest.javaChunk(new ChunkPos(cx, cz), gen, rs, heights, containers, structures, biomeCache);
+                terrain.put(ChunkPos.pack(cx, cz), ids(c, heights));
+                progress("terrain", ++done, n);
+            }
+        trace("end terrain " + set.place());
+        AtlasOverlayTapes.Window w = window(terrain, heights, containers);
+        BoundingBox first = raw.pieces().get(0).getBoundingBox();
+        BlockPos reference = new BlockPos(first.getCenter().getX(), first.minY(), first.getCenter().getZ());
+        trace("begin postProcess " + set.place());
+        com.nirncraft.dungeons.world.Painter.RECORDING.set(Boolean.TRUE);
+        try {
+            for (int cz = set.cz0(); cz <= set.cz1(); cz++)
+                for (int cx = set.cx0(); cx <= set.cx1(); cx++) {
+                    ChunkPos cp = new ChunkPos(cx, cz);
+                    BoundingBox chunkBox = new BoundingBox(cp.getMinBlockX(), heights.getMinY() + 1, cp.getMinBlockZ(), cp.getMaxBlockX(),
+                            heights.getMaxY(), cp.getMaxBlockZ());
+                    WorldGenLevel level = w.region(cx, cz);
+                    for (net.minecraft.world.level.levelgen.structure.StructurePiece p : raw.pieces()) {
+                        if (!p.getBoundingBox().intersects(chunkBox)) continue;
+                        try {
+                            p.postProcess(level, null, gen, RandomSource.create(0L), chunkBox, cp, reference);
+                        } catch (RuntimeException e) {
+                            System.out.println("TRACE piece failed " + set.place() + " " + e);
+                        }
+                    }
+                }
+        } finally {
+            com.nirncraft.dungeons.world.Painter.RECORDING.remove();
+        }
+        trace("end postProcess " + set.place());
+        Map<Long, int[]> withPieces = new LinkedHashMap<>();
+        for (int cz = set.cz0(); cz <= set.cz1(); cz++)
+            for (int cx = set.cx0(); cx <= set.cx1(); cx++) withPieces.put(ChunkPos.pack(cx, cz), ids(w.chunk(cx, cz), heights));
+        return new Ref(terrain, withPieces, withPieces, withPieces);
+    }
+
+    /**
+     * The nearest start of each structure NIRNCRAFT_OVL_SEEDED names to NIRNCRAFT_OVL_SEEDED_AT, found as the server
+     * finds them (AtlasOverlayStarts over the generator's structure state), in rings of 2048 blocks out to 16384.
+     */
+    static List<TestSet> seededSets(MinecraftServer server, NoiseBasedChunkGenerator gen, RandomState rs, LevelHeightAccessor heights) {
+        String spec = System.getenv().getOrDefault("NIRNCRAFT_OVL_SEEDED", "");
+        List<TestSet> out = new ArrayList<>();
+        if (spec.isBlank()) return out;
+        String[] at = System.getenv().getOrDefault("NIRNCRAFT_OVL_SEEDED_AT", "6000,6000").split(",");
+        int ox = Integer.parseInt(at[0].trim()), oz = Integer.parseInt(at[1].trim());
+        trace("begin seeded starts");
+        var state = gen.createState(server.registryAccess().lookupOrThrow(Registries.STRUCTURE_SET), rs, SEED);
+        AtlasOverlayStarts starts = new AtlasOverlayStarts(server.registryAccess(), gen, state, server.getStructureTemplateManager(), heights,
+                AtlasOverlayStarts.ALL);
+        java.util.Set<String> want = new java.util.LinkedHashSet<>();
+        for (String w : spec.split(",")) if (!w.isBlank()) want.add(w.trim());
+        Map<String, AtlasOverlayStarts.Start> found = new LinkedHashMap<>();
+        for (int r = 2048; r <= 16384 && found.size() < want.size(); r += 2048) {
+            List<AtlasOverlayStarts.Start> list = new ArrayList<>(starts.in(ox - r, oz - r, ox + r, oz + r));
+            list.sort(java.util.Comparator.comparingLong(st -> {
+                long dx = st.chunk().getMiddleBlockX() - ox, dz = st.chunk().getMiddleBlockZ() - oz;
+                return dx * dx + dz * dz;
+            }));
+            for (AtlasOverlayStarts.Start st : list) {
+                String name = st.structure().substring(st.structure().indexOf(':') + 1);
+                if (want.contains(name) && !found.containsKey(name)) found.put(name, st);
+            }
+            trace("progress seeded " + found.size() + "/" + want.size() + " (" + starts.sets() + " sets, ring " + r + ")");
+        }
+        for (AtlasOverlayStarts.Start st : found.values()) {
+            BoundingBox b = st.box();
+            if (st.layer() == AtlasOverlayTapes.LAYER_SETTLEMENTS) SEEDED.put(st.key(), st.settlementPieces());
+            else SEEDED_RAW.put(st.key(), st);
+            out.add(new TestSet(st.key(), b.minX() >> 4, b.minZ() >> 4, b.maxX() >> 4, b.maxZ() >> 4));
+        }
+        for (String w : want) if (!found.containsKey(w)) System.out.println("TRACE skip seeded " + w + " (no start found)");
+        trace("end seeded starts");
         return out;
     }
 
@@ -659,7 +892,7 @@ class AtlasOverlaysGpuTest {
             }
         }
         h ^= plan.nodes() * 31L + plan.edges();
-        return "ovlref v" + REF_VERSION + " seed " + SEED + " " + set + " plan " + Long.toHexString(h) + " states " + Block.BLOCK_STATE_REGISTRY.size();
+        return "ovlref v" + REF_VERSION + " seed " + SEED + " " + set + " plan " + Long.toHexString(h) + " states " + Block.BLOCK_STATE_REGISTRY.size() + " order " + registryOrder();
     }
 
     static Ref readRef(Path file, String key) {
@@ -751,7 +984,7 @@ class AtlasOverlaysGpuTest {
         trace("begin record " + set.place());
         long rt = System.nanoTime();
         // in the server's order over the window's chunks (the reference's order: z, then x)
-        int built = tapes.recordSettlement(set.place(), window(ref.terrain(), heights, containers), set.cx0(), set.cz0(), set.cx1(), set.cz1());
+        int built = tapes.record(set.place(), pieces, window(ref.terrain(), heights, containers), set.cx0(), set.cz0(), set.cx1(), set.cz1());
         double recMs = (System.nanoTime() - rt) / 1e6;
         trace(String.format("end record %s", set.place()));
         trace(String.format("done record %s %.1fs (%d pieces, %d ops, %d failed)", set.place(), recMs / 1000, built, tapes.ops, tapes.failed));

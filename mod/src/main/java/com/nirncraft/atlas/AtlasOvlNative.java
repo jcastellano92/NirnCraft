@@ -21,7 +21,7 @@ import static java.lang.foreign.ValueLayout.JAVA_LONG;
 final class AtlasOvlNative {
     static final int BACKEND_VULKAN = 1;
     static final int SET_BLOCKS = 0, SET_TAPES = 1, SET_STREETS = 2, SET_ROADS = 3;
-    static final int KIND_PIECES = 1, KIND_STREETS = 2, KIND_SWEEPS = 4, KIND_ROADS = 8, KIND_MBNL = 16;
+    static final int KIND_PIECES = 1, KIND_STREETS = 2, KIND_SWEEPS = 4, KIND_ROADS = 8, KIND_MBNL = 16, KIND_UNDER = 32, KIND_SURFACE = 64;
 
     private final MethodHandle create, destroy, lastError, device, set, run, createForGen, setKinds, stamped;
 

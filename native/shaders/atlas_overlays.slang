@@ -28,6 +28,7 @@ struct OvlParams {
     int levels;       // y levels per chunk column (from -64)
     uint packed;      // 1: two 16-bit ids a word (atlas_ovl_run); 0: one id a word (the generator's blocks, a stage)
     uint chunkWords;  // words per chunk in ids
+    uint chunkBase;   // piecesMain: where this layer's chunk records start in chunks (a layer of the tapes: 0, n, 2 n records in)
 };
 [[vk::push_constant]] ConstantBuffer<OvlParams> params;
 [[vk::binding(0, 0)]] StructuredBuffer<uint> blocks;   // AtlasOverlayTapes.blockWords
@@ -42,6 +43,7 @@ static const uint CHUNK_INTS = 8u, ID_WORDS = 7u, REC_OPS = 513u;
 static const uint HEADER = 16u;
 // op kinds (Canvas.Tape) and flags (AtlasOverlayTapes.OF_*)
 static const uint OP_W = 1u, OP_OPEN = 2u, OP_NOT_AIR = 3u, OP_PLANT = 4u, OP_FOUNDATION = 5u, OP_BED = 6u, OP_FURNITURE = 7u;
+static const uint OP_RAW = 9u;  // AtlasOverlayTapes.RAW: the state over y0..y1, whatever is there (a dungeon's recorded writes)
 static const uint OF_NOSMOTHER = 1u, OF_VAR = 2u, OF_BOTTOMCLIP = 4u, OF_GUARD = 8u;
 // block flags (AtlasOverlayTapes.F_*)
 static const uint F_AIR = 1u, F_FLUID = 2u, F_OPEN = 4u, F_SOLIDGROUND = 8u, F_FCR = 16u, F_BED = 32u, F_DOOR = 64u,
@@ -168,6 +170,10 @@ uint applyOp(uint i) {
         if ((flagsOf(getB(y0)) & (F_OPEN | F_CARPET)) != 0u) wset(y0, s, nosm, (fl & OF_GUARD) != 0u);
         return 2u;
     }
+    if (kind == OP_RAW) {
+        for (int y = y0; y <= y1; y++) setB(y, s);
+        return 2u;
+    }
     return 2u;  // unknown: skipped
 }
 
@@ -175,7 +181,7 @@ uint applyOp(uint i) {
 [numthreads(64, 1, 1)]
 void piecesMain(uint3 id : SV_DispatchThreadID) {
     if (int(id.y) >= params.count || id.x >= 256u) return;
-    int rec = chunks[id.y * CHUNK_INTS + 2u];
+    int rec = chunks[params.chunkBase + id.y * CHUNK_INTS + 2u];
     if (rec < 0) return;
     gBase = id.y * params.chunkWords;
     gCol = id.x;
