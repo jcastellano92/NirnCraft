@@ -404,6 +404,59 @@ else()
   set_source_files_properties("${GEN}/atlas_gen_cpu.cpp" PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-fast-math;-w"
                               COMPILE_DEFINITIONS "${GEN_RENAME}")
 endif()
+# Structures from the plans (atlas_overlays.slang, overlays_engine.cpp): the pieces' op tapes and the street painter
+# stamped on chunk columns; the same exact float contract as the generator (the painter's float expressions)
+set(OVL_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_overlays.slang")
+set(OVL_HEADERS)
+foreach(pair "pieces:piecesMain" "streets:streetsMain" "sanity:sanityMain" "connect:connectMain" "access:accessMain" "mark:markMain"
+             "done:doneMain")
+  string(REPLACE ":" ";" pe "${pair}")
+  list(GET pe 0 pass)
+  list(GET pe 1 entry)
+  set(OVL_VALIDATE)
+  if(SPIRV_VAL)
+    set(OVL_VALIDATE COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/atlas_ovl_${pass}.spv")
+  endif()
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_ovl_${pass}.spv"
+    COMMAND "${SLANGC}" "${OVL_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise
+            -warnings-disable 41035 -o "${GEN}/atlas_ovl_${pass}_raw.spv"
+    COMMAND spv_exact "${GEN}/atlas_ovl_${pass}_raw.spv" "${GEN}/atlas_ovl_${pass}.spv"
+    ${OVL_VALIDATE}
+    DEPENDS "${OVL_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" spv_exact COMMENT "slangc atlas_overlays:${entry} -> SPIR-V (exact float contract)")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_ovl_${pass}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_ovl_${pass}.spv -DOUT=${GEN}/atlas_ovl_${pass}_spv.h
+            -DNAME=atlas_ovl_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_ovl_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND OVL_HEADERS "${GEN}/atlas_ovl_${pass}_spv.h")
+endforeach()
+# the road painter (atlas_overlays_roads.slang: RoadPaint over the generator's map) and the heightmap it reads
+set(OVLR_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_overlays_roads.slang")
+foreach(pair "roads:roadsMain" "mbnl:mbnlMain")
+  string(REPLACE ":" ";" pe "${pair}")
+  list(GET pe 0 pass)
+  list(GET pe 1 entry)
+  set(OVL_VALIDATE)
+  if(SPIRV_VAL)
+    set(OVL_VALIDATE COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/atlas_ovl_${pass}.spv")
+  endif()
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_ovl_${pass}.spv"
+    COMMAND "${SLANGC}" "${OVLR_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise
+            -warnings-disable 41035 -o "${GEN}/atlas_ovl_${pass}_raw.spv"
+    COMMAND spv_exact "${GEN}/atlas_ovl_${pass}_raw.spv" "${GEN}/atlas_ovl_${pass}.spv"
+    ${OVL_VALIDATE}
+    DEPENDS "${OVLR_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang"
+            "${CMAKE_SOURCE_DIR}/shaders/atlas_ovl_javamath.slang" spv_exact COMMENT "slangc atlas_overlays_roads:${entry} -> SPIR-V (exact float contract)")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_ovl_${pass}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_ovl_${pass}.spv -DOUT=${GEN}/atlas_ovl_${pass}_spv.h
+            -DNAME=atlas_ovl_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_ovl_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND OVL_HEADERS "${GEN}/atlas_ovl_${pass}_spv.h")
+endforeach()
+target_sources(atlas_core PRIVATE src/overlays_engine.cpp ${OVL_HEADERS})
 
 # The client's decoration (atlas_features.slang, docs/ATLAS-CLIENT-GENERATION.md stage 4): the same exact float
 # contract, one SPIR-V module per kernel (one a feature type); the big helpers are [noinline] (else the driver inlines

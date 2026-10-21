@@ -110,7 +110,8 @@ public final class Sanity {
                             } else if (pass == 0) {
                                 shaped.add(p.immutable());
                             }
-                        } else if (!anyNeighbour(level, chunkBox, p)) {
+                        } else if (s.getFluidState().isEmpty() && !anyNeighbour(level, chunkBox, p)) {
+                            // never a fluid (water or any source or flowing state: a river under a bridge stays whole)
                             level.setBlock(p, air, 2);
                         }
                     }

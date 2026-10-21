@@ -969,6 +969,70 @@ ATLAS_API AtlasStatus atlas_gen_store_stats(AtlasGen* h, uint32_t* held, uint32_
 ATLAS_API AtlasStatus atlas_gen_probe(AtlasGen* h, uint32_t kind, uint32_t n, const int32_t* xz, uint32_t* out);
 
 /*
+ * Structures from the plans on the GPU (shaders/atlas_overlays.slang, overlays_engine.cpp; Java:
+ * com.nirncraft.atlas.AtlasOverlayTapes): the named settlements' pieces as op tapes and the street painter's plan,
+ * stamped in place on chunk columns of 16-bit ids of the overlay block table (b = x + 16 z + 256 (y + 64), `levels`
+ * y levels from -64, two ids a word), one GPU thread per column. Vulkan only. atlas_ovl_set: which 0 the block table
+ * ('AOBL': 7 words per id: flags, transforms, sweep classes, block index / facing / cover, shape table, access classes, road classes; then the shape
+ * tables), 1 the tapes ('AOTP': per chunk record: 257 column starts, 256 column sweep ranges, the ops; the index after
+ * the records: cx, cz, record, layer (word 3: 4, the stride; layer 0 the settlements', 1 the underground structures',
+ * 2 the surface structures'), 2 the street plan ('AOSR'); resident until replaced. atlas_ovl_run stamps layer 0. atlas_ovl_run: chunks ATLAS_OVL_CHUNK_INTS ints each (cx, cz, the chunk's
+ * tape record word offset or -1, its street plan bucket or -1, the batch slots of its N, E, S, W neighbours or -1);
+ * kinds bit 0 the pieces, bit 2 their sweep (Sanity, then fence / wall / pane shapes), bit 1 the streets (in that
+ * order: the server's).
+ */
+#define ATLAS_OVL_CHUNK_INTS 8u
+typedef struct AtlasOvl AtlasOvl;
+typedef struct AtlasOvlTimes {
+    double uploadMs, kernelMs, piecesMs, streetsMs, readbackMs, totalMs, sweepsMs;  /* pieces, sweeps, streets: GPU timestamps */
+} AtlasOvlTimes;
+ATLAS_API AtlasStatus atlas_ovl_create(AtlasBackend backend, AtlasOvl** out);
+ATLAS_API void atlas_ovl_destroy(AtlasOvl* h);
+ATLAS_API const char* atlas_ovl_last_error(AtlasOvl* h);
+ATLAS_API const char* atlas_ovl_device(AtlasOvl* h);
+ATLAS_API AtlasStatus atlas_ovl_set(AtlasOvl* h, uint32_t which, const uint32_t* words, uint32_t count);
+ATLAS_API AtlasStatus atlas_ovl_run(AtlasOvl* h, uint32_t count, const int32_t* chunks, uint32_t levels, uint32_t kinds,
+                                    uint32_t* ids, AtlasOvlTimes* times);
+/* The overlays as stages of the generator, GPU to GPU on its device, registered both as store stages
+   (atlas_gen_add_store_stage, with their radii: atlas_gen_run_store) and as batch stages (atlas_gen_add_stage:
+   atlas_gen_run / atlas_gen_chunks; they stand down once the store has called the overlays): the heightmap the road
+   painter reads at ATLAS_GEN_STAGE_DECORATION - 3 (r 0), the tapes' dungeon layers (a structure's recorded writes:
+   the underground structures' at DECORATION - 2, the surface structures' at DECORATION - 1, r 0; before the
+   decoration, which is one stage for every step), the settlements' pieces at ATLAS_GEN_STAGE_PIECES (r 0; the store
+   keeps each chunk's result per slot), their sweep at ATLAS_GEN_STAGE_SWEEPS (r 1: Sanity reads the four neighbours as
+   their pieces left them), the road painter (RoadPaint) at ATLAS_GEN_STAGE_PAINT and the street painter at
+   ATLAS_GEN_STAGE_PAINT + 50 (r 0), the road painter once atlas_ovl_set(which 3: 'AORD', RoadPaintGpu.words) is given.
+   Each chunk's tape record and street bucket come from the data's own chunk index. The block table's first ids must
+   be the generator program's blocks (AtlasOverlayTapes(prog.blocks)); the ingest table (atlas_gen_set_ingest) must
+   cover the whole block table. atlas_ovl_set's data goes up at the generator's next stage call. ATLAS_ERR_UNSUPPORTED
+   for a CPU generator. Destroy the overlays before the generator (it detaches itself). atlas_ovl_run is refused on such
+   a handle. */
+ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out);
+/* The structures' piece boxes for the generator's other store stages (the features' placement mask), valid during a
+   store stage call (the buffers may be replaced between calls: ask again each call). tapes: the tape words
+   (AtlasOverlayTapes.tapeWords); slotRecords: per store slot an int, the word offset of that slot's chunk's record in
+   tapes, -1 none (written at the overlays' first store stage, DECORATION - 3, for every chunk of the store). A
+   record's boxes: at rec + 513 + tapes[rec + 256], a count n, then n boxes of 5 ints (minX, minZ, maxX, maxZ, maxY,
+   world blocks): every settlement piece and dungeon piece whose box meets that chunk (pieces over 160 blocks across
+   left out, as PlacementMask.collect); a box near but not on a chunk is in its neighbours' lists. ATLAS_ERR_STATE before
+   the store has called the overlays or before any tapes. */
+typedef struct AtlasOvlStoreBoxes {
+    uint32_t version;      /* 1 */
+    uint32_t slots;        /* the store's slots (slotRecords' length) */
+    uint32_t tapeWords;    /* tapes' size in words */
+    uint32_t pad;
+    uint64_t tapes;        /* VkBuffer (uint words) */
+    uint64_t slotRecords;  /* VkBuffer (int per slot) */
+} AtlasOvlStoreBoxes;
+ATLAS_API AtlasStatus atlas_ovl_store_boxes(AtlasOvl* h, AtlasOvlStoreBoxes* out);
+/* The passes a stage runs (bit 0 pieces, bit 2 their sweep, bit 1 streets, bit 3 roads, bit 4 the roads' heightmap,
+   bit 5 the underground structures' layer, bit 6 the surface structures'; default all). */
+ATLAS_API AtlasStatus atlas_ovl_set_kinds(AtlasOvl* h, uint32_t kinds);
+/* Chunks a stage has stamped so far (those with a tape record or a street bucket). (The batch apron is gone: the store's
+   radii make the results batch-independent.) */
+ATLAS_API uint64_t atlas_ovl_stamped(AtlasOvl* h);
+
+/*
  * The client's decoration (docs/ATLAS-CLIENT-GENERATION.md stage 4, shaders/atlas_features.slang): the world's placed
  * features (AtlasFeatureProgram) over generated terrain, Java's order, seeds and random streams. A batch: `slots`
  * terrain chunks (ids: ATLAS_FEAT_CHUNK_WORDS words each, 16-bit block ids of the feature program's table, b = x +

@@ -88,6 +88,12 @@ public final class Painter {
      */
     public static final ThreadLocal<java.util.function.BiConsumer<BoundingBox, String>> FEATURES = new ThreadLocal<>();
 
+    /**
+     * Set while the client's overlays record a dungeon's blocks (AtlasOverlayTapes.recordRaw, over a level with no
+     * world behind it): no mobs and no minecarts (entities, not blocks). Unset during real world generation.
+     */
+    public static final ThreadLocal<Boolean> RECORDING = new ThreadLocal<>();
+
     /** Announces a set piece or room purpose ("sarcophagus_hall", "story:journal"...) to the analyzer, if one listens. */
     public void feature(String id) {
         java.util.function.BiConsumer<BoundingBox, String> c = FEATURES.get();
@@ -375,6 +381,7 @@ public final class Painter {
     @Nullable
     private Mob spawn(@Nullable String id, int x, int y, int z, float yaw, @Nullable String name,
                       @Nullable java.util.function.Consumer<Mob> setup, boolean essential) {
+        if (RECORDING.get() != null) return null;
         if (!essential) {
             if (mood == Pacing.EMPTY) return null;
             if (mood == Pacing.SLEEP) {
@@ -438,7 +445,7 @@ public final class Painter {
 
     /** A chest minecart with loot (mines). */
     public void chestMinecart(int x, int y, int z, Identifier loot) {
-        if (!ok(x, y, z)) return;
+        if (!ok(x, y, z) || RECORDING.get() != null) return;
         MinecartChest cart = new net.minecraft.world.entity.vehicle.minecart.MinecartChest(net.minecraft.world.entity.EntityTypes.CHEST_MINECART, level.getLevel());
         cart.setPos( x + 0.5, y + 0.5, z + 0.5);
         cart.setLootTable(net.minecraft.resources.ResourceKey.create(Registries.LOOT_TABLE, loot), hash(x, y, z, 77));

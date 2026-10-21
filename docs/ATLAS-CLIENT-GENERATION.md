@@ -341,6 +341,103 @@ grid's admission (accepted, air as a uniform hint) and its dropped / wanted repo
 per call site), shared helpers are [noinline]: every gen kernel compiles at -O3 in 1-3 s (0.14-0.40 MB). The -O0
 builds run slowly enough to trip the GPU watchdog. Dev tool: `native/tools/gen_probe` (the far passes from a dumped
 program and map, NIRNCRAFT_GEN_DUMP).
+### 7.5 Structures from the plans on the device (2026-10-21)
+
+`atlas_ovl_*` (`native/shaders/atlas_overlays.slang`, `overlays_engine.cpp`; Java `AtlasOverlayTapes`,
+`AtlasOvlNative`), Vulkan only, its own device for now (like the decoration). Survey of what Java did:
+`E:/NirnCraft-scratch/overlays/survey.md`.
+
+* **Tapes.** The named settlements' pieces (`StreetPlan.layout`, the server's `SettlementPiece`: spec, seed, owner)
+  are built once each by their own builders on a `Canvas` over a level holding the terrain. `Canvas.Tape` (a hook,
+  null in the game) records every write primitive as an op: a plain write (`wset`: nothing over
+  FEATURES_CANNOT_REPLACE, no block over a door or bed, grass under a sturdy block to dirt), set-if-open, air, clear,
+  clear-plants, a foundation column down to solid ground, bed halves, furniture. Ops are kept per chunk column in the
+  server's order (piece, then op), with each column's sweep range (the union of the pieces' clips and wide boxes as
+  postProcess sweeps them). The builders' own branches on what they read are taken once, on the terrain.
+* **Kernels**, one thread per chunk column, in the server's order: `piecesMain` replays the column's ops, each
+  predicate tested on the blocks there (a tree or a deeper hollow the client generated counts as on the server);
+  `sanityMain` is `Sanity.sweep` (two passes over the sweep range: unsupported doors, beds, trapdoors, stray stairs,
+  carpets, lanterns, ladders, unreachable chests, fences on nothing, any block with no supported neighbour);
+  `connectMain` gives fences, walls and panes their sides (`Sanity.connect`, wall tall / low / post from the block
+  above); `streetsMain` is `StreetPaint.Painter` (doorstep paths, stone stairs, gate lanes; Java's float expressions
+  under the exact contract). The sweeps read the four neighbour chunks of the batch (`ATLAS_OVL_CHUNK_INTS`).
+* **Block table** (`AtlasOverlayTapes.blockWords`): five words per id (flags, the painter's transforms, sweep classes,
+  block index / facing / the bottom face's cover of the wall test shapes, shape table), then per connectable state
+  its shape table. `new AtlasOverlayTapes(prog.blocks)` makes the generator's ids the table's first ids.
+* **Order in the pipeline**: the settlement structures are at `top_layer_modification`, so after the decoration's
+  steps 0-9 and before freeze_top_layer, road paint and street paint (the decoration engine must call the pieces and
+  sweep between those).
+
+**Live** (`AtlasOverlayLive`, single player): the engine runs as stages of the client generator's batches
+(`atlas_ovl_create_for_gen` -> `atlas_gen_add_stage`: pieces at ATLAS_GEN_STAGE_PIECES, Sanity + Accessibility +
+Sanity + shapes at ATLAS_GEN_STAGE_SWEEPS, the street painter at ATLAS_GEN_STAGE_PAINT + 50), on its device, GPU to
+GPU. The states the stages place are fixed with the program (`AtlasGenProgram.addBlocks`: the baked
+`nirncraft/atlas/overlay_states.txt`, 3,612 states from all 1,341 settlements' 75,704 pieces with the transforms and
+shapes; `AtlasOverlaysGpuTest.bakeStates` remakes it). A thread ahead of the camera records each settlement once
+per world, in the server's order (SettlementPiece.postProcess itself, its canvas taped through
+`SettlementPiece.TAPE`), over terrain from a recording generator of its own, caches it under
+`<game dir>/nirncraft-cache/overlays/<seed>-<program>-<plan>-v1`, and has chunks made before it generated again
+(`AtlasClientGen.regenerate`); `AtlasClientGen.DETACH` takes the stages away before the generator closes.
+
+**Checked** (`AtlasOverlaysGpuTest`, NIRNCRAFT_OVL_TEST=1: Java's `SettlementPiece.postProcess` per chunk in piece
+order, then `StreetPaint`, over Minecraft's own terrain, seed 1234, cached under `E:/NirnCraft-scratch/overlays/ref`;
+Sanity keeps fluids since 2026-10-21, the owner's decision): Riverwood 6 x 6, Whiterun 8 x 8, Rorikstead 6 x 6 and
+Pelagia Farm 4 x 4 chunks. Of the blocks either side changed: pieces without the sweeps against the builders alone
+100 % (120,949); pieces and sweeps against postProcess 99.913 % (120,974); street paint 100 %; the generator's
+batches with the stages (program with the baked states, frozen table: 0 ops dropped) 99.917 % of 121,526
+(Riverwood 99.97, Whiterun 99.92, Rorikstead 99.85, Pelagia Farm 100). **Measured**: the passes 0.1 ms a chunk;
+recording 5 ms a piece-chunk in Java, once per world.
+
+**Batch apron** (`atlas_gen_set_apron`, gen_engine.cpp): the overlays name each settlement chunk's missing
+neighbours; the generator makes them with the batch (up to 64 beside the 64 asked for; buffers sized 128), its stages
+see them (`AtlasGenStageBatch.outputCount`, version 2), the caller and the ingest never do. The sweeps then read every
+neighbour as its terrain and pieces left it whatever the batch: each chunk generated alone equals the whole window
+(0 blocks differ on the 4 sets).
+
+**Road paint** (`atlas_overlays_roads.slang`, `RoadPaintGpu`): RoadPaint.Painter ported literally as a stage at
+ATLAS_GEN_STAGE_PAINT (street paint stays at PAINT + 50, after it as on the server): the plan's geometry (at,
+atSegment, junctions), the culture's materials by roll, verges and retaining walls, lamp posts and milestones,
+bridges (stone arches and piers, timber decks, rails), culverts, fords, stairs, tunnels with portals and lamps;
+TamrielMap.sample, the culture's region and PlanGround's pads from the generator's map; MOTION_BLOCKING_NO_LEAVES as
+the server primes it before the decoration (a stage at ATLAS_GEN_STAGE_DECORATION - 1). A workgroup a chunk: the
+columns' plan queries side by side, the painting by one thread in Java's order (lamp arms, rails and felled crowns
+reach the next column). **Checked** (`roadsMatchJava`): 54 road chunks, 6 of each span kind (normal, cut, fill,
+bridge, culvert, ford, switchback, stairs, tunnel): 100 % of 9,594 painted blocks. **Measured**: 5.1 ms a chunk
+(one chunk a batch); the pipeline is 567 KB of SPIR-V, 19 s to JIT the first time. Not done: a felled tree's crown
+in a neighbour chunk (the stage writes only its chunk).
+
+**Seeded structures** (`AtlasOverlayStarts`): the generic settlements and working sites (random spread) and the
+dungeons (the wilds' random spread, the named places' dungeons) found as the server finds them: each set's candidate
+chunks, its placement's isStructureChunk (frequency, exclusion zones), the weighted try-in-turn choice, then
+Structure.generate. Planned on the CPU once per start, near the camera, cached like the named settlements' tapes.
+Settlement starts record through SettlementPiece.postProcess as before. Dungeons record **raw writes**: their
+builders paint through a Painter that reads the world as it goes, so the recording keeps every write the window takes,
+in order per column (op RAW), over the recording generator's terrain; exact for that terrain. The tapes have
+**layers**: the settlements' at ATLAS_GEN_STAGE_PIECES, the underground structures' at DECORATION + 3, the surface
+structures' at DECORATION + 4, the server's steps (structures before the step's features: the overlays register first;
+the features engine must keep that). Spawns and block entities are left out (`Painter.RECORDING`). The frozen block table
+bake now covers every seeded settlement start of Tamriel and three of each dungeon structure, kit and theme
+(4,362 states). **Checked** (stage path, seed 1234): working site, bandit camp, fort, watchtower, cave, mine
+100 %, Nordic barrow 99.998 % (one puzzle keyhole); generic hamlet 99.39 %,
+farmstead 98.68 %, village 99.25 %: the rest is RockSweep and OrphanSweep removing what the builders left loose on
+rough ground (not on the GPU yet). Not here: the site lists' sets (`nirncraft:sites`: the Steps, Blackreach).
+
+**On the chunk store** (atlas_gen_add_store_stage, the features agent's store): every overlay stage is also a store
+stage with its radius: the heightmap snapshot at DECORATION - 3, the dungeon layers at DECORATION - 2 / - 1 (before the
+decoration, which is one stage for all steps), the pieces at PIECES (r 0; each slot's result kept as the sweeps'
+snapshot), the sweeps at SWEEPS (r 1: Sanity, and the fence shapes, read a neighbour as its pieces left it), roads at
+PAINT and streets at PAINT + 50 (r 0); the batch stages stand down once the store calls. The store sends a chunk's
+stages again when a chunk near it is made; our ops read what they write, so a per-slot mark (the first word's high bits,
+set when the slot's blocks are new) and per-slot stage bits keep a stage from running twice on the same blocks. The
+batch apron is gone. **Checked** (NIRNCRAFT_OVL_STORE=1): Riverwood 99.957 %, Whiterun 99.920 %, Rorikstead 99.854 %,
+Pelagia farm 100 %, a cave 99.99 %, a generic hamlet 99.39 %; the same blocks whatever the batching (64 a call against
+one a call in reverse order: 0 differ on all six). The settlements' and dungeons' piece boxes for the features'
+placement mask: atlas_ovl_store_boxes (the tapes and a record offset per store slot; atlas.h).
+
+**Not yet**: OrphanSweep / RockSweep (flood fills reaching 14 blocks into the neighbour chunks; they wait for the
+shared store of unfinished chunks), one sweep per chunk instead of per piece (the last ~0.08 %, with the server's
+chunk order at chunk borders), a bed's other half on a write of air, tile plans beyond Tamriel for the street
+painter.
 
 ### 7.5 Snow, ice and the far roads on the device (2026-10-21)
 
@@ -378,9 +475,8 @@ watchdog's 2 s. Over 500 ms prints `TRACE warn gen submission`.
 
 ## 8. Open
 
-* **Structures from the plans**: starts per chunk (`ChunkGenerator.createStructures` with the server's
-  `ChunkGeneratorStructureState`, named settlements from the street plan) into the proto chunks, their pieces placed
-  in decoration as `applyBiomeDecoration` does; the remaining 0.17 %.
+* **Structures from the plans**: named and seeded settlements, dungeons, road and street paint are stages of the
+  client generator (7.5); still to do there: OrphanSweep / RockSweep, the site lists' structures.
 * **Features are slow and single threaded** (81 ms a chunk): decorate disjoint 3 x 3s in parallel; trees on the GPU
   later (their placements are pure; shapes need the decoration random).
 * **The surface pass** is the kernel's largest (a thread per column walks it): split the per-block rule work.

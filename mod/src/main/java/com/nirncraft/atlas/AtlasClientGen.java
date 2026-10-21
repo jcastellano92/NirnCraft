@@ -74,6 +74,20 @@ final class AtlasClientGen implements AutoCloseable {
      */
     static final java.util.List<java.util.function.BiConsumer<AtlasGenNative.Gen, AtlasGenProgram>> ATTACH =
             new java.util.concurrent.CopyOnWriteArrayList<>();
+    /** Called with the generator before it closes: the stage engines remove their stages and free what is on its device. */
+    static final java.util.List<java.util.function.Consumer<AtlasGenNative.Gen>> DETACH = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    /**
+     * Chunks to generate again (their stages' data arrived after they went up: a settlement's tapes): the active
+     * generator forgets them, so the camera's window makes them anew. Any thread.
+     */
+    static void regenerate(long[] chunkKeys) {
+        AtlasClientGen c = active;
+        if (c == null) return;
+        boolean any = false;
+        for (long k : chunkKeys) any |= c.done.remove(k);
+        if (any) c.wake();
+    }
 
     static boolean far() {
         return !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.far"));
@@ -1279,6 +1293,13 @@ final class AtlasClientGen implements AutoCloseable {
             for (Thread t : all) if (t.isAlive()) t.join(5000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+        for (var detach : DETACH) {
+            try {
+                detach.accept(gen);
+            } catch (RuntimeException e) {
+                com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: a stage engine did not detach", e);
+            }
         }
         if (featStages != null) gen.detachFeatures(featStages);  // (its stages off the generator, then its pipelines)
         gen.close();
