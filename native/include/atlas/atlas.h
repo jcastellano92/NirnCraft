@@ -794,6 +794,37 @@ ATLAS_API AtlasStatus atlas_gen_set_map(AtlasGen* h, const uint32_t* words, uint
    TamrielMap.sample (the MapSample fields in declaration order). For the parity checks. */
 ATLAS_API AtlasStatus atlas_gen_probe(AtlasGen* h, uint32_t kind, uint32_t n, const int32_t* xz, uint32_t* out);
 
+/*
+ * The client's decoration (docs/ATLAS-CLIENT-GENERATION.md stage 4, shaders/atlas_features.slang): the world's placed
+ * features (AtlasFeatureProgram) over generated terrain, Java's order, seeds and random streams. A batch: `slots`
+ * terrain chunks (ids: ATLAS_FEAT_CHUNK_WORDS words each, 16-bit block ids of the feature program's table, b = x +
+ * 16 z + 256 (y + 64), y -64..639; aux: ATLAS_FEAT_AUX_WORDS words each, the 4 x 4 x 176 quart biomes as 16-bit
+ * program biome ids, then the 256 placement mask bytes, then 3 x 256 alchemy class bytes (by the map), the 256
+ * temperature noise floats, 8 words of frozen-modifier bits, then room for the heightmaps the kernels compute); `origins`
+ * chunks decorated in isolation (28 ints each: cx, cz, the 5 x 5 terrain slots around it z-major, -1 none, pad);
+ * `targets` chunks assembled from their 3 x 3 origins' writes in a fixed order (12 ints each: own slot, the 9 origin
+ * indices z-major (-1 none), cx, cz) into outIds (ATLAS_FEAT_CHUNK_WORDS each). outTables (optional, the isolated
+ * check): per origin ATLAS_FEAT_TABLE_WORDS words: 16 meta words ([0] entries, [1] flags: 1 table full, 2 a read
+ * outside the 5 x 5, 4 an unsupported piece, 8 a stack limit, 16 math not proven), then the write table (key, id)
+ * pairs, key = 1 + ((y + 64) * 48 + z - (cz - 1) * 16) * 48 + x - (cx - 1) * 16, 0 empty.
+ */
+#define ATLAS_FEAT_CHUNK_WORDS (44u * 2048u)
+#define ATLAS_FEAT_AUX_WORDS (1928u + 6u * 256u)
+#define ATLAS_FEAT_TABLE_WORDS (16u + 32768u * 2u)
+typedef struct AtlasFeat AtlasFeat;
+typedef struct AtlasFeatTimes {
+    double uploadMs, kernelMs, featureMs, gatherMs, readbackMs, totalMs;
+} AtlasFeatTimes;
+ATLAS_API AtlasStatus atlas_feat_create(AtlasBackend backend, AtlasFeat** out);
+ATLAS_API void atlas_feat_destroy(AtlasFeat* h);
+ATLAS_API const char* atlas_feat_last_error(AtlasFeat* h);
+ATLAS_API const char* atlas_feat_device(AtlasFeat* h);
+/* The feature program (AtlasFeatureProgram: words[0] = 'AFEA'); copied. */
+ATLAS_API AtlasStatus atlas_feat_set_program(AtlasFeat* h, const uint32_t* words, uint32_t count);
+ATLAS_API AtlasStatus atlas_feat_run(AtlasFeat* h, uint32_t slots, const uint32_t* ids, const uint32_t* aux, uint32_t origins,
+                                     const int32_t* org, uint32_t targets, const int32_t* tgt, uint32_t* outIds,
+                                     uint32_t* outTables, AtlasFeatTimes* times);
+
 #ifdef __cplusplus
 }
 #endif

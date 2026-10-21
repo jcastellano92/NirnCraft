@@ -192,6 +192,35 @@ client):
 * Features (`AtlasGenFeatures`): the decoration driver of `applyBiomeDecoration` replicated over proto chunks filled
   with the generated blocks; 0 feature failures; 81 ms a chunk in Java, one thread.
 
+### 6.1 The decoration on the GPU (stage 4, branch atlas-features)
+
+`native/shaders/atlas_features.slang` + `native/src/features_engine.cpp` (`atlas_feat_*` in atlas.h), its own Vulkan
+device like the standalone generator, and the same source compiled to C++. The program (`AtlasFeatureProgram`, Java)
+compiles the world's own placed features: Java's dispatch order (step, global index), every placement modifier,
+every feature configuration, the biome lists (per step, and `hasFeature` for the biome filter), a block table (flags
+from the states, transforms: axis, waterlogged, leaf distance, snowy), bit sets for rule tests and block predicates
+evaluated on every state, the survival table of the plants (below-only rules tried in a stub level), Mth's sin table.
+
+* **Order (gather).** Every chunk of a batch is an origin decorated in isolation: its 3 x 3 terrain plus its own
+  earlier writes, which is exactly what Java's decoration sees when no neighbour was decorated before it. One dispatch
+  per placed feature in Java's order, one thread per origin (one kernel per feature type). Writes go into the origin's
+  own table; a target chunk is its terrain with its 9 origins' writes applied in a fixed order (z-major, the order
+  `AtlasGenParityTest` decorates a 3 x 3 in), the later winning. No two threads write one block in one dispatch.
+* **Random.** WorldgenRandom over Xoroshiro128++ with BitRandomSource's methods (`nextDouble`/`nextFloat` are float
+  arithmetic in Java), the decoration and feature seeds, FeaturePlacer's stack order.
+* **Trees** keep their leaves and trimmings exactly as fastutil's `Long2ObjectOpenHashMap` keeps them (hash, probing,
+  rehash, removal shifts), because TreeBuilder draws randoms while walking them in table order.
+* **Math**: `Math.sin/cos/pow/exp/atan2/hypot` (HotSpot intrinsics) are fdlibm on the GPU; they differ in the last
+  bit for some arguments, which changes a block only when a comparison is that close.
+* **Slang pitfalls found**: an unsuffixed float literal is float even in double arithmetic (`0.35` is
+  0.3499999940...; every double literal carries `l`); passing a struct member as an `inout` argument makes Slang inline
+  the callee at every call site (the exact-math functions: megabytes of SPIR-V and minutes of compile), so the
+  kernels' "not proven" flag is a thread-private static.
+* **Inputs from Java per chunk** (2D functions of the map and plans, like the generator's pages): the placement mask,
+  the regional alchemy plant class of each column, the temperature noise, the frozen modifier's verdict.
+* **Check**: `AtlasGenFeaturesGpuTest.featureDump` (Java's decoration of each origin alone and of each target in
+  order) and `native/tests/features_test.cpp` (`atlas_feat_test <dump> cpu|vulkan|both`).
+
 ## 7. The near field from atlas's own generation (stage 5)
 
 `-Dnirncraft.atlas.clientGen=true` (single player): `AtlasClientGen` generates the window around the camera

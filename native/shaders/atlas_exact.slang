@@ -13,11 +13,13 @@
 // Every function takes `inout uint bad` where an argument lies outside what is proven here (subnormal results,
 // sin/cos beyond 2^20 pi / 2): the caller flags the chunk and the server's blocks correct it.
 
+[noinline]
 int hiW(double x) {
     uint lo, hi;
     asuint(x, lo, hi);
     return int(hi);
 }
+[noinline]
 int loW(double x) {
     uint lo, hi;
     asuint(x, lo, hi);
@@ -36,6 +38,7 @@ double nextUpD(double x) {  // finite, nonzero x
     b = x > 0.0l ? b + 1u : b - 1u;
     return asdouble(uint(b & 0xFFFFFFFFu), uint(b >> 32));
 }
+[noinline]
 double nextDownD(double x) {
     uint64_t b = (uint64_t(uint(hiW(x))) << 32) | uint64_t(uint(loW(x)));
     b = x > 0.0l ? b - 1u : b + 1u;
@@ -44,6 +47,7 @@ double nextDownD(double x) {
 
 // a * b = p + e exactly (Dekker; |a|, |b| < 2^996)
 static const double SPLITTER = 134217729.0l;  // 2^27 + 1
+[noinline]
 void twoProd(double a, double b, out double p, out double e) {
     p = a * b;
     double ca = SPLITTER * a, ah = ca - (ca - a), al = a - ah;
@@ -51,6 +55,7 @@ void twoProd(double a, double b, out double p, out double e) {
     e = ((ah * bh - p) + ah * bl + al * bh) + al * bl;
 }
 // |a - c * b|, exact enough to rank neighbouring c (c * b within a factor 2 of a)
+[noinline]
 double residual(double a, double c, double b) {
     double p, e;
     twoProd(c, b, p, e);
@@ -58,6 +63,7 @@ double residual(double a, double c, double b) {
 }
 
 // a / b, correctly rounded (Java's double division). A quotient is never halfway between two doubles: no ties.
+[noinline]
 double divD(double a, double b, inout uint bad) {
     double q = a / b;
     if (!isFiniteD(q) || q == 0.0l || !isFiniteD(a) || !isFiniteD(b)) return q;  // the exact special cases
@@ -77,6 +83,7 @@ double divD(double a, double b, inout uint bad) {
 }
 
 // Math.sqrt(x), correctly rounded (Newton from the halved exponent, then the neighbour with the smallest residual)
+[noinline]
 double sqrtD(double x, inout uint bad) {
     if (!(x > 0.0l) || !isFiniteD(x)) {
         if (x == 0.0l) return x;  // +-0
@@ -108,6 +115,7 @@ static const double HUGE_D = 1.0e+300l;
 
 static const double S1 = asdouble(0x55555549u, 0xBFC55555u), S2 = asdouble(0x1110F8A6u, 0x3F811111u), S3 = asdouble(0x19C161D5u, 0xBF2A01A0u),
                     S4 = asdouble(0x57B1FE7Du, 0x3EC71DE3u), S5 = asdouble(0x8A2B9CEBu, 0xBE5AE5E6u), S6 = asdouble(0x5ACFD57Cu, 0x3DE5D93Au);
+[noinline]
 double kernelSin(double x, double y, int iy) {
     int ix = hiW(x) & EXP_SIGNIF_BITS;
     if (ix < 0x3e400000) {
@@ -122,6 +130,7 @@ double kernelSin(double x, double y, int iy) {
 
 static const double C1 = asdouble(0x5555554Cu, 0x3FA55555u), C2 = asdouble(0x16C15177u, 0xBF56C16Cu), C3 = asdouble(0x19CB1590u, 0x3EFA01A0u),
                     C4 = asdouble(0x809C52ADu, 0xBE927E4Fu), C5 = asdouble(0xBDB4B1C4u, 0x3E21EE9Eu), C6 = asdouble(0xBE8838D4u, 0xBDA8FAE9u);
+[noinline]
 double kernelCos(double x, double y) {
     int ix = hiW(x) & EXP_SIGNIF_BITS;
     if (ix < 0x3e400000) {
@@ -147,6 +156,7 @@ static const double INVPIO2 = asdouble(0x6DC9C883u, 0x3FE45F30u), PIO2_1 = asdou
                     PIO2_2 = asdouble(0x1A600000u, 0x3DD0B461u), PIO2_2T = asdouble(0x2E037073u, 0x3BA3198Au), PIO2_3 = asdouble(0x2E000000u, 0x3BA3198Au),
                     PIO2_3T = asdouble(0x252049C1u, 0x397B839Au);
 // __ieee754_rem_pio2 for |x| <= 2^19 pi / 2 (beyond: bad)
+[noinline]
 int remPio2(double x, out double y0, out double y1, inout uint bad) {
     int hx = hiW(x);
     int ix = hx & EXP_SIGNIF_BITS;

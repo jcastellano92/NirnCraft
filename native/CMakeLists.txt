@@ -341,7 +341,7 @@ foreach(pass corner aquifer fill top surface pack cols secs mats math probe)
   endif()
   add_custom_command(
     OUTPUT "${GEN}/atlas_gen_${pass}.spv"
-    COMMAND "${SLANGC}" "${GEN_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise
+    COMMAND "${SLANGC}" "${GEN_SRC}" -target spirv -entry ${entry} -stage compute -O0 -fp-mode precise
             -warnings-disable 41035 -o "${GEN}/atlas_gen_${pass}_raw.spv"
     COMMAND spv_exact "${GEN}/atlas_gen_${pass}_raw.spv" "${GEN}/atlas_gen_${pass}.spv"
     ${GEN_VALIDATE}
@@ -368,6 +368,51 @@ else()
   set_source_files_properties("${GEN}/atlas_gen_cpu.cpp" PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-fast-math;-w"
                               COMPILE_DEFINITIONS "${GEN_RENAME}")
 endif()
+
+# The client's decoration (atlas_features.slang, docs/ATLAS-CLIENT-GENERATION.md stage 4): the same exact float
+# contract, one SPIR-V module per kernel (one a feature type); the big helpers are [noinline] (else the driver inlines
+# them at every call site). -O0: at -O3 the kernels' results change (spring and lake no longer match Java: to find).
+# GPU only (the CPU fallback is a later job of its own).
+set(FEAT_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_features.slang")
+set(FEAT_HEADERS)
+foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:featApplyMain" "pack:featPackMain"
+             "ore:featOreMain" "cover:featCoverMain" "rock:featRockMain" "tree:featTreeMain" "freeze:featFreezeMain"
+             "disk:featDiskMain" "spring:featSpringMain" "lake:featLakeMain")
+  string(REPLACE ":" ";" pe "${pair}")
+  list(GET pe 0 pass)
+  list(GET pe 1 entry)
+  set(FEAT_VALIDATE)
+  if(SPIRV_VAL)
+    set(FEAT_VALIDATE COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/atlas_feat_${pass}.spv")
+  endif()
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_feat_${pass}.spv"
+    COMMAND "${SLANGC}" "${FEAT_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise
+            -warnings-disable 41035 -o "${GEN}/atlas_feat_${pass}_raw.spv"
+    COMMAND spv_exact "${GEN}/atlas_feat_${pass}_raw.spv" "${GEN}/atlas_feat_${pass}.spv"
+    ${FEAT_VALIDATE}
+    DEPENDS "${FEAT_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" spv_exact COMMENT "slangc atlas_features:${entry} -> SPIR-V (exact float contract)")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_feat_${pass}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_feat_${pass}.spv -DOUT=${GEN}/atlas_feat_${pass}_spv.h
+            -DNAME=atlas_feat_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_feat_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND FEAT_HEADERS "${GEN}/atlas_feat_${pass}_spv.h")
+endforeach()
+target_sources(atlas_core PRIVATE src/features_engine.cpp ${FEAT_HEADERS})
+# the decoration alone (its offline check needs no renderer kernels: a small library of its own)
+add_library(atlas_feat SHARED src/features_engine.cpp src/vk_loader.cpp ${FEAT_HEADERS})
+target_include_directories(atlas_feat PUBLIC include PRIVATE src "${GEN}" "${ATLAS_VK_INCLUDE}")
+target_compile_definitions(atlas_feat PRIVATE ATLAS_BUILD VK_NO_PROTOTYPES)
+target_link_libraries(atlas_feat PRIVATE Threads::Threads)
+# the decoration's offline check: a dump from AtlasGenFeaturesGpuTest (Java's decoration) against the kernels
+# the driver's JIT time of a compute module (no pipeline cache): spv_jit_time <a.spv> ...
+add_executable(spv_jit_time tools/spv_jit_time.cpp src/vk_loader.cpp)
+target_include_directories(spv_jit_time PRIVATE src "${ATLAS_VK_INCLUDE}")
+target_compile_definitions(spv_jit_time PRIVATE VK_NO_PROTOTYPES)
+add_executable(atlas_feat_test tests/features_test.cpp)
+target_include_directories(atlas_feat_test PRIVATE include)
+target_link_libraries(atlas_feat_test PRIVATE atlas_feat)
 
 add_executable(atlas_height_test tests/height_test.cpp)
 target_include_directories(atlas_height_test PRIVATE include)
