@@ -339,22 +339,30 @@ program and map, NIRNCRAFT_GEN_DUMP).
   steps 0-9 and before freeze_top_layer, road paint and street paint (the decoration engine must call the pieces and
   sweep between those).
 
-**Checked** (`AtlasOverlaysGpuTest`, NIRNCRAFT_OVL_TEST=1: Java's `SettlementPiece.postProcess` per chunk in piece
-order, then `StreetPaint`, over Minecraft's own terrain, seed 1234, cached under `E:/NirnCraft-scratch/overlays/ref`):
-Riverwood 6 x 6, Whiterun 8 x 8, Rorikstead 6 x 6 and Pelagia Farm 4 x 4 chunks (27.4 M blocks). Of the blocks
-either side changed: pieces without the sweep against the builders alone 99.993 % (120,957); pieces and sweep
-against postProcess 99.13 % (122,577: Whiterun 99.82, Rorikstead 99.79, Pelagia Farm 100, Riverwood 89.76); street
-paint 99.92 % (1,189); whole windows 99.996 %. **Measured**: all four passes 0.00041 ms a column (0.105 ms a chunk);
-pipelines 22-184 KB of SPIR-V, 0.04-0.61 s to create the first time; recording 1 ms a piece in Java, once.
+**Live** (`AtlasOverlayLive`, single player): the engine runs as stages of the client generator's batches
+(`atlas_ovl_create_for_gen` -> `atlas_gen_add_stage`: pieces at ATLAS_GEN_STAGE_PIECES, Sanity + Accessibility +
+Sanity + shapes at ATLAS_GEN_STAGE_SWEEPS, the street painter at ATLAS_GEN_STAGE_PAINT + 50), on its device, GPU to
+GPU. The states the stages place are fixed with the program (`AtlasGenProgram.addBlocks`: the baked
+`nirncraft/atlas/overlay_states.txt`, 3,612 states from all 1,341 settlements' 75,704 pieces with the transforms and
+shapes; `AtlasOverlaysGpuTest.bakeStates` remakes it). A thread ahead of the camera records each settlement once
+per world, in the server's order (SettlementPiece.postProcess itself, its canvas taped through
+`SettlementPiece.TAPE`), over terrain from a recording generator of its own, caches it under
+`<game dir>/nirncraft-cache/overlays/<seed>-<program>-<plan>-v1`, and has chunks made before it generated again
+(`AtlasClientGen.regenerate`); `AtlasClientGen.DETACH` takes the stages away before the generator closes.
 
-**Not yet**: what remains is the server's own order (one sweep per piece and chunk there, one per chunk here; Sanity's
-removal chains across columns, most of Riverwood's gap along its river), `Accessibility` (door approaches: paths),
-`OrphanSweep` / `RockSweep`, road paint (`RoadPaint`, `Paver`), generic and seeded structures (dungeons, generic
-settlements, working sites). Not wired into `AtlasClientGen` yet: recording a settlement needs its terrain (the
-generator's ids read back, or the plan's terrain for a seed-free bake) and the stamp belongs on the generator's device
-between the decoration's steps (GPU to GPU). Found on the way, for the owner: `Sanity.sweep`'s last rule removes any
-block with no supported neighbour, fluids included, so the server cuts holes in rivers and lakes inside a piece's
-clip (Riverwood's bridge; water flowing back only on a neighbour update).
+**Checked** (`AtlasOverlaysGpuTest`, NIRNCRAFT_OVL_TEST=1: Java's `SettlementPiece.postProcess` per chunk in piece
+order, then `StreetPaint`, over Minecraft's own terrain, seed 1234, cached under `E:/NirnCraft-scratch/overlays/ref`;
+Sanity keeps fluids since 2026-10-21, the owner's decision): Riverwood 6 x 6, Whiterun 8 x 8, Rorikstead 6 x 6 and
+Pelagia Farm 4 x 4 chunks. Of the blocks either side changed: pieces without the sweeps against the builders alone
+100 % (120,949); pieces and sweeps against postProcess 99.913 % (120,974); street paint 100 %; the generator's
+batches with the stages (program with the baked states, frozen table: 0 ops dropped) 99.917 % of 121,526
+(Riverwood 99.97, Whiterun 99.92, Rorikstead 99.85, Pelagia Farm 100). **Measured**: the passes 0.1 ms a chunk;
+recording 5 ms a piece-chunk in Java, once per world.
+
+**Not yet**: OrphanSweep / RockSweep (flood fills; the test terrain has no decoration to test them on), one sweep
+per chunk instead of per piece (the last ~0.08 %, with the server's chunk order at chunk borders), a bed's other
+half on a write of air, road paint (`RoadPaint`, `Paver`), generic and seeded structures, tile plans beyond
+Tamriel for the street painter. A batch's edge: a neighbour outside the batch reads as unknown (needs an apron).
 
 ## 8. Open
 
