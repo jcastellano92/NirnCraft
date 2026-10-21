@@ -42,8 +42,11 @@ struct GenParams {
 // per chunk INFO_WORDS: [0] lowest ground + 1024, [1] ~(highest top + 1024), [2] the tints' biome, [3]
 // pad; then per section 4 words: hash lo, hash hi, kind (SEC_*), pad
 [[vk::binding(10, 0)]] RWStructuredBuffer<uint> secInfo;
+// the map of Nirn (atlas_map.slang, AtlasGenMap): uploaded once (atlas_gen_set_map)
+[[vk::binding(11, 0)]] StructuredBuffer<uint> mapData;
 
 #include "atlas_exact.slang"
+#include "atlas_map.slang"
 
 // ---- program layout (AtlasGenProgram writes it; keep in step) --------------------------------------------------
 static const uint MAGIC = 0x4E454741u;  // "AGEN"
@@ -1249,6 +1252,49 @@ void matsMain(uint3 id : SV_DispatchThreadID) {
     uint biome = secInfo[ci * INFO_WORDS + 2];
     uint b0 = blocks[blockBase(ci) + i * 2u], b1 = blocks[blockBase(ci) + i * 2u + 1u];
     outIds[ci * OUT_WORDS + i] = (igMat(biome, b0) & 0xFFFFu) | (igMat(biome, b1) << 16);
+}
+
+// ---- probes, checked against Java (atlas_gen_probe): pageIndex holds n (x, z) pairs, outIds PROBE_WORDS per probe ----
+// outMode 0: TamrielMap.sample (MapS in declaration order, inTamriel 0 / 1), then the flag
+static const uint PROBE_WORDS = 32;
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void probeMain(uint3 id : SV_DispatchThreadID) {
+    uint i = id.x;
+    if (i >= uint(params.chunks)) return;
+    int x = pageIndex[i * 2], z = pageIndex[i * 2 + 1];
+    uint bad = 0u;
+    uint o = i * PROBE_WORDS;
+    for (uint k = 0u; k < PROBE_WORDS; k++) outIds[o + k] = 0u;
+    if (params.outMode == 0u) {
+        MapS s = tamrielSample(x, z, bad);
+        outIds[o] = uint(s.region);
+        outIds[o + 1] = uint(s.blendRegion);
+        outIds[o + 2] = asuint(s.blendWeight);
+        outIds[o + 3] = asuint(s.elevation);
+        outIds[o + 4] = asuint(s.ridge);
+        outIds[o + 5] = asuint(s.river);
+        outIds[o + 6] = asuint(s.lake);
+        outIds[o + 7] = asuint(s.coastDistance);
+        outIds[o + 8] = asuint(s.waterLevel);
+        outIds[o + 9] = asuint(s.riverDistance);
+        outIds[o + 10] = asuint(s.riverHalfWidth);
+        outIds[o + 11] = asuint(s.lakeDistance);
+        outIds[o + 12] = asuint(s.roughness);
+        outIds[o + 13] = asuint(s.crag);
+        outIds[o + 14] = asuint(s.dunes);
+        outIds[o + 15] = asuint(s.wetland);
+        outIds[o + 16] = asuint(s.road);
+        outIds[o + 17] = s.inTamriel ? 1u : 0u;
+        outIds[o + 18] = asuint(s.peak);
+        outIds[o + 19] = asuint(s.calm);
+        outIds[o + 20] = asuint(s.slope);
+        outIds[o + 21] = asuint(s.rainshadow);
+        outIds[o + 22] = asuint(s.heat);
+        outIds[o + 23] = asuint(s.aspectX);
+        outIds[o + 24] = asuint(s.aspectZ);
+    }
+    outIds[o + PROBE_WORDS - 1u] = bad;
 }
 
 // ---- the exact math, checked against Java (atlas_gen_math) --------------------------------------------------------

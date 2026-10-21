@@ -30,6 +30,10 @@ final class AtlasGenNative {
     private final MethodHandle create, destroy, lastError, device, setProgram, pageWords, missing, putPage, chunks, into;
     // GPU -> GPU (atlas_gen_create_for ...): null in a library without them
     private final MethodHandle createFor, setIngest, run, ingest;
+    // the map on the GPU (atlas_gen_set_map, atlas_gen_probe): null in a library without them
+    private final MethodHandle setMap, probe;
+    /** Words per probe (atlas_gen_probe). */
+    static final int PROBE_WORDS = 32;
 
     private AtlasGenNative(SymbolLookup lib) {
         Linker l = Linker.nativeLinker();
@@ -48,6 +52,9 @@ final class AtlasGenNative {
         setIngest = gpu ? bind(l, lib, "atlas_gen_set_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT)) : null;
         run = gpu ? bind(l, lib, "atlas_gen_run", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
         ingest = gpu ? bind(l, lib, "atlas_gen_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
+        boolean map = lib.find("atlas_gen_set_map").isPresent();
+        setMap = map ? bind(l, lib, "atlas_gen_set_map", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT)) : null;
+        probe = map ? bind(l, lib, "atlas_gen_probe", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS)) : null;
     }
 
     private static MethodHandle bind(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd) {
@@ -208,6 +215,27 @@ final class AtlasGenNative {
                 if (flags != null) MemorySegment.copy(fl, JAVA_INT, 0, flags, 0, n);
                 if (sections != null) sections[0] = sec.get(JAVA_INT, 0);
                 return Times.of(t);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** The map of Nirn for the kernels (atlas_gen_set_map, AtlasGenMap). */
+        void setMap(int[] words) {
+            try (Arena a = Arena.ofConfined()) {
+                check((int) setMap.invokeExact(ptr, a.allocateFrom(JAVA_INT, words), words.length), "atlas_gen_set_map");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** The kernels' pieces at (x, z) columns (atlas_gen_probe): PROBE_WORDS words each, the last a flag. */
+        synchronized int[] probe(int kind, int[] xz) {
+            int n = xz.length / 2;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment out = a.allocate(JAVA_INT, (long) n * PROBE_WORDS);
+                check((int) probe.invokeExact(ptr, kind, n, a.allocateFrom(JAVA_INT, xz), out), "atlas_gen_probe");
+                return out.toArray(JAVA_INT);
             } catch (Throwable t) {
                 throw rethrow(t);
             }

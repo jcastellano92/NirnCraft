@@ -788,6 +788,11 @@ ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_
    (outside the window: cleared, send them again when it comes). ATLAS_ERR_TIMEOUT (masks all cleared) when the grid
    has no window yet or has not taken earlier sections for 2 s (no frames). outSections: how many went. */
 ATLAS_API AtlasStatus atlas_gen_ingest(AtlasGen* h, uint64_t* masks, uint32_t* outSections, AtlasGenTimes* times);
+/* The map of Nirn for the kernels (AtlasGenMap: words[0] = 'AMAP'), uploaded once; copied. */
+ATLAS_API AtlasStatus atlas_gen_set_map(AtlasGen* h, const uint32_t* words, uint32_t count);
+/* Probes the kernels' pieces at n (x, z) columns (n <= 2^17), 32 words each, the last a flag (nonzero: not proven): kind 0
+   TamrielMap.sample (the MapSample fields in declaration order). For the parity checks. */
+ATLAS_API AtlasStatus atlas_gen_probe(AtlasGen* h, uint32_t kind, uint32_t n, const int32_t* xz, uint32_t* out);
 
 #ifdef __cplusplus
 }

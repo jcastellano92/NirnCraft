@@ -333,7 +333,7 @@ endif()
 set(GEN_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_gen.slang")
 set(GEN_HEADERS)
 set(GEN_CPU_ENTRIES)
-foreach(pass corner aquifer fill top surface pack cols secs mats math)
+foreach(pass corner aquifer fill top surface pack cols secs mats math probe)
   set(entry "${pass}Main")
   set(GEN_VALIDATE)
   if(SPIRV_VAL)
@@ -345,7 +345,7 @@ foreach(pass corner aquifer fill top surface pack cols secs mats math)
             -warnings-disable 41035 -o "${GEN}/atlas_gen_${pass}_raw.spv"
     COMMAND spv_exact "${GEN}/atlas_gen_${pass}_raw.spv" "${GEN}/atlas_gen_${pass}.spv"
     ${GEN_VALIDATE}
-    DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" spv_exact COMMENT "slangc atlas_gen:${entry} -> SPIR-V (exact float contract)")
+    DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" spv_exact COMMENT "slangc atlas_gen:${entry} -> SPIR-V (exact float contract)")
   add_custom_command(
     OUTPUT "${GEN}/atlas_gen_${pass}_spv.h"
     COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_gen_${pass}.spv -DOUT=${GEN}/atlas_gen_${pass}_spv.h
@@ -358,7 +358,7 @@ add_custom_command(
   OUTPUT "${GEN}/atlas_gen_cpu.cpp"
   COMMAND "${SLANGC}" "${GEN_SRC}" -target cpp ${GEN_CPU_ENTRIES} -O3 -fp-mode precise -warnings-disable 41035
           -o "${GEN}/atlas_gen_cpu.cpp"
-  DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" COMMENT "slangc atlas_gen -> C++ (CPU reference)")
+  DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" COMMENT "slangc atlas_gen -> C++ (CPU reference)")
 target_sources(atlas_core PRIVATE src/gen_engine.cpp "${GEN}/atlas_gen_cpu.cpp" ${GEN_HEADERS})
 set(GEN_RENAME "GlobalParams_0=GenGlobals_0;KernelContext_0=GenContext_0")
 if(MSVC)
