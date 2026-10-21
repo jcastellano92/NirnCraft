@@ -294,6 +294,9 @@ ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out);
    the big kernels takes seconds to minutes the first time), set before atlas_create / atlas_gen_create*; the
    ATLAS_PIPELINE_CACHE environment variable wins. NULL or "": none. (The loading phase: the game's instance.) */
 ATLAS_API AtlasStatus atlas_set_pipeline_cache(const char* path);
+/* The native build's content hash (its sources and shaders): part of every cache's key (the self-baking cache, the
+   horizon cache, the cold tier's generated records), so a code change starts them fresh. */
+ATLAS_API uint64_t atlas_build_hash(void);
 ATLAS_API void atlas_destroy(AtlasContext* ctx);
 /* Last error message for this context, static until the next call. NULL: why this thread's last atlas_create
    failed (e.g. no usable Vulkan device, and why each one was rejected). */
@@ -1093,6 +1096,9 @@ ATLAS_API AtlasStatus atlas_gen_store_ensure(AtlasGen* h, const int32_t* chunkXZ
 /* The chunks around a chunk its store stages read, through their chain (the sum of their radii): what must be in the
    store for it to pass them all. */
 ATLAS_API uint32_t atlas_gen_store_reach(AtlasGen* h);
+/* Chunks to be made again (their stages' data changed: a settlement's tapes arrived): the self-baking cache forgets
+   them, the store sends them back through its stages (packed again once through). */
+ATLAS_API AtlasStatus atlas_gen_regenerate(AtlasGen* h, const int32_t* chunkXZ, uint32_t count);
 /* Since the generator was made: chunks generated into the store, store stage runs (per chunk), chunks packed out. */
 ATLAS_API AtlasStatus atlas_gen_store_counters(AtlasGen* h, uint64_t* made, uint64_t* stageRuns, uint64_t* packs);
 /* Drops the store's chunks outside [minCx, maxCx] x [minCz, maxCz] (asked for again, they are generated again). */

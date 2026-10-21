@@ -14,6 +14,8 @@ namespace atlas {
 
 // (atlas_set_pipeline_cache) the pipeline cache's file: ATLAS_PIPELINE_CACHE, else the one set; "": none
 std::string pipelineCachePath();
+// the native build's content hash (cmake/buildhash.cmake): the caches' build fingerprint
+uint64_t buildHash();
 void setPipelineCachePath(const std::string& p);
 
 struct GlFrameIO {

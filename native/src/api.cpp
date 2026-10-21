@@ -17,6 +17,7 @@
 #include "atlas/atlas.h"
 #include "air.hpp"
 #include "backend.hpp"
+#include "atlas_build_hash.h"
 #include "bricks.hpp"
 #include "lights.hpp"
 #include "parallel.hpp"
@@ -388,6 +389,7 @@ std::string pipelineCachePath() {
     std::lock_guard<std::mutex> l(pipeCacheMu());
     return pipeCacheSet();
 }
+uint64_t buildHash() { return ATLAS_BUILD_HASH; }
 void setPipelineCachePath(const std::string& p) {
     std::lock_guard<std::mutex> l(pipeCacheMu());
     pipeCacheSet() = p;
@@ -562,6 +564,8 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
         return "{}";
     }
 }
+
+ATLAS_API uint64_t atlas_build_hash(void) { return atlas::buildHash(); }
 
 ATLAS_API AtlasStatus atlas_set_pipeline_cache(const char* path) {
     atlas::setPipelineCachePath(path ? path : "");

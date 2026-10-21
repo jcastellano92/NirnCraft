@@ -3,6 +3,7 @@
 #include "sectionpack.hpp"
 #include "sectionstore.hpp"
 #include "gencache.hpp"
+#include "backend.hpp"
 #include "parallel.hpp"
 
 #ifdef _WIN32
@@ -750,6 +751,9 @@ void World::packedDone(const std::vector<PackDone>& done, Made* made) {
 void World::configureStore(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBytes, uint64_t coldBytes,
                            Made* made) {
     std::unique_lock<std::mutex> lock(mu_);
+    // (the cold tier's whole records carry the caller's version and the native build's: another build's are not read)
+    uint64_t bh = buildHash();
+    genVersion ^= uint32_t(bh) ^ uint32_t(bh >> 32);
     store_->configure(dir, seed, genVersion, warmBytes ? warmBytes : 512ull << 20, coldBytes ? coldBytes : 4ull << 30);
     {
         // (the gen cache beside the world's other tiers: <dir>/<seed>/gen-<fingerprint>)

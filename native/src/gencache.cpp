@@ -145,6 +145,7 @@ void GenCache::configure(const std::string& root, uint64_t fingerprint) {
         on_.load())
         return;
     regions_.clear();
+    dataBytes_ = 0;
     on_ = false;
     fp_ = fingerprint;
     dir_.clear();
@@ -159,6 +160,17 @@ void GenCache::configure(const std::string& root, uint64_t fingerprint) {
     for (auto& e : std::filesystem::directory_iterator(dir_, ec))
         if (e.path().extension() == ".gch") st_.fileBytes += uint64_t(e.file_size(ec));
     on_ = true;
+    // (another generator's or build's sets: never read again; deleted in the background, the world's folder does not
+    // grow with every build)
+    std::vector<std::filesystem::path> old;
+    for (auto& e : std::filesystem::directory_iterator(root, ec))
+        if (e.is_directory(ec) && e.path().filename().string().rfind("gen-", 0) == 0 && e.path().filename() != sub + 1)
+            old.push_back(e.path());
+    if (!old.empty())
+        std::thread([old] {
+            std::error_code e2;
+            for (auto& p : old) std::filesystem::remove_all(p, e2);
+        }).detach();
 }
 
 GenCache::Region& GenCache::region(uint64_t rk) {
@@ -321,12 +333,13 @@ void GenCache::flush() {
 }
 
 bool GenCache::readBytes(uint64_t rk, const Loc& loc, std::vector<uint8_t>& out) {
-    // (the region's file read whole once, again when a record lies past it: one open a region, not one a record)
+    // (a region's file read whole on its first read: one open a region, not one a record; a record written since lies
+    // past that copy: read alone. The copies within a budget, the least recently read dropped)
     std::shared_ptr<std::vector<uint8_t>> data;
     {
         std::lock_guard<std::mutex> l(mu_);
         Region& r = region(rk);
-        if (!r.data || r.data->size() < loc.offset + loc.bytes) {
+        if (!r.data) {
             auto d = std::make_shared<std::vector<uint8_t>>();
             FILE* f = std::fopen(regionPath(rk).c_str(), "rb");
             if (!f) return false;
@@ -338,18 +351,43 @@ bool GenCache::readBytes(uint64_t rk, const Loc& loc, std::vector<uint8_t>& out)
             std::fclose(f);
             d->resize(got);
             r.data = d;
+            dataBytes_ += got;
+            while (dataBytes_ > DATA_BUDGET) {
+                Region* lru = nullptr;
+                for (auto& [k, o] : regions_)
+                    if (o.data && &o != &r && (!lru || o.dataUse < lru->dataUse)) lru = &o;
+                if (!lru) break;
+                dataBytes_ -= std::min<uint64_t>(dataBytes_, lru->data->size());
+                lru->data.reset();
+            }
         }
+        r.dataUse = ++dataClock_;
         data = r.data;
     }
-    if (data->size() < loc.offset + loc.bytes) return false;
-    out.assign(data->begin() + ptrdiff_t(loc.offset), data->begin() + ptrdiff_t(loc.offset + loc.bytes));
-    return true;
+    if (data->size() >= loc.offset + loc.bytes) {
+        out.assign(data->begin() + ptrdiff_t(loc.offset), data->begin() + ptrdiff_t(loc.offset + loc.bytes));
+        return true;
+    }
+    FILE* f = std::fopen(regionPath(rk).c_str(), "rb");
+    if (!f) return false;
+    out.resize(loc.bytes);
+    bool ok = std::fseek(f, long(loc.offset), SEEK_SET) == 0 && std::fread(out.data(), 1, out.size(), f) == out.size();
+    std::fclose(f);
+    return ok;
 }
 
 bool GenCache::hasChunk(int cx, int cz) {
     if (!on()) return false;
     std::lock_guard<std::mutex> l(mu_);
     return region(regionOf(cx, cz)).chunks.count(chunkKey(cx, cz)) != 0;
+}
+
+void GenCache::forget(int cx, int cz) {
+    if (!on()) return;
+    std::lock_guard<std::mutex> l(mu_);
+    Region& r = region(regionOf(cx, cz));
+    r.chunks.erase(chunkKey(cx, cz));
+    for (int s = 0; s < 40; s++) r.secs.erase(Key3{0, cx, s - 4, cz});
 }
 
 bool GenCache::complete(int cx, int cz) {

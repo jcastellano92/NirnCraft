@@ -163,6 +163,10 @@ foreach(pair "lightCullMain;lightcull" "lightAdmitMain;lightadmit" "lightBinMain
     DEPENDS "${GEN}/atlas_${short}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
   list(APPEND FAR_EXTRA_HEADERS "${GEN}/atlas_${short}_spv.h")
 endforeach()
+# the build fingerprint of the caches (cmake/buildhash.cmake): every build, rewritten only when the sources changed
+add_custom_target(atlas_build_hash ALL
+  COMMAND "${CMAKE_COMMAND}" -DROOT=${CMAKE_SOURCE_DIR} -DOUT=${GEN}/atlas_build_hash.h -P "${CMAKE_SOURCE_DIR}/cmake/buildhash.cmake"
+  BYPRODUCTS "${GEN}/atlas_build_hash.h" COMMENT "the native build hash")
 add_library(atlas_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/groups.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
   src/gl_api.cpp src/lights.cpp src/voxgrid.cpp src/sectionstore.cpp src/gencache.cpp src/bricks.cpp
@@ -170,6 +174,7 @@ add_library(atlas_core SHARED
   "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h" "${GEN}/atlas_nearlight_spv.h" "${GEN}/atlas_nearup_spv.h"
   "${GEN}/atlas_neartemporal_spv.h" ${VG_HEADERS} ${FAR_EXTRA_HEADERS})
 target_include_directories(atlas_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${ATLAS_VK_INCLUDE}")
+add_dependencies(atlas_core atlas_build_hash)
 target_compile_definitions(atlas_core PRIVATE ATLAS_BUILD ATLAS_VERSION_STRING="${PROJECT_VERSION}" VK_NO_PROTOTYPES)
 target_link_libraries(atlas_core PRIVATE ${ATLAS_GL_LIBS} Threads::Threads)
 if(NOT MSVC)

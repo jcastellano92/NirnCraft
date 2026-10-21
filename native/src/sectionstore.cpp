@@ -228,6 +228,11 @@ SectionStore::ColdRegion& SectionStore::coldRegion(uint64_t rk) {
     while (std::fread(h, 4, HEAD, f) == HEAD && h[0] == COLD_MAGIC && h[9] <= MAX_PAYLOAD && h[10] <= MAX_PAYLOAD) {
         Key3 k{0, int32_t(h[1]), int32_t(h[2]), int32_t(h[3])};
         uint64_t recBytes = uint64_t(HEAD) * 4 + pad4(h[9]) + pad4(h[10]);
+        if (h[8] != genVersion_) {  // (another build's or generator's record: not read; dead in the file)
+            at += recBytes;
+            if (std::fseek(f, long(at), SEEK_SET) != 0) break;
+            continue;
+        }
         auto old = cr.recs.find(k);
         if (old != cr.recs.end()) cr.liveBytes -= uint64_t(HEAD) * 4 + pad4(old->second.bytes);
         cr.recs[k] = {at + HEAD * 4, h[9], h[5], uint8_t(h[4] >> 8)};

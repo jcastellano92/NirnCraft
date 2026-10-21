@@ -87,8 +87,22 @@ final class AtlasClientGen implements AutoCloseable {
         AtlasClientGen c = active;
         if (c == null) return;
         boolean any = false;
-        for (long k : chunkKeys) any |= c.done.remove(k);
-        if (any) c.wake();
+        int[] xz = new int[chunkKeys.length * 2];
+        for (int i = 0; i < chunkKeys.length; i++) {
+            long k = chunkKeys[i];
+            any |= c.done.remove(k);
+            xz[i * 2] = ChunkPos.getX(k);
+            xz[i * 2 + 1] = ChunkPos.getZ(k);
+            for (int sec = 0; sec < 40; sec++) AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(xz[i * 2], sec - 4, xz[i * 2 + 1]));
+        }
+        // (the self-baking cache forgets them and the store runs their stages again: else the cache served the copy
+        // made before the data, and the store packed its old blocks)
+        try {
+            c.gen.regenerate(xz);
+        } catch (RuntimeException e) {
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: regenerate: {}", e.toString());
+        }
+        if (any || xz.length > 0) c.wake();
     }
 
     static boolean far() {

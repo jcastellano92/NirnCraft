@@ -2351,7 +2351,8 @@ uint64_t fnv64(const void* p, size_t n, uint64_t h = 1469598103934665603ull) {
 // (caller holds h->mu) the fingerprint again; to the context's world when it changed (the cache's directory)
 void refreshFingerprint(AtlasGen* h) {
     if (!h->ctx || !h->fpProg || !h->fpIngest) return;  // (not a generator yet)
-    uint64_t f = fnv64(&h->fpProg, 8);
+    uint64_t bh = buildHash();  // (the native code: kernels, store, stages' engines' own C++)
+    uint64_t f = fnv64(&h->fpProg, 8, fnv64(&bh, 8));
     f = fnv64(&h->fpIngest, 8, f);
     f = fnv64(&h->fpMap, 8, f);
     f = fnv64(&h->fpExtra, 8, f);
@@ -2960,6 +2961,24 @@ ATLAS_API AtlasStatus atlas_gen_store_ensure(AtlasGen* h, const int32_t* chunkXZ
         std::string err;
         int32_t ccx, ccz;
         return storeInsert(h, chunkXZ, count, false, t, err, ccx, ccz);
+    });
+}
+
+ATLAS_API AtlasStatus atlas_gen_regenerate(AtlasGen* h, const int32_t* chunkXZ, uint32_t count) {
+    if (!h || (count && !chunkXZ)) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        std::lock_guard<std::mutex> l(h->mu);
+        GenCache* gc = h->ctx ? contextWorld(h->ctx)->genCache() : nullptr;
+        for (uint32_t i = 0; i < count; i++) {
+            int32_t cx = chunkXZ[i * 2], cz = chunkXZ[i * 2 + 1];
+            if (gc) gc->forget(cx, cz);
+            auto it = h->store.find(key(cx, cz));
+            if (it == h->store.end()) continue;
+            it->second.status = 0;  // (its stages again, with their new data)
+            it->second.packed = false;
+            it->second.wanted = true;
+        }
+        return ATLAS_OK;
     });
 }
 

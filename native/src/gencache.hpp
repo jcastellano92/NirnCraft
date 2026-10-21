@@ -52,6 +52,9 @@ public:
     bool chunk(int cx, int cz, uint32_t* info);
     bool hasChunk(int cx, int cz);  // (its header, whether complete or not)
     bool complete(int cx, int cz);  // (its header and every section with blocks: from the index alone)
+    // a chunk made again (its stages' data changed): its header and sections no longer known (the new ones, written
+    // after, are the newest records: those a later scan keeps)
+    void forget(int cx, int cz);
     // a section's packed words from disk (null: none)
     std::shared_ptr<const std::vector<uint32_t>> section(const Key3& k);
     // The far terrain (the grid's coarse levels, atlas_gen_far_ingest): a level-lod tile's chunk kinds (16 x 16 columns x
@@ -80,7 +83,8 @@ private:
         };
         std::unordered_map<uint64_t, Chunk> chunks;  // (cx, cz) packed
         std::unordered_map<Key3, Loc, Key3Hash> secs;
-        std::shared_ptr<std::vector<uint8_t>> data;  // (the file as last read: the reads' copy)
+        std::shared_ptr<std::vector<uint8_t>> data;  // (the file as first read: the reads' copy, a budget of them)
+        uint64_t dataUse = 0;
         // (a far region) its tiles (tx, tz) with their mixed chunks' count, its coarse chunks, the baked ones a tile
         struct Tile {
             Loc loc;
@@ -107,6 +111,8 @@ private:
     std::string dir_;
     uint64_t fp_ = 0;
     std::unordered_map<uint64_t, Region> regions_;
+    uint64_t dataBytes_ = 0, dataClock_ = 0;
+    static constexpr uint64_t DATA_BUDGET = 64ull << 20;  // (the regions' in-memory copies, least recently read out)
     Stats st_;
     static uint64_t regionOf(int cx, int cz);
     static uint64_t farRegionOf(int lod, int tx, int tz) {  // (lod in the top byte: never a near region's)

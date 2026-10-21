@@ -158,6 +158,7 @@ public final class AtlasClient {
             AtlasFarField f = farField;
             if (f != null && f.source() instanceof AtlasExactSource s) s.setThreads(n);
         });
+        NeoForge.EVENT_BUS.addListener(AtlasCacheWipe::onCommands);  // (/nirncraft-atlas-wipecache)
         // the loading phase (AtlasLoadingScreen): armed on joining, opened once vanilla's terrain screen closed
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn e) -> AtlasLoadingScreen.arm());
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) ->
@@ -533,6 +534,7 @@ public final class AtlasClient {
                 if (advice != null) com.nirncraft.NirnCraft.LOGGER.info("atlas: {}", advice);
             }
             if (guard != null) guard.starting();
+            AtlasCacheWipe.applyIfPending(mc);  // (-Dnirncraft.atlas.wipeCache, /nirncraft-atlas-wipecache)
             if (lib == null) {
                 lib = loadLibrary(mc.gameDirectory.toPath());
                 // the pipelines warm from the instance's cache (the loading phase): seconds, not minutes, after the first run

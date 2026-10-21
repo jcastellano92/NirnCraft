@@ -37,7 +37,7 @@ final class AtlasGenNative {
     // the pages made on the device (atlas_gen_read_page, atlas_gen_page_stats): null in a library without them
     private final MethodHandle readPage, pageStats, tiles, far, farIngest, gridReports;
     // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
-    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest;
+    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate;
     // the chunk store and the decoration's store stages (atlas_gen_store_*, atlas_feat_attach): null in a library without them
     private final MethodHandle storeEnable, runStore, storeKeep, storeStats, featAttach, featDestroy, featOverlays;
     /** Columns of a far tile (atlas_gen_tiles). */
@@ -81,6 +81,8 @@ final class AtlasGenNative {
         cacheLookup = cache ? bind(l, lib, "atlas_gen_cache_lookup", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS)) : null;
         cacheIngest = cache ? bind(l, lib, "atlas_gen_cache_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS)) : null;
         setFingerprint = cache ? bind(l, lib, "atlas_gen_set_fingerprint", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG)) : null;
+        regenerate = lib.find("atlas_gen_regenerate").isPresent()
+                ? bind(l, lib, "atlas_gen_regenerate", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT)) : null;
         farCacheIngest = lib.find("atlas_gen_far_cache_ingest").isPresent()
                 ? bind(l, lib, "atlas_gen_far_cache_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS))
                 : null;
@@ -303,6 +305,16 @@ final class AtlasGenNative {
          * A far tile from the self-baking cache into the grid's level lod (atlas_gen_far_cache_ingest), as
          * {@link #farIngest} would put it; null when the cache does not know it (generate it then).
          */
+        /** Chunks made again (their stages' data changed): out of the self-baking cache, back through the store. */
+        synchronized void regenerate(int[] chunkXZ) {
+            if (regenerate == null || chunkXZ.length == 0) return;
+            try (Arena a = Arena.ofConfined()) {
+                check((int) regenerate.invokeExact(ptr, a.allocateFrom(JAVA_INT, chunkXZ), chunkXZ.length / 2), "atlas_gen_regenerate");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
         synchronized FarIngest farCacheIngest(int lod, int tx, int tz) {
             if (farCacheIngest == null) return null;
             try (Arena a = Arena.ofConfined()) {

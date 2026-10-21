@@ -162,9 +162,13 @@ sourceSets.main.resources.srcDir(files(generationIdentityDir).builtBy('generatio
 // The far field's tiles (Infinite ATLAS) are a function of world generation and of the code that paints them: their
 // cache is keyed by this identity, so any change to either starts a fresh cache by itself (nothing to remember).
 def farIdentityDir = layout.buildDirectory.dir('generated/far-identity')
+// (every atlas source and the natives the jar carries: any code that makes, paints or reads the cached data, the client
+// generator's programs, features and overlays among it, keys a fresh cache: the native core's own build hash is in
+// its caches' keys too, atlas_build_hash)
 def farSources = fileTree('src/main/java/com/nirncraft/atlas') {
-    include 'AtlasSurface.java', 'AtlasSnowCover.java', 'AtlasTileCodec.java', 'AtlasExactSource.java',
-            'AtlasBiomes.java', 'AtlasGround.java', 'AtlasHeightGpu.java', 'AtlasTints.java'
+    include '**/*.java'
+} + fileTree('src/main/resources/natives') {
+    include '**/*'
 }
 tasks.register('farIdentity') {
     inputs.files generationSources, generationData, farSources
