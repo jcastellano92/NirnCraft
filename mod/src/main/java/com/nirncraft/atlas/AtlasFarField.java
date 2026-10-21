@@ -96,6 +96,28 @@ final class AtlasFarField implements AutoCloseable {
         };
     }
 
+    /**
+     * No terrain tiles: the far terrain comes from the client generator into the grid's coarse levels
+     * (AtlasClientGen, atlas_gen_far_ingest), so nothing is made or built here for it.
+     */
+    static ColumnSource noTerrainSource() {
+        return new ColumnSource() {
+            @Override
+            public boolean usesBlockPalette() {
+                return true;
+            }
+
+            @Override
+            public void prepare(AtlasNative.Context ctx) {
+            }
+
+            @Override
+            public boolean cover(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1) {
+                return false;
+            }
+        };
+    }
+
     static final int LODS = 7, WINDOW = 2;
     /** Time the overlays (buildings, trees) may take per pass before the far field shows what it has. */
     static final long OVERLAY_BUDGET_MS = 120;

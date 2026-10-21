@@ -34,7 +34,7 @@ final class AtlasGenNative {
     // the map on the GPU (atlas_gen_set_map, atlas_gen_probe): null in a library without them
     private final MethodHandle setMap, probe;
     // the pages made on the device (atlas_gen_read_page, atlas_gen_page_stats): null in a library without them
-    private final MethodHandle readPage, pageStats, tiles, far;
+    private final MethodHandle readPage, pageStats, tiles, far, farIngest, gridReports;
     /** Columns of a far tile (atlas_gen_tiles). */
     static final int TILE_COLS = 65536;
     /** Words per probe (atlas_gen_probe). */
@@ -66,6 +66,12 @@ final class AtlasGenNative {
         far = lib.find("atlas_gen_far").isPresent()
                 ? bind(l, lib, "atlas_gen_far", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS,
                 JAVA_INT, ADDRESS, ADDRESS, ADDRESS)) : null;
+        farIngest = lib.find("atlas_gen_far_ingest").isPresent()
+                ? bind(l, lib, "atlas_gen_far_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS,
+                ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
+        gridReports = lib.find("atlas_gen_grid_reports").isPresent()
+                ? bind(l, lib, "atlas_gen_grid_reports", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, JAVA_INT,
+                ADDRESS)) : null;
         tiles = lib.find("atlas_gen_tiles").isPresent()
                 ? bind(l, lib, "atlas_gen_tiles", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
     }
@@ -251,6 +257,44 @@ final class AtlasGenNative {
                 int mixed = m.get(JAVA_INT, 0);
                 return new FarChunks(k.toArray(JAVA_INT), ids.asSlice(0, (long) Math.min(mixed, capacity) * 2048 * 4).toArray(JAVA_INT), mixed,
                         f.toArray(JAVA_INT), t.get(JAVA_DOUBLE, 8));
+            } catch (Throwable e) {
+                throw rethrow(e);
+            }
+        }
+
+        /** Whether this library puts far chunks into a context's grid (atlas_gen_far_ingest). */
+        boolean farIngestSupported() {
+            return farIngest != null && gridReports != null;
+        }
+
+        /** A far call into the grid: chunks taken, chunks made (all of the call's), mixed ones; -1 taken when busy. */
+        record FarIngest(int taken, int chunks, int mixed, double kernelMs) {}
+
+        /** Far chunks of lod tiles (tx, tz pairs) into the context's grid (atlas_gen_far_ingest); null when busy. */
+        FarIngest farIngest(int lod, int[] txTz, int capacity) {
+            int n = txTz.length / 2, rows = (44 + (1 << lod) - 1) >> lod;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment k = a.allocate(JAVA_INT, (long) n * 256 * rows * 2), m = a.allocate(JAVA_INT), tk = a.allocate(JAVA_INT);
+                MemorySegment f = a.allocate(JAVA_INT, n), t = a.allocate(96);
+                int s = (int) farIngest.invokeExact(ptr, lod, a.allocateFrom(JAVA_INT, txTz), n, capacity, k, m, tk, f, t);
+                if (s == -8) return null;  // ATLAS_ERR_TIMEOUT: no window yet, or the far buffers still read
+                check(s, "atlas_gen_far_ingest");
+                return new FarIngest(tk.get(JAVA_INT, 0), n * 256 * rows, m.get(JAVA_INT, 0), t.get(JAVA_DOUBLE, 8));
+            } catch (Throwable e) {
+                throw rethrow(e);
+            }
+        }
+
+        /** The grid's reports since the last call: [0] dropped {level, x, y, z}..., [1] wanted (atlas_gen_grid_reports). */
+        int[][] gridReports() {
+            try (Arena a = Arena.ofConfined()) {
+                int cap = 1 << 16;
+                MemorySegment d = a.allocate(JAVA_INT, (long) cap * 4), w = a.allocate(JAVA_INT, (long) cap * 4);
+                MemorySegment dn = a.allocate(JAVA_INT), wn = a.allocate(JAVA_INT);
+                int lost = (int) gridReports.invokeExact(ptr, d, cap, dn, w, cap, wn);
+                if (lost > 0) com.nirncraft.NirnCraft.LOGGER.warn("atlas generator: {} grid reports did not fit", lost);
+                return new int[][]{d.asSlice(0, (long) dn.get(JAVA_INT, 0) * 16).toArray(JAVA_INT),
+                        w.asSlice(0, (long) wn.get(JAVA_INT, 0) * 16).toArray(JAVA_INT)};
             } catch (Throwable e) {
                 throw rethrow(e);
             }

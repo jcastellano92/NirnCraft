@@ -7,6 +7,7 @@
 #include "vk_loader.hpp"  // first: VK_NO_PROTOTYPES
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cstdio>
@@ -146,6 +147,8 @@ struct Batch {
     std::vector<int32_t> chunks;
     // pages the engine makes first (the map set: atlas_page.slang), (cx, cz, slot, full) each
     std::vector<int32_t> jobs;
+    // (atlas_gen_run) each chunk's 40 sections' kinds (SEC_*), for the ingest's uniform hints
+    std::vector<uint8_t> kinds;
 };
 
 // What a run hands back: ids (null: not wanted) n * OUT_WORDS words; flags n words; info (null: no ingest passes)
@@ -187,6 +190,19 @@ public:
     // the last ingest run's sections (chunk c's section s where masks[c] bit s), to the context: count sent
     // (masks in / out: on return the bits of the sections that went)
     virtual bool ingest(AtlasContext* ctx, const Batch& b, uint64_t* masks, uint32_t& sent, std::string& err) = 0;
+    // far chunks into the context's grid (atlas_gen_far_ingest, GPU only): far()'s passes into a slab the grid reads,
+    // then VoxGrid::ingestCoarseGpu; kinds as far()'s; taken: the chunks the grid took
+    virtual bool farIngest(const std::vector<int32_t>& jobs, int lod, uint32_t rows, uint32_t cap, uint32_t* kinds, uint32_t& mixed,
+                           uint32_t& taken, uint32_t* bad, double& ms, std::string& err) {
+        (void)jobs, (void)lod, (void)rows, (void)cap, (void)kinds, (void)mixed, (void)taken, (void)bad, (void)ms;
+        err = "far chunks go into a grid on a Vulkan context only";
+        return false;
+    }
+    // the grid's dropped / wanted sections and chunks ({level, x, y, z}): what to make and send again
+    virtual void takeGridReports(std::vector<std::array<int32_t, 4>>& dropped, std::vector<std::array<int32_t, 4>>& wanted) {
+        dropped.clear();
+        wanted.clear();
+    }
 };
 
 class CpuEngine final : public Engine {
@@ -431,6 +447,8 @@ public:
                 if (leak) std::fprintf(stderr, "[atlas] generator: grid sections still pending at close; their buffers stay\n");
                 for (Slab& s : slabs_)
                     if (!leak) release(s.buf);
+                for (FarSlab& f : farSlabs_)
+                    if (!leak) release(f.buf);
             } else {
                 vkDeviceWaitIdle(dev_);
             }
@@ -688,12 +706,33 @@ public:
              uint32_t& mixed, uint32_t* bad, double& ms, std::string& err) override {
         if (dead_) return fail(err, "the generator's device was lost earlier");
         uint32_t n = uint32_t(jobs.size() / 4);
-        VkDeviceSize planes = VkDeviceSize(n) * TILE_PLANES * TILE_COLS * 4;
-        if (planes > out_.size) return fail(err, "too many tiles for one call");
         size_t chunks = size_t(n) * 256 * rows;
         size_t words = 4 + chunks * 2 + size_t(cap) * 2048;
         if (words * 4 > readback_.size) return fail(err, "far chunks: the capacity exceeds the readback buffer");
         if (!ensure(far_, words * 4, false, err)) return false;
+        writeSet();
+        if (!farPasses(jobs, rows, mode, cap, words, chunks, kinds, mixed, bad, ms, err)) return false;
+        if (ids) {
+            // the mixed chunks' voxels (the passes read back the counter and the kinds only)
+            begin();
+            VkBufferCopy c{VkDeviceSize(4 + chunks * 2) * 4, 0, VkDeviceSize(std::min(mixed, cap)) * 2048 * 4};
+            if (c.size) vkCmdCopyBuffer(cmd_, far_.buf, readback_.buf, 1, &c);
+            barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
+            if (!submitWait(err)) return false;
+            std::memcpy(ids, readback_.map, size_t(c.size));
+        }
+        ran_ = 0;
+        return true;
+    }
+
+    // the far passes into far_ (bound as binding 14): the tile's columns, their biomes and surface, then the chunks;
+    // back: the counter (mixed) and the chunks' kinds and slots
+    bool farPasses(const std::vector<int32_t>& jobs, uint32_t rows, uint32_t mode, uint32_t cap, size_t words, size_t chunks,
+                   uint32_t* kinds, uint32_t& mixed, uint32_t* bad, double& ms, std::string& err) {
+        uint32_t n = uint32_t(jobs.size() / 4);
+        VkDeviceSize planes = VkDeviceSize(n) * TILE_PLANES * TILE_COLS * 4;
+        if (planes > out_.size) return fail(err, "too many tiles for one call");
+        (void)words;
         if (jobs.size() * 4 > jobs_.size) {
             if (!waitIdle(err)) return false;
             release(jobs_);
@@ -727,7 +766,7 @@ public:
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
             if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 1);
             if (k == 3) {
-                VkBufferCopy c{0, 0, VkDeviceSize(words) * 4};
+                VkBufferCopy c{0, 0, VkDeviceSize(4 + chunks * 2) * 4};
                 vkCmdCopyBuffer(cmd_, far_.buf, readback_.buf, 1, &c);
                 barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
             }
@@ -744,9 +783,70 @@ public:
         const uint32_t* rb = static_cast<const uint32_t*>(readback_.map);
         mixed = rb[0];
         std::memcpy(kinds, rb + 4, chunks * 2 * 4);
-        if (ids) std::memcpy(ids, rb + 4 + chunks * 2, size_t(std::min(mixed, cap)) * 2048 * 4);
         std::memcpy(bad, flags, size_t(n) * 4);
         ran_ = 0;
+        return true;
+    }
+
+    void takeGridReports(std::vector<std::array<int32_t, 4>>& dropped, std::vector<std::array<int32_t, 4>>& wanted) override {
+        dropped.clear();
+        wanted.clear();
+        if (!grid_) return;
+        dropped = grid_->takeGpuDropped();
+        wanted = grid_->takeGpuWanted();
+    }
+
+    bool farIngest(const std::vector<int32_t>& jobs, int lod, uint32_t rows, uint32_t cap, uint32_t* kinds, uint32_t& mixed,
+                   uint32_t& taken, uint32_t* bad, double& ms, std::string& err) override {
+        if (dead_) return fail(err, "the generator's device was lost earlier");
+        if (!shared_ || !grid_) return fail(err, "not on a context's device (atlas_gen_create_for)");
+        int32_t org[4];
+        grid_->origin(org);
+        if (!org[3]) return fail(err, "busy: the grid has no window yet (no frame rendered)");
+        uint32_t n = uint32_t(jobs.size() / 4);
+        size_t chunks = size_t(n) * 256 * rows;
+        size_t words = 4 + chunks * 2 + size_t(cap) * 2048;
+        // a slab the grid no longer reads (none waiting in it, a frame completed since), else a new one
+        reclaimFar();
+        int pick = -1;
+        for (size_t i = 0; i < farSlabs_.size() && pick < 0; i++)
+            if (!farSlabs_[i].busy && farSlabs_[i].buf.size >= words * 4) pick = int(i);
+        if (pick < 0) {
+            if (farSlabs_.size() >= 24) return fail(err, "busy: every far slab is still read by the grid");
+            FarSlab fs;
+            if (!ensure(fs.buf, words * 4, false, err, false, true)) return false;
+            farSlabs_.push_back(std::move(fs));
+            pick = int(farSlabs_.size() - 1);
+        }
+        FarSlab& slab = farSlabs_[size_t(pick)];
+        // the passes write the slab (binding 14 while they run), the kinds come back
+        std::swap(far_, slab.buf);
+        writeSet();
+        bool ok = farPasses(jobs, rows, 1u, cap, words, chunks, kinds, mixed, bad, ms, err);
+        std::swap(far_, slab.buf);
+        writeSet();
+        if (!ok) return false;
+        // to the grid: air and uniform chunks as kinds, mixed ones from their slot in the slab
+        std::vector<uint64_t> offs;
+        std::vector<int32_t> pos;
+        std::vector<uint32_t> kd;
+        for (uint32_t t = 0; t < n; t++)
+            for (uint32_t k = 0; k < 256 * rows; k++) {
+                size_t c = size_t(t) * 256 * rows + k;
+                uint32_t kind = kinds[c * 2], slot = kinds[c * 2 + 1];
+                if (kind == 0xFFFFFFFEu) continue;  // no room in this call: the caller asks again
+                uint32_t cc = k / rows, cy = k % rows;
+                pos.insert(pos.end(), {jobs[t * 4 + 1] * 16 + int32_t(cc & 15u), int32_t(cy), jobs[t * 4 + 2] * 16 + int32_t(cc >> 4)});
+                offs.push_back(kind == 0u ? (uint64_t(4 + chunks * 2) + uint64_t(slot) * 2048) * 4 : 0);
+                kd.push_back(kind);
+            }
+        std::vector<uint8_t> acc(kd.size(), 0);
+        taken = kd.empty() ? 0 : uint32_t(grid_->ingestCoarseGpu(lod, uint64_t(slab.buf.buf), offs.data(), pos.data(), kd.data(), kd.size(),
+                                                                acc.data()));
+        bool anyMixed = false;
+        for (size_t i = 0; i < kd.size(); i++) anyMixed = anyMixed || (acc[i] && kd[i] == 0u);
+        slab.busy = anyMixed;  // (only mixed chunks are read from the slab)
+        slab.stamp = 0;
         return true;
     }
 
@@ -918,9 +1018,17 @@ public:
         }
         ran_ = 0;  // once: the next run overwrites the output
         if (want.empty()) return true;
+        // air sections go as the grid's uniform hint (no slot, no copy): only the others need slots
+        std::vector<Want> air;
+        if (b.kinds.size() == size_t(n) * 40) {
+            std::vector<Want> blocks;
+            for (const Want& w : want) (b.kinds[size_t(w.chunk) * 40 + w.sec] == 0 ? air : blocks).push_back(w);
+            want.swap(blocks);
+        }
         // slots: reclaim, grow, else wait for the frames to take what they have (bounded)
         std::vector<std::pair<uint32_t, uint32_t>> got;  // slab, slot
         auto t0 = std::chrono::steady_clock::now();
+        if (want.empty() && slabs_.empty() && !addSlab(err)) return false;  // (a buffer handle for the hints)
         for (;;) {
             reclaim();
             for (uint32_t si = 0; si < slabs_.size() && got.size() < want.size(); si++) {
@@ -943,32 +1051,62 @@ public:
             std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
         // the copies, grouped per slab
-        begin();
-        std::vector<std::vector<VkBufferCopy>> copies(slabs_.size());
-        for (size_t k = 0; k < want.size(); k++) {
-            VkDeviceSize src = (VkDeviceSize(want[k].chunk) * OUT_WORDS + VkDeviceSize(want[k].sec) * 2048) * 4;
-            copies[got[k].first].push_back({src, VkDeviceSize(got[k].second) * SECTION_BYTES, SECTION_BYTES});
+        if (!want.empty()) {
+            begin();
+            std::vector<std::vector<VkBufferCopy>> copies(slabs_.size());
+            for (size_t k = 0; k < want.size(); k++) {
+                VkDeviceSize src = (VkDeviceSize(want[k].chunk) * OUT_WORDS + VkDeviceSize(want[k].sec) * 2048) * 4;
+                copies[got[k].first].push_back({src, VkDeviceSize(got[k].second) * SECTION_BYTES, SECTION_BYTES});
+            }
+            for (size_t si = 0; si < copies.size(); si++)
+                if (!copies[si].empty()) vkCmdCopyBuffer(cmd_, out_.buf, slabs_[si].buf.buf, uint32_t(copies[si].size()), copies[si].data());
+            // the grid's copy comes later in submission order (or on another queue after our fence): make it visible
+            barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            if (!submitWait(err)) return false;
         }
-        for (size_t si = 0; si < copies.size(); si++)
-            if (!copies[si].empty()) vkCmdCopyBuffer(cmd_, out_.buf, slabs_[si].buf.buf, uint32_t(copies[si].size()), copies[si].data());
-        // the grid's copy comes later in submission order (or on another queue after our fence): make it visible
-        barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                VK_PIPELINE_STAGE_TRANSFER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-        if (!submitWait(err)) return false;
         std::vector<std::vector<uint64_t>> offs(slabs_.size());
         std::vector<std::vector<int32_t>> pos(slabs_.size());
+        std::vector<std::vector<size_t>> which(slabs_.size());
         for (size_t k = 0; k < want.size(); k++) {
             uint32_t si = got[k].first, slot = got[k].second;
-            slabs_[si].busy[slot] = 1;
-            slabs_[si].stamp[slot] = 0;
             offs[si].push_back(uint64_t(slot) * SECTION_BYTES);
             pos[si].push_back(b.chunks[want[k].chunk * 2]);
             pos[si].push_back(int32_t(want[k].sec) - 4);
             pos[si].push_back(b.chunks[want[k].chunk * 2 + 1]);
+            which[si].push_back(k);
         }
-        for (size_t si = 0; si < slabs_.size(); si++)
-            if (!offs[si].empty()) grid_->ingestGpu(uint64_t(slabs_[si].buf.buf), offs[si].data(), pos[si].data(), offs[si].size());
-        sent += uint32_t(want.size());
+        // taken ones hold their slot until the grid has copied them; the others are free again and their bits cleared
+        auto refuse = [&](const Want& w) { masks[w.chunk] &= ~(uint64_t(1) << w.sec); };
+        for (size_t si = 0; si < slabs_.size(); si++) {
+            if (offs[si].empty()) continue;
+            std::vector<uint8_t> acc(offs[si].size(), 0);
+            grid_->ingestGpu(uint64_t(slabs_[si].buf.buf), offs[si].data(), pos[si].data(), offs[si].size(), acc.data());
+            for (size_t q = 0; q < acc.size(); q++) {
+                size_t k = which[si][q];
+                uint32_t slot = got[k].second;
+                if (acc[q]) {
+                    slabs_[si].busy[slot] = 1;
+                    slabs_[si].stamp[slot] = 0;
+                    sent++;
+                } else {
+                    slabs_[si].free.push_back(slot);
+                    refuse(want[k]);
+                }
+            }
+        }
+        if (!air.empty()) {
+            std::vector<uint64_t> aoffs(air.size(), 0);
+            std::vector<int32_t> apos;
+            std::vector<uint32_t> uni(air.size(), 0u);  // one id: air
+            for (const Want& w : air) apos.insert(apos.end(), {b.chunks[w.chunk * 2], int32_t(w.sec) - 4, b.chunks[w.chunk * 2 + 1]});
+            std::vector<uint8_t> acc(air.size(), 0);
+            grid_->ingestGpu(uint64_t(slabs_[0].buf.buf), aoffs.data(), apos.data(), air.size(), acc.data(), uni.data());
+            for (size_t q = 0; q < air.size(); q++) {
+                if (acc[q]) sent++;
+                else refuse(air[q]);
+            }
+        }
         return true;
     }
 
@@ -981,6 +1119,28 @@ public:
 
 private:
     static constexpr uint32_t SLAB_SLOTS = 2048;  // 16 MiB of sections per buffer
+    // a far call's chunks (atlas_gen_far_ingest): busy while the grid may read a mixed one; stamp as Slab's
+    struct FarSlab {
+        Buf buf;
+        bool busy = false;
+        uint64_t stamp = 0;
+    };
+    std::vector<FarSlab> farSlabs_;
+    void reclaimFar() {
+        if (!grid_ || !backend_) return;
+        uint64_t submitted = backend_->framesSubmitted(), completed = backend_->framesCompleted();
+        std::vector<uint64_t> pending;
+        for (FarSlab& f : farSlabs_) {
+            if (!f.busy) continue;
+            grid_->gpuPendingOffsets(uint64_t(f.buf.buf), pending);
+            if (!pending.empty()) continue;
+            if (!f.stamp) f.stamp = submitted + 1;
+            if (completed >= f.stamp) {
+                f.busy = false;
+                f.stamp = 0;
+            }
+        }
+    }
     struct Slab {
         Buf buf;
         std::vector<uint32_t> free;
@@ -1743,6 +1903,56 @@ ATLAS_API AtlasStatus atlas_gen_far(AtlasGen* h, int32_t lod, const int32_t* txT
     });
 }
 
+ATLAS_API AtlasStatus atlas_gen_far_ingest(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint32_t capacity,
+                                           uint32_t* outKinds, uint32_t* outMixed, uint32_t* outTaken, uint32_t* outFlags,
+                                           AtlasGenTimes* times) {
+    if (!h || !txTz || !outKinds || count == 0 || count > TILE_MAX || lod < 1 || lod > 6) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        std::lock_guard<std::mutex> l(h->mu);
+        if (!h->ctx) return h->fail(ATLAS_ERR_STATE, "not made for a context (atlas_gen_create_for)");
+        if (!h->devicePages) return h->fail(ATLAS_ERR_STATE, "no map or a program without the page passes' inputs");
+        if (!h->ingestSet) return h->fail(ATLAS_ERR_STATE, "no ingest table (atlas_gen_set_ingest)");
+        auto t0 = std::chrono::steady_clock::now();
+        std::vector<int32_t> jobs;
+        for (uint32_t i = 0; i < count; i++) jobs.insert(jobs.end(), {lod, txTz[i * 2], txTz[i * 2 + 1], 0});
+        uint32_t rows = (44u + (1u << uint32_t(lod)) - 1u) >> uint32_t(lod);
+        std::vector<uint32_t> bad(count);
+        uint32_t mixed = 0, taken = 0;
+        double ms = 0;
+        std::string err;
+        bool ok = h->engine->farIngest(jobs, lod, rows, capacity, outKinds, mixed, taken, bad.data(), ms, err);
+        h->last = Batch{};
+        if (!ok) return h->fail(err.rfind("busy:", 0) == 0 ? ATLAS_ERR_TIMEOUT : ATLAS_ERR_GPU, err);
+        if (outMixed) *outMixed = mixed;
+        if (outTaken) *outTaken = taken;
+        if (outFlags) std::memcpy(outFlags, bad.data(), size_t(count) * 4);
+        if (times) {
+            *times = AtlasGenTimes{};
+            times->kernelMs = ms;
+            times->totalMs = msSince(t0);
+        }
+        return ATLAS_OK;
+    });
+}
+
+ATLAS_API uint32_t atlas_gen_grid_reports(AtlasGen* h, int32_t* outDropped, uint32_t droppedCap, uint32_t* outDroppedCount,
+                                          int32_t* outWanted, uint32_t wantedCap, uint32_t* outWantedCount) {
+    if (!h) return 0;
+    try {
+        std::lock_guard<std::mutex> l(h->mu);
+        std::vector<std::array<int32_t, 4>> d, w;
+        h->engine->takeGridReports(d, w);
+        uint32_t nd = uint32_t(std::min<size_t>(d.size(), droppedCap)), nw = uint32_t(std::min<size_t>(w.size(), wantedCap));
+        for (uint32_t i = 0; i < nd && outDropped; i++) std::memcpy(outDropped + i * 4, d[i].data(), 16);
+        for (uint32_t i = 0; i < nw && outWanted; i++) std::memcpy(outWanted + i * 4, w[i].data(), 16);
+        if (outDroppedCount) *outDroppedCount = nd;
+        if (outWantedCount) *outWantedCount = nw;
+        return uint32_t(d.size() + w.size() - nd - nw);  // reports that did not fit (lost: the caller sizes its arrays)
+    } catch (...) {
+        return 0;
+    }
+}
+
 ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, double* pageMs, int32_t* onDevice) {
     if (!h) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> pl(h->pagesMu);
@@ -1787,6 +1997,9 @@ ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_
         if (!h->engine->run(h->last, o, t, err)) return h->fail(ATLAS_ERR_GPU, err);
         pagesRan(h, h->last, o, flags.data());
         if (outFlags) std::memcpy(outFlags, flags.data(), size_t(count) * 4);
+        h->last.kinds.assign(size_t(count) * 40, 1);
+        for (uint32_t i = 0; i < count; i++)
+            for (uint32_t k = 0; k < 40; k++) h->last.kinds[size_t(i) * 40 + k] = uint8_t(info[size_t(i) * INFO_WORDS + 4 + k * 4 + 2]);
         // decoded: lowest ground, highest top, the tints' biome, then the sections' (hash lo, hash hi, kind, 0)
         for (uint32_t i = 0; i < count; i++) {
             const uint32_t* r = info.data() + size_t(i) * INFO_WORDS;

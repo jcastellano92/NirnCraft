@@ -822,6 +822,19 @@ ATLAS_API AtlasStatus atlas_gen_tiles(AtlasGen* h, const int32_t* lodTxTz, uint3
    atlas materials (the ingest table's, by the column's biome). */
 ATLAS_API AtlasStatus atlas_gen_far(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint32_t outMode, uint32_t* outKinds,
                                     uint32_t* outIds, uint32_t capacity, uint32_t* outMixed, uint32_t* outFlags, AtlasGenTimes* times);
+/* Far chunks into the context's grid (atlas_gen_create_for, GPU only): atlas_gen_far's chunks in atlas materials (the
+   ingest table), made in a buffer of the generator's that the grid reads (VoxGrid::ingestCoarseGpu: level lod, air and
+   uniform chunks without a slot), kept until the grid no longer waits for them and a frame completed. outKinds as
+   atlas_gen_far's; outTaken: the chunks the grid took (the others lie outside its level's window, or past a full pool's
+   cut-off: ask again later). ATLAS_ERR_TIMEOUT: no window yet, or every far buffer still read. */
+ATLAS_API AtlasStatus atlas_gen_far_ingest(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint32_t capacity,
+                                           uint32_t* outKinds, uint32_t* outMixed, uint32_t* outTaken, uint32_t* outFlags,
+                                           AtlasGenTimes* times);
+/* The grid's reports since the last call (VoxGrid::takeGpuDropped / takeGpuWanted), {level, x, y, z} each: level 0
+   sections (section coordinates) or level-k chunks the grid no longer holds (dropped), and level 0 sections it would take
+   now (wanted): make and send them again. Returns how many did not fit the arrays. */
+ATLAS_API uint32_t atlas_gen_grid_reports(AtlasGen* h, int32_t* outDropped, uint32_t droppedCap, uint32_t* outDroppedCount,
+                                          int32_t* outWanted, uint32_t wantedCap, uint32_t* outWantedCount);
 /* Pages the device made so far, the page passes' total time, and whether the device makes them (any may be NULL). */
 ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, double* pageMs, int32_t* onDevice);
 /* Probes the kernels' pieces at n (x, z) columns (n <= 2^17), 32 words each, the last a flag (nonzero: not proven): kind 0
