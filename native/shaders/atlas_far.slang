@@ -394,6 +394,7 @@ bool secondaryShapeMisses(uint mat, float3 l, float3 d) {
 static const uint VG_EMPTY = 0u;
 static const uint VG_MIXED = 1u;
 static const uint VG_UNLOADED = 2u;
+static const uint VG_UNIFORM = 3u;  // one id throughout (bits 2-17), no slot: read as a MIXED chunk all of that id
 // (primary rays) the threshold a cut-out face's texel coverage is tested against (farMain: a per-pixel one, rotated
 // under the host's TAA, which averages a part-covered texel's coverage)
 static float gAlphaXi = 0.5;
@@ -621,11 +622,14 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, out float u
             hi = (c + ep + 1) * 16;
             secCount(2u, 0);
         } else {
+            // (VG_UNIFORM: every block full, every voxel the id; the same steps as a MIXED chunk's from here, so a
+            // uniform lake, leaf or glass section is cut out, passed and lit as the mixed ones are)
+            bool uni = st == VG_UNIFORM;
             uint slot = cw >> 2;
             int3 l = v & 15;
             int3 b = l >> 2;
             uint bi = uint(b.x + 4 * (b.z + 4 * b.y));
-            uint bw = vgBlocks[slot * 64u + bi];
+            uint bw = uni ? 1u : vgBlocks[slot * 64u + bi];
             secCount(4u, 0);
             if ((bw & 1u) == 0u) {
                 int3 en = int3(int((bw >> 2) & 3u), int((bw >> 6) & 3u), int((bw >> 10) & 3u));
@@ -633,12 +637,12 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, out float u
                 lo = c * 16 + (b - en) * 4;
                 hi = c * 16 + (b + ep + 1) * 4;
             } else {
-                uint64_t bits = vgBits[slot * 64u + bi];
+                uint64_t bits = uni ? ~uint64_t(0) : vgBits[slot * 64u + bi];
                 int3 q = v & 3;
                 uint bt = uint(q.x + 4 * q.z + 16 * q.y);
                 if (((bits >> bt) & 1) != 0) {
                     uint i = uint(l.x + 16 * (l.z + 16 * l.y));
-                    uint mat = (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
+                    uint mat = uni ? (cw >> 2) & 0xFFFFu : (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
                     if (g.k > 0) {
                         // a coarse level's voxel: a cube of its material (the regions' levels' rule)
                         if (voxelStops(mat, v, v + gVox, g.k, ro, d, inv, stepPos, t)) {
@@ -754,17 +758,36 @@ int traceLod(int lod, float3 p0, float3 d, float len, out float uncExit) {
             if (uStop >= len) return TRACE_MISS;
             bool left;
             float uEnd = vgUnloadedEnd(g, p0, d, uStop, len, left);
-            float ue;
-            gSecT += uStop;  // (the secondary ray's distance where the regions' chord starts)
-            int q = traceLodRegions(lod, p0 + d * uStop, d, uEnd - uStop, ue);
-            gSecT -= uStop;
-            if (q == TRACE_HIT) {
-                gTr.t += uStop;
-                return TRACE_HIT;
+            // (the grid owns level 0: a run of level-0 chunks it does not hold yet inside its window is the best of its
+            // coarse levels that holds it, never a CPU level 0 or the tiles' stand-in where real blocks are known; the
+            // ray stays at level 0 past the run. vgDims.w bit 4, off with ATLAS_VOXGRID_FALLBACK=0: the regions as before)
+            float uFrom = uStop;
+            if (lod == 0 && !left && (frame.vgDims.w & 5u) == 5u) {
+                for (int k = 1; k <= 6 && uFrom < uEnd; k++) {
+                    if (!vgLevelOn(k) || ((frame.vgLevel[clamp(k, 1, 6) - 1].w >> 17) & 1) == 0) continue;
+                    float uk;
+                    int rk = traceVoxGrid(vgGrid(k), p0, d, uFrom, uEnd, uk);
+                    if (rk == TRACE_HIT) return TRACE_HIT;
+                    if (rk == TRACE_MISS) {
+                        uFrom = uEnd;
+                        break;
+                    }
+                    uFrom = max(uFrom, uk);  // (the rest of the run from the next coarser level)
+                }
             }
-            if (q == TRACE_UNCOVERED) {
-                uncExit = ue < 1e29 ? ue + uStop : 1e30;
-                return TRACE_UNCOVERED;
+            if (uFrom < uEnd) {
+                float ue;
+                gSecT += uFrom;  // (the secondary ray's distance where the regions' chord starts)
+                int q = traceLodRegions(lod, p0 + d * uFrom, d, uEnd - uFrom, ue);
+                gSecT -= uFrom;
+                if (q == TRACE_HIT) {
+                    gTr.t += uFrom;
+                    return TRACE_HIT;
+                }
+                if (q == TRACE_UNCOVERED) {
+                    uncExit = ue < 1e29 ? ue + uFrom : 1e30;
+                    return TRACE_UNCOVERED;
+                }
             }
             if (left || uEnd >= len) return TRACE_MISS;
             u = uEnd + 1e-3;
@@ -877,6 +900,7 @@ int vgVoxelL(int k, float3 p) {
     uint cw = vgChunks[vgCellG(g, c)];
     if ((cw & 3u) == VG_UNLOADED) return -1;
     if ((cw & 3u) == VG_EMPTY) return 0;
+    if ((cw & 3u) == VG_UNIFORM) return int((cw >> 2) & 0xFFFFu);
     int3 l = v & 15;
     uint i = uint(l.x + 16 * (l.z + 16 * l.y));
     return int((vgPool[(cw >> 2) * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu);

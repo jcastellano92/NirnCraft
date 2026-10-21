@@ -335,6 +335,11 @@ struct Slot {
     bool hostNearLight = false;  // ... and the near light (abi 0.15)
     // the level-0 grid's build this frame (voxgrid.hpp): its sections and jobs in host memory, what to record
     Buf vgStage, vgJobs, vgGsrc;
+    // (the GPU's own sections) level 0's jobs copied back after the build: those vgSectionMain found to be one id
+    // (VoxGrid::gpuUniform), read when this slot comes round again; their cells' generations
+    Buf vgResults;
+    uint32_t vgResultN = 0;
+    std::vector<uint32_t> vgGens;
     // (VoxGrid::ingestGpu) copies from the sections' own buffers: into vgGsrc (the coarse levels' ingest), into the pool
     struct VgGpuCopy {
         VkBuffer from;
@@ -380,6 +385,7 @@ public:
                 release(s.vgStage);
                 release(s.vgJobs);
                 release(s.vgGsrc);
+                release(s.vgResults);
                 if (s.fence) vkDestroyFence(dev_, s.fence, nullptr);
                 if (s.query) vkDestroyQueryPool(dev_, s.query, nullptr);
             }
@@ -440,6 +446,7 @@ public:
     }
 
     const char* name() const override { return deviceName_; }
+    bool onDevice() const override { return true; }
     // the far lights culled and binned on the device (ATLAS_CPU_LIGHTS=1: on the CPU, as before; measurements)
     bool gpuLights() const override {
         static const bool cpu = [] {
@@ -1953,6 +1960,17 @@ private:
         return ok;
     }
     bool stageVoxGridTimed(Slot& s, const FrameInputs& in, std::string& err) {
+        // (the slot was waited: its last build is done) the GPU's sections it found to be one id give their slots back
+        if (s.vgResultN && in.voxgrid && s.vgResults.map) {
+            std::vector<VoxGrid::UniformHit> hits;
+            const uint32_t* r = static_cast<const uint32_t*>(s.vgResults.map);
+            for (uint32_t k = 0; k < s.vgResultN && k < s.vgGens.size(); k++) {
+                const uint32_t* j = r + size_t(k) * 4;
+                if ((j[1] & 3u) == VG_UNIFORM && j[2] != ~0u && j[2] != VG_COLUMN) hits.push_back({j[0], j[2], s.vgGens[k], j[1] >> 2});
+            }
+            if (!hits.empty()) in.voxgrid->gpuUniform(hits);
+        }
+        s.vgResultN = 0;
         s.vgCopies.clear();
         s.vgJobCount = 0;
         s.vgClear = s.vgStates = s.vgTimed = false;
@@ -2040,6 +2058,15 @@ private:
             }
         }
         s.vgJobCount = uint32_t(b.jobs.size());
+        // (level 0's jobs of the GPU's own sections: their words back, the uniform ones' slots to free)
+        bool gpuLevel0 = false;
+        for (size_t k = 0; k < b.level0Jobs && !gpuLevel0; k++)
+            gpuLevel0 = b.jobs[k].slot != ~0u && b.jobs[k].slot != VG_COLUMN && b.jobs[k].data != VG_NO_COPY && (b.jobs[k].data & VG_GPU_SRC);
+        if (gpuLevel0 && b.gens.size() >= b.level0Jobs) {
+            if (!ensure(s.vgResults, b.level0Jobs * 16, false, Mem::Readback, err)) return false;
+            s.vgResultN = uint32_t(b.level0Jobs);
+            s.vgGens.assign(b.gens.begin(), b.gens.begin() + ptrdiff_t(b.level0Jobs));
+        }
         s.vgOx = b.ox;
         s.vgOz = b.oz;
         s.vgClear = b.clear || fresh;
@@ -2112,6 +2139,17 @@ private:
         pass(6, s.vgIngests, s.vgIngestAt);
         for (int k = 0; k < VG_LEVELS; k++) pass(7, s.vgDowns[k], s.vgDownAt[k]);
         pass(0, s.vgJobCount, 0);
+        if (s.vgResultN) {
+            // (the findings back to the host: pass's barrier is compute to compute)
+            mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+            mb.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+            VkBufferCopy rc{0, 0, VkDeviceSize(s.vgResultN) * 16};
+            vkCmdCopyBuffer(cmd, s.vgJobs.buf, s.vgResults.buf, 1, &rc);
+            mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
+            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+        }
         // the chunk-level boxes of each level whose chunk states may have changed
         // (twice: the EMPTY chunks' boxes of empty chunks, then the UNLOADED chunks' of unloaded ones)
         for (int round = 0; round < 2 * VG_LEVELS; round++) {

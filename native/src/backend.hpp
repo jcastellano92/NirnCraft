@@ -99,6 +99,9 @@ public:
     // Whether the frame's far lights may be culled and binned on the device (FRAME_GPU_LIGHTS_BIT, FrameInputs::lights):
     // the CPU backend bins them on the CPU (Lights::frame)
     virtual bool gpuLights() const { return false; }
+    // Whether it renders on a device (Vulkan): the CPU's own fallbacks (a CPU level 0 for what the grid gave up) are
+    // the CPU backend's alone
+    virtual bool onDevice() const { return false; }
     virtual bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) = 0;
     // Called from the update thread with a new scene revision: a backend may copy it to the GPU here, off the
     // render thread. Returns false when it could not (the frame then uploads it itself).
