@@ -30,6 +30,18 @@ public class DensityFilter implements PlacementFilter {
         this.field = field;
     }
 
+    public float density() {
+        return density;
+    }
+
+    public float floor() {
+        return floor;
+    }
+
+    public FloraField field() {
+        return field;
+    }
+
     /** The chance a position at (x, z) is kept. */
     public double keep(long worldSeed, int x, int z) {
         return floor + (density - floor) * field.sample(worldSeed, x, z);

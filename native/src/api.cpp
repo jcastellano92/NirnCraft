@@ -1841,3 +1841,9 @@ ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint3
 }
 
 }  // extern "C"
+
+// (gen_engine.cpp, the client generator on the context's own device) the context's backend and grid
+namespace atlas {
+Backend* contextBackend(AtlasContext* ctx) { return ctx ? ctx->backend.get() : nullptr; }
+VoxGrid* contextGrid(AtlasContext* ctx) { return ctx ? &ctx->voxgrid : nullptr; }
+}  // namespace atlas

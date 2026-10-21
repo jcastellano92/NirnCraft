@@ -14,6 +14,38 @@ public final class FarRoads {
 
     private static final ThreadLocal<RoadPlan.Hit> HIT = ThreadLocal.withInitial(RoadPlan.Hit::new);
 
+    /** Every block a far road shows (the styles' surfaces and bridge decks): the GPU generator's block table. */
+    public static java.util.List<BlockState> blocks() {
+        java.util.LinkedHashSet<BlockState> out = new java.util.LinkedHashSet<>();
+        for (Culture c : Culture.VALUES) {
+            out.add(RoadStyle.deck(c));
+            for (int k = 0; k < 4; k++) java.util.Collections.addAll(out, RoadStyle.surfaces(c, k));
+        }
+        return java.util.List.copyOf(out);
+    }
+
+    /** Words per culture in {@link #gpuStyles}. */
+    public static final int STYLE_WORDS = 1 + 4 * 9;
+
+    /**
+     * The styles for the GPU's far roads (atlas_page.slang farRoad): per culture ordinal STYLE_WORDS words, the bridge
+     * deck's id, then per road class (highway, road, lane, trail) its surface count and up to 8 ids (surface()'s order).
+     */
+    public static int[] gpuStyles(java.util.function.ToIntFunction<BlockState> id) {
+        int[] w = new int[Culture.VALUES.length * STYLE_WORDS];
+        for (Culture c : Culture.VALUES) {
+            int at = c.ordinal() * STYLE_WORDS;
+            w[at] = id.applyAsInt(RoadStyle.deck(c));
+            for (int k = 0; k < 4; k++) {
+                BlockState[] list = RoadStyle.surfaces(c, k);
+                if (list.length > 8) throw new IllegalStateException("a road style with more than 8 surfaces");
+                w[at + 1 + k * 9] = list.length;
+                for (int i = 0; i < list.length; i++) w[at + 2 + k * 9 + i] = id.applyAsInt(list[i]);
+            }
+        }
+        return w;
+    }
+
     /** The road surface for the far column centred at (x, z), `span` blocks wide; null where there is no road. */
     public static BlockState surface(int x, int z, int span, boolean wet) {
         RoadPlan plan;
