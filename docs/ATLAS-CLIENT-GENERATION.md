@@ -211,6 +211,33 @@ same window). Through `atlas_gen_into` into a context: 956 ms (ingest through `a
 CPU world build, the grid owner's to move to the GPU). Features for the 16-chunk radius: about 800 chunks at 81 ms
 on one thread, a minute behind the terrain.
 
+### 7.1 GPU to GPU (2026-10-20)
+
+`atlas_gen_create_for(ctx)` puts the generator on the context's own device: on a queue of its own (async compute when
+the device has a compute-only family, else a second queue of the frames' family, else the frames' queue under their
+lock), 64-bit floats enabled on the device when it has them. `atlas_gen_run` adds three passes after the terrain's:
+`colsMain` (a column's top and ground, `decode`'s), `secsMain` (the chunk's lowest ground and highest top, each
+section's kind: air, blocks, deep rock; its FNV-1a hash over the far ids seeded with the tints, `AtlasEditsClient
+.claim`'s; the tints' biome by the seeded zoom at the centre and the highest top) and `matsMain` (the atlas materials
+by biome, the table `AtlasClientGen.ingestTable` builds once: putGen's `mats.section` with each block's tint). Only
+the 164 words of infos come back a chunk, plus the generator ids for the chunks the features will decorate. Java
+claims what the core lacks and `atlas_gen_ingest` copies those sections device to device into slots of 16 MiB
+buffers and hands them to `VoxGrid::ingestGpu` (the grid agent's entry point, f1579c89); a slot is free again once
+the grid no longer waits for it and a frame submitted after that has completed (`framesSubmitted`,
+`framesCompleted`, `VoxGrid::gpuPendingOffsets`). The grid takes GPU sections only inside its level-0 window and its
+CPU World never sees them, so: before the first frame `atlas_gen_ingest` says busy, sections outside the window come
+back unsent, and `AtlasClientGen` forgets chunks (and their claims) once they leave its window + 2 chunks, so they
+are generated and sent again when the camera returns. On a CPU-backend context the same calls run the C++ kernels
+and the sections go up as `atlas_upload_section` takes them. `.direct=false` keeps the old path.
+
+**Checked** (`gpuIngest`, 256 chunks at Whiterun): lowest ground, highest top, all 10,240 sections' kinds and hashes
+and the tints' biome agree with the Java decode 100 %; the C++ build's infos equal Vulkan's word for word; one
+context fed device to device and another fed the same materials through `atlas_upload_section` render the same
+frame identically (depth and colour, 129,600 of 129,600 px). **Measured** (`clientGenJump`, a render thread drawing
+320 x 180 frames beside it, features on 4 threads, the GPU shared): the first chunk in the grid 103 ms after a
+1,600-block jump (pages 23, generated 100, sent 103), the radius-24 window (1,793 chunks) 2.0 s; the info and
+material passes add about a third to the terrain kernels.
+
 ## 8. Open
 
 * **Structures from the plans**: starts per chunk (`ChunkGenerator.createStructures` with the server's
@@ -219,7 +246,8 @@ on one thread, a minute behind the terrain.
 * **Features are slow and single threaded** (81 ms a chunk): decorate disjoint 3 x 3s in parallel; trees on the GPU
   later (their placements are pure; shapes need the decoration random).
 * **The surface pass** is the kernel's largest (a thread per column walks it): split the per-block rule work.
-* **GPU-to-GPU ingest** with the level-0 grid (one device), and the CPU world build behind `atlas_upload_section`.
+* **The grid and GPU sections**: `VoxGrid::ingestGpu` drops what lies outside its windows and cannot refill it (the
+  CPU World never had it); a list of the sections it let go would let the generator resend exactly those.
 * **The 2D inputs on the GPU**: the map rasters, hydrology, road and street plans as device data (today Java computes
   pages: 0.15 ms a chunk on 20 threads).
 * **Multiplayer**: the client has no seed (the public / secret decision, ATLAS-STREAMING.md decision 3).

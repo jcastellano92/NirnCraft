@@ -139,6 +139,8 @@ public:
     // put() of the same section replaces it. The CPU backend ignores them.
     void ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count);
     size_t gpuSectionsPending() const;
+    // (the client generator) the byte offsets of `buffer` whose sections still wait (it reuses the others)
+    void gpuPendingOffsets(uint64_t buffer, std::vector<uint64_t>& out) const;
     // render thread, once a frame: the window follows the camera's block (FOLLOW sections behind; the columns it enters
     // are read from the world when its lock is free); refill: the same read on the update thread (atlas_update), waiting
     void frame(const int32_t camBlock[3], World& world);

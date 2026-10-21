@@ -91,6 +91,13 @@ size_t VoxGrid::gpuSectionsPending() const {
     return gpuRef_.size();
 }
 
+void VoxGrid::gpuPendingOffsets(uint64_t buffer, std::vector<uint64_t>& out) const {
+    out.clear();
+    std::lock_guard<std::mutex> lock(mu_);
+    for (auto& [k, g] : gpuRef_)
+        if (g.buffer == buffer) out.push_back(g.offset);
+}
+
 void VoxGrid::put(int sx, int sy, int sz, const uint16_t* mats) {
     if (!enabled) return;
     std::lock_guard<std::mutex> lock(mu_);

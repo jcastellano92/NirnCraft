@@ -405,10 +405,47 @@ class AtlasGenParityTest {
         try (AtlasNative.Context ctx = atlas.create(AtlasGenNative.BACKEND_VULKAN)) {
             AtlasClientGen cg = AtlasClientGen.startFor(server, lib, ctx, new AtlasMaterials());
             if (cg == null) throw new IllegalStateException("no client generator");
+            // the render thread: a small frame at the camera every 16 ms (the grid places its window and takes the GPU
+            // sections with its frames)
+            double[] cam0 = {0.5, 0.5};
+            java.util.concurrent.atomic.AtomicBoolean rendering = new java.util.concurrent.atomic.AtomicBoolean(true);
+            java.util.concurrent.atomic.AtomicLong frames = new java.util.concurrent.atomic.AtomicLong();
+            String[] renderError = {null};
+            Thread renderer = new Thread(() -> {
+                AtlasNative.Frame f = new AtlasNative.Frame();
+                f.width = 320;
+                f.height = 180;
+                f.flags = 0;
+                f.nearFieldEnd = 0;
+                f.maxDistance = 2000;
+                new org.joml.Matrix4f().perspective((float) Math.toRadians(70), 320f / 180f, 0.05f, 4000f)
+                        .lookAt(0, 0, 0, 0, -0.5f, 1, 0, 1, 0).invert().get(f.invViewProj);
+                int[] color = new int[320 * 180];
+                while (rendering.get()) {
+                    f.x = cam0[0];
+                    f.y = 160;
+                    f.z = cam0[1];
+                    try {
+                        ctx.update(f.x, f.y, f.z, frames.get() == 0 ? 0 : 2);  // (the first builds everything)
+                        ctx.render(f, color, null, null);
+                        frames.incrementAndGet();
+                        Thread.sleep(16);
+                    } catch (InterruptedException e) {
+                        return;
+                    } catch (Throwable t) {
+                        renderError[0] = t.toString();
+                        return;
+                    }
+                }
+            }, "test render");
+            renderer.setDaemon(true);
+            renderer.start();
             try {
                 report.append(String.format("radius %d, features %d on %d threads%n", AtlasClientGen.RADIUS,
                         AtlasClientGen.FEATURE_RADIUS, AtlasClientGen.FEATURE_THREADS));
                 for (int[] cam : new int[][]{{0, 0}, {1600, 0}}) {
+                    cam0[0] = cam[0] + 0.5;
+                    cam0[1] = cam[1] + 0.5;
                     AtlasClientGen.follow(cam[0] + 0.5, cam[1] + 0.5, 0f);
                     long t0 = System.nanoTime();
                     report.append(String.format("camera %d, %d%n", cam[0], cam[1]));
@@ -429,15 +466,270 @@ class AtlasGenParityTest {
                     }
                     double[] j = cg.jumpTimes();
                     report.append(String.format("  jump: first chunk up %.0f ms, the window's terrain up %.0f ms (%d chunks), "
-                                    + "the features' window up %.0f ms (%d chunks)%n", j[0], j[1], (int) j[3], j[2], (int) j[4]));
+                                    + "the features' window up %.0f ms (%d chunks); %d frames rendered%n", j[0], j[1], (int) j[3], j[2],
+                            (int) j[4], frames.get()));
+                    if (renderError[0] != null) report.append("  render thread: ").append(renderError[0]).append(System.lineSeparator());
                 }
             } finally {
                 cg.close();
+                rendering.set(false);
+                renderer.join(5000);
             }
         }
         String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
         if (out != null) Files.writeString(Path.of(out + ".jump.txt"), report.toString());
         System.out.println(report);
+    }
+
+    /**
+     * GPU -> GPU (atlas_gen_create_for, atlas_gen_run, atlas_gen_ingest): the kernels' section infos against the Java
+     * decode they replace (AtlasClientGen.decode / putGen: the lowest ground, highest top, each section's kind and its
+     * hash, the tints' biome), then the sections device to device into one context against the same materials uploaded
+     * through atlas_upload_section into another, rendered from the same camera: depth and colour pixel for pixel.
+     */
+    @Test
+    void gpuIngest(MinecraftServer server) throws Exception {
+        RegistryAccess ra = server.registryAccess();
+        LevelStem stem = ra.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL).value()
+                .createWorldDimensions().dimensions().get(LevelStem.OVERWORLD);
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) stem.generator();
+        NoiseGeneratorSettings settings = gen.generatorSettings().value();
+        RandomState rs = RandomState.create(ra.lookupOrThrow(Registries.NOISE), SEED, settings);
+        DimensionType dt = stem.type().value();
+        LevelHeightAccessor heights = LevelHeightAccessor.create(dt.minY(), dt.height());
+        AtlasGenProgram prog = AtlasGenProgram.compile(gen, settings, rs, heights, SEED, null);
+        AtlasGenPages pages = new AtlasGenPages(prog, rs, gen.getBiomeSource(), heights);
+        Path lib = Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB"));
+        AtlasNative atlas = AtlasNative.load(lib);
+        AtlasGenNative nat = AtlasGenNative.load(lib);
+        int w = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_GEN_WINDOW", "16"));
+        StringBuilder report = new StringBuilder();
+        net.minecraft.world.level.biome.BiomeResolver resolver = gen.getBiomeSource()
+                .createResolver(rs.createClimateSampler(net.minecraft.world.level.levelgen.densityfunction.SamplerContext.EMPTY_UNCACHED));
+        long zoom = BiomeManager.obfuscateSeed(SEED);
+        try (AtlasNative.Context ctxA = atlas.create(AtlasGenNative.BACKEND_VULKAN);
+             AtlasNative.Context ctxB = atlas.create(AtlasGenNative.BACKEND_VULKAN)) {
+            AtlasGenNative.Gen g = nat.createFor(ctxA.handle());
+            if (g == null) throw new IllegalStateException("atlas_gen_create_for refused the context's device");
+            try (g) {
+                g.setProgram(prog.words);
+                int[] tab = AtlasClientGen.ingestTable(prog, new AtlasMaterials(), ctxA);
+                int[] tabB = AtlasClientGen.ingestTable(prog, new AtlasMaterials(), ctxB);
+                if (!Arrays.equals(tab, tabB)) throw new IllegalStateException("the two contexts' materials differ");
+                g.setIngest(tab);
+                int n = tab[0], nb = tab[1], tints = 2 + 2 * n, matBase = tints + 2 * nb;
+                report.append(String.format("%s; %d generator ids, %d biomes%n", g.device(), n, nb));
+                // the two contexts from one camera above Whiterun, looking north-east and down
+                AtlasNative.Frame f = new AtlasNative.Frame();
+                f.width = 480;
+                f.height = 270;
+                f.x = 8.5;
+                f.y = 140;
+                f.z = 8.5;
+                f.nearFieldEnd = 0;
+                f.maxDistance = 2000;
+                f.flags = 0;
+                org.joml.Matrix4f vp = new org.joml.Matrix4f().perspective((float) Math.toRadians(70), 480f / 270f, 0.05f, 4000f)
+                        .lookAt(0, 0, 0, 0.6f, -0.45f, 0.65f, 0, 1, 0).invert();
+                vp.get(f.invViewProj);
+                int px = f.width * f.height;
+                float[] da = new float[px], db = new float[px];
+                int[] ca = new int[px], cb = new int[px];
+                // a first frame each: the grids place their windows (GPU sections go only into a placed window)
+                ctxA.update(f.x, f.y, f.z, 0);
+                ctxB.update(f.x, f.y, f.z, 0);
+                ctxA.render(f, ca, null, da);
+                ctxB.render(f, cb, null, db);
+                // a window at Whiterun, nearest first
+                List<int[]> order = new ArrayList<>();
+                for (int dz = -w / 2; dz < w / 2; dz++)
+                    for (int dx = -w / 2; dx < w / 2; dx++) order.add(new int[]{dx, dz});
+                order.sort(java.util.Comparator.comparingInt(c -> c[0] * c[0] + c[1] * c[1]));
+                long chunksOk = 0, chunksN = 0, secN = 0, kindOk = 0, hashOk = 0, biomeOk = 0, lowOk = 0, highOk = 0, sent = 0;
+                long hashOkJavaTints = 0;
+                double runMs = 0, ingestMs = 0, kernelMs = 0, terrainMs = 0;
+                String firstDiff = null;
+                for (int b0 = 0; b0 < order.size(); b0 += AtlasGenNative.RUN_CHUNKS) {
+                    int m = Math.min(AtlasGenNative.RUN_CHUNKS, order.size() - b0);
+                    int[] xz = new int[m * 2];
+                    for (int i = 0; i < m; i++) {
+                        xz[i * 2] = order.get(b0 + i)[0];
+                        xz[i * 2 + 1] = order.get(b0 + i)[1];
+                    }
+                    int[] miss = g.missing(xz);
+                    for (int i = 0; i < miss.length / 3; i++)
+                        g.putPage(miss[i * 3], miss[i * 3 + 1], miss[i * 3 + 2] != 0, pages.page(miss[i * 3], miss[i * 3 + 1], miss[i * 3 + 2] != 0));
+                    int[] ids = new int[m * AtlasGenNative.CHUNK_WORDS], flags = new int[m], info = new int[m * AtlasGenNative.INFO_WORDS];
+                    long t0 = System.nanoTime();
+                    AtlasGenNative.Times t = g.run(xz, ids, flags, info);
+                    runMs += (System.nanoTime() - t0) / 1e6;
+                    kernelMs += t.kernelMs();
+                    double terrain = 0;
+                    for (double v : t.passMs()) terrain += v;
+                    terrainMs += terrain;
+                    if (b0 == 0) {
+                        // the kernels' C++ build on a CPU context: the same infos?
+                        try (AtlasNative.Context cpuCtx = atlas.create(AtlasGenNative.BACKEND_CPU)) {
+                            AtlasGenNative.Gen gc = nat.createFor(cpuCtx.handle());
+                            try (gc) {
+                                gc.setProgram(prog.words);
+                                gc.setIngest(tab);
+                                int[] mc = gc.missing(xz);
+                                for (int i = 0; i < mc.length / 3; i++)
+                                    gc.putPage(mc[i * 3], mc[i * 3 + 1], mc[i * 3 + 2] != 0, pages.page(mc[i * 3], mc[i * 3 + 1], mc[i * 3 + 2] != 0));
+                                int[] infoC = new int[m * AtlasGenNative.INFO_WORDS];
+                                gc.run(xz, null, new int[m], infoC);
+                                int same = 0;
+                                for (int i = 0; i < infoC.length; i++) if (infoC[i] == info[i]) same++;
+                                report.append(String.format("cpu (%s) infos of the first %d chunks: %d of %d words as Vulkan's; chunk 0 section -4 hash %08x%08x%n",
+                                        gc.device(), m, same, infoC.length, infoC[5], infoC[4]));
+                            }
+                        }
+                    }
+                    long[] masks = new long[m];
+                    for (int i = 0; i < m; i++) {
+                        int cx = xz[i * 2], cz = xz[i * 2 + 1];
+                        chunksN++;
+                        if (flags[i] != 0) continue;
+                        // Java's decode over the ids
+                        int low = Integer.MAX_VALUE, high = Integer.MIN_VALUE;
+                        int base = i * AtlasGenNative.CHUNK_WORDS;
+                        for (int z = 0; z < 16; z++)
+                            for (int x = 0; x < 16; x++) {
+                                int top = -65, ground = -65;
+                                for (int y = 575; y >= -64 && (top == -65 || ground == -65); y--) {
+                                    int k = ((y + 64) >> 4) * 4096 + x + 16 * (z + 16 * (y & 15));
+                                    int word = ids[base + (k >> 1)], id = (k & 1) == 0 ? word & 0xFFFF : word >>> 16;
+                                    int fl = tab[2 + id * 2 + 1];
+                                    if (top == -65 && (fl & 1) == 0) top = y;
+                                    if (ground == -65 && (fl & 4) != 0) ground = y;
+                                }
+                                low = Math.min(low, ground);
+                                high = Math.max(high, top);
+                            }
+                        int o = i * AtlasGenNative.INFO_WORDS;
+                        boolean ok = true;
+                        if (info[o] == low) lowOk++; else ok = false;
+                        if (info[o + 1] == high) highOk++; else ok = false;
+                        Holder<Biome> jb = new BiomeManager(resolver, zoom).getBiome(new BlockPos(cx * 16 + 8, high, cz * 16 + 8));
+                        int gb = info[o + 2];
+                        boolean sameBiome = gb < prog.biomes.size() && prog.biomes.get(gb).equals(jb);
+                        if (sameBiome) biomeOk++;
+                        int jbi = prog.biomeIds.getOrDefault(jb, gb);
+                        int highest = -1;
+                        boolean started = false;
+                        int[] kinds = new int[40];
+                        for (int sec = 0; sec < 40; sec++) {
+                            secN++;
+                            boolean any = false, rock = true;
+                            long h = 0xcbf29ce484222325L ^ ((long) tab[tints + gb * 2] << 24 ^ tab[tints + gb * 2 + 1]);
+                            long hj = 0xcbf29ce484222325L ^ ((long) tab[tints + jbi * 2] << 24 ^ tab[tints + jbi * 2 + 1]);
+                            for (int bk = 0; bk < 4096; bk++) {
+                                int k = sec * 4096 + bk;
+                                int word = ids[base + (k >> 1)], id = (k & 1) == 0 ? word & 0xFFFF : word >>> 16;
+                                any |= id != 0;
+                                rock &= (tab[2 + id * 2 + 1] & 2) != 0;
+                                h = (h ^ tab[2 + id * 2]) * 0x100000001b3L;
+                                hj = (hj ^ tab[2 + id * 2]) * 0x100000001b3L;
+                            }
+                            int kind = !any ? 0 : rock && AtlasSections.deep(sec - 4, low) ? 2 : 1;
+                            kinds[sec] = kind;
+                            if (kind == 1) highest = sec;
+                            int so = o + 4 + sec * 4;
+                            long gh = (info[so] & 0xFFFFFFFFL) | (long) info[so + 1] << 32;
+                            if (info[so + 2] == kind) kindOk++; else ok = false;
+                            if (kind == 2) {  // deep rock: no hash (it never goes up)
+                                h = 0;
+                                hj = 0;
+                            }
+                            if (gh == h) hashOk++; else ok = false;
+                            if (gh == hj) hashOkJavaTints++;
+                            if (!ok && firstDiff == null) {
+                                // (which seed the kernel's hash came from, if not Java's)
+                                long g1 = 0xcbf29ce484222325L ^ (((long) tab[tints + gb * 2] << 24 & 0xFFFFFFFFL) ^ tab[tints + gb * 2 + 1]);
+                                long g2 = 0x84222325L ^ ((long) tab[tints + gb * 2] << 24 ^ tab[tints + gb * 2 + 1]);
+                                long g3 = 0xcbf29ce484222325L;
+                                for (int bk = 0; bk < 4096; bk++) {
+                                    int k = sec * 4096 + bk;
+                                    int word = ids[base + (k >> 1)], id = (k & 1) == 0 ? word & 0xFFFF : word >>> 16;
+                                    g1 = (g1 ^ tab[2 + id * 2]) * 0x100000001b3L;
+                                    g2 = (g2 ^ tab[2 + id * 2]) * 0x100000001b3L;
+                                    g3 = (g3 ^ tab[2 + id * 2]) * 0x100000001b3L;
+                                }
+                                firstDiff = String.format("chunk %d,%d section %d: kind %d / %d, hash %x / %x (tint shift 32-bit %b, seed low only %b, "
+                                                + "no tints %b; grass %x foliage %x), low %d / %d, high %d / %d",
+                                        cx, cz, sec - 4, info[so + 2], kind, gh, h, gh == g1, gh == g2, gh == g3, tab[tints + gb * 2],
+                                        tab[tints + gb * 2 + 1], info[o], low, info[o + 1], high);
+                            }
+                        }
+                        if (ok) chunksOk++;
+                        // the column as AtlasClientGen sends it
+                        long mask = 0;
+                        for (int sec = 0; sec <= highest; sec++) {
+                            if (kinds[sec] == 2 || (kinds[sec] == 0 && !started)) continue;
+                            started = true;
+                            mask |= 1L << sec;
+                            // the same materials up the CPU path into the other context
+                            short[] mats = new short[4096];
+                            for (int bk = 0; bk < 4096; bk++) {
+                                int k = sec * 4096 + bk;
+                                int word = ids[base + (k >> 1)], id = (k & 1) == 0 ? word & 0xFFFF : word >>> 16;
+                                mats[bk] = (short) tab[matBase + gb * n + id];
+                            }
+                            ctxB.uploadSection(cx, sec - 4, cz, mats);
+                        }
+                        masks[i] = mask;
+                    }
+                    long t1 = System.nanoTime();
+                    long[] asked = masks.clone();
+                    int s = g.ingest(masks);
+                    ingestMs += (System.nanoTime() - t1) / 1e6;
+                    if (s < 0) throw new IllegalStateException("ingest refused: " + s);
+                    if (!Arrays.equals(asked, masks)) throw new IllegalStateException("sections in the window not taken");
+                    sent += s;
+                }
+                report.append(String.format("%d chunks: %d agree whole (lowest ground %d, highest top %d), %d sections: kind %d, hash %d "
+                                + "(with Java's own tints' biome %d); tints' biome as Java's resolver %d of %d%n",
+                        chunksN, chunksOk, lowOk, highOk, secN, kindOk, hashOk, hashOkJavaTints, biomeOk, chunksN));
+                if (firstDiff != null) report.append("  first difference: ").append(firstDiff).append('\n');
+                report.append(String.format("run %.0f ms (kernels %.1f ms: terrain %.1f, the sections' infos and materials %.1f), ingest %.1f ms: "
+                                + "%d sections device to device%n", runMs, kernelMs, terrainMs, kernelMs - terrainMs, ingestMs, sent));
+                for (int frame = 0; frame < 12; frame++) {
+                    ctxA.update(f.x, f.y, f.z, 0);
+                    ctxB.update(f.x, f.y, f.z, 0);
+                    ctxA.render(f, ca, null, da);
+                    ctxB.render(f, cb, null, db);
+                }
+                int depthSame = 0, colorSame = 0, hitA = 0, hitB = 0;
+                for (int i = 0; i < px; i++) {
+                    if (da[i] == db[i]) depthSame++;
+                    if (ca[i] == cb[i]) colorSame++;
+                    if (da[i] < 1500) hitA++;
+                    if (db[i] < 1500) hitB++;
+                }
+                report.append(String.format("render %d x %d after 12 frames: depth equal %d of %d px (%.3f%%), colour equal %d (%.3f%%); "
+                                + "terrain hit: GPU-ingested %d px, uploaded %d px%n", f.width, f.height, depthSame, px,
+                        100.0 * depthSame / px, colorSame, 100.0 * colorSame / px, hitA, hitB));
+                String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+                if (out != null) {
+                    javax.imageio.ImageIO.write(image(ca, f.width, f.height), "png", Path.of(out + ".ingestA.png").toFile());
+                    javax.imageio.ImageIO.write(image(cb, f.width, f.height), "png", Path.of(out + ".ingestB.png").toFile());
+                }
+            }
+        }
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".ingest.txt"), report.toString());
+        System.out.println(report);
+    }
+
+    static java.awt.image.BufferedImage image(int[] rgba, int w, int h) {
+        java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++) {
+                int c = rgba[y * w + x];
+                img.setRGB(x, y, (c & 0xFF) << 16 | (c & 0xFF00) | (c >> 16 & 0xFF));
+            }
+        return img;
     }
 
     /** Chunks of each terrain kind on a scan of the map (deterministic). */

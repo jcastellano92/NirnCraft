@@ -46,6 +46,8 @@ final class AtlasClientGen implements AutoCloseable {
     static final int FEATURE_THREADS = Integer.getInteger("nirncraft.atlas.clientGen.featureThreads",
             Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors() / 4)));
     static final boolean ORES = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.ores"));
+    /** {@code .direct=false}: the generator's sections come back to the CPU and go up as uploads (the old path). */
+    static final boolean DIRECT = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.direct"));
     /** Chunks per GPU batch; the first after a jump is small, so the blocks under the camera come first. */
     private static final int BATCH = 64, FIRST_BATCH = 16, READY_MAX = 512;
     private static volatile AtlasClientGen active;
@@ -60,6 +62,9 @@ final class AtlasClientGen implements AutoCloseable {
     private final AtlasGenPages pages;
     private final AtlasGenNative.Gen gen;
     private final AtlasNative.Context ctx;  // null: the far-field worker's feed puts the chunks up (applySections)
+    // GPU -> GPU (atlas_gen_create_for): the generator runs on the context's device and its sections go device to device
+    // into the grid (atlas_gen_run + atlas_gen_ingest); the decorated chunks still go up through the uploader
+    private final boolean direct;
     private final AtlasMaterials mats;
     private final int[] farIds;          // per generator id: its far state id (0: not kept, like AtlasSections.ids)
     private final boolean[] solid;       // per generator id: renders as a full cube (AtlasSections.solidRock)
@@ -91,12 +96,15 @@ final class AtlasClientGen implements AutoCloseable {
     private volatile long chunks, flagged, pagesMade, featureChunks, uploadedChunks, uploadedSections;
     private volatile double genMs, pageMs, featureMs, uploadMs, gpuMs, decodeMs, kernelMs, readbackMs;
     // the last jump: when the camera moved, its first and its last chunk of the new window up
-    private volatile long jumpNs, firstUpNs, windowUpNs, windowFeaturesNs;
+    private volatile long jumpNs, firstUpNs, windowUpNs, windowFeaturesNs, firstBatchPagesNs;
+    private volatile String firstBatch = "";  // (direct) the first batch after the last move, stage by stage
     private volatile int jumpCx, jumpCz;
     private final Set<Long> upSinceJump = ConcurrentHashMap.newKeySet(), featuredSinceJump = ConcurrentHashMap.newKeySet();
 
     private AtlasClientGen(AtlasGenProgram program, AtlasGenPages pages, AtlasGenNative.Gen gen, NoiseBasedChunkGenerator g,
-                           RandomState random, long seed, AtlasGenFeatures features, AtlasNative.Context ctx, AtlasMaterials mats) {
+                           RandomState random, long seed, AtlasGenFeatures features, AtlasNative.Context ctx, AtlasMaterials mats,
+                           boolean direct) {
+        this.direct = direct;
         this.generator = g;
         this.random = random;
         this.features = features;
@@ -138,7 +146,7 @@ final class AtlasClientGen implements AutoCloseable {
     /** A generator without its threads (the parity tool decodes with it). */
     static AtlasClientGen detached(AtlasGenProgram prog, AtlasGenPages pages, AtlasGenNative.Gen gen,
                                    NoiseBasedChunkGenerator g, RandomState rs, long seed) {
-        return new AtlasClientGen(prog, pages, gen, g, rs, seed, null, null, null);
+        return new AtlasClientGen(prog, pages, gen, g, rs, seed, null, null, null, false);
     }
 
     /** Starts generation for the integrated server's overworld (when the flag is on), or returns null (logged). */
@@ -160,10 +168,14 @@ final class AtlasClientGen implements AutoCloseable {
                 com.nirncraft.NirnCraft.LOGGER.info("atlas client generation off: the core has no generator");
                 return null;
             }
-            AtlasGenNative.Gen gen = nat.create(AtlasGenNative.BACKEND_VULKAN);
+            // on the context's own device (its sections device to device into the grid), else a device of its own
+            AtlasGenNative.Gen gen = ctx != null && mats != null && DIRECT ? nat.createFor(ctx.handle()) : null;
+            boolean direct = gen != null;
+            if (gen == null) gen = nat.create(AtlasGenNative.BACKEND_VULKAN);
             if (gen == null) gen = nat.create(AtlasGenNative.BACKEND_CPU);
             if (gen == null) return null;
             gen.setProgram(prog.words);
+            if (direct) gen.setIngest(ingestTable(prog, mats, ctx));
             AtlasGenFeatures feats = null;
             if (FEATURE_RADIUS > 0) {
                 try {
@@ -173,7 +185,7 @@ final class AtlasClientGen implements AutoCloseable {
                 }
             }
             AtlasClientGen c = new AtlasClientGen(prog, new AtlasGenPages(prog, rs, g.getBiomeSource(), ow), gen, g, rs,
-                    ow.getSeed(), feats, ctx, mats);
+                    ow.getSeed(), feats, ctx, mats, direct);
             com.nirncraft.NirnCraft.LOGGER.info("atlas client generation on ({}): program {} words, {} fields, radius {} chunks, "
                             + "features {} chunks on {} threads, {} ms", gen.device(), prog.words.length, prog.fields.size(), RADIUS,
                     feats == null ? 0 : FEATURE_RADIUS, feats == null ? 0 : FEATURE_THREADS, (System.nanoTime() - t0) / 1_000_000);
@@ -217,6 +229,41 @@ final class AtlasClientGen implements AutoCloseable {
 
     static double cameraZ() {
         return camZ;
+    }
+
+    /**
+     * The context's side of the generator's blocks (atlas_gen_set_ingest, atlas.h): per generator id its far state id
+     * (the sections' hash) and flags (air, solid render, motion blocking or fluid: decode's tests), per biome its tints
+     * (tints(): the grass at the biome's own colour, no position modifier), then per biome and id the atlas material
+     * (putGen's: mats.section with the block's tint), registered with the context before the first section uses them.
+     */
+    static int[] ingestTable(AtlasGenProgram p, AtlasMaterials mats, AtlasNative.Context ctx) {
+        int n = p.blocks.size(), nb = p.biomes.size();
+        int[] w = new int[2 + 2 * n + 2 * nb + n * nb];
+        w[0] = n;
+        w[1] = nb;
+        int[] far = new int[n];
+        for (int i = 0; i < n; i++) {
+            BlockState s = p.blocks.get(i);
+            far[i] = AtlasSections.kept(s) ? AtlasFarState.farId(s) : 0;
+            int f = (s.isAir() ? 1 : 0) | (!s.isAir() && s.isSolidRender() ? 2 : 0)
+                    | (net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES.isOpaque().test(s) ? 4 : 0);
+            w[2 + i * 2] = far[i];
+            w[2 + i * 2 + 1] = f;
+        }
+        int tints = 2 + 2 * n, matBase = tints + 2 * nb;
+        for (int b = 0; b < nb; b++) {
+            Biome bio = p.biomes.get(b).value();
+            int grass = bio.getGrassColor(0, 0) & 0xFFFFFF, foliage = bio.getFoliageColor() & 0xFFFFFF;
+            w[tints + b * 2] = grass;
+            w[tints + b * 2 + 1] = foliage;
+            for (int i = 0; i < n; i++) {
+                BlockState st = p.blocks.get(i);
+                w[matBase + b * n + i] = far[i] == 0 ? 0 : mats.section(st, AtlasMaterials.tint(st, grass, foliage)) & 0xFFFF;
+            }
+        }
+        mats.flush(ctx);
+        return w;
     }
 
     /** Whether this generator puts its chunks up itself (else the far-field worker's feed polls them). */
@@ -359,12 +406,12 @@ final class AtlasClientGen implements AutoCloseable {
             r = c.ready.size();
         }
         long now = System.nanoTime(), j = c.jumpNs;
-        return String.format("clientGen{%s chunks=%d flagged=%d ready=%d up=%d/%d sections pages=%d genMs=%.0f pageMs=%.0f "
-                        + "(gpu=%.0f: kernels %.0f readback %.0f; decode=%.0f) uploadMs=%.0f features=%d featureMs=%.0f failures=%d jump{firstUp=%.0f windowUp=%.0f features=%.0f ms}}",
-                c.gen.device(), c.chunks, c.flagged, r, c.uploadedChunks, c.uploadedSections, c.pagesMade, c.genMs, c.pageMs,
+        return String.format("clientGen{%s%s chunks=%d flagged=%d ready=%d up=%d/%d sections pages=%d genMs=%.0f pageMs=%.0f "
+                        + "(gpu=%.0f: kernels %.0f readback %.0f; decode=%.0f) uploadMs=%.0f features=%d featureMs=%.0f failures=%d jump{firstUp=%.0f windowUp=%.0f features=%.0f ms; %s}}",
+                c.direct ? "gpu->grid " : "", c.gen.device(), c.chunks, c.flagged, r, c.uploadedChunks, c.uploadedSections, c.pagesMade, c.genMs, c.pageMs,
                 c.gpuMs, c.kernelMs, c.readbackMs, c.decodeMs,
                 c.uploadMs, c.featureChunks, c.featureMs, c.features == null ? 0 : c.features.failures(),
-                since(j, c.firstUpNs), since(j, c.windowUpNs), since(j, c.windowFeaturesNs));
+                since(j, c.firstUpNs), since(j, c.windowUpNs), since(j, c.windowFeaturesNs), c.firstBatch);
     }
 
     private static double since(long t0, long t) {
@@ -399,6 +446,7 @@ final class AtlasClientGen implements AutoCloseable {
     private void run() {
         int[] ids = new int[BATCH * AtlasGenNative.CHUNK_WORDS];
         int[] flags = new int[BATCH];
+        int[] info = new int[BATCH * AtlasGenNative.INFO_WORDS];
         long lastJump = 0;
         Planned cur = null;
         while (running) {
@@ -421,7 +469,8 @@ final class AtlasClientGen implements AutoCloseable {
                 if (cur == null) cur = plan(camCx, camCz, fresh ? FIRST_BATCH : BATCH);
                 terrainBusy = cur != null;
                 if (cur == null) {
-                    prune(camCx, camCz);
+                    if (direct) pruneDirect(camCx, camCz);
+                    else prune(camCx, camCz);
                     for (Thread t : featureWorkers) LockSupport.unpark(t);
                     LockSupport.parkNanos(20_000_000L);
                     continue;
@@ -435,6 +484,18 @@ final class AtlasClientGen implements AutoCloseable {
                 // the next batch's pages while this one is on the GPU
                 Planned next = plan(camCx, camCz, BATCH);
                 int n = batch.length / 2;
+                if (direct) {
+                    if (fresh) firstBatchPagesNs = t1;
+                    directBatch(batch, ids, flags, info, fresh);
+                    pruneDirect(camCx, camCz);
+                    chunks += n;
+                    pagesMade += miss.length / 3;
+                    pageMs += (t1 - t0) / 1e6;
+                    genMs += (System.nanoTime() - t1) / 1e6;
+                    cur = next;
+                    for (Thread t : featureWorkers) LockSupport.unpark(t);
+                    continue;
+                }
                 long tg = System.nanoTime();
                 AtlasGenNative.Times gt = gen.chunks(batch, 0, ids, flags);
                 long td = System.nanoTime();
@@ -474,6 +535,101 @@ final class AtlasClientGen implements AutoCloseable {
         }
     }
 
+    /**
+     * A batch GPU to GPU: generated on the context's device, its sections' kinds and hashes back (decode's and putGen's
+     * work, done by the kernels), the ones the core lacks claimed here (AtlasEditsClient's hashes) and handed to the grid
+     * device to device. Only the chunks the features will decorate bring their ids back.
+     */
+    private void directBatch(int[] batch, int[] ids, int[] flags, int[] info, boolean first) {
+        int n = batch.length / 2;
+        boolean wantIds = false;
+        if (features != null)
+            for (int i = 0; i < n && !wantIds; i++) wantIds = near(batch[i * 2], batch[i * 2 + 1], camCx, camCz, FEATURE_RADIUS + 2);
+        long tg = System.nanoTime();
+        AtlasGenNative.Times gt = gen.run(batch, wantIds ? ids : null, flags, info);
+        long td = System.nanoTime();
+        gpuMs += (td - tg) / 1e6;
+        kernelMs += gt.kernelMs();
+        readbackMs += gt.readbackMs();
+        long[] masks = new long[n];
+        int ccx = camCx, ccz = camCz;
+        for (int i = 0; i < n; i++) {
+            int cx = batch[i * 2], cz = batch[i * 2 + 1];
+            if (flags[i] != 0) {
+                flagged++;  // not proven exact here: the server's blocks
+                continue;
+            }
+            if (!inWindow(cx, cz, ccx, ccz, RADIUS + 1)) {
+                done.remove(ChunkPos.pack(cx, cz));  // the camera left while it ran: generated again if it comes back
+                continue;
+            }
+            if (wantIds && near(cx, cz, ccx, ccz, FEATURE_RADIUS + 2)) store.put(ChunkPos.pack(cx, cz), compact(ids, i));
+            if (AtlasClientSections.isReal(cx, cz)) continue;  // the loaded chunk's own blocks are up: they stay
+            int o = i * AtlasGenNative.INFO_WORDS + 4;
+            int highest = -1;
+            for (int sec = 0; sec < 40; sec++) {
+                int kind = info[o + sec * 4 + 2];
+                if (kind == AtlasGenNative.SEC_BLOCKS) highest = sec;
+                else if (kind == AtlasGenNative.SEC_ROCK) deepRock.add(net.minecraft.core.SectionPos.asLong(cx, sec - 4, cz));
+            }
+            // the column whole from its lowest kept section to its highest with blocks (air between included: the grid
+            // takes rock under the lowest, air over the highest)
+            long m = 0;
+            boolean started = false;
+            for (int sec = 0; sec <= highest; sec++) {
+                int kind = info[o + sec * 4 + 2];
+                if (kind == AtlasGenNative.SEC_ROCK || (kind == AtlasGenNative.SEC_AIR && !started)) continue;
+                started = true;
+                long h = (info[o + sec * 4] & 0xFFFFFFFFL) | (long) info[o + sec * 4 + 1] << 32;
+                if (AtlasEditsClient.claim(net.minecraft.core.SectionPos.asLong(cx, sec - 4, cz), h)) m |= 1L << sec;
+            }
+            masks[i] = m;
+        }
+        decodeMs += (System.nanoTime() - td) / 1e6;
+        long tu = System.nanoTime();
+        long[] asked = masks.clone();
+        int sent = gen.ingest(masks);
+        long t1 = System.nanoTime();
+        boolean refused = false;
+        for (int i = 0; i < n; i++) {
+            long lost = asked[i] & ~masks[i];
+            if (lost == 0) continue;
+            // not taken (no window yet, outside it, the pool full): forgotten, so they go again when they can
+            refused = true;
+            done.remove(ChunkPos.pack(batch[i * 2], batch[i * 2 + 1]));
+            for (int sec = 0; sec < 40; sec++)
+                if ((lost >>> sec & 1) != 0) AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(batch[i * 2], sec - 4, batch[i * 2 + 1]));
+        }
+        if (sent < 0) {
+            LockSupport.parkNanos(50_000_000L);
+            return;
+        }
+        if (refused) LockSupport.parkNanos(5_000_000L);
+        uploadMs += (t1 - tu) / 1e6;
+        uploadedSections += sent;
+        if (first && jumpNs != 0)
+            firstBatch = String.format("pages up %.0f, generated %.0f (kernels %.1f), claimed %.0f, sent %.0f ms after the move",
+                    (firstBatchPagesNs - jumpNs) / 1e6, (td - jumpNs) / 1e6, gt.kernelMs(), (tu - jumpNs) / 1e6, (t1 - jumpNs) / 1e6);
+        for (int i = 0; i < n; i++) {
+            int cx = batch[i * 2], cz = batch[i * 2 + 1];
+            if (flags[i] != 0 || !inWindow(cx, cz, ccx, ccz, RADIUS + 1) || !done.contains(ChunkPos.pack(cx, cz))) continue;
+            AtlasClientSections.up(cx, cz);
+            uploadedChunks++;
+            if (jumpNs != 0 && inWindow(cx, cz, jumpCx, jumpCz, RADIUS)) {
+                if (firstUpNs == 0) firstUpNs = t1;
+                upSinceJump.add(ChunkPos.pack(cx, cz));
+                if (windowUpNs == 0 && upSinceJump.size() >= windowChunks()) windowUpNs = t1;
+            }
+        }
+    }
+
+    private static int windowChunks() {
+        int w = 0;
+        for (int dz = -RADIUS; dz <= RADIUS; dz++)
+            for (int dx = -RADIUS; dx <= RADIUS; dx++) if (dx * dx + dz * dz <= RADIUS * RADIUS) w++;
+        return w;
+    }
+
     /** The next chunks to generate: within the window, not done, nearest first and in view before behind. */
     private int[] next(int ccx, int ccz, int max) {
         double yaw = Math.toRadians(camYaw);
@@ -498,6 +654,22 @@ final class AtlasClientGen implements AutoCloseable {
             xz[i * 2 + 1] = ChunkPos.getZ(cand.get(i)[0]);
         }
         return xz;
+    }
+
+    /**
+     * (direct) Forgets the chunks that left the window, and their claims: the grid drops GPU sections once they leave
+     * its level-0 window (512 blocks a side from the camera at the least, more than this window's 26 chunks) and the CPU
+     * World it refills from never had them, so a chunk that comes back is generated and sent again.
+     */
+    private void pruneDirect(int ccx, int ccz) {
+        int far = RADIUS + 2;
+        done.removeIf(k -> {
+            int cx = ChunkPos.getX(k), cz = ChunkPos.getZ(k);
+            if (Math.abs(cx - ccx) <= far && Math.abs(cz - ccz) <= far) return false;
+            for (int sec = 0; sec < 40; sec++) AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(cx, sec - 4, cz));
+            return true;
+        });
+        deepRock.removeIf(k -> Math.abs(net.minecraft.core.SectionPos.x(k) - ccx) > far || Math.abs(net.minecraft.core.SectionPos.z(k) - ccz) > far);
     }
 
     /** Forgets chunks far outside the window (atlas drops their sections in time; a return generates them again). */

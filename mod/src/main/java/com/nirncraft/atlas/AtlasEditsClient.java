@@ -198,6 +198,13 @@ final class AtlasEditsClient {
         return up;
     }
 
+    /** Forgets a claim whose section did not go up after all (it must go up when it comes again). Any thread. */
+    static void unclaim(long key) {
+        synchronized (UPLOADED) {
+            UPLOADED.remove(key);
+        }
+    }
+
     /** Whether section key with block hash h must go up (the core does not have it): recorded if so. Any thread. */
     static boolean claim(long key, long h) {
         synchronized (UPLOADED) {

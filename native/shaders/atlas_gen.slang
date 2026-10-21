@@ -35,6 +35,13 @@ struct GenParams {
 [[vk::binding(6, 0)]] RWStructuredBuffer<uint> blocks;     // per chunk 16 * 16 * 640 generator ids
 [[vk::binding(7, 0)]] RWStructuredBuffer<int> colInfo;     // per chunk COL_WORDS
 [[vk::binding(8, 0)]] RWStructuredBuffer<uint> outIds;     // per chunk 40 * 2048 words; then one flag word per chunk
+// (GPU -> GPU, atlas_gen_run) the context's side of the blocks: [0] ids, [1] biomes; per id 2 words: the far state id
+// (the section hash's), flags (IG_*); per biome 2 words: grass, foliage (the hash seed's tints); then biomes x ids
+// atlas materials (one word each)
+[[vk::binding(9, 0)]] StructuredBuffer<uint> ingestTab;
+// per chunk INFO_WORDS: [0] lowest ground + 1024, [1] ~(highest top + 1024), [2] the tints' biome, [3]
+// pad; then per section 4 words: hash lo, hash hi, kind (SEC_*), pad
+[[vk::binding(10, 0)]] RWStructuredBuffer<uint> secInfo;
 
 #include "atlas_exact.slang"
 
@@ -1147,6 +1154,101 @@ void packMain(uint3 id : SV_DispatchThreadID) {
         else { b0 = b0 & 0xFFFFu; b1 = b1 & 0xFFFFu; }
     }
     outIds[ci * OUT_WORDS + i] = (b0 & 0xFFFFu) | (b1 << 16);
+}
+
+// ---- passes 7-9 (atlas_gen_run): the sections as the context takes them -------------------------------------------
+// AtlasClientGen.decode / putGen on the GPU: a column's top (highest non-air) and ground (highest motion-blocking or
+// fluid, MOTION_BLOCKING_NO_LEAVES), the chunk's lowest ground and highest top; per section air (no block), deep
+// rock (all solid render, wholly 16 or more below the lowest ground: AtlasSections.deep, left to the tiles' stone) or
+// blocks, and its hash (FNV-1a 64 over the far ids, seeded with the tints: AtlasEditsClient.claim's); the tints from the
+// biome at the chunk's centre at the highest top (BiomeManager.getBiome); then the atlas materials, per biome.
+static const uint IG_AIR = 1, IG_SOLID = 2, IG_MOTION = 4;
+static const uint SEC_AIR = 0, SEC_BLOCKS = 1, SEC_ROCK = 2;
+static const uint INFO_WORDS = 4 + 40 * 4;
+uint igIds() { return ingestTab[0]; }
+uint igFar(uint id) { return ingestTab[2 + id * 2]; }
+uint igFlags(uint id) { return ingestTab[2 + id * 2 + 1]; }
+uint igTint(uint biome, uint k) { return ingestTab[2 + igIds() * 2 + biome * 2 + k]; }
+uint igMat(uint biome, uint id) { return ingestTab[2 + igIds() * 2 + ingestTab[1] * 2 + biome * igIds() + id]; }
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void colsMain(uint3 id : SV_DispatchThreadID) {
+    uint ci = id.y, c = id.x;
+    if (c >= 256u || ci >= uint(params.chunks)) return;
+    int lx = int(c & 15u), lz = int(c >> 4);
+    int top = -65, ground = -65;
+    for (int ly = NOISE_H - 1; ly >= 0 && (top == -65 || ground == -65); ly--) {
+        uint f = igFlags(blocks[blockBase(ci) + blockIndex(lx, ly, lz)]);
+        if (top == -65 && (f & IG_AIR) == 0u) top = MIN_Y + ly;
+        if (ground == -65 && (f & IG_MOTION) != 0u) ground = MIN_Y + ly;
+    }
+    // (the surface pass is done with the heights: their words take the column's top and ground)
+    colInfo[colBase(ci) + c] = int(uint(top + 1024) | (uint(ground + 1024) << 16));
+}
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void secsMain(uint3 id : SV_DispatchThreadID) {
+    uint ci = id.y, sec = id.x;
+    if (sec >= 40u || ci >= uint(params.chunks)) return;
+    uint info = ci * INFO_WORDS;
+    int low = 1 << 20, high = -(1 << 20);
+    for (uint c = 0u; c < 256u; c++) {
+        uint w = uint(colInfo[colBase(ci) + c]);
+        int t = int(w & 0xFFFFu) - 1024, g = int(w >> 16) - 1024;
+        if (t > high) high = t;  // (no min / max: extended instructions are refused)
+        if (g < low) low = g;
+    }
+    if (sec == 0u) {
+        secInfo[info] = uint(low + 1024);
+        secInfo[info + 1] = ~uint(high + 1024);
+    }
+    int cx = chunkList[ci * 2], cz = chunkList[ci * 2 + 1];
+    uint bad = 0u;
+    uint biome = biomeAt(cx * 16 + 8, high, cz * 16 + 8, bad);
+    if (sec == 0u) secInfo[info + 2] = biome;
+    uint64_t h = (uint64_t(0xCBF29CE4u) << 32) | uint64_t(0x84222325u);
+    // seed ^ ((long) grass << 24 ^ foliage)
+    h = h ^ ((uint64_t(igTint(biome, 0u)) << 24) ^ uint64_t(igTint(biome, 1u)));
+    // what the section holds (any block; all solid render), stopping as soon as both are known
+    bool any = false, rock = true;
+    uint base = blockBase(ci) + sec * 4096u;
+    for (uint b = 0u; b < 4096u && (rock || !any); b++) {
+        uint g = blocks[base + b];
+        any = any || g != 0u;
+        rock = rock && (igFlags(g) & IG_SOLID) != 0u;
+    }
+    int sy0 = int(sec) - 4;
+    bool deep = any && rock && sy0 * 16 + 16 <= low - 16;
+    // the hash (not for deep rock: it never goes up). The FNV prime 0x100000001B3 = 2^40 + 435: h * it as
+    // (h << 40) + h * 435 (mod 2^64); air (every far id 0) is the seed * prime^4096 = 0x62231D84A3104001
+    if (!any && igFar(0u) == 0u) {
+        h = h * ((uint64_t(0x62231D84u) << 32) | uint64_t(0xA3104001u));
+    } else if (!deep) {
+        for (uint b = 0u; b < 4096u; b++) {
+            h = h ^ uint64_t(igFar(blocks[base + b]));
+            h = (h << 40) + h * uint64_t(0x1B3u);
+        }
+    } else {
+        h = 0ull;
+    }
+    uint kind = !any ? SEC_AIR : (deep ? SEC_ROCK : SEC_BLOCKS);
+    uint o = info + 4u + sec * 4u;
+    secInfo[o] = uint(h & 0xFFFFFFFFull);
+    secInfo[o + 1u] = uint(h >> 32);
+    secInfo[o + 2u] = kind;
+    flagChunk(ci, bad);
+}
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void matsMain(uint3 id : SV_DispatchThreadID) {
+    uint ci = id.y, i = id.x;
+    if (i >= OUT_WORDS || ci >= uint(params.chunks)) return;
+    uint biome = secInfo[ci * INFO_WORDS + 2];
+    uint b0 = blocks[blockBase(ci) + i * 2u], b1 = blocks[blockBase(ci) + i * 2u + 1u];
+    outIds[ci * OUT_WORDS + i] = (igMat(biome, b0) & 0xFFFFu) | (igMat(biome, b1) << 16);
 }
 
 // ---- the exact math, checked against Java (atlas_gen_math) --------------------------------------------------------

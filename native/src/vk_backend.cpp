@@ -583,6 +583,30 @@ public:
         return true;
     }
 
+    bool sharedDevice(SharedDevice& d) override {
+        if (!dev_ || lost_) return false;
+        d.instance = inst_;
+        d.physical = phys_;
+        d.device = dev_;
+        d.frameFamily = family_;
+        if (genQueue_) {
+            d.queue = genQueue_;
+            d.family = genFamily_;
+            d.queueMu = nullptr;
+            d.timestamps = genTimestamps_;
+        } else {
+            d.queue = queue_;
+            d.family = family_;
+            d.queueMu = &queueMu_;
+            d.timestamps = timestamps_;
+        }
+        d.float64 = float64_;
+        d.timestampPeriod = timestampPeriod_;
+        return true;
+    }
+    uint64_t framesSubmitted() const override { return frameCounter_.load(); }
+    uint64_t framesCompleted() const override { return completedFrame_.load(); }
+
     bool memoryInfo(MemoryInfo& m, std::string&) override {
         VkPhysicalDeviceMemoryBudgetPropertiesEXT budget{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT};
         VkPhysicalDeviceMemoryProperties2 mp2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2};
@@ -1258,6 +1282,20 @@ private:
                     break;
                 }
             }
+        // the client generator's queue (sharedDevice): a compute-only family (async compute) when there is one, else a
+        // second queue of the frames' family, else none (it then submits to the frames' queue)
+        genFamily_ = UINT32_MAX;
+        genTimestamps_ = false;
+        for (uint32_t i = 0; i < qn && family_ != UINT32_MAX; i++)
+            if (i != family_ && (qf[i].queueFlags & VK_QUEUE_COMPUTE_BIT) && !(qf[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
+                genFamily_ = i;
+                genTimestamps_ = qf[i].timestampValidBits > 0;
+                break;
+            }
+        if (genFamily_ == UINT32_MAX && family_ != UINT32_MAX && qf[family_].queueCount >= 2) {
+            genFamily_ = family_;
+            genTimestamps_ = timestamps_;
+        }
         return family_ != UINT32_MAX || fail(err, "no compute queue");
     }
 
@@ -1387,16 +1425,28 @@ private:
                             (!has(MEM_EXT) && !has(SEM_EXT) ? std::string(MEM_EXT) + " and " + SEM_EXT
                                                             : std::string(has(MEM_EXT) ? SEM_EXT : MEM_EXT));
         }
-        float prio = 1.0f;
-        VkDeviceQueueCreateInfo qci{VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO};
-        qci.queueFamilyIndex = family_;
-        qci.queueCount = 1;
-        qci.pQueuePriorities = &prio;
+        // the frames' queue, and the client generator's (lower priority: frames first)
+        float prio[2] = {1.0f, 0.5f};
+        VkDeviceQueueCreateInfo qci[2] = {{VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO}, {VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO}};
+        uint32_t nq = 1;
+        qci[0].queueFamilyIndex = family_;
+        qci[0].queueCount = genFamily_ == family_ ? 2 : 1;
+        qci[0].pQueuePriorities = prio;
+        if (genFamily_ != UINT32_MAX && genFamily_ != family_) {
+            qci[1].queueFamilyIndex = genFamily_;
+            qci[1].queueCount = 1;
+            qci[1].pQueuePriorities = prio + 1;
+            nq = 2;
+        }
+        VkPhysicalDeviceFeatures have{};
+        vkGetPhysicalDeviceFeatures(phys_, &have);
         VkPhysicalDeviceFeatures feats{};
         feats.shaderInt64 = VK_TRUE;
+        feats.shaderFloat64 = have.shaderFloat64;  // the client generator's exact doubles (optional)
+        float64_ = have.shaderFloat64 == VK_TRUE;
         VkDeviceCreateInfo dci{VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
-        dci.queueCreateInfoCount = 1;
-        dci.pQueueCreateInfos = &qci;
+        dci.queueCreateInfoCount = nq;
+        dci.pQueueCreateInfos = qci;
         dci.pEnabledFeatures = &feats;
         dci.enabledExtensionCount = uint32_t(enable.size());
         dci.ppEnabledExtensionNames = enable.data();
@@ -1417,6 +1467,7 @@ private:
             return vkOk(cr, "vkCreateDevice", err);
         }
         vkGetDeviceQueue(dev_, family_, 0, &queue_);
+        if (genFamily_ != UINT32_MAX) vkGetDeviceQueue(dev_, genFamily_, genFamily_ == family_ ? 1 : 0, &genQueue_);
         if (interopCapable_) interopCapable_ = export_.load(dev_);
         return true;
     }
@@ -2685,8 +2736,12 @@ private:
     std::mutex sceneMu_;
     std::mutex queueMu_;  // vkQueueSubmit from the render and staging threads
     VkCommandPool uploadPool_ = VK_NULL_HANDLE;
-    uint64_t frameCounter_ = 0;
+    std::atomic<uint64_t> frameCounter_{0};  // (atomic: the client generator reads it, framesSubmitted)
     int staleFrames_ = 0;
+    // the client generator's queue (sharedDevice; VK_NULL_HANDLE: it shares queue_ under queueMu_)
+    uint32_t genFamily_ = UINT32_MAX;
+    VkQueue genQueue_ = VK_NULL_HANDLE;
+    bool genTimestamps_ = false, float64_ = false;
     std::atomic<uint64_t> completedFrame_{0};
     const void* noiseUploaded_ = nullptr;
     uint64_t frameIndex_ = 0;

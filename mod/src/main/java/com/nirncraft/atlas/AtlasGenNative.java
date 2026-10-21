@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import static java.lang.foreign.ValueLayout.ADDRESS;
 import static java.lang.foreign.ValueLayout.JAVA_DOUBLE;
 import static java.lang.foreign.ValueLayout.JAVA_INT;
+import static java.lang.foreign.ValueLayout.JAVA_LONG;
 
 /**
  * The atlas_gen_* calls of atlas_core (atlas.h: the client's world generator), bound on their own so the generator
@@ -20,8 +21,15 @@ final class AtlasGenNative {
     static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     /** Words per generated chunk (40 sections of 2048 words: two 16-bit ids each). */
     static final int CHUNK_WORDS = 40 * 2048;
+    /** Words of a chunk's section info (atlas_gen_run): ground, top, biome, 0, then per section hash lo, hi, kind, 0. */
+    static final int INFO_WORDS = 4 + 40 * 4;
+    static final int SEC_AIR = 0, SEC_BLOCKS = 1, SEC_ROCK = 2;
+    /** Most chunks of one atlas_gen_run. */
+    static final int RUN_CHUNKS = 64;
 
     private final MethodHandle create, destroy, lastError, device, setProgram, pageWords, missing, putPage, chunks, into;
+    // GPU -> GPU (atlas_gen_create_for ...): null in a library without them
+    private final MethodHandle createFor, setIngest, run, ingest;
 
     private AtlasGenNative(SymbolLookup lib) {
         Linker l = Linker.nativeLinker();
@@ -35,6 +43,11 @@ final class AtlasGenNative {
         putPage = bind(l, lib, "atlas_gen_put_page", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, JAVA_INT));
         chunks = bind(l, lib, "atlas_gen_chunks", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
         into = bind(l, lib, "atlas_gen_into", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
+        boolean gpu = lib.find("atlas_gen_create_for").isPresent();
+        createFor = gpu ? bind(l, lib, "atlas_gen_create_for", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
+        setIngest = gpu ? bind(l, lib, "atlas_gen_set_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT)) : null;
+        run = gpu ? bind(l, lib, "atlas_gen_run", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
+        ingest = gpu ? bind(l, lib, "atlas_gen_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
     }
 
     private static MethodHandle bind(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd) {
@@ -64,6 +77,21 @@ final class AtlasGenNative {
         try (Arena a = Arena.ofConfined()) {
             MemorySegment out = a.allocate(ADDRESS);
             int s = (int) create.invokeExact(backend, out);
+            return s == 0 ? new Gen(out.get(ADDRESS, 0)) : null;
+        } catch (Throwable t) {
+            throw rethrow(t);
+        }
+    }
+
+    /**
+     * A generator on the context's own device whose sections go device to device into its grid (atlas_gen_create_for),
+     * or null when that cannot be (no such call, the device cannot run the exact kernels, the grid is off).
+     */
+    Gen createFor(MemorySegment ctx) {
+        if (createFor == null) return null;
+        try (Arena a = Arena.ofConfined()) {
+            MemorySegment out = a.allocate(ADDRESS);
+            int s = (int) createFor.invokeExact(ctx, out);
             return s == 0 ? new Gen(out.get(ADDRESS, 0)) : null;
         } catch (Throwable t) {
             throw rethrow(t);
@@ -180,6 +208,61 @@ final class AtlasGenNative {
                 if (flags != null) MemorySegment.copy(fl, JAVA_INT, 0, flags, 0, n);
                 if (sections != null) sections[0] = sec.get(JAVA_INT, 0);
                 return Times.of(t);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** The context's side of the blocks (atlas_gen_set_ingest). */
+        void setIngest(int[] words) {
+            try (Arena a = Arena.ofConfined()) {
+                check((int) setIngest.invokeExact(ptr, a.allocateFrom(JAVA_INT, words), words.length), "atlas_gen_set_ingest");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * Generates up to RUN_CHUNKS chunks for {@link #ingest}: ids (null: not wanted) count * CHUNK_WORDS generator ids,
+         * flags count words, info count * INFO_WORDS words (atlas_gen_run).
+         */
+        synchronized Times run(int[] chunkXZ, int[] ids, int[] flags, int[] info) {
+            int n = chunkXZ.length / 2;
+            if (ids != null && (outSeg == null || outWords < (long) n * CHUNK_WORDS)) {
+                if (outArena != null) outArena.close();
+                outArena = Arena.ofShared();
+                outWords = Math.max(64L, n) * CHUNK_WORDS;
+                outSeg = outArena.allocate(JAVA_INT, outWords);
+            }
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment out = ids != null ? outSeg : MemorySegment.NULL;
+                MemorySegment fl = a.allocate(JAVA_INT, n);
+                MemorySegment inf = a.allocate(JAVA_INT, (long) n * INFO_WORDS);
+                MemorySegment t = a.allocate(88, 8);
+                check((int) run.invokeExact(ptr, a.allocateFrom(JAVA_INT, chunkXZ), n, out, fl, inf, t), "atlas_gen_run");
+                if (ids != null) MemorySegment.copy(out, JAVA_INT, 0, ids, 0, n * CHUNK_WORDS);
+                if (flags != null) MemorySegment.copy(fl, JAVA_INT, 0, flags, 0, n);
+                MemorySegment.copy(inf, JAVA_INT, 0, info, 0, n * INFO_WORDS);
+                return Times.of(t);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * The last run's sections whose bit is set in masks[chunk] (bit s: section y s - 4) into the context's grid, device
+         * to device; masks then hold the bits that went (the grid's level-0 window takes no others). Returns how many went,
+         * or -1 (none went) when the grid has no window yet or has not taken earlier ones (no frames for 2 s).
+         */
+        synchronized int ingest(long[] masks) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment sec = a.allocate(JAVA_INT);
+                MemorySegment m = a.allocateFrom(JAVA_LONG, masks);
+                int s = (int) ingest.invokeExact(ptr, m, sec, MemorySegment.NULL);
+                MemorySegment.copy(m, JAVA_LONG, 0, masks, 0, masks.length);
+                if (s == -8) return -1;  // ATLAS_ERR_TIMEOUT
+                check(s, "atlas_gen_ingest");
+                return sec.get(JAVA_INT, 0);
             } catch (Throwable t) {
                 throw rethrow(t);
             }

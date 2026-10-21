@@ -761,6 +761,33 @@ ATLAS_API AtlasStatus atlas_gen_math(AtlasGen* h, uint32_t op, uint32_t n, const
 /* Generates and uploads the chunks' non-air sections into ctx (the atlas_upload_section path); outSections: count. */
 ATLAS_API AtlasStatus atlas_gen_into(AtlasGen* h, AtlasContext* ctx, const int32_t* chunkXZ, uint32_t count,
                                      uint32_t* outFlags, uint32_t* outSections, AtlasGenTimes* times);
+/*
+ * GPU -> GPU: a generator on ctx's own device, whose kernels' sections go device to device into the context's grid
+ * (VoxGrid::ingestGpu; the CPU World never sees them). Its kernels run on a queue of their own when the device has one
+ * (async compute), else on the frames' queue. On a CPU-backend context: the kernels' C++ build, the sections going up
+ * as atlas_upload_section takes them. ATLAS_ERR_UNSUPPORTED when the context's device cannot run the exact kernels or
+ * its grid is off (use atlas_gen_create and atlas_upload_section then). Destroy it before the context.
+ */
+ATLAS_API AtlasStatus atlas_gen_create_for(AtlasContext* ctx, AtlasGen** out);
+/* The context's side of the generator's blocks (atlas_gen_run, atlas_gen_ingest): words[0] = ids (the program's block
+   table), words[1] = biomes (its biome list); per id 2 words: the far state id (the section hash's), flags (1 air, 2
+   solid render, 4 motion blocking or fluid); per biome 2 words: grass, foliage (0xRRGGBB, the tints); then biomes x ids
+   atlas materials (one word each, biome-major). count = 2 + 2 ids + 2 biomes + ids * biomes. */
+ATLAS_API AtlasStatus atlas_gen_set_ingest(AtlasGen* h, const uint32_t* words, uint32_t count);
+/* Generates count (<= 64) chunks for atlas_gen_ingest. outIds (may be NULL): the generator ids as atlas_gen_chunks gives
+   them (the features' terrain); outFlags (may be NULL) as there; outInfo count * 164 words, per chunk: the lowest ground
+   (highest motion-blocking-or-fluid block of a column, the lowest of them; -65: none), the highest top (non-air), the
+   biome the tints come from (at the centre, the highest top), 0; then per section bottom up: its hash (FNV-1a 64 of the
+   far ids seeded with the tints, AtlasEditsClient.claim's; lo, hi; 0 for deep rock), kind (0 air, 1 blocks, 2 deep rock: all solid render, 16 or more below the
+   lowest ground), 0. */
+ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t* outIds,
+                                    uint32_t* outFlags, uint32_t* outInfo, AtlasGenTimes* times);
+/* The last atlas_gen_run's sections whose bit is set in masks[chunk] (bit s: section y s - 4), as atlas materials (the
+   biome's tints), into the context's grid; once per run, before the next. The grid takes them only inside its level-0
+   window (they never reach the CPU World that refills it): on return masks hold the bits of the sections that went
+   (outside the window: cleared, send them again when it comes). ATLAS_ERR_TIMEOUT (masks all cleared) when the grid
+   has no window yet or has not taken earlier sections for 2 s (no frames). outSections: how many went. */
+ATLAS_API AtlasStatus atlas_gen_ingest(AtlasGen* h, uint64_t* masks, uint32_t* outSections, AtlasGenTimes* times);
 
 #ifdef __cplusplus
 }

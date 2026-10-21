@@ -2,6 +2,7 @@
 #pragma once
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -121,6 +122,21 @@ public:
         return false;
     }
     virtual void glDetach() {}
+    // (the client generator, gen_engine.cpp) the device for kernels that write straight into the grid's sections:
+    // Vulkan handles as void*, a queue of its own when the device has one (else the frames' queue, submitted under
+    // queueMu), 64-bit floats enabled or not. False on a backend without a device.
+    struct SharedDevice {
+        void *instance = nullptr, *physical = nullptr, *device = nullptr, *queue = nullptr;
+        uint32_t family = 0, frameFamily = 0;  // the queue's family; the frames' (buffers both read: concurrent)
+        std::mutex* queueMu = nullptr;         // non-null: the queue is the frames' own
+        bool float64 = false;
+        float timestampPeriod = 1.0f;
+        bool timestamps = false;
+    };
+    virtual bool sharedDevice(SharedDevice&) { return false; }
+    // frames submitted, and the last one known complete (any thread)
+    virtual uint64_t framesSubmitted() const { return 0; }
+    virtual uint64_t framesCompleted() const { return 0; }
     // The sun map as last computed (size * (size + 1) float2, empty when none). Waits for the GPU.
     virtual bool readSunMap(std::vector<float>& out, std::string& err) {
         err = "no sun map";
