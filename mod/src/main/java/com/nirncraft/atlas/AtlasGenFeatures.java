@@ -97,6 +97,19 @@ final class AtlasGenFeatures {
     }
     /** The features that failed here: the first failure of each (dev reports). */
     final Map<String, String> failed = new ConcurrentHashMap<>();
+    /**
+     * Dev profiling, off when null: per placed feature {calls, nanos, block writes through the level} (writes into
+     * sections a feature reaches through getChunk, as the ores do, are not counted).
+     */
+    volatile Map<String, long[]> profile;
+    /** Dev comparisons (the GPU decoration's check): only these placed features run, null all. */
+    volatile Predicate<PlacedFeature> only;
+
+    /** A placed feature's key (dev reports). */
+    String key(PlacedFeature feature) {
+        return registries.lookupOrThrow(net.minecraft.core.registries.Registries.PLACED_FEATURE)
+                .getResourceKey(feature).map(k -> k.identifier().toString()).orElse("?");
+    }
 
     @SuppressWarnings("unchecked")
     AtlasGenFeatures(ChunkGenerator generator, ServerLevel owner, RegistryAccess registries, LevelHeightAccessor heights, long seed,
@@ -191,9 +204,21 @@ final class AtlasGenFeatures {
             Arrays.sort(order);
             for (int gi : order) {
                 PlacedFeature feature = data.features().get(gi);
+                Predicate<PlacedFeature> filter = only;
+                if (filter != null && !filter.test(feature)) continue;
                 random.setFeatureSeed(deco, gi, step);
+                Map<String, long[]> prof = profile;
+                long pt = prof != null ? System.nanoTime() : 0, pw = l.writes;
                 try {
                     placer.placeWithBiomeCheck(feature, random, origin);
+                    if (prof != null) {
+                        long[] a = prof.computeIfAbsent(key(feature), k -> new long[3]);
+                        synchronized (a) {
+                            a[0]++;
+                            a[1] += System.nanoTime() - pt;
+                            a[2] += l.writes - pw;
+                        }
+                    }
                 } catch (RuntimeException | LinkageError e) {
                     failures.increment();  // a feature reading what this level does not offer: the server's blocks correct it
                     String key = registries.lookupOrThrow(net.minecraft.core.registries.Registries.PLACED_FEATURE)
@@ -209,12 +234,19 @@ final class AtlasGenFeatures {
         nanos.add(System.nanoTime() - t0);
     }
 
+    /** PlacementMask's clearance at a column as a decoration of chunk (cx, cz) sees it (the GPU's mask pages). */
+    int clearance(Window w, int cx, int cz, int x, int z) {
+        return com.nirncraft.world.PlacementMask.clearance(new Level(w, cx, cz).proxy(), x, z);
+    }
+
     /** One decoration's level over the window: writable over the 3 x 3 chunks, as a WorldGenRegion at the features step. */
     private final class Level {
         final Window w;
         final int cx, cz;
         final RandomSource random;
         final BiomeManager biomes;
+        /** Blocks written through this level (dev profiling). */
+        long writes;
 
         Level(Window w, int cx, int cz) {
             this.w = w;
@@ -258,6 +290,7 @@ final class AtlasGenFeatures {
                             ProtoChunk c = w.chunk(SectionPos.blockToSectionCoord(p.getX()), SectionPos.blockToSectionCoord(p.getZ()));
                             if (c == null) return false;
                             c.setBlockState(p, s, (int) args[2]);
+                            writes++;
                             return true;
                         }
                         break;

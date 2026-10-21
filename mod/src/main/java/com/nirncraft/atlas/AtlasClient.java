@@ -626,6 +626,8 @@ public final class AtlasClient {
             AtlasTrees.activeLod = trees != null ? AtlasTrees.APPROX_LOD : -1;  // before the first tile goes up
             farField = new AtlasFarField(ctx, source, () -> AtlasSettlements.create(ground, mats, trees), lods);
             AtlasClientSections.reset();  // a new context holds no real blocks: the loaded chunks go up again
+            // the structures from the plans as stages of the client generator's batches (before its program compiles)
+            if (AtlasClientGen.ON && mc.hasSingleplayerServer()) AtlasOverlayLive.register(libPath, mc.getSingleplayerServer());
             if (AtlasClientGen.ON && mc.hasSingleplayerServer()) clientGen = AtlasClientGen.start(mc.getSingleplayerServer(), libPath, ctx, mats);
             lightBudget = -1;
             startedFor = mc.level;

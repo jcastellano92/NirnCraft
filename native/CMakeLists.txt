@@ -380,6 +380,23 @@ add_custom_command(
   COMMAND "${SLANGC}" "${GEN_SRC}" -target cpp ${GEN_CPU_ENTRIES} -O3 -fp-mode precise -warnings-disable 41035
           -o "${GEN}/atlas_gen_cpu.cpp"
   DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_page.slang" COMMENT "slangc atlas_gen -> C++ (CPU reference)")
+# the generator's chunk store (atlas_store.slang: a chunk into its slot and back, the map's region and elevation per
+# column; -O0 like the features)
+foreach(pass storeIn storeOut)
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_store_${pass}.spv"
+    COMMAND "${SLANGC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_store.slang" -target spirv -entry ${pass}Main -stage compute -O0
+            -fp-mode precise -warnings-disable 41035 -o "${GEN}/atlas_store_${pass}_raw.spv"
+    COMMAND spv_exact "${GEN}/atlas_store_${pass}_raw.spv" "${GEN}/atlas_store_${pass}.spv"
+    DEPENDS "${CMAKE_SOURCE_DIR}/shaders/atlas_store.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang"
+            "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" spv_exact COMMENT "slangc atlas_store:${pass}Main -> SPIR-V (exact float contract)")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_store_${pass}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_store_${pass}.spv -DOUT=${GEN}/atlas_store_${pass}_spv.h
+            -DNAME=atlas_store_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_store_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND GEN_HEADERS "${GEN}/atlas_store_${pass}_spv.h")
+endforeach()
 target_sources(atlas_core PRIVATE src/gen_engine.cpp "${GEN}/atlas_gen_cpu.cpp" ${GEN_HEADERS})
 set(GEN_RENAME "GlobalParams_0=GenGlobals_0;KernelContext_0=GenContext_0")
 if(MSVC)
@@ -389,7 +406,108 @@ else()
   set_source_files_properties("${GEN}/atlas_gen_cpu.cpp" PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-fast-math;-w"
                               COMPILE_DEFINITIONS "${GEN_RENAME}")
 endif()
+# Structures from the plans (atlas_overlays.slang, overlays_engine.cpp): the pieces' op tapes and the street painter
+# stamped on chunk columns; the same exact float contract as the generator (the painter's float expressions)
+set(OVL_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_overlays.slang")
+set(OVL_HEADERS)
+foreach(pair "pieces:piecesMain" "streets:streetsMain" "sanity:sanityMain" "connect:connectMain" "access:accessMain" "mark:markMain"
+             "done:doneMain")
+  string(REPLACE ":" ";" pe "${pair}")
+  list(GET pe 0 pass)
+  list(GET pe 1 entry)
+  set(OVL_VALIDATE)
+  if(SPIRV_VAL)
+    set(OVL_VALIDATE COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/atlas_ovl_${pass}.spv")
+  endif()
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_ovl_${pass}.spv"
+    COMMAND "${SLANGC}" "${OVL_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise
+            -warnings-disable 41035 -o "${GEN}/atlas_ovl_${pass}_raw.spv"
+    COMMAND spv_exact "${GEN}/atlas_ovl_${pass}_raw.spv" "${GEN}/atlas_ovl_${pass}.spv"
+    ${OVL_VALIDATE}
+    DEPENDS "${OVL_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" spv_exact COMMENT "slangc atlas_overlays:${entry} -> SPIR-V (exact float contract)")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_ovl_${pass}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_ovl_${pass}.spv -DOUT=${GEN}/atlas_ovl_${pass}_spv.h
+            -DNAME=atlas_ovl_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_ovl_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND OVL_HEADERS "${GEN}/atlas_ovl_${pass}_spv.h")
+endforeach()
+# the road painter (atlas_overlays_roads.slang: RoadPaint over the generator's map) and the heightmap it reads
+set(OVLR_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_overlays_roads.slang")
+foreach(pair "roads:roadsMain" "mbnl:mbnlMain")
+  string(REPLACE ":" ";" pe "${pair}")
+  list(GET pe 0 pass)
+  list(GET pe 1 entry)
+  set(OVL_VALIDATE)
+  if(SPIRV_VAL)
+    set(OVL_VALIDATE COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/atlas_ovl_${pass}.spv")
+  endif()
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_ovl_${pass}.spv"
+    COMMAND "${SLANGC}" "${OVLR_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise
+            -warnings-disable 41035 -o "${GEN}/atlas_ovl_${pass}_raw.spv"
+    COMMAND spv_exact "${GEN}/atlas_ovl_${pass}_raw.spv" "${GEN}/atlas_ovl_${pass}.spv"
+    ${OVL_VALIDATE}
+    DEPENDS "${OVLR_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang"
+            "${CMAKE_SOURCE_DIR}/shaders/atlas_ovl_javamath.slang" spv_exact COMMENT "slangc atlas_overlays_roads:${entry} -> SPIR-V (exact float contract)")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_ovl_${pass}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_ovl_${pass}.spv -DOUT=${GEN}/atlas_ovl_${pass}_spv.h
+            -DNAME=atlas_ovl_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_ovl_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND OVL_HEADERS "${GEN}/atlas_ovl_${pass}_spv.h")
+endforeach()
+target_sources(atlas_core PRIVATE src/overlays_engine.cpp ${OVL_HEADERS})
 
+# The client's decoration (atlas_features.slang, docs/ATLAS-CLIENT-GENERATION.md stage 4): the same exact float
+# contract, one SPIR-V module per kernel (one a feature type); the big helpers are [noinline] (else the driver inlines
+# them at every call site). Its exact math is a copy of its own (atlas_feat_math.slang: the flag through an argument,
+# see there). -O0, and it ships so: from slangc's -O3 SPIR-V (checked valid and
+# right op for op) NVIDIA's driver 616.56 compiles wrong code (spring: `holes == 1` false with holes 1; its SSA form,
+# not the source, triggers it), while the -O0 SPIR-V matches Java exactly (E:/NirnCraft-scratch/features/o3).
+# GPU only (the CPU fallback is a later job of its own).
+set(FEAT_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_features.slang")
+set(FEAT_HEADERS)
+foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:featApplyMain" "pack:featPackMain"
+             "ore:featOreMain" "cover:featCoverMain" "rock:featRockMain" "tree:featTreeMain" "freeze:featFreezeMain"
+             "disk:featDiskMain" "spring:featSpringMain" "lake:featLakeMain" "aux:featAuxMain"
+             "sapply:featStoreApplyMain")
+  string(REPLACE ":" ";" pe "${pair}")
+  list(GET pe 0 pass)
+  list(GET pe 1 entry)
+  set(FEAT_VALIDATE)
+  if(SPIRV_VAL)
+    set(FEAT_VALIDATE COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/atlas_feat_${pass}.spv")
+  endif()
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_feat_${pass}.spv"
+    COMMAND "${SLANGC}" "${FEAT_SRC}" -target spirv -entry ${entry} -stage compute -O0 -fp-mode precise
+            -warnings-disable 41035 -o "${GEN}/atlas_feat_${pass}_raw.spv"
+    COMMAND spv_exact "${GEN}/atlas_feat_${pass}_raw.spv" "${GEN}/atlas_feat_${pass}.spv"
+    ${FEAT_VALIDATE}
+    DEPENDS "${FEAT_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_feat_math.slang" spv_exact COMMENT "slangc atlas_features:${entry} -> SPIR-V (exact float contract)")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_feat_${pass}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_feat_${pass}.spv -DOUT=${GEN}/atlas_feat_${pass}_spv.h
+            -DNAME=atlas_feat_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_feat_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND FEAT_HEADERS "${GEN}/atlas_feat_${pass}_spv.h")
+endforeach()
+target_sources(atlas_core PRIVATE src/features_engine.cpp ${FEAT_HEADERS})
+# the decoration alone (its offline check needs no renderer kernels: a small library of its own)
+add_library(atlas_feat SHARED src/features_engine.cpp src/vk_loader.cpp ${FEAT_HEADERS})
+target_include_directories(atlas_feat PUBLIC include PRIVATE src "${GEN}" "${ATLAS_VK_INCLUDE}")
+target_compile_definitions(atlas_feat PRIVATE ATLAS_BUILD VK_NO_PROTOTYPES ATLAS_FEAT_ALONE)  # (no generator: no atlas_feat_attach)
+target_link_libraries(atlas_feat PRIVATE Threads::Threads)
+# the decoration's offline check: a dump from AtlasGenFeaturesGpuTest (Java's decoration) against the kernels
+# the driver's JIT time of a compute module (no pipeline cache): spv_jit_time <a.spv> ...
+add_executable(spv_jit_time tools/spv_jit_time.cpp src/vk_loader.cpp)
+target_include_directories(spv_jit_time PRIVATE src "${ATLAS_VK_INCLUDE}")
+target_compile_definitions(spv_jit_time PRIVATE VK_NO_PROTOTYPES)
+add_executable(atlas_feat_test tests/features_test.cpp)
+target_include_directories(atlas_feat_test PRIVATE include)
+target_link_libraries(atlas_feat_test PRIVATE atlas_feat)
 # the far passes without Java (dev tool: gen_probe <dir> <lod> <tx> <tz> [far], the parity test's dump)
 add_executable(gen_probe tools/gen_probe.cpp)
 target_include_directories(gen_probe PRIVATE include)

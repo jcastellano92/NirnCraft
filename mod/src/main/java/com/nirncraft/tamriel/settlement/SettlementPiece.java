@@ -27,6 +27,11 @@ import java.util.List;
 public class SettlementPiece extends StructurePiece {
     /** Foundations and posts may reach this far below the floor. */
     public static final int FOUNDATION = 48;
+    /**
+     * The atlas overlays' recorder (com.nirncraft.atlas.AtlasOverlayTapes): while set on this thread, postProcess's
+     * canvas records its writes there (the sweeps after it are not recorded). Unset in the game.
+     */
+    public static final ThreadLocal<Canvas.Tape> TAPE = new ThreadLocal<>();
 
     public final Spec spec;
     public final long seed;
@@ -179,6 +184,7 @@ public class SettlementPiece extends StructurePiece {
         if (clip.minX() > clip.maxX() || clip.minZ() > clip.maxZ() || clip.minY() > clip.maxY()) return;
         Canvas c = canvas(level, clip);
         c.owner = owner();
+        c.tape = TAPE.get();
         try {
             Builders.build(c, this);
             com.nirncraft.tamriel.settlement.build.Sanity.sweep(level, clip, chunkBox);

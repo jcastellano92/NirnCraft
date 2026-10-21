@@ -38,6 +38,8 @@ final class AtlasGenNative {
     private final MethodHandle readPage, pageStats, tiles, far, farIngest, gridReports;
     // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
     private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest;
+    // the chunk store and the decoration's store stages (atlas_gen_store_*, atlas_feat_attach): null in a library without them
+    private final MethodHandle storeEnable, runStore, storeKeep, storeStats, featAttach, featDestroy;
     /** Columns of a far tile (atlas_gen_tiles). */
     static final int TILE_COLS = 65536;
     /** Words per probe (atlas_gen_probe). */
@@ -82,6 +84,16 @@ final class AtlasGenNative {
         farCacheIngest = lib.find("atlas_gen_far_cache_ingest").isPresent()
                 ? bind(l, lib, "atlas_gen_far_cache_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS))
                 : null;
+        boolean st = lib.find("atlas_gen_run_store").isPresent();
+        storeEnable = st ? bind(l, lib, "atlas_gen_store_enable", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT)) : null;
+        runStore = st ? bind(l, lib, "atlas_gen_run_store", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS,
+                ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
+        storeKeep = st ? bind(l, lib, "atlas_gen_store_keep", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT)) : null;
+        storeStats = st ? bind(l, lib, "atlas_gen_store_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
+        boolean fa = lib.find("atlas_feat_attach").isPresent();
+        featAttach = fa ? bind(l, lib, "atlas_feat_attach", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT,
+                ADDRESS, JAVA_INT, ADDRESS)) : null;
+        featDestroy = fa ? bind(l, lib, "atlas_feat_destroy", FunctionDescriptor.ofVoid(ADDRESS)) : null;
         tiles = lib.find("atlas_gen_tiles").isPresent()
                 ? bind(l, lib, "atlas_gen_tiles", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
     }
@@ -512,6 +524,99 @@ final class AtlasGenNative {
                 if (s == -8) return -1;  // ATLAS_ERR_TIMEOUT
                 check(s, "atlas_gen_ingest");
                 return sec.get(JAVA_INT, 0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Whether this library has the chunk store and the decoration's store stages (atlas_gen_run_store, atlas_feat_attach). */
+        boolean storeSupported() {
+            return runStore != null && featAttach != null;
+        }
+
+        /** Turns the chunk store on with that many slots (atlas_gen_store_enable). */
+        void storeEnable(int slots) {
+            try {
+                check((int) storeEnable.invokeExact(ptr, slots), "atlas_gen_store_enable");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * Chunks into the store and, from it, up to RUN_CHUNKS chunks through every store stage (atlas_gen_run_store):
+         * done receives their (cx, cz) pairs, ids (null: not wanted) their CHUNK_WORDS generator ids, flags their flags,
+         * info (null: no ingest passes; else {@link #ingest} takes them next) their INFO_WORDS words. Returns how many.
+         */
+        synchronized int runStore(int[] chunkXZ, int[] done, int[] ids, int[] flags, int[] info, Times[] times) {
+            int n = chunkXZ.length / 2;
+            if (ids != null && (outSeg == null || outWords < (long) RUN_CHUNKS * CHUNK_WORDS)) {
+                if (outArena != null) outArena.close();
+                outArena = Arena.ofShared();
+                outWords = (long) RUN_CHUNKS * CHUNK_WORDS;
+                outSeg = outArena.allocate(JAVA_INT, outWords);
+            }
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment in = n > 0 ? a.allocateFrom(JAVA_INT, chunkXZ) : MemorySegment.NULL;
+                MemorySegment dn = a.allocate(JAVA_INT, RUN_CHUNKS * 2L), cnt = a.allocate(JAVA_INT);
+                MemorySegment out = ids != null ? outSeg : MemorySegment.NULL;
+                MemorySegment fl = a.allocate(JAVA_INT, RUN_CHUNKS);
+                MemorySegment inf = info != null ? a.allocate(JAVA_INT, (long) RUN_CHUNKS * INFO_WORDS) : MemorySegment.NULL;
+                MemorySegment t = a.allocate(88, 8);
+                check((int) runStore.invokeExact(ptr, in, n, dn, cnt, out, fl, inf, t), "atlas_gen_run_store");
+                int m = cnt.get(JAVA_INT, 0);
+                MemorySegment.copy(dn, JAVA_INT, 0, done, 0, m * 2);
+                if (ids != null) MemorySegment.copy(out, JAVA_INT, 0, ids, 0, m * CHUNK_WORDS);
+                if (flags != null) MemorySegment.copy(fl, JAVA_INT, 0, flags, 0, m);
+                if (info != null) MemorySegment.copy(inf, JAVA_INT, 0, info, 0, m * INFO_WORDS);
+                if (times != null && times.length > 0) times[0] = Times.of(t);
+                return m;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Drops the store's chunks outside the box (atlas_gen_store_keep). */
+        void storeKeep(int minCx, int minCz, int maxCx, int maxCz) {
+            try {
+                check((int) storeKeep.invokeExact(ptr, minCx, minCz, maxCx, maxCz), "atlas_gen_store_keep");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** The store's chunks: held, waiting (not through every stage), ready (through, not packed). */
+        int[] storeStats() {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment h = a.allocate(JAVA_INT), w = a.allocate(JAVA_INT), r = a.allocate(JAVA_INT);
+                check((int) storeStats.invokeExact(ptr, h, w, r), "atlas_gen_store_stats");
+                return new int[]{h.get(JAVA_INT, 0), w.get(JAVA_INT, 0), r.get(JAVA_INT, 0)};
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * The decoration as this generator's store stages (atlas_feat_attach): the feature program, and the id tables
+         * (null both: the same ids). Returns the handle for {@link #detachFeatures}.
+         */
+        MemorySegment attachFeatures(int[] words, int[] gen2feat, int[] feat2gen) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment out = a.allocate(ADDRESS);
+                MemorySegment g2f = gen2feat != null ? a.allocateFrom(JAVA_INT, gen2feat) : MemorySegment.NULL;
+                MemorySegment f2g = feat2gen != null ? a.allocateFrom(JAVA_INT, feat2gen) : MemorySegment.NULL;
+                check((int) featAttach.invokeExact(ptr, a.allocateFrom(JAVA_INT, words), words.length, g2f,
+                        gen2feat != null ? gen2feat.length : 0, f2g, feat2gen != null ? feat2gen.length : 0, out), "atlas_feat_attach");
+                return out.get(ADDRESS, 0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Removes the decoration's store stages (atlas_feat_destroy). */
+        void detachFeatures(MemorySegment feat) {
+            try {
+                featDestroy.invokeExact(feat);
             } catch (Throwable t) {
                 throw rethrow(t);
             }
