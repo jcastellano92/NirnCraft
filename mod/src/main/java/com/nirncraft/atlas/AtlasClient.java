@@ -624,6 +624,10 @@ public final class AtlasClient {
             AtlasTrees trees = source instanceof AtlasExactSource e && lib.abi() >= 0x000D00
                     ? AtlasTrees.forServer(mc.getSingleplayerServer(), e) : null;
             AtlasTrees.activeLod = trees != null ? AtlasTrees.APPROX_LOD : -1;  // before the first tile goes up
+            // the far trees from the GPU decoration (the client generator's far chunks): no dressing canopy on any tile,
+            // from the first (AtlasClientGen settles it once its decoration is attached)
+            AtlasTileUpload.noDressingCanopy = AtlasClientGen.ON && mc.hasSingleplayerServer() && AtlasClientGen.STORE && AtlasClientGen.far()
+                    && !"0".equals(System.getenv("ATLAS_FEAT_FAR"));
             farField = new AtlasFarField(ctx, source, () -> AtlasSettlements.create(ground, mats, trees), lods);
             AtlasClientSections.reset();  // a new context holds no real blocks: the loaded chunks go up again
             // the structures from the plans as stages of the client generator's batches (before its program compiles)

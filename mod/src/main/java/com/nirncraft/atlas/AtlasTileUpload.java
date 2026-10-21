@@ -21,6 +21,12 @@ final class AtlasTileUpload {
     private final int[] grassRgb = new int[AtlasTints.GRID * AtlasTints.GRID], foliageRgb = new int[grassRgb.length];
     private final short[] grassMat = new short[N], foliageMat = new short[N], topMat = new short[N], fillMat = new short[N];
     private final byte[] flags = new byte[N];
+    /**
+     * The far trees come from the decoration on the GPU (AtlasClientGen: the features' far stage writes them into the
+     * generator's far chunks): the dressing's stand-in canopy goes from every tile (ATLAS_COLUMN_NO_CANOPY), else it
+     * paints forests where the real features put none (and they vanish as you come near).
+     */
+    static volatile boolean noDressingCanopy;
     private final AtlasTileCodec.Surface blocks = new AtlasTileCodec.Surface();
     private final AtlasTints tints = new AtlasTints();
     private final Map<String, Short> ids = new HashMap<>();
@@ -101,7 +107,7 @@ final class AtlasTileUpload {
                 // a grass block wears its biome's tint (0 = the dressing's own tinted grass)
                 topMat[c] = t < byIndex.length ? grass[t] ? tinted ? grassMat[c] : 0 : byIndex[t] : 0;
                 fillMat[c] = u < byIndex.length && !grass[u] ? byIndex[u] : 0;
-                flags[c] = blocks.flags[c];
+                flags[c] = (byte) (noDressingCanopy ? blocks.flags[c] | AtlasTrees.NO_CANOPY : blocks.flags[c]);
             }
             // (the dressing's canopy stays until the tile's real trees replace it: AtlasSettlements uploads them with
             // STRUCTURES_REPLACE_CANOPY, so the tree line never goes bare while they are being built)

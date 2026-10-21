@@ -43,6 +43,137 @@ import java.util.function.Predicate;
 class AtlasGenFeaturesGpuTest {
 
     /**
+     * The far trees (the far stage, atlas_gen_add_far_stage) against the decoration's own: a square of chunks decorated
+     * in the store, then the lod-1 far tile over it from the same generator; per 2 x 2 block column, whether leaves stand
+     * there (coverage) and which leaves (the species' mix), the decoration's against the far canopy's. Right on average
+     * is the aim (after a chunk's first tree the far trees are the decoration's in number and kind, not in place).
+     * NIRNCRAFT_FEAT_FAR_CHECK=1; NIRNCRAFT_FEAT_FAR_AT "cx,cz", NIRNCRAFT_FEAT_FAR_R its radius in chunks.
+     */
+    @Test
+    void farTreesLikeTheDecoration(MinecraftServer server) throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue("tamriel".equals(System.getenv("NIRNCRAFT_TEST_WORLD")), "the flat test world");
+        org.junit.jupiter.api.Assumptions.assumeTrue(System.getenv("NIRNCRAFT_FEAT_FAR_CHECK") != null, "no far trees check asked for");
+        ServerLevel ow = overworld(server);
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) ow.getChunkSource().getGenerator();
+        RandomState rs = ow.getChunkSource().randomState();
+        long seed = ow.getSeed();
+        AtlasGenProgram prog0 = AtlasGenProgram.compile(gen, gen.generatorSettings().value(), rs, ow, seed, null);
+        long zs = net.minecraft.world.level.biome.BiomeManager.obfuscateSeed(seed);
+        AtlasFeatureProgram fp0 = AtlasFeatureProgram.compile(gen, ow, prog0, seed, zs, null);
+        // as the client generator: the blocks the features place join the generator's program (its ids then theirs)
+        List<BlockState> missing = fp0.blocks.stream().filter(st -> !prog0.blockIds.containsKey(st)).toList();
+        if (!missing.isEmpty()) AtlasGenProgram.addBlocks(() -> missing);
+        AtlasGenProgram prog = missing.isEmpty() ? prog0 : AtlasGenProgram.compile(gen, gen.generatorSettings().value(), rs, ow, seed, null);
+        AtlasFeatureProgram fp = missing.isEmpty() ? fp0 : AtlasFeatureProgram.compile(gen, ow, prog, seed, zs, null);
+        int[] g2f = new int[prog.blocks.size()], f2g = new int[fp.blocks.size()];
+        for (int i = 0; i < g2f.length; i++) g2f[i] = fp.blockIds.getOrDefault(prog.blocks.get(i), 0);
+        for (int i = 0; i < f2g.length; i++) f2g[i] = prog.blockIds.getOrDefault(fp.blocks.get(i), 0);
+        int[] map = AtlasGenMap.words(prog, gen.getBiomeSource());
+        AtlasGenNative nat = AtlasGenNative.load(Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB")));
+        String at = System.getenv().getOrDefault("NIRNCRAFT_FEAT_FAR_AT", "0,312");
+        int cx0 = Integer.parseInt(at.split(",")[0].trim()), cz0 = Integer.parseInt(at.split(",")[1].trim());
+        int r = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_FEAT_FAR_R", "8"));
+        // the leaves: generator ids of leaf states (the far canopy's crowns are leaves; its trunks logs)
+        java.util.Set<Integer> leaves = new java.util.HashSet<>();
+        for (int i = 0; i < prog.blocks.size(); i++) if (prog.blocks.get(i).is(net.minecraft.tags.BlockTags.LEAVES)) leaves.add(i);
+        StringBuilder report = new StringBuilder();
+        try (AtlasGenNative.Gen g = nat.create(AtlasGenNative.BACKEND_VULKAN)) {
+            if (g == null || !g.storeSupported()) throw new IllegalStateException("no Vulkan generator with the store");
+            g.setProgram(prog.words);
+            g.setMap(map);
+            g.storeEnable(768);
+            java.lang.foreign.MemorySegment f = g.attachFeatures(fp.words, g2f, f2g);
+            List<int[]> order = new ArrayList<>();
+            for (int dz = -r - 3; dz <= r + 3; dz++) for (int dx = -r - 3; dx <= r + 3; dx++) order.add(new int[]{cx0 + dx, cz0 + dz});
+            int[] xz = new int[AtlasGenNative.RUN_CHUNKS * 2];
+            int[] ids = new int[AtlasGenNative.RUN_CHUNKS * AtlasGenNative.CHUNK_WORDS];
+            Map<Long, int[]> done = new HashMap<>();
+            System.out.println("TRACE begin far-trees decoration");
+            for (int i = 0, calls = 0; ; i += 64, calls++) {
+                int n = Math.max(0, Math.min(64, order.size() - i));
+                int[] batch = new int[n * 2];
+                for (int j = 0; j < n; j++) {
+                    batch[j * 2] = order.get(i + j)[0];
+                    batch[j * 2 + 1] = order.get(i + j)[1];
+                }
+                int m = g.runStore(batch, xz, ids, null, null, null);
+                for (int j = 0; j < m; j++)
+                    done.put(ChunkPos.pack(xz[j * 2], xz[j * 2 + 1]),
+                            java.util.Arrays.copyOfRange(ids, j * AtlasGenNative.CHUNK_WORDS, (j + 1) * AtlasGenNative.CHUNK_WORDS));
+                System.out.println("TRACE progress far-trees-decoration " + done.size());
+                if ((n == 0 && m == 0) || calls > 400) break;
+            }
+            System.out.println("TRACE end far-trees decoration");
+            // the lod-1 tile over the square's centre
+            int lod = 1, span = AtlasNative.TILE << lod, rows = (44 + (1 << lod) - 1) >> lod;
+            int tx = Math.floorDiv(cx0 * 16, span), tz = Math.floorDiv(cz0 * 16, span);
+            long t0 = System.nanoTime();
+            AtlasGenNative.Gen.FarChunks fc = g.far(lod, new int[]{tx, tz}, 0, 3000);
+            double farMs = (System.nanoTime() - t0) / 1e6;
+            if (fc.mixed() > 3000) throw new IllegalStateException("more mixed chunks than the capacity: " + fc.mixed());
+            // per 2 x 2 column of the square's finished chunks: leaves in the decoration's blocks / in the far chunks
+            long cells = 0, real = 0, farC = 0, both = 0;
+            Map<Integer, Long> realMix = new HashMap<>(), farMix = new HashMap<>();
+            for (var e : done.entrySet()) {
+                int cx = ChunkPos.getX(e.getKey()), cz = ChunkPos.getZ(e.getKey());
+                if (Math.abs(cx - cx0) > r || Math.abs(cz - cz0) > r) continue;
+                int[] w = e.getValue();
+                int[] top = new int[256];  // the highest leaf id of each column (0 none)
+                for (int s = 0; s < 40; s++)
+                    for (int k = 0; k < 4096; k++) {
+                        int id = (w[s * 2048 + (k >> 1)] >>> ((k & 1) * 16)) & 0xFFFF;
+                        if (id != 0 && leaves.contains(id)) top[k & 255] = id;
+                    }
+                for (int qz = 0; qz < 16; qz += 2)
+                    for (int qx = 0; qx < 16; qx += 2) {
+                        int rid = 0;
+                        for (int d = 0; d < 4 && rid == 0; d++) rid = top[(qz + (d >> 1)) * 16 + qx + (d & 1)];
+                        // the far tile's column and its chunk column
+                        int bx = cx * 16 + qx - tx * span, bz = cz * 16 + qz - tz * span;
+                        if (bx < 0 || bz < 0 || bx >= span || bz >= span) continue;
+                        int col = bx >> lod, row = bz >> lod, cc = (row >> 4) * 16 + (col >> 4);
+                        int vx = col & 15, vz = row & 15, fid = 0;
+                        for (int cy = 0; cy < rows && fid == 0; cy++) {
+                            int kk = cc * rows + cy, kind = fc.kinds()[kk * 2], slot = fc.kinds()[kk * 2 + 1];
+                            if (kind != 0) {
+                                if (kind >= 2 && kind != 0xFFFFFFFE && leaves.contains(kind >>> 8)) fid = kind >>> 8;
+                                continue;
+                            }
+                            for (int vy = 0; vy < 16 && fid == 0; vy++) {
+                                int v = vy * 256 + vz * 16 + vx;
+                                int id = (fc.ids()[slot * 2048 + (v >> 1)] >>> ((v & 1) * 16)) & 0xFFFF;
+                                if (leaves.contains(id)) fid = id;
+                            }
+                        }
+                        cells++;
+                        if (rid != 0) { real++; realMix.merge(rid, 1L, Long::sum); }
+                        if (fid != 0) { farC++; farMix.merge(fid, 1L, Long::sum); }
+                        if (rid != 0 && fid != 0) both++;
+                    }
+            }
+            java.util.function.Function<Map<Integer, Long>, String> mix = m -> {
+                Map<String, Long> byBlock = new HashMap<>();  // (the leaves' states together: one species' leaves)
+                m.forEach((id, nn) -> byBlock.merge(prog.blocks.get(id).getBlock().getDescriptionId().replace("block.", ""), nn, Long::sum));
+                long tot = byBlock.values().stream().mapToLong(Long::longValue).sum();
+                StringBuilder sb = new StringBuilder();
+                byBlock.entrySet().stream().sorted((a, b) -> Long.compare(b.getValue(), a.getValue())).limit(6).forEach(en ->
+                        sb.append(String.format(" %s %.0f%%", en.getKey(), 100.0 * en.getValue() / Math.max(1, tot))));
+                return sb.toString();
+            };
+            report.append(String.format("far trees at chunk %d, %d (r %d): %d columns of 2 x 2; leaves in the decoration's %.1f %%, in the far "
+                            + "tile's %.1f %%, both %.1f %%; far tile %.0f ms (%d mixed chunks)%n  the decoration's leaves:%s%n  the far tile's:%s%n",
+                    cx0, cz0, r, cells, 100.0 * real / Math.max(1, cells), 100.0 * farC / Math.max(1, cells), 100.0 * both / Math.max(1, cells),
+                    farMs, fc.mixed(), mix.apply(realMix), mix.apply(farMix)));
+            System.out.println(String.format("TRACE done far-trees coverage decoration %.1f%% far %.1f%%", 100.0 * real / Math.max(1, cells),
+                    100.0 * farC / Math.max(1, cells)));
+            g.detachFeatures(f);
+        }
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".fartrees.txt"), report);
+        System.out.print(report);
+    }
+
+    /**
      * In-game-like: the feature program compiles as the client generator compiles it, with the pack's mods loaded
      * (NIRNCRAFT_TEST_PACK_MODS, build.gradle: e.g. Lithium, whose math.sine_lut drops Mth's sine table), and its sine
      * table is Mth's to the bit. NIRNCRAFT_FEAT_PACK=1.

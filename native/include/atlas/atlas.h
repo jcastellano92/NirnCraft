@@ -1047,8 +1047,9 @@ typedef int32_t (*AtlasGenStoreStageFn)(void* user, const AtlasGenStoreBatch* ba
  * A far stage (atlas_gen_add_far_stage): called in the far chunks' passes (atlas_gen_far, atlas_gen_far_ingest) once a
  * tile, after its columns' planes (surface, water, blocks, biomes) and before its chunks are made from them. It records
  * into the command buffer given (never submits) and may write the tile's planes 5 and 6, which the chunks then draw
- * (both 0 on entry: nothing): plane 5 a column's canopy, (crown top y + 1024) << 16 | (crown bottom y + 1024), the
- * voxels at or above the bottom and below the top (and above the ground) its leaves; plane 6 the leaves' generator id
+ * (both 0 on entry: nothing): plane 5 a column's canopy, fill << 27 | (crown top y + 1024) << 16 | (crown bottom y +
+ * 1024), the voxels at or above the bottom and below the top (and above the ground) its leaves, fill/32 of them (a
+ * hash of the voxel picks; fill 0: all); plane 6 the leaves' generator id
  * | the trunk's << 16 (0: no trunk), the voxels above the ground below the crown the trunk. The tile cache's
  * fingerprint holds each far stage's own (`fingerprint`: its engine's version and data), so a change makes the
  * cached far chunks again.

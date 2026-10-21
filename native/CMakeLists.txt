@@ -472,7 +472,8 @@ set(FEAT_HEADERS)
 foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:featApplyMain" "pack:featPackMain"
              "ore:featOreMain" "cover:featCoverMain" "rock:featRockMain" "tree:featTreeMain" "freeze:featFreezeMain"
              "disk:featDiskMain" "spring:featSpringMain" "lake:featLakeMain" "aux:featAuxMain"
-             "sapply:featStoreApplyMain" "mask:featMaskMain")
+             "sapply:featStoreApplyMain" "mask:featMaskMain" "farplaces:featFarPlacesMain" "fartrees:featFarTreesMain"
+             "farcanopy:featFarCanopyMain")
   string(REPLACE ":" ";" pe "${pair}")
   list(GET pe 0 pass)
   list(GET pe 1 entry)

@@ -1363,9 +1363,13 @@ uint farVoxel(uint t, uint c, float yc, float s) {
     if (params.pageH != 0) {
         uint cw = outIds[P + TILE_COLS * 5u + c];
         if (cw != 0u) {
-            float top = float(int(cw >> 16) - 1024), bottom = float(int(cw & 0xFFFFu) - 1024);
-            uint tids = outIds[P + TILE_COLS * 6u + c];
-            if (yc >= bottom && yc < top) return farMat(biome, tids & 0xFFFFu);
+            float top = float(int((cw >> 16) & 0x7FFu) - 1024), bottom = float(int(cw & 0xFFFFu) - 1024);
+            uint tids = outIds[P + TILE_COLS * 6u + c], fill = cw >> 27;
+            // (fill: the crown's share of leaves in 32nds, 0 all; a voxel's own hash picks it: a crown with its gaps)
+            uint vh = (c * 0x9E3779B1u) ^ (uint(int(yc * 2.0f) + 4096) * 0x85EBCA77u) ^ (t * 0xC2B2AE3Du);
+            vh = (vh ^ (vh >> 15)) * 0x2C1B3C6Du;
+            bool leaf = fill == 0u || ((vh ^ (vh >> 13)) & 31u) < fill;
+            if (yc >= bottom && yc < top) return leaf ? farMat(biome, tids & 0xFFFFu) : 0u;
             if (yc < bottom && (tids >> 16) != 0u) return farMat(biome, tids >> 16);
         }
     }

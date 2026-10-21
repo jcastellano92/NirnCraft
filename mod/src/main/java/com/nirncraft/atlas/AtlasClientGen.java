@@ -245,6 +245,7 @@ final class AtlasClientGen implements AutoCloseable {
      */
     private static void gpuDecorationFailed(String why, Throwable cause) {
         com.nirncraft.NirnCraft.LOGGER.error("atlas client generation: the GPU decoration is OFF ({}); the decoration falls back to the CPU", why, cause);
+        AtlasTileUpload.noDressingCanopy = false;  // (no far trees from it: the dressing's canopy again)
         if (DEV) throw new IllegalStateException("the GPU decoration failed (" + why + "): " + cause, cause);
     }
 
@@ -348,6 +349,8 @@ final class AtlasClientGen implements AutoCloseable {
                     ow.getSeed(), feats, ctx, mats, direct);
             c.storeOn = stages != null;
             c.featStages = stages;
+            // the far chunks carry the decoration's trees (its far stage, unless ATLAS_FEAT_FAR=0): no stand-in canopy
+            AtlasTileUpload.noDressingCanopy = stages != null && far() && !"0".equals(System.getenv("ATLAS_FEAT_FAR"));
             com.nirncraft.NirnCraft.LOGGER.info("atlas client generation on ({}): program {} words, {} fields, pages from the worker, radius {} chunks, "
                             + "features {} chunks on {} threads, {} ms", gen.device(), prog.words.length, prog.fields.size(),
                     RADIUS, feats == null ? 0 : FEATURE_RADIUS, feats == null ? 0 : FEATURE_THREADS, (System.nanoTime() - t0) / 1_000_000);
@@ -1429,6 +1432,7 @@ final class AtlasClientGen implements AutoCloseable {
             Thread.currentThread().interrupt();
         }
         if (featStages != null) gen.setFeatureOverlays(featStages, null);  // (before the overlays go)
+        if (featStages != null) AtlasTileUpload.noDressingCanopy = false;
         for (var detach : DETACH) {
             try {
                 detach.accept(gen);

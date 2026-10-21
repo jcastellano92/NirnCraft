@@ -825,13 +825,13 @@ public:
         // one submission a pass and tile (the watchdog: see tiles())
         for (uint32_t k = 0; k < 4; k++)
           for (uint32_t ti = 0; ti < n; ti++) {
+            if (k == 3 && ti == 0 && !runFarStages(jobs, n, err)) return false;  // (their own submissions)
             begin();
             if (timestamps_) {
                 vkCmdResetQueryPool(cmd_, queries_, 0, 2);
                 vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
             }
             p.pad1 = int32_t(ti);
-            if (k == 3 && ti == 0 && !runFarStages(jobs, n, err)) return false;
             p.pageH = farStaged_ ? 1 : 0;  // (farChunk: draw planes 5, 6)
             if (k == 3 && ti == 0) {
                 vkCmdFillBuffer(cmd_, far_.buf, 0, 4, 0u);   // the mixed chunks' counter
