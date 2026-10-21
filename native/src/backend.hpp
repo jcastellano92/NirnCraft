@@ -103,6 +103,9 @@ public:
     // Whether it renders on a device (Vulkan): the CPU's own fallbacks (a CPU level 0 for what the grid gave up) are
     // the CPU backend's alone
     virtual bool onDevice() const { return false; }
+    // (test hook, atlas_debug_coarse_chunks) a buffer on the device holding `bytes` of data, kept until the backend
+    // goes: its handle as ingestGpu / ingestCoarseGpu take it (0: none on this backend)
+    virtual uint64_t debugDeviceBuffer(const void*, size_t) { return 0; }
     virtual bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) = 0;
     // Called from the update thread with a new scene revision: a backend may copy it to the GPU here, off the
     // render thread. Returns false when it could not (the frame then uploads it itself).

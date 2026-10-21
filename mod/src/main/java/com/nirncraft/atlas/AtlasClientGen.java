@@ -41,13 +41,38 @@ import java.util.stream.IntStream;
  */
 final class AtlasClientGen implements AutoCloseable {
     static final boolean ON = Boolean.getBoolean("nirncraft.atlas.clientGen");
-    static final int RADIUS = Integer.getInteger("nirncraft.atlas.clientGen.radius", 24);
+    /** The window, within the grid's level 0 (ATLAS_VOXGRID_D sections, voxgrid.cpp: 8..128, 64): wider, its edge
+     *  chunks would be dropped and wanted again without end. */
+    static final int RADIUS = Math.min(Integer.getInteger("nirncraft.atlas.clientGen.radius", 24), (gridD() - 3) / 2);
+
+    private static int gridD() {
+        try {
+            String d = System.getenv("ATLAS_VOXGRID_D");
+            return d == null ? 64 : Math.max(8, Math.min(128, Integer.parseInt(d.trim())));
+        } catch (NumberFormatException e) {
+            return 8;  // (atoi: 0, clamped to 8)
+        }
+    }
     static final int FEATURE_RADIUS = Integer.getInteger("nirncraft.atlas.clientGen.featureRadius", 16);
     static final int FEATURE_THREADS = Integer.getInteger("nirncraft.atlas.clientGen.featureThreads",
             Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors() / 4)));
     static final boolean ORES = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.ores"));
     /** {@code .direct=false}: the generator's sections come back to the CPU and go up as uploads (the old path). */
     static final boolean DIRECT = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.direct"));
+    /** (direct) The far terrain on the GPU into the grid's coarse levels (atlas_gen_far_ingest); false: the tiles. */
+    /**
+     * Called with each new client generator and its program before its first batch: the features and overlays engines
+     * register their stages there (gen.handle(): atlas_gen_add_stage, atlas_gen_device_handles; prog.blockIds for the
+     * blocks they place, registered beforehand with AtlasGenProgram.addBlocks). Register at mod setup (any thread).
+     */
+    static final java.util.List<java.util.function.BiConsumer<AtlasGenNative.Gen, AtlasGenProgram>> ATTACH =
+            new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    static boolean far() {
+        return !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.far"));
+    }
+    /** Far tiles a side around the camera per coarse level (the level's window is 4 tiles of 16 of its chunks). */
+    static final int FAR_TILES = 2;
     /** Chunks per GPU batch; the first after a jump is small, so the blocks under the camera come first. */
     private static final int BATCH = 64, FIRST_BATCH = 16, READY_MAX = 512;
     private static volatile AtlasClientGen active;
@@ -57,6 +82,10 @@ final class AtlasClientGen implements AutoCloseable {
     private static volatile float camYaw;
     private static volatile boolean camSet;
     private static volatile int camCx = Integer.MIN_VALUE, camCz = Integer.MIN_VALUE;
+    // the camera's motion (blocks a second, smoothed; zeroed by a jump): requests lead it by PREDICT_S
+    private static volatile double camVx, camVz;
+    private static long camNs;
+    private static final double PREDICT_S = 1.5;
 
     private final AtlasGenProgram program;
     private final AtlasGenPages pages;
@@ -91,6 +120,15 @@ final class AtlasClientGen implements AutoCloseable {
     private final NoiseBasedChunkGenerator generator;
     private final RandomState random;
     private volatile boolean running = true;
+    // (direct, FAR) the far tiles put into the grid, per level and tile; those the grid did not take whole (outside its
+    // window, its pool's cut-off) go again once the camera has moved a tile at that level
+    private final Set<Long> farDone = ConcurrentHashMap.newKeySet(), farPartial = ConcurrentHashMap.newKeySet();
+    private final int[][] farCam = new int[7][];
+    private volatile long farTiles, farChunks, farTaken, farBusy;
+    private volatile double farMs;
+    private volatile boolean farOn;
+    /** The generator makes its own pages on the device (atlas_gen_set_map took the map). */
+    private volatile boolean devicePages;
     private volatile boolean terrainBusy = true;  // the window has chunks to generate: features wait (terrain first)
     // stats (atlas-info)
     private volatile long chunks, flagged, pagesMade, featureChunks, uploadedChunks, uploadedSections;
@@ -149,6 +187,26 @@ final class AtlasClientGen implements AutoCloseable {
         return new AtlasClientGen(prog, pages, gen, g, rs, seed, null, null, null, false);
     }
 
+    /**
+     * The map of Nirn to the generator (atlas_gen_set_map, AtlasGenMap): with it the device makes every page itself
+     * (atlas_page.slang) and Java computes none. Returns what the log says: "on the device", or why they stay in Java
+     * (an older library, a program or biome source the page passes do not cover; AtlasGenPages then, as before).
+     */
+    static String devicePages(AtlasGenNative.Gen gen, AtlasGenProgram prog, net.minecraft.world.level.biome.BiomeSource biomes) {
+        if (!gen.devicePagesSupported()) return "in Java (the library makes no pages)";
+        if (!prog.pageGen) return "in Java (the program lacks the page passes' inputs)";
+        try {
+            long t0 = System.nanoTime();
+            int[] map = AtlasGenMap.words(prog, biomes);
+            gen.setMap(map);
+            if (gen.pageStats()[2] == 0) return "in Java (the generator did not take them)";
+            return String.format("on the device (map %d words, %.0f ms)", map.length, (System.nanoTime() - t0) / 1e6);
+        } catch (RuntimeException e) {
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: pages stay in Java", e);
+            return "in Java (" + e.getMessage() + ")";
+        }
+    }
+
     /** Starts generation for the integrated server's overworld (when the flag is on), or returns null (logged). */
     static AtlasClientGen start(MinecraftServer server, Path library, AtlasNative.Context ctx, AtlasMaterials mats) {
         return ON ? startFor(server, library, ctx, mats) : null;
@@ -175,6 +233,14 @@ final class AtlasClientGen implements AutoCloseable {
             if (gen == null) gen = nat.create(AtlasGenNative.BACKEND_CPU);
             if (gen == null) return null;
             gen.setProgram(prog.words);
+            // the batch's stages (atlas.h atlas_gen_add_stage): the features and overlays engines attach to this generator
+            for (var attach : ATTACH) {
+                try {
+                    attach.accept(gen, prog);
+                } catch (RuntimeException e) {
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: a stage engine did not attach", e);
+                }
+            }
             if (direct) gen.setIngest(ingestTable(prog, mats, ctx));
             AtlasGenFeatures feats = null;
             if (FEATURE_RADIUS > 0) {
@@ -186,9 +252,9 @@ final class AtlasClientGen implements AutoCloseable {
             }
             AtlasClientGen c = new AtlasClientGen(prog, new AtlasGenPages(prog, rs, g.getBiomeSource(), ow), gen, g, rs,
                     ow.getSeed(), feats, ctx, mats, direct);
-            com.nirncraft.NirnCraft.LOGGER.info("atlas client generation on ({}): program {} words, {} fields, radius {} chunks, "
-                            + "features {} chunks on {} threads, {} ms", gen.device(), prog.words.length, prog.fields.size(), RADIUS,
-                    feats == null ? 0 : FEATURE_RADIUS, feats == null ? 0 : FEATURE_THREADS, (System.nanoTime() - t0) / 1_000_000);
+            com.nirncraft.NirnCraft.LOGGER.info("atlas client generation on ({}): program {} words, {} fields, pages from the worker, radius {} chunks, "
+                            + "features {} chunks on {} threads, {} ms", gen.device(), prog.words.length, prog.fields.size(),
+                    RADIUS, feats == null ? 0 : FEATURE_RADIUS, feats == null ? 0 : FEATURE_THREADS, (System.nanoTime() - t0) / 1_000_000);
             active = c;
             c.worker.start();
             if (ctx != null && mats != null) c.uploader.start();
@@ -204,6 +270,16 @@ final class AtlasClientGen implements AutoCloseable {
 
     /** The camera this frame: a new chunk wakes the generator, a jump drops the work queued for the old place. */
     static void follow(double x, double z, float yaw) {
+        long now = System.nanoTime();
+        double dt = camNs == 0 ? 0 : (now - camNs) / 1e9;
+        if (dt > 0 && dt < 0.5) {
+            double vx = (x - camX) / dt, vz = (z - camZ) / dt;
+            if (vx * vx + vz * vz > 400.0 * 400.0) vx = vz = 0;  // a teleport is no motion
+            double k = Math.min(1.0, dt / 0.25);  // ~a quarter second of smoothing
+            camVx += (vx - camVx) * k;
+            camVz += (vz - camVz) * k;
+        }
+        camNs = now;
         camX = x;
         camZ = z;
         camYaw = yaw;
@@ -215,7 +291,10 @@ final class AtlasClientGen implements AutoCloseable {
         camCz = cz;
         AtlasClientGen c = active;
         if (c == null) return;
-        if (ox == Integer.MIN_VALUE || Math.max(Math.abs(cx - ox), Math.abs(cz - oz)) > 4) c.jumped(cx, cz);
+        if (ox == Integer.MIN_VALUE || Math.max(Math.abs(cx - ox), Math.abs(cz - oz)) > 4) {
+            camVx = camVz = 0;
+            c.jumped(cx, cz);
+        }
         c.wake();
     }
 
@@ -406,9 +485,14 @@ final class AtlasClientGen implements AutoCloseable {
             r = c.ready.size();
         }
         long now = System.nanoTime(), j = c.jumpNs;
-        return String.format("clientGen{%s%s chunks=%d flagged=%d ready=%d up=%d/%d sections pages=%d genMs=%.0f pageMs=%.0f "
+        double[] dp = c.devicePages ? c.gen.pageStats() : null;
+        String pagesNow = dp == null ? "java" : String.format("device %d in %.0f ms", (long) dp[0], dp[1]);
+        if (c.farOn) pagesNow += String.format(", far %d tiles %d/%d chunks taken %.0f ms busy %d", c.farTiles, c.farTaken, c.farChunks,
+                c.farMs, c.farBusy);
+        return String.format("clientGen{%s%s chunks=%d flagged=%d ready=%d up=%d/%d sections pages=%d (%s) genMs=%.0f pageMs=%.0f "
                         + "(gpu=%.0f: kernels %.0f readback %.0f; decode=%.0f) uploadMs=%.0f features=%d featureMs=%.0f failures=%d jump{firstUp=%.0f windowUp=%.0f features=%.0f ms; %s}}",
-                c.direct ? "gpu->grid " : "", c.gen.device(), c.chunks, c.flagged, r, c.uploadedChunks, c.uploadedSections, c.pagesMade, c.genMs, c.pageMs,
+                c.direct ? "gpu->grid " : "", c.gen.device(), c.chunks, c.flagged, r, c.uploadedChunks, c.uploadedSections, c.pagesMade, pagesNow,
+                c.genMs, c.pageMs,
                 c.gpuMs, c.kernelMs, c.readbackMs, c.decodeMs,
                 c.uploadMs, c.featureChunks, c.featureMs, c.features == null ? 0 : c.features.failures(),
                 since(j, c.firstUpNs), since(j, c.windowUpNs), since(j, c.windowFeaturesNs), c.firstBatch);
@@ -427,13 +511,15 @@ final class AtlasClientGen implements AutoCloseable {
     // ---- terrain: the GPU ----
 
     /** A batch and the pages it lacks, computed while the batch before it is on the GPU. */
-    private record Planned(int[] batch, java.util.concurrent.CompletableFuture<int[][]> pages) {}
+    private record Planned(int[] batch, int cx, int cz, java.util.concurrent.CompletableFuture<int[][]> pages) {}
 
     private Planned plan(int ccx, int ccz, int max) {
         int[] batch = next(ccx, ccz, max);
         if (batch == null) return null;
         for (int i = 0; i < batch.length; i += 2) done.add(ChunkPos.pack(batch[i], batch[i + 1]));  // claimed
-        return new Planned(batch, java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+        if (devicePages)  // the device makes the pages (atlas_page.slang): nothing to compute here
+            return new Planned(batch, ccx, ccz, java.util.concurrent.CompletableFuture.completedFuture(new int[][]{new int[0]}));
+        return new Planned(batch, ccx, ccz, java.util.concurrent.CompletableFuture.supplyAsync(() -> {
             int[] miss = gen.missing(batch);  // answers while a batch runs
             int[][] made = new int[miss.length / 3 + 1][];
             made[0] = miss;
@@ -444,6 +530,18 @@ final class AtlasClientGen implements AutoCloseable {
     }
 
     private void run() {
+        // the map to the device first (seconds at most; Java's pages serve until it is up): then the device makes them
+        try {
+            String on = devicePages(gen, program, generator.getBiomeSource());
+            devicePages = on.startsWith("on the device");
+            com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: pages {}", on);
+            farOn = direct && far() && devicePages && gen.farIngestSupported();
+            com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: far terrain {}", farOn ? "into the grid's coarse levels (GPU)"
+                    : "from the tiles (" + (!direct ? "not GPU to GPU" : !far() ? "nirncraft.atlas.clientGen.far=false"
+                    : !devicePages ? "no device pages" : "the library has no far ingest") + ")");
+        } catch (RuntimeException e) {
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: pages stay in Java", e);
+        }
         int[] ids = new int[BATCH * AtlasGenNative.CHUNK_WORDS];
         int[] flags = new int[BATCH];
         int[] info = new int[BATCH * AtlasGenNative.INFO_WORDS];
@@ -455,22 +553,28 @@ final class AtlasClientGen implements AutoCloseable {
                 synchronized (ready) {
                     waiting = ready.size();
                 }
-                if (!camSet || waiting >= READY_MAX) {
-                    LockSupport.parkNanos(waiting >= READY_MAX ? 2_000_000L : 20_000_000L);
+                // (direct: terrain goes device to device, the ready queue holds only decorated chunks: never a reason to wait)
+                boolean full = !direct && waiting >= READY_MAX;
+                if (!camSet || full) {
+                    LockSupport.parkNanos(full ? 2_000_000L : 20_000_000L);
                     continue;
                 }
                 boolean fresh = jumpNs != lastJump;
                 lastJump = jumpNs;
-                if (fresh && cur != null) {
-                    // the camera jumped: the batch planned for the old place goes back (its chunks not generated)
+                if (cur != null && (fresh || Math.max(Math.abs(cur.cx - camCx), Math.abs(cur.cz - camCz)) >= 2)) {
+                    // the camera jumped, or moved on since this batch was planned (while the last one ran): it goes back
+                    // (its chunks not generated) and the requests are ordered again from where the camera is now
                     for (int i = 0; i < cur.batch.length; i += 2) done.remove(ChunkPos.pack(cur.batch[i], cur.batch[i + 1]));
                     cur = null;
                 }
                 if (cur == null) cur = plan(camCx, camCz, fresh ? FIRST_BATCH : BATCH);
                 terrainBusy = cur != null;
+                if (direct) gridReports();
                 if (cur == null) {
                     if (direct) pruneDirect(camCx, camCz);
                     else prune(camCx, camCz);
+                    // the near window done: the far terrain (a tile a turn, so a move is answered at once)
+                    if (farOn && farStep()) continue;
                     for (Thread t : featureWorkers) LockSupport.unpark(t);
                     LockSupport.parkNanos(20_000_000L);
                     continue;
@@ -488,6 +592,7 @@ final class AtlasClientGen implements AutoCloseable {
                     if (fresh) firstBatchPagesNs = t1;
                     directBatch(batch, ids, flags, info, fresh);
                     pruneDirect(camCx, camCz);
+                    if (farOn && (chunks / BATCH) % 4 == 3) farStep();  // the far terrain between near batches too
                     chunks += n;
                     pagesMade += miss.length / 3;
                     pageMs += (t1 - t0) / 1e6;
@@ -634,6 +739,8 @@ final class AtlasClientGen implements AutoCloseable {
     private int[] next(int ccx, int ccz, int max) {
         double yaw = Math.toRadians(camYaw);
         double dirX = -Math.sin(yaw), dirZ = Math.cos(yaw);
+        // where the camera will be (chunks from the camera's chunk): what it moves towards comes before what it leaves
+        double px = camVx * PREDICT_S / 16.0, pz = camVz * PREDICT_S / 16.0;
         List<long[]> cand = new ArrayList<>();
         int r = RADIUS;
         for (int dz = -r; dz <= r; dz++)
@@ -641,9 +748,12 @@ final class AtlasClientGen implements AutoCloseable {
                 if (dx * dx + dz * dz > r * r) continue;
                 long k = ChunkPos.pack(ccx + dx, ccz + dz);
                 if (done.contains(k)) continue;
+                // nearest and in view first; the predicted place's nearest next (never ahead of the camera's own chunks)
                 double d2 = dx * dx + dz * dz;
+                double ex = dx - px, ez = dz - pz;
+                double score = Math.min(d2, Math.max(2.0, 1.5 * (ex * ex + ez * ez)));
                 boolean behind = dx * dirX + dz * dirZ < -1.5;
-                cand.add(new long[]{k, (long) (d2 * (behind ? 4 : 1) * 16)});
+                cand.add(new long[]{k, (long) (score * (behind ? 4 : 1) * 16)});
             }
         if (cand.isEmpty()) return null;
         cand.sort(java.util.Comparator.comparingLong(c -> c[1]));
@@ -661,6 +771,106 @@ final class AtlasClientGen implements AutoCloseable {
      * its level-0 window (512 blocks a side from the camera at the least, more than this window's 26 chunks) and the CPU
      * World it refills from never had them, so a chunk that comes back is generated and sent again.
      */
+    // ---- the far terrain (direct, FAR): the grid's coarse levels from the generator's far chunks ----
+
+    private static long farKey(int level, int tx, int tz) {
+        return (long) level << 56 ^ ((long) tx & 0xFFFFFFFL) << 28 ^ ((long) tz & 0xFFFFFFFL);
+    }
+
+    /**
+     * One far tile into the grid: of the coarse levels' tiles around the camera (FAR_TILES a side), the nearest one not
+     * up yet (distance in tiles of its level, finer levels first at equal distance). Returns false when all are up.
+     */
+    private boolean farStep() {
+        double x = camX, z = camZ;
+        int best = -1, btx = 0, btz = 0;
+        double bestD = Double.MAX_VALUE;
+        for (int k = 1; k <= 6; k++) {
+            int span = 256 << k;
+            int ctx = Math.floorDiv((int) Math.floor(x), span), ctz = Math.floorDiv((int) Math.floor(z), span);
+            int[] last = farCam[k];
+            if (last == null || last[0] != ctx || last[1] != ctz) {
+                farCam[k] = new int[]{ctx, ctz};
+                // the camera moved a tile at this level: partial tiles go again, far ones are forgotten (the grid lets
+                // them go with its window)
+                final int lk = k;
+                farPartial.removeIf(key -> {
+                    if ((int) (key >>> 56) != lk) return false;
+                    farDone.remove(key);
+                    return true;
+                });
+                farDone.removeIf(key -> {
+                    if ((int) (key >>> 56) != lk) return false;
+                    int tx = (int) (key << 8 >> 36), tz = (int) (key << 36 >> 36);
+                    return Math.abs(tx - ctx) > FAR_TILES + 1 || Math.abs(tz - ctz) > FAR_TILES + 1;
+                });
+            }
+            for (int dz = -FAR_TILES; dz <= FAR_TILES; dz++)
+                for (int dx = -FAR_TILES; dx <= FAR_TILES; dx++) {
+                    int tx = ctx + dx, tz = ctz + dz;
+                    if (farDone.contains(farKey(k, tx, tz))) continue;
+                    double cx = (tx + 0.5) * span - x, cz = (tz + 0.5) * span - z;
+                    double d = Math.sqrt(cx * cx + cz * cz) / span + k * 0.01;
+                    if (d < bestD) {
+                        bestD = d;
+                        best = k;
+                        btx = tx;
+                        btz = tz;
+                    }
+                }
+        }
+        if (best < 0) return false;
+        long t0 = System.nanoTime();
+        AtlasGenNative.Gen.FarIngest r;
+        try {
+            r = gen.farIngest(best, new int[]{btx, btz}, 2000);
+        } catch (RuntimeException e) {
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas far terrain off (the tiles' path stays): {}", e.toString());
+            farOn = false;
+            return false;
+        }
+        farMs += (System.nanoTime() - t0) / 1e6;
+        if (r == null) {
+            farBusy++;  // no window yet, or every far buffer still read: later
+            LockSupport.parkNanos(10_000_000L);
+            return true;
+        }
+        long key = farKey(best, btx, btz);
+        farDone.add(key);
+        if (r.taken() < r.chunks()) farPartial.add(key);
+        farTiles++;
+        farChunks += r.chunks();
+        farTaken += r.taken();
+        return true;
+    }
+
+    /**
+     * The grid's reports. Wanted (level 0 would take it now): made and sent again. Dropped: a near section outside the
+     * window is forgotten (made again when the camera comes back), one inside waits for the grid to want it (its pool
+     * was full of nearer ones: sending it again now would only churn); a coarse chunk's tile goes again once the camera
+     * has moved a tile at that level.
+     */
+    private void gridReports() {
+        if (!gen.farIngestSupported()) return;
+        int[][] rep = gen.gridReports();
+        int ccx = camCx, ccz = camCz;
+        for (int r = 0; r < 2; r++) {
+            int[] list = rep[r];
+            boolean wanted = r == 1;
+            for (int i = 0; i + 3 < list.length; i += 4) {
+                int level = list[i], x = list[i + 1], z = list[i + 3];
+                if (level == 0) {
+                    if (!wanted && inWindow(x, z, ccx, ccz, RADIUS + 1)) continue;
+                    // the chunk is made again; only this section's claim goes, so only it is sent again
+                    AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(x, list[i + 2], z));
+                    done.remove(ChunkPos.pack(x, z));
+                } else {
+                    farPartial.add(farKey(level, Math.floorDiv(x, 16), Math.floorDiv(z, 16)));
+                }
+            }
+        }
+    }
+
     private void pruneDirect(int ccx, int ccz) {
         int far = RADIUS + 2;
         done.removeIf(k -> {

@@ -40,7 +40,7 @@ struct FeatParams {
 [[vk::binding(7, 0)]] RWStructuredBuffer<uint> outWide;
 [[vk::binding(8, 0)]] RWStructuredBuffer<uint> counters;  // [0] origins with placements left after this dispatch   // per target WIDE_W words: one id a block (the gather, then packed)
 
-#include "atlas_exact.slang"
+#include "atlas_feat_math.slang"  // its own copy of the exact math (not atlas_exact.slang: see there)
 
 // the exact functions without their flag argument: a call that passed a thread-private flag word itself made Slang
 // clone the callee for every call site (megabytes of SPIR-V), so the flag goes through a local

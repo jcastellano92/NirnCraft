@@ -576,7 +576,29 @@ public final class AtlasClient {
                 String why = e.enableGpu(lib);
                 if (why != null) com.nirncraft.NirnCraft.LOGGER.info("atlas exact heights on the CPU: {}", why);
             }
+            // whole far tiles in the generator's kernels (map, height, water on the device; checked per LOD against the
+            // CPU path); -Dnirncraft.atlas.gpuTiles=false keeps the path above
+            if (source instanceof AtlasExactSource e && libPath != null && !"false".equals(System.getProperty("nirncraft.atlas.gpuTiles"))) {
+                // (off the render thread: the program and the map take a while; tiles until then take the path above)
+                net.minecraft.server.MinecraftServer sp = mc.getSingleplayerServer();
+                Path lp = libPath;
+                Thread t = new Thread(() -> {
+                    String why = e.enableGpuTiles(sp, lp);
+                    com.nirncraft.NirnCraft.LOGGER.info("atlas far tiles {}", why == null ? "on the GPU (the generator's kernels)" : "not on the GPU: " + why);
+                }, "atlas far tiles setup");
+                t.setDaemon(true);
+                t.start();
+            }
             if (source == null) source = AtlasFarField.defaultSource();
+            // the far terrain from the client generator straight into the grid's coarse levels (GPU): with
+            // -Dnirncraft.atlas.farTiles=false the far field makes no terrain tiles at all (no tile columns, no CPU
+            // World build of them); its overlays, lights and the server's sections still go up as before
+            if (AtlasClientGen.ON && AtlasClientGen.far() && mc.hasSingleplayerServer()
+                    && "false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.farTiles"))) {
+                if (source instanceof AtlasExactSource e) e.close();
+                source = AtlasFarField.noTerrainSource();
+                com.nirncraft.NirnCraft.LOGGER.info("atlas far terrain: the client generator's coarse levels only (no terrain tiles)");
+            }
             if (source.usesBlockPalette()) ctx.setPalette(AtlasPalette.blocks());  // else atlas's preview palette
             int[] noise = AtlasPalette.cloudNoiseVolume();
             if (noise != null) ctx.setCloudNoise(noise);

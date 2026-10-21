@@ -25,6 +25,7 @@ import net.minecraft.world.level.levelgen.densityfunction.TilingMode;
 import net.minecraft.world.level.levelgen.densityfunction.generator.ConstantFunction;
 import net.minecraft.world.level.levelgen.densityfunction.generator.GradientFunction;
 import net.minecraft.world.level.levelgen.densityfunction.generator.NoiseFunction;
+import net.minecraft.world.level.levelgen.densityfunction.generator.ShiftNoiseFunction;
 import net.minecraft.world.level.levelgen.densityfunction.op.BinaryFunction;
 import net.minecraft.world.level.levelgen.densityfunction.op.BlendDensityFunction;
 import net.minecraft.world.level.levelgen.densityfunction.op.CacheFunction;
@@ -90,13 +91,18 @@ final class AtlasGenProgram {
     static final int S_SEA = 64, S_AQ_LO = 65, S_ORE_LO = 69, S_SURF_LO = 73, S_ZOOM = 77, S_SURFNOISE = 79,
             S_SECNOISE = 80, S_CLAYNOISE = 81, S_STONE = 82, S_WATER = 83, S_LAVA = 84, S_WAYBELOW = 85,
             S_LAVALEVEL = 86, S_ORECOUNT = 87, S_RULESTART = 88, S_NBIOMES = 89;
+    /** The page passes' inputs (atlas_page.slang): the climate entries (6 start / end pairs), the fields' kinds, the
+     *  height noises' stacks (4), and whether the program carries them all (the device then makes the pages). */
+    static final int S_CLIMATE = 96, S_FKINDS = 108, S_HNOISE = 109, S_PAGEGEN = 113, S_CLIMFIELDS = 114;
+    /** A field's kind: TamrielHeight, else 1 + its TamrielChannel ordinal; FK_NONE: not on the device. */
+    static final int FK_HEIGHT = 0, FK_NONE = 0xFFFF;
     static final int HEADER = 128, LAYER_WORDS = 76, REGS = 96, MAX_INTERP = 16, MAX_ORES = 4;
     static final int OP_CONST = 1, OP_Y = 2, OP_COL = 3, OP_NOISE = 4, OP_GRAD = 5, OP_ADD = 6, OP_SUB = 7,
             OP_MUL_V = 8, OP_MUL_P = 9, OP_DIV_V = 10, OP_DIV_P = 11, OP_MIN_V = 12, OP_MIN_P = 13, OP_MAX_V = 14,
             OP_MAX_P = 15, OP_ADDC = 16, OP_MULC = 17, OP_CSUB = 18, OP_CDIV = 19, OP_MINC_V = 20, OP_MINC_P = 21,
             OP_MAXC_V = 22, OP_MAXC_P = 23, OP_ABS = 24, OP_SQUARE = 25, OP_CUBE = 26, OP_SQUEEZE = 27, OP_NEG = 28,
             OP_LEAKY = 29, OP_RECIP = 30, OP_SIGN = 31, OP_CLAMP = 32, OP_RANGE = 33, OP_RANGEC = 34, OP_ISEL = 35,
-            OP_INTERP = 36, OP_OUT = 39;
+            OP_INTERP = 36, OP_OUT = 39, OP_SNOISE = 41, OP_NOISEB = 42;
     static final int R_END = 0, R_TEST = 1, R_BLOCK = 2, R_ORE = 3, R_BANDS = 4;
     static final int C_STONE_DEPTH = 1, C_WATER = 2, C_Y = 3, C_STEEP = 4, C_HOLE = 5, C_NOISE = 6, C_VGRAD = 7,
             C_ABOVE_PRELIM = 8, C_BIOME = 9, C_NOT = 10;
@@ -113,6 +119,10 @@ final class AtlasGenProgram {
     final List<Holder<Biome>> biomes;
     final Map<Holder<Biome>, Integer> biomeIds;
     final int interpolated, registers, oreVeins;
+    /** The program carries what the page passes need: the device makes the pages (atlas_gen_set_map). */
+    final boolean pageGen;
+    /** The world seed (the far columns' snow cover: AtlasGenMap.far). */
+    final long seed;
 
     int pageWords() {
         return fields.size() * 256 + 256 + 4 * 4 * QY / 2;
@@ -128,12 +138,33 @@ final class AtlasGenProgram {
         interpolated = c.interps.size();
         registers = c.maxRegs;
         oreVeins = c.ores.size();
+        pageGen = c.climate != null;
+        seed = c.seed;
+    }
+
+    /** A column field's kind for the page passes (FK_NONE: a function they do not compute). */
+    static int fieldKind(DensityFunction f) {
+        if (f instanceof com.nirncraft.tamriel.terrain.TamrielHeight) return FK_HEIGHT;
+        if (f instanceof com.nirncraft.tamriel.terrain.TamrielChannel(var ch)) return 1 + ch.ordinal();
+        return FK_NONE;
     }
 
     /**
      * Compiles the overworld generator. heights: the level's height accessor (vertical anchors resolve against it as
      * in chunk generation); material: the atlas material of a block state (null: the generator ids themselves).
      */
+    /**
+     * Block states the batch's stages (atlas_gen_add_stage: the features and overlays engines) place besides the
+     * terrain's: every program compiled after a registration gives them generator ids (AtlasGenProgram.blockIds) and
+     * the ingest table their atlas materials. Register before the client generator starts (any thread).
+     */
+    private static final java.util.List<java.util.function.Supplier<java.util.Collection<BlockState>>> EXTRA_BLOCKS =
+            new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    static void addBlocks(java.util.function.Supplier<java.util.Collection<BlockState>> states) {
+        EXTRA_BLOCKS.add(states);
+    }
+
     static AtlasGenProgram compile(ChunkGenerator generator, NoiseGeneratorSettings settings, RandomState random,
                                    LevelHeightAccessor heights, long seed, ToIntFunction<BlockState> material) {
         Compiler c = new Compiler(generator, settings, random, heights, seed);
@@ -194,6 +225,10 @@ final class AtlasGenProgram {
         final List<OreVeinRule> ores = new ArrayList<>();
         final List<long[]> extraSeeds = new ArrayList<>();  // vertical gradients' (lo, hi)
         final Entry[] entries = new Entry[E_MAX];
+        /** The climate router's entries (point), or null when the page passes cannot run on the device. */
+        Entry[] climate;
+        final int[] heightStacks = {-1, -1, -1, -1};
+        int climateFields;
         int maxRegs, surfNoise, secNoise, clayNoise;
         int[] out;
 
@@ -232,6 +267,7 @@ final class AtlasGenProgram {
             entries[E_AQ_EXCL] = entry(aq.exclusion(), true);
             entries[E_AQ_SURF] = entry(aq.surfaceLevel(), true);
             entries[E_PRELIM] = entry(router.chunkSurfaceLevel(), true);
+            pageInputs(router);
             // the material rule (its ore veins compile their own entries)
             MaterialRule rule = settings.materialRule().value();
             rule(rule);
@@ -262,10 +298,51 @@ final class AtlasGenProgram {
             for (int i = 0; i < bands.length; i++) bandIds[i] = block(bands[i]);
             if (bands.length != 192) throw new IllegalStateException("clay bands: " + bands.length);
             // the surface system's noises, before the layout fixes the noise region
+            // the far columns' own (atlas_page.slang tileSurfMain): freeze_top_layer's snow layer and ice, the far roads'
+            block(Blocks.SNOW.defaultBlockState());
+            block(Blocks.ICE.defaultBlockState());
+            for (BlockState st : com.nirncraft.roads.FarRoads.blocks()) block(st);
+            // the stages' blocks (addBlocks), after the terrain's: their ids stay put when the stages change
+            for (var supplier : EXTRA_BLOCKS)
+                for (BlockState st : supplier.get()) block(st);
+            if (blocks.size() > 65535) throw new IllegalStateException("more than 65535 block states for 16-bit ids");
             surfNoise = stack((Noise) get(MaterialSystem.class, system, "surfaceNoise"));
             secNoise = stack((Noise) get(MaterialSystem.class, system, "surfaceSecondaryNoise"));
             clayNoise = stack((Noise) get(MaterialSystem.class, system, "clayBandsOffsetNoise"));
             assemble(material, system, bandIds);
+        }
+
+        /**
+         * The page passes' inputs (atlas_page.slang): Climate.Sampler's six functions as point entries (the biome
+         * source's climate), and the four noises TamrielHeight binds (its WorldNoise holders, the RandomState's
+         * instances as compileSampler's bind takes them). Left null when anything is outside what the kernels do.
+         */
+        void pageInputs(net.minecraft.world.level.levelgen.NoiseRouter router) {
+            try {
+                DensityFunction[] fs = {router.temperature(), router.vegetation(), router.continents(), router.erosion(),
+                        router.depth(), router.ridges()};
+                Entry[] es = new Entry[fs.length];
+                for (int i = 0; i < fs.length; i++) es[i] = entry(fs[i], true);
+                com.nirncraft.tamriel.terrain.TamrielHeight th = null;
+                for (DensityFunction f : fields) if (f instanceof com.nirncraft.tamriel.terrain.TamrielHeight t) th = t;
+                if (th == null) throw new IllegalStateException("no nirncraft:tamriel_height in the router");
+                com.nirncraft.worldgen.WorldNoise[] wn = {th.hills(), th.detail(), th.ridges(), th.dunes()};
+                for (int i = 0; i < 4; i++) {
+                    ResourceKey<net.minecraft.world.level.levelgen.synth.NormalNoise> key = wn[i].noiseData().unwrapKey()
+                            .orElseThrow(() -> new IllegalStateException("an unnamed TamrielHeight noise"));
+                    heightStacks[i] = stack(random.getOrCreateNoise(key));
+                }
+                for (DensityFunction f : fields)
+                    if (fieldKind(f) == FK_NONE) throw new IllegalStateException("a column field the page passes lack: " + f);
+                climate = es;
+                // the column fields the climate entries read (a far column computes only those)
+                for (Entry e : es)
+                    for (Ins ins : e.code)
+                        if (ins.op == OP_COL) climateFields |= 1 << ins.imm[0];
+            } catch (IllegalStateException e) {
+                climate = null;
+                com.nirncraft.NirnCraft.LOGGER.info("atlas generator: pages stay in Java ({})", e.getMessage());
+            }
         }
 
         // ---- density functions ----
@@ -327,12 +404,37 @@ final class AtlasGenProgram {
                 return emit(e, OP_GRAD, new int[0],
                         new int[]{ax, from, Math.min(from, to), Math.max(from, to), fb(fromValue), fb(factor)}, new int[0]);
             }
+            if (f instanceof ShiftNoiseFunction sn) {
+                // the climate's shifts (point only): Shift / ShiftA / ShiftB's samplers, then their ConstMulSampler * 4
+                if (!e.point) throw unsupported(f);
+                ResourceKey<net.minecraft.world.level.levelgen.synth.NormalNoise> key = sn.offsetNoise().unwrapKey()
+                        .orElseThrow(() -> unsupported(f));
+                int stack = stack(random.getOrCreateNoise(key));
+                long q = Double.doubleToRawLongBits(0.25), zero = Double.doubleToRawLongBits(0.0);
+                int r;
+                if (sn instanceof ShiftNoiseFunction.ShiftA)
+                    r = emit(e, OP_NOISE, new int[0], new int[]{stack | 1 << 16, (int) q, (int) (q >>> 32), (int) zero, (int) (zero >>> 32)},
+                            new int[0]);
+                else if (sn instanceof ShiftNoiseFunction.ShiftB) r = emit(e, OP_NOISEB, new int[0], new int[]{stack}, new int[0]);
+                else if (sn instanceof ShiftNoiseFunction.Shift)
+                    r = emit(e, OP_NOISE, new int[0], new int[]{stack | 1 << 16, (int) q, (int) (q >>> 32), (int) q, (int) (q >>> 32)},
+                            new int[0]);
+                else throw unsupported(f);
+                return emitImm(e, OP_MULC, r, fb(ShiftNoiseFunction.VALUE_FACTOR));
+            }
             if (f instanceof NoiseFunction n) {
-                if (!isZero(n.shiftX()) || !isZero(n.shiftY()) || !isZero(n.shiftZ())) throw unsupported(f);
+                boolean shifted = !isZero(n.shiftX()) || !isZero(n.shiftY()) || !isZero(n.shiftZ());
+                if (shifted && (!e.point || !isZero(n.shiftY()))) throw unsupported(f);
                 ResourceKey<net.minecraft.world.level.levelgen.synth.NormalNoise> key = n.noise().unwrapKey()
                         .orElseThrow(() -> unsupported(f));
                 int stack = stack(random.getOrCreateNoise(key));
                 long xz = Double.doubleToRawLongBits(n.xzScale()), y = Double.doubleToRawLongBits(n.yScale());
+                if (shifted) {
+                    // NoiseFunction.ShiftedXzSampler.sampleValue
+                    int sx = compile(n.shiftX(), e), sz = compile(n.shiftZ(), e);
+                    return emit(e, OP_SNOISE, new int[]{sx, sz}, new int[]{stack | 1 << 16, (int) xz, (int) (xz >>> 32), (int) y,
+                            (int) (y >>> 32)}, new int[0]);
+                }
                 return emit(e, OP_NOISE, new int[0], new int[]{stack | (e.point ? 1 << 16 : 0), (int) xz, (int) (xz >>> 32),
                         (int) y, (int) (y >>> 32)}, new int[0]);
             }
@@ -655,8 +757,21 @@ final class AtlasGenProgram {
                 w.set(H_ENTRY + e * 2, start);
                 w.set(H_ENTRY + e * 2 + 1, code.size());
             }
+            if (climate != null)
+                for (int k = 0; k < climate.length; k++) {
+                    int start = code.size();
+                    encode(climate[k], code);
+                    w.set(S_CLIMATE + k * 2, start);
+                    w.set(S_CLIMATE + k * 2 + 1, code.size());
+                }
             w.addAll(code);
             w.set(H_REGS, maxRegs);
+            // the fields' kinds and the height noises (atlas_page.slang)
+            w.set(S_FKINDS, w.size());
+            for (DensityFunction f : fields) w.add(fieldKind(f));
+            for (int i = 0; i < 4; i++) w.set(S_HNOISE + i, heightStacks[i]);
+            w.set(S_PAGEGEN, climate != null && fields.size() <= 16 ? 1 : 0);
+            w.set(S_CLIMFIELDS, climateFields);
             // seeds of the vertical gradients
             int seedsAt = w.size();
             for (long[] s : extraSeeds) {

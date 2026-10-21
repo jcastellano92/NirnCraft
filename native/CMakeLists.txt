@@ -349,7 +349,7 @@ endif()
 set(GEN_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_gen.slang")
 set(GEN_HEADERS)
 set(GEN_CPU_ENTRIES)
-foreach(pass corner aquifer fill top surface pack cols secs mats math probe)
+foreach(pass corner aquifer fill top surface pack cols secs mats math probe pageCols pageBiomes tile tileSurf tileBiome farChunk)
   set(entry "${pass}Main")
   set(GEN_VALIDATE)
   if(SPIRV_VAL)
@@ -361,20 +361,23 @@ foreach(pass corner aquifer fill top surface pack cols secs mats math probe)
             -warnings-disable 41035 -o "${GEN}/atlas_gen_${pass}_raw.spv"
     COMMAND spv_exact "${GEN}/atlas_gen_${pass}_raw.spv" "${GEN}/atlas_gen_${pass}.spv"
     ${GEN_VALIDATE}
-    DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" spv_exact COMMENT "slangc atlas_gen:${entry} -> SPIR-V (exact float contract)")
+    DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_page.slang" spv_exact COMMENT "slangc atlas_gen:${entry} -> SPIR-V (exact float contract)")
   add_custom_command(
     OUTPUT "${GEN}/atlas_gen_${pass}_spv.h"
     COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_gen_${pass}.spv -DOUT=${GEN}/atlas_gen_${pass}_spv.h
             -DNAME=atlas_gen_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
     DEPENDS "${GEN}/atlas_gen_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
   list(APPEND GEN_HEADERS "${GEN}/atlas_gen_${pass}_spv.h")
-  list(APPEND GEN_CPU_ENTRIES -entry ${entry} -stage compute)
+  # (GPU-only passes stay out of the C++ reference: its target has no atomics)
+  if(NOT pass STREQUAL "farChunk")
+    list(APPEND GEN_CPU_ENTRIES -entry ${entry} -stage compute)
+  endif()
 endforeach()
 add_custom_command(
   OUTPUT "${GEN}/atlas_gen_cpu.cpp"
   COMMAND "${SLANGC}" "${GEN_SRC}" -target cpp ${GEN_CPU_ENTRIES} -O3 -fp-mode precise -warnings-disable 41035
           -o "${GEN}/atlas_gen_cpu.cpp"
-  DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" COMMENT "slangc atlas_gen -> C++ (CPU reference)")
+  DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_page.slang" COMMENT "slangc atlas_gen -> C++ (CPU reference)")
 target_sources(atlas_core PRIVATE src/gen_engine.cpp "${GEN}/atlas_gen_cpu.cpp" ${GEN_HEADERS})
 set(GEN_RENAME "GlobalParams_0=GenGlobals_0;KernelContext_0=GenContext_0")
 if(MSVC)
@@ -387,7 +390,8 @@ endif()
 
 # The client's decoration (atlas_features.slang, docs/ATLAS-CLIENT-GENERATION.md stage 4): the same exact float
 # contract, one SPIR-V module per kernel (one a feature type); the big helpers are [noinline] (else the driver inlines
-# them at every call site). -O0: at -O3 the kernels' results change (spring and lake no longer match Java: to find).
+# them at every call site). Its exact math is a copy of its own (atlas_feat_math.slang: the flag through an argument,
+# see there). -O0: at -O3 the kernels' results change (to check again).
 # GPU only (the CPU fallback is a later job of its own).
 set(FEAT_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_features.slang")
 set(FEAT_HEADERS)
@@ -407,7 +411,7 @@ foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:feat
             -warnings-disable 41035 -o "${GEN}/atlas_feat_${pass}_raw.spv"
     COMMAND spv_exact "${GEN}/atlas_feat_${pass}_raw.spv" "${GEN}/atlas_feat_${pass}.spv"
     ${FEAT_VALIDATE}
-    DEPENDS "${FEAT_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" spv_exact COMMENT "slangc atlas_features:${entry} -> SPIR-V (exact float contract)")
+    DEPENDS "${FEAT_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_feat_math.slang" spv_exact COMMENT "slangc atlas_features:${entry} -> SPIR-V (exact float contract)")
   add_custom_command(
     OUTPUT "${GEN}/atlas_feat_${pass}_spv.h"
     COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_feat_${pass}.spv -DOUT=${GEN}/atlas_feat_${pass}_spv.h
@@ -429,6 +433,10 @@ target_compile_definitions(spv_jit_time PRIVATE VK_NO_PROTOTYPES)
 add_executable(atlas_feat_test tests/features_test.cpp)
 target_include_directories(atlas_feat_test PRIVATE include)
 target_link_libraries(atlas_feat_test PRIVATE atlas_feat)
+# the far passes without Java (dev tool: gen_probe <dir> <lod> <tx> <tz> [far], the parity test's dump)
+add_executable(gen_probe tools/gen_probe.cpp)
+target_include_directories(gen_probe PRIVATE include)
+target_link_libraries(gen_probe PRIVATE atlas_core)
 
 add_executable(atlas_height_test tests/height_test.cpp)
 target_include_directories(atlas_height_test PRIVATE include)

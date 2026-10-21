@@ -2061,6 +2061,80 @@ static void testOverhang() {
     atlas_destroy(cpu);
 }
 
+// The GPU generator's far terrain into the grid (VoxGrid::ingestCoarseGpu, through atlas_debug_coarse_chunks): level-1
+// chunks given whole over flat tiles (ground y 100) with no sections, the camera straight down from y 300 over the
+// chunk at x, z 0..32, its row y 192..224. A pixel there needs level 0, which has nothing: the trace takes the grid's
+// coarse levels behind the gap (traceLod), so it meets what was given. One id throughout: the chunk's top (y 224); its
+// ids, rock in its lower half: y 208; air: the ground again (y 100).
+static void testCoarseGiven() {
+    std::printf("coarse\n");
+    AtlasContext* ctx = nullptr;
+    if (atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) {
+        std::printf("  SKIP: no Vulkan device\n");
+        return;
+    }
+    std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 52), fill(256 * 256, 52);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
+        }
+    AtlasMaterial m[1] = {{{0.4f, 0.4f, 0.4f}, 0.9f, 0, ATLAS_CLASS_TERRAIN}};
+    atlas_set_materials(ctx, 50, m, 1);
+    double centre[3] = {16.0, 300.0, 16.0};
+    atlas_update(ctx, centre, 0);
+    AtlasFrame f{};
+    f.cameraPos[0] = 16.0;
+    f.cameraPos[1] = 300.0;
+    f.cameraPos[2] = 16.0;
+    float inv[16] = {0.1f, 0, 0, 0, 0, 0, 0.1f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};  // straight down (testAbi)
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 64;
+    f.height = 64;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> depth(64 * 64);
+    AtlasFrameOutput o{nullptr, nullptr, depth.data()};
+    // the centre pixels' median depth after a few frames (the grid takes what was given with the next one)
+    auto look = [&]() {
+        for (int i = 0; i < 3; i++) CHECK(atlas_render(ctx, &f, &o) == ATLAS_OK);
+        std::vector<float> c;
+        for (int y = 28; y < 36; y++)
+            for (int x = 28; x < 36; x++) c.push_back(depth[size_t(y) * 64 + size_t(x)]);
+        std::sort(c.begin(), c.end());
+        return c[c.size() / 2];
+    };
+    double len = std::sqrt(1.0 + 0.01 * (0.5 / 32) * (0.5 / 32) * 2);  // (the centre rays are almost straight down)
+    float d0 = look();
+    int32_t pos[3] = {0, 8, 0};  // level 1: blocks 0..32, rows of 32 from y -64: y 192..224
+    uint32_t kind = 2u | 50u << 8;
+    std::vector<uint16_t> ids(4096, 0);
+    uint8_t acc = 0;
+    CHECK(atlas_debug_coarse_chunks(ctx, 1, 1, pos, &kind, ids.data(), &acc) == ATLAS_OK);
+    CHECK(acc == 1);
+    float d1 = look();
+    for (int y = 0; y < 8; y++)
+        for (int i = 0; i < 256; i++) ids[size_t(y) * 256 + size_t(i)] = 50;  // rock in the lower half: top y 208
+    kind = 0u;
+    CHECK(atlas_debug_coarse_chunks(ctx, 1, 1, pos, &kind, ids.data(), &acc) == ATLAS_OK);
+    float d2 = look();
+    kind = 1u;
+    CHECK(atlas_debug_coarse_chunks(ctx, 1, 1, pos, &kind, ids.data(), &acc) == ATLAS_OK);
+    float d3 = look();
+    int32_t far[3] = {100000, 8, 0};  // outside the level's window: not taken
+    CHECK(atlas_debug_coarse_chunks(ctx, 1, 1, far, &kind, ids.data(), &acc) == ATLAS_OK);
+    CHECK(acc == 0);
+    std::printf("  centre depth: ground %.2f, one id %.2f, its lower half %.2f, air %.2f (expect 200, 76, 92, 200)\n", d0, d1,
+                d2, d3);
+    CHECK(std::abs(d0 - 200.0 * len) < 0.6);
+    CHECK(std::abs(d1 - 76.0 * len) < 0.6);
+    CHECK(std::abs(d2 - 92.0 * len) < 0.6);
+    CHECK(std::abs(d3 - 200.0 * len) < 0.6);
+    atlas_destroy(ctx);
+}
+
 int main(int argc, char** argv) {
     std::setvbuf(stdout, nullptr, _IONBF, 0);  // (each line as it comes: a suite stopped part way still shows where)
     // atlas_tests [raster] [only=a,b,..]: the suites named alone (svdag, caves, ..., parity); each prints
@@ -2082,7 +2156,7 @@ int main(int argc, char** argv) {
         {"actormotion", testActorMotion}, {"transitions", testTransitions}, {"lights", testLights}, {"faults", testFaults},
         {"neardepth", [&] { testNearDepth(raster); }}, {"columnheights", [&] { testColumnHeights(raster); }},
         {"grasstint", [&] { testGrassTint(raster); }}, {"surfaceoverrides", [&] { testSurfaceOverrides(raster); }},
-        {"parity", [&] { parity(raster); }},
+        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven},
     };
     for (const Suite& t : suites) {
         if (!only.empty() && only.find("," + std::string(t.name) + ",") == std::string::npos) continue;

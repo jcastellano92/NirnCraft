@@ -107,9 +107,9 @@ the same pipeline: heights exact, no caves, no overhangs, no aquifers.
 * **GPU (stage 2):** density, caves, aquifers, map water, the surface paint and the ore veins, for whole chunk columns
   (the surface pass walks a column top down, so a section cannot be painted alone; a column costs little more than its
   sections). Output: per section 4096 ids, either generator block ids (parity) or atlas material ids.
-* **Java, per column (for now):** the 2D inputs the GPU program reads: `TamrielHeight` (already GPU-assisted), the
-  channels, the map water level, and the quart biomes. These are the mod's own code, so they are exact by
-  construction; moving them to the GPU means porting the map rasters, hydrology and the plans (a later stage).
+* **GPU too (2026-10-21, section 7.2):** the 2D inputs the program reads: `TamrielMap.sample`, `TamrielHeight`, the
+  channels, the map water and the quart biomes, from the map's data on the device. Java's `AtlasGenPages` is only the
+  fallback now (a library or program without the page passes).
 * **Java, per chunk (stage 4):** features and structures, run with the real feature code into a capture level over
   the generated blocks, as `AtlasTrees` does, then into the same section path.
 * **Server (stage 5):** only differences: player edits, and generator divergences found by comparison.
@@ -156,7 +156,7 @@ division with sticky bit); signed integer division only on non-negative operands
 * The mod's 2D functions (`tamriel_height`, the channels: road, erosion, overhang, river, elevation) become column
   fields read from pages.
 
-**Pages** (`AtlasGenPages`, Java, per chunk): the fields from the generator's own compiled samplers (exact by
+**Pages** (made on the device since 2026-10-21, section 7.2; `AtlasGenPages`, Java, per chunk, is the fallback): the fields from the generator's own compiled samplers (exact by
 construction), the map water of each column (`MapWaterFeature`'s test), and for the chunk's 3 x 3 the quart biomes,
 filled as `ChunkGenerator.createBiomes` fills them (fresh climate sampler, sections bottom up). A chunk reads heights
 from chunks x-4..x+2, z-2..z+2 (the aquifer looks up to three chunks west) and biomes from its 3 x 3. Pages stay
@@ -267,6 +267,115 @@ frame identically (depth and colour, 129,600 of 129,600 px). **Measured** (`clie
 1,600-block jump (pages 23, generated 100, sent 103), the radius-24 window (1,793 chunks) 2.0 s; the info and
 material passes add about a third to the terrain kernels.
 
+### 7.2 The pages on the device (2026-10-21)
+
+`atlas_gen_set_map(gen, AtlasGenMap.words(prog, biomeSource))` puts the map of Nirn on the generator's device once; with
+a program that carries the page passes' inputs (`AtlasGenProgram.pageGen`: the climate router's six entries as point
+code, every column field's kind, the four TamrielHeight noises' stacks) the engine then makes every page a batch needs
+itself, before the batch's terrain, in the same submission: `pageColsMain` (a thread per column: fields and map water)
+and `pageBiomesMain` (a thread per quart column: its 176 quart biomes). `atlas_gen_missing_pages` answers 0 and Java
+computes nothing; a page with a value the kernels could not prove flags every chunk that reads it.
+
+The kernels (`atlas_page.slang`, `atlas_map.slang`) are the mod's Java ported term for term (Java's float / double
+promotions, StrictMath through `atlas_exact.slang`, exact division and square root):
+
+| Java | on the device from |
+|---|---|
+| `TamrielMap.sample` (MapRaster, Hydrology, MapPeaks, Beyond) | the raster's channels and regions, the falls' grid, the peaks' records, the lands |
+| `TamrielHeight.height`, `OceanIsles.surfaceHeight` | the program's noise stacks; every 512-block cell's isle (`OceanIsles.cellIsle` itself, at map build) |
+| `PlanGround.bed / pad`, `StreetPlan.pad`, `PlanGround.influence` | the authored road plan, PlanGround's edge and site indices, the street plan (sorted key tables) |
+| `TamrielChannel.value` (+ influence on road / overhang) | the sample |
+| the map water word (`AtlasGenPages`) | the sample |
+| `TamrielBiomeSource.getNoiseBiome` (+ Palettes, BiomeNoise) | the palettes in the program's biome ids, the regions' palettes and cave classes, the climate entries |
+
+Not on the device: `TilePlanner`'s tile plans beyond Tamriel (Java uses one only where its planner finished that
+tile), and the biome source's test modes (`nirncraft.biomeTest`: the pages stay in Java then).
+
+**Checked** (`gpuPagesMatchJava`, NIRNCRAFT_GEN_PARITY_N=11: 100 chunks over the 10 kinds): 16,384,000 of 16,384,000
+blocks equal on Vulkan (RTX 3090) and in C++, no chunk flagged; the 3,497 pages those chunks read equal to
+AtlasGenPages' word for word in every field, the map water and all 1,267,200 quart-biome words (the overhang channel
+after the double-influence fix: re-checked on 30 chunks, 1,050 pages, every word equal). **Measured**: 0.066 ms a page on the device (3,497 in
+229 ms of passes; Java: 373 ms on all 20 cores), a batch with its pages resident 0.42 ms a chunk. The map is 19.6 M
+words (78 MB, the raster most of it), packed in about 0.1 s once the plans are loaded (a fresh dev tree whose road
+and street plan bakes are stale plans them first: 35 s, which the world's own generation needs anyway); it goes up
+from the generator's worker thread, Java's pages serving until then.
+
+### 7.3 Far tiles on the device (2026-10-21)
+
+`atlas_gen_tiles(gen, (lod, tx, tz)..., surface, water, flags)` (`tileMain`): AtlasExactSource.fill's 256 x 256
+columns (TamrielMap.sample, TamrielHeight.height at each 2^lod square's centre block, waterAt) from the same kernels.
+`AtlasExactSource.enableGpuTiles` (single player, `-Dnirncraft.atlas.gpuTiles=false` off) makes the client's far
+tiles there; the first tile of each LOD is also made on the CPU and compared bit for bit (a difference turns the path
+off, logged). **Checked** (`gpuTilesMatchJava`): 12 tiles over LODs 0-6 (Whiterun, sea, the raster's edge, Atmora,
+Yokuda, Hammerfell): 786,432 of 786,432 columns equal on Vulkan and C++. **Measured**: 1.32 ms a tile on the device,
+23.2 ms with all CPU cores. Still Java per tile: the surface blocks (`AtlasSurface`, the material rule at the top) and
+the tints (`AtlasBiomes`), then the tile's encoding and the far World build (`atlas_upload_tile`). Multiplayer clients
+have no seed: their tiles still come from the server's tile service.
+
+### 7.4 The far terrain on the GPU, into the grid (2026-10-21)
+
+**Far columns' surface** (`atlas_gen_tiles` with blocks): `tileBiomeMain` (the biomes the surface reads, as chunks
+store them: the biome source from y -64 through the seeded zoom, one lookup a thread; the climate's column fields
+computed per thread, only those the climate entries read) and `tileSurfMain` (the material rule at the top block and
+the one under it, AtlasSurface.column's context: stone depth 1 / 64, the sea over ground below y 62, no ore veins).
+Checked against Minecraft's own chunks (`gpuFarColumnsMatchChunks`, 30 chunks, the Java reference cached in
+E:/NirnCraft-scratch/gen/ref): where the ground lies at TamrielHeight (67 % of columns) the top block agrees 95.7 %, the
+one under it 99.9 %; the misses are grass where the far rule (like AtlasSurface) puts the sea over dry land below y 62.
+
+**Far chunks** (`atlas_gen_far`, `farChunkMain`, GPU only): a lod-k tile's 16 x 16 level-k chunk columns (16^3 voxels of
+2^k blocks: the grid's coarse level k), each air, uniform or mixed, the far World build's terrain voxel
+(TileVoxels::columnVoxel without the overlays) in generator ids or the ingest table's atlas materials. `gpuFarChunks`:
+0 of 44 M voxels differ from that rule on the same columns. A lod-1 tile: 5,632 chunks (3,464 air, 1,695 uniform, 473
+mixed), 13-25 ms of passes.
+
+**Into the grid** (`atlas_gen_far_ingest`, VoxGrid::ingestCoarseGpu): the chunks in a buffer the grid reads (kept until it
+no longer waits for them and a frame completed), the air and uniform ones without a slot. AtlasClientGen asks per coarse
+level for the 5 x 5 tiles around the camera, nearest first, a tile a turn between near batches; tiles not taken whole,
+or whose chunks the grid dropped, go again once the camera moves a tile at that level. Near sections now take the
+grid's admission (accepted, air as a uniform hint) and its dropped / wanted reports (`atlas_gen_grid_reports`).
+`clientGenJump` (full renderer context): first chunk in the grid 202 ms after a 1,600-block jump, the radius-24 window in
+1.8 s, the far terrain settled 5 s later; a horizon frame hits terrain on 60.1 % of pixels out to 9,418 blocks (15.7 % and
+436 blocks without it). `-Dnirncraft.atlas.farTiles=false` stops the far field's terrain tiles and their CPU World build.
+
+**Kernels**: the exactness flag is a thread-private static (it was an inout parameter, which made Slang copy every callee
+per call site), shared helpers are [noinline]: every gen kernel compiles at -O3 in 1-3 s (0.14-0.40 MB). The -O0
+builds run slowly enough to trip the GPU watchdog. Dev tool: `native/tools/gen_probe` (the far passes from a dumped
+program and map, NIRNCRAFT_GEN_DUMP).
+
+### 7.5 Snow, ice and the far roads on the device (2026-10-21)
+
+`tileSurfMain` now finishes a far column the way the server's painter does (`AtlasSurface.column` plus `FarRoads`), from
+the map's far section (`AtlasGenMap.far`, MH_FAR):
+
+* **freeze_top_layer**: snow lies on dry ground that is not sea, on a block that is solid and not ice, where the biome at
+  top + 1 is cold enough (`Biome.coldEnoughToSnow`: base temperature, the frozen modifier's noise stack, the
+  height-adjusted `TEMPERATURE_NOISE`, all ported from SimplexNoise/NoiseStack) and where its ground cover leaves the
+  ground bare (`AtlasSnowCover`: each biome's ground_cover features with their `flora_density` fields, FloraField and
+  FloraNoise ported, then the patch roll). Snow becomes the top block and the ground goes under it. Water whose top is
+  cold is flagged frozen.
+* **Far roads**: `RoadPlan.at` with the plan's own bucket index, then the width test, tunnels left out, bridge decks,
+  water left alone, and the culture's surface by `Paver.roll` (region -> culture table, `FarRoads.gpuStyles`).
+* The planes after it: 2 = top | under << 16; 3 = the top block's biome | flags << 16 (1 snow, 2 frozen, 8 road;
+  `atlas_gen_tiles`' outBiomes); 4 = the biome at top + 1 or at the water's top. A far chunk's ground voxels take plane
+  3's biome (they took the water's before, so riverbeds tinted like the water), its water voxels plane 4's, and a
+  frozen column's top water voxel is ice.
+
+**Checked** (`gpuFarSurfaceMatchesPainter`, 24 tiles at LODs 0-3 over Tamriel and its rim, against `AtlasSurface.fillRows`
+on the same columns, every column at LOD 0 and those it evaluates itself above that): 785,724 of 786,432 columns equal
+(99.910 %). Roads: 7,930 on both, 0 differ. Frozen: 15,295, 0 differ. Snow: 6,795 versus 6,820. 19 of the 25
+differences follow from a different ground block (the rule part, below), and 6 have the same ground; Java's `Math.exp`
+is HotSpot's intrinsic and the kernels use fdlibm's, so a bare share can differ by an ulp. The other ~700 differ in the
+material rule itself (mud / grass, granite / gravel, sand / sandstone, and copper ore the painter shows at the top). That
+was not compared before this test; the painter's context is not a chunk's, and it is open below. `gpuFarChunks`: 0 of
+67 M voxels differ. Device time: 12.2 ms a tile with blocks (the painter: 33-47 ms a tile on all cores).
+
+**Beyond Tamriel** RoadPlan.at asks `TilePlanner`, whose runtime expansion is dormant (`Beyond.ENDLESS_LANDS_ENABLED =
+false`): it answers no plan, and so does the device. They match. If the endless lands come back, the tile plans would go
+up per world as a second road index (the planner is deterministic from the seed).
+
+**Submissions**: one per pass and tile (tiles, far chunks) and one per pass (a batch), each well under the Windows GPU
+watchdog's 2 s. Over 500 ms prints `TRACE warn gen submission`.
+
 ## 8. Open
 
 * **Structures from the plans**: starts per chunk (`ChunkGenerator.createStructures` with the server's
@@ -277,9 +386,57 @@ material passes add about a third to the terrain kernels.
 * **The surface pass** is the kernel's largest (a thread per column walks it): split the per-block rule work.
 * **The grid and GPU sections**: `VoxGrid::ingestGpu` drops what lies outside its windows and cannot refill it (the
   CPU World never had it); a list of the sections it let go would let the generator resend exactly those.
-* **The 2D inputs on the GPU**: the map rasters, hydrology, road and street plans as device data (today Java computes
-  pages: 0.15 ms a chunk on 20 threads).
-* **Multiplayer**: the client has no seed (the public / secret decision, ATLAS-STREAMING.md decision 3).
+* **The far rule against the painter**: 0.09 % of far columns differ from `AtlasSurface` in the rule's own block (7.5).
+  Find which is the chunk's (gpuFarColumnsMatchChunks has the chunks).
+* **The far tiles' tints** (`AtlasBiomes`' grids) stay on the tile path. The far chunks into the grid carry the biome's
+  tints through the ingest table. Snow, ice and roads are on the device (7.5).
+* **The overlays on the tiles** (settlements, trees: the features agent's) keep the far field's terrain tiles on; with
+  them on the GPU, `farTiles=false` can become the default and the far World build goes.
+* **Multiplayer**: the client has no seed (the public / secret decision, ATLAS-STREAMING.md decision 3). Design in 9.
 * Found on the way, for the owner: the router has no `minecraft:beardifier` (structures' `beard_box` /
   `beard_thin` do nothing), `nirncraft:tamriel_caves` is dead code, and `TamrielBiomeSource` samples a quart
   column's climate at the first quart asked (an order dependence; chunk generation asks bottom up).
+
+## 9. Multiplayer client generation (design, 2026-10-21; it needs the owner's decision 3)
+
+The client generates as in single player: near chunks, far chunks and the far terrain from the program and the map,
+on its GPU. The server sends no geometry. It sends who the world is, the edits, and what is secret.
+
+**Handshake** (S->C on login and on entering the overworld; it replaces `AtlasNet.Hello` for such servers):
+`GenHello(publicSeed, generatorVersion, mapVersion, editsRoot)`. `generatorVersion` hashes the server's program words
+(AtlasGenProgram for the public seed) and the datapack's worldgen registries. `mapVersion` hashes the map words (the
+baked plans and rasters, AtlasGenMap). The client builds its own program and map from the same seed and data, then
+compares the hashes. If they match, it generates and stops asking for tiles (`TileRequest`), and the server stops serving
+it (`AtlasTileServer`), so the tile service retires for that player. If they differ (another mod version or datapack),
+it falls back to the tile service as today and logs why. Fallback stays: no player sees a broken world.
+
+**Edits, hash-checked** (decision 4's absolute overrides): today's `FarEdits` journal per 256-block tile, plus per edited
+section its override (the block states it holds now) and the hash of the base it replaced. The base hash is the
+generator-id FNV-1a hash `AtlasEditsClient.claim` already computes, and later BLAKE3 (decision 5). The client applies an
+override only when its own base hash for that section matches. On a mismatch (the generators disagree there) it asks
+for the real section (`FarSections` exists for that) and reports the position, so a generator divergence becomes
+visible instead of silently wrong. The server's per-tile journal versions keep resends small.
+
+**What the seed gives away** is the decision the owner has to make. Minecraft derives everything from the one world
+seed: terrain, biomes, surface, trees, and also ore veins (the noise router's `ore_vein_*`), ore features (the
+decoration seed) and structure placement. Sending it lets a client compute every ore, which is seed cracking made
+trivial. The options:
+
+1. *Public world seed.* Send it, and generate ores on the client (or leave them out with `clientGen.ores=false`). This
+   is simple and available now. Ores are not secret.
+2. *Split keys (decision 3).* The world seed becomes public. Ores move to a server-only key: the vanilla ore placed
+   features come off the biomes (a NeoForge biome modifier, no mixin), the router's ore veins are turned off in
+   `noise_settings`, and the mod's own ore feature and vein stage, keyed by the secret, run as a server overlay. A
+   section's ores reach a client when it is in radius and line of sight (the streaming doc's fog of war). The client
+   generates placeholder stone. It is buildable, but it changes existing worlds' ores (a generator version bump).
+3. *Secret seed, no client generation in multiplayer.* Keep the tile service for remote players and use client
+   generation only in single player and on LAN with the host's consent.
+
+Structures and named settlements come from the baked plans (seed-free) or the structure seed. Under option 2, their
+loot is already server state (the 2026-10-19 consequences), so it does not change.
+
+**Built so far**: nothing on the wire. The handshake without the seed decision would only carry hashes no one can use.
+Everything the client needs to generate is in place: the program, the map with its far section, the stages, and the
+grid ingest. Once the owner picks an option, the work is the `GenHello` packet, the version hashes (the program and map
+words are already deterministic arrays), retiring the tile requests behind the hash match, and the base-hash check in
+`AtlasEditsClient`.

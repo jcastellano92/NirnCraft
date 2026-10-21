@@ -187,6 +187,7 @@ bool voxelStops(uint hitMat, int3 v, int3 wv, int rl, float3 ro, float3 rd, floa
     return !pass;
 }
 
+[noinline]  // (one copy, called: see atlas_far.slang traceLod)
 bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps) {
     float3 inv = float3(abs(rd.x) > 1e-12 ? 1.0 / rd.x : 1e30, abs(rd.y) > 1e-12 ? 1.0 / rd.y : 1e30,
                         abs(rd.z) > 1e-12 ? 1.0 / rd.z : 1e30);
@@ -578,6 +579,7 @@ void vgTexel(uint mat, float3 lp, float3 d, int ax, float tView) {
 // inside a block with voxels its bitmap: an empty chunk or block is left through the far side of its empty box, an
 // empty voxel through its empty 2^3 octant when it has one, as traceRegion's bricks are. A coarse level (g.k > 0) the
 // same in its voxels (u still in blocks along dw), its voxels cubes of their material, as the regions' levels are.
+[noinline]  // (one copy, called: see traceLod)
 int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, out float uStop) {
     uStop = u0;
     int3 gBlock = g.origin;
@@ -734,6 +736,51 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, out float u
 // Walk the regions of one LOD along the chord p0 + d u, u in [0, len].
 // On TRACE_UNCOVERED, uncExit is where the chord leaves the unloaded region cell (1e30 when it left the LOD's
 // window: that LOD has nothing further along this ray at all).
+// A run [u0, u1) of the chord p0 + d u through level-0 chunks the grid does not hold yet (the grid owns level 0): at
+// each point the finest of its coarse levels that holds it, never a CPU level 0 or the tiles' stand-in where real
+// blocks are known; the regions (level 0's: the tiles) only over what no grid level holds. TRACE_HIT (gTr, its t from
+// p0), TRACE_MISS, or TRACE_UNCOVERED with uncExit (from p0) as the regions report it.
+int vgCoarseRun(float3 p0, float3 d, float u0, float u1, out float uncExit) {
+    uncExit = 1e30;
+    float u = u0;
+    for (int it = 0; it < 24 && u < u1; it++) {
+        bool on = false;
+        float next = u1;  // (where some level holds data again)
+        for (int k = 1; k <= 6; k++) {
+            if (!vgLevelOn(k) || ((frame.vgLevel[clamp(k, 1, 6) - 1].w >> 17) & 1) == 0) continue;
+            VgGrid gk = vgGrid(k);
+            float uk;
+            int rk = traceVoxGrid(gk, p0, d, u, u1, uk);
+            if (rk == TRACE_HIT) return TRACE_HIT;
+            if (rk == TRACE_MISS) return TRACE_MISS;
+            if (uk > u + 1e-4) {
+                // this level held [u, uk) and missed there: on from the finest level again
+                u = uk;
+                on = true;
+                break;
+            }
+            bool left;
+            next = min(next, vgUnloadedEnd(gk, p0, d, uk, u1, left));
+        }
+        if (on) continue;
+        // no grid level holds u: the regions to where one does
+        float ue;
+        gSecT += u;
+        int q = traceLodRegions(0, p0 + d * u, d, max(next - u, 1e-3), ue);
+        gSecT -= u;
+        if (q == TRACE_HIT) {
+            gTr.t += u;
+            return TRACE_HIT;
+        }
+        if (q == TRACE_UNCOVERED) {
+            uncExit = ue < 1e29 ? ue + u : 1e30;
+            return TRACE_UNCOVERED;
+        }
+        u = max(next, u + 1e-3);
+    }
+    return TRACE_MISS;
+}
+
 // ([noinline]: SPIR-V optimisers inline every call; traceLod and what it calls, once per call site, made farMain 26 MB of
 // SPIR-V at -O1, a ~30 GB, 14 min -O3 compile and a driver JIT that stalled: one copy, called. Also traceSecondary,
 // lodPrepareR, cloudNoiseAt.)
@@ -745,7 +792,9 @@ int traceLod(int lod, float3 p0, float3 d, float len, out float uncExit) {
     // (the content-shaped groups keep level-0 primary rays where a frame asks for them unless the grid owns level 0:
     // vgDims.w, ATLAS_VOXGRID_LEVEL0, where the SVDAG level 0 no longer follows the sections)
     // (a level holding no data at all, vgOrigin.w / vgLevel.w bit 2 of the second byte pair: the regions alone)
-    bool hasData = lod == 0 ? (frame.vgOrigin.w & 2) != 0 : lod <= 6 && ((frame.vgLevel[clamp(lod, 1, 6) - 1].w >> 17) & 1) != 0;
+    // (level 0 with the coarse levels behind its gaps, vgDims.w bits 1 and 4: traced even holding nothing itself)
+    bool hasData = lod == 0 ? (frame.vgOrigin.w & 2) != 0 || (frame.vgDims.w & 5u) == 5u
+                            : lod <= 6 && ((frame.vgLevel[clamp(lod, 1, 6) - 1].w >> 17) & 1) != 0;
     bool grid = hasData && vgLevelOn(lod) && (lod > 0 || !gGroups || frame.vgDims.w != 0u);
     float u = 0.0;
     if (grid) {
@@ -761,31 +810,25 @@ int traceLod(int lod, float3 p0, float3 d, float len, out float uncExit) {
             // (the grid owns level 0: a run of level-0 chunks it does not hold yet inside its window is the best of its
             // coarse levels that holds it, never a CPU level 0 or the tiles' stand-in where real blocks are known; the
             // ray stays at level 0 past the run. vgDims.w bit 4, off with ATLAS_VOXGRID_FALLBACK=0: the regions as before)
-            float uFrom = uStop;
-            if (lod == 0 && !left && (frame.vgDims.w & 5u) == 5u) {
-                for (int k = 1; k <= 6 && uFrom < uEnd; k++) {
-                    if (!vgLevelOn(k) || ((frame.vgLevel[clamp(k, 1, 6) - 1].w >> 17) & 1) == 0) continue;
-                    float uk;
-                    int rk = traceVoxGrid(vgGrid(k), p0, d, uFrom, uEnd, uk);
-                    if (rk == TRACE_HIT) return TRACE_HIT;
-                    if (rk == TRACE_MISS) {
-                        uFrom = uEnd;
-                        break;
-                    }
-                    uFrom = max(uFrom, uk);  // (the rest of the run from the next coarser level)
-                }
-            }
-            if (uFrom < uEnd) {
+            if (lod == 0 && (frame.vgDims.w & 5u) == 5u) {  // (left: to the window's edge, then the coarse levels' own)
                 float ue;
-                gSecT += uFrom;  // (the secondary ray's distance where the regions' chord starts)
-                int q = traceLodRegions(lod, p0 + d * uFrom, d, uEnd - uFrom, ue);
-                gSecT -= uFrom;
+                int q = vgCoarseRun(p0, d, uStop, uEnd, ue);
+                if (q == TRACE_HIT) return TRACE_HIT;
+                if (q == TRACE_UNCOVERED) {
+                    uncExit = ue;
+                    return TRACE_UNCOVERED;
+                }
+            } else {
+                float ue;
+                gSecT += uStop;  // (the secondary ray's distance where the regions' chord starts)
+                int q = traceLodRegions(lod, p0 + d * uStop, d, uEnd - uStop, ue);
+                gSecT -= uStop;
                 if (q == TRACE_HIT) {
-                    gTr.t += uFrom;
+                    gTr.t += uStop;
                     return TRACE_HIT;
                 }
                 if (q == TRACE_UNCOVERED) {
-                    uncExit = ue < 1e29 ? ue + uFrom : 1e30;
+                    uncExit = ue < 1e29 ? ue + uStop : 1e30;
                     return TRACE_UNCOVERED;
                 }
             }
@@ -804,6 +847,7 @@ int traceLod(int lod, float3 p0, float3 d, float len, out float uncExit) {
     return r0;
 }
 
+[noinline]  // (one copy, called: see traceLod)
 int traceLodRegions(int lod, float3 p0, float3 d, float len, out float uncExit) {
     uncExit = 1e30;
     LodGpu L = frame.lods[lod];
