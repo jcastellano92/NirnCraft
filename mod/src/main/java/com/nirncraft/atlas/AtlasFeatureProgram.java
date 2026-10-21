@@ -96,7 +96,8 @@ final class AtlasFeatureProgram {
     // header (atlas_features.slang H_*)
     static final int H_VERSION = 1, H_NBLOCKS = 2, H_BLOCKS = 3, H_NBIOMES = 4, H_BIOMEWORDS = 5, H_SEED = 6, H_ZOOM = 8,
             H_SEA = 10, H_SIN = 11, H_FIELDS = 12, H_PREDS = 13, H_SURVIVE = 14, H_SURVIVE_N = 15, H_CONSTS = 16,
-            H_GENMINY = 17, H_GENHEIGHT = 18, H_DISPATCH = 19, H_NDISPATCH = 20, H_ALCH = 21, H_TREES = 22, H_BIOMETAB = 23, HEADER = 32;
+            H_GENMINY = 17, H_GENHEIGHT = 18, H_DISPATCH = 19, H_NDISPATCH = 20, H_ALCH = 21, H_TREES = 22, H_BIOMETAB = 23,
+            H_ALCHREG = 27, H_ALCHLEAF = 28, HEADER = 32;  // (24..26: the store's tables, features_engine.cpp)
     static final int BLK_W = 16;
     static final int F2_LIQUID = 1, F2_SNOWY = 2, F2_LIQUID_PROP = 4;
     static final int T_AX = 0, T_WL = 3, T_DIST = 5, T_SNOWY = 12;
@@ -149,6 +150,68 @@ final class AtlasFeatureProgram {
             known = c;
         }
         return known;
+    }
+
+    // ---- the alchemy classes on the GPU (the store's aux, atlas_features.slang featAux) -------------------------------
+    // GroundCoverFeature.chooseRegionalFloraId's decision as a leaf (0..16) of its region's province and id, the
+    // column's map elevation, the y it is asked for and whether by water; each leaf's list is one class (learned from
+    // the map scan). The region word: province code | flags << 8.
+    static final int ALCH_LEAVES = 17;
+    static final int P_OTHER = 0, P_MW = 1, P_BM = 2, P_ELSWEYR = 3, P_HAMMERFELL = 4, P_VALENWOOD = 5, P_SUMMERSET = 6, P_CYRODIIL = 7,
+            P_HIGH_ROCK = 8, P_ATMORA = 9;
+
+    static int alchRegionWord(com.nirncraft.tamriel.Region r) {
+        // Cultures.province: skyrim outside Tamriel is "realm", a sea region "sea": both the default branch
+        String p = "sea".equals(r.kind()) || r.province() == null ? "realm" : r.province().toLowerCase(java.util.Locale.ROOT);
+        int code = switch (p) {
+            case "morrowind" -> P_MW;
+            case "black_marsh" -> P_BM;
+            case "elsweyr" -> P_ELSWEYR;
+            case "hammerfell" -> P_HAMMERFELL;
+            case "valenwood" -> P_VALENWOOD;
+            case "summerset" -> P_SUMMERSET;
+            case "cyrodiil" -> P_CYRODIIL;
+            case "high_rock" -> P_HIGH_ROCK;
+            case "atmora" -> P_ATMORA;
+            default -> P_OTHER;
+        };
+        String id = r.id();
+        int f = 0;
+        if (id.contains("ashlands") || id.contains("red_mountain") || id.contains("molag_amur")) f |= 1;
+        if (id.contains("bitter_coast") || id.contains("ascadian")) f |= 2;
+        if (id.contains("eastmarch")) f |= 4;
+        if (id.contains("hjaalmarch")) f |= 8;
+        if (id.contains("the_rift") || id.contains("falkreath")) f |= 16;
+        if (id.contains("the_reach")) f |= 32;
+        if (id.contains("winterhold") || id.contains("the_pale")) f |= 64;
+        if ("dragon_tongue".equals(id)) f |= 128;
+        return code | f << 8;
+    }
+
+    /** The leaf of chooseRegionalFloraId's decision (the GPU's alchLeaf). */
+    static int alchLeaf(int regionWord, float elevation, int y, boolean water) {
+        int prov = regionWord & 255, f = regionWord >>> 8;
+        if (water) return prov == P_MW ? 0 : prov == P_BM ? 1 : 2;
+        switch (prov) {
+            case P_MW:
+                return (f & 1) != 0 ? 3 : (f & 2) != 0 ? 4 : 5;
+            case P_BM:
+                return 6;
+            case P_ELSWEYR, P_HAMMERFELL:
+                return 7;
+            case P_VALENWOOD, P_SUMMERSET:
+                return 8;
+            case P_CYRODIIL, P_HIGH_ROCK:
+                return 9;
+            default:
+                break;
+        }
+        if ((f & 4) != 0) return (f & 128) != 0 ? 16 : 10;
+        if ((f & 8) != 0) return 11;
+        if ((f & 16) != 0) return 12;
+        if ((f & 32) != 0) return 13;
+        if (y > 110 || elevation > 140 || (f & 64) != 0 || prov == P_ATMORA) return 14;
+        return 15;
     }
 
     private static Object temperatureNoise;
@@ -818,10 +881,20 @@ final class AtlasFeatureProgram {
             choose.setAccessible(true);
             int minX = com.nirncraft.tamriel.TamrielMap.MIN_X, maxX = com.nirncraft.tamriel.TamrielMap.MAX_X;
             int minZ = com.nirncraft.tamriel.TamrielMap.MIN_Z, maxZ = com.nirncraft.tamriel.TamrielMap.MAX_Z;
+            java.util.Arrays.fill(alchLeafClass, -1);
             for (int z = minZ; z < maxZ; z += 64)
-                for (int x = minX; x < maxX; x += 64)
-                    for (int v = 0; v < 3; v++) alchClass(x, z, v);
+                for (int x = minX; x < maxX; x += 64) {
+                    int rw = alchRegionWord(com.nirncraft.tamriel.TamrielMap.region(x, z));
+                    float elev = com.nirncraft.tamriel.TamrielMap.elevation(x, z);
+                    for (int v = 0; v < 3; v++) {
+                        int c = alchClass(x, z, v);
+                        int leaf = alchLeaf(rw, elev, v == 1 ? 200 : 64, v == 2);
+                        if (alchLeafClass[leaf] == -1) alchLeafClass[leaf] = c;
+                        else if (alchLeafClass[leaf] != c) alchLeafClass[leaf] = 255;  // (two lists for one leaf: unknown)
+                    }
+                }
         }
+        final int[] alchLeafClass = java.util.stream.IntStream.generate(() -> -1).limit(ALCH_LEAVES).toArray();
 
         /** The class of a column's alchemy draw (variant 0 dry and low, 1 dry above y 110, 2 by water), 255 unknown. */
         int alchClass(int x, int z, int variant) {
@@ -971,6 +1044,13 @@ final class AtlasFeatureProgram {
             }
             for (int o2 : offs) out.add(o2);
             for (int i = 0; i < 256; i++) for (int w : (i < alchLists.size() ? alchLists.get(i) : empty)) out.add(w);
+            // the alchemy decision's tables (the store's aux kernel): per region index its word, per leaf its class
+            int alchRegAt = here();
+            int nreg = com.nirncraft.tamriel.Regions.count();
+            out.add(nreg);
+            for (int i = 0; i < nreg; i++) out.add(alchRegionWord(com.nirncraft.tamriel.Regions.byIndex(i)));
+            int alchLeafAt = here();
+            for (int leaf = 0; leaf < ALCH_LEAVES; leaf++) out.add(alchLeafClass[leaf] < 0 ? 255 : alchLeafClass[leaf]);
             int consts = here();
             long c = Double.doubleToRawLongBits(1.702 / 0.27);
             out.add((int) c);
@@ -1040,6 +1120,8 @@ final class AtlasFeatureProgram {
             out.set(H_ALCH, alchAt);
             out.set(H_TREES, treesAt < 0 ? 0 : treesAt);
             out.set(H_BIOMETAB, biomeTab);
+            out.set(H_ALCHREG, alchRegAt);
+            out.set(H_ALCHLEAF, alchLeafAt);
             return out.toIntArray();
         }
 

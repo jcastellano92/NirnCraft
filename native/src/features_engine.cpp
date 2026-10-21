@@ -46,9 +46,10 @@ constexpr uint32_t HT_CAP = 32768, SCR_HT = 16, SCR_HM = 16 + HT_CAP * 2, SCR_BI
 constexpr uint32_t H_DISPATCH = 19, H_NDISPATCH = 20, MAGIC = 0x41454641u;
 constexpr uint32_t TABLE_W = ATLAS_FEAT_TABLE_WORDS;  // meta + the write table, per origin (the isolated check)
 static_assert(TABLE_W == 16 + HT_CAP * 2, "table words");
-constexpr uint32_t NB = 9, WIDE_W = 44u * 4096u;
+constexpr uint32_t NB = 10, WIDE_W = 44u * 4096u;
 // pipelines: hm, init, copy, apply, pack, then one a feature type (atlas_features.slang FT_*: 1 ore .. 8 lake)
-constexpr uint32_t P_HM = 0, P_INIT = 1, P_COPY = 2, P_APPLY = 3, P_PACK = 4, P_FEAT = 5, FT_TYPES = 9, PIPES = P_FEAT + FT_TYPES - 1;
+constexpr uint32_t P_HM = 0, P_INIT = 1, P_COPY = 2, P_APPLY = 3, P_PACK = 4, P_FEAT = 5, FT_TYPES = 9, P_AUX = P_FEAT + FT_TYPES - 1,
+                   PIPES = P_AUX + 1;
 constexpr uint32_t R_TYPE = 0;
 
 double msSince(std::chrono::steady_clock::time_point t0) {
@@ -75,6 +76,8 @@ public:
     virtual const char* device() const = 0;
     virtual bool setProgram(const std::vector<uint32_t>& prog, std::string& err) = 0;
     virtual bool run(const Batch& b, uint32_t* outIds, uint32_t* outTables, AtlasFeatTimes& t, std::string& err) = 0;
+    // the store's aux kernel over n chunks ((cx, cz) each) with the generator's map: n * AUX_W words (the quarts not)
+    virtual bool probeAux(const std::vector<uint32_t>& map, uint32_t n, const int32_t* xz, uint32_t* out, std::string& err) = 0;
 };
 
 std::vector<uint32_t> dispatchList(const std::vector<uint32_t>& prog) {
@@ -97,7 +100,7 @@ public:
     ~VulkanEngine() override {
         if (dev_) {
             if (!dead_) vkDeviceWaitIdle(dev_);
-            for (Buf* b : {&prog_, &ids_, &aux_, &org_, &scratch_, &out_, &tgt_, &wide_, &cnt_, &staging_}) release(*b);
+            for (Buf* b : {&prog_, &ids_, &aux_, &org_, &scratch_, &out_, &tgt_, &wide_, &cnt_, &staging_, &map_}) release(*b);
             if (queries_) vkDestroyQueryPool(dev_, queries_, nullptr);
             if (fence_) vkDestroyFence(dev_, fence_, nullptr);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
@@ -349,12 +352,12 @@ private:
         const uint32_t* code[PIPES] = {atlas_feat_hm_spv,   atlas_feat_init_spv,  atlas_feat_copy_spv,  atlas_feat_apply_spv,
                                        atlas_feat_pack_spv, atlas_feat_ore_spv,   atlas_feat_cover_spv, atlas_feat_rock_spv,
                                        atlas_feat_tree_spv, atlas_feat_freeze_spv, atlas_feat_disk_spv, atlas_feat_spring_spv,
-                                       atlas_feat_lake_spv};
+                                       atlas_feat_lake_spv, atlas_feat_aux_spv};
         const size_t size[PIPES] = {atlas_feat_hm_spv_size,   atlas_feat_init_spv_size,  atlas_feat_copy_spv_size,
                                     atlas_feat_apply_spv_size, atlas_feat_pack_spv_size, atlas_feat_ore_spv_size,
                                     atlas_feat_cover_spv_size, atlas_feat_rock_spv_size, atlas_feat_tree_spv_size,
                                     atlas_feat_freeze_spv_size, atlas_feat_disk_spv_size, atlas_feat_spring_spv_size,
-                                    atlas_feat_lake_spv_size};
+                                    atlas_feat_lake_spv_size, atlas_feat_aux_spv_size};
         static const char* names[PIPES] = {"hm", "init", "copy", "apply", "pack", "ore", "cover", "rock", "tree", "freeze", "disk", "spring", "lake"};
         bool trace = std::getenv("ATLAS_FEAT_TRACE") != nullptr;
         for (uint32_t i = 0; i < PIPES; i++) {
@@ -478,7 +481,7 @@ private:
         return true;
     }
     void writeSet() {
-        Buf* bs[NB] = {&prog_, &ids_, &aux_, &org_, &scratch_, &out_, &tgt_, &wide_, &cnt_};
+        Buf* bs[NB] = {&prog_, &ids_, &aux_, &org_, &scratch_, &out_, &tgt_, &wide_, &cnt_, map_.buf ? &map_ : &prog_};  // (9: the map)
         VkDescriptorBufferInfo bi[NB];
         VkWriteDescriptorSet w[NB];
         for (uint32_t i = 0; i < NB; i++) {
@@ -542,7 +545,32 @@ private:
     VkCommandBuffer cmd_ = VK_NULL_HANDLE;
     VkFence fence_ = VK_NULL_HANDLE;
     VkQueryPool queries_ = VK_NULL_HANDLE;
-    Buf prog_, ids_, aux_, org_, scratch_, out_, tgt_, wide_, cnt_, staging_;
+    Buf prog_, ids_, aux_, org_, scratch_, out_, tgt_, wide_, cnt_, staging_, map_;
+
+public:
+    bool probeAux(const std::vector<uint32_t>& map, uint32_t n, const int32_t* xz, uint32_t* out, std::string& err) override {
+        if (dead_) return fail(err, "the decoration's device was lost earlier");
+        vkDeviceWaitIdle(dev_);
+        std::vector<int32_t> list(size_t(n) * 3);
+        for (uint32_t i = 0; i < n; i++) {
+            list[i * 3] = int32_t(i);
+            list[i * 3 + 1] = xz[i * 2];
+            list[i * 3 + 2] = xz[i * 2 + 1];
+        }
+        bool ok = ensure(map_, map.size() * 4, false, err) && ensure(tgt_, list.size() * 4, false, err) &&
+                  ensure(aux_, size_t(n) * AUX_W * 4, false, err) && ensure(wide_, size_t(n) * ATLAS_GEN_STORE_AUX_WORDS * 4, false, err);
+        if (!ok) return false;
+        writeSet();
+        if (!upload(map_, map.data(), map.size() * 4, err) || !upload(tgt_, list.data(), list.size() * 4, err)) return false;
+        FeatParams p{0, 0, 0, 0, int32_t(n), 0, 0, 1u};
+        begin();
+        vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+        vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(FeatParams), &p);
+        vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_AUX]);
+        vkCmdDispatch(cmd_, (AUX_W + GROUP - 1) / GROUP, n, 1);
+        if (!submitWait(err)) return false;
+        return download(aux_, 0, out, size_t(n) * AUX_W * 4, err);
+    }
 };
 
 #ifndef ATLAS_FEAT_ALONE
@@ -561,7 +589,8 @@ class StageEngine {
 public:
     ~StageEngine() {
         if (!dev_) return;
-        for (Buf* b : {&prog_, &staging_, &aux_, &org_, &scratch_, &list_, &cnt_}) release(*b);
+        flushAux();
+        for (Buf* b : {&prog_, &staging_, &aux_, &org_, &scratch_, &list_, &cnt_, &dbg_}) release(*b);
         if (descPool_) vkDestroyDescriptorPool(dev_, descPool_, nullptr);
         for (auto& p : pipes_)
             if (p) vkDestroyPipeline(dev_, p, nullptr);
@@ -627,7 +656,7 @@ public:
         bool ok = ensure(prog_, prog.size() * 4, false, err) && ensure(staging_, prog.size() * 4, true, err) &&
                   ensure(org_, size_t(MAX_ORIGINS) * ORIGIN_W * 4, false, err) &&
                   ensure(scratch_, size_t(MAX_ORIGINS) * SCR_W * 4, false, err) &&
-                  ensure(list_, size_t(MAX_ORIGINS) * 25 * 4, false, err) && ensure(cnt_, 64, false, err);
+                  ensure(list_, size_t(MAX_ORIGINS) * 25 * 3 * 4, false, err) && ensure(cnt_, 64, false, err);
         if (!ok) return false;
         std::memcpy(staging_.map, prog.data(), prog.size() * 4);
         progBytes_ = prog.size() * 4;
@@ -652,17 +681,18 @@ public:
         // the origins (cx, cz, the 5 x 5 slots) and the slots they read (each once), in the command buffer
         uint32_t n = b->count;
         const int32_t* nbh = b->neighborsHost;
-        std::vector<int32_t> org(size_t(n) * ORIGIN_W, -1), slots;
+        std::vector<int32_t> org(size_t(n) * ORIGIN_W, -1), slots;  // slots: (slot, cx, cz) each
         std::vector<uint8_t> seen(b->slots, 0);
         for (uint32_t i = 0; i < n; i++) {
-            org[size_t(i) * ORIGIN_W] = b->chunks[i * 3];
-            org[size_t(i) * ORIGIN_W + 1] = b->chunks[i * 3 + 1];
+            int32_t cx = b->chunks[i * 3], cz = b->chunks[i * 3 + 1];
+            org[size_t(i) * ORIGIN_W] = cx;
+            org[size_t(i) * ORIGIN_W + 1] = cz;
             for (uint32_t j = 0; j < 25; j++) {
                 int32_t sl = nbh[size_t(i) * 25 + j];
                 org[size_t(i) * ORIGIN_W + 2 + j] = sl;
                 if (sl >= 0 && uint32_t(sl) < b->slots && !seen[size_t(sl)]) {
                     seen[size_t(sl)] = 1;
-                    slots.push_back(sl);
+                    slots.insert(slots.end(), {sl, cx + int32_t(j % 5) - 2, cz + int32_t(j / 5) - 2});
                 }
             }
         }
@@ -673,7 +703,7 @@ public:
         // the bindings: the program, the store's terrain, our aux (per store slot), the origins, the scratch, the store's
         // blocks, the slot list, the store's aux, the counter
         VkBuffer bufs[NB] = {prog_.buf, VkBuffer(b->terrain), aux_.buf, org_.buf, scratch_.buf, VkBuffer(b->blocks), list_.buf,
-                             VkBuffer(b->aux), cnt_.buf};
+                             VkBuffer(b->aux), cnt_.buf, VkBuffer(b->map)};
         VkDescriptorBufferInfo bi[NB];
         VkWriteDescriptorSet w[NB];
         for (uint32_t i = 0; i < NB; i++) {
@@ -687,7 +717,8 @@ public:
         }
         vkUpdateDescriptorSets(dev_, NB, w, 0, nullptr);
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
-        FeatParams p{int32_t(n), 0, 0, 0, int32_t(slots.size()), 1u, 1u << 30, 1u};
+        uint32_t nslots = uint32_t(slots.size() / 3);
+        FeatParams p{int32_t(n), 0, 0, 0, int32_t(nslots), 1u, 1u << 30, 1u};
         auto dispatch = [&](uint32_t pipe, uint32_t gx, uint32_t gy) {
             vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(FeatParams), &p);
             vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipe]);
@@ -695,9 +726,25 @@ public:
             barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         };
-        if (!slots.empty()) {
-            dispatch(S_AUX, (AUX_W + GROUP - 1) / GROUP, uint32_t(slots.size()));
-            dispatch(S_HM, 4, uint32_t(slots.size()));
+        if (nslots) {
+            dispatch(S_AUX, (AUX_W + GROUP - 1) / GROUP, nslots);
+            dispatch(S_HM, 4, nslots);
+        }
+        // dev: ATLAS_FEAT_AUX_DUMP=<file>: the aux of the slots each call read, (cx, cz, AUX_W words) a record, for the
+        // checks against Java (written at the next call or at the end: the generator waits for each submission)
+        if (const char* ad = std::getenv("ATLAS_FEAT_AUX_DUMP")) {
+            flushAux();
+            dumpPath_ = ad;
+            if (nslots && ensure(dbg_, size_t(MAX_ORIGINS) * 25 * AUX_W * 4, true, err)) {
+                std::vector<VkBufferCopy> cs;
+                for (uint32_t i = 0; i < nslots; i++) {
+                    cs.push_back({VkDeviceSize(slots[i * 3]) * AUX_W * 4, VkDeviceSize(i) * AUX_W * 4, VkDeviceSize(AUX_W) * 4});
+                    pendingXZ_.push_back(slots[i * 3 + 1]);
+                    pendingXZ_.push_back(slots[i * 3 + 2]);
+                }
+                vkCmdCopyBuffer(cmd, aux_.buf, dbg_.buf, uint32_t(cs.size()), cs.data());
+                barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
+            }
         }
         dispatch(S_INIT, 64, n);
         for (uint32_t rec : dispatch_) {
@@ -711,6 +758,17 @@ public:
     }
 
 private:
+    void flushAux() {
+        if (pendingXZ_.empty() || dumpPath_.empty() || !dbg_.map) return;
+        if (FILE* f = std::fopen(dumpPath_.c_str(), "ab")) {
+            for (size_t i = 0; i < pendingXZ_.size() / 2; i++) {
+                std::fwrite(&pendingXZ_[i * 2], 4, 2, f);
+                std::fwrite(static_cast<const uint32_t*>(dbg_.map) + i * AUX_W, 4, AUX_W, f);
+            }
+            std::fclose(f);
+        }
+        pendingXZ_.clear();
+    }
     static bool fail(std::string& err, std::string m) {
         err = std::move(m);
         return false;
@@ -772,7 +830,9 @@ private:
     VkPipelineLayout layout_ = VK_NULL_HANDLE;
     VkDescriptorPool descPool_ = VK_NULL_HANDLE;
     VkDescriptorSet set_ = VK_NULL_HANDLE;
-    Buf prog_, staging_, aux_, org_, scratch_, list_, cnt_;
+    Buf prog_, staging_, aux_, org_, scratch_, list_, cnt_, dbg_;
+    std::vector<int32_t> pendingXZ_;
+    std::string dumpPath_;
     size_t progBytes_ = 0;
     bool progUp_ = false;
     uint32_t storeSlots_ = 0;
@@ -829,6 +889,20 @@ ATLAS_API AtlasStatus atlas_feat_create(AtlasBackend backend, AtlasFeat** out) {
             return ATLAS_ERR_UNSUPPORTED;  // GPU only (the CPU fallback is a later job)
         }
         *out = h.release();
+        return ATLAS_OK;
+    });
+}
+
+ATLAS_API AtlasStatus atlas_feat_probe_aux(AtlasFeat* h, const uint32_t* map, uint32_t mapCount, uint32_t n, const int32_t* chunkXZ,
+                                           uint32_t* outAux) {
+    if (!h || !h->engine || !map || !chunkXZ || !outAux || n == 0) return ATLAS_ERR_ARG;
+    return guarded(h, [&] {
+        std::string err;
+        std::vector<uint32_t> m(map, map + mapCount);
+        if (!h->engine->probeAux(m, n, chunkXZ, outAux, err)) {
+            h->error = err;
+            return ATLAS_ERR_GPU;
+        }
         return ATLAS_OK;
     });
 }

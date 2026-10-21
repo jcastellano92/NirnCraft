@@ -378,13 +378,16 @@ add_custom_command(
   COMMAND "${SLANGC}" "${GEN_SRC}" -target cpp ${GEN_CPU_ENTRIES} -O3 -fp-mode precise -warnings-disable 41035
           -o "${GEN}/atlas_gen_cpu.cpp"
   DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_page.slang" COMMENT "slangc atlas_gen -> C++ (CPU reference)")
-# the generator's chunk store (atlas_store.slang: a chunk into its slot and back; integers only, -O0 like the features)
+# the generator's chunk store (atlas_store.slang: a chunk into its slot and back, the map's region and elevation per
+# column; -O0 like the features)
 foreach(pass storeIn storeOut)
   add_custom_command(
     OUTPUT "${GEN}/atlas_store_${pass}.spv"
     COMMAND "${SLANGC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_store.slang" -target spirv -entry ${pass}Main -stage compute -O0
-            -o "${GEN}/atlas_store_${pass}.spv"
-    DEPENDS "${CMAKE_SOURCE_DIR}/shaders/atlas_store.slang" COMMENT "slangc atlas_store:${pass}Main -> SPIR-V")
+            -fp-mode precise -warnings-disable 41035 -o "${GEN}/atlas_store_${pass}_raw.spv"
+    COMMAND spv_exact "${GEN}/atlas_store_${pass}_raw.spv" "${GEN}/atlas_store_${pass}.spv"
+    DEPENDS "${CMAKE_SOURCE_DIR}/shaders/atlas_store.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang"
+            "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" spv_exact COMMENT "slangc atlas_store:${pass}Main -> SPIR-V (exact float contract)")
   add_custom_command(
     OUTPUT "${GEN}/atlas_store_${pass}_spv.h"
     COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_store_${pass}.spv -DOUT=${GEN}/atlas_store_${pass}_spv.h

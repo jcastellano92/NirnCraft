@@ -57,6 +57,13 @@ final class AtlasClientGen implements AutoCloseable {
     static final int FEATURE_THREADS = Integer.getInteger("nirncraft.atlas.clientGen.featureThreads",
             Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors() / 4)));
     static final boolean ORES = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.ores"));
+    /**
+     * (direct) The decoration on the GPU in the generator's chunk store (atlas_gen_run_store + atlas_feat_attach): chunks
+     * are generated into the store and go into the grid once decorated; {@code .store=false}: Java's decoration as
+     * before. {@code .storeSlots}: the store's chunks (about 1.3 MiB each).
+     */
+    static final boolean STORE = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.store"));
+    static final int STORE_SLOTS = Integer.getInteger("nirncraft.atlas.clientGen.storeSlots", 768);
     /** {@code .direct=false}: the generator's sections come back to the CPU and go up as uploads (the old path). */
     static final boolean DIRECT = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.direct"));
     /** (direct) The far terrain on the GPU into the grid's coarse levels (atlas_gen_far_ingest); false: the tiles. */
@@ -130,6 +137,10 @@ final class AtlasClientGen implements AutoCloseable {
     /** The generator makes its own pages on the device (atlas_gen_set_map took the map). */
     private volatile boolean devicePages;
     private volatile boolean terrainBusy = true;  // the window has chunks to generate: features wait (terrain first)
+    // (direct) the chunk store with the decoration's stages: chunks come out of it decorated (atlas_gen_run_store)
+    private volatile boolean storeOn;
+    private volatile java.lang.foreign.MemorySegment featStages;
+    private volatile long storeFinished;
     // stats (atlas-info)
     private volatile long chunks, flagged, pagesMade, featureChunks, uploadedChunks, uploadedSections;
     private volatile double genMs, pageMs, featureMs, uploadMs, gpuMs, decodeMs, kernelMs, readbackMs;
@@ -232,7 +243,50 @@ final class AtlasClientGen implements AutoCloseable {
             if (gen == null) gen = nat.create(AtlasGenNative.BACKEND_VULKAN);
             if (gen == null) gen = nat.create(AtlasGenNative.BACKEND_CPU);
             if (gen == null) return null;
+            // the decoration on the GPU (the store's stages): its program over the generator's blocks and biomes; the
+            // blocks it places join the generator's program (AtlasGenProgram.addBlocks), compiled again if it lacked any
+            AtlasFeatureProgram storeFp = null;
+            if (direct && STORE && FEATURE_RADIUS > 0 && gen.storeSupported()) {
+                try {
+                    long zs = net.minecraft.world.level.biome.BiomeManager.obfuscateSeed(ow.getSeed());
+                    java.util.function.Predicate<String> only = ORES ? null : k -> !k.startsWith("minecraft:ore_");
+                    storeFp = AtlasFeatureProgram.compile(g, ow, prog, ow.getSeed(), zs, only);
+                    AtlasGenProgram base = prog;
+                    List<BlockState> missing = storeFp.blocks.stream().filter(st -> !base.blockIds.containsKey(st)).toList();
+                    if (!missing.isEmpty()) {
+                        AtlasGenProgram.addBlocks(() -> missing);
+                        prog = AtlasGenProgram.compile(g, g.generatorSettings().value(), rs, ow, ow.getSeed(), null);
+                        storeFp = AtlasFeatureProgram.compile(g, ow, prog, ow.getSeed(), zs, only);
+                    }
+                } catch (ReflectiveOperationException | RuntimeException e) {
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: the GPU decoration is off", e);
+                    storeFp = null;
+                }
+            }
             gen.setProgram(prog.words);
+            java.lang.foreign.MemorySegment stages = null;
+            if (storeFp != null) {
+                try {
+                    // the id tables (the same ids when the feature program's extra blocks follow the generator's order)
+                    int[] g2f = new int[prog.blocks.size()], f2g = new int[storeFp.blocks.size()];
+                    for (int i = 0; i < g2f.length; i++) {
+                        Integer f = storeFp.blockIds.get(prog.blocks.get(i));
+                        g2f[i] = f == null ? 0 : f;
+                    }
+                    for (int i = 0; i < f2g.length; i++) {
+                        Integer gi = prog.blockIds.get(storeFp.blocks.get(i));
+                        f2g[i] = gi == null ? 0 : gi;
+                    }
+                    long ts = System.nanoTime();
+                    gen.storeEnable(STORE_SLOTS);
+                    stages = gen.attachFeatures(storeFp.words, g2f, f2g);
+                    com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: the decoration on the GPU ({} placed features, {} slots, {} ms)",
+                            storeFp.dispatched.size(), STORE_SLOTS, (System.nanoTime() - ts) / 1_000_000);
+                } catch (RuntimeException e) {
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: the GPU decoration did not attach", e);
+                    stages = null;
+                }
+            }
             // the batch's stages (atlas.h atlas_gen_add_stage): the features and overlays engines attach to this generator
             for (var attach : ATTACH) {
                 try {
@@ -243,7 +297,7 @@ final class AtlasClientGen implements AutoCloseable {
             }
             if (direct) gen.setIngest(ingestTable(prog, mats, ctx));
             AtlasGenFeatures feats = null;
-            if (FEATURE_RADIUS > 0) {
+            if (FEATURE_RADIUS > 0 && stages == null) {
                 try {
                     feats = new AtlasGenFeatures(g, ow, server.registryAccess(), ow, ow.getSeed(), prog, ORES);
                 } catch (ReflectiveOperationException | RuntimeException e) {
@@ -252,6 +306,8 @@ final class AtlasClientGen implements AutoCloseable {
             }
             AtlasClientGen c = new AtlasClientGen(prog, new AtlasGenPages(prog, rs, g.getBiomeSource(), ow), gen, g, rs,
                     ow.getSeed(), feats, ctx, mats, direct);
+            c.storeOn = stages != null;
+            c.featStages = stages;
             com.nirncraft.NirnCraft.LOGGER.info("atlas client generation on ({}): program {} words, {} fields, pages from the worker, radius {} chunks, "
                             + "features {} chunks on {} threads, {} ms", gen.device(), prog.words.length, prog.fields.size(),
                     RADIUS, feats == null ? 0 : FEATURE_RADIUS, feats == null ? 0 : FEATURE_THREADS, (System.nanoTime() - t0) / 1_000_000);
@@ -570,6 +626,12 @@ final class AtlasClientGen implements AutoCloseable {
                 if (cur == null) cur = plan(camCx, camCz, fresh ? FIRST_BATCH : BATCH);
                 terrainBusy = cur != null;
                 if (direct) gridReports();
+                if (cur == null && direct && storeOn) {
+                    // nothing new to generate: the store's ready chunks still go out (64 a call)
+                    long before = storeFinished;
+                    directBatch(new int[0], ids, flags, info, false);
+                    if (storeFinished != before) continue;
+                }
                 if (cur == null) {
                     if (direct) pruneDirect(camCx, camCz);
                     else prune(camCx, camCz);
@@ -648,10 +710,27 @@ final class AtlasClientGen implements AutoCloseable {
     private void directBatch(int[] batch, int[] ids, int[] flags, int[] info, boolean first) {
         int n = batch.length / 2;
         boolean wantIds = false;
-        if (features != null)
+        if (features != null && !storeOn)
             for (int i = 0; i < n && !wantIds; i++) wantIds = near(batch[i * 2], batch[i * 2 + 1], camCx, camCz, FEATURE_RADIUS + 2);
         long tg = System.nanoTime();
-        AtlasGenNative.Times gt = gen.run(batch, wantIds ? ids : null, flags, info);
+        AtlasGenNative.Times gt;
+        if (storeOn) {
+            // generated into the store; what comes out (decorated) is not this batch but the chunks whose neighbourhood
+            // is ready: the rest of this call works on those
+            int[] outXZ = new int[AtlasGenNative.RUN_CHUNKS * 2];
+            AtlasGenNative.Times[] tt = new AtlasGenNative.Times[1];
+            int m = gen.runStore(batch, outXZ, null, flags, info, tt);
+            gt = tt[0];
+            storeFinished += m;
+            batch = java.util.Arrays.copyOf(outXZ, m * 2);
+            n = m;
+            if (m == 0) {
+                gpuMs += (System.nanoTime() - tg) / 1e6;
+                return;
+            }
+        } else {
+            gt = gen.run(batch, wantIds ? ids : null, flags, info);
+        }
         long td = System.nanoTime();
         gpuMs += (td - tg) / 1e6;
         kernelMs += gt.kernelMs();
@@ -742,7 +821,8 @@ final class AtlasClientGen implements AutoCloseable {
         // where the camera will be (chunks from the camera's chunk): what it moves towards comes before what it leaves
         double px = camVx * PREDICT_S / 16.0, pz = camVz * PREDICT_S / 16.0;
         List<long[]> cand = new ArrayList<>();
-        int r = RADIUS;
+        // (the store: three chunks more, so that the window's own chunks have their neighbourhood and come out decorated)
+        int r = RADIUS + (storeOn ? 3 : 0);
         for (int dz = -r; dz <= r; dz++)
             for (int dx = -r; dx <= r; dx++) {
                 if (dx * dx + dz * dz > r * r) continue;
@@ -873,6 +953,7 @@ final class AtlasClientGen implements AutoCloseable {
 
     private void pruneDirect(int ccx, int ccz) {
         int far = RADIUS + 2;
+        if (storeOn) gen.storeKeep(ccx - far - 3, ccz - far - 3, ccx + far + 3, ccz + far + 3);
         done.removeIf(k -> {
             int cx = ChunkPos.getX(k), cz = ChunkPos.getZ(k);
             if (Math.abs(cx - ccx) <= far && Math.abs(cz - ccz) <= far) return false;
@@ -1199,6 +1280,7 @@ final class AtlasClientGen implements AutoCloseable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        if (featStages != null) gen.detachFeatures(featStages);  // (its stages off the generator, then its pipelines)
         gen.close();
     }
 }

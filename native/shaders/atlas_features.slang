@@ -39,6 +39,7 @@ struct FeatParams {
 [[vk::binding(5, 0)]] RWStructuredBuffer<uint> outIds;    // per target CHUNK_W words
 [[vk::binding(6, 0)]] StructuredBuffer<int> targets;      // per target TARGET_W ints: own terrain slot, the 9 origins (-1 none)
 [[vk::binding(7, 0)]] RWStructuredBuffer<uint> outWide;
+[[vk::binding(9, 0)]] StructuredBuffer<uint> mapData;     // (the store) the generator's map words (AtlasGenMap)
 [[vk::binding(8, 0)]] RWStructuredBuffer<uint> counters;  // [0] origins with placements left after this dispatch   // per target WIDE_W words: one id a block (the gather, then packed)
 
 #include "atlas_feat_math.slang"  // its own copy of the exact math (not atlas_exact.slang: see there)
@@ -3152,7 +3153,7 @@ bool runPlaced<let T : uint>(uint rec, bool first, uint budget) {
 void featHmMain(uint3 id : SV_DispatchThreadID) {
     uint slot = id.y, c = id.x;
     if (c >= 256u || slot >= uint(params.slots)) return;
-    if (params.store != 0u) slot = uint(targets[slot]);  // (the store: the slots listed)
+    if (params.store != 0u) slot = uint(targets[slot * 3u]);  // (the store: the slots listed: slot, cx, cz)
     uint lx = c & 15u, lz = c >> 4;
     for (uint t = 0; t < 6u; t++) {
         int h = MIN_Y;
@@ -3281,18 +3282,128 @@ void featOneMain(uint3 id : SV_DispatchThreadID) {
 }
 
 // ---- the store (atlas.h atlas_gen_add_store_stage) ------------------------------------------------------------------
-// a listed slot's aux from the store's: the quart biomes (generator ids are the feature program's biome ids: it is
-// compiled over the generator's biomes); the placement mask, the alchemy classes, the temperature noise and the frozen
-// bits: (to come from their kernels) open, class 0, 0, none
+// the generator's map (atlas_map.slang, atlas_page.slang): its far section holds Biome's noises
+// ([12] TEMPERATURE_NOISE, [13] BIOME_INFO_NOISE, [14] FROZEN_TEMPERATURE_NOISE's layers; [8..11] SimplexNoise F2, G2)
+static const uint MH_FAR = 13;
+uint mapW(uint i) { return mapData[i]; }
+double mapD(uint i) { return asdouble(mapData[i], mapData[i + 1]); }
+float mapF(uint i) { return asfloat(mapData[i]); }
+uint farW(uint k) { return mapW(mapW(MH_FAR) + k); }
+static const int SN_GX[12] = {1, -1, 1, -1, 1, -1, 1, -1, 0, 0, 0, 0};
+static const int SN_GY[12] = {1, 1, -1, -1, 0, 0, 0, 0, 1, -1, 1, -1};
+int snPerm(uint rec, int x) {
+    uint i = uint(x & 255);
+    return int((mapW(rec + (i >> 2)) >> ((i & 3u) * 8u)) & 255u);
+}
+double snCorner(int gi, double x, double y) {
+    double t0 = 0.5l - x * x - y * y - 0.0l * 0.0l;
+    if (t0 < 0.0l) return 0.0l;
+    t0 = t0 * t0;
+    return t0 * t0 * (double(SN_GX[gi]) * x + double(SN_GY[gi]) * y + 0.0l * 0.0l);
+}
+// SimplexNoise.get(x, y): a record of 64 words of permutation, offsetX, offsetY
+[noinline]
+float simplex2(uint rec, double xi, double yi) {
+    double xin = xi + mapD(rec + 64u), yin = yi + mapD(rec + 66u);
+    double F2 = mapD(mapW(MH_FAR) + 8u), G2 = mapD(mapW(MH_FAR) + 10u);
+    double s = (xin + yin) * F2;
+    int i = floorD_X(xin + s), j = floorD_X(yin + s);
+    double t = double(i + j) * G2;
+    double X0 = double(i) - t, Y0 = double(j) - t;
+    double x0 = xin - X0, y0 = yin - Y0;
+    int i1 = x0 > y0 ? 1 : 0, j1 = x0 > y0 ? 0 : 1;
+    double x1 = x0 - double(i1) + G2, y1 = y0 - double(j1) + G2;
+    double x2 = x0 - 1.0l + 2.0l * G2, y2 = y0 - 1.0l + 2.0l * G2;
+    int ii = i & 255, jj = j & 255;
+    int gi0 = snPerm(rec, ii + snPerm(rec, jj)) % 12;
+    int gi1 = snPerm(rec, ii + i1 + snPerm(rec, jj + j1)) % 12;
+    int gi2 = snPerm(rec, ii + 1 + snPerm(rec, jj + 1)) % 12;
+    double n0 = snCorner(gi0, x0, y0), n1 = snCorner(gi1, x1, y1), n2 = snCorner(gi2, x2, y2);
+    return float(70.0l * (n0 + n1 + n2));
+}
+// NoiseStack.get(x, y): count, then per layer the noise, its frequency (double) and amplitude (float)
+[noinline]
+float simplexStack2(uint at, double x, double y) {
+    uint n = mapW(at);
+    float v = 0.0f;
+    for (uint k = 0u; k < n; k++) {
+        uint L = at + 1u + k * 71u;
+        double f = mapD(L + 68u);
+        v = v + mapF(L + 70u) * simplex2(L, x * f, y * f);
+    }
+    return v;
+}
+// GroundCoverFeature.chooseRegionalFloraId's decision (AtlasFeatureProgram.alchLeaf): the leaf of a region word
+// (province code | flags << 8), the map elevation, the y asked for and by water; the program's tables give each
+// region index its word ([H_ALCHREG]: count, words) and each leaf its class ([H_ALCHLEAF], 255 unknown)
+static const uint H_ALCHREG = 27, H_ALCHLEAF = 28;
+static const uint AL_MW = 1, AL_BM = 2, AL_ELSWEYR = 3, AL_HAMMERFELL = 4, AL_VALENWOOD = 5, AL_SUMMERSET = 6, AL_CYRODIIL = 7,
+                  AL_HIGH_ROCK = 8, AL_ATMORA = 9;
+uint alchLeaf(uint rw, float elevation, int y, bool water) {
+    uint prov = rw & 255u, f = rw >> 8;
+    if (water) return prov == AL_MW ? 0u : (prov == AL_BM ? 1u : 2u);
+    if (prov == AL_MW) return (f & 1u) != 0u ? 3u : ((f & 2u) != 0u ? 4u : 5u);
+    if (prov == AL_BM) return 6u;
+    if (prov == AL_ELSWEYR || prov == AL_HAMMERFELL) return 7u;
+    if (prov == AL_VALENWOOD || prov == AL_SUMMERSET) return 8u;
+    if (prov == AL_CYRODIIL || prov == AL_HIGH_ROCK) return 9u;
+    if ((f & 4u) != 0u) return (f & 128u) != 0u ? 16u : 10u;
+    if ((f & 8u) != 0u) return 11u;
+    if ((f & 16u) != 0u) return 12u;
+    if ((f & 32u) != 0u) return 13u;
+    if (y > 110 || elevation > 140.0f || (f & 64u) != 0u || prov == AL_ATMORA) return 14u;
+    return 15u;
+}
+uint alchClassOf(int region, float elevation, uint variant) {
+    uint reg = hdr(H_ALCHREG), leafAt = hdr(H_ALCHLEAF);
+    if (reg == 0u || leafAt == 0u) return 255u;
+    uint rw = region >= 0 && uint(region) < fprog[reg] ? fprog[reg + 1u + uint(region)] : 0u;  // (generated realms: 0)
+    return fprog[leafAt + alchLeaf(rw, elevation, variant == 1u ? 200 : 64, variant == 2u)] & 255u;
+}
+// Biome.TemperatureModifier.FROZEN turning a column's temperature to 0.2
+[noinline]
+bool frozenAt(int x, int z) {
+    double large = double(simplexStack2(farW(14), double(x) * 0.05l, double(z) * 0.05l) * 7.0f);
+    double edge = double(simplex2(farW(13), double(x) * 0.2l, double(z) * 0.2l));
+    if (!(large + edge < 0.3l)) return false;
+    return double(simplex2(farW(13), double(x) * 0.09l, double(z) * 0.09l)) < 0.8l;
+}
+// a listed slot's aux (the list: slot, cx, cz): the quart biomes from the store's (generator ids are the feature
+// program's biome ids: it is compiled over the generator's biomes); Biome's temperature noise (x / 8, z / 8, times 8)
+// and the frozen modifier's bits from the map's noises; the alchemy classes from each column's map region and
+// elevation (the store's aux: atlas_store.slang); the placement mask: (to come from its kernel) open
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void featAuxMain(uint3 id : SV_DispatchThreadID) {
     uint item = id.y, i = id.x;
     if (item >= uint(params.slots) || i >= AUX_HM) return;
-    uint slot = uint(targets[item]);
+    uint slot = uint(targets[item * 3u]);
+    int cx = targets[item * 3u + 1u], cz = targets[item * 3u + 2u];
     uint v = 0u;
-    if (i < AUX_MASK) v = outWide[slot * STORE_AUX_W + i];
-    else if (i < AUX_ALCH) v = 0x3F3F3F3Fu;  // PlacementMask.CAP everywhere
+    if (i < AUX_MASK) {
+        v = outWide[slot * STORE_AUX_W + i];
+    } else if (i < AUX_ALCH) {
+        v = 0x3F3F3F3Fu;  // PlacementMask.CAP everywhere
+    } else if (i < AUX_TEMP) {
+        // four bytes: variant (0 dry and low, 1 dry above y 110, 2 by water) * 256 + column
+        for (uint k = 0u; k < 4u; k++) {
+            uint idx = (i - AUX_ALCH) * 4u + k, variant = idx >> 8, c = idx & 255u;
+            int region = int(outWide[slot * STORE_AUX_W + 1408u + c]);
+            float elev = asfloat(outWide[slot * STORE_AUX_W + 1664u + c]);
+            v = v | (alchClassOf(region, elev, variant) << (k * 8u));
+        }
+    } else if (i >= AUX_TEMP && i < AUX_FROZEN) {
+        uint c = i - AUX_TEMP;
+        int x = cx * 16 + int(c & 15u), z = cz * 16 + int(c >> 4);
+        // (x / 8.0F: a power of two, exact as the product)
+        v = asuint(simplex2(farW(12), double(float(x) * 0.125f), double(float(z) * 0.125f)) * 8.0f);
+    } else if (i >= AUX_FROZEN && i < AUX_HM) {
+        uint w0 = (i - AUX_FROZEN) * 32u;
+        for (uint k = 0u; k < 32u; k++) {
+            uint c = w0 + k;
+            if (frozenAt(cx * 16 + int(c & 15u), cz * 16 + int(c >> 4))) v = v | (1u << k);
+        }
+    }
     chunkAux[slot * AUX_W + i] = v;
 }
 // an origin's writes into the store's blocks: each block keeps the write of the origin latest in the gather's order
