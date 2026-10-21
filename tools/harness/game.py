@@ -270,7 +270,9 @@ def close():
     STATE.unlink(missing_ok=True)
 
 
-BUILT = Path("E:/NirnCraft-scratch/migration-26.3/build/libs/nirncraft-0.1.0.jar")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "dev"))
+import buildpaths  # noqa: E402  (a worktree builds into its own directory)
+BUILT = buildpaths.build_dir() / "libs/nirncraft-0.1.0.jar"
 
 
 def stale_core():
@@ -537,7 +539,7 @@ def rebuild_jar():
     if r.returncode:
         tail = [l for l in (r.stdout + r.stderr).splitlines() if "error:" in l or "FAILED" in l][:12]
         raise RuntimeError("jar build failed:\n" + "\n".join(tail))
-    jar = next(iter(sorted(Path("E:/NirnCraft-scratch/migration-26.3/build/libs").glob("nirncraft-*.jar"))), None)
+    jar = next(iter(sorted((buildpaths.build_dir() / "libs").glob("nirncraft-*.jar"))), None)
     if jar is None:
         raise RuntimeError("built jar not found")
     if running():

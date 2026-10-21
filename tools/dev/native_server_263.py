@@ -102,7 +102,9 @@ def main() -> None:
         raise ValueError('Configured development JDK must be Java 25')
     subprocess.run([sys.executable, str(Path(__file__).with_name('build_263.py')), '--run-dir', str(runtime),
                     '--dev-dir', str(control), 'prepareServerRun', 'createServerLaunchScript'], check=True, env=environment)
-    manifest = prepare(scratch, runtime, control, java, args.jdwp, args.xmx)
+    sys.path.insert(0, str(Path(__file__).parent))
+    import buildpaths  # a worktree builds into its own directory (build_263.py)
+    manifest = prepare(buildpaths.out_dir(scratch=scratch), runtime, control, java, args.jdwp, args.xmx)
     args.output.write_text(json.dumps(manifest, indent=2) + '\n')
     print('Native server launch prepared; Minecraft was not started.')
 

@@ -24,7 +24,8 @@ from hotswap import JdwpClient  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "mod/src/main/java"
-BUILT = Path("E:/NirnCraft-scratch/migration-26.3/build/classes/java/main")
+import buildpaths  # noqa: E402  (a worktree builds into its own directory)
+BUILT = buildpaths.build_dir() / "classes/java/main"
 INSTANCE = Path.home() / "AppData/Roaming/PrismLauncher/instances/NirnCraft-26.3-autotest/instance.cfg"
 AGENT = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:5006"
 

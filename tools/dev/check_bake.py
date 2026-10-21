@@ -22,7 +22,9 @@ NAMES = {n + ".bin" for n in ("landmass", "roadplan", "streetplan", "sceneplan")
 
 
 def newest_jar():
-    jars = sorted(Path(r"E:\NirnCraft-scratch\migration-26.3\build\libs").glob("nirncraft-*.jar"),
+    sys.path.insert(0, str(Path(__file__).parent))
+    import buildpaths  # a worktree builds into its own directory
+    jars = sorted((buildpaths.build_dir() / "libs").glob("nirncraft-*.jar"),
                   key=lambda p: p.stat().st_mtime, reverse=True)
     jars = [j for j in jars if not j.name.endswith(("-sources.jar", "-javadoc.jar"))]
     return jars[0] if jars else None
