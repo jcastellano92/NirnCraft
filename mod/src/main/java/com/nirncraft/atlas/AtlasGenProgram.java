@@ -150,6 +150,18 @@ final class AtlasGenProgram {
      * Compiles the overworld generator. heights: the level's height accessor (vertical anchors resolve against it as
      * in chunk generation); material: the atlas material of a block state (null: the generator ids themselves).
      */
+    /**
+     * Block states the batch's stages (atlas_gen_add_stage: the features and overlays engines) place besides the
+     * terrain's: every program compiled after a registration gives them generator ids (AtlasGenProgram.blockIds) and
+     * the ingest table their atlas materials. Register before the client generator starts (any thread).
+     */
+    private static final java.util.List<java.util.function.Supplier<java.util.Collection<BlockState>>> EXTRA_BLOCKS =
+            new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    static void addBlocks(java.util.function.Supplier<java.util.Collection<BlockState>> states) {
+        EXTRA_BLOCKS.add(states);
+    }
+
     static AtlasGenProgram compile(ChunkGenerator generator, NoiseGeneratorSettings settings, RandomState random,
                                    LevelHeightAccessor heights, long seed, ToIntFunction<BlockState> material) {
         Compiler c = new Compiler(generator, settings, random, heights, seed);
@@ -283,6 +295,10 @@ final class AtlasGenProgram {
             for (int i = 0; i < bands.length; i++) bandIds[i] = block(bands[i]);
             if (bands.length != 192) throw new IllegalStateException("clay bands: " + bands.length);
             // the surface system's noises, before the layout fixes the noise region
+            // the stages' blocks (addBlocks), after the terrain's: their ids stay put when the stages change
+            for (var supplier : EXTRA_BLOCKS)
+                for (BlockState st : supplier.get()) block(st);
+            if (blocks.size() > 65535) throw new IllegalStateException("more than 65535 block states for 16-bit ids");
             surfNoise = stack((Noise) get(MaterialSystem.class, system, "surfaceNoise"));
             secNoise = stack((Noise) get(MaterialSystem.class, system, "surfaceSecondaryNoise"));
             clayNoise = stack((Noise) get(MaterialSystem.class, system, "clayBandsOffsetNoise"));

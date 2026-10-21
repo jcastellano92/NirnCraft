@@ -835,6 +835,65 @@ ATLAS_API AtlasStatus atlas_gen_far_ingest(AtlasGen* h, int32_t lod, const int32
    now (wanted): make and send them again. Returns how many did not fit the arrays. */
 ATLAS_API uint32_t atlas_gen_grid_reports(AtlasGen* h, int32_t* outDropped, uint32_t droppedCap, uint32_t* outDroppedCount,
                                           int32_t* outWanted, uint32_t wantedCap, uint32_t* outWantedCount);
+/*
+ * The batch's stages (the features and overlays engines, GPU to GPU on the generator's device and in its batch). A
+ * batch (atlas_gen_run / atlas_gen_chunks) runs: the pages it lacks, the terrain (density, aquifers, surface rule, map
+ * water), then the registered stages in order, then the pack (blocks -> 16-bit sections), the sections' kinds and
+ * hashes, the atlas materials and (atlas_gen_ingest) the grid. A stage records its Vulkan commands into the batch's
+ * command buffer (vkCommandBuffer): it binds its own pipelines and descriptors (made beforehand on the device of
+ * atlas_gen_device_handles), reads and writes `blocks`, and returns 0 (anything else fails the batch). The generator
+ * puts a memory barrier after each stage and binds its own state again. The order numbers (ATLAS_GEN_STAGE_*):
+ *   1000 + step   decoration step 0..9 (GenerationStep.Decoration's ordinal: the features engine)
+ *   2000          settlement and structure pieces, 2100 their sweeps (the overlays engine)
+ *   3000          freeze_top_layer (snow and ice), 3100 road and street paint
+ * Stages of one order run in registration order. Callbacks run on the thread that calls atlas_gen_run, with the
+ * generator's lock held: they must not call back into atlas_gen_*. Vulkan only (ATLAS_ERR_UNSUPPORTED on the C++ engine).
+ */
+enum {
+    ATLAS_GEN_STAGE_DECORATION = 1000,  /* + the step, 0..9 */
+    ATLAS_GEN_STAGE_PIECES = 2000,
+    ATLAS_GEN_STAGE_SWEEPS = 2100,
+    ATLAS_GEN_STAGE_FREEZE = 3000,
+    ATLAS_GEN_STAGE_PAINT = 3100
+};
+typedef struct AtlasGenStageBatch {
+    uint32_t version;              /* 1 */
+    uint32_t order;                /* the stage being called */
+    uint32_t chunkCount;           /* chunks in this batch (<= 64) */
+    uint32_t queueFamily;          /* vkCommandBuffer's */
+    const int32_t* chunks;         /* (cx, cz) pairs, host memory */
+    void* vkDevice;                /* VkDevice */
+    void* vkCommandBuffer;         /* VkCommandBuffer, recording, compute bind point */
+    uint64_t blocks;               /* VkBuffer: per chunk blocksWordsPerChunk uint32 generator block ids (the program's
+                                      block table: AtlasGenProgram.blocks), index x + 16 * (z + 16 * (y + 64)), y -64..575 */
+    uint64_t blocksWordsPerChunk;  /* 16 * 16 * 640 */
+    uint64_t chunkList;            /* VkBuffer: the chunks' (cx, cz) int pairs, in batch order */
+    uint64_t pages;                /* VkBuffer: the pages (pageWords words each: the column fields, the map water word,
+                                      the quart biomes; atlas_gen.slang's layout) */
+    uint64_t pageIndex;            /* VkBuffer: int slot per page of the grid pageMinCx.., pageW x pageH (-1: none) */
+    uint32_t pageWords;
+    int32_t pageMinCx, pageMinCz, pageW, pageH;
+    uint32_t pad0;
+    uint64_t program;              /* VkBuffer: the program's words (AtlasGenProgram: seeds, noises, the block table) */
+    uint64_t map;                  /* VkBuffer: the map's words (AtlasGenMap) */
+} AtlasGenStageBatch;
+typedef int32_t (*AtlasGenStageFn)(void* user, const AtlasGenStageBatch* batch);
+/* Registers a stage at `order` (outId: for atlas_gen_remove_stage). Copied: the callback and user stay valid until removed
+   or the generator is destroyed. */
+ATLAS_API AtlasStatus atlas_gen_add_stage(AtlasGen* h, uint32_t order, AtlasGenStageFn fn, void* user, uint32_t* outId);
+ATLAS_API AtlasStatus atlas_gen_remove_stage(AtlasGen* h, uint32_t id);
+/* The generator's Vulkan device, for the stages' engines to make their pipelines and buffers on beforehand. */
+typedef struct AtlasGenDevice {
+    uint32_t version;              /* 1 */
+    uint32_t queueFamily;          /* the generator's queue family (its batches' command buffers) */
+    uint32_t frameQueueFamily;     /* the context's frames' family (atlas_gen_create_for), for buffers both read */
+    uint32_t sharedWithContext;    /* 1: the context's own device (atlas_gen_create_for) */
+    void* vkInstance;
+    void* vkPhysicalDevice;
+    void* vkDevice;
+    void* vkQueue;                 /* the generator's queue: submit nothing of your own on it while a batch may run */
+} AtlasGenDevice;
+ATLAS_API AtlasStatus atlas_gen_device_handles(AtlasGen* h, AtlasGenDevice* out);
 /* Pages the device made so far, the page passes' total time, and whether the device makes them (any may be NULL). */
 ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, double* pageMs, int32_t* onDevice);
 /* Probes the kernels' pieces at n (x, z) columns (n <= 2^17), 32 words each, the last a flag (nonzero: not proven): kind 0

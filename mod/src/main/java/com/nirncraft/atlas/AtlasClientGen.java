@@ -49,6 +49,14 @@ final class AtlasClientGen implements AutoCloseable {
     /** {@code .direct=false}: the generator's sections come back to the CPU and go up as uploads (the old path). */
     static final boolean DIRECT = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.direct"));
     /** (direct) The far terrain on the GPU into the grid's coarse levels (atlas_gen_far_ingest); false: the tiles. */
+    /**
+     * Called with each new client generator and its program before its first batch: the features and overlays engines
+     * register their stages there (gen.handle(): atlas_gen_add_stage, atlas_gen_device_handles; prog.blockIds for the
+     * blocks they place, registered beforehand with AtlasGenProgram.addBlocks). Register at mod setup (any thread).
+     */
+    static final java.util.List<java.util.function.BiConsumer<AtlasGenNative.Gen, AtlasGenProgram>> ATTACH =
+            new java.util.concurrent.CopyOnWriteArrayList<>();
+
     static boolean far() {
         return !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.far"));
     }
@@ -214,6 +222,14 @@ final class AtlasClientGen implements AutoCloseable {
             if (gen == null) gen = nat.create(AtlasGenNative.BACKEND_CPU);
             if (gen == null) return null;
             gen.setProgram(prog.words);
+            // the batch's stages (atlas.h atlas_gen_add_stage): the features and overlays engines attach to this generator
+            for (var attach : ATTACH) {
+                try {
+                    attach.accept(gen, prog);
+                } catch (RuntimeException e) {
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: a stage engine did not attach", e);
+                }
+            }
             if (direct) gen.setIngest(ingestTable(prog, mats, ctx));
             AtlasGenFeatures feats = null;
             if (FEATURE_RADIUS > 0) {

@@ -84,6 +84,7 @@ constexpr uint32_t OUT_WORDS = 40 * 2048;
 constexpr uint32_t INFO_WORDS = 4 + 40 * 4;  // atlas_gen.slang secInfo
 constexpr uint32_t PASSES = 6;               // the terrain's; then INGEST_PASSES (cols, secs, mats), then the math check
 constexpr uint32_t INGEST_PASSES = 3;
+constexpr uint32_t PACK_PASS = 5;  // (the passes: corners, aquifer, fill, tops, surface, pack): the stages run before it
 constexpr uint32_t PIPES = PASSES + INGEST_PASSES + 8;
 constexpr uint32_t MATH_PIPE = PASSES + INGEST_PASSES, PROBE_PIPE = MATH_PIPE + 1;
 constexpr uint32_t PAGECOLS_PIPE = PROBE_PIPE + 1, PAGEBIOMES_PIPE = PROBE_PIPE + 2;  // the pages on the device
@@ -161,9 +162,26 @@ struct RunOut {
     double pageMs = 0;           // the page passes (device timestamps or CPU wall)
 };
 
+// A registered stage of the batch (atlas_gen_add_stage): its order, the engine's callback, its data, its id
+struct Stage {
+    uint32_t order, id;
+    AtlasGenStageFn fn;
+    void* user;
+};
+
 class Engine {
 public:
     virtual ~Engine() = default;
+    // the stages the batch runs between the terrain and its sections (sorted by order; GPU engines only)
+    virtual bool setStages(const std::vector<Stage>& stages, std::string& err) {
+        if (!stages.empty()) return (err = "stages run on a Vulkan generator only"), false;
+        return true;
+    }
+    // the device the stages' engines make their pipelines on (atlas_gen_device_handles)
+    virtual bool deviceHandles(AtlasGenDevice& out) {
+        (void)out;
+        return false;
+    }
     virtual const char* device() const = 0;
     virtual bool setProgram(const std::vector<uint32_t>& prog, std::string& err) = 0;
     virtual bool setPage(uint32_t slot, const uint32_t* words, std::string& err) = 0;
@@ -788,6 +806,62 @@ public:
         return true;
     }
 
+    bool setStages(const std::vector<Stage>& stages, std::string&) override {
+        stages_ = stages;
+        return true;
+    }
+
+    bool deviceHandles(AtlasGenDevice& out) override {
+        out = AtlasGenDevice{};
+        out.version = 1;
+        out.vkInstance = inst_;
+        out.vkPhysicalDevice = phys_;
+        out.vkDevice = dev_;
+        out.vkQueue = queue_;
+        out.queueFamily = family_;
+        out.frameQueueFamily = frameFamily_;
+        out.sharedWithContext = shared_ ? 1 : 0;
+        return true;
+    }
+
+    // the batch's stages (atlas_gen_add_stage): after the surface pass (the terrain, its surface and map water done),
+    // before the pack (the blocks into sections, hashes, materials). Each records into our command buffer; after it
+    // our bindings come back and its writes are made visible.
+    bool runStages(const Batch& b, uint32_t n, std::string& err) {
+        if (stages_.empty()) return true;
+        AtlasGenStageBatch sb{};
+        sb.version = 1;
+        sb.chunkCount = n;
+        sb.chunks = b.chunks.data();
+        sb.vkDevice = dev_;
+        sb.vkCommandBuffer = cmd_;
+        sb.queueFamily = family_;
+        sb.blocks = uint64_t(blocks_.buf);
+        sb.blocksWordsPerChunk = BLOCK_WORDS;
+        sb.chunkList = uint64_t(chunks_.buf);
+        sb.pages = uint64_t(pages_.buf);
+        sb.pageWords = pageWords_;
+        sb.pageIndex = uint64_t(pageIdx_.buf);
+        sb.pageMinCx = b.params.pageMinCx;
+        sb.pageMinCz = b.params.pageMinCz;
+        sb.pageW = b.params.pageW;
+        sb.pageH = b.params.pageH;
+        sb.program = uint64_t(prog_.buf);
+        sb.map = uint64_t(map_.buf);
+        for (const Stage& st : stages_) {
+            sb.order = st.order;
+            int32_t r = st.fn(st.user, &sb);
+            if (r != 0) return fail(err, "generator stage " + std::to_string(st.order) + " failed (" + std::to_string(r) + ")");
+            barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT,
+                    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
+        }
+        vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+        vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &b.params);
+        return true;
+    }
+
     void takeGridReports(std::vector<std::array<int32_t, 4>>& dropped, std::vector<std::array<int32_t, 4>>& wanted) override {
         dropped.clear();
         wanted.clear();
@@ -914,6 +988,7 @@ public:
                 barrier(VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_HOST_READ_BIT,
                         VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_HOST_BIT);
             }
+            if (p == PACK_PASS && !runStages(b, n, err)) return false;  // the features and overlays (atlas_gen_add_stage)
             vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[p]);
             vkCmdDispatch(cmd_, (PASS_ITEMS[p] + GROUP - 1) / GROUP, n, 1);
             barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
@@ -1470,6 +1545,7 @@ private:
     VkFence fence_ = VK_NULL_HANDLE;
     VkQueryPool queries_ = VK_NULL_HANDLE;
     Buf prog_, pages_, pageIdx_, chunks_, corners_, aq_, blocks_, col_, out_, readback_, staging_, tab_, info_, map_, jobs_, bad_, far_;
+    std::vector<Stage> stages_;
 };
 
 int64_t key(int32_t cx, int32_t cz) { return (int64_t(cx) << 32) ^ int64_t(uint32_t(cz)); }
@@ -1498,6 +1574,8 @@ struct AtlasGen {
     uint64_t clock = 0;
     // the map is set and the program carries what the page passes need: the engine makes its own pages
     bool mapSet = false, devicePages = false;
+    std::vector<Stage> stages;  // atlas_gen_add_stage's, sorted by order
+    uint32_t nextStage = 1;
     uint64_t pagesMade = 0;
     double pageMs = 0;
     // a slot for chunk (cx, cz)'s page: a free one, else the least recently used page not used at `clock`
@@ -1951,6 +2029,48 @@ ATLAS_API uint32_t atlas_gen_grid_reports(AtlasGen* h, int32_t* outDropped, uint
     } catch (...) {
         return 0;
     }
+}
+
+ATLAS_API AtlasStatus atlas_gen_add_stage(AtlasGen* h, uint32_t order, AtlasGenStageFn fn, void* user, uint32_t* outId) {
+    if (!h || !fn) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        std::lock_guard<std::mutex> l(h->mu);
+        std::vector<Stage> next = h->stages;
+        Stage st{order, h->nextStage, fn, user};
+        // after the stages of the same order already there (registration order within an order)
+        auto at = std::upper_bound(next.begin(), next.end(), order, [](uint32_t o, const Stage& s) { return o < s.order; });
+        next.insert(at, st);
+        std::string err;
+        if (!h->engine->setStages(next, err)) return h->fail(ATLAS_ERR_UNSUPPORTED, err);
+        h->stages.swap(next);
+        h->nextStage++;
+        if (outId) *outId = st.id;
+        return ATLAS_OK;
+    });
+}
+
+ATLAS_API AtlasStatus atlas_gen_remove_stage(AtlasGen* h, uint32_t id) {
+    if (!h) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        std::lock_guard<std::mutex> l(h->mu);
+        std::vector<Stage> next;
+        for (const Stage& s : h->stages)
+            if (s.id != id) next.push_back(s);
+        if (next.size() == h->stages.size()) return h->fail(ATLAS_ERR_ARG, "no such stage");
+        std::string err;
+        if (!h->engine->setStages(next, err)) return h->fail(ATLAS_ERR_UNSUPPORTED, err);
+        h->stages.swap(next);
+        return ATLAS_OK;
+    });
+}
+
+ATLAS_API AtlasStatus atlas_gen_device_handles(AtlasGen* h, AtlasGenDevice* out) {
+    if (!h || !out) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        std::lock_guard<std::mutex> l(h->mu);
+        if (!h->engine->deviceHandles(*out)) return h->fail(ATLAS_ERR_UNSUPPORTED, "not a Vulkan generator");
+        return ATLAS_OK;
+    });
 }
 
 ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, double* pageMs, int32_t* onDevice) {

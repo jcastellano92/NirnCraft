@@ -133,6 +133,11 @@ final class AtlasGenNative {
     final class Gen implements AutoCloseable {
         private final MemorySegment ptr;
 
+        /** The native AtlasGen* (atlas.h), for the stages' engines to call atlas_gen_add_stage / atlas_gen_device_handles. */
+        MemorySegment handle() {
+            return ptr;
+        }
+
         private Gen(MemorySegment ptr) {
             this.ptr = ptr;
         }
