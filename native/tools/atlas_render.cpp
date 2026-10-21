@@ -408,7 +408,7 @@ int main(int argc, char** argv) {
         if (keepNear && num(a, "bricks", 1) > 0) {
             size_t bricked = 0;
             auto b0 = std::chrono::steady_clock::now();
-            if (!exportdata::uploadBricks(ctx, ml, ex.firstMat, ex.matState, grass, foliage, bricked, why)) {
+            if (!exportdata::uploadBricks(ctx, ml, ex.firstMat, ex.matState, grass, foliage, bricked, why, num(a, "animtest", 0) > 0)) {
                 std::fprintf(stderr, "bricks: %s\n", why.c_str());
                 return 2;
             }

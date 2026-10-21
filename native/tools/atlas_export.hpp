@@ -236,7 +236,7 @@ inline bool brickWorthy(const ModelLib& ml, uint32_t id) {
 // The bricks of materials [first, first + ids.size()) for state ids `ids` (0 / not brick-worthy: none), tinted with
 // the export's colours, through atlas_set_material_bricks.
 inline bool uploadBricks(AtlasContext* ctx, const ModelLib& ml, uint16_t first, const std::vector<uint32_t>& ids,
-                         uint32_t grass, uint32_t foliage, size_t& bricked, std::string& why) {
+                         uint32_t grass, uint32_t foliage, size_t& bricked, std::string& why, bool animTest = false) {
     std::vector<AtlasBrickQuad> quads;
     std::vector<float> emission(ids.size(), 0.0f);
     for (size_t m = 0; m < ids.size(); m++) {
@@ -291,8 +291,20 @@ inline bool uploadBricks(AtlasContext* ctx, const ModelLib& ml, uint16_t first, 
     }
     std::vector<AtlasBrickSprite> sp(ml.sprites.size());
     for (size_t i = 0; i < sp.size(); i++) sp[i] = {ml.sprites[i].w, ml.sprites[i].h, ml.sprites[i].first, 1};
+    // animtest=1: every animated sprite (sprites.bin holds frame 0) as two frames, the second its colours inverted, a
+    // tick each: what the frame's time shows can be checked offline (time=0 vs time=0.05)
+    std::vector<uint32_t> texels = ml.texels;
+    if (animTest)
+        for (size_t i = 0; i < sp.size(); i++) {
+            if (!ml.sprites[i].animated) continue;
+            uint32_t n = sp[i].width * sp[i].height, at = uint32_t(texels.size());
+            for (uint32_t k = 0; k < n; k++) texels.push_back(ml.texels[sp[i].firstTexel + k]);
+            for (uint32_t k = 0; k < n; k++) texels.push_back(ml.texels[sp[i].firstTexel + k] ^ 0x00FFFFFFu);
+            sp[i].firstTexel = at;
+            sp[i].frames = 2u | 1u << 16;
+        }
     if (atlas_set_material_bricks(ctx, first, uint32_t(ids.size()), quads.data(), uint32_t(quads.size()), sp.data(),
-                                  uint32_t(sp.size()), ml.texels.data(), uint32_t(ml.texels.size()), emission.data()) != ATLAS_OK)
+                                  uint32_t(sp.size()), texels.data(), uint32_t(texels.size()), emission.data()) != ATLAS_OK)
         return why = atlas_last_error(ctx), false;
     return true;
 }
