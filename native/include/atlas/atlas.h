@@ -808,9 +808,11 @@ ATLAS_API AtlasStatus atlas_gen_read_page(AtlasGen* h, int32_t cx, int32_t cz, u
    columns at the centre block of their 2^lod squares (AtlasExactSource.fill): outSurface count * 65536 floats
    ((float) TamrielHeight.height, row-major), outWater the same (the sea below y 63, the map's rivers and lakes at
    ceil(level), NaN dry); outBlocks (may be NULL: not made) per column the material rule's top block | the one under it
-   << 16 (generator ids, AtlasSurface.column's: ore veins left out, the biomes as chunks store them); outBiomes (with
-   outBlocks, may be NULL) the biome id at the column's top (dry: the ground's top + 1, else the water's top); outFlags
-   (may be NULL) nonzero where a column is not proven exact. */
+   << 16 (generator ids, AtlasSurface.column's: ore veins left out, the biomes as chunks store them; then, with a map
+   that carries the far section (AtlasGenMap.far), freeze_top_layer's snow layer on top where it lies, the ground
+   under it, and a far road's block on top: FarRoads.surface); outBiomes (with outBlocks, may be NULL) the biome id at
+   the column's top block | flags << 16 (ATLAS_COLUMN_SNOW, ATLAS_COLUMN_FROZEN: its water's top freezes, 8: a far
+   road); outFlags (may be NULL) nonzero where a column is not proven exact. */
 ATLAS_API AtlasStatus atlas_gen_tiles(AtlasGen* h, const int32_t* lodTxTz, uint32_t count, float* outSurface, float* outWater,
                                       uint32_t* outBlocks, uint32_t* outBiomes, uint32_t* outFlags, AtlasGenTimes* times);
 /* Far chunks on the device (GPU only; atlas_page.slang farChunkMain): count (<= 16) lod tiles (tx, tz pairs; lod 1..6),
@@ -876,22 +878,12 @@ typedef struct AtlasGenStageBatch {
     uint32_t pad0;
     uint64_t program;              /* VkBuffer: the program's words (AtlasGenProgram: seeds, noises, the block table) */
     uint64_t map;                  /* VkBuffer: the map's words (AtlasGenMap) */
-    uint32_t outputCount;          /* (version 2) the first outputCount chunks were asked for; the rest are the apron
-                                      (atlas_gen_set_apron): generated for the stages to read, never handed back */
-    uint32_t pad1;
 } AtlasGenStageBatch;
 typedef int32_t (*AtlasGenStageFn)(void* user, const AtlasGenStageBatch* batch);
 /* Registers a stage at `order` (outId: for atlas_gen_remove_stage). Copied: the callback and user stay valid until removed
    or the generator is destroyed. */
 ATLAS_API AtlasStatus atlas_gen_add_stage(AtlasGen* h, uint32_t order, AtlasGenStageFn fn, void* user, uint32_t* outId);
 ATLAS_API AtlasStatus atlas_gen_remove_stage(AtlasGen* h, uint32_t id);
-/* (the overlays agent) A batch's apron: given the chunks asked for, fn writes up to max more (cx, cz) pairs into out and
-   returns how many: chunks the stages must read (the overlays' sweeps read a settlement chunk's four neighbours as
-   their terrain and pieces left them), generated with the batch (up to 64 beside the 64 asked for) but never handed
-   back or ingested, so a chunk's result does not depend on its batch. Called under the generator's lock (never call
-   atlas_gen_* from it). NULL: no apron. */
-typedef uint32_t (*AtlasGenApronFn)(void* user, const int32_t* chunks, uint32_t n, int32_t* out, uint32_t max);
-ATLAS_API AtlasStatus atlas_gen_set_apron(AtlasGen* h, AtlasGenApronFn fn, void* user);
 /* The generator's Vulkan device, for the stages' engines to make their pipelines and buffers on beforehand. */
 typedef struct AtlasGenDevice {
     uint32_t version;              /* 1 */
@@ -906,6 +898,69 @@ typedef struct AtlasGenDevice {
 ATLAS_API AtlasStatus atlas_gen_device_handles(AtlasGen* h, AtlasGenDevice* out);
 /* Pages the device made so far, the page passes' total time, and whether the device makes them (any may be NULL). */
 ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, double* pageMs, int32_t* onDevice);
+/*
+ * The chunk store (GPU only): chunks wait on the generator's device until their neighbourhood is ready for each
+ * store stage, the way the server's chunks wait for their neighbours' status. With the store on (atlas_gen_store_enable),
+ * atlas_gen_run_store generates its chunks into the store (terrain, surface, map water: status 0), then runs every
+ * store stage wherever it can and packs the chunks that passed them all (the same pack, kinds, hashes and materials
+ * as atlas_gen_run; atlas_gen_ingest takes them into the grid). Whatever batch a chunk came in, its blocks come out the
+ * same: a stage runs on a chunk only once the chunks within its radius all hold the previous stage's result.
+ *
+ * A store stage (atlas_gen_add_store_stage, ordered by `order`, ATLAS_GEN_STAGE_*) has a radius r: it runs on chunk C
+ * (status k - 1) once every chunk within r of C (Chebyshev) is in the store with status >= k - 1; C's status becomes k.
+ * It may write the blocks of chunks within r of C that have not passed it: a stage writing its neighbours must be
+ * followed by one whose radius covers those writes (the features: decoration r 2 writing 3 x 3, then finishing r 1),
+ * so that nothing writes a chunk after it is packed. Writes a stage makes must be the same whichever neighbour runs
+ * first (the features keep the highest-priority write per block). Like a batch stage it records into the command
+ * buffer given (never submits), and returns 0. One call handles up to 64 chunks; the next call the rest.
+ *
+ * Eviction: a full store drops packed chunks no waiting chunk needs, then waiting chunks farthest from the batch
+ * (their neighbours that passed a stage go back to status 0: stages must give the same writes when run again).
+ * atlas_gen_store_keep drops what lies outside a box (the camera's window).
+ */
+#define ATLAS_GEN_STORE_TERRAIN_WORDS (16u * 16u * 640u / 2u) /* per slot: two 16-bit generator ids a word */
+#define ATLAS_GEN_STORE_BLOCK_WORDS (16u * 16u * 640u)        /* per slot: one 32-bit generator id a block */
+#define ATLAS_GEN_STORE_AUX_WORDS 2048u                       /* per slot: [0, 1408) the quart biomes, then 0 */
+typedef struct AtlasGenStoreBatch {
+    uint32_t version;              /* 1 */
+    uint32_t order;                /* the stage being called */
+    uint32_t count;                /* chunks to process (<= 64) */
+    uint32_t radius;               /* the stage's radius r */
+    const int32_t* chunks;         /* host: (cx, cz, slot) per chunk */
+    void* vkDevice;                /* VkDevice */
+    void* vkCommandBuffer;         /* VkCommandBuffer, recording, compute bind point */
+    uint32_t queueFamily;
+    uint32_t slots;                /* the store's slots */
+    uint64_t list;                 /* VkBuffer: the chunks' (cx, cz, slot) int triples */
+    uint64_t neighbors;            /* VkBuffer: per chunk (2 r + 1)^2 ints, the slot of (cx + dx, cz + dz) at
+                                      (dz + r) * (2 r + 1) + dx + r (-1 none: never inside the radius) */
+    const int32_t* neighborsHost;  /* host: the same */
+    uint64_t terrain;              /* VkBuffer: per slot ATLAS_GEN_STORE_TERRAIN_WORDS: the terrain as generated (before
+                                      any stage), block b = x + 16 * (z + 16 * (y + 64)) in the low half of word b / 2
+                                      for even b, the high half for odd b */
+    uint64_t blocks;               /* VkBuffer: per slot ATLAS_GEN_STORE_BLOCK_WORDS: the blocks as the stages left them
+                                      (the low 16 bits the generator id; a stage may use the high bits until a later
+                                      stage of its own clears them) */
+    uint64_t aux;                  /* VkBuffer: per slot ATLAS_GEN_STORE_AUX_WORDS (the quart biomes, generator ids,
+                                      atlas_gen.slang quartBiome's layout) */
+    uint64_t program;              /* VkBuffer: the generator program's words */
+    uint64_t map;                  /* VkBuffer: the map's words (AtlasGenMap) */
+} AtlasGenStoreBatch;
+typedef int32_t (*AtlasGenStoreStageFn)(void* user, const AtlasGenStoreBatch* batch);
+/* Turns the store on with `slots` chunks (about 1.3 MiB each), Vulkan only. */
+ATLAS_API AtlasStatus atlas_gen_store_enable(AtlasGen* h, uint32_t slots);
+ATLAS_API AtlasStatus atlas_gen_add_store_stage(AtlasGen* h, uint32_t order, uint32_t radius, AtlasGenStoreStageFn fn, void* user,
+                                                uint32_t* outId);
+/* (atlas_gen_remove_stage removes store stages too) Generates count (<= 64, may be 0) chunks into the store, runs the
+   store stages, packs up to 64 chunks that passed them all: outChunks (64 pairs) their (cx, cz), outCount how many,
+   outFlags / outInfo as atlas_gen_run's for them. outIds (optional, 64 * 40 * 2048 words): their generator ids as
+   atlas_gen_run gives them. Chunks already in the store are not generated again. */
+ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, int32_t* outChunks, uint32_t* outCount,
+                                          uint32_t* outIds, uint32_t* outFlags, uint32_t* outInfo, AtlasGenTimes* times);
+/* Drops the store's chunks outside [minCx, maxCx] x [minCz, maxCz] (asked for again, they are generated again). */
+ATLAS_API AtlasStatus atlas_gen_store_keep(AtlasGen* h, int32_t minCx, int32_t minCz, int32_t maxCx, int32_t maxCz);
+/* held: chunks in the store; waiting: not yet through every stage; ready: through every stage, not yet packed. */
+ATLAS_API AtlasStatus atlas_gen_store_stats(AtlasGen* h, uint32_t* held, uint32_t* waiting, uint32_t* ready);
 /* Probes the kernels' pieces at n (x, z) columns (n <= 2^17), 32 words each, the last a flag (nonzero: not proven): kind 0
    TamrielMap.sample (the MapSample fields in declaration order). For the parity checks. */
 ATLAS_API AtlasStatus atlas_gen_probe(AtlasGen* h, uint32_t kind, uint32_t n, const int32_t* xz, uint32_t* out);
@@ -935,24 +990,85 @@ ATLAS_API const char* atlas_ovl_device(AtlasOvl* h);
 ATLAS_API AtlasStatus atlas_ovl_set(AtlasOvl* h, uint32_t which, const uint32_t* words, uint32_t count);
 ATLAS_API AtlasStatus atlas_ovl_run(AtlasOvl* h, uint32_t count, const int32_t* chunks, uint32_t levels, uint32_t kinds,
                                     uint32_t* ids, AtlasOvlTimes* times);
-/* The overlays as stages of the generator's own batches (atlas_gen_add_stage: the pieces at ATLAS_GEN_STAGE_PIECES, their
-   sweep at ATLAS_GEN_STAGE_SWEEPS, the street painter at ATLAS_GEN_STAGE_PAINT + 50; GPU to GPU, on its device): every
-   atlas_gen_run / atlas_gen_chunks then stamps its chunks before packing them, finding each chunk's tape record and
-   street bucket from the data's own chunk index and its neighbours in the batch. The block table's first ids must be the generator program's blocks
-   (AtlasOverlayTapes(prog.blocks)); the ingest table (atlas_gen_set_ingest) must cover the whole block table. Such a
-   handle also runs the road painter (RoadPaint) at ATLAS_GEN_STAGE_PAINT over the generator's map, after a heightmap
-   snapshot at ATLAS_GEN_STAGE_DECORATION - 1, once atlas_ovl_set(which 3: 'AORD', RoadPaintGpu.words) is given, and
-   the tapes' dungeon layers (a structure's recorded writes) at its decoration step: ATLAS_GEN_STAGE_DECORATION + 3
-   (underground structures) and + 4 (surface structures), registered before a features engine's stages of those orders
-   so they run first, as the server places a step's structures before its features.
-   atlas_ovl_set's data goes up at the generator's next batch. ATLAS_ERR_UNSUPPORTED for a CPU generator. Destroy the
-   overlays before the generator (it detaches itself). atlas_ovl_run is refused on such a handle. */
+/* The overlays as stages of the generator, GPU to GPU on its device, registered both as store stages
+   (atlas_gen_add_store_stage, with their radii: atlas_gen_run_store) and as batch stages (atlas_gen_add_stage:
+   atlas_gen_run / atlas_gen_chunks; they stand down once the store has called the overlays): the heightmap the road
+   painter reads at ATLAS_GEN_STAGE_DECORATION - 3 (r 0), the tapes' dungeon layers (a structure's recorded writes:
+   the underground structures' at DECORATION - 2, the surface structures' at DECORATION - 1, r 0; before the
+   decoration, which is one stage for every step), the settlements' pieces at ATLAS_GEN_STAGE_PIECES (r 0; the store
+   keeps each chunk's result per slot), their sweep at ATLAS_GEN_STAGE_SWEEPS (r 1: Sanity reads the four neighbours as
+   their pieces left them), the road painter (RoadPaint) at ATLAS_GEN_STAGE_PAINT and the street painter at
+   ATLAS_GEN_STAGE_PAINT + 50 (r 0), the road painter once atlas_ovl_set(which 3: 'AORD', RoadPaintGpu.words) is given.
+   Each chunk's tape record and street bucket come from the data's own chunk index. The block table's first ids must
+   be the generator program's blocks (AtlasOverlayTapes(prog.blocks)); the ingest table (atlas_gen_set_ingest) must
+   cover the whole block table. atlas_ovl_set's data goes up at the generator's next stage call. ATLAS_ERR_UNSUPPORTED
+   for a CPU generator. Destroy the overlays before the generator (it detaches itself). atlas_ovl_run is refused on such
+   a handle. */
 ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out);
+/* The structures' piece boxes for the generator's other store stages (the features' placement mask), valid during a
+   store stage call (the buffers may be replaced between calls: ask again each call). tapes: the tape words
+   (AtlasOverlayTapes.tapeWords); slotRecords: per store slot an int, the word offset of that slot's chunk's record in
+   tapes, -1 none (written at the overlays' first store stage, DECORATION - 3, for every chunk of the store). A
+   record's boxes: at rec + 513 + tapes[rec + 256], a count n, then n boxes of 5 ints (minX, minZ, maxX, maxZ, maxY,
+   world blocks): every settlement piece and dungeon piece whose box meets that chunk (pieces over 160 blocks across
+   left out, as PlacementMask.collect); a box near but not on a chunk is in its neighbours' lists. ATLAS_ERR_STATE before
+   the store has called the overlays or before any tapes. */
+typedef struct AtlasOvlStoreBoxes {
+    uint32_t version;      /* 1 */
+    uint32_t slots;        /* the store's slots (slotRecords' length) */
+    uint32_t tapeWords;    /* tapes' size in words */
+    uint32_t pad;
+    uint64_t tapes;        /* VkBuffer (uint words) */
+    uint64_t slotRecords;  /* VkBuffer (int per slot) */
+} AtlasOvlStoreBoxes;
+ATLAS_API AtlasStatus atlas_ovl_store_boxes(AtlasOvl* h, AtlasOvlStoreBoxes* out);
 /* The passes a stage runs (bit 0 pieces, bit 2 their sweep, bit 1 streets, bit 3 roads, bit 4 the roads' heightmap,
    bit 5 the underground structures' layer, bit 6 the surface structures'; default all). */
 ATLAS_API AtlasStatus atlas_ovl_set_kinds(AtlasOvl* h, uint32_t kinds);
-/* Chunks a stage has stamped so far (those with a tape record or a street bucket). */
+/* Chunks a stage has stamped so far (those with a tape record or a street bucket). (The batch apron is gone: the store's
+   radii make the results batch-independent.) */
 ATLAS_API uint64_t atlas_ovl_stamped(AtlasOvl* h);
+
+/*
+ * The client's decoration (docs/ATLAS-CLIENT-GENERATION.md stage 4, shaders/atlas_features.slang): the world's placed
+ * features (AtlasFeatureProgram) over generated terrain, Java's order, seeds and random streams. A batch: `slots`
+ * terrain chunks (ids: ATLAS_FEAT_CHUNK_WORDS words each, 16-bit block ids of the feature program's table, b = x +
+ * 16 z + 256 (y + 64), y -64..639; aux: ATLAS_FEAT_AUX_WORDS words each, the 4 x 4 x 176 quart biomes as 16-bit
+ * program biome ids, then the 256 placement mask bytes, then 3 x 256 alchemy class bytes (by the map), the 256
+ * temperature noise floats, 8 words of frozen-modifier bits, then room for the heightmaps the kernels compute); `origins`
+ * chunks decorated in isolation (28 ints each: cx, cz, the 5 x 5 terrain slots around it z-major, -1 none, pad);
+ * `targets` chunks assembled from their 3 x 3 origins' writes in a fixed order (12 ints each: own slot, the 9 origin
+ * indices z-major (-1 none), cx, cz) into outIds (ATLAS_FEAT_CHUNK_WORDS each). outTables (optional, the isolated
+ * check): per origin ATLAS_FEAT_TABLE_WORDS words: 16 meta words ([0] entries, [1] flags: 1 table full, 2 a read
+ * outside the 5 x 5, 4 an unsupported piece, 8 a stack limit, 16 math not proven), then the write table (key, id)
+ * pairs, key = 1 + ((y + 64) * 48 + z - (cz - 1) * 16) * 48 + x - (cx - 1) * 16, 0 empty.
+ */
+#define ATLAS_FEAT_CHUNK_WORDS (44u * 2048u)
+#define ATLAS_FEAT_AUX_WORDS (1928u + 6u * 256u)
+#define ATLAS_FEAT_TABLE_WORDS (16u + 32768u * 2u)
+typedef struct AtlasFeat AtlasFeat;
+typedef struct AtlasFeatTimes {
+    double uploadMs, kernelMs, featureMs, gatherMs, readbackMs, totalMs;
+} AtlasFeatTimes;
+ATLAS_API AtlasStatus atlas_feat_create(AtlasBackend backend, AtlasFeat** out);
+ATLAS_API void atlas_feat_destroy(AtlasFeat* h);
+ATLAS_API const char* atlas_feat_last_error(AtlasFeat* h);
+ATLAS_API const char* atlas_feat_device(AtlasFeat* h);
+/* The feature program (AtlasFeatureProgram: words[0] = 'AFEA'); copied. */
+ATLAS_API AtlasStatus atlas_feat_set_program(AtlasFeat* h, const uint32_t* words, uint32_t count);
+ATLAS_API AtlasStatus atlas_feat_run(AtlasFeat* h, uint32_t slots, const uint32_t* ids, const uint32_t* aux, uint32_t origins,
+                                     const int32_t* org, uint32_t targets, const int32_t* tgt, uint32_t* outIds,
+                                     uint32_t* outTables, AtlasFeatTimes* times);
+/* The decoration as the generator's store stages (atlas_features.slang on the generator's device, GPU to GPU): decoration
+   at ATLAS_GEN_STAGE_DECORATION (radius 2: every origin decorated in isolation over its 5 x 5 terrain, its writes into
+   the store's blocks of its 3 x 3, each block keeping the write latest in the gather's order), then its finish at
+   ATLAS_GEN_STAGE_DECORATION + 999 (radius 1: a chunk all of whose origins are decorated). words: the feature program
+   (AtlasFeatureProgram, compiled over the generator's biomes); gen2feat (nGen) the feature id of each generator id and
+   feat2gen (nFeat) the generator id of each feature id, or both null (the same ids). The store must be on
+   (atlas_gen_store_enable); the decoration's pipelines are made here (the driver's first compile can take minutes).
+   Calls on the generator must not run meanwhile. atlas_feat_destroy removes the stages. */
+ATLAS_API AtlasStatus atlas_feat_attach(AtlasGen* gen, const uint32_t* words, uint32_t count, const uint32_t* gen2feat, uint32_t nGen,
+                                        const uint32_t* feat2gen, uint32_t nFeat, AtlasFeat** out);
 
 #ifdef __cplusplus
 }

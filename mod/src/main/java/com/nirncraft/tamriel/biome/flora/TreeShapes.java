@@ -73,6 +73,21 @@ final class TreeShapes {
         }
     }
 
+    /** Dev tracing (FloraTreeFeature.trace): a mark inside a shape, with the random draws so far. */
+    static void mark(Grow g, int stage, long extra) {
+        java.util.function.Consumer<long[]> t = FloraTreeFeature.trace;
+        if (t == null) return;
+        long n = g.r instanceof net.minecraft.world.level.levelgen.WorldgenRandom w ? w.getCount() : -1;
+        t.accept(new long[]{stage, g.x, g.y, g.z, n, extra});
+    }
+
+    /** The exact bits of three values, mixed (a trace mark's extra). */
+    static long bits(double a, double b, double c) {
+        long h = Double.doubleToRawLongBits(a);
+        h = h * 31 + Double.doubleToRawLongBits(b);
+        return h * 31 + Double.doubleToRawLongBits(c);
+    }
+
     static void grow(Grow g) {
         switch (g.sp.shape) {
             case CONIFER -> conifer(g);
@@ -103,12 +118,14 @@ final class TreeShapes {
         double la = g.leanAngle();
         double lm = g.sp.lean * h * g.u(0.3, 1.0) * leanScale;
         double wob = g.u(0.0, 0.35), ph = g.angle(), freq = g.u(0.25, 0.5);
+        mark(g, 46, bits(la, lm, wob));
+        mark(g, 47, bits(ph, freq, 0));
         double[][] c = new double[h + 2][2];
         for (int dy = 0; dy <= h + 1; dy++) {
             double t = dy / (double) Math.max(1, h);
-            double off = lm * Math.pow(t, 1.6);
-            c[dy][0] = g.x + 0.5 + Math.cos(la) * off + Math.sin(ph + dy * freq) * wob * t;
-            c[dy][1] = g.z + 0.5 + Math.sin(la) * off + Math.cos(ph + dy * freq) * wob * t;
+            double off = lm * StrictMath.pow(t, 1.6);
+            c[dy][0] = g.x + 0.5 + StrictMath.cos(la) * off + StrictMath.sin(ph + dy * freq) * wob * t;
+            c[dy][1] = g.z + 0.5 + StrictMath.sin(la) * off + StrictMath.cos(ph + dy * freq) * wob * t;
         }
         return c;
     }
@@ -144,9 +161,9 @@ final class TreeShapes {
         for (int i = 0; i < count; i++) {
             double a = (i + g.r.nextDouble() * 0.6) * Math.PI * 2 / count;
             double len = g.u(len0, len1);
-            double sx = cx + Math.cos(a) * r0, sz = cz + Math.sin(a) * r0;
-            double mx = cx + Math.cos(a) * (r0 + len * 0.45), mz = cz + Math.sin(a) * (r0 + len * 0.45);
-            double ex = cx + Math.cos(a) * (r0 + len), ez = cz + Math.sin(a) * (r0 + len);
+            double sx = cx + StrictMath.cos(a) * r0, sz = cz + StrictMath.sin(a) * r0;
+            double mx = cx + StrictMath.cos(a) * (r0 + len * 0.45), mz = cz + StrictMath.sin(a) * (r0 + len * 0.45);
+            double ex = cx + StrictMath.cos(a) * (r0 + len), ez = cz + StrictMath.sin(a) * (r0 + len);
             double my = g.y + rise * 0.45;
             g.b.branch(sx, g.y + rise, sz, mx, my, mz, 0, 0, g.sp.log);
             g.b.branch(mx, my, mz, ex, g.y - 1, ez, 0, 0, g.sp.log);
@@ -176,13 +193,14 @@ final class TreeShapes {
         if (sp.trunk >= 2 && sp.roots > 0) roots(g, c[0][0], c[0][1], tr + 0.2, 3 + g.r.nextInt(2), 1.2, 2.6, 1);
         int cb = Math.max(1, (int) (h * g.u(sp.base0, sp.base1)));
         double rMax = sp.radius * g.u(0.82, 1.15);
+        mark(g, 60, bits(cb, rMax, tr));
         // dead stubs along the bare trunk
         for (int dy = 2; dy < cb; dy += 1 + g.r.nextInt(2)) {
             if (g.r.nextFloat() < sp.deadLimbs) {
                 double a = g.angle();
                 double len = 1 + g.r.nextInt(2) + (tr > 0 ? 1 : 0);
-                g.b.branch(c[dy][0], g.y + dy + 0.5, c[dy][1], c[dy][0] + Math.cos(a) * (len + tr),
-                        g.y + dy + 0.5 - g.r.nextInt(2), c[dy][1] + Math.sin(a) * (len + tr), 0, 0, sp.log);
+                g.b.branch(c[dy][0], g.y + dy + 0.5, c[dy][1], c[dy][0] + StrictMath.cos(a) * (len + tr),
+                        g.y + dy + 0.5 - g.r.nextInt(2), c[dy][1] + StrictMath.sin(a) * (len + tr), 0, 0, sp.log);
             }
         }
         // the tiers, from the top down
@@ -192,12 +210,14 @@ final class TreeShapes {
             double t = (dy - cb) / (double) Math.max(1, top - cb);
             double rad;
             if (sp.umbrella) {
-                rad = 1.2 + rMax * Math.pow(Math.sin(Math.PI * Math.min(1, 0.25 + t * 0.85)), 0.7) * g.u(0.8, 1.1);
+                rad = 1.2 + rMax * StrictMath.pow(StrictMath.sin(Math.PI * Math.min(1, 0.25 + t * 0.85)), 0.7) * g.u(0.8, 1.1);
             } else {
-                rad = 0.9 + rMax * Math.pow(1 - t, 0.85) * g.u(0.78, 1.15);
+                rad = 0.9 + rMax * StrictMath.pow(1 - t, 0.85) * g.u(0.78, 1.15);
             }
             boolean gap = t > 0.12 && t < 0.8 && g.r.nextFloat() < sp.gaps;
+            mark(g, 61, bits(rad, c[dy][0], c[dy][1]));
             if (!gap) tier(g, c[dy][0], g.y + dy, c[dy][1], rad, tr);
+            mark(g, 62, dy);
             dy -= rad > 3.2 ? 2 + g.r.nextInt(2) : 2;
         }
         // the spire
@@ -223,10 +243,11 @@ final class TreeShapes {
             len[i] = rad * g.u(0.72, 1.08);
             if (rad >= 2.6) {
                 double bl = len[i] * 0.35 + tr;   // inside the tier's thick middle: no log ends poking out
-                g.b.branch(cx, y + 0.5, cz, cx + Math.cos(ang[i]) * bl, y + 0.5 - g.sp.droop * 0.4,
-                        cz + Math.sin(ang[i]) * bl, 0, 0, g.sp.log);
+                g.b.branch(cx, y + 0.5, cz, cx + StrictMath.cos(ang[i]) * bl, y + 0.5 - g.sp.droop * 0.4,
+                        cz + StrictMath.sin(ang[i]) * bl, 0, 0, g.sp.log);
             }
         }
+        mark(g, 63, bits(ang[n - 1], len[n - 1], a0));
         int ri = (int) Math.ceil(rad + tr);
         int bx = Mth.floor(cx), bz = Mth.floor(cz);
         for (int dx = -ri; dx <= ri; dx++) {
@@ -234,10 +255,10 @@ final class TreeShapes {
                 double fx = bx + dx + 0.5 - cx, fz = bz + dz + 0.5 - cz;
                 double d = Math.sqrt(fx * fx + fz * fz) - tr;
                 if (d > rad + 0.5) continue;
-                double th = Math.atan2(fz, fx);
+                double th = StrictMath.atan2(fz, fx);
                 double reach = 0;
                 for (int i = 0; i < n; i++) {
-                    double cos = Math.cos(th - ang[i]);
+                    double cos = StrictMath.cos(th - ang[i]);
                     if (cos > 0) reach = Math.max(reach, len[i] * (0.55 + 0.45 * cos * cos * cos));
                 }
                 reach = Math.max(reach, Math.min(1.5, rad));
@@ -261,15 +282,18 @@ final class TreeShapes {
         TreeSpecies sp = g.sp;
         int h = g.height();
         double[][] c = trunkLine(g, h, 1.0);
+        mark(g, 10, h);
         double tr = sp.trunk >= 3 ? g.u(1.5, 2.2) : sp.trunk == 2 ? g.u(0.85, 1.15) : 0;
         int fork = Math.max(2, (int) (h * g.u(sp.base0, sp.base1)));
         trunk(g, c, 0, fork, tr, tr * 0.8, tr > 0 ? 0.7 + tr * 0.25 : 0);
+        mark(g, 11, fork);
         if (sp.roots > 0 && g.r.nextFloat() < sp.roots) {
             roots(g, c[0][0], c[0][1], tr * 0.8 + 0.3, 3 + g.r.nextInt(3), 1.2, 2.5 + tr, tr > 1 ? 2 : 1);
         }
         double crownR = sp.radius * g.u(0.85, 1.15);
         double fx = c[fork][0], fz = c[fork][1];
         int limbs = sp.limbs + g.r.nextInt(2);
+        mark(g, 12, limbs);
         double a0 = g.angle();
         double wind = sp.wind;
         double crownH = h - fork;
@@ -281,14 +305,18 @@ final class TreeShapes {
                 az = g.windAngle + rel * Math.PI * (1 - wind * 0.6);
             }
             double elev = Math.toRadians(Mth.lerp(sp.spread, 72, 18) + (g.r.nextDouble() - 0.5) * 24);
-            double len = Math.max(2.5, Math.hypot(crownR * 0.72, crownH * 0.75) * g.u(0.75, 1.05));
+            double len = Math.max(2.5, StrictMath.hypot(crownR * 0.72, crownH * 0.75) * g.u(0.75, 1.05));
             double sy = g.y + fork + g.r.nextInt(2) - (i % 2);
-            double ex = fx + Math.cos(az) * Math.cos(elev) * len;
-            double ez = fz + Math.sin(az) * Math.cos(elev) * len;
-            double ey = sy + Math.sin(elev) * len;
+            double ex = fx + StrictMath.cos(az) * StrictMath.cos(elev) * len;
+            double ez = fz + StrictMath.sin(az) * StrictMath.cos(elev) * len;
+            double ey = sy + StrictMath.sin(elev) * len;
             boolean deadLimb = g.r.nextFloat() < sp.deadLimbs;
+            mark(g, 24, bits(az, elev, len));
+            mark(g, 25, bits(fx, fz, sy));
+            mark(g, 20, (long) Math.floor(ex * 16) * 1000003L + (long) Math.floor(ey * 16) * 1009L + (long) Math.floor(ez * 16));
             g.b.branch(fx, sy, fz, ex, ey, ez, tr > 1 ? tr * 0.55 : 0, 0, sp.log);
             BlockState lv = g.clumpLeaves();
+            mark(g, 21, deadLimb ? 1 : 0);
             // side shoots
             int shoots = 1 + g.r.nextInt(2) + (sp.trunk >= 3 ? 1 : 0);
             for (int k = 0; k < shoots; k++) {
@@ -297,18 +325,22 @@ final class TreeShapes {
                 double saz = az + (g.r.nextBoolean() ? 1 : -1) * g.u(0.5, 1.1);
                 double sel = elev + g.u(-0.1, 0.35);
                 double sl = len * g.u(0.35, 0.6);
-                double qx = px + Math.cos(saz) * Math.cos(sel) * sl, qz = pz + Math.sin(saz) * Math.cos(sel) * sl;
-                double qy = py + Math.sin(sel) * sl;
+                double qx = px + StrictMath.cos(saz) * StrictMath.cos(sel) * sl, qz = pz + StrictMath.sin(saz) * StrictMath.cos(sel) * sl;
+                double qy = py + StrictMath.sin(sel) * sl;
                 g.b.branch(px, py, pz, qx, qy, qz, 0, 0, sp.log);
                 if (!deadLimb) leafClump(g, qx, qy + 0.5, qz, sp.clump * g.u(0.75, 1.0), lv);
             }
+            mark(g, 22, shoots);
             if (!deadLimb) leafClump(g, ex, ey + 0.5, ez, sp.clump * g.u(0.9, 1.2), lv);
+            mark(g, 23, 0);
         }
         // the leader and a fill clump so the crown is not hollow
-        double lx = c[h][0] + (wind > 0 ? Math.cos(g.windAngle) * wind * 1.5 : 0);
-        double lz = c[h][1] + (wind > 0 ? Math.sin(g.windAngle) * wind * 1.5 : 0);
+        double lx = c[h][0] + (wind > 0 ? StrictMath.cos(g.windAngle) * wind * 1.5 : 0);
+        double lz = c[h][1] + (wind > 0 ? StrictMath.sin(g.windAngle) * wind * 1.5 : 0);
         g.b.branch(fx, g.y + fork, fz, lx, g.y + h - 1, lz, tr > 1 ? tr * 0.5 : 0, 0, sp.log);
+        mark(g, 30, 0);
         leafClump(g, lx, g.y + h, lz, sp.clump * g.u(0.95, 1.25), g.clumpLeaves());
+        mark(g, 31, 0);
         double midY = g.y + fork + crownH * 0.65;
         g.b.clump(fx + (lx - fx) * 0.6, midY, fz + (lz - fz) * 0.6, crownR * 0.55, Math.max(1.5, crownH * 0.35),
                 crownR * 0.55, g.clumpLeaves(), 0.7);
@@ -343,7 +375,7 @@ final class TreeShapes {
                 int dy = cb + (int) Math.round((h - cb) * t);
                 dy = Math.min(dy, h);
                 double a = g.angle(), off = g.u(0.2, 1.3) * (1 - t * 0.6);
-                double px = c[dy][0] + Math.cos(a) * off, pz = c[dy][1] + Math.sin(a) * off;
+                double px = c[dy][0] + StrictMath.cos(a) * off, pz = c[dy][1] + StrictMath.sin(a) * off;
                 double rr = sp.radius * g.u(0.75, 1.1) * (1.05 - t * 0.35);
                 BlockState lv = g.r.nextFloat() < sp.accentChance ? g.leafFor(true) : main;
                 if (off > 0.8) g.b.branch(c[dy][0], g.y + dy, c[dy][1], px, g.y + dy + 1, pz, 0, 0, sp.log);
@@ -369,7 +401,7 @@ final class TreeShapes {
         for (int i = 0; i < limbs; i++) {
             double az = a0 + i * Math.PI * 2 / limbs + (g.r.nextDouble() - 0.5) * 0.7;
             double out = crownR * g.u(0.5, 0.8), up = g.u(2, h - fork + 1.5);
-            double ex = fx + Math.cos(az) * out, ez = fz + Math.sin(az) * out, ey = g.y + fork + up;
+            double ex = fx + StrictMath.cos(az) * out, ez = fz + StrictMath.sin(az) * out, ey = g.y + fork + up;
             g.b.branch(fx, g.y + fork, fz, ex, ey, ez, 0, 0, sp.log);
             g.b.clump(ex, ey, ez, sp.clump * g.u(0.9, 1.2), sp.clump * 0.7, sp.clump * g.u(0.9, 1.2), g.clumpLeaves(), 0.35);
         }
@@ -392,7 +424,7 @@ final class TreeShapes {
         double peak = g.u(0.22, 0.38);
         for (int dy = 1; dy <= h + 1; dy++) {
             double t = dy / (double) (h + 1);
-            double r = t < peak ? rMax * Math.pow(t / peak, 0.5) : rMax * Math.pow((1 - t) / (1 - peak), 0.8);
+            double r = t < peak ? rMax * StrictMath.pow(t / peak, 0.5) : rMax * StrictMath.pow((1 - t) / (1 - peak), 0.8);
             r = Math.max(r, 0.6);
             int cy = Math.min(dy, h);
             int bx = Mth.floor(c[cy][0]), bz = Mth.floor(c[cy][1]);
@@ -421,7 +453,7 @@ final class TreeShapes {
         int knees = 2 + g.r.nextInt(4);
         for (int i = 0; i < knees; i++) {
             double a = g.angle(), d = g.u(2.5, 5.5);
-            int kx = Mth.floor(c[0][0] + Math.cos(a) * d), kz = Mth.floor(c[0][1] + Math.sin(a) * d);
+            int kx = Mth.floor(c[0][0] + StrictMath.cos(a) * d), kz = Mth.floor(c[0][1] + StrictMath.sin(a) * d);
             int floor = ground(g.b.box, kx, kz, g.y);
             if (floor == Integer.MIN_VALUE || Math.abs(floor - g.y) > 2) continue;
             int kh = 1 + g.water / 2 + (g.r.nextInt(3) == 0 ? 1 : 0);
@@ -438,7 +470,7 @@ final class TreeShapes {
             for (int i = 0; i < arms; i++) {
                 double a = a0 + i * Math.PI * 2 / arms + g.u(-0.4, 0.4);
                 double al = pr * g.u(0.45, 0.75);
-                double ax = px + Math.cos(a) * al, az = pz + Math.sin(a) * al;
+                double ax = px + StrictMath.cos(a) * al, az = pz + StrictMath.sin(a) * al;
                 g.b.branch(px, py - 1, pz, ax, py, az, 0, 0, sp.log);
                 g.b.pad(ax, py + 1, az, pr * 0.5, pr * 0.5, g.leaves, 0.6, true);
             }
@@ -467,7 +499,7 @@ final class TreeShapes {
             int steps = (int) Math.ceil(out * 2);
             for (int s = 0; s <= steps; s++) {
                 double t = s / (double) steps;
-                double rx = sx + Math.cos(a) * out * t, rz = sz + Math.sin(a) * out * t;
+                double rx = sx + StrictMath.cos(a) * out * t, rz = sz + StrictMath.sin(a) * out * t;
                 // an arch: out first, then down
                 int ry = g.y + (int) Math.round(startY * (1 - t * t)) - (t > 0.9 ? 1 : 0);
                 g.b.anchor(Mth.floor(rx), ry, Mth.floor(rz), rootBlock);
@@ -481,7 +513,7 @@ final class TreeShapes {
         int clumps = 3 + g.r.nextInt(3);
         for (int k = 0; k < clumps; k++) {
             double a = g.angle(), d = g.u(0.5, crownR * 0.6);
-            double px = c[top][0] + Math.cos(a) * d, pz = c[top][1] + Math.sin(a) * d;
+            double px = c[top][0] + StrictMath.cos(a) * d, pz = c[top][1] + StrictMath.sin(a) * d;
             int py = g.y + top - g.r.nextInt(3);
             g.b.branch(c[top - 2][0], g.y + top - 2, c[top - 2][1], px, py, pz, 0, 0, sp.log);
             leafClump(g, px, py + 0.5, pz, sp.clump * g.u(0.9, 1.2), g.leaves);
@@ -503,8 +535,8 @@ final class TreeShapes {
         int tx = g.x, tz = g.z;
         for (int dy = 0; dy < h; dy++) {
             double t = dy / (double) h;
-            sx = g.x + 0.5 + Math.cos(a) * bend * h * t * t;
-            sz = g.z + 0.5 + Math.sin(a) * bend * h * t * t;
+            sx = g.x + 0.5 + StrictMath.cos(a) * bend * h * t * t;
+            sz = g.z + 0.5 + StrictMath.sin(a) * bend * h * t * t;
             int nx = Mth.floor(sx), nz = Mth.floor(sz);
             if (dy > 0 && (nx != tx || nz != tz)) g.b.log(nx, g.y + dy - 1, nz, sp.log);
             tx = nx;
@@ -525,15 +557,15 @@ final class TreeShapes {
             int px = Integer.MIN_VALUE, py = 0, pz = 0;
             for (double s = 0.8; s <= len; s += 0.5) {
                 double t = s / len;
-                int fx = Mth.floor(tx + 0.5 + Math.cos(fa) * s), fz = Mth.floor(tz + 0.5 + Math.sin(fa) * s);
+                int fx = Mth.floor(tx + 0.5 + StrictMath.cos(fa) * s), fz = Mth.floor(tz + 0.5 + StrictMath.sin(fa) * s);
                 int fy = top + (int) Math.round(rise * 2 * t - (rise * 2 + (date ? 2.2 : 3.4)) * t * t);
                 if (px != Integer.MIN_VALUE && fy < py - 1) g.b.leaf(fx, fy + 1, fz, g.leaves);
                 g.b.leaf(fx, fy, fz, g.leaves);
                 if (t > 0.25 && t < 0.75) {
                     // the frond's width: leaflets either side of the midrib
                     double pa = fa + Math.PI / 2;
-                    g.b.leaf(Mth.floor(fx + 0.5 + Math.cos(pa)), fy, Mth.floor(fz + 0.5 + Math.sin(pa)), g.leaves);
-                    g.b.leaf(Mth.floor(fx + 0.5 - Math.cos(pa)), fy, Mth.floor(fz + 0.5 - Math.sin(pa)), g.leaves);
+                    g.b.leaf(Mth.floor(fx + 0.5 + StrictMath.cos(pa)), fy, Mth.floor(fz + 0.5 + StrictMath.sin(pa)), g.leaves);
+                    g.b.leaf(Mth.floor(fx + 0.5 - StrictMath.cos(pa)), fy, Mth.floor(fz + 0.5 - StrictMath.sin(pa)), g.leaves);
                 }
                 px = fx;
                 py = fy;
@@ -559,7 +591,7 @@ final class TreeShapes {
         for (int i = 0; i < limbs; i++) {
             double az = a0 + i * Math.PI * 2 / limbs + g.u(-0.5, 0.5);
             double out = sp.radius * g.u(0.45, 0.85);
-            double ex = c[fork][0] + Math.cos(az) * out, ez = c[fork][1] + Math.sin(az) * out;
+            double ex = c[fork][0] + StrictMath.cos(az) * out, ez = c[fork][1] + StrictMath.sin(az) * out;
             double ey = crownY - g.r.nextInt(2);
             g.b.branch(c[fork][0], g.y + fork, c[fork][1], ex, ey, ez, 0, 0, sp.log);
             double pr = sp.radius * g.u(0.6, 0.95);
@@ -577,7 +609,7 @@ final class TreeShapes {
         BlockState log = TreeBuilder.axis(sp.log, Direction.Axis.Y);
         for (int dy = 0; dy <= h; dy++) {
             double t = dy / (double) h;
-            double r = rb * (1.0 + 0.12 * Math.sin(t * Math.PI * 1.2) - 0.55 * Math.pow(t, 1.6));
+            double r = rb * (1.0 + 0.12 * StrictMath.sin(t * Math.PI * 1.2) - 0.55 * StrictMath.pow(t, 1.6));
             g.b.disc(c[dy][0], g.y + dy, c[dy][1], r, log);
         }
         int ri = (int) Math.ceil(rb);
@@ -593,8 +625,8 @@ final class TreeShapes {
         for (int i = 0; i < n; i++) {
             double az = a0 + i * Math.PI * 2 / n + g.u(-0.4, 0.4);
             double out = g.u(2.5, 5), up = g.u(1, 3.5);
-            double sx = c[h][0] + Math.cos(az) * 0.8, sz = c[h][1] + Math.sin(az) * 0.8;
-            double ex = sx + Math.cos(az) * out, ez = sz + Math.sin(az) * out, ey = g.y + h + up;
+            double sx = c[h][0] + StrictMath.cos(az) * 0.8, sz = c[h][1] + StrictMath.sin(az) * 0.8;
+            double ex = sx + StrictMath.cos(az) * out, ez = sz + StrictMath.sin(az) * out, ey = g.y + h + up;
             g.b.branch(sx, g.y + h, sz, ex, ey, ez, 0, 0, sp.log);
             g.b.clump(ex, ey + 0.7, ez, g.u(1.4, 2.2), g.u(1.0, 1.4), g.u(1.4, 2.2), g.leaves, 0.6);
         }
@@ -615,7 +647,7 @@ final class TreeShapes {
         for (int k = 0; k < side; k++) {
             int dy = (int) (h * g.u(0.5, 0.82));
             double a = g.angle(), l = g.u(2, 4) + tr;
-            double ex = c[dy][0] + Math.cos(a) * l, ez = c[dy][1] + Math.sin(a) * l;
+            double ex = c[dy][0] + StrictMath.cos(a) * l, ez = c[dy][1] + StrictMath.sin(a) * l;
             g.b.branch(c[dy][0], g.y + dy, c[dy][1], ex, g.y + dy + 2, ez, 0, 0, sp.log);
             g.b.clump(ex, g.y + dy + 2.5, ez, sp.clump * 0.7, 1.4, sp.clump * 0.7, g.leaves, 0.45);
         }
@@ -623,7 +655,7 @@ final class TreeShapes {
         double crownR = sp.radius * g.u(0.85, 1.15);
         for (int k = 0; k < clumps; k++) {
             double a = g.angle(), d = g.u(1, crownR * 0.65);
-            double ex = c[h][0] + Math.cos(a) * d, ez = c[h][1] + Math.sin(a) * d;
+            double ex = c[h][0] + StrictMath.cos(a) * d, ez = c[h][1] + StrictMath.sin(a) * d;
             int ey = g.y + h - g.r.nextInt(3);
             g.b.branch(c[h - 3][0], g.y + h - 3, c[h - 3][1], ex, ey, ez, 0, 0, sp.log);
             g.b.clump(ex, ey + 1, ez, sp.clump * g.u(0.9, 1.2), sp.clump * 0.5, sp.clump * g.u(0.9, 1.2), g.leaves, 0.4);
@@ -662,8 +694,8 @@ final class TreeShapes {
             if (dy >= straight) {
                 // the trunk bends hard, then corrects: an S-curve shaped by wind and rock
                 double step = sp.lean * 2.2 * g.u(0.5, 1.3);
-                cx += Math.cos(la) * step;
-                cz += Math.sin(la) * step;
+                cx += StrictMath.cos(la) * step;
+                cz += StrictMath.sin(la) * step;
                 la += g.u(-0.7, 0.7);
             }
         }
@@ -678,7 +710,7 @@ final class TreeShapes {
             double a = sp.wind > 0 && g.r.nextFloat() < sp.wind ? g.windAngle + g.u(-1.0, 1.0)
                     : a0 + i * 2.4 + g.u(-0.5, 0.5);
             double l = g.u(1.5, sp.radius + 1.5) * (1.1 - 0.4 * dy / (double) h);
-            double ex = c[dy][0] + Math.cos(a) * l, ez = c[dy][1] + Math.sin(a) * l;
+            double ex = c[dy][0] + StrictMath.cos(a) * l, ez = c[dy][1] + StrictMath.sin(a) * l;
             int ey = g.y + dy + g.r.nextInt(2);
             g.b.branch(c[dy][0], g.y + dy, c[dy][1], ex, ey, ez, 0, 0, sp.log);
             if (g.r.nextFloat() < sp.deadLimbs) continue;
@@ -704,7 +736,7 @@ final class TreeShapes {
         for (int i = 0; i < blobs; i++) {
             double a = g.angle(), d = i == 0 ? 0 : g.u(0.6, 1.4);
             double rr = sp.radius * g.u(0.7, 1.15);
-            g.b.clump(g.x + 0.5 + Math.cos(a) * d, g.y + h * 0.6 + 0.8, g.z + 0.5 + Math.sin(a) * d, rr,
+            g.b.clump(g.x + 0.5 + StrictMath.cos(a) * d, g.y + h * 0.6 + 0.8, g.z + 0.5 + StrictMath.sin(a) * d, rr,
                     Math.max(1.0, rr * g.u(0.6, 0.85)), rr * g.u(0.8, 1.1), g.clumpLeaves(), sp.ragged + 0.2);
         }
     }
@@ -738,7 +770,7 @@ final class TreeShapes {
                     double a = a0 + i * Math.PI * 2 / n + g.u(-0.6, 0.6);
                     double l = 0.8 + (1 - t) * g.u(0.3, 1.6);
                     int sy = g.y + dy + (g.r.nextInt(3) == 0 ? 1 : 0);
-                    double ex = c[dy][0] + Math.cos(a) * l, ez = c[dy][1] + Math.sin(a) * l;
+                    double ex = c[dy][0] + StrictMath.cos(a) * l, ez = c[dy][1] + StrictMath.sin(a) * l;
                     g.b.branch(c[dy][0], sy, c[dy][1], ex, sy - (l > 1.6 && g.r.nextBoolean() ? 1 : 0), ez, 0, 0, sp.log);
                     if (sp.accentChance > 0 && g.r.nextFloat() < sp.accentChance) {
                         g.b.clump(ex, sy, ez, 1.4, 0.9, 1.4, g.leaves, 0.6);
@@ -752,12 +784,12 @@ final class TreeShapes {
                 int dy = Math.max(2, (int) (standing * g.u(0.45, 0.95)));
                 dy = Math.min(dy, standing - 1);
                 double a = g.angle(), el = Math.toRadians(g.u(10, 50)), l = g.u(1.2, 3.2);
-                double ex = c[dy][0] + Math.cos(a) * Math.cos(el) * l, ez = c[dy][1] + Math.sin(a) * Math.cos(el) * l;
-                double ey = g.y + dy + Math.sin(el) * l;
+                double ex = c[dy][0] + StrictMath.cos(a) * StrictMath.cos(el) * l, ez = c[dy][1] + StrictMath.sin(a) * StrictMath.cos(el) * l;
+                double ey = g.y + dy + StrictMath.sin(el) * l;
                 g.b.branch(c[dy][0], g.y + dy, c[dy][1], ex, ey, ez, 0, 0, sp.log);
                 if (l > 2.5 && g.r.nextInt(3) == 0) {
                     double a2 = a + g.u(-1, 1);
-                    g.b.branch(ex, ey, ez, ex + Math.cos(a2), ey + 1, ez + Math.sin(a2), 0, 0, sp.log);
+                    g.b.branch(ex, ey, ez, ex + StrictMath.cos(a2), ey + 1, ez + StrictMath.sin(a2), 0, 0, sp.log);
                 }
             }
         }
@@ -765,17 +797,17 @@ final class TreeShapes {
             // the broken-off top lies on the ground beside the stump
             double a = g.angle();
             int len = Math.min(8, h - standing + 1);
-            lying(g, Mth.floor(c[0][0] + Math.cos(a) * 2), Mth.floor(c[0][1] + Math.sin(a) * 2), a, len, sp.log, false);
+            lying(g, Mth.floor(c[0][0] + StrictMath.cos(a) * 2), Mth.floor(c[0][1] + StrictMath.sin(a) * 2), a, len, sp.log, false);
         }
     }
 
     /** A log lying along the ground in direction {@code a}, following the terrain; returns the blocks laid. */
     static int lying(Grow g, int x0, int z0, double a, int len, BlockState logBase, boolean dress) {
-        Direction.Axis axis = Math.abs(Math.cos(a)) >= Math.abs(Math.sin(a)) ? Direction.Axis.X : Direction.Axis.Z;
+        Direction.Axis axis = Math.abs(StrictMath.cos(a)) >= Math.abs(StrictMath.sin(a)) ? Direction.Axis.X : Direction.Axis.Z;
         BlockState log = TreeBuilder.axis(logBase, axis);
         int prevY = Integer.MIN_VALUE, laid = 0, lx = Integer.MIN_VALUE, lz = 0;
         for (double s = 0; s < len; s += 0.75) {
-            int x = Mth.floor(x0 + 0.5 + Math.cos(a) * s), z = Mth.floor(z0 + 0.5 + Math.sin(a) * s);
+            int x = Mth.floor(x0 + 0.5 + StrictMath.cos(a) * s), z = Mth.floor(z0 + 0.5 + StrictMath.sin(a) * s);
             if (x == lx && z == lz) continue;
             int y = ground(g.b.box, x, z, prevY == Integer.MIN_VALUE ? g.y : prevY);
             if (y == Integer.MIN_VALUE) break;
@@ -823,16 +855,16 @@ final class TreeShapes {
         if (laid < 3) return;
         if (sp.trunk >= 2) {
             double pa = a + Math.PI / 2;
-            lying(g, Mth.floor(g.x + 0.5 + Math.cos(pa)), Mth.floor(g.z + 0.5 + Math.sin(pa)), a, laid, sp.log, true);
+            lying(g, Mth.floor(g.x + 0.5 + StrictMath.cos(pa)), Mth.floor(g.z + 0.5 + StrictMath.sin(pa)), a, laid, sp.log, true);
         }
-        int bx = Mth.floor(g.x + 0.5 - Math.cos(a)), bz = Mth.floor(g.z + 0.5 - Math.sin(a));
+        int bx = Mth.floor(g.x + 0.5 - StrictMath.cos(a)), bz = Mth.floor(g.z + 0.5 - StrictMath.sin(a));
         if (g.r.nextInt(3) == 0) {
             // a root plate torn out of the ground, standing on edge
             double pa = a + Math.PI / 2;
             for (int w = -2; w <= 2; w++) {
                 for (int up = 0; up <= 2; up++) {
                     if (Math.abs(w) + up > 3 || g.r.nextInt(5) == 0) continue;
-                    int px = Mth.floor(bx + 0.5 + Math.cos(pa) * w), pz = Mth.floor(bz + 0.5 + Math.sin(pa) * w);
+                    int px = Mth.floor(bx + 0.5 + StrictMath.cos(pa) * w), pz = Mth.floor(bz + 0.5 + StrictMath.sin(pa) * w);
                     g.b.extra(px, g.y + up, pz, (g.r.nextInt(3) == 0 ? Blocks.COARSE_DIRT : Blocks.ROOTED_DIRT).defaultBlockState());
                 }
             }
@@ -865,7 +897,7 @@ final class TreeShapes {
         double rad = g.sp.radius * g.u(0.8, 1.2);
         for (int i = 0; i < n; i++) {
             double a = g.angle(), d = Math.sqrt(g.r.nextDouble()) * rad;
-            int x = Mth.floor(g.x + 0.5 + Math.cos(a) * d), z = Mth.floor(g.z + 0.5 + Math.sin(a) * d);
+            int x = Mth.floor(g.x + 0.5 + StrictMath.cos(a) * d), z = Mth.floor(g.z + 0.5 + StrictMath.sin(a) * d);
             int y = ground(g.b.box, x, z, g.y);
             if (y == Integer.MIN_VALUE || Math.abs(y - g.y) > 3) continue;
             if (!g.b.box.get(x, y - 1, z).is(BlockTags.SUPPORTS_BAMBOO)) continue;
@@ -888,8 +920,8 @@ final class TreeShapes {
         for (int i = 0; i < limbs; i++) {
             int dy = Math.max(2, (int) (h * g.u(0.45, 0.9)));
             double a = g.angle(), el = Math.toRadians(g.u(30, 65)), l = g.u(2, sp.radius + 1);
-            double ex = c[dy][0] + Math.cos(a) * Math.cos(el) * l, ez = c[dy][1] + Math.sin(a) * Math.cos(el) * l;
-            double ey = g.y + dy + Math.sin(el) * l;
+            double ex = c[dy][0] + StrictMath.cos(a) * StrictMath.cos(el) * l, ez = c[dy][1] + StrictMath.sin(a) * StrictMath.cos(el) * l;
+            double ey = g.y + dy + StrictMath.sin(el) * l;
             g.b.branch(c[dy][0], g.y + dy, c[dy][1], ex, ey, ez, 0, 0, g.leaves);
             if (sp.extra != null && sp.extra.hasProperty(BlockStateProperties.FACING)) {
                 g.b.extra(Mth.floor(ex), Mth.floor(ey) + 1, Mth.floor(ez), sp.extra.setValue(BlockStateProperties.FACING, Direction.UP));

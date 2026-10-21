@@ -121,6 +121,8 @@ final class AtlasGenProgram {
     final int interpolated, registers, oreVeins;
     /** The program carries what the page passes need: the device makes the pages (atlas_gen_set_map). */
     final boolean pageGen;
+    /** The world seed (the far columns' snow cover: AtlasGenMap.far). */
+    final long seed;
 
     int pageWords() {
         return fields.size() * 256 + 256 + 4 * 4 * QY / 2;
@@ -137,6 +139,7 @@ final class AtlasGenProgram {
         registers = c.maxRegs;
         oreVeins = c.ores.size();
         pageGen = c.climate != null;
+        seed = c.seed;
     }
 
     /** A column field's kind for the page passes (FK_NONE: a function they do not compute). */
@@ -295,6 +298,10 @@ final class AtlasGenProgram {
             for (int i = 0; i < bands.length; i++) bandIds[i] = block(bands[i]);
             if (bands.length != 192) throw new IllegalStateException("clay bands: " + bands.length);
             // the surface system's noises, before the layout fixes the noise region
+            // the far columns' own (atlas_page.slang tileSurfMain): freeze_top_layer's snow layer and ice, the far roads'
+            block(Blocks.SNOW.defaultBlockState());
+            block(Blocks.ICE.defaultBlockState());
+            for (BlockState st : com.nirncraft.roads.FarRoads.blocks()) block(st);
             // the stages' blocks (addBlocks), after the terrain's: their ids stay put when the stages change
             for (var supplier : EXTRA_BLOCKS)
                 for (BlockState st : supplier.get()) block(st);

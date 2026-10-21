@@ -192,6 +192,35 @@ client):
 * Features (`AtlasGenFeatures`): the decoration driver of `applyBiomeDecoration` replicated over proto chunks filled
   with the generated blocks; 0 feature failures; 81 ms a chunk in Java, one thread.
 
+### 6.1 The decoration on the GPU (stage 4, branch atlas-features)
+
+`native/shaders/atlas_features.slang` + `native/src/features_engine.cpp` (`atlas_feat_*` in atlas.h), its own Vulkan
+device like the standalone generator, and the same source compiled to C++. The program (`AtlasFeatureProgram`, Java)
+compiles the world's own placed features: Java's dispatch order (step, global index), every placement modifier,
+every feature configuration, the biome lists (per step, and `hasFeature` for the biome filter), a block table (flags
+from the states, transforms: axis, waterlogged, leaf distance, snowy), bit sets for rule tests and block predicates
+evaluated on every state, the survival table of the plants (below-only rules tried in a stub level), Mth's sin table.
+
+* **Order (gather).** Every chunk of a batch is an origin decorated in isolation: its 3 x 3 terrain plus its own
+  earlier writes, which is exactly what Java's decoration sees when no neighbour was decorated before it. One dispatch
+  per placed feature in Java's order, one thread per origin (one kernel per feature type). Writes go into the origin's
+  own table; a target chunk is its terrain with its 9 origins' writes applied in a fixed order (z-major, the order
+  `AtlasGenParityTest` decorates a 3 x 3 in), the later winning. No two threads write one block in one dispatch.
+* **Random.** WorldgenRandom over Xoroshiro128++ with BitRandomSource's methods (`nextDouble`/`nextFloat` are float
+  arithmetic in Java), the decoration and feature seeds, FeaturePlacer's stack order.
+* **Trees** keep their leaves and trimmings exactly as fastutil's `Long2ObjectOpenHashMap` keeps them (hash, probing,
+  rehash, removal shifts), because TreeBuilder draws randoms while walking them in table order.
+* **Math**: `Math.sin/cos/pow/exp/atan2/hypot` (HotSpot intrinsics) are fdlibm on the GPU; they differ in the last
+  bit for some arguments, which changes a block only when a comparison is that close.
+* **Slang pitfalls found**: an unsuffixed float literal is float even in double arithmetic (`0.35` is
+  0.3499999940...; every double literal carries `l`); passing a struct member as an `inout` argument makes Slang inline
+  the callee at every call site (the exact-math functions: megabytes of SPIR-V and minutes of compile), so the
+  kernels' "not proven" flag is a thread-private static.
+* **Inputs from Java per chunk** (2D functions of the map and plans, like the generator's pages): the placement mask,
+  the regional alchemy plant class of each column, the temperature noise, the frozen modifier's verdict.
+* **Check**: `AtlasGenFeaturesGpuTest.featureDump` (Java's decoration of each origin alone and of each target in
+  order) and `native/tests/features_test.cpp` (`atlas_feat_test <dump> cpu|vulkan|both`).
+
 ## 7. The near field from atlas's own generation (stage 5)
 
 `-Dnirncraft.atlas.clientGen=true` (single player): `AtlasClientGen` generates the window around the camera
@@ -398,6 +427,40 @@ shared store of unfinished chunks), one sweep per chunk instead of per piece (th
 chunk order at chunk borders), a bed's other half on a write of air, tile plans beyond Tamriel for the street
 painter.
 
+### 7.5 Snow, ice and the far roads on the device (2026-10-21)
+
+`tileSurfMain` now finishes a far column the way the server's painter does (`AtlasSurface.column` plus `FarRoads`), from
+the map's far section (`AtlasGenMap.far`, MH_FAR):
+
+* **freeze_top_layer**: snow lies on dry ground that is not sea, on a block that is solid and not ice, where the biome at
+  top + 1 is cold enough (`Biome.coldEnoughToSnow`: base temperature, the frozen modifier's noise stack, the
+  height-adjusted `TEMPERATURE_NOISE`, all ported from SimplexNoise/NoiseStack) and where its ground cover leaves the
+  ground bare (`AtlasSnowCover`: each biome's ground_cover features with their `flora_density` fields, FloraField and
+  FloraNoise ported, then the patch roll). Snow becomes the top block and the ground goes under it. Water whose top is
+  cold is flagged frozen.
+* **Far roads**: `RoadPlan.at` with the plan's own bucket index, then the width test, tunnels left out, bridge decks,
+  water left alone, and the culture's surface by `Paver.roll` (region -> culture table, `FarRoads.gpuStyles`).
+* The planes after it: 2 = top | under << 16; 3 = the top block's biome | flags << 16 (1 snow, 2 frozen, 8 road;
+  `atlas_gen_tiles`' outBiomes); 4 = the biome at top + 1 or at the water's top. A far chunk's ground voxels take plane
+  3's biome (they took the water's before, so riverbeds tinted like the water), its water voxels plane 4's, and a
+  frozen column's top water voxel is ice.
+
+**Checked** (`gpuFarSurfaceMatchesPainter`, 24 tiles at LODs 0-3 over Tamriel and its rim, against `AtlasSurface.fillRows`
+on the same columns, every column at LOD 0 and those it evaluates itself above that): 785,724 of 786,432 columns equal
+(99.910 %). Roads: 7,930 on both, 0 differ. Frozen: 15,295, 0 differ. Snow: 6,795 versus 6,820. 19 of the 25
+differences follow from a different ground block (the rule part, below), and 6 have the same ground; Java's `Math.exp`
+is HotSpot's intrinsic and the kernels use fdlibm's, so a bare share can differ by an ulp. The other ~700 differ in the
+material rule itself (mud / grass, granite / gravel, sand / sandstone, and copper ore the painter shows at the top). That
+was not compared before this test; the painter's context is not a chunk's, and it is open below. `gpuFarChunks`: 0 of
+67 M voxels differ. Device time: 12.2 ms a tile with blocks (the painter: 33-47 ms a tile on all cores).
+
+**Beyond Tamriel** RoadPlan.at asks `TilePlanner`, whose runtime expansion is dormant (`Beyond.ENDLESS_LANDS_ENABLED =
+false`): it answers no plan, and so does the device. They match. If the endless lands come back, the tile plans would go
+up per world as a second road index (the planner is deterministic from the seed).
+
+**Submissions**: one per pass and tile (tiles, far chunks) and one per pass (a batch), each well under the Windows GPU
+watchdog's 2 s. Over 500 ms prints `TRACE warn gen submission`.
+
 ## 8. Open
 
 * **Structures from the plans**: named and seeded settlements, dungeons, road and street paint are stages of the
@@ -407,13 +470,57 @@ painter.
 * **The surface pass** is the kernel's largest (a thread per column walks it): split the per-block rule work.
 * **The grid and GPU sections**: `VoxGrid::ingestGpu` drops what lies outside its windows and cannot refill it (the
   CPU World never had it); a list of the sections it let go would let the generator resend exactly those.
-* **Tile plans beyond Tamriel** (`TilePlanner`): Java shapes roads there only where its planner finished a tile, so the
-  kernels (authored plan only) differ where one did. The plans would go up as device data like the authored one.
-* **The far tiles' tints and snow** (`AtlasBiomes`, `AtlasSnowCover`) and the far roads (`FarRoads`): Java per tile on
-  the tile path; the far chunks into the grid (7.4) carry the biome's tints through the ingest table, no snow layer yet.
+* **The far rule against the painter**: 0.09 % of far columns differ from `AtlasSurface` in the rule's own block (7.5).
+  Find which is the chunk's (gpuFarColumnsMatchChunks has the chunks).
+* **The far tiles' tints** (`AtlasBiomes`' grids) stay on the tile path. The far chunks into the grid carry the biome's
+  tints through the ingest table. Snow, ice and roads are on the device (7.5).
 * **The overlays on the tiles** (settlements, trees: the features agent's) keep the far field's terrain tiles on; with
   them on the GPU, `farTiles=false` can become the default and the far World build goes.
-* **Multiplayer**: the client has no seed (the public / secret decision, ATLAS-STREAMING.md decision 3).
+* **Multiplayer**: the client has no seed (the public / secret decision, ATLAS-STREAMING.md decision 3). Design in 9.
 * Found on the way, for the owner: the router has no `minecraft:beardifier` (structures' `beard_box` /
   `beard_thin` do nothing), `nirncraft:tamriel_caves` is dead code, and `TamrielBiomeSource` samples a quart
   column's climate at the first quart asked (an order dependence; chunk generation asks bottom up).
+
+## 9. Multiplayer client generation (design, 2026-10-21; it needs the owner's decision 3)
+
+The client generates as in single player: near chunks, far chunks and the far terrain from the program and the map,
+on its GPU. The server sends no geometry. It sends who the world is, the edits, and what is secret.
+
+**Handshake** (S->C on login and on entering the overworld; it replaces `AtlasNet.Hello` for such servers):
+`GenHello(publicSeed, generatorVersion, mapVersion, editsRoot)`. `generatorVersion` hashes the server's program words
+(AtlasGenProgram for the public seed) and the datapack's worldgen registries. `mapVersion` hashes the map words (the
+baked plans and rasters, AtlasGenMap). The client builds its own program and map from the same seed and data, then
+compares the hashes. If they match, it generates and stops asking for tiles (`TileRequest`), and the server stops serving
+it (`AtlasTileServer`), so the tile service retires for that player. If they differ (another mod version or datapack),
+it falls back to the tile service as today and logs why. Fallback stays: no player sees a broken world.
+
+**Edits, hash-checked** (decision 4's absolute overrides): today's `FarEdits` journal per 256-block tile, plus per edited
+section its override (the block states it holds now) and the hash of the base it replaced. The base hash is the
+generator-id FNV-1a hash `AtlasEditsClient.claim` already computes, and later BLAKE3 (decision 5). The client applies an
+override only when its own base hash for that section matches. On a mismatch (the generators disagree there) it asks
+for the real section (`FarSections` exists for that) and reports the position, so a generator divergence becomes
+visible instead of silently wrong. The server's per-tile journal versions keep resends small.
+
+**What the seed gives away** is the decision the owner has to make. Minecraft derives everything from the one world
+seed: terrain, biomes, surface, trees, and also ore veins (the noise router's `ore_vein_*`), ore features (the
+decoration seed) and structure placement. Sending it lets a client compute every ore, which is seed cracking made
+trivial. The options:
+
+1. *Public world seed.* Send it, and generate ores on the client (or leave them out with `clientGen.ores=false`). This
+   is simple and available now. Ores are not secret.
+2. *Split keys (decision 3).* The world seed becomes public. Ores move to a server-only key: the vanilla ore placed
+   features come off the biomes (a NeoForge biome modifier, no mixin), the router's ore veins are turned off in
+   `noise_settings`, and the mod's own ore feature and vein stage, keyed by the secret, run as a server overlay. A
+   section's ores reach a client when it is in radius and line of sight (the streaming doc's fog of war). The client
+   generates placeholder stone. It is buildable, but it changes existing worlds' ores (a generator version bump).
+3. *Secret seed, no client generation in multiplayer.* Keep the tile service for remote players and use client
+   generation only in single player and on LAN with the host's consent.
+
+Structures and named settlements come from the baked plans (seed-free) or the structure seed. Under option 2, their
+loot is already server state (the 2026-10-19 consequences), so it does not change.
+
+**Built so far**: nothing on the wire. The handshake without the seed decision would only carry hashes no one can use.
+Everything the client needs to generate is in place: the program, the map with its far section, the stages, and the
+grid ingest. Once the owner picks an option, the work is the `GenHello` packet, the version hashes (the program and map
+words are already deterministic arrays), retiring the tile requests behind the hash match, and the base-hash check in
+`AtlasEditsClient`.

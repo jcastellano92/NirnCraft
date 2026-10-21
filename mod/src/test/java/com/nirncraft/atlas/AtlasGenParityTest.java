@@ -492,8 +492,18 @@ class AtlasGenParityTest {
                             String[] tr = truth.get(ChunkPos.pack(x, z));
                             int top = (int) Math.ceil(s[k]) - 1;
                             if (tr == null || Integer.parseInt(tr[0]) != top) continue;
+                            int cf = biomes[k] >>> 16;
+                            if ((cf & 8) != 0) continue;  // a far road (the chunks here are terrain only)
                             onGround++;
-                            String gt = name(prog.blocks.get(blocks[k] & 0xFFFF)), gu = name(prog.blocks.get(blocks[k] >>> 16));
+                            // snow (freeze_top_layer, not in terrain-only chunks): the ground is its under block
+                            String gt = name(prog.blocks.get((cf & 1) != 0 ? blocks[k] >>> 16 : blocks[k] & 0xFFFF));
+                            String gu = (cf & 1) != 0 ? null : name(prog.blocks.get(blocks[k] >>> 16));
+                            if (gu == null) {
+                                if (gt.equals(tr[1])) topSame++;
+                                else pairs.merge("top " + tr[1] + " -> " + gt, 1L, Long::sum);
+                                underSame++;  // (the snow hides it: not compared)
+                                continue;
+                            }
                             if (gt.equals(tr[1])) topSame++;
                             else pairs.merge("top " + tr[1] + " -> " + gt, 1L, Long::sum);
                             if (gu.equals(tr[2])) underSame++;
@@ -514,6 +524,112 @@ class AtlasGenParityTest {
         String text = report.toString();
         String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
         if (out != null) Files.writeString(Path.of(out + ".far.txt"), text);
+        System.out.println(text);
+    }
+
+    /**
+     * The far columns' surface on the device (atlas_gen_tiles with blocks: the rule's top and under block, then
+     * freeze_top_layer's snow and ice and the far roads) against AtlasSurface.fillRows, the server's far painter, on the
+     * same columns (the device's heights, which gpuTilesMatchJava checks against Java). At LOD 0 every column; above it
+     * the columns the painter evaluates itself (even i and j: it shares those with their 2 x 2 group). ".farsurf.txt".
+     */
+    @Test
+    void gpuFarSurfaceMatchesPainter(MinecraftServer server) throws Exception {
+        RegistryAccess ra = server.registryAccess();
+        WorldDimensions dims = ra.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL).value().createWorldDimensions();
+        LevelStem stem = dims.dimensions().get(LevelStem.OVERWORLD);
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) stem.generator();
+        NoiseGeneratorSettings settings = gen.generatorSettings().value();
+        RandomState rs = RandomState.create(ra.lookupOrThrow(Registries.NOISE), SEED, settings);
+        DimensionType dt = stem.type().value();
+        LevelHeightAccessor heights = LevelHeightAccessor.create(dt.minY(), dt.height());
+        AtlasGenProgram prog = AtlasGenProgram.compile(gen, settings, rs, heights, SEED, st -> 0);
+        int[] map = AtlasGenMap.words(prog, gen.getBiomeSource());
+        AtlasSurface painter = AtlasSurface.forGenerator(gen, rs, SEED, heights);
+        int nTiles = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_GEN_PARITY_N", "24"));
+        // tiles over Tamriel and a little beyond (a fixed draw): a third at LOD 0, the rest LOD 1..3
+        java.util.Random rnd = new java.util.Random(77);
+        List<int[]> tiles = new ArrayList<>();
+        for (int i = 0; i < nTiles; i++) {
+            int lod = i % 3 == 0 ? 0 : 1 + rnd.nextInt(3), span = AtlasNative.TILE << lod;
+            int x = TamrielMap.MIN_X - 2000 + rnd.nextInt(TamrielMap.MAX_X - TamrielMap.MIN_X + 4000);
+            int z = TamrielMap.MIN_Z - 2000 + rnd.nextInt(TamrielMap.MAX_Z - TamrielMap.MIN_Z + 4000);
+            tiles.add(new int[]{lod, Math.floorDiv(x, span), Math.floorDiv(z, span)});
+        }
+        int cols = AtlasGenNative.TILE_COLS, n = AtlasNative.TILE;
+        StringBuilder report = new StringBuilder();
+        AtlasGenNative nat = AtlasGenNative.load(Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB")));
+        try (AtlasGenNative.Gen g = nat.create(AtlasGenNative.BACKEND_VULKAN)) {
+            if (g == null) throw new IllegalStateException("no Vulkan generator");
+            g.setProgram(prog.words);
+            g.setMap(map);
+            long compared = 0, same = 0, snowCpu = 0, snowGpu = 0, snowDiff = 0, frozenCpu = 0, frozenDiff = 0, roadCpu = 0,
+                    roadGpu = 0, roadDiff = 0, flaggedTiles = 0, oddCompared = 0, oddSame = 0, snowDiffSameGround = 0;
+            double kernelMs = 0, cpuMs = 0;
+            Map<String, Long> pairs = new TreeMap<>();
+            trace("begin far-surface");
+            for (int ti = 0; ti < tiles.size(); ti++) {
+                int[] t = tiles.get(ti);
+                int lod = t[0], st = 1 << lod;
+                float[] su = new float[cols], wa = new float[cols];
+                int[] bl = new int[cols], bi = new int[cols];
+                double[] ms = new double[1];
+                int[] bad = g.tiles(new int[]{lod, t[1], t[2]}, su, wa, bl, bi, ms);
+                kernelMs += ms[0];
+                if (bad[0] != 0) flaggedTiles++;
+                AtlasTileCodec.Surface out = new AtlasTileCodec.Surface();
+                long c0 = System.nanoTime();
+                java.util.stream.IntStream.range(0, 16).parallel().forEach(q -> painter.fillRows(lod, t[1], t[2], su, wa, out, q * 16, q * 16 + 16));
+                cpuMs += (System.nanoTime() - c0) / 1e6;
+                for (int c = 0; c < cols; c++) {
+                    int i = c & 255, j = c >> 8;
+                    boolean own = lod == 0 || ((i | j) & 1) == 0;
+                    int x = t[1] * (n << lod) + i * st + (st >> 1), z = t[2] * (n << lod) + j * st + (st >> 1);
+                    String ct = out.names.get(out.top[c] & 255), cu = out.names.get(out.under[c] & 255);
+                    String gt = AtlasSurface.name(prog.blocks.get(bl[c] & 0xFFFF)), gu = AtlasSurface.name(prog.blocks.get(bl[c] >>> 16));
+                    int cf = out.flags[c], gf = bi[c] >>> 16;
+                    boolean wet = Math.ceil(su[c]) - 1 < gen.getSeaLevel() - 1 || !Float.isNaN(wa[c]) && wa[c] > su[c];
+                    boolean cRoad = com.nirncraft.roads.FarRoads.surface(x, z, st, wet) != null, gRoad = (gf & 8) != 0;
+                    boolean eq = ct.equals(gt) && cu.equals(gu) && (cf & 3) == (gf & 3) && cRoad == gRoad;
+                    if (!own) {
+                        oddCompared++;
+                        if (eq) oddSame++;
+                        continue;
+                    }
+                    compared++;
+                    if ((cf & 1) != 0) snowCpu++;
+                    if ((gf & 1) != 0) snowGpu++;
+                    if ((cf & 1) != (gf & 1)) {
+                        snowDiff++;
+                        // the same ground under it (the snow decision itself differs, not the rule's block)
+                        if (!cRoad && !gRoad && ((cf & 1) != 0 ? cu : ct).equals((gf & 1) != 0 ? gu : gt)) snowDiffSameGround++;
+                    }
+                    if ((cf & 2) != 0) frozenCpu++;
+                    if ((cf & 2) != (gf & 2)) frozenDiff++;
+                    if (cRoad) roadCpu++;
+                    if (gRoad) roadGpu++;
+                    if (cRoad != gRoad) roadDiff++;
+                    if (eq) same++;
+                    else if (pairs.size() < 4000)
+                        pairs.merge(String.format("%s/%s f%d%s -> %s/%s f%d%s", ct, cu, cf & 3, cRoad ? " road" : "", gt, gu, gf & 3,
+                                gRoad ? " road" : ""), 1L, Long::sum);
+                }
+                progress("far-surface", ti + 1, tiles.size());
+            }
+            trace("end far-surface");
+            report.append(String.format("== %s: %d tiles (%d flagged), kernels %.1f ms (%.2f ms a tile with blocks), the painter %.0f ms (%.0f ms a tile)%n",
+                    g.device(), tiles.size(), flaggedTiles, kernelMs, kernelMs / tiles.size(), cpuMs, cpuMs / tiles.size()));
+            report.append(String.format("   columns compared %d: all equal %d (%.5f %%)%n", compared, same, 100.0 * same / Math.max(1, compared)));
+            report.append(String.format("   snow differs on the same ground block: %d%n", snowDiffSameGround));
+            report.append(String.format("   snow: painter %d, device %d, differ %d; frozen: painter %d, differ %d; roads: painter %d, device %d, differ %d%n",
+                    snowCpu, snowGpu, snowDiff, frozenCpu, frozenDiff, roadCpu, roadGpu, roadDiff));
+            report.append(String.format("   (shared 2 x 2 columns, informational: %d, equal %.3f %%)%n", oddCompared, 100.0 * oddSame / Math.max(1, oddCompared)));
+            pairs.entrySet().stream().sorted((a, b) -> Long.compare(b.getValue(), a.getValue())).limit(30)
+                    .forEach(e -> report.append(String.format("     %7d  %s%n", e.getValue(), e.getKey())));
+        }
+        String text = report.toString();
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".farsurf.txt"), text);
         System.out.println(text);
     }
 
@@ -554,6 +670,7 @@ class AtlasGenParityTest {
             g.setProgram(prog.words);
             g.setMap(map);
             int stone = 1, water = 2;  // the program's fixed ids (AtlasGenProgram: default block, default fluid)
+            int ice = prog.blockIds.get(net.minecraft.world.level.block.Blocks.ICE.defaultBlockState());
             // (lod, block x, block z): Whiterun, the Reach, the sea off Solitude, Morrowind's ash
             int[][] spots = {{1, 0, 0}, {1, -9000, 2000}, {2, -2000, -6000}, {3, 20000, 4000}, {4, 0, 0}};
             for (int[] sp : spots) {
@@ -582,7 +699,9 @@ class AtlasGenParityTest {
                             if (yc < su[c]) {
                                 float depth = su[c] - yc;
                                 want = depth <= s ? bl[c] & 0xFFFF : depth <= s + 3f ? bl[c] >>> 16 : stone;
-                            } else want = !Float.isNaN(wa[c]) && yc < wa[c] ? water : 0;
+                            } else if (!Float.isNaN(wa[c]) && yc < wa[c])  // (frozen: ice in the top voxel)
+                                want = (bi[c] >>> 16 & 2) != 0 && wa[c] - yc <= s ? ice : water;
+                            else want = 0;
                             int got = kind == 1 ? 0 : kind == 0 ? (fc.ids()[slot * 2048 + (v >> 1)] >>> ((v & 1) * 16)) & 0xFFFF
                                     : kind == 0xFFFFFFFE ? -1 : kind >>> 8;
                             voxels++;

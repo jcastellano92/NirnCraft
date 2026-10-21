@@ -123,6 +123,19 @@ int main(int argc, char** argv) {
     double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
     std::printf("tiles: status %d (%s), kernels %.2f ms, wall %.1f ms, flag %u\n", int(s), s == ATLAS_OK ? "ok" : atlas_gen_last_error(g),
                 t.kernelMs, ms, flags[0]);
+    if (s == ATLAS_OK) {
+        // a checksum of the whole tile (FNV-1a over its words): before / after a change to the passes
+        uint64_t h = 1469598103934665603ull;
+        auto mix = [&](const void* p, size_t n) {
+            const uint8_t* b = static_cast<const uint8_t*>(p);
+            for (size_t i = 0; i < n; i++) h = (h ^ b[i]) * 1099511628211ull;
+        };
+        mix(surf.data(), cols * 4);
+        mix(water.data(), cols * 4);
+        mix(blocks.data(), cols * 4);
+        mix(biomes.data(), cols * 4);
+        std::printf("  tile checksum %016llx\n", (unsigned long long)h);
+    }
     if (s == ATLAS_OK)
         for (uint32_t c : {0u, 1u, 255u, 32768u + 128u, 65535u, std::getenv("PROBE_COL") ? uint32_t(std::atoi(std::getenv("PROBE_COL"))) : 0u})
             std::printf("  column %5u: surface %.3f water %.3f top %u under %u biome %u\n", c, surf[c], water[c], blocks[c] & 0xFFFF,
@@ -139,6 +152,13 @@ int main(int argc, char** argv) {
             else if (kd == 0) mix++;
             else uni++;
         }
+        uint64_t h = 1469598103934665603ull;
+        for (uint32_t k = 0; k < 256 * rows * 2; k += 2) {
+            h = (h ^ kinds[k]) * 1099511628211ull;
+            if (kinds[k] == 0 && kinds[k + 1] < cap)  // a mixed chunk: its voxels (slots come in any order)
+                for (size_t v = 0; v < 2048; v++) h = (h ^ ids[size_t(kinds[k + 1]) * 2048 + v]) * 1099511628211ull;
+        }
+        std::printf("  far checksum %016llx (kinds and the mixed chunks' voxels in chunk order)\n", (unsigned long long)h);
         std::printf("far: status %d (%s), kernels %.2f ms, %u chunks: %u air, %u uniform, %u mixed (counter %u)\n", int(s),
                     s == ATLAS_OK ? "ok" : atlas_gen_last_error(g), t.kernelMs, 256 * rows, air, uni, mix, mixed);
     }

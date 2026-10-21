@@ -75,7 +75,7 @@ public class RockFeature extends ConfiguredFeature<RockFeature.Config> {
                 int n = 3 + r.nextInt(4);
                 for (int i = 0; i < n; i++) {
                     double a = r.nextDouble() * Math.PI * 2, d = 1 + r.nextDouble() * (2 + size);
-                    int sx = x + (int) Math.round(Math.cos(a) * d), sz = z + (int) Math.round(Math.sin(a) * d);
+                    int sx = x + (int) Math.round(StrictMath.cos(a) * d), sz = z + (int) Math.round(StrictMath.sin(a) * d);
                     int sy = TreeShapes.ground(box, sx, sz, y);
                     if (sy == Integer.MIN_VALUE || Math.abs(sy - y) > 2) continue;
                     double rr = 0.7 + r.nextDouble() * 0.8;
@@ -102,7 +102,7 @@ public class RockFeature extends ConfiguredFeature<RockFeature.Config> {
                 // a smaller companion leaning on it
                 if (r.nextInt(3) == 0) {
                     double a = r.nextDouble() * Math.PI * 2;
-                    double cx = x + 0.5 + Math.cos(a) * rx, cz = z + 0.5 + Math.sin(a) * rz;
+                    double cx = x + 0.5 + StrictMath.cos(a) * rx, cz = z + 0.5 + StrictMath.sin(a) * rz;
                     rock(box, cfg, r, seed + 99, cx, y - 0.2, cz, rr * 0.5, rr * 0.45, rr * 0.5, r.nextDouble() * 3, 0, 0);
                 }
             }
@@ -116,7 +116,7 @@ public class RockFeature extends ConfiguredFeature<RockFeature.Config> {
      */
     private static void rock(GenBox box, Config cfg, RandomSource r, long seed, double cx, double cy, double cz,
                              double rx, double ry, double rz, double yaw, double tiltX, double tiltZ) {
-        double cos = Math.cos(yaw), sin = Math.sin(yaw);
+        double cos = StrictMath.cos(yaw), sin = StrictMath.sin(yaw);
         int ext = (int) Math.ceil(Math.max(rx, rz) + 1);
         int ey = (int) Math.ceil(ry + 2 + ext * (Math.abs(tiltX) + Math.abs(tiltZ)));
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();

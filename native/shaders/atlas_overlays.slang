@@ -34,11 +34,12 @@ struct OvlParams {
 [[vk::binding(0, 0)]] StructuredBuffer<uint> blocks;   // AtlasOverlayTapes.blockWords
 [[vk::binding(1, 0)]] StructuredBuffer<uint> tapes;    // AtlasOverlayTapes.tapeWords
 [[vk::binding(2, 0)]] StructuredBuffer<uint> streets;  // AtlasOverlayTapes.streetWords
-[[vk::binding(3, 0)]] StructuredBuffer<int> chunks;    // per chunk (CHUNK_INTS): cx, cz, tape record (-1), street bucket (-1), N E S W slots (-1)
+[[vk::binding(3, 0)]] StructuredBuffer<int> chunks;    // per chunk (CHUNK_INTS): cx, cz, tape record (-1), street bucket (-1), N E S W slots (-1), own slot
 [[vk::binding(4, 0)]] RWStructuredBuffer<uint> ids;    // per chunk levels * 128 words
 [[vk::binding(5, 0)]] StructuredBuffer<uint> snap;     // ids as the pieces left them (the sweeps' neighbour reads)
 
-static const uint CHUNK_INTS = 8u, ID_WORDS = 7u, REC_OPS = 513u;
+// (a slot: a chunk's place in ids and snap: the batch's index, or the generator's store slot)
+static const uint CHUNK_INTS = 9u, ID_WORDS = 7u, REC_OPS = 513u;
 
 static const uint HEADER = 16u;
 // op kinds (Canvas.Tape) and flags (AtlasOverlayTapes.OF_*)
@@ -75,7 +76,7 @@ uint idPlanks() { return blocks[6]; }
 uint getB(int y) {
     if (y < -64 || y >= -64 + params.levels) return 0u;
     uint b = gCol + 256u * uint(y + 64);
-    if (params.packed == 0u) return ids[gBase + b];
+    if (params.packed == 0u) return ids[gBase + b] & 0xFFFFu;  // (the store's high bits: a stage's priority)
     uint w = ids[gBase + (b >> 1)];
     return (b & 1u) != 0u ? w >> 16 : w & 0xFFFFu;
 }
@@ -183,7 +184,7 @@ void piecesMain(uint3 id : SV_DispatchThreadID) {
     if (int(id.y) >= params.count || id.x >= 256u) return;
     int rec = chunks[params.chunkBase + id.y * CHUNK_INTS + 2u];
     if (rec < 0) return;
-    gBase = id.y * params.chunkWords;
+    gBase = uint(chunks[id.y * CHUNK_INTS + 8u]) * params.chunkWords;
     gCol = id.x;
     gX = chunks[id.y * CHUNK_INTS] * 16 + int(id.x & 15u);
     gZ = chunks[id.y * CHUNK_INTS + 1u] * 16 + int(id.x >> 4);
@@ -383,7 +384,7 @@ void streetsMain(uint3 id : SV_DispatchThreadID) {
     if (int(id.y) >= params.count || id.x >= 256u) return;
     int bucket = chunks[id.y * CHUNK_INTS + 3u];
     if (bucket < 0) return;
-    gBase = id.y * params.chunkWords;
+    gBase = uint(chunks[id.y * CHUNK_INTS + 8u]) * params.chunkWords;
     gCol = id.x;
     int x0 = chunks[id.y * CHUNK_INTS] * 16, z0 = chunks[id.y * CHUNK_INTS + 1u] * 16;
     gX = x0 + int(id.x & 15u);
@@ -462,17 +463,20 @@ uint snapAt(int dx, int dz, int y) {
     uint i = nbWord(dx, dz, y);
     if (i == UNKNOWN) return UNKNOWN;
     if (i == UNKNOWN - 1u) return 0u;
-    if (params.packed == 0u) return snap[i];
+    if (params.packed == 0u) return snap[i] & 0xFFFFu;
     uint w = snap[i & 0x7FFFFFFFu];
     return (i >> 31) != 0u ? w >> 16 : w & 0xFFFFu;
 }
 
-// the same, live (connectMain: a neighbour changes only its shape there, never its class)
+// the same, live in this chunk (connectMain: its own sweep done); a neighbour chunk's as its pieces left it (snap: its
+// own sweep may or may not have run, whatever the batching)
 uint liveAt(int dx, int dz, int y) {
+    int lx = int(gCol & 15u) + dx, lz = int(gCol >> 4) + dz;
+    if (lx < 0 || lx > 15 || lz < 0 || lz > 15) return snapAt(dx, dz, y);
     uint i = nbWord(dx, dz, y);
     if (i == UNKNOWN) return UNKNOWN;
     if (i == UNKNOWN - 1u) return 0u;
-    if (params.packed == 0u) return ids[i];
+    if (params.packed == 0u) return ids[i] & 0xFFFFu;
     uint w = ids[i & 0x7FFFFFFFu];
     return (i >> 31) != 0u ? w >> 16 : w & 0xFFFFu;
 }
@@ -618,8 +622,8 @@ bool sweepRange(uint slot, out int y0, out int y1) {
 }
 
 void sweepSetup(uint3 id) {
-    gSlot = id.y;
-    gBase = id.y * params.chunkWords;
+    gSlot = uint(chunks[id.y * CHUNK_INTS + 8u]);
+    gBase = gSlot * params.chunkWords;
     gCol = id.x;
     gNb0 = chunks[id.y * CHUNK_INTS + 4u];
     gNb1 = chunks[id.y * CHUNK_INTS + 5u];

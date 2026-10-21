@@ -356,6 +356,11 @@ class AtlasOverlaysGpuTest {
             gen.setProgram(prog.words);
             // the map on the device (its pages made there; the road stage reads TamrielMap.sample from it)
             report.append("stage: pages ").append(AtlasClientGen.devicePages(gen, prog, g.getBiomeSource())).append('\n');
+            if (STORE) {
+                if (!gen.storeSupported()) throw new IllegalStateException("NIRNCRAFT_OVL_STORE: no chunk store in this library");
+                gen.storeEnable(STORE_SLOTS);
+                report.append("stage: the generator's chunk store, ").append(STORE_SLOTS).append(" slots (atlas_gen_run_store)\n");
+            }
             AtlasOvlNative.Ovl ovl = nat.createForGen(gen);
             trace("end stage rig");
             if (ovl == null) {
@@ -415,6 +420,12 @@ class AtlasOverlaysGpuTest {
         for (int i = 0; i < miss.length; i += 3)
             rig.gen().putPage(miss[i], miss[i + 1], miss[i + 2] != 0, rig.pages().page(miss[i], miss[i + 1], miss[i + 2] != 0));
         int[] ids = new int[n * AtlasGenNative.CHUNK_WORDS], flags = new int[n];
+        int kindsWith = AtlasOvlNative.KIND_PIECES | AtlasOvlNative.KIND_SWEEPS | (raw != null ? 0 : AtlasOvlNative.KIND_STREETS)
+                | AtlasOvlNative.KIND_UNDER | AtlasOvlNative.KIND_SURFACE;
+        if (STORE) {
+            storeSet(report, set, ref, rig, tapes, keys, xz, ids, flags, kindsWith, total, raw);
+            return;
+        }
         // without the stage, then with it (twice: the first pays the pipelines): the stage's own cost from the kernels
         rig.ovl().kinds(0);
         rig.gen().chunks(xz, 0, ids, flags);
@@ -471,6 +482,108 @@ class AtlasOverlaysGpuTest {
                 .forEach(e -> report.append(String.format("    %8d  %s   (e.g. %s)%n", e.getValue(), e.getKey(), stageEx.get(e.getKey()))));
         total.add(sc);
         trace(String.format("done stage %s %.4f%%", set.place(), sc.pct()));
+    }
+
+    /** NIRNCRAFT_OVL_STORE=1: the stages run as store stages (atlas_gen_run_store) instead of the batch's. */
+    static final boolean STORE = "1".equals(System.getenv("NIRNCRAFT_OVL_STORE"));
+    static final int STORE_SLOTS = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_OVL_STORE_SLOTS", "320"));
+
+    /**
+     * The window through the generator's store: its chunks and a ring round them (the sweeps' radius) asked for in the
+     * given order, 64 a call, then calls without new chunks until no window chunk is left waiting; the window's
+     * chunks' generator ids into ids (keys' order). Starts from an empty store. Returns the kernel ms.
+     */
+    static double storeWindow(StageRig rig, List<Long> keys, int[] ids, int[] flags, boolean reverse, int per) {
+        rig.gen().storeKeep(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);  // empty
+        Map<Long, Integer> want = new HashMap<>();
+        for (int i = 0; i < keys.size(); i++) want.put(keys.get(i), i);
+        java.util.LinkedHashSet<Long> ask = new java.util.LinkedHashSet<>();
+        for (long k : keys)
+            for (int dz = -1; dz <= 1; dz++)
+                for (int dx = -1; dx <= 1; dx++) ask.add(ChunkPos.pack(ChunkPos.getX(k) + dx, ChunkPos.getZ(k) + dz));
+        List<Long> order = new ArrayList<>(ask);
+        if (reverse) java.util.Collections.reverse(order);
+        int[] done = new int[AtlasGenNative.RUN_CHUNKS * 2], out = new int[AtlasGenNative.RUN_CHUNKS * AtlasGenNative.CHUNK_WORDS],
+                fl = new int[AtlasGenNative.RUN_CHUNKS];
+        AtlasGenNative.Times[] t = new AtlasGenNative.Times[1];
+        int got = 0;
+        double ms = 0;
+        java.util.function.IntConsumer take = m -> {
+            for (int j = 0; j < m; j++) {
+                Integer i = want.remove(ChunkPos.pack(done[j * 2], done[j * 2 + 1]));
+                if (i == null) continue;
+                System.arraycopy(out, j * AtlasGenNative.CHUNK_WORDS, ids, i * AtlasGenNative.CHUNK_WORDS, AtlasGenNative.CHUNK_WORDS);
+                flags[i] = fl[j];
+            }
+        };
+        for (int at = 0; at < order.size(); at += per) {
+            int m = Math.min(per, order.size() - at);
+            int[] xz = new int[m * 2];
+            for (int j = 0; j < m; j++) {
+                xz[j * 2] = ChunkPos.getX(order.get(at + j));
+                xz[j * 2 + 1] = ChunkPos.getZ(order.get(at + j));
+            }
+            take.accept(rig.gen().runStore(xz, done, out, fl, null, t));
+            ms += t[0].kernelMs();
+        }
+        for (int round = 0; round < 64 && !want.isEmpty(); round++) {
+            int m = rig.gen().runStore(new int[0], done, out, fl, null, t);
+            ms += t[0].kernelMs();
+            if (m == 0) break;
+            take.accept(m);
+        }
+        if (!want.isEmpty()) throw new IllegalStateException("the store kept back " + want.size() + " window chunks");
+        return ms;
+    }
+
+    /** stageSet through the generator's store: bare, with the stages, then another batching (each chunk alone, reversed). */
+    static void storeSet(StringBuilder report, TestSet set, Ref ref, StageRig rig, AtlasOverlayTapes tapes, List<Long> keys, int[] xz,
+                         int[] ids, int[] flags, int kindsWith, Score total, AtlasOverlayStarts.Start raw) {
+        int n = keys.size();
+        rig.ovl().kinds(0);
+        storeWindow(rig, keys, ids, flags, false, 64);
+        double bare = storeWindow(rig, keys, ids, flags, false, 64);
+        rig.ovl().kinds(kindsWith);
+        storeWindow(rig, keys, ids, flags, false, 64);
+        long stamped0 = rig.ovl().stamped();
+        double with = storeWindow(rig, keys, ids, flags, false, 64);
+        int[] other = new int[ids.length], otherFlags = new int[n];
+        storeWindow(rig, keys, other, otherFlags, true, 1);
+        long batchDiff = 0;
+        for (int k = 0; k < ids.length; k++) {
+            int a = ids[k], b2 = other[k];
+            if (a == b2) continue;
+            batchDiff += ((a ^ b2) & 0xFFFF) != 0 ? 1 : 0;
+            batchDiff += ((a ^ b2) >>> 16) != 0 ? 1 : 0;
+        }
+        report.append(String.format("  batch independence (the store): 64 a call vs one at a time, reversed: %d blocks differ%n", batchDiff));
+        Score sc = new Score();
+        Map<String, Long> pairs = new HashMap<>();
+        Map<String, String> ex = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            int[] t = ref.terrain().get(keys.get(i)), rs = ref.streets().get(keys.get(i));
+            for (int b = 0; b < 256 * 640; b++) {
+                int w = ids[i * AtlasGenNative.CHUNK_WORDS + (b >> 1)];
+                int id = (b & 1) != 0 ? w >>> 16 : w & 0xFFFF;
+                int g = id < tapes.blocks.size() ? Block.getId(tapes.blocks.get(id)) : -1;
+                boolean jc = rs[b] != t[b], gc = g != t[b];
+                if (jc || gc) tally(sc, null, rs[b], g, jc, gc);
+                if ((jc || gc) && rs[b] != g) {
+                    String pk = name(t[b]) + ": " + name(rs[b]) + " -> " + (g < 0 ? "?" : name(g));
+                    pairs.merge(pk, 1L, Long::sum);
+                    ChunkPos cp = ChunkPos.unpack(keys.get(i));
+                    ex.putIfAbsent(pk, (cp.getMinBlockX() + (b & 15)) + " " + (b / 256 - 64) + " " + (cp.getMinBlockZ() + (b >> 4 & 15)));
+                }
+            }
+        }
+        report.append(String.format("  frozen table: %d states, %d ops dropped%n", tapes.blocks.size(), tapes.missing));
+        report.append(String.format("  the generator's store with the overlays as store stages: %s; kernels %.2f ms without, %.2f ms with (%.4f ms a "
+                + "chunk of the window and its ring); %d chunks stamped%n", sc, bare, with, (with - bare) / n, rig.ovl().stamped() - stamped0));
+        report.append("  store differences (terrain: Java -> GPU):\n");
+        pairs.entrySet().stream().sorted((a, b) -> Long.compare(b.getValue(), a.getValue())).limit(12)
+                .forEach(e -> report.append(String.format("    %8d  %s   (e.g. %s)%n", e.getValue(), e.getKey(), ex.get(e.getKey()))));
+        total.add(sc);
+        trace(String.format("done stage %s %.4f%% (store, %d differ between batchings)", set.place(), sc.pct(), batchDiff));
     }
 
     // ---- the road painter (RoadPaint) as a stage ----

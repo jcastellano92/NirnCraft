@@ -34,7 +34,7 @@ struct OvlParams {
 #include "atlas_ovl_javamath.slang"
 #include "atlas_map.slang"
 
-static const uint HEADER = 16u, CHUNK_INTS = 8u, ID_WORDS = 7u, REC_OPS = 513u;
+static const uint HEADER = 16u, CHUNK_INTS = 9u, ID_WORDS = 7u, REC_OPS = 513u;  // chunks: ... own slot (ids, mbnl) at 8
 static const uint R_GROUND = 1u, R_SUPPORT = 2u, R_CLEARABLE = 4u, R_NATURAL = 8u, R_LOGS = 16u, R_LEAVES = 32u,
                   R_FALLING = 64u, R_VERGE = 128u, R_MOTION_NL = 256u, R_SNOWLAYER = 512u;
 static const uint F_AIR = 1u, F_FLUID = 2u;
@@ -47,7 +47,7 @@ bool fluidId(uint id) { return (flagsOf(id) & F_FLUID) != 0u; }
 
 // ---- this thread's chunk -----------------------------------------------------------------------------------------
 
-static uint gSlot, gBase;
+static uint gSlot, gBase, gOwn;  // gSlot: the chunk in chunks; gOwn: its slot in ids and mbnl
 static int gX0, gZ0;
 static const int MIN_Y = -64;
 int maxYW() { return MIN_Y + params.levels - 1; }
@@ -56,7 +56,7 @@ uint getW(int x, int y, int z) {
     int lx = x - gX0, lz = z - gZ0;
     if (lx < 0 || lx > 15 || lz < 0 || lz > 15 || y < MIN_Y || y > maxYW()) return 0u;  // (outside: air)
     uint b = uint(lx) + 16u * uint(lz) + 256u * uint(y + 64);
-    if (params.packed == 0u) return ids[gBase + b];
+    if (params.packed == 0u) return ids[gBase + b] & 0xFFFFu;  // (the store's high bits: a stage's priority)
     uint w = ids[gBase + (b >> 1)];
     return (b & 1u) != 0u ? w >> 16 : w & 0xFFFFu;
 }
@@ -683,7 +683,7 @@ bool reservedAt(int x, int z) {
 
 // Painter.verge
 void verge(int x, int z, float d, float hw, int sy, int span, uint c, int kind, int roll) {
-    int top = mbnl[gSlot * 256u + uint((z - gZ0) * 16 + (x - gX0))];
+    int top = mbnl[gOwn * 256u + uint((z - gZ0) * 16 + (x - gX0))];
     int last = gMaxY < top + 28 ? gMaxY : top + 28;
     for (int y = top; y <= last; y++) {
         uint s = getW(x, y, z);
@@ -866,7 +866,8 @@ groupshared uint gsAny;
 void roadsMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
     if (int(gid.y) >= params.count) return;  // (the whole group alike)
     gSlot = gid.y;
-    gBase = gid.y * params.chunkWords;
+    gOwn = uint(chunks[gid.y * CHUNK_INTS + 8u]);
+    gBase = gOwn * params.chunkWords;
     gX0 = chunks[gid.y * CHUNK_INTS] * 16;
     gZ0 = chunks[gid.y * CHUNK_INTS + 1u] * 16;
     gMinY = MIN_Y;
@@ -949,7 +950,8 @@ void roadsMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
 void mbnlMain(uint3 id : SV_DispatchThreadID) {
     if (int(id.y) >= params.count || id.x >= 256u) return;
     gSlot = id.y;
-    gBase = id.y * params.chunkWords;
+    gOwn = uint(chunks[id.y * CHUNK_INTS + 8u]);
+    gBase = gOwn * params.chunkWords;
     gX0 = chunks[id.y * CHUNK_INTS] * 16;
     gZ0 = chunks[id.y * CHUNK_INTS + 1u] * 16;
     int x = gX0 + int(id.x & 15u), z = gZ0 + int(id.x >> 4);
@@ -959,5 +961,5 @@ void mbnlMain(uint3 id : SV_DispatchThreadID) {
             top = y + 1;
             break;
         }
-    mbnl[id.y * 256u + id.x] = top;
+    mbnl[gOwn * 256u + id.x] = top;
 }
