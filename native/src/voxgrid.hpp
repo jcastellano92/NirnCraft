@@ -111,6 +111,18 @@ struct VgBatch {
         uint32_t gen = 0, src = 0;
     };
     std::vector<PackJob> packJobs;
+    // (residency on the GPU) the waiting flags that changed (level-0 cell, 0 / 1 / 2), and this batch's ranking: the
+    // eye, the view's cone, the reach, the window, the pool (cap, free), the budget, the margin (atlas_voxgrid.slang
+    // RankView)
+    std::vector<std::pair<uint32_t, uint32_t>> cand;
+    struct Rank {
+        bool on = false;
+        int32_t eye[3] = {0, 0, 0};
+        float fwd[3] = {0, 0, -1};
+        float cosView = 0.5f, reach = 1e29f, nearBall = 48.0f, viewOut = 3.0f;
+        int32_t ox = 0, oz = 0;
+        uint32_t cap = 0, free = 0, budget = 256, margin = 3;
+    } rank;
     std::vector<VgGpuRef> gsecs;  // ids already on the GPU (ingestGpu): data / src VG_GPU_SRC | index here
     // the coarse levels: whole chunks to air first, then boxes (rock under a column's lowest section, air), the sections'
     // generated levels, the levels 5+ from the level below (in order of level)
@@ -130,7 +142,7 @@ struct VgBatch {
     std::vector<uint32_t> gens;
     bool coarse() const {
         if (!clears.empty() || !fills.empty() || !ingests.empty() || jobs.size() > level0Jobs || !gsecs.empty() ||
-            !poolCopies.empty() || !packs.empty() || !packJobs.empty())
+            !poolCopies.empty() || !packs.empty() || !packJobs.empty() || !cand.empty() || rank.on)
             return true;
         for (int k = 1; k < VG_LEVELS; k++)
             if (levels[k].clear || levels[k].grow || !downs[k].empty()) return true;
@@ -166,6 +178,9 @@ public:
     void put(int sx, int sy, int sz, VgIds ids);
     // the world whose tiers the grid takes its sections back from (standby) and feeds packing (World::packOnGpu)
     void setWorld(World* w) { world_ = w; }
+    // level 0's ranking on the GPU (a device backend): the host applies the lists rankResults hands it (no host ranking)
+    bool gpuRank = false;
+    void rankResults(const std::vector<uint32_t>& admits, const std::vector<uint32_t>& evicts, uint32_t cut, uint32_t waitBest);
     // (the backend) a batch it took never reached the GPU (a failure before its submit): every level is placed again
     // next frame (what the books thought written, written again)
     void forceReplace();
@@ -448,7 +463,13 @@ private:
     std::shared_ptr<const std::vector<uint8_t>> classes_ = std::make_shared<std::vector<uint8_t>>();
     float viewX_ = 0.0f, viewZ_ = 0.0f;
     int camSy_ = 0;
-    void take0(VgBatch& b, int maxSections);             // (mu_ held) level 0's share of a batch
+    void take0(VgBatch& b, int maxSections);             // (mu_ held) level 0's share of a batch (ranked here)
+    void take0Gpu(VgBatch& b, int maxSections);          // (mu_ held) ... ranked on the GPU (gpuRank)
+    std::vector<uint32_t> rankAdmits_, rankEvicts_;      // (rankResults) the last lists, cells
+    uint32_t rankCut_ = 255, rankWaitBest_ = 255;        // (buckets)
+    bool rankSeen_ = false;
+    float lastFwd_[3] = {0, 0, -1}, vel_[3] = {0, 0, 0}, turnRate_ = 0.0f;  // (predicted motion)
+    int lastEye_[3] = {0, 0, 0};
     void layOut();                                       // (mu_ held)
     void placeLevel(Level& L, int camSx, int camSz);     // (mu_ held) follow the camera
     void refillCoarse(World& world, bool wait);          // (mu_ held) the entered columns' sections from the world

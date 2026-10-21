@@ -125,7 +125,8 @@ add_custom_command(
 set(VG_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_voxgrid.slang")
 set(VG_HEADERS "")
 foreach(pair "section:vgSectionMain" "satx:vgSatX" "satz:vgSatZ" "saty:vgSatY" "grow:vgGrowMain" "fill:vgFillMain" "ingest:vgIngestMain" "down:vgDownMain"
-             "pack:vgPackMain" "unpack:vgUnpackMain")
+             "pack:vgPackMain" "unpack:vgUnpackMain" "cand:vgCandMain" "rank:vgRankMain" "rankcut:vgRankCutMain"
+             "ranklist:vgRankListMain")
   string(REPLACE ":" ";" kv "${pair}")
   list(GET kv 0 short)
   list(GET kv 1 entry)

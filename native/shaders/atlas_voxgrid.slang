@@ -12,6 +12,9 @@
 // The host's warm tier (native/src/sectionpack.hpp: the format), where the ids pass through the GPU anyway:
 //   vgPackMain     a section's raw ids (staged, or on the GPU) to its packed words and content hash, read back
 //   vgUnpackMain   packed words (staged) to a section's raw ids in gsrc (a level-0 slot's copy, the coarse ingest)
+// Residency (step 5: one priority, ranked on the GPU; the host only keeps the books):
+//   vgCandMain     the host's changes to the waiting flags;  vgRankMain   every cell's priority into histograms
+//   vgRankCutMain  where the pool is full, what to admit and evict;  vgRankListMain   the admit and evict lists
 
 struct VgParams {
     uint4 dims;  // D (x), H (y), D (z), job count
@@ -31,6 +34,8 @@ struct VgParams {
 [[vk::binding(7, 0)]] RWStructuredBuffer<uint> gsrc;  // and those that were on the GPU already (VoxGrid::ingestGpu)
 [[vk::binding(8, 0)]] RWStructuredBuffer<uint> packIn;   // packed sections staged (vgUnpackMain)
 [[vk::binding(9, 0)]] RWStructuredBuffer<uint> packOut;  // packed sections made (vgPackMain): per job its hash, then its words
+[[vk::binding(10, 0)]] RWStructuredBuffer<uint> cand;  // (residency) per level-0 cell: 1 a section waiting (the host's), 2 (the GPU's), 0 none
+[[vk::binding(11, 0)]] RWStructuredBuffer<uint> rank;  // (residency) histograms, cut-offs, the admit and evict lists (RANK_*)
 
 static const uint VG_EMPTY = 0u;
 
@@ -529,5 +534,172 @@ void vgUnpackMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
             pair |= id << (16u * e);
         }
         gsrc[out + w] = pair;
+    }
+}
+
+// ---- residency (docs/ATLAS-STATUS.md step 5): one priority, ranked on the GPU -------------------------------------
+// Every level-0 cell holding a section (MIXED: a slot) or with one waiting (cand: the host's books, 1 its ids in the
+// world's tiers, 2 the GPU's own, to ask for again) is scored by residencyPriority, into a histogram of 256 buckets
+// (residents, waiting); one thread then finds where a pool of `cap` slots is full, which waiting to admit within the
+// batch's budget (nearest first), and how many of the worst residents (worse by a margin) give way; the lists go back
+// to the host, which only keeps the books (VoxGrid::rankResults). The C++ mirror (VoxGrid::priority) is for single items.
+static const uint RANK_RES = 0u, RANK_WAIT = 256u, RANK_NADMIT = 512u, RANK_NEVICT = 513u, RANK_CUT = 514u,
+                  RANK_ADMIT_B = 515u, RANK_EVICT_B = 516u, RANK_WAIT_BEST = 517u, RANK_NEED = 518u,
+                  RANK_AOFF = 520u, RANK_ACNT = 776u, RANK_EOFF = 1032u, RANK_ECNT = 1288u, RANK_LISTS = 1544u,
+                  RANK_MAXL = 4096u;
+// (the lists come out in order: a counting sort, each bucket's first place from the cut pass; admits nearest first,
+// evicts worst first)
+
+// the view and the pool (jobs[misc.y ..]): eye block, view cone, reach, the window's origin, cap, free slots,
+// the batch's budget, the eviction margin (buckets)
+struct RankView {
+    int3 eye;
+    float3 fwd;
+    float cosView, reach, nearBall, viewOut;
+    int ox, oz;
+    uint cap, free, budget, margin;
+};
+RankView rankView() {
+    uint4 a = jobs[pc.misc.y], b = jobs[pc.misc.y + 1u], c = jobs[pc.misc.y + 2u], d = jobs[pc.misc.y + 3u];
+    RankView v;
+    v.eye = int3(int(a.x), int(a.y), int(a.z));
+    v.fwd = float3(asfloat(b.x), asfloat(b.y), asfloat(b.z));
+    v.cosView = asfloat(b.w);
+    v.reach = asfloat(c.x);
+    v.nearBall = asfloat(c.y);
+    v.viewOut = asfloat(c.z);
+    v.ox = int(d.x);
+    v.oz = int(d.y);
+    v.cap = d.z;
+    v.free = d.w;
+    v.budget = c.w & 0xFFFFu;
+    v.margin = c.w >> 16;
+    return v;
+}
+
+// a box's priority (blocks; 1e30 past the reach): the eye to the box, times viewOut outside the view's cone (but
+// within nearBall); the cone widened by the box's own half diagonal as seen from the eye. One rule for every piece of
+// data (VoxGrid::priority, chunkPriority: its mirrors)
+float residencyPriority(float3 lo, float side, RankView v) {
+    float h = side * 0.5;
+    float3 c = lo + h - float3(v.eye);
+    float3 e = max(abs(c) - h, float3(0, 0, 0));
+    float d = length(e);
+    if (d > v.reach) return 1e30;
+    if (d <= v.nearBall) return d;
+    float cl = length(c);
+    float cosA = dot(c, v.fwd) / cl;
+    float sinM = min(1.0, h * 1.7320508 / cl), cosM = sqrt(1.0 - sinM * sinM);
+    float sinV = sqrt(max(0.0, 1.0 - v.cosView * v.cosView));
+    return cosA >= v.cosView * cosM - sinV * sinM ? d : d * v.viewOut;
+}
+uint rankBucket(float p) { return p >= 1e29 ? 255u : min(254u, uint(log2(1.0 + p) * 16.0)); }
+
+// a level-0 cell's section (world section coordinates) and bucket
+uint cellBucket(uint c, RankView v) {
+    uint D = pc.dims.x;
+    int px = int(c % D), pz = int((c / D) % D), sy = int(c / (D * D)) - 4;  // (VG_MIN_SY)
+    int sx = v.ox + ((px - v.ox) % int(D) + int(D)) % int(D), sz = v.oz + ((pz - v.oz) % int(D) + int(D)) % int(D);
+    return rankBucket(residencyPriority(float3(sx, sy, sz) * 16.0, 16.0, v));
+}
+
+// the host's changes to the waiting flags (jobs[misc.y + j]: cell, flag)
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void vgCandMain(uint3 id : SV_DispatchThreadID) {
+    if (id.x >= pc.dims.w) return;
+    uint4 jb = jobs[pc.misc.y + id.x];
+    cand[jb.x] = jb.y;
+}
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void vgRankMain(uint3 id : SV_DispatchThreadID) {
+    if (id.x >= pc.dims.w) return;
+    uint w = chunks[id.x], f = cand[id.x];
+    bool res = (w & 3u) == 1u;  // (MIXED: a slot)
+    if (!res && f == 0u) return;
+    RankView v = rankView();
+    uint b = cellBucket(id.x, v);
+    InterlockedAdd(rank[(res ? RANK_RES : RANK_WAIT) + b], 1u);
+    if (!res) InterlockedMax(rank[RANK_WAIT_BEST], 255u - b);
+}
+
+[shader("compute")]
+[numthreads(1, 1, 1)]
+void vgRankCutMain(uint3 id : SV_DispatchThreadID) {
+    RankView v = rankView();
+    // where the pool is full: the best `cap` of residents and waiting
+    uint cum = 0u, B = 256u;
+    for (uint b = 0u; b < 256u; b++) {
+        cum += rank[RANK_RES + b] + rank[RANK_WAIT + b];
+        if (cum > v.cap) {
+            B = b;
+            break;
+        }
+    }
+    // the waiting to admit: under the cut, nearest first, the batch's budget (a part of a bucket: the list's counter)
+    uint w = 0u, A = 0u;
+    uint Ba = B > v.margin ? B - v.margin : 0u;  // (the margin on the admitting side: a resident past the cut gives way to
+    // a waiting one well inside it, never to one at the edge: no thrash)
+    for (uint b = 0u; b < min(Ba, 255u); b++) {
+        uint n = rank[RANK_WAIT + b];
+        if (w + n > v.budget) {
+            if (A == 0u && n > 0u) {
+                A = b + 1u;
+                w = v.budget;
+            }
+            break;
+        }
+        w += n;
+        A = b + 1u;
+    }
+    uint admits = min(w, v.budget), need = admits > v.free ? admits - v.free : 0u;
+    // the residents to give way: the worst, worse than the cut by the margin, as many as needed
+    uint r = 0u, E = 256u;
+    if (need > 0u)
+        for (int b = 255; b >= 0 && uint(b) >= B; b--) {
+            r += rank[RANK_RES + uint(b)];
+            E = uint(b);
+            if (r >= need) break;
+        }
+    rank[RANK_CUT] = B;
+    rank[RANK_ADMIT_B] = A;
+    rank[RANK_EVICT_B] = E;
+    rank[RANK_NEED] = need;
+    uint off = 0u;
+    for (uint b = 0u; b < A; b++) {
+        rank[RANK_AOFF + b] = off;
+        off += rank[RANK_WAIT + b];
+    }
+    rank[RANK_NADMIT] = min(off, v.budget);
+    off = 0u;
+    for (int b = 255; b >= int(E) && E < 256u; b--) {
+        rank[RANK_EOFF + uint(b)] = off;
+        off += rank[RANK_RES + uint(b)];
+    }
+    rank[RANK_NEVICT] = min(off, need);
+}
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void vgRankListMain(uint3 id : SV_DispatchThreadID) {
+    if (id.x >= pc.dims.w) return;
+    uint w = chunks[id.x], f = cand[id.x];
+    bool res = (w & 3u) == 1u;
+    if (!res && f == 0u) return;
+    RankView v = rankView();
+    uint b = cellBucket(id.x, v);
+    if (!res && b < rank[RANK_ADMIT_B]) {
+        uint i;
+        InterlockedAdd(rank[RANK_ACNT + b], 1u, i);
+        uint at = rank[RANK_AOFF + b] + i;
+        if (at < min(v.budget, RANK_MAXL)) rank[RANK_LISTS + at] = id.x;
+    }
+    if (res && b >= rank[RANK_EVICT_B]) {
+        uint i;
+        InterlockedAdd(rank[RANK_ECNT + b], 1u, i);
+        uint at = rank[RANK_EOFF + b] + i;
+        if (at < min(rank[RANK_NEED], RANK_MAXL)) rank[RANK_LISTS + RANK_MAXL + at] = id.x;
     }
 }

@@ -1407,6 +1407,8 @@ int main(int argc, char** argv) {
                             std::string inf = atlas_info(ctx);
                             size_t r0 = inf.find("\"resident\":"), r1 = inf.find("\"origin\":", r0 == std::string::npos ? 0 : r0);
                             if (r0 != std::string::npos && r1 != std::string::npos) extra += "," + inf.substr(r0, r1 - r0 - 1);
+                            size_t sc = inf.find("\"stageCpuMs\":");  // (the render thread's share of the grid's batch)
+                            if (sc != std::string::npos) extra += "," + inf.substr(sc, inf.find(',', sc) - sc);
 #ifdef _WIN32
                             PROCESS_MEMORY_COUNTERS_EX pm{};
                             if (K32GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pm), sizeof pm)) {

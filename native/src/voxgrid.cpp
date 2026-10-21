@@ -120,7 +120,15 @@ VoxGrid::Residency VoxGrid::residency() const {
     r.gpuUniform = gpuUniformHits_;
     r.cutoff = std::min(cutoff_, reach_);
     r.reach = reach_;
-    r.nearestMissing = nearestMissing_;
+    // (measured against the view as it is, not the ranking's predicted one: atlas_info's path, not the frame's)
+    float nm = 1e30f;
+    if (gpuRank) {
+        for (auto& [k, v] : standby_) nm = std::min(nm, priority(k.x, k.y, k.z));
+        for (auto& [k, v] : gpuStandby_) nm = std::min(nm, priority(k.x, k.y, k.z));
+        r.nearestMissing = nm < 1e29f ? uint32_t(nm) : 0u;
+    } else {
+        r.nearestMissing = nearestMissing_;
+    }
     return r;
 }
 
@@ -385,7 +393,10 @@ void VoxGrid::origin(int32_t o[4]) const {
 
 size_t VoxGrid::pending() const {
     std::lock_guard<std::mutex> lock(mu_);
-    return pending_.size() + (clearPending_ ? 1 : 0) + (freshColumns_ ? 1 : 0) + (vacated_.empty() ? 0 : 1);
+    bool freeSlot = nextSlot_ < slotCap || !freeSlots_.empty();
+    // (waiting with free slots: until a ranking says none in reach waits)
+    size_t waiting = gpuRank && freeSlot && (!rankSeen_ || rankWaitBest_ < 255) ? standby_.size() : 0;
+    return pending_.size() + waiting + (clearPending_ ? 1 : 0) + (freshColumns_ ? 1 : 0) + (vacated_.empty() ? 0 : 1);
 }
 
 VoxGrid::Stats VoxGrid::stats() const {
@@ -725,7 +736,10 @@ VgBatch VoxGrid::take(int maxSections) {
     VgBatch b;
     std::lock_guard<std::mutex> lock(mu_);
     if (!enabled) return b;
-    if (centred_) take0(b, maxSections);
+    if (centred_) {
+        if (gpuRank) take0Gpu(b, maxSections);
+        else take0(b, maxSections);
+    }
     b.level0Jobs = b.jobs.size();
     if (activeCoarse_) takeCoarse(b);
     // the host's warm tier: uploads packed on the GPU (staged with the batch's raw sections, read back next time)
@@ -1045,6 +1059,312 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
         stats_.settledFrame = stats_.frames;  // (the window's content complete again: frames since its last move)
         stats_.lastSettleFrames = stats_.frames - stats_.lastShiftFrame;
     }
+}
+
+// Level 0's share of a batch on a device (gpuRank): no ranking here. The GPU scores every cell holding or waiting for a
+// section (atlas_voxgrid.slang vgRankMain .. vgRankListMain: one priority) and sends back what to admit and what gives
+// way (rankResults); the host applies those lists and keeps the books: a new section of one id is written at once, one
+// whose cell holds a slot is rewritten in place, a GPU section is taken while slots are free (the generator sends the
+// nearest first), every other waits (its cell flagged for the GPU's ranking: 1 its ids in the world's tiers, 2 the GPU's
+// own, asked for again when admitted).
+void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
+    if (!enabled || !centred_) return;
+    bool lists = !rankAdmits_.empty() || !rankEvicts_.empty();
+    bool waiting = !standby_.empty() || !gpuStandby_.empty();
+    if (pending_.empty() && !clearPending_ && vacated_.empty() && !lists && !waiting) return;
+    b.clear = clearPending_;
+    b.chunkStates = clearPending_;
+    b.ox = ox_;
+    b.oz = oz_;
+    clearPending_ = false;
+    if (b.clear) {
+        // (the lists are of the cells before the jump: stale)
+        rankAdmits_.clear();
+        rankEvicts_.clear();
+        lists = false;
+    }
+    // the columns the window left: unknown until their new columns' sections come, a job a column; alone in their batch
+    if (!vacated_.empty()) {
+        if (!b.clear) {
+            for (uint32_t col : vacated_) b.jobs.push_back({col, VG_UNLOADED, VG_COLUMN, 0});
+            b.chunkStates = true;
+        }
+        vacated_.clear();
+        if (!b.clear) {
+            b.gens.assign(b.jobs.size(), 0u);
+            rankAdmits_.clear();  // (cells of the columns that left: stale)
+            rankEvicts_.clear();
+            return;
+        }
+    }
+    size_t n = size_t(D) * H * D;
+    if (jobAt_.size() != n) jobAt_.assign(n, ~0u);
+    if (cellGen_.size() != n) cellGen_.assign(n, 0u);
+    if (slotCpu_.size() != slotCap) slotCpu_.resize(slotCap);
+    std::vector<uint32_t> touched;  // (jobAt_ put back after the batch)
+    auto emit = [&](uint32_t chunk, uint32_t word, uint32_t slot, uint32_t data) {
+        uint8_t st = uint8_t(word & 3u);
+        if (st == VG_EMPTY && state_[chunk] == VG_EMPTY && !b.clear && jobAt_[chunk] == ~0u) return;
+        if (st != state_[chunk]) b.chunkStates = true;
+        if (state_[chunk] == VG_UNIFORM && st != VG_UNIFORM) uniform_--;
+        if (st == VG_UNIFORM && state_[chunk] != VG_UNIFORM) uniform_++;
+        state_[chunk] = st;
+        uint32_t gen = ++cellGen_[chunk];
+        if (jobAt_[chunk] != ~0u) {
+            b.jobs[jobAt_[chunk]] = {chunk, word, slot, data};
+            b.gens[jobAt_[chunk]] = gen;
+        } else {
+            jobAt_[chunk] = uint32_t(b.jobs.size());
+            touched.push_back(chunk);
+            b.jobs.push_back({chunk, word, slot, data});
+            b.gens.push_back(gen);
+        }
+    };
+    b.gens.assign(b.jobs.size(), 0u);
+    auto setCand = [&](uint32_t c, uint32_t v) { b.cand.push_back({c, v}); };
+    auto freeSlot = [&](uint32_t chunk) {
+        if (slotOf_[chunk] == ~0u) return;
+        freeSlots_.push_back(slotOf_[chunk]);
+        slotChunk_[slotOf_[chunk]] = ~0u;
+        slotCpu_[slotOf_[chunk]] = 0;
+        slotOf_[chunk] = ~0u;
+        slotsUsed_--;
+    };
+    auto takeSlot = [&](uint32_t c) -> uint32_t {
+        uint32_t slot = ~0u;
+        if (!freeSlots_.empty()) {
+            slot = freeSlots_.back();
+            freeSlots_.pop_back();
+        } else if (nextSlot_ < slotCap) {
+            slot = nextSlot_++;
+        }
+        if (slot != ~0u) {
+            slotOf_[c] = slot;
+            slotChunk_[slot] = c;
+            slotsUsed_++;
+        }
+        return slot;
+    };
+    auto worldOf = [&](uint32_t c, int& sx, int& sy, int& sz) {
+        int px = int(c % uint32_t(D)), pz = int((c / uint32_t(D)) % uint32_t(D));
+        sy = int(c / uint32_t(D * D)) + VG_MIN_SY;
+        sx = ox_ + pmod(px - ox_, D);
+        sz = oz_ + pmod(pz - oz_, D);
+    };
+    // a section into its slot: its ids staged (raw), expanded on the GPU (packed), or copied (the GPU's own)
+    int built = 0;
+    auto build = [&](uint32_t c, uint32_t slot, const Key& k, const Ids& ids) {
+        uint32_t at = uint32_t(b.secs.size());
+        if (ids.gpu()) {
+            at = VG_GPU_SRC | uint32_t(b.gsecs.size());
+            b.gsecs.push_back(gpuRef_[k]);
+        } else if (ids.packed) {
+            at = VG_PACK_SRC | uint32_t(b.packs.size());
+            b.packs.push_back(ids.packed);
+        } else {
+            b.secs.push_back(ids.ids);
+        }
+        slotCpu_[slot] = ids.gpu() ? 0 : 1;
+        emit(c, slot << 2 | VG_MIXED, slot, at);
+        built++;
+    };
+    // 1. what the GPU's ranking gave way: the worst residents (never one written in this batch); they wait. Only as many
+    // as the admits this batch applies need beyond the free slots (the lists of two frames overlap: both ask for the
+    // same room, made before either was applied)
+    size_t wantSlots = 0;
+    for (uint32_t c : rankAdmits_) {
+        if (wantSlots >= size_t(std::max(maxSections, 1))) break;
+        if (c >= n || slotOf_[c] != ~0u) continue;
+        int sx, sy, sz;
+        worldOf(c, sx, sy, sz);
+        if (standby_.count({sx, sy, sz})) wantSlots++;
+    }
+    size_t freeNow = freeSlots_.size() + (slotCap - nextSlot_);
+    size_t evictLeft = wantSlots > freeNow ? wantSlots - freeNow : 0;
+    for (uint32_t c : rankEvicts_) {
+        if (!evictLeft) break;
+        if (c >= n || slotOf_[c] == ~0u || jobAt_[c] != ~0u) continue;
+        evictLeft--;
+        uint32_t slot = slotOf_[c];
+        int vx, vy, vz;
+        worldOf(c, vx, vy, vz);
+        if (slotCpu_[slot]) {
+            standby_[{vx, vy, vz}] = 1;
+            setCand(c, 1);
+        } else {
+            gpuLetGo(vx, vy, vz, 1u);
+            gpuStandby_[{vx, vy, vz}] = 0;
+            setCand(c, 2);
+        }
+        freeSlot(c);
+        emit(c, VG_UNLOADED, ~0u, 0);
+        released_.push_back({0, vx, vy, vz});
+        stats_.evicted++;
+    }
+    rankEvicts_.clear();
+    // 2. what it admits: nearest first, into the free slots (its ids from the world's tiers; a GPU one asked for)
+    for (uint32_t c : rankAdmits_) {
+        if (built >= maxSections) break;  // (the rest: the next lists hold them again)
+        if (c >= n) continue;
+        if (slotOf_[c] != ~0u) {
+            setCand(c, 0);
+            continue;
+        }
+        int sx, sy, sz;
+        worldOf(c, sx, sy, sz);
+        Key k{sx, sy, sz};
+        if (auto g = gpuStandby_.find(k); g != gpuStandby_.end()) {
+            if (!g->second) {
+                g->second = 1;
+                reportWanted({0, sx, sy, sz});
+            }
+            continue;
+        }
+        auto it = standby_.find(k);
+        if (it == standby_.end()) {
+            setCand(c, 0);  // (a flag the books no longer hold: the cell's columns moved, it came since)
+            continue;
+        }
+        World::SectionSrc src = world_ ? world_->sectionSource(sx, sy, sz) : World::SectionSrc{};
+        if (!src) {
+            standby_.erase(it);
+            setCand(c, 0);
+            continue;
+        }
+        uint32_t slot = takeSlot(c);
+        if (slot == ~0u) break;  // (no slot came free: the next lists)
+        build(c, slot, k, src.raw ? VgSrc{VgIds(src.raw, &src.raw->mats), nullptr} : VgSrc{nullptr, src.packed});
+        standby_.erase(it);
+        setCand(c, 0);
+    }
+    rankAdmits_.clear();
+    // 3. the new sections
+    static const bool topAir = [] {  // ATLAS_VOXGRID_TOPAIR=0: above a column's top section stays UNLOADED
+        const char* e = std::getenv("ATLAS_VOXGRID_TOPAIR");
+        return !e || std::atoi(e) != 0;
+    }();
+    static const bool uniformOn = [] {  // (ATLAS_VOXGRID_UNIFORM=0, measurements: a slot for every non-air section)
+        const char* e = std::getenv("ATLAS_VOXGRID_UNIFORM");
+        return !e || std::atoi(e) != 0;
+    }();
+    size_t share = size_t(std::max(maxSections, 1)) * 4, done = 0;
+    for (auto it = pending_.begin(); it != pending_.end() && done < share;) {
+        Key k = it->first;
+        Ids ids = it->second;
+        bool onGpu = ids.gpu();
+        uint32_t c = phys(k.x, k.y, k.z);
+        uint32_t uni = VG_NOT_UNIFORM;
+        if (onGpu) {
+            auto h = gpuUniformHint_.find(k);
+            if (h != gpuUniformHint_.end()) uni = h->second;
+        } else if (ids.packed) {
+            uni = packUniform(ids.packed->data());
+        } else {
+            uni = uniformIdOf(*ids.ids);
+        }
+        if (!uniformOn && uni != 0) uni = VG_NOT_UNIFORM;
+        // (a free slot takes it at once, from either source: only a full pool waits for the GPU's ranking)
+        bool fits = slotOf_[c] != ~0u || nextSlot_ < slotCap || !freeSlots_.empty();
+        if (uni == VG_NOT_UNIFORM && fits && built >= maxSections) {
+            ++it;  // (a copy for the next batch)
+            continue;
+        }
+        done++;
+        if (uni != VG_NOT_UNIFORM) {
+            freeSlot(c);
+            emit(c, uni == 0 ? VG_EMPTY : (uni & 0xFFFFu) << 2 | VG_UNIFORM, ~0u, 0);
+            standby_.erase(k);
+            gpuStandby_.erase(k);
+            setCand(c, 0);
+        } else if (fits) {
+            uint32_t slot = slotOf_[c] != ~0u ? slotOf_[c] : takeSlot(c);
+            build(c, slot, k, ids);
+            standby_.erase(k);
+            gpuStandby_.erase(k);
+            setCand(c, 0);
+        } else {
+            // waits for the GPU's ranking (unknown here meanwhile: the coarse levels answer)
+            if (state_[c] != VG_UNLOADED) emit(c, VG_UNLOADED, ~0u, 0);
+            if (onGpu) {
+                gpuLetGo(k.x, k.y, k.z, 1u);
+                gpuStandby_[k] = 0;
+                setCand(c, 2);
+            } else {
+                standby_[k] = 1;
+                setCand(c, 1);
+            }
+        }
+        // the column's top: the game sends a chunk's sections up to its highest block, never the air above
+        size_t col = physCol(k.x, k.z);
+        int top = colTop_[col];
+        if (!topAir) {
+        } else if (top == NO_TOP) {
+            for (int sy = k.y + 1; sy < VG_MIN_SY + H; sy++) {
+                uint32_t a = phys(k.x, sy, k.z);
+                if (state_[a] == VG_UNLOADED && slotOf_[a] == ~0u && !pending_.count({k.x, sy, k.z}) &&
+                    !standby_.count({k.x, sy, k.z}) && !gpuStandby_.count({k.x, sy, k.z}))
+                    emit(a, VG_EMPTY, ~0u, 0);
+            }
+        } else if (k.y > top) {
+            for (int sy = top + 1; sy < k.y; sy++) {
+                uint32_t a = phys(k.x, sy, k.z);
+                if (state_[a] == VG_EMPTY && slotOf_[a] == ~0u && !pending_.count({k.x, sy, k.z})) emit(a, VG_UNLOADED, ~0u, 0);
+            }
+        }
+        if (top == NO_TOP || k.y > top) colTop_[col] = int16_t(k.y);
+        it = pending_.erase(it);
+        if (onGpu && !cpending_.count(k)) {
+            gpuRef_.erase(k);
+            gpuUniformHint_.erase(k);
+        }
+    }
+    for (uint32_t c : touched) jobAt_[c] = ~0u;
+    // 4. this batch's ranking on the GPU (after its jobs: the words it reads are this batch's)
+    b.rank.on = !standby_.empty() || !gpuStandby_.empty();
+    // predicted motion (the residency priority's fourth term): the lists come back RANK_LAG frames after they are made,
+    // so the view they rank for is where the camera will be by then: the eye moved on by its velocity, the cone widened
+    // by the turn (blocks and radians a batch, eased)
+    constexpr float RANK_LAG = 3.0f;
+    float turn = std::acos(std::clamp(fwd_[0] * lastFwd_[0] + fwd_[1] * lastFwd_[1] + fwd_[2] * lastFwd_[2], -1.0f, 1.0f));
+    turnRate_ += (turn - turnRate_) * 0.5f;
+    for (int i = 0; i < 3; i++) {
+        vel_[i] += (float(camB_[i] - lastEye_[i]) - vel_[i]) * 0.5f;
+        if (std::fabs(vel_[i]) > 256.0f) vel_[i] = 0.0f;  // (a jump, not a motion)
+        lastEye_[i] = camB_[i];
+        lastFwd_[i] = fwd_[i];
+    }
+    if (b.rank.on) {
+        for (int i = 0; i < 3; i++) b.rank.eye[i] = camB_[i] + int32_t(std::lround(vel_[i] * RANK_LAG)), b.rank.fwd[i] = fwd_[i];
+        float half = std::acos(std::clamp(cosView_, -1.0f, 1.0f)) + turnRate_ * RANK_LAG;
+        b.rank.cosView = half >= 3.14159f ? -1.0f : std::cos(half);
+        b.rank.reach = std::min(reach_, 1e29f);
+        b.rank.nearBall = NEAR_BALL;
+        b.rank.viewOut = VIEW_OUT;
+        b.rank.ox = ox_;
+        b.rank.oz = oz_;
+        b.rank.cap = slotCap;
+        b.rank.free = slotCap - slotsUsed_;
+        b.rank.budget = uint32_t(std::max(maxSections, 1)) * 2;  // (read two frames later, made before the last applied)
+        b.rank.margin = 3;  // (buckets of 1/16 octave: 14%, no thrash)
+    }
+    // the cut-off and the nearest waiting from the last ranking (buckets of 1/16 of an octave of 1 + blocks)
+    cutoff_ = rankCut_ >= 255 ? reach_ : std::exp2(float(rankCut_) / 16.0f) - 1.0f;
+    nearestMissing_ = rankWaitBest_ >= 255 || !b.rank.on ? 0u : uint32_t(std::exp2(float(rankWaitBest_) / 16.0f) - 1.0f);
+    sectionsBuilt += uint64_t(built);
+    batches++;
+    if (pending_.empty() && !freshColumns_ && stats_.lastShiftFrame >= stats_.settledFrame) {
+        stats_.settledFrame = stats_.frames;
+        stats_.lastSettleFrames = stats_.frames - stats_.lastShiftFrame;
+    }
+}
+
+void VoxGrid::rankResults(const std::vector<uint32_t>& admits, const std::vector<uint32_t>& evicts, uint32_t cut, uint32_t waitBest) {
+    std::lock_guard<std::mutex> lock(mu_);
+    rankAdmits_ = admits;
+    rankEvicts_ = evicts;
+    rankCut_ = cut;
+    rankWaitBest_ = waitBest;
+    rankSeen_ = true;
 }
 
 namespace {

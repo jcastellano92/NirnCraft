@@ -536,6 +536,7 @@ ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {
     }
     armFromEnvironment(*ctx->backend);
     ctx->voxgrid.setWorld(&ctx->world);  // (the grid takes its sections back from the world's tiers)
+    ctx->voxgrid.gpuRank = ctx->backend->onDevice();  // (level 0 ranked on the GPU; the CPU backend ranks here)
     if (const char* d = std::getenv("ATLAS_CACHE_DIR")) ctx->cacheDir = d;
     if (const char* v = std::getenv("ATLAS_HOST_SECTIONS_MB")) ctx->cacheHostBytes = uint64_t(std::max(16, std::atoi(v))) << 20;
     if (const char* v = std::getenv("ATLAS_COLD_MB")) ctx->cacheDiskBytes = uint64_t(std::max(16, std::atoi(v))) << 20;
