@@ -47,7 +47,7 @@ final class AtlasClientGen implements AutoCloseable {
     private final AtlasGenProgram program;
     private final AtlasGenPages pages;
     private final AtlasGenNative.Gen gen;
-    private final int[] farIds;          // per generator id: its far state id (0: not kept, like AtlasSections.ids)
+    private final int[] farIds;          // per generator id: its near id (AtlasClientSections.nearIdOf; 0: not kept)
     private final boolean[] solid;       // per generator id: renders as a full cube (AtlasSections.solidRock)
     private final boolean[] motionOrFluid, air;
     private final ThreadLocal<BiomeResolver> biomes;
@@ -90,7 +90,7 @@ final class AtlasClientGen implements AutoCloseable {
         air = new boolean[n];
         for (int i = 0; i < n; i++) {
             BlockState s = program.blocks.get(i);
-            farIds[i] = AtlasSections.kept(s) ? AtlasFarState.farId(s) : 0;
+            farIds[i] = AtlasClientSections.nearIdOf(s);  // (the client feed's rule: every block, full state, bricks)
             solid[i] = !s.isAir() && s.isSolidRender();
             motionOrFluid[i] = net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES.isOpaque().test(s);
             air[i] = s.isAir();
@@ -489,7 +489,7 @@ final class AtlasClientGen implements AutoCloseable {
                         if (rock && (st.isAir() || !st.isSolidRender())) rock = false;
                         Integer id = ids.get(st);
                         if (id == null) {
-                            id = AtlasSections.kept(st) ? AtlasFarState.farId(st) : 0;
+                            id = AtlasClientSections.nearIdOf(st);
                             ids.put(st, id);
                         }
                         far[x + 16 * (z + 16 * y)] = id;
