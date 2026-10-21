@@ -30,15 +30,20 @@
 #include "atlas_ovl_sanity_spv.h"
 #include "atlas_ovl_connect_spv.h"
 #include "atlas_ovl_access_spv.h"
+#include "atlas_ovl_roads_spv.h"
+#include "atlas_ovl_mbnl_spv.h"
 
 using namespace atlas;
 
 namespace {
 
 // keep in step with atlas_overlays.slang and AtlasOverlayTapes
-constexpr uint32_t GROUP = 64, NB = 6, PIPES = 5, P_PIECES = 0, P_STREETS = 1, P_SANITY = 2, P_CONNECT = 3, P_ACCESS = 4;
+constexpr uint32_t GROUP = 64, NB = 9, PIPES = 7, P_PIECES = 0, P_STREETS = 1, P_SANITY = 2, P_CONNECT = 3, P_ACCESS = 4, P_ROADS = 5,
+                   P_MBNL = 6;
+// kinds: 1 pieces, 2 streets, 4 sweeps, 8 roads (RoadPaint), 16 the heightmap snapshot the roads read
+constexpr uint32_t K_PIECES = 1, K_STREETS = 2, K_SWEEPS = 4, K_ROADS = 8, K_MBNL = 16;
 constexpr uint32_t CHUNK_INTS = ATLAS_OVL_CHUNK_INTS;
-constexpr uint32_t BLOCKS_MAGIC = 0x4C424F41u, TAPES_MAGIC = 0x50544F41u, STREETS_MAGIC = 0x52534F41u;
+constexpr uint32_t BLOCKS_MAGIC = 0x4C424F41u, TAPES_MAGIC = 0x50544F41u, STREETS_MAGIC = 0x52534F41u, ROADS_MAGIC = 0x44524F41u;
 constexpr uint32_t GEN_LEVELS = 640;  // the generator's columns: y -64 .. 575
 
 double msSince(std::chrono::steady_clock::time_point t0) {
@@ -61,15 +66,17 @@ struct Buf {
 
 enum class Mem { Device, Readback, Upload };
 
-// the street painter's stage: after the generator's road paint (StreetPaint runs after RoadPaint in the top layer step)
-constexpr uint32_t STAGE_STREETS = ATLAS_GEN_STAGE_PAINT + 50;
+// the street painter's stage: after the road paint (StreetPaint runs after RoadPaint in the top layer step); the road
+// paint at ATLAS_GEN_STAGE_PAINT; the heightmap the road paint reads, as the server primes it, before the decoration
+constexpr uint32_t STAGE_STREETS = ATLAS_GEN_STAGE_PAINT + 50, STAGE_ROADS = ATLAS_GEN_STAGE_PAINT,
+                   STAGE_MBNL = ATLAS_GEN_STAGE_DECORATION - 1;
 
 class VulkanEngine final {
 public:
     ~VulkanEngine() {
         if (dev_) {
             if (!attached_ && !dead_) vkDeviceWaitIdle(dev_);
-            for (Buf* b : {&blocks_, &tapes_, &streets_, &chunks_, &ids_, &snap_, &staging_}) release(*b);
+            for (Buf* b : {&blocks_, &tapes_, &streets_, &chunks_, &ids_, &snap_, &roads_, &mbnl_, &dummy_, &staging_}) release(*b);
             if (queries_) vkDestroyQueryPool(dev_, queries_, nullptr);
             if (fence_) vkDestroyFence(dev_, fence_, nullptr);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
@@ -172,6 +179,7 @@ public:
         if (dead_) return fail(err, "the overlays' device was lost earlier");
         if (attached_) {
             // kept here until the generator's next batch (its lock held, its device idle for us) puts it up
+            if (which > 3) return fail(err, "which");
             pending_[which].assign(words, words + count);
             dirty_[which] = true;
             if (which == 1) indexTapes();
@@ -179,6 +187,7 @@ public:
             has_[which] = true;
             return true;
         }
+        if (which == 3) return fail(err, "the road painter needs the generator's map: a stage only");
         Buf& b = which == 0 ? blocks_ : which == 1 ? tapes_ : streets_;
         if (!ensure(b, size_t(count) * 4, Mem::Device, err)) return false;
         writeSet(ids_.buf);
@@ -263,13 +272,15 @@ public:
     // A stage of the generator's batch (kinds: which of our passes this stage records): inside its command buffer,
     // between the terrain and the pack pass, with its lock held and its previous batch complete
     bool record(VkCommandBuffer cmd, VkBuffer blocks, uint32_t chunkWords, uint32_t n, const int32_t* chunkXZ, uint32_t kinds,
-                std::string& err) {
+                VkBuffer map, std::string& err) {
         std::lock_guard<std::mutex> lock(mu_);
-        if (dead_ || !has_[0] || (!has_[1] && !has_[2])) return true;  // nothing to stamp yet
+        if (dead_ || !has_[0]) return true;  // nothing to stamp yet
+        if ((kinds & (K_ROADS | K_MBNL)) && !has_[3]) return true;
+        if (!(kinds & (K_ROADS | K_MBNL)) && !has_[1] && !has_[2]) return true;
         // what changed since the last batch goes up now (the generator waited for its last batch: nothing reads ours)
         bool grown = false;
-        Buf* bufs[3] = {&blocks_, &tapes_, &streets_};
-        for (uint32_t w = 0; w < 3; w++) {
+        Buf* bufs[4] = {&blocks_, &tapes_, &streets_, &roads_};
+        for (uint32_t w = 0; w < 4; w++) {
             if (!dirty_[w]) continue;
             size_t bytes = pending_[w].size() * 4;
             if (!(bufs[w]->buf && bufs[w]->size >= bytes)) grown = true;
@@ -300,14 +311,33 @@ public:
             d[7] = find(slot, chunkKey(cx - 1, cz));
             if (d[2] >= 0 || d[3] >= 0) any++;
         }
-        if (!any) return true;  // no settlement here: nothing recorded
+        bool roadsToo = (kinds & (K_ROADS | K_MBNL)) != 0;
+        if (!any && !roadsToo) return true;  // no settlement here: nothing recorded
         size_t chunkBytes = desc.size() * 4, idBytes = size_t(n) * chunkWords * 4;
         if (!(chunks_.buf && chunks_.size >= chunkBytes)) grown = true;
         if (!(snap_.buf && snap_.size >= idBytes)) grown = true;
-        if (!ensure(chunks_, chunkBytes, Mem::Upload, err) || !ensure(snap_, idBytes, Mem::Device, err)) return false;
+        if (!(mbnl_.buf && mbnl_.size >= size_t(n) * 256 * 4)) grown = true;
+        if (!ensure(chunks_, chunkBytes, Mem::Upload, err) || !ensure(snap_, idBytes, Mem::Device, err) ||
+            !ensure(mbnl_, size_t(n) * 256 * 4, Mem::Device, err))
+            return false;
         std::memcpy(chunks_.map, desc.data(), chunkBytes);
-        if (grown || blocks != boundIds_) writeSet(blocks);
+        if (grown || blocks != boundIds_ || map != boundMap_) writeSet(blocks, map);
         OvlParams p{int32_t(n), int32_t(GEN_LEVELS), 0u, chunkWords};
+        if (roadsToo) {
+            if ((kinds & kinds_ & K_MBNL) && pipes_[P_MBNL]) {
+                vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+                vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(OvlParams), &p);
+                vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_MBNL]);
+                vkCmdDispatch(cmd, 256 / GROUP, n, 1);
+            }
+            if ((kinds & kinds_ & K_ROADS) && pipes_[P_ROADS]) {
+                vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+                vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(OvlParams), &p);
+                vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_ROADS]);
+                vkCmdDispatch(cmd, (n + GROUP - 1) / GROUP, 1, 1);
+            }
+            return true;
+        }
         recordPasses(cmd, p, kinds & kinds_, blocks, idBytes, false);
         if (kinds & 1u) stamped_ += any;
         return true;
@@ -415,10 +445,10 @@ private:
         pl.pPushConstantRanges = &pr;
         if (vkCreatePipelineLayout(dev_, &pl, nullptr, &layout_) != VK_SUCCESS) return fail(err, "pipeline layout");
         const uint32_t* code[PIPES] = {atlas_ovl_pieces_spv, atlas_ovl_streets_spv, atlas_ovl_sanity_spv, atlas_ovl_connect_spv,
-                                       atlas_ovl_access_spv};
+                                       atlas_ovl_access_spv, atlas_ovl_roads_spv, atlas_ovl_mbnl_spv};
         const size_t size[PIPES] = {atlas_ovl_pieces_spv_size, atlas_ovl_streets_spv_size, atlas_ovl_sanity_spv_size,
-                                    atlas_ovl_connect_spv_size, atlas_ovl_access_spv_size};
-        static const char* names[PIPES] = {"pieces", "streets", "sanity", "connect", "access"};
+                                    atlas_ovl_connect_spv_size, atlas_ovl_access_spv_size, atlas_ovl_roads_spv_size, atlas_ovl_mbnl_spv_size};
+        static const char* names[PIPES] = {"pieces", "streets", "sanity", "connect", "access", "roads", "mbnl"};
         for (uint32_t i = 0; i < PIPES; i++) {
             auto p0 = std::chrono::steady_clock::now();
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
@@ -450,7 +480,8 @@ private:
         if (vkAllocateDescriptorSets(dev_, &da, &set_) != VK_SUCCESS) return fail(err, "descriptor set");
         Mem small = attached_ ? Mem::Upload : Mem::Device;
         bool ok = ensure(blocks_, 64, small, err) && ensure(tapes_, 64, small, err) && ensure(streets_, 64, small, err) &&
-                  ensure(chunks_, 64, small, err) && ensure(snap_, 64, Mem::Device, err) && ensure(ids_, 64, Mem::Device, err);
+                  ensure(chunks_, 64, small, err) && ensure(snap_, 64, Mem::Device, err) && ensure(ids_, 64, Mem::Device, err) &&
+                  ensure(roads_, 64, small, err) && ensure(mbnl_, 64, Mem::Device, err) && ensure(dummy_, 64, Mem::Device, err);
         if (!ok) return false;
         if (attached_) {
             writeSet(ids_.buf);  // the generator's blocks take binding 4 at its batches
@@ -556,8 +587,8 @@ private:
         }
         return true;
     }
-    void writeSet(VkBuffer ids) {
-        VkBuffer bs[NB] = {blocks_.buf, tapes_.buf, streets_.buf, chunks_.buf, ids, snap_.buf};
+    void writeSet(VkBuffer ids, VkBuffer map = VK_NULL_HANDLE) {
+        VkBuffer bs[NB] = {blocks_.buf, tapes_.buf, streets_.buf, chunks_.buf, ids, snap_.buf, roads_.buf, map ? map : dummy_.buf, mbnl_.buf};
         VkDescriptorBufferInfo bi[NB];
         VkWriteDescriptorSet w[NB];
         for (uint32_t i = 0; i < NB; i++) {
@@ -571,6 +602,7 @@ private:
         }
         vkUpdateDescriptorSets(dev_, NB, w, 0, nullptr);
         boundIds_ = ids;
+        boundMap_ = map;
     }
     void begin() {
         vkResetCommandBuffer(cmd_, 0);
@@ -605,12 +637,12 @@ private:
 
     std::mutex mu_;
     bool dead_ = false, timestamps_ = false, attached_ = false;
-    bool has_[3] = {false, false, false}, dirty_[3] = {false, false, false};
-    std::vector<uint32_t> pending_[3];
+    bool has_[4] = {false, false, false, false}, dirty_[4] = {false, false, false, false};
+    std::vector<uint32_t> pending_[4];
     std::unordered_map<int64_t, int32_t> tapeIndex_, bucketIndex_;
-    uint32_t kinds_ = 7u;
+    uint32_t kinds_ = 31u;
     uint64_t stamped_ = 0, apronChunks_ = 0;
-    VkBuffer boundIds_ = VK_NULL_HANDLE;
+    VkBuffer boundIds_ = VK_NULL_HANDLE, boundMap_ = VK_NULL_HANDLE;
     float timestampPeriod_ = 1.0f;
     char name_[300] = "vulkan";
     VkInstance inst_ = VK_NULL_HANDLE;
@@ -628,7 +660,7 @@ private:
     VkCommandBuffer cmd_ = VK_NULL_HANDLE;
     VkFence fence_ = VK_NULL_HANDLE;
     VkQueryPool queries_ = VK_NULL_HANDLE;
-    Buf blocks_, tapes_, streets_, chunks_, ids_, snap_, staging_;
+    Buf blocks_, tapes_, streets_, chunks_, ids_, snap_, roads_, mbnl_, dummy_, staging_;
 };
 
 }  // namespace
@@ -637,7 +669,7 @@ struct AtlasOvl {
     std::unique_ptr<VulkanEngine> engine;
     std::string error;
     AtlasGen* gen = nullptr;  // atlas_ovl_create_for_gen's: its stages are removed on destroy
-    uint32_t stageIds[3] = {0, 0, 0};
+    uint32_t stageIds[5] = {0, 0, 0, 0, 0};
     uint32_t blockCount = 0, tapeWords = 0, streetBuckets = 0;
 };
 
@@ -679,11 +711,12 @@ namespace {
 int32_t stageFn(void* user, const AtlasGenStageBatch* b) {
     auto* h = static_cast<AtlasOvl*>(user);
     if (!h || !b || b->version < 1) return -1;
-    uint32_t kinds = b->order == ATLAS_GEN_STAGE_PIECES ? 1u : b->order == ATLAS_GEN_STAGE_SWEEPS ? 4u : 2u;
+    uint32_t kinds = b->order == ATLAS_GEN_STAGE_PIECES ? K_PIECES : b->order == ATLAS_GEN_STAGE_SWEEPS ? K_SWEEPS
+                     : b->order == STAGE_ROADS ? K_ROADS : b->order == STAGE_MBNL ? K_MBNL : K_STREETS;
     try {
         std::string err;
         if (!h->engine->record(static_cast<VkCommandBuffer>(b->vkCommandBuffer), reinterpret_cast<VkBuffer>(b->blocks),
-                               uint32_t(b->blocksWordsPerChunk), b->chunkCount, b->chunks, kinds, err)) {
+                               uint32_t(b->blocksWordsPerChunk), b->chunkCount, b->chunks, kinds, reinterpret_cast<VkBuffer>(b->map), err)) {
             h->error = err;
             return -1;
         }
@@ -715,8 +748,8 @@ ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out) {
         }
         h->engine = std::move(vk);
         h->gen = gen;
-        const uint32_t orders[3] = {ATLAS_GEN_STAGE_PIECES, ATLAS_GEN_STAGE_SWEEPS, STAGE_STREETS};
-        for (uint32_t k = 0; k < 3; k++) {
+        const uint32_t orders[5] = {STAGE_MBNL, ATLAS_GEN_STAGE_PIECES, ATLAS_GEN_STAGE_SWEEPS, STAGE_ROADS, STAGE_STREETS};
+        for (uint32_t k = 0; k < 5; k++) {
             AtlasStatus s = atlas_gen_add_stage(gen, orders[k], stageFn, h.get(), &h->stageIds[k]);
             if (s != ATLAS_OK) {
                 for (uint32_t j = 0; j < k; j++) atlas_gen_remove_stage(gen, h->stageIds[j]);
@@ -741,10 +774,10 @@ ATLAS_API const char* atlas_ovl_last_error(AtlasOvl* h) { return h ? h->error.c_
 ATLAS_API const char* atlas_ovl_device(AtlasOvl* h) { return h ? h->engine->device() : "null handle"; }
 
 ATLAS_API AtlasStatus atlas_ovl_set(AtlasOvl* h, uint32_t which, const uint32_t* words, uint32_t count) {
-    if (!h || !words || count < 16 || which > 2) return ATLAS_ERR_ARG;
-    static const uint32_t magic[3] = {BLOCKS_MAGIC, TAPES_MAGIC, STREETS_MAGIC};
+    if (!h || !words || count < 16 || which > 3) return ATLAS_ERR_ARG;
+    static const uint32_t magic[4] = {BLOCKS_MAGIC, TAPES_MAGIC, STREETS_MAGIC, ROADS_MAGIC};
     if (words[0] != magic[which]) return ATLAS_ERR_ARG;
-    if (which == 0 && (words[8] != 6 || count < 16 + words[1] * words[8])) return ATLAS_ERR_ARG;
+    if (which == 0 && (words[8] != 7 || count < 16 + words[1] * words[8])) return ATLAS_ERR_ARG;
     if (which == 1 && (words[2] < 16 || words[2] + words[1] * 3 > count)) return ATLAS_ERR_ARG;
     return guarded(h, [&] {
         if (!h->engine->set(which, words, count, h->error)) return ATLAS_ERR_GPU;
@@ -757,7 +790,7 @@ ATLAS_API AtlasStatus atlas_ovl_set(AtlasOvl* h, uint32_t which, const uint32_t*
 
 ATLAS_API AtlasStatus atlas_ovl_set_kinds(AtlasOvl* h, uint32_t kinds) {
     if (!h) return ATLAS_ERR_ARG;
-    h->engine->setKinds(kinds & 7u);
+    h->engine->setKinds(kinds & 31u);
     return ATLAS_OK;
 }
 

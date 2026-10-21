@@ -53,7 +53,7 @@ final class AtlasOverlayLive {
     /** The block states the settlements' builders place (a dev bake: AtlasOverlaysGpuTest.bakeStates). */
     static final String STATES = "/nirncraft/atlas/overlay_states.txt";
     /** Bumped when the tapes' meaning changes (the cache's key). */
-    static final int TAPE_VERSION = 1;
+    static final int TAPE_VERSION = 2;  // 2: the pieces' boxes per chunk
     /** Settlements within the client generator's window plus this many blocks are prepared. */
     static final int AHEAD = Integer.getInteger("nirncraft.atlas.overlays.ahead", 384);
     static final boolean ON = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.overlays"));
@@ -101,6 +101,7 @@ final class AtlasOverlayLive {
             } catch (java.io.IOException e) {
                 com.nirncraft.NirnCraft.LOGGER.warn("atlas overlays: the baked block states are unreadable", e);
             }
+            placed.addAll(com.nirncraft.roads.RoadPaintGpu.states());  // the road painter's materials
             states = AtlasOverlayTapes.closure(placed);
             return states;
         }
@@ -162,6 +163,10 @@ final class AtlasOverlayLive {
             StreetPlan plan = StreetPlan.get();
             ovl.set(AtlasOvlNative.SET_BLOCKS, tapes.blockWords());
             ovl.set(AtlasOvlNative.SET_STREETS, AtlasOverlayTapes.streetWords(plan, ow, 0));
+            ovl.set(AtlasOvlNative.SET_ROADS, com.nirncraft.roads.RoadPaintGpu.words(com.nirncraft.worldplan.RoadPlan.get(), s -> {
+                int i = tapes.idIfPresent(s);
+                return i < 0 ? 0 : i;
+            }));
             String key = Long.toHexString(ow.getSeed()) + "-" + Integer.toHexString(java.util.Arrays.hashCode(prog.words)) + "-"
                     + Integer.toHexString(plan.settlements() * 31 + plan.nodes() * 17 + plan.edges()) + "-v" + TAPE_VERSION;
             cache = server.getServerDirectory().resolve("nirncraft-cache").resolve("overlays").resolve(key);

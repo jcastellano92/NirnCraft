@@ -160,7 +160,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
     }
 
     /** Words per id in the block table: flags, transform, sweep bits, block index and facing and cover, shape table. */
-    static final int ID_WORDS = 6;
+    static final int ID_WORDS = 7;
 
     // sweep bits (word 2; Sanity and its connect step); keep in step with atlas_overlays.slang
     static final int S_DOOR_LOWER = 1, S_DOOR_UPPER = 1 << 1, S_BED = 1 << 2, S_BED_HEAD = 1 << 3, S_TRAPDOOR = 1 << 4, S_STAIR = 1 << 5,
@@ -241,6 +241,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
             w[o + 3] = blockIndex.computeIfAbsent(s.getBlock(), k -> blockIndex.size() + 1) | facing(s) << 16 | cover(s) << 20;
             w[o + 4] = shapeOf[i] == 0 ? 0 : shapeOffset[shapeOf[i] - 1];
             w[o + 5] = accessBits(s);
+            w[o + 6] = com.nirncraft.roads.RoadPaintGpu.bits(s);
         }
         for (int k = 0; k < shapes.size(); k++) System.arraycopy(shapes.get(k), 0, w, shapeOffset[k], shapes.get(k).length);
         return w;
@@ -471,6 +472,8 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         final int[] last = new int[256];
         /** Per column the y range postProcess's sweeps look at (Sanity over the clip and the wide box): y0 | y1 << 16. */
         final int[] sweep = new int[256];
+        /** The settlement pieces' boxes over this chunk (minX, minZ, maxX, maxZ, maxY: PlacementMask's structure mask). */
+        final IntArrayList boxes = new IntArrayList();
 
         Cols() {
             java.util.Arrays.fill(sweep, NO_SWEEP);
@@ -594,6 +597,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                         SettlementPiece.TAPE.remove();
                     }
                     sweeps(piece.getBoundingBox(), cx, cz, minY, maxY);
+                    box(piece.getBoundingBox(), cx, cz);
                     nanos += System.nanoTime() - t0;
                     pieces++;
                     built++;
@@ -631,6 +635,22 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         int wy0 = Math.max(minY + 1, cy0 - 2), wy1 = Math.min(maxY, cy1 + 4);
         sweep(Math.max(x0, cx0 - 7), Math.max(z0, cz0 - 7), Math.min(x1, cx1 + 7), Math.min(z1, cz1 + 7), Math.max(wy0, minY + 1),
                 Math.min(wy1, top));
+    }
+
+    /** PlacementMask.collect's piece filter: no box wider than this counts (a long wall or street). */
+    static final int PIECE_SPAN_MAX = 160;
+
+    /** A piece's box over chunk (cx, cz), for the road painter's structure mask. */
+    private void box(BoundingBox b, int cx, int cz) {
+        if (b.getXSpan() > PIECE_SPAN_MAX || b.getZSpan() > PIECE_SPAN_MAX) return;
+        if (keep != null && ((cx << 4) + 15 < keep.minX() || (cx << 4) > keep.maxX() || (cz << 4) + 15 < keep.minZ() || (cz << 4) > keep.maxZ()))
+            return;
+        Cols cs = cols(cx << 4, cz << 4);
+        cs.boxes.add(b.minX());
+        cs.boxes.add(b.minZ());
+        cs.boxes.add(b.maxX());
+        cs.boxes.add(b.maxZ());
+        cs.boxes.add(b.maxY());
     }
 
     private void sweep(int x0, int z0, int x1, int z1, int y0, int y1) {
@@ -676,6 +696,8 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                 out.writeInt(len);
                 for (int j = 0; j < len; j++) out.writeInt(l.getInt(j));
             }
+            out.writeInt(c.boxes.size());
+            for (int j = 0; j < c.boxes.size(); j++) out.writeInt(c.boxes.getInt(j));
         }
     }
 
@@ -696,6 +718,8 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                 cs.ops[i] = l;
                 cs.last[i] = -1;  // (no merging into a loaded list)
             }
+            int nb = in.readInt();
+            for (int j = 0; j < nb; j++) cs.boxes.add(in.readInt());
             chunks.put(k, cs);
         }
         return keys;
@@ -729,6 +753,9 @@ final class AtlasOverlayTapes implements Canvas.Tape {
             w.add(at);
             for (int c = 0; c < 256; c++) w.add(e.getValue().sweep[c]);
             for (int c = 0; c < 256; c++) if (cols[c] != null) w.addAll(cols[c]);
+            // after the ops: the pieces' boxes (count, then minX, minZ, maxX, maxZ, maxY each)
+            w.add(e.getValue().boxes.size() / 5);
+            w.addAll(e.getValue().boxes);
         }
         w.set(2, w.size());
         for (var e : chunks.long2ObjectEntrySet()) {

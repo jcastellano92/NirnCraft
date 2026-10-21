@@ -413,6 +413,31 @@ foreach(pair "pieces:piecesMain" "streets:streetsMain" "sanity:sanityMain" "conn
     DEPENDS "${GEN}/atlas_ovl_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
   list(APPEND OVL_HEADERS "${GEN}/atlas_ovl_${pass}_spv.h")
 endforeach()
+# the road painter (atlas_overlays_roads.slang: RoadPaint over the generator's map) and the heightmap it reads
+set(OVLR_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_overlays_roads.slang")
+foreach(pair "roads:roadsMain" "mbnl:mbnlMain")
+  string(REPLACE ":" ";" pe "${pair}")
+  list(GET pe 0 pass)
+  list(GET pe 1 entry)
+  set(OVL_VALIDATE)
+  if(SPIRV_VAL)
+    set(OVL_VALIDATE COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/atlas_ovl_${pass}.spv")
+  endif()
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_ovl_${pass}.spv"
+    COMMAND "${SLANGC}" "${OVLR_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise
+            -warnings-disable 41035 -o "${GEN}/atlas_ovl_${pass}_raw.spv"
+    COMMAND spv_exact "${GEN}/atlas_ovl_${pass}_raw.spv" "${GEN}/atlas_ovl_${pass}.spv"
+    ${OVL_VALIDATE}
+    DEPENDS "${OVLR_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang"
+            "${CMAKE_SOURCE_DIR}/shaders/atlas_ovl_javamath.slang" spv_exact COMMENT "slangc atlas_overlays_roads:${entry} -> SPIR-V (exact float contract)")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_ovl_${pass}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_ovl_${pass}.spv -DOUT=${GEN}/atlas_ovl_${pass}_spv.h
+            -DNAME=atlas_ovl_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_ovl_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND OVL_HEADERS "${GEN}/atlas_ovl_${pass}_spv.h")
+endforeach()
 target_sources(atlas_core PRIVATE src/overlays_engine.cpp ${OVL_HEADERS})
 
 # the far passes without Java (dev tool: gen_probe <dir> <lod> <tx> <tz> [far], the parity test's dump)

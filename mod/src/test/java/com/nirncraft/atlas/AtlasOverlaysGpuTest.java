@@ -264,6 +264,8 @@ class AtlasOverlaysGpuTest {
             AtlasGenNative.Gen gen = gn.create(AtlasGenNative.BACKEND_VULKAN);
             if (gen == null) return null;
             gen.setProgram(prog.words);
+            // the map on the device (its pages made there; the road stage reads TamrielMap.sample from it)
+            report.append("stage: pages ").append(AtlasClientGen.devicePages(gen, prog, g.getBiomeSource())).append('\n');
             AtlasOvlNative.Ovl ovl = nat.createForGen(gen);
             trace("end stage rig");
             if (ovl == null) {
@@ -357,6 +359,144 @@ class AtlasOverlaysGpuTest {
                 stageMs / n, rig.ovl().stamped() - stamped0));
         total.add(sc);
         trace(String.format("done stage %s %.4f%%", set.place(), sc.pct()));
+    }
+
+    // ---- the road painter (RoadPaint) as a stage ----
+
+    /**
+     * The road painter on the GPU (atlas_overlays_roads.slang, a stage at ATLAS_GEN_STAGE_PAINT) against Java's
+     * RoadPaint.Painter on the same terrain: chunks along the road plan by span kind (normal, bridge, culvert, ford,
+     * stairs, tunnel, cut, fill, switchback), each 250 blocks from any place (no structure mask in either).
+     * NIRNCRAFT_OVL_ROADS_N chunks a kind (default 6).
+     */
+    @Test
+    void roadsMatchJava(MinecraftServer server) throws Exception {
+        long t0 = System.nanoTime();
+        RegistryAccess ra = server.registryAccess();
+        WorldDimensions dims = ra.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL).value().createWorldDimensions();
+        LevelStem stem = dims.dimensions().get(LevelStem.OVERWORLD);
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) stem.generator();
+        NoiseGeneratorSettings settings = gen.generatorSettings().value();
+        RandomState rs = RandomState.create(ra.lookupOrThrow(Registries.NOISE), SEED, settings);
+        DimensionType dt = stem.type().value();
+        LevelHeightAccessor heights = LevelHeightAccessor.create(dt.minY(), dt.height());
+        PalettedContainerFactory containers = PalettedContainerFactory.create(ra);
+        StructureManager structures = new StructureManager(null, null, null) {
+            @Override
+            public List<StructureStart> startsForStructure(int x, int z, Predicate<Structure> m) {
+                return List.of();
+            }
+        };
+        trace("begin plans");
+        StreetPlan streets = StreetPlan.get();
+        com.nirncraft.worldplan.RoadPlan roads = com.nirncraft.worldplan.RoadPlan.get();
+        trace("end plans");
+        StringBuilder report = new StringBuilder("the road painter on the GPU against Java's RoadPaint.Painter (seed " + SEED + ")\n");
+        // the chunks: by span kind, far from places
+        int per = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_OVL_ROADS_N", "6"));
+        String[] spanNames = {"normal", "cut", "fill", "bridge", "culvert", "ford", "switchback", "stairs", "tunnel"};
+        Map<Long, String> chunksKind = new LinkedHashMap<>();
+        int[] count = new int[spanNames.length];
+        for (int i = 0; i + 1 < roads.vx.length; i++) {
+            int sp = roads.vspan[i];
+            if (sp < 0 || sp >= spanNames.length || count[sp] >= per) continue;
+            if (roads.vseg[i] != roads.vseg[i + 1]) continue;
+            int x = (int) Math.floor(roads.vx[i]), z = (int) Math.floor(roads.vz[i]);
+            if (!com.nirncraft.tamriel.Places.overlapping(x - 250, z - 250, x + 250, z + 250).isEmpty()) continue;
+            long k = ChunkPos.pack(x >> 4, z >> 4);
+            if (chunksKind.containsKey(k)) continue;
+            chunksKind.put(k, spanNames[sp]);
+            count[sp]++;
+        }
+        report.append("chunks: ").append(chunksKind.size()).append(' ').append(java.util.Arrays.toString(count)).append('\n');
+        // Java: terrain, then the painter (cached)
+        Path refDir = Path.of(System.getenv().getOrDefault("NIRNCRAFT_OVL_REF", "E:/NirnCraft-scratch/overlays/ref"));
+        Files.createDirectories(refDir);
+        Path file = refDir.resolve("roads_n" + per + "_s" + SEED + ".bin.gz");
+        String key = "ovlroads v1 seed " + SEED + " " + chunksKind.keySet() + " plan " + roads.vx.length + " " + roads.segStart.length
+                + " states " + Block.BLOCK_STATE_REGISTRY.size();
+        Ref ref = "1".equals(System.getenv("NIRNCRAFT_OVL_REFRESH")) ? null : readRef(file, key);
+        if (ref == null) {
+            trace("begin road reference");
+            Map<ChunkPos, ProtoChunk> biomeCache = new HashMap<>();
+            Map<Long, int[]> terrain = new LinkedHashMap<>(), painted = new LinkedHashMap<>();
+            java.lang.reflect.Constructor<?> painterNew = Class.forName("com.nirncraft.roads.RoadPaint$Painter")
+                    .getDeclaredConstructor(WorldGenLevel.class, com.nirncraft.worldplan.RoadPlan.class, int.class, int.class);
+            painterNew.setAccessible(true);
+            java.lang.reflect.Method run = painterNew.getDeclaringClass().getDeclaredMethod("run");
+            run.setAccessible(true);
+            int done = 0;
+            for (long k : chunksKind.keySet()) {
+                ChunkPos cp = ChunkPos.unpack(k);
+                ProtoChunk c = AtlasGenParityTest.javaChunk(cp, gen, rs, heights, containers, structures, biomeCache);
+                int[] t = ids(c, heights);
+                terrain.put(k, t);
+                Map<Long, int[]> one = new HashMap<>();
+                one.put(k, t);
+                AtlasOverlayTapes.Window w = window(one, heights, containers);
+                com.nirncraft.worldplan.RoadPlan.Hit hit = new com.nirncraft.worldplan.RoadPlan.Hit();
+                if (roads.at(cp.getMinBlockX() + 8, cp.getMinBlockZ() + 8, hit))
+                    run.invoke(painterNew.newInstance(w.region(cp.x(), cp.z()), roads, cp.getMinBlockX(), cp.getMinBlockZ()));
+                painted.put(k, ids(w.chunk(cp.x(), cp.z()), heights));
+                progress("road reference", ++done, chunksKind.size());
+            }
+            ref = new Ref(terrain, painted, painted, painted);
+            writeRef(file, key, ref);
+            trace("end road reference");
+        }
+        // the GPU: the generator with the overlays' stages (no tapes: roads alone)
+        Path lib = Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB"));
+        AtlasOvlNative nat = AtlasOvlNative.load(lib);
+        StageRig rig = StageRig.open(lib, nat, gen, settings, rs, heights, report);
+        if (rig == null) throw new IllegalStateException("no stage rig");
+        AtlasOverlayTapes tapes = new AtlasOverlayTapes(rig.prog().blocks);
+        tapes.frozen = true;
+        rig.ovl().set(AtlasOvlNative.SET_BLOCKS, tapes.blockWords());
+        rig.ovl().set(AtlasOvlNative.SET_TAPES, tapes.tapeWords(new HashMap<>()));
+        rig.ovl().set(AtlasOvlNative.SET_STREETS, AtlasOverlayTapes.streetWords(streets, heights, 0));
+        rig.ovl().set(AtlasOvlNative.SET_ROADS, com.nirncraft.roads.RoadPaintGpu.words(roads, st -> {
+            int i = tapes.idIfPresent(st);
+            return i < 0 ? 0 : i;
+        }));
+        rig.ovl().kinds(AtlasOvlNative.KIND_ROADS | AtlasOvlNative.KIND_MBNL);
+        Score all = new Score();
+        Map<String, Score> byKind = new TreeMap<>();
+        Map<String, Long> pairs = new TreeMap<>();
+        Map<String, String> example = new HashMap<>();
+        int[] ids = new int[AtlasGenNative.CHUNK_WORDS], flag = new int[1];
+        double gpuMs = 0;
+        int done = 0;
+        for (var e : chunksKind.entrySet()) {
+            ChunkPos cp = ChunkPos.unpack(e.getKey());
+            AtlasGenNative.Times tm = rig.gen().chunks(new int[] {cp.x(), cp.z()}, 0, ids, flag);
+            gpuMs += tm.kernelMs();
+            int[] t = ref.terrain().get(e.getKey()), r = ref.pieces().get(e.getKey());
+            Score k = byKind.computeIfAbsent(e.getValue(), x -> new Score());
+            for (int b = 0; b < 256 * 640; b++) {
+                int w = ids[b >> 1], id = (b & 1) != 0 ? w >>> 16 : w & 0xFFFF;
+                int g = id < tapes.blocks.size() ? Block.getId(tapes.blocks.get(id)) : -1;
+                boolean jc = r[b] != t[b], gc = g != t[b];
+                if (!jc && !gc) continue;
+                tally(all, k, r[b], g, jc, gc);
+                if (r[b] != g) {
+                    String pk = name(r[b]) + " -> " + (g < 0 ? "?" : name(g));
+                    pairs.merge(pk, 1L, Long::sum);
+                    example.putIfAbsent(pk, (cp.getMinBlockX() + (b & 15)) + " " + (b / 256 - 64) + " " + (cp.getMinBlockZ() + (b >> 4 & 15)));
+                }
+            }
+            progress("road gpu", ++done, chunksKind.size());
+        }
+        rig.close();
+        report.append("road paint: ").append(all).append('\n');
+        byKind.forEach((k, v) -> report.append(String.format("  %-10s %s%n", k, v)));
+        report.append(String.format("  generator batches with the stages: %.2f ms kernels for %d chunks (one a batch)%n", gpuMs, chunksKind.size()));
+        report.append("  differences (Java -> GPU):\n");
+        pairs.entrySet().stream().sorted((a, b) -> Long.compare(b.getValue(), a.getValue())).limit(30)
+                .forEach(e -> report.append(String.format("    %8d  %s   (e.g. %s)%n", e.getValue(), e.getKey(), example.get(e.getKey()))));
+        String out = System.getenv("NIRNCRAFT_OVL_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".roads.txt"), report.toString());
+        System.out.println(report);
+        trace(String.format("done roadsMatchJava %.1fs %.4f%%", (System.nanoTime() - t0) / 1e9, all.pct()));
     }
 
     // ---- test sets --------------------------------------------------------------------------------------------

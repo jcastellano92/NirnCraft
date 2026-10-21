@@ -37,7 +37,7 @@ struct OvlParams {
 [[vk::binding(4, 0)]] RWStructuredBuffer<uint> ids;    // per chunk levels * 128 words
 [[vk::binding(5, 0)]] StructuredBuffer<uint> snap;     // ids as the pieces left them (the sweeps' neighbour reads)
 
-static const uint CHUNK_INTS = 8u, ID_WORDS = 6u, REC_OPS = 513u;
+static const uint CHUNK_INTS = 8u, ID_WORDS = 7u, REC_OPS = 513u;
 
 static const uint HEADER = 16u;
 // op kinds (Canvas.Tape) and flags (AtlasOverlayTapes.OF_*)

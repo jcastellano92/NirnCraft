@@ -915,7 +915,7 @@ ATLAS_API AtlasStatus atlas_gen_probe(AtlasGen* h, uint32_t kind, uint32_t n, co
  * com.nirncraft.atlas.AtlasOverlayTapes): the named settlements' pieces as op tapes and the street painter's plan,
  * stamped in place on chunk columns of 16-bit ids of the overlay block table (b = x + 16 z + 256 (y + 64), `levels`
  * y levels from -64, two ids a word), one GPU thread per column. Vulkan only. atlas_ovl_set: which 0 the block table
- * ('AOBL': 6 words per id: flags, transforms, sweep classes, block index / facing / cover, shape table, access classes; then the shape
+ * ('AOBL': 7 words per id: flags, transforms, sweep classes, block index / facing / cover, shape table, access classes, road classes; then the shape
  * tables), 1 the tapes ('AOTP': per chunk record: 257 column starts, 256 column sweep ranges, the ops), 2 the street
  * plan ('AOSR'); resident until replaced. atlas_ovl_run: chunks ATLAS_OVL_CHUNK_INTS ints each (cx, cz, the chunk's
  * tape record word offset or -1, its street plan bucket or -1, the batch slots of its N, E, S, W neighbours or -1);
@@ -938,7 +938,9 @@ ATLAS_API AtlasStatus atlas_ovl_run(AtlasOvl* h, uint32_t count, const int32_t* 
    sweep at ATLAS_GEN_STAGE_SWEEPS, the street painter at ATLAS_GEN_STAGE_PAINT + 50; GPU to GPU, on its device): every
    atlas_gen_run / atlas_gen_chunks then stamps its chunks before packing them, finding each chunk's tape record and
    street bucket from the data's own chunk index and its neighbours in the batch. The block table's first ids must be the generator program's blocks
-   (AtlasOverlayTapes(prog.blocks)); the ingest table (atlas_gen_set_ingest) must cover the whole block table.
+   (AtlasOverlayTapes(prog.blocks)); the ingest table (atlas_gen_set_ingest) must cover the whole block table. Such a
+   handle also runs the road painter (RoadPaint) at ATLAS_GEN_STAGE_PAINT over the generator's map, after a heightmap
+   snapshot at ATLAS_GEN_STAGE_DECORATION - 1, once atlas_ovl_set(which 3: 'AORD', RoadPaintGpu.words) is given.
    atlas_ovl_set's data goes up at the generator's next batch. ATLAS_ERR_UNSUPPORTED for a CPU generator. Destroy the
    overlays before the generator (it detaches itself). atlas_ovl_run is refused on such a handle. */
 ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out);
