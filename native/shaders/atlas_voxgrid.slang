@@ -185,23 +185,44 @@ int vKind(uint m, out float cover) {
     return c == 1u ? 1 : (c == 2u ? 2 : 0);
 }
 
+// a fixed hash in [0, 1) of a coarse voxel (its level and world position): the coverage dither's, the same every
+// frame (stable under the temporal filter) and every time the voxel is made again
+float voxHash01(uint level, int x, int y, int z) {
+    uint h = uint(x) * 0x8DA6B343u ^ uint(y) * 0xD8163841u ^ uint(z) * 0xCB1AB31Fu ^ level * 0x9E3779B9u;
+    h ^= h >> 15;
+    h *= 0x2C1B3C6Du;
+    h ^= h >> 12;
+    h *= 0x297A2D39u;
+    h ^= h >> 15;
+    return float(h >> 8) * (1.0 / 16777216.0);
+}
+
 // a coarse voxel from its 8 children (x + 2 z + 4 y): solid when 3 or more are (bricks by their coverage: a rail or a
 // door barely), foliage when 2 are leaves or half its volume is foliage (leaves and plants, plants by their coverage:
 // a meadow's grass tufts are no 2^k green cube on a hill), water when 4, else air; the commonest of the winning kind's
-// children seen from above, full blocks before bricks, ties to the higher (world.cpp shownKid)
-uint voteMip(uint ch[8]) {
+// children seen from above, full blocks before bricks, ties to the higher (world.cpp shownKid).
+// Plants under those thresholds are not lost (the pop-in line: all of a meadow's grass at level 0, none past it): the
+// voxel is foliage with the chance of the share of its volume they cover, a fixed dither (voxHash01 of its place), so
+// the density carries into the coarse levels and grass thins with distance instead of ending at a line. At level 1
+// the children are blocks (a plant by its coverage); above, the children are such voxels (a plant one counts whole).
+uint voteMip(uint ch[8], uint level, float dither) {
     int kd[8];
     float cv[8];
     float c0 = 0.0, plants = 0.0;
-    int c1 = 0, c2 = 0;
+    int c1 = 0, c2 = 0, np = 0;
     for (int k = 0; k < 8; k++) {
         kd[k] = vKind(ch[k], cv[k]);
         c0 += kd[k] == 0 ? 1.0 : (kd[k] == 3 ? cv[k] : 0.0);
         c1 += kd[k] == 1 ? 1 : 0;
         plants += kd[k] == 4 ? cv[k] : 0.0;
+        np += kd[k] == 4 ? 1 : 0;
         c2 += kd[k] == 2 ? 1 : 0;
     }
     int want = c0 >= 3.0 ? 0 : (c1 >= 2 || float(c1) + plants >= 4.0 ? 1 : (c2 >= 4 ? 2 : -1));
+    if (want < 0 && np > 0) {
+        float share = level <= 1u ? (float(c1) + plants) / 8.0 : float(c1 + np) / 8.0;
+        if (dither < share) want = 1;
+    }
     if (want < 0) return 0u;
     bool shown[8];
     for (int a = 0; a < 4; a++) shown[a] = ch[a + 4] == 0u || kd[a + 4] != kd[a];
@@ -301,27 +322,27 @@ void vgIngestMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
         uint x = v & 7u, z = (v >> 3) & 7u, y = v >> 6;
         uint ch[8];
         for (uint c = 0u; c < 8u; c++) ch[c] = s0Id(2u * x + (c & 1u), 2u * y + (c >> 2), 2u * z + ((c >> 1) & 1u));
-        gL1[v] = voteMip(ch);
+        gL1[v] = voteMip(ch, 1u, voxHash01(1u, int(b.y) * 8 + int(x), int(b.z) * 8 + int(y), int(b.w) * 8 + int(z)));
     }
     GroupMemoryBarrierWithGroupSync();
     {
         uint x = t & 3u, z = (t >> 2) & 3u, y = t >> 4;
         uint ch[8];
         for (uint c = 0u; c < 8u; c++) ch[c] = gL1[(2u * x + (c & 1u)) + 8u * ((2u * z + ((c >> 1) & 1u)) + 8u * (2u * y + (c >> 2)))];
-        gL2[t] = voteMip(ch);
+        gL2[t] = voteMip(ch, 2u, voxHash01(2u, int(b.y) * 4 + int(x), int(b.z) * 4 + int(y), int(b.w) * 4 + int(z)));
     }
     GroupMemoryBarrierWithGroupSync();
     if (t < 8u) {
         uint x = t & 1u, z = (t >> 1) & 1u, y = t >> 2;
         uint ch[8];
         for (uint c = 0u; c < 8u; c++) ch[c] = gL2[(2u * x + (c & 1u)) + 4u * ((2u * z + ((c >> 1) & 1u)) + 4u * (2u * y + (c >> 2)))];
-        gL3[t] = voteMip(ch);
+        gL3[t] = voteMip(ch, 3u, voxHash01(3u, int(b.y) * 2 + int(x), int(b.z) * 2 + int(y), int(b.w) * 2 + int(z)));
     }
     GroupMemoryBarrierWithGroupSync();
     if (t == 0u) {
         uint ch[8];
         for (uint c = 0u; c < 8u; c++) ch[c] = gL3[c];
-        gL4 = voteMip(ch);
+        gL4 = voteMip(ch, 4u, voxHash01(4u, int(b.y), int(b.z), int(b.w)));
     }
     GroupMemoryBarrierWithGroupSync();
     writeLevel(a.y, 1u, t);
@@ -352,7 +373,10 @@ void vgDownMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
                 ch[c] = kid == 0xFFFFFFFFu ? 0u : (kid == 0xFFFFFFFEu ? h.y : ((kid & 0xFF000000u) == 0xFD000000u ? (kid & 0xFFFFu)
                                                                                 : poolId(kid, cx + 16u * (cz + 16u * cy))));
             }
-            ids[e] = voteMip(ch);
+            // (the chunk's place and level: h.z its x, h.w its z (20 bits), y (7), level (4))
+            int lv = int(h.w >> 27);
+            int vx = int(h.z) * 16 + int(x), vz = (int(h.w << 12) >> 12) * 16 + int(z), vy = int((h.w >> 20) & 127u) * 16 + int(y);
+            ids[e] = voteMip(ch, uint(lv), voxHash01(uint(lv), vx, vy, vz));
         }
         pool[h.x * 2048u + q] = ids[0] | ids[1] << 16;
     }

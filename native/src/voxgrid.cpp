@@ -1865,6 +1865,8 @@ void VoxGrid::takeCoarse(VgBatch& b) {
         VgIngest ing{};
         ing.src = ~0u;
         for (uint32_t& t : ing.target) t = ~0u;
+        // (the section's place: the vote's dither, atlas_voxgrid.slang vgIngestMain)
+        ing.pad[0] = uint32_t(key.x), ing.pad[1] = uint32_t(key.y - VG_MIN_SY), ing.pad[2] = uint32_t(key.z);
         bool any = false;
         for (int k = 1; k <= sectionLevels; k++) {
             Level& L = lv_[k];
@@ -1905,7 +1907,8 @@ void VoxGrid::takeCoarse(VgBatch& b) {
                 for (int y = 0; y < L.H; y++) {
                     uint32_t c2 = L.cell(cx, y, cz);
                     markDirty(L, c2);
-                    if (bottom != oldBottom && L.slotOf[c2] != ~0u && !L.lost[c2] && !L.given[c2])
+                    // (a generator's chunk in its slot, given 3, too: its far voxels over this real column go)
+                    if (bottom != oldBottom && L.slotOf[c2] != ~0u && !L.lost[c2] && (L.given[c2] == 0 || L.given[c2] == 3))
                         colFills_.push_back({k, c2, key.x, key.z});
                 }
             }
@@ -2015,6 +2018,9 @@ void VoxGrid::takeCoarse(VgBatch& b) {
             int cx, cy, cz;
             cellCoords(L, parent, cx, cy, cz);
             VgDown d{};
+            // (the chunk's place and level, the vote's dither: atlas_voxgrid.slang vgDownMain)
+            d.pad[0] = uint32_t(cx);
+            d.pad[1] = (uint32_t(cz) & 0xFFFFFu) | uint32_t(cy & 127) << 20 | uint32_t(k & 15) << 27;
             int air = 0, rock = 0, uni = 0;
             uint32_t uniId = ~0u;
             bool uniSame = true;
