@@ -23,6 +23,9 @@ milestone.
    compressed, keyed by seed + generator version + edit hash: back somewhere = instant reload); LRU per tier, bounded
    sizes, reference-counted slots, free lists, compaction, leak checks; uniform (all-stone) sections take no slot.
 
+**Order change (owner, 2026-10-21):** step 5 (the residency manager) moves up and runs now beside the rest of step 1,
+starting with the unbounded host RAM (the world stores every streamed section). The grid agent owns it on atlas-naadf.
+
 Later: baked light in the voxels (static emitters, AO, sky visibility baked on the GPU by the same light kernel;
 real time only where something changes, rebaked when it settles; downsampled with the blocks so towns glow far off).
 Weather and biome work stay paused until the owner says.
