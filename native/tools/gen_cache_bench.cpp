@@ -418,7 +418,7 @@ int main(int argc, char** argv) {
     double tFull = nowMs();
     // the horizon (AtlasClientGen.farStep's tiles: each coarse level's 5 x 5 tiles around the camera): from the cache
     // when known (atlas_gen_far_cache_ingest), else made on the device (atlas_gen_far_ingest, baked)
-    size_t farTiles = 0, farCached = 0, farMade = 0, farBusy = 0;
+    size_t farTiles = 0, farCached = 0, farMade = 0, farBusy = 0, farChunks = 0, farTaken = 0;
     double tFar0 = nowMs();
     for (int k = 1; k <= 6; k++) {
         int span = 256 << k;
@@ -434,6 +434,7 @@ int main(int argc, char** argv) {
                 atlas_gen_far_cache_ingest(g, k, t, 1, &served, &ch, &tk);
                 if (served) {
                     farCached++;
+                    farChunks += ch, farTaken += tk;
                     continue;
                 }
                 for (int tries = 0; tries < 200; tries++) {
@@ -441,6 +442,7 @@ int main(int argc, char** argv) {
                     AtlasStatus s = atlas_gen_far_ingest(g, k, t, 1, 2000, kinds.data(), &mixed, &taken, ff.data(), nullptr);
                     if (s == ATLAS_OK) {
                         farMade++;
+                        farChunks += 256 * rows, farTaken += taken;
                         break;
                     }
                     farBusy++;
@@ -466,8 +468,8 @@ int main(int argc, char** argv) {
     AtlasGenCacheStats cs{};
     atlas_gen_cache_stats(g, &cs);
     double km2 = double(todo.size()) * 256.0 / 1e6;
-    std::printf("{\"horizon\":{\"tiles\":%zu,\"fromCache\":%zu,\"made\":%zu,\"busy\":%zu,\"ms\":%.0f,\"farWrites\":%llu,"
-                "\"farHits\":%llu},", farTiles, farCached, farMade, farBusy, tFar - tFar0, (unsigned long long)cs.farWrites,
+    std::printf("{\"horizon\":{\"tiles\":%zu,\"fromCache\":%zu,\"made\":%zu,\"busy\":%zu,\"ms\":%.0f,\"chunks\":%zu,\"taken\":%zu,\"farWrites\":%llu,"
+                "\"farHits\":%llu},", farTiles, farCached, farMade, farBusy, tFar - tFar0, farChunks, farTaken, (unsigned long long)cs.farWrites,
                 (unsigned long long)cs.farHits);
     std::printf("\"radius\":%d,\"chunks\":%zu,\"generated\":%zu,\"fromCache\":%zu,\"flagged\":%zu,\"sections\":%zu,\"frames\":%zu,"
                 "\"setupMs\":%.0f,\"toFullRadiusMs\":%.0f,\"sentMs\":%.0f,\"genMs\":%.0f,\"cacheMs\":%.0f,\"renderMs\":%.0f,"

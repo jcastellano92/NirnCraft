@@ -282,6 +282,7 @@ public:
     int coarseD = 64;      // their windows' side in chunks (ATLAS_VOXGRID_COARSE_D)
     // per level its pool slots (ATLAS_VOXGRID_COARSE_SLOTS, comma separated from level 1); full: the farthest go
     uint32_t coarseCap[VG_LEVELS] = {0, 6144, 2048, 1024, 512, 512, 256};
+    bool coarseCapByHand = false;  // (ATLAS_VOXGRID_COARSE_SLOTS: planMemory leaves them)
     int coarseBudget = 512;  // sections taken into the coarse levels a batch at most (ATLAS_VOXGRID_COARSE_BUDGET)
     uint16_t stoneMat = 1;   // what lies under a column's lowest section
     void setClasses(const std::vector<uint8_t>& cls);  // the palette's material classes (the vote's kinds)
@@ -485,6 +486,9 @@ private:
     };
     std::unordered_map<uint32_t, CGiven> cgiven_[VG_LEVELS];
     float chunkPriority(int k, int cx, int cy, int cz) const;  // (mu_ held) a level-k chunk's priority (blocks)
+    // (mu_ held) whether a level-k chunk at that priority would get a slot now (coarseSlot's rule, nothing taken)
+    bool coarseRoom(Level& L, float dist);
+    void coarseVictims(Level& L);
     // (ingestGpu) the levels holding each section taken (bit k), by column; those no level holds any more
     std::unordered_map<Key, uint32_t, KeyHash> gpuHold_;
     std::unordered_map<uint64_t, std::vector<int16_t>> gpuCol_;
