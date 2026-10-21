@@ -92,6 +92,11 @@ Weather and biome work stay paused until the owner says.
 | Light agent | `worktree-agent-a9041fbf0158099cd` | Merged (5dc820e7). Was assigned baked voxel light; not started. Deferred until after the five steps. |
 | Moons, stars | merged | Done (moons a158cb48, comet b401de28). |
 
+**Before the owner's live test (owner, 2026-10-21):** step 1 complete and merged, including the grid's bug-1 fix
+(verified on Vulkan), `VoxGrid::ingestCoarseGpu` (far data from the GPU generator straight into the coarse levels),
+farMain without forwarded inout chains (fast compile and driver JIT), the generator's far chunks, and the features on
+the GPU. The orchestrator then installs the build and boots the client with the passive profiler; the owner plays.
+
 Not merged into atlas-render yet: everything on atlas-naadf after 424841c5 and the generator branch.
 
 ## Open bugs (seen live)
