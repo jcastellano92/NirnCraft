@@ -93,8 +93,8 @@ struct FrameGpu {
     // level 0 everywhere, the full light), y the share of the split's tiles traced a frame (1: all), z the sun ray's
     // cone (voxels of a level before the next: 0 none), w the bounce's sun ray's cone
     float4 lightCtl;
-    // (internal, FRAME_GPU_LIGHTS) the far lights culled on the GPU (lightCullMain): x the air's extinction per block at
-    // the eye, y the screen's light tiles across, z down
+    // (internal) x (FRAME_GPU_LIGHTS) the air's extinction per block at the eye, for the far lights culled on the GPU
+    // (lightCullMain); zw the last frame's jitter (NDC), for the near light's history (nearHistoryAt)
     float4 farLight;
 };
 

@@ -66,8 +66,8 @@ struct alignas(16) FrameGpu {
     // (internal) the light by need (api.cpp lightControl; atlas_shared.slang): footprint scale, tiles' share a frame,
     // the sun ray's cone, the bounce's
     float lightCtl[4];
-    // (internal, FRAME_GPU_LIGHTS_BIT) the far lights culled on the GPU: the air's extinction per block at the eye, the
-    // light tiles across and down
+    // (internal) the air's extinction per block at the eye (FRAME_GPU_LIGHTS_BIT: the far lights culled on the GPU), 0,
+    // the last frame's jitter in NDC (the near light's history)
     float farLight[4];
 };
 
@@ -143,6 +143,9 @@ struct FarGlobals {
     CpuBuffer<Float4> lightSrc;
     CpuBuffer<Float4> lightCand;
     CpuBuffer<uint32_t> lightList;
+    // (the split's history: the Vulkan backend only) the near light's own samples per pixel, this frame's and the last's
+    CpuBuffer<uint32_t> outNearAge;
+    CpuBuffer<uint32_t> prevNearAge;
 };
 
 }  // namespace atlas

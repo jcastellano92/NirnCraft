@@ -187,7 +187,7 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 37;
+constexpr uint32_t BINDINGS = 39;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
@@ -198,7 +198,9 @@ constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPT
                    B_TEX = 33,  // (abi 0.16) the near field's textures (voxgrid.hpp packTextures)
                    // the far lights on the GPU (FRAME_GPU_LIGHTS_BIT): the index (shared, uploaded when it changes), this
                    // frame's candidates and its tile lists (atlas_far.slang lightCullMain)
-                   B_LIGHT_SRC = 34, B_LIGHT_CAND = 35, B_LIGHT_LIST = 36;
+                   B_LIGHT_SRC = 34, B_LIGHT_CAND = 35, B_LIGHT_LIST = 36,
+                   // the near light's own samples per pixel in its history (nearTemporalMain), this frame's and the last's
+                   B_NEAR_AGE = 37, B_PREV_NEAR_AGE = 38;
 // lightList's words before the tiles' (counters, the score histogram) and a tile's (count + 64 indices)
 constexpr uint32_t LIGHT_LIST_HEAD = 260, LIGHT_TILE_WORDS = 65;
 // the level-0 grid's build kernels (atlas_voxgrid.slang): chunks, blocks, bits, pool, jobs, summed-volume table
@@ -218,7 +220,7 @@ constexpr uint32_t PASS_PUSH_BYTES = 16;  // width, height, nearLight, pre-expos
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
            b == B_COUNTERS || b == B_NEAR || b == B_ACTORS || b == B_CLOUD || b == B_CLOUD_DEPTH || b == B_SURFACE ||
-           b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST;
+           b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST || b == B_NEAR_AGE;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT,
@@ -1699,8 +1701,11 @@ private:
                   ensure(s.bufs[B_CLOUD_DEPTH], size_t((w + 1) / 2) * ((h + 1) / 2) * 4, false, Mem::DeviceOnly, err);
         if (ok) {
             VkBuffer before = s.bufs[B_SURFACE].buf;
-            ok = ensure(s.bufs[B_SURFACE], px * 4, false, Mem::DeviceOnly, err);
-            if (ok && s.bufs[B_SURFACE].buf != before) s.surfaceFresh = true;  // filled with "no surface" in record
+            VkBuffer ageBefore = s.bufs[B_NEAR_AGE].buf;
+            ok = ensure(s.bufs[B_SURFACE], px * 4, false, Mem::DeviceOnly, err) &&
+                 ensure(s.bufs[B_NEAR_AGE], px * 4, false, Mem::DeviceOnly, err);
+            // filled with "no surface" and "no samples" in record
+            if (ok && (s.bufs[B_SURFACE].buf != before || s.bufs[B_NEAR_AGE].buf != ageBefore)) s.surfaceFresh = true;
         }
         return ok;
     }
@@ -1732,6 +1737,7 @@ private:
                              : i == B_PREV_CLOUD ? ps.bufs[B_CLOUD]
                              : i == B_PREV_CLOUD_DEPTH ? ps.bufs[B_CLOUD_DEPTH]
                              : i == B_PREV_NEAR_LIGHT ? (ps.bufs[B_NEAR_LIGHT].buf ? ps.bufs[B_NEAR_LIGHT] : s.bufs[B_NEAR_LIGHT])
+                             : i == B_PREV_NEAR_AGE ? (ps.bufs[B_NEAR_AGE].buf ? ps.bufs[B_NEAR_AGE] : s.bufs[B_NEAR_AGE])
                              : perSlot(i) ? s.bufs[i] : (isScene(i) ? sc.bufs[i] : shared_[i]);
                 info[i] = {b.buf, 0, i == B_FRAME ? uniformRange(b) : storageRange(b)};
                 wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
@@ -1991,6 +1997,7 @@ private:
         }
         if (s.surfaceFresh) {
             vkCmdFillBuffer(s.cmd, s.bufs[B_SURFACE].buf, 0, VK_WHOLE_SIZE, 0x7149F2CAu);  // 1e30f: no surface yet
+            vkCmdFillBuffer(s.cmd, s.bufs[B_NEAR_AGE].buf, 0, VK_WHOLE_SIZE, 0u);
             VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
             mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
             mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;

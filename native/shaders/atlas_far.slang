@@ -67,6 +67,10 @@
 [[vk::binding(34, 0)]] StructuredBuffer<float4> lightSrc;
 [[vk::binding(35, 0)]] RWStructuredBuffer<float4> lightCand;
 [[vk::binding(36, 0)]] RWStructuredBuffer<uint> lightList;
+// (FRAME_NEAR_SPLIT under PRIMARY_NEAR_LIT) how many of the pixel's own traced samples its history holds (nearTemporalMain),
+// this frame's and the last frame's
+[[vk::binding(37, 0)]] RWStructuredBuffer<uint> outNearAge;
+[[vk::binding(38, 0)]] StructuredBuffer<uint> prevNearAge;
 
 #include "atlas_air.slang"
 #include "atlas_clouds.slang"
@@ -959,11 +963,15 @@ static int gSecHitLod = 0;
 // 1280x800 (the near light's sun ray; its bounce's as much again). 0: the ray keeps its level (the far field's rays).
 static float gSecCone = 0.0;
 static const int SEC_CONE_LOD = 4;
-// (the light by need, nearLightAt) the cone's level steps, each pixel's own: gSecCone x a factor in [1, 2) a sample, so
-// where a ray turns coarser is spread over the octave and averaged by the history (no ring where the level changes)
+// (the light by need, nearLightAt) the cone's level steps, each surface point's own: gSecCone x a factor in [1, 2) fixed to
+// the point (surfaceRand), so where a ray turns coarser is spread over the octave across a face (no ring where it changes)
 static float gSecConeJit = 1.0;
 // the bounce's own sun ray (bounceFrom): its cone (0: none); bounced light is soft, its occluders need no fine voxels
 static float gBounceCone = 0.0;
+// (nearLightAt) the pixel's footprint (blocks, 0: none): a secondary ray may go a level coarser every SEC_FOOT_VOXELS
+// voxels while the next level's voxels are no wider than it (their errors then fall inside one pixel)
+static float gSecFoot = 0.0;
+static const float SEC_FOOT_VOXELS = 4.0;
 // the sample's index in the light's cycles (sky rays' strata, the far lights' emitter points, the dithers below): the
 // split's own trace count of the pixel (nearLightMain), else -1: the frame's (the TAA's frames)
 static int gSampleIndex = -1;
@@ -971,9 +979,12 @@ uint lightSample() {
     if (gSampleIndex >= 0) return uint(gSampleIndex);
     return frame.jitter.z > 0.5 ? frame.temporal.x : 0u;
 }
-// a uniform number in [0, 1) for this pixel, sample and use (salt)
-float lightRand(uint2 px, uint salt) {
-    uint h = hashU(px.x * 73856093u ^ (px.y * 19349663u) ^ (lightSample() * 2654435761u) ^ (salt * 83492791u));
+// a uniform number in [0, 1) fixed to the surface point (camera-relative p; world eighths of a block) and use (salt):
+// where a ray's level steps is the same for that point frame after frame (the history's test of the key light's
+// visibility against its own then sees only real change), the points of a face spread over the octave
+float surfaceRand(float3 p, uint salt) {
+    int3 q = int3(floor((p + float3(frame.camInt.xyz)) * 8.0));
+    uint h = hashU(uint(q.x) * 73856093u ^ (uint(q.y) * 19349663u) ^ (uint(q.z) * 83492791u) ^ (salt * 2654435761u));
     return float(h & 0xFFFFFFu) / 16777216.0;
 }
 float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
@@ -993,8 +1004,9 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
         if (t >= maxT) break;
         float s = float(1 << lod);
         float len = min(192.0 * s, maxT - t);
-        if (gSecCone > 0.0 && lod < SEC_CONE_LOD && lod + 1 < lodCount) {
-            float edge = gSecCone * s * gSecConeJit;
+        if ((gSecCone > 0.0 || gSecFoot >= 2.0 * s) && lod < SEC_CONE_LOD && lod + 1 < lodCount) {
+            // (the footprint's coarsening while the next level's voxels are no wider than it, then the sun's cone)
+            float edge = (gSecFoot >= 2.0 * s ? SEC_FOOT_VOXELS : (gSecCone > 0.0 ? gSecCone : 1e30)) * s * gSecConeJit;
             if (t >= edge) { lod++; continue; }
             len = min(len, edge - t);
         }
@@ -1095,9 +1107,6 @@ float3 bounceFrom(float3 o, float3 w, float3 sun, bool inOpen) {
 static const int SKY_RAYS = 1;
 static const float SKY_REACH = 16.0;
 static const float ENCLOSED_REACH = 64.0;
-// (the light by need) the reaches in voxels of the rays' level, when the caller keeps them in blocks (0: the above)
-static float gSkyReachVox = 0.0;
-static float gEnclosedReachVox = 0.0;
 float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool enclosed, bool withBounce, out float vis) {
     float3 skyUp = frame.airSkyUp.xyz, ground = frame.airGround.xyz;  // skyAmbient's two radiances (the air's light)
     uint fi = lightSample() & 15u;  // a 16-sample cycle: a still pixel converges to one stratified set
@@ -1105,9 +1114,7 @@ float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool en
     float s = float(1 << lod);
     uint ab = asuint(frame.jitter.w);  // (ATLAS_ABLATE 8192: two rays, 16384: half the reach; measurements)
     int rays = (ab & 8192u) != 0u ? 2 : SKY_RAYS;
-    float reach = gSkyReachVox > 0.0 ? gSkyReachVox : SKY_REACH;
-    float enclosedReach = gEnclosedReachVox > 0.0 ? max(gEnclosedReachVox, reach) : ENCLOSED_REACH;
-    if ((ab & 16384u) != 0u) reach *= 0.5;
+    float reach = (ab & 16384u) != 0u ? 0.5 * SKY_REACH : SKY_REACH;
     // one bounce (bounceFrom): a ray that meets a surface brings back that surface's own light instead of none
     // (ATLAS_ABLATE 524288: none, the look's constant bounce alone, as before)
     bool bounce = withBounce && (ab & 524288u) == 0u;
@@ -1128,7 +1135,7 @@ float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool en
             // pit's sunlit floor beyond a tunnel's mouth), none under cover (a cavern's far wall). Without the bounce:
             // such an open face counts as the sky, what the short reach stands in for in the open
             float3 o2 = o + w * (reach * s);
-            float T2 = traceSecondary(o2, w, (enclosedReach - reach) * s, lod);
+            float T2 = traceSecondary(o2, w, (ENCLOSED_REACH - reach) * s, lod);
             if (T2 <= 0.0 && bounce) {
                 back += T * bounceFrom(o2, w, sun, false);
                 traced += T;
@@ -1392,11 +1399,12 @@ bool lightTile(uint2 px, out uint start, out uint count) {
 
 ActorGpu lightOfTile(uint start, uint k, out uint li) {
     if ((frame.dims.z & FRAME_GPU_LIGHTS) != 0u) {
-        li = lightList[start + 1u + k];
+        uint slot = lightList[start + 1u + k];
         ActorGpu l;
-        l.posYaw = lightCand[li * 4u];
-        l.shape = lightCand[li * 4u + 1u];
-        l.motion = lightCand[li * 4u + 2u];
+        l.posYaw = lightCand[slot * 4u];
+        l.shape = lightCand[slot * 4u + 1u];
+        l.motion = lightCand[slot * 4u + 2u];
+        li = asuint(lightCand[slot * 4u + 3u].w) >> 8u;  // (its record: the same light the same index every frame)
         return l;
     }
     uint L = uint(frame.weatherParams.y), A = uint(frame.weatherParams.w);
@@ -1588,7 +1596,9 @@ void lightCullMain(uint3 id : SV_DispatchThreadID) {
     lightCand[slot * 4u] = float4(rx + frame.camFrac.x, ry + frame.camFrac.y, rz + frame.camFrac.z, sigma);
     lightCand[slot * 4u + 1u] = float4(r1.xyz * k, float(kind));
     lightCand[slot * 4u + 2u] = float4(d, r2.y, halo, radius);
-    lightCand[slot * 4u + 3u] = float4(px, py, reach, asfloat(bin));
+    // (w: the score's bin, then the record: a tile's list is ordered by it, so its sum is the same whatever order the
+    // candidates were appended in, frame after frame)
+    lightCand[slot * 4u + 3u] = float4(px, py, reach, asfloat(bin | (i << 8u)));
     InterlockedAdd(lightList[LL_HIST + bin], 1u);
 }
 
@@ -1620,7 +1630,7 @@ void lightAdmitMain(uint3 id : SV_DispatchThreadID, uint3 gt : SV_GroupThreadID)
     lightThreshold(budget, LL_HIST, gt.x);
     uint n = min(lightList[0], LIGHT_CAND_CAP), i = id.x;
     if (i >= n) return;
-    uint bin = asuint(lightCand[i * 4u + 3u].w);
+    uint bin = asuint(lightCand[i * 4u + 3u].w) & 255u;
     if (gsLightT < 0 || int(bin) > gsLightT) return;
     bool keep = false;
     if (int(bin) == gsLightT) {
@@ -1632,6 +1642,8 @@ void lightAdmitMain(uint3 id : SV_DispatchThreadID, uint3 gt : SV_GroupThreadID)
 }
 
 groupshared uint gsTileHist[256];
+groupshared uint gsTileSlot[64];
+groupshared uint gsTileKey[64];
 groupshared uint gsTileCount;
 groupshared uint gsTileTaken;
 groupshared int gsTileT;
@@ -1661,7 +1673,7 @@ void lightBinMain(uint3 gid : SV_GroupID, uint3 gt : SV_GroupThreadID) {
     uint n = min(lightList[0], LIGHT_CAND_CAP);
     for (uint i = tid; i < n; i += 64u) {
         float4 sc = lightCand[i * 4u + 3u];
-        if (lightCovers(sc, tx, ty)) InterlockedAdd(gsTileHist[asuint(sc.w)], 1u);
+        if (lightCovers(sc, tx, ty)) InterlockedAdd(gsTileHist[asuint(sc.w) & 255u], 1u);
     }
     GroupMemoryBarrierWithGroupSync();
     if (tid == 0u) {
@@ -1683,7 +1695,7 @@ void lightBinMain(uint3 gid : SV_GroupID, uint3 gt : SV_GroupThreadID) {
     for (uint i = tid; i < n; i += 64u) {
         float4 sc = lightCand[i * 4u + 3u];
         if (!lightCovers(sc, tx, ty)) continue;
-        int bin = int(asuint(sc.w));
+        int bin = int(asuint(sc.w) & 255u);
         if (gsTileT >= 0 && bin < gsTileT) continue;
         if (gsTileT >= 0 && bin == gsTileT) {
             uint taken;
@@ -1692,10 +1704,20 @@ void lightBinMain(uint3 gid : SV_GroupID, uint3 gt : SV_GroupThreadID) {
         }
         uint k;
         InterlockedAdd(gsTileCount, 1u, k);
-        if (k < LIGHTS_PER_TILE) lightList[base + 1u + k] = i;
+        if (k < LIGHTS_PER_TILE) {
+            gsTileSlot[k] = i;
+            gsTileKey[k] = asuint(sc.w) >> 8u;
+        }
     }
     GroupMemoryBarrierWithGroupSync();
-    if (tid == 0u) lightList[base] = min(gsTileCount, LIGHTS_PER_TILE);
+    // the list in record order (each entry's rank among the others'): the same lights sum the same way every frame
+    uint m = min(gsTileCount, LIGHTS_PER_TILE);
+    if (tid < m) {
+        uint key = gsTileKey[tid], rank = 0u;
+        for (uint j = 0u; j < m; j++) rank += gsTileKey[j] < key || (gsTileKey[j] == key && j < tid) ? 1u : 0u;
+        lightList[base + 1u + rank] = gsTileSlot[tid];
+    }
+    if (tid == 0u) lightList[base] = m;
 }
 
 uint cloudDiv() { return (frame.dims.z & FRAME_CLOUDS_QUARTER) != 0 ? 4u : 2u; }
@@ -1883,7 +1905,6 @@ void sunMapMain(uint3 id : SV_DispatchThreadID) {
 // the one bounce (skyVisible withBounce), which only the near light traces.
 // rgb: irradiance; a: the key light's visibility. gNearRoofed: the surface lies under solid cover (solidRoof).
 static bool gNearRoofed = false;
-static const int FOOT_LOD_MAX = 4;  // the footprint's level at most (16-block voxels: a pixel past ~9 km at 1280 x 800)
 float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 sun) {
     float R = frame.camFrac.w;
     float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
@@ -1904,54 +1925,40 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
             so.y = floor(so.y + ci.y) + 1.02 - ci.y;
         }
     }
-    // The light by need (docs/ATLAS-RENDERER-PLAN.md "The light by need"): what a pixel's secondary rays resolve need be no
-    // finer than the pixel's footprint there (the blocks one pixel covers: distance x the pixel's angle x
-    // lightCtl.x), so they start at the level whose voxels are about that size: the level's fraction dithered per pixel
-    // and sample (the history averages it, so quality fades with distance and never steps). From that level the origin
-    // is lifted out of its coarse voxel along the face (as a coarse far hit's is), a hair beyond; a concave corner the
-    // coarse voxels fill keeps level 0. lightCtl.x 0: level 0 everywhere (the full light).
-    int lv = 0;
-    float3 so0 = so;
-    if (frame.lightCtl.x > 0.0 && !cheapLight) {
-        float lf = log2(max(nd * frame.params.w * frame.lightCtl.x, 1e-6));
-        lv = clamp(int(floor(lf + lightRand(px, 3u))), 0, min(FOOT_LOD_MAX, int(frame.dims.w) - 1));
-        if (lv > 0) {
-            float sl = float(1 << lv);
-            int ax = abs(N.x) > abs(N.y) ? (abs(N.x) > abs(N.z) ? 0 : 2) : (abs(N.y) > abs(N.z) ? 1 : 2);
-            float sg = N[ax] >= 0.0 ? 1.0 : -1.0;
-            for (int i = 0; i < 2; i++) {
-                if (!occupiedAt(lv, so)) break;
-                so[ax] = (floor((so[ax] + ci[ax]) / sl) + 0.5) * sl - ci[ax] + sg * (0.51 * sl);
-            }
-            if (occupiedAt(lv, so)) {
-                lv = 0;
-                so = so0;
-            }
-        }
+    // The light by need (docs/ATLAS-RENDERER-PLAN.md "The light by need"): a pixel cannot show the light's detail finer
+    // than its footprint there (the blocks one pixel covers: distance x the pixel's angle x lightCtl.x), so its secondary
+    // rays need no finer voxels where they are that far from the surface: each starts at level 0 (the surface's own
+    // nooks and steps shade it as they do up close: lifting the origin out of a coarse voxel brightened far slopes) and
+    // goes a level coarser every SEC_FOOT_VOXELS voxels until its voxels are the footprint (gSecFoot), the steps
+    // dithered per surface point (surfaceRand) so quality fades with distance, never steps; past that the sun's cone. 0: none.
+    // (atlas's own field only, PRIMARY_NEAR: the raster near field's pixels are near; a voxel two blocks wide is
+    // sub-pixel only past ~1.1 km at 1280 x 800, and a ray takes it only 4 blocks from the surface)
+    gSecFoot = 0.0;
+    if (frame.lightCtl.x > 0.0 && !cheapLight && (frame.dims.z & (FRAME_PRIMARY_NEAR | FRAME_PRIMARY_NEAR_LIT)) != 0u) {
+        gSecFoot = nd * frame.params.w * frame.lightCtl.x * exp2(surfaceRand(p, 3u) - 0.5);
     }
-    float slv = float(1 << lv);
     // still inside a solid voxel: atlas's world disagrees with the drawn one here (the tiles' stand-in houses, solid
     // and wider than the real ones, until the loaded chunks' blocks are up; a snow layer atlas holds as a block). Traced
     // from inside, the sun and sky rays were stopped at once: sunlit walls black. Lit untraced instead (the key light
     // by the normal, the open sky's ambient), as the cheap light does
     bool untrusted = false;
     if (!cheapLight) {
-        uint om = materialAt(0, so0);
-        untrusted = om != 0xFFFFFFFFu && !secondaryShapeMisses(om, frac(so0 + ci), float3(0, 1, 0)) &&
+        uint om = materialAt(0, so);
+        untrusted = om != 0xFFFFFFFFu && !secondaryShapeMisses(om, frac(so + ci), float3(0, 1, 0)) &&
                     secondarySigma(om, uint(palette[om].emisClass.y)) < 0.0;
     }
     float3 L = keyLightDir(sun);
     float sunVis = 1.0;
     // The sun ray widens as the sun's own cone (lightCtl.z voxels of a level before the next: about the inverse of the
     // sun's 0.53 degrees, so an occluder's voxel never outgrows its penumbra there; a tree's crown within ~100 blocks
-    // stays at the receiver's level, the blobby crowns a 32-voxel cone drew are gone), its steps dithered per pixel
+    // stays at the receiver's level, the blobby crowns a 32-voxel cone drew are gone), its steps dithered per surface point
     gSecCone = frame.lightCtl.z;
-    gSecConeJit = exp2(lightRand(px, 5u));
+    gSecConeJit = exp2(surfaceRand(p, 5u));
     if ((frame.dims.z & FRAME_SHADOWS) != 0 && (ablate & 4u) == 0u) {
         if (dot(N, L) <= 0.0) sunVis = 0.0;
         else if (untrusted) sunVis = eyeRoofed() ? 0.0 : 1.0;  // (in a cave: rock, most likely)
         else if (cheapLight) sunVis = traceShadow(p + N * 1.01 + L * 0.5, L, 0);
-        else sunVis = traceSecondary(so + L * (0.05 * slv), L, 2048.0, lv);
+        else sunVis = traceSecondary(so + L * 0.05, L, 2048.0, 0);
     }
     gSecCone = 0.0;
     // the sun reached it through water alone: a = 1 + the water's chord (the resolve draws its caustics at full rate)
@@ -1967,15 +1974,10 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     } else {
         float skyVis;
         // (ATLAS_ABLATE 512, measurements: never enclosed, the sky's short reach and the haze everywhere as before)
-        gNearRoofed = sunVis <= 0.0 && (ablate & 512u) == 0u && solidRoof(so, lv);
-        // the sky rays keep their reach in blocks (16 in the open, 64 under cover) at any level, at least 4 voxels
-        gSkyReachVox = max(SKY_REACH / slv, 4.0);
-        gEnclosedReachVox = max(ENCLOSED_REACH / slv, 8.0);
+        gNearRoofed = sunVis <= 0.0 && (ablate & 512u) == 0u && solidRoof(so, 0);
         gBounceCone = frame.lightCtl.w;
-        gSecConeJit = exp2(lightRand(px, 7u));
-        ambient = skyVisible(px, so, N, lv, sun, gNearRoofed, true, skyVis) + FAR_AMBIENT_FLOOR;
-        gSkyReachVox = 0.0;
-        gEnclosedReachVox = 0.0;
+        gSecConeJit = exp2(surfaceRand(p, 7u));
+        ambient = skyVisible(px, so, N, 0, sun, gNearRoofed, true, skyVis) + FAR_AMBIENT_FLOOR;
         gBounceCone = 0.0;
     }
     // under water: the sky's light is what the water above lets down, red first then green (the sky rays reach 16 blocks
@@ -1986,7 +1988,8 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     white.emisClass = float4(0, 0, 0, 0);
     float3 irr = shadeSurfaceAmb(float3(1, 1, 1), white, N, dir, sun, sunVis, 0u, ambient, float3(0, 0, 0));
     gSecCone = 0.0;
-    if ((ablate & 8u) == 0u) irr += farLightsOn(px, p, so, N, lv, sun, false, cheapLight);
+    if ((ablate & 8u) == 0u) irr += farLightsOn(px, p, so, N, 0, sun, false, cheapLight);
+    gSecFoot = 0.0;
     // the host composites albedo x this x T + inscatter with one transmittance (its luminance): the air's colour
     // through it (the blue lost first) rides in the light
     float3 Tr = aerialT(dir, nd);
@@ -2006,12 +2009,17 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
 // light is diffuse, so what a surface receives does not change as the camera moves, only as the sun, the sky and the
 // world do; the history (nearTemporalMain) carries it along the camera's motion, and a tile need not be traced every
 // frame. nearLightMain's groups are 16 x 16 pixel tiles; each is traced on the frames its own phase accumulator crosses
-// an integer at lightCtl.y a frame (1: every frame, the old split; 0.25: every fourth, staggered), and always while any
-// of its pixels lacks a history (a disocclusion, a new surface: never a frame of noise or a hole). Its 2 x 2 phase is the
-// next of the four each time it is traced, so every pixel is traced in turn. A tile not traced this frame marks its
-// traced pixels SPLIT_SKIPPED: the upsample and the history take the history alone there. The composite (albedo x
-// light x T + inscatter) is nearTemporalMain's, after the history.
+// an integer at lightCtl.y a frame (1: every frame, the old split; 0.25: every fourth, staggered), and every frame while
+// any of its pixels holds fewer than NEAR_SAMPLES_YOUNG samples of its own (a disocclusion, a new surface: never a
+// frame of noise or a hole). Its 2 x 2 phase is the next of the four each time it is traced, so every pixel is traced in
+// turn; the traced pixel flags itself (SPLIT_TRACED in its info). Where nothing was traced around a pixel this frame
+// the upsample marks it SPLIT_SKIPPED: the history alone. The composite (albedo x light x T + inscatter) is
+// nearTemporalMain's, after the history.
 static const float SPLIT_SKIPPED = -2.0;
+static const uint SPLIT_TRACED = 1u;  // (nearInfo's low byte, PRIMARY_NEAR_LIT) traced this frame
+// a tile is traced every frame while a pixel of it holds fewer of its own samples than this (a fresh view, a
+// disocclusion: its noise settles in a quarter of a second, not four)
+static const uint NEAR_SAMPLES_YOUNG = 4u;
 bool splitPrimary() { return (frame.dims.z & FRAME_PRIMARY_NEAR_LIT) != 0u; }
 // the tile's traces before this frame and whether it is scheduled for this one (its phase: a hash of the tile)
 uint splitTraces(uint2 tile, out bool scheduled) {
@@ -2031,11 +2039,6 @@ uint2 splitOffsetOf(uint traces) {
     // (0,0) (1,1) (1,0) (0,1): diagonal pairs first, so two frames already cover both rows and columns
     return uint2((k == 1u || k == 2u) ? 1u : 0u, (k == 1u || k == 3u) ? 1u : 0u);
 }
-// the 2 x 2 phase of the tile holding pixel px (or block b = px / 2)
-uint2 splitOffsetAt(uint2 px) {
-    bool sch;
-    return splitOffsetOf(splitTraces(px / 16u, sch));
-}
 uint2 nearSplitOffset() {
     uint k = frame.jitter.z > 0.5 ? (frame.temporal.x & 3u) : 0u;
     return splitOffsetOf(k);
@@ -2049,11 +2052,16 @@ float3 pixelRay(uint2 px, uint w, uint h) {
 
 // The previous frame's near light at this pixel's surface (reprojected through its camera and view-projection, where
 // the previous frame's surface lay at the same distance); the weight found (0: none, the point was hidden or off
-// screen then)
-float nearHistoryAt(uint2 px, float nd, out float4 hist) {
+// screen then), and how many of the pixel's own samples it holds (prevNearAge, as weighted as the light)
+// (bit 8 of an age: the pixel lay under solid cover, nearLightAt's roof test; its air is unlit when the eye is too)
+static const uint NEAR_AGE_ROOFED = 256u;
+float nearHistoryAt(uint2 px, float nd, out float4 hist, out uint samples, out bool roofed) {
     uint w = frame.dims.x, h = frame.dims.y;
     hist = float4(0, 0, 0, 0);
+    samples = 0u;
+    roofed = false;
     float hw = 0.0;
+    float ages = 0.0, roofs = 0.0;
     uint count, stride;
     prevNearLight.GetDimensions(count, stride);
     if (count < w * h) return 0.0;
@@ -2063,7 +2071,9 @@ float nearHistoryAt(uint2 px, float nd, out float4 hist) {
     float3 X = worldAt(frame.camFrac.xyz, dir, k, nd) - frame.prevCam.xyz;
     float4 clip = frame.prevViewProj[0] * X.x + frame.prevViewProj[1] * X.y + frame.prevViewProj[2] * X.z + frame.prevViewProj[3];
     if (clip.w <= 1e-4) return 0.0;
-    float2 pn = clip.xy / clip.w;
+    // (the last frame's pixel whose jittered ray went there: its jitter taken off, or a still view's history would be
+    // resampled half a pixel askew every frame of the TAA's cycle and blur)
+    float2 pn = clip.xy / clip.w - frame.farLight.zw;
     float hx = (pn.x * 0.5 + 0.5) * float(w) - 0.5, hy = (0.5 - pn.y * 0.5) * float(h) - 0.5;
     float dist = length(X), tol = 0.03 * dist + 0.1;
     int2 b = int2(floor(float2(hx, hy)));
@@ -2079,8 +2089,13 @@ float nearHistoryAt(uint2 px, float nd, out float4 hist) {
             float bw = (i == 0 ? 1.0 - fr.x : fr.x) * (j == 0 ? 1.0 - fr.y : fr.y);
             hist += v * bw;
             hw += bw;
+            uint age = prevNearAge[qp];
+            ages += float(age & 255u) * bw;
+            roofs += (age & NEAR_AGE_ROOFED) != 0u ? bw : 0.0;
         }
     }
+    samples = hw > 1e-4 ? uint(ages / hw + 0.5) : 0u;
+    roofed = roofs > 0.5 * hw && hw > 1e-4;
     return hw;
 }
 
@@ -2094,13 +2109,13 @@ void nearLightMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3
     bool primary = splitPrimary();
     bool scheduled = true;
     uint traces = primary ? splitTraces(gid.xy, scheduled) : (frame.jitter.z > 0.5 ? frame.temporal.x : 0u);
-    uint2 q = id.xy * 2u + splitOffsetOf(traces);
+    // (a tile traced off its schedule, for its young history: the frame's phase, so the four pixels take turns)
+    uint2 q = id.xy * 2u + splitOffsetOf(primary && !scheduled ? frame.temporal.x : traces);
     bool inside = q.x < w && q.y < h;
     uint pix = inside ? q.y * w + q.x : 0u;
     float nd = inside ? nearDepth[pix] : 1e30;
     if (primary && !scheduled) {
-        // not this tile's frame: traced all the same while a pixel of its 2 x 2 has no history (or the eye is under
-        // cover: the unlit air needs each pixel's own roof test)
+        // not this tile's frame: traced all the same while a pixel of it has a young history (NEAR_SAMPLES_YOUNG)
         if (gt.x == 0u && gt.y == 0u) gsSplitFresh = 0u;
         GroupMemoryBarrierWithGroupSync();
         bool fresh = false;
@@ -2109,25 +2124,31 @@ void nearLightMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3
             if (c.x >= w || c.y >= h) continue;
             float cd = nearDepth[c.y * w + c.x];
             if (!(cd < 1e29)) continue;
-            float4 hv;
-            fresh = nearHistoryAt(c, cd, hv) <= 0.25;
+            // (the history at the same pixel, not reprojected: exact for a still view, and a moving one's changed
+            // depth counts as fresh; a quarter of the cost of the history's own lookup)
+            uint cp = c.y * w + c.x;
+            uint count, stride;
+            prevNearAge.GetDimensions(count, stride);
+            fresh = count < w * h || (prevNearAge[cp] & 255u) < NEAR_SAMPLES_YOUNG ||
+                    abs(prevSurface[cp] - cd) > 0.03 * cd + 0.1;
         }
         if (fresh) InterlockedOr(gsSplitFresh, 1u);
         GroupMemoryBarrierWithGroupSync();
-        if (gsSplitFresh == 0u && !eyeRoofed()) {
-            if (inside && nd < 1e29) outNearLight[pix] = float4(0, 0, 0, SPLIT_SKIPPED);
-            return;
-        }
+        if (gsSplitFresh == 0u) return;  // (nothing traced: the upsample marks its pixels SPLIT_SKIPPED)
     }
     if (!inside || !(nd < 1e29)) return;  // not the near field's (farMain wrote its zero)
     gAblate = asuint(frame.jitter.w);
     gSecAblate = gAblate;
     gHead = groupData[0];  // (the material shapes: secondary rays, the grid's level 0)
-    // the pixel's own trace count: its sky strata and dithers step once a trace, not once a frame
-    gSampleIndex = primary ? int(traces >> 2u) : -1;
-    float4 nl = nearLightAt(q, frame.camFrac.xyz, pixelRay(q, w, h), nd, nearInfo[pix], frame.sunDir.xyz);
+    // (PRIMARY_NEAR_LIT) a pixel is traced at most once every four frames: its sky strata and dithers step once a
+    // trace. The traced pixel says so in its info's low byte (atlas's own hits leave it 0), for the upsample and history
+    gSampleIndex = primary ? int(frame.temporal.x >> 2u) : -1;
+    uint info = nearInfo[pix];
+    float4 nl = nearLightAt(q, frame.camFrac.xyz, pixelRay(q, w, h), nd, info, frame.sunDir.xyz);
     if (gNearRoofed) nl.a = -1.0;
     outNearLight[pix] = nl;
+    if (primary) nearInfo[pix] = info | SPLIT_TRACED;
+    if (primary && (gAblate & 536870912u) != 0u) counters[pix] = 1u;
 }
 
 float3 nearInfoNormal(uint info) {
@@ -2144,8 +2165,8 @@ void nearUpsampleMain(uint3 id : SV_DispatchThreadID) {
     float nd = nearDepth[pix];
     if (!(nd < 1e29)) return;
     bool primary = splitPrimary();
-    uint2 off = primary ? splitOffsetAt(id.xy) : nearSplitOffset();
-    bool traced = (id.x & 1u) == off.x && (id.y & 1u) == off.y;
+    uint2 off = nearSplitOffset();
+    bool traced = primary ? (nearInfo[pix] & SPLIT_TRACED) != 0u : (id.x & 1u) == off.x && (id.y & 1u) == off.y;
     float roofed;
     if (traced) {
         float a0 = outNearLight[pix].a;
@@ -2162,7 +2183,16 @@ void nearUpsampleMain(uint3 id : SV_DispatchThreadID) {
             for (int i = -1; i <= 1; i++) {
                 int2 bb = b + int2(i, j);
                 if (bb.x < 0 || bb.y < 0) continue;
-                int2 r = bb * 2 + int2(primary ? splitOffsetAt(uint2(bb) * 2u) : off);
+                int2 r = bb * 2 + int2(off);
+                if (primary) {
+                    // (the block's traced pixel, if any: its tile's phase this frame)
+                    r = int2(-1, -1);
+                    for (uint k = 0u; k < 4u; k++) {
+                        int2 c = bb * 2 + int2(int(k & 1u), int(k >> 1u));
+                        if (c.x < int(w) && c.y < int(h) && (nearInfo[uint(c.y) * w + uint(c.x)] & SPLIT_TRACED) != 0u) r = c;
+                    }
+                    if (r.x < 0) continue;
+                }
                 if (r.x >= int(w) || r.y >= int(h)) continue;
                 uint rp = uint(r.y) * w + uint(r.x);
                 float rd = nearDepth[rp];
@@ -2204,6 +2234,7 @@ void nearUpsampleMain(uint3 id : SV_DispatchThreadID) {
 // (PRIMARY_NEAR_LIT) then the composite: albedo (farMain left it in the colour) x light x T + inscatter, as farMain's
 // full-rate path writes it, and the key light's visibility into the normal's alpha.
 static const float NEAR_HISTORY = 8.0;
+static const uint NEAR_SAMPLES = 8u;  // (PRIMARY_NEAR_LIT) a pixel's own samples averaged, at most
 
 [shader("compute")]
 [numthreads(8, 8, 1)]
@@ -2221,14 +2252,53 @@ void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
     bool roofed = cur.a < 0.0 && !skipped;
     cur.a = max(cur.a, 0.0);  // (the under-cover mark has done its work in the upsample)
     float4 hist;
-    float hw = nearHistoryAt(id.xy, nd, hist);
-    // a traced pixel (one in four each frame) counts for more than the upsampled ones in between; where nothing was
-    // traced this frame the history stands
-    uint2 off = primary ? splitOffsetAt(id.xy) : nearSplitOffset();
-    bool traced = (id.x & 1u) == off.x && (id.y & 1u) == off.y;
-    float a = traced ? 2.0 / NEAR_HISTORY : 1.0 / NEAR_HISTORY;
-    if (skipped) cur = hw > 1e-4 ? hist / hw : float4(0, 0, 0, 0);
-    else if (hw > 0.25) cur = lerp(hist / hw, cur, a);
+    uint samples;
+    bool histRoofed;
+    float hw = nearHistoryAt(id.xy, nd, hist, samples, histRoofed);
+    if (skipped) roofed = histRoofed;  // (no roof test this frame: the history's)
+    uint2 off = nearSplitOffset();
+    bool traced = !skipped && (primary ? (nearInfo[pix] & SPLIT_TRACED) != 0u : (id.x & 1u) == off.x && (id.y & 1u) == off.y);
+    if (primary) {
+        // (PRIMARY_NEAR_LIT) the history holds the pixel's own traced samples, averaged as they come up to
+        // NEAR_SAMPLES (then a running average of that many): a still view converges to its own light, exact at
+        // shadow edges. Its neighbours' light (the upsample) fills a pixel with none of its own yet (a disocclusion, a
+        // new surface) and counts as half a sample after, only where it agrees about the sun; where nothing was traced
+        // this frame the history stands.
+        float4 hv = hw > 1e-4 ? hist / hw : float4(0, 0, 0, 0);
+        uint n = hw > 0.25 ? samples : 0u;
+        if (skipped) {
+            cur = hv;
+        } else if (traced) {
+            // (a history of the neighbours' light alone counts as one sample)
+            float prior = float(n) + (n == 0u && hw > 0.25 ? 1.0 : 0.0);
+            n = min(n + 1u, NEAR_SAMPLES);
+            // the key light's visibility is one deterministic ray, not noise: where the history disagrees with it (an
+            // edge the history's resampling blurred as the camera moved, a shadow the sun or an edit moved) the
+            // sample counts as much as that says, and the count restarts with it
+            float stale = saturate(abs(min(cur.a, 1.0) - min(hv.a, 1.0)) * 2.0 - 0.1);
+            float a = max(1.0 / min(prior + 1.0, float(NEAR_SAMPLES)), stale);
+            cur = lerp(hv, cur, a);
+            if (stale > 0.5) n = 1u;
+        } else if (n == 0u && hw > 0.25) {
+            cur = lerp(hv, cur, 0.5);
+        } else if (n == 1u) {
+            // one sample of its own: the neighbours' light as a third of one where it agrees about the key light (the
+            // same side of a shadow edge), the first noise down sooner after a disocclusion. Past that none: their light
+            // is another surface's (a far slope's pixels are its steps' tops and sides: blended in, the shaded sides
+            // came out 4 % brighter than they are)
+            float agree = saturate(1.0 - abs(cur.a - hv.a) * 4.0);
+            cur = lerp(hv, cur, agree * 0.25);
+        } else if (n > 0u) {
+            cur = hv;
+        }
+        outNearAge[pix] = n | (roofed ? NEAR_AGE_ROOFED : 0u);
+    } else {
+        // a traced pixel (one in four each frame) counts for more than the upsampled ones in between; where nothing was
+        // traced this frame the history stands
+        float a = traced ? 2.0 / NEAR_HISTORY : 1.0 / NEAR_HISTORY;
+        if (skipped) cur = hw > 1e-4 ? hist / hw : float4(0, 0, 0, 0);
+        else if (hw > 0.25) cur = lerp(hist / hw, cur, a);
+    }
     outNearLight[pix] = cur;
     if (primary) {
         float3 dir = pixelRay(id.xy, w, h);
@@ -2389,7 +2459,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             outNormal[pix] = packNormal(n, (cls & 0x7Fu) | 0x80u, 0.0);
             outDepth[pix] = hostDepth(dir, tHit);
             outSurface[pix] = tHit;
-            counters[pix] = res.steps;
+            // (ATLAS_ABLATE 536870912, measurements: the counters count the pixels the split traces, nearLightMain)
+            counters[pix] = (gAblate & 536870912u) != 0u ? 0u : res.steps;
             return;
         }
         gSecAblate = gAblate;
@@ -2697,5 +2768,5 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     outColor[pix] = float4(color, coverage);
     outNormal[pix] = packNormal(n, cls, sunVis);
     outDepth[pix] = primaryNear ? hostDepth(dir, depth) : depth;  // (PRIMARY_NEAR: the host's NDC depth, every pixel)
-    counters[pix] = res.steps;  // per-pixel step count (summed on the host; no atomics so the C++ target matches)
+    counters[pix] = (gAblate & 536870912u) != 0u ? 0u : res.steps;  // per-pixel step count (summed on the host; no atomics so the C++ target matches)
 }
