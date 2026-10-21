@@ -108,7 +108,7 @@ static_assert(STORE_TERRAIN_WORDS == ATLAS_GEN_STORE_TERRAIN_WORDS && BLOCK_WORD
                   STORE_AUX_WORDS == ATLAS_GEN_STORE_AUX_WORDS, "atlas.h's store layout");
 struct StoreParams {
     int32_t count, pageMinCx, pageMinCz, pageW, pageH;
-    uint32_t pageWords, quartOffset, pad;
+    uint32_t pageWords, quartOffset, base;
 };
 
 double msSince(std::chrono::steady_clock::time_point t0) {
@@ -1060,6 +1060,7 @@ public:
         sb.map = uint64_t(map_.buf);
         begin();
         sb.vkCommandBuffer = cmd_;
+        phase_ = "store stage " + std::to_string(st.order) + ", " + std::to_string(count) + " chunks";
         int32_t r = st.sfn(st.user, &sb);
         if (r != 0) {
             vkEndCommandBuffer(cmd_);
@@ -1072,10 +1073,12 @@ public:
         return submitWait(err);
     }
 
-    // a store pass (0 in, 1 out) over the batch's store items
-    void storePass(uint32_t which, const Batch& b) {
-        uint32_t n = uint32_t(b.storeItems.size() / 4);
-        StoreParams sp{int32_t(n), b.params.pageMinCx, b.params.pageMinCz, b.params.pageW, b.params.pageH, pageWords_, quartOffset_, 0};
+    // a store pass (0 in, 1 out) over the batch's store items [first, first + n)
+    void storePass(uint32_t which, const Batch& b, uint32_t first = 0, uint32_t n = UINT32_MAX) {
+        uint32_t all = uint32_t(b.storeItems.size() / 4);
+        if (n > all - first) n = all - first;
+        StoreParams sp{int32_t(first + n), b.params.pageMinCx, b.params.pageMinCz, b.params.pageW, b.params.pageH, pageWords_, quartOffset_,
+                       first};
         vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, stLayout_, 0, 1, &stSet_, 0, nullptr);
         vkCmdPushConstants(cmd_, stLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(StoreParams), &sp);
         vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, stPipes_[which]);
@@ -1181,6 +1184,7 @@ public:
                 barrier(VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_HOST_READ_BIT,
                         VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_HOST_BIT);
             }
+            phase_ = "pass " + std::to_string(p) + (fromStore ? " (from the store)" : "");
             if (p == PACK_PASS && !runStages(b, n, err)) return false;  // the features and overlays (atlas_gen_add_stage)
             vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[p]);
             vkCmdDispatch(cmd_, (PASS_ITEMS[p] + GROUP - 1) / GROUP, n, 1);
@@ -1190,7 +1194,14 @@ public:
             if (p + 1 < pEnd && !cut(int(p))) return false;
         }
         if (toStore) {
-            storePass(0, b);  // the batch's blocks into the slots
+            // the batch's blocks into the slots, 16 a submission (the map's samples per column are heavy: a shared GPU
+            // stretches a submission, and the watchdog counts its wall time)
+            uint32_t items = uint32_t(b.storeItems.size() / 4);
+            for (uint32_t f = 0; f < items; f += 16) {
+                if (!cut(-1)) return false;
+                phase_ = "store in";
+                storePass(0, b, f, 16);
+            }
             VkBufferCopy c{idBytes, idBytes, VkDeviceSize(n) * 4};  // the flags
             vkCmdCopyBuffer(cmd_, out_.buf, readback_.buf, 1, &c);
         } else if (!ingest) {
@@ -1723,7 +1734,7 @@ private:
         auto w0 = std::chrono::steady_clock::now();
         VkResult w = vkWaitForFences(dev_, 1, &fence_, VK_TRUE, 20'000'000'000ull);
         if (double ws = msSince(w0); ws > 500.0)  // (a submission near the watchdog's 2 s: split the work further)
-            std::fprintf(stderr, "TRACE warn gen submission took %.0f ms\n", ws);
+            std::fprintf(stderr, "TRACE warn gen submission took %.0f ms (%s)\n", ws, phase_.c_str());
         if (w != VK_SUCCESS) {
             dead_ = true;
             hung_ = w == VK_TIMEOUT;
@@ -1769,6 +1780,7 @@ private:
     Buf prog_, pages_, pageIdx_, chunks_, corners_, aq_, blocks_, col_, out_, readback_, staging_, tab_, info_, map_, jobs_, bad_, far_;
     std::vector<Stage> stages_;
     uint32_t quartOffset_ = 0;
+    std::string phase_ = "?";  // what the submission being waited for holds (the watchdog warning names it)
     // the chunk store
     uint32_t storeSlots_ = 0;
     Buf stTerrain_, stBlocks_, stAux_, stItems_, stList_, stNb_;
@@ -2035,7 +2047,7 @@ bool storeAdvance(AtlasGen* h, std::string& err) {
     std::vector<const Stage*> st = storeStages(h);
     for (uint32_t k = 1; k <= st.size(); k++) {
         const Stage& stage = *st[k - 1];
-        for (int round = 0; round < 1024; round++) {
+        for (int round = 0; round < 4096; round++) {
             std::vector<const AtlasGen::StoreChunk*> ready;
             for (auto& [kk, c] : h->store)
                 if (storeReady(h, c, k, stage.radius)) ready.push_back(&c);
@@ -2043,7 +2055,14 @@ bool storeAdvance(AtlasGen* h, std::string& err) {
             std::sort(ready.begin(), ready.end(), [](const AtlasGen::StoreChunk* a, const AtlasGen::StoreChunk* b) {
                 return a->cz != b->cz ? a->cz < b->cz : a->cx < b->cx;
             });
-            if (ready.size() > MAX_CHUNKS) ready.resize(MAX_CHUNKS);
+            // a call's chunks: few enough that its one submission stays well inside the display driver's watchdog (a
+            // decoration of 64 chunks took up to 2.3 s); ATLAS_GEN_STORE_CALL to tune
+            static const size_t perCall = [] {
+                const char* e = std::getenv("ATLAS_GEN_STORE_CALL");
+                int v = e ? std::atoi(e) : 16;
+                return size_t(std::max(1, std::min(int(MAX_CHUNKS), v)));
+            }();
+            if (ready.size() > perCall) ready.resize(perCall);
             int32_t r = int32_t(stage.radius), w = 2 * r + 1;
             std::vector<int32_t> list, nb;
             for (const AtlasGen::StoreChunk* c : ready) {

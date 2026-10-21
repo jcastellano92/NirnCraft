@@ -152,7 +152,7 @@ struct StoreParams {
     int pageMinCx, pageMinCz, pageW, pageH;
     uint pageWords;
     uint quartOffset;  // the quart biomes' offset in a page (fields * 256 + 256)
-    uint pad;
+    uint base;         // the first item of this dispatch (count: the items up to it)
 };
 [[vk::push_constant]] StoreParams params;
 
@@ -163,7 +163,7 @@ static const uint AUX_REGION = 1408u, AUX_ELEV = 1664u;
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void storeInMain(uint3 id : SV_DispatchThreadID) {
-    uint item = id.y, i = id.x;
+    uint item = id.y + params.base, i = id.x;
     if (item >= uint(params.count) || i >= TERRAIN_WORDS) return;
     uint ci = uint(list[item * 4u]), slot = uint(list[item * 4u + 1u]);
     uint b0 = genBlocks[ci * BLOCK_WORDS + i * 2u] & 0xFFFFu, b1 = genBlocks[ci * BLOCK_WORDS + i * 2u + 1u] & 0xFFFFu;
@@ -189,7 +189,7 @@ void storeInMain(uint3 id : SV_DispatchThreadID) {
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void storeOutMain(uint3 id : SV_DispatchThreadID) {
-    uint item = id.y, i = id.x;
+    uint item = id.y + params.base, i = id.x;
     if (item >= uint(params.count) || i >= BLOCK_WORDS) return;
     uint ci = uint(list[item * 4u]), slot = uint(list[item * 4u + 1u]);
     genBlocks[ci * BLOCK_WORDS + i] = blocks[slot * BLOCK_WORDS + i] & 0xFFFFu;

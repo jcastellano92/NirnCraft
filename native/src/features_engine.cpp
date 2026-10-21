@@ -13,6 +13,7 @@
 #include <cstring>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "atlas/atlas.h"
@@ -246,7 +247,7 @@ public:
             auto d0 = std::chrono::steady_clock::now();
             // rounds: each thread makes up to `budget` placements a dispatch (trees few: one may take long), the rest in
             // the next, until no origin has any left (the counter)
-            p.budget = type == 4 ? 1u : 1u << 30;
+            p.budget = type == 4 && !std::getenv("ATLAS_FEAT_TREES_AT_ONCE") ? 1u : 1u << 30;
             for (uint32_t round = 0;; round++) {
                 p.first = round == 0 ? 1u : 0u;
                 begin();
@@ -632,15 +633,24 @@ public:
             smci.codeSize = size[i];
             smci.pCode = code[i];
             if (vkCreateShaderModule(dev_, &smci, nullptr, &modules_[i]) != VK_SUCCESS) return fail(err, "shader module");
-            VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
-            cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
-            cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-            cp.stage.module = modules_[i];
-            cp.stage.pName = "main";
-            cp.layout = layout_;
-            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipes_[i]) != VK_SUCCESS)
-                return fail(err, "pipeline " + std::to_string(i) + " refused");
         }
+        // the pipelines on threads of their own: the driver compiles them side by side (the tree kernel's alone is
+        // about half a minute on a cold cache; one after the other they were a minute)
+        std::vector<VkResult> res(S_PIPES, VK_SUCCESS);
+        std::vector<std::thread> th;
+        for (uint32_t i = 0; i < S_PIPES; i++)
+            th.emplace_back([&, i] {
+                VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
+                cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+                cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+                cp.stage.module = modules_[i];
+                cp.stage.pName = "main";
+                cp.layout = layout_;
+                res[i] = vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipes_[i]);
+            });
+        for (auto& t : th) t.join();
+        for (uint32_t i = 0; i < S_PIPES; i++)
+            if (res[i] != VK_SUCCESS) return fail(err, "pipeline " + std::to_string(i) + " refused");
         VkDescriptorPoolSize ps{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NB};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
         dp.maxSets = 1;
@@ -747,9 +757,13 @@ public:
             }
         }
         dispatch(S_INIT, 64, n);
+        uint32_t skip = 0;  // ATLAS_FEAT_SKIP: feature types left out (dev checks)
+        if (const char* sk = std::getenv("ATLAS_FEAT_SKIP"))
+            for (const char* c = sk; *c; c++)
+                if (*c >= '1' && *c <= '9') skip |= 1u << uint32_t(*c - '0');
         for (uint32_t rec : dispatch_) {
             uint32_t type = rec < types_.size() ? types_[rec] : 0;
-            if (type == 0 || type >= FT_TYPES) continue;
+            if (type == 0 || type >= FT_TYPES || (skip & (1u << type))) continue;
             p.rec = rec;
             dispatch(S_FEAT + type - 1, n, 1);  // a group (one warp) an origin; every placement in one dispatch
         }

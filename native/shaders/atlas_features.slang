@@ -166,6 +166,94 @@ double wrapDegrees_X(double a) {
     return v;
 }
 
+// the same without the flag, [noinline] (pure: NVIDIA keeps their calls apart then), for the trees' code: inlined at
+// its hundreds of call sites the driver's compile of the tree kernel took minutes
+[noinline]
+uint arraySize_N(uint expected) {
+    uint lb = 0u;
+    return arraySize(expected, lb);
+}
+[noinline]
+double atan2S_N(double y, double x) {
+    uint lb = 0u;
+    return atan2S(y, x, lb);
+}
+[noinline]
+int ceilD_N(double d) {
+    uint lb = 0u;
+    return ceilD(d, lb);
+}
+[noinline]
+int ceilF_N(float f) {
+    uint lb = 0u;
+    return ceilF(f, lb);
+}
+[noinline]
+double cosS_N(double x) {
+    uint lb = 0u;
+    return cosS(x, lb);
+}
+[noinline]
+double divD_N(double a, double b) {
+    uint lb = 0u;
+    return divD(a, b, lb);
+}
+[noinline]
+float divF_N(float a, float b) {
+    uint lb = 0u;
+    return divF(a, b, lb);
+}
+[noinline]
+double expS_N(double x) {
+    uint lb = 0u;
+    return expS(x, lb);
+}
+[noinline]
+double fbm_N(double x, double z, int64_t seed, int octaves) {
+    uint lb = 0u;
+    return fbm(x, z, seed, octaves, lb);
+}
+[noinline]
+double fieldSample_N(uint f, int64_t worldSeed, double x, double z) {
+    uint lb = 0u;
+    return fieldSample(f, worldSeed, x, z, lb);
+}
+[noinline]
+int floorD_N(double d) {
+    uint lb = 0u;
+    return floorD(d, lb);
+}
+[noinline]
+double hypotS_N(double x, double y) {
+    uint lb = 0u;
+    return hypotS(x, y, lb);
+}
+[noinline]
+double powD_N(double a, double b) {
+    uint lb = 0u;
+    return powD(a, b, lb);
+}
+[noinline]
+double sinS_N(double x) {
+    uint lb = 0u;
+    return sinS(x, lb);
+}
+[noinline]
+double sqrtD_N(double x) {
+    uint lb = 0u;
+    return sqrtD(x, lb);
+}
+[noinline]
+double valueNoise_N(double x, double z, int64_t seed) {
+    uint lb = 0u;
+    return valueNoise(x, z, seed, lb);
+}
+[noinline]
+double wrapDegrees_N(double a) {
+    uint lb = 0u;
+    return wrapDegrees(a, lb);
+}
+
 // ---- layout (AtlasFeatureProgram and features_engine.cpp keep in step) ------------------------------------------
 static const int MIN_Y = -64, HEIGHT = 704, MAX_Y = 639;  // the overworld: y -64..639 (44 sections)
 static const uint SECTIONS = 44;
@@ -409,14 +497,30 @@ uint64_t xoroNext() {
     rngStore(rotl(s0, 49u) ^ s1 ^ (s1 << 21u), rotl(s1, 28u));
     return result;
 }
-// WorldgenRandom.next(bits) = (int) (nextLong() >>> 64 - bits)
+// WorldgenRandom.next(bits) = (int) (nextLong() >>> 64 - bits): one [noinline] draw (inlined at every call site the
+// tree kernel's driver compile took minutes), its result through a pointer argument (a local of each call site: NVIDIA
+// merges or mixes the returned values of calls to a [noinline] function with side effects, see sRA)
+[noinline]
+void rngNextP(uint bits, inout int r) { r = int(uint(xoroNext() >> (64u - bits))); }
 [ForceInline]
-int rngNext(uint bits) { return int(uint(xoroNext() >> (64u - bits))); }
+int rngNext(uint bits) {
+    int r = 0;
+    rngNextP(bits, r);
+    return r;
+}
 [ForceInline]
 int rngInt() { return rngNext(32u); }
-// BitRandomSource.nextInt(bound)
+// BitRandomSource.nextInt(bound) (as rngNext: a void [noinline] with its result through a pointer)
 [ForceInline]
 int rngIntB(int bound) {
+    int r = 0;
+    rngIntBP(bound, r);
+    return r;
+}
+[noinline]
+void rngIntBP(int bound, inout int r) { r = rngIntBV(bound); }
+[ForceInline]
+int rngIntBV(int bound) {
     if (bound <= 0) return 0;
     if ((bound & (bound - 1)) == 0) return int((int64_t(bound) * int64_t(rngNext(31u))) >> 31);
     // Java: do { sample = next(31); modulo = sample % bound; } while (sample - modulo + (bound - 1) < 0), the sum
@@ -443,6 +547,14 @@ bool rngBool() { return rngNext(1u) != 0; }
 float rngFloat() { return float(rngNext(24u)) * asfloat(0x33800000u); }  // * 5.9604645E-8F (2^-24)
 [ForceInline]
 double rngDouble() {
+    double r = 0.0l;
+    rngDoubleP(r);
+    return r;
+}
+[noinline]
+void rngDoubleP(inout double r) { r = rngDoubleV(); }
+[ForceInline]
+double rngDoubleV() {
     int upper = rngNext(26u);
     int lower = rngNext(27u);
     int64_t combined = (int64_t(upper) << 27) + int64_t(lower);
@@ -907,8 +1019,8 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
     float PIF = asfloat(0x40490FDBu);  // (float) Math.PI
     float dir = rngFloat() * PIF;
     float spreadXY = float(size) / 8.0f;  // exact (a power of two)
-    int maxRadius = ceilF_X((float(size) / 16.0f * 2.0f + 1.0f) / 2.0f);
-    double sd = sinS_X(double(dir)), cd = cosS_X(double(dir));
+    int maxRadius = ceilF_N((float(size) / 16.0f * 2.0f + 1.0f) / 2.0f);
+    double sd = sinS_N(double(dir)), cd = cosS_N(double(dir));
     double x0 = double(ox) + sd * double(spreadXY);
     double x1 = double(ox) - sd * double(spreadXY);
     double z0 = double(oz) + cd * double(spreadXY);
@@ -917,7 +1029,7 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
     double y0 = double(oy + ry0 - 2);
     int ry1 = rngIntB(3);
     double y1 = double(oy + ry1 - 2);
-    int cs = ceilF_X(spreadXY);
+    int cs = ceilF_N(spreadXY);
     int xStart = ox - cs - maxRadius, yStart = oy - 2 - maxRadius, zStart = oz - cs - maxRadius;
     int sizeXZ = 2 * (cs + maxRadius), sizeY = 2 * (2 + maxRadius);
     bool any = false;
@@ -928,7 +1040,7 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
     // doPlace
     uint data = sG.base + SCR_MISC + M_ORE;  // size <= 64: 4 doubles each (8 words)
     for (int i = 0; i < size; i++) {
-        float step = divF_X(float(i), float(size));
+        float step = divF_N(float(i), float(size));
         double xx = x0 + double(step) * (x1 - x0);
         double yy = y0 + double(step) * (y1 - y0);
         double zz = z0 + double(step) * (z1 - z0);
@@ -959,16 +1071,16 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
         double rr = scrD(data + uint(i) * 8u + 6u);
         if (rr < 0.0l) continue;
         double xx = scrD(data + uint(i) * 8u), yy = scrD(data + uint(i) * 8u + 2u), zz = scrD(data + uint(i) * 8u + 4u);
-        int xMin = imax(floorD_X(xx - rr), xStart), yMin = imax(floorD_X(yy - rr), yStart), zMin = imax(floorD_X(zz - rr), zStart);
-        int xMax = imax(floorD_X(xx + rr), xMin), yMax = imax(floorD_X(yy + rr), yMin), zMax = imax(floorD_X(zz + rr), zMin);
+        int xMin = imax(floorD_N(xx - rr), xStart), yMin = imax(floorD_N(yy - rr), yStart), zMin = imax(floorD_N(zz - rr), zStart);
+        int xMax = imax(floorD_N(xx + rr), xMin), yMax = imax(floorD_N(yy + rr), yMin), zMax = imax(floorD_N(zz + rr), zMin);
         for (int x = xMin; x <= xMax; x++) {
-            double xd = divD_X(double(x) + 0.5l - xx, rr);
+            double xd = divD_N(double(x) + 0.5l - xx, rr);
             if (!(xd * xd < 1.0l)) continue;
             for (int y = yMin; y <= yMax; y++) {
-                double yd = divD_X(double(y) + 0.5l - yy, rr);
+                double yd = divD_N(double(y) + 0.5l - yy, rr);
                 if (!(xd * xd + yd * yd < 1.0l)) continue;
                 for (int z = zMin; z <= zMax; z++) {
-                    double zd = divD_X(double(z) + 0.5l - zz, rr);
+                    double zd = divD_N(double(z) + 0.5l - zz, rr);
                     if (!(xd * xd + yd * yd + zd * zd < 1.0l) || y < MIN_Y || y > MAX_Y) continue;
                     int bi = (x - xStart) + (y - yStart) * sizeXZ + (z - zStart) * sizeXZ * sizeY;
                     if (bi < 0 || bi >= 12288) { flag(FL_STACK); continue; }
@@ -1073,8 +1185,8 @@ int coverPick(uint cfg, int x, int z, double roll) {
     double w[16];
     double total = 0.0l;
     for (uint i = 0; i < n && i < 16u; i++) {
-        double nz = patch > 0.0f ? fbm_X(divD_X(double(x), scale), divD_X(double(z), scale), base + 7919 * int64_t(i + 1u), 2) : 0.0l;
-        w[i] = double(int(fprog[cfg + CV_ENTRIES + i * 4u + 2u])) * expS_X(double(patch) * 7.0l * nz);
+        double nz = patch > 0.0f ? fbm_N(divD_N(double(x), scale), divD_N(double(z), scale), base + 7919 * int64_t(i + 1u), 2) : 0.0l;
+        w[i] = double(int(fprog[cfg + CV_ENTRIES + i * 4u + 2u])) * expS_N(double(patch) * 7.0l * nz);
         total += w[i];
     }
     double t = roll * total;
@@ -1160,12 +1272,12 @@ bool placeCover(uint cfg, int ox, int oy, int oz) {
 // PI_D: Math.PI (atlas_exact.slang)
 void rockOne(GBox b, uint cfg, int64_t seed, double cx, double cy, double cz, double rx, double ry,
              double rz, double yaw, double tiltX, double tiltZ) {
-    double cs = cosS_X(yaw), sn = sinS_X(yaw);
-    int ext = ceilD_X(dmax(rx, rz) + 1.0l);
-    int ey = ceilD_X(ry + 2.0l + double(ext) * (absD(tiltX) + absD(tiltZ)));
+    double cs = cosS_N(yaw), sn = sinS_N(yaw);
+    int ext = ceilD_N(dmax(rx, rz) + 1.0l);
+    int ey = ceilD_N(ry + 2.0l + double(ext) * (absD(tiltX) + absD(tiltZ)));
     uint stone = fprog[cfg], moss = fprog[cfg + 1];
     float mossChance = pfF(cfg + 2);
-    int fcx = floorD_X(cx), fcz = floorD_X(cz), fcy = floorD_X(cy);
+    int fcx = floorD_N(cx), fcz = floorD_N(cz), fcy = floorD_N(cy);
     for (int dx = -ext; dx <= ext; dx++) {
         for (int dz = -ext; dz <= ext; dz++) {
             int bx = fcx + dx, bz = fcz + dz;
@@ -1176,9 +1288,9 @@ void rockOne(GBox b, uint cfg, int64_t seed, double cx, double cy, double cz, do
             for (int dy = -ey; dy <= ey; dy++) {
                 int by = fcy + dy;
                 double fy = double(by) + 0.5l - cy - lift;
-                double ur = divD_X(u, rx), fr = divD_X(fy, ry), vr = divD_X(v, rz);
+                double ur = divD_N(u, rx), fr = divD_N(fy, ry), vr = divD_N(v, rz);
                 double d = ur * ur + fr * fr + vr * vr;
-                double warp = valueNoise_X(double(bx) * 0.45l + double(by) * 0.31l, double(bz) * 0.45l - double(by) * 0.27l, seed) * 0.28l;
+                double warp = valueNoise_N(double(bx) * 0.45l + double(by) * 0.31l, double(bz) * 0.45l - double(by) * 0.27l, seed) * 0.28l;
                 if (d > 1.0l + warp) continue;
                 uint here = gGet(b, bx, by, bz);
                 if (!bis(here, B_SOFT) && !bis(here, B_SUBSTRATE) && !bis(here, B_SAND)) continue;
@@ -1214,7 +1326,7 @@ bool placeRock(uint cfg, int x, int y, int z) {
         for (int i = 0; i < n; i++) {
             double a = rngDouble() * PI_D * 2.0l;
             double d = 1.0l + rngDouble() * double(2 + size);
-            int sx = x + int(jroundD(cosS_X(a) * d)), sz = z + int(jroundD(sinS_X(a) * d));
+            int sx = x + int(jroundD(cosS_N(a) * d)), sz = z + int(jroundD(sinS_N(a) * d));
             int sy = floraGround(b, sx, sz, y);
             if (sy == NONE || iabs(sy - y) > 2) continue;
             double rr = 0.7l + rngDouble() * 0.8l;
@@ -1246,7 +1358,7 @@ bool placeRock(uint cfg, int x, int y, int z) {
         rockOne(b, cfg, seed, double(x) + 0.5l, double(y) - ry * 0.35l, double(z) + 0.5l, rx, ry, rz, a4, a5, a6);
         if (rngIntB(3) == 0) {
             double a = rngDouble() * PI_D * 2.0l;
-            double ccx = double(x) + 0.5l + cosS_X(a) * rx, ccz = double(z) + 0.5l + sinS_X(a) * rz;
+            double ccx = double(x) + 0.5l + cosS_N(a) * rx, ccz = double(z) + 0.5l + sinS_N(a) * rz;
             double yaw = rngDouble() * 3.0l;
             rockOne(b, cfg, seed + 99, ccx, double(y) - 0.2l, ccz, rr * 0.5l, rr * 0.45l, rr * 0.5l, yaw, 0.0l, 0.0l);
         }
@@ -1270,7 +1382,7 @@ float biomeTemperature(int b, int x, int y, int z) {
     int snowLevel = int(hdr(H_SEA)) + 17;
     if (y > snowLevel) {
         float v = asfloat(chunkAux[uint(slot) * AUX_W + AUX_TEMP + c]);
-        return base - divF_X((v + float(y) - float(snowLevel)) * 0.05f, 40.0f);
+        return base - divF_N((v + float(y) - float(snowLevel)) * 0.05f, 40.0f);
     }
     return base;
 }
@@ -1367,7 +1479,7 @@ uint maxFillOf(uint n) {
 // new Long2ObjectOpenHashMap(expected)
 [noinline]
 void fmInit(FMap m, uint expected) {
-    uint n = arraySize_X(expected);
+    uint n = arraySize_N(expected);
     if (n > m.cap) { flag(FL_TABLE_FULL); n = m.cap; }
     scratch[m.at] = n;
     scratch[m.at + 1] = 0u;
@@ -1427,7 +1539,7 @@ bool fmPut(FMap m, int64_t k, uint v, uint tmp) {
     fmSetSlot(m, pos, k, v);
     uint size = fmSize(m);
     scratch[m.at + 1] = size + 1u;
-    if (size >= scratch[m.at + 2]) fmRehash(m, arraySize_X(size + 2u), tmp);
+    if (size >= scratch[m.at + 2]) fmRehash(m, arraySize_N(size + 2u), tmp);
     return true;
 }
 [noinline]
@@ -1524,11 +1636,11 @@ void tSink(int x, int y, int z, uint state, int maxD) {
 [noinline]
 void tDisc(double cx, int y, double cz, double r, uint state) {
     if (r < 0.75l) {
-        tLog(floorD_X(cx), y, floorD_X(cz), state);
+        tLog(floorD_N(cx), y, floorD_N(cz), state);
         return;
     }
-    int ri = ceilD_X(r);
-    int bx = floorD_X(cx), bz = floorD_X(cz);
+    int ri = ceilD_N(r);
+    int bx = floorD_N(cx), bz = floorD_N(cz);
     for (int dx = -ri; dx <= ri; dx++)
         for (int dz = -ri; dz <= ri; dz++) {
             double fx = double(bx + dx) + 0.5l - cx, fz = double(bz + dz) + 0.5l - cz;
@@ -1561,23 +1673,23 @@ void tChain(int x, int y, int z, uint state, uint base) {
 void tBranch(double x0, double y0, double z0, double x1, double y1, double z1, double r0, double r1, uint log) {
     double dx = x1 - x0, dy = y1 - y0, dz = z1 - z0;
     double len = dmax(absD2(dx), dmax(absD2(dy), absD2(dz)));
-    int steps = imax(1, ceilD_X(len * 1.2l));
+    int steps = imax(1, ceilD_N(len * 1.2l));
     uint axis = absD2(dy) >= dmax(absD2(dx), absD2(dz)) ? 1u : (absD2(dx) >= absD2(dz) ? 0u : 2u);
     uint state = axisOf(log, axis);
     scratch[sG.base + SCR_TREE + T_LAST] = 0u;
     for (int s = 0; s <= steps; s++) {
-        double t = divD_X(double(s), double(steps));
+        double t = divD_N(double(s), double(steps));
         double x = x0 + dx * t, y = y0 + dy * t, z = z0 + dz * t;
         double r = r0 + (r1 - r0) * t;
         if (r >= 0.75l) {
-            int ri = ceilD_X(r);
-            int fx = floorD_X(x), fy = floorD_X(y), fz = floorD_X(z);
+            int ri = ceilD_N(r);
+            int fx = floorD_N(x), fy = floorD_N(y), fz = floorD_N(z);
             for (int ox = -ri; ox <= ri; ox++)
                 for (int oy = -ri; oy <= ri; oy++)
                     for (int oz = -ri; oz <= ri; oz++)
                         if (double(ox * ox + oy * oy + oz * oz) <= r * r + 0.2l) tLog(fx + ox, fy + oy, fz + oz, state);
         } else {
-            tChain(floorD_X(x), floorD_X(y), floorD_X(z), state, log);
+            tChain(floorD_N(x), floorD_N(y), floorD_N(z), state, log);
         }
     }
     scratch[sG.base + SCR_TREE + T_LAST] = 0u;
@@ -1599,20 +1711,16 @@ uint bitsMix(double a, double b, double c) {
 [ForceInline]
 void tMark(uint stage, double a, double b, double c) {
     if (!TREE_TRACE) return;
-    int64_t mk = int64_t(floorD_X(a * 16.0l)) * 1000003 + int64_t(floorD_X(b * 16.0l)) * 1009 + int64_t(floorD_X(c * 16.0l));
-    treeTrace(stage, 0, 0, 0, uint(uint64_t(mk) & 0xFFFFFFFFu));
 }
 [noinline]
 void tClump(double cx, double cy, double cz, double rx, double ry, double rz, uint state, double ragged) {
-    tMark(43u, cx, cy, cz);
-    tMark(44u, rx, ry, rz);
-    int x0 = floorD_X(cx - rx), x1 = floorD_X(cx + rx);
-    int y0 = floorD_X(cy - ry), y1 = floorD_X(cy + ry);
-    int z0 = floorD_X(cz - rz), z1 = floorD_X(cz + rz);
+    int x0 = floorD_N(cx - rx), x1 = floorD_N(cx + rx);
+    int y0 = floorD_N(cy - ry), y1 = floorD_N(cy + ry);
+    int z0 = floorD_N(cz - rz), z1 = floorD_N(cz + rz);
     for (int x = x0; x <= x1; x++)
         for (int y = y0; y <= y1; y++)
             for (int z = z0; z <= z1; z++) {
-                double fx = divD_X(double(x) + 0.5l - cx, rx), fy = divD_X(double(y) + 0.5l - cy, ry), fz = divD_X(double(z) + 0.5l - cz, rz);
+                double fx = divD_N(double(x) + 0.5l - cx, rx), fy = divD_N(double(y) + 0.5l - cy, ry), fz = divD_N(double(z) + 0.5l - cz, rz);
                 double d = fx * fx + fy * fy + fz * fz;
                 if (d > 1.0l) continue;
                 if (d > 0.45l && double(rngFloat()) * ragged > (1.0l - d) * 0.9l) continue;
@@ -1621,11 +1729,10 @@ void tClump(double cx, double cy, double cz, double rx, double ry, double rz, ui
 }
 [noinline]
 void tPad(double cx, int y, double cz, double rx, double rz, uint state, double ragged, bool domed) {
-    tMark(45u, cx, double(y), cz);
-    int x0 = floorD_X(cx - rx), x1 = floorD_X(cx + rx), z0 = floorD_X(cz - rz), z1 = floorD_X(cz + rz);
+    int x0 = floorD_N(cx - rx), x1 = floorD_N(cx + rx), z0 = floorD_N(cz - rz), z1 = floorD_N(cz + rz);
     for (int x = x0; x <= x1; x++)
         for (int z = z0; z <= z1; z++) {
-            double fx = divD_X(double(x) + 0.5l - cx, rx), fz = divD_X(double(z) + 0.5l - cz, rz);
+            double fx = divD_N(double(x) + 0.5l - cx, rx), fz = divD_N(double(z) + 0.5l - cz, rz);
             double d = fx * fx + fz * fz;
             if (d > 1.0l) continue;
             if (d > 0.5l && double(rngFloat()) * ragged > (1.0l - d)) continue;
@@ -1979,31 +2086,29 @@ void trunkLine(Grow t, int h, double leanScale, Line c) {
     double la = gLeanAngle(t);
     double lm = double(spF(t.sp, S_LEAN) * float(h)) * gu(0.3l, 1.0l) * leanScale;
     double wob = gu(0.0l, 0.35l), ph = gAngle(), freq = gu(0.25l, 0.5l);
-    treeTrace(46u, t.x, t.y, t.z, bitsMix(la, lm, wob));
-    treeTrace(47u, t.x, t.y, t.z, bitsMix(ph, freq, 0.0l));
     if (h + 2 > MAXC) { flag(FL_STACK); return; }
-    double cl = cosS_X(la), sl = sinS_X(la);
+    double cl = cosS_N(la), sl = sinS_N(la);
     for (int dy = 0; dy <= h + 1; dy++) {
-        double tt = divD_X(double(dy), double(imax(1, h)));
-        double off = lm * powD_X(tt, 1.6l);
-        setL(c, dy, double(t.x) + 0.5l + cl * off + sinS_X(ph + double(dy) * freq) * wob * tt,
-             double(t.z) + 0.5l + sl * off + cosS_X(ph + double(dy) * freq) * wob * tt);
+        double tt = divD_N(double(dy), double(imax(1, h)));
+        double off = lm * powD_N(tt, 1.6l);
+        setL(c, dy, double(t.x) + 0.5l + cl * off + sinS_N(ph + double(dy) * freq) * wob * tt,
+             double(t.z) + 0.5l + sl * off + cosS_N(ph + double(dy) * freq) * wob * tt);
     }
 }
 [noinline]
 void trunkDraw(Grow t, Line c, int from, int to, double r0, double r1, double flare) {
     uint log = axisOf(spU(t.sp, S_LOG), 1u);
     for (int dy = from; dy <= to; dy++) {
-        double tt = divD_X(double(dy - from), double(imax(1, to - from)));
-        double rr = r0 + (r1 - r0) * tt + (dy - from < 3 ? divD_X(flare * double(3 - (dy - from)), 3.0l) : 0.0l);
-        if (rr < 0.75l) tLog(floorD_X(LX(c, dy)), t.y + dy, floorD_X(LZ(c, dy)), log);
+        double tt = divD_N(double(dy - from), double(imax(1, to - from)));
+        double rr = r0 + (r1 - r0) * tt + (dy - from < 3 ? divD_N(flare * double(3 - (dy - from)), 3.0l) : 0.0l);
+        if (rr < 0.75l) tLog(floorD_N(LX(c, dy)), t.y + dy, floorD_N(LZ(c, dy)), log);
         else tDisc(LX(c, dy), t.y + dy, LZ(c, dy), rr, log);
     }
     double rb = r0 + flare;
-    int ri = ceilD_X(rb);
+    int ri = ceilD_N(rb);
     for (int dx = -ri; dx <= ri; dx++)
         for (int dz = -ri; dz <= ri; dz++) {
-            int bx = floorD_X(LX(c, from)) + dx, bz = floorD_X(LZ(c, from)) + dz;
+            int bx = floorD_N(LX(c, from)) + dx, bz = floorD_N(LZ(c, from)) + dz;
             if (tIsLog(bx, t.y + from, bz)) tSink(bx, t.y + from, bz, log, 4 + t.water);
         }
 }
@@ -2011,16 +2116,16 @@ void trunkDraw(Grow t, Line c, int from, int to, double r0, double r1, double fl
 void roots(Grow t, double cx, double cz, double r0, int count, double len0, double len1, int rise) {
     uint log = spU(t.sp, S_LOG);
     for (int i = 0; i < count; i++) {
-        double a = divD_X((double(i) + rngDouble() * 0.6l) * PI_D * 2.0l, double(count));
+        double a = divD_N((double(i) + rngDouble() * 0.6l) * PI_D * 2.0l, double(count));
         double len = gu(len0, len1);
-        double ca = cosS_X(a), sa = sinS_X(a);
+        double ca = cosS_N(a), sa = sinS_N(a);
         double sx = cx + ca * r0, sz = cz + sa * r0;
         double mx = cx + ca * (r0 + len * 0.45l), mz = cz + sa * (r0 + len * 0.45l);
         double ex = cx + ca * (r0 + len), ez = cz + sa * (r0 + len);
         double my = double(t.y) + double(rise) * 0.45l;
         tBranch(sx, double(t.y + rise), sz, mx, my, mz, 0.0l, 0.0l, log);
         tBranch(mx, my, mz, ex, double(t.y - 1), ez, 0.0l, 0.0l, log);
-        tSink(floorD_X(ex), t.y - 1, floorD_X(ez), axisOf(log, 1u), 2);
+        tSink(floorD_N(ex), t.y - 1, floorD_N(ez), axisOf(log, 1u), 2);
     }
 }
 [noinline]
@@ -2029,31 +2134,30 @@ void tier(Grow t, double cx, int y, double cz, double rad, double tr) {
     double a0 = gAngle();
     double ang[8], len[8];
     for (int i = 0; i < n; i++) {
-        ang[i] = a0 + divD_X(double(i) * PI_D * 2.0l, double(n)) + (rngDouble() - 0.5l) * 0.7l;
+        ang[i] = a0 + divD_N(double(i) * PI_D * 2.0l, double(n)) + (rngDouble() - 0.5l) * 0.7l;
         len[i] = rad * gu(0.72l, 1.08l);
         if (rad >= 2.6l) {
             double bl = len[i] * 0.35l + tr;
-            tBranch(cx, double(y) + 0.5l, cz, cx + cosS_X(ang[i]) * bl, double(y) + 0.5l - double(spF(t.sp, S_DROOP)) * 0.4l,
-                    cz + sinS_X(ang[i]) * bl, 0.0l, 0.0l, spU(t.sp, S_LOG));
+            tBranch(cx, double(y) + 0.5l, cz, cx + cosS_N(ang[i]) * bl, double(y) + 0.5l - double(spF(t.sp, S_DROOP)) * 0.4l,
+                    cz + sinS_N(ang[i]) * bl, 0.0l, 0.0l, spU(t.sp, S_LOG));
         }
     }
-    treeTrace(63u, t.x, t.y, t.z, bitsMix(ang[n - 1], len[n - 1], a0));
-    int ri = ceilD_X(rad + tr);
-    int bx = floorD_X(cx), bz = floorD_X(cz);
+    int ri = ceilD_N(rad + tr);
+    int bx = floorD_N(cx), bz = floorD_N(cz);
     for (int dx = -ri; dx <= ri; dx++)
         for (int dz = -ri; dz <= ri; dz++) {
             double fx = double(bx + dx) + 0.5l - cx, fz = double(bz + dz) + 0.5l - cz;
-            double d = sqrtD_X(fx * fx + fz * fz) - tr;
+            double d = sqrtD_N(fx * fx + fz * fz) - tr;
             if (d > rad + 0.5l) continue;
-            double th = atan2S_X(fz, fx);
+            double th = atan2S_N(fz, fx);
             double reach = 0.0l;
             for (int i = 0; i < n; i++) {
-                double cs = cosS_X(th - ang[i]);
+                double cs = cosS_N(th - ang[i]);
                 if (cs > 0.0l) reach = dmax(reach, len[i] * (0.55l + 0.45l * cs * cs * cs));
             }
             reach = dmax(reach, dmin(1.5l, rad));
             if (d > reach + (rngDouble() - 0.5l) * 0.8l) continue;
-            double rel = divD_X(d, dmax(1.0l, rad));
+            double rel = divD_N(d, dmax(1.0l, rad));
             int droop = rel > 0.5l ? int(jroundD(double(spF(t.sp, S_DROOP)) * (rel - 0.5l) * 2.2l)) : 0;
             tLeaf(bx + dx, y - droop, bz + dz, t.leaves);
             if (rel < 0.4l || (rel < 0.65l && rngIntB(3) == 0)) tLeaf(bx + dx, y + 1 - droop, bz + dz, t.leaves);
@@ -2081,34 +2185,31 @@ void shConifer(Grow t) {
     }
     int cb = imax(1, d2i(double(h) * gu(double(spF(sp, S_BASE0)), double(spF(sp, S_BASE1)))));
     double rMax = double(spF(sp, S_RADIUS)) * gu(0.82l, 1.15l);
-    treeTrace(60u, t.x, t.y, t.z, bitsMix(double(cb), rMax, tr));
     for (int dy = 2; dy < cb; dy += 1 + rngIntB(2)) {
         if (rngFloat() < spF(sp, S_DEAD)) {
             double a = gAngle();
             double len = double(1 + rngIntB(2) + (tr > 0.0l ? 1 : 0));
-            double ex = LX(c, dy) + cosS_X(a) * (len + tr);
+            double ex = LX(c, dy) + cosS_N(a) * (len + tr);
             double ey = double(t.y + dy) + 0.5l - double(rngIntB(2));
-            tBranch(LX(c, dy), double(t.y + dy) + 0.5l, LZ(c, dy), ex, ey, LZ(c, dy) + sinS_X(a) * (len + tr), 0.0l, 0.0l, spU(sp, S_LOG));
+            tBranch(LX(c, dy), double(t.y + dy) + 0.5l, LZ(c, dy), ex, ey, LZ(c, dy) + sinS_N(a) * (len + tr), 0.0l, 0.0l, spU(sp, S_LOG));
         }
     }
     int top = h;
     int dy = top - 1;
     for (int guard = 0; guard < 256 && dy >= cb; guard++) {
-        double tt = divD_X(double(dy - cb), double(imax(1, top - cb)));
+        double tt = divD_N(double(dy - cb), double(imax(1, top - cb)));
         double rad;
         if (spU(sp, S_UMBRELLA) != 0u)
-            rad = 1.2l + rMax * powD_X(sinS_X(PI_D * dmin(1.0l, 0.25l + tt * 0.85l)), 0.7l) * gu(0.8l, 1.1l);
+            rad = 1.2l + rMax * powD_N(sinS_N(PI_D * dmin(1.0l, 0.25l + tt * 0.85l)), 0.7l) * gu(0.8l, 1.1l);
         else
-            rad = 0.9l + rMax * powD_X(1.0l - tt, 0.85l) * gu(0.78l, 1.15l);
+            rad = 0.9l + rMax * powD_N(1.0l - tt, 0.85l) * gu(0.78l, 1.15l);
         bool gap = tt > 0.12l && tt < 0.8l && rngFloat() < spF(sp, S_GAPS);
-        treeTrace(61u, t.x, t.y, t.z, bitsMix(rad, LX(c, dy), LZ(c, dy)));
         if (!gap) tier(t, LX(c, dy), t.y + dy, LZ(c, dy), rad, tr);
-        treeTrace(62u, t.x, t.y, t.z, uint(dy));
         dy -= rad > 3.2l ? 2 + rngIntB(2) : 2;
     }
     double sx = LX(c, top), sz = LZ(c, top);
     int sy = t.y + top;
-    int fsx = floorD_X(sx), fsz = floorD_X(sz);
+    int fsx = floorD_N(sx), fsz = floorD_N(sz);
     tLeaf(fsx, sy + 1, fsz, t.leaves);
     if (rngBool()) tLeaf(fsx, sy + 2, fsz, t.leaves);
     for (uint d = 0; d < 4u; d++) {
@@ -2127,12 +2228,10 @@ void shBroadleaf(Grow t) {
     int h = gHeight(t);
     Line c = lineOf();
     trunkLine(t, h, 1.0l, c);
-    treeTrace(10u, t.x, t.y, t.z, uint(h));
     int trunk = spI(sp, S_TRUNK);
     double tr = trunk >= 3 ? gu(1.5l, 2.2l) : (trunk == 2 ? gu(0.85l, 1.15l) : 0.0l);
     int fork = imax(2, d2i(double(h) * gu(double(spF(sp, S_BASE0)), double(spF(sp, S_BASE1)))));
     trunkDraw(t, c, 0, fork, tr, tr * 0.8l, tr > 0.0l ? 0.7l + tr * 0.25l : 0.0l);
-    treeTrace(11u, t.x, t.y, t.z, uint(fork));
     if (spF(sp, S_ROOTS) > 0.0f && rngFloat() < spF(sp, S_ROOTS)) {
         int cnt = 3 + rngIntB(3);
         roots(t, LX(c, 0), LZ(c, 0), tr * 0.8l + 0.3l, cnt, 1.2l, 2.5l + tr, tr > 1.0l ? 2 : 1);
@@ -2140,33 +2239,27 @@ void shBroadleaf(Grow t) {
     double crownR = double(spF(sp, S_RADIUS)) * gu(0.85l, 1.15l);
     double fx = LX(c, fork), fz = LZ(c, fork);
     int limbs = spI(sp, S_LIMBS) + rngIntB(2);
-    treeTrace(12u, t.x, t.y, t.z, uint(limbs));
     double a0 = gAngle();
     double wind = double(spF(sp, S_WIND));
     double crownH = double(h - fork);
     uint log = spU(sp, S_LOG);
     double clumpF = double(spF(sp, S_CLUMP));
     for (int i = 0; i < limbs; i++) {
-        double az = a0 + divD_X(double(i) * PI_D * 2.0l, double(limbs)) + (rngDouble() - 0.5l) * 0.9l;
+        double az = a0 + divD_N(double(i) * PI_D * 2.0l, double(limbs)) + (rngDouble() - 0.5l) * 0.9l;
         if (wind > 0.0l) {
-            double rel = divD_X(wrapDegrees_X((az - t.windAngle) * RAD2DEG), 180.0l);
+            double rel = divD_N(wrapDegrees_N((az - t.windAngle) * RAD2DEG), 180.0l);
             az = t.windAngle + rel * PI_D * (1.0l - wind * 0.6l);
         }
         float lerp = 72.0f + spF(sp, S_SPREAD) * (18.0f - 72.0f);  // Mth.lerp(float, 72, 18)
         double elev = (double(lerp) + (rngDouble() - 0.5l) * 24.0l) * DEG2RAD;
-        double len = dmax(2.5l, hypotS_X(crownR * 0.72l, crownH * 0.75l) * gu(0.75l, 1.05l));
+        double len = dmax(2.5l, hypotS_N(crownR * 0.72l, crownH * 0.75l) * gu(0.75l, 1.05l));
         int ri2 = rngIntB(2);
         double sy = double(t.y + fork + ri2 - (i % 2));
-        double ca = cosS_X(az), sa = sinS_X(az), ce = cosS_X(elev), se = sinS_X(elev);
+        double ca = cosS_N(az), sa = sinS_N(az), ce = cosS_N(elev), se = sinS_N(elev);
         double ex = fx + ca * ce * len, ez = fz + sa * ce * len, ey = sy + se * len;
         bool deadLimb = rngFloat() < spF(sp, S_DEAD);
-        treeTrace(24u, t.x, t.y, t.z, bitsMix(az, elev, len));
-        treeTrace(25u, t.x, t.y, t.z, bitsMix(fx, fz, sy));
-        int64_t mk = int64_t(floorD_X(ex * 16.0l)) * 1000003 + int64_t(floorD_X(ey * 16.0l)) * 1009 + int64_t(floorD_X(ez * 16.0l));
-        treeTrace(20u, t.x, t.y, t.z, uint(uint64_t(mk) & 0xFFFFFFFFu));
         tBranch(fx, sy, fz, ex, ey, ez, tr > 1.0l ? tr * 0.55l : 0.0l, 0.0l, log);
         uint lv = clumpLeaves(t);
-        treeTrace(21u, t.x, t.y, t.z, deadLimb ? 1u : 0u);
         int shoots = 1 + rngIntB(2) + (trunk >= 3 ? 1 : 0);
         for (int k = 0; k < shoots; k++) {
             double tt = gu(0.45l, 0.85l);
@@ -2175,24 +2268,20 @@ void shBroadleaf(Grow t) {
             double saz = az + sign * gu(0.5l, 1.1l);
             double sel = elev + gu(-0.1l, 0.35l);
             double sl = len * gu(0.35l, 0.6l);
-            double cs2 = cosS_X(sel);
-            double qx = px + cosS_X(saz) * cs2 * sl, qz = pz + sinS_X(saz) * cs2 * sl;
-            double qy = py + sinS_X(sel) * sl;
+            double cs2 = cosS_N(sel);
+            double qx = px + cosS_N(saz) * cs2 * sl, qz = pz + sinS_N(saz) * cs2 * sl;
+            double qy = py + sinS_N(sel) * sl;
             tBranch(px, py, pz, qx, qy, qz, 0.0l, 0.0l, log);
             if (!deadLimb) leafClump(t, qx, qy + 0.5l, qz, clumpF * gu(0.75l, 1.0l), lv);
         }
-        treeTrace(22u, t.x, t.y, t.z, uint(shoots));
         if (!deadLimb) leafClump(t, ex, ey + 0.5l, ez, clumpF * gu(0.9l, 1.2l), lv);
-        treeTrace(23u, t.x, t.y, t.z, 0u);
     }
-    double lx = LX(c, h) + (wind > 0.0l ? cosS_X(t.windAngle) * wind * 1.5l : 0.0l);
-    double lz = LZ(c, h) + (wind > 0.0l ? sinS_X(t.windAngle) * wind * 1.5l : 0.0l);
+    double lx = LX(c, h) + (wind > 0.0l ? cosS_N(t.windAngle) * wind * 1.5l : 0.0l);
+    double lz = LZ(c, h) + (wind > 0.0l ? sinS_N(t.windAngle) * wind * 1.5l : 0.0l);
     tBranch(fx, double(t.y + fork), fz, lx, double(t.y + h - 1), lz, tr > 1.0l ? tr * 0.5l : 0.0l, 0.0l, log);
-    treeTrace(30u, t.x, t.y, t.z, 0u);
     double lr = clumpF * gu(0.95l, 1.25l);
     uint llv = clumpLeaves(t);
     leafClump(t, lx, double(t.y + h), lz, lr, llv);
-    treeTrace(31u, t.x, t.y, t.z, 0u);
     double midY = double(t.y + fork) + crownH * 0.65l;
     uint mlv = clumpLeaves(t);
     tClump(fx + (lx - fx) * 0.6l, midY, fz + (lz - fz) * 0.6l, crownR * 0.55l, dmax(1.5l, crownH * 0.35l), crownR * 0.55l, mlv, 0.7l);
@@ -2216,11 +2305,11 @@ void shAspen(Grow t) {
         int clumps = 3 + rngIntB(3);
         uint mainLv = clumpLeaves(t);
         for (int k = 0; k < clumps; k++) {
-            double tt = divD_X(double(k) + rngDouble() * 0.6l, double(clumps));
+            double tt = divD_N(double(k) + rngDouble() * 0.6l, double(clumps));
             int dy = cb + int(jroundD(double(h - cb) * tt));
             dy = imin(dy, h);
             double a = gAngle(), off = gu(0.2l, 1.3l) * (1.0l - tt * 0.6l);
-            double px = LX(c, dy) + cosS_X(a) * off, pz = LZ(c, dy) + sinS_X(a) * off;
+            double px = LX(c, dy) + cosS_N(a) * off, pz = LZ(c, dy) + sinS_N(a) * off;
             double rr = double(spF(sp, S_RADIUS)) * gu(0.75l, 1.1l) * (1.05l - tt * 0.35l);
             uint lv = rngFloat() < spF(sp, S_ACCENT_CH) ? leafFor(t, true) : mainLv;
             if (off > 0.8l) tBranch(LX(c, dy), double(t.y + dy), LZ(c, dy), px, double(t.y + dy + 1), pz, 0.0l, 0.0l, spU(sp, S_LOG));
@@ -2245,9 +2334,9 @@ void shWillow(Grow t) {
     double a0 = gAngle();
     double clumpF = double(spF(sp, S_CLUMP));
     for (int i = 0; i < limbs; i++) {
-        double az = a0 + divD_X(double(i) * PI_D * 2.0l, double(limbs)) + (rngDouble() - 0.5l) * 0.7l;
+        double az = a0 + divD_N(double(i) * PI_D * 2.0l, double(limbs)) + (rngDouble() - 0.5l) * 0.7l;
         double outv = crownR * gu(0.5l, 0.8l), up = gu(2.0l, double(h - fork) + 1.5l);
-        double ex = fx + cosS_X(az) * outv, ez = fz + sinS_X(az) * outv, ey = double(t.y + fork) + up;
+        double ex = fx + cosS_N(az) * outv, ez = fz + sinS_N(az) * outv, ey = double(t.y + fork) + up;
         tBranch(fx, double(t.y + fork), fz, ex, ey, ez, 0.0l, 0.0l, spU(sp, S_LOG));
         double rx = clumpF * gu(0.9l, 1.2l);
         double rz = clumpF * gu(0.9l, 1.2l);
@@ -2266,19 +2355,19 @@ void shColumnar(Grow t) {
     double rMax = double(spF(t.sp, S_RADIUS)) * gu(0.8l, 1.2l);
     double peak = gu(0.22l, 0.38l);
     for (int dy = 1; dy <= h + 1; dy++) {
-        double tt = divD_X(double(dy), double(h + 1));
-        double rr = tt < peak ? rMax * powD_X(divD_X(tt, peak), 0.5l) : rMax * powD_X(divD_X(1.0l - tt, 1.0l - peak), 0.8l);
+        double tt = divD_N(double(dy), double(h + 1));
+        double rr = tt < peak ? rMax * powD_N(divD_N(tt, peak), 0.5l) : rMax * powD_N(divD_N(1.0l - tt, 1.0l - peak), 0.8l);
         rr = dmax(rr, 0.6l);
         int cy = imin(dy, h);
-        int bx = floorD_X(LX(c, cy)), bz = floorD_X(LZ(c, cy));
-        int ri = ceilD_X(rr);
+        int bx = floorD_N(LX(c, cy)), bz = floorD_N(LZ(c, cy));
+        int ri = ceilD_N(rr);
         for (int dx = -ri; dx <= ri; dx++)
             for (int dz = -ri; dz <= ri; dz++) {
-                double d = sqrtD_X(double(dx * dx + dz * dz));
+                double d = sqrtD_N(double(dx * dx + dz * dz));
                 if (d <= rr + (rngDouble() - 0.5l) * 0.7l) tLeaf(bx + dx, t.y + dy, bz + dz, t.leaves);
             }
     }
-    tLeaf(floorD_X(LX(c, h)), t.y + h + 2, floorD_X(LZ(c, h)), t.leaves);
+    tLeaf(floorD_N(LX(c, h)), t.y + h + 2, floorD_N(LZ(c, h)), t.leaves);
 }
 [noinline]
 void shBaldCypress(Grow t) {
@@ -2291,7 +2380,7 @@ void shBaldCypress(Grow t) {
     int knees = 2 + rngIntB(4);
     for (int i = 0; i < knees; i++) {
         double a = gAngle(), d = gu(2.5l, 5.5l);
-        int kx = floorD_X(LX(c, 0) + cosS_X(a) * d), kz = floorD_X(LZ(c, 0) + sinS_X(a) * d);
+        int kx = floorD_N(LX(c, 0) + cosS_N(a) * d), kz = floorD_N(LZ(c, 0) + sinS_N(a) * d);
         int fl = floraGround(sB.box, kx, kz, t.y);
         if (fl == NONE || iabs(fl - t.y) > 2) continue;
         int kh = 1 + t.water / 2 + (rngIntB(3) == 0 ? 1 : 0);
@@ -2308,9 +2397,9 @@ void shBaldCypress(Grow t) {
         int arms = 3 + rngIntB(3);
         double a0 = gAngle();
         for (int i = 0; i < arms; i++) {
-            double a = a0 + divD_X(double(i) * PI_D * 2.0l, double(arms)) + gu(-0.4l, 0.4l);
+            double a = a0 + divD_N(double(i) * PI_D * 2.0l, double(arms)) + gu(-0.4l, 0.4l);
             double al = pr * gu(0.45l, 0.75l);
-            double ax = px + cosS_X(a) * al, az = pz + sinS_X(a) * al;
+            double ax = px + cosS_N(a) * al, az = pz + sinS_N(a) * al;
             tBranch(px, double(py - 1), pz, ax, double(py), az, 0.0l, 0.0l, spU(sp, S_LOG));
             tPad(ax, py + 1, az, pr * 0.5l, pr * 0.5l, t.leaves, 0.6l, true);
         }
@@ -2328,18 +2417,18 @@ void shMangrove(Grow t) {
     uint rootBlock = spU(sp, S_EXTRA) != NO_STATE ? spU(sp, S_EXTRA) : spU(sp, S_LOG);
     int nroots = 5 + rngIntB(4);
     for (int i = 0; i < nroots; i++) {
-        double a = divD_X((double(i) + rngDouble() * 0.6l) * PI_D * 2.0l, double(nroots));
+        double a = divD_N((double(i) + rngDouble() * 0.6l) * PI_D * 2.0l, double(nroots));
         double outv = gu(2.0l, 4.2l);
         int startY = lift - rngIntB(2);
         double sx = LX(c, startY), sz = LZ(c, startY);
-        int steps = ceilD_X(outv * 2.0l);
-        double ca = cosS_X(a), sa = sinS_X(a);
+        int steps = ceilD_N(outv * 2.0l);
+        double ca = cosS_N(a), sa = sinS_N(a);
         for (int s = 0; s <= steps; s++) {
-            double tt = divD_X(double(s), double(steps));
+            double tt = divD_N(double(s), double(steps));
             double rx = sx + ca * outv * tt, rz = sz + sa * outv * tt;
             int ry = t.y + int(jroundD(double(startY) * (1.0l - tt * tt))) - (tt > 0.9l ? 1 : 0);
-            tAnchor(floorD_X(rx), ry, floorD_X(rz), rootBlock);
-            if (tt > 0.85l) tSink(floorD_X(rx), ry, floorD_X(rz), rootBlock, 3);
+            tAnchor(floorD_N(rx), ry, floorD_N(rz), rootBlock);
+            if (tt > 0.85l) tSink(floorD_N(rx), ry, floorD_N(rz), rootBlock, 3);
         }
     }
     trunkDraw(t, c, lift, h + lift, 0.0l, 0.0l, 0.0l);
@@ -2348,7 +2437,7 @@ void shMangrove(Grow t) {
     int clumps = 3 + rngIntB(3);
     for (int k = 0; k < clumps; k++) {
         double a = gAngle(), d = gu(0.5l, crownR * 0.6l);
-        double px = LX(c, top) + cosS_X(a) * d, pz = LZ(c, top) + sinS_X(a) * d;
+        double px = LX(c, top) + cosS_N(a) * d, pz = LZ(c, top) + sinS_N(a) * d;
         int py = t.y + top - rngIntB(3);
         tBranch(LX(c, top - 2), double(t.y + top - 2), LZ(c, top - 2), px, double(py), pz, 0.0l, 0.0l, spU(sp, S_LOG));
         leafClump(t, px, double(py) + 0.5l, pz, double(spF(sp, S_CLUMP)) * gu(0.9l, 1.2l), t.leaves);
@@ -2363,13 +2452,13 @@ void shPalm(Grow t) {
     double bend = double(spF(sp, S_LEAN)) * gu(0.4l, 1.2l);
     double sx = 0.0l, sz = 0.0l;
     int tx = t.x, tz = t.z;
-    double ca = cosS_X(a), sa = sinS_X(a);
+    double ca = cosS_N(a), sa = sinS_N(a);
     uint log = spU(sp, S_LOG);
     for (int dy = 0; dy < h; dy++) {
-        double tt = divD_X(double(dy), double(h));
+        double tt = divD_N(double(dy), double(h));
         sx = double(t.x) + 0.5l + ca * bend * double(h) * tt * tt;
         sz = double(t.z) + 0.5l + sa * bend * double(h) * tt * tt;
-        int nx = floorD_X(sx), nz = floorD_X(sz);
+        int nx = floorD_N(sx), nz = floorD_N(sz);
         if (dy > 0 && (nx != tx || nz != tz)) tLog(nx, t.y + dy - 1, nz, log);
         tx = nx;
         tz = nz;
@@ -2383,22 +2472,22 @@ void shPalm(Grow t) {
     int n = date ? spI(sp, S_LIMBS) + rngIntB(3) : 7 + rngIntB(4);
     double a0 = gAngle();
     for (int i = 0; i < n; i++) {
-        double fa = a0 + divD_X(double(i) * PI_D * 2.0l, double(n)) + gu(-0.3l, 0.3l);
+        double fa = a0 + divD_N(double(i) * PI_D * 2.0l, double(n)) + gu(-0.3l, 0.3l);
         double len = double(spF(sp, S_RADIUS)) * gu(0.75l, 1.15l);
         double rise = date ? gu(0.3l, 1.0l) : gu(0.6l, 1.4l);
         int px = NONE, py = 0, pz = 0;
-        double cf = cosS_X(fa), sf = sinS_X(fa);
+        double cf = cosS_N(fa), sf = sinS_N(fa);
         double pa = fa + TWO_PI_HALF;
-        double cp = cosS_X(pa), sp2 = sinS_X(pa);
+        double cp = cosS_N(pa), sp2 = sinS_N(pa);
         for (double s = 0.8l; s <= len; s += 0.5l) {
-            double tt = divD_X(s, len);
-            int fx = floorD_X(double(tx) + 0.5l + cf * s), fz = floorD_X(double(tz) + 0.5l + sf * s);
+            double tt = divD_N(s, len);
+            int fx = floorD_N(double(tx) + 0.5l + cf * s), fz = floorD_N(double(tz) + 0.5l + sf * s);
             int fy = top + int(jroundD(rise * 2.0l * tt - (rise * 2.0l + (date ? 2.2l : 3.4l)) * tt * tt));
             if (px != NONE && fy < py - 1) tLeaf(fx, fy + 1, fz, t.leaves);
             tLeaf(fx, fy, fz, t.leaves);
             if (tt > 0.25l && tt < 0.75l) {
-                tLeaf(floorD_X(double(fx) + 0.5l + cp), fy, floorD_X(double(fz) + 0.5l + sp2), t.leaves);
-                tLeaf(floorD_X(double(fx) + 0.5l - cp), fy, floorD_X(double(fz) + 0.5l - sp2), t.leaves);
+                tLeaf(floorD_N(double(fx) + 0.5l + cp), fy, floorD_N(double(fz) + 0.5l + sp2), t.leaves);
+                tLeaf(floorD_N(double(fx) + 0.5l - cp), fy, floorD_N(double(fz) + 0.5l - sp2), t.leaves);
             }
             px = fx;
             py = fy;
@@ -2420,9 +2509,9 @@ void shAcacia(Grow t) {
     double crownY = double(t.y + h);
     double radius = double(spF(sp, S_RADIUS));
     for (int i = 0; i < limbs; i++) {
-        double az = a0 + divD_X(double(i) * PI_D * 2.0l, double(limbs)) + gu(-0.5l, 0.5l);
+        double az = a0 + divD_N(double(i) * PI_D * 2.0l, double(limbs)) + gu(-0.5l, 0.5l);
         double outv = radius * gu(0.45l, 0.85l);
-        double ex = LX(c, fork) + cosS_X(az) * outv, ez = LZ(c, fork) + sinS_X(az) * outv;
+        double ex = LX(c, fork) + cosS_N(az) * outv, ez = LZ(c, fork) + sinS_N(az) * outv;
         double ey = crownY - double(rngIntB(2));
         tBranch(LX(c, fork), double(t.y + fork), LZ(c, fork), ex, ey, ez, 0.0l, 0.0l, spU(sp, S_LOG));
         double pr = radius * gu(0.6l, 0.95l);
@@ -2440,21 +2529,21 @@ void shBaobab(Grow t) {
     trunkLine(t, h, 0.2l, c);
     uint log = axisOf(spU(sp, S_LOG), 1u);
     for (int dy = 0; dy <= h; dy++) {
-        double tt = divD_X(double(dy), double(h));
-        double rr = rb * (1.0l + 0.12l * sinS_X(tt * PI_D * 1.2l) - 0.55l * powD_X(tt, 1.6l));
+        double tt = divD_N(double(dy), double(h));
+        double rr = rb * (1.0l + 0.12l * sinS_N(tt * PI_D * 1.2l) - 0.55l * powD_N(tt, 1.6l));
         tDisc(LX(c, dy), t.y + dy, LZ(c, dy), rr, log);
     }
-    int ri = ceilD_X(rb);
-    int fx0 = floorD_X(LX(c, 0)), fz0 = floorD_X(LZ(c, 0));
+    int ri = ceilD_N(rb);
+    int fx0 = floorD_N(LX(c, 0)), fz0 = floorD_N(LZ(c, 0));
     for (int dx = -ri; dx <= ri; dx++)
         for (int dz = -ri; dz <= ri; dz++)
             if (tIsLog(fx0 + dx, t.y, fz0 + dz)) tSink(fx0 + dx, t.y, fz0 + dz, log, 4);
     int n = spI(sp, S_LIMBS) + rngIntB(3);
     double a0 = gAngle();
     for (int i = 0; i < n; i++) {
-        double az = a0 + divD_X(double(i) * PI_D * 2.0l, double(n)) + gu(-0.4l, 0.4l);
+        double az = a0 + divD_N(double(i) * PI_D * 2.0l, double(n)) + gu(-0.4l, 0.4l);
         double outv = gu(2.5l, 5.0l), up = gu(1.0l, 3.5l);
-        double ca = cosS_X(az), sa = sinS_X(az);
+        double ca = cosS_N(az), sa = sinS_N(az);
         double sx = LX(c, h) + ca * 0.8l, sz = LZ(c, h) + sa * 0.8l;
         double ex = sx + ca * outv, ez = sz + sa * outv, ey = double(t.y + h) + up;
         tBranch(sx, double(t.y + h), sz, ex, ey, ez, 0.0l, 0.0l, spU(sp, S_LOG));
@@ -2480,7 +2569,7 @@ void shJungle(Grow t) {
     for (int k = 0; k < side; k++) {
         int dy = d2i(double(h) * gu(0.5l, 0.82l));
         double a = gAngle(), l = gu(2.0l, 4.0l) + tr;
-        double ex = LX(c, dy) + cosS_X(a) * l, ez = LZ(c, dy) + sinS_X(a) * l;
+        double ex = LX(c, dy) + cosS_N(a) * l, ez = LZ(c, dy) + sinS_N(a) * l;
         tBranch(LX(c, dy), double(t.y + dy), LZ(c, dy), ex, double(t.y + dy + 2), ez, 0.0l, 0.0l, log);
         tClump(ex, double(t.y + dy) + 2.5l, ez, clumpF * 0.7l, 1.4l, clumpF * 0.7l, t.leaves, 0.45l);
     }
@@ -2488,7 +2577,7 @@ void shJungle(Grow t) {
     double crownR = double(spF(sp, S_RADIUS)) * gu(0.85l, 1.15l);
     for (int k = 0; k < clumps; k++) {
         double a = gAngle(), d = gu(1.0l, crownR * 0.65l);
-        double ex = LX(c, h) + cosS_X(a) * d, ez = LZ(c, h) + sinS_X(a) * d;
+        double ex = LX(c, h) + cosS_N(a) * d, ez = LZ(c, h) + sinS_N(a) * d;
         int ey = t.y + h - rngIntB(3);
         tBranch(LX(c, h - 3), double(t.y + h - 3), LZ(c, h - 3), ex, double(ey), ez, 0.0l, 0.0l, log);
         double rx = clumpF * gu(0.9l, 1.2l);
@@ -2497,14 +2586,14 @@ void shJungle(Grow t) {
     }
     tClump(LX(c, h), double(t.y + h) + 1.5l, LZ(c, h), clumpF * 0.9l, clumpF * 0.55l, clumpF * 0.9l, t.leaves, 0.3l);
     tHangVines(double(spF(sp, S_VINES)), 7);
-    int bx = floorD_X(LX(c, 0)), bz = floorD_X(LZ(c, 0));
+    int bx = floorD_N(LX(c, 0)), bz = floorD_N(LZ(c, 0));
     tTrunkVines(bx + int(jroundD(tr)), t.y, t.y + h - 4, bz, 0.5l);
     if (tr == 0.0l && spU(sp, S_JUNGLELOG) != 0u) {
         for (uint d = 0; d < 4u; d++) {
             if (rngIntB(4) != 0) continue;
             int dy = 2 + rngIntB(imax(1, h / 2));
             int age = rngIntB(3);
-            tExtra(floorD_X(LX(c, dy)) + hdx(d), t.y + dy, floorD_X(LZ(c, dy)) + hdz(d), tconst(TCN_COCOA + d * 3u + uint(age)));
+            tExtra(floorD_N(LX(c, dy)) + hdx(d), t.y + dy, floorD_N(LZ(c, dy)) + hdz(d), tconst(TCN_COCOA + d * 3u + uint(age)));
         }
     }
 }
@@ -2521,23 +2610,23 @@ void shTwisted(Grow t) {
         setL(c, dy, cx, cz);
         if (dy >= straight) {
             double step = double(spF(sp, S_LEAN)) * 2.2l * gu(0.5l, 1.3l);
-            cx += cosS_X(la) * step;
-            cz += sinS_X(la) * step;
+            cx += cosS_N(la) * step;
+            cz += sinS_N(la) * step;
             la += gu(-0.7l, 0.7l);
         }
     }
     uint log = spU(sp, S_LOG);
     for (int dy = 0; dy < h; dy++) tBranch(LX(c, dy), double(t.y + dy), LZ(c, dy), LX(c, dy + 1), double(t.y + dy + 1), LZ(c, dy + 1), 0.0l, 0.0l, log);
-    tSink(floorD_X(LX(c, 0)), t.y, floorD_X(LZ(c, 0)), axisOf(log, 1u), 3);
+    tSink(floorD_N(LX(c, 0)), t.y, floorD_N(LZ(c, 0)), axisOf(log, 1u), 3);
     int limbs = 3 + rngIntB(3);
     double a0 = gAngle();
     double radius = double(spF(sp, S_RADIUS));
     float wind = spF(sp, S_WIND);
     for (int i = 0; i < limbs; i++) {
-        int dy = imax(1, imin(h - 1, int(jroundD(double(h) * (0.3l + divD_X(0.6l * double(i), double(limbs))))) + rngIntB(2)));
+        int dy = imax(1, imin(h - 1, int(jroundD(double(h) * (0.3l + divD_N(0.6l * double(i), double(limbs))))) + rngIntB(2)));
         double a = wind > 0.0f && rngFloat() < wind ? t.windAngle + gu(-1.0l, 1.0l) : a0 + double(i) * 2.4l + gu(-0.5l, 0.5l);
-        double l = gu(1.5l, radius + 1.5l) * (1.1l - divD_X(0.4l * double(dy), double(h)));
-        double ex = LX(c, dy) + cosS_X(a) * l, ez = LZ(c, dy) + sinS_X(a) * l;
+        double l = gu(1.5l, radius + 1.5l) * (1.1l - divD_N(0.4l * double(dy), double(h)));
+        double ex = LX(c, dy) + cosS_N(a) * l, ez = LZ(c, dy) + sinS_N(a) * l;
         int ey = t.y + dy + rngIntB(2);
         tBranch(LX(c, dy), double(t.y + dy), LZ(c, dy), ex, double(ey), ez, 0.0l, 0.0l, log);
         if (rngFloat() < spF(sp, S_DEAD)) continue;
@@ -2569,18 +2658,18 @@ void shShrub(Grow t) {
         double ry = dmax(1.0l, rr * gu(0.6l, 0.85l));
         double rz = rr * gu(0.8l, 1.1l);
         uint lv = clumpLeaves(t);
-        tClump(double(t.x) + 0.5l + cosS_X(a) * d, double(t.y) + double(h) * 0.6l + 0.8l, double(t.z) + 0.5l + sinS_X(a) * d,
+        tClump(double(t.x) + 0.5l + cosS_N(a) * d, double(t.y) + double(h) * 0.6l + 0.8l, double(t.z) + 0.5l + sinS_N(a) * d,
                rr, ry, rz, lv, double(spF(sp, S_RAGGED)) + 0.2l);
     }
 }
 [noinline]
 int lying(Grow t, int x0, int z0, double a, int len, uint logBase, bool dress) {
-    double ca = cosS_X(a), sa = sinS_X(a);
+    double ca = cosS_N(a), sa = sinS_N(a);
     uint axis = absD2(ca) >= absD2(sa) ? 0u : 2u;
     uint log = axisOf(logBase, axis);
     int prevY = NONE, laid = 0, lx = NONE, lz = 0;
     for (double s = 0.0l; s < double(len); s += 0.75l) {
-        int x = floorD_X(double(x0) + 0.5l + ca * s), z = floorD_X(double(z0) + 0.5l + sa * s);
+        int x = floorD_N(double(x0) + 0.5l + ca * s), z = floorD_N(double(z0) + 0.5l + sa * s);
         if (x == lx && z == lz) continue;
         int y = floraGround(sB.box, x, z, prevY == NONE ? t.y : prevY);
         if (y == NONE) break;
@@ -2614,21 +2703,21 @@ void shDead(Grow t) {
     uint weathered = spU(sp, S_EXTRA) != NO_STATE ? axisOf(spU(sp, S_EXTRA), 1u) : log;
     for (int dy = 0; dy < standing; dy++) {
         uint s = rngIntB(6) == 0 ? weathered : log;
-        tLog(floorD_X(LX(c, dy)), t.y + dy, floorD_X(LZ(c, dy)), s);
+        tLog(floorD_N(LX(c, dy)), t.y + dy, floorD_N(LZ(c, dy)), s);
     }
-    tSink(floorD_X(LX(c, 0)), t.y, floorD_X(LZ(c, 0)), log, 3 + t.water);
+    tSink(floorD_N(LX(c, 0)), t.y, floorD_N(LZ(c, 0)), log, 3 + t.water);
     uint raw = spU(sp, S_LOG);
     if (spU(sp, S_WHORLS) != 0u) {
         for (int dy = d2i(double(standing) * 0.3l); dy < standing - 1; dy += 2 + rngIntB(2)) {
             int n = 3 + rngIntB(3);
             double a0 = gAngle();
-            double tt = divD_X(double(dy), double(h));
+            double tt = divD_N(double(dy), double(h));
             for (int i = 0; i < n; i++) {
                 if (rngIntB(3) == 0) continue;
-                double a = a0 + divD_X(double(i) * PI_D * 2.0l, double(n)) + gu(-0.6l, 0.6l);
+                double a = a0 + divD_N(double(i) * PI_D * 2.0l, double(n)) + gu(-0.6l, 0.6l);
                 double l = 0.8l + (1.0l - tt) * gu(0.3l, 1.6l);
                 int sy = t.y + dy + (rngIntB(3) == 0 ? 1 : 0);
-                double ex = LX(c, dy) + cosS_X(a) * l, ez = LZ(c, dy) + sinS_X(a) * l;
+                double ex = LX(c, dy) + cosS_N(a) * l, ez = LZ(c, dy) + sinS_N(a) * l;
                 int dropv = (l > 1.6l && rngBool()) ? 1 : 0;
                 tBranch(LX(c, dy), double(sy), LZ(c, dy), ex, double(sy - dropv), ez, 0.0l, 0.0l, raw);
                 if (spF(sp, S_ACCENT_CH) > 0.0f && rngFloat() < spF(sp, S_ACCENT_CH)) tClump(ex, double(sy), ez, 1.4l, 0.9l, 1.4l, t.leaves, 0.6l);
@@ -2640,20 +2729,20 @@ void shDead(Grow t) {
             int dy = imax(2, d2i(double(standing) * gu(0.45l, 0.95l)));
             dy = imin(dy, standing - 1);
             double a = gAngle(), el = gu(10.0l, 50.0l) * DEG2RAD, l = gu(1.2l, 3.2l);
-            double ce = cosS_X(el);
-            double ex = LX(c, dy) + cosS_X(a) * ce * l, ez = LZ(c, dy) + sinS_X(a) * ce * l;
-            double ey = double(t.y + dy) + sinS_X(el) * l;
+            double ce = cosS_N(el);
+            double ex = LX(c, dy) + cosS_N(a) * ce * l, ez = LZ(c, dy) + sinS_N(a) * ce * l;
+            double ey = double(t.y + dy) + sinS_N(el) * l;
             tBranch(LX(c, dy), double(t.y + dy), LZ(c, dy), ex, ey, ez, 0.0l, 0.0l, raw);
             if (l > 2.5l && rngIntB(3) == 0) {
                 double a2 = a + gu(-1.0l, 1.0l);
-                tBranch(ex, ey, ez, ex + cosS_X(a2), ey + 1.0l, ez + sinS_X(a2), 0.0l, 0.0l, raw);
+                tBranch(ex, ey, ez, ex + cosS_N(a2), ey + 1.0l, ez + sinS_N(a2), 0.0l, 0.0l, raw);
             }
         }
     }
     if (snapped) {
         double a = gAngle();
         int len = imin(8, h - standing + 1);
-        lying(t, floorD_X(LX(c, 0) + cosS_X(a) * 2.0l), floorD_X(LZ(c, 0) + sinS_X(a) * 2.0l), a, len, raw, false);
+        lying(t, floorD_N(LX(c, 0) + cosS_N(a) * 2.0l), floorD_N(LZ(c, 0) + sinS_N(a) * 2.0l), a, len, raw, false);
     }
 }
 [noinline]
@@ -2666,16 +2755,16 @@ void shFallenLog(Grow t) {
     if (laid < 3) return;
     if (spI(sp, S_TRUNK) >= 2) {
         double pa = a + TWO_PI_HALF;
-        lying(t, floorD_X(double(t.x) + 0.5l + cosS_X(pa)), floorD_X(double(t.z) + 0.5l + sinS_X(pa)), a, laid, raw, true);
+        lying(t, floorD_N(double(t.x) + 0.5l + cosS_N(pa)), floorD_N(double(t.z) + 0.5l + sinS_N(pa)), a, laid, raw, true);
     }
-    int bx = floorD_X(double(t.x) + 0.5l - cosS_X(a)), bz = floorD_X(double(t.z) + 0.5l - sinS_X(a));
+    int bx = floorD_N(double(t.x) + 0.5l - cosS_N(a)), bz = floorD_N(double(t.z) + 0.5l - sinS_N(a));
     if (rngIntB(3) == 0) {
         double pa = a + TWO_PI_HALF;
-        double cp = cosS_X(pa), sp2 = sinS_X(pa);
+        double cp = cosS_N(pa), sp2 = sinS_N(pa);
         for (int w = -2; w <= 2; w++)
             for (int up = 0; up <= 2; up++) {
                 if (iabs(w) + up > 3 || rngIntB(5) == 0) continue;
-                int px = floorD_X(double(bx) + 0.5l + cp * double(w)), pz = floorD_X(double(bz) + 0.5l + sp2 * double(w));
+                int px = floorD_N(double(bx) + 0.5l + cp * double(w)), pz = floorD_N(double(bz) + 0.5l + sp2 * double(w));
                 tExtra(px, t.y + up, pz, rngIntB(3) == 0 ? tconst(TCN_COARSE) : tconst(TCN_ROOTED));
             }
     } else if (rngBool()) {
@@ -2706,13 +2795,13 @@ void shBamboo(Grow t) {
     double rad = double(spF(t.sp, S_RADIUS)) * gu(0.8l, 1.2l);
     for (int i = 0; i < n; i++) {
         double a = gAngle();
-        double d = sqrtD_X(rngDouble()) * rad;
-        int x = floorD_X(double(t.x) + 0.5l + cosS_X(a) * d), z = floorD_X(double(t.z) + 0.5l + sinS_X(a) * d);
+        double d = sqrtD_N(rngDouble()) * rad;
+        int x = floorD_N(double(t.x) + 0.5l + cosS_N(a) * d), z = floorD_N(double(t.z) + 0.5l + sinS_N(a) * d);
         int y = floraGround(sB.box, x, z, t.y);
         if (y == NONE || iabs(y - t.y) > 3) continue;
         if (!bis(gGet(sB.box, x, y - 1, z), B_BAMBOO_SOIL)) continue;
         int hh = gHeight(t);
-        int h = d2i(double(hh) * (1.1l - divD_X(0.5l * d, rad)));
+        int h = d2i(double(hh) * (1.1l - divD_N(0.5l * d, rad)));
         for (int k = 0; k < h; k++) {
             uint lv = k >= h - 2 ? 2u : (k == h - 3 ? 1u : 0u);
             tExtra(x, y + k, z, tconst(TCN_BAMBOO + lv * 2u + (k == h - 1 ? 1u : 0u)));
@@ -2731,15 +2820,15 @@ void shCrystal(Grow t) {
     for (int i = 0; i < limbs; i++) {
         int dy = imax(2, d2i(double(h) * gu(0.45l, 0.9l)));
         double a = gAngle(), el = gu(30.0l, 65.0l) * DEG2RAD, l = gu(2.0l, double(spF(sp, S_RADIUS) + 1.0f));  // float + int: float
-        double ce = cosS_X(el);
-        double ex = LX(c, dy) + cosS_X(a) * ce * l, ez = LZ(c, dy) + sinS_X(a) * ce * l;
-        double ey = double(t.y + dy) + sinS_X(el) * l;
+        double ce = cosS_N(el);
+        double ex = LX(c, dy) + cosS_N(a) * ce * l, ez = LZ(c, dy) + sinS_N(a) * ce * l;
+        double ey = double(t.y + dy) + sinS_N(el) * l;
         tBranch(LX(c, dy), double(t.y + dy), LZ(c, dy), ex, ey, ez, 0.0l, 0.0l, t.leaves);
-        if (facing) tExtra(floorD_X(ex), floorD_X(ey) + 1, floorD_X(ez), spU(sp, S_EXTRA_UP));
+        if (facing) tExtra(floorD_N(ex), floorD_N(ey) + 1, floorD_N(ez), spU(sp, S_EXTRA_UP));
     }
     if (facing) {
         tBranch(LX(c, h - 2), double(t.y + h - 2), LZ(c, h - 2), LX(c, h), double(t.y + h), LZ(c, h), 0.0l, 0.0l, t.leaves);
-        tExtra(floorD_X(LX(c, h)), t.y + h + 1, floorD_X(LZ(c, h)), spU(sp, S_EXTRA_UP));
+        tExtra(floorD_N(LX(c, h)), t.y + h + 1, floorD_N(LZ(c, h)), spU(sp, S_EXTRA_UP));
     }
 }
 
@@ -2755,8 +2844,8 @@ uint treePick(uint cfg, int x, int z, double roll) {
     double w[24];
     double total = 0.0l;
     for (uint i = 0; i < n && i < 24u; i++) {
-        double nz = stands > 0.0f ? fbm_X(divD_X(double(x), scale), divD_X(double(z), scale), seed + 1013 * int64_t(i + 1u), 2) : 0.0l;
-        w[i] = double(int(fprog[cfg + 4 + i * 2])) * expS_X(double(stands) * 3.2l * nz);
+        double nz = stands > 0.0f ? fbm_N(divD_N(double(x), scale), divD_N(double(z), scale), seed + 1013 * int64_t(i + 1u), 2) : 0.0l;
+        w[i] = double(int(fprog[cfg + 4 + i * 2])) * expS_N(double(stands) * 3.2l * nz);
         total += w[i];
     }
     double tt = roll * total;
@@ -2778,9 +2867,7 @@ void treeTrace(uint stage, int x, int y, int z, uint extra) {
 }
 [noinline]
 bool placeTree(uint cfg, int x, int y, int z) {
-    treeTrace(0u, x, y, z, 0u);
     bool placed = placeTreeAt(cfg, x, y, z);
-    treeTrace(3u, x, y, z, placed ? 1u : 0u);
     return placed;
 }
 [noinline]
@@ -2789,7 +2876,6 @@ bool placeTreeAt(uint cfg, int x, int y, int z) {
     int64_t seed = int64_t(pfU64(H_SEED));
     uint sp = treePick(cfg, x, z, rngDouble());
     if (sp == NO_STATE) return false;
-    treeTrace(1u, x, y, z, spU(sp, S_SHAPE));
     if (!maskClear(x, z, spI(sp, S_REACH))) return false;
     int water = imax(0, heightAt(HM_WORLD_SURFACE, x, z) - y);
     if (water > spI(sp, S_MAXWATER)) return false;
@@ -2806,7 +2892,7 @@ bool placeTreeAt(uint cfg, int x, int y, int z) {
     fmInit(sB.logs, 16u);
     fmInit(sB.extras, 16u);
     fmInit(sB.anchors, 16u);
-    double wind = valueNoise_X(divD_X(double(x), 900.0l), divD_X(double(z), 900.0l), seed + 31) * PI_D * 0.8l + PI_D * 0.15l;
+    double wind = valueNoise_N(divD_N(double(x), 900.0l), divD_N(double(z), 900.0l), seed + 31) * PI_D * 0.8l + PI_D * 0.15l;
     Grow t;
     t.sp = sp;
     t.x = x; t.y = y; t.z = z;
@@ -2839,7 +2925,6 @@ bool placeTreeAt(uint cfg, int x, int y, int z) {
     else if (shape == SH_BAMBOO) shBamboo(t);
     else shCrystal(t);
     if (spU(sp, S_ACCENT_TOP) != 0u && t.accent != NO_STATE) tTint(t.leaves, t.accent, double(spF(sp, S_ACCENT_CH)), true);
-    treeTrace(2u, x, y, z, 0u);
     return tCommit(x, y, z);
 }
 
@@ -2931,9 +3016,9 @@ bool placeLake(uint cfg, int ox, int oy, int oz) {
         for (int xx = 1; xx < 15; xx++)
             for (int zz = 1; zz < 15; zz++)
                 for (int yy = 1; yy < 7; yy++) {
-                    double xd = divD_X(double(xx) - xp, xr / 2.0l);
-                    double yd = divD_X(double(yy) - yp, yr / 2.0l);
-                    double zd = divD_X(double(zz) - zp, zr / 2.0l);
+                    double xd = divD_N(double(xx) - xp, xr / 2.0l);
+                    double yd = divD_N(double(yy) - yp, yr / 2.0l);
+                    double zd = divD_N(double(zz) - zp, zr / 2.0l);
                     if (xd * xd + yd * yd + zd * zd < 1.0l) {
                         int b = (xx * 16 + zz) * 8 + yy;
                         scratch[grid + uint(b >> 5)] |= 1u << uint(b & 31);
@@ -3006,7 +3091,7 @@ bool scatterAlive(uint m, int64_t worldSeed, int h, int x, int z) {
     // the words: spacing, min distance, pad, density, floor, field
     float density = pfF(m + 4), floorV = pfF(m + 5);
     uint field = hdr(H_FIELDS) + fprog[m + 6] * FIELD_W;
-    double p = double(floorV) + double(density - floorV) * fieldSample_X(field, worldSeed, double(x), double(z));
+    double p = double(floorV) + double(density - floorV) * fieldSample_N(field, worldSeed, double(x), double(z));
     return unit01(int(uint(h) * 0x5BD1E995u ^ 0x68E31DA4u)) < p;
 }
 // the stack (x, y, z, modifier) and the outputs (x, y, z) in scratch
@@ -3103,7 +3188,7 @@ bool runPlaced<let T : uint>(uint rec, bool first, uint budget) {
         } else if (kind == M_FLORA_DENSITY) {
             float density = pfF(m + 1), floorV = pfF(m + 2);
             uint field = hdr(H_FIELDS) + fprog[m + 3] * FIELD_W;
-            double keepP = double(floorV) + double(density - floorV) * fieldSample_X(field, worldSeed, double(x), double(z));
+            double keepP = double(floorV) + double(density - floorV) * fieldSample_N(field, worldSeed, double(x), double(z));
             if (rngDouble() < keepP) out1(o, x, y, z);
         } else if (kind == M_MASK) {
             if (maskClear(x, z, int(fprog[m + 1]))) out1(o, x, y, z);
