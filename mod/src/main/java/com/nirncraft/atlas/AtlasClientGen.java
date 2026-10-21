@@ -95,7 +95,7 @@ final class AtlasClientGen implements AutoCloseable {
     // into the grid (atlas_gen_run + atlas_gen_ingest); the decorated chunks still go up through the uploader
     private final boolean direct;
     private final AtlasMaterials mats;
-    private final int[] farIds;          // per generator id: its far state id (0: not kept, like AtlasSections.ids)
+    private final int[] farIds;          // per generator id: its near id (AtlasClientSections.nearIdOf; 0: not kept)
     private final boolean[] solid;       // per generator id: renders as a full cube (AtlasSections.solidRock)
     private final boolean[] motionOrFluid, air;
     private final ThreadLocal<BiomeResolver> biomes;
@@ -159,7 +159,7 @@ final class AtlasClientGen implements AutoCloseable {
         air = new boolean[n];
         for (int i = 0; i < n; i++) {
             BlockState s = program.blocks.get(i);
-            farIds[i] = AtlasSections.kept(s) ? AtlasFarState.farId(s) : 0;
+            farIds[i] = AtlasClientSections.nearIdOf(s);  // (the client feed's rule: every block, full state, bricks)
             solid[i] = !s.isAir() && s.isSolidRender();
             motionOrFluid[i] = net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES.isOpaque().test(s);
             air[i] = s.isAir();
@@ -333,7 +333,7 @@ final class AtlasClientGen implements AutoCloseable {
         int[] far = new int[n];
         for (int i = 0; i < n; i++) {
             BlockState s = p.blocks.get(i);
-            far[i] = AtlasSections.kept(s) ? AtlasFarState.farId(s) : 0;
+            far[i] = AtlasClientSections.nearIdOf(s);  // (the client feed's rule: every block, full state, bricks)
             int f = (s.isAir() ? 1 : 0) | (!s.isAir() && s.isSolidRender() ? 2 : 0)
                     | (net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES.isOpaque().test(s) ? 4 : 0);
             w[2 + i * 2] = far[i];
@@ -347,7 +347,7 @@ final class AtlasClientGen implements AutoCloseable {
             w[tints + b * 2 + 1] = foliage;
             for (int i = 0; i < n; i++) {
                 BlockState st = p.blocks.get(i);
-                w[matBase + b * n + i] = far[i] == 0 ? 0 : mats.section(st, AtlasMaterials.tint(st, grass, foliage)) & 0xFFFF;
+                w[matBase + b * n + i] = far[i] == 0 ? 0 : mats.section(net.minecraft.world.level.block.Block.stateById(far[i]), AtlasMaterials.tint(st, grass, foliage)) & 0xFFFF;
             }
         }
         mats.flush(ctx);
@@ -1284,7 +1284,7 @@ final class AtlasClientGen implements AutoCloseable {
                         if (rock && (st.isAir() || !st.isSolidRender())) rock = false;
                         Integer id = ids.get(st);
                         if (id == null) {
-                            id = AtlasSections.kept(st) ? AtlasFarState.farId(st) : 0;
+                            id = AtlasClientSections.nearIdOf(st);
                             ids.put(st, id);
                         }
                         far[x + 16 * (z + 16 * y)] = id;

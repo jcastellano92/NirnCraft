@@ -91,6 +91,8 @@ public final class AtlasNearPass {
     // items (dropped, in frames, held by mobs, on campfires): vanilla's item shader is its entity shader on the same
     // vertex format without the per-face light, so they take near_entity too (our light, not the lightmap alone)
     private static final Identifier VANILLA_ITEM = Identifier.withDefaultNamespace("core/item");
+    // falling blocks, moving pistons (vanilla's block shader: no normal in its format; near_block takes the face's)
+    private static final Identifier VANILLA_BLOCK = Identifier.withDefaultNamespace("core/block");
     private static boolean entityPushed;  // the entity modifier is on the stack (from the resolve to AfterLevel)
     private static final Set<Identifier> TRANSLUCENT = Set.of(RenderPipelines.TRANSLUCENT_TERRAIN.getLocation(),
             RenderPipelines.TRANSLUCENT_TERRAIN_MULTIDRAW.getLocation());
@@ -266,7 +268,8 @@ public final class AtlasNearPass {
      */
     private static RenderPipeline entityPipeline(RenderPipeline p, Identifier name) {
         Identifier vs = p.getShaders().get(com.mojang.renderpearl.api.pipeline.ShaderType.VERTEX);
-        String ours = VANILLA_ENTITY.equals(vs) || VANILLA_ITEM.equals(vs) ? "core/near_entity" : VANILLA_PARTICLE.equals(vs) ? "core/near_particle" : null;
+        String ours = VANILLA_ENTITY.equals(vs) || VANILLA_ITEM.equals(vs) ? "core/near_entity"
+                : VANILLA_PARTICLE.equals(vs) ? "core/near_particle" : VANILLA_BLOCK.equals(vs) ? "core/near_block" : null;
         if (ours == null) return p;
         return p.toBuilder()
                 .withLocation(name)

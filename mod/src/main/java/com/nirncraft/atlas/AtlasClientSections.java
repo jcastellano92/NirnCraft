@@ -53,7 +53,7 @@ final class AtlasClientSections {
     private static final Set<Long> DIRTY = ConcurrentHashMap.newKeySet();
     // per (block, model, tint kind, light) the first state seen with it: states that look alike (a fire's age, a
     // leaf's distance) share one id, so a ticking block re-uploads nothing (client thread)
-    private static final java.util.Map<java.util.List<Object>, Integer> LOOKS = new java.util.HashMap<>();
+    private static final java.util.Map<java.util.List<Object>, Integer> LOOKS = new ConcurrentHashMap<>();  // (any thread)
 
     static void init() {
         if (!ON) return;
@@ -95,7 +95,15 @@ final class AtlasClientSections {
         }
     }
 
-    /** The near id of a state: its full state id, or that of the first state looking just like it; 0 not kept. */
+    /**
+     * The near id of a state, the one rule for every near section atlas takes (the client feed's, and generation's:
+     * AtlasClientGen's table of its generator ids): its full state id, or that of the first state looking just like
+     * it; 0 not kept. Any thread.
+     */
+    static int nearIdOf(BlockState s) {
+        return nearId(s);
+    }
+
     private static int nearId(BlockState s) {
         if (!nearKept(s)) return 0;
         Object model;
