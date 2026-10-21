@@ -141,9 +141,10 @@ Not merged into atlas-render yet: everything on atlas-naadf after 424841c5 and t
   directories point CMake's `SLANGC` at `E:/NirnCraft-scratch/tools/slangc-dev.cmd`. **Fixed on atlas-naadf
   113c57cd:** spirv-opt inlined traceLod and everything under it 46 times (farMain was one function of 1.88M
   instructions: ~14 min and ~30 GB at `-O3`); `[noinline]` on the shared trace functions makes it 17 s, 0.76 GB, 2.7 MB.
-  Rule for every kernel: `[noinline]` on big helpers called from several places, no inout structs forwarded through
-  calls (thread-private statics instead). Until every branch has 113c57cd the wrapper compiles farMain `-O3` only with
-  `ATLAS_FARMAIN_O3=1`. **The first Vulkan context after a SPIR-V change takes ~6 min once** (NVIDIA's JIT; its disk
+  Rule for every kernel: `[noinline]` on big helpers called from several places, no inout values forwarded through
+  calls (thread-private statics instead); the gen and feature kernels got the same fix (all compile at `-O3` in
+  1-3 s, < 1 GB). **Every kernel builds at `-O3`** (the wrapper's default again; `-O0` kernels run so slowly the
+  Windows GPU watchdog resets the device). Only farMain in a tree without 113c57cd falls back to `-O1`. **The first Vulkan context after a SPIR-V change takes ~6 min once** (NVIDIA's JIT; its disk
   cache then makes it seconds): for players, ship or prewarm a pipeline cache (`ATLAS_PIPELINE_CACHE`; step 2's loading
   phase). atlas_far.slang's other entries at `-O3`, cached by content (source + includes + args) in `E:/NirnCraft-scratch/slangcache` so each source
   state compiles once for every worktree; every other kernel at `-O0` (seconds). After switching branches or pulling,
