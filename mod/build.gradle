@@ -90,6 +90,16 @@ afterEvaluate {
         doFirst { testTask ->
             java.nio.file.Files.createDirectories(testTask.workingDir.toPath())
             java.nio.file.Files.createDirectories(nativeTestTemp.toPath())
+            // NIRNCRAFT_TEST_PACK_MODS=<jar>;<jar>...: the pack's mods loaded in the test game (an in-game-like run, e.g.
+            // Lithium's math mixins under the feature program's compile); none left from an earlier run otherwise
+            def modsDir = new File(testTask.workingDir, 'mods')
+            modsDir.mkdirs()
+            modsDir.listFiles()?.findAll { it.name.startsWith('pack-') }?.each { it.delete() }
+            def pack = System.getenv('NIRNCRAFT_TEST_PACK_MODS')
+            if (pack) pack.split(';').findAll { it.trim() }.each { p ->
+                def f = new File(p.trim())
+                java.nio.file.Files.copy(f.toPath(), new File(modsDir, 'pack-' + f.name).toPath())
+            }
         }
     }
 }

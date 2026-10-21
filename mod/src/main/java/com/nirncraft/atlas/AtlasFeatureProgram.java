@@ -99,6 +99,36 @@ final class AtlasFeatureProgram {
             H_GENMINY = 17, H_GENHEIGHT = 18, H_DISPATCH = 19, H_NDISPATCH = 20, H_ALCH = 21, H_TREES = 22, H_BIOMETAB = 23,
             H_ALCHREG = 27, H_ALCHLEAF = 28, H_PLACES = 29, HEADER = 32;  // (24..26: the store's tables, features_engine.cpp)
     static final int BLK_W = 16;
+
+    /**
+     * Mth's sine table: its own when it has one, else (Lithium's math.sine_lut drops it for a quarter table it checks
+     * bit for bit against Mth's at start, then reads with the same index but for |x| >= 2^31 / 10430.38) rebuilt as
+     * Mth builds it: {@code (float) Math.sin(i / 10430.378350470453)}. Re-evaluating Mth.sin(i / k) instead may land on
+     * a neighbouring entry.
+     */
+    static float[] sinTable() {
+        float[] table = null;
+        try {
+            Field t = net.minecraft.util.Mth.class.getDeclaredField("SIN");
+            t.setAccessible(true);
+            table = (float[]) t.get(null);
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            // (renamed or gone: rebuilt below)
+        }
+        float[] built = table;
+        if (built == null || built.length != 65536) {
+            built = new float[65536];
+            for (int i = 0; i < built.length; i++) built[i] = (float) Math.sin((double) i / 10430.378350470453);
+        }
+        // the running Mth.sin must read the same values (a replaced sine would make the GPU's trees differ)
+        for (int i = 0; i < built.length; i += 97) {
+            float m = net.minecraft.util.Mth.sin((double) i / 10430.378350470453 + 1.0e-7);
+            if (Float.floatToRawIntBits(m) != Float.floatToRawIntBits(built[i]))
+                throw new IllegalStateException("Mth.sin differs from Mth's table at entry " + i + " (" + m + " vs " + built[i]
+                        + "): a mod replaced the sine; the GPU decoration would not match");
+        }
+        return built;
+    }
     static final int F2_LIQUID = 1, F2_SNOWY = 2, F2_LIQUID_PROP = 4;
     static final int T_AX = 0, T_WL = 3, T_DIST = 5, T_SNOWY = 12;
     static final int B_AIR = 1, B_WATER = 1 << 1, B_LAVA = 1 << 2, B_SOURCE = 1 << 3, B_MOTION = 1 << 4, B_LEAVES_TAG = 1 << 5,
@@ -1066,16 +1096,7 @@ final class AtlasFeatureProgram {
             out.add((int) (c >>> 32));
             // the sin table (Mth's own)
             int sinAt = here();
-            // Mth's own table (re-evaluating Mth.sin(i / k) may land on a neighbouring entry)
-            float[] table;
-            try {
-                Field t = net.minecraft.util.Mth.class.getDeclaredField("SIN");
-                t.setAccessible(true);
-                table = (float[]) t.get(null);
-            } catch (ReflectiveOperationException e) {
-                throw new IllegalStateException(e);
-            }
-            for (int i = 0; i < 65536; i++) out.add(Float.floatToRawIntBits(table[i]));
+            for (float v : sinTable()) out.add(Float.floatToRawIntBits(v));
             // survival bit sets: below-only rules, tried with everything else air (cane: water beside the soil)
             for (int i = 0; i < survivors.size(); i++) {
                 BlockState plant = survivors.get(i);

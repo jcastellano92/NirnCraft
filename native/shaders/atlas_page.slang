@@ -882,7 +882,7 @@ void pageBiomesMain(uint3 id : SV_DispatchThreadID) {
 static const uint TILE_SIDE = 256, TILE_COLS = 65536;
 // a tile's planes: surface, water, top | under (the biome at the top first), the biome at the top + 1 / water, the
 // biome under the top (tileBiomeMain's, for tileSurfMain)
-static const uint TILE_PLANES = 5;
+static const uint TILE_PLANES = 7;  // (5, 6: the far stages' canopy, atlas.h AtlasGenFarBatch)
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void tileMain(uint3 id : SV_DispatchThreadID) {
@@ -1358,6 +1358,20 @@ uint farVoxel(uint t, uint c, float yc, float s) {
         if (depth <= s) return farMat(biome, blocks & 0xFFFFu);
         if (depth <= s + FAR_FILL_DEPTH) return farMat(biome, blocks >> 16);
         return farMat(biome, hdr(S_STONE));
+    }
+    // (params.pageH: a far stage drew planes 5, 6) the trees: the crown, the trunk under it
+    if (params.pageH != 0) {
+        uint cw = outIds[P + TILE_COLS * 5u + c];
+        if (cw != 0u) {
+            float top = float(int((cw >> 16) & 0x7FFu) - 1024), bottom = float(int(cw & 0xFFFFu) - 1024);
+            uint tids = outIds[P + TILE_COLS * 6u + c], fill = cw >> 27;
+            // (fill: the crown's share of leaves in 32nds, 0 all; a voxel's own hash picks it: a crown with its gaps)
+            uint vh = (c * 0x9E3779B1u) ^ (uint(int(yc * 2.0f) + 4096) * 0x85EBCA77u) ^ (t * 0xC2B2AE3Du);
+            vh = (vh ^ (vh >> 15)) * 0x2C1B3C6Du;
+            bool leaf = fill == 0u || ((vh ^ (vh >> 13)) & 31u) < fill;
+            if (yc >= bottom && yc < top) return leaf ? farMat(biome, tids & 0xFFFFu) : 0u;
+            if (yc < bottom && (tids >> 16) != 0u) return farMat(biome, tids >> 16);
+        }
     }
     if (!isNaNF(w) && yc < w) {
         // the water's own biome; frozen: ice in its top voxel (freeze_top_layer freezes the top block)

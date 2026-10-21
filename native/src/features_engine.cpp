@@ -19,6 +19,9 @@
 #include "atlas/atlas.h"
 #include "atlas_feat_hm_spv.h"  // generated: slangc + spv_exact, one module per kernel
 #include "atlas_feat_mask_spv.h"
+#include "atlas_feat_farplaces_spv.h"
+#include "atlas_feat_fartrees_spv.h"
+#include "atlas_feat_farcanopy_spv.h"
 #include "atlas_feat_init_spv.h"
 #include "atlas_feat_copy_spv.h"
 #include "atlas_feat_apply_spv.h"
@@ -48,7 +51,7 @@ constexpr uint32_t HT_CAP = 32768, SCR_HT = 16, SCR_HM = 16 + HT_CAP * 2, SCR_BI
 constexpr uint32_t H_DISPATCH = 19, H_NDISPATCH = 20, MAGIC = 0x41454641u;
 constexpr uint32_t TABLE_W = ATLAS_FEAT_TABLE_WORDS;  // meta + the write table, per origin (the isolated check)
 static_assert(TABLE_W == 16 + HT_CAP * 2, "table words");
-constexpr uint32_t NB = 12, WIDE_W = 44u * 4096u;
+constexpr uint32_t NB = 13, WIDE_W = 44u * 4096u;
 // pipelines: hm, init, copy, apply, pack, then one a feature type (atlas_features.slang FT_*: 1 ore .. 8 lake)
 constexpr uint32_t P_HM = 0, P_INIT = 1, P_COPY = 2, P_APPLY = 3, P_PACK = 4, P_FEAT = 5, FT_TYPES = 9, P_AUX = P_FEAT + FT_TYPES - 1,
                    PIPES = P_AUX + 1;
@@ -484,7 +487,7 @@ private:
     }
     void writeSet() {
         Buf* bs[NB] = {&prog_, &ids_, &aux_, &org_, &scratch_, &out_, &tgt_, &wide_, &cnt_, map_.buf ? &map_ : &prog_,
-                       &prog_, &prog_};  // (9: the map; 10, 11: the overlays' boxes, the store's only)
+                       &prog_, &prog_, &prog_};  // (9: the map; 10, 11: the overlays' boxes, 12 the far planes: the stages')
         VkDescriptorBufferInfo bi[NB];
         VkWriteDescriptorSet w[NB];
         for (uint32_t i = 0; i < NB; i++) {
@@ -586,7 +589,9 @@ public:
 constexpr uint32_t STORE_AUX_W = ATLAS_GEN_STORE_AUX_WORDS, MAX_ORIGINS = 64;
 constexpr uint32_t H_GEN2FEAT = 24, H_FEAT2GEN = 25, H_NGEN = 26;
 // pipelines: hm, init, aux, store apply, one a feature type, then the placement mask
-constexpr uint32_t S_HM = 0, S_INIT = 1, S_AUX = 2, S_APPLY = 3, S_FEAT = 4, S_MASK = S_FEAT + FT_TYPES - 1, S_PIPES = S_MASK + 1;
+constexpr uint32_t S_HM = 0, S_INIT = 1, S_AUX = 2, S_APPLY = 3, S_FEAT = 4, S_MASK = S_FEAT + FT_TYPES - 1, S_FARPLACES = S_MASK + 1,
+                   S_FARTREES = S_MASK + 2, S_FARCANOPY = S_MASK + 3, S_PIPES = S_MASK + 4;
+constexpr uint32_t H_PLACES = 29;  // (AtlasFeatureProgram: the settlements' table)
 
 class StageEngine {
 public:
@@ -626,12 +631,14 @@ public:
         const uint32_t* code[S_PIPES] = {atlas_feat_hm_spv, atlas_feat_init_spv, atlas_feat_aux_spv, atlas_feat_sapply_spv,
                                          atlas_feat_ore_spv, atlas_feat_cover_spv, atlas_feat_rock_spv, atlas_feat_tree_spv,
                                          atlas_feat_freeze_spv, atlas_feat_disk_spv, atlas_feat_spring_spv, atlas_feat_lake_spv,
-                                         atlas_feat_mask_spv};
+                                         atlas_feat_mask_spv, atlas_feat_farplaces_spv, atlas_feat_fartrees_spv,
+                                         atlas_feat_farcanopy_spv};
         const size_t size[S_PIPES] = {atlas_feat_hm_spv_size, atlas_feat_init_spv_size, atlas_feat_aux_spv_size,
                                       atlas_feat_sapply_spv_size, atlas_feat_ore_spv_size, atlas_feat_cover_spv_size,
                                       atlas_feat_rock_spv_size, atlas_feat_tree_spv_size, atlas_feat_freeze_spv_size,
                                       atlas_feat_disk_spv_size, atlas_feat_spring_spv_size, atlas_feat_lake_spv_size,
-                                      atlas_feat_mask_spv_size};
+                                      atlas_feat_mask_spv_size, atlas_feat_farplaces_spv_size, atlas_feat_fartrees_spv_size,
+                                      atlas_feat_farcanopy_spv_size};
         for (uint32_t i = 0; i < S_PIPES; i++) {
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
             smci.codeSize = size[i];
@@ -655,9 +662,9 @@ public:
         for (auto& t : th) t.join();
         for (uint32_t i = 0; i < S_PIPES; i++)
             if (res[i] != VK_SUCCESS) return fail(err, "pipeline " + std::to_string(i) + " refused");
-        VkDescriptorPoolSize ps{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NB};
+        VkDescriptorPoolSize ps{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NB * 2};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
-        dp.maxSets = 1;
+        dp.maxSets = 2;
         dp.poolSizeCount = 1;
         dp.pPoolSizes = &ps;
         if (vkCreateDescriptorPool(dev_, &dp, nullptr, &descPool_) != VK_SUCCESS) return fail(err, "descriptor pool");
@@ -666,6 +673,10 @@ public:
         da.descriptorSetCount = 1;
         da.pSetLayouts = &setLayout_;
         if (vkAllocateDescriptorSets(dev_, &da, &set_) != VK_SUCCESS) return fail(err, "descriptor set");
+        if (vkAllocateDescriptorSets(dev_, &da, &farSet_) != VK_SUCCESS) return fail(err, "descriptor set");  // (the far stage's)
+        // the far trees: the settlements a tile asks (the places table's count), the keys' species field (21 bits)
+        if (prog.size() > H_PLACES && prog[H_PLACES] && prog[H_PLACES] < prog.size()) places_ = prog[prog[H_PLACES]];
+        farOk_ = prog.size() < (1u << 21);
         // the program goes up with the first call's commands (its copy recorded there: no queue of ours)
         bool ok = ensure(prog_, prog.size() * 4, false, err) && ensure(staging_, prog.size() * 4, true, err) &&
                   ensure(org_, size_t(MAX_ORIGINS) * ORIGIN_W * 4, false, err) &&
@@ -678,6 +689,50 @@ public:
     }
 
     // the decoration stage: up to 64 chunks, each with its 5 x 5 store slots
+    // The far stage (atlas_gen_add_far_stage): the trees of a far tile as its canopy planes (atlas_features.slang
+    // featFarTreesMain): the settlements near it, the trees of its chunks, each column's crown
+    int32_t far(const AtlasGenFarBatch* b) {
+        if (!farOk_ || b->lod < 1 || b->lod > 6) return 0;
+        VkCommandBuffer cmd = VkCommandBuffer(b->vkCommandBuffer);
+        if (!progUp_) {
+            VkBufferCopy c{0, 0, progBytes_};
+            vkCmdCopyBuffer(cmd, staging_.buf, prog_.buf, 1, &c);
+            progUp_ = true;
+        }
+        VkBuffer planes = VkBuffer(b->planes);
+        VkBuffer bufs[NB] = {prog_.buf, prog_.buf, scratch_.buf, prog_.buf, scratch_.buf, scratch_.buf, prog_.buf,
+                             scratch_.buf, scratch_.buf, VkBuffer(b->map), prog_.buf, prog_.buf, planes};
+        VkDescriptorBufferInfo bi[NB];
+        VkWriteDescriptorSet w[NB];
+        for (uint32_t i = 0; i < NB; i++) {
+            bi[i] = {bufs[i], 0, VK_WHOLE_SIZE};
+            w[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+            w[i].dstSet = farSet_;
+            w[i].dstBinding = i;
+            w[i].descriptorCount = 1;
+            w[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            w[i].pBufferInfo = &bi[i];
+        }
+        vkUpdateDescriptorSets(dev_, NB, w, 0, nullptr);
+        vkCmdFillBuffer(cmd, scratch_.buf, 0, 4, 0u);  // (the places list's count)
+        barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &farSet_, 0, nullptr);
+        FeatParams p{b->tx, b->tz, 0, uint32_t(b->lod), int32_t(b->tile), 0u, 0u, 0u};
+        auto dispatch = [&](uint32_t pipe, uint32_t gx) {
+            vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(FeatParams), &p);
+            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipe]);
+            vkCmdDispatch(cmd, std::max(1u, gx), 1, 1);
+            barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+        };
+        uint32_t side = b->lod <= 4 ? (16u << uint32_t(b->lod)) : 256u;  // the chunks a tile side the trees run on
+        dispatch(S_FARPLACES, (places_ + GROUP - 1) / GROUP);
+        dispatch(S_FARTREES, (side * side + GROUP - 1) / GROUP);
+        dispatch(S_FARCANOPY, ATLAS_GEN_TILE_COLS / GROUP);
+        return 0;
+    }
+
     // atlas_feat_set_overlays: the overlays whose piece boxes the mask reads (null: none)
     void setOverlays(AtlasOvl* o) { ovl_ = o; }
 
@@ -726,7 +781,7 @@ public:
                          boxes.slots >= b->slots;
         VkBuffer bufs[NB] = {prog_.buf, VkBuffer(b->terrain), aux_.buf, org_.buf, scratch_.buf, VkBuffer(b->blocks), list_.buf,
                              VkBuffer(b->aux), cnt_.buf, VkBuffer(b->map), haveBoxes ? VkBuffer(boxes.tapes) : prog_.buf,
-                             haveBoxes ? VkBuffer(boxes.slotRecords) : prog_.buf};
+                             haveBoxes ? VkBuffer(boxes.slotRecords) : prog_.buf, prog_.buf};
         VkDescriptorBufferInfo bi[NB];
         VkWriteDescriptorSet w[NB];
         for (uint32_t i = 0; i < NB; i++) {
@@ -867,9 +922,21 @@ private:
     bool progUp_ = false;
     uint32_t storeSlots_ = 0;
     AtlasOvl* ovl_ = nullptr;
+    VkDescriptorSet farSet_ = VK_NULL_HANDLE;
+    uint32_t places_ = 0;
+    bool farOk_ = false;
 };
 
 int32_t decorateStage(void* user, const AtlasGenStoreBatch* b) { return static_cast<StageEngine*>(user)->decorate(b); }
+int32_t farStage(void* user, const AtlasGenFarBatch* b) { return static_cast<StageEngine*>(user)->far(b); }
+// the far stage's fingerprint (the tile cache's): its kernels' version and the feature program
+constexpr uint64_t FAR_TREES_VERSION = 4;
+uint64_t farFingerprint(const std::vector<uint32_t>& prog) {
+    uint64_t h = 1469598103934665603ull ^ FAR_TREES_VERSION;
+    for (uint32_t w : prog)
+        for (int i = 0; i < 4; i++) h = (h ^ ((w >> (i * 8)) & 0xFFu)) * 1099511628211ull;
+    return h;
+}
 // the finish: a chunk is done once every origin around it decorated (its radius 1): nothing to record
 int32_t finishStage(void*, const AtlasGenStoreBatch*) { return 0; }
 #endif
@@ -883,7 +950,7 @@ struct AtlasFeat {
 #ifndef ATLAS_FEAT_ALONE
     // atlas_feat_attach: the generator and the stages registered there
     AtlasGen* gen = nullptr;
-    uint32_t stageIds[2] = {0, 0};
+    uint32_t stageIds[3] = {0, 0, 0};
     std::unique_ptr<StageEngine> stage;
 #endif
 };
@@ -977,6 +1044,12 @@ ATLAS_API AtlasStatus atlas_feat_attach(AtlasGen* gen, const uint32_t* words, ui
         if (s != ATLAS_OK) return s;
         s = atlas_gen_add_store_stage(gen, ATLAS_GEN_STAGE_DECORATION + 999, 1, finishStage, nullptr, &h->stageIds[1]);
         if (s != ATLAS_OK) return s;
+        // the far tiles' trees (ATLAS_FEAT_FAR=0: none, the far field's ground bare)
+        const char* ff = std::getenv("ATLAS_FEAT_FAR");
+        if (!(ff && ff[0] == '0')) {
+            s = atlas_gen_add_far_stage(gen, farStage, h->stage.get(), farFingerprint(prog), &h->stageIds[2]);
+            if (s != ATLAS_OK) return s;
+        }
         h->program = true;
         *out = h.release();
         return ATLAS_OK;

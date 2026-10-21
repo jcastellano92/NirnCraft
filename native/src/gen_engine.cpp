@@ -97,7 +97,7 @@ constexpr uint32_t PAGECOLS_PIPE = PROBE_PIPE + 1, PAGEBIOMES_PIPE = PROBE_PIPE 
 constexpr uint32_t TILE_PIPE = PROBE_PIPE + 3, TILESURF_PIPE = PROBE_PIPE + 4, TILEBIOME_PIPE = PROBE_PIPE + 5;  // far tiles
 constexpr uint32_t FARCHUNK_PIPE = PROBE_PIPE + 6;  // far chunks (atlas_gen_far)
 // columns of a tile; its planes (surface, water, top | under, biome, the under biome); tiles of one dispatch
-constexpr uint32_t TILE_COLS = 65536, TILE_PLANES = 5, TILE_MAX = 16;
+constexpr uint32_t TILE_COLS = 65536, TILE_PLANES = 7, TILE_MAX = 16;  // (5, 6: the far stages' canopy)
 constexpr uint32_t NB = 15;  // storage buffer bindings
 constexpr uint32_t QUERIES = PASSES + INGEST_PASSES + 4;  // the passes' timestamps, then the page passes' two
 constexpr uint32_t PROBE_WORDS = 32;  // atlas_gen.slang probeMain
@@ -192,6 +192,8 @@ struct Stage {
     bool store = false;
     uint32_t radius = 0;
     AtlasGenStoreStageFn sfn = nullptr;
+    AtlasGenFarStageFn ffn = nullptr;  // a far stage (atlas_gen_add_far_stage): neither a batch's nor the store's
+    uint64_t fp = 0;                   // (a far stage) its fingerprint
 };
 
 class Engine {
@@ -823,12 +825,14 @@ public:
         // one submission a pass and tile (the watchdog: see tiles())
         for (uint32_t k = 0; k < 4; k++)
           for (uint32_t ti = 0; ti < n; ti++) {
+            if (k == 3 && ti == 0 && !runFarStages(jobs, n, err)) return false;  // (their own submissions)
             begin();
             if (timestamps_) {
                 vkCmdResetQueryPool(cmd_, queries_, 0, 2);
                 vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
             }
             p.pad1 = int32_t(ti);
+            p.pageH = farStaged_ ? 1 : 0;  // (farChunk: draw planes 5, 6)
             if (k == 3 && ti == 0) {
                 vkCmdFillBuffer(cmd_, far_.buf, 0, 4, 0u);   // the mixed chunks' counter
                 vkCmdFillBuffer(cmd_, far_.buf, 4, 4, cap);  // the capacity
@@ -865,6 +869,46 @@ public:
         return true;
     }
 
+    // the far stages (atlas_gen_add_far_stage) over each tile of a far call: planes 5, 6 cleared, the stages record, one
+    // submission a tile (the watchdog)
+    bool farStaged_ = false;
+    bool runFarStages(const std::vector<int32_t>& jobs, uint32_t n, std::string& err) {
+        farStaged_ = false;
+        bool any = false;
+        for (const Stage& st : stages_) any = any || st.ffn;
+        if (!any) return true;
+        for (uint32_t ti = 0; ti < n; ti++) {
+            begin();
+            vkCmdFillBuffer(cmd_, out_.buf, (VkDeviceSize(ti) * TILE_PLANES + 5) * TILE_COLS * 4, VkDeviceSize(2) * TILE_COLS * 4, 0u);
+            barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            AtlasGenFarBatch fb{};
+            fb.version = 1;
+            fb.lod = jobs[ti * 4];
+            fb.tx = jobs[ti * 4 + 1];
+            fb.tz = jobs[ti * 4 + 2];
+            fb.tile = ti;
+            fb.tiles = n;
+            fb.vkDevice = dev_;
+            fb.vkCommandBuffer = cmd_;
+            fb.queueFamily = family_;
+            fb.planes = uint64_t(out_.buf);
+            fb.program = uint64_t(prog_.buf);
+            fb.map = uint64_t(map_.buf);
+            for (const Stage& st : stages_) {
+                if (!st.ffn) continue;
+                int32_t r = st.ffn(st.user, &fb);
+                if (r != 0) return fail(err, "far stage failed (" + std::to_string(r) + ")");
+                barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            }
+            phase_ = "far stage, tile " + std::to_string(ti);
+            if (!submitWait(err)) return fail(err, err + " (far stage)");
+        }
+        farStaged_ = true;
+        return true;
+    }
+
     bool setStages(const std::vector<Stage>& stages, std::string&) override {
         stages_ = stages;
         return true;
@@ -888,7 +932,7 @@ public:
     // our bindings come back and its writes are made visible.
     bool runStages(const Batch& b, uint32_t n, std::string& err) {
         bool any = false;
-        for (const Stage& st : stages_) any = any || !st.store;
+        for (const Stage& st : stages_) any = any || (!st.store && st.fn);
         if (!any) return true;
         AtlasGenStageBatch sb{};
         sb.version = 1;
@@ -910,7 +954,7 @@ public:
         sb.program = uint64_t(prog_.buf);
         sb.map = uint64_t(map_.buf);
         for (const Stage& st : stages_) {
-            if (st.store) continue;  // (the store's: atlas_gen_run_store)
+            if (st.store || !st.fn) continue;  // (the store's: atlas_gen_run_store; the far stages: farPasses)
             sb.order = st.order;
             int32_t r = st.fn(st.user, &sb);
             if (r != 0) return fail(err, "generator stage " + std::to_string(st.order) + " failed (" + std::to_string(r) + ")");
@@ -1652,8 +1696,10 @@ private:
                   ensure(aq_, size_t(MAX_CHUNKS) * AQ_WORDS * 4, false, err) &&
                   ensure(blocks_, size_t(MAX_CHUNKS) * BLOCK_WORDS * 4, false, err) &&
                   ensure(col_, size_t(MAX_CHUNKS) * COL_WORDS * 4, false, err) &&
-                  ensure(out_, (size_t(MAX_CHUNKS) * OUT_WORDS + MAX_CHUNKS) * 4, false, err) &&
-                  ensure(readback_, (size_t(MAX_CHUNKS) * (OUT_WORDS + INFO_WORDS) + MAX_CHUNKS) * 4, true, err, true) &&
+                  // (and TILE_MAX tiles' planes: atlas_gen_tiles)
+                  ensure(out_, std::max(size_t(MAX_CHUNKS) * OUT_WORDS + MAX_CHUNKS, size_t(TILE_MAX) * TILE_PLANES * TILE_COLS) * 4, false, err) &&
+                  ensure(readback_, std::max(size_t(MAX_CHUNKS) * (OUT_WORDS + INFO_WORDS) + MAX_CHUNKS, size_t(TILE_MAX) * TILE_PLANES * TILE_COLS) * 4,
+                         true, err, true) &&
                   ensure(staging_, 1 << 20, true, err) && ensure(tab_, 64, false, err) && ensure(map_, 64, false, err) &&
                   ensure(jobs_, 1 << 16, true, err) && ensure(bad_, size_t(slots_) * 4, true, err) && ensure(far_, 64, false, err) &&
                   ensure(info_, size_t(MAX_CHUNKS) * INFO_WORDS * 4, false, err);
@@ -2239,7 +2285,10 @@ void refreshFingerprint(AtlasGen* h) {
     f = fnv64(&h->fpIngest, 8, f);
     f = fnv64(&h->fpMap, 8, f);
     f = fnv64(&h->fpExtra, 8, f);
-    for (const Stage& s : h->stages) f = fnv64(&s.order, 4, f);
+    for (const Stage& s : h->stages) {
+        f = fnv64(&s.order, 4, f);
+        if (s.ffn) f = fnv64(&s.fp, 8, f);  // (a far stage: its own)
+    }
     if (!f) f = 1;
     if (f == h->fpSent) return;
     h->fpSent = f;
@@ -2583,6 +2632,25 @@ ATLAS_API AtlasStatus atlas_gen_add_stage(AtlasGen* h, uint32_t order, AtlasGenS
         h->nextStage++;
         if (outId) *outId = st.id;
         refreshFingerprint(h);
+        return ATLAS_OK;
+    });
+}
+
+ATLAS_API AtlasStatus atlas_gen_add_far_stage(AtlasGen* h, AtlasGenFarStageFn fn, void* user, uint64_t fingerprint, uint32_t* outId) {
+    if (!h || !fn) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        std::lock_guard<std::mutex> l(h->mu);
+        std::vector<Stage> next = h->stages;
+        Stage st{0xFFFFFFFFu, h->nextStage, nullptr, user};
+        st.ffn = fn;
+        st.fp = fingerprint;
+        next.push_back(st);  // (after every other: its order is no batch's)
+        std::string err;
+        if (!h->engine->setStages(next, err)) return h->fail(ATLAS_ERR_UNSUPPORTED, err);
+        h->stages.swap(next);
+        h->nextStage++;
+        if (outId) *outId = st.id;
+        refreshFingerprint(h);  // (the far tiles' cache: chunks with the stage's canopy)
         return ATLAS_OK;
     });
 }

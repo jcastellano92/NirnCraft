@@ -1043,6 +1043,38 @@ typedef struct AtlasGenStoreBatch {
     uint64_t map;                  /* VkBuffer: the map's words (AtlasGenMap) */
 } AtlasGenStoreBatch;
 typedef int32_t (*AtlasGenStoreStageFn)(void* user, const AtlasGenStoreBatch* batch);
+/*
+ * A far stage (atlas_gen_add_far_stage): called in the far chunks' passes (atlas_gen_far, atlas_gen_far_ingest) once a
+ * tile, after its columns' planes (surface, water, blocks, biomes) and before its chunks are made from them. It records
+ * into the command buffer given (never submits) and may write the tile's planes 5 and 6, which the chunks then draw
+ * (both 0 on entry: nothing): plane 5 a column's canopy, fill << 27 | (crown top y + 1024) << 16 | (crown bottom y +
+ * 1024), the voxels at or above the bottom and below the top (and above the ground) its leaves, fill/32 of them (a
+ * hash of the voxel picks; fill 0: all); plane 6 the leaves' generator id
+ * | the trunk's << 16 (0: no trunk), the voxels above the ground below the crown the trunk. The tile cache's
+ * fingerprint holds each far stage's own (`fingerprint`: its engine's version and data), so a change makes the
+ * cached far chunks again.
+ */
+#define ATLAS_GEN_TILE_COLS 65536u   /* a tile's columns, 256 x 256, row-major (z outer) */
+#define ATLAS_GEN_TILE_PLANES 7u     /* a tile's planes of ATLAS_GEN_TILE_COLS words */
+typedef struct AtlasGenFarBatch {
+    uint32_t version;              /* 1 */
+    int32_t lod;                   /* the tiles' level: a column is 2^lod blocks square */
+    int32_t tx, tz;                /* the tile: blocks tx * 256 * 2^lod .. (columns from there) */
+    uint32_t tile;                 /* its index in the planes buffer: planes at tile * TILE_PLANES * TILE_COLS words */
+    uint32_t tiles;                /* tiles in this call */
+    void* vkDevice;
+    void* vkCommandBuffer;         /* recording, compute bind point */
+    uint32_t queueFamily;
+    uint32_t pad;
+    uint64_t planes;               /* VkBuffer: the tiles' planes: 0 surface (float: ground below it), 1 water (float,
+                                      NaN none), 2 the top block | the one under it << 16 (generator ids), 3 the top
+                                      block's biome | flags << 16, 4 the biome above it or the water's; 5, 6 as above */
+    uint64_t program;              /* VkBuffer: the generator program's words */
+    uint64_t map;                  /* VkBuffer: the map's words (AtlasGenMap) */
+} AtlasGenFarBatch;
+typedef int32_t (*AtlasGenFarStageFn)(void* user, const AtlasGenFarBatch* batch);
+/* Registers a far stage (outId: for atlas_gen_remove_stage). */
+ATLAS_API AtlasStatus atlas_gen_add_far_stage(AtlasGen* h, AtlasGenFarStageFn fn, void* user, uint64_t fingerprint, uint32_t* outId);
 /* Turns the store on with `slots` chunks (about 1.3 MiB each), Vulkan only. */
 ATLAS_API AtlasStatus atlas_gen_store_enable(AtlasGen* h, uint32_t slots);
 ATLAS_API AtlasStatus atlas_gen_add_store_stage(AtlasGen* h, uint32_t order, uint32_t radius, AtlasGenStoreStageFn fn, void* user,

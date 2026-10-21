@@ -1006,6 +1006,8 @@ class AtlasGenParityTest {
             // NIRNCRAFT_GEN_FAR=false: the far terrain off (the horizon then shows what the near window alone gives)
             boolean farWanted = !"false".equalsIgnoreCase(System.getenv("NIRNCRAFT_GEN_FAR"));
             System.setProperty("nirncraft.atlas.clientGen.far", String.valueOf(farWanted));
+            // the self-baking cache: NIRNCRAFT_GEN_CACHE_DIR, else off (no client here to hold one)
+            System.setProperty("nirncraft.atlas.cacheDir", System.getenv().getOrDefault("NIRNCRAFT_GEN_CACHE_DIR", "off"));
             AtlasClientGen cg = AtlasClientGen.startFor(server, lib, ctx, new AtlasMaterials());
             if (cg == null) throw new IllegalStateException("no client generator");
             // the render thread: a small frame at the camera every 16 ms (the grid places its window and takes the GPU
@@ -1020,15 +1022,18 @@ class AtlasGenParityTest {
             String[] renderError = {null};
             Thread renderer = new Thread(() -> {
                 AtlasNative.Frame f = new AtlasNative.Frame();
-                f.width = 320;
-                f.height = 180;
+                // NIRNCRAFT_GEN_JUMP_SIZE "w,h": the frames' size (default 320 x 180)
+                String[] sz = System.getenv().getOrDefault("NIRNCRAFT_GEN_JUMP_SIZE", "320,180").split(",");
+                final int fw = Integer.parseInt(sz[0].trim()), fh = Integer.parseInt(sz[1].trim());
+                f.width = fw;
+                f.height = fh;
                 f.flags = 0;
                 f.nearFieldEnd = 0;
                 f.maxDistance = 2000;
-                new org.joml.Matrix4f().perspective((float) Math.toRadians(70), 320f / 180f, 0.05f, 4000f)
+                new org.joml.Matrix4f().perspective((float) Math.toRadians(70), (float) fw / fh, 0.05f, 4000f)
                         .lookAt(0, 0, 0, 0, -0.5f, 1, 0, 1, 0).invert().get(f.invViewProj);
-                int[] color = new int[320 * 180];
-                float[] depth = new float[320 * 180];
+                int[] color = new int[fw * fh];
+                float[] depth = new float[fw * fh];
                 double lookNow = -1;
                 while (rendering.get()) {
                     f.x = cam0[0];
@@ -1036,7 +1041,7 @@ class AtlasGenParityTest {
                     f.z = cam0[1];
                     if (look[0] != lookNow) {
                         lookNow = look[0];
-                        new org.joml.Matrix4f().perspective((float) Math.toRadians(70), 320f / 180f, 0.05f, 4000f)
+                        new org.joml.Matrix4f().perspective((float) Math.toRadians(70), (float) fw / fh, 0.05f, 4000f)
                                 .lookAt(0, 0, 0, 0, lookNow == 1 ? -0.08f : -0.5f, 1, 0, 1, 0).invert().get(f.invViewProj);
                         f.maxDistance = lookNow == 1 ? 60000 : 2000;
                     }
@@ -1060,7 +1065,12 @@ class AtlasGenParityTest {
             try {
                 report.append(String.format("radius %d, features %d on %d threads%n", AtlasClientGen.RADIUS,
                         AtlasClientGen.FEATURE_RADIUS, AtlasClientGen.FEATURE_THREADS));
-                for (int[] cam : new int[][]{{0, 0}, {1600, 0}}) {
+                // NIRNCRAFT_GEN_JUMP_CAMS "x,z;x,z": the cameras (the horizon from the last; default 0,0 then 1600,0)
+                String camsEnv = System.getenv().getOrDefault("NIRNCRAFT_GEN_JUMP_CAMS", "0,0;1600,0");
+                int[][] cams = java.util.Arrays.stream(camsEnv.split(";")).map(q -> q.split(","))
+                        .map(q -> new int[]{Integer.parseInt(q[0].trim()), Integer.parseInt(q[1].trim())}).toArray(int[][]::new);
+                for (int ci = 0; ci < cams.length; ci++) {
+                    int[] cam = cams[ci];
                     cam0[0] = cam[0] + 0.5;
                     cam0[1] = cam[1] + 0.5;
                     AtlasClientGen.follow(cam[0] + 0.5, cam[1] + 0.5, 0f);
@@ -1084,7 +1094,7 @@ class AtlasGenParityTest {
                         Thread.sleep(20);
                     }
                     trace("end jump " + cam[0] + "," + cam[1]);
-                    if (cam[0] != 0) {
+                    if (ci == cams.length - 1) {
                         // the horizon once the far terrain has settled (nothing changed for 4 s), or at once without it
                         look[0] = 1;
                         long f0 = System.nanoTime();
@@ -1374,7 +1384,8 @@ class AtlasGenParityTest {
             if (a > 400f) far++;
             maxD = Math.max(maxD, a);
         }
-        if (png != null) javax.imageio.ImageIO.write(image(color, 320, 180), "png", Path.of(png).toFile());
+        int w = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_GEN_JUMP_SIZE", "320,180").split(",")[0].trim());
+        if (png != null) javax.imageio.ImageIO.write(image(color, w, color.length / w), "png", Path.of(png).toFile());
         return String.format("%.1f %% of pixels hit terrain, %.1f %% past 400 blocks, farthest %.0f blocks%s", 100.0 * hit / n, 100.0 * far / n,
                 maxD, png == null ? "" : " (" + png + ")");
     }

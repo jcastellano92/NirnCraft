@@ -622,7 +622,8 @@ final class AtlasGenNative {
         boolean setFeatureOverlays(MemorySegment feat, MemorySegment ovl) {
             if (featOverlays == null) return false;
             try {
-                check((int) featOverlays.invokeExact(feat, ovl == null ? MemorySegment.NULL : ovl), "atlas_feat_set_overlays");
+                MemorySegment o = ovl == null ? MemorySegment.NULL : ovl;  // (a typed local: invokeExact's signature)
+                check((int) featOverlays.invokeExact(feat, o), "atlas_feat_set_overlays");
                 return true;
             } catch (Throwable t) {
                 throw rethrow(t);

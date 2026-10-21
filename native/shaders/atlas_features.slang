@@ -42,6 +42,7 @@ struct FeatParams {
 [[vk::binding(9, 0)]] StructuredBuffer<uint> mapData;     // (the store) the generator's map words (AtlasGenMap)
 [[vk::binding(10, 0)]] StructuredBuffer<uint> ovlTapes;   // (the store) the overlays' tapes (atlas_ovl_store_boxes)
 [[vk::binding(11, 0)]] StructuredBuffer<int> ovlRecords;  // (the store) each store slot's tape record, -1 none
+[[vk::binding(12, 0)]] RWStructuredBuffer<uint> farPlanes; // (the far stage) the generator's far tiles' planes (AtlasGenFarBatch)
 [[vk::binding(8, 0)]] RWStructuredBuffer<uint> counters;  // [0] origins with placements left after this dispatch   // per target WIDE_W words: one id a block (the gather, then packed)
 
 #include "atlas_feat_math.slang"  // its own copy of the exact math (not atlas_exact.slang: see there)
@@ -3733,4 +3734,371 @@ void featPackMain(uint3 id : SV_DispatchThreadID) {
     uint t = id.y, w = id.x;
     if (t >= uint(params.targets) || w >= CHUNK_W) return;
     outIds[t * CHUNK_W + w] = (outWide[t * WIDE_W + w * 2u] & 0xFFFFu) | (outWide[t * WIDE_W + w * 2u + 1u] << 16);
+}
+
+// ---- the far trees (atlas.h atlas_gen_add_far_stage): the decoration's trees over a far tile, as canopy --------------
+// A far tile is 256 x 256 columns of 2^lod blocks (planes: 0 the ground's surface, 1 the water's, 2 the top block |
+// the one under << 16, 3 its biome | flags << 16; generator ids). Each real chunk of the tile (lod <= 4; coarser: one
+// chunk a column, standing for the column's 2^(lod-4) x 2^(lod-4)) runs the tree records' placements as the
+// decoration does (its seeds, its draws, the scatter's grid) over the tile's ground instead of the terrain, then the
+// species' pick (the decoration's first draw at the tree); the growth's draws are not made, so after a chunk's first
+// tree the count / in_square trees are the decoration's in number and in kind, not in place. Each tree adds its crown's
+// area to the columns under it (plane 5; bit 31: a trunk stands in it) and its key, (crown top + 64) << 21 | species,
+// the highest winning (plane 6); featFarCanopyMain then gives a column its crown when the crowns cover it (dithered,
+// so a coarse column shows the forest's density), as AtlasGenFarBatch's planes 5 and 6.
+// params: origins tx, targets tz, k lod, slots the tile's index in the planes, rec the places list's count (scratch 0)
+static const uint FAR_THR = 16384u, FAR_THR_W = 12u, FAR_PLACES = 16000u;
+uint farP(uint plane, uint c) { return uint(params.slots) * TILE_COLS_F * TILE_PLANES_F + plane * TILE_COLS_F + c; }
+static const uint TILE_COLS_F = 65536u, TILE_PLANES_F = 7u;
+// the tile's column of block (x, z), or -1 outside
+int farCol(int x, int z) {
+    int lod = int(params.k);
+    int i = (x - params.origins * (256 << lod)) >> lod, j = (z - params.targets * (256 << lod)) >> lod;
+    return i < 0 || i >= 256 || j < 0 || j >= 256 ? -1 : j * 256 + i;
+}
+float farSurf(int c) { return asfloat(farPlanes[farP(0u, uint(c))]); }
+// Heightmap.Types: WORLD_SURFACE(_WG), MOTION_BLOCKING(_NO_LEAVES) over the water; OCEAN_FLOOR(_WG) the ground
+int farHeight(uint type, int c) {
+    float g = farSurf(c), w = asfloat(farPlanes[farP(1u, uint(c))]);
+    float top = (type == HM_OCEAN_FLOOR_WG || type == HM_OCEAN_FLOOR || (w != w) || w <= g) ? g : w;
+    return floorD_N(double(top) + 0.5l);
+}
+// the block the tree stands on (feature ids): the top block, or under a snow cover the one below it
+uint farGround(int c) {
+    uint b = farPlanes[farP(2u, uint(c))], flags = farPlanes[farP(3u, uint(c))] >> 16;
+    uint g = (flags & 1u) != 0u ? (b >> 16) : (b & 0xFFFFu);  // (COL_SNOW, atlas_page.slang)
+    uint t = hdr(H_GEN2FEAT);
+    return t == 0u ? g : (g < hdr(H_NGEN) ? fprog[t + g] : AIR);
+}
+int farBiome(int c) { return int(farPlanes[farP(3u, uint(c))] & 0xFFFFu); }
+uint farHash(int x, int z, uint salt) {
+    uint h = uint(x) * 0x9E3779B1u ^ uint(z) * 0x85EBCA77u ^ salt * 0xC2B2AE3Du;
+    h = (h ^ (h >> 15)) * 0x2C1B3C6Du;
+    h = (h ^ (h >> 12)) * 0x297A2D39u;
+    return h ^ (h >> 15);
+}
+// the places near the tile (featFarPlacesMain's list in scratch) as PlacementMask.places
+[noinline]
+int farMaskPlaces(int cur, int x0, int z0, int x, int z) {
+    uint at = hdr(H_PLACES), n = imin(int(scratch[0]), int(FAR_PLACES));
+    for (uint q = 0u; q < uint(n); q++) {
+        uint i = scratch[1u + q];
+        int px = int(fprog[at + 1u + i * 3u]), pz = int(fprog[at + 2u + i * 3u]), pr = int(fprog[at + 3u + i * 3u]);
+        int minX = x0 - MASK_CAP, minZ = z0 - MASK_CAP, maxX = x0 + 15 + MASK_CAP, maxZ = z0 + 15 + MASK_CAP;
+        if (!(px + pr >= minX && px - pr <= maxX && pz + pr >= minZ && pz - pr <= maxZ)) continue;
+        double radius = double(float(pr) * 0.5f + 4.0f);
+        double ex = double(x - px), ez = double(z - pz);
+        cur = maskLower(cur, sqrtD_N(ex * ex + ez * ez) - radius);
+    }
+    return cur;
+}
+// the baked plans' clearance at a column (the far field has no structure pieces)
+[noinline]
+int farClearance(int x, int z) {
+    int cx = x >> 4, cz = z >> 4, x0 = cx << 4, z0 = cz << 4;
+    int m = farMaskPlaces(MASK_CAP, x0, z0, x, z);
+    if (roadClear(double(x0 + 8), double(z0 + 8)) < 1.0e8f) {
+        float rc = roadClear(double(x) + 0.5l, double(z) + 0.5l);
+        if (rc < 1.0e8f) m = maskLower(m, double(rc));
+    }
+    return maskStreets(m, cx, cz, x, z);
+}
+// the crown's bottom as a share of the tree's height, by growth form (-1: no crown)
+float farCrownBase(uint shape) {
+    if (shape == SH_CONIFER) return 0.25f;
+    if (shape == SH_COLUMNAR) return 0.2f;
+    if (shape == SH_WILLOW || shape == SH_BAMBOO || shape == SH_CRYSTAL) return 0.35f;
+    if (shape == SH_MANGROVE) return 0.4f;
+    if (shape == SH_BROADLEAF) return 0.45f;
+    if (shape == SH_ASPEN || shape == SH_TWISTED) return 0.5f;
+    if (shape == SH_BALD_CYPRESS || shape == SH_JUNGLE) return 0.55f;
+    if (shape == SH_BAOBAB) return 0.6f;
+    if (shape == SH_ACACIA) return 0.65f;
+    if (shape == SH_PALM) return 0.8f;
+    if (shape == SH_SHRUB) return 0.0f;
+    return -1.0f;  // dead trees, fallen logs, stumps
+}
+// a tree at (x, y, z), its species picked (placeTreeAt's checks on the tile's ground): its crown into the columns
+[noinline]
+void farTree(uint cfg, int x, int y, int z, uint weight) {
+    uint sp = treePick(cfg, x, z, rngDouble());
+    if (sp == NO_STATE) return;
+    int c = farCol(x, z);
+    if (c < 0) return;
+    float base = farCrownBase(spU(sp, S_SHAPE));
+    if (base < 0.0f || spU(sp, S_LEAVES) == NO_STATE) return;
+    if (!(x >= int(tconst(TCN_MINX)) && x < int(tconst(TCN_MAXX)) && z >= int(tconst(TCN_MINZ)) && z < int(tconst(TCN_MAXZ)))) return;
+    if (!(farClearance(x, z) > spI(sp, S_REACH))) return;
+    int water = imax(0, farHeight(HM_WORLD_SURFACE, c) - y);
+    if (water > spI(sp, S_MAXWATER)) return;
+    uint soil = spU(sp, S_SOIL), ground = farGround(c);
+    bool fits = ((soil & 1u) != 0u && bis(ground, B_SOIL_DIRT)) || ((soil & 2u) != 0u && bis(ground, B_SOIL_SAND)) ||
+                ((soil & 4u) != 0u && bis(ground, B_SOIL_STONE)) || ((soil & 8u) != 0u && bis(ground, B_SOIL_ASH)) ||
+                ((soil & 16u) != 0u && bis(ground, B_SOIL_SNOW));
+    if (!fits) return;
+    int lo = spI(sp, S_MINH), hi = spI(sp, S_MAXH);
+    int height = lo + int(farHash(x, z, 7u) % uint(imax(1, hi - lo + 1)));
+    if (y > (MAX_Y + 1) - hi - 12) return;
+    float r = spF(sp, S_RADIUS);
+    int lod = int(params.k), cs = 1 << lod;
+    uint key = (uint(y + height + 64) << 21) | (sp & 0x1FFFFFu);
+    // the crown's columns: those it reaches into (all at once), or the one under the trunk with its area when
+    // a column is wider than the crown
+    float area = 3.14159265f * r * r;
+    bool cone = spU(sp, S_SHAPE) == SH_CONIFER || spU(sp, S_SHAPE) == SH_COLUMNAR;
+    if (2.0f * r < float(cs)) {
+        InterlockedAdd(farPlanes[farP(5u, uint(c))], uint(area) * weight);
+        InterlockedMax(farPlanes[farP(6u, uint(c))], key);
+    } else {
+        int ci = c & 255, cj = c >> 8;
+        int reach = ceilF_N(r / float(cs)) + 1;
+        float px = float(x) + 0.5f, pz = float(z) + 0.5f;
+        int X0 = params.origins * (256 << lod), Z0 = params.targets * (256 << lod);
+        for (int dj = -reach; dj <= reach; dj++)
+            for (int di = -reach; di <= reach; di++) {
+                int i = ci + di, j = cj + dj;
+                if (i < 0 || i >= 256 || j < 0 || j >= 256) continue;
+                // (the column's nearest point to the trunk within the crown: leaves somewhere in it, as the real
+                // crowns' columns come down)
+                float ax = float(X0 + i * cs), az = float(Z0 + j * cs);
+                float qx = px < ax ? ax - px : (px > ax + float(cs) ? px - ax - float(cs) : 0.0f);
+                float qz = pz < az ? az - pz : (pz > az + float(cs) ? pz - az - float(cs) : 0.0f);
+                if (qx * qx + qz * qz > r * r) continue;
+                uint cc = uint(j * 256 + i);
+                // the crown's top over this column: a cone (conifers) or a dome, from the trunk's out to the rim
+                float ex = float(X0 + i * cs) + float(cs) * 0.5f - px, ez = float(Z0 + j * cs) + float(cs) * 0.5f - pz;
+                float u = (ex * ex + ez * ez) / (r * r);
+                u = u > 1.0f ? 1.0f : u;
+                float drop = float(height) * (1.0f - base) * (cone ? 0.85f * float(sqrtD_N(double(u))) : 0.6f * u);
+                int ctop = y + height - int(drop);
+                uint ckey = (uint(ctop + 64) << 21) | (sp & 0x1FFFFFu);
+                InterlockedAdd(farPlanes[farP(5u, cc)], uint(cs * cs) * weight);
+                InterlockedMax(farPlanes[farP(6u, cc)], ckey);
+            }
+    }
+    if (lod <= 1) InterlockedOr(farPlanes[farP(5u, uint(c))], 0x80000000u);  // (the trunk: seen at 1 and 2 block columns)
+}
+// the scatter's next live point of chunk (x0, z0) from grid cell `idx` on (ScatterPlacement, as runPlaced): false none
+[noinline]
+bool farScatterNext(uint m, int x0, int z0, inout int idx, inout int qx, inout int qz) {
+    int64_t worldSeed = int64_t(pfU64(H_SEED));
+    int s = int(fprog[m + 1]);
+    float minDistance = pfF(m + 2);
+    uint field = hdr(H_FIELDS) + fprog[m + 6] * FIELD_W;
+    int64_t seed = fieldSeed(field, worldSeed) ^ int64_t(uint64_t(0x7F4A7C15u) * uint64_t(int64_t(s)));
+    int ci0 = floorDivI(x0, s), ci1 = floorDivI(x0 + 15, s);
+    int cj0 = floorDivI(z0, s), cj1 = floorDivI(z0 + 15, s);
+    int nj = cj1 - cj0 + 1, total = (ci1 - ci0 + 1) * nj;
+    double minD2 = double(float(s) * minDistance * float(s) * minDistance);
+    for (; idx < total; idx++) {
+        int i = ci0 + idx / nj, j = cj0 + idx % nj;
+        int h = floraHash(i, j, seed);
+        int px0 = i * s + d2i(unit01(h) * double(s));
+        int pz0 = j * s + d2i(unit01(int(uint(h) * 0x2C1B3C6Du + 0x297A2D39u)) * double(s));
+        if (px0 < x0 || px0 > x0 + 15 || pz0 < z0 || pz0 > z0 + 15) continue;
+        if (!scatterAlive(m, worldSeed, h, px0, pz0)) continue;
+        bool keep = true;
+        for (int di = -1; di <= 1 && keep; di++)
+            for (int dj = -1; dj <= 1; dj++) {
+                if (di == 0 && dj == 0) continue;
+                int hn = floraHash(i + di, j + dj, seed);
+                if ((uint(hn) * 0x165667B1u) <= (uint(h) * 0x165667B1u)) continue;
+                int nx = (i + di) * s + d2i(unit01(hn) * double(s));
+                int nz = (j + dj) * s + d2i(unit01(int(uint(hn) * 0x2C1B3C6Du + 0x297A2D39u)) * double(s));
+                double d2 = double(nx - px0) * double(nx - px0) + double(nz - pz0) * double(nz - pz0);
+                if (d2 < minD2 && scatterAlive(m, worldSeed, hn, nx, nz)) { keep = false; break; }
+            }
+        if (keep) {
+            qx = px0;
+            qz = pz0;
+            idx++;
+            return true;
+        }
+    }
+    return false;
+}
+// one tree record's placements over chunk (cx, cz), depth first in the decoration's order (the expanding modifiers,
+// count and the scatter, as frames; the others filter or move the position)
+[noinline]
+void farRecord(uint rec, int cx, int cz, uint weight) {
+    uint nm = fprog[rec + R_NMODS], mods = fprog[rec + R_MODS], cfg = fprog[rec + R_CFG];
+    int64_t worldSeed = int64_t(pfU64(H_SEED));
+    int fmi[3], fx[3], fy[3], fz[3], fleft[3];
+    bool fscat[3];
+    int depth = 0;
+    int mi = 0, x = cx * 16, y = MIN_Y, z = cz * 16;
+    for (int guard = 0; guard < 4096; guard++) {
+        bool pop = false;
+        if (uint(mi) >= nm) {
+            farTree(cfg, x, y, z, weight);
+            pop = true;
+        } else {
+            uint m = mods + uint(mi) * MOD_W, kind = fprog[m];
+            int c = farCol(x, z);
+            if (kind == M_COUNT) {
+                int n = intProvider(m + 1);
+                if (n <= 0 || depth >= 3) pop = true;
+                else {
+                    fmi[depth] = mi + 1; fx[depth] = x; fy[depth] = y; fz[depth] = z; fleft[depth] = n - 1; fscat[depth] = false;
+                    depth++;
+                    mi++;
+                }
+            } else if (kind == M_FLORA_SCATTER) {
+                int idx = 0, qx = 0, qz = 0;
+                if (depth >= 3 || !farScatterNext(m, x & ~15, z & ~15, idx, qx, qz)) pop = true;
+                else {
+                    fmi[depth] = mi; fx[depth] = x; fy[depth] = y; fz[depth] = z; fleft[depth] = idx; fscat[depth] = true;
+                    depth++;
+                    x = qx; z = qz;
+                    mi++;
+                }
+            } else if (kind == M_IN_SQUARE) {
+                int ax = rngIntB(16) + x;
+                int az = rngIntB(16) + z;
+                x = ax; z = az;
+                mi++;
+            } else if (kind == M_HEIGHTMAP) {
+                if (c < 0) pop = true;
+                else {
+                    int h = farHeight(fprog[m + 1], c);
+                    if (h > MIN_Y) { y = h; mi++; } else pop = true;
+                }
+            } else if (kind == M_BIOME) {
+                if (c >= 0 && biomeBit(fprog[rec + R_ANY], farBiome(c))) mi++; else pop = true;
+            } else if (kind == M_RARITY) {
+                if (rngFloat() < pfF(m + 1)) mi++; else pop = true;
+            } else if (kind == M_HEIGHT_RANGE) {
+                y = heightProvider(m + 1);
+                mi++;
+            } else if (kind == M_FLORA_DENSITY) {
+                float density = pfF(m + 1), floorV = pfF(m + 2);
+                uint field = hdr(H_FIELDS) + fprog[m + 3] * FIELD_W;
+                double keepP = double(floorV) + double(density - floorV) * fieldSample_N(field, worldSeed, double(x), double(z));
+                if (rngDouble() < keepP) mi++; else pop = true;
+            } else if (kind == M_MASK) {
+                if (farClearance(x, z) > int(fprog[m + 1])) mi++; else pop = true;
+            } else if (kind == M_SURF_REL) {
+                if (c < 0) pop = true;
+                else {
+                    int64_t sy = int64_t(farHeight(fprog[m + 1], c));
+                    if (sy + int64_t(int(fprog[m + 2])) <= int64_t(y) && int64_t(y) <= sy + int64_t(int(fprog[m + 3]))) mi++;
+                    else pop = true;
+                }
+            } else if (kind == M_OFFSET) {
+                int ax = intProvider(m + 1);
+                int ay = intProvider(m + 5);
+                int az = intProvider(m + 9);
+                x += ax; y += ay; z += az;
+                mi++;
+            } else {
+                mi++;  // (block predicates and scans: the far field has no blocks to ask; passed)
+            }
+        }
+        if (!pop) continue;
+        // the next position of the innermost frame with one left
+        bool next = false;
+        while (depth > 0 && !next) {
+            int d = depth - 1;
+            if (fscat[d]) {
+                int idx = fleft[d], qx = 0, qz = 0;
+                if (farScatterNext(mods + uint(fmi[d]) * MOD_W, fx[d] & ~15, fz[d] & ~15, idx, qx, qz)) {
+                    fleft[d] = idx;
+                    x = qx; y = fy[d]; z = qz;
+                    mi = fmi[d] + 1;
+                    next = true;
+                } else depth--;
+            } else if (fleft[d] > 0) {
+                fleft[d]--;
+                x = fx[d]; y = fy[d]; z = fz[d];
+                mi = fmi[d];
+                next = true;
+            } else depth--;
+        }
+        if (!next) return;
+    }
+}
+// the settlements near the tile (PlacementMask.places' candidates) into scratch: count, then their indices
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void featFarPlacesMain(uint3 id : SV_DispatchThreadID) {
+    uint at = hdr(H_PLACES);
+    if (at == 0u) return;
+    uint i = id.x;
+    if (i >= fprog[at]) return;
+    int lod = int(params.k), span = 256 << lod;
+    int x0 = params.origins * span, z0 = params.targets * span;
+    int px = int(fprog[at + 1u + i * 3u]), pz = int(fprog[at + 2u + i * 3u]), pr = int(fprog[at + 3u + i * 3u]);
+    int pad = pr + MASK_CAP + 16;
+    if (px + pad < x0 || px - pad > x0 + span || pz + pad < z0 || pz - pad > z0 + span) return;
+    uint slot;
+    InterlockedAdd(scratch[0], 1u, slot);
+    if (slot < FAR_PLACES) scratch[1u + slot] = i;
+}
+// one real chunk a thread: every tree record the chunk's biomes list, as the decoration seeds it
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void featFarTreesMain(uint3 id : SV_DispatchThreadID) {
+    int lod = int(params.k);
+    int side = lod <= 4 ? (16 << lod) : 256;  // chunks a tile side evaluated
+    uint t = id.x;
+    if (t >= uint(side * side)) return;
+    int per = lod <= 4 ? 1 : (1 << (lod - 4));  // chunks a column side (lod > 4: one stands for them)
+    int cx = params.origins * (16 << lod) + int(t % uint(side)) * per + (per >> 1);
+    int cz = params.targets * (16 << lod) + int(t / uint(side)) * per + (per >> 1);
+    uint weight = uint(per * per);
+    sG.base = FAR_THR + t * FAR_THR_W;  // (flag()'s word and the random: this thread's own)
+    sRA = sG.base + SCR_META + 6u;
+    // the biomes the chunk holds (its centre and corners: applyBiomeDecoration's listing)
+    int b[5];
+    int x0 = cx * 16, z0 = cz * 16;
+    int cs[5] = {farCol(x0 + 8, z0 + 8), farCol(x0, z0), farCol(x0 + 15, z0), farCol(x0, z0 + 15), farCol(x0 + 15, z0 + 15)};
+    for (int q = 0; q < 5; q++) b[q] = cs[q] < 0 ? -1 : farBiome(cs[q]);
+    int64_t deco = decorationSeed(int64_t(pfU64(H_SEED)), x0, z0);
+    uint dl = hdr(H_DISPATCH), nd = hdr(H_NDISPATCH);
+    for (uint r = 0u; r < nd; r++) {
+        uint rec = fprog[dl + r];
+        if (fprog[rec + R_TYPE] != FT_TREE) continue;
+        bool listed = false;
+        for (int q = 0; q < 5 && !listed; q++) listed = b[q] >= 0 && biomeBit(fprog[rec + R_HERE], b[q]);
+        if (!listed) continue;
+        featureSeed(deco, int(fprog[rec + R_GI]), int(fprog[rec + R_STEP]));
+        farRecord(rec, cx, cz, weight);
+    }
+}
+// each column's canopy from what the trees left: crowns covering it (its share against a dither), the tallest's
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void featFarCanopyMain(uint3 id : SV_DispatchThreadID) {
+    uint c = id.x;
+    if (c >= TILE_COLS_F) return;
+    uint cov = farPlanes[farP(5u, c)], key = farPlanes[farP(6u, c)];
+    farPlanes[farP(5u, c)] = 0u;
+    farPlanes[farP(6u, c)] = 0u;
+    if (key == 0u) return;
+    int lod = int(params.k), cs = 1 << lod;
+    bool trunk = (cov & 0x80000000u) != 0u;
+    cov = cov & 0x7FFFFFFFu;
+    int i = int(c & 255u), j = int(c >> 8);
+    int wx = params.origins * (256 << lod) + i * cs, wz = params.targets * (256 << lod) + j * cs;
+    float dither = float(farHash(wx, wz, 3u + uint(lod)) & 0xFFFFu) / 65536.0f;
+    bool crown = float(cov) >= dither * float(cs * cs);
+    if (!crown && !trunk) return;
+    uint sp = key & 0x1FFFFFu;
+    int top = int(key >> 21) - 64;
+    float ground = farSurf(int(c));
+    float base = farCrownBase(spU(sp, S_SHAPE));
+    float h = float(top) - ground;
+    if (h < 1.0f) return;
+    int bottom = floorD_N(double(ground + (h * base > 1.0f ? h * base : 1.0f)) + 0.5l);
+    if (!crown) bottom = top;  // (the trunk alone)
+    uint ft = hdr(H_FEAT2GEN);
+    uint leaf = spU(sp, S_LEAVES), logId = trunk ? spU(sp, S_LOG) : 0u;
+    if (ft != 0u) {
+        leaf = fprog[ft + leaf];
+        logId = trunk ? fprog[ft + logId] : 0u;
+    }
+    // the crown's leaves: a 2 block column shows its gaps, coarser ones are mostly leaf (as the real crowns come down)
+    uint fill = lod <= 1 ? 21u : (lod == 2 ? 26u : 0u);
+    farPlanes[farP(5u, c)] = (fill << 27) | (uint(top + 1024) << 16) | uint(bottom + 1024);
+    farPlanes[farP(6u, c)] = (leaf & 0xFFFFu) | ((logId & 0xFFFFu) << 16);
 }
