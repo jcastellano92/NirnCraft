@@ -194,7 +194,7 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 39;
+constexpr uint32_t BINDINGS = 40;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
@@ -207,7 +207,9 @@ constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPT
                    // frame's candidates and its tile lists (atlas_far.slang lightCullMain)
                    B_LIGHT_SRC = 34, B_LIGHT_CAND = 35, B_LIGHT_LIST = 36,
                    // the near light's own samples per pixel in its history (nearTemporalMain), this frame's and the last's
-                   B_NEAR_AGE = 37, B_PREV_NEAR_AGE = 38;
+                   B_NEAR_AGE = 37, B_PREV_NEAR_AGE = 38,
+                   // (the split under PRIMARY_NEAR_LIT) the water over each pixel's surface (farMain), for nearTemporalMain
+                   B_WATER_ADD = 39;
 // lightList's words before the tiles' (counters, the score histogram) and a tile's (count + 64 indices)
 constexpr uint32_t LIGHT_LIST_HEAD = 260, LIGHT_TILE_WORDS = 65;
 // the grid's build kernels (atlas_voxgrid.slang): chunks, blocks, bits, pool, jobs, summed-volume table, the batch's
@@ -229,7 +231,7 @@ constexpr uint32_t PASS_PUSH_BYTES = 16;  // width, height, nearLight, pre-expos
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
            b == B_COUNTERS || b == B_NEAR || b == B_ACTORS || b == B_CLOUD || b == B_CLOUD_DEPTH || b == B_SURFACE ||
-           b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST || b == B_NEAR_AGE;
+           b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST || b == B_NEAR_AGE || b == B_WATER_ADD;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT,
@@ -1805,7 +1807,8 @@ private:
                   // the near light: a pixel's worth unless the frame lights the near field (the kernel writes it then)
                   ensure(s.bufs[B_NEAR_LIGHT], (frame.dims[2] & FRAME_NEAR_LIGHT_BIT) ? px * 16 : 16, false, outKind, err) &&
                   ensure(s.bufs[B_CLOUD], size_t((w + 1) / 2) * ((h + 1) / 2) * 16, false, Mem::DeviceOnly, err) &&
-                  ensure(s.bufs[B_CLOUD_DEPTH], size_t((w + 1) / 2) * ((h + 1) / 2) * 4, false, Mem::DeviceOnly, err);
+                  ensure(s.bufs[B_CLOUD_DEPTH], size_t((w + 1) / 2) * ((h + 1) / 2) * 4, false, Mem::DeviceOnly, err) &&
+                  ensure(s.bufs[B_WATER_ADD], pnSplit ? px * 16 : 16, false, Mem::DeviceOnly, err);
         if (ok) {
             VkBuffer before = s.bufs[B_SURFACE].buf;
             VkBuffer ageBefore = s.bufs[B_NEAR_AGE].buf;
