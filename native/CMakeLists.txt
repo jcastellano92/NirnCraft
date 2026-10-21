@@ -403,7 +403,7 @@ foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:feat
   endif()
   add_custom_command(
     OUTPUT "${GEN}/atlas_feat_${pass}.spv"
-    COMMAND "${SLANGC}" "${FEAT_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise
+    COMMAND "${SLANGC}" "${FEAT_SRC}" -target spirv -entry ${entry} -stage compute -O0 -fp-mode precise
             -warnings-disable 41035 -o "${GEN}/atlas_feat_${pass}_raw.spv"
     COMMAND spv_exact "${GEN}/atlas_feat_${pass}_raw.spv" "${GEN}/atlas_feat_${pass}.spv"
     ${FEAT_VALIDATE}

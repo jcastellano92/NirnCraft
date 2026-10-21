@@ -355,10 +355,22 @@ double dmin(double a, double b) { return (a != a) ? a : (a <= b ? (a == 0.0l && 
 double dmax(double a, double b) { return (a != a) ? a : (a >= b ? (a == 0.0l && b == 0.0l && hiW(a) < 0 ? b : a) : b); }
 
 // ---- random: WorldgenRandom over XoroshiroRandomSource (BitRandomSource's methods), and LegacyRandomSource -------
-struct Rng {
-    uint64_t lo, hi;
-};
-static Rng sR;   // the feature's random (WorldgenRandom over Xoroshiro), thread-private
+// The feature's random (WorldgenRandom over Xoroshiro) lives in the origin's scratch meta words (sRA: lo low, lo high,
+// hi low, hi high), not in a thread-private static: NVIDIA's compiler took the [noinline] random functions writing a
+// Private variable for side-effect free and re-evaluated or merged their calls (ore's two nextInt(3) drew three
+// times). A storage buffer write it must keep. It also carries the random from one dispatch to the next.
+static uint sRA;
+[ForceInline]
+uint64_t rngLo() { return (uint64_t(scratch[sRA + 1u]) << 32) | uint64_t(scratch[sRA]); }
+[ForceInline]
+uint64_t rngHi() { return (uint64_t(scratch[sRA + 3u]) << 32) | uint64_t(scratch[sRA + 2u]); }
+[ForceInline]
+void rngStore(uint64_t lo, uint64_t hi) {
+    scratch[sRA] = uint(lo & 0xFFFFFFFFu);
+    scratch[sRA + 1u] = uint(lo >> 32u);
+    scratch[sRA + 2u] = uint(hi & 0xFFFFFFFFu);
+    scratch[sRA + 3u] = uint(hi >> 32u);
+}
 uint64_t rotl(uint64_t x, uint k) { return (x << k) | (x >> (64u - k)); }
 [noinline]
 uint64_t mixStafford13(uint64_t z) {
@@ -371,53 +383,61 @@ uint64_t mixStafford13(uint64_t z) {
 void rngSeed(int64_t seed) {
     uint64_t lo = uint64_t(seed) ^ ((uint64_t(0x6A09E667u) << 32) | uint64_t(0xF3BCC909u));   // SILVER_RATIO_64
     uint64_t hi = lo + ((uint64_t(0x9E3779B9u) << 32) | uint64_t(0x7F4A7C15u));                // + GOLDEN_RATIO_64
-    sR.lo = mixStafford13(lo);
-    sR.hi = mixStafford13(hi);
-    if ((sR.lo | sR.hi) == 0u) {
-        sR.lo = (uint64_t(0x9E3779B9u) << 32) | uint64_t(0x7F4A7C15u);
-        sR.hi = (uint64_t(0x6A09E667u) << 32) | uint64_t(0xF3BCC909u);
+    uint64_t a = mixStafford13(lo), b = mixStafford13(hi);
+    if ((a | b) == 0u) {
+        a = (uint64_t(0x9E3779B9u) << 32) | uint64_t(0x7F4A7C15u);
+        b = (uint64_t(0x6A09E667u) << 32) | uint64_t(0xF3BCC909u);
     }
+    rngStore(a, b);
 }
-[noinline]
+[ForceInline]
 uint64_t xoroNext() {
-    uint64_t s0 = sR.lo, s1 = sR.hi;
+    uint64_t s0 = rngLo(), s1 = rngHi();
     uint64_t result = rotl(s0 + s1, 17u) + s0;
     s1 = s1 ^ s0;
-    sR.lo = rotl(s0, 49u) ^ s1 ^ (s1 << 21u);
-    sR.hi = rotl(s1, 28u);
+    rngStore(rotl(s0, 49u) ^ s1 ^ (s1 << 21u), rotl(s1, 28u));
     return result;
 }
 // WorldgenRandom.next(bits) = (int) (nextLong() >>> 64 - bits)
+[ForceInline]
 int rngNext(uint bits) { return int(uint(xoroNext() >> (64u - bits))); }
+[ForceInline]
 int rngInt() { return rngNext(32u); }
 // BitRandomSource.nextInt(bound)
-[noinline]
+[ForceInline]
 int rngIntB(int bound) {
     if (bound <= 0) return 0;
     if ((bound & (bound - 1)) == 0) return int((int64_t(bound) * int64_t(rngNext(31u))) >> 31);
-    int sample, modulo;
-    for (int guard = 0; guard < 64; guard++) {
+    // Java: do { sample = next(31); modulo = sample % bound; } while (sample - modulo + (bound - 1) < 0), the sum
+    // overflowing int; here in 64 bits (no signed overflow), the redraw a plain while loop
+    int sample = rngNext(31u);
+    int modulo = int(uint(sample) % uint(bound));  // sample >= 0
+    int guard = 0;
+    while (int64_t(sample) - int64_t(modulo) + int64_t(bound - 1) > int64_t(0x7FFFFFFF) && guard < 64) {
         sample = rngNext(31u);
-        modulo = int(uint(sample) % uint(bound));  // sample >= 0
-        if (sample - modulo + (bound - 1) >= 0) break;
+        modulo = int(uint(sample) % uint(bound));
+        guard++;
     }
     return modulo;
 }
-[noinline]
+[ForceInline]
 int64_t rngLong() {
     int upper = rngNext(32u);
     int lower = rngNext(32u);
     return (int64_t(upper) << 32) + int64_t(lower);
 }
+[ForceInline]
 bool rngBool() { return rngNext(1u) != 0; }
+[ForceInline]
 float rngFloat() { return float(rngNext(24u)) * asfloat(0x33800000u); }  // * 5.9604645E-8F (2^-24)
-[noinline]
+[ForceInline]
 double rngDouble() {
     int upper = rngNext(26u);
     int lower = rngNext(27u);
     int64_t combined = (int64_t(upper) << 27) + int64_t(lower);
     return double(l2f(combined) * asfloat(0x25000000u));  // a long times 1.110223E-16F: float arithmetic
 }
+[ForceInline]
 int rngBetween(int lo, int hi) { return rngIntB(hi - lo + 1) + lo; }  // Mth.randomBetweenInclusive
 // WorldgenRandom.setDecorationSeed / setFeatureSeed
 [noinline]
@@ -3098,6 +3118,7 @@ void featBody<let T : uint>(uint o) {
     sBad = 0u;
     uint rec = params.rec;
     uint meta = sG.base + SCR_META;
+    sRA = meta + 6u;
     bool first = params.first != 0u;
     if (first) {
         // applyBiomeDecoration: the feature runs when a biome the 3 x 3 holds lists it at this step
@@ -3109,15 +3130,9 @@ void featBody<let T : uint>(uint o) {
         int64_t deco = decorationSeed(int64_t(pfU64(H_SEED)), sG.cx * 16, sG.cz * 16);
         featureSeed(deco, int(fprog[rec + R_GI]), int(fprog[rec + R_STEP]));
     } else {
-        if (scratch[meta + 10u] != 1u) return;
-        sR.lo = (uint64_t(scratch[meta + 7u]) << 32) | uint64_t(scratch[meta + 6u]);
-        sR.hi = (uint64_t(scratch[meta + 9u]) << 32) | uint64_t(scratch[meta + 8u]);
+        if (scratch[meta + 10u] != 1u) return;  // the random is still in meta 6..9
     }
     bool more = runPlaced<T>(rec, first, params.budget);
-    scratch[meta + 6u] = uint(sR.lo & 0xFFFFFFFFu);
-    scratch[meta + 7u] = uint(sR.lo >> 32u);
-    scratch[meta + 8u] = uint(sR.hi & 0xFFFFFFFFu);
-    scratch[meta + 9u] = uint(sR.hi >> 32u);
     scratch[meta + 10u] = more ? 1u : 2u;
     scratch[meta + 1u] = scratch[meta + 1u] | sBad;
     if (more) InterlockedAdd(counters[0], 1u);

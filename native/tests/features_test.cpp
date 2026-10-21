@@ -314,13 +314,16 @@ int main(int argc, char** argv) {
                         auto it = gpu.find(key);
                         if (it == gpu.end()) lines.push_back("java only " + pos(key) + " " + name(id));
                         else if (it->second != id) lines.push_back("differ    " + pos(key) + " java " + name(id) + " gpu " + name(it->second));
+                        else if (std::getenv("ATLAS_FEAT_DIFF_ALL")) lines.push_back("alike     " + pos(key) + " " + name(id));
                     }
                     for (auto& [key, id] : gpu)
                         if (!tr.iso[o].count(key)) lines.push_back("gpu only  " + pos(key) + " " + name(id));
                     if (lines.empty()) continue;
                     std::sort(lines.begin(), lines.end());
                     report += "    origin " + std::to_string(ocx) + " " + std::to_string(ocz) + ": " + std::to_string(lines.size()) + " differences\n";
-                    for (size_t i = 0; i < lines.size() && i < 60; i++) report += "      " + lines[i] + "\n";
+                    const char* dn = std::getenv("ATLAS_FEAT_DIFF_N");  // lines per origin (default 60)
+                    size_t lim = dn ? size_t(std::atoi(dn)) : 60u;
+                    for (size_t i = 0; i < lines.size() && i < lim; i++) report += "      " + lines[i] + "\n";
                     shown++;
                 }
             }

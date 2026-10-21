@@ -283,6 +283,19 @@ public:
         if (outTables)
             for (uint32_t o = 0; o < b.origins; o++)
                 if (!download(scratch_, VkDeviceSize(o) * SCR_W * 4, outTables + size_t(o) * TABLE_W, TABLE_W * 4, err)) return false;
+        // dev: ATLAS_FEAT_SCRATCH_DUMP=<file> writes each origin's misc scratch (cx, cz, then MISC_W words: the last
+        // placement's ore spheres, stack ...), for comparing a kernel's working values with an emulation
+        if (const char* sd = std::getenv("ATLAS_FEAT_SCRATCH_DUMP")) {
+            if (FILE* f = std::fopen(sd, "wb")) {
+                std::vector<uint32_t> misc(MISC_W);
+                for (uint32_t o = 0; o < b.origins; o++) {
+                    if (!download(scratch_, (VkDeviceSize(o) * SCR_W + SCR_TREE + TREE_W) * 4, misc.data(), MISC_W * 4, err)) break;
+                    std::fwrite(b.org + size_t(o) * ORIGIN_W, 4, 2, f);
+                    std::fwrite(misc.data(), 4, MISC_W, f);
+                }
+                std::fclose(f);
+            }
+        }
         t.readbackMs += msSince(r0);
         return true;
     }
