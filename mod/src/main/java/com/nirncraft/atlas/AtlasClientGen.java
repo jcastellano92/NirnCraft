@@ -600,8 +600,9 @@ final class AtlasClientGen implements AutoCloseable {
         long now = System.nanoTime(), j = c.jumpNs;
         double[] dp = c.devicePages ? c.gen.pageStats() : null;
         String pagesNow = dp == null ? "java" : String.format("device %d in %.0f ms", (long) dp[0], dp[1]);
-        if (c.farOn) pagesNow += String.format(", far %d tiles %d/%d chunks taken %.0f ms busy %d", c.farTiles, c.farTaken, c.farChunks,
-                c.farMs, c.farBusy);
+        if (c.farOn) pagesNow += String.format(", far %d tiles %d/%d chunks taken %.0f ms busy %d, partial %d (retried %d), from the cache %d",
+                c.farTiles, c.farTaken, c.farChunks, c.farMs, c.farBusy, c.farPartial.size(), c.farRetried, c.farCached);
+        pagesNow += String.format(", cached chunks %d (%d sections)", c.cachedChunks, c.cachedSections);
         return String.format("clientGen{%s%s chunks=%d flagged=%d ready=%d up=%d/%d sections pages=%d (%s) genMs=%.0f pageMs=%.0f "
                         + "(gpu=%.0f: kernels %.0f readback %.0f; decode=%.0f) uploadMs=%.0f features=%d featureMs=%.0f failures=%d jump{firstUp=%.0f windowUp=%.0f features=%.0f ms; %s}}",
                 c.direct ? "gpu->grid " : "", c.gen.device(), c.chunks, c.flagged, r, c.uploadedChunks, c.uploadedSections, c.pagesMade, pagesNow,
@@ -1032,7 +1033,7 @@ final class AtlasClientGen implements AutoCloseable {
      * One far tile into the grid: of the coarse levels' tiles around the camera (FAR_TILES a side), the nearest one not
      * up yet (distance in tiles of its level, finer levels first at equal distance). Returns false when all are up.
      */
-    private long farRetryNs;
+    private long farRetryNs, farRetried;
 
     private boolean farStep() {
         double x = camX, z = camZ;
@@ -1041,6 +1042,7 @@ final class AtlasClientGen implements AutoCloseable {
         if (nowNs - farRetryNs > 2_000_000_000L && !farPartial.isEmpty()) {
             farRetryNs = nowNs;
             for (long key : farPartial) farDone.remove(key);
+            farRetried += farPartial.size();
             farPartial.clear();
         }
         int best = -1, btx = 0, btz = 0;

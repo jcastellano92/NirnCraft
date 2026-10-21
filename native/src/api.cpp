@@ -476,22 +476,22 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             Backend::VoxGridTimes t = ctx->backend->voxgridTimes();
             const VoxGrid& v = ctx->voxgrid;
             uint64_t bytes = uint64_t(v.chunkWords()) * 4 + uint64_t(v.totalSlots()) * (64 * 12 + VG_SECTION_WORDS * 4);
-            char b[1536];
+            char b[4096];
             std::snprintf(b, sizeof b,
                           ",\"voxgrid\":{\"window\":[%d,%d,%d],\"slots\":%u,\"slotCap\":%u,\"gpuBytes\":%llu,\"built\":%llu,"
                           "\"batches\":%llu,\"pending\":%zu,\"lastGpuMs\":%.3f,\"lastSections\":%u,\"lastJobs\":%u,"
                           "\"lastRegrow\":%s,\"totalGpuMs\":%.2f,\"ownsLevel0\":%s,\"level0Skipped\":%zu,"
-                          "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f,\"baking\":%zu,",
+                          "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f,\"baking\":%zu,%s",
                           v.D, v.H, v.D, v.slotsUsed(), v.slotCap, (unsigned long long)bytes, (unsigned long long)v.sectionsBuilt,
                           (unsigned long long)v.batches, v.pending(), t.lastMs, t.lastSections, t.lastJobs,
                           t.lastStates ? "true" : "false", t.totalMs, ctx->world.gridOwnsLevel0.load() ? "true" : "false",
-                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs, v.bakeQueued());
+                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs, v.bakeQueued(), v.refineInfo().c_str());
             // residency: slots used / of the pool, uniform cells (no slot), the waiting (CPU ids kept, GPU ones to ask
             // for), given up for nearer ones, could not be taken, the GPU's uniform finds, the priority cut-off of a
             // full pool, level 0's footprint reach and the nearest known section not resident (blocks; 0: none)
             {
                 VoxGrid::Residency rs = v.residency();
-                char r[512];
+                char r[1024];
                 std::snprintf(r, sizeof r,
                               "\"resident\":%u,\"slotsTotal\":%u,\"uniform\":%u,\"waiting\":%zu,\"gpuWaiting\":%zu,\"coarseWaiting\":%zu,"
                               "\"misses\":%llu,\"evictedNow\":%llu,\"gpuUniform\":%llu,\"cutoff\":%.0f,\"reach\":%.0f,\"nearestMissing\":%u,",
@@ -507,7 +507,7 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                 SectionStore::Stats ts;
                 World::StoreStats ws = ctx->world.storeStats(&ts);
                 VoxGrid::Residency rs = v.residency();
-                char t[1400];
+                char t[4096];
                 std::snprintf(t, sizeof t,
                               "\"tiers\":{\"hot\":{\"slots\":%u,\"uniform\":%u,\"mb\":%.1f},\"raw\":{\"sections\":%zu,\"mb\":%.1f,"
                               "\"packQueue\":%zu,\"packed\":%llu},\"warm\":{\"sections\":%zu,\"mb\":%.1f,\"budgetMb\":%.0f,"
@@ -533,7 +533,7 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             // where the window is against the camera (sections), how it moved, what it still waits for, what the pool
             // full gave back, and how many frames its content took to be complete after its last move
             VoxGrid::Stats st = v.stats();
-            char c[768];
+            char c[2048];
             std::snprintf(c, sizeof c,
                           "\"origin\":[%d,%d],\"cameraSection\":[%d,%d],\"jumps\":%llu,\"shifts\":%llu,\"refills\":%llu,"
                           "\"freshColumns\":%u,\"pendingSections\":%zu,\"evicted\":%llu,\"overflow\":%llu,"
@@ -546,7 +546,7 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             std::string coarse = ",\"levels\":[";
             for (int k = 1; k < v.levels(); k++) {
                 VoxGrid::LevelInfo li = v.levelInfo(k);
-                char q[384];
+                char q[1024];
                 std::snprintf(q, sizeof q,
                               "%s{\"level\":%d,\"window\":[%d,%d,%d],\"origin\":[%d,%d],\"slots\":%u,\"slotCap\":%u,"
                               "\"ingested\":%llu,\"pending\":%zu,\"evicted\":%llu,\"overflow\":%llu,\"jumps\":%llu,"

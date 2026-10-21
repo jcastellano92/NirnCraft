@@ -34,6 +34,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <deque>
+#include <cstdio>
+#include <string>
 #include <vector>
 
 #include "world.hpp"  // (Key3, Section)
@@ -192,6 +194,17 @@ public:
     size_t ingestCoarseHost(int level, const int32_t* pos, const uint32_t* kinds, const VgPacked* packed, size_t count,
                             uint8_t* accepted);
     int bakeBudget = 512;
+    // (atlas_info voxgrid) what is still to refine with the camera still: coarse cells given up and waiting for room, GPU
+    // sections asked for again and the asks held back (asked lately), the bake's queue
+    std::string refineInfo() const {
+        std::lock_guard<std::mutex> lock(mu_);
+        size_t lost = 0;
+        for (int k = 1; k < VG_LEVELS; k++) lost += lostCells_[k].size();
+        char b[160];
+        std::snprintf(b, sizeof b, "\"coarseLost\":%zu,\"wantedAsked\":%llu,\"wantedHeld\":%llu,", lost,
+                      (unsigned long long)wantedAgain_, (unsigned long long)wantedHeld_);
+        return b;
+    }
     size_t bakeQueued() const {
         std::lock_guard<std::mutex> lock(mu_);
         return bake_.size();
