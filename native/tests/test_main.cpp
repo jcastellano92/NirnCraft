@@ -2062,27 +2062,37 @@ static void testOverhang() {
 }
 
 int main(int argc, char** argv) {
-    testSvdag();
-    testCaves();
-    testOverhang();
-    testGroups();
-    testAbi();
-    testStreamingGap();
-    testFourZones();
-    testRegionSeam();
-    testStructures();
-    testSunMap();
-    testActors();
-    testImpostorShape();
-    testActorMotion();
-    testTransitions();
-    testLights();
-    testFaults();
-    testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
-    testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
-    testGrassTint(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
-    testSurfaceOverrides(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
-    parity(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
+    std::setvbuf(stdout, nullptr, _IONBF, 0);  // (each line as it comes: a suite stopped part way still shows where)
+    // atlas_tests [raster] [only=a,b,..]: the suites named alone (svdag, caves, ..., parity); each prints
+    // "TRACE done <name> <secs>s" when it ends, so a slow or runaway one is named
+    const char* raster = "native/data/tamriel_raster.bin";
+    std::string only;
+    for (int i = 1; i < argc; i++) {
+        if (std::strncmp(argv[i], "only=", 5) == 0) only = "," + std::string(argv[i] + 5) + ",";
+        else raster = argv[i];
+    }
+    struct Suite {
+        const char* name;
+        std::function<void()> run;
+    };
+    const Suite suites[] = {
+        {"svdag", testSvdag}, {"caves", testCaves}, {"overhang", testOverhang}, {"groups", testGroups}, {"abi", testAbi},
+        {"streaminggap", testStreamingGap}, {"fourzones", testFourZones}, {"regionseam", testRegionSeam},
+        {"structures", testStructures}, {"sunmap", testSunMap}, {"actors", testActors}, {"impostor", testImpostorShape},
+        {"actormotion", testActorMotion}, {"transitions", testTransitions}, {"lights", testLights}, {"faults", testFaults},
+        {"neardepth", [&] { testNearDepth(raster); }}, {"columnheights", [&] { testColumnHeights(raster); }},
+        {"grasstint", [&] { testGrassTint(raster); }}, {"surfaceoverrides", [&] { testSurfaceOverrides(raster); }},
+        {"parity", [&] { parity(raster); }},
+    };
+    for (const Suite& t : suites) {
+        if (!only.empty() && only.find("," + std::string(t.name) + ",") == std::string::npos) continue;
+        std::printf("TRACE begin %s\n", t.name);
+        auto t0 = std::chrono::steady_clock::now();
+        int before = failures;
+        t.run();
+        std::printf("TRACE done %s %.1fs (%d failures)\n", t.name,
+                    std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(), failures - before);
+    }
     std::printf(failures ? "FAILED (%d)\n" : "PASS\n", failures);
     return failures ? 1 : 0;
 }

@@ -498,20 +498,24 @@ void World::setClasses(std::vector<uint8_t> cls) {
     classes_ = std::move(cls);
 }
 
-void World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
-    auto s = std::make_unique<Section>();
+std::shared_ptr<const Section> World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
+    auto s = std::make_shared<Section>();
     std::copy(mats, mats + 4096, s->mats.begin());
-    // (its generated levels outside the world's lock: an upload holds it for the map's update alone)
-    std::vector<uint8_t> cls;
-    {
-        std::lock_guard<std::mutex> lock(mu_);
-        cls = classes_;
+    // (its generated levels outside the world's lock: an upload holds it for the map's update alone; none when the
+    // grid's coarse levels own every level that reads them: the GPU makes them, no CPU stage per section)
+    if (!gridOwnsReal()) {
+        std::vector<uint8_t> cls;
+        {
+            std::lock_guard<std::mutex> lock(mu_);
+            cls = classes_;
+        }
+        s->buildMips(cls);
     }
-    s->buildMips(cls);
     std::lock_guard<std::mutex> lock(mu_);
-    sections_[{0, sx, sy, sz}] = std::move(s);
+    sections_[{0, sx, sy, sz}] = s;
     if (gridCoarse.load(std::memory_order_relaxed) < coarseTop()) undigested_.insert({0, sx, sy, sz});  // (World::digest)
     markSectionDirty(sx, sy, sz);
+    return s;
 }
 
 void World::sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const {
@@ -544,6 +548,7 @@ void World::setGridWindow(int ox, int oz, int d) {
 }
 
 void World::gridReleased(const std::vector<Key3>& secs) {
+    if (gridOwnsReal()) return;  // (level 0's regions are the tiles' alone: the grid's unknown chunks fall back to them)
     std::lock_guard<std::mutex> lock(mu_);
     bool nbrs = groupsWanted.load(std::memory_order_relaxed);
     for (const Key3& k : secs) {
@@ -581,7 +586,8 @@ void World::markSectionDirty(int sx, int sy, int sz) {
     bool nbrs = groupsWanted.load(std::memory_order_relaxed);
     // (the GPU's grid holds it: its level-0 region waits until the grid's window leaves it, setGridWindow)
     bool grid = gridOwnsLevel0.load(std::memory_order_relaxed) && gridHolds(sx, sz) && !gridNotHeld_.count({0, sx, sy, sz});
-    markRegions(sx, sy, sz, 0, 0, grid ? gridSkipped_ : dirty_, nbrs);
+    // (the grid owns every level's real blocks: level 0's regions are the tiles' alone, nothing to rebuild either)
+    if (!gridOwnsReal()) markRegions(sx, sy, sz, 0, 0, grid ? gridSkipped_ : dirty_, nbrs);
     // (levels the grid's coarse levels own: nothing to rebuild here)
     int owned = gridCoarse.load(std::memory_order_relaxed);
     if (owned < 4) markRegions(sx, sy, sz, 1 + owned, 4, sectionDirty_, nbrs);
@@ -666,7 +672,7 @@ void World::editBlock(int x, int y, int z, uint16_t mat) {
                 }
     }
     s->mats[size_t((x & 15) + 16 * ((z & 15) + 16 * (y & 15)))] = mat;
-    s->buildMips(classes_);
+    if (!gridOwnsReal()) s->buildMips(classes_);
     sections_[sk] = std::move(s);
     if (gridCoarse.load(std::memory_order_relaxed) < coarseTop()) undigested_.insert(sk);
     markSectionDirty(sx, sy, sz);
@@ -1056,7 +1062,7 @@ World::Job World::snapshot(const Key3& k, bool groups) const {
         }
     }
     // (a level the grid's coarse levels own: its regions from the tiles alone, the real blocks the grid's)
-    bool real = k.lod == 0 || k.lod > gridCoarse.load(std::memory_order_relaxed);
+    bool real = k.lod == 0 ? !gridOwnsReal() : k.lod > gridCoarse.load(std::memory_order_relaxed);
     if (groups && real && k.lod <= 4 && !sections_.empty()) {
         // the groups read whole section columns around the region (its border ring for exposure, every row: a column
         // is evaluated over all its content)

@@ -31,6 +31,7 @@ static const uint VG_EMPTY = 0u;
 
 groupshared uint gMaskLo;
 groupshared uint gMaskHi;
+groupshared uint gDiffers;  // (level 0) some id of the section differs from its first
 
 bool maskBit(uint2 m, int i) { return ((i < 32 ? m.x >> uint(i) : m.y >> uint(i - 32)) & 1u) != 0u; }
 
@@ -103,17 +104,21 @@ void vgSectionMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
         chunks[job.x] = job.y;
         gMaskLo = 0u;
         gMaskHi = 0u;
+        gDiffers = 0u;
     }
     if (job.z == 0xFFFFFFFFu) return;
     GroupMemoryBarrierWithGroupSync();
     uint slot = job.z;
     int bx = int(bi & 3u), bz = int((bi >> 2) & 3u), by = int(bi >> 4);
     uint2 v = uint2(0u, 0u);
+    uint id0 = pool[slot * 2048u] & 0xFFFFu, same = id0 | id0 << 16;
+    bool differs = false;
     for (int ly = 0; ly < 4; ly++)
         for (int lz = 0; lz < 4; lz++) {
             int y = by * 4 + ly, z = bz * 4 + lz, x = bx * 4;
             uint i = uint(x + 16 * (z + 16 * y));  // even: 4 ids in two words
             uint w0 = pool[slot * 2048u + (i >> 1)], w1 = pool[slot * 2048u + (i >> 1) + 1u];
+            differs = differs || w0 != same || w1 != same;
             uint row = ((w0 & 0xFFFFu) != 0u ? 1u : 0u) | ((w0 >> 16) != 0u ? 2u : 0u) | ((w1 & 0xFFFFu) != 0u ? 4u : 0u) |
                        ((w1 >> 16) != 0u ? 8u : 0u);
             uint b = uint(4 * lz + 16 * ly);
@@ -125,11 +130,18 @@ void vgSectionMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
         if (bi < 32u) InterlockedOr(gMaskLo, 1u << bi);
         else InterlockedOr(gMaskHi, 1u << (bi - 32u));
     }
+    if (differs) InterlockedOr(gDiffers, 1u);
     GroupMemoryBarrierWithGroupSync();
     uint2 mask = uint2(gMaskLo, gMaskHi);
     blocks[slot * 64u + bi] = full ? 1u : growBox(int3(bx, by, bz), int3(4, 4, 4), 3, 2u, 0u, mask) << 2;
     // (a coarse chunk whose content the vote left out: empty, its box grown with the rest)
     if (bi == 0u && mask.x == 0u && mask.y == 0u) chunks[job.x] = VG_EMPTY;
+    // (level 0, a section of one id: the GPU's own sections, whose ids the host never saw) the chunk VG_UNIFORM, no
+    // slot read any more; the job's word says so, read back by the host, which frees the slot (VoxGrid::gpuUniform)
+    if (bi == 0u && gDiffers == 0u && job.x < pc.dims.x * pc.dims.y * pc.dims.z) {
+        if (id0 != 0u) chunks[job.x] = id0 << 2 | 3u;
+        jobs[j] = uint4(job.x, id0 << 2 | 3u, job.z, job.w);
+    }
 }
 
 // ---- the coarse levels ------------------------------------------------------------------------------------------
@@ -328,6 +340,7 @@ uint chunkAt(uint x, uint y, uint z) {
     return pc.misc.w + (y * Z + (z + pc.misc.z) % Z) * X + (x + pc.misc.y) % X;  // (misc.w: the level's first word)
 }
 
+// (sat, grow) dims.w: the state whose boxes are grown, EMPTY (0) or UNLOADED (2): the table counts the other cells
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void vgSatX(uint3 id : SV_DispatchThreadID) {
@@ -336,7 +349,7 @@ void vgSatX(uint3 id : SV_DispatchThreadID) {
     uint y = id.x / Z, z = id.x % Z;
     uint acc = 0u;
     for (uint x = 0u; x < X; x++) {
-        acc += (chunks[chunkAt(x, y, z)] & 3u) != VG_EMPTY ? 1u : 0u;
+        acc += (chunks[chunkAt(x, y, z)] & 3u) != pc.dims.w ? 1u : 0u;
         sat[satIndex(x + 1u, y + 1u, z + 1u)] = acc;
     }
 }
@@ -375,6 +388,8 @@ void vgGrowMain(uint3 id : SV_DispatchThreadID) {
     int x = int(id.x % X), z = int((id.x / X) % Z), y = int(id.x / (X * Z));  // (logical)
     uint at = chunkAt(uint(x), uint(y), uint(z));
     uint c = chunks[at];
-    if ((c & 3u) != VG_EMPTY) return;
-    chunks[at] = growBox(int3(x, y, z), int3(int(X), int(Y), int(Z)), 31, 5u, 1u, uint2(0u, 0u)) << 2 | VG_EMPTY;
+    // an EMPTY chunk's box of empty chunks; an UNLOADED one's of unloaded chunks (a ray crosses a run of chunks without
+    // data in one step to where the grid has some again: atlas_far.slang vgUnloadedEnd)
+    if ((c & 3u) != pc.dims.w) return;
+    chunks[at] = growBox(int3(x, y, z), int3(int(X), int(Y), int(Z)), 31, 5u, 1u, uint2(0u, 0u)) << 2 | pc.dims.w;
 }

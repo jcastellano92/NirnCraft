@@ -25,7 +25,8 @@
 [[vk::binding(11, 0)]] StructuredBuffer<uint> weather;
 [[vk::binding(12, 0)]] RWStructuredBuffer<uint> counters;
 [[vk::binding(13, 0)]] StructuredBuffer<uint> cloudNoise;
-[[vk::binding(14, 0)]] StructuredBuffer<float> nearDepth;  // view distance of the near field per pixel (row 0 top)
+// view distance of the near field per pixel (row 0 top); (PRIMARY_NEAR_LIT, FRAME_NEAR_SPLIT) farMain writes its own hits'
+[[vk::binding(14, 0)]] RWStructuredBuffer<float> nearDepth;
 
 #include "atlas_actors.slang"
 [[vk::binding(15, 0)]] StructuredBuffer<ActorGpu> actors;
@@ -47,7 +48,8 @@
 [[vk::binding(25, 0)]] StructuredBuffer<uint4> groupData;
 // (abi 0.15, FRAME_NEAR_LIGHT) the near field's surface info per pixel (RGBA8 packed, r low: block light, sky light,
 // octahedral normal; row 0 top) and the near light out (irradiance on a white diffuse surface, key light visibility)
-[[vk::binding(26, 0)]] StructuredBuffer<uint> nearInfo;
+// (PRIMARY_NEAR_LIT, FRAME_NEAR_SPLIT: farMain writes its hits' normals for the light passes)
+[[vk::binding(26, 0)]] RWStructuredBuffer<uint> nearInfo;
 [[vk::binding(27, 0)]] RWStructuredBuffer<float4> outNearLight;
 // (FRAME_NEAR_SPLIT) the previous frame's near light, for nearTemporalMain (a pixel's worth when it had none)
 [[vk::binding(28, 0)]] StructuredBuffer<float4> prevNearLight;
@@ -59,6 +61,16 @@
 [[vk::binding(32, 0)]] StructuredBuffer<uint> vgPool;
 // (abi 0.16) the near field's textures (voxgrid.hpp packTextures): 16 x 16 a face, as mip chains
 [[vk::binding(33, 0)]] StructuredBuffer<uint> texData;
+// (FRAME_GPU_LIGHTS) the far lights on the GPU (lightCullMain, lightAdmitMain, lightBinMain): the index as lights.cpp
+// packs it (header, cells, records), this frame's candidates (four float4 each: the ActorGpu record the kernel reads,
+// then where it lands on screen), and the counters, the score histogram and every screen tile's list
+[[vk::binding(34, 0)]] StructuredBuffer<float4> lightSrc;
+[[vk::binding(35, 0)]] RWStructuredBuffer<float4> lightCand;
+[[vk::binding(36, 0)]] RWStructuredBuffer<uint> lightList;
+// (FRAME_NEAR_SPLIT under PRIMARY_NEAR_LIT) how many of the pixel's own traced samples its history holds (nearTemporalMain),
+// this frame's and the last frame's
+[[vk::binding(37, 0)]] RWStructuredBuffer<uint> outNearAge;
+[[vk::binding(38, 0)]] StructuredBuffer<uint> prevNearAge;
 
 #include "atlas_air.slang"
 #include "atlas_clouds.slang"
@@ -77,6 +89,11 @@ struct TraceResult {
     float3 albedo;   // a groups hit: the texel's albedo (linear), when hasAlbedo
     uint hasAlbedo;
 };
+// the trace's result, thread-private: the chain traceView -> traceLod -> traceVoxGrid / traceLodRegions -> traceRegion /
+// traceGroups -> drawBox / stepLeaf -> groupHit, vgTexel works on it instead of forwarding an inout TraceResult (Slang
+// inlines a callee whose inout parameter is forwarded into another one: farMain's SPIR-V grew to 24 MB at -O1 and its
+// -O3 compile took ~14 min and ~30 GB). Callers outside the chain copy their own in and out.
+static TraceResult gTr;
 
 uint popcount64(uint64_t x) { return countbits(uint(x)) + countbits(uint(x >> 32)); }
 
@@ -170,13 +187,13 @@ bool voxelStops(uint hitMat, int3 v, int3 wv, int rl, float3 ro, float3 rd, floa
     return !pass;
 }
 
-bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps, inout TraceResult res) {
+bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps) {
     float3 inv = float3(abs(rd.x) > 1e-12 ? 1.0 / rd.x : 1e30, abs(rd.y) > 1e-12 ? 1.0 / rd.y : 1e30,
                         abs(rd.z) > 1e-12 ? 1.0 / rd.z : 1e30);
     float3 stepPos = float3(rd.x > 0 ? 1.0 : 0.0, rd.y > 0 ? 1.0 : 0.0, rd.z > 0 ? 1.0 : 0.0);
     uint nodeBase = r.bases.x, leafBase = r.bases.y;
     float t = t0;
-    int axis = res.axis;
+    int axis = gTr.axis;
     // The descent path of the previous step: a step usually stays inside most of its ancestors, so the next descent
     // resumes from the deepest one still containing the new voxel instead of the root; and a step inside the same
     // 4^3 brick reuses its bitmap without touching the tree at all.
@@ -194,7 +211,7 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
     bool useMip = !(gSecondary && rl == 0 && (gSecAblate & 2097152u) != 0u);
     for (int it = 0; it < 1024; it++) {
         if (t >= t1) break;
-        res.steps++;
+        gTr.steps++;
         secCount(1u, rl);
         float3 p = ro + rd * t;
         // Over terrain: find the largest column cell (whole region down to 4x4 voxels) whose highest voxel the ray
@@ -276,9 +293,9 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
                 rank += popcount64(bits & ((uint64_t(1) << b) - 1));
                 uint hitMat = lookupMaterial(r, rank);
                 if (voxelStops(hitMat, v, (r.origin.xyz >> rl) + v, rl, ro, rd, inv, stepPos, t)) {
-                    res.t = t;
-                    res.mat = hitMat;
-                    res.axis = entryAxis(v, ro, rd, inv, stepPos);
+                    gTr.t = t;
+                    gTr.mat = hitMat;
+                    gTr.axis = entryAxis(v, ro, rd, inv, stepPos);
                     return true;
                 }
             }
@@ -294,7 +311,7 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
         axis = tt.x <= tn ? 0 : (tt.y <= tn ? 1 : 2);
         t = max(tn, t) + eps;
     }
-    res.axis = axis;
+    gTr.axis = axis;
     return false;
 }
 
@@ -377,6 +394,7 @@ bool secondaryShapeMisses(uint mat, float3 l, float3 d) {
 static const uint VG_EMPTY = 0u;
 static const uint VG_MIXED = 1u;
 static const uint VG_UNLOADED = 2u;
+static const uint VG_UNIFORM = 3u;  // one id throughout (bits 2-17), no slot: read as a MIXED chunk all of that id
 // (primary rays) the threshold a cut-out face's texel coverage is tested against (farMain: a per-pixel one, rotated
 // under the host's TAA, which averages a part-covered texel's coverage)
 static float gAlphaXi = 0.5;
@@ -419,7 +437,7 @@ VgGrid vgGrid(int k) {
         g.Z = int(frame.vgDims.z);
         g.base = 0u;
     } else {
-        int4 L = frame.vgLevel[k - 1];
+        int4 L = frame.vgLevel[clamp(k, 1, 6) - 1];  // (clamped: inlined with k 0 this branch is dead, its index -1)
         int cs = 16 << k;
         g.origin = int3(L.x * cs, -64, L.y * cs);
         g.ox = L.x;
@@ -439,7 +457,8 @@ uint vgCellG(VgGrid g, int3 c) {
 }
 
 // Where a chord p0 + d u standing at u in a chunk without data (or outside the window: `left`) reaches the next chunk
-// with data: the run of unloaded chunks the regions answer for (chunk by chunk, one load each; at most 64)
+// with data: the run of unloaded chunks the regions answer for. An UNLOADED chunk carries a box of unloaded chunks
+// around it (vgGrowMain, as an EMPTY one's of empty ones): left through its far side, one load a box (at most 64).
 float vgUnloadedEnd(VgGrid g, float3 p0, float3 d, float u, float u1, out bool left) {
     left = false;
     float cs = float(16 << g.k);
@@ -456,12 +475,19 @@ float vgUnloadedEnd(VgGrid g, float3 p0, float3 d, float u, float u1, out bool l
             left = true;  // (from here the window has nothing: the regions take the rest)
             return u1;
         }
-        if ((vgChunks[vgCellG(g, c)] & 3u) != VG_UNLOADED) return t;
-        float3 tt = (float3(c) + float3(dc.x > 0.0 ? 1.0 : 0.0, dc.y > 0.0 ? 1.0 : 0.0, dc.z > 0.0 ? 1.0 : 0.0) - ro) * inv;
+        uint cw = vgChunks[vgCellG(g, c)];
+        if ((cw & 3u) != VG_UNLOADED) return t;
+        int3 lo = c - int3(int((cw >> 2) & 31u), int((cw >> 12) & 31u), int((cw >> 22) & 31u));
+        int3 hi = c + int3(int((cw >> 7) & 31u), int((cw >> 17) & 31u), int((cw >> 27) & 31u)) + 1;
+        float3 tt = (float3(dc.x > 0.0 ? hi.x : lo.x, dc.y > 0.0 ? hi.y : lo.y, dc.z > 0.0 ? hi.z : lo.z) - ro) * inv;
         tt = float3(abs(dc.x) > 1e-14 ? tt.x : 1e30, abs(dc.y) > 1e-14 ? tt.y : 1e30, abs(dc.z) > 1e-14 ? tt.z : 1e30);
         float tn = min(tt.x, min(tt.y, tt.z));
         int a = tt.x <= tn ? 0 : (tt.y <= tn ? 1 : 2);
-        c[a] += st[a];
+        // the cell across the box's face it leaves by (by index on that axis, as traceVoxGrid's exit)
+        int3 nc = int3(floor(ro + dc * tn));
+        nc[a] = st[a] > 0 ? hi[a] : lo[a] - 1;
+        c = clamp(nc, lo, hi - 1);  // (the face lies within the box on the other axes)
+        c[a] = nc[a];
         t = max(t, tn);
     }
     return min(t, u1);
@@ -532,7 +558,7 @@ float4 texSample(uint at, int f, float u, float v, float fp) {
 // A level-0 hit's texel (primary rays): the material's 16 x 16 face texture at the hit point p (voxel-local 0..1) on the
 // face the ray entered by, over the pixel's footprint there; a covered texel replaces res's albedo (a cut-out's
 // uncovered texel keeps its face tile's colour)
-void vgTexel(inout TraceResult res, uint mat, float3 lp, float3 d, int ax, float tView) {
+void vgTexel(uint mat, float3 lp, float3 d, int ax, float tView) {
     uint at = vgTexture(mat);
     if (at == 0u) return;
     int f = d[ax] > 0.0 ? G_FACE_LOW[ax] : G_FACE_HIGH[ax];
@@ -541,9 +567,9 @@ void vgTexel(inout TraceResult res, uint mat, float3 lp, float3 d, int ax, float
     uv = clamp(uv, float2(0, 0), float2(0.9999, 0.9999));
     float fp = tView * frame.params.w * frame.params.z / max(abs(d[ax]), 0.2);
     float4 c = texSample(at, f, uv.x, uv.y, fp);
-    if (c.a < 0.5 && res.hasAlbedo != 0u) return;
-    res.albedo = c.rgb;
-    res.hasAlbedo = 1u;
+    if (c.a < 0.5 && gTr.hasAlbedo != 0u) return;
+    gTr.albedo = c.rgb;
+    gTr.hasAlbedo = 1u;
 }
 
 // The chord p0 + d u (camera-relative), u in [u0, u1), through the grid: TRACE_HIT (res filled), TRACE_MISS (it crossed
@@ -552,7 +578,7 @@ void vgTexel(inout TraceResult res, uint mat, float3 lp, float3 d, int ax, float
 // inside a block with voxels its bitmap: an empty chunk or block is left through the far side of its empty box, an
 // empty voxel through its empty 2^3 octant when it has one, as traceRegion's bricks are. A coarse level (g.k > 0) the
 // same in its voxels (u still in blocks along dw), its voxels cubes of their material, as the regions' levels are.
-int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, inout TraceResult res, out float uStop) {
+int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, out float uStop) {
     uStop = u0;
     int3 gBlock = g.origin;
     float vs = float(1 << g.k);
@@ -569,7 +595,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, inout Trace
     int exitAxis = -1, exitTo = 0;
     for (int it = 0; it < 4096; it++) {
         if (t >= u1) return TRACE_MISS;
-        res.steps++;
+        gTr.steps++;
         secCount(1u, 0);
         // (a point exactly on a cell face going down that axis lies in the cell below: else that face's exit is at t,
         // not after it, and the ray left a camera standing on a chunk's floor through the box's far sides instead)
@@ -596,11 +622,14 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, inout Trace
             hi = (c + ep + 1) * 16;
             secCount(2u, 0);
         } else {
+            // (VG_UNIFORM: every block full, every voxel the id; the same steps as a MIXED chunk's from here, so a
+            // uniform lake, leaf or glass section is cut out, passed and lit as the mixed ones are)
+            bool uni = st == VG_UNIFORM;
             uint slot = cw >> 2;
             int3 l = v & 15;
             int3 b = l >> 2;
             uint bi = uint(b.x + 4 * (b.z + 4 * b.y));
-            uint bw = vgBlocks[slot * 64u + bi];
+            uint bw = uni ? 1u : vgBlocks[slot * 64u + bi];
             secCount(4u, 0);
             if ((bw & 1u) == 0u) {
                 int3 en = int3(int((bw >> 2) & 3u), int((bw >> 6) & 3u), int((bw >> 10) & 3u));
@@ -608,19 +637,19 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, inout Trace
                 lo = c * 16 + (b - en) * 4;
                 hi = c * 16 + (b + ep + 1) * 4;
             } else {
-                uint64_t bits = vgBits[slot * 64u + bi];
+                uint64_t bits = uni ? ~uint64_t(0) : vgBits[slot * 64u + bi];
                 int3 q = v & 3;
                 uint bt = uint(q.x + 4 * q.z + 16 * q.y);
                 if (((bits >> bt) & 1) != 0) {
                     uint i = uint(l.x + 16 * (l.z + 16 * l.y));
-                    uint mat = (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
+                    uint mat = uni ? (cw >> 2) & 0xFFFFu : (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
                     if (g.k > 0) {
                         // a coarse level's voxel: a cube of its material (the regions' levels' rule)
                         if (voxelStops(mat, v, v + gVox, g.k, ro, d, inv, stepPos, t)) {
-                            res.t = t;
-                            res.mat = mat;
-                            res.axis = entryAxis(v, ro, d, inv, stepPos);
-                            res.lod = g.k;
+                            gTr.t = t;
+                            gTr.mat = mat;
+                            gTr.axis = entryAxis(v, ro, d, inv, stepPos);
+                            gTr.lod = g.k;
                             return TRACE_HIT;
                         }
                         lo = v;
@@ -649,31 +678,31 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, inout Trace
                             float fp = (gChordT + t) * frame.params.w * frame.params.z / max(abs(d[ax]), 0.2);
                             float4 c = texSample(tex, f, uv.x, uv.y, fp);
                             if (c.a > gAlphaXi) {
-                                res.t = t;
-                                res.mat = mat;
-                                res.axis = ax;
-                                res.lod = 0;
-                                res.albedo = c.rgb;
-                                res.hasAlbedo = 1u;
+                                gTr.t = t;
+                                gTr.mat = mat;
+                                gTr.axis = ax;
+                                gTr.lod = 0;
+                                gTr.albedo = c.rgb;
+                                gTr.hasAlbedo = 1u;
                                 return TRACE_HIT;
                             }
                         } else if (vgShapeHit(sh, v, v + gBlock, ro, d, t, tHit, ax, q)) {
-                            res.t = tHit;
-                            res.mat = mat;
-                            res.axis = ax;
-                            res.lod = 0;
+                            gTr.t = tHit;
+                            gTr.mat = mat;
+                            gTr.axis = ax;
+                            gTr.lod = 0;
                             int f = d[ax] > 0.0 ? G_FACE_LOW[ax] : G_FACE_HIGH[ax];
-                            res.albedo = cellAlbedo(mat | G_CELL_SHAPED, f, q);
-                            res.hasAlbedo = 1u;
-                            vgTexel(res, mat, ro + d * tHit - float3(v), d, ax, gChordT + tHit);
+                            gTr.albedo = cellAlbedo(mat | G_CELL_SHAPED, f, q);
+                            gTr.hasAlbedo = 1u;
+                            vgTexel(mat, ro + d * tHit - float3(v), d, ax, gChordT + tHit);
                             return TRACE_HIT;
                         }
                     } else if (voxelStops(mat, v, v + gBlock, 0, ro, d, inv, stepPos, t)) {
-                        res.t = t;
-                        res.mat = mat;
-                        res.axis = entryAxis(v, ro, d, inv, stepPos);
-                        res.lod = 0;
-                        if (!gSecondary) vgTexel(res, mat, ro + d * t - float3(v), d, res.axis, gChordT + t);
+                        gTr.t = t;
+                        gTr.mat = mat;
+                        gTr.axis = entryAxis(v, ro, d, inv, stepPos);
+                        gTr.lod = 0;
+                        if (!gSecondary) vgTexel(mat, ro + d * t - float3(v), d, gTr.axis, gChordT + t);
                         return TRACE_HIT;
                     }
                     lo = v;
@@ -705,35 +734,60 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, inout Trace
 // Walk the regions of one LOD along the chord p0 + d u, u in [0, len].
 // On TRACE_UNCOVERED, uncExit is where the chord leaves the unloaded region cell (1e30 when it left the LOD's
 // window: that LOD has nothing further along this ray at all).
-int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out float uncExit) {
+// ([noinline]: SPIR-V optimisers inline every call; traceLod and what it calls, once per call site, made farMain 26 MB of
+// SPIR-V at -O1, a ~30 GB, 14 min -O3 compile and a driver JIT that stalled: one copy, called. Also traceSecondary,
+// lodPrepareR, cloudNoiseAt.)
+[noinline]
+int traceLod(int lod, float3 p0, float3 d, float len, out float uncExit) {
     uncExit = 1e30;
     // the GPU-built grid's level first (real blocks), the regions (the tiles; level 0 the sections past the grid) only
     // over the runs of chunks where it has no data: the grid again past each
     // (the content-shaped groups keep level-0 primary rays where a frame asks for them unless the grid owns level 0:
     // vgDims.w, ATLAS_VOXGRID_LEVEL0, where the SVDAG level 0 no longer follows the sections)
-    bool grid = vgLevelOn(lod) && (lod > 0 || !gGroups || frame.vgDims.w != 0u);
+    // (a level holding no data at all, vgOrigin.w / vgLevel.w bit 2 of the second byte pair: the regions alone)
+    bool hasData = lod == 0 ? (frame.vgOrigin.w & 2) != 0 : lod <= 6 && ((frame.vgLevel[clamp(lod, 1, 6) - 1].w >> 17) & 1) != 0;
+    bool grid = hasData && vgLevelOn(lod) && (lod > 0 || !gGroups || frame.vgDims.w != 0u);
     float u = 0.0;
     if (grid) {
         VgGrid g = vgGrid(lod);
         for (int run = 0; run < 16; run++) {
             gLeafGap = lod <= 1 ? 0.3 : 0.0;
             float uStop;
-            int r = traceVoxGrid(g, p0, d, u, len, res, uStop);
+            int r = traceVoxGrid(g, p0, d, u, len, uStop);
             if (r != TRACE_UNCOVERED) return r;
             if (uStop >= len) return TRACE_MISS;
             bool left;
             float uEnd = vgUnloadedEnd(g, p0, d, uStop, len, left);
-            float ue;
-            gSecT += uStop;  // (the secondary ray's distance where the regions' chord starts)
-            int q = traceLodRegions(lod, p0 + d * uStop, d, uEnd - uStop, res, ue);
-            gSecT -= uStop;
-            if (q == TRACE_HIT) {
-                res.t += uStop;
-                return TRACE_HIT;
+            // (the grid owns level 0: a run of level-0 chunks it does not hold yet inside its window is the best of its
+            // coarse levels that holds it, never a CPU level 0 or the tiles' stand-in where real blocks are known; the
+            // ray stays at level 0 past the run. vgDims.w bit 4, off with ATLAS_VOXGRID_FALLBACK=0: the regions as before)
+            float uFrom = uStop;
+            if (lod == 0 && !left && (frame.vgDims.w & 5u) == 5u) {
+                for (int k = 1; k <= 6 && uFrom < uEnd; k++) {
+                    if (!vgLevelOn(k) || ((frame.vgLevel[clamp(k, 1, 6) - 1].w >> 17) & 1) == 0) continue;
+                    float uk;
+                    int rk = traceVoxGrid(vgGrid(k), p0, d, uFrom, uEnd, uk);
+                    if (rk == TRACE_HIT) return TRACE_HIT;
+                    if (rk == TRACE_MISS) {
+                        uFrom = uEnd;
+                        break;
+                    }
+                    uFrom = max(uFrom, uk);  // (the rest of the run from the next coarser level)
+                }
             }
-            if (q == TRACE_UNCOVERED) {
-                uncExit = ue < 1e29 ? ue + uStop : 1e30;
-                return TRACE_UNCOVERED;
+            if (uFrom < uEnd) {
+                float ue;
+                gSecT += uFrom;  // (the secondary ray's distance where the regions' chord starts)
+                int q = traceLodRegions(lod, p0 + d * uFrom, d, uEnd - uFrom, ue);
+                gSecT -= uFrom;
+                if (q == TRACE_HIT) {
+                    gTr.t += uFrom;
+                    return TRACE_HIT;
+                }
+                if (q == TRACE_UNCOVERED) {
+                    uncExit = ue < 1e29 ? ue + uFrom : 1e30;
+                    return TRACE_UNCOVERED;
+                }
             }
             if (left || uEnd >= len) return TRACE_MISS;
             u = uEnd + 1e-3;
@@ -741,16 +795,16 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
     }
     // (no grid at this level, or a chord that crossed many runs: the regions for the rest)
     gSecT += u;
-    int r0 = traceLodRegions(lod, p0 + d * u, d, len - u, res, uncExit);
+    int r0 = traceLodRegions(lod, p0 + d * u, d, len - u, uncExit);
     gSecT -= u;
     if (u > 0.0) {
-        if (r0 == TRACE_HIT) res.t += u;
+        if (r0 == TRACE_HIT) gTr.t += u;
         if (uncExit < 1e29) uncExit += u;
     }
     return r0;
 }
 
-int traceLodRegions(int lod, float3 p0, float3 d, float len, inout TraceResult res, out float uncExit) {
+int traceLodRegions(int lod, float3 p0, float3 d, float len, out float uncExit) {
     uncExit = 1e30;
     LodGpu L = frame.lods[lod];
     float s = float(1 << lod);
@@ -789,7 +843,7 @@ int traceLodRegions(int lod, float3 p0, float3 d, float len, inout TraceResult r
                     // a refinement fade (World::fading_): pixels whose dither is past the fade's progress still see
                     // what the region replaced, or the coarser LOD when it is new to the window
                     float prog = float(int(frame.temporal.z - r.runs.w)) / float(max(frame.temporal.w, 1u));
-                    if (res.dither >= prog) {
+                    if (gTr.dither >= prog) {
                         if (r.runs.z == 0xFFFFFFFFu) {
                             uncExit = uExit;
                             return TRACE_UNCOVERED;
@@ -803,16 +857,16 @@ int traceLodRegions(int lod, float3 p0, float3 d, float len, inout TraceResult r
                 if (!air && gGroups && r.groups.x != 0xFFFFFFFFu) {
                     // the chord's first cell: a ray that starts inside this level's solid (a switch to a coarser level)
                     // hits it at once, as the old path does (the groups hold only what a ray can reach from outside)
-                    if (firstCell && r.bases.z != 0xFFFFFFFFu && traceRegion(r, ro, d / s, u, min(u + 1e-3, uExit), 1e-3, res)) {
-                        res.lod = lod;
+                    if (firstCell && r.bases.z != 0xFFFFFFFFu && traceRegion(r, ro, d / s, u, min(u + 1e-3, uExit), 1e-3)) {
+                        gTr.lod = lod;
                         return TRACE_HIT;
                     }
-                    if (traceGroups(r, ro, d / s, u, uExit, d, res)) {
-                        res.lod = lod;
+                    if (traceGroups(r, ro, d / s, u, uExit, d)) {
+                        gTr.lod = lod;
                         return TRACE_HIT;
                     }
-                } else if (!air && r.bases.z != 0xFFFFFFFFu && traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
-                    res.lod = lod;
+                } else if (!air && r.bases.z != 0xFFFFFFFFu && traceRegion(r, ro, d / s, u, uExit, 1e-3)) {
+                    gTr.lod = lod;
                     return TRACE_HIT;
                 }
             }
@@ -846,6 +900,7 @@ int vgVoxelL(int k, float3 p) {
     uint cw = vgChunks[vgCellG(g, c)];
     if ((cw & 3u) == VG_UNLOADED) return -1;
     if ((cw & 3u) == VG_EMPTY) return 0;
+    if ((cw & 3u) == VG_UNIFORM) return int((cw >> 2) & 0xFFFFu);
     int3 l = v & 15;
     uint i = uint(l.x + 16 * (l.z + 16 * l.y));
     return int((vgPool[(cw >> 2) * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu);
@@ -979,31 +1034,49 @@ float lodWindowR(int k) {
     float lox = float(L.origin.x * span - frame.camInt.x) - frame.camFrac.x;
     float loz = float(L.origin.z * span - frame.camInt.z) - frame.camFrac.z;
     float hix = lox + float(L.dim.x * span), hiz = loz + float(L.dim.z * span);
-    return max(min(min(-lox, hix), min(-loz, hiz)), 1.0);
+    float r = max(min(min(-lox, hix), min(-loz, hiz)), 1.0);
+    // a level whose real blocks are the grid's alone (its regions the tiles' fallback, vgDims.w bit 2 for level 0):
+    // what it holds is the grid's window
+    if (k <= 6 && (k == 0 ? (frame.vgDims.w & 2u) != 0u && vgOn() : vgLevelOn(k))) {
+        VgGrid g = vgGrid(k);
+        float gs = float(g.X * (16 << k));
+        float gx = float(g.origin.x - frame.camInt.x) - frame.camFrac.x, gz = float(g.origin.z - frame.camInt.z) - frame.camFrac.z;
+        r = min(r, max(min(min(-gx, gx + gs), min(-gz, gz + gs)), 1.0));
+    }
+    return r;
+}
+// (the radii once an invocation: every stretch of every ray asks; computed per call they cost a third of a frame)
+static float gLodR[8];
+static bool gLodRReady = false;
+[noinline]
+void lodPrepareR() {
+    if (gLodRReady) return;
+    gLodRReady = true;
+    int n = min(int(frame.dims.w), 8);
+    float prev = 1.0;
+    for (int k = 0; k < 8; k++) {
+        float r = k < n ? max(lodWindowR(k), prev * 1.01) : prev * 2.0;  // (nested: each wider than the one inside it)
+        gLodR[k] = r;
+        prev = r;
+    }
 }
 float lodResident(float3 p) {
+    lodPrepareR();
     int n = int(frame.dims.w);
     float d = max(max(abs(p.x), abs(p.z)), 1.0);
-    float ra = lodWindowR(0);
-    if (d <= ra) return 1.0 + log2(d / ra);
-    for (int k = 0; k + 1 < n; k++) {
-        float rb = max(lodWindowR(k + 1), ra * 1.01);  // (nested: each wider than the one inside it)
-        if (d <= rb) return float(k + 1) + log2(d / ra) / log2(rb / ra);
-        ra = rb;
-    }
+    if (d <= gLodR[0]) return 1.0 + log2(d / gLodR[0]);
+    for (int k = 0; k + 1 < n; k++)
+        if (d <= gLodR[k + 1]) return float(k + 1) + log2(d / gLodR[k]) / log2(gLodR[k + 1] / gLodR[k]);
     return float(n);
 }
 // the distance (Chebyshev) at which lodResident reaches `level`
 float lodResidentDist(float level) {
+    lodPrepareR();
     int n = int(frame.dims.w);
-    float ra = lodWindowR(0);
-    if (level <= 1.0) return ra * exp2(level - 1.0);
-    for (int k = 0; k + 1 < n; k++) {
-        float rb = max(lodWindowR(k + 1), ra * 1.01);
-        if (level <= float(k + 2)) return ra * pow(rb / ra, level - float(k + 1));
-        ra = rb;
-    }
-    return 1e30;
+    if (level <= 1.0) return gLodR[0] * exp2(level - 1.0);
+    int k = min(int(floor(level)) - 1, 6);
+    if (k + 1 >= n) return 1e30;
+    return gLodR[k] * pow(gLodR[k + 1] / gLodR[k], level - float(k + 1));
 }
 
 // the continuous level of the last primary hit (FRAME_DEBUG_LOD shows it)
@@ -1016,7 +1089,7 @@ static float gHitLod = 0.0;
 // coarser level, the coarser level's surface near it is the hit (ATLAS_ABLATE 2147483648: not).
 // (ATLAS_ABLATE 1048576, measurements: the levels by ring as before: the finest level with data (groups: from level 0;
 // else floor(log2(footprint))), its segment grid phased per pixel by lodDither: a stochastic band a segment wide)
-float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout TraceResult res) {
+float traceView(float3 o, float3 dir, float t0, float t1, float lodDither) {
     bool rings = (gAblate & 1048576u) != 0u;
     int phasedLod = -1;  // (rings) the level whose segment grid was last phase-shifted
     float shrink = 0.0;  // (rings) fraction cut off the current segment
@@ -1038,13 +1111,13 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
     // (a grazing hit's second look: the coarser level over [t, grazeEnd), the finer hit kept for when it has none)
     bool graze = false;
     float grazeEnd = 0.0, fineT = 0.0;
-    TraceResult fine = res;
+    TraceResult fine = gTr;
     for (int seg = 0; seg < 768; seg++) {
         if (t >= t1) break;
         float3 a = worldAt(o, dir, k, t);
         // rising above the world top: the parabola only climbs further from here
         if (!graze && a.y > worldTop && dir.y + 2.0 * k * t >= 0.0) break;
-        float lc = max(lodFromFootprint(t, pa, 1.0), lodResident(a));
+        float lc = rings || graze ? 0.0 : max(lodFromFootprint(t, pa, 1.0), lodResident(a));
         int want = graze ? lod : max(lodPick(lc, xi, lodCount), groupsFrom);
         if (rings) want = gGroups ? groupsFrom : int(clamp(floor(log2(max(t * pa, 1.0))), 0.0, float(lodCount - 1)));
         if (!finer && !graze) lod = pinLeft > 0 ? pinned : max(lod, want);
@@ -1069,37 +1142,37 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
         float3 d = (b - a) / len;
         float uncExit;
         gChordT = t;
-        int r = traceLod(lod, a, d, len, res, uncExit);
+        int r = traceLod(lod, a, d, len, uncExit);
         if (graze) {
             // the coarser level's surface near the grazing hit, else the finer hit as it was
-            if (r == TRACE_HIT) return t + res.t;
-            res = fine;
+            if (r == TRACE_HIT) return t + gTr.t;
+            gTr = fine;
             return fineT;
         }
         if (r == TRACE_HIT) {
-            float th = t + res.t;
-            float3 ph = a + d * res.t;
-            float cs = res.axis >= 0 ? abs(d[res.axis]) : 1.0;
-            float lh = max(lodFromFootprint(th, pa, cs), lodResident(ph));
+            float th = t + gTr.t;
+            float3 ph = a + d * gTr.t;
+            float cs = gTr.axis >= 0 ? abs(d[gTr.axis]) : 1.0;
+            float lh = rings ? float(lod) : max(lodFromFootprint(th, pa, cs), lodResident(ph));
             gHitLod = rings ? float(lod) : max(lh, float(lod));
             int k2 = lodPick(lh, xi, lodCount);
             if (!rings && (gAblate & 2147483648u) == 0u && k2 > lod && !finer) {
                 // seen at a grazing angle, its footprint wants a coarser level: that level's surface around the hit,
                 // from a little in front of it (the next stretch)
                 float s2 = float(1 << k2);
-                fine = res;
+                fine = gTr;
                 fineT = th;
                 graze = true;
                 lod = k2;
                 grazeEnd = min(th + 3.0 * s2, t1);
                 t = max(t0, th - 3.0 * s2);
-                res.axis = -1;
+                gTr.axis = -1;
                 continue;
             }
             return th;
         }
         if (r == TRACE_UNCOVERED) {
-            res.axis = -1;
+            gTr.axis = -1;
             pinLeft = 0;
             // chord parameter equals view distance only to O(k): fine for choosing where to resume
             gapEnd = min(gapEnd, uncExit < 1e29 ? t + uncExit : 1e30);
@@ -1189,7 +1262,9 @@ float traceShadow(float3 p, float3 dir, int lod) {
         float s = float(1 << lod);
         len = min(len, 192.0 * s);
         float uncExit;
-        int r = traceLod(lod, p + dir * t, dir, len, res, uncExit);
+        gTr = res;
+        int r = traceLod(lod, p + dir * t, dir, len, uncExit);
+        res = gTr;
         if (r == TRACE_HIT) return 0.0;
         if (r == TRACE_UNCOVERED) {
             if (lod + 1 < lodCount) { lod++; continue; }
@@ -1210,16 +1285,39 @@ static float gSecHitT = 0.0;  // where the last secondary ray was stopped (block
 static uint gSecHitMat = 0xFFFFFFFFu;  // and what stopped it: its material, the axis of the face it entered, its level
 static int gSecHitAxis = 1;
 static int gSecHitLod = 0;
-// gSecCone (the near light's rays): the ray widens as a cone, a level coarser for each doubling of the distance past
-// gSecCone blocks (its footprint t / gSecCone, the same continuous rule as every ray's, up to SEC_CONE_LOD): what
-// shadows a point from far off needs no finer voxels than its distance resolves, and a 2048-block ray through a forest
-// at lod 0 cost 3 ms a frame at 1280x800 (the near light's sun ray; its bounce's as much again). 0: gSecSpread's cone,
-// if any.
+// gSecCone (the near light's rays): the ray widens as a cone, a level coarser each time it has gone gSecCone voxels of
+// its level (lod 0 to gSecCone blocks, lod 1 to twice that, ... up to SEC_CONE_LOD): what shadows a point from far off
+// needs no finer voxels than its distance resolves, and a 2048-block ray through a forest at lod 0 cost 3 ms a frame at
+// 1280x800 (the near light's sun ray; its bounce's as much again). 0 (and no gSecFoot): gSecSpread's cone, if any (the
+// far field's hits: secLevelAt). Every footprint here is lodFromFootprint's.
 static float gSecCone = 0.0;
 static const int SEC_CONE_LOD = 4;
+// (the light by need, nearLightAt) the cone's level steps, each surface point's own: gSecCone x a factor in [1, 2) fixed to
+// the point (surfaceRand), so where a ray turns coarser is spread over the octave across a face (no ring where it changes)
+static float gSecConeJit = 1.0;
+// the bounce's own sun ray (bounceFrom): its cone (0: none); bounced light is soft, its occluders need no fine voxels
+static float gBounceCone = 0.0;
+// (nearLightAt) the pixel's footprint (blocks, 0: none): a secondary ray may go a level coarser every SEC_FOOT_VOXELS
+// voxels while the next level's voxels are no wider than it (their errors then fall inside one pixel)
+static float gSecFoot = 0.0;
+static const float SEC_FOOT_VOXELS = 4.0;
+// the sample's index in the light's cycles (sky rays' strata, the far lights' emitter points, the dithers below): the
+// split's own trace count of the pixel (nearLightMain), else -1: the frame's (the TAA's frames)
+static int gSampleIndex = -1;
+uint lightSample() {
+    if (gSampleIndex >= 0) return uint(gSampleIndex);
+    return frame.jitter.z > 0.5 ? frame.temporal.x : 0u;
+}
+// a uniform number in [0, 1) fixed to the surface point (camera-relative p; world eighths of a block) and use (salt):
+// where a ray's level steps is the same for that point frame after frame (the history's test of the key light's
+// visibility against its own then sees only real change), the points of a face spread over the octave
+float surfaceRand(float3 p, uint salt) {
+    int3 q = int3(floor((p + float3(frame.camInt.xyz)) * 8.0));
+    uint h = hashU(uint(q.x) * 73856093u ^ (uint(q.y) * 19349663u) ^ (uint(q.z) * 83492791u) ^ (salt * 2654435761u));
+    return float(h & 0xFFFFFFu) / 16777216.0;
+}
+[noinline]
 float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
-    bool legacyCone = gSecCone > 0.0;
-    float spread = legacyCone ? 1.0 / gSecCone : gSecSpread, foot0 = legacyCone ? float(1 << lod) : gSecFoot0;
     TraceResult res;
     res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.dither = 0.5; res.albedo = float3(0, 0, 0); res.hasAlbedo = 0u;
     int lodCount = int(frame.dims.w);
@@ -1234,12 +1332,23 @@ float traceSecondary(float3 p, float3 dir, float maxT, int lod) {
     float vis = 1.0;
     for (int seg = 0; seg < 48; seg++) {
         if (t >= maxT) break;
-        float len = min(192.0 * float(1 << lod), maxT - t);
-        lod = secLevelAt(p, dir, t, lod, legacyCone ? min(SEC_CONE_LOD, lodCount - 1) : lodCount - 1, foot0, spread, len);
-        len = min(len, 192.0 * float(1 << lod));
+        float s = float(1 << lod);
+        float len = min(192.0 * s, maxT - t);
+        if (gSecSpread > 0.0 && gSecCone <= 0.0 && gSecFoot <= 0.0) {
+            // (the far field's rays: the pixel's cone, the primary rays' continuous rule: secLevelAt)
+            lod = secLevelAt(p, dir, t, lod, lodCount - 1, gSecFoot0, gSecSpread, len);
+            len = min(len, 192.0 * float(1 << lod));
+        } else if ((gSecCone > 0.0 || gSecFoot >= 2.0 * s) && lod < SEC_CONE_LOD && lod + 1 < lodCount) {
+            // (the footprint's coarsening while the next level's voxels are no wider than it, then the sun's cone)
+            float edge = (gSecFoot >= 2.0 * s ? SEC_FOOT_VOXELS : (gSecCone > 0.0 ? gSecCone : 1e30)) * s * gSecConeJit;
+            if (t >= edge) { lod++; continue; }
+            len = min(len, edge - t);
+        }
         float uncExit;
         gSecT = t;
-        int r = traceLod(lod, p + dir * t, dir, len, res, uncExit);
+        gTr = res;
+        int r = traceLod(lod, p + dir * t, dir, len, uncExit);
+        res = gTr;
         if (r == TRACE_HIT) {
             gStopFoliage = gTrans <= 0.0;
             gSecHitT = t + res.t;
@@ -1310,7 +1419,10 @@ float3 bounceFrom(float3 o, float3 w, float3 sun, bool inOpen) {
     float ndl = dot(nh, L);
     float vis = (frame.dims.z & FRAME_SHADOWS) != 0u ? 0.0 : 1.0;
     if (ndl > 0.0 && vis == 0.0) {
+        float cone = gSecCone;
+        gSecCone = gBounceCone;
         vis = traceSecondary(hp + L * (0.05 * hs), L, 2048.0, hl);
+        gSecCone = cone;
         if ((frame.dims.z & FRAME_CLOUDS) != 0u && vis > 0.0) vis *= cloudShadow(hp, L);
     }
     float sky = 1.0;
@@ -1335,7 +1447,7 @@ static const float SKY_REACH = 16.0;
 static const float ENCLOSED_REACH = 64.0;
 float3 skyVisible(uint2 px, float3 o, float3 faceN, int lod, float3 sun, bool enclosed, bool withBounce, out float vis) {
     float3 skyUp = frame.airSkyUp.xyz, ground = frame.airGround.xyz;  // skyAmbient's two radiances (the air's light)
-    uint fi =frame.jitter.z > 0.5 ? (frame.temporal.x & 15u) : 0u;  // a 16-frame cycle: a still pixel converges to one stratified set
+    uint fi = lightSample() & 15u;  // a 16-sample cycle: a still pixel converges to one stratified set
     float ru = pixelDither(px, 11u), rv = pixelDither(px, 13u);
     float s = float(1 << lod);
     uint ab = asuint(frame.jitter.w);  // (ATLAS_ABLATE 8192: two rays, 16384: half the reach; measurements)
@@ -1567,7 +1679,9 @@ float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 s
         if (tr >= maxT) break;
         float len = min(192.0 * float(1 << l), maxT - tr);
         float uncExit;
-        int hit = traceLod(l, o + r * tr, r, len, rr, uncExit);
+        gTr = rr;
+        int hit = traceLod(l, o + r * tr, r, len, uncExit);
+        rr = gTr;
         if (hit == TRACE_HIT) {
             MaterialGpu m = palette[rr.mat];
             // a grazing reflection that skims back into the water sees the water's own sky, not a dark "top"
@@ -1595,28 +1709,67 @@ uint actorWord(uint rec, uint k) {
     return asuint(v);
 }
 
+// The far lights of this pixel's 32 px tile: where its list starts and how long it is (false: no lights this frame), and
+// its k-th light (li: an index of the light, the same for every tile it is in). Either the lists lights.cpp packed
+// after the far actors (start: the tile's first index entry) or, under FRAME_GPU_LIGHTS, the lists lightBinMain built
+// (start: the tile's list in lightList).
+static const uint LIGHT_TILE_PX = 32u;
+static const uint LIGHTS_PER_TILE = 64u;
+static const uint LL_HIST = 4u;      // lightList: [0] candidates, [1] taken from the threshold bin, [2..3] unused,
+static const uint LL_TILES = 260u;   // [4, 260) the score histogram, then (1 + LIGHTS_PER_TILE) words a tile
+static const uint LIGHT_BINS = 256u;
+bool lightTile(uint2 px, out uint start, out uint count) {
+    start = 0u;
+    count = 0u;
+    uint L = uint(frame.weatherParams.y);
+    if (L == 0u) return false;
+    uint tilesX = (frame.dims.x + 31u) / 32u, tilesY = (frame.dims.y + 31u) / 32u;
+    uint tile = (px.y / 32u) * tilesX + px.x / 32u;
+    if ((frame.dims.z & FRAME_GPU_LIGHTS) != 0u) {
+        start = LL_TILES + tile * (1u + LIGHTS_PER_TILE);
+        count = min(lightList[start], LIGHTS_PER_TILE);
+        return count > 0u;
+    }
+    uint A = uint(frame.weatherParams.w);
+    uint tableBase = A + L, indexBase = tableBase + (tilesX * tilesY + 5u) / 6u;
+    start = actorWord(tableBase + tile / 6u, (tile % 6u) * 2u);
+    count = min(actorWord(tableBase + tile / 6u, (tile % 6u) * 2u + 1u), 64u);
+    return count > 0u;
+}
+
+ActorGpu lightOfTile(uint start, uint k, out uint li) {
+    if ((frame.dims.z & FRAME_GPU_LIGHTS) != 0u) {
+        uint slot = lightList[start + 1u + k];
+        ActorGpu l;
+        l.posYaw = lightCand[slot * 4u];
+        l.shape = lightCand[slot * 4u + 1u];
+        l.motion = lightCand[slot * 4u + 2u];
+        li = asuint(lightCand[slot * 4u + 3u].w) >> 8u;  // (its record: the same light the same index every frame)
+        return l;
+    }
+    uint L = uint(frame.weatherParams.y), A = uint(frame.weatherParams.w);
+    uint tilesX = (frame.dims.x + 31u) / 32u, tilesY = (frame.dims.y + 31u) / 32u;
+    uint indexBase = A + L + (tilesX * tilesY + 5u) / 6u;
+    uint e = start + k;
+    li = actorWord(indexBase + e / 12u, e % 12u);
+    return actors[A + li];
+}
+
 // The glow of the far lights over this pixel: each light of the pixel's tile that nothing nearer hides (its distance
 // against the pixel's surface, with a voxel of slack) adds a core about a pixel wide (or its own size up close) and a
 // halo that widens with the haze between it and the camera. Town lights show from dusk to dawn, fires flicker, lava
 // pulses, spray is lit by the sun and sky.
 float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
-    uint L = uint(frame.weatherParams.y);
-    if (L == 0u) return float3(0, 0, 0);
-    uint A = uint(frame.weatherParams.w);
-    uint tilesX = (frame.dims.x + 31u) / 32u, tilesY = (frame.dims.y + 31u) / 32u;
-    uint tile = (px.y / 32u) * tilesX + px.x / 32u;
-    uint tableBase = A + L, indexBase = tableBase + (tilesX * tilesY + 5u) / 6u;
-    uint start = actorWord(tableBase + tile / 6u, (tile % 6u) * 2u);
-    uint count = min(actorWord(tableBase + tile / 6u, (tile % 6u) * 2u + 1u), 64u);
+    uint start, count;
+    if (!lightTile(px, start, count)) return float3(0, 0, 0);
     float night = smoothstep(0.12, -0.1, sun.y);
     float day = smoothstep(-0.12, 0.2, sun.y);
     float pa = max(frame.params.w, 1e-5);
     float t = frame.sunDir.w;
     float3 sum = float3(0, 0, 0);
     for (uint k = 0u; k < count; k++) {
-        uint e = start + k;
-        uint li = actorWord(indexBase + e / 12u, e % 12u);
-        ActorGpu l = actors[A + li];
+        uint li;
+        ActorGpu l = lightOfTile(start, k, li);
         float dist = l.motion.x;
         float slack = max(3.0, dist * pa * 3.0) + l.motion.w;
         if (surface < dist - slack) continue;  // terrain, a building or an actor in front of it
@@ -1661,22 +1814,15 @@ float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
 static const float3 BLOCK_LIGHT_HUE = float3(1.0, 0.62, 0.32);
 static const float BLOCK_LIGHT_SCALE = 0.001;  // physical: a lamp lights its block at ~1/1000 of noon (atlas_look.glsl the same)
 float3 farLightsOn(uint2 px, float3 p, float3 so, float3 faceN, int lod, float3 sun, bool fol, bool cheap) {
-    uint L = uint(frame.weatherParams.y);
-    if (L == 0u) return float3(0, 0, 0);
-    uint A = uint(frame.weatherParams.w);
-    uint tilesX = (frame.dims.x + 31u) / 32u, tilesY = (frame.dims.y + 31u) / 32u;
-    uint tile = (px.y / 32u) * tilesX + px.x / 32u;
-    uint tableBase = A + L, indexBase = tableBase + (tilesX * tilesY + 5u) / 6u;
-    uint start = actorWord(tableBase + tile / 6u, (tile % 6u) * 2u);
-    uint count = min(actorWord(tableBase + tile / 6u, (tile % 6u) * 2u + 1u), 64u);
+    uint start, count;
+    if (!lightTile(px, start, count)) return float3(0, 0, 0);
     float night = smoothstep(0.12, -0.1, sun.y);
-    uint fi = frame.jitter.z > 0.5 ? (frame.temporal.x & 15u) : 0u;  // a 16-frame cycle: a still pixel converges to one stratified set
+    uint fi = lightSample() & 15u;  // a 16-sample cycle: a still pixel converges to one stratified set
     float s = float(1 << lod);
     float3 sum = float3(0, 0, 0);
     for (uint k = 0u; k < count; k++) {
-        uint e = start + k;
-        uint li = actorWord(indexBase + e / 12u, e % 12u);
-        ActorGpu l = actors[A + li];
+        uint li;
+        ActorGpu l = lightOfTile(start, k, li);
         uint kind = uint(l.shape.w + 0.5);
         if (kind == 3u) continue;  // spray is lit, it lights nothing
         float vis = kind == 0u ? night : 1.0;
@@ -1714,6 +1860,204 @@ float3 farLightsOn(uint2 px, float3 p, float3 so, float3 faceN, int lod, float3 
         sum += hue * (E * vis * occ * BLOCK_LIGHT_SCALE);
     }
     return sum;
+}
+
+// ---- the far lights culled, ranked and binned on the GPU (FRAME_GPU_LIGHTS) -----------------------------------------
+// lights.cpp's Lights::frame, as three passes before farMain (the CPU's version stays for the CPU backend): it cost the
+// render thread 25-28 ms a frame live (every light of every cell in reach projected, sorted and binned each frame).
+// lightSrc (lights.cpp packGpu, uploaded when the lights change): [0] cells, records, the cluster distance, the budget;
+// a float4 a cell (its 1 km cell's coordinates); three a record: (x, y, z within the cell's corner, radius), (linear
+// rgb, intensity), (kind, flicker seed, cell, 1 for a far cluster).
+//  lightCullMain (a thread a record): the cell's fine lights within the cluster distance, its clusters past it; the
+//    kind by the time of day; the near field's radius and the far plane; projected, its reach on screen (glow, halo,
+//    the walls it lights) against the frame; each survivor appended to lightCand with its score (intensity x falloff)
+//    counted in a log-score histogram.
+//  lightAdmitMain (a thread a candidate): the budget's threshold from the histogram, brightest first (the bin it falls
+//    in shares what is left of the budget first come).
+//  lightBinMain (a group a 32 px tile): the tile's candidates by the same histogram, its brightest LIGHTS_PER_TILE.
+static const uint LIGHT_CAND_CAP = 65536u;
+float lightFalloff(float d) { return 1.0 / pow(1.0 + d / 1500.0, 1.5); }
+uint lightBin(float score) { return uint(clamp((log2(max(score, 1e-12)) + 24.0) * 8.0, 0.0, float(LIGHT_BINS - 1u))); }
+static const uint LIGHT_REJECTED = 0xFFFFFFFFu;
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void lightCullMain(uint3 id : SV_DispatchThreadID) {
+    float4 head = lightSrc[0];
+    uint cells = asuint(head.x), records = asuint(head.y);
+    float clusterDist = head.z;
+    uint i = id.x;
+    if (i >= records) return;
+    uint rb = 1u + cells + 3u * i;
+    float4 r0 = lightSrc[rb], r1 = lightSrc[rb + 1u], r2 = lightSrc[rb + 2u];
+    uint kind = asuint(r2.x), cell = asuint(r2.z);
+    bool coarse = asuint(r2.w) != 0u;
+    float sunY = frame.sunDir.y;
+    if (kind == 0u && !(sunY < 0.14)) return;   // town lights from dusk to dawn
+    if (kind == 3u && !(sunY > -0.12)) return;  // spray by day
+    float4 c = lightSrc[1u + cell];
+    int cx = asint(c.x), cz = asint(c.y);
+    // the cell's corner from the eye (exact: integer blocks first)
+    float x0 = float(cx * 1024 - frame.camInt.x) - frame.camFrac.x, z0 = float(cz * 1024 - frame.camInt.z) - frame.camFrac.z;
+    float nearEnd = frame.params.x, maxDist = frame.params.y;
+    float dx = max(max(x0, -(x0 + 1024.0)), 0.0), dz = max(max(z0, -(z0 + 1024.0)), 0.0);
+    float cnear = sqrt(dx * dx + dz * dz);
+    if (cnear > maxDist) return;
+    float fx = max(abs(x0), abs(x0 + 1024.0)), fz = max(abs(z0), abs(z0 + 1024.0));
+    if (sqrt(fx * fx + fz * fz) < nearEnd) return;
+    if (coarse != (cnear > clusterDist)) return;
+    float rx = x0 + r0.x, ry = r0.y - float(frame.camInt.y) - frame.camFrac.y, rz = z0 + r0.z;
+    float h2 = rx * rx + rz * rz;
+    float R = frame.camFrac.w;
+    if (R > 0.0) ry -= h2 / (2.0 * R);
+    float d = sqrt(h2 + ry * ry), radius = r0.w;
+    if (d < nearEnd + radius || d > maxDist) return;
+    float4 clip = frame.viewProj[0] * rx + frame.viewProj[1] * ry + frame.viewProj[2] * rz + frame.viewProj[3];
+    if (clip.w <= 1e-4) return;
+    float W = float(frame.dims.x), H = float(frame.dims.y);
+    float px = (clip.x / clip.w * 0.5 + 0.5) * W, py = (0.5 - clip.y / clip.w * 0.5) * H;
+    float pa = max(frame.params.w, 1e-5);
+    float sigma = max(0.5, 0.3 * radius / (d * pa));
+    float T = exp(-d * frame.farLight.x);
+    float halo = 1.5 + 8.0 * (1.0 - T);
+    float intensity = r1.w;
+    float range = kind == 3u ? 0.0 : 15.0 * min(intensity, 1.0) + (kind == 2u ? radius : 0.0) + 1.0;
+    float screen = max(W, H);
+    float lit = range <= 0.0 ? 0.0 : d <= 1.6 * range ? screen : 1.6 * range / ((d - range) * pa);
+    float reach = min(screen, max(3.0 * sigma + 3.0 * halo, lit));
+    if (px + reach < 0.0 || py + reach < 0.0 || px - reach > W || py - reach > H) return;
+    float score = intensity * lightFalloff(d);
+    uint slot;
+    InterlockedAdd(lightList[0], 1u, slot);
+    if (slot >= LIGHT_CAND_CAP) return;
+    uint bin = lightBin(score);
+    float k = 6.0 * score;
+    // the kernel's record (as lights.cpp writes it: camera-relative to camInt), then where it lands on screen
+    lightCand[slot * 4u] = float4(rx + frame.camFrac.x, ry + frame.camFrac.y, rz + frame.camFrac.z, sigma);
+    lightCand[slot * 4u + 1u] = float4(r1.xyz * k, float(kind));
+    lightCand[slot * 4u + 2u] = float4(d, r2.y, halo, radius);
+    // (w: the score's bin, then the record: a tile's list is ordered by it, so its sum is the same whatever order the
+    // candidates were appended in, frame after frame)
+    lightCand[slot * 4u + 3u] = float4(px, py, reach, asfloat(bin | (i << 8u)));
+    InterlockedAdd(lightList[LL_HIST + bin], 1u);
+}
+
+// The bin the budget ends in (brightest first) and how many of it still fit: -1 when everything does.
+groupshared int gsLightT;
+groupshared uint gsLightRem;
+void lightThreshold(uint budget, uint histBase, uint tid) {
+    if (tid == 0u) {
+        uint cum = 0u;
+        gsLightT = -1;
+        gsLightRem = 0u;
+        for (int b = int(LIGHT_BINS) - 1; b >= 0; b--) {
+            uint nb = lightList[histBase + uint(b)];
+            if (cum + nb > budget) {
+                gsLightT = b;
+                gsLightRem = budget - cum;
+                break;
+            }
+            cum += nb;
+        }
+    }
+    GroupMemoryBarrierWithGroupSync();
+}
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void lightAdmitMain(uint3 id : SV_DispatchThreadID, uint3 gt : SV_GroupThreadID) {
+    uint budget = asuint(lightSrc[0].w);
+    lightThreshold(budget, LL_HIST, gt.x);
+    uint n = min(lightList[0], LIGHT_CAND_CAP), i = id.x;
+    if (i >= n) return;
+    uint bin = asuint(lightCand[i * 4u + 3u].w) & 255u;
+    if (gsLightT < 0 || int(bin) > gsLightT) return;
+    bool keep = false;
+    if (int(bin) == gsLightT) {
+        uint taken;
+        InterlockedAdd(lightList[1], 1u, taken);
+        keep = taken < gsLightRem;
+    }
+    if (!keep) lightCand[i * 4u + 3u].w = asfloat(LIGHT_REJECTED);
+}
+
+groupshared uint gsTileHist[256];
+groupshared uint gsTileSlot[64];
+groupshared uint gsTileKey[64];
+groupshared uint gsTileCount;
+groupshared uint gsTileTaken;
+groupshared int gsTileT;
+groupshared uint gsTileRem;
+
+bool lightCovers(float4 sc, uint tx, uint ty) {
+    if (asuint(sc.w) == LIGHT_REJECTED) return false;
+    float t = float(LIGHT_TILE_PX);
+    int x0 = int(floor((sc.x - sc.z) / t)), x1 = int(floor((sc.x + sc.z) / t));
+    int y0 = int(floor((sc.y - sc.z) / t)), y1 = int(floor((sc.y + sc.z) / t));
+    return int(tx) >= x0 && int(tx) <= x1 && int(ty) >= y0 && int(ty) <= y1;
+}
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void lightBinMain(uint3 gid : SV_GroupID, uint3 gt : SV_GroupThreadID) {
+    uint tilesX = (frame.dims.x + 31u) / 32u, tilesY = (frame.dims.y + 31u) / 32u;
+    uint tile = gid.x;
+    if (tile >= tilesX * tilesY) return;  // (uniform over the group)
+    uint tx = tile % tilesX, ty = tile / tilesX, tid = gt.x;
+    for (uint b = tid; b < LIGHT_BINS; b += 64u) gsTileHist[b] = 0u;
+    if (tid == 0u) {
+        gsTileCount = 0u;
+        gsTileTaken = 0u;
+    }
+    GroupMemoryBarrierWithGroupSync();
+    uint n = min(lightList[0], LIGHT_CAND_CAP);
+    for (uint i = tid; i < n; i += 64u) {
+        float4 sc = lightCand[i * 4u + 3u];
+        if (lightCovers(sc, tx, ty)) InterlockedAdd(gsTileHist[asuint(sc.w) & 255u], 1u);
+    }
+    GroupMemoryBarrierWithGroupSync();
+    if (tid == 0u) {
+        uint cum = 0u;
+        gsTileT = -1;
+        gsTileRem = 0u;
+        for (int b = int(LIGHT_BINS) - 1; b >= 0; b--) {
+            uint nb = gsTileHist[uint(b)];
+            if (cum + nb > LIGHTS_PER_TILE) {
+                gsTileT = b;
+                gsTileRem = LIGHTS_PER_TILE - cum;
+                break;
+            }
+            cum += nb;
+        }
+    }
+    GroupMemoryBarrierWithGroupSync();
+    uint base = LL_TILES + tile * (1u + LIGHTS_PER_TILE);
+    for (uint i = tid; i < n; i += 64u) {
+        float4 sc = lightCand[i * 4u + 3u];
+        if (!lightCovers(sc, tx, ty)) continue;
+        int bin = int(asuint(sc.w) & 255u);
+        if (gsTileT >= 0 && bin < gsTileT) continue;
+        if (gsTileT >= 0 && bin == gsTileT) {
+            uint taken;
+            InterlockedAdd(gsTileTaken, 1u, taken);
+            if (taken >= gsTileRem) continue;
+        }
+        uint k;
+        InterlockedAdd(gsTileCount, 1u, k);
+        if (k < LIGHTS_PER_TILE) {
+            gsTileSlot[k] = i;
+            gsTileKey[k] = asuint(sc.w) >> 8u;
+        }
+    }
+    GroupMemoryBarrierWithGroupSync();
+    // the list in record order (each entry's rank among the others'): the same lights sum the same way every frame
+    uint m = min(gsTileCount, LIGHTS_PER_TILE);
+    if (tid < m) {
+        uint key = gsTileKey[tid], rank = 0u;
+        for (uint j = 0u; j < m; j++) rank += gsTileKey[j] < key || (gsTileKey[j] == key && j < tid) ? 1u : 0u;
+        lightList[base + 1u + rank] = gsTileSlot[tid];
+    }
+    if (tid == 0u) lightList[base] = m;
 }
 
 uint cloudDiv() { return (frame.dims.z & FRAME_CLOUDS_QUARTER) != 0 ? 4u : 2u; }
@@ -1856,7 +2200,9 @@ float2 sunTexel(uint i, uint j) {
         float s = float(1 << l);
         float len = min(192.0 * s, maxT - t);
         float uncExit;
-        int hit = traceLod(l, O + d * t, d, len, rr, uncExit);
+        gTr = rr;
+        int hit = traceLod(l, O + d * t, d, len, uncExit);
+        rr = gTr;
         if (hit == TRACE_HIT) {
             float3 hp = O + d * (t + rr.t);
             return float2(dot(hp - c, L), clouds ? cloudShadow(hp, L) : 1.0);
@@ -1921,6 +2267,19 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
             so.y = floor(so.y + ci.y) + 1.02 - ci.y;
         }
     }
+    // The light by need (docs/ATLAS-RENDERER-PLAN.md "The light by need"): a pixel cannot show the light's detail finer
+    // than its footprint there (the blocks one pixel covers: distance x the pixel's angle x lightCtl.x), so its secondary
+    // rays need no finer voxels where they are that far from the surface: each starts at level 0 (the surface's own
+    // nooks and steps shade it as they do up close: lifting the origin out of a coarse voxel brightened far slopes) and
+    // goes a level coarser every SEC_FOOT_VOXELS voxels until its voxels are the footprint (gSecFoot), the steps
+    // dithered per surface point (surfaceRand) so quality fades with distance, never steps; past that the sun's cone. 0: none.
+    // (atlas's own field only, PRIMARY_NEAR: the raster near field's pixels are near; a voxel two blocks wide is
+    // sub-pixel only past ~1.1 km at 1280 x 800, and a ray takes it only 4 blocks from the surface)
+    gSecFoot = 0.0;
+    if (frame.lightCtl.x > 0.0 && !cheapLight && (frame.dims.z & (FRAME_PRIMARY_NEAR | FRAME_PRIMARY_NEAR_LIT)) != 0u) {
+        // (the one footprint rule, lodFromFootprint: its level as blocks)
+        gSecFoot = exp2(lodFromFootprint(nd, frame.params.w * frame.lightCtl.x, 1.0)) * exp2(surfaceRand(p, 3u) - 0.5);
+    }
     // still inside a solid voxel: atlas's world disagrees with the drawn one here (the tiles' stand-in houses, solid
     // and wider than the real ones, until the loaded chunks' blocks are up; a snow layer atlas holds as a block). Traced
     // from inside, the sun and sky rays were stopped at once: sunlit walls black. Lit untraced instead (the key light
@@ -1933,14 +2292,18 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     }
     float3 L = keyLightDir(sun);
     float sunVis = 1.0;
-    // (no cone: past 32 blocks the coarser levels' fat crowns cast blobby shadows off the trees; it saved 0.4 ms)
-    gSecCone = 0.0;
+    // The sun ray widens as the sun's own cone (lightCtl.z voxels of a level before the next: about the inverse of the
+    // sun's 0.53 degrees, so an occluder's voxel never outgrows its penumbra there; a tree's crown within ~100 blocks
+    // stays at the receiver's level, the blobby crowns a 32-voxel cone drew are gone), its steps dithered per surface point
+    gSecCone = frame.lightCtl.z;
+    gSecConeJit = exp2(surfaceRand(p, 5u));
     if ((frame.dims.z & FRAME_SHADOWS) != 0 && (ablate & 4u) == 0u) {
         if (dot(N, L) <= 0.0) sunVis = 0.0;
         else if (untrusted) sunVis = eyeRoofed() ? 0.0 : 1.0;  // (in a cave: rock, most likely)
         else if (cheapLight) sunVis = traceShadow(p + N * 1.01 + L * 0.5, L, 0);
         else sunVis = traceSecondary(so + L * 0.05, L, 2048.0, 0);
     }
+    gSecCone = 0.0;
     // the sun reached it through water alone: a = 1 + the water's chord (the resolve draws its caustics at full rate)
     float waterChord = sunVis > 0.0 && gWaterChord > 0.05 && sunVis >= 0.98 * exp(-WATER_SIGMA * gWaterChord) ? gWaterChord : 0.0;
     if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, L);
@@ -1955,7 +2318,10 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
         float skyVis;
         // (ATLAS_ABLATE 512, measurements: never enclosed, the sky's short reach and the haze everywhere as before)
         gNearRoofed = sunVis <= 0.0 && (ablate & 512u) == 0u && solidRoof(so, 0);
+        gBounceCone = frame.lightCtl.w;
+        gSecConeJit = exp2(surfaceRand(p, 7u));
         ambient = skyVisible(px, so, N, 0, sun, gNearRoofed, true, skyVis) + FAR_AMBIENT_FLOOR;
+        gBounceCone = 0.0;
     }
     // under water: the sky's light is what the water above lets down, red first then green (the sky rays reach 16 blocks
     // and saw the surface's light undimmed past that): its depth from the sun ray's way out of the water
@@ -1966,6 +2332,7 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     float3 irr = shadeSurfaceAmb(float3(1, 1, 1), white, N, dir, sun, sunVis, 0u, ambient, float3(0, 0, 0));
     gSecCone = 0.0;
     if ((ablate & 8u) == 0u) irr += farLightsOn(px, p, so, N, 0, sun, false, cheapLight);
+    gSecFoot = 0.0;
     // the host composites albedo x this x T + inscatter with one transmittance (its luminance): the air's colour
     // through it (the blue lost first) rides in the light
     float3 Tr = aerialT(dir, nd);
@@ -1973,17 +2340,51 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
     return float4(irr, waterChord > 0.0 ? 1.0 + waterChord : sunVis);
 }
 
-// ---- the near light at half resolution (FRAME_NEAR_SPLIT) -------------------------------------------------------
+/// ---- the near light at half resolution (FRAME_NEAR_SPLIT) -------------------------------------------------------
 // The near light's rays (the sun's, the sky's, the bounce's) for every pixel of the near field cost 5 ms a frame at
 // 1280x800 in a forest town (Falkreath), most of atlas's frame: they scale with the pixels traced. nearLightMain traces
 // one pixel of each 2 x 2 block, a different one each frame of the TAA's cycle (so a still view gathers all four),
 // nearUpsampleMain fills the other three from the traced pixels around them on the same surface (the near field's own
 // depth and normal: a shadow edge on one face stays put, light does not leak across a silhouette). A traced pixel under
 // cover carries a = -1 (the publish pass clamps it to 0): with the eye under cover too its air is unlit.
-uint2 nearSplitOffset() {
-    uint k = frame.jitter.z > 0.5 ? (frame.temporal.x & 3u) : 0u;
+//
+// The light by need (FRAME_PRIMARY_NEAR_LIT: atlas's own field; docs/ATLAS-RENDERER-PLAN.md "The light by need"): the
+// light is diffuse, so what a surface receives does not change as the camera moves, only as the sun, the sky and the
+// world do; the history (nearTemporalMain) carries it along the camera's motion, and a tile need not be traced every
+// frame. nearLightMain's groups are 16 x 16 pixel tiles; each is traced on the frames its own phase accumulator crosses
+// an integer at lightCtl.y a frame (1: every frame, the old split; 0.25: every fourth, staggered), and every frame while
+// any of its pixels holds fewer than NEAR_SAMPLES_YOUNG samples of its own (a disocclusion, a new surface: never a
+// frame of noise or a hole). Its 2 x 2 phase is the next of the four each time it is traced, so every pixel is traced in
+// turn; the traced pixel flags itself (SPLIT_TRACED in its info). Where nothing was traced around a pixel this frame
+// the upsample marks it SPLIT_SKIPPED: the history alone. The composite (albedo x light x T + inscatter) is
+// nearTemporalMain's, after the history.
+static const float SPLIT_SKIPPED = -2.0;
+static const uint SPLIT_TRACED = 1u;  // (nearInfo's low byte, PRIMARY_NEAR_LIT) traced this frame
+// a tile is traced every frame while a pixel of it holds fewer of its own samples than this (a fresh view, a
+// disocclusion: its noise settles in a quarter of a second, not four)
+static const uint NEAR_SAMPLES_YOUNG = 4u;
+bool splitPrimary() { return (frame.dims.z & FRAME_PRIMARY_NEAR_LIT) != 0u; }
+// the tile's traces before this frame and whether it is scheduled for this one (its phase: a hash of the tile)
+uint splitTraces(uint2 tile, out bool scheduled) {
+    float r = frame.lightCtl.y;  // (0: unset, every frame)
+    if (!splitPrimary() || r <= 0.0 || r >= 1.0 || frame.jitter.z < 0.5) {
+        scheduled = true;
+        return frame.jitter.z > 0.5 ? frame.temporal.x : 0u;
+    }
+    float phi = float(hashU(tile.x * 73856093u ^ (tile.y * 19349663u)) & 0xFFFFu) / 65536.0;
+    float k = float(frame.temporal.x & 0xFFFFu);
+    float a = floor(phi + k * r), b = floor(phi + (k + 1.0) * r);
+    scheduled = b > a;
+    return uint(a);
+}
+uint2 splitOffsetOf(uint traces) {
+    uint k = traces & 3u;
     // (0,0) (1,1) (1,0) (0,1): diagonal pairs first, so two frames already cover both rows and columns
     return uint2((k == 1u || k == 2u) ? 1u : 0u, (k == 1u || k == 3u) ? 1u : 0u);
+}
+uint2 nearSplitOffset() {
+    uint k = frame.jitter.z > 0.5 ? (frame.temporal.x & 3u) : 0u;
+    return splitOffsetOf(k);
 }
 
 float3 pixelRay(uint2 px, uint w, uint h) {
@@ -1992,23 +2393,105 @@ float3 pixelRay(uint2 px, uint w, uint h) {
     return normalize(unproject(frame, ndc));
 }
 
+// The previous frame's near light at this pixel's surface (reprojected through its camera and view-projection, where
+// the previous frame's surface lay at the same distance); the weight found (0: none, the point was hidden or off
+// screen then), and how many of the pixel's own samples it holds (prevNearAge, as weighted as the light)
+// (bit 8 of an age: the pixel lay under solid cover, nearLightAt's roof test; its air is unlit when the eye is too)
+static const uint NEAR_AGE_ROOFED = 256u;
+float nearHistoryAt(uint2 px, float nd, out float4 hist, out uint samples, out bool roofed) {
+    uint w = frame.dims.x, h = frame.dims.y;
+    hist = float4(0, 0, 0, 0);
+    samples = 0u;
+    roofed = false;
+    float hw = 0.0;
+    float ages = 0.0, roofs = 0.0;
+    uint count, stride;
+    prevNearLight.GetDimensions(count, stride);
+    if (count < w * h) return 0.0;
+    float3 dir = pixelRay(px, w, h);
+    float R = frame.camFrac.w;
+    float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
+    float3 X = worldAt(frame.camFrac.xyz, dir, k, nd) - frame.prevCam.xyz;
+    float4 clip = frame.prevViewProj[0] * X.x + frame.prevViewProj[1] * X.y + frame.prevViewProj[2] * X.z + frame.prevViewProj[3];
+    if (clip.w <= 1e-4) return 0.0;
+    // (the last frame's pixel whose jittered ray went there: its jitter taken off, or a still view's history would be
+    // resampled half a pixel askew every frame of the TAA's cycle and blur)
+    float2 pn = clip.xy / clip.w - frame.farLight.zw;
+    float hx = (pn.x * 0.5 + 0.5) * float(w) - 0.5, hy = (0.5 - pn.y * 0.5) * float(h) - 0.5;
+    float dist = length(X), tol = 0.03 * dist + 0.1;
+    int2 b = int2(floor(float2(hx, hy)));
+    float2 fr = float2(hx, hy) - float2(b);
+    for (int j = 0; j <= 1; j++) {
+        for (int i = 0; i <= 1; i++) {
+            int2 q = b + int2(i, j);
+            if (q.x < 0 || q.y < 0 || q.x >= int(w) || q.y >= int(h)) continue;
+            uint qp = uint(q.y) * w + uint(q.x);
+            if (abs(prevSurface[qp] - dist) > tol) continue;  // another surface there then
+            float4 v = prevNearLight[qp];
+            if (dot(v.rgb, float3(1, 1, 1)) <= 0.0 && v.a <= 0.0) continue;  // it was not lit then
+            float bw = (i == 0 ? 1.0 - fr.x : fr.x) * (j == 0 ? 1.0 - fr.y : fr.y);
+            hist += v * bw;
+            hw += bw;
+            uint age = prevNearAge[qp];
+            ages += float(age & 255u) * bw;
+            roofs += (age & NEAR_AGE_ROOFED) != 0u ? bw : 0.0;
+        }
+    }
+    samples = hw > 1e-4 ? uint(ages / hw + 0.5) : 0u;
+    roofed = roofs > 0.5 * hw && hw > 1e-4;
+    return hw;
+}
+
+groupshared uint gsSplitFresh;
 [shader("compute")]
 [numthreads(8, 8, 1)]
-void nearLightMain(uint3 id : SV_DispatchThreadID) {
+void nearLightMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gt : SV_GroupThreadID) {
     airBegin();
     gEyeRoofed = -1;
     uint w = frame.dims.x, h = frame.dims.y;
-    uint2 q = id.xy * 2u + nearSplitOffset();
-    if (q.x >= w || q.y >= h) return;
-    uint pix = q.y * w + q.x;
-    float nd = nearDepth[pix];
-    if (!(nd < 1e29)) return;  // not the near field's (farMain wrote its zero)
+    bool primary = splitPrimary();
+    bool scheduled = true;
+    uint traces = primary ? splitTraces(gid.xy, scheduled) : (frame.jitter.z > 0.5 ? frame.temporal.x : 0u);
+    // (a tile traced off its schedule, for its young history: the frame's phase, so the four pixels take turns)
+    uint2 q = id.xy * 2u + splitOffsetOf(primary && !scheduled ? frame.temporal.x : traces);
+    bool inside = q.x < w && q.y < h;
+    uint pix = inside ? q.y * w + q.x : 0u;
+    float nd = inside ? nearDepth[pix] : 1e30;
+    if (primary && !scheduled) {
+        // not this tile's frame: traced all the same while a pixel of it has a young history (NEAR_SAMPLES_YOUNG)
+        if (gt.x == 0u && gt.y == 0u) gsSplitFresh = 0u;
+        GroupMemoryBarrierWithGroupSync();
+        bool fresh = false;
+        for (uint k = 0u; k < 4u && !fresh; k++) {
+            uint2 c = id.xy * 2u + uint2(k & 1u, k >> 1u);
+            if (c.x >= w || c.y >= h) continue;
+            float cd = nearDepth[c.y * w + c.x];
+            if (!(cd < 1e29)) continue;
+            // (the history at the same pixel, not reprojected: exact for a still view, and a moving one's changed
+            // depth counts as fresh; a quarter of the cost of the history's own lookup)
+            uint cp = c.y * w + c.x;
+            uint count, stride;
+            prevNearAge.GetDimensions(count, stride);
+            fresh = count < w * h || (prevNearAge[cp] & 255u) < NEAR_SAMPLES_YOUNG ||
+                    abs(prevSurface[cp] - cd) > 0.03 * cd + 0.1;
+        }
+        if (fresh) InterlockedOr(gsSplitFresh, 1u);
+        GroupMemoryBarrierWithGroupSync();
+        if (gsSplitFresh == 0u) return;  // (nothing traced: the upsample marks its pixels SPLIT_SKIPPED)
+    }
+    if (!inside || !(nd < 1e29)) return;  // not the near field's (farMain wrote its zero)
     gAblate = asuint(frame.jitter.w);
     gSecAblate = gAblate;
     gHead = groupData[0];  // (the material shapes: secondary rays, the grid's level 0)
-    float4 nl = nearLightAt(q, frame.camFrac.xyz, pixelRay(q, w, h), nd, nearInfo[pix], frame.sunDir.xyz);
+    // (PRIMARY_NEAR_LIT) a pixel is traced at most once every four frames: its sky strata and dithers step once a
+    // trace. The traced pixel says so in its info's low byte (atlas's own hits leave it 0), for the upsample and history
+    gSampleIndex = primary ? int(frame.temporal.x >> 2u) : -1;
+    uint info = nearInfo[pix];
+    float4 nl = nearLightAt(q, frame.camFrac.xyz, pixelRay(q, w, h), nd, info, frame.sunDir.xyz);
     if (gNearRoofed) nl.a = -1.0;
     outNearLight[pix] = nl;
+    if (primary) nearInfo[pix] = info | SPLIT_TRACED;
+    if (primary && (gAblate & 536870912u) != 0u) counters[pix] = 1u;
 }
 
 float3 nearInfoNormal(uint info) {
@@ -2024,27 +2507,41 @@ void nearUpsampleMain(uint3 id : SV_DispatchThreadID) {
     uint pix = id.y * w + id.x;
     float nd = nearDepth[pix];
     if (!(nd < 1e29)) return;
+    bool primary = splitPrimary();
     uint2 off = nearSplitOffset();
-    bool traced = (id.x & 1u) == off.x && (id.y & 1u) == off.y;
+    bool traced = primary ? (nearInfo[pix] & SPLIT_TRACED) != 0u : (id.x & 1u) == off.x && (id.y & 1u) == off.y;
     float roofed;
     if (traced) {
-        roofed = outNearLight[pix].a < 0.0 ? 1.0 : 0.0;
+        float a0 = outNearLight[pix].a;
+        roofed = a0 < 0.0 && a0 > -1.5 ? 1.0 : 0.0;
     } else {
         // the traced pixels of the 3 x 3 blocks around: weighted by distance on screen, depth and normal alike
         float3 n = nearInfoNormal(nearInfo[pix]);
         int2 b = int2(id.xy >> 1);
         float4 sum = float4(0, 0, 0, 0);
         float wsum = 0.0, rsum = 0.0, best = 1e30;
-        float4 nearest = float4(0, 0, 0, 0);
+        float4 nearest = float4(0, 0, 0, SPLIT_SKIPPED);
         float nearestRoof = 0.0;
         for (int j = -1; j <= 1; j++) {
             for (int i = -1; i <= 1; i++) {
-                int2 r = (b + int2(i, j)) * 2 + int2(off);
-                if (r.x < 0 || r.y < 0 || r.x >= int(w) || r.y >= int(h)) continue;
+                int2 bb = b + int2(i, j);
+                if (bb.x < 0 || bb.y < 0) continue;
+                int2 r = bb * 2 + int2(off);
+                if (primary) {
+                    // (the block's traced pixel, if any: its tile's phase this frame)
+                    r = int2(-1, -1);
+                    for (uint k = 0u; k < 4u; k++) {
+                        int2 c = bb * 2 + int2(int(k & 1u), int(k >> 1u));
+                        if (c.x < int(w) && c.y < int(h) && (nearInfo[uint(c.y) * w + uint(c.x)] & SPLIT_TRACED) != 0u) r = c;
+                    }
+                    if (r.x < 0) continue;
+                }
+                if (r.x >= int(w) || r.y >= int(h)) continue;
                 uint rp = uint(r.y) * w + uint(r.x);
                 float rd = nearDepth[rp];
                 if (!(rd < 1e29)) continue;
                 float4 v = outNearLight[rp];
+                if (v.a < -1.5) continue;  // (its tile was not traced this frame)
                 float isRoof = v.a < 0.0 ? 1.0 : 0.0;
                 v.a = max(v.a, 0.0);
                 float dz = abs(rd - nd);
@@ -2059,12 +2556,15 @@ void nearUpsampleMain(uint3 id : SV_DispatchThreadID) {
                 wsum += wt;
             }
         }
-        // nothing on the same surface around (a lone pixel of a thin thing): the nearest in depth
+        // nothing on the same surface around (a lone pixel of a thin thing): the nearest in depth (none traced near
+        // it this frame: SPLIT_SKIPPED, the history alone)
         float4 v = wsum > 1e-4 ? sum / wsum : nearest;
         roofed = wsum > 1e-4 ? rsum / wsum : nearestRoof;
+        // (PRIMARY_NEAR_LIT: the composite comes after the history; the mark goes with it)
+        if (primary && roofed > 0.5 && v.a >= 0.0) v.a = -1.0;
         outNearLight[pix] = v;
     }
-    if (roofed > 0.5 && eyeRoofed()) outColor[pix].rgb = float3(0, 0, 0);  // under cover at both ends: unlit air
+    if (!primary && roofed > 0.5 && eyeRoofed()) outColor[pix].rgb = float3(0, 0, 0);  // under cover at both ends: unlit air
 }
 
 // The near light's own history (FRAME_NEAR_SPLIT, after nearUpsampleMain): each pixel's light is one ray of each kind,
@@ -2074,55 +2574,84 @@ void nearUpsampleMain(uint3 id : SV_DispatchThreadID) {
 // view-projection, as the clouds' are) and blended with the light found there, where the previous frame's surface lay
 // at the same distance (else the point was hidden or off screen then: this frame's light alone). An exponential
 // average of about NEAR_HISTORY frames: still views converge, a moving camera keeps its history on the surfaces.
+// (PRIMARY_NEAR_LIT) then the composite: albedo (farMain left it in the colour) x light x T + inscatter, as farMain's
+// full-rate path writes it, and the key light's visibility into the normal's alpha.
 static const float NEAR_HISTORY = 8.0;
+static const uint NEAR_SAMPLES = 8u;  // (PRIMARY_NEAR_LIT) a pixel's own samples averaged, at most
 
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
+    airBegin();
+    gEyeRoofed = -1;
     uint w = frame.dims.x, h = frame.dims.y;
     if (id.x >= w || id.y >= h) return;
     uint pix = id.y * w + id.x;
     float nd = nearDepth[pix];
     if (!(nd < 1e29)) return;
+    bool primary = splitPrimary();
     float4 cur = outNearLight[pix];
+    bool skipped = cur.a < -1.5;
+    bool roofed = cur.a < 0.0 && !skipped;
     cur.a = max(cur.a, 0.0);  // (the under-cover mark has done its work in the upsample)
-    uint count, stride;
-    prevNearLight.GetDimensions(count, stride);
-    float4 hist = float4(0, 0, 0, 0);
-    float hw = 0.0;
-    if (count >= w * h) {
-        float3 dir = pixelRay(id.xy, w, h);
-        float R = frame.camFrac.w;
-        float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
-        float3 X = worldAt(frame.camFrac.xyz, dir, k, nd) - frame.prevCam.xyz;
-        float4 clip = frame.prevViewProj[0] * X.x + frame.prevViewProj[1] * X.y + frame.prevViewProj[2] * X.z + frame.prevViewProj[3];
-        if (clip.w > 1e-4) {
-            float2 pn = clip.xy / clip.w;
-            float hx = (pn.x * 0.5 + 0.5) * float(w) - 0.5, hy = (0.5 - pn.y * 0.5) * float(h) - 0.5;
-            float dist = length(X), tol = 0.03 * dist + 0.1;
-            int2 b = int2(floor(float2(hx, hy)));
-            float2 fr = float2(hx, hy) - float2(b);
-            for (int j = 0; j <= 1; j++) {
-                for (int i = 0; i <= 1; i++) {
-                    int2 q = b + int2(i, j);
-                    if (q.x < 0 || q.y < 0 || q.x >= int(w) || q.y >= int(h)) continue;
-                    uint qp = uint(q.y) * w + uint(q.x);
-                    if (abs(prevSurface[qp] - dist) > tol) continue;  // another surface there then
-                    float4 v = prevNearLight[qp];
-                    if (dot(v.rgb, float3(1, 1, 1)) <= 0.0 && v.a <= 0.0) continue;  // it was not lit then
-                    float bw = (i == 0 ? 1.0 - fr.x : fr.x) * (j == 0 ? 1.0 - fr.y : fr.y);
-                    hist += v * bw;
-                    hw += bw;
-                }
-            }
-        }
-    }
-    // a traced pixel (one in four each frame) counts for more than the upsampled ones in between
+    float4 hist;
+    uint samples;
+    bool histRoofed;
+    float hw = nearHistoryAt(id.xy, nd, hist, samples, histRoofed);
+    if (skipped) roofed = histRoofed;  // (no roof test this frame: the history's)
     uint2 off = nearSplitOffset();
-    bool traced = (id.x & 1u) == off.x && (id.y & 1u) == off.y;
-    float a = traced ? 2.0 / NEAR_HISTORY : 1.0 / NEAR_HISTORY;
-    if (hw > 0.25) cur = lerp(hist / hw, cur, a);
+    bool traced = !skipped && (primary ? (nearInfo[pix] & SPLIT_TRACED) != 0u : (id.x & 1u) == off.x && (id.y & 1u) == off.y);
+    if (primary) {
+        // (PRIMARY_NEAR_LIT) the history holds the pixel's own traced samples, averaged as they come up to
+        // NEAR_SAMPLES (then a running average of that many): a still view converges to its own light, exact at
+        // shadow edges. Its neighbours' light (the upsample) fills a pixel with none of its own yet (a disocclusion, a
+        // new surface) and counts as half a sample after, only where it agrees about the sun; where nothing was traced
+        // this frame the history stands.
+        float4 hv = hw > 1e-4 ? hist / hw : float4(0, 0, 0, 0);
+        uint n = hw > 0.25 ? samples : 0u;
+        if (skipped) {
+            cur = hv;
+        } else if (traced) {
+            // (a history of the neighbours' light alone counts as one sample)
+            float prior = float(n) + (n == 0u && hw > 0.25 ? 1.0 : 0.0);
+            n = min(n + 1u, NEAR_SAMPLES);
+            // the key light's visibility is one deterministic ray, not noise: where the history disagrees with it (an
+            // edge the history's resampling blurred as the camera moved, a shadow the sun or an edit moved) the
+            // sample counts as much as that says, and the count restarts with it
+            float stale = saturate(abs(min(cur.a, 1.0) - min(hv.a, 1.0)) * 2.0 - 0.1);
+            float a = max(1.0 / min(prior + 1.0, float(NEAR_SAMPLES)), stale);
+            cur = lerp(hv, cur, a);
+            if (stale > 0.5) n = 1u;
+        } else if (n == 0u && hw > 0.25) {
+            cur = lerp(hv, cur, 0.5);
+        } else if (n == 1u) {
+            // one sample of its own: the neighbours' light as a third of one where it agrees about the key light (the
+            // same side of a shadow edge), the first noise down sooner after a disocclusion. Past that none: their light
+            // is another surface's (a far slope's pixels are its steps' tops and sides: blended in, the shaded sides
+            // came out 4 % brighter than they are)
+            float agree = saturate(1.0 - abs(cur.a - hv.a) * 4.0);
+            cur = lerp(hv, cur, agree * 0.25);
+        } else if (n > 0u) {
+            cur = hv;
+        }
+        outNearAge[pix] = n | (roofed ? NEAR_AGE_ROOFED : 0u);
+    } else {
+        // a traced pixel (one in four each frame) counts for more than the upsampled ones in between; where nothing was
+        // traced this frame the history stands
+        float a = traced ? 2.0 / NEAR_HISTORY : 1.0 / NEAR_HISTORY;
+        if (skipped) cur = hw > 1e-4 ? hist / hw : float4(0, 0, 0, 0);
+        else if (hw > 0.25) cur = lerp(hist / hw, cur, a);
+    }
     outNearLight[pix] = cur;
+    if (primary) {
+        float3 dir = pixelRay(id.xy, w, h);
+        AirPath air = aerialPathTo(dir, nd);
+        float T = dot(air.transmittance, float3(0.2126, 0.7152, 0.0722));
+        float3 ins = roofed && eyeRoofed() ? float3(0, 0, 0) : air.inscatter;  // under cover at both ends: unlit air
+        float3 albedo = outColor[pix].rgb;
+        outColor[pix] = float4(albedo * cur.rgb * T + ins, 1.0);
+        outNormal[pix] = (outNormal[pix] & 0x00FFFFFFu) | (uint(saturate(cur.a) * 255.0 + 0.5) << 24);
+    }
 }
 
 // (ATLAS_FRAME_PRIMARY_NEAR) the host's NDC depth (clip z / w through frame.viewProj, the inverse of its
@@ -2243,12 +2772,16 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     gAblate = asuint(frame.jitter.w);
     gGroupPa = frame.params.w * frame.params.z;
     gGroupTol = 0.7 + 0.6 * pixelDither(id.xy, phase + 5u);
-    float tHit = traceView(o, dir, tStart, frame.params.y, lodDither, res);
+    gTr = res;
+    float tHit = traceView(o, dir, tStart, frame.params.y, lodDither);
+    res = gTr;
     // (PRIMARY_NEAR) near water is the host's to raster: a primary ray meeting it in the near field goes on to what is
     // under it (the groups' cells and the SVDAG have no near-only pass, so a second trace with water skipped)
     if (primaryNear && tHit >= 0.0 && tHit < frame.params.x && uint(palette[res.mat].emisClass.y) == 2u) {
         gSkipWater = true;
-        tHit = traceView(o, dir, tStart, frame.params.y, lodDither, res);
+        gTr = res;
+        tHit = traceView(o, dir, tStart, frame.params.y, lodDither);
+        res = gTr;
         gSkipWater = false;
     }
     gGroups = false;  // secondary rays (shadows, reflections, block light) keep the old path
@@ -2274,6 +2807,19 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         float3 albedo = res.hasAlbedo != 0u ? res.albedo : m.albedoRough.rgb;
         float2 e = octEncode(n);
         uint info = (255u << 8) | (uint(saturate(e.x) * 255.0 + 0.5) << 16) | (uint(saturate(e.y) * 255.0 + 0.5) << 24);
+        if ((frame.dims.z & (FRAME_PRIMARY_NEAR_LIT | FRAME_NEAR_SPLIT)) == (FRAME_PRIMARY_NEAR_LIT | FRAME_NEAR_SPLIT)) {
+            // (the split, the light by need) the hit for the light passes: its distance and normal; its albedo in the
+            // colour until nearTemporalMain composites it, the key light's visibility there too
+            nearDepth[pix] = tHit;
+            nearInfo[pix] = info;
+            outColor[pix] = float4(albedo, 1.0);
+            outNormal[pix] = packNormal(n, (cls & 0x7Fu) | 0x80u, 0.0);
+            outDepth[pix] = hostDepth(dir, tHit);
+            outSurface[pix] = tHit;
+            // (ATLAS_ABLATE 536870912, measurements: the counters count the pixels the split traces, nearLightMain)
+            counters[pix] = (gAblate & 536870912u) != 0u ? 0u : res.steps;
+            return;
+        }
         gSecAblate = gAblate;
         gSecMode = (gAblate >> 23) & 7u;
         gSecCount = 0u;
@@ -2448,7 +2994,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
                     r2.albedo = float3(0, 0, 0); r2.hasAlbedo = 0u;
                     gGroups = true;
                     gSkipWater = true;
-                    float t2 = traceView(o, dir, tStart, frame.params.y, lodDither, r2);
+                    gTr = r2;
+                    float t2 = traceView(o, dir, tStart, frame.params.y, lodDither);
+                    r2 = gTr;
                     gSkipWater = false;
                     gGroups = false;
                     if (t2 >= 0.0) {  // (blended as the game's framebuffer does: on the sRGB values)
@@ -2598,8 +3146,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     }
     outSurface[pix] = surface;
     if ((frame.dims.z & FRAME_NEAR_LIGHT) != 0u) outNearLight[pix] = float4(0, 0, 0, 0);  // not the near field's
+    if (primaryNear && (frame.dims.z & FRAME_NEAR_SPLIT) != 0u) nearDepth[pix] = 1e30;  // (nor the light passes')
     outColor[pix] = float4(color, coverage);
     outNormal[pix] = packNormal(n, cls, sunVis);
     outDepth[pix] = primaryNear ? hostDepth(dir, depth) : depth;  // (PRIMARY_NEAR: the host's NDC depth, every pixel)
-    counters[pix] = res.steps;  // per-pixel step count (summed on the host; no atomics so the C++ target matches)
+    counters[pix] = (gAblate & 536870912u) != 0u ? 0u : res.steps;  // per-pixel step count (summed on the host; no atomics so the C++ target matches)
 }
