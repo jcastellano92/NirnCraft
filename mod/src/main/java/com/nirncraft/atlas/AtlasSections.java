@@ -321,7 +321,12 @@ public final class AtlasSections {
      * A decoded chunk: its first section y, per section the block state ids (4096, x + 16 * (z + 16 * y); null: not
      * recorded, solid rock the tiles hold), tints.
      */
-    record Decoded(int cx, int cz, int sy0, int[][] sections, int grass, int foliage) {}
+    record Decoded(int cx, int cz, int sy0, int[][] sections, int grass, int foliage, int[] grassCols, int[] foliageCols) {
+        /** One tint for the chunk (the server's recording). */
+        Decoded(int cx, int cz, int sy0, int[][] sections, int grass, int foliage) {
+            this(cx, cz, sy0, sections, grass, foliage, null, null);
+        }
+    }
 
     static Decoded decode(byte[] blob) throws IOException {
         try (DataInputStream in = new DataInputStream(new InflaterInputStream(new java.io.ByteArrayInputStream(blob)))) {

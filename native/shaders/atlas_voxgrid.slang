@@ -176,6 +176,7 @@ int vKind(uint m) {
         uint w = q == 0u ? w4.x : q == 1u ? w4.y : q == 2u ? w4.z : w4.w;
         c = (w >> ((m & 3u) * 8u)) & 255u;
     }
+    if (c == 255u) return -1;  // (a sparse brick: a rail, a torch, a door; api.cpp syncClasses)
     return c == 1u ? 1 : (c == 2u ? 2 : 0);
 }
 

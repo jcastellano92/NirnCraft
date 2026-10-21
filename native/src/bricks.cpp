@@ -1,0 +1,312 @@
+#include "bricks.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <map>
+
+namespace atlas {
+
+namespace {
+
+float lin(uint32_t c8) { return std::pow(float(c8) / 255.0f, 2.2f); }
+
+// the voxel a sample at p (micro-voxel units, 0..16) of a quad with normal n lands in. An axis-aligned quad on a
+// micro-voxel boundary goes into the voxel behind it (inside its element); a zero-thickness element's two faces (a
+// rail, a ladder: up and down, or front and back, on the same plane) share the voxel the first of them took
+struct Placer {
+    // plane (axis, boundary index) x cell on the plane -> the layer taken (+1; 0: none yet)
+    std::map<uint64_t, int> taken;
+    bool place(const float p[3], const float n[3], int out[3]) {
+        int a = std::fabs(n[0]) > 0.999f ? 0 : std::fabs(n[1]) > 0.999f ? 1 : std::fabs(n[2]) > 0.999f ? 2 : -1;
+        for (int k = 0; k < 3; k++) {
+            if (!(p[k] > -1e-3f && p[k] < 16.0f + 1e-3f)) return false;
+            out[k] = std::clamp(int(std::floor(p[k])), 0, 15);
+        }
+        if (a < 0) {
+            // slanted (crossed plants, rotated elements): the voxel the point is in, a hair inside
+            for (int k = 0; k < 3; k++) out[k] = std::clamp(int(std::floor(p[k] - n[k] * 0.02f)), 0, 15);
+            return true;
+        }
+        float c = p[a];
+        float r = std::round(c);
+        if (std::fabs(c - r) > 1e-3f) {
+            out[a] = std::clamp(int(std::floor(c)), 0, 15);
+            return true;
+        }
+        int b0 = (a + 1) % 3, b1 = (a + 2) % 3;
+        uint64_t key = uint64_t(a) << 40 | uint64_t(uint32_t(int(r) + 1)) << 16 | uint64_t(out[b0]) << 8 | uint64_t(out[b1]);
+        int want = std::clamp(int(r) - (n[a] > 0 ? 1 : 0), 0, 15);
+        auto it = taken.find(key);
+        if (it != taken.end()) want = it->second - 1;
+        else taken.emplace(key, want + 1);
+        out[a] = want;
+        return true;
+    }
+};
+
+}  // namespace
+
+bool voxeliseBrick(const AtlasBrickQuad* quads, uint32_t quadCount, uint32_t m, const AtlasBrickSprite* sprites,
+                   uint32_t spriteCount, const uint32_t* texels, uint32_t texelCount, float emission, BrickVoxels& v,
+                   uint32_t frame) {
+    std::vector<float> acc(4096 * 4, 0.0f);  // linear rgb sums, samples
+    Placer placer;
+    bool any = false;
+    for (uint32_t qi = 0; qi < quadCount; qi++) {
+        const AtlasBrickQuad& q = quads[qi];
+        if (q.material != m || q.sprite >= spriteCount) continue;
+        const AtlasBrickSprite& sp = sprites[q.sprite];
+        uint32_t nf = std::max(1u, sp.frames & 0xFFFFu);
+        if (!sp.width || !sp.height || uint64_t(sp.firstTexel) + uint64_t(sp.width) * sp.height * nf > texelCount) continue;
+        uint32_t f0 = sp.firstTexel + (frame % nf) * sp.width * sp.height;
+        float P[4][3];
+        for (int i = 0; i < 4; i++)
+            for (int k = 0; k < 3; k++) P[i][k] = q.pos[i][k] * 16.0f;
+        float e1[3], e2[3], n[3];
+        for (int k = 0; k < 3; k++) e1[k] = P[1][k] - P[0][k], e2[k] = P[3][k] - P[0][k];
+        n[0] = e1[1] * e2[2] - e1[2] * e2[1], n[1] = e1[2] * e2[0] - e1[0] * e2[2], n[2] = e1[0] * e2[1] - e1[1] * e2[0];
+        float nl = std::sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+        if (nl < 1e-6f) continue;
+        for (float& c : n) c /= nl;
+        // outwards as the quad's face direction says (winding aside)
+        static const int DV[6][3] = {{0, -1, 0}, {0, 1, 0}, {0, 0, -1}, {0, 0, 1}, {-1, 0, 0}, {1, 0, 0}};
+        if (q.dir >= 0 && q.dir < 6 && n[0] * DV[q.dir][0] + n[1] * DV[q.dir][1] + n[2] * DV[q.dir][2] < 0)
+            for (float& c : n) c = -c;
+        float l1 = std::sqrt(e1[0] * e1[0] + e1[1] * e1[1] + e1[2] * e1[2]);
+        float l2 = std::sqrt(e2[0] * e2[0] + e2[1] * e2[1] + e2[2] * e2[2]);
+        int n1 = std::clamp(int(std::ceil(l1 * 3.0f)), 2, 96), n2 = std::clamp(int(std::ceil(l2 * 3.0f)), 2, 96);
+        float tr = float((q.tint >> 16) & 255) / 255.0f, tg = float((q.tint >> 8) & 255) / 255.0f, tb = float(q.tint & 255) / 255.0f;
+        for (int j = 0; j < n2; j++)
+            for (int i = 0; i < n1; i++) {
+                float s = (float(i) + 0.5f) / float(n1), t = (float(j) + 0.5f) / float(n2);
+                float w00 = (1 - s) * (1 - t), w10 = s * (1 - t), w11 = s * t, w01 = (1 - s) * t;
+                float p[3], uv[2];
+                for (int k = 0; k < 3; k++) p[k] = P[0][k] * w00 + P[1][k] * w10 + P[2][k] * w11 + P[3][k] * w01;
+                for (int k = 0; k < 2; k++) uv[k] = q.uv[0][k] * w00 + q.uv[1][k] * w10 + q.uv[2][k] * w11 + q.uv[3][k] * w01;
+                int px = std::clamp(int(std::floor(uv[0] * float(sp.width))), 0, int(sp.width) - 1);
+                int py = std::clamp(int(std::floor(uv[1] * float(sp.height))), 0, int(sp.height) - 1);
+                uint32_t c = texels[f0 + uint32_t(py) * sp.width + uint32_t(px)];
+                if ((c >> 24) < 128) continue;  // a cut-out texel: nothing there
+                int vx[3];
+                if (!placer.place(p, n, vx)) continue;
+                size_t at = size_t(vx[0] + 16 * (vx[2] + 16 * vx[1])) * 4;
+                acc[at] += lin((c >> 16) & 255) * tr;
+                acc[at + 1] += lin((c >> 8) & 255) * tg;
+                acc[at + 2] += lin(c & 255) * tb;
+                acc[at + 3] += 1.0f;
+                any = true;
+            }
+    }
+    v.argb.fill(0);
+    v.filled.fill(0);
+    v.count = 0;
+    v.lightRgb = 0;
+    if (!any) return false;
+    double lr = 0, lg = 0, lb = 0, er = 0, eg = 0, eb = 0;  // (bright texels' colour; every glowing one's, if none is bright)
+    for (int i = 0; i < 4096; i++) {
+        float w = acc[size_t(i) * 4 + 3];
+        if (w <= 0) continue;
+        float rgb[3];
+        uint32_t c8[3];
+        for (int k = 0; k < 3; k++) {
+            rgb[k] = acc[size_t(i) * 4 + size_t(k)] / w;
+            c8[k] = uint32_t(std::clamp(std::pow(rgb[k], 1.0f / 2.2f) * 255.0f + 0.5f, 0.0f, 255.0f));
+        }
+        float lum = 0.2126f * rgb[0] + 0.7152f * rgb[1] + 0.0722f * rgb[2];
+        float s = std::clamp((lum - 0.35f) / 0.45f, 0.0f, 1.0f);
+        float e = emission > 0 ? std::clamp(emission * (0.25f + 0.75f * s * s * (3 - 2 * s)), 0.0f, 1.0f) : 0.0f;  // (nearEmission's weights)
+        v.argb[size_t(i)] = uint32_t(e * 255.0f + 0.5f) << 24 | c8[0] << 16 | c8[1] << 8 | c8[2];
+        float w8 = emission > 0 ? s * s * (3 - 2 * s) : 0.0f;  // (the light's colour: its bright texels', a flame's, not the stick's)
+        lr += w8 * rgb[0], lg += w8 * rgb[1], lb += w8 * rgb[2];
+        er += e * rgb[0], eg += e * rgb[1], eb += e * rgb[2];
+        v.filled[size_t(i)] = 1;
+        v.count++;
+    }
+    if (std::max(lr, std::max(lg, lb)) < 1e-6) lr = er, lg = eg, lb = eb;
+    double mx = std::max(lr, std::max(lg, lb));
+    if (mx > 1e-6) {
+        auto q = [&](double x) { return uint32_t(std::clamp(std::pow(x / mx, 1.0 / 2.2) * 255.0 + 0.5, 0.0, 255.0)); };
+        v.lightRgb = q(lr) << 16 | q(lg) << 8 | q(lb);
+    }
+    return true;
+}
+
+std::vector<uint32_t> encodeBrick(const BrickVoxels& v) {
+    // the palette: every distinct ARGB; past 256, colours at 5 bits a channel, then the 256 commonest and the nearest
+    std::map<uint32_t, uint32_t> freq;
+    for (int i = 0; i < 4096; i++)
+        if (v.filled[size_t(i)]) freq[v.argb[size_t(i)]]++;
+    auto quant = [](uint32_t c) { return c & 0xFFF8F8F8u; };
+    std::vector<uint32_t> pal;
+    std::unordered_map<uint32_t, uint8_t> index;
+    bool coarse = freq.size() > 256;
+    if (coarse) {
+        std::map<uint32_t, uint32_t> qf;
+        for (auto& [c, n] : freq) qf[quant(c)] += n;
+        std::vector<std::pair<uint32_t, uint32_t>> byN(qf.begin(), qf.end());
+        std::sort(byN.begin(), byN.end(), [](auto& a, auto& b) { return a.second > b.second || (a.second == b.second && a.first < b.first); });
+        for (size_t k = 0; k < byN.size() && k < 256; k++) pal.push_back(byN[k].first);
+    } else {
+        for (auto& kv : freq) pal.push_back(kv.first);
+    }
+    auto nearest = [&](uint32_t c) -> uint8_t {
+        auto it = index.find(c);
+        if (it != index.end()) return it->second;
+        int best = 0, bd = INT32_MAX;
+        for (size_t k = 0; k < pal.size(); k++) {
+            int d = 0;
+            for (int s = 0; s < 32; s += 8) {
+                int a = int((c >> s) & 255), b = int((pal[k] >> s) & 255);
+                d += (a - b) * (a - b);
+            }
+            if (d < bd) bd = d, best = int(k);
+        }
+        index.emplace(c, uint8_t(best));
+        return uint8_t(best);
+    };
+    uint64_t gmask = 0;
+    std::array<uint64_t, 64> occ{};
+    for (int y = 0; y < 16; y++)
+        for (int z = 0; z < 16; z++)
+            for (int x = 0; x < 16; x++)
+                if (v.filled[size_t(x + 16 * (z + 16 * y))]) {
+                    int g = (x >> 2) + 4 * ((z >> 2) + 4 * (y >> 2));
+                    gmask |= 1ull << g;
+                    occ[size_t(g)] |= 1ull << ((x & 3) + 4 * ((z & 3) + 4 * (y & 3)));
+                }
+    uint32_t ng = uint32_t(std::popcount(gmask));
+    std::vector<uint32_t> rec(4 + 3 * size_t(ng), 0u);
+    rec[0] = uint32_t(gmask), rec[1] = uint32_t(gmask >> 32);
+    std::vector<uint8_t> idx;
+    idx.reserve(v.count);
+    uint32_t r = 0;
+    for (int g = 0; g < 64; g++) {
+        if (!(gmask >> g & 1)) continue;
+        rec[4 + 3 * size_t(r)] = uint32_t(occ[size_t(g)]);
+        rec[5 + 3 * size_t(r)] = uint32_t(occ[size_t(g)] >> 32);
+        rec[6 + 3 * size_t(r)] = uint32_t(idx.size());
+        int gx = (g & 3) * 4, gz = ((g >> 2) & 3) * 4, gy = (g >> 4) * 4;
+        for (int bit = 0; bit < 64; bit++) {
+            if (!(occ[size_t(g)] >> bit & 1)) continue;
+            int x = gx + (bit & 3), z = gz + ((bit >> 2) & 3), y = gy + (bit >> 4);
+            uint32_t c = v.argb[size_t(x + 16 * (z + 16 * y))];
+            idx.push_back(coarse ? nearest(quant(c)) : nearest(c));
+        }
+        r++;
+    }
+    for (size_t k = 0; k < idx.size(); k += 4) {
+        uint32_t w = 0;
+        for (size_t j = 0; j < 4 && k + j < idx.size(); j++) w |= uint32_t(idx[k + j]) << (8 * j);
+        rec.push_back(w);
+    }
+    rec[2] = ng | uint32_t(pal.size()) << 16;
+    rec[3] = uint32_t(rec.size());
+    rec.insert(rec.end(), pal.begin(), pal.end());
+    return rec;
+}
+
+void BrickStore::set(uint32_t m, std::shared_ptr<const std::vector<uint32_t>> record, uint32_t lightRgb) {
+    std::lock_guard<std::mutex> lock(mu_);
+    if (m >= byMat_.size()) {
+        if (!record) return;
+        byMat_.resize(size_t(m) + 1);
+        lightRgb_.resize(size_t(m) + 1, 0u);
+    }
+    if (byMat_[m] == record && lightRgb_[m] == lightRgb && (m >= frames_.size() || frames_[m].empty())) return;
+    byMat_[m] = std::move(record);
+    lightRgb_[m] = lightRgb;
+    if (m < frames_.size()) frames_[m].clear();
+    revision_++;
+}
+
+void BrickStore::setFrames(uint32_t m, std::vector<std::shared_ptr<const std::vector<uint32_t>>> frames, uint32_t ticks,
+                           uint32_t lightRgb) {
+    std::lock_guard<std::mutex> lock(mu_);
+    if (m >= byMat_.size()) byMat_.resize(size_t(m) + 1), lightRgb_.resize(size_t(m) + 1, 0u);
+    if (m >= frames_.size()) frames_.resize(size_t(m) + 1), ticks_.resize(size_t(m) + 1, 1u);
+    byMat_[m] = frames.empty() ? nullptr : frames[0];
+    frames_[m] = std::move(frames);
+    ticks_[m] = std::max(1u, ticks);
+    lightRgb_[m] = lightRgb;
+    revision_++;
+}
+
+void BrickStore::setSparse(uint32_t m, bool sparse) {
+    std::lock_guard<std::mutex> lock(mu_);
+    if (m >= sparse_.size()) {
+        if (!sparse) return;
+        sparse_.resize(size_t(m) + 1, 0);
+    }
+    sparse_[m] = sparse ? 1 : 0;
+}
+
+bool BrickStore::sparse(uint32_t m) const {
+    std::lock_guard<std::mutex> lock(mu_);
+    return m < sparse_.size() && sparse_[m];
+}
+
+uint32_t BrickStore::lightRgb(uint32_t m) const {
+    std::lock_guard<std::mutex> lock(mu_);
+    return m < lightRgb_.size() ? lightRgb_[m] : 0u;
+}
+
+std::shared_ptr<const std::vector<uint32_t>> BrickStore::intern(std::vector<uint32_t> rec) {
+    uint64_t h = 0xcbf29ce484222325ull;
+    for (uint32_t w : rec) h = (h ^ w) * 0x100000001b3ull;
+    std::lock_guard<std::mutex> lock(mu_);
+    auto& same = unique_[h];
+    for (auto& s : same)
+        if (*s == rec) return s;
+    auto p = std::make_shared<const std::vector<uint32_t>>(std::move(rec));
+    same.push_back(p);
+    return p;
+}
+
+uint64_t BrickStore::revision() const {
+    std::lock_guard<std::mutex> lock(mu_);
+    return revision_;
+}
+
+size_t BrickStore::bricks() const {
+    std::lock_guard<std::mutex> lock(mu_);
+    size_t n = 0;
+    for (auto& [h, v] : unique_) n += v.size();
+    return n;
+}
+
+bool BrickStore::pack(uint64_t have, bool force, const std::vector<uint32_t>& lights, std::vector<uint32_t>& out,
+                      uint64_t& revision) const {
+    std::lock_guard<std::mutex> lock(mu_);
+    if (have == revision_ && !force && !out.empty()) return false;
+    revision = revision_;
+    uint32_t M = uint32_t(std::max(byMat_.size(), lights.size()));
+    out.assign(1 + 2 * size_t(M), 0u);
+    out[0] = M;
+    std::copy(lights.begin(), lights.end(), out.begin() + 1 + M);
+    std::unordered_map<const std::vector<uint32_t>*, uint32_t> at;
+    auto place = [&](const std::shared_ptr<const std::vector<uint32_t>>& r) {
+        auto it = at.find(r.get());
+        if (it == at.end()) {
+            it = at.emplace(r.get(), uint32_t(out.size())).first;
+            out.insert(out.end(), r->begin(), r->end());
+        }
+        return it->second;
+    };
+    for (uint32_t m = 0; m < uint32_t(byMat_.size()); m++) {
+        if (m < frames_.size() && frames_[m].size() > 1) {
+            // an animated set: frames | ticks a frame << 16, then each frame's brick
+            std::vector<uint32_t> offs;
+            for (const auto& r : frames_[m]) offs.push_back(place(r));
+            uint32_t set = uint32_t(out.size());
+            out.push_back(uint32_t(offs.size()) | std::min(ticks_[m], 0xFFFFu) << 16);
+            out.insert(out.end(), offs.begin(), offs.end());
+            out[1 + m] = 0x80000000u | set;
+            continue;
+        }
+        const auto& r = byMat_[m];
+        if (r) out[1 + m] = place(r);
+    }
+    return true;
+}
+
+}  // namespace atlas

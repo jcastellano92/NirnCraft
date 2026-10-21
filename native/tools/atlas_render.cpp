@@ -384,10 +384,36 @@ int main(int argc, char** argv) {
         uint32_t grass = exportdata::jsonColour(side, "grass", 0x91BD59), foliage = exportdata::jsonColour(side, "foliage", 0x77AB2F),
                  water = exportdata::jsonColour(side, "water", 0x3F76E4);
         std::string why;
+        // keep=near: the client feed's rule (every block with a model) with each non-cube one's micro-voxel brick from
+        // quads.bin / sprites.bin beside blocks.bin (atlas_set_material_bricks)
+        bool keepNear = str(a, "keep", "far") == "near";
+        exportdata::ModelLib ml;
+        std::vector<uint8_t> modelled;
+        if (keepNear) {
+            std::string bp = str(a, "blocks", "");
+            auto sl = bp.find_last_of("/\\");
+            if (!exportdata::loadModels(sl == std::string::npos ? std::string() : bp.substr(0, sl + 1), ml)) {
+                std::fprintf(stderr, "keep=near: no quads.bin / sprites.bin beside blocks=\n");
+                return 2;
+            }
+            modelled.assign(ml.states.size(), 0);
+            for (size_t i = 0; i < ml.states.size(); i++)
+                modelled[i] = exportdata::brickWorthy(ml, uint32_t(i)) ? 1 : 0;  // (AtlasClientSections.nearKept)
+        }
         if (!exportdata::upload(ctx, lib, secs, str(a, "keep", "far") == "all", grass, foliage, water, 64, ex, why,
-                                boxed ? box : nullptr, num(a, "cutout", 1) > 0, server)) {
+                                boxed ? box : nullptr, num(a, "cutout", 1) > 0, server, keepNear ? &modelled : nullptr)) {
             std::fprintf(stderr, "export: %s\n", why.c_str());
             return 2;
+        }
+        if (keepNear && num(a, "bricks", 1) > 0) {
+            size_t bricked = 0;
+            auto b0 = std::chrono::steady_clock::now();
+            if (!exportdata::uploadBricks(ctx, ml, ex.firstMat, ex.matState, grass, foliage, bricked, why)) {
+                std::fprintf(stderr, "bricks: %s\n", why.c_str());
+                return 2;
+            }
+            std::fprintf(stderr, "atlas_render: %zu materials with bricks in %.0f ms\n", bricked,
+                         std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - b0).count());
         }
         if (boxed && !ex.sections) {
             std::fprintf(stderr, "export: nothing the far field keeps inside box=%s\n", str(a, "box", "").c_str());
@@ -775,6 +801,7 @@ int main(int argc, char** argv) {
         // the level-0 grid built before anything is timed or compared (a few frames: the backend builds a budget a frame)
         {
             AtlasFrameOutput none{color.data(), normal.data(), depth.data(), linear.data()};
+            none.nearLight = o.nearLight;  // (primarynear: the near light's output is required with FRAME_NEAR_LIGHT)
             // (the first frame places the grid's window: before it there is nothing pending to see)
             // nowarm=1: no warm-up (the frame as the game's first one after a move sees it)
             int k = 0;
@@ -836,10 +863,14 @@ int main(int argc, char** argv) {
             double updMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - u0).count();
             atlas_get_stats(ctx, &st);
             AtlasFrameOutput none{color.data(), normal.data(), depth.data(), linear.data()};
+            none.nearLight = o.nearLight;  // (primarynear: the near light's output is required with FRAME_NEAR_LIGHT)
             int frames2 = 0;
             std::string stageMs;  // the render thread's share of each frame's grid batch (atlas_info voxgrid stageCpuMs)
             for (; frames2 < 256 && voxgridPending(ctx) > 0; frames2++) {
-                if (atlas_render(ctx, &f, &none) != ATLAS_OK) return 4;
+                if (atlas_render(ctx, &f, &none) != ATLAS_OK) {
+                    std::fprintf(stderr, "render (warm-up 2): %s\n", atlas_last_error(ctx));
+                    return 4;
+                }
                 std::string inf = atlas_info(ctx);
                 auto sp = inf.find("\"stageCpuMs\":");
                 if (sp != std::string::npos) stageMs += (stageMs.empty() ? "" : " ") + inf.substr(sp + 13, inf.find(',', sp) - sp - 13);
