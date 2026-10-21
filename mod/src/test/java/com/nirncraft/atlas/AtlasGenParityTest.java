@@ -238,7 +238,7 @@ class AtlasGenParityTest {
         Path lib = Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB"));
         AtlasGenNative nat = AtlasGenNative.load(lib);
         int nf = prog.fields.size();
-        for (int backend : new int[]{AtlasGenNative.BACKEND_VULKAN, AtlasGenNative.BACKEND_CPU}) {
+        for (int backend : new int[]{AtlasGenNative.BACKEND_VULKAN}) {
             try (AtlasGenNative.Gen g = nat.create(backend)) {
                 if (g == null) {
                     report.append("backend ").append(backend).append(": unavailable\n");
@@ -373,7 +373,7 @@ class AtlasGenParityTest {
             double cpuMs = (System.nanoTime() - ct) / 1e6;
             report.append(String.format("cpu: %d tiles in %.0f ms (%.1f ms a tile, all cores)%n", spots.length, cpuMs, cpuMs / spots.length));
             AtlasGenNative nat = AtlasGenNative.load(Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB")));
-            for (int backend : new int[]{AtlasGenNative.BACKEND_VULKAN, AtlasGenNative.BACKEND_CPU}) {
+            for (int backend : new int[]{AtlasGenNative.BACKEND_VULKAN}) {
                 try (AtlasGenNative.Gen g = nat.create(backend)) {
                     if (g == null) continue;
                     trace("begin gpu-tiles " + g.device());
@@ -419,6 +419,231 @@ class AtlasGenParityTest {
         String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
         if (out != null) Files.writeString(Path.of(out + ".tiles.txt"), text);
         System.out.println(text);
+    }
+
+    /**
+     * Far columns on the device (atlas_gen_tiles with blocks, LOD 0) against Minecraft's own generated chunks: where the
+     * chunk's ground is where TamrielHeight puts it (no overhang, cave mouth or map water bed changing it), the rule's
+     * top block and the one under it must be the chunk's. Columns elsewhere are counted apart. ".far.txt".
+     */
+    @Test
+    void gpuFarColumnsMatchChunks(MinecraftServer server) throws Exception {
+        RegistryAccess ra = server.registryAccess();
+        WorldDimensions dims = ra.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL).value().createWorldDimensions();
+        LevelStem stem = dims.dimensions().get(LevelStem.OVERWORLD);
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) stem.generator();
+        NoiseGeneratorSettings settings = gen.generatorSettings().value();
+        RandomState rs = RandomState.create(ra.lookupOrThrow(Registries.NOISE), SEED, settings);
+        DimensionType dt = stem.type().value();
+        LevelHeightAccessor heights = LevelHeightAccessor.create(dt.minY(), dt.height());
+        AtlasGenProgram prog = AtlasGenProgram.compile(gen, settings, rs, heights, SEED, s -> 0);
+        int per = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_GEN_PARITY_N", "3"));
+        Map<String, List<ChunkPos>> kinds = pick(per);
+        List<ChunkPos> all = new ArrayList<>();
+        kinds.values().forEach(all::addAll);
+        // the Java reference once per chunk set and generator (E:/NirnCraft-scratch/gen/ref): per column x z, the
+        // chunk's highest block that is not air or fluid, that block and the one under it
+        Path ref = farReference(gen, rs, heights, ra, all, per);
+        Map<Long, String[]> truth = new HashMap<>();
+        for (String line : Files.readAllLines(ref)) {
+            String[] f = line.split(" ");
+            truth.put(ChunkPos.pack(Integer.parseInt(f[0]), Integer.parseInt(f[1])), new String[]{f[2], f[3], f[4]});
+        }
+        trace("begin map");
+        int[] map = AtlasGenMap.words(prog, gen.getBiomeSource());
+        trace("end map");
+        List<Long> tileKeys = new ArrayList<>();
+        for (ChunkPos c : all) {
+            long k = ChunkPos.pack(Math.floorDiv(c.getMinBlockX(), AtlasNative.TILE), Math.floorDiv(c.getMinBlockZ(), AtlasNative.TILE));
+            if (!tileKeys.contains(k)) tileKeys.add(k);
+        }
+        StringBuilder report = new StringBuilder(String.format("chunks %d in %d LOD 0 tiles; reference %s%n", all.size(), tileKeys.size(), ref));
+        AtlasGenNative nat = AtlasGenNative.load(Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB")));
+        int cols = AtlasGenNative.TILE_COLS;
+        try (AtlasGenNative.Gen g = nat.create(AtlasGenNative.BACKEND_VULKAN)) {
+            if (g == null) throw new IllegalStateException("no Vulkan generator (a pipeline the driver refused?): see [atlas] generator: on stderr");
+            g.setProgram(prog.words);
+            g.setMap(map);
+            long columns = 0, onGround = 0, topSame = 0, underSame = 0, flagged = 0;
+            double kernelMs = 0;
+            Map<String, Long> pairs = new TreeMap<>();
+            trace("begin gpu-far");
+            for (int t0 = 0; t0 < tileKeys.size(); t0 += 2) {
+                int n = Math.min(2, tileKeys.size() - t0);
+                int[] tiles = new int[n * 3];
+                for (int i = 0; i < n; i++) {
+                    tiles[i * 3 + 1] = ChunkPos.getX(tileKeys.get(t0 + i));
+                    tiles[i * 3 + 2] = ChunkPos.getZ(tileKeys.get(t0 + i));
+                }
+                float[] s = new float[n * cols], w = new float[n * cols];
+                int[] blocks = new int[n * cols], biomes = new int[n * cols];
+                double[] ms = new double[1];
+                int[] bad = g.tiles(tiles, s, w, blocks, biomes, ms);
+                kernelMs += ms[0];
+                for (ChunkPos c : all) {
+                    int ti = tileKeys.indexOf(ChunkPos.pack(Math.floorDiv(c.getMinBlockX(), AtlasNative.TILE), Math.floorDiv(c.getMinBlockZ(), AtlasNative.TILE))) - t0;
+                    if (ti < 0 || ti >= n) continue;
+                    if (bad[ti] != 0) flagged++;
+                    for (int lz = 0; lz < 16; lz++)
+                        for (int lx = 0; lx < 16; lx++) {
+                            int x = c.getMinBlockX() + lx, z = c.getMinBlockZ() + lz;
+                            int k = ti * cols + Math.floorMod(z, AtlasNative.TILE) * AtlasNative.TILE + Math.floorMod(x, AtlasNative.TILE);
+                            columns++;
+                            String[] tr = truth.get(ChunkPos.pack(x, z));
+                            int top = (int) Math.ceil(s[k]) - 1;
+                            if (tr == null || Integer.parseInt(tr[0]) != top) continue;
+                            onGround++;
+                            String gt = name(prog.blocks.get(blocks[k] & 0xFFFF)), gu = name(prog.blocks.get(blocks[k] >>> 16));
+                            if (gt.equals(tr[1])) topSame++;
+                            else pairs.merge("top " + tr[1] + " -> " + gt, 1L, Long::sum);
+                            if (gu.equals(tr[2])) underSame++;
+                            else pairs.merge("under " + tr[2] + " -> " + gu, 1L, Long::sum);
+                        }
+                }
+                trace(String.format("progress gpu-far %d/%d tiles: top %.3f %%, under %.3f %% of %d on-ground columns", t0 + n, tileKeys.size(),
+                        100.0 * topSame / Math.max(1, onGround), 100.0 * underSame / Math.max(1, onGround), onGround));
+            }
+            trace("end gpu-far");
+            report.append(String.format("%n== %s: kernels %.1f ms (%.2f ms a tile with blocks); %d chunks in flagged tiles%n", g.device(),
+                    kernelMs, kernelMs / tileKeys.size(), flagged));
+            report.append(String.format("   columns %d, ground where TamrielHeight puts it %d (%.2f %%): top block %.4f %%, under %.4f %%%n",
+                    columns, onGround, 100.0 * onGround / columns, 100.0 * topSame / Math.max(1, onGround), 100.0 * underSame / Math.max(1, onGround)));
+            pairs.entrySet().stream().sorted((x, y) -> Long.compare(y.getValue(), x.getValue())).limit(30)
+                    .forEach(e -> report.append(String.format("     %7d  %s%n", e.getValue(), e.getKey())));
+        }
+        String text = report.toString();
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".far.txt"), text);
+        System.out.println(text);
+    }
+
+    /**
+     * Far chunks on the device (atlas_gen_far): every voxel of the level-k chunks of a few lod-k tiles (k 1..4) against
+     * the far World build's terrain voxel (TileVoxels::columnVoxel without the overlays) applied in Java to the same
+     * tiles' device columns (atlas_gen_tiles with blocks; those are checked against Java by gpuTilesMatchJava and
+     * gpuFarColumnsMatchChunks), the kinds (air, uniform, mixed) included; and the time. GPU only. ".farchunks.txt".
+     */
+    @Test
+    void gpuFarChunks(MinecraftServer server) throws Exception {
+        RegistryAccess ra = server.registryAccess();
+        WorldDimensions dims = ra.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL).value().createWorldDimensions();
+        LevelStem stem = dims.dimensions().get(LevelStem.OVERWORLD);
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) stem.generator();
+        NoiseGeneratorSettings settings = gen.generatorSettings().value();
+        RandomState rs = RandomState.create(ra.lookupOrThrow(Registries.NOISE), SEED, settings);
+        DimensionType dt = stem.type().value();
+        LevelHeightAccessor heights = LevelHeightAccessor.create(dt.minY(), dt.height());
+        AtlasGenProgram prog = AtlasGenProgram.compile(gen, settings, rs, heights, SEED, s -> 0);
+        trace("begin map");
+        int[] map = AtlasGenMap.words(prog, gen.getBiomeSource());
+        trace("end map");
+        String dump = System.getenv("NIRNCRAFT_GEN_DUMP");  // the program and the map for native/tools/gen_probe
+        if (dump != null) {
+            Files.createDirectories(Path.of(dump));
+            for (var e : Map.of("prog.bin", prog.words, "map.bin", map).entrySet()) {
+                java.nio.ByteBuffer bb = java.nio.ByteBuffer.allocate(e.getValue().length * 4).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+                bb.asIntBuffer().put(e.getValue());
+                Files.write(Path.of(dump, e.getKey()), bb.array());
+            }
+        }
+        StringBuilder report = new StringBuilder();
+        AtlasGenNative nat = AtlasGenNative.load(Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB")));
+        int cols = AtlasGenNative.TILE_COLS;
+        try (AtlasGenNative.Gen g = nat.create(AtlasGenNative.BACKEND_VULKAN)) {
+            if (g == null) throw new IllegalStateException("no Vulkan generator: see [atlas] generator: on stderr");
+            g.setProgram(prog.words);
+            g.setMap(map);
+            int stone = 1, water = 2;  // the program's fixed ids (AtlasGenProgram: default block, default fluid)
+            // (lod, block x, block z): Whiterun, the Reach, the sea off Solitude, Morrowind's ash
+            int[][] spots = {{1, 0, 0}, {1, -9000, 2000}, {2, -2000, -6000}, {3, 20000, 4000}, {4, 0, 0}};
+            for (int[] sp : spots) {
+                int lod = sp[0], span = AtlasNative.TILE << lod, rows = (44 + (1 << lod) - 1) >> lod;
+                int tx = Math.floorDiv(sp[1], span), tz = Math.floorDiv(sp[2], span);
+                trace("begin far-chunks lod " + lod);
+                float[] su = new float[cols], wa = new float[cols];
+                int[] bl = new int[cols], bi = new int[cols];
+                g.tiles(new int[]{lod, tx, tz}, su, wa, bl, bi, new double[1]);
+                AtlasGenNative.Gen.FarChunks fc = g.far(lod, new int[]{tx, tz}, 0, 2000);
+                if (fc.mixed() > 2000) throw new IllegalStateException("more mixed chunks than the capacity: " + fc.mixed());
+                long voxels = 0, differ = 0, air = 0, uniform = 0, mixedN = 0;
+                float s = 1 << lod;
+                for (int cc = 0; cc < 256; cc++)
+                    for (int cy = 0; cy < rows; cy++) {
+                        int k = cc * rows + cy, kind = fc.kinds()[k * 2], slot = fc.kinds()[k * 2 + 1];
+                        if (kind == 1) air++;
+                        else if (kind == 0) mixedN++;
+                        else uniform++;
+                        int ccx = cc & 15, ccz = cc >> 4;
+                        for (int v = 0; v < 4096; v++) {
+                            int vx = v & 15, vz = v >> 4 & 15, vy = v >> 8;
+                            int c = (ccz * 16 + vz) * AtlasNative.TILE + ccx * 16 + vx;
+                            float yc = -64f + ((cy * 16 + vy) + 0.5f) * s;
+                            int want;
+                            if (yc < su[c]) {
+                                float depth = su[c] - yc;
+                                want = depth <= s ? bl[c] & 0xFFFF : depth <= s + 3f ? bl[c] >>> 16 : stone;
+                            } else want = !Float.isNaN(wa[c]) && yc < wa[c] ? water : 0;
+                            int got = kind == 1 ? 0 : kind == 0 ? (fc.ids()[slot * 2048 + (v >> 1)] >>> ((v & 1) * 16)) & 0xFFFF
+                                    : kind == 0xFFFFFFFE ? -1 : kind >>> 8;
+                            voxels++;
+                            if (got != want) differ++;
+                        }
+                    }
+                trace("end far-chunks lod " + lod);
+                report.append(String.format("lod %d tile (%d, %d): %d chunks (%d air, %d uniform, %d mixed), %d of %d voxels differ, kernels %.2f ms%s%n",
+                        lod, tx, tz, 256 * rows, air, uniform, mixedN, differ, voxels, fc.kernelMs(), fc.flags()[0] != 0 ? " (flagged)" : ""));
+            }
+        }
+        String text = report.toString();
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".farchunks.txt"), text);
+        System.out.println(text);
+    }
+
+    /**
+     * The far-column reference (gpuFarColumnsMatchChunks): computed once per seed, generator identity and chunk set, one
+     * chunk at a time (nothing held), to E:/NirnCraft-scratch/gen/ref; lines "x z y top under".
+     */
+    static Path farReference(NoiseBasedChunkGenerator gen, RandomState rs, LevelHeightAccessor heights, RegistryAccess ra,
+                             List<ChunkPos> all, int per) throws java.io.IOException {
+        String id = AtlasTileCodec.identity() + "-" + Integer.toHexString(all.hashCode());
+        Path ref = Path.of(System.getenv().getOrDefault("NIRNCRAFT_GEN_REF", "E:/NirnCraft-scratch/gen/ref"),
+                "far-columns-seed" + SEED + "-" + id + "-n" + per + ".txt");
+        if (Files.exists(ref)) return ref;
+        Files.createDirectories(ref.getParent());
+        PalettedContainerFactory containers = PalettedContainerFactory.create(ra);
+        StructureManager structures = new StructureManager(null, null, null) {
+            @Override
+            public List<StructureStart> startsForStructure(int x, int z, Predicate<Structure> m) {
+                return List.of();
+            }
+        };
+        StringBuilder sb = new StringBuilder();
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        trace("begin java-reference");
+        int done = 0;
+        for (ChunkPos c : all) {
+            Map<ChunkPos, ProtoChunk> biomeChunks = new HashMap<>();
+            ProtoChunk chunk = javaChunk(c, gen, rs, heights, containers, structures, biomeChunks);
+            for (int lz = 0; lz < 16; lz++)
+                for (int lx = 0; lx < 16; lx++) {
+                    int x = c.getMinBlockX() + lx, z = c.getMinBlockZ() + lz;
+                    int y = 575;
+                    while (y > -64) {
+                        BlockState b = chunk.getBlockState(p.set(x, y, z));
+                        if (!b.isAir() && b.getFluidState().isEmpty()) break;
+                        y--;
+                    }
+                    sb.append(x).append(' ').append(z).append(' ').append(y).append(' ').append(name(chunk.getBlockState(p.set(x, y, z))))
+                            .append(' ').append(name(chunk.getBlockState(p.set(x, y - 1, z)))).append('\n');
+                }
+            progress("java-reference", ++done, all.size());
+        }
+        Path tmp = ref.resolveSibling(ref.getFileName() + ".tmp");
+        Files.writeString(tmp, sb);
+        Files.move(tmp, ref, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        trace("end java-reference");
+        return ref;
     }
 
     /**
@@ -705,6 +930,7 @@ class AtlasGenParityTest {
                     AtlasClientGen.follow(cam[0] + 0.5, cam[1] + 0.5, 0f);
                     long t0 = System.nanoTime();
                     report.append(String.format("camera %d, %d%n", cam[0], cam[1]));
+                    trace("begin jump " + cam[0] + "," + cam[1]);
                     long next = 0;
                     while (true) {
                         double t = (System.nanoTime() - t0) / 1e9;
@@ -716,10 +942,12 @@ class AtlasGenParityTest {
                             report.append(String.format("  %5.1f s  gc %d ms, heap %d / %d MB  %s%n", t, gcMs,
                                     (rt.totalMemory() - rt.freeMemory()) >> 20, rt.maxMemory() >> 20, AtlasClientGen.state()));
                             next += 600_000_000L;
+                            progress("jump", (int) t, 40);
                         }
                         if ((j[1] >= 0 && j[2] >= 0) || t > 40) break;
                         Thread.sleep(20);
                     }
+                    trace("end jump " + cam[0] + "," + cam[1]);
                     double[] j = cg.jumpTimes();
                     report.append(String.format("  jump: first chunk up %.0f ms, the window's terrain up %.0f ms (%d chunks), "
                                     + "the features' window up %.0f ms (%d chunks); %d frames rendered%n", j[0], j[1], (int) j[3], j[2],

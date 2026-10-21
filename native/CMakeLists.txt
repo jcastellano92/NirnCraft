@@ -349,7 +349,7 @@ endif()
 set(GEN_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_gen.slang")
 set(GEN_HEADERS)
 set(GEN_CPU_ENTRIES)
-foreach(pass corner aquifer fill top surface pack cols secs mats math probe pageCols pageBiomes tile)
+foreach(pass corner aquifer fill top surface pack cols secs mats math probe pageCols pageBiomes tile tileSurf tileBiome farChunk)
   set(entry "${pass}Main")
   set(GEN_VALIDATE)
   if(SPIRV_VAL)
@@ -368,7 +368,10 @@ foreach(pass corner aquifer fill top surface pack cols secs mats math probe page
             -DNAME=atlas_gen_${pass}_spv -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
     DEPENDS "${GEN}/atlas_gen_${pass}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
   list(APPEND GEN_HEADERS "${GEN}/atlas_gen_${pass}_spv.h")
-  list(APPEND GEN_CPU_ENTRIES -entry ${entry} -stage compute)
+  # (GPU-only passes stay out of the C++ reference: its target has no atomics)
+  if(NOT pass STREQUAL "farChunk")
+    list(APPEND GEN_CPU_ENTRIES -entry ${entry} -stage compute)
+  endif()
 endforeach()
 add_custom_command(
   OUTPUT "${GEN}/atlas_gen_cpu.cpp"
@@ -384,6 +387,11 @@ else()
   set_source_files_properties("${GEN}/atlas_gen_cpu.cpp" PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-fast-math;-w"
                               COMPILE_DEFINITIONS "${GEN_RENAME}")
 endif()
+
+# the far passes without Java (dev tool: gen_probe <dir> <lod> <tx> <tz> [far], the parity test's dump)
+add_executable(gen_probe tools/gen_probe.cpp)
+target_include_directories(gen_probe PRIVATE include)
+target_link_libraries(gen_probe PRIVATE atlas_core)
 
 add_executable(atlas_height_test tests/height_test.cpp)
 target_include_directories(atlas_height_test PRIVATE include)

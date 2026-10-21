@@ -798,9 +798,21 @@ ATLAS_API AtlasStatus atlas_gen_read_page(AtlasGen* h, int32_t cx, int32_t cz, u
 /* Far tiles on the device (the map set, atlas_page.slang tileMain): count tiles as (lod, tx, tz) triples, each 256 x 256
    columns at the centre block of their 2^lod squares (AtlasExactSource.fill): outSurface count * 65536 floats
    ((float) TamrielHeight.height, row-major), outWater the same (the sea below y 63, the map's rivers and lakes at
-   ceil(level), NaN dry); outFlags (may be NULL) nonzero where a column is not proven exact. */
+   ceil(level), NaN dry); outBlocks (may be NULL: not made) per column the material rule's top block | the one under it
+   << 16 (generator ids, AtlasSurface.column's: ore veins left out, the biomes as chunks store them); outBiomes (with
+   outBlocks, may be NULL) the biome id at the column's top (dry: the ground's top + 1, else the water's top); outFlags
+   (may be NULL) nonzero where a column is not proven exact. */
 ATLAS_API AtlasStatus atlas_gen_tiles(AtlasGen* h, const int32_t* lodTxTz, uint32_t count, float* outSurface, float* outWater,
-                                      uint32_t* outFlags, AtlasGenTimes* times);
+                                      uint32_t* outBlocks, uint32_t* outBiomes, uint32_t* outFlags, AtlasGenTimes* times);
+/* Far chunks on the device (GPU only; atlas_page.slang farChunkMain): count (<= 16) lod tiles (tx, tz pairs; lod 1..6),
+   each 16 x 16 columns of level-lod chunks (16^3 voxels of 2^lod blocks, rows = ceil(44 / 2^lod) from y -64: the grid's
+   coarse level lod), made from the tile's columns (atlas_gen_tiles with blocks) as the far World build's terrain voxel.
+   outKinds: per chunk (tile, column z * 16 + x, row inner) 2 words: kind (0 mixed, 1 air, 2 | material << 8 uniform,
+   0xFFFFFFFE mixed without room: capacity too small) and slot; outIds (may be NULL) capacity * 2048 words, the mixed
+   chunks' voxels (x + 16 * (z + 16 * y), two ids a word); outMixed: the slots wanted. outMode 0: generator ids, 1:
+   atlas materials (the ingest table's, by the column's biome). */
+ATLAS_API AtlasStatus atlas_gen_far(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint32_t outMode, uint32_t* outKinds,
+                                    uint32_t* outIds, uint32_t capacity, uint32_t* outMixed, uint32_t* outFlags, AtlasGenTimes* times);
 /* Pages the device made so far, the page passes' total time, and whether the device makes them (any may be NULL). */
 ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, double* pageMs, int32_t* onDevice);
 /* Probes the kernels' pieces at n (x, z) columns (n <= 2^17), 32 words each, the last a flag (nonzero: not proven): kind 0

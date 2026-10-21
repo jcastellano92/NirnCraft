@@ -93,7 +93,7 @@ final class AtlasGenProgram {
             S_LAVALEVEL = 86, S_ORECOUNT = 87, S_RULESTART = 88, S_NBIOMES = 89;
     /** The page passes' inputs (atlas_page.slang): the climate entries (6 start / end pairs), the fields' kinds, the
      *  height noises' stacks (4), and whether the program carries them all (the device then makes the pages). */
-    static final int S_CLIMATE = 96, S_FKINDS = 108, S_HNOISE = 109, S_PAGEGEN = 113;
+    static final int S_CLIMATE = 96, S_FKINDS = 108, S_HNOISE = 109, S_PAGEGEN = 113, S_CLIMFIELDS = 114;
     /** A field's kind: TamrielHeight, else 1 + its TamrielChannel ordinal; FK_NONE: not on the device. */
     static final int FK_HEIGHT = 0, FK_NONE = 0xFFFF;
     static final int HEADER = 128, LAYER_WORDS = 76, REGS = 96, MAX_INTERP = 16, MAX_ORES = 4;
@@ -213,6 +213,7 @@ final class AtlasGenProgram {
         /** The climate router's entries (point), or null when the page passes cannot run on the device. */
         Entry[] climate;
         final int[] heightStacks = {-1, -1, -1, -1};
+        int climateFields;
         int maxRegs, surfNoise, secNoise, clayNoise;
         int[] out;
 
@@ -311,6 +312,10 @@ final class AtlasGenProgram {
                 for (DensityFunction f : fields)
                     if (fieldKind(f) == FK_NONE) throw new IllegalStateException("a column field the page passes lack: " + f);
                 climate = es;
+                // the column fields the climate entries read (a far column computes only those)
+                for (Entry e : es)
+                    for (Ins ins : e.code)
+                        if (ins.op == OP_COL) climateFields |= 1 << ins.imm[0];
             } catch (IllegalStateException e) {
                 climate = null;
                 com.nirncraft.NirnCraft.LOGGER.info("atlas generator: pages stay in Java ({})", e.getMessage());
@@ -742,7 +747,8 @@ final class AtlasGenProgram {
             w.set(S_FKINDS, w.size());
             for (DensityFunction f : fields) w.add(fieldKind(f));
             for (int i = 0; i < 4; i++) w.set(S_HNOISE + i, heightStacks[i]);
-            w.set(S_PAGEGEN, climate != null ? 1 : 0);
+            w.set(S_PAGEGEN, climate != null && fields.size() <= 16 ? 1 : 0);
+            w.set(S_CLIMFIELDS, climateFields);
             // seeds of the vertical gradients
             int seedsAt = w.size();
             for (long[] s : extraSeeds) {

@@ -34,7 +34,7 @@ final class AtlasGenNative {
     // the map on the GPU (atlas_gen_set_map, atlas_gen_probe): null in a library without them
     private final MethodHandle setMap, probe;
     // the pages made on the device (atlas_gen_read_page, atlas_gen_page_stats): null in a library without them
-    private final MethodHandle readPage, pageStats, tiles;
+    private final MethodHandle readPage, pageStats, tiles, far;
     /** Columns of a far tile (atlas_gen_tiles). */
     static final int TILE_COLS = 65536;
     /** Words per probe (atlas_gen_probe). */
@@ -63,8 +63,11 @@ final class AtlasGenNative {
         boolean dp = lib.find("atlas_gen_page_stats").isPresent();
         readPage = dp ? bind(l, lib, "atlas_gen_read_page", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS, JAVA_INT)) : null;
         pageStats = dp ? bind(l, lib, "atlas_gen_page_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
+        far = lib.find("atlas_gen_far").isPresent()
+                ? bind(l, lib, "atlas_gen_far", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS,
+                JAVA_INT, ADDRESS, ADDRESS, ADDRESS)) : null;
         tiles = lib.find("atlas_gen_tiles").isPresent()
-                ? bind(l, lib, "atlas_gen_tiles", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
+                ? bind(l, lib, "atlas_gen_tiles", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
     }
 
     private static MethodHandle bind(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd) {
@@ -235,6 +238,24 @@ final class AtlasGenNative {
             return setMap != null && pageStats != null;
         }
 
+        /** Level-lod far chunks of lod tiles (atlas_gen_far): kinds and slots per chunk, the mixed ones' voxels. */
+        record FarChunks(int[] kinds, int[] ids, int mixed, int[] flags, double kernelMs) {}
+
+        /** Far chunks on the device (atlas_gen_far); mode 0 generator ids, 1 atlas materials. */
+        FarChunks far(int lod, int[] txTz, int mode, int capacity) {
+            int n = txTz.length / 2, rows = (44 + (1 << lod) - 1) >> lod;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment k = a.allocate(JAVA_INT, (long) n * 256 * rows * 2), ids = a.allocate(JAVA_INT, (long) capacity * 2048);
+                MemorySegment m = a.allocate(JAVA_INT), f = a.allocate(JAVA_INT, n), t = a.allocate(96);
+                check((int) far.invokeExact(ptr, lod, a.allocateFrom(JAVA_INT, txTz), n, mode, k, ids, capacity, m, f, t), "atlas_gen_far");
+                int mixed = m.get(JAVA_INT, 0);
+                return new FarChunks(k.toArray(JAVA_INT), ids.asSlice(0, (long) Math.min(mixed, capacity) * 2048 * 4).toArray(JAVA_INT), mixed,
+                        f.toArray(JAVA_INT), t.get(JAVA_DOUBLE, 8));
+            } catch (Throwable e) {
+                throw rethrow(e);
+            }
+        }
+
         /** Whether this library makes far tiles on the device (atlas_gen_tiles). */
         boolean tilesSupported() {
             return tiles != null;
@@ -245,13 +266,22 @@ final class AtlasGenNative {
          * each; returns per tile nonzero where a column is not proven exact. Also the kernel ms in times[0].
          */
         int[] tiles(int[] lodTxTz, float[] surface, float[] water, double[] times) {
+            return tiles(lodTxTz, surface, water, null, null, times);
+        }
+
+        /** As tiles, with each column's top | under << 16 (generator ids) and its top's biome when blocks != null. */
+        int[] tiles(int[] lodTxTz, float[] surface, float[] water, int[] blocks, int[] biomes, double[] times) {
             int n = lodTxTz.length / 3;
             try (Arena a = Arena.ofConfined()) {
                 MemorySegment s = a.allocate(JAVA_FLOAT, (long) n * TILE_COLS), w = a.allocate(JAVA_FLOAT, (long) n * TILE_COLS);
+                MemorySegment b = blocks != null ? a.allocate(JAVA_INT, (long) n * TILE_COLS) : MemorySegment.NULL;
+                MemorySegment bi = blocks != null && biomes != null ? a.allocate(JAVA_INT, (long) n * TILE_COLS) : MemorySegment.NULL;
                 MemorySegment f = a.allocate(JAVA_INT, n), t = a.allocate(96);
-                check((int) tiles.invokeExact(ptr, a.allocateFrom(JAVA_INT, lodTxTz), n, s, w, f, t), "atlas_gen_tiles");
+                check((int) tiles.invokeExact(ptr, a.allocateFrom(JAVA_INT, lodTxTz), n, s, w, b, bi, f, t), "atlas_gen_tiles");
                 MemorySegment.copy(s, JAVA_FLOAT, 0, surface, 0, n * TILE_COLS);
                 MemorySegment.copy(w, JAVA_FLOAT, 0, water, 0, n * TILE_COLS);
+                if (blocks != null) MemorySegment.copy(b, JAVA_INT, 0, blocks, 0, n * TILE_COLS);
+                if (blocks != null && biomes != null) MemorySegment.copy(bi, JAVA_INT, 0, biomes, 0, n * TILE_COLS);
                 if (times != null && times.length > 0) times[0] = t.get(JAVA_DOUBLE, 8);
                 return f.toArray(JAVA_INT);
             } catch (Throwable t) {
