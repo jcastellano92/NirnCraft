@@ -29,6 +29,9 @@ Weather and biome work stay paused until the owner says.
 
 ## Standing rules (also in memory)
 
+- **GPU only for now (owner, 2026-10-21):** test on Vulkan only; no CPU-backend versions of new GPU work and no
+  CPU-backend runs as gates (the CPU fallback is a later, separate job). Java stays the exactness reference, computed
+  once per test set and cached on E:.
 - GPU-first, end to end. The client owns the world: it generates and renders everything; the server sends only
   coalesced, position-based operations (edits), hash-checked.
 - One renderer, one continuous gradient: no near / far field. Detail per pixel from its footprint (continuous level,
