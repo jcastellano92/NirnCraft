@@ -2,6 +2,7 @@
 
 #include "sectionpack.hpp"
 #include "sectionstore.hpp"
+#include "gencache.hpp"
 #include "parallel.hpp"
 
 #ifdef _WIN32
@@ -501,7 +502,18 @@ void World::setClasses(std::vector<uint8_t> cls) {
     classes_ = std::move(cls);
 }
 
-World::World() : store_(std::make_unique<SectionStore>()) {}
+World::World() : store_(std::make_unique<SectionStore>()), genCache_(std::make_unique<GenCache>()) {}
+
+void World::setGenFingerprint(uint64_t fp) {
+    std::string root;
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        if (genFp_ == fp) return;
+        genFp_ = fp;
+        root = storeRoot_;
+    }
+    genCache_->configure(root, fp);
+}
 
 namespace {
 uint32_t uniformOf(const uint16_t* ids) {
@@ -666,7 +678,9 @@ World::SectionSrc World::sectionSource(int sx, int sy, int sz) {
     std::lock_guard<std::mutex> lock(mu_);
     auto it = sections_.find({0, sx, sy, sz});
     if (it != sections_.end()) return {it->second, nullptr};
-    return {nullptr, store_->get({0, sx, sy, sz})};
+    PackedIds w = store_->get({0, sx, sy, sz});
+    if (!w && genCache_->on()) w = genCache_->section({0, sx, sy, sz});  // (a generated one the cache holds: never generated again)
+    return {nullptr, w};
 }
 
 bool World::sectionMats(int sx, int sy, int sz, uint16_t out[4096]) {
@@ -717,6 +731,10 @@ void World::takePackQueue(size_t max, std::vector<PackReq>& out, size_t burst) {
 void World::packedDone(const std::vector<PackDone>& done, Made* made) {
     std::lock_guard<std::mutex> lock(mu_);
     for (const PackDone& d : done) {
+        if (d.gen & BAKE) {
+            if (d.words) genCache_->putSection(d.key, d.words);  // (to disk on the cache's own thread)
+            continue;
+        }
         if (d.gen & BASE_FETCH) {
             // (an edit layer's base, the GPU's own, packed there and read back)
             if (!d.words) continue;
@@ -737,8 +755,19 @@ void World::packedDone(const std::vector<PackDone>& done, Made* made) {
 
 void World::configureStore(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBytes, uint64_t coldBytes,
                            Made* made) {
-    std::lock_guard<std::mutex> lock(mu_);
+    std::unique_lock<std::mutex> lock(mu_);
     store_->configure(dir, seed, genVersion, warmBytes ? warmBytes : 512ull << 20, coldBytes ? coldBytes : 4ull << 30);
+    {
+        // (the gen cache beside the world's other tiers: <dir>/<seed>/gen-<fingerprint>)
+        char sub[32];
+        std::snprintf(sub, sizeof sub, "/%016llx", (unsigned long long)seed);
+        storeRoot_ = dir.empty() ? std::string() : dir + sub;
+        std::string root = storeRoot_;
+        uint64_t fp = genFp_;
+        lock.unlock();
+        genCache_->configure(root, fp);
+        lock.lock();
+    }
     layerCount = store_->layerCount();
     // (layers on disk still waiting for a base: asked of the grid again)
     std::vector<Key3> keys;
@@ -2226,6 +2255,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
 }
 
 World::~World() {
+    genCache_.reset();  // (its queue written first)
     {
         // (the edited sections not packed yet: into warm, so their layers' records keep them whole beside them)
         std::lock_guard<std::mutex> lock(mu_);

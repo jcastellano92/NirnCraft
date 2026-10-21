@@ -33,6 +33,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
+#include <deque>
 #include <vector>
 
 #include "world.hpp"  // (Key3, Section)
@@ -179,6 +180,16 @@ public:
     // the same with the world's own copy (shared, never copied: World::putSection's, immutable once stored)
     void put(int sx, int sy, int sz, VgIds ids);
     void putLocked(int sx, int sy, int sz, VgIds ids);  // (caller holds mu_)
+    // a section's packed words (the gen cache's: sectionpack.hpp), expanded on the GPU
+    void putPacked(int sx, int sy, int sz, VgPacked words);
+    // (the self-baking cache) generated sections on the GPU to pack for the world's gen cache (World::BAKE): at most
+    // bakeBudget a batch; their buffers held (gpuPendingOffsets) until a batch took them
+    void bakeGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count);
+    int bakeBudget = 512;
+    size_t bakeQueued() const {
+        std::lock_guard<std::mutex> lock(mu_);
+        return bake_.size();
+    }
     // the world whose tiers the grid takes its sections back from (standby) and feeds packing (World::packOnGpu)
     void setWorld(World* w) { world_ = w; }
     // level 0's ranking on the GPU (a device backend): the host applies the lists rankResults hands it (no host ranking)
@@ -378,6 +389,8 @@ private:
     std::unordered_map<Key, uint32_t, KeyHash> gpuUniformHint_;  // (ingestGpu's hint) for the pending GPU sections
     // (edit layers, World::takeBaseWanted) sections whose GPU base the world waits for: packed on the GPU at their build
     std::unordered_set<Key, KeyHash> baseFetch_;
+    std::deque<std::pair<Key, VgGpuRef>> bake_;
+    void putSrc(int sx, int sy, int sz, VgSrc src);  // (caller holds mu_)
     int baseOx_ = INT32_MIN, baseOz_ = INT32_MIN;
     std::vector<uint16_t> uniId_;  // per cell: its one id while VG_UNIFORM
     // the view (setView), the footprint's reach, the cut-off of a full pool, when the waiting were last ranked

@@ -167,6 +167,8 @@ void VoxGrid::gpuPendingOffsets(uint64_t buffer, std::vector<uint64_t>& out) con
     std::lock_guard<std::mutex> lock(mu_);
     for (auto& [k, g] : gpuRef_)
         if (g.buffer == buffer) out.push_back(g.offset);
+    for (auto& [k, g] : bake_)
+        if (g.buffer == buffer) out.push_back(g.offset);
     for (int k = 1; k < VG_LEVELS; k++)
         for (auto& [c, g] : cgiven_[k])
             if (g.kind == VG_GIVEN_MIXED && g.ref.buffer == buffer) out.push_back(g.ref.offset);
@@ -364,8 +366,25 @@ void VoxGrid::put(int sx, int sy, int sz, VgIds a) {
     putLocked(sx, sy, sz, std::move(a));
 }
 
+void VoxGrid::putPacked(int sx, int sy, int sz, VgPacked words) {
+    if (!enabled || !words) return;
+    std::lock_guard<std::mutex> lock(mu_);
+    putSrc(sx, sy, sz, VgSrc{nullptr, std::move(words)});
+}
+
+void VoxGrid::bakeGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count) {
+    if (!enabled || !buffer) return;
+    std::lock_guard<std::mutex> lock(mu_);
+    for (size_t i = 0; i < count; i++) bake_.push_back({Key{pos[3 * i], pos[3 * i + 1], pos[3 * i + 2]}, VgGpuRef{buffer, offsets[i]}});
+}
+
 void VoxGrid::putLocked(int sx, int sy, int sz, VgIds a) {
     if (!enabled || !a) return;
+    putSrc(sx, sy, sz, VgSrc{std::move(a), nullptr});
+}
+
+void VoxGrid::putSrc(int sx, int sy, int sz, VgSrc a) {
+    if (!enabled || (!a.ids && !a.packed)) return;
     // before the window is placed the world keeps them (frame() reads them from there); outside it they wait there too
     bool level0 = centred_ && inWindow(sx, sy, sz);
     uint32_t levels = 0;
@@ -379,10 +398,10 @@ void VoxGrid::putLocked(int sx, int sy, int sz, VgIds a) {
     standby_.erase({sx, sy, sz});
     gpuStandby_.erase({sx, sy, sz});
     gpuUniformHint_.erase({sx, sy, sz});
-    if (level0) pending_[{sx, sy, sz}] = VgSrc{a, nullptr};
+    if (level0) pending_[{sx, sy, sz}] = a;
     if (levels) {
         CPending& p = cpending_[{sx, sy, sz}];
-        p.ids = VgSrc{std::move(a), nullptr};
+        p.ids = std::move(a);
         p.levels |= levels;
     }
     gpuRef_.erase({sx, sy, sz});  // (an upload replaces a GPU section waiting, and holding it is the world's again)
@@ -771,6 +790,16 @@ VgBatch VoxGrid::take(int maxSections) {
                 b.secs.push_back(ids);
             }
             b.packJobs.push_back({r.key, r.gen, f->second});
+        }
+    }
+    // (the self-baking cache) generated sections packed for the world's gen cache, read back with the batch
+    if (world_ && !bake_.empty()) {
+        for (int i = 0; i < bakeBudget && !bake_.empty(); i++) {
+            auto [k, ref] = bake_.front();
+            bake_.pop_front();
+            uint32_t at = VG_GPU_SRC | uint32_t(b.gsecs.size());
+            b.gsecs.push_back(ref);
+            b.packJobs.push_back({Key3{0, k.x, k.y, k.z}, World::BAKE, at});
         }
     }
     // (ingestGpu's sections no level waits for any more: their windows moved on)

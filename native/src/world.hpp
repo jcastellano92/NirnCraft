@@ -201,6 +201,11 @@ public:
     // (packedDone with BASE_FETCH in its generation), or knows it as one id (baseUniform); the layer applied, the section
     // is the host's from then on (never the tile's stand-in).
     static constexpr uint32_t BASE_FETCH = 0x80000000u;
+    // (the self-baking cache, gencache.hpp) a generated section packed on the GPU for it (VoxGrid::bakeGpu): BAKE in the
+    // generation; the generator's fingerprint (its program, ingest table, map, stages: atlas_gen_*), and the cache
+    static constexpr uint32_t BAKE = 0x40000000u;
+    void setGenFingerprint(uint64_t fp);
+    class GenCache* genCache() { return genCache_.get(); }
     void takeBaseWanted(std::vector<Key3>& out);
     void baseUniform(const Key3& k, uint16_t id, Made& made);
     // 0: no layer; 1: a layer whose section the host holds (a GPU base must not replace it); 2: a layer waiting for a base
@@ -352,6 +357,9 @@ private:
     uint32_t gen_ = 0;
     uint64_t packedCount_ = 0;
     std::unique_ptr<SectionStore> store_;
+    std::unique_ptr<class GenCache> genCache_;
+    std::string storeRoot_;           // (the cold tier's directory for this world: the gen cache's root)
+    uint64_t genFp_ = 0;
     std::vector<Key3> baseWanted_;                  // (edit layers waiting for a base the grid has: asked once)
     std::unordered_set<Key3, Key3Hash> baseAsked_;
     // caller holds mu_: a base (regenerated, uploaded, fetched) and the section's layer: s becomes base + edits (flags

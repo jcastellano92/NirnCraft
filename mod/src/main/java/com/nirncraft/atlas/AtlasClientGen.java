@@ -242,6 +242,15 @@ final class AtlasClientGen implements AutoCloseable {
                 }
             }
             if (direct) gen.setIngest(ingestTable(prog, mats, ctx));
+            // the self-baking cache: the instance's atlas-cache/<seed>/ (nirncraft.atlas.cacheDir moves it; "off": none),
+            // the generator's fingerprint completed by the far identity (world generation and painting code)
+            if (direct && gen.cacheSupported() && !"off".equals(System.getProperty("nirncraft.atlas.cacheDir"))) {
+                Path dir = System.getProperty("nirncraft.atlas.cacheDir") != null ? Path.of(System.getProperty("nirncraft.atlas.cacheDir"))
+                        : net.minecraft.client.Minecraft.getInstance().gameDirectory.toPath().resolve("atlas-cache");
+                gen.setFingerprint((long) AtlasTileCodec.identity().hashCode() << 32 ^ AtlasTileCodec.VERSION);
+                if (ctx.setCache(dir, ow.getSeed(), AtlasTileCodec.VERSION, 0, 0))
+                    com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: the self-baking cache in {}", dir);
+            }
             AtlasGenFeatures feats = null;
             if (FEATURE_RADIUS > 0) {
                 try {
@@ -646,6 +655,12 @@ final class AtlasClientGen implements AutoCloseable {
      * device to device. Only the chunks the features will decorate bring their ids back.
      */
     private void directBatch(int[] batch, int[] ids, int[] flags, int[] info, boolean first) {
+        // (the self-baking cache) the chunks it knows go into the grid from disk, not generated; the features' chunks
+        // (their ids wanted here) are generated as before
+        if (gen.cacheSupported()) {
+            batch = fromCache(batch, info);
+            if (batch.length == 0) return;
+        }
         int n = batch.length / 2;
         boolean wantIds = false;
         if (features != null)
@@ -726,6 +741,83 @@ final class AtlasClientGen implements AutoCloseable {
                 if (windowUpNs == 0 && upSinceJump.size() >= windowChunks()) windowUpNs = t1;
             }
         }
+    }
+
+    private long cachedChunks, cachedSections;
+
+    /** The chunks of batch the cache knows put into the grid from it; returns the others (to generate). */
+    private int[] fromCache(int[] batch, int[] info) {
+        int n = batch.length / 2;
+        byte[] hit = new byte[n];
+        if (gen.cacheLookup(batch, info, hit) == 0) return batch;
+        int ccx = camCx, ccz = camCz;
+        int[] rest = new int[batch.length], known = new int[batch.length];
+        long[] masks = new long[n];
+        int nr = 0, nk = 0;
+        for (int i = 0; i < n; i++) {
+            int cx = batch[i * 2], cz = batch[i * 2 + 1];
+            boolean feat = features != null && near(cx, cz, ccx, ccz, FEATURE_RADIUS + 2);
+            if (hit[i] == 0 || feat) {
+                rest[nr++] = cx;
+                rest[nr++] = cz;
+                continue;
+            }
+            if (!inWindow(cx, cz, ccx, ccz, RADIUS + 1)) {
+                done.remove(ChunkPos.pack(cx, cz));
+                continue;
+            }
+            if (AtlasClientSections.isReal(cx, cz)) continue;  // the loaded chunk's own blocks are up: they stay
+            masks[nk / 2] = masksOf(cx, cz, info, i * AtlasGenNative.INFO_WORDS + 4);
+            known[nk++] = cx;
+            known[nk++] = cz;
+        }
+        if (nk > 0) {
+            int[] kb = java.util.Arrays.copyOf(known, nk);
+            long[] km = java.util.Arrays.copyOf(masks, nk / 2);
+            long[] asked = km.clone();
+            int sent = gen.cacheIngest(kb, km);
+            for (int i = 0; i < nk / 2; i++) {
+                int cx = kb[i * 2], cz = kb[i * 2 + 1];
+                long lost = asked[i] & ~km[i];
+                if (lost != 0 || sent < 0) {
+                    done.remove(ChunkPos.pack(cx, cz));  // (not taken: again when it can)
+                    for (int sec = 0; sec < 40; sec++)
+                        if ((lost >>> sec & 1) != 0) AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(cx, sec - 4, cz));
+                    continue;
+                }
+                AtlasClientSections.up(cx, cz);
+                uploadedChunks++;
+                cachedChunks++;
+                if (jumpNs != 0 && inWindow(cx, cz, jumpCx, jumpCz, RADIUS)) {
+                    long t = System.nanoTime();
+                    if (firstUpNs == 0) firstUpNs = t;
+                    upSinceJump.add(ChunkPos.pack(cx, cz));
+                    if (windowUpNs == 0 && upSinceJump.size() >= windowChunks()) windowUpNs = t;
+                }
+            }
+            if (sent > 0) cachedSections += sent;
+        }
+        return java.util.Arrays.copyOf(rest, nr);
+    }
+
+    /** A chunk's sections to send, from its info row at o (directBatch's rule; claims them as AtlasEditsClient's). */
+    private long masksOf(int cx, int cz, int[] info, int o) {
+        int highest = -1;
+        for (int sec = 0; sec < 40; sec++) {
+            int kind = info[o + sec * 4 + 2];
+            if (kind == AtlasGenNative.SEC_BLOCKS) highest = sec;
+            else if (kind == AtlasGenNative.SEC_ROCK) deepRock.add(net.minecraft.core.SectionPos.asLong(cx, sec - 4, cz));
+        }
+        long m = 0;
+        boolean started = false;
+        for (int sec = 0; sec <= highest; sec++) {
+            int kind = info[o + sec * 4 + 2];
+            if (kind == AtlasGenNative.SEC_ROCK || (kind == AtlasGenNative.SEC_AIR && !started)) continue;
+            started = true;
+            long h = (info[o + sec * 4] & 0xFFFFFFFFL) | (long) info[o + sec * 4 + 1] << 32;
+            if (AtlasEditsClient.claim(net.minecraft.core.SectionPos.asLong(cx, sec - 4, cz), h)) m |= 1L << sec;
+        }
+        return m;
     }
 
     private static int windowChunks() {

@@ -441,11 +441,11 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           ",\"voxgrid\":{\"window\":[%d,%d,%d],\"slots\":%u,\"slotCap\":%u,\"gpuBytes\":%llu,\"built\":%llu,"
                           "\"batches\":%llu,\"pending\":%zu,\"lastGpuMs\":%.3f,\"lastSections\":%u,\"lastJobs\":%u,"
                           "\"lastRegrow\":%s,\"totalGpuMs\":%.2f,\"ownsLevel0\":%s,\"level0Skipped\":%zu,"
-                          "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f,",
+                          "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f,\"baking\":%zu,",
                           v.D, v.H, v.D, v.slotsUsed(), v.slotCap, (unsigned long long)bytes, (unsigned long long)v.sectionsBuilt,
                           (unsigned long long)v.batches, v.pending(), t.lastMs, t.lastSections, t.lastJobs,
                           t.lastStates ? "true" : "false", t.totalMs, ctx->world.gridOwnsLevel0.load() ? "true" : "false",
-                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs);
+                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs, v.bakeQueued());
             // residency: slots used / of the pool, uniform cells (no slot), the waiting (CPU ids kept, GPU ones to ask
             // for), given up for nearer ones, could not be taken, the GPU's uniform finds, the priority cut-off of a
             // full pool, level 0's footprint reach and the nearest known section not resident (blocks; 0: none)
@@ -1846,4 +1846,5 @@ ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint3
 namespace atlas {
 Backend* contextBackend(AtlasContext* ctx) { return ctx ? ctx->backend.get() : nullptr; }
 VoxGrid* contextGrid(AtlasContext* ctx) { return ctx ? &ctx->voxgrid : nullptr; }
+World* contextWorld(AtlasContext* ctx) { return ctx ? &ctx->world : nullptr; }
 }  // namespace atlas

@@ -9,6 +9,7 @@ import java.lang.invoke.MethodHandle;
 import java.nio.file.Path;
 
 import static java.lang.foreign.ValueLayout.ADDRESS;
+import static java.lang.foreign.ValueLayout.JAVA_BYTE;
 import static java.lang.foreign.ValueLayout.JAVA_DOUBLE;
 import static java.lang.foreign.ValueLayout.JAVA_FLOAT;
 import static java.lang.foreign.ValueLayout.JAVA_INT;
@@ -35,6 +36,8 @@ final class AtlasGenNative {
     private final MethodHandle setMap, probe;
     // the pages made on the device (atlas_gen_read_page, atlas_gen_page_stats): null in a library without them
     private final MethodHandle readPage, pageStats, tiles, far, farIngest, gridReports;
+    // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
+    private final MethodHandle cacheLookup, cacheIngest, setFingerprint;
     /** Columns of a far tile (atlas_gen_tiles). */
     static final int TILE_COLS = 65536;
     /** Words per probe (atlas_gen_probe). */
@@ -72,6 +75,10 @@ final class AtlasGenNative {
         gridReports = lib.find("atlas_gen_grid_reports").isPresent()
                 ? bind(l, lib, "atlas_gen_grid_reports", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, JAVA_INT,
                 ADDRESS)) : null;
+        boolean cache = lib.find("atlas_gen_cache_lookup").isPresent();
+        cacheLookup = cache ? bind(l, lib, "atlas_gen_cache_lookup", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS)) : null;
+        cacheIngest = cache ? bind(l, lib, "atlas_gen_cache_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS)) : null;
+        setFingerprint = cache ? bind(l, lib, "atlas_gen_set_fingerprint", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG)) : null;
         tiles = lib.find("atlas_gen_tiles").isPresent()
                 ? bind(l, lib, "atlas_gen_tiles", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
     }
@@ -422,6 +429,61 @@ final class AtlasGenNative {
          * to device; masks then hold the bits that went (the grid's level-0 window takes no others). Returns how many went,
          * or -1 (none went) when the grid has no window yet or has not taken earlier ones (no frames for 2 s).
          */
+        /** The self-baking cache is in the library (it is on once the context has a cache directory, Context.setCache). */
+        boolean cacheSupported() {
+            return cacheLookup != null;
+        }
+
+        /** The caller's part of the generator's fingerprint (the stages' engines' versions): another, another cache. */
+        void setFingerprint(long extra) {
+            if (setFingerprint == null) return;
+            try {
+                check((int) setFingerprint.invokeExact(ptr, extra), "atlas_gen_set_fingerprint");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * The chunks the cache knows (atlas_gen_cache_lookup): hit[i] 1 and info's rows as {@link #run}'s for those.
+         * Returns how many.
+         */
+        synchronized int cacheLookup(int[] chunkXZ, int[] info, byte[] hit) {
+            int n = chunkXZ.length / 2;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment inf = a.allocate(JAVA_INT, (long) n * INFO_WORDS);
+                MemorySegment h = a.allocate(n);
+                check((int) cacheLookup.invokeExact(ptr, a.allocateFrom(JAVA_INT, chunkXZ), n, inf, h), "atlas_gen_cache_lookup");
+                MemorySegment.copy(inf, JAVA_INT, 0, info, 0, n * INFO_WORDS);
+                int hits = 0;
+                for (int i = 0; i < n; i++) {
+                    hit[i] = h.get(JAVA_BYTE, i);
+                    hits += hit[i];
+                }
+                return hits;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * The known chunks' sections whose bit is set in masks into the grid from the cache, as {@link #ingest} (no run
+         * before); masks then hold what went. Returns how many, or -1 (none went: the grid has no window yet).
+         */
+        synchronized int cacheIngest(int[] chunkXZ, long[] masks) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment sec = a.allocate(JAVA_INT);
+                MemorySegment m = a.allocateFrom(JAVA_LONG, masks);
+                int s = (int) cacheIngest.invokeExact(ptr, a.allocateFrom(JAVA_INT, chunkXZ), chunkXZ.length / 2, m, sec);
+                MemorySegment.copy(m, JAVA_LONG, 0, masks, 0, masks.length);
+                if (s == -8) return -1;  // ATLAS_ERR_TIMEOUT
+                check(s, "atlas_gen_cache_ingest");
+                return sec.get(JAVA_INT, 0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
         synchronized int ingest(long[] masks) {
             try (Arena a = Arena.ofConfined()) {
                 MemorySegment sec = a.allocate(JAVA_INT);

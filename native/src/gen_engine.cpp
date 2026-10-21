@@ -25,6 +25,9 @@
 #include "backend.hpp"
 #include "parallel.hpp"
 #include "voxgrid.hpp"
+#include "gencache.hpp"
+#include "sectionpack.hpp"
+#include "sectionstore.hpp"
 #include "atlas_gen_corner_spv.h"  // generated: slangc + spv_exact, one module per pass
 #include "atlas_gen_aquifer_spv.h"
 #include "atlas_gen_fill_spv.h"
@@ -71,6 +74,7 @@ namespace atlas {
 // api.cpp: the context's backend and grid
 Backend* contextBackend(AtlasContext* ctx);
 VoxGrid* contextGrid(AtlasContext* ctx);
+World* contextWorld(AtlasContext* ctx);
 }  // namespace atlas
 
 using namespace atlas;
@@ -150,6 +154,8 @@ struct Batch {
     std::vector<int32_t> jobs;
     // (atlas_gen_run) each chunk's 40 sections' kinds (SEC_*), for the ingest's uniform hints
     std::vector<uint8_t> kinds;
+    // (the self-baking cache, gencache.hpp) per chunk: its sections with blocks packed for the world's gen cache
+    std::vector<uint8_t> bake;
 };
 
 // What a run hands back: ids (null: not wanted) n * OUT_WORDS words; flags n words; info (null: no ingest passes)
@@ -1124,7 +1130,20 @@ public:
             }
         }
         ran_ = 0;  // once: the next run overwrites the output
-        if (want.empty()) return true;
+        // (the self-baking cache) the sections with blocks of the chunks it lacks, wanted here or not: packed by the
+        // grid on the GPU for the world's gen cache (VoxGrid::bakeGpu, World::BAKE)
+        auto baking = [&](uint32_t i, uint32_t s) {
+            return b.bake.size() == size_t(n) && b.bake[i] && b.kinds.size() == size_t(n) * 40 && b.kinds[size_t(i) * 40 + s] == 1;
+        };
+        std::vector<Want> bakeOnly;
+        {
+            std::vector<uint8_t> wanted(size_t(n) * 40, 0);
+            for (const Want& w : want) wanted[size_t(w.chunk) * 40 + w.sec] = 1;
+            for (uint32_t i = 0; i < n; i++)
+                for (uint32_t s = 0; s < 40; s++)
+                    if (baking(i, s) && !wanted[size_t(i) * 40 + s]) bakeOnly.push_back({i, s});
+        }
+        if (want.empty() && bakeOnly.empty()) return true;
         // air sections go as the grid's uniform hint (no slot, no copy): only the others need slots
         std::vector<Want> air;
         if (b.kinds.size() == size_t(n) * 40) {
@@ -1132,6 +1151,8 @@ public:
             for (const Want& w : want) (b.kinds[size_t(w.chunk) * 40 + w.sec] == 0 ? air : blocks).push_back(w);
             want.swap(blocks);
         }
+        const size_t nWant = want.size();
+        want.insert(want.end(), bakeOnly.begin(), bakeOnly.end());  // (slots and copies for both; only the first to the grid)
         // slots: reclaim, grow, else wait for the frames to take what they have (bounded)
         std::vector<std::pair<uint32_t, uint32_t>> got;  // slab, slot
         auto t0 = std::chrono::steady_clock::now();
@@ -1175,7 +1196,17 @@ public:
         std::vector<std::vector<uint64_t>> offs(slabs_.size());
         std::vector<std::vector<int32_t>> pos(slabs_.size());
         std::vector<std::vector<size_t>> which(slabs_.size());
-        for (size_t k = 0; k < want.size(); k++) {
+        std::vector<std::vector<uint64_t>> bakeOffs(slabs_.size());
+        std::vector<std::vector<int32_t>> bakePos(slabs_.size());
+        auto bakeIt = [&](size_t k) {
+            uint32_t si = got[k].first, slot = got[k].second;
+            bakeOffs[si].push_back(uint64_t(slot) * SECTION_BYTES);
+            bakePos[si].insert(bakePos[si].end(), {b.chunks[want[k].chunk * 2], int32_t(want[k].sec) - 4, b.chunks[want[k].chunk * 2 + 1]});
+            slabs_[si].busy[slot] = 1;  // (held until the grid's batch took it: gpuPendingOffsets)
+            slabs_[si].stamp[slot] = 0;
+        };
+        for (size_t k = nWant; k < want.size(); k++) bakeIt(k);
+        for (size_t k = 0; k < nWant; k++) {
             uint32_t si = got[k].first, slot = got[k].second;
             offs[si].push_back(uint64_t(slot) * SECTION_BYTES);
             pos[si].push_back(b.chunks[want[k].chunk * 2]);
@@ -1196,12 +1227,16 @@ public:
                     slabs_[si].busy[slot] = 1;
                     slabs_[si].stamp[slot] = 0;
                     sent++;
+                    if (baking(want[k].chunk, want[k].sec)) bakeIt(k);
                 } else {
-                    slabs_[si].free.push_back(slot);
                     refuse(want[k]);
+                    if (baking(want[k].chunk, want[k].sec)) bakeIt(k);
+                    else slabs_[si].free.push_back(slot);
                 }
             }
         }
+        for (size_t si = 0; si < slabs_.size(); si++)
+            if (!bakeOffs[si].empty()) grid_->bakeGpu(uint64_t(slabs_[si].buf.buf), bakeOffs[si].data(), bakePos[si].data(), bakeOffs[si].size());
         if (!air.empty()) {
             std::vector<uint64_t> aoffs(air.size(), 0);
             std::vector<int32_t> apos;
@@ -1615,6 +1650,9 @@ struct AtlasGen {
     bool mapSet = false, devicePages = false;
     std::vector<Stage> stages;  // atlas_gen_add_stage's, sorted by order
     uint32_t nextStage = 1;
+    // (the self-baking cache) the generator's fingerprint: its program, ingest table, map, stages' orders and the
+    // caller's own (atlas_gen_set_fingerprint: the stages' engines' versions), FNV-1a 64 each; told to the context's world
+    uint64_t fpProg = 0, fpIngest = 0, fpMap = 0, fpExtra = 0, fpSent = 0;
     uint64_t pagesMade = 0;
     double pageMs = 0;
     // a slot for chunk (cx, cz)'s page: a free one, else the least recently used page not used at `clock`
@@ -1756,6 +1794,27 @@ AtlasStatus guarded(F f) {
 
 extern "C" {
 
+namespace {
+uint64_t fnv64(const void* p, size_t n, uint64_t h = 1469598103934665603ull) {
+    const uint8_t* b = static_cast<const uint8_t*>(p);
+    for (size_t i = 0; i < n; i++) h = (h ^ b[i]) * 1099511628211ull;
+    return h;
+}
+// (caller holds h->mu) the fingerprint again; to the context's world when it changed (the cache's directory)
+void refreshFingerprint(AtlasGen* h) {
+    if (!h->ctx || !h->fpProg || !h->fpIngest) return;  // (not a generator yet)
+    uint64_t f = fnv64(&h->fpProg, 8);
+    f = fnv64(&h->fpIngest, 8, f);
+    f = fnv64(&h->fpMap, 8, f);
+    f = fnv64(&h->fpExtra, 8, f);
+    for (const Stage& s : h->stages) f = fnv64(&s.order, 4, f);
+    if (!f) f = 1;
+    if (f == h->fpSent) return;
+    h->fpSent = f;
+    if (World* w = contextWorld(h->ctx)) w->setGenFingerprint(f);
+}
+}  // namespace
+
 ATLAS_API AtlasStatus atlas_gen_create(AtlasBackend backend, AtlasGen** out) {
     if (!out) return ATLAS_ERR_ARG;
     *out = nullptr;
@@ -1831,6 +1890,8 @@ ATLAS_API AtlasStatus atlas_gen_set_program(AtlasGen* h, const uint32_t* words, 
         h->devicePages = h->mapSet && h->prog[S_PAGEGEN] != 0;
         std::string err;
         if (!h->engine->setProgram(h->prog, err)) return h->fail(ATLAS_ERR_GPU, err);
+        h->fpProg = fnv64(words, size_t(count) * 4);
+        refreshFingerprint(h);
         return ATLAS_OK;
     });
 }
@@ -1844,6 +1905,8 @@ ATLAS_API AtlasStatus atlas_gen_set_ingest(AtlasGen* h, const uint32_t* words, u
         std::string err;
         if (!h->engine->setIngest(std::vector<uint32_t>(words, words + count), err)) return h->fail(ATLAS_ERR_GPU, err);
         h->ingestSet = true;
+        h->fpIngest = fnv64(words, size_t(count) * 4);
+        refreshFingerprint(h);
         return ATLAS_OK;
     });
 }
@@ -1859,6 +1922,8 @@ ATLAS_API AtlasStatus atlas_gen_set_map(AtlasGen* h, const uint32_t* words, uint
         std::lock_guard<std::mutex> pl(h->pagesMu);
         h->devicePages = h->prog.size() > S_PAGEGEN && h->prog[S_PAGEGEN] != 0;
         if (h->devicePages) h->resetPages();
+        h->fpMap = fnv64(words, size_t(count) * 4);
+        refreshFingerprint(h);
         return ATLAS_OK;
     });
 }
@@ -2084,6 +2149,7 @@ ATLAS_API AtlasStatus atlas_gen_add_stage(AtlasGen* h, uint32_t order, AtlasGenS
         h->stages.swap(next);
         h->nextStage++;
         if (outId) *outId = st.id;
+        refreshFingerprint(h);
         return ATLAS_OK;
     });
 }
@@ -2099,6 +2165,7 @@ ATLAS_API AtlasStatus atlas_gen_remove_stage(AtlasGen* h, uint32_t id) {
         std::string err;
         if (!h->engine->setStages(next, err)) return h->fail(ATLAS_ERR_UNSUPPORTED, err);
         h->stages.swap(next);
+        refreshFingerprint(h);
         return ATLAS_OK;
     });
 }
@@ -2174,6 +2241,16 @@ ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_
                 w[4 + k * 4 + 3] = 0;
             }
         }
+        // (the self-baking cache) the chunks proven exact that it lacks: their headers now, their sections at the ingest
+        GenCache* gc = h->ctx ? contextWorld(h->ctx)->genCache() : nullptr;
+        h->last.bake.assign(count, 0);
+        if (gc && gc->on())
+            for (uint32_t i = 0; i < count; i++) {
+                int32_t cx = chunkXZ[i * 2], cz = chunkXZ[i * 2 + 1];
+                if (flags[i] != 0 || gc->complete(cx, cz)) continue;
+                h->last.bake[i] = 1;
+                if (!gc->hasChunk(cx, cz)) gc->putChunk(cx, cz, outInfo + size_t(i) * INFO_WORDS);
+            }
         t.totalMs = msSince(t0);
         if (times) *times = t;
         return ATLAS_OK;
@@ -2236,6 +2313,121 @@ ATLAS_API AtlasStatus atlas_gen_into(AtlasGen* h, AtlasContext* ctx, const int32
         t.totalMs = msSince(t0);
         if (times) *times = t;
         if (outSections) *outSections = sections;
+        return ATLAS_OK;
+    });
+}
+
+ATLAS_API AtlasStatus atlas_gen_set_fingerprint(AtlasGen* h, uint64_t extra) {
+    if (!h) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        std::lock_guard<std::mutex> l(h->mu);
+        h->fpExtra = extra;
+        refreshFingerprint(h);
+        return ATLAS_OK;
+    });
+}
+
+ATLAS_API AtlasStatus atlas_gen_cache_lookup(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t* outInfo, uint8_t* outHit) {
+    if (!h || !chunkXZ || !outInfo || !outHit) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        std::memset(outHit, 0, count);
+        GenCache* gc = h->ctx ? contextWorld(h->ctx)->genCache() : nullptr;
+        if (!gc || !gc->on()) return ATLAS_OK;
+        for (uint32_t i = 0; i < count; i++)
+            outHit[i] = gc->chunk(chunkXZ[i * 2], chunkXZ[i * 2 + 1], outInfo + size_t(i) * INFO_WORDS) ? 1 : 0;
+        return ATLAS_OK;
+    });
+}
+
+ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint64_t* masks,
+                                             uint32_t* outSections) {
+    if (!h || !chunkXZ || !masks) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        if (outSections) *outSections = 0;
+        GenCache* gc = h->ctx ? contextWorld(h->ctx)->genCache() : nullptr;
+        VoxGrid* grid = h->ctx ? contextGrid(h->ctx) : nullptr;
+        World* world = h->ctx ? contextWorld(h->ctx) : nullptr;
+        if (!gc || !gc->on() || !grid) {
+            for (uint32_t i = 0; i < count; i++) masks[i] = 0;
+            return h->fail(ATLAS_ERR_STATE, "no gen cache");
+        }
+        int32_t org[4];
+        grid->origin(org);
+        if (!org[3]) {
+            for (uint32_t i = 0; i < count; i++) masks[i] = 0;
+            return h->fail(ATLAS_ERR_TIMEOUT, "busy: the grid has no window yet (no frame rendered)");
+        }
+        // the sections wanted inside the level-0 window, read and expanded on all cores (decoded from disk, packed),
+        // then to the grid packed (expanded on the GPU); air ones as the grid's uniform hint
+        struct Item {
+            uint32_t chunk, sec;
+            std::shared_ptr<const std::vector<uint32_t>> words;
+        };
+        std::vector<Item> items;
+        for (uint32_t i = 0; i < count; i++) {
+            int32_t cx = chunkXZ[i * 2], cz = chunkXZ[i * 2 + 1];
+            bool in = cx >= org[0] && cx < org[0] + grid->D && cz >= org[2] && cz < org[2] + grid->D;
+            for (uint32_t s = 0; s < 40; s++) {
+                int32_t sy = int32_t(s) - 4;
+                if (!in || sy < org[1] || sy >= org[1] + grid->H) masks[i] &= ~(uint64_t(1) << s);
+                if ((masks[i] >> s) & 1u) items.push_back({i, s, nullptr});
+            }
+        }
+        std::atomic<size_t> next{0};
+        atlas::parallelRun([&] {
+            for (size_t k; (k = next.fetch_add(1)) < items.size();)
+                items[k].words = gc->section(Key3{0, chunkXZ[items[k].chunk * 2], int32_t(items[k].sec) - 4, chunkXZ[items[k].chunk * 2 + 1]});
+        }, 8);
+        uint32_t sent = 0;
+        for (const Item& it : items) {
+            int32_t cx = chunkXZ[it.chunk * 2], cz = chunkXZ[it.chunk * 2 + 1], sy = int32_t(it.sec) - 4;
+            if (!it.words) {
+                // (air: never baked) one id throughout, no slot in the grid
+                std::vector<uint16_t> ids(4096, 0);
+                if (world->layerNeed(Key3{0, cx, sy, cz})) {
+                    std::shared_ptr<const Section> sec = world->putSection(cx, sy, cz, ids.data(), SectionStore::REGEN);
+                    grid->put(cx, sy, cz, VgIds(sec, &sec->mats));
+                } else {
+                    grid->putPacked(cx, sy, cz, std::make_shared<const std::vector<uint32_t>>(packSection(ids.data())));
+                }
+                sent++;
+                continue;
+            }
+            if (world->layerNeed(Key3{0, cx, sy, cz})) {
+                // (an edited section: its layer over this base, the world's)
+                std::vector<uint16_t> ids(4096);
+                unpackSection(it.words->data(), ids.data());
+                std::shared_ptr<const Section> sec = world->putSection(cx, sy, cz, ids.data(), SectionStore::REGEN);
+                grid->put(cx, sy, cz, VgIds(sec, &sec->mats));
+            } else {
+                grid->putPacked(cx, sy, cz, it.words);
+            }
+            sent++;
+        }
+        if (outSections) *outSections = sent;
+        return ATLAS_OK;
+    });
+}
+
+ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out) {
+    if (!h || !out) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        *out = AtlasGenCacheStats{};
+        GenCache* gc = h->ctx ? contextWorld(h->ctx)->genCache() : nullptr;
+        if (!gc) return ATLAS_OK;
+        gc->flush();
+        GenCache::Stats st = gc->stats();
+        out->on = st.on ? 1u : 0u;
+        out->fingerprint = st.fingerprint;
+        out->chunks = st.chunks;
+        out->sections = st.sections;
+        out->fileBytes = st.fileBytes;
+        out->chunkHits = st.chunkHits;
+        out->chunkMisses = st.chunkMisses;
+        out->sectionWrites = st.sectionWrites;
+        out->sectionReads = st.sectionReads;
+        out->encodeMs = st.encodeMs;
+        out->decodeMs = st.decodeMs;
         return ATLAS_OK;
     });
 }

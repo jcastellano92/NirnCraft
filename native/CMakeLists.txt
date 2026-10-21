@@ -165,7 +165,7 @@ foreach(pair "lightCullMain;lightcull" "lightAdmitMain;lightadmit" "lightBinMain
 endforeach()
 add_library(atlas_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/groups.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
-  src/gl_api.cpp src/lights.cpp src/voxgrid.cpp src/sectionstore.cpp
+  src/gl_api.cpp src/lights.cpp src/voxgrid.cpp src/sectionstore.cpp src/gencache.cpp
   "${GEN}/atlas_far_cpu.cpp" "${GEN}/atlas_far_spv.h" "${GEN}/atlas_publish_spv.h" "${GEN}/atlas_ingest_spv.h"
   "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h" "${GEN}/atlas_nearlight_spv.h" "${GEN}/atlas_nearup_spv.h"
   "${GEN}/atlas_neartemporal_spv.h" ${VG_HEADERS} ${FAR_EXTRA_HEADERS})
@@ -394,6 +394,10 @@ endif()
 add_executable(gen_probe tools/gen_probe.cpp)
 target_include_directories(gen_probe PRIVATE include)
 target_link_libraries(gen_probe PRIVATE atlas_core)
+# the self-baking cache without Java (dev tool: gen_cache_bench <dump dir> <cache dir> [x= z= radius= seed=])
+add_executable(gen_cache_bench tools/gen_cache_bench.cpp)
+target_include_directories(gen_cache_bench PRIVATE include)
+target_link_libraries(gen_cache_bench PRIVATE atlas_core)
 
 add_executable(atlas_height_test tests/height_test.cpp)
 target_include_directories(atlas_height_test PRIVATE include)

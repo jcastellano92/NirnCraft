@@ -819,6 +819,28 @@ ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_
    (outside the window: cleared, send them again when it comes). ATLAS_ERR_TIMEOUT (masks all cleared) when the grid
    has no window yet or has not taken earlier sections for 2 s (no frames). outSections: how many went. */
 ATLAS_API AtlasStatus atlas_gen_ingest(AtlasGen* h, uint64_t* masks, uint32_t* outSections, AtlasGenTimes* times);
+/*
+ * The self-baking cache (docs/ATLAS-WORLD-STORE.md section 1). With the context's cache set (atlas_set_cache: the world's
+ * directory and seed), what the generator makes is kept on disk, keyed by the seed, the generator's fingerprint (its
+ * program, ingest table, map, stages and atlas_gen_set_fingerprint's value: another generator, another set; generated
+ * again) and the position: atlas_gen_run writes each new chunk's info, atlas_gen_ingest has the grid pack its sections
+ * with blocks on the GPU (wanted there or not) and the cache writes them compressed on a thread of its own.
+ * Before generating, atlas_gen_cache_lookup tells which chunks it knows (outHit 1: outInfo's row as atlas_gen_run's);
+ * atlas_gen_cache_ingest then puts their sections whose bit is set in masks into the grid as atlas_gen_ingest would
+ * (inside the level-0 window; on return masks hold what went), read from disk, expanded on the GPU, an edited one with
+ * its edit layer over it. No generation for those chunks.
+ */
+ATLAS_API AtlasStatus atlas_gen_set_fingerprint(AtlasGen* h, uint64_t extra);
+ATLAS_API AtlasStatus atlas_gen_cache_lookup(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t* outInfo, uint8_t* outHit);
+ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint64_t* masks,
+                                             uint32_t* outSections);
+typedef struct AtlasGenCacheStats {
+    uint32_t on;
+    uint64_t fingerprint, chunks, sections, fileBytes, chunkHits, chunkMisses, sectionWrites, sectionReads;
+    double encodeMs, decodeMs;
+} AtlasGenCacheStats;
+/* (waits for the cache's writes first) */
+ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out);
 /* The map of Nirn for the kernels (AtlasGenMap: words[0] = 'AMAP'), uploaded once; copied. With a program that carries
    the page passes' inputs (AtlasGenProgram: the climate entries, the fields' kinds, the height noises) the generator
    then makes every page itself on its device (atlas_page.slang) before each batch's terrain: atlas_gen_missing_pages

@@ -151,6 +151,8 @@ public final class AtlasNative {
     private final MethodHandle setAir, airFromClimate, airLight, airCoeffs, airMultiscatter;
     // abi 0.17, the sky's own light (null with an older library)
     private final MethodHandle setSkyGlow;
+    // the host's tiers and the self-baking cache's directory (atlas_set_cache; null with an older library)
+    private final MethodHandle setCache;
     /** AtlasClimate and AtlasAir (atlas.h) as float arrays: 13 and 11 floats. */
     public static final int CLIMATE_FLOATS = 13, AIR_FLOATS = 11;
     private int abi;
@@ -238,6 +240,8 @@ public final class AtlasNative {
         airCoeffs = bindOptional(l, lib, "atlas_air_coeffs", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         airMultiscatter = bindOptional(l, lib, "atlas_air_multiscatter", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         setSkyGlow = bindOptional(l, lib, "atlas_set_sky_glow", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
+        setCache = bindOptional(l, lib, "atlas_set_cache",
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_LONG, JAVA_INT, JAVA_LONG, JAVA_LONG));
     }
 
     // ---- the air (abi 0.16; atlas.h AtlasAir, native/src/air.hpp): context-free, any thread ------------------------
@@ -675,6 +679,22 @@ public final class AtlasNative {
          * added to the air's sky light the far field lights with: up and ground radiance (rgb). A core without it lights
          * with the air alone; false then.
          */
+        /**
+         * The world's directory for the core's disk tiers (atlas_set_cache): the sections the client generated (the
+         * self-baking cache), edits as layers over them, the server's sections; a directory of the seed's inside it.
+         * Budgets 0: the core's defaults. False with an older library.
+         */
+        public boolean setCache(java.nio.file.Path dir, long seed, int genVersion, long hostBytes, long diskBytes) {
+            if (setCache == null) return false;
+            try (Arena a = Arena.ofConfined()) {
+                check((int) setCache.invokeExact(ptr, a.allocateFrom(dir.toAbsolutePath().toString()), seed, genVersion, hostBytes, diskBytes),
+                        "atlas_set_cache");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
         public boolean setSkyGlow(float[] up, float[] ground) {
             if (setSkyGlow == null) return false;
             try (Arena a = Arena.ofConfined()) {
