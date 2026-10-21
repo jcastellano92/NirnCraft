@@ -42,6 +42,131 @@ import java.util.function.Predicate;
 @ExtendWith(BoundedServerProvider.class)
 class AtlasGenFeaturesGpuTest {
 
+    /**
+     * The decoration as the generator's store stages (atlas_gen_run_store + atlas_feat_attach), GPU to GPU: a square of
+     * chunks generated in two different batchings (raster batches of 64; a shuffled order in batches of 37) must give the
+     * same blocks for every chunk both finished (exact across batch edges), and the features must have written blocks.
+     * NIRNCRAFT_FEAT_STORE=1, NIRNCRAFT_ATLAS_LIB the atlas_core library; NIRNCRAFT_FEAT_STORE_AT "cx,cz" the centre,
+     * NIRNCRAFT_FEAT_STORE_R its radius (chunks).
+     */
+    @Test
+    void storeBatchEdges(MinecraftServer server) throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue("tamriel".equals(System.getenv("NIRNCRAFT_TEST_WORLD")), "the flat test world");
+        org.junit.jupiter.api.Assumptions.assumeTrue(System.getenv("NIRNCRAFT_FEAT_STORE") != null, "no store check asked for");
+        ServerLevel ow = overworld(server);
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) ow.getChunkSource().getGenerator();
+        RandomState rs = ow.getChunkSource().randomState();
+        long seed = ow.getSeed();
+        AtlasGenProgram prog = AtlasGenProgram.compile(gen, gen.generatorSettings().value(), rs, ow, seed, null);
+        AtlasFeatureProgram fp = AtlasFeatureProgram.compile(gen, ow, prog, seed, net.minecraft.world.level.biome.BiomeManager.obfuscateSeed(seed), null);
+        System.out.println("TRACE begin map");
+        int[] map = AtlasGenMap.words(prog, gen.getBiomeSource());
+        System.out.println("TRACE end map");
+        AtlasGenNative nat = AtlasGenNative.load(Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB")));
+        String at = System.getenv().getOrDefault("NIRNCRAFT_FEAT_STORE_AT", "285,-202");
+        int cx0 = Integer.parseInt(at.split(",")[0].trim()), cz0 = Integer.parseInt(at.split(",")[1].trim());
+        int r = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_FEAT_STORE_R", "7"));
+        List<int[]> square = new ArrayList<>();
+        for (int dz = -r; dz <= r; dz++) for (int dx = -r; dx <= r; dx++) square.add(new int[]{cx0 + dx, cz0 + dz});
+        List<int[]> shuffled = new ArrayList<>(square);
+        java.util.Collections.shuffle(shuffled, new java.util.Random(7));
+        StringBuilder report = new StringBuilder();
+        Map<Long, int[]> a = storeRun(nat, prog, map, fp, square, 64, "raster", report);
+        Map<Long, int[]> b = storeRun(nat, prog, map, fp, shuffled, 37, "shuffled", report);
+        // the terrain alone (no stages): what the features changed
+        Map<Long, int[]> plain = new HashMap<>();
+        try (AtlasGenNative.Gen g = nat.create(AtlasGenNative.BACKEND_VULKAN)) {
+            g.setProgram(prog.words);
+            g.setMap(map);
+            int[] ids = new int[64 * AtlasGenNative.CHUNK_WORDS];
+            List<Long> keys = new ArrayList<>(a.keySet());
+            for (int i = 0; i < keys.size(); i += 64) {
+                int n = Math.min(64, keys.size() - i);
+                int[] xz = new int[n * 2];
+                for (int j = 0; j < n; j++) {
+                    xz[j * 2] = ChunkPos.getX(keys.get(i + j));
+                    xz[j * 2 + 1] = ChunkPos.getZ(keys.get(i + j));
+                }
+                g.chunks(xz, 0, ids, null);
+                for (int j = 0; j < n; j++)
+                    plain.put(keys.get(i + j), java.util.Arrays.copyOfRange(ids, j * AtlasGenNative.CHUNK_WORDS, (j + 1) * AtlasGenNative.CHUNK_WORDS));
+            }
+        }
+        long both = 0, same = 0, diffBlocks = 0, featBlocks = 0;
+        for (var e : a.entrySet()) {
+            int[] o = b.get(e.getKey());
+            int[] t = plain.get(e.getKey());
+            if (t != null)
+                for (int w = 0; w < t.length; w++) {
+                    if ((t[w] & 0xFFFF) != (e.getValue()[w] & 0xFFFF)) featBlocks++;
+                    if ((t[w] >>> 16) != (e.getValue()[w] >>> 16)) featBlocks++;
+                }
+            if (o == null) continue;
+            both++;
+            boolean eq = true;
+            for (int w = 0; w < o.length; w++) {
+                if ((o[w] & 0xFFFF) != (e.getValue()[w] & 0xFFFF)) {
+                    diffBlocks++;
+                    eq = false;
+                }
+                if ((o[w] >>> 16) != (e.getValue()[w] >>> 16)) {
+                    diffBlocks++;
+                    eq = false;
+                }
+            }
+            if (eq) same++;
+        }
+        report.append(String.format("store: %d chunks asked, raster finished %d, shuffled finished %d, both %d, alike %d, %d blocks differ; "
+                + "the features changed %d blocks of the raster's chunks%n", square.size(), a.size(), b.size(), both, same, diffBlocks, featBlocks));
+        System.out.println(String.format("TRACE done store-batch-edges alike %d of %d chunks, %d blocks differ, %d blocks by the features", same, both,
+                diffBlocks, featBlocks));
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".store.txt"), report);
+        System.out.print(report);
+        if (both == 0 || same != both || featBlocks == 0) throw new AssertionError(report.toString());
+    }
+
+    /** One generator with the store and the decoration's stages: the chunks in batches of `per`, then drained. */
+    static Map<Long, int[]> storeRun(AtlasGenNative nat, AtlasGenProgram prog, int[] map, AtlasFeatureProgram fp, List<int[]> order, int per,
+                                     String name, StringBuilder report) {
+        Map<Long, int[]> done = new HashMap<>();
+        long t0 = System.nanoTime();
+        try (AtlasGenNative.Gen g = nat.create(AtlasGenNative.BACKEND_VULKAN)) {
+            if (g == null || !g.storeSupported()) throw new IllegalStateException("no Vulkan generator with the store");
+            g.setProgram(prog.words);
+            g.setMap(map);
+            g.storeEnable(768);
+            System.out.println("TRACE begin attach " + name);
+            long ta = System.nanoTime();
+            java.lang.foreign.MemorySegment f = g.attachFeatures(fp.words, null, null);
+            System.out.println(String.format("TRACE done attach %s %.1fs", name, (System.nanoTime() - ta) / 1e9));
+            int[] xz = new int[AtlasGenNative.RUN_CHUNKS * 2];
+            int[] ids = new int[AtlasGenNative.RUN_CHUNKS * AtlasGenNative.CHUNK_WORDS];
+            int calls = 0;
+            for (int i = 0; ; i += per) {
+                int n = Math.max(0, Math.min(per, order.size() - i));
+                int[] batch = new int[n * 2];
+                for (int j = 0; j < n; j++) {
+                    batch[j * 2] = order.get(i + j)[0];
+                    batch[j * 2 + 1] = order.get(i + j)[1];
+                }
+                int m = g.runStore(batch, xz, ids, null, null, null);
+                calls++;
+                for (int j = 0; j < m; j++)
+                    done.put(ChunkPos.pack(xz[j * 2], xz[j * 2 + 1]),
+                            java.util.Arrays.copyOfRange(ids, j * AtlasGenNative.CHUNK_WORDS, (j + 1) * AtlasGenNative.CHUNK_WORDS));
+                System.out.println("TRACE progress store-" + name + " " + Math.min(i + per, order.size()) + "/" + order.size());
+                if (n == 0 && m == 0) break;
+                if (calls > 1000) throw new IllegalStateException("the store does not drain");
+            }
+            int[] st = g.storeStats();
+            report.append(String.format("store %s: %d calls, %d finished, store held %d waiting %d ready %d, %.0f ms%n", name, calls, done.size(),
+                    st[0], st[1], st[2], (System.nanoTime() - t0) / 1e6));
+            g.detachFeatures(f);
+        }
+        return done;
+    }
+
     /** The overworld of the JUnit server (created as a dedicated server does when the test server loads none). */
     static ServerLevel overworld(MinecraftServer server) {
         if (server.overworld() == null) {

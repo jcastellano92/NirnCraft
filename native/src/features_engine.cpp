@@ -29,6 +29,8 @@
 #include "atlas_feat_disk_spv.h"
 #include "atlas_feat_spring_spv.h"
 #include "atlas_feat_lake_spv.h"
+#include "atlas_feat_aux_spv.h"
+#include "atlas_feat_sapply_spv.h"
 
 
 using namespace atlas;
@@ -57,7 +59,7 @@ struct FeatParams {
     int32_t origins, targets;
     uint32_t rec, k;
     int32_t slots;
-    uint32_t first, budget, pad2;
+    uint32_t first, budget, store;
 };
 struct Batch {
     uint32_t slots, origins, targets;
@@ -543,12 +545,256 @@ private:
     Buf prog_, ids_, aux_, org_, scratch_, out_, tgt_, wide_, cnt_, staging_;
 };
 
+#ifndef ATLAS_FEAT_ALONE
+// ---- the decoration as the generator's store stages (atlas_feat_attach) ------------------------------------------
+// Its pipelines on the generator's device, its commands recorded into the generator's command buffers (no queue, no
+// upload or readback of chunk data: the store's terrain in, the store's blocks out). A call decorates up to 64 origins
+// (each with its 5 x 5 store slots): their aux from the store's (featAux), their heightmaps (featHm), each placed
+// feature once (one origin a warp), then their writes into the store's blocks (featStoreApply: the gather's order kept
+// by priority, whichever origin runs first).
+constexpr uint32_t STORE_AUX_W = ATLAS_GEN_STORE_AUX_WORDS, MAX_ORIGINS = 64;
+constexpr uint32_t H_GEN2FEAT = 24, H_FEAT2GEN = 25, H_NGEN = 26;
+// pipelines: hm, init, aux, store apply, then one a feature type
+constexpr uint32_t S_HM = 0, S_INIT = 1, S_AUX = 2, S_APPLY = 3, S_FEAT = 4, S_PIPES = S_FEAT + FT_TYPES - 1;
+
+class StageEngine {
+public:
+    ~StageEngine() {
+        if (!dev_) return;
+        for (Buf* b : {&prog_, &staging_, &aux_, &org_, &scratch_, &list_, &cnt_}) release(*b);
+        if (descPool_) vkDestroyDescriptorPool(dev_, descPool_, nullptr);
+        for (auto& p : pipes_)
+            if (p) vkDestroyPipeline(dev_, p, nullptr);
+        for (auto& m : modules_)
+            if (m) vkDestroyShaderModule(dev_, m, nullptr);
+        if (layout_) vkDestroyPipelineLayout(dev_, layout_, nullptr);
+        if (setLayout_) vkDestroyDescriptorSetLayout(dev_, setLayout_, nullptr);
+    }
+
+    bool init(const AtlasGenDevice& d, const std::vector<uint32_t>& prog, std::string& err) {
+        dev_ = VkDevice(d.vkDevice);
+        phys_ = VkPhysicalDevice(d.vkPhysicalDevice);
+        dispatch_ = dispatchList(prog);
+        types_.assign(prog.size(), 0u);
+        for (uint32_t rec : dispatch_)
+            if (rec + R_TYPE < prog.size()) types_[rec] = prog[rec + R_TYPE];
+        VkDescriptorSetLayoutBinding b[NB];
+        for (uint32_t i = 0; i < NB; i++) b[i] = {i, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1, VK_SHADER_STAGE_COMPUTE_BIT, nullptr};
+        VkDescriptorSetLayoutCreateInfo dl{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
+        dl.bindingCount = NB;
+        dl.pBindings = b;
+        if (vkCreateDescriptorSetLayout(dev_, &dl, nullptr, &setLayout_) != VK_SUCCESS) return fail(err, "set layout");
+        VkPushConstantRange pr{VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(FeatParams)};
+        VkPipelineLayoutCreateInfo pl{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
+        pl.setLayoutCount = 1;
+        pl.pSetLayouts = &setLayout_;
+        pl.pushConstantRangeCount = 1;
+        pl.pPushConstantRanges = &pr;
+        if (vkCreatePipelineLayout(dev_, &pl, nullptr, &layout_) != VK_SUCCESS) return fail(err, "pipeline layout");
+        const uint32_t* code[S_PIPES] = {atlas_feat_hm_spv, atlas_feat_init_spv, atlas_feat_aux_spv, atlas_feat_sapply_spv,
+                                         atlas_feat_ore_spv, atlas_feat_cover_spv, atlas_feat_rock_spv, atlas_feat_tree_spv,
+                                         atlas_feat_freeze_spv, atlas_feat_disk_spv, atlas_feat_spring_spv, atlas_feat_lake_spv};
+        const size_t size[S_PIPES] = {atlas_feat_hm_spv_size, atlas_feat_init_spv_size, atlas_feat_aux_spv_size,
+                                      atlas_feat_sapply_spv_size, atlas_feat_ore_spv_size, atlas_feat_cover_spv_size,
+                                      atlas_feat_rock_spv_size, atlas_feat_tree_spv_size, atlas_feat_freeze_spv_size,
+                                      atlas_feat_disk_spv_size, atlas_feat_spring_spv_size, atlas_feat_lake_spv_size};
+        for (uint32_t i = 0; i < S_PIPES; i++) {
+            VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
+            smci.codeSize = size[i];
+            smci.pCode = code[i];
+            if (vkCreateShaderModule(dev_, &smci, nullptr, &modules_[i]) != VK_SUCCESS) return fail(err, "shader module");
+            VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
+            cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+            cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            cp.stage.module = modules_[i];
+            cp.stage.pName = "main";
+            cp.layout = layout_;
+            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipes_[i]) != VK_SUCCESS)
+                return fail(err, "pipeline " + std::to_string(i) + " refused");
+        }
+        VkDescriptorPoolSize ps{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NB};
+        VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
+        dp.maxSets = 1;
+        dp.poolSizeCount = 1;
+        dp.pPoolSizes = &ps;
+        if (vkCreateDescriptorPool(dev_, &dp, nullptr, &descPool_) != VK_SUCCESS) return fail(err, "descriptor pool");
+        VkDescriptorSetAllocateInfo da{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
+        da.descriptorPool = descPool_;
+        da.descriptorSetCount = 1;
+        da.pSetLayouts = &setLayout_;
+        if (vkAllocateDescriptorSets(dev_, &da, &set_) != VK_SUCCESS) return fail(err, "descriptor set");
+        // the program goes up with the first call's commands (its copy recorded there: no queue of ours)
+        bool ok = ensure(prog_, prog.size() * 4, false, err) && ensure(staging_, prog.size() * 4, true, err) &&
+                  ensure(org_, size_t(MAX_ORIGINS) * ORIGIN_W * 4, false, err) &&
+                  ensure(scratch_, size_t(MAX_ORIGINS) * SCR_W * 4, false, err) &&
+                  ensure(list_, size_t(MAX_ORIGINS) * 25 * 4, false, err) && ensure(cnt_, 64, false, err);
+        if (!ok) return false;
+        std::memcpy(staging_.map, prog.data(), prog.size() * 4);
+        progBytes_ = prog.size() * 4;
+        return true;
+    }
+
+    // the decoration stage: up to 64 chunks, each with its 5 x 5 store slots
+    int32_t decorate(const AtlasGenStoreBatch* b) {
+        std::string err;
+        if (b->radius != 2 || b->count > MAX_ORIGINS) return 1;
+        if (!aux_.buf || storeSlots_ != b->slots) {
+            release(aux_);
+            if (!ensure(aux_, size_t(b->slots) * AUX_W * 4, false, err)) return 2;
+            storeSlots_ = b->slots;
+        }
+        VkCommandBuffer cmd = VkCommandBuffer(b->vkCommandBuffer);
+        if (!progUp_) {
+            VkBufferCopy c{0, 0, progBytes_};
+            vkCmdCopyBuffer(cmd, staging_.buf, prog_.buf, 1, &c);
+            progUp_ = true;
+        }
+        // the origins (cx, cz, the 5 x 5 slots) and the slots they read (each once), in the command buffer
+        uint32_t n = b->count;
+        const int32_t* nbh = b->neighborsHost;
+        std::vector<int32_t> org(size_t(n) * ORIGIN_W, -1), slots;
+        std::vector<uint8_t> seen(b->slots, 0);
+        for (uint32_t i = 0; i < n; i++) {
+            org[size_t(i) * ORIGIN_W] = b->chunks[i * 3];
+            org[size_t(i) * ORIGIN_W + 1] = b->chunks[i * 3 + 1];
+            for (uint32_t j = 0; j < 25; j++) {
+                int32_t sl = nbh[size_t(i) * 25 + j];
+                org[size_t(i) * ORIGIN_W + 2 + j] = sl;
+                if (sl >= 0 && uint32_t(sl) < b->slots && !seen[size_t(sl)]) {
+                    seen[size_t(sl)] = 1;
+                    slots.push_back(sl);
+                }
+            }
+        }
+        vkCmdUpdateBuffer(cmd, org_.buf, 0, org.size() * 4, org.data());
+        vkCmdUpdateBuffer(cmd, list_.buf, 0, std::max<size_t>(1, slots.size()) * 4, slots.empty() ? org.data() : slots.data());
+        barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+        // the bindings: the program, the store's terrain, our aux (per store slot), the origins, the scratch, the store's
+        // blocks, the slot list, the store's aux, the counter
+        VkBuffer bufs[NB] = {prog_.buf, VkBuffer(b->terrain), aux_.buf, org_.buf, scratch_.buf, VkBuffer(b->blocks), list_.buf,
+                             VkBuffer(b->aux), cnt_.buf};
+        VkDescriptorBufferInfo bi[NB];
+        VkWriteDescriptorSet w[NB];
+        for (uint32_t i = 0; i < NB; i++) {
+            bi[i] = {bufs[i], 0, VK_WHOLE_SIZE};
+            w[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+            w[i].dstSet = set_;
+            w[i].dstBinding = i;
+            w[i].descriptorCount = 1;
+            w[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            w[i].pBufferInfo = &bi[i];
+        }
+        vkUpdateDescriptorSets(dev_, NB, w, 0, nullptr);
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+        FeatParams p{int32_t(n), 0, 0, 0, int32_t(slots.size()), 1u, 1u << 30, 1u};
+        auto dispatch = [&](uint32_t pipe, uint32_t gx, uint32_t gy) {
+            vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(FeatParams), &p);
+            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipe]);
+            vkCmdDispatch(cmd, gx, gy, 1);
+            barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+        };
+        if (!slots.empty()) {
+            dispatch(S_AUX, (AUX_W + GROUP - 1) / GROUP, uint32_t(slots.size()));
+            dispatch(S_HM, 4, uint32_t(slots.size()));
+        }
+        dispatch(S_INIT, 64, n);
+        for (uint32_t rec : dispatch_) {
+            uint32_t type = rec < types_.size() ? types_[rec] : 0;
+            if (type == 0 || type >= FT_TYPES) continue;
+            p.rec = rec;
+            dispatch(S_FEAT + type - 1, n, 1);  // a group (one warp) an origin; every placement in one dispatch
+        }
+        dispatch(S_APPLY, HT_CAP / GROUP, n);
+        return 0;
+    }
+
+private:
+    static bool fail(std::string& err, std::string m) {
+        err = std::move(m);
+        return false;
+    }
+    static void barrier(VkCommandBuffer cmd, VkAccessFlags src, VkAccessFlags dst, VkPipelineStageFlags from, VkPipelineStageFlags to) {
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = src;
+        mb.dstAccessMask = dst;
+        vkCmdPipelineBarrier(cmd, from, to, 0, 1, &mb, 0, nullptr, 0, nullptr);
+    }
+    uint32_t memoryType(uint32_t bits, VkMemoryPropertyFlags want) {
+        VkPhysicalDeviceMemoryProperties mp;
+        vkGetPhysicalDeviceMemoryProperties(phys_, &mp);
+        for (uint32_t t = 0; t < mp.memoryTypeCount; t++)
+            if ((bits & (1u << t)) && (mp.memoryTypes[t].propertyFlags & want) == want) return t;
+        return UINT32_MAX;
+    }
+    void release(Buf& b) {
+        if (!dev_) return;
+        if (b.map) vkUnmapMemory(dev_, b.mem);
+        if (b.buf) vkDestroyBuffer(dev_, b.buf, nullptr);
+        if (b.mem) vkFreeMemory(dev_, b.mem, nullptr);
+        b = {};
+    }
+    bool ensure(Buf& b, size_t size, bool host, std::string& err) {
+        size = std::max<size_t>(size, 64);
+        if (b.buf && b.size >= size) return true;
+        release(b);
+        VkBufferCreateInfo bc{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
+        bc.size = size;
+        bc.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        if (vkCreateBuffer(dev_, &bc, nullptr, &b.buf) != VK_SUCCESS) return fail(err, "vkCreateBuffer");
+        VkMemoryRequirements req;
+        vkGetBufferMemoryRequirements(dev_, b.buf, &req);
+        VkMemoryPropertyFlags want =
+            host ? (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+        uint32_t type = memoryType(req.memoryTypeBits, want);
+        if (type == UINT32_MAX) return fail(err, "no suitable memory type");
+        VkMemoryAllocateInfo ma{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
+        ma.allocationSize = req.size;
+        ma.memoryTypeIndex = type;
+        if (vkAllocateMemory(dev_, &ma, nullptr, &b.mem) != VK_SUCCESS) {
+            vkDestroyBuffer(dev_, b.buf, nullptr);
+            b.buf = VK_NULL_HANDLE;
+            return fail(err, "vkAllocateMemory");
+        }
+        vkBindBufferMemory(dev_, b.buf, b.mem, 0);
+        if (host && vkMapMemory(dev_, b.mem, 0, VK_WHOLE_SIZE, 0, &b.map) != VK_SUCCESS) return fail(err, "vkMapMemory");
+        b.size = size;
+        return true;
+    }
+
+    VkDevice dev_ = VK_NULL_HANDLE;
+    VkPhysicalDevice phys_ = VK_NULL_HANDLE;
+    std::vector<uint32_t> dispatch_, types_;
+    VkShaderModule modules_[S_PIPES] = {};
+    VkPipeline pipes_[S_PIPES] = {};
+    VkDescriptorSetLayout setLayout_ = VK_NULL_HANDLE;
+    VkPipelineLayout layout_ = VK_NULL_HANDLE;
+    VkDescriptorPool descPool_ = VK_NULL_HANDLE;
+    VkDescriptorSet set_ = VK_NULL_HANDLE;
+    Buf prog_, staging_, aux_, org_, scratch_, list_, cnt_;
+    size_t progBytes_ = 0;
+    bool progUp_ = false;
+    uint32_t storeSlots_ = 0;
+};
+
+int32_t decorateStage(void* user, const AtlasGenStoreBatch* b) { return static_cast<StageEngine*>(user)->decorate(b); }
+// the finish: a chunk is done once every origin around it decorated (its radius 1): nothing to record
+int32_t finishStage(void*, const AtlasGenStoreBatch*) { return 0; }
+#endif
+
 }  // namespace
 
 struct AtlasFeat {
     std::unique_ptr<Engine> engine;
     std::string error;
     bool program = false;
+#ifndef ATLAS_FEAT_ALONE
+    // atlas_feat_attach: the generator and the stages registered there
+    AtlasGen* gen = nullptr;
+    uint32_t stageIds[2] = {0, 0};
+    std::unique_ptr<StageEngine> stage;
+#endif
 };
 
 namespace {
@@ -587,7 +833,51 @@ ATLAS_API AtlasStatus atlas_feat_create(AtlasBackend backend, AtlasFeat** out) {
     });
 }
 
-ATLAS_API void atlas_feat_destroy(AtlasFeat* h) { delete h; }
+ATLAS_API void atlas_feat_destroy(AtlasFeat* h) {
+#ifndef ATLAS_FEAT_ALONE
+    if (h && h->gen) {
+        for (uint32_t id : h->stageIds)
+            if (id) atlas_gen_remove_stage(h->gen, id);
+    }
+#endif
+    delete h;
+}
+
+#ifndef ATLAS_FEAT_ALONE
+ATLAS_API AtlasStatus atlas_feat_attach(AtlasGen* gen, const uint32_t* words, uint32_t count, const uint32_t* gen2feat, uint32_t nGen,
+                                        const uint32_t* feat2gen, uint32_t nFeat, AtlasFeat** out) {
+    if (!gen || !words || count < 32 || words[0] != MAGIC || !out || (gen2feat && !feat2gen) || (!gen2feat && feat2gen)) return ATLAS_ERR_ARG;
+    *out = nullptr;
+    return guarded(nullptr, [&] {
+        auto h = std::make_unique<AtlasFeat>();
+        AtlasGenDevice d{};
+        if (atlas_gen_device_handles(gen, &d) != ATLAS_OK) return ATLAS_ERR_UNSUPPORTED;
+        // the program with the store's tables after it
+        std::vector<uint32_t> prog(words, words + count);
+        if (gen2feat) {
+            prog[H_GEN2FEAT] = uint32_t(prog.size());
+            prog.insert(prog.end(), gen2feat, gen2feat + nGen);
+            prog[H_NGEN] = nGen;
+            prog[H_FEAT2GEN] = uint32_t(prog.size());
+            prog.insert(prog.end(), feat2gen, feat2gen + nFeat);
+        }
+        h->stage = std::make_unique<StageEngine>();
+        std::string err;
+        if (!h->stage->init(d, prog, err)) {
+            std::fprintf(stderr, "[atlas] decoration stages: %s\n", err.c_str());
+            return ATLAS_ERR_GPU;
+        }
+        h->gen = gen;
+        AtlasStatus s = atlas_gen_add_store_stage(gen, ATLAS_GEN_STAGE_DECORATION, 2, decorateStage, h->stage.get(), &h->stageIds[0]);
+        if (s != ATLAS_OK) return s;
+        s = atlas_gen_add_store_stage(gen, ATLAS_GEN_STAGE_DECORATION + 999, 1, finishStage, nullptr, &h->stageIds[1]);
+        if (s != ATLAS_OK) return s;
+        h->program = true;
+        *out = h.release();
+        return ATLAS_OK;
+    });
+}
+#endif
 ATLAS_API const char* atlas_feat_last_error(AtlasFeat* h) { return h ? h->error.c_str() : "null handle"; }
 ATLAS_API const char* atlas_feat_device(AtlasFeat* h) { return h ? h->engine->device() : "null handle"; }
 

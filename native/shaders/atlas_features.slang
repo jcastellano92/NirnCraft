@@ -27,7 +27,8 @@ struct FeatParams {
     int slots;     // terrain slots (hmMain)
     uint first;    // featMain: 1 the feature's first dispatch (seed, start), 0 a later one (resume)
     uint budget;   // featMain: placements a thread makes in this dispatch (the rest the next: the GPU watchdog)
-    uint pad2;
+    uint store;    // 1: the generator's chunk store (atlas.h atlas_gen_add_store_stage): chunkIds its terrain (generator
+                   // ids, STORE_TERRAIN_W a slot, y -64..575), outIds its blocks, outWide its aux, targets a slot list
 };
 [[vk::push_constant]] ConstantBuffer<FeatParams> params;
 [[vk::binding(0, 0)]] StructuredBuffer<uint> fprog;
@@ -193,6 +194,12 @@ static const uint FL_TABLE_FULL = 1, FL_OUTSIDE = 2, FL_UNSUPPORTED = 4, FL_STAC
 
 // fprog header
 static const uint MAGIC = 0x41454641u;  // "AFEA"
+// the store's tables (features_engine.cpp appends them): generator id -> feature id, feature id -> generator id (0: the
+// same ids); H_NGEN the generator ids the first holds
+static const uint H_GEN2FEAT = 24, H_FEAT2GEN = 25, H_NGEN = 26;
+// the store's layout (atlas.h ATLAS_GEN_STORE_*)
+static const uint STORE_TERRAIN_W = 16u * 16u * 640u / 2u, STORE_BLOCK_W = 16u * 16u * 640u, STORE_AUX_W = 2048u,
+                  STORE_BLOCKS = 16u * 16u * 640u;
 static const uint H_VERSION = 1, H_NBLOCKS = 2, H_BLOCKS = 3, H_NBIOMES = 4, H_BIOMEWORDS = 5, H_SEED = 6, H_ZOOM = 8,
                   H_SEA = 10, H_SIN = 11, H_FIELDS = 12, H_PREDS = 13, H_SURVIVE = 14, H_SURVIVE_N = 15,
                   H_CONSTS = 16, H_GENMINY = 17, H_GENHEIGHT = 18, H_DISPATCH = 19,
@@ -522,13 +529,25 @@ void htPut(uint key, uint id) {
         s = (s + 1u) & (HT_CAP - 1u);
     }
 }
+// block b (x + 16 z + 256 (y + 64)) of a terrain slot, a feature id
+[noinline]
+uint slotBlock(uint slot, uint b) {
+    if (params.store != 0u) {
+        if (b >= STORE_BLOCKS) return AIR;  // (the store holds y -64..575: air above)
+        uint w = chunkIds[slot * STORE_TERRAIN_W + (b >> 1)];
+        uint g = (b & 1u) != 0u ? (w >> 16) : (w & 0xFFFFu);
+        uint t = hdr(H_GEN2FEAT);
+        return t == 0u ? g : (g < hdr(H_NGEN) ? fprog[t + g] : AIR);
+    }
+    uint w = chunkIds[slot * CHUNK_W + (b >> 1)];
+    return (b & 1u) != 0u ? (w >> 16) : (w & 0xFFFFu);
+}
 [noinline]
 uint terrainAt(int x, int y, int z) {
     int slot = slotOf(x >> 4, z >> 4);
     if (slot < 0) { flag(FL_OUTSIDE); return AIR; }
     uint b = uint(x & 15) + 16u * uint(z & 15) + 256u * uint(y - MIN_Y);
-    uint w = chunkIds[uint(slot) * CHUNK_W + (b >> 1)];
-    return (b & 1u) != 0u ? (w >> 16) : (w & 0xFFFFu);
+    return slotBlock(uint(slot), b);
 }
 // Level.getBlockState: what this decoration sees
 [noinline]
@@ -3133,13 +3152,13 @@ bool runPlaced<let T : uint>(uint rec, bool first, uint budget) {
 void featHmMain(uint3 id : SV_DispatchThreadID) {
     uint slot = id.y, c = id.x;
     if (c >= 256u || slot >= uint(params.slots)) return;
+    if (params.store != 0u) slot = uint(targets[slot]);  // (the store: the slots listed)
     uint lx = c & 15u, lz = c >> 4;
     for (uint t = 0; t < 6u; t++) {
         int h = MIN_Y;
         for (int y = MAX_Y; y >= MIN_Y; y--) {
             uint b = lx + 16u * lz + 256u * uint(y - MIN_Y);
-            uint w = chunkIds[slot * CHUNK_W + (b >> 1)];
-            uint bid = (b & 1u) != 0u ? (w >> 16) : (w & 0xFFFFu);
+            uint bid = slotBlock(slot, b);
             if (hmOpaque(t, bid)) { h = y + 1; break; }
         }
         chunkAux[slot * AUX_W + AUX_HM + t * 256u + c] = uint(h);
@@ -3259,6 +3278,46 @@ void featLakeMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
 [numthreads(1, 1, 1)]
 void featOneMain(uint3 id : SV_DispatchThreadID) {
     if (id.x < uint(params.origins)) featBody<0u>(id.x);
+}
+
+// ---- the store (atlas.h atlas_gen_add_store_stage) ------------------------------------------------------------------
+// a listed slot's aux from the store's: the quart biomes (generator ids are the feature program's biome ids: it is
+// compiled over the generator's biomes); the placement mask, the alchemy classes, the temperature noise and the frozen
+// bits: (to come from their kernels) open, class 0, 0, none
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void featAuxMain(uint3 id : SV_DispatchThreadID) {
+    uint item = id.y, i = id.x;
+    if (item >= uint(params.slots) || i >= AUX_HM) return;
+    uint slot = uint(targets[item]);
+    uint v = 0u;
+    if (i < AUX_MASK) v = outWide[slot * STORE_AUX_W + i];
+    else if (i < AUX_ALCH) v = 0x3F3F3F3Fu;  // PlacementMask.CAP everywhere
+    chunkAux[slot * AUX_W + i] = v;
+}
+// an origin's writes into the store's blocks: each block keeps the write of the origin latest in the gather's order
+// (atomic max of (k + 1) << 16 | id, k its index z-major among the block's chunk's 3 x 3 origins), whichever origin
+// runs first: the same blocks as featApply's order
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void featStoreApplyMain(uint3 id : SV_DispatchThreadID) {
+    uint o = id.y, s = id.x;
+    if (o >= uint(params.origins) || s >= HT_CAP) return;
+    uint base = o * SCR_W;
+    uint key = scratch[base + SCR_HT + s * 2u];
+    if (key == 0u) return;
+    uint idv = scratch[base + SCR_HT + s * 2u + 1u];
+    uint li = key - 1u;
+    int lx = int(li % 48u), lz = int((li / 48u) % 48u), ly = int(li / 2304u);
+    if (uint(ly) >= 640u) return;  // (above the store's rows: nothing there)
+    int dx = lx / 16 - 1, dz = lz / 16 - 1;  // the target: the origin's neighbour (dx, dz)
+    int slot = origins[o * ORIGIN_W + 2u + uint((dz + 2) * 5 + (dx + 2))];
+    if (slot < 0) return;
+    uint k = uint((1 - dz) * 3 + (1 - dx));  // the origin seen from the target: offset (-dx, -dz)
+    uint t = hdr(H_FEAT2GEN);
+    uint gid = t == 0u ? idv : fprog[t + idv];
+    uint b = uint(lx & 15) + 16u * uint(lz & 15) + 256u * uint(ly);
+    InterlockedMax(outIds[uint(slot) * STORE_BLOCK_W + b], ((k + 1u) << 16) | (gid & 0xFFFFu));
 }
 
 [shader("compute")]
