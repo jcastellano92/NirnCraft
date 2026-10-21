@@ -92,6 +92,11 @@ final class AtlasOvlNative {
             this.ptr = ptr;
         }
 
+        /** The native handle (for atlas_feat_set_overlays). */
+        MemorySegment handle() {
+            return ptr;
+        }
+
         String device() {
             try {
                 return ((MemorySegment) device.invokeExact(ptr)).reinterpret(512).getString(0);

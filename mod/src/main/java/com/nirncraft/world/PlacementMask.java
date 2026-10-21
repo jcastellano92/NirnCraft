@@ -265,10 +265,15 @@ public final class PlacementMask {
      * Allocates one chunk grid per call; not counted in the statistics.
      */
     public static boolean clearOfBakedPlans(long seed, int x, int z, int radius) {
+        return bakedPlanGrid(seed, x >> 4, z >> 4)[(z & 15) << 4 | (x & 15)] > radius;
+    }
+
+    /** The overworld's baked plans over chunk (cx, cz): 256 clearances, z-major (the GPU decoration's mask checks). */
+    public static byte[] bakedPlanGrid(long seed, int cx, int cz) {
         byte[] p = new byte[256];
         Arrays.fill(p, (byte) CAP);
-        bakedPlans(p, seed, x >> 4, z >> 4, true);
-        return p[(z & 15) << 4 | (x & 15)] > radius;
+        bakedPlans(p, seed, cx, cz, true);
+        return p;
     }
 
     /** Developer aid: {@code -Dnirncraft.mask.dump=<file>} appends "chunkX chunkZ minClearance maskedColumns" per grid. */

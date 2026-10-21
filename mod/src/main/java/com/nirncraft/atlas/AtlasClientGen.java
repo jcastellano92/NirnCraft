@@ -309,6 +309,12 @@ final class AtlasClientGen implements AutoCloseable {
                     com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: a stage engine did not attach", e);
                 }
             }
+            // the decoration's placement mask keeps clear of the overlays' structure pieces (their boxes on the GPU)
+            if (stages != null) {
+                java.lang.foreign.MemorySegment ovl = AtlasOverlayLive.handleFor(gen);
+                if (ovl != null && !gen.setFeatureOverlays(stages, ovl))
+                    com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: the GPU decoration's mask without the structure pieces (an older library)");
+            }
             if (direct) gen.setIngest(ingestTable(prog, mats, ctx));
             AtlasGenFeatures feats = null;
             if (FEATURE_RADIUS > 0 && stages == null) {
@@ -1294,6 +1300,7 @@ final class AtlasClientGen implements AutoCloseable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        if (featStages != null) gen.setFeatureOverlays(featStages, null);  // (before the overlays go)
         for (var detach : DETACH) {
             try {
                 detach.accept(gen);

@@ -18,6 +18,7 @@
 
 #include "atlas/atlas.h"
 #include "atlas_feat_hm_spv.h"  // generated: slangc + spv_exact, one module per kernel
+#include "atlas_feat_mask_spv.h"
 #include "atlas_feat_init_spv.h"
 #include "atlas_feat_copy_spv.h"
 #include "atlas_feat_apply_spv.h"
@@ -47,7 +48,7 @@ constexpr uint32_t HT_CAP = 32768, SCR_HT = 16, SCR_HM = 16 + HT_CAP * 2, SCR_BI
 constexpr uint32_t H_DISPATCH = 19, H_NDISPATCH = 20, MAGIC = 0x41454641u;
 constexpr uint32_t TABLE_W = ATLAS_FEAT_TABLE_WORDS;  // meta + the write table, per origin (the isolated check)
 static_assert(TABLE_W == 16 + HT_CAP * 2, "table words");
-constexpr uint32_t NB = 10, WIDE_W = 44u * 4096u;
+constexpr uint32_t NB = 12, WIDE_W = 44u * 4096u;
 // pipelines: hm, init, copy, apply, pack, then one a feature type (atlas_features.slang FT_*: 1 ore .. 8 lake)
 constexpr uint32_t P_HM = 0, P_INIT = 1, P_COPY = 2, P_APPLY = 3, P_PACK = 4, P_FEAT = 5, FT_TYPES = 9, P_AUX = P_FEAT + FT_TYPES - 1,
                    PIPES = P_AUX + 1;
@@ -482,7 +483,8 @@ private:
         return true;
     }
     void writeSet() {
-        Buf* bs[NB] = {&prog_, &ids_, &aux_, &org_, &scratch_, &out_, &tgt_, &wide_, &cnt_, map_.buf ? &map_ : &prog_};  // (9: the map)
+        Buf* bs[NB] = {&prog_, &ids_, &aux_, &org_, &scratch_, &out_, &tgt_, &wide_, &cnt_, map_.buf ? &map_ : &prog_,
+                       &prog_, &prog_};  // (9: the map; 10, 11: the overlays' boxes, the store's only)
         VkDescriptorBufferInfo bi[NB];
         VkWriteDescriptorSet w[NB];
         for (uint32_t i = 0; i < NB; i++) {
@@ -583,8 +585,8 @@ public:
 // by priority, whichever origin runs first).
 constexpr uint32_t STORE_AUX_W = ATLAS_GEN_STORE_AUX_WORDS, MAX_ORIGINS = 64;
 constexpr uint32_t H_GEN2FEAT = 24, H_FEAT2GEN = 25, H_NGEN = 26;
-// pipelines: hm, init, aux, store apply, then one a feature type
-constexpr uint32_t S_HM = 0, S_INIT = 1, S_AUX = 2, S_APPLY = 3, S_FEAT = 4, S_PIPES = S_FEAT + FT_TYPES - 1;
+// pipelines: hm, init, aux, store apply, one a feature type, then the placement mask
+constexpr uint32_t S_HM = 0, S_INIT = 1, S_AUX = 2, S_APPLY = 3, S_FEAT = 4, S_MASK = S_FEAT + FT_TYPES - 1, S_PIPES = S_MASK + 1;
 
 class StageEngine {
 public:
@@ -623,11 +625,13 @@ public:
         if (vkCreatePipelineLayout(dev_, &pl, nullptr, &layout_) != VK_SUCCESS) return fail(err, "pipeline layout");
         const uint32_t* code[S_PIPES] = {atlas_feat_hm_spv, atlas_feat_init_spv, atlas_feat_aux_spv, atlas_feat_sapply_spv,
                                          atlas_feat_ore_spv, atlas_feat_cover_spv, atlas_feat_rock_spv, atlas_feat_tree_spv,
-                                         atlas_feat_freeze_spv, atlas_feat_disk_spv, atlas_feat_spring_spv, atlas_feat_lake_spv};
+                                         atlas_feat_freeze_spv, atlas_feat_disk_spv, atlas_feat_spring_spv, atlas_feat_lake_spv,
+                                         atlas_feat_mask_spv};
         const size_t size[S_PIPES] = {atlas_feat_hm_spv_size, atlas_feat_init_spv_size, atlas_feat_aux_spv_size,
                                       atlas_feat_sapply_spv_size, atlas_feat_ore_spv_size, atlas_feat_cover_spv_size,
                                       atlas_feat_rock_spv_size, atlas_feat_tree_spv_size, atlas_feat_freeze_spv_size,
-                                      atlas_feat_disk_spv_size, atlas_feat_spring_spv_size, atlas_feat_lake_spv_size};
+                                      atlas_feat_disk_spv_size, atlas_feat_spring_spv_size, atlas_feat_lake_spv_size,
+                                      atlas_feat_mask_spv_size};
         for (uint32_t i = 0; i < S_PIPES; i++) {
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
             smci.codeSize = size[i];
@@ -674,6 +678,9 @@ public:
     }
 
     // the decoration stage: up to 64 chunks, each with its 5 x 5 store slots
+    // atlas_feat_set_overlays: the overlays whose piece boxes the mask reads (null: none)
+    void setOverlays(AtlasOvl* o) { ovl_ = o; }
+
     int32_t decorate(const AtlasGenStoreBatch* b) {
         std::string err;
         if (b->radius != 2 || b->count > MAX_ORIGINS) return 1;
@@ -712,8 +719,14 @@ public:
                 VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         // the bindings: the program, the store's terrain, our aux (per store slot), the origins, the scratch, the store's
         // blocks, the slot list, the store's aux, the counter
+        // and the overlays' piece boxes (atlas_ovl_store_boxes, asked each call: their buffers may have grown), when
+        // they are on and have tapes (else the program in their place, and the mask without the pieces)
+        AtlasOvlStoreBoxes boxes{};
+        bool haveBoxes = ovl_ && atlas_ovl_store_boxes(ovl_, &boxes) == ATLAS_OK && boxes.tapes && boxes.slotRecords &&
+                         boxes.slots >= b->slots;
         VkBuffer bufs[NB] = {prog_.buf, VkBuffer(b->terrain), aux_.buf, org_.buf, scratch_.buf, VkBuffer(b->blocks), list_.buf,
-                             VkBuffer(b->aux), cnt_.buf, VkBuffer(b->map)};
+                             VkBuffer(b->aux), cnt_.buf, VkBuffer(b->map), haveBoxes ? VkBuffer(boxes.tapes) : prog_.buf,
+                             haveBoxes ? VkBuffer(boxes.slotRecords) : prog_.buf};
         VkDescriptorBufferInfo bi[NB];
         VkWriteDescriptorSet w[NB];
         for (uint32_t i = 0; i < NB; i++) {
@@ -739,6 +752,9 @@ public:
         if (nslots) {
             dispatch(S_AUX, (AUX_W + GROUP - 1) / GROUP, nslots);
             dispatch(S_HM, 4, nslots);
+            p.k = haveBoxes ? 1u : 0u;  // (the mask: k, the boxes bound)
+            dispatch(S_MASK, 1, nslots);
+            p.k = 0;
         }
         // dev: ATLAS_FEAT_AUX_DUMP=<file>: the aux of the slots each call read, (cx, cz, AUX_W words) a record, for the
         // checks against Java (written at the next call or at the end: the generator waits for each submission)
@@ -850,6 +866,7 @@ private:
     size_t progBytes_ = 0;
     bool progUp_ = false;
     uint32_t storeSlots_ = 0;
+    AtlasOvl* ovl_ = nullptr;
 };
 
 int32_t decorateStage(void* user, const AtlasGenStoreBatch* b) { return static_cast<StageEngine*>(user)->decorate(b); }
@@ -964,6 +981,11 @@ ATLAS_API AtlasStatus atlas_feat_attach(AtlasGen* gen, const uint32_t* words, ui
         *out = h.release();
         return ATLAS_OK;
     });
+}
+ATLAS_API AtlasStatus atlas_feat_set_overlays(AtlasFeat* h, AtlasOvl* ovl) {
+    if (!h || !h->stage) return ATLAS_ERR_ARG;
+    h->stage->setOverlays(ovl);
+    return ATLAS_OK;
 }
 #endif
 ATLAS_API const char* atlas_feat_last_error(AtlasFeat* h) { return h ? h->error.c_str() : "null handle"; }

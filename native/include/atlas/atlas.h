@@ -1076,6 +1076,11 @@ ATLAS_API AtlasStatus atlas_feat_probe_aux(AtlasFeat* h, const uint32_t* map, ui
    Calls on the generator must not run meanwhile. atlas_feat_destroy removes the stages. */
 ATLAS_API AtlasStatus atlas_feat_attach(AtlasGen* gen, const uint32_t* words, uint32_t count, const uint32_t* gen2feat, uint32_t nGen,
                                         const uint32_t* feat2gen, uint32_t nFeat, AtlasFeat** out);
+/* The overlays whose structure pieces the decoration's placement mask keeps clear (atlas_ovl_store_boxes, read in every
+   decoration call; until they have tapes, or with null, the mask has the plans alone: the settlements' cores, the
+   roads, the streets). On a handle from atlas_feat_attach; the overlays must outlive it or be unset first. The minor
+   sites' and landmarks' pads are not in the GPU's mask. */
+ATLAS_API AtlasStatus atlas_feat_set_overlays(AtlasFeat* h, AtlasOvl* ovl);
 
 #ifdef __cplusplus
 }

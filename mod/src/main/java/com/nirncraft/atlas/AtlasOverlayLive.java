@@ -131,6 +131,12 @@ final class AtlasOverlayLive {
         l.close();
     }
 
+    /** The overlays' handle on this generator (the decoration's mask reads their piece boxes), or null. */
+    static java.lang.foreign.MemorySegment handleFor(AtlasGenNative.Gen gen) {
+        Live l = live;
+        return l == null || l.gen != gen ? null : l.ovl.handle();
+    }
+
     /** "overlays: settlements ready / recording, chunks stamped" (atlas-info). */
     static String state() {
         Live l = live;

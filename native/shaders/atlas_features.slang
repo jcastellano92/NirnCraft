@@ -40,6 +40,8 @@ struct FeatParams {
 [[vk::binding(6, 0)]] StructuredBuffer<int> targets;      // per target TARGET_W ints: own terrain slot, the 9 origins (-1 none)
 [[vk::binding(7, 0)]] RWStructuredBuffer<uint> outWide;
 [[vk::binding(9, 0)]] StructuredBuffer<uint> mapData;     // (the store) the generator's map words (AtlasGenMap)
+[[vk::binding(10, 0)]] StructuredBuffer<uint> ovlTapes;   // (the store) the overlays' tapes (atlas_ovl_store_boxes)
+[[vk::binding(11, 0)]] StructuredBuffer<int> ovlRecords;  // (the store) each store slot's tape record, -1 none
 [[vk::binding(8, 0)]] RWStructuredBuffer<uint> counters;  // [0] origins with placements left after this dispatch   // per target WIDE_W words: one id a block (the gather, then packed)
 
 #include "atlas_feat_math.slang"  // its own copy of the exact math (not atlas_exact.slang: see there)
@@ -3445,6 +3447,180 @@ uint alchClassOf(int region, float elevation, uint variant) {
     uint rw = region >= 0 && uint(region) < fprog[reg] ? fprog[reg + 1u + uint(region)] : 0u;  // (generated realms: 0)
     return fprog[leafAt + alchLeaf(rw, elevation, variant == 1u ? 200 : 64, variant == 2u)] & 255u;
 }
+// ---- PlacementMask.clearance (the store: featMaskMain) -----------------------------------------------------------
+// The plans first (PlacementMask.bakedPlans: the settlements' cores and the registered sources, RoadMask and
+// StreetMask), then the structure pieces (the overlays' boxes); the minor sites' and landmarks' pads are not here yet.
+static const int MASK_CAP = 63;
+static const uint H_PLACES = 29;  // the settlements: count, then (x, z, radius) each
+int maskLower(int cur, double d) {  // PlacementMask.lower
+    int v = d <= 0.0l ? 0 : (d >= double(MASK_CAP) ? MASK_CAP : int(d));
+    return v < cur ? v : cur;
+}
+static const uint MH_ROADS_F = 9, MH_STREETS_F = 10;
+uint rdW(uint k) { return mapW(mapW(MH_ROADS_F) + k); }
+uint stW(uint k) { return mapW(mapW(MH_STREETS_F) + k); }
+float mapFI(uint arr, int i) { return mapF(arr + uint(i)); }
+int mapII(uint arr, int i) { return int(mapW(arr + uint(i))); }
+// (bx, bz, k) triples sorted by (bx, bz): k of the key, or -1 (atlas_page.slang keyFind)
+[noinline]
+int mapKeyFind(uint at, uint n, int bx, int bz) {
+    int lo = 0, hi = int(n) - 1;
+    for (int guard = 0; guard < 64 && lo <= hi; guard++) {
+        int mid = int(uint(lo + hi) >> 1);
+        uint w = at + uint(mid) * 3u;
+        int kx = int(mapW(w)), kz = int(mapW(w + 1u));
+        if (kx == bx && kz == bz) return int(mapW(w + 2u));
+        if (kx < bx || (kx == bx && kz < bz)) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return -1;
+}
+// RoadPlan.at (the authored plan: the map's far section [19..24]) as RoadMask asks it: the distance to the nearest
+// centre line within REACH (32) less its segment's half width and the verge (2), or 1e9 when none (beyond Tamriel the
+// plan asks TilePlanner's tiles: not on the device)
+[noinline]
+float roadClear(double x, double z) {
+    if (farW(24) == 0u) return 1.0e9f;
+    int k = mapKeyFind(farW(20), farW(19), floorD_N(x) >> 6, floorD_N(z) >> 6);
+    if (k < 0) return 1.0e9f;
+    float px = float(x), pz = float(z);
+    float best = 32.0f * 32.0f;
+    int bestEdge = -1;
+    int j1 = int(mapW(farW(21) + uint(k) + 1u));
+    for (int j = int(mapW(farW(21) + uint(k))); j < j1; j++) {
+        int i = int(mapW(farW(22) + uint(j)));
+        float ax = mapFI(rdW(4), i), az = mapFI(rdW(5), i);
+        float dx = mapFI(rdW(4), i + 1) - ax, dz = mapFI(rdW(5), i + 1) - az;
+        float t = ((px - ax) * dx + (pz - az) * dz) * mapF(farW(23) + uint(i));
+        t = t < 0.0f ? 0.0f : (t > 1.0f ? 1.0f : t);
+        float qx = ax + dx * t - px, qz = az + dz * t - pz;
+        float d2 = qx * qx + qz * qz;
+        if (d2 < best) {
+            best = d2;
+            bestEdge = i;
+        }
+    }
+    if (bestEdge < 0) return 1.0e9f;
+    float half = mapFI(rdW(12), mapII(rdW(10), bestEdge));
+    return float(sqrtD_N(double(best))) - (half + 2.0f);
+}
+// PlacementMask.places: the core of every named settlement near the chunk (Places.overlapping, then circle)
+[noinline]
+int maskPlaces(int cur, int x0, int z0, int x, int z) {
+    uint at = hdr(H_PLACES);
+    if (at == 0u) return cur;
+    uint n = fprog[at];
+    int minX = x0 - MASK_CAP, minZ = z0 - MASK_CAP, maxX = x0 + 15 + MASK_CAP, maxZ = z0 + 15 + MASK_CAP;
+    for (uint i = 0u; i < n; i++) {
+        int px = int(fprog[at + 1u + i * 3u]), pz = int(fprog[at + 2u + i * 3u]), pr = int(fprog[at + 3u + i * 3u]);
+        if (!(px + pr >= minX && px - pr <= maxX && pz + pr >= minZ && pz - pr <= maxZ)) continue;
+        double radius = double(float(pr) * 0.5f + 4.0f);  // radius * CORE_FRACTION + CORE_PAD (a float)
+        if (double(px) + radius + double(MASK_CAP) < double(x0) || double(px) - radius - double(MASK_CAP) > double(x0 + 15) ||
+            double(pz) + radius + double(MASK_CAP) < double(z0) || double(pz) - radius - double(MASK_CAP) > double(z0 + 15)) continue;
+        double ex = double(x - px), ez = double(z - pz);
+        cur = maskLower(cur, sqrtD_N(ex * ex + ez * ez) - radius);
+    }
+    return cur;
+}
+// StreetMask: the street plan's plots (their boxes) and walks (their segments) the chunk's bucket lists
+[noinline]
+int maskStreets(int cur, int cx, int cz, int x, int z) {
+    if (stW(0) == 0u) return cur;
+    int k = mapKeyFind(stW(1), stW(0), cx, cz);
+    if (k < 0) return cur;
+    int x0 = cx << 4, z0 = cz << 4;
+    int j1 = mapII(stW(2), k + 1);
+    for (int j = mapII(stW(2), k); j < j1; j++) {
+        int p = mapII(stW(3), j);
+        int ax = mapII(stW(7), p), bx = mapII(stW(9), p), az = mapII(stW(8), p), bz = mapII(stW(10), p);
+        if (ax - x0 > 15 + MASK_CAP || x0 - bx > MASK_CAP || az - z0 > 15 + MASK_CAP || z0 - bz > MASK_CAP) continue;
+        int oz = z < az ? az - z : (z > bz ? z - bz : 0);
+        int ox = x < ax ? ax - x : (x > bx ? x - bx : 0);
+        cur = maskLower(cur, double(float(ox > oz ? ox : oz) - 1.0f));
+    }
+    int e1 = mapII(stW(4), k + 1);
+    for (int j = mapII(stW(4), k); j < e1; j++) {
+        int e = mapII(stW(5), j);
+        int ia = mapII(stW(12), e), ib = mapII(stW(13), e);
+        float ax = mapFI(stW(14), ia), az = mapFI(stW(15), ia);
+        float ddx = mapFI(stW(14), ib) - ax, ddz = mapFI(stW(15), ib) - az;
+        float l2 = ddx * ddx + ddz * ddz, half = divF_N(mapFI(stW(17), e), 2.0f);
+        float px = float(x) + 0.5f - ax, pz = float(z) + 0.5f - az;
+        float t = 0.0f;
+        if (!(l2 < 1.0e-6f)) {
+            float u = divF_N(px * ddx + pz * ddz, l2);
+            t = u < 0.0f ? 0.0f : (u > 1.0f ? 1.0f : u);  // Math.max(0, Math.min(1, u))
+        }
+        float qx = px - t * ddx, qz = pz - t * ddz;
+        cur = maskLower(cur, double(float(sqrtD_N(double(qx * qx + qz * qz))) - half - 1.0f));
+    }
+    return cur;
+}
+// the listed store slot of chunk (cx, cz) (featHm's list: slot, cx, cz each), or -1
+[noinline]
+int listedSlot(int cx, int cz) {
+    for (int i = 0; i < params.slots; i++)
+        if (targets[uint(i) * 3u + 1u] == cx && targets[uint(i) * 3u + 2u] == cz) return targets[uint(i) * 3u];
+    return -1;
+}
+// The mask of every listed slot, four columns a thread: the plans, then (params.k: the overlays' boxes bound) the pieces
+// the overlays list for the chunk and its 8 neighbours (every box within 16 blocks of a column; the decoration asks
+// the mask of its 3 x 3 only, whose neighbours the 5 x 5 always lists), pieces buried more than 4 below the chunk's
+// own WORLD_SURFACE_WG left out, a box grown by 2 (PlacementMask.structures)
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void featMaskMain(uint3 id : SV_DispatchThreadID) {
+    uint i = id.y, w = id.x;
+    if (i >= uint(params.slots) || w >= 64u) return;
+    int slot = targets[i * 3u], cx = targets[i * 3u + 1u], cz = targets[i * 3u + 2u];
+    int x0 = cx << 4, z0 = cz << 4;
+    // RoadMask: none within the plan's reach of the centre, none on the chunk
+    bool roads = roadClear(double(x0 + 8), double(z0 + 8)) < 1.0e8f;
+    int m0 = MASK_CAP, m1 = MASK_CAP, m2 = MASK_CAP, m3 = MASK_CAP;
+    for (uint k = 0u; k < 4u; k++) {
+        uint c = w * 4u + k;
+        int x = x0 + int(c & 15u), z = z0 + int(c >> 4);
+        int m = maskPlaces(MASK_CAP, x0, z0, x, z);
+        if (roads) {
+            float rc = roadClear(double(x) + 0.5l, double(z) + 0.5l);
+            if (rc < 1.0e8f) m = maskLower(m, double(rc));
+        }
+        m = maskStreets(m, cx, cz, x, z);
+        if (k == 0u) m0 = m; else if (k == 1u) m1 = m; else if (k == 2u) m2 = m; else m3 = m;
+    }
+    if (params.k != 0u) {
+        uint hm = uint(slot) * AUX_W + AUX_HM + HM_WORLD_SURFACE_WG * 256u + w * 4u;
+        int g0 = int(chunkAux[hm]), g1 = int(chunkAux[hm + 1u]), g2 = int(chunkAux[hm + 2u]), g3 = int(chunkAux[hm + 3u]);
+        int z = z0 + int((w * 4u) >> 4), xa = x0 + int((w * 4u) & 15u);
+        for (int j = 0; j < 9; j++) {
+            int sl = listedSlot(cx + j % 3 - 1, cz + j / 3 - 1);
+            if (sl < 0) continue;
+            int rec = ovlRecords[uint(sl)];
+            if (rec < 0) continue;
+            uint at = uint(rec) + 513u + ovlTapes[uint(rec) + 256u];
+            uint n = ovlTapes[at];
+            for (uint b = 0u; b < n; b++) {
+                uint bw = at + 1u + b * 5u;
+                int minX = int(ovlTapes[bw]), minZ = int(ovlTapes[bw + 1u]), maxX = int(ovlTapes[bw + 2u]), maxZ = int(ovlTapes[bw + 3u]);
+                int maxY = int(ovlTapes[bw + 4u]);
+                int ez = imax(imax(minZ - z, z - maxZ), 0);
+                for (uint k = 0u; k < 4u; k++) {
+                    int best = k == 0u ? m0 : (k == 1u ? m1 : (k == 2u ? m2 : m3));
+                    int ground = k == 0u ? g0 : (k == 1u ? g1 : (k == 2u ? g2 : g3));
+                    if (best == 0 || maxY < ground - 4) continue;  // (buried: dungeon halls, cellars)
+                    int x = xa + int(k);
+                    int ex = imax(imax(minX - x, x - maxX), 0);
+                    if (ex > best + 2 || ez > best + 2) continue;
+                    double d = sqrtD_N(double(ex) * double(ex) + double(ez) * double(ez)) - 2.0l;
+                    if (d < double(best)) best = d <= 0.0l ? 0 : int(d);
+                    if (k == 0u) m0 = best; else if (k == 1u) m1 = best; else if (k == 2u) m2 = best; else m3 = best;
+                }
+            }
+        }
+    }
+    chunkAux[uint(slot) * AUX_W + AUX_MASK + w] = uint(m0) | uint(m1) << 8 | uint(m2) << 16 | uint(m3) << 24;
+}
+
 // Biome.TemperatureModifier.FROZEN turning a column's temperature to 0.2
 [noinline]
 bool frozenAt(int x, int z) {

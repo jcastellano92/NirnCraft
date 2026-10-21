@@ -97,7 +97,7 @@ final class AtlasFeatureProgram {
     static final int H_VERSION = 1, H_NBLOCKS = 2, H_BLOCKS = 3, H_NBIOMES = 4, H_BIOMEWORDS = 5, H_SEED = 6, H_ZOOM = 8,
             H_SEA = 10, H_SIN = 11, H_FIELDS = 12, H_PREDS = 13, H_SURVIVE = 14, H_SURVIVE_N = 15, H_CONSTS = 16,
             H_GENMINY = 17, H_GENHEIGHT = 18, H_DISPATCH = 19, H_NDISPATCH = 20, H_ALCH = 21, H_TREES = 22, H_BIOMETAB = 23,
-            H_ALCHREG = 27, H_ALCHLEAF = 28, HEADER = 32;  // (24..26: the store's tables, features_engine.cpp)
+            H_ALCHREG = 27, H_ALCHLEAF = 28, H_PLACES = 29, HEADER = 32;  // (24..26: the store's tables, features_engine.cpp)
     static final int BLK_W = 16;
     static final int F2_LIQUID = 1, F2_SNOWY = 2, F2_LIQUID_PROP = 4;
     static final int T_AX = 0, T_WL = 3, T_DIST = 5, T_SNOWY = 12;
@@ -1051,6 +1051,15 @@ final class AtlasFeatureProgram {
             for (int i = 0; i < nreg; i++) out.add(alchRegionWord(com.nirncraft.tamriel.Regions.byIndex(i)));
             int alchLeafAt = here();
             for (int leaf = 0; leaf < ALCH_LEAVES; leaf++) out.add(alchLeafClass[leaf] < 0 ? 255 : alchLeafClass[leaf]);
+            // the placement mask's settlement cores (PlacementMask.places): count, then (x, z, radius) each
+            int placesAt = here();
+            List<com.nirncraft.tamriel.Place> settled = com.nirncraft.tamriel.Places.all().stream().filter(p -> p.type().isSettlement()).toList();
+            out.add(settled.size());
+            for (var p : settled) {
+                out.add(p.x());
+                out.add(p.z());
+                out.add(p.radius());
+            }
             int consts = here();
             long c = Double.doubleToRawLongBits(1.702 / 0.27);
             out.add((int) c);
@@ -1122,6 +1131,7 @@ final class AtlasFeatureProgram {
             out.set(H_BIOMETAB, biomeTab);
             out.set(H_ALCHREG, alchRegAt);
             out.set(H_ALCHLEAF, alchLeafAt);
+            out.set(H_PLACES, placesAt);
             return out.toIntArray();
         }
 
