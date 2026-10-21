@@ -19,6 +19,10 @@
 //                  then          per filled micro-voxel (in group order, then bit order) its palette index, one byte, four
 //                                to a word (low byte first)
 //                  palette       ARGB: rgb the micro-voxel's colour (sRGB, tints applied), a its emission (0..255)
+//   a cross at c (the table's word with bit 30: a plant whose model is the two vertical diagonal planes, block/cross,
+//   tinted_cross, a sapling, a flower, grass: traced as the planes themselves, not voxels, which drew them as slatted
+//   columns): [c] which planes it has (bit 0 x = z, bit 1 x + z = 1), then per plane its quads' extent (x0, x1, y0, y1,
+//   float bits) and 16 x 16 ARGB cells over it (along x, down from y1; alpha 255 shown, 0 not)
 #pragma once
 #include <array>
 #include <cstdint>
@@ -50,11 +54,18 @@ bool voxeliseBrick(const AtlasBrickQuad* quads, uint32_t quadCount, uint32_t m, 
 // The packed record of a brick (the layout above, offsets relative to its first word).
 std::vector<uint32_t> encodeBrick(const BrickVoxels& v);
 
+// A cross's record (the layout above) when every quad of material m lies on the block's two vertical diagonals, else
+// empty. frame: as voxeliseBrick's.
+std::vector<uint32_t> crossRecord(const AtlasBrickQuad* quads, uint32_t quadCount, uint32_t m, const AtlasBrickSprite* sprites,
+                                  uint32_t spriteCount, const uint32_t* texels, uint32_t texelCount, uint32_t frame = 0);
+
 // The context's bricks: per material its (deduplicated) record, packed for the kernels once per revision.
 class BrickStore {
 public:
     // material m's brick (record nullptr: none)
     void set(uint32_t m, std::shared_ptr<const std::vector<uint32_t>> record, uint32_t lightRgb = 0);
+    // material m as a cross (crossRecord; nullptr: none): what its table word points at instead of its voxels
+    void setCross(uint32_t m, std::shared_ptr<const std::vector<uint32_t>> record);
     // an animated one: a record a frame, `ticks` game ticks each
     void setFrames(uint32_t m, std::vector<std::shared_ptr<const std::vector<uint32_t>>> frames, uint32_t ticks, uint32_t lightRgb);
     // material m's brick's coverage for the grid's coarse vote, 0..63 (BrickVoxels.coverage x 63); -1: no brick
@@ -77,6 +88,7 @@ private:
     std::vector<std::vector<std::shared_ptr<const std::vector<uint32_t>>>> frames_;  // (animated: every frame's)
     std::vector<uint32_t> ticks_;
     std::vector<int8_t> coverage_;
+    std::vector<std::shared_ptr<const std::vector<uint32_t>>> cross_;
     std::unordered_map<uint64_t, std::vector<std::shared_ptr<const std::vector<uint32_t>>>> unique_;
     uint64_t revision_ = 0;
 };

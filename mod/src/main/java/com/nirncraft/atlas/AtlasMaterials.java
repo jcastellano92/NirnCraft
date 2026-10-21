@@ -245,6 +245,8 @@ final class AtlasMaterials {
     /** Per state its tint source's answer: TINT_* for none or a biome colour, else the constant RGB. */
     private static final Map<BlockState, Integer> TINT_KINDS = new java.util.concurrent.ConcurrentHashMap<>();
     private static final int TINT_NONE = -1, TINT_GRASS = -2, TINT_FOLIAGE = -3;
+    /** Vanilla's dry foliage colour in the temperate middle of its map (leaf litter, dry grass), RGB. */
+    static final int DRY_FOLIAGE = 0xA0825A;
 
     /**
      * The tint the near field gives a block's tinted quads, as its tint source answers the chunk mesher: the biome's
@@ -264,7 +266,9 @@ final class AtlasMaterials {
             if (sources.isEmpty() || sources.get(0) == null) return TINT_NONE;
             int c = sources.get(0).colorInWorld(s, AtlasLabExport.TINT_PROBE, BlockPos.ZERO);
             int rgb = c & 0xFFFFFF;
-            if (c == -1 || rgb == 0xFFFFFF || rgb == AtlasLabExport.PROBE_WATER || rgb == AtlasLabExport.PROBE_DRY) return TINT_NONE;
+            if (c == -1 || rgb == 0xFFFFFF || rgb == AtlasLabExport.PROBE_WATER) return TINT_NONE;
+            // dry foliage (leaf litter, dry grass): its common colour, a constant (it was untinted: grey-white)
+            if (rgb == AtlasLabExport.PROBE_DRY) return DRY_FOLIAGE;
             if (rgb == AtlasLabExport.PROBE_GRASS || rgb == AtlasLabExport.PROBE_OTHER) return TINT_GRASS;
             return rgb == AtlasLabExport.PROBE_FOLIAGE ? TINT_FOLIAGE : rgb;
         } catch (RuntimeException e) {

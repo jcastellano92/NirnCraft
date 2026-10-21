@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <map>
 
 namespace atlas {
@@ -231,6 +232,86 @@ std::vector<uint32_t> encodeBrick(const BrickVoxels& v) {
     return rec;
 }
 
+std::vector<uint32_t> crossRecord(const AtlasBrickQuad* quads, uint32_t quadCount, uint32_t m, const AtlasBrickSprite* sprites,
+                                  uint32_t spriteCount, const uint32_t* texels, uint32_t texelCount, uint32_t frame) {
+    // every quad on a diagonal: x = z (plane 0) or x + z = 1 (plane 1), vertical
+    std::vector<std::pair<int, const AtlasBrickQuad*>> qs;
+    uint32_t used = 0;
+    float ext[2][4] = {{1, 0, 1, 0}, {1, 0, 1, 0}};  // per plane x0, x1, y0, y1 of its quads
+    for (uint32_t qi = 0; qi < quadCount; qi++) {
+        const AtlasBrickQuad& q = quads[qi];
+        if (q.material != m) continue;
+        bool p0 = true, p1 = true;
+        for (int i = 0; i < 4; i++) {
+            p0 &= std::fabs(q.pos[i][0] - q.pos[i][2]) < 2e-3f;
+            p1 &= std::fabs(q.pos[i][0] + q.pos[i][2] - 1.0f) < 2e-3f;
+        }
+        int k = p0 ? 0 : p1 ? 1 : -1;
+        if (k < 0) return {};
+        qs.emplace_back(k, &q);
+        used |= 1u << k;
+        for (int i = 0; i < 4; i++) {
+            ext[k][0] = std::min(ext[k][0], q.pos[i][0]), ext[k][1] = std::max(ext[k][1], q.pos[i][0]);
+            ext[k][2] = std::min(ext[k][2], q.pos[i][1]), ext[k][3] = std::max(ext[k][3], q.pos[i][1]);
+        }
+    }
+    if (!used) return {};
+    // per plane its extent (4 floats) and 16 x 16 cells over it: each cell the texel its centre shows, the quads in turn
+    // (a later one's shown texel over an earlier's: an overlay); clear where none shows
+    std::vector<uint32_t> rec(1 + 2 * 260, 0u);
+    rec[0] = used;
+    for (int k = 0; k < 2; k++) {
+        if (!((used >> k) & 1)) continue;
+        float x0 = ext[k][0], x1 = std::max(ext[k][1], x0 + 1e-3f), y0 = ext[k][2], y1 = std::max(ext[k][3], y0 + 1e-3f);
+        size_t base = 1 + size_t(k) * 260;
+        std::memcpy(&rec[base], &x0, 4), std::memcpy(&rec[base + 1], &x1, 4);
+        std::memcpy(&rec[base + 2], &y0, 4), std::memcpy(&rec[base + 3], &y1, 4);
+        for (int j = 0; j < 16; j++)
+            for (int i = 0; i < 16; i++) {
+                float x = x0 + (float(i) + 0.5f) / 16.0f * (x1 - x0), y = y1 - (float(j) + 0.5f) / 16.0f * (y1 - y0);
+                for (auto& [qk, qp] : qs) {
+                    if (qk != k) continue;
+                    const AtlasBrickQuad& q = *qp;
+                    // (s, t) of (x, y) on the quad (a rectangle in the plane: P0 + s e1 + t e3)
+                    float e1x = q.pos[1][0] - q.pos[0][0], e1y = q.pos[1][1] - q.pos[0][1];
+                    float e3x = q.pos[3][0] - q.pos[0][0], e3y = q.pos[3][1] - q.pos[0][1];
+                    float det = e1x * e3y - e1y * e3x;
+                    if (std::fabs(det) < 1e-8f) continue;
+                    float rx = x - q.pos[0][0], ry = y - q.pos[0][1];
+                    float st = (rx * e3y - ry * e3x) / det, tt = (e1x * ry - e1y * rx) / det;
+                    if (st < -1e-4f || st > 1.0001f || tt < -1e-4f || tt > 1.0001f) continue;
+                    float u = q.uv[0][0] + st * (q.uv[1][0] - q.uv[0][0]) + tt * (q.uv[3][0] - q.uv[0][0]);
+                    float v = q.uv[0][1] + st * (q.uv[1][1] - q.uv[0][1]) + tt * (q.uv[3][1] - q.uv[0][1]);
+                    if (q.sprite >= spriteCount) continue;
+                    const AtlasBrickSprite& sp = sprites[q.sprite];
+                    uint32_t nf = std::max(1u, sp.frames & 0xFFFFu);
+                    if (!sp.width || !sp.height || uint64_t(sp.firstTexel) + uint64_t(sp.width) * sp.height * nf > texelCount) continue;
+                    uint32_t f0 = sp.firstTexel + (frame % nf) * sp.width * sp.height;
+                    int sx = std::clamp(int(std::floor(u * float(sp.width))), 0, int(sp.width) - 1);
+                    int sy = std::clamp(int(std::floor(v * float(sp.height))), 0, int(sp.height) - 1);
+                    uint32_t cc = texels[f0 + uint32_t(sy) * sp.width + uint32_t(sx)];
+                    if ((cc >> 24) < 128) continue;
+                    float tr = float((q.tint >> 16) & 255) / 255.0f, tg = float((q.tint >> 8) & 255) / 255.0f, tb = float(q.tint & 255) / 255.0f;
+                    uint32_t r = uint32_t(float((cc >> 16) & 255) * tr + 0.5f), g = uint32_t(float((cc >> 8) & 255) * tg + 0.5f),
+                             bl = uint32_t(float(cc & 255) * tb + 0.5f);
+                    rec[base + 4 + size_t(i + 16 * j)] = 0xFF000000u | r << 16 | g << 8 | bl;
+                }
+            }
+    }
+    return rec;
+}
+
+void BrickStore::setCross(uint32_t m, std::shared_ptr<const std::vector<uint32_t>> record) {
+    std::lock_guard<std::mutex> lock(mu_);
+    if (m >= cross_.size()) {
+        if (!record) return;
+        cross_.resize(size_t(m) + 1);
+    }
+    if (cross_[m] == record) return;
+    cross_[m] = std::move(record);
+    revision_++;
+}
+
 void BrickStore::set(uint32_t m, std::shared_ptr<const std::vector<uint32_t>> record, uint32_t lightRgb) {
     std::lock_guard<std::mutex> lock(mu_);
     if (m >= byMat_.size()) {
@@ -305,7 +386,7 @@ bool BrickStore::pack(uint64_t have, bool force, const std::vector<uint32_t>& li
     std::lock_guard<std::mutex> lock(mu_);
     if (have == revision_ && !force && !out.empty()) return false;
     revision = revision_;
-    uint32_t M = uint32_t(std::max(byMat_.size(), lights.size()));
+    uint32_t M = uint32_t(std::max(std::max(byMat_.size(), lights.size()), cross_.size()));
     out.assign(1 + 2 * size_t(M), 0u);
     out[0] = M;
     std::copy(lights.begin(), lights.end(), out.begin() + 1 + M);
@@ -318,7 +399,12 @@ bool BrickStore::pack(uint64_t have, bool force, const std::vector<uint32_t>& li
         }
         return it->second;
     };
-    for (uint32_t m = 0; m < uint32_t(byMat_.size()); m++) {
+    for (uint32_t m = 0; m < M; m++) {
+        if (m < cross_.size() && cross_[m]) {
+            out[1 + m] = 0x40000000u | place(cross_[m]);  // (a cross: its planes, atlas_bricks.slang crossHit)
+            continue;
+        }
+        if (m >= byMat_.size()) continue;
         if (m < frames_.size() && frames_[m].size() > 1) {
             // an animated set: frames | ticks a frame << 16, then each frame's brick
             std::vector<uint32_t> offs;

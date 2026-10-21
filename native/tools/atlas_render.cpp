@@ -439,7 +439,7 @@ int main(int argc, char** argv) {
             }
             modelled.assign(ml.states.size(), 0);
             for (size_t i = 0; i < ml.states.size(); i++)
-                modelled[i] = exportdata::brickWorthy(ml, uint32_t(i)) ? 1 : 0;  // (AtlasClientSections.nearKept)
+                modelled[i] = exportdata::brickWorthy(ml, uint32_t(i)) ? 1 : exportdata::holedCube(ml, uint32_t(i)) ? 2 : 0;  // (nearKept)
         }
         if (!exportdata::upload(ctx, lib, secs, str(a, "keep", "far") == "all", grass, foliage, water, 64, ex, why,
                                 boxed ? box : nullptr, num(a, "cutout", 1) > 0, server, keepNear ? &modelled : nullptr,

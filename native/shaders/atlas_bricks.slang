@@ -15,6 +15,7 @@
 uint brickOf(uint mat) {
     uint n = brickData[0];
     uint b = mat < n ? brickData[1u + mat] : 0u;
+    if ((b & 0x40000000u) != 0u) return b;  // a cross (crossHit): its planes' record, flagged
     if ((b & 0x80000000u) != 0u) {
         b &= 0x7FFFFFFFu;
         uint h = brickData[b];
@@ -49,10 +50,45 @@ bool brickCell(uint b, int3 m, uint gLo, uint gHi, out uint rank) {
     return true;
 }
 
+// The ray l + d t through a cross's planes (record c: bit 0 x = z, bit 1 x + z = 1; 16 x 16 texels each): the nearer
+// shown texel inside the block, its axis the one the ray runs more along (the face shading's).
+BrickHit crossHit(uint c, float3 l, float3 d, int axis) {
+    BrickHit r;
+    r.hit = false;
+    r.t = 1e30;
+    r.axis = axis;
+    r.albedo = float3(0, 0, 0);
+    r.emission = 0.0;
+    uint used = brickData[c];
+    for (uint k = 0u; k < 2u; k++) {
+        if (((used >> k) & 1u) == 0u) continue;
+        float den = k == 0u ? d.x - d.z : d.x + d.z;
+        if (abs(den) < 1e-6) continue;
+        float t = k == 0u ? -(l.x - l.z) / den : (1.0 - l.x - l.z) / den;
+        if (t < 0.0 || t >= r.t) continue;
+        float3 p = l + d * t;
+        if (any(p < float3(-1e-4, -1e-4, -1e-4)) || any(p > float3(1.0001, 1.0001, 1.0001))) continue;
+        uint base = c + 1u + k * 260u;  // (its extent x0, x1, y0, y1, then its 16 x 16 cells over it)
+        float x0 = asfloat(brickData[base]), x1 = asfloat(brickData[base + 1u]);
+        float y0 = asfloat(brickData[base + 2u]), y1 = asfloat(brickData[base + 3u]);
+        if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) continue;
+        int ti = clamp(int((p.x - x0) / max(x1 - x0, 1e-4) * 16.0), 0, 15), tj = clamp(int((y1 - p.y) / max(y1 - y0, 1e-4) * 16.0), 0, 15);
+        uint cc = brickData[base + 4u + uint(ti + 16 * tj)];
+        if ((cc >> 24) < 128u) continue;
+        r.hit = true;
+        r.t = t;
+        r.axis = abs(d.x) > abs(d.z) ? 0 : 2;
+        r.albedo = srgbLinear(cc);
+    }
+    if (!r.hit) r.t = 0.0;
+    return r;
+}
+
 // The ray l + d t (l: where it entered the voxel, voxel-local 0..1; d in blocks per t) through brick b, from the voxel
 // face it entered by (axis); the first filled micro-voxel it meets, or hit = false when it leaves the voxel first.
 [noinline]
 BrickHit brickHit(uint b, float3 l, float3 d, int axis) {
+    if ((b & 0x40000000u) != 0u) return crossHit(b & 0x3FFFFFFFu, l, d, axis);
     BrickHit r;
     r.hit = false;
     r.t = 0.0;

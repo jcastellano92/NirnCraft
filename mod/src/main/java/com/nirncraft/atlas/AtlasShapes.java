@@ -156,7 +156,8 @@ final class AtlasShapes {
         if (fluid) mask = -1L;
         if (mask == 0 || quads.isEmpty() && !fluid) return null;
         // cut-out coverage for leaves and plants only (a grass block's cut-out overlay is no hole in the block)
-        boolean cutout = st.is(BlockTags.LEAVES) || plant(st, quads, boxes);
+        // (and a plain cube with see-through texels: a copper grate, mangrove roots, a cut-out cube's holes)
+        boolean cutout = st.is(BlockTags.LEAVES) || plant(st, quads, boxes) || holedCube(quads, faces);
         return new Shape(mask, mean(faces), cutout ? AtlasNative.SHAPE_CUTOUT : 0, faces);
     }
 
@@ -348,17 +349,62 @@ final class AtlasShapes {
      * clear (redstone dust is in the translucent layer: its brick is its opaque texels).
      */
     static boolean brickable(BlockState st, List<BakedQuad> quads) {
-        if (quads.isEmpty() || st.is(BlockTags.LEAVES)) return false;
+        if (quads.isEmpty()) return false;
+        boolean cube = fullCubeModel(quads);
+        // leaves are textured cut-out cubes; a block tagged leaves whose model is no cube (a berry bush, a hedge's
+        // twigs) is a brick like any plant (as a leaves cube it was its texture on six faces)
+        if (st.is(BlockTags.LEAVES) && cube) return false;
         boolean animated = false;
-        boolean glassy = st.is(BlockTags.IMPERMEABLE) || st.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock;
+        // glass, panes, ice, slime, honey stay the translucent layer's; another translucent model (redstone dust, a
+        // plant with soft edges) is a brick of its texels that are half opaque or more
+        boolean glassy = st.is(BlockTags.IMPERMEABLE) || st.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock
+                || st.getBlock() instanceof net.minecraft.world.level.block.HalfTransparentBlock;
         for (BakedQuad q : quads) {
-            if (q.materialInfo().layer() == ChunkSectionLayer.TRANSLUCENT && (glassy || !binaryAlpha(q.materialInfo().sprite())))
-                return false;
+            if (q.materialInfo().layer() == ChunkSectionLayer.TRANSLUCENT && glassy) return false;
             animated |= q.materialInfo().sprite().contents().isAnimated();
         }
         // a full solid cube is a textured cube, unless its texture moves (magma, a sea lantern, prismarine): a brick a
         // frame then (its micro-voxels are its texels)
-        return !st.isSolidRender() || animated;
+        return !(st.isSolidRender() || cube && st.canOcclude()) || animated;
+    }
+
+    /** Whether a plain-cube model shows the background through its faces' tiles (a grate, roots: a cut-out cube). */
+    static boolean holedCube(List<BakedQuad> quads, int[][] faces) {
+        boolean cut = false;
+        for (BakedQuad q : quads) cut |= q.materialInfo().layer() == ChunkSectionLayer.CUTOUT;
+        if (!cut || !fullCubeModel(quads)) return false;
+        for (int[] tile : faces)
+            if (tile != null)
+                for (int c : tile)
+                    if ((c >>> 24) < 250) return true;
+        return false;
+    }
+
+    /**
+     * Whether a model is a plain cube: on each of the six faces a quad lying on the block's boundary that covers it whole
+     * (a stone, a log, leaves; not a bush, a slab, a cross).
+     */
+    static boolean fullCubeModel(List<BakedQuad> quads) {
+        int faces = 0;
+        for (BakedQuad q : quads) {
+            Direction d = q.direction();
+            int a = d.getAxis().ordinal();  // x 0, y 1, z 2
+            float plane = d.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1f : 0f;
+            float lo0 = 1, hi0 = 0, lo1 = 1, hi1 = 0;
+            boolean on = true;
+            for (int i = 0; i < 4; i++) {
+                Vector3fc p = q.position(i);
+                float[] c = {p.x(), p.y(), p.z()};
+                if (Math.abs(c[a] - plane) > 1e-3f) on = false;
+                float u = c[(a + 1) % 3], v = c[(a + 2) % 3];
+                lo0 = Math.min(lo0, u);
+                hi0 = Math.max(hi0, u);
+                lo1 = Math.min(lo1, v);
+                hi1 = Math.max(hi1, v);
+            }
+            if (on && lo0 < 1e-3f && lo1 < 1e-3f && hi0 > 1 - 1e-3f && hi1 > 1 - 1e-3f) faces |= 1 << d.get3DDataValue();
+        }
+        return faces == 63;
     }
 
     /** A state's brick model (tint RGB for its tinted quads, -1 none), or null when it takes no brick. */
