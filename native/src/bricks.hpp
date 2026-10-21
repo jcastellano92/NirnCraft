@@ -8,6 +8,7 @@
 //   [0]            M: the table's length (materials 0 .. M - 1)
 //   [1 + m]        material m's brick: its first word, 0 none; with bit 31 an animated set's first word: frames | game
 //                  ticks a frame << 16, then each frame's brick (atlas_bricks.slang brickOf picks it by the frame's time)
+//   [1 + 2M + m]   material m's random offset (atlas.h atlas_set_material_offsets; 0 none)
 //   [1 + M + m]    material m's light (gridLightMain: the grid's emitters as lights): its colour (sRGB, brightest channel
 //                  255) | its light level (0..15) << 24; 0: it emits nothing
 //   a brick at b:  [b], [b + 1]  64 bits: which of its 4 x 4 x 4 groups of 4 x 4 x 4 micro-voxels hold any (bit
@@ -67,6 +68,7 @@ public:
     void set(uint32_t m, std::shared_ptr<const std::vector<uint32_t>> record, uint32_t lightRgb = 0);
     // material m as a cross (crossRecord; nullptr: none): what its table word points at instead of its voxels
     void setCross(uint32_t m, std::shared_ptr<const std::vector<uint32_t>> record);
+    void setOffset(uint32_t m, uint32_t word);
     // animated sheets: a record a frame, `ticks` game ticks each (a fire's, a campfire's flames)
     void setCrossFrames(uint32_t m, std::vector<std::shared_ptr<const std::vector<uint32_t>>> frames, uint32_t ticks);
     // an animated one: a record a frame, `ticks` game ticks each
@@ -92,6 +94,7 @@ private:
     std::vector<uint32_t> ticks_;
     std::vector<int8_t> coverage_;
     std::vector<std::shared_ptr<const std::vector<uint32_t>>> cross_;
+    std::vector<uint32_t> offset_;
     std::vector<std::vector<std::shared_ptr<const std::vector<uint32_t>>>> crossFrames_;
     std::vector<uint32_t> crossTicks_;
     std::unordered_map<uint64_t, std::vector<std::shared_ptr<const std::vector<uint32_t>>>> unique_;

@@ -147,7 +147,7 @@ final class AtlasShapes {
         List<AABB> boxes = boxes(st);
         long mask = mask(boxes);
         int[][] faces = new int[6][];
-        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(d, quads, tint);
+        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(st, d, quads, tint, TILE);
         // thinner than a micro-voxel (a snow layer, a carpet, a torch, a lantern's chain): its outline fills none of the
         // 4 x 4 x 4, so its shape is the visual hull of its face tiles (a layer's bottom layer, a post's core column;
         // a chain is no floating slab)
@@ -173,6 +173,11 @@ final class AtlasShapes {
 
     /** Face d's tile at res x res texels (as face(): 4 for the shapes, 16 for the near field's textures). */
     static int[] face(Direction d, List<BakedQuad> quads, int tint, int TILE) {
+        return face(null, d, quads, tint, TILE);
+    }
+
+    /** face() of state st: each quad tinted by its own tint layer (AtlasMaterials.layerTint), not layer 0's for all. */
+    static int[] face(BlockState st, Direction d, List<BakedQuad> quads, int tint, int TILE) {
         int sub = Math.max(1, 16 / TILE);  // samples a texel side: a 4x4 tile averages 4x4 of the 16x16 sprite
         int[] tile = new int[TILE * TILE];
         float[] depth = new float[TILE * TILE];
@@ -186,7 +191,9 @@ final class AtlasShapes {
             } catch (RuntimeException e) {
                 continue;
             }
-            boolean tinted = tint >= 0 && q.materialInfo().tintIndex() >= 0;
+            int qt = tint < 0 || q.materialInfo().tintIndex() < 0 ? -1
+                    : st == null ? tint : AtlasMaterials.layerTint(st, q.materialInfo().tintIndex(), tint);
+            boolean tinted = qt >= 0;
             int fw = sp.contents().width(), fh = sp.contents().height();
             // the quad's extent in the face plane and its depth along d
             float a0 = Float.MAX_VALUE, a1 = -Float.MAX_VALUE, b0 = Float.MAX_VALUE, b1 = -Float.MAX_VALUE, dep = 0;
@@ -235,9 +242,9 @@ final class AtlasShapes {
                     if (sa == 0) continue;  // the quad is see-through here: what is behind it shows
                     depth[k] = dep;
                     if (tinted) {
-                        sr *= ((tint >> 16) & 255) / 255.0;
-                        sg *= ((tint >> 8) & 255) / 255.0;
-                        sb *= (tint & 255) / 255.0;
+                        sr *= ((qt >> 16) & 255) / 255.0;
+                        sg *= ((qt >> 8) & 255) / 255.0;
+                        sb *= (qt & 255) / 255.0;
                     }
                     tile[k] = (int) Math.round(255.0 * sa / n) << 24 | (int) Math.round(sr / sa) << 16 | (int) Math.round(sg / sa) << 8
                             | (int) Math.round(sb / sa);
@@ -257,7 +264,7 @@ final class AtlasShapes {
         List<BakedQuad> quads = quads(st);
         if (quads.isEmpty()) return null;
         int[][] faces = new int[6][];
-        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(d, quads, tint, TEX);
+        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(st, d, quads, tint, TEX);
         return faces;
     }
 
@@ -290,17 +297,20 @@ final class AtlasShapes {
             }
             int w = s.contents().width(), h = s.contents().height();
             int[] frames = {0};
+            int ticks = 1;
             if (s.contents().isAnimated()) {
-                var u = s.contents().getUniqueFrames();
-                frames = new int[Math.min(64, Math.max(1, u.size()))];
-                for (int i = 0; i < frames.length; i++) frames[i] = u.getInt(i);
+                // its .mcmeta's sequence (frames: indices or {index, time}; frametime the default), each frame repeated
+                // by its time over the times' common divisor: one tick rate a sprite, the sequence as the game plays it
+                int[] seq = frameSequence(s.contents().name(), s.contents().getUniqueFrames());
+                frames = java.util.Arrays.copyOfRange(seq, 1, seq.length);
+                ticks = seq[0];
             }
             int perRow = Math.max(1, img.getWidth() / Math.max(1, w));
             int[] t = new int[SPRITE_HEAD + w * h * frames.length];
             t[0] = w;
             t[1] = h;
             t[2] = frames.length;
-            t[3] = frames.length > 1 ? frameTicks(s.contents().name()) : 1;
+            t[3] = ticks;
             for (int f = 0; f < frames.length; f++) {
                 int ox = (frames[f] % perRow) * w, oy = (frames[f] / perRow) * h;
                 if (ox + w > img.getWidth() || oy + h > img.getHeight()) ox = oy = 0;
@@ -322,19 +332,57 @@ final class AtlasShapes {
         return n > 0 && mid * 50 <= n;
     }
 
-    /** An animated texture's frame time in game ticks (its .png.mcmeta's animation.frametime; 1 when it says none). */
-    private static int frameTicks(net.minecraft.resources.Identifier name) {
+    /**
+     * An animated texture's frames as the game plays them: {ticks a frame, frame index, ...}, from its .png.mcmeta
+     * (animation.frames: indices or {index, time}, animation.frametime the default, 1) with each frame repeated by its
+     * time over the times' common divisor (at most 64 entries); its distinct frames in order when it says no sequence.
+     */
+    private static int[] frameSequence(net.minecraft.resources.Identifier name, it.unimi.dsi.fastutil.ints.IntList unique) {
+        java.util.List<int[]> seq = new java.util.ArrayList<>();  // {index, time}
+        int def = 1;
         try {
             var id = net.minecraft.resources.Identifier.fromNamespaceAndPath(name.getNamespace(), "textures/" + name.getPath() + ".png.mcmeta");
             var res = Minecraft.getInstance().getResourceManager().getResource(id);
-            if (res.isEmpty()) return 1;
-            try (var r = res.get().openAsReader()) {
-                var o = com.google.gson.JsonParser.parseReader(r).getAsJsonObject().getAsJsonObject("animation");
-                return o != null && o.has("frametime") ? Math.max(1, o.get("frametime").getAsInt()) : 1;
-            }
+            if (res.isPresent())
+                try (var r = res.get().openAsReader()) {
+                    var o = com.google.gson.JsonParser.parseReader(r).getAsJsonObject().getAsJsonObject("animation");
+                    if (o != null) {
+                        if (o.has("frametime")) def = Math.max(1, o.get("frametime").getAsInt());
+                        if (o.has("frames"))
+                            for (var e : o.getAsJsonArray("frames")) {
+                                if (e.isJsonPrimitive()) seq.add(new int[] {e.getAsInt(), -1});
+                                else {
+                                    var fo = e.getAsJsonObject();
+                                    seq.add(new int[] {fo.get("index").getAsInt(), fo.has("time") ? Math.max(1, fo.get("time").getAsInt()) : -1});
+                                }
+                            }
+                    }
+                }
         } catch (Exception e) {
-            return 1;
+            seq.clear();
         }
+        if (seq.isEmpty()) for (int i = 0; i < unique.size(); i++) seq.add(new int[] {unique.getInt(i), -1});
+        int g = 0;
+        for (int[] f : seq) {
+            if (f[1] < 0) f[1] = def;
+            g = gcd(g, f[1]);
+        }
+        g = Math.max(1, g);
+        long total = 0;
+        for (int[] f : seq) total += f[1] / g;
+        while (total > 64 && g < 4096) {  // (too long a sequence: a coarser tick, frames merged; bounded)
+            g *= 2;
+            total = 0;
+            for (int[] f : seq) total += Math.max(1, f[1] / g);
+        }
+        java.util.List<Integer> out = new java.util.ArrayList<>();
+        out.add(g);
+        for (int[] f : seq) for (int k = 0, n = Math.max(1, f[1] / g); k < n && out.size() <= 64; k++) out.add(f[0]);
+        return out.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
     }
 
     /** Forget the cached sprite texels (resources reloaded). */
@@ -407,6 +455,26 @@ final class AtlasShapes {
         return faces == 63;
     }
 
+    /**
+     * A state's random offset (vanilla's OffsetType) as atlas.h atlas_set_material_offsets takes it: the type and its
+     * largest offsets, from the offset the state gives positions (0: none).
+     */
+    static int offsetWord(BlockState st) {
+        try {
+            if (!st.hasOffsetFunction()) return 0;
+            double h = 0, v = 0;
+            for (int i = 0; i < 64; i++) {
+                var o = st.getOffset(new BlockPos(i * 7, 0, i * 13));
+                h = Math.max(h, Math.max(Math.abs(o.x), Math.abs(o.z)));
+                v = Math.max(v, -o.y);
+            }
+            if (h <= 0 && v <= 0) return 0;
+            return (v > 0 ? 2 : 1) | (int) Math.min(255, Math.round(h * 255)) << 8 | (int) Math.min(255, Math.round(v * 255)) << 16;
+        } catch (RuntimeException e) {
+            return 0;
+        }
+    }
+
     /** A state's brick model (tint RGB for its tinted quads, -1 none), or null when it takes no brick. */
     static BrickModel brick(BlockState st, int tint) {
         List<BakedQuad> quads = quads(st);
@@ -427,7 +495,8 @@ final class AtlasShapes {
                 uv[2 * i] = (UVPair.unpackU(puv) - sp.getU0()) / (sp.getU1() - sp.getU0());
                 uv[2 * i + 1] = (UVPair.unpackV(puv) - sp.getV0()) / (sp.getV1() - sp.getV0());
             }
-            int t = tint >= 0 && q.materialInfo().tintIndex() >= 0 ? tint & 0xFFFFFF : 0xFFFFFF;
+            int lt = tint >= 0 ? AtlasMaterials.layerTint(st, q.materialInfo().tintIndex(), tint) : -1;
+            int t = lt >= 0 ? lt & 0xFFFFFF : 0xFFFFFF;  // (its own tint layer's colour: AtlasMaterials.layerTint)
             out.add(new BrickQuad(pos, uv, tx, t, q.direction().get3DDataValue()));
         }
         return out.isEmpty() ? null : new BrickModel(out, st.getLightEmission() / 15f);

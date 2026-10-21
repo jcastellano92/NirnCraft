@@ -20,7 +20,9 @@ struct Placer {
     bool place(const float p[3], const float n[3], int out[3]) {
         int a = std::fabs(n[0]) > 0.999f ? 0 : std::fabs(n[1]) > 0.999f ? 1 : std::fabs(n[2]) > 0.999f ? 2 : -1;
         for (int k = 0; k < 3; k++) {
-            if (!(p[k] > -1e-3f && p[k] < 16.0f + 1e-3f)) return false;
+            // (a model may overshoot its block a little: a piston head's rod, a few custom models; up to two
+            // micro-voxels it is kept, at the edge)
+            if (!(p[k] > -2.0f && p[k] < 18.0f)) return false;
             out[k] = std::clamp(int(std::floor(p[k])), 0, 15);
         }
         if (a < 0) {
@@ -51,6 +53,7 @@ bool voxeliseBrick(const AtlasBrickQuad* quads, uint32_t quadCount, uint32_t m, 
                    uint32_t spriteCount, const uint32_t* texels, uint32_t texelCount, float emission, BrickVoxels& v,
                    uint32_t frame) {
     std::vector<float> acc(4096 * 4, 0.0f);  // linear rgb sums, samples
+    std::vector<int32_t> lastQuad(4096, -1);  // the quad that last wrote each voxel: a later quad over it overwrites
     Placer placer;
     bool any = false;
     for (uint32_t qi = 0; qi < quadCount; qi++) {
@@ -90,7 +93,12 @@ bool voxeliseBrick(const AtlasBrickQuad* quads, uint32_t quadCount, uint32_t m, 
                 if ((c >> 24) < 128) continue;  // a cut-out texel: nothing there
                 int vx[3];
                 if (!placer.place(p, n, vx)) continue;
-                size_t at = size_t(vx[0] + 16 * (vx[2] + 16 * vx[1])) * 4;
+                size_t vi = size_t(vx[0] + 16 * (vx[2] + 16 * vx[1])), at = vi * 4;
+                if (lastQuad[vi] != int32_t(qi)) {
+                    // (an overlay on the same face, a later quad: its texel, not a mean of the two)
+                    if (lastQuad[vi] >= 0) acc[at] = acc[at + 1] = acc[at + 2] = acc[at + 3] = 0.0f;
+                    lastQuad[vi] = int32_t(qi);
+                }
                 acc[at] += lin((c >> 16) & 255) * tr;
                 acc[at + 1] += lin((c >> 8) & 255) * tg;
                 acc[at + 2] += lin(c & 255) * tb;
@@ -362,6 +370,17 @@ void BrickStore::setCross(uint32_t m, std::shared_ptr<const std::vector<uint32_t
     revision_++;
 }
 
+void BrickStore::setOffset(uint32_t m, uint32_t word) {
+    std::lock_guard<std::mutex> lock(mu_);
+    if (m >= offset_.size()) {
+        if (!word) return;
+        offset_.resize(size_t(m) + 1, 0u);
+    }
+    if (offset_[m] == word) return;
+    offset_[m] = word;
+    revision_++;
+}
+
 void BrickStore::setCrossFrames(uint32_t m, std::vector<std::shared_ptr<const std::vector<uint32_t>>> frames, uint32_t ticks) {
     std::lock_guard<std::mutex> lock(mu_);
     if (m >= cross_.size()) cross_.resize(size_t(m) + 1);
@@ -446,10 +465,11 @@ bool BrickStore::pack(uint64_t have, bool force, const std::vector<uint32_t>& li
     std::lock_guard<std::mutex> lock(mu_);
     if (have == revision_ && !force && !out.empty()) return false;
     revision = revision_;
-    uint32_t M = uint32_t(std::max(std::max(byMat_.size(), lights.size()), cross_.size()));
-    out.assign(1 + 2 * size_t(M), 0u);
+    uint32_t M = uint32_t(std::max(std::max(std::max(byMat_.size(), lights.size()), cross_.size()), offset_.size()));
+    out.assign(1 + 3 * size_t(M), 0u);
     out[0] = M;
     std::copy(lights.begin(), lights.end(), out.begin() + 1 + M);
+    std::copy(offset_.begin(), offset_.end(), out.begin() + 1 + 2 * size_t(M));
     std::unordered_map<const std::vector<uint32_t>*, uint32_t> at;
     auto place = [&](const std::shared_ptr<const std::vector<uint32_t>>& r) {
         auto it = at.find(r.get());

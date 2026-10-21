@@ -95,6 +95,8 @@ struct ModelLib {
         std::vector<std::pair<uint8_t, uint32_t>> tints;  // per tint index: kind (1 grass, 2 foliage, 5 constant), colour
         int model = -1;  // its first variant
         std::string name;
+        uint8_t offType = 0;  // (0 none, 1 XZ, 2 XYZ) and its largest offsets
+        float offH = 0, offV = 0;
         int fluid = -1;  // its fluid model (quads.bin), -1 none
         float fluidH = 0;  // the fluid's own height
     };
@@ -171,7 +173,8 @@ inline bool loadModels(const std::string& dir, ModelLib& ml) {
         s.emit = u8();
         u8();
         f32();
-        if (u8()) p += 8;  // offset
+        s.offType = u8();
+        if (s.offType) s.offH = f32(), s.offV = f32();
         s.fluid = int8_t(u8());
         if (s.fluid >= 0) s.fluidH = f32(), p += 2;  // own height, amount, flags
         u8();
@@ -419,6 +422,15 @@ inline bool uploadBricks(AtlasContext* ctx, const ModelLib& ml, uint16_t first, 
             sp[i].firstTexel = at;
             sp[i].frames = 2u | 1u << 16;
         }
+    // (the plants' random offsets: atlas_set_material_offsets, from quads.bin's offset type)
+    std::vector<uint32_t> offs(ids.size(), 0u);
+    for (size_t m = 0; m < ids.size(); m++)
+        if (ids[m] < ml.states.size() && ml.states[ids[m]].offType) {
+            const auto& s = ml.states[ids[m]];
+            offs[m] = uint32_t(s.offType) | uint32_t(std::clamp(s.offH, 0.0f, 1.0f) * 255.0f + 0.5f) << 8 |
+                      uint32_t(std::clamp(s.offV, 0.0f, 1.0f) * 255.0f + 0.5f) << 16;
+        }
+    if (!offs.empty()) atlas_set_material_offsets(ctx, first, offs.data(), uint32_t(offs.size()));
     if (atlas_set_material_bricks(ctx, first, uint32_t(ids.size()), quads.data(), uint32_t(quads.size()), sp.data(),
                                   uint32_t(sp.size()), texels.data(), uint32_t(texels.size()), emission.data()) != ATLAS_OK)
         return why = atlas_last_error(ctx), false;

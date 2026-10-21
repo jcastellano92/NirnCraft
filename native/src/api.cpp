@@ -1734,6 +1734,15 @@ ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t fi
     ATLAS_CATCH(ctx)
 }
 
+ATLAS_API AtlasStatus atlas_set_material_offsets(AtlasContext* ctx, uint32_t first, const uint32_t* words, uint32_t count) {
+    if (!ctx || first == 0 || (!words && count)) return ATLAS_ERR_ARG;
+    if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
+    ATLAS_TRY
+    for (uint32_t m = 0; m < count; m++) ctx->bricks.setOffset(first + m, words[m]);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
 ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t first, uint32_t count, const AtlasBrickQuad* quads,
                                                 uint32_t quadCount, const AtlasBrickSprite* sprites, uint32_t spriteCount,
                                                 const uint32_t* texels, uint32_t texelCount, const float* emission) {

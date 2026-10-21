@@ -41,6 +41,7 @@ final class AtlasMaterials {
     private final List<AtlasShapes.Shape> pendingExactShapes = new ArrayList<>();
     private final List<int[][]> pendingExactTextures = new ArrayList<>();  // their faces' 16x16 textures (near hits)
     private final List<AtlasShapes.BrickModel> pendingExactBricks = new ArrayList<>();  // their bricks' quads (non-cube blocks)
+    private final List<Integer> pendingExactOffsets = new ArrayList<>();  // their random offsets (plants)
     private int nextExact = EXACT_FIRST;
 
     /** Shapes on: the materials handed out from now on carry their shapes, real sections use per-state ids. */
@@ -172,6 +173,7 @@ final class AtlasMaterials {
             brick = null;  // a model that cannot say: its shape then
         }
         pendingExactBricks.add(brick);
+        pendingExactOffsets.add(AtlasShapes.offsetWord(s));
         short id = (short) nextExact++;
         exact.put(key, id);
         byState.computeIfAbsent(sid, k -> new ArrayList<>()).add(new int[] {q, id});
@@ -260,11 +262,52 @@ final class AtlasMaterials {
         return k == TINT_GRASS ? grass : k == TINT_FOLIAGE ? foliage : k;
     }
 
+    /**
+     * A state's tint as its first tinting layer gives it (pink petals and wildflowers leave layer 0 blank and tint
+     * layer 1 by the grass): TINT_* or the constant RGB.
+     */
     private static int probeTint(BlockState s) {
+        int n = layers(s);
+        for (int i = 0; i < n; i++) {
+            int k = probeLayer(s, i);
+            if (k != TINT_NONE) return k;
+        }
+        return TINT_NONE;
+    }
+
+    private static int layers(BlockState s) {
+        try {
+            return net.minecraft.client.Minecraft.getInstance().getBlockColors().getTintSources(s).size();
+        } catch (RuntimeException e) {
+            return 0;
+        }
+    }
+
+    private static final Map<BlockState, int[]> LAYER_KINDS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * The colour a quad of tint layer `layer` takes on state s whose material wears the biome colour `tint` (RGB, the
+     * first tinting layer's, tint()): that colour for a biome layer, the constant for a constant one, dry foliage's for
+     * dry foliage, -1 for a blank layer (untinted).
+     */
+    static int layerTint(BlockState s, int layer, int tint) {
+        if (layer < 0) return -1;
+        int[] kinds = LAYER_KINDS.computeIfAbsent(s, st -> {
+            int n = layers(st);
+            int[] k = new int[n];
+            for (int i = 0; i < n; i++) k[i] = probeLayer(st, i);
+            return k;
+        });
+        if (layer >= kinds.length) return kinds.length == 0 ? tint : -1;
+        int k = kinds[layer];
+        return k == TINT_NONE ? -1 : k == TINT_GRASS || k == TINT_FOLIAGE ? tint : k;
+    }
+
+    private static int probeLayer(BlockState s, int layer) {
         try {
             var sources = net.minecraft.client.Minecraft.getInstance().getBlockColors().getTintSources(s);
-            if (sources.isEmpty() || sources.get(0) == null) return TINT_NONE;
-            int c = sources.get(0).colorInWorld(s, AtlasLabExport.TINT_PROBE, BlockPos.ZERO);
+            if (layer >= sources.size() || sources.get(layer) == null) return TINT_NONE;
+            int c = sources.get(layer).colorInWorld(s, AtlasLabExport.TINT_PROBE, BlockPos.ZERO);
             int rgb = c & 0xFFFFFF;
             if (c == -1 || rgb == 0xFFFFFF || rgb == AtlasLabExport.PROBE_WATER) return TINT_NONE;
             // dry foliage (leaf litter, dry grass): its common colour, a constant (it was untinted: grey-white)
@@ -291,10 +334,12 @@ final class AtlasMaterials {
             ctx.setMaterialShapes(first, pendingExactShapes.toArray(new AtlasShapes.Shape[0]));
             ctx.setMaterialTextures(first, pendingExactTextures.toArray(new int[0][][]));
             ctx.setMaterialBricks(first, pendingExactBricks.toArray(new AtlasShapes.BrickModel[0]));
+            ctx.setMaterialOffsets(first, pendingExactOffsets.stream().mapToInt(Integer::intValue).toArray());
             pendingExact.clear();
             pendingExactShapes.clear();
             pendingExactTextures.clear();
             pendingExactBricks.clear();
+            pendingExactOffsets.clear();
         }
     }
 

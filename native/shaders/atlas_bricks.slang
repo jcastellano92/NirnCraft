@@ -167,6 +167,23 @@ static const int GRID_LIGHT_RY = 48;
 static const uint GRID_LIGHT_ID = 0x00800000u;  // (+ 5 a 4 x 4 x 4: four single lights, one cluster)
 static const uint GRID_LIGHT_THREADS = uint((2 * GRID_LIGHT_R / 4) * (2 * GRID_LIGHT_R / 4) * (2 * GRID_LIGHT_RY / 4));
 
+// Material mat's random offset at world block wb (vanilla's OffsetType from Mth.getSeed(x, 0, z), atlas.h
+// atlas_set_material_offsets): where its brick is drawn from, shifted (0 for most)
+float3 brickOffset(uint mat, int3 wb) {
+    uint n = brickData[0];
+    uint w = mat < n ? brickData[1u + 2u * n + mat] : 0u;
+    if ((w & 3u) == 0u) return float3(0, 0, 0);
+    int64_t sx = int64_t(int(uint(wb.x) * 3129871u)), sz = int64_t(wb.z) * int64_t(116129781);
+    int64_t seed = sx ^ sz;
+    seed = seed * seed * int64_t(42317861) + seed * int64_t(11);
+    seed = seed >> 16;
+    float maxH = float((w >> 8) & 255u) / 255.0, maxV = float((w >> 16) & 255u) / 255.0;
+    float ox = clamp((float(int(seed & int64_t(15))) / 15.0 - 0.5) * 0.5, -maxH, maxH);
+    float oz = clamp((float(int((seed >> 8) & int64_t(15))) / 15.0 - 0.5) * 0.5, -maxH, maxH);
+    float oy = (w & 3u) == 2u ? (float(int((seed >> 4) & int64_t(15))) / 15.0 - 1.0) * maxV : 0.0;
+    return float3(ox, oy, oz);
+}
+
 // material mat's light word (bricks.hpp: rgb | level << 24), 0 none
 uint brickLightOf(uint mat) {
     uint n = brickData[0];

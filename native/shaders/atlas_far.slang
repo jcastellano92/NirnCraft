@@ -718,7 +718,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                     if (br != 0u) {
                         // (its walk is up to 48 micro-voxels: counted against the ray's budget as a few steps)
                         gTr.steps += 4u;
-                        BrickHit bh = brickHit(br, ro + d * t - float3(v), d, entryAxis(v, ro, d, inv, stepPos));
+                        BrickHit bh = brickHit(br, ro + d * t - float3(v) - brickOffset(mat, v + gBlock), d, entryAxis(v, ro, d, inv, stepPos));
                         if (bh.hit) {
                             gTr.t = t + bh.t;
                             gTr.mat = mat;
