@@ -1,4 +1,8 @@
 #include "world.hpp"
+
+#include "sectionpack.hpp"
+#include "sectionstore.hpp"
+#include "gencache.hpp"
 #include "parallel.hpp"
 
 #ifdef _WIN32
@@ -498,42 +502,352 @@ void World::setClasses(std::vector<uint8_t> cls) {
     classes_ = std::move(cls);
 }
 
-void World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
-    auto s = std::make_unique<Section>();
-    std::copy(mats, mats + 4096, s->mats.begin());
-    // (its generated levels outside the world's lock: an upload holds it for the map's update alone)
-    std::vector<uint8_t> cls;
+World::World() : store_(std::make_unique<SectionStore>()), genCache_(std::make_unique<GenCache>()) {}
+
+void World::setGenFingerprint(uint64_t fp) {
+    std::string root;
     {
         std::lock_guard<std::mutex> lock(mu_);
-        cls = classes_;
+        if (genFp_ == fp) return;
+        genFp_ = fp;
+        root = storeRoot_;
     }
-    s->buildMips(cls);
-    std::lock_guard<std::mutex> lock(mu_);
-    sections_[{0, sx, sy, sz}] = std::move(s);
-    undigested_.insert({0, sx, sy, sz});  // its coarse levels (World::digest)
-    markSectionDirty(sx, sy, sz);
+    genCache_->configure(root, fp);
 }
 
-void World::sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const {
+namespace {
+uint32_t uniformOf(const uint16_t* ids) {
+    for (int i = 1; i < 4096; i++)
+        if (ids[i] != ids[0]) return EditLayer::MIXED;
+    return ids[0];
+}
+}  // namespace
+
+std::shared_ptr<const Section> World::layerOver(const Key3& k, Section& s, uint8_t& flags) {
+    LayerPtr L = store_->layer(k);
+    if (!L) return nullptr;
+    if (!(flags & SectionStore::REGEN)) {
+        // a server's section: whole, and what it says stands (a regenerated base never replaces it)
+        if (!L->replaced) L->replaced = L->dirty = true;
+        return nullptr;
+    }
+    if (L->replaced || L->baseLost) {
+        // whole elsewhere (a rewrite, a lost base): kept, the regenerated base ignored (a raw copy only if edited: an
+        // unedited one is a base uploaded before the layer was known)
+        auto it = sections_.find(k);
+        auto m = rawMeta_.find(k);
+        if (it != sections_.end() && m != rawMeta_.end() && (m->second.flags & SectionStore::EDITED)) return it->second;
+        if (PackedIds w = store_->get(k)) {
+            auto c = std::make_shared<Section>();
+            unpackSection(w->data(), c->mats.data());
+            return c;
+        }
+    }
+    uint32_t h = sectionHash(s.mats.data());
+    if (!L->baseKnown) {
+        L->baseKnown = L->dirty = true;
+        L->baseHash = h;
+        L->baseUni = uniformOf(s.mats.data());
+    }
+    if (h == L->baseHash) {
+        L->apply(s.mats.data());
+        flags |= SectionStore::EDITED;
+        store_->countBase(true);
+        return nullptr;
+    }
+    // the generator changed under it: the delta cannot apply; the old section stays whole, flagged
+    store_->countBase(false);
+    std::fprintf(stderr, "[atlas] edit layer of section %d,%d,%d: its base changed (hash %08x, was %08x): the old section kept\n",
+                 k.x, k.y, k.z, h, L->baseHash);
+    L->baseLost = L->dirty = true;
+    PackedIds old;
+    auto it = sections_.find(k);
+    if (it != sections_.end()) {
+        s.mats = it->second->mats;
+    } else if ((old = store_->peek(k)) || (old = store_->fallback(k))) {
+        unpackSection(old->data(), s.mats.data());
+    } else {
+        L->apply(s.mats.data());  // (no copy left: its edits on the new base)
+    }
+    flags = SectionStore::EDITED | SectionStore::BASE_LOST;
+    return nullptr;
+}
+
+void World::commitSection(const Key3& k, std::shared_ptr<Section> s, uint8_t flags) {
+    sections_[k] = s;
+    if (gridCoarse.load(std::memory_order_relaxed) < coarseTop()) undigested_.insert(k);  // (World::digest)
+    markSectionDirty(k.x, k.y, k.z);
+    // (the tiers: packed on the GPU, then the raw copy goes; the packed one it replaces is stale)
+    RawMeta& m = rawMeta_[k];
+    m.gen = ++gen_;
+    m.flags = flags;
+    store_->erase(k);
+    if (packOnGpu.load(std::memory_order_relaxed)) packQueue_.push_back({k, m.gen});
+}
+
+void World::baseIn(const Key3& k, const uint16_t* base, Made* made) {
+    baseAsked_.erase(k);
+    LayerPtr L = store_->layer(k);
+    // (a host copy came meanwhile: it holds them; unless the base was not known: that copy was the tile's stand-in)
+    if (!L || (L->baseKnown && (sections_.count(k) || store_->has(k)))) return;
+    if (!L->baseKnown) store_->erase(k);
+    auto s = std::make_shared<Section>();
+    std::copy(base, base + 4096, s->mats.begin());
+    uint8_t flags = SectionStore::REGEN;
+    if (std::shared_ptr<const Section> keep = layerOver(k, *s, flags)) {
+        if (made) made->push_back({k, keep});
+        return;
+    }
+    if (!gridOwnsReal()) s->buildMips(classes_);
+    commitSection(k, s, flags);
+    if (made) made->push_back({k, s});
+}
+
+void World::takeBaseWanted(std::vector<Key3>& out) {
+    std::lock_guard<std::mutex> lock(mu_);
+    out.swap(baseWanted_);
+    baseWanted_.clear();
+    baseWantedN = 0;
+}
+
+void World::baseUniform(const Key3& k, uint16_t id, Made& made) {
+    std::lock_guard<std::mutex> lock(mu_);
+    std::vector<uint16_t> ids(4096, id);
+    baseIn(k, ids.data(), &made);
+}
+
+int World::layerNeed(const Key3& k) {
+    if (!layerCount.load(std::memory_order_relaxed)) return 0;
+    std::lock_guard<std::mutex> lock(mu_);
+    LayerPtr L = store_->layer(k);
+    if (!L) return 0;
+    if (L->replaced || L->baseLost || L->selfContained() || sections_.count(k) || store_->has(k)) return 1;
+    return 2;
+}
+
+std::shared_ptr<const Section> World::putSection(int sx, int sy, int sz, const uint16_t* mats, uint8_t flags) {
+    auto s = std::make_shared<Section>();
+    std::copy(mats, mats + 4096, s->mats.begin());
+    if (layerCount.load(std::memory_order_relaxed)) {
+        // (an edited section's base again: its layer over it; or its whole copy stays)
+        std::lock_guard<std::mutex> lock(mu_);
+        baseAsked_.erase({0, sx, sy, sz});
+        if (std::shared_ptr<const Section> keep = layerOver({0, sx, sy, sz}, *s, flags)) return keep;
+    }
+    // (its generated levels outside the world's lock: an upload holds it for the map's update alone; none when the
+    // grid's coarse levels own every level that reads them: the GPU makes them, no CPU stage per section)
+    if (!gridOwnsReal()) {
+        std::vector<uint8_t> cls;
+        {
+            std::lock_guard<std::mutex> lock(mu_);
+            cls = classes_;
+        }
+        s->buildMips(cls);
+    }
+    std::lock_guard<std::mutex> lock(mu_);
+    commitSection({0, sx, sy, sz}, s, flags);
+    return s;
+}
+
+void World::sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, SectionSrc>>& out) {
     std::lock_guard<std::mutex> lock(mu_);
     for (auto& [k, s] : sections_)
-        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, s);
+        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, SectionSrc{s, nullptr});
+    std::vector<std::pair<Key3, PackedIds>> packed;
+    store_->inRange(sx0, sz0, sx1, sz1, packed);
+    for (auto& [k, w] : packed)
+        if (!sections_.count(k)) out.emplace_back(k, SectionSrc{nullptr, w});
 }
 
-bool World::sectionMats(int sx, int sy, int sz, uint16_t out[4096]) const {
+void World::sectionsInBox(int x0, int y0, int z0, int x1, int y1, int z1, std::vector<std::pair<Key3, SectionSrc>>& out) {
+    std::lock_guard<std::mutex> lock(mu_);
+    for (int z = z0; z < z1; z++)
+        for (int x = x0; x < x1; x++)
+            for (int y = y0; y < y1; y++) {
+                Key3 k{0, x, y, z};
+                auto it = sections_.find(k);
+                if (it != sections_.end()) {
+                    out.emplace_back(k, SectionSrc{it->second, nullptr});
+                } else if (PackedIds w = store_->peek(k)) {
+                    out.emplace_back(k, SectionSrc{nullptr, w});
+                }
+            }
+}
+
+World::SectionSrc World::sectionSource(int sx, int sy, int sz) {
     std::lock_guard<std::mutex> lock(mu_);
     auto it = sections_.find({0, sx, sy, sz});
-    if (it == sections_.end()) return false;
-    std::copy(it->second->mats.begin(), it->second->mats.end(), out);
+    if (it != sections_.end()) return {it->second, nullptr};
+    PackedIds w = store_->get({0, sx, sy, sz});
+    if (!w && genCache_->on()) w = genCache_->section({0, sx, sy, sz});  // (a generated one the cache holds: never generated again)
+    return {nullptr, w};
+}
+
+bool World::sectionMats(int sx, int sy, int sz, uint16_t out[4096]) {
+    SectionSrc s = sectionSource(sx, sy, sz);
+    if (s.raw) {
+        std::copy(s.raw->mats.begin(), s.raw->mats.end(), out);
+        return true;
+    }
+    if (!s.packed) return false;
+    unpackSection(s.packed->data(), out);  // (one section: the host's own mirror)
     return true;
 }
 
-bool World::trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const {
+bool World::trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, SectionSrc>>& out) {
     std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
     if (!lock.owns_lock()) return false;
     for (auto& [k, s] : sections_)
-        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, s);
+        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, SectionSrc{s, nullptr});
+    std::vector<std::pair<Key3, PackedIds>> packed;
+    store_->inRange(sx0, sz0, sx1, sz1, packed);
+    for (auto& [k, w] : packed)
+        if (!sections_.count(k)) out.emplace_back(k, SectionSrc{nullptr, w});
     return true;
+}
+
+void World::setPackOnGpu(bool on) {
+    if (packOnGpu.load(std::memory_order_relaxed) == on) return;
+    std::lock_guard<std::mutex> lock(mu_);
+    packOnGpu = on;
+    if (!on) return;
+    for (auto& [k, m] : rawMeta_) packQueue_.push_back({k, m.gen});  // (uploaded before: packed now too)
+}
+
+void World::takePackQueue(size_t max, std::vector<PackReq>& out, size_t burst) {
+    std::lock_guard<std::mutex> lock(mu_);
+    if (burst > max) max = std::max(max, std::min(burst, packQueue_.size() / 8));
+    size_t i = 0;
+    for (; i < packQueue_.size() && out.size() < max; i++) {
+        auto& [k, gen] = packQueue_[i];
+        auto m = rawMeta_.find(k);
+        auto s = sections_.find(k);
+        if (m == rawMeta_.end() || m->second.gen != gen || s == sections_.end()) continue;  // (stale: newer, or gone)
+        out.push_back({k, gen, s->second});
+    }
+    packQueue_.erase(packQueue_.begin(), packQueue_.begin() + ptrdiff_t(i));
+}
+
+void World::packedDone(const std::vector<PackDone>& done, Made* made) {
+    std::lock_guard<std::mutex> lock(mu_);
+    for (const PackDone& d : done) {
+        if (d.gen & BAKE) {
+            if (d.words) {
+                if (d.key.lod > 0) genCache_->putCoarse(d.key, d.words, d.hash);  // (a far tile's mixed chunk)
+                else genCache_->putSection(d.key, d.words, d.hash);             // (to disk on the cache's own thread)
+            }
+            continue;
+        }
+        if (d.gen & BASE_FETCH) {
+            // (an edit layer's base, the GPU's own, packed there and read back)
+            if (!d.words) continue;
+            uint16_t ids[4096];
+            unpackSection(d.words->data(), ids);
+            baseIn(d.key, ids, made);
+            continue;
+        }
+        auto m = rawMeta_.find(d.key);
+        if (m == rawMeta_.end() || m->second.gen != d.gen || !d.words) continue;  // (an upload since replaced it)
+        store_->put(d.key, d.words, d.hash, m->second.flags);
+        sections_.erase(d.key);
+        undigested_.erase(d.key);
+        rawMeta_.erase(m);
+        packedCount_++;
+    }
+}
+
+void World::configureStore(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBytes, uint64_t coldBytes,
+                           Made* made) {
+    std::unique_lock<std::mutex> lock(mu_);
+    store_->configure(dir, seed, genVersion, warmBytes ? warmBytes : 512ull << 20, coldBytes ? coldBytes : 4ull << 30);
+    {
+        // (the gen cache beside the world's other tiers: <dir>/<seed>/gen-<fingerprint>)
+        char sub[32];
+        std::snprintf(sub, sizeof sub, "/%016llx", (unsigned long long)seed);
+        storeRoot_ = dir.empty() ? std::string() : dir + sub;
+        std::string root = storeRoot_;
+        uint64_t fp = genFp_;
+        lock.unlock();
+        genCache_->configure(root, fp);
+        lock.lock();
+    }
+    layerCount = store_->layerCount();
+    // (layers on disk still waiting for a base: asked of the grid again)
+    std::vector<Key3> keys;
+    store_->forEachLayer([&](const Key3& k, const EditLayer& l) {
+        keys.push_back(k);
+        if (!l.baseKnown && baseAsked_.insert(k).second) baseWanted_.push_back(k);
+    });
+    baseWantedN = baseWanted_.size();
+    // the generated sections held already (uploaded before the cache was set) that a loaded layer edits: the layer over
+    // them now, as if they had come after it
+    for (const Key3& k : keys) {
+        std::shared_ptr<Section> s;
+        uint8_t flags = 0;
+        auto it = sections_.find(k);
+        if (it != sections_.end()) {
+            auto m = rawMeta_.find(k);
+            flags = m == rawMeta_.end() ? 0 : m->second.flags;
+            if (!(flags & SectionStore::REGEN) || (flags & SectionStore::EDITED)) continue;
+            s = std::make_shared<Section>(*it->second);
+        } else if (PackedIds w = store_->peek(k)) {
+            uint32_t h = 0;
+            store_->meta(k, h, flags);
+            if (!(flags & SectionStore::REGEN) || (flags & SectionStore::EDITED)) continue;
+            s = std::make_shared<Section>();
+            unpackSection(w->data(), s->mats.data());
+        } else {
+            continue;
+        }
+        if (std::shared_ptr<const Section> keep = layerOver(k, *s, flags)) {
+            // (the whole copy stands: the raw base uploaded before goes)
+            if (sections_.count(k) && !(rawMeta_[k].flags & SectionStore::EDITED))
+                sections_.erase(k), rawMeta_.erase(k), undigested_.erase(k);
+            if (made) made->push_back({k, keep});
+            continue;
+        }
+        if (!gridOwnsReal()) s->buildMips(classes_);
+        commitSection(k, s, flags);
+        if (made) made->push_back({k, s});
+    }
+    // and what the cold tier holds inside the grid's window (whole sections, builds on air): the window read the world
+    // before the cache was set
+    int d = gridD_.load(std::memory_order_relaxed);
+    if (made && d > 0 && !dir.empty()) {
+        int ox = gridOx_.load(std::memory_order_relaxed), oz = gridOz_.load(std::memory_order_relaxed);
+        std::vector<std::pair<Key3, PackedIds>> held;
+        std::unordered_set<Key3, Key3Hash> before;
+        for (auto& [k, s] : *made) before.insert(k);
+        std::vector<std::pair<Key3, PackedIds>> warmNow;
+        for (int z = oz; z < oz + d; z += 16)
+            for (int x = ox; x < ox + d; x += 16) {
+                // (warm's own the grid had; only what came from disk now)
+                std::vector<std::pair<Key3, PackedIds>> part;
+                store_->inRange(x, z, std::min(x + 16, ox + d), std::min(z + 16, oz + d), part);
+                for (auto& [k, w] : part) held.push_back({k, w});
+            }
+        for (auto& [k, w] : held) {
+            if (sections_.count(k) || before.count(k) || !w) continue;
+            uint32_t h = 0;
+            uint8_t f = 0;
+            store_->meta(k, h, f);
+            if (!(f & SectionStore::EDITED)) continue;  // (a generated one warm held: the grid has it)
+            auto s = std::make_shared<Section>();
+            unpackSection(w->data(), s->mats.data());
+            made->push_back({k, s});
+        }
+    }
+}
+
+World::StoreStats World::storeStats(void* tiers) const {
+    std::lock_guard<std::mutex> lock(mu_);
+    StoreStats s;
+    s.raw = sections_.size();
+    s.rawBytes = uint64_t(sections_.size()) * sizeof(Section);
+    s.packQueue = packQueue_.size();
+    s.packed = packedCount_;
+    if (tiers) *static_cast<SectionStore::Stats*>(tiers) = store_->stats();
+    return s;
 }
 
 void World::setGridWindow(int ox, int oz, int d) {
@@ -544,6 +858,7 @@ void World::setGridWindow(int ox, int oz, int d) {
 }
 
 void World::gridReleased(const std::vector<Key3>& secs) {
+    if (gridOwnsReal()) return;  // (level 0's regions are the tiles' alone: the grid's unknown chunks fall back to them)
     std::lock_guard<std::mutex> lock(mu_);
     bool nbrs = groupsWanted.load(std::memory_order_relaxed);
     for (const Key3& k : secs) {
@@ -581,8 +896,11 @@ void World::markSectionDirty(int sx, int sy, int sz) {
     bool nbrs = groupsWanted.load(std::memory_order_relaxed);
     // (the GPU's grid holds it: its level-0 region waits until the grid's window leaves it, setGridWindow)
     bool grid = gridOwnsLevel0.load(std::memory_order_relaxed) && gridHolds(sx, sz) && !gridNotHeld_.count({0, sx, sy, sz});
-    markRegions(sx, sy, sz, 0, 0, grid ? gridSkipped_ : dirty_, nbrs);
-    markRegions(sx, sy, sz, 1, 4, sectionDirty_, nbrs);
+    // (the grid owns every level's real blocks: level 0's regions are the tiles' alone, nothing to rebuild either)
+    if (!gridOwnsReal()) markRegions(sx, sy, sz, 0, 0, grid ? gridSkipped_ : dirty_, nbrs);
+    // (levels the grid's coarse levels own: nothing to rebuild here)
+    int owned = gridCoarse.load(std::memory_order_relaxed);
+    if (owned < 4) markRegions(sx, sy, sz, 1 + owned, 4, sectionDirty_, nbrs);
     lastSectionMs_ = nowMs();
 }
 
@@ -639,14 +957,56 @@ void Section::buildMips(const std::vector<uint8_t>& cls) {
     (void)src;
 }
 
-void World::editBlock(int x, int y, int z, uint16_t mat) {
+bool World::editBlock(int x, int y, int z, uint16_t mat) {
     std::lock_guard<std::mutex> lock(mu_);
     int sx = floorDiv(x, 16), sy = floorDiv(y, 16), sz = floorDiv(z, 16);
     Key3 sk{0, sx, sy, sz};
+    uint32_t voxel = uint32_t((x & 15) + 16 * ((z & 15) + 16 * (y & 15)));
     auto it = sections_.find(sk);
     std::shared_ptr<Section> s;
+    uint8_t flags = SectionStore::EDITED, srcFlags = 0;
+    uint32_t srcHash = 0;
+    if (auto m = rawMeta_.find(sk); m != rawMeta_.end()) srcFlags = m->second.flags;
+    PackedIds held = it == sections_.end() ? store_->get(sk) : nullptr;
+    if (held) store_->meta(sk, srcHash, srcFlags);
+    flags |= srcFlags & (SectionStore::REGEN | SectionStore::BASE_LOST);
+    // (the edit kept as a layer over the generated base, sectionstore.hpp; the tiers on, one whose base the host does
+    // not hold waits for it, else the tile's stand-in as before)
+    bool tiers = packOnGpu.load(std::memory_order_relaxed);
+    LayerPtr L = store_->layer(sk);
+    if (!L) {
+        if (it != sections_.end() || held) {
+            if ((srcFlags & SectionStore::REGEN) && !(srcFlags & SectionStore::EDITED)) {
+                L = store_->makeLayer(sk);
+                layerCount = store_->layerCount();
+                L->baseKnown = true;
+                if (it != sections_.end()) {
+                    L->baseHash = sectionHash(it->second->mats.data());
+                    L->baseUni = uniformOf(it->second->mats.data());
+                } else {
+                    uint16_t ids[4096];
+                    unpackSection(held->data(), ids);
+                    L->baseHash = srcHash;
+                    L->baseUni = uniformOf(ids);
+                }
+            }
+        } else {
+            L = store_->makeLayer(sk);  // (its base: the GPU's, or not made yet)
+            layerCount = store_->layerCount();
+        }
+    }
+    if (L) L->set(voxel, mat);
+    if (L && (tiers || !L->baseKnown) && it == sections_.end() && !held) {
+        // no host copy: the base is the GPU's (the generator's), or one to come again: the edit shows once it does
+        // (the tiers off: the tile's stand-in meanwhile, replaced when the base comes)
+        if (baseAsked_.insert(sk).second) baseWanted_.push_back(sk), baseWantedN = baseWanted_.size();
+        if (tiers) return false;
+    }
     if (it != sections_.end()) {
         s = std::make_shared<Section>(*it->second);  // copy on write: builders may hold the old one
+    } else if (held) {
+        s = std::make_shared<Section>();
+        unpackSection(held->data(), s->mats.data());  // (the warm or cold tier's: one section, the host's mirror)
     } else {
         // materialise the section from the LOD 0 tile so the edit sits in consistent surroundings
         s = std::make_shared<Section>();
@@ -663,23 +1023,37 @@ void World::editBlock(int x, int y, int z, uint16_t mat) {
                     s->mats[size_t(lx + 16 * (lz + 16 * ly))] = m;
                 }
     }
-    s->mats[size_t((x & 15) + 16 * ((z & 15) + 16 * (y & 15)))] = mat;
-    s->buildMips(classes_);
-    sections_[sk] = std::move(s);
-    undigested_.insert(sk);
-    markSectionDirty(sx, sy, sz);
+    if (L && !L->baseKnown && it == sections_.end() && !held) {
+        // (the tiers off: the tile's stand-in is the base it was edited on; one id throughout, above the ground, it is
+        // whole on its own; a generated base that comes later and differs keeps this section, as a generator change)
+        uint32_t u = uniformOf(s->mats.data());
+        if (u != EditLayer::MIXED) {
+            L->baseKnown = true;
+            L->baseUni = u;
+            L->baseHash = sectionHash(s->mats.data());
+            flags |= SectionStore::REGEN;
+            baseAsked_.erase(sk);
+        }
+    }
+    s->mats[voxel] = mat;
+    if (!gridOwnsReal()) s->buildMips(classes_);
+    // (edited: kept whatever its source, packed again, its old packed copy stale)
+    commitSection(sk, std::move(s), flags);
+    return true;
 }
 
 // ---- the coarse levels of real content (CoarseCube) ------------------------------------------------------------------
 
 template <class F> void World::forCoarse(const Key3& k, F&& f) const {
-    if (coarse_.empty()) return;
+    // (a level the grid's coarse levels own is built from the tiles alone; nor are the cubes they own kept)
+    int owned = gridCoarse.load(std::memory_order_relaxed);
+    if (coarse_.empty() || k.lod <= owned) return;
     int s = 1 << k.lod, span = 256 << k.lod;
     // the region's columns and its ring (one voxel), every row (a column is evaluated over all its content)
     int x0 = floorDiv(k.x * span - s, COARSE_CUBE), x1 = floorDiv(k.x * span + span + s - 1, COARSE_CUBE);
     int z0 = floorDiv(k.z * span - s, COARSE_CUBE), z1 = floorDiv(k.z * span + span + s - 1, COARSE_CUBE);
     int rows = (WORLD_TOP_Y - WORLD_MIN_Y + COARSE_CUBE - 1) / COARSE_CUBE;
-    int first = std::max(k.lod, COARSE_MIN), top = coarseTop();
+    int first = std::max({k.lod, COARSE_MIN, owned + 1}), top = coarseTop();
     if (first > top) return;
     size_t keys = size_t(x1 - x0 + 1) * size_t(z1 - z0 + 1) * size_t(rows) * size_t(top - first + 1);
     if (keys > coarse_.size()) {
@@ -713,10 +1087,12 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
     std::shared_ptr<const ShapeSet> shapes;
     std::vector<uint8_t> cls;
     int top;
+    // (the levels the grid's coarse levels own are not kept here: from the next one up)
+    int first = std::max(COARSE_MIN, gridCoarse.load(std::memory_order_relaxed) + 1);
     {
         std::lock_guard<std::mutex> lock(mu_);
         top = coarseTop();
-        if (top < COARSE_MIN) {
+        if (top < first) {
             undigested_.clear();
             return;
         }
@@ -772,7 +1148,8 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
                 const Section& sec = *todo[i].second;
                 D& d = ds[i];
                 int bx = sk.x * 16, by = sk.y * 16, bz = sk.z * 16;
-                for (int level = COARSE_MIN; level <= std::min(4, top); level++) {
+                if (first > 4) d.m4 = sec.at(4, 0, 0, 0);  // (level 5's child: the section's generated level)
+                for (int level = first; level <= std::min(4, top); level++) {
                     int n = 16 >> level;
                     for (int y = 0; y < n; y++)
                         for (int z = 0; z < n; z++)
@@ -787,7 +1164,7 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
                             }
                 }
                 d.any = Coverage::contentBox(sec, 0, 0, 0, 16, d.lo, d.hi);
-                if (top >= 5 && d.any) {
+                if (top >= 5 && first <= 5 && d.any) {
                     for (int c = 0; c < 8; c++) {
                         int cx = c & 1, cz = (c >> 1) & 1, cy = c >> 2;
                         int q0[3] = {cx * 32, cy * 32, cz * 32}, w0[3] = {bx * 4 + q0[0], by * 4 + q0[1], bz * 4 + q0[2]};
@@ -873,15 +1250,15 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
         int lx, ly, lz;
         sectionInCube(sk.x, sk.y, sk.z, lx, ly, lz);
         int bit = lx + 16 * (lz + 16 * ly);
-        for (int level = COARSE_MIN; level <= top; level++) edit(sectionCube(level, sk.x, sk.y, sk.z)).seen[bit >> 6] |= 1ull << (bit & 63);
+        for (int level = first; level <= top; level++) edit(sectionCube(level, sk.x, sk.y, sk.z)).seen[bit >> 6] |= 1ull << (bit & 63);
         // the trees of the levels that read it only from here (5 and up)
-        if (top >= 5) markRegions(sk.x, sk.y, sk.z, 5, lodCount - 1, treeDirty_, true);
+        if (top >= 5) markRegions(sk.x, sk.y, sk.z, std::max(5, first), lodCount - 1, treeDirty_, true);
         for (const Vox& v : d.vox) {
             Next& n = touch(v.level, v.x, v.y, v.z);
             n.mat = v.mat, n.mask = v.mat ? v.mask : 0, n.box = v.box, n.fm = v.fm;
         }
         int bx = sk.x * 16, by = sk.y * 16, bz = sk.z * 16;
-        if (top >= 5) {
+        if (top >= 5 && first <= 5) {
             Next& n = touch(5, bx, by, bz);
             int ox = sk.x & 1, oy = (sk.y - WORLD_MIN_Y / 16) & 1, oz = sk.z & 1;  // the section's octant
             for (int c = 0; c < 8; c++) {
@@ -904,6 +1281,7 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
     std::sort(changed5.begin(), changed5.end());
     changed5.erase(std::unique(changed5.begin(), changed5.end()), changed5.end());
     for (auto& v : changed5) {
+        if (first > 5) break;  // (level 6's children are level 5's: not kept)
         Next& n5 = touch(5, v[0], v[1], v[2]);
         n5.mat = voteKids(n5.kids, cls);
         n5.box = unionOf(n5.kidBoxes);
@@ -1047,7 +1425,9 @@ World::Job World::snapshot(const Key3& k, bool groups) const {
             if (n != tiles_.end()) j.nbr[i] = n->second;
         }
     }
-    if (groups && k.lod <= 4 && !sections_.empty()) {
+    // (a level the grid's coarse levels own: its regions from the tiles alone, the real blocks the grid's)
+    bool real = k.lod == 0 ? !gridOwnsReal() : k.lod > gridCoarse.load(std::memory_order_relaxed);
+    if (groups && real && k.lod <= 4 && !sections_.empty()) {
         // the groups read whole section columns around the region (its border ring for exposure, every row: a column
         // is evaluated over all its content)
         int per = 16 << k.lod;
@@ -1067,7 +1447,7 @@ World::Job World::snapshot(const Key3& k, bool groups) const {
         }
     }
     if (groups) forCoarse(k, [&](const Key3& ck, const std::shared_ptr<const CoarseCube>& c) { j.coarse.emplace(ck, c); });
-    if (!groups && k.lod <= 4 && !sections_.empty()) {
+    if (!groups && real && k.lod <= 4 && !sections_.empty()) {
         int per = 16 << k.lod;  // sections per region side at this level
         int sx0 = k.x * per, sy0 = floorDiv(WORLD_MIN_Y + k.y * 256 * (1 << k.lod), 16), sz0 = k.z * per;
         if (k.lod > 0 || sections_.size() < 4096) {
@@ -1810,9 +2190,11 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         for (auto it = sections_.begin(); it != sections_.end();) {
             int rx = floorDiv(it->first.x * 16, 256), rz = floorDiv(it->first.z * 16, 256);
             if (std::abs(rx - centreRegion[0][0]) > keep || std::abs(rz - centreRegion[0][1]) > keep)
-                undigested_.erase(it->first), it = sections_.erase(it);
+                undigested_.erase(it->first), rawMeta_.erase(it->first), it = sections_.erase(it);
             else ++it;
         }
+        // the packed tiers: past the kept regions out of warm (to the cold tier, or dropped), and the warm one's budget
+        store_->enforce(centreRegion[0][0] * 16 + 8, centreRegion[0][1] * 16 + 8, keep);
         for (int lod = 0; lod < lodCount; lod++)
             if (centreRegion[lod][0] != lastCentre_[lod][0] || centreRegion[lod][1] != lastCentre_[lod][1]) moved = true;
     }
@@ -1876,6 +2258,20 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
 }
 
 World::~World() {
+    genCache_.reset();  // (its queue written first)
+    {
+        // (the edited sections not packed yet: into warm, so their layers' records keep them whole beside them)
+        std::lock_guard<std::mutex> lock(mu_);
+        for (auto& [k, m] : rawMeta_) {
+            LayerPtr L = (m.flags & SectionStore::EDITED) ? store_->layer(k) : nullptr;
+            auto s = sections_.find(k);
+            if (!L || !L->dirty || s == sections_.end()) continue;
+            store_->put(k, std::make_shared<const std::vector<uint32_t>>(packSection(s->second->mats.data())),
+                        sectionHash(s->second->mats.data()), m.flags);
+        }
+    }
+    // (store_ first: its type is complete only here; it writes its changed layers)
+    store_.reset();
     {
         std::lock_guard<std::mutex> lock(mu_);
         stopBuilders_ = true;

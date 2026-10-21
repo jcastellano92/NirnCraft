@@ -453,33 +453,49 @@ public final class StreetPlan {
         return t * t * (3f - 2f * t);
     }
 
-    // ------------------------------------------------------------------ painter / mask access (package)
+    // ------------------------------------------------------------------ painter / mask access (public: the atlas overlays upload the buckets)
 
-    int bucket(int bx, int bz) {
+    /** Per bucket id its chunk (bx, bz) pair (the atlas overlays look buckets up on the GPU's side). */
+    public int[] bucketChunks() {
+        int[] out = new int[buckets() * 2];
+        for (var e : bucketOf.long2IntEntrySet()) {
+            long k = e.getLongKey();
+            out[e.getIntValue() * 2] = (int) (k >> 32);
+            out[e.getIntValue() * 2 + 1] = (int) k;
+        }
+        return out;
+    }
+
+    /** The number of chunk buckets (bucket ids are 0 .. buckets() - 1). */
+    public int buckets() {
+        return bucketEdgeOff.length - 1;
+    }
+
+    public int bucket(int bx, int bz) {
         return bucketOf.get(key(bx, bz));
     }
 
-    int edgeFrom(int k) {
+    public int edgeFrom(int k) {
         return bucketEdgeOff[k];
     }
 
-    int edgeTo(int k) {
+    public int edgeTo(int k) {
         return bucketEdgeOff[k + 1];
     }
 
-    int edgeAt(int j) {
+    public int edgeAt(int j) {
         return bucketEdges[j];
     }
 
-    int plotFrom(int k) {
+    public int plotFrom(int k) {
         return bucketPlotOff[k];
     }
 
-    int plotTo(int k) {
+    public int plotTo(int k) {
         return bucketPlotOff[k + 1];
     }
 
-    int plotAt(int j) {
+    public int plotAt(int j) {
         return bucketPlots[j];
     }
 

@@ -151,6 +151,10 @@ public final class AtlasNative {
     private final MethodHandle setAir, airFromClimate, airLight, airCoeffs, airMultiscatter;
     // abi 0.17, the sky's own light (null with an older library)
     private final MethodHandle setSkyGlow;
+    // the host's tiers and the self-baking cache's directory (atlas_set_cache; null with an older library)
+    private final MethodHandle setCache, setPipelineCache;
+    // abi 0.18, the micro-voxel bricks (null with an older library)
+    private final MethodHandle setBricks;
     /** AtlasClimate and AtlasAir (atlas.h) as float arrays: 13 and 11 floats. */
     public static final int CLIMATE_FLOATS = 13, AIR_FLOATS = 11;
     private int abi;
@@ -238,6 +242,11 @@ public final class AtlasNative {
         airCoeffs = bindOptional(l, lib, "atlas_air_coeffs", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         airMultiscatter = bindOptional(l, lib, "atlas_air_multiscatter", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         setSkyGlow = bindOptional(l, lib, "atlas_set_sky_glow", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
+        setPipelineCache = bindOptional(l, lib, "atlas_set_pipeline_cache", FunctionDescriptor.of(JAVA_INT, ADDRESS));
+        setCache = bindOptional(l, lib, "atlas_set_cache",
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_LONG, JAVA_INT, JAVA_LONG, JAVA_LONG));
+        setBricks = bindOptional(l, lib, "atlas_set_material_bricks", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT,
+                ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS));
     }
 
     // ---- the air (abi 0.16; atlas.h AtlasAir, native/src/air.hpp): context-free, any thread ------------------------
@@ -435,6 +444,20 @@ public final class AtlasNative {
     public String buildInfo() {
         try {
             return ((MemorySegment) buildInfo.invokeExact()).reinterpret(512).getString(0);
+        } catch (Throwable t) {
+            throw rethrow(t);
+        }
+    }
+
+    /**
+     * The file atlas keeps its Vulkan pipelines in between runs (the context's and the generator's), before the
+     * first context (atlas_set_pipeline_cache): the loading phase's warm start. False with an older library.
+     */
+    public boolean setPipelineCache(java.nio.file.Path file) {
+        if (setPipelineCache == null) return false;
+        try (Arena a = Arena.ofConfined()) {
+            java.nio.file.Files.createDirectories(file.toAbsolutePath().getParent());
+            return (int) setPipelineCache.invokeExact(a.allocateFrom(file.toAbsolutePath().toString())) == 0;
         } catch (Throwable t) {
             throw rethrow(t);
         }
@@ -675,6 +698,22 @@ public final class AtlasNative {
          * added to the air's sky light the far field lights with: up and ground radiance (rgb). A core without it lights
          * with the air alone; false then.
          */
+        /**
+         * The world's directory for the core's disk tiers (atlas_set_cache): the sections the client generated (the
+         * self-baking cache), edits as layers over them, the server's sections; a directory of the seed's inside it.
+         * Budgets 0: the core's defaults. False with an older library.
+         */
+        public boolean setCache(java.nio.file.Path dir, long seed, int genVersion, long hostBytes, long diskBytes) {
+            if (setCache == null) return false;
+            try (Arena a = Arena.ofConfined()) {
+                check((int) setCache.invokeExact(ptr, a.allocateFrom(dir.toAbsolutePath().toString()), seed, genVersion, hostBytes, diskBytes),
+                        "atlas_set_cache");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
         public boolean setSkyGlow(float[] up, float[] ground) {
             if (setSkyGlow == null) return false;
             try (Arena a = Arena.ofConfined()) {
@@ -770,6 +809,71 @@ public final class AtlasNative {
                         for (int k = 0; k < 256; k++) m.set(JAVA_INT, per * i + 4L * (f * 256 + k), t[f][k]);
                 }
                 check((int) setTextures.invokeExact(ptr, first, m, textures.length), "atlas_set_material_textures");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** (abi 0.18) Whether this core takes micro-voxel bricks (atlas_set_material_bricks). */
+        public boolean hasBricks() {
+            return setBricks != null;
+        }
+
+        /**
+         * (abi 0.18, optional) The micro-voxel bricks of materials first .. first + n - 1 (atlas.h atlas_set_material_bricks):
+         * per material its model quads (null or empty: no brick), voxelised natively. False when the core does not take them.
+         */
+        public boolean setMaterialBricks(int first, AtlasShapes.BrickModel[] models) {
+            if (setBricks == null || models.length == 0) return false;
+            // the sprites the quads sample, once each (frame 0, ARGB)
+            java.util.IdentityHashMap<int[], Integer> spriteIndex = new java.util.IdentityHashMap<>();
+            java.util.List<int[]> sprites = new java.util.ArrayList<>();
+            int quads = 0;
+            long texels = 0;
+            for (AtlasShapes.BrickModel bm : models) {
+                if (bm == null) continue;
+                for (AtlasShapes.BrickQuad q : bm.quads()) {
+                    quads++;
+                    if (spriteIndex.putIfAbsent(q.texels(), sprites.size()) == null) {
+                        sprites.add(q.texels());
+                        texels += q.texels().length - AtlasShapes.SPRITE_HEAD;
+                    }
+                }
+            }
+            final long QUAD = 96;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment qm = a.allocate(QUAD * Math.max(1, quads), 8);
+                MemorySegment sm = a.allocate(16L * Math.max(1, sprites.size()), 8);
+                MemorySegment tm = a.allocate(4L * Math.max(1, texels), 8);
+                MemorySegment em = a.allocate(4L * models.length, 8);
+                long at = 0;
+                for (int i = 0; i < sprites.size(); i++) {
+                    int[] t = sprites.get(i);  // {width, height, frames, ticks a frame, texels...}
+                    sm.set(JAVA_INT, 16L * i, t[0]);
+                    sm.set(JAVA_INT, 16L * i + 4, t[1]);
+                    sm.set(JAVA_INT, 16L * i + 8, (int) at);
+                    sm.set(JAVA_INT, 16L * i + 12, (t[2] & 0xFFFF) | (Math.min(t[3], 0xFFFF) << 16));
+                    MemorySegment.copy(t, AtlasShapes.SPRITE_HEAD, tm, JAVA_INT, 4L * at, t.length - AtlasShapes.SPRITE_HEAD);
+                    at += t.length - AtlasShapes.SPRITE_HEAD;
+                }
+                long o = 0;
+                for (int m = 0; m < models.length; m++) {
+                    AtlasShapes.BrickModel bm = models[m];
+                    em.set(JAVA_FLOAT, 4L * m, bm == null ? 0f : bm.emission());
+                    if (bm == null) continue;
+                    for (AtlasShapes.BrickQuad q : bm.quads()) {
+                        for (int k = 0; k < 12; k++) qm.set(JAVA_FLOAT, o + 4L * k, q.pos()[k]);
+                        for (int k = 0; k < 8; k++) qm.set(JAVA_FLOAT, o + 48 + 4L * k, q.uv()[k]);
+                        qm.set(JAVA_INT, o + 80, spriteIndex.get(q.texels()));
+                        qm.set(JAVA_INT, o + 84, q.tint());
+                        qm.set(JAVA_INT, o + 88, q.dir());
+                        qm.set(JAVA_INT, o + 92, m);
+                        o += QUAD;
+                    }
+                }
+                check((int) setBricks.invokeExact(ptr, first, models.length, qm, quads, sm, sprites.size(), tm, (int) texels, em),
+                        "atlas_set_material_bricks");
                 return true;
             } catch (Throwable t) {
                 throw rethrow(t);

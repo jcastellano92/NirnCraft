@@ -17,6 +17,8 @@ layout(location = 2) in vec2 texCoord0;
 layout(location = 3) in vec4 vertexColor;
 layout(location = 4) in vec2 lightLevels;
 layout(location = 5) in vec3 toCamera;
+layout(location = 6) in vec4 clipPos;
+uniform sampler2D AtlasWater;  // atlas's near light: its alpha the water's surface in front (atlasBehindWater)
 
 #ifndef OIT_ALPHA_ONLY
 layout(location = 0) out vec4 fragColor;
@@ -43,6 +45,8 @@ void main() {
     }
 #endif
     // (our look: no vanilla distance fog, the air's haze is the resolve's; a medium if the eye is in one)
+    if (KeyDir.w > 1.5)  // (the unified field: under atlas's water, through it)
+        color.rgb = atlasBehindWater(color.rgb, texture(AtlasWater, clipPos.xy / clipPos.w * 0.5 + 0.5).a, sphericalVertexDistance);
     if (Look.z > 0.5) { fragColor = vec4(atlasMedium(color.rgb, sphericalVertexDistance), color.a); return; }
     fragColor = apply_fog(color, sphericalVertexDistance, cylindricalVertexDistance, FogEnvironmentalStart,
                           FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, fogColor);

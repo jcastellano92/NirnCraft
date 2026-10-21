@@ -34,6 +34,8 @@
 // left that window and come back; the core keeps them as it does in game (World::sectionKeep: windowRadius + 3 regions)
 // and draws what it dropped from its coarse levels of real content. server=0 uploads them all at once and keeps them
 // however far the camera goes (ATLAS_SECTION_KEEP=64: the old element tier, which no game reproduces).
+// synth=R (no export) builds sections over the preview terrain instead (stone, dirt, grass, water, some ore pockets),
+// sent farthest first (synthorder=far|near|random); seqgrid=1 adds the grid's residency to every seq frame's line.
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -42,6 +44,15 @@
 #include <cstring>
 #include <filesystem>
 #include <map>
+#include <set>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <psapi.h>  // (seqgrid: the process's memory; K32GetProcessMemoryInfo, in kernel32)
+#undef near
+#undef far
+#endif
 #include <string>
 #include <thread>
 #include <vector>
@@ -292,6 +303,111 @@ int main(int argc, char** argv) {
     // the in-game export: its states as far materials, its sections, the ground under them in the column tiles
     exportdata::Loaded ex;
     double loadMs = 0;
+    // synth=R (no export; residency tests): sections built over the preview terrain within R sections of the camera's,
+    // sent as a server's stream carries them (synthorder=far, the default: farthest first, the arrival order the live
+    // pool filled in; near; random): stone under the ground, three of dirt, the top grass (snow above y 200), water to
+    // y 62, nothing above; an ore pocket of gravel in a quarter of the sections (so most of a mountain's inside is one id)
+    // a synth column's sections (the preview's ground; see synth= above), appended to out; the count of one id
+    auto synthColumn = [&](int cx, int cz, std::vector<exportdata::Held>& out) {
+        int hgt[256];
+        int top = 62;
+        size_t uniform = 0;
+        for (int i = 0; i < 256; i++) {
+            hgt[i] = int(std::floor(atlas_preview_height(ctx, cx * 16 + (i & 15) + 0.5, cz * 16 + (i >> 4) + 0.5)));
+            top = std::max(top, hgt[i]);
+        }
+        for (int sy = -4; sy * 16 <= top && sy < 40; sy++) {
+            exportdata::Held hs{cx, sy, cz, std::vector<uint16_t>(4096, 0)};
+            uint32_t hsd = uint32_t(cx) * 73856093u ^ uint32_t(sy) * 19349663u ^ uint32_t(cz) * 83492791u;
+            hsd = (hsd ^ (hsd >> 13)) * 1274126177u;
+            bool ore = (hsd >> 30) == 0u;
+            int ox = int((hsd >> 4) & 15u), oy = int((hsd >> 8) & 15u), oz = int((hsd >> 12) & 15u);
+            bool any = false, one = true;
+            for (int y = 0; y < 16; y++)
+                for (int lz = 0; lz < 16; lz++)
+                    for (int lx = 0; lx < 16; lx++) {
+                        int wy = sy * 16 + y, g = hgt[lx + 16 * lz];
+                        uint16_t m = wy < g - 3 ? 1 : wy < g ? 3 : wy == g ? (g > 200 ? 5 : 2) : wy <= 62 ? 6 : 0;
+                        if (m == 1 && ore && std::abs(lx - ox) <= 1 && std::abs(y - oy) <= 1 && std::abs(lz - oz) <= 1) m = 7;
+                        hs.mats[size_t(lx + 16 * (lz + 16 * y))] = m;
+                        any |= m != 0;
+                        one &= m == hs.mats[0];
+                    }
+            if (!any) continue;
+            uniform += one ? 1 : 0;
+            out.push_back(std::move(hs));
+        }
+        return uniform;
+    };
+    // synthstream=1 (with synth=): the sections made a 256-block tile at a time as the server's window (4 tiles either
+    // side of the camera's) enters it, sent again after a tile left and came back (synthonce=1: never again: what
+    // comes back is the core's own, from its tiers); long walks without holding the whole world in the tool
+    bool synthStream = !haveExport && num(a, "synth", 0) > 0 && num(a, "synthstream", 0) > 0;
+    bool synthOnce = num(a, "synthonce", 0) > 0;
+    std::set<std::pair<int, int>> synthSent, synthEver;
+    // synthregen=1: the synth sections sent as the client's generator's (ATLAS_SECTION_REGENERABLE: dropped when they
+    // leave, not kept); synthedit=N: a builder's edits, N builds a tile the first time it is sent (a house of stone
+    // walls on a gravel floor under a dirt roof, its cellar dug out; every fourth with a 40-block tower), through
+    // atlas_notify_block: the edit layers' test (sectionstore.hpp)
+    bool synthRegen = num(a, "synthregen", 0) > 0;
+    int synthEdits = int(num(a, "synthedit", 0));
+    std::set<std::pair<int, int>> synthBuilt;
+    size_t editBlocks = 0, editBuilds = 0;
+    std::set<std::array<int, 3>> editKeys;  // (secdump=: the sections the builds touched)
+    auto synthBuild = [&](int tx, int tz) {
+        for (int j = 0; j < synthEdits; j++) {
+            uint32_t h = uint32_t(tx) * 2654435761u ^ uint32_t(tz) * 2246822519u ^ uint32_t(j) * 3266489917u;
+            h = (h ^ (h >> 15)) * 2246822519u;
+            h ^= h >> 13;
+            int w = 7 + int(h & 3u), d = 7 + int((h >> 2) & 3u), ht = 5 + int((h >> 4) & 1u);
+            int x0 = tx * 256 + 16 + int((h >> 8) % 200u), z0 = tz * 256 + 16 + int((h >> 16) % 200u);
+            int g = int(std::floor(atlas_preview_height(ctx, x0 + w * 0.5, z0 + d * 0.5)));
+            if (g <= 63 || g > 300) continue;  // (not in water)
+            auto put = [&](int x, int y, int z, uint16_t m) {
+                atlas_notify_block(ctx, x, y, z, m);
+                editBlocks++;
+                auto fdv = [](int v) { return v >= 0 ? v / 16 : -((-v + 15) / 16); };
+                editKeys.insert({fdv(x), fdv(y), fdv(z)});
+            };
+            for (int x = x0; x < x0 + w; x++)
+                for (int z = z0; z < z0 + d; z++) {
+                    bool edge = x == x0 || z == z0 || x == x0 + w - 1 || z == z0 + d - 1;
+                    bool door = z == z0 && x == x0 + w / 2;
+                    for (int y = g - 4; y < g; y++) put(x, y, z, edge ? 1 : 0);  // (the cellar)
+                    put(x, g, z, 7);
+                    for (int y = g + 1; y <= g + ht; y++) put(x, y, z, edge && !(door && y <= g + 2) ? 1 : 0);
+                }
+            for (int x = x0 - 1; x <= x0 + w; x++)
+                for (int z = z0 - 1; z <= z0 + d; z++) put(x, g + ht + 1, z, 3);
+            if (j % 4 == 0)
+                for (int y = g + ht + 2; y < g + ht + 42; y++)
+                    for (int x = x0; x < x0 + 3; x++)
+                        for (int z = z0; z < z0 + 3; z++) put(x, y, z, 1);
+            editBuilds++;
+        }
+    };
+    if (!haveExport && num(a, "synth", 0) > 0 && !synthStream) {
+        int R = int(num(a, "synth", 0));
+        int csx = int(std::floor(x / 16)), csz = int(std::floor(z / 16));
+        size_t uniform = 0;
+        for (int cz = csz - R; cz <= csz + R; cz++)
+            for (int cx = csx - R; cx <= csx + R; cx++) uniform += synthColumn(cx, cz, ex.held);
+        std::string so = str(a, "synthorder", "far");
+        auto d2 = [&](const exportdata::Held& h) { return (h.cx - csx) * (h.cx - csx) + (h.cz - csz) * (h.cz - csz); };
+        if (so == "random") {
+            uint32_t sd = 777u;
+            for (size_t i = ex.held.size(); i > 1; i--) {
+                sd = sd * 1664525u + 1013904223u;
+                std::swap(ex.held[i - 1], ex.held[size_t(sd >> 8) % i]);
+            }
+        } else {
+            std::stable_sort(ex.held.begin(), ex.held.end(), [&](const exportdata::Held& p, const exportdata::Held& q) {
+                return so == "near" ? d2(p) < d2(q) : d2(p) > d2(q);
+            });
+        }
+        std::fprintf(stderr, "atlas_render: synth %zu sections (%zu of one id) in %d x %d columns, sent %s first\n", ex.held.size(),
+                     uniform, 2 * R + 1, 2 * R + 1, so.c_str());
+    }
     if (haveExport) {
         auto l0 = std::chrono::steady_clock::now();
         std::vector<exportdata::State> lib;
@@ -309,10 +425,36 @@ int main(int argc, char** argv) {
         uint32_t grass = exportdata::jsonColour(side, "grass", 0x91BD59), foliage = exportdata::jsonColour(side, "foliage", 0x77AB2F),
                  water = exportdata::jsonColour(side, "water", 0x3F76E4);
         std::string why;
+        // keep=near: the client feed's rule (every block with a model) with each non-cube one's micro-voxel brick from
+        // quads.bin / sprites.bin beside blocks.bin (atlas_set_material_bricks)
+        bool keepNear = str(a, "keep", "far") == "near";
+        exportdata::ModelLib ml;
+        std::vector<uint8_t> modelled;
+        if (keepNear) {
+            std::string bp = str(a, "blocks", "");
+            auto sl = bp.find_last_of("/\\");
+            if (!exportdata::loadModels(sl == std::string::npos ? std::string() : bp.substr(0, sl + 1), ml)) {
+                std::fprintf(stderr, "keep=near: no quads.bin / sprites.bin beside blocks=\n");
+                return 2;
+            }
+            modelled.assign(ml.states.size(), 0);
+            for (size_t i = 0; i < ml.states.size(); i++)
+                modelled[i] = exportdata::brickWorthy(ml, uint32_t(i)) ? 1 : 0;  // (AtlasClientSections.nearKept)
+        }
         if (!exportdata::upload(ctx, lib, secs, str(a, "keep", "far") == "all", grass, foliage, water, 64, ex, why,
-                                boxed ? box : nullptr, num(a, "cutout", 1) > 0, server)) {
+                                boxed ? box : nullptr, num(a, "cutout", 1) > 0, server, keepNear ? &modelled : nullptr)) {
             std::fprintf(stderr, "export: %s\n", why.c_str());
             return 2;
+        }
+        if (keepNear && num(a, "bricks", 1) > 0) {
+            size_t bricked = 0;
+            auto b0 = std::chrono::steady_clock::now();
+            if (!exportdata::uploadBricks(ctx, ml, ex.firstMat, ex.matState, grass, foliage, bricked, why, num(a, "animtest", 0) > 0)) {
+                std::fprintf(stderr, "bricks: %s\n", why.c_str());
+                return 2;
+            }
+            std::fprintf(stderr, "atlas_render: %zu materials with bricks in %.0f ms\n", bricked,
+                         std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - b0).count());
         }
         if (boxed && !ex.sections) {
             std::fprintf(stderr, "export: nothing the far field keeps inside box=%s\n", str(a, "box", "").c_str());
@@ -450,6 +592,29 @@ int main(int argc, char** argv) {
     auto serverWindow = [&](double cxw, double czw) -> bool {
         auto fd = [](int v, int d) { return v >= 0 ? v / d : -((-v + d - 1) / d); };
         int ptx = fd(int(std::floor(cxw)), 256), ptz = fd(int(std::floor(czw)), 256);
+        if (synthStream) {
+            // the tiles that left forgotten (sent again on return, unless synthonce), the entering ones made and sent,
+            // nearest first
+            for (auto it = synthSent.begin(); it != synthSent.end();)
+                it = std::abs(it->first - ptx) > 4 || std::abs(it->second - ptz) > 4 ? synthSent.erase(it) : std::next(it);
+            for (int r = 0; r <= 4; r++)
+                for (int tz = ptz - r; tz <= ptz + r; tz++)
+                    for (int tx = ptx - r; tx <= ptx + r; tx++) {
+                        if (std::max(std::abs(tx - ptx), std::abs(tz - ptz)) != r || synthSent.count({tx, tz})) continue;
+                        synthSent.insert({tx, tz});
+                        if (synthOnce && !synthEver.insert({tx, tz}).second) continue;
+                        std::vector<exportdata::Held> secs;
+                        for (int cz = tz * 16; cz < tz * 16 + 16; cz++)
+                            for (int cx = tx * 16; cx < tx * 16 + 16; cx++) synthColumn(cx, cz, secs);
+                        for (const exportdata::Held& hs : secs)
+                            if ((synthRegen ? atlas_upload_section_flags(ctx, hs.cx, hs.sy, hs.cz, hs.mats.data(),
+                                                                        ATLAS_SECTION_REGENERABLE)
+                                            : atlas_upload_section(ctx, hs.cx, hs.sy, hs.cz, hs.mats.data())) != ATLAS_OK)
+                                return false;
+                        if (synthEdits > 0 && synthBuilt.insert({tx, tz}).second) synthBuild(tx, tz);
+                    }
+            return true;
+        }
         for (exportdata::Held& hs : ex.held) {
             int tx = fd(hs.cx * 16, 256), tz = fd(hs.cz * 16, 256);
             bool inside = std::abs(tx - ptx) <= 4 && std::abs(tz - ptz) <= 4;
@@ -681,6 +846,7 @@ int main(int argc, char** argv) {
         // the level-0 grid built before anything is timed or compared (a few frames: the backend builds a budget a frame)
         {
             AtlasFrameOutput none{color.data(), normal.data(), depth.data(), linear.data()};
+            none.nearLight = o.nearLight;  // (primarynear: the near light's output is required with FRAME_NEAR_LIGHT)
             // (the first frame places the grid's window: before it there is nothing pending to see)
             // nowarm=1: no warm-up (the frame as the game's first one after a move sees it)
             int k = 0;
@@ -690,7 +856,10 @@ int main(int argc, char** argv) {
             double maxUpd = 0;
             int maxK = updateBudget > 0 ? 100000 : 256;
             for (; k < maxK && num(a, "nowarm", 0) <= 0; k++) {
-                if (atlas_render(ctx, &f, &none) != ATLAS_OK) return 4;
+                if (atlas_render(ctx, &f, &none) != ATLAS_OK) {
+                    std::fprintf(stderr, "render (warm-up): %s\n", atlas_last_error(ctx));
+                    return 4;
+                }
                 double cw[3] = {f.cameraPos[0], f.cameraPos[1], f.cameraPos[2]};
                 // feed=N: N held sections sent again each frame (as the game's feed keeps sending while it builds),
                 // each upload timed: what an upload waits behind
@@ -722,6 +891,9 @@ int main(int argc, char** argv) {
             auto vg = inf.find("\"voxgrid\":{");
             std::fprintf(stderr, "atlas_render: grid warm-up %d frames; %s\n", k,
                          vg == std::string::npos ? "no grid" : inf.substr(vg, inf.find('}', vg) - vg + 1).c_str());
+            auto lv = inf.find("\"levels\":[");  // (its coarse levels)
+            if (lv != std::string::npos)
+                std::fprintf(stderr, "atlas_render: grid levels %s\n", inf.substr(lv, inf.find("}]", lv) - lv + 2).c_str());
         }
         // reupload=1: every section the core holds sent again (as a burst of edits would), then the CPU update that follows
         // timed, and the frames until the GPU grid has them again
@@ -736,10 +908,14 @@ int main(int argc, char** argv) {
             double updMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - u0).count();
             atlas_get_stats(ctx, &st);
             AtlasFrameOutput none{color.data(), normal.data(), depth.data(), linear.data()};
+            none.nearLight = o.nearLight;  // (primarynear: the near light's output is required with FRAME_NEAR_LIGHT)
             int frames2 = 0;
             std::string stageMs;  // the render thread's share of each frame's grid batch (atlas_info voxgrid stageCpuMs)
             for (; frames2 < 256 && voxgridPending(ctx) > 0; frames2++) {
-                if (atlas_render(ctx, &f, &none) != ATLAS_OK) return 4;
+                if (atlas_render(ctx, &f, &none) != ATLAS_OK) {
+                    std::fprintf(stderr, "render (warm-up 2): %s\n", atlas_last_error(ctx));
+                    return 4;
+                }
                 std::string inf = atlas_info(ctx);
                 auto sp = inf.find("\"stageCpuMs\":");
                 if (sp != std::string::npos) stageMs += (stageMs.empty() ? "" : " ") + inf.substr(sp + 13, inf.find(',', sp) - sp - 13);
@@ -1294,6 +1470,39 @@ int main(int argc, char** argv) {
                                 atlas::writePng(sb + nm, disp.data(), w, h);
                             }
                         }
+                        {
+                            // (a TRACE line every 5 s: where a long sequence is)
+                            static auto lastTrace = std::chrono::steady_clock::now();
+                            auto now = std::chrono::steady_clock::now();
+                            if (std::chrono::duration<double>(now - lastTrace).count() > 5.0) {
+                                std::fprintf(stderr, "TRACE progress seq_%s %d/%d\n", kind.c_str(), i, n);
+                                std::fflush(stderr);
+                                lastTrace = now;
+                            }
+                        }
+                        if (num(a, "seqgrid", 0) > 0) {
+                            // seqgrid=1: the grid's residency and the tiers each frame (atlas_info voxgrid: resident ..
+                            // the tiers), the process's memory
+                            std::string inf = atlas_info(ctx);
+                            size_t r0 = inf.find("\"resident\":"), r1 = inf.find("\"origin\":", r0 == std::string::npos ? 0 : r0);
+                            if (r0 != std::string::npos && r1 != std::string::npos) extra += "," + inf.substr(r0, r1 - r0 - 1);
+                            size_t sc = inf.find("\"stageCpuMs\":");  // (the render thread's share of the grid's batch)
+                            if (sc != std::string::npos) extra += "," + inf.substr(sc, inf.find(',', sc) - sc);
+                            if (synthEdits > 0) {
+                                char eb[96];
+                                std::snprintf(eb, sizeof eb, ",\"editBlocks\":%zu,\"editBuilds\":%zu", editBlocks, editBuilds);
+                                extra += eb;
+                            }
+#ifdef _WIN32
+                            PROCESS_MEMORY_COUNTERS_EX pm{};
+                            if (K32GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pm), sizeof pm)) {
+                                char mb[96];
+                                std::snprintf(mb, sizeof mb, ",\"workingSetMb\":%.0f,\"privateMb\":%.0f", double(pm.WorkingSetSize) / 1048576.0,
+                                              double(pm.PrivateUsage) / 1048576.0);
+                                extra += mb;
+                            }
+#endif
+                        }
                         std::printf("{\"seq\":\"%s%s\",\"frame\":%d,\"ms\":%.3f,\"steps\":%llu%s}\n", kind.c_str(), tag.c_str(), i, st.lastFrameMs,
                                     (unsigned long long)st.raySteps, extra.c_str());
                     }
@@ -1449,6 +1658,13 @@ int main(int argc, char** argv) {
         }
         vsTruth += "}}";
     }
+    if (num(a, "depthraw", 0) > 0) {
+        // depthraw=1: <out>_depth.f32, the frame's depth as floats (w x h, rows from the top; 1e30 sky), for metrics
+        if (FILE* fp = std::fopen((out.substr(0, out.size() - 4) + "_depth.f32").c_str(), "wb")) {
+            std::fwrite(depth.data(), sizeof(float), depth.size(), fp);
+            std::fclose(fp);
+        }
+    }
     if (num(a, "depthpng", 0) > 0 && !haveExport) {
         std::vector<uint32_t> d(size_t(w) * h);
         for (size_t i = 0; i < d.size(); i++) {
@@ -1499,6 +1715,34 @@ int main(int argc, char** argv) {
                 backendName.c_str(), haveExport ? "export+preview" : "preview", x, y, z, ground, w, h, st.regions,
                 (unsigned long long)st.nodeBytes, (unsigned long long)st.leafBytes, (unsigned long long)st.materialBytes, buildMs,
                 best, (unsigned long long)st.raySteps, double(hits) / depth.size(), far, outJson.c_str(), extra.c_str(), vsTruth.c_str());
+    // secdump=<file>: the sections as the host holds them, voxel-exact (the edit layers' check): the keys of seckeys=<file>
+    // (x y z a line), else those this run's builds touched; written <file> (x, y, z, tier, 4096 ids each) and <file>.keys
+    if (!str(a, "secdump", "").empty()) {
+        std::string path = str(a, "secdump", "");
+        std::vector<std::array<int, 3>> keys;
+        if (!str(a, "seckeys", "").empty()) {
+            FILE* kf = std::fopen(str(a, "seckeys", "").c_str(), "r");
+            int kx, ky, kz;
+            while (kf && std::fscanf(kf, "%d %d %d", &kx, &ky, &kz) == 3) keys.push_back({kx, ky, kz});
+            if (kf) std::fclose(kf);
+        } else {
+            keys.assign(editKeys.begin(), editKeys.end());
+        }
+        FILE* df = std::fopen(path.c_str(), "wb");
+        FILE* kf = std::fopen((path + ".keys").c_str(), "w");
+        std::vector<uint16_t> ids(4096);
+        for (auto& k : keys) {
+            uint32_t tier = 0;
+            std::fill(ids.begin(), ids.end(), uint16_t(0));
+            atlas_debug_section(ctx, k[0], k[1], k[2], ids.data(), &tier);
+            int32_t h[4] = {k[0], k[1], k[2], int32_t(tier)};
+            if (df) std::fwrite(h, 4, 4, df), std::fwrite(ids.data(), 2, 4096, df);
+            if (kf) std::fprintf(kf, "%d %d %d\n", k[0], k[1], k[2]);
+        }
+        if (df) std::fclose(df);
+        if (kf) std::fclose(kf);
+        std::fprintf(stderr, "atlas_render: %zu sections dumped to %s\n", keys.size(), path.c_str());
+    }
     atlas_destroy(ctx);
     return 0;
 }

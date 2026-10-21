@@ -84,8 +84,8 @@ public final class OceanIsles {
         if (type == TYPE_ATOLL) {
             double ang = unit(h, 6) * Math.PI * 2.0;
             double ringR = radius * 0.58;
-            sx = ix + (int) Math.round(Math.cos(ang) * ringR);
-            sz = iz + (int) Math.round(Math.sin(ang) * ringR);
+            sx = ix + (int) Math.round(StrictMath.cos(ang) * ringR);
+            sz = iz + (int) Math.round(StrictMath.sin(ang) * ringR);
         }
         return new Isle(cx, cz, ix, iz, sx, sz, type, radius, peak, h);
     }
@@ -107,7 +107,7 @@ public final class OceanIsles {
 
         // Subtle organic shoreline warp from detailN/hillsN
         double ang = Math.atan2(dz, dx);
-        double stretch = 1.0 + 0.18 * Math.cos(2 * ang + unit(isle.hash, 8) * 6.283);
+        double stretch = 1.0 + 0.18 * StrictMath.cos(2 * ang + unit(isle.hash, 8) * 6.283);
         double d = Math.hypot(dx, dz) * stretch - detailN * 3.2 - hillsN * 2.5;
         if (d > outer) return Double.NaN;
 
@@ -116,13 +116,13 @@ public final class OceanIsles {
             case TYPE_SEA_STACK -> {
                 // Steep rocky spire + secondary satellite stack
                 double tMain = MapNoise.clamp(1.0 - d / r, 0.0, 1.0);
-                double hMain = sea - 14.0 + (14.0 + isle.peakAboveSea) * Math.pow(tMain, 1.35) + Math.max(0, detailN) * 2.5 * tMain;
+                double hMain = sea - 14.0 + (14.0 + isle.peakAboveSea) * StrictMath.pow(tMain, 1.35) + Math.max(0, detailN) * 2.5 * tMain;
                 double satAng = unit(isle.hash, 9) * Math.PI * 2.0;
-                double sx = isle.centerX + Math.cos(satAng) * (r * 0.85);
-                double sz = isle.centerZ + Math.sin(satAng) * (r * 0.85);
+                double sx = isle.centerX + StrictMath.cos(satAng) * (r * 0.85);
+                double sz = isle.centerZ + StrictMath.sin(satAng) * (r * 0.85);
                 double sd = Math.hypot(x - sx, z - sz) - detailN * 1.8;
                 double tSat = MapNoise.clamp(1.0 - sd / (r * 0.48), 0.0, 1.0);
-                double hSat = sea - 14.0 + (14.0 + isle.peakAboveSea * 0.7) * Math.pow(tSat, 1.4);
+                double hSat = sea - 14.0 + (14.0 + isle.peakAboveSea * 0.7) * StrictMath.pow(tSat, 1.4);
                 yield Math.max(hMain, hSat);
             }
             case TYPE_ATOLL -> {
@@ -154,7 +154,7 @@ public final class OceanIsles {
             default -> {
                 // Elongated sandbar & shoal chain
                 double dir = unit(isle.hash, 10) * Math.PI;
-                double cos = Math.cos(dir), sin = Math.sin(dir);
+                double cos = StrictMath.cos(dir), sin = StrictMath.sin(dir);
                 double lx = dx * cos + dz * sin;
                 double lz = -dx * sin + dz * cos - 0.012 * lx * lx;
                 double ed = Math.hypot(lx * 0.62, lz * 1.25) - detailN * 2.2;

@@ -171,8 +171,94 @@ final class AtlasExactSource extends AtlasRefiningSource {
         return 3;  // ~0.1 s of columns between clipmap rebuilds
     }
 
+    // ---- far tiles on the device (atlas_gen_tiles: the client generator's page kernels, atlas_page.slang) ----------
+    private volatile AtlasGenNative.Gen tileGen;
+    /** LODs whose first device tile matched the CPU path bit for bit (later tiles are trusted, flagged columns aside). */
+    private final java.util.Set<Integer> tileVerified = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    final java.util.concurrent.atomic.LongAdder deviceTiles = new java.util.concurrent.atomic.LongAdder();
+    final java.util.concurrent.atomic.DoubleAdder deviceTileMs = new java.util.concurrent.atomic.DoubleAdder();
+    volatile String tileOffReason;
+    private boolean closed;  // (synchronized on this) the setup thread closes what it made late
+
+    /**
+     * Whole tiles on the GPU: TamrielMap.sample and TamrielHeight.height of every column in kernels (the client
+     * generator's, its own device), not the noises alone (AtlasHeightGpu, whose height() replay stays on the CPU).
+     * The first tile of each LOD is also made on the CPU and compared bit for bit; a difference turns it off for good
+     * (logged). Returns why it could not start, else null.
+     */
+    String enableGpuTiles(MinecraftServer server, java.nio.file.Path library) {
+        try {
+            ServerLevel ow = server.overworld();
+            if (ow == null || !(ow.getChunkSource().getGenerator() instanceof NoiseBasedChunkGenerator g)) return tileOffReason = "no overworld generator";
+            AtlasGenNative nat = AtlasGenNative.load(library);
+            if (nat == null) return tileOffReason = "the core has no generator";
+            AtlasGenProgram prog = AtlasGenProgram.compile(g, g.generatorSettings().value(), ow.getChunkSource().randomState(), ow,
+                    ow.getSeed(), null);
+            if (!prog.pageGen) return tileOffReason = "the program lacks the page passes' inputs";
+            AtlasGenNative.Gen gen = nat.create(AtlasGenNative.BACKEND_VULKAN);
+            if (gen == null) return tileOffReason = "no Vulkan device for the exact kernels";
+            if (!gen.tilesSupported()) {
+                gen.close();
+                return tileOffReason = "the core has no atlas_gen_tiles";
+            }
+            gen.setProgram(prog.words);
+            gen.setMap(AtlasGenMap.words(prog, g.getBiomeSource()));
+            synchronized (this) {
+                if (closed) {
+                    gen.close();
+                    return tileOffReason = "closed before the setup finished";
+                }
+                tileGen = gen;
+            }
+            return tileOffReason = null;
+        } catch (RuntimeException | LinkageError e) {
+            return tileOffReason = e.toString();
+        }
+    }
+
+    /** The device's tile into surface / water, or false (no device path, a flagged column, or the check failed). */
+    private boolean fillGpu(int lod, int tx, int tz, float[] surface, float[] water) {
+        AtlasGenNative.Gen g = tileGen;
+        if (g == null) return false;
+        double[] ms = new double[1];
+        int[] bad;
+        try {
+            bad = g.tiles(new int[]{lod, tx, tz}, surface, water, ms);
+        } catch (RuntimeException e) {
+            tileGen = null;
+            tileOffReason = e.toString();
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas far tiles off the GPU: {}", e.toString());
+            return false;
+        }
+        deviceTileMs.add(ms[0]);
+        if (bad[0] != 0) return false;  // a value the kernels could not prove: this tile on the CPU
+        if (!tileVerified.contains(lod)) {
+            float[] s2 = new float[TILE * TILE], w2 = new float[TILE * TILE];
+            fillCpu(lod, tx, tz, s2, w2);
+            for (int k = 0; k < s2.length; k++)
+                if (Float.floatToRawIntBits(s2[k]) != Float.floatToRawIntBits(surface[k])
+                        || Float.floatToRawIntBits(w2[k]) != Float.floatToRawIntBits(water[k])) {
+                    tileGen = null;
+                    tileOffReason = String.format("tile %d %d %d column %d: gpu %s / %s, cpu %s / %s", lod, tx, tz, k, surface[k], water[k], s2[k], w2[k]);
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas far tiles off the GPU (differs from the CPU): {}", tileOffReason);
+                    System.arraycopy(s2, 0, surface, 0, s2.length);
+                    System.arraycopy(w2, 0, water, 0, w2.length);
+                    return true;
+                }
+            tileVerified.add(lod);
+        }
+        deviceTiles.increment();
+        return true;
+    }
+
     /** Surface and water of tile (lod, tx, tz): column (i, j) sampled at its centre block, row-major [j][i]. */
     void fill(int lod, int tx, int tz, float[] surface, float[] water) {
+        if (fillGpu(lod, tx, tz, surface, water)) return;
+        fillCpu(lod, tx, tz, surface, water);
+    }
+
+    /** fill without the device's tiles (the noise-only GPU path or the CPU). */
+    void fillCpu(int lod, int tx, int tz, float[] surface, float[] water) {
         double[] h = new double[TILE * TILE];
         float[] top = new float[TILE * TILE];
         heights(lod, tx, tz, h, top);
@@ -568,6 +654,13 @@ final class AtlasExactSource extends AtlasRefiningSource {
     @Override
     public void close() {
         pool.shutdownNow();
+        AtlasGenNative.Gen tg;
+        synchronized (this) {
+            closed = true;
+            tg = tileGen;
+            tileGen = null;
+        }
+        if (tg != null) tg.close();
         AtlasHeightGpu g = gpu, r = retiredGpu;
         gpu = null;
         retiredGpu = null;

@@ -5,7 +5,7 @@
 struct PublishParams {
     uint width;
     uint height;
-    uint nearLight;  // 1: publish the near light too (FRAME_NEAR_LIGHT, abi 0.15)
+    uint nearLight;  // 1: publish the near light too (FRAME_NEAR_LIGHT, abi 0.15); 2: and the water's surface in its alpha
     float preExposure;  // (abi 0.16) radiance and irradiance scaled by the host's exposure (half precision's range)
 };
 
@@ -18,6 +18,9 @@ struct PublishParams {
 [[vk::binding(5, 0)]] [[vk::image_format("r32f")]] RWTexture2D<float> dstDepth;
 [[vk::binding(6, 0)]] StructuredBuffer<float4> srcNearLight;
 [[vk::binding(7, 0)]] [[vk::image_format("rgba16f")]] RWTexture2D<float4> dstNearLight;
+// (PRIMARY_NEAR_LIT's split) atlas_far.slang waterAdd: a, the water's surface in front of the pixel's surface (view
+// distance; 0 none, < 0 the eye under water)
+[[vk::binding(8, 0)]] StructuredBuffer<float4> srcWater;
 
 float4 unpack8(uint v) {
     return float4(float(v & 255u), float((v >> 8) & 255u), float((v >> 16) & 255u), float(v >> 24)) / 255.0;
@@ -37,6 +40,13 @@ void publishMain(uint3 id : SV_DispatchThreadID) {
     // (a < 0: a pixel the half-resolution near light found under cover, atlas_far.slang nearLightMain)
     if (pc.nearLight != 0u) {
         float4 nl = srcNearLight[i];
-        dstNearLight[dst] = float4(nl.rgb * pc.preExposure, max(nl.a, 0.0));
+        // (nearLight 2: the unified field, where the host reads no visibility from it: the water's surface for its
+        // entities' depth, as -(2 + distance), never a visibility's 0..2)
+        float a = max(nl.a, 0.0);
+        if (pc.nearLight == 2u) {
+            float w = srcWater[i].a;
+            if (w > 0.0) a = -(2.0 + min(w, 60000.0));
+        }
+        dstNearLight[dst] = float4(nl.rgb * pc.preExposure, a);
     }
 }

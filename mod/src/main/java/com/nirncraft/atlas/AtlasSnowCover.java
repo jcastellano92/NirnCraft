@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 final class AtlasSnowCover {
     /** One ground_cover feature: plants per chunk before the density field, and the field (null: everywhere). */
-    private record Cover(double perChunk, DensityFilter density) {}
+    record Cover(double perChunk, DensityFilter density) {}
 
     private static final Cover[] NONE = new Cover[0];
 
@@ -65,7 +65,8 @@ final class AtlasSnowCover {
         return h ^ (h >>> 29);
     }
 
-    private static Cover[] covers(Holder<Biome> biome) {
+    /** A biome's ground cover as bare() sums it (the GPU's copy: AtlasGenMap.far). */
+    static Cover[] covers(Holder<Biome> biome) {
         List<Cover> out = new ArrayList<>();
         for (HolderSet<PlacedFeature> step : biome.value().getGenerationSettings().features())
             for (Holder<PlacedFeature> pf : step) {

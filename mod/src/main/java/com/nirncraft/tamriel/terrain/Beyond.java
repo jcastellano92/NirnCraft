@@ -299,7 +299,7 @@ public final class Beyond {
 
     /** Depth below sea level at d blocks from the coast (same curve as tamriel_map.py). */
     static double seaDepth(double d) {
-        return 0.05 * Math.min(d, 64) + 75 * (1 - Math.exp(-Math.max(d - 64, 0) / 1300.0));
+        return 0.05 * Math.min(d, 64) + 75 * (1 - StrictMath.exp(-Math.max(d - 64, 0) / 1300.0));
     }
 
     // ---- endless lands ---------------------------------------------------------------------------------------------

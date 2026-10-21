@@ -75,6 +75,36 @@ public final class Canvas {
     private it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap<TerrainColumn> terrainColumns;
     private record TerrainColumn(int ground, int water) {}
 
+    /**
+     * A recorder of this canvas's write primitives as ops (com.nirncraft.atlas.AtlasOverlayTapes: the client stamps
+     * them on the GPU, each predicate tested against the blocks there). Called once per primitive with the world
+     * position and the state it would write (rotated); {@code a} is the top of a column range or a foundation's lowest
+     * y, {@code b} a foundation's clip top. The primitive still paints this canvas's level. Null in the game.
+     */
+    public interface Tape {
+        int W = 1, OPEN = 2, NOT_AIR = 3, PLANT = 4, FOUNDATION = 5, BED = 6, FURNITURE = 7;
+        /** A declared entrance (Accessibility keeps its approach free): the lower door half, a = the outward 2D value. */
+        int ENTRANCE = 8;
+
+        void op(Canvas c, int kind, int x, int y, int z, BlockState s, int a, int b);
+    }
+
+    @Nullable
+    public Tape tape;
+    /** Inside a taped primitive: its own writes are part of its op. */
+    private int tapeMute;
+
+    private boolean tapeBegin(int kind, int x, int y, int z, BlockState s, int a, int b) {
+        if (tape == null || tapeMute > 0) return false;
+        tape.op(this, kind, x, y, z, s, a, b);
+        tapeMute++;
+        return true;
+    }
+
+    private void tapeEnd(boolean began) {
+        if (began) tapeMute--;
+    }
+
     /** Painting canvas, clipped to {@code clip}. */
     public Canvas(WorldGenLevel level, BoundingBox clip, int ox, int oy, int oz, Direction facing, long seed) {
         this.level = level;
@@ -123,6 +153,7 @@ public final class Canvas {
         c.deadBeds = deadBeds;
         c.beds = beds;
         c.doorSink = doorSink;
+        c.tape = tape;
         return c;
     }
 
@@ -224,6 +255,7 @@ public final class Canvas {
 
     public void wset(int x, int y, int z, BlockState s) {
         if (!okWorld(x, y, z)) return;
+        if (tape != null && tapeMute == 0) tape.op(this, Tape.W, x, y, z, s, y, 0);
         m.set(x, y, z);
         BlockState old = level.getBlockState(m);
         if (old.is(BlockTags.FEATURES_CANNOT_REPLACE)) return;
@@ -379,13 +411,17 @@ public final class Canvas {
         if (!okWorld(x, y, z)) return;
         if (!reserved.isEmpty() && !s.isAir() && !(s.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock)
                 && reserved.contains(BlockPos.asLong(x, y, z))) return;
+        boolean t = tapeBegin(Tape.OPEN, x, y, z, rot(s), y, 0);
         if (open(wget(x, y, z))) wset(x, y, z, rot(s));
+        tapeEnd(t);
     }
 
     public void air(int lx, int ly, int lz) {
         int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
         if (!okWorld(x, y, z)) return;
+        boolean t = tapeBegin(Tape.NOT_AIR, x, y, z, Blocks.AIR.defaultBlockState(), y, 0);
         if (!wget(x, y, z).isAir()) wset(x, y, z, Blocks.AIR.defaultBlockState());
+        tapeEnd(t);
     }
 
     public void fill(int ax, int ay, int az, int bx, int by, int bz, BlockState s) {
@@ -407,8 +443,11 @@ public final class Canvas {
         int minY = Math.max(oy + Math.min(ay, by), y0), maxY = Math.min(oy + Math.max(ay, by), y1);
         BlockState air = Blocks.AIR.defaultBlockState();
         java.util.ArrayList<int[]> cut = new java.util.ArrayList<>();
+        boolean t = tape != null && tapeMute == 0 && minY <= maxY;
+        if (t) tapeMute++;
         for (int x = minX; x <= maxX; x++)
-            for (int z = minZ; z <= maxZ; z++)
+            for (int z = minZ; z <= maxZ; z++) {
+                if (t) tape.op(this, Tape.NOT_AIR, x, minY, z, air, maxY, 0);
                 for (int y = minY; y <= maxY; y++) {
                     BlockState s = level.getBlockState(m.set(x, y, z));
                     if (!s.isAir()) {
@@ -416,7 +455,9 @@ public final class Canvas {
                         wset(x, y, z, air);
                     }
                 }
+            }
         sweepCrowns(cut);
+        if (t) tapeMute--;
     }
 
     /** Clears trees, plants and snow (not built blocks or terrain) in a local box. */
@@ -427,19 +468,29 @@ public final class Canvas {
         int minY = Math.max(oy + Math.min(ay, by), y0), maxY = Math.min(oy + Math.max(ay, by), y1);
         BlockState air = Blocks.AIR.defaultBlockState();
         java.util.ArrayList<int[]> cut = new java.util.ArrayList<>();
+        boolean t = tape != null && tapeMute == 0 && minY <= maxY;
+        if (t) tapeMute++;
         for (int x = minX; x <= maxX; x++)
-            for (int z = minZ; z <= maxZ; z++)
+            for (int z = minZ; z <= maxZ; z++) {
+                if (t) tape.op(this, Tape.PLANT, x, minY, z, air, maxY, 0);
                 for (int y = minY; y <= maxY; y++) {
                     BlockState s = level.getBlockState(m.set(x, y, z));
                     if (s.isAir()) continue;
-                    if (s.is(BlockTags.LEAVES) || (s.is(BlockTags.LOGS) && natural(s))
-                            || (s.canBeReplaced() && s.getFluidState().isEmpty()) || s.is(Blocks.SNOW) || s.is(BlockTags.FLOWERS)
-                            || s.is(Blocks.BAMBOO) || s.is(Blocks.SUGAR_CANE) || s.is(Blocks.CACTUS)) {
+                    if (plant(s)) {
                         if (s.is(BlockTags.LOGS) && cut.size() < 48) cut.add(new int[]{x, y, z});
                         wset(x, y, z, air);
                     }
                 }
+            }
         sweepCrowns(cut);
+        if (t) tapeMute--;
+    }
+
+    /** What {@link #clearPlants} takes away: trees, plants and snow (not built blocks or terrain). */
+    public static boolean plant(BlockState s) {
+        return s.is(BlockTags.LEAVES) || (s.is(BlockTags.LOGS) && natural(s))
+                || (s.canBeReplaced() && s.getFluidState().isEmpty()) || s.is(Blocks.SNOW) || s.is(BlockTags.FLOWERS)
+                || s.is(Blocks.BAMBOO) || s.is(Blocks.SUGAR_CANE) || s.is(Blocks.CACTUS);
     }
 
     /**
@@ -489,12 +540,15 @@ public final class Canvas {
         int x = wx(lx, lz), z = wz(lx, lz);
         if (x < x0 || x > x1 || z < z0 || z > z1) return;
         BlockState r = rot(s);
+        int top = oy + ly, bottom = Math.max(top - maxDepth + 1, y0);
+        boolean t = bottom <= top && tapeBegin(Tape.FOUNDATION, x, top, z, r, bottom, y1);
         for (int y = oy + ly; y > oy + ly - maxDepth; y--) {
-            if (y < y0) return;
+            if (y < y0) break;
             BlockState here = wget(x, y, z);
-            if (y < oy + ly && solidGround(here)) return;
+            if (y < oy + ly && solidGround(here)) break;
             if (y <= y1) wset(x, y, z, r);
         }
+        tapeEnd(t);
     }
 
     public static boolean open(BlockState s) {
@@ -541,6 +595,7 @@ public final class Canvas {
         door(lx, ly, lz, door, face);
         int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
         if (doorSink != null) doorSink.add(new int[]{x, y, z, dir(face.getOpposite()).get2DDataValue()});
+        if (tape != null && tapeMute == 0) tape.op(this, Tape.ENTRANCE, x, y, z, door, dir(face.getOpposite()).get2DDataValue(), 0);
         if (owner != null && !owner.isEmpty()) {
             anchor(AnchorType.BUILDING_DOOR, lx, ly, lz);
         }
@@ -593,6 +648,10 @@ public final class Canvas {
                     headState = com.nirncraft.fire.aftermath.Charring.apply(headState, hxW, yW, hzW, ly, seed, burn);
                 }
                 if (!footState.isAir() && !headState.isAir()) {
+                    if (tape != null && tapeMute == 0) {
+                        tape.op(this, Tape.BED, fxW, yW, fzW, footState, yW, 0);
+                        tape.op(this, Tape.BED, hxW, yW, hzW, headState, yW, 0);
+                    }
                     // Ensure solid support under both halves of the bed
                     for (BlockPos bp : new BlockPos[]{fp.below(), hp.below()}) {
                         BlockState below = level.getBlockState(bp);
@@ -639,10 +698,15 @@ public final class Canvas {
         if (isReserved(lx, ly, lz)) return;
         int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
         if (!okWorld(x, y, z)) return;
-        BlockState cur = wget(x, y, z);
-        if (!open(cur) && !(cur.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock)) return;
         BlockState state = com.nirncraft.tamriel.settlement.furniture.FurnitureBlocks.stateFor(kind, localFacing);
+        boolean t = tapeBegin(Tape.FURNITURE, x, y, z, rot(state), y, 0);
+        BlockState cur = wget(x, y, z);
+        if (!open(cur) && !(cur.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock)) {
+            tapeEnd(t);
+            return;
+        }
         wset(x, y, z, rot(state));
+        tapeEnd(t);
         m.set(x, y, z);
         if (level.getBlockEntity(m) instanceof com.nirncraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlockEntity fbe) {
             fbe.configure(kind, cultureId, (int) (hash(x, y, z, 73) & 7));

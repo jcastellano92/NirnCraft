@@ -184,11 +184,13 @@ dependencies {
 
 tasks.named('test', Test).configure {
     useJUnitPlatform()
-    maxHeapSize = '2G'
+    maxHeapSize = System.getenv('NIRNCRAFT_TEST_HEAP') ?: '6g'
     outputs.upToDateWhen { false }
     testLogging {
         events "passed", "skipped", "failed"
         exceptionFormat "short"
+        // the dev tools' TRACE lines (heavy.py timestamps them, its watcher flags a silent job): NIRNCRAFT_TEST_STDOUT=1
+        showStandardStreams = System.getenv('NIRNCRAFT_TEST_STDOUT') == '1'
     }
 }
 

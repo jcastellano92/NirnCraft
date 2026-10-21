@@ -127,10 +127,10 @@ public final class MapPeaks {
             double reach = reachAt(p, Math.atan2(dz, dx));
             if (r >= reach) continue;
             // (1 - u^shape)^power, damped in road corridors and settlement pads so they stay passes and level ground
-            double u = r / reach, ua = Math.pow(u, p.shape);
-            double prof = Math.pow(1 - ua, p.power) * (1 - 0.85 * out.road);
+            double u = r / reach, ua = StrictMath.pow(u, p.shape);
+            double prof = StrictMath.pow(1 - ua, p.power) * (1 - 0.85 * out.road);
             // the massif's own steepness (d height / d r), for the cliff bands and the detail damping
-            double dprof = p.power * Math.pow(Math.max(1e-6, 1 - ua), p.power - 1) * p.shape * ua / Math.max(u, 1e-6) / reach;
+            double dprof = p.power * StrictMath.pow(Math.max(1e-6, 1 - ua), p.power - 1) * p.shape * ua / Math.max(u, 1e-6) / reach;
             out.slope = (float) Math.max(out.slope, Math.max(p.height - p.hornHeight - out.elevation, 0) * dprof
                     * (1 - 0.85 * out.road));
             for (double[] c : p.clear) {
@@ -142,14 +142,14 @@ public final class MapPeaks {
             if (p.calderaRadius > 0) {
                 if (r >= p.calderaRadius) {
                     double hr = r - p.calderaRadius;
-                    if (hr < p.hornRadius) y += p.hornHeight * Math.pow(1 - hr / p.hornRadius, 1.5);
+                    if (hr < p.hornRadius) y += p.hornHeight * StrictMath.pow(1 - hr / p.hornRadius, 1.5);
                 } else {
                     double cu = r / p.calderaRadius;
-                    y += p.hornHeight - p.calderaDepth * Math.pow(1 - cu * cu, 1.35);
+                    y += p.hornHeight - p.calderaDepth * StrictMath.pow(1 - cu * cu, 1.35);
                     calm = Math.max(calm, 0.65 * (1 - cu * cu));
                 }
             } else if (r < p.hornRadius) {
-                y += p.hornHeight * Math.pow(1 - r / p.hornRadius, 1.5);
+                y += p.hornHeight * StrictMath.pow(1 - r / p.hornRadius, 1.5);
             }
             for (double[] s : p.shelves) {
                 double d = Math.hypot(x - s[0], z - s[1]);
@@ -226,14 +226,14 @@ public final class MapPeaks {
                 p.reach = new float[BINS];
                 for (int i = 0; i < BINS; i++) {
                     double th = -Math.PI + TWO_PI * i / BINS;
-                    double r = reach * (1 + 0.06 * (0.5 * Math.sin(3 * th + 1.3) + 0.3 * Math.sin(7 * th + 0.4)
-                            + 0.2 * Math.sin(11 * th + 2.1)));
+                    double r = reach * (1 + 0.06 * (0.5 * StrictMath.sin(3 * th + 1.3) + 0.3 * StrictMath.sin(7 * th + 0.4)
+                            + 0.2 * StrictMath.sin(11 * th + 2.1)));
                     for (JsonElement se : spurs) {
                         JsonArray s = se.getAsJsonArray();
                         double da = th - Math.toRadians(s.get(0).getAsDouble());
                         da -= TWO_PI * Math.round(da / TWO_PI);
                         double q = Math.toDegrees(da) / s.get(1).getAsDouble();
-                        r *= 1 + s.get(2).getAsDouble() * Math.exp(-q * q);
+                        r *= 1 + s.get(2).getAsDouble() * StrictMath.exp(-q * q);
                     }
                     p.reach[i] = (float) r;
                     p.maxReach = Math.max(p.maxReach, r);

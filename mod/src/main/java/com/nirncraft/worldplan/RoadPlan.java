@@ -382,6 +382,30 @@ public final class RoadPlan {
     }
 
     /** Span index of segment {@code s} containing global vertex {@code v}, or -1. */
+    /** Per bucket id its (bx, bz) (BUCKET_SHIFT): for the GPU's road stage (com.nirncraft.roads.RoadPaintGpu). */
+    public int[] bucketChunks() {
+        int[] out = new int[(bucketOff.length - 1) * 2];
+        for (var e : bucketOf.long2IntEntrySet()) {
+            long k = e.getLongKey();
+            out[e.getIntValue() * 2] = (int) (k >> 32);
+            out[e.getIntValue() * 2 + 1] = (int) k;
+        }
+        return out;
+    }
+
+    /** The bucket index arrays as they are (read only): offsets, edges, and each edge's 1 / length^2. */
+    public int[] bucketOffsets() {
+        return bucketOff;
+    }
+
+    public int[] bucketEdgeList() {
+        return bucketEdges;
+    }
+
+    public float[] invLen2() {
+        return edgeInvLen2;
+    }
+
     public int spanAt(int s, int v) {
         for (int k = spanOff[s]; k < spanOff[s + 1]; k++) if (v >= spanFrom[k] && v <= spanTo[k]) return k;
         return -1;
