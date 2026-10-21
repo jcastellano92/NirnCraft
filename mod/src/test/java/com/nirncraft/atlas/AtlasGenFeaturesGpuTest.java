@@ -43,6 +43,34 @@ import java.util.function.Predicate;
 class AtlasGenFeaturesGpuTest {
 
     /**
+     * In-game-like: the feature program compiles as the client generator compiles it, with the pack's mods loaded
+     * (NIRNCRAFT_TEST_PACK_MODS, build.gradle: e.g. Lithium, whose math.sine_lut drops Mth's sine table), and its sine
+     * table is Mth's to the bit. NIRNCRAFT_FEAT_PACK=1.
+     */
+    @Test
+    void featureProgramUnderPack(MinecraftServer server) throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue("tamriel".equals(System.getenv("NIRNCRAFT_TEST_WORLD")), "the flat test world");
+        org.junit.jupiter.api.Assumptions.assumeTrue(System.getenv("NIRNCRAFT_FEAT_PACK") != null, "no pack check asked for");
+        ServerLevel ow = overworld(server);
+        NoiseBasedChunkGenerator gen = (NoiseBasedChunkGenerator) ow.getChunkSource().getGenerator();
+        RandomState rs = ow.getChunkSource().randomState();
+        long seed = ow.getSeed();
+        java.lang.reflect.Field f = net.minecraft.util.Mth.class.getDeclaredField("SIN");
+        f.setAccessible(true);
+        boolean dropped = f.get(null) == null;
+        boolean lithium = net.neoforged.fml.ModList.get().isLoaded("lithium");
+        System.out.println("TRACE begin pack-compile lithium " + lithium + ", Mth.SIN " + (dropped ? "null" : "present"));
+        AtlasGenProgram prog = AtlasGenProgram.compile(gen, gen.generatorSettings().value(), rs, ow, seed, null);
+        AtlasFeatureProgram fp = AtlasFeatureProgram.compile(gen, ow, prog, seed, net.minecraft.world.level.biome.BiomeManager.obfuscateSeed(seed), null);
+        int at = fp.words[AtlasFeatureProgram.H_SIN], bad = 0;
+        for (int i = 0; i < 65536; i++)
+            if (fp.words[at + i] != Float.floatToRawIntBits((float) Math.sin((double) i / 10430.378350470453))) bad++;
+        System.out.println("TRACE done pack-compile " + fp.dispatched.size() + " placed features, sine table " + (65536 - bad) + "/65536 Mth's");
+        if (System.getenv("NIRNCRAFT_TEST_PACK_MODS") != null && !lithium) throw new AssertionError("the pack's mods did not load");
+        if (bad != 0) throw new AssertionError(bad + " sine entries differ from Mth's");
+    }
+
+    /**
      * The decoration as the generator's store stages (atlas_gen_run_store + atlas_feat_attach), GPU to GPU: a square of
      * chunks generated in two different batchings (raster batches of 64; a shuffled order in batches of 37) must give the
      * same blocks for every chunk both finished (exact across batch edges), and the features must have written blocks.
