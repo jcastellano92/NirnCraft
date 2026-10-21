@@ -143,7 +143,9 @@ int bucketOf(int bx, int bz) {
     return -1;
 }
 
-// RoadPlan.at (segment < 0) / atSegment (only that segment's edges), at the double point (x, z)
+// RoadPlan.at (segment < 0) / atSegment (only that segment's edges), at the double point (x, z). [noinline]: pure (it
+// reads only the plan), called from many places (a copy each would make the pipeline several times bigger)
+[noinline]
 Hit roadAt(double x, double z, int segment) {
     Hit h = noHit();
     int ix = floorD(x), iz = floorD(z);
@@ -208,8 +210,12 @@ int rollOf(int x, int z) {
 }
 
 // RoadStyle.cultureAt: the region's culture (TamrielMap.region: the map sample's region)
+// TamrielMap.sample: pure (the map only); one copy
+[noinline]
+MapS sampleAt(int x, int z) { return tamrielSample(x, z); }
+
 uint cultureAt(int x, int z) {
-    MapS s = tamrielSample(x, z);
+    MapS s = sampleAt(x, z);
     int r = s.region;
     if (r < 0 || r >= int(roads[5])) return 0u;  // (generated lands beyond: NORD, as the endless lands are off)
     return uint(ri(RH_CULTURES, r));
@@ -218,6 +224,7 @@ uint cultureAt(int x, int z) {
 // ---- the painter's state (thread-private: nothing forwarded through calls) -----------------------------------------
 
 static Hit gHit;
+static uint gCult;
 static float gHeight;
 static int gMinY, gMaxY;
 
@@ -489,7 +496,7 @@ void bridgeColumn(int x, int z, float d, float hw, int sy, bool halfStep, uint c
 
 // Painter.channel: TamrielMap.sample(x, z).inWater()
 bool channel(int x, int z) {
-    MapS s = tamrielSample(x, z);
+    MapS s = sampleAt(x, z);
     if (isNaNF(s.waterLevel)) return false;
     return s.lakeDistance > 0.0f || s.riverDistance < s.riverHalfWidth;
 }
@@ -548,7 +555,7 @@ void wallTorch(int x, int z, int sy, int kind, int roll) {
     if (left != (jrem(jdivI(cell, every), 2) == 0)) return;
     bool lit = kind == 2 ? jrem(roll, 10) != 0 : jrem(roll, 2) == 0;
     uint facing = (uint(out) + 2u) & 3u;  // out.getOpposite()
-    setW(x, sy + 2, z, cm(cultureAt(x, z), (lit ? M_WALL_TORCH : M_WALL_TORCH_OUT) + facing));
+    setW(x, sy + 2, z, cm(gCult, (lit ? M_WALL_TORCH : M_WALL_TORCH_OUT) + facing));
 }
 int jdivI(int a, int b) { return a >= 0 ? int(uint(a) / uint(b)) : -int(uint(-a) / uint(b)); }  // Java's int /
 
@@ -738,7 +745,8 @@ int keyFind(uint at, uint n, int bx, int bz) {
     }
     return -1;
 }
-// PlanGround.pad's weight (0: no pad)
+// PlanGround.pad's weight (0: no pad); pure
+[noinline]
 float padWeight(int x, int z) {
     if (rdw(17) == 0u) return 0.0f;
     int k = keyFind(rdw(18), rdw(17), x >> 8, z >> 8);
@@ -763,6 +771,7 @@ bool curbAt(int x, int z) { return padWeight(x, z) > 0.35f; }
 
 // Painter.keptUp: a settlement within 60 blocks of its edge, or a fort within 90 (Places.overlapping +-120, then
 // sqrt(distSqr) - radius)
+[noinline]
 bool keptUpAt(int x, int z) {
     uint at = roads[RH_PLACES];
     uint n = roads[at];
@@ -778,10 +787,9 @@ bool keptUpAt(int x, int z) {
 }
 
 // Painter.paint: one column
-void paintColumn(int x, int z, float d, float hw, bool reserved) {
+void paintColumn(int x, int z, float d, float hw, bool reserved, uint c, int roll) {
     int kind = gHit.kind, span = gHit.span;
-    uint c = cultureAt(x, z);
-    int roll = rollOf(x, z);
+    gCult = c;
     float h = gHeight;
     int sy = floorF(h);
     bool halfStep = kind <= 1 && h - float(sy) >= 0.5f && span != SPAN_FORD && span != SPAN_STAIRS;
@@ -846,42 +854,92 @@ int junctionOf(Hit h) {
     return -1;
 }
 
+// a chunk's columns, worked out side by side (each its own: the plan's hit, the profile height, culture, roll and the
+// structure mask, as Java would find them before painting the chunk), then painted by one thread in Java's order
+groupshared int gsI[256 * 6];    // ok, segment, vertex, kind, span, roll
+groupshared float gsF[256 * 10]; // halfWidth, distance, height, ground, water, t, along, dirX, dirZ, gHeight
+groupshared uint gsU[256 * 2];   // culture, reserved
+groupshared uint gsAny;
+
 [shader("compute")]
-[numthreads(64, 1, 1)]
-void roadsMain(uint3 id : SV_DispatchThreadID) {
-    if (int(id.x) >= params.count) return;
-    gSlot = id.x;
-    gBase = id.x * params.chunkWords;
-    gX0 = chunks[id.x * CHUNK_INTS] * 16;
-    gZ0 = chunks[id.x * CHUNK_INTS + 1u] * 16;
+[numthreads(256, 1, 1)]
+void roadsMain(uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID) {
+    if (int(gid.y) >= params.count) return;  // (the whole group alike)
+    gSlot = gid.y;
+    gBase = gid.y * params.chunkWords;
+    gX0 = chunks[gid.y * CHUNK_INTS] * 16;
+    gZ0 = chunks[gid.y * CHUNK_INTS + 1u] * 16;
     gMinY = MIN_Y;
     gMaxY = maxYW();
-    // the plan answers within 32 blocks: nothing near the chunk's centre, nothing in it
-    if (!roadAt(double(gX0 + 8), double(gZ0 + 8), -1).ok) return;
-    for (int dz = 0; dz < 16; dz++)
-        for (int dx = 0; dx < 16; dx++) {
-            int x = gX0 + dx, z = gZ0 + dz;
-            Hit hit = roadAt(double(x) + 0.5l, double(z) + 0.5l, -1);
-            if (!hit.ok) continue;
-            int join = junctionOf(hit);
-            if (join >= 0) {
-                Hit j = roadAt(double(x) + 0.5l, double(z) + 0.5l, join);
-                if (j.ok && j.distance <= j.halfWidth + 0.5f) hit = j;
-            }
-            float d = hit.distance, hw = hit.halfWidth;
-            float reach = hw + (hit.span == SPAN_TUNNEL ? 2.0f : hit.span == SPAN_BRIDGE ? 1.0f : VERGE);
-            if (d > reach) continue;
-            gHit = hit;
+    uint col = tid.x;
+    if (col == 0u) gsAny = roadAt(double(gX0 + 8), double(gZ0 + 8), -1).ok ? 1u : 0u;  // nothing near the centre: nothing
+    GroupMemoryBarrierWithGroupSync();
+    if (gsAny == 0u) return;
+    int dx = int(col & 15u), dz = int(col >> 4);
+    int x = gX0 + dx, z = gZ0 + dz;
+    gsI[col * 6u] = 0;
+    Hit hit = roadAt(double(x) + 0.5l, double(z) + 0.5l, -1);
+    if (hit.ok) {
+        int join = junctionOf(hit);
+        if (join >= 0) {
+            Hit j = roadAt(double(x) + 0.5l, double(z) + 0.5l, join);
+            if (j.ok && j.distance <= j.halfWidth + 0.5f) hit = j;
+        }
+        float d = hit.distance, hw = hit.halfWidth;
+        float reach = hw + (hit.span == SPAN_TUNNEL ? 2.0f : hit.span == SPAN_BRIDGE ? 1.0f : VERGE);
+        if (d <= reach) {
             Hit corner = roadAt(double(x), double(z), hit.segment);
-            gHeight = corner.ok ? corner.height : hit.height;
+            float hgt = corner.ok ? corner.height : hit.height;
             int ev = hit.vertex;
             float el = rf(RH_VARC, ev + 1) - rf(RH_VARC, ev);
-            if (el > 1.0e-3f && divF(absF(rf(RH_VH, ev + 1) - rf(RH_VH, ev)), el) > 0.2f) gHeight = hit.height;
-            gHeight = gHeight + 0.002f;
+            if (el > 1.0e-3f && divF(absF(rf(RH_VH, ev + 1) - rf(RH_VH, ev)), el) > 0.2f) hgt = hit.height;
+            hgt = hgt + 0.002f;
             bool reserved = reservedAt(x, z);
             if (reserved && workOnly(x, z)) reserved = false;
-            paintColumn(x, z, d, hw, reserved);
+            gsI[col * 6u] = 1;
+            gsI[col * 6u + 1u] = hit.segment;
+            gsI[col * 6u + 2u] = hit.vertex;
+            gsI[col * 6u + 3u] = hit.kind;
+            gsI[col * 6u + 4u] = hit.span;
+            gsI[col * 6u + 5u] = rollOf(x, z);
+            gsF[col * 10u] = hit.halfWidth;
+            gsF[col * 10u + 1u] = hit.distance;
+            gsF[col * 10u + 2u] = hit.height;
+            gsF[col * 10u + 3u] = hit.ground;
+            gsF[col * 10u + 4u] = hit.water;
+            gsF[col * 10u + 5u] = hit.t;
+            gsF[col * 10u + 6u] = hit.along;
+            gsF[col * 10u + 7u] = hit.dirX;
+            gsF[col * 10u + 8u] = hit.dirZ;
+            gsF[col * 10u + 9u] = hgt;
+            gsU[col * 2u] = cultureAt(x, z);
+            gsU[col * 2u + 1u] = reserved ? 1u : 0u;
         }
+    }
+    GroupMemoryBarrierWithGroupSync();
+    if (col != 0u) return;
+    for (uint c = 0u; c < 256u; c++) {
+        if (gsI[c * 6u] == 0) continue;
+        int px = gX0 + int(c & 15u), pz = gZ0 + int(c >> 4);
+        Hit h;
+        h.ok = true;
+        h.segment = gsI[c * 6u + 1u];
+        h.vertex = gsI[c * 6u + 2u];
+        h.kind = gsI[c * 6u + 3u];
+        h.span = gsI[c * 6u + 4u];
+        h.halfWidth = gsF[c * 10u];
+        h.distance = gsF[c * 10u + 1u];
+        h.height = gsF[c * 10u + 2u];
+        h.ground = gsF[c * 10u + 3u];
+        h.water = gsF[c * 10u + 4u];
+        h.t = gsF[c * 10u + 5u];
+        h.along = gsF[c * 10u + 6u];
+        h.dirX = gsF[c * 10u + 7u];
+        h.dirZ = gsF[c * 10u + 8u];
+        gHit = h;
+        gHeight = gsF[c * 10u + 9u];
+        paintColumn(px, pz, h.distance, h.halfWidth, gsU[c * 2u + 1u] != 0u, gsU[c * 2u], gsI[c * 6u + 5u]);
+    }
 }
 
 // MOTION_BLOCKING_NO_LEAVES as the server primes it before a chunk's decoration (a stage before the decoration):

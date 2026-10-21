@@ -334,7 +334,7 @@ public:
                 vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
                 vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(OvlParams), &p);
                 vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[P_ROADS]);
-                vkCmdDispatch(cmd, (n + GROUP - 1) / GROUP, 1, 1);
+                vkCmdDispatch(cmd, 1, n, 1);  // a workgroup a chunk
             }
             return true;
         }

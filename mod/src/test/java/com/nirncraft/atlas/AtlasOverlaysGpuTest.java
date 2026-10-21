@@ -366,7 +366,8 @@ class AtlasOverlaysGpuTest {
     /**
      * The road painter on the GPU (atlas_overlays_roads.slang, a stage at ATLAS_GEN_STAGE_PAINT) against Java's
      * RoadPaint.Painter on the same terrain: chunks along the road plan by span kind (normal, bridge, culvert, ford,
-     * stairs, tunnel, cut, fill, switchback), each 250 blocks from any place (no structure mask in either).
+     * stairs, tunnel, cut, fill, switchback); no structure mask in either (no tapes here; the reference level is not a
+     * WorldGenRegion).
      * NIRNCRAFT_OVL_ROADS_N chunks a kind (default 6).
      */
     @Test
@@ -402,7 +403,6 @@ class AtlasOverlaysGpuTest {
             if (sp < 0 || sp >= spanNames.length || count[sp] >= per) continue;
             if (roads.vseg[i] != roads.vseg[i + 1]) continue;
             int x = (int) Math.floor(roads.vx[i]), z = (int) Math.floor(roads.vz[i]);
-            if (!com.nirncraft.tamriel.Places.overlapping(x - 250, z - 250, x + 250, z + 250).isEmpty()) continue;
             long k = ChunkPos.pack(x >> 4, z >> 4);
             if (chunksKind.containsKey(k)) continue;
             chunksKind.put(k, spanNames[sp]);
@@ -468,8 +468,13 @@ class AtlasOverlaysGpuTest {
         int done = 0;
         for (var e : chunksKind.entrySet()) {
             ChunkPos cp = ChunkPos.unpack(e.getKey());
+            // the batch's kernels without the road stage, then with it (pages warm): the stage's own time
+            rig.ovl().kinds(AtlasOvlNative.KIND_MBNL);
+            rig.gen().chunks(new int[] {cp.x(), cp.z()}, 0, ids, flag);
+            AtlasGenNative.Times bare = rig.gen().chunks(new int[] {cp.x(), cp.z()}, 0, ids, flag);
+            rig.ovl().kinds(AtlasOvlNative.KIND_ROADS | AtlasOvlNative.KIND_MBNL);
             AtlasGenNative.Times tm = rig.gen().chunks(new int[] {cp.x(), cp.z()}, 0, ids, flag);
-            gpuMs += tm.kernelMs();
+            gpuMs += tm.totalMs() - bare.totalMs();
             int[] t = ref.terrain().get(e.getKey()), r = ref.pieces().get(e.getKey());
             Score k = byKind.computeIfAbsent(e.getValue(), x -> new Score());
             for (int b = 0; b < 256 * 640; b++) {
@@ -489,7 +494,8 @@ class AtlasOverlaysGpuTest {
         rig.close();
         report.append("road paint: ").append(all).append('\n');
         byKind.forEach((k, v) -> report.append(String.format("  %-10s %s%n", k, v)));
-        report.append(String.format("  generator batches with the stages: %.2f ms kernels for %d chunks (one a batch)%n", gpuMs, chunksKind.size()));
+        report.append(String.format("  the road stage: %.2f ms for %d chunks, %.3f ms a chunk (a batch with it minus without, one chunk a batch)%n",
+                gpuMs, chunksKind.size(), gpuMs / chunksKind.size()));
         report.append("  differences (Java -> GPU):\n");
         pairs.entrySet().stream().sorted((a, b) -> Long.compare(b.getValue(), a.getValue())).limit(30)
                 .forEach(e -> report.append(String.format("    %8d  %s   (e.g. %s)%n", e.getValue(), e.getKey(), example.get(e.getKey()))));
