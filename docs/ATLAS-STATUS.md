@@ -124,6 +124,10 @@ Not merged into atlas-render yet: everything on atlas-naadf after 424841c5 and t
 
 ## Tools and how to test
 
+- Shader compile speed: `-O3` on atlas_far's entries takes ~14 min each (the SPIR-V optimiser), `-O0` ~2 s. Dev build
+  directories point CMake's `SLANGC` at `E:/NirnCraft-scratch/tools/slangc-dev.cmd` (the real slangc with `-O3` swapped
+  for `-O0`; `ATLAS_SLANG_OPT` overrides): `cmake -S native -B native/build -DSLANGC=<that>`. Whether `-O3` is worth it
+  at run time is measured at shipping, not now.
 - Build: native `.\native\build.ps1 -NoTest` (suites `native/build/Release/atlas_tests.exe`, `atlas_gl_test.exe`);
   Java `py -3 tools/dev/build_263.py --offline jar` (or `compileJava`); shaders `py -3 tools/dev/glsl_check.py`.
 - Ship natives: copy `native/build/Release/atlas_core.dll` to `mod/src/main/resources/natives/windows-x86_64/` and
