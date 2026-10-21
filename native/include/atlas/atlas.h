@@ -807,6 +807,31 @@ ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, dou
    TamrielMap.sample (the MapSample fields in declaration order). For the parity checks. */
 ATLAS_API AtlasStatus atlas_gen_probe(AtlasGen* h, uint32_t kind, uint32_t n, const int32_t* xz, uint32_t* out);
 
+/*
+ * Structures from the plans on the GPU (shaders/atlas_overlays.slang, overlays_engine.cpp; Java:
+ * com.nirncraft.atlas.AtlasOverlayTapes): the named settlements' pieces as op tapes and the street painter's plan,
+ * stamped in place on chunk columns of 16-bit ids of the overlay block table (b = x + 16 z + 256 (y + 64), `levels`
+ * y levels from -64, two ids a word), one GPU thread per column. Vulkan only. atlas_ovl_set: which 0 the block table
+ * ('AOBL': 5 words per id: flags, transforms, sweep classes, block index / facing / cover, shape table; then the shape
+ * tables), 1 the tapes ('AOTP': per chunk record: 257 column starts, 256 column sweep ranges, the ops), 2 the street
+ * plan ('AOSR'); resident until replaced. atlas_ovl_run: chunks ATLAS_OVL_CHUNK_INTS ints each (cx, cz, the chunk's
+ * tape record word offset or -1, its street plan bucket or -1, the batch slots of its N, E, S, W neighbours or -1);
+ * kinds bit 0 the pieces, bit 2 their sweep (Sanity, then fence / wall / pane shapes), bit 1 the streets (in that
+ * order: the server's).
+ */
+#define ATLAS_OVL_CHUNK_INTS 8u
+typedef struct AtlasOvl AtlasOvl;
+typedef struct AtlasOvlTimes {
+    double uploadMs, kernelMs, piecesMs, streetsMs, readbackMs, totalMs, sweepsMs;  /* pieces, sweeps, streets: GPU timestamps */
+} AtlasOvlTimes;
+ATLAS_API AtlasStatus atlas_ovl_create(AtlasBackend backend, AtlasOvl** out);
+ATLAS_API void atlas_ovl_destroy(AtlasOvl* h);
+ATLAS_API const char* atlas_ovl_last_error(AtlasOvl* h);
+ATLAS_API const char* atlas_ovl_device(AtlasOvl* h);
+ATLAS_API AtlasStatus atlas_ovl_set(AtlasOvl* h, uint32_t which, const uint32_t* words, uint32_t count);
+ATLAS_API AtlasStatus atlas_ovl_run(AtlasOvl* h, uint32_t count, const int32_t* chunks, uint32_t levels, uint32_t kinds,
+                                    uint32_t* ids, AtlasOvlTimes* times);
+
 #ifdef __cplusplus
 }
 #endif
