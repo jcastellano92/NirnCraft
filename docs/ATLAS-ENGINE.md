@@ -41,6 +41,13 @@ Seen in the owner's live test (2026-10-21):
 5. **Stutter** (frame spikes to 317 ms) and CPU load: measure again after 1.
 6. **Small green squares floating in the sky**: unknown.
 
+Second live test (2026-10-21, 42b07edb): still CPU-heavy (the generator churns: 802,809 chunks processed for ~1,000
+sections uploaded); the far field is still the old tile path and the GPU far chunks don't show; caches outlive code
+changes; **a pop-in line** where grass and small detail appear at the level-0 edge (no coverage in the coarse levels);
+plants drawn as full textured cubes; many blocks and foliage still wrong; green squares in the sky (not material
+exhaustion); **water missing in places**. Owners: grid agent (churn, far field, cache fingerprint and wipe, pop-in
+gradient, CPU re-reads), content agent (block gallery review, plants, foliage, green squares), renderer agent (water).
+
 From the code review (gap list):
 - Entities (mobs, NPCs, players), block entities (chests, signs, banners), particles, the first-person hand: **vanilla**
   raster with our forward light; they cast no shadows into atlas and are not traced.
