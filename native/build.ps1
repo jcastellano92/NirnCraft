@@ -9,11 +9,17 @@ $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $tc = if ($env:NIRNCRAFT_TOOLCHAINS) { $env:NIRNCRAFT_TOOLCHAINS } else { (& "$PSScriptRoot\toolchains.ps1") }
 . "$tc\env.ps1"
 $build = Join-Path $here 'build'
-if (-not (Test-Path "$build\CMakeCache.txt")) {
-    cmake -S $here -B $build -G 'Visual Studio 16 2019' -A x64 | Out-Host
+# build (and any re-configure it triggers) with the CMake that made the cache: another version on PATH (the
+# toolchain's CMake 4.x vs Visual Studio's 3.x) refuses the existing cache
+$cmake = 'cmake'
+if (Test-Path "$build\CMakeCache.txt") {
+    $line = Select-String -Path "$build\CMakeCache.txt" -Pattern '^CMAKE_COMMAND:INTERNAL=(.+)$' | Select-Object -First 1
+    if ($line -and (Test-Path $line.Matches[0].Groups[1].Value)) { $cmake = $line.Matches[0].Groups[1].Value }
+} else {
+    & $cmake -S $here -B $build -G 'Visual Studio 16 2019' -A x64 | Out-Host
     if ($LASTEXITCODE) { throw 'cmake configure failed' }
 }
-cmake --build $build --config $Config --parallel | Out-Host
+& $cmake --build $build --config $Config --parallel | Out-Host
 if ($LASTEXITCODE) { throw 'build failed' }
 # the sources this core was built from (the harness rebuilds only when they change, not when a file's time does)
 py -3 -I (Join-Path (Split-Path -Parent $here) 'tools\dev\native_sources.py') --stamp (Join-Path $build "$Config\atlas_core.sources")
