@@ -283,7 +283,36 @@ Yokuda, Hammerfell): 786,432 of 786,432 columns equal on Vulkan and C++. **Measu
 the tints (`AtlasBiomes`), then the tile's encoding and the far World build (`atlas_upload_tile`). Multiplayer clients
 have no seed: their tiles still come from the server's tile service.
 
-### 7.4 Structures from the plans on the device (2026-10-21)
+### 7.4 The far terrain on the GPU, into the grid (2026-10-21)
+
+**Far columns' surface** (`atlas_gen_tiles` with blocks): `tileBiomeMain` (the biomes the surface reads, as chunks
+store them: the biome source from y -64 through the seeded zoom, one lookup a thread; the climate's column fields
+computed per thread, only those the climate entries read) and `tileSurfMain` (the material rule at the top block and
+the one under it, AtlasSurface.column's context: stone depth 1 / 64, the sea over ground below y 62, no ore veins).
+Checked against Minecraft's own chunks (`gpuFarColumnsMatchChunks`, 30 chunks, the Java reference cached in
+E:/NirnCraft-scratch/gen/ref): where the ground lies at TamrielHeight (67 % of columns) the top block agrees 95.7 %, the
+one under it 99.9 %; the misses are grass where the far rule (like AtlasSurface) puts the sea over dry land below y 62.
+
+**Far chunks** (`atlas_gen_far`, `farChunkMain`, GPU only): a lod-k tile's 16 x 16 level-k chunk columns (16^3 voxels of
+2^k blocks: the grid's coarse level k), each air, uniform or mixed, the far World build's terrain voxel
+(TileVoxels::columnVoxel without the overlays) in generator ids or the ingest table's atlas materials. `gpuFarChunks`:
+0 of 44 M voxels differ from that rule on the same columns. A lod-1 tile: 5,632 chunks (3,464 air, 1,695 uniform, 473
+mixed), 13-25 ms of passes.
+
+**Into the grid** (`atlas_gen_far_ingest`, VoxGrid::ingestCoarseGpu): the chunks in a buffer the grid reads (kept until it
+no longer waits for them and a frame completed), the air and uniform ones without a slot. AtlasClientGen asks per coarse
+level for the 5 x 5 tiles around the camera, nearest first, a tile a turn between near batches; tiles not taken whole,
+or whose chunks the grid dropped, go again once the camera moves a tile at that level. Near sections now take the
+grid's admission (accepted, air as a uniform hint) and its dropped / wanted reports (`atlas_gen_grid_reports`).
+`clientGenJump` (full renderer context): first chunk in the grid 202 ms after a 1,600-block jump, the radius-24 window in
+1.8 s, the far terrain settled 5 s later; a horizon frame hits terrain on 60.1 % of pixels out to 9,418 blocks (15.7 % and
+436 blocks without it). `-Dnirncraft.atlas.farTiles=false` stops the far field's terrain tiles and their CPU World build.
+
+**Kernels**: the exactness flag is a thread-private static (it was an inout parameter, which made Slang copy every callee
+per call site), shared helpers are [noinline]: every gen kernel compiles at -O3 in 1-3 s (0.14-0.40 MB). The -O0
+builds run slowly enough to trip the GPU watchdog. Dev tool: `native/tools/gen_probe` (the far passes from a dumped
+program and map, NIRNCRAFT_GEN_DUMP).
+### 7.5 Structures from the plans on the device (2026-10-21)
 
 `atlas_ovl_*` (`native/shaders/atlas_overlays.slang`, `overlays_engine.cpp`; Java `AtlasOverlayTapes`,
 `AtlasOvlNative`), Vulkan only, its own device for now (like the decoration). Survey of what Java did:
@@ -330,7 +359,7 @@ clip (Riverwood's bridge; water flowing back only on a neighbour update).
 ## 8. Open
 
 * **Structures from the plans**: named settlements' pieces, their Sanity sweep and the street painter are on the device
-  (7.4); still to do there: wiring into AtlasClientGen (GPU to GPU), the other sweeps, road paint, seeded structures.
+  (7.5); still to do there: wiring into AtlasClientGen (GPU to GPU), the other sweeps, road paint, seeded structures.
 * **Features are slow and single threaded** (81 ms a chunk): decorate disjoint 3 x 3s in parallel; trees on the GPU
   later (their placements are pure; shapes need the decoration random).
 * **The surface pass** is the kernel's largest (a thread per column walks it): split the per-block rule work.
@@ -338,8 +367,10 @@ clip (Riverwood's bridge; water flowing back only on a neighbour update).
   CPU World never had it); a list of the sections it let go would let the generator resend exactly those.
 * **Tile plans beyond Tamriel** (`TilePlanner`): Java shapes roads there only where its planner finished a tile, so the
   kernels (authored plan only) differ where one did. The plans would go up as device data like the authored one.
-* **The far tiles' surface blocks and tints** (`AtlasSurface`, `AtlasBiomes`): still Java per tile; the heights and water
-  come from the device (section 7.3). The rule VM and the biome kernels are on the device already.
+* **The far tiles' tints and snow** (`AtlasBiomes`, `AtlasSnowCover`) and the far roads (`FarRoads`): Java per tile on
+  the tile path; the far chunks into the grid (7.4) carry the biome's tints through the ingest table, no snow layer yet.
+* **The overlays on the tiles** (settlements, trees: the features agent's) keep the far field's terrain tiles on; with
+  them on the GPU, `farTiles=false` can become the default and the far World build goes.
 * **Multiplayer**: the client has no seed (the public / secret decision, ATLAS-STREAMING.md decision 3).
 * Found on the way, for the owner: the router has no `minecraft:beardifier` (structures' `beard_box` /
   `beard_thin` do nothing), `nirncraft:tamriel_caves` is dead code, and `TamrielBiomeSource` samples a quart

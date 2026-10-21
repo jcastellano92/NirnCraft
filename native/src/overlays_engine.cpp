@@ -5,10 +5,12 @@
 // the CPU fallback is a later job).
 //
 // Two modes. Standalone (atlas_ovl_create): its own device, chunks of packed 16-bit ids uploaded and read back
-// (atlas_ovl_run: the parity checks). A stage of the generator (atlas_ovl_create_for_gen, gen_stage.hpp): on the
-// generator's device, recorded into the generator's batch before its pack pass, on its blocks buffer (one 32-bit
-// generator id a block), GPU to GPU; each chunk's tape record and street bucket are looked up here from the batch's
-// chunk positions (the tapes and the street plan carry their chunk index), its neighbours from the batch itself.
+// (atlas_ovl_run: the parity checks). Stages of the generator (atlas_ovl_create_for_gen: atlas_gen_add_stage at
+// ATLAS_GEN_STAGE_PIECES, ATLAS_GEN_STAGE_SWEEPS and the street painter after the generator's paint): on the
+// generator's device (atlas_gen_device_handles), recorded into its batch's command buffer between the terrain and the
+// pack pass, on its blocks buffer (one 32-bit generator id a block), GPU to GPU, nothing submitted of our own; each
+// chunk's tape record and street bucket are looked up here from the batch's chunk positions (the tapes and the street
+// plan carry their chunk index), its neighbours from the batch itself.
 #include "vk_loader.hpp"  // first: VK_NO_PROTOTYPES
 
 #include <algorithm>
@@ -23,7 +25,6 @@
 #include <vector>
 
 #include "atlas/atlas.h"
-#include "gen_stage.hpp"
 #include "atlas_ovl_pieces_spv.h"  // generated: slangc + spv_exact, one module per kernel
 #include "atlas_ovl_streets_spv.h"
 #include "atlas_ovl_sanity_spv.h"
@@ -59,9 +60,12 @@ struct Buf {
 
 enum class Mem { Device, Readback, Upload };
 
-class VulkanEngine final : public GenStage {
+// the street painter's stage: after the generator's road paint (StreetPaint runs after RoadPaint in the top layer step)
+constexpr uint32_t STAGE_STREETS = ATLAS_GEN_STAGE_PAINT + 50;
+
+class VulkanEngine final {
 public:
-    ~VulkanEngine() override {
+    ~VulkanEngine() {
         if (dev_) {
             if (!attached_ && !dead_) vkDeviceWaitIdle(dev_);
             for (Buf* b : {&blocks_, &tapes_, &streets_, &chunks_, &ids_, &snap_, &staging_}) release(*b);
@@ -148,7 +152,7 @@ public:
         return build(err);
     }
 
-    // On the generator's device (a stage of its batch): pipelines and buffers of our own, its queue and command buffer
+    // On the generator's device (stages of its batch): pipelines and buffers of our own, its command buffers
     bool attach(VkPhysicalDevice phys, VkDevice dev, std::string& err) {
         attached_ = true;
         phys_ = phys;
@@ -229,9 +233,10 @@ public:
         return true;
     }
 
-    // GenStage: inside the generator's batch, before its pack pass
-    bool record(VkCommandBuffer cmd, VkBuffer blocks, uint32_t chunkWords, uint32_t n, const int32_t* chunkXZ,
-                std::string& err) override {
+    // A stage of the generator's batch (kinds: which of our passes this stage records): inside its command buffer,
+    // between the terrain and the pack pass, with its lock held and its previous batch complete
+    bool record(VkCommandBuffer cmd, VkBuffer blocks, uint32_t chunkWords, uint32_t n, const int32_t* chunkXZ, uint32_t kinds,
+                std::string& err) {
         std::lock_guard<std::mutex> lock(mu_);
         if (dead_ || !has_[0] || (!has_[1] && !has_[2])) return true;  // nothing to stamp yet
         // what changed since the last batch goes up now (the generator waited for its last batch: nothing reads ours)
@@ -276,8 +281,8 @@ public:
         std::memcpy(chunks_.map, desc.data(), chunkBytes);
         if (grown || blocks != boundIds_) writeSet(blocks);
         OvlParams p{int32_t(n), int32_t(GEN_LEVELS), 0u, chunkWords};
-        recordPasses(cmd, p, kinds_, blocks, idBytes, false);
-        stamped_ += any;
+        recordPasses(cmd, p, kinds & kinds_, blocks, idBytes, false);
+        if (kinds & 1u) stamped_ += any;
         return true;
     }
 
@@ -499,7 +504,7 @@ private:
             begin();
             VkBufferCopy c{0, done, n};
             vkCmdCopyBuffer(cmd_, staging_.buf, dst.buf, 1, &c);
-            barrier(cmd_, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+            barrier(cmd_, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
             if (!submitWait(err)) return false;
             done += n;
@@ -599,7 +604,8 @@ private:
 struct AtlasOvl {
     std::unique_ptr<VulkanEngine> engine;
     std::string error;
-    AtlasGen* gen = nullptr;  // atlas_ovl_create_for_gen's: the stage is detached from it on destroy
+    AtlasGen* gen = nullptr;  // atlas_ovl_create_for_gen's: its stages are removed on destroy
+    uint32_t stageIds[3] = {0, 0, 0};
     uint32_t blockCount = 0, tapeWords = 0, streetBuckets = 0;
 };
 
@@ -636,23 +642,50 @@ ATLAS_API AtlasStatus atlas_ovl_create(AtlasBackend backend, AtlasOvl** out) {
     });
 }
 
+namespace {
+// the generator's stage callback (atlas_gen_add_stage): the order says which of our passes
+int32_t stageFn(void* user, const AtlasGenStageBatch* b) {
+    auto* h = static_cast<AtlasOvl*>(user);
+    if (!h || !b || b->version < 1) return -1;
+    uint32_t kinds = b->order == ATLAS_GEN_STAGE_PIECES ? 1u : b->order == ATLAS_GEN_STAGE_SWEEPS ? 4u : 2u;
+    try {
+        std::string err;
+        if (!h->engine->record(static_cast<VkCommandBuffer>(b->vkCommandBuffer), reinterpret_cast<VkBuffer>(b->blocks),
+                               uint32_t(b->blocksWordsPerChunk), b->chunkCount, b->chunks, kinds, err)) {
+            h->error = err;
+            return -1;
+        }
+        return 0;
+    } catch (const std::exception& e) {
+        h->error = e.what();
+        return -1;
+    }
+}
+}  // namespace
+
 ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out) {
     if (!out || !gen) return ATLAS_ERR_ARG;
     *out = nullptr;
     return guarded(nullptr, [&] {
-        VkPhysicalDevice phys = VK_NULL_HANDLE;
-        VkDevice dev = VK_NULL_HANDLE;
-        if (!atlas::genDevice(gen, phys, dev)) return ATLAS_ERR_UNSUPPORTED;  // a CPU generator
+        AtlasGenDevice d{};
+        if (atlas_gen_device_handles(gen, &d) != ATLAS_OK || !d.vkDevice) return ATLAS_ERR_UNSUPPORTED;  // a CPU generator
         auto h = std::make_unique<AtlasOvl>();
         auto vk = std::make_unique<VulkanEngine>();
         std::string err;
-        if (!vk->attach(phys, dev, err)) {
+        if (!vk->attach(static_cast<VkPhysicalDevice>(d.vkPhysicalDevice), static_cast<VkDevice>(d.vkDevice), err)) {
             std::fprintf(stderr, "[atlas] overlays: %s\n", err.c_str());
             return ATLAS_ERR_UNSUPPORTED;
         }
         h->engine = std::move(vk);
         h->gen = gen;
-        atlas::genSetStage(gen, h->engine.get());
+        const uint32_t orders[3] = {ATLAS_GEN_STAGE_PIECES, ATLAS_GEN_STAGE_SWEEPS, STAGE_STREETS};
+        for (uint32_t k = 0; k < 3; k++) {
+            AtlasStatus s = atlas_gen_add_stage(gen, orders[k], stageFn, h.get(), &h->stageIds[k]);
+            if (s != ATLAS_OK) {
+                for (uint32_t j = 0; j < k; j++) atlas_gen_remove_stage(gen, h->stageIds[j]);
+                return s;
+            }
+        }
         *out = h.release();
         return ATLAS_OK;
     });
@@ -660,7 +693,8 @@ ATLAS_API AtlasStatus atlas_ovl_create_for_gen(AtlasGen* gen, AtlasOvl** out) {
 
 ATLAS_API void atlas_ovl_destroy(AtlasOvl* h) {
     if (!h) return;
-    if (h->gen) atlas::genSetStage(h->gen, nullptr);  // between batches: nothing of ours is in flight after this
+    if (h->gen)
+        for (uint32_t id : h->stageIds) atlas_gen_remove_stage(h->gen, id);  // between batches: nothing of ours in flight after
     delete h;
 }
 ATLAS_API const char* atlas_ovl_last_error(AtlasOvl* h) { return h ? h->error.c_str() : "null handle"; }

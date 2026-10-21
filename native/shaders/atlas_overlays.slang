@@ -56,11 +56,13 @@ static uint gBase;  // the chunk's first word in ids
 static uint gCol;   // x + 16 z
 static int gX, gZ;  // the column's world x, z
 
-uint flagsOf(uint id) { return blocks[HEADER + id * ID_WORDS]; }
-uint xformOf(uint id) { return blocks[HEADER + id * ID_WORDS + 1u]; }
-uint sweepOf(uint id) { return blocks[HEADER + id * ID_WORDS + 2u]; }
-uint miscOf(uint id) { return blocks[HEADER + id * ID_WORDS + 3u]; }
-uint shapeOf(uint id) { return blocks[HEADER + id * ID_WORDS + 4u]; }
+// an id beyond the table (not one of its blocks) reads as air's
+uint idWord(uint id, uint k) { return blocks[HEADER + (id < blocks[1] ? id : 0u) * ID_WORDS + k]; }
+uint flagsOf(uint id) { return idWord(id, 0u); }
+uint xformOf(uint id) { return idWord(id, 1u); }
+uint sweepOf(uint id) { return idWord(id, 2u); }
+uint miscOf(uint id) { return idWord(id, 3u); }
+uint shapeOf(uint id) { return idWord(id, 4u); }
 uint idWater() { return blocks[7]; }
 uint idAir() { return blocks[2]; }
 uint idDirt() { return blocks[3]; }
@@ -84,14 +86,11 @@ void setB(int y, uint v) {
         return;
     }
     uint i = gBase + (b >> 1);
-    uint old;
-    if ((b & 1u) != 0u) {
-        InterlockedAnd(ids[i], 0x0000FFFFu, old);
-        InterlockedOr(ids[i], v << 16, old);
-    } else {
-        InterlockedAnd(ids[i], 0xFFFF0000u, old);
-        InterlockedOr(ids[i], v & 0xFFFFu, old);
-    }
+    // one atomic xor of this thread's half (the other half is its neighbour column's, read by others meanwhile: an
+    // and-then-or would show it a moment of air)
+    uint sh = (b & 1u) * 16u;
+    uint cur = (ids[i] >> sh) & 0xFFFFu, old;
+    InterlockedXor(ids[i], ((cur ^ v) & 0xFFFFu) << sh, old);
 }
 
 int lo16(uint w) { return int(w << 16) >> 16; }
@@ -405,8 +404,7 @@ void streetsMain(uint3 id : SV_DispatchThreadID) {
         } else if (cls == C_STAIRS && surf == S_STONE) {
             path(e, a, b, true);
         } else if (gateLane(a, b)) {
-            uint bad = 0u;
-            float len = float(hypotS(double(nodeX(b) - nodeX(a)), double(nodeZ(b) - nodeZ(a)), bad));
+            float len = float(hypotS(double(nodeX(b) - nodeX(a)), double(nodeZ(b) - nodeZ(a))));
             if (len <= MAX_LANE) band(e, a, b);
         }
     }

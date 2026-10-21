@@ -184,7 +184,7 @@ dependencies {
 
 tasks.named('test', Test).configure {
     useJUnitPlatform()
-    maxHeapSize = '2G'
+    maxHeapSize = System.getenv('NIRNCRAFT_TEST_HEAP') ?: '6g'
     outputs.upToDateWhen { false }
     testLogging {
         events "passed", "skipped", "failed"

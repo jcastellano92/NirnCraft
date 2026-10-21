@@ -158,7 +158,8 @@ public:
     std::atomic<uint32_t> fadeMs{0};
 
     void putTile(std::unique_ptr<Tile> t);
-    void putSection(int sx, int sy, int sz, const uint16_t* mats);
+    // (returns the stored section: immutable, shared with the GPU grid's books, VoxGrid::put)
+    std::shared_ptr<const Section> putSection(int sx, int sy, int sz, const uint16_t* mats);
     // the real sections of columns [sx0, sx1) x [sz0, sz1) (the GPU's level-0 grid, voxgrid.hpp, re-reads them when
     // its window moves); and one section's ids (false: none)
     void sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const;

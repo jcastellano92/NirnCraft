@@ -685,6 +685,15 @@ ATLAS_API AtlasStatus atlas_set_clipmap(AtlasContext* ctx, uint32_t lodCount);
 ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint32_t afterFrames);
 
 /*
+ * Test hook (the GPU generator's far terrain without the generator): `count` level-`level` chunks given to the grid
+ * through a buffer on the context's own device (VoxGrid::ingestCoarseGpu): pos[3 i ..] the chunk (level-k chunk
+ * units, cy from y -64), kinds[i] 0 mixed (ids[4096 i ..] its 16^3 voxel ids, x + 16 (z + 16 y)), 1 air,
+ * 2 | id << 8 one id. accepted (optional, count bytes): 1 for each taken. Vulkan only (ATLAS_ERR_UNSUPPORTED else).
+ */
+ATLAS_API AtlasStatus atlas_debug_coarse_chunks(AtlasContext* ctx, int32_t level, uint32_t count, const int32_t* pos,
+                                                const uint32_t* kinds, const uint16_t* ids, uint8_t* accepted);
+
+/*
  * Exact seeded noise for the terrain height (shaders/atlas_height.slang): the WorldNoise evaluations the mod's
  * TamrielHeight.height makes, for a batch of columns, bit-identical to Minecraft's NoiseStack of PerlinNoise layers
  * (see the kernel's header for the argument). The caller runs height() itself, served these values. Independent of
@@ -798,9 +807,93 @@ ATLAS_API AtlasStatus atlas_gen_read_page(AtlasGen* h, int32_t cx, int32_t cz, u
 /* Far tiles on the device (the map set, atlas_page.slang tileMain): count tiles as (lod, tx, tz) triples, each 256 x 256
    columns at the centre block of their 2^lod squares (AtlasExactSource.fill): outSurface count * 65536 floats
    ((float) TamrielHeight.height, row-major), outWater the same (the sea below y 63, the map's rivers and lakes at
-   ceil(level), NaN dry); outFlags (may be NULL) nonzero where a column is not proven exact. */
+   ceil(level), NaN dry); outBlocks (may be NULL: not made) per column the material rule's top block | the one under it
+   << 16 (generator ids, AtlasSurface.column's: ore veins left out, the biomes as chunks store them); outBiomes (with
+   outBlocks, may be NULL) the biome id at the column's top (dry: the ground's top + 1, else the water's top); outFlags
+   (may be NULL) nonzero where a column is not proven exact. */
 ATLAS_API AtlasStatus atlas_gen_tiles(AtlasGen* h, const int32_t* lodTxTz, uint32_t count, float* outSurface, float* outWater,
-                                      uint32_t* outFlags, AtlasGenTimes* times);
+                                      uint32_t* outBlocks, uint32_t* outBiomes, uint32_t* outFlags, AtlasGenTimes* times);
+/* Far chunks on the device (GPU only; atlas_page.slang farChunkMain): count (<= 16) lod tiles (tx, tz pairs; lod 1..6),
+   each 16 x 16 columns of level-lod chunks (16^3 voxels of 2^lod blocks, rows = ceil(44 / 2^lod) from y -64: the grid's
+   coarse level lod), made from the tile's columns (atlas_gen_tiles with blocks) as the far World build's terrain voxel.
+   outKinds: per chunk (tile, column z * 16 + x, row inner) 2 words: kind (0 mixed, 1 air, 2 | material << 8 uniform,
+   0xFFFFFFFE mixed without room: capacity too small) and slot; outIds (may be NULL) capacity * 2048 words, the mixed
+   chunks' voxels (x + 16 * (z + 16 * y), two ids a word); outMixed: the slots wanted. outMode 0: generator ids, 1:
+   atlas materials (the ingest table's, by the column's biome). */
+ATLAS_API AtlasStatus atlas_gen_far(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint32_t outMode, uint32_t* outKinds,
+                                    uint32_t* outIds, uint32_t capacity, uint32_t* outMixed, uint32_t* outFlags, AtlasGenTimes* times);
+/* Far chunks into the context's grid (atlas_gen_create_for, GPU only): atlas_gen_far's chunks in atlas materials (the
+   ingest table), made in a buffer of the generator's that the grid reads (VoxGrid::ingestCoarseGpu: level lod, air and
+   uniform chunks without a slot), kept until the grid no longer waits for them and a frame completed. outKinds as
+   atlas_gen_far's; outTaken: the chunks the grid took (the others lie outside its level's window, or past a full pool's
+   cut-off: ask again later). ATLAS_ERR_TIMEOUT: no window yet, or every far buffer still read. */
+ATLAS_API AtlasStatus atlas_gen_far_ingest(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint32_t capacity,
+                                           uint32_t* outKinds, uint32_t* outMixed, uint32_t* outTaken, uint32_t* outFlags,
+                                           AtlasGenTimes* times);
+/* The grid's reports since the last call (VoxGrid::takeGpuDropped / takeGpuWanted), {level, x, y, z} each: level 0
+   sections (section coordinates) or level-k chunks the grid no longer holds (dropped), and level 0 sections it would take
+   now (wanted): make and send them again. Returns how many did not fit the arrays. */
+ATLAS_API uint32_t atlas_gen_grid_reports(AtlasGen* h, int32_t* outDropped, uint32_t droppedCap, uint32_t* outDroppedCount,
+                                          int32_t* outWanted, uint32_t wantedCap, uint32_t* outWantedCount);
+/*
+ * The batch's stages (the features and overlays engines, GPU to GPU on the generator's device and in its batch). A
+ * batch (atlas_gen_run / atlas_gen_chunks) runs: the pages it lacks, the terrain (density, aquifers, surface rule, map
+ * water), then the registered stages in order, then the pack (blocks -> 16-bit sections), the sections' kinds and
+ * hashes, the atlas materials and (atlas_gen_ingest) the grid. A stage records its Vulkan commands into the batch's
+ * command buffer (vkCommandBuffer): it binds its own pipelines and descriptors (made beforehand on the device of
+ * atlas_gen_device_handles), reads and writes `blocks`, and returns 0 (anything else fails the batch). The generator
+ * puts a memory barrier after each stage and binds its own state again. The order numbers (ATLAS_GEN_STAGE_*):
+ *   1000 + step   decoration step 0..9 (GenerationStep.Decoration's ordinal: the features engine)
+ *   2000          settlement and structure pieces, 2100 their sweeps (the overlays engine)
+ *   3000          freeze_top_layer (snow and ice), 3100 road and street paint
+ * Stages of one order run in registration order. Callbacks run on the thread that calls atlas_gen_run, with the
+ * generator's lock held: they must not call back into atlas_gen_*. Vulkan only (ATLAS_ERR_UNSUPPORTED on the C++ engine).
+ */
+enum {
+    ATLAS_GEN_STAGE_DECORATION = 1000,  /* + the step, 0..9 */
+    ATLAS_GEN_STAGE_PIECES = 2000,
+    ATLAS_GEN_STAGE_SWEEPS = 2100,
+    ATLAS_GEN_STAGE_FREEZE = 3000,
+    ATLAS_GEN_STAGE_PAINT = 3100
+};
+typedef struct AtlasGenStageBatch {
+    uint32_t version;              /* 1 */
+    uint32_t order;                /* the stage being called */
+    uint32_t chunkCount;           /* chunks in this batch (<= 64) */
+    uint32_t queueFamily;          /* vkCommandBuffer's */
+    const int32_t* chunks;         /* (cx, cz) pairs, host memory */
+    void* vkDevice;                /* VkDevice */
+    void* vkCommandBuffer;         /* VkCommandBuffer, recording, compute bind point */
+    uint64_t blocks;               /* VkBuffer: per chunk blocksWordsPerChunk uint32 generator block ids (the program's
+                                      block table: AtlasGenProgram.blocks), index x + 16 * (z + 16 * (y + 64)), y -64..575 */
+    uint64_t blocksWordsPerChunk;  /* 16 * 16 * 640 */
+    uint64_t chunkList;            /* VkBuffer: the chunks' (cx, cz) int pairs, in batch order */
+    uint64_t pages;                /* VkBuffer: the pages (pageWords words each: the column fields, the map water word,
+                                      the quart biomes; atlas_gen.slang's layout) */
+    uint64_t pageIndex;            /* VkBuffer: int slot per page of the grid pageMinCx.., pageW x pageH (-1: none) */
+    uint32_t pageWords;
+    int32_t pageMinCx, pageMinCz, pageW, pageH;
+    uint32_t pad0;
+    uint64_t program;              /* VkBuffer: the program's words (AtlasGenProgram: seeds, noises, the block table) */
+    uint64_t map;                  /* VkBuffer: the map's words (AtlasGenMap) */
+} AtlasGenStageBatch;
+typedef int32_t (*AtlasGenStageFn)(void* user, const AtlasGenStageBatch* batch);
+/* Registers a stage at `order` (outId: for atlas_gen_remove_stage). Copied: the callback and user stay valid until removed
+   or the generator is destroyed. */
+ATLAS_API AtlasStatus atlas_gen_add_stage(AtlasGen* h, uint32_t order, AtlasGenStageFn fn, void* user, uint32_t* outId);
+ATLAS_API AtlasStatus atlas_gen_remove_stage(AtlasGen* h, uint32_t id);
+/* The generator's Vulkan device, for the stages' engines to make their pipelines and buffers on beforehand. */
+typedef struct AtlasGenDevice {
+    uint32_t version;              /* 1 */
+    uint32_t queueFamily;          /* the generator's queue family (its batches' command buffers) */
+    uint32_t frameQueueFamily;     /* the context's frames' family (atlas_gen_create_for), for buffers both read */
+    uint32_t sharedWithContext;    /* 1: the context's own device (atlas_gen_create_for) */
+    void* vkInstance;
+    void* vkPhysicalDevice;
+    void* vkDevice;
+    void* vkQueue;                 /* the generator's queue: submit nothing of your own on it while a batch may run */
+} AtlasGenDevice;
+ATLAS_API AtlasStatus atlas_gen_device_handles(AtlasGen* h, AtlasGenDevice* out);
 /* Pages the device made so far, the page passes' total time, and whether the device makes them (any may be NULL). */
 ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, double* pageMs, int32_t* onDevice);
 /* Probes the kernels' pieces at n (x, z) columns (n <= 2^17), 32 words each, the last a flag (nonzero: not proven): kind 0
@@ -831,9 +924,10 @@ ATLAS_API const char* atlas_ovl_device(AtlasOvl* h);
 ATLAS_API AtlasStatus atlas_ovl_set(AtlasOvl* h, uint32_t which, const uint32_t* words, uint32_t count);
 ATLAS_API AtlasStatus atlas_ovl_run(AtlasOvl* h, uint32_t count, const int32_t* chunks, uint32_t levels, uint32_t kinds,
                                     uint32_t* ids, AtlasOvlTimes* times);
-/* The overlays as a stage of the generator's own batches (GPU to GPU, on its device): every atlas_gen_run / atlas_gen_chunks
-   then stamps its chunks before packing them, finding each chunk's tape record and street bucket from the data's own
-   chunk index and its neighbours in the batch. The block table's first ids must be the generator program's blocks
+/* The overlays as stages of the generator's own batches (atlas_gen_add_stage: the pieces at ATLAS_GEN_STAGE_PIECES, their
+   sweep at ATLAS_GEN_STAGE_SWEEPS, the street painter at ATLAS_GEN_STAGE_PAINT + 50; GPU to GPU, on its device): every
+   atlas_gen_run / atlas_gen_chunks then stamps its chunks before packing them, finding each chunk's tape record and
+   street bucket from the data's own chunk index and its neighbours in the batch. The block table's first ids must be the generator program's blocks
    (AtlasOverlayTapes(prog.blocks)); the ingest table (atlas_gen_set_ingest) must cover the whole block table.
    atlas_ovl_set's data goes up at the generator's next batch. ATLAS_ERR_UNSUPPORTED for a CPU generator. Destroy the
    overlays before the generator (it detaches itself). atlas_ovl_run is refused on such a handle. */

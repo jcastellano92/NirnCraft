@@ -138,6 +138,7 @@ struct AtlasContext {
     std::unique_ptr<Backend> backend;
     World world;
     VoxGrid voxgrid;  // the level-0 grid's books (voxgrid.hpp): sections in, batches to the backend's GPU build
+    bool gridPlanned = false;  // (its pool sized from the device's memory once, before its first frame)
     std::vector<uint32_t> texturesPacked = std::vector<uint32_t>(1, 0u);  // packTextures of the world's TextureSet
     uint64_t texturesRevision = 0;
     std::vector<MaterialGpu> palette;
@@ -429,7 +430,7 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             Backend::VoxGridTimes t = ctx->backend->voxgridTimes();
             const VoxGrid& v = ctx->voxgrid;
             uint64_t bytes = uint64_t(v.chunkWords()) * 4 + uint64_t(v.totalSlots()) * (64 * 12 + VG_SECTION_WORDS * 4);
-            char b[1024];
+            char b[1536];
             std::snprintf(b, sizeof b,
                           ",\"voxgrid\":{\"window\":[%d,%d,%d],\"slots\":%u,\"slotCap\":%u,\"gpuBytes\":%llu,\"built\":%llu,"
                           "\"batches\":%llu,\"pending\":%zu,\"lastGpuMs\":%.3f,\"lastSections\":%u,\"lastJobs\":%u,"
@@ -439,8 +440,22 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           (unsigned long long)v.batches, v.pending(), t.lastMs, t.lastSections, t.lastJobs,
                           t.lastStates ? "true" : "false", t.totalMs, ctx->world.gridOwnsLevel0.load() ? "true" : "false",
                           ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs);
+            // residency: slots used / of the pool, uniform cells (no slot), the waiting (CPU ids kept, GPU ones to ask
+            // for), given up for nearer ones, could not be taken, the GPU's uniform finds, the priority cut-off of a
+            // full pool, level 0's footprint reach and the nearest known section not resident (blocks; 0: none)
+            {
+                VoxGrid::Residency rs = v.residency();
+                char r[512];
+                std::snprintf(r, sizeof r,
+                              "\"resident\":%u,\"slotsTotal\":%u,\"uniform\":%u,\"waiting\":%zu,\"gpuWaiting\":%zu,"
+                              "\"misses\":%llu,\"evictedNow\":%llu,\"gpuUniform\":%llu,\"cutoff\":%.0f,\"reach\":%.0f,\"nearestMissing\":%u,",
+                              rs.resident, rs.cap, rs.uniform, rs.waiting, rs.gpuWaiting, (unsigned long long)rs.misses, (unsigned long long)rs.evicted,
+                              (unsigned long long)rs.gpuUniform, std::fmin(rs.cutoff, 1e9f), std::fmin(rs.reach, 1e9f),
+                              rs.nearestMissing);
+                std::strncat(b, r, sizeof b - std::strlen(b) - 1);
+            }
             // where the window is against the camera (sections), how it moved, what it still waits for, what the pool
-            // full gave back to the CPU, and how many frames its content took to be complete after its last move
+            // full gave back, and how many frames its content took to be complete after its last move
             VoxGrid::Stats st = v.stats();
             char c[768];
             std::snprintf(c, sizeof c,
@@ -562,8 +577,9 @@ ATLAS_API AtlasStatus atlas_upload_column_tile(AtlasContext* ctx, const AtlasCol
 ATLAS_API AtlasStatus atlas_upload_section(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz, const uint16_t* mats) {
     if (!ctx || !mats) return ATLAS_ERR_ARG;
     ATLAS_TRY
-    ctx->world.putSection(sx, sy, sz, mats);
-    ctx->voxgrid.put(sx, sy, sz, mats);
+    // (the grid's books share the world's stored copy: one section's ids once in memory, whatever reads them)
+    std::shared_ptr<const Section> sec = ctx->world.putSection(sx, sy, sz, mats);
+    ctx->voxgrid.put(sx, sy, sz, VgIds(sec, &sec->mats));
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }
@@ -739,11 +755,12 @@ ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], do
     ATLAS_TRY
     double ms = 0;
     // the level-0 grid: the columns its window entered read from the world here when the render thread could not (its
-    // lock busy), and what it gave up rebuilt by the CPU again
+    // lock busy); what it gave up is the CPU's level 0 again only on the CPU backend (on a device the grid's coarse
+    // levels answer there: no CPU level 0 near)
     ctx->voxgrid.refill(ctx->world);
     {
         std::vector<Key3> rel = ctx->voxgrid.takeReleased();
-        if (!rel.empty()) ctx->world.gridReleased(rel);
+        if (!rel.empty() && !ctx->backend->onDevice()) ctx->world.gridReleased(rel);
     }
     // the grid's coarse levels own their levels' real blocks (before its first frame too: what they will hold)
     ctx->world.gridCoarse = ctx->voxgrid.enabled ? std::clamp(ctx->voxgrid.coarseLevels, 0, std::max(0, ctx->world.lodCount - 1)) : 0;
@@ -1107,6 +1124,21 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
             ctx->world.setView(a[0] / hl, a[2] / hl);
             ctx->voxgrid.setView(a[0] / hl, a[2] / hl);
         }
+        // the grid's residency: the full forward, the cone to the screen's corner, the pixel's angle (times the lod
+        // bias, as the continuous level's footprint) and the level's bias (ATLAS_LOD's third knob)
+        float corner[3];
+        pixelDir(f->invViewProj, 0.0f, 0.0f, f->width, f->height, corner);
+        float cosHalf = a[0] * corner[0] + a[1] * corner[1] + a[2] * corner[2];
+        float dc = std::fmin(1.0f, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
+        float lodBias = f->lodBias > 0 ? f->lodBias : 1.0f;
+        ctx->voxgrid.setView(a, cosHalf, std::acos(dc) * lodBias, g.lodParams[2]);
+        if (!ctx->gridPlanned) {
+            // level 0's pool from the device's memory plan (atlas_memory_info's budget), before its first frame
+            ctx->gridPlanned = true;
+            MemoryInfo m;
+            std::string merr;
+            if (ctx->backend->memoryInfo(m, merr)) ctx->voxgrid.planMemory(m.deviceLocalBudget ? m.deviceLocalBudget : m.deviceLocalBytes * 8 / 10);
+        }
     }
     float dot = std::fmin(1.0f, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
     g.params[0] = f->nearFieldEnd;
@@ -1256,7 +1288,13 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     }();
     ctx->world.gridOwnsLevel0 = ownLevel0 && ctx->voxgrid.enabled;
     // (bit 2: the grid owns every level's real blocks, World::gridOwnsReal: level 0's regions are the tiles' alone)
-    g.vgDims[3] = (ctx->world.gridOwnsLevel0 ? 1u : 0u) | (ctx->world.gridOwnsReal() ? 2u : 0u);
+    // (bit 4: a run of level-0 chunks the grid does not hold yet traced in its coarse levels, atlas_far.slang traceLod;
+    // ATLAS_VOXGRID_FALLBACK=0, measurements: the regions as before)
+    static const bool fallback = [] {
+        const char* e = std::getenv("ATLAS_VOXGRID_FALLBACK");
+        return !e || std::atoi(e) != 0;
+    }();
+    g.vgDims[3] = (ctx->world.gridOwnsLevel0 ? 1u : 0u) | (ctx->world.gridOwnsReal() ? 2u : 0u) | (fallback ? 4u : 0u);
     in.voxgrid = &ctx->voxgrid;
     {
         // the near field's textures (atlas_set_material_textures), packed for the kernels once each revision
@@ -1659,6 +1697,21 @@ ATLAS_API AtlasStatus atlas_set_clipmap(AtlasContext* ctx, uint32_t lodCount) {
     if (!ctx || lodCount < 1 || lodCount > 7u) return ATLAS_ERR_ARG;  // 7: the default (and the most the mod streams)
     ctx->world.lodCount = int(lodCount);
     return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_debug_coarse_chunks(AtlasContext* ctx, int32_t level, uint32_t count, const int32_t* pos,
+                                                const uint32_t* kinds, const uint16_t* ids, uint8_t* accepted) {
+    if (!ctx || !pos || !kinds || (count && !ids)) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    if (!ctx->backend->onDevice()) return ctx->fail(ATLAS_ERR_UNSUPPORTED, "atlas_debug_coarse_chunks: Vulkan only");
+    uint64_t buf = ctx->backend->debugDeviceBuffer(ids, size_t(count) * 8192);
+    if (!buf) return ctx->fail(ATLAS_ERR_UNSUPPORTED, "atlas_debug_coarse_chunks: no device buffer");
+    std::vector<uint64_t> offs(count);
+    for (uint32_t i = 0; i < count; i++) offs[i] = uint64_t(i) * 8192;
+    ctx->voxgrid.ingestCoarseGpu(level, buf, offs.data(), pos, kinds, count, accepted);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
 ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint32_t afterFrames) {

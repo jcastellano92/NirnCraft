@@ -498,8 +498,8 @@ void World::setClasses(std::vector<uint8_t> cls) {
     classes_ = std::move(cls);
 }
 
-void World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
-    auto s = std::make_unique<Section>();
+std::shared_ptr<const Section> World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
+    auto s = std::make_shared<Section>();
     std::copy(mats, mats + 4096, s->mats.begin());
     // (its generated levels outside the world's lock: an upload holds it for the map's update alone; none when the
     // grid's coarse levels own every level that reads them: the GPU makes them, no CPU stage per section)
@@ -512,9 +512,10 @@ void World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
         s->buildMips(cls);
     }
     std::lock_guard<std::mutex> lock(mu_);
-    sections_[{0, sx, sy, sz}] = std::move(s);
+    sections_[{0, sx, sy, sz}] = s;
     if (gridCoarse.load(std::memory_order_relaxed) < coarseTop()) undigested_.insert({0, sx, sy, sz});  // (World::digest)
     markSectionDirty(sx, sy, sz);
+    return s;
 }
 
 void World::sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, std::shared_ptr<const Section>>>& out) const {

@@ -29,7 +29,7 @@ float4 noiseTexel(int3 c) {
 // NirnCraftCloudNoise: period 16 world units in p, trilinear over the 64^3 volume, mix(b, r, 0.3).
 // On Vulkan one hardware trilinear fetch with REPEAT (identical up to the filter's 8-bit weights); the C++ reference
 // build does the same filter by hand from the buffer.
-[noinline]  // (one copy: atlas_far.slang traceLod)
+[noinline]  // (one copy, called: see atlas_far.slang traceLod)
 float cloudNoiseAt(float3 p) {
     __target_switch {
     case spirv:
@@ -138,6 +138,7 @@ float middleCloudDensity(float3 p, float4 w) {
 
 // GetCloudNoise at quality 3 (4 octaves), CLOUD_SPEED_MULT 100, CLOUD_UNBOUND_AMOUNT 1, no smoke plumes.
 // p: world position with y = altitude above the (curved) surface datum. horizontal: distance from the camera.
+[noinline]  // (one copy, called: see atlas_far.slang traceLod)
 float cumulusDensity(float3 p, CloudColumn col, float horizontal, out float h01) {
     float skyCov = col.weather.r, skyTower = col.weather.g, skyCurtain = col.weather.b;
     float effectiveCov = max(skyCov, skyCurtain * 0.68);

@@ -10,8 +10,13 @@
 // Inc. business. Permission to use, copy, modify, and distribute this software is freely granted, provided that this
 // notice is preserved.
 //
-// Every function takes `inout uint bad` where an argument lies outside what is proven here (subnormal results,
+// Every function takes `inout uint g_bad` where an argument lies outside what is proven here (subnormal results,
 // sin/cos beyond 2^20 pi / 2): the caller flags the chunk and the server's blocks correct it.
+
+// the flag every function sets where an argument lies outside what is proven (was an inout parameter: Slang
+// inlines a callee wherever one is forwarded, which made the page kernels megabytes of SPIR-V); a thread's own,
+// cleared at the start of each kernel
+static uint g_bad = 0u;
 
 int hiW(double x) {
     uint lo, hi;
@@ -58,11 +63,12 @@ double residual(double a, double c, double b) {
 }
 
 // a / b, correctly rounded (Java's double division). A quotient is never halfway between two doubles: no ties.
-double divD(double a, double b, inout uint bad) {
+[noinline]
+double divD(double a, double b) {
     double q = a / b;
     if (!isFiniteD(q) || q == 0.0l || !isFiniteD(a) || !isFiniteD(b)) return q;  // the exact special cases
     int e = (hiW(q) >> 20) & 0x7ff, ea = (hiW(a) >> 20) & 0x7ff, eb = (hiW(b) >> 20) & 0x7ff;
-    if (e < 60 || e > 2000 || ea < 60 || ea > 1990 || eb < 60 || eb > 1990) { bad = bad | 1u; return q; }
+    if (e < 60 || e > 2000 || ea < 60 || ea > 1990 || eb < 60 || eb > 1990) { g_bad = g_bad | 1u; return q; }
     double best = q, r = residual(a, q, b);
     double u = nextUpD(q), d = nextDownD(q);
     double ru = residual(a, u, b), rd = residual(a, d, b);
@@ -77,14 +83,15 @@ double divD(double a, double b, inout uint bad) {
 }
 
 // Math.sqrt(x), correctly rounded (Newton from the halved exponent, then the neighbour with the smallest residual)
-double sqrtD(double x, inout uint bad) {
+[noinline]
+double sqrtD(double x) {
     if (!(x > 0.0l) || !isFiniteD(x)) {
         if (x == 0.0l) return x;  // +-0
         if (x != x || x < 0.0l) return asdouble(0u, 0x7ff80000u);
         return x;  // +inf
     }
     int e = (hiW(x) >> 20) & 0x7ff;
-    if (e < 60 || e > 1990) { bad = bad | 1u; return 0.0l; }
+    if (e < 60 || e > 1990) { g_bad = g_bad | 1u; return 0.0l; }
     // a guess with half the exponent, then Newton (approximate divisions are fine here)
     double s = asdouble(0u, uint(((e - 1023) / 2 + 1023) << 20));
     for (int i = 0; i < 7; i++) s = 0.5l * (s + x / s);
@@ -146,8 +153,9 @@ static const int NPIO2_HW[32] = {
 static const double INVPIO2 = asdouble(0x6DC9C883u, 0x3FE45F30u), PIO2_1 = asdouble(0x54400000u, 0x3FF921FBu), PIO2_1T = asdouble(0x1A626331u, 0x3DD0B461u),
                     PIO2_2 = asdouble(0x1A600000u, 0x3DD0B461u), PIO2_2T = asdouble(0x2E037073u, 0x3BA3198Au), PIO2_3 = asdouble(0x2E000000u, 0x3BA3198Au),
                     PIO2_3T = asdouble(0x252049C1u, 0x397B839Au);
-// __ieee754_rem_pio2 for |x| <= 2^19 pi / 2 (beyond: bad)
-int remPio2(double x, out double y0, out double y1, inout uint bad) {
+// __ieee754_rem_pio2 for |x| <= 2^19 pi / 2 (beyond: g_bad)
+[noinline]
+int remPio2(double x, out double y0, out double y1) {
     int hx = hiW(x);
     int ix = hx & EXP_SIGNIF_BITS;
     y0 = x;
@@ -219,16 +227,17 @@ int remPio2(double x, out double y0, out double y1, inout uint bad) {
         y1 = y0;
         return 0;
     }
-    bad = bad | 1u;  // |x| > 2^19 pi / 2: __kernel_rem_pio2 is not ported
+    g_bad = g_bad | 1u;  // |x| > 2^19 pi / 2: __kernel_rem_pio2 is not ported
     return 0;
 }
 
-double sinS(double x, inout uint bad) {  // StrictMath.sin
+[noinline]
+double sinS(double x) {  // StrictMath.sin
     int ix = hiW(x) & EXP_SIGNIF_BITS;
     if (ix <= 0x3fe921fb) return kernelSin(x, 0.0l, 0);
     if (ix >= EXP_BITS) return x - x;
     double y0, y1;
-    int n = remPio2(x, y0, y1, bad);
+    int n = remPio2(x, y0, y1);
     switch (n & 3) {
         case 0: return kernelSin(y0, y1, 1);
         case 1: return kernelCos(y0, y1);
@@ -236,12 +245,13 @@ double sinS(double x, inout uint bad) {  // StrictMath.sin
         default: return -kernelCos(y0, y1);
     }
 }
-double cosS(double x, inout uint bad) {  // StrictMath.cos
+[noinline]
+double cosS(double x) {  // StrictMath.cos
     int ix = hiW(x) & EXP_SIGNIF_BITS;
     if (ix <= 0x3fe921fb) return kernelCos(x, 0.0l);
     if (ix >= EXP_BITS) return x - x;
     double y0, y1;
-    int n = remPio2(x, y0, y1, bad);
+    int n = remPio2(x, y0, y1);
     switch (n & 3) {
         case 0: return kernelCos(y0, y1);
         case 1: return -kernelSin(y0, y1, 1);
@@ -256,7 +266,8 @@ static const uint ATANLO_W[8] = {0x222F65E2u, 0x3C7A2B7Fu, 0x33145C07u, 0x3C81A6
 double ATANLO(int i) { return asdouble(ATANLO_W[i * 2], ATANLO_W[i * 2 + 1]); }
 static const uint AT_W[22] = {0x5555550Du, 0x3FD55555u, 0x9998EBC4u, 0xBFC99999u, 0x920083FFu, 0x3FC24924u, 0xFE231671u, 0xBFBC71C6u, 0xC54C206Eu, 0x3FB745CDu, 0xAF749A6Du, 0xBFB3B0F2u, 0xA0D03D51u, 0x3FB10D66u, 0x52DEFD9Au, 0xBFADDE2Du, 0x24760DEBu, 0x3FA97B4Bu, 0x2C6A6C2Fu, 0xBFA2B444u, 0xE322DA11u, 0x3F90AD3Au};
 double AT(int i) { return asdouble(AT_W[i * 2], AT_W[i * 2 + 1]); }
-double atanS(double x, inout uint bad) {  // StrictMath.atan
+[noinline]
+double atanS(double x) {  // StrictMath.atan
     int hx = hiW(x);
     int ix = hx & EXP_SIGNIF_BITS;
     int id;
@@ -275,18 +286,18 @@ double atanS(double x, inout uint bad) {  // StrictMath.atan
         if (ix < 0x3ff30000) {
             if (ix < 0x3fe60000) {
                 id = 0;
-                x = divD(2.0l * x - 1.0l, 2.0l + x, bad);
+                x = divD(2.0l * x - 1.0l, 2.0l + x);
             } else {
                 id = 1;
-                x = divD(x - 1.0l, x + 1.0l, bad);
+                x = divD(x - 1.0l, x + 1.0l);
             }
         } else {
             if (ix < 0x40038000) {
                 id = 2;
-                x = divD(x - 1.5l, 1.0l + 1.5l * x, bad);
+                x = divD(x - 1.5l, 1.0l + 1.5l * x);
             } else {
                 id = 3;
-                x = divD(-1.0l, x, bad);
+                x = divD(-1.0l, x);
             }
         }
     }
@@ -301,7 +312,8 @@ double atanS(double x, inout uint bad) {  // StrictMath.atan
 
 static const double TINY_D = 1.0e-300l, PI_O_4 = asdouble(0x54442D18u, 0x3FE921FBu), PI_O_2 = asdouble(0x54442D18u, 0x3FF921FBu),
                     PI_LO = asdouble(0x33145C07u, 0x3CA1A626u), PI_D = asdouble(0x54442D18u, 0x400921FBu);
-double atan2S(double y, double x, inout uint bad) {  // StrictMath.atan2
+[noinline]
+double atan2S(double y, double x) {  // StrictMath.atan2
     int hx = hiW(x);
     int ix = hx & EXP_SIGNIF_BITS;
     int lx = loW(x);
@@ -309,7 +321,7 @@ double atan2S(double y, double x, inout uint bad) {  // StrictMath.atan2
     int iy = hy & EXP_SIGNIF_BITS;
     int ly = loW(y);
     if (isNaND(x) || isNaND(y)) return x + y;
-    if (((hx - 0x3ff00000) | lx) == 0) return atanS(y, bad);
+    if (((hx - 0x3ff00000) | lx) == 0) return atanS(y);
     int m = ((hy >> 31) & 1) | ((hx >> 30) & 2);
     if ((iy | ly) == 0) {
         switch (m) {
@@ -342,7 +354,7 @@ double atan2S(double y, double x, inout uint bad) {  // StrictMath.atan2
     double z;
     if (k > 60) z = PI_O_2 + 0.5l * PI_LO;
     else if (hx < 0 && k < -60) z = 0.0l;
-    else z = atanS(absD2(divD(y, x, bad)), bad);
+    else z = atanS(absD2(divD(y, x)));
     switch (m) {
         case 0: return z;
         case 1: return -z;
@@ -351,7 +363,8 @@ double atan2S(double y, double x, inout uint bad) {  // StrictMath.atan2
     }
 }
 
-double hypotS(double x, double y, inout uint bad) {  // StrictMath.hypot (finite, normal-range arguments)
+[noinline]
+double hypotS(double x, double y) {  // StrictMath.hypot (finite, normal-range arguments)
     double a = absD2(x);
     double b = absD2(y);
     if (!isFiniteD(a) || !isFiniteD(b)) {
@@ -368,7 +381,7 @@ double hypotS(double x, double y, inout uint bad) {  // StrictMath.hypot (finite
     if ((ha - hb) > 0x3c00000) return a + b;
     if (a > asdouble(0xFFFFFFFFu, 0x5F300000u) || b < asdouble(0x00000000u, 0x20B00000u)) {
         if (b == 0.0l) return a;
-        bad = bad | 1u;  // the rescaled ranges are not ported
+        g_bad = g_bad | 1u;  // the rescaled ranges are not ported
         return a;
     }
     double t1, t2;
@@ -377,7 +390,7 @@ double hypotS(double x, double y, inout uint bad) {  // StrictMath.hypot (finite
         t1 = 0.0l;
         t1 = setHiW(t1, ha);
         t2 = a - t1;
-        w = sqrtD(t1 * t1 - (b * (-b) - t2 * (a + t1)), bad);
+        w = sqrtD(t1 * t1 - (b * (-b) - t2 * (a + t1)));
     } else {
         a = a + a;
         double y1 = 0.0l;
@@ -386,7 +399,7 @@ double hypotS(double x, double y, inout uint bad) {  // StrictMath.hypot (finite
         t1 = 0.0l;
         t1 = setHiW(t1, ha + 0x00100000);
         t2 = a - t1;
-        w = sqrtD(t1 * y1 - (w * (-w) - (t1 * y2 + t2 * b)), bad);
+        w = sqrtD(t1 * y1 - (w * (-w) - (t1 * y2 + t2 * b)));
     }
     return w;
 }
@@ -397,7 +410,8 @@ static const uint DP_H_W[4] = {0x00000000u, 0x00000000u, 0x40000000u, 0x3FE2B803
 double DP_H(int i) { return asdouble(DP_H_W[i * 2], DP_H_W[i * 2 + 1]); }
 static const uint DP_L_W[4] = {0x00000000u, 0x00000000u, 0x43CFD006u, 0x3E4CFDEBu};
 double DP_L(int i) { return asdouble(DP_L_W[i * 2], DP_L_W[i * 2 + 1]); }
-double powS(double x, double y, inout uint bad) {  // StrictMath.pow
+[noinline]
+double powS(double x, double y) {  // StrictMath.pow
     double z;
     double r, s, t, u, v, w;
     int i, j, k, n;
@@ -409,9 +423,9 @@ double powS(double x, double y, inout uint bad) {  // StrictMath.pow
     if (y == 2.0l) {
         return x * x;
     } else if (y == 0.5l) {
-        if (x >= -asdouble(0xffffffffu, 0x7fefffffu)) return sqrtD(x + 0.0l, bad);
+        if (x >= -asdouble(0xffffffffu, 0x7fefffffu)) return sqrtD(x + 0.0l);
     } else if (y_abs == 1.0l) {
-        return (y == 1.0l) ? x : divD(1.0l, x, bad);
+        return (y == 1.0l) ? x : divD(1.0l, x);
     } else if (y_abs == INF) {
         if (x_abs == 1.0l) return y - y;
         else if (x_abs > 1.0l) return (y >= 0.0l) ? y : 0.0l;
@@ -429,7 +443,7 @@ double powS(double x, double y, inout uint bad) {  // StrictMath.pow
     }
     if (x_abs == 0.0l || x_abs == INF || x_abs == 1.0l) {
         z = x_abs;
-        if (y < 0.0l) z = divD(1.0l, z, bad);
+        if (y < 0.0l) z = divD(1.0l, z);
         if (hx < 0) {
             if (((ix - 0x3ff00000) | y_is_int) == 0) z = asdouble(0u, 0x7ff80000u);
             else if (y_is_int == 1) z = -1.0l * z;
@@ -457,7 +471,7 @@ double powS(double x, double y, inout uint bad) {  // StrictMath.pow
         double z_h, z_l, ss, s2, s_h, s_l, t_h, t_l;
         n = 0;
         if (ix < 0x00100000) {
-            bad = bad | 1u;  // subnormal x: not ported
+            g_bad = g_bad | 1u;  // subnormal x: not ported
             return 0.0l;
         }
         n += ((ix) >> 20) - 0x3ff;
@@ -474,7 +488,7 @@ double powS(double x, double y, inout uint bad) {  // StrictMath.pow
         double L1 = asdouble(0x33333303u, 0x3FE33333u), L2 = asdouble(0xDB6FABFFu, 0x3FDB6DB6u), L3 = asdouble(0x518F264Du, 0x3FD55555u),
                L4 = asdouble(0xA91D4101u, 0x3FD17460u), L5 = asdouble(0x93C9DB65u, 0x3FCD864Au), L6 = asdouble(0x4A454EEFu, 0x3FCA7E28u);
         u = x_abs - BP(k);
-        v = divD(1.0l, x_abs + BP(k), bad);
+        v = divD(1.0l, x_abs + BP(k));
         ss = u * v;
         s_h = ss;
         s_h = setLoW(s_h, 0);
@@ -539,12 +553,12 @@ double powS(double x, double y, inout uint bad) {  // StrictMath.pow
     w = v - (z - u);
     t = z * z;
     t1 = z - t * (P1 + t * (P2 + t * (P3 + t * (P4 + t * P5))));
-    r = divD(z * t1, t1 - 2.0l, bad) - (w + z * w);
+    r = divD(z * t1, t1 - 2.0l) - (w + z * w);
     z = 1.0l - (r - z);
     j = hiW(z);
     j += (n << 20);
     if ((j >> 20) <= 0) {
-        bad = bad | 1u;  // a subnormal result (Math.scalb): not ported
+        g_bad = g_bad | 1u;  // a subnormal result (Math.scalb): not ported
         return 0.0l;
     }
     int z_hi = hiW(z);
@@ -559,7 +573,8 @@ static const uint LN2HI_W[4] = {0xFEE00000u, 0x3FE62E42u, 0xFEE00000u, 0xBFE62E4
 double LN2HI(int i) { return asdouble(LN2HI_W[i * 2], LN2HI_W[i * 2 + 1]); }
 static const uint LN2LO_W[4] = {0x35793C76u, 0x3DEA39EFu, 0x35793C76u, 0xBDEA39EFu};
 double LN2LO(int i) { return asdouble(LN2LO_W[i * 2], LN2LO_W[i * 2 + 1]); }
-double expS(double x, inout uint bad) {  // StrictMath.exp
+[noinline]
+double expS(double x) {  // StrictMath.exp
     double o_threshold = asdouble(0xFEFA39EFu, 0x40862E42u), u_threshold = asdouble(0xD52D3051u, 0xC0874910u), invln2 = asdouble(0x652B82FEu, 0x3FF71547u);
     double P1 = asdouble(0x5555553Eu, 0x3FC55555u), P2 = asdouble(0x16BEBD93u, 0xBF66C16Cu), P3 = asdouble(0xAF25DE2Cu, 0x3F11566Au),
            P4 = asdouble(0xC5D26BF1u, 0xBEBBBD41u), P5 = asdouble(0x72BEA4D0u, 0x3E663769u);
@@ -599,12 +614,12 @@ double expS(double x, inout uint bad) {  // StrictMath.exp
     }
     t = x * x;
     c = x - t * (P1 + t * (P2 + t * (P3 + t * (P4 + t * P5))));
-    if (k == 0) return 1.0l - (divD(x * c, c - 2.0l, bad) - x);
-    y = 1.0l - ((lo - divD(x * c, 2.0l - c, bad)) - hi);
+    if (k == 0) return 1.0l - (divD(x * c, c - 2.0l) - x);
+    y = 1.0l - ((lo - divD(x * c, 2.0l - c)) - hi);
     if (k >= -1021) {
         y = setHiW(y, hiW(y) + (k << 20));
         return y;
     }
-    bad = bad | 1u;  // a subnormal result: not ported
+    g_bad = g_bad | 1u;  // a subnormal result: not ported
     return 0.0l;
 }
