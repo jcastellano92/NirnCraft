@@ -68,6 +68,16 @@ Weather and biome work stay paused until the owner says.
 - **Inside a block** (clipping): rock and earth opaque dark with depth (nothing seen past it, the eye's adaptation held);
   leaves and glass a volume by their chord. Vanilla's in-wall overlay off under our light.
 
+## Defaults and shipping (so nothing is assumed)
+
+- The unified field and client generation are **off by default** (flags default false). With no flags the dev instance
+  draws vanilla's chunk meshes lit by atlas, atlas beyond them.
+- **The shipped pack does not run the new renderer**: `pack/mods` still carries Sodium and Iris, and AtlasNearPass
+  turns itself off when Sodium is loaded, so players get the shader-pack path. The near pass and the unified field run
+  only in the dev instance (Sodium and Iris removed by hand). Shipping it means removing them from the pack (step 3).
+- **Linux natives are behind**: the shipped libatlas_core.so (3440faae) lacks the 0.16 / 0.17 entry points (air, GPU
+  generator, sky glow); Windows is 0.17. Rebuild with `py -3 tools/dev/build_linux_wsl.py` before shipping.
+
 ## In flight (branches, worktrees, work in progress)
 
 | Who | Branch / worktree | State |
