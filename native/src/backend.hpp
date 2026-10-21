@@ -71,6 +71,7 @@ enum class Fault { None, Error, DeviceLost, OutOfMemory, Timeout };
 // Memory of the device (atlas_memory_info); zeros where unknown.
 struct MemoryInfo {
     uint64_t deviceLocalBytes = 0, deviceLocalBudget = 0, deviceLocalUsage = 0, hostHeapBytes = 0, atlasBytes = 0;
+    uint64_t maxStorageRange = 0;  // (what one storage descriptor sees: the grid's pool is one)
     bool integrated = false, budgetExt = false;
 };
 

@@ -157,7 +157,7 @@ public:
     static constexpr uint32_t SLOT_BYTES = VG_SECTION_WORDS * 4 + 64 * 12;
     // the memory plan (atlas_memory_info): `deviceBytes` the device-local budget the process may use (0: unknown, the
     // default cap stays); ATLAS_VOXGRID_MEM the share of it level 0's pool takes (0.10)
-    void planMemory(uint64_t deviceBytes);
+    void planMemory(uint64_t deviceBytes, uint64_t maxRangeBytes = 0);  // (and what one descriptor sees)
     bool enabled = true;  // ATLAS_VOXGRID=0: off (the SVDAG level 0 alone)
 
     // a section's ids as World::putSection gets them (any thread)
@@ -166,6 +166,9 @@ public:
     void put(int sx, int sy, int sz, VgIds ids);
     // the world whose tiers the grid takes its sections back from (standby) and feeds packing (World::packOnGpu)
     void setWorld(World* w) { world_ = w; }
+    // (the backend) a batch it took never reached the GPU (a failure before its submit): every level is placed again
+    // next frame (what the books thought written, written again)
+    void forceReplace();
     int packBudget = 512;  // sections packed a batch at most (ATLAS_PACK_BUDGET)
     // (the backend) a batch's packed sections, back from the GPU: to the world's warm tier
     void packedResults(const std::vector<World::PackDone>& done);
@@ -343,6 +346,17 @@ private:
     std::unordered_map<Key, uint8_t, KeyHash> standby_;  // (host sections: their ids from World::sectionSource)
     std::unordered_map<Key, uint8_t, KeyHash> gpuStandby_;  // (1: asked for already)
     std::vector<std::array<int32_t, 4>> gpuWanted_;
+    // (the reports, bounded: a consumer that never takes them loses the oldest, never memory)
+    void reportDropped(const std::array<int32_t, 4>& r);
+    void reportWanted(const std::array<int32_t, 4>& r);
+    // (takeCoarse) a coarse chunk's job in this batch (global chunk index -> job), one job a chunk; and the coarse
+    // levels' cells given up for nearer chunks, taken back when the view moves on or slots come free (coarse standby)
+    std::unordered_map<uint32_t, uint32_t> coarseJobAt_;
+    void coarseJob(VgBatch& b, const VgJob& j);
+    std::vector<uint32_t> lostCells_[VG_LEVELS];
+    bool coarseRankDue_ = true;
+    int coarseRankedSx_ = INT32_MIN, coarseRankedSz_ = INT32_MIN;
+    void coarseReadmit(VgBatch& b);
     std::unordered_map<Key, uint32_t, KeyHash> gpuUniformHint_;  // (ingestGpu's hint) for the pending GPU sections
     // the view (setView), the footprint's reach, the cut-off of a full pool, when the waiting were last ranked
     float fwd_[3] = {0, 0, -1}, cosView_ = 0.5f, pixelAngle_ = 0.0f, levelBias_ = 0.0f, reach_ = 1e30f, cutoff_ = 1e30f;

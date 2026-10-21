@@ -175,6 +175,8 @@ public:
     void sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, SectionSrc>>& out);
     bool sectionMats(int sx, int sy, int sz, uint16_t out[4096]);
     SectionSrc sectionSource(int sx, int sy, int sz);
+    // the sections of a box [x0, x1) x [y0, y1) x [z0, z1) by direct lookups (small boxes: a coarse chunk's)
+    void sectionsInBox(int x0, int y0, int z0, int x1, int y1, int z1, std::vector<std::pair<Key3, SectionSrc>>& out);
     // The host's tiers (step 5's residency): uploads are packed on the GPU (the grid's batches: packOnGpu, set by the
     // Vulkan backend's context) into the warm tier; the raw copy goes once its packed words came back. The queue of
     // raw sections to pack (each with its generation: a newer upload makes an older pack stale), and the results.

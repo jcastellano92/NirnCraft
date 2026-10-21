@@ -32,6 +32,10 @@ public:
     void configure(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBudget, uint64_t coldBudget);
     void put(const Key3& k, PackedIds words, uint32_t hash, uint8_t flags);
     PackedIds get(const Key3& k);  // warm, else cold (then warm again); null: none
+    PackedIds peek(const Key3& k) const {  // (warm only, not counted)
+        auto it = warm_.find(k);
+        return it == warm_.end() ? nullptr : it->second.words;
+    }
     void erase(const Key3& k);     // (a newer upload replaces it)
     bool has(const Key3& k) const { return warm_.count(k) != 0; }
     // every section of columns [sx0, sx1) x [sz0, sz1) the tiers hold (the cold ones read back into warm)

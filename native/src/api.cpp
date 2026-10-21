@@ -1211,7 +1211,8 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
             ctx->gridPlanned = true;
             MemoryInfo m;
             std::string merr;
-            if (ctx->backend->memoryInfo(m, merr)) ctx->voxgrid.planMemory(m.deviceLocalBudget ? m.deviceLocalBudget : m.deviceLocalBytes * 8 / 10);
+            if (ctx->backend->memoryInfo(m, merr))
+                ctx->voxgrid.planMemory(m.deviceLocalBudget ? m.deviceLocalBudget : m.deviceLocalBytes * 8 / 10, m.maxStorageRange);
             applyCache(ctx);  // (and the host's tiers)
         }
     }

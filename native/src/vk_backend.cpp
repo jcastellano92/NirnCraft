@@ -670,6 +670,7 @@ public:
         }
         if (host >= 0) m.hostHeapBytes = mp.memoryHeaps[host].size;
         m.atlasBytes = allocated_.load();
+        m.maxStorageRange = maxStorageRange_;
         m.integrated = props_.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
                        props_.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU;
         m.budgetExt = budgetExt_;
@@ -1759,6 +1760,7 @@ private:
         }
         releaseRetired(false);
         if (!stageVoxGrid(s, in, err)) return false;
+        vgOpen_ = true;  // (cleared by the frame's submit)
         if (!shared_[B_TEX].buf || (in.textures && in.texturesRevision != texRevision_)) {
             // a new texture set: into a new buffer; frames in flight keep the old one until they are done (no wait)
             retire(shared_[B_TEX]);
@@ -1983,6 +1985,12 @@ private:
         return ok;
     }
     bool stageVoxGridTimed(Slot& s, const FrameInputs& in, std::string& err) {
+        if (vgOpen_) {
+            // (the last batch was taken but its frame failed before the submit: the books thought it written)
+            vgOpen_ = false;
+            if (in.voxgrid) in.voxgrid->forceReplace();
+            for (auto& o : slots_) o.vgResultN = 0, o.vgPackRead = 0;
+        }
         // (the slot was waited: its last build is done) the GPU's sections it found to be one id give their slots back
         if (s.vgResultN && in.voxgrid && s.vgResults.map) {
             std::vector<VoxGrid::UniformHit> hits;
@@ -2379,6 +2387,7 @@ private:
         {
             std::lock_guard<std::mutex> q(queueMu_);  // the staging thread submits scene copies to the same queue
             if (!vkOk(vkQueueSubmit(queue_, 1, &si, s.fence), "vkQueueSubmit (frame)", err)) return false;
+            vgOpen_ = false;  // (the grid's batch is on its way)
         }
         s.inFlight = true;
         s.frameNumber = ++frameCounter_;
@@ -2909,6 +2918,7 @@ private:
     VkPipelineCache pipeCache_ = VK_NULL_HANDLE;  // (makePipeline: ATLAS_PIPELINE_CACHE)
     std::deque<Buf> debugBufs_;                    // (debugDeviceBuffer)
     bool pipeCacheTried_ = false;
+    bool vgOpen_ = false;  // (a grid batch staged and not yet submitted)
     std::string pipeCachePath_;
     VkQueue queue_ = VK_NULL_HANDLE;
     uint32_t family_ = 0;

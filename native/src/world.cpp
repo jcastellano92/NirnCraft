@@ -540,6 +540,21 @@ void World::sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair
         if (!sections_.count(k)) out.emplace_back(k, SectionSrc{nullptr, w});
 }
 
+void World::sectionsInBox(int x0, int y0, int z0, int x1, int y1, int z1, std::vector<std::pair<Key3, SectionSrc>>& out) {
+    std::lock_guard<std::mutex> lock(mu_);
+    for (int z = z0; z < z1; z++)
+        for (int x = x0; x < x1; x++)
+            for (int y = y0; y < y1; y++) {
+                Key3 k{0, x, y, z};
+                auto it = sections_.find(k);
+                if (it != sections_.end()) {
+                    out.emplace_back(k, SectionSrc{it->second, nullptr});
+                } else if (PackedIds w = store_->peek(k)) {
+                    out.emplace_back(k, SectionSrc{nullptr, w});
+                }
+            }
+}
+
 World::SectionSrc World::sectionSource(int sx, int sy, int sz) {
     std::lock_guard<std::mutex> lock(mu_);
     auto it = sections_.find({0, sx, sy, sz});

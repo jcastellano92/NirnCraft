@@ -78,14 +78,17 @@ void VoxGrid::setView(const float fwd[3], float cosHalf, float pixelAngle, float
     levelBias_ = levelBias;
 }
 
-void VoxGrid::planMemory(uint64_t deviceBytes) {
+void VoxGrid::planMemory(uint64_t deviceBytes, uint64_t maxRangeBytes) {
     std::lock_guard<std::mutex> lock(mu_);
     if (laidOut_ || centred_ || !deviceBytes || std::getenv("ATLAS_VOXGRID_SLOTS")) return;  // (fixed, or by hand)
     double share = 0.10;
     if (const char* e = std::getenv("ATLAS_VOXGRID_MEM")) share = std::clamp(std::atof(e), 0.01, 0.6);
     uint64_t slots = uint64_t(double(deviceBytes) * share) / SLOT_BYTES;
     // (never more than a slot a cell of the window, never fewer than the old fixed pool)
-    slotCap = uint32_t(std::clamp<uint64_t>(slots, 16384, uint64_t(D) * H * D));
+    uint64_t cells = uint64_t(D) * H * D;
+    // (at most a slot a cell, what one descriptor sees of the pool, and 2^19: a coarse target's slot << 12 in 32 bits)
+    uint64_t hi = std::min<uint64_t>({cells, maxRangeBytes ? maxRangeBytes / (VG_SECTION_WORDS * 4) : cells, 1u << 19});
+    slotCap = uint32_t(std::clamp<uint64_t>(slots, std::min<uint64_t>(16384, hi), hi));
 }
 
 float VoxGrid::priority(int sx, int sy, int sz) const {
@@ -126,6 +129,22 @@ std::vector<std::array<int32_t, 4>> VoxGrid::takeGpuWanted() {
     std::vector<std::array<int32_t, 4>> r;
     r.swap(gpuWanted_);
     return r;
+}
+
+void VoxGrid::forceReplace() {
+    std::lock_guard<std::mutex> lock(mu_);
+    centred_ = false;
+    for (int k = 1; k <= activeCoarse_; k++) lv_[k].centred = false;
+}
+
+void VoxGrid::reportDropped(const std::array<int32_t, 4>& r) {
+    if (gpuDropped_.size() >= 65536) gpuDropped_.erase(gpuDropped_.begin(), gpuDropped_.begin() + 32768);
+    gpuDropped_.push_back(r);
+}
+
+void VoxGrid::reportWanted(const std::array<int32_t, 4>& r) {
+    if (gpuWanted_.size() >= 65536) gpuWanted_.erase(gpuWanted_.begin(), gpuWanted_.begin() + 32768);
+    gpuWanted_.push_back(r);
 }
 
 void VoxGrid::packedResults(const std::vector<World::PackDone>& done) {
@@ -171,6 +190,14 @@ size_t VoxGrid::ingestCoarseGpu(int k, uint64_t buffer, const uint64_t* offsets,
         uint32_t kind = kinds[i] & 255u;
         if (!L.inWindow(cx, cz) || cy < 0 || cy >= L.H || kind > VG_GIVEN_UNIFORM) continue;
         if (kind == VG_GIVEN_MIXED && !buffer) continue;
+        if (kind == VG_GIVEN_UNIFORM && (kinds[i] >> 8) > 0xFFFFu) continue;
+        bool sections = false;  // (sections first: a chunk any of whose columns came is theirs)
+        if (k <= 4) {
+            int s = L.span();
+            for (int dz = 0; dz < s && !sections; dz++)
+                for (int dx = 0; dx < s && !sections; dx++) sections = L.cols.count(colKey(cx * s + dx, cz * s + dz)) != 0;
+        }
+        if (sections) continue;
         CGiven g;
         g.kind = kind;
         g.mat = kinds[i] >> 8;
@@ -228,6 +255,7 @@ size_t VoxGrid::ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_
         int sx = pos[3 * i], sy = pos[3 * i + 1], sz = pos[3 * i + 2];
         bool level0 = centred_ && inWindow(sx, sy, sz);
         uint32_t uni = uniform ? uniform[i] : VG_NOT_UNIFORM;
+        if (uni != VG_NOT_UNIFORM && uni > 0xFFFFu) uni = VG_NOT_UNIFORM;  // (ids are 16 bits)
         if (level0) gpuStandby_.erase({sx, sy, sz});
         if (level0 && uni == VG_NOT_UNIFORM && slotOf_[phys(sx, sy, sz)] == ~0u) {
             // a full pool takes a new one only within its cut-off; past the footprint's reach level 0 wants none: it
@@ -239,7 +267,7 @@ size_t VoxGrid::ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_
             }
         }
         uint32_t levels = 0;
-        for (int k = 1; k <= activeCoarse_; k++) {
+        for (int k = 1; k <= std::min(4, activeCoarse_); k++) {  // (levels 5-6: made from the level below)
             const Level& L = lv_[k];
             int s = L.span();
             if (L.centred && L.inWindow(fdiv(sx, s), fdiv(sz, s)) && sy >= VG_MIN_SY && (sy - VG_MIN_SY) / s < L.H) levels |= 1u << k;
@@ -285,7 +313,7 @@ void VoxGrid::gpuLetGo(int sx, int sy, int sz, uint32_t bits) {
     it->second &= ~bits;
     if (it->second) return;
     gpuHold_.erase(it);
-    gpuDropped_.push_back({0, sx, sy, sz});
+    reportDropped({0, sx, sy, sz});
     auto c = gpuCol_.find(colKey(sx, sz));
     if (c != gpuCol_.end()) {
         c->second.erase(std::remove(c->second.begin(), c->second.end(), int16_t(sy)), c->second.end());
@@ -320,7 +348,7 @@ void VoxGrid::put(int sx, int sy, int sz, VgIds a) {
     // before the window is placed the world keeps them (frame() reads them from there); outside it they wait there too
     bool level0 = centred_ && inWindow(sx, sy, sz);
     uint32_t levels = 0;
-    for (int k = 1; k <= activeCoarse_; k++) {
+    for (int k = 1; k <= std::min(4, activeCoarse_); k++) {  // (levels 5-6: made from the level below)
         const Level& L = lv_[k];
         int s = L.span();
         if (L.centred && L.inWindow(fdiv(sx, s), fdiv(sz, s)) && sy >= VG_MIN_SY && (sy - VG_MIN_SY) / s < L.H) levels |= 1u << k;
@@ -507,14 +535,14 @@ void VoxGrid::placeLevel(Level& L, int camSx, int camSz) {
         if (!L.given[c]) return;
         int gx, gy, gz;
         cellCoords(L, c, gx, gy, gz);
-        gpuDropped_.push_back({L.k, gx, gy, gz});
+        reportDropped({L.k, gx, gy, gz});
         L.given[c] = 0;
     };
     if (!L.centred || std::abs(nox - L.ox) >= L.D || std::abs(noz - L.oz) >= L.D) {
         // placed, or a jump past the window: nothing of it known
         if (L.centred)
             for (uint32_t c = 0; c < uint32_t(n); c++) letGo(c);
-        for (auto& [c, g] : cgiven_[L.k]) gpuDropped_.push_back({L.k, g.cx, g.cy, g.cz});
+        for (auto& [c, g] : cgiven_[L.k]) reportDropped({L.k, g.cx, g.cy, g.cz});
         cgiven_[L.k].clear();
         L.slotOf.assign(n, ~0u);
         L.word.assign(n, VG_UNLOADED);
@@ -550,7 +578,7 @@ void VoxGrid::placeLevel(Level& L, int camSx, int camSz) {
                     L.rock[c] = 0;
                     letGo(c);
                     if (auto g = cgiven_[L.k].find(c); g != cgiven_[L.k].end()) {
-                        gpuDropped_.push_back({L.k, g->second.cx, g->second.cy, g->second.cz});
+                        reportDropped({L.k, g->second.cx, g->second.cy, g->second.cz});
                         cgiven_[L.k].erase(g);
                     }
                     if (L.word[c] != VG_UNLOADED) L.vacated.push_back(c);
@@ -588,7 +616,7 @@ void VoxGrid::refillCoarse(World& world, bool wait) {
     else if (!world.trySectionsIn(x0, z0, x1, z1, secs)) return;
     for (auto& [key, sec] : secs) {
         uint32_t levels = 0;
-        for (int k = 1; k <= activeCoarse_; k++) {
+        for (int k = 1; k <= std::min(4, activeCoarse_); k++) {  // (levels 5-6: made from the level below)
             const Level& L = lv_[k];
             if (!L.freshCount) continue;
             int s = L.span(), cx = fdiv(key.x, s), cz = fdiv(key.z, s);
@@ -597,6 +625,7 @@ void VoxGrid::refillCoarse(World& world, bool wait) {
         }
         if (!levels) continue;
         CPending& p = cpending_[{key.x, key.y, key.z}];
+        if (gpuRef_.count({key.x, key.y, key.z})) continue;  // (the GPU's own, newer, waiting)
         if (p.ids.gpu()) p.ids = sec.raw ? VgSrc{VgIds(sec.raw, &sec.raw->mats), nullptr} : VgSrc{nullptr, sec.packed};  // (an upload since is newer)
         p.levels |= levels;
     }
@@ -636,7 +665,7 @@ void VoxGrid::shift(int nox, int noz, World& world) {
         freshColumns_ = uint32_t(D * D);
         slotChunk_.assign(slotCap, ~0u);
         slotCpu_.assign(slotCap, 0);
-        cellGen_.assign(n, 0);
+        if (cellGen_.size() != n) cellGen_.assign(n, 0);  // (never reset: stale findings must not match)
         freeSlots_.clear();
         nextSlot_ = 0;
         slotsUsed_ = 0;
@@ -809,6 +838,7 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
     }
     auto byP = [](const Cand& a, const Cand& c) { return a.p < c.p || (a.p == c.p && a.k.y < c.k.y); };
     size_t share = std::min(order.size(), size_t(std::max(maxSections, 1)) * 8);
+    bool cut = share < order.size();
     if (share < order.size()) {
         std::nth_element(order.begin(), order.begin() + ptrdiff_t(share), order.end(), byP);
         order.resize(share);
@@ -898,7 +928,7 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
             auto it = gpuStandby_.find(k);
             if (it == gpuStandby_.end() || it->second || !canTake(cand.p)) continue;
             it->second = 1;
-            gpuWanted_.push_back({0, k.x, k.y, k.z});
+            reportWanted({0, k.x, k.y, k.z});
             continue;
         }
         // one id throughout (air, rock, a lake's water): no slot, the id in the chunk's word
@@ -1007,6 +1037,10 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
     }
     sectionsBuilt += uint64_t(built);
     batches++;
+    // (still to rank next time: free slots while a section in reach waits; a full pool's waiting are ranked when the
+    // view moves on, never every batch: they would fill the batch's share and starve the new sections)
+    (void)cut;
+    if (rankWaiting && (nextSlot_ < slotCap || !freeSlots_.empty()) && nearestMissing_ > 0) rankDue_ = true;
     if (pending_.empty() && !freshColumns_ && stats_.lastShiftFrame >= stats_.settledFrame) {
         stats_.settledFrame = stats_.frames;  // (the window's content complete again: frames since its last move)
         stats_.lastSettleFrames = stats_.frames - stats_.lastShiftFrame;
@@ -1061,15 +1095,16 @@ uint32_t VoxGrid::coarseSlot(Level& L, uint32_t cell, VgBatch& b, bool raw) {
                 // (a generator's chunk given up: listed, to give again when it ranks)
                 int vx, vy, vz;
                 cellCoords(L, vc, vx, vy, vz);
-                gpuDropped_.push_back({k, vx, vy, vz});
+                reportDropped({k, vx, vy, vz});
                 L.given[vc] = 0;
             }
             L.slotOf[vc] = ~0u;
             L.slotCell[slot] = ~0u;
             L.used--;
             L.lost[vc] = 1;
+            lostCells_[k].push_back(vc);
             if (L.word[vc] != VG_UNLOADED) {
-                b.jobs.push_back({L.chunkBase + vc, VG_UNLOADED, ~0u, 0});
+                coarseJob(b, {L.chunkBase + vc, VG_UNLOADED, ~0u, 0});
                 b.levels[k].grow = true;
             }
             L.word[vc] = VG_UNLOADED;
@@ -1078,6 +1113,7 @@ uint32_t VoxGrid::coarseSlot(Level& L, uint32_t cell, VgBatch& b, bool raw) {
     }
     if (slot == ~0u) {
         L.lost[cell] = 1;
+        lostCells_[k].push_back(cell);
         L.overflow++;
         return ~0u;
     }
@@ -1138,8 +1174,76 @@ uint32_t VoxGrid::evalCell(Level& L, uint32_t cell, VgBatch& b) {
     return (L.slotBase + L.slotOf[cell]) << 2 | VG_MIXED;
 }
 
+void VoxGrid::coarseJob(VgBatch& b, const VgJob& j) {
+    // (the GPU runs a pass's jobs at once: two for one chunk would race; the later one is what holds)
+    auto [it, fresh] = coarseJobAt_.emplace(j.chunk, uint32_t(b.jobs.size()));
+    if (fresh) b.jobs.push_back(j);
+    else b.jobs[it->second] = j;
+}
+
+void VoxGrid::coarseReadmit(VgBatch& b) {
+    // the coarse cells given up for nearer chunks (or that found no slot): taken back when the view moved on or slots
+    // came free; their sections read again from the world's tiers (GPU ones asked for again), levels 5-6 made again
+    // from the level below. A cell still beaten by nearer ones is given up again (coarseSlot).
+    if (!coarseRankDue_ || !world_) return;
+    coarseRankDue_ = false;
+    for (int k = 1; k <= activeCoarse_; k++) {
+        Level& L = lv_[k];
+        auto& lost = lostCells_[k];
+        if (!L.centred || lost.empty()) continue;
+        std::vector<std::pair<float, uint32_t>> order;
+        for (uint32_t c : lost)
+            if (L.lost[c]) {
+                int cx, cy, cz;
+                cellCoords(L, c, cx, cy, cz);
+                order.push_back({chunkPriority(k, cx, cy, cz), c});
+            }
+        std::sort(order.begin(), order.end());
+        order.erase(std::unique(order.begin(), order.end()), order.end());
+        lost.clear();
+        size_t take = std::min(order.size(), size_t(64));  // (a few a batch, nearest first)
+        for (size_t i = 0; i < order.size(); i++) {
+            uint32_t c = order[i].second;
+            if (i >= take) {
+                lost.push_back(c);
+                continue;
+            }
+            L.lost[c] = 0;
+            int cx, cy, cz;
+            cellCoords(L, c, cx, cy, cz);
+            if (k >= 5) {
+                if (!L.downDirty[c]) L.downDirty[c] = 1, L.downList.push_back(c);
+                continue;
+            }
+            int s = L.span();
+            std::vector<std::pair<Key3, World::SectionSrc>> secs;
+            int y0 = VG_MIN_SY + cy * s, y1 = y0 + s;
+            world_->sectionsInBox(cx * s, y0, cz * s, cx * s + s, y1, cz * s + s, secs);
+            for (auto& [key, sec] : secs) {
+                if (key.y < y0 || key.y >= y1) continue;
+                CPending& p = cpending_[{key.x, key.y, key.z}];
+                if (p.ids.gpu() && !gpuRef_.count({key.x, key.y, key.z}))
+                    p.ids = sec.raw ? VgSrc{VgIds(sec.raw, &sec.raw->mats), nullptr} : VgSrc{nullptr, sec.packed};
+                p.levels |= 1u << k;
+            }
+            for (int dz = 0; dz < s; dz++)
+                for (int dx = 0; dx < s; dx++) {
+                    auto col = gpuCol_.find(colKey(cx * s + dx, cz * s + dz));
+                    if (col == gpuCol_.end()) continue;
+                    for (int16_t sy : col->second)
+                        if (sy >= y0 && sy < y1) reportWanted({0, cx * s + dx, sy, cz * s + dz});  // (the GPU's own: again)
+                }
+            markDirty(L, c);
+        }
+    }
+}
+
 void VoxGrid::takeCoarse(VgBatch& b) {
     b.classes = classes_;
+    coarseJobAt_.clear();
+    // (the coarse standby is ranked again with level 0's waiting: the view moved on, or slots came free)
+    if (camSx_ != coarseRankedSx_ || camSz_ != coarseRankedSz_) coarseRankDue_ = true, coarseRankedSx_ = camSx_, coarseRankedSz_ = camSz_;
+    coarseReadmit(b);
     for (int k = 1; k <= activeCoarse_; k++) {
         Level& L = lv_[k];
         b.levels[k].ox = L.ox;
@@ -1151,7 +1255,7 @@ void VoxGrid::takeCoarse(VgBatch& b) {
             L.clearPending = false;
             L.vacated.clear();
         }
-        for (uint32_t c : L.vacated) b.jobs.push_back({L.chunkBase + c, VG_UNLOADED, ~0u, 0});
+        for (uint32_t c : L.vacated) coarseJob(b, {L.chunkBase + c, VG_UNLOADED, ~0u, 0});
         if (!L.vacated.empty()) b.levels[k].grow = true;
         L.vacated.clear();
     }
@@ -1161,17 +1265,27 @@ void VoxGrid::takeCoarse(VgBatch& b) {
     for (int k = 1; k <= activeCoarse_; k++) {
         Level& L = lv_[k];
         if (!L.centred || cgiven_[k].empty()) continue;
-        int s = L.span(), budget = coarseBudget;
-        for (auto it = cgiven_[k].begin(); it != cgiven_[k].end() && budget > 0; budget--) {
+        int s = L.span();
+        // (nearest first, a coarseBudget a batch)
+        std::vector<std::pair<float, uint32_t>> order;
+        for (auto& [c, g] : cgiven_[k]) order.push_back({chunkPriority(k, g.cx, g.cy, g.cz), c});
+        size_t share = std::min(order.size(), size_t(coarseBudget));
+        if (share < order.size()) {
+            std::nth_element(order.begin(), order.begin() + ptrdiff_t(share), order.end());
+            order.resize(share);
+        }
+        std::sort(order.begin(), order.end());
+        for (auto& [pr, cell] : order) {
+            auto it = cgiven_[k].find(cell);
+            if (it == cgiven_[k].end()) continue;
             const CGiven g = it->second;
-            uint32_t cell = it->first;
-            it = cgiven_[k].erase(it);
+            cgiven_[k].erase(it);
             bool sections = false;
             if (k <= 4)
                 for (int dz = 0; dz < s && !sections; dz++)
                     for (int dx = 0; dx < s && !sections; dx++) sections = L.cols.count(colKey(g.cx * s + dx, g.cz * s + dz)) != 0;
             if (sections || !L.inWindow(g.cx, g.cz)) {
-                gpuDropped_.push_back({k, g.cx, g.cy, g.cz});
+                reportDropped({k, g.cx, g.cy, g.cz});
                 continue;
             }
             L.lost[cell] = 0;
@@ -1192,7 +1306,7 @@ void VoxGrid::takeCoarse(VgBatch& b) {
                     // (a pool full of nearer chunks: not held, listed; the cell stays open to its sections)
                     L.lost[cell] = 0;
                     L.given[cell] = 0;
-                    gpuDropped_.push_back({k, g.cx, g.cy, g.cz});
+                    reportDropped({k, g.cx, g.cy, g.cz});
                     continue;
                 }
                 b.poolCopies.push_back({L.slotBase + slot, g.ref});
@@ -1359,7 +1473,7 @@ void VoxGrid::takeCoarse(VgBatch& b) {
         if (L.lost[cell]) word = VG_UNLOADED;
         bool mixed = (word & 3u) == VG_MIXED;
         if (word == L.word[cell] && !(mixed && L.touched[cell])) return false;
-        b.jobs.push_back({L.chunkBase + cell, word, mixed ? word >> 2 : ~0u, VG_NO_COPY});
+        coarseJob(b, {L.chunkBase + cell, word, mixed ? word >> 2 : ~0u, VG_NO_COPY});
         L.word[cell] = word;
         b.levels[L.k].grow = true;
         return true;
@@ -1427,6 +1541,13 @@ void VoxGrid::takeCoarse(VgBatch& b) {
             uint32_t word = VG_UNLOADED;
             L.rock[parent] = 0;
             if (L.lost[parent] || incomplete) {
+                // (unknown until its children are: its slot back, it holds nothing)
+                if (!L.lost[parent] && L.slotOf[parent] != ~0u) {
+                    L.freeSlots.push_back(L.slotOf[parent]);
+                    L.slotCell[L.slotOf[parent]] = ~0u;
+                    L.slotOf[parent] = ~0u;
+                    L.used--;
+                }
             } else if (uni == 8 && uniSame) {
                 // eight children of one id: one id, no slot
                 if (L.slotOf[parent] != ~0u) {
@@ -1453,9 +1574,10 @@ void VoxGrid::takeCoarse(VgBatch& b) {
                 }
             }
             if (emit(L, parent, word)) markParent(L, parent);
-            L.touched[parent] = 0;
             L.downDirty[parent] = 0;
         }
+        // (touched until the batch is made: a parent rebuilt here is never another's victim in it)
+        for (uint32_t p : L.downList) L.touched[p] = 0;
         L.downList.clear();
         // (the generator's chunks given at this level: their words)
         for (uint32_t c : L.dirtyList)
