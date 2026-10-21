@@ -48,6 +48,21 @@ plants drawn as full textured cubes; many blocks and foliage still wrong; green 
 exhaustion); **water missing in places**. Owners: grid agent (churn, far field, cache fingerprint and wipe, pop-in
 gradient, CPU re-reads), content agent (block gallery review, plants, foliage, green squares), renderer agent (water).
 
+Fixes after the second live test (atlas-render 751bcbd5, third test pending):
+- Generation churn (802,809 chunks for ~1,000 uploads): request and drop radii disagreed, so ~330 chunks were forgotten and
+  re-requested every turn; only cache misses now enter the store, which keeps their neighbourhood and never demotes a
+  packed chunk. Still-camera stall: the store now drains without a new request. Far field: the GPU far chunks are the
+  far field (tile path off by default). Caches are keyed by the build (native source hash, atlas sources, bundled
+  natives) and `/nirncraft-atlas-wipecache` / `-Dnirncraft.atlas.wipeCache` wipe them.
+- Green squares: stale generated sections above a real chunk's top are cleared, far crowns reach the ground at coarse
+  lods, far leaf gaps hashed in world space. Blocks: plants as crossed planes, tint per quad layer, real states from the
+  server, animation frame sequences, plant offsets, overlays overwrite, overshoot kept.
+- Pop-in line: sparse plants carry their coverage into the coarse levels (world-stable dither), so grass thins with
+  distance. **Not yet verified in the game or offline** (the offline volume path does not run the GPU vote).
+- Water: waterlogged blocks, flowing heights, far-lake holes fixed (atlas-render b1e0f0b7 and the water branch).
+- Still open: far crowns are right only on average (exact for scatter trees and the first tree per chunk); the level-0
+  window is a fixed radius; coarse-level evictions run on the CPU; remaining gallery classes (content agent).
+
 From the code review (gap list):
 - Entities (mobs, NPCs, players), block entities (chests, signs, banners), particles, the first-person hand: **vanilla**
   raster with our forward light; they cast no shadows into atlas and are not traced.
