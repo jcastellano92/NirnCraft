@@ -25,6 +25,15 @@ below apply to every session and agent.
   `TRACE progress <phase> <i>/<n>` at least every 30 s inside long loops, and `TRACE done <name> <secs>s` for steps it
   times itself (one per suite / test / feature type, with its result in the line). Gradle tasks and slangc compiles are
   traced automatically. A job silent for 5 minutes is flagged to the orchestrator.
+* **GPU kernel rules (learned 2026-10-21):** every kernel builds at `-O3`; `[noinline]` on big helpers called from
+  several places (else spirv-opt copies them into every call site: 30 GB / 14 min compiles, multi-minute driver JITs);
+  no inout values forwarded through calls; **never keep mutable state (RNG, flags, builders) in a thread-private
+  `static` read or written by a `[noinline]` function**: NVIDIA and slangc treat such calls as pure and merge identical
+  calls (two `nextInt(3)` returned the same value). Keep such state in a storage buffer or pass it explicitly, and
+  `[ForceInline]` the RNG chain. Double literals need the `l` suffix. Time each pipeline's creation with a `pipeline:`
+  TRACE line.
+* **Reviewers:** the orchestrator puts read-only reviewer agents on new GPU code and on any stuck debugging; their
+  findings come to the owning agent through the orchestrator.
 * **Check free RAM before a heavy job** (`Get-CimInstance Win32_OperatingSystem` FreePhysicalMemory, or Task Manager);
   wait or close something rather than start one on a full machine.
 * **Heavy outputs go to `E:\NirnCraft-scratch` or the repository's `.work`**, never C: (renders, bakes, traces,
