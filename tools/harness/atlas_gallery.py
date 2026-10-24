@@ -65,6 +65,7 @@ def run(runner, s, v, fp):
     work = folder / "work"
     work.mkdir(exist_ok=True)
     g.ensure_visible()
+    atlas_tools.wait_alive(g)
     setup = ["ui close", "perspective first", "hud off", "try time set 6000", "try nirncraft-weather fronts clear", "weather-off on",
              "try nirncraft-weather set-all clear 120"]
     ox, oy, oz = ORIGIN

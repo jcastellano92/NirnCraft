@@ -60,7 +60,7 @@ final class AtlasRoute {
     // frames
     private static long lastFrameNs, frameStartNs;
     private static volatile int curSec;
-    private static int excludeFrames;
+    private static int excludeFrames, startDelay;
     private static final ArrayList<ArrayList<Float>> frames = new ArrayList<>();
     private static final ArrayList<ArrayList<Float>> cpu = new ArrayList<>();
     private static final ArrayList<float[]> worst = new ArrayList<>();  // {ms, routeTick, second}
@@ -199,14 +199,19 @@ final class AtlasRoute {
         display = new JsonObject();
         if (spec.has("uncap") && spec.get("uncap").getAsBoolean()) uncap(mc);
         if (spec.has("window")) resize(mc, spec.getAsJsonArray("window").get(0).getAsInt(), spec.getAsJsonArray("window").get(1).getAsInt());
+        startDelay = display.has("resizedFrom") ? 80 : 0;  // (the window takes its new size on a later event poll)
+        if (startDelay == 0) measureDisplay(mc);
+        began = System.currentTimeMillis();
+        running = true;
+        NirnCraft.LOGGER.info("Autotest live: route {} started ({} ticks, {} captures)", tag, phaseStart[phases.size()], captureTicks.length);
+    }
+
+    private static void measureDisplay(Minecraft mc) {
         display.addProperty("framebufferW", mc.getWindow().getWidth());
         display.addProperty("framebufferH", mc.getWindow().getHeight());
         display.addProperty("vsync", mc.options.enableVsync().get());
         display.addProperty("framerateLimit", mc.options.framerateLimit().get());
         display.addProperty("renderDistance", mc.options.renderDistance().get());
-        began = System.currentTimeMillis();
-        running = true;
-        NirnCraft.LOGGER.info("Autotest live: route {} started ({} ticks, {} captures)", tag, phaseStart[phases.size()], captureTicks.length);
     }
 
     private static void uncap(Minecraft mc) {
@@ -248,6 +253,10 @@ final class AtlasRoute {
             return;
         }
         if (!running) return;
+        if (startDelay > 0) {
+            if (--startDelay == 0) measureDisplay(mc);
+            return;
+        }
         int total = phaseStart[phases.size()];
         if (routeTick >= total) {
             finish(mc);
@@ -424,7 +433,7 @@ final class AtlasRoute {
     }
 
     static void frameEnd(Minecraft mc) {
-        if (!running) {
+        if (!running || startDelay > 0) {
             lastFrameNs = 0;
             return;
         }

@@ -88,6 +88,21 @@ def wipe_cache(g):
     return n
 
 
+def wait_alive(g, limit=420):
+    """Atlas's first frames after a new build compile its pipelines on the render thread (a cold driver cache: 90 s with
+    no heartbeat). The harness' ready check passes before that and its next action then fails on a stale heartbeat;
+    wait here until the client answers again and its world is up."""
+    import live_world as lw
+    t0, fresh = time.monotonic(), 0
+    while time.monotonic() - t0 < limit:
+        c = (lw.status() or {}).get("client", {})
+        fresh = fresh + 1 if c.get("fresh") and c.get("worldLoaded") and not c.get("loading") else 0
+        if fresh >= 4:
+            return time.monotonic() - t0
+        time.sleep(1.5)
+    raise RuntimeError(f"the client did not answer within {limit} s (a pipeline compile that never ends?)")
+
+
 def fly_route(runner, s, tag=TAG, say=print):
     """One run of the route in the running client; returns the parsed report (or raises)."""
     g = runner.game
@@ -105,9 +120,10 @@ def fly_route(runner, s, tag=TAG, say=print):
     x, z, up = START
     mark = g.log_mark()
     g.ensure_visible()
+    wait_alive(g)
     lines = ["ui close", "perspective first", "hud off", "try time set 6000", "try nirncraft-weather fronts clear",
              "weather-off on", "try nirncraft-weather set-all clear 120",
-             f"visit {x} {z} {up} {HEADING} 0 clear", "settle-atlas 2400 100",
+             f"visit {x} {z} {up} {HEADING} 0 clear", "settle-atlas 1200 100",
              f"route {spec_file.as_posix()}"]
     try:
         g.actions(lines, timeout=s.get("timeout", 1500))
