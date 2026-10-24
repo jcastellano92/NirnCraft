@@ -59,13 +59,14 @@ def run(runner, s, v, fp):
     folder = OUT / ("sweep" if sweep else "near") / stamp
     folder.mkdir(parents=True, exist_ok=True)
     mark = g.log_mark()
+    g.ensure_visible()
+    atlas_tools.wait_alive(g)
     index = load_index(g)
     groups = choose(index["groups"], a, sweep)
     print(f"  gallery: {index['states']} states in {len(index['groups'])} model groups; testing {len(groups)}", flush=True)
     work = folder / "work"
     work.mkdir(exist_ok=True)
     g.ensure_visible()
-    atlas_tools.wait_alive(g)
     setup = ["ui close", "perspective first", "hud off", "try time set 6000", "try nirncraft-weather fronts clear", "weather-off on",
              "try nirncraft-weather set-all clear 120"]
     ox, oy, oz = ORIGIN
@@ -137,6 +138,24 @@ def eye(c, dist, dy=0.5):
 
 
 # ------------------------------------------------------------------------------------------------------------ near / 16 m
+def blank(png):
+    """A crop that is one flat colour: the camera saw nothing (a section vanilla had not meshed yet), not a block."""
+    try:
+        return float(np.asarray(Image.open(png).convert("RGB"), dtype=np.float32).std()) < 0.6
+    except OSError:
+        return True
+
+
+def shots_for(batch_cells, mode, settle):
+    steps = []
+    for gr, c in batch_cells:
+        for tag, dist, half in (("a2", NEAR, 0.5), ("b16", MID, 1.5)):
+            e, lk = eye(c, dist)
+            steps.append({"op": "shot", "name": f"{mode}/{gr['id']}__{tag}", "eye": e, "look": lk, "settle": settle,
+                          "targets": [{"name": "c", "at": lk, "half": half}]})
+    return steps
+
+
 def near_rows(g, groups, work, a, say=print):
     rows = []
     nb = (len(groups) + COLS * ROWS - 1) // (COLS * ROWS)
@@ -153,16 +172,25 @@ def near_rows(g, groups, work, a, say=print):
         steps += [{"op": "goto", "at": [ox, oy + 6, oz], "wait": 30},
                   {"op": "place", "items": [dict(zip("xyz", cell(i)), state=gr["state"], w=3, d=3) for i, gr in enumerate(batch)],
                    "wait": 60}]
+        settle = getattr(a, "gallery_settle", 0) or 3
+        cells = [(gr, cell(i)) for i, gr in enumerate(batch)]
         for mode in ("vanilla", "atlas"):
-            steps.append({"op": "mode", "name": mode, "wait": 50 if mode == "vanilla" else 80})
-            for i, gr in enumerate(batch):
-                c = cell(i)
-                for tag, dist, half in (("a2", NEAR, 0.5), ("b16", MID, 1.5)):
-                    e, lk = eye(c, dist)
-                    steps.append({"op": "shot", "name": f"{mode}/{gr['id']}__{tag}", "eye": e, "look": lk, "settle": 5,
-                                  "targets": [{"name": "c", "at": lk, "half": half}]})
+            steps.append({"op": "mode", "name": mode, "wait": 100})
+            steps += shots_for(cells, mode, settle)
         steps.append({"op": "mode", "name": "atlas", "wait": 1})
         receipt = run_script(g, f"batch{b}", steps, out, timeout=2400)
+        for attempt in range(2):  # a crop of one flat colour is a view vanilla had not meshed yet: shoot those again
+            again = [(gr, cell(i)) for i, gr in enumerate(batch)
+                     if any(blank(out / m / f"{gr['id']}__{t}__c.png") for m in ("vanilla", "atlas") for t in ("a2", "b16"))]
+            if not again:
+                break
+            say(f"  {len(again)} state(s) came out blank; shooting them again")
+            ox, oy, oz = ORIGIN
+            steps = [{"op": "goto", "at": [ox, oy + 6, oz], "wait": 40}]
+            for mode in ("vanilla", "atlas"):
+                steps += [{"op": "mode", "name": mode, "wait": 120}] + shots_for(again, mode, settle + 2)
+            steps.append({"op": "mode", "name": "atlas", "wait": 1})
+            run_script(g, f"batch{b}-again{attempt}", steps, out, timeout=1800)
         for i, gr in enumerate(batch):
             rows.append(measure_pair(out, gr))
         elapsed = time.monotonic() - t0

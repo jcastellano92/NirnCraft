@@ -60,7 +60,15 @@ final class AtlasGallery {
                     continue;
                 }
                 var model = models.get(state);
-                var sb = new StringBuilder().append(System.identityHashCode(model)).append('|').append(fluid ? state.getFluidState().getType() : "")
+                // the model by what it draws: every part's quads (positions, uvs, sprite, direction), not the object (one per state)
+                var parts = new ArrayList<net.minecraft.client.renderer.block.dispatch.BlockStateModelPart>();
+                model.collectParts(net.minecraft.util.RandomSource.create(0L), parts);
+                int shape = 17;
+                for (var part : parts) {
+                    shape = shape * 31 + part.getQuads(null).hashCode();
+                    for (var dir : net.minecraft.core.Direction.values()) shape = shape * 31 + part.getQuads(dir).hashCode();
+                }
+                var sb = new StringBuilder().append(shape).append('|').append(parts.isEmpty() ? id : "").append('|').append(fluid ? state.getFluidState().getType() : "")
                         .append('|').append(state.getLightEmission());
                 for (var p : coloring) sb.append('|').append(state.getValue(p));
                 if (fluid && !state.getBlock().defaultBlockState().equals(state)) sb.append("|f").append(state.getFluidState().getAmount());
@@ -422,10 +430,6 @@ final class AtlasGallery {
         if (WRITING.get() > 0) return;  // (the last pictures are still being written)
         running = false;
         System.clearProperty("nirncraft.atlas.fixedExposure");
-        if (resized) {
-            org.lwjgl.sdl.SDLVideo.SDL_SetWindowSize(mc.getWindow().handle(), savedW, savedH);
-            resized = false;
-        }
         var o = new JsonObject();
         o.addProperty("name", scriptName);
         o.addProperty("shots", shots);
