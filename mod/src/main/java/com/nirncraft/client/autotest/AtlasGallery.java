@@ -68,7 +68,15 @@ final class AtlasGallery {
                 for (var p : coloring) extras.append('|').append(state.getValue(p));
                 if (fluid) extras.append("|fluid ").append(state.getFluidState().getType()).append(state.getFluidState().getAmount());
                 java.util.Set<String> keys = new java.util.TreeSet<>();
+                java.util.Set<String> layerSet = new java.util.TreeSet<>();
+                boolean animated = false;
                 for (var part : parts) {
+                    for (var dir : new net.minecraft.core.Direction[]{null, net.minecraft.core.Direction.UP, net.minecraft.core.Direction.NORTH}) {
+                        for (var q : part.getQuads(dir)) {
+                            layerSet.add(q.materialInfo().layer().name());
+                            animated |= q.materialInfo().sprite().contents().isAnimated();
+                        }
+                    }
                     int h = 17;
                     h = h * 31 + quadsHash(part.getQuads(null));
                     for (var dir : net.minecraft.core.Direction.values()) h = h * 31 + quadsHash(part.getQuads(dir));
@@ -89,6 +97,10 @@ final class AtlasGallery {
                     g.addProperty("blockEntity", state.hasBlockEntity());
                     g.addProperty("render", state.getRenderShape().toString());
                     g.addProperty("parts", keys.size());
+                    g.addProperty("layers", String.join(",", layerSet));
+                    g.addProperty("animated", animated);
+                    g.addProperty("noCollision", state.getCollisionShape(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, net.minecraft.core.BlockPos.ZERO).isEmpty());
+                    g.addProperty("props", String.join(",", state.getProperties().stream().map(net.minecraft.world.level.block.state.properties.Property::getName).toList()));
                     groups.put(sig, g);
                     keysOf.put(sig, keys);
                 }

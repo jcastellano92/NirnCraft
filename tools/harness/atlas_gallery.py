@@ -14,6 +14,7 @@ Results: .work/harness/atlas/gallery/<stamp>/ (report.json, report.html, failure
 .../latest/.
 """
 import fnmatch
+import hashlib
 import json
 import math
 import shutil
@@ -38,6 +39,7 @@ PIT_L = 20.0
 NEAR, MID = 2.0, 16.0
 SWEEP_DISTANCES = [64, 256, 1000]
 SWEEP_LIMITS = {"colourDE": 12.0, "coverage": 0.2}
+RESUME = {"dir": None}
 
 
 def scenes(common):
@@ -66,8 +68,19 @@ def run(runner, s, v, fp):
     groups = choose(index["groups"], a, sweep)
     print(f"  gallery: {index['states']} states, {index.get('exactGroups')} exact model groups, {len(index['groups'])} representatives "
           f"that together draw every part of every block; testing {len(groups)}", flush=True)
-    work = folder / "work"
-    work.mkdir(exist_ok=True)
+    idle = bool(getattr(a, "idle_only", False)) and not sweep
+    key = hashlib.sha1((",".join(x["id"] for x in groups)).encode()).hexdigest()[:10]
+    resume = OUT / "resume" / key
+    done_rows = []
+    if idle and (resume / "rows.json").exists():
+        done_rows = json.loads((resume / "rows.json").read_text(encoding="utf-8"))
+        print(f"  resuming: {len(done_rows)} of {len(groups)} groups were measured by earlier slices", flush=True)
+    done_ids = {r["id"] for r in done_rows}
+    todo = [x for x in groups if x["id"] not in done_ids]
+    RESUME["dir"] = resume if idle else None
+    work = (resume / "work") if idle else (folder / "work")
+    work.mkdir(parents=True, exist_ok=True)
+    first = len(list(work.glob("b*")))
     g.ensure_visible()
     setup = ["ui close", "perspective first", "hud off", "try time set 6000", "try nirncraft-weather fronts clear", "weather-off on",
              "try nirncraft-weather set-all clear 120"]
@@ -77,7 +90,21 @@ def run(runner, s, v, fp):
         g.actions(setup + [f"camera {ox} {oy + 10} {oz} {ox} {oy} {oz + 20}", "settle-atlas 600 60",
                            f"try fill {ox - half} {oy - 1} {oz - half} {ox + half} {oy - 1} {oz + half} minecraft:smooth_stone",
                            f"try fill {ox - half} {oy} {oz - half} {ox + half} {oy + 4} {oz + half} minecraft:air"], timeout=900)
-        rows = sweep_rows(g, groups, work, a, say=print) if sweep else near_rows(g, groups, work, a, say=print)
+        if sweep:
+            rows = sweep_rows(g, groups, work, a, say=print)
+        else:
+            try:
+                rows = done_rows + near_rows(g, todo, work, a, say=print, first=first,
+                                             yield_check=waiting_elsewhere if idle else None)
+            except Yielded as y:  # someone waits for the machine: stop here, keep the slice, the next run goes on
+                rows = done_rows + y.rows
+                resume.mkdir(parents=True, exist_ok=True)
+                (resume / "rows.json").write_text(json.dumps(rows), encoding="utf-8")
+                import results
+                msg = f"yielded to a waiting job after {len(rows)} of {len(groups)} groups; run it again to go on"
+                print("  " + msg, flush=True)
+                return results.record(s["id"], v, "atlas-gallery", "skip", {"groups": len(rows), "of": len(groups)}, fp,
+                                     extra={"error": msg})
     except RuntimeError:
         g.recover(s)
         raise
@@ -104,14 +131,49 @@ def load_index(g):
     return json.loads(f.read_text(encoding="utf-8"))
 
 
+CLASSES = ["cube", "cutout", "connecting", "noncube", "plant", "fluid", "emissive", "animated", "nirncraft"]
+
+
+def classify(g):
+    """The model class a group is sampled by (docs/ATLAS-PLAN.md stage 3's classes): the first that fits."""
+    props = set((g.get("props") or "").split(","))
+    if g["block"].startswith("nirncraft:"):
+        return "nirncraft"
+    if g.get("fluid"):
+        return "fluid"
+    if (g.get("emits") or 0) > 0:
+        return "emissive"
+    if g.get("animated"):
+        return "animated"
+    if {"north", "east", "south", "west"} <= props:
+        return "connecting"
+    if g.get("noCollision"):
+        return "plant"
+    if "CUTOUT" in (g.get("layers") or "") or "TRANSLUCENT" in (g.get("layers") or ""):
+        return "cutout"
+    if not g.get("full"):
+        return "noncube"
+    return "cube"
+
+
+def spread(lst, k):
+    return list(lst) if len(lst) <= k else [lst[int(i * len(lst) / k)] for i in range(k)]
+
+
 def choose(groups, a, sweep):
+    """The groups to test. Default: a sample of 300 spread over the model classes (grass included), about 7 minutes of
+    the game; --sample N changes it, --class a,b limits it, --gallery-filter picks blocks, --gallery-all (or
+    --idle-only, which yields to other jobs between batches) takes every representative (about 4900 at 6 a block)."""
     pats = [p for p in (getattr(a, "gallery_filter", None) or "").split(",") if p]
     out = [g for g in groups if not pats or any(fnmatch.fnmatch(g["block"], p) or fnmatch.fnmatch(g["id"], p) for p in pats)]
-    n = getattr(a, "gallery_limit", 0) or 0
-    if sweep and not n and not pats and not getattr(a, "gallery_all", False):
-        n = 96  # a spread through the registry, in order; --gallery-all for every group
+    for g in out:
+        g["class"] = classify(g)
+    want = [c for c in (getattr(a, "gallery_class", None) or "").split(",") if c]
+    if want:
+        out = [g for g in out if g["class"] in want]
+    full = getattr(a, "gallery_all", False) or getattr(a, "idle_only", False)
     per = getattr(a, "gallery_per_block", 0) or 6
-    if not getattr(a, "gallery_all", False) and not sweep:
+    if not full and not sweep:
         # models that differ only by a rotation or a facing are one kind of thing: at most `per` of a block (the ones
         # with the most parts first, the rest spread), every part of the block is still in the sample
         keep, byblock = [], {}
@@ -119,15 +181,29 @@ def choose(groups, a, sweep):
             byblock.setdefault(g["block"], []).append(g)
         for lst in byblock.values():
             if len(lst) > per:
-                head = lst[:2]
-                rest = lst[2:]
-                k = per - 2
-                lst = head + [rest[int(i * len(rest) / k)] for i in range(k)]
+                lst = lst[:2] + spread(lst[2:], per - 2)
             keep += lst
         out = keep
+    n = getattr(a, "sample", 0) or getattr(a, "gallery_limit", 0) or 0
+    if not n and not full and not pats and not want:
+        n = 96 if sweep else 300
     if n and len(out) > n:
-        step = len(out) / n
-        out = [out[int(i * step)] for i in range(n)]
+        by = {}
+        for g in out:
+            by.setdefault(g["class"], []).append(g)
+        classes = [c for c in CLASSES if c in by]
+        quota = {c: n // len(classes) for c in classes}
+        for c in classes[: n - sum(quota.values())]:
+            quota[c] += 1
+        spare = sum(max(0, quota[c] - len(by[c])) for c in classes)  # a small class gives its unused share to the others
+        out = []
+        for c in classes:
+            t = min(len(by[c]), quota[c] + (spare if quota[c] < len(by[c]) else 0))
+            sel = spread(by[c], t)
+            if c == "cube":  # grass first: the texel pits live in its tops
+                grass = [g for g in by[c] if g["block"] == "minecraft:grass_block"]
+                sel = grass + [g for g in sel if g not in grass][: max(0, t - len(grass))]
+            out += sel
     return out
 
 
@@ -173,13 +249,35 @@ def shots_for(batch_cells, mode, settle):
     return steps
 
 
-def near_rows(g, groups, work, a, say=print):
+class Yielded(Exception):
+    def __init__(self, rows):
+        super().__init__("yielded")
+        self.rows = rows
+
+
+def waiting_elsewhere():
+    """Whether another job waits for the heavy lock (a waiting file whose process is alive)."""
+    import ctypes
+    d = Path(r"E:\NirnCraft-scratch\locks\waiting")
+    for f in (d.glob("*.json") if d.exists() else []):
+        try:
+            pid = int(json.loads(f.read_text(encoding="utf-8")).get("pid", 0))
+        except (OSError, ValueError):
+            continue
+        h = ctypes.windll.kernel32.OpenProcess(0x1000, False, pid)
+        if h:
+            ctypes.windll.kernel32.CloseHandle(h)
+            return True
+    return False
+
+
+def near_rows(g, groups, work, a, say=print, yield_check=None, first=0):
     rows = []
     nb = (len(groups) + COLS * ROWS - 1) // (COLS * ROWS)
     t0 = time.monotonic()
     for b in range(nb):
         batch = groups[b * COLS * ROWS:(b + 1) * COLS * ROWS]
-        out = work / f"b{b:03d}"
+        out = work / f"b{first + b:03d}"
         for m in ("vanilla", "atlas"):
             (out / m).mkdir(parents=True, exist_ok=True)
         ox, oy, oz = ORIGIN
@@ -209,7 +307,12 @@ def near_rows(g, groups, work, a, say=print):
             steps.append({"op": "mode", "name": "atlas", "wait": 1})
             run_script(g, f"batch{b}-again{attempt}", steps, out, timeout=1800)
         for i, gr in enumerate(batch):
-            rows.append(measure_pair(out, gr))
+            row = measure_pair(out, gr)
+            row["dir"] = str(out)
+            row["class"] = gr.get("class", "")
+            rows.append(row)
+        if yield_check and b + 1 < nb and yield_check():
+            raise Yielded(rows)
         elapsed = time.monotonic() - t0
         say(f"  TRACE progress gallery {min(len(groups), (b + 1) * COLS * ROWS)}/{len(groups)} groups, {elapsed:.0f} s "
             f"(batch {b + 1}/{nb}: {receipt.get('shots')} shots in {receipt.get('ms')} ms)")
@@ -331,11 +434,7 @@ def failure_sheets(rows, work_dirs, folder, per=24, tile=200):
 def finish_near(g, s, v, fp, rows, folder, groups, counts):
     import results
     work = folder / "work"
-    where = {}
-    # which batch folder holds which group
-    for b, d in enumerate(sorted(work.glob("b*"))):
-        for gr in groups[b * COLS * ROWS:(b + 1) * COLS * ROWS]:
-            where[gr["id"]] = d
+    where = {r["id"]: Path(r["dir"]) for r in rows}
     sheets = failure_sheets(rows, where, folder)
     failing = [r for r in rows if r["fails"]]
     worst = sorted(failing, key=lambda r: -r["score"])[:5]
@@ -353,6 +452,8 @@ def finish_near(g, s, v, fp, rows, folder, groups, counts):
                 if src.exists():
                     shutil.copy2(src, fail_dir / f"{r['id']}__{m}__{tag}.png")
     shutil.rmtree(work, ignore_errors=True)
+    if RESUME["dir"]:
+        shutil.rmtree(RESUME["dir"], ignore_errors=True)
     body = "".join(f"<tr><td>{i + 1}</td><td>{r['id']}</td><td>{r['state']}</td><td>{(r['m2'] or {}).get('dE', 0):.1f}</td>"
                    f"<td>{(r['m2'] or {}).get('pit', 0) * 100:.2f}%</td><td>{(r['m16'] or {}).get('dE', 0):.1f}</td>"
                    f"<td>{(r['m16'] or {}).get('pit', 0) * 100:.2f}%</td><td>{'; '.join(r['fails'])}</td></tr>"
