@@ -5,6 +5,28 @@ order-of-work sections of ATLAS-STATUS.md, ATLAS-ENGINE.md §3 and ATLAS-RENDERE
 history and reference: the design (ATLAS-LOD, -STREAMING, -WORLD-STORE), the checklist of everything Minecraft draws
 (ATLAS-RENDER-INVENTORY) and the decision log.
 
+## 0. Principles (owner, 2026-10-24)
+
+1. **One system for everything.** Our renderer draws every pixel of the world, near and far: blocks, fluids,
+   entities, block entities, items, particles and effects. There is no Minecraft-style near renderer with a far
+   field behind it. Only the UI and the first-person hand are laid on top.
+2. **One continuous gradient.** Detail falls off smoothly with distance, matched to what the eye can resolve at
+   that distance (the pixel footprint). There's never a line where one system hands over to another.
+3. **The same look near and far.** A block, a tree or a town reads the same at 2 m and 2 km, only less detailed.
+   Every vanilla block and every NirnCraft block matches vanilla up close.
+4. **One world, used for everything.** The same voxel world the renderer draws also answers collisions and
+   physical interactions, so what you see is what you hit. It lives on the client.
+5. **The client owns the world.** It generates, stores and renders everything. The server sends only the key pieces:
+   edits, entity state and interactions, coalesced and by position, hash-checked.
+6. **Scale without switches.** Quality is continuous everywhere, like dynamic resolution: one controller trades the
+   least important detail first (distant entities, far light bounces, coarse levels) to hold the frame, on low-end
+   and high-end machines alike. Nothing pops on or off. The same holds for entities, players, light and physical
+   interactions: they scale by importance and distance, not by hard limits.
+7. **Realistic light at every distance**, from the same light system near and far.
+
+The stages below reach this end state in order. Early stages may keep vanilla drawing some things (composited
+into our frame) only as a step; stage 4 and stage 5 remove every one of those steps.
+
 ## 1. The bar (what "done" means, measurable)
 
 The owner's target (2026-10-20): one renderer from the player's feet to the horizon, everything Minecraft draws
@@ -19,6 +41,8 @@ distance. As numbers:
 | Smooth | Same route, 1440p, RTX 3090 | p99 frame ≤ 20 ms, worst ≤ 50 ms, no frame over 50 ms caused by atlas |
 | Instant revisit | Relaunch, same route | 0 chunks generated in visited places; full radius in under 2 s |
 | Everything drawn | ATLAS-RENDER-INVENTORY's checklist | Every item ticked in route captures (ours, or vanilla composited and lit by ours) |
+| One system | Route captures | Nothing composited from vanilla but the hand and the UI (stage 4 on) |
+| What you see is what you hit | Scripted walk against the drawn world | No walking through or floating on anything (stage 5) |
 | Scale | Stress scenes: ocean, mountains, dense forest, caves, night with many lights, Imperial City, fast flight | Each within the frame bar; frame time ≤ vanilla at its default distance |
 
 A stage is done when its bar passes in the real game, not offline.
@@ -116,31 +140,42 @@ Worked through the gallery's failures by class, worst first. Each fix is verifie
 
 Gate: gallery 100% within threshold, sweep within threshold; owner test.
 
-### Stage 4: effects and things that move
+### Stage 4: everything that moves, in our renderer
 
-Vanilla still draws these, composited into our frame with our depth and lit by our light. This stage makes them
-correct and lit, and adds what's missing:
+Vanilla draws these today, composited into our frame. This stage moves them into our renderer (ATLAS-WORLD-STORE
+§3), so they're lit, shadowed and scaled like the terrain:
 
+- **Entities, block entities and items as object-space micro-voxel bricks**, built from their models (the same
+  baked-quad method as non-cube blocks), posed per frame on the GPU from a compact state array. Traced near and
+  mid-range through a GPU BVH with the terrain (shadows, light, bounce); splatted into the coarse levels far off.
+  Covers mobs, NPCs, players, armour and held items, chests, signs (text), banners, shelves, pots, dropped items
+  and item frames. Detail and update rate scale by importance and distance, so crowds and far players cost little.
 - **Dynamic light list:** fire blocks (flicker), burning entities, held torches, fire arrows, spells and lightning
   into the GPU light binning in their own colour.
-- **Particles:** fire smoke, campfire smoke, flame, drips, splashes, portal and spell effects: depth-correct and lit by
-  ours. Check the green-squares source here.
-- Entities, block entities (chests, signs, banners, shelves, pots), dropped items, item frames, the hand, breaking
-  cracks, the block outline: each checked in route captures; entities cast shadows into atlas through a proxy.
+- **Particles and effects** (smoke, flame, drips, splashes, portal, spells) as our own GPU particles, lit by ours and
+  scaling with distance. The green-squares source is checked here.
+- Breaking cracks and the block outline drawn by us; only the hand and the UI stay on top.
 - Every item in the inventory checklist ticked.
 
-Gate: the checklist, from route captures, plus an owner test at night with fire and torches.
+Gate: the checklist from route captures, with nothing composited from vanilla but the hand and the UI; a crowd
+scene (hundreds of entities) within the frame bar; an owner test at night with fire and torches.
 
-### Stage 5: vanilla chunks off, and scale
+### Stage 5: one world: vanilla chunks off, collisions ours, and scale
 
-- Vanilla's chunk meshing and far sending off. The near shadow map, entity visibility and block-entity lists come
-  from atlas.
-- Stress scenes and the frame bar; adaptive quality on the integrated GPU.
+- Vanilla's chunk meshing and its chunk sending off; vanilla simulates only a small radius.
+- **Collisions and physical interactions from our voxel world** on the client: the player's and entities'
+  collision shapes, raycasts (block targeting) and fluids read the same store the renderer draws, so they always
+  agree. The server checks the key pieces only.
+- The near shadow map, entity visibility and block-entity lists from our world.
+- **One quality controller across everything** (detail, entities, light, effects, interactions), continuous, no
+  switches; tested on the integrated GPU and the CPU path.
+- Stress scenes and the frame bar.
 
-Gate: frame time ≤ vanilla at its default distance; the owner flies every stress scene.
+Gate: frame time ≤ vanilla at its default distance; collisions match the drawn world in a scripted walk (no
+walking through or floating on anything); the owner flies every stress scene.
 
-**Then, in the owner's order:** far settlements (the overlays agent's far stage), far life (R5), entities as bricks
-(ATLAS-WORLD-STORE §3), multiplayer, baked light, weather.
+**Then, in the owner's order:** far settlements (the overlays agent's far stage), far life (R5: far players
+building in real time), multiplayer at scale, baked light, weather.
 
 ## 5. How the work runs (cost)
 
