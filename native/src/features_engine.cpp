@@ -14,6 +14,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <unordered_map>
 #include <vector>
 
 #include "atlas/atlas.h"
@@ -598,7 +599,7 @@ public:
     ~StageEngine() {
         if (!dev_) return;
         flushAux();
-        for (Buf* b : {&prog_, &staging_, &aux_, &org_, &scratch_, &list_, &cnt_, &dbg_}) release(*b);
+        for (Buf* b : {&prog_, &staging_, &aux_, &org_, &scratch_, &list_, &cnt_, &dbg_, &left_}) release(*b);
         if (descPool_) vkDestroyDescriptorPool(dev_, descPool_, nullptr);
         for (auto& p : pipes_)
             if (p) vkDestroyPipeline(dev_, p, nullptr);
@@ -750,38 +751,64 @@ public:
             vkCmdCopyBuffer(cmd, staging_.buf, prog_.buf, 1, &c);
             progUp_ = true;
         }
-        // the origins (cx, cz, the 5 x 5 slots) and the slots they read (each once), in the command buffer
+        // (version 2: in parts) the work as steps: the slots' aux, heights and mask, the origins' init, a pass a placed
+        // feature, the apply; a part records `units` of them (0: all) and says MORE while some are left. The origins
+        // and the slot list go up with part 0 and stay for the parts after it (the generator calls again at once).
+        uint32_t part = b->version >= 2 ? b->part : 0, units = b->version >= 2 ? b->units : 0;
         uint32_t n = b->count;
-        const int32_t* nbh = b->neighborsHost;
-        std::vector<int32_t> org(size_t(n) * ORIGIN_W, -1), slots;  // slots: (slot, cx, cz) each
-        std::vector<uint8_t> seen(b->slots, 0);
-        for (uint32_t i = 0; i < n; i++) {
-            int32_t cx = b->chunks[i * 3], cz = b->chunks[i * 3 + 1];
-            org[size_t(i) * ORIGIN_W] = cx;
-            org[size_t(i) * ORIGIN_W + 1] = cz;
-            for (uint32_t j = 0; j < 25; j++) {
-                int32_t sl = nbh[size_t(i) * 25 + j];
-                org[size_t(i) * ORIGIN_W + 2 + j] = sl;
-                if (sl >= 0 && uint32_t(sl) < b->slots && !seen[size_t(sl)]) {
-                    seen[size_t(sl)] = 1;
-                    slots.insert(slots.end(), {sl, cx + int32_t(j % 5) - 2, cz + int32_t(j / 5) - 2});
+        if (part == 0) {
+            // the origins (cx, cz, the 5 x 5 slots) and the slots they read (each once), in the command buffer
+            const int32_t* nbh = b->neighborsHost;
+            std::vector<int32_t> org(size_t(n) * ORIGIN_W, -1), slots;  // slots: (slot, cx, cz) each
+            std::vector<uint8_t> seen(b->slots, 0);
+            for (uint32_t i = 0; i < n; i++) {
+                int32_t cx = b->chunks[i * 3], cz = b->chunks[i * 3 + 1];
+                org[size_t(i) * ORIGIN_W] = cx;
+                org[size_t(i) * ORIGIN_W + 1] = cz;
+                for (uint32_t j = 0; j < 25; j++) {
+                    int32_t sl = nbh[size_t(i) * 25 + j];
+                    org[size_t(i) * ORIGIN_W + 2 + j] = sl;
+                    if (sl >= 0 && uint32_t(sl) < b->slots && !seen[size_t(sl)]) {
+                        seen[size_t(sl)] = 1;
+                        slots.insert(slots.end(), {sl, cx + int32_t(j % 5) - 2, cz + int32_t(j / 5) - 2});
+                    }
                 }
             }
+            vkCmdUpdateBuffer(cmd, org_.buf, 0, org.size() * 4, org.data());
+            vkCmdUpdateBuffer(cmd, list_.buf, 0, std::max<size_t>(1, slots.size()) * 4, slots.empty() ? org.data() : slots.data());
+            barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            // and the overlays' piece boxes (atlas_ovl_store_boxes, asked each call: their buffers may have grown), when
+            // they are on and have tapes (else the program in their place, and the mask without the pieces)
+            AtlasOvlStoreBoxes boxes{};
+            bool haveBoxes = ovl_ && atlas_ovl_store_boxes(ovl_, &boxes) == ATLAS_OK && boxes.tapes && boxes.slotRecords &&
+                             boxes.slots >= b->slots;
+            partBoxes_ = haveBoxes;
+            partTapes_ = haveBoxes ? VkBuffer(boxes.tapes) : prog_.buf;
+            partRecords_ = haveBoxes ? VkBuffer(boxes.slotRecords) : prog_.buf;
+            partSlotXZ_ = slots;
+            partSlots_ = uint32_t(slots.size() / 3);
+            partCursor_ = 0;
+            partRound_ = 0;
+            partRoundRec_ = ~0u;
+            partSteps_.clear();
+            if (partSlots_) partSteps_.insert(partSteps_.end(), {STEP_AUX, STEP_HM, STEP_MASK});
+            partSteps_.push_back(STEP_INIT);
+            uint32_t skip = 0;  // ATLAS_FEAT_SKIP: feature types left out (dev checks)
+            if (const char* sk = std::getenv("ATLAS_FEAT_SKIP"))
+                for (const char* c = sk; *c; c++)
+                    if (*c >= '1' && *c <= '9') skip |= 1u << uint32_t(*c - '0');
+            for (uint32_t rec : dispatch_) {
+                uint32_t type = rec < types_.size() ? types_[rec] : 0;
+                if (type == 0 || type >= FT_TYPES || (skip & (1u << type))) continue;
+                partSteps_.push_back(rec);
+            }
+            partSteps_.push_back(STEP_APPLY);
         }
-        vkCmdUpdateBuffer(cmd, org_.buf, 0, org.size() * 4, org.data());
-        vkCmdUpdateBuffer(cmd, list_.buf, 0, std::max<size_t>(1, slots.size()) * 4, slots.empty() ? org.data() : slots.data());
-        barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         // the bindings: the program, the store's terrain, our aux (per store slot), the origins, the scratch, the store's
-        // blocks, the slot list, the store's aux, the counter
-        // and the overlays' piece boxes (atlas_ovl_store_boxes, asked each call: their buffers may have grown), when
-        // they are on and have tapes (else the program in their place, and the mask without the pieces)
-        AtlasOvlStoreBoxes boxes{};
-        bool haveBoxes = ovl_ && atlas_ovl_store_boxes(ovl_, &boxes) == ATLAS_OK && boxes.tapes && boxes.slotRecords &&
-                         boxes.slots >= b->slots;
+        // blocks, the slot list, the store's aux, the counter, the map, the overlays' boxes (a part binds them again)
         VkBuffer bufs[NB] = {prog_.buf, VkBuffer(b->terrain), aux_.buf, org_.buf, scratch_.buf, VkBuffer(b->blocks), list_.buf,
-                             VkBuffer(b->aux), cnt_.buf, VkBuffer(b->map), haveBoxes ? VkBuffer(boxes.tapes) : prog_.buf,
-                             haveBoxes ? VkBuffer(boxes.slotRecords) : prog_.buf, prog_.buf};
+                             VkBuffer(b->aux), cnt_.buf, VkBuffer(b->map), partTapes_, partRecords_, prog_.buf};
         VkDescriptorBufferInfo bi[NB];
         VkWriteDescriptorSet w[NB];
         for (uint32_t i = 0; i < NB; i++) {
@@ -793,9 +820,9 @@ public:
             w[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             w[i].pBufferInfo = &bi[i];
         }
-        vkUpdateDescriptorSets(dev_, NB, w, 0, nullptr);
+        vkUpdateDescriptorSets(dev_, NB, w, 0, nullptr);  // (the part before has finished: the generator waited for it)
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
-        uint32_t nslots = uint32_t(slots.size() / 3);
+        uint32_t nslots = partSlots_;
         FeatParams p{int32_t(n), 0, 0, 0, int32_t(nslots), 1u, 1u << 30, 1u};
         auto dispatch = [&](uint32_t pipe, uint32_t gx, uint32_t gy) {
             vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(FeatParams), &p);
@@ -804,43 +831,144 @@ public:
             barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         };
-        if (nslots) {
+        uint32_t total = uint32_t(partSteps_.size());
+        if (units == 0) {
+            // (all at once: an older generator) every step, every placement in one dispatch
+            for (; partCursor_ < total; partCursor_++) runStep(cmd, p, dispatch, partSteps_[partCursor_], true, 1u << 30);
+            return 0;
+        }
+        // In parts: a step a part, a placed feature in rounds of `budget` placements an origin (the kernel resumes from
+        // the origin's stack: featBody), its budget fitted to about ATLAS_GEN_PART_MS from the last round's time
+        // (lastPartUs); the round's count of origins with placements left read back for the next part.
+        if (part > 0 && partRoundRec_ != ~0u) {
+            static const double partMs = [] {
+                const char* e = std::getenv("ATLAS_GEN_PART_MS");
+                return e && std::atof(e) > 0 ? std::atof(e) : 4.0;
+            }();
+            double ms = double(b->lastPartUs) / 1000.0;
+            uint32_t& bud = featBudget_[partRoundRec_];
+            // dev: ATLAS_FEAT_PART_TRACE=1: per placed feature its rounds' time and budget, to stderr every 20 s
+            static const bool ptrace = std::getenv("ATLAS_FEAT_PART_TRACE") != nullptr;
+            if (ptrace) {
+                RecStat& rs = recStats_[partRoundRec_];
+                rs.max = std::max(rs.max, ms);
+                rs.sum += ms;
+                rs.n++;
+                if (ms > 8.0) rs.over++;
+                rs.minBud = std::min(rs.minBud, bud);
+                auto now = std::chrono::steady_clock::now();
+                if (now - recStatsAt_ > std::chrono::seconds(20)) {
+                    recStatsAt_ = now;
+                    std::vector<std::pair<double, uint32_t>> top;
+                    for (auto& [r, st] : recStats_) top.push_back({st.max, r});
+                    std::sort(top.rbegin(), top.rend());
+                    for (size_t i = 0; i < top.size() && i < 12; i++) {
+                        const RecStat& st = recStats_[top[i].second];
+                        std::fprintf(stderr, "TRACE feat record %u type %u: rounds %llu, %.1f ms mean, %.1f max, %llu over 8 ms, budget down to %u\n",
+                                     top[i].second, types_[top[i].second], (unsigned long long)st.n, st.sum / double(st.n), st.max,
+                                     (unsigned long long)st.over, st.minBud);
+                    }
+                }
+            }
+            if (ms > 0.0) {
+                double want = double(bud) * partMs / ms;
+                bud = uint32_t(std::clamp(want, std::max(1.0, double(bud) / 4.0), double(bud) * 4.0));
+                bud = std::clamp<uint32_t>(bud, 1u, 1u << 20);
+            }
+            uint32_t left = left_.map ? *static_cast<const uint32_t*>(left_.map) : 0u;
+            if (left > 0 && partRound_ < 100000) {
+                partRound_++;
+            } else {
+                partCursor_++;  // (the feature done: the next step)
+                partRound_ = 0;
+            }
+            partRoundRec_ = ~0u;
+        }
+        if (partCursor_ >= total) return 0;
+        uint32_t step = partSteps_[partCursor_];
+        if (step < STEP_AUX) {
+            std::string err;
+            if (!ensure(left_, 64, true, err)) return 3;
+            auto it = featBudget_.find(step);
+            uint32_t bud = it != featBudget_.end() ? it->second : (featBudget_[step] = types_[step] == 4 ? 1u : 64u);
+            vkCmdFillBuffer(cmd, cnt_.buf, 0, 4, 0u);
+            barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            runStep(cmd, p, dispatch, step, partRound_ == 0, bud);
+            barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT);
+            VkBufferCopy c{0, 0, 4};
+            vkCmdCopyBuffer(cmd, cnt_.buf, left_.buf, 1, &c);
+            barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
+            partRoundRec_ = step;
+            return ATLAS_GEN_STAGE_MORE;  // (its count read at the next part: another round, or the next step)
+        }
+        runStep(cmd, p, dispatch, step, true, 1u << 30);
+        partCursor_++;
+        return partCursor_ < total ? ATLAS_GEN_STAGE_MORE : 0;
+    }
+    // one step of decorate: a pass over the slots or origins, or a placed feature's round (first: its first round)
+    template <class D>
+    void runStep(VkCommandBuffer cmd, FeatParams& p, D& dispatch, uint32_t step, bool first, uint32_t budget) {
+        uint32_t n = uint32_t(p.origins), nslots = uint32_t(p.slots);
+        if (step == STEP_AUX) {
             dispatch(S_AUX, (AUX_W + GROUP - 1) / GROUP, nslots);
+        } else if (step == STEP_HM) {
             dispatch(S_HM, 4, nslots);
-            p.k = haveBoxes ? 1u : 0u;  // (the mask: k, the boxes bound)
+        } else if (step == STEP_MASK) {
+            p.k = partBoxes_ ? 1u : 0u;  // (the mask: k, the boxes bound)
             dispatch(S_MASK, 1, nslots);
             p.k = 0;
-        }
-        // dev: ATLAS_FEAT_AUX_DUMP=<file>: the aux of the slots each call read, (cx, cz, AUX_W words) a record, for the
-        // checks against Java (written at the next call or at the end: the generator waits for each submission)
-        if (const char* ad = std::getenv("ATLAS_FEAT_AUX_DUMP")) {
-            flushAux();
-            dumpPath_ = ad;
-            if (nslots && ensure(dbg_, size_t(MAX_ORIGINS) * 25 * AUX_W * 4, true, err)) {
-                std::vector<VkBufferCopy> cs;
-                for (uint32_t i = 0; i < nslots; i++) {
-                    cs.push_back({VkDeviceSize(slots[i * 3]) * AUX_W * 4, VkDeviceSize(i) * AUX_W * 4, VkDeviceSize(AUX_W) * 4});
-                    pendingXZ_.push_back(slots[i * 3 + 1]);
-                    pendingXZ_.push_back(slots[i * 3 + 2]);
+        } else if (step == STEP_INIT) {
+            // dev: ATLAS_FEAT_AUX_DUMP=<file>: the aux of the slots each call read, (cx, cz, AUX_W words) a record, for
+            // the checks against Java (written at the next call or at the end: the generator waits for each submission)
+            if (const char* ad = std::getenv("ATLAS_FEAT_AUX_DUMP")) {
+                std::string err;
+                flushAux();
+                dumpPath_ = ad;
+                if (nslots && ensure(dbg_, size_t(MAX_ORIGINS) * 25 * AUX_W * 4, true, err)) {
+                    std::vector<VkBufferCopy> cs;
+                    for (uint32_t i = 0; i < nslots; i++) {
+                        cs.push_back({VkDeviceSize(partSlotXZ_[i * 3]) * AUX_W * 4, VkDeviceSize(i) * AUX_W * 4, VkDeviceSize(AUX_W) * 4});
+                        pendingXZ_.push_back(partSlotXZ_[i * 3 + 1]);
+                        pendingXZ_.push_back(partSlotXZ_[i * 3 + 2]);
+                    }
+                    vkCmdCopyBuffer(cmd, aux_.buf, dbg_.buf, uint32_t(cs.size()), cs.data());
+                    barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                            VK_PIPELINE_STAGE_HOST_BIT);
                 }
-                vkCmdCopyBuffer(cmd, aux_.buf, dbg_.buf, uint32_t(cs.size()), cs.data());
-                barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
             }
+            dispatch(S_INIT, 64, n);
+        } else if (step == STEP_APPLY) {
+            dispatch(S_APPLY, HT_CAP / GROUP, n);
+        } else {
+            p.rec = step;
+            p.first = first ? 1u : 0u;
+            p.budget = budget;
+            dispatch(S_FEAT + types_[step] - 1, n, 1);  // a group (one warp) an origin
+            p.first = 1u;
+            p.budget = 1u << 30;
         }
-        dispatch(S_INIT, 64, n);
-        uint32_t skip = 0;  // ATLAS_FEAT_SKIP: feature types left out (dev checks)
-        if (const char* sk = std::getenv("ATLAS_FEAT_SKIP"))
-            for (const char* c = sk; *c; c++)
-                if (*c >= '1' && *c <= '9') skip |= 1u << uint32_t(*c - '0');
-        for (uint32_t rec : dispatch_) {
-            uint32_t type = rec < types_.size() ? types_[rec] : 0;
-            if (type == 0 || type >= FT_TYPES || (skip & (1u << type))) continue;
-            p.rec = rec;
-            dispatch(S_FEAT + type - 1, n, 1);  // a group (one warp) an origin; every placement in one dispatch
-        }
-        dispatch(S_APPLY, HT_CAP / GROUP, n);
-        return 0;
     }
+    // (decorate in parts) the call under way: its steps (a placed feature's record, or a STEP_ above every record) and
+    // where it is, the slots it reads, the boxes it binds
+    static constexpr uint32_t STEP_AUX = 0xFFFFFF00u, STEP_HM = 0xFFFFFF01u, STEP_MASK = 0xFFFFFF02u, STEP_INIT = 0xFFFFFF03u,
+                              STEP_APPLY = 0xFFFFFF04u;
+    std::vector<uint32_t> partSteps_;
+    std::vector<int32_t> partSlotXZ_;
+    uint32_t partCursor_ = 0, partSlots_ = 0;
+    uint32_t partRound_ = 0, partRoundRec_ = ~0u;  // (the feature in rounds: its round, the record the last part ran)
+    std::unordered_map<uint32_t, uint32_t> featBudget_;  // per record: placements an origin a round (fitted to the part)
+    Buf left_;  // (host) the last round's count of origins with placements left
+    struct RecStat {
+        double max = 0, sum = 0;
+        uint64_t n = 0, over = 0;
+        uint32_t minBud = ~0u;
+    };
+    std::unordered_map<uint32_t, RecStat> recStats_;  // (ATLAS_FEAT_PART_TRACE)
+    std::chrono::steady_clock::time_point recStatsAt_ = std::chrono::steady_clock::now();
+    bool partBoxes_ = false;
+    VkBuffer partTapes_ = VK_NULL_HANDLE, partRecords_ = VK_NULL_HANDLE;
 
 private:
     void flushAux() {

@@ -1073,7 +1073,14 @@ typedef struct AtlasGenStoreBatch {
                                       atlas_gen.slang quartBiome's layout; the columns' map region and elevation) */
     uint64_t program;              /* VkBuffer: the generator program's words */
     uint64_t map;                  /* VkBuffer: the map's words (AtlasGenMap) */
+    /* (version 2) a stage may record its work in parts, one submission each (the generator's GPU budget: a part of
+       about 4 ms): it records `units` of its own units of work (0: all) and returns ATLAS_GEN_STAGE_MORE while some are
+       left; the generator submits, then calls it again with the same chunks and part + 1. part 0 starts the work. */
+    uint32_t part;
+    uint32_t units;
+    uint32_t lastPartUs; /* the part before's GPU time, microseconds (0 at part 0): a stage may fit its parts to it */
 } AtlasGenStoreBatch;
+#define ATLAS_GEN_STAGE_MORE 0x4D4F5245 /* a store stage's return: part recorded, call again */
 typedef int32_t (*AtlasGenStoreStageFn)(void* user, const AtlasGenStoreBatch* batch);
 /*
  * A far stage (atlas_gen_add_far_stage): called in the far chunks' passes (atlas_gen_far, atlas_gen_far_ingest) once a

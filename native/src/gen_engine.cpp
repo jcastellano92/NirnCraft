@@ -261,8 +261,12 @@ public:
         double periodMs = 0, duty = 1, tokensMs = 0, usedMs = 0, waitedMs = 0, farWaitedMs = 0, maxSubMs = 0;
         uint64_t submissions = 0;
         char maxPhase[48] = {};  // what the longest submission was
+        double frameGpuMs = 0;
+        double recentMaxMs = 0;  // the longest of the last 10-20 s, and what it was
+        char recentPhase[48] = {};
     };
     virtual PaceStats paceStats() const { return {}; }
+    virtual bool stageInParts(uint32_t) const { return false; }  // (a store stage seen recording in parts)
     virtual bool farIngest(const std::vector<int32_t>& jobs, int lod, uint32_t rows, uint32_t cap, uint32_t* kinds, uint32_t& mixed,
                            uint32_t& taken, uint32_t* bad, double& ms, std::string& err) {
         (void)jobs, (void)lod, (void)rows, (void)cap, (void)kinds, (void)mixed, (void)taken, (void)bad, (void)ms;
@@ -1154,19 +1158,42 @@ public:
         sb.aux = uint64_t(stAux_.buf);
         sb.program = uint64_t(prog_.buf);
         sb.map = uint64_t(map_.buf);
-        begin();
-        sb.vkCommandBuffer = cmd_;
-        phase_ = "store stage " + std::to_string(st.order) + ", " + std::to_string(count) + " chunks";
-        int32_t r = st.sfn(st.user, &sb);
-        if (r != 0) {
-            vkEndCommandBuffer(cmd_);
-            return fail(err, "store stage " + std::to_string(st.order) + " failed (" + std::to_string(r) + ")");
+        sb.version = 2;
+        // in parts of about ATLAS_GEN_PART_MS (4) of GPU time, one submission each: the stage's units a part from its
+        // measured time a unit (a decoration's passes are a warp an origin, bound by latency: its time hardly grows with
+        // the chunks, so a call takes many chunks and its passes go a few at a time)
+        static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
+        double& perUnit = partUnitMs_[st.order];
+        double lastMs = 0.0;
+        for (uint32_t part = 0;; part++) {
+            sb.part = part;
+            sb.lastPartUs = uint32_t(std::min(lastMs * 1000.0, 4e9));
+            sb.units = perUnit > 0.0 ? uint32_t(std::clamp(partMs / perUnit, 1.0, 4096.0)) : 2u;
+            begin();
+            sb.vkCommandBuffer = cmd_;
+            phase_ = "store stage " + std::to_string(st.order) + ", " + std::to_string(count) + " chunks, part " + std::to_string(part);
+            int32_t r = st.sfn(st.user, &sb);
+            if (r != 0 && r != ATLAS_GEN_STAGE_MORE) {
+                vkEndCommandBuffer(cmd_);
+                return fail(err, "store stage " + std::to_string(st.order) + " failed (" + std::to_string(r) + ")");
+            }
+            barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT,
+                    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
+            double used0 = pace_.usedMs;
+            if (!submitWait(err)) return false;
+            if (r != ATLAS_GEN_STAGE_MORE) return true;
+            double ms = pace_.usedMs - used0, per = ms / double(sb.units);
+            lastMs = ms;
+            perUnit = perUnit <= 0.0 ? per : perUnit * 0.7 + per * 0.3;
+            if (part > 100000) return fail(err, "store stage " + std::to_string(st.order) + " never finished");
         }
-        barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT,
-                VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
-                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
-                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
-        return submitWait(err);
+    }
+    std::unordered_map<uint32_t, double> partUnitMs_;  // (store stages in parts) per stage order: ms a unit, measured
+    bool stageInParts(uint32_t order) const override {
+        auto it = partUnitMs_.find(order);
+        return it != partUnitMs_.end() && it->second > 0.0;
     }
 
     // a store pass (0 in, 1 out) over the batch's store items [first, first + n)
@@ -2474,7 +2501,10 @@ bool storeAdvance(AtlasGen* h, std::string& err) {
                     const char* e = std::getenv("ATLAS_GEN_PACE");
                     return !e || std::atoi(e) != 0;
                 }();
-                if (paced && h->ctx) {
+                // (a stage that records in parts slices its own submissions: only the others are sized by time)
+                if (h->engine->stageInParts(stage.order)) {
+                    if (!std::getenv("ATLAS_GEN_STORE_CALL")) calls = MAX_CHUNKS;
+                } else if (paced && h->ctx) {
                     auto m = h->storeStageMs.find(stage.order);
                     calls = m == h->storeStageMs.end() ? std::min<size_t>(perCall, 4)
                                                        : std::max<size_t>(1, std::min<size_t>(perCall, size_t(50.0 / std::max(m->second, 0.5))));
