@@ -522,7 +522,7 @@ public:
         }
         o += ",\"vkExport\":" + b(interopCapable_);
         if (!interopCapable_) o += ",\"vkExportReason\":" + q(vkInteropWhy_);
-        o += ",\"dedicatedOnly\":" + b(dedicatedOnly_) + ",\"timestamps\":" + b(timestamps_) +
+        o += ",\"dedicatedOnly\":" + b(dedicatedOnly_) + ",\"timestamps\":" + b(timestamps_) + ",\"genLowPriority\":" + b(genLowPriority_) + ",\"genOwnFamily\":" + b(genFamily_ != UINT32_MAX && genFamily_ != family_) +
              ",\"maxStorageBufferRange\":" + std::to_string(maxStorageRange_);
         if (glLoaded_) {
             o += ",\"gl\":{\"renderer\":" + q(glRenderer_) + ",\"version\":" + q(glVersion_) + ",\"vendor\":" + q(glVendor_) +
@@ -1541,11 +1541,21 @@ private:
         qci[0].queueFamilyIndex = family_;
         qci[0].queueCount = genFamily_ == family_ ? 2 : 1;
         qci[0].pQueuePriorities = prio;
+        // (VK_EXT_global_priority, where offered: the generator's compute-only family at the system's low priority, so
+        // the frames' work goes before it across queues too; ATLAS_GEN_LOW_PRIORITY=0 off)
+        VkDeviceQueueGlobalPriorityCreateInfoEXT low{VK_STRUCTURE_TYPE_DEVICE_QUEUE_GLOBAL_PRIORITY_CREATE_INFO_EXT};
+        low.globalPriority = VK_QUEUE_GLOBAL_PRIORITY_LOW_EXT;
+        bool lowWanted = !(std::getenv("ATLAS_GEN_LOW_PRIORITY") && std::getenv("ATLAS_GEN_LOW_PRIORITY")[0] == '0');
         if (genFamily_ != UINT32_MAX && genFamily_ != family_) {
             qci[1].queueFamilyIndex = genFamily_;
             qci[1].queueCount = 1;
             qci[1].pQueuePriorities = prio + 1;
             nq = 2;
+            if (lowWanted && has("VK_EXT_global_priority")) {
+                enable.push_back("VK_EXT_global_priority");
+                qci[1].pNext = &low;
+                genLowPriority_ = true;
+            }
         }
         VkPhysicalDeviceFeatures have{};
         vkGetPhysicalDeviceFeatures(phys_, &have);
@@ -1560,6 +1570,17 @@ private:
         dci.enabledExtensionCount = uint32_t(enable.size());
         dci.ppEnabledExtensionNames = enable.data();
         VkResult cr = vkCreateDevice(phys_, &dci, nullptr, &dev_);
+        if (cr != VK_SUCCESS && genLowPriority_) {
+            // (a driver that refuses the priority: as before, without it)
+            qci[1].pNext = nullptr;
+            enable.erase(std::remove_if(enable.begin(), enable.end(), [](const char* e) { return std::strcmp(e, "VK_EXT_global_priority") == 0; }),
+                         enable.end());
+            genLowPriority_ = false;
+            dci.enabledExtensionCount = uint32_t(enable.size());
+            dci.ppEnabledExtensionNames = enable.data();
+            dev_ = VK_NULL_HANDLE;
+            cr = vkCreateDevice(phys_, &dci, nullptr, &dev_);
+        }
         if (cr != VK_SUCCESS && budgetExt_) {
             // a driver that lists the budget extension yet refuses it: try again without
             enable.erase(std::remove_if(enable.begin(), enable.end(),
@@ -3216,6 +3237,7 @@ private:
     // the client generator's queue (sharedDevice; VK_NULL_HANDLE: it shares queue_ under queueMu_)
     uint32_t genFamily_ = UINT32_MAX;
     VkQueue genQueue_ = VK_NULL_HANDLE;
+    bool genLowPriority_ = false;  // (the generator's queue at VK_EXT_global_priority's low)
     bool genTimestamps_ = false, float64_ = false;
     std::atomic<uint64_t> completedFrame_{0};
     const void* noiseUploaded_ = nullptr;
