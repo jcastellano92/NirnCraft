@@ -202,6 +202,7 @@ struct State {
     bool watcherStarted = false;
     // statistics
     std::atomic<uint64_t> frames{0}, dumps{0}, suppressed{0}, lastFrame{0};
+    std::atomic<double> lastDumpMs{0};
     std::string lastDir, lastError;
     uint64_t statEvents = 0, statFrames = 0;
     double zoneNs = 0, offNs = 0;
@@ -715,6 +716,8 @@ std::string dumpNow(uint64_t fs, uint64_t fe, bool manual, uint64_t to, std::str
         const char* cpuTopName = "";
         std::string cpuTopLane;
         std::vector<std::pair<uint64_t, uint64_t>> frameCover, gpuFrames, gpuGen;
+        double qLatMs = 0;  // the longest wait of a GPU frame between its submit and the GPU starting it
+        uint64_t qStart = 0, qSubmit = 0;
         for (auto& e : evs) {
             if (e.name == fname) continue;
             uint64_t a = std::max(e.t0, fs), b = std::min(e.t1, fe);
@@ -725,7 +728,14 @@ std::string dumpNow(uint64_t fs, uint64_t fe, bool manual, uint64_t to, std::str
             if (ln.gpu) {
                 if (startsWith(e.name, "gpu ")) {
                     if (std::strstr(ln.name.c_str(), "gen")) gpuGen.push_back({e.t0, e.t1});
-                    else gpuFrames.push_back({e.t0, e.t1});
+                    else {
+                        gpuFrames.push_back({e.t0, e.t1});
+                        if (e.arg / 1000.0 > qLatMs) {
+                            qLatMs = e.arg / 1000.0;
+                            qStart = e.t0;
+                            qSubmit = e.t0 - uint64_t(e.arg) * 1000;
+                        }
+                    }
                 }
                 continue;
             }
@@ -751,12 +761,27 @@ std::string dumpNow(uint64_t fs, uint64_t fe, bool manual, uint64_t to, std::str
         double gpuBusy = ms(unionLen(gpuFrames, fs, fe)), genBusy = ms(unionLen(gpuGen, fs, fe));
         double outside = fMs - ms(covered);
 
+        // what the GPU frame queued behind: the generator submission that overlapped its wait the most
+        const Ev* qBehind = nullptr;
+        uint64_t qOver = 0;
+        if (qLatMs >= 10.0)
+            for (auto& e : evs) {
+                if (!L(e.lane).gpu || startsWith(e.name, "gpu ") || L(e.lane).name.find("gen") == std::string::npos) continue;
+                uint64_t a = std::max(e.t0, qSubmit), b = std::min(e.t1, qStart);
+                if (b > a && b - a > qOver) {
+                    qOver = b - a;
+                    qBehind = &e;
+                }
+            }
         // the verdict
         std::string verdict;
         char vb[640];
         if (gcMs >= 0.3 * fMs) {
             std::snprintf(vb, sizeof(vb), "the JVM was paused by garbage collection: %.1f ms of the frame in GC (%s, longest %.1f ms); the JVM stops every thread, so nothing else is to blame",
                           gcMs, gcName, gcLongest);
+        } else if (qLatMs >= 0.3 * fMs && qBehind) {
+            std::snprintf(vb, sizeof(vb), "the GPU was the long pole: the frame's GPU work (%.1f ms of it) started %.1f ms after its submit, queued behind the generator's \"%s\" (%.1f ms on the GPU, %.1f ms of it inside the wait)",
+                          gpuBusy, qLatMs, qBehind->name, ms(qBehind->t1 - qBehind->t0), ms(qOver));
         } else if (waitGpu >= 0.4 * fMs || gpuBusy >= 0.85 * fMs) {
             std::snprintf(vb, sizeof(vb), "the GPU was the long pole: the frame thread waited %.1f ms for the GPU and the frame work kept it busy %.1f ms of %.1f ms (generator work on the same card: %.1f ms)",
                           waitGpu, gpuBusy, fMs, genBusy);
@@ -850,6 +875,7 @@ std::string dumpNow(uint64_t fs, uint64_t fe, bool manual, uint64_t to, std::str
         std::lock_guard<std::mutex> lk(S.mu);
         S.lastDir = dir.string();
     }
+    S.lastDumpMs.store(ms(nowNs() - t_begin));
     S.dumps.fetch_add(1);  // (after lastDir: a reader that sees the count sees the directory)
     std::fprintf(stderr, "[atlas] flight recorder: %s dump in %.0f ms -> %s (%zu events, frame %.1f ms)\n", manual ? "manual" : "spike",
                  ms(nowNs() - t_begin), dir.string().c_str(), evs.size(), ms(fe - fs));
@@ -996,9 +1022,9 @@ ATLAS_API const char* atlas_fr_status(void) {
     char b[1024];
     std::snprintf(b, sizeof(b),
                   "{\"on\":%s,\"rings\":%u,\"events\":%llu,\"frames\":%llu,\"dumps\":%llu,\"held_back\":%llu,\"zone_ns\":%.1f,\"off_zone_ns\":%.1f,"
-                  "\"events_per_frame\":%.1f,\"cost_us_per_frame\":%.2f,\"last\":\"%s\",\"error\":\"%s\"}",
+                  "\"events_per_frame\":%.1f,\"cost_us_per_frame\":%.2f,\"last_dump_ms\":%.0f,\"last\":\"%s\",\"error\":\"%s\"}",
                   enabled() ? "true" : "false", n, (unsigned long long)events, (unsigned long long)frames, (unsigned long long)S.dumps.load(),
-                  (unsigned long long)S.suppressed.load(), S.zoneNs, S.offNs, perFrame, perFrame * S.zoneNs / 1000.0, jsonEsc(last.c_str()).c_str(),
+                  (unsigned long long)S.suppressed.load(), S.zoneNs, S.offNs, perFrame, perFrame * S.zoneNs / 1000.0, S.lastDumpMs.load(), jsonEsc(last.c_str()).c_str(),
                   jsonEsc(lastErr.c_str()).c_str());
     out = b;
     return out.c_str();
