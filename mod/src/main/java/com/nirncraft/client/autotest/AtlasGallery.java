@@ -47,10 +47,12 @@ final class AtlasGallery {
         var models = mc.getModelManager().getBlockStateModelSet();
         var colors = mc.getBlockColors();
         var out = new JsonArray();
-        int states = 0, skipped = 0;
+        int states = 0, skipped = 0, exact = 0;
         for (var block : net.minecraft.core.registries.BuiltInRegistries.BLOCK) {
             var id = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block).toString();
+            // exact models: states that draw the same parts, tinted and lit the same, are one group
             Map<String, JsonObject> groups = new LinkedHashMap<>();
+            Map<String, java.util.Set<String>> keysOf = new HashMap<>();
             var coloring = colors.getColoringProperties(block);
             for (var state : block.getStateDefinition().getPossibleStates()) {
                 states++;
@@ -60,19 +62,21 @@ final class AtlasGallery {
                     continue;
                 }
                 var model = models.get(state);
-                // the model by what it draws: every part's quads (positions, uvs, sprite, direction), not the object (one per state)
                 var parts = new ArrayList<net.minecraft.client.renderer.block.dispatch.BlockStateModelPart>();
                 model.collectParts(net.minecraft.util.RandomSource.create(0L), parts);
-                int shape = 17;
+                var extras = new StringBuilder().append('|').append(state.getLightEmission());
+                for (var p : coloring) extras.append('|').append(state.getValue(p));
+                if (fluid) extras.append("|fluid ").append(state.getFluidState().getType()).append(state.getFluidState().getAmount());
+                java.util.Set<String> keys = new java.util.TreeSet<>();
                 for (var part : parts) {
-                    shape = shape * 31 + part.getQuads(null).hashCode();
-                    for (var dir : net.minecraft.core.Direction.values()) shape = shape * 31 + part.getQuads(dir).hashCode();
+                    int h = 17;
+                    h = h * 31 + quadsHash(part.getQuads(null));
+                    for (var dir : net.minecraft.core.Direction.values()) h = h * 31 + quadsHash(part.getQuads(dir));
+                    keys.add(h + extras.toString());
                 }
-                var sb = new StringBuilder().append(shape).append('|').append(parts.isEmpty() ? id : "").append('|').append(fluid ? state.getFluidState().getType() : "")
-                        .append('|').append(state.getLightEmission());
-                for (var p : coloring) sb.append('|').append(state.getValue(p));
-                if (fluid && !state.getBlock().defaultBlockState().equals(state)) sb.append("|f").append(state.getFluidState().getAmount());
-                var g = groups.get(sb.toString());
+                if (parts.isEmpty()) keys.add("none|" + id + extras);
+                String sig = String.join(",", keys);
+                var g = groups.get(sig);
                 if (g == null) {
                     g = new JsonObject();
                     g.addProperty("block", id);
@@ -84,18 +88,41 @@ final class AtlasGallery {
                     g.addProperty("fluid", fluid);
                     g.addProperty("blockEntity", state.hasBlockEntity());
                     g.addProperty("render", state.getRenderShape().toString());
-                    groups.put(sb.toString(), g);
+                    g.addProperty("parts", keys.size());
+                    groups.put(sig, g);
+                    keysOf.put(sig, keys);
                 }
                 g.addProperty("count", g.get("count").getAsInt() + 1);
             }
+            exact += groups.size();
+            // the representatives: the fewest exact groups whose parts together are every distinct part of the block
+            // (a wall's 324 connection combinations are two or three states; each part is seen in a whole state)
+            java.util.Set<String> uncovered = new java.util.HashSet<>();
+            keysOf.values().forEach(uncovered::addAll);
+            var left = new ArrayList<>(groups.keySet());
             int n = 0;
-            for (var g : groups.values()) {
+            while (!uncovered.isEmpty() && !left.isEmpty()) {
+                String best = null;
+                int bestGain = -1;
+                for (String sig : left) {
+                    int gain = 0;
+                    for (String k : keysOf.get(sig)) if (uncovered.contains(k)) gain++;
+                    if (gain > bestGain) {
+                        bestGain = gain;
+                        best = sig;
+                    }
+                }
+                left.remove(best);
+                uncovered.removeAll(keysOf.get(best));
+                var g = groups.get(best);
                 g.addProperty("id", id.replace(':', '.') + "." + n++);
+                g.addProperty("represents", groups.size());
                 out.add(g);
             }
         }
         var root = new JsonObject();
         root.addProperty("states", states);
+        root.addProperty("exactGroups", exact);
         root.addProperty("invisibleSkipped", skipped);
         root.add("groups", out);
         try {
@@ -105,13 +132,36 @@ final class AtlasGallery {
         } catch (java.io.IOException e) {
             throw new IllegalStateException("gallery index failed", e);
         }
-        NirnCraft.LOGGER.info("Autotest live: gallery index: {} states in {} groups ({} invisible skipped)", states, out.size(), skipped);
+        NirnCraft.LOGGER.info("Autotest live: gallery index: {} states, {} exact model groups, {} representatives cover every part ({} invisible skipped)",
+                states, exact, out.size(), skipped);
+    }
+
+    /** What a list of quads draws: corners, uvs, sprite, layer, tint, light (the records' own hash includes per-state objects). */
+    private static int quadsHash(List<net.minecraft.client.resources.model.geometry.BakedQuad> quads) {
+        int h = 1;
+        for (var q : quads) {
+            for (int v = 0; v < 4; v++) {
+                var p = q.position(v);
+                h = h * 31 + Float.floatToIntBits(p.x());
+                h = h * 31 + Float.floatToIntBits(p.y());
+                h = h * 31 + Float.floatToIntBits(p.z());
+                h = h * 31 + Long.hashCode(q.packedUV(v));
+            }
+            var m = q.materialInfo();
+            h = h * 31 + q.direction().ordinal();
+            h = h * 31 + m.sprite().contents().name().hashCode();
+            h = h * 31 + m.layer().ordinal();
+            h = h * 31 + m.tintIndex();
+            h = h * 31 + m.lightEmission();
+        }
+        return h;
     }
 
     // ---------------------------------------------------------------------------------------------------- script
     private static List<JsonObject> steps = new ArrayList<>();
     private static int idx, waitTicks, shots;
-    private static boolean running, stepStarted, wantShot;
+    private static boolean running, stepStarted, shotArmed;
+    private static int framesLeft;
     private static Path outDir;
     private static String scriptName = "";
     private static long began;
@@ -144,7 +194,7 @@ final class AtlasGallery {
         }
         System.setProperty("nirncraft.atlas.fixedExposure", "true");  // the eye's metering would change every state's look
         idx = waitTicks = shots = 0;
-        stepStarted = wantShot = false;
+        stepStarted = shotArmed = false;
         serverTask = null;
         began = System.currentTimeMillis();
         running = true;
@@ -170,7 +220,7 @@ final class AtlasGallery {
             keepCamera(mc);
             return;
         }
-        if (wantShot) {  // the picture is taken in the next frame's end (frameEnd)
+        if (shotArmed) {  // frames at the new camera, then the picture, are frameEnd's
             keepCamera(mc);
             return;
         }
@@ -233,27 +283,28 @@ final class AtlasGallery {
                 waitTicks = current.has("wait") ? current.get("wait").getAsInt() : 2;
                 idx++;
             }
-            case "shot" -> {
-                double[] eye = vec(current, "eye"), look = vec(current, "look");
-                camEye = eye;
-                double dx = look[0] - eye[0], dy = look[1] - eye[1], dz = look[2] - eye[2];
-                camYaw = Math.toDegrees(Math.atan2(-dx, dz));
-                camPitch = -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
-                keepCamera(mc);
-                waitTicks = current.has("settle") ? current.get("settle").getAsInt() : 6;
-                wantShot = true;
-                idx++;
-            }
+            case "shot" -> armShot(mc);
             default -> throw new IllegalArgumentException("gallery: unknown op " + op);
         }
+    }
+
+    /** The camera on the current shot step; `settle` rendered frames later (frameEnd) the picture is taken. */
+    private static void armShot(Minecraft mc) {
+        current = steps.get(idx);
+        double[] eye = vec(current, "eye"), look = vec(current, "look");
+        camEye = eye;
+        double dx = look[0] - eye[0], dy = look[1] - eye[1], dz = look[2] - eye[2];
+        camYaw = Math.toDegrees(Math.atan2(-dx, dz));
+        camPitch = -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
+        keepCamera(mc);
+        framesLeft = current.has("settle") ? current.get("settle").getAsInt() : 3;
+        shotArmed = true;
     }
 
     private static void keepCamera(Minecraft mc) {
         var p = mc.player;
         if (p == null) return;
-        p.setPos(camEye[0], camEye[1] - 1.62, camEye[2]);
-        p.setYRot((float) camYaw);
-        p.setXRot((float) camPitch);
+        p.snapTo(camEye[0], camEye[1] - 1.62, camEye[2], (float) camYaw, (float) camPitch);
         p.setYHeadRot((float) camYaw);
         p.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
     }
@@ -279,9 +330,11 @@ final class AtlasGallery {
 
     /** Called at the end of every rendered frame: takes the picture a shot step asked for. */
     static void frameEnd(Minecraft mc) {
-        if (!running || !wantShot || waitTicks > 0 || serverTask != null) return;
-        wantShot = false;
-        JsonObject shot = steps.get(idx - 1);
+        if (!running || !shotArmed || serverTask != null) return;
+        if (--framesLeft > 0) return;
+        shotArmed = false;
+        JsonObject shot = steps.get(idx);
+        idx++;
         String name = shot.get("name").getAsString();
         double[] eye = camEye.clone();
         double yaw = camYaw, pitch = camPitch;
@@ -390,6 +443,7 @@ final class AtlasGallery {
             WRITING.decrementAndGet();
             throw ex;
         }
+        if (idx < steps.size() && steps.get(idx).get("op").getAsString().equals("shot")) armShot(mc);  // (no tick between shots)
     }
 
     /** The square (x, y, w, h) around a world point as the camera projects it, `half` blocks each side. */

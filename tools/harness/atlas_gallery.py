@@ -29,10 +29,11 @@ OUT = ROOT / ".work/harness/atlas/gallery"
 ORIGIN = (4400, 521, 4096)       # the middle of the stage; the patches' layer (the stone floor is the layer below)
 SPACING, COLS, ROWS = 12, 8, 8   # 64 patches a batch, 12 blocks apart
 WINDOW = (1920, 1080)
-# pass / fail (printed in every report). dE is CIE76 on the crop's pixels; the pit share counts pixels where atlas is
-# darker than vanilla by more than PIT_L after the pair's median brightness offset is removed (the texel-sized black
-# pits in grass tops are a share of the crop's texels, not a mean shift)
-LIMITS = {"dE": 8.0, "pit": 0.005, "dE16": 8.0, "pit16": 0.01}
+# pass / fail (printed in every report). dE is CIE76 on the crop's pixels. A state fails on STRUCTURE (dEshape: dE after
+# the pair's median Lab offset is removed, so lighting level does not hide or fake a shape difference; pit: the share of
+# pixels where atlas is darker than vanilla by more than PIT_L after that offset, the texel-sized black pits in grass
+# tops) or on TONE (the brightness offset itself, more than `tone` L: atlas lights the block differently from vanilla)
+LIMITS = {"shape": 6.0, "pit": 0.005, "shape16": 8.0, "pit16": 0.01, "tone": 6.0}
 PIT_L = 20.0
 NEAR, MID = 2.0, 16.0
 SWEEP_DISTANCES = [64, 256, 1000]
@@ -63,7 +64,8 @@ def run(runner, s, v, fp):
     atlas_tools.wait_alive(g)
     index = load_index(g)
     groups = choose(index["groups"], a, sweep)
-    print(f"  gallery: {index['states']} states in {len(index['groups'])} model groups; testing {len(groups)}", flush=True)
+    print(f"  gallery: {index['states']} states, {index.get('exactGroups')} exact model groups, {len(index['groups'])} representatives "
+          f"that together draw every part of every block; testing {len(groups)}", flush=True)
     work = folder / "work"
     work.mkdir(exist_ok=True)
     g.ensure_visible()
@@ -237,19 +239,21 @@ def measure_pair(out, gr):
     why = []
     if row.get("missing"):
         why.append("no capture (" + ",".join(row["missing"]) + ")")
-    if m2:
-        if m2["dE"] > LIMITS["dE"]:
-            why.append(f"dE {m2['dE']:.1f} at 2 m")
-        if m2["pit"] > LIMITS["pit"]:
-            why.append(f"{m2['pit'] * 100:.1f}% dark pits at 2 m")
-    if m16:
-        if m16["dE"] > LIMITS["dE16"]:
-            why.append(f"dE {m16['dE']:.1f} at 16 m")
-        if m16["pit"] > LIMITS["pit16"]:
-            why.append(f"{m16['pit'] * 100:.1f}% dark pits at 16 m")
+    struct, tone = 0.0, 0.0
+    for m, d, lim_s, lim_p in ((m2, "2 m", LIMITS["shape"], LIMITS["pit"]), (m16, "16 m", LIMITS["shape16"], LIMITS["pit16"])):
+        if not m:
+            continue
+        struct = max(struct, m["dEshape"] / lim_s, m["pit"] / lim_p)
+        tone = max(tone, abs(m["offsetL"]) / LIMITS["tone"])
+        if m["dEshape"] > lim_s:
+            why.append(f"structure dE {m['dEshape']:.1f} at {d}")
+        if m["pit"] > lim_p:
+            why.append(f"{m['pit'] * 100:.1f}% dark pits at {d}")
+        if abs(m["offsetL"]) > LIMITS["tone"]:
+            why.append(f"{m['offsetL']:+.0f} L brighter/darker than vanilla at {d}")
     row["fails"] = why
-    row["score"] = max([(m2 or {}).get("dE", 99) / LIMITS["dE"], (m16 or {}).get("dE", 99) / LIMITS["dE16"],
-                        (m2 or {}).get("pit", 0) / LIMITS["pit"], (m16 or {}).get("pit", 0) / LIMITS["pit16"]]) if (m2 or m16) else 99
+    row["structure"], row["tone"] = round(struct, 2), round(tone, 2)
+    row["score"] = struct * 10 + tone if (m2 or m16) else 999
     return row
 
 
@@ -331,16 +335,22 @@ def finish_near(g, s, v, fp, rows, folder, groups, counts):
     (folder / "report.html").write_text(
         f"<!doctype html><meta charset=utf-8><title>atlas gallery</title><style>body{{font:13px system-ui;background:#111;color:#ddd;margin:16px}}"
         f"td,th{{border:1px solid #444;padding:2px 8px}}img{{max-width:100%}}</style><h1>Vanilla gallery: atlas vs vanilla's raster</h1>"
-        f"<p>{len(rows)} model groups tested, <b>{len(failing)}</b> failing. Limits: {LIMITS} (dE = CIE76 over the centre crop; pit = share of "
-        f"pixels {PIT_L:g} L darker than vanilla after the median offset).</p>"
+        f"<p>{len(rows)} model groups tested, <b>{len(failing)}</b> failing. Limits: {LIMITS} (dE = CIE76 over the centre crop; structure = dE "
+        f"after the median offset; pit = share of pixels {PIT_L:g} L darker than vanilla after the offset; tone = the offset).</p>"
         + "".join(f'<img src="{x.name}">' for x in sheets[:3])
         + f"<table><tr><th>#</th><th>group</th><th>state</th><th>dE 2m</th><th>pits 2m</th><th>dE 16m</th><th>pits 16m</th><th>why</th></tr>{body}</table>",
         encoding="utf-8")
     latest = OUT / "near" / "latest"
     shutil.rmtree(latest, ignore_errors=True)
     shutil.copytree(folder, latest)
-    fails = [f"{len(failing)} of {len(rows)} state groups differ from vanilla beyond the limits"] if failing else []
-    metrics = {"groups": len(rows), "failing": len(failing), "worst": [f"{r['id']}: {'; '.join(r['fails'][:2])}" for r in worst],
+    fails = [f"{len(failing)} of {len(rows)} state groups differ from vanilla beyond the limits "
+             f"({len([r for r in failing if r.get('structure', 0) > 1])} in structure, the rest in tone only)"] if failing else []
+    structural = [r for r in failing if r.get("structure", 0) > 1]
+    metrics = {"groups": len(rows), "failing": len(failing), "structureFailing": len(structural),
+               "toneOnlyFailing": len(failing) - len(structural),
+               "medianOffsetL2m": round(float(np.median([r["m2"]["offsetL"] for r in rows if r["m2"]] or [0])), 1),
+               "pitFailing": len([r for r in rows if any(r[k] and r[k]["pit"] > LIMITS["pit" if k == "m2" else "pit16"] for k in ("m2", "m16"))]),
+               "worst": [f"{r['id']}: {'; '.join(r['fails'][:2])}" for r in worst],
                "dEmean2m": round(float(np.mean([r["m2"]["dE"] for r in rows if r["m2"]] or [0])), 2),
                "dEmean16m": round(float(np.mean([r["m16"]["dE"] for r in rows if r["m16"]] or [0])), 2),
                "report": str(latest / "report.html"), "sheet": str(latest / "failures-01.png"), **counts}
@@ -381,7 +391,7 @@ def sweep_rows(g, groups, work, a, say=print):
                   {"op": "settle", "max": 600, "min": 40}]
         for gr, c in fields:
             e, lk = eye(c, NEAR)
-            steps.append({"op": "shot", "name": f"near/{gr['id']}", "eye": e, "look": lk, "settle": 8,
+            steps.append({"op": "shot", "name": f"near/{gr['id']}", "eye": e, "look": lk, "settle": 12,
                           "targets": [{"name": "q", "quad": quad(c), "at": lk, "half": 0.5}]})
         cx, cz = ox, oz - 20  # the middle of the fields
         for dist in SWEEP_DISTANCES:
@@ -391,7 +401,7 @@ def sweep_rows(g, groups, work, a, say=print):
             look = [cx + 0.5, oy + 0.5, cz + 0.5]
             steps.append({"op": "goto", "at": [eyep[0], eyep[1] - 1.62, eyep[2]], "wait": 20})
             steps.append({"op": "settle", "max": 1800, "min": 60})
-            steps.append({"op": "shot", "name": f"d{dist}/all", "eye": eyep, "look": look, "settle": 10,
+            steps.append({"op": "shot", "name": f"d{dist}/all", "eye": eyep, "look": look, "settle": 20,
                           "targets": [{"name": gr["id"], "quad": quad(c), "at": [c[0] + 8.5, oy + 1, c[2] + 8.5], "half": 8}
                                       for gr, c in fields]})
         steps.append({"op": "goto", "at": [ox, oy + 6, oz], "wait": 20})

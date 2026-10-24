@@ -2766,7 +2766,7 @@ def main():
         p.add_argument("--cold", action="store_true", help="atlas gates: wipe atlas's caches first (a first visit)")
         p.add_argument("--gallery-filter", help="atlas-gallery: block ids / group ids (globs, comma = or), e.g. 'minecraft:grass_block,minecraft:oak_*'")
         p.add_argument("--gallery-limit", type=int, default=0, help="atlas-gallery: test this many groups, spread through the registry")
-        p.add_argument("--gallery-settle", type=int, default=0, help="atlas-gallery: ticks the camera rests before each shot (default 3)")
+        p.add_argument("--gallery-settle", type=int, default=0, help="atlas-gallery: rendered frames at the new camera before each shot (default 3)")
         p.add_argument("--gallery-all", action="store_true", help="atlas-gallery-sweep: every group (default: 96 spread through the registry)")
     selection(sub.add_parser("serve"))
     sub.add_parser("status")
