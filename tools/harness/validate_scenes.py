@@ -25,7 +25,7 @@ VERBS = {"wait-dead", "door-file", "frame", "frame-box", "frame-file", "inside-f
          "capture", "identity", "transport", "stop", "screen", "click", "key", "expect-screen", "perspective",
          "renderdistance", "hud", "settle-visual", "message", "weather-off", "atlaslab", "atlas-edits-why", "fog-off", "truth-quiet", "far-timeline",
          "pin", "pin-place", "pin-view", "pin-fly", "pin-shimmer", "pin-export", "pin-hide", "pin-clear", "pin-list",
-         "atlas-suspend"}
+         "atlas-suspend", "route", "settle-atlas", "atlas-unified", "atlas-near", "gallery"}
 ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 TAG = re.compile(r"^[a-z]+:[A-Za-z0-9_/:.\-]+$")
 SUMMON = re.compile(r"\bsummon\s+nirncraft:([a-z0-9_]+)")

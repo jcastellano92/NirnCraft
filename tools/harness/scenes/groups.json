@@ -53,5 +53,16 @@
     "description": "offline tools (native/build/Release/atlas_render.exe, pack_lab.exe); no game client",
     "jvm": {},
     "server": false
+  },
+  "atlas": {
+    "description": "Infinite ATLAS draws every pixel (unified) with client-side GPU world generation and the passive profiler: the in-game gates (atlas_tools.py: the scripted route, the vanilla gallery). The kept test world. The instance has no Sodium or Iris.",
+    "jvm": {
+      "nirncraft.atlas.unified": "true",
+      "nirncraft.atlas.clientGen": "true",
+      "nirncraft.atlas.profile": "true",
+      "nirncraft.atlas.safeMode": "false"
+    },
+    "keptWorld": true,
+    "server": false
   }
 }

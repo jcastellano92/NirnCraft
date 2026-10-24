@@ -341,6 +341,8 @@ class Runner:
         return catalog.fingerprint(s, self.inputs(s, v))
 
     def cached(self, s, v, fp):
+        if s.get("nocache"):  # a measurement (the atlas gates): every run measures again
+            return None
         rec = results.latest(s["id"], v)
         return rec if reusable(rec, fp) else None
 
@@ -607,6 +609,9 @@ class Runner:
         except Exception as e:  # noqa: BLE001  the client cannot start: skip the group, do not hang on it
             self.disabled[s["group"]] = f"skipped: the client did not start ({str(e)[:160]})"
             raise
+        if s.get("atlas_tool"):  # the in-game gates for Infinite ATLAS (atlas_tools.py): they drive the client themselves
+            import atlas_tools
+            return atlas_tools.run(self, s, v, fp)
         g.pack_options(s.get("pack_options"))  # the scene's pack options (a reload only when they change)
         if s.get("kind") == "behaviour":
             return self.run_behaviour(s, v, fp)
@@ -1369,6 +1374,8 @@ def cmd_plan(a):
 
 
 def cmd_run(a, watch=False):
+    if getattr(a, "relaunch", False):  # atlas-route --relaunch is the scene atlas-route-relaunch
+        a.ids = [i + "-relaunch" if i == "atlas-route" else i for i in (a.ids or [])]
     scenes = select(catalog.load(), a)
     items = items_of(scenes, a)
     if not items:
@@ -2755,6 +2762,16 @@ def main():
         p.add_argument("--rebuild", action="store_true", help="rebuild + install the jar when Java changed")
         p.add_argument("--include-quarantined", action="store_true", help="also run tests quarantined for failing")
         p.add_argument("--fresh-world", action="store_true", help="make the kept test world again (else reused)")
+        p.add_argument("--relaunch", action="store_true", help="atlas-route: twice across a client restart on one cache")
+        p.add_argument("--cold", action="store_true", help="atlas gates: wipe atlas's caches first (a first visit)")
+        p.add_argument("--gallery-filter", help="atlas-gallery: block ids / group ids (globs, comma = or), e.g. 'minecraft:grass_block,minecraft:oak_*'")
+        p.add_argument("--gallery-limit", type=int, default=0, help="atlas-gallery: test this many groups, spread through the registry")
+        p.add_argument("--gallery-settle", type=int, default=0, help="atlas-gallery: rendered frames at the new camera before each shot (default 3)")
+        p.add_argument("--gallery-per-block", type=int, default=0, help="atlas-gallery: at most this many model groups of one block (default 6; --gallery-all lifts it)")
+        p.add_argument("--sample", type=int, default=0, help="atlas-gallery: about this many model groups spread over the model classes (default 300; sweep 96)")
+        p.add_argument("--class", dest="gallery_class", help="atlas-gallery: only these model classes (comma): cube,cutout,connecting,noncube,plant,fluid,emissive,animated,nirncraft")
+        p.add_argument("--idle-only", action="store_true", help="atlas-gallery: every representative, resumable: stops between batches when another job waits for the machine and goes on at the next run")
+        p.add_argument("--gallery-all", action="store_true", help="atlas-gallery: every model group, no per-block cap (13k); atlas-gallery-sweep: every group (default 96)")
     selection(sub.add_parser("serve"))
     sub.add_parser("status")
     selection(sub.add_parser("report"))

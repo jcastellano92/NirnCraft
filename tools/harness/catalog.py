@@ -530,6 +530,8 @@ def load():
     scenes += pinned.scenes()
     import loading  # how fast the far field shows a place just arrived at, and how it resolves (loading.py)
     scenes += loading.scenes()
+    import atlas_tools  # the in-game gates for Infinite ATLAS: the scripted route, the vanilla gallery (atlas_tools.py)
+    scenes += atlas_tools.scenes()
     scenes += pose_checks(scenes)
     seam_core(scenes)
     for s in scenes:
