@@ -255,6 +255,7 @@ public final class ClientAutotest {
         Minecraft mc = Minecraft.getInstance();
         FrameProbe.endFrame(mc);
         AtlasRoute.frameEnd(mc);
+        AtlasGallery.frameEnd(mc);
         if(liveCapture!=null) {
             String tag=liveCapture;
             captureAndSave(mc,tag);
@@ -357,8 +358,8 @@ public final class ClientAutotest {
             if (pre != null) status.addProperty("farPrebuild", pre[0] + "/" + pre[1]);
             // what advances while a step runs (the harness fails a step whose progress stops: a hang, not a slow step)
             status.addProperty("progress", liveLastAction + "|" + LIVE_ACTIONS.size() + "|" + com.nirncraft.atlas.AtlasLabExport.viewProgress
-                    + "|" + visualStable + "|" + liveSettleStable + "|" + liveSettlePartial + "|" + AtlasRoute.progress());
-            status.addProperty("commandPending", liveCommand != null || liveResources != null || liveCapture != null || burstRemaining>0 || ReviewCaptures.pending()>0 || FrameProbe.active() || CameraTravel.active() || AtlasRoute.active());
+                    + "|" + visualStable + "|" + liveSettleStable + "|" + liveSettlePartial + "|" + AtlasRoute.progress() + AtlasGallery.progress());
+            status.addProperty("commandPending", liveCommand != null || liveResources != null || liveCapture != null || burstRemaining>0 || ReviewCaptures.pending()>0 || FrameProbe.active() || CameraTravel.active() || AtlasRoute.active() || AtlasGallery.active());
             status.addProperty("controlVersion", liveModified);
             status.addProperty("lastAction", liveLastAction);
             status.addProperty("error", liveError);
@@ -419,6 +420,7 @@ public final class ClientAutotest {
                     FrameProbe.cancel();
                     CameraTravel.cancel();
                     AtlasRoute.cancel();
+                    AtlasGallery.cancel();
                 }
             } catch (Exception e) { NirnCraft.LOGGER.warn("Autotest live: control file unavailable", e); }
         }
@@ -437,6 +439,14 @@ public final class ClientAutotest {
             try { AtlasRoute.tick(mc); }
             catch(RuntimeException e) {
                 AtlasRoute.cancel(); liveError="Route failed: "+e; LIVE_ACTIONS.clear();
+                NirnCraft.LOGGER.error("Autotest live: {}",liveError,e);
+            }
+            return;
+        }
+        if(AtlasGallery.active()) {
+            try { AtlasGallery.tick(mc); }
+            catch(RuntimeException e) {
+                AtlasGallery.cancel(); liveError="Gallery failed: "+e; LIVE_ACTIONS.clear();
                 NirnCraft.LOGGER.error("Autotest live: {}",liveError,e);
             }
             return;
@@ -726,6 +736,10 @@ public final class ClientAutotest {
                 CameraTravel.begin(mc,action.substring(14));
             } else if(action.startsWith("route ")) {  // SPEC.json: the scripted route (AtlasRoute)
                 AtlasRoute.begin(mc,action.substring(6));
+            } else if(action.startsWith("gallery-index ")) {  // OUT.json: every block state grouped by its model
+                AtlasGallery.index(mc,action.substring(14));
+            } else if(action.startsWith("gallery-run ")) {  // SCRIPT.json: placements and shots, run in the client (AtlasGallery)
+                AtlasGallery.begin(mc,action.substring(12));
             } else if(action.startsWith("settle-atlas ")) {  // MAX_TICKS [MIN_TICKS]: settled on atlas's own state
                 AtlasRoute.beginSettle(mc,action.substring(13));
             } else if(action.startsWith("ui ")) {

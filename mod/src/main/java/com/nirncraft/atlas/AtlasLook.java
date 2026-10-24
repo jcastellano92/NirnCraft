@@ -44,7 +44,8 @@ final class AtlasLook {
         float open = canonicalExposure(sun);
         float log2 = open + (EXPOSURE_MAX - open) * (1f - smooth(0.1f, 0.8f, eyeSky));
         // the metered eye once it has a reading (AtlasMeter: the finished frame, adapting fast to bright, slowly to dark)
-        float metered = AtlasMeter.exposure(log2);
+        // (the gates hold the exposure so a state's look is the state's, not the eye's: -Dnirncraft.atlas.fixedExposure)
+        float metered = System.getProperty("nirncraft.atlas.fixedExposure") != null ? Float.NaN : AtlasMeter.exposure(log2);
         if (!Float.isNaN(metered)) log2 = metered;
         lastLog2 = log2;
         return new float[] {(float) Math.pow(2, log2), NIGHT_VISION};
