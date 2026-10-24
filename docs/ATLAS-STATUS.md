@@ -5,6 +5,9 @@ The current state of NirnCraft's renderer, what the owner has decided, what is i
 [ATLAS-RENDERER-PLAN.md](ATLAS-RENDERER-PLAN.md) keeps the decision log, this file the present. Update it at every
 milestone.
 
+**Superseded order of work (2026-10-24):** the plan to finish the renderer, its bar and its stages are in
+[ATLAS-PLAN.md](ATLAS-PLAN.md); read it first. This file keeps the rules, tools and history below.
+
 ## The owner's order of work (2026-10-20)
 
 1. **Finish the GPU conversion.** Everything on the GPU; the CPU is only the CPU backend's fallback. No CPU interim
