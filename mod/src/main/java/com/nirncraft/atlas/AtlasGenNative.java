@@ -37,7 +37,7 @@ final class AtlasGenNative {
     // the pages made on the device (atlas_gen_read_page, atlas_gen_page_stats): null in a library without them
     private final MethodHandle readPage, pageStats, tiles, far, farIngest, gridReports;
     // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
-    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate, coarseRoom, paceStats, coarseWindow, cachePeek;
+    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate, coarseRoom, paceStats, coarseWindow, cachePeek, noBake;
     // the chunk store and the decoration's store stages (atlas_gen_store_*, atlas_feat_attach): null in a library without them
     private final MethodHandle storeEnable, runStore, storeKeep, storeStats, featAttach, featDestroy, featOverlays;
     /** Columns of a far tile (atlas_gen_tiles). */
@@ -89,6 +89,8 @@ final class AtlasGenNative {
                 ? bind(l, lib, "atlas_gen_coarse_room", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT)) : null;
         paceStats = lib.find("atlas_gen_pace_stats").isPresent()
                 ? bind(l, lib, "atlas_gen_pace_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
+        noBake = lib.find("atlas_gen_set_no_bake").isPresent()
+                ? bind(l, lib, "atlas_gen_set_no_bake", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT)) : null;
         regenerate = lib.find("atlas_gen_regenerate").isPresent()
                 ? bind(l, lib, "atlas_gen_regenerate", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT)) : null;
         farCacheIngest = lib.find("atlas_gen_far_cache_ingest").isPresent()
@@ -349,8 +351,8 @@ final class AtlasGenNative {
             long[] s = cacheStats();
             if (s == null) return null;
             return String.format("genCache{%s fp %016x on disk %d chunks %d sections %.1f MB; queued writes %d; written %d chunks %d sections %d far tiles; "
-                            + "chunk hits %d misses %d, section reads %d, far tile hits %d, hash errors %d}",
-                    s[0] != 0 ? "on" : "OFF", s[1], s[2], s[3], s[4] / 1048576.0, s[13], s[12], s[7], s[9], s[5], s[6], s[8], s[10], s[11]);
+                            + "chunk hits %d misses %d (%d incomplete), section reads %d, far tile hits %d, hash errors %d}",
+                    s[0] != 0 ? "on" : "OFF", s[1], s[2], s[3], s[4] / 1048576.0, s[13], s[12], s[7], s[9], s[5], s[6], s[14], s[8], s[10], s[11]);
         }
 
         /**
@@ -388,6 +390,20 @@ final class AtlasGenNative {
         }
 
         /** Chunks made again (their stages' data changed): out of the self-baking cache, back through the store. */
+        /**
+         * Boxes of chunks (minCx, minCz, maxCx, maxCz each) the self-baking cache keeps nothing of: their stages' data
+         * is still to come (a settlement's tapes); replaces the last set.
+         */
+        synchronized void setNoBake(int[] boxes) {
+            if (noBake == null) return;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment m = boxes.length == 0 ? MemorySegment.NULL : a.allocateFrom(JAVA_INT, boxes);
+                check((int) noBake.invokeExact(ptr, m, boxes.length / 4), "atlas_gen_set_no_bake");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
         synchronized void regenerate(int[] chunkXZ) {
             if (regenerate == null || chunkXZ.length == 0) return;
             try (Arena a = Arena.ofConfined()) {

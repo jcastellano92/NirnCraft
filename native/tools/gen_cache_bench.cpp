@@ -528,7 +528,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     // fp=<n>: the caller's part of the fingerprint (atlas_gen_set_fingerprint: another generator, another cache)
-    if (!arg(argc, argv, "fp", "").empty()) atlas_gen_set_fingerprint(g, std::strtoull(arg(argc, argv, "fp", "0").c_str(), nullptr, 10));
+    atlas_gen_set_fingerprint(g, std::strtoull(arg(argc, argv, "fp", "0").c_str(), nullptr, 10));  // (arms the cache)
     if (cache != "-" && lateCache) atlas_set_cache(ctx, cache.c_str(), seed, 1, 0, 0);
     double tReady = nowMs();
     // the frame: above the spawn, looking down the slope (the grid places its window on the first)

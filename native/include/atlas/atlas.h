@@ -877,6 +877,8 @@ ATLAS_API AtlasStatus atlas_gen_ingest(AtlasGen* h, uint64_t* masks, uint32_t* o
  * its edit layer over it. No generation for those chunks.
  */
 ATLAS_API AtlasStatus atlas_gen_set_fingerprint(AtlasGen* h, uint64_t extra);
+/* (the call also arms the cache: no fingerprint reaches the world before it, so call it once the program, the stages,
+   the ingest table and the map are in; a change after it, a stage added or removed, opens another set) */
 ATLAS_API AtlasStatus atlas_gen_cache_lookup(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t* outInfo, uint8_t* outHit);
 ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint64_t* masks,
                                              uint32_t* outSections);
@@ -910,6 +912,7 @@ typedef struct AtlasGenCacheStats {
     uint64_t hashErrors;  /* records whose ids did not match the GPU's content hash: refused (generated again) */
     uint64_t chunkWrites; /* chunk headers written this session */
     uint64_t queued;      /* records waiting to be written */
+    uint64_t chunkIncomplete; /* of the misses: a chunk whose header is there and a section of it not (yet) */
 } AtlasGenCacheStats;
 /* (waits for the cache's writes first) */
 ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out);
@@ -1123,8 +1126,12 @@ ATLAS_API AtlasStatus atlas_gen_store_ensure(AtlasGen* h, const int32_t* chunkXZ
    store for it to pass them all. */
 ATLAS_API uint32_t atlas_gen_store_reach(AtlasGen* h);
 /* Chunks to be made again (their stages' data changed: a settlement's tapes arrived): the self-baking cache forgets
-   them, the store sends them back through its stages (packed again once through). */
+   those it wrote this session (one from disk was made with the data: nothing is baked inside a no-bake box), the store
+   sends them back through its stages (packed again once through). */
 ATLAS_API AtlasStatus atlas_gen_regenerate(AtlasGen* h, const int32_t* chunkXZ, uint32_t count);
+/* Boxes (minCx, minCz, maxCx, maxCz each, inclusive) whose chunks the self-baking cache does not keep: their stages'
+   data is still to come (a settlement's tapes not ready); replaces the last set (count 0: none). */
+ATLAS_API AtlasStatus atlas_gen_set_no_bake(AtlasGen* h, const int32_t* boxes, uint32_t count);
 /* Since the generator was made: chunks generated into the store, store stage runs (per chunk), chunks packed out. */
 ATLAS_API AtlasStatus atlas_gen_store_counters(AtlasGen* h, uint64_t* made, uint64_t* stageRuns, uint64_t* packs);
 /* Drops the store's chunks outside [minCx, maxCx] x [minCz, maxCz] (asked for again, they are generated again). */

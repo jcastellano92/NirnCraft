@@ -2152,6 +2152,7 @@ struct AtlasGen {
     // (the self-baking cache) the generator's fingerprint: its program, ingest table, map, stages' orders and the
     // caller's own (atlas_gen_set_fingerprint: the stages' engines' versions), FNV-1a 64 each; told to the context's world
     uint64_t fpProg = 0, fpIngest = 0, fpMap = 0, fpExtra = 0, fpSent = 0;
+    bool fpArmed = false;  // (atlas_gen_set_fingerprint called: the fingerprint goes to the world from then on)
     // the chunk store (atlas_gen_store_enable): chunk -> its slot, its status (the store stages it passed), packed (sent
     // through the pack and the ingest passes since it last changed), its terrain's flag, last use
     struct StoreChunk {
@@ -2167,6 +2168,7 @@ struct AtlasGen {
     std::unordered_set<int64_t> storeDropped;
     uint64_t storeMade = 0, storeStageRuns = 0, storePacks = 0;  // (atlas_gen_store_counters)
     std::unordered_map<uint32_t, double> storeStageMs;  // per stage order: ms a chunk (EMA), for the call sizes
+    std::vector<int32_t> noBake;  // (atlas_gen_set_no_bake) boxes the cache keeps nothing of: minCx, minCz, maxCx, maxCz
     int32_t storeFocusX = 0, storeFocusZ = 0;  // (the last asked chunks' centre: a call asking none drains around it)
     std::vector<uint32_t> storeFree;
     uint32_t storeSlots = 0;
@@ -2533,7 +2535,10 @@ uint64_t fnv64(const void* p, size_t n, uint64_t h = 1469598103934665603ull) {
 }
 // (caller holds h->mu) the fingerprint again; to the context's world when it changed (the cache's directory)
 void refreshFingerprint(AtlasGen* h) {
-    if (!h->ctx || !h->fpProg || !h->fpIngest) return;  // (not a generator yet)
+    // (not a generator yet, or not all of it: the caller arms it with atlas_gen_set_fingerprint once its program,
+    // stages, ingest and map are in. A fingerprint sent while the map was still to come opened another set, and the
+    // set of the launch before was deleted as another generator's: every launch started from an empty cache)
+    if (!h->ctx || !h->fpProg || !h->fpIngest || !h->fpArmed) return;
     uint64_t bh = buildHash();  // (the native code: kernels, store, stages' engines' own C++)
     uint64_t f = fnv64(&h->fpProg, 8, fnv64(&bh, 8));
     f = fnv64(&h->fpIngest, 8, f);
@@ -2545,6 +2550,16 @@ void refreshFingerprint(AtlasGen* h) {
     }
     if (!f) f = 1;
     if (f == h->fpSent) return;
+    // (what it is made of, to the log each time it changes: a fingerprint that moves between launches is a cache that
+    // is wiped at every launch)
+    {
+        uint64_t st = 0;
+        for (const Stage& s : h->stages) st = fnv64(&s.order, 4, s.ffn ? fnv64(&s.fp, 8, st) : st);
+        std::fprintf(stderr, "[atlas] gen fingerprint %016llx (was %016llx): build %016llx program %016llx ingest %016llx map %016llx extra %016llx stages %zu %016llx\n",
+                     (unsigned long long)f, (unsigned long long)h->fpSent, (unsigned long long)bh, (unsigned long long)h->fpProg,
+                     (unsigned long long)h->fpIngest, (unsigned long long)h->fpMap, (unsigned long long)h->fpExtra, h->stages.size(),
+                     (unsigned long long)st);
+    }
     h->fpSent = f;
     if (World* w = contextWorld(h->ctx)) w->setGenFingerprint(f);
 }
@@ -2922,7 +2937,10 @@ ATLAS_API AtlasStatus atlas_gen_remove_stage(AtlasGen* h, uint32_t id) {
         std::string err;
         if (!h->engine->setStages(next, err)) return h->fail(ATLAS_ERR_UNSUPPORTED, err);
         h->stages.swap(next);
-        refreshFingerprint(h);
+        // (a stage leaves when the generator comes apart, at the session's end: the cache's set stays as it is, no
+        // fingerprint of a generator in pieces; one stage removed for good needs atlas_gen_set_fingerprint again. A set
+        // opened at each quit took the place of the real one)
+        h->fpArmed = false;
         return ATLAS_OK;
     });
 }
@@ -2963,6 +2981,13 @@ ATLAS_API AtlasStatus atlas_gen_add_store_stage(AtlasGen* h, uint32_t order, uin
         if (outId) *outId = st.id;
         return ATLAS_OK;
     });
+}
+
+// (caller holds h->mu) a chunk inside a no-bake box (atlas_gen_set_no_bake): its stages' data still to come
+static bool noBake(const AtlasGen* h, int32_t cx, int32_t cz) {
+    for (size_t i = 0; i + 3 < h->noBake.size(); i += 4)
+        if (cx >= h->noBake[i] && cz >= h->noBake[i + 1] && cx <= h->noBake[i + 2] && cz <= h->noBake[i + 3]) return true;
+    return false;
 }
 
 ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, int32_t* outChunks, uint32_t* outCount,
@@ -3098,7 +3123,7 @@ ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, u
                 if (gc && gc->on())
                     for (uint32_t i = 0; i < m; i++) {
                         int32_t cx = xz[i * 2], cz = xz[i * 2 + 1];
-                        if (flags[i] != 0 || gc->complete(cx, cz)) continue;
+                        if (flags[i] != 0 || gc->complete(cx, cz) || noBake(h, cx, cz)) continue;
                         b.bake[i] = 1;
                         if (!gc->hasChunk(cx, cz)) gc->putChunk(cx, cz, outInfo + size_t(i) * INFO_WORDS);
                     }
@@ -3165,6 +3190,13 @@ ATLAS_API AtlasStatus atlas_gen_regenerate(AtlasGen* h, const int32_t* chunkXZ, 
         }
         return ATLAS_OK;
     });
+}
+
+ATLAS_API AtlasStatus atlas_gen_set_no_bake(AtlasGen* h, const int32_t* boxes, uint32_t count) {
+    if (!h || (count && !boxes)) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> l(h->mu);
+    h->noBake.assign(boxes, boxes + size_t(count) * 4);
+    return ATLAS_OK;
 }
 
 ATLAS_API uint32_t atlas_gen_store_reach(AtlasGen* h) {
@@ -3285,7 +3317,7 @@ ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_
         if (gc && gc->on())
             for (uint32_t i = 0; i < count; i++) {
                 int32_t cx = chunkXZ[i * 2], cz = chunkXZ[i * 2 + 1];
-                if (flags[i] != 0 || gc->complete(cx, cz)) continue;
+                if (flags[i] != 0 || gc->complete(cx, cz) || noBake(h, cx, cz)) continue;
                 h->last.bake[i] = 1;
                 if (!gc->hasChunk(cx, cz)) gc->putChunk(cx, cz, outInfo + size_t(i) * INFO_WORDS);
             }
@@ -3360,6 +3392,7 @@ ATLAS_API AtlasStatus atlas_gen_set_fingerprint(AtlasGen* h, uint64_t extra) {
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
         h->fpExtra = extra;
+        h->fpArmed = true;
         refreshFingerprint(h);
         return ATLAS_OK;
     });
@@ -3536,6 +3569,7 @@ static AtlasStatus genCacheStats(AtlasGen* h, AtlasGenCacheStats* out, bool wait
         out->fileBytes = st.fileBytes;
         out->chunkHits = st.chunkHits;
         out->chunkMisses = st.chunkMisses;
+        out->chunkIncomplete = st.chunkIncomplete;
         out->sectionWrites = st.sectionWrites;
         out->sectionReads = st.sectionReads;
         out->encodeMs = st.encodeMs;

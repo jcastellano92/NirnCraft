@@ -343,10 +343,12 @@ final class AtlasClientGen implements AutoCloseable {
             if (direct) gen.setIngest(ingestTable(prog, mats, ctx));
             // the self-baking cache: the instance's atlas-cache/<seed>/ (nirncraft.atlas.cacheDir moves it; "off": none),
             // the generator's fingerprint completed by the far identity (world generation and painting code)
+            boolean cacheArm = false;
             if (direct && gen.cacheSupported() && !"off".equals(System.getProperty("nirncraft.atlas.cacheDir"))) {
                 Path dir = System.getProperty("nirncraft.atlas.cacheDir") != null ? Path.of(System.getProperty("nirncraft.atlas.cacheDir"))
                         : net.minecraft.client.Minecraft.getInstance().gameDirectory.toPath().resolve("atlas-cache");
-                gen.setFingerprint((long) AtlasTileCodec.identity().hashCode() << 32 ^ AtlasTileCodec.VERSION);
+                // (the fingerprint is armed by the worker once the map is on the device: AtlasClientGen.run)
+                cacheArm = true;
                 if (ctx.setCache(dir, ow.getSeed(), AtlasTileCodec.VERSION, 0, 0))
                     com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: the self-baking cache in {}", dir);
             }
@@ -360,6 +362,7 @@ final class AtlasClientGen implements AutoCloseable {
             }
             AtlasClientGen c = new AtlasClientGen(prog, new AtlasGenPages(prog, rs, g.getBiomeSource(), ow), gen, g, rs,
                     ow.getSeed(), feats, ctx, mats, direct);
+            c.cacheArm = cacheArm;
             c.storeOn = stages != null;
             c.featStages = stages;
             // the far chunks carry the decoration's trees (its far stage, unless ATLAS_FEAT_FAR=0): no stand-in canopy
@@ -669,6 +672,9 @@ final class AtlasClientGen implements AutoCloseable {
         } catch (RuntimeException e) {
             com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: pages stay in Java", e);
         }
+        // the self-baking cache's fingerprint, now that the generator is whole (program, stages, ingest, map): the
+        // generator's completed by the far identity (world generation and painting code)
+        if (cacheArm) gen.setFingerprint((long) AtlasTileCodec.identity().hashCode() << 32 ^ AtlasTileCodec.VERSION);
         int[] ids = new int[BATCH * AtlasGenNative.CHUNK_WORDS];
         int[] flags = new int[BATCH];
         int[] info = new int[BATCH * AtlasGenNative.INFO_WORDS];
@@ -890,6 +896,17 @@ final class AtlasClientGen implements AutoCloseable {
     }
 
     private long cachedChunks, cachedSections, farCached;
+    // (direct, the store) the cache's misses waiting for the window's lookups to finish (directBatch's defer); any thread
+    // may drop one (regenerate)
+    private final Set<Long> deferred = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private boolean cacheArm;  // (the self-baking cache configured: its fingerprint armed by the worker, run)
+    private volatile boolean nearIdle, farIdle;  // (the worker found nothing to do: the window's chunks, the far tiles)
+
+    /** {the near window has nothing left to make or send, the far tiles nothing to ask for}; null without a generator. */
+    static boolean[] idle() {
+        AtlasClientGen c = active;
+        return c == null ? null : new boolean[]{c.nearIdle && c.deferred.isEmpty(), c.farIdle || !c.farOn};
+    }
     private volatile long generatedChunks;  // (chunks that went through the generator: not served by the cache)
 
     /** The loading phase's view of the generator (AtlasLoadingScreen). */
