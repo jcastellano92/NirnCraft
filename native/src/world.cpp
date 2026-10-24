@@ -2108,6 +2108,12 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
     {
         fr::LockZone lock(mu_, "wait:world.mu(update#5)", "hold:world.mu(update#5)");
         tLock1 = std::chrono::steady_clock::now();
+        uint64_t cpT = fr::nowNs();  // (flight recorder: which part of this critical section is long)
+        auto cp = [&](const char* name) {
+            uint64_t t = fr::nowNs();
+            if (t - cpT >= 500000) fr::record(name, cpT, t);
+            cpT = t;
+        };
         lastGroupsBuilt_ = uint32_t(treesBuilt.load());
         lastGroupsMs_ = double(treeUs.load()) / 1000.0;
         uint32_t now = nowMs();
@@ -2134,6 +2140,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             }
             regions_[k] = r;
         }
+        cp("update.commit built regions");
         for (auto it = fading_.begin(); it != fading_.end();) {
             int dx = std::abs(it->first.x - centreRegion[it->first.lod][0]), dz = std::abs(it->first.z - centreRegion[it->first.lod][1]);
             if (int32_t(now - it->second.startMs) >= int32_t(fadeMs) || dx > windowRadius + 1 || dz > windowRadius + 1) {
@@ -2143,6 +2150,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
                 ++it;
             }
         }
+        cp("update.fading");
         // evict regions far outside the window (keep one ring of slack against thrashing), and the tiles and
         // sections behind them two rings out, so memory stays bounded however far the player travels
         for (auto it = regions_.begin(); it != regions_.end();) {
@@ -2151,24 +2159,28 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             if (k.lod >= lodCount || dx > windowRadius + 1 || dz > windowRadius + 1) it = regions_.erase(it);
             else ++it;
         }
+        cp("update.evict regions");
         for (auto it = treeDirty_.begin(); it != treeDirty_.end();) {  // (a region built anew there reads it all)
             const Key3& k = *it;
             int dx = std::abs(k.x - centreRegion[k.lod][0]), dz = std::abs(k.z - centreRegion[k.lod][1]);
             if (k.lod >= lodCount || dx > windowRadius + 1 || dz > windowRadius + 1) it = treeDirty_.erase(it);
             else ++it;
         }
+        cp("update.treeDirty");
         for (auto it = tiles_.begin(); it != tiles_.end();) {
             const Key3& k = it->first;
             int dx = std::abs(k.x - centreRegion[k.lod][0]), dz = std::abs(k.z - centreRegion[k.lod][1]);
             if (k.lod >= lodCount || dx > windowRadius + 2 || dz > windowRadius + 2) it = tiles_.erase(it);
             else ++it;
         }
+        cp("update.evict tiles");
         for (auto it = structures_.begin(); it != structures_.end();) {
             const Key3& k = it->first;
             int dx = std::abs(k.x - centreRegion[k.lod][0]), dz = std::abs(k.z - centreRegion[k.lod][1]);
             if (k.lod >= lodCount || dx > windowRadius + 2 || dz > windowRadius + 2) it = structures_.erase(it);
             else ++it;
         }
+        cp("update.evict structures");
         // LOD-0 regions either side: one ring beyond the server's sections window (AtlasSections.RADIUS_TILES = 4, the
         // same 256-block grid), which forgets a tile once it leaves and sends it again on return; what the core drops
         // inside that window would never come back
@@ -2179,8 +2191,20 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
                 undigested_.erase(it->first), rawMeta_.erase(it->first), it = sections_.erase(it);
             else ++it;
         }
+        cp("update.evict sections");
         // the packed tiers: past the kept regions out of warm (to the cold tier, or dropped), and the warm one's budget
-        store_->enforce(centreRegion[0][0] * 16 + 8, centreRegion[0][1] * 16 + 8, keep);
+        store_->enforce(centreRegion[0][0] * 16 + 8, centreRegion[0][1] * 16 + 8, keep);  // (planned only: the spiller does the disk work)
+        cp("update.store enforce (plan)");
+        if (store_->spillPending()) {
+            if (!spillThread_.joinable()) {
+                try {
+                    spillThread_ = std::thread([this] { spiller(); });
+                } catch (...) {
+                    while (store_->drainSpills(1e9)) {}  // (no thread: as before)
+                }
+            }
+            spillCv_.notify_one();
+        }
         for (int lod = 0; lod < lodCount; lod++)
             if (centreRegion[lod][0] != lastCentre_[lod][0] || centreRegion[lod][1] != lastCentre_[lod][1]) moved = true;
     }
@@ -2244,6 +2268,12 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
 }
 
 World::~World() {
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        spillStop_ = true;
+    }
+    spillCv_.notify_all();
+    if (spillThread_.joinable()) spillThread_.join();
     genCache_.reset();  // (its queue written first)
     {
         // (the edited sections not packed yet: into warm, so their layers' records keep them whole beside them)
@@ -2271,6 +2301,27 @@ World::~World() {
     for (auto& t : builders_)
         if (t.joinable()) t.join();
     if (packerThread_.joinable()) packerThread_.join();
+}
+
+// The warm tier's spill to the cold tier: the disk work of SectionStore::enforce, a slice (about half a millisecond) at a
+// time with mu_ let go and a pause between slices, so that the render thread (packedDone, takePackQueue ...) never waits
+// behind seconds of file writes
+void World::spiller() {
+#ifdef _WIN32
+    SetThreadPriority(GetCurrentThread(), -1);
+#endif
+    std::unique_lock<std::mutex> lock(mu_);
+    for (;;) {
+        spillCv_.wait(lock, [&] { return spillStop_ || store_->spillPending(); });
+        if (spillStop_) return;
+        uint64_t t1 = fr::nowNs();
+        store_->drainSpills(0.5);
+        uint64_t t2 = fr::nowNs();
+        if (t2 - t1 >= 1000000) fr::record("hold:world.mu(spill slice)", t1, t2);
+        lock.unlock();
+        std::this_thread::sleep_for(std::chrono::microseconds(300));
+        lock.lock();
+    }
 }
 
 bool World::coveredByFiner(const Key3& k, const int centreRegion[MAX_LODS][2]) const {

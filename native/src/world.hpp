@@ -463,6 +463,11 @@ private:
     bool coveredByFiner(const Key3& k, const int centreRegion[MAX_LODS][2]) const;  // its extent inside lod - 1's window
     // (budgeted updates) the packer thread: the scene packed from the latest centre it was handed, off the update
     std::thread packerThread_;
+    // the warm tier's spill to disk, in slices with mu_ let go between them (SectionStore::drainSpills)
+    std::thread spillThread_;
+    std::condition_variable spillCv_;
+    bool spillStop_ = false;
+    void spiller();
     std::mutex packMu_;
     std::condition_variable packCv_;
     bool packWanted_ = false;                   // (packMu_)
