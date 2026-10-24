@@ -1227,7 +1227,7 @@ class AtlasGenParityTest {
                         long[] last = AtlasClientGen.counters();
                         long still = System.nanoTime();
                         long stopStart = System.nanoTime();
-                        while ((System.nanoTime() - stopStart) / 1e9 < 300) {
+                        while ((System.nanoTime() - stopStart) / 1e9 < 120) {
                             Thread.sleep(250);
                             long[] now = AtlasClientGen.counters();
                             if (now[0] != last[0] || now[1] != last[1]) {  // (the near window's: far tiles go on meanwhile)

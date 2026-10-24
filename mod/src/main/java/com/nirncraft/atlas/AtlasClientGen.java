@@ -320,6 +320,11 @@ final class AtlasClientGen implements AutoCloseable {
                     long ts = System.nanoTime();
                     gen.storeEnable(STORE_SLOTS);
                     stages = gen.attachFeatures(storeFp.words, g2f, f2g);
+                    if (System.getenv("ATLAS_FEAT_PART_TRACE") != null) {  // (dev: which feature a traced record is)
+                        var reg = ow.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.PLACED_FEATURE);
+                        for (int i = 0; i < storeFp.dispatched.size(); i++)
+                            System.err.println("TRACE feat record " + storeFp.records.getInt(i) + " = " + reg.getKey(storeFp.dispatched.get(i)));
+                    }
                     com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: the decoration on the GPU ({} placed features, {} slots, {} ms)",
                             storeFp.dispatched.size(), STORE_SLOTS, (System.nanoTime() - ts) / 1_000_000);
                 } catch (RuntimeException e) {
@@ -833,6 +838,7 @@ final class AtlasClientGen implements AutoCloseable {
      * of its misses (seconds a call).
      */
     private void directBatch(int[] batch, int[] ids, int[] flags, int[] info, boolean first, boolean defer) {
+        if (batch.length > 0) nearWorkNs = System.nanoTime();
         // (the self-baking cache) the chunks it knows go into the grid from disk, not generated; the features' chunks
         // (their ids wanted here) are generated as before
         if (gen.cacheSupported()) {
@@ -861,6 +867,7 @@ final class AtlasClientGen implements AutoCloseable {
             int m = gen.runStore(batch, outXZ, null, flags, info, tt);
             gt = tt[0];
             storeFinished += m;
+            if (m > 0) nearWorkNs = System.nanoTime();
             batch = java.util.Arrays.copyOf(outXZ, m * 2);
             n = m;
             if (m == 0) {
@@ -952,12 +959,17 @@ final class AtlasClientGen implements AutoCloseable {
     // may drop one (regenerate)
     private final Set<Long> deferred = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private boolean cacheArm;  // (the self-baking cache configured: its fingerprint armed by the worker, run)
-    private volatile boolean nearIdle, farIdle;  // (the worker found nothing to do: the window's chunks, the far tiles)
+    private volatile boolean nearIdle, farIdle;
+    private volatile long nearWorkNs;  // (the last near batch planned, deferred, served or finished)  // (the worker found nothing to do: the window's chunks, the far tiles)
 
     /** {the near window has nothing left to make or send, the far tiles nothing to ask for}; null without a generator. */
     static boolean[] idle() {
         AtlasClientGen c = active;
-        return c == null ? null : new boolean[]{c.nearIdle && c.deferred.isEmpty(), c.farIdle || !c.farOn};
+        if (c == null) return null;
+        // (near: nothing planned, deferred, sent or finished by the store for a second; the store's edge chunks may wait
+        // for neighbours nobody asks for, so its waiting count is no signal)
+        boolean near = c.nearIdle && c.deferred.isEmpty() && System.nanoTime() - c.nearWorkNs > 1_000_000_000L;
+        return new boolean[]{near, c.farIdle || !c.farOn};
     }
     private volatile long generatedChunks;  // (chunks that went through the generator: not served by the cache)
 
