@@ -23,6 +23,7 @@
 #include "atlas_feat_farplaces_spv.h"
 #include "atlas_feat_fartrees_spv.h"
 #include "atlas_feat_farcanopy_spv.h"
+#include "atlas_feat_vein_spv.h"
 #include "atlas_feat_init_spv.h"
 #include "atlas_feat_copy_spv.h"
 #include "atlas_feat_apply_spv.h"
@@ -591,8 +592,9 @@ constexpr uint32_t STORE_AUX_W = ATLAS_GEN_STORE_AUX_WORDS, MAX_ORIGINS = 64;
 constexpr uint32_t H_GEN2FEAT = 24, H_FEAT2GEN = 25, H_NGEN = 26;
 // pipelines: hm, init, aux, store apply, one a feature type, then the placement mask
 constexpr uint32_t S_HM = 0, S_INIT = 1, S_AUX = 2, S_APPLY = 3, S_FEAT = 4, S_MASK = S_FEAT + FT_TYPES - 1, S_FARPLACES = S_MASK + 1,
-                   S_FARTREES = S_MASK + 2, S_FARCANOPY = S_MASK + 3, S_PIPES = S_MASK + 4;
+                   S_FARTREES = S_MASK + 2, S_FARCANOPY = S_MASK + 3, S_VEIN = S_MASK + 4, S_PIPES = S_MASK + 5;
 constexpr uint32_t H_PLACES = 29;  // (AtlasFeatureProgram: the settlements' table)
+constexpr uint32_t VEIN_W = 12288;  // (atlas_features.slang featVeinMain: a thread a position of an ore vein's box)
 
 class StageEngine {
 public:
@@ -633,13 +635,13 @@ public:
                                          atlas_feat_ore_spv, atlas_feat_cover_spv, atlas_feat_rock_spv, atlas_feat_tree_spv,
                                          atlas_feat_freeze_spv, atlas_feat_disk_spv, atlas_feat_spring_spv, atlas_feat_lake_spv,
                                          atlas_feat_mask_spv, atlas_feat_farplaces_spv, atlas_feat_fartrees_spv,
-                                         atlas_feat_farcanopy_spv};
+                                         atlas_feat_farcanopy_spv, atlas_feat_vein_spv};
         const size_t size[S_PIPES] = {atlas_feat_hm_spv_size, atlas_feat_init_spv_size, atlas_feat_aux_spv_size,
                                       atlas_feat_sapply_spv_size, atlas_feat_ore_spv_size, atlas_feat_cover_spv_size,
                                       atlas_feat_rock_spv_size, atlas_feat_tree_spv_size, atlas_feat_freeze_spv_size,
                                       atlas_feat_disk_spv_size, atlas_feat_spring_spv_size, atlas_feat_lake_spv_size,
                                       atlas_feat_mask_spv_size, atlas_feat_farplaces_spv_size, atlas_feat_fartrees_spv_size,
-                                      atlas_feat_farcanopy_spv_size};
+                                      atlas_feat_farcanopy_spv_size, atlas_feat_vein_spv_size};
         for (uint32_t i = 0; i < S_PIPES; i++) {
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
             smci.codeSize = size[i];
@@ -847,10 +849,11 @@ public:
             }();
             double ms = double(b->lastPartUs) / 1000.0;
             uint32_t& bud = featBudget_[partRoundRec_];
+            uint32_t phase = partPhase_;  // (0 the feature's round; 1..3 its vein's passes)
             // dev: ATLAS_FEAT_PART_TRACE=1: per placed feature its rounds' time and budget, to stderr every 20 s
             static const bool ptrace = std::getenv("ATLAS_FEAT_PART_TRACE") != nullptr;
             if (ptrace) {
-                RecStat& rs = recStats_[partRoundRec_];
+                RecStat& rs = recStats_[partRoundRec_ | phase << 28];
                 rs.max = std::max(rs.max, ms);
                 rs.sum += ms;
                 rs.n++;
@@ -864,21 +867,37 @@ public:
                     std::sort(top.rbegin(), top.rend());
                     for (size_t i = 0; i < top.size() && i < 12; i++) {
                         const RecStat& st = recStats_[top[i].second];
-                        std::fprintf(stderr, "TRACE feat record %u type %u: rounds %llu, %.1f ms mean, %.1f max, %llu over 8 ms, budget down to %u\n",
-                                     top[i].second, types_[top[i].second], (unsigned long long)st.n, st.sum / double(st.n), st.max,
+                        uint32_t r = top[i].second & 0x0FFFFFFFu, ph = top[i].second >> 28;
+                        std::fprintf(stderr, "TRACE feat record %u type %u%s%u: rounds %llu, %.1f ms mean, %.1f max, %llu over 8 ms, budget down to %u\n",
+                                     r, types_[r], ph ? " vein pass " : "", ph ? ph - 1 : 0u, (unsigned long long)st.n, st.sum / double(st.n), st.max,
                                      (unsigned long long)st.over, st.minBud);
                     }
                 }
             }
-            if (ms > 0.0) {
-                double want = double(bud) * partMs / ms;
-                bud = uint32_t(std::clamp(want, std::max(1.0, double(bud) / 4.0), double(bud) * 4.0));
-                bud = std::clamp<uint32_t>(bud, 1u, 1u << 20);
+            if (phase == 0) {
+                if (ms > 0.0) {
+                    double want = double(bud) * partMs / ms;
+                    bud = uint32_t(std::clamp(want, std::max(1.0, double(bud) / 4.0), double(bud) * 4.0));
+                    bud = std::clamp<uint32_t>(bud, 1u, 1u << 20);
+                }
+                partLeft_ = left_.map ? *static_cast<const uint32_t*>(left_.map) : 0u;
             }
-            uint32_t left = left_.map ? *static_cast<const uint32_t*>(left_.map) : 0u;
+            if (partVein_ && phase < 3) {
+                // the round's vein passes, a dispatch a part (featVeinMain: clear, first visits, fates)
+                partPhase_ = phase + 1;
+                p.k = phase;
+                dispatch(S_VEIN, (VEIN_W + 63) / 64, n);
+                p.k = 0;
+                return ATLAS_GEN_STAGE_MORE;
+            }
+            partPhase_ = 0;
+            uint32_t left = partLeft_;
             if (left > 0 && partRound_ < 100000) {
                 partRound_++;
             } else {
+                if (left > 0)
+                    std::fprintf(stderr, "[atlas] decoration: record %u stopped after %u rounds with %u origins left (a vein may be lost)\n",
+                                 partRoundRec_, partRound_, left);
                 partCursor_++;  // (the feature done: the next step)
                 partRound_ = 0;
             }
@@ -894,7 +913,17 @@ public:
             vkCmdFillBuffer(cmd, cnt_.buf, 0, 4, 0u);
             barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            // an ore's vein: its block loop on the vein kernel's threads (atlas_features.slang featVeinMain), its three
+            // passes the parts after this one, written at the origin's next round; ATLAS_FEAT_VEINS=0: on the one lane
+            static const bool veins = [] {
+                const char* e = std::getenv("ATLAS_FEAT_VEINS");
+                return !(e && e[0] == '0');
+            }();
+            partVein_ = veins && types_[step] == 1;
+            partPhase_ = 0;
+            if (partVein_) p.store = 3u;
             runStep(cmd, p, dispatch, step, partRound_ == 0, bud);
+            p.store = 1u;
             barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
                     VK_PIPELINE_STAGE_TRANSFER_BIT);
             VkBufferCopy c{0, 0, 4};
@@ -957,7 +986,9 @@ public:
     std::vector<uint32_t> partSteps_;
     std::vector<int32_t> partSlotXZ_;
     uint32_t partCursor_ = 0, partSlots_ = 0;
-    uint32_t partRound_ = 0, partRoundRec_ = ~0u;  // (the feature in rounds: its round, the record the last part ran)
+    uint32_t partRound_ = 0, partRoundRec_ = ~0u;
+    uint32_t partPhase_ = 0, partLeft_ = 0;  // (an ore's round: its vein pass next, and the round's count of origins left)
+    bool partVein_ = false;  // (the feature in rounds: its round, the record the last part ran)
     std::unordered_map<uint32_t, uint32_t> featBudget_;  // per record: placements an origin a round (fitted to the part)
     Buf left_;  // (host) the last round's count of origins with placements left
     struct RecStat {
