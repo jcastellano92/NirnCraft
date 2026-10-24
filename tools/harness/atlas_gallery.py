@@ -166,7 +166,7 @@ def blank(png):
 def shots_for(batch_cells, mode, settle):
     steps = []
     for gr, c in batch_cells:
-        for tag, dist, half in (("a2", NEAR, 0.5), ("b16", MID, 1.5)):
+        for tag, dist, half in (("a2", NEAR, 0.5), ("b16", MID, 1.0)):
             e, lk = eye(c, dist)
             steps.append({"op": "shot", "name": f"{mode}/{gr['id']}__{tag}", "eye": e, "look": lk, "settle": settle,
                           "targets": [{"name": "c", "at": lk, "half": half}]})
