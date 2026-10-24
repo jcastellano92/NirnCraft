@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 import javax.management.NotificationEmitter;
@@ -59,13 +60,13 @@ public final class AtlasRecorder {
     }
 
     // the zones of this class
-    static final Zone CLIENT_TICK = zone("mc:clientTick");
+    static final Zone CLIENT_TICK = zone("mc:clientTick"), RENDER_FRAME = zone("mc:renderFrame (vanilla + every mod)");
 
     private static volatile boolean on;
     private static MethodHandle zoneH, zoneIdH, trackIdH, nameH, nowH, configureH, dumpH, statusH, countH, lastH;
     private static long offset;  // native clock - System.nanoTime()
     private static int gcTrack, gcConcurrentTrack;
-    private static long tickT0;
+    private static long tickT0, renderT0;
     private static long seenDumps;
     private static volatile Path traceDir;
 
@@ -204,6 +205,11 @@ public final class AtlasRecorder {
             end(CLIENT_TICK, tickT0);
             tickT0 = 0L;
             tick();
+        });
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, (RenderFrameEvent.Pre e) -> renderT0 = begin());
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, (RenderFrameEvent.Post e) -> {
+            end(RENDER_FRAME, renderT0);
+            renderT0 = 0L;
         });
         NeoForge.EVENT_BUS.addListener(AtlasRecorder::onCommands);
     }

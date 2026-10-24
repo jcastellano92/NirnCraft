@@ -895,8 +895,11 @@ public:
         if (nearLight && !ensure(s.bufs[B_NEAR_INFO], size_t(w) * h * 4, false, nearKind, err)) return false;
         refreshDescriptors(s);
 
-        if (io && io->nearDepthTex && !primaryNear && (!host || nearLight) && !linearizeNearDepth(*io, w, h, nearLight, err))
-            return false;
+        {
+            ATLAS_ZONE_MIN("gl:linearizeNearDepth", 100);
+            if (io && io->nearDepthTex && !primaryNear && (!host || nearLight) && !linearizeNearDepth(*io, w, h, nearLight, err))
+                return false;
+        }
         if (hostNearInputs_ && !readNearInputs(s, w, h)) return fail(err, "reading the near depth and info back from GL failed");
         if (sunSize_ != sunImageSize_) {
             for (auto& o : slots_)
@@ -925,8 +928,11 @@ public:
             layouts[IMAGES] = GL_LAYOUT_GENERAL_EXT;
             nTex++;
         }
-        gl_.SignalSemaphoreEXT(s.glReady.gl, 0, nullptr, nTex, tex, layouts);
-        gl_.Flush();
+        {
+            ATLAS_ZONE_MIN("gl:signalSemaphore+flush", 100);
+            gl_.SignalSemaphoreEXT(s.glReady.gl, 0, nullptr, nTex, tex, layouts);
+            gl_.Flush();
+        }
 
         begin(s);
         ATLAS_ZONE("vk:recordAndSubmit");
@@ -954,8 +960,11 @@ public:
         frameIndex_++;
 
         // GL commands after this point wait for the Vulkan frame
-        gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, nTex, tex, layouts);
-        copyToCaller(io, w, h, nearLight);
+        {
+            ATLAS_ZONE_MIN("gl:waitSemaphore+copyToCaller", 100);
+            gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, nTex, tex, layouts);
+            copyToCaller(io, w, h, nearLight);
+        }
         auto tg3 = std::chrono::steady_clock::now();
         auto ease = [](double& v, std::chrono::steady_clock::time_point a, std::chrono::steady_clock::time_point b) {
             v += (std::chrono::duration<double, std::milli>(b - a).count() - v) * 0.05;
@@ -1697,6 +1706,7 @@ private:
     // at every 250 ms) the far, cloud and sun map pipelines are rebuilt from them. The bindings must stay the same (a
     // layout change needs a build); a file that fails keeps the running pipelines.
     void hotReload() {
+        ATLAS_ZONE_MIN("vk:hotReload", 100);
         // ATLAS_SHADER_DIR, else a folder named atlas-shaders in the working directory (the game's: a dev instance opts
         // in by having it, where a launcher's environment settings are unreliable)
         static const char* dir = [] {
@@ -1931,6 +1941,7 @@ private:
     }
 
     void refreshDescriptors(Slot& s) {
+        ATLAS_ZONE_MIN("vk:refreshDescriptors", 100);
         const SceneCopy& sc = copies_[current_];
         int prev = prevSlot_ < 0 ? int(&s - slots_) : prevSlot_;
         VkBuffer prevBuf = slots_[prev].bufs[B_SURFACE].buf;  // (its cloud buffers are allocated with it)
@@ -2124,7 +2135,10 @@ private:
                 const uint32_t* j = r + size_t(k) * 4;
                 if ((j[1] & 3u) == VG_UNIFORM && j[2] != ~0u && j[2] != VG_COLUMN) hits.push_back({j[0], j[2], s.vgGens[k], j[1] >> 2});
             }
-            if (!hits.empty()) in.voxgrid->gpuUniform(hits);
+            if (!hits.empty()) {
+                ATLAS_ZONE_MIN("grid:gpuUniform", 100);
+                in.voxgrid->gpuUniform(hits);
+            }
         }
         s.vgResultN = 0;
         // (and the raw sections it packed: to the world's warm tier)
@@ -2138,6 +2152,7 @@ private:
                 done.push_back({s.vgPackKeys[k].first, s.vgPackKeys[k].second, rec[0],
                                 std::make_shared<const std::vector<uint32_t>>(rec + 1, rec + 1 + n)});
             }
+            ATLAS_ZONE_MIN("grid:packedResults", 100);
             in.voxgrid->packedResults(done);
         }
         s.vgPackRead = 0;
@@ -2147,6 +2162,7 @@ private:
             uint32_t na = std::min({r[512], s.vgRankBudget, RANK_MAXL}), ne = std::min({r[513], r[518], RANK_MAXL});
             std::vector<uint32_t> admits(r + RANK_LISTS, r + RANK_LISTS + na);
             std::vector<uint32_t> evicts(r + RANK_LISTS + RANK_MAXL, r + RANK_LISTS + RANK_MAXL + ne);
+            ATLAS_ZONE_MIN("grid:rankResults", 100);
             in.voxgrid->rankResults(admits, evicts, r[514], 255u - std::min(r[517], 255u));
         }
         s.vgRankRead = false;
@@ -2166,6 +2182,7 @@ private:
                 const char* e = std::getenv("ATLAS_VOXGRID_BUDGET");  // sections built a frame at most
                 return e ? std::max(1, std::atoi(e)) : 256;  // (8 KiB each: a 2 MiB copy a frame at most, ~0.2 ms)
             }();
+            ATLAS_ZONE_MIN("grid:take", 100);
             b = g->take(budget);
         }
         bool work = b.clear || !b.jobs.empty() || b.coarse();
@@ -2947,6 +2964,7 @@ private:
         b = {};
     }
     void releaseRetired(bool all) {
+        ATLAS_ZONE_MIN("vk:releaseRetired", 100);
         for (size_t i = 0; i < retired_.size();) {
             if (all || retired_[i].frame <= completedFrame_.load()) {
                 release(retired_[i].b);
@@ -2984,6 +3002,7 @@ private:
     bool ensure(Buf& b, VkDeviceSize size, bool uniform, Mem kind, std::string& err) {
         size = size < 16 ? 16 : size;
         if (b.buf && b.size >= size && b.kind == kind) return true;
+        ATLAS_ZONE_MIN("vk:ensure (new buffer)", 100);
         // a descriptor can only see maxStorageBufferRange bytes (lavapipe and some mobile-class parts: 128 MB)
         bool bound = kind != Mem::Staging && kind != Mem::HostRead;
         VkDeviceSize limit = uniform ? props_.limits.maxUniformBufferRange : maxStorageRange_;
@@ -3126,6 +3145,7 @@ private:
     }
 
     bool upload(Buf& b, const void* data, size_t bytes, bool uniform, Mem kind, std::string& err) {
+        ATLAS_ZONE_MIN("vk:upload", 100);
         if (!ensure(b, bytes, uniform, kind, err)) return false;
         if (bytes && !b.map) return fail(err, "upload into an unmapped buffer");
         if (bytes) std::memcpy(b.map, data, bytes);

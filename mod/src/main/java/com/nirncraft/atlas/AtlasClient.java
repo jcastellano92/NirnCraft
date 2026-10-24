@@ -981,6 +981,8 @@ public final class AtlasClient {
      */
     private static double glRenderMs, frameWallMs;
     // flight recorder zones (AtlasRecorder)
+    private static final AtlasRecorder.Zone Z_INFO = AtlasRecorder.zone("atlas:info (ctx.info)"), Z_STATE_SECTIONS = AtlasRecorder.zone("atlas:state sections"),
+            Z_STATE_EDITS = AtlasRecorder.zone("atlas:state edits"), Z_STATE_GEN = AtlasRecorder.zone("atlas:state clientGen");
     private static final AtlasRecorder.Zone Z_RENDER_FAR = AtlasRecorder.zone("atlas:renderFrame"),
             Z_GL_RENDER = AtlasRecorder.zone("atlas:ctx.glRender"), Z_WEATHER = AtlasRecorder.zone("atlas:feedWeather"),
             Z_AIR = AtlasRecorder.zone("atlas:air"), Z_ACTORS = AtlasRecorder.zone("atlas:feedActors"),
@@ -1013,12 +1015,23 @@ public final class AtlasClient {
     /** The autotest's atlas-info: the core's own report (the grid's pool among it) and the feeds' queues. */
     public static String debugInfo() {
         var c = ctx;
+        long iz = AtlasRecorder.begin();
         String core = c != null ? c.info() : "no context";
+        AtlasRecorder.end(Z_INFO, iz, 1_000_000);
         var lvl = Minecraft.getInstance().level;
         String frame = c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f glRenderWallMs=%.2f frameWallMs=%.2f fps=%d unified=%b loadedChunks=%d t=%d} ",
                 c.stats().frameMs(), glRenderMs, frameWallMs, Minecraft.getInstance().getFps(), AtlasNearPass.unified(),
                 lvl != null ? lvl.getChunkSource().getLoadedChunksCount() : -1, System.currentTimeMillis() % 1_000_000) : "";
-        return frame + "inside{" + AtlasNearPass.insideWhat + "} " + AtlasClientSections.state() + " " + (materials != null ? materials.state() + " " : "") + AtlasEditsClient.state() + " " + AtlasClientGen.state() + " core=" + core + " " + AtlasRecorder.state();
+        long sz = AtlasRecorder.begin();
+        String sections = AtlasClientSections.state();
+        AtlasRecorder.end(Z_STATE_SECTIONS, sz, 1_000_000);
+        sz = AtlasRecorder.begin();
+        String edits = AtlasEditsClient.state();
+        AtlasRecorder.end(Z_STATE_EDITS, sz, 1_000_000);
+        sz = AtlasRecorder.begin();
+        String gen = AtlasClientGen.state();
+        AtlasRecorder.end(Z_STATE_GEN, sz, 1_000_000);
+        return frame + "inside{" + AtlasNearPass.insideWhat + "} " + sections + " " + (materials != null ? materials.state() + " " : "") + edits + " " + gen + " core=" + core + " " + AtlasRecorder.state();
     }
 
     private static void jitter(AtlasNative.Context ctx, boolean on) {
