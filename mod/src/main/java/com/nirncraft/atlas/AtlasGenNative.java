@@ -37,7 +37,7 @@ final class AtlasGenNative {
     // the pages made on the device (atlas_gen_read_page, atlas_gen_page_stats): null in a library without them
     private final MethodHandle readPage, pageStats, tiles, far, farIngest, gridReports;
     // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
-    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate, coarseRoom, paceStats;
+    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate, coarseRoom, paceStats, coarseWindow, cachePeek;
     // the chunk store and the decoration's store stages (atlas_gen_store_*, atlas_feat_attach): null in a library without them
     private final MethodHandle storeEnable, runStore, storeKeep, storeStats, featAttach, featDestroy, featOverlays;
     /** Columns of a far tile (atlas_gen_tiles). */
@@ -81,6 +81,10 @@ final class AtlasGenNative {
         cacheLookup = cache ? bind(l, lib, "atlas_gen_cache_lookup", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS)) : null;
         cacheIngest = cache ? bind(l, lib, "atlas_gen_cache_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS)) : null;
         setFingerprint = cache ? bind(l, lib, "atlas_gen_set_fingerprint", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG)) : null;
+        cachePeek = lib.find("atlas_gen_cache_peek").isPresent()
+                ? bind(l, lib, "atlas_gen_cache_peek", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
+        coarseWindow = lib.find("atlas_gen_coarse_window").isPresent()
+                ? bind(l, lib, "atlas_gen_coarse_window", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS)) : null;
         coarseRoom = lib.find("atlas_gen_coarse_room").isPresent()
                 ? bind(l, lib, "atlas_gen_coarse_room", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT)) : null;
         paceStats = lib.find("atlas_gen_pace_stats").isPresent()
@@ -309,6 +313,23 @@ final class AtlasGenNative {
          * A far tile from the self-baking cache into the grid's level lod (atlas_gen_far_cache_ingest), as
          * {@link #farIngest} would put it; null when the cache does not know it (generate it then).
          */
+        /**
+         * A coarse level's window now: {origin x, z, side (chunks of the level), placed (1), jumps, rows}; null with an older
+         * library. The far tiles to ask for are those that cover its columns.
+         */
+        int[] coarseWindow(int level) {
+            if (coarseWindow == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment o = a.allocate(JAVA_INT, 6);
+                check((int) coarseWindow.invokeExact(ptr, level, o), "atlas_gen_coarse_window");
+                int[] r = new int[6];
+                for (int i = 0; i < 6; i++) r[i] = o.getAtIndex(JAVA_INT, i);
+                return r;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
         /** Free slots in the grid's coarse level (a refused far tile is asked for again when there is room); -1: unknown. */
         int coarseRoom(int level) {
             if (coarseRoom == null) return -1;
@@ -319,14 +340,48 @@ final class AtlasGenNative {
             }
         }
 
-        /** The GPU budget's numbers (atlas_gen_pace_stats): period, duty, used, waited, far waited, longest submission (ms). */
-        double[] paceStats() {
+        /**
+         * The self-baking cache's numbers (atlas_gen_cache_peek) as a profile block: whether it is on and which
+         * fingerprint, what is on disk, what waits to be written, what this session wrote and read; null with an older
+         * library.
+         */
+        String cacheLine() {
+            long[] s = cacheStats();
+            if (s == null) return null;
+            return String.format("genCache{%s fp %016x on disk %d chunks %d sections %.1f MB; queued writes %d; written %d chunks %d sections %d far tiles; "
+                            + "chunk hits %d misses %d, section reads %d, far tile hits %d, hash errors %d}",
+                    s[0] != 0 ? "on" : "OFF", s[1], s[2], s[3], s[4] / 1048576.0, s[13], s[12], s[7], s[9], s[5], s[6], s[8], s[10], s[11]);
+        }
+
+        /**
+         * {on, fingerprint, chunks, sections, bytes, chunkHits, chunkMisses, sectionWrites, sectionReads, farWrites, farHits,
+         * hashErrors, chunkWrites, queued}; null with an older library.
+         */
+        long[] cacheStats() {
+            if (cachePeek == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment s = a.allocate(8L * 20);
+                check((int) cachePeek.invokeExact(ptr, s), "atlas_gen_cache_peek");
+                // (AtlasGenCacheStats: on at 0; fingerprint 8, chunks 16, sections 24, bytes 32, chunkHits 40, chunkMisses 48,
+                // sectionWrites 56, sectionReads 64, encodeMs 72, decodeMs 80, farWrites 88, farHits 96, farMisses 104,
+                // hashErrors 112, chunkWrites 120, queued 128)
+                return new long[]{s.get(JAVA_INT, 0), s.get(JAVA_LONG, 8), s.get(JAVA_LONG, 16), s.get(JAVA_LONG, 24), s.get(JAVA_LONG, 32),
+                        s.get(JAVA_LONG, 40), s.get(JAVA_LONG, 48), s.get(JAVA_LONG, 56), s.get(JAVA_LONG, 64), s.get(JAVA_LONG, 88),
+                        s.get(JAVA_LONG, 96), s.get(JAVA_LONG, 112), s.get(JAVA_LONG, 120), s.get(JAVA_LONG, 128)};
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** The GPU budget's numbers (atlas_gen_pace_stats) as a profile line; null with an older library. */
+        String paceLine() {
             if (paceStats == null) return null;
             try (Arena a = Arena.ofConfined()) {
-                MemorySegment s = a.allocate(8L * 8);
+                MemorySegment s = a.allocate(8L * 8 + 48);
                 check((int) paceStats.invokeExact(ptr, s), "atlas_gen_pace_stats");
-                return new double[]{s.get(JAVA_DOUBLE, 0), s.get(JAVA_DOUBLE, 8), s.get(JAVA_DOUBLE, 24), s.get(JAVA_DOUBLE, 32),
-                        s.get(JAVA_DOUBLE, 40), s.get(JAVA_DOUBLE, 48), s.get(JAVA_LONG, 56)};
+                return String.format("budget{frame %.1f ms duty %.2f used %.0f waited %.0f (far %.0f) longest %.0f ms (%s), %d submissions}",
+                        s.get(JAVA_DOUBLE, 0), s.get(JAVA_DOUBLE, 8), s.get(JAVA_DOUBLE, 24), s.get(JAVA_DOUBLE, 32),
+                        s.get(JAVA_DOUBLE, 40), s.get(JAVA_DOUBLE, 48), s.getString(64), s.get(JAVA_LONG, 56));
             } catch (Throwable t) {
                 throw rethrow(t);
             }
